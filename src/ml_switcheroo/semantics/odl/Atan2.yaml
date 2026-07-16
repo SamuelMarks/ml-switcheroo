@@ -1,0 +1,17 @@
+description: "Calculates an implementation-dependent approximation of the inverse\
+  \ tangent of the quotient ``x1/x2``, having domain ``[-infinity, +infinity] x [-infinity,\
+  \ +infinity]`` (where the ``x`` notation denotes the set of ordered pairs of elements\
+  \ ``(x1_i, x2_i)``) and codomain ``[-\u03C0, +\u03C0]``, for each pair of elements\
+  \ ``(x1_i, x2_i)`` of the input arrays ``x1`` and ``x2``, respectively. Each element-wise\
+  \ result is expressed in radians."
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x1
+  type: Union[array, int, float]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x2
+  type: Union[array, int, float]
+variants: {}
+operation: atan2

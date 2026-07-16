@@ -314,9 +314,9 @@ variants:
     macro_template: "keras.ops.sqrt(keras.ops.square({x1}) + keras.ops.square({x2}))"
   tensorflow:
     api: "tf.math.reduce_euclidean_norm"
-    # reduce_euclidean_norm expects stacked tensor or similar. 
+    # reduce_euclidean_norm expects stacked tensor or similar.
     # Use explicit sqrt/square macro or tf.math.hypot if available (added recently)
-    macro_template: "tf.math.sqrt(tf.math.square({x1}) + tf.math.square({x2}))" 
+    macro_template: "tf.math.sqrt(tf.math.square({x1}) + tf.math.square({x2}))"
   numpy:
     api: "numpy.hypot"
   mlx:
@@ -411,7 +411,7 @@ variants:
 operation: "Inexact"
 description: "Abstract base class for inexact types (floating point)."
 op_type: "class"
-std_args: [] 
+std_args: []
 variants:
   numpy:
     api: "numpy.inexact"
@@ -421,7 +421,7 @@ variants:
 operation: "Inf"
 description: "Infinity constant."
 op_type: "attribute"
-std_args: [] 
+std_args: []
 variants:
   torch:
     api: "torch.inf"
@@ -465,7 +465,6 @@ variants:
        a: "x1"
        b: "x2"
   tensorflow:
-    api: "tf.linalg.inner_product" # Or tf.tensordot logic, exp.numpy.inner preferred
     # Using experimental numpy behavior for fidelity
     api: "tf.experimental.numpy.inner"
   numpy:
@@ -476,7 +475,7 @@ variants:
 operation: "Int16"
 description: "16-bit signed integer type."
 op_type: "attribute"
-std_args: [] 
+std_args: []
 variants:
   torch:
     api: "torch.int16"
@@ -498,7 +497,7 @@ variants:
 operation: "Int32"
 description: "32-bit signed integer type."
 op_type: "attribute"
-std_args: [] 
+std_args: []
 variants:
   torch:
     api: "torch.int32"
@@ -520,7 +519,7 @@ variants:
 operation: "Int64"
 description: "64-bit signed integer type."
 op_type: "attribute"
-std_args: [] 
+std_args: []
 variants:
   torch:
     api: "torch.int64"
@@ -542,7 +541,7 @@ variants:
 operation: "Int8"
 description: "8-bit signed integer type."
 op_type: "attribute"
-std_args: [] 
+std_args: []
 variants:
   torch:
     api: "torch.int8"
@@ -564,7 +563,7 @@ variants:
 operation: "Int_"
 description: "Default integer type (maps to Int64 typically)."
 op_type: "attribute"
-std_args: [] 
+std_args: []
 variants:
   torch:
     api: "torch.int64"
@@ -642,7 +641,7 @@ variants:
     api: null
   tensorflow:
     api: "tf.math.is_complex"
-    # Note: tf.math.is_complex vs numpy.iscomplex (which returns array or scalar?) 
+    # Note: tf.math.is_complex vs numpy.iscomplex (which returns array or scalar?)
     # Matches elementwise behavior
   numpy:
     api: "numpy.iscomplex"
@@ -697,7 +696,7 @@ variants:
   numpy:
     api: "numpy.isfinite"
   mlx:
-    # Not available directly in core? 
+    # Not available directly in core?
     macro_template: "mlx.core.logical_not(mlx.core.isinf({x}) | mlx.core.isnan({x}))"
 ---
 operation: "IsInf"

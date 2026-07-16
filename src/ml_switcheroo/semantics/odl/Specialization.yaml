@@ -1,0 +1,11 @@
+description: Specialization for a colocated_python function.
+std_args:
+- self
+- in_specs_treedef
+- in_specs_leaves
+- out_specs_fn
+- out_specs_treedef
+- out_specs_leaves
+- devices
+type: class
+operation: Specialization

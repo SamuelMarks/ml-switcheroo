@@ -1,0 +1,17 @@
+description: Normalizes along dimension `axis` using an L2 norm.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+- default: 1e-12
+  is_variadic: false
+  kind: positional_or_keyword
+  name: epsilon
+  type: float
+variants: {}
+operation: L2Normalize

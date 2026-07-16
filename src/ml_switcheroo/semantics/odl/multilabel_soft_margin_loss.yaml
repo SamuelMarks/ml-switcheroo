@@ -1,0 +1,4 @@
+description: Auto-generated mapping for multilabel_soft_margin_loss.
+std_args: []
+type: function
+operation: multilabel_soft_margin_loss

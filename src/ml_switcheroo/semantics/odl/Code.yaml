@@ -1,0 +1,5 @@
+description: JIT Code object.
+op_type: class
+std_args: []
+variants: {}
+operation: Code

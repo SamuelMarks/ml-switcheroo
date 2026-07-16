@@ -1,0 +1,8 @@
+description: Flattens a nested state dictionary.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: state
+  type: dict
+variants: {}
+operation: ToFlatState

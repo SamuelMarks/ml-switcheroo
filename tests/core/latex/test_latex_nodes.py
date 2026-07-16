@@ -1,5 +1,4 @@
-"""
-Tests for MIDL Semantic Nodes.
+"""Tests for MIDL Semantic Nodes.
 
 Verifies:
 1.  Data structure integrity.
@@ -18,7 +17,7 @@ from ml_switcheroo.core.latex.nodes import (
 
 
 def test_memory_node_serialization():
-  """Verify \\Attribute rendering."""
+  r"""Verify \\Attribute rendering."""
   # self.conv = nn.Conv2d(in=1, out=32)
   node = MemoryNode(node_id="conv", op_type="Conv2d", config={"in": "1", "out": "32"})
   output = node.to_latex()
@@ -29,14 +28,14 @@ def test_memory_node_serialization():
 
 
 def test_input_node_serialization():
-  """Verify \\Input rendering."""
+  r"""Verify \\Input rendering."""
   node = InputNode(name="x", shape="[B, 32]")
   output = node.to_latex()
   assert output == r"\Input{x}{[B, 32]}"
 
 
 def test_compute_node_serialization():
-  """Verify \\Op rendering."""
+  r"""Verify \\Op rendering."""
   # torch.flatten(x, start=1)
   node = ComputeNode(node_id="s1", op_type="Flatten", args=["x", "start=1"], shape="[B, 1024]")
   output = node.to_latex()
@@ -46,7 +45,7 @@ def test_compute_node_serialization():
 
 
 def test_state_op_node_serialization():
-  """Verify \\StateOp rendering."""
+  r"""Verify \\StateOp rendering."""
   # self.conv(x)
   node = StateOpNode(node_id="s2", attribute_id="conv", args=["x"], shape="[B, 32]")
   output = node.to_latex()
@@ -56,15 +55,13 @@ def test_state_op_node_serialization():
 
 
 def test_return_node_serialization():
-  """Verify \\Return rendering."""
+  r"""Verify \\Return rendering."""
   node = ReturnNode(target_id="s2")
   assert node.to_latex() == r"\Return{s2}"
 
 
 def test_model_container_rendering():
-  """
-  Verify full model structure with indentation.
-  """
+  """Verify full model structure with indentation."""
   # Build complete graph
   m_conv = MemoryNode("conv", "Conv2d", {"k": "3"})
   m_fc = MemoryNode("fc", "Linear", {"out": "10"})

@@ -1,0 +1,4 @@
+description: Thread block size for second Q dimension in backward pass. Use as 'bwd_BLOCK_M2'.
+std_args: []
+type: attribute
+operation: BLOCK_M2

@@ -1,0 +1,5 @@
+description: Computes the percentage of blocks that are sparse (i.e. not computed)
+std_args:
+- self
+type: function
+operation: sparsity

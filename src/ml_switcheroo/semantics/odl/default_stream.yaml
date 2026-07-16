@@ -1,0 +1,11 @@
+description: "Return the default :class:`Stream` for a given device.\n\nArgs:\n  \
+  \  device (torch.device or int, optional): selected device. Returns\n        the\
+  \ default :class:`Stream` for the current device, given by\n        :func:`~torch.mtia.current_device`,\
+  \ if :attr:`device` is ``None``\n        (default)."
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Any
+variants: {}
+operation: default_stream

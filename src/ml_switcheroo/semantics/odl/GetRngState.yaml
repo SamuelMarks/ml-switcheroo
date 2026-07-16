@@ -1,0 +1,4 @@
+description: Returns the random number generator state.
+std_args: []
+variants: {}
+operation: GetRngState

@@ -1,0 +1,20 @@
+description: Functional loop from lower to upper bound.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: lower
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: upper
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: body_fun
+  type: Callable
+- is_variadic: false
+  kind: positional_or_keyword
+  name: init_val
+  type: Any
+variants: {}
+operation: ForiLoop

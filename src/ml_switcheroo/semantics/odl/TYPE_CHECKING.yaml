@@ -1,0 +1,5 @@
+description: Boolean constant used for static analysis guards.
+op_type: attribute
+std_args: []
+variants: {}
+operation: TYPE_CHECKING

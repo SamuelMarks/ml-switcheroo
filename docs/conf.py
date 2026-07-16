@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import os
 import sys
 import inspect
@@ -106,8 +108,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- Linkcode Resolution Logic -----------------------------------------------
 def linkcode_resolve(domain, info):
-  """
-  Resolve a GitHub URL for the given Python object.
+  """Resolve a GitHub URL for the given Python object.
   Required by sphinx.ext.linkcode to generate [source] links.
   """
   if domain != "py":

@@ -1,0 +1,12 @@
+description: Recursively applies a function to all nodes and leaves.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: f
+  type: Callable
+- is_variadic: false
+  kind: positional_or_keyword
+  name: node
+  type: Any
+variants: {}
+operation: RecursiveMap

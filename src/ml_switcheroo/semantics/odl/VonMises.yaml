@@ -1,0 +1,22 @@
+description: "A circular von Mises distribution.\n\nThis implementation uses polar\
+  \ coordinates. The ``loc`` and ``value`` args\ncan be any real number (to facilitate\
+  \ unconstrained optimization), but are\ninterpreted as angles modulo 2 pi.\n\nExample::\n\
+  \    >>> # xdoctest: +IGNORE_WANT(\"non-deterministic\")\n    >>> m = VonMises(torch.tensor([1.0]),\
+  \ torch.tensor([1.0]))\n    >>> m.sample()  # von Mises distributed with loc=1 and\
+  \ concentration=1\n    tensor([1.9777])\n\n:param torch.Tensor loc: an angle in\
+  \ radians.\n:param torch.Tensor concentration: concentration parameter"
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: loc
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: concentration
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: validate_args
+  type: Any
+variants: {}
+operation: VonMises

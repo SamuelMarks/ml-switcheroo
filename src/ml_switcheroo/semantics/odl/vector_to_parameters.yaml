@@ -1,0 +1,6 @@
+description: Copy slices of a vector into an iterable of parameters.
+std_args:
+- vec
+- parameters
+type: function
+operation: vector_to_parameters

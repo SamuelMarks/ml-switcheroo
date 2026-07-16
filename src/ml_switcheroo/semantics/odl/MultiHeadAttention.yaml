@@ -1,0 +1,17 @@
+description: Dot-product attention with multiple heads.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: embed_dim
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_heads
+  type: int
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dropout
+  type: float
+type: class
+operation: MultiheadAttention

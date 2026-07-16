@@ -1,0 +1,7 @@
+description: Makes a random attention mask.
+std_args:
+- shape
+- sparsity
+- seed
+type: function
+operation: make_random_mask

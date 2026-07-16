@@ -1,0 +1,4 @@
+description: Auto-generated mapping for ragged_all_to_all.
+std_args: []
+variants: {}
+operation: ragged_all_to_all

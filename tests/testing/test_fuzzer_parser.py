@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_get_fallback_base_value():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.parser import get_fallback_base_value
 
   assert get_fallback_base_value("bool", ()) is False
@@ -15,6 +19,7 @@ def test_get_fallback_base_value():
 
 
 def test_generate_from_hint():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
   import numpy as np
 
@@ -120,6 +125,7 @@ def test_generate_from_hint():
 
 
 def test_fuzzer_parser_missed():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
   symbol_map = {}
@@ -149,6 +155,7 @@ def test_fuzzer_parser_missed():
 
 
 def test_fuzzer_parser_more():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
   symbol_map = {}
@@ -158,6 +165,7 @@ def test_fuzzer_parser_more():
 
 
 def test_fuzzer_parser_bool_list():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
   symbol_map = {}
@@ -167,6 +175,7 @@ def test_fuzzer_parser_bool_list():
 
 
 def test_fuzzer_parser_int_inference():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
   symbol_map = {}

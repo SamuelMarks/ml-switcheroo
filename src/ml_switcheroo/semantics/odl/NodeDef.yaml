@@ -1,0 +1,20 @@
+description: NodeDef(type, flatten_fn, unflatten_fn, flatten_with_keys_fn)
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: type
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: flatten_fn
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: unflatten_fn
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: flatten_with_keys_fn
+  type: Any
+variants: {}
+operation: NodeDef

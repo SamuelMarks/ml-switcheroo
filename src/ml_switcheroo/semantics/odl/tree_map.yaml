@@ -1,0 +1,40 @@
+description: "Map a multi-input function over pytree args to produce a new pytree.\n\
+  \nSee also :func:`tree_map_`.\n\n>>> tree_map(lambda x: x + 1, {\"x\": 7, \"y\"\
+  : (42, 64)})\n{'x': 8, 'y': (43, 65)}\n>>> tree_map(lambda x: x is None, {\"x\"\
+  : 7, \"y\": (42, 64), \"z\": None})\n{'x': False, 'y': (False, False), 'z': True}\n\
+  \nIf multiple inputs are given, the structure of the tree is taken from the first\
+  \ input;\nsubsequent inputs need only have ``tree`` as a prefix:\n\n>>> tree_map(lambda\
+  \ x, y: [x] + y, [5, 6], [[7, 9], [1, 2]])\n[[5, 7, 9], [6, 1, 2]]\n\nArgs:\n  \
+  \  func (callable): A function that takes ``1 + len(rests)`` arguments, to be applied\
+  \ at the\n        corresponding leaves of the pytrees.\n    tree (pytree): A pytree\
+  \ to be mapped over, with each leaf providing the first positional\n        argument\
+  \ to function ``func``.\n    rests (tuple of pytree): A tuple of pytrees, each of\
+  \ which has the same structure as\n        ``tree`` or has ``tree`` as a prefix.\n\
+  \    is_leaf (callable, optional): An extra leaf predicate function that will be\
+  \ called at each\n        flattening step. The function should have a single argument\
+  \ with signature\n        ``is_leaf(node) -> bool``. If it returns :data:`True`,\
+  \ the whole subtree being treated\n        as a leaf. Otherwise, the default pytree\
+  \ registry will be used to determine a node is a\n        leaf or not. If the function\
+  \ is not specified, the default pytree registry will be used.\n\nReturns:\n    A\
+  \ new pytree with the same structure as ``tree`` but with the value at each leaf\
+  \ given by\n    ``func(x, *xs)`` where ``x`` is the value at the corresponding leaf\
+  \ in ``tree`` and ``xs``\n    is the tuple of values at corresponding nodes in ``rests``."
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: func
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tree
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: rests
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: is_leaf
+  type: Any
+variants: {}
+operation: tree_map

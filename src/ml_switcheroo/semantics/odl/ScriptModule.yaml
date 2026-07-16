@@ -1,0 +1,4 @@
+description: Internal TorchScript module.
+std_args: []
+variants: {}
+operation: ScriptModule

@@ -1,0 +1,4 @@
+description: Auto-generated mapping for linalg_sharding_rule.
+std_args: []
+variants: {}
+operation: linalg_sharding_rule

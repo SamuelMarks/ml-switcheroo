@@ -1,0 +1,4 @@
+description: PyTorch internal profiler configuration.
+std_args: []
+variants: {}
+operation: ProfilerAllowCudagraphCuptiLazyReinitCuda12

@@ -1,6 +1,4 @@
-"""
-Integration Test for Sequential Container Mapping.
-"""
+"""Integration Test for Sequential Container Mapping."""
 
 import pytest
 from ml_switcheroo.core.engine import ASTEngine
@@ -72,22 +70,22 @@ def semantics_manager():
 
 def test_sequential_container_transpilation(semantics_manager):
   """Function docstring."""
-  source_code = """ 
+  source_code = """
 import torch
 import torch.nn as nn
 
-class MLP(nn.Module): 
-    def __init__(self): 
-        super().__init__() 
-        self.net = nn.Sequential( 
-            nn.Flatten(), 
-            nn.Linear(28 * 28, 512), 
-            nn.ReLU(), 
-            nn.Linear(512, 10) 
-        ) 
+class MLP(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(28 * 28, 512),
+            nn.ReLU(),
+            nn.Linear(512, 10)
+        )
 
-    def forward(self, x): 
-        return self.net(x) 
+    def forward(self, x):
+        return self.net(x)
 """
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   engine = ASTEngine(semantics=semantics_manager, config=config)

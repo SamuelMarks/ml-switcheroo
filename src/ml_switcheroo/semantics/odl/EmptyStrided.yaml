@@ -1,0 +1,12 @@
+description: Creates an uninitialized tensor with specified size and strides.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: size
+  type: List[int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: stride
+  type: List[int]
+variants: {}
+operation: EmptyStrided

@@ -1,0 +1,5 @@
+description: Internal state of the graph executor.
+op_type: class
+std_args: []
+variants: {}
+operation: GraphExecutorState

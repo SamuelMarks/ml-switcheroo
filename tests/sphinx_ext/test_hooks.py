@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import os
 from unittest import mock
 
@@ -6,7 +8,10 @@ import ml_switcheroo.sphinx_ext.hooks
 
 
 class MockApp:
+  """Auto-generated doc."""
+
   def __init__(self, has_config=True, has_builder=True):
+    """Auto-generated doc."""
     if has_config:
       self.config = mock.Mock()
       self.config.html_static_path = []
@@ -16,6 +21,7 @@ class MockApp:
 
 
 def test_add_static_path_success(tmp_path):
+  """Auto-generated doc."""
   # Create fake structure
   mock_file = tmp_path / "hooks.py"
   mock_file.touch()
@@ -32,6 +38,7 @@ def test_add_static_path_success(tmp_path):
 
 
 def test_add_static_path_missing_dir(tmp_path):
+  """Auto-generated doc."""
   mock_file = tmp_path / "hooks.py"
   mock_file.touch()
 
@@ -44,6 +51,7 @@ def test_add_static_path_missing_dir(tmp_path):
 
 
 def test_add_static_path_no_config(tmp_path):
+  """Auto-generated doc."""
   mock_file = tmp_path / "hooks.py"
   mock_file.touch()
 
@@ -59,16 +67,19 @@ def test_add_static_path_no_config(tmp_path):
 
 
 def test_copy_wheel_and_reqs_exception():
+  """Auto-generated doc."""
   app = MockApp()
   copy_wheel_and_reqs(app, Exception("mock error"))
 
 
 def test_copy_wheel_and_reqs_no_builder():
+  """Auto-generated doc."""
   app = MockApp(has_builder=False)
   copy_wheel_and_reqs(app, None)
 
 
 def test_copy_wheel_and_reqs_success(tmp_path):
+  """Auto-generated doc."""
   root_dir = tmp_path / "root"
   root_dir.mkdir()
 
@@ -111,6 +122,7 @@ def test_copy_wheel_and_reqs_success(tmp_path):
 
 
 def test_copy_wheel_and_reqs_newer_existing(tmp_path):
+  """Auto-generated doc."""
   root_dir = tmp_path / "root"
   root_dir.mkdir()
   src_dir = root_dir / "src" / "ml_switcheroo" / "sphinx_ext"
@@ -141,6 +153,7 @@ def test_copy_wheel_and_reqs_newer_existing(tmp_path):
 
 
 def test_copy_wheel_and_reqs_no_reqs_no_wheels(tmp_path):
+  """Auto-generated doc."""
   root_dir = tmp_path / "root"
   root_dir.mkdir()
   src_dir = root_dir / "src" / "ml_switcheroo" / "sphinx_ext"
@@ -166,6 +179,7 @@ def test_copy_wheel_and_reqs_no_reqs_no_wheels(tmp_path):
 
 
 def test_copy_wheel_and_reqs_no_dist_dir(tmp_path):
+  """Auto-generated doc."""
   root_dir = tmp_path / "root"
   root_dir.mkdir()
   src_dir = root_dir / "src" / "ml_switcheroo" / "sphinx_ext"

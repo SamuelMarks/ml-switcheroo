@@ -1,0 +1,9 @@
+description: Clip the gradient norm of an iterable of parameters.
+std_args:
+- parameters
+- max_norm
+- norm_type
+- error_if_nonfinite
+- foreach
+type: function
+operation: clip_grad_norm_

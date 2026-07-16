@@ -1,0 +1,6 @@
+description: A type to which both input should be adapted to before dot product.
+std_args:
+- lhs
+- rhs
+type: function
+operation: select_input_dtype

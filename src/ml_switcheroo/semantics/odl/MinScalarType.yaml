@@ -1,0 +1,9 @@
+description: Returns the data type with the smallest size and scalar kind which can
+  hold its value.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Tensor
+variants: {}
+operation: MinScalarType

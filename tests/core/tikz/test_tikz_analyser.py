@@ -1,5 +1,4 @@
-"""
-Tests for Static Graph Extraction.
+"""Tests for Static Graph Extraction.
 
 Verifies:
 1.  Node Extraction: Correctly identifying layers in __init__.
@@ -10,7 +9,7 @@ Verifies:
 
 import libcst as cst
 from ml_switcheroo.core.tikz.analyser import GraphExtractor
-from ml_switcheroo.compiler.ir import LogicalGraph
+from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 def parse_and_extract(code: str) -> LogicalGraph:
@@ -22,9 +21,7 @@ def parse_and_extract(code: str) -> LogicalGraph:
 
 
 def test_extract_nodes_from_init():
-  """
-  Scenario: Basic ConvNet init.
-  """
+  """Scenario: Basic ConvNet init."""
   code = """
 class Net:
     def __init__(self):
@@ -48,9 +45,7 @@ class Net:
 
 
 def test_extract_edges_sequential_flow():
-  """
-  Scenario: x = conv(x) -> x = fc(x)
-  """
+  """Scenario: x = conv(x) -> x = fc(x)"""
   code = """
 class Net:
     def __init__(self):
@@ -81,9 +76,7 @@ class Net:
 
 
 def test_functional_call_tracing():
-  """
-  Scenario: x = self.conv(x); x = F.relu(x)
-  """
+  """Scenario: x = self.conv(x); x = F.relu(x)"""
   code = """
 class Net:
     def __init__(self):
@@ -115,9 +108,7 @@ class Net:
 
 
 def test_keyword_argument_extraction():
-  """
-  Verify keyword args in init are captured.
-  """
+  """Verify keyword args in init are captured."""
   code = """
 class Layer:
     def __init__(self):
@@ -130,9 +121,7 @@ class Layer:
 
 
 def test_ignore_constants_reused():
-  """
-  Verify that passing constants (not tracked variables) doesn't create broken edges.
-  """
+  """Verify that passing constants (not tracked variables) doesn't create broken edges."""
   code = """
 class Model:
     def __init__(self):

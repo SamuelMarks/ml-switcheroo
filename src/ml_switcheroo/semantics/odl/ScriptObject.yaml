@@ -1,0 +1,4 @@
+description: Internal TorchScript object.
+std_args: []
+variants: {}
+operation: ScriptObject

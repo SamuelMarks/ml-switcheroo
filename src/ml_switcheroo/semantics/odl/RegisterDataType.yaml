@@ -1,0 +1,8 @@
+description: Registers a type as pytree data type recognized by Object.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: type_
+  type: type
+variants: {}
+operation: RegisterDataType

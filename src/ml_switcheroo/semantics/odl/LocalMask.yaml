@@ -1,0 +1,9 @@
+description: Lazy local mask, prevents model from attending to tokens outside window.
+std_args:
+- self
+- shape
+- window_size
+- offset
+- shard_count
+type: class
+operation: LocalMask

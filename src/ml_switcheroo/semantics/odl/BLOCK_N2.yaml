@@ -1,0 +1,4 @@
+description: Thread block size for second K/V dimension in backward pass. Use as 'bwd_BLOCK_N2'.
+std_args: []
+type: attribute
+operation: BLOCK_N2

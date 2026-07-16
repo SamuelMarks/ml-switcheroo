@@ -21,7 +21,7 @@ from ml_switcheroo.semantics.merging import (
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 
 # Filenames to treat as discovered/consensus content
-DISCOVERED_FILENAMES = {"k_discovered.json"}
+DISCOVERED_FILENAMES = {"k_discovered.yaml"}
 
 
 class KnowledgeBaseLoader:
@@ -49,11 +49,15 @@ class KnowledgeBaseLoader:
     # FIX: Do not return early if semantics dir missing.
     # Overlays (Snapshots) might still exist and need loading.
     if base_path.exists():
-      all_files = list(base_path.rglob("*.json"))
+      import yaml
+
+      all_files = list(base_path.rglob("*.yaml"))
       prioritized_files: List[Tuple[int, Path]] = []
 
       for fpath in all_files:
         fname = fpath.name
+        if fname == "schema.yaml":
+          continue
         priority = 30
         if "array" in fname:
           priority = 10
@@ -68,11 +72,30 @@ class KnowledgeBaseLoader:
 
       for priority, fpath in prioritized_files:
         try:
-          with open(fpath, "r", encoding="utf-8") as f:
-            content = json.load(f)
+          if fpath.suffix == ".yaml":
+            with open(fpath, "r", encoding="utf-8") as f:
+              yaml_content = yaml.safe_load(f)
+              # Wrap it back into a dict keyed by operation name since atomic yamls are just the op definition
+              if (
+                isinstance(yaml_content, dict)
+                and "operation" in yaml_content
+                and isinstance(yaml_content["operation"], str)
+                and len(yaml_content) < 10
+                and not any(isinstance(v, dict) for k, v in yaml_content.items() if k not in ["variants", "std_args"])
+              ):
+                op_name = yaml_content["operation"]
+                content = {op_name: yaml_content}
+              else:
+                content = yaml_content
+          else:
+            with open(fpath, "r", encoding="utf-8") as f:  # pragma: no cover
+              content = json.load(f)  # pragma: no cover
           tier = infer_tier_from_priority(priority)
           self._load_tier_content(content, tier)
         except Exception as e:
+          import traceback
+
+          traceback.print_exc()
           print(f"⚠️ Error loading {fpath.name}: {e}")
 
     # Load Overlays after specs (or even if specs missing)

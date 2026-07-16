@@ -1,0 +1,10 @@
+description: The class representing a Python function.
+std_args:
+- f
+- store
+- tag
+- spenv
+- spvalues
+- bufs
+type: function
+operation: sparsify_subtrace

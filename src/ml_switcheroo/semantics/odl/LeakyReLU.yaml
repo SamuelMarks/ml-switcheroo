@@ -1,0 +1,9 @@
+description: Applies the LeakyReLU activation function.
+std_args:
+- default: 0.01
+  is_variadic: false
+  kind: positional_or_keyword
+  name: negative_slope
+  type: float
+type: class
+operation: LeakyReLU

@@ -1,0 +1,12 @@
+description: Returns element-wise remainder of division.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y
+  type: Tensor
+variants: {}
+operation: FloorMod

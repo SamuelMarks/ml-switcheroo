@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- a
+- b
+- g
+type: function
+operation: ragged_dot_reference

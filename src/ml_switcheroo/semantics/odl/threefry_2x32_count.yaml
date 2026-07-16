@@ -1,0 +1,8 @@
+description: Generates random bits using the Threefry hash function.
+std_args:
+- key
+- shape
+- unpadded_shape
+- block_size
+type: function
+operation: threefry_2x32_count

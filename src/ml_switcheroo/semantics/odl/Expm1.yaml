@@ -1,0 +1,9 @@
+description: Calculates an implementation-dependent approximation to ``exp(x)-1``
+  for each element ``x_i`` of the input array ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+type: attribute
+operation: expm1

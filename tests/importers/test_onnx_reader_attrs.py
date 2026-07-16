@@ -1,5 +1,4 @@
-"""
-Tests for Extended ONNX Spec Reader (Attributes & Type Support).
+"""Tests for Extended ONNX Spec Reader (Attributes & Type Support).
 
 Verifies that:
 1.  The reader parses `#### Attributes` in addition to Inputs.
@@ -73,8 +72,7 @@ def mock_spec_file(tmp_path):
 
 
 def test_extract_attributes_integration(importer, mock_spec_file):
-  """
-  Scenario: Parse a file containing Inputs and Attributes.
+  """Scenario: Parse a file containing Inputs and Attributes.
   Expectation: `std_args` contains both tensor inputs and config attributes with types.
   """
   semantics = importer.parse_file(mock_spec_file)
@@ -104,9 +102,7 @@ def test_extract_attributes_integration(importer, mock_spec_file):
 
 
 def test_extract_section_logic_tuples(importer):
-  """
-  Unit test to verify the extraction helper returns tuples.
-  """
+  """Unit test to verify the extraction helper returns tuples."""
   text = """
 #### Attributes
 <dl>
@@ -124,8 +120,7 @@ def test_extract_section_logic_tuples(importer):
 
 
 def test_no_attributes_section(importer, mock_spec_file):
-  """
-  Scenario: Operator has Inputs but no Attributes (e.g., Relu).
+  """Scenario: Operator has Inputs but no Attributes (e.g., Relu).
   Expectation: `std_args` contains inputs only, no crashes.
   """
   semantics = importer.parse_file(mock_spec_file)
@@ -138,9 +133,7 @@ def test_no_attributes_section(importer, mock_spec_file):
 
 
 def test_html_tag_cleaning_and_mapping(importer):
-  """
-  Verify different HTML variances seen in type definitions.
-  """
+  """Verify different HTML variances seen in type definitions."""
   text = """
 #### Inputs
 <dt>clean : int</dt>
@@ -165,8 +158,7 @@ def test_html_tag_cleaning_and_mapping(importer):
 
 
 def test_missing_file_returns_empty(importer, tmp_path):
-  """
-  Scenario: File does not exist.
+  """Scenario: File does not exist.
   Expectation: Empty dict, log error.
   """
   res = importer.parse_file(tmp_path / "ghost.md")

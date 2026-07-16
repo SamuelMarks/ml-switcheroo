@@ -1,0 +1,16 @@
+description: Constructs a sparse tensor in COO (Coordinate) format.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: indices
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: values
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: size
+  type: Optional[List[int]]
+variants: {}
+operation: SparseCooTensor

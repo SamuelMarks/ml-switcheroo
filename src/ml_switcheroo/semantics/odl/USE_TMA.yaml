@@ -1,0 +1,4 @@
+description: Whether to use Tensor Memory Accelerator (TMA) on supported hardware.
+std_args: []
+type: attribute
+operation: USE_TMA

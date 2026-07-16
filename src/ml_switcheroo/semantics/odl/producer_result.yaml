@@ -1,0 +1,5 @@
+description: Given an operand, returns the corresponding result in its producer.
+std_args:
+- operand
+type: function
+operation: producer_result

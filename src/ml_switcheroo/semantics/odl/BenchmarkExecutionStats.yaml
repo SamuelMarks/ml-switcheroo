@@ -1,0 +1,5 @@
+description: Execution statistics for benchmarks.
+op_type: class
+std_args: []
+variants: {}
+operation: BenchmarkExecutionStats

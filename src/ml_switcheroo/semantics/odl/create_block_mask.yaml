@@ -1,0 +1,12 @@
+description: This function creates a block mask tuple from a mask_mod function.
+std_args:
+- mask_mod
+- B
+- H
+- Q_LEN
+- KV_LEN
+- device
+- BLOCK_SIZE
+- _compile
+type: function
+operation: create_block_mask

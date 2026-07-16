@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 
@@ -12,6 +14,7 @@ from ml_switcheroo.plugins.optimizer_step import (
 
 
 def test_create_dotted_name():
+  """Auto-generated doc."""
   # Test single
   node = _create_dotted_name("Adam")
   assert isinstance(node, cst.Name)
@@ -28,6 +31,7 @@ def test_create_dotted_name():
 
 
 def test_transform_optimizer_init():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
 
   # 1. Positional arg first
@@ -58,6 +62,7 @@ def test_transform_optimizer_init():
 
 
 def test_get_func_name():
+  """Auto-generated doc."""
   # Attribute func
   node_attr = cst.Call(func=cst.Attribute(value=cst.Name("opt"), attr=cst.Name("step")), args=[])
   assert _get_func_name(node_attr) == "step"
@@ -68,6 +73,7 @@ def test_get_func_name():
 
 
 def test_transform_optimizer_step():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
 
   node = cst.Call(func=cst.Attribute(value=cst.Name("opt"), attr=cst.Name("step")), args=[])
@@ -78,6 +84,7 @@ def test_transform_optimizer_step():
 
 
 def test_transform_optimizer_step_no_leading_lines():
+  """Auto-generated doc."""
   # If a node doesn't have leading_lines, EscapeHatch handles it gracefully.
   # While cst.Call doesn't inherently block setting leading_lines when used with with_changes (actually it does, Wait, cst.Call does not have leading_lines!)
   # Ah! In libcst, statements have leading_lines. Expressions like cst.Call do *not*.
@@ -92,6 +99,7 @@ def test_transform_optimizer_step_no_leading_lines():
 
 
 def test_strip_zero_grad():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
 
   node = cst.Call(func=cst.Attribute(value=cst.Name("opt"), attr=cst.Name("zero_grad")), args=[])

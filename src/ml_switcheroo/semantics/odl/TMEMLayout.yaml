@@ -1,0 +1,6 @@
+description: Wraps a known TMEM layout.
+std_args:
+- self
+- value
+type: class
+operation: TMEMLayout

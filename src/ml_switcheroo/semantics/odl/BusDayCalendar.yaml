@@ -1,0 +1,14 @@
+description: A business day calendar object.
+op_type: class
+std_args:
+- default: '1111100'
+  is_variadic: false
+  kind: positional_or_keyword
+  name: weekmask
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: holidays
+  type: Any
+variants: {}
+operation: BusDayCalendar

@@ -1,0 +1,12 @@
+description: Forks the (nested) Rng states of the given node.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: node
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: split
+  type: Any
+variants: {}
+operation: ForkRngs

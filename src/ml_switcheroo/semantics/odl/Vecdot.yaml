@@ -1,0 +1,16 @@
+description: Computes the (vector) dot product of two arrays.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x1
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x2
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+type: attribute
+operation: vecdot

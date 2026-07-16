@@ -1,0 +1,9 @@
+description: Create BCOO-format sparse matrix from a dense matrix.
+std_args:
+- mat
+- nse
+- n_batch
+- n_dense
+- index_dtype
+type: function
+operation: bcoo_fromdense

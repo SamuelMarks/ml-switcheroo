@@ -1,0 +1,20 @@
+description: Put values into the destination array by matching 1d index and data slices.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arr
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: indices
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: values
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: PutAlongAxis

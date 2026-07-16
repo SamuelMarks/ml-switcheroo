@@ -1,0 +1,27 @@
+description: Dot-product attention layer, a.k.a. Luong-style attention.
+op_type: class
+std_args:
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: use_scale
+  type: bool
+- default: dot
+  is_variadic: false
+  kind: positional_or_keyword
+  name: score_mode
+  options:
+  - dot
+  - concat
+  type: str
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dropout
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: seed
+  type: int
+variants: {}
+operation: AttentionLayer

@@ -1,0 +1,7 @@
+description: Copy the data from the src reference to the dst reference.
+std_args:
+- src
+- dst
+- swizzle
+type: function
+operation: copy_tiled

@@ -1,0 +1,14 @@
+description: Performs spectral normalization on the weights of a target layer.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: layer
+  type: Any
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: power_iterations
+  type: int
+variants: {}
+operation: SpectralNormalization

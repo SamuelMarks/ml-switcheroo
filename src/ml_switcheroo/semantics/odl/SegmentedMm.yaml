@@ -1,0 +1,16 @@
+description: Segmented matrix multiplication.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: segments
+  type: Tensor
+variants: {}
+operation: SegmentedMm

@@ -1,0 +1,5 @@
+description: A nicer way to build up index tuples for arrays (\s\_).
+op_type: attribute
+std_args: []
+variants: {}
+operation: IndexExpression

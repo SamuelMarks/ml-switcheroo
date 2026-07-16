@@ -1,0 +1,5 @@
+description: Converts an OptimizerState to a marked pytree.
+std_args:
+- opt_state
+type: function
+operation: unpack_optimizer_state

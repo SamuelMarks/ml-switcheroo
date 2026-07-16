@@ -1,0 +1,5 @@
+description: JIT Await Type.
+op_type: class
+std_args: []
+variants: {}
+operation: AwaitType

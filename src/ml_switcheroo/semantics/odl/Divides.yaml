@@ -1,0 +1,7 @@
+description: States that the `expr` tiling is a divisor of `tiling_multiple`.
+std_args:
+- self
+- expr
+- tiling_multiple
+type: class
+operation: Divides

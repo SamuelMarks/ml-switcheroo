@@ -1,0 +1,8 @@
+description: Pad a packed batch of variable length sequences.
+std_args:
+- sequence
+- batch_first
+- padding_value
+- total_length
+type: function
+operation: pad_packed_sequence

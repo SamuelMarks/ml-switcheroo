@@ -214,7 +214,7 @@ variants:
     api: "numpy.iscomplexobj"
     args:
       input: "x"
-  mlx: 
+  mlx:
     # Macro for checking dtypes
     macro_template: "False" # Placeholder or custom check
 ---
@@ -436,7 +436,7 @@ std_args:
 variants:
   torch:
     api: "torch.is_conj"
-  # Concept of 'conjugate view' bit is specific to Torch/some frameworks. 
+  # Concept of 'conjugate view' bit is specific to Torch/some frameworks.
   # JAX doesn't typically expose "is conjugated view" but resolves it.
   jax:
     macro_template: "False"
@@ -567,7 +567,7 @@ std_args:
     type: "Tensor"
 variants:
   torch:
-    api: "torch.signbit" # torch.is_neg usually aliased to checking negative items or signbit? 
+    api: "torch.signbit" # torch.is_neg usually aliased to checking negative items or signbit?
   jax:
     api: "jax.numpy.signbit"
     args:

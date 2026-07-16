@@ -1,0 +1,4 @@
+description: Returns whether PyTorch was built with _GLIBCXX_USE_CXX11_ABI=1.
+std_args: []
+variants: {}
+operation: CompiledWithCxx11Abi

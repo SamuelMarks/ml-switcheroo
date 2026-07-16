@@ -1,0 +1,9 @@
+description: Applies Alpha Dropout to the input.
+std_args:
+- default: 0.5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: p
+  type: float
+type: class
+operation: AlphaDropout

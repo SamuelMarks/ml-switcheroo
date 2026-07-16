@@ -1,0 +1,4 @@
+description: Auto-generated mapping for gelu.
+std_args: []
+type: attribute
+operation: gelu

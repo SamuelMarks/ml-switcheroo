@@ -1,0 +1,5 @@
+description: Double precision float type.
+op_type: attribute
+std_args: []
+variants: {}
+operation: Float64

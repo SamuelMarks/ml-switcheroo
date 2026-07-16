@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 from ml_switcheroo.plugins.gather import transform_gather
@@ -5,6 +7,7 @@ from ml_switcheroo.core.hooks import HookContext
 
 
 def test_gather_no_target_api():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
   node = cst.Call(func=cst.Name("gather"))
@@ -13,6 +16,7 @@ def test_gather_no_target_api():
 
 
 def test_gather_kwargs():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.take_along_axis"
   ctx.target_fw = "jax"
@@ -28,6 +32,7 @@ def test_gather_kwargs():
 
 
 def test_gather_missing_args():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.take_along_axis"
   ctx.target_fw = "jax"

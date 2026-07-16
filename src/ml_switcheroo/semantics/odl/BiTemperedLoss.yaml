@@ -1,0 +1,15 @@
+description: Bi-tempered logistic loss for noisy labels.
+op_type: class
+std_args:
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: t1
+  type: float
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: t2
+  type: float
+variants: {}
+operation: BiTemperedLoss

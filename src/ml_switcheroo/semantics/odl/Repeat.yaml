@@ -1,0 +1,17 @@
+description: Repeats each element of an array a specified number of times on a per-element
+  basis.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: repeats
+  type: Union[int, array]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: Optional[int]
+variants: {}
+operation: repeat

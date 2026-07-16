@@ -1,0 +1,19 @@
+description: Cell class for SimpleRNN.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: units
+  type: int
+- default: tanh
+  is_variadic: false
+  kind: positional_or_keyword
+  name: activation
+  type: str
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dropout
+  type: float
+variants: {}
+operation: SimpleRNNCell

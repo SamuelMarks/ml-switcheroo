@@ -1,0 +1,20 @@
+description: The class representing a Python function.
+std_args:
+- q
+- k_pages
+- v_pages
+- block_tables
+- lengths
+- k_scales_pages
+- v_scales_pages
+- block_h
+- pages_per_compute_block
+- k_splits
+- num_warps
+- num_stages
+- interpret
+- debug
+- mask_value
+- attn_logits_soft_cap
+type: function
+operation: paged_attention_unbatched

@@ -1,0 +1,12 @@
+description: Checkpoint logic for gradient reduction.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: function
+  type: Callable
+- is_variadic: true
+  kind: positional_or_keyword
+  name: args
+  type: Any
+type: attribute
+operation: Checkpoint

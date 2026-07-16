@@ -32,7 +32,7 @@ def guess_dtype_by_name(name: str) -> str:
   return "float"
 
 
-def generate_by_heuristic(name: str, base_shape: Tuple[int, ...], constraints: Dict[str, Any] = None) -> Any:
+def generate_by_heuristic(name: str, base_shape: Tuple[int, ...], constraints: Dict[str, Any] = None) -> Any:  # type: ignore
   """Generates a value based on the argument name when no type hint is provided.
 
   Respects provided constraints if any.

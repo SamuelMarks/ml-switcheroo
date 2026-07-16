@@ -1,0 +1,12 @@
+description: Imports a TorchScript IR module. Not supported in functional frameworks.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: cu
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: filename
+  type: str
+variants: {}
+operation: ImportIrModule

@@ -1,0 +1,12 @@
+description: Broadcasts a tensor to a new shape.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: shape
+  type: Tuple[int, ...]
+variants: {}
+operation: BroadcastTo

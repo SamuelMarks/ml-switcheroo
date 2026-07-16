@@ -1,0 +1,4 @@
+description: Reads internal system vitals. Internal utility.
+std_args: []
+variants: {}
+operation: ReadVitals

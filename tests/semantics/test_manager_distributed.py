@@ -1,6 +1,4 @@
-"""
-Tests for Distributed Semantics Loading (Recursion & Extensions).
-"""
+"""Tests for Distributed Semantics Loading (Recursion & Extensions)."""
 
 import json
 import pytest
@@ -11,16 +9,18 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def mock_semantics_tree(tmp_path):
-  """
-  Creates a mock directory structure for semantics.
-  """
+  """Creates a mock directory structure for semantics."""
   # 1. Base Array API
   array_content = {"abs": {"description": "Math Abs", "variants": {"torch": {"api": "torch.abs"}}}}
-  (tmp_path / "k_array_api.json").write_text(json.dumps(array_content))
+  import yaml
+
+  array_content["abs"]["operation"] = "abs"
+  (tmp_path / "k_array_api.yaml").write_text(yaml.dump(array_content["abs"]))
 
   # 2. Base Neural
   neural_content = {"Linear": {"description": "Standard Linear", "variants": {"torch": {"api": "torch.nn.Linear"}}}}
-  (tmp_path / "k_neural_net.json").write_text(json.dumps(neural_content))
+  neural_content["Linear"]["operation"] = "Linear"
+  (tmp_path / "k_neural_net.yaml").write_text(yaml.dump(neural_content["Linear"]))
 
   # 3. Extension (XGBoost)
   ext_dir = tmp_path / "extensions"
@@ -30,26 +30,25 @@ def mock_semantics_tree(tmp_path):
     "__frameworks__": {"xgboost": {"alias": {"module": "xgboost", "name": "xgb"}}},
     "XGBClassifier": {"description": "Boosted Trees", "variants": {"xgboost": {"api": "xgboost.XGBClassifier"}}},
   }
-  (ext_dir / "xgboost_maps.json").write_text(json.dumps(xgb_content))
+  (ext_dir / "xgboost_maps.yaml").write_text(yaml.dump(xgb_content))
 
   # 4. Patch (Override Neural)
   patch_dir = ext_dir / "patches"
   patch_dir.mkdir()
 
   patch_content = {"Linear": {"description": "Patched Linear", "variants": {"custom": {"api": "mylib.Linear"}}}}
-  (patch_dir / "neural_patch.json").write_text(json.dumps(patch_content))
+  patch_content["Linear"]["operation"] = "Linear"
+  (patch_dir / "neural_patch.yaml").write_text(yaml.dump(patch_content["Linear"]))
 
   return tmp_path
 
 
 def test_recursive_discovery(mock_semantics_tree):
-  """
-  Verify that files in root, subfolders, and nested subfolders are all loaded.
+  """Verify that files in root, subfolders, and nested subfolders are all loaded.
 
   Fix: Patched file_loader resolve_semantics_dir and registry_loader available_frameworks
   where they are imported.
   """
-
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_semantics_tree):
     # Prevent loading default templates to simplify assertion
     # Patch available_frameworks in registry_loader, NOT manager, as that's where it's imported
@@ -68,9 +67,7 @@ def test_recursive_discovery(mock_semantics_tree):
 
 
 def test_tier_priority_override(mock_semantics_tree):
-  """
-  Verify loading order ensures Extensions (Extras) override Base defs.
-  """
+  """Verify loading order ensures Extensions (Extras) override Base defs."""
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_semantics_tree):
     with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
       mgr = SemanticsManager()
@@ -83,9 +80,7 @@ def test_tier_priority_override(mock_semantics_tree):
 
 
 def test_framework_config_merging(mock_semantics_tree):
-  """
-  Verify __frameworks__ block from extension file is merged into manager config.
-  """
+  """Verify __frameworks__ block from extension file is merged into manager config."""
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_semantics_tree):
     with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
       mgr = SemanticsManager()
@@ -96,8 +91,7 @@ def test_framework_config_merging(mock_semantics_tree):
 
 
 def test_test_templates_via_overlay(tmp_path):
-  """
-  Verify that templates are loaded from overlays (snapshots).
+  """Verify that templates are loaded from overlays (snapshots).
 
   Fix: Manually create the semantics directory to ensure loader doesn't skip execution,
   and patch paths in file_loader where they are imported.

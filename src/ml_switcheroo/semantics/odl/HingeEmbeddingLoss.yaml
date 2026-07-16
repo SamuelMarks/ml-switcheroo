@@ -1,0 +1,22 @@
+description: Measures the loss given an input tensor and a labels tensor (-1 or 1).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: target
+  type: Tensor
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: margin
+  type: float
+- default: mean
+  is_variadic: false
+  kind: positional_or_keyword
+  name: reduction
+  type: str
+type: class
+operation: HingeEmbeddingLoss

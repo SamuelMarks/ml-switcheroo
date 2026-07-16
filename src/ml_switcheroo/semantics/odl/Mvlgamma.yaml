@@ -1,0 +1,12 @@
+description: Computes the multivariate log-gamma function.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: p
+  type: int
+variants: {}
+operation: Mvlgamma

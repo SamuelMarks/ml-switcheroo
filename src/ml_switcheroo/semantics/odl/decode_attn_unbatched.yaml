@@ -1,0 +1,20 @@
+description: The class representing a Python function.
+std_args:
+- q
+- k
+- v
+- start_idx
+- kv_seq_len
+- sm_scale
+- block_h
+- block_k
+- k_splits
+- num_warps
+- num_stages
+- grid
+- interpret
+- debug
+- return_residuals
+- normalize_output
+type: function
+operation: decode_attn_unbatched

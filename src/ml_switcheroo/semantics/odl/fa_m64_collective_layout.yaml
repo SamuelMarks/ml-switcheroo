@@ -1,0 +1,5 @@
+description: The register layout for transfers to/from tmem_m64_collective_layout.
+std_args:
+- columns
+type: function
+operation: fa_m64_collective_layout

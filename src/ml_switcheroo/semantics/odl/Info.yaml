@@ -1,0 +1,21 @@
+description: Get help information for an array, function, class, or module. Interactive
+  use only.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: object
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: maxwidth
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: output
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: toplevel
+  type: Any
+variants: {}
+operation: Info

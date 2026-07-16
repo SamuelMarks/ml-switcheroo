@@ -1,0 +1,5 @@
+description: Internal PyTorch type representing a concrete module type for JIT.
+op_type: class
+std_args: []
+variants: {}
+operation: ConcreteModuleType

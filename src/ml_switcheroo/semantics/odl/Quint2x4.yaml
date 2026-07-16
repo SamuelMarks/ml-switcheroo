@@ -1,0 +1,5 @@
+description: Data type for quint2x4 quantized tensors.
+op_type: attribute
+std_args: []
+variants: {}
+operation: Quint2x4

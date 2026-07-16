@@ -1,0 +1,8 @@
+description: Returns the fraction of zeros in value.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: value
+  type: Tensor
+variants: {}
+operation: ZeroFraction

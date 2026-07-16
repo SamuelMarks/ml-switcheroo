@@ -1,0 +1,8 @@
+description: Category of data types.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: values
+  type: Any
+variants: {}
+operation: DtypeCategory

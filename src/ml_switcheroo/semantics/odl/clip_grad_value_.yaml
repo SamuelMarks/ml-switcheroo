@@ -1,0 +1,7 @@
+description: Clip the gradients of an iterable of parameters at specified value.
+std_args:
+- parameters
+- clip_value
+- foreach
+type: function
+operation: clip_grad_value_

@@ -1,0 +1,5 @@
+description: Adds transitive NotOfType constraints for all non-splat variables.
+std_args:
+- constraint_system
+type: function
+operation: saturate_distinct_from_splat

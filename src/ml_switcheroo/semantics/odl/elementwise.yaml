@@ -1,0 +1,6 @@
+description: Layer that applies a scalar function elementwise on its inputs.
+std_args:
+- fun
+- fun_kwargs
+type: function
+operation: elementwise

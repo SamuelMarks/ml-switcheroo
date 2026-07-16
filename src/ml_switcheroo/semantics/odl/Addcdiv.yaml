@@ -1,0 +1,22 @@
+description: Performs element-wise division of tensor1 by tensor2, multiplies by value,
+  adds to input.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tensor1
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tensor2
+  type: Tensor
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: value
+  type: float
+variants: {}
+operation: Addcdiv

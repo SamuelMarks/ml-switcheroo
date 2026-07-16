@@ -372,8 +372,8 @@ variants:
     api: "tf.math.is_finite"
   mlx:
     macro_template: "mx.logical_not(mx.isinf({x})) & mx.logical_not(mx.isnan({x}))"
-    # MLX has no direct isfinite yet? verify current API. 
-    # Use macro to be safe. 
+    # MLX has no direct isfinite yet? verify current API.
+    # Use macro to be safe.
 
 ---
 operation: "IsFortran"

@@ -1,0 +1,12 @@
+description: True if two arrays have the same shape and elements.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a1
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a2
+  type: Tensor
+variants: {}
+operation: ArrayEqual

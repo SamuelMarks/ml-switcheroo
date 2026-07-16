@@ -1,5 +1,4 @@
-"""
-Tests for Framework Registry and Base Protocol Mechanics.
+"""Tests for Framework Registry and Base Protocol Mechanics.
 
 Verifies:
 1. Registration Decorator adds classes to `_ADAPTER_REGISTRY`.
@@ -63,9 +62,7 @@ def mock_snapshot_dir(tmp_path):
 
 
 def test_load_snapshot_sorts_versions(mock_snapshot_dir):
-  """
-  Verify logical sorting of versions (lexical sort by filename).
-  """
+  """Verify logical sorting of versions (lexical sort by filename)."""
   # Create files
   (mock_snapshot_dir / "testfw_v1.0.json").write_text(json.dumps({"version": "1.0"}), encoding="utf-8")
   (mock_snapshot_dir / "testfw_v2.0.json").write_text(json.dumps({"version": "2.0"}), encoding="utf-8")

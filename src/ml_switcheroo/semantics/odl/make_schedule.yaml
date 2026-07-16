@@ -1,0 +1,5 @@
+description: The class representing a Python function.
+std_args:
+- scalar_or_schedule
+type: function
+operation: make_schedule

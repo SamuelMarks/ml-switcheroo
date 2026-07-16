@@ -1,12 +1,11 @@
-"""
-Tests for IR Data Structures and Algorithms.
+"""Tests for IR Data Structures and Algorithms.
 
 Verifies:
 1. LogicalNode/Edge creation.
 2. Topological Sort logic correctness and cycle handling.
 """
 
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, topological_sort
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, topological_sort
 
 
 def test_graph_structure():
@@ -70,7 +69,7 @@ def test_topological_sort_cycle_resilience():
 
 def test_logical_axis():
   """Verify LogicalAxis properties."""
-  from ml_switcheroo.compiler.ir import LogicalAxis
+  from ml_switcheroo.core.compiler.ir import LogicalAxis
 
   axis = LogicalAxis(name="embed", size=1024)
   assert axis.name == "embed"
@@ -79,7 +78,7 @@ def test_logical_axis():
 
 def test_partition_spec():
   """Verify PartitionSpec properties."""
-  from ml_switcheroo.compiler.ir import PartitionSpec
+  from ml_switcheroo.core.compiler.ir import PartitionSpec
 
   spec = PartitionSpec(axes=("data", None, ("model", "tensor")))
   assert len(spec.axes) == 3
@@ -90,7 +89,7 @@ def test_partition_spec():
 
 def test_logical_mesh():
   """Verify LogicalMesh properties."""
-  from ml_switcheroo.compiler.ir import LogicalMesh
+  from ml_switcheroo.core.compiler.ir import LogicalMesh
 
   mesh = LogicalMesh(shape={"data": 2, "model": 4})
   assert mesh.shape["data"] == 2
@@ -99,7 +98,7 @@ def test_logical_mesh():
 
 def test_graph_sharding_attributes():
   """Verify sharding and mesh attributes on nodes and graph."""
-  from ml_switcheroo.compiler.ir import LogicalMesh, PartitionSpec, LogicalGraph, LogicalNode
+  from ml_switcheroo.core.compiler.ir import LogicalMesh, PartitionSpec, LogicalGraph, LogicalNode
 
   mesh = LogicalMesh(shape={"data": 8})
   spec = PartitionSpec(axes=("data", None))

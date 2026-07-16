@@ -1,0 +1,8 @@
+description: Type variable helper.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: name
+  type: str
+variants: {}
+operation: TypeVarM

@@ -1,0 +1,8 @@
+description: Machine limits for floating-point data types.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: type
+  type: Union[dtype, array]
+variants: {}
+operation: finfo

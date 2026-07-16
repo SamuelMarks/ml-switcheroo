@@ -1,0 +1,12 @@
+description: Applies max pooling 3D (MKLDNN).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: int
+variants: {}
+operation: MkldnnMaxPool3d

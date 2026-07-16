@@ -1,7 +1,7 @@
 """Module docstring."""
 
-from ml_switcheroo.compiler.backends.sass.macros import expand_conv2d, expand_linear
-from ml_switcheroo.compiler.frontends.sass.nodes import Instruction, Label, Register, Comment
+from ml_switcheroo.core.compiler.backends.sass.macros import expand_conv2d, expand_linear
+from ml_switcheroo.core.compiler.frontends.sass.nodes import Instruction, Label, Register, Comment
 
 
 class MockAllocator:
@@ -25,9 +25,7 @@ class MockAllocator:
 
 
 def test_expand_conv2d_structure() -> None:
-  """
-  Verify Conv2d generates nested loops and FFMA logic.
-  """
+  """Verify Conv2d generates nested loops and FFMA logic."""
   alloc = MockAllocator()
   nodes = expand_conv2d(alloc, "conv1", {"k": 3})
 
@@ -55,9 +53,7 @@ def test_expand_conv2d_structure() -> None:
 
 
 def test_expand_linear_structure() -> None:
-  """
-  Verify Linear generates GEMM loop.
-  """
+  """Verify Linear generates GEMM loop."""
   alloc = MockAllocator()
   nodes = expand_linear(alloc, "fc1", {"in_features": 512, "bias": True})
 

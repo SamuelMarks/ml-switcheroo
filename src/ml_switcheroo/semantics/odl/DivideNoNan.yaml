@@ -1,0 +1,12 @@
+description: Computes a safe divide which returns 0 if `y` (denominator) is zero.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y
+  type: Tensor
+variants: {}
+operation: DivideNoNan

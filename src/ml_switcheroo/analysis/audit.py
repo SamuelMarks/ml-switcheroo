@@ -51,7 +51,11 @@ class CoverageScanner(cst.CSTVisitor):
     """
     for alias in node.names:
       full_name = get_full_name(alias.name)
-      local_name = alias.asname.name.value if alias.asname else full_name.split(".")[0]
+      local_name = (
+        (alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else "")
+        if alias.asname
+        else full_name.split(".")[0]
+      )
       self._alias_map[local_name] = full_name
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
@@ -65,12 +69,16 @@ class CoverageScanner(cst.CSTVisitor):
       return
     module_name = get_full_name(node.module)
 
-    for alias in node.names:
-      if isinstance(alias, cst.ImportAlias):
-        import_name = alias.name.value
-        local_name = alias.asname.name.value if alias.asname else import_name
-        full_path = f"{module_name}.{import_name}"
-        self._alias_map[local_name] = full_path
+    if isinstance(node.names, cst.ImportStar):
+      return
+
+    for alias in node.names:  # type: ignore
+      import_name = alias.name.value if isinstance(alias.name, cst.Name) else ""
+      local_name = (
+        (alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else "") if alias.asname else import_name
+      )
+      full_path = f"{module_name}.{import_name}"
+      self._alias_map[local_name] = full_path
 
   def visit_Call(self, node: cst.Call) -> None:
     """Visits function call nodes to check the invoked function.
@@ -143,7 +151,7 @@ class CoverageScanner(cst.CSTVisitor):
 
     """
     # 1. Flatten CST to string
-    raw_name = get_full_name(node)
+    raw_name = get_full_name(node)  # type: ignore
     if not raw_name:
       return ""  # pragma: no cover
 

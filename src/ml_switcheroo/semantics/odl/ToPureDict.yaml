@@ -1,0 +1,8 @@
+description: Converts a State object to a standard Python dictionary.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: state
+  type: Any
+variants: {}
+operation: ToPureDict

@@ -1,0 +1,9 @@
+description: Context manager for setting logical to mesh axis bindings.
+op_type: context
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: rules
+  type: Sequence
+variants: {}
+operation: LogicalAxisRules

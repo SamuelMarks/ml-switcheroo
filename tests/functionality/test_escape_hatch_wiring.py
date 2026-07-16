@@ -1,6 +1,4 @@
-"""
-Tests for Escape Hatch Wiring in AST Translation.
-"""
+"""Tests for Escape Hatch Wiring in AST Translation."""
 
 import pytest
 from typing import Set, Dict, Tuple, Optional

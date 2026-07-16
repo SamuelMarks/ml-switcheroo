@@ -3,7 +3,7 @@
 Simplified to only provide Metadata.
 """
 
-from typing import Dict, List, Tuple, Any, Optional
+from typing import Union, Dict, List, Tuple, Any, Optional
 from ml_switcheroo.frameworks.base import register_framework, FrameworkAdapter, StandardMap, ImportConfig, InitMode
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 from ml_switcheroo.core.dsl import OperationDef
@@ -35,7 +35,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return "html_dsl", "dsl"
 
   @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
     """Execute implementation detail."""
     return {"html_dsl": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="dsl")}
 
@@ -152,7 +152,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
   def get_tiered_examples(self) -> Dict[str, str]:
     """Execute implementation detail."""
     return {
-      "tier2_neural": """ 
+      "tier2_neural": """
 <div class="grid">
   <div class="box r">
     <span class="header-txt">conv: Conv2d</span>

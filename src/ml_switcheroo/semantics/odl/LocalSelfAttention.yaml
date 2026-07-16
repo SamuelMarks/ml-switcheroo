@@ -1,0 +1,17 @@
+description: Local Attention with given left and right context.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_heads
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: window_size
+  type: int
+variants: {}
+operation: LocalSelfAttention

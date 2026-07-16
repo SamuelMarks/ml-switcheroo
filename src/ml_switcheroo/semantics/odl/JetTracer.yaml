@@ -1,0 +1,8 @@
+description: The class representing a Python class.
+std_args:
+- self
+- trace
+- primal
+- terms
+type: class
+operation: JetTracer

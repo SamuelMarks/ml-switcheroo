@@ -161,7 +161,7 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
       # Simple heuristic: grab first arg.
       # If it's a literal 'False' or 'True', we use it.
       # For variables, we just passthrough the variable name node.
-      val = node.args[0].value
+      val = node.args[0].value  # type: ignore
     state_updates["training"] = val
 
   # 3. persist State in Context

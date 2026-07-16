@@ -1,0 +1,8 @@
+description: Constructs a Tensor with uint8 data type (Byte).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data
+  type: Any
+variants: {}
+operation: ByteTensor

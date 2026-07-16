@@ -1,0 +1,4 @@
+description: Return the directory that contains the NumPy \*.h header files.
+std_args: []
+variants: {}
+operation: GetInclude

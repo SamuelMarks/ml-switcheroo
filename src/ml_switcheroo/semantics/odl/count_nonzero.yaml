@@ -1,0 +1,16 @@
+description: Counts the number of array elements which are non-zero.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: Optional[Union[int, Tuple[int, Ellipsis]]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: keepdims
+  type: bool
+variants: {}
+operation: count_nonzero

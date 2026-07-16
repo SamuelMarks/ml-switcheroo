@@ -1,0 +1,13 @@
+description: Perform the Walsh-Hadamard transform along the final axis.
+return_type: Tensor
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: scale
+  type: float
+variants: {}
+operation: HadamardTransform

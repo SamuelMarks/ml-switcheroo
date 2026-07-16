@@ -1,0 +1,12 @@
+description: Joins a sequence of arrays along a new axis.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arrays
+  type: Union[Tuple[array, Ellipsis], List[array]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: stack

@@ -1,0 +1,12 @@
+description: Computes the product along segments of a tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: segment_ids
+  type: Tensor
+variants: {}
+operation: SegmentProd

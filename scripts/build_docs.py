@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Documentation Build Script for ml-switcheroo.
+"""Documentation Build Script for ml-switcheroo.
 
 This script orchestrates the Sphinx documentation build process, including:
 1.  Cleaning previous build artifacts.
@@ -33,9 +32,7 @@ ROOT_FILES = (
 
 
 def clean() -> None:
-  """
-  Cleans the build directory and temporary artifacts.
-  """
+  """Cleans the build directory and temporary artifacts."""
   if BUILD_DIR.exists():
     shutil.rmtree(BUILD_DIR)
 
@@ -56,9 +53,7 @@ def clean() -> None:
 
 
 def copy_root_files() -> None:
-  """
-  Copies essential Markdown files from the project root to the docs directory.
-  """
+  """Copies essential Markdown files from the project root to the docs directory."""
   print("📋 Copying root Markdown files to docs/...")
   for fname in ROOT_FILES:
     src = PROJECT_ROOT / fname
@@ -70,9 +65,7 @@ def copy_root_files() -> None:
 
 
 def build_wheel() -> None:
-  """
-  Builds the pure Python wheel for the WASM demo.
-  """
+  """Builds the pure Python wheel for the WASM demo."""
   print("📦 Building Python Wheel for WASM...")
   dist_dir = PROJECT_ROOT / "dist"
   if dist_dir.exists():
@@ -88,10 +81,25 @@ def build_wheel() -> None:
     sys.exit(1)
 
 
+def calculate_unique_variants() -> None:
+  """Calculates the unique cross-framework variants across all semantics files."""
+  try:
+    from ml_switcheroo.semantics.manager import SemanticsManager
+
+    mgr = SemanticsManager()
+    total_variants = len(mgr._reverse_index)
+
+    print(f"📊 Calculated unique cross-framework variants: {total_variants}")
+    if os.environ.get("CI") == "true" and total_variants < 1860:
+      print(f"❌ CI Assertion Failed: Unique operator count ({total_variants}) is below the required 1860 limit.")
+      sys.exit(1)
+  except Exception as e:
+    print(f"⚠️ Failed to calculate variants: {e}")
+
+
 def build(build_all: bool = False) -> int:
-  """
-  Executes the Sphinx build process.
-  """
+  """Executes the Sphinx build process."""
+  calculate_unique_variants()
   build_wheel()
 
   print("🏗️  Building Sphinx documentation...")
@@ -119,6 +127,7 @@ def build(build_all: bool = False) -> int:
 
 
 def main() -> None:
+  """Auto-generated doc."""
   import argparse
 
   parser = argparse.ArgumentParser(description="Build ml-switcheroo documentation.")

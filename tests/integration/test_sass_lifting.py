@@ -1,6 +1,4 @@
-"""
-Integration Tests for SASS Decompilation (Lifting).
-"""
+"""Integration Tests for SASS Decompilation (Lifting)."""
 
 import ast
 import pytest
@@ -14,20 +12,20 @@ from ml_switcheroo.frameworks.torch import TorchAdapter
 from ml_switcheroo.frameworks import register_framework
 
 # --- Source Snippet (SASS) ---
-SASS_SOURCE = dedent(""" 
+SASS_SOURCE = dedent("""
     // Input x -> R0
-    // BEGIN Conv2d (conv) 
-    MOV R1, RZ; 
-    MOV R2, RZ; 
-L_KY_conv: 
-    IADD3 R3, R3, 1, RZ; 
-    // END Conv2d (conv) 
-    // Unmapped Op: torch.flatten (func_flatten) 
-    // BEGIN Linear (fc) 
-    MOV R7, RZ; 
-L_GEMM_fc: 
-    FFMA R7, R9, R10, R7; 
-    // END Linear (fc) 
+    // BEGIN Conv2d (conv)
+    MOV R1, RZ;
+    MOV R2, RZ;
+L_KY_conv:
+    IADD3 R3, R3, 1, RZ;
+    // END Conv2d (conv)
+    // Unmapped Op: torch.flatten (func_flatten)
+    // BEGIN Linear (fc)
+    MOV R7, RZ;
+L_GEMM_fc:
+    FFMA R7, R9, R10, R7;
+    // END Linear (fc)
     // Return: R7
 """)
 
@@ -46,9 +44,7 @@ def lifting_engine() -> ASTEngine:
 
 
 def test_sass_lifting_e2e(lifting_engine: ASTEngine) -> None:
-  """
-  Verifies that the SASS snippet is successfully decompiled into a PyTorch class.
-  """
+  """Verifies that the SASS snippet is successfully decompiled into a PyTorch class."""
   # 1. Run Conversion
   result = lifting_engine.run(SASS_SOURCE)
 
@@ -78,8 +74,7 @@ def test_sass_lifting_e2e(lifting_engine: ASTEngine) -> None:
 
 
 def test_sass_lifting_no_structural_markers(lifting_engine: ASTEngine) -> None:
-  """
-  Verifies fallback if SASS contains no high-level markers.
+  """Verifies fallback if SASS contains no high-level markers.
   Should produce low-level python calls (asm.FADD) inside a generic class wrapper.
   """
   raw_sass = "FADD R0, R1, R2;"

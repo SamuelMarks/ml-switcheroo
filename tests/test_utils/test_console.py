@@ -1,5 +1,4 @@
-"""
-Tests for Centralized Logging Utility and Injection Mechanics.
+"""Tests for Centralized Logging Utility and Injection Mechanics.
 
 Verifies:
 1. Singleton Proxy correctness.
@@ -28,9 +27,7 @@ def cleanup_console():
 
 
 def test_console_singleton_proxy():
-  """
-  Verify `console` acts as a proxy to a real Rich console.
-  """
+  """Verify `console` acts as a proxy to a real Rich console."""
   # Should define print method
   assert hasattr(console, "print")
   assert callable(console.print)
@@ -43,8 +40,7 @@ def test_console_singleton_proxy():
 
 
 def test_custom_console_injection():
-  """
-  Verify we can inject a capturing console and retrieve logs.
+  """Verify we can inject a capturing console and retrieve logs.
   This simulates how a Web API would capture logs for a response.
   """
   # 1. Create a capturing console
@@ -64,9 +60,7 @@ def test_custom_console_injection():
 
 
 def test_reset_functionality():
-  """
-  Verify `reset_console` restores default behavior.
-  """
+  """Verify `reset_console` restores default behavior."""
   original_backend = get_console()
 
   # Inject temporary
@@ -84,8 +78,7 @@ def test_reset_functionality():
 
 
 def test_logging_wrappers_format(capsys):
-  """
-  Verify semantic wrappers utilize the theme colors and prefixes.
+  """Verify semantic wrappers utilize the theme colors and prefixes.
   Note: We rely on capsys capturing stdout from the default console.
   """
   # Ensure default
@@ -106,8 +99,7 @@ def test_logging_wrappers_format(capsys):
 
 
 def test_proxy_getattr_delegation():
-  """
-  Verify that accessing attributes not explicitly defined on the proxy
+  """Verify that accessing attributes not explicitly defined on the proxy
   falls through to the backend via __getattr__.
   """
   # 'width' is a property of Rich Console, not defined on _ConsoleProxy

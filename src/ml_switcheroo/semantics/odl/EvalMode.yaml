@@ -1,0 +1,8 @@
+description: Creates a new node/module set to evaluation mode (deterministic=True).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: node
+  type: Module
+variants: {}
+operation: EvalMode

@@ -1,0 +1,5 @@
+description: The class representing a Python function.
+std_args:
+- limit
+type: function
+operation: artificial_shared_memory_limit

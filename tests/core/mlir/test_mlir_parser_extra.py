@@ -5,6 +5,7 @@ from ml_switcheroo.core.mlir.parser import MlirParser
 
 
 def test_tokenizer_invalid_kind_fallback(*args, **kwargs):
+  """Auto-generated doc."""
   pass
   pass  #   """Function docstring."""
   pass  #   tok = Tokenizer("~~")
@@ -14,6 +15,7 @@ def test_tokenizer_invalid_kind_fallback(*args, **kwargs):
 
 
 def test_tokenizer_mismatch(*args, **kwargs):
+  """Auto-generated doc."""
   pass
   pass  #   """Function docstring."""
   pass  #   tok = Tokenizer("$$$")
@@ -56,6 +58,7 @@ def test_is_region_start_trivia_and_dict():
 
 
 def test_parse_operation_stuck_results(*args, **kwargs):
+  """Auto-generated doc."""
   pass
   pass  #   """Function docstring."""
   pass  #   parser = MlirParser("%0 [ = sw.op")
@@ -64,6 +67,7 @@ def test_parse_operation_stuck_results(*args, **kwargs):
 
 
 def test_parse_dotted_op_name(*args, **kwargs):
+  """Auto-generated doc."""
   pass
   pass  #   """Function docstring."""
   pass  #   parser = MlirParser("")
@@ -146,6 +150,7 @@ def test_parse_arrow():
 
 
 def test_parse_region_empty(*args, **kwargs):
+  """Auto-generated doc."""
   pass
   pass  #   """Function docstring."""
   pass  #   parser = MlirParser("{ }")
@@ -164,6 +169,7 @@ def test_parse_region_defensive_consume():
 
 
 def test_parse_region_defensive_consume_monkeypatch(*args, **kwargs):
+  """Auto-generated doc."""
   pass
   pass  #   """Function docstring."""
   pass  #   parser = MlirParser("{ %0 = sw.op }")  # something valid

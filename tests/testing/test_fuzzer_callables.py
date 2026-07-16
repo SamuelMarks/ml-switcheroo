@@ -1,5 +1,4 @@
-"""
-Tests for Fuzzer Callable Support.
+"""Tests for Fuzzer Callable Support.
 
 Verifies that:
 1. Hints like 'Callable' generate executable functions.
@@ -25,8 +24,7 @@ def fuzzer():
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_generate_simple_callable(fuzzer, data):
-  """
-  Scenario: User hints 'Callable'.
+  """Scenario: User hints 'Callable'.
   Expectation: Return a python function (lambda).
   """
   hints = {"fn": "Callable"}
@@ -44,8 +42,7 @@ def test_generate_simple_callable(fuzzer, data):
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_generate_complex_callable_hint(fuzzer, data):
-  """
-  Scenario: User hints 'Callable[[int], int]'.
+  """Scenario: User hints 'Callable[[int], int]'.
   Expectation: Fuzzer handles the brackets gracefully and returns basic callable.
   """
   hints = {"op": "Callable[[int], int]"}
@@ -60,9 +57,7 @@ def test_generate_complex_callable_hint(fuzzer, data):
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_generate_func_shorthand(fuzzer, data):
-  """
-  Scenario: User hints 'func' or 'function' (often used in ODL for vmap/grad).
-  """
+  """Scenario: User hints 'func' or 'function' (often used in ODL for vmap/grad)."""
   hints = {"f": "func", "g": "function"}
   strats = fuzzer.build_strategies(["f", "g"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
@@ -78,8 +73,7 @@ def test_generate_func_shorthand(fuzzer, data):
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_callable_in_list(fuzzer, data):
-  """
-  Scenario: List[Callable].
+  """Scenario: List[Callable].
   Expectation: A list of functions.
   """
   hints = {"ops": "List[Callable]"}
@@ -93,8 +87,7 @@ def test_callable_in_list(fuzzer, data):
 
 
 def test_fallback_depth_recursion(fuzzer):
-  """
-  Scenario: Recursion limit hit on 'List[List[List[Callable]]]'.
+  """Scenario: Recursion limit hit on 'List[List[List[Callable]]]'.
   Expectation: Should still return sensible fallbacks for containers,
                or at least not crash if it reaches the callable.
   """
@@ -110,9 +103,7 @@ def test_fallback_depth_recursion(fuzzer):
 @given(data=st.data())
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_vmap_usage_simulation(fuzzer, data):
-  """
-  Scenario: Simulating a vmap test where 'func' is generated.
-  """
+  """Scenario: Simulating a vmap test where 'func' is generated."""
   hints = {"func": "Callable", "in_axes": "int"}
   strats = fuzzer.build_strategies(["func", "in_axes"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))

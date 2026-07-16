@@ -1,0 +1,23 @@
+description: The operator casts the elements of a given input tensor to a data type
+  specified by the 'to' argument and returns an output tensor of the same size in
+  the converted type. The 'to' argument must be one of the data types specified in
+  the 'DataType' enum field in the TensorProto message. Casting from s...
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: round_mode
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: saturate
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: to
+  type: int
+type: attribute
+operation: Cast

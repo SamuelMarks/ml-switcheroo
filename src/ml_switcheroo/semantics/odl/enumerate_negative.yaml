@@ -1,0 +1,5 @@
+description: Like built-in enumerate, but returns negative indices into the sequence.
+std_args:
+- elems
+type: function
+operation: enumerate_negative

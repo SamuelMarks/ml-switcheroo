@@ -1,0 +1,12 @@
+description: "Wrapper class for quantized operations.\n\nThe instance of this class\
+  \ can be used instead of the\n``torch.ops.quantized`` prefix. See example usage\
+  \ below.\n\n.. note::\n\n    This class does not provide a ``forward`` hook. Instead,\
+  \ you must use\n    one of the underlying functions (e.g. ``add``).\n\nExamples::\n\
+  \n    >>> q_add = QFunctional()\n    >>> # xdoctest: +SKIP\n    >>> a = torch.quantize_per_tensor(torch.tensor(3.0),\
+  \ 1.0, 0, torch.qint32)\n    >>> b = torch.quantize_per_tensor(torch.tensor(4.0),\
+  \ 1.0, 0, torch.qint32)\n    >>> q_add.add(a, b)  # Equivalent to ``torch.ops.quantized.add(a,\
+  \ b, 1.0, 0)``\n\nValid operation names:\n    - add\n    - cat\n    - mul\n    -\
+  \ add_relu\n    - add_scalar\n    - mul_scalar"
+std_args: []
+variants: {}
+operation: QFunctional

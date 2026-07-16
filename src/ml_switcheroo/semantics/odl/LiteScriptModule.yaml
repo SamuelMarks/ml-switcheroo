@@ -1,0 +1,5 @@
+description: JIT module optimized for mobile.
+op_type: class
+std_args: []
+variants: {}
+operation: LiteScriptModule

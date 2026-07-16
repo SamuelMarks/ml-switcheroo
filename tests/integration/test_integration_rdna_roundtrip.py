@@ -1,5 +1,4 @@
-"""
-Integration Test for RDNA Round-Trip (PyTorch -> RDNA -> PyTorch).
+"""Integration Test for RDNA Round-Trip (PyTorch -> RDNA -> PyTorch).
 
 This test verifies the complete "Shift-Left" compiler/decompiler pipeline:
 1.  **Compilation**: Converts high-level PyTorch code into low-level AMD RDNA assembly.
@@ -39,8 +38,7 @@ CONVNET_SOURCE = textwrap.dedent("""
 
 @pytest.fixture
 def semantics_mgr():
-  """
-  Sets up a Semantic knowledge base supporting both Torch and RDNA definitions.
+  """Sets up a Semantic knowledge base supporting both Torch and RDNA definitions.
   We mock the definitions usually found in JSON files to ensure test stability.
   """
   mgr = SemanticsManager()
@@ -68,9 +66,7 @@ def semantics_mgr():
 
 
 def test_rdna_roundtrip_logic(semantics_mgr):
-  """
-  Executes the full Round-Trip Pipeline.
-  """
+  """Executes the full Round-Trip Pipeline."""
   print("\n--- [Phase 1] Compilation (Torch -> RDNA) ---")
 
   # 1. Setup Compiler

@@ -13,127 +13,13 @@ The `SymbolTableAnalyzer` visitor populates a `SymbolTable` by tracking:
 """
 
 import libcst as cst
-from typing import Dict, Optional, List
-from dataclasses import dataclass
+from typing import Dict, Optional
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.scanners import get_full_name
 
 
-@dataclass
-class SymbolType:
-  """Base class for inferred types."""
-
-  name: str
-  """A string representation of the type (e.g., 'Tensor')."""
-
-  def __str__(self) -> str:
-    """Returns the type name."""
-    return self.name
-
-  def __eq__(self, other: object) -> bool:
-    """Execute implementation detail."""
-    if not isinstance(other, SymbolType):
-      return False
-    return self.name == other.name
-
-
-@dataclass
-class TensorType(SymbolType):
-  """Represents a Tensor object from a specific framework."""
-
-  framework: str
-  """The framework key (e.g. "torch" or "jax") responsible for this tensor."""
-
-  def __eq__(self, other: object) -> bool:
-    """Execute implementation detail."""
-    if not isinstance(other, TensorType):
-      return False
-    return self.name == other.name and self.framework == other.framework
-
-
-@dataclass
-class ModuleType(SymbolType):
-  """Represents an imported module or sub-module."""
-
-  path: str
-  """Fully qualified path string (e.g. "torch.nn")."""
-
-  def __eq__(self, other: object) -> bool:
-    """Execute implementation detail."""
-    if not isinstance(other, ModuleType):
-      return False
-    return self.name == other.name and self.path == other.path
-
-
-@dataclass
-class UnionType(SymbolType):
-  """Represents a union of potential types resulting from control flow divergence."""
-
-  types: List[SymbolType]
-
-  def __init__(self, types: List[SymbolType]):
-    """Execute implementation detail."""
-    super().__init__("Union")
-    self.types = types
-
-  def __str__(self) -> str:
-    """Execute implementation detail."""
-    unique_names = sorted(list(set(str(t) for t in self.types)))
-    return f"Union[{', '.join(unique_names)}]"
-
-  def __eq__(self, other: object) -> bool:
-    """Execute implementation detail."""
-    if not isinstance(other, UnionType):
-      return False
-    # Set based comparison for equivalence ignoring order
-    return set(str(t) for t in self.types) == set(str(t) for t in other.types)
-
-
-class Scope:
-  """Represents a variable scope (Global, Class, or Function)."""
-
-  def __init__(self, parent: Optional["Scope"] = None, name: str = "<root>"):
-    """Initialize the scope.
-
-    Args:
-        parent: The enclosing scope (None for global).
-        name: Debug name for the scope.
-
-    """
-    self.parent = parent
-    self.name = name
-    self.symbols: Dict[str, SymbolType] = {}
-
-  def set(self, name: str, sym_type: SymbolType) -> None:
-    """Register a symbol in the current scope.
-
-    Args:
-        name: Variable identifier.
-        sym_type: Inferred Type object.
-
-    """
-    self.symbols[name] = sym_type
-
-  def get(self, name: str) -> Optional[SymbolType]:
-    """Resolve a symbol, traversing parent scopes.
-
-    Args:
-        name: Variable identifier to lookup.
-
-    Returns:
-        The SymbolType if found, else None.
-
-    """
-    if name in self.symbols:
-      return self.symbols[name]
-    if self.parent:
-      return self.parent.get(name)
-    return None
-
-  def snapshot(self) -> Dict[str, SymbolType]:
-    """Returns a shallow copy of the current symbol table for branching."""
-    return self.symbols.copy()
+from ml_switcheroo.analysis.symbol_types import SymbolType, TensorType, ModuleType, UnionType, Scope
 
 
 class SymbolTable:
@@ -141,7 +27,7 @@ class SymbolTable:
 
   def __init__(self):
     """Initializes an empty node map."""
-    self._node_types: Dict[cst.CSTNode, SymbolType] = {}
+    self._node_types: Dict[cst.CSTNode, SymbolType] = {}  # type: ignore
 
   def record_type(self, node: cst.CSTNode, sym_type: SymbolType) -> None:
     """Associates a CST node with a type.
@@ -192,8 +78,8 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
   def leave_ClassDef(self, node: cst.ClassDef) -> None:
     """Exits class scope."""
-    if self.current_scope.parent:
-      self.current_scope = self.current_scope.parent
+    assert self.current_scope.parent is not None
+    self.current_scope = self.current_scope.parent
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> None:
     """Enters function scope."""
@@ -201,8 +87,8 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
     """Exits function scope."""
-    if self.current_scope.parent:
-      self.current_scope = self.current_scope.parent
+    assert self.current_scope.parent is not None
+    self.current_scope = self.current_scope.parent
 
   # --- Control Flow Support ---
 
@@ -307,7 +193,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
           merged[k] = self._make_union(val_a, val_b)
       elif in_a:
         merged[k] = state_a[k]
-      elif in_b:
+      else:
         merged[k] = state_b[k]
 
     return merged
@@ -351,7 +237,11 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     """
     for alias in node.names:
       full_path = get_full_name(alias.name)
-      bind_name = alias.asname.name.value if alias.asname else full_path.split(".")[0]
+      bind_name = (
+        (alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else "")
+        if alias.asname
+        else full_path.split(".")[0]
+      )
       self.current_scope.set(bind_name, ModuleType(name="Module", path=full_path))
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
@@ -362,12 +252,16 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       return
     base_mod = get_full_name(node.module)
 
-    for alias in node.names:
-      if isinstance(alias, cst.ImportAlias):
-        import_name = alias.name.value
-        bind_name = alias.asname.name.value if alias.asname else import_name
-        full_path = f"{base_mod}.{import_name}"
-        self.current_scope.set(bind_name, ModuleType(name="Module", path=full_path))
+    if isinstance(node.names, cst.ImportStar):
+      return
+
+    for alias in node.names:  # type: ignore
+      import_name = alias.name.value if isinstance(alias.name, cst.Name) else ""
+      bind_name = (
+        (alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else "") if alias.asname else import_name
+      )
+      full_path = f"{base_mod}.{import_name}"
+      self.current_scope.set(bind_name, ModuleType(name="Module", path=full_path))
 
   def leave_Assign(self, node: cst.Assign) -> None:
     """Propagate type from RHS to LHS.
@@ -422,15 +316,14 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       receiver_type = self.table.get_type(node.func.value)
       if isinstance(receiver_type, TensorType):
         method = node.func.attr.value
-        if hasattr(receiver_type, "framework"):
-          api_path = f"{receiver_type.framework}.Tensor.{method}"
+        api_path = f"{receiver_type.framework}.Tensor.{method}"
       # Handle Unions where ALL branches are Tensors
       elif isinstance(receiver_type, UnionType):
         # Heuristic: If ANY option in the union is a Tensor, we treat it as a potential Tensor call.
         # This helps with weak inference (e.g. Tensor OR None).
         # We pick the first TensorType to drive API lookup prefix.
         tensor_opt = next((t for t in receiver_type.types if isinstance(t, TensorType)), None)
-        if tensor_opt:
+        if tensor_opt is not None:
           method = node.func.attr.value
           api_path = f"{tensor_opt.framework}.Tensor.{method}"
 

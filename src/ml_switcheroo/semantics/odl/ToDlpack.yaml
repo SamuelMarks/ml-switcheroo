@@ -1,0 +1,8 @@
+description: Exports a tensor to a DLPack capsule.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tensor
+  type: Tensor
+variants: {}
+operation: ToDlpack

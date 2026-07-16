@@ -1,20 +1,33 @@
+"""Auto-generated doc."""
+
+
 def test_utils_missing():
+  """Auto-generated doc."""
   import libcst as cst
   from ml_switcheroo.plugins.utils import is_framework_module_node, _extract_root_name
   from ml_switcheroo.core.hooks import HookContext
 
   class DummyAlias:
+    """Auto-generated doc."""
+
     def model_dump(self):
+      """Auto-generated doc."""
       return {"name": "pd"}
 
   class DummyConf:
+    """Auto-generated doc."""
+
     alias = DummyAlias()
 
   class DummySM:
+    """Auto-generated doc."""
+
     _source_registry = {"torch.nn": {}}
     framework_configs = {"pandas": DummyConf()}
 
   class DummyConfigObj:
+    """Auto-generated doc."""
+
     source_framework = "s"
     target_framework = "t"
     effective_source = "s"

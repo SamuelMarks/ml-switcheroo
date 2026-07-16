@@ -73,10 +73,10 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
   for key in fws:
     adapter = get_adapter(key)
     if hasattr(adapter, "get_tiered_examples"):
-      tiers = adapter.get_tiered_examples()
+      tiers = adapter.get_tiered_examples()  # type: ignore
       parent_key = getattr(adapter, "inherits_from", None)
 
-      for tier_name, code in tiers.items():
+      for tier_name, code in tiers.items():  # type: ignore
         uid = f"{key}_{tier_name}"
 
         if parent_key:

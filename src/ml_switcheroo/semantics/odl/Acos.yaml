@@ -1,0 +1,9 @@
+description: Calculates an implementation-dependent approximation of the principal
+  value of the inverse cosine for each element ``x_i`` of the input array ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+variants: {}
+operation: acos

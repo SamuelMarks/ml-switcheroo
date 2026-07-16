@@ -1,0 +1,5 @@
+description: JIT type representing None.
+op_type: class
+std_args: []
+variants: {}
+operation: NoneType

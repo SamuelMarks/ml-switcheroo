@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import subprocess
 import ast
 import json
@@ -34,6 +36,7 @@ TMP_DIR = Path("tmp/repos")
 
 
 def clone_repos():
+  """Auto-generated doc."""
   TMP_DIR.mkdir(parents=True, exist_ok=True)
   for name, url in REPOS.items():
     repo_path = TMP_DIR / name
@@ -50,6 +53,7 @@ def clone_repos():
 
 
 def extract_api_surface(repo_name: str, focus_dirs: list[str]) -> list[str]:
+  """Auto-generated doc."""
   repo_path = TMP_DIR / repo_name
   api_nodes = []
 
@@ -88,6 +92,7 @@ def extract_api_surface(repo_name: str, focus_dirs: list[str]) -> list[str]:
 
 
 def generate_mappings():
+  """Auto-generated doc."""
   logging.info("Extracting APIs...")
   apis = {}
   for name in REPOS.keys():

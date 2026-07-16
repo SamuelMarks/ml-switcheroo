@@ -1,0 +1,12 @@
+description: Applies a 2D max pooling over an input signal.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: Union[int, Tuple[int, int]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: stride
+  type: Union[int, Tuple[int, int]]
+type: class
+operation: MaxPool2d

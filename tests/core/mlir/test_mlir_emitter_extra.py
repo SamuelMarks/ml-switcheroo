@@ -29,7 +29,7 @@ def test_statement_leading_trivia():
   """Function docstring."""
   code = """
 def func(a):
-    
+
     # Statement leading comment
     return a
 """

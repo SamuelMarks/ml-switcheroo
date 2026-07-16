@@ -1,0 +1,5 @@
+description: Base class for activation functions.
+op_type: class
+std_args: []
+variants: {}
+operation: BaseActivation

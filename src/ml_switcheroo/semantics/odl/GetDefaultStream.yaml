@@ -1,0 +1,8 @@
+description: Get the device's default stream.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Device
+variants: {}
+operation: GetDefaultStream

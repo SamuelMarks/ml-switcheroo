@@ -1,0 +1,4 @@
+description: Checks if vitals are enabled. Internal.
+std_args: []
+variants: {}
+operation: VitalsEnabled

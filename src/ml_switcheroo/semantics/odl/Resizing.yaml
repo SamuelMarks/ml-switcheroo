@@ -1,0 +1,18 @@
+description: Preprocessing layer which resizes images.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: height
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: width
+  type: int
+- default: bilinear
+  is_variadic: false
+  kind: positional_or_keyword
+  name: interpolation
+  type: str
+variants: {}
+operation: Resizing

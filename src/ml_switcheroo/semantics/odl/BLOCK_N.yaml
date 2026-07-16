@@ -1,0 +1,5 @@
+description: Thread block size for the sequence length dimension of K/V in forward
+  pass.
+std_args: []
+type: attribute
+operation: BLOCK_N

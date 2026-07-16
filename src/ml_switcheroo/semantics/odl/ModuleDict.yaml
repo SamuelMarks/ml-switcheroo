@@ -1,0 +1,8 @@
+description: Holds submodules in a dictionary.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: modules
+  type: Dict[str, Module]
+type: class
+operation: ModuleDict

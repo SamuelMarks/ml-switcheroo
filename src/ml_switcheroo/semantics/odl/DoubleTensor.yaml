@@ -1,0 +1,5 @@
+description: Legacy constructor for float64 tensors.
+op_type: class
+std_args: []
+variants: {}
+operation: DoubleTensor

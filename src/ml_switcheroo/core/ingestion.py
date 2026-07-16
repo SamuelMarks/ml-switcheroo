@@ -15,7 +15,7 @@ from ml_switcheroo.core.mlir.parser import MlirParser
 
 # TikZ Bridge
 from ml_switcheroo.core.tikz.parser import TikzParser
-from ml_switcheroo.compiler.backends.python import PythonBackend
+from ml_switcheroo.core.compiler.backends.python import PythonBackend
 from ml_switcheroo.frameworks.base import FrameworkAdapter
 
 

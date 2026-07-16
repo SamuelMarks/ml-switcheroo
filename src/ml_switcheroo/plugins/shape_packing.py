@@ -26,7 +26,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))
+    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
   return node
 
 
@@ -70,7 +70,7 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
       is_method = True
 
   if is_method:
-    input_tensor = node.func.value
+    input_tensor = node.func.value  # type: ignore
     shape_args = list(node.args)
   else:
     if not node.args:

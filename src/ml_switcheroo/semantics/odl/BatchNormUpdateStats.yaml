@@ -1,0 +1,20 @@
+description: Internal operation for BatchNorm statistics update.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: running_mean
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: running_var
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: momentum
+  type: Any
+variants: {}
+operation: BatchNormUpdateStats

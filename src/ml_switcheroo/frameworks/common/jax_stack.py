@@ -143,7 +143,7 @@ class JAXStackMixin:
             raw_tree = checkpointer.restore({path_var})
             if 'params' in raw_tree:
                 raw_tree = raw_tree['params']
-            
+
             # Helper to flatten with tuple keys
             # Key format: (layer_name, param_name) tuple
             # We convert tuple keys to dot-separated strings for the interop mapping

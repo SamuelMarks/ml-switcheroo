@@ -1,0 +1,12 @@
+description: In-place GCD.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: other
+  type: Tensor
+variants: {}
+operation: Gcd_

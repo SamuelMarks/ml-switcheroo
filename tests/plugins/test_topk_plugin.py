@@ -1,6 +1,4 @@
-"""
-Tests for TopK Semantics Plugin (Decoupled).
-"""
+"""Tests for TopK Semantics Plugin (Decoupled)."""
 
 import pytest
 import libcst as cst

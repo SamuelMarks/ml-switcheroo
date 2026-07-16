@@ -1,0 +1,8 @@
+description: Returns True if the value is statically known to be divisible by the
+  divisor.
+std_args:
+- value
+- divisor
+- max_depth
+type: function
+operation: is_known_divisible

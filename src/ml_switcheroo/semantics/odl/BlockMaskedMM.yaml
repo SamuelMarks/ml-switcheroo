@@ -1,0 +1,29 @@
+description: Matrix multiplication with block masking.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b
+  type: Tensor
+- default: 64
+  is_variadic: false
+  kind: positional_or_keyword
+  name: block_size
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mask_out
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mask_lhs
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mask_rhs
+  type: Tensor
+variants: {}
+operation: BlockMaskedMM

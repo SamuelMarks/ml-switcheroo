@@ -1,0 +1,58 @@
+description: 'Returns a callable that can be used as profiler ``schedule`` argument.
+  The profiler will skip
+
+  the first ``skip_first`` steps, then wait for ``wait`` steps, then do the warmup
+  for the next ``warmup`` steps,
+
+  then do the active recording for the next ``active`` steps and then repeat the cycle
+  starting with ``wait`` steps.
+
+  The optional number of cycles is specified with the ``repeat`` parameter, the zero
+  value means that
+
+  the cycles will continue until the profiling is finished.
+
+
+  The ``skip_first_wait`` parameter controls whether the first ``wait`` stage should
+  be skipped.
+
+  This can be useful if a user wants to wait longer than ``skip_first`` between cycles,
+  but not
+
+  for the first profile. For example, if ``skip_first`` is 10 and ``wait`` is 20,
+  the first cycle will
+
+  wait 10 + 20 = 30 steps before warmup if ``skip_first_wait`` is zero, but will wait
+  only 10
+
+  steps if ``skip_first_wait`` is non-zero. All subsequent cycles will then wait 20
+  steps between the
+
+  last active and warmup.'
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: wait
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: warmup
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: active
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: repeat
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: skip_first
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: skip_first_wait
+  type: Any
+variants: {}
+operation: schedule

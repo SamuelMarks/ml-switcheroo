@@ -1,0 +1,4 @@
+description: Return the number of MTIA devices available.
+std_args: []
+variants: {}
+operation: device_count

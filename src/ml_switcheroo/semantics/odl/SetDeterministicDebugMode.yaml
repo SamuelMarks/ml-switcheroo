@@ -1,0 +1,8 @@
+description: Sets debug mode for deterministic operations.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: debug_mode
+  type: Union[str, int]
+variants: {}
+operation: SetDeterministicDebugMode

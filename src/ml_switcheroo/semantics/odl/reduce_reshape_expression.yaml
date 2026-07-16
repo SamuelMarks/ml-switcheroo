@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- reshape
+- assignments
+type: function
+operation: reduce_reshape_expression

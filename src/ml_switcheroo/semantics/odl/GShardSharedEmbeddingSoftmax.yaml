@@ -1,0 +1,13 @@
+description: Softmax layer with embedding lookup and Gaussian init used in GShard.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: in_features
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_classes
+  type: int
+variants: {}
+operation: GShardSharedEmbeddingSoftmax

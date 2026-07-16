@@ -1,0 +1,4 @@
+description: Auto-generated mapping for binary_cross_entropy_with_logits.
+std_args: []
+type: function
+operation: binary_cross_entropy_with_logits

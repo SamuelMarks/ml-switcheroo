@@ -1,5 +1,4 @@
-"""
-Tests for the Plugin Scaffolder Tool.
+"""Tests for the Plugin Scaffolder Tool.
 
 Verifies:
 1. Generation of new plugin files (Call/Block).
@@ -24,9 +23,7 @@ def plugin_dir(tmp_path):
 
 
 def test_filename_normalization(plugin_dir):
-  """
-  Verify that PascalCase names are converted to snake_case filenames.
-  """
+  """Verify that PascalCase names are converted to snake_case filenames."""
   gen = PluginGenerator(plugin_dir)
 
   # Case 1: PascalCase
@@ -98,8 +95,7 @@ def test_generate_creates_directory(tmp_path):
 
 
 def test_generate_plugin_with_rules(plugin_dir):
-  """
-  Verify that plugins generated with declarative rules contain correct logic.
+  """Verify that plugins generated with declarative rules contain correct logic.
   Covers int, string, and bool value matching logic compilation.
   """
   gen = PluginGenerator(plugin_dir)
@@ -143,8 +139,7 @@ def test_generate_plugin_with_rules(plugin_dir):
 
 
 def test_preserves_user_logic(plugin_dir):
-  """
-  Verify that if a user modifies the logic body, regenerating the plugin
+  """Verify that if a user modifies the logic body, regenerating the plugin
   preserves that logic while updating the wrapper/metadata.
   """
   gen = PluginGenerator(plugin_dir)
@@ -157,15 +152,15 @@ def test_preserves_user_logic(plugin_dir):
   # 2. Simulate User Edit
   # User adds print statements and custom return
   # Using clean formatting for input simulation
-  user_code = ''' 
+  user_code = '''
 import libcst as cst
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
-@register_hook("custom_logic") 
-def custom_logic(node: cst.Call, ctx: HookContext) -> cst.CSTNode: 
-    """Old Docstring.""" 
-    print("User Custom Logic") 
-    return node.with_changes(func=cst.Name("hacked")) 
+@register_hook("custom_logic")
+def custom_logic(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
+    """Old Docstring."""
+    print("User Custom Logic")
+    return node.with_changes(func=cst.Name("hacked"))
 '''
   file_path.write_text(user_code.strip(), encoding="utf-8")
 
@@ -195,19 +190,17 @@ def custom_logic(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
 
 def test_preserves_logic_with_complex_indentation(plugin_dir):
-  """
-  Verify indentation is handled correctly when extracting and reinjecting body.
-  """
+  """Verify indentation is handled correctly when extracting and reinjecting body."""
   gen = PluginGenerator(plugin_dir)
   scaffold = PluginScaffoldDef(name="indent_test", type=PluginType.CALL, doc="Doc")
   gen.generate(scaffold)
 
   file_path = plugin_dir / "indent_test.py"
-  user_code = """ 
-@register_hook("indent_test") 
-def indent_test(node, ctx): 
-    if True: 
-        print("Indented") 
+  user_code = """
+@register_hook("indent_test")
+def indent_test(node, ctx):
+    if True:
+        print("Indented")
     return node
 """
   file_path.write_text(user_code.strip(), encoding="utf-8")
@@ -225,8 +218,7 @@ def indent_test(node, ctx):
 
 
 def test_user_logic_trumps_rules(plugin_dir):
-  """
-  Scenario: User has written custom logic. Updates specify generated rules.
+  """Scenario: User has written custom logic. Updates specify generated rules.
   Expectation: User logic is preserved, rules are ignored (preservation priority).
   """
   gen = PluginGenerator(plugin_dir)
@@ -234,10 +226,10 @@ def test_user_logic_trumps_rules(plugin_dir):
   gen.generate(scaffold)
 
   file_path = plugin_dir / "priority_test.py"
-  file_path.write_text(""" 
-@register_hook("priority_test") 
-def priority_test(node, ctx): 
-    return "UserLogic" 
+  file_path.write_text("""
+@register_hook("priority_test")
+def priority_test(node, ctx):
+    return "UserLogic"
 """)
 
   # Regenerate with rules
@@ -252,8 +244,7 @@ def priority_test(node, ctx):
 
 
 def test_overwrite_on_syntax_error(plugin_dir, capsys):
-  """
-  Scenario: Existing file has syntax error (unparseable).
+  """Scenario: Existing file has syntax error (unparseable).
   Expectation: Generator logs warning and overwrites with default scaffold.
   """
   gen = PluginGenerator(plugin_dir)
@@ -274,8 +265,7 @@ def test_overwrite_on_syntax_error(plugin_dir, capsys):
 
 
 def test_auto_wire_generation(plugin_dir):
-  """
-  Scenario: scaffold_plugins entry contains 'auto_wire' dict.
+  """Scenario: scaffold_plugins entry contains 'auto_wire' dict.
   Expectation: Generated file includes `auto_wire={...}` in decorator.
   """
   gen = PluginGenerator(plugin_dir)

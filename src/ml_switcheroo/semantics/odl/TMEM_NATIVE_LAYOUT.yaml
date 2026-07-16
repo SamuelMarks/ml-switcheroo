@@ -1,0 +1,5 @@
+description: A layout resembling the logical organization of TMEM.
+std_args:
+- vector_length
+type: function
+operation: tmem_native_layout

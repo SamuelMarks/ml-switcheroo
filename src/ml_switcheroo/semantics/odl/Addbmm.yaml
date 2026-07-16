@@ -1,0 +1,26 @@
+description: Performs batch matrix-matrix product of matrices with reduced add step.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: batch1
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: batch2
+  type: Tensor
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: beta
+  type: float
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: alpha
+  type: float
+variants: {}
+operation: Addbmm

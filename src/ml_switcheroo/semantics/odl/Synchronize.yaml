@@ -1,0 +1,8 @@
+description: Synchronize with the given stream.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: stream
+  type: Optional[Any]
+variants: {}
+operation: Synchronize

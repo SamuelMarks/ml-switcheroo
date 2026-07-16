@@ -23,7 +23,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))
+    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
   return node
 
 
@@ -106,7 +106,7 @@ def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.
   new_call = cst.Call(func=new_func, args=args)
 
   reason = "Functional optimizers require explicit `update(model, grads)`. Variables inferred placeholders."
-  return EscapeHatch.mark_failure(new_call, reason)
+  return EscapeHatch.mark_failure(new_call, reason)  # type: ignore
 
 
 @register_hook("mlx_zero_grad")

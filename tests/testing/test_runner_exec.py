@@ -1,5 +1,4 @@
-"""
-Tests for the EquivalenceRunner Execution Logic.
+"""Tests for the EquivalenceRunner Execution Logic.
 
 Verifies:
 1.  Execution flow across mocked frameworks.
@@ -20,8 +19,7 @@ from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 @pytest.fixture
 def mock_frameworks():
-  """
-  Injects mocks directly into sys.modules.
+  """Injects mocks directly into sys.modules.
   Returns the overrides dict for further manipulation if needed.
   """
 
@@ -51,9 +49,7 @@ def mock_frameworks():
 
 
 def test_runner_uses_adapter_registry_for_normalization(mock_frameworks):
-  """
-  Feature Verification: Ensure `_to_numpy` logic calls the NumpyAdapter.
-  """
+  """Feature Verification: Ensure `_to_numpy` logic calls the NumpyAdapter."""
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum"}}
 
@@ -75,8 +71,7 @@ def test_runner_uses_adapter_registry_for_normalization(mock_frameworks):
 
 
 def test_equivalence_flow_integration(mock_frameworks):
-  """
-  Verify full end-to-end flow (Mock -> Adapter -> Compare).
+  """Verify full end-to-end flow (Mock -> Adapter -> Compare).
   Both frameworks return 5.0 (match).
   """
   runner = EquivalenceRunner()
@@ -92,9 +87,7 @@ def test_equivalence_flow_integration(mock_frameworks):
 
 
 def test_adapter_normalization_logic_real():
-  """
-  Verify NumpyAdapter logic handles the types previously handled by _to_numpy.
-  """
+  """Verify NumpyAdapter logic handles the types previously handled by _to_numpy."""
   adapter = NumpyAdapter()
 
   # 1. Detach pattern (Torch-like tensor)
@@ -156,8 +149,7 @@ def test_deep_compare_nan_handling():
 
 
 def test_argument_renaming_application(mock_frameworks):
-  """
-  Verify parameter mapping logic (std -> fw).
+  """Verify parameter mapping logic (std -> fw).
   Scenario: Standard 'axis' -> Torch 'dim'.
   """
   runner = EquivalenceRunner()

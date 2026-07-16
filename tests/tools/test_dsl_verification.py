@@ -1,6 +1,4 @@
-"""
-Tests for ODL Schema Extension: Verification Mode.
-"""
+"""Tests for ODL Schema Extension: Verification Mode."""
 
 import pytest
 from pydantic import ValidationError

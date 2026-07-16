@@ -1,0 +1,5 @@
+description: Internal locking logger.
+op_type: class
+std_args: []
+variants: {}
+operation: LockingLogger

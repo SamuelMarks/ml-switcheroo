@@ -1,5 +1,4 @@
-"""
-Integration Tests for RDNA Compiler (PyTorch -> RDNA).
+"""Integration Tests for RDNA Compiler (PyTorch -> RDNA).
 
 This test validates the full graph lowering pipeline:
 1.  **Graph Extraction**: PyTorch source code `ConvNet` is parsed into a `LogicalGraph`.
@@ -39,9 +38,7 @@ class ConvNet(nn.Module):
 
 @pytest.fixture
 def compiler_semantics():
-  """
-  Creates a SemanticsManager with necessary definitions for Torch->RDNA.
-  """
+  """Creates a SemanticsManager with necessary definitions for Torch->RDNA."""
   mgr = SemanticsManager()
 
   # 1. Register Source Definitions (Torch) for Graph Extraction.
@@ -71,9 +68,7 @@ def compiler_semantics():
 
 
 def test_rdna_compiler_pipeline(compiler_semantics):
-  """
-  End-to-End Compile: Torch Source -> RDNA Assembly.
-  """
+  """End-to-End Compile: Torch Source -> RDNA Assembly."""
   # 1. Setup Engine
   config = RuntimeConfig(source_framework="torch", target_framework="rdna", strict_mode=False)
   engine = ASTEngine(semantics=compiler_semantics, config=config)

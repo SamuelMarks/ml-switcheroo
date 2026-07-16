@@ -1,0 +1,13 @@
+description: Return a string representation of a number in the given base system.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: number
+  type: int
+- default: 2
+  is_variadic: false
+  kind: positional_or_keyword
+  name: base
+  type: int
+variants: {}
+operation: BaseRepr

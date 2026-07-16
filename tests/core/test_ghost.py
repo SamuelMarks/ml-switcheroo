@@ -1,5 +1,4 @@
-"""
-Tests for Ghost Core (Introspection & Serialization).
+"""Tests for Ghost Core (Introspection & Serialization).
 
 Verifies that:
 1. Live objects (Functions) are correctly inspected.
@@ -128,7 +127,7 @@ def test_inspect_failure_handling(monkeypatch):
 
 
 def test_ghost_ref_helper_methods():
-  """verify helper utility methods on the dataclass."""
+  """Verify helper utility methods on the dataclass."""
   ref = GhostInspector.inspect(simple_func, "foo")
 
   assert ref.has_arg("x") is True
@@ -136,7 +135,10 @@ def test_ghost_ref_helper_methods():
 
 
 def test_ghost_varargs():
+  """Auto-generated doc."""
+
   def func_with_args(*args):
+    """Auto-generated doc."""
     pass
 
   ref = GhostInspector.inspect(func_with_args, "func_with_args")
@@ -144,10 +146,14 @@ def test_ghost_varargs():
 
 
 def test_ghost_callable_default():
+  """Auto-generated doc."""
+
   def some_callable():
+    """Auto-generated doc."""
     pass
 
   def func_with_callable(cb=some_callable):
+    """Auto-generated doc."""
     pass
 
   ref = GhostInspector.inspect(func_with_callable, "func_with_callable")
@@ -155,21 +161,32 @@ def test_ghost_callable_default():
 
 
 def test_ghost_unrepresentable_default():
+  """Auto-generated doc."""
+
   class BadRepr:
+    """Auto-generated doc."""
+
     def __repr__(self):
+      """Auto-generated doc."""
       return "GoodRepr"
 
     def __str__(self):
+      """Auto-generated doc."""
       return "BadStr at 0x123"
 
   class ExplodingStr:
+    """Auto-generated doc."""
+
     def __repr__(self):
+      """Auto-generated doc."""
       return "SafeRepr"
 
     def __str__(self):
+      """Auto-generated doc."""
       raise Exception("Boom")
 
   def func_with_bad_str(x=BadRepr(), y=ExplodingStr()):
+    """Auto-generated doc."""
     pass
 
   ref = GhostInspector.inspect(func_with_bad_str, "func_with_bad_str")
@@ -178,11 +195,17 @@ def test_ghost_unrepresentable_default():
 
 
 def test_ghost_annotation_without_name():
+  """Auto-generated doc."""
+
   class NoNameAnnotation:
+    """Auto-generated doc."""
+
     def __str__(self):
+      """Auto-generated doc."""
       return "NoName"
 
   def func_with_anno(x: NoNameAnnotation()):
+    """Auto-generated doc."""
     pass
 
   ref = GhostInspector.inspect(func_with_anno, "func_with_anno")
@@ -190,12 +213,16 @@ def test_ghost_annotation_without_name():
 
 
 def test_ghost_function_c_extension_fallback(monkeypatch):
+  """Auto-generated doc."""
+
   def mock_sig(obj):
+    """Auto-generated doc."""
     raise ValueError("no signature found")
 
   monkeypatch.setattr("inspect.signature", mock_sig)
 
   def dummy_func():
+    """Auto-generated doc."""
     pass
 
   ref = GhostInspector.inspect(dummy_func, "dummy_func")

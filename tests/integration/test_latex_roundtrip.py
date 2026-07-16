@@ -1,6 +1,4 @@
-"""
-End-to-End Integration Tests for LaTeX DSL (MIDL) Roundtrip.
-"""
+"""End-to-End Integration Tests for LaTeX DSL (MIDL) Roundtrip."""
 
 import pytest
 from ml_switcheroo.core.engine import ASTEngine
@@ -11,20 +9,20 @@ from ml_switcheroo.semantics.registry_loader import RegistryLoader
 # Force load adapter
 
 # Updated source: Use keyword arg for kernel_size to ensure metadata capture
-SOURCE_TORCH = """ 
+SOURCE_TORCH = """
 import torch.nn as nn
 import torch.nn.functional as F
 
-class ConvNet(nn.Module): 
-    def __init__(self): 
-        super().__init__() 
-        self.conv = nn.Conv2d(1, 32, kernel_size=3) 
-        self.fc = nn.Linear(32 * 26 * 26, 10) 
+class ConvNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv = nn.Conv2d(1, 32, kernel_size=3)
+        self.fc = nn.Linear(32 * 26 * 26, 10)
 
-    def forward(self, x): 
-        x = self.conv(x) 
-        x = F.relu(x) 
-        x = self.fc(x) 
+    def forward(self, x):
+        x = self.conv(x)
+        x = F.relu(x)
+        x = self.fc(x)
         return x
 """
 
@@ -86,17 +84,17 @@ def test_torch_to_latex_generation(semantics):
 def test_latex_to_flax_generation(semantics):
   """Function docstring."""
   latex_source = r"""
-\documentclass[tikz]{standalone} 
-\begin{DefModel}{ConvNet} 
-    \Attribute{conv}{Conv2d}{in=1, out=32, k=3} 
-    \Attribute{fc}{Linear}{in=21632, out=10} 
-    \Input{x}{[_]} 
+\documentclass[tikz]{standalone}
+\begin{DefModel}{ConvNet}
+    \Attribute{conv}{Conv2d}{in=1, out=32, k=3}
+    \Attribute{fc}{Linear}{in=21632, out=10}
+    \Input{x}{[_]}
 
-    \StateOp{op_conv}{conv}{x}{[_]} 
-    \Op{op_act}{ReLU}{op_conv}{[_]} 
-    \StateOp{op_fc}{fc}{op_act}{[_]} 
-    \Return{op_fc} 
-\end{DefModel} 
+    \StateOp{op_conv}{conv}{x}{[_]}
+    \Op{op_act}{ReLU}{op_conv}{[_]}
+    \StateOp{op_fc}{fc}{op_act}{[_]}
+    \Return{op_fc}
+\end{DefModel}
 """
   config = RuntimeConfig(source_framework="latex_dsl", target_framework="flax_nnx", strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
@@ -115,18 +113,18 @@ def test_latex_to_flax_generation(semantics):
 
 def test_latex_roundtrip_complex_args(semantics):
   """Function docstring."""
-  source_code = """ 
+  source_code = """
 import torch.nn as nn
 import torch.nn.functional as F
 
-class ComplexNet(nn.Module): 
-    def __init__(self): 
-        super().__init__() 
+class ComplexNet(nn.Module):
+    def __init__(self):
+        super().__init__()
         # Complex expression in arguments
-        self.fc = nn.Linear(32 * 26 * 26, 10) 
+        self.fc = nn.Linear(32 * 26 * 26, 10)
 
-    def forward(self, x): 
-        return self.fc(x) 
+    def forward(self, x):
+        return self.fc(x)
 """
 
   # 1. Convert Torch -> LaTeX

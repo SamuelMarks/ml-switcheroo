@@ -1,0 +1,10 @@
+description: The class representing a Python function.
+std_args:
+- cls
+- ref
+- layout
+- reduction
+- swizzle
+- is_signed
+type: function
+operation: load_reduce_untiled

@@ -1,0 +1,4 @@
+description: Auto-generated mapping for AdaptiveAvgPool3d.
+std_args: []
+type: class
+operation: AdaptiveAvgPool3d

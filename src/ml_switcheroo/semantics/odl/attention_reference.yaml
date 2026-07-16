@@ -1,0 +1,14 @@
+description: The class representing a Python function.
+std_args:
+- mask
+- q
+- k
+- v
+- segment_ids
+- sinks
+- mask_value
+- save_residuals
+- custom_type
+- attn_logits_soft_cap
+type: function
+operation: attention_reference

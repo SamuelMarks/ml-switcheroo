@@ -1,0 +1,17 @@
+description: Returns the k largest elements from the input (Values only).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: k
+  type: int
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: TopKValues

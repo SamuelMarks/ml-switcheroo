@@ -1,0 +1,16 @@
+description: Save arrays to GGUF format.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: file
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arrays
+  type: Dict[str, Tensor]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: metadata
+  type: Dict[str, Any]
+variants: {}
+operation: SaveGguf

@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_is_pipe_top_level():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.utils import is_pipe_top_level
 
   assert is_pipe_top_level("int | str")
@@ -8,6 +12,7 @@ def test_is_pipe_top_level():
 
 
 def test_split_outside_brackets():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.utils import split_outside_brackets
 
   assert split_outside_brackets("int, str") == ["int", "str"]
@@ -16,6 +21,7 @@ def test_split_outside_brackets():
 
 
 def test_resolve_symbolic_shape():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.utils import resolve_symbolic_shape
 
   sym_map = {}
@@ -39,6 +45,7 @@ def test_resolve_symbolic_shape():
 
 
 def test_adjust_shape_rank():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.utils import adjust_shape_rank
 
   assert adjust_shape_rank((2, 2), 2) == (2, 2)

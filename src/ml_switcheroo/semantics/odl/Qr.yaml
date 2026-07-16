@@ -1,0 +1,13 @@
+description: Returns the QR decomposition of a full column rank matrix (or a stack
+  of matrices).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mode
+  type: Literal[reduced, complete]
+type: attribute
+operation: qr

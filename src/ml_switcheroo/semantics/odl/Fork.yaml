@@ -1,0 +1,12 @@
+description: Creates a task for TorchScript execution.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: func
+  type: Any
+- is_variadic: true
+  kind: positional_or_keyword
+  name: args
+  type: Any
+variants: {}
+operation: Fork

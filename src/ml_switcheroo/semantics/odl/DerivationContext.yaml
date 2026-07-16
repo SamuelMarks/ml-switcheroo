@@ -1,0 +1,5 @@
+description: Holds context information used for deriving an constraint system.
+std_args:
+- self
+type: class
+operation: DerivationContext

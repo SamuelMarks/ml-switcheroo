@@ -1,0 +1,7 @@
+description: Returns the linear index of a block within a subset of the cluster spanned
+  by the given dimensions.
+std_args:
+- dim
+- dim_idx
+type: function
+operation: cluster_idx

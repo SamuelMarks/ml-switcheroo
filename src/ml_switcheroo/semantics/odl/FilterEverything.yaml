@@ -1,0 +1,5 @@
+description: Filter matching everything.
+op_type: class
+std_args: []
+variants: {}
+operation: FilterEverything

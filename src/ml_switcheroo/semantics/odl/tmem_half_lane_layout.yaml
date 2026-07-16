@@ -1,0 +1,6 @@
+description: A TMEM layout used for 1CTA MMA with M=64.
+std_args:
+- columns
+- packing
+type: function
+operation: tmem_half_lane_layout

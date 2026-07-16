@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- smem_ref
+- tmem_ref
+- collective
+type: function
+operation: async_copy_sparse_metadata_smem_to_tmem

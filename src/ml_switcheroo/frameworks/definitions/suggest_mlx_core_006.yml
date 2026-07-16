@@ -49,7 +49,7 @@ variants:
     args:
       x: "a"
   jax:
-    api: "jax.numpy.logaddexp.accumulate" 
+    api: "jax.numpy.logaddexp.accumulate"
     requires_plugin: "ufunc_methods" # JAX doesn't support ufunc methods directly usually
   flax_nnx:
     requires_plugin: "ufunc_methods"

@@ -1,0 +1,9 @@
+description: Experimental batched COO matrix implemented in JAX
+std_args:
+- self
+- args
+- shape
+- indices_sorted
+- unique_indices
+type: class
+operation: BCOO

@@ -1,0 +1,12 @@
+description: Returns a view of the original tensor input with its dimensions permuted.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dims
+  type: List[int]
+variants: {}
+operation: Permute

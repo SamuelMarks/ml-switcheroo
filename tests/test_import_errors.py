@@ -1,8 +1,11 @@
+"""Auto-generated doc."""
+
 from unittest.mock import patch
 import importlib
 
 
 def test_import_errors_frameworks():
+  """Auto-generated doc."""
   with patch.dict(
     "sys.modules",
     {

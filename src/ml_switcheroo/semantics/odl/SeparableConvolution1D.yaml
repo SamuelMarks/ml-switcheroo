@@ -1,0 +1,18 @@
+description: Alias for SeparableConv1D.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: filters
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: int
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: strides
+  type: int
+variants: {}
+operation: SeparableConvolution1D

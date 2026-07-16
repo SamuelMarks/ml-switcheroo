@@ -1,0 +1,4 @@
+description: Abstract base for storage.
+std_args: []
+variants: {}
+operation: StorageBase

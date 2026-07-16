@@ -1,0 +1,8 @@
+description: Iterates over all nested nodes and leaves of the graph.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: node
+  type: Any
+variants: {}
+operation: IterGraph

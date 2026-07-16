@@ -1,0 +1,8 @@
+description: Sort a complex array using the real part first, then the imaginary part.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Array
+variants: {}
+operation: SortComplex

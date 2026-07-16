@@ -1,0 +1,17 @@
+description: Convert an array of datetimes into an array of strings.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arr
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: unit
+  type: str
+- default: naive
+  is_variadic: false
+  kind: positional_or_keyword
+  name: timezone
+  type: str
+variants: {}
+operation: DatetimeAsString

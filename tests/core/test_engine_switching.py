@@ -1,5 +1,4 @@
-"""
-Tests for ASTEngine Source/Target Switching Logic.
+"""Tests for ASTEngine Source/Target Switching Logic.
 
 Verifies:
 1. Python -> MLIR (Target Switching).
@@ -47,8 +46,7 @@ def base_engine():
 
 
 def test_python_to_mlir(base_engine):
-  """
-  Scenario: User converts Python code to MLIR.
+  """Scenario: User converts Python code to MLIR.
   Input: x = 1
   Output: MLIR Text containing sw.constant
   """
@@ -64,9 +62,7 @@ def test_python_to_mlir(base_engine):
 
 
 def test_mlir_to_python(base_engine):
-  """
-  Scenario: User converts MLIR code to Python.
-  """
+  """Scenario: User converts MLIR code to Python."""
   engine = base_engine("mlir", "jax")
   # Use canonical spacing to ensure tokenizer handles it cleanly
   mlir_code = '%0 = "sw.constant"() {value = 1}'
@@ -79,9 +75,7 @@ def test_mlir_to_python(base_engine):
 
 
 def test_mlir_to_mlir_roundtrip(base_engine):
-  """
-  Scenario: MLIR -> Python AST -> MLIR
-  """
+  """Scenario: MLIR -> Python AST -> MLIR"""
   engine = base_engine("mlir", "mlir")
   mlir_code = '%0 = "sw.op"() {type = "util.noop"}'
 

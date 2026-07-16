@@ -1,5 +1,4 @@
-"""
-Tests for MLIR -> Python Generator.
+"""Tests for MLIR -> Python Generator.
 
 Verifies:
 1.  Structure: sw.module -> class, sw.func -> def.
@@ -29,8 +28,7 @@ def gen_code(node: ModuleNode) -> str:
 
 
 def test_module_to_class():
-  """
-  Input: sw.module {sym_name = "MyClass"} {}
+  """Input: sw.module {sym_name = "MyClass"} {}
   Expect: class MyClass: pass
   """
   op = OperationNode(name="sw.module", attributes=[AttributeNode("sym_name", '"MyClass"')])
@@ -43,8 +41,7 @@ def test_module_to_class():
 
 
 def test_func_to_def_with_args():
-  """
-  Input: sw.func {sym_name="forward"} ^entry(%x: !sw.unk): ...
+  """Input: sw.func {sym_name="forward"} ^entry(%x: !sw.unk): ...
   Expect: def forward(x): ...
   """
   # 1. Create Func Body Block
@@ -68,8 +65,7 @@ def test_func_to_def_with_args():
 
 
 def test_ops_assignment_and_call():
-  """
-  Input:
+  """Input:
       %0 = sw.op {type="torch.add"} (%a, %b)
       sw.return %0
   Expect:
@@ -93,8 +89,7 @@ def test_ops_assignment_and_call():
 
 
 def test_trivia_restoration():
-  """
-  Input: // My Comment attached to op
+  """Input: // My Comment attached to op
   Expect: # My Comment
   """
   op = OperationNode(name="sw.return", leading_trivia=[TriviaNode("// My Comment", "comment")])
@@ -106,8 +101,7 @@ def test_trivia_restoration():
 
 
 def test_constant_generation():
-  """
-  Input: %c = sw.constant {value = 1}
+  """Input: %c = sw.constant {value = 1}
   Expect: return 1 (Fused)
   """
   op = OperationNode(name="sw.constant", results=[ValueNode("%c")], attributes=[AttributeNode("value", "1")])
@@ -122,8 +116,7 @@ def test_constant_generation():
 
 
 def test_getattr_generation():
-  """
-  Input:
+  """Input:
       %attr = sw.getattr %self {name = "layer"}
   Expect:
       return self.layer (Smart Heuristic inlines single usage)
@@ -147,8 +140,7 @@ def test_getattr_generation():
 
 
 def test_sw_call_generation():
-  """
-  Input: %res = sw.call %func (%arg)
+  """Input: %res = sw.call %func (%arg)
   Expect: return _func(_arg) (Fused)
   """
   op = OperationNode(name="sw.call", results=[ValueNode("%res")], operands=[ValueNode("%func"), ValueNode("%arg")])

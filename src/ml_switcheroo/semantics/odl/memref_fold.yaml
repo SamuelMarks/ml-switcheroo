@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- ref
+- dim
+- fold_rank
+type: function
+operation: memref_fold

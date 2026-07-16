@@ -1,0 +1,20 @@
+description: Computes the n-dimensional inverse of ``rfftn`` for complex-valued input.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: s
+  type: Optional[Sequence[int]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axes
+  type: Optional[Sequence[int]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: norm
+  type: Literal[backward, ortho, forward]
+type: function
+operation: irfftn

@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import ast
 import pytest
 from pathlib import Path
@@ -8,14 +10,17 @@ from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
 
 @pytest.fixture
 def importer():
+  """Auto-generated doc."""
   return ArrayApiSpecImporter()
 
 
 def test_parse_folder_no_files(importer, tmp_path):
+  """Auto-generated doc."""
   assert importer.parse_folder(tmp_path) == {}
 
 
 def test_parse_folder_with_files(importer, tmp_path):
+  """Auto-generated doc."""
   file1 = tmp_path / "test1.py"
   file1.write_text("def my_func(x: int):\n    '''Docstring'''\n    pass")
 
@@ -24,6 +29,7 @@ def test_parse_folder_with_files(importer, tmp_path):
 
 
 def test_parse_stubs_skip_private(importer, tmp_path):
+  """Auto-generated doc."""
   file1 = tmp_path / "_private.py"
   file1.write_text("def func(): pass")
   file2 = tmp_path / "__init__.py"
@@ -35,6 +41,7 @@ def test_parse_stubs_skip_private(importer, tmp_path):
 
 
 def test_parse_stubs_relative_path_error(importer, tmp_path):
+  """Auto-generated doc."""
   Path("/some/outside/path.py")
 
   # Mocking the read_text to avoid FileNotFoundError
@@ -48,6 +55,7 @@ def test_parse_stubs_relative_path_error(importer, tmp_path):
 
 
 def test_parse_stubs_parse_error(importer, tmp_path):
+  """Auto-generated doc."""
   file1 = tmp_path / "bad.py"
   file1.write_text("def bad_syntax(")
 
@@ -56,11 +64,12 @@ def test_parse_stubs_parse_error(importer, tmp_path):
 
 
 def test_parse_stubs_function_parsing(importer, tmp_path):
+  """Auto-generated doc."""
   code = '''
 def valid_func(x: int, /, y: float, *, z: str):
     """
     My function summary.
-    
+
     Detailed description.
     """
     pass
@@ -85,6 +94,7 @@ def __magic_method__():
 
 
 def test_parse_stubs_constant_parsing(importer, tmp_path):
+  """Auto-generated doc."""
   code = '''
 E = 2.718
 """Euler's constant."""
@@ -110,6 +120,7 @@ _PRIVATE_CONST = 1
 
 
 def test_parse_annotation(importer):
+  """Auto-generated doc."""
   # None
   assert importer._parse_annotation(None) == "Any"
 
@@ -142,6 +153,7 @@ def test_parse_annotation(importer):
 
 
 def test_get_assignment_name(importer):
+  """Auto-generated doc."""
   # ast.Assign
   assert importer._get_assignment_name(ast.parse("x = 1").body[0]) == "x"
   assert importer._get_assignment_name(ast.parse("x.y = 1").body[0]) is None
@@ -155,6 +167,7 @@ def test_get_assignment_name(importer):
 
 
 def test_clean_docstring(importer):
+  """Auto-generated doc."""
   assert importer._clean_docstring(None) == ""
   assert importer._clean_docstring("  \nSingle line summary.  \n\nDetailed doc.") == "Single line summary."
   assert importer._clean_docstring("Line 1.\nLine 2.\n\nLine 3.") == "Line 1. Line 2."

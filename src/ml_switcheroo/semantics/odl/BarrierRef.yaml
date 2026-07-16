@@ -1,0 +1,9 @@
+description: The class representing a Python class.
+std_args:
+- self
+- base_address
+- offset
+- phases
+- num_barriers
+type: class
+operation: BarrierRef

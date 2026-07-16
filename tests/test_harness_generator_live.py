@@ -1,5 +1,4 @@
-"""
-Integration test for the Harness Generator using live code extraction.
+"""Integration test for the Harness Generator using live code extraction.
 
 Verifies that:
 1. The generator correctly extracts `InputFuzzer` at runtime.
@@ -14,9 +13,7 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 def test_generated_fuzzer_runs_standalone(tmp_path):
-  """
-  Verifies that the injected InputFuzzer logic works without 'ml_switcheroo' in path.
-  """
+  """Verifies that the injected InputFuzzer logic works without 'ml_switcheroo' in path."""
   src = tmp_path / "src.py"
   tgt = tmp_path / "tgt.py"
   # Simple identity function

@@ -1,0 +1,5 @@
+description: Configuration for benchmarks.
+op_type: class
+std_args: []
+variants: {}
+operation: BenchmarkConfig

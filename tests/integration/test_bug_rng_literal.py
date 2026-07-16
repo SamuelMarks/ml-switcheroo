@@ -1,5 +1,4 @@
-"""
-Regression Test for Flax NNX RNG Argument Literal Bug.
+"""Regression Test for Flax NNX RNG Argument Literal Bug.
 
 Verifies that:
 1. `rngs` argument is injected as a variable (`rngs=rngs`), not a string literal (`rngs='rngs'`).
@@ -12,22 +11,21 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 # Source PyTorch Code
-SOURCE_TORCH = """ 
+SOURCE_TORCH = """
 import torch.nn as nn
 
-class MyLayer(nn.Module): 
-    def __init__(self, in_features, out_features): 
-        super().__init__() 
-        self.linear = nn.Linear(in_features, out_features) 
+class MyLayer(nn.Module):
+    def __init__(self, in_features, out_features):
+        super().__init__()
+        self.linear = nn.Linear(in_features, out_features)
 
-    def forward(self, x): 
-        return self.linear(x) 
+    def forward(self, x):
+        return self.linear(x)
 """
 
 
 def test_rng_variable_injection():
-  """
-  Ensures that when converting to Flax NNX, the rngs argument passed to Linear
+  """Ensures that when converting to Flax NNX, the rngs argument passed to Linear
   uses the variable name `rngs` provided in __init__, not a string literal.
   """
   semantics = SemanticsManager()

@@ -1,6 +1,4 @@
-"""
-Tests for Polygot Device Allocation using Adapter Delegation.
-"""
+"""Tests for Polygot Device Allocation using Adapter Delegation."""
 
 import pytest
 import libcst as cst

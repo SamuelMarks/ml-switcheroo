@@ -1,0 +1,10 @@
+description: Grouped query attention with a single query per request.
+std_args:
+- queries
+- k_pages
+- v_pages
+- seq_lens
+- soft_cap
+- debug
+type: function
+operation: grouped_query_attention_reference

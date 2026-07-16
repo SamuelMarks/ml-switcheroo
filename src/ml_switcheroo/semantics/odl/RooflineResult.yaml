@@ -1,0 +1,12 @@
+description: The class representing a Python class.
+std_args:
+- self
+- flops
+- unfused_flops
+- ici_bytes
+- ici_latency
+- hbm_bytes
+- peak_hbm_bytes
+- unfused_hbm_bytes
+type: class
+operation: RooflineResult

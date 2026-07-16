@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- self
+- block
+type: function
+operation: smem_bytes

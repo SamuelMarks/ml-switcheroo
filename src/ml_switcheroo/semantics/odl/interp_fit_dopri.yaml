@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- y0
+- y1
+- k
+- dt
+type: function
+operation: interp_fit_dopri

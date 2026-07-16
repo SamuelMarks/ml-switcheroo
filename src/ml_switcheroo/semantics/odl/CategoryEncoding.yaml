@@ -1,0 +1,19 @@
+description: A preprocessing layer which encodes integer features.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_tokens
+  type: int
+- default: multi_hot
+  is_variadic: false
+  kind: positional_or_keyword
+  name: output_mode
+  type: str
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: sparse
+  type: bool
+variants: {}
+operation: CategoryEncoding

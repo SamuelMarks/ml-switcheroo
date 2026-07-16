@@ -32,7 +32,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))
+    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
   return node
 
 
@@ -41,7 +41,7 @@ def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:
   Checks the Semantic Knowledge Base (Variant Args) first, falls back to default.
   """
   if ctx.current_variant and ctx.current_variant.args:
-    return ctx.current_variant.args.get(std_name, default)
+    return ctx.current_variant.args.get(std_name, default)  # type: ignore
   return default
 
 

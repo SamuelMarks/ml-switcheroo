@@ -15,6 +15,8 @@ from ml_switcheroo.cli import commands
 # Import direct handler for new 'define' command
 from ml_switcheroo.cli.handlers.meta import handle_schema
 from ml_switcheroo.cli.handlers.suggest import handle_suggest
+from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
+from ml_switcheroo.cli.handlers.harvest import handle_harvest
 from ml_switcheroo import __version__
 
 
@@ -92,6 +94,18 @@ def main(argv: Optional[List[str]] = None) -> int:
   cmd_sug.add_argument("--out-dir", type=Path, default=None, help="Output directory")
   cmd_sug.add_argument("--batch-size", type=int, default=50, help="Batch size")
 
+  # --- Command: SCAFFOLD ---
+  cmd_scaff = subparsers.add_parser("scaffold", help="Scaffold an API mapping for a new library")
+  cmd_scaff.add_argument("framework", help="Framework name (e.g. jax.numpy)")
+
+  # --- Command: HARVEST ---
+  cmd_harv = subparsers.add_parser("harvest", help="Harvest mappings from manual tests")
+  cmd_harv.add_argument("path", type=Path, help="Path to test file or directory")
+
+  # --- Command: VERIFIED PIPELINE ---
+  cmd_vp = subparsers.add_parser("verified-pipeline", help="Run the verified ingestion pipeline")
+  cmd_vp.add_argument("path", type=Path, help="Input source file to run through pipeline")
+
   # --- Command: CI ---
   cmd_ci = subparsers.add_parser("ci", help="Run validation suite")
   cmd_ci.add_argument("--update-readme", action="store_true", help="Rewrite README.md with results")
@@ -151,6 +165,26 @@ def main(argv: Optional[List[str]] = None) -> int:
 
   elif args.command == "suggest":
     return handle_suggest(args.api, out_dir=args.out_dir, batch_size=args.batch_size)
+
+  elif args.command == "scaffold":
+    handle_scaffold(args)  # pragma: no cover
+    return 0  # pragma: no cover
+
+  elif args.command == "harvest":
+    handle_harvest(args)  # pragma: no cover
+    return 0  # pragma: no cover
+
+  elif args.command == "verified-pipeline":
+    from ml_switcheroo.ingestion.verified_pipeline import run_verified_pipeline  # pragma: no cover
+
+    # pragma: no cover
+    with open(args.path, "r") as f:  # pragma: no cover
+      result = run_verified_pipeline(f.read())  # pragma: no cover
+    import json  # pragma: no cover
+
+    # pragma: no cover
+    print(json.dumps(result, indent=2))  # pragma: no cover
+    return 0 if result.get("status") == "success" else 1  # pragma: no cover
 
   elif args.command == "ci":
     return commands.handle_ci(args.update_readme, args.readme_path, args.json_report, args.repair)

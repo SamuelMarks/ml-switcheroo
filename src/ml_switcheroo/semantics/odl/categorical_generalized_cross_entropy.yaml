@@ -1,0 +1,17 @@
+description: Computes the Generalized Cross Entropy loss.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_true
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_pred
+  type: Any
+- default: 0.5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: q
+  type: float
+variants: {}
+operation: categorical_generalized_cross_entropy

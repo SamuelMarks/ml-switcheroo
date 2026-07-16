@@ -1,0 +1,8 @@
+description: Safe reciprocal, returns 0 where input is 0.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: ReciprocalNoNan

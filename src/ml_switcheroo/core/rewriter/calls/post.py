@@ -48,7 +48,7 @@ def handle_post_processing(
     try:
       type_node = rewriter._create_dotted_name(mapping["output_cast"])
       result_node = cst.Call(
-        func=cst.Attribute(value=result_node, attr=cst.Name("astype")),
+        func=cst.Attribute(value=result_node, attr=cst.Name("astype")),  # type: ignore
         args=[cst.Arg(value=type_node)],
       )
     except Exception:
@@ -65,7 +65,8 @@ def handle_post_processing(
     origins = getattr(rewriter.semantics, "_key_origins", {})
     tier = origins.get(abstract_id)
     traits = rewriter._get_target_traits()
-    is_neural = tier == SemanticTier.NEURAL.value
+    is_neural = tier in (SemanticTier.NEURAL.value, "neural_ops")
+    print(f"DEBUG: abstract_id={abstract_id} tier={tier} is_neural={is_neural} result_node_type={type(result_node)}")
 
     force = False
     if isinstance(result_node, cst.Call):
@@ -79,6 +80,7 @@ def handle_post_processing(
           break
 
     if is_neural or force:
+      print(f"DEBUG: INJECTING MAGIC ARGS FOR {abstract_id}")
       if isinstance(result_node, cst.Call):
         # A. Inject Magic Arguments
         for arg_name, _ in traits.inject_magic_args:

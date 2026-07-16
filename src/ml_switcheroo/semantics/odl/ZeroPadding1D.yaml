@@ -1,0 +1,10 @@
+description: Zero-padding layer for 1D input.
+op_type: class
+std_args:
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: int
+variants: {}
+operation: ZeroPadding1d

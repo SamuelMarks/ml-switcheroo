@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- module
+- launch_context
+- auto_barriers
+type: function
+operation: lower_mgpu_dialect

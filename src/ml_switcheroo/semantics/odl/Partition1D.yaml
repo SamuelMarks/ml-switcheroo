@@ -1,0 +1,9 @@
+description: The class representing a Python class.
+std_args:
+- self
+- elements
+- base_offset
+- num_chunks
+- chunk_size
+type: class
+operation: Partition1D

@@ -1,0 +1,30 @@
+description: Converts a tuple of index arrays into an array of flat indices, applying
+  boundary modes to the multi-index.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: multi_index
+  type: Tuple[Array]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dims
+  type: Tuple[int]
+- default: raise
+  is_variadic: false
+  kind: positional_or_keyword
+  name: mode
+  options:
+  - raise
+  - wrap
+  - clip
+  type: str
+- default: C
+  is_variadic: false
+  kind: positional_or_keyword
+  name: order
+  options:
+  - C
+  - F
+  type: str
+variants: {}
+operation: RavelMultiIndex

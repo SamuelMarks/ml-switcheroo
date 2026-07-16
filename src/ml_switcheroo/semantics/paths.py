@@ -28,11 +28,11 @@ def resolve_semantics_dir() -> Path:
   # 1. Local Source Priority (Dev/Test/Editable)
   local_path = Path(__file__).parent
   # Simple check: does the main neural file exist here?
-  if (local_path / "k_neural_net.json").exists():
+  if (local_path / "odl").exists() or (local_path / "k_neural_net.json").exists():
     return local_path
 
   # 2. Installed Package Fallback
-  if sys.version_info >= (3, 9) and files:
+  if sys.version_info >= (3, 9) and files:  # type: ignore
     try:
       # Note: wrapping in Path(str(...)) ensures compatibility issues
       # with early 3.9 implementations are smoothed over.

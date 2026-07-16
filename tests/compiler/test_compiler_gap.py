@@ -1,8 +1,15 @@
+"""Auto-generated doc."""
+
+
 def test_compiler_backend_base():
-  from ml_switcheroo.compiler.backend import CompilerBackend
+  """Auto-generated doc."""
+  from ml_switcheroo.core.compiler.backend import CompilerBackend
 
   class DummyBackend(CompilerBackend):
+    """Auto-generated doc."""
+
     def compile(self, graph):
+      """Auto-generated doc."""
       return super().compile(graph)
 
   backend = DummyBackend()
@@ -13,7 +20,8 @@ def test_compiler_backend_base():
 
 
 def test_registry_gaps():
-  from ml_switcheroo.compiler.registry import get_backend_class, is_isa_target, is_isa_source
+  """Auto-generated doc."""
+  from ml_switcheroo.core.compiler.registry import get_backend_class, is_isa_target, is_isa_source
 
   # 118: get_backend_class with unknown target falls back to python
   cls = get_backend_class("unknown_target")
@@ -29,7 +37,8 @@ def test_registry_gaps():
 
 
 def test_sharding_extractor_gaps():
-  from ml_switcheroo.compiler.sharding_extractor import ShardingExtractionPass
+  """Auto-generated doc."""
+  from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
 
   # Line 56: no source_id found (sharding node has no incoming edges)

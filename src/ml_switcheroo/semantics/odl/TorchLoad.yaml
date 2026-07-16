@@ -1,0 +1,13 @@
+operation: TorchLoad
+description: Definition for TorchLoad
+std_args:
+- f
+variants:
+  torch:
+    api: torch.load
+  jax:
+    api: load
+    requires_plugin: io_handler
+  numpy:
+    api: load
+    requires_plugin: io_handler

@@ -1,0 +1,8 @@
+description: Sets whether Variables should use eager sharding by default.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: value
+  type: bool
+variants: {}
+operation: UseEagerSharding

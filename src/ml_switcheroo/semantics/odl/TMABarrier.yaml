@@ -1,0 +1,6 @@
+description: The class representing a Python class.
+std_args:
+- self
+- num_barriers
+type: class
+operation: TMABarrier

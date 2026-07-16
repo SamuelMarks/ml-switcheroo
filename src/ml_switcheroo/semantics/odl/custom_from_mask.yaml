@@ -1,0 +1,8 @@
+description: Prune tensor corresponding to parameter called ``name`` in ``module``
+  by applying the pre-computed mask in ``mask``.
+std_args:
+- module
+- name
+- mask
+type: function
+operation: custom_from_mask

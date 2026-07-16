@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_visualizer_exceptions():
+  """Auto-generated doc."""
   import libcst as cst
   from ml_switcheroo.utils.visualizer import MermaidGenerator
 
@@ -6,10 +10,14 @@ def test_visualizer_exceptions():
 
   # 137-138
   class BadNode(cst.CSTNode):
+    """Auto-generated doc."""
+
     def _codegen_impl(self, state):
+      """Auto-generated doc."""
       raise Exception("fail")
 
     def _visit_and_replace_children(self, v):
+      """Auto-generated doc."""
       return self
 
   assert "<BadNode>" in gen._node_to_str(BadNode())
@@ -35,6 +43,7 @@ def test_visualizer_exceptions():
 
 
 def test_visualizer_more_nodes():
+  """Auto-generated doc."""
   import libcst as cst
   from ml_switcheroo.utils.visualizer import MermaidGenerator
 
@@ -67,6 +76,7 @@ def test_visualizer_more_nodes():
 
 
 def test_visualizer_more_fallbacks():
+  """Auto-generated doc."""
   import libcst as cst
   from ml_switcheroo.utils.visualizer import MermaidGenerator
 
@@ -78,6 +88,8 @@ def test_visualizer_more_fallbacks():
 
   # 238: Import names empty
   class DummyImportAlias(cst.ImportAlias):
+    """Auto-generated doc."""
+
     pass
 
   imp = cst.Import(names=[DummyImportAlias(name=cst.Attribute(cst.Name("a"), cst.Name("b")))])

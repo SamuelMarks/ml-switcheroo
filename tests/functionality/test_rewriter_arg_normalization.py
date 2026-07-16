@@ -1,5 +1,4 @@
-"""
-Tests for Argument Normalization Logic in TestRewriter.
+"""Tests for Argument Normalization Logic in TestRewriter.
 
 Verifies that the Rewriter correctly pivots argument names and positions
 based on the abstract specification.
@@ -13,9 +12,7 @@ from ml_switcheroo.config import RuntimeConfig
 
 
 class MockArgSemantics(SemanticsManager):
-  """
-  Mock Data for Argument Normalization tests.
-  """
+  """Mock Data for Argument Normalization tests."""
 
   def __init__(self) -> None:
     """Initializes with specific argument mapping scenarios."""
@@ -122,8 +119,7 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
 
 
 def test_keyword_translation(engine: TestRewriter) -> None:
-  """
-  Input:  `torch.sum(input=z, dim=1)`
+  """Input:  `torch.sum(input=z, dim=1)`
   Logic:  input -> x -> a, dim -> axis -> axis.
   Output: `jax.numpy.sum(a=z, axis=1)`
   """
@@ -180,9 +176,7 @@ def test_argument_value_mapping_strings(engine: TestRewriter) -> None:
 
 
 def test_module_alias_detection(engine: TestRewriter) -> None:
-  """
-  Test dynamic module alias detection logic.
-  """
+  """Test dynamic module alias detection logic."""
   # Case 1: Framework call
   code_fw = "torch.method_op(y)"
   res_fw = rewrite_code(engine, code_fw)

@@ -425,7 +425,7 @@ variants:
     args:
       in_features: "input_dims"
       out_features: "output_dims"
-      bias: null # Has implicit bias handling via has_bias usually but Signature provided says implicit. 
+      bias: null # Has implicit bias handling via has_bias usually but Signature provided says implicit.
   torch:
     api: "torch.nn.Linear"
     args:
@@ -569,7 +569,7 @@ variants:
       hidden_features: "hidden_dims"
   torch:
     # No direct block, usually torchvision.ops.MLP
-    api: "torchvision.ops.MLP" 
+    api: "torchvision.ops.MLP"
     args:
       in_features: "in_channels"
       hidden_features: "hidden_channels"

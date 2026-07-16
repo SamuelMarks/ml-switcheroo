@@ -1,0 +1,8 @@
+description: Computes the number of 1-bits in the absolute value of x.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Array
+variants: {}
+operation: BitwiseCount

@@ -541,7 +541,7 @@ variants:
     api: "jax.nn.hard_tanh"
     missing_message: "HardShrink not direct in JAX NN. Use macro."
     transformation_type: "inline_lambda"
-    macro_template: "jax.numpy.where(jax.numpy.abs({input}) > {lambd}, {input}, 0)" 
+    macro_template: "jax.numpy.where(jax.numpy.abs({input}) > {lambd}, {input}, 0)"
   keras:
     api: "keras.activations.hard_sigmoid"
     missing_message: "HardShrink distinct from HardSigmoid."

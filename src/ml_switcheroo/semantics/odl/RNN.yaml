@@ -1,0 +1,17 @@
+description: Elman recurrent layer.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_size
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hidden_size
+  type: int
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: bool
+type: class
+operation: RNN

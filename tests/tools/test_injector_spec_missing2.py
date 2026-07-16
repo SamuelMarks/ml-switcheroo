@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_injector_spec_write_parent_not_exist():
+  """Auto-generated doc."""
   from ml_switcheroo.tools.injector_spec import StandardsInjector
   from ml_switcheroo.core.dsl import OperationDef
 

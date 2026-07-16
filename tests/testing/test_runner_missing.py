@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_runner_run_exceptions():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
   sr = EquivalenceRunner()
@@ -13,6 +17,7 @@ def test_runner_run_exceptions():
   # 111-113: run_check exception
   # Instead of mocking given, we can mock run_check internally, or we can just make it fail hypothesis execution
   def force_fail(*args, **kwargs):
+    """Auto-generated doc."""
     raise ValueError("hypothesis failed")
 
   with __import__("unittest.mock").mock.patch(
@@ -23,6 +28,7 @@ def test_runner_run_exceptions():
 
 
 def test_runner_execute_api():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
   sr = EquivalenceRunner()
@@ -30,6 +36,7 @@ def test_runner_execute_api():
 
 
 def test_runner_compare():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
   sr = EquivalenceRunner()
@@ -46,12 +53,16 @@ def test_runner_compare():
 
 
 def test_runner_deep_compare_exceptions():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
   sr = EquivalenceRunner()
 
   class BadNumpy:
+    """Auto-generated doc."""
+
     def __array__(self, *args, **kwargs):
+      """Auto-generated doc."""
       raise Exception("fail")
 
   assert sr._deep_compare(1, BadNumpy()) is False
@@ -63,6 +74,7 @@ def test_runner_deep_compare_exceptions():
 
 
 def test_runner_run_details_not_dict():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
   sr = EquivalenceRunner()
@@ -75,6 +87,7 @@ def test_runner_run_details_not_dict():
 
 
 def test_runner_run_shape_calculation_error():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
   import numpy as np
 
@@ -83,12 +96,16 @@ def test_runner_run_shape_calculation_error():
   variants = {"jax": {"api": "jax.add"}}
 
   class DummyFuzzer:
+    """Auto-generated doc."""
+
     def build_strategies(self, p, h, c):
+      """Auto-generated doc."""
       import hypothesis.strategies as st
 
       return {"x": st.just(np.array([1]))}
 
     def adapt_to_framework(self, args, fw):
+      """Auto-generated doc."""
       return args
 
   sr.fuzzer = DummyFuzzer()
@@ -101,6 +118,7 @@ def test_runner_run_shape_calculation_error():
 
 
 def test_runner_deep_compare_kind_o():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
   import numpy as np
 
@@ -110,6 +128,7 @@ def test_runner_deep_compare_kind_o():
 
 
 def test_runner_deep_compare_kind_o_match():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
   import numpy as np
 
@@ -119,6 +138,7 @@ def test_runner_deep_compare_kind_o_match():
 
 
 def test_runner_deep_compare_fallback():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
   sr = EquivalenceRunner()

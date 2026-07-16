@@ -1,0 +1,44 @@
+description: Applies a multi-layer quantized LSTM RNN to an input sequence.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: batch_sizes
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hx
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: params
+  type: List[Tensor]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: has_biases
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_layers
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dropout
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: train
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: bidirectional
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Any
+variants: {}
+operation: QuantizedLstm

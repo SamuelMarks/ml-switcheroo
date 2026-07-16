@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- x_ref
+- y_ref
+type: function
+operation: double_kernel

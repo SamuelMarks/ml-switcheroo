@@ -1,0 +1,10 @@
+description: Compute optimal Runge-Kutta stepsize.
+std_args:
+- last_step
+- mean_error_ratio
+- safety
+- ifactor
+- dfactor
+- order
+type: function
+operation: optimal_step_size

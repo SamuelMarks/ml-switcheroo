@@ -1,0 +1,6 @@
+description: A wrapper around a Future that makes it look like an async function.
+std_args:
+- self
+- future
+type: class
+operation: PyTreeFuture

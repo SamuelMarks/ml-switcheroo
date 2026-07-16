@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- self
+- grid
+- block
+type: function
+operation: jax_buffer_type

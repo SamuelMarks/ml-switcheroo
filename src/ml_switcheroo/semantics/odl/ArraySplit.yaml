@@ -1,0 +1,17 @@
+description: Split an array into multiple sub-arrays.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ary
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: indices_or_sections
+  type: Union[int, List[int]]
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: ArraySplit

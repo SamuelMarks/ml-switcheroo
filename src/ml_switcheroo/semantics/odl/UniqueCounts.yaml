@@ -1,0 +1,8 @@
+description: Find the unique elements and counts of an input array.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Array
+variants: {}
+operation: UniqueCounts

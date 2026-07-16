@@ -1,6 +1,4 @@
-"""
-Tests for the Tracing System.
-"""
+"""Tests for the Tracing System."""
 
 from ml_switcheroo.core.tracer import TraceLogger, TraceEventType
 

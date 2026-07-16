@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- args
+- _
+type: function
+operation: original_hlo_generate_dump

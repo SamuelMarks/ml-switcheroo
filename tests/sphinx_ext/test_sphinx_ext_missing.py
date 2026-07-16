@@ -1,7 +1,10 @@
+"""Auto-generated doc."""
+
 from unittest.mock import patch, MagicMock
 
 
 def test_sphinx_registry_missing():
+  """Auto-generated doc."""
   from ml_switcheroo.sphinx_ext.registry import scan_registry
 
   with patch("ml_switcheroo.sphinx_ext.registry.get_adapter", return_value=None):
@@ -20,6 +23,7 @@ def test_sphinx_registry_missing():
 
 
 def test_sphinx_directive():
+  """Auto-generated doc."""
   from ml_switcheroo.sphinx_ext.directive import SwitcherooDemo
   from docutils.statemachine import StringList
 

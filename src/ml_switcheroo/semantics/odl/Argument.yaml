@@ -1,0 +1,4 @@
+description: JIT Argument specification.
+std_args: []
+type: attribute
+operation: Argument

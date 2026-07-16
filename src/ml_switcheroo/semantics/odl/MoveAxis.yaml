@@ -1,0 +1,17 @@
+description: Moves array axes (dimensions) to new positions, while leaving other axes
+  in their original positions.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: source
+  type: Union[int, Tuple[int, Ellipsis]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: destination
+  type: Union[int, Tuple[int, Ellipsis]]
+variants: {}
+operation: moveaxis

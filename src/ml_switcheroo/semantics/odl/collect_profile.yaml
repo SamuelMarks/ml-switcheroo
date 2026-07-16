@@ -1,0 +1,10 @@
+description: The class representing a Python function.
+std_args:
+- port
+- duration_in_ms
+- host
+- log_dir
+- no_perfetto_link
+- xprof_options
+type: function
+operation: collect_profile

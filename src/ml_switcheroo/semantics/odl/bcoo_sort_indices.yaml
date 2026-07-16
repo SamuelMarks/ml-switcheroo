@@ -1,0 +1,5 @@
+description: Sort indices of a BCOO array.
+std_args:
+- mat
+type: function
+operation: bcoo_sort_indices

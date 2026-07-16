@@ -1,0 +1,19 @@
+description: The class representing a Python function.
+std_args:
+- q
+- kv_pages
+- kv_lens
+- page_indices
+- cu_q_lens
+- num_seqs
+- sm_scale
+- sliding_window
+- soft_cap
+- mask_value
+- k_scale
+- v_scale
+- num_kv_pages_per_block
+- num_queries_per_block
+- vmem_limit_bytes
+type: function
+operation: dynamic_validate_inputs

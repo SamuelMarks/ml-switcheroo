@@ -1,5 +1,4 @@
-"""
-Tests for `vmap` Semantics (Feature 057).
+"""Tests for `vmap` Semantics (Feature 057).
 
 Verifies:
 1.  `torch.vmap` <-> `jax.vmap` mapping.
@@ -65,8 +64,7 @@ def semantics():
 
 
 def test_vmap_torch_to_jax_basic(semantics):
-  """
-  Scenario: `v = torch.vmap(my_func)`
+  """Scenario: `v = torch.vmap(my_func)`
   Expect: `v = jax.vmap(my_func)`
   """
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
@@ -80,8 +78,7 @@ def test_vmap_torch_to_jax_basic(semantics):
 
 
 def test_vmap_torch_to_jax_args(semantics):
-  """
-  Scenario: `v = torch.vmap(f, in_dims=0, out_dims=1)`
+  """Scenario: `v = torch.vmap(f, in_dims=0, out_dims=1)`
   Expect: `v = jax.vmap(f, in_axes=0, out_axes=1)`
   (Renaming `dims` -> `axes`).
   """
@@ -99,8 +96,7 @@ def test_vmap_torch_to_jax_args(semantics):
 
 
 def test_vmap_jax_to_torch_args(semantics):
-  """
-  Scenario: `v = jax.vmap(f, in_axes=(0, None), out_axes=0)`
+  """Scenario: `v = jax.vmap(f, in_axes=(0, None), out_axes=0)`
   Expect: `v = torch.vmap(f, in_dims=(0, None), out_dims=0)`
   (Renaming `axes` -> `dims`).
   """
@@ -117,8 +113,7 @@ def test_vmap_jax_to_torch_args(semantics):
 
 
 def test_vmap_jax_keyword_fun(semantics):
-  """
-  Scenario: `v = jax.vmap(fun=my_f)`
+  """Scenario: `v = jax.vmap(fun=my_f)`
   Expect: `v = torch.vmap(func=my_f)`
   (Renaming `fun` -> `func` if keyword used, assuming standard is `func`).
   """

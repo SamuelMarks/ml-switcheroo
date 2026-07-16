@@ -1,6 +1,4 @@
-"""
-Tests for verify_results 'exact' mode.
-"""
+"""Tests for verify_results 'exact' mode."""
 
 import numpy as np
 from ml_switcheroo.generated_tests.runtime import verify_results

@@ -1,0 +1,6 @@
+description: Lazy full mask, allows all tokens to attend to all other tokens.
+std_args:
+- self
+- _shape
+type: class
+operation: FullMask

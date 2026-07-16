@@ -1,0 +1,9 @@
+description: Pytest test runner.
+std_args:
+- default: fast
+  is_variadic: false
+  kind: positional_or_keyword
+  name: label
+  type: str
+variants: {}
+operation: Test

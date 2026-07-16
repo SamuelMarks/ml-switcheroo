@@ -1,5 +1,4 @@
-"""
-Integration Tests for External Plugin Loading.
+"""Integration Tests for External Plugin Loading.
 
 Verifies that:
 1. `RuntimeConfig.load` parses `plugin_paths` from `pyproject.toml`.
@@ -11,13 +10,12 @@ Verifies that:
 import pytest
 from pathlib import Path
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.hooks import load_plugins, get_hook, clear_hooks
+from ml_switcheroo.core.hooks import load_plugins, get_hook
 
 
 @pytest.fixture
 def workspace(tmp_path):
-  """
-  Creates a mock project structure:
+  """Creates a mock project structure:
   /workspace
     pyproject.toml
     /extensions
@@ -46,9 +44,7 @@ def my_hook(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
 
 def test_config_loads_plugin_paths_from_toml(workspace):
-  """
-  Verify RuntimeConfig parses [tool.ml_switcheroo] plugin_paths.
-  """
+  """Verify RuntimeConfig parses [tool.ml_switcheroo] plugin_paths."""
   toml_content = """
 [tool.ml_switcheroo]
 plugin_paths = ["extensions", "/absolute/path/ignored"]
@@ -69,9 +65,7 @@ plugin_paths = ["extensions", "/absolute/path/ignored"]
 
 
 def test_load_plugins_imports_external_hooks(workspace):
-  """
-  Verify load_plugins actually executes the code in external directories.
-  """
+  """Verify load_plugins actually executes the code in external directories."""
   # 1. Setup Config
   toml_content = """
 [tool.ml_switcheroo]
@@ -81,31 +75,32 @@ plugin_paths = ["extensions"]
 
   config = RuntimeConfig.load(search_path=workspace)
 
-  # 2. Reset Registry
-  clear_hooks()
-  assert get_hook("custom_external_hook") is None
+  # 2. Reset Registry via patch
+  from unittest.mock import patch
 
-  # 3. Trigger Load
-  # Note: In real app, ASTEngine would call load_plugins with config.plugin_paths
-  count = load_plugins(extra_dirs=config.plugin_paths)
+  with patch.dict("ml_switcheroo.core.hooks_registry._HOOKS", {}, clear=True):
+    with patch("ml_switcheroo.core.hooks_registry._PLUGINS_LOADED", False):
+      assert get_hook("custom_external_hook") is None
 
-  # 4. Verify
-  # Count should include at least custom_hook.py (and defaults if found)
-  assert count >= 1
+      # 3. Trigger Load
+      # Note: In real app, ASTEngine would call load_plugins with config.plugin_paths
+      count = load_plugins(extra_dirs=config.plugin_paths)
 
-  # Check Registry for the specific hook defined in custom_hook.py
-  hook_func = get_hook("custom_external_hook")
-  assert hook_func is not None
-  assert callable(hook_func)
+      # 4. Verify
+      # Count should include at least custom_hook.py (and defaults if found)
+      assert count >= 1
 
-  # Check name to ensure it's not a mock
-  assert hook_func.__name__ == "my_hook"
+      # Check Registry for the specific hook defined in custom_hook.py
+      hook_func = get_hook("custom_external_hook")
+      assert hook_func is not None
+      assert callable(hook_func)
+
+      # Check name to ensure it's not a mock
+      assert hook_func.__name__ == "my_hook"
 
 
 def test_external_overrides_defaults(workspace):
-  """
-  Verify external plugins can overwrite hooks with the same name.
-  """
+  """Verify external plugins can overwrite hooks with the same name."""
   # Create a plugin that overwrites 'decompose_alpha' (a standard plugin)
   ext_dir = workspace / "extensions"
   if not ext_dir.exists():
@@ -116,35 +111,37 @@ from ml_switcheroo.core.hooks import register_hook
 
 @register_hook("decompose_alpha")
 def override_hook(node, ctx):
-    return "OVERRIDDEN" 
+    return "OVERRIDDEN"
 """
   (ext_dir / "override.py").write_text(hook_code, encoding="utf-8")
 
   # Setup Paths
   paths = [ext_dir]
 
-  # Reset
-  clear_hooks()
+  from unittest.mock import patch
 
-  # Load
-  load_plugins(extra_dirs=paths)
+  # Reset and Load
+  with patch.dict("ml_switcheroo.core.hooks_registry._HOOKS", {}, clear=True):
+    with patch("ml_switcheroo.core.hooks_registry._PLUGINS_LOADED", False):
+      load_plugins(extra_dirs=paths)
 
-  # Verify
-  hook = get_hook("decompose_alpha")
-  # Execute dummy args to check return value
-  assert hook(None, None) == "OVERRIDDEN"
+      # Verify
+      hook = get_hook("decompose_alpha")
+      # Execute dummy args to check return value
+      assert hook(None, None) == "OVERRIDDEN"
 
 
 def test_graceful_failure_missing_dir(tmp_path):
-  """
-  Verify system doesn't crash if config points to non-existent dir.
-  """
+  """Verify system doesn't crash if config points to non-existent dir."""
   # Path that doesn't exist
   bad_path = tmp_path / "ghost_dir"
 
+  from unittest.mock import patch
+
   # Should run without exception and return 0 (or count of defaults)
-  clear_hooks()
-  _count = load_plugins(extra_dirs=[bad_path])
+  with patch.dict("ml_switcheroo.core.hooks_registry._HOOKS", {}, clear=True):
+    with patch("ml_switcheroo.core.hooks_registry._PLUGINS_LOADED", False):
+      _count = load_plugins(extra_dirs=[bad_path])
 
   # It might load defaults, but definitely shouldn't crash on bad_path
   # Try getting a hook that doesn't exist

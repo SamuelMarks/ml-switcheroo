@@ -1,0 +1,4 @@
+description: The class representing a Python function.
+std_args: []
+type: function
+operation: get_thread_local_state_call_tf_concrete_function_list

@@ -1,0 +1,4 @@
+description: Auto-generated mapping for instance_norm.
+std_args: []
+type: function
+operation: instance_norm

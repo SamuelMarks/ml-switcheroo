@@ -1,0 +1,17 @@
+description: The VQ-VAE sequence vector quantizer.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_latent_classes
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: latent_dim
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: beta
+  type: float
+variants: {}
+operation: VectorQuantizer

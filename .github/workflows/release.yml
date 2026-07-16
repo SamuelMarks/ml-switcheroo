@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # other workflow uses uv, by using non-uv this is another test so let's keep heterogeneity
       - name: Set up Python
@@ -39,7 +39,7 @@ jobs:
         run: python3 -m build . --wheel
 
       - name: Upload to GitHub Releases
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           # This grabs the .whl file generated in the previous step

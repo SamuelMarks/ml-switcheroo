@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- r
+- r_blk_size
+- c
+- c_blk_size
+type: function
+operation: below_or_on_diag

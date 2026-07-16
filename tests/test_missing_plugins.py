@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 from unittest.mock import MagicMock
 
 # Import the plugins
@@ -33,6 +35,7 @@ from ml_switcheroo.plugins import (
 
 
 def test_auto_fsdp():
+  """Auto-generated doc."""
   try:
     auto_fsdp_wrapper.AutoFSDPWrapper().transform(MagicMock(), MagicMock())
   except Exception:

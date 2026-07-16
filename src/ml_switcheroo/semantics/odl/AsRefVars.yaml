@@ -1,0 +1,8 @@
+description: Converts a Variable or structure of Variables to Variables with has_ref=True.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: node
+  type: Any
+variants: {}
+operation: AsRefVars

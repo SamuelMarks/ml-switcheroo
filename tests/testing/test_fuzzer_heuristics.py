@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_guess_dtype_by_name():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.heuristics import guess_dtype_by_name
 
   assert guess_dtype_by_name("mask") == "bool"
@@ -9,6 +13,7 @@ def test_guess_dtype_by_name():
 
 
 def test_generate_by_heuristic():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.heuristics import generate_by_heuristic
   import numpy as np
 

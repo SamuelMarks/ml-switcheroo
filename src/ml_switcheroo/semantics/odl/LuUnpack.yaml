@@ -1,0 +1,22 @@
+description: Unpacks the LU decomposition into P, L, U matrices.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: LU_data
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: LU_pivots
+  type: Tensor
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: unpack_data
+  type: bool
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: unpack_pivots
+  type: bool
+variants: {}
+operation: LuUnpack

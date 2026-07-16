@@ -1,0 +1,6 @@
+description: Convert ``memory_format`` of ``nn.Conv3d.weight`` to ``memory_format``
+std_args:
+- module
+- memory_format
+type: function
+operation: convert_conv3d_weight_memory_format

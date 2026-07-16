@@ -1,0 +1,15 @@
+description: The class representing a Python function.
+std_args:
+- x_aval
+- h_0_aval
+- c_0_aval
+- w_aval
+- seq_lengths_aval
+- input_size
+- hidden_size
+- num_layers
+- dropout
+- bidirectional
+- cudnn_allow_tf32
+type: function
+operation: rnn_abstract_eval

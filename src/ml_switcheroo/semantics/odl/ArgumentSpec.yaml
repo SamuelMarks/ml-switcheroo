@@ -1,0 +1,5 @@
+description: JIT Argument Specification.
+op_type: class
+std_args: []
+variants: {}
+operation: ArgumentSpec

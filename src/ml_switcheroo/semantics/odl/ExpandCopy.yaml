@@ -1,0 +1,12 @@
+description: Expands the tensor to size.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: true
+  kind: positional_or_keyword
+  name: size
+  type: List[int]
+variants: {}
+operation: ExpandCopy

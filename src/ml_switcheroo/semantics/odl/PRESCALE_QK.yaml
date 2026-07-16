@@ -1,0 +1,5 @@
+description: Whether to pre-scale QK by 1/sqrt(d) and change of base. This is slightly
+  faster but
+std_args: []
+type: attribute
+operation: PRESCALE_QK

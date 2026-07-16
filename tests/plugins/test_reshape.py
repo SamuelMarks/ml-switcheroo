@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 
@@ -6,6 +8,7 @@ from ml_switcheroo.plugins.reshape import _create_dotted_name, transform_view_se
 
 
 def test_create_dotted_name():
+  """Auto-generated doc."""
   node = _create_dotted_name("np.reshape")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "reshape"
@@ -18,6 +21,7 @@ def test_create_dotted_name():
 
 
 def test_transform_view_semantics_no_mapping():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
 
@@ -27,6 +31,7 @@ def test_transform_view_semantics_no_mapping():
 
 
 def test_transform_view_semantics_method_empty_args():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.lookup_api.side_effect = lambda x: "jnp.reshape" if x == "Reshape" else None
   ctx._runtime_config.strict_mode = False
@@ -41,6 +46,7 @@ def test_transform_view_semantics_method_empty_args():
 
 
 def test_transform_view_semantics_method_pack_varargs():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.lookup_api.return_value = "jnp.reshape"
   ctx._runtime_config.strict_mode = False
@@ -58,6 +64,7 @@ def test_transform_view_semantics_method_pack_varargs():
 
 
 def test_transform_view_semantics_method_pack_single_int():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.lookup_api.return_value = "jnp.reshape"
   ctx._runtime_config.strict_mode = False
@@ -72,6 +79,7 @@ def test_transform_view_semantics_method_pack_single_int():
 
 
 def test_transform_view_semantics_method_no_pack_tuple():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.lookup_api.return_value = "jnp.reshape"
   ctx._runtime_config.strict_mode = False
@@ -88,6 +96,7 @@ def test_transform_view_semantics_method_no_pack_tuple():
 
 
 def test_transform_view_semantics_func_empty_args():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.lookup_api.return_value = "jnp.reshape"
 
@@ -99,6 +108,7 @@ def test_transform_view_semantics_func_empty_args():
 
 
 def test_transform_view_semantics_func_no_pack():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.lookup_api.return_value = "jnp.reshape"
   ctx._runtime_config.strict_mode = False
@@ -118,6 +128,7 @@ def test_transform_view_semantics_func_no_pack():
 
 
 def test_transform_view_semantics_func_pack_varargs():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.lookup_api.return_value = "jnp.reshape"
   ctx._runtime_config.strict_mode = False
@@ -135,6 +146,7 @@ def test_transform_view_semantics_func_pack_varargs():
 
 
 def test_transform_view_semantics_func_pack_single_int():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.lookup_api.return_value = "jnp.reshape"
   ctx._runtime_config.strict_mode = False
@@ -149,6 +161,7 @@ def test_transform_view_semantics_func_pack_single_int():
 
 
 def test_transform_view_semantics_func_empty_orig_args():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.lookup_api.return_value = "jnp.reshape"
   ctx._runtime_config.strict_mode = False
@@ -161,6 +174,7 @@ def test_transform_view_semantics_func_empty_orig_args():
 
 
 def test_transform_view_semantics_strict_mode():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.lookup_api.return_value = "jnp.reshape"
   ctx._runtime_config.strict_mode = True
@@ -181,6 +195,7 @@ def test_transform_view_semantics_strict_mode():
 
 
 def test_transform_view_semantics_strict_mode_no_trait():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.lookup_api.return_value = "jnp.reshape"
   ctx._runtime_config.strict_mode = True

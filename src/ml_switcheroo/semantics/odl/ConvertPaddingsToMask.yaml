@@ -1,0 +1,12 @@
+description: Converts binary paddings to a logit mask ready to add to attention matrix.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: paddings
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Any
+variants: {}
+operation: ConvertPaddingsToMask

@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- self
+- ref
+- swizzle
+- optimized
+type: function
+operation: store_untiled

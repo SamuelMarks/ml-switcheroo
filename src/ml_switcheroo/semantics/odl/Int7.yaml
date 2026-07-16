@@ -1,0 +1,5 @@
+description: 7-bit integer data type (Quantization).
+op_type: attribute
+std_args: []
+variants: {}
+operation: Int7

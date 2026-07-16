@@ -1,0 +1,8 @@
+description: Symbolic utility for creating a fresh size symbol.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: expr
+  type: Any
+variants: {}
+operation: SymFreshSize

@@ -1,0 +1,4 @@
+description: Options for controlling the behavior of FlexAttention kernels.
+std_args: []
+type: class
+operation: FlexKernelOptions

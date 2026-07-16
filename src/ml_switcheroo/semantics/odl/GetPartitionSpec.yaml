@@ -1,0 +1,8 @@
+description: Extracts a PartitionSpec tree from a PyTree.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tree
+  type: Any
+variants: {}
+operation: GetPartitionSpec

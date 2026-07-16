@@ -1,5 +1,4 @@
-"""
-Tests for Shared Base Inheritance Resolution.
+"""Tests for Shared Base Inheritance Resolution.
 
 Verifies that SemanticsManager correctly walks the framework hierarchy
 defined by adapters to find operation mappings.
@@ -30,8 +29,7 @@ def manager():
 
 
 def test_immediate_fallback(manager):
-  """
-  Scenario: 'paxml' has no mapping for 'abs', but inherits from 'jax'. 'jax' has mappings.
+  """Scenario: 'paxml' has no mapping for 'abs', but inherits from 'jax'. 'jax' has mappings.
   Expectation: resolve_variant('paxml') returns 'jax' variant.
   """
   # 1. Setup Data: 'abs' defined for JAX only
@@ -48,8 +46,7 @@ def test_immediate_fallback(manager):
 
 
 def test_explicit_override_precedence(manager):
-  """
-  Scenario: 'paxml' defines 'Linear' specifically. 'jax' also has it.
+  """Scenario: 'paxml' defines 'Linear' specifically. 'jax' also has it.
   Expectation: resolve_variant('paxml') returns 'paxml' variant (Override).
   """
   manager.data["Linear"] = {"variants": {"jax": {"api": "flax.nnx.Linear"}, "paxml": {"api": "praxis.layers.Linear"}}}
@@ -63,8 +60,7 @@ def test_explicit_override_precedence(manager):
 
 
 def test_deep_inheritance_chain(manager):
-  """
-  Scenario: GrandChild -> Child -> Parent.
+  """Scenario: GrandChild -> Child -> Parent.
   Operation defined only in Parent.
   Request for GrandChild should traverse up to Parent.
   """
@@ -87,8 +83,7 @@ def test_deep_inheritance_chain(manager):
 
 
 def test_circular_inheritance_safety(manager):
-  """
-  Scenario: A -> B -> A.
+  """Scenario: A -> B -> A.
   Operation exists in C (unreachable) or nowhere.
   Expectation: Stops safely at recursion limit, returns None.
   """
@@ -109,8 +104,7 @@ def test_circular_inheritance_safety(manager):
 
 
 def test_integration_with_json_confg_fallback(manager):
-  """
-  Scenario: Adapter not registered, but JSON config defined 'extends'.
+  """Scenario: Adapter not registered, but JSON config defined 'extends'.
   Expectation: Manager falls back to framework_configs dict.
   """
   manager.data["abs"] = {"variants": {"jax": {"api": "jnp.abs"}}}
@@ -127,8 +121,7 @@ def test_integration_with_json_confg_fallback(manager):
 
 
 def test_json_overrides_adapter_inheritance(manager):
-  """
-  Scenario: Adapter says inherits from 'parent_A'.
+  """Scenario: Adapter says inherits from 'parent_A'.
             JSON config says inherits from 'parent_B'.
             Operation is defined in 'parent_B'.
   Expectation: Manager follows JSON config to 'parent_B'.

@@ -1,5 +1,4 @@
-"""
-Integration Tests for Gradient Modes (Context Managers).
+"""Integration Tests for Gradient Modes (Context Managers).
 
 Verifies that:
 1. `torch.no_grad()` maps to `contextlib.nullcontext()` in JAX.

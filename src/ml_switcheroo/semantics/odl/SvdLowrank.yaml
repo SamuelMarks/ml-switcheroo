@@ -1,0 +1,22 @@
+description: Computes a low-rank approximation of the singular value decomposition.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: A
+  type: Tensor
+- default: 6
+  is_variadic: false
+  kind: positional_or_keyword
+  name: q
+  type: int
+- default: 2
+  is_variadic: false
+  kind: positional_or_keyword
+  name: niter
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: M
+  type: Tensor
+variants: {}
+operation: SvdLowrank

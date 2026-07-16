@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_injector_fw_missing():
+  """Auto-generated doc."""
   from ml_switcheroo.tools.injector_fw.core import FrameworkInjector
   from ml_switcheroo.core.dsl import FrameworkVariant
 
@@ -24,6 +28,7 @@ def test_injector_fw_missing():
 
 
 def test_injector_fw_updating():
+  """Auto-generated doc."""
   from ml_switcheroo.tools.injector_fw.core import FrameworkInjector
   from ml_switcheroo.core.dsl import FrameworkVariant
 

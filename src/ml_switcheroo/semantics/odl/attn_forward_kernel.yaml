@@ -1,0 +1,15 @@
+description: The class representing a Python function.
+std_args:
+- q_ref
+- k_ref
+- v_ref
+- start_idx_ref
+- kv_seq_len_ref
+- o_ref
+- residual_refs
+- sm_scale
+- block_k
+- block_h
+- num_heads
+type: function
+operation: attn_forward_kernel

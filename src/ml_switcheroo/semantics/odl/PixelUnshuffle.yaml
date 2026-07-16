@@ -1,0 +1,12 @@
+description: Reverses the PixelShuffle operation.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: downscale_factor
+  type: int
+type: class
+operation: PixelUnshuffle

@@ -127,7 +127,7 @@ class RewriterContext:
       alias_info = fw_conf.get("alias")
       # Handle Pydantic model dump or dict
       if hasattr(alias_info, "model_dump"):
-        alias_info = alias_info.model_dump()
+        alias_info = alias_info.model_dump()  # type: ignore
 
       if isinstance(alias_info, dict):
         name = alias_info.get("name")

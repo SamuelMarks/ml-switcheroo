@@ -1,6 +1,6 @@
 """Module docstring."""
 
-from ml_switcheroo.compiler.frontends.rdna.nodes import (
+from ml_switcheroo.core.compiler.frontends.rdna.nodes import (
   Comment,
   Directive,
   Immediate,

@@ -1,0 +1,10 @@
+description: A FragmentedArray layout derived from a tiling expression.
+std_args:
+- self
+- tiling
+- warp_dims
+- lane_dims
+- vector_dim
+- _check_canonical
+type: class
+operation: TiledLayoutImpl

@@ -1,5 +1,4 @@
-"""
-Tests for Conditional API Dispatch in TestRewriter.
+"""Tests for Conditional API Dispatch in TestRewriter.
 
 Verifies that:
 1.  Runtime rules trigger API switching based on argument values.
@@ -140,8 +139,7 @@ def rewrite(rewriter, code):
 
 
 def test_dispatch_equality_string(rewriter):
-  """
-  Scenario: resize(..., mode='nearest')
+  """Scenario: resize(..., mode='nearest')
   Expect: jax.image.resize_nearest
   """
   code = "y = torch.resize(x, None, mode='nearest')"
@@ -152,8 +150,7 @@ def test_dispatch_equality_string(rewriter):
 
 
 def test_dispatch_fallback_default(rewriter):
-  """
-  Scenario: resize(..., mode='linear') -> No rule match.
+  """Scenario: resize(..., mode='linear') -> No rule match.
   Expect: jax.image.resize (default api)
   """
   code = "y = torch.resize(x, None, mode='linear')"
@@ -163,8 +160,7 @@ def test_dispatch_fallback_default(rewriter):
 
 
 def test_dispatch_in_list(rewriter):
-  """
-  Scenario: resize(..., mode='bicubic') -> Matches IN list.
+  """Scenario: resize(..., mode='bicubic') -> Matches IN list.
   Expect: jax.image.resize_bi
   """
   code = "y = torch.resize(x, None, mode='bicubic')"
@@ -174,8 +170,7 @@ def test_dispatch_in_list(rewriter):
 
 
 def test_dispatch_positional_extraction(rewriter):
-  """
-  Scenario: torch.resize(x, None, 'nearest')
+  """Scenario: torch.resize(x, None, 'nearest')
   'mode' is 3rd argument in std_args.
   Value 'nearest' is positional arg 2.
   Expect: Dispatch triggers.
@@ -187,8 +182,7 @@ def test_dispatch_positional_extraction(rewriter):
 
 
 def test_dispatch_numeric_gt(rewriter):
-  """
-  Scenario: torch.clamp(x, 150) -> limit=150 > 100.
+  """Scenario: torch.clamp(x, 150) -> limit=150 > 100.
   Expect: jnp.heavy_clip
   """
   code = "y = torch.clamp(x, 150)"
@@ -198,8 +192,7 @@ def test_dispatch_numeric_gt(rewriter):
 
 
 def test_dispatch_numeric_method_call(rewriter):
-  """
-  Scenario: x.clamp(150). Method call implicit self.
+  """Scenario: x.clamp(150). Method call implicit self.
   std_args: [x, limit]. Method args: [limit].
   Positional index logic should map limit -> arg 0.
   Expect: jnp.heavy_clip
@@ -214,26 +207,21 @@ def test_dispatch_numeric_method_call(rewriter):
 
 
 def test_dispatch_is_type_list(rewriter):
-  """
-  Scenario: input is List Literal [1, 2] -> Is List -> Batch API.
-  """
+  """Scenario: input is List Literal [1, 2] -> Is List -> Batch API."""
   code = "y = torch.process([1, 2])"
   res = rewrite(rewriter, code)
   assert "jax.batch_process" in res
 
 
 def test_dispatch_is_type_int(rewriter):
-  """
-  Scenario: input is Integer Literal 5 -> Is Int -> Int API.
-  """
+  """Scenario: input is Integer Literal 5 -> Is Int -> Int API."""
   code = "y = torch.process(5)"
   res = rewrite(rewriter, code)
   assert "jax.int_process" in res
 
 
 def test_dispatch_is_type_fallback(rewriter):
-  """
-  Scenario: input is variable 'x' (unknown type/Name).
+  """Scenario: input is variable 'x' (unknown type/Name).
   Logic fails integer/list checks -> Default API.
   """
   code = "y = torch.process(x)"

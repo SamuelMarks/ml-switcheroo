@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 
@@ -8,6 +10,7 @@ from ml_switcheroo.plugins.auto_fsdp_wrapper import wrap_with_sharding
 
 
 def test_auto_fsdp_wrapper_pytorch():
+  """Auto-generated doc."""
   node = cst.Call(func=cst.Name("Linear"), args=[])
 
   op_def = OperationDef(
@@ -16,6 +19,9 @@ def test_auto_fsdp_wrapper_pytorch():
 
   mock_semantics = MagicMock()
   mock_semantics.get_operation.return_value = op_def
+  mock_semantics.get_framework_config.return_value = {
+    "plugin_traits": {"sharding_wrapper_api": "torch.distributed.fsdp.FSDP"}
+  }
   mock_config = RuntimeConfig(target_framework="torch", source_framework="jax")
 
   ctx = HookContext(semantics=mock_semantics, config=mock_config)
@@ -32,6 +38,7 @@ def test_auto_fsdp_wrapper_pytorch():
 
 
 def test_auto_fsdp_wrapper_jax():
+  """Auto-generated doc."""
   node = cst.Call(func=cst.Name("Dense"), args=[])
 
   op_def = OperationDef(
@@ -40,6 +47,9 @@ def test_auto_fsdp_wrapper_jax():
 
   mock_semantics = MagicMock()
   mock_semantics.get_operation.return_value = op_def
+  mock_semantics.get_framework_config.return_value = {
+    "plugin_traits": {"sharding_wrapper_api": "jax.experimental.pjit.pjit"}
+  }
   mock_config = RuntimeConfig(target_framework="jax", source_framework="torch")
 
   ctx = HookContext(semantics=mock_semantics, config=mock_config)
@@ -54,6 +64,7 @@ def test_auto_fsdp_wrapper_jax():
 
 
 def test_auto_fsdp_wrapper_not_supported():
+  """Auto-generated doc."""
   node = cst.Call(func=cst.Name("Activation"), args=[])
 
   op_def = OperationDef(
@@ -75,6 +86,7 @@ def test_auto_fsdp_wrapper_not_supported():
 
 
 def test_auto_fsdp_wrapper_no_op_id():
+  """Auto-generated doc."""
   node = cst.Call(func=cst.Name("Unknown"), args=[])
 
   mock_semantics = MagicMock()

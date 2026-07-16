@@ -1,0 +1,21 @@
+description: Randomly apply brightness, contrast, saturation and hue image processing.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: brightness_factor
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: contrast_factor
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: saturation_factor
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hue_factor
+  type: float
+variants: {}
+operation: RandomColorJitter

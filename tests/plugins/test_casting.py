@@ -1,5 +1,4 @@
-"""
-Tests for Type Casting Plugin.
+"""Tests for Type Casting Plugin.
 
 Verifies:
 1. Retrieval of Abstract Type ID from Operation Metadata.
@@ -97,8 +96,7 @@ def rewriter():
 
 
 def test_float_cast(rewriter):
-  """
-  Input: x.float()
+  """Input: x.float()
   Logic:
     1. Map .float() -> 'CastFloat'
     2. 'CastFloat' metadata -> 'Float32'
@@ -116,8 +114,7 @@ def test_float_cast(rewriter):
 
 
 def test_long_cast(rewriter):
-  """
-  Input: x.long()
+  """Input: x.long()
   Logic: 'CastLong' -> 'Int64' -> 'jax.numpy.int64'
   """
   rewriter.ctx.current_op_id = "CastLong"
@@ -130,8 +127,7 @@ def test_long_cast(rewriter):
 
 
 def test_metadata_missing_fallback(rewriter):
-  """
-  Scenario: Op definition exists but metadata missing.
+  """Scenario: Op definition exists but metadata missing.
   Expectation: Return original node.
   """
   # Inject bad definition
@@ -151,8 +147,7 @@ def test_metadata_missing_fallback(rewriter):
 
 
 def test_type_resolution_failure(rewriter):
-  """
-  Scenario: Target Framework doesn't map the abstract type.
+  """Scenario: Target Framework doesn't map the abstract type.
   Expectation: Return original node.
   """
   # Define cast asking for 'Int128'
@@ -176,6 +171,7 @@ def test_type_resolution_failure(rewriter):
 
 
 def test_missing_semantics():
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.semantics = None
   # No semantics attached
@@ -185,6 +181,7 @@ def test_missing_semantics():
 
 
 def test_missing_conf(rewriter):
+  """Auto-generated doc."""
   rewriter.ctx.semantics.get_framework_config.return_value = None
   node = cst.parse_expression("x.float()")
   res = transform_casting(node, rewriter.ctx)
@@ -192,6 +189,7 @@ def test_missing_conf(rewriter):
 
 
 def test_missing_traits(rewriter):
+  """Auto-generated doc."""
   rewriter.ctx.semantics.get_framework_config.return_value = {}
   node = cst.parse_expression("x.float()")
   res = transform_casting(node, rewriter.ctx)
@@ -199,11 +197,15 @@ def test_missing_traits(rewriter):
 
 
 class MockTraits:
+  """Auto-generated doc."""
+
   def __init__(self, val):
+    """Auto-generated doc."""
     self.has_numpy_compatible_arrays = val
 
 
 def test_object_traits(rewriter):
+  """Auto-generated doc."""
   rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": MockTraits(True)}
   rewriter.ctx.current_op_id = "CastFloat"
   node = cst.parse_expression("x.float()")
@@ -212,6 +214,7 @@ def test_object_traits(rewriter):
 
 
 def test_object_traits_false(rewriter):
+  """Auto-generated doc."""
   rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": MockTraits(False)}
   rewriter.ctx.current_op_id = "CastFloat"
   node = cst.parse_expression("x.float()")
@@ -220,6 +223,7 @@ def test_object_traits_false(rewriter):
 
 
 def test_non_attribute_call(rewriter):
+  """Auto-generated doc."""
   # node.func is not an attribute
   rewriter.ctx.current_op_id = "CastFloat"
   node = cst.parse_expression("float(x)")
@@ -228,6 +232,7 @@ def test_non_attribute_call(rewriter):
 
 
 def test_missing_op_id(rewriter):
+  """Auto-generated doc."""
   rewriter.ctx.current_op_id = None
   node = cst.parse_expression("x.float()")
   res = transform_casting(node, rewriter.ctx)
@@ -235,6 +240,7 @@ def test_missing_op_id(rewriter):
 
 
 def test_missing_defn(rewriter):
+  """Auto-generated doc."""
   rewriter.ctx.current_op_id = "UnknownOp"
   rewriter.ctx.semantics.get_definition_by_id.return_value = None
   node = cst.parse_expression("x.float()")
@@ -243,11 +249,13 @@ def test_missing_defn(rewriter):
 
 
 def test_fallback_infer_type(rewriter):
+  """Auto-generated doc."""
   # Fallback: Infer type from Op ID if metadata missing
   # Op ID: CastHalf -> Float16
   cast_half_def = {"variants": {}}
 
   def get_def_by_id(op_id):
+    """Auto-generated doc."""
     if op_id == "CastHalf":
       return cast_half_def
     return None
@@ -256,6 +264,7 @@ def test_fallback_infer_type(rewriter):
 
   # Resolve Float16 -> 'jax.numpy.float16'
   def resolve(aid, fw):
+    """Auto-generated doc."""
     if aid == "Float16" and fw == "jax":
       return {"api": "jax.numpy.float16"}
     return None
@@ -271,10 +280,12 @@ def test_fallback_infer_type(rewriter):
 
 
 def test_fallback_infer_type_unmapped(rewriter):
+  """Auto-generated doc."""
   # Op ID: CastUnknown -> Unknown
   cast_unknown_def = {"variants": {}}
 
   def get_def_by_id(op_id):
+    """Auto-generated doc."""
     if op_id == "CastUnknown":
       return cast_unknown_def
     return None

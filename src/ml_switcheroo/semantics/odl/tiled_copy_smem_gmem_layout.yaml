@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- row_tiles
+- col_tiles
+- swizzle
+- bitwidth
+type: function
+operation: tiled_copy_smem_gmem_layout

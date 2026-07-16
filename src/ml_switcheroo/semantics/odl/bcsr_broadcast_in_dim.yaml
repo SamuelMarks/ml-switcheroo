@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- mat
+- shape
+- broadcast_dimensions
+- sharding
+type: function
+operation: bcsr_broadcast_in_dim

@@ -1,0 +1,16 @@
+description: The class representing a Python function.
+std_args:
+- lhs
+- rhs
+- window_strides
+- padding
+- lhs_dilation
+- rhs_dilation
+- dimension_numbers
+- feature_group_count
+- batch_group_count
+- precision
+- preferred_element_type
+- out_sharding
+type: function
+operation: bcoo_conv_general_dilated

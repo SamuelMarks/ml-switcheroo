@@ -1,0 +1,20 @@
+description: Returns a new array having a specified ``shape`` and filled with ``fill_value``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: shape
+  type: Union[int, Tuple[int, Ellipsis]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: fill_value
+  type: Union[bool, int, float, complex]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Optional[dtype]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Optional[device]
+type: attribute
+operation: full

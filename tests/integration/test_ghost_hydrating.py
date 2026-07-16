@@ -1,5 +1,4 @@
-"""
-Integration Test for Hybrid Loading (Ghost Protocol).
+"""Integration Test for Hybrid Loading (Ghost Protocol).
 
 Verifies that:
 1. An Adapter correctly falls back to Ghost Mode when the library is missing.
@@ -25,8 +24,7 @@ from ml_switcheroo.frameworks.base import (
 
 
 class MockAdapter:
-  """
-  A minimal adapter implementation that supports the Hybrid Protocol.
+  """A minimal adapter implementation that supports the Hybrid Protocol.
   We inject logic here similar to what real adapters (Torch/JAX) will do.
   """
 
@@ -64,9 +62,7 @@ class MockAdapter:
 
 @pytest.fixture
 def snapshot_dir(tmp_path):
-  """
-  Create a fake snapshot directory and inject it into the module.
-  """
+  """Create a fake snapshot directory and inject it into the module."""
   # Create the structure
   (tmp_path / "snapshots").mkdir()
   tgt_dir = tmp_path / "snapshots"
@@ -78,8 +74,7 @@ def snapshot_dir(tmp_path):
 
 @pytest.fixture
 def valid_snapshot(snapshot_dir):
-  """
-  Creates a valid snapshot file for 'mockfw'.
+  """Creates a valid snapshot file for 'mockfw'.
   Contains data that perfectly mimics the "Live" data to prove parity.
   """
   data = {
@@ -110,17 +105,14 @@ def valid_snapshot(snapshot_dir):
 
 
 def test_load_snapshot_helper_finds_latest(valid_snapshot):
-  """
-  Verify the utility function picks the correct file (lexical sort).
-  """
+  """Verify the utility function picks the correct file (lexical sort)."""
   data = load_snapshot_for_adapter("mockfw")
   assert data is not None
   assert data["version"] == "1.0"  # Picked v1.0 over v0.9
 
 
 def test_hybrid_mode_live():
-  """
-  Scenario: 'mockfw' is in sys.modules.
+  """Scenario: 'mockfw' is in sys.modules.
   Expectation: Adapter stays in LIVE mode and returns live data.
   """
   # Inject mock module
@@ -137,8 +129,7 @@ def test_hybrid_mode_live():
 
 
 def test_hybrid_mode_ghost(valid_snapshot):
-  """
-  Scenario: 'mockfw' is MISSING. Snapshot exists.
+  """Scenario: 'mockfw' is MISSING. Snapshot exists.
   Expectation: Adapter enters GHOST mode, loads snapshot, returns data matching Live structure.
   """
   # Ensure mockfw not present
@@ -165,8 +156,7 @@ def test_hybrid_mode_ghost(valid_snapshot):
 
 
 def test_ghost_mode_no_snapshot(snapshot_dir):
-  """
-  Scenario: 'mockfw' missing AND no snapshot file.
+  """Scenario: 'mockfw' missing AND no snapshot file.
   Expectation: Graceful empty state.
   """
   with patch.dict(sys.modules):

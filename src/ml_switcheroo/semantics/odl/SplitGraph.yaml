@@ -1,0 +1,8 @@
+description: Splits a stateful graph node into structure (GraphDef) and state.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: node
+  type: Any
+variants: {}
+operation: SplitGraph

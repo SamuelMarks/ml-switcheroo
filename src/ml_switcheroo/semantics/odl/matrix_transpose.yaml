@@ -1,0 +1,8 @@
+description: Transposes a matrix (or a stack of matrices) ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+type: function
+operation: matrix_transpose

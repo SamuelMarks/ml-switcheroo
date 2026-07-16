@@ -1,0 +1,21 @@
+description: Pools the input by taking the minimum of a window slice.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inputs
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: window_shape
+  type: Union[int, Tuple[int, ...]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: strides
+  type: Union[int, Tuple[int, ...]]
+- default: VALID
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: str
+variants: {}
+operation: MinPool

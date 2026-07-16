@@ -1,0 +1,5 @@
+description: Signed integer type, compatible with C long long (typically 64-bit).
+op_type: attribute
+std_args: []
+variants: {}
+operation: LongLong

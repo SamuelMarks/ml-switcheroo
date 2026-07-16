@@ -1,0 +1,13 @@
+description: Return the indices for the lower-triangle of arr.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arr
+  type: Tensor
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: k
+  type: int
+variants: {}
+operation: TrilIndicesFrom

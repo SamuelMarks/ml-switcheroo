@@ -1,0 +1,9 @@
+description: Returns a view of the tensor conjugated and with the last two dimensions
+  transposed.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: Adjoint

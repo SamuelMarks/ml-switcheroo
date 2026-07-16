@@ -1,0 +1,16 @@
+description: Slices the tensor, returning a copy.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: index
+  type: int
+variants: {}
+operation: SelectCopy

@@ -1,0 +1,17 @@
+operation: Mean
+description: Definition for Mean
+std_args:
+- x
+variants:
+  torch:
+    api: torch.mean
+  jax:
+    api: jax.numpy.mean
+  numpy:
+    api: numpy.mean
+  tensorflow:
+    api: tf.math.reduce_mean
+  mlx:
+    api: mlx.core.mean
+  keras:
+    api: keras.ops.mean

@@ -1,5 +1,4 @@
-"""
-Integration Tests for Tensor Layout Permutation (Feature 5).
+"""Integration Tests for Tensor Layout Permutation (Feature 5).
 
 Verifies:
 1.  DSL updates allow `layout_map` definition.

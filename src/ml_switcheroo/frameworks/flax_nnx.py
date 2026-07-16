@@ -10,7 +10,7 @@ Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 
 import logging
 import textwrap
-from typing import List, Tuple, Dict, Any, Optional
+from typing import Union, List, Tuple, Dict, Any, Optional
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
@@ -28,13 +28,13 @@ from ml_switcheroo.frameworks.loader import load_definitions
 try:
   import jax
 except Exception:
-  jax = None
+  jax: Any = None  # type: ignore
 try:
   import flax.nnx
 
   flax_nnx = flax.nnx  # pragma: no cover
 except Exception:
-  flax_nnx = None
+  flax_nnx = None  # type: ignore
 
 
 @register_framework("flax_nnx")
@@ -95,7 +95,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     return "flax.nnx", "nnx"
 
   @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
     """Declares self namespaces with tiers and recommended aliases.
 
     Returns:
@@ -127,13 +127,13 @@ class FlaxNNXAdapter(JAXStackMixin):
   def get_harness_init_code(self) -> str:
     """Logic to create Flax NNX Rngs."""
     return textwrap.dedent(
-      """ 
-            def _make_flax_rngs(seed): 
-                "Attempts to create a Flax NNX Rngs object." 
-                try: 
-                    return nnx.Rngs(seed) 
-                except (ImportError, AttributeError): 
-                    return "mock_flax_rngs" 
+      """
+            def _make_flax_rngs(seed):
+                "Attempts to create a Flax NNX Rngs object."
+                try:
+                    return nnx.Rngs(seed)
+                except (ImportError, AttributeError):
+                    return "mock_flax_rngs"
         """
     ).strip()
 
@@ -185,6 +185,7 @@ class FlaxNNXAdapter(JAXStackMixin):
       requires_functional_control_flow=True,
       enforce_purity_analysis=True,
       strict_materialization_method="block_until_ready",
+      sharding_wrapper_api="jax.experimental.pjit.pjit",
     )
 
   @property
@@ -272,13 +273,13 @@ class FlaxNNXAdapter(JAXStackMixin):
       "tier2_neural": """from flax import nnx
 import jax.numpy as jnp
 
-class Net(nnx.Module): 
-    def __init__(self, rngs: nnx.Rngs): 
-        self.linear = nnx.Linear(10, 10, rngs=rngs) 
+class Net(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        self.linear = nnx.Linear(10, 10, rngs=rngs)
 
-    def __call__(self, x): 
-        x = self.linear(x) 
-        return nnx.relu(x) 
+    def __call__(self, x):
+        x = self.linear(x)
+        return nnx.relu(x)
 """,
       "tier3_extras": """# Flax NNX State Management
 # See repo for details on nnx.Variable interactions.""",
@@ -314,7 +315,7 @@ class Qwen3VLPatchEmbed(nnx.Module):
             seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size
         )
         hidden_states = hidden_states.transpose(0, 2, 3, 4, 1)
-        
+
         return self.proj(hidden_states).reshape(seq_len, cfg.hidden_size)
 """,
     }

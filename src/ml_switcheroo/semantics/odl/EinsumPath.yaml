@@ -1,0 +1,12 @@
+description: Evaluates the lowest cost contraction order for an einsum expression.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: subscripts
+  type: str
+- is_variadic: true
+  kind: positional_or_keyword
+  name: operands
+  type: Tensor
+variants: {}
+operation: EinsumPath

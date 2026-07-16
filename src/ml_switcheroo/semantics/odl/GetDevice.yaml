@@ -1,0 +1,8 @@
+description: Returns the device index of a tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Any
+variants: {}
+operation: GetDevice

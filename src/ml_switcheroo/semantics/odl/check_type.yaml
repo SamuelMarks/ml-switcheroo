@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- self
+- shape
+- bitwidth
+type: function
+operation: check_type

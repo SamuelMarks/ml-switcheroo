@@ -1,0 +1,4 @@
+description: Internal TorchScript serializer.
+std_args: []
+variants: {}
+operation: ScriptModuleSerializer

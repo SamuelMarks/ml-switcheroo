@@ -1,0 +1,8 @@
+description: Computes the bitwise NOT of the given input tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Any
+variants: {}
+operation: BitwiseNot

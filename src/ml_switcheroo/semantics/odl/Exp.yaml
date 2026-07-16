@@ -1,0 +1,10 @@
+description: Calculates an implementation-dependent approximation to the exponential
+  function for each element ``x_i`` of the input array ``x`` (``e`` raised to the
+  power of ``x_i``, where ``e`` is the base of the natural logarithm).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+variants: {}
+operation: exp

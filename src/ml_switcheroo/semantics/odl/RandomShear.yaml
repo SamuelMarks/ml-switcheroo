@@ -1,0 +1,24 @@
+description: Randomly applies shear transformations.
+op_type: class
+std_args:
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: x_factor
+  type: float
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: y_factor
+  type: float
+- default: bilinear
+  is_variadic: false
+  kind: positional_or_keyword
+  name: interpolation
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: seed
+  type: int
+variants: {}
+operation: RandomShear

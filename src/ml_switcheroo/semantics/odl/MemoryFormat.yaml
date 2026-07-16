@@ -1,0 +1,5 @@
+description: Enum for memory layout.
+op_type: attribute
+std_args: []
+variants: {}
+operation: MemoryFormat

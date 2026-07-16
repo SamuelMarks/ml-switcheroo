@@ -1,0 +1,26 @@
+description: Contiguous storage for quantized int32 data.
+op_type: class
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: args
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: wrap_storage
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Any
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: _internal
+  type: Any
+variants: {}
+operation: QInt32Storage

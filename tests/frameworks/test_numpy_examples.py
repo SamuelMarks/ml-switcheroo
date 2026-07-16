@@ -1,5 +1,4 @@
-"""
-Tests for NumPy Adapter Examples.
+"""Tests for NumPy Adapter Examples.
 
 Ensures that tiered examples provided by the NumpyAdapter are syntactically valid
 and contain expected numpy patterns.

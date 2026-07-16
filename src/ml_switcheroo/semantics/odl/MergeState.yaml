@@ -1,0 +1,12 @@
+description: Merges multiple State objects.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: state
+  type: Mapping
+- is_variadic: true
+  kind: positional_or_keyword
+  name: states
+  type: Any
+variants: {}
+operation: MergeState

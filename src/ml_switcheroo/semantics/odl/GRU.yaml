@@ -1,0 +1,32 @@
+description: Applies a multi-layer gated recurrent unit (GRU) RNN to an input sequence.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_size
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hidden_size
+  type: int
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: num_layers
+  type: int
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: bool
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dropout
+  type: float
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: bidirectional
+  type: bool
+type: class
+operation: GRU

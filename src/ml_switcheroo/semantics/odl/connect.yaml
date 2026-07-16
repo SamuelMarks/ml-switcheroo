@@ -1,0 +1,6 @@
+description: Creates a connection to a remote server.
+std_args:
+- self
+- address
+type: function
+operation: connect

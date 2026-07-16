@@ -1,0 +1,8 @@
+description: Stop gradients from being computed.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: StopGradient

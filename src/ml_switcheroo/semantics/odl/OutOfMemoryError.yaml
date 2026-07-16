@@ -1,0 +1,5 @@
+description: Exception raised when device is out of memory.
+op_type: class
+std_args: []
+variants: {}
+operation: OutOfMemoryError

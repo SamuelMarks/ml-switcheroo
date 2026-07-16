@@ -1,0 +1,20 @@
+description: Convert the input to an array.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: obj
+  type: Union[array, bool, int, float, complex, NestedSequence, SupportsBufferProtocol]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Optional[dtype]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Optional[device]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: copy
+  type: Optional[bool]
+variants: {}
+operation: asarray

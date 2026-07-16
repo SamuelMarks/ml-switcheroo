@@ -1,6 +1,4 @@
-"""
-Tests for Configuration, Path Resolution, and Defaults Logic.
-"""
+"""Tests for Configuration, Path Resolution, and Defaults Logic."""
 
 from ml_switcheroo.config import (
   RuntimeConfig,

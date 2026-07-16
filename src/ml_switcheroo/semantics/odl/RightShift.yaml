@@ -1,0 +1,12 @@
+description: Shift the bits of an integer to the right.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x1
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x2
+  type: Array
+variants: {}
+operation: RightShift

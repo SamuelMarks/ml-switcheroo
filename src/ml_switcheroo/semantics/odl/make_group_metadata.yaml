@@ -1,0 +1,10 @@
+description: Create the metadata needed for grouped matmul computation.
+std_args:
+- group_sizes
+- m
+- tm
+- start_group
+- num_nonzero_groups
+- visit_empty_groups
+type: function
+operation: make_group_metadata

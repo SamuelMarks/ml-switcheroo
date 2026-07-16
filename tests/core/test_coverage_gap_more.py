@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import pytest
 import libcst as cst
 from unittest.mock import patch, MagicMock
@@ -10,6 +12,7 @@ from ml_switcheroo.core.mlir.parser import MlirParser
 
 
 def get_context():
+  """Auto-generated doc."""
   cfg = RuntimeConfig(strict_mode=False)
   sm = SemanticsManager()
   ctx = RewriterContext(semantics=sm, config=cfg)
@@ -17,6 +20,7 @@ def get_context():
 
 
 def test_api_check_version_constraints():
+  """Auto-generated doc."""
   t = ApiTransformer(get_context())
 
   # Coverage for 272-273, 276
@@ -25,6 +29,7 @@ def test_api_check_version_constraints():
 
 
 def test_api_normalize_args_coverage():
+  """Auto-generated doc."""
   t = ApiTransformer(get_context())
 
   # Cover 923-924 (target_val_map parsing error)
@@ -57,6 +62,7 @@ def test_api_normalize_args_coverage():
 
 
 def test_api_convert_to_indented_block():
+  """Auto-generated doc."""
   t = ApiTransformer(get_context())
   # Cover 1061
   fn = cst.parse_module("def foo():\n  pass").body[0]
@@ -65,6 +71,7 @@ def test_api_convert_to_indented_block():
 
 
 def test_auxiliary_transformer_coverage():
+  """Auto-generated doc."""
   sm = SemanticsManager()
   sm.get_framework_config = MagicMock(return_value=None)  # Cover 64-73
   ctx = RewriterContext(semantics=sm, config=RuntimeConfig())
@@ -132,7 +139,7 @@ def test_auxiliary_transformer_coverage():
 
 
 def test_mlir_parser_coverage():
-
+  """Auto-generated doc."""
   # 298 Unexpected token where Op expected
   with pytest.raises(SyntaxError, match="Unexpected token .* where Op expected"):
     p = MlirParser("^bb0: 123")
@@ -178,6 +185,7 @@ def test_mlir_parser_coverage():
 
 
 def test_api_pass_gap_lines():
+  """Auto-generated doc."""
   from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
   from ml_switcheroo.semantics.manager import SemanticsManager
   import libcst as cst
@@ -216,6 +224,7 @@ def test_api_pass_gap_lines():
 
 
 def test_auxiliary_pass_gap_lines():
+  """Auto-generated doc."""
   from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryTransformer
   from ml_switcheroo.semantics.manager import SemanticsManager
   import libcst as cst
@@ -247,7 +256,7 @@ def test_auxiliary_pass_gap_lines():
 
 
 def test_mlir_parser_remaining():
-
+  """Auto-generated doc."""
   # 371: break after 20 tokens in lookahead without EQUAL
   p = MlirParser("a b c d e f g h i j k l m n o p q r s t u v w x y z")
   p.parse_operation()
@@ -280,7 +289,7 @@ def test_mlir_parser_remaining():
 
 
 def test_parser_unreachable_hits():
-
+  """Auto-generated doc."""
   # 439: hit the inner RBRACE match by making absorb_trivia advance past a comment to an RBRACE
   p = MlirParser('"op"() { // comment\n}')
   p.parse_operation()
@@ -304,7 +313,7 @@ def test_parser_unreachable_hits():
 
 
 def test_parser_unreachable_hits2():
-
+  """Auto-generated doc."""
   # 439: we can't easily hit this unless `match` advances token in an unexpected way? No, it's just dead code because of `while not self.match(RBRACE)`. If it enters the loop, it's because it's not RBRACE. Then it checks if it's EOF, if so breaks. Then checks if it's RBRACE and breaks. It could only be RBRACE if absorb_trivia() consumed tokens up to an RBRACE.
   # So `"{ // comment\n }"` might hit it.
   p = MlirParser('"op"() { // comment\n}')
@@ -322,6 +331,7 @@ def test_parser_unreachable_hits2():
 
 
 def test_api_unreachable_hits():
+  """Auto-generated doc."""
   from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
   from ml_switcheroo.semantics.manager import SemanticsManager
   import libcst as cst
@@ -366,6 +376,7 @@ def test_api_unreachable_hits():
 
 
 def test_auxiliary_201():
+  """Auto-generated doc."""
   from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryTransformer
   from ml_switcheroo.semantics.manager import SemanticsManager
   import libcst as cst

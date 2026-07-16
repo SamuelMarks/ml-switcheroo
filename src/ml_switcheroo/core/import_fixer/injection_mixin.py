@@ -7,6 +7,7 @@ determined by the `ResolutionPlan`.
 from typing import List, Set
 
 import libcst as cst
+from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 
 from ml_switcheroo.core.import_fixer.utils import (
   create_dotted_name,
@@ -19,6 +20,9 @@ from ml_switcheroo.core.import_fixer.utils import (
 class InjectionMixin(cst.CSTTransformer):
   """Mixin for injecting imports at the Module level."""
 
+  plan: ResolutionPlan
+  _satisfied_injections: "set[str]"
+
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
     """Post-process module to inject imports from the plan."""
     injections: List[cst.CSTNode] = []
@@ -28,7 +32,7 @@ class InjectionMixin(cst.CSTTransformer):
         continue
 
       check_name = req.alias if req.alias else (req.subcomponent if req.subcomponent else req.module.split(".")[0])
-      if check_name in self._defined_names:
+      if check_name in self._defined_names:  # type: ignore
         continue
 
       # Logic:
@@ -61,7 +65,7 @@ class InjectionMixin(cst.CSTTransformer):
       )
 
       self._append_injection(injections, node)
-      self._defined_names.add(check_name)
+      self._defined_names.add(check_name)  # type: ignore
       self._satisfied_injections.add(req.signature)
 
     # Insertion Logic
@@ -80,7 +84,7 @@ class InjectionMixin(cst.CSTTransformer):
     clean_body = []
     seen_imports: Set[str] = set()
 
-    for stmt in merged_body:
+    for stmt in merged_body:  # type: ignore
       is_import = False
       sig = ""
 

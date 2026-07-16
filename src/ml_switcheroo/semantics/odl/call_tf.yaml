@@ -1,0 +1,9 @@
+description: Calls a TensorFlow function from JAX, with support for reverse autodiff.
+std_args:
+- callable_tf
+- has_side_effects
+- ordered
+- output_shape_dtype
+- call_tf_graph
+type: function
+operation: call_tf

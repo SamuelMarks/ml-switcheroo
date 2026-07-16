@@ -1,6 +1,4 @@
-"""
-Tests for Generator Verification Mode Emittance.
-"""
+"""Tests for Generator Verification Mode Emittance."""
 
 import pytest
 from unittest.mock import MagicMock

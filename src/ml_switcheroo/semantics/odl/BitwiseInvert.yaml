@@ -1,0 +1,8 @@
+description: Compute bit-wise inversion, or bit-wise NOT, element-wise.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: BitwiseInvert

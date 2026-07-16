@@ -1,0 +1,8 @@
+description: Update the storage layout (i.e. n_batch & n_dense) of a BCOO matrix.
+std_args:
+- mat
+- n_batch
+- n_dense
+- on_inefficient
+type: function
+operation: bcoo_update_layout

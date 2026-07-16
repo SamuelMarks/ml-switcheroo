@@ -1,0 +1,27 @@
+description: Solves a system of equations with a triangular coefficient matrix.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: A
+  type: Tensor
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: upper
+  type: bool
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: transpose
+  type: bool
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: unitriangular
+  type: bool
+variants: {}
+operation: TriangularSolve

@@ -402,9 +402,9 @@ variants:
     api: "torch.cuda.reset_peak_memory_stats"
     dispatch_rules:
       - if_arg: "device"  # Implicit
-        op: "is_type" 
-        val: "None" 
-        use_api: "torch.cuda.reset_peak_memory_stats" 
+        op: "is_type"
+        val: "None"
+        use_api: "torch.cuda.reset_peak_memory_stats"
   jax:
     api: null  # Not applicable
   flax_nnx:
@@ -474,7 +474,7 @@ variants:
     api: "jax.numpy.right_shift"
   keras:
     transformation_type: "infix"
-    operator: ">>" 
+    operator: ">>"
   tensorflow:
     api: "tf.bitwise.right_shift"
     args:
@@ -553,9 +553,9 @@ variants:
       decimals: "decimals"
   tensorflow:
     api: "tf.round"
-    # tf.round does not take decimals. Logic might need macro. 
+    # tf.round does not take decimals. Logic might need macro.
     # Macro for TF: tf.round(x * 10**decs) / 10**decs
-    macro_template: "tf.round({a} * (10**{decimals})) / (10**{decimals})" 
+    macro_template: "tf.round({a} * (10**{decimals})) / (10**{decimals})"
 ---
 operation: "Rsqrt"
 description: "Element-wise reciprocal square root."
@@ -618,7 +618,7 @@ variants:
     macro_template: "np.save({file}, {arr})"
   tensorflow:
     # No direct simple save, use IO
-    macro_template: "tf.io.write_file({file}, tf.io.serialize_tensor({arr}))" 
+    macro_template: "tf.io.write_file({file}, tf.io.serialize_tensor({arr}))"
 ---
 operation: "SaveGguf"
 description: "Save arrays to GGUF format."
@@ -661,19 +661,19 @@ variants:
   torch:
     required_imports:
       - "from safetensors.torch import save_file"
-    macro_template: "save_file({arrays}, {file}, metadata={metadata})" 
+    macro_template: "save_file({arrays}, {file}, metadata={metadata})"
   jax:
     required_imports:
       - "from safetensors.flax import save_file"
-    macro_template: "save_file({arrays}, {file}, metadata={metadata})" 
+    macro_template: "save_file({arrays}, {file}, metadata={metadata})"
   flax_nnx:
     required_imports:
       - "from safetensors.flax import save_file"
-    macro_template: "save_file({arrays}, {file}, metadata={metadata})" 
+    macro_template: "save_file({arrays}, {file}, metadata={metadata})"
   paxml:
     required_imports:
       - "from safetensors.flax import save_file"
-    macro_template: "save_file({arrays}, {file}, metadata={metadata})" 
+    macro_template: "save_file({arrays}, {file}, metadata={metadata})"
   keras:
     requires_plugin: "save_safetensors_adapter"
   tensorflow:
@@ -762,7 +762,7 @@ variants:
   keras:
     requires_plugin: "segmented_ops"
   tensorflow:
-    api: "tf.math.segment_sum" # Partial match logic? Unsafe to map directly to mm. 
+    api: "tf.math.segment_sum" # Partial match logic? Unsafe to map directly to mm.
     requires_plugin: "segmented_ops"
 ---
 operation: "SetCacheLimit"
@@ -775,7 +775,7 @@ variants:
     api: "mlx.core.set_cache_limit"
   torch:
     api: "torch.cuda.set_per_process_memory_fraction"
-    # Semantic mismatch: cache vs memory fraction. 
+    # Semantic mismatch: cache vs memory fraction.
     requires_plugin: "resource_limit_adapter"
   jax:
     # JAX preallocates by default

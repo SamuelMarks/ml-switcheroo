@@ -1,0 +1,8 @@
+description: Reshapes tensors to match the broadcast shape of the inputs.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: tensors
+  type: List[Tensor]
+variants: {}
+operation: AlignTensors

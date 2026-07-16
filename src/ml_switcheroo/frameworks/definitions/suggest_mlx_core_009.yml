@@ -269,7 +269,7 @@ variants:
     args:
       x: "a"
   torch:
-    # Requires numpy bridge or viewing. 
+    # Requires numpy bridge or viewing.
     # 'view' in torch is reshape. 'view(dtype)' is complex.
     requires_plugin: "torch_bitcast_shim"
   jax:

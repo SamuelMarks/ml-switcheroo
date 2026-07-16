@@ -1,0 +1,17 @@
+description: Returns a new array containing the data from another (array) object with
+  a ``__dlpack__`` method.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: object
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Optional[device]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: copy
+  type: Optional[bool]
+variants: {}
+operation: from_dlpack

@@ -1,0 +1,11 @@
+description: Context manager/decorator for handling complex state updates with graph
+  mutations.
+op_type: context
+std_args:
+- default: '''default'''
+  is_variadic: false
+  kind: positional_or_keyword
+  name: tag
+  type: str
+variants: {}
+operation: UpdateContext

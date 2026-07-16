@@ -1,0 +1,5 @@
+description: Same as `lax.round(..., TO_NEAREST_EVEN)`.
+std_args:
+- self
+type: function
+operation: round_even

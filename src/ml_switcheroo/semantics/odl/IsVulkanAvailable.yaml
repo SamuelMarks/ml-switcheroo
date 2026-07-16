@@ -1,0 +1,4 @@
+description: Returns True if the backend is available.
+std_args: []
+variants: {}
+operation: IsVulkanAvailable

@@ -1,0 +1,12 @@
+description: Deserializes a serialized loss class/function instance.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: name
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: custom_objects
+  type: dict
+variants: {}
+operation: deserializeloss

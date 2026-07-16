@@ -148,7 +148,7 @@ class MigrationGuideGenerator:
     # Invert the maps for lookup: {fw_name: std_name}
     # Actually no, semantics stores {std_name: fw_name}.
     # Wait, let's verify semantics structure from previous files.
-    # k_array_api.json: "std_args": ["x", "axis"], "variants": { "torch": { "args": {"axis": "dim"} } }
+    # odl/abs.yaml: "std_args": ["x", "axis"], "variants": { "torch": { "args": {"axis": "dim"} } }
     # So key is std_name, value is fw_name. Correct.
 
     for std_arg in clean_std_args:

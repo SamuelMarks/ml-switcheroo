@@ -1,0 +1,17 @@
+description: Determine if two arrays share memory.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b
+  type: Array
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: max_work
+  type: int
+variants: {}
+operation: SharesMemory

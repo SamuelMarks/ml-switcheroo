@@ -1,0 +1,12 @@
+description: Performs the same operation as permute, but output is freshly created.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dims
+  type: List[int]
+variants: {}
+operation: PermuteCopy

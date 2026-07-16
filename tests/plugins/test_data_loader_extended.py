@@ -1,5 +1,4 @@
-"""
-Tests for Extended Data Loader Support (Shim Hardening).
+"""Tests for Extended Data Loader Support (Shim Hardening).
 
 Verifies:
 1. `num_workers` passing.
@@ -59,8 +58,7 @@ def rewriter():
 
 
 def test_shim_arguments_passing(rewriter):
-  """
-  Scenario: Torch initialization with perf args.
+  """Scenario: Torch initialization with perf args.
   Input: DataLoader(ds, batch_size=32, num_workers=4, pin_memory=True)
   Output: GenericDataLoader(ds, batch_size=32, num_workers=4, pin_memory=True)
   """
@@ -78,8 +76,7 @@ def test_shim_arguments_passing(rewriter):
 
 
 def test_collate_fn_passing(rewriter):
-  """
-  Scenario: Torch custom collate function.
+  """Scenario: Torch custom collate function.
   Input: DataLoader(ds, collate_fn=my_collate)
   Output: GenericDataLoader(ds, collate_fn=my_collate)
   """
@@ -92,8 +89,7 @@ def test_collate_fn_passing(rewriter):
 
 
 def test_positional_preservation(rewriter):
-  """
-  Scenario: Mixed positional/keyword.
+  """Scenario: Mixed positional/keyword.
   Input: DataLoader(ds, 64, shuffle=True)
   """
   code = "dl = DataLoader(ds, 64, shuffle=True)"
@@ -106,9 +102,7 @@ def test_positional_preservation(rewriter):
 
 
 def test_shim_code_injection_check(rewriter):
-  """
-  Verify the updated Shim code contains the new arguments in __init__.
-  """
+  """Verify the updated Shim code contains the new arguments in __init__."""
   # Wrap in function to trigger preamble injection
   code = "def main(): dl = DataLoader(ds)"
   res = rewrite_code(rewriter, code)

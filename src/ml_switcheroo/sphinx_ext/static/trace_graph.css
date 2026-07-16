@@ -125,7 +125,7 @@
     display: none;
 }
 .tt-config summary::after {
-    content: "⚙️"; 
+    content: "⚙️";
     margin-left: 4px;
 }
 

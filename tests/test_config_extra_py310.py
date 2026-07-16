@@ -1,7 +1,10 @@
+"""Auto-generated doc."""
+
 from unittest import mock
 
 
 def test_config_tomli_import():
+  """Auto-generated doc."""
   from ml_switcheroo.config import _import_tomllib
 
   with mock.patch("sys.version_info", (3, 10, 0, "final", 0)):

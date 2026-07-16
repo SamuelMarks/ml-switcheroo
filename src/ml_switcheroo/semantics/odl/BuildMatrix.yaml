@@ -1,0 +1,16 @@
+description: Build a matrix object from a string, nested sequence, or array.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: obj
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ldict
+  type: dict
+- is_variadic: false
+  kind: positional_or_keyword
+  name: gdict
+  type: dict
+variants: {}
+operation: BuildMatrix

@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import pytest
 
 from ml_switcheroo.importers.stablehlo_reader import StableHloSpecImporter
@@ -5,14 +7,17 @@ from ml_switcheroo.importers.stablehlo_reader import StableHloSpecImporter
 
 @pytest.fixture
 def importer():
+  """Auto-generated doc."""
   return StableHloSpecImporter()
 
 
 def test_parse_file_not_found(importer, tmp_path):
+  """Auto-generated doc."""
   assert importer.parse_file(tmp_path / "missing.md") == {}
 
 
 def test_parse_file_valid(importer, tmp_path):
+  """Auto-generated doc."""
   md_file = tmp_path / "spec.md"
   md_file.write_text("""
 ### `abs`
@@ -41,6 +46,7 @@ Logs the plus one.
 
 
 def test_finalize_op_truncation(importer):
+  """Auto-generated doc."""
   semantics = {}
   details = {"description": ["A" * 100, "B" * 100, "C" * 150], "raw_syntax": "%x, %y"}
   importer._finalize_op(semantics, "MyOp", details)
@@ -52,6 +58,7 @@ def test_finalize_op_truncation(importer):
 
 
 def test_finalize_op_args_filtering(importer):
+  """Auto-generated doc."""
   semantics = {}
   details = {"description": ["Desc"], "raw_syntax": "%0 = stablehlo.add %lhs, %rhs, %result, %results"}
   importer._finalize_op(semantics, "Add", details)
@@ -62,6 +69,7 @@ def test_finalize_op_args_filtering(importer):
 
 
 def test_finalize_op_args_fallback(importer):
+  """Auto-generated doc."""
   semantics = {}
   details = {"description": ["Desc"], "raw_syntax": ""}
   importer._finalize_op(semantics, "Sub", details)
@@ -71,6 +79,7 @@ def test_finalize_op_args_fallback(importer):
 
 
 def test_finalize_op_api_suffix(importer):
+  """Auto-generated doc."""
   # Testing Add, Sub, Mul, Div, Pow overrides in _finalize_op
   semantics = {}
 
@@ -91,6 +100,7 @@ def test_finalize_op_api_suffix(importer):
 
 
 def test_normalize_op_name(importer):
+  """Auto-generated doc."""
   assert importer._normalize_op_name("abs") == "Abs"
   assert importer._normalize_op_name("add") == "Add"
   assert importer._normalize_op_name("subtract") == "Sub"

@@ -1,6 +1,4 @@
-"""
-Tests for GraphPatcher CST Logic.
-"""
+"""Tests for GraphPatcher CST Logic."""
 
 import pytest
 import libcst as cst
@@ -10,8 +8,8 @@ from ml_switcheroo.core.rewriter.patcher import (
   DeleteAction,
   ReplaceAction,
 )
-from ml_switcheroo.compiler.backends.python_snippet import PythonSnippetEmitter
-from ml_switcheroo.compiler.ir import LogicalNode
+from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
+from ml_switcheroo.core.compiler.ir import LogicalNode
 
 
 class MockEmitter(PythonSnippetEmitter):
@@ -39,9 +37,7 @@ def emitter():
 
 
 def test_delete_node(emitter):
-  """
-  Scenario: Delete 'self.bn = BatchNorm()' statement.
-  """
+  """Scenario: Delete 'self.bn = BatchNorm()' statement."""
   code = """
 class Net:
     def __init__(self):
@@ -67,9 +63,7 @@ class Net:
 
 
 def test_replace_init_node(emitter):
-  """
-  Scenario: Replace 'self.conv = Conv()' with 'self.fused = Fused()'.
-  """
+  """Scenario: Replace 'self.conv = Conv()' with 'self.fused = Fused()'."""
   code = "self.conv = Conv()"
   module = cst.parse_module(code)
   # Extract Assign node
@@ -87,9 +81,7 @@ def test_replace_init_node(emitter):
 
 
 def test_replace_call_statement(emitter):
-  """
-  Scenario: Replace 'x = self.conv(x)' (Statement) with 'y = self.fused(x, z)'.
-  """
+  """Scenario: Replace 'x = self.conv(x)' (Statement) with 'y = self.fused(x, z)'."""
   code = "x = self.conv(x)"
   module = cst.parse_module(code)
   # Extract Assign node
@@ -115,8 +107,7 @@ def test_replace_call_statement(emitter):
 
 
 def test_replace_call_expression_nested(emitter):
-  """
-  Scenario: Replace 'relu(x)' inside 'return relu(x)'.
+  """Scenario: Replace 'relu(x)' inside 'return relu(x)'.
   Provenance points to the Call node `relu(x)`.
   """
   code = "return relu(x)"
@@ -137,8 +128,7 @@ def test_replace_call_expression_nested(emitter):
 
 
 def test_expression_statement_deletion(emitter):
-  """
-  Scenario: Delete 'func(x)' expression statement.
+  """Scenario: Delete 'func(x)' expression statement.
   Provenance points to Expr node.
   """
   code = "func(x)"

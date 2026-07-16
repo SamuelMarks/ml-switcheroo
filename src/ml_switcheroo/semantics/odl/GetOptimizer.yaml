@@ -1,0 +1,8 @@
+description: Retrieves a Keras Optimizer instance.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: identifier
+  type: Union[str, Dict]
+variants: {}
+operation: GetOptimizer

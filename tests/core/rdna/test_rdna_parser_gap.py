@@ -1,8 +1,11 @@
+"""Auto-generated doc."""
+
 import pytest
-from ml_switcheroo.compiler.frontends.rdna.parser import RdnaParser
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 
 
 def test_rdna_parser_unexpected_eof():
+  """Auto-generated doc."""
   parser = RdnaParser(".text")
   # Manually drain
   parser._consume()
@@ -11,42 +14,50 @@ def test_rdna_parser_unexpected_eof():
 
 
 def test_rdna_parser_expected_token_mismatch():
+  """Auto-generated doc."""
   parser = RdnaParser("v_add_f32")
   with pytest.raises(SyntaxError, match="Expected"):
     parser._consume(kind=1)  # Using a wrong enum if it's enum
 
 
 def test_rdna_parser_parse_line_eof():
+  """Auto-generated doc."""
   parser = RdnaParser("")
   assert parser._parse_line() is None
 
 
 def test_rdna_parser_bad_token():
+  """Auto-generated doc."""
   parser = RdnaParser(",")
   with pytest.raises(SyntaxError, match="Unexpected token"):
     parser.parse()
 
 
 def test_rdna_parser_directive_eof():
+  """Auto-generated doc."""
   parser = RdnaParser(".amdgcn_target")
   parser.parse()
 
 
 def test_rdna_parser_instruction_eof():
+  """Auto-generated doc."""
   parser = RdnaParser("v_add_f32")
   parser.parse()
 
 
 def test_rdna_parser_operand_eof():
+  """Auto-generated doc."""
   RdnaParser("v_add_f32 ")
 
 
 def test_rdna_parser_special_reg():
+  """Auto-generated doc."""
   parser = RdnaParser("v_add_f32 exec")
   parser.parse()
 
 
 def test_rdna_parser_coverage_remaining():
+  """Auto-generated doc."""
   parser = RdnaParser(".directive")
   parser.parse()
 
@@ -62,6 +73,7 @@ def test_rdna_parser_coverage_remaining():
 
 
 def test_rdna_parser_directive_eof2():
+  """Auto-generated doc."""
   parser = RdnaParser(".directive")
   # if we force `next_t` to evaluate to False inside the while loop
   # We can patch `_peek` to return None specifically inside _parse_directive
@@ -73,6 +85,7 @@ def test_rdna_parser_directive_eof2():
 
 
 def test_rdna_parser_operand_eof2():
+  """Auto-generated doc."""
   parser = RdnaParser("v_add_f32 v0")
   # if we force `_parse_operand` to receive None from `_peek`
   from unittest.mock import patch

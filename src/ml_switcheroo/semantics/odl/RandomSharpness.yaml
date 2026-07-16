@@ -1,0 +1,20 @@
+description: Randomly performs the sharpness operation on given images.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: factor
+  type: float
+- default:
+  - 0
+  - 255
+  is_variadic: false
+  kind: positional_or_keyword
+  name: value_range
+  type: Tuple[int, int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: seed
+  type: int
+variants: {}
+operation: RandomSharpness

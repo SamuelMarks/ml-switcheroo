@@ -1,0 +1,9 @@
+description: Context manager for setting the current stream.
+op_type: context
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: stream
+  type: Stream
+variants: {}
+operation: StreamContext

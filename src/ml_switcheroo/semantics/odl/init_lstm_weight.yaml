@@ -1,0 +1,9 @@
+description: Random initialize LSTM weights from U(-k, k), k=sqrt(1/hidden_size).
+std_args:
+- rng
+- input_size
+- hidden_size
+- num_layers
+- bidirectional
+type: function
+operation: init_lstm_weight

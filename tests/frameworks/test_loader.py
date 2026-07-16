@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import json
 from unittest.mock import patch
 from ml_switcheroo.frameworks.loader import (
@@ -10,11 +12,13 @@ from ml_switcheroo_ir.schema.ghost import StandardMap
 
 
 def test_load_definitions_file_not_found():
+  """Auto-generated doc."""
   clear_definition_cache()
   assert load_definitions("non_existent_framework") == {}
 
 
 def test_load_definitions_json_error(tmp_path):
+  """Auto-generated doc."""
   clear_definition_cache()
   bad_json = tmp_path / "bad.json"
   bad_json.write_text("invalid json")
@@ -24,6 +28,7 @@ def test_load_definitions_json_error(tmp_path):
 
 
 def test_load_definitions_success(tmp_path):
+  """Auto-generated doc."""
   clear_definition_cache()
   good_json = tmp_path / "good.json"
   good_json.write_text(json.dumps({"Add": {"api": "add"}}))
@@ -36,5 +41,6 @@ def test_load_definitions_success(tmp_path):
 
 
 def test_get_definitions_path():
+  """Auto-generated doc."""
   path = get_definitions_path("test_fw")
   assert path == DEFINITIONS_DIR / "test_fw.json"

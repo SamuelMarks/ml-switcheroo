@@ -1,5 +1,4 @@
-"""
-Integration Test for Tracer Diffs.
+"""Integration Test for Tracer Diffs.
 
 Verifies that the engine produces trace events with populated
 'before' and 'after' code snapshots.

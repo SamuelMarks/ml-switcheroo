@@ -1,0 +1,15 @@
+description: Applies random Gaussian blur to images for data augmentation.
+op_type: class
+std_args:
+- default: 3
+  is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: int
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: sigma
+  type: float
+variants: {}
+operation: RandomGaussianBlur

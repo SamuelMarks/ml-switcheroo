@@ -324,7 +324,7 @@ variants:
     api: "torch.Tensor.copy_"
     args:
       dst: null # Implicit self
-      src: "func_arg_0" 
+      src: "func_arg_0"
       casting: null
       where: null # Not directly supported in copy_
     transformation_type: "infix" # Requires custom handling to make this a method call "dst.copy_(src)"
@@ -477,7 +477,7 @@ variants:
     args:
       m: "input"
       # Torch cov expects stacked input if y is present
-      y: null 
+      y: null
 
 ---
 operation: "Cross"
@@ -708,9 +708,9 @@ variants:
   tensorflow:
     api: "tf.experimental.numpy.deg2rad"
   keras:
-    macro_template: "{x} * (3.1415926535 / 180.0)" 
+    macro_template: "{x} * (3.1415926535 / 180.0)"
   mlx:
-    macro_template: "{x} * (3.1415926535 / 180.0)" 
+    macro_template: "{x} * (3.1415926535 / 180.0)"
 
 ---
 operation: "Degrees"
@@ -734,6 +734,6 @@ variants:
   tensorflow:
     api: "tf.experimental.numpy.degrees"
   keras:
-    macro_template: "{x} * (180.0 / 3.1415926535)" 
+    macro_template: "{x} * (180.0 / 3.1415926535)"
   mlx:
     macro_template: "{x} * (180.0 / 3.1415926535)"

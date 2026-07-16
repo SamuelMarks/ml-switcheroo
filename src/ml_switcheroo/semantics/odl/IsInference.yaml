@@ -1,0 +1,8 @@
+description: Returns True if input is an inference tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: IsInference

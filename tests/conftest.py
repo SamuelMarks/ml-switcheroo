@@ -36,8 +36,7 @@ except ImportError:
 
 
 class TestRewriter:
-  """
-  Test helper wrapping the RewriterPipeline.
+  """Test helper wrapping the RewriterPipeline.
 
   Orchestrates the execution of the standard pipeline passes (Structure, API, Auxiliary)
   on a CST module using a provided configuration and semantics manager. This allows
@@ -64,16 +63,12 @@ class TestRewriter:
     return self.context.semantics
 
   def convert(self, module):
-    """
-    Executes the pipeline on the given CST module.
-    """
+    """Executes the pipeline on the given CST module."""
     return self.pipeline.run(module, self.context)
 
 
 class SnapshotAssert:
-  """
-  Simple snapshot comparison logic to verify CLI output stability.
-  """
+  """Simple snapshot comparison logic to verify CLI output stability."""
 
   def __init__(self, request: pytest.FixtureRequest):
     """Function docstring."""
@@ -84,8 +79,7 @@ class SnapshotAssert:
     self.update_mode = request.config.getoption("--update-snapshots", default=False)
 
   def assert_match(self, content: str, extension: str = "txt", normalizer: Optional[Callable[[str], str]] = None):
-    """
-    Compares content against stored file.
+    """Compares content against stored file.
 
     Args:
         content: The actual output string.
@@ -127,8 +121,7 @@ def snapshot(request):
 
 @pytest.fixture(autouse=True)
 def isolate_hook_registry():
-  """
-  Ensures that modifications to the plugin hook registry
+  """Ensures that modifications to the plugin hook registry
   do not leak between tests.
   """
   from ml_switcheroo.core.hooks import _HOOKS, _HOOK_METADATA
@@ -147,8 +140,7 @@ def isolate_hook_registry():
 
 @pytest.fixture(autouse=True)
 def isolate_framework_registry():
-  """
-  Ensures that modifications to the framework adapter registry
+  """Ensures that modifications to the framework adapter registry
   (adding custom frameworks for tests) do not leak between tests.
   """
   original_registry = _ADAPTER_REGISTRY.copy()

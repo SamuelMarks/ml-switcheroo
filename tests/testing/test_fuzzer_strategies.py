@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_get_dtype_strategy():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.strategies import _get_dtype_strategy
   import numpy as np
 
@@ -16,6 +20,7 @@ def test_get_dtype_strategy():
 
 
 def test_strategies_from_spec():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.strategies import strategies_from_spec
 
   # options
@@ -68,6 +73,7 @@ def test_strategies_from_spec():
 
 
 def test_array_strategy():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.strategies import _array_strategy
 
   shared_dims = {}
@@ -81,6 +87,7 @@ def test_array_strategy():
 
 
 def test_strategies_from_spec_more():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.strategies import strategies_from_spec, _array_strategy
 
   strategies_from_spec("List[int] | float", {})

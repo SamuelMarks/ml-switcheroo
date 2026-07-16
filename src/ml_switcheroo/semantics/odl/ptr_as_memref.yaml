@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- ptr
+- memref_ty
+- ptr_memory_space
+type: function
+operation: ptr_as_memref

@@ -1,0 +1,5 @@
+description: Loss base class.
+op_type: class
+std_args: []
+variants: {}
+operation: Loss

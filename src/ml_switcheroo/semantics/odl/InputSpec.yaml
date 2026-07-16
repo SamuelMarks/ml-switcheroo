@@ -1,0 +1,17 @@
+description: Specifies the rank, dtype and shape of every input to a layer.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: shape
+  type: tuple
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ndim
+  type: int
+variants: {}
+operation: InputSpec

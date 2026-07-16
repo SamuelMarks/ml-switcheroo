@@ -1,0 +1,6 @@
+description: The class representing a Python class.
+std_args:
+- self
+- timeout_secs
+type: class
+operation: AsyncManager

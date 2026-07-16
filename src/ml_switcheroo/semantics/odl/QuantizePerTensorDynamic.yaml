@@ -1,0 +1,18 @@
+description: Converts a float tensor to a quantized tensor with scale and zero_point
+  calculated dynamically.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Any
+- default: 'False'
+  is_variadic: false
+  kind: positional_or_keyword
+  name: reduce_range
+  type: bool
+variants: {}
+operation: QuantizePerTensorDynamic

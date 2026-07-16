@@ -1,0 +1,7 @@
+description: A constraint system contains a set of constraints and assignments.
+std_args:
+- self
+- assignments
+- constraints
+type: class
+operation: ConstraintSystem

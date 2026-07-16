@@ -1,0 +1,14 @@
+description: The class representing a Python function.
+std_args:
+- d
+- a
+- b
+- a_swizzle
+- b_swizzle
+- a_scale
+- b_scale
+- a_sparse_metadata
+- accumulate
+- collective
+type: function
+operation: mma

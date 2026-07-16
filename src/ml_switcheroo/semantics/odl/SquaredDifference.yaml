@@ -1,0 +1,12 @@
+description: Returns (x - y)(x - y) element-wise.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y
+  type: Tensor
+variants: {}
+operation: SquaredDifference

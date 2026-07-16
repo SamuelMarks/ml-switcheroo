@@ -1,6 +1,4 @@
-"""
-Tests for Plugin Logic Injection with Advanced Operators.
-"""
+"""Tests for Plugin Logic Injection with Advanced Operators."""
 
 import pytest
 from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule, LogicOp
@@ -16,9 +14,7 @@ def plugin_dir(tmp_path):
 
 
 def test_generate_logic_operators(plugin_dir):
-  """
-  Verify that GT, LT, IN operators generate valid Python syntax.
-  """
+  """Verify that GT, LT, IN operators generate valid Python syntax."""
   gen = PluginGenerator(plugin_dir)
 
   rules = [
@@ -48,8 +44,7 @@ def test_generate_logic_operators(plugin_dir):
 
 
 def test_generate_logic_generation_check(plugin_dir):
-  """
-  Verify we can generate logic multiple times by targeting new files.
+  """Verify we can generate logic multiple times by targeting new files.
   (Avoids testing the preservation logic which prevents update).
   """
   gen = PluginGenerator(plugin_dir)

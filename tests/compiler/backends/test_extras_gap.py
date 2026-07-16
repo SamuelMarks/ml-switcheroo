@@ -1,14 +1,15 @@
-from ml_switcheroo.compiler.backends.extras import (
-  HtmlBackend,
-  TikzBackend,
-  LatexBackend,
-  MlirBackend,
-  StableHloBackend,
-)
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+"""Auto-generated doc."""
+
+from ml_switcheroo.core.compiler.backends.html import HtmlBackend
+from ml_switcheroo.core.compiler.backends.mlir import MlirBackend
+from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
+from ml_switcheroo.core.compiler.backends.visual_tikz import TikzBackend
+from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 
 
 def test_html_backend_format_args():
+  """Auto-generated doc."""
   backend = HtmlBackend()
   meta = {"arg_0": "x", "kernel_size": "3", "arg_1": "y"}
   result = backend._format_args(meta)
@@ -16,6 +17,7 @@ def test_html_backend_format_args():
 
 
 def test_html_backend_is_stateful():
+  """Auto-generated doc."""
   backend = HtmlBackend()
   assert backend._is_stateful(LogicalNode("n1", "Input")) is False
   assert backend._is_stateful(LogicalNode("n2", "func_add")) is False
@@ -27,6 +29,7 @@ def test_html_backend_is_stateful():
 
 
 def test_html_backend_clean_kind():
+  """Auto-generated doc."""
   backend = HtmlBackend()
   assert backend._clean_kind("func_relu") == "Relu"
   assert backend._clean_kind("nn.Conv2d") == "Conv2d"
@@ -34,6 +37,7 @@ def test_html_backend_clean_kind():
 
 
 def test_html_backend_create_arrow():
+  """Auto-generated doc."""
   backend = HtmlBackend()
   arrow_def = backend._create_arrow(0, 0, "def")
   assert arrow_def.style_class == "s-red"
@@ -51,6 +55,7 @@ def test_html_backend_create_arrow():
 
 
 def test_html_backend_compile():
+  """Auto-generated doc."""
   backend = HtmlBackend()
   g = LogicalGraph("TestNet")
 
@@ -72,6 +77,7 @@ def test_html_backend_compile():
 
 
 def test_html_backend_compile_no_name():
+  """Auto-generated doc."""
   backend = HtmlBackend()
   g = LogicalGraph()
   g.nodes = [LogicalNode("conv1", "Conv2d")]
@@ -80,6 +86,7 @@ def test_html_backend_compile_no_name():
 
 
 def test_tikz_backend_compile():
+  """Auto-generated doc."""
   backend = TikzBackend()
   g = LogicalGraph("TestNet")
 
@@ -102,6 +109,7 @@ def test_tikz_backend_compile():
 
 
 def test_tikz_backend_disconnected_components():
+  """Auto-generated doc."""
   backend = TikzBackend()
   g = LogicalGraph()
   g.nodes = [LogicalNode("a", "OpA"), LogicalNode("b", "OpB")]
@@ -112,6 +120,7 @@ def test_tikz_backend_disconnected_components():
 
 
 def test_tikz_backend_queue_logic():
+  """Auto-generated doc."""
   backend = TikzBackend()
   g = LogicalGraph()
   # Create graph with cycle or without degree 0 to test else branches
@@ -123,6 +132,7 @@ def test_tikz_backend_queue_logic():
 
 
 def test_latex_backend_compile():
+  """Auto-generated doc."""
   backend = LatexBackend()
   g = LogicalGraph("TestNet")
 
@@ -146,6 +156,7 @@ def test_latex_backend_compile():
 
 
 def test_latex_backend_compile_no_name():
+  """Auto-generated doc."""
   backend = LatexBackend()
   g = LogicalGraph()
   g.nodes = [LogicalNode("in", "Input")]
@@ -154,6 +165,7 @@ def test_latex_backend_compile_no_name():
 
 
 def test_latex_backend_transcode_graph_no_input_output():
+  """Auto-generated doc."""
   backend = LatexBackend()
   g = LogicalGraph()
   g.nodes = [LogicalNode("a", "OpA"), LogicalNode("b", "OpB")]
@@ -164,6 +176,7 @@ def test_latex_backend_transcode_graph_no_input_output():
 
 
 def test_latex_backend_transcode_graph_func_memory():
+  """Auto-generated doc."""
   backend = LatexBackend()
   g = LogicalGraph()
   g.nodes = [LogicalNode("func_a", "OpA"), LogicalNode("a", "OpA")]
@@ -173,6 +186,7 @@ def test_latex_backend_transcode_graph_func_memory():
 
 
 def test_mlir_backend_compile():
+  """Auto-generated doc."""
   backend = MlirBackend()
   g = LogicalGraph()
   g.nodes = [
@@ -191,6 +205,7 @@ def test_mlir_backend_compile():
 
 
 def test_stablehlo_backend_compile():
+  """Auto-generated doc."""
   backend = StableHloBackend()
   g = LogicalGraph()
   g.nodes = [LogicalNode("in", "Input"), LogicalNode("op", "math.Add"), LogicalNode("out", "Output")]
@@ -201,7 +216,8 @@ def test_stablehlo_backend_compile():
 
 
 def test_latex_dsl_backend_unranked_node():
-  from ml_switcheroo.compiler.backends.extras import TikzBackend as LatexBackend
+  """Auto-generated doc."""
+  from ml_switcheroo.core.compiler.backends import TikzBackend as LatexBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
   from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -217,7 +233,8 @@ def test_latex_dsl_backend_unranked_node():
 
 
 def test_latex_backend_visited_ops():
-  from ml_switcheroo.compiler.backends.extras import LatexBackend
+  """Auto-generated doc."""
+  from ml_switcheroo.core.compiler.backends import LatexBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
   from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -241,7 +258,7 @@ def test_latex_backend_visited_ops():
   assert "Add" in code2
 
   # Test HtmlBackend for dot handling
-  from ml_switcheroo.compiler.backends.extras import HtmlBackend
+  from ml_switcheroo.core.compiler.backends import HtmlBackend
 
   backend3 = HtmlBackend(SemanticsManager())
   code3 = backend3.compile(graph2)
@@ -249,7 +266,8 @@ def test_latex_backend_visited_ops():
 
 
 def test_html_backend_visited_ops():
-  from ml_switcheroo.compiler.backends.extras import HtmlBackend
+  """Auto-generated doc."""
+  from ml_switcheroo.core.compiler.backends import HtmlBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
   from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -277,7 +295,7 @@ def test_html_backend_visited_ops():
   assert "Add" in code2
 
   # Test HtmlBackend for dot handling
-  from ml_switcheroo.compiler.backends.extras import HtmlBackend
+  from ml_switcheroo.core.compiler.backends import HtmlBackend
 
   backend3 = HtmlBackend(SemanticsManager())
   code3 = backend3.compile(graph2)

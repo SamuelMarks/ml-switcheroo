@@ -1,0 +1,8 @@
+description: An approximation to Gaussian Error Linear Unit (Tanh based).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: GeluApprox

@@ -1,0 +1,285 @@
+$defs:
+  FrameworkAlias:
+    description: Configuration for global module aliasing.
+    properties:
+      module:
+        title: Module
+        type: string
+      name:
+        title: Name
+        type: string
+    required:
+    - module
+    - name
+    title: FrameworkAlias
+    type: object
+  FrameworkTraits:
+    additionalProperties: true
+    description: Configuration for a framework's structural behavior.
+    properties:
+      alias:
+        anyOf:
+        - $ref: '#/$defs/FrameworkAlias'
+        - type: 'null'
+        default: null
+        description: Default import alias configuration.
+      extends:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        description: Base framework to inherit variants from (e.g. paxml extends jax).
+        title: Extends
+      plugin_traits:
+        anyOf:
+        - $ref: '#/$defs/PluginTraits'
+        - type: 'null'
+        description: Configuration logic flags for plugins.
+      stateful_call:
+        anyOf:
+        - additionalProperties:
+            type: string
+          type: object
+        - type: 'null'
+        default: null
+        description: Configuration for stateful calling conventions.
+        title: Stateful Call
+      tiers:
+        anyOf:
+        - items:
+            $ref: '#/$defs/SemanticTier'
+          type: array
+        - type: 'null'
+        default: null
+        description: List of Semantic Tiers (array, neural, extras) this framework
+          supports.
+        title: Tiers
+      traits:
+        anyOf:
+        - $ref: '#/$defs/StructuralTraits'
+        - type: 'null'
+        description: Configuration for AST structural rewriting.
+    title: FrameworkTraits
+    type: object
+  PatternDef:
+    description: Definition of a subgraph pattern for Graph Fusion.
+    properties:
+      allow_partial:
+        default: false
+        description: If True, matches prefixes of sequence (not implemented yet).
+        title: Allow Partial
+        type: boolean
+      name:
+        description: Name of the pattern (e.g., 'ConvBNReLU').
+        title: Name
+        type: string
+      replace_with:
+        description: The target Operation Kind to substitute (e.g. 'FusedConvBlock').
+        title: Replace With
+        type: string
+      sequence:
+        description: Ordered list of Operation Kinds (e.g. ['Conv2d', 'BatchNorm',
+          'ReLU']).
+        items:
+          type: string
+        title: Sequence
+        type: array
+    required:
+    - name
+    - sequence
+    - replace_with
+    title: PatternDef
+    type: object
+  PluginTraits:
+    additionalProperties: true
+    description: Defines capability flags for a framework to guide plugin logic.
+    properties:
+      enforce_purity_analysis:
+        default: false
+        description: If True, the Engine runs PurityScanner to detect side-effects
+          (globals, IO) before transpilation.
+        title: Enforce Purity Analysis
+        type: boolean
+      has_numpy_compatible_arrays:
+        default: false
+        description: If True, supports .astype(), numpy-style padding, and array properties.
+        title: Has Numpy Compatible Arrays
+        type: boolean
+      requires_explicit_rng:
+        default: false
+        description: If True, stochastic operations require threaded PRNG keys (JAX-style).
+        title: Requires Explicit Rng
+        type: boolean
+      requires_functional_control_flow:
+        default: false
+        description: If True, standard Python loops are unsafe for JIT/Graph mode.
+        title: Requires Functional Control Flow
+        type: boolean
+      requires_functional_state:
+        default: false
+        description: If True, stateful layers (BN/Optimizers) return updated state
+          explicitly.
+        title: Requires Functional State
+        type: boolean
+      strict_materialization_method:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        description: Method name to force materialization in strict mode (e.g. 'block_until_ready').
+        title: Strict Materialization Method
+    title: PluginTraits
+    type: object
+  SemanticTier:
+    description: Categorization of API operations to distinct knowledge base tiers.
+    enum:
+    - array
+    - neural
+    - neural_ops
+    - extras
+    - loss
+    - optimizer
+    - layer
+    - activation
+    - metric
+    - util
+    - scheduler
+    - model
+    - initializer
+    - dataloader
+    title: SemanticTier
+    type: string
+  StructuralTraits:
+    additionalProperties: true
+    description: Defines structural patterns for a framework to guide generic rewriters.
+    properties:
+      auto_strip_magic_args:
+        default: false
+        description: If True, automatically strips all magic arguments (built from
+          the global registry) not used by this framework.
+        title: Auto Strip Magic Args
+        type: boolean
+      forward_method:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        description: Standard method name for forward pass.
+        title: Forward Method
+      functional_execution_method:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: apply
+        description: Method name used for functional execution (e.g. 'apply'). Rewriter
+          unwraps this pattern.
+        title: Functional Execution Method
+      implicit_method_roots:
+        description: List of fully qualified class names to try as prefixes for method
+          calls.
+        items:
+          type: string
+        title: Implicit Method Roots
+        type: array
+      impurity_methods:
+        description: List of method names considered side-effects.
+        items:
+          type: string
+        title: Impurity Methods
+        type: array
+      init_method_name:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: __init__
+        description: Name of the constructor (e.g. 'setup' for Pax).
+        title: Init Method Name
+      inject_magic_args:
+        description: List of (name, type) tuples to inject into signatures.
+        items:
+          maxItems: 2
+          minItems: 2
+          prefixItems:
+          - type: string
+          - anyOf:
+            - type: string
+            - type: 'null'
+          type: array
+        title: Inject Magic Args
+        type: array
+      jit_static_args:
+        description: Argument keywords that require static compilation.
+        items:
+          type: string
+        title: Jit Static Args
+        type: array
+      known_inference_methods:
+        default:
+        - call
+        - forward
+        - __call__
+        description: Set of method names recognized as model inference entry points.
+        items:
+          type: string
+        title: Known Inference Methods
+        type: array
+        uniqueItems: true
+      lifecycle_strip_methods:
+        description: List of method names to strip from chains (identity transform).
+        items:
+          type: string
+        title: Lifecycle Strip Methods
+        type: array
+      lifecycle_warn_methods:
+        description: List of method names to strip but trigger a warning.
+        items:
+          type: string
+        title: Lifecycle Warn Methods
+        type: array
+      module_base:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+        description: Base class API for neural modules.
+        title: Module Base
+      requires_super_init:
+        default: false
+        description: If True, injects super().__init__() in constructors.
+        title: Requires Super Init
+        type: boolean
+      strip_magic_args:
+        description: Explicit list of argument names to remove from signatures.
+        items:
+          type: string
+        title: Strip Magic Args
+        type: array
+    title: StructuralTraits
+    type: object
+additionalProperties: true
+description: Schema representing an entire semantics JSON file.
+properties:
+  __frameworks__:
+    anyOf:
+    - additionalProperties:
+        $ref: '#/$defs/FrameworkTraits'
+      type: object
+    - type: 'null'
+    default: null
+    title: Frameworks
+  __imports__:
+    anyOf:
+    - additionalProperties: true
+      type: object
+    - type: 'null'
+    default: null
+    title: Imports
+  __patterns__:
+    anyOf:
+    - items:
+        $ref: '#/$defs/PatternDef'
+      type: array
+    - type: 'null'
+    title: Patterns
+title: SemanticsFile
+type: object

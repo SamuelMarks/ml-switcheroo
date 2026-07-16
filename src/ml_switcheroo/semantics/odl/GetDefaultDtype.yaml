@@ -1,0 +1,4 @@
+description: Get the current default floating point dtype.
+std_args: []
+variants: {}
+operation: GetDefaultDtype

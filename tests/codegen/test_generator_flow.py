@@ -1,5 +1,4 @@
-"""
-Tests for Variable Backend Test Generation.
+"""Tests for Variable Backend Test Generation.
 
 Verifies:
 1.  Generator handles 'torch' and 'jax' correctly (standard case).
@@ -17,8 +16,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def mock_mgr():
-  """
-  Provides a SemanticsManager with pre-loaded templates for all frameworks
+  """Provides a SemanticsManager with pre-loaded templates for all frameworks
   used in these tests. This ensures tests run independently of the filesystem/bootstrap state.
   """
   mgr = MagicMock(spec=SemanticsManager)
@@ -55,9 +53,7 @@ def mock_mgr():
 
 
 def test_generation_runtime_import(tmp_path, mock_mgr):
-  """
-  Verify `from .runtime import *` is generated.
-  """
+  """Verify `from .runtime import *` is generated."""
   semantics = {"add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}}
 
   out_file = tmp_path / "test_structure.py"
@@ -75,8 +71,8 @@ def test_generation_safety(tmp_path, mock_mgr):
 
   # 2. Setup existing file with a manual test
   out_file = tmp_path / "test_generated.py"
-  out_file.write_text(""" 
-def test_gen_abs(): 
+  out_file.write_text("""
+def test_gen_abs():
     # Manual override
     assert True
 """)
@@ -93,8 +89,7 @@ def test_gen_abs():
 
 
 def test_generation_multi_backend(tmp_path, mock_mgr):
-  """
-  Scenario: Semantics includes Torch, JAX, and TensorFlow.
+  """Scenario: Semantics includes Torch, JAX, and TensorFlow.
   Expect: Generated code contains execution blocks for all three.
   """
   # 1. Mock Semantics
@@ -122,8 +117,7 @@ def test_generation_multi_backend(tmp_path, mock_mgr):
 
 
 def test_excludes_single_variant(tmp_path, mock_mgr):
-  """
-  Scenario: Operation only defined for Torch.
+  """Scenario: Operation only defined for Torch.
   Expect: No test generated (cannot compare).
   """
   semantics = {"unique_op": {"variants": {"torch": {"api": "torch.unique_thing"}}}}
@@ -139,9 +133,7 @@ def test_excludes_single_variant(tmp_path, mock_mgr):
 
 
 def test_generation_unary_vs_binary(tmp_path, mock_mgr):
-  """
-  Verify argument count logic.
-  """
+  """Verify argument count logic."""
   semantics = {
     "neg": {
       "std_args": ["x"],  # Unary

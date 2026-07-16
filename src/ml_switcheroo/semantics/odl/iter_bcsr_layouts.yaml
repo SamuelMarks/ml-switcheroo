@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- shape
+- min_n_batch
+type: function
+operation: iter_bcsr_layouts

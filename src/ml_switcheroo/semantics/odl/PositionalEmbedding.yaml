@@ -1,0 +1,13 @@
+description: Generates position embedding for a given 1-d sequence.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: embedding_dims
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: max_timescale
+  type: int
+variants: {}
+operation: PositionalEmbedding

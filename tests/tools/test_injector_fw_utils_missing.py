@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_injector_fw_utils_missing():
+  """Auto-generated doc."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import (
     get_import_root,
@@ -26,12 +30,15 @@ def test_injector_fw_utils_missing():
     assert isinstance(convert_to_cst_literal("something"), cst.SimpleString)
 
   class UnrecognizedObject:
+    """Auto-generated doc."""
+
     pass
 
   assert isinstance(convert_to_cst_literal(UnrecognizedObject()), cst.SimpleString)
 
 
 def test_injector_fw_utils_convert_complex():
+  """Auto-generated doc."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
 
@@ -47,6 +54,7 @@ def test_injector_fw_utils_convert_complex():
 
 
 def test_injector_fw_utils_get_import_root_name():
+  """Auto-generated doc."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import get_import_root, is_docstring
 
@@ -56,6 +64,7 @@ def test_injector_fw_utils_get_import_root_name():
 
 
 def test_injector_fw_utils_is_future_import():
+  """Auto-generated doc."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import is_future_import
 
@@ -70,6 +79,7 @@ def test_injector_fw_utils_is_future_import():
 
 
 def test_injector_fw_utils_get_import_root_attr():
+  """Auto-generated doc."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import get_import_root, is_docstring
 
@@ -79,6 +89,7 @@ def test_injector_fw_utils_get_import_root_attr():
 
 
 def test_injector_fw_utils_convert_negative():
+  """Auto-generated doc."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
 

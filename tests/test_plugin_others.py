@@ -1,8 +1,11 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 
 
 def test_plugin_others():
+  """Auto-generated doc."""
   from ml_switcheroo.plugins.device_allocator import _parse_device_args
 
   # 56-58, 63-64: kwargs
@@ -57,6 +60,7 @@ def test_plugin_others():
 
 
 def get_dummy_ctx(target_fw="torch", current_op_id="dummy", sharding_supported=False):
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.target_fw = target_fw
   ctx.current_op_id = current_op_id

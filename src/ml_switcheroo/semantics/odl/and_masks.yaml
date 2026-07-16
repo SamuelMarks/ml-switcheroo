@@ -1,0 +1,5 @@
+description: Returns a mask_mod that's the intersection of provided mask_mods
+std_args:
+- mask_mods
+type: function
+operation: and_masks

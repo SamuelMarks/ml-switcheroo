@@ -1,0 +1,8 @@
+description: Nonblocking alias of load, return an awaitable future with a pytree stub.
+std_args:
+- directory
+- shardings
+- mask
+- ts_specs
+type: function
+operation: nonblocking_load

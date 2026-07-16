@@ -410,6 +410,7 @@ def test_normalize_arguments_inject_and_kwargs_map():
 
 
 def test_api_convert_indented_block_no_op():
+  """Auto-generated doc."""
   from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
   from ml_switcheroo.core.rewriter.context import RewriterContext
   import libcst as cst

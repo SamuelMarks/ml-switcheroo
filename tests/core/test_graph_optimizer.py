@@ -1,6 +1,4 @@
-"""
-Tests for GraphOptimizer Feature via LogicalGraph.
-"""
+"""Tests for GraphOptimizer Feature via LogicalGraph."""
 
 import pytest
 from ml_switcheroo.core.graph_optimizer import GraphOptimizer

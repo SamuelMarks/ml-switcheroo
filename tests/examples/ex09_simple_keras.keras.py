@@ -5,8 +5,7 @@ from keras import layers, ops
 
 
 def build_model(input_shape, num_classes):
-  """
-  Keras Functional API Model.
+  """Keras Functional API Model.
   Source: Keras Examples.
   """
   inputs = keras.Input(shape=input_shape)

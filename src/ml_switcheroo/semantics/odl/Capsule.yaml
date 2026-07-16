@@ -1,0 +1,5 @@
+description: JIT Capsule.
+op_type: class
+std_args: []
+variants: {}
+operation: Capsule

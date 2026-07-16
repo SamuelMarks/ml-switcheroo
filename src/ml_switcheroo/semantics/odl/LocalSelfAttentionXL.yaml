@@ -1,0 +1,5 @@
+description: Local version of transformer-xl self attention.
+op_type: class
+std_args: []
+variants: {}
+operation: LocalSelfAttentionXL

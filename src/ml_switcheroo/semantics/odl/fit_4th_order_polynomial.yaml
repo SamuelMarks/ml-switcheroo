@@ -1,0 +1,10 @@
+description: The class representing a Python function.
+std_args:
+- y0
+- y1
+- y_mid
+- dy0
+- dy1
+- dt
+type: function
+operation: fit_4th_order_polynomial

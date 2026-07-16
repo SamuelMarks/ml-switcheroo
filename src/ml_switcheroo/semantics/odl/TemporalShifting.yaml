@@ -1,0 +1,20 @@
+description: Shifts audio signals by a random amount during training.
+op_type: class
+std_args:
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: shift_range_ms
+  type: float
+- default: 16000.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: sample_rate
+  type: float
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: TemporalShifting

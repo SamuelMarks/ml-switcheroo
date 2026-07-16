@@ -1,0 +1,13 @@
+description: Combine attention masks using logical AND.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: masks
+  type: Array
+- default: float32
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Dtype
+variants: {}
+operation: CombineMasks

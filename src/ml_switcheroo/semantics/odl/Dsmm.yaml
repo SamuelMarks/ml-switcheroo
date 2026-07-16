@@ -1,0 +1,13 @@
+description: Performs a matrix multiplication of the sparse matrix input and the dense
+  matrix mat2.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mat2
+  type: Tensor
+variants: {}
+operation: Dsmm

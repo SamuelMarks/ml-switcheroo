@@ -204,7 +204,7 @@ variants:
   mlx:
     api: "mlx.nn.step"
   torch:
-    # torch.heaviside uses (input, values), not threshold. 
+    # torch.heaviside uses (input, values), not threshold.
     # Use generic conditional macro
     macro_template: "torch.where({x} >= {threshold}, 1.0, 0.0)"
   jax:
@@ -258,7 +258,7 @@ variants:
     # Requires plugin for complex model handling
     requires_plugin: "torch_functional_grad"
   jax:
-    # JAX operates on functions, not models directly. 
+    # JAX operates on functions, not models directly.
     # Requires complex plugin to bind model parameters to function args.
     requires_plugin: "jax_value_and_grad_wrapper"
   flax_nnx:

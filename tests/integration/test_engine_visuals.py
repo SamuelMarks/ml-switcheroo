@@ -1,5 +1,4 @@
-"""
-Integration Tests for Engine Visuals.
+"""Integration Tests for Engine Visuals.
 
 Verifies that the ASTEngine populates the trace event with a valid
 Mermaid graph string using the MermaidGenerator.
@@ -11,8 +10,7 @@ from ml_switcheroo.core.tracer import TraceEventType
 
 
 def test_engine_emits_valid_mermaid():
-  """
-  Scenario: Run simple conversion.
+  """Scenario: Run simple conversion.
   Expectation: Trace events of type AST_SNAPSHOT contain 'mermaid' field starting with 'graph TD'.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="jax")

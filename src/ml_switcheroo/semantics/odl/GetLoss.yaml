@@ -1,0 +1,8 @@
+description: Retrieves a Keras loss as a function/Loss class instance.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: identifier
+  type: Union[str, dict]
+variants: {}
+operation: getloss

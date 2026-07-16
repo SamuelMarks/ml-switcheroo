@@ -1,6 +1,4 @@
-"""
-Tests for InitializationTracker.
-"""
+"""Tests for InitializationTracker."""
 
 import libcst as cst
 from ml_switcheroo.analysis.lifecycle import InitializationTracker
@@ -16,12 +14,12 @@ def scan_code(code: str) -> list[str]:
 
 def test_valid_init_usage():
   """Test case for test_valid_init_usage."""
-  code = """ 
-class Model: 
-    def __init__(self): 
+  code = """
+class Model:
+    def __init__(self):
         self.conv = 1
-    def forward(self, x): 
-        return self.conv(x) 
+    def forward(self, x):
+        return self.conv(x)
 """
   warnings = scan_code(code)
   assert not warnings
@@ -29,12 +27,12 @@ class Model:
 
 def test_missing_init():
   """Test case for test_missing_init."""
-  code = """ 
-class Model: 
-    def __init__(self): 
+  code = """
+class Model:
+    def __init__(self):
         pass
-    def forward(self, x): 
-        return self.conv(x) 
+    def forward(self, x):
+        return self.conv(x)
 """
   warnings = scan_code(code)
   assert len(warnings) == 1
@@ -44,11 +42,11 @@ class Model:
 
 def test_call_alias():
   """Test case for test_call_alias."""
-  code = """ 
-class Model: 
-    def __init__(self): 
+  code = """
+class Model:
+    def __init__(self):
         pass
-    def __call__(self, x): 
+    def __call__(self, x):
         return self.missing
 """
   warnings = scan_code(code)
@@ -58,11 +56,11 @@ class Model:
 
 def test_multiple_missing():
   """Test case for test_multiple_missing."""
-  code = """ 
-class Model: 
-    def __init__(self): 
+  code = """
+class Model:
+    def __init__(self):
         self.ok = 1
-    def forward(self): 
+    def forward(self):
         return self.ok + self.missing1 + self.missing2
 """
   warnings = scan_code(code)
@@ -73,11 +71,11 @@ class Model:
 
 def test_annotated_assignment():
   """Test case for test_annotated_assignment."""
-  code = """ 
-class Model: 
-    def __init__(self): 
+  code = """
+class Model:
+    def __init__(self):
         self.x: int = 1
-    def forward(self): 
+    def forward(self):
         return self.x
 """
   warnings = scan_code(code)
@@ -86,11 +84,11 @@ class Model:
 
 def test_tuple_unpacking_assignment():
   """Test case for test_tuple_unpacking_assignment."""
-  code = """ 
-class Model: 
-    def __init__(self): 
+  code = """
+class Model:
+    def __init__(self):
         self.x, self.y = 1, 2
-    def forward(self): 
+    def forward(self):
         return self.x + self.y
 """
   warnings = scan_code(code)
@@ -99,18 +97,18 @@ class Model:
 
 def test_nested_classes():
   """Test case for test_nested_classes."""
-  code = """ 
-class Outer: 
-    def __init__(self): 
+  code = """
+class Outer:
+    def __init__(self):
         self.outer_val = 1
-    
-    class Inner: 
-        def __init__(self): 
+
+    class Inner:
+        def __init__(self):
             pass
-        def forward(self): 
+        def forward(self):
             return self.inner_missing  # Missing in Inner
 
-    def forward(self): 
+    def forward(self):
         return self.outer_val
 """
   warnings = scan_code(code)
@@ -122,17 +120,16 @@ class Outer:
 
 
 def test_ignore_assignments_in_forward():
-  """
-  Even if assigned in forward, it should technically be in init for static guarantees.
+  """Even if assigned in forward, it should technically be in init for static guarantees.
   But specifically, we track assignments in __init__.
   If assigned in forward AND used in forward, it's missed by __init__ scan,
   so it should warn (as dynamic definition).
   """
-  code = """ 
-class Model: 
-    def __init__(self): 
+  code = """
+class Model:
+    def __init__(self):
         pass
-    def forward(self): 
+    def forward(self):
         self.dynamic = 1
         return self.dynamic
 """
@@ -143,8 +140,7 @@ class Model:
 
 
 def test_module_level_constructs():
-  """
-  Scenario: Functions, assignments, and attributes exist outside a class.
+  """Scenario: Functions, assignments, and attributes exist outside a class.
   Expectation: Scope stack is empty. Lifecycle analysis safely ignores them.
   """
   code = """
@@ -164,5 +160,25 @@ z = self.x
 
 
 def test_defensive_leave_classdef():
+  """Auto-generated doc."""
   tracker = InitializationTracker()
   tracker.leave_ClassDef(None)
+
+
+def test_other_branches():
+  """Hits remaining missing branches."""
+  code = """
+class Model:
+    def __init__(self):
+        x = 1
+        self.ok = 1
+
+    def other_method(self):
+        self.dynamic: int = 1
+
+    def forward(self, input_tensor):
+        shape = input_tensor.shape
+        return self.ok
+"""
+  warnings = scan_code(code)
+  assert not warnings

@@ -1,0 +1,7 @@
+description: A fragmented array where all the values are equal represented as a register
+  per thread.
+std_args:
+- self
+- shape
+type: class
+operation: WGSplatFragLayout

@@ -1,0 +1,13 @@
+description: Creates a BlockMask instance from key-value block information.
+std_args:
+- cls
+- kv_num_blocks
+- kv_indices
+- full_kv_num_blocks
+- full_kv_indices
+- BLOCK_SIZE
+- mask_mod
+- seq_lengths
+- compute_q_blocks
+type: function
+operation: from_kv_blocks

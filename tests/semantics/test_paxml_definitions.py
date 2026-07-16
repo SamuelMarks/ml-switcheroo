@@ -1,5 +1,4 @@
-"""
-Tests for PaxML (Praxis) Semantic Definitions.
+"""Tests for PaxML (Praxis) Semantic Definitions.
 
 Verifies that:
 1. The SemanticsManager correctly loads 'paxml' variants from `k_neural_net.json`.
@@ -18,9 +17,7 @@ def semantics():
 
 
 def test_linear_layer_paxml_mapping(semantics):
-  """
-  Verify 'Linear' maps to 'praxis.layers.Linear' and arguments are pivoted correctly.
-  """
+  """Verify 'Linear' maps to 'praxis.layers.Linear' and arguments are pivoted correctly."""
   defn = semantics.get_definition_by_id("Linear")
   # Note: If bootstrap deleted the files and they weren't restored, this might fail.
   # In that case, we can only skip or assert None if we want robust/isolated tests.
@@ -45,9 +42,7 @@ def test_linear_layer_paxml_mapping(semantics):
 
 
 def test_sequential_container_paxml_mapping(semantics):
-  """
-  Verify 'Sequential' maps to 'praxis.layers.Sequential'.
-  """
+  """Verify 'Sequential' maps to 'praxis.layers.Sequential'."""
   defn = semantics.get_definition_by_id("Sequential")
   if defn is None:
     pytest.skip("Sequential definition missing.")
@@ -60,9 +55,7 @@ def test_sequential_container_paxml_mapping(semantics):
 
 
 def test_relu_paxml_mapping(semantics):
-  """
-  Verify 'ReLU' maps to 'praxis.layers.ReLU'.
-  """
+  """Verify 'ReLU' maps to 'praxis.layers.ReLU'."""
   defn = semantics.get_definition_by_id("ReLU")
   if defn is None:
     pytest.skip("ReLU definition missing.")
@@ -75,8 +68,7 @@ def test_relu_paxml_mapping(semantics):
 
 
 def test_flatten_paxml_mapping(semantics):
-  """
-  Verify 'Flatten' maps to 'praxis.layers.Flatten'.
+  """Verify 'Flatten' maps to 'praxis.layers.Flatten'.
 
   Note: This test relies on 'ml_switcheroo sync paxml' having successfully
   identified 'praxis.layers.Flatten' using the updated FrameworkSyncer class-aware logic.

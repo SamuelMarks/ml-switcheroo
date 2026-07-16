@@ -1,0 +1,8 @@
+description: Internal bit packing.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Any
+variants: {}
+operation: Bits2x4

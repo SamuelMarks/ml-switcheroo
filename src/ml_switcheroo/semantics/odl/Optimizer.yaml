@@ -1,0 +1,4 @@
+description: Abstract optimizer base class.
+std_args: []
+type: function
+operation: Optimizer

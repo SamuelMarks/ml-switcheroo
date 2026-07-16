@@ -1,0 +1,21 @@
+description: Computes the sparse categorical crossentropy loss.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_true
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_pred
+  type: Tensor
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: from_logits
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ignore_class
+  type: int
+variants: {}
+operation: sparsecategoricalcrossentropy

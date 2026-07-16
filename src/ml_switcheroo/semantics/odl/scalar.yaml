@@ -1,0 +1,18 @@
+description: 'scalar(dtype, obj)
+
+
+  Return a new scalar array of the given type initialized with obj.
+
+
+  This function is meant mainly for pickle support. `dtype` must be a
+
+  valid data-type descriptor. If `dtype` corresponds to an object
+
+  descriptor, then `obj` can be any object, otherwise `obj` must be a
+
+  string. If `obj` is not given, it will be interpreted as None for object
+
+  type and as zeros for all other types.'
+std_args: []
+variants: {}
+operation: scalar

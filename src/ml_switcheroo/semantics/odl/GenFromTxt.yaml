@@ -1,0 +1,17 @@
+description: Load data from a text file, with missing values handled as specified.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: fname
+  type: str
+- default: float
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: type
+- is_variadic: false
+  kind: positional_or_keyword
+  name: delimiter
+  type: Optional[str]
+variants: {}
+operation: GenFromTxt

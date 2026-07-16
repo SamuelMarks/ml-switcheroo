@@ -1,13 +1,13 @@
 ml-switcheroo 🔄🦘
 ==================
 
-A Deterministic, Specification-Driven Transpiler for Deep Learning Frameworks. 
+A Deterministic, Specification-Driven Transpiler for Deep Learning Frameworks.
 
 ## Interactive Demo
 
-Try it right in your browser! The engine runs entirely client-side using WebAssembly. 
+Try it right in your browser! The engine runs entirely client-side using WebAssembly.
 
-```{switcheroo_demo} 
+```{switcheroo_demo}
 ```
 
 ```mermaid
@@ -31,7 +31,7 @@ flowchart TD
 %% Hardware: Navy (SASS) - Roboto Mono
     classDef asmNode fill: #20344b, stroke: #57caff, stroke-width: 2px, color: white, font-family: 'Roboto Mono Normal', font-size: 14px, rx: 2px, ry: 2px;
 
-%% --- 2. Subgraph Styling --- 
+%% --- 2. Subgraph Styling ---
 %% White backgrounds to ensure text readability + visual grouping
     classDef containerL0 fill: white, stroke: #ea4335, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
     classDef containerL1 fill: white, stroke: #4285f4, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
@@ -95,7 +95,7 @@ flowchart TD
     class LBottom containerHW;
 ```
 
-```{toctree} 
+```{toctree}
 :maxdepth: 2
 :caption: Documentation
 
@@ -108,7 +108,7 @@ INTERNALS
 IDEAS
 ```
 
-```{toctree} 
+```{toctree}
 :maxdepth: 3
 :caption: Reference
 

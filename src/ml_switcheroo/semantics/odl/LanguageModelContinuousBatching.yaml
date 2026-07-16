@@ -1,0 +1,5 @@
+description: Language model that uses continuous batching.
+op_type: class
+std_args: []
+variants: {}
+operation: LanguageModelContinuousBatching

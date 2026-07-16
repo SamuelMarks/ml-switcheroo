@@ -1,9 +1,7 @@
-"""
-Tests for Sharding Extraction Pass (Reverse Translation).
-"""
+"""Tests for Sharding Extraction Pass (Reverse Translation)."""
 
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.compiler.sharding_extractor import ShardingExtractionPass
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
 
 def test_sharding_extraction_pass():

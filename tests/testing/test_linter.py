@@ -1,5 +1,4 @@
-"""
-Tests for Structural Linter (Forbidden Artifact Detection).
+"""Tests for Structural Linter (Forbidden Artifact Detection).
 
 Verifies:
 1. Detection of residual imports.
@@ -51,8 +50,7 @@ def test_linter_detects_from_import(linter):
 
 
 def test_linter_detects_aliased_usage(linter):
-  """
-  Scenario: 'import torch as t; t.abs()'.
+  """Scenario: 'import torch as t; t.abs()'.
   Verifies that usage of 't' triggers violation because 't' aliases 'torch'.
   """
   code = """
@@ -72,8 +70,7 @@ y = t.abs(x)
 
 
 def test_facade_flax_inheritance():
-  """
-  Verify that validate_transpilation bans Parent frameworks too.
+  """Verify that validate_transpilation bans Parent frameworks too.
   If source='flax_nnx' (inherits jax), output containing 'import jax' should fail.
   """
   # Mock Adapter structure
@@ -92,8 +89,7 @@ def test_facade_flax_inheritance():
 
 
 def test_facade_mlx_detection(tmp_path):
-  """
-  Verify detection of the user's specific MLX No-Op bug.
+  """Verify detection of the user's specific MLX No-Op bug.
   Code: import mlx.core as mx ... mx.abs(x)
   Target: JAX (Source: MLX)
   """

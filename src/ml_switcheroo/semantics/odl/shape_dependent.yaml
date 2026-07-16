@@ -1,0 +1,5 @@
+description: Combinator to delay layer constructor pair until input shapes are known.
+std_args:
+- make_layer
+type: function
+operation: shape_dependent

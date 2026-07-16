@@ -1,0 +1,8 @@
+description: Storage for quantized 2x4 int8 tensors.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: args
+  type: Any
+variants: {}
+operation: QUInt2x4Storage

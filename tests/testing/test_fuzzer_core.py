@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_fuzzer_core_coverage():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.core import InputFuzzer
 
   ig = InputFuzzer()
@@ -7,7 +11,10 @@ def test_fuzzer_core_coverage():
 
   # 103-104: conversion failure
   class FailingAdapter:
+    """Auto-generated doc."""
+
     def convert(self, x):
+      """Auto-generated doc."""
       raise ValueError("fail")
 
   with __import__("unittest.mock").mock.patch(

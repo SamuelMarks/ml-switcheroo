@@ -1,0 +1,42 @@
+description: General convolution over an input with several channels.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Tensor
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: stride
+  type: Union[int, Sequence[int]]
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: Union[int, Sequence[int]]
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_dilation
+  type: Union[int, Sequence[int]]
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: input_dilation
+  type: Union[int, Sequence[int]]
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: groups
+  type: int
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: flip
+  type: bool
+type: function
+operation: GeneralConv

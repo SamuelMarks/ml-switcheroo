@@ -1,0 +1,12 @@
+description: Adaptive stepsize (Dormand-Prince) Runge-Kutta odeint implementation.
+std_args:
+- func
+- y0
+- t
+- args
+- rtol
+- atol
+- mxstep
+- hmax
+type: function
+operation: odeint

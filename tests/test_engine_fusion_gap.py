@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -6,6 +8,7 @@ import textwrap
 
 
 def test_engine_fusion_gap():
+  """Auto-generated doc."""
   code = textwrap.dedent("""
         import torch.nn as nn
         class Model(nn.Module):

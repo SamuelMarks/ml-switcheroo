@@ -1,0 +1,4 @@
+description: Auto-generated mapping for hinge_embedding_loss.
+std_args: []
+type: function
+operation: hinge_embedding_loss

@@ -1,5 +1,4 @@
-"""
-End-to-End Integration Tests for Complex SASS Kernel Generation.
+"""End-to-End Integration Tests for Complex SASS Kernel Generation.
 
 This test validates the "Macro Expansion" capabilities of the SASS backend.
 It inputs a full PyTorch Convolutional Neural Network definition matching the
@@ -42,8 +41,7 @@ class ConvNet(nn.Module):
 
 @pytest.fixture
 def sass_engine() -> ASTEngine:
-  """
-  Creates an ASTEngine configured for Torch -> SASS conversion.
+  """Creates an ASTEngine configured for Torch -> SASS conversion.
 
   Returns:
       ASTEngine: Configured engine instance.
@@ -57,8 +55,7 @@ def sass_engine() -> ASTEngine:
 
 
 def test_convnet_macro_expansion(sass_engine: ASTEngine) -> None:
-  """
-  Verifies that the ConvNet model compiles to expanded SASS assembly.
+  """Verifies that the ConvNet model compiles to expanded SASS assembly.
 
   Args:
       sass_engine (ASTEngine): The compilation engine.

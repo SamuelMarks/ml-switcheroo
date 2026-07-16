@@ -1,0 +1,16 @@
+description: Linear interpolation.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: end
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Tensor
+variants: {}
+operation: Lerp

@@ -1,0 +1,28 @@
+description: 'Auto-discovered via Consensus (Score: 2.0)'
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: lr
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: momentum
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: nesterov
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ns_steps
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight_decay
+  type: Any
+variants: {}
+operation: Muon

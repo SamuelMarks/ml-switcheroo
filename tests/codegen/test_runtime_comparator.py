@@ -1,5 +1,4 @@
-"""
-Tests for verify_results (Recursive Comparator).
+"""Tests for verify_results (Recursive Comparator).
 
 Ensures the runtime helper handles:
 1. Lists/Tuples recursion.

@@ -1,0 +1,8 @@
+description: Converts a tensor from an external library into a Tensor via DLPack.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ext_tensor
+  type: Any
+variants: {}
+operation: FromDlpack

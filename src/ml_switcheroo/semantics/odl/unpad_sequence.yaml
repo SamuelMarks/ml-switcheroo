@@ -1,0 +1,7 @@
+description: Unpad padded Tensor into a list of variable length Tensors.
+std_args:
+- padded_sequences
+- lengths
+- batch_first
+type: function
+operation: unpad_sequence

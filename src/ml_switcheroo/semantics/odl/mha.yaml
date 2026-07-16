@@ -1,0 +1,18 @@
+description: The class representing a Python function.
+std_args:
+- q
+- k
+- v
+- segment_ids
+- sm_scale
+- causal
+- block_sizes
+- backward_pass_impl
+- num_warps
+- num_stages
+- grid
+- interpret
+- debug
+- return_residuals
+type: function
+operation: mha

@@ -1,0 +1,8 @@
+description: 'Quantization utility: returns scale of a quantized tensor.'
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: QScale

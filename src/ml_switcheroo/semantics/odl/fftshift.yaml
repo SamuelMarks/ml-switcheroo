@@ -1,0 +1,12 @@
+description: Shifts the zero-frequency component to the center of the spectrum.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axes
+  type: Optional[Union[int, Sequence[int]]]
+type: function
+operation: fftshift

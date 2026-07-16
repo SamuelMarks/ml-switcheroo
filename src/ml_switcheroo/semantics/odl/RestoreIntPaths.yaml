@@ -1,0 +1,8 @@
+description: Restores integer keys in a state dictionary (often stringified by JSON).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: pure_dict
+  type: dict
+variants: {}
+operation: RestoreIntPaths

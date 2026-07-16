@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 from ml_switcheroo.plugins.state_flag_injection import _get_func_name, inject_training_flag_call, capture_eval_state
@@ -5,10 +7,12 @@ from ml_switcheroo.core.hooks import HookContext
 
 
 def test_get_func_name():
+  """Auto-generated doc."""
   assert _get_func_name(cst.Call(func=cst.SimpleString("'a'"))) is None
 
 
 def test_inject_training_flag_call():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
   ctx.metadata = {}
 
@@ -24,6 +28,7 @@ def test_inject_training_flag_call():
 
 
 def test_capture_eval_state():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
   ctx.metadata = {}
 

@@ -1,0 +1,8 @@
+description: Configuration flag for global dependencies.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Any
+variants: {}
+operation: UseGlobalDeps

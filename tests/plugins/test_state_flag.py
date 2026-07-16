@@ -1,5 +1,4 @@
-"""
-Tests for State Flag Injection Plugin (Eval/Train mode).
+"""Tests for State Flag Injection Plugin (Eval/Train mode).
 
 Verifies:
 1.  **State Capture**: `model.eval()` is stripped and state recorded in Context.

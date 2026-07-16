@@ -1,5 +1,4 @@
-"""
-Tests for JIT Compliance Generation (Feature 054).
+"""Tests for JIT Compliance Generation (Feature 054).
 
 Verifies:
 1. JAX blocks contain `jax.jit` ONLY if explicitly templated.
@@ -51,8 +50,7 @@ class MockTraitSemantics(SemanticsManager):
 
 
 def test_missing_template_skips_jit(tmp_path):
-  """
-  Scenario: Template has NO 'jit_template'.
+  """Scenario: Template has NO 'jit_template'.
   Expect: No JIT wrapping, just direct call. (Verifies Decoupling).
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
@@ -81,8 +79,7 @@ def test_missing_template_skips_jit(tmp_path):
 
 
 def test_standard_jit_template(tmp_path):
-  """
-  Scenario: Standard JAX template with {fn} and {static_argnums}.
+  """Scenario: Standard JAX template with {fn} and {static_argnums}.
   Expect: jax.jit(fn, static_argnums=None) for non-static calls.
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
@@ -106,8 +103,7 @@ def test_standard_jit_template(tmp_path):
 
 
 def test_custom_jit_template(tmp_path):
-  """
-  Scenario: Template provides "jit_template": "TinyJit.trace({fn})"
+  """Scenario: Template provides "jit_template": "TinyJit.trace({fn})"
   Expect: Generator uses the custom string.
   """
   semantics = {"add": {"std_args": ["x", "y"], "variants": {"tinygrad": {"api": "add"}, "torch": {"api": "add"}}}}
@@ -137,8 +133,7 @@ def test_custom_jit_template(tmp_path):
 
 
 def test_jit_static_argnums_detection(tmp_path):
-  """
-  Scenario: Operation has 'axis' argument (e.g. sum), matched against template.
+  """Scenario: Operation has 'axis' argument (e.g. sum), matched against template.
   Expect: jax.jit(fn, static_argnums=(1,))
   """
   semantics = {
@@ -164,8 +159,7 @@ def test_jit_static_argnums_detection(tmp_path):
 
 
 def test_custom_template_static_args_interpolation(tmp_path):
-  """
-  Scenario: Template uses {static_argnums} placeholder.
+  """Scenario: Template uses {static_argnums} placeholder.
   Expect: "custom_jit(fn, static=(1,))"
   """
   semantics = {
@@ -200,8 +194,7 @@ def test_custom_template_static_args_interpolation(tmp_path):
 
 
 def test_custom_template_static_args_missing(tmp_path):
-  """
-  Scenario: Template expects {static_argnums} but op has none.
+  """Scenario: Template expects {static_argnums} but op has none.
   Expect: Placeholder replaced with 'None'.
   """
   semantics = {
@@ -235,9 +228,7 @@ def test_custom_template_static_args_missing(tmp_path):
 
 
 def test_torch_block_no_jit(tmp_path):
-  """
-  Scenario: Verify Torch block remains clean (no jit templates defined).
-  """
+  """Scenario: Verify Torch block remains clean (no jit templates defined)."""
   semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
 
   mgr = MockTraitSemantics()
@@ -256,9 +247,7 @@ def test_torch_block_no_jit(tmp_path):
 
 
 def test_runtime_generation_includes_jit_modules(tmp_path):
-  """
-  Scenario: Generating code creates runtime.py which should include framework imports.
-  """
+  """Scenario: Generating code creates runtime.py which should include framework imports."""
   semantics = {
     "sum": {
       "variants": {"jax": {"api": "jnp.sum"}, "torch": {"api": "torch.sum"}},

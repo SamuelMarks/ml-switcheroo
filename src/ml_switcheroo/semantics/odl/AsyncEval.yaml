@@ -1,0 +1,8 @@
+description: Asynchronously evaluate an array or tree of arrays.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: tensors
+  type: Tensor
+variants: {}
+operation: AsyncEval

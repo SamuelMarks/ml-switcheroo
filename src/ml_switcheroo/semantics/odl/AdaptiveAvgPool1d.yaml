@@ -1,0 +1,13 @@
+description: Applies a 1D adaptive average pooling over an input signal.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  rank: 3
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: output_size
+  type: int
+type: class
+operation: AdaptiveAvgPool1d

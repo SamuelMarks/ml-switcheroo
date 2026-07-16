@@ -1,0 +1,12 @@
+description: Create nditers for use in nested loops.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: op
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axes
+  type: Any
+variants: {}
+operation: NestedIters

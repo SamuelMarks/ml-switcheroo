@@ -1,0 +1,18 @@
+description: In-place version of FeatureDropout.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- default: 0.5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: p
+  type: float
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: training
+  type: bool
+variants: {}
+operation: FeatureDropout_

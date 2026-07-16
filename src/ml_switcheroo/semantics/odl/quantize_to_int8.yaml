@@ -1,0 +1,5 @@
+description: Quantizes a float array to an int8 QuantizedTensor.
+std_args:
+- x
+type: function
+operation: quantize_to_int8

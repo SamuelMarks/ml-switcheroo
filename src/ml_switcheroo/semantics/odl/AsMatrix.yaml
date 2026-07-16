@@ -1,0 +1,8 @@
+description: Interpret the input as a matrix.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data
+  type: Any
+variants: {}
+operation: AsMatrix

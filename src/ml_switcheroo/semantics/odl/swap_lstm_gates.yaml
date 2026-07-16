@@ -1,0 +1,9 @@
+description: Swaps the weights for the input and output gates for an LSTM model.
+std_args:
+- weights
+- input_size
+- hidden_size
+- num_layers
+- bidirectional
+type: function
+operation: swap_lstm_gates

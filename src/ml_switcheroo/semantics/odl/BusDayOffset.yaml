@@ -1,0 +1,17 @@
+description: Applies an offset counted in valid days.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dates
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: offsets
+  type: Any
+- default: raise
+  is_variadic: false
+  kind: positional_or_keyword
+  name: roll
+  type: Any
+variants: {}
+operation: BusDayOffset

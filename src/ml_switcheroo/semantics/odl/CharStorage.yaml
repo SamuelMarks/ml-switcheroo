@@ -1,0 +1,5 @@
+description: Storage for Char (Int8) data.
+op_type: class
+std_args: []
+variants: {}
+operation: CharStorage

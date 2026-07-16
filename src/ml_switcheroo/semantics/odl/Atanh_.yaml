@@ -1,0 +1,9 @@
+description: In-place version of Atanh.
+is_inplace: true
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: Atanh_

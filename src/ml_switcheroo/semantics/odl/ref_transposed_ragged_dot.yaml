@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- lhs
+- rhs
+- group_sizes
+type: function
+operation: ref_transposed_ragged_dot

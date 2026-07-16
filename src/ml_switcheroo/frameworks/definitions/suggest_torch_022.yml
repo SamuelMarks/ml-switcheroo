@@ -288,7 +288,7 @@ variants:
   mlx:
     api: "mlx.random.categorical"
     args:
-      input: "logits" 
+      input: "logits"
 
 ---
 operation: "Multiply"
@@ -344,16 +344,16 @@ variants:
   jax:
     api: "jax.scipy.special.multigammaln"
     args:
-      input: "a" 
+      input: "a"
   tensorflow:
     api: "tf.math.mvlgamma"
     args:
-      input: "x" 
+      input: "x"
   numpy:
     api: "scipy.special.multigammaln"
-    required_imports: ["import scipy.special"] 
+    required_imports: ["import scipy.special"]
     args:
-      input: "a" 
+      input: "a"
 
 ---
 operation: "Nan"
@@ -370,7 +370,7 @@ variants:
     api: "jax.numpy.nan"
     op_type: "attribute"
   mlx:
-    macro_template: "float('nan')" 
+    macro_template: "float('nan')"
   numpy:
     api: "numpy.nan"
     op_type: "attribute"
@@ -414,8 +414,8 @@ variants:
   torch:
     api: "torch.nan_to_num_"
   jax:
-    api: "jax.numpy.nan_to_num" 
-    # Engine will unroll x.nan_to_num_() -> x = jnp.nan_to_num(x) 
+    api: "jax.numpy.nan_to_num"
+    # Engine will unroll x.nan_to_num_() -> x = jnp.nan_to_num(x)
 
 ---
 operation: "NanMean"
@@ -539,7 +539,7 @@ variants:
         length: "slice_size"
   mlx:
     # Macro for slicing syntax x.narrow(d, s, l) -> manually construct slice?
-    # MLX has slicing. Requires plugin to generate x[...] 
+    # MLX has slicing. Requires plugin to generate x[...]
     requires_plugin: "slice_generator"
   numpy:
     requires_plugin: "slice_generator"
@@ -684,5 +684,5 @@ variants:
   keras:
     api: "keras.ops.layer_norm"
     args:
-        input: "x" 
+        input: "x"
         normalized_shape: "axis" # Keras takes axis, Torch takes shape

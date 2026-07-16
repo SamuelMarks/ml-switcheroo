@@ -1,0 +1,12 @@
+description: Format a floating-point scalar as a decimal string in scientific notation.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: precision
+  type: int
+variants: {}
+operation: FormatFloatScientific

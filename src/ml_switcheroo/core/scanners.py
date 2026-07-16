@@ -35,7 +35,7 @@ def get_full_name(node: Union[cst.Name, cst.Attribute]) -> str:
   if isinstance(node, cst.Name):
     return node.value
   elif isinstance(node, cst.Attribute):
-    return f"{get_full_name(node.value)}.{node.attr.value}"
+    return f"{get_full_name(node.value)}.{node.attr.value}"  # type: ignore
   return ""
 
 
@@ -160,7 +160,7 @@ class UsageScanner(cst.CSTVisitor):
       if base_name == self.source_fw or base_name.startswith(f"{self.source_fw}."):
         # Determine the bound name in local scope
         if alias.asname:
-          bound_name = alias.asname.name.value
+          bound_name = alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else ""
         else:
           # For `import torch.nn`, the bound name is the top-level 'torch'
           # For `import torch`, the bound name is 'torch'
@@ -191,12 +191,12 @@ class UsageScanner(cst.CSTVisitor):
 
     # Check relevancy
     if module_name == self.source_fw or module_name.startswith(f"{self.source_fw}."):
-      for alias in node.names:
+      for alias in node.names:  # type: ignore
         if isinstance(alias, cst.ImportAlias):
           if alias.asname:
-            bound_name = alias.asname.name.value
+            bound_name = alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else ""
           else:
-            bound_name = alias.name.value
+            bound_name = alias.name.value if isinstance(alias.name, cst.Name) else ""
           self._tracked_aliases.add(bound_name)
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:

@@ -1,0 +1,5 @@
+description: Pseudo-random number generator state.
+op_type: class
+std_args: []
+variants: {}
+operation: Generator

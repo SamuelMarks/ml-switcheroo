@@ -1,0 +1,4 @@
+description: Auto-generated mapping for fractional_max_pool2d_with_indices.
+std_args: []
+type: function
+operation: fractional_max_pool2d_with_indices

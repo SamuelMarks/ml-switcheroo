@@ -1,0 +1,27 @@
+description: Creates a criterion that measures the loss given input tensors x1, x2
+  and a Tensor label y.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input1
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input2
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: target
+  type: Tensor
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: margin
+  type: float
+- default: mean
+  is_variadic: false
+  kind: positional_or_keyword
+  name: reduction
+  type: str
+type: class
+operation: CosineEmbeddingLoss

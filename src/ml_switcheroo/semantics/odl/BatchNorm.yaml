@@ -1,0 +1,39 @@
+description: Applies Batch Normalization to the input.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: running_mean
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: running_var
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: Tensor
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: training
+  type: bool
+- default: 0.1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: momentum
+  type: float
+- default: 1e-5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: float
+type: function
+operation: BatchNorm

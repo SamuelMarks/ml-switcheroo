@@ -1,0 +1,4 @@
+description: Returns True if eager sharding is currently enabled.
+std_args: []
+variants: {}
+operation: UsingEagerSharding

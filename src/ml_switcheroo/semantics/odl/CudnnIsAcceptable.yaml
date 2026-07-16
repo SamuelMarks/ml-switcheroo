@@ -1,0 +1,5 @@
+description: Check if tensor is acceptable for CuDNN.
+std_args:
+- tensor
+variants: {}
+operation: CudnnIsAcceptable

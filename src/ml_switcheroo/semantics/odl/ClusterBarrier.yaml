@@ -1,0 +1,8 @@
+description: The class representing a Python class.
+std_args:
+- self
+- collective_dims
+- arrival_count
+- num_barriers
+type: class
+operation: ClusterBarrier

@@ -1,9 +1,9 @@
 """Module docstring."""
 
 import pytest
-from ml_switcheroo.compiler.frontends.sass.tokens import SassLexer, TokenType
-from ml_switcheroo.compiler.frontends.sass.parser import SassParser
-from ml_switcheroo.compiler.frontends.sass.nodes import (
+from ml_switcheroo.core.compiler.frontends.sass.tokens import SassLexer, TokenType
+from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
+from ml_switcheroo.core.compiler.frontends.sass.nodes import (
   Instruction,
   Label,
   Directive,
@@ -59,12 +59,12 @@ def test_lexer_predicates_and_labels():
 
 def test_parser_basic_block_structure():
   """Function docstring."""
-  code = """ 
-    L_START: 
-        FADD R0, R1, R2; 
-        BRA L_END; 
-    L_END: 
-        EXIT; 
+  code = """
+    L_START:
+        FADD R0, R1, R2;
+        BRA L_END;
+    L_END:
+        EXIT;
     """
   parser = SassParser(code)
   nodes = parser.parse()
@@ -111,7 +111,7 @@ def test_parser_predicates():
 
 def test_parser_comments_preservation():
   """Function docstring."""
-  code = """ 
+  code = """
     // Init Loop
     MOV R0, RZ; // Clear Accumulator
     """

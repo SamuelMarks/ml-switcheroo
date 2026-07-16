@@ -1,0 +1,6 @@
+description: Creates a wrapper class that executes the given Python class methods
+  on the same devices as the arguments.
+std_args:
+- cls
+type: function
+operation: colocated_python_class

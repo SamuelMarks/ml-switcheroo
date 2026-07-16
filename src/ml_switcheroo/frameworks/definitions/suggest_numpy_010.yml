@@ -169,7 +169,7 @@ variants:
   keras:
     api: "keras.ops.transpose" # Keras generic transpose defaults to matrix behavior for 2D
   mlx:
-    api: "mlx.core.transpose" # Default swap last two for 2D? Needs args. 
+    api: "mlx.core.transpose" # Default swap last two for 2D? Needs args.
     args:
       x: "a"
     kwargs_map:
@@ -439,7 +439,7 @@ variants:
     # TF takes *args
   keras:
     api: "keras.ops.meshgrid"
-    # Keras takes list or *args? Usually *args or list. 
+    # Keras takes list or *args? Usually *args or list.
     pack_as: "List"
   mlx:
     api: "mlx.core.meshgrid"
@@ -451,7 +451,7 @@ variants:
 operation: "MGrid"
 description: "Returns a dense multi-dimensional 'meshgrid'."
 op_type: "attribute"
-std_args: [] 
+std_args: []
 variants:
   numpy:
     api: "numpy.mgrid"
@@ -634,7 +634,7 @@ variants:
   paxml:
     api: "jax.numpy.modf"
   torch:
-    # No direct tuple returning func. 
+    # No direct tuple returning func.
     macro_template: "(torch.frac({x}), torch.trunc({x}))"
   tensorflow:
     # TF doesn't have modf directly exposed in core math usually
@@ -768,12 +768,9 @@ variants:
   paxml:
     api: "jax.numpy.nan_to_num"
   tensorflow:
-    api: "tf.where(tf.math.is_nan({x}), {nan}, {x})" # TF nan_to_num exists but signature varies. Macro safer? 
-    # Use direct API if possible, assuming default args match
-    api: "tf.math.xdivy" # Wait, no. tf.math.nan_to_num exists but args differ slightly? 
     # Stick to explicit API mapping where possible
-    api: "numpy.nan_to_num" 
-    requires_plugin: "numpy_fallback" 
+    api: "tf.math.nan_to_num"
+    requires_plugin: "numpy_fallback"
   keras:
     api: "keras.ops.nan_to_num"
   mlx:
@@ -804,7 +801,7 @@ variants:
   paxml:
     api: "jax.numpy.nanargmax"
   tensorflow:
-    # TF doesn't have direct nanargmax. 
+    # TF doesn't have direct nanargmax.
     requires_plugin: "numpy_fallback"
   keras:
     requires_plugin: "numpy_fallback"

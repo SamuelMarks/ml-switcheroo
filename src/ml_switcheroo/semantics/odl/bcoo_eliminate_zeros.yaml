@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- mat
+- nse
+type: function
+operation: bcoo_eliminate_zeros

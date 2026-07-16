@@ -1,0 +1,5 @@
+description: Returns the number of elements (not accounting for sparsity) in the mask.
+std_args:
+- self
+type: function
+operation: numel

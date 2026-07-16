@@ -4,8 +4,7 @@ import torch.nn as nn
 
 
 class SimpleMLP(nn.Module):
-  """
-  A simple Multi-Layer Perceptron for PaxML conversion testing.
+  """A simple Multi-Layer Perceptron for PaxML conversion testing.
   Semantic pivot:
     - nn.Module -> praxis.base_layer.BaseLayer
     - __init__ -> setup

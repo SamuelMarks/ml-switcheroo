@@ -1,0 +1,4 @@
+description: Contains runtime masking information for the Splash attention kernel.
+std_args: []
+type: class
+operation: MaskInfo

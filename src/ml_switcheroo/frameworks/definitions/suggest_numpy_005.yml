@@ -289,14 +289,14 @@ variants:
     api: "jax.numpy.dot"
   torch:
     api: "torch.dot"
-    # Note: torch.dot is only 1D, differs from numpy for 2D. 
+    # Note: torch.dot is only 1D, differs from numpy for 2D.
     # Use dispatch rules or matmul based on rank if possible.
   mlx:
     api: "mlx.core.matmul" # Best approximation for modern usage
   keras:
     api: "keras.ops.matmul"
   tensorflow:
-    api: "tf.tensordot" 
+    api: "tf.tensordot"
     # Usually requires axis logic, might need macro in real use
 ---
 operation: "Double"
@@ -392,11 +392,11 @@ variants:
   torch:
     # No direct attribute in torch, requires macro
     api: "numpy.e" # Fallback to numpy constant often used
-    requires_imports: 
+    requires_imports:
       - "import numpy as np"
   mlx:
     api: "math.e"
-    requires_imports: 
+    requires_imports:
       - "import math"
 ---
 operation: "Ediff1d"

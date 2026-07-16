@@ -99,13 +99,13 @@ def generate_array(type_lbl: str, shape: Tuple[int, ...], constraints: Dict[str,
     return arr.astype(np.int32)
 
   # Float default
-  arr = np.random.randn(*shape)
+  arr = np.random.randn(*shape)  # type: ignore
 
   # Constraint Clipping logic
   if min_val is not None or max_val is not None:
     if min_val is not None and max_val is not None:
       # Uniform within bounds
-      arr = np.random.uniform(min_val, max_val, size=shape)
+      arr = np.random.uniform(min_val, max_val, size=shape)  # type: ignore
     else:
       # Clip standard normal
       safe_min = float(min_val) if min_val is not None else -np.inf
@@ -176,6 +176,6 @@ def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tupl
   return tuple(new_shape)
 
 
-def generate_fake_callable(constraints: Dict[str, Any] = None) -> Any:
+def generate_fake_callable(constraints: Dict[str, Any] = None) -> Any:  # type: ignore
   """Generates a dummy function (identity) for functional ops."""
   return lambda x, *args, **kwargs: x

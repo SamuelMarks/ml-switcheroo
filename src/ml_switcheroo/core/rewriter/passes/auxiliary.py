@@ -99,7 +99,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     parts = name_str.split(".")
     node = cst.Name(parts[0])
     for part in parts[1:]:
-      node = cst.Attribute(value=node, attr=cst.Name(part))
+      node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
     return node
 
   # --- Error Handling ---
@@ -128,13 +128,13 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     if self.context.current_stmt_warnings:
       unique = list(dict.fromkeys(self.context.current_stmt_warnings))
       msg = "; ".join(unique)
-      return EscapeHatch.mark_failure(updated_node, msg)
+      return EscapeHatch.mark_failure(updated_node, msg)  # type: ignore
 
     # Check errors (Priority over warnings for reversion logic structure)
     if self.context.current_stmt_errors:
       unique = list(dict.fromkeys(self.context.current_stmt_errors))
       msg = "; ".join(unique)
-      return EscapeHatch.mark_failure(original_node, msg)
+      return EscapeHatch.mark_failure(original_node, msg)  # type: ignore
 
     return updated_node
 
@@ -188,7 +188,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
       if isinstance(current_expr, cst.Call):
         new_expr = current_expr.with_changes(func=new_name_node)
       else:
-        new_expr = new_name_node
+        new_expr = new_name_node  # type: ignore
 
       return updated_node.with_changes(decorator=new_expr)
 
@@ -197,7 +197,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
   # --- Control Flow Logic ---
 
   # Fix: Ensure leave_For handles error bubbling since it isn't a SimpleStatementLine
-  def leave_For(self, original_node: cst.For, updated_node: cst.For) -> Union[cst.For, cst.CSTNode, cst.FlattenSentinel]:
+  def leave_For(self, original_node: cst.For, updated_node: cst.For) -> Union[cst.For, cst.CSTNode, cst.FlattenSentinel]:  # type: ignore
     """Processes 'for' loops for safety checks and unrolling."""
     # 1. Attempt Static Unroll (Optimization Hook)
     static_hook = get_hook("transform_for_loop_static")

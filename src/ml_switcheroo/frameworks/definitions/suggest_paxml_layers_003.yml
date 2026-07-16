@@ -137,7 +137,7 @@ variants:
   mlx:
     api: "mlx.nn.ReLU"
   flax_nnx:
-    api: "nnx.relu" 
+    api: "nnx.relu"
 
 ---
 operation: "ReLU6"

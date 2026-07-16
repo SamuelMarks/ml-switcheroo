@@ -1,0 +1,6 @@
+description: Like TPUMPStrategy.experimental_split_to_logical_devices.
+std_args:
+- tensor
+- partition_dimensions
+type: function
+operation: split_to_logical_devices

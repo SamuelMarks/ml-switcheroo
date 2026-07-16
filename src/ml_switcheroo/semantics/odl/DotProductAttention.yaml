@@ -1,0 +1,34 @@
+description: Computes dot-product attention given query, key, and value.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: query
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: key
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: value
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mask
+  type: Any
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dropout_rate
+  type: float
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: is_causal
+  type: bool
+variants: {}
+operation: DotProductAttention

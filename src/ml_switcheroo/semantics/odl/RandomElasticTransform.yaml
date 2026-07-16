@@ -1,0 +1,5 @@
+description: A preprocessing layer that applies random elastic transformations.
+op_type: class
+std_args: []
+variants: {}
+operation: RandomElasticTransform

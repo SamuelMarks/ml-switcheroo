@@ -1,0 +1,12 @@
+description: Computes the bitwise OR of input and other.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: other
+  type: Any
+variants: {}
+operation: BitwiseOr

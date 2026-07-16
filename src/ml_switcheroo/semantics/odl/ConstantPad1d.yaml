@@ -1,0 +1,4 @@
+description: Auto-generated mapping for ConstantPad1d.
+std_args: []
+type: class
+operation: ConstantPad1d

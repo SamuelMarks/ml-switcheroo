@@ -1,6 +1,4 @@
-"""
-Integration test for Type Inference-driven rewriting.
-"""
+"""Integration test for Type Inference-driven rewriting."""
 
 import pytest
 import importlib
@@ -11,21 +9,20 @@ from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-SOURCE = """ 
+SOURCE = """
 import torch
 
-def process(): 
-    x = torch.randn(10) 
+def process():
+    x = torch.randn(10)
     # Implicit method call on inferred Tensor
-    y = x.view(5, 2) 
+    y = x.view(5, 2)
     return y
 """
 
 
 @pytest.fixture(autouse=True)
 def reload_required_plugins():
-  """
-  Reloads critical plugins to ensure hooks are registered in the global registry.
+  """Reloads critical plugins to ensure hooks are registered in the global registry.
   This prevents "Missing required plugin" errors caused by test suite isolation/clearing.
   """
   importlib.reload(ml_switcheroo.plugins.rng_threading)

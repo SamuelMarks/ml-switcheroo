@@ -1,0 +1,8 @@
+description: Returns a 3-dimensional view.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: tensors
+  type: Tensor
+variants: {}
+operation: Atleast3d

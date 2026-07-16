@@ -1,0 +1,20 @@
+description: Matrix multiplication with matrix-level gather.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: lhs_indices
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: rhs_indices
+  type: Tensor
+variants: {}
+operation: GatherMM

@@ -1,0 +1,16 @@
+description: Selects values from input at indices along the given dim.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: indices
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+variants: {}
+operation: TakeAlongDim

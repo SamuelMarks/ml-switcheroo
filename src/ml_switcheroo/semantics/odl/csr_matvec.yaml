@@ -1,0 +1,7 @@
+description: Product of CSR sparse matrix and a dense vector.
+std_args:
+- mat
+- v
+- transpose
+type: function
+operation: csr_matvec

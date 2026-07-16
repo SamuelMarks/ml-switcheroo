@@ -1,0 +1,12 @@
+description: The class representing a Python function.
+std_args:
+- f
+- mesh
+- in_specs
+- out_specs
+- pin_lhs_in_vmem
+- pin_rhs_in_vmem
+- vjp
+- print_jaxpr
+type: function
+operation: roofline

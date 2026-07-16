@@ -1,0 +1,16 @@
+description: Computes the confusion matrix from predictions and labels.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: labels
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: predictions
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_classes
+  type: int
+variants: {}
+operation: ConfusionMatrix

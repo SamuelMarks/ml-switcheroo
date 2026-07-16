@@ -1,0 +1,6 @@
+description: Prune (currently unpruned) units in a tensor at random.
+std_args:
+- self
+- amount
+type: class
+operation: RandomUnstructured

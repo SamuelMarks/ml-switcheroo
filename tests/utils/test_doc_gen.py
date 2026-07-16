@@ -1,5 +1,4 @@
-"""
-Tests for Migration Guide Generator.
+"""Tests for Migration Guide Generator.
 
 Verifies that:
 1. Markdown is generated with correct headers.
@@ -15,9 +14,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """
-  Mock Manager with deterministic data for documentation generation.
-  """
+  """Mock Manager with deterministic data for documentation generation."""
 
   def __init__(self):
     """Function docstring."""
@@ -90,9 +87,7 @@ def generator():
 
 
 def test_markdown_structure(generator):
-  """
-  Verify overall document structure (Headers, Intro).
-  """
+  """Verify overall document structure (Headers, Intro)."""
   md = generator.generate("torch", "jax")
 
   assert "# Migration Guide: Torch to Jax" in md
@@ -102,17 +97,14 @@ def test_markdown_structure(generator):
 
 
 def test_simple_match_row(generator):
-  """
-  Verify a simple 1:1 mapping produces a clean row.
-  """
+  """Verify a simple 1:1 mapping produces a clean row."""
   md = generator.generate("torch", "jax")
   # | `torch.abs` | `jax.numpy.abs` | - |
   assert "| `torch.abs` | `jax.numpy.abs` | - |" in md
 
 
 def test_argument_diff_logic(generator):
-  """
-  Verify argument renaming diffs are computed.
+  """Verify argument renaming diffs are computed.
   Std: x, axis
   Torch: input, dim
   JAX: a, axis
@@ -131,9 +123,7 @@ def test_argument_diff_logic(generator):
 
 
 def test_missing_target(generator):
-  """
-  Verify operations missing in target show up with '—'.
-  """
+  """Verify operations missing in target show up with '—'."""
   md = generator.generate("torch", "jax")
 
   # unique_op: Torch API exists, Jax API missing
@@ -142,18 +132,14 @@ def test_missing_target(generator):
 
 
 def test_plugin_annotation(generator):
-  """
-  Verify operations using plugins are annotated.
-  """
+  """Verify operations using plugins are annotated."""
   md = generator.generate("torch", "jax")
 
   assert "*(Plugin: magic_fix)*" in md
 
 
 def test_tier_ordering(generator):
-  """
-  Verify Tiers appear in specific order: Array, Neural, Extras.
-  """
+  """Verify Tiers appear in specific order: Array, Neural, Extras."""
   md = generator.generate("torch", "jax")
 
   idx_array = md.find("## Array")
@@ -165,8 +151,7 @@ def test_tier_ordering(generator):
 
 
 def test_filtering_missing_source(generator):
-  """
-  Verify that if Source FW does not have the op, it is skipped entirely.
+  """Verify that if Source FW does not have the op, it is skipped entirely.
   If source is 'tensorflow' (unknown in mock), doc should represent that nothing was found
   (headers skipped because no ops valid).
   """

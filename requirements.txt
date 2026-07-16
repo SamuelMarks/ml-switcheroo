@@ -9,5 +9,6 @@ pydantic_core==2.27.2;platform_system=='Emscripten'
 pygments==2.19.1;platform_system=='Emscripten'
 rich>=13.0
 hypothesis
-
-
+cdd @ file:///Users/samuel/repos/cdd-python
+ml-switcheroo-ir @ file:///Users/samuel/repos/ml-switcheroo-ir
+griffe

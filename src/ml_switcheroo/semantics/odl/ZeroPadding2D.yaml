@@ -1,0 +1,12 @@
+description: Zero-padding layer for 2D input.
+op_type: class
+std_args:
+- default:
+  - 1
+  - 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: Tuple[int, int]
+variants: {}
+operation: ZeroPadding2d

@@ -1,0 +1,12 @@
+description: Updates the state of a module/node using a dictionary of values.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: state
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: pure_dict
+  type: dict
+variants: {}
+operation: ReplaceByPureDict

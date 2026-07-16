@@ -17,8 +17,8 @@ try:
   import jax
   import jax.numpy as jnp
 except Exception:
-  jax = None
-  jnp = None
+  jax: Any = None  # type: ignore
+  jnp = None  # type: ignore
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
@@ -30,7 +30,7 @@ from ml_switcheroo.frameworks.base import (
   load_snapshot_for_adapter,
 )
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.frameworks.optax_shim import OptaxScanner
+from ml_switcheroo.frameworks.common.optax_shim import OptaxScanner
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 
@@ -94,13 +94,13 @@ class JaxCoreAdapter(JAXStackMixin):
   def get_harness_init_code(self) -> str:
     """Returns logic to create JAX PRNG Keys."""
     return textwrap.dedent(
-      """ 
-            def _make_jax_key(seed): 
-                "Attempts to create a JAX PRNGKey." 
-                try: 
-                    return jax.random.PRNGKey(seed) 
-                except (ImportError, AttributeError): 
-                    return "mock_jax_key" 
+      """
+            def _make_jax_key(seed):
+                "Attempts to create a JAX PRNGKey."
+                try:
+                    return jax.random.PRNGKey(seed)
+                except (ImportError, AttributeError):
+                    return "mock_jax_key"
         """
     ).strip()
 
@@ -145,6 +145,7 @@ class JaxCoreAdapter(JAXStackMixin):
       requires_functional_control_flow=True,
       enforce_purity_analysis=True,
       strict_materialization_method="block_until_ready",
+      sharding_wrapper_api="jax.experimental.pjit.pjit",
     )
 
   @property
@@ -172,13 +173,13 @@ class JaxCoreAdapter(JAXStackMixin):
 
   def _collect_live(self, category: SemanticTier) -> List[GhostRef]:
     """Scans installed JAX/Optax modules."""
-    results = []  # pragma: no cover
+    results: list = []  # pragma: no cover  # type: ignore
     if category == SemanticTier.LOSS:  # pragma: no cover
-      results.extend(OptaxScanner.scan_losses())  # pragma: no cover
+      results.extend(getattr(OptaxScanner, "scan_losses", lambda: [])())  # pragma: no cover
     elif category == SemanticTier.OPTIMIZER:  # pragma: no cover
-      results.extend(OptaxScanner.scan_optimizers())  # pragma: no cover
+      results.extend(getattr(OptaxScanner, "scan_optimizers", lambda: [])())  # pragma: no cover
     elif category == SemanticTier.ACTIVATION:  # pragma: no cover
-      results.extend(self._scan_jax_activations())  # pragma: no cover
+      results.extend(getattr(self, "_scan_jax_activations", lambda: [])())  # pragma: no cover
     return results  # pragma: no cover
 
   def convert(self, data: Any) -> Any:
@@ -232,13 +233,13 @@ import jax.lax as lax
 class VisionFrontEnd:
     def __init__(self, kernel):
         self.patch_conv_w = kernel
-        
+
     def __call__(self, x):
         # Vision Patch Embedding Extraction
         return lax.conv_general_dilated(
-            lhs=x, 
-            rhs=self.patch_conv_w, 
-            window_strides=(2, 14, 14), 
+            lhs=x,
+            rhs=self.patch_conv_w,
+            window_strides=(2, 14, 14),
             padding='VALID',
             dimension_numbers=('NCDHW', 'OIDHW', 'NCDHW')
         )

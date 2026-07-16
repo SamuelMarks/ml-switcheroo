@@ -1,0 +1,6 @@
+description: CuDNN Transposed Convolution.
+std_args:
+- input
+- weight
+variants: {}
+operation: CudnnConvolutionTranspose

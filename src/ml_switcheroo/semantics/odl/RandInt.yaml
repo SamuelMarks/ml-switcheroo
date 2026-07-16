@@ -1,0 +1,18 @@
+description: Returns a tensor filled with random integers generated uniformly between
+  low (inclusive) and high (exclusive).
+std_args:
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: low
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: high
+  type: int
+- is_variadic: true
+  kind: positional_or_keyword
+  name: size
+  type: int
+variants: {}
+operation: RandInt

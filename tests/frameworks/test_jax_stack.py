@@ -1,6 +1,4 @@
-"""
-Tests for the JAX Stack Mixin (Level 0/1 Logic).
-"""
+"""Tests for the JAX Stack Mixin (Level 0/1 Logic)."""
 
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 

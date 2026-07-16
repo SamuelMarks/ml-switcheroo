@@ -1,0 +1,18 @@
+description: Initiates an async copy between GMEM and SMEM.
+std_args:
+- self
+- src_ref
+- dst_ref
+- gmem_slice
+- gmem_transform
+- gmem_peer_id
+- barrier
+- swizzle
+- arrive
+- collective
+- partitioned
+- predicate
+- reduction_op
+- implementation
+type: function
+operation: async_copy

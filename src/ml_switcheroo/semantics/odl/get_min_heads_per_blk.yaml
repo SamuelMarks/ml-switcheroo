@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- num_q_heads
+- num_combined_kv_heads
+- q_dtype
+- kv_dtype
+type: function
+operation: get_min_heads_per_blk

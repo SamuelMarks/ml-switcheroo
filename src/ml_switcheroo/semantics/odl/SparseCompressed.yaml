@@ -1,0 +1,5 @@
+description: Layout constant
+op_type: attribute
+std_args: []
+variants: {}
+operation: SparseCompressed

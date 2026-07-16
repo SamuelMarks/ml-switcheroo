@@ -1,0 +1,8 @@
+description: Per channel affine quantization (internal).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: PerChannelAffine

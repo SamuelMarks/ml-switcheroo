@@ -1,0 +1,4 @@
+description: Get the actively used memory in bytes.
+std_args: []
+variants: {}
+operation: GetActiveMemory

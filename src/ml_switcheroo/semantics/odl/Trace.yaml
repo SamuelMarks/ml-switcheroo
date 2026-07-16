@@ -1,0 +1,17 @@
+description: Returns the sum along the specified diagonals of a matrix (or a stack
+  of matrices) ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: offset
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Optional[dtype]
+variants: {}
+operation: trace

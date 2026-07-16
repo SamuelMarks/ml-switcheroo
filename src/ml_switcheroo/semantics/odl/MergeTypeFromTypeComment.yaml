@@ -1,0 +1,4 @@
+description: Internal JIT utility.
+std_args: []
+variants: {}
+operation: MergeTypeFromTypeComment

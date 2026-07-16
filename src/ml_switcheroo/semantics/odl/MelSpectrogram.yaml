@@ -1,0 +1,25 @@
+description: A preprocessing layer to convert raw audio signals to Mel spectrograms.
+op_type: class
+std_args:
+- default: 2048
+  is_variadic: false
+  kind: positional_or_keyword
+  name: fft_length
+  type: int
+- default: 512
+  is_variadic: false
+  kind: positional_or_keyword
+  name: sequence_stride
+  type: int
+- default: 128
+  is_variadic: false
+  kind: positional_or_keyword
+  name: num_mel_bins
+  type: int
+- default: 16000
+  is_variadic: false
+  kind: positional_or_keyword
+  name: sampling_rate
+  type: int
+variants: {}
+operation: MelSpectrogram

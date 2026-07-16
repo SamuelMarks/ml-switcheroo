@@ -1,9 +1,7 @@
-"""
-Tests for Qwen-specific Graph Optimization Passes.
-"""
+"""Tests for Qwen-specific Graph Optimization Passes."""
 
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.compiler.qwen_fusion import (
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.qwen_fusion import (
   SwiGLUFusionPass,
   SwiGLUDefusionPass,
   VisionPatchEmbeddingFusionPass,

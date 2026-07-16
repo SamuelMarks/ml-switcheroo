@@ -1,0 +1,4 @@
+description: Internal static module wrapper.
+std_args: []
+variants: {}
+operation: StaticModule

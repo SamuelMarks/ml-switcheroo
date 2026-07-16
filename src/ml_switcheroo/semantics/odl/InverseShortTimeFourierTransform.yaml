@@ -1,0 +1,48 @@
+description: Inverse short time Fourier Transform.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  rank: 3
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: n_fft
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hop_length
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: win_length
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: window
+  type: Tensor
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: center
+  type: bool
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: normalized
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: onesided
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: length
+  type: int
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: return_complex
+  type: bool
+variants: {}
+operation: InverseShortTimeFourierTransform

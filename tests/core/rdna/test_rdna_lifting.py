@@ -2,9 +2,9 @@
 
 from typing import List
 
-from ml_switcheroo.compiler.frontends.rdna.analysis import RdnaAnalyzer
-from ml_switcheroo.compiler.frontends.rdna.lifter import RdnaLifter
-from ml_switcheroo.compiler.frontends.rdna.nodes import (
+from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
+from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+from ml_switcheroo.core.compiler.frontends.rdna.nodes import (
   Comment,
   Immediate,
   Instruction,
@@ -20,9 +20,7 @@ def make_inst(opcode: str, *operands) -> Instruction:
 
 
 def test_analyze_conv2d() -> None:
-  """
-  Verify analyzer extracts kernel size from s_cmp_lt_i32.
-  """
+  """Verify analyzer extracts kernel size from s_cmp_lt_i32."""
   s4 = SGPR(4)
   insts = [
     make_inst("s_mov_b32", s4, Immediate(0)),
@@ -36,9 +34,7 @@ def test_analyze_conv2d() -> None:
 
 
 def test_analyze_linear() -> None:
-  """
-  Verify analyzer extracts in_features.
-  """
+  """Verify analyzer extracts in_features."""
   s0 = SGPR(0)
   insts = [
     make_inst("global_load_dword"),
@@ -51,9 +47,7 @@ def test_analyze_linear() -> None:
 
 
 def test_lift_simple_chain() -> None:
-  """
-  Scenario: Input -> Linear -> Output.
-  """
+  """Scenario: Input -> Linear -> Output."""
   nodes: List[RdnaNode] = [
     Comment("Input x -> v0"),
     Comment("BEGIN Linear (fc1)"),
@@ -75,9 +69,7 @@ def test_lift_simple_chain() -> None:
 
 
 def test_lift_unmapped_op() -> None:
-  """
-  Scenario: Unknown op preserved as comment.
-  """
+  """Scenario: Unknown op preserved as comment."""
   nodes: List[RdnaNode] = [
     Comment("Input x -> v0"),
     Comment("Unmapped Op: torch.flatten (flat)"),
@@ -94,8 +86,7 @@ def test_lift_unmapped_op() -> None:
 
 
 def test_lift_no_markers() -> None:
-  """
-  Scenario: Raw assembly without markers.
+  """Scenario: Raw assembly without markers.
   Expect: Nodes for each instruction (1:1 lifting).
   """
   nodes: List[RdnaNode] = [make_inst("v_add_f32", VGPR(0), VGPR(1), VGPR(2))]

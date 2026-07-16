@@ -12,7 +12,7 @@ Capabilities:
 
 import numpy as np
 import textwrap
-from typing import List, Tuple, Optional, Dict, Any
+from typing import Union, List, Tuple, Optional, Dict, Any
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
 from ml_switcheroo.frameworks.loader import load_definitions
@@ -43,7 +43,7 @@ class NumpyAdapter:
     return "numpy", "np"
 
   @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
     """Remaps imports to 'np' alias.
 
     Returns:
@@ -226,16 +226,16 @@ class NumpyAdapter:
   def get_weight_load_code(self, path_var: str) -> str:
     """Loads .npz files into a dictionary."""
     return textwrap.dedent(  # pragma: no cover
-      f""" 
-            loaded = np.load({path_var}, allow_pickle=True) 
+      f"""
+            loaded = np.load({path_var}, allow_pickle=True)
             # If NpzFile wrapper, convert to dict
-            if hasattr(loaded, 'files'): 
-                raw_state = {{k: loaded[k] for k in loaded.files}} 
-            elif isinstance(loaded.item(), dict): 
-                # Handle 0-d array wrapping a dict (common in np.save) 
-                raw_state = loaded.item() 
-            else: 
-                raw_state = {{'data': loaded}} 
+            if hasattr(loaded, 'files'):
+                raw_state = {{k: loaded[k] for k in loaded.files}}
+            elif isinstance(loaded.item(), dict):
+                # Handle 0-d array wrapping a dict (common in np.save)
+                raw_state = loaded.item()
+            else:
+                raw_state = {{'data': loaded}}
             """
     )
 
@@ -304,34 +304,34 @@ class NumpyAdapter:
     return {
       "tier1_math": """import numpy as np
 
-def linear_algebra_ops(a, b): 
+def linear_algebra_ops(a, b):
     # Tier 1: Standard Numeric Computing
     # Matrix Multiplication
-    dot = np.matmul(a, b) 
+    dot = np.matmul(a, b)
 
     # Element-wise operations
-    diff = np.abs(a - b) 
+    diff = np.abs(a - b)
 
     # Aggregation
-    norm = np.linalg.norm(diff) 
+    norm = np.linalg.norm(diff)
     return dot, norm
 """,
       "tier2_neural": """import numpy as np
 
-# Tier 2: Neural Networks (Out of Scope for NumPy) 
-# NumPy does not offer a built-in neural layer API. 
+# Tier 2: Neural Networks (Out of Scope for NumPy)
+# NumPy does not offer a built-in neural layer API.
 # While possible to write one from scratch, it is not
-# supported by the ml-switcheroo transpiler out-of-the-box. 
+# supported by the ml-switcheroo transpiler out-of-the-box.
 """,
       "tier3_extras": """import numpy as np
 
-def serialize_data(arr, filename): 
+def serialize_data(arr, filename):
     # Tier 3: IO Persistence
-    # Use standard binary format (.npy) 
-    np.save(file=filename, arr=arr) 
+    # Use standard binary format (.npy)
+    np.save(file=filename, arr=arr)
 
     # Reload
-    loaded = np.load(file=filename) 
+    loaded = np.load(file=filename)
     return loaded
 """,
     }

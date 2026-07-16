@@ -1,0 +1,8 @@
+description: Set the wired memory limit (macOS).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: limit
+  type: int
+variants: {}
+operation: SetWiredLimit

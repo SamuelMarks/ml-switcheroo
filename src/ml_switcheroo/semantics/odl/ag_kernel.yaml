@@ -1,0 +1,10 @@
+description: The class representing a Python function.
+std_args:
+- x_ref
+- o_ref
+- send_sem
+- recv_sem
+- axis_name
+- mesh
+type: function
+operation: ag_kernel

@@ -1,0 +1,48 @@
+description: Applies a quantized RNN cell with ReLU non-linearity to inputs.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hx
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: w_ih
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: w_hh
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b_ih
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b_hh
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: packed_ih
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: packed_hh
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: col_offsets
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: scale
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: zero_point
+  type: int
+variants: {}
+operation: QuantizedRnnReluCell

@@ -1,0 +1,22 @@
+description: Applies a 1D convolution over input (Time, Batch, Channels).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  shape_spec: '[T, B, C]'
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: Tensor
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: pad
+  type: int
+type: attribute
+operation: conv_tbc

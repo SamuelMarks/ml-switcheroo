@@ -1,0 +1,8 @@
+description: Returns the optimizer configuration as a Python dict.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: optimizer
+  type: Any
+variants: {}
+operation: SerializeOptimizer

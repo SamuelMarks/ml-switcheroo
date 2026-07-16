@@ -1,0 +1,13 @@
+description: Reverses the order of elements in an array along the given axis. The
+  shape of the array must be preserved.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: Optional[Union[int, Tuple[int, Ellipsis]]]
+variants: {}
+operation: flip

@@ -1,6 +1,4 @@
-"""
-Architecture Tests for SemanticsManager.
-"""
+"""Architecture Tests for SemanticsManager."""
 
 from unittest.mock import patch
 
@@ -9,7 +7,6 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 def test_manager_loads_files():
   """Verify manager attempts to load JSONs from semantics dir."""
-
   # Mock data
 
   # We patch the KnowledgeBaseLoader internal logic or the open calls
@@ -25,8 +22,7 @@ def test_manager_loads_files():
 
 
 def test_clean_slate_if_files_missing(tmp_path):
-  """
-  Scenario: Semantics directory is empty/missing.
+  """Scenario: Semantics directory is empty/missing.
   Expectation: Manager initializes empty without crashing.
   """
   empty_sem = tmp_path / "semantics"

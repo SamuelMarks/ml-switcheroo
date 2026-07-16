@@ -117,13 +117,13 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
       kw_node = None
       if i < len(keywords) and keywords[i]:
-        kw_node = cst.Name(keywords[i])
+        kw_node = cst.Name(keywords[i])  # type: ignore
 
       args.append(
         cst.Arg(
           value=arg_expr,
           keyword=kw_node,
-          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace(""))
+          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace(""))  # type: ignore
           if kw_node
           else None,
         )
@@ -156,13 +156,13 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
       arg_expr = self._resolve_operand(op_val.name)
       kw_node = None
       if i < len(keywords) and keywords[i]:
-        kw_node = cst.Name(keywords[i])
+        kw_node = cst.Name(keywords[i])  # type: ignore
 
       args.append(
         cst.Arg(
           value=arg_expr,
           keyword=kw_node,
-          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace(""))
+          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace(""))  # type: ignore
           if kw_node
           else None,
         )

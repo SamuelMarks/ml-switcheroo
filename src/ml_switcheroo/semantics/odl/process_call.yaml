@@ -1,0 +1,9 @@
+description: The class representing a Python function.
+std_args:
+- self
+- call_primitive
+- f
+- tracers
+- params
+type: function
+operation: process_call

@@ -1,0 +1,25 @@
+description: Returns evenly spaced values within the half-open interval ``[start,
+  stop)`` as a one-dimensional array.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: start
+  type: Union[int, float]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: stop
+  type: Optional[Union[int, float]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: step
+  type: Union[int, float]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Optional[dtype]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Optional[device]
+variants: {}
+operation: arange

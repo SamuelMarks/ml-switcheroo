@@ -1,0 +1,4 @@
+description: The class representing a Python module/class/instance attribute.
+std_args: []
+type: attribute
+operation: global_array_to_host_local_array_p

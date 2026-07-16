@@ -83,7 +83,7 @@ def transform_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.Flatt
       f"{target_fw_label} requires explicit functional loops (e.g. `fori_loop`) for stateful logic. "
       "Auto-conversion prevented due to missing dataflow analysis of 'carry' state."
     )
-    return EscapeHatch.mark_failure(node, warn_msg)
+    return EscapeHatch.mark_failure(node, warn_msg)  # type: ignore
 
   # 3. Fallback for Generic Iterators (Lists, Tensors, Zips)
   # Candidate for scan
@@ -91,4 +91,4 @@ def transform_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.Flatt
     f"Python 'for' loop in {target_fw_label} requires structural rewrite (e.g. `scan`). "
     "Unrolling this loop may break if it depends on external state."
   )
-  return EscapeHatch.mark_failure(node, warn_msg)
+  return EscapeHatch.mark_failure(node, warn_msg)  # type: ignore

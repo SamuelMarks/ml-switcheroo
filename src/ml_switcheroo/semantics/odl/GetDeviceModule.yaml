@@ -1,0 +1,8 @@
+description: Returns the module associated with a given device.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Any
+variants: {}
+operation: GetDeviceModule

@@ -1,6 +1,4 @@
-"""
-Tests for RNG Threading Plugin using Trait-Based Logic.
-"""
+"""Tests for RNG Threading Plugin using Trait-Based Logic."""
 
 import pytest
 import libcst as cst

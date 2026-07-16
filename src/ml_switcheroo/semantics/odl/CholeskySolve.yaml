@@ -1,0 +1,18 @@
+description: Solves a linear system of equations with a positive semidefinite matrix
+  to be inverted given its Cholesky factor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input2
+  type: Tensor
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: upper
+  type: bool
+variants: {}
+operation: CholeskySolve

@@ -1,0 +1,14 @@
+description: The class representing a Python function.
+std_args:
+- acc
+- a
+- b_descriptor
+- a_transpose
+- b_transpose
+- a_k_stride
+- b_k_stride
+- n
+- swizzle
+- element_type
+type: function
+operation: wgmma_m64

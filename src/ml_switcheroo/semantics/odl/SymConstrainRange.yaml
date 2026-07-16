@@ -1,0 +1,16 @@
+description: Symbolic utility to constrain value range (Traced).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: min
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: max
+  type: Any
+variants: {}
+operation: SymConstrainRange

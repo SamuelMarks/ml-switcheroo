@@ -1,12 +1,10 @@
-"""
-Tests for Python Backend.
-"""
+"""Tests for Python Backend."""
 
 import pytest
 import ast
 import libcst as cst
-from ml_switcheroo.compiler.backends.python import PythonBackend
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.backends.python import PythonBackend
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 
 
 @pytest.fixture
@@ -78,7 +76,7 @@ def test_context_preservation(backend: PythonBackend) -> None:
 
 def test_python_backend_sharding():
   """Verify sharding constraint generation in jax/flax framework."""
-  from ml_switcheroo.compiler.ir import PartitionSpec
+  from ml_switcheroo.core.compiler.ir import PartitionSpec
 
   graph = LogicalGraph(name="ShardedNet")
   graph.nodes = [
@@ -97,7 +95,7 @@ def test_python_backend_sharding():
 
 def test_python_backend_sharding_none():
   """Verify None axes format correctly."""
-  from ml_switcheroo.compiler.ir import PartitionSpec
+  from ml_switcheroo.core.compiler.ir import PartitionSpec
 
   graph = LogicalGraph(name="ShardedNet")
   graph.nodes = [
@@ -116,7 +114,7 @@ def test_python_backend_sharding_none():
 
 def test_python_backend_sharding_torch():
   """Verify sharding constraint generation in PyTorch DTensor format."""
-  from ml_switcheroo.compiler.ir import PartitionSpec
+  from ml_switcheroo.core.compiler.ir import PartitionSpec
 
   graph = LogicalGraph(name="ShardedNet")
   graph.nodes = [
@@ -136,7 +134,7 @@ def test_python_backend_sharding_torch():
 
 def test_python_backend_sharding_tf_mlx():
   """Verify sharding constraint generation in TF and MLX."""
-  from ml_switcheroo.compiler.ir import PartitionSpec
+  from ml_switcheroo.core.compiler.ir import PartitionSpec
 
   graph = LogicalGraph(name="ShardedNet")
   graph.nodes = [
@@ -157,8 +155,8 @@ def test_python_backend_sharding_tf_mlx():
 
 def test_python_backend_primitive_mapping_mlx():
   """Verify advanced nodes fall back correctly in MLX."""
-  from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode
-  from ml_switcheroo.compiler.backends.python import PythonBackend
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+  from ml_switcheroo.core.compiler.backends.python import PythonBackend
 
   graph = LogicalGraph()
   graph.nodes = [

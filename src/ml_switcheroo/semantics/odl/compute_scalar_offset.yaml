@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- iteration_index
+- total_size
+- block_size
+type: function
+operation: compute_scalar_offset

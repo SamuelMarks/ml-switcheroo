@@ -1,5 +1,4 @@
-"""
-Tests for the get_to_numpy_code protocol implementation.
+"""Tests for the get_to_numpy_code protocol implementation.
 
 Verifies that all registered adapters implement `get_to_numpy_code`
 and return valid Python strings for data conversion.
@@ -63,9 +62,7 @@ def test_mlx_implementation():
 
 
 def test_all_adapters_comply(isolate_framework_registry):
-  """
-  Iterates all registered frameworks to ensure protocol compliance.
-  """
+  """Iterates all registered frameworks to ensure protocol compliance."""
   fws = available_frameworks()
   for fw in fws:
     adapter = get_adapter(fw)

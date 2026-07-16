@@ -1,0 +1,4 @@
+description: SegmentIds for Q and KV sequences.
+std_args: []
+type: class
+operation: SegmentIds

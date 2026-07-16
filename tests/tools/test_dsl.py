@@ -1,6 +1,4 @@
-"""
-Tests for ODL DSL Schema.
-"""
+"""Tests for ODL DSL Schema."""
 
 from ml_switcheroo.core.dsl import (
   OperationDef,
@@ -10,9 +8,7 @@ from ml_switcheroo.core.dsl import (
 
 
 def test_parameter_def_rich_defaults():
-  """
-  Verify 'default' field accepts various types (int, float, list, bool).
-  """
+  """Verify 'default' field accepts various types (int, float, list, bool)."""
   p1 = ParameterDef(name="d", default=1)
   assert p1.default == 1
 

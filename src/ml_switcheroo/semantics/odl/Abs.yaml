@@ -1,0 +1,17 @@
+operation: Abs
+description: Definition for Abs
+std_args:
+- x
+variants:
+  torch:
+    api: torch.abs
+  jax:
+    api: jax.numpy.abs
+  numpy:
+    api: numpy.abs
+  tensorflow:
+    api: tf.abs
+  mlx:
+    api: mlx.core.abs
+  keras:
+    api: keras.ops.abs

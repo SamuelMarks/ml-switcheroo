@@ -1,0 +1,14 @@
+description: Import a function from a serialized file format (MLX specific, mapping
+  to JIT/SavedModel load).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: file
+  type: str
+- default: cpu
+  is_variadic: false
+  kind: positional_or_keyword
+  name: map_location
+  type: str
+variants: {}
+operation: ImportFunction

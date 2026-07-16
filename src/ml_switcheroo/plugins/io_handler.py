@@ -84,7 +84,7 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
       return node
 
   # Serialize args to Python strings for the adapter
-  f_str = capture_node_source(file_arg.value)
+  f_str = capture_node_source(file_arg.value)  # type: ignore
   obj_str = capture_node_source(obj_arg.value) if obj_arg else None
 
   # 1. Preamble Injection
@@ -99,6 +99,6 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
       return node  # pragma: no cover
 
     # 3. Parse back to CST
-    return cst.parse_expression(new_code)
+    return cst.parse_expression(new_code)  # type: ignore
   except Exception:
     return node

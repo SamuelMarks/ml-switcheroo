@@ -1,0 +1,35 @@
+description: Computes the cross-entropy loss between true labels and predicted labels.
+op_type: class
+std_args:
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: from_logits
+  type: bool
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: label_smoothing
+  type: float
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+- default: sum_over_batch_size
+  is_variadic: false
+  kind: positional_or_keyword
+  name: reduction
+  options:
+  - sum
+  - sum_over_batch_size
+  - mean
+  - none
+  type: str
+- default: binary_crossentropy
+  is_variadic: false
+  kind: positional_or_keyword
+  name: name
+  type: str
+variants: {}
+operation: BinaryCrossentropy

@@ -1,0 +1,7 @@
+description: Wraps a transformed memref to an unrealized cast with transforms.
+std_args:
+- transformed_memref
+- logical_type
+- transforms
+type: function
+operation: wrap_transformed_memref

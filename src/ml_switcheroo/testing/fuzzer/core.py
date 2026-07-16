@@ -37,7 +37,7 @@ class InputFuzzer:
     strategies = {}
 
     # Shared Context for dimension symbols
-    shared_dims = {}
+    shared_dims = {}  # type: ignore
 
     for p in params:
       hint = hints.get(p)
@@ -74,7 +74,7 @@ class InputFuzzer:
             hint = "Array"
             cons.setdefault("dtype", "float")
 
-      strategies[p] = strategies_from_spec(hint, cons, shared_dims)
+      strategies[p] = strategies_from_spec(hint, cons, shared_dims)  # type: ignore
 
     return strategies
 

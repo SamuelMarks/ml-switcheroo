@@ -1,0 +1,16 @@
+description: Symbolic if-then-else.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: t
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: f
+  type: Any
+variants: {}
+operation: SymIte

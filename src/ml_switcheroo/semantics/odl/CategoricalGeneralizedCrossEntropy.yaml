@@ -1,0 +1,10 @@
+description: Computes the Generalized Cross Entropy loss.
+op_type: class
+std_args:
+- default: 0.5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: q
+  type: float
+variants: {}
+operation: CategoricalGeneralizedCrossEntropy

@@ -1,0 +1,7 @@
+description: Asynchronously copies the scale data from SMEM to TMEM.
+std_args:
+- smem_ref
+- tmem_ref
+- collective
+type: function
+operation: async_copy_scales_smem_to_tmem

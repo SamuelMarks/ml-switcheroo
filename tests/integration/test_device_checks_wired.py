@@ -1,6 +1,4 @@
-"""
-Integration test verifying the Device Checks plugin is now live and wired properly.
-"""
+"""Integration test verifying the Device Checks plugin is now live and wired properly."""
 
 import pytest
 import importlib

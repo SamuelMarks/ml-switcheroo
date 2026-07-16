@@ -1,0 +1,11 @@
+description: Applies Softmax function to an n-dimensional input Tensor, optionally
+  computing CrossEntropy.
+op_type: class
+std_args:
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+variants: {}
+operation: FullSoftmax

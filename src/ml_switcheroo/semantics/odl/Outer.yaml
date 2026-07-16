@@ -1,0 +1,12 @@
+description: Returns the outer product of two vectors ``x1`` and ``x2``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x1
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x2
+  type: array
+variants: {}
+operation: outer

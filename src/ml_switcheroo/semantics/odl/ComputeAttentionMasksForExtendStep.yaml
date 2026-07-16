@@ -1,0 +1,12 @@
+description: Computes attention mask from paddings, segment masks etc for extend_step.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: time_step
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: seq_len
+  type: int
+variants: {}
+operation: ComputeAttentionMasksForExtendStep

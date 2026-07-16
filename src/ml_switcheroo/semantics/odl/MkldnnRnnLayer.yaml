@@ -1,0 +1,16 @@
+description: Applies RNN layer (MKLDNN).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight0
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight1
+  type: Tensor
+variants: {}
+operation: MkldnnRnnLayer

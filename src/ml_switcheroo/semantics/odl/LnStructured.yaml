@@ -1,0 +1,9 @@
+description: Prune entire (currently unpruned) channels in a tensor based on their
+  L\ ``n``-norm.
+std_args:
+- self
+- amount
+- n
+- dim
+type: class
+operation: LnStructured

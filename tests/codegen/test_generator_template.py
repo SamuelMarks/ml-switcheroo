@@ -1,5 +1,4 @@
-"""
-Tests for Template-Based Test Generation.
+"""Tests for Template-Based Test Generation.
 
 Verifies:
 1. Generator can use mock/injected templates.
@@ -48,8 +47,7 @@ def semantics_data():
 
 
 def test_default_template_fallback(tmp_path, semantics_data):
-  """
-  Scenario: Use default templates.
+  """Scenario: Use default templates.
   Note: Since real defaults depend on snapshot files which might be missing
   during bad bootstrap, we mock the manager here to ensure test stability.
   """
@@ -79,8 +77,7 @@ def test_default_template_fallback(tmp_path, semantics_data):
 
 
 def test_custom_backend_template(tmp_path, semantics_data):
-  """
-  Scenario: Add templates for 'tinygrad'.
+  """Scenario: Add templates for 'tinygrad'.
   Expect: Generated code includes TinyGrad block, imports are in runtime.
   """
   custom_templates = {
@@ -116,9 +113,7 @@ def test_custom_backend_template(tmp_path, semantics_data):
 
 
 def test_jit_config_via_template(tmp_path):
-  """
-  Scenario: Enable JIT via explicitly providing `jit_template`.
-  """
+  """Scenario: Enable JIT via explicitly providing `jit_template`."""
   data = {
     "add": {
       "std_args": ["x"],
@@ -156,8 +151,7 @@ def test_jit_config_via_template(tmp_path):
 
 
 def test_invalid_framework_skipped(tmp_path, semantics_data):
-  """
-  Scenario: Data has variant 'ghost_fw', but no template exists.
+  """Scenario: Data has variant 'ghost_fw', but no template exists.
   Expect: 'ghost_fw' is excluded from generation.
   """
   semantics_data["abs"]["variants"]["ghost_fw"] = {"api": "ghost.abs"}

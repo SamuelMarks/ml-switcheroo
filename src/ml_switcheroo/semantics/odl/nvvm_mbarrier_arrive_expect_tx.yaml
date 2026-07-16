@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- barrier
+- expect_tx
+- predicate
+type: function
+operation: nvvm_mbarrier_arrive_expect_tx

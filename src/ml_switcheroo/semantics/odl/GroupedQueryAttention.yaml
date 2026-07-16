@@ -1,0 +1,17 @@
+description: Dot-product attention sharing keys and values across heads.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: embed_dim
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_heads
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_kv_heads
+  type: int
+variants: {}
+operation: GroupedQueryAttention

@@ -1,0 +1,16 @@
+description: Constructs a loop that executes body_fn while cond_fn is true.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: cond_fn
+  type: Callable
+- is_variadic: false
+  kind: positional_or_keyword
+  name: body_fn
+  type: Callable
+- is_variadic: false
+  kind: positional_or_keyword
+  name: init_val
+  type: Any
+variants: {}
+operation: WhileLoop

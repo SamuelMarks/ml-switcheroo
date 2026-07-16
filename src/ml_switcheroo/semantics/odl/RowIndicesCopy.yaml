@@ -1,0 +1,12 @@
+description: Copy row indices.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: out
+  type: Tensor
+variants: {}
+operation: RowIndicesCopy

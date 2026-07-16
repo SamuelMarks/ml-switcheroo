@@ -1,0 +1,25 @@
+description: Layer normalization layer.
+op_type: class
+std_args:
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: Any
+- default: 0.001
+  is_variadic: false
+  kind: positional_or_keyword
+  name: epsilon
+  type: float
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: center
+  type: bool
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: scale
+  type: bool
+variants: {}
+operation: LayerNormalization

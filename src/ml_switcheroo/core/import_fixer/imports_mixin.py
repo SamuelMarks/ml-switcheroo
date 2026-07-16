@@ -7,6 +7,7 @@ on the centralized `ResolutionPlan`.
 from typing import Union
 
 import libcst as cst
+from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 
 from ml_switcheroo.core.import_fixer.utils import create_dotted_name
 from ml_switcheroo.core.scanners import get_full_name
@@ -14,6 +15,14 @@ from ml_switcheroo.core.import_fixer.resolution import ImportReq
 
 
 class ImportMixin(cst.CSTTransformer):
+  """Mixin for transforming imports."""
+
+  plan: ResolutionPlan
+  source_fws: "list[str]"
+  preserve_source: bool
+  _track_definition: "set[str]"
+  _satisfied_injections: "set[str]"
+
   """Mixin for processing Import statements."""
 
   def _make_alias_node(self, req: ImportReq) -> cst.ImportAlias:
@@ -62,13 +71,13 @@ class ImportMixin(cst.CSTTransformer):
           new_alias = new_alias.with_changes(asname=alias.asname)
 
         new_aliases.append(new_alias)
-        self._track_definition(new_alias)
+        self._track_definition(new_alias)  # type: ignore
 
         self._satisfied_injections.add(req.signature)
         replacement_occurred = True
         continue
 
-      self._track_definition(alias)
+      self._track_definition(alias)  # type: ignore
 
       # 2. Existence Check
       for req in self.plan.required_imports:
@@ -117,19 +126,19 @@ class ImportMixin(cst.CSTTransformer):
           self._satisfied_injections.add(req.signature)
           # Track definition manually since we bypass leave_Import logic
           if isinstance(new_node.names[0], cst.ImportAlias):
-            self._track_definition(new_node.names[0])
+            self._track_definition(new_node.names[0])  # type: ignore
           return new_node
 
         else:
           new_node = cst.Import(names=[self._make_alias_node(req)])
           self._satisfied_injections.add(req.signature)
           if isinstance(new_node.names[0], cst.ImportAlias):
-            self._track_definition(new_node.names[0])
+            self._track_definition(new_node.names[0])  # type: ignore
           return new_node
 
     for alias in updated_node.names:
       if isinstance(alias, cst.ImportAlias):
-        self._track_definition(alias)
+        self._track_definition(alias)  # type: ignore
 
     if root_pkg in self.source_fws:
       if self.preserve_source:

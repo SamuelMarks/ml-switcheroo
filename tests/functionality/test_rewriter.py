@@ -1,5 +1,4 @@
-"""
-Comprehensive Integration Tests for the TestRewriter pipeline.
+"""Comprehensive Integration Tests for the TestRewriter pipeline.
 
 Verifies:
 1.  **API Swapping**: Calls are correctly mapped (torch.abs -> jax.numpy.abs).
@@ -18,9 +17,7 @@ from ml_switcheroo.config import RuntimeConfig
 
 
 class MockSemantics(SemanticsManager):
-  """
-  Mock Manager that skips file I/O and provides deterministic test data.
-  """
+  """Mock Manager that skips file I/O and provides deterministic test data."""
 
   def __init__(self):
     """Function docstring."""
@@ -80,8 +77,7 @@ def rewrite(rewriter, code):
 
 
 def test_simple_api_swap(rewriter):
-  """
-  Input:  y = torch.abs(x)
+  """Input:  y = torch.abs(x)
   Output: y = jax.numpy.abs(x)
   """
   code = "y = torch.abs(x)"
@@ -90,8 +86,7 @@ def test_simple_api_swap(rewriter):
 
 
 def test_argument_renaming(rewriter):
-  """
-  Input:  y = torch.sum(input=t)
+  """Input:  y = torch.sum(input=t)
   Output: y = jax.numpy.sum(a=t)
   """
   code = "y = torch.sum(input=t)"
@@ -100,8 +95,7 @@ def test_argument_renaming(rewriter):
 
 
 def test_nested_calls_recursive(rewriter):
-  """
-  Input:  y = torch.abs(torch.neg(x))
+  """Input:  y = torch.abs(torch.neg(x))
   Output: y = jax.numpy.abs(jax.numpy.negative(x))
   """
   code = "y = torch.abs(torch.neg(x))"
@@ -113,8 +107,7 @@ def test_nested_calls_recursive(rewriter):
 
 
 def test_complex_nested_structure(rewriter):
-  """
-  Input:  y = torch.add(torch.abs(a), torch.neg(b))
+  """Input:  y = torch.add(torch.abs(a), torch.neg(b))
   Output is fully converted.
   """
   code = "y = torch.add(torch.abs(a), torch.neg(b))"
@@ -126,8 +119,7 @@ def test_complex_nested_structure(rewriter):
 
 
 def test_return_statement_rewrite(rewriter):
-  """
-  Verify rewrites work inside return statements.
+  """Verify rewrites work inside return statements.
   Input:  return torch.abs(x)
   Output: return jax.numpy.abs(x)
   """
@@ -137,8 +129,7 @@ def test_return_statement_rewrite(rewriter):
 
 
 def test_function_arg_rewrite(rewriter):
-  """
-  Verify rewrites work when call is an argument to another function.
+  """Verify rewrites work when call is an argument to another function.
   Input:  print(torch.abs(x))
   Output: print(jax.numpy.abs(x))
   """
@@ -148,8 +139,7 @@ def test_function_arg_rewrite(rewriter):
 
 
 def test_list_element_rewrite(rewriter):
-  """
-  Input:  l = [torch.abs(x), torch.neg(y)]
+  """Input:  l = [torch.abs(x), torch.neg(y)]
   Output: l = [jax.numpy.abs(x), jax.numpy.negative(y)]
   """
   code = "l = [torch.abs(x), torch.neg(y)]"
@@ -159,8 +149,7 @@ def test_list_element_rewrite(rewriter):
 
 
 def test_dict_value_rewrite(rewriter):
-  """
-  Input:  d = {'val': torch.abs(x)}
+  """Input:  d = {'val': torch.abs(x)}
   Output: d = {'val': jax.numpy.abs(x)}
   """
   code = "d = {'val': torch.abs(x)}"
@@ -169,17 +158,14 @@ def test_dict_value_rewrite(rewriter):
 
 
 def test_pass_through_unknown(rewriter):
-  """
-  Verify unknown APIs are preserved verbatim.
-  """
+  """Verify unknown APIs are preserved verbatim."""
   code = "y = torch.unknown_func(x)"
   result = rewrite(rewriter, code)
   assert "torch.unknown_func(x)" in result
 
 
 def test_aliased_usage(rewriter):
-  """
-  Verify that local aliases defined in import override source rules.
+  """Verify that local aliases defined in import override source rules.
   Input:
       import torch as t
       y = t.abs(x)

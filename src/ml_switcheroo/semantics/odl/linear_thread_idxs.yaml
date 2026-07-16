@@ -1,0 +1,5 @@
+description: The indexes to be used for vector load/store WGStridedFragLayout.
+std_args:
+- self
+type: function
+operation: linear_thread_idxs

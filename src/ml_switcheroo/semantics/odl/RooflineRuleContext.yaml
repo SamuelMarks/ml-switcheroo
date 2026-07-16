@@ -1,0 +1,13 @@
+description: The class representing a Python class.
+std_args:
+- self
+- name_stack
+- primitive
+- avals_in
+- avals_out
+- jaxpr_eqn_ctx
+- mesh
+- pin_lhs_in_vmem
+- pin_rhs_in_vmem
+type: class
+operation: RooflineRuleContext

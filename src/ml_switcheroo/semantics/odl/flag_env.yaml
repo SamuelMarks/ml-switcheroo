@@ -1,0 +1,5 @@
+description: A context manager for setting and restoring flags.
+std_args:
+- kwargs
+type: function
+operation: flag_env

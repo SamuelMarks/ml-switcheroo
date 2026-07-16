@@ -19,18 +19,18 @@ from ml_switcheroo.utils.console import log_info, log_error, log_success
 class SassHtmlParser(HTMLParser):
   """State-machine based HTML parser for extracting SASS Instruction tables."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Execute implementation detail."""
     super().__init__()
     self.in_table = False
     self.in_tbody = False
     self.in_row = False
     self.in_cell = False
-    self.current_row_cells: List[str] = []
-    self.extracted_ops: List[Tuple[str, str]] = []  # (Opcode, Description)
+    self.current_row_cells: List[str] = []  # type: ignore
+    self.extracted_ops: List[Tuple[str, str]] = []  # (Opcode, Description)  # type: ignore
     self.cell_buffer = ""
 
-  def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]):
+  def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
     """Execute implementation detail."""
     if tag == "table":
       # Heuristic: Check if table has a summary or class indicating instruction set
@@ -46,7 +46,7 @@ class SassHtmlParser(HTMLParser):
       self.in_cell = True
       self.cell_buffer = ""
 
-  def handle_endtag(self, tag: str):
+  def handle_endtag(self, tag: str) -> None:
     """Execute implementation detail."""
     if tag == "td" and self.in_cell:
       self.in_cell = False
@@ -71,7 +71,7 @@ class SassHtmlParser(HTMLParser):
     elif tag == "table":
       self.in_table = False
 
-  def handle_data(self, data: str):
+  def handle_data(self, data: str) -> None:
     """Execute implementation detail."""
     if self.in_cell:
       self.cell_buffer += data
@@ -121,7 +121,7 @@ class SassSpecImporter:
     parser = SassHtmlParser()
     parser.feed(content)
 
-    mappings = {}
+    mappings = {}  # type: ignore
 
     for opcode, desc in parser.extracted_ops:
       abstract_id = self._infer_abstract_op(opcode, desc)

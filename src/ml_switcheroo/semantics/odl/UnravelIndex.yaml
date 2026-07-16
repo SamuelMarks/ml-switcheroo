@@ -1,0 +1,13 @@
+description: Converts a flat index or array of flat indices into a tuple of coordinate
+  arrays.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: indices
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: shape
+  type: Tuple[int]
+variants: {}
+operation: UnravelIndex

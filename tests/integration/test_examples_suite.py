@@ -1,5 +1,4 @@
-"""
-Integration Tests for Example Files.
+"""Integration Tests for Example Files.
 
 Verifies that the provided example files can be transpiled end-to-end
 using the semantics and engine logic. This suite uses a local Mock Semantics
@@ -30,8 +29,7 @@ def _load_files():
 
 
 class MockBidirectionalSemantics(SemanticsManager):
-  """
-  Injects deterministic mappings supporting BOTH directions (Torch <-> JAX).
+  """Injects deterministic mappings supporting BOTH directions (Torch <-> JAX).
   Includes expanded mappings for VAE (ex08), CNN (ex07), and Keras (ex09) support.
   """
 
@@ -198,8 +196,7 @@ class MockBidirectionalSemantics(SemanticsManager):
 
 @pytest.mark.parametrize("example_file", _load_files())
 def test_transpile_generates_valid_code(example_file):
-  """
-  Core Compatibility Test.
+  """Core Compatibility Test.
 
   Verifies file conversion for all examples in the suite.
   """

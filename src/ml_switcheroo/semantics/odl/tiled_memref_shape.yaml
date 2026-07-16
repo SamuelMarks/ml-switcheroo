@@ -1,0 +1,5 @@
+description: Returns the 2D untiled shape and element type of a tiled 4D memref.
+std_args:
+- ref
+type: function
+operation: tiled_memref_shape

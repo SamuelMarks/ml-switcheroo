@@ -1,0 +1,12 @@
+description: Get Abstract model definition.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: init_fn
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mesh
+  type: Any
+variants: {}
+operation: GetAbstractModel

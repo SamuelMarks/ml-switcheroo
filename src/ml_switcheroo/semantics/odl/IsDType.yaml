@@ -1,0 +1,13 @@
+description: Returns a boolean indicating whether a provided dtype is of a specified
+  data type "kind".
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: dtype
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kind
+  type: Union[dtype, str, Tuple[Union[dtype, str], Ellipsis]]
+variants: {}
+operation: isdtype

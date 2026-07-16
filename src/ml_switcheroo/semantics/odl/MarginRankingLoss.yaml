@@ -1,0 +1,19 @@
+description: Creates a criterion that measures the loss given inputs x1, x2, two 1D
+  mini-batch Tensors, and a label 1D mini-batch tensor y.
+std_args:
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: margin
+  type: float
+- default: mean
+  is_variadic: false
+  kind: positional_or_keyword
+  name: reduction
+  options:
+  - none
+  - mean
+  - sum
+  type: str
+type: class
+operation: MarginRankingLoss

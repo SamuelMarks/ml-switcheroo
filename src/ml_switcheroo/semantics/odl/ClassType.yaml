@@ -1,0 +1,5 @@
+description: JIT Class Type.
+op_type: class
+std_args: []
+variants: {}
+operation: ClassType

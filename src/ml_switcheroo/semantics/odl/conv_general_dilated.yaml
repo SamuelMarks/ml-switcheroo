@@ -1,0 +1,4 @@
+description: Auto-generated mapping for conv_general_dilated.
+std_args: []
+variants: {}
+operation: conv_general_dilated

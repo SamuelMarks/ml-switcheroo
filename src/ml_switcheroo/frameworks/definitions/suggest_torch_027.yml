@@ -111,7 +111,7 @@ variants:
     api: "keras.ops.scatter"
   mlx:
     # MLX often relies on indexing ops
-    api: null 
+    api: null
   numpy:
     api: "numpy.put_along_axis" # Approximate equivalent
     args:

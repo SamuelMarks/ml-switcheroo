@@ -1,0 +1,23 @@
+description: Eliminates all but the first element from every consecutive group of
+  equivalent elements.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: return_inverse
+  type: bool
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: return_counts
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: UniqueConsecutive

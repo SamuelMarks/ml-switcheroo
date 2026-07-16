@@ -1,0 +1,9 @@
+description: CuDNN Affine Grid Generator.
+std_args:
+- theta
+- N
+- C
+- H
+- W
+variants: {}
+operation: CudnnAffineGridGenerator

@@ -22,9 +22,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 def get_rewriter_for_target(target_fw, pack_kw, pack_as=None):
-  """
-  Creates a rewriter with mocked semantics.
-  """
+  """Creates a rewriter with mocked semantics."""
   hooks._PLUGINS_LOADED = True
 
   mgr = MagicMock()
@@ -83,9 +81,7 @@ def test_generic_axis_packing_tuple():
 
 
 def test_custom_perm_packing_list():
-  """
-  Verify packing to 'perm' into a List.
-  """
+  """Verify packing to 'perm' into a List."""
   rewriter = get_rewriter_for_target("tensorflow", pack_kw="perm", pack_as="List")
 
   code = "y = torch.permute(x, 0, 2, 1)"

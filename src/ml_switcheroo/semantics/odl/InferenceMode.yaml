@@ -1,0 +1,10 @@
+description: Context manager that enables or disables inference mode (gradient isolation).
+op_type: context
+std_args:
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: mode
+  type: bool
+variants: {}
+operation: InferenceMode

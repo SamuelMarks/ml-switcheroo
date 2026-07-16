@@ -1,0 +1,7 @@
+description: Returns a value that can be used as a shard_map partition spec for the
+  kernel.
+std_args:
+- self
+- sharding
+type: function
+operation: manual_sharding_spec

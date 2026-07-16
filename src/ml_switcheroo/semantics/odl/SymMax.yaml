@@ -1,0 +1,12 @@
+description: Symbolic Max operation.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b
+  type: Any
+variants: {}
+operation: SymMax

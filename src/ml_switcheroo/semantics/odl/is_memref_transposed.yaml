@@ -1,0 +1,5 @@
+description: The class representing a Python function.
+std_args:
+- ref
+type: function
+operation: is_memref_transposed

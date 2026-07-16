@@ -1,0 +1,7 @@
+description: Fetches a pytree of arrays from a remote device.
+std_args:
+- self
+- uuid
+- xs
+type: function
+operation: pull

@@ -104,6 +104,6 @@ def _parse_device_args(node: cst.Call) -> Tuple[Optional[cst.BaseExpression], Op
 
   # Handle explicit index argument (torch.device('cuda', 1))
   if len(node.args) > 1:
-    dev_index_node = node.args[1].value
+    dev_index_node = node.args[1].value  # type: ignore
 
   return dev_type_node, dev_index_node

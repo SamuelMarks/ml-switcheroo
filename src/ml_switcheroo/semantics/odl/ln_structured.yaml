@@ -1,0 +1,11 @@
+description: Prune tensor by removing channels with the lowest L\ ``n``-norm along
+  the specified dimension.
+std_args:
+- module
+- name
+- amount
+- n
+- dim
+- importance_scores
+type: function
+operation: ln_structured

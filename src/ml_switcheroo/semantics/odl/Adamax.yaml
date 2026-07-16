@@ -1,0 +1,7 @@
+description: 'Auto-discovered via Consensus (Score: 2.0)'
+std_args:
+- eps
+- lr
+- weight_decay
+type: function
+operation: Adamax

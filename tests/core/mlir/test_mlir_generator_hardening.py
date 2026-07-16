@@ -1,5 +1,4 @@
-"""
-Tests for Generator Hardening requirements.
+"""Tests for Generator Hardening requirements.
 Efficiently validates sw.op attribute handling and call structures.
 """
 
@@ -21,8 +20,7 @@ def gen_code(op: OperationNode) -> str:
 
 
 def test_sw_op_attribute_hardening():
-  """
-  Verify `sw.op` uses `type` attribute for complex dotted names.
+  """Verify `sw.op` uses `type` attribute for complex dotted names.
   Scenario: x = torch.nn.Conv2d(...)
   Impact of Void Suppression: Unused result -> Expression Statement.
   """
@@ -40,8 +38,7 @@ def test_sw_op_attribute_hardening():
 
 
 def test_sw_call_method_chain_hardening():
-  """
-  Verify `sw.call` correctly handles callable stored in variable.
+  """Verify `sw.call` correctly handles callable stored in variable.
   Scenario:
       self.conv = ...
       x = self.conv(x)
@@ -67,8 +64,7 @@ def test_sw_call_method_chain_hardening():
 
 
 def test_sw_op_void_return():
-  """
-  Verify `sw.op` without results generates an Expression Statement.
+  """Verify `sw.op` without results generates an Expression Statement.
   Scenario: print("hello")
   """
   op = OperationNode(
@@ -85,9 +81,7 @@ def test_sw_op_void_return():
 
 
 def test_naming_context_reserved_words():
-  """
-  Verify NamingContext avoids keywords if they appear as SSA hints.
-  """
+  """Verify NamingContext avoids keywords if they appear as SSA hints."""
   gen = MlirToPythonGenerator()
   # %0 -> hint="for" -> invalid python var
   name = gen.ctx.register("%0", hint="for")
@@ -95,9 +89,7 @@ def test_naming_context_reserved_words():
 
 
 def test_naming_context_global_symbol():
-  """
-  Verify global symbol references (@func) are stripped.
-  """
+  """Verify global symbol references (@func) are stripped."""
   gen = MlirToPythonGenerator()
   name = gen.ctx.lookup("@my_global_func")
   assert name == "my_global_func"

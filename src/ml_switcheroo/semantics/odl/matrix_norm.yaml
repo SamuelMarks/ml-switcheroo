@@ -1,0 +1,16 @@
+description: Computes the matrix norm of a matrix (or a stack of matrices) ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: keepdims
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ord
+  type: Optional[Union[int, float, Literal[inf, Any, fro, nuc]]]
+type: function
+operation: matrix_norm

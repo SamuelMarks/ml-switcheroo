@@ -1,0 +1,36 @@
+description: Applies batch normalization on a quantized tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mean
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: var
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: output_scale
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: output_zero_point
+  type: int
+variants: {}
+operation: QuantizedBatchNorm

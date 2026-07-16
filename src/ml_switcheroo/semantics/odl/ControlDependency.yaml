@@ -1,0 +1,12 @@
+description: Insert dependencies between arrays in the graph.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inputs
+  type: Union[Tensor, Sequence[Tensor]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dependencies
+  type: Union[Tensor, Sequence[Tensor]]
+variants: {}
+operation: ControlDependency

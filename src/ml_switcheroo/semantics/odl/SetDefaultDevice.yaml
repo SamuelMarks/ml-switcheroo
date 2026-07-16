@@ -1,0 +1,8 @@
+description: Sets the default device for tensor allocation.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Union[str, Device]
+variants: {}
+operation: SetDefaultDevice

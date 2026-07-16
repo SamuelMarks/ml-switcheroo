@@ -1,0 +1,5 @@
+description: Enumeration of Dispatch Keys for the PyTorch dispatcher.
+op_type: class
+std_args: []
+variants: {}
+operation: DispatchKey

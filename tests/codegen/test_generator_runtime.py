@@ -1,5 +1,4 @@
-"""
-Tests for Runtime Module Generation (DRY Fix).
+"""Tests for Runtime Module Generation (DRY Fix).
 
 Verifies that:
 1. `_ensure_runtime_module` constructs a valid `runtime.py`.
@@ -42,9 +41,7 @@ def generator(tmp_path):
 
 
 def test_runtime_file_creation(generator, tmp_path):
-  """
-  Verify `runtime.py` is created with correct content and helpers.
-  """
+  """Verify `runtime.py` is created with correct content and helpers."""
   tmp_out_dir = tmp_path / "gen_tests"
   generator._ensure_runtime_module(tmp_out_dir)
 
@@ -64,9 +61,7 @@ def test_runtime_file_creation(generator, tmp_path):
 
 
 def test_gen_tests_use_runtime_import(generator, tmp_path):
-  """
-  Verify generated tests import the flags from .runtime.
-  """
+  """Verify generated tests import the flags from .runtime."""
   # Update semantics to have 2 frameworks with templates in the Mock
   semantics = {"abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}}}
 

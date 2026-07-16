@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
@@ -6,12 +8,14 @@ from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
 
 def get_tracer_mock():
+  """Auto-generated doc."""
   m = MagicMock()
   m.export.return_value = []
   return m
 
 
 def test_rewriter_loopback_sharding_full():
+  """Auto-generated doc."""
   cfg = RuntimeConfig(strict_mode=False)
   cfg.enable_sharding = True
   # Test jax branch
@@ -20,17 +24,17 @@ def test_rewriter_loopback_sharding_full():
   with (
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
-    patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
+    patch("ml_switcheroo.core.compiler.differ.GraphDiffer") as mock_differ,
     patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
-    patch("ml_switcheroo.compiler.backends.python_snippet.PythonSnippetEmitter"),
-    patch("ml_switcheroo.compiler.sharding.ShardingInferencePass"),
-    patch("ml_switcheroo.compiler.sharding_extractor.ShardingExtractionPass"),
-    patch("ml_switcheroo.compiler.fusion.QKVFusionPass"),
-    patch("ml_switcheroo.compiler.fusion.QKVDefusionPass"),
-    patch("ml_switcheroo.compiler.qwen_fusion.SwiGLUFusionPass"),
-    patch("ml_switcheroo.compiler.qwen_fusion.SwiGLUDefusionPass"),
-    patch("ml_switcheroo.compiler.qwen_fusion.VisionPatchEmbeddingFusionPass"),
-    patch("ml_switcheroo.compiler.qwen_fusion.VisionPatchEmbeddingDefusionPass"),
+    patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
+    patch("ml_switcheroo.core.compiler.sharding.ShardingInferencePass"),
+    patch("ml_switcheroo.core.compiler.sharding_extractor.ShardingExtractionPass"),
+    patch("ml_switcheroo.core.compiler.fusion.QKVFusionPass"),
+    patch("ml_switcheroo.core.compiler.fusion.QKVDefusionPass"),
+    patch("ml_switcheroo.core.compiler.qwen_fusion.SwiGLUFusionPass"),
+    patch("ml_switcheroo.core.compiler.qwen_fusion.SwiGLUDefusionPass"),
+    patch("ml_switcheroo.core.compiler.qwen_fusion.VisionPatchEmbeddingFusionPass"),
+    patch("ml_switcheroo.core.compiler.qwen_fusion.VisionPatchEmbeddingDefusionPass"),
   ):
     mock_differ.return_value.diff.return_value = [1]
     with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor:
@@ -44,17 +48,17 @@ def test_rewriter_loopback_sharding_full():
   with (
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
-    patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
+    patch("ml_switcheroo.core.compiler.differ.GraphDiffer") as mock_differ,
     patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
-    patch("ml_switcheroo.compiler.backends.python_snippet.PythonSnippetEmitter"),
-    patch("ml_switcheroo.compiler.sharding.ShardingInferencePass"),
-    patch("ml_switcheroo.compiler.sharding_extractor.ShardingExtractionPass"),
-    patch("ml_switcheroo.compiler.fusion.QKVFusionPass"),
-    patch("ml_switcheroo.compiler.fusion.QKVDefusionPass"),
-    patch("ml_switcheroo.compiler.qwen_fusion.SwiGLUFusionPass"),
-    patch("ml_switcheroo.compiler.qwen_fusion.SwiGLUDefusionPass"),
-    patch("ml_switcheroo.compiler.qwen_fusion.VisionPatchEmbeddingFusionPass"),
-    patch("ml_switcheroo.compiler.qwen_fusion.VisionPatchEmbeddingDefusionPass"),
+    patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
+    patch("ml_switcheroo.core.compiler.sharding.ShardingInferencePass"),
+    patch("ml_switcheroo.core.compiler.sharding_extractor.ShardingExtractionPass"),
+    patch("ml_switcheroo.core.compiler.fusion.QKVFusionPass"),
+    patch("ml_switcheroo.core.compiler.fusion.QKVDefusionPass"),
+    patch("ml_switcheroo.core.compiler.qwen_fusion.SwiGLUFusionPass"),
+    patch("ml_switcheroo.core.compiler.qwen_fusion.SwiGLUDefusionPass"),
+    patch("ml_switcheroo.core.compiler.qwen_fusion.VisionPatchEmbeddingFusionPass"),
+    patch("ml_switcheroo.core.compiler.qwen_fusion.VisionPatchEmbeddingDefusionPass"),
   ):
     mock_differ.return_value.diff.return_value = [1]
     with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor:

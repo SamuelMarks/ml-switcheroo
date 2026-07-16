@@ -1,0 +1,12 @@
+description: Splits an array into a sequence of arrays along the given axis.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: unstack

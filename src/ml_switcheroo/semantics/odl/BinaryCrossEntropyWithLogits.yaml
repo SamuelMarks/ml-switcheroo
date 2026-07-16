@@ -1,0 +1,24 @@
+description: Computes Binary Cross Entropy with Logits.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: target
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: pos_weight
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: reduction
+  type: Any
+variants: {}
+operation: BinaryCrossEntropyWithLogits

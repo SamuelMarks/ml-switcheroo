@@ -1,0 +1,28 @@
+description: The class representing a Python function.
+std_args:
+- lengths_ref
+- page_indices_ref
+- buffer_index_ref
+- init_flag_ref
+- q_ref
+- k_pages_hbm_ref
+- k_scales_pages_hbm_ref
+- v_pages_hbm_ref
+- v_scales_pages_hbm_ref
+- o_ref
+- m_ref
+- l_ref
+- k_vmem_buffer
+- k_scales_vmem_buffer
+- v_vmem_buffer
+- v_scales_vmem_buffer
+- k_sems
+- v_sems
+- batch_size
+- pages_per_compute_block
+- pages_per_sequence
+- mask_value
+- attn_logits_soft_cap
+- megacore_mode
+type: function
+operation: paged_flash_attention_kernel_inline_seq_dim

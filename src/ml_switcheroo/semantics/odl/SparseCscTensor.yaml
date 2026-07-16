@@ -1,0 +1,20 @@
+description: Constructs a sparse tensor in CSC (Compressed Sparse Column) format.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ccol_indices
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: row_indices
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: values
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: size
+  type: Optional[List[int]]
+variants: {}
+operation: SparseCscTensor

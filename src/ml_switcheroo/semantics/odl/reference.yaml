@@ -1,0 +1,7 @@
+description: Reference implementation of a mixed-type matrix multiplication.
+std_args:
+- a
+- b
+- out_dtype
+type: function
+operation: reference

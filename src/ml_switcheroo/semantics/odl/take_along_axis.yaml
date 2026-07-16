@@ -1,0 +1,17 @@
+description: Returns elements from an array at the one-dimensional indices specified
+  by ``indices`` along a provided ``axis``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: indices
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: take_along_axis

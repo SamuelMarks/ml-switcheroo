@@ -1,0 +1,28 @@
+description: Perform quantized matrix multiplication with matrix-level gather.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: w
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: scales
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: biases
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: lhs_indices
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: rhs_indices
+  type: Tensor
+variants: {}
+operation: GatherQMM

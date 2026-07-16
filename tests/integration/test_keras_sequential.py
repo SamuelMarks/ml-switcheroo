@@ -1,6 +1,4 @@
-"""
-Integration Tests for Keras Sequential Porting.
-"""
+"""Integration Tests for Keras Sequential Porting."""
 
 import pytest
 from unittest.mock import MagicMock

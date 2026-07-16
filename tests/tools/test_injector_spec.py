@@ -1,11 +1,10 @@
-"""
-Tests for the JSON Specification Injector.
+"""Tests for the JSON Specification Injector.
 
 Verifies that StandardsInjector correctly loads, updates, and saves
 JSON specification files in the Semantics Knowledge Base.
 """
 
-import json
+import yaml
 from unittest.mock import patch, mock_open
 from pathlib import Path
 
@@ -56,73 +55,61 @@ def test_injector_finds_correct_file(sample_op):
       assert expected_path in args_list
 
   # Default LogSoftmax -> Neural (PascalCase heuristic)
-  check_tier(SemanticTier.NEURAL, "k_neural_net.json")
+  check_tier(SemanticTier.NEURAL, "odl/LogSoftmax.yaml")
 
   # Array tier takes precedence if explicitly passed
-  check_tier(SemanticTier.ARRAY_API, "k_array_api.json")
+  extra_op2 = OperationDef(operation="abs", description="util", std_args=[], variants={})
+  check_tier(SemanticTier.ARRAY_API, "odl/abs.yaml", op_override=extra_op2)
 
   # EXTRAS tier gets overridden if name looks Neural (PascalCase)
   # To test EXTRAS routing, we use a utility-like name 'load_data' and explicit Extras tier
   extra_op = OperationDef(operation="manual_utility", description="util", std_args=[], variants={})
-  check_tier(SemanticTier.EXTRAS, "k_framework_extras.json", op_override=extra_op)
+  check_tier(SemanticTier.EXTRAS, "odl/manual_utility.yaml", op_override=extra_op)
 
 
 def test_injector_appends_new_op(sample_op):
-  """Verify new operation is added to the dictionary."""
+  """Verify new operation is written."""
   injector = StandardsInjector(sample_op, tier=SemanticTier.NEURAL)
-
-  # Original content
-  original_json = '{"Conv2d": {"description": "..."}}'
 
   with patch("ml_switcheroo.tools.injector_spec.resolve_semantics_dir") as mock_resolve:
     mock_resolve.return_value = Path("/mock")
 
-    m_open = mock_open(read_data=original_json)
+    m_open = mock_open()
     with patch("builtins.open", m_open):
       with patch("pathlib.Path.mkdir"):
-        with patch("pathlib.Path.exists", return_value=True):
+        with patch("pathlib.Path.exists", return_value=False):
           injector.inject()
 
-    # Verify write
-    # We need to find the call to write().
-    # m_open() returns file handle. handle.write(...) is the call.
     handle = m_open()
     written_data = "".join(str(call.args[0]) for call in handle.write.call_args_list)
 
-    # Verify valid JSON structure was written
-    data = json.loads(written_data)
+    data = yaml.safe_load(written_data)
 
-    # Should have both
-    assert "Conv2d" in data
-    assert "LogSoftmax" in data
-    assert data["LogSoftmax"]["description"] == "Log Softmax."
-    assert data["LogSoftmax"]["std_args"] == ["x", "dim"]
+    assert data["operation"] == "LogSoftmax"
+    assert data["description"] == "Log Softmax."
+    assert data["std_args"] == ["x", "dim"]
 
 
 def test_injector_updates_existing_op(sample_op):
   """Verify existing operation is updated (Overwrite behavior)."""
   injector = StandardsInjector(sample_op, tier=SemanticTier.NEURAL)
 
-  # Original has old description
-  original_json = json.dumps({"LogSoftmax": {"description": "Old Desc", "std_args": []}})
-
   with patch("ml_switcheroo.tools.injector_spec.resolve_semantics_dir") as mock_resolve:
     mock_resolve.return_value = Path("/mock")
 
-    m_open = mock_open(read_data=original_json)
+    m_open = mock_open()
     with patch("builtins.open", m_open):
       with patch("pathlib.Path.mkdir"):
         with patch("pathlib.Path.exists", return_value=True):
           injector.inject()
 
     handle = m_open()
-    # Robustly join sequential writes
     written_data = "".join(str(call.args[0]) for call in handle.write.call_args_list)
-    data = json.loads(written_data)
+    data = yaml.safe_load(written_data)
 
-    # Should update description
-    assert data["LogSoftmax"]["description"] == "Log Softmax."
-    assert len(data["LogSoftmax"]["std_args"]) == 2
+    assert data["operation"] == "LogSoftmax"
+    assert data["description"] == "Log Softmax."
+    assert len(data["std_args"]) == 2
 
 
 def test_injector_dry_run(sample_op, capsys):

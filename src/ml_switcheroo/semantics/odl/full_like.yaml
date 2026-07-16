@@ -1,0 +1,21 @@
+description: Returns a new array filled with ``fill_value`` and having the same ``shape``
+  as an input array ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: fill_value
+  type: Union[bool, int, float, complex]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Optional[dtype]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Optional[device]
+type: attribute
+operation: full_like

@@ -1,0 +1,8 @@
+description: Prune tensor by removing units with the lowest L1-norm.
+std_args:
+- module
+- name
+- amount
+- importance_scores
+type: function
+operation: l1_unstructured

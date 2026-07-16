@@ -1,0 +1,6 @@
+description: Uwraps a memref from an unrealized cast and verifies its transforms.
+std_args:
+- ref
+- expected_transforms
+type: function
+operation: unwrap_transformed_memref

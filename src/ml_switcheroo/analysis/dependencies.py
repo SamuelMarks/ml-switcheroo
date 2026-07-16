@@ -71,9 +71,11 @@ class DependencyScanner(cst.CSTVisitor):
     if node.relative:
       return
 
-    if node.module:
-      root_pkg = self._get_root_package(node.module)
-      self._validate_package(root_pkg)
+    if not node.module:
+      return  # pragma: no cover
+
+    root_pkg = self._get_root_package(node.module)
+    self._validate_package(root_pkg)
 
   def _get_root_package(self, node: cst.BaseExpression) -> str:
     """Extracts the root package string from a CST node.

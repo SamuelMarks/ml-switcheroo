@@ -1,5 +1,4 @@
-"""
-Tests for Escape Hatch Reliability.
+"""Tests for Escape Hatch Reliability.
 
 Verifies that:
 1. Partial mutations are reverted (Verbatim Preservation).
@@ -21,8 +20,7 @@ from ml_switcheroo.config import RuntimeConfig
 
 
 class MockSemantics(SemanticsManager):
-  """
-  Mock Manager configured with:
+  """Mock Manager configured with:
   - 1 Working Op (good_op)
   - 1 Failing Op (bad_op)
   """
@@ -73,8 +71,7 @@ def rewrite_code(rewriter, code):
 
 
 def test_verbatim_preservation_on_partial_failure(rewriter):
-  """
-  Scenario: A statement contains one translatable call and one failing call.
+  """Scenario: A statement contains one translatable call and one failing call.
   Input: res = torch.good(x) + torch.bad(y)
 
   Behavior:
@@ -102,9 +99,7 @@ def test_verbatim_preservation_on_partial_failure(rewriter):
 
 
 def test_end_marker_presence(rewriter):
-  """
-  Verify the END marker and the Ellipsis sentinel are emitted.
-  """
+  """Verify the END marker and the Ellipsis sentinel are emitted."""
   code = "y = torch.bad(x)"
   result = rewrite_code(rewriter, code)
 
@@ -115,8 +110,7 @@ def test_end_marker_presence(rewriter):
 
 
 def test_nested_call_failure_bubbling(rewriter):
-  """
-  Scenario: Failure deep inside a call.
+  """Scenario: Failure deep inside a call.
   Input: y = torch.good(torch.bad(x))
   """
   code = "y = torch.good(torch.bad(x))"
@@ -129,9 +123,7 @@ def test_nested_call_failure_bubbling(rewriter):
 
 
 def test_multiple_statements_handled_independently(rewriter):
-  """
-  Verify that a failure in one line doesn't affect the next line.
-  """
+  """Verify that a failure in one line doesn't affect the next line."""
   code = """
 y = torch.bad(x)
 z = torch.good(x)

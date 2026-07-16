@@ -1,0 +1,17 @@
+description: Copies elements from source into self tensor at positions where the mask
+  is True.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mask
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: source
+  type: Tensor
+variants: {}
+operation: MaskedScatter

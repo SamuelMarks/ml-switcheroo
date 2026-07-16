@@ -685,7 +685,7 @@ variants:
   tensorflow:
     api: "tf.keras.layers.BatchNormalization"
   torch:
-    api: "torch.nn.BatchNorm2d" # Dimensionality ambiguity: Keras is generic. Torch needs 1d/2d/3d. 
+    api: "torch.nn.BatchNorm2d" # Dimensionality ambiguity: Keras is generic. Torch needs 1d/2d/3d.
     args:
       axis: null
       momentum: "momentum"
@@ -784,7 +784,7 @@ variants:
   torch:
     api: "torchvision.transforms.CenterCrop"
     args:
-      height: "size" 
+      height: "size"
       width: null # Torch expects single int or tuple for size
     pack_to_tuple: "size" # Logic to pack h/w
   jax:
@@ -851,7 +851,7 @@ variants:
     api: "torch.nn.Conv1d"
     args:
       filters: "out_channels"
-      # Input channels is missing in Keras (inferred), required in Torch. 
+      # Input channels is missing in Keras (inferred), required in Torch.
       # This mapping is partial/requires context.
       kernel_size: "kernel_size"
       strides: "stride"

@@ -1,0 +1,5 @@
+description: Storage class for float64 data.
+op_type: class
+std_args: []
+variants: {}
+operation: DoubleStorage

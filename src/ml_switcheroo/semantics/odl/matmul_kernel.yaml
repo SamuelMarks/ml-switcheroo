@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- x_tile_ref
+- y_tile_ref
+- o_tile_ref
+- acc_ref
+type: function
+operation: matmul_kernel

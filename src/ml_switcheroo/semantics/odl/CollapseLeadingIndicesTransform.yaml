@@ -1,0 +1,6 @@
+description: Collapses leading indices into one.
+std_args:
+- self
+- strides
+type: class
+operation: CollapseLeadingIndicesTransform

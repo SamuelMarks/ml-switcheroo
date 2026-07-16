@@ -13,8 +13,8 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Union, Any
 
 import libcst as cst
-from ml_switcheroo.compiler.ir import LogicalNode
-from ml_switcheroo.compiler.backends.python_snippet import PythonSnippetEmitter
+from ml_switcheroo.core.compiler.ir import LogicalNode
+from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
 
 
 @dataclass
@@ -132,19 +132,19 @@ class GraphPatcher(cst.CSTTransformer):
 
   # --- Statement Level Hooks ---
 
-  def leave_Assign(
+  def leave_Assign(  # type: ignore
     self, original_node: cst.Assign, updated_node: cst.Assign
   ) -> Union[cst.Assign, cst.SimpleStatementLine, cst.RemovalSentinel]:
     """Intercepts Assignment statements (e.g. `self.conv = ...`, `y = func(x)`)."""
     return self._handle_node(original_node, updated_node)
 
-  def leave_Expr(
+  def leave_Expr(  # type: ignore
     self, original_node: cst.Expr, updated_node: cst.Expr
   ) -> Union[cst.Expr, cst.SimpleStatementLine, cst.RemovalSentinel]:
     """Intercepts Expression statements (e.g. `func(x)` without assignment)."""
     return self._handle_node(original_node, updated_node)
 
-  def leave_Call(
+  def leave_Call(  # type: ignore
     self, original_node: cst.Call, updated_node: cst.Call
   ) -> Union[cst.Call, cst.BaseExpression, cst.RemovalSentinel]:
     """Execute implementation detail."""

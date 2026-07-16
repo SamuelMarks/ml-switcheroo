@@ -92,7 +92,7 @@ class TraceGraph {
                 row.style.backgroundColor = 'transparent';
             });
         }
-        
+
         // --- Timeline Seek Interaction ---
         if (event.type === 'ast_snapshot') {
             row.style.cursor = "pointer";
@@ -252,7 +252,7 @@ class TimeTravelController {
         this.label = document.getElementById("tt-phase-label");
 
         this._bindEvents();
-        
+
         // Listen for timeline clicks
         document.addEventListener('tt-seek-request', (e) => {
             if (e.detail && e.detail.eventId) {
@@ -260,7 +260,7 @@ class TimeTravelController {
             }
         });
     }
-    
+
     _bindEvents() {
         if (!this.slider) return;
 
@@ -282,10 +282,10 @@ class TimeTravelController {
      */
     loadEvents(events) {
         if (!events) return;
-        
+
         // Filter for snapshots and sort by timestamp implicitly via list order
         this.snapshots = events.filter(e => e.type === "ast_snapshot");
-        
+
         if (this.snapshots.length === 0) {
             this._resetUI(false);
             return;
@@ -304,7 +304,7 @@ class TimeTravelController {
         // Default to latest state
         this.seek(maxIdx);
     }
-    
+
     _resetUI(enabled) {
         if (this.btnPrev) this.btnPrev.disabled = !enabled;
         if (this.btnNext) this.btnNext.disabled = !enabled;
@@ -326,14 +326,14 @@ class TimeTravelController {
      */
     seek(index) {
         if (index < 0 || index >= this.snapshots.length) return;
-        
+
         this.currentIndex = index;
         const snap = this.snapshots[index];
 
         // Update UI
         if (this.slider) this.slider.value = index;
         if (this.label) this.label.textContent = `${index + 1}/${this.snapshots.length}: ${snap.description}`;
-        
+
         if (this.btnPrev) this.btnPrev.disabled = (index === 0);
         if (this.btnNext) this.btnNext.disabled = (index === this.snapshots.length - 1);
 
@@ -347,7 +347,7 @@ class TimeTravelController {
             }
         }
     }
-    
+
     /**
      * Seeks to the snapshot with the matching Event ID.
      * @param {string} id - The event uuid.

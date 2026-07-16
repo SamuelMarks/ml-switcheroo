@@ -1,0 +1,28 @@
+description: Helper function to define pooling functions.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inputs
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: init
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: reduce_fn
+  type: Callable
+- is_variadic: false
+  kind: positional_or_keyword
+  name: window_shape
+  type: Tuple
+- is_variadic: false
+  kind: positional_or_keyword
+  name: strides
+  type: Tuple
+- is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: str
+variants: {}
+operation: Pool

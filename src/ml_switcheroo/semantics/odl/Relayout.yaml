@@ -1,0 +1,8 @@
+description: States that `source` must be relayout-able to `target`.
+std_args:
+- self
+- source
+- target
+- bitwidth
+type: class
+operation: Relayout

@@ -1,0 +1,22 @@
+description: "Samples from a Cauchy (Lorentz) distribution. The distribution of the\
+  \ ratio of\nindependent normally distributed random variables with means `0` follows\
+  \ a\nCauchy distribution.\n\nExample::\n\n    >>> # xdoctest: +IGNORE_WANT(\"non-deterministic\"\
+  )\n    >>> m = Cauchy(torch.tensor([0.0]), torch.tensor([1.0]))\n    >>> m.sample()\
+  \  # sample from a Cauchy distribution with loc=0 and scale=1\n    tensor([ 2.3214])\n\
+  \nArgs:\n    loc (float or Tensor): mode or median of the distribution.\n    scale\
+  \ (float or Tensor): half width at half maximum."
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: loc
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: scale
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: validate_args
+  type: Any
+variants: {}
+operation: Cauchy

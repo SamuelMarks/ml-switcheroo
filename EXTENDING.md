@@ -78,10 +78,10 @@ from ml_switcheroo.enums import SemanticTier
 @register_framework("my_lib")
 class MyLibAdapter:
     display_name = "My Library"
-    
+
     # Optional: Inherit implementation behavior (e.g., 'flax_nnx' inherits 'jax' math)
     inherits_from = None
-    
+
     # Discovery configuration
     ui_priority = 100
 
@@ -124,7 +124,7 @@ class MyLibAdapter:
             "SiLU": StandardMap(
                 macro_template="{x} * ml.sigmoid({x})"
             ),
-            
+
             # Linking to a Custom Plugin (Logic located in src/plugins/)
             "SpecialOp": StandardMap(
                 requires_plugin="my_custom_logic"
@@ -153,7 +153,7 @@ class MyLibAdapter:
             requires_explicit_rng=False,         # Requires JAX-style keys?
             requires_functional_state=False      # Requires BatchNorm unrolling?
         )
-        
+
     @property
     def supported_tiers(self) -> List[SemanticTier]:
         return [SemanticTier.ARRAY_API, SemanticTier.NEURAL]
@@ -184,21 +184,21 @@ def transform_special_op(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     # Check framework capabilities or configuration
     if not ctx.plugin_traits.has_numpy_compatible_arrays:
         return node
-        
+
     # Look up API path dynamically (Decoupling)
     target_api = ctx.lookup_api("SpecialOp") or "default.op"
-    
+
     # 2. Inject Dependencies (Preamble)
     if not ctx.metadata.get("my_helper_injected"):
         ctx.inject_preamble("import my_helper_lib")
         ctx.metadata["my_helper_injected"] = True
-        
+
     # 3. Modify AST
     # Change function name
     # Ensure you import logic for creating dotted names
     # from ml_switcheroo.plugins.utils import create_dotted_name
     pass
-        
+
     return node
 ```
 

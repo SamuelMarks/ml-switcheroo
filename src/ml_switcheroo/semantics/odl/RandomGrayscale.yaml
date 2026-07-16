@@ -1,0 +1,10 @@
+description: Preprocessing layer for random conversion of RGB images to grayscale.
+op_type: class
+std_args:
+- default: 0.5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: factor
+  type: float
+variants: {}
+operation: RandomGrayscale

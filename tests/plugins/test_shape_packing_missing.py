@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 from ml_switcheroo.plugins.shape_packing import _create_dotted_name, transform_shape_packing
@@ -5,11 +7,13 @@ from ml_switcheroo.core.hooks import HookContext
 
 
 def test_create_dotted_name():
+  """Auto-generated doc."""
   res = _create_dotted_name("jax.numpy.reshape")
   assert isinstance(res, cst.Attribute)
 
 
 def test_transform_shape_packing_misses():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
   ctx.current_op_id = "Reshape"
 

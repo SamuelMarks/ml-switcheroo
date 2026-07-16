@@ -1,0 +1,9 @@
+description: Applies a series of layers to an input.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: layers
+  type: List
+variants: {}
+operation: Pipeline

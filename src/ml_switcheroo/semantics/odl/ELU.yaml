@@ -1,0 +1,4 @@
+description: Auto-generated mapping for elu.
+std_args: []
+type: function
+operation: elu

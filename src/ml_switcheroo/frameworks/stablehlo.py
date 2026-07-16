@@ -5,7 +5,7 @@ This adapter acts as a metadata container for the Compiler Registry,
 identifying StableHLO as a target language and providing static definitions.
 """
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Union, Any, Dict, List, Optional, Tuple
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import ImportConfig, InitMode, StandardMap, register_framework, FrameworkAdapter
 from ml_switcheroo.frameworks.loader import load_definitions
@@ -32,7 +32,7 @@ class StableHloAdapter(FrameworkAdapter):
     return "stablehlo", "stablehlo"
 
   @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
     """Execute implementation detail."""
     return {}
 

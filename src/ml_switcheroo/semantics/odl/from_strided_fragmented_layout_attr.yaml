@@ -1,0 +1,6 @@
+description: 'Constructs a WGStridedFragLayout from a #mosaic_gpu.WGStridedFragLayout
+  attribute.'
+std_args:
+- attr
+type: function
+operation: from_strided_fragmented_layout_attr

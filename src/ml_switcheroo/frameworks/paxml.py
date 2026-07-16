@@ -10,7 +10,7 @@ such as the ``setup()`` lifecycle method for layer definition.
 
 import logging
 import textwrap
-from typing import List, Tuple, Dict, Any, Optional
+from typing import Union, List, Tuple, Dict, Any, Optional
 
 try:
   import praxis
@@ -90,7 +90,7 @@ class PaxmlAdapter(JAXStackMixin):
     return "praxis.layers", "pl"
 
   @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
     """Defines the semantic roles of Praxis namespaces.
 
     Returns:
@@ -133,13 +133,13 @@ class PaxmlAdapter(JAXStackMixin):
 
     """
     return textwrap.dedent(
-      """ 
-            def _make_jax_key(seed): 
-                try: 
+      """
+            def _make_jax_key(seed):
+                try:
                     import jax
-                    return jax.random.PRNGKey(seed) 
-                except Exception: 
-                    return "mock_jax_key" 
+                    return jax.random.PRNGKey(seed)
+                except Exception:
+                    return "mock_jax_key"
         """
     ).strip()
 
@@ -281,30 +281,30 @@ class PaxmlAdapter(JAXStackMixin):
       "tier2_neural": """import praxis.layers as pl
 from praxis import base_layer
 
-class SimpleMLP(base_layer.BaseLayer): 
+class SimpleMLP(base_layer.BaseLayer):
     # Tier 2: Praxis Layer Definition
-    # Note the use of 'setup()' instead of '__init__' 
+    # Note the use of 'setup()' instead of '__init__'
 
-    def setup(self): 
-        # Layers are instantiated in setup() 
-        self.fc1 = pl.Linear(output_dims=128) 
-        self.fc2 = pl.Linear(output_dims=10) 
-        self.dropout = pl.Dropout(keep_prob=0.5) 
+    def setup(self):
+        # Layers are instantiated in setup()
+        self.fc1 = pl.Linear(output_dims=128)
+        self.fc2 = pl.Linear(output_dims=10)
+        self.dropout = pl.Dropout(keep_prob=0.5)
 
-    def __call__(self, x): 
-        x = self.fc1(x) 
-        x = pl.relu(x) 
-        x = self.dropout(x) 
-        return self.fc2(x) 
+    def __call__(self, x):
+        x = self.fc1(x)
+        x = pl.relu(x)
+        x = self.dropout(x)
+        return self.fc2(x)
 """,
       "tier3_extras": """import praxis.layers as pl
 from praxis import pax_fiddle
 
-def get_model_config(): 
+def get_model_config():
     # Tier 3: HParams Configuration
     # Praxis often relies on fiddle/HParams for configuration
 
-    p = pax_fiddle.Config(pl.Linear, name="my_linear") 
+    p = pax_fiddle.Config(pl.Linear, name="my_linear")
     p.input_dims = 64
     p.output_dims = 10
 

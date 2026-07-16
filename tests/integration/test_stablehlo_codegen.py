@@ -1,5 +1,4 @@
-"""
-Integration Tests mimicking StableHLO codegen via the main engines.
+"""Integration Tests mimicking StableHLO codegen via the main engines.
 Repurposed to fix test_ex03 failures by using non-strict comparison.
 """
 
@@ -9,11 +8,11 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
-SOURCE_TORCH = """ 
+SOURCE_TORCH = """
 import torch
 
-def transpose_matrices(batch): 
-    return torch.permute(batch, 0, 2, 1) 
+def transpose_matrices(batch):
+    return torch.permute(batch, 0, 2, 1)
 """
 
 

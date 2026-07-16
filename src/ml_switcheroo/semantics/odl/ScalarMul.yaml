@@ -1,0 +1,12 @@
+description: Multiplies a scalar times a Tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: scalar
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: ScalarMul

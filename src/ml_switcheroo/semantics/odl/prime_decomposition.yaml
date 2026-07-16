@@ -1,0 +1,6 @@
+description: Returns the prime decomposition of the given number `n` as a list of
+  ints.
+std_args:
+- n
+type: function
+operation: prime_decomposition

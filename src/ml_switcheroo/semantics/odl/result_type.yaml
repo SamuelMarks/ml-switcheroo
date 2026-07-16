@@ -1,0 +1,5 @@
+description: Returns the dtype that results from applying type promotion rules (see
+  type-promotion) to the arguments.
+std_args: []
+variants: {}
+operation: result_type

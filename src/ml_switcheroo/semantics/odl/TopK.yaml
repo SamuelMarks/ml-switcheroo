@@ -1,0 +1,28 @@
+description: Returns the k largest elements of the given input tensor along a given
+  dimension.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: k
+  type: int
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: largest
+  type: bool
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: sorted
+  type: bool
+variants: {}
+operation: TopK

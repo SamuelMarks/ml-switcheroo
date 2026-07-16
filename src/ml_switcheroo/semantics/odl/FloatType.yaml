@@ -1,0 +1,5 @@
+description: Internal type definition for floats.
+op_type: class
+std_args: []
+variants: {}
+operation: FloatType

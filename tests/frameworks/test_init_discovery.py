@@ -1,5 +1,4 @@
-"""
-Tests for Dynamic Framework Discovery (__init__.py).
+"""Tests for Dynamic Framework Discovery (__init__.py).
 
 Verifies:
 1. `available_frameworks` returns keys from the registry.
@@ -18,9 +17,7 @@ import ml_switcheroo.frameworks as frameworks_pkg
 
 
 def test_available_frameworks_reflects_registry():
-  """
-  Verify `available_frameworks()` returns the keys of the underlying registry.
-  """
+  """Verify `available_frameworks()` returns the keys of the underlying registry."""
   # Mock the registry directly
   mock_registry = {"mock_fw_1": MagicMock(), "mock_fw_2": MagicMock()}
 
@@ -32,8 +29,7 @@ def test_available_frameworks_reflects_registry():
 
 
 def test_auto_discovery_logic():
-  """
-  Verify that `_auto_register_adapters` iterates modules and imports them.
+  """Verify that `_auto_register_adapters` iterates modules and imports them.
   We mock pkgutil and importlib to simulate finding a 'tinygrad' module.
   """
   # 1. Mock pkgutil to return a specific list of modules
@@ -60,8 +56,7 @@ def test_auto_discovery_logic():
 
 
 def test_broken_module_handling(capsys):
-  """
-  Verify that if an adapter raises an Exception during import (e.g. SyntaxError
+  """Verify that if an adapter raises an Exception during import (e.g. SyntaxError
   or runtime error), the scanning continues and logs a warning.
   """
   mock_modules = [(None, "broken_adapter", False)]
@@ -80,9 +75,7 @@ def test_broken_module_handling(capsys):
 
 
 def test_helpers_are_exported():
-  """
-  Verify that essential helpers are exposed in __all__.
-  """
+  """Verify that essential helpers are exposed in __all__."""
   assert "get_adapter" in frameworks_pkg.__all__
   assert "register_framework" in frameworks_pkg.__all__
   assert callable(frameworks_pkg.get_adapter)

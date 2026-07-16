@@ -1,0 +1,5 @@
+description: Attribute representing a new axis (None).
+op_type: attribute
+std_args: []
+variants: {}
+operation: NewAxis

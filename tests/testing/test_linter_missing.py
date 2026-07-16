@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_linter_missing_coverage():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.linter import StructuralLinter
 
   linter = StructuralLinter({"torch"})
@@ -17,6 +21,7 @@ def test_linter_missing_coverage():
 
 
 def test_linter_get_full_name_attribute():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.linter import StructuralLinter
   import libcst as cst
 
@@ -26,6 +31,7 @@ def test_linter_get_full_name_attribute():
 
 
 def test_linter_parse_error():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.linter import validate_transpilation
 
   # 57-58: Linter Parse Error
@@ -35,6 +41,7 @@ def test_linter_parse_error():
 
 
 def test_linter_direct_access():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.linter import validate_transpilation
 
   # 156-159: Direct access of forbidden roots without alias

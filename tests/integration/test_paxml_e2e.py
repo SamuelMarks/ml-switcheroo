@@ -21,9 +21,7 @@ def _read_code(filename: str) -> str:
 
 
 class PaxE2ESemantics(SemanticsManager):
-  """
-  Mock Manager with PaxML structural traits.
-  """
+  """Mock Manager with PaxML structural traits."""
 
   def __init__(self):
     """Function docstring."""
@@ -128,9 +126,7 @@ def pax_engine():
 
 
 def test_ex06_paxml_full_conversion(pax_engine):
-  """
-  Runs the E2E conversion of ex06_paxml.torch.py.
-  """
+  """Runs the E2E conversion of ex06_paxml.torch.py."""
   code = _read_code("ex06_paxml.torch.py")
   result = pax_engine.run(code)
 

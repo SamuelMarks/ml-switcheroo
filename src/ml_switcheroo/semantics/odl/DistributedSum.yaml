@@ -1,0 +1,4 @@
+description: Enum value for Sum reduction in distributed operations.
+std_args: []
+variants: {}
+operation: DistributedSum

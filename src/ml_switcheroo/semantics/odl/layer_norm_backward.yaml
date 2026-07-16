@@ -1,0 +1,11 @@
+description: The class representing a Python function.
+std_args:
+- num_warps
+- num_stages
+- eps
+- backward_pass_impl
+- interpret
+- res
+- do
+type: function
+operation: layer_norm_backward

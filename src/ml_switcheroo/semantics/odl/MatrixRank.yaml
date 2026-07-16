@@ -1,0 +1,17 @@
+description: Returns the numerical rank of a 2-D tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tol
+  type: float
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: symmetric
+  type: bool
+variants: {}
+operation: MatrixRank

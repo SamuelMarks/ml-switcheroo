@@ -1,0 +1,9 @@
+description: Keras Layer that wraps a JAX model.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: call_fn
+  type: callable
+variants: {}
+operation: JaxLayer

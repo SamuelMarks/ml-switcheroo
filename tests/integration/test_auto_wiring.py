@@ -1,5 +1,4 @@
-"""
-Integration Tests for Automatic Plugin Wiring.
+"""Integration Tests for Automatic Plugin Wiring.
 
 Verifies that:
 1. Defining a hook with `auto_wire` metadata correctly registers it.
@@ -11,7 +10,7 @@ import pytest
 import libcst as cst
 from unittest.mock import patch
 
-from ml_switcheroo.core.hooks import register_hook, clear_hooks, HookContext
+from ml_switcheroo.core.hooks import register_hook, HookContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
@@ -20,14 +19,13 @@ from ml_switcheroo.config import RuntimeConfig
 @pytest.fixture(autouse=True)
 def clean_env():
   """Function docstring."""
-  clear_hooks()
+  pass  # clear_hooks removed
   yield
-  clear_hooks()
+  pass  # clear_hooks removed
 
 
 def test_auto_wired_plugin_flow(tmp_path):
-  """
-  Scenario: Define a custom plugin 'MagicSwap' that auto-wires itself to
+  """Scenario: Define a custom plugin 'MagicSwap' that auto-wires itself to
   a new operation 'MagicOp'.
   Input: `torch.magic(x)`
   Output: `jax.magic_swapped(x)`

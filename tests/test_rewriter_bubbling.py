@@ -1,6 +1,4 @@
-"""
-Tests for verification failure bubbling via TestRewriter.
-"""
+"""Tests for verification failure bubbling via TestRewriter."""
 
 import pytest
 import libcst as cst

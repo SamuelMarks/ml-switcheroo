@@ -1,0 +1,21 @@
+description: Updates embedding weights in-place to enforce max norm.
+is_inplace: true
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: max_norm
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: norm_type
+  type: float
+variants: {}
+operation: EmbeddingRenorm_

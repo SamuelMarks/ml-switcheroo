@@ -1,0 +1,12 @@
+description: BCOO version of lax.gather.
+std_args:
+- operand
+- start_indices
+- dimension_numbers
+- slice_sizes
+- unique_indices
+- indices_are_sorted
+- mode
+- fill_value
+type: function
+operation: bcoo_gather

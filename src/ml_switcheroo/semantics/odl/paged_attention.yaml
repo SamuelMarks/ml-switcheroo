@@ -1,0 +1,14 @@
+description: Paged grouped query attention.
+std_args:
+- q
+- k_pages
+- v_pages
+- lengths
+- page_indices
+- mask_value
+- attn_logits_soft_cap
+- pages_per_compute_block
+- megacore_mode
+- inline_seq_dim
+type: function
+operation: paged_attention

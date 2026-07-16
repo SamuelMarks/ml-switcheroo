@@ -1,5 +1,4 @@
-"""
-Tests for Device Allocator Plugin using Real Adapters logic.
+"""Tests for Device Allocator Plugin using Real Adapters logic.
 
 Verifies that:
 1. `torch.device('cuda')` delegates to JAX Adapter -> `jax.devices('gpu')[0]`.

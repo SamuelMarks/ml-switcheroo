@@ -1,0 +1,4 @@
+description: Auto-generated mapping for AdaptiveMaxPool3d.
+std_args: []
+type: class
+operation: AdaptiveMaxPool3d

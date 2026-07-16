@@ -336,8 +336,8 @@ variants:
     args:
       input: "x"
   mlx:
-    api: "mlx.core.erf" 
-    # MLX docs show erf is in core? It appears in mlx.core. 
+    api: "mlx.core.erf"
+    # MLX docs show erf is in core? It appears in mlx.core.
     # Can verify with scaffolding if fails.
     args:
       input: "a"
@@ -724,35 +724,35 @@ variants:
 ---
 operation: "FbgemmLinearFp16Weight"
 description: "FBGEMM linear with FP16 weights."
-std_args: [] 
+std_args: []
 variants:
   torch:
     api: "torch.fbgemm_linear_fp16_weight"
 ---
 operation: "FbgemmLinearFp16WeightFp32Activation"
 description: "FBGEMM linear with FP16 weights and FP32 activation."
-std_args: [] 
+std_args: []
 variants:
   torch:
     api: "torch.fbgemm_linear_fp16_weight_fp32_activation"
 ---
 operation: "FbgemmLinearInt8Weight"
 description: "FBGEMM linear with Int8 weights."
-std_args: [] 
+std_args: []
 variants:
   torch:
     api: "torch.fbgemm_linear_int8_weight"
 ---
 operation: "FbgemmLinearInt8WeightFp32Activation"
 description: "FBGEMM linear with Int8 weights and FP32 activation."
-std_args: [] 
+std_args: []
 variants:
   torch:
     api: "torch.fbgemm_linear_int8_weight_fp32_activation"
 ---
 operation: "FbgemmLinearQuantizeWeight"
 description: "FBGEMM linear weight quantization."
-std_args: [] 
+std_args: []
 variants:
   torch:
     api: "torch.fbgemm_linear_quantize_weight"

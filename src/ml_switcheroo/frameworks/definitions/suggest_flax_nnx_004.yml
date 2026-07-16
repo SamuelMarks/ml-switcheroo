@@ -104,7 +104,7 @@ variants:
   keras:
     api: "tf.cond"
   mlx:
-    api: null 
+    api: null
     missing_message: "MLX relies on standard Python if/else."
 
 ---
@@ -159,7 +159,7 @@ variants:
     api: null
   torch:
     api: "torch.nn.Parameter"
-    args: 
+    args:
       value: "data"
     arg_values:
       requires_grad: "False"
@@ -264,7 +264,7 @@ variants:
     api: "model.eval"
     transformation_type: "method_call"
   keras:
-    api: null 
+    api: null
     missing_message: "Keras handles evaluation mode via the 'training=False' argument in call."
   jax:
     api: null # Functional models pass train=False args
@@ -284,10 +284,10 @@ variants:
   jax:
     api: "jax.eval_shape"
   torch:
-    api: "torch.func.eval_shape" 
+    api: "torch.func.eval_shape"
     min_version: "2.0"
   tensorflow:
-    api: null 
+    api: null
 
 ---
 operation: "FilterState"
@@ -430,7 +430,7 @@ variants:
   torch:
     api: "torch.nn.functional.gelu"
     args:
-        approximate: "approximate" 
+        approximate: "approximate"
     arg_values:
         approximate:
             "True": "'tanh'"

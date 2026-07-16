@@ -1,0 +1,5 @@
+description: Storage for Boolean data.
+op_type: class
+std_args: []
+variants: {}
+operation: BoolStorage

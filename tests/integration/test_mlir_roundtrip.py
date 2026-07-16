@@ -1,6 +1,4 @@
-"""
-Integration test for the MLIR Bridge Pipeline.
-"""
+"""Integration test for the MLIR Bridge Pipeline."""
 
 import pytest
 from unittest.mock import patch

@@ -1,0 +1,7 @@
+description: Convert the array to 1D and then shard across threads.
+std_args:
+- self
+- shape
+- vec_size
+type: class
+operation: WGStridedFragLayout

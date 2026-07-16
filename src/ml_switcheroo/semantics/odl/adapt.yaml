@@ -1,0 +1,28 @@
+description: 'NOTE: This adapter may mutate given ``input_args_with_path``.'
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: self
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: target_spec
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_spec
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_args
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: metadata
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: obj
+  type: Any
+variants: {}
+operation: adapt

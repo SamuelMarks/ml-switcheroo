@@ -1,0 +1,13 @@
+description: Returns the remainder of division for each element ``x1_i`` of the input
+  array ``x1`` and the respective element ``x2_i`` of the input array ``x2``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x1
+  type: Union[array, int, float]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x2
+  type: Union[array, int, float]
+variants: {}
+operation: remainder

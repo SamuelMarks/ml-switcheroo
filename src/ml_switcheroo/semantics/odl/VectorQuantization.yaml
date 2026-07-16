@@ -1,0 +1,20 @@
+description: Implements vector quantization (VQ)/online k-means clustering.
+op_type: class
+std_args:
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: num_clusters
+  type: int
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: num_heads
+  type: int
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dim_per_head
+  type: int
+variants: {}
+operation: VectorQuantization

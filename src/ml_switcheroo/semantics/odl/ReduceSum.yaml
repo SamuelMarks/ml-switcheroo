@@ -1,0 +1,17 @@
+description: Computes the sum of elements across dimensions of a tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int | List[int]
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: keepdims
+  type: bool
+variants: {}
+operation: ReduceSum

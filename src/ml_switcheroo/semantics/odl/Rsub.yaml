@@ -1,0 +1,17 @@
+description: Subtracts input from other (other - input) scaling input by alpha.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: other
+  type: Tensor
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: alpha
+  type: float
+variants: {}
+operation: Rsub

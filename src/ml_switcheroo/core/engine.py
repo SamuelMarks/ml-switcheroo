@@ -32,15 +32,15 @@ from ml_switcheroo.core.rewriter.passes.api import ApiPass
 from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass
 
 # Compiler Components
-from ml_switcheroo.compiler.registry import (
+from ml_switcheroo.core.compiler.registry import (
   is_isa_target,
   is_isa_source,
   get_backend_class,
 )
-from ml_switcheroo.compiler.frontends.python import PythonFrontend
-from ml_switcheroo.compiler.frontends.sass import SassParser, SassLifter
-from ml_switcheroo.compiler.frontends.rdna import RdnaParser, RdnaLifter
-from ml_switcheroo.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
+from ml_switcheroo.core.compiler.frontends.sass import SassParser, SassLifter
+from ml_switcheroo.core.compiler.frontends.rdna import RdnaParser, RdnaLifter
+from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.frameworks.base import get_adapter
 
 # Visualization
@@ -164,15 +164,17 @@ class ASTEngine:
       if self.source == "sass":
         parser = SassParser(code)
         nodes = parser.parse()
-        lifter = SassLifter()
+        lifter: Any = SassLifter()
         graph = lifter.lift(nodes)
       elif self.source == "rdna":
-        parser = RdnaParser(code)
+        parser = RdnaParser(code)  # type: ignore
         nodes = parser.parse()
         lifter = RdnaLifter()
         graph = lifter.lift(nodes)
       else:
         raise NotImplementedError(f"No frontend for {self.source}")
+
+    assert graph is not None
 
     if self.config.enable_graph_optimization:
       from ml_switcheroo.core.graph_optimizer import GraphOptimizer
@@ -186,10 +188,10 @@ class ASTEngine:
       tracer.end_phase()
 
     if getattr(self.config, "enable_sharding", False):
-      from ml_switcheroo.compiler.sharding import ShardingInferencePass
-      from ml_switcheroo.compiler.sharding_extractor import ShardingExtractionPass
-      from ml_switcheroo.compiler.fusion import QKVFusionPass, QKVDefusionPass
-      from ml_switcheroo.compiler.qwen_fusion import (
+      from ml_switcheroo.core.compiler.sharding import ShardingInferencePass
+      from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
+      from ml_switcheroo.core.compiler.fusion import QKVFusionPass, QKVDefusionPass
+      from ml_switcheroo.core.compiler.qwen_fusion import (
         SwiGLUFusionPass,
         SwiGLUDefusionPass,
         VisionPatchEmbeddingFusionPass,
@@ -220,7 +222,7 @@ class ASTEngine:
     if backend_cls.__name__ == "PythonBackend":
       backend = backend_cls(framework=self.target)  # type: ignore
     else:
-      backend = cast(CompilerBackend, backend_cls(self.semantics))
+      backend = cast(CompilerBackend, backend_cls(self.semantics))  # type: ignore
 
     output_code = backend.compile(graph)
     tracer.log_mutation("Codegen", "(Graph)", output_code)
@@ -241,9 +243,9 @@ class ASTEngine:
       tracer.start_phase("Graph Guided Rewriting", "Fusion & Surgery")
       try:
         from ml_switcheroo.core.graph_optimizer import GraphOptimizer
-        from ml_switcheroo.compiler.differ import GraphDiffer
-        from ml_switcheroo.core.rewriter.patcher import GraphPatcher
-        from ml_switcheroo.compiler.backends.python_snippet import (
+        from ml_switcheroo.core.compiler.differ import GraphDiffer
+        from ml_switcheroo.core.rewriter.patcher import GraphPatcher  # type: ignore
+        from ml_switcheroo.core.compiler.backends.python_snippet import (
           PythonSnippetEmitter,
         )
 
@@ -260,10 +262,10 @@ class ASTEngine:
           optimized_graph = optimizer.optimize(original_graph)
 
           if self.config.enable_sharding:
-            from ml_switcheroo.compiler.sharding import ShardingInferencePass
-            from ml_switcheroo.compiler.sharding_extractor import ShardingExtractionPass
-            from ml_switcheroo.compiler.fusion import QKVFusionPass, QKVDefusionPass
-            from ml_switcheroo.compiler.qwen_fusion import (
+            from ml_switcheroo.core.compiler.sharding import ShardingInferencePass
+            from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
+            from ml_switcheroo.core.compiler.fusion import QKVFusionPass, QKVDefusionPass
+            from ml_switcheroo.core.compiler.qwen_fusion import (
               SwiGLUFusionPass,
               SwiGLUDefusionPass,
               VisionPatchEmbeddingFusionPass,
@@ -293,7 +295,7 @@ class ASTEngine:
           # D. Patching
           if plan:
             emitter = PythonSnippetEmitter(framework=self.target)
-            patcher = GraphPatcher(plan, provenance, emitter)
+            patcher = GraphPatcher(plan, provenance, emitter)  # type: ignore
             tree = tree.visit(patcher)
             tracer.log_mutation(
               "Graph Patching",
@@ -338,10 +340,11 @@ class ASTEngine:
       usage_scanner = UsageScanner(self.source)
       tree.visit(usage_scanner)
       should_preserve = usage_scanner.get_result()
+      print(f"DEBUG: should_preserve={should_preserve}")
       resolver = ImportResolver(self.semantics)
-      plan = resolver.resolve(tree, self.target)
+      plan = resolver.resolve(tree, self.target)  # type: ignore
       fixer = ImportFixer(
-        plan=plan,
+        plan=plan,  # type: ignore
         source_fws={
           self.config.source_framework,
           self.config.effective_source,

@@ -1,0 +1,12 @@
+description: Save an array to a text file.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: fname
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: X
+  type: Array
+variants: {}
+operation: SaveTxt

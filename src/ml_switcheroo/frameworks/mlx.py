@@ -12,7 +12,6 @@ It supports:
 Definitions are loaded from `frameworks/definitions/mlx.json`.
 """
 
-import textwrap
 from typing import List, Tuple, Optional, Dict, Any
 import numpy as np
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -20,8 +19,11 @@ from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, 
 from ml_switcheroo.frameworks.loader import load_definitions
 
 
+from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
+
+
 @register_framework("mlx")
-class MLXAdapter:
+class MLXAdapter(MlxIOMixin):
   """Adapter for Apple MLX (Silicon-optimized tensor framework)."""
 
   display_name: str = "Apple MLX"
@@ -179,7 +181,7 @@ class MLXAdapter:
       import mlx.core as mx
 
       if isinstance(data, (np.ndarray, list, tuple, np.generic)):  # pragma: no cover
-        return mx.array(data)  # pragma: no cover
+        return mx.array(data)  # type: ignore  # pragma: no cover
     except Exception:
       pass
     return data
@@ -194,49 +196,49 @@ class MLXAdapter:
     return {
       "tier1_math": """import mlx.core as mx
 
-def math_ops(x, y): 
+def math_ops(x, y):
     # Tier 1: Unified Buffer Architecture Math
     # MLX uses lazy evaluation by default
-    a = mx.abs(x) 
-    b = mx.add(a, y) 
+    a = mx.abs(x)
+    b = mx.add(a, y)
 
     # Reductions
-    return mx.mean(b, axis=0) 
+    return mx.mean(b, axis=0)
 """,
       "tier2_neural": """import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optim
 
-class MLP(nn.Module): 
+class MLP(nn.Module):
     # Tier 2: Neural Modules
     # Inherits from nn.Module, uses __call__ for inference
-    def __init__(self, in_dims: int, out_dims: int): 
-        super().__init__() 
-        self.layers = [ 
-            nn.Linear(in_dims, 64), 
-            nn.ReLU(), 
-            nn.Linear(64, out_dims) 
-        ] 
+    def __init__(self, in_dims: int, out_dims: int):
+        super().__init__()
+        self.layers = [
+            nn.Linear(in_dims, 64),
+            nn.ReLU(),
+            nn.Linear(64, out_dims)
+        ]
 
-    def __call__(self, x): 
-        for l in self.layers: 
-            x = l(x) 
+    def __call__(self, x):
+        for l in self.layers:
+            x = l(x)
         return x
-        
-def train_step(model, optimizer, x, y): 
+
+def train_step(model, optimizer, x, y):
     # Backward pass handled by value_and_grad via mx.compile typically
     pass
 """,
       "tier3_extras": """import mlx.core as mx
 
-def compute_on_gpu(x): 
-    # Tier 3: Extras (Streams & Devices) 
+def compute_on_gpu(x):
+    # Tier 3: Extras (Streams & Devices)
     # Explicitly schedule computation on the GPU stream
-    with mx.stream(mx.gpu): 
+    with mx.stream(mx.gpu):
         y = mx.array(x) * 2
 
-        # Trigger evaluation (sync) 
-        mx.eval(y) 
+        # Trigger evaluation (sync)
+        mx.eval(y)
         return y
 """,
       "tier4_qwen3-vl": """import mlx.core as mx
@@ -268,11 +270,11 @@ class Qwen3VLPatchEmbed(nn.Module):
         seq_len = hidden_states.shape[0]
 
         hidden_states = mx.reshape(
-            hidden_states, 
+            hidden_states,
             [seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size]
         )
         hidden_states = mx.transpose(hidden_states, (0, 2, 3, 4, 1))
-        
+
         out = self.proj(hidden_states)
         return mx.reshape(out, [seq_len, cfg.hidden_size])
 """,
@@ -328,64 +330,8 @@ class Qwen3VLPatchEmbed(nn.Module):
     """
     return ["import mlx.core as mx"]  # pragma: no cover
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Returns save/load syntax.
-
-    Args:
-        op: 'save' or 'load'.
-        file_arg: Target file path.
-        object_arg: Object name.
-
-    Returns:
-        str: Code string.
-
-    """
-    if op == "save" and object_arg:  # pragma: no cover
-      return f"mx.save({file_arg}, {object_arg})"  # pragma: no cover
-    elif op == "load":  # pragma: no cover
-      return f"mx.load({file_arg})"  # pragma: no cover
-    return ""  # pragma: no cover
-
-  def get_weight_conversion_imports(self) -> List[str]:
-    """Returns imports needed for weight scripts."""
-    return ["import mlx.core as mx"]  # pragma: no cover
-
-  def get_weight_load_code(self, path_var: str) -> str:
-    """Loads weights using mx.load (npz/safetensors) into a raw dictionary."""
-    return textwrap.dedent(  # pragma: no cover
-      f""" 
-            if str({path_var}).endswith(".npz"): 
-                loaded = mx.load({path_var}) 
-            else: 
-                loaded = mx.load({path_var}) # supports safetensors implicitly usually
-                
-            # If load returns array, wrap in dict
-            if isinstance(loaded, dict): 
-                 raw_state = loaded
-            else: 
-                 # Flatten if nested or assume single array? 
-                 # MLX usually loads dict of arrays
-                 raw_state = loaded
-            """
-    )
-
-  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Converts MLX array to numpy."""
-    return f"np.array({tensor_var})"  # pragma: no cover
-
-  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Saves dictionary of arrays to .npz or .safetensors."""
-    return textwrap.dedent(  # pragma: no cover
-      f""" 
-            # Convert to MLX arrays if numpy
-            mlx_state = {{k: mx.array(v) for k, v in {state_var}.items()}} 
-            mx.save_safetensors({path_var}, mlx_state) 
-            """
-    )
-
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Applies manual wiring for MLX.
-    Overrides/Patches snapshot items that cannot be statically defined.
+  def apply_wiring(self, snapshot):
+    """Overrides/Patches snapshot items that cannot be statically defined.
 
     Args:
         snapshot: Snapshotdict.

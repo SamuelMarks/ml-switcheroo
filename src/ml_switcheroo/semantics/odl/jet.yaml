@@ -1,0 +1,9 @@
+description: Taylor-mode higher-order automatic differentiation.
+std_args:
+- fun
+- primals
+- series
+- factorial_scaled
+- _
+type: function
+operation: jet

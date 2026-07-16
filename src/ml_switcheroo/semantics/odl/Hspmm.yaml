@@ -1,0 +1,12 @@
+description: Performs sparse matrix multiplication.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mat1
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mat2
+  type: Tensor
+variants: {}
+operation: Hspmm

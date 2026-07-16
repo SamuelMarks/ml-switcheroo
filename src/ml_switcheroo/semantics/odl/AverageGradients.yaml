@@ -1,0 +1,8 @@
+description: Average the gradients across distributed processes.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: gradients
+  type: Any
+variants: {}
+operation: AverageGradients

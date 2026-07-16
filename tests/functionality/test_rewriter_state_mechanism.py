@@ -1,6 +1,4 @@
-"""
-Tests for Generic State Mechanism handling.
-"""
+"""Tests for Generic State Mechanism handling."""
 
 import pytest
 import libcst as cst
@@ -11,9 +9,7 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 class MockStateSemantics(SemanticsManager):
-  """
-  Mock Manager with arbitrary state configurations.
-  """
+  """Mock Manager with arbitrary state configurations."""
 
   def __init__(self) -> None:
     """Function docstring."""

@@ -1,0 +1,6 @@
+description: Splits the key into two keys of the same shape.
+std_args:
+- key
+- shape
+type: function
+operation: philox_split

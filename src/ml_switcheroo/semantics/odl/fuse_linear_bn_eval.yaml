@@ -1,0 +1,7 @@
+description: Fuse a linear module and a BatchNorm module into a single, new linear
+  module.
+std_args:
+- linear
+- bn
+type: function
+operation: fuse_linear_bn_eval

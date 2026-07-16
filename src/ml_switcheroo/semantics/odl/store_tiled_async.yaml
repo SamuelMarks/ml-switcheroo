@@ -1,0 +1,12 @@
+description: The class representing a Python function.
+std_args:
+- self
+- ref
+- barrier
+- cluster_dim
+- cluster_idx
+- swizzle
+- optimized
+- tiling_rank
+type: function
+operation: store_tiled_async

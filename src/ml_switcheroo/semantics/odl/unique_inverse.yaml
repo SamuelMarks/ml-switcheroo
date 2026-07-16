@@ -1,0 +1,9 @@
+description: Returns the unique elements of an input array ``x`` and the indices from
+  the set of unique elements that reconstruct ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+variants: {}
+operation: unique_inverse

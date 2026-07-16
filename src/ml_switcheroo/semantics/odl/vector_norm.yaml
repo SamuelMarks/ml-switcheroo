@@ -1,0 +1,20 @@
+description: Computes the vector norm of a vector (or batch of vectors) ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: Optional[Union[int, Tuple[int, Ellipsis]]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: keepdims
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ord
+  type: Union[int, float, Literal[inf, Any]]
+type: function
+operation: vector_norm

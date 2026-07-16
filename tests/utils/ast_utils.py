@@ -1,6 +1,4 @@
-"""
-ast_utils, a bunch of helpers for converting input into ast.* input_str
-"""
+"""ast_utils, a bunch of helpers for converting input into ast.* input_str"""
 
 from ast import AST
 
@@ -10,8 +8,7 @@ class Undefined:
 
 
 def cmp_ast(node0, node1):
-  """
-  Compare if two nodes are equal. Verbatim stolen from `meta.asttools`.
+  """Compare if two nodes are equal. Verbatim stolen from `meta.asttools`.
 
   :param node0: First node
   :type node0: ```Union[AST, List[AST], Tuple[AST]]```
@@ -22,7 +19,6 @@ def cmp_ast(node0, node1):
   :return: Whether they are equal (recursive)
   :rtype: ```bool```
   """
-
   if type(node0) is not type(node1):
     return False
 

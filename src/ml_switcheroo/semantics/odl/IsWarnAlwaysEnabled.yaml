@@ -1,0 +1,4 @@
+description: Returns True if the global warn_always flag is turned on.
+std_args: []
+variants: {}
+operation: IsWarnAlwaysEnabled

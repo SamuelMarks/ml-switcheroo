@@ -1,5 +1,4 @@
-"""
-Integration Tests for HTML DSL Roundtrip.
+"""Integration Tests for HTML DSL Roundtrip.
 
 Verifies:
 1. Python -> HTML generation (Red/Blue Boxes, SVG Arrows, Functional Ops classification).
@@ -14,28 +13,28 @@ from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 # Sample Python source (PyTorch style)
 # Updated to include functional calls (flatten, relu) to test classification logic
-SOURCE_CODE = """ 
+SOURCE_CODE = """
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class Net(nn.Module): 
-    def __init__(self): 
-        super().__init__() 
-        self.conv = nn.Conv2d(1, 32, 3) 
-        self.fc = nn.Linear(32, 10) 
-    
-    def forward(self, x): 
-        x = self.conv(x) 
-        x = torch.flatten(x, 1) 
-        x = F.relu(x) 
-        return self.fc(x) 
+class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv = nn.Conv2d(1, 32, 3)
+        self.fc = nn.Linear(32, 10)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = torch.flatten(x, 1)
+        x = F.relu(x)
+        return self.fc(x)
 """
 
 # Sample HTML Input logic
 # Update: 'in' keyword replaced by 'i' to ensure valid python generation by Parser
 # Includes a Green box to verify it is ignored by the parser
-HTML_INPUT = """ 
+HTML_INPUT = """
 <h3>Model: RestoredNet</h3>
 <div class="sw-grid">
   <!-- Attribute: self.conv = Conv2d(...) -->
@@ -43,7 +42,7 @@ HTML_INPUT = """
      <span class="header-txt">conv: Conv2d</span>
      <code>i=1, o=32, k=3</code>
   </div>
-  
+
   <!-- Operation: Call self.conv(x) -->
   <div class="box b">
      <span class="header-txt">Call (conv)</span>
@@ -56,7 +55,7 @@ HTML_INPUT = """
      <span class="header-txt">out_conv</span>
      <code>[_]</code>
   </div>
-  
+
   <!-- Functional Operation -->
   <div class="box b">
      <span class="header-txt">Flatten</span>
@@ -68,8 +67,7 @@ HTML_INPUT = """
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """
-  Returns a hydrated SemanticsManager.
+  """Returns a hydrated SemanticsManager.
   Ideally loads definitions from the HTML adapter to ensure mappings match.
   """
   mgr = SemanticsManager()
@@ -78,8 +76,7 @@ def semantics() -> SemanticsManager:
 
 
 def test_torch_to_html_generation(semantics):
-  """
-  Scenario: Convert Python class to HTML Grid.
+  """Scenario: Convert Python class to HTML Grid.
   Expect: Valid HTML structure with styled boxes and connections.
   Verifies that functional ops like 'flatten' are correctly placed in Blue boxes,
   not Red attribute boxes.
@@ -124,8 +121,7 @@ def test_torch_to_html_generation(semantics):
 
 
 def test_html_to_python_parsing(semantics):
-  """
-  Scenario: Convert HTML Grid back to Python.
+  """Scenario: Convert HTML Grid back to Python.
   Expect: Valid Python class with `html_dsl` alias (rewriter will pivot to target if configured).
   Verifies that Green 'Data' boxes are ignored and do not produce function calls.
   """

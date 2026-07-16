@@ -1,0 +1,20 @@
+description: Extracts sliding local blocks from a batched input tensor. Copy variant.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dimension
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: size
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: step
+  type: int
+variants: {}
+operation: UnfoldCopy

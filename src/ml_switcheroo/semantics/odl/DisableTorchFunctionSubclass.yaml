@@ -1,0 +1,5 @@
+description: Context manager that disables __torch_function__ for subclasses.
+op_type: context
+std_args: []
+variants: {}
+operation: DisableTorchFunctionSubclass

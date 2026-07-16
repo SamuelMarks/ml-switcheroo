@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- arr
+- global_mesh
+- pspec
+type: function
+operation: host_local_array_to_global_array_impl

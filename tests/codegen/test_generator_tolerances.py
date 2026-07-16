@@ -1,5 +1,4 @@
-"""
-Tests for Dynamic Tolerance Injection in Test Generator.
+"""Tests for Dynamic Tolerance Injection in Test Generator.
 
 Verifies:
 1. Default behavior: Uses 1e-3, 1e-4 if not specified.
@@ -32,8 +31,7 @@ def generator():
 
 
 def test_tolerance_defaults(generator, tmp_path):
-  """
-  Scenario: No constraints in definition.
+  """Scenario: No constraints in definition.
   Expect: rtol=1e-3, atol=1e-4.
   """
   semantics = {
@@ -52,9 +50,7 @@ def test_tolerance_defaults(generator, tmp_path):
 
 
 def test_tolerance_override(generator, tmp_path):
-  """
-  Scenario: Explicit loose tolerances for unstable ops (e.g. fast math).
-  """
+  """Scenario: Explicit loose tolerances for unstable ops (e.g. fast math)."""
   semantics = {
     "LooseOp": {
       "std_args": ["x"],
@@ -73,9 +69,7 @@ def test_tolerance_override(generator, tmp_path):
 
 
 def test_tolerance_scientific_notation(generator, tmp_path):
-  """
-  Scenario: Tiny tolerances using E-notation.
-  """
+  """Scenario: Tiny tolerances using E-notation."""
   semantics = {
     "StrictOp": {
       "std_args": ["x"],

@@ -1,0 +1,8 @@
+description: Stack arrays in sequence vertically (row wise).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tensors
+  type: List[Tensor]
+variants: {}
+operation: RowStack

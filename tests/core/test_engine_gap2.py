@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
@@ -6,12 +8,14 @@ from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
 
 def get_tracer_mock():
+  """Auto-generated doc."""
   m = MagicMock()
   m.export.return_value = []
   return m
 
 
 def test_engine_target_torch_keras_sharding():
+  """Auto-generated doc."""
   # 214-215 sharding logic for torch/keras targets
   engine = ASTEngine(source="sass", target="keras")
   engine.config.enable_sharding = True
@@ -29,13 +33,14 @@ def test_engine_target_torch_keras_sharding():
 
 
 def test_rewriter_loopback():
+  """Auto-generated doc."""
   engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   with (
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
-    patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
+    patch("ml_switcheroo.core.compiler.differ.GraphDiffer") as mock_differ,
     patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
-    patch("ml_switcheroo.compiler.backends.python_snippet.PythonSnippetEmitter"),
+    patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
     real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
     real_map = {"a": None}
@@ -48,15 +53,16 @@ def test_rewriter_loopback():
 
 
 def test_rewriter_loopback_sharding_jax():
+  """Auto-generated doc."""
   cfg = RuntimeConfig(strict_mode=False)
   cfg.enable_sharding = True
   engine = ASTEngine(config=cfg, source="torch", target="jax", enable_graph_optimization=True)
   with (
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
-    patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
+    patch("ml_switcheroo.core.compiler.differ.GraphDiffer") as mock_differ,
     patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
-    patch("ml_switcheroo.compiler.backends.python_snippet.PythonSnippetEmitter"),
+    patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
     real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
     real_map = {"a": None}
@@ -69,15 +75,16 @@ def test_rewriter_loopback_sharding_jax():
 
 
 def test_rewriter_loopback_sharding_torch():
+  """Auto-generated doc."""
   cfg = RuntimeConfig(strict_mode=False)
   cfg.enable_sharding = True
   engine = ASTEngine(config=cfg, source="jax", target="torch", enable_graph_optimization=True)
   with (
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
-    patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
+    patch("ml_switcheroo.core.compiler.differ.GraphDiffer") as mock_differ,
     patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
-    patch("ml_switcheroo.compiler.backends.python_snippet.PythonSnippetEmitter"),
+    patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
     real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
     real_map = {"a": None}
@@ -90,6 +97,7 @@ def test_rewriter_loopback_sharding_torch():
 
 
 def test_engine_target_rdna():
+  """Auto-generated doc."""
   engine = ASTEngine(source="rdna", target="keras")
 
   with (

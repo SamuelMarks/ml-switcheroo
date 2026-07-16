@@ -1,0 +1,7 @@
+description: Prune tensor by removing random (currently unpruned) units.
+std_args:
+- module
+- name
+- amount
+type: function
+operation: random_unstructured

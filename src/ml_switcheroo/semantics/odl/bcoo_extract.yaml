@@ -1,0 +1,7 @@
+description: Extract values from a dense array according to the sparse array's indices.
+std_args:
+- sparr
+- arr
+- assume_unique
+type: function
+operation: bcoo_extract

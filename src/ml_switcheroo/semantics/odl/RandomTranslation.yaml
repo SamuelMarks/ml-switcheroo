@@ -1,0 +1,22 @@
+description: Randomly translates images.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: height_factor
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: width_factor
+  type: float
+- default: bilinear
+  is_variadic: false
+  kind: positional_or_keyword
+  name: interpolation
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: seed
+  type: int
+variants: {}
+operation: RandomTranslation

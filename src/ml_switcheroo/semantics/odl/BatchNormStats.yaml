@@ -1,0 +1,12 @@
+description: Internal operation for BatchNorm statistics calculation.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: Any
+variants: {}
+operation: BatchNormStats

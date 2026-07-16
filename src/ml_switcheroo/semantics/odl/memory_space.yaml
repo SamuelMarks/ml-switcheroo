@@ -1,0 +1,4 @@
+description: Returns the memory space associated with this value.
+std_args: []
+type: attribute
+operation: memory_space

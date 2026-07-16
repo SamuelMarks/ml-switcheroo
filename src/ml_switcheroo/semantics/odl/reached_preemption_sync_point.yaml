@@ -1,0 +1,5 @@
+description: Determine whether all hosts have reached a preemption sync step.
+std_args:
+- step_id
+type: function
+operation: reached_preemption_sync_point

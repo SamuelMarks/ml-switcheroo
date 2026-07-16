@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import pytest
 from pydantic import BaseModel
 from ml_switcheroo.config import parse_cli_key_values, RuntimeConfig, get_framework_priority_order
@@ -5,11 +7,13 @@ import ml_switcheroo.config as conf
 
 
 def test_config_tomli_fallback(monkeypatch):
+  """Auto-generated doc."""
   monkeypatch.setattr(conf, "tomllib", None)
   assert conf.tomllib is None
 
 
 def test_parse_cli_key_values():
+  """Auto-generated doc."""
   assert parse_cli_key_values(None) == {}
   assert parse_cli_key_values([]) == {}
 
@@ -28,14 +32,18 @@ def test_parse_cli_key_values():
 
 
 def test_runtime_config_validate_frameworks():
+  """Auto-generated doc."""
   with pytest.raises(ValueError, match="Unknown framework"):
     RuntimeConfig(source_framework="unknown")
 
 
 def test_get_plugin_config_validation():
+  """Auto-generated doc."""
   config = RuntimeConfig(source_framework="jax", target_framework="torch", plugin_settings={"x": "bad"})
 
   class DummySchema(BaseModel):
+    """Auto-generated doc."""
+
     x: int
 
   with pytest.raises(ValueError):
@@ -43,12 +51,14 @@ def test_get_plugin_config_validation():
 
 
 def test_load_toml_config_missing():
+  """Auto-generated doc."""
   res, p = conf._load_toml_settings(start_path=conf.Path("/nonexistent_path_to_toml_dir"))
   assert res == {}
   assert p is None
 
 
 def test_runtime_config_default_fallback(monkeypatch):
+  """Auto-generated doc."""
   import ml_switcheroo.frameworks.base as fb
 
   monkeypatch.setattr(fb, "available_frameworks", lambda: [])
@@ -56,8 +66,11 @@ def test_runtime_config_default_fallback(monkeypatch):
   assert conf._resolve_default_target() == "target_placeholder"
 
   class BadAdapter:
+    """Auto-generated doc."""
+
     @property
     def ui_priority(self):
+      """Auto-generated doc."""
       return "bad"
 
   monkeypatch.setattr(fb, "available_frameworks", lambda: ["dummy"])
@@ -67,6 +80,7 @@ def test_runtime_config_default_fallback(monkeypatch):
 
 
 def test_from_toml_path():
+  """Auto-generated doc."""
   import tempfile
   from pathlib import Path
 

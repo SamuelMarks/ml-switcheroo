@@ -289,7 +289,7 @@ description: "Holds submodules in a dictionary."
 op_type: "class"
 std_args:
   - name: "modules"
-    type: "Dict[str, Module]" 
+    type: "Dict[str, Module]"
     default: null
 variants:
   torch:

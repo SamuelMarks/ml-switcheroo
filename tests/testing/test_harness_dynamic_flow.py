@@ -1,5 +1,4 @@
-"""
-Tests for Dynamic Harness Generation Logic.
+"""Tests for Dynamic Harness Generation Logic.
 
 Verifies that:
 1. Queries to `get_harness_init_code` determine the injected helper.
@@ -22,9 +21,7 @@ def generator():
 
 
 class MockAdapterWithMagic:
-  """
-  Simulates a framework requiring init (like JAX).
-  """
+  """Simulates a framework requiring init (like JAX)."""
 
   declared_magic_args = ["magic_k", "other_k"]
   harness_imports = ["import magic_lib"]
@@ -59,8 +56,7 @@ class MockAdapterNoMagic:
 
 
 def test_dynamic_logic_injection(generator, tmp_path):
-  """
-  Scenario: Target framework has magic args (MockAdapterWithMagic).
+  """Scenario: Target framework has magic args (MockAdapterWithMagic).
   Expectation:
       1. 'import magic_lib' present.
       2. '_magic_helper' definition present.
@@ -93,8 +89,7 @@ def test_dynamic_logic_injection(generator, tmp_path):
 
 
 def test_dynamic_logic_noop(generator, tmp_path):
-  """
-  Scenario: Target framework has no magic (MockAdapterNoMagic).
+  """Scenario: Target framework has no magic (MockAdapterNoMagic).
   Expectation: No imports, empty init, pass logic.
   """
   target_key = "plain_fw"

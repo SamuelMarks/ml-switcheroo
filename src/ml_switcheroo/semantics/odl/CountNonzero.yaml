@@ -1,0 +1,13 @@
+description: Counts the number of non-zero values in the tensor input along the given
+  dim.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: Union[int, Tuple[int]]
+variants: {}
+operation: CountNonzero

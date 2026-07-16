@@ -1,5 +1,4 @@
-"""
-Content Tests for Standards.
+"""Content Tests for Standards.
 
 Verifies that key operations are present in the loaded SemanticsManager.
 Replaces legacy checks against standards_internal.py.
@@ -22,11 +21,11 @@ def test_functional_math_ops(mgr):
   if not data:
     pytest.skip("No semantics loaded (Bootstrap needed)")
 
-  assert "Abs" in data
-  assert "Add" in data
+  assert "abs" in data
+  assert "add" in data
   assert "Mean" in data
 
-  abs_op = data["Abs"]
+  abs_op = data["abs"]
   # Handle list of dicts (new format) or strings
   args = []
   for arg in abs_op.get("std_args", []):

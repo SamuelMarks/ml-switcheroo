@@ -1,0 +1,12 @@
+description: Computes the shape/dtype of a function without performing actual computation.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: f
+  type: Callable
+- is_variadic: true
+  kind: positional_or_keyword
+  name: args
+  type: Any
+variants: {}
+operation: EvalShape

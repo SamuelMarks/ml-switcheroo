@@ -1,5 +1,4 @@
-"""
-End-to-End Test for IO Persistence Wiring.
+"""End-to-End Test for IO Persistence Wiring.
 
 Verifies that adding "Save/Load" to standards_internal.py effectively
 activates the io_handler plugin.
@@ -14,20 +13,19 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 # Source code with IO operations
-SOURCE_CODE = """ 
+SOURCE_CODE = """
 import torch
 
-def save_model(model): 
-    torch.save(model, 'checkpoint.pth') 
-    loaded = torch.load('checkpoint.pth') 
+def save_model(model):
+    torch.save(model, 'checkpoint.pth')
+    loaded = torch.load('checkpoint.pth')
     return loaded
 """
 
 
 @pytest.fixture(autouse=True)
 def ensure_io_plugin():
-  """
-  Robustness Fix: Prevents "Missing required plugin" errors caused by
+  """Robustness Fix: Prevents "Missing required plugin" errors caused by
   test pollution. Forces a reload of the io_handler module to re-register
   the @register_hook decorators if a previous test cleared the registry.
   """

@@ -1,0 +1,17 @@
+description: Spatial 2D version of Dropout.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: rate
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data_format
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: seed
+  type: int
+variants: {}
+operation: SpatialDropout2D

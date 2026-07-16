@@ -1,0 +1,13 @@
+operation: permute_dims
+description: Definition for permute_dims
+std_args:
+- x
+- name: axes
+  is_variadic: true
+variants:
+  jax:
+    api: jnp.transpose
+    pack_to_tuple: axes
+  numpy:
+    api: numpy.transpose
+    pack_to_tuple: axes

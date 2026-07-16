@@ -1,0 +1,7 @@
+description: The class representing a Python class.
+std_args:
+- self
+- shape
+- dtype
+type: class
+operation: RooflineShape

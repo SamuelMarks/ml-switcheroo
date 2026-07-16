@@ -1,0 +1,12 @@
+description: Register a pair of Linen collection name and its NNX type.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: name
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: typ
+  type: type
+variants: {}
+operation: RegisterVariableName

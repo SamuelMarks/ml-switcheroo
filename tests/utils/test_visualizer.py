@@ -1,5 +1,4 @@
-"""
-Tests for the Mermaid Visualizer.
+"""Tests for the Mermaid Visualizer.
 
 Verifies:
 1. Graph structure generation (nodes, edges).
@@ -13,9 +12,7 @@ from ml_switcheroo.utils.visualizer import MermaidGenerator
 
 
 def test_visualizer_basic_flow():
-  """
-  Scenario: Visualize a simple assignment.
-  """
+  """Scenario: Visualize a simple assignment."""
   code = "x = 1"
   tree = cst.parse_module(code)
   gen = MermaidGenerator()
@@ -33,9 +30,7 @@ def test_visualizer_basic_flow():
 
 
 def test_visualizer_function_def():
-  """
-  Scenario: Visualize a function definition with args.
-  """
+  """Scenario: Visualize a function definition with args."""
   code = "def f(a, b=2): pass"
   tree = cst.parse_module(code)
   gen = MermaidGenerator()
@@ -50,9 +45,7 @@ def test_visualizer_function_def():
 
 
 def test_visualizer_call_structure():
-  """
-  Scenario: Nested function calls.
-  """
+  """Scenario: Nested function calls."""
   code = "fn(x, y=z)"
   tree = cst.parse_module(code)
   gen = MermaidGenerator()
@@ -66,9 +59,7 @@ def test_visualizer_call_structure():
 
 
 def test_visualizer_truncated_labels():
-  """
-  Scenario: Very long string literal.
-  """
+  """Scenario: Very long string literal."""
   long_str = "A" * 100
   code = f"x = '{long_str}'"
   tree = cst.parse_module(code)
@@ -80,9 +71,7 @@ def test_visualizer_truncated_labels():
 
 
 def test_visualizer_escapes_quotes():
-  """
-  Scenario: Label contains quotes.
-  """
+  """Scenario: Label contains quotes."""
   code = 'x = "quote"'
   tree = cst.parse_module(code)
   gen = MermaidGenerator()
@@ -94,9 +83,7 @@ def test_visualizer_escapes_quotes():
 
 
 def test_node_to_str_robustness():
-  """
-  Unit test for string conversion helper.
-  """
+  """Unit test for string conversion helper."""
   gen = MermaidGenerator()
 
   # Simple Name

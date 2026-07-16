@@ -1,14 +1,18 @@
+"""Auto-generated doc."""
+
 import pytest
 from ml_switcheroo.core.tikz.parser import TikzParser, TokenKind
 
 
 def test_tikz_end_command():
+  """Auto-generated doc."""
   parser = TikzParser(r"\end{tikzpicture}")
   parser.parse()
   # Should complete without error
 
 
 def test_tikz_peek_eof():
+  """Auto-generated doc."""
   parser = TikzParser(r"\node (a) {};")
   # offset past end
   token = parser._peek(offset=100)
@@ -16,18 +20,21 @@ def test_tikz_peek_eof():
 
 
 def test_tikz_expect_error():
+  """Auto-generated doc."""
   parser = TikzParser(r"\node (a) {};")
   with pytest.raises(SyntaxError):
     parser._expect(TokenKind.LBRACE)
 
 
 def test_tikz_node_at_coordinates():
+  """Auto-generated doc."""
   parser = TikzParser(r"\node (a) at (1, 2) {Linear};")
   graph = parser.parse()
   assert len(graph.nodes) == 1
 
 
 def test_tikz_edge_unexpected_connector():
+  """Auto-generated doc."""
   # Provide an edge without an arrow
   parser = TikzParser(r"\draw (a) (b);")
   graph = parser.parse()
@@ -35,6 +42,7 @@ def test_tikz_edge_unexpected_connector():
 
 
 def test_tikz_scan_until_semicolon_eof():
+  """Auto-generated doc."""
   parser = TikzParser(r"\draw (a) ")
   # force scan to EOF
   parser._scan_until_semicolon()
@@ -42,6 +50,7 @@ def test_tikz_scan_until_semicolon_eof():
 
 
 def test_tikz_extract_metadata_empty():
+  """Auto-generated doc."""
   parser = TikzParser(r"\node (a) {\textbf};")
   graph = parser.parse()
   assert len(graph.nodes) == 1
@@ -49,6 +58,7 @@ def test_tikz_extract_metadata_empty():
 
 
 def test_tikz_parser_gaps():
+  """Auto-generated doc."""
   from ml_switcheroo.core.tikz.parser import TikzParser
 
   # Line 174: unknown command or unhandled structure

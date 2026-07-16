@@ -1,0 +1,5 @@
+description: A TMEM layout used for 1CTA MMA with M=128 and 2CTA MMA with M=256.
+std_args:
+- packing
+type: function
+operation: tmem_default_layout

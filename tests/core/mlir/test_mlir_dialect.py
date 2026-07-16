@@ -1,5 +1,4 @@
-"""
-Tests for Switcheroo Dialect Schema Validation.
+"""Tests for Switcheroo Dialect Schema Validation.
 
 Verifies:
 1. Valid ops pass validation.

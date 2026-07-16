@@ -1,0 +1,12 @@
+description: Computes the orthogonal matrix Q of a QR factorization.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tau
+  type: Tensor
+variants: {}
+operation: OrgQr

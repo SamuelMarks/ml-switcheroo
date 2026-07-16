@@ -1,0 +1,17 @@
+description: Computes the Euclidean norm of elements across dimensions.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: keepdims
+  type: bool
+variants: {}
+operation: EuclideanNorm

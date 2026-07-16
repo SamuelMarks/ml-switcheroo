@@ -1,0 +1,15 @@
+description: Generate a random BCOO matrix.
+std_args:
+- key
+- shape
+- dtype
+- indices_dtype
+- nse
+- n_batch
+- n_dense
+- unique_indices
+- sorted_indices
+- generator
+- kwds
+type: function
+operation: random_bcoo

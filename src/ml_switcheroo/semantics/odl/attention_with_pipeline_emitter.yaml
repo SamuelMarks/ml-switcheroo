@@ -1,0 +1,9 @@
+description: The class representing a Python function.
+std_args:
+- q
+- k
+- v
+- config
+- save_residuals
+type: function
+operation: attention_with_pipeline_emitter

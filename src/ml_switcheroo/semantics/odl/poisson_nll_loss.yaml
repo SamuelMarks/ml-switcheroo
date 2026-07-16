@@ -1,0 +1,4 @@
+description: Auto-generated mapping for poisson_nll_loss.
+std_args: []
+type: function
+operation: poisson_nll_loss

@@ -1,0 +1,20 @@
+description: Adds values into a tensor at indices specified by index.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: index
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: src
+  type: Tensor
+variants: {}
+operation: ScatterAdd

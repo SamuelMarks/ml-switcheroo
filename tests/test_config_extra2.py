@@ -1,8 +1,11 @@
+"""Auto-generated doc."""
+
 from pathlib import Path
 from unittest.mock import patch
 
 
 def test_config_plugin_paths_no_toml_dir():
+  """Auto-generated doc."""
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"plugin_paths": ["plugin1", "plugin2"]}, None)):
@@ -12,7 +15,7 @@ def test_config_plugin_paths_no_toml_dir():
 
 
 def test_config_tomllib_none():
-
+  """Auto-generated doc."""
   with patch("ml_switcheroo.config.tomllib", None):
     from ml_switcheroo.config import _load_toml_settings
 
@@ -20,6 +23,7 @@ def test_config_tomllib_none():
 
 
 def test_config_validation_report_toml():
+  """Auto-generated doc."""
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"validation_report": "report.json"}, Path("."))):
@@ -28,6 +32,7 @@ def test_config_validation_report_toml():
 
 
 def test_config_plugin_paths_toml_dir():
+  """Auto-generated doc."""
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"plugin_paths": ["plugin1"]}, Path("."))):
@@ -37,6 +42,7 @@ def test_config_plugin_paths_toml_dir():
 
 
 def test_config_graph_optimization():
+  """Auto-generated doc."""
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"enable_graph_optimization": True}, None)):

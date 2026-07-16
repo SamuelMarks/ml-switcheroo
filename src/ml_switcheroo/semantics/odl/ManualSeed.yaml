@@ -1,0 +1,8 @@
+description: Sets the seed for generating random numbers.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: seed
+  type: int
+variants: {}
+operation: ManualSeed

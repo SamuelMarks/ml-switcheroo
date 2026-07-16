@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- vals
+- layout
+type: function
+operation: from_head_minor

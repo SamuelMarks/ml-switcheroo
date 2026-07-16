@@ -1,0 +1,8 @@
+description: Get param count in LSTM.
+std_args:
+- input_size
+- hidden_size
+- num_layers
+- bidirectional
+type: function
+operation: get_num_params_in_lstm

@@ -107,7 +107,7 @@ variants:
   torch:
     api: "torch.masked_scatter"
   jax:
-    api: "jax.numpy.where" # Can simulate with where(mask, source, input) if shapes match
+    # Can simulate with where(mask, source, input) if shapes match
     # Note: Torch masked_scatter flattens source. JAX where expects broadcastable shapes.
     # Strict mapping might require a plugin to emulate flatten behavior.
     api: null
@@ -259,7 +259,7 @@ variants:
     # JAX argmax returns indices.
     # Requires plugin to return Tuple(values, indices) if dim is present.
     api: "jax.numpy.max"
-    requires_plugin: "topk_adapter" 
+    requires_plugin: "topk_adapter"
     dispatch_rules:
       - if_arg: "dim"
         op: "neq"
@@ -344,7 +344,7 @@ variants:
       stride: "strides"
   flax_nnx:
     api: "flax.nnx.max_pool"
-    
+
 ---
 operation: "MaxPool3d"
 description: "Applies a 3D max pooling over an input signal."
@@ -467,8 +467,7 @@ variants:
   keras:
     api: "keras.ops.median" # Might not exist in all versions, check
   mlx:
-    api: "mlx.core.median" # Does not exist in core? Check docs. 
-    # MLX has no median currently. 
+    # MLX has no median currently.
     api: null
 
 ---
@@ -479,7 +478,7 @@ variants:
   torch:
     api: "torch.memory_format"
   # Other frameworks handle layout implicitly or via specific args
-  jax: 
+  jax:
     api: null
 
 ---

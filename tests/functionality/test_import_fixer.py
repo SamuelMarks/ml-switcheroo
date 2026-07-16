@@ -1,5 +1,4 @@
-"""
-Tests for the ImportFixer AST Transformation.
+"""Tests for the ImportFixer AST Transformation.
 Updated for Centralized Resolution Logic.
 """
 
@@ -21,17 +20,16 @@ def apply_fixer(code: str, plan=None, preserve=False, source_fws={"torch"}) -> s
 
 
 def test_remap_and_preserve_mixed():
-  """
-  Scenario: 'import torch' and 'from torch import nn'.
+  """Scenario: 'import torch' and 'from torch import nn'.
   'nn' is mapped (removed/replaced).
   'torch' is used elsewhere (lingering).
   Expect: 'import torch' preserved, 'from torch import nn' replaced.
   """
-  code = """ 
+  code = """
 import torch
 from torch import nn
-x = torch.bad() 
-y = nn.Linear() 
+x = torch.bad()
+y = nn.Linear()
 """
   # Plan: Map 'torch.nn' -> flax.linen
   mapping = {"torch.nn": ImportReq("flax", "linen", "nn")}
@@ -49,8 +47,7 @@ y = nn.Linear()
 
 
 def test_transform_from_import_to_root_import():
-  """
-  Scenario: 'from flax import nnx' -> Mapped to 'torch.nn' (root='torch.nn', sub=None).
+  """Scenario: 'from flax import nnx' -> Mapped to 'torch.nn' (root='torch.nn', sub=None).
   Expect: 'import torch.nn as nn' (or alias if specified).
   """
   code = "from flax import nnx"

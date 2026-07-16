@@ -1,5 +1,4 @@
-"""
-Tests for TikZ CST Nodes.
+"""Tests for TikZ CST Nodes.
 
 Verifies:
 1.  Correct string rendering (`to_text`) for all node types.
@@ -115,9 +114,7 @@ def test_edge_rendering_with_trivia():
 
 
 def test_graph_composition():
-  """
-  Verify full graph structure generation with indentation.
-  """
+  """Verify full graph structure generation with indentation."""
   node1 = TikzNode(node_id="a", x=0, y=0, content="A")
   node2 = TikzNode(node_id="b", x=1, y=0, content="B")
   edge = TikzEdge(source_id="a", target_id="b")

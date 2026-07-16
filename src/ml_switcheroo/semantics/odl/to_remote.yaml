@@ -1,0 +1,9 @@
+description: The class representing a Python function.
+std_args:
+- self
+- ref
+- peer
+- _kernel_arg_idx
+- on_host
+type: function
+operation: to_remote

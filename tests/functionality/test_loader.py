@@ -18,9 +18,7 @@ def test_load_semantics(manager):
 
 
 def test_resolve_torch_sum(manager):
-  """
-  Test reverse lookup logic.
-  """
+  """Test reverse lookup logic."""
   # 1. Define Mock Data
   mock_data = {"mock_op": {"variants": {"torch": {"api": "torch.mock_op"}}}}
 

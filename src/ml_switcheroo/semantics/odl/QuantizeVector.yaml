@@ -1,0 +1,12 @@
+description: Vector quantization.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: latent
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: codebook
+  type: Tensor
+variants: {}
+operation: QuantizeVector

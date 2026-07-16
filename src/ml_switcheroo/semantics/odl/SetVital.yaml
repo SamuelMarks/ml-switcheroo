@@ -1,0 +1,16 @@
+description: Undocumented utility.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arg0
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arg1
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arg2
+  type: Any
+variants: {}
+operation: SetVital

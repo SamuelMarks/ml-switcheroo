@@ -1,0 +1,4 @@
+description: Abstract base class for creation of new pruning techniques.
+std_args: []
+type: class
+operation: BasePruningMethod

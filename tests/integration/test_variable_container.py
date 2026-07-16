@@ -1,6 +1,4 @@
-"""
-Integration Test for Variable/Parameter State Conversion.
-"""
+"""Integration Test for Variable/Parameter State Conversion."""
 
 import pytest
 import textwrap
@@ -13,12 +11,12 @@ from ml_switcheroo.plugins.nnx_to_torch_params import transform_nnx_param
 
 SOURCE_FLAX_VARIABLE = textwrap.dedent("""
   import flax.nnx as nnx
-  
-  class MyLayer(nnx.Module): 
-    def __init__(self, rngs: nnx.Rngs): 
-        self.param = nnx.Param(1.0) 
-        self.var = nnx.Variable(2.0) 
-        self.cache = nnx.Cache(3.0) 
+
+  class MyLayer(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        self.param = nnx.Param(1.0)
+        self.var = nnx.Variable(2.0)
+        self.cache = nnx.Cache(3.0)
 """)
 
 

@@ -1,0 +1,48 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.5
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks:
+      - id: mypy
+        args: []
+        additional_dependencies: [ types-PyYAML, pydantic ]
+        exclude: ^tests/
+
+
+
+  - repo: https://github.com/econchick/interrogate
+    rev: 1.7.0
+    hooks:
+      - id: interrogate
+        args: [ --fail-under=100, src/ml_switcheroo ]
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: check-python-loc
+        name: check-python-loc
+        entry: scripts/check_python_loc.sh
+        language: script
+        types: [python]
+
+      - id: prevent-hardcoded-frameworks
+        name: prevent-hardcoded-frameworks
+        entry: scripts/prevent_hardcoded_frameworks.sh
+        language: script
+        types: [python]
+        files: ^src/

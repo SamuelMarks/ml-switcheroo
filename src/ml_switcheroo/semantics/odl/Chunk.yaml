@@ -1,0 +1,17 @@
+description: Splits a tensor into a specific number of chunks.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: chunks
+  type: int
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+variants: {}
+operation: Chunk

@@ -1,0 +1,8 @@
+description: Constructs a Tensor with boolean data type.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data
+  type: Any
+variants: {}
+operation: BoolTensor

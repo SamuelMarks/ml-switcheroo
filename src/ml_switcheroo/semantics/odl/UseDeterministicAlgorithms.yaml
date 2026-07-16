@@ -1,0 +1,13 @@
+description: Sets whether operations must use deterministic algorithms.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mode
+  type: bool
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: warn_only
+  type: bool
+variants: {}
+operation: UseDeterministicAlgorithms

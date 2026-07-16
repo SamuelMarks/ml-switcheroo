@@ -1,0 +1,100 @@
+DUMMY_RDNA_INST_0:
+  alu: dummy_0
+DUMMY_RDNA_INST_1:
+  alu: dummy_1
+DUMMY_RDNA_INST_10:
+  alu: dummy_10
+DUMMY_RDNA_INST_11:
+  alu: dummy_11
+DUMMY_RDNA_INST_12:
+  alu: dummy_12
+DUMMY_RDNA_INST_13:
+  alu: dummy_13
+DUMMY_RDNA_INST_14:
+  alu: dummy_14
+DUMMY_RDNA_INST_15:
+  alu: dummy_15
+DUMMY_RDNA_INST_16:
+  alu: dummy_16
+DUMMY_RDNA_INST_17:
+  alu: dummy_17
+DUMMY_RDNA_INST_18:
+  alu: dummy_18
+DUMMY_RDNA_INST_19:
+  alu: dummy_19
+DUMMY_RDNA_INST_2:
+  alu: dummy_2
+DUMMY_RDNA_INST_20:
+  alu: dummy_20
+DUMMY_RDNA_INST_21:
+  alu: dummy_21
+DUMMY_RDNA_INST_22:
+  alu: dummy_22
+DUMMY_RDNA_INST_23:
+  alu: dummy_23
+DUMMY_RDNA_INST_24:
+  alu: dummy_24
+DUMMY_RDNA_INST_25:
+  alu: dummy_25
+DUMMY_RDNA_INST_26:
+  alu: dummy_26
+DUMMY_RDNA_INST_27:
+  alu: dummy_27
+DUMMY_RDNA_INST_28:
+  alu: dummy_28
+DUMMY_RDNA_INST_29:
+  alu: dummy_29
+DUMMY_RDNA_INST_3:
+  alu: dummy_3
+DUMMY_RDNA_INST_30:
+  alu: dummy_30
+DUMMY_RDNA_INST_31:
+  alu: dummy_31
+DUMMY_RDNA_INST_32:
+  alu: dummy_32
+DUMMY_RDNA_INST_33:
+  alu: dummy_33
+DUMMY_RDNA_INST_34:
+  alu: dummy_34
+DUMMY_RDNA_INST_35:
+  alu: dummy_35
+DUMMY_RDNA_INST_36:
+  alu: dummy_36
+DUMMY_RDNA_INST_37:
+  alu: dummy_37
+DUMMY_RDNA_INST_38:
+  alu: dummy_38
+DUMMY_RDNA_INST_39:
+  alu: dummy_39
+DUMMY_RDNA_INST_4:
+  alu: dummy_4
+DUMMY_RDNA_INST_40:
+  alu: dummy_40
+DUMMY_RDNA_INST_41:
+  alu: dummy_41
+DUMMY_RDNA_INST_42:
+  alu: dummy_42
+DUMMY_RDNA_INST_5:
+  alu: dummy_5
+DUMMY_RDNA_INST_6:
+  alu: dummy_6
+DUMMY_RDNA_INST_7:
+  alu: dummy_7
+DUMMY_RDNA_INST_8:
+  alu: dummy_8
+DUMMY_RDNA_INST_9:
+  alu: dummy_9
+global_load_dword:
+  memory: load
+global_store_dword:
+  memory: store
+s_branch:
+  control_flow: branch
+s_cbranch_vccnz:
+  control_flow: cond_branch
+v_add_f32_e32:
+  alu: float_add
+v_fmac_f32_e32:
+  alu: fused_multiply_add
+v_mac_f32_e32:
+  alu: fused_multiply_add

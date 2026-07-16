@@ -1,0 +1,4 @@
+description: Type variable 'A' for static typing.
+std_args: []
+variants: {}
+operation: TypeVarA

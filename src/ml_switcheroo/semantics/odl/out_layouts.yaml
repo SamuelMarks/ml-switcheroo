@@ -1,0 +1,5 @@
+description: Returns the out_layouts attribute of the given operation.
+std_args:
+- op
+type: function
+operation: out_layouts

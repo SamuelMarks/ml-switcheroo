@@ -1,9 +1,12 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 from ml_switcheroo.plugins.padding import _supports_numpy_padding, transform_padding
 
 
 def test_padding_coverage():
+  """Auto-generated doc."""
   ctx = MagicMock()
   # 44: no semantics
   ctx.semantics = None

@@ -1,0 +1,4 @@
+description: Returns the numeric version of the TPU, or -1 if not on TPU.
+std_args: []
+type: function
+operation: get_tpu_version

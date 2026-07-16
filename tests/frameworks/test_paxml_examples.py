@@ -1,5 +1,4 @@
-"""
-Tests for PaxML Adapter Examples.
+"""Tests for PaxML Adapter Examples.
 
 Ensures that tiered examples provided by the PaxmlAdapter are syntactically valid
 and contain expected Praxis patterns (setup() lifecycle).

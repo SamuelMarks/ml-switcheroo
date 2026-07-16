@@ -1,0 +1,9 @@
+description: States that `source` layout must be transferable across memory spaces
+  to `target` layout.
+std_args:
+- self
+- source
+- target
+- shape
+type: class
+operation: IsTransferable

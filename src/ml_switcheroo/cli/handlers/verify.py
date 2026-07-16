@@ -44,7 +44,7 @@ def handle_ci(update_readme: bool, readme_path: Path, json_report: Optional[Path
 
   manual_tests_dir = Path("tests")
   if not manual_tests_dir.exists():
-    manual_tests_dir = None  # pragma: no cover
+    manual_tests_dir = None  # type: ignore # pragma: no cover
 
   results = validator.run_all(verbose=True, manual_test_dir=manual_tests_dir)
 

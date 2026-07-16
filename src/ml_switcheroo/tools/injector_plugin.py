@@ -172,7 +172,7 @@ class PluginGenerator:
     if isinstance(body_node, cst.IndentedBlock):
       stmts = list(body_node.body)
     elif isinstance(body_node, cst.SimpleStatementSuite):
-      stmts = list(body_node.body)
+      stmts = list(body_node.body)  # type: ignore
 
     # Strip Docstring (First stmt is expression string)
     if stmts:
@@ -193,7 +193,7 @@ class PluginGenerator:
 
     # Render back to string using a temporary module container
     # We construct a module from the statements to leverage LibCST's code generation
-    temp_mod = cst.Module(body=stmts)
+    temp_mod = cst.Module(body=stmts)  # type: ignore
     code = temp_mod.code
 
     # The code extracted might contain inconsistent indentation

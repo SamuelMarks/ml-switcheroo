@@ -1,0 +1,12 @@
+description: Return a contiguous array (ndim >= 1) in memory (C order).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: str
+variants: {}
+operation: AsContiguousArray

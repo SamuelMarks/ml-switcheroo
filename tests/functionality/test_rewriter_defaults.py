@@ -1,6 +1,4 @@
-"""
-Tests for ODL Default Argument Injection with Rich Types.
-"""
+"""Tests for ODL Default Argument Injection with Rich Types."""
 
 import pytest
 import libcst as cst

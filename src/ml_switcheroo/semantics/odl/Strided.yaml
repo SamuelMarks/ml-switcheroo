@@ -1,0 +1,5 @@
+description: Directs layout to strided (Standard).
+op_type: attribute
+std_args: []
+variants: {}
+operation: Strided

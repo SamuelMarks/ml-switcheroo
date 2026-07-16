@@ -1,0 +1,21 @@
+description: Saves an object (tensor or model) to a disk file.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: obj
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: f
+  type: Union[str, Path]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: pickle_module
+  type: Any
+- default: 2
+  is_variadic: false
+  kind: positional_or_keyword
+  name: pickle_protocol
+  type: int
+type: function
+operation: Save

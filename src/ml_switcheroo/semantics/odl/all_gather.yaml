@@ -1,0 +1,20 @@
+description: ''
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inputs
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: outputs
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: streams
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: comms
+  type: Any
+type: function
+operation: all_gather

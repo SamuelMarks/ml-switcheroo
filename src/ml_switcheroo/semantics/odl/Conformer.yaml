@@ -1,0 +1,13 @@
+description: Conformer layer (CNN + Transformer).
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: model_dims
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: int
+variants: {}
+operation: Conformer

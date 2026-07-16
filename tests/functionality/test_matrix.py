@@ -1,5 +1,4 @@
-"""
-Tests for Compatibility Matrix UI (Dynamic Generation).
+"""Tests for Compatibility Matrix UI (Dynamic Generation).
 
 Verifies:
 1. Dynamic Column Discovery using `get_framework_priority_order`.
@@ -17,8 +16,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockMatrixSemantics(SemanticsManager):
-  """
-  Mock Manager providing deterministic API definitions for the matrix.
+  """Mock Manager providing deterministic API definitions for the matrix.
   Bypasses file system loading.
   """
 
@@ -82,9 +80,7 @@ def test_status_icon_resolution(matrix):
 @patch("ml_switcheroo.frameworks.base.available_frameworks")
 @patch("ml_switcheroo.frameworks.base.get_adapter")
 def test_dynamic_column_sorting(mock_get_adapter, mock_avail, matrix):
-  """
-  Verify that columns are ordered by Adapter UI priority.
-  """
+  """Verify that columns are ordered by Adapter UI priority."""
   # 1. Setup Mock Registry
   # Unsorted list
   mock_avail.return_value = ["beta", "alpha", "gamma"]
@@ -128,9 +124,7 @@ def test_dynamic_column_sorting(mock_get_adapter, mock_avail, matrix):
 @patch("ml_switcheroo.frameworks.base.available_frameworks")
 @patch("ml_switcheroo.frameworks.base.get_adapter")
 def test_render_output_contains_headers(mock_get_adapter, mock_avail, matrix):
-  """
-  Verify Rich Table rendering includes dynamic headers.
-  """
+  """Verify Rich Table rendering includes dynamic headers."""
   mock_avail.return_value = ["torch", "jax"]
   # Simple priority to enforce order
   mock_get_adapter.side_effect = lambda n: MagicMock(ui_priority=0 if n == "torch" else 10, inherits_from=None)
@@ -154,8 +148,7 @@ def test_render_output_contains_headers(mock_get_adapter, mock_avail, matrix):
 @patch("ml_switcheroo.frameworks.base.available_frameworks")
 @patch("ml_switcheroo.frameworks.base.get_adapter")
 def test_inheritance_hiding_logic(mock_get_adapter, mock_avail, matrix):
-  """
-  Verify that frameworks inheriting from others (Children/Flavours) are
+  """Verify that frameworks inheriting from others (Children/Flavours) are
   sorted to the end (priority 9999) to keep the main table clean.
   """
   mock_avail.return_value = ["jax", "flax_nnx"]

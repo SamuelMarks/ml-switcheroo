@@ -1,0 +1,11 @@
+description: The class representing a Python function.
+std_args:
+- fun
+- t0
+- y0
+- order
+- rtol
+- atol
+- f0
+type: function
+operation: initial_step_size

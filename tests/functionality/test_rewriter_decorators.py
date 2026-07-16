@@ -1,6 +1,4 @@
-"""
-Tests for Decorator Rewriting Logic.
-"""
+"""Tests for Decorator Rewriting Logic."""
 
 import pytest
 import libcst as cst
@@ -11,9 +9,7 @@ from ml_switcheroo.core.dsl import OpType
 
 
 class MockDecoratorSemantics(SemanticsManager):
-  """
-  Mock Manager for decorator scenarios.
-  """
+  """Mock Manager for decorator scenarios."""
 
   def __init__(self):
     """Function docstring."""

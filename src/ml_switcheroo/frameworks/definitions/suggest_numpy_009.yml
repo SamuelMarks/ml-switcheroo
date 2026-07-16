@@ -49,9 +49,9 @@ variants:
     min_version: "2.16.0" # Added recently
     missing_message: "tf.math.is_real requires TF 2.16+. Use tf.math.imag(x) == 0 for older versions."
   mlx:
-    # MLX arrays are generally real unless complex dtype specified. 
-    # Macro check imaginary part if complex support exists, else True? 
-    # MLX dtypes are static. 
+    # MLX arrays are generally real unless complex dtype specified.
+    # Macro check imaginary part if complex support exists, else True?
+    # MLX dtypes are static.
     macro_template: "mx.full({x}.shape, True, dtype=mx.bool_)"
 
 ---
@@ -149,7 +149,7 @@ variants:
       indexing: "'ij'"
     # Incompatibility: torch.meshgrid returns full mesh, np.ix_ returns open mesh.
     # Requires plugin to align behavior if strict.
-    requires_plugin: "ix_adapter" 
+    requires_plugin: "ix_adapter"
 
 ---
 operation: "Kaiser"
@@ -199,7 +199,7 @@ variants:
   torch:
     api: "torch.kron"
   tensorflow:
-    api: "tf.experimental.numpy.kron" 
+    api: "tf.experimental.numpy.kron"
 
 ---
 operation: "Lcm"
@@ -268,7 +268,7 @@ variants:
     api: "tf.bitwise.left_shift"
   mlx:
     transformation_type: "infix"
-    operator: "<<" 
+    operator: "<<"
   keras:
     api: "keras.ops.bitwise_left_shift"
 
@@ -379,8 +379,8 @@ variants:
   torch:
     api: "torch.linspace"
     args:
-      num: "steps" 
-      endpoint: null # torch linspace might not support endpoint keyword arg in older versions, default True. 
+      num: "steps"
+      endpoint: null # torch linspace might not support endpoint keyword arg in older versions, default True.
       retstep: null # Not supported directly
       axis: null
   tensorflow:
@@ -388,7 +388,7 @@ variants:
   mlx:
     # Macro for MLX: start + arange(num) * (stop-start)/(num-1)
     # Or use existing functional if added
-    macro_template: "mx.linspace({start}, {stop}, {num})" 
+    macro_template: "mx.linspace({start}, {stop}, {num})"
 
 ---
 operation: "LittleEndian"
@@ -398,7 +398,7 @@ variants:
   numpy:
     macro_template: "np.little_endian"
   torch:
-    macro_template: "True" # Mostly True for current supported hardware (x86/ARM) 
+    macro_template: "True" # Mostly True for current supported hardware (x86/ARM)
 
 ---
 operation: "Load"
@@ -418,7 +418,7 @@ variants:
   torch:
     api: "torch.load"
   mlx:
-    api: "mlx.core.load" 
+    api: "mlx.core.load"
 
 ---
 operation: "LoadTxt"
@@ -434,7 +434,7 @@ variants:
   flax_nnx:
     api: "numpy.loadtxt"
   paxml:
-    api: "numpy.loadtxt" 
+    api: "numpy.loadtxt"
 
 ---
 operation: "Log"
@@ -548,12 +548,12 @@ variants:
   torch:
     api: "torch.logaddexp"
   tensorflow:
-    api: "tf.math.reduce_logsumexp" # Note: reduce_logsumexp is reduction, not elementwise binary. 
-    macro_template: "tf.math.log(tf.exp({x1}) + tf.exp({x2}))" 
+    api: "tf.math.reduce_logsumexp" # Note: reduce_logsumexp is reduction, not elementwise binary.
+    macro_template: "tf.math.log(tf.exp({x1}) + tf.exp({x2}))"
   mlx:
     api: "mlx.core.logaddexp"
   keras:
-    api: "keras.ops.logaddexp" 
+    api: "keras.ops.logaddexp"
 
 ---
 operation: "LogAddExp2"
@@ -575,7 +575,7 @@ variants:
   torch:
     api: "torch.logaddexp2"
   tensorflow:
-    macro_template: "tf.math.log(2.0**{x1} + 2.0**{x2}) / tf.math.log(2.0)" 
+    macro_template: "tf.math.log(2.0**{x1} + 2.0**{x2}) / tf.math.log(2.0)"
 
 ---
 operation: "LogicalAnd"
@@ -600,7 +600,7 @@ variants:
     api: "tf.math.logical_and"
   mlx:
     # MLX has no direct logical_and func? Use operator &?
-    macro_template: "{x1} & {x2}" 
+    macro_template: "{x1} & {x2}"
   keras:
     api: "keras.ops.logical_and"
 
@@ -624,7 +624,7 @@ variants:
   tensorflow:
     api: "tf.math.logical_not"
   mlx:
-    macro_template: "~{x}" 
+    macro_template: "~{x}"
   keras:
     api: "keras.ops.logical_not"
 
@@ -709,9 +709,9 @@ variants:
   torch:
     api: "torch.logspace"
     args:
-       num: "steps" 
+       num: "steps"
   tensorflow:
-    # TF logspace usually missing directly in core math? 
-    # Logic: 
+    # TF logspace usually missing directly in core math?
+    # Logic:
     api: "tf.exp"
     macro_template: "tf.math.pow({base}, tf.linspace({start}, {stop}, {num}))"

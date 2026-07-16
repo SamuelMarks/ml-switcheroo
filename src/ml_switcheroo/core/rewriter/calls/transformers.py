@@ -28,8 +28,8 @@ def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
   # Safe conversion to string for Integer node construction
   idx_node = cst.Integer(str(index))
 
-  return cst.Subscript(
-    value=inner_node,  # type: ignore (BaseExpression)
+  return cst.Subscript(  # type: ignore
+    value=inner_node,  # type: ignore
     slice=[cst.SubscriptElement(slice=cst.Index(value=idx_node))],
   )
 
@@ -176,11 +176,11 @@ def rewrite_as_infix(
       "<<": cst.LeftShift(),
       ">>": cst.RightShift(),
     }
-    cst_op = op_map.get(op_symbol)
+    cst_op = op_map.get(op_symbol)  # type: ignore
     if not cst_op:
       raise ValueError(f"Unsupported binary operator: {op_symbol}")
 
-    return cst.BinaryOperation(left=args[0].value, operator=cst_op, right=args[1].value)
+    return cst.BinaryOperation(left=args[0].value, operator=cst_op, right=args[1].value)  # type: ignore
 
   else:
     raise ValueError(f"Infix operator requires 1 or 2 args, got {len(args)}")

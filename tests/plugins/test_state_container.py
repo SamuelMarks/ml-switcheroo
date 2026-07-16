@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import patch
 from ml_switcheroo.plugins.state_container import (
@@ -12,14 +14,19 @@ from ml_switcheroo.plugins.state_container import (
 
 
 class DummyContext:
+  """Auto-generated doc."""
+
   def __init__(self, api_map=None):
+    """Auto-generated doc."""
     self.api_map = api_map or {}
 
   def lookup_api(self, op_id):
+    """Auto-generated doc."""
     return self.api_map.get(op_id)
 
 
 def test_create_node():
+  """Auto-generated doc."""
   # Valid expression
   node = _create_node("a.b.c")
   assert isinstance(node, cst.Attribute)
@@ -32,6 +39,7 @@ def test_create_node():
 
 
 def test_get_receiver():
+  """Auto-generated doc."""
   # Call with Attribute
   node = cst.parse_expression("self.register_buffer('name', tensor)")
   receiver = _get_receiver(node)
@@ -45,6 +53,7 @@ def test_get_receiver():
 
 
 def test_convert_register_buffer():
+  """Auto-generated doc."""
   # Missing args
   node = cst.parse_expression("self.register_buffer('name')")
   ctx = DummyContext({"BatchStat": "flax.nnx.BatchStat"})
@@ -74,6 +83,7 @@ def test_convert_register_buffer():
 
 
 def test_convert_register_parameter():
+  """Auto-generated doc."""
   # Missing args
   node = cst.parse_expression("self.register_parameter('name')")
   ctx = DummyContext({"Param": "flax.nnx.Param"})
@@ -98,6 +108,7 @@ def test_convert_register_parameter():
 
 
 def test_convert_state_dict():
+  """Auto-generated doc."""
   # No receiver
   node = cst.parse_expression("state_dict()")
   ctx = DummyContext({"ModuleState": "flax.nnx.state"})
@@ -120,6 +131,7 @@ def test_convert_state_dict():
 
 
 def test_convert_load_state_dict():
+  """Auto-generated doc."""
   # No receiver
   node = cst.parse_expression("load_state_dict(sd)")
   ctx = DummyContext({"UpdateState": "flax.nnx.update"})
@@ -144,6 +156,7 @@ def test_convert_load_state_dict():
 
 
 def test_convert_parameters():
+  """Auto-generated doc."""
   # No receiver
   node = cst.parse_expression("parameters()")
   ctx = DummyContext({"ModuleState": "flax.nnx.state", "Param": "flax.nnx.Param"})

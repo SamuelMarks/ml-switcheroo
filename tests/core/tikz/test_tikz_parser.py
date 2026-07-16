@@ -1,5 +1,4 @@
-"""
-Tests for TikZ Parser (Feature #4).
+r"""Tests for TikZ Parser (Feature #4).
 
 Verifies:
 1.  **Tokenization**: Correctly splits LaTeX input including comments and commands.
@@ -107,9 +106,7 @@ def test_parser_ignore_comments_and_env():
 
 
 def test_parser_robust_metadata():
-  """
-  Verify metadata extraction handles underscores and simple formatting.
-  """
+  """Verify metadata extraction handles underscores and simple formatting."""
   code = r"""
 \node (n) at (0,0) {
     \begin{tabular}{c}

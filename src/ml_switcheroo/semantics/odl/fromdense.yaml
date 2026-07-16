@@ -1,0 +1,10 @@
+description: Create a BCOO array from a (dense) :class:`~jax.Array`.
+std_args:
+- cls
+- mat
+- nse
+- index_dtype
+- n_dense
+- n_batch
+type: function
+operation: fromdense

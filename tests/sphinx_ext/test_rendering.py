@@ -1,5 +1,4 @@
-"""
-Tests for Sphinx HTML Rendering utilities (WASM Demo).
+"""Tests for Sphinx HTML Rendering utilities (WASM Demo).
 
 Verifies that:
 1. `render_demo_html` produces valid HTML structure.
@@ -24,8 +23,7 @@ def mock_registry_data():
 
 
 def test_render_demo_html_structure(mock_registry_data):
-  """
-  Scenario: Generating the demo HTML block.
+  """Scenario: Generating the demo HTML block.
   Expectation: Contains all structural divs, inputs, Weight Script, and Time Travel toolbar.
   """
   hierarchy, ex, meta = mock_registry_data
@@ -63,9 +61,7 @@ def test_render_demo_html_structure(mock_registry_data):
 
 
 def test_default_selection_logic(mock_registry_data):
-  """
-  Scenario: Verify default "selected" attribute injection.
-  """
+  """Scenario: Verify default "selected" attribute injection."""
   hierarchy, ex, meta = mock_registry_data
   html = render_demo_html(hierarchy, ex, meta)
 
@@ -77,9 +73,7 @@ def test_default_selection_logic(mock_registry_data):
 
 
 def test_flavour_dropdown_rendering():
-  """
-  Scenario: Rendering flavour secondary selector.
-  """
+  """Scenario: Rendering flavour secondary selector."""
   hierarchy = {"jax": [{"key": "flax_nnx", "label": "Flax"}, {"key": "haiku", "label": "Haiku"}]}
 
   # We call internal helper processing used in render_demo_html implicitly via import

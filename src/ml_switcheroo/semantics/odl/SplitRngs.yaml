@@ -1,0 +1,13 @@
+description: Splits RNG keys for stochastic operations.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: key
+  type: Any
+- default: 2
+  is_variadic: false
+  kind: positional_or_keyword
+  name: count
+  type: int
+variants: {}
+operation: SplitRngs

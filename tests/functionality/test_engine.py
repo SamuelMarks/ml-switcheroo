@@ -1,12 +1,10 @@
-"""
-Tests for the main ASTEngine and result structures.
-"""
+"""Tests for the main ASTEngine and result structures."""
 
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.core.rewriter.patcher import PatchAction
 
 
@@ -29,7 +27,7 @@ def test_graph_optimization_rewriter_path():
   with (
     patch("ml_switcheroo.core.engine.GraphExtractor") as MockExtractor,
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer") as MockOptimizer,
-    patch("ml_switcheroo.compiler.differ.GraphDiffer") as MockDiffer,
+    patch("ml_switcheroo.core.compiler.differ.GraphDiffer") as MockDiffer,
     patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher") as MockPatcher,
     patch("ml_switcheroo.core.engine.ingest_code") as MockIngest,
   ):

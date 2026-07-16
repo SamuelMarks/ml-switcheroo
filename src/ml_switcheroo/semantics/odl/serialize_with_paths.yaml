@@ -1,0 +1,9 @@
+description: The class representing a Python function.
+std_args:
+- self
+- arrays
+- paths
+- on_commit_callback
+- transaction
+type: function
+operation: serialize_with_paths

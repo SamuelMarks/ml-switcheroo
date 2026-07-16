@@ -1,6 +1,4 @@
-"""
-Tests for BatchNorm Functionalization Plugin.
-"""
+"""Tests for BatchNorm Functionalization Plugin."""
 
 import pytest
 import libcst as cst
@@ -63,8 +61,7 @@ def rewriter():
 
 
 def test_bn_injection_and_unwrap(rewriter):
-  """
-  Scenario: Standard forward pass call.
+  """Scenario: Standard forward pass call.
   Input: y = self.bn(x)
   Output: y = self.bn(x, use_running_average=not training, mutable=['batch_stats'])[0]
   """
@@ -79,8 +76,7 @@ def test_bn_injection_and_unwrap(rewriter):
 
 
 def test_bn_nested_expression(rewriter):
-  """
-  Scenario: Nested inside activation.
+  """Scenario: Nested inside activation.
   Input: y = F.relu(self.bn(x))
   """
   code = "y = F.relu(self.bn(x))"

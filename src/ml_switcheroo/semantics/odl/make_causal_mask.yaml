@@ -1,0 +1,4 @@
+description: Auto-generated mapping for make_causal_mask.
+std_args: []
+type: function
+operation: make_causal_mask

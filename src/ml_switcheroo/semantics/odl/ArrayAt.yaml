@@ -1,0 +1,8 @@
+description: Interface for indexed updates (JAX style).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: ArrayAt

@@ -1,0 +1,44 @@
+description: 'Auto-discovered via Consensus (Score: 2.0)'
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: batch_shape
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: batch_size
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kwargs
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: name
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: optional
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ragged
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: shape
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: sparse
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Any
+variants: {}
+operation: Input

@@ -1,5 +1,4 @@
-"""
-Tests for BatchValidator Argument Parsing and Discovery.
+"""Tests for BatchValidator Argument Parsing and Discovery.
 
 Verifies:
 1. Legacy support: `["x", "y"]` -> params=["x", "y"], hints={}.
@@ -15,9 +14,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_unpack_args_mixed_support():
-  """
-  Verify parsing of mixed arg formats (tuple vs string).
-  """
+  """Verify parsing of mixed arg formats (tuple vs string)."""
   mgr = MagicMock(spec=SemanticsManager)
   validator = BatchValidator(mgr)
 
@@ -33,9 +30,7 @@ def test_unpack_args_mixed_support():
 
 
 def test_batch_runner_execution_flow():
-  """
-  Verify the Validator calls runner.verify() with unpacked hints.
-  """
+  """Verify the Validator calls runner.verify() with unpacked hints."""
   # 1. Setup Mock Semantics Data (Typed)
   mgr = MagicMock(spec=SemanticsManager)
   mgr.get_known_apis.return_value = {
@@ -68,8 +63,7 @@ def test_batch_runner_execution_flow():
 
 
 def test_skip_generated_tests(tmp_path):
-  """
-  Verify manual test scanning explicitly skips 'generated' folder contents.
+  """Verify manual test scanning explicitly skips 'generated' folder contents.
   Ensures robust path checking avoids false positives on path substrings.
   """
   mgr = MagicMock(spec=SemanticsManager)

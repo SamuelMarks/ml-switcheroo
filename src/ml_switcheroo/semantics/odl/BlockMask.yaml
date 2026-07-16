@@ -1,0 +1,16 @@
+description: BlockMask is our format for representing a block-sparse attention mask.
+std_args:
+- self
+- seq_lengths
+- kv_num_blocks
+- kv_indices
+- full_kv_num_blocks
+- full_kv_indices
+- q_num_blocks
+- q_indices
+- full_q_num_blocks
+- full_q_indices
+- BLOCK_SIZE
+- mask_mod
+type: class
+operation: BlockMask

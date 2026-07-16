@@ -1,0 +1,5 @@
+description: Exception class for fatal errors.
+op_type: class
+std_args: []
+variants: {}
+operation: FatalError

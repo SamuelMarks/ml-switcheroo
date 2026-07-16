@@ -1,0 +1,13 @@
+description: Container combining model and optimizer.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: model
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: optimizer
+  type: Any
+variants: {}
+operation: ModelAndOptimizer

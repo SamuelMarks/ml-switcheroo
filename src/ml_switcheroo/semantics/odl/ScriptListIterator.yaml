@@ -1,0 +1,4 @@
+description: Internal TorchScript list iterator.
+std_args: []
+variants: {}
+operation: ScriptListIterator

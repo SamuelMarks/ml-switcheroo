@@ -1,0 +1,12 @@
+description: Main performant deserialization routine for arrays using tensorstore.
+std_args:
+- in_type
+- tensorstore_spec
+- global_shape
+- dtype
+- byte_limiter
+- context
+- chunk_layout
+- assume_metadata
+type: function
+operation: async_deserialize

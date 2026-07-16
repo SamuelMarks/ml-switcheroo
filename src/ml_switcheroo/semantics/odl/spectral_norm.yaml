@@ -1,0 +1,9 @@
+description: Apply spectral normalization to a parameter in the given module.
+std_args:
+- module
+- name
+- n_power_iterations
+- eps
+- dim
+type: function
+operation: spectral_norm

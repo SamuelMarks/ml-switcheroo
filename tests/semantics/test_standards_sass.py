@@ -1,5 +1,4 @@
-"""
-Tests for SASS Definition Wiring.
+"""Tests for SASS Definition Wiring.
 
 Verifies that SASS-specific operation variants are correctly exposed via the
 Framework Adapter layer, enforcing the architectural decision to decouple
@@ -10,8 +9,7 @@ from ml_switcheroo.frameworks.sass import SassAdapter
 
 
 def test_neural_ops_sass_variants() -> None:
-  """
-  Verify that Neural Network macros are registered in the SassAdapter definitions.
+  """Verify that Neural Network macros are registered in the SassAdapter definitions.
   These mappings (1-to-N) are injected programmatically by the adapter.
   """
   adapter = SassAdapter()
@@ -25,9 +23,7 @@ def test_neural_ops_sass_variants() -> None:
 
 
 def test_math_ops_sass_variants() -> None:
-  """
-  Verify that Math Opcodes (1-to-1) are registered in the SassAdapter definitions.
-  """
+  """Verify that Math Opcodes (1-to-1) are registered in the SassAdapter definitions."""
   adapter = SassAdapter()
   defs = adapter.definitions
 

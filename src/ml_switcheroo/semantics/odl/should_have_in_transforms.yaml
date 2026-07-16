@@ -1,0 +1,5 @@
+description: Returns 'True' if the operation should be assigned in transforms.
+std_args:
+- op
+type: function
+operation: should_have_in_transforms

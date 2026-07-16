@@ -28,7 +28,7 @@ def get_root_name(node: Union[cst.Name, cst.Attribute]) -> str:
   if isinstance(node, cst.Name):
     return node.value
   if isinstance(node, cst.Attribute):
-    return get_root_name(node.value)
+    return get_root_name(node.value)  # type: ignore
   return ""
 
 
@@ -45,7 +45,7 @@ def create_dotted_name(name_str: str) -> Union[cst.Name, cst.Attribute]:
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))
+    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
   return node
 
 

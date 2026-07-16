@@ -75,14 +75,14 @@ variants:
     api: "torch.feature_alpha_dropout"
   jax:
     # JAX handles dropout via random keys usually, specialized feature alpha needed
-    api: null 
+    api: null
   flax_nnx:
     api: null
   paxml:
     api: null
   keras:
     # Keras AlphaDropout acts on features, but 1D/2D variants are explicit
-    api: "keras.layers.AlphaDropout" 
+    api: "keras.layers.AlphaDropout"
     op_type: "class"
     args:
       p: "rate"
@@ -204,7 +204,7 @@ variants:
     output_shape_calc: "lambda input, value: input.shape"
     args:
       input: "dims" # TF fill takes dims, not tensor. Mismatch.
-    # TF fill(dims, value) requires shape. 
+    # TF fill(dims, value) requires shape.
     # Use generic helper:
     macro_template: "tf.fill(tf.shape({input}), {value})"
   mlx:
@@ -274,9 +274,6 @@ variants:
   keras:
     api: "keras.ops.trunc"
   tensorflow:
-    api: "tf.math.truncate_div" # Not exact match? tf.fix doesn't exist? tf.trunc? 
-    api: "tf.math.round" # Fix behavior is 'trunc' 
-    api: "tf.trunc" # Exists?
     api: "tf.raw_ops.Truncate" # Safe
     macro_template: "tf.cast(tf.cast({input}, tf.int32), {input}.dtype)"
   mlx:
@@ -322,7 +319,7 @@ variants:
   paxml:
     requires_plugin: "flatten_range"
   keras:
-    api: "keras.ops.reshape" 
+    api: "keras.ops.reshape"
     # Partial flatten logic handled via reshape macro
     macro_template: "{input}.reshape((-1,))" # Only for full flatten
     requires_plugin: "flatten_range" # Use plugin for correctness
@@ -369,8 +366,8 @@ variants:
     args:
       dims: "axis"
   mlx:
-    # MLX has slice-based reverse. No direct multi-dim flip api? 
-    # Use python slice [::-1] 
+    # MLX has slice-based reverse. No direct multi-dim flip api?
+    # Use python slice [::-1]
     requires_plugin: "slice_reverse"
   numpy:
     api: "numpy.flip"
@@ -391,9 +388,9 @@ variants:
   flax_nnx:
     api: "jax.numpy.fliplr"
   keras:
-    # Keras ops usually general flip. 
+    # Keras ops usually general flip.
     api: "keras.ops.flip"
-    args: 
+    args:
       # fliplr usually means axis 1 for 2D+
       input: "x"
     inject_args:
@@ -522,8 +519,8 @@ variants:
   tensorflow:
     api: "tf.float64"
   mlx:
-    api: null # MLX focuses on 16/32 typically on silicon? Need to check. 
-    # Spec update: MLX has no float64 sometimes depending on build? 
+    api: null # MLX focuses on 16/32 typically on silicon? Need to check.
+    # Spec update: MLX has no float64 sometimes depending on build?
     # Safe to assume null for now or 'mx.float32' with warning.
   numpy:
     api: "np.float64"
@@ -628,7 +625,7 @@ variants:
   paxml:
     api: "jnp.float_power"
   keras:
-    api: "keras.ops.power" # No float_power? 
+    api: "keras.ops.power" # No float_power?
     output_cast: "float64"
   tensorflow:
     api: "tf.math.pow"
@@ -722,7 +719,7 @@ variants:
   keras:
     # No direct fmax in standard ops usually, only max
     # Fallback plugin? Or custom macro
-    macro_template: "{input}.where(isnan({input}), {other}, {input}).maximum({other})" # Complex implementation... 
+    macro_template: "{input}.where(isnan({input}), {other}, {input}).maximum({other})" # Complex implementation...
     api: null
   tensorflow:
     api: null # tf has no fmax

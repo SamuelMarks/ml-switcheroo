@@ -1,15 +1,18 @@
+"""Auto-generated doc."""
+
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from unittest.mock import patch, MagicMock
 
 
 def test_engine_target_torch_sharding_compiler():
+  """Auto-generated doc."""
   config = RuntimeConfig(enable_sharding=True, enable_graph_optimization=True)
   engine = ASTEngine(source="jax", target="torch", config=config)
   code = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
 
-  with patch("ml_switcheroo.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
-    with patch("ml_switcheroo.compiler.sharding_extractor.ShardingExtractionPass.apply"):
+  with patch("ml_switcheroo.core.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
+    with patch("ml_switcheroo.core.compiler.sharding_extractor.ShardingExtractionPass.apply"):
       with patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer") as MockOptCls:
         MockOptCls.return_value.optimize.return_value = MagicMock(nodes=["n1"])
         with patch("ml_switcheroo.core.engine.get_backend_class") as MockGetBackend:
@@ -22,12 +25,13 @@ def test_engine_target_torch_sharding_compiler():
 
 
 def test_engine_target_flax_sharding_compiler():
+  """Auto-generated doc."""
   config = RuntimeConfig(enable_sharding=True, enable_graph_optimization=True)
   engine = ASTEngine(source="jax", target="flax", config=config)
   code = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
 
-  with patch("ml_switcheroo.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
-    with patch("ml_switcheroo.compiler.sharding_extractor.ShardingExtractionPass.apply"):
+  with patch("ml_switcheroo.core.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
+    with patch("ml_switcheroo.core.compiler.sharding_extractor.ShardingExtractionPass.apply"):
       with patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer") as MockOptCls:
         MockOptCls.return_value.optimize.return_value = MagicMock(nodes=["n1"])
         with patch("ml_switcheroo.core.engine.get_backend_class") as MockGetBackend:
@@ -40,13 +44,14 @@ def test_engine_target_flax_sharding_compiler():
 
 
 def test_engine_target_torch_sharding_rewriter_2():
+  """Auto-generated doc."""
   config = RuntimeConfig(enable_sharding=True, enable_graph_optimization=True)
   engine = ASTEngine(source="jax", target="torch", config=config)
   code = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
 
-  with patch("ml_switcheroo.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
-    with patch("ml_switcheroo.compiler.sharding_extractor.ShardingExtractionPass.apply"):
-      with patch("ml_switcheroo.compiler.differ.GraphDiffer.diff", return_value=None):
+  with patch("ml_switcheroo.core.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
+    with patch("ml_switcheroo.core.compiler.sharding_extractor.ShardingExtractionPass.apply"):
+      with patch("ml_switcheroo.core.compiler.differ.GraphDiffer.diff", return_value=None):
         with patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer") as MockOptCls:
           MockOptCls.return_value.optimize.return_value = MagicMock(nodes=["n1"])
           with patch("ml_switcheroo.core.graph.GraphExtractor") as MockExtCls:
@@ -56,7 +61,7 @@ def test_engine_target_torch_sharding_rewriter_2():
             MockExt.graph = g
             MockExt.node_map = {}
 
-            with patch("ml_switcheroo.compiler.backends.python_snippet.PythonSnippetEmitter"):
+            with patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"):
               with patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"):
                 engine._run_rewriter_pipeline(code, MagicMock())
                 MockSharding.assert_called()

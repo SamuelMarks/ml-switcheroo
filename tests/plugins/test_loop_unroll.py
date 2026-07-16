@@ -1,5 +1,4 @@
-"""
-Tests for Loop Unrolling Plugin (Decoupled Logic).
+"""Tests for Loop Unrolling Plugin (Decoupled Logic).
 
 Verifies:
 1. Passthrough on frameworks NOT requiring functional control flow.
@@ -32,9 +31,7 @@ def rewrite_code(rewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter_factory():
-  """
-  Sets up a PivotRewriter where we can control the Semantic Traits regarding loops.
-  """
+  """Sets up a PivotRewriter where we can control the Semantic Traits regarding loops."""
   # Clear existing hooks to prevent interference
   hooks._HOOKS.clear()
   hooks._HOOK_METADATA.clear()
@@ -65,8 +62,7 @@ def rewriter_factory():
 
 
 def test_imperative_passthrough(rewriter_factory):
-  """
-  Verify that loops remain untouched for frameworks that support imperative flow (like Torch).
+  """Verify that loops remain untouched for frameworks that support imperative flow (like Torch).
   Control: requires_functional_control_flow = False.
   """
   rewriter = rewriter_factory("torch")
@@ -81,8 +77,7 @@ for i in range(10):
 
 
 def test_functional_range_warning(rewriter_factory):
-  """
-  Verify that frameworks requiring functional flow (like JAX) get a safety warning for range().
+  """Verify that frameworks requiring functional flow (like JAX) get a safety warning for range().
   Control: requires_functional_control_flow = True.
   """
   rewriter = rewriter_factory("jax")
@@ -98,8 +93,7 @@ for i in range(10):
 
 
 def test_functional_iterator_warning(rewriter_factory):
-  """
-  Verify generic iterator loops also get flagged with specific scan message.
+  """Verify generic iterator loops also get flagged with specific scan message.
   Control: requires_functional_control_flow = True.
   """
   rewriter = rewriter_factory("jax")

@@ -1,0 +1,25 @@
+description: Returns a two-dimensional array with ones on the ``k``\th diagonal and
+  zeros elsewhere.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: n_rows
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: n_cols
+  type: Optional[int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: k
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Optional[dtype]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Optional[device]
+type: attribute
+operation: eye

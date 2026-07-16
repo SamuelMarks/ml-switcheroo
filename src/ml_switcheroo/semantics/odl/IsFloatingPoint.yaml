@@ -1,0 +1,8 @@
+description: Returns True if the data type of the tensor is a floating point type.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: IsFloatingPoint

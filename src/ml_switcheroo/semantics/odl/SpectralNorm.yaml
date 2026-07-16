@@ -1,0 +1,18 @@
+description: Spectral normalization.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: layer
+  type: Any
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: n_steps
+  type: int
+- default: 1e-12
+  is_variadic: false
+  kind: positional_or_keyword
+  name: epsilon
+  type: float
+type: class
+operation: SpectralNorm

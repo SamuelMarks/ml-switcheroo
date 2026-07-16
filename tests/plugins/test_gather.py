@@ -1,5 +1,4 @@
-"""
-Tests for Gather Semantics Plugin (Decoupled).
+"""Tests for Gather Semantics Plugin (Decoupled).
 
 Verifies:
 1. Reordering of arguments works if mapping exists.
@@ -100,8 +99,7 @@ def rewriter_factory():
 
 
 def test_gather_method_reorder_jax(rewriter_factory):
-  """
-  Input: x.gather(1, indices)
+  """Input: x.gather(1, indices)
   Output: jnp.take_along_axis(x, indices, 1)
   """
   rw = rewriter_factory("jax")
@@ -114,8 +112,7 @@ def test_gather_method_reorder_jax(rewriter_factory):
 
 
 def test_gather_missing_target_passthrough(rewriter_factory):
-  """
-  Scenario: Target 'numpy' (not defined in mock semantics).
+  """Scenario: Target 'numpy' (not defined in mock semantics).
   Expectation: Return original node (no default to JAX).
   """
   rw = rewriter_factory("numpy")
@@ -132,9 +129,7 @@ def test_gather_missing_target_passthrough(rewriter_factory):
 
 
 def test_gather_custom_fw_transpilation(rewriter_factory):
-  """
-  Scenario: Target Custom Framework defined in semantics.
-  """
+  """Scenario: Target Custom Framework defined in semantics."""
   rw = rewriter_factory("custom_fw")
   code = "y = torch.gather(x, 1, idx)"
   res = rewrite_code(rw, code)

@@ -1,0 +1,6 @@
+description: Convert a pytree of (sparse) arrays to an equivalent pytree of spvalues.
+std_args:
+- spenv
+- args
+type: function
+operation: arrays_to_spvalues

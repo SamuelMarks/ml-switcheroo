@@ -1,6 +1,4 @@
-"""
-Integration Test for Clean MLIR Code Generation (ConvNet).
-"""
+"""Integration Test for Clean MLIR Code Generation (ConvNet)."""
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig

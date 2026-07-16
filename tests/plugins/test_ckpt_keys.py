@@ -1,6 +1,4 @@
-"""
-Tests for Checkpoint Keys Plugin.
-"""
+"""Tests for Checkpoint Keys Plugin."""
 
 import pytest
 import libcst as cst
@@ -50,8 +48,7 @@ def rewriter():
 
 
 def test_load_state_dict_rewrite(rewriter):
-  """
-  Input: model.load_state_dict(sd)
+  """Input: model.load_state_dict(sd)
   Output: KeyMapper.from_torch(sd)
   """
   code = "model.load_state_dict(sd)"
@@ -63,8 +60,7 @@ def test_load_state_dict_rewrite(rewriter):
 
 
 def test_load_state_dict_kwargs(rewriter):
-  """
-  Input: x.load_state_dict(state_dict=y, strict=False)
+  """Input: x.load_state_dict(state_dict=y, strict=False)
   Output: KeyMapper.from_torch(y)
   """
   code = "x.load_state_dict(state_dict=y, strict=False)"
@@ -74,9 +70,7 @@ def test_load_state_dict_kwargs(rewriter):
 
 
 def test_mapper_source_availability():
-  """
-  Ensure the plugin exposes the source code for the runtime utility.
-  """
+  """Ensure the plugin exposes the source code for the runtime utility."""
   assert "class KeyMapper" in KEY_MAPPER_SOURCE
   assert "map_name" in KEY_MAPPER_SOURCE
   assert "map_value" in KEY_MAPPER_SOURCE

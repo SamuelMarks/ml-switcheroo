@@ -1,0 +1,24 @@
+description: Fully-connected RNN where output is fed back as input.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: units
+  type: int
+- default: tanh
+  is_variadic: false
+  kind: positional_or_keyword
+  name: activation
+  type: str
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: return_sequences
+  type: bool
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: return_state
+  type: bool
+variants: {}
+operation: SimpleRNN

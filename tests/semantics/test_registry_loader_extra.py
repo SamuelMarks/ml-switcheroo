@@ -1,18 +1,28 @@
+"""Auto-generated doc."""
+
 from unittest.mock import MagicMock
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 import ml_switcheroo.semantics.registry_loader as registry_loader
 
 
 def test_registry_loader_exceptions(monkeypatch, capsys):
+  """Auto-generated doc."""
+
   # test 48: adapter is None
   def mock_get(fw):
+    """Auto-generated doc."""
     if fw == "dummy":
       return None
     elif fw == "dummy_traits":
 
       class BadTraitsAdapter:
+        """Auto-generated doc."""
+
         class FakeTraits:
+          """Auto-generated doc."""
+
           def model_dump(self, **kwargs):
+            """Auto-generated doc."""
             raise ValueError("bad traits")
 
         structural_traits = FakeTraits()
@@ -21,7 +31,10 @@ def test_registry_loader_exceptions(monkeypatch, capsys):
     elif fw == "dummy_wiring":
 
       class BadWiringAdapter:
+        """Auto-generated doc."""
+
         def apply_wiring(self, snap):
+          """Auto-generated doc."""
           raise ValueError("bad wiring")
 
       return BadWiringAdapter()

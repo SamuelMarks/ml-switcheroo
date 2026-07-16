@@ -1,0 +1,9 @@
+description: Layer that computes an einsum and optional bias.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: equation
+  type: str
+variants: {}
+operation: EinsumLayer

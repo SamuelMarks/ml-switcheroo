@@ -1,0 +1,8 @@
+description: Internal JIT parser for type comments.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arg0
+  type: str
+variants: {}
+operation: ParseTypeComment

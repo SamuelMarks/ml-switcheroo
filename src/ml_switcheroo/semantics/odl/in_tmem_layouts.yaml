@@ -1,0 +1,5 @@
+description: Returns the in_tmem_layouts attribute of the given operation.
+std_args:
+- op
+type: function
+operation: in_tmem_layouts

@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- step_size
+- decay_steps
+- final_step_size
+- power
+type: function
+operation: polynomial_decay

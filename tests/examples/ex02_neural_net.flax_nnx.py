@@ -4,8 +4,7 @@ from flax import nnx
 
 
 class SimplePerceptron(nnx.Module):
-  """
-  Basic Single-Layer Perceptron in Flax NNX.
+  """Basic Single-Layer Perceptron in Flax NNX.
   Semantic pivot:
     - flax.nnx.Module -> torch.nn.Module
     - flax.nnx.Linear -> torch.nn.Linear

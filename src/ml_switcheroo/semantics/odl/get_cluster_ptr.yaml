@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- ptr
+- cluster_block
+- generic
+type: function
+operation: get_cluster_ptr

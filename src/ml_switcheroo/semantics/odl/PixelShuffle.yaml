@@ -1,0 +1,13 @@
+description: Rearranges elements in a tensor of shape (*, C x r^2, H, W) to (*, C,
+  H x r, W x r).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: upscale_factor
+  type: int
+type: class
+operation: PixelShuffle

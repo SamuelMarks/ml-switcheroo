@@ -97,7 +97,7 @@ class HarnessGenerator:
     deps.append("import hypothesis.extra.numpy as npst")
     deps.append("import re")
     deps.append("import numpy as np")
-    deps.append("from typing import Any, Dict, List, Optional, Tuple, Callable")
+    deps.append("from typing import Union, Any, Dict, List, Optional, Tuple, Callable")
 
     def extract_module_functions(module):
       """Execute implementation detail."""

@@ -1,0 +1,6 @@
+description: Recommended min page size for high-performance kernel.
+std_args:
+- max_model_len
+- min_page_size
+type: function
+operation: get_min_page_size

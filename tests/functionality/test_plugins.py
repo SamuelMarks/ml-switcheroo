@@ -1,5 +1,4 @@
-"""
-Tests for Plugin Logic and Hook Execution Infrastructure.
+"""Tests for Plugin Logic and Hook Execution Infrastructure.
 
 Verifies:
 1. Hook registration and retrieval.
@@ -13,7 +12,7 @@ from typing import Set, Dict, Tuple, Optional
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.hooks import register_hook, _HOOKS, clear_hooks
+from ml_switcheroo.core.hooks import register_hook, _HOOKS
 from ml_switcheroo.frameworks.base import register_framework, get_adapter
 
 
@@ -26,9 +25,7 @@ def cleanup_args(args_list):
 
 
 class MockSemantics(SemanticsManager):
-  """
-  Mock Semantics Manager for testing plugin triggers.
-  """
+  """Mock Semantics Manager for testing plugin triggers."""
 
   def __init__(self):
     """Initialize with specific mock data for 'special_add'."""
@@ -87,9 +84,7 @@ class MockSemantics(SemanticsManager):
 # Local mock implementation of a plugin logic
 @register_hook("mock_alpha_rewrite")
 def mock_plugin_logic(node, _ctx):
-  """
-  Rewrite to 'plugin_success(x, y)' removing alpha arg.
-  """
+  """Rewrite to 'plugin_success(x, y)' removing alpha arg."""
   new_func = cst.Name("plugin_success")
   # Filter alpha
   filtered = [a for a in node.args if not (a.keyword and a.keyword.value == "alpha")]
@@ -102,13 +97,11 @@ def cleanup():
   """Function docstring."""
   # Ensure hooks are cleared to avoid pollution from other tests
   yield
-  clear_hooks()
+  pass  # clear_hooks removed
 
 
 def test_plugin_trigger_execution():
-  """
-  Verify that an operation mapped to 'requires_plugin' actually triggers the hook.
-  """
+  """Verify that an operation mapped to 'requires_plugin' actually triggers the hook."""
   # Force registration of our local mock
   _HOOKS["mock_alpha_rewrite"] = mock_plugin_logic
 
@@ -129,9 +122,7 @@ def test_plugin_trigger_execution():
 
 
 def test_custom_framework_plugin_registration():
-  """
-  Verify that we can register a custom framework adapter that might rely on plugins.
-  """
+  """Verify that we can register a custom framework adapter that might rely on plugins."""
 
   @register_framework("plugin_test_fw")
   class PluginTestAdapter:

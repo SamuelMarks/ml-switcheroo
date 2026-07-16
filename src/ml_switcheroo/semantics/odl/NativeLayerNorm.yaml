@@ -1,0 +1,24 @@
+description: Native layer normalization.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: normalized_shape
+  type: List[int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: float
+variants: {}
+operation: NativeLayerNorm

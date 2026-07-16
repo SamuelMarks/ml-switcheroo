@@ -1,9 +1,12 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
 
 def get_dummy_ctx(target_fw="torch", current_op_id="dummy", sharding_supported=False):
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.target_fw = target_fw
   ctx.current_op_id = current_op_id
@@ -14,6 +17,7 @@ def get_dummy_ctx(target_fw="torch", current_op_id="dummy", sharding_supported=F
 
 
 def test_plugin_loss_wrapper():
+  """Auto-generated doc."""
   ctx = get_dummy_ctx(target_fw="unknown")
   ctx.semantics.get_operation.return_value = MagicMock(is_loss=True)
   ctx.lookup_api.return_value = "dummy.loss"

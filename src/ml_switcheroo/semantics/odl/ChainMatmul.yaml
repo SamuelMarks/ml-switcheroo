@@ -1,0 +1,8 @@
+description: Performs matrix multiplication of N tensors.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: matrices
+  type: List[Tensor]
+variants: {}
+operation: ChainMatmul

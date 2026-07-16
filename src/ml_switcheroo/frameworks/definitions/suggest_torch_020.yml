@@ -27,7 +27,7 @@ variants:
       weights_only: "allow_pickle" # logical mapping approximation
     arg_values:
       weights_only:
-        true: "False" # numpy allow_pickle=False is safer? Inverted logic. 
+        true: "False" # numpy allow_pickle=False is safer? Inverted logic.
   tensorflow:
     requires_plugin: "io_handler"
   keras:
@@ -668,7 +668,7 @@ variants:
       other: "x2"
   mlx:
     # MLX has no direct logical_xor, usually not_equal on bools suffices
-    macro_template: "mlx.core.not_equal({input}, {other})" 
+    macro_template: "mlx.core.not_equal({input}, {other})"
 
 ---
 operation: "Logit"
@@ -702,12 +702,12 @@ variants:
     api: "tf.math.atanh"
     # logit(p) is atanh(2p - 1), but TF math.atanh is just atanh
     # Strict mapping might require macro: 2*p - 1
-    macro_template: "tf.math.atanh(2 * {input} - 1)" 
+    macro_template: "tf.math.atanh(2 * {input} - 1)"
   keras:
     # Keras ops has no logit, macro fallback
-    macro_template: "keras.ops.log({input} / (1 - {input}))" 
+    macro_template: "keras.ops.log({input} / (1 - {input}))"
   mlx:
-    macro_template: "mlx.core.log({input} / (1 - {input}))" 
+    macro_template: "mlx.core.log({input} / (1 - {input}))"
 
 ---
 operation: "Logit_"
@@ -733,7 +733,7 @@ variants:
       input: "p"
       eps: null
   mlx:
-    macro_template: "mlx.core.log({input} / (1 - {input}))" 
+    macro_template: "mlx.core.log({input} / (1 - {input}))"
 
 ---
 operation: "LogSpace"
@@ -842,21 +842,21 @@ std_args:
 variants:
   torch:
     # Transformation: x.long()
-    macro_template: "{input}.long()" 
+    macro_template: "{input}.long()"
   jax:
-    macro_template: "{input}.astype(jax.numpy.int64)" 
+    macro_template: "{input}.astype(jax.numpy.int64)"
   flax_nnx:
-    macro_template: "{input}.astype(jax.numpy.int64)" 
+    macro_template: "{input}.astype(jax.numpy.int64)"
   paxml:
-    macro_template: "{input}.astype(jax.numpy.int64)" 
+    macro_template: "{input}.astype(jax.numpy.int64)"
   numpy:
-     macro_template: "{input}.astype(numpy.int64)" 
+     macro_template: "{input}.astype(numpy.int64)"
   tensorflow:
-     macro_template: "tf.cast({input}, tf.int64)" 
+     macro_template: "tf.cast({input}, tf.int64)"
   keras:
-     macro_template: "keras.ops.cast({input}, 'int64')" 
+     macro_template: "keras.ops.cast({input}, 'int64')"
   mlx:
-     macro_template: "{input}.astype(mlx.core.int64)" 
+     macro_template: "{input}.astype(mlx.core.int64)"
 
 ---
 operation: "LSTM"
@@ -1031,7 +1031,7 @@ variants:
     args:
        b: "b"
        LU_data: "lu_and_piv" # JAX usually expects tuple (lu, piv)
-       LU_pivots: null 
+       LU_pivots: null
     # Macro required for packing
   numpy:
      api: "scipy.linalg.lu_solve"

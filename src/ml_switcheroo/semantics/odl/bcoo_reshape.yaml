@@ -1,0 +1,8 @@
+description: Sparse implementation of :func:`jax.lax.reshape`.
+std_args:
+- mat
+- new_sizes
+- dimensions
+- sharding
+type: function
+operation: bcoo_reshape

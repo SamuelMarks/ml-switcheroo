@@ -1,5 +1,4 @@
-"""
-Tests for Output Dtype Casting (Feature 12).
+"""Tests for Output Dtype Casting (Feature 12).
 
 Verifies that the rewriter injects `.astype(...)` logic when `output_cast`
 is defined in the semantics mapping.
@@ -70,9 +69,7 @@ def rewrite(rewriter, code):
 
 
 def test_output_cast_injection(rewriter):
-  """
-  Scenario: torch.argmax(x) -> jax.numpy.argmax(x).astype(jnp.int64)
-  """
+  """Scenario: torch.argmax(x) -> jax.numpy.argmax(x).astype(jnp.int64)"""
   code = "y = torch.argmax(x)"
   result = rewrite(rewriter, code)
 
@@ -81,9 +78,7 @@ def test_output_cast_injection(rewriter):
 
 
 def test_output_cast_float_conversion(rewriter):
-  """
-  Scenario: torch.simple_op(x) -> jax.op(x).astype(jnp.float32)
-  """
+  """Scenario: torch.simple_op(x) -> jax.op(x).astype(jnp.float32)"""
   code = "z = torch.simple_op(x)"
   result = rewrite(rewriter, code)
 

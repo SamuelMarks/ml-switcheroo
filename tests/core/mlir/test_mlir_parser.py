@@ -1,5 +1,4 @@
-"""
-Tests for MLIR Text Parser (Round-Trip).
+"""Tests for MLIR Text Parser (Round-Trip).
 
 Verifies:
 1. Tokenizer correctness for identifiers, symbols, and trivia.
@@ -45,14 +44,12 @@ def test_parse_attributes():
 
 
 def test_parse_region_nested():
-  """
-  Verify region and block parsing.
-  """
+  """Verify region and block parsing."""
   # Update: Ensure canonical spacing for roundtrip equality check
-  code = """sw.func { 
-^entry: 
+  code = """sw.func {
+^entry:
     sw.return
-} 
+}
 """
   assert roundtrip(code) == code
 
@@ -60,10 +57,10 @@ def test_parse_region_nested():
 def test_parse_with_comments():
   """Verify comment preservation."""
   code = """// Header
-sw.module { 
+sw.module {
     // Body
     sw.op
-} 
+}
 """
   assert roundtrip(code) == code
 
@@ -71,7 +68,7 @@ sw.module {
 def test_parse_block_args():
   """Verify block arguments."""
   # Update: Canonical input respects the spacing logic of BlockNode/OperationNode
-  code = """^bb0(%arg0: i32, %arg1: f32): 
+  code = """^bb0(%arg0: i32, %arg1: f32):
     sw.return
 """
   # Note: Manual block parsing test

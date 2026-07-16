@@ -153,7 +153,7 @@ std_args:
     type: "Tensor"
 variants:
   torch:
-    api: "numpy.shape" 
+    api: "numpy.shape"
     # Fallback to numpy shim for shape query on tensors if not method
   jax:
     api: "jax.numpy.shape"
@@ -195,7 +195,7 @@ variants:
     api: "numpy.sign"
   mlx:
     # Macro for sign: (x > 0) - (x < 0) or similar, but standard ops exist in new versions
-    api: null 
+    api: null
 
 ---
 operation: "Signbit"
@@ -864,7 +864,7 @@ variants:
     api: "numpy.tile"
   mlx:
     # Requires plugin or macro usually
-    api: null 
+    api: null
 
 ---
 operation: "Trace"
@@ -883,7 +883,7 @@ std_args:
     default: 1
 variants:
   torch:
-    api: "torch.diagonal" 
+    api: "torch.diagonal"
     macro_template: "torch.sum(torch.diagonal({a}, {offset}, {axis1}, {axis2}))"
   jax:
     api: "jax.numpy.trace"

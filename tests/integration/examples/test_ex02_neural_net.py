@@ -1,5 +1,4 @@
-"""
-Integration Tests for Neural Network Conversion (Example 02).
+"""Integration Tests for Neural Network Conversion (Example 02).
 
 This module validates the end-to-end translation of a Neural Network definition
 (stateful class) from PyTorch to various target frameworks.
@@ -12,16 +11,16 @@ from ml_switcheroo import RuntimeConfig, ASTEngine, SemanticsManager
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 # --- Source Code (PyTorch) ---
-SOURCE_TORCH = textwrap.dedent(""" 
+SOURCE_TORCH = textwrap.dedent("""
     import torch.nn as nn
 
-    class SimplePerceptron(nn.Module): 
-        def __init__(self, in_features, out_features): 
-            super().__init__() 
-            self.layer = nn.Linear(in_features, out_features) 
+    class SimplePerceptron(nn.Module):
+        def __init__(self, in_features, out_features):
+            super().__init__()
+            self.layer = nn.Linear(in_features, out_features)
 
-        def forward(self, x): 
-            return self.layer(x) 
+        def forward(self, x):
+            return self.layer(x)
     """)
 
 
@@ -81,9 +80,7 @@ def semantics():
   ],
 )
 def test_torch_to_target_neural(semantics, target_fw, check_strings):
-  """
-  Executes conversion of a Neural Network class from Torch to Target.
-  """
+  """Executes conversion of a Neural Network class from Torch to Target."""
   config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
 

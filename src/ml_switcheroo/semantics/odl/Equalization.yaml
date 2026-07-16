@@ -1,0 +1,17 @@
+description: Histogram equalization.
+op_type: class
+std_args:
+- default:
+  - 0
+  - 255
+  is_variadic: false
+  kind: positional_or_keyword
+  name: value_range
+  type: Tuple[float, float]
+- default: 256
+  is_variadic: false
+  kind: positional_or_keyword
+  name: bins
+  type: int
+variants: {}
+operation: Equalization

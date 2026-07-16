@@ -1,0 +1,96 @@
+--- src/ml_switcheroo/core/rewriter/passes/api_helpers.py
++++ src/ml_switcheroo/core/rewriter/passes/api_helpers.py
+@@ -1,7 +1,9 @@
+ """Helpers for ApiTransformer."""
+
+-from typing import Optional, Union, List
++from typing import Optional, Union, List, Dict, Any
+ import libcst as cst
++import re
++from ml_switcheroo.core.tracer import get_tracer
+
+
+ class ApiHelpersMixin:
+@@ -107,3 +109,83 @@
+       new_stmts = [cst.SimpleStatementLine(body=[s]) for s in node.body.body]
+       return node.with_changes(body=cst.IndentedBlock(body=new_stmts))
+     return node
++
++  def _get_mapping(self, name: str, silent: bool = False) -> Optional[Dict[str, Any]]:
++    """Queries the Semantics Manager for the target implementation of the API."""
++    lookup = self.semantics.get_definition(name)  # type: ignore
++    if not lookup:
++      is_known_source_prefix = False
++      root = name.split(".")[0]
++      if root == self.source_fw or (self.context.alias_map and root in self.context.alias_map):  # type: ignore
++        is_known_source_prefix = True
++
++      if self.strict_mode and is_known_source_prefix and not silent:  # type: ignore
++        self._report_failure(f"API '{name}' not found in semantics.")  # type: ignore
++      return None
++
++    abstract_id, details = lookup
++
++    if not self.semantics.is_verified(abstract_id):  # type: ignore
++      if not silent:
++        self._report_failure(f"Skipped '{name}': Marked unsafe by verification report.")  # type: ignore
++      return None
++
++    target_impl = self.semantics.resolve_variant(abstract_id, self.target_fw)  # type: ignore
++
++    if target_impl:
++      get_tracer().log_match(
++        source_api=name,
++        target_api=target_impl.get("api", "Plugin Logic"),
++        abstract_op=abstract_id,
++      )
++    else:
++      if self.strict_mode and not silent:  # type: ignore
++        self._report_failure(f"No mapping available for '{name}' -> '{self.target_fw}'")  # type: ignore
++      return None
++
++    return target_impl
++
++  def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
++    """Injects required imports defined in the variant."""
++    reqs = variant.get("required_imports", [])
++    for r in reqs:
++      stmt = ""
++      if isinstance(r, str):
++        clean = r.strip()
++        if clean.startswith("import") or clean.startswith("from"):
++          stmt = clean
++        else:
++          stmt = f"import {clean}"
++      elif isinstance(r, dict):
++        mod = r.get("module")
++        alias = r.get("alias")
++        if mod:
++          if alias:
++            stmt = f"import {mod} as {alias}"
++          else:
++            stmt = f"import {mod}"
++
++      if stmt:
++        self.context.hook_context.inject_preamble(stmt)  # type: ignore
++
++  def _is_framework_base(self, name: str) -> bool:
++    """Checks if a class name corresponds to any known framework Module base."""
++    if not name:
++      return False
++
++    if getattr(self, "_known_module_bases", None) is None:
++      self._known_module_bases = set()  # type: ignore
++      for _, config in self.semantics.framework_configs.items():  # type: ignore
++        traits = config.get("traits")
++        if traits:
++          base = traits.get("module_base") if isinstance(traits, dict) else getattr(traits, "module_base", None)
++          if base:
++            self._known_module_bases.add(base)  # type: ignore
++
++    if name in self._known_module_bases:  # type: ignore
++      return True
++    for known in self._known_module_bases:  # type: ignore
++      if known.endswith(f".{name}"):
++        return True
++    return False

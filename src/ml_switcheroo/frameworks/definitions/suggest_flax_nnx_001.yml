@@ -300,7 +300,7 @@ variants:
   paxml:
     api: "praxis.layers.Dropout"
     args:
-      rate: "keep_prob" 
+      rate: "keep_prob"
       deterministic: null
 
 ---

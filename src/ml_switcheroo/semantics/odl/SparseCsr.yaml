@@ -1,0 +1,5 @@
+description: Layout constant for CSR.
+op_type: attribute
+std_args: []
+variants: {}
+operation: SparseCsr

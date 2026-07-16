@@ -1,0 +1,7 @@
+description: States that `expr` is not an instance of `type`.
+std_args:
+- self
+- expr
+- type
+type: class
+operation: NotOfType

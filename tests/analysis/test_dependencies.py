@@ -1,5 +1,4 @@
-"""
-Tests for Import Dependency Validator (Feature 055).
+"""Tests for Import Dependency Validator (Feature 055).
 
 Verifies that:
 1. Standard library imports (e.g., `os`, `json`) are ignored.
@@ -46,14 +45,13 @@ def scan_code(scanner, code):
 
 
 def test_ignore_stdlib(scanner):
-  """
-  Scenario: User imports 'os', 'sys', 'typing'.
+  """Scenario: User imports 'os', 'sys', 'typing'.
   Expectation: No warnings (all detected as stdlib).
   """
   code = """
 import os
 import sys
-from typing import List
+from typing import Union, List
 from datetime import datetime
 """
   unknowns = scan_code(scanner, code)
@@ -61,8 +59,7 @@ from datetime import datetime
 
 
 def test_ignore_source_framework(scanner):
-  """
-  Scenario: User imports 'torch' or 'torch.nn'.
+  """Scenario: User imports 'torch' or 'torch.nn'.
   Expectation: No warnings (handled by ImportFixer).
   """
   code = """
@@ -75,8 +72,7 @@ from torch import optim
 
 
 def test_ignore_mapped_dependencies(scanner):
-  """
-  Scenario: User imports 'numpy' and 'PIL'.
+  """Scenario: User imports 'numpy' and 'PIL'.
   Expectation: No warnings (present in MockSemantics).
   """
   code = """
@@ -89,8 +85,7 @@ from PIL import Image
 
 
 def test_flag_unmapped_third_party(scanner):
-  """
-  Scenario: User imports 'pandas' and 'cv2'.
+  """Scenario: User imports 'pandas' and 'cv2'.
   Expectation: Flagged as unknown dependencies.
   """
   code = """
@@ -104,8 +99,7 @@ import cv2
 
 
 def test_flag_deep_imports(scanner):
-  """
-  Scenario: `from sklearn.metrics import f1_score`.
+  """Scenario: `from sklearn.metrics import f1_score`.
   Expectation: Flag 'sklearn' as unknown root.
   """
   code = "from sklearn.metrics import f1_score"
@@ -114,8 +108,7 @@ def test_flag_deep_imports(scanner):
 
 
 def test_ignore_relative_imports(scanner):
-  """
-  Scenario: `from . import utils` or `from ..models import net`.
+  """Scenario: `from . import utils` or `from ..models import net`.
   Expectation: Ignored (internal project structure).
   """
   # LibCST ImportFrom.module is None for 'from . import x',
@@ -138,16 +131,19 @@ def test_ignore_relative_imports(scanner):
 
 
 def test_get_root_package_non_name(scanner):
+  """Auto-generated doc."""
   res = scanner._get_root_package(cst.Integer("1"))
   assert res == ""
 
 
 def test_validate_package_empty(scanner):
+  """Auto-generated doc."""
   scanner._validate_package("")
   assert len(scanner.unknown_imports) == 0
 
 
 def test_is_stdlib_fallback(scanner):
+  """Auto-generated doc."""
   with patch.object(sys, "version_info", (3, 9)):
     assert scanner._is_stdlib("os") is True
     assert scanner._is_stdlib("unknown_lib") is False
@@ -155,3 +151,9 @@ def test_is_stdlib_fallback(scanner):
     # Check builtin modules list fallback
     with patch.object(sys, "builtin_module_names", ["fake_builtin"]):
       assert scanner._is_stdlib("fake_builtin") is True
+
+
+def test_no_semantics():
+  """Test case for missing semantics."""
+  scanner = DependencyScanner(None, source_fw="torch")
+  assert len(scanner._known_semantic_roots) == 0

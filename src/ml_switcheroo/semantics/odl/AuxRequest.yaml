@@ -1,0 +1,4 @@
+description: Request which auxiliary outputs to compute from flex_attention.
+std_args: []
+type: class
+operation: AuxRequest

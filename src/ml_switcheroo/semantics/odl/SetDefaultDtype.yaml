@@ -1,0 +1,8 @@
+description: Sets the default floating point dtype.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: d
+  type: DType
+variants: {}
+operation: SetDefaultDtype

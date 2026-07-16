@@ -1,0 +1,8 @@
+description: Helper function that computes the mesh indices of a neighbor.
+std_args:
+- idx
+- mesh
+- axis_name
+- direction
+type: function
+operation: get_neighbor

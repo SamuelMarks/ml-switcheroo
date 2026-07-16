@@ -1,5 +1,4 @@
-"""
-Tests for Physical Test File Generation.
+"""Tests for Physical Test File Generation.
 
 Verifies:
 1. Generator can create new files.
@@ -16,8 +15,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """
-  Mock Manager providing predefined templates and specs.
+  """Mock Manager providing predefined templates and specs.
   Skips filesystem logic.
   """
 

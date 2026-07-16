@@ -1,0 +1,12 @@
+description: Performs the auto-contrast operation on an image.
+op_type: class
+std_args:
+- default:
+  - 0
+  - 255
+  is_variadic: false
+  kind: positional_or_keyword
+  name: value_range
+  type: Tuple[int, int]
+variants: {}
+operation: AutoContrast

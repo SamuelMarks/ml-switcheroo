@@ -1,5 +1,4 @@
-"""
-Tests for ODL Schema Extension: Tensor Rank Constraints.
+"""Tests for ODL Schema Extension: Tensor Rank Constraints.
 Corresponds to Limitation #1 in the Architectural roadmap.
 """
 
@@ -9,8 +8,7 @@ from ml_switcheroo.core.dsl import ParameterDef, OperationDef, FrameworkVariant
 
 
 def test_param_rank_field_initialization():
-  """
-  Verify that the 'rank' field can be initialized explicitly.
+  """Verify that the 'rank' field can be initialized explicitly.
   This enables the Fuzzer to generate tensors with fixed dimensions (e.g. 4 for images).
   """
   # Case: Explicit Rank
@@ -20,8 +18,7 @@ def test_param_rank_field_initialization():
 
 
 def test_param_rank_default_is_none():
-  """
-  Verify 'rank' defaults to None (arbitrary rank).
+  """Verify 'rank' defaults to None (arbitrary rank).
   This ensures backward compatibility with existing definitions.
   """
   p = ParameterDef(name="x")
@@ -29,9 +26,7 @@ def test_param_rank_default_is_none():
 
 
 def test_param_rank_type_validation():
-  """
-  Verify that 'rank' enforces integer types.
-  """
+  """Verify that 'rank' enforces integer types."""
   # Valid string casting
   p = ParameterDef(name="x", rank="3")
   assert p.rank == 3
@@ -44,8 +39,7 @@ def test_param_rank_type_validation():
 
 
 def test_integration_in_operation_def():
-  """
-  Verify that ParameterDef with rank integrates correctly into the top-level OperationDef.
+  """Verify that ParameterDef with rank integrates correctly into the top-level OperationDef.
   Simulates defining a Conv2d operation which requires 4D input.
   """
   conv_op = OperationDef(
@@ -63,8 +57,7 @@ def test_integration_in_operation_def():
 
 
 def test_rank_serialization_roundtrip():
-  """
-  Verify that rank metadata survives JSON serialization/deserialization cycles.
+  """Verify that rank metadata survives JSON serialization/deserialization cycles.
   This is critical for saving/loading the Knowledge Base.
   """
   original = ParameterDef(name="x", rank=5)

@@ -1,0 +1,12 @@
+description: Linear projection on the last dim of the input Tensor using Einsum.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inputs
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Tensor
+variants: {}
+operation: ProjectLastDim

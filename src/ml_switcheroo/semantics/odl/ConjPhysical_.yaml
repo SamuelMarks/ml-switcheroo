@@ -1,0 +1,9 @@
+description: In-place version of ConjPhysical.
+is_inplace: true
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: ConjPhysical_

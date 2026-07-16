@@ -1,5 +1,4 @@
-"""
-Tests for Data Loader Plugin (Decoupled Logic).
+"""Tests for Data Loader Plugin (Decoupled Logic).
 
 Verifies:
 1. Plugin execution is driven by Metadata, not Target string hardcoding.
@@ -69,8 +68,7 @@ def rewriter_factory():
 
 
 def test_blind_execution(rewriter_factory):
-  """
-  Verify that if 'torch' target explicitly requests the plugin (via mock semantics),
+  """Verify that if 'torch' target explicitly requests the plugin (via mock semantics),
   the plugin EXECUTES and injects the shim.
   (Previously, this would return original node because of hardcoded 'if target==torch: return')
   """

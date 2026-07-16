@@ -1,0 +1,5 @@
+description: Gets the serialized profiled instructions proto from profile.
+std_args:
+- tensorboard_dir
+type: function
+operation: get_profiled_instructions_proto

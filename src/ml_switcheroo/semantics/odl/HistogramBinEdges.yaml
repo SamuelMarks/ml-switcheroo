@@ -1,0 +1,22 @@
+description: Function to calculate only the edges of the bins used by the histogram
+  function.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Array
+- default: 10
+  is_variadic: false
+  kind: positional_or_keyword
+  name: bins
+  type: Union[int, str]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: range
+  type: Optional[Tuple[float, float]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weights
+  type: Optional[Array]
+variants: {}
+operation: HistogramBinEdges

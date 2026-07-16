@@ -1,0 +1,4 @@
+description: Returns the number of threads used for inter-op parallelism on CPU.
+std_args: []
+variants: {}
+operation: GetNumInteropThreads

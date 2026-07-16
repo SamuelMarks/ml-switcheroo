@@ -1,0 +1,13 @@
+description: The class representing a Python function.
+std_args:
+- q
+- k
+- v
+- ab
+- segment_ids
+- causal
+- mask_value
+- sm_scale
+- save_residuals
+type: function
+operation: mha_reference_no_custom_vjp

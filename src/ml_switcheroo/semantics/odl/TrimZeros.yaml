@@ -1,0 +1,17 @@
+description: Remove values along a dimension which are zero along all other.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: filt
+  type: Tensor
+- default: fb
+  is_variadic: false
+  kind: positional_or_keyword
+  name: trim
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: TrimZeros

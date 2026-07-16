@@ -1,9 +1,12 @@
+"""Auto-generated doc."""
+
 from unittest.mock import MagicMock
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.types import SignatureContext
 
 
 def test_default_arg_injector():
+  """Auto-generated doc."""
   ctx = RewriterContext(MagicMock(), MagicMock())
   sig_ctx = SignatureContext()
   ctx.signature_stack.append(sig_ctx)
@@ -15,6 +18,7 @@ def test_default_arg_injector():
 
 
 def test_default_preamble_injector():
+  """Auto-generated doc."""
   ctx = RewriterContext(MagicMock(), MagicMock())
 
   # Empty stack
@@ -43,6 +47,7 @@ def test_default_preamble_injector():
 
 
 def test_hydrate_source_aliases_exception():
+  """Auto-generated doc."""
   semantics = MagicMock()
   semantics.get_framework_config.side_effect = Exception("err")
   config = MagicMock()
@@ -52,6 +57,7 @@ def test_hydrate_source_aliases_exception():
 
 
 def test_hydrate_source_aliases_pydantic():
+  """Auto-generated doc."""
   semantics = MagicMock()
   alias_info = MagicMock()
   alias_info.model_dump.return_value = {"name": "jax"}
@@ -62,6 +68,7 @@ def test_hydrate_source_aliases_pydantic():
 
 
 def test_hydrate_source_aliases_no_name():
+  """Auto-generated doc."""
   semantics = MagicMock()
   semantics.get_framework_config.return_value = {"alias": {}}
   config = MagicMock()
@@ -70,6 +77,7 @@ def test_hydrate_source_aliases_no_name():
 
 
 def test_hydrate_source_aliases_none():
+  """Auto-generated doc."""
   semantics = MagicMock()
   semantics.get_framework_config.return_value = None
   config = MagicMock()

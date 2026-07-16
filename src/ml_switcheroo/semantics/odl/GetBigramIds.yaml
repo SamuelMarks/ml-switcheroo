@@ -1,0 +1,12 @@
+description: Generate bi-gram ids from uni-gram ids.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ids
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: vocab_size
+  type: int
+variants: {}
+operation: GetBigramIds

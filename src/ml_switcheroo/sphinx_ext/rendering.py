@@ -76,11 +76,11 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   src_flavours_html = _render_flavour_dropdown("src", hierarchy, def_source)
   tgt_flavours_html = _render_flavour_dropdown("tgt", hierarchy, def_target)
 
-  return f""" 
+  return f"""
         <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
             <script>
-                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json}; 
-                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json}; 
+                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json};
+                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json};
             </script>
 
             <div class="demo-header">
@@ -100,7 +100,7 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
             </div>
 
             <div id="demo-interface" style="display:none;">
-                
+
                 <!-- Material 3 Stepper Navigation -->
                 <div class="m3-stepper">
                     <div class="m3-step active" data-target="step-0" id="nav-step-0">
@@ -128,14 +128,14 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
                         <div class="select-wrapper">
                             <select id="select-src" class="material-select">{opts_src}</select>
                             <div id="src-flavour-region" style="background:transparent; margin-left:5px;">
-                                {src_flavours_html} 
+                                {src_flavours_html}
                             </div>
                         </div>
                         <button id="btn-swap" class="swap-icon-btn" title="Swap Languages">⇄</button>
                         <div class="select-wrapper">
                             <select id="select-tgt" class="material-select">{opts_tgt}</select>
                              <div id="tgt-flavour-region" style="background:transparent; margin-left:5px;">
-                                {tgt_flavours_html} 
+                                {tgt_flavours_html}
                             </div>
                         </div>
                     </div>
@@ -154,8 +154,8 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
                             <textarea id="code-source" spellcheck="false" class="material-input" placeholder="Source code...">import torch
 import torch.nn as nn
 
-class Model(nn.Module): 
-    def forward(self, x): 
+class Model(nn.Module):
+    def forward(self, x):
         return torch.abs(x)</textarea>
                         </div>
                         <div class="editor-group target-group">
@@ -372,8 +372,8 @@ def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: st
   else:
     opts.append('<option value="" disabled selected>No Flavours</option>')
 
-  return f""" 
+  return f"""
         <select id="{side}-flavour" class="material-select-sm" style="{style}">
-            {"".join(opts)} 
+            {"".join(opts)}
         </select>
         """

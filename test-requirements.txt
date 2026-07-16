@@ -8,3 +8,4 @@ hypothesis
 docutils
 hypothesis[numpy]
 sphinx
+griffe @ git+https://github.com/SamuelMarks/griffe.git@rest

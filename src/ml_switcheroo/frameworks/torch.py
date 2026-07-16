@@ -12,7 +12,6 @@ It provides:
 """
 
 import logging
-import textwrap
 from typing import List, Tuple, Dict, Any, Optional
 
 try:
@@ -20,9 +19,9 @@ try:
   import torch.nn as nn
   import torch.optim as optim  # pragma: no cover
 except Exception:
-  torch = None
-  nn = None
-  optim = None
+  torch: Any = None  # type: ignore
+  nn = None  # type: ignore
+  optim = None  # type: ignore
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -37,8 +36,11 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.loader import load_definitions
 
 
+from ml_switcheroo.frameworks.torch_io import TorchIOMixin
+
+
 @register_framework("torch")
-class TorchAdapter:
+class TorchAdapter(TorchIOMixin):
   """Adapter for PyTorch (Meta).
 
   Handles Source and Target translation rules for PyTorch, including
@@ -174,6 +176,7 @@ class TorchAdapter:
       requires_explicit_rng=False,
       requires_functional_state=False,
       requires_functional_control_flow=False,
+      sharding_wrapper_api="torch.distributed.fsdp.FSDP",
     )
 
   @property
@@ -262,102 +265,6 @@ class TorchAdapter:
     """
     return "pass"  # pragma: no cover
 
-  def get_serialization_imports(self) -> List[str]:
-    """Returns imports required for IO operations.
-
-    Returns:
-        List of import statements.
-
-    """
-    return ["import torch"]  # pragma: no cover
-
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Generates save/load syntax.
-
-    Args:
-        op: Operation name ('save' or 'load').
-        file_arg: Code string representing the file path.
-        object_arg: Code string representing the object to save (optional).
-
-    Returns:
-        Python code string for the operation.
-
-    """
-    if op == "save" and object_arg:  # pragma: no cover
-      return f"torch.save({object_arg}, {file_arg})"  # pragma: no cover
-    elif op == "load":  # pragma: no cover
-      return f"torch.load({file_arg})"  # pragma: no cover
-    return ""  # pragma: no cover
-
-  def get_weight_conversion_imports(self) -> List[str]:
-    """Returns imports required for the generated weight migration script logic.
-
-    Returns:
-        List of import strings.
-
-    """
-    return ["import torch"]  # pragma: no cover
-
-  def get_weight_load_code(self, path_var: str) -> str:
-    """Returns Python code to load a .pth file into a raw state dictionary.
-    Handles both bare state dicts and Lightning-style checkpoints.
-
-    Args:
-        path_var: Variable name containing the file path string.
-
-    Returns:
-        Block of python code setting 'raw_state'.
-
-    """
-    return textwrap.dedent(  # pragma: no cover
-      f""" 
-            # Load PyTorch checkpoint to CPU to avoid CUDA dependency
-            loaded = torch.load({path_var}, map_location='cpu') 
-            
-            # Unwrap common checkpoint formats
-            if isinstance(loaded, dict) and 'state_dict' in loaded: 
-                raw_state = loaded['state_dict'] 
-            else: 
-                raw_state = loaded
-            
-            if not isinstance(raw_state, dict): 
-                raise ValueError(f"Expected dict-like checkpoint, got {{type(loaded)}}") 
-            """
-    )
-
-  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Returns expression to convert a Torch tensor variable to a NumPy array.
-    Includes detach and cpu calls for safety.
-
-    Args:
-        tensor_var: Name of variable holding the torch tensor.
-
-    Returns:
-        Expression string.
-
-    """
-    return f"{tensor_var}.detach().cpu().numpy()"  # pragma: no cover
-
-  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Returns Python code to save the converted state dictionary back to .pth format.
-    Converts NumPy arrays back to Torch tensors before saving.
-
-    Args:
-        state_var: Variable name of the flat dictionary {key: numpy_array}.
-        path_var: Variable name of the output path.
-
-    Returns:
-        Block of python code.
-
-    """
-    return textwrap.dedent(  # pragma: no cover
-      f""" 
-            # Convert NumPy arrays back to Torch Tensors
-            torch_state = {{k: torch.from_numpy(v) for k, v in {state_var}.items()}} 
-            torch.save(torch_state, {path_var}) 
-            """
-    )
-
   def get_doc_url(self, api_name: str) -> Optional[str]:
     """Returns the official PyTorch documentation URL.
 
@@ -373,123 +280,10 @@ class TorchAdapter:
     return f"https://pytorch.org/docs/stable/generated/{api_name}.html"
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Provides code snippets for "Wizard" or "Demo" usage.
+    """Returns example snippets for each semantic tier."""
+    from ml_switcheroo.frameworks.torch_examples import get_torch_tiered_examples
 
-    Returns:
-        Dictionary mapping tier IDs to code snippets.
-
-    """
-    return {
-      "tier1_math": """import torch
-
-def math_ops(x, y):
-    # Tier 1: Core Tensor Operations
-    a = torch.abs(x)
-    b = torch.add(a, y)
-    
-    # Reduction
-    return torch.mean(b)
-""",
-      "tier2_neural_simple": """import torch
-import torch.nn as nn
-
-class Net(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.fc = nn.Linear(10, 10)
-        
-    def forward(self, x):
-        x = self.fc(x)
-        return nn.functional.relu(x)
-""",
-      "tier2_neural_cnn": """import torch
-import torch.nn as nn
-
-class ConvNet(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv = nn.Conv2d(1, 32, 3)
-        self.fc = nn.Linear(32 * 26 * 26, 10)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = torch.flatten(x, 1)
-        return self.fc(x)
-""",
-      "tier3_extras_dataloader": """import torch
-from torch.utils.data import DataLoader, TensorDataset
-
-def create_loader(data, targets):
-    # Tier 3: Data Loader
-    ds = TensorDataset(data, targets)
-    return DataLoader(ds, batch_size=32, num_workers=4)
-""",
-      "tier4_qwen3": """import torch
-import torch.nn as nn
-
-class QwenBlock(nn.Module):
-    def __init__(self):
-        super().__init__()
-        # Standard HF-style separate projections
-        self.q_proj = nn.Linear(1024, 1024)
-        self.k_proj = nn.Linear(1024, 1024)
-        self.v_proj = nn.Linear(1024, 1024)
-        
-        self.gate_proj = nn.Linear(1024, 4096)
-        self.up_proj = nn.Linear(1024, 4096)
-        self.down_proj = nn.Linear(4096, 1024)
-        
-    def forward(self, x):
-        # Attention
-        q = self.q_proj(x)
-        k = self.k_proj(x)
-        v = self.v_proj(x)
-        
-        # SwiGLU MLP
-        gate = self.gate_proj(x)
-        up = self.up_proj(x)
-        # Note: switcheroo handles the fusion with SwiGLU
-        mlp_out = self.down_proj(gate * up) 
-        
-        return q, mlp_out
-""",
-      "tier4_qwen3-vl": """import torch
-import torch.nn as nn
-
-class Qwen3VLVisionConfig:
-    in_channels: int = 3
-    hidden_size: int = 1280
-    temporal_patch_size: int = 2
-    patch_size: int = 14
-
-class Qwen3VLPatchEmbed(nn.Module):
-    '''3D Convolutional patch embedding for vision input.'''
-    def __init__(self, config: Qwen3VLVisionConfig):
-        super().__init__()
-        self.config = config
-        kernel = (config.temporal_patch_size, config.patch_size, config.patch_size)
-        self.proj = nn.Conv3d(
-            in_channels=config.in_channels,
-            out_channels=config.hidden_size,
-            kernel_size=kernel,
-            stride=kernel,
-            padding=0,
-            bias=True,
-        )
-
-    def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
-        cfg = self.config
-        seq_len = hidden_states.shape[0]
-
-        hidden_states = hidden_states.reshape(
-            seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size
-        )
-        
-        out = self.proj(hidden_states)
-        
-        return out.reshape(seq_len, cfg.hidden_size)
-""",
-    }
+    return get_torch_tiered_examples()
 
   def convert(self, data: Any) -> Any:
     """Converts input data (numpy, lists) into PyTorch Tensors for verification runners.
@@ -543,15 +337,15 @@ class Qwen3VLPatchEmbed(nn.Module):
         List of discovered GhostRef objects.
 
     """
-    results = []  # pragma: no cover
+    results: list = []  # pragma: no cover  # type: ignore
     if category == SemanticTier.LOSS:  # pragma: no cover
-      results.extend(self._scan_losses())  # pragma: no cover
+      results.extend(getattr(self, "_scan_losses", lambda: [])())  # pragma: no cover
     elif category == SemanticTier.OPTIMIZER:  # pragma: no cover
-      results.extend(self._scan_optimizers())  # pragma: no cover
+      results.extend(getattr(self, "_scan_optimizers", lambda: [])())  # pragma: no cover
     elif category == SemanticTier.ACTIVATION:  # pragma: no cover
-      results.extend(self._scan_activations())  # pragma: no cover
+      results.extend(getattr(self, "_scan_activations", lambda: [])())  # pragma: no cover
     elif category == SemanticTier.LAYER:  # pragma: no cover
-      results.extend(self._scan_layers())  # pragma: no cover
+      results.extend(getattr(self, "_scan_layers", lambda: [])())  # pragma: no cover
     return results  # pragma: no cover
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:

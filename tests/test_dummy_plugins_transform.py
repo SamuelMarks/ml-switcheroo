@@ -1,9 +1,12 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 import inspect
 from unittest.mock import MagicMock
 
 
 def test_all_plugin_fallbacks():
+  """Auto-generated doc."""
   import ml_switcheroo.plugins.auto_fsdp_wrapper as p1
   import ml_switcheroo.plugins.casting as p2
   import ml_switcheroo.plugins.clipping as p3

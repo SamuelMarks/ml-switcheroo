@@ -1,0 +1,12 @@
+description: Filter a State into one or more States based on types/predicates.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: state
+  type: State
+- is_variadic: true
+  kind: positional_or_keyword
+  name: filters
+  type: Any
+variants: {}
+operation: FilterState

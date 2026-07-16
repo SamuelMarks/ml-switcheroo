@@ -1,6 +1,6 @@
 operation: "PerChannelSymmetric"
 description: "Quantization utility for per-channel symmetric schemes."
-std_args: 
+std_args:
   - name: "input"
     type: "Tensor"
 variants:
@@ -24,7 +24,7 @@ variants:
 ---
 operation: "PerTensorAffine"
 description: "Quantization utility for per-tensor affine schemes."
-std_args: 
+std_args:
   - name: "input"
     type: "Tensor"
 variants:
@@ -48,7 +48,7 @@ variants:
 ---
 operation: "PerTensorSymmetric"
 description: "Quantization utility for per-tensor symmetric schemes."
-std_args: 
+std_args:
   - name: "input"
     type: "Tensor"
 variants:
@@ -389,9 +389,9 @@ variants:
   paxml:
     macro_template: "{abs} * jax.numpy.exp(1j * {angle})"
   keras:
-    api: "keras.ops.polar" 
+    api: "keras.ops.polar"
   tensorflow:
-    api: "tf.complex" 
+    api: "tf.complex"
     macro_template: "tf.complex({abs} * tf.math.cos({angle}), {abs} * tf.math.sin({angle}))"
   mlx:
     macro_template: "{abs} * mlx.core.exp(1j * {angle})"
@@ -727,10 +727,10 @@ variants:
     args:
       input: "a"
       index: "ind"
-      source: "v" 
+      source: "v"
       # JAX put/place returns None (in-place on numpy, immutable on jax.numpy usually maps to .at[].set?)
-      # jax.numpy.put is equivalent to a.put(ind, v, mode) in numpy. 
-      # True equivalent is .at[].set. 
+      # jax.numpy.put is equivalent to a.put(ind, v, mode) in numpy.
+      # True equivalent is .at[].set.
     requires_plugin: "scatter_indexer"
   flax_nnx:
     api: "jax.numpy.put"
@@ -961,7 +961,7 @@ variants:
     api: "tf.linalg.qr"
     args:
        input: "input"
-    # TF takes 'full_matrices' (bool) 
+    # TF takes 'full_matrices' (bool)
     # some=True -> reduced -> full_matrices=False
     # some=False -> complete -> full_matrices=True
     kwargs_map:

@@ -1,0 +1,15 @@
+description: This function implements scaled dot product attention with an arbitrary
+  attention score modification function.
+std_args:
+- query
+- key
+- value
+- score_mod
+- block_mask
+- scale
+- enable_gqa
+- return_lse
+- kernel_options
+- return_aux
+type: function
+operation: flex_attention

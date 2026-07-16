@@ -1,0 +1,9 @@
+description: The class representing a Python function.
+std_args:
+- error_estimate
+- rtol
+- atol
+- y0
+- y1
+type: function
+operation: mean_error_ratio

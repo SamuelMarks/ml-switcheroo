@@ -1,6 +1,4 @@
-"""
-Tests for Padding Normalization Plugin.
-"""
+"""Tests for Padding Normalization Plugin."""
 
 import pytest
 import libcst as cst

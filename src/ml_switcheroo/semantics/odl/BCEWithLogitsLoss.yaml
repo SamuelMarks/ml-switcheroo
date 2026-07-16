@@ -1,0 +1,4 @@
+description: Auto-generated mapping for BCEWithLogitsLoss.
+std_args: []
+type: class
+operation: BCEWithLogitsLoss

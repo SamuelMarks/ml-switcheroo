@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- key
+- bit_width
+- shape
+type: function
+operation: philox_random_bits

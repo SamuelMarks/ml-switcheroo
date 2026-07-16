@@ -1,0 +1,7 @@
+description: Product of COO sparse matrix and a dense vector.
+std_args:
+- mat
+- v
+- transpose
+type: function
+operation: coo_matvec

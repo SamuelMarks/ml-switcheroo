@@ -1,5 +1,4 @@
-"""
-Tests for ODL Schema Extension: Explicit Import Dependencies.
+"""Tests for ODL Schema Extension: Explicit Import Dependencies.
 
 Verifies that the FrameworkVariant schema correctly accepts and validates
 declarative import requirements, enabling plugins to access non-standard dependencies.
@@ -11,17 +10,13 @@ from ml_switcheroo.core.dsl import FrameworkVariant, ImportReq
 
 
 def test_variant_imports_strings():
-  """
-  Verify that 'required_imports' stores a list of import strings (Legacy support).
-  """
+  """Verify that 'required_imports' stores a list of import strings (Legacy support)."""
   v = FrameworkVariant(api="foo", required_imports=["import os"])
   assert "import os" in v.required_imports
 
 
 def test_variant_imports_structured():
-  """
-  Verify support for structured ImportReq objects {module, alias}.
-  """
+  """Verify support for structured ImportReq objects {module, alias}."""
   req = ImportReq(module="numpy", alias="np")
   v = FrameworkVariant(api="foo", required_imports=[req])
 
@@ -33,8 +28,7 @@ def test_variant_imports_structured():
 
 
 def test_variant_imports_dict_coercion():
-  """
-  Verify Pydantic coerces dicts to ImportReq objects automatically.
+  """Verify Pydantic coerces dicts to ImportReq objects automatically.
   This mimics loading from JSON.
   """
   data = {"api": "foo", "required_imports": [{"module": "pandas", "alias": "pd"}]}
@@ -45,9 +39,7 @@ def test_variant_imports_dict_coercion():
 
 
 def test_variant_imports_mixed():
-  """
-  Verify that multiple imports of mixed types (str and object) work.
-  """
+  """Verify that multiple imports of mixed types (str and object) work."""
   imports = ["import cv2", ImportReq(module="PIL", alias="Image")]
   v = FrameworkVariant(api="image_op", required_imports=imports)
 
@@ -57,8 +49,6 @@ def test_variant_imports_mixed():
 
 
 def test_variant_imports_default_empty():
-  """
-  Verify default behavior is an empty list (safe for most ops).
-  """
+  """Verify default behavior is an empty list (safe for most ops)."""
   v = FrameworkVariant(api="basic_op")
   assert v.required_imports == []

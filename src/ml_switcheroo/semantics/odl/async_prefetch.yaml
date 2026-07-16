@@ -1,0 +1,13 @@
+description: The class representing a Python function.
+std_args:
+- self
+- gmem_ref
+- gmem_slice
+- gmem_transform
+- gmem_peer_id
+- swizzle
+- collective
+- partitioned
+- predicate
+type: function
+operation: async_prefetch

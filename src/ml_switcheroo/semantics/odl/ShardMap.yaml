@@ -1,0 +1,12 @@
+description: Transformation for sharded parallel execution over a mesh.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: f
+  type: Callable
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mesh
+  type: Any
+variants: {}
+operation: ShardMap

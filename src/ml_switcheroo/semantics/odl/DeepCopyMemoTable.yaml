@@ -1,0 +1,5 @@
+description: Internal helper for deepcopy operations in PyTorch.
+op_type: class
+std_args: []
+variants: {}
+operation: DeepCopyMemoTable

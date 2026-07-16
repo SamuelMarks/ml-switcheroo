@@ -1,3 +1,5 @@
+"""Test module."""
+
 import pytest
 import json
 
@@ -8,6 +10,7 @@ from ml_switcheroo.sphinx_ext.registry import scan_registry
 
 
 def get_examples():
+  """Test function."""
   _, examples_json, _ = scan_registry()
   return json.loads(examples_json)
 
@@ -17,11 +20,13 @@ EXAMPLES = get_examples()
 
 @pytest.fixture(scope="module")
 def semantics():
+  """Test function."""
   return SemanticsManager()
 
 
 @pytest.mark.parametrize("example_key", sorted(EXAMPLES.keys()))
 def test_wasm_combination(example_key, semantics, snapshot):
+  """Test function."""
   ex = EXAMPLES[example_key]
   src_fw = ex["srcFw"]
   src_flavour = ex["srcFlavour"]

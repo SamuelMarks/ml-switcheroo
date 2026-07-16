@@ -1,6 +1,4 @@
-"""
-Tests for Functional Unwrapping logic in TestRewriter.
-"""
+"""Tests for Functional Unwrapping logic in TestRewriter."""
 
 import pytest
 import libcst as cst
@@ -10,9 +8,7 @@ from ml_switcheroo.config import RuntimeConfig
 
 
 class MockUnwrapSemantics(SemanticsManager):
-  """
-  Mock Manager for unwrapping tests.
-  """
+  """Mock Manager for unwrapping tests."""
 
   def __init__(self):
     """Function docstring."""
@@ -46,8 +42,7 @@ def rewrite_code(rewriter, code):
 
 
 def test_unwrap_call_only(rewriter):
-  """
-  Input: `z = self.layer.apply(variables, x) + 1`
+  """Input: `z = self.layer.apply(variables, x) + 1`
   Output: `z = self.layer(x) + 1`
   """
   code = "z = self.layer.apply(variables, x) + 1"
@@ -59,8 +54,7 @@ def test_unwrap_call_only(rewriter):
 
 
 def test_unwrap_assignment_tuple(rewriter):
-  """
-  Input: `y, updates = self.layer.apply(vars, x)`
+  """Input: `y, updates = self.layer.apply(vars, x)`
   Output: `y = self.layer(x)`
   """
   code = "y, updates = self.layer.apply(vars, x)"

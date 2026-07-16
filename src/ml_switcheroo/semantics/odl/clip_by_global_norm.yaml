@@ -1,0 +1,4 @@
+description: Auto-generated from jax_code_defs
+std_args: []
+type: attribute
+operation: clip_by_global_norm

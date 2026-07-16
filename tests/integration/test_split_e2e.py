@@ -1,8 +1,4 @@
-"""
-End-to-End Integration Test for Distributed Semantics.
-"""
-
-import json
+"""End-to-End Integration Test for Distributed Semantics."""
 
 import pytest
 
@@ -25,6 +21,12 @@ def legacy_env(tmp_path):
 
   sem_dir.mkdir(parents=True)
 
-  (sem_dir / "k_array_api.json").write_text(json.dumps(LEGACY_MATH_JSON))
+  import yaml
+
+  odl_dir = sem_dir / "odl"
+  odl_dir.mkdir()
+  for k, v in LEGACY_MATH_JSON.items():
+    v["operation"] = k
+    (odl_dir / f"{k.replace('/', '_')}.yaml").write_text(yaml.dump(v))
 
   return sem_dir, snap_dir

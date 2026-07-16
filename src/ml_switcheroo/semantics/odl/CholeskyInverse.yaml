@@ -1,0 +1,14 @@
+description: Computes the inverse of a symmetric positive-definite matrix using its
+  Cholesky factor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: upper
+  type: bool
+variants: {}
+operation: CholeskyInverse

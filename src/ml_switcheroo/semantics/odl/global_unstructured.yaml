@@ -1,0 +1,9 @@
+description: Globally prunes tensors corresponding to all parameters in ``parameters``
+  by applying the specified ``pruning_method``.
+std_args:
+- parameters
+- pruning_method
+- importance_scores
+- kwargs
+type: function
+operation: global_unstructured

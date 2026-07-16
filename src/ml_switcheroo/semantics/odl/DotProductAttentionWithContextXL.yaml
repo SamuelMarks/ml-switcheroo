@@ -1,0 +1,9 @@
+description: Transformer-XL style attention with context.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: rel_pos_emb_dim
+  type: int
+variants: {}
+operation: DotProductAttentionWithContextXL

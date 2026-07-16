@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import yaml
 from unittest import mock
 
@@ -11,17 +13,22 @@ from ml_switcheroo.sphinx_ext.autogen_ops import (
 
 
 class MockEnum:
+  """Auto-generated doc."""
+
   def __init__(self, value):
+    """Auto-generated doc."""
     self.value = value
 
 
 def test_indented_dumper():
+  """Auto-generated doc."""
   dumper = IndentedDumper(None)
   result = dumper.increase_indent(flow=False, indentless=True)
   assert result is None
 
 
 def test_build_yaml_entry():
+  """Auto-generated doc."""
   definition = {
     "std_args": [
       "arg_str",
@@ -53,6 +60,7 @@ def test_build_yaml_entry():
 
 
 def test_build_yaml_entry_minimal():
+  """Auto-generated doc."""
   entry = _build_yaml_entry("test_op", {})
   assert entry["operation"] == "test_op"
   assert entry["description"] == ""
@@ -68,6 +76,7 @@ def test_build_yaml_entry_minimal():
 
 
 def test_write_yaml_update(tmp_path):
+  """Auto-generated doc."""
   out_path = tmp_path / "operations.yaml"
 
   new_entries = [
@@ -94,6 +103,7 @@ def test_write_yaml_update(tmp_path):
 
 
 def test_write_yaml_update_corrupt_existing(tmp_path):
+  """Auto-generated doc."""
   out_path = tmp_path / "operations.yaml"
   out_path.write_text("invalid: yaml: [")
 
@@ -107,6 +117,7 @@ def test_write_yaml_update_corrupt_existing(tmp_path):
 
 
 def test_write_yaml_update_existing_not_list(tmp_path):
+  """Auto-generated doc."""
   out_path = tmp_path / "operations.yaml"
   out_path.write_text("not_a_list: true")
 
@@ -120,6 +131,7 @@ def test_write_yaml_update_existing_not_list(tmp_path):
 
 
 def test_write_yaml_update_ioerror(tmp_path):
+  """Auto-generated doc."""
   out_path = tmp_path / "not_exist_dir" / "operations.yaml"
 
   new_entries = [{"operation": "OpA", "val": 1}]
@@ -129,6 +141,7 @@ def test_write_yaml_update_ioerror(tmp_path):
 
 
 def test_write_index_file(tmp_path):
+  """Auto-generated doc."""
   out_dir = tmp_path / "out"
   out_dir.mkdir()
 
@@ -144,7 +157,10 @@ def test_write_index_file(tmp_path):
 
 
 class MockApp:
+  """Auto-generated doc."""
+
   def __init__(self, srcdir):
+    """Auto-generated doc."""
     self.srcdir = srcdir
 
 
@@ -152,6 +168,7 @@ class MockApp:
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.DocContextBuilder")
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.OpPageRenderer")
 def test_generate_op_docs(mock_renderer_cls, mock_builder_cls, mock_manager_cls, tmp_path):
+  """Auto-generated doc."""
   mock_manager = mock.Mock()
   mock_manager_cls.return_value = mock_manager
 
@@ -206,6 +223,7 @@ def test_generate_op_docs(mock_renderer_cls, mock_builder_cls, mock_manager_cls,
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.DocContextBuilder")
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.OpPageRenderer")
 def test_generate_op_docs_ioerror(mock_renderer_cls, mock_builder_cls, mock_manager_cls, tmp_path):
+  """Auto-generated doc."""
   mock_manager = mock.Mock()
   mock_manager_cls.return_value = mock_manager
   mock_manager.get_known_apis.return_value = {
@@ -227,6 +245,7 @@ def test_generate_op_docs_ioerror(mock_renderer_cls, mock_builder_cls, mock_mana
   original_open = open
 
   def mock_open(path, *args, **kwargs):
+    """Auto-generated doc."""
     if "ValidOp.rst" in str(path):
       raise IOError("mock error")
     return original_open(path, *args, **kwargs)
@@ -243,6 +262,7 @@ def test_generate_op_docs_ioerror(mock_renderer_cls, mock_builder_cls, mock_mana
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.DocContextBuilder")
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.OpPageRenderer")
 def test_generate_op_docs_empty(mock_renderer_cls, mock_builder_cls, mock_manager_cls, tmp_path):
+  """Auto-generated doc."""
   mock_manager = mock.Mock()
   mock_manager_cls.return_value = mock_manager
   mock_manager.get_known_apis.return_value = {}

@@ -1,0 +1,7 @@
+description: Atomically cancels a pending cluster launch.
+std_args:
+- result_ref
+- barrier
+- predicate
+type: function
+operation: try_cluster_cancel

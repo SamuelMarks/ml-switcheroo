@@ -1,0 +1,4 @@
+description: Auto-generated mapping for broadcast_shardings.
+std_args: []
+variants: {}
+operation: broadcast_shardings

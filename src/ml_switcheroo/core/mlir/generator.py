@@ -35,7 +35,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     self.ctx = NamingContext()
 
     # Store usage counts for inlining logic: {ssa_name: count}
-    self.usage_counts: Dict[str, int] = defaultdict(int)
+    self.usage_counts: Dict[str, int] = defaultdict(int)  # type: ignore
     # Map of ssa_name -> consumer_op (single consumer context)
     self.usage_consumers: Dict[str, OperationNode] = {}
 
@@ -59,7 +59,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     stmt_body = self._convert_block(node.body)
 
     # Ensure we return a module with valid body sequence
-    return cst.Module(body=stmt_body)
+    return cst.Module(body=stmt_body)  # type: ignore
 
   def _analyze_module_usage(self, mod: ModuleNode) -> None:
     """Traverses the MLIR tree to count SSAs usage.
@@ -122,7 +122,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
       else:
         # Handle statements that are never expressions (Control Flow, Class Defs, Defs, Imports)
         # These are handled by StatementGeneratorMixin
-        stmt_node = self._convert_statement_op(op)
+        stmt_node = self._convert_statement_op(op)  # type: ignore
         if stmt_node:
           if hasattr(stmt_node, "with_changes") and leading:
             stmt_node = stmt_node.with_changes(leading_lines=leading)

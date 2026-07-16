@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- self
+- leading_rank
+type: function
+operation: batch

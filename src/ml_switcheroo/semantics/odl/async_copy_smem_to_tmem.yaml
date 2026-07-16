@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- smem_ref
+- tmem_ref
+- swizzle
+- collective
+type: function
+operation: async_copy_smem_to_tmem

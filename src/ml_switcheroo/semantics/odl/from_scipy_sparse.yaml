@@ -1,0 +1,9 @@
+description: Create a BCOO array from a :mod:`scipy.sparse` array.
+std_args:
+- cls
+- mat
+- index_dtype
+- n_dense
+- n_batch
+type: function
+operation: from_scipy_sparse

@@ -1,0 +1,4 @@
+description: Auto-generated mapping for batch_norm.
+std_args: []
+type: function
+operation: batch_norm

@@ -1,0 +1,9 @@
+description: The class representing a Python function.
+std_args:
+- f
+- tag
+- order
+- primals
+- series
+type: function
+operation: jet_subtrace

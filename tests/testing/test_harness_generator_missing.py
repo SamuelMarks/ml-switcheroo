@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_harness_generate_template():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
   from pathlib import Path
 
@@ -13,6 +17,7 @@ def test_harness_generate_template():
 
 
 def test_harness_adapter_shim_exceptions():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
@@ -24,7 +29,10 @@ def test_harness_adapter_shim_exceptions():
 
   # Force _build_result_normalization adapter exceptions
   class MockAdapter:
+    """Auto-generated doc."""
+
     def get_to_numpy_code(self):
+      """Auto-generated doc."""
       raise Exception("Fail")
 
   with __import__("unittest.mock").mock.patch(
@@ -35,6 +43,7 @@ def test_harness_adapter_shim_exceptions():
 
 
 def test_harness_extractor_oserror():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
@@ -49,6 +58,7 @@ def test_harness_extractor_oserror():
 
 
 def test_harness_extract_module_functions_oserror():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
   import inspect
 
@@ -58,6 +68,7 @@ def test_harness_extract_module_functions_oserror():
   original_getsource = inspect.getsource
 
   def mock_getsource(obj):
+    """Auto-generated doc."""
     if inspect.isfunction(obj):
       raise OSError("fail")
     return original_getsource(obj)
@@ -67,6 +78,7 @@ def test_harness_extract_module_functions_oserror():
 
 
 def test_harness_build_result_normalization_flax():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
@@ -75,6 +87,7 @@ def test_harness_build_result_normalization_flax():
 
 
 def test_harness_generate_adapter_shim_oserror():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
   import inspect
 
@@ -82,6 +95,7 @@ def test_harness_generate_adapter_shim_oserror():
   original_getsource = inspect.getsource
 
   def mock_getsource(obj):
+    """Auto-generated doc."""
     if hasattr(obj, "__name__") and obj.__name__ == "convert":
       raise OSError("fail")
     return original_getsource(obj)
@@ -91,11 +105,14 @@ def test_harness_generate_adapter_shim_oserror():
 
 
 def test_harness_generate_adapter_shim_no_convert():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
   from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY
 
   # Temporarily inject an adapter with no convert
   class NoConvertAdapter:
+    """Auto-generated doc."""
+
     pass
 
   _ADAPTER_REGISTRY["fake_fw"] = NoConvertAdapter

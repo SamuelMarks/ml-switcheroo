@@ -1,0 +1,10 @@
+description: Emits a custom call referencing a tf.Graph embedding of the TF function.
+std_args:
+- ctx
+- concrete_function_flat_tf
+- operands
+- has_side_effects
+- ordered
+- output_avals
+type: function
+operation: emit_tf_embedded_graph_custom_call

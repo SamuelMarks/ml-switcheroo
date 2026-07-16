@@ -1,8 +1,11 @@
-from ml_switcheroo.compiler.differ import GraphDiffer, _is_likely_stateful
+"""Auto-generated doc."""
+
+from ml_switcheroo.core.compiler.differ import GraphDiffer, _is_likely_stateful
 from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
 
 
 def test_differ_no_changes():
+  """Auto-generated doc."""
   differ = GraphDiffer()
   g1 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
   g2 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
@@ -10,6 +13,7 @@ def test_differ_no_changes():
 
 
 def test_differ_deleted_node():
+  """Auto-generated doc."""
   differ = GraphDiffer()
   g1 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
   g2 = LogicalGraph(nodes=[], edges=[])
@@ -19,6 +23,7 @@ def test_differ_deleted_node():
 
 
 def test_differ_replace_node():
+  """Auto-generated doc."""
   differ = GraphDiffer()
   # Replace single node
   g1 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
@@ -29,6 +34,7 @@ def test_differ_replace_node():
 
 
 def test_differ_insert_node():
+  """Auto-generated doc."""
   differ = GraphDiffer()
   g1 = LogicalGraph(nodes=[], edges=[])
   g2 = LogicalGraph(nodes=[LogicalNode("a", "Conv", metadata={"anchor": "missing"})], edges=[])
@@ -38,6 +44,7 @@ def test_differ_insert_node():
 
 
 def test_differ_complex_replace():
+  """Auto-generated doc."""
   differ = GraphDiffer()
   # 2 nodes become 1 node (Fusion)
   g1 = LogicalGraph(nodes=[LogicalNode("a", "Linear"), LogicalNode("b", "GELU")], edges=[LogicalEdge("a", "b")])
@@ -52,6 +59,7 @@ def test_differ_complex_replace():
 
 
 def test__is_likely_stateful():
+  """Auto-generated doc."""
   assert _is_likely_stateful(LogicalNode("1", "Conv2d")) is True
   assert _is_likely_stateful(LogicalNode("2", "add")) is False
   assert _is_likely_stateful(LogicalNode("3", "fused_add")) is False  # wait

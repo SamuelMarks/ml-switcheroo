@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- prim
+- deriv
+- primals_in
+- series_in
+type: function
+operation: deriv_prop

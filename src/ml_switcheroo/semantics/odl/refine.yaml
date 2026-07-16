@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- self
+- chunk
+- num_chunks
+- chunk_size
+type: function
+operation: refine

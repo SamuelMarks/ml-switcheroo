@@ -1,0 +1,8 @@
+description: Copy-variant of .values() accessor (typically for sparse tensors).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: ValuesCopy

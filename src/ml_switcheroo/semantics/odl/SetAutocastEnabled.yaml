@@ -1,0 +1,12 @@
+description: Enables autocast.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device_type
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: enabled
+  type: bool
+variants: {}
+operation: SetAutocastEnabled

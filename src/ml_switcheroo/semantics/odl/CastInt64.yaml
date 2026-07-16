@@ -1,0 +1,8 @@
+description: Casts tensor to 64-bit integer type.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: CastInt64

@@ -1,0 +1,12 @@
+description: Simple RNN cell.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: in_features
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hidden_features
+  type: int
+variants: {}
+operation: SimpleCell

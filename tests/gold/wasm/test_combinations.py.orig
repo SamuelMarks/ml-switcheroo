@@ -23,7 +23,7 @@ def test_wasm_combination(example_key, semantics, snapshot):
     src_flavour = ex["srcFlavour"]
     tgt_fw = ex["tgtFw"]
     tgt_flavour = ex["tgtFlavour"]
-    
+
     # 1. Forward
     config_fwd = RuntimeConfig(
         source_framework=src_fw,
@@ -36,7 +36,7 @@ def test_wasm_combination(example_key, semantics, snapshot):
     print("\n--- BEFORE FWD ---:\n" + ex["code"])
     result_fwd = engine_fwd.run(ex["code"])
     assert result_fwd.success, f"Forward transpilation failed: {result_fwd.errors}"
-    
+
     print("\n--- FWD RESULT ---:\n" + result_fwd.code)
     # 2. Backward
     config_bwd = RuntimeConfig(
@@ -50,7 +50,7 @@ def test_wasm_combination(example_key, semantics, snapshot):
     print("\n--- BEFORE BWD ---:\n" + result_fwd.code)
     result_bwd = engine_bwd.run(result_fwd.code)
     assert result_bwd.success, f"Backward transpilation failed: {result_bwd.errors}"
-    
+
     print("\n--- BWD RESULT ---:\n" + result_bwd.code)
     # Snapshot the roundtrip
     snapshot.assert_match(

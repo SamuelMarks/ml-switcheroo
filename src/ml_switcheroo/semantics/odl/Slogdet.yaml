@@ -1,0 +1,9 @@
+description: Returns the sign and the natural logarithm of the absolute value of the
+  determinant of a square matrix (or a stack of square matrices) ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+type: attribute
+operation: slogdet

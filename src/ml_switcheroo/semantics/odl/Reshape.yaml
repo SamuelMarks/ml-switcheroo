@@ -1,0 +1,16 @@
+description: Reshapes an array without changing its data.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: shape
+  type: Tuple[int, Ellipsis]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: copy
+  type: Optional[bool]
+variants: {}
+operation: reshape

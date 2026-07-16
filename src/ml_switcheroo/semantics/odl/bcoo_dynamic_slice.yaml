@@ -1,0 +1,7 @@
+description: Sparse implementation of :func:`jax.lax.dynamic_slice`.
+std_args:
+- mat
+- start_indices
+- slice_sizes
+type: function
+operation: bcoo_dynamic_slice

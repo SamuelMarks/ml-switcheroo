@@ -1,0 +1,15 @@
+description: The class representing a Python function.
+std_args:
+- x_ref
+- weight_ref
+- bias_ref
+- do_ref
+- mean_ref
+- rstd_ref
+- dw_ref
+- db_ref
+- eps
+- block_m
+- block_n
+type: function
+operation: layer_norm_backward_kernel_dw_db

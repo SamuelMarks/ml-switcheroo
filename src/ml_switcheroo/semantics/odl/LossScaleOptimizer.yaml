@@ -1,0 +1,19 @@
+description: An optimizer that dynamically scales the loss to prevent underflow.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inner_optimizer
+  type: Any
+- default: 32768.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: initial_scale
+  type: float
+- default: 2000
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dynamic_growth_steps
+  type: int
+variants: {}
+operation: LossScaleOptimizer

@@ -1,0 +1,8 @@
+description: Convert flat state object into State object.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: flat_state
+  type: Mapping
+variants: {}
+operation: FromFlatState

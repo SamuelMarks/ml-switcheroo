@@ -1,0 +1,13 @@
+description: Calculates the difference for each element ``x1_i`` of the input array
+  ``x1`` with the respective element ``x2_i`` of the input array ``x2``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x1
+  type: Union[array, int, float, complex]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x2
+  type: Union[array, int, float, complex]
+variants: {}
+operation: subtract

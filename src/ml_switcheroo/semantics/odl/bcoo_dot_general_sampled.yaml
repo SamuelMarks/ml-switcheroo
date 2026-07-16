@@ -1,0 +1,8 @@
+description: A contraction operation with output computed at given sparse indices.
+std_args:
+- A
+- B
+- indices
+- dimension_numbers
+type: function
+operation: bcoo_dot_general_sampled

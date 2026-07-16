@@ -62,7 +62,7 @@ class BatchValidator:
 
     iterator = op_names
     if verbose:
-      iterator = track(op_names, description="🧪 Verifying Semantics...")
+      iterator = track(op_names, description="🧪 Verifying Semantics...")  # type: ignore
 
     for op_name in iterator:
       # 1. Manual Test Priority
@@ -150,7 +150,7 @@ class BatchValidator:
         Set of operation names found in manual tests.
 
     """
-    found = set()
+    found = set()  # type: ignore
     if not root.exists():
       return found
 

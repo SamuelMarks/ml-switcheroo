@@ -1,0 +1,8 @@
+description: Sets the random number generator state.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: new_state
+  type: Tensor
+variants: {}
+operation: SetRngState

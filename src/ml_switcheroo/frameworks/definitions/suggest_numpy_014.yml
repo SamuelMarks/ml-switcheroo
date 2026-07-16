@@ -72,7 +72,7 @@ variants:
     api: "jax.numpy.shape"
   torch:
     api: "torch.func.shape" # Or just attribute access transformation
-    transformation_type: "attribute" 
+    transformation_type: "attribute"
     # If standard is function, mapping to x.shape property is common
   keras:
     api: "keras.ops.shape"
@@ -98,7 +98,7 @@ variants:
   numpy:
     api: "numpy.shares_memory"
   torch:
-    api: "torch.shares_memory" 
+    api: "torch.shares_memory"
     # Logic might differ slightly
   jax:
     # JAX arrays are immutable/pure
@@ -199,7 +199,7 @@ variants:
     api: "tf.math.signbit"
   mlx:
     # Not directly in mlx.core
-    api: null 
+    api: null
 
 ---
 operation: "Sin"
@@ -264,7 +264,6 @@ variants:
   paxml:
     api: "jax.numpy.float32"
   torch:
-    api: "torch.float32" # This is a dtype object, actual cast is .to or tensor(..., dtype=float32)
     # Using float() for casting
     api: "torch.float"
   tensorflow:
@@ -351,7 +350,7 @@ variants:
   torch:
     api: "torch.sort"
     args: { "axis": "dim" }
-    # Torch sort returns (values, indices). If standard is 'values only', 
+    # Torch sort returns (values, indices). If standard is 'values only',
     # we need to select output index 0.
     output_select_index: 0
   keras:
@@ -563,8 +562,8 @@ variants:
   torch:
     api: "torch.std"
     args: { "a": "input", "axis": "dim", "keepdims": "keepdim" }
-    # Torch defaults "unbiased=True" (ddof=1). 
-    # To match standard (ddof=0), we must inject correction or map args. 
+    # Torch defaults "unbiased=True" (ddof=1).
+    # To match standard (ddof=0), we must inject correction or map args.
     # Torch doesn't have `ddof` arg directly, it uses `correction`.
     arg_values:
       ddof:
@@ -681,7 +680,7 @@ variants:
     api: "keras.ops.swapaxes"
     args: { "a": "x" }
   tensorflow:
-    api: "tf.experimental.numpy.swapaxes" 
+    api: "tf.experimental.numpy.swapaxes"
     # Fallback to macro if experimental unavailable
     macro_template: "tf.transpose({a}, perm=...)" # Complex logic required for dynamic perms
   mlx:

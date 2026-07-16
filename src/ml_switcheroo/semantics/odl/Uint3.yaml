@@ -1,0 +1,5 @@
+description: 3-bit unsigned integer type.
+op_type: attribute
+std_args: []
+variants: {}
+operation: Uint3

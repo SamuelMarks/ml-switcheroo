@@ -130,17 +130,17 @@ class GraphExtractor(cst.CSTVisitor):
     """Parses `self.conv = nn.Conv2d(...)` lines."""
     # 1. Identify Target (must be self.something)
     target = node.targets[0].target
-    if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):
+    if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):  # type: ignore
       return
 
-    attr_name = target.attr.value
+    attr_name = target.attr.value  # type: ignore
 
     # 2. Identify Op Type
     call = node.value
     if not isinstance(call, cst.Call):
       return
 
-    op_type = get_full_name(call.func)
+    op_type = get_full_name(call.func)  # type: ignore
     # Simplify name (e.g. torch.nn.Conv2d -> Conv2d)
     if "." in op_type:
       op_type = op_type.split(".")[-1]
@@ -175,12 +175,12 @@ class GraphExtractor(cst.CSTVisitor):
   def _resolve_layer_or_func_name(self, func_node: cst.BaseExpression) -> Optional[str]:
     """Resolves `self.layer` -> `layer` or `F.relu` -> `func_relu`."""
     # 1. Method call on self (Registered Layer)
-    if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):
-      return func_node.attr.value
+    if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):  # type: ignore
+      return func_node.attr.value  # type: ignore
 
     # 2. Functional Call (Ephemeral Node)
     # Simplified: tracing only explicit layers from init + functional if identified
-    func_name = get_full_name(func_node)
+    func_name = get_full_name(func_node)  # type: ignore
     if func_name:
       # Create ad-hoc functional node
       layer_name = f"func_{func_name.split('.')[-1].lower()}"

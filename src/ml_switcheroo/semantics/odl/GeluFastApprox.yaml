@@ -1,0 +1,8 @@
+description: A fast approximation to GELU (Sigmoid based).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: GeluFastApprox

@@ -1,0 +1,12 @@
+description: Computes the masks which combines causal masking and segment masks.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: segment_ids
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: causal_attention_mask
+  type: Tensor
+variants: {}
+operation: CausalSegmentMask

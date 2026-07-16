@@ -1,0 +1,5 @@
+description: Simple MLP model for Classification.
+op_type: class
+std_args: []
+variants: {}
+operation: ClassificationMLPModel

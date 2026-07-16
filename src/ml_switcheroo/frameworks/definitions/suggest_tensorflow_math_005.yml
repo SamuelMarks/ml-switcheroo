@@ -221,9 +221,9 @@ variants:
   paxml:
     api: "jax.scipy.special.zeta"
   torch:
-    # torch.special.zeta(input, other) 
+    # torch.special.zeta(input, other)
     # computes \sum (other + k)^{-input}
-    # TF docs: \sum (q + n)^{-x} -> TF(x, q) maps to Torch(x, q) 
+    # TF docs: \sum (q + n)^{-x} -> TF(x, q) maps to Torch(x, q)
     api: "torch.special.zeta"
     args:
       x: "input"

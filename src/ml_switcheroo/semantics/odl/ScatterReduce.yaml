@@ -1,0 +1,30 @@
+description: Reduces values into a tensor at indices specified by index using a reduction
+  operation.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: index
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: src
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: reduce
+  type: str
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: include_self
+  type: bool
+variants: {}
+operation: ScatterReduce

@@ -1,0 +1,14 @@
+description: Preprocessing layer which rescales input values to a new range.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: scale
+  type: float
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: offset
+  type: float
+variants: {}
+operation: Rescaling

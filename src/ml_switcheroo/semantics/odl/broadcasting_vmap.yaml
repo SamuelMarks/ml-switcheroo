@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- fun
+- in_axes
+- out_axes
+type: function
+operation: broadcasting_vmap

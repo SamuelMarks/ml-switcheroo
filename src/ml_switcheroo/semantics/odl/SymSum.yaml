@@ -1,0 +1,8 @@
+description: Symbolic N-ary sum.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: args
+  type: List
+variants: {}
+operation: SymSum

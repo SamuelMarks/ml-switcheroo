@@ -43,17 +43,17 @@ class AttributeMixin(cst.CSTTransformer):
     for i in range(len(parts) - 1, 0, -1):
       prefix = ".".join(parts[:i])
 
-      if prefix in self._path_to_alias:
-        alias = self._path_to_alias[prefix]
+      if prefix in self._path_to_alias:  # type: ignore
+        alias = self._path_to_alias[prefix]  # type: ignore
         suffix_parts = parts[i:]
 
         # Construct collapsed node: alias.Remainder
         new_node = cst.Name(alias)
         for part in suffix_parts:
-          new_node = cst.Attribute(value=new_node, attr=cst.Name(part))
+          new_node = cst.Attribute(value=new_node, attr=cst.Name(part))  # type: ignore
 
         # Apply deep simplification again on the collapsed result just in case
-        return self._simplify_reexports(new_node)
+        return self._simplify_reexports(new_node)  # type: ignore
 
     return updated_node
 

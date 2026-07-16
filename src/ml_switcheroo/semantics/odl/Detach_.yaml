@@ -1,0 +1,8 @@
+description: Detaches the Tensor from the graph in-place.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: Detach_

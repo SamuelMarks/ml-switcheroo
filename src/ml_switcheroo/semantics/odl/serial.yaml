@@ -1,0 +1,5 @@
+description: Combinator for composing layers in serial.
+std_args:
+- layers
+type: function
+operation: serial

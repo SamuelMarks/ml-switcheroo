@@ -1,0 +1,7 @@
+description: Converts a global `jax.Array` to a host local `jax.Array`.
+std_args:
+- global_inputs
+- global_mesh
+- pspecs
+type: function
+operation: global_array_to_host_local_array

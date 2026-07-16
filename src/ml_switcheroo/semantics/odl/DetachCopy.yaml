@@ -1,0 +1,8 @@
+description: Returns a new Tensor, detached from the current graph and copied.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: DetachCopy

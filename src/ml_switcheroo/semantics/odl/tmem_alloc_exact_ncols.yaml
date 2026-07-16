@@ -1,0 +1,6 @@
+description: Returns the exact number of columns to allocate in TMEM.
+std_args:
+- ncols
+- exact
+type: function
+operation: tmem_alloc_exact_ncols

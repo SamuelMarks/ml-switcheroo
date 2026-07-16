@@ -1,0 +1,22 @@
+description: 2D Convolutional LSTM.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_size
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hidden_size
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: int | Tuple[int, int]
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: bool
+variants: {}
+operation: ConvLSTM2d

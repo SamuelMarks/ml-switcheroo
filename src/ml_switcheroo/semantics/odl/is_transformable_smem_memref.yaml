@@ -1,0 +1,5 @@
+description: Whether the value is a memref in SMEM on which transforms should be applied.
+std_args:
+- v
+type: function
+operation: is_transformable_smem_memref

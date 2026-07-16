@@ -3,14 +3,14 @@
 import pytest
 from unittest.mock import MagicMock
 
-from ml_switcheroo.compiler.backends.rdna.synthesizer import (
+from ml_switcheroo.core.compiler.backends.rdna.synthesizer import (
   RegisterAllocator,
   RdnaSynthesizer,
   MAX_VGPR,
   MAX_SGPR,
 )
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.compiler.frontends.rdna.nodes import Instruction, VGPR, SGPR, Comment, Label
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.frontends.rdna.nodes import Instruction, VGPR, SGPR, Comment, Label
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -87,9 +87,7 @@ def mock_semantics() -> MagicMock:
 
 
 def test_graph_to_rdna_basic_math(mock_semantics: MagicMock) -> None:
-  """
-  Scenario: x -> Add(y) -> z.
-  """
+  """Scenario: x -> Add(y) -> z."""
   synth = RdnaSynthesizer(mock_semantics)
   g = LogicalGraph()
   g.nodes = [
@@ -127,8 +125,7 @@ def test_graph_to_rdna_unmapped(mock_semantics: MagicMock) -> None:
 
 
 def test_rdna_to_python_instruction() -> None:
-  """
-  Input: v_add_f32 v0, v1, v2
+  """Input: v_add_f32 v0, v1, v2
   Output: v0 = rdna.v_add_f32(v1, v2)
   """
   synth = RdnaSynthesizer(MagicMock())
@@ -139,8 +136,7 @@ def test_rdna_to_python_instruction() -> None:
 
 
 def test_rdna_to_python_ranges() -> None:
-  """
-  Input: image_load v[0:3], v[4:7], s[0:3]
+  """Input: image_load v[0:3], v[4:7], s[0:3]
   Output: v_0_3 = rdna.image_load(v_4_7, s_0_3)
   """
   synth = RdnaSynthesizer(MagicMock())
@@ -153,8 +149,7 @@ def test_rdna_to_python_ranges() -> None:
 
 
 def test_rdna_to_python_label() -> None:
-  """
-  Input: Label
+  """Input: Label
   Output: Comment marker
   """
   synth = RdnaSynthesizer(MagicMock())

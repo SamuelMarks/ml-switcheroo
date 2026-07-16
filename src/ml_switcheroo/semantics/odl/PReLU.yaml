@@ -1,0 +1,4 @@
+description: Auto-generated mapping for prelu.
+std_args: []
+type: attribute
+operation: prelu

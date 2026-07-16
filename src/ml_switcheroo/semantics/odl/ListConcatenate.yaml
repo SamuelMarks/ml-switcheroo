@@ -1,0 +1,13 @@
+description: Functional interface to the Concatenate layer.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inputs
+  type: List[Tensor]
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: ListConcatenate

@@ -1,0 +1,15 @@
+description: Performs global pooling over the input.
+op_type: class
+std_args:
+- default: AVG
+  is_variadic: false
+  kind: positional_or_keyword
+  name: pooling_type
+  type: str
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: keepdims
+  type: bool
+variants: {}
+operation: GlobalPooling

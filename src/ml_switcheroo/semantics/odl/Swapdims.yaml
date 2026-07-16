@@ -1,0 +1,16 @@
+description: Interchange two dimensions of a tensor (Alias for Swapaxes).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim0
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim1
+  type: int
+variants: {}
+operation: Swapdims

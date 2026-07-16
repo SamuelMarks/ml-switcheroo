@@ -1,5 +1,4 @@
-"""
-Tests for Apple MLX Adapter Examples.
+"""Tests for Apple MLX Adapter Examples.
 
 Ensures that tiered examples provided by the MLXAdapter are syntactically valid
 and contain expected MLX specific patterns.

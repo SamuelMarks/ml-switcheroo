@@ -1,0 +1,13 @@
+description: The class representing a Python class.
+std_args:
+- self
+- module
+- scratch
+- cluster_size
+- profiler
+- device_collective_metadata
+- host_collective_metadata
+- num_peers
+- is_device_collective
+type: class
+operation: LaunchContext

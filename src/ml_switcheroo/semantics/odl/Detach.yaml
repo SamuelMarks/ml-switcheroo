@@ -1,0 +1,9 @@
+description: Returns a new Tensor, detached from the current graph. The result will
+  never require gradient.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: Detach

@@ -1,0 +1,4 @@
+description: Get the peak amount of used memory in bytes.
+std_args: []
+variants: {}
+operation: GetPeakMemory

@@ -1,0 +1,10 @@
+operation: CastFloat
+description: Definition for CastFloat
+std_args:
+- x
+variants:
+  torch:
+    api: float
+  jax:
+    api: astype
+    requires_plugin: type_methods

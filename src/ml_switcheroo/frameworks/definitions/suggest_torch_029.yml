@@ -251,7 +251,7 @@ variants:
     api: "torch.sqrt_"
   jax:
     # Mapped to functional equivalent via automation, or macro
-    macro_template: "jax.numpy.sqrt({input})" 
+    macro_template: "jax.numpy.sqrt({input})"
 ---
 operation: "Square"
 description: "Computes the square element-wise."
@@ -294,7 +294,7 @@ variants:
   torch:
     api: "torch.square_"
   jax:
-    macro_template: "jax.numpy.square({input})" 
+    macro_template: "jax.numpy.square({input})"
 ---
 operation: "Squeeze"
 description: "Returns a tensor with all the dimensions of input of size 1 removed."
@@ -375,7 +375,7 @@ variants:
   torch:
     api: "torch.sspaddmm"
   jax:
-    macro_template: "{beta} * {input} + {alpha} * jax.experimental.sparse.spmatmul({mat1}, {mat2})" 
+    macro_template: "{beta} * {input} + {alpha} * jax.experimental.sparse.spmatmul({mat1}, {mat2})"
 ---
 operation: "Stack"
 description: "Concatenates a sequence of tensors along a new dimension."
@@ -480,7 +480,7 @@ variants:
   torch:
     api: "torch.std_mean"
   jax:
-    macro_template: "(jax.numpy.std({input}, axis={dim}, ddof={correction}, keepdims={keepdim}), jax.numpy.mean({input}, axis={dim}, keepdims={keepdim}))" 
+    macro_template: "(jax.numpy.std({input}, axis={dim}, ddof={correction}, keepdims={keepdim}), jax.numpy.mean({input}, axis={dim}, keepdims={keepdim}))"
 ---
 operation: "Stft"
 description: "Short-time Fourier transform."
@@ -516,7 +516,7 @@ variants:
     api: "torch.stft"
   jax:
     api: "jax.scipy.signal.stft"
-    requires_plugin: "stft_adapter" 
+    requires_plugin: "stft_adapter"
   tensorflow:
     api: "tf.signal.stft"
     requires_plugin: "stft_adapter"
@@ -548,15 +548,15 @@ variants:
   torch:
     api: "torch.sub"
   jax:
-    macro_template: "jax.numpy.subtract({input}, {other} * {alpha})" 
+    macro_template: "jax.numpy.subtract({input}, {other} * {alpha})"
   numpy:
-    macro_template: "numpy.subtract({input}, {other} * {alpha})" 
+    macro_template: "numpy.subtract({input}, {other} * {alpha})"
   keras:
-    macro_template: "keras.ops.subtract({input}, {other} * {alpha})" 
+    macro_template: "keras.ops.subtract({input}, {other} * {alpha})"
   tensorflow:
-    macro_template: "tf.math.subtract({input}, {other} * {alpha})" 
+    macro_template: "tf.math.subtract({input}, {other} * {alpha})"
   mlx:
-    macro_template: "mlx.core.subtract({input}, {other} * {alpha})" 
+    macro_template: "mlx.core.subtract({input}, {other} * {alpha})"
 ---
 operation: "Subtract"
 description: "Alias for Sub."
@@ -573,7 +573,7 @@ variants:
   torch:
     api: "torch.subtract"
   jax:
-    macro_template: "jax.numpy.subtract({input}, {other} * {alpha})" 
+    macro_template: "jax.numpy.subtract({input}, {other} * {alpha})"
 ---
 operation: "Sum"
 description: "Returns the sum of all elements in the input tensor."
@@ -650,8 +650,8 @@ variants:
       compute_uv: "compute_uv"
     arg_values:
       some:
-        true: "False"  # torch.some=True means full_matrices=False (reduced) 
-        false: "True" 
+        true: "False"  # torch.some=True means full_matrices=False (reduced)
+        false: "True"
   numpy:
     api: "numpy.linalg.svd"
     args:

@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- f
+- input_shapes
+type: function
+operation: tf_wrap_with_input_names

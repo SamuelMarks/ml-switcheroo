@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- self
+- allow_groups
+- await_read_only
+- scope
+type: function
+operation: await_async_copy

@@ -1,5 +1,4 @@
-"""
-End-to-End Tests for jax-ml/bonsai architectures (Qwen3 & Qwen3-VL).
+"""End-to-End Tests for jax-ml/bonsai architectures (Qwen3 & Qwen3-VL).
 
 Validates the full Engine Pipeline including:
 1. Sharding Metadata Extraction.
@@ -28,20 +27,20 @@ class QwenBlock(nn.Module):
         self.q_proj = nn.Linear(1024, 1024)
         self.k_proj = nn.Linear(1024, 1024)
         self.v_proj = nn.Linear(1024, 1024)
-        
+
         self.gate_proj = nn.Linear(1024, 4096)
         self.up_proj = nn.Linear(1024, 4096)
         self.down_proj = nn.Linear(4096, 1024)
-        
+
     def forward(self, x):
         q = self.q_proj(x)
         k = self.k_proj(x)
         v = self.v_proj(x)
-        
+
         gate = self.gate_proj(x)
         up = self.up_proj(x)
-        mlp_out = self.down_proj(gate * up) 
-        
+        mlp_out = self.down_proj(gate * up)
+
         return q, mlp_out
 """
 
@@ -58,7 +57,7 @@ class VisionFrontEnd(nn.Module):
             stride=(2, 14, 14),
             bias=False
         )
-        
+
     def forward(self, x):
         return self.patch_conv(x)
 """

@@ -1,5 +1,4 @@
-"""
-Tests for JAX Stack Wiring and Integration.
+"""Tests for JAX Stack Wiring and Integration.
 
 Verifies that the `JAXStackMixin` correctly configures high-level framework adapters
 with the shared Level 0 (Core) and Level 1 (Common Libs) mappings.
@@ -10,8 +9,7 @@ from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 
 
 class MockAdapter(JAXStackMixin):
-  """
-  A dummy adapter class representing a high-level framework (e.g. Flax, PaxML).
+  """A dummy adapter class representing a high-level framework (e.g. Flax, PaxML).
   It inherits from JAXStackMixin to gain wiring capabilities.
   """
 
@@ -28,9 +26,7 @@ def adapter():
 
 
 def test_core_math_mappings(adapter):
-  """
-  Verify Level 0: Array API mappings are injected.
-  """
+  """Verify Level 0: Array API mappings are injected."""
   snapshot = {}
   adapter.apply_wiring(snapshot)
 
@@ -47,9 +43,7 @@ def test_core_math_mappings(adapter):
 
 
 def test_optax_autowiring(adapter):
-  """
-  Verify Level 1: Optax optimizers are automatically configured.
-  """
+  """Verify Level 1: Optax optimizers are automatically configured."""
   snapshot = {}
   adapter.apply_wiring(snapshot)
 
@@ -68,9 +62,7 @@ def test_optax_autowiring(adapter):
 
 
 def test_io_serialization_wiring(adapter):
-  """
-  Verify Level 1: Orbax syntax generation.
-  """
+  """Verify Level 1: Orbax syntax generation."""
   # Test Imports
   imports = adapter.get_serialization_imports()
   assert "import orbax.checkpoint" in imports[0]
@@ -88,9 +80,7 @@ def test_io_serialization_wiring(adapter):
 
 
 def test_control_flow_templates(adapter):
-  """
-  Verify Level 0: Control Flow templates are injected.
-  """
+  """Verify Level 0: Control Flow templates are injected."""
   snapshot = {}
   adapter.apply_wiring(snapshot)
 
@@ -103,9 +93,7 @@ def test_control_flow_templates(adapter):
 
 
 def test_device_syntax_generation(adapter):
-  """
-  Verify Level 0: Hardware abstraction API.
-  """
+  """Verify Level 0: Hardware abstraction API."""
   # 1. CUDA -> GPU logic
   code_cuda = adapter.get_device_syntax("'cuda'")
   assert "jax.devices('gpu')[0]" == code_cuda

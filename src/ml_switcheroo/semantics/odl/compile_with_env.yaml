@@ -1,0 +1,9 @@
+description: The class representing a Python function.
+std_args:
+- f
+- f_args
+- f_kwargs
+- env_flags
+- compiler_flags
+type: function
+operation: compile_with_env

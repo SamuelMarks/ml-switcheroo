@@ -1,0 +1,8 @@
+description: Return an array (ndim >= 1) laid out in Fortran order in memory.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Array
+variants: {}
+operation: AsFortranArray

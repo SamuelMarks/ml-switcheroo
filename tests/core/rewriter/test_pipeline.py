@@ -1,6 +1,4 @@
-"""
-Tests for the Rewriter Pipeline Infrastructure.
-"""
+"""Tests for the Rewriter Pipeline Infrastructure."""
 
 import pytest
 import libcst as cst
@@ -31,9 +29,7 @@ class MockPass(RewriterPass):
 
 
 def test_pipeline_execution_sequence() -> None:
-  """
-  Verify that passes are executed in the order provided.
-  """
+  """Verify that passes are executed in the order provided."""
   # Setup
   ctx = MagicMock(spec=RewriterContext)
   pass1 = MockPass("A")
@@ -57,9 +53,7 @@ def test_pipeline_execution_sequence() -> None:
 
 
 def test_pipeline_empty() -> None:
-  """
-  Verify pipeline works with no passes (Identity).
-  """
+  """Verify pipeline works with no passes (Identity)."""
   ctx = MagicMock(spec=RewriterContext)
   pipeline = RewriterPipeline([])
   module = cst.parse_module("x = 1")
@@ -69,9 +63,7 @@ def test_pipeline_empty() -> None:
 
 
 def test_interface_enforcement() -> None:
-  """
-  Verify abstract base class enforcement.
-  """
+  """Verify abstract base class enforcement."""
   with pytest.raises(TypeError):
     # Should fail if transform not implemented
     class InvalidPass(RewriterPass):

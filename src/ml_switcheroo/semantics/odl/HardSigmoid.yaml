@@ -1,0 +1,4 @@
+description: Auto-generated mapping for hardsigmoid.
+std_args: []
+type: function
+operation: hardsigmoid

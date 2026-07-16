@@ -1,0 +1,5 @@
+description: Metadata for operators.
+op_type: class
+std_args: []
+variants: {}
+operation: OperatorInfo

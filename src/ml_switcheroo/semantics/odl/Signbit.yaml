@@ -1,0 +1,9 @@
+description: Determines whether the sign bit is set for each element ``x_i`` of the
+  input array ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+variants: {}
+operation: signbit

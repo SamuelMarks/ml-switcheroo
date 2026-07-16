@@ -1,9 +1,12 @@
+"""Auto-generated doc."""
+
 from unittest.mock import patch
 
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 
 
 def test_compatibility_matrix():
+  """Auto-generated doc."""
   with patch("ml_switcheroo.cli.matrix.SemanticsManager") as MockSemantics:
     semantics = MockSemantics()
 

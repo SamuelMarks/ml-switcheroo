@@ -4,8 +4,7 @@ import torch.nn as nn
 
 
 class SimplePerceptron(nn.Module):
-  """
-  Basic Single-Layer Perceptron.
+  """Basic Single-Layer Perceptron.
   Semantic pivot:
     - nn.Module -> flax.nnx.Module
     - nn.Linear -> flax.nnx.Linear

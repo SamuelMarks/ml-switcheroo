@@ -1,0 +1,6 @@
+description: Merge two ts specs, dict2 takes precedence.
+std_args:
+- dict1
+- dict2
+type: function
+operation: merge_nested_ts_specs

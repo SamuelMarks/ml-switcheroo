@@ -1,0 +1,17 @@
+description: Splits the tensor into chunks chunks with specified sizes.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tensor
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: split_sizes
+  type: List[int]
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+variants: {}
+operation: SplitWithSizes

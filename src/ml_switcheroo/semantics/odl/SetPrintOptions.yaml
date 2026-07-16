@@ -1,0 +1,12 @@
+description: Set printing options.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: args
+  type: Any
+- is_variadic: false
+  kind: var_keyword
+  name: kwargs
+  type: Any
+variants: {}
+operation: SetPrintoptions

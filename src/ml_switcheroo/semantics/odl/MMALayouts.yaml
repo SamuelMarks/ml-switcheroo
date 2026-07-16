@@ -1,0 +1,6 @@
+description: Container for MMA layouts, providing a convenient way to create
+std_args:
+- self
+- element_type
+type: class
+operation: MMALayouts

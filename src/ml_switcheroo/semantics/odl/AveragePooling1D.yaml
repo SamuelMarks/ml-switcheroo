@@ -1,0 +1,22 @@
+description: Average pooling for temporal data.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: pool_size
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: strides
+  type: int
+- default: valid
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data_format
+  type: str
+variants: {}
+operation: AveragePooling1D

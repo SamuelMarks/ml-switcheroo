@@ -1,0 +1,8 @@
+description: Converts angles from degrees to radians in-place.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: Deg2Rad_

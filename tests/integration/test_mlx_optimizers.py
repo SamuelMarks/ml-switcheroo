@@ -1,6 +1,4 @@
-"""
-Integration Tests for Apple MLX Optimizer Transpilation.
-"""
+"""Integration Tests for Apple MLX Optimizer Transpilation."""
 
 import pytest
 import libcst as cst
@@ -47,9 +45,7 @@ def functional_framework_setup():
 
 @pytest.fixture
 def mlx_semantics(functional_framework_setup):
-  """
-  Sets up a Mock SemanticsManager wired with MLX-specific definitions.
-  """
+  """Sets up a Mock SemanticsManager wired with MLX-specific definitions."""
   fw_key = functional_framework_setup
 
   # 1. Register Plugins (simulate system bootstrap)
@@ -125,9 +121,7 @@ def mlx_semantics(functional_framework_setup):
 
 
 def test_mlx_optimizer_transformation(mlx_semantics, functional_framework_setup):
-  """
-  Verifies the end-to-end transformation of an optimizer workflow.
-  """
+  """Verifies the end-to-end transformation of an optimizer workflow."""
   target = functional_framework_setup
   config = RuntimeConfig(source_framework="torch", target_framework=target, strict_mode=True)
   engine = ASTEngine(semantics=mlx_semantics, config=config)

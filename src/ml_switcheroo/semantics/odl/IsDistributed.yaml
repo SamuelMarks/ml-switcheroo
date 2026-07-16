@@ -1,0 +1,4 @@
+description: Returns True if the DistributedRPC framework is initialized.
+std_args: []
+variants: {}
+operation: IsDistributed

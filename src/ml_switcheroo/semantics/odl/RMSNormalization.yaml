@@ -1,0 +1,15 @@
+description: Root Mean Square (RMS) Normalization layer.
+op_type: class
+std_args:
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+- default: 1e-6
+  is_variadic: false
+  kind: positional_or_keyword
+  name: epsilon
+  type: float
+variants: {}
+operation: RMSNormalization

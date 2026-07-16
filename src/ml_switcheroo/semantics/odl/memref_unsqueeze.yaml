@@ -1,0 +1,6 @@
+description: Inserts a singleton dimension.
+std_args:
+- ref
+- dim
+type: function
+operation: memref_unsqueeze

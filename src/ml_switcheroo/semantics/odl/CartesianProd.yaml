@@ -1,0 +1,8 @@
+description: Performs cartesian product of the given sequence of tensors.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: tensors
+  type: List[Tensor]
+variants: {}
+operation: CartesianProd

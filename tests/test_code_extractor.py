@@ -1,5 +1,4 @@
-"""
-Tests for the Code Extractor Utility.
+"""Tests for the Code Extractor Utility.
 
 Verifies that the extractor can retrieve source code from Python classes,
 ensuring that the 'Split-Brain' fix is viable.
@@ -27,9 +26,7 @@ def test_extract_simple_class():
 
 
 def test_indentation_dedent():
-  """
-  Verify that nested classes are extracted with proper dedent.
-  """
+  """Verify that nested classes are extracted with proper dedent."""
 
   # Nested definition
   class Nested:
@@ -70,8 +67,7 @@ def test_normalize_imports_injection():
 
 
 def test_real_fuzzer_extraction():
-  """
-  Integration: Ensure we can extract the real InputFuzzer class.
+  """Integration: Ensure we can extract the real InputFuzzer class.
   This is the primary use-case for the harness generator.
   """
   from ml_switcheroo.testing.fuzzer import InputFuzzer

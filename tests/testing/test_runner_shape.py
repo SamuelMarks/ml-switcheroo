@@ -1,6 +1,4 @@
-"""
-Tests for EquivalenceRunner Shape verification logic.
-"""
+"""Tests for EquivalenceRunner Shape verification logic."""
 
 import pytest
 import numpy as np
@@ -19,9 +17,7 @@ def runner():
 
 
 def test_verify_passes_correct_shape(runner):
-  """
-  Scenario: Op returns shape (2,). Lambda expects (2,).
-  """
+  """Scenario: Op returns shape (2,). Lambda expects (2,)."""
   # Setup Inputs
   inputs = {"x": np.array([1, 2])}
   runner.fuzzer.build_strategies.return_value = {}
@@ -62,9 +58,7 @@ def test_verify_passes_correct_shape(runner):
 
 
 def test_verify_fails_shape_mismatch(runner):
-  """
-  Scenario: Op returns shape (2,). Lambda expects (3,).
-  """
+  """Scenario: Op returns shape (2,). Lambda expects (3,)."""
   import hypothesis.strategies as st
 
   inputs = {"x": np.zeros((2,))}

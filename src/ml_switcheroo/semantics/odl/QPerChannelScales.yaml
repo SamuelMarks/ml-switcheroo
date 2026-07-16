@@ -1,0 +1,4 @@
+description: Quantization utility for accessing per-channel scales.
+std_args: []
+variants: {}
+operation: QPerChannelScales

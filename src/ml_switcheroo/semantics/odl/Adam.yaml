@@ -1,0 +1,6 @@
+description: 'Auto-discovered via Consensus (Score: 4.0)'
+std_args:
+- eps
+- lr
+type: function
+operation: Adam

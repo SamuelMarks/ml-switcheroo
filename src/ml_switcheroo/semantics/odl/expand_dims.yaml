@@ -1,0 +1,13 @@
+description: Expands the shape of an array by inserting a new axis (dimension) of
+  size one at the position specified by ``axis``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: expand_dims

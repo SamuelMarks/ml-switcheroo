@@ -1,5 +1,4 @@
-"""
-Tests for Engine <-> Linter Integration.
+"""Tests for Engine <-> Linter Integration.
 
 Verifies that:
 1. ASTEngine automatically calls StructuralLinter at the end of run().
@@ -102,11 +101,10 @@ def engine():
 
 
 def test_engine_catches_leaked_import(engine):
-  """
-  Scenario: Input has `import torch`. Rewriter fails to remove it.
+  """Scenario: Input has `import torch`. Rewriter fails to remove it.
   Expectation: Engine returns result with Lint Violation errors.
   """
-  code = """ 
+  code = """
 import torch
 x = 1
 """
@@ -121,14 +119,13 @@ x = 1
 
 
 def test_engine_catches_leaked_usage(engine):
-  """
-  Scenario: Input has `torch.abs(x)`. No Semantics defined to map it.
+  """Scenario: Input has `torch.abs(x)`. No Semantics defined to map it.
   Rewriter passes it through (Lax Mode).
   Expectation: Linter catches 'torch.abs'.
   """
-  code = """ 
+  code = """
 import torch
-y = torch.abs(x) 
+y = torch.abs(x)
 """
   result = engine.run(code)
 
@@ -140,8 +137,7 @@ y = torch.abs(x)
 
 
 def test_linter_trace_event(engine):
-  """
-  Verify linter execution is logged in trace.
+  """Verify linter execution is logged in trace.
   The linter runs as a distinct phase "Structural Linter" in strict mode.
   """
   code = "import torch"

@@ -1,0 +1,13 @@
+description: Composes a floating-point value with the magnitude of ``x1_i`` and the
+  sign of ``x2_i`` for each element of the input array ``x1``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x1
+  type: Union[array, int, float]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x2
+  type: Union[array, int, float]
+variants: {}
+operation: copysign

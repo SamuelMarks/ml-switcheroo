@@ -1,0 +1,13 @@
+description: Return the indices to access the main diagonal of an array.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: n
+  type: int
+- default: 2
+  is_variadic: false
+  kind: positional_or_keyword
+  name: ndim
+  type: int
+variants: {}
+operation: DiagIndices

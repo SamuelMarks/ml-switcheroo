@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_injector_spec_missing():
+  """Auto-generated doc."""
   from ml_switcheroo.tools.injector_spec import StandardsInjector
   from ml_switcheroo.core.dsl import OperationDef, ParameterDef, OpType
 
@@ -42,9 +46,12 @@ def test_injector_spec_missing():
 
 
 def test_injector_spec_missing_more():
+  """Auto-generated doc."""
   from ml_switcheroo.tools.injector_spec import StandardsInjector
 
   class DummyOpDef:
+    """Auto-generated doc."""
+
     op_type = "function"
 
   injector = StandardsInjector(DummyOpDef())
@@ -61,6 +68,7 @@ def test_injector_spec_missing_more():
 
 
 def test_injector_spec_write_parent_not_exist():
+  """Auto-generated doc."""
   from ml_switcheroo.tools.injector_spec import StandardsInjector
   from ml_switcheroo.core.dsl import OperationDef
 
@@ -70,10 +78,14 @@ def test_injector_spec_write_parent_not_exist():
   # 101: if not target_path.parent.exists()
 
   class MockPath:
+    """Auto-generated doc."""
+
     def __init__(self, *args, **kwargs):
+      """Auto-generated doc."""
       self.parent = type("MockParent", (), {"exists": lambda: False, "mkdir": lambda parents, exist_ok: None})()
 
     def exists(self):
+      """Auto-generated doc."""
       return False
 
   with __import__("unittest.mock").mock.patch(

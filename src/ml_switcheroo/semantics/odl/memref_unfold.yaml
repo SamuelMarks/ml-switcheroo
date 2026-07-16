@@ -1,0 +1,7 @@
+description: Unfolds dim into two dimensions, the size of leading one given be major_factor.
+std_args:
+- ref
+- dim
+- factors
+type: function
+operation: memref_unfold

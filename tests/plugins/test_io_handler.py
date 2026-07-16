@@ -1,5 +1,4 @@
-"""
-Tests for IO Handler Plugin using Real JAX Adapter logic.
+"""Tests for IO Handler Plugin using Real JAX Adapter logic.
 
 Verifies:
 1. Delegation to Adapter for Preamble Injection.
@@ -48,8 +47,7 @@ def rewriter():
 
 
 def test_save_transform_positional(rewriter):
-  """
-  Input: torch.save(model, 'p')
+  """Input: torch.save(model, 'p')
   Expect: orbax.checkpoint...save(directory='p', item=model)
   """
   code = "def f():\n  torch.save(model, 'p')"
@@ -64,8 +62,7 @@ def test_save_transform_positional(rewriter):
 
 
 def test_save_transform_keywords(rewriter):
-  """
-  Input: torch.save(obj=m, f='p')
+  """Input: torch.save(obj=m, f='p')
   Expect: Correct mapping regardless of source order.
   """
   code = "def f():\n  torch.save(f='p', obj=m)"
@@ -77,8 +74,7 @@ def test_save_transform_keywords(rewriter):
 
 
 def test_load_transform(rewriter):
-  """
-  Input: torch.load('p')
+  """Input: torch.load('p')
   Expect: orbax...restore('p')
   """
   code = "def f():\n  x = torch.load('p')"

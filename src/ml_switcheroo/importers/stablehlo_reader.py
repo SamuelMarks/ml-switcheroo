@@ -58,7 +58,7 @@ class StableHloSpecImporter:
     lines = content.splitlines()
 
     semantics: Dict[str, Any] = {}
-    current_op: str | None = None
+    current_op: str | None = None  # type: ignore
     current_def: Dict[str, Any] = {}
 
     # Parse Loop

@@ -1,0 +1,13 @@
+description: Adaptive max pooling operation for 2D spatial data.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: output_size
+  type: Union[int, Tuple[int, int]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data_format
+  type: str
+variants: {}
+operation: AdaptiveMaxPooling2D

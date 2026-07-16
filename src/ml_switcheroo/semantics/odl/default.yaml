@@ -1,0 +1,18 @@
+description: "Implement this method in a subclass such that it returns\na serializable\
+  \ object for ``o``, or calls the base implementation\n(to raise a ``TypeError``).\n\
+  \nFor example, to support arbitrary iterators, you could\nimplement default like\
+  \ this::\n\n    def default(self, o):\n        try:\n            iterable = iter(o)\n\
+  \        except TypeError:\n            pass\n        else:\n            return\
+  \ list(iterable)\n        # Let the base class default method raise the TypeError\n\
+  \        return super().default(o)"
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: self
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: obj
+  type: Any
+variants: {}
+operation: default

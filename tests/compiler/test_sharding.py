@@ -1,5 +1,4 @@
-"""
-Tests for Sharding Inference Pass.
+"""Tests for Sharding Inference Pass.
 
 Verifies:
 1. Heuristics for column parallel projection layers.
@@ -7,8 +6,8 @@ Verifies:
 3. Fallback logic.
 """
 
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode
-from ml_switcheroo.compiler.sharding import ShardingInferencePass
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.sharding import ShardingInferencePass
 
 
 def test_sharding_inference_heuristics():

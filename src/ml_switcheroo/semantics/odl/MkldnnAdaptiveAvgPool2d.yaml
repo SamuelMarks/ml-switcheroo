@@ -1,0 +1,12 @@
+description: Applies adaptive average pooling (MKLDNN backend optimization).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: output_size
+  type: int
+variants: {}
+operation: MkldnnAdaptiveAvgPool2d

@@ -1,0 +1,5 @@
+description: Implements a generic N-grammer layer which looks up latent bi-gram id.
+op_type: class
+std_args: []
+variants: {}
+operation: Ngrammer

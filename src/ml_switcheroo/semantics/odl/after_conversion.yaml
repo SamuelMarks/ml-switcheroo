@@ -1,0 +1,5 @@
+description: The class representing a Python function.
+std_args:
+- self
+type: function
+operation: after_conversion

@@ -1,0 +1,5 @@
+description: Simplify the key to reduce the number of combinations.
+std_args:
+- key
+type: function
+operation: simplify_key

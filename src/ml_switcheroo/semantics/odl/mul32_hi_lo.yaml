@@ -1,0 +1,6 @@
+description: Multiplies 2 32-bit values and returns the hi+low bits of the result.
+std_args:
+- x
+- y
+type: function
+operation: mul32_hi_lo

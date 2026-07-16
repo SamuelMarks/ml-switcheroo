@@ -1,0 +1,8 @@
+description: Logic for Sparse Block Compressed Column format.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arg0
+  type: Any
+variants: {}
+operation: SparseBsc

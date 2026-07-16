@@ -1,0 +1,12 @@
+description: Sets internal precision for float32 matrix multiplications.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: precision
+  options:
+  - highest
+  - high
+  - medium
+  type: str
+variants: {}
+operation: SetFloat32MatmulPrecision

@@ -1,0 +1,6 @@
+description: Makes a chunked causal attention mask.
+std_args:
+- shape
+- chunk_size
+type: function
+operation: make_chunk_attention_mask

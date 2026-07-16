@@ -1,0 +1,7 @@
+description: Generates a SourceMapBundle for the specified compiler passes.
+std_args:
+- f
+- passes
+- pass_kwargs
+type: function
+operation: generate_sourcemaps

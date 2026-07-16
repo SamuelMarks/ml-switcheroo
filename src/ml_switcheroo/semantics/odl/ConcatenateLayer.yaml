@@ -1,0 +1,10 @@
+description: Concatenates a list of inputs.
+op_type: class
+std_args:
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: ConcatenateLayer

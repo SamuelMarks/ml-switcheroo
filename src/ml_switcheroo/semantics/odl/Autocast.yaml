@@ -1,0 +1,23 @@
+description: Context manager or decorator to allow regions of script to run in mixed
+  precision.
+op_type: context
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device_type
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: dtype
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: enabled
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: cache_enabled
+  type: bool
+variants: {}
+operation: Autocast

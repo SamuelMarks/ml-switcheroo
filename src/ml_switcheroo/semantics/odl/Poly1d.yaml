@@ -1,0 +1,19 @@
+description: A one-dimensional polynomial class.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: c_or_r
+  type: Array
+- default: 'False'
+  is_variadic: false
+  kind: positional_or_keyword
+  name: r
+  type: bool
+- default: None
+  is_variadic: false
+  kind: positional_or_keyword
+  name: variable
+  type: str
+variants: {}
+operation: Poly1d

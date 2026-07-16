@@ -1,7 +1,7 @@
 """Module docstring."""
 
-from ml_switcheroo.compiler.backends.rdna.macros import expand_conv2d, expand_linear
-from ml_switcheroo.compiler.frontends.rdna.nodes import (
+from ml_switcheroo.core.compiler.backends.rdna.macros import expand_conv2d, expand_linear
+from ml_switcheroo.core.compiler.frontends.rdna.nodes import (
   Instruction,
   Label,
   SGPR,
@@ -46,9 +46,7 @@ class MockAllocator:
 
 
 def test_expand_conv2d_structure() -> None:
-  """
-  Verify Conv2d generates nested loops, loads, and waitcnt.
-  """
+  """Verify Conv2d generates nested loops, loads, and waitcnt."""
   alloc = MockAllocator()
   nodes = expand_conv2d(alloc, "conv1", {"k": 3})
 
@@ -87,9 +85,7 @@ def test_expand_conv2d_structure() -> None:
 
 
 def test_expand_linear_structure() -> None:
-  """
-  Verify Linear generates GEMM loop.
-  """
+  """Verify Linear generates GEMM loop."""
   alloc = MockAllocator()
   nodes = expand_linear(alloc, "fc1", {"in_features": 256})
 

@@ -1,6 +1,4 @@
-"""
-Tests for Flatten Range Plugin.
-"""
+"""Tests for Flatten Range Plugin."""
 
 import pytest
 import libcst as cst
@@ -157,6 +155,7 @@ def test_flatten_fallback_lookups():
   ctx.current_op_id = None
 
   def mock_lookup(aid):
+    """Auto-generated doc."""
     if aid == "flatten_full":
       return "jnp.ravel"
     return None
@@ -174,6 +173,7 @@ def test_flatten_fallback_lookups_range():
   ctx.current_op_id = None
 
   def mock_lookup(aid):
+    """Auto-generated doc."""
     if aid == "flatten_range":
       return "jnp.reshape"
     return None

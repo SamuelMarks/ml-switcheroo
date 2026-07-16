@@ -1,0 +1,5 @@
+description: Controls whether gradient scatters are done in the DQ iteration loop
+  of the backward pass.
+std_args: []
+type: attribute
+operation: WRITE_DQ

@@ -1,0 +1,8 @@
+description: Return the indices to access the main diagonal of an n-dimensional array.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arr
+  type: Tensor
+variants: {}
+operation: DiagIndicesFrom

@@ -8,7 +8,7 @@ variants:
     api: "numpy.euler_gamma"
   torch:
     # Use macro to access constant via numpy or hardcode if needed
-    macro_template: "0.57721566490153286060" 
+    macro_template: "0.57721566490153286060"
   jax:
     macro_template: "0.57721566490153286060"
 
@@ -25,7 +25,7 @@ variants:
   jax:
     # JAX uses block_until_ready() on array futures
     api: "jax.block_until_ready"
-    pack_to_tuple: "x" 
+    pack_to_tuple: "x"
     # This is rough mapping; proper JAX usage is per-array
   torch:
     # Torch is eager, no-op usually for eval (not mode)
@@ -167,7 +167,7 @@ variants:
     api: "mlx.core.eye"
   torch:
     api: "torch.eye"
-    # Torch does not support 'k' in eye directly (identity). Diag creation is different. 
+    # Torch does not support 'k' in eye directly (identity). Diag creation is different.
     # Use fallback or macro if k != 0
   jax:
     api: "jax.numpy.eye"

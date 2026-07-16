@@ -1,6 +1,4 @@
-"""
-Tests for Trait-Based Structural Rewriting using TestRewriter.
-"""
+"""Tests for Trait-Based Structural Rewriting using TestRewriter."""
 
 import pytest
 import libcst as cst
@@ -11,9 +9,7 @@ from ml_switcheroo.frameworks import register_framework
 
 
 class MockTraitSemantics(SemanticsManager):
-  """
-  Mock Manager that returns explicit traits.
-  """
+  """Mock Manager that returns explicit traits."""
 
   def __init__(self):
     """Function docstring."""
@@ -92,8 +88,7 @@ def test_trait_module_inheritance_rewrite(rewriter_factory):
 
 
 def test_dynamic_base_discovery(rewriter_factory):
-  """
-  Verifies that a completely unknown framework base ('ghost.Network')
+  """Verifies that a completely unknown framework base ('ghost.Network')
   is detected as a Module purely because it exists in the SemanticsManager config.
   """
   semantics = MockTraitSemantics()

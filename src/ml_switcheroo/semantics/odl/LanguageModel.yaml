@@ -1,0 +1,5 @@
+description: Language Model base task.
+op_type: class
+std_args: []
+variants: {}
+operation: LanguageModel

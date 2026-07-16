@@ -1,0 +1,10 @@
+description: BERT Model base task.
+op_type: class
+std_args:
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: mask_token_id
+  type: int
+variants: {}
+operation: BertModel

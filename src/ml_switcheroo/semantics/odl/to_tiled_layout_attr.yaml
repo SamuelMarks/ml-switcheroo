@@ -1,0 +1,5 @@
+description: 'Constructs a #mosaic_gpu.TiledLayout attribute from a TiledLayout.'
+std_args:
+- layout
+type: function
+operation: to_tiled_layout_attr

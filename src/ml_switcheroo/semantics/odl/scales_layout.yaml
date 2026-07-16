@@ -1,0 +1,4 @@
+description: A TMEM layout for A and B scales in .scale_vec::1X configuration.
+std_args: []
+type: function
+operation: scales_layout

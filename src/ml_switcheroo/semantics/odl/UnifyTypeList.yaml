@@ -1,0 +1,8 @@
+description: Internal type unification utility. No-op in transpilation contexts.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: types
+  type: List[Any]
+variants: {}
+operation: UnifyTypeList

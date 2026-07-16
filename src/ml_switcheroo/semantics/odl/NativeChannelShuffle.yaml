@@ -1,0 +1,12 @@
+description: Native kernel level implementation of the channel_shuffle.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: groups
+  type: int
+variants: {}
+operation: NativeChannelShuffle

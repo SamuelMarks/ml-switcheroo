@@ -1,0 +1,6 @@
+description: Determine if a module has a parametrization.
+std_args:
+- module
+- tensor_name
+type: function
+operation: is_parametrized

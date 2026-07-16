@@ -1,0 +1,16 @@
+description: The class representing a Python function.
+std_args:
+- body
+- grid
+- block
+- in_shape
+- out_shape
+- smem_scratch_shape
+- prof_spec
+- cluster
+- module_name
+- kernel_name
+- thread_semantics
+- inout_shape
+type: function
+operation: as_torch_gpu_kernel

@@ -1,0 +1,9 @@
+description: Stack of Transformer layers using repeat.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x_times
+  type: int
+variants: {}
+operation: StackedTransformerRepeated

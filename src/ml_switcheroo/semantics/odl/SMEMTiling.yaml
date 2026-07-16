@@ -1,0 +1,6 @@
+description: Wraps a known SMEM Tile Transform.
+std_args:
+- self
+- value
+type: class
+operation: SMEMTiling

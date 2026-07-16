@@ -1,0 +1,5 @@
+description: Returns the list of free variables in the system.
+std_args:
+- self
+type: function
+operation: unknowns

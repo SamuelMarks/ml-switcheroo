@@ -1,0 +1,4 @@
+description: FBGEMM linear weight quantization.
+std_args: []
+variants: {}
+operation: FbgemmLinearQuantizeWeight

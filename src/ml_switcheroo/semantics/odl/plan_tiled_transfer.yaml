@@ -1,0 +1,13 @@
+description: Plans the tiled transfer in a way that avoids SMEM bank conflicts.
+std_args:
+- tiles_shape
+- tiles_strides
+- warp_shape
+- warp_strides
+- lane_shape
+- lane_strides
+- vector_length
+- element_bits
+- swizzle
+type: function
+operation: plan_tiled_transfer

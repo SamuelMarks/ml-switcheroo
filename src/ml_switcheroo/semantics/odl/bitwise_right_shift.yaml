@@ -1,0 +1,13 @@
+description: Shifts the bits of each element ``x1_i`` of the input array ``x1`` to
+  the right according to the respective element ``x2_i`` of the input array ``x2``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x1
+  type: Union[array, int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x2
+  type: Union[array, int]
+variants: {}
+operation: bitwise_right_shift

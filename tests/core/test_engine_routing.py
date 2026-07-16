@@ -1,13 +1,11 @@
-"""
-Tests for ASTEngine Pipeline Routing.
-"""
+"""Tests for ASTEngine Pipeline Routing."""
 
 import pytest
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.compiler.ir import LogicalGraph
+from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 @pytest.fixture
@@ -52,8 +50,7 @@ def test_routing_to_rewriter_pipeline_high_level(mock_managers):
 
 
 def test_python_frontend_invoked_in_compiler_pipeline(mock_managers):
-  """
-  Verify python source ingestion logic when targeting an ISA.
+  """Verify python source ingestion logic when targeting an ISA.
   If source is 'torch' and target is 'sass', we enter compiler pipeline,
   and should use PythonFrontend because 'torch' is not an ISA source.
   """

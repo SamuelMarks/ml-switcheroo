@@ -97,18 +97,18 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
       if n == "*":
         # ImportStar
         return cst.SimpleStatementLine(
-          body=[cst.ImportFrom(module=self._create_dotted_name(module_val), names=cst.ImportStar())]
+          body=[cst.ImportFrom(module=self._create_dotted_name(module_val), names=cst.ImportStar())]  # type: ignore
         )
 
       asname = None
       if a and a != n:
         asname = cst.AsName(name=cst.Name(a))
 
-      import_aliases.append(cst.ImportAlias(name=self._create_dotted_name(n), asname=asname))
+      import_aliases.append(cst.ImportAlias(name=self._create_dotted_name(n), asname=asname))  # type: ignore
 
     if module_val:
       return cst.SimpleStatementLine(
-        body=[cst.ImportFrom(module=self._create_dotted_name(module_val), names=import_aliases)]
+        body=[cst.ImportFrom(module=self._create_dotted_name(module_val), names=import_aliases)]  # type: ignore
       )
     else:
       return cst.SimpleStatementLine(body=[cst.Import(names=import_aliases)])

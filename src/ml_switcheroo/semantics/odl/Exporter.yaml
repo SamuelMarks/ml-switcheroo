@@ -1,0 +1,13 @@
+description: Context manager to export execution traces.
+op_type: context
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: file
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: fun
+  type: Callable
+variants: {}
+operation: Exporter

@@ -1,0 +1,28 @@
+description: Returns evenly spaced numbers over a specified interval.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: start
+  type: Union[int, float, complex]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: stop
+  type: Union[int, float, complex]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Optional[dtype]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Optional[device]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: endpoint
+  type: bool
+variants: {}
+operation: linspace

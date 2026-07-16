@@ -1,0 +1,10 @@
+description: The class representing a Python class.
+std_args:
+- self
+- fun_jax
+- args_specs
+- kwargs_specs
+- native_serialization_platforms
+- native_serialization_disabled_checks
+type: class
+operation: NativeSerializationImpl

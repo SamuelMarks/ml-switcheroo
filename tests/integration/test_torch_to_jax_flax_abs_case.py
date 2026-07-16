@@ -1,5 +1,4 @@
-"""
-Integration test for the specific user reported case (torch.abs -> jnp.abs).
+"""Integration test for the specific user reported case (torch.abs -> jnp.abs).
 
 Verifies:
 1. `import torch` is removed.

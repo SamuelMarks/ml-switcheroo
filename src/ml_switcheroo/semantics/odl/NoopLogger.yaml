@@ -1,0 +1,5 @@
+description: Internal no-op logger.
+op_type: class
+std_args: []
+variants: {}
+operation: NoopLogger

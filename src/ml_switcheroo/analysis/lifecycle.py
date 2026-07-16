@@ -43,8 +43,8 @@ class InitializationTracker(cst.CSTVisitor):
 
   def __init__(self):
     """Initializes the tracker with empty state."""
-    self.warnings: List[str] = []
-    self._scope_stack: List[_ClassContext] = []
+    self.warnings: List[str] = []  # type: ignore
+    self._scope_stack: List[_ClassContext] = []  # type: ignore
 
   def visit_ClassDef(self, node: cst.ClassDef) -> None:
     """Enters a class definition.

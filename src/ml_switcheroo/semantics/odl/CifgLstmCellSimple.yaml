@@ -1,0 +1,13 @@
+description: Coupled Input and Forget Gate (CIFG) LSTM Cell.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_size
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hidden_size
+  type: int
+variants: {}
+operation: CifgLstmCellSimple

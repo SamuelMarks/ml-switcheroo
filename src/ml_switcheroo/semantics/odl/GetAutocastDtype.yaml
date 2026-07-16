@@ -1,0 +1,8 @@
+description: Get autocast dtype.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device_type
+  type: Any
+variants: {}
+operation: GetAutocastDtype

@@ -1,0 +1,5 @@
+description: Number of warps to use in the CUDA kernel. Higher values may improve
+  performance
+std_args: []
+type: attribute
+operation: num_warps

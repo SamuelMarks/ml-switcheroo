@@ -1,0 +1,38 @@
+description: Matrix multiplication with a quantized weight matrix.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: w
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: scales
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: biases
+  type: Tensor | None
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: transpose
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: group_size
+  type: int | None
+- is_variadic: false
+  kind: positional_or_keyword
+  name: bits
+  type: int | None
+- default: affine
+  is_variadic: false
+  kind: positional_or_keyword
+  name: mode
+  type: str
+variants: {}
+operation: QuantizedMatmul

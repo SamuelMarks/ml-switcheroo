@@ -1,0 +1,8 @@
+description: Storage for int16 tensors.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: args
+  type: Any
+variants: {}
+operation: ShortStorage

@@ -1,0 +1,8 @@
+description: Create a new structured or unstructured void scalar.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: length_or_data
+  type: Any
+variants: {}
+operation: Void

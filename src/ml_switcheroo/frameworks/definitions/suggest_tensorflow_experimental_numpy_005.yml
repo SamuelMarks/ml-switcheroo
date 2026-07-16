@@ -494,7 +494,7 @@ std_args:
     default: null
 variants:
   torch:
-    api: "torch.amax" # torch.max has different semantics (returns tuple sometimes) 
+    api: "torch.amax" # torch.max has different semantics (returns tuple sometimes)
     args:
         axis: "dim"
   jax:
@@ -571,7 +571,7 @@ std_args:
   - name: "xi"
     is_variadic: true
   - name: "indexing"
-    default: "xy" 
+    default: "xy"
 variants:
   torch:
     api: "torch.meshgrid"

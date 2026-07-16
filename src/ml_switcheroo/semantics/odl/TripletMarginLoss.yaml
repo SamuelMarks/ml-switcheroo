@@ -1,0 +1,36 @@
+description: Creates a criterion that measures the triplet loss.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: anchor
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: positive
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: negative
+  type: Tensor
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: margin
+  type: float
+- default: 2.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: p
+  type: float
+- default: 1e-06
+  is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: float
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: swap
+  type: bool
+type: class
+operation: TripletMarginLoss

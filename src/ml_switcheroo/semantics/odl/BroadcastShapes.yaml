@@ -1,0 +1,8 @@
+description: Calculates the shape resulting from broadcasting multiple shapes together.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: shapes
+  type: List[Tuple[int, ...]]
+variants: {}
+operation: BroadcastShapes

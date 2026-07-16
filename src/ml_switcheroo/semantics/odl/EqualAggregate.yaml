@@ -1,0 +1,12 @@
+description: True if two tensors have the same size and elements, False otherwise.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: other
+  type: Tensor
+variants: {}
+operation: EqualAggregate

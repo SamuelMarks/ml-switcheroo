@@ -1,0 +1,13 @@
+description: Returns the (Moore-Penrose) pseudo-inverse of a matrix (or a stack of
+  matrices) ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: rtol
+  type: Optional[Union[float, array]]
+type: function
+operation: pinv

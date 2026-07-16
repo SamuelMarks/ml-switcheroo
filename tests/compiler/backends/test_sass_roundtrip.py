@@ -1,5 +1,4 @@
-"""
-Integration test for full SASS Compiler Stack Roundtrip.
+"""Integration test for full SASS Compiler Stack Roundtrip.
 
 Verifies:
 1. LogicalGraph -> SASS Text (via Backend).
@@ -9,10 +8,10 @@ Verifies:
 
 import pytest
 from unittest.mock import MagicMock
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.compiler.backends.sass import SassBackend
-from ml_switcheroo.compiler.frontends.sass.parser import SassParser
-from ml_switcheroo.compiler.frontends.sass.lifter import SassLifter
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.backends.sass import SassBackend
+from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
+from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -42,8 +41,7 @@ def semantics_mgr():
 
 
 def test_round_trip_math_op(semantics_mgr):
-  """
-  Scenario: Input -> Add -> Output
+  """Scenario: Input -> Add -> Output
   Roundtrip: Graph -> SASS -> Graph
   """
   # 1. Create Source Graph
@@ -78,8 +76,7 @@ def test_round_trip_math_op(semantics_mgr):
 
 
 def test_round_trip_macro_block(semantics_mgr):
-  """
-  Scenario: Input -> Conv2d -> Output
+  """Scenario: Input -> Conv2d -> Output
   Verifies full structural recovery via BEGIN/END markers.
   """
   # 1. Source Graph

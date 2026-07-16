@@ -1,5 +1,4 @@
-"""
-Tests for HTML Core Nodes.
+"""Tests for HTML Core Nodes.
 
 Verifies:
 1. SvgArrow rendering logic.

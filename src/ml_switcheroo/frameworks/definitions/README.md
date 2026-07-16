@@ -43,7 +43,7 @@ To analyse what you have, use commands like:
 
 ```sh
 # Find total number of unique operations mapped out of `mlx.core`
-$ yq -r '.operation' $(fd -F 'suggest_mlx_core' -e yml) | sort -u | wc -l                
+$ yq -r '.operation' $(fd -F 'suggest_mlx_core' -e yml) | sort -u | wc -l
      252
 # Find number of `mlx.core` operations that map to NumPy
 $ yq -r 'select(.variants.numpy.api) | .operation' $(fd -F 'suggest_mlx_core' -e yml) | sort -u | wc -l

@@ -1,0 +1,13 @@
+description: Blackman window function.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: window_length
+  type: int
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: periodic
+  type: bool
+variants: {}
+operation: BlackmanWindow

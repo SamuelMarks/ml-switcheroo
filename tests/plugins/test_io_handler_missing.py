@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.plugins.io_handler import _get_func_name, _get_arg, transform_io_calls
@@ -5,16 +7,19 @@ from ml_switcheroo.core.hooks import HookContext
 
 
 def test_get_func_name():
+  """Auto-generated doc."""
   assert _get_func_name(cst.Call(func=cst.Name("foo"))) == "foo"
   assert _get_func_name(cst.Call(func=cst.SimpleString("'bar'"))) is None
 
 
 def test_get_arg():
+  """Auto-generated doc."""
   args = [cst.Arg(value=cst.Name("a"), keyword=cst.Name("a_kw"))]
   assert _get_arg(args, 1, "missing") is None
 
 
 def test_transform_io_calls_misses():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
 
@@ -29,7 +34,10 @@ def test_transform_io_calls_misses():
 
   # Adapter doesn't have format_save (line 67)
   class BadAdapter:
+    """Auto-generated doc."""
+
     def get_serialization_imports(self):
+      """Auto-generated doc."""
       return []
 
     pass
@@ -39,13 +47,18 @@ def test_transform_io_calls_misses():
 
   # Save with missing args (line 81, 86)
   class GoodAdapter:
+    """Auto-generated doc."""
+
     def get_serialization_imports(self):
+      """Auto-generated doc."""
       return []
 
     def format_save(self, obj, path):
+      """Auto-generated doc."""
       return cst.Call(func=cst.Name("good_save"))
 
     def format_load(self, path):
+      """Auto-generated doc."""
       return cst.Call(func=cst.Name("good_load"))
 
   with patch("ml_switcheroo.plugins.io_handler.get_adapter", return_value=GoodAdapter()):
@@ -61,10 +74,14 @@ def test_transform_io_calls_misses():
 
     # Exception during adapter logic (line 105-106)
     class RaiseAdapter:
+      """Auto-generated doc."""
+
       def get_serialization_imports(self):
+        """Auto-generated doc."""
         return []
 
       def format_save(self, obj, path):
+        """Auto-generated doc."""
         raise ValueError("boom")
 
     with patch("ml_switcheroo.plugins.io_handler.get_adapter", return_value=RaiseAdapter()):

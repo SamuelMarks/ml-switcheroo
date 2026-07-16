@@ -1,0 +1,8 @@
+description: Symbolic square root.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Any
+variants: {}
+operation: SymSqrt

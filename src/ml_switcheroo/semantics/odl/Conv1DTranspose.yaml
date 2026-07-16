@@ -1,0 +1,32 @@
+description: 1D transposed convolution layer.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: filters
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: Union[int, Tuple[int]]
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: strides
+  type: int
+- default: valid
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: str
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dilation_rate
+  type: int
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: use_bias
+  type: bool
+type: attribute
+operation: Conv1DTranspose

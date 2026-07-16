@@ -1,15 +1,13 @@
 """Module docstring."""
 
 from unittest.mock import MagicMock
-from ml_switcheroo.compiler.backends.sass.synthesizer import SassSynthesizer
-from ml_switcheroo.compiler.backends.sass import SassBackend
-from ml_switcheroo.compiler.backends.sass.macros import expand_conv2d, expand_linear
+from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
+from ml_switcheroo.core.compiler.backends.sass import SassBackend
+from ml_switcheroo.core.compiler.backends.sass.macros import expand_conv2d, expand_linear
 
 
 def test_synthesizer_wires_macros() -> None:
-  """
-  Verify that SassSynthesizer populates the macro_registry on init.
-  """
+  """Verify that SassSynthesizer populates the macro_registry on init."""
   semantics_mock = MagicMock()
   synth = SassSynthesizer(semantics_mock)
 
@@ -22,9 +20,7 @@ def test_synthesizer_wires_macros() -> None:
 
 
 def test_backend_wires_synthesizer() -> None:
-  """
-  Verify SassBackend initializes the synthesizer correctly.
-  """
+  """Verify SassBackend initializes the synthesizer correctly."""
   semantics_mock = MagicMock()
   backend = SassBackend(semantics=semantics_mock)
 

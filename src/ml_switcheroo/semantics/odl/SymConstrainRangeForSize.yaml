@@ -1,0 +1,8 @@
+description: Symbolic utility to constrain size range (Traced).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Any
+variants: {}
+operation: SymConstrainRangeForSize

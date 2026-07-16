@@ -1,0 +1,17 @@
+description: Converts data into a tensor, sharing data and preserving autograd history
+  if possible.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: dtype
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Device
+variants: {}
+operation: AsTensor

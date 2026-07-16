@@ -1,0 +1,11 @@
+description: The class representing a Python function.
+std_args:
+- ref
+- swizzle
+- group_size
+- logical_k_major
+- large_tile
+- mma_bytewidth_k
+- split_const
+type: function
+operation: create_descriptor

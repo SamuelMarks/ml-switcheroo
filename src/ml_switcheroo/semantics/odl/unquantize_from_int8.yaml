@@ -1,0 +1,6 @@
+description: Unquantizes an int8 QuantizedTensor to a float array.
+std_args:
+- x
+- dtype
+type: function
+operation: unquantize_from_int8

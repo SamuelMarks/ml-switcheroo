@@ -1,0 +1,12 @@
+description: Convert the input to an array, checking for NaNs or Infs.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: dtype
+variants: {}
+operation: AsArrayChkFinite

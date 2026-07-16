@@ -1,0 +1,16 @@
+description: Performs Gaussian blurring on the image by given kernel
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: img
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: sigma
+  type: Any
+variants: {}
+operation: gaussian_blur

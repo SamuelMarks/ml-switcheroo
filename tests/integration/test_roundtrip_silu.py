@@ -1,5 +1,4 @@
-"""
-Integration Test for SiLU (Sigmoid Linear Unit) Operation.
+"""Integration Test for SiLU (Sigmoid Linear Unit) Operation.
 Manual fixtures used to ensure robustness against file state.
 
 Verifies:
@@ -17,8 +16,7 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 @pytest.fixture
 def semantics_env():
-  """
-  Creates a SemanticsManager with explicit SiLU mappings for testing.
+  """Creates a SemanticsManager with explicit SiLU mappings for testing.
   This bypasses external JSON loading to ensure test determinism.
   """
   mgr = SemanticsManager()
@@ -52,8 +50,7 @@ def semantics_env():
 
 
 def test_silu_flax_to_torch(semantics_env):
-  """
-  Scenario: Flax SiLU -> Torch SiLU.
+  """Scenario: Flax SiLU -> Torch SiLU.
   Expectation: `torch.nn.functional.silu` (or `F.silu` alias).
   """
   source = "y = flax.nnx.silu(x)"
@@ -66,8 +63,7 @@ def test_silu_flax_to_torch(semantics_env):
 
 
 def test_silu_flax_to_numpy_macro(semantics_env):
-  """
-  Scenario: Flax SiLU -> NumPy (which lacks native SiLU).
+  """Scenario: Flax SiLU -> NumPy (which lacks native SiLU).
   Expectation: Macro expansion into sigmoid logic (`x * (1 / (1 + np.exp(-x)))`).
   """
   source = "y = flax.nnx.silu(x)"
@@ -80,8 +76,7 @@ def test_silu_flax_to_numpy_macro(semantics_env):
 
 
 def test_silu_flax_to_tensorflow(semantics_env):
-  """
-  Scenario: Flax SiLU -> TensorFlow SiLU.
+  """Scenario: Flax SiLU -> TensorFlow SiLU.
   Expectation: `tensorflow.nn.silu` (or `nn.silu` alias).
   """
   source = "y = flax.nnx.silu(x)"

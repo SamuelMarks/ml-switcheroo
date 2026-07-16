@@ -1,0 +1,6 @@
+description: Creates a DialectBarrierRef from a memref of a dialect barrier.
+std_args:
+- cls
+- barrier
+type: function
+operation: from_barrier_memref

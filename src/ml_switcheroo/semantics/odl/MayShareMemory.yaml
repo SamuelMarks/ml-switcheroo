@@ -1,0 +1,12 @@
+description: Determine if two arrays might share memory.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b
+  type: Tensor
+variants: {}
+operation: MayShareMemory

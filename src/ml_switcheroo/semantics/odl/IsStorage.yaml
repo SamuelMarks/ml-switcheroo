@@ -1,0 +1,8 @@
+description: Returns True if the object is a storage object.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: obj
+  type: Any
+variants: {}
+operation: IsStorage

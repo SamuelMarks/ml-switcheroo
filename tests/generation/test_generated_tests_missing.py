@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_generator_empty_semantics():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.generator import TestCaseGenerator
   from pathlib import Path
 
@@ -7,16 +11,21 @@ def test_generator_empty_semantics():
 
 
 def test_templates_exception():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.templates import get_template
 
   class FaultyManager:
+    """Auto-generated doc."""
+
     def get_test_template(self, fw):
+      """Auto-generated doc."""
       raise ValueError("fail")
 
   assert get_template(FaultyManager(), "torch") != {}
 
 
 def test_inputs_parse_arg_def():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.inputs import parse_arg_def
 
   assert parse_arg_def({"name": "foo", "type": "Any", "default": True})["type"] == "bool"
@@ -27,6 +36,7 @@ def test_inputs_parse_arg_def():
 
 
 def test_infer_type_from_default():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.inputs import _infer_type_from_default
 
   assert _infer_type_from_default(True) == "bool"
@@ -37,6 +47,7 @@ def test_infer_type_from_default():
 
 
 def test_inputs_generate_input_value_code():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.inputs import generate_input_value_code
 
   assert "random.choice([1, 2])" in generate_input_value_code("foo", {"options": [1, 2]})
@@ -70,6 +81,7 @@ def test_inputs_generate_input_value_code():
 
 
 def test_generate_dim_heuristic():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.inputs import _generate_dim_heuristic
 
   assert _generate_dim_heuristic("axis") == "1"
@@ -78,6 +90,7 @@ def test_generate_dim_heuristic():
 
 
 def test_inputs_parse_arg_def_more():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.inputs import parse_arg_def
 
   assert parse_arg_def(("foo", "int")) == {"name": "foo", "type": "int"}
@@ -87,12 +100,14 @@ def test_inputs_parse_arg_def_more():
 
 
 def test_infer_type_from_default_more():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.inputs import _infer_type_from_default
 
   assert _infer_type_from_default(["abc"]) == "List[Any]"
 
 
 def test_inputs_generate_input_value_code_more():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.inputs import generate_input_value_code
 
   assert "random.randint" in generate_input_value_code("foo", {"type": "Any", "min": 1})
@@ -102,24 +117,28 @@ def test_inputs_generate_input_value_code_more():
 
 
 def test_inputs_infer_type_from_default_any():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.inputs import _infer_type_from_default
 
   assert _infer_type_from_default("abc") == "Any"
 
 
 def test_inputs_generate_dim_heuristic_fallback():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.inputs import generate_input_value_code
 
   assert "1" in generate_input_value_code("axis", {"type": "Any"})
 
 
 def test_inputs_generate_dim_heuristic_fallback_2():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.inputs import generate_input_value_code
 
   assert "np.random.randn" in generate_input_value_code("foo_bar", {"type": "Any"})
 
 
 def test_templates_is_static_arg():
+  """Auto-generated doc."""
   from ml_switcheroo.generated_tests.templates import is_static_arg, get_template
 
   assert is_static_arg({"type": "int"}) is True
@@ -135,7 +154,10 @@ def test_templates_is_static_arg():
   assert is_static_arg({"type": "Array", "name": "foo"}) is False
 
   class GoodManager:
+    """Auto-generated doc."""
+
     def get_test_template(self, fw):
+      """Auto-generated doc."""
       return {"import": "foo"}
 
   assert get_template(GoodManager(), "jax") == {"import": "foo"}

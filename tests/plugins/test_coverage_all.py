@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from ml_switcheroo.core.hooks import HookContext, _HOOKS
 from ml_switcheroo.config import RuntimeConfig
@@ -7,6 +9,7 @@ _sem = SemanticsManager()
 
 
 def make_ctx(target="torch"):
+  """Auto-generated doc."""
   config = RuntimeConfig(source_framework="jax", target_framework=target)
   hctx = HookContext(
     semantics=_sem,
@@ -17,6 +20,7 @@ def make_ctx(target="torch"):
 
 
 def get_ast_nodes():
+  """Auto-generated doc."""
   return [
     cst.Call(func=cst.Name("func")),
     cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("y"))),
@@ -58,7 +62,7 @@ def get_ast_nodes():
 
 
 def test_plugin_coverage_fuzz():
-
+  """Auto-generated doc."""
   # Fuzz all hooks with lots of configurations and variants
   nodes = get_ast_nodes()
   targets = ["torch", "jax", "mlx", "tensorflow", "keras", "source_placeholder"]

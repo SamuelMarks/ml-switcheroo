@@ -1,0 +1,32 @@
+description: Internal operation for BatchNorm backward elementwise steps.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: grad_out
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mean
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: invstd
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: sum_dy
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: sum_dy_x_mu
+  type: Any
+variants: {}
+operation: BatchNormBackwardElemt

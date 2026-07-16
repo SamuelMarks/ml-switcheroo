@@ -87,7 +87,7 @@ class EquivalenceRunner:
             for r in results.values():
               if hasattr(r, "shape"):
                 s = tuple(r.shape) if hasattr(r.shape, "__iter__") else (r.shape,)
-                e = tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)
+                e = tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)  # type: ignore
                 if s != e:
                   failure_msg.append(f"Shape Mismatch: {s} != {e}")
         except Exception as e:

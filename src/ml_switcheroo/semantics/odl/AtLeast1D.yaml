@@ -1,0 +1,8 @@
+description: Returns a 1-dimensional view of each input tensor with zero dimensions.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: tensors
+  type: Tensor
+variants: {}
+operation: Atleast1d

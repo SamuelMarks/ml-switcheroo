@@ -1,9 +1,12 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from ml_switcheroo.core.import_fixer import ImportFixer
 from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 
 
 def test_attributes_mixin_missing():
+  """Auto-generated doc."""
   plan = ResolutionPlan()
   fixer = ImportFixer(plan)
 
@@ -45,6 +48,7 @@ def test_attributes_mixin_missing():
 
 
 def test_attributes_mixin_no_full_name():
+  """Auto-generated doc."""
   plan = ResolutionPlan()
   fixer = ImportFixer(plan)
 
@@ -55,6 +59,7 @@ def test_attributes_mixin_no_full_name():
 
 
 def test_imports_mixin_alias():
+  """Auto-generated doc."""
   plan = ResolutionPlan()
   fixer = ImportFixer(plan)
   fixer._path_to_alias = {"foo": "bar"}
@@ -71,6 +76,7 @@ def test_imports_mixin_alias():
 
 
 def test_imports_mixin_107():
+  """Auto-generated doc."""
   plan = ResolutionPlan()
   fixer = ImportFixer(plan)
   fixer.source_fws = ["foo"]
@@ -81,6 +87,7 @@ def test_imports_mixin_107():
 
 
 def test_base_import_fixer():
+  """Auto-generated doc."""
   from ml_switcheroo.core.import_fixer.base import BaseImportFixer
 
   plan = ResolutionPlan()
@@ -104,6 +111,7 @@ def test_base_import_fixer():
 
 
 def test_attributes_mixin_line_40():
+  """Auto-generated doc."""
   plan = ResolutionPlan()
   fixer = ImportFixer(plan)
 

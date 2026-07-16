@@ -239,9 +239,9 @@ def _array_strategy(type_str: str, constraints: Dict, shared_dims: Optional[Dict
     elements = st.integers(min_value=min_v, max_value=max_v)
 
   elif np.issubdtype(dtype, np.floating):
-    min_v = float(mn) if mn is not None else -10.0
-    max_v = float(mx) if mx is not None else 10.0
-    elements = st.floats(
+    min_v = float(mn) if mn is not None else -10.0  # type: ignore
+    max_v = float(mx) if mx is not None else 10.0  # type: ignore
+    elements = st.floats(  # type: ignore
       min_value=min_v,
       max_value=max_v,
       allow_nan=False,

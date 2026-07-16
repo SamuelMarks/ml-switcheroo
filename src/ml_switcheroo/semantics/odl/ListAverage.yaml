@@ -1,0 +1,8 @@
+description: Functional interface to the Average layer. Takes a list of tensors.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inputs
+  type: List[Tensor]
+variants: {}
+operation: ListAverage

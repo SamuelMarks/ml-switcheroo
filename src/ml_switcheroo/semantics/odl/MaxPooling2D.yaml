@@ -1,0 +1,21 @@
+description: Max pooling operation for 2D spatial data (Alias).
+op_type: class
+std_args:
+- default:
+  - 2
+  - 2
+  is_variadic: false
+  kind: positional_or_keyword
+  name: pool_size
+  type: Union[int, Tuple[int, int]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: strides
+  type: Union[int, Tuple[int, int]]
+- default: valid
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: str
+variants: {}
+operation: MaxPooling2d

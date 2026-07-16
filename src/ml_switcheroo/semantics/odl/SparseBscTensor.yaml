@@ -1,0 +1,28 @@
+description: Constructs a sparse tensor in BSC format.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ccol_indices
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: row_indices
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: values
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: size
+  type: Optional[Tuple]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Optional[str]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Optional[str]
+variants: {}
+operation: SparseBscTensor

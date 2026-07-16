@@ -16,7 +16,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))
+    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
   return node
 
 

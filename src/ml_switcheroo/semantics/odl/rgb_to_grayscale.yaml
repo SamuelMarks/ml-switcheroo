@@ -1,0 +1,12 @@
+description: Convert RGB image to grayscale version of image.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: img
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_output_channels
+  type: Any
+variants: {}
+operation: rgb_to_grayscale

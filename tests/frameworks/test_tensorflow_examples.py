@@ -1,5 +1,4 @@
-"""
-Tests for TensorFlow Adapter Examples.
+"""Tests for TensorFlow Adapter Examples.
 
 Ensures that tiered examples provided by the TensorFlowAdapter are syntactically valid
 and contain expected TF Core patterns.

@@ -1,0 +1,9 @@
+description: Constructs a jax.stages.Compiled from a serialized executable.
+std_args:
+- serialized
+- in_tree
+- out_tree
+- backend
+- execution_devices
+type: function
+operation: deserialize_and_load

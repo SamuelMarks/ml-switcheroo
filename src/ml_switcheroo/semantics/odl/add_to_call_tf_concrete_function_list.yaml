@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- concrete_tf_fn
+- call_tf_concrete_function_list
+type: function
+operation: add_to_call_tf_concrete_function_list

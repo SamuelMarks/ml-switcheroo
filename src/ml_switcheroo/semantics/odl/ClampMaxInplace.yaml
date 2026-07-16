@@ -1,0 +1,12 @@
+description: Clamps elements with only an upper bound in-place.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: max
+  type: float
+variants: {}
+operation: ClampMaxInplace

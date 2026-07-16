@@ -1,0 +1,10 @@
+description: MixUp implements the MixUp data augmentation technique.
+op_type: class
+std_args:
+- default: 0.2
+  is_variadic: false
+  kind: positional_or_keyword
+  name: alpha
+  type: float
+variants: {}
+operation: MixUp

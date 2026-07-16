@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- args
+- kwargs
+type: function
+operation: create_scaled_f8f6f4_instr_descriptor

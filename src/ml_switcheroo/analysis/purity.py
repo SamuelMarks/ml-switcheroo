@@ -115,7 +115,7 @@ class PurityScanner(cst.CSTTransformer):
       reason_msg = f"Side-effect unsafe for JAX: {', '.join(unique_reasons)}"
 
       # We wrap the *updated_node*.
-      return EscapeHatch.mark_failure(updated_node, reason_msg)
+      return EscapeHatch.mark_failure(updated_node, reason_msg)  # type: ignore
 
     return updated_node
 

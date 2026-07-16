@@ -1,0 +1,8 @@
+description: Returns the current active UpdateContext for the given tag.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tag
+  type: Hashable
+variants: {}
+operation: CurrentUpdateContext

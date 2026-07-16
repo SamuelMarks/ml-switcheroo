@@ -15,7 +15,7 @@ from ml_switcheroo.core.import_fixer.injection_mixin import InjectionMixin
 from ml_switcheroo.core.import_fixer.resolution import ImportResolver, ResolutionPlan, ImportReq
 
 
-class ImportFixer(AttributeMixin, ImportMixin, InjectionMixin, BaseImportFixer):
+class ImportFixer(AttributeMixin, ImportMixin, InjectionMixin, BaseImportFixer):  # type: ignore
   """Composite Transformer for managing imports and namespacing.
 
   Inherits functionality from:

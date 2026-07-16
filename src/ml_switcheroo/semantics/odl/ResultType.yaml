@@ -1,0 +1,12 @@
+description: Returns the promotion type of arguments.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tensor1
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tensor2
+  type: Tensor
+variants: {}
+operation: ResultType

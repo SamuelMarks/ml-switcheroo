@@ -6,13 +6,13 @@ Knowledge Base JSON files (The Hub) with new operation definitions.
 It replaces the legacy LibCST-based injector that modified `standards_internal.py`.
 """
 
-import json
+import yaml
 from typing import Any, Dict, List, Union, Tuple
 
 from ml_switcheroo.core.dsl import OperationDef, ParameterDef
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
-from ml_switcheroo.utils.console import log_info, log_success, log_warning
+from ml_switcheroo.utils.console import log_info, log_success
 
 
 class StandardsInjector:
@@ -57,46 +57,26 @@ class StandardsInjector:
     # NOTE: Removed islower() heuristic that forced EXTRAS->ARRAY_API.
     # Explicit EXTRAS assignment should be respected for utilities like 'save' or 'load'.
 
-    if self.tier == SemanticTier.ARRAY_API:
-      filename = "k_array_api.json"
-    elif self.tier == SemanticTier.NEURAL:
-      filename = "k_neural_net.json"
-    else:
-      filename = "k_framework_extras.json"
+    safe_name = op_name.replace("/", "_")
+    filename = f"{safe_name}.yaml"
+    target_path = resolve_semantics_dir() / "odl" / filename
 
-    target_path = resolve_semantics_dir() / filename
-
-    # 2. Serialize Definition
-    # We manually construct the dict to ensure clean output matching the schema
-    # `model_dump` often includes null fields we want to omit for brevity
     data_entry = self._serialize_op(self.op_def)
+    data_entry["operation"] = op_name
 
-    # 3. Load Existing
-    current_data = {}
     if target_path.exists():
-      try:
-        with open(target_path, "r", encoding="utf-8") as f:
-          current_data = json.load(f)
-      except json.JSONDecodeError:
-        log_warning(f"Corrupt JSON at {target_path}. Proceeding with empty dict.")
-
-    # 4. Update
-    if op_name in current_data:
       log_info(f"  Updating existing Hub definition for '{op_name}' in {filename}")
     else:
       log_info(f"  Adding new Hub definition for '{op_name}' to {filename}")
 
-    current_data[op_name] = data_entry
     self.found = True
 
-    # 5. Write
     if dry_run:
-      print(f"[Dry Run] Writing to {filename}:\n{json.dumps({op_name: data_entry}, indent=2)}")
+      print(f"[Dry Run] Writing to {filename}:\n{yaml.dump(data_entry, indent=2)}")
     else:
-      if not target_path.parent.exists():
-        target_path.parent.mkdir(parents=True, exist_ok=True)
+      target_path.parent.mkdir(parents=True, exist_ok=True)
       with open(target_path, "w", encoding="utf-8") as f:
-        json.dump(current_data, f, indent=2, sort_keys=True)
+        yaml.dump(data_entry, f, sort_keys=False, indent=2, default_flow_style=False)
       log_success(f"  Updated Hub: {filename}")
 
     return True
@@ -114,9 +94,9 @@ class StandardsInjector:
     if op.op_type != "function":
       out["op_type"] = op.op_type
     if op.return_type != "Any":
-      out["return_type"] = op.return_type
+      out["return_type"] = op.return_type  # type: ignore
     if op.is_inplace:
-      out["is_inplace"] = True
+      out["is_inplace"] = True  # type: ignore
     if op.output_shape_calc:
       out["output_shape_calc"] = op.output_shape_calc
 
@@ -147,6 +127,6 @@ class StandardsInjector:
         result.append(entry)
 
       elif isinstance(arg, str):
-        result.append(arg)
+        result.append(arg)  # type: ignore
 
     return result

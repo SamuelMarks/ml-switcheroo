@@ -1,0 +1,14 @@
+description: 'Flattens a pytree into a list of values and a TreeSpec that can be used
+
+  to reconstruct the pytree.'
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tree
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: is_leaf
+  type: Any
+type: function
+operation: tree_flatten

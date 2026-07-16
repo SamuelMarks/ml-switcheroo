@@ -1,0 +1,8 @@
+description: The class representing a Python class.
+std_args:
+- self
+- name
+- compile_fn
+- generate_dump
+type: class
+operation: Pass

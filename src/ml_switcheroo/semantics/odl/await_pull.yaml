@@ -1,0 +1,7 @@
+description: Schedules a pytree of arrays to be fetched by a remote device.
+std_args:
+- self
+- uuid
+- arrays
+type: function
+operation: await_pull

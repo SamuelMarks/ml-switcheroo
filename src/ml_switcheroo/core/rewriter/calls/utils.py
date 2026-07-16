@@ -105,7 +105,7 @@ def rewrite_stateful_call(rewriter: Any, node: cst.Call, instance_name: str, con
       attr=cst.Name(method_name),
     )
   else:
-    new_func = node.func
+    new_func = node.func  # type: ignore
 
   return node.with_changes(func=new_func, args=new_args)
 
@@ -313,12 +313,12 @@ def inject_permute_call(
   parts = api_str.split(".")
   func_node = cst.Name(parts[0])
   for part in parts[1:]:
-    func_node = cst.Attribute(value=func_node, attr=cst.Name(part))
+    func_node = cst.Attribute(value=func_node, attr=cst.Name(part))  # type: ignore
 
   # 3. Construct Args
   # Input argument
   input_arg = cst.Arg(
-    value=base_node,
+    value=base_node,  # type: ignore
     comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
   )
 
@@ -356,7 +356,7 @@ def inject_permute_call(
     for i, idx_val in enumerate(indices):
       comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
       if i == len(indices) - 1:
-        comma = cst.MaybeSentinel.DEFAULT
+        comma = cst.MaybeSentinel.DEFAULT  # type: ignore
 
       call_args.append(
         cst.Arg(

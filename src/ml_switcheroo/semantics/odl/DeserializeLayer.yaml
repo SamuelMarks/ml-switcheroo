@@ -1,0 +1,12 @@
+description: Returns a Keras layer object via its configuration.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: config
+  type: dict
+- is_variadic: false
+  kind: positional_or_keyword
+  name: custom_objects
+  type: dict
+variants: {}
+operation: DeserializeLayer

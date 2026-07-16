@@ -1,6 +1,4 @@
-"""
-Integration Tests for TensorFlow Native Data Pipeline.
-"""
+"""Integration Tests for TensorFlow Native Data Pipeline."""
 
 import pytest
 from ml_switcheroo.core.engine import ASTEngine

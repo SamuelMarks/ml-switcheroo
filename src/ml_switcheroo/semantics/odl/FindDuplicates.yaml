@@ -1,0 +1,8 @@
+description: Finds duplicate nodes or node leaves in the given node graph.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: node
+  type: Any
+variants: {}
+operation: FindDuplicates

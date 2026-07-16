@@ -1,6 +1,4 @@
-"""
-Integration Test for Flax NNX <-> Apple MLX Bidirectional Conversion.
-"""
+"""Integration Test for Flax NNX <-> Apple MLX Bidirectional Conversion."""
 
 import pytest
 import textwrap
@@ -13,16 +11,16 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.mlx import MLXAdapter
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
-FLAX_SOURCE = textwrap.dedent(""" 
+FLAX_SOURCE = textwrap.dedent("""
 from flax import nnx
 
-class Net(nnx.Module): 
-    def __init__(self, rngs: nnx.Rngs): 
-        self.linear = nnx.Linear(10, 10, rngs=rngs) 
+class Net(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        self.linear = nnx.Linear(10, 10, rngs=rngs)
 
-    def __call__(self, x): 
-        x = self.linear(x) 
-        return nnx.relu(x) 
+    def __call__(self, x):
+        x = self.linear(x)
+        return nnx.relu(x)
 """).strip()
 
 

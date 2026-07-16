@@ -1,0 +1,5 @@
+description: Creates a lower-right triangular causal bias.
+std_args:
+- size
+type: function
+operation: causal_lower_right

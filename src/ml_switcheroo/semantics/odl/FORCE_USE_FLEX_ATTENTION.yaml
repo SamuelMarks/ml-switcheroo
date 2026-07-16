@@ -1,0 +1,5 @@
+description: If True, forces the use of the flex attention kernel instead of potentially
+  using
+std_args: []
+type: attribute
+operation: FORCE_USE_FLEX_ATTENTION

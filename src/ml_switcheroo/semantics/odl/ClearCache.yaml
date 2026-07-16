@@ -1,0 +1,4 @@
+description: Clear the memory cache.
+std_args: []
+variants: {}
+operation: ClearCache

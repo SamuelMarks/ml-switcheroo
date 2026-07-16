@@ -1,0 +1,13 @@
+description: Look up for the best (num_kv_pages_per_blk, num_queries_per_blk) from
+  auto-tuned table.
+std_args:
+- q_dtype
+- kv_dtype
+- num_q_heads_per_blk
+- num_kv_heads_per_blk
+- head_dim
+- page_size
+- max_num_batched_tokens
+- pages_per_seq
+type: function
+operation: get_tuned_block_sizes

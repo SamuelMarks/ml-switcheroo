@@ -76,16 +76,15 @@ class TikzOption(TikzBaseNode):
 
 @dataclass
 class TikzTable(TikzBaseNode):
-  r""" 
-  Represents an HTML-like table structure used inside TikZ Node labels. 
-  Uses LaTeX tabular environment syntax. 
+  r"""Represents an HTML-like table structure used inside TikZ Node labels.
+  Uses LaTeX tabular environment syntax.
 
-  Example:: 
+  Example::
 
-      \\begin{tabular}{c} 
-          \\textbf{LayerName} \\\\ 
+      \\begin{tabular}{c}
+          \\textbf{LayerName} \\\\
           param: val
-      \\end{tabular} 
+      \\end{tabular}
   """
 
   rows: List[List[str]] = field(default_factory=list)

@@ -1,9 +1,7 @@
-"""
-Tests for QKV Fusion and Defusion Passes.
-"""
+"""Tests for QKV Fusion and Defusion Passes."""
 
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.compiler.fusion import QKVFusionPass, QKVDefusionPass
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.fusion import QKVFusionPass, QKVDefusionPass
 
 
 def test_qkv_fusion_pass():

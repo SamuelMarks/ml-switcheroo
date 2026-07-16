@@ -1,0 +1,6 @@
+description: Returns a tuple of the attributes of the BlockMask.
+std_args:
+- self
+- flatten
+type: function
+operation: as_tuple

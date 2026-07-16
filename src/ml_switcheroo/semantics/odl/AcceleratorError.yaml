@@ -1,0 +1,5 @@
+description: Exception raised while executing on device.
+op_type: class
+std_args: []
+variants: {}
+operation: AcceleratorError

@@ -1,0 +1,6 @@
+description: Define the jet rule for a primitive in terms of its first derivative.
+std_args:
+- prim
+- deriv
+type: function
+operation: def_deriv

@@ -1,5 +1,4 @@
-"""
-Integration Test for PyTorch Output Purity.
+"""Integration Test for PyTorch Output Purity.
 
 This test specifically targets the "Mixed Output" bug where JAX/Flax artifacts
 leak into generated PyTorch code. It uses explicit string literals for input
@@ -25,18 +24,18 @@ from tests.utils.ast_utils import cmp_ast
 # Fix: Import specific adapter for Neural traits
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
-flax_nnx_tier2_ex0 = """  
+flax_nnx_tier2_ex0 = """
 from flax import nnx
-  
-class Net(nnx.Module):  
-    def __init__(self, rngs: nnx.Rngs):  
-        # State injection pattern  
-        self.linear = nnx.Linear(10, 10, rngs=rngs)  
-  
-    def __call__(self, x):  
-        x = self.linear(x)  
-        # Functional activation  
-        return nnx.relu(x)  
+
+class Net(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        # State injection pattern
+        self.linear = nnx.Linear(10, 10, rngs=rngs)
+
+    def __call__(self, x):
+        x = self.linear(x)
+        # Functional activation
+        return nnx.relu(x)
 """
 
 # Revised expectation: ImportFixer (RegistryLoader) splits "torch.nn" -> root "torch", sub "nn".

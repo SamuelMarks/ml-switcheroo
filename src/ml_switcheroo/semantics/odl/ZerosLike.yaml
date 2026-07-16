@@ -1,0 +1,30 @@
+description: Returns a tensor filled with the scalar value 0, with the same size as
+  input.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: DType
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Device
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: requires_grad
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: layout
+  type: Layout
+- is_variadic: false
+  kind: positional_or_keyword
+  name: memory_format
+  type: MemoryFormat
+variants: {}
+operation: ZerosLike

@@ -1,5 +1,4 @@
-"""
-Tests for Smart Import Injection via ResolutionPlan.
+"""Tests for Smart Import Injection via ResolutionPlan.
 
 Verifies that:
 1. Imports are inserted based on resolution.
@@ -36,8 +35,7 @@ def solve_and_fix(code, target_fw="jax", alias_map=None):
 
 
 def test_smart_injection_jnp_usage():
-  """
-  Scenario: Transpiled code uses `jnp.array(...)`.
+  """Scenario: Transpiled code uses `jnp.array(...)`.
   Expect: `import jax.numpy as jnp` is injected.
   """
   code = "x = jnp.array([1])"
@@ -47,8 +45,7 @@ def test_smart_injection_jnp_usage():
 
 
 def test_smart_injection_tensorflow():
-  """
-  Scenario: Transpiled code uses `tf.math.add(...)`.
+  """Scenario: Transpiled code uses `tf.math.add(...)`.
   Target: tensorflow.
   Expect: `import tensorflow as tf` injection.
   """
@@ -58,8 +55,7 @@ def test_smart_injection_tensorflow():
 
 
 def test_no_double_injection():
-  """
-  Scenario: Source already had `import jax.numpy as jnp`.
+  """Scenario: Source already had `import jax.numpy as jnp`.
   Expect: Do NOT inject a second `import jax.numpy as jnp`.
   """
   code = "import jax.numpy as jnp\nx = jnp.ones(3)"

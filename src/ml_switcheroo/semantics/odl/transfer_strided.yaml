@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- self
+- ref
+- vec_size
+type: function
+operation: transfer_strided

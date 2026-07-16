@@ -1,0 +1,8 @@
+description: Register a parametrization to a tensor in a module.
+std_args:
+- module
+- tensor_name
+- parametrization
+- unsafe
+type: function
+operation: register_parametrization

@@ -1,0 +1,41 @@
+description: Applies a 1D transposed convolution operator.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: Tensor
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: stride
+  type: int
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: int
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: output_padding
+  type: int
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: groups
+  type: int
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dilation
+  type: int
+type: class
+operation: ConvTranspose1d

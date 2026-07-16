@@ -1,0 +1,9 @@
+description: Decorator for custom gradient definitions.
+op_type: decorator
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: fn
+  type: Callable
+variants: {}
+operation: CustomAutograd

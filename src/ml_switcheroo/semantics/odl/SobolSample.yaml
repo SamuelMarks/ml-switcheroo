@@ -1,0 +1,17 @@
+description: Generates points from the Sobol sequence.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_results
+  type: int
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: skip
+  type: int
+variants: {}
+operation: SobolSample

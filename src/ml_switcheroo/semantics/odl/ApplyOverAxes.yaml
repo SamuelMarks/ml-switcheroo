@@ -1,0 +1,16 @@
+description: Apply a function repeatedly over multiple axes.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: func
+  type: Callable
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axes
+  type: List[int]
+variants: {}
+operation: ApplyOverAxes

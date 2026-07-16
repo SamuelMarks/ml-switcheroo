@@ -1,0 +1,22 @@
+description: Compute a non-ragged matmul for a single output block.
+std_args:
+- a_gmem
+- b_gmem
+- out_gmem
+- grid_indices
+- wg_axis
+- collective_axes
+- local_index
+- config
+- group_info
+- a_smem
+- b_smem
+- acc_tmem
+- acc_smem
+- a_tma_barrier
+- b_tma_barrier
+- store_done_barrier
+- mma_done_barrier
+- consumed_barrier
+type: function
+operation: do_matmul

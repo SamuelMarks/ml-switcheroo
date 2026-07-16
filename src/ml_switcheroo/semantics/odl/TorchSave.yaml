@@ -1,0 +1,14 @@
+operation: TorchSave
+description: Definition for TorchSave
+std_args:
+- obj
+- f
+variants:
+  torch:
+    api: torch.save
+  jax:
+    api: save
+    requires_plugin: io_handler
+  numpy:
+    api: save
+    requires_plugin: io_handler

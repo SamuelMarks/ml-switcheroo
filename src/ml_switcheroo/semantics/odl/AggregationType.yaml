@@ -1,0 +1,5 @@
+description: Enum for aggregation types (SUM, AVG).
+op_type: class
+std_args: []
+variants: {}
+operation: AggregationType

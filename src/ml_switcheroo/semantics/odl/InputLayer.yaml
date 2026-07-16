@@ -1,0 +1,9 @@
+description: Layer to be used as an entry point into a Network.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_shape
+  type: tuple
+variants: {}
+operation: InputLayer

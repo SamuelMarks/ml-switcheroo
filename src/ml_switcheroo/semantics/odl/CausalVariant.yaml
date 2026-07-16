@@ -1,0 +1,4 @@
+description: Enum for causal variants used in attention mechanisms.
+std_args: []
+type: class
+operation: CausalVariant

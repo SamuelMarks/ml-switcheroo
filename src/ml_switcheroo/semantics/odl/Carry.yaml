@@ -1,0 +1,5 @@
+description: Helper for scan carry state.
+op_type: class
+std_args: []
+variants: {}
+operation: Carry

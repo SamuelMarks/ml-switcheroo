@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_generate_scalar_int():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.generators import generate_scalar_int
 
   assert isinstance(generate_scalar_int({}), int)
@@ -6,6 +10,7 @@ def test_generate_scalar_int():
 
 
 def test_generate_scalar_float():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.generators import generate_scalar_float
 
   res = generate_scalar_float({"min": 10, "max": 20})
@@ -22,6 +27,7 @@ def test_generate_scalar_float():
 
 
 def test_generate_array():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.generators import generate_array
   import numpy as np
 
@@ -71,6 +77,7 @@ def test_generate_array():
 
 
 def test_get_random_shape():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.generators import get_random_shape
 
   shape = get_random_shape((3, 3))
@@ -81,6 +88,7 @@ def test_get_random_shape():
 
 
 def test_make_broadcastable_shape():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.generators import make_broadcastable_shape
 
   shape = make_broadcastable_shape((10, 10, 10))
@@ -89,6 +97,7 @@ def test_make_broadcastable_shape():
 
 
 def test_generate_fake_callable():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.fuzzer.generators import generate_fake_callable
 
   fn = generate_fake_callable()

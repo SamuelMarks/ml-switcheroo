@@ -1,5 +1,4 @@
-"""
-Integration Tests for Composite Operations (Macros) - Feature 08.
+"""Integration Tests for Composite Operations (Macros) - Feature 08.
 
 Verifies:
 1.  **Swish Macro**: `torch.swish(x)` -> `x * jax.nn.sigmoid(x)`.
@@ -98,8 +97,7 @@ def test_macro_expansion():
 
 
 def test_macro_argument_rename():
-  """
-  Verify that if input argument is named differently (e.g. 'input' vs 'x'),
+  """Verify that if input argument is named differently (e.g. 'input' vs 'x'),
   normalization correctly maps it to the macro placeholder '{x}'.
   """
   # Setup semantics where source arg is 'input' but standard arg is 'x'

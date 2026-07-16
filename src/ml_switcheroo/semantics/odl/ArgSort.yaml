@@ -1,0 +1,20 @@
+description: Returns the indices that sort an array ``x`` along a specified axis.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: descending
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: stable
+  type: bool
+variants: {}
+operation: argsort

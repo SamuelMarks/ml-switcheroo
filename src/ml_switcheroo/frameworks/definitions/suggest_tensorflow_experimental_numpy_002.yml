@@ -883,7 +883,7 @@ variants:
     api: "numpy.diagonal"
   tensorflow:
     api: "tf.linalg.diag_part"
-    # Arguments differ significantly (name, k, padding_value). 
+    # Arguments differ significantly (name, k, padding_value).
   torch:
     api: "torch.diagonal"
     args:

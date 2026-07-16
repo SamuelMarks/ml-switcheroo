@@ -1,14 +1,22 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from ml_switcheroo.core.import_fixer.injection_mixin import InjectionMixin
 
 
 class DummyPlan:
+  """Auto-generated doc."""
+
   def __init__(self):
+    """Auto-generated doc."""
     self.required_imports = []
 
 
 class DummyReq:
+  """Auto-generated doc."""
+
   def __init__(self, module, subcomponent, alias, signature):
+    """Auto-generated doc."""
     self.module = module
     self.subcomponent = subcomponent
     self.alias = alias
@@ -16,13 +24,17 @@ class DummyReq:
 
 
 class DummyFixer(InjectionMixin, cst.CSTTransformer):
+  """Auto-generated doc."""
+
   def __init__(self, plan):
+    """Auto-generated doc."""
     self.plan = plan
     self._satisfied_injections = set()
     self._defined_names = {"foo"}
 
 
 def test_injection_skip_defined():
+  """Auto-generated doc."""
   plan = DummyPlan()
   plan.required_imports.append(DummyReq(module="foo", subcomponent=None, alias="foo", signature="import foo"))
 
@@ -32,6 +44,7 @@ def test_injection_skip_defined():
 
 
 def test_injection_skip_satisfied():
+  """Auto-generated doc."""
   plan = DummyPlan()
   plan.required_imports.append(DummyReq(module="foo", subcomponent=None, alias="foo", signature="import foo"))
 
@@ -42,6 +55,7 @@ def test_injection_skip_satisfied():
 
 
 def test_injection_add_imports():
+  """Auto-generated doc."""
   plan = DummyPlan()
   plan.required_imports.append(DummyReq(module="sys", subcomponent=None, alias=None, signature="import sys"))
   plan.required_imports.append(
@@ -55,6 +69,7 @@ def test_injection_add_imports():
 
 
 def test_injection_dedup_and_docstring():
+  """Auto-generated doc."""
   plan = DummyPlan()
   plan.required_imports.append(DummyReq(module="sys", subcomponent=None, alias=None, signature="import sys"))
   plan.required_imports.append(DummyReq(module="sys", subcomponent=None, alias=None, signature="import sys"))  # Dupe

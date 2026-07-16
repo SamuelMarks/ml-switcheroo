@@ -1,0 +1,5 @@
+description: Class defining quantization schemes used in PyTorch.
+op_type: class
+std_args: []
+variants: {}
+operation: QScheme

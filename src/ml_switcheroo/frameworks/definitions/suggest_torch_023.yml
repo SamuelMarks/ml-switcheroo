@@ -543,13 +543,13 @@ variants:
     api: "torch.pairwise_distance"
   keras:
     api: "keras.ops.norm"
-    macro_template: "keras.ops.norm({x1} - {x2}, ord={p})" 
+    macro_template: "keras.ops.norm({x1} - {x2}, ord={p})"
   numpy:
     api: "numpy.linalg.norm"
-    macro_template: "np.linalg.norm({x1} - {x2}, ord={p})" 
+    macro_template: "np.linalg.norm({x1} - {x2}, ord={p})"
   jax:
     api: "jax.numpy.linalg.norm"
-    macro_template: "jnp.linalg.norm({x1} - {x2}, ord={p})" 
+    macro_template: "jnp.linalg.norm({x1} - {x2}, ord={p})"
 
 ---
 operation: "ParseIr"

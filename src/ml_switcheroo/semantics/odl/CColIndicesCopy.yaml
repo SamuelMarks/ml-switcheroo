@@ -1,0 +1,8 @@
+description: Copies the column indices of a sparse matrix.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: CColIndicesCopy

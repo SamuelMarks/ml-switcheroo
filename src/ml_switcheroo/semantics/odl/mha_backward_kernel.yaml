@@ -1,0 +1,22 @@
+description: The class representing a Python function.
+std_args:
+- q_ref
+- k_ref
+- v_ref
+- segment_ids_ref
+- out_ref
+- do_scaled_ref
+- lse_ref
+- delta_ref
+- dq_ref
+- dk_ref
+- dv_ref
+- sm_scale
+- causal
+- block_q_dkv
+- block_kv_dkv
+- block_q_dq
+- block_kv_dq
+- head_dim
+type: function
+operation: mha_backward_kernel

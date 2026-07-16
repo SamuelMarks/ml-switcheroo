@@ -1,9 +1,9 @@
 """Module docstring."""
 
 import pytest
-from ml_switcheroo.compiler.frontends.rdna.tokens import RdnaLexer, TokenType
-from ml_switcheroo.compiler.frontends.rdna.parser import RdnaParser
-from ml_switcheroo.compiler.frontends.rdna.nodes import (
+from ml_switcheroo.core.compiler.frontends.rdna.tokens import RdnaLexer, TokenType
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
+from ml_switcheroo.core.compiler.frontends.rdna.nodes import (
   Instruction,
   Label,
   Directive,
@@ -133,7 +133,7 @@ def test_parser_modifiers() -> None:
 def test_parser_labels_and_structure() -> None:
   """Verify labels and comments."""
   code = """; Start
-L_ENTRY: 
+L_ENTRY:
     s_endpgm"""
   parser = RdnaParser(code)
   nodes = parser.parse()
@@ -171,6 +171,7 @@ def test_parser_unexpected_token() -> None:
 
 
 def test_rdna_directive_with_comma():
+  """Auto-generated doc."""
   parser = RdnaParser(".amdgcn_target gfx90a, param2")
   nodes = parser.parse()
   assert len(nodes) == 1
@@ -178,12 +179,14 @@ def test_rdna_directive_with_comma():
 
 
 def test_rdna_directive_followed_by_directive():
+  """Auto-generated doc."""
   parser = RdnaParser(".amdgcn_target gfx90a .another")
   nodes = parser.parse()
   assert len(nodes) == 2
 
 
 def test_rdna_instruction_with_comma():
+  """Auto-generated doc."""
   parser = RdnaParser("v_add_f32 v0, v1, v2")
   nodes = parser.parse()
   assert len(nodes) == 1

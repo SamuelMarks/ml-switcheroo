@@ -520,10 +520,10 @@ variants:
   keras:
     api: "keras.ops.vdot"
   tensorflow:
-    api: "tf.tensordot" 
+    api: "tf.tensordot"
     # TF vdot semantics are slightly different, often uses tensordot
   mlx:
-    api: "mlx.core.matmul" # For 1D behaves as dot? 
+    api: "mlx.core.matmul" # For 1D behaves as dot?
     # MLX doesn't have explicit vdot, usually dot or matmul
 ---
 operation: "ViewAsComplex"
@@ -772,8 +772,8 @@ variants:
     args:
       tensors: "tup"
   mlx:
-    api: "mlx.core.concatenate" # Fallback, no explicit vstack in core? 
-    # Check mlx.core.stack/concat. Usually axis=0. 
+    # Fallback, no explicit vstack in core?
+    # Check mlx.core.stack/concat. Usually axis=0.
     # Stick to null/plugin as strict match
     api: null
 ---

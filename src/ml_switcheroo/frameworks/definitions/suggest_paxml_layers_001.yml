@@ -284,7 +284,7 @@ variants:
   paxml:
     api: "praxis.layers.Conv2D"
     args:
-      in_channels: null # Pax infers from filter_shape[2] 
+      in_channels: null # Pax infers from filter_shape[2]
       out_channels: null # Pax infers from filter_shape[3]
       kernel_size: null # Pax uses filter_shape tuple
       stride: "filter_stride" # Tuple

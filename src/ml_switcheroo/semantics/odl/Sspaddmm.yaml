@@ -1,0 +1,29 @@
+description: 'Sparse matrix multiply and add: t + beta * m1 @ m2'
+std_args:
+- doc: Sparse matrix to add
+  is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- doc: Sparse matrix 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: mat1
+  type: Tensor
+- doc: Dense matrix 2
+  is_variadic: false
+  kind: positional_or_keyword
+  name: mat2
+  type: Tensor
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: beta
+  type: float
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: alpha
+  type: float
+variants: {}
+operation: Sspaddmm

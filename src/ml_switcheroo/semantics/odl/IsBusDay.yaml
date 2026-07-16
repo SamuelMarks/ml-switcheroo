@@ -1,0 +1,24 @@
+description: Calculates which of the given dates are valid days.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dates
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weekmask
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: holidays
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: busdaycal
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: out
+  type: Any
+variants: {}
+operation: IsBusDay

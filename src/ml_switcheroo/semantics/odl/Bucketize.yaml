@@ -1,0 +1,22 @@
+description: Returns the indices of the buckets to which each value in the input belongs.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: boundaries
+  type: Tensor
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: out_int32
+  type: bool
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: right
+  type: bool
+variants: {}
+operation: Bucketize

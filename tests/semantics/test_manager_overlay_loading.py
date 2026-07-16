@@ -1,5 +1,4 @@
-"""
-Tests for Segmented Semantics Loading (Overlay Strategy).
+"""Tests for Segmented Semantics Loading (Overlay Strategy).
 
 Verifies that:
 1. `SemanticsManager` loads base specs from `semantics/`.
@@ -22,12 +21,11 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 @pytest.fixture
 def mock_root_tree(tmp_path):
-  """
-  Creates a mock directory structure mimicking the distributed source tree.
+  """Creates a mock directory structure mimicking the distributed source tree.
 
   /root
     /semantics
-      k_array_api.json      <-- Spec Definitions
+      odl/*.yaml            <-- Spec Definitions
     /snapshots
       torch_vlatest_map.json   <-- Framework Overlay
       jax_vlatest_map.json     <-- Framework Overlay
@@ -43,7 +41,12 @@ def mock_root_tree(tmp_path):
     "Abs": {"description": "Calculate absolute value", "std_args": ["x"]},
     "Add": {"description": "Addition", "std_args": ["a", "b"]},
   }
-  (semantics_dir / "k_array_api.json").write_text(json.dumps(spec_content))
+  import yaml
+
+  odl_dir = semantics_dir / "odl"
+  odl_dir.mkdir()
+  (odl_dir / "add.yaml").write_text(yaml.dump({"Add": spec_content["Add"]}))
+  (odl_dir / "abs.yaml").write_text(yaml.dump({"Abs": spec_content["Abs"]}))
 
   # 2. Create Torch Overlay
   # Uses dedicated __framework__ key
@@ -70,7 +73,6 @@ def mock_root_tree(tmp_path):
 @pytest.fixture
 def manager(mock_root_tree):
   """Initializes manager with patched path resolution."""
-
   # FIX: Patch file_loader directly as that is where resolve_* functions are used
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_root_tree):
     with patch(
@@ -82,8 +84,7 @@ def manager(mock_root_tree):
 
 
 def test_overlay_merging_logic(manager):
-  """
-  Scenario: Load 'Abs' from Spec. Merge 'torch' and 'jax' from Snapshots.
+  """Scenario: Load 'Abs' from Spec. Merge 'torch' and 'jax' from Snapshots.
   Expectation: 'Abs' entry contains both variants.
   """
   # 1. Verify Spec loaded
@@ -100,8 +101,7 @@ def test_overlay_merging_logic(manager):
 
 
 def test_overlay_missing_op_handling(manager):
-  """
-  Scenario: Overlay defines 'custom_op' which is NOT in the Spec files.
+  """Scenario: Overlay defines 'custom_op' which is NOT in the Spec files.
   Expectation: Manager creates a new entry (Tier: Extras).
   """
   assert "custom_op" in manager.data
@@ -118,8 +118,7 @@ def test_overlay_missing_op_handling(manager):
 
 
 def test_filename_framework_inference(tmp_path):
-  """
-  Scenario: Overlay file lacks "__framework__" key.
+  """Scenario: Overlay file lacks "__framework__" key.
   Expectation: Logic infers framework from filename 'numpy_vlatest_map.json' -> 'numpy'.
   """
   sem_dir = tmp_path / "semantics"
@@ -147,8 +146,7 @@ def test_filename_framework_inference(tmp_path):
 
 
 def test_reverse_index_integrity(manager):
-  """
-  Scenario: Reverse check APIs loaded from Overlays.
+  """Scenario: Reverse check APIs loaded from Overlays.
   Expectation: `get_definition("torch.abs")` returns ("Abs", data).
   """
   # Check reverse lookup

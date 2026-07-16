@@ -1,0 +1,6 @@
+description: Broadcast data from a source host (host 0 by default) to all other hosts.
+std_args:
+- in_tree
+- is_source
+type: function
+operation: broadcast_one_to_all

@@ -11,7 +11,7 @@ upstream standards.
 
 This guide covers the full lifecycle: **Ingestion**, **Discovery**, **Mapping**, **Verification**, and **Release**.
 
---- 
+---
 
 ## 🔄 The Maintenance Lifecycle
 
@@ -46,7 +46,7 @@ graph TD
         HUB[("<b>The Hub (Specs)</b><br/>semantics/*.json<br/><i>Definitions & Types</i>")]:::hub
         SPOKE[("<b>The Spokes (Maps)</b><br/>snapshots/*_mappings.json<br/><i>API Links & Plugins</i>")]:::spoke
     end
-    
+
     subgraph Verify ["4. Verification"]
         CI("CI Fuzzer &<br/>Gen-Tests"):::action
         LOCK("Verified Lockfile<br/>README Matrix"):::spoke
@@ -61,13 +61,13 @@ graph TD
     CONSENSUS --> HUB
     HARVEST --> SPOKE
     SCAFFOLD --> SPOKE
-    
+
     HUB --> CI
     SPOKE --> CI
     CI --> LOCK
 ```
 
---- 
+---
 
 ## ⚡ Quick Start: The Bootstrap Script
 
@@ -81,11 +81,11 @@ ingestion, consensus discovery, scaffolding, ghost snapshotting, and synchroniza
 * You want to reset the semantic definitions to their upstream defaults.
 
 ```bash
-# Full hydration cycle (Warning: Overwrites existing JSONs) 
+# Full hydration cycle (Warning: Overwrites existing JSONs)
 ./scripts/bootstrap.sh
 ```
 
---- 
+---
 
 ## 🛠️ Phase 1: Ingestion (The Hub)
 
@@ -126,7 +126,7 @@ a unified standard.
 ml_switcheroo sync-standards --categories layer activation loss optimizer
 ```
 
---- 
+---
 
 ## 🔗 Phase 2: Mapping (The Spokes)
 
@@ -162,16 +162,16 @@ error, the Harvester can extract the rule back into the JSONs.
 
 1. **Write/Fix a test** in `tests/examples/`:
    ```python
-   def test_custom_add(): 
+   def test_custom_add():
        # You manually fixed arguments: alpha -> scale
-       jax.numpy.add(x, y, scale=0.5) 
+       jax.numpy.add(x, y, scale=0.5)
    ```
 2. **Run the extractor**:
    ```bash
    ml_switcheroo harvest tests/examples/test_custom_add.py --target jax
    ```
 
---- 
+---
 
 ## 👻 Phase 3: Ghost Mode Support
 
@@ -190,7 +190,7 @@ ml_switcheroo snapshot --out-dir src/ml_switcheroo/snapshots
 
 *Note: `bootstrap.sh` runs this automatically.*
 
---- 
+---
 
 ## ✅ Phase 4: Verification (CI Loop)
 
@@ -201,7 +201,7 @@ Hints in the Spec, executes the operation in both Source and Target frameworks, 
 
 ```bash
 # 1. Install all backends
-pip install ".[test]" 
+pip install ".[test]"
 pip install torch jax flax tensorflow mlx numpy
 
 # 2. Run Verification Suite
@@ -224,7 +224,7 @@ If the CI pass changes the support status of any operation, update the `README.m
 ml_switcheroo ci --update-readme
 ```
 
---- 
+---
 
 ## 📚 Documentation & Web Demo
 
@@ -243,17 +243,17 @@ site assets.
 python scripts/build_docs.py
 ```
 
---- 
+---
 
 ## 🗃️ Glossary of Artifacts
 
 The Knowledge Base is composed of specific JSON files with distinct roles.
 
-| Artifact Path | Classification | Role & Purpose | Maintenance Strategy | 
-| :--- | :--- | :--- | :--- | 
-| `semantics/k_array_api.json` | **Hub (Spec)** | **Tier A (Math):** Basic array operations (abs, sum) derived from the Python Data API Consortium. | **Import** via `import-spec`. | 
-| `semantics/k_neural_net.json` | **Hub (Spec)** | **Tier B (Neural):** stateful layers (Conv2d, LSTM) derived from ONNX Operators. | **Import** via `import-spec`. | 
-| `semantics/k_framework_extras.json` | **Hub (Spec)** | **Tier C (Extras):** Utilities, IO, Devices. Often manually curated or scaffolded. | **Harvest** or **Wizard**. | 
-| `semantics/k_discovered.json` | **Hub (Spec)** | **Consensus:** Ops discovered by overlapping API surfaces (Optimizers/Activations). | **Generate** via `sync-standards`. | 
-| `snapshots/{fw}_v*_map.json` | **Spoke (Overlay)** | **Mapping Overlay:** Defines how a specific framework implements the specs. Contains API paths and Plugin hooks. | **Sync**, **Scaffold**, or **Harvest**. | 
-| `snapshots/{fw}_v*.json` | **Ghost Snapshot** | **Raw API Dump:** Serialized signatures of the library. Used by `GhostInspector` in WASM. | **Capture** via `snapshot`. | 
+| Artifact Path | Classification | Role & Purpose | Maintenance Strategy |
+| :--- | :--- | :--- | :--- |
+| `semantics/k_array_api.json` | **Hub (Spec)** | **Tier A (Math):** Basic array operations (abs, sum) derived from the Python Data API Consortium. | **Import** via `import-spec`. |
+| `semantics/k_neural_net.json` | **Hub (Spec)** | **Tier B (Neural):** stateful layers (Conv2d, LSTM) derived from ONNX Operators. | **Import** via `import-spec`. |
+| `semantics/k_framework_extras.json` | **Hub (Spec)** | **Tier C (Extras):** Utilities, IO, Devices. Often manually curated or scaffolded. | **Harvest** or **Wizard**. |
+| `semantics/k_discovered.json` | **Hub (Spec)** | **Consensus:** Ops discovered by overlapping API surfaces (Optimizers/Activations). | **Generate** via `sync-standards`. |
+| `snapshots/{fw}_v*_map.json` | **Spoke (Overlay)** | **Mapping Overlay:** Defines how a specific framework implements the specs. Contains API paths and Plugin hooks. | **Sync**, **Scaffold**, or **Harvest**. |
+| `snapshots/{fw}_v*.json` | **Ghost Snapshot** | **Raw API Dump:** Serialized signatures of the library. Used by `GhostInspector` in WASM. | **Capture** via `snapshot`. |

@@ -1,0 +1,4 @@
+description: Internal TorchScript dictionary representation.
+std_args: []
+variants: {}
+operation: ScriptDict

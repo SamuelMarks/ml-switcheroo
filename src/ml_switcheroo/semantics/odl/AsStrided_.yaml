@@ -1,0 +1,21 @@
+description: In-place version of as_strided.
+is_inplace: true
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: size
+  type: Sequence[int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: stride
+  type: Sequence[int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: storage_offset
+  type: int
+variants: {}
+operation: AsStrided_

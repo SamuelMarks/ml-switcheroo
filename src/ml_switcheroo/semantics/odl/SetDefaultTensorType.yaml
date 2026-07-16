@@ -1,0 +1,8 @@
+description: Sets the default tensor type (Deprecated).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: t
+  type: Any
+variants: {}
+operation: SetDefaultTensorType

@@ -1,0 +1,22 @@
+description: Grouped Query Attention layer.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: head_dim
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_query_heads
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_key_value_heads
+  type: int
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dropout
+  type: float
+variants: {}
+operation: GroupQueryAttention

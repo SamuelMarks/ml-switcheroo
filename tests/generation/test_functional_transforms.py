@@ -1,5 +1,4 @@
-"""
-Tests for Functional API Transformations (Feature: vmap/grad/jit).
+"""Tests for Functional API Transformations (Feature: vmap/grad/jit).
 
 Verifies:
 1.  `vmap` mapping with argument pivots:
@@ -83,8 +82,7 @@ def engine_factory():
 
 
 def test_torch_vmap_to_jax(engine_factory):
-  """
-  Scenario: Torch uses 'in_dims'. JAX expects 'in_axes'.
+  """Scenario: Torch uses 'in_dims'. JAX expects 'in_axes'.
   Source: v = torch.vmap(my_f, in_dims=(0, None))
   Target: v = jax.vmap(fun=my_f, in_axes=(0, None))
   """
@@ -107,8 +105,7 @@ def test_torch_vmap_to_jax(engine_factory):
 
 
 def test_jax_vmap_to_torch(engine_factory):
-  """
-  Scenario: JAX uses 'fun' keyword and 'in_axes'. Torch expects 'in_dims'.
+  """Scenario: JAX uses 'fun' keyword and 'in_axes'. Torch expects 'in_dims'.
   Source: v = jax.vmap(fun=f, in_axes=0)
   Target: v = torch.vmap(f, in_dims=0)  # Torch arg0 is 'func'
   """
@@ -132,9 +129,7 @@ def test_jax_vmap_to_torch(engine_factory):
 
 
 def test_grad_translation(engine_factory):
-  """
-  Scenario: torch.func.grad(f) -> jax.grad(f)
-  """
+  """Scenario: torch.func.grad(f) -> jax.grad(f)"""
   source_code = "g = torch.func.grad(predict)(params)"
 
   engine = engine_factory("torch", "jax")

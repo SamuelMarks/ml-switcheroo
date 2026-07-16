@@ -1,5 +1,4 @@
-"""
-Tests for Output Normalization Logic.
+"""Tests for Output Normalization Logic.
 
 This module validates the mechanism for reconciling return signature differences
 between frameworks using structured indexing (`output_select_index`).
@@ -14,9 +13,7 @@ from ml_switcheroo.config import RuntimeConfig
 
 
 class MockOutputSemantics(SemanticsManager):
-  """
-  Mock Manager injected with specific output index scenarios.
-  """
+  """Mock Manager injected with specific output index scenarios."""
 
   def __init__(self):
     """Function docstring."""
@@ -73,8 +70,7 @@ def rewrite(rewriter, code):
 
 
 def test_structured_index_wrapping(rewriter):
-  """
-  Scenario: `res = torch.split(x)`
+  """Scenario: `res = torch.split(x)`
   Semantics: `jax.numpy.split` accessed via `output_select_index=0`.
   Expectation: `res = jax.numpy.split(x)[0]` (Clean Subscript Syntax)
   """

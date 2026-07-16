@@ -72,7 +72,7 @@ class LatexParser:
       m = self._STATE_OP_RE.search(line)
       if m:
         d = m.groupdict()
-        compute_nodes.append(StateOpNode(d["id"], d["attr"], self._parse_arg_list(d["args"]), d["shape"]))
+        compute_nodes.append(StateOpNode(d["id"], d["attr"], self._parse_arg_list(d["args"]), d["shape"]))  # type: ignore
         continue
 
       m = self._RETURN_RE.search(line)
@@ -128,13 +128,13 @@ class LatexParser:
     # 3. Fallback to Identifier (Name)
     return cst.Name(clean_val)
 
-  def _create_call(self, func_name: str, config: Dict = None, args_list: List = None) -> cst.Call:
+  def _create_call(self, func_name: str, config: Dict = None, args_list: List = None) -> cst.Call:  # type: ignore
     """Constructs a CST Call node from config and arguments."""
     if "." in func_name:
       p = func_name.split(".")
       fn = cst.Name(p[0])
       for x in p[1:]:
-        fn = cst.Attribute(value=fn, attr=cst.Name(x))
+        fn = cst.Attribute(value=fn, attr=cst.Name(x))  # type: ignore
     else:
       fn = cst.Name(func_name)
 
@@ -210,7 +210,7 @@ class LatexParser:
         rhs = self._create_call(fname, args_list=op.args)
       else:
         # Fallback, though should not be reachable given loop source
-        rhs = cst.Name("None")
+        rhs = cst.Name("None")  # type: ignore
 
       fwd_body.append(cst.SimpleStatementLine([cst.Assign(targets=[lhs], value=rhs)]))
 

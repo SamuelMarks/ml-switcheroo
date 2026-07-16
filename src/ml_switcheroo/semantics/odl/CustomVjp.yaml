@@ -1,0 +1,14 @@
+description: Define custom Vision-Jacobian Product (backward pass) for valid differentiation.
+op_type: decorator
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: fun
+  type: Callable
+- default: ()
+  is_variadic: false
+  kind: positional_or_keyword
+  name: nondiff_argnums
+  type: tuple
+variants: {}
+operation: CustomVjp

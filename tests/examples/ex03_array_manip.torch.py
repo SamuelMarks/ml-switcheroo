@@ -4,8 +4,7 @@ import torch
 
 
 def transpose_matrices(batch):
-  """
-  Swaps dimensions.
+  """Swaps dimensions.
   Semantic pivot: torch.permute -> jax.numpy.transpose
   """
   # Assuming batch of 2D matrices

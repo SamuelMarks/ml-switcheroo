@@ -1,0 +1,9 @@
+description: A layer for Relative Attention Bias.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_heads
+  type: int
+variants: {}
+operation: RelativeBias

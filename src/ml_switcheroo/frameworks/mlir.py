@@ -3,7 +3,7 @@
 Simplified to only provide Metadata.
 """
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Union, Any, Dict, List, Optional, Tuple
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -36,7 +36,7 @@ class MlirAdapter(FrameworkAdapter):
     return "mlir", "sw"
 
   @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
     """Execute implementation detail."""
     return {}
 

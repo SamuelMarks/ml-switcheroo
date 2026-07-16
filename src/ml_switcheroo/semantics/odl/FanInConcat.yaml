@@ -1,0 +1,5 @@
+description: Layer construction function for a fan-in concatenation layer.
+std_args:
+- axis
+type: function
+operation: FanInConcat

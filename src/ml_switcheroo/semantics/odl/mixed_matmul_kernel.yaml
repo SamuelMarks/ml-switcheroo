@@ -1,0 +1,8 @@
+description: Mixed-type matrix multiplication kernel for Hopper GPUs.
+std_args:
+- a
+- b
+- out_dtype
+- config
+type: function
+operation: mixed_matmul_kernel

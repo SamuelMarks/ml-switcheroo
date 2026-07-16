@@ -1,0 +1,10 @@
+description: Rounds each element ``x_i`` of the input array ``x`` to the greatest
+  (i.e., closest to ``+infinity``) integer-valued number that is not greater than
+  ``x_i``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+variants: {}
+operation: floor

@@ -1,0 +1,7 @@
+description: Remove the parametrizations on a tensor in a module.
+std_args:
+- module
+- tensor_name
+- leave_parametrized
+type: function
+operation: remove_parametrizations

@@ -1,0 +1,27 @@
+description: Computes the Hamming window.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: window_length
+  type: int
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: periodic
+  type: bool
+- default: 0.54
+  is_variadic: false
+  kind: positional_or_keyword
+  name: alpha
+  type: float
+- default: 0.46
+  is_variadic: false
+  kind: positional_or_keyword
+  name: beta
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: str
+variants: {}
+operation: HammingWindow

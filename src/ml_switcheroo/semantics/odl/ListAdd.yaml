@@ -1,0 +1,9 @@
+description: Functional interface to the Add layer (elementwise sum). Takes a list
+  of tensors.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inputs
+  type: List[Tensor]
+variants: {}
+operation: ListAdd

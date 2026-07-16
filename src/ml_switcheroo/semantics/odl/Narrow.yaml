@@ -1,0 +1,20 @@
+description: Returns a new tensor that is a narrowed version of input tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: start
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: length
+  type: int
+variants: {}
+operation: Narrow

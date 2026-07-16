@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import pytest
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.core.engine import ASTEngine
@@ -9,6 +11,7 @@ from pathlib import Path
 
 
 def test_engine_init_coverage():
+  """Auto-generated doc."""
   cfg = RuntimeConfig(strict_mode=False)
   engine = ASTEngine(config=cfg, intermediate="onnx")
   assert engine.config.intermediate == "onnx"
@@ -21,6 +24,7 @@ def test_engine_init_coverage():
 
 
 def test_engine_run_exception_coverage():
+  """Auto-generated doc."""
   engine = ASTEngine(source="torch", target="jax")
   with patch.object(engine, "_run_rewriter_pipeline", side_effect=Exception("mocked error")):
     res = engine.run("def foo(): pass")
@@ -29,26 +33,33 @@ def test_engine_run_exception_coverage():
 
 
 def test_engine_parse_coverage():
+  """Auto-generated doc."""
   engine = ASTEngine()
   tree = engine.parse("x = 1")
   assert isinstance(tree, cst.Module)
 
 
 class MockBackend:
+  """Auto-generated doc."""
+
   def __init__(self, *args, **kwargs):
+    """Auto-generated doc."""
     pass
 
   def compile(self, graph):
+    """Auto-generated doc."""
     return "compiled code"
 
 
 def get_tracer_mock():
+  """Auto-generated doc."""
   m = MagicMock()
   m.export.return_value = []
   return m
 
 
 def test_compiler_pipeline_coverage():
+  """Auto-generated doc."""
   engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   with (
     patch("ml_switcheroo.core.engine.ingest_code", side_effect=Exception("mocked err")),
@@ -95,14 +106,19 @@ def test_compiler_pipeline_coverage():
 
 
 class MockPythonBackend:
+  """Auto-generated doc."""
+
   def __init__(self, *args, **kwargs):
+    """Auto-generated doc."""
     pass
 
   def compile(self, graph):
+    """Auto-generated doc."""
     return "compiled py code"
 
 
 def test_compiler_pipeline_backend_coverage():
+  """Auto-generated doc."""
   engine = ASTEngine(source="torch", target="jax")
   with (
     patch("ml_switcheroo.core.engine.ingest_code"),
@@ -126,14 +142,15 @@ def test_compiler_pipeline_backend_coverage():
 
 
 def test_rewriter_pipeline_coverage():
+  """Auto-generated doc."""
   engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   with (
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
     patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor,
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
-    patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
+    patch("ml_switcheroo.core.compiler.differ.GraphDiffer") as mock_differ,
     patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
-    patch("ml_switcheroo.compiler.backends.python_snippet.PythonSnippetEmitter"),
+    patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
     mock_extractor.return_value.graph.nodes = [1]
     mock_differ.return_value.diff.return_value = True
@@ -147,7 +164,7 @@ def test_rewriter_pipeline_coverage():
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
     patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor,
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
-    patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
+    patch("ml_switcheroo.core.compiler.differ.GraphDiffer") as mock_differ,
   ):
     mock_extractor.return_value.graph.nodes = [1]
     mock_differ.return_value.diff.return_value = False
@@ -203,6 +220,7 @@ def test_rewriter_pipeline_coverage():
 
 
 def test_rewriter_sharding_torch_target():
+  """Auto-generated doc."""
   cfg = RuntimeConfig(strict_mode=False)
   cfg.enable_sharding = True
   engine = ASTEngine(config=cfg, source="jax", target="torch", enable_graph_optimization=True)
@@ -210,7 +228,7 @@ def test_rewriter_sharding_torch_target():
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
     patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor,
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
-    patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
+    patch("ml_switcheroo.core.compiler.differ.GraphDiffer") as mock_differ,
   ):
     mock_extractor.return_value.graph.nodes = [1]
     mock_differ.return_value.diff.return_value = False

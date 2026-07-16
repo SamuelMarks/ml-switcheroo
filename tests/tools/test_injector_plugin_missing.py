@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_injector_plugin_missing():
+  """Auto-generated doc."""
   import libcst as cst
   from ml_switcheroo.tools.injector_plugin import BodyExtractor, PluginGenerator
   from pathlib import Path
@@ -22,6 +26,7 @@ def test_injector_plugin_missing():
 
 
 def test_injector_plugin_generate_body_logic():
+  """Auto-generated doc."""
   from ml_switcheroo.tools.injector_plugin import PluginGenerator
   from ml_switcheroo.core.dsl import Rule, LogicOp
   from pathlib import Path

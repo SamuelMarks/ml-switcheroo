@@ -1,0 +1,10 @@
+description: The class representing a Python function.
+std_args:
+- insert_axis
+- axis_data
+- vals_in
+- dims_in
+- global_mesh
+- pspec
+type: function
+operation: ltg_batcher

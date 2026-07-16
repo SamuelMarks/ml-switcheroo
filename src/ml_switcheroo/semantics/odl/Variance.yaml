@@ -1,0 +1,30 @@
+description: Compute the variance along the specified axis.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: dtype
+- is_variadic: false
+  kind: positional_or_keyword
+  name: out
+  type: Tensor
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: ddof
+  type: int
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: keepdims
+  type: bool
+variants: {}
+operation: Variance

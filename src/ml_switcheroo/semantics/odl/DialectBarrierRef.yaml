@@ -1,0 +1,6 @@
+description: The class representing a Python class.
+std_args:
+- self
+- barrier_ref
+type: class
+operation: DialectBarrierRef

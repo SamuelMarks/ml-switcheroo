@@ -849,7 +849,7 @@ variants:
     api: "torch.solve"
   jax:
     api: "jax.numpy.linalg.solve"
-    # JAX returns just solution x, Torch returns (solution, LU). 
+    # JAX returns just solution x, Torch returns (solution, LU).
     requires_plugin: "solve_adapter"
   flax_nnx:
     api: "jax.numpy.linalg.solve"

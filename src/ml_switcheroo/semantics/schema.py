@@ -1,6 +1,6 @@
 """Pydantic Schemas for Semantic Knowledge Base.
 
-This module defines the data structure of the JSON mapping files (`k_array_api.json`, etc.)
+This module defines the data structure of the JSON mapping files (`odl/*.yaml`, etc.)
 and the Framework Configuration blocks.
 
 Updated to support:
@@ -33,7 +33,7 @@ class PluginTraits(BaseModel):
     description="If True, stochastic operations require threaded PRNG keys (JAX-style).",
   )
   requires_functional_state: bool = Field(
-    False,
+    default=False,
     description="If True, stateful layers (BN/Optimizers) return updated state explicitly.",
   )
   requires_functional_control_flow: bool = Field(
@@ -41,11 +41,15 @@ class PluginTraits(BaseModel):
     description="If True, standard Python loops are unsafe for JIT/Graph mode.",
   )
   enforce_purity_analysis: bool = Field(
-    False,
+    default=False,
     description="If True, the Engine runs PurityScanner to detect side-effects (globals, IO) before transpilation.",
   )
   strict_materialization_method: Optional[str] = Field(
-    None, description="Method name to force materialization in strict mode (e.g. 'block_until_ready')."
+    default=None, description="Method name to force materialization in strict mode (e.g. 'block_until_ready')."
+  )
+  sharding_wrapper_api: Optional[str] = Field(
+    default=None,
+    description="Fully qualified API for wrapping operations in sharding (e.g. 'torch.distributed.fsdp.FSDP' or 'jax.experimental.pjit.pjit').",
   )
 
 
@@ -54,18 +58,20 @@ class StructuralTraits(BaseModel):
 
   model_config = ConfigDict(extra="allow")
 
-  module_base: Optional[str] = Field(None, description="Base class API for neural modules.")
-  forward_method: Optional[str] = Field(None, description="Standard method name for forward pass.")
+  module_base: Optional[str] = Field(default=None, description="Base class API for neural modules.")
+  forward_method: Optional[str] = Field(default=None, description="Standard method name for forward pass.")
   known_inference_methods: Set[str] = Field(
     default={"forward", "__call__", "call"},
     description="Set of method names recognized as model inference entry points.",
   )
   functional_execution_method: Optional[str] = Field(
-    "apply",
+    default="apply",
     description="Method name used for functional execution (e.g. 'apply'). Rewriter unwraps this pattern.",
   )
-  requires_super_init: bool = Field(False, description="If True, injects super().__init__() in constructors.")
-  init_method_name: Optional[str] = Field("__init__", description="Name of the constructor (e.g. 'setup' for Pax).")
+  requires_super_init: bool = Field(default=False, description="If True, injects super().__init__() in constructors.")
+  init_method_name: Optional[str] = Field(
+    default="__init__", description="Name of the constructor (e.g. 'setup' for Pax)."
+  )
   inject_magic_args: List[Tuple[str, Optional[str]]] = Field(
     default_factory=list, description="List of (name, type) tuples to inject into signatures."
   )
@@ -73,7 +79,7 @@ class StructuralTraits(BaseModel):
     default_factory=list, description="Explicit list of argument names to remove from signatures."
   )
   auto_strip_magic_args: bool = Field(
-    False,
+    default=False,
     description="If True, automatically strips all magic arguments (built from the global registry) not used by this framework.",
   )
   lifecycle_strip_methods: List[str] = Field(
@@ -103,8 +109,10 @@ class FrameworkTraits(BaseModel):
 
   model_config = ConfigDict(extra="allow")
 
-  extends: Optional[str] = Field(None, description="Base framework to inherit variants from (e.g. paxml extends jax).")
-  alias: Optional[FrameworkAlias] = Field(None, description="Default import alias configuration.")
+  extends: Optional[str] = Field(
+    default=None, description="Base framework to inherit variants from (e.g. paxml extends jax)."
+  )
+  alias: Optional[FrameworkAlias] = Field(default=None, description="Default import alias configuration.")
   stateful_call: Optional[Dict[str, str]] = Field(None, description="Configuration for stateful calling conventions.")
   tiers: Optional[List[SemanticTier]] = Field(
     default=None, description="List of Semantic Tiers (array, neural, extras) this framework supports."
@@ -123,4 +131,4 @@ class SemanticsFile(BaseModel):
   model_config = ConfigDict(extra="allow")
   frameworks: Optional[Dict[str, FrameworkTraits]] = Field(None, alias="__frameworks__")
   imports: Optional[Dict[str, Any]] = Field(None, alias="__imports__")
-  patterns: Optional[List[PatternDef]] = Field(default_factory=list, alias="__patterns__")
+  patterns: Optional[List[PatternDef]] = Field(default_factory=lambda: [], alias="__patterns__")

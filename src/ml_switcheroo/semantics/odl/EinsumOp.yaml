@@ -1,0 +1,5 @@
+description: Functional einsum operation wrapper.
+op_type: class
+std_args: []
+variants: {}
+operation: EinsumOp

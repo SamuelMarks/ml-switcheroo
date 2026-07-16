@@ -1,15 +1,14 @@
-"""
-Integration test for full RDNA Compiler Stack Roundtrip.
+"""Integration test for full RDNA Compiler Stack Roundtrip.
 
 Verifies: Graph -> RDNA Text -> Graph
 """
 
 import pytest
 from unittest.mock import MagicMock
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.compiler.backends.rdna import RdnaBackend
-from ml_switcheroo.compiler.frontends.rdna.parser import RdnaParser
-from ml_switcheroo.compiler.frontends.rdna.lifter import RdnaLifter
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.backends.rdna import RdnaBackend
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
+from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -38,8 +37,7 @@ def semantics_mgr():
 
 
 def test_rdna_roundtrip_macro(semantics_mgr):
-  """
-  Scenario: Input -> Conv2d(k=3) -> Output
+  """Scenario: Input -> Conv2d(k=3) -> Output
   Roundtrip ensures markers and metadata recovery work.
   """
   g_in = LogicalGraph()

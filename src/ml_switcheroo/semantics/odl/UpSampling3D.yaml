@@ -1,0 +1,17 @@
+description: Upsampling layer for 3D inputs.
+op_type: class
+std_args:
+- default:
+  - 2
+  - 2
+  - 2
+  is_variadic: false
+  kind: positional_or_keyword
+  name: size
+  type: Tuple[int, int, int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data_format
+  type: str
+variants: {}
+operation: UpSampling3d

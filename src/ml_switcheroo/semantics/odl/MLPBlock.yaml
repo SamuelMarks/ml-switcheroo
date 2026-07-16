@@ -1,0 +1,17 @@
+description: Multilayer perceptron block composed of multiple FeedForward layers.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: in_features
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hidden_features
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: out_features
+  type: int
+variants: {}
+operation: MLPBlock

@@ -1,0 +1,5 @@
+description: The class representing a Python function.
+std_args:
+- leaf
+type: function
+operation: is_tensorstore_spec_leaf

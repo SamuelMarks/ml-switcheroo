@@ -35,7 +35,7 @@ def _success(self, message, *args, **kwargs):
 
 
 # Patch basic Logger class
-logging.Logger.success = _success
+logging.Logger.success = _success  # type: ignore
 
 # Define standard semantic colors for the CLI
 _THEME = Theme(

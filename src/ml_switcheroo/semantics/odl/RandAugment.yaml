@@ -1,0 +1,15 @@
+description: RandAugment performs the Rand Augment operation on input images.
+op_type: class
+std_args:
+- default: 2
+  is_variadic: false
+  kind: positional_or_keyword
+  name: num_ops
+  type: int
+- default: 9
+  is_variadic: false
+  kind: positional_or_keyword
+  name: magnitude
+  type: int
+variants: {}
+operation: RandAugment

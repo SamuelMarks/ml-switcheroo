@@ -1,8 +1,15 @@
+"""Auto-generated doc."""
+
+
 def test_doc_gen_missing():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
   class DummySM:
+    """Auto-generated doc."""
+
     def get_definition_by_id(self, op_name):
+      """Auto-generated doc."""
       if op_name == "missing":
         return None
       return {"std_args": ["a"]}
@@ -14,10 +21,14 @@ def test_doc_gen_missing():
 
 
 def test_doc_gen_missing_tuple_arg():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
   class DummySM:
+    """Auto-generated doc."""
+
     def get_definition_by_id(self, op_name):
+      """Auto-generated doc."""
       return {"std_args": [("a", "int")]}
 
   m = MigrationGuideGenerator(DummySM())

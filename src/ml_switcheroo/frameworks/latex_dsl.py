@@ -4,7 +4,7 @@ Provides metadata and hooks for the Machine Intelligence Definition Language (MI
 LaTeX DSL.
 """
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Union, Any, Dict, List, Optional, Tuple
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StandardMap, ImportConfig, InitMode, OperationDef
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
@@ -35,7 +35,7 @@ class LatexDSLAdapter:
     return "midl", "midl"
 
   @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
     """Execute implementation detail."""
     return {"midl": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="midl")}
 

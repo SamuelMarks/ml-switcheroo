@@ -1,0 +1,5 @@
+description: The class representing a Python function.
+std_args:
+- attr
+type: function
+operation: is_splat_fragmented_layout

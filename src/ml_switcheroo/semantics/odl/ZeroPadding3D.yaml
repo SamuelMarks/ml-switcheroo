@@ -1,0 +1,13 @@
+description: Zero-padding layer for 3D data.
+op_type: class
+std_args:
+- default:
+  - 1
+  - 1
+  - 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: Tuple[int, int, int]
+variants: {}
+operation: ZeroPadding3d

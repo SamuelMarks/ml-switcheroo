@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- q_segment_ids
+- kv_segment_ids
+type: function
+operation: segment_mask

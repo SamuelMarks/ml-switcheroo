@@ -1,0 +1,12 @@
+description: Retrieves the state (parameters/variables) from a model node.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: node
+  type: Any
+- is_variadic: true
+  kind: positional_or_keyword
+  name: filters
+  type: Any
+variants: {}
+operation: GetState

@@ -1,0 +1,6 @@
+description: Sum array element over given axes.
+std_args:
+- mat
+- axes
+type: function
+operation: bcoo_reduce_sum

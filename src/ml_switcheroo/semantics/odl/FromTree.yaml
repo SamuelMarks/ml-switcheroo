@@ -1,0 +1,8 @@
+description: Reconstructs object from tree definition.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tree
+  type: Any
+variants: {}
+operation: FromTree

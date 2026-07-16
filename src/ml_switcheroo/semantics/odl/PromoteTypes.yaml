@@ -1,0 +1,13 @@
+description: Returns the dtype with the smallest size and scalar kind that is not
+  smaller than either type1 or type2.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: type1
+  type: DType
+- is_variadic: false
+  kind: positional_or_keyword
+  name: type2
+  type: DType
+variants: {}
+operation: PromoteTypes

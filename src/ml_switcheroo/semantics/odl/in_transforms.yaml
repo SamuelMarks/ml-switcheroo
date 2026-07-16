@@ -1,0 +1,5 @@
+description: Returns the in_transforms attribute of the given operation.
+std_args:
+- op
+type: function
+operation: in_transforms

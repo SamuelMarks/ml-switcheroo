@@ -1,5 +1,4 @@
-"""
-Tests for DocContextBuilder.
+"""Tests for DocContextBuilder.
 
 Verifies:
 1.  Construction of view model from semantic definitions.
@@ -28,36 +27,28 @@ def builder(mock_semantics):
 
 
 def test_argument_formatting_string(builder):
-  """
-  Scenario: ["x", "y"]
-  """
+  """Scenario: ["x", "y"]"""
   std_args = ["x", "y"]
   formatted = builder._format_args(std_args)
   assert formatted == ["x", "y"]
 
 
 def test_argument_formatting_tuple(builder):
-  """
-  Scenario: [("x", "Tensor"), "dim"]
-  """
+  """Scenario: [("x", "Tensor"), "dim"]"""
   std_args = [("x", "Tensor"), "dim"]
   formatted = builder._format_args(std_args)
   assert formatted == ["x: Tensor", "dim"]
 
 
 def test_argument_formatting_dict(builder):
-  """
-  Scenario: [{"name": "dim", "type": "int", "default": "-1"}]
-  """
+  """Scenario: [{"name": "dim", "type": "int", "default": "-1"}]"""
   std_args = [{"name": "dim", "type": "int", "default": "-1"}]
   formatted = builder._format_args(std_args)
   assert formatted == ["dim: int = -1"]
 
 
 def test_missing_property_defaults(builder):
-  """
-  Verify safe handling of missing description/fields.
-  """
+  """Verify safe handling of missing description/fields."""
   context = builder.build("EmptyOp", {})
   assert context["name"] == "EmptyOp"
   assert context["description"] == "No description available."
@@ -90,8 +81,7 @@ def test_impl_type_classification_direct(builder):
 
 
 def test_full_build_flow_with_adapter_logic(builder):
-  """
-  Verify end-to-end build combining all logic.
+  """Verify end-to-end build combining all logic.
   Mocks `get_adapter` to test display name and URL resolution.
   """
   op_def = {

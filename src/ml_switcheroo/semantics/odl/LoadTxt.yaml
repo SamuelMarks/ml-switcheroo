@@ -1,0 +1,8 @@
+description: Load data from a text file.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: fname
+  type: str
+variants: {}
+operation: LoadTxt

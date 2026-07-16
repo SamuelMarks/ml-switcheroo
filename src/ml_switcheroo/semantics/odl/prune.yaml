@@ -1,0 +1,8 @@
+description: Compute and returns a pruned version of input tensor ``t``.
+std_args:
+- self
+- t
+- default_mask
+- importance_scores
+type: function
+operation: prune

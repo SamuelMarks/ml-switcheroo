@@ -1,6 +1,4 @@
-"""
-Integration Tests for Clamp/Clip Semantics.
-"""
+"""Integration Tests for Clamp/Clip Semantics."""
 
 import pytest
 import libcst as cst

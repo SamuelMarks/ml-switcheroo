@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_code_extractor_error():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.code_extractor import CodeExtractor
   import pytest
 
@@ -9,6 +13,7 @@ def test_code_extractor_error():
 
 
 def test_code_extractor_normalize_harness_imports():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.code_extractor import CodeExtractor
 
   ce = CodeExtractor()
@@ -17,10 +22,14 @@ def test_code_extractor_normalize_harness_imports():
 
 
 def test_doc_context_branches():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
+    """Auto-generated doc."""
+
     def get_all_operations(self):
+      """Auto-generated doc."""
       return {}
 
   b = DocContextBuilder(DummySM())
@@ -38,6 +47,7 @@ def test_doc_context_branches():
 
 
 def test_code_extractor_error_more():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.code_extractor import CodeExtractor
   import pytest
 
@@ -47,9 +57,12 @@ def test_code_extractor_error_more():
 
 
 def test_doc_context_more():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
+    """Auto-generated doc."""
+
     pass
 
   b = DocContextBuilder(DummySM())
@@ -73,9 +86,12 @@ def test_doc_context_more():
 
 
 def test_doc_context_more_variants():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
+    """Auto-generated doc."""
+
     pass
 
   b = DocContextBuilder(DummySM())

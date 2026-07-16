@@ -1,0 +1,6 @@
+description: Marks the boundary between two joined (nested) pytrees.
+std_args:
+- self
+- subtree
+type: class
+operation: JoinPoint

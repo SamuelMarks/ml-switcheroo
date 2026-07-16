@@ -6,8 +6,7 @@ import torch.nn.functional as F
 
 
 class Net(nn.Module):
-  """
-  Standard MNIST CNN.
+  """Standard MNIST CNN.
   Source: PyTorch Examples.
   """
 

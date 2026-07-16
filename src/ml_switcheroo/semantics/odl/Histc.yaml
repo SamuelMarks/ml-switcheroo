@@ -1,0 +1,23 @@
+description: Computes the histogram of a tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- default: 100
+  is_variadic: false
+  kind: positional_or_keyword
+  name: bins
+  type: int
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: min
+  type: float
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: max
+  type: float
+variants: {}
+operation: Histc

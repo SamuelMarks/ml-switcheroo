@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import pytest
 import sys
 import numpy as np
@@ -8,6 +10,7 @@ import ml_switcheroo.generated_tests.runtime as rt
 
 @pytest.fixture
 def mock_sys_modules():
+  """Auto-generated doc."""
   torch_mock = MagicMock()
   tf_mock = MagicMock()
 
@@ -19,6 +22,7 @@ def mock_sys_modules():
 
 
 def test_ensure_determinism_auto(mock_sys_modules):
+  """Auto-generated doc."""
   torch_mock, tf_mock = mock_sys_modules
   func = getattr(rt.ensure_determinism, "__pytest_wrapped__", None)
   if func:
@@ -46,11 +50,13 @@ def test_ensure_determinism_auto(mock_sys_modules):
 
 
 def test_verify_results_shape_mismatch():
+  """Auto-generated doc."""
   # 133-134
   assert verify_results(np.array([1, 2]), np.array([1, 2, 3])) is False
 
 
 def test_verify_results_types():
+  """Auto-generated doc."""
   assert verify_results(None, None) is True
   assert verify_results(None, 1) is False
 
@@ -68,28 +74,39 @@ def test_verify_results_types():
   assert verify_results(np.array([1]), np.array([1]), exact=False) is True
 
   class Uncomparable:
+    """Auto-generated doc."""
+
     def __eq__(self, other):
+      """Auto-generated doc."""
       raise ValueError("bad eq")
 
   assert verify_results(Uncomparable(), Uncomparable()) is False
 
   class Comparable:
+    """Auto-generated doc."""
+
     def __eq__(self, other):
+      """Auto-generated doc."""
       return True
 
   assert verify_results(Comparable(), Comparable()) is True
 
   class NoArray:
+    """Auto-generated doc."""
+
     def __array__(self):
+      """Auto-generated doc."""
       raise ValueError("no array")
 
     def __eq__(self, other):
+      """Auto-generated doc."""
       return True
 
   assert verify_results(NoArray(), NoArray()) is True
 
 
 def test_verify_results_chex(monkeypatch):
+  """Auto-generated doc."""
   chex_mock = MagicMock()
   chex_mock.assert_trees_all_close = MagicMock()
   rt.globals = lambda: {"chex": chex_mock}

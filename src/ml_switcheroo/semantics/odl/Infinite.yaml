@@ -1,0 +1,5 @@
+description: Floating point positive infinity value.
+op_type: attribute
+std_args: []
+variants: {}
+operation: Infinite

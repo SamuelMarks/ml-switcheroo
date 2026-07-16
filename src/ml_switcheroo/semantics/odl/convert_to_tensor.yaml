@@ -1,0 +1,4 @@
+description: Auto-generated from keras_code_defs
+std_args: []
+variants: {}
+operation: convert_to_tensor

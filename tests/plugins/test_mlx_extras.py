@@ -1,6 +1,4 @@
-"""
-Tests for MLX Extras Plugin (Decoupled).
-"""
+"""Tests for MLX Extras Plugin (Decoupled)."""
 
 import pytest
 import libcst as cst
@@ -69,8 +67,7 @@ def rewrite(rewriter, code):
 
 
 def test_compiler_decorator(rewriter):
-  """
-  Verify decorator replacement using looked up API.
+  """Verify decorator replacement using looked up API.
   Input: @torch.compile(args)
   Output: @custom.jit
   """

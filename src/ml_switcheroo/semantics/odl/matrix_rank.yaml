@@ -1,0 +1,13 @@
+description: Returns the rank (i.e., number of non-zero singular values) of a matrix
+  (or a stack of matrices).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: rtol
+  type: Optional[Union[float, array]]
+type: attribute
+operation: matrix_rank

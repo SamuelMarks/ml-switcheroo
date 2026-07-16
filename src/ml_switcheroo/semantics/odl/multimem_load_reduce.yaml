@@ -1,0 +1,8 @@
+description: The class representing a Python function.
+std_args:
+- ty
+- ptr
+- reduction
+- is_signed
+type: function
+operation: multimem_load_reduce

@@ -492,10 +492,10 @@ variants:
     description: "JAX cholesky returns lower triangle by default. Upper support requires transpose."
     dispatch_rules:
       - if_arg: "upper"
-        op: "eq" 
+        op: "eq"
         val: true
         use_api: "jax.numpy.linalg.cholesky" # Requires macro to transpose result
-        
+
   numpy:
     api: "numpy.linalg.cholesky"
     args:
@@ -528,16 +528,16 @@ variants:
     api: "torch.cholesky_inverse"
     # Args: input is L
   # Others require manual inv(L.T @ L) or similar
-  
+
 ---
 operation: "CholeskySolve"
 description: "Solves a linear system of equations with a positive semidefinite matrix to be inverted given its Cholesky factor."
 op_type: "function"
 std_args:
   - name: "input"
-    type: "Tensor" # The RHS 'b' 
+    type: "Tensor" # The RHS 'b'
   - name: "input2"
-    type: "Tensor" # The Cholesky 'u' 
+    type: "Tensor" # The Cholesky 'u'
   - name: "upper"
     type: "bool"
     default: false
@@ -549,7 +549,7 @@ variants:
     args:
       input: "b"
       input2: "c_and_lower" # expects (c, lower) tuple
-      # mismatch in API design. 
+      # mismatch in API design.
   tensorflow:
     api: "tf.linalg.cholesky_solve"
     args:

@@ -1,0 +1,6 @@
+description: A mask backed by a dense numpy array.
+std_args:
+- self
+- array
+type: class
+operation: NumpyMask

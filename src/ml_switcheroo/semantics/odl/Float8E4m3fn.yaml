@@ -1,0 +1,5 @@
+description: FP8 type E4M3FN.
+op_type: attribute
+std_args: []
+variants: {}
+operation: Float8E4m3fn

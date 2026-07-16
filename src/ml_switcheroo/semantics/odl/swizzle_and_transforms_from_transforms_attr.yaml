@@ -1,0 +1,5 @@
+description: Returns the swizzle and MemrefTransforms for the given transforms.
+std_args:
+- transforms
+type: function
+operation: swizzle_and_transforms_from_transforms_attr

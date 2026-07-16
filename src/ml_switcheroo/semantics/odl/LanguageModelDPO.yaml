@@ -1,0 +1,5 @@
+description: Contains a pair of TransformerLM for direct preference optimization.
+op_type: class
+std_args: []
+variants: {}
+operation: LanguageModelDPO

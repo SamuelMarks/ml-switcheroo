@@ -1,0 +1,5 @@
+description: Returns 'true' if the operation should be assigned a TMEM layout.
+std_args:
+- op
+type: function
+operation: should_have_tmem_layout

@@ -1,0 +1,4 @@
+description: CUPTI-based profiler.
+std_args: []
+type: class
+operation: Cupti

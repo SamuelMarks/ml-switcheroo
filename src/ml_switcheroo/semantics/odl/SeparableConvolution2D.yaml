@@ -1,0 +1,20 @@
+description: Alias for SeparableConv2D.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: filters
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: int
+- default:
+  - 1
+  - 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: strides
+  type: Tuple[int, int]
+variants: {}
+operation: SeparableConvolution2D

@@ -1,0 +1,14 @@
+description: Returns a tensor with the same size as input that is filled with random
+  numbers from a uniform distribution.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- default: None
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Any
+variants: {}
+operation: RandLike

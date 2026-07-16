@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- shape
+- layout
+type: function
+operation: is_valid_register_layout_assignment

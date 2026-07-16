@@ -1,5 +1,4 @@
-"""
-Integration Tests for Standalone Harness Verification (Dynamic Shim).
+"""Integration Tests for Standalone Harness Verification (Dynamic Shim).
 
 Verifies that:
 1. The HarnessGenerator correctly extracts `InputFuzzer` logic.
@@ -42,9 +41,7 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess:
 
 
 def test_dynamic_shim_generation(tmp_path):
-  """
-  Verify that the shim includes logic from a dynamically registered adapter.
-  """
+  """Verify that the shim includes logic from a dynamically registered adapter."""
   # 1. Register a custom framework
   register_framework("mock_keras")(DynKerasAdapter)
 
@@ -65,8 +62,7 @@ def test_dynamic_shim_generation(tmp_path):
 
 
 def test_harness_execution_match(tmp_path):
-  """
-  Verify correctness: Identical functions return Exit Code 0.
+  """Verify correctness: Identical functions return Exit Code 0.
   Using 'numpy' mode to avoid needing installed Torch/JAX in test worker.
   """
   src_file = tmp_path / "mod_src.py"

@@ -1,0 +1,9 @@
+description: RMS normalization without scale.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+variants: {}
+operation: RmsNormNoScale

@@ -1,0 +1,4 @@
+description: Quantization utility for accessing per-channel axis.
+std_args: []
+variants: {}
+operation: QPerChannelAxis

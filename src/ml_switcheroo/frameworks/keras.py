@@ -12,7 +12,6 @@ It handles:
 """
 
 import logging
-import textwrap
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
@@ -38,8 +37,11 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.loader import load_definitions
 
 
+from ml_switcheroo.frameworks.keras_io import KerasIOMixin
+
+
 @register_framework("keras")
-class KerasAdapter:
+class KerasAdapter(KerasIOMixin):
   """Adapter for Keras v3 (Multi-backend).
 
   Provides definitions for Keras Core Ops, Layers, and Models.
@@ -235,20 +237,28 @@ class KerasAdapter:
         List[GhostRef]: Found items.
 
     """
-    results = []  # pragma: no cover
+    results: list["Any"] = []  # pragma: no cover
     if category == SemanticTier.LOSS:  # pragma: no cover
       results.extend(
-        self._scan_module(keras.losses, "keras.losses", kind="class", block_list={"Loss", "Container"})
+        getattr(self, "_scan_module", lambda *args, **kwargs: [])(
+          keras.losses, "keras.losses", kind="class", block_list={"Loss", "Container"}
+        )
       )  # pragma: no cover
     elif category == SemanticTier.OPTIMIZER:  # pragma: no cover
       results.extend(  # pragma: no cover
-        self._scan_module(keras.optimizers, "keras.optimizers", kind="class", block_list={"Optimizer", "TFOptimizer"})
+        getattr(self, "_scan_module", lambda *args, **kwargs: [])(
+          keras.optimizers, "keras.optimizers", kind="class", block_list={"Optimizer", "TFOptimizer"}
+        )
       )
     elif category == SemanticTier.ACTIVATION:  # pragma: no cover
-      results.extend(self._scan_module(keras.activations, "keras.activations", kind="function"))  # pragma: no cover
+      results.extend(
+        getattr(self, "_scan_module", lambda *args, **kwargs: [])(keras.activations, "keras.activations", kind="function")
+      )  # pragma: no cover
     elif category == SemanticTier.LAYER:  # pragma: no cover
       results.extend(
-        self._scan_module(keras.layers, "keras.layers", kind="class", block_list={"Layer"})
+        getattr(self, "_scan_module", lambda *args, **kwargs: [])(
+          keras.layers, "keras.layers", kind="class", block_list={"Layer"}
+        )
       )  # pragma: no cover
     return results  # pragma: no cover
 
@@ -268,100 +278,6 @@ class KerasAdapter:
       return keras.ops.convert_to_tensor(data)  # pragma: no cover
     except (ImportError, AttributeError):  # pragma: no cover
       return data  # pragma: no cover
-
-  def get_serialization_imports(self) -> List[str]:
-    """Imports for saving/loading.
-
-    Returns:
-        List[str]: Imports.
-
-    """
-    return ["import keras"]  # pragma: no cover
-
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Syntax for saving/loading models.
-
-    Args:
-        op (str): 'save' or 'load'.
-        file_arg (str): Path string.
-        object_arg (Optional[str]): Object name.
-
-    Returns:
-        str: Generated python code.
-
-    """
-    if op == "save" and object_arg:  # pragma: no cover
-      return f"{object_arg}.save({file_arg})"  # pragma: no cover
-    elif op == "load":  # pragma: no cover
-      return f"keras.saving.load_model({file_arg})"  # pragma: no cover
-    return ""  # pragma: no cover
-
-  def get_weight_conversion_imports(self) -> List[str]:
-    """Returns imports required for the generated weight migration script.
-
-    Returns:
-        List[str]: List of import statements.
-
-    """
-    return ["import keras", "import numpy as np", "import h5py"]  # pragma: no cover
-
-  def get_weight_load_code(self, path_var: str) -> str:
-    """Returns python code to load a checkpoint.
-    Stub implemented as Keras models contain structure + weights, making raw dict handling tricky.
-    """
-    return textwrap.dedent(  # pragma: no cover
-      f""" 
-            try: 
-                # Keras weights are usually saved with .weights.h5 or as full model
-                # This stub attempts to load if it's a full model file, extracting weights
-                model = keras.models.load_model({path_var}, compile=False) 
-                raw_state = {{w.name: w.numpy() for w in model.weights}} 
-            except Exception as e: 
-                print(f"Warning: Failed to load Keras model ({{e}}). Assuming raw h5 weights file.") 
-                # Fallback to h5py if available for raw weights
-                try: 
-                    import h5py
-                    f = h5py.File({path_var}, 'r') 
-                    raw_state = {{}} 
-                    def visit_func(name, node): 
-                        if isinstance(node, h5py.Dataset): 
-                            raw_state[name] = node[()] 
-                    f.visititems(visit_func) 
-                except Exception: 
-                    print("h5py not installed, cannot load raw weights.") 
-                    raw_state = {{}} 
-            """
-    )
-
-  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Returns python expression string that converts `tensor_var` from Keras tensor to numpy array."""
-    return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"  # pragma: no cover
-
-  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Returns Python code to save the dictionary `state_var` (mapping flat keys to numpy arrays)
-    to `path_var` using h5py.
-
-    Args:
-        state_var (str): Variable name of the state dictionary.
-        path_var (str): Variable name of the output path.
-
-    Returns:
-        str: Generated Python code block.
-
-    """
-    return textwrap.dedent(  # pragma: no cover
-      f""" 
-            print(f"Saving generic HDF5 weights to {{ {path_var} }} using h5py...") 
-            with h5py.File({path_var}, "w") as f: 
-                for key, val in {state_var}.items(): 
-                    # Save flat keys as datasets
-                    # We use '/' replacement to create groups if key implies hierarchy, 
-                    # or just flat keys if preferred. 
-                    # Keras variable names usually allowed in HDF5 keys. 
-                    f.create_dataset(str(key), data=val) 
-            print("Done.") 
-            """
-    )
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Syntax for device scoping.
@@ -417,74 +333,7 @@ class KerasAdapter:
     return f"https://keras.io/search.html?q={api_name}"
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Returns tiered examples.
+    """Returns example snippets for each semantic tier."""
+    from ml_switcheroo.frameworks.keras_examples import get_keras_tiered_examples
 
-    Returns:
-        Dict[str, str]: Map of tiers to examples.
-
-    """
-    return {
-      "tier1_math": """import keras
-from keras import ops
-
-def math_ops(x, y):
-  # Tier 1: Using keras.ops for backend-agnostic math
-  a = ops.abs(x)
-  b = ops.add(a, y)
-  return ops.mean(b)
-""",
-      "tier2_neural": """import keras
-from keras import layers
-
-def build_model(input_shape):
-  inputs = keras.Input(shape=input_shape)
-  x = layers.Conv2D(32, 3, activation="relu")(inputs)
-  x = layers.Flatten()(x)
-  outputs = layers.Dense(10)(x)
-  return keras.Model(inputs, outputs)
-""",
-      "tier3_extras": """import keras
-from keras import random
-
-def generate_noise(shape):
-  seed_gen = random.SeedGenerator(42)
-  return random.normal(shape, seed=seed_gen)
-""",
-      "tier4_qwen3-vl": """import keras
-from keras import layers
-import keras.ops as ops
-
-class Qwen3VLVisionConfig:
-    in_channels: int = 3
-    hidden_size: int = 1280
-    temporal_patch_size: int = 2
-    patch_size: int = 14
-
-class Qwen3VLPatchEmbed(keras.Layer):
-    '''3D Convolutional patch embedding for vision input.'''
-    def __init__(self, config: Qwen3VLVisionConfig):
-        super().__init__()
-        self.config = config
-        kernel = (config.temporal_patch_size, config.patch_size, config.patch_size)
-        self.proj = layers.Conv3D(
-            filters=config.hidden_size,
-            kernel_size=kernel,
-            strides=kernel,
-            padding="valid",
-            use_bias=True,
-        )
-
-    def call(self, hidden_states):
-        cfg = self.config
-        seq_len = ops.shape(hidden_states)[0]
-
-        hidden_states = ops.reshape(
-            hidden_states, 
-            (seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size)
-        )
-        hidden_states = ops.transpose(hidden_states, (0, 2, 3, 4, 1))
-        
-        out = self.proj(hidden_states)
-        return ops.reshape(out, (seq_len, cfg.hidden_size))
-""",
-    }
+    return get_keras_tiered_examples()

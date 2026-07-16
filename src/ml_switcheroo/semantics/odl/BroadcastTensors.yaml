@@ -1,0 +1,8 @@
+description: Broadcasts the given tensors according to broadcasting semantics.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: tensors
+  type: List[Tensor]
+variants: {}
+operation: BroadcastTensors

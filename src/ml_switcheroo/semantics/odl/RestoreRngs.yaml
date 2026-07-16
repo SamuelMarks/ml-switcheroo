@@ -1,0 +1,8 @@
+description: Restores RNG states from a backup.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: backups
+  type: Any
+variants: {}
+operation: RestoreRngs

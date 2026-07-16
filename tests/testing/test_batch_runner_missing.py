@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_batch_runner_verbose():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.batch_runner import BatchValidator
   from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -12,6 +16,7 @@ def test_batch_runner_verbose():
 
 
 def test_batch_runner_unpack_args_dict():
+  """Auto-generated doc."""
   from ml_switcheroo.testing.batch_runner import BatchValidator
   from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -29,6 +34,7 @@ def test_batch_runner_unpack_args_dict():
 
 
 def test_batch_runner_scan_manual_tests_not_exist(tmp_path):
+  """Auto-generated doc."""
   from ml_switcheroo.testing.batch_runner import BatchValidator
   from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -38,6 +44,7 @@ def test_batch_runner_scan_manual_tests_not_exist(tmp_path):
 
 
 def test_batch_runner_scan_manual_tests_parse_error(tmp_path):
+  """Auto-generated doc."""
   from ml_switcheroo.testing.batch_runner import BatchValidator
   from ml_switcheroo.semantics.manager import SemanticsManager
 

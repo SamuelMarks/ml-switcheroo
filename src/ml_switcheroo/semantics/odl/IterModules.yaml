@@ -1,0 +1,8 @@
+description: Recursively iterates over all nested Modules.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: module
+  type: Module
+variants: {}
+operation: IterModules

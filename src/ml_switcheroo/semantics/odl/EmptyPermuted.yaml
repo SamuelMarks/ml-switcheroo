@@ -1,0 +1,12 @@
+description: Creates an uninitialized tensor with a specified physical layout.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: size
+  type: List[int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: physical_layout
+  type: List[int]
+variants: {}
+operation: EmptyPermuted

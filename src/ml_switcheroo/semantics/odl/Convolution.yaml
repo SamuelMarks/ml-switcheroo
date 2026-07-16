@@ -1,0 +1,11 @@
+description: Generic convolution operator.
+std_args:
+- input
+- weight
+- bias
+- stride
+- padding
+- dilation
+- groups
+variants: {}
+operation: Convolution

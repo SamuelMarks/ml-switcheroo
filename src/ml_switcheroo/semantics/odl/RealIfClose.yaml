@@ -1,0 +1,14 @@
+description: If input is complex with all imaginary parts close to zero, return real
+  parts.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Array
+- default: '100'
+  is_variadic: false
+  kind: positional_or_keyword
+  name: tol
+  type: float
+variants: {}
+operation: RealIfClose

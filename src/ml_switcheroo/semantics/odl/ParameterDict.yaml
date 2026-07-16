@@ -1,0 +1,8 @@
+description: Holds parameters in a dictionary.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: parameters
+  type: Dict[str, Any]
+type: class
+operation: ParameterDict

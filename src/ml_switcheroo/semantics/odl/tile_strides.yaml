@@ -1,0 +1,6 @@
+description: Tiles the trailing strides in `strides` according to `tiling`.
+std_args:
+- strides
+- tiling
+type: function
+operation: tile_strides

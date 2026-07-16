@@ -1,5 +1,4 @@
-"""
-Tests for verify functionality (Harness Generation).
+"""Tests for verify functionality (Harness Generation).
 Checks that the harness is generated correctly, compiles, and runs standalone.
 """
 
@@ -10,9 +9,7 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 def test_harness_generation_file_creation(tmp_path):
-  """
-  Verify the harness file is physically created and standalone.
-  """
+  """Verify the harness file is physically created and standalone."""
   src_file = tmp_path / "source.py"
   src_file.write_text("def fn(x): return x")
 
@@ -37,23 +34,22 @@ def test_harness_generation_file_creation(tmp_path):
 
 
 def test_harness_execution_standalone(tmp_path):
-  """
-  Verify correctness by running the script in a subprocess WITHOUT adding
+  """Verify correctness by running the script in a subprocess WITHOUT adding
   ml_switcheroo to PYTHONPATH. This proves it is portable.
   """
   # 1. Source
   src_file = tmp_path / "mod_src.py"
-  src_file.write_text(""" 
+  src_file.write_text("""
 import numpy as np
-def my_op(x): 
+def my_op(x):
     return x * 2
 """)
 
   # 2. Target
   tgt_file = tmp_path / "mod_tgt.py"
-  tgt_file.write_text(""" 
+  tgt_file.write_text("""
 import numpy as np
-def my_op(x): 
+def my_op(x):
     return x * 2
 """)
 
@@ -76,8 +72,7 @@ def my_op(x):
 
 
 def test_harness_execution_mismatch(tmp_path):
-  """
-  Verify that logic failures are still caught in the standalone script.
+  """Verify that logic failures are still caught in the standalone script.
   Forces float input type so generated test does not use empty arrays, ensuring numeric mismatch logic triggers.
   """
   src_file = tmp_path / "mod_src.py"

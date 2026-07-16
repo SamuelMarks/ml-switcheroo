@@ -1,0 +1,22 @@
+description: Performs the element-wise multiplication of tensor1 by tensor2, multiplies
+  the result by the scalar value and adds it to input.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tensor1
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tensor2
+  type: Tensor
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: value
+  type: float
+variants: {}
+operation: Addcmul

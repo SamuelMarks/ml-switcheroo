@@ -1,0 +1,8 @@
+description: Returns an fp32 Tensor by dequantizing a quantized Tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tensor
+  type: Tensor
+variants: {}
+operation: Dequantize

@@ -1,0 +1,12 @@
+description: Creates mask for attention weights (Flax utility).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: query_input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: key_input
+  type: Tensor
+variants: {}
+operation: MakeAttentionMask

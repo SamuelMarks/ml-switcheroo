@@ -182,37 +182,37 @@ def _build_header(schema_json: str) -> str:
 Your task is to generate valid YAML definitions—for: PyTorch, MLX, Keras, TensorFlow (if different from Keras),
 Flax NNX (if different from JAX), and Pax (if different from JAX)—using the Operation Definition Language (ODL).
 
---- OUTPUT FORMAT (JSON SCHEMA) --- 
-The YAML must conform rigidly to this Pydantic schema: 
+--- OUTPUT FORMAT (JSON SCHEMA) ---
+The YAML must conform rigidly to this Pydantic schema:
 ```json
-{schema_json} 
+{schema_json}
 ```
 
---- ONE-SHOT EXAMPLE --- 
-Here is a valid example mapping `torch.abs` to all supported frameworks: 
+--- ONE-SHOT EXAMPLE ---
+Here is a valid example mapping `torch.abs` to all supported frameworks:
 ```yml
-operation: "Abs" 
-description: "Calculates the absolute value element-wise." 
-std_args: 
-  - name: "x" 
-    type: "Tensor" 
-variants: 
-  torch: 
-    api: "torch.abs" 
-  jax: 
-    api: "jax.numpy.abs" 
-  flax_nnx: 
+operation: "Abs"
+description: "Calculates the absolute value element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.abs"
+  jax:
+    api: "jax.numpy.abs"
+  flax_nnx:
     api: "jax.numpy.abs" # Flax NNX uses JAX for math
-  paxml: 
+  paxml:
     api: "jax.numpy.abs" # Pax uses JAX for math
-  keras: 
+  keras:
     api: "keras.ops.abs" # Keras 3 backend-agnostic ops
-  tensorflow: 
-    api: "tf.abs" 
-  numpy: 
-    api: "numpy.abs" 
-  mlx: 
-    api: "mlx.core.abs" 
+  tensorflow:
+    api: "tf.abs"
+  numpy:
+    api: "numpy.abs"
+  mlx:
+    api: "mlx.core.abs"
 ```
 """
 
@@ -223,23 +223,23 @@ def _build_target_block(api_path: str, info: Dict[str, Any]) -> str:
   newline = "\n"  # pragma: no cover
 
   return f"""  # pragma: no cover
---- TARGET OPERATION --- 
-Name: {api_path} 
-Type: {info["kind"]} 
-Signature: {op_name}{info["signature"]} 
+--- TARGET OPERATION ---
+Name: {api_path}
+Type: {info["kind"]}
+Signature: {op_name}{info["signature"]}
 
-Docstring: 
+Docstring:
 
-{(newline + ">").join(info["docstring"].split(newline))} 
+{(newline + ">").join(info["docstring"].split(newline))}
 """
 
 
 def _build_footer(source_fw: str) -> str:
   """Returns the final instructions."""
   return f"""  # pragma: no cover
---- INSTRUCTIONS --- 
-1. Analyze the Target Operations listed above. 
+--- INSTRUCTIONS ---
+1. Analyze the Target Operations listed above.
 2. Define the variants block mapping the source framework ('flax') and at least one target (e.g., 'jax' or 'numpy'). The goal is all of: PyTorch, MLX, Keras, TensorFlow (if different from Keras), Flax NNX (if different from JAX), and Pax (if different from JAX).
-3. Define the `variants` block mapping the source framework ('{source_fw}') and at least one target (e.g., 'jax' or 'numpy'). 
-4. Return ONLY the valid YAML block(s), separated by '---' if multiple. 
+3. Define the `variants` block mapping the source framework ('{source_fw}') and at least one target (e.g., 'jax' or 'numpy').
+4. Return ONLY the valid YAML block(s), separated by '---' if multiple.
 """

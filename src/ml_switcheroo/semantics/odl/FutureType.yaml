@@ -1,0 +1,5 @@
+description: Internal type definiton for Futures.
+op_type: class
+std_args: []
+variants: {}
+operation: FutureType

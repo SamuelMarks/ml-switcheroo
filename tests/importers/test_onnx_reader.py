@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import pytest
 
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
@@ -5,15 +7,18 @@ from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
 
 @pytest.fixture
 def importer():
+  """Auto-generated doc."""
   return OnnxSpecImporter()
 
 
 def test_parse_file_not_found(importer, tmp_path):
+  """Auto-generated doc."""
   missing_file = tmp_path / "missing.md"
   assert importer.parse_file(missing_file) == {}
 
 
 def test_parse_file_found(importer, tmp_path):
+  """Auto-generated doc."""
   md_file = tmp_path / "Operators.md"
   md_file.write_text('### <a name="Add"></a>\n**Add**\nDesc')
   result = importer.parse_file(md_file)
@@ -21,6 +26,7 @@ def test_parse_file_found(importer, tmp_path):
 
 
 def test_parse_markdown_duplicate_op(importer, tmp_path):
+  """Auto-generated doc."""
   md_file = tmp_path / "ops.md"
   md_file.write_text('### <a name="Add"></a>\n**Add**\nThis is v1\n### <a name="Add"></a>\n**Add**\nThis is v2\n')
   result = importer._parse_markdown(md_file)
@@ -29,6 +35,7 @@ def test_parse_markdown_duplicate_op(importer, tmp_path):
 
 
 def test_extract_summary(importer):
+  """Auto-generated doc."""
   text = """
 <a name="Add"></a>
 **Add**
@@ -48,6 +55,7 @@ Some input details.
 
 
 def test_extract_section_keys(importer):
+  """Auto-generated doc."""
   text = """
 #### Inputs
 <dl>
@@ -67,6 +75,7 @@ def test_extract_section_keys(importer):
 
 
 def test_map_onnx_type(importer):
+  """Auto-generated doc."""
   assert importer._map_onnx_type("list of ints") == "List[int]"
   assert importer._map_onnx_type("list of floats") == "List[float]"
   assert importer._map_onnx_type("list of strings") == "List[str]"

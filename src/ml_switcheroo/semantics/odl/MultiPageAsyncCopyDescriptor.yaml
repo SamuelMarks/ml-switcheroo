@@ -1,0 +1,10 @@
+description: Descriptor for async copy of multiple K/V pages from HBM.
+std_args:
+- self
+- pages_hbm_ref
+- vmem_buf
+- sem
+- page_indices_ref
+- metadata
+type: class
+operation: MultiPageAsyncCopyDescriptor

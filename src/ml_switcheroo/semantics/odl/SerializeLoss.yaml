@@ -1,0 +1,8 @@
+description: Serializes loss function or Loss instance.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: loss
+  type: Any
+variants: {}
+operation: serializeloss

@@ -1,0 +1,22 @@
+description: Computes the Tversky loss value between y_true and y_pred.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_true
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_pred
+  type: Tensor
+- default: 0.5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: alpha
+  type: float
+- default: 0.5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: beta
+  type: float
+variants: {}
+operation: tverskyloss

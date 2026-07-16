@@ -1,0 +1,5 @@
+description: Decodes the response of `try_cluster_cancel`.
+std_args:
+- result_ref
+type: function
+operation: query_cluster_cancel

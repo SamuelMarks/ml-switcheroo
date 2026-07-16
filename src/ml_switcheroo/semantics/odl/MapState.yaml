@@ -1,0 +1,12 @@
+description: Maps a function over a State object.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: f
+  type: Callable
+- is_variadic: false
+  kind: positional_or_keyword
+  name: state
+  type: State
+variants: {}
+operation: MapState

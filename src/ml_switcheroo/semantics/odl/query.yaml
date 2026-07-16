@@ -1,0 +1,9 @@
+description: "Check if all the work submitted has been completed.\n\nReturns:\n  \
+  \  A boolean indicating if all kernels in this stream are completed."
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: self
+  type: Any
+variants: {}
+operation: query

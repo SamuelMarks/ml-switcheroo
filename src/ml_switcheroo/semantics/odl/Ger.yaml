@@ -1,0 +1,12 @@
+description: Outer product of two vectors.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: vec2
+  type: Tensor
+variants: {}
+operation: Ger

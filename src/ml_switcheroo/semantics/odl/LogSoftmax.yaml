@@ -1,0 +1,13 @@
+description: Applies the LogSoftmax function to an n-dimensional input Tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+type: class
+operation: LogSoftmax

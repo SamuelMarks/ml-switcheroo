@@ -1,0 +1,4 @@
+description: Auto-generated mapping for broadcast_in_dim.
+std_args: []
+type: function
+operation: broadcast_in_dim

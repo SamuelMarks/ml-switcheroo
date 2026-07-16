@@ -1,0 +1,27 @@
+description: 3D transposed convolution layer (Verbose Alias).
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: in_channels
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: out_channels
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: int | Tuple[int, int, int]
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: stride
+  type: int | Tuple[int, int, int]
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: bool
+variants: {}
+operation: Convolution3dTranspose

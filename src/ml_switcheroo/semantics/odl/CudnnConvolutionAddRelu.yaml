@@ -1,0 +1,8 @@
+description: CuDNN Fused Convolution Add ReLU.
+std_args:
+- input
+- weight
+- z
+- bias
+variants: {}
+operation: CudnnConvolutionAddRelu

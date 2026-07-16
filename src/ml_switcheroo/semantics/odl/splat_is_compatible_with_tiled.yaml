@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- l1
+- l2
+type: function
+operation: splat_is_compatible_with_tiled

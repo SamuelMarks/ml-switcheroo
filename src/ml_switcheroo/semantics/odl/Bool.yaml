@@ -1,0 +1,5 @@
+description: Boolean data type identifier.
+op_type: attribute
+std_args: []
+variants: {}
+operation: Bool

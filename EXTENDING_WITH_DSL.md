@@ -27,33 +27,33 @@ graph TD
 
     %% --- NODES ---
     YAML("<b>ODL YAML</b><br/>my_op.yaml"):::file
-    
+
     subgraph CLI [" CLI: ml_switcheroo define "]
         direction TB
         PARSER("<b>ODL Parser</b><br/>Validates Schema"):::process
         INJECTOR("<b>Injectors</b><br/>Updates AST & JSONs"):::process
-        
+
         PARSER --> INJECTOR
     end
-    
+
     subgraph KB [" Knowledge Base "]
         direction TB
         HUB[("<b>The Hub</b><br/>standards.py<br/><i>Abstract Def</i>")]:::hub
         SPOKE[("<b>The Spokes</b><br/>frameworks/*.json<br/><i>Variants</i>")]:::hub
     end
-    
+
     TEST_GEN("<b>Test Generator</b><br/>Builds PyTest Harness"):::process
-    
+
     ARTIFACTS("<b>Generated Code</b><br/>tests/generated/test_my_op.py<br/>plugins/my_op_plugin.py"):::output
 
     %% --- EDGES ---
     YAML --> PARSER
     INJECTOR -->|" 1a. Writes spec "| HUB
     INJECTOR -->|" 1b. Writes maps "| SPOKE
-    
+
     HUB --> TEST_GEN
     SPOKE --> TEST_GEN
-    
+
     TEST_GEN -->|" 2. Creates "| ARTIFACTS
 ```
 

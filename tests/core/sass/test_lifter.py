@@ -2,14 +2,12 @@
 
 from typing import List
 
-from ml_switcheroo.compiler.frontends.sass.lifter import SassLifter
-from ml_switcheroo.compiler.frontends.sass.nodes import Comment, Instruction, Register, SassNode
+from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+from ml_switcheroo.core.compiler.frontends.sass.nodes import Comment, Instruction, Register, SassNode
 
 
 def test_lift_simple_chain() -> None:
-  """
-  Scenario: Input -> Conv2d -> Output.
-  """
+  """Scenario: Input -> Conv2d -> Output."""
   nodes: List[SassNode] = [
     Comment("Input x -> R0"),
     Instruction("MOV", [Register("R1"), Register("RZ")]),
@@ -39,9 +37,7 @@ def test_lift_simple_chain() -> None:
 
 
 def test_lift_complex_snippet() -> None:
-  """
-  Scenario: Input -> Conv2d -> Flatten -> Linear -> Return.
-  """
+  """Scenario: Input -> Conv2d -> Flatten -> Linear -> Return."""
   nodes: List[SassNode] = [
     Comment("Input x -> R0"),
     Comment("BEGIN Conv2d (conv)"),
@@ -83,9 +79,7 @@ def test_lift_duplicate_markers_ignored() -> None:
 
 
 def test_lift_no_comments() -> None:
-  """
-  Verify standard SASS without markers yields instructions nodes.
-  """
+  """Verify standard SASS without markers yields instructions nodes."""
   nodes: List[SassNode] = [
     Instruction("FADD", [Register("R0"), Register("R1")]),
     Comment("Just a normal comment"),

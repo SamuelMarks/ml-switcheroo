@@ -224,7 +224,7 @@ variants:
   mlx:
     api: "mlx.core.block_masked_mm"
   torch:
-    api: "torch.sparse.bsr_spmm" 
+    api: "torch.sparse.bsr_spmm"
     missing_message: "Requires BSR format."
 ---
 operation: "Bool"
@@ -337,7 +337,7 @@ std_args:
 variants:
   mlx:
     api: "mlx.core.checkpoint"
-    pack_to_tuple: null 
+    pack_to_tuple: null
   torch:
     api: "torch.utils.checkpoint.checkpoint"
   jax:

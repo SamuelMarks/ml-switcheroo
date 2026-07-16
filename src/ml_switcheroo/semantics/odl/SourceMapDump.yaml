@@ -1,0 +1,8 @@
+description: A container for a source map and the paired generated code.
+std_args:
+- self
+- source_map
+- generated_code
+- pass_name
+type: class
+operation: SourceMapDump

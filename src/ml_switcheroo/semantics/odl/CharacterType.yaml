@@ -1,0 +1,5 @@
+description: Abstract base class of all character string scalar types.
+op_type: class
+std_args: []
+variants: {}
+operation: CharacterType

@@ -1,0 +1,12 @@
+description: Annotates an initializer with sharding constraints.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: initializer
+  type: Callable
+- is_variadic: false
+  kind: positional_or_keyword
+  name: sharding
+  type: Any
+variants: {}
+operation: WithPartitioning

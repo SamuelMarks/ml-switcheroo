@@ -1,0 +1,11 @@
+description: The class representing a Python function.
+std_args:
+- x_ref
+- weight_ref
+- bias_ref
+- o_ref
+- rstd_ref
+- eps
+- block_size
+type: function
+operation: rms_norm_forward_kernel

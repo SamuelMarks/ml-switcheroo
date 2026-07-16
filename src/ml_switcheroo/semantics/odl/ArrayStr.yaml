@@ -1,0 +1,8 @@
+description: Return a string representation of the data in an array.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Array
+variants: {}
+operation: ArrayStr

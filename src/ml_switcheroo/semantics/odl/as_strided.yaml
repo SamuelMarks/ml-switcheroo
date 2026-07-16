@@ -1,0 +1,4 @@
+description: Create a view of an existing tensor.
+std_args: []
+variants: {}
+operation: as_strided

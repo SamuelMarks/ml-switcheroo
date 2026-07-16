@@ -1,0 +1,4 @@
+description: Type hint for symbolic boolean.
+std_args: []
+variants: {}
+operation: SymBoolType

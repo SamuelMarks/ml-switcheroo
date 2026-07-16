@@ -1,0 +1,6 @@
+description: Finds devices or a mesh that has CPU devices colocated with the given
+  devices or mesh.
+std_args:
+- devices_or_mesh
+type: function
+operation: colocated_cpu_devices

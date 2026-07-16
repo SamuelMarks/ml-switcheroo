@@ -1,0 +1,13 @@
+description: VanillaNet model without skip-connection or batch-norm mirroring ResNets.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: strides
+  type: Sequence[int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: channels
+  type: Sequence[int]
+variants: {}
+operation: VanillaNet

@@ -1,5 +1,4 @@
-"""
-Tests for Purity Analysis (JAX Safety Checks).
+"""Tests for Purity Analysis (JAX Safety Checks).
 
 Verifies Feature 051 & Global/Nonlocal Detection:
 1.  Detection of I/O (`print`, `input`).
@@ -30,9 +29,7 @@ class MockSemantics:
 
 
 def analyze(code: str, use_semantics: bool = False) -> str:
-  """
-  Helper to parse, scan, and re-emit code.
-  """
+  """Helper to parse, scan, and re-emit code."""
   semantics = MockSemantics() if use_semantics else None
 
   tree = cst.parse_module(code)
@@ -85,9 +82,7 @@ def outer():
 
 
 def test_rng_seed_detection_dynamic():
-  """
-  Verification: Dynamic seed methods from SemanticsManager are caught.
-  """
+  """Verification: Dynamic seed methods from SemanticsManager are caught."""
   code = "lib.custom_seed(123)"
   result = analyze(code, use_semantics=True)
   assert EscapeHatch.START_MARKER in result
@@ -95,9 +90,7 @@ def test_rng_seed_detection_dynamic():
 
 
 def test_framework_specific_impurity():
-  """
-  Verification: Framework-specific mutation methods (add_) defined in schema are caught.
-  """
+  """Verification: Framework-specific mutation methods (add_) defined in schema are caught."""
   code = "x.add_(y)"
   result = analyze(code, use_semantics=True)
 
@@ -120,3 +113,30 @@ def test_file_write_detection():
   result = analyze(code)
   assert EscapeHatch.START_MARKER in result
   assert "I/O Call (.write)" in result
+
+
+class IncompleteSemantics:
+  """Mock semantics missing optional methods."""
+
+  def get_framework_config(self, framework):
+    """Auto doc."""
+    return {"other": "stuff"}
+
+
+def test_purity_missing_branches():
+  """Covers missing branches in PurityScanner."""
+  # Test with semantics missing get_all_rng_methods and traits
+  semantics = IncompleteSemantics()
+  _scanner = PurityScanner(semantics=semantics, source_fw="torch")
+
+  # Test with semantics but NO source_fw
+  _scanner2 = PurityScanner(semantics=MockSemantics(), source_fw=None)
+
+  # Test pure calls that shouldn't trigger anything
+  code = """
+my_func()  # Call with Name, but not I/O
+my_list.copy()  # Call with Attribute, but not mutating
+(lambda x: x)(1)  # Call with func that is not Name or Attribute
+"""
+  result = analyze(code, use_semantics=False)
+  assert EscapeHatch.START_MARKER not in result

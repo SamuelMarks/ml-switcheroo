@@ -1,0 +1,7 @@
+description: Sums duplicate indices within a BCOO array, returning an array with sorted
+  indices.
+std_args:
+- mat
+- nse
+type: function
+operation: bcoo_sum_duplicates

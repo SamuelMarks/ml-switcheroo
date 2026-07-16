@@ -1,0 +1,17 @@
+description: Returns min k values and their indices using approximate search.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: operand
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: k
+  type: int
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: reduction_dimension
+  type: int
+variants: {}
+operation: ApproxMinK

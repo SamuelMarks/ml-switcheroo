@@ -67,7 +67,7 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
   else:
     # Input is the receiver, we will move it to first arg for take_along_axis
     # node.func.value is the object expression 'x'
-    input_arg = cst.Arg(value=node.func.value)
+    input_arg = cst.Arg(value=node.func.value)  # type: ignore
 
   # 2. Parse remaining args (dim, index)
   # Search for keywords first

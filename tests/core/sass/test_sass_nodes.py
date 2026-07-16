@@ -1,6 +1,6 @@
 """Module docstring."""
 
-from ml_switcheroo.compiler.frontends.sass.nodes import (
+from ml_switcheroo.core.compiler.frontends.sass.nodes import (
   Comment,
   Directive,
   Immediate,

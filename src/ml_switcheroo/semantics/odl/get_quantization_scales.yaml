@@ -1,0 +1,5 @@
+description: Computes the quantization scales for a float array.
+std_args:
+- x
+type: function
+operation: get_quantization_scales

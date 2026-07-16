@@ -1,0 +1,5 @@
+description: Context manager that disables gradient calculation.
+op_type: context
+std_args: []
+variants: {}
+operation: NoGrad

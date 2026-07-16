@@ -1,0 +1,5 @@
+description: Object dtype indicator.
+op_type: class
+std_args: []
+variants: {}
+operation: DtypeObject

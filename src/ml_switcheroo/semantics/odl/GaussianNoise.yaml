@@ -1,0 +1,13 @@
+description: Apply additive zero-centered Gaussian noise.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: stddev
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: seed
+  type: int
+variants: {}
+operation: GaussianNoise

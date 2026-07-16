@@ -1,0 +1,20 @@
+description: Transform a tensor image with elastic transformations.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: img
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: displacement
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: interpolation
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: fill
+  type: Any
+variants: {}
+operation: elastic_transform

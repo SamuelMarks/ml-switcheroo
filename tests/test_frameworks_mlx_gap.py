@@ -1,7 +1,10 @@
+"""Auto-generated doc."""
+
 from unittest import mock
 
 
 def test_mlx_imports_success():
+  """Auto-generated doc."""
   mock_mlx = mock.MagicMock()
   with mock.patch.dict(
     "sys.modules",

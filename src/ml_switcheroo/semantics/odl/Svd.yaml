@@ -1,0 +1,13 @@
+description: Returns a singular value decomposition (SVD) of a matrix (or a stack
+  of matrices) ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: full_matrices
+  type: bool
+type: attribute
+operation: svd

@@ -1,6 +1,4 @@
-"""
-Tests for Scatter/Gather Syntax Plugin.
-"""
+"""Tests for Scatter/Gather Syntax Plugin."""
 
 import pytest
 import libcst as cst
@@ -56,8 +54,7 @@ def rewriter():
 
 
 def test_scatter_simple_rewrite(rewriter):
-  """
-  Input: x.scatter_(1, idx, src)
+  """Input: x.scatter_(1, idx, src)
   Output: x.at[idx].set(src)
   """
   code = "res = x.scatter_(1, idx, src)"
@@ -70,8 +67,7 @@ def test_scatter_simple_rewrite(rewriter):
 
 
 def test_scatter_add_rewrite(rewriter):
-  """
-  Input: x.scatter_add_(0, idx, val)
+  """Input: x.scatter_add_(0, idx, val)
   Output: x.at[idx].add(val)
   """
   # Need to ensure scatter_add matches definition mock
@@ -83,8 +79,7 @@ def test_scatter_add_rewrite(rewriter):
 
 
 def test_scatter_keywords(rewriter):
-  """
-  Input: x.scatter_(dim=0, src=updates, index=indices)
+  """Input: x.scatter_(dim=0, src=updates, index=indices)
   Output: x.at[indices].set(updates)
   """
   code = "x.scatter_(dim=0, src=updates, index=indices)"
@@ -95,8 +90,7 @@ def test_scatter_keywords(rewriter):
 
 
 def test_ignore_tf_target(rewriter):
-  """
-  Verify that if the target framework is NOT JAX (and thus not wired to the plugin),
+  """Verify that if the target framework is NOT JAX (and thus not wired to the plugin),
   the conversion is skipped.
   Implementation relies on the SemanticsManager returning None for 'tensorflow'.
   """

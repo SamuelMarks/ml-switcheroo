@@ -1,8 +1,11 @@
+"""Auto-generated doc."""
+
 from ml_switcheroo.core.mlir.parser import MlirParser, Token
 from ml_switcheroo.core.mlir.tokens import TokenKind
 
 
 def test_parser_gap3():
+  """Auto-generated doc."""
   p = MlirParser("{")
   p.tokens = [
     Token(TokenKind.SYMBOL, "{", 1, 0),

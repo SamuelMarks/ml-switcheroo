@@ -37,17 +37,17 @@ class MermaidGenerator(cst.CSTVisitor):
   }
 
   # Mermaid Style Definitions
-  STYLES = f""" 
+  STYLES = f"""
     %% Styles
-    classDef default font-family:'Google Sans Normal',color:{COLORS["navy"]},stroke:{COLORS["navy"]}; 
-    classDef modNode fill:{COLORS["navy"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium'; 
-    classDef classNode fill:{COLORS["red"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium'; 
-    classDef funcNode fill:{COLORS["blue"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium'; 
-    classDef callNode fill:{COLORS["green"]},stroke:{COLORS["navy"]},stroke-width:2px,color:{COLORS["white"]},rx:5px,font-family:'Roboto Mono Normal'; 
-    classDef stmtNode fill:{COLORS["white"]},stroke:{COLORS["navy"]},stroke-dasharray: 2 2,color:{COLORS["navy"]},font-family:'Roboto Mono Normal'; 
-    classDef argNode fill:{COLORS["yellow"]},stroke:{COLORS["navy"]},color:{COLORS["navy"]},rx:2px,font-size:10px; 
-    classDef impNode fill:{COLORS["halftone_blue"]},stroke:{COLORS["navy"]},color:{COLORS["navy"]},rx:5px; 
-    classDef valNode fill:{COLORS["halftone_red"]},stroke:{COLORS["navy"]},color:{COLORS["navy"]},rx:5px; 
+    classDef default font-family:'Google Sans Normal',color:{COLORS["navy"]},stroke:{COLORS["navy"]};
+    classDef modNode fill:{COLORS["navy"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium';
+    classDef classNode fill:{COLORS["red"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium';
+    classDef funcNode fill:{COLORS["blue"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium';
+    classDef callNode fill:{COLORS["green"]},stroke:{COLORS["navy"]},stroke-width:2px,color:{COLORS["white"]},rx:5px,font-family:'Roboto Mono Normal';
+    classDef stmtNode fill:{COLORS["white"]},stroke:{COLORS["navy"]},stroke-dasharray: 2 2,color:{COLORS["navy"]},font-family:'Roboto Mono Normal';
+    classDef argNode fill:{COLORS["yellow"]},stroke:{COLORS["navy"]},color:{COLORS["navy"]},rx:2px,font-size:10px;
+    classDef impNode fill:{COLORS["halftone_blue"]},stroke:{COLORS["navy"]},color:{COLORS["navy"]},rx:5px;
+    classDef valNode fill:{COLORS["halftone_red"]},stroke:{COLORS["navy"]},color:{COLORS["navy"]},rx:5px;
     """
 
   def __init__(self) -> None:
@@ -246,7 +246,7 @@ class MermaidGenerator(cst.CSTVisitor):
     else:
       for n in node.names:
         if hasattr(n, "name") and hasattr(n.name, "value"):
-          names.append(n.name.value)
+          names.append(n.name.value)  # type: ignore
 
     display_names = ", ".join(names[:3])
     if len(names) > 3:

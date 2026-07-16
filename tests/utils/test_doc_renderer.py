@@ -1,5 +1,4 @@
-"""
-Tests for OpPageRenderer.
+"""Tests for OpPageRenderer.
 
 Verifies:
 1.  RST Header structure.

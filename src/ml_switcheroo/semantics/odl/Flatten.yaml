@@ -1,0 +1,18 @@
+description: Flattens input by reshaping a range of dimensions into a single dimension.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- default: '0'
+  is_variadic: false
+  kind: positional_or_keyword
+  name: start_dim
+  type: int
+- default: '-1'
+  is_variadic: false
+  kind: positional_or_keyword
+  name: end_dim
+  type: int
+variants: {}
+operation: flatten

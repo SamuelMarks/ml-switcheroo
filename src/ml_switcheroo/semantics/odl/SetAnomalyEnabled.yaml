@@ -1,0 +1,9 @@
+description: Context-manager/Function to enable or disable anomaly detection (NaN
+  checks).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mode
+  type: bool
+variants: {}
+operation: SetAnomalyEnabled

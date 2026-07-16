@@ -1,0 +1,18 @@
+description: Computes the Short-Time Fourier Transform (STFT) spectrogram.
+op_type: class
+std_args:
+- default: 256
+  is_variadic: false
+  kind: positional_or_keyword
+  name: frame_length
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: frame_step
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: fft_length
+  type: int
+variants: {}
+operation: STFTSpectrogram

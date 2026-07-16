@@ -1,0 +1,21 @@
+description: Copies an array to a specified data type irrespective of type-promotion
+  rules.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: dtype
+- is_variadic: false
+  kind: positional_or_keyword
+  name: copy
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Optional[device]
+variants: {}
+operation: astype

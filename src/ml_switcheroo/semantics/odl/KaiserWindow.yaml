@@ -1,0 +1,18 @@
+description: Computes the Kaiser window.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: window_length
+  type: int
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: periodic
+  type: bool
+- default: 12.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: beta
+  type: float
+variants: {}
+operation: KaiserWindow

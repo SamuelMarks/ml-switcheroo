@@ -1,0 +1,16 @@
+description: The class representing a Python function.
+std_args:
+- queries
+- kv_pages
+- kv_lens
+- page_indices
+- cu_q_lens
+- num_seqs
+- sm_scale
+- sliding_window
+- soft_cap
+- mask_value
+- k_scale
+- v_scale
+type: function
+operation: ref_ragged_paged_attention

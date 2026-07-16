@@ -437,7 +437,7 @@ variants:
   tensorflow:
     # TF gather is different (slices), gather_nd is different
     # This specifically maps to take_along_axis semantics
-    api: "tf.gather" 
+    api: "tf.gather"
     args:
       dim: "axis"
       index: "indices"
@@ -600,7 +600,7 @@ variants:
       input: "a"
       vec2: "b"
   tensorflow:
-    api: "tf.tensordot" 
+    api: "tf.tensordot"
     # Requires complex args injection for outer product (axes=0)
     macro_template: "tf.tensordot({input}, {vec2}, axes=0)"
   keras:

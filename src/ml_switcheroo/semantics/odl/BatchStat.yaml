@@ -1,0 +1,5 @@
+description: Wrapper for Batch Statistics state.
+op_type: class
+std_args: []
+variants: {}
+operation: BatchStat

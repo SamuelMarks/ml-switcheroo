@@ -1,5 +1,4 @@
-"""
-Tests for the LaTeX DSL Parser.
+"""Tests for the LaTeX DSL Parser.
 
 Verifies:
 1. Macro Regex Extraction.
@@ -21,7 +20,7 @@ def basic_latex():
 \begin{DefModel}{SimpleNet}
     \Attribute{fc1}{Linear}{in=10, out=5}
     \Input{data}{[B, 10]}
-    
+
     \StateOp{h1}{fc1}{data}{[B, 5]}
     \Op{act}{ReLU}{h1}{[B, 5]}
     \Return{act}
@@ -31,8 +30,7 @@ def basic_latex():
 
 
 def test_parser_end_to_end(basic_latex):
-  """
-  Verify complete transformation from LaTeX to Python AST.
+  """Verify complete transformation from LaTeX to Python AST.
   Checks for `midl` namespace usage.
   """
   parser = LatexParser(basic_latex)

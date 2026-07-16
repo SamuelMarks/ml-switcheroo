@@ -10,7 +10,7 @@ ml-switcheroo 🔄🦘
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](https://opensource.org/license/apache-2-0)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Test and release](https://github.com/SamuelMarks/ml-switcheroo/actions/workflows/test_and_release.yml/badge.svg)](https://github.com/SamuelMarks/ml-switcheroo/actions/workflows/test_and_release.yml)
-![Coverage: 99%](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)
+![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)
 ![Doc Coverage: 100%](https://img.shields.io/badge/doc%20coverage-100%25-brightgreen.svg)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Interactive docs](https://img.shields.io/badge/interactive-docs-orange)](https://samuelmarks.github.io/ml-switcheroo/)
@@ -40,7 +40,7 @@ flowchart TD
 %% Hardware: Navy (SASS) - Roboto Mono
     classDef asmNode fill: #20344b, stroke: #57caff, stroke-width: 2px, color: white, font-family: 'Roboto Mono Normal', font-size: 14px, rx: 2px, ry: 2px;
 
-%% --- 2. Subgraph Styling --- 
+%% --- 2. Subgraph Styling ---
 %% White backgrounds to ensure text readability + visual grouping
     classDef containerL0 fill: white, stroke: #ea4335, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
     classDef containerL1 fill: white, stroke: #4285f4, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
@@ -190,16 +190,16 @@ graph TD
     subgraph PLUGINS ["Extension System"]
       direction TB
       target_trait("<b>Target Traits (JAX)</b><br/>requires_explicit_rng: True"):::db
-      
+
       HOOK_DEF("<b>Plugin: rng_threading</b><br/><i>Injects 'rngs' arg into<br/>stateful layer calls</i>"):::plug
       HOOK_DEF:::title
-      
+
       HOOK_FLAT("<b>Plugin: flatten_range</b><br/><i>Maps flatten(x, 1)<br/>to nnx.Flatten</i>"):::plug
       HOOK_FLAT:::title
 
       target_trait -.-> HOOK_DEF
     end
-    
+
     REWRITE <-->|" State Injection "|HOOK_DEF
     REWRITE <-->|" API Swap "|HOOK_FLAT
 

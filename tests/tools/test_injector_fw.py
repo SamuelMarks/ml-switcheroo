@@ -1,5 +1,4 @@
-"""
-Tests for the Framework Definition Injector (JSON Mode).
+"""Tests for the Framework Definition Injector (JSON Mode).
 
 Verifies that:
 1. It loads existing JSON definitions.
@@ -41,9 +40,7 @@ def sample_variant():
 
 
 def test_injector_updates_existing_json(target_json, sample_variant):
-  """
-  Scenario: File exists. Inject a new Op.
-  """
+  """Scenario: File exists. Inject a new Op."""
   # Patch the path discovery to point to our temp file
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
     injector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
@@ -63,9 +60,7 @@ def test_injector_updates_existing_json(target_json, sample_variant):
 
 
 def test_injector_creates_new_file(tmp_path, sample_variant):
-  """
-  Scenario: Definitions file does not exist.
-  """
+  """Scenario: Definitions file does not exist."""
   missing_path = tmp_path / "definitions" / "new_fw.json"
 
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=missing_path):
@@ -79,9 +74,7 @@ def test_injector_creates_new_file(tmp_path, sample_variant):
 
 
 def test_injector_dry_run(target_json, sample_variant, capsys):
-  """
-  Scenario: Dry Run enabled. File should NOT change.
-  """
+  """Scenario: Dry Run enabled. File should NOT change."""
   target_json.stat().st_mtime
 
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):

@@ -1,0 +1,4 @@
+description: Auto-generated mapping for adaptive_max_pool3d_with_indices.
+std_args: []
+type: function
+operation: adaptive_max_pool3d_with_indices

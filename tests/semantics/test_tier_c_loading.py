@@ -1,6 +1,4 @@
-"""
-Tests for Tier C Loading and Integration.
-"""
+"""Tests for Tier C Loading and Integration."""
 
 import json
 import pytest
@@ -23,7 +21,13 @@ def mock_specs(tmp_path):
     "DataLoader": {"std_args": ["dataset"]},
   }
   (tmp_path / "semantics").mkdir()
-  (tmp_path / "semantics" / "k_framework_extras.json").write_text(json.dumps(spec))
+  import yaml
+
+  odl_dir = tmp_path / "semantics" / "odl"
+  odl_dir.mkdir()
+  for k, v in spec.items():
+    v["operation"] = k
+    (odl_dir / f"{k}.yaml").write_text(yaml.dump(v))
 
   # Overlays
   (tmp_path / "snapshots").mkdir()

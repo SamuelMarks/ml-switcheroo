@@ -1,0 +1,8 @@
+description: Views a complex tensor as a real tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: ViewAsReal

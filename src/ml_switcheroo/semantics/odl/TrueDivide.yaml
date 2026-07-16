@@ -1,0 +1,12 @@
+description: Alias for division with float promotion.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dividend
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: divisor
+  type: Tensor
+variants: {}
+operation: TrueDivide

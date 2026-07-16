@@ -1,5 +1,4 @@
-"""
-Tests for API Documentation URL Generation Protocol.
+"""Tests for API Documentation URL Generation Protocol.
 
 Verifies that:
 1.  All adapters implement `get_doc_url`.

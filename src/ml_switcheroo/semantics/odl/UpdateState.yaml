@@ -1,0 +1,12 @@
+description: Updates a graph node with a new state dictionary in-place.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: node
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: state
+  type: Any
+variants: {}
+operation: UpdateState

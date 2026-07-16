@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 
@@ -7,6 +9,7 @@ from ml_switcheroo.plugins.jax_decompose import decompose_via_jax
 
 
 def test_jax_decompose_plugin():
+  """Auto-generated doc."""
   node = cst.Call(func=cst.Name("UnsupportedOp"), args=[])
 
   mock_config = RuntimeConfig(target_framework="keras", source_framework="torch")
@@ -25,6 +28,7 @@ def test_jax_decompose_plugin():
 
 
 def test_jax_decompose_plugin_no_op_id():
+  """Auto-generated doc."""
   node = cst.Call(func=cst.Name("UnsupportedOp"), args=[])
 
   mock_config = RuntimeConfig(target_framework="keras", source_framework="torch")

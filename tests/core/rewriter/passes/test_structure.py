@@ -1,6 +1,4 @@
-"""
-Tests for the Structural Transformation Pass.
-"""
+"""Tests for the Structural Transformation Pass."""
 
 import pytest
 import libcst as cst
@@ -94,8 +92,8 @@ def test_class_base_rewrite_aliased(run_pass):
 
 def test_method_renaming(run_pass):
   """Verify forward -> __call__."""
-  code = """ 
-class Net(torch.nn.Module): 
+  code = """
+class Net(torch.nn.Module):
     def forward(self, x): pass
 """
   res = run_pass(code)
@@ -104,8 +102,8 @@ class Net(torch.nn.Module):
 
 def test_magic_arg_injection(run_pass):
   """Verify rngs injection."""
-  code = """ 
-class Net(torch.nn.Module): 
+  code = """
+class Net(torch.nn.Module):
     def __init__(self, dim): pass
 """
   res = run_pass(code)
@@ -114,10 +112,10 @@ class Net(torch.nn.Module):
 
 def test_super_init_stripping(run_pass):
   """Verify super().__init__() removal for Flax."""
-  code = """ 
-class Net(torch.nn.Module): 
-    def __init__(self): 
-        super().__init__() 
+  code = """
+class Net(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
         self.x = 1
 """
   res = run_pass(code)
@@ -134,8 +132,8 @@ def test_type_hint_rewrite(run_pass):
 
 def test_ignore_non_module_classes(run_pass):
   """Verify standard classes are untouched."""
-  code = """ 
-class Data: 
+  code = """
+class Data:
     def forward(self): pass
 """
   res = run_pass(code)

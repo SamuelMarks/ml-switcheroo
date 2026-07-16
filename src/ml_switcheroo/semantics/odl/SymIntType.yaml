@@ -1,0 +1,5 @@
+description: Meta-type for Symbolic Integers.
+op_type: class
+std_args: []
+variants: {}
+operation: SymIntType

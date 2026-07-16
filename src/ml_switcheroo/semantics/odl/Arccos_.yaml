@@ -1,0 +1,8 @@
+description: In-place version of Arccos.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: Arccos_

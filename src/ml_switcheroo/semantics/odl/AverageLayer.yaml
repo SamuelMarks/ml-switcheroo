@@ -1,0 +1,5 @@
+description: Averages a list of inputs element-wise.
+op_type: class
+std_args: []
+variants: {}
+operation: AverageLayer

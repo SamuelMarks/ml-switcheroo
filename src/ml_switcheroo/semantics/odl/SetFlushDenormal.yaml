@@ -1,0 +1,8 @@
+description: Disables denormal floating numbers on CPU.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mode
+  type: bool
+variants: {}
+operation: SetFlushDenormal

@@ -1,10 +1,15 @@
+"""Auto-generated doc."""
+
 from unittest.mock import patch
 
 from ml_switcheroo.semantics.file_loader import KnowledgeBaseLoader
 
 
 class DummyManager:
+  """Auto-generated doc."""
+
   def __init__(self):
+    """Auto-generated doc."""
     self.data = {}
     self._key_origins = {}
     self.framework_configs = {}
@@ -12,13 +17,14 @@ class DummyManager:
 
 
 def test_file_loader_discovered_filename(tmp_path):
+  """Auto-generated doc."""
   manager = DummyManager()
   loader = KnowledgeBaseLoader(manager)
 
   # Create semantics dir
   sem_dir = tmp_path / "semantics"
   sem_dir.mkdir()
-  (sem_dir / "k_discovered.json").write_text('{"test": {}}')
+  (sem_dir / "k_discovered.yaml").write_text("operation: test\n")
 
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
     with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=tmp_path / "snapshots"):
@@ -29,12 +35,13 @@ def test_file_loader_discovered_filename(tmp_path):
 
 
 def test_file_loader_spec_exception(tmp_path, capsys):
+  """Auto-generated doc."""
   manager = DummyManager()
   loader = KnowledgeBaseLoader(manager)
 
   sem_dir = tmp_path / "semantics"
   sem_dir.mkdir()
-  (sem_dir / "k_neural.json").write_text("invalid json")
+  (sem_dir / "k_neural.yaml").write_text("invalid yaml:")
 
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
     with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=tmp_path / "snapshots"):
@@ -45,6 +52,7 @@ def test_file_loader_spec_exception(tmp_path, capsys):
 
 
 def test_file_loader_overlay_exception(tmp_path, capsys):
+  """Auto-generated doc."""
   manager = DummyManager()
   loader = KnowledgeBaseLoader(manager)
 

@@ -1,0 +1,8 @@
+description: Checks if a pytree is valid.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: pytree
+  type: Any
+variants: {}
+operation: CheckPytree

@@ -1,0 +1,21 @@
+description: Puts values into tensor at indices (tuple).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: indices
+  type: Tuple[Tensor]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: values
+  type: Tensor
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: accumulate
+  type: bool
+variants: {}
+operation: IndexPut

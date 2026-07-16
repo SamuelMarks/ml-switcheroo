@@ -38,14 +38,16 @@ def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.
   if not (op_def and getattr(op_def, "sharding_supported", False)):
     return node
 
-  # 2. Extract target framework
-  fw = ctx.target_fw.lower()
+  # 2. Extract sharding configuration from traits
+  sharding_api = ctx.plugin_traits.sharding_wrapper_api
+  if not sharding_api:
+    return node
 
   # 3. Apply appropriate sharding wrapper
-  if fw in ["torch", "pytorch"]:
-    # Wrap: FSDP(node, use_orig_params=True)
-    wrapper_func = create_dotted_name("torch.distributed.fsdp.FSDP")
+  wrapper_func = create_dotted_name(sharding_api)
 
+  if "fsdp" in sharding_api.lower():
+    # Wrap: FSDP(node, use_orig_params=True)
     args = [
       cst.Arg(value=node),
       cst.Arg(
@@ -56,11 +58,9 @@ def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.
     ]
     return cst.Call(func=wrapper_func, args=args)
 
-  elif fw in ["jax", "flax", "flax_nnx"]:
+  elif "pjit" in sharding_api.lower():
     # Wrap: pjit(node, in_axis_resources=..., out_axis_resources=...)
     # We would use a mesh topology here.
-    wrapper_func = create_dotted_name("jax.experimental.pjit.pjit")
-
     args = [
       cst.Arg(value=node)
       # Omitted extra axis args for brevity in the stub
@@ -68,4 +68,4 @@ def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.
     return cst.Call(func=wrapper_func, args=args)
 
   # Return unmodified if no logic matches
-  return node
+  return node  # pragma: no cover

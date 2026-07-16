@@ -1,0 +1,4 @@
+description: Type hint for array-compatible objects.
+std_args: []
+variants: {}
+operation: ArrayLike

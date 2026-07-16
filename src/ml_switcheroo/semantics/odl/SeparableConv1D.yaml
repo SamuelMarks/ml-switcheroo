@@ -1,0 +1,28 @@
+description: 1D separable convolution layer.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: filters
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: int
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: strides
+  type: int
+- default: valid
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: str
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: depth_multiplier
+  type: int
+variants: {}
+operation: SeparableConv1D

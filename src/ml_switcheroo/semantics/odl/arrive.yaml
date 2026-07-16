@@ -1,0 +1,7 @@
+description: Arrives on a barrier in all blocks that share at least one of the coordinates
+  along the collective dimensions.
+std_args:
+- self
+- orders_tensor_core
+type: function
+operation: arrive

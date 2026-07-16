@@ -1,0 +1,16 @@
+description: The class representing a Python function.
+std_args:
+- q
+- k
+- v
+- ab
+- segment_ids
+- o
+- l
+- m
+- do
+- causal
+- mask_value
+- sm_scale
+type: function
+operation: mha_reference_bwd

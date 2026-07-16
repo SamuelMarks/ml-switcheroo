@@ -16,7 +16,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))
+    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
   return node
 
 
@@ -93,7 +93,7 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
       arg2_val = cst.Attribute(value=input_val, attr=cst.Name("ndim"))
     else:
       # Generate: end_dim + 1
-      arg2_val = cst.Integer(str(end_dim + 1))
+      arg2_val = cst.Integer(str(end_dim + 1))  # type: ignore
 
     arg2 = cst.Arg(value=arg2_val)
 

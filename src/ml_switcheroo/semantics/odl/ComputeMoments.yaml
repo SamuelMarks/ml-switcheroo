@@ -1,0 +1,16 @@
+description: Computes mean and variance over the valid data points in inputs.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inputs
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: reduce_over_dims
+  type: List[int]
+variants: {}
+operation: ComputeMoments

@@ -1,0 +1,9 @@
+description: The class representing a Python function.
+std_args:
+- cls
+- value
+- shape
+- layout
+- is_signed
+type: function
+operation: splat

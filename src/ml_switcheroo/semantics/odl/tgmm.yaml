@@ -1,0 +1,13 @@
+description: Compute lhs[:, sizes[i-1]:sizes[i]] @ rhs[sizes[i-1]:sizes[i], :].
+std_args:
+- lhs
+- rhs
+- group_sizes
+- preferred_element_type
+- tiling
+- group_offset
+- num_actual_groups
+- existing_out
+- interpret
+type: function
+operation: tgmm

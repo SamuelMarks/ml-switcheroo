@@ -1,0 +1,12 @@
+description: Removes singleton dimensions (axes) from ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: Union[int, Tuple[int, Ellipsis]]
+variants: {}
+operation: squeeze

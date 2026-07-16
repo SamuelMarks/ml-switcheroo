@@ -384,7 +384,7 @@ variants:
   numpy:
     api: "numpy.expm1"
   mlx:
-    api: null 
+    api: null
     macro_template: "(mlx.core.exp({x}) - 1)"
 ---
 operation: "Eye"
@@ -540,7 +540,7 @@ variants:
   numpy:
     api: "numpy.flip"
   mlx:
-    api: null # MLX core has no flip in 0.0.10, slicing with step -1 via macro? 
+    api: null # MLX core has no flip in 0.0.10, slicing with step -1 via macro?
 ---
 operation: "Fliplr"
 description: "Flip array in the left/right direction."
@@ -598,7 +598,7 @@ variants:
   jax:
     api: "jax.numpy.float16"
   keras:
-    api: "keras.float16" # Not standard, usually string "float16" 
+    api: "keras.float16" # Not standard, usually string "float16"
     macro_template: "'float16'"
   numpy:
     api: "numpy.float16"
@@ -641,7 +641,7 @@ variants:
   numpy:
     api: "numpy.float64"
   mlx:
-    api: null # No float64 in MLX? Check docs. Usually absent on Apple Silicon HW accel? 
+    api: null # No float64 in MLX? Check docs. Usually absent on Apple Silicon HW accel?
 ---
 operation: "Float_"
 description: "Alias for float64."

@@ -1,0 +1,58 @@
+description: A preprocessing layer that maps strings to (possibly encoded) indices.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: max_tokens
+  type: int
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: num_oov_indices
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mask_token
+  type: str
+- default: '[UNK]'
+  is_variadic: false
+  kind: positional_or_keyword
+  name: oov_token
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: vocabulary
+  type: List[str]
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: invert
+  type: bool
+- default: int
+  is_variadic: false
+  kind: positional_or_keyword
+  name: output_mode
+  options:
+  - int
+  - one_hot
+  - multi_hot
+  - count
+  - tf_idf
+  type: str
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: pad_to_max_tokens
+  type: bool
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: sparse
+  type: bool
+- default: utf-8
+  is_variadic: false
+  kind: positional_or_keyword
+  name: encoding
+  type: str
+variants: {}
+operation: StringLookup

@@ -1,0 +1,8 @@
+description: Set the default stream.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: stream
+  type: Any
+variants: {}
+operation: SetDefaultStream

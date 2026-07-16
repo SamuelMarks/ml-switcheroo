@@ -623,7 +623,7 @@ variants:
   tensorflow:
     # Partially supported via macro/plugin usage, usually explicit policy
     macro_template: "tf.keras.mixed_precision.Policy('mixed_float16')"
-    missing_message: "TensorFlow uses global policies for mixed precision." 
+    missing_message: "TensorFlow uses global policies for mixed precision."
 
 ---
 operation: "AutocastDecrementNesting"
@@ -696,20 +696,20 @@ variants:
   torch:
     api: "torch.baddbmm"
   jax:
-    macro_template: "{beta} * {input} + {alpha} * jax.numpy.matmul({batch1}, {batch2})" 
+    macro_template: "{beta} * {input} + {alpha} * jax.numpy.matmul({batch1}, {batch2})"
     required_imports:
-      - "import jax" 
+      - "import jax"
   flax_nnx:
-    macro_template: "{beta} * {input} + {alpha} * jax.numpy.matmul({batch1}, {batch2})" 
+    macro_template: "{beta} * {input} + {alpha} * jax.numpy.matmul({batch1}, {batch2})"
   numpy:
-    macro_template: "{beta} * {input} + {alpha} * numpy.matmul({batch1}, {batch2})" 
+    macro_template: "{beta} * {input} + {alpha} * numpy.matmul({batch1}, {batch2})"
     required_imports:
-      - "import numpy" 
+      - "import numpy"
   keras:
-    macro_template: "{beta} * {input} + {alpha} * keras.ops.matmul({batch1}, {batch2})" 
+    macro_template: "{beta} * {input} + {alpha} * keras.ops.matmul({batch1}, {batch2})"
     required_imports:
-      - "import keras" 
+      - "import keras"
   mlx:
-    macro_template: "{beta} * {input} + {alpha} * mlx.core.matmul({batch1}, {batch2})" 
+    macro_template: "{beta} * {input} + {alpha} * mlx.core.matmul({batch1}, {batch2})"
     required_imports:
       - "import mlx.core"

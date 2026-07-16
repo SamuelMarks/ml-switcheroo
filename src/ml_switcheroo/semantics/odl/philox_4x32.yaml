@@ -1,0 +1,11 @@
+description: Philox 4x32 keyed hash function.
+std_args:
+- hi0
+- lo0
+- hi1
+- lo1
+- k_hi
+- k_lo
+- rounds
+type: function
+operation: philox_4x32

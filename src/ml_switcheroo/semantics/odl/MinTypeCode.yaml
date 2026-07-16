@@ -1,0 +1,9 @@
+description: Return the character for the minimum-size type to which given types can
+  be safely cast.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: typechars
+  type: List[str]
+variants: {}
+operation: MinTypeCode

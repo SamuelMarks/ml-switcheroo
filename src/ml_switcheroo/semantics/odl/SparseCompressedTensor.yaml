@@ -1,0 +1,24 @@
+description: Constructs a sparse tensor in a compressed format (CSR, CSC, BSR, BSC).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: compressed_indices
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: plain_indices
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: values
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: size
+  type: Optional[List[int]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: layout
+  type: Optional[Any]
+variants: {}
+operation: SparseCompressedTensor

@@ -1,0 +1,46 @@
+--- src/ml_switcheroo/core/rewriter/calls/strategy.py
++++ src/ml_switcheroo/core/rewriter/calls/strategy.py
+@@ -15,6 +15,7 @@
+   inject_permute_call,
+ )
+ from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards
++from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
+
+
+ def execute_strategy(
+@@ -58,7 +59,7 @@
+   # 2. Infix
+   if trans_type == "infix":
+     try:
+-      norm_args = rewriter._normalize_arguments(original, updated, details, mapping)
++      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
+       return rewrite_as_infix(
+         original,
+         norm_args,
+@@ -72,7 +73,7 @@
+   # 3. Inline Lambda
+   elif trans_type == "inline_lambda":
+     try:
+-      norm_args = rewriter._normalize_arguments(original, updated, details, mapping)
++      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
+       return rewrite_as_inline_lambda(mapping["api"], norm_args)
+     except Exception as e:
+       rewriter._report_failure(f"Inline lambda transformation failed: {e}")
+@@ -91,7 +92,7 @@
+   # 5. Macro
+   elif mapping.get("macro_template"):
+     try:
+-      norm_args = rewriter._normalize_arguments(original, updated, details, mapping)
++      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
+       std_arg_names = []
+       for item in details.get("std_args", []):
+         if isinstance(item, (list, tuple)):
+@@ -118,7 +119,7 @@
+       return updated
+
+     try:
+-      norm_args = rewriter._normalize_arguments(original, updated, details, mapping)
++      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
+
+       # Apply Strict Guards (Rank Checking)
+       if rewriter.strict_mode:

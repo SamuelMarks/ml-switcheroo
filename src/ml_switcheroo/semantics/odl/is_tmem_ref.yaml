@@ -1,0 +1,5 @@
+description: Returns true if the input mem ref or memref type points to TMEM.
+std_args:
+- ref
+type: function
+operation: is_tmem_ref

@@ -1,0 +1,24 @@
+description: Simulates quantization per tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: scale
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: zero_point
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: quant_min
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: quant_max
+  type: int
+variants: {}
+operation: FakeQuantizePerTensorAffine

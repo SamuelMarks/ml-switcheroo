@@ -1,0 +1,5 @@
+description: Signed integer type, compatible with C char (Alias for int8 usually).
+op_type: attribute
+std_args: []
+variants: {}
+operation: ByteType

@@ -1,0 +1,8 @@
+description: A FragmentedArray that has is synchronized with the async proxy.
+std_args:
+- self
+- _value
+- _original_layout
+- _sync
+type: class
+operation: WGMMAAccumulator

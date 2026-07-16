@@ -1,0 +1,9 @@
+description: A sequential container that holds and manages the original parameters
+  or buffers of a parametrized :class:`torch.nn.Module`.
+std_args:
+- self
+- modules
+- original
+- unsafe
+type: class
+operation: ParametrizationList

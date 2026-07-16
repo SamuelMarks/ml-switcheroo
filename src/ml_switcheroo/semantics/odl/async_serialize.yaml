@@ -1,0 +1,12 @@
+description: Serialize an array using TensorStore.
+std_args:
+- arr_inp
+- tensorstore_spec
+- commit_future
+- context
+- chunk_layout
+- primary_host
+- replica_id
+- transaction
+type: function
+operation: async_serialize

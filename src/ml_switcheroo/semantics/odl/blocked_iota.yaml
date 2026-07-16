@@ -1,0 +1,6 @@
+description: Computes a sub-block of a larger shaped iota.
+std_args:
+- block_shape
+- total_shape
+type: function
+operation: blocked_iota

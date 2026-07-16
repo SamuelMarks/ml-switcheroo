@@ -1,0 +1,4 @@
+description: Auto-generated mapping for register_module_forward_hook.
+std_args: []
+type: function
+operation: register_module_forward_hook

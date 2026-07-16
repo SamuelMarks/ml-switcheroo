@@ -1,0 +1,8 @@
+description: Return a scalar type which is common to the input arrays.
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: arrays
+  type: List[Array]
+variants: {}
+operation: CommonType

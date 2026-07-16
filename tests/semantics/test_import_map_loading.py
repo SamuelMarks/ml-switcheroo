@@ -1,5 +1,4 @@
-"""
-Tests for Data-Driven Import Mapping (Feature 024).
+"""Tests for Data-Driven Import Mapping (Feature 024).
 
 Verifies that:
 1. SemanticsManager starts clean (no hardcoded defaults).
@@ -25,8 +24,7 @@ class MockSemantics(SemanticsManager):
 
 
 def test_no_hardcoded_defaults():
-  """
-  Ensure the manager honors the strict architecture rule:
+  """Ensure the manager honors the strict architecture rule:
   No hardcoded mappings in Python. Initialization should yield
   an empty state if no JSON files are found.
   """
@@ -37,8 +35,7 @@ def test_no_hardcoded_defaults():
 
 
 def test_merged_json_data():
-  """
-  Simulate loading usage of providers from adapter/json.
+  """Simulate loading usage of providers from adapter/json.
   Since 'import_data' attribute is removed, we check _providers structure.
   """
   mgr = SemanticsManager()
@@ -58,8 +55,7 @@ def test_merged_json_data():
 
 
 def test_get_import_map_structure():
-  """
-  Verify `get_import_map` transforms internal storage to the tuple format
+  """Verify `get_import_map` transforms internal storage to the tuple format
   expected by ImportFixer.
   Format: Dict[str, Tuple[root, sub, alias]]
   """

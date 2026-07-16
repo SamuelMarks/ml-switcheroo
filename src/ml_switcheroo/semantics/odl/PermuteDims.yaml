@@ -1,0 +1,12 @@
+description: Permutes the dimensions of an array.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: a
+  type: Array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axes
+  type: Tuple[int]
+variants: {}
+operation: PermuteDims

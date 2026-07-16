@@ -3,9 +3,9 @@
 import pytest
 from unittest.mock import MagicMock
 
-from ml_switcheroo.compiler.backends.sass.synthesizer import RegisterAllocator, SassSynthesizer, MAX_REGISTERS
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.compiler.frontends.sass.nodes import Instruction, Register, Immediate, Comment, Label
+from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator, SassSynthesizer, MAX_REGISTERS
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.frontends.sass.nodes import Instruction, Register, Immediate, Comment, Label
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -30,7 +30,7 @@ def test_allocator_reuse():
 def test_allocator_overflow():
   """Function docstring."""
   alloc = RegisterAllocator()
-  alloc._next_idx = MAX_REGISTERS + 1
+  alloc._free_pool = []
   with pytest.raises(ValueError, match="Register overflow"):
     alloc.get_register("overflow")
 
@@ -49,9 +49,9 @@ def test_allocator_reset():
   """Function docstring."""
   alloc = RegisterAllocator()
   alloc.get_register("x")
-  assert alloc._next_idx == 1
+  assert len(alloc._free_pool) == MAX_REGISTERS - 1
   alloc.reset()
-  assert alloc._next_idx == 0
+  assert len(alloc._free_pool) == MAX_REGISTERS
   assert alloc._var_to_reg == {}
 
 

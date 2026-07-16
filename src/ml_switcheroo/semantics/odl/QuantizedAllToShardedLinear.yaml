@@ -1,0 +1,13 @@
+description: Quantized distributed linear layer.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: in_features
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: out_features
+  type: int
+variants: {}
+operation: QuantizedAllToShardedLinear

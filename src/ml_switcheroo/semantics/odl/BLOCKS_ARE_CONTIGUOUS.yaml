@@ -1,0 +1,4 @@
+description: If True, guarantees that all blocks in the mask are contiguous.
+std_args: []
+type: attribute
+operation: BLOCKS_ARE_CONTIGUOUS

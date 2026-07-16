@@ -1,0 +1,22 @@
+description: A Linear layer with built-in LoRA adaptation.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: in_features
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: out_features
+  type: int
+- default: 8
+  is_variadic: false
+  kind: positional_or_keyword
+  name: lora_rank
+  type: int
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: bool
+variants: {}
+operation: LoRALinear

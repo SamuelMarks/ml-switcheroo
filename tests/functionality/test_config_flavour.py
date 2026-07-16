@@ -1,5 +1,4 @@
-"""
-Tests for Framework Flavour Configuration.
+"""Tests for Framework Flavour Configuration.
 
 Verifies:
 1. RuntimeConfig flavour resolution logic.
@@ -46,8 +45,7 @@ def test_engine_adopts_flavour():
 
 
 def test_rewriter_integration_mock():
-  """
-  Verify PivotRewriter (via Engine) requests the specific Flavour config
+  """Verify PivotRewriter (via Engine) requests the specific Flavour config
   from the SemanticsManager.
   """
   # 1. Setup Mock Semantics

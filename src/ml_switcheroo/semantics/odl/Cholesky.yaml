@@ -1,0 +1,13 @@
+description: Returns the lower (upper) Cholesky decomposition of a complex Hermitian
+  or real symmetric positive-definite matrix ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: upper
+  type: bool
+type: attribute
+operation: cholesky

@@ -1,5 +1,4 @@
-"""
-Tests for Verification Harness Protocol Adherence.
+"""Tests for Verification Harness Protocol Adherence.
 
 Verifies that all registered adapters:
 1. Implement `harness_imports` returning a list.
@@ -38,9 +37,7 @@ def mock_all_imports():
 
 
 def test_protocol_implementation_coverage(mock_all_imports):
-  """
-  Iterates all registered frameworks and verifies types.
-  """
+  """Iterates all registered frameworks and verifies types."""
   fws = available_frameworks()
   # Ensure our main targets are present in registry
   assert "jax" in fws

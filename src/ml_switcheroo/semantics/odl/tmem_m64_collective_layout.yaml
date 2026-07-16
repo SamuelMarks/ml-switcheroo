@@ -1,0 +1,6 @@
+description: A TMEM layout used for 2CTA MMA with M=128.
+std_args:
+- columns
+- packing
+type: function
+operation: tmem_m64_collective_layout

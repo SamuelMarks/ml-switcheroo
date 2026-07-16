@@ -1,7 +1,7 @@
 """Module docstring."""
 
-from ml_switcheroo.compiler.frontends.sass.analysis import SassAnalyzer
-from ml_switcheroo.compiler.frontends.sass.nodes import Instruction, Register, Immediate, Predicate
+from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+from ml_switcheroo.core.compiler.frontends.sass.nodes import Instruction, Register, Immediate, Predicate
 
 
 def make_inst(opcode, *operands):
@@ -11,9 +11,7 @@ def make_inst(opcode, *operands):
 
 
 def test_analyze_conv2d_kernel_size():
-  """
-  Scenario: Conv2d block with loop limit 3.
-  """
+  """Scenario: Conv2d block with loop limit 3."""
   # Mock sequence: loop check
   r3 = Register("R3")
   pt = Register("PT")
@@ -34,9 +32,7 @@ def test_analyze_conv2d_kernel_size():
 
 
 def test_analyze_linear_in_features():
-  """
-  Scenario: Linear block with loop limit 128.
-  """
+  """Scenario: Linear block with loop limit 128."""
   r8 = Register("R8")
   pt = Register("PT")
   p0 = Predicate("P0")
@@ -54,9 +50,7 @@ def test_analyze_linear_in_features():
 
 
 def test_analyze_no_loop_found():
-  """
-  Scenario: Block with no ISETP instructions.
-  """
+  """Scenario: Block with no ISETP instructions."""
   insts = [make_inst("FADD", Register("R0"), Register("R1"), Register("R2"))]
   meta = SassAnalyzer.analyze_block("Linear", insts)
   assert meta == {}

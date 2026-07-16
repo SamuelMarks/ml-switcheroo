@@ -1,0 +1,8 @@
+description: Gets the Variable class from a collection name.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: name
+  type: str
+variants: {}
+operation: VariableTypeFromName

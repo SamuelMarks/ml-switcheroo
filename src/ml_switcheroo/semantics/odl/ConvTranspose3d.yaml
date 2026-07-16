@@ -1,0 +1,43 @@
+description: Applies a 3D transposed convolution operator over an input image.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  rank: 5
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  rank: 5
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: Tensor
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: stride
+  type: Union[int, Tuple[int, int, int]]
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: Union[int, Tuple[int, int, int]]
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: output_padding
+  type: Union[int, Tuple[int, int, int]]
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: groups
+  type: int
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dilation
+  type: Union[int, Tuple[int, int, int]]
+type: class
+operation: ConvTranspose3d

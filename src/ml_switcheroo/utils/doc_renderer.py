@@ -114,16 +114,16 @@ class OpPageRenderer:
       pane = f'<div id="{fw_label}_{idx}" class="op-tab-pane {is_active}">{"".join(details)}</div>'
       panes.append(pane)
 
-    return f""" 
-<div class="op-tabs-container"> 
-  <div class="op-tabs-nav"> 
-    {"".join(nav_buttons)} 
-  </div> 
-  <div class="op-tabs-content"> 
-    {"".join(panes)} 
-  </div> 
+    return f"""
+<div class="op-tabs-container">
+  <div class="op-tabs-nav">
+    {"".join(nav_buttons)}
+  </div>
+  <div class="op-tabs-content">
+    {"".join(panes)}
+  </div>
 
-  <!-- Load JS Logic only once per page ideally, but safe to exist globally --> 
-  <script src="../_static/op_tabs.js"></script> 
-</div> 
+  <!-- Load JS Logic only once per page ideally, but safe to exist globally -->
+  <script src="../_static/op_tabs.js"></script>
+</div>
 """

@@ -1,5 +1,4 @@
-"""
-Tests for PythonToMlirEmitter.
+"""Tests for PythonToMlirEmitter.
 
 Verifies:
 1.  Variable scoping and SSA ID generation.
@@ -22,8 +21,7 @@ def convert_code(code: str):
 
 
 def test_class_definition():
-  """
-  Input: class MyNet: pass
+  """Input: class MyNet: pass
   Output: sw.module {sym_name = "MyNet"} { ... }
   """
   code = "class MyNet:\n    pass"
@@ -34,8 +32,7 @@ def test_class_definition():
 
 
 def test_function_definition_with_args():
-  """
-  Input:
+  """Input:
       def forward(self, x):
           return x
 
@@ -45,8 +42,8 @@ def test_function_definition_with_args():
           sw.return (%x1)
       }
   """
-  code = """ 
-def forward(self, x): 
+  code = """
+def forward(self, x):
     return x
 """
   mlir = convert_code(code)
@@ -58,8 +55,7 @@ def forward(self, x):
 
 
 def test_attribute_call_mapping():
-  """
-  Input:
+  """Input:
       def f(self, x):
           return self.layer(x)
 
@@ -68,9 +64,9 @@ def test_attribute_call_mapping():
       2. %1 = sw.call %0 (%x)
       3. sw.return %1
   """
-  code = """ 
-def f(self, x): 
-    return self.layer(x) 
+  code = """
+def f(self, x):
+    return self.layer(x)
 """
   mlir = convert_code(code)
 
@@ -81,8 +77,7 @@ def f(self, x):
 
 
 def test_constructor_op_mapping():
-  """
-  Input:
+  """Input:
       x = torch.nn.Conv2d(1, 32)
 
   Logic:
@@ -100,16 +95,15 @@ def test_constructor_op_mapping():
 
 
 def test_trivia_preservation():
-  """
-  Input:
+  """Input:
       # My Comment
       class A: pass
 
   Output: Contains // My Comment
   """
-  code = """ 
+  code = """
 # My Comment
-class A: 
+class A:
     pass
 """
   mlir = convert_code(code)
@@ -117,14 +111,13 @@ class A:
 
 
 def test_scope_isolation():
-  """
-  Verify variables vars in different functions get unique SSA IDs
+  """Verify variables vars in different functions get unique SSA IDs
   and don't conflict logic.
   """
-  code = """ 
-def f1(a): 
+  code = """
+def f1(a):
     return a
-def f2(a): 
+def f2(a):
     return a
 """
   mlir = convert_code(code)
@@ -138,8 +131,7 @@ def f2(a):
 
 
 def test_typed_args():
-  """
-  Input: def f(x: int): pass
+  """Input: def f(x: int): pass
   Output: type should be !sw.type<"int">
   """
   code = "def f(x: int): pass"
@@ -149,8 +141,7 @@ def test_typed_args():
 
 
 def test_binary_math_expression():
-  """
-  Input: x = 32 * 26 * 26
+  """Input: x = 32 * 26 * 26
   Logic:
       1. Constants for 32, 26, 26
       2. sw.op(..., ...) {type="binop.mul"} recursed
@@ -165,8 +156,7 @@ def test_binary_math_expression():
 
 
 def test_mixed_binary_math():
-  """
-  Input: y = a + b / 2
+  """Input: y = a + b / 2
   Logic:
       1. binop.div
       2. binop.add

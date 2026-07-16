@@ -1,0 +1,5 @@
+description: Return the input as-is with BaseNormalization-compatible HParams.
+op_type: class
+std_args: []
+variants: {}
+operation: IdentityNorm

@@ -1,0 +1,6 @@
+description: Reshape by means of folding and unfolding.
+std_args:
+- ref
+- shape
+type: function
+operation: memref_reshape

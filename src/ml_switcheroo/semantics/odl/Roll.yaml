@@ -1,0 +1,18 @@
+description: Rolls array elements along a specified axis. Array elements that roll
+  beyond the last position are re-introduced at the first position. Array elements
+  that roll beyond the first position are re-introduced at the last position.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: shift
+  type: Union[int, Tuple[int, Ellipsis]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: Optional[Union[int, Tuple[int, Ellipsis]]]
+variants: {}
+operation: roll

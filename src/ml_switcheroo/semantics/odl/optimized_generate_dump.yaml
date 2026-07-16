@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- args
+- xla_compiler_flags
+- _
+type: function
+operation: optimized_generate_dump

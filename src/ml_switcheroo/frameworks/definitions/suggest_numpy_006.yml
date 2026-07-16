@@ -564,7 +564,7 @@ variants:
   tensorflow:
     api: "tf.constant"
     inject_args: { "dtype": "tf.float64" }
-  mlx: null 
+  mlx: null
 
 ---
 operation: "ConstructFloat16"

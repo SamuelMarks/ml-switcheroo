@@ -1,0 +1,29 @@
+description: Performs a reduction along segments of a tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: reduce
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: lengths
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: indices
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: offsets
+  type: Tensor
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: SegmentReduce

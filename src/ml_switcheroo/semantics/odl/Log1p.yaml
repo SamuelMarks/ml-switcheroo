@@ -1,0 +1,10 @@
+description: Calculates an implementation-dependent approximation to ``log(1+x)``,
+  where ``log`` refers to the natural (base ``e``) logarithm, for each element ``x_i``
+  of the input array ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+type: attribute
+operation: log1p

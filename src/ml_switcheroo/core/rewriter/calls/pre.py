@@ -107,14 +107,14 @@ def handle_pre_checks(
       if method_name in strip_set:
         if isinstance(updated.func, cst.Attribute):
           rewriter._report_warning(f"Stripped framework-specific lifecycle method '.{method_name}()'.")
-          result_node = updated.func.value
+          result_node = updated.func.value  # type: ignore
           log_diff("Lifecycle Strip", original, result_node)
           return True, result_node
 
       if method_name in warn_set:
         if isinstance(updated.func, cst.Attribute):
           rewriter._report_warning(f"Ignored model state method '.{method_name}()'.")
-          result_node = updated.func.value
+          result_node = updated.func.value  # type: ignore
           log_diff("Lifecycle Warn", original, result_node)
           return True, result_node
 

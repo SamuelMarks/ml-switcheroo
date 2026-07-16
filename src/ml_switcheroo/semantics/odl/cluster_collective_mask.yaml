@@ -1,0 +1,6 @@
+description: The class representing a Python function.
+std_args:
+- cluster_shape
+- collective
+type: function
+operation: cluster_collective_mask

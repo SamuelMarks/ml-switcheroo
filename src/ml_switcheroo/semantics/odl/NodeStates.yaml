@@ -1,0 +1,9 @@
+description: Internal state storage for graph nodes.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: states
+  type: Any
+variants: {}
+operation: NodeStates

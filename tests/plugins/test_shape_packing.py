@@ -1,6 +1,4 @@
-"""
-Tests for Shape Packing.
-"""
+"""Tests for Shape Packing."""
 
 import pytest
 import libcst as cst

@@ -1,5 +1,4 @@
-"""
-Tests for ODL Constraint Injection in generated test code.
+"""Tests for ODL Constraint Injection in generated test code.
 
 Verifies that:
 1. 'options' constraint generates `random.choice`.
@@ -26,8 +25,7 @@ def generator(tmp_path):
 
 
 def test_generate_options_constraint(generator, tmp_path):
-  """
-  Scenario: Argument constrained to specific values options=[1, 2, 3].
+  """Scenario: Argument constrained to specific values options=[1, 2, 3].
   Expect: random.choice([1, 2, 3])
   """
   semantics = {
@@ -45,8 +43,7 @@ def test_generate_options_constraint(generator, tmp_path):
 
 
 def test_generate_int_range_constraint(generator, tmp_path):
-  """
-  Scenario: int argument with min=10, max=20.
+  """Scenario: int argument with min=10, max=20.
   Expect: random.randint(10, 20)
   """
   semantics = {
@@ -64,8 +61,7 @@ def test_generate_int_range_constraint(generator, tmp_path):
 
 
 def test_generate_float_range_constraint(generator, tmp_path):
-  """
-  Scenario: float argument with min=0.0, max=1.0.
+  """Scenario: float argument with min=0.0, max=1.0.
   Expect: random.uniform(0.0, 1.0)
   """
   semantics = {
@@ -83,8 +79,7 @@ def test_generate_float_range_constraint(generator, tmp_path):
 
 
 def test_generate_array_bounds_constraint(generator, tmp_path):
-  """
-  Scenario: Array input with min=0.0 (e.g. for sqrt).
+  """Scenario: Array input with min=0.0 (e.g. for sqrt).
   Expect: np.abs(...) + 0.0 to ensure positive.
   """
   semantics = {
@@ -104,8 +99,7 @@ def test_generate_array_bounds_constraint(generator, tmp_path):
 
 
 def test_generate_array_range_constraint(generator, tmp_path):
-  """
-  Scenario: Array input with bounded min/max.
+  """Scenario: Array input with bounded min/max.
   Expect: np.random.uniform
   """
   semantics = {

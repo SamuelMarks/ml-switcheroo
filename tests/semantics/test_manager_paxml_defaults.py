@@ -1,6 +1,4 @@
-"""
-Tests for PaxML Default Alias Configuration via Adapter.
-"""
+"""Tests for PaxML Default Alias Configuration via Adapter."""
 
 import libcst as cst
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -25,9 +23,9 @@ def test_import_fixer_injects_pl_alias():
   mgr._reverse_index = {}
   resolver = ImportResolver(mgr)
 
-  source_code = """ 
-def setup(self): 
-    self.layer = pl.Linear(10, 20) 
+  source_code = """
+def setup(self):
+    self.layer = pl.Linear(10, 20)
 """
   tree = cst.parse_module(source_code)
 

@@ -2,17 +2,15 @@
 
 from unittest.mock import MagicMock
 
-from ml_switcheroo.compiler.backends.sass.emitter import SassEmitter
-from ml_switcheroo.compiler.frontends.sass.nodes import Instruction, Register, Comment, Label, Directive, Immediate
-from ml_switcheroo.compiler.backends.sass.synthesizer import SassSynthesizer
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.backends.sass.emitter import SassEmitter
+from ml_switcheroo.core.compiler.frontends.sass.nodes import Instruction, Register, Comment, Label, Directive, Immediate
+from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_emit_basic_instruction():
-  """
-  Requirement: Add emits `FADD R0, R1, R2;` (indented).
-  """
+  """Requirement: Add emits `FADD R0, R1, R2;` (indented)."""
   emitter = SassEmitter()
   inst = Instruction(opcode="FADD", operands=[Register("R0"), Register("R1"), Register("R2")])
 
@@ -26,9 +24,7 @@ def test_emit_basic_instruction():
 
 
 def test_emit_label_flush_left():
-  """
-  Requirement: Labels must be flush-left.
-  """
+  """Requirement: Labels must be flush-left."""
   emitter = SassEmitter()
   block = [Label("L_START"), Instruction("MOV", [Register("R0"), Register("RZ")])]
 
@@ -42,16 +38,15 @@ def test_emit_label_flush_left():
 
 
 def test_emit_unmapped_op_fallback():
-  """
-  Requirement: If an op isn't in sass.json, output `// Op: {Name}`.
-  """
-  # 1. Setup Mock Semantics (Empty for 'Conv2d')
+  """Requirement: If an op isn't in sass.json, output `// Op: {Name}`."""
+  # 1. Setup Mock Semantics (Empty for 'WeirdOp')
   mgr = MagicMock(spec=SemanticsManager)
   mgr.resolve_variant.return_value = None
+  mgr.get_definition.return_value = None
 
   # 2. Synthesize Graph
   synth = SassSynthesizer(mgr)
-  graph = LogicalGraph(nodes=[LogicalNode(id="conv1", kind="Conv2d", metadata={})])
+  graph = LogicalGraph(nodes=[LogicalNode(id="conv1", kind="WeirdOp", metadata={})])
   ast_nodes = synth.from_graph(graph)
 
   # 3. Emit
@@ -59,7 +54,7 @@ def test_emit_unmapped_op_fallback():
   output = emitter.emit(ast_nodes)
 
   # 4. Verify Output
-  assert "// Unmapped Op: Conv2d" in output
+  assert "// Unmapped Op: WeirdOp" in output
   assert output.strip().startswith("//")
 
 

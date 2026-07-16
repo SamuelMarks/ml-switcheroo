@@ -5,15 +5,13 @@ transforms Python LibCST trees into the MLIR CST object model.
 """
 
 import libcst as cst
-from typing import Dict, List, Optional, Union, Tuple, Sequence
+from typing import Dict, List, Optional, Union, Sequence
 
 from ml_switcheroo.core.mlir.nodes import (
   ModuleNode,
   OperationNode,
   BlockNode,
-  RegionNode,
   ValueNode,
-  TypeNode,
   AttributeNode,
   TriviaNode,
 )
@@ -25,8 +23,8 @@ class SSAContext:
 
   def __init__(self):
     """Initialize the context with a root scope."""
-    self._scopes: List[Dict[str, ValueNode]] = [{}]
-    self._counter: int = 0
+    self._scopes: List[Dict[str, ValueNode]] = [{}]  # type: ignore
+    self._counter: int = 0  # type: ignore
 
   def enter_scope(self) -> None:
     """Push a new variable scope onto the stack."""
@@ -78,7 +76,11 @@ class SSAContext:
     return val
 
 
-class PythonToMlirEmitter:
+from ml_switcheroo.core.mlir.emitter_expr import MlirEmitterExprMixin  # noqa: E402
+from ml_switcheroo.core.mlir.emitter_decl import MlirEmitterDeclMixin  # noqa: E402
+
+
+class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
   """Translates Python LibCST modules into MLIR structural nodes."""
 
   def __init__(self):
@@ -150,11 +152,11 @@ class PythonToMlirEmitter:
 
     """
     block = BlockNode(label=label)
-    stmts = []
+    stmts = []  # type: ignore
     if isinstance(body_enc, (cst.IndentedBlock, cst.SimpleStatementSuite, cst.Module)):
-      stmts = body_enc.body
+      stmts = body_enc.body  # type: ignore
     elif isinstance(body_enc, (list, tuple)):
-      stmts = body_enc
+      stmts = body_enc  # type: ignore
 
     for stmt in stmts:
       ops = self._emit_statement(stmt)
@@ -237,7 +239,7 @@ class PythonToMlirEmitter:
       for alias in node.names:
         names.append(get_full_name(alias.name))
         if alias.asname:
-          aliases.append(alias.asname.name.value)
+          aliases.append((alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else ""))
         else:
           aliases.append("")
 
@@ -253,69 +255,6 @@ class PythonToMlirEmitter:
     attrs.append(AttributeNode(name="aliases", value=quoted_aliases))
 
     return OperationNode(name="sw.import", attributes=attrs)
-
-  def _emit_class_def(self, node: cst.ClassDef) -> OperationNode:
-    """Converts a Python class definition to `sw.module`.
-
-    Args:
-        node: The ClassDef node.
-
-    Returns:
-        An `sw.module` OperationNode containing the class body region.
-
-    """
-    self.ctx.enter_scope()
-    name_obj = AttributeNode(name="sym_name", value=f'"{node.name.value}"')
-
-    attributes = [name_obj]
-
-    # Capture Bases (Inheritance)
-    if node.bases:
-      base_names = []
-      for b in node.bases:
-        flat_name = self._flatten_attr(b.value)
-        if flat_name:
-          base_names.append(f'"{flat_name}"')
-
-      if base_names:
-        attributes.append(AttributeNode(name="bases", value=base_names))
-
-    region = RegionNode(blocks=[self._emit_block(node.body)])
-    op = OperationNode(name="sw.module", attributes=attributes, regions=[region])
-    self.ctx.exit_scope()
-    return op
-
-  def _emit_func_def(self, node: cst.FunctionDef) -> OperationNode:
-    """Converts a Python function definition to `sw.func`.
-
-    Args:
-        node: The FunctionDef node.
-
-    Returns:
-        An `sw.func` OperationNode with arguments mapped to block arguments.
-
-    """
-    self.ctx.enter_scope()
-    func_name = node.name.value
-    block_args = []
-
-    for param in node.params.params:
-      if isinstance(param.name, cst.Name):
-        p_name = param.name.value
-        val = self.ctx.allocate_ssa(prefix=f"%{p_name}")
-        self.ctx.declare(p_name, val)
-        t_str = "!sw.unknown"
-        if param.annotation:
-          t_str = f'!sw.type<"{self._annotation_to_string(param.annotation.annotation)}">'
-        block_args.append((val, TypeNode(t_str)))
-
-    body_block = self._emit_block(node.body, label="^entry")
-    body_block.arguments = block_args
-    op = OperationNode(
-      name="sw.func", attributes=[AttributeNode("sym_name", f'"{func_name}"')], regions=[RegionNode(blocks=[body_block])]
-    )
-    self.ctx.exit_scope()
-    return op
 
   def _emit_assign(self, node: cst.Assign) -> List[OperationNode]:
     """Converts an assignment statement.
@@ -443,135 +382,3 @@ class PythonToMlirEmitter:
     if isinstance(operator, cst.BitXor):
       return "xor"
     return "unknown"
-
-  def _emit_expression(self, expr: cst.BaseExpression) -> Tuple[ValueNode, List[OperationNode]]:
-    """Recursively converts an expression into a value and a list of supporting operations.
-
-    Handles:
-    - Variables (Names)
-    - Function Calls (capturing keywords)
-    - Binary Operations
-    - Constants
-
-    Args:
-        expr: The expression node.
-
-    Returns:
-        Tuple (ResultValue, List[Ops]).
-
-    """
-    ops = []
-    if isinstance(expr, cst.Name):
-      val = self.ctx.lookup(expr.value)
-      if not val:
-        val = ValueNode(f"@{expr.value}")
-      return val, ops
-    elif isinstance(expr, cst.Call):
-      operands = []
-      arg_keywords = []  # new feature
-
-      # Process arguments
-      for arg in expr.args:
-        v, o = self._emit_expression(arg.value)
-        ops.extend(o)
-        operands.append(v)
-
-        # Capture keyword if present
-        kw = ""
-        if arg.keyword:
-          kw = arg.keyword.value
-        arg_keywords.append(kw)
-
-      flat_name = self._flatten_attr(expr.func)
-      root_var = flat_name.split(".")[0] if flat_name else ""
-      is_static_op = False
-      if flat_name and not self.ctx.lookup(root_var):
-        is_static_op = True
-
-      common_attrs = []
-      # Pack keywords into attribute if any are non-empty
-      if any(arg_keywords):
-        # AttributeNode needs a list of strings formatted for the printer
-        # e.g. ["k=val", ""] -> we just need to store the keys.
-        # "arg_keywords" = ["a", "", "b"]
-        # We store as list of quoted strings
-        kw_vals = [f'"{k}"' for k in arg_keywords]
-        common_attrs.append(AttributeNode("arg_keywords", kw_vals))
-
-      if is_static_op:
-        result = self.ctx.allocate_ssa()
-        attrs = [AttributeNode("type", f'"{flat_name}"')] + common_attrs
-        op = OperationNode(
-          name="sw.op",
-          results=[result],
-          operands=operands,
-          attributes=attrs,
-        )
-        ops.append(op)
-        return result, ops
-
-      if isinstance(expr.func, cst.Attribute):
-        obj, o_ops = self._emit_expression(expr.func.value)
-        ops.extend(o_ops)
-        attr_val = self.ctx.allocate_ssa()
-        get_op = OperationNode(
-          name="sw.getattr",
-          results=[attr_val],
-          operands=[obj],
-          attributes=[AttributeNode("name", f'"{expr.func.attr.value}"')],
-        )
-        ops.append(get_op)
-        res_val = self.ctx.allocate_ssa()
-        # Attach keywords
-        call_op = OperationNode(
-          name="sw.call",
-          results=[res_val],
-          operands=[attr_val] + operands,
-          attributes=common_attrs,
-        )
-        ops.append(call_op)
-        return res_val, ops
-
-      if isinstance(expr.func, cst.Name):
-        func_val, f_ops = self._emit_expression(expr.func)
-        ops.extend(f_ops)
-        result = self.ctx.allocate_ssa()
-        call_op = OperationNode(name="sw.call", results=[result], operands=[func_val] + operands, attributes=common_attrs)
-        ops.append(call_op)
-        return result, ops
-
-    elif isinstance(expr, cst.BinaryOperation):
-      lhs_val, l_ops = self._emit_expression(expr.left)
-      rhs_val, r_ops = self._emit_expression(expr.right)
-      ops.extend(l_ops)
-      ops.extend(r_ops)
-
-      op_str = self._get_binop_str(expr.operator)
-      res_val = self.ctx.allocate_ssa()
-      op = OperationNode(
-        name="sw.op",
-        results=[res_val],
-        operands=[lhs_val, rhs_val],
-        attributes=[AttributeNode("type", f'"binop.{op_str}"')],
-      )
-      ops.append(op)
-      return res_val, ops
-
-    elif isinstance(expr, (cst.Integer, cst.Float)):
-      val = self.ctx.allocate_ssa(prefix="%cst")
-      op = OperationNode(
-        name="sw.constant", results=[val], attributes=[AttributeNode("value", getattr(expr, "value", "0"))]
-      )
-      ops.append(op)
-      return val, ops
-
-    return ValueNode("%error"), []
-
-  def _annotation_to_string(self, node: cst.CSTNode) -> str:
-    """Flattens a type annotation node to a string representation."""
-    if isinstance(node, cst.Name):
-      return node.value
-    elif isinstance(node, cst.Attribute):
-      return f"{self._annotation_to_string(node.value)}.{node.attr.value}"
-    else:
-      return "Any"

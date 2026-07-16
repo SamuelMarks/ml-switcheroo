@@ -1,0 +1,8 @@
+description: Creates a Tensor from a numpy.ndarray.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ndarray
+  type: Array
+variants: {}
+operation: FromNumpy

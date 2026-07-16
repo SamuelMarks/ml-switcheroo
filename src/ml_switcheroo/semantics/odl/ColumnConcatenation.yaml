@@ -1,0 +1,8 @@
+description: Translates slice objects to concatenation along the second axis (\np.c\_).
+std_args:
+- is_variadic: true
+  kind: positional_or_keyword
+  name: arrays
+  type: Any
+variants: {}
+operation: ColumnConcatenation

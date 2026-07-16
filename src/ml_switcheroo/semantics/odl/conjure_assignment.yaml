@@ -1,0 +1,6 @@
+description: Attempts to conjure an assignment for an unknown variable.
+std_args:
+- unknowns
+- constraint_system
+type: function
+operation: conjure_assignment

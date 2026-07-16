@@ -1,0 +1,18 @@
+description: Pooling layer over dimension 1.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: window
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: stride
+  type: int
+- default: AVG
+  is_variadic: false
+  kind: positional_or_keyword
+  name: pooling_type
+  type: str
+variants: {}
+operation: Pooling1D

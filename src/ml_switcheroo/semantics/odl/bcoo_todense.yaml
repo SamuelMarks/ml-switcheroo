@@ -1,0 +1,5 @@
+description: Convert batched sparse matrix to a dense matrix.
+std_args:
+- mat
+type: function
+operation: bcoo_todense

@@ -314,7 +314,7 @@ variants:
     # Requires custom implementation or Optax
     requires_plugin: "triplet_loss_impl"
   tensorflow:
-    api: "tf.keras.losses.triplet_semihard_loss" 
+    api: "tf.keras.losses.triplet_semihard_loss"
     # Mismatch: TF generic triplet loss implies mining. Manual calc preferred.
     macro_template: "tf.maximum(tf.norm({anchor}-{positive}, ord={p}) - tf.norm({anchor}-{negative}, ord={p}) + {margin}, 0)"
 
@@ -414,10 +414,10 @@ variants:
   numpy:
     api: "np.trunc"
   mlx:
-    # MLX trunc does not exist directly? Uses astype(int)? 
-    # Fallback: cast to int then back to float? Or floor if positive. 
+    # MLX trunc does not exist directly? Uses astype(int)?
+    # Fallback: cast to int then back to float? Or floor if positive.
     # MLX has no direct 'trunc'.
-    macro_template: "mlx.core.array(np.trunc(np.array({input})))" 
+    macro_template: "mlx.core.array(np.trunc(np.array({input})))"
     # Using numpy fallback for MLX gap
   keras:
     api: "keras.ops.trunc"
@@ -623,8 +623,8 @@ variants:
   torch:
     api: "torch.unbind"
   jax:
-    # Approx via list-comprehension iteration over axis? 
-    # Or unstack if available (TF style). JAX has no direct unbind. 
+    # Approx via list-comprehension iteration over axis?
+    # Or unstack if available (TF style). JAX has no direct unbind.
     macro_template: "[jnp.squeeze(x, axis={dim}) for x in jnp.split({input}, {input}.shape[{dim}], axis={dim})]"
   tensorflow:
     api: "tf.unstack"
@@ -649,7 +649,7 @@ variants:
     api: "torch.unbind_copy"
   tensorflow:
     api: "tf.unstack"
-    args: 
+    args:
       dim: "axis"
 
 ---
@@ -667,8 +667,8 @@ variants:
     api: "torch.unflatten"
   jax:
     # Requires shape calculation logic (complex macro or plugin)
-    # Reshape is the general tool. 
+    # Reshape is the general tool.
     requires_plugin: "unflatten_logic"
   keras:
-    # Keras doesn't have unflatten per se, uses reshape. 
+    # Keras doesn't have unflatten per se, uses reshape.
     requires_plugin: "unflatten_logic"

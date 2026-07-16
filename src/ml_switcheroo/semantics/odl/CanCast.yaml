@@ -1,0 +1,12 @@
+description: Determines if a type conversion is allowed under casting rules.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: from_dtype
+  type: DType
+- is_variadic: false
+  kind: positional_or_keyword
+  name: to_dtype
+  type: DType
+variants: {}
+operation: CanCast

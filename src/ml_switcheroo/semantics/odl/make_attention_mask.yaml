@@ -1,0 +1,4 @@
+description: Auto-generated mapping for make_attention_mask.
+std_args: []
+variants: {}
+operation: make_attention_mask

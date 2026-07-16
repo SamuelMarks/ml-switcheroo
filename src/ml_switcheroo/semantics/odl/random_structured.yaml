@@ -1,0 +1,8 @@
+description: Prune tensor by removing random channels along the specified dimension.
+std_args:
+- module
+- name
+- amount
+- dim
+type: function
+operation: random_structured

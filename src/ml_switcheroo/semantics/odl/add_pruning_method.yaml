@@ -1,0 +1,6 @@
+description: Add a child pruning ``method`` to the container.
+std_args:
+- self
+- method
+type: function
+operation: add_pruning_method

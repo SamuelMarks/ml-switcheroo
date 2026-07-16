@@ -11,6 +11,7 @@ Core Responsibilities:
 """
 
 import json
+import yaml
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Any, Set, List
 from pydantic import ValidationError
@@ -124,6 +125,8 @@ class SemanticsManager:
         score += 50
       elif tier == SemanticTier.NEURAL.value:
         score -= 50
+      elif tier == SemanticTier.EXTRAS.value:
+        score -= 100
 
       score += len(details.get("variants", {}))
       return score
@@ -317,26 +320,14 @@ class SemanticsManager:
       if isinstance(impl, dict) and "api" in impl:
         self._reverse_index[impl["api"]] = (abstract_id, final_data)
 
-    tier_str = self._key_origins.get(abstract_id, SemanticTier.ARRAY_API.value)
-    filename = "k_array_api.json"
-    if tier_str == SemanticTier.NEURAL.value:
-      filename = "k_neural_net.json"
-    elif tier_str == SemanticTier.EXTRAS.value:
-      filename = "k_framework_extras.json"
+    safe_name = abstract_id.replace("/", "_")
+    filename = f"{safe_name}.yaml"
+    odl_dir = resolve_semantics_dir() / "odl"
+    odl_dir.mkdir(parents=True, exist_ok=True)
+    file_path = odl_dir / filename
 
-    file_path = resolve_semantics_dir() / filename
-    if file_path.exists():
-      try:
-        with open(file_path, "r", encoding="utf-8") as f:
-          file_content = json.load(f)
-      except Exception:
-        file_content = {}
-    else:
-      file_content = {}
-
-    file_content[abstract_id] = final_data
     try:
       with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(file_content, f, indent=2, sort_keys=True)
+        yaml.dump(final_data, f, sort_keys=False, indent=2, default_flow_style=False)
     except Exception as e:
       print(f"❌ Failed to write update for {abstract_id} to {filename}: {e}")

@@ -1,0 +1,5 @@
+description: JIT Call Stack.
+op_type: class
+std_args: []
+variants: {}
+operation: CallStack

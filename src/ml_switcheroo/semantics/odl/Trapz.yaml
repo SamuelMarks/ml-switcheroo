@@ -1,0 +1,21 @@
+description: Alias for Trapezoid.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dx
+  type: float
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+variants: {}
+operation: Trapz

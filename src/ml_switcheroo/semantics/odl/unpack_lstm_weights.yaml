@@ -1,0 +1,9 @@
+description: Unpack cudnn LSTM weights into individual weights.
+std_args:
+- weights
+- input_size
+- hidden_size
+- num_layers
+- bidirectional
+type: function
+operation: unpack_lstm_weights

@@ -1,0 +1,8 @@
+description: Explicit Boolean scalar constructor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: value
+  type: Any
+variants: {}
+operation: BoolScalar

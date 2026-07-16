@@ -1,4 +1,8 @@
+"""Auto-generated doc."""
+
+
 def test_console_missing_export():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.console import _ConsoleProxy
   import unittest.mock
 
@@ -19,6 +23,7 @@ def test_console_missing_export():
 
 
 def test_console_missing_more():
+  """Auto-generated doc."""
   import logging
   from ml_switcheroo.utils.console import (
     get_console,
@@ -49,6 +54,7 @@ def test_console_missing_more():
 
 
 def test_console_missing_export_again():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.console import _ConsoleProxy
   import unittest.mock
 
@@ -59,6 +65,7 @@ def test_console_missing_export_again():
 
 
 def test_doc_renderer_missing():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.doc_renderer import OpPageRenderer
 
   r = OpPageRenderer()
@@ -68,6 +75,7 @@ def test_doc_renderer_missing():
 
 
 def test_readme_editor_missing():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
   from pathlib import Path
 
@@ -86,6 +94,7 @@ def test_readme_editor_missing():
 
 
 def test_readme_editor_write_error(tmp_path):
+  """Auto-generated doc."""
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   p = tmp_path / "README.md"
@@ -98,6 +107,7 @@ def test_readme_editor_write_error(tmp_path):
 
 
 def test_readme_editor_guess_category():
+  """Auto-generated doc."""
   from ml_switcheroo.utils.readme_editor import _guess_category
 
   assert _guess_category("torch.add", {"requires_plugin": "foo"}) == "Special"

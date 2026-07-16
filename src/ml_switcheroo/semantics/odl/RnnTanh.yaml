@@ -1,0 +1,16 @@
+description: RNN with Tanh activation.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hx
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: params
+  type: List[Tensor]
+variants: {}
+operation: RnnTanh

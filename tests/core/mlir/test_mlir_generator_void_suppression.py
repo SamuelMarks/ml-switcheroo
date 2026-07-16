@@ -1,5 +1,4 @@
-"""
-Tests for Void Assignment Suppression in MLIR Generator.
+"""Tests for Void Assignment Suppression in MLIR Generator.
 
 Verifies that:
 1. Unused operations are emitted as Expr statements (no assignment).
@@ -25,8 +24,7 @@ def gen_code_from_block(ops: list[OperationNode]) -> str:
 
 
 def test_suppress_unused_result():
-  """
-  Scenario: %0 = foo(). %0 is never used.
+  """Scenario: %0 = foo(). %0 is never used.
   Expectation: `foo()` (Expr statement), NOT `_0 = foo()`.
   """
   op = OperationNode(
@@ -42,8 +40,7 @@ def test_suppress_unused_result():
 
 
 def test_assign_used_result():
-  """
-  Scenario: %0 = foo(). %1 = bar(%0).
+  """Scenario: %0 = foo(). %1 = bar(%0).
   Expectation: `_0 = foo()`, `_bar(_0)`.
   """
   op1 = OperationNode(
@@ -69,8 +66,7 @@ def test_assign_used_result():
 
 
 def test_suppress_super_init():
-  """
-  Scenario: %res = super().__init__(). even if %res is technically generated.
+  """Scenario: %res = super().__init__(). even if %res is technically generated.
   Expectation: `super().__init__()` without assignment prefix.
   """
   op_super = OperationNode(name="sw.op", results=[ValueNode("%0")], attributes=[AttributeNode("type", '"super"')])
@@ -89,9 +85,7 @@ def test_suppress_super_init():
 
 
 def test_super_init_pattern_detection():
-  """
-  Unit test for `_is_void_call` helper logic using LibCST nodes.
-  """
+  """Unit test for `_is_void_call` helper logic using LibCST nodes."""
   import libcst as cst
 
   gen = MlirToPythonGenerator()

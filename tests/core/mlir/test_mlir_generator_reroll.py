@@ -1,5 +1,4 @@
-"""
-Tests for Explicit Re-rolling (Default Behavior).
+"""Tests for Explicit Re-rolling (Default Behavior).
 
 Verifies that:
 1. Sequential SSA statements are generated for nested operations.
@@ -23,8 +22,7 @@ def gen_code_from_block(ops: list[OperationNode]) -> str:
 
 
 def test_default_rerolling_structure():
-  """
-  Scenario: %0 = foo(). %1 = bar(%0).
+  """Scenario: %0 = foo(). %1 = bar(%0).
   %0 is used. %1 is unused.
 
   Expect: _0 = foo(); bar(_0)
@@ -48,8 +46,7 @@ def test_default_rerolling_structure():
 
 
 def test_reroll_nested_chain():
-  """
-  Scenario: Chain A -> B -> C.
+  """Scenario: Chain A -> B -> C.
   Expect assignments for A and B. C is unused.
   """
   op1 = OperationNode(name="sw.call", results=[ValueNode("%a")], operands=[ValueNode("%funcA")])

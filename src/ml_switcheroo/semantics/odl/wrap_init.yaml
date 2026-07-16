@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- f
+- params
+- debug_info
+type: function
+operation: wrap_init

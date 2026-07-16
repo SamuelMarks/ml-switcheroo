@@ -1,0 +1,5 @@
+description: Unpack PackedSequence into a list of variable length Tensors.
+std_args:
+- packed_sequences
+type: function
+operation: unpack_sequence

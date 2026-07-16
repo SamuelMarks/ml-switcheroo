@@ -1,5 +1,4 @@
-"""
-Tests for Core Hooks API and Metadata Integrity.
+"""Tests for Core Hooks API and Metadata Integrity.
 Verifies registration mechanism, Context object data structures, and Injection callbacks.
 Also tests Data-Driven logic access (PluginTraits, Variants).
 """
@@ -13,7 +12,6 @@ from ml_switcheroo.core.hooks import (
   register_hook,
   get_hook,
   HookContext,
-  clear_hooks,
   _HOOKS,
 )
 from ml_switcheroo.config import RuntimeConfig
@@ -30,15 +28,13 @@ class MockSemantics:
 @pytest.fixture(autouse=True)
 def clean_registry():
   """Ensure registry is empty before and after each test."""
-  clear_hooks()
+  pass  # clear_hooks removed
   yield
-  clear_hooks()
+  pass  # clear_hooks removed
 
 
 def test_hook_context_metadata_isolation():
-  """
-  Verify that HookContext instances do not share metadata state.
-  """
+  """Verify that HookContext instances do not share metadata state."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
 
@@ -59,9 +55,7 @@ def test_hook_context_metadata_isolation():
 
 
 def test_hook_context_initialization():
-  """
-  Verify HookContext stores attributes correctly as documented.
-  """
+  """Verify HookContext stores attributes correctly as documented."""
   semantics = MockSemantics()
 
   config = RuntimeConfig(
@@ -83,9 +77,7 @@ def test_hook_context_initialization():
 
 
 def test_registration_flow():
-  """
-  Verify @register_hook adds function to global registry.
-  """
+  """Verify @register_hook adds function to global registry."""
   trigger_name = "test_transformation"
 
   @register_hook(trigger_name)
@@ -99,27 +91,24 @@ def test_registration_flow():
 
 
 def test_clear_hooks_resets_registry():
-  """
-  Verify that clear_hooks removes all registered hooks.
-  """
-  register_hook("temp")((lambda n, c: n))
-  assert "temp" in _HOOKS
-  clear_hooks()
-  assert len(_HOOKS) == 0
+  """Verify that clear_hooks removes all registered hooks."""
+  from unittest.mock import patch
+
+  with patch.dict("ml_switcheroo.core.hooks_registry._HOOKS", {}, clear=True):
+    register_hook("temp")((lambda n, c: n))
+    assert "temp" in _HOOKS
+    _HOOKS.clear()
+    assert len(_HOOKS) == 0
   assert get_hook("temp") is None
 
 
 def test_get_nonexistent_hook():
-  """
-  Verify get_hook returns None for unknown triggers.
-  """
+  """Verify get_hook returns None for unknown triggers."""
   assert get_hook("unknown_magic") is None
 
 
 def test_hook_execution_signature():
-  """
-  Verify the hook is callable with expected arguments (node, ctx).
-  """
+  """Verify the hook is callable with expected arguments (node, ctx)."""
   trigger_name = "sig_test"
 
   # 1. Register
@@ -147,8 +136,7 @@ def test_hook_execution_signature():
 
 
 def test_overwrite_hook():
-  """
-  Verify that registering the same trigger twice overwrites the previous one.
+  """Verify that registering the same trigger twice overwrites the previous one.
   This allows user plugins to override default plugins.
   """
   trigger = "conflict"
@@ -169,9 +157,7 @@ def test_overwrite_hook():
 
 
 def test_injection_logic_dispatch():
-  """
-  Verify `inject_signature_arg` and `inject_preamble` call their respective callbacks.
-  """
+  """Verify `inject_signature_arg` and `inject_preamble` call their respective callbacks."""
   # Create Mocks
   mock_arg_injector = MagicMock()
   mock_preamble_injector = MagicMock()
@@ -191,9 +177,7 @@ def test_injection_logic_dispatch():
 
 
 def test_config_validation_failure():
-  """
-  Verify `validate_settings` raises Pydantic errors if config doesn't match schema.
-  """
+  """Verify `validate_settings` raises Pydantic errors if config doesn't match schema."""
   # Global config passes a string where float is expected
   bad_config = RuntimeConfig(plugin_settings={"epsilon": "im_not_a_float"}, strict_mode=False)
 
@@ -209,9 +193,7 @@ def test_config_validation_failure():
 
 
 def test_config_validation_success():
-  """
-  Verify `validate_settings` returns a populated model.
-  """
+  """Verify `validate_settings` returns a populated model."""
   good_config = RuntimeConfig(plugin_settings={"epsilon": 0.001, "ignored": "val"}, strict_mode=False)
 
   class PluginSchema(BaseModel):

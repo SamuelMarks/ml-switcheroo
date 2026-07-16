@@ -1,0 +1,5 @@
+description: Transformer-XL attention.
+op_type: class
+std_args: []
+variants: {}
+operation: DotProductAttentionXL

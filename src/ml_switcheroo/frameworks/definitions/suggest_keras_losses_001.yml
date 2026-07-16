@@ -75,7 +75,7 @@ variants:
   tensorflow:
     api: "tf.keras.losses.BinaryFocalCrossentropy"
   torch:
-    # Torchvision or custom often required, but kornia has focal. 
+    # Torchvision or custom often required, but kornia has focal.
     # Providing null implies missing in core.
     api: null
   mlx:
@@ -131,7 +131,7 @@ variants:
   tensorflow:
     api: "tf.keras.losses.CategoricalCrossentropy"
   torch:
-    # Torch CrossEntropyLoss requires class indices by default or soft probs. 
+    # Torch CrossEntropyLoss requires class indices by default or soft probs.
     # Keras defaults to One-Hot. Torch supports probs if dim matches.
     api: "torch.nn.CrossEntropyLoss"
     args:
@@ -168,7 +168,7 @@ variants:
   tensorflow:
     api: "tf.keras.losses.CategoricalFocalCrossentropy"
   torch:
-    api: null 
+    api: null
 
 ---
 # 6. CategoricalGeneralizedCrossEntropy (Class)

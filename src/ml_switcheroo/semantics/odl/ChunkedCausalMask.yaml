@@ -1,0 +1,8 @@
+description: Lazy chunked causal mask.
+std_args:
+- self
+- shape
+- chunk_size
+- shard_count
+type: class
+operation: ChunkedCausalMask

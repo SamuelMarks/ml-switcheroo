@@ -1,0 +1,4 @@
+description: Auto-generated mapping for canonicalize_device_to_sharding.
+std_args: []
+variants: {}
+operation: canonicalize_device_to_sharding

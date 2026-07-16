@@ -1,6 +1,4 @@
-"""
-Tests for Decoupled Parameter Conversion Plugin.
-"""
+"""Tests for Decoupled Parameter Conversion Plugin."""
 
 import pytest
 import libcst as cst

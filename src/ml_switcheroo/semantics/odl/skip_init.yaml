@@ -1,0 +1,8 @@
+description: Given a module class object and args / kwargs, instantiate the module
+  without initializing parameters / buffers.
+std_args:
+- module_cls
+- args
+- kwargs
+type: function
+operation: skip_init

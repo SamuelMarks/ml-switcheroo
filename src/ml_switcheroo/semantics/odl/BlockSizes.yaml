@@ -1,0 +1,17 @@
+description: Tile sizes parameterizing SplashAttention kernels.
+std_args:
+- self
+- block_q
+- block_kv
+- block_kv_compute
+- block_q_dkv
+- block_kv_dkv
+- block_kv_dkv_compute
+- block_q_dq
+- block_kv_dq
+- use_fused_bwd_kernel
+- q_layout
+- k_layout
+- v_layout
+type: class
+operation: BlockSizes

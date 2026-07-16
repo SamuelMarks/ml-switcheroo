@@ -1,0 +1,6 @@
+description: Packs a list of variable length Tensors.
+std_args:
+- sequences
+- enforce_sorted
+type: function
+operation: pack_sequence

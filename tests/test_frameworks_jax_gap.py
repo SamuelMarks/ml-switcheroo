@@ -1,8 +1,11 @@
+"""Auto-generated doc."""
+
 from unittest import mock
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 
 
 def test_jax_import_success():
+  """Auto-generated doc."""
   with mock.patch.dict("sys.modules", {"jax": mock.MagicMock(), "jax.numpy": mock.MagicMock()}):
     import ml_switcheroo.frameworks.jax as fjax
     import importlib
@@ -13,6 +16,7 @@ def test_jax_import_success():
 
 
 def test_jax_convert_fallback():
+  """Auto-generated doc."""
   mock_jax = mock.MagicMock()
   mock_jnp = mock.MagicMock()
   with mock.patch.dict("sys.modules", {"jax": mock_jax, "jax.numpy": mock_jnp}):

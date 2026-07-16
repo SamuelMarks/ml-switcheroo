@@ -1,0 +1,9 @@
+description: Generates a random BCOO array.
+std_args:
+- rng
+- rand_method
+- nse
+- n_batch
+- n_dense
+type: function
+operation: rand_bcoo

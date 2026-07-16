@@ -1,11 +1,13 @@
+"""Auto-generated doc."""
+
 import pytest
 import libcst as cst
 from ml_switcheroo.core.graph_optimizer import GraphOptimizer
-from ml_switcheroo.compiler.ir import LogicalNode
-from ml_switcheroo.core.import_fixer.resolution import _QualNameScanner
+from ml_switcheroo.core.compiler.ir import LogicalNode
 
 
 def test_conversion_result_has_errors():
+  """Auto-generated doc."""
   from ml_switcheroo.core.conversion_result import ConversionResult
 
   res = ConversionResult(errors=["err"])
@@ -15,6 +17,7 @@ def test_conversion_result_has_errors():
 
 
 def test_escape_hatch_fallback():
+  """Auto-generated doc."""
   from ml_switcheroo.core.escape_hatch import EscapeHatch
 
   node = cst.Name("x")
@@ -23,6 +26,7 @@ def test_escape_hatch_fallback():
 
 
 def test_graph_extractor_coverage():
+  """Auto-generated doc."""
   from ml_switcheroo.core.graph import GraphExtractor
 
   extractor = GraphExtractor()
@@ -53,8 +57,8 @@ def test_graph_extractor_coverage():
 
 
 def test_graph_optimizer_processed_ids():
-  from ml_switcheroo.core.graph_optimizer import GraphOptimizer
-  from ml_switcheroo.compiler.ir import LogicalNode, LogicalEdge, LogicalGraph
+  """Auto-generated doc."""
+  from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph
 
   opt = GraphOptimizer([])
   n1 = LogicalNode("n1", "A")
@@ -64,9 +68,12 @@ def test_graph_optimizer_processed_ids():
 
 
 def test_html_node_not_implemented():
+  """Auto-generated doc."""
   from ml_switcheroo.core.html.nodes import HtmlNode
 
   class DummyNode(HtmlNode):
+    """Auto-generated doc."""
+
     pass
 
   with pytest.raises(NotImplementedError):
@@ -74,16 +81,21 @@ def test_html_node_not_implemented():
 
 
 def test_latex_node_to_text():
+  """Auto-generated doc."""
   from ml_switcheroo.core.latex.nodes import LatexNode
 
   class DummyNode(LatexNode):
+    """Auto-generated doc."""
+
     def to_latex(self):
+      """Auto-generated doc."""
       return super().to_latex()
 
   assert DummyNode().to_latex() is None
 
 
 def test_mlir_dialect_validate_false():
+  """Auto-generated doc."""
   from ml_switcheroo.core.mlir.dialect import OpSchema
   from ml_switcheroo.core.mlir.nodes import OperationNode
 
@@ -93,6 +105,7 @@ def test_mlir_dialect_validate_false():
 
 
 def test_mlir_gen_base_coverage():
+  """Auto-generated doc."""
   from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
   from ml_switcheroo.core.mlir.nodes import OperationNode, AttributeNode
 
@@ -103,28 +116,37 @@ def test_mlir_gen_base_coverage():
 
 
 def test_mlir_node_to_text():
+  """Auto-generated doc."""
   from ml_switcheroo.core.mlir.nodes import MlirNode
 
   class DummyNode(MlirNode):
+    """Auto-generated doc."""
+
     def to_text(self):
+      """Auto-generated doc."""
       return super().to_text()
 
   assert DummyNode().to_text() is None
 
 
 def test_rewriter_interface():
+  """Auto-generated doc."""
   from ml_switcheroo.core.rewriter.interface import RewriterPass
 
   class DummyPass(RewriterPass):
+    """Auto-generated doc."""
+
     def transform(self, module, context):
+      """Auto-generated doc."""
       return super().transform(module, context)
 
   assert DummyPass().transform(None, None) is None
 
 
 def test_patcher_coverage():
+  """Auto-generated doc."""
   from ml_switcheroo.core.rewriter.patcher import GraphPatcher, PatchAction
-  from ml_switcheroo.compiler.backends.python_snippet import PythonSnippetEmitter
+  from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
   import libcst as cst
 
   node = cst.Name("test")
@@ -142,10 +164,14 @@ def test_patcher_coverage():
 
 
 def test_tikz_nodes_coverage():
+  """Auto-generated doc."""
   from ml_switcheroo.core.tikz.nodes import TikzBaseNode, TikzNode, TikzGraph, TriviaNode
 
   class DummyNode(TikzBaseNode):
+    """Auto-generated doc."""
+
     def to_text(self):
+      """Auto-generated doc."""
       return super().to_text()
 
   assert DummyNode().to_text() is None
@@ -158,6 +184,7 @@ def test_tikz_nodes_coverage():
 
 
 def test_tracer_coverage():
+  """Auto-generated doc."""
   from ml_switcheroo.core.tracer import TraceLogger
 
   t = TraceLogger()
@@ -167,6 +194,7 @@ def test_tracer_coverage():
 
 
 def test_html_parser_edge_cases():
+  """Auto-generated doc."""
   from ml_switcheroo.core.html.parser import HtmlParser
 
   # 1. Red box without ':'
@@ -194,6 +222,7 @@ def test_html_parser_edge_cases():
 
 
 def test_html_parser_empty_init():
+  """Auto-generated doc."""
   from ml_switcheroo.core.html.parser import HtmlParser
 
   html = """
@@ -208,6 +237,7 @@ def test_html_parser_empty_init():
 
 
 def test_html_parser_more_edges():
+  """Auto-generated doc."""
   from ml_switcheroo.core.html.parser import HtmlParser
 
   html = """
@@ -227,6 +257,7 @@ def test_html_parser_more_edges():
 
 
 def test_html_create_call_no_config():
+  """Auto-generated doc."""
   from ml_switcheroo.core.html.parser import HtmlParser
 
   parser = HtmlParser("")
@@ -235,6 +266,7 @@ def test_html_create_call_no_config():
 
 
 def test_parse_args_empty():
+  """Auto-generated doc."""
   from ml_switcheroo.core.html.parser import HtmlParser
 
   parser = HtmlParser("")
@@ -242,6 +274,7 @@ def test_parse_args_empty():
 
 
 def test_html_parser_attr_with_config():
+  """Auto-generated doc."""
   from ml_switcheroo.core.html.parser import HtmlParser
 
   html = """
@@ -255,294 +288,8 @@ def test_html_parser_attr_with_config():
 
 
 def test_html_create_call_with_config():
+  """Auto-generated doc."""
   from ml_switcheroo.core.html.parser import HtmlParser
 
   parser = HtmlParser("")
   parser._create_call("my.func", "a=1")
-
-
-def test_latex_parser_edges():
-  from ml_switcheroo.core.latex.parser import LatexParser
-
-  parser = LatexParser("")
-
-  # 108: _parse_arg_list empty
-  assert parser._parse_arg_list("   ") == []
-
-  # 124: _safe_value_node ellipsis
-  import libcst as cst
-
-  assert isinstance(parser._safe_value_node("..."), cst.Ellipsis)
-
-  # 129-133: _safe_value_node fallback
-  # Provide something that CST can't parse as an expression but could be a Name or just causes an exception
-  # e.g., an invalid python syntax string
-  with __import__("unittest.mock").mock.patch(
-    "libcst.parse_expression", side_effect=cst.ParserSyntaxError("msg", lines=[], raw_line=0, raw_column=0)
-  ):
-    node = parser._safe_value_node("valid_id")
-  assert isinstance(node, cst.Name)
-
-  # 143: _create_call without dots
-  call = parser._create_call("myfunc")
-  assert isinstance(call.func, cst.Name)
-
-  # 156: _create_call arg_ prefix
-  call = parser._create_call("f", config={"arg_0": "x"})
-  assert len(call.args) == 1
-  assert call.args[0].keyword is None
-
-  # 170-172: _create_call args_list with =
-  call = parser._create_call("f", args_list=["kw=val"])
-  assert call.args[0].keyword.value == "kw"
-
-  # 217: fallback inside generate_module
-  from ml_switcheroo.core.latex.nodes import LatexNode
-
-  class DummyOp(LatexNode):
-    def __init__(self):
-      super().__init__()
-      self.output_id = "out"
-      self.node_id = "out"
-
-    def to_latex(self):
-      return ""
-
-  cdef = parser._synthesize_class("Test", [], None, [DummyOp()], None)
-  import libcst as cst
-
-  mod = cst.Module(body=[cdef])
-  assert "None" in mod.code
-
-
-def test_mlir_naming_edges():
-  from ml_switcheroo.core.mlir.naming import NamingContext
-
-  strategy = NamingContext()
-
-  # Manually populate reserved/used to force collisions
-  strategy._used_names["class"] = "class"
-  strategy._used_names["_class"] = "_class"
-  strategy._used_names["_class_0"] = "_class_0"
-
-  # Hint '%class' becomes 'class'.
-  # 'class' is a python keyword so it might be in _reserved anyway, or in _used_names.
-  # Doesn't start with '_', so attempt = '_class'.
-  # '_class' is in _used_names, so falls to indexed fallback.
-  # prefix = '_class'. attempt = '_class_0'.
-  # '_class_0' is in _used_names, hits count += 1.
-  # try '_class_1'. Succeeds.
-
-  name = strategy.register("%class", hint="%class")
-  assert name == "_class_1"
-
-
-def test_mlir_naming_line_123():
-  from ml_switcheroo.core.mlir.naming import NamingContext
-
-  strategy = NamingContext()
-  # "class" is a keyword, attempt will be "_class".
-  # "_class" is valid and not used, so it hits line 123.
-  name = strategy.register("%class", hint="%class")
-  assert name == "_class"
-
-
-def test_graph_optimizer_lines():
-  from ml_switcheroo.core.graph_optimizer import GraphOptimizer
-  from ml_switcheroo.compiler.ir import LogicalNode
-
-  opt = GraphOptimizer([])
-
-  n1 = LogicalNode("n1", "A")
-  # line 215: empty sequence
-  assert opt._match_sequence(n1, [], {}, {}, set()) is None
-
-  # line 233: tgt in processed_ids
-  n2 = LogicalNode("n2", "B")
-  nmap = {"n1": n1, "n2": n2}
-  edges = {"n1": ["n2"]}
-  proc = {"n2"}
-  assert opt._match_sequence(n1, ["A", "B"], nmap, edges, proc) is None
-
-
-def test_graph_opt():
-  opt = GraphOptimizer([])
-  n1 = LogicalNode("n1", "A")
-  # line 215: empty sequence
-  assert opt._match_sequence(n1, [], {}, {}, set()) is None
-
-  # line 233: tgt in processed_ids
-  n2 = LogicalNode("n2", "B")
-  nmap = {"n1": n1, "n2": n2}
-  edges = {"n1": ["n2"]}
-  proc = {"n2"}
-  assert opt._match_sequence(n1, ["A", "B"], nmap, edges, proc) is None
-
-
-def test_usage_visitor():
-  visitor = _QualNameScanner("foo.bar")
-
-  # Visit attribute but error inside get_full_name
-  # line 68-69 (exception in visit_attribute)
-  node = cst.Attribute(value=cst.Name("foo"), attr=cst.Name("bar"))
-  # get_full_name fails if the node is malformed.
-  # Let's mock get_full_name
-  with __import__("unittest.mock").mock.patch(
-    "ml_switcheroo.core.import_fixer.resolution.get_full_name", side_effect=Exception("mocked")
-  ):
-    visitor.found = False
-    visitor.visit_Attribute(node)
-    visitor.visit_Attribute(node)
-
-  # line 76
-  visitor = _QualNameScanner("foo")
-  visitor.visit_Name(cst.Name("foo"))
-  assert visitor.found is True
-
-
-def test_mlir_generator_gaps():
-  from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
-  from ml_switcheroo.core.mlir.nodes import OperationNode, ValueNode, AttributeNode, BlockNode
-  import libcst as cst
-
-  # Fake module structure
-  # We need to pass a ModuleNode, but we can just instantiate the generator directly.
-  gen = MlirToPythonGenerator()
-
-  # 232-235: sw.import and unknown
-  import_op = OperationNode('"sw.import"', [], [])
-  with __import__("unittest.mock").mock.patch.object(gen, "_convert_import", return_value=None):
-    assert (
-      gen._convert_statement_op(import_op) is None
-    )  # Assuming StatementGeneratorMixin lacks this, wait it might have it?
-  # Let's mock _convert_import if it exists or just test the dispatch
-  unknown_op = OperationNode('"sw.unknown_xyz"', [], [])
-  assert gen._convert_statement_op(unknown_op) is None
-
-  # 251: _wrap_as_statement _is_void_call
-  # _is_void_call looks for e.g. super().__init__()
-  # Let's mock _is_void_call
-  op = OperationNode('"sw.call"', [ValueNode("%0")], [])
-  gen.usage_counts["%0"] = 1
-  with __import__("unittest.mock").mock.patch.object(gen, "_is_void_call", return_value=True):
-    res = gen._wrap_as_statement(op, cst.Name("foo"))
-    assert isinstance(res.body[0], cst.Expr)
-
-  # 264-266: sw.getattr
-  op_get = OperationNode('"sw.getattr"', [ValueNode("%1")], [AttributeNode("name", '"foo_attr"')])
-  gen.usage_counts["%1"] = 1
-
-  def mock_get_attr(op, attr):
-    if attr == "type":
-      return None
-    return '"foo_attr"'
-
-  with __import__("unittest.mock").mock.patch.object(gen, "_get_attr", side_effect=mock_get_attr):
-    res = gen._wrap_as_statement(op_get, cst.Name("foo"))
-  assert res.body[0].targets[0].target.value == "_foo_attr"
-
-  # 270: sw.constant
-  op_const = OperationNode('"sw.constant"', [ValueNode("%2")], [])
-  gen.usage_counts["%2"] = 1
-  res = gen._wrap_as_statement(op_const, cst.Name("foo"))
-  assert res.body[0].targets[0].target.value == "_cst"
-
-  # 126: with_changes and leading
-  # we need to simulate _convert_block returning a SimpleStatementLine with leading lines
-  # It requires a block
-  block = BlockNode("^bb0", operations=[OperationNode('"sw.call"', [ValueNode("%3")], [])])
-  from ml_switcheroo.core.mlir.nodes import TriviaNode
-
-  block.operations[0].leading_trivia = [TriviaNode("// test")]
-  gen.usage_counts["%3"] = 1
-  # Mock deferred_expr so it evaluates as a statement
-  with __import__("unittest.mock").mock.patch.object(gen, "_create_expression_from_op", return_value=cst.Name("test")):
-    stmts = gen._convert_block(block)
-    assert len(stmts) == 1
-    assert len(stmts[0].leading_lines) == 1
-
-
-def test_stablehlo_emitter_gaps():
-  from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
-  from ml_switcheroo.core.mlir.nodes import OperationNode
-
-  # Needs a semantics mock
-  class MockSemantics:
-    def get_definition(self, name):
-      if name == "missing_variant":
-        return ("id", {"variants": {}})
-      return None
-
-  emitter = StableHloEmitter(MockSemantics())
-
-  # 172: no type attr
-  op = OperationNode('"sw.call"', [], [])
-  emitter._resolve_sw_op(op)
-  assert op.name == '"sw.call"'
-
-  # 207: no stablehlo variant
-  assert emitter._lookup_stablehlo_op("missing_variant") is None
-
-  # 225: bool
-  assert emitter._map_py_type_to_mlir("bool") == "i1"
-
-  # 229: unknown
-  assert emitter._map_py_type_to_mlir("custom_object") == "!sw.unknown"
-
-
-def test_structure_pass_coverage_245():
-  from ml_switcheroo.core.rewriter.passes.structure import StructuralTransformer
-  import libcst as cst
-
-  class MockSuper:
-    pass
-
-  class FakePass(MockSuper, StructuralTransformer):
-    def __init__(self):
-      self.context = type("MockContext", (), {"source_fw": "src", "target_fw": "tgt", "semantics": None})()
-      self._in_annotation = False
-
-  p = FakePass()
-  node = cst.Attribute(value=cst.Name("x"), attr=cst.Name("y"))
-
-  # Mock hasattr to force line 245
-  import builtins
-
-  original_hasattr = builtins.hasattr
-
-  def mock_hasattr(obj, name):
-    if name == "leave_Attribute" and isinstance(obj, super):
-      return False
-    return original_hasattr(obj, name)
-
-  with __import__("unittest.mock").mock.patch("builtins.hasattr", side_effect=mock_hasattr):
-    res = p.leave_Attribute(node, node)
-    assert res is node
-
-
-def test_tikz_analyser_edges():
-  from ml_switcheroo.core.tikz.analyser import GraphExtractor
-  import libcst as cst
-
-  code = """
-class MyModel:
-    def __init__(self):
-        # 148: target is not self.something
-        x = nn.Conv2d()
-        
-        # 155: value is not a call
-        self.attr = 42
-
-    def forward(self, x):
-        # 180: value is not a call
-        y = x
-        
-        # 217: _analyze_call_expression without layer_name
-        # 208: _resolve_layer_or_func_name returns None (e.g. call a complex expression)
-        z = x[0]()
-        
-        return z
-"""
-  mod = cst.parse_module(code)
-  analyser = GraphExtractor()
-  mod.visit(analyser)

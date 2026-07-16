@@ -1,0 +1,12 @@
+description: The class representing a Python class.
+std_args:
+- self
+- launch_context
+- single_thread_per_block_predicate
+- single_thread_per_warpgroup_predicate
+- single_warp_per_block_predicate
+- auto_barriers
+- smem_requested_bytes
+- lowered_operations
+type: class
+operation: LoweringContext

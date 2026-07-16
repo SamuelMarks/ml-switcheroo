@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import pytest
 
 from ml_switcheroo.importers.sass_reader import SassHtmlParser, SassSpecImporter
@@ -5,15 +7,18 @@ from ml_switcheroo.importers.sass_reader import SassHtmlParser, SassSpecImporter
 
 @pytest.fixture
 def parser():
+  """Auto-generated doc."""
   return SassHtmlParser()
 
 
 @pytest.fixture
 def importer():
+  """Auto-generated doc."""
   return SassSpecImporter()
 
 
 def test_sass_html_parser(parser):
+  """Auto-generated doc."""
   html = """
     <table>
         <tbody>
@@ -40,10 +45,12 @@ def test_sass_html_parser(parser):
 
 
 def test_parse_file_not_found(importer, tmp_path):
+  """Auto-generated doc."""
   assert importer.parse_file(tmp_path / "missing.html") == {}
 
 
 def test_parse_file_utf8(importer, tmp_path):
+  """Auto-generated doc."""
   html_file = tmp_path / "doc.html"
   html_file.write_text("<table><tbody><tr><td>FADD</td><td>FP32 Add</td></tr></tbody></table>", encoding="utf-8")
 
@@ -53,6 +60,7 @@ def test_parse_file_utf8(importer, tmp_path):
 
 
 def test_parse_file_fallback_encoding(importer, tmp_path):
+  """Auto-generated doc."""
   html_file = tmp_path / "doc.html"
   # Write invalid UTF-8
   html_file.write_bytes(b"<table><tbody><tr><td>FMUL</td><td>FP32 Multiply \xff</td></tr></tbody></table>")
@@ -63,6 +71,7 @@ def test_parse_file_fallback_encoding(importer, tmp_path):
 
 
 def test_conflict_resolution(importer, tmp_path):
+  """Auto-generated doc."""
   html_file = tmp_path / "doc.html"
   html = """
     <table>
@@ -81,6 +90,7 @@ def test_conflict_resolution(importer, tmp_path):
 
 
 def test_infer_abstract_op(importer):
+  """Auto-generated doc."""
   # Mnemonics
   assert importer._infer_abstract_op("FADD", "Unknown") == "Add"
   assert importer._infer_abstract_op("FMUL", "Unknown") == "Mul"

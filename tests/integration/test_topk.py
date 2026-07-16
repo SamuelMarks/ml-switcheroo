@@ -1,6 +1,4 @@
-"""
-Integration Tests for TopK Semantics.
-"""
+"""Integration Tests for TopK Semantics."""
 
 import pytest
 import libcst as cst

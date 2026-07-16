@@ -1,0 +1,9 @@
+description: Puts the model or node into training mode (enabling dropout, batch norm
+  updating).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: node
+  type: Any
+variants: {}
+operation: TrainMode

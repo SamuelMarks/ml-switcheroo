@@ -1,0 +1,5 @@
+description: The class representing a Python function.
+std_args:
+- x
+type: function
+operation: attr_get

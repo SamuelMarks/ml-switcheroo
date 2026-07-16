@@ -1,0 +1,5 @@
+description: Enumeration for JAX checkpoint types.
+op_type: class
+std_args: []
+variants: {}
+operation: AutodiffCheckpointType

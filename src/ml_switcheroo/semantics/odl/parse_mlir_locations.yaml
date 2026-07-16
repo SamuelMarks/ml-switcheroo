@@ -1,0 +1,5 @@
+description: The class representing a Python function.
+std_args:
+- mlir_dump
+type: function
+operation: parse_mlir_locations

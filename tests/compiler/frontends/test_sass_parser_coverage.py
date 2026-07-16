@@ -1,10 +1,13 @@
-from ml_switcheroo.compiler.frontends.sass.parser import SassParser
+"""Auto-generated doc."""
+
+from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
 
 
 def test_sass_parser_missing():
+  """Auto-generated doc."""
   parser = SassParser(".text\n.global main")
   try:
-    from ml_switcheroo.compiler.frontends.sass.parser import LabelRef as PLabelRef
+    from ml_switcheroo.core.compiler.frontends.sass.nodes import LabelRef as PLabelRef
 
     r = PLabelRef("test")
     assert str(r) == "test"

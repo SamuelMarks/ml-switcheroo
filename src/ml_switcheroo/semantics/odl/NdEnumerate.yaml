@@ -1,0 +1,8 @@
+description: Multidimensional index iterator.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: arr
+  type: Array
+variants: {}
+operation: NdEnumerate

@@ -1,0 +1,7 @@
+description: The class representing a Python function.
+std_args:
+- topology_name
+- platform
+- kwargs
+type: function
+operation: get_topology_desc

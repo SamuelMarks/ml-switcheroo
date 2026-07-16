@@ -265,7 +265,7 @@ variants:
   keras:
     api: null
   tensorflow:
-    api: "tf.raw_ops.AffineGrid" 
+    api: "tf.raw_ops.AffineGrid"
     # Partial support via raw ops, arguments may differ significantly
   mlx:
     api: null
@@ -649,12 +649,12 @@ variants:
     api: "jnp.angle"
   keras:
     # Not in keras.ops standard yet, fallback to numpy
-    api: "numpy.angle" 
+    api: "numpy.angle"
   tensorflow:
     api: "tf.math.angle"
   mlx:
-    # MLX lacks direct angle for complex currently, usually composite 
-    api: null 
+    # MLX lacks direct angle for complex currently, usually composite
+    api: null
   numpy:
     api: "np.angle"
 

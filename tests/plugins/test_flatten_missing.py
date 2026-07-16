@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 from ml_switcheroo.plugins.flatten import transform_flatten
@@ -5,6 +7,7 @@ from ml_switcheroo.core.hooks import HookContext
 
 
 def test_flatten_unhandled_fw():
+  """Auto-generated doc."""
   ctx = MagicMock(spec=HookContext)
   ctx.target_fw = "unknown"
   ctx.current_op_id = "Flatten"

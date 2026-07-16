@@ -1,0 +1,8 @@
+description: Returns column indices of sparse tensor (copy).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: ColIndicesCopy

@@ -12,7 +12,7 @@ from pathlib import Path
 # scan the current directory for modules
 _pkg_dir = Path(__file__).parent
 
-for _, module_name, _ in pkgutil.iter_modules([str(_pkg_dir)]):
+for _, module_name, _ in pkgutil.iter_modules([str(_pkg_dir)]):  # type: ignore
   # Skip potential future protected modules if necessary
   if module_name.startswith("_") or "utils" in module_name or "helpers" in module_name:
     continue  # pragma: no cover

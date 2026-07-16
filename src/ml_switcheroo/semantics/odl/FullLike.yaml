@@ -1,0 +1,12 @@
+description: Returns a tensor with the same size as input filled with fill_value.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: fill_value
+  type: float
+variants: {}
+operation: FullLike

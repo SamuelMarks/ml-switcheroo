@@ -1,0 +1,8 @@
+description: Transfer parametrizations and the parameters they parametrize from :attr:`from_module`
+  to :attr:`to_module`.
+std_args:
+- from_module
+- to_module
+- tensor_name
+type: function
+operation: transfer_parametrizations_and_params

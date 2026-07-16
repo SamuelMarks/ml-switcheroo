@@ -1,0 +1,8 @@
+description: Transposes a matrix (or a stack of matrices) swapping the last two dimensions.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: MatrixTranspose

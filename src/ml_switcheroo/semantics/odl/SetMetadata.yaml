@@ -1,0 +1,8 @@
+description: Attaches metadata to a graph node.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: node
+  type: Any
+variants: {}
+operation: SetMetadata

@@ -1,0 +1,8 @@
+description: Convenience function to call philox_4x32_kernel with padded shapes.
+std_args:
+- key
+- shape
+- offset
+- fuse_output
+type: function
+operation: philox_4x32_count

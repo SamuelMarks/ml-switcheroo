@@ -1,0 +1,14 @@
+description: Reload a Keras model/layer that was saved via SavedModel / ExportArchive.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: filepath
+  type: str
+- default: serve
+  is_variadic: false
+  kind: positional_or_keyword
+  name: call_endpoint
+  type: str
+variants: {}
+operation: TFSMLayer

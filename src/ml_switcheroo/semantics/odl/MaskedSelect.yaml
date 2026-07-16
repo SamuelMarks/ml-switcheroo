@@ -1,0 +1,13 @@
+description: Returns a new 1-D tensor which indexes the input tensor according to
+  the boolean mask.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mask
+  type: Tensor
+variants: {}
+operation: MaskedSelect

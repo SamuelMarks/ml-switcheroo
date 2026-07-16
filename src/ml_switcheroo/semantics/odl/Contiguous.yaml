@@ -1,0 +1,8 @@
+description: Force an array to be row contiguous.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: Contiguous

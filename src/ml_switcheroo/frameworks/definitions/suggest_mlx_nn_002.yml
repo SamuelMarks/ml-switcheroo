@@ -318,7 +318,7 @@ variants:
       in_features: "input_dims"
       out_features: "output_dims"
   torch:
-    api: null 
+    api: null
 
 ---
 operation: "QuantizedAllToShardedLinear"
@@ -641,7 +641,7 @@ variants:
   mlx:
     api: "mlx.nn.Softmax"
     args:
-      dim: null # mlx Softmax default class usually over last dim or configurable? Docs say Softmax() 
+      dim: null # mlx Softmax default class usually over last dim or configurable? Docs say Softmax()
   torch:
     api: "torch.nn.Softmax"
   keras:

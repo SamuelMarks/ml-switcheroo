@@ -1,0 +1,8 @@
+description: Create a partial from a NNX transformed function.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: f
+  type: Callable
+variants: {}
+operation: CachedPartial

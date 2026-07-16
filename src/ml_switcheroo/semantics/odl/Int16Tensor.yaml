@@ -1,0 +1,8 @@
+description: Constructor/Type for 16-bit integer tensors.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data
+  type: Any
+variants: {}
+operation: Int16Tensor

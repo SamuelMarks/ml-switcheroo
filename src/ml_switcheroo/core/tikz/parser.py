@@ -361,7 +361,7 @@ class TikzParser:
       return ("Unknown", {})
 
     kind = content[0]
-    metadata = {}
+    metadata = {}  # type: ignore
 
     # The rest should be key-value pairs?
     # The emitter puts ID in italics as row 2.

@@ -1,0 +1,4 @@
+description: Return current print options.
+std_args: []
+variants: {}
+operation: GetPrintoptions

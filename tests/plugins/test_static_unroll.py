@@ -1,5 +1,4 @@
-"""
-Tests for Static Loop Unrolling Plugin.
+"""Tests for Static Loop Unrolling Plugin.
 
 Verifies:
 1.  **Detection**: Identifies `for i in range(N)` where N is a static integer.
@@ -49,8 +48,7 @@ def rewriter():
 
 
 def test_unroll_simple_range(rewriter):
-  """
-  Input:
+  """Input:
       for i in range(2):
           print(i)
   Output:
@@ -66,8 +64,7 @@ def test_unroll_simple_range(rewriter):
 
 
 def test_unroll_dependency_replacement(rewriter):
-  """
-  Input:
+  """Input:
       x = 0
       for i in range(2):
           x = x + i
@@ -90,8 +87,7 @@ for i in range(2):
 
 
 def test_ignore_dynamic_range(rewriter):
-  """
-  Input: for i in range(N): ...
+  """Input: for i in range(N): ...
   Output: Preserved (or handled by fallback).
   """
   code = "for i in range(N):\n    pass"
@@ -102,8 +98,7 @@ def test_ignore_dynamic_range(rewriter):
 
 
 def test_safety_limit(rewriter):
-  """
-  Input: range(100)
+  """Input: range(100)
   Output: Preserved (too large to unroll).
   """
   code = "for i in range(100):\n    pass"

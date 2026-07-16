@@ -44,7 +44,7 @@ class SvgArrow(HtmlNode):
     """Renders the arrow as an absolute SVG element.
     Adds 'sw-arrow' class for scoped styling.
     """
-    return f""" 
+    return f"""
     <svg class="sw-arrow" style="{self.parent_style}">
       <line x1="{self.x1}" y1="{self.y1}" x2="{self.x2}" y2="{self.y2}" class="{self.style_class}" marker-end="{self.marker_end}" />
     </svg>"""
@@ -87,10 +87,10 @@ class GridBox(HtmlNode):
     # Render arrows inside the box div to allow relative positioning
     arrow_html = "".join(a.to_html() for a in self.arrows)
 
-    return f""" 
+    return f"""
   <div class="{self.css_class}" style="{style}">
-    {"".join(content)} 
-    {arrow_html} 
+    {"".join(content)}
+    {arrow_html}
   </div>"""
 
 
@@ -106,80 +106,80 @@ class HtmlDocument(HtmlNode):
   # 1. Scoped .grid -> .sw-grid to avoid conflicts.
   # 2. Replaced global 'svg' selector with '.sw-arrow'.
   # 3. Changed .col-mid-bg to 'grid-row: 1 / -1' for full height.
-  _CSS = """ 
-  .sw-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 200px 1fr; 
-    gap: 40px; 
-    position: relative; 
-    max-width: 950px; 
-    font-family: sans-serif; 
-    font-size: 14px; 
-    background-color: #fcfcfc; 
-    padding: 20px; 
-  } 
+  _CSS = """
+  .sw-grid {
+    display: grid;
+    grid-template-columns: 1fr 200px 1fr;
+    gap: 40px;
+    position: relative;
+    max-width: 950px;
+    font-family: sans-serif;
+    font-size: 14px;
+    background-color: #fcfcfc;
+    padding: 20px;
+  }
 
-  /* Middle Column Borders (Background) */ 
-  .col-mid-bg { 
-    grid-column: 2; 
-    /* Span from row 1 to the end */ 
-    grid-row: 1 / -1; 
-    border-left: 2px dotted #bbb; 
-    border-right: 2px dotted #bbb; 
-    z-index: 0; 
-    pointer-events: none; 
-  } 
+  /* Middle Column Borders (Background) */
+  .col-mid-bg {
+    grid-column: 2;
+    /* Span from row 1 to the end */
+    grid-row: 1 / -1;
+    border-left: 2px dotted #bbb;
+    border-right: 2px dotted #bbb;
+    z-index: 0;
+    pointer-events: none;
+  }
 
-  /* HEADERS */ 
-  .sw-grid h3 { margin: 0; font-size: 16px; text-decoration: underline; white-space: nowrap; align-self: end; padding-bottom: 10px; color: #333; } 
+  /* HEADERS */
+  .sw-grid h3 { margin: 0; font-size: 16px; text-decoration: underline; white-space: nowrap; align-self: end; padding-bottom: 10px; color: #333; }
 
-  /* BOX STYLES */ 
-  .sw-grid .box { 
-    border: 2px solid; 
-    padding: 8px 12px; 
-    border-radius: 6px; 
-    background: white; 
-    position: relative; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: center; 
-    box-sizing: border-box; 
-    height: 100%; 
-    z-index: 2; 
-  } 
+  /* BOX STYLES */
+  .sw-grid .box {
+    border: 2px solid;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: white;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 100%;
+    z-index: 2;
+  }
 
-  .sw-grid .header-txt { font-weight: bold; color: black; margin-bottom: 4px; display: block; } 
-  .sw-grid code { font-family: monospace; font-size: 12px; color: #444; display: block; background: rgba(0,0,0,0.05); padding: 2px; border-radius: 3px; } 
+  .sw-grid .header-txt { font-weight: bold; color: black; margin-bottom: 4px; display: block; }
+  .sw-grid code { font-family: monospace; font-size: 12px; color: #444; display: block; background: rgba(0,0,0,0.05); padding: 2px; border-radius: 3px; }
 
-  /* COLORS & SPECIFICS */ 
-  .sw-grid .r { border-color: #d00; background: #ffecec; } 
-  .sw-grid .b { border-color: #00d; background: #ecf0ff; width: 90%; justify-self: center; } 
-  .sw-grid .g { border-color: #080; background: #ecffec; } 
+  /* COLORS & SPECIFICS */
+  .sw-grid .r { border-color: #d00; background: #ffecec; }
+  .sw-grid .b { border-color: #00d; background: #ecf0ff; width: 90%; justify-self: center; }
+  .sw-grid .g { border-color: #080; background: #ecffec; }
 
-  .sw-grid .circ { 
-    width: 60px; height: 60px; 
-    border-radius: 50%; 
-    background: darkblue; color: white; 
-    display: flex; align-items: center; justify-content: center; 
-    font-weight: bold; 
-    justify-self: center; align-self: center; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
-    z-index: 2; 
-  } 
+  .sw-grid .circ {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: darkblue; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
+    justify-self: center; align-self: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    z-index: 2;
+  }
 
-  /* SVG Overlays */ 
-  .sw-arrow { 
-    position: absolute; 
-    overflow: visible; 
-    pointer-events: none; 
-    z-index: 10; 
-    width: 1px; 
-    height: 1px; 
-  } 
+  /* SVG Overlays */
+  .sw-arrow {
+    position: absolute;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 10;
+    width: 1px;
+    height: 1px;
+  }
 
-  .sw-grid .s-red   { stroke: #d00; stroke-width: 2; stroke-dasharray: 4; fill: none; } 
-  .sw-grid .s-blue  { stroke: #00d; stroke-width: 2; fill: none; } 
-  .sw-grid .s-green { stroke: #080; stroke-width: 2; stroke-dasharray: 4; fill: none; } 
+  .sw-grid .s-red   { stroke: #d00; stroke-width: 2; stroke-dasharray: 4; fill: none; }
+  .sw-grid .s-blue  { stroke: #00d; stroke-width: 2; fill: none; }
+  .sw-grid .s-green { stroke: #080; stroke-width: 2; stroke-dasharray: 4; fill: none; }
 """
 
   def to_html(self) -> str:
@@ -203,11 +203,11 @@ class HtmlDocument(HtmlNode):
 <html>
 <head>
 <style>
-{self._CSS} 
-  /* Explicit Row Heights */ 
-  .sw-grid {{ 
-    grid-template-rows: 30px repeat({repeat_count}, 80px); 
-  }} 
+{self._CSS}
+  /* Explicit Row Heights */
+  .sw-grid {{
+    grid-template-rows: 30px repeat({repeat_count}, 80px);
+  }}
 </style>
 </head>
 <body>
@@ -231,7 +231,7 @@ class HtmlDocument(HtmlNode):
   <div style="grid-row:1; grid-column:2; text-align:center;"><h3>Computer (forward)</h3></div>
   <div style="grid-row:1; grid-column:3;"><h3>Data (shape)</h3></div>
 
-  {"".join(map(methodcaller("to_html"), self.children))} 
+  {"".join(map(methodcaller("to_html"), self.children))}
 </div>
 
 </body>

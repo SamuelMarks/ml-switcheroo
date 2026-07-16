@@ -1,7 +1,7 @@
 """Module docstring."""
 
-from ml_switcheroo.compiler.backends.rdna.emitter import RdnaEmitter
-from ml_switcheroo.compiler.frontends.rdna.nodes import (
+from ml_switcheroo.core.compiler.backends.rdna.emitter import RdnaEmitter
+from ml_switcheroo.core.compiler.frontends.rdna.nodes import (
   Comment,
   Directive,
   Immediate,
@@ -14,9 +14,7 @@ from ml_switcheroo.compiler.frontends.rdna.nodes import (
 
 
 def test_emit_basic_instruction() -> None:
-  """
-  Requirement: `v_add_f32 v0, v1, v2` (indented).
-  """
+  """Requirement: `v_add_f32 v0, v1, v2` (indented)."""
   emitter = RdnaEmitter()
   inst = Instruction(opcode="v_add_f32", operands=[VGPR(0), VGPR(1), VGPR(2)])
 
@@ -30,9 +28,7 @@ def test_emit_basic_instruction() -> None:
 
 
 def test_emit_label_flush_left() -> None:
-  """
-  Requirement: Labels must be flush-left.
-  """
+  """Requirement: Labels must be flush-left."""
   emitter = RdnaEmitter()
   block = [
     Label("L_START"),
@@ -50,9 +46,7 @@ def test_emit_label_flush_left() -> None:
 
 
 def test_emit_register_range() -> None:
-  """
-  Verify s[0:3] formatting.
-  """
+  """Verify s[0:3] formatting."""
   emitter = RdnaEmitter()
   inst = Instruction("s_load_dwordx4", [SGPR(0, count=4), SGPR(4, count=2), Immediate(0)])
   output = emitter.emit([inst])
@@ -61,9 +55,7 @@ def test_emit_register_range() -> None:
 
 
 def test_emit_modifiers() -> None:
-  """
-  Verify modifiers are appended correctly.
-  """
+  """Verify modifiers are appended correctly."""
   emitter = RdnaEmitter()
   inst = Instruction("buffer_load", [VGPR(0), Modifier("off"), Modifier("glc")])
   output = emitter.emit([inst])

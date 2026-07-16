@@ -1,0 +1,9 @@
+description: Returns True if the input is a single element tensor which is not equal
+  to zero.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: IsNonZero

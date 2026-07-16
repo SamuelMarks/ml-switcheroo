@@ -1,0 +1,9 @@
+description: Computes the inverse of a square matrix.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  rank: 2
+  type: Tensor
+variants: {}
+operation: Inverse

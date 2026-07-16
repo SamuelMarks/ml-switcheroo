@@ -1,0 +1,5 @@
+description: Loads a pytree from the given directory.
+std_args:
+- directory
+type: function
+operation: load_pytreedef

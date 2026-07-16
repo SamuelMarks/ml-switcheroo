@@ -1,0 +1,5 @@
+description: The class representing a Python function.
+std_args:
+- bitwidth
+type: function
+operation: can_relayout_wgmma_4x_to_wgmma_2x

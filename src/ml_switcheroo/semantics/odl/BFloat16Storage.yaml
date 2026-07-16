@@ -1,0 +1,5 @@
+description: Storage for BFloat16 data.
+op_type: class
+std_args: []
+variants: {}
+operation: BFloat16Storage

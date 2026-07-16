@@ -1,6 +1,4 @@
-"""
-Integration Tests for MultiHead Attention Layer Transpilation.
-"""
+"""Integration Tests for MultiHead Attention Layer Transpilation."""
 
 import pytest
 
@@ -12,16 +10,16 @@ from ml_switcheroo.core.hooks import _HOOKS
 # FIX: Import the specific strategies instead of the removed dispatch function
 from ml_switcheroo.plugins.attention_packing import repack_attn_keras, repack_attn_flax
 
-SOURCE_TORCH = """ 
+SOURCE_TORCH = """
 import torch.nn as nn
 
-class MyAttn(nn.Module): 
-    def __init__(self): 
-        super().__init__() 
-        self.attn = nn.MultiheadAttention(embed_dim=256, num_heads=8) 
+class MyAttn(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.attn = nn.MultiheadAttention(embed_dim=256, num_heads=8)
 
-    def forward(self, q, k, v, mask): 
-        out, _ = self.attn(q, k, v, key_padding_mask=mask) 
+    def forward(self, q, k, v, mask):
+        out, _ = self.attn(q, k, v, key_padding_mask=mask)
         return out
 """
 

@@ -74,7 +74,9 @@ class StructuralLinter(cst.CSTVisitor):
 
         # Track alias for usage detection
         # import torch -> alias 'torch', import torch as t -> alias 't'
-        local_name = alias.asname.name.value if alias.asname else root
+        local_name = (
+          (alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else "") if alias.asname else root
+        )
         # Store what it maps to (the forbidden root)
         self._local_aliases[local_name] = root
 
@@ -113,7 +115,11 @@ class StructuralLinter(cst.CSTVisitor):
         else:
           for alias in node.names:
             if isinstance(alias, cst.ImportAlias):
-              local_name = alias.asname.name.value if alias.asname else alias.name.value
+              local_name = (
+                (alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else "")
+                if alias.asname
+                else (alias.name.value if isinstance(alias.name, cst.Name) else "")
+              )
               self._local_aliases[local_name] = root
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:

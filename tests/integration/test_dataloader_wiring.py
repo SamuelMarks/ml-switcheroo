@@ -1,5 +1,4 @@
-"""
-Integration Tests for DataLoader Plugin Wiring (Updated for Distributed Semantics).
+"""Integration Tests for DataLoader Plugin Wiring (Updated for Distributed Semantics).
 
 Verifies that:
 1. Semantic definitions in `semantics/` are correctly loaded.
@@ -30,14 +29,18 @@ def test_generation_and_execution_flow(tmp_path):
   # 2. Pre-seed the Semantics (Simulation of Hub)
   # Note: Previously we hydrated this from internal defaults manually.
   # Now we must explicitly create the JSON file the test expects to find.
-  # The test verify 'k_framework_extras.json' existence.
+  # The test verify 'odl' existence.
   extras_content = {
     "DataLoader": {
       "std_args": ["dataset"],
       "description": "Load Dataset",
     }
   }
-  (sem_dir / "k_framework_extras.json").write_text(json.dumps(extras_content), encoding="utf-8")
+  import yaml
+
+  odl_dir = sem_dir / "odl"
+  odl_dir.mkdir()
+  (odl_dir / "DataLoader.yaml").write_text(yaml.dump(extras_content), encoding="utf-8")
 
   # Mock paths in the system to use our temp dirs
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
@@ -47,10 +50,12 @@ def test_generation_and_execution_flow(tmp_path):
 
   # 4. Verify Abstract Spec Creation verification
   # The file we manually created exists
-  extra_spec = sem_dir / "k_framework_extras.json"
+  extra_spec = sem_dir / "odl" / "DataLoader.yaml"
   assert extra_spec.exists()
 
-  spec_data = json.loads(extra_spec.read_text())
+  import yaml
+
+  spec_data = yaml.safe_load(extra_spec.read_text())
   assert "DataLoader" in spec_data
   # Key Verification: Variants must NOT be in the Abstract Spec
   assert "variants" not in spec_data["DataLoader"]

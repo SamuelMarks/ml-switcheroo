@@ -1,6 +1,4 @@
-"""
-Tests for Data-Driven Framework Alias Configuration.
-"""
+"""Tests for Data-Driven Framework Alias Configuration."""
 
 import libcst as cst
 from unittest.mock import MagicMock

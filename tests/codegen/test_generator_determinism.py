@@ -1,6 +1,4 @@
-"""
-Tests for Determinism Injection.
-"""
+"""Tests for Determinism Injection."""
 
 import pytest
 from unittest.mock import MagicMock
@@ -20,9 +18,7 @@ def generator():
 
 
 def test_determinism_fixture_injection(generator, tmp_path):
-  """
-  Verify runtime.py includes the ensure_determinism fixture.
-  """
+  """Verify runtime.py includes the ensure_determinism fixture."""
   out_dir = tmp_path / "gen"
   generator._ensure_runtime_module(out_dir)
 

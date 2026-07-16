@@ -1,0 +1,16 @@
+description: 'Auto-discovered via Consensus (Score: 4.0)'
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: lr
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight_decay
+  type: Any
+variants: {}
+operation: Adamw

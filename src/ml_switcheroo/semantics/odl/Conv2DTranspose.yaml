@@ -1,0 +1,37 @@
+description: 2D transposed convolution layer.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: filters
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: Union[int, Tuple[int, int]]
+- default:
+  - 1
+  - 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: strides
+  type: Union[int, Tuple[int, int]]
+- default: valid
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
+  type: str
+- default:
+  - 1
+  - 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dilation_rate
+  type: Union[int, Tuple[int, int]]
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: use_bias
+  type: bool
+variants: {}
+operation: Conv2DTranspose

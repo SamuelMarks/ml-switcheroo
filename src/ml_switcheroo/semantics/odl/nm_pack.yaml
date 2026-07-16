@@ -1,0 +1,7 @@
+description: Generate metadata tensor for an N:M mask.
+std_args:
+- mask
+- n
+- m
+type: function
+operation: nm_pack

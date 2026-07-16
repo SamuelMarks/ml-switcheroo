@@ -85,8 +85,8 @@ def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> Union[cst.Call,
 
   # 1. Parse Arguments
   dataset_arg = node.args[0].value
-  batch_size_arg = _get_arg_by_name(node.args, "batch_size")
-  shuffle_arg = _get_arg_by_name(node.args, "shuffle")
+  batch_size_arg = _get_arg_by_name(node.args, "batch_size")  # type: ignore
+  shuffle_arg = _get_arg_by_name(node.args, "shuffle")  # type: ignore
 
   # 2. Unwrap Dataset
   tensors = _extract_tensor_dataset_inputs(dataset_arg)
@@ -97,7 +97,7 @@ def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> Union[cst.Call,
   if len(tensors) > 1:
     slice_input = cst.Tuple(elements=[cst.Element(t) for t in tensors])
   else:
-    slice_input = tensors[0]
+    slice_input = tensors[0]  # type: ignore
 
   # 4. Build Pipeline Chain
   # Root: tf.data.Dataset.from_tensor_slices

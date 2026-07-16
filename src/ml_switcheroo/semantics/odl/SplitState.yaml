@@ -1,0 +1,8 @@
+description: Splits a State object into multiple subsets based on filters.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: state
+  type: Any
+variants: {}
+operation: SplitState

@@ -1,0 +1,12 @@
+description: Computes attention mask from paddings, segment masks etc for fprop.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inputs
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: paddings
+  type: Tensor
+variants: {}
+operation: ComputeAttentionMasksForFprop

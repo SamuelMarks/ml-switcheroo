@@ -1,0 +1,9 @@
+description: Gated State Space Model.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_dims
+  type: int
+variants: {}
+operation: SSMGated

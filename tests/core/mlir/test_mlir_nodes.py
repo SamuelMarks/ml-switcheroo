@@ -1,5 +1,4 @@
-"""
-Tests for MLIR CST Object Model.
+"""Tests for MLIR CST Object Model.
 
 Verifies that:
 1. Nodes can be instantiated.
@@ -48,9 +47,7 @@ def test_attribute_rendering():
 
 
 def test_operation_simple():
-  """
-  Scenario: %0 = arith.addf(%a, %b) : f32
-  """
+  """Scenario: %0 = arith.addf(%a, %b) : f32"""
   op = OperationNode(
     name="arith.addf",
     results=[ValueNode("%0")],
@@ -64,10 +61,9 @@ def test_operation_simple():
 
 
 def test_operation_with_attributes_and_trivia():
-  """
-  Scenario:
-      // Compute sum
-      %sum = "sw.op"() { name = "add" } : () -> i32
+  """Scenario:
+  // Compute sum
+  %sum = "sw.op"() { name = "add" } : () -> i32
   """
   op = OperationNode(
     name='"sw.op"',
@@ -86,8 +82,7 @@ def test_operation_with_attributes_and_trivia():
 
 
 def test_block_structure():
-  """
-  Scenario:
+  """Scenario:
   ^bb0(%arg0: i32):
      %0 = op()
   """
@@ -101,8 +96,7 @@ def test_block_structure():
 
 
 def test_region_nesting():
-  """
-  Scenario:
+  """Scenario:
   scf.if (%cond) {
      ^true:
        yield
@@ -132,9 +126,7 @@ def test_module_node():
 
 
 def test_multiple_results_and_types():
-  """
-  Scenario: %0, %1 = op() : (i32, f32)
-  """
+  """Scenario: %0, %1 = op() : (i32, f32)"""
   op = OperationNode(
     name="op", results=[ValueNode("%0"), ValueNode("%1")], result_types=[TypeNode("i32"), TypeNode("f32")]
   )

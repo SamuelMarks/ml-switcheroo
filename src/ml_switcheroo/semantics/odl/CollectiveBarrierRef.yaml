@@ -1,0 +1,7 @@
+description: The class representing a Python class.
+std_args:
+- self
+- barrier
+- cluster_mask
+type: class
+operation: CollectiveBarrierRef

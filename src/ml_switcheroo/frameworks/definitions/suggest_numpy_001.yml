@@ -769,7 +769,7 @@ variants:
       a: "input"
       kth: "k"
       axis: "dim"
-    output_select_index: 1 # Returns (values, indices) 
+    output_select_index: 1 # Returns (values, indices)
   jax:
     api: "jax.numpy.argpartition"
   flax_nnx:

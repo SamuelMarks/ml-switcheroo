@@ -1,0 +1,5 @@
+description: Convert a CSR-format sparse matrix to a dense matrix.
+std_args:
+- mat
+type: function
+operation: csr_todense

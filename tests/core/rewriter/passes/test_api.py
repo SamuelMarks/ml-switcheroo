@@ -1,6 +1,4 @@
-"""
-Tests for the ApiPass via TestRewriter.
-"""
+"""Tests for the ApiPass via TestRewriter."""
 
 import pytest
 import libcst as cst

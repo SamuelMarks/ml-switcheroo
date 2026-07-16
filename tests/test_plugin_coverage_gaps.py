@@ -1,8 +1,11 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from unittest.mock import MagicMock
 
 
 def get_dummy_ctx(target_fw="torch", current_op_id="dummy", sharding_supported=False):
+  """Auto-generated doc."""
   ctx = MagicMock()
   ctx.target_fw = target_fw
   ctx.current_op_id = current_op_id
@@ -14,10 +17,13 @@ def get_dummy_ctx(target_fw="torch", current_op_id="dummy", sharding_supported=F
 
 
 def test_plugin_coverage_gaps():
+  """Auto-generated doc."""
   from ml_switcheroo.plugins.auto_fsdp_wrapper import wrap_with_sharding
 
   node = cst.Call(func=cst.Name("dummy"), args=[])
-  wrap_with_sharding(node, get_dummy_ctx(target_fw="unknown", sharding_supported=True))
+  ctx = get_dummy_ctx(target_fw="unknown", sharding_supported=True)
+  ctx.plugin_traits.sharding_wrapper_api = None
+  wrap_with_sharding(node, ctx)
 
   from ml_switcheroo.plugins.casting import transform_casting
 

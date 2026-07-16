@@ -1,6 +1,4 @@
-"""
-Tests for Multi-Backend IO Logic (Numpy, TF).
-"""
+"""Tests for Multi-Backend IO Logic (Numpy, TF)."""
 
 import pytest
 import libcst as cst

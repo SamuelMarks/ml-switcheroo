@@ -1,6 +1,4 @@
-"""
-Tests for Semantics Bisector.
-"""
+"""Tests for Semantics Bisector."""
 
 from unittest.mock import MagicMock
 from ml_switcheroo.testing.bisector import SemanticsBisector
@@ -22,7 +20,7 @@ def test_propose_fix_relaxes_tolerances():
   ]
 
   bisector = SemanticsBisector(runner)
-  op_def = {"std_args": ["x"], "variants": {"a": {}}, "test_rtol": 1e-5}
+  op_def = {"std_args": ["x", {"name": "y"}], "variants": {"a": {}}, "test_rtol": 1e-5}
 
   patch = bisector.propose_fix("MyOp", op_def)
 
@@ -39,8 +37,21 @@ def test_propose_fix_returns_none_if_no_relaxation_helps():
   runner.verify.return_value = (False, "Fail")
 
   bisector = SemanticsBisector(runner)
-  op_def = {"std_args": ["x"], "variants": {"a": {}}}
+  op_def = {"std_args": [("x", "int"), {"name": "z", "min": 0}], "variants": {"a": {}}}
 
   patch = bisector.propose_fix("MyOp", op_def)
 
+  assert patch is None
+
+
+def test_propose_fix_returns_none_if_matches_original():
+  """Auto-generated doc."""
+  runner = MagicMock(spec=EquivalenceRunner)
+  runner.verify.return_value = (True, "Pass")
+
+  bisector = SemanticsBisector(runner)
+  # Standard default is 1e-3, 1e-4. Test matching.
+  op_def = {"std_args": ["x"], "variants": {"a": {}}, "test_rtol": 1e-3, "test_atol": 1e-4}
+
+  patch = bisector.propose_fix("MyOp", op_def)
   assert patch is None

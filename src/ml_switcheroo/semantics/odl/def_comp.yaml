@@ -1,0 +1,8 @@
+description: Define the jet rule for a primitive in terms of a composition of simpler
+  primitives.
+std_args:
+- prim
+- comp
+- kwargs
+type: function
+operation: def_comp

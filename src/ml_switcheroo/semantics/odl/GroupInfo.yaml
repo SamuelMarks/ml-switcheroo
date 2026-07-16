@@ -1,0 +1,12 @@
+description: Information regarding the group being processed in a block.
+std_args:
+- self
+- group_id
+- block
+- block_start
+- actual_start
+- actual_end
+- start_within_block
+- actual_size
+type: class
+operation: GroupInfo

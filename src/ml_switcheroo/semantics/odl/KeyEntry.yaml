@@ -1,0 +1,22 @@
+description: "Base class for protocol classes.\n\nProtocol classes are defined as::\n\
+  \n    class Proto(Protocol):\n        def meth(self) -> int:\n            ...\n\n\
+  Such classes are primarily used with static type checkers that recognize\nstructural\
+  \ subtyping (static duck-typing).\n\nFor example::\n\n    class C:\n        def\
+  \ meth(self) -> int:\n            return 0\n\n    def func(x: Proto) -> int:\n \
+  \       return x.meth()\n\n    func(C())  # Passes static type check\n\nSee PEP\
+  \ 544 for details. Protocol classes decorated with\n@typing.runtime_checkable act\
+  \ as simple-minded runtime protocols that check\nonly the presence of given attributes,\
+  \ ignoring their type signatures.\nProtocol classes can be generic, they are defined\
+  \ as::\n\n    class GenProto[T](Protocol):\n        def meth(self) -> T:\n     \
+  \       ..."
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: args
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kwargs
+  type: Any
+variants: {}
+operation: KeyEntry

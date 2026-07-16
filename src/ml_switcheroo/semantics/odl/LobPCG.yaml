@@ -1,0 +1,17 @@
+description: Finds the k largest/smallest eigenvalues using LOBPCG.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: A
+  type: Tensor
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: k
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: B
+  type: Tensor
+variants: {}
+operation: LobPCG

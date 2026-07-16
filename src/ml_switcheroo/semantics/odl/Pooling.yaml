@@ -1,0 +1,20 @@
+description: Pooling layer, performing max or average pooling.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: window_shape
+  type: Sequence[int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: window_stride
+  type: Sequence[int]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: pooling_type
+  options:
+  - MAX
+  - AVG
+  type: str
+variants: {}
+operation: Pooling

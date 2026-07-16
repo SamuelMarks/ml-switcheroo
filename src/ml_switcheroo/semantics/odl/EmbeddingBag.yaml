@@ -1,0 +1,54 @@
+description: Computes sums or means of bags of embeddings, without instantiating the
+  intermediate embeddings.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: offsets
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: max_norm
+  type: float
+- default: 2.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: norm_type
+  type: float
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: scale_grad_by_freq
+  type: bool
+- default: mean
+  is_variadic: false
+  kind: positional_or_keyword
+  name: mode
+  type: str
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: sparse
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: per_sample_weights
+  type: Tensor
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: include_last_offset
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: padding_idx
+  type: int
+type: class
+operation: EmbeddingBag

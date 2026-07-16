@@ -1,0 +1,8 @@
+description: Constructor/Cast for Float64.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: value
+  type: Any
+variants: {}
+operation: ConstructFloat64

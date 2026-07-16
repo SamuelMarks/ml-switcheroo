@@ -1,0 +1,8 @@
+description: Copy-variant of view_as_real.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants: {}
+operation: ViewAsRealCopy

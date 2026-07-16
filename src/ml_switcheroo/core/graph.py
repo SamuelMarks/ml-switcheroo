@@ -12,7 +12,7 @@ import libcst as cst
 from libcst import matchers as m
 
 # Re-export Core IR definitions for backward compatibility
-from ml_switcheroo.compiler.ir import LogicalNode, LogicalEdge, LogicalGraph, topological_sort
+from ml_switcheroo.core.compiler.ir import LogicalNode, LogicalEdge, LogicalGraph, topological_sort
 from ml_switcheroo.core.scanners import get_full_name
 from ml_switcheroo.utils.node_diff import capture_node_source
 
@@ -158,15 +158,15 @@ class GraphExtractor(cst.CSTVisitor):
   def _analyze_layer_def(self, node: cst.Assign) -> None:
     """Parses self.layer = ... lines."""
     target = node.targets[0].target
-    if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):
+    if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):  # type: ignore
       return
 
-    attr_name = target.attr.value
+    attr_name = target.attr.value  # type: ignore
     call = node.value
     if not isinstance(call, cst.Call):
       return
 
-    op_type = get_full_name(call.func)
+    op_type = get_full_name(call.func)  # type: ignore
     if "." in op_type:
       op_type = op_type.split(".")[-1]
 
@@ -213,10 +213,10 @@ class GraphExtractor(cst.CSTVisitor):
     self, func_node: cst.BaseExpression, context_node: Optional[cst.CSTNode] = None
   ) -> Optional[str]:
     """Resolves identifier to node ID. Creates functional nodes on fly."""
-    if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):
-      return func_node.attr.value
+    if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):  # type: ignore
+      return func_node.attr.value  # type: ignore
 
-    func_name = get_full_name(func_node)
+    func_name = get_full_name(func_node)  # type: ignore
     if func_name:
       layer_name = f"func_{func_name.split('.')[-1].lower()}"
       if layer_name not in self.layer_registry:

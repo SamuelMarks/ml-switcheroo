@@ -1,5 +1,4 @@
-"""
-Tests for Verification Gated Rewriting.
+"""Tests for Verification Gated Rewriting.
 
 Verifies that:
 1. ASTEngine loads validation reports from config.
@@ -19,9 +18,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """
-  Mock Manager with pre-loaded definitions for testing gating.
-  """
+  """Mock Manager with pre-loaded definitions for testing gating."""
 
   def __init__(self):
     """Function docstring."""
@@ -69,15 +66,13 @@ def mock_report(tmp_path):
 
 
 def test_validation_gating_logic(mock_report):
-  """
-  Scenario:
+  """Scenario:
       - `good_op` is True in report.
       - `bad_op` is False in report.
   Expectation:
       - `good_op` is rewritten to `jax.good`.
       - `bad_op` is skipped via EscapeHatch because of verification failure.
   """
-
   # 1. Setup Config with Report
   config = RuntimeConfig(source_framework="torch", target_framework="jax", validation_report=mock_report)
 
@@ -108,8 +103,7 @@ y2 = torch.bad(x)
 
 
 def test_missing_report_logic():
-  """
-  Scenario: No validation report provided.
+  """Scenario: No validation report provided.
   Expectation: Optimistic behavior (everything is allowed).
   """
   semantics = MockSemantics()
@@ -128,8 +122,7 @@ def test_missing_report_logic():
 
 
 def test_untracked_op_defaults_true(mock_report):
-  """
-  Scenario: Op matches semantics but is NOT in the report (untested).
+  """Scenario: Op matches semantics but is NOT in the report (untested).
   Expectation: Treated as Valid/Verified (Fail Open).
   """
   semantics = MockSemantics()

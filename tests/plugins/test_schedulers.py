@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import libcst as cst
 from ml_switcheroo.plugins.schedulers import (
   _create_dotted_name,
@@ -10,21 +12,29 @@ from ml_switcheroo.plugins.schedulers import (
 
 
 class DummyVariant:
+  """Auto-generated doc."""
+
   def __init__(self, args=None):
+    """Auto-generated doc."""
     self.args = args
 
 
 class DummyContext:
+  """Auto-generated doc."""
+
   def __init__(self, op_id, api, variant_args=None):
+    """Auto-generated doc."""
     self.current_op_id = op_id
     self._api = api
     self.current_variant = DummyVariant(variant_args) if variant_args is not None else DummyVariant({})
 
   def lookup_api(self, op_id):
+    """Auto-generated doc."""
     return self._api
 
 
 def test_create_dotted_name():
+  """Auto-generated doc."""
   node = _create_dotted_name("a")
   assert isinstance(node, cst.Name)
   assert node.value == "a"
@@ -37,6 +47,7 @@ def test_create_dotted_name():
 
 
 def test_get_target_arg_name():
+  """Auto-generated doc."""
   # No variant
   ctx1 = DummyContext("op", "api")
   ctx1.current_variant = None
@@ -57,6 +68,7 @@ def test_get_target_arg_name():
 
 
 def test_transform_scheduler_init_no_api():
+  """Auto-generated doc."""
   ctx = DummyContext("StepLR", None)
   call_node = cst.Call(func=cst.Name("StepLR"))
   result = transform_scheduler_init(call_node, ctx)
@@ -64,6 +76,7 @@ def test_transform_scheduler_init_no_api():
 
 
 def test_transform_scheduler_init_unknown_op():
+  """Auto-generated doc."""
   ctx = DummyContext("UnknownLR", "target.api")
   call_node = cst.Call(func=cst.Name("UnknownLR"))
   result = transform_scheduler_init(call_node, ctx)
@@ -71,6 +84,7 @@ def test_transform_scheduler_init_unknown_op():
 
 
 def test_transform_scheduler_init_none_op_id():
+  """Auto-generated doc."""
   ctx = DummyContext(None, "target.api")
   call_node = cst.Call(func=cst.Name("UnknownLR"))
   result = transform_scheduler_init(call_node, ctx)
@@ -78,6 +92,7 @@ def test_transform_scheduler_init_none_op_id():
 
 
 def test_transform_scheduler_init_step_lr():
+  """Auto-generated doc."""
   ctx = DummyContext("StepLR", "target.api")
   call_node = cst.parse_expression("StepLR(optimizer, step_size=30, gamma=0.1)")
   result = transform_scheduler_init(call_node, ctx)
@@ -87,6 +102,7 @@ def test_transform_scheduler_init_step_lr():
 
 
 def test_transform_scheduler_init_cosine_lr():
+  """Auto-generated doc."""
   ctx = DummyContext("CosineAnnealingLR", "target.api")
   call_node = cst.parse_expression("CosineAnnealingLR(optimizer, T_max=10, eta_min=0)")
   result = transform_scheduler_init(call_node, ctx)
@@ -94,6 +110,7 @@ def test_transform_scheduler_init_cosine_lr():
 
 
 def test_transform_step_lr_detailed():
+  """Auto-generated doc."""
   ctx = DummyContext("StepLR", "target.api")
 
   # 1. No args
@@ -146,6 +163,7 @@ def test_transform_step_lr_detailed():
 
 
 def test_transform_cosine_lr_detailed():
+  """Auto-generated doc."""
   ctx = DummyContext("CosineAnnealingLR", "target.api")
 
   # 1. No args
@@ -196,6 +214,7 @@ def test_transform_cosine_lr_detailed():
 
 
 def test_transform_scheduler_step():
+  """Auto-generated doc."""
   ctx = DummyContext("noop", "api")
   call_node = cst.parse_expression("scheduler.step()")
   result = transform_scheduler_step(call_node, ctx)

@@ -1,5 +1,4 @@
-"""
-Tests for Compiler Backend Protocol.
+"""Tests for Compiler Backend Protocol.
 
 Verifies:
 1. CompilerBackend abstract class enforcement.
@@ -9,14 +8,12 @@ Verifies:
 
 import pytest
 from typing import Any
-from ml_switcheroo.compiler.backend import CompilerBackend
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 
 class NoOpBackend(CompilerBackend):
-  """
-  A minimal backend that returns the graph node count as 'compiled' output.
-  """
+  """A minimal backend that returns the graph node count as 'compiled' output."""
 
   def compile(self, graph: LogicalGraph) -> Any:
     """Function docstring."""

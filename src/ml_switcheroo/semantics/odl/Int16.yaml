@@ -1,0 +1,5 @@
+description: 16-bit integer type.
+op_type: attribute
+std_args: []
+variants: {}
+operation: Int16

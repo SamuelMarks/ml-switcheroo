@@ -67,7 +67,7 @@ echo "=> Coverage Shields: Test ${TEST_COV_ROUNDED}%, Doc ${DOC_COV_ROUNDED}%"
 git add README.md
 
 # To avoid auto-adding unstaged user modifications to tracked files,
-# we only update the index for files that are already partially staged 
+# we only update the index for files that are already partially staged
 # or if ruff changed them, we just notify the user.
 # Actually, since it's a pre-commit hook, if ruff changed things, it's safer to just fail.
 if ! git diff --quiet; then

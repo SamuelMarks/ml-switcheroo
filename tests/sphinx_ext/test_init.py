@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import os
 from unittest import mock
 
@@ -5,27 +7,35 @@ from ml_switcheroo.sphinx_ext import setup
 
 
 class MockApp:
+  """Auto-generated doc."""
+
   def __init__(self):
+    """Auto-generated doc."""
     self.directives = {}
     self.css_files = []
     self.js_files = []
     self.events = []
 
   def add_directive(self, name, directive):
+    """Auto-generated doc."""
     self.directives[name] = directive
 
   def add_css_file(self, filename):
+    """Auto-generated doc."""
     self.css_files.append(filename)
 
   def add_js_file(self, filename, **kwargs):
+    """Auto-generated doc."""
     self.js_files.append((filename, kwargs))
 
   def connect(self, event, callback):
+    """Auto-generated doc."""
     self.events.append((event, callback))
 
 
 @mock.patch.dict(os.environ, {"BUILD_ALL_DOCS": "1"})
 def test_setup_build_all():
+  """Auto-generated doc."""
   app = MockApp()
 
   result = setup(app)
@@ -56,6 +66,7 @@ def test_setup_build_all():
 
 @mock.patch.dict(os.environ, clear=True)
 def test_setup_default_no_docs():
+  """Auto-generated doc."""
   app = MockApp()
   setup(app)
 

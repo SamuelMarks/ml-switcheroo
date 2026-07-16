@@ -1,0 +1,23 @@
+description: Performs linear PCA on a low-rank matrix.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: A
+  type: Tensor
+- default: None
+  is_variadic: false
+  kind: positional_or_keyword
+  name: q
+  type: int
+- default: 'True'
+  is_variadic: false
+  kind: positional_or_keyword
+  name: center
+  type: bool
+- default: '2'
+  is_variadic: false
+  kind: positional_or_keyword
+  name: niter
+  type: int
+variants: {}
+operation: PcaLowRank

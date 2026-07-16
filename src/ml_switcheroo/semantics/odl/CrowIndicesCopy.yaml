@@ -1,0 +1,8 @@
+description: Copies the crow indices of a sparse tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants: {}
+operation: CrowIndicesCopy

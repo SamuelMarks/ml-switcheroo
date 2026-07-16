@@ -1,0 +1,13 @@
+description: 'depends(inputs: Union[array, Sequence[array]], dependencies: Union[array,
+  Sequence[array]])'
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: args
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kwargs
+  type: Any
+variants: {}
+operation: depends

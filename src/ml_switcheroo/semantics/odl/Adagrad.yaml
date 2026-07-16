@@ -1,0 +1,7 @@
+description: 'Auto-discovered via Consensus (Score: 4.0)'
+std_args:
+- eps
+- initial_accumulator_value
+- lr
+type: function
+operation: Adagrad

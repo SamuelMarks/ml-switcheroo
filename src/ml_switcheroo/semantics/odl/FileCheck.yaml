@@ -1,0 +1,5 @@
+description: Testing utility for verifying file contents.
+op_type: class
+std_args: []
+variants: {}
+operation: FileCheck

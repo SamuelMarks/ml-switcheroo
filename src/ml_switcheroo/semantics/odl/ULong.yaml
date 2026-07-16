@@ -1,0 +1,9 @@
+description: Unsigned long integer type.
+std_args:
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: value
+  type: int
+variants: {}
+operation: ULong

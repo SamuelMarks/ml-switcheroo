@@ -1,0 +1,12 @@
+description: ''
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: self
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: w
+  type: Any
+variants: {}
+operation: set_weight

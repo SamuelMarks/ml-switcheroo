@@ -1,0 +1,41 @@
+description: A preprocessing layer which maps text features to integer sequences.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: max_tokens
+  type: int
+- default: lower_and_strip_punctuation
+  is_variadic: false
+  kind: positional_or_keyword
+  name: standardize
+  type: str
+- default: whitespace
+  is_variadic: false
+  kind: positional_or_keyword
+  name: split
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ngrams
+  type: int
+- default: int
+  is_variadic: false
+  kind: positional_or_keyword
+  name: output_mode
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: output_sequence_length
+  type: int
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: pad_to_max_tokens
+  type: bool
+- is_variadic: false
+  kind: positional_or_keyword
+  name: vocabulary
+  type: List[str]
+variants: {}
+operation: TextVectorization

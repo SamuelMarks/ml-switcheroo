@@ -1,9 +1,12 @@
+"""Auto-generated doc."""
+
 import pytest
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.core.ingestion import ingest_code
 
 
 def test_ingestion_adapter_exception():
+  """Auto-generated doc."""
   adapter = MagicMock()
   # Ensure it's treated as having create_parser
   adapter.create_parser.side_effect = Exception("Adapter Error")
@@ -14,6 +17,7 @@ def test_ingestion_adapter_exception():
 
 
 def test_ingestion_mlir_exception():
+  """Auto-generated doc."""
   tracer = MagicMock()
   with patch("ml_switcheroo.core.ingestion.MlirParser") as MockMlir:
     MockMlir.side_effect = Exception("MLIR Error")
@@ -23,6 +27,7 @@ def test_ingestion_mlir_exception():
 
 
 def test_ingestion_tikz_exception():
+  """Auto-generated doc."""
   tracer = MagicMock()
   with patch("ml_switcheroo.core.ingestion.TikzParser") as MockTikz:
     MockTikz.side_effect = Exception("TikZ Error")
@@ -32,6 +37,7 @@ def test_ingestion_tikz_exception():
 
 
 def test_ingestion_tikz_success():
+  """Auto-generated doc."""
   tracer = MagicMock()
   with patch("ml_switcheroo.core.ingestion.TikzParser") as MockTikz:
     with patch("ml_switcheroo.core.ingestion.PythonBackend") as MockBackend:
@@ -51,6 +57,7 @@ def test_ingestion_tikz_success():
 
 
 def test_ingestion_python_exception():
+  """Auto-generated doc."""
   tracer = MagicMock()
   with pytest.raises(Exception):
     ingest_code("def foo(:", "torch", "jax", None, tracer)

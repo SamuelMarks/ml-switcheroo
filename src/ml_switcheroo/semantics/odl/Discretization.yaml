@@ -1,0 +1,18 @@
+description: Buckets continuous features by ranges.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: bin_boundaries
+  type: List[float]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_bins
+  type: int
+- default: 0.01
+  is_variadic: false
+  kind: positional_or_keyword
+  name: epsilon
+  type: float
+variants: {}
+operation: Discretization

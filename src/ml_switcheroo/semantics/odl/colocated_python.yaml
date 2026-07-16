@@ -1,0 +1,5 @@
+description: Executes the given Python function on the same devices as the arguments.
+std_args:
+- fun
+type: function
+operation: colocated_python

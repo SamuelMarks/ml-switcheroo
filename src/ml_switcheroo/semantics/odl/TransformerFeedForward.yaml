@@ -1,0 +1,18 @@
+description: Transformer feedforward layer with residual connection and dropout.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_dims
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hidden_dims
+  type: int
+- default: 0.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dropout_prob
+  type: float
+variants: {}
+operation: TransformerFeedForward

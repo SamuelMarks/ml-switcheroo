@@ -1,0 +1,13 @@
+description: Online Bregman PCA layer.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_components
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_dims
+  type: int
+variants: {}
+operation: BregmanPCA

@@ -1,0 +1,8 @@
+description: The base class for all Variable types.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: value
+  type: Any
+type: class
+operation: Variable

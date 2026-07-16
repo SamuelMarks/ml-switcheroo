@@ -1,0 +1,24 @@
+description: Calculates the n-th discrete forward difference along a specified axis.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: n
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: prepend
+  type: Optional[array]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: append
+  type: Optional[array]
+variants: {}
+operation: diff

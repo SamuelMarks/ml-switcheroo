@@ -1,0 +1,6 @@
+description: Lazy multihead mask, combines multiple lazy masks one per head.
+std_args:
+- self
+- masks
+type: class
+operation: MultiHeadMask

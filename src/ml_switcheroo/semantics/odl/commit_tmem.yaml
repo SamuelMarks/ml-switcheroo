@@ -1,0 +1,4 @@
+description: The class representing a Python function.
+std_args: []
+type: function
+operation: commit_tmem

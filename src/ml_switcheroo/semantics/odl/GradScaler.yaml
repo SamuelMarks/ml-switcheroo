@@ -1,0 +1,30 @@
+description: Utility for gradient scaling in mixed precision training.
+op_type: class
+std_args:
+- default: 65536.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: init_scale
+  type: float
+- default: 2.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: growth_factor
+  type: float
+- default: 0.5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: backoff_factor
+  type: float
+- default: 2000
+  is_variadic: false
+  kind: positional_or_keyword
+  name: growth_interval
+  type: int
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: enabled
+  type: bool
+variants: {}
+operation: GradScaler

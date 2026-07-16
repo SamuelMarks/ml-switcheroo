@@ -1,0 +1,32 @@
+description: 'Auto-discovered via Consensus (Score: 3.0)'
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b1
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: b2
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: eps_root
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: lr
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mask
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight_decay
+  type: Any
+variants: {}
+operation: Lamb

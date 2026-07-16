@@ -1,0 +1,8 @@
+description: Sets the number of threads used for intraop parallelism.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: int
+  type: int
+variants: {}
+operation: SetNumThreads

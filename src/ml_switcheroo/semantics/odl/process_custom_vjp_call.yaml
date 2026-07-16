@@ -1,0 +1,11 @@
+description: The class representing a Python function.
+std_args:
+- self
+- primitive
+- fun
+- fwd
+- bwd
+- tracers
+- out_trees
+type: function
+operation: process_custom_vjp_call

@@ -1,0 +1,63 @@
+description: Computes scaled dot product attention on query, key and value tensors,
+  using an optional attention mask if passed. This operator covers self and cross
+  variants of the attention operation based on sequence lengths of K, Q and V. For
+  self attention, `kv_sequence_length` equals to `q_sequence_length`. ...
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: Q
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: K
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: V
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: attn_mask
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: past_key
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: past_value
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: nonpad_kv_seqlen
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: is_causal
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kv_num_heads
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: q_num_heads
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: qk_matmul_output_mode
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: scale
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: softcap
+  type: float
+- is_variadic: false
+  kind: positional_or_keyword
+  name: softmax_precision
+  type: int
+type: function
+operation: Attention

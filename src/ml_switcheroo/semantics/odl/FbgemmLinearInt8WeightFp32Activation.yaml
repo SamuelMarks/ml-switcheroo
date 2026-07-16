@@ -1,0 +1,4 @@
+description: FBGEMM linear with Int8 weights and FP32 activation.
+std_args: []
+variants: {}
+operation: FbgemmLinearInt8WeightFp32Activation

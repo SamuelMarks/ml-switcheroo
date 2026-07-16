@@ -22,7 +22,7 @@ def get_import_root(node: Union[cst.Name, cst.Attribute]) -> str:
   if isinstance(node, cst.Name):
     return node.value
   if isinstance(node, cst.Attribute):
-    return get_import_root(node.value)
+    return get_import_root(node.value)  # type: ignore
   return ""
 
 
@@ -100,7 +100,7 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
       k_node = convert_to_cst_literal(k)
       v_node = convert_to_cst_literal(v)
       elements.append(
-        cst.DictElement(
+        cst.DictElement(  # type: ignore
           key=k_node,
           value=v_node,
           comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
@@ -111,7 +111,7 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
       last = elements[-1]
       elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
-    return cst.Dict(elements=elements)
+    return cst.Dict(elements=elements)  # type: ignore
 
   # 3. Primitives
   if isinstance(val, bool):

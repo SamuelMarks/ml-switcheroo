@@ -1,0 +1,8 @@
+description: Reconstructs a PyTree from flat state?
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tree
+  type: Any
+variants: {}
+operation: ToTree

@@ -1,0 +1,10 @@
+operation: Float32
+description: Definition for Float32
+std_args: []
+variants:
+  jax:
+    api: jax.numpy.float32
+  numpy:
+    api: numpy.float32
+  keras:
+    api: numpy.float32

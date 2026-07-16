@@ -1,0 +1,17 @@
+description: Returns a new tensor which indexes the input tensor along dimension dim
+  using the entries in index.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: index
+  type: Tensor
+variants: {}
+operation: IndexSelect

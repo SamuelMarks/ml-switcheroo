@@ -1,0 +1,8 @@
+description: Checks if a value is a registered data type (Flax NNX specific).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: value
+  type: Any
+variants: {}
+operation: IsData

@@ -1,0 +1,12 @@
+description: Draws binary random numbers (0 or 1) from a Bernoulli distribution.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: generator
+  type: Optional[Generator]
+variants: {}
+operation: Bernoulli

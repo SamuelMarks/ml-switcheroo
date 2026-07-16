@@ -1,0 +1,18 @@
+description: Chunks a tensor into specific number of chunks. Alias for Chunk where
+  unsafe optimization is ignored.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: chunks
+  type: int
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: int
+variants: {}
+operation: UnsafeChunk

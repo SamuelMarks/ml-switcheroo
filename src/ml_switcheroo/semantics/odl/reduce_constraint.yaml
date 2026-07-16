@@ -1,0 +1,6 @@
+description: Reduces a constraint.
+std_args:
+- constraint
+- assignments
+type: function
+operation: reduce_constraint

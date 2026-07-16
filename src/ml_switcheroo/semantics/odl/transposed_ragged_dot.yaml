@@ -1,0 +1,12 @@
+description: The class representing a Python function.
+std_args:
+- lhs
+- rhs
+- group_sizes
+- block_m
+- block_n
+- block_k
+- max_concurrent_steps
+- grid_block_n
+type: function
+operation: transposed_ragged_dot

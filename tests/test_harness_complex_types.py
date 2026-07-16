@@ -1,5 +1,4 @@
-"""
-Tests for Robust Harness Fuzzer Logic.
+"""Tests for Robust Harness Fuzzer Logic.
 
 Verifies that the generated standalone harness script:
 1. Embeds the robust Fuzzer capable of parsing type hints.
@@ -26,9 +25,7 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess:
 
 
 def test_harness_complex_list(tmp_path):
-  """
-  Scenario: Function expects List[int].
-  """
+  """Scenario: Function expects List[int]."""
   src_file = tmp_path / "mod_list_src.py"
   src_file.write_text("""
 def compute(param):
@@ -59,9 +56,7 @@ def compute(param):
 
 
 def test_harness_tuple_variadic(tmp_path):
-  """
-  Scenario: Function expects Tuple[int, ...].
-  """
+  """Scenario: Function expects Tuple[int, ...]."""
   src_file = tmp_path / "mod_tup.py"
   src_file.write_text("""
 def process(items):
@@ -83,9 +78,7 @@ def process(items):
 
 
 def test_harness_nested_dict(tmp_path):
-  """
-  Scenario: Function expects Dict[str, List[int]].
-  """
+  """Scenario: Function expects Dict[str, List[int]]."""
   src_file = tmp_path / "mod_dict.py"
   src_file.write_text("""
 def config(data):
@@ -109,8 +102,7 @@ def config(data):
 
 
 def test_harness_recursive_conversion_list_of_arrays(tmp_path):
-  """
-  Scenario: Function takes List[Array].
+  """Scenario: Function takes List[Array].
   Verifies that `adapt` recursively converts inner items to frameworks.
   Since we use "numpy" backend in test to stay lightweight,
   conversion is idempotent, but we verify struct integrity.
@@ -138,9 +130,7 @@ def batched(tensors):
 
 
 def test_harness_hints_json_injection(tmp_path):
-  """
-  Verify the generator actually writes JSON hints into the script file.
-  """
+  """Verify the generator actually writes JSON hints into the script file."""
   harness_path = tmp_path / "verify.py"
   semantics = {"op": {"std_args": [("x", "int")]}}
 

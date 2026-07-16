@@ -350,7 +350,7 @@ variants:
     api: null
   torch:
     api: "torch.Tensor"
-    # Mapping shape/dtype roughly 
+    # Mapping shape/dtype roughly
   tensorflow:
     api: null
   mlx:
@@ -409,7 +409,7 @@ variants:
 ---
 operation: "NewAxis"
 description: "A convenient alias for None, useful for indexing."
-std_args: [] 
+std_args: []
 variants:
   numpy:
     api: "numpy.newaxis"
@@ -427,7 +427,7 @@ variants:
     api: "mlx.core.newaxis"
   keras:
     macro_template: "None"
-    
+
 ---
 operation: "NextAfter"
 description: "Return the next floating-point value after x1 towards x2, element-wise."
@@ -470,7 +470,7 @@ variants:
   paxml:
     api: "jax.numpy.nonzero"
   torch:
-    # torch.nonzero returns [N, D], numpy returns Tuple[Array]. 
+    # torch.nonzero returns [N, D], numpy returns Tuple[Array].
     # Use as_tuple=True to match numpy behavior.
     api: "torch.nonzero"
     arg_values:
@@ -478,7 +478,7 @@ variants:
   tensorflow:
     # tf.where returns indices [N, D] equivalent to torch default
     # Needs structural output adapter to match tuple semantics if strictly enforcing
-    api: "tf.where" 
+    api: "tf.where"
   mlx:
     api: null
   keras:
@@ -658,7 +658,7 @@ variants:
   paxml:
     api: "jax.numpy.pad"
   torch:
-    # Torch pad takes (left, right, top, bottom) 
+    # Torch pad takes (left, right, top, bottom)
     # Use built-in plugin to convert ((t,b), (l,r)) syntax
     api: "torch.nn.functional.pad"
     requires_plugin: "padding_converter"
@@ -816,7 +816,7 @@ variants:
 operation: "NdIter"
 description: "Efficient multi-dimensional iterator object."
 op_type: "class"
-std_args: 
+std_args:
   - name: "op"
     type: "Array"
 variants:

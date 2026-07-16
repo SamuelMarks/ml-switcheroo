@@ -1,0 +1,17 @@
+description: Moves the dimension(s) of input at the position(s) in source to the position(s)
+  in destination.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: source
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: destination
+  type: int
+variants: {}
+operation: Movedim

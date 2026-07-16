@@ -15,6 +15,7 @@ from ml_switcheroo.core.rewriter.calls.utils import (
   inject_permute_call,
 )
 from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards
+from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 
 
 def execute_strategy(
@@ -58,11 +59,11 @@ def execute_strategy(
   # 2. Infix
   if trans_type == "infix":
     try:
-      norm_args = rewriter._normalize_arguments(original, updated, details, mapping)
+      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
       return rewrite_as_infix(
         original,
         norm_args,
-        mapping.get("operator"),
+        mapping.get("operator"),  # type: ignore
         details.get("std_args", []),
       )
     except (ValueError, IndexError) as e:
@@ -72,7 +73,7 @@ def execute_strategy(
   # 3. Inline Lambda
   elif trans_type == "inline_lambda":
     try:
-      norm_args = rewriter._normalize_arguments(original, updated, details, mapping)
+      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
       return rewrite_as_inline_lambda(mapping["api"], norm_args)
     except Exception as e:
       rewriter._report_failure(f"Inline lambda transformation failed: {e}")
@@ -91,7 +92,7 @@ def execute_strategy(
   # 5. Macro
   elif mapping.get("macro_template"):
     try:
-      norm_args = rewriter._normalize_arguments(original, updated, details, mapping)
+      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
       std_arg_names = []
       for item in details.get("std_args", []):
         if isinstance(item, (list, tuple)):
@@ -117,7 +118,7 @@ def execute_strategy(
       return updated
 
     try:
-      norm_args = rewriter._normalize_arguments(original, updated, details, mapping)
+      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
 
       # Apply Strict Guards (Rank Checking)
       if rewriter.strict_mode:
@@ -186,6 +187,6 @@ def _apply_layout_permutation(
       src_l, tgt_l = rule.split("->")
       perm_indices = compute_permutation(src_l.strip(), tgt_l.strip())
       if perm_indices:
-        node = inject_permute_call(node, perm_indices, rewriter.semantics, rewriter.target_fw)
+        node = inject_permute_call(node, perm_indices, rewriter.semantics, rewriter.target_fw)  # type: ignore
 
   return node

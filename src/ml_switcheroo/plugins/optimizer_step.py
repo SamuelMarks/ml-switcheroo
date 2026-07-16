@@ -36,7 +36,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))
+    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
   return node
 
 
@@ -93,7 +93,7 @@ def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call
     f"Imperative `{_get_func_name(node)}` cannot be automatically converted to functional update. "
     "Manual intervention required (e.g. `updates, state = opt.update(grads, state)`)."
   )
-  return EscapeHatch.mark_failure(node, reason)
+  return EscapeHatch.mark_failure(node, reason)  # type: ignore
 
 
 @register_hook("optimizer_zero_grad")

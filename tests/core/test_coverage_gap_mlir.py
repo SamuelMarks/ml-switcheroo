@@ -1,3 +1,5 @@
+"""Auto-generated doc."""
+
 import pytest
 from unittest.mock import patch
 import re
@@ -6,6 +8,7 @@ from ml_switcheroo.core.mlir.tokens import TokenKind
 
 
 def test_mlir_parser_coverage():
+  """Auto-generated doc."""
   # 92-93: TokenKind ValueError
   t = Tokenizer("dummy")
   with patch.object(Tokenizer, "_REGEX", re.compile("(?P<UNKNOWN>dummy)")):

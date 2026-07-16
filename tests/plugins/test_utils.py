@@ -1,5 +1,4 @@
-"""
-Tests for Plugin Utilities (Dynamic Framework Detection).
+"""Tests for Plugin Utilities (Dynamic Framework Detection).
 
 Verifies:
 1. create_dotted_name builds correct CST.

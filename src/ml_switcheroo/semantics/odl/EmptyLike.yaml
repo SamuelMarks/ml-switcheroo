@@ -1,0 +1,21 @@
+description: Returns an uninitialized tensor with the same size as input.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Dtype
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Device
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: requires_grad
+  type: bool
+variants: {}
+operation: EmptyLike

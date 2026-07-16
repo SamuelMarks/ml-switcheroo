@@ -56,7 +56,7 @@ try:
     # Initialize Semantics Singleton if needed to avoid re-parsing JSONs
     if 'GLOBAL_SEMANTICS' not in globals():
         GLOBAL_SEMANTICS = SemanticsManager()
-    
+
     # Resolve flavors from JS globals
     src_flavour = js_src_flavour if 'js_src_flavour' in globals() and js_src_flavour else None
     tgt_flavour = js_tgt_flavour if 'js_tgt_flavour' in globals() and js_tgt_flavour else None
@@ -64,7 +64,7 @@ try:
     # Determine execution config
     real_source = src_flavour if src_flavour else js_src_fw
     real_target = tgt_flavour if tgt_flavour else js_tgt_fw
-    
+
     # Read optional flags (default False/True as set in JS)
     opt_graph = js_enable_graph_opt if 'js_enable_graph_opt' in globals() else False
     opt_imports = js_enable_import_fixer if 'js_enable_import_fixer' in globals() else True
@@ -80,12 +80,12 @@ try:
         enable_import_fixer=opt_imports,
         enable_sharding=opt_sharding
     )
-    
+
     # 1. Run Transpilation
     print(f"Running AST Engine ({real_source} -> {real_target})...")
     engine = ASTEngine(semantics=GLOBAL_SEMANTICS, config=config)
     result = engine.run(js_source_code)
-    
+
     if result.success:
         print("Transpilation successful.")
     else:
@@ -93,7 +93,7 @@ try:
 
     # 2. Run Weight Script Generator (If architecture detected)
     weight_script_code = ""
-    
+
     # Fix: Block IR targets from generating weight scripts (Visual/Intermediate only)
     ir_targets = {'mlir', 'stablehlo', 'tikz', 'latex_dsl', 'html'}
 
@@ -104,16 +104,16 @@ try:
             f_src = pathlib.Path("/tmp/src_model.py")
             f_src.write_text(js_source_code, encoding="utf-8")
             f_out = pathlib.Path("/tmp/migration_script.py")
-            
+
             from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
-            
+
             wgen = WeightScriptGenerator(GLOBAL_SEMANTICS, config)
             success = wgen.generate(f_src, f_out)
-            
+
             if success and f_out.exists():
                 weight_script_code = f_out.read_text(encoding="utf-8")
             else:
-                pass 
+                pass
                 # Silent fail typical for non-architecture code
         except Exception as e:
             print(f"Weight Gen Error: {e}")
@@ -544,7 +544,7 @@ async function runTranspilation() {
         pyodide.globals.set("js_tgt_flavour", tgtFlav);
         pyodide.globals.set("js_strict_mode", optStrictMode);
     pyodide.globals.set("js_enable_sharding", optSharding);
-        
+
         // Pass pipeline flags
         pyodide.globals.set("js_enable_graph_opt", optGraph);
         pyodide.globals.set("js_enable_import_fixer", optImports);
@@ -600,7 +600,7 @@ async function runTranspilation() {
 
              if (tgtFw === 'tikz' || srcFw === 'tikz') {
                  document.getElementById("tab-render").checked = true;
-                 setTimeout(() => renderTikZ(result.code), 150); 
+                 setTimeout(() => renderTikZ(result.code), 150);
              } else if (tgtFw === 'html' || srcFw === 'html') {
                  document.getElementById("tab-render").checked = true;
                  renderHtmlDSL(result.code);
@@ -616,14 +616,14 @@ async function runTranspilation() {
                  // Render the timeline list
                  new window.TraceGraph('trace-visualizer', updateLineHighlight).render(result.trace_events);
              }
-             
+
              // Initialize Time Travel Controller
              if (timeTravel) {
                  timeTravel.loadEvents(result.trace_events);
              }
-             
+
              // Initial Graph Render (Final state if available, or first valid snapshot?)
-             // TimeTravel seek to last does this automatically now. 
+             // TimeTravel seek to last does this automatically now.
         }
     } catch (err) {
         console.error("Transpilation JS Error", err);
@@ -655,29 +655,29 @@ function switchStep(stepId) {
         el.style.display = 'none';
         el.classList.remove('active');
     });
-    
+
     // Update navigation styles
     document.querySelectorAll('.m3-step').forEach(el => {
         el.classList.remove('active');
-        
+
         // Mark as completed if it's before the current step
         const currentStepNum = parseInt(stepId.replace('step-', ''));
         const thisStepNum = parseInt(el.getAttribute('data-target').replace('step-', ''));
-        
+
         if (thisStepNum < currentStepNum) {
             el.classList.add('completed');
         } else {
             el.classList.remove('completed');
         }
     });
-    
+
     // Show current content
     const targetEl = document.getElementById(stepId);
     if (targetEl) {
         targetEl.style.display = 'block';
         targetEl.classList.add('active');
     }
-    
+
     // Activate nav item
     const navEl = document.querySelector(`.m3-step[data-target="${stepId}"]`);
     if (navEl) {
@@ -703,13 +703,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if (step1Src) {
                 step1Src.value = tgtCode || "# Run translation in Step 0 first to see output here.";
             }
-            
+
             // Mock ONNX generation
             const step1Tgt = document.getElementById('code-step1-target');
             if (step1Tgt) {
                 step1Tgt.value = "ir_version: 8\nproducer_name: \"ml-switcheroo-onnx\"\ngraph {\n  node {\n    input: \"x\"\n    output: \"y\"\n    op_type: \"Abs\"\n  }\n  name: \"main_graph\"\n  input {\n    name: \"x\"\n    type {\n      tensor_type {\n        elem_type: 1\n        shape {\n          dim {\n            dim_value: 1\n          }\n        }\n      }\n    }\n  }\n  output {\n    name: \"y\"\n    type {\n      tensor_type {\n        elem_type: 1\n        shape {\n          dim {\n            dim_value: 1\n          }\n        }\n      }\n    }\n  }\n}";
             }
-            
+
             switchStep('step-1');
         });
     }
@@ -719,7 +719,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnNextStep2) {
         btnNextStep2.addEventListener('click', () => {
             switchStep('step-2');
-            
+
             // Simulate Compilation Log
             const logEl = document.getElementById('compile-log');
             if (logEl) {
@@ -736,7 +736,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     "[INFO] Optimizing WASM binary (SIMD enabled)...",
                     "[SUCCESS] WASM compilation complete! Binary size: 45KB."
                 ];
-                
+
                 const interval = setInterval(() => {
                     if (step < messages.length) {
                         logEl.innerHTML += messages[step] + "\n";
@@ -755,11 +755,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnNextStep3) {
         btnNextStep3.addEventListener('click', () => {
             switchStep('step-3');
-            
+
             // Update Live UI based on selection
             const execType = document.getElementById('select-execution').value;
             const modality = document.getElementById('select-modality').value;
-            
+
             const liveUi = document.getElementById('live-system-ui');
             if (liveUi) {
                 if (execType === 'download') {

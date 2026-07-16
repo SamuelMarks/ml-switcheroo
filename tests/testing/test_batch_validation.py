@@ -1,5 +1,4 @@
-"""
-Tests for Batch Validation Logic.
+"""Tests for Batch Validation Logic.
 
 Verifies:
 1. Automated fuzzing execution flow.
@@ -49,9 +48,7 @@ def validator(mock_semantics):
 
 
 def test_batch_execution_flow(validator):
-  """
-  Verify that runner.verify is called for operations without manual tests.
-  """
+  """Verify that runner.verify is called for operations without manual tests."""
 
   # Mock Runner behavior
   def mock_verify(variants, params, hints=None, constraints=None, shape_calc=None):

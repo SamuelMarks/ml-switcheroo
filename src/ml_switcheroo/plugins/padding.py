@@ -125,7 +125,7 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
     parts = target_api.split(".")
     new_func = cst.Name(parts[0])
     for part in parts[1:]:
-      new_func = cst.Attribute(value=new_func, attr=cst.Name(part))
+      new_func = cst.Attribute(value=new_func, attr=cst.Name(part))  # type: ignore
 
     return node.with_changes(func=new_func, args=args)
 

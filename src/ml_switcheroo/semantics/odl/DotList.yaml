@@ -1,0 +1,18 @@
+description: Functional interface to the Dot layer.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: inputs
+  type: List[Tensor]
+- default: -1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: axes
+  type: Union[int, Tuple[int, int]]
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: normalize
+  type: bool
+variants: {}
+operation: DotList

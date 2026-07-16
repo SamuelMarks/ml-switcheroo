@@ -1,0 +1,8 @@
+description: Stack 1-D arrays as columns into a 2-D array.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: tensors
+  type: List[Tensor]
+variants: {}
+operation: ColumnStack

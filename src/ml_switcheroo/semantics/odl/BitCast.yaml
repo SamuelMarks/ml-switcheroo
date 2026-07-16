@@ -1,0 +1,12 @@
+description: View (Reinterpret Cast) the array as a different type.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Dtype
+type: function
+operation: BitCast

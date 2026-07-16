@@ -1,0 +1,5 @@
+description: Description of IO descriptor.
+op_type: class
+std_args: []
+variants: {}
+operation: IODescriptor

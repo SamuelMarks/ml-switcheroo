@@ -1,0 +1,4 @@
+description: Auto-generated mapping for LazyBatchNorm2d.
+std_args: []
+type: class
+operation: LazyBatchNorm2d

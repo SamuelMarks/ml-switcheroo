@@ -1,0 +1,8 @@
+description: PyTorch specific utility for multiprocessing setup.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: path
+  type: str
+variants: {}
+operation: PrepareMultiprocessingEnvironment

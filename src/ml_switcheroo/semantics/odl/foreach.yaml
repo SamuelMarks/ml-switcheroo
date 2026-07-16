@@ -1,0 +1,8 @@
+description: Call a function for each value and index.
+std_args:
+- self
+- fn
+- create_array
+- is_signed
+type: function
+operation: foreach

@@ -1,0 +1,9 @@
+description: Filter predicate matching a specific type.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: type
+  type: Any
+variants: {}
+operation: OfType

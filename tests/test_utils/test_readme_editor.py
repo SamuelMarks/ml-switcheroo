@@ -1,5 +1,4 @@
-"""
-Tests for automatic README documentation updating.
+"""Tests for automatic README documentation updating.
 
 Verifies that:
 1.  The `ReadmeEditor` correctly identifies the injection point.
@@ -37,8 +36,7 @@ def editor(tmp_path):
 
 
 def test_missing_file_returns_false(tmp_path):
-  """
-  Scenario: Path does not exist.
+  """Scenario: Path does not exist.
   Expectation: Returns False, logs error.
   """
   mgr = MockSemantics()
@@ -50,8 +48,7 @@ def test_missing_file_returns_false(tmp_path):
 
 
 def test_missing_section_header_returns_false(editor):
-  """
-  Scenario: README exists but lacks '## ✅ Compatibility Matrix'.
+  """Scenario: README exists but lacks '## ✅ Compatibility Matrix'.
   Expectation: Returns False, no changes made.
   """
   editor.readme_path.write_text("# Title\n\nNo matrix here.", encoding="utf-8")
@@ -64,8 +61,7 @@ def test_missing_section_header_returns_false(editor):
 
 
 def test_injection_between_headers(editor):
-  """
-  Scenario: Table section exists between two headers.
+  """Scenario: Table section exists between two headers.
   Expectation: Old table replaced, surrounding content preserved.
   """
   original_content = """# Title
@@ -104,8 +100,7 @@ Please help.
 
 
 def test_injection_at_end_of_file(editor):
-  """
-  Scenario: Table section is the last section in the file.
+  """Scenario: Table section is the last section in the file.
   Expectation: content appends correctly without crashing search regex.
   """
   original_content = """# Title
@@ -126,9 +121,7 @@ Old Data
 
 
 def test_category_heuristics(editor):
-  """
-  Verify _guess_category logic inside the table generation.
-  """
+  """Verify _guess_category logic inside the table generation."""
   # Pre-seed the header is critical!
   editor.readme_path.write_text("## ✅ Compatibility Matrix\n", encoding="utf-8")
 
@@ -147,9 +140,7 @@ def test_category_heuristics(editor):
 
 
 def test_null_variant_handling(editor):
-  """
-  Verify operations with no target (None) are rendered as dashes.
-  """
+  """Verify operations with no target (None) are rendered as dashes."""
   # Pre-seed header
   editor.readme_path.write_text("## ✅ Compatibility Matrix\n", encoding="utf-8")
 

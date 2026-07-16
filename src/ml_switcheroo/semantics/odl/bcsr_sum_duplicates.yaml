@@ -1,0 +1,7 @@
+description: Sums duplicate indices within a BCSR array, returning an array with sorted
+  indices.
+std_args:
+- mat
+- nse
+type: function
+operation: bcsr_sum_duplicates

@@ -1,0 +1,4 @@
+description: Represents a connection to exactly one peer.
+std_args: []
+type: class
+operation: TransferConnection

@@ -1,0 +1,25 @@
+description: "Base class to create custom autograd.Function.\n\nTo create a custom\
+  \ autograd.Function, subclass this class and implement\nthe :meth:forward and :meth:backward\
+  \ static methods. Then, to use your custom\nop in the forward pass, call the class\
+  \ method apply. Do not call\n:meth:forward directly.\n\nTo ensure correctness and\
+  \ best performance, make sure you are calling the\ncorrect methods on ctx and validating\
+  \ your backward function using\n:func:torch.autograd.gradcheck.\n\nSee extending-autograd\
+  \ for more details on how to use this class.\n\nExamples::\n\n    >>> # xdoctest:\
+  \ +REQUIRES(env:TORCH_DOCTEST_AUTOGRAD)\n    >>> class Exp(Function):\n    >>> \
+  \    @staticmethod\n    >>>     def forward(ctx, i):\n    >>>         result = i.exp()\n\
+  \    >>>         ctx.save_for_backward(result)\n    >>>         return result\n\
+  \    >>>\n    >>>     @staticmethod\n    >>>     def backward(ctx, grad_output):\n\
+  \    >>>         result, = ctx.saved_tensors\n    >>>         return grad_output\
+  \ * result\n    >>>\n    >>> # Use it by calling the apply method:\n    >>> # xdoctest:\
+  \ +SKIP\n    >>> output = Exp.apply(input)"
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: args
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kwargs
+  type: Any
+variants: {}
+operation: Function

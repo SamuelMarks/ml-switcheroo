@@ -1,5 +1,4 @@
-"""
-Integration Test for Device Allocator Wiring.
+"""Integration Test for Device Allocator Wiring.
 
 Verifies that the "Device" abstract op correctly triggers the
 device_allocator plugin and maps platform specific strings.

@@ -1,0 +1,17 @@
+description: Computes the minimum and maximum values of the input tensor.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dim
+  type: int
+- default: false
+  is_variadic: false
+  kind: positional_or_keyword
+  name: keepdim
+  type: bool
+variants: {}
+operation: Aminmax

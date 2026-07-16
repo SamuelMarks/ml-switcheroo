@@ -1,0 +1,8 @@
+description: Packs a Tensor containing padded sequences of variable length.
+std_args:
+- input
+- lengths
+- batch_first
+- enforce_sorted
+type: function
+operation: pack_padded_sequence

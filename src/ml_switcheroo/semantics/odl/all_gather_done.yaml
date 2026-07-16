@@ -1,0 +1,4 @@
+description: Auto-generated mapping for all_gather_done.
+std_args: []
+variants: {}
+operation: all_gather_done

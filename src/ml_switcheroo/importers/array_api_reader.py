@@ -107,7 +107,7 @@ class ArrayApiSpecImporter:
             "from": rel_path,
             "description": summary,
             "std_args": [],  # Constants have no args
-            "variants": {},
+            "variants": {},  # type: ignore
           }
 
     return semantics

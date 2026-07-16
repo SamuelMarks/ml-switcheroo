@@ -1,0 +1,11 @@
+description: Returns the unique elements of an input array ``x``, the first occurring
+  indices for each unique element in ``x``, the indices from the set of unique elements
+  that reconstruct ``x``, and the corresponding counts for each unique element in
+  ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+variants: {}
+operation: unique_all
