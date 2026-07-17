@@ -11,6 +11,8 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdg
 
 class SwiGLUFusionPass:
   """Fuses separate gate_proj and up_proj nodes into a single SwiGLU node.
+
+
   Matches standard JAX/Flax Bonsai idioms.
   """
 

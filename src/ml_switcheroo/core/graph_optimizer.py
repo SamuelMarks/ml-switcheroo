@@ -194,6 +194,8 @@ class GraphOptimizer:
     processed_ids: Set[str],
   ) -> Optional[List[str]]:
     """Checks if a sequence of Op Kinds exists starting from `start_node`.
+
+
     Enforces linear chain constraint (A->B->C).
 
     Args:

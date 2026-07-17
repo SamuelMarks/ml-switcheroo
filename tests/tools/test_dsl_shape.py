@@ -11,6 +11,7 @@ from ml_switcheroo.core.dsl import ParameterDef
 
 def test_symbolic_shape_initialization():
   """Verify shape_spec field exists and accepts symbolic strings.
+
   Test Case from specification.
   """
   p = ParameterDef(name="x", shape_spec="[N, N]")

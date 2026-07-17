@@ -112,6 +112,8 @@ def rewrite_stateful_call(rewriter: Any, node: cst.Call, instance_name: str, con
 
 def inject_kwarg(node: cst.Call, arg_name: str, val_name: str) -> cst.Call:
   """Generic helper to inject a keyword argument into a call.
+
+
   Prevents duplication if the argument already exists.
 
   Format: `func(..., arg_name=val_name)`
@@ -201,6 +203,7 @@ def is_super_call(node: cst.Call) -> bool:
 
 def is_builtin(name: str) -> bool:
   """Checks if a name corresponds to a standard Python builtin.
+
   Used to prevent excessive logging/tracing of standard language features.
 
   Args:

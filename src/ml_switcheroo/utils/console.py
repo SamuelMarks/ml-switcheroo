@@ -95,7 +95,9 @@ class _ConsoleProxy:
     return self._backend
 
   def _configure_logging(self) -> None:
-    """Configures or re-configures the standard python logging library
+    """Configures or re-configures the standard python logging library.
+
+
     to direct output to the current backend console.
     """
     # Remove existing RichHandlers to prevent duplicate logs/wrong destinations

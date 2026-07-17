@@ -27,7 +27,8 @@ def emitter_flax():
 
 def test_emit_init_stateful_torch(emitter_torch):
   """Scenario: Torch Conv2d initialization.
-  Expect: self.conv1 = nn.Conv2d(in_channels=3, out_channels=64)
+
+  Expect: self.conv1 = nn.Conv2d(in_channels=3, out_channels=64).
   """
   node = LogicalNode(id="conv1", kind="Conv2d", metadata={"in_channels": 3, "out_channels": 64})
   stmt = emitter_torch.emit_init(node)
@@ -45,6 +46,7 @@ def test_emit_init_stateful_torch(emitter_torch):
 
 def test_emit_init_stateful_flax_rng(emitter_flax):
   """Scenario: Flax Linear initialization.
+
   Expect: Injection of `rngs=rngs`.
   """
   node = LogicalNode(id="fc1", kind="Linear", metadata={"features": 10})
@@ -63,6 +65,7 @@ def test_emit_init_stateful_flax_rng(emitter_flax):
 
 def test_emit_init_functional_noop(emitter_torch):
   """Scenario: Functional node (relu).
+
   Expect: pass (No init).
   """
   node = LogicalNode(id="r1", kind="func_relu")
@@ -88,6 +91,7 @@ def test_emit_call_stateful(emitter_torch):
 
 def test_emit_call_functional_params(emitter_torch):
   """Scenario: Calling functional op with metadata args.
+
   Flatten(x, 1) -> torch.flatten(x, start_dim=1)  (if keyword) or positional.
   """
   # Metadata keys starting with arg_N map to positional in emitter

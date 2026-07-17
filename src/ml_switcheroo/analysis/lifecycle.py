@@ -48,6 +48,8 @@ class InitializationTracker(cst.CSTVisitor):
 
   def visit_ClassDef(self, node: cst.ClassDef) -> None:
     """Enters a class definition.
+
+
     Pushes a new Context onto the stack.
 
     Args:
@@ -58,6 +60,7 @@ class InitializationTracker(cst.CSTVisitor):
 
   def leave_ClassDef(self, node: cst.ClassDef) -> None:
     """Exits a class definition and computes the difference between usages and inits.
+
     If discrepancies are found, they are recorded in `self.warnings`.
 
     Args:
@@ -83,6 +86,7 @@ class InitializationTracker(cst.CSTVisitor):
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> None:
     """Tracks entry into __init__ or forward/call methods.
+
     Sets context flags `in_init` or `in_forward`.
 
     Args:
@@ -102,6 +106,7 @@ class InitializationTracker(cst.CSTVisitor):
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
     """Exits function scope.
+
     Resets context flags.
 
     Args:
@@ -172,10 +177,12 @@ class InitializationTracker(cst.CSTVisitor):
       # Simple check: is value 'self'?
       if self._is_self(node.value):
         member_name = node.attr.value
+
         ctx.used_in_forward.add(member_name)
 
   def _check_assignment_target(self, node: cst.BaseExpression, ctx: _ClassContext) -> None:
     """Helper to extract attribute name from assignment target.
+
     Recurses for tuple unpacking.
 
     Args:

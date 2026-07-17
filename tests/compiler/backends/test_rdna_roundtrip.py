@@ -37,7 +37,8 @@ def semantics_mgr():
 
 
 def test_rdna_roundtrip_macro(semantics_mgr):
-  """Scenario: Input -> Conv2d(k=3) -> Output
+  """Scenario: Input -> Conv2d(k=3) -> Output.
+
   Roundtrip ensures markers and metadata recovery work.
   """
   g_in = LogicalGraph()

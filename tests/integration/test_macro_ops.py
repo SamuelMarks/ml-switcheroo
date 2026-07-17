@@ -97,7 +97,8 @@ def test_macro_expansion():
 
 
 def test_macro_argument_rename():
-  """Verify that if input argument is named differently (e.g. 'input' vs 'x'),
+  """Verify that if input argument is named differently (e.g. 'input' vs 'x'),.
+
   normalization correctly maps it to the macro placeholder '{x}'.
   """
   # Setup semantics where source arg is 'input' but standard arg is 'x'

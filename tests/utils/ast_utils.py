@@ -1,10 +1,10 @@
-"""ast_utils, a bunch of helpers for converting input into ast.* input_str"""
+"""ast_utils, a bunch of helpers for converting input into ast.* input_str."""
 
 from ast import AST
 
 
 class Undefined:
-  """Null class"""
+  """Null class."""
 
 
 def cmp_ast(node0, node1):

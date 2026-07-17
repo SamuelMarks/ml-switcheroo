@@ -24,8 +24,9 @@ def gen_code(ops: list[OperationNode]) -> str:
 
 
 def test_naming_from_type_attribute():
-  """Scenario: %0 = sw.op {type="torch.flatten"}
-  Expectation: _flatten = torch.flatten(...)
+  """Scenario: %0 = sw.op {type="torch.flatten"}.
+
+  Expectation: _flatten = torch.flatten(...).
   """
   # Must use result in another op to force assignment
   op1 = OperationNode(
@@ -48,8 +49,9 @@ def test_naming_from_type_attribute():
 
 
 def test_naming_from_nested_type():
-  """Scenario: %0 = sw.op {type="flax.nnx.Linear"}
-  Expectation: _linear = flax.nnx.Linear(...)
+  """Scenario: %0 = sw.op {type="flax.nnx.Linear"}.
+
+  Expectation: _linear = flax.nnx.Linear(...).
   """
   op1 = OperationNode(
     name="sw.op",
@@ -70,6 +72,7 @@ def test_naming_from_nested_type():
 
 def test_naming_collision_handling():
   """Scenario: Two different flattens.
+
   Expectation: _flatten and _flatten_0.
   """
   op1 = OperationNode(
@@ -99,6 +102,7 @@ def test_naming_collision_handling():
 
 def test_naming_fallback():
   """Scenario: No type attribute.
+
   Expectation: SSA ID preservation (e.g. _a).
   """
   op1 = OperationNode(

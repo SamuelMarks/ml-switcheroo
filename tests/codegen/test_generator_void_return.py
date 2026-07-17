@@ -35,6 +35,7 @@ def generator(tmp_path):
 
 def test_void_return_logic(generator, tmp_path):
   """Scenario: Operation 'Save' has return_type="None".
+
   Expectation: No `verify_results` call in generated code.
   """
   semantics = {
@@ -65,6 +66,7 @@ def test_void_return_logic(generator, tmp_path):
 
 def test_standard_return_logic(generator, tmp_path):
   """Scenario: Standard Op (default return type).
+
   Expectation: Verification logic IS present.
   """
   semantics = {

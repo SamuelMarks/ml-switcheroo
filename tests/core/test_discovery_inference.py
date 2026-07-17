@@ -15,6 +15,7 @@ from ml_switcheroo.core.discovery import SimulatedReflection
 
 def mock_module_with_members(name: str, members: list):
   """Helper to create a real ModuleType with MagicMock members.
+
   Allows inspect.getmembers to work correctly.
   """
   mod = types.ModuleType(name)
@@ -32,6 +33,7 @@ def get_mock_adapter(modules=None):
 
 def test_exact_match():
   """Scenario: 'LogSoftmax' requested. 'mock_fw.nn' contains 'LogSoftmax' (Exact).
+
   Expect: 'mock_fw.nn.LogSoftmax'.
   """
   adapter = get_mock_adapter()
@@ -58,6 +60,7 @@ def test_exact_match():
 
 def test_normalized_match():
   """Scenario: 'LogSoftmax' requested. 'mock_fw.nn' contains 'log_softmax'.
+
   Expect: 'mock_fw.nn.log_softmax' (Normalization matches snake_case vs CamelCase).
   """
   adapter = get_mock_adapter()
@@ -83,6 +86,7 @@ def test_normalized_match():
 
 def test_fuzzy_match():
   """Scenario: 'softmax' requested. 'mock_fw' contains 'softmax_v2'.
+
   Expect: 'mock_fw.softmax_v2' (Closest string match fallback).
   """
   adapter = get_mock_adapter(modules=["mock_fw"])
@@ -98,6 +102,7 @@ def test_fuzzy_match():
 
 def test_no_match_returns_none():
   """Scenario: Operation not found in any search module.
+
   Expect: None.
   """
   adapter = get_mock_adapter()
@@ -113,6 +118,7 @@ def test_no_match_returns_none():
 
 def test_missing_adapter_fallback():
   """Scenario: get_adapter returns None for the framework.
+
   Expect: System falls back to using [framework_name] as the search list.
   """
   mod = mock_module_with_members("ghost_fw", ["Op"])
@@ -133,6 +139,7 @@ def test_missing_adapter_fallback():
 
 def test_import_error_handled_gracefully():
   """Scenario: One of the search modules fails to import.
+
   Expect: Continues to next module without crashing.
   """
   adapter = get_mock_adapter(modules=["bad_mod", "good_mod"])
@@ -157,6 +164,7 @@ def test_import_error_handled_gracefully():
 
 def test_fuzzy_match_import_error():
   """Scenario: No exact match found, proceeding to fuzzy match. One module raises ImportError.
+
   Expect: The ImportError is caught and ignored during fuzzy match collection.
   """
   adapter = get_mock_adapter(modules=["bad_mod", "good_mod"])
@@ -180,6 +188,7 @@ def test_fuzzy_match_import_error():
 
 def test_fuzzy_match_no_candidates():
   """Scenario: No exact match, and no candidates found for fuzzy matching.
+
   Expect: Returns None.
   """
   adapter = get_mock_adapter(modules=["bad_mod"])

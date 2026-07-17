@@ -324,6 +324,8 @@ class Model(nn.Module):
 
 def _render_primary_options(hierarchy: HierarchyMap) -> str:
   """Renders the top-level <option> elements for root frameworks.
+
+
   Organizes frameworks into <optgroup> categories based on their semantic level.
   """
   # Organizes roots into buckets

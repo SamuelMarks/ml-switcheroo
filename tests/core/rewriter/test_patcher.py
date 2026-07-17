@@ -108,6 +108,7 @@ def test_replace_call_statement(emitter):
 
 def test_replace_call_expression_nested(emitter):
   """Scenario: Replace 'relu(x)' inside 'return relu(x)'.
+
   Provenance points to the Call node `relu(x)`.
   """
   code = "return relu(x)"
@@ -129,6 +130,7 @@ def test_replace_call_expression_nested(emitter):
 
 def test_expression_statement_deletion(emitter):
   """Scenario: Delete 'func(x)' expression statement.
+
   Provenance points to Expr node.
   """
   code = "func(x)"

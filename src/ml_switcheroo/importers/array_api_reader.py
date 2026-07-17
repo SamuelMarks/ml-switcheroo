@@ -142,6 +142,8 @@ class ArrayApiSpecImporter:
 
   def _parse_annotation(self, annotation: Optional[ast.AST]) -> str:
     """Recursively resolves AST type annotations to a readable string string.
+
+
     e.g. ``Name('int')`` -> 'int'
          ``BinOp(Subscript('Optional'), 'int')`` -> 'Optional[int]'  (simplified).
 

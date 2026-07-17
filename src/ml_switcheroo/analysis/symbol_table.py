@@ -54,6 +54,8 @@ class SymbolTable:
 
 class SymbolTableAnalyzer(cst.CSTVisitor):
   """Static Analysis pass to populate the SymbolTable.
+
+
   Runs post-order traversal logic (via leave methods) to propagate types bottom-up.
   Implements shallow control flow inference for If/Else and Loops.
   """
@@ -94,6 +96,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
   def visit_If(self, node: cst.If) -> bool:
     """Handle branching logic.
+
     1. Snapshot state.
     2. Visit body -> State_Body.
     3. Revert to Snapshot.
@@ -127,6 +130,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
   def visit_For(self, node: cst.For) -> bool:
     """Handle loop logic.
+
     Loops may execute 0 times or N times, introducing potential ambiguity.
     We merge the state after loop body with the state before loop.
     """
@@ -174,6 +178,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
   def _merge_states(self, state_a: Dict[str, SymbolType], state_b: Dict[str, SymbolType]) -> Dict[str, SymbolType]:
     """Merges two symbol dictionaries, creating Unions for conflicts.
+
     A missing key in one branch implies a potential Unbound state,
     but we optimistically retain the structured type found in the other branch.
     """
@@ -233,6 +238,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
   def leave_Import(self, node: cst.Import) -> None:
     """Track imports.
+
     e.g. `import torch` -> symbols['torch'] = ModuleType(name='Module', path='torch').
     """
     for alias in node.names:
@@ -246,6 +252,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
     """Track from-imports.
+
     e.g. `from torch import nn` -> symbols['nn'] = ModuleType(name='Module', path='torch.nn').
     """
     if not node.module:
@@ -265,6 +272,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
   def leave_Assign(self, node: cst.Assign) -> None:
     """Propagate type from RHS to LHS.
+
     x = torch.randn() -> x is Tensor.
     """
     rhs_type = self.table.get_type(node.value)
@@ -291,8 +299,10 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
   def leave_Attribute(self, node: cst.Attribute) -> None:
     """Resolve attributes based on their receiver type.
+
     If `x` is Module('torch'), `x.nn` is Module('torch.nn').
     If `x` is Tensor, `x.shape` might be recorded etc.
+
     """
     base_type = self.table.get_type(node.value)
     if isinstance(base_type, ModuleType):
@@ -301,6 +311,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
   def leave_Call(self, node: cst.Call) -> None:
     """Infer return type of a call.
+
     1. Resolve function fully qualified name.
     2. Check SemanticsManager for return type.
     """

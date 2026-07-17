@@ -69,7 +69,9 @@ class SemanticsManager:
     self._build_index()
 
   def _build_index(self) -> None:
-    """Constructs the reverse index mapping from concrete API endpoints
+    """Constructs the reverse index mapping from concrete API endpoints.
+
+
     back to their abstract definitions.
     """
     self._reverse_index.clear()
@@ -89,6 +91,7 @@ class SemanticsManager:
 
     def get_priority(abs_id, details, tier):
       """Determines indexing priority when multiple abstract ops map to the same target API.
+
       This handles overlaps between generic ops like `cat` vs `concat`.
       """
       score = 0
@@ -144,6 +147,7 @@ class SemanticsManager:
 
           def register_api(name):
             """Registers the target concrete API mapped back to its abstract concept.
+
             Uses tie-breaker scores when overlaps are found.
             """
             if name in self._reverse_index:

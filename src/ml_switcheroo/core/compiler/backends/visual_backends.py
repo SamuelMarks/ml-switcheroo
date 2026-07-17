@@ -30,21 +30,24 @@ from ml_switcheroo.core.latex.nodes import (  # pragma: no cover
 # pragma: no cover
 # pragma: no cover
 class TikzBackend(CompilerBackend):  # pragma: no cover
-  """Orchestrates the conversion of a LogicalGraph to TikZ source code.  # pragma: no cover
-  Verified to use Rank-Based Layout.  # pragma: no cover
+  """Orchestrates the conversion of a LogicalGraph to TikZ source code.  # pragma: no cover.
+
+
+  Verified to use Rank-Based Layout.  # pragma: no cover.
   """  # pragma: no cover
 
   # pragma: no cover
   def __init__(
     self, semantics: Optional[Any] = None, y_spacing: float = 2.5, x_spacing: float = 3.0
   ) -> None:  # pragma: no cover
-    """Initialize TikZ backend.  # pragma: no cover
+    """Initialize TikZ backend.  # pragma: no cover.
+
     # pragma: no cover
     Args:  # pragma: no cover
         semantics: Unused.  # pragma: no cover
         y_spacing: Vertical space between ranks.  # pragma: no cover
         x_spacing: Horizontal space between nodes.  # pragma: no cover
-    # pragma: no cover
+    # pragma: no cover.
     """  # pragma: no cover
     self.y_spacing = y_spacing  # pragma: no cover
     self.x_spacing = x_spacing  # pragma: no cover

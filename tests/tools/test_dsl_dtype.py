@@ -1,4 +1,5 @@
 """Tests for ODL Schema Extension: Dtype Constraints.
+
 Corresponds to Limitation #2 in the Architectural roadmap.
 
 Verifies:
@@ -59,6 +60,7 @@ def fuzzer():
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_fuzzer_respects_dtype_int64(fuzzer, data):
   """Scenario: Constraint declares dtype='int64'.
+
   Expectation: Generated array is int64, even if default is float32 or int32.
   """
   constraints = {"x": {"dtype": "int64"}}
@@ -99,6 +101,7 @@ def test_fuzzer_respects_dtype_bool(fuzzer, data):
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_fuzzer_dtype_priority_over_heuristic(fuzzer, data):
   """Scenario: Name 'mask' implies bool via heuristic.
+
             Constraint 'dtype' explicitly asks for 'float32' (e.g. attention mask floats).
   Expectation: Float32 wins.
   """

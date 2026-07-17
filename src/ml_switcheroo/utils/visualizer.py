@@ -107,6 +107,8 @@ class MermaidGenerator(cst.CSTVisitor):
 
   def _node_to_str(self, node: cst.CSTNode) -> str:
     """Robustly extracts a string representation of a Name, Attribute, or complex expression.
+
+
     Avoids LibCST code generation for simple cases to prevent crashes on detached nodes.
 
     Args:

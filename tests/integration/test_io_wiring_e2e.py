@@ -25,7 +25,8 @@ def save_model(model):
 
 @pytest.fixture(autouse=True)
 def ensure_io_plugin():
-  """Robustness Fix: Prevents "Missing required plugin" errors caused by
+  """Robustness Fix: Prevents "Missing required plugin" errors caused by.
+
   test pollution. Forces a reload of the io_handler module to re-register
   the @register_hook decorators if a previous test cleared the registry.
   """

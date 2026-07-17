@@ -102,6 +102,7 @@ def engine():
 
 def test_engine_catches_leaked_import(engine):
   """Scenario: Input has `import torch`. Rewriter fails to remove it.
+
   Expectation: Engine returns result with Lint Violation errors.
   """
   code = """
@@ -120,6 +121,7 @@ x = 1
 
 def test_engine_catches_leaked_usage(engine):
   """Scenario: Input has `torch.abs(x)`. No Semantics defined to map it.
+
   Rewriter passes it through (Lax Mode).
   Expectation: Linter catches 'torch.abs'.
   """
@@ -138,6 +140,7 @@ y = torch.abs(x)
 
 def test_linter_trace_event(engine):
   """Verify linter execution is logged in trace.
+
   The linter runs as a distinct phase "Structural Linter" in strict mode.
   """
   code = "import torch"

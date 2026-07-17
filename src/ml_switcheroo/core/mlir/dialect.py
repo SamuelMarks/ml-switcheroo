@@ -110,6 +110,8 @@ class DialectRegistry:
   @classmethod
   def validate_op(cls, node: OperationNode) -> bool:
     """Validates a single operation node against the schema.
+
+
     Returns False if op is unknown or invalid.
     """
     schema = cls._OPS.get(node.name)
@@ -125,6 +127,7 @@ class DialectRegistry:
   @classmethod
   def get_abstract_op(cls, op_name: str) -> str:
     """Maps a high-level framework op string (e.g. 'Linear') to the canonical dialect op.
+
     Currently they all map to 'sw.op' with type attributes, but this allows future expansion.
     """
     return "sw.op"

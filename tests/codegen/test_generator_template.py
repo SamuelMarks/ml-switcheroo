@@ -48,6 +48,7 @@ def semantics_data():
 
 def test_default_template_fallback(tmp_path, semantics_data):
   """Scenario: Use default templates.
+
   Note: Since real defaults depend on snapshot files which might be missing
   during bad bootstrap, we mock the manager here to ensure test stability.
   """
@@ -78,6 +79,7 @@ def test_default_template_fallback(tmp_path, semantics_data):
 
 def test_custom_backend_template(tmp_path, semantics_data):
   """Scenario: Add templates for 'tinygrad'.
+
   Expect: Generated code includes TinyGrad block, imports are in runtime.
   """
   custom_templates = {
@@ -152,6 +154,7 @@ def test_jit_config_via_template(tmp_path):
 
 def test_invalid_framework_skipped(tmp_path, semantics_data):
   """Scenario: Data has variant 'ghost_fw', but no template exists.
+
   Expect: 'ghost_fw' is excluded from generation.
   """
   semantics_data["abs"]["variants"]["ghost_fw"] = {"api": "ghost.abs"}

@@ -64,6 +64,7 @@ def test_batch_runner_execution_flow():
 
 def test_skip_generated_tests(tmp_path):
   """Verify manual test scanning explicitly skips 'generated' folder contents.
+
   Ensures robust path checking avoids false positives on path substrings.
   """
   mgr = MagicMock(spec=SemanticsManager)

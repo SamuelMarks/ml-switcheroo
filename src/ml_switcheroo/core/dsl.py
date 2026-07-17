@@ -92,6 +92,8 @@ class ParameterDef(BaseModel):
 
 class Rule(BaseModel):
   """Declarative rule for conditional logic within a variant or plugin.
+
+
   Evaluated at runtime to dynamically switch APIs.
   """
 

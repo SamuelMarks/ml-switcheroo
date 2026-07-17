@@ -25,6 +25,7 @@ def fuzzer():
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_generate_simple_callable(fuzzer, data):
   """Scenario: User hints 'Callable'.
+
   Expectation: Return a python function (lambda).
   """
   hints = {"fn": "Callable"}
@@ -43,6 +44,7 @@ def test_generate_simple_callable(fuzzer, data):
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_generate_complex_callable_hint(fuzzer, data):
   """Scenario: User hints 'Callable[[int], int]'.
+
   Expectation: Fuzzer handles the brackets gracefully and returns basic callable.
   """
   hints = {"op": "Callable[[int], int]"}
@@ -74,6 +76,7 @@ def test_generate_func_shorthand(fuzzer, data):
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_callable_in_list(fuzzer, data):
   """Scenario: List[Callable].
+
   Expectation: A list of functions.
   """
   hints = {"ops": "List[Callable]"}
@@ -88,6 +91,7 @@ def test_callable_in_list(fuzzer, data):
 
 def test_fallback_depth_recursion(fuzzer):
   """Scenario: Recursion limit hit on 'List[List[List[Callable]]]'.
+
   Expectation: Should still return sensible fallbacks for containers,
                or at least not crash if it reaches the callable.
   """

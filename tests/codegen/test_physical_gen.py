@@ -16,6 +16,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 class MockSemantics(SemanticsManager):
   """Mock Manager providing predefined templates and specs.
+
   Skips filesystem logic.
   """
 

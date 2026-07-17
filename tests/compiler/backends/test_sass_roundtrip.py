@@ -41,8 +41,9 @@ def semantics_mgr():
 
 
 def test_round_trip_math_op(semantics_mgr):
-  """Scenario: Input -> Add -> Output
-  Roundtrip: Graph -> SASS -> Graph
+  """Scenario: Input -> Add -> Output.
+
+  Roundtrip: Graph -> SASS -> Graph.
   """
   # 1. Create Source Graph
   g_in = LogicalGraph()
@@ -76,7 +77,8 @@ def test_round_trip_math_op(semantics_mgr):
 
 
 def test_round_trip_macro_block(semantics_mgr):
-  """Scenario: Input -> Conv2d -> Output
+  """Scenario: Input -> Conv2d -> Output.
+
   Verifies full structural recovery via BEGIN/END markers.
   """
   # 1. Source Graph

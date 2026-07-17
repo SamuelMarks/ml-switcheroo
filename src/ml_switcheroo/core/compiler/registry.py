@@ -112,6 +112,8 @@ def is_isa_target(target: str) -> bool:
 
 def is_isa_source(source: str) -> bool:
   """Determines if the source requires Lifting (ASM -> Graph -> AST).
+
+
   Only SASS and RDNA are treated as low-level source inputs.
 
   Args:

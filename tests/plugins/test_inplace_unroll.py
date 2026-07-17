@@ -72,7 +72,8 @@ def rewriter():
 
 
 def test_strip_inplace_underscore(rewriter):
-  """Scenario: `x.add_(y)`
+  """Scenario: `x.add_(y)`.
+
   Expectation: `x + y` (Infix operator for JAX compatibility).
   """
   code = "res = x.add_(y)"
@@ -85,7 +86,8 @@ def test_strip_inplace_underscore(rewriter):
 
 def test_metadata_trigger_implicit(rewriter):
   """Scenario: Op 'assign_add' has no underscore, but ODL metadata says `is_inplace=True`.
-  Expectation: Plugin runs, stripping suffix (idempotent if no suffix? no, plugin expects _)
+
+  Expectation: Plugin runs, stripping suffix (idempotent if no suffix? no, plugin expects _).
 
   Note: The actual plugin requires underscore by implementation details.
   This test verifies that the rewriter *attempts* to call the hook if metadata is set.
@@ -105,7 +107,8 @@ def test_metadata_trigger_implicit(rewriter):
 
 
 def test_fallback_non_math_unroll(rewriter):
-  """Scenario: `x.custom_(y)` (Unknown op, matched via heuristics in pre.py)
+  """Scenario: `x.custom_(y)` (Unknown op, matched via heuristics in pre.py).
+
   Expectation: `x.custom(y)` (Method strip fallback).
   """
   # This relies on the 'endswith(_)' check in pre.py
@@ -116,7 +119,8 @@ def test_fallback_non_math_unroll(rewriter):
 
 
 def test_ignore_standard_calls(rewriter):
-  """Scenario: `x.add(y)` (No underscore, no metadata)
+  """Scenario: `x.add(y)` (No underscore, no metadata).
+
   Expectation: No change.
   """
   code = "x.add(y)"
@@ -125,7 +129,8 @@ def test_ignore_standard_calls(rewriter):
 
 
 def test_ignore_dunders(rewriter):
-  """Scenario: `x.__init__(y)`
+  """Scenario: `x.__init__(y)`.
+
   Expectation: No stripping of underscore.
   """
   hook = unroll_inplace_ops
@@ -137,7 +142,8 @@ def test_ignore_dunders(rewriter):
 
 
 def test_ignore_single_underscore(rewriter):
-  """Scenario: `x._(y)` (Obscure but valid python)
+  """Scenario: `x._(y)` (Obscure but valid python).
+
   Expectation: No strip.
   """
   hook = unroll_inplace_ops

@@ -47,8 +47,9 @@ def rewriter():
 
 
 def test_save_transform_positional(rewriter):
-  """Input: torch.save(model, 'p')
-  Expect: orbax.checkpoint...save(directory='p', item=model)
+  """Input: torch.save(model, 'p').
+
+  Expect: orbax.checkpoint...save(directory='p', item=model).
   """
   code = "def f():\n  torch.save(model, 'p')"
   res = rewrite_code(rewriter, code)
@@ -62,7 +63,8 @@ def test_save_transform_positional(rewriter):
 
 
 def test_save_transform_keywords(rewriter):
-  """Input: torch.save(obj=m, f='p')
+  """Input: torch.save(obj=m, f='p').
+
   Expect: Correct mapping regardless of source order.
   """
   code = "def f():\n  torch.save(f='p', obj=m)"
@@ -74,8 +76,9 @@ def test_save_transform_keywords(rewriter):
 
 
 def test_load_transform(rewriter):
-  """Input: torch.load('p')
-  Expect: orbax...restore('p')
+  """Input: torch.load('p').
+
+  Expect: orbax...restore('p').
   """
   code = "def f():\n  x = torch.load('p')"
   res = rewrite_code(rewriter, code)

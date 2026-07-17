@@ -120,6 +120,8 @@ class Immediate(Operand):
 @dataclass
 class Modifier(Operand):
   """Represents an instruction modifier or attribute.
+
+
   e.g., `glc`, `slc`, `off`.
 
   Attributes:
@@ -137,6 +139,7 @@ class Modifier(Operand):
 @dataclass
 class Memory(Operand):
   """Represents a memory address operand, typically used in generic loads/stores.
+
   RDNA often passes the address as a register or register pair, but explicit
   offset syntax exists.
 
@@ -242,6 +245,7 @@ class Directive(RdnaNode):
 @dataclass
 class Comment(RdnaNode):
   """Represents a line comment.
+
   RDNA assembly uses `;` for comments.
 
   Format: `; {text}`

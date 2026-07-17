@@ -56,6 +56,8 @@ class TypeNode(MlirNode):
 @dataclass
 class AttributeNode(MlirNode):
   """Represents a named attribute.
+
+
   Value can be a string literal or a list of string literals (e.g. for bases).
   """
 

@@ -51,6 +51,7 @@ def test_routing_to_rewriter_pipeline_high_level(mock_managers):
 
 def test_python_frontend_invoked_in_compiler_pipeline(mock_managers):
   """Verify python source ingestion logic when targeting an ISA.
+
   If source is 'torch' and target is 'sass', we enter compiler pipeline,
   and should use PythonFrontend because 'torch' is not an ISA source.
   """

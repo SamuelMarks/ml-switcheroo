@@ -119,9 +119,10 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
 
 
 def test_keyword_translation(engine: TestRewriter) -> None:
-  """Input:  `torch.sum(input=z, dim=1)`
+  """Input:  `torch.sum(input=z, dim=1)`.
+
   Logic:  input -> x -> a, dim -> axis -> axis.
-  Output: `jax.numpy.sum(a=z, axis=1)`
+  Output: `jax.numpy.sum(a=z, axis=1)`.
   """
   code = "res = torch.sum(input=temp, dim=1)"
   result = rewrite_code(engine, code)

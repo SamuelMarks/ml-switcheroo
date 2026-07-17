@@ -46,6 +46,8 @@ def resolve_semantics_dir() -> Path:
 
 def resolve_snapshots_dir() -> Path:
   """Locates the directory containing framework snapshots and mapping overlays.
+
+
   Defaults to the sibling 'snapshots' directory relative to 'semantics'.
 
   Returns:

@@ -39,6 +39,8 @@ class LatexNode(ABC):
 @dataclass
 class MemoryNode(LatexNode):
   r"""Represents stateful memory allocation (e.g., Weights/Layers).
+
+
   Maps to the ``\\Attribute`` macro.
 
   Example::
@@ -65,6 +67,7 @@ class MemoryNode(LatexNode):
 @dataclass
 class InputNode(LatexNode):
   r"""Represents the model input definition.
+
   Maps to the ``\\Input`` macro.
 
   Example::
@@ -86,6 +89,7 @@ class InputNode(LatexNode):
 @dataclass
 class ComputeNode(LatexNode):
   r"""Represents a stateless operation call.
+
   Maps to the ``\\Op`` macro.
 
   Example::
@@ -114,6 +118,7 @@ class ComputeNode(LatexNode):
 @dataclass
 class StateOpNode(LatexNode):
   r"""Represents a call to a stateful layer defined in Memory.
+
   Maps to the ``\\StateOp`` macro.
 
   Example::
@@ -142,6 +147,7 @@ class StateOpNode(LatexNode):
 @dataclass
 class ReturnNode(LatexNode):
   r"""Represents the output return statement.
+
   Maps to the ``\\Return`` macro.
 
   Example::
@@ -160,6 +166,7 @@ class ReturnNode(LatexNode):
 @dataclass
 class ModelContainer(LatexNode):
   """Root container representing the Model definition block.
+
   Maps to the ``DefModel`` environment.
   """
 

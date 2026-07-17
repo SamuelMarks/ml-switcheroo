@@ -11,6 +11,7 @@ from ml_switcheroo.core.tracer import TraceEventType
 
 def test_engine_emits_valid_mermaid():
   """Scenario: Run simple conversion.
+
   Expectation: Trace events of type AST_SNAPSHOT contain 'mermaid' field starting with 'graph TD'.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="jax")

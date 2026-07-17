@@ -57,10 +57,11 @@ class MockAdapterNoMagic:
 
 def test_dynamic_logic_injection(generator, tmp_path):
   """Scenario: Target framework has magic args (MockAdapterWithMagic).
+
   Expectation:
       1. 'import magic_lib' present.
       2. '_magic_helper' definition present.
-      3. Dispatch logic: `if tp in ["magic_k", "other_k"]: val = _magic_helper(...)`
+      3. Dispatch logic: `if tp in ["magic_k", "other_k"]: val = _magic_helper(...)`.
   """
   target_key = "magic_fw"
 
@@ -90,6 +91,7 @@ def test_dynamic_logic_injection(generator, tmp_path):
 
 def test_dynamic_logic_noop(generator, tmp_path):
   """Scenario: Target framework has no magic (MockAdapterNoMagic).
+
   Expectation: No imports, empty init, pass logic.
   """
   target_key = "plain_fw"

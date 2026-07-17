@@ -45,7 +45,7 @@ class Net:
 
 
 def test_extract_edges_sequential_flow():
-  """Scenario: x = conv(x) -> x = fc(x)"""
+  """Scenario: x = conv(x) -> x = fc(x)."""
   code = """
 class Net:
     def __init__(self):
@@ -76,7 +76,7 @@ class Net:
 
 
 def test_functional_call_tracing():
-  """Scenario: x = self.conv(x); x = F.relu(x)"""
+  """Scenario: x = self.conv(x); x = F.relu(x)."""
   code = """
 class Net:
     def __init__(self):

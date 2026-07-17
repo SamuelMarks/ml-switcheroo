@@ -1,4 +1,5 @@
 """Integration Visual Tests for CLI Output.
+
 Ensures that the Rich table formatting and JSON reports remain stable.
 """
 
@@ -49,6 +50,7 @@ class MockInspector:
 
 def test_matrix_visual_snapshot(snapshot, tmp_path):
   """Verifies the ASCII output of the Compatibility Matrix table.
+
   Captures Rich Console output into a string.
   """
   semantics = StableMockSemantics()

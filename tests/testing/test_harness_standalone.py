@@ -63,6 +63,7 @@ def test_dynamic_shim_generation(tmp_path):
 
 def test_harness_execution_match(tmp_path):
   """Verify correctness: Identical functions return Exit Code 0.
+
   Using 'numpy' mode to avoid needing installed Torch/JAX in test worker.
   """
   src_file = tmp_path / "mod_src.py"

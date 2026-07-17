@@ -105,6 +105,8 @@ class PaxmlAdapter(JAXStackMixin):
   @property
   def test_config(self) -> Dict[str, str]:
     """Returns templates for generating physical test files.
+
+
     Extends the JAX base config with Praxis imports.
 
     Returns:
@@ -156,6 +158,7 @@ class PaxmlAdapter(JAXStackMixin):
   @property
   def declared_magic_args(self) -> List[str]:
     """Returns list of magic arguments to strip.
+
     Praxis usually handles RNG context internally or differently than Flax.
 
     Returns:
@@ -190,6 +193,7 @@ class PaxmlAdapter(JAXStackMixin):
   @property
   def plugin_traits(self) -> PluginTraits:
     """Returns plugin capability flags.
+
     Enables functional control flow and purity analysis (inherited from JAX requirements).
 
     Returns:
@@ -206,6 +210,7 @@ class PaxmlAdapter(JAXStackMixin):
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """Returns static definitions for Praxis Layers.
+
     Ensures that 'Linear' maps 'bias' to 'use_bias' to satisfy tests.
 
     Returns:

@@ -18,6 +18,8 @@ from typing import Union
 
 class EscapeHatch:
   """Handles the "Pass-Through" Protocol.
+
+
   Wraps untranslatable nodes with standardized comment flags and valid Python syntax markers.
   """
 

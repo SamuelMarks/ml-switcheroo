@@ -67,6 +67,7 @@ def mock_report(tmp_path):
 
 def test_validation_gating_logic(mock_report):
   """Scenario:
+
       - `good_op` is True in report.
       - `bad_op` is False in report.
   Expectation:
@@ -104,6 +105,7 @@ y2 = torch.bad(x)
 
 def test_missing_report_logic():
   """Scenario: No validation report provided.
+
   Expectation: Optimistic behavior (everything is allowed).
   """
   semantics = MockSemantics()
@@ -123,6 +125,7 @@ def test_missing_report_logic():
 
 def test_untracked_op_defaults_true(mock_report):
   """Scenario: Op matches semantics but is NOT in the report (untested).
+
   Expectation: Treated as Valid/Verified (Fail Open).
   """
   semantics = MockSemantics()

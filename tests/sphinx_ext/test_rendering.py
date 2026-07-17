@@ -24,6 +24,7 @@ def mock_registry_data():
 
 def test_render_demo_html_structure(mock_registry_data):
   """Scenario: Generating the demo HTML block.
+
   Expectation: Contains all structural divs, inputs, Weight Script, and Time Travel toolbar.
   """
   hierarchy, ex, meta = mock_registry_data

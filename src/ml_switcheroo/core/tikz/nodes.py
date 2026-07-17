@@ -41,6 +41,8 @@ class TriviaNode(TikzBaseNode):
 @dataclass
 class TikzComment(TikzBaseNode):
   """Represents a LaTeX comment (e.g. ``% My Comment``).
+
+
   Includes the percent sign in the content or adds it during export.
   """
 
@@ -77,6 +79,7 @@ class TikzOption(TikzBaseNode):
 @dataclass
 class TikzTable(TikzBaseNode):
   r"""Represents an HTML-like table structure used inside TikZ Node labels.
+
   Uses LaTeX tabular environment syntax.
 
   Example::

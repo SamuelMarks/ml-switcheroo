@@ -10,6 +10,7 @@ from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 
 class MockAdapter(JAXStackMixin):
   """A dummy adapter class representing a high-level framework (e.g. Flax, PaxML).
+
   It inherits from JAXStackMixin to gain wiring capabilities.
   """
 

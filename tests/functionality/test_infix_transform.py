@@ -14,7 +14,8 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInfixSemantics(SemanticsManager):
-  """Mock semantics defining a wide range of binary and unary operators
+  """Mock semantics defining a wide range of binary and unary operators.
+
   to test the `_rewrite_as_infix` method comprehensively.
   """
 
@@ -109,6 +110,7 @@ def test_unary_complex_expression_parens(engine):
 
 def test_infix_invalid_arg_count_binary(engine):
   """Input:  torch.div(a)  <- Missing arg for binary op.
+
   Expect: Fallback to original code w/ Error Marker.
   """
   code = "res = torch.div(start_val)"
@@ -123,6 +125,7 @@ def test_infix_invalid_arg_count_binary(engine):
 
 def test_infix_invalid_operator_symbol(engine):
   """Input:  torch.bad(a, b) maps to symbol '???'.
+
   Expect: Fallback and reporting.
   """
   code = "res = torch.bad(a, b)"

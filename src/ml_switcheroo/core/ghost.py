@@ -62,6 +62,8 @@ class GhostInspector:
   @staticmethod
   def inspect(obj: Union[Any, Callable], api_path: str) -> "GhostRef":
     """Creates a GhostRef from a live Python object.
+
+
     Gracefully handles C-Extensions and builtins that resist introspection.
 
     Args:

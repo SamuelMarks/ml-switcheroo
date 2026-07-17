@@ -23,6 +23,7 @@ def process():
 @pytest.fixture(autouse=True)
 def reload_required_plugins():
   """Reloads critical plugins to ensure hooks are registered in the global registry.
+
   This prevents "Missing required plugin" errors caused by test suite isolation/clearing.
   """
   importlib.reload(ml_switcheroo.plugins.rng_threading)

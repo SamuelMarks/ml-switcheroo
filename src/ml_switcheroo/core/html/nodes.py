@@ -42,6 +42,8 @@ class SvgArrow(HtmlNode):
 
   def to_html(self) -> str:
     """Renders the arrow as an absolute SVG element.
+
+
     Adds 'sw-arrow' class for scoped styling.
     """
     return f"""

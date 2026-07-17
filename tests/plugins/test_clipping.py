@@ -50,8 +50,9 @@ def rewriter():
 
 
 def test_clip_transform(rewriter):
-  """Input: torch.nn.utils.clip_grad_norm_(grads, 1.0)
-  Output: optax.clip_by_global_norm(1.0).update(grads, None)[0]
+  """Input: torch.nn.utils.clip_grad_norm_(grads, 1.0).
+
+  Output: optax.clip_by_global_norm(1.0).update(grads, None)[0].
   """
   code = "torch.nn.utils.clip_grad_norm_(grads, 1.0)"
   res = rewrite_code(rewriter, code)
@@ -62,8 +63,9 @@ def test_clip_transform(rewriter):
 
 
 def test_clip_with_variable_args(rewriter):
-  """Input: clip_grad_norm_(g, max_norm)
-  Output: optax... (max_norm) ... (g, None)[0]
+  """Input: clip_grad_norm_(g, max_norm).
+
+  Output: optax... (max_norm) ... (g, None)[0].
   """
   code = "clip_grad_norm_(g, max_val)"
   res = rewrite_code(rewriter, code)

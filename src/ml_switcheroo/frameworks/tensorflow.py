@@ -108,6 +108,8 @@ class TensorFlowAdapter:
   @property
   def harness_imports(self) -> List[str]:
     """Returns extra imports required for the verification harness.
+
+
     TensorFlow requires no special initialization imports beyond the standard test config.
 
     Returns:
@@ -118,6 +120,7 @@ class TensorFlowAdapter:
 
   def get_harness_init_code(self) -> str:
     """Returns initialization logic for the verification harness.
+
     TensorFlow handles state implicitly, so no RNG setup code is needed.
 
     Returns:
@@ -138,6 +141,7 @@ class TensorFlowAdapter:
   @property
   def declared_magic_args(self) -> List[str]:
     """Returns list of framework-specific 'magic' arguments to be stripped from other frameworks.
+
     TensorFlow generally uses explicit arguments or class attributes, not injected magic args.
 
     Returns:
@@ -192,6 +196,7 @@ class TensorFlowAdapter:
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """Returns the static dictionary of Operation Mappings.
+
     Loaded dynamically from `frameworks/definitions/tensorflow.json`.
 
     Returns:
@@ -203,16 +208,19 @@ class TensorFlowAdapter:
   @property
   def rng_seed_methods(self) -> List[str]:
     """Returns list of methods used to set global random seeds.
+
     Used by the PurityScanner to detect side-effects.
 
     Returns:
         List[str]: Method names (e.g. ``set_seed``).
+
 
     """
     return ["set_seed", "random.set_seed"]
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """Applies manual wiring patches to the generated snapshot.
+
     Updates `tensorflow.` API prefixes to `tf.` to match standard aliases.
 
     Args:
@@ -266,11 +274,13 @@ class TensorFlowAdapter:
     Returns:
         str: ``len(tf.config.list_physical_devices('GPU')) > 0``
 
+
     """
     return "len(tf.config.list_physical_devices('GPU')) > 0"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """Returns syntax for splitting RNG state.
+
     Since TF uses internal state, this returns 'pass' (no-op).
 
     Args:
@@ -321,6 +331,7 @@ class TensorFlowAdapter:
 
   def get_weight_load_code(self, path_var: str) -> str:
     """Returns Python code to load a TF checkpoint into a raw state dictionary.
+
     Attempt to load variable map if available.
 
     Args:
@@ -348,6 +359,7 @@ class TensorFlowAdapter:
     Args:
         tensor_var: Variable name of the tensor.
 
+
     Returns:
         Conversion expression string.
 
@@ -356,6 +368,7 @@ class TensorFlowAdapter:
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """Returns logic (stubbed with warning) for saving weights.
+
     TensorFlow checkpoint saving generally requires a model instance structure,
     so raw dictionary saving is not supported in the standalone migration script.
 
@@ -377,6 +390,7 @@ class TensorFlowAdapter:
 
   def convert(self, data: Any) -> Any:
     """Converts input data (NumPy/List) into TensorFlow Tensors.
+
     Used by the Fuzzer for validation.
 
     Args:
@@ -384,6 +398,7 @@ class TensorFlowAdapter:
 
     Returns:
         Any: ``tf.Tensor`` or original data if conversion fails.
+
 
     """
     try:
@@ -395,6 +410,7 @@ class TensorFlowAdapter:
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
     """Generates TensorFlow API documentation URL.
+
     Corrects internal `tensorflow` path to `tf` for doc references.
 
     Args:

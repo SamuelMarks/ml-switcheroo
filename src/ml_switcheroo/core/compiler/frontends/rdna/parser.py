@@ -129,6 +129,8 @@ class RdnaParser:
 
   def _parse_instruction(self) -> Instruction:
     """Parses an RDNA instruction.
+
+
     Format: Opcode [Operands...].
     """
     op_tok = self._consume(TokenType.IDENTIFIER)

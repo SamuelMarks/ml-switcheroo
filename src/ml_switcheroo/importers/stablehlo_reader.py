@@ -166,6 +166,8 @@ class StableHloSpecImporter:
 
   def _normalize_op_name(self, name: str) -> str:
     """Converts 'abs' -> 'Abs', 'log_plus_one' -> 'LogPlusOne'.
+
+
     StableHLO uses snake_case. ODL uses PascalCase for Abstract IDs.
 
     Args:

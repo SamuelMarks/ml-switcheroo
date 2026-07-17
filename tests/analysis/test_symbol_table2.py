@@ -14,6 +14,7 @@ def analyzer():
   sem = MagicMock()
 
   def get_def(name):
+    """Auto-generated doc."""
     if "randn" in name or "view" in name:
       return ("op", {"return_type": "Tensor"})
     return None

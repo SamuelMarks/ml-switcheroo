@@ -7,6 +7,7 @@ class MockRule:
   """Docstring."""
 
   def __init__(self, if_arg=None, op=None, is_val=None, use_api=None, target_variant=None):  # noqa: D107
+    """Initialize MockRule."""
     self.if_arg = if_arg
     self.op = op
     self.is_val = is_val
@@ -18,6 +19,7 @@ class MockRewriterDispatch:
   """Docstring."""
 
   def __init__(self):  # noqa: D107
+    """Initialize MockRewriterDispatch."""
     self.context = type("Ctx", (), {"semantics": None, "imports": set()})()
     self.current_rule = None
     self.source_fw = "src"

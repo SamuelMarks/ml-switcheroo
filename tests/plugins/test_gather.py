@@ -99,8 +99,9 @@ def rewriter_factory():
 
 
 def test_gather_method_reorder_jax(rewriter_factory):
-  """Input: x.gather(1, indices)
-  Output: jnp.take_along_axis(x, indices, 1)
+  """Input: x.gather(1, indices).
+
+  Output: jnp.take_along_axis(x, indices, 1).
   """
   rw = rewriter_factory("jax")
   code = "y = x.gather(1, indices)"
@@ -113,6 +114,7 @@ def test_gather_method_reorder_jax(rewriter_factory):
 
 def test_gather_missing_target_passthrough(rewriter_factory):
   """Scenario: Target 'numpy' (not defined in mock semantics).
+
   Expectation: Return original node (no default to JAX).
   """
   rw = rewriter_factory("numpy")

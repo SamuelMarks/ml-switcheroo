@@ -17,6 +17,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 class MockMatrixSemantics(SemanticsManager):
   """Mock Manager providing deterministic API definitions for the matrix.
+
   Bypasses file system loading.
   """
 
@@ -148,7 +149,8 @@ def test_render_output_contains_headers(mock_get_adapter, mock_avail, matrix):
 @patch("ml_switcheroo.frameworks.base.available_frameworks")
 @patch("ml_switcheroo.frameworks.base.get_adapter")
 def test_inheritance_hiding_logic(mock_get_adapter, mock_avail, matrix):
-  """Verify that frameworks inheriting from others (Children/Flavours) are
+  """Verify that frameworks inheriting from others (Children/Flavours) are.
+
   sorted to the end (priority 9999) to keep the main table clean.
   """
   mock_avail.return_value = ["jax", "flax_nnx"]

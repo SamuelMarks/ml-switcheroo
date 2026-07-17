@@ -1,4 +1,5 @@
 """Tests for Package integrity and enumerations.
+
 Renamed from test_structure.py to avoid collision with core pass tests.
 """
 

@@ -48,6 +48,8 @@ class GraphExtractor(cst.CSTVisitor):
 
   def leave_Module(self, original_node: cst.Module) -> None:
     """Finalize graph construction after visiting the whole module.
+
+
     This ensures nodes are populated even if there is no forward pass.
     """
     self._finalize_graph()
@@ -83,6 +85,7 @@ class GraphExtractor(cst.CSTVisitor):
 
   def visit_Return(self, node: cst.Return) -> Optional[bool]:
     """Handles return statements in forward pass to create Output nodes.
+
     Also handles case where return contains a functional call directly.
     """
     if self._in_forward and node.value:
@@ -217,6 +220,7 @@ class GraphExtractor(cst.CSTVisitor):
 
   def _node_to_string(self, node: cst.CSTNode) -> str:
     """Extracts source string representation of an AST Node.
+
     Handles complex expressions by capturing exact source via utility.
     """
     return capture_node_source(node)

@@ -28,6 +28,7 @@ def mock_ctx():
 
 def parse_call_node(code):
   """Safely extract the Call node from a statement.
+
   Assumes `var = call(...)` or just `call(...)`.
   """
   tree = cst.parse_module(code)
@@ -52,8 +53,9 @@ def to_code(node):
 
 
 def test_keras_strategy_constructor_happy_path(mock_ctx):
-  """Constructor: torch.MultiheadAttention(embed_dim=256, num_heads=8)
-  Expect: target.Attention(key_dim=256, num_heads=8)
+  """Constructor: torch.MultiheadAttention(embed_dim=256, num_heads=8).
+
+  Expect: target.Attention(key_dim=256, num_heads=8).
   """
   # Configure semantic return
   mock_ctx.lookup_api.return_value = "keras.layers.MultiHeadAttention"
@@ -72,6 +74,7 @@ def test_keras_strategy_constructor_happy_path(mock_ctx):
 
 def test_keras_strategy_constructor_missing_api_aborts(mock_ctx):
   """Scenario: Semantics knowledge base missing 'MultiheadAttention'.
+
   Expect: Return original node (Safety check).
   """
   mock_ctx.lookup_api.return_value = None
@@ -86,8 +89,9 @@ def test_keras_strategy_constructor_missing_api_aborts(mock_ctx):
 
 
 def test_keras_strategy_forward(mock_ctx):
-  """Call: attn(q, k, v, attn_mask=m)
-  Expect: call(q, v, key=k, attention_mask=m)
+  """Call: attn(q, k, v, attn_mask=m).
+
+  Expect: call(q, v, key=k, attention_mask=m).
   """
   code = "y = self.attn(q, k, v, attn_mask=m)"
   call_node = parse_call_node(code)
@@ -108,7 +112,8 @@ def test_keras_strategy_forward(mock_ctx):
 
 def test_flax_strategy_constructor_happy_path(mock_ctx):
   """Constructor: Torch...
-  Expect: flax.nnx.MultiHeadAttention (from Context)
+
+  Expect: flax.nnx.MultiHeadAttention (from Context).
   """
   mock_ctx.lookup_api.return_value = "flax.nnx.MultiHeadAttention"
 
@@ -123,6 +128,7 @@ def test_flax_strategy_constructor_happy_path(mock_ctx):
 
 def test_flax_strategy_constructor_missing_api_aborts(mock_ctx):
   """Scenario: Lookup returns None.
+
   Expect: Abort.
   """
   mock_ctx.lookup_api.return_value = None
@@ -135,8 +141,9 @@ def test_flax_strategy_constructor_missing_api_aborts(mock_ctx):
 
 
 def test_flax_strategy_forward(mock_ctx):
-  """Call: attn(q, k, v, key_padding_mask=m)
-  Expect: attn(q, k, v, mask=m)
+  """Call: attn(q, k, v, key_padding_mask=m).
+
+  Expect: attn(q, k, v, mask=m).
   """
   code = "y = self.attn(q, k, v, key_padding_mask=m)"
   call_node = parse_call_node(code)

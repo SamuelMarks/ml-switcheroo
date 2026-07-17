@@ -24,6 +24,8 @@ from ml_switcheroo.core.mlir.gen_statements import StatementGeneratorMixin
 
 class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, BaseGeneratorMixin):
   """Transpiler back-end: MLIR CST -> Python LibCST.
+
+
   Integrates expression and statement generation logic.
   """
 
@@ -63,6 +65,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
   def _analyze_module_usage(self, mod: ModuleNode) -> None:
     """Traverses the MLIR tree to count SSAs usage.
+
     Populates self.usage_counts.
     """
     self._scan_block_usage(mod.body)
@@ -83,6 +86,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
   def _convert_trivia(self, trivia: List[TriviaNode]) -> List[cst.EmptyLine]:
     """Converts MLIR comments (//) to Python comments (#).
+
     Ignores layout whitespace as LibCST handles indentation.
     """
     lines = []
@@ -97,6 +101,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
   def _convert_block(self, block: BlockNode) -> List[cst.BaseStatement]:
     """Converts operations in a block to a list of Python statements.
+
     Applies expression folding where possible.
     """
     stmts: List[cst.BaseStatement] = []
@@ -172,6 +177,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
     """Resolves an SSA value to a CST Expression.
+
     If previously deferred, returns the AST node (folding).
     Else returns a Name or Attribute reference.
     """
@@ -191,6 +197,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
   def _create_expression_from_op(self, op: OperationNode) -> Optional[cst.BaseExpression]:
     """Attempts to map an Op to a Python Expression (e.g. Call, BinaryOp, Attribute).
+
     Delegates to ExpressionGeneratorMixin.
     """
     op_name = op.name.strip('"')
@@ -225,6 +232,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
   def _wrap_as_statement(self, op: OperationNode, expr: cst.BaseExpression) -> cst.BaseStatement:
     """Wraps an expression into a statement (Assign or Expr).
+
     Extracts semantic hints from 'type' attribute to produce readable variable names.
     """
     if op.results:

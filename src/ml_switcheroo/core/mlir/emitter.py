@@ -47,6 +47,8 @@ class SSAContext:
 
   def lookup(self, name: str) -> Optional[ValueNode]:
     """Resolve a Python variable name to its current SSA value.
+
+
     Searches scopes from innermost to outermost.
 
     Args:

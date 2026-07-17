@@ -42,8 +42,9 @@ def rewrite_code(rewriter, code):
 
 
 def test_unwrap_call_only(rewriter):
-  """Input: `z = self.layer.apply(variables, x) + 1`
-  Output: `z = self.layer(x) + 1`
+  """Input: `z = self.layer.apply(variables, x) + 1`.
+
+  Output: `z = self.layer(x) + 1`.
   """
   code = "z = self.layer.apply(variables, x) + 1"
   result = rewrite_code(rewriter, code)
@@ -54,8 +55,9 @@ def test_unwrap_call_only(rewriter):
 
 
 def test_unwrap_assignment_tuple(rewriter):
-  """Input: `y, updates = self.layer.apply(vars, x)`
-  Output: `y = self.layer(x)`
+  """Input: `y, updates = self.layer.apply(vars, x)`.
+
+  Output: `y = self.layer(x)`.
   """
   code = "y, updates = self.layer.apply(vars, x)"
   result = rewrite_code(rewriter, code)

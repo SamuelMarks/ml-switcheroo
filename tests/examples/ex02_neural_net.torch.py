@@ -5,10 +5,11 @@ import torch.nn as nn
 
 class SimplePerceptron(nn.Module):
   """Basic Single-Layer Perceptron.
+
   Semantic pivot:
     - nn.Module -> flax.nnx.Module
     - nn.Linear -> flax.nnx.Linear
-    - forward -> __call__
+    - forward -> __call__.
   """
 
   def __init__(self, in_features, out_features):

@@ -25,6 +25,7 @@ def gen_code_from_block(ops: list[OperationNode]) -> str:
 
 def test_suppress_unused_result():
   """Scenario: %0 = foo(). %0 is never used.
+
   Expectation: `foo()` (Expr statement), NOT `_0 = foo()`.
   """
   op = OperationNode(
@@ -41,6 +42,7 @@ def test_suppress_unused_result():
 
 def test_assign_used_result():
   """Scenario: %0 = foo(). %1 = bar(%0).
+
   Expectation: `_0 = foo()`, `_bar(_0)`.
   """
   op1 = OperationNode(
@@ -67,6 +69,7 @@ def test_assign_used_result():
 
 def test_suppress_super_init():
   """Scenario: %res = super().__init__(). even if %res is technically generated.
+
   Expectation: `super().__init__()` without assignment prefix.
   """
   op_super = OperationNode(name="sw.op", results=[ValueNode("%0")], attributes=[AttributeNode("type", '"super"')])

@@ -86,6 +86,7 @@ def test_lookup_api_missing_op(mock_semantics):
 
 def test_lookup_api_plugin_variant(mock_semantics):
   """Verify lookup returns None if the variant exists but has no 'api' key.
+
   (e.g., pure plugin logic).
   """
   config = RuntimeConfig(target_framework="jax")

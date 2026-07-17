@@ -47,7 +47,7 @@ def test_attribute_rendering():
 
 
 def test_operation_simple():
-  """Scenario: %0 = arith.addf(%a, %b) : f32"""
+  """Scenario: %0 = arith.addf(%a, %b) : f32."""
   op = OperationNode(
     name="arith.addf",
     results=[ValueNode("%0")],
@@ -62,8 +62,9 @@ def test_operation_simple():
 
 def test_operation_with_attributes_and_trivia():
   """Scenario:
+
   // Compute sum
-  %sum = "sw.op"() { name = "add" } : () -> i32
+  %sum = "sw.op"() { name = "add" } : () -> i32.
   """
   op = OperationNode(
     name='"sw.op"',
@@ -83,8 +84,9 @@ def test_operation_with_attributes_and_trivia():
 
 def test_block_structure():
   """Scenario:
+
   ^bb0(%arg0: i32):
-     %0 = op()
+     %0 = op().
   """
   op = OperationNode(name="op", results=[ValueNode("%0")])
 
@@ -97,10 +99,11 @@ def test_block_structure():
 
 def test_region_nesting():
   """Scenario:
+
   scf.if (%cond) {
      ^true:
        yield
-  }
+  }.
   """
   op_yield = OperationNode(name="yield")
   blk = BlockNode(label="^true", operations=[op_yield])
@@ -126,7 +129,7 @@ def test_module_node():
 
 
 def test_multiple_results_and_types():
-  """Scenario: %0, %1 = op() : (i32, f32)"""
+  """Scenario: %0, %1 = op() : (i32, f32)."""
   op = OperationNode(
     name="op", results=[ValueNode("%0"), ValueNode("%1")], result_types=[TypeNode("i32"), TypeNode("f32")]
   )

@@ -11,6 +11,8 @@ from typing import List, Tuple, Optional
 
 class GridParser(HTMLParser):
   """HTML Parser callback handler.
+
+
   Extracts high-level model components (Name, Attributes, Operations) from the DOM stream.
   """
 

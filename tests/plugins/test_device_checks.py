@@ -49,7 +49,8 @@ def test_assignment_transform(rewriter):
 
 
 def test_ignore_wrong_fw(rewriter):
-  """Verify that targeting 'numpy' (which has no wiring for this op)
+  """Verify that targeting 'numpy' (which has no wiring for this op).
+
   results in pass-through.
   """
   # PivotRewriter.target_fw is read-only property from config.

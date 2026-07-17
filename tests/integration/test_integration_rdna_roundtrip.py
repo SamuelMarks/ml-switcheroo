@@ -39,6 +39,7 @@ CONVNET_SOURCE = textwrap.dedent("""
 @pytest.fixture
 def semantics_mgr():
   """Sets up a Semantic knowledge base supporting both Torch and RDNA definitions.
+
   We mock the definitions usually found in JSON files to ensure test stability.
   """
   mgr = SemanticsManager()

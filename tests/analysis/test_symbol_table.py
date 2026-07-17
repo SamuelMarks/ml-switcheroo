@@ -1,4 +1,5 @@
 """Tests for Symbol Table Analysis.
+
 Updated to include Control Flow Inference tests.
 """
 
@@ -56,10 +57,11 @@ x = torch.randn(1)
 
 def test_control_flow_union(analyzer):
   """Scenario:
+
   if cond:
       x = torch.randn()  (Tensor)
   else:
-      x = 5              (Assuming 5 is untracked/None or we can simulate int if we had IntType)
+      x = 5              (Assuming 5 is untracked/None or we can simulate int if we had IntType).
 
   Since we don't track ints, let's use:
   if cond:
@@ -87,6 +89,7 @@ else:
 
 def test_control_flow_ambiguity(analyzer):
   """Scenario: Variable defined in IF but not ELSE.
+
   Result: Should retain type from IF branch (Optimistic typing).
   """
   code = """
@@ -100,7 +103,8 @@ if True:
 
 
 def test_ternary_expression_union(analyzer):
-  """Scenario: x = torch.randn() if C else torch.nn
+  """Scenario: x = torch.randn() if C else torch.nn.
+
   Result: Expr type is Union[Tensor, Module]. x gets that type.
   """
   code = """
@@ -118,9 +122,10 @@ x = torch.randn() if True else torch.nn
 
 def test_loop_state_merge(analyzer):
   """Scenario:
+
   x = torch.nn
   for i in range(10):
-      x = torch.randn()
+      x = torch.randn().
 
   Start state: x is Module.
   Loop body: x becomes Tensor.
@@ -143,6 +148,7 @@ for i in range(10):
 
 def test_implicit_tensor_method_on_union(analyzer):
   """Scenario: x is Union[Tensor, Module]. Call x.view().
+
   Expected: Inferred as Tensor method call due to presence of Tensor in Union.
   """
   # Manually inject a union type into the table for a node

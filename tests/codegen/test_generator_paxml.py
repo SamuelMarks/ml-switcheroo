@@ -1,4 +1,4 @@
-"""test_generator_paxml.py
+"""test_generator_paxml.py.
 
 Verifies that the TestCaseGenerator correctly handles the 'paxml' framework configuration.
 Ensures that templates derived from `k_test_templates.json` (or Registry Sync)
@@ -15,6 +15,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 def test_paxml_code_generation(tmp_path):
   """Scenario:
+
       Semantics definition contains a 'paxml' variant.
   Expected Output:
       - A runtime.py containing `import praxis`.

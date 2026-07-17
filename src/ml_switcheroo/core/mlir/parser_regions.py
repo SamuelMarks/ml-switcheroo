@@ -30,7 +30,9 @@ class MlirParserRegionsMixin(MlirParserBase):  # pragma: no cover
 
   # pragma: no cover
   def _expect(self, kind: str) -> Any:  # pragma: no cover
-    """Consumes the token if it matches, else raises SyntaxError.  # pragma: no cover
+    """Consumes the token if it matches, else raises SyntaxError.  # pragma: no cover.
+
+
     # pragma: no cover
     Args:  # pragma: no cover
         kind (str): The expected token kind or text.  # pragma: no cover
@@ -40,7 +42,7 @@ class MlirParserRegionsMixin(MlirParserBase):  # pragma: no cover
     # pragma: no cover
     Raises:  # pragma: no cover
         SyntaxError: If the current token does not match the expectation.  # pragma: no cover
-    # pragma: no cover
+    # pragma: no cover.
     """  # pragma: no cover
     if not self.match(kind):  # pragma: no cover
       cur = self.peek()  # pragma: no cover
@@ -49,20 +51,23 @@ class MlirParserRegionsMixin(MlirParserBase):  # pragma: no cover
 
   # pragma: no cover
   def _flush_trivia(self) -> List[TriviaNode]:  # pragma: no cover
-    """Returns and clears the accumulated trivia buffer.  # pragma: no cover
+    """Returns and clears the accumulated trivia buffer.  # pragma: no cover.
+
     # pragma: no cover
     Returns:  # pragma: no cover
         List[TriviaNode]: The collected whitespace and comments.  # pragma: no cover
-    # pragma: no cover
+    # pragma: no cover.
     """  # pragma: no cover
     t = self.trivia_buffer  # pragma: no cover
     self.trivia_buffer = []  # pragma: no cover
     return t  # pragma: no cover
 
   # pragma: no cover
+
   def _absorb_trivia(self) -> None:  # pragma: no cover
-    """Consumes whitespace, comments, and newlines into the trivia buffer.  # pragma: no cover
-    This allows semantic parsing methods to ignore layout while preserving it.  # pragma: no cover
+    """Consumes whitespace, comments, and newlines into the trivia buffer.  # pragma: no cover.
+
+    This allows semantic parsing methods to ignore layout while preserving it.  # pragma: no cover.
     """  # pragma: no cover
     while True:  # pragma: no cover
       tk = self.peek()  # pragma: no cover
@@ -78,17 +83,19 @@ class MlirParserRegionsMixin(MlirParserBase):  # pragma: no cover
 
   # pragma: no cover
   def parse(self) -> ModuleNode:  # pragma: no cover
-    """Top-level parsing entry point.  # pragma: no cover
+    """Top-level parsing entry point.  # pragma: no cover.
+
     # pragma: no cover
     Returns:  # pragma: no cover
         ModuleNode: The root of the MLIR CST.  # pragma: no cover
-    # pragma: no cover
+    # pragma: no cover.
     """  # pragma: no cover
     return ModuleNode(body=self.parse_block(is_top_level=True))  # pragma: no cover
 
   # pragma: no cover
   def parse_block(self, is_top_level: bool = False) -> BlockNode:  # pragma: no cover
-    """Parses a Basic Block.  # pragma: no cover
+    """Parses a Basic Block.  # pragma: no cover.
+
     # pragma: no cover
     A block consists of an optional label (with arguments) and a list of operations.  # pragma: no cover
     # pragma: no cover
@@ -101,7 +108,7 @@ class MlirParserRegionsMixin(MlirParserBase):  # pragma: no cover
     # pragma: no cover
     Raises:  # pragma: no cover
         SyntaxError: If invalid tokens are encountered where an operation was expected.  # pragma: no cover
-    # pragma: no cover
+    # pragma: no cover.
     """  # pragma: no cover
     label = ""  # pragma: no cover
     arguments = []  # pragma: no cover

@@ -169,7 +169,9 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
   # --- Visitor Logic: Module Preamble Injection ---
 
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-    """Injects accumulated module-level preamble statements (e.g. imports, shim classes)
+    """Injects accumulated module-level preamble statements (e.g. imports, shim classes).
+
+
     requested by plugins during the rewrite.
     Flushes and clears the buffer to prevent double injection in subsequent passes.
     """
@@ -219,6 +221,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
   def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
     """Rewrite dotted type attributes (e.g. torch.Tensor) if inside an annotation.
+
     This fixes issue where complex types like torch.Tensor fail to rewrite because
     leave_Name only handles the leaves individually without context.
     """

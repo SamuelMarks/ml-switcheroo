@@ -6,6 +6,7 @@ from jax import random
 
 def sample_latent(mean, logvar, key):
   """VAE Reparameterization Trick.
+
   Source: JAX Examples.
   """
   std = jnp.exp(0.5 * logvar)

@@ -59,8 +59,9 @@ def rewriter():
 
 def test_shim_arguments_passing(rewriter):
   """Scenario: Torch initialization with perf args.
+
   Input: DataLoader(ds, batch_size=32, num_workers=4, pin_memory=True)
-  Output: GenericDataLoader(ds, batch_size=32, num_workers=4, pin_memory=True)
+  Output: GenericDataLoader(ds, batch_size=32, num_workers=4, pin_memory=True).
   """
   code = "dl = DataLoader(ds, batch_size=32, num_workers=4, pin_memory=True)"
   res = rewrite_code(rewriter, code)
@@ -77,8 +78,9 @@ def test_shim_arguments_passing(rewriter):
 
 def test_collate_fn_passing(rewriter):
   """Scenario: Torch custom collate function.
+
   Input: DataLoader(ds, collate_fn=my_collate)
-  Output: GenericDataLoader(ds, collate_fn=my_collate)
+  Output: GenericDataLoader(ds, collate_fn=my_collate).
   """
   code = "dl = DataLoader(ds, collate_fn=my_collate)"
   res = rewrite_code(rewriter, code)
@@ -90,7 +92,8 @@ def test_collate_fn_passing(rewriter):
 
 def test_positional_preservation(rewriter):
   """Scenario: Mixed positional/keyword.
-  Input: DataLoader(ds, 64, shuffle=True)
+
+  Input: DataLoader(ds, 64, shuffle=True).
   """
   code = "dl = DataLoader(ds, 64, shuffle=True)"
   res = rewrite_code(rewriter, code)

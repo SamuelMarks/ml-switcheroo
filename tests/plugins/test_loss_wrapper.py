@@ -94,8 +94,9 @@ def rewriter_factory():
 
 def test_jax_mean_reduction(rewriter_factory):
   """Scenario: Target JAX. Default reduction (mean).
+
   Input: F.cross_entropy(logits, target)
-  Output: jnp.mean(optax.softmax_cross_entropy...(logits, target))
+  Output: jnp.mean(optax.softmax_cross_entropy...(logits, target)).
   """
   rewriter = rewriter_factory("jax")
   code = "loss = F.cross_entropy(logits, target)"
@@ -109,8 +110,9 @@ def test_jax_mean_reduction(rewriter_factory):
 
 def test_tensorflow_mean_reduction(rewriter_factory):
   """Scenario: Target TensorFlow. Default reduction.
+
   Input: F.cross_entropy(logits, target)
-  Output: tf.reduce_mean(tf.nn.sparse_softmax...(logits, target))
+  Output: tf.reduce_mean(tf.nn.sparse_softmax...(logits, target)).
 
   Proves removal of hardcoded jax strings.
   """
@@ -124,8 +126,9 @@ def test_tensorflow_mean_reduction(rewriter_factory):
 
 def test_explicit_sum_reduction(rewriter_factory):
   """Scenario: Target JAX. Explicit sum reduction.
+
   Input: F.cross_entropy(..., reduction='sum')
-  Output: jnp.sum(...)
+  Output: jnp.sum(...).
   """
   rewriter = rewriter_factory("jax")
   code = "loss = F.cross_entropy(pred, y, reduction='sum')"
@@ -137,7 +140,8 @@ def test_explicit_sum_reduction(rewriter_factory):
 
 def test_reduction_none(rewriter_factory):
   """Scenario: Target JAX. reduction='none'.
-  Output: optax.softmax_cross_(...) (No wrapper)
+
+  Output: optax.softmax_cross_(...) (No wrapper).
   """
   rewriter = rewriter_factory("jax")
   code = "loss = F.cross_entropy(x, y, reduction='none')"

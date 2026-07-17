@@ -114,6 +114,8 @@ class MlirParser(MlirParserOpsMixin):
 
   def _absorb_trivia(self) -> None:
     """Consumes whitespace, comments, and newlines into the trivia buffer.
+
+
     This allows semantic parsing methods to ignore layout while preserving it.
     """
     while True:
@@ -215,7 +217,8 @@ class MlirParser(MlirParserOpsMixin):
     return BlockNode(label=label, arguments=arguments, operations=operations, leading_trivia=leading)
 
   def _is_region_start(self) -> bool:
-    """Lookahead heuristic to determine if the next sequence of tokens represents
+    """Lookahead heuristic to determine if the next sequence of tokens represents.
+
     the start of a Region (nested blocks).
 
     Used to disambiguate between dictionary definitions and regions when parsing

@@ -27,6 +27,8 @@ class PatchAction:
 @dataclass
 class DeleteAction(PatchAction):
   """Instruction to remove a node from the AST.
+
+
   Used for nodes that have been fused into others or pruned.
   """
 
@@ -118,6 +120,7 @@ class GraphPatcher(cst.CSTTransformer):
 
   def _build_action_index(self) -> None:
     """Correlates Plan IDs with CST Nodes via Provenance.
+
     Populates `_action_map` keying by `id(node)`.
     """
     # Create map of node_id -> Action
@@ -194,7 +197,8 @@ class GraphPatcher(cst.CSTTransformer):
     return updated
 
   def _unwrap_stmt_if_nested(self, context_node: cst.CSTNode, new_stmt: cst.SimpleStatementLine) -> Any:
-    """Helper: If we are replacing a node that is already inside a SimpleStatementLine body list
+    """Helper: If we are replacing a node that is already inside a SimpleStatementLine body list.
+
     (like Assign or Expr), we should return the inner component to avoid double wrapping.
     """
     if isinstance(context_node, (cst.Assign, cst.Expr)):

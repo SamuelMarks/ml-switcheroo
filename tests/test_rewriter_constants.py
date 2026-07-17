@@ -70,8 +70,9 @@ def rewrite(rewriter, code):
 
 
 def test_constant_rewrite_assignment(rewriter):
-  """Input:  dtype = torch.float32
-  Expect: dtype = jax.numpy.float32
+  """Input:  dtype = torch.float32.
+
+  Expect: dtype = jax.numpy.float32.
   """
   code = "x = torch.float32"
   res = rewrite(rewriter, code)
@@ -80,8 +81,9 @@ def test_constant_rewrite_assignment(rewriter):
 
 
 def test_constant_rewrite_argument(rewriter):
-  """Input:  init(dtype=torch.float32)
-  Expect: init(dtype=jax.numpy.float32)
+  """Input:  init(dtype=torch.float32).
+
+  Expect: init(dtype=jax.numpy.float32).
   """
   code = "y = init(dtype=torch.float32)"
   res = rewrite(rewriter, code)
@@ -89,8 +91,9 @@ def test_constant_rewrite_argument(rewriter):
 
 
 def test_function_attribute_bypass(rewriter):
-  """Input:  f = torch.abs
-  Expect: f = torch.abs (No rewrite)
+  """Input:  f = torch.abs.
+
+  Expect: f = torch.abs (No rewrite).
 
   Why: By design, we skip rewriting attributes that look like functions
   (have std_args) in leave_Attribute, to avoid conflict with leave_Call.
@@ -102,8 +105,9 @@ def test_function_attribute_bypass(rewriter):
 
 
 def test_function_call_rewrite(rewriter):
-  """Input:  y = torch.abs(x)
-  Expect: y = jax.numpy.abs(x)
+  """Input:  y = torch.abs(x).
+
+  Expect: y = jax.numpy.abs(x).
 
   Verifies that leave_Attribute skipping 'torch.abs' allowed leave_Call to handle it.
   """

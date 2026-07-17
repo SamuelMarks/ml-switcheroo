@@ -97,6 +97,7 @@ def rewrite(rewriter, code):
 
 def test_strict_guard_injection(rewriter_factory):
   """Scenario: Op with Rank=4 constraint. Strict Mode ENABLED.
+
   Expect: _check_rank wrapper around argument.
   """
   rewriter = rewriter_factory(strict=True)
@@ -119,6 +120,7 @@ def test_strict_guard_injection(rewriter_factory):
 
 def test_lax_mode_no_injection(rewriter_factory):
   """Scenario: Op with Rank=4 constraint. Strict Mode DISABLED.
+
   Expect: No wrapper.
   """
   rewriter = rewriter_factory(strict=False)
@@ -132,6 +134,7 @@ def test_lax_mode_no_injection(rewriter_factory):
 
 def test_guard_ignore_no_constraint(rewriter_factory):
   """Scenario: Op with no rank constraints (Linear). Strict Mode ENABLED.
+
   Expect: No wrapper.
   """
   rewriter = rewriter_factory(strict=True)

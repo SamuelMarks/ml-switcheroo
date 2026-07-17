@@ -45,6 +45,7 @@ def test_generate_logic_operators(plugin_dir):
 
 def test_generate_logic_generation_check(plugin_dir):
   """Verify we can generate logic multiple times by targeting new files.
+
   (Avoids testing the preservation logic which prevents update).
   """
   gen = PluginGenerator(plugin_dir)

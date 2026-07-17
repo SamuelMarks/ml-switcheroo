@@ -23,8 +23,9 @@ def gen_code(ops: list[OperationNode]) -> str:
 
 
 def test_fusion_return():
-  """Scenario: %0 = call(); return %0
-  Expect: return call() (Fused), NOT _0=call(); return _0
+  """Scenario: %0 = call(); return %0.
+
+  Expect: return call() (Fused), NOT _0=call(); return _0.
   """
   op_call = OperationNode(name="sw.call", results=[ValueNode("%0")], operands=[ValueNode("%fn")])
   op_return = OperationNode(name="sw.return", operands=[ValueNode("%0")])
@@ -36,8 +37,9 @@ def test_fusion_return():
 
 
 def test_fusion_setattr():
-  """Scenario: %0 = op(); setattr(%self, "attr", %0)
-  Expect: self.attr = op() (Fused)
+  """Scenario: %0 = op(); setattr(%self, "attr", %0).
+
+  Expect: self.attr = op() (Fused).
   """
   op_create = OperationNode(
     name="sw.op",
@@ -60,9 +62,10 @@ def test_fusion_setattr():
 
 
 def test_fusion_no_fuse_if_multicount():
-  """Scenario: %0 = op(); setattr(..., %0); return %0
+  """Scenario: %0 = op(); setattr(..., %0); return %0.
+
   Usage Count: 2
-  Expect: NO Fusion. _op = op(); self.a = _op; return _op
+  Expect: NO Fusion. _op = op(); self.a = _op; return _op.
 
   Note: Variable name '_op' is derived from the type attribute "op".
   """
@@ -89,8 +92,9 @@ def test_fusion_no_fuse_if_multicount():
 
 
 def test_atom_inlining_getattr():
-  """Scenario: %0 = getattr(%self, "conv"); %1 = call(%0, %x)
-  Expect: self.conv(x) (getattr is always atomic/inlined)
+  """Scenario: %0 = getattr(%self, "conv"); %1 = call(%0, %x).
+
+  Expect: self.conv(x) (getattr is always atomic/inlined).
   """
   op_get = OperationNode(
     name="sw.getattr",
@@ -114,8 +118,9 @@ def test_atom_inlining_getattr():
 
 
 def test_atom_inlining_constant():
-  """Scenario: %c = constant 1; op(%c)
-  Expect: op(1)
+  """Scenario: %c = constant 1; op(%c).
+
+  Expect: op(1).
   """
   op_c = OperationNode(
     name="sw.constant",

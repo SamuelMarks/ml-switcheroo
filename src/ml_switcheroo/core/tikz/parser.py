@@ -243,6 +243,8 @@ class TikzParser:
 
   def _parse_node(self) -> None:
     r"""Parses a `\\node` command and adds a LogicalNode to the graph.
+
+
     Expects format: `\\node [options] (id) at (x,y) {content};`.
     """
     self._expect(TokenKind.COMMAND)  # \node
@@ -290,6 +292,7 @@ class TikzParser:
 
   def _parse_edge(self) -> None:
     r"""Parses a `\\draw` command and adds a LogicalEdge to the graph.
+
     Expects format: `\\draw [opts] (src) -- (tgt);`.
     """
     self._expect(TokenKind.COMMAND)  # \draw

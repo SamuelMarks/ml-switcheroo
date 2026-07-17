@@ -62,8 +62,9 @@ def rewriter():
 
 def test_bn_injection_and_unwrap(rewriter):
   """Scenario: Standard forward pass call.
+
   Input: y = self.bn(x)
-  Output: y = self.bn(x, use_running_average=not training, mutable=['batch_stats'])[0]
+  Output: y = self.bn(x, use_running_average=not training, mutable=['batch_stats'])[0].
   """
   code = "y = self.bn(x)"
   res = rewrite_code(rewriter, code)
@@ -77,7 +78,8 @@ def test_bn_injection_and_unwrap(rewriter):
 
 def test_bn_nested_expression(rewriter):
   """Scenario: Nested inside activation.
-  Input: y = F.relu(self.bn(x))
+
+  Input: y = F.relu(self.bn(x)).
   """
   code = "y = F.relu(self.bn(x))"
   res = rewrite_code(rewriter, code)

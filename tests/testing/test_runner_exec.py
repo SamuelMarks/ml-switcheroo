@@ -20,6 +20,7 @@ from ml_switcheroo.frameworks.numpy import NumpyAdapter
 @pytest.fixture
 def mock_frameworks():
   """Injects mocks directly into sys.modules.
+
   Returns the overrides dict for further manipulation if needed.
   """
 
@@ -72,6 +73,7 @@ def test_runner_uses_adapter_registry_for_normalization(mock_frameworks):
 
 def test_equivalence_flow_integration(mock_frameworks):
   """Verify full end-to-end flow (Mock -> Adapter -> Compare).
+
   Both frameworks return 5.0 (match).
   """
   runner = EquivalenceRunner()
@@ -150,6 +152,7 @@ def test_deep_compare_nan_handling():
 
 def test_argument_renaming_application(mock_frameworks):
   """Verify parameter mapping logic (std -> fw).
+
   Scenario: Standard 'axis' -> Torch 'dim'.
   """
   runner = EquivalenceRunner()

@@ -28,8 +28,9 @@ def gen_code(node: ModuleNode) -> str:
 
 
 def test_module_to_class():
-  """Input: sw.module {sym_name = "MyClass"} {}
-  Expect: class MyClass: pass
+  """Input: sw.module {sym_name = "MyClass"} {}.
+
+  Expect: class MyClass: pass.
   """
   op = OperationNode(name="sw.module", attributes=[AttributeNode("sym_name", '"MyClass"')])
   # Wrap in module structure
@@ -42,6 +43,7 @@ def test_module_to_class():
 
 def test_func_to_def_with_args():
   """Input: sw.func {sym_name="forward"} ^entry(%x: !sw.unk): ...
+
   Expect: def forward(x): ...
   """
   # 1. Create Func Body Block
@@ -66,10 +68,11 @@ def test_func_to_def_with_args():
 
 def test_ops_assignment_and_call():
   """Input:
+
       %0 = sw.op {type="torch.add"} (%a, %b)
       sw.return %0
   Expect:
-      return torch.add(_a, _b) (Fused)
+      return torch.add(_a, _b) (Fused).
   """
   op = OperationNode(
     name="sw.op",
@@ -89,8 +92,9 @@ def test_ops_assignment_and_call():
 
 
 def test_trivia_restoration():
-  """Input: // My Comment attached to op
-  Expect: # My Comment
+  """Input: // My Comment attached to op.
+
+  Expect: # My Comment.
   """
   op = OperationNode(name="sw.return", leading_trivia=[TriviaNode("// My Comment", "comment")])
   mod = ModuleNode(body=BlockNode("", operations=[op]))
@@ -101,8 +105,9 @@ def test_trivia_restoration():
 
 
 def test_constant_generation():
-  """Input: %c = sw.constant {value = 1}
-  Expect: return 1 (Fused)
+  """Input: %c = sw.constant {value = 1}.
+
+  Expect: return 1 (Fused).
   """
   op = OperationNode(name="sw.constant", results=[ValueNode("%c")], attributes=[AttributeNode("value", "1")])
 
@@ -117,9 +122,10 @@ def test_constant_generation():
 
 def test_getattr_generation():
   """Input:
+
       %attr = sw.getattr %self {name = "layer"}
   Expect:
-      return self.layer (Smart Heuristic inlines single usage)
+      return self.layer (Smart Heuristic inlines single usage).
   """
   op = OperationNode(
     name="sw.getattr",
@@ -140,8 +146,9 @@ def test_getattr_generation():
 
 
 def test_sw_call_generation():
-  """Input: %res = sw.call %func (%arg)
-  Expect: return _func(_arg) (Fused)
+  """Input: %res = sw.call %func (%arg).
+
+  Expect: return _func(_arg) (Fused).
   """
   op = OperationNode(name="sw.call", results=[ValueNode("%res")], operands=[ValueNode("%func"), ValueNode("%arg")])
 

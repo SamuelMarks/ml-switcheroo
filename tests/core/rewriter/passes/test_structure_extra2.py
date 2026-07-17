@@ -11,24 +11,30 @@ class DummySemantics:
   """Docstring."""
 
   def __init__(self):  # noqa: D102, D107
+    """Init."""
     self.definitions = {}
     self.configs = {}
     self.framework_configs = self.configs
     self.variants = {}
 
   def resolve_definition(self, *args, **kwargs):  # noqa: D102, D107
+    """Resolve def."""
     return None  # noqa: D102
 
   def get_standard_module(self, *args, **kwargs):  # noqa: D102, D107
+    """Get mod."""
     return "nn"  # noqa: D102
 
   def resolve_variant(self, op_id, fw):  # noqa: D102, D107
+    """Resolve var."""
     return self.variants.get((op_id, fw))
 
   def get_framework_config(self, framework):  # noqa: D102, D107
+    """Get cfg."""
     return self.configs.get(framework, {})
 
   def get_definition(self, api):  # noqa: D102, D107
+    """Get def."""
     return self.definitions.get(api)
 
 

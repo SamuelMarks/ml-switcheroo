@@ -18,6 +18,7 @@ from ml_switcheroo.semantics.registry_loader import RegistryLoader
 @pytest.fixture
 def semantics_env():
   """Creates a SemanticsManager hydrated from the registry.
+
   Ensures default type mapping definitions are active.
   """
   mgr = SemanticsManager()
@@ -27,8 +28,9 @@ def semantics_env():
 
 def test_type_hint_jax_to_torch(semantics_env):
   """Scenario: Function argument and return type hint using JAX Array.
+
   Input: `def process(x: jax.Array) -> jax.Array:`
-  Expectation: `def process(x: torch.Tensor) -> torch.Tensor:`
+  Expectation: `def process(x: torch.Tensor) -> torch.Tensor:`.
   """
   source = "def process(x: jax.Array) -> jax.Array:\n    return x"
   config = RuntimeConfig(source_framework="jax", target_framework="torch")
@@ -40,6 +42,7 @@ def test_type_hint_jax_to_torch(semantics_env):
 
 def test_type_hint_torch_to_mlx(semantics_env):
   """Scenario: Function argument hint using Torch Tensor.
+
   Input: `def forward(t: torch.Tensor):`
   Expectation: `def forward(t: mlx.core.array):` (or `mx.array`).
   """

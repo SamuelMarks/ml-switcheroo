@@ -46,7 +46,8 @@ def mock_frameworks():
 
 
 def test_runner_uses_adapter_registry_for_normalization(mock_frameworks):
-  """Feature Verification: Ensure `_to_numpy` logic is gone and replaced by
+  """Feature Verification: Ensure `_to_numpy` logic is gone and replaced by.
+
   a call to the NumpyAdapter from the registry.
   """
   runner = EquivalenceRunner()

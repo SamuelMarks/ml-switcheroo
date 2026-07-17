@@ -68,6 +68,7 @@ HTML_INPUT = """
 @pytest.fixture
 def semantics() -> SemanticsManager:
   """Returns a hydrated SemanticsManager.
+
   Ideally loads definitions from the HTML adapter to ensure mappings match.
   """
   mgr = SemanticsManager()
@@ -77,6 +78,7 @@ def semantics() -> SemanticsManager:
 
 def test_torch_to_html_generation(semantics):
   """Scenario: Convert Python class to HTML Grid.
+
   Expect: Valid HTML structure with styled boxes and connections.
   Verifies that functional ops like 'flatten' are correctly placed in Blue boxes,
   not Red attribute boxes.
@@ -122,6 +124,7 @@ def test_torch_to_html_generation(semantics):
 
 def test_html_to_python_parsing(semantics):
   """Scenario: Convert HTML Grid back to Python.
+
   Expect: Valid Python class with `html_dsl` alias (rewriter will pivot to target if configured).
   Verifies that Green 'Data' boxes are ignored and do not produce function calls.
   """

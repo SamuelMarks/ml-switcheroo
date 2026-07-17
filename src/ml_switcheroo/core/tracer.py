@@ -46,6 +46,8 @@ class TraceEvent:
 
 class TraceLogger:
   """Records transpilation events for visualization.
+
+
   Designed to be injected into the Engine and Rewriter.
 
   This class maintains a stack of active phases to establish parent-child
@@ -87,6 +89,7 @@ class TraceLogger:
 
   def end_phase(self) -> None:
     """Ends the current active phase.
+
     Pops the phase ID from the stack and logs an end event.
     """
     if not self._active_phases:

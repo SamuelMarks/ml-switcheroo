@@ -103,6 +103,7 @@ def config(data):
 
 def test_harness_recursive_conversion_list_of_arrays(tmp_path):
   """Scenario: Function takes List[Array].
+
   Verifies that `adapt` recursively converts inner items to frameworks.
   Since we use "numpy" backend in test to stay lightweight,
   conversion is idempotent, but we verify struct integrity.

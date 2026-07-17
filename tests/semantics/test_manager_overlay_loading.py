@@ -85,6 +85,7 @@ def manager(mock_root_tree):
 
 def test_overlay_merging_logic(manager):
   """Scenario: Load 'Abs' from Spec. Merge 'torch' and 'jax' from Snapshots.
+
   Expectation: 'Abs' entry contains both variants.
   """
   # 1. Verify Spec loaded
@@ -102,6 +103,7 @@ def test_overlay_merging_logic(manager):
 
 def test_overlay_missing_op_handling(manager):
   """Scenario: Overlay defines 'custom_op' which is NOT in the Spec files.
+
   Expectation: Manager creates a new entry (Tier: Extras).
   """
   assert "custom_op" in manager.data
@@ -119,6 +121,7 @@ def test_overlay_missing_op_handling(manager):
 
 def test_filename_framework_inference(tmp_path):
   """Scenario: Overlay file lacks "__framework__" key.
+
   Expectation: Logic infers framework from filename 'numpy_vlatest_map.json' -> 'numpy'.
   """
   sem_dir = tmp_path / "semantics"
@@ -147,6 +150,7 @@ def test_filename_framework_inference(tmp_path):
 
 def test_reverse_index_integrity(manager):
   """Scenario: Reverse check APIs loaded from Overlays.
+
   Expectation: `get_definition("torch.abs")` returns ("Abs", data).
   """
   # Check reverse lookup

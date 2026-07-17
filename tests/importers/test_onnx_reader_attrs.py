@@ -73,6 +73,7 @@ def mock_spec_file(tmp_path):
 
 def test_extract_attributes_integration(importer, mock_spec_file):
   """Scenario: Parse a file containing Inputs and Attributes.
+
   Expectation: `std_args` contains both tensor inputs and config attributes with types.
   """
   semantics = importer.parse_file(mock_spec_file)
@@ -121,6 +122,7 @@ def test_extract_section_logic_tuples(importer):
 
 def test_no_attributes_section(importer, mock_spec_file):
   """Scenario: Operator has Inputs but no Attributes (e.g., Relu).
+
   Expectation: `std_args` contains inputs only, no crashes.
   """
   semantics = importer.parse_file(mock_spec_file)
@@ -159,6 +161,7 @@ def test_html_tag_cleaning_and_mapping(importer):
 
 def test_missing_file_returns_empty(importer, tmp_path):
   """Scenario: File does not exist.
+
   Expectation: Empty dict, log error.
   """
   res = importer.parse_file(tmp_path / "ghost.md")

@@ -49,6 +49,7 @@ def test_merge_clean_insert():
 
 def test_array_vs_neural_silent_upgrade():
   """Scenario: 'sigmoid' defined in Array API, then upgraded in Neural.
+
   Expectation: Content updated, Tier Origin updated to Neural, NO warning emitted (Refinement upgrade).
   """
   mgr = MockConflictSemantics()
@@ -127,6 +128,7 @@ def test_extras_override_silence():
 
 def test_duplicate_same_tier_arg_count_upgrade_silent():
   """Scenario: Same key, same tier. New def has MORE args (Superset).
+
   Expectation: Silent Upgrade.
   """
   mgr = MockConflictSemantics()
@@ -162,6 +164,7 @@ def test_duplicate_same_tier_arg_count_upgrade_silent():
 
 def test_duplicate_same_tier_arg_count_downgrade_protects_old():
   """Scenario: Same key, same tier. New def has FEWER args (Subset).
+
   Expectation: Silent Persistence of Old Data.
   """
   mgr = MockConflictSemantics()
@@ -194,6 +197,7 @@ def test_duplicate_same_tier_arg_count_downgrade_protects_old():
 
 def test_duplicate_same_tier_ambiguous_warning():
   """Scenario: Same key, same tier, SAME LENGTH, different names.
+
   Expectation: Warning issued.
   """
   mgr = MockConflictSemantics()
@@ -223,6 +227,7 @@ def test_duplicate_same_tier_ambiguous_warning():
 
 def test_duplicate_same_tier_identical_is_silent():
   """Scenario: Content is reloaded (identical or minor metadata change only).
+
   Expectation: No warning.
   """
   mgr = MockConflictSemantics()

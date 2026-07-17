@@ -49,6 +49,8 @@ class DependencyScanner(cst.CSTVisitor):
 
   def visit_Import(self, node: cst.Import) -> None:
     """Visits ``import x``, ``import x.y``.
+
+
     Checks the root package name.
 
     Args:
@@ -61,6 +63,7 @@ class DependencyScanner(cst.CSTVisitor):
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
     """Visits ``from x import y``.
+
     Checks the module root package name.
 
     Args:
@@ -79,6 +82,7 @@ class DependencyScanner(cst.CSTVisitor):
 
   def _get_root_package(self, node: cst.BaseExpression) -> str:
     """Extracts the root package string from a CST node.
+
     e.g., ``Attribute(Name(os), Name(path))`` -> "os".
 
     Args:
@@ -100,6 +104,7 @@ class DependencyScanner(cst.CSTVisitor):
 
   def _validate_package(self, pkg_name: str) -> None:
     """Filters and checks the package name.
+
     If it's external and unmapped, adds to unknown_imports.
 
     Args:
@@ -122,10 +127,12 @@ class DependencyScanner(cst.CSTVisitor):
       return
 
     # 4. Flag as Unknown
+
     self.unknown_imports.add(pkg_name)
 
   def _is_stdlib(self, name: str) -> bool:
     """Determines if a package is part of the Python Standard Library.
+
     Uses ``sys.stdlib_module_names`` on Python 3.10+, falls back to known list.
 
     Args:

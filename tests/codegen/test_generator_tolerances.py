@@ -32,6 +32,7 @@ def generator():
 
 def test_tolerance_defaults(generator, tmp_path):
   """Scenario: No constraints in definition.
+
   Expect: rtol=1e-3, atol=1e-4.
   """
   semantics = {

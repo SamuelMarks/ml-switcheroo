@@ -52,6 +52,8 @@ class JaxCoreAdapter(JAXStackMixin):
 
   def __init__(self) -> None:
     """Initializes the JAX adapter.
+
+
     Detects installation status to toggle between LIVE and GHOST modes.
     """
     self._mode = InitMode.LIVE
@@ -112,6 +114,7 @@ class JaxCoreAdapter(JAXStackMixin):
   @property
   def structural_traits(self) -> StructuralTraits:
     """Defines JAX structural behavior (Transformation rules).
+
     Specifies JIT static arguments for compilation safety.
 
     Returns:
@@ -131,6 +134,7 @@ class JaxCoreAdapter(JAXStackMixin):
   @property
   def plugin_traits(self) -> PluginTraits:
     """Defines logic capabilities for plugins.
+
     Enables NumPy compatibility and explicit RNG threading.
 
     IMPORTANT: Enforces Purity Analysis to catch side-effects unsafe for functional trace.
@@ -156,6 +160,7 @@ class JaxCoreAdapter(JAXStackMixin):
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """Static Definitions for JAX Core, Optax, Orbax, and Types.
+
     Loaded dynamically from `frameworks/definitions/jax.json`.
 
     Returns:
@@ -198,10 +203,12 @@ class JaxCoreAdapter(JAXStackMixin):
       return data
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
       return jnp.array(data)
+
     return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """Applies Level 0/1 Stack wiring.
+
     Populates the JSON snapshot with manually wired logic.
 
     Args:

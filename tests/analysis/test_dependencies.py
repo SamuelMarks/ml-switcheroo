@@ -46,6 +46,7 @@ def scan_code(scanner, code):
 
 def test_ignore_stdlib(scanner):
   """Scenario: User imports 'os', 'sys', 'typing'.
+
   Expectation: No warnings (all detected as stdlib).
   """
   code = """
@@ -60,6 +61,7 @@ from datetime import datetime
 
 def test_ignore_source_framework(scanner):
   """Scenario: User imports 'torch' or 'torch.nn'.
+
   Expectation: No warnings (handled by ImportFixer).
   """
   code = """
@@ -73,6 +75,7 @@ from torch import optim
 
 def test_ignore_mapped_dependencies(scanner):
   """Scenario: User imports 'numpy' and 'PIL'.
+
   Expectation: No warnings (present in MockSemantics).
   """
   code = """
@@ -86,6 +89,7 @@ from PIL import Image
 
 def test_flag_unmapped_third_party(scanner):
   """Scenario: User imports 'pandas' and 'cv2'.
+
   Expectation: Flagged as unknown dependencies.
   """
   code = """
@@ -100,6 +104,7 @@ import cv2
 
 def test_flag_deep_imports(scanner):
   """Scenario: `from sklearn.metrics import f1_score`.
+
   Expectation: Flag 'sklearn' as unknown root.
   """
   code = "from sklearn.metrics import f1_score"
@@ -109,6 +114,7 @@ def test_flag_deep_imports(scanner):
 
 def test_ignore_relative_imports(scanner):
   """Scenario: `from . import utils` or `from ..models import net`.
+
   Expectation: Ignored (internal project structure).
   """
   # LibCST ImportFrom.module is None for 'from . import x',

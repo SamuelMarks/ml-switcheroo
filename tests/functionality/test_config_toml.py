@@ -33,6 +33,7 @@ debug_level = "info"
 
 def test_load_defaults_from_toml(tmp_path, toml_file):
   """Scenario: User runs CLI without args inside a configured project.
+
   Expect: Config matches TOML values.
   """
   # Simulate loading from the project root
@@ -47,6 +48,7 @@ def test_load_defaults_from_toml(tmp_path, toml_file):
 
 def test_cli_overrides_toml(tmp_path, toml_file):
   """Scenario: User provides CLI arg which contradicts TOML.
+
   Expect: CLI arg takes precedence.
   """
   config = RuntimeConfig.load(
@@ -61,6 +63,7 @@ def test_cli_overrides_toml(tmp_path, toml_file):
 
 def test_plugin_settings_merge(tmp_path, toml_file):
   """Scenario: Plugins configured in TOML, but one value overridden via CLI.
+
   Expect: Merged dict, CLI value wins collision.
   """
   cli_plugins = {"epsilon": 1.0, "new_flag": "yes"}
@@ -79,6 +82,7 @@ def test_plugin_settings_merge(tmp_path, toml_file):
 
 def test_hierarchical_search(tmp_path, toml_file):
   """Scenario: Config is in root, but user runs command from src/subdir.
+
   Expect: Traversing up finds the root pyproject.toml.
   """
   subdir = tmp_path / "src" / "subdir"
@@ -91,6 +95,7 @@ def test_hierarchical_search(tmp_path, toml_file):
 
 def test_no_toml_fallback(tmp_path):
   """Scenario: No pyproject.toml exists.
+
   Expect: Default values are derived from registry.
   Note: Config logic prioritizes 'torch' as source.
   """
@@ -109,6 +114,7 @@ def test_no_toml_fallback(tmp_path):
 
 def test_malformed_toml_is_ignored(tmp_path):
   """Scenario: pyproject.toml is invalid syntax.
+
   Expect: Silent ignore, fallback to defaults (robustness).
   """
   fpath = tmp_path / "pyproject.toml"

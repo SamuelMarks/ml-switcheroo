@@ -29,6 +29,7 @@ def generator(tmp_path):
 
 def test_grad_injection_enabled(generator, tmp_path):
   """Scenario: Differentiable operation (default).
+
   Expect: results_grad dict and grad checking code.
   """
   semantics = {"sin": {"std_args": ["x"], "variants": {"torch": {"api": "torch.sin"}, "jax": {"api": "jnp.sin"}}}}
@@ -50,6 +51,7 @@ def test_grad_injection_enabled(generator, tmp_path):
 
 def test_grad_injection_disabled_flag(generator, tmp_path):
   """Scenario: differentiable=False in spec.
+
   Expect: No gradient code.
   """
   semantics = {
@@ -70,6 +72,7 @@ def test_grad_injection_disabled_flag(generator, tmp_path):
 
 def test_grad_injection_disabled_primitive(generator, tmp_path):
   """Scenario: Input is integer (not Array/Tensor).
+
   Expect: Skip gradient check because arg0 is not differentiable.
   """
   # Note: Generator _is_primitive("int") returns True -> skips
@@ -89,7 +92,8 @@ def test_grad_injection_disabled_primitive(generator, tmp_path):
 
 def test_grad_multi_arg(generator, tmp_path):
   """Scenario: Binary Op.
-  Expect: Lambda signature 'lambda a0, a1: ...'
+
+  Expect: Lambda signature 'lambda a0, a1: ...'.
   """
   semantics = {"add": {"std_args": ["x", "y"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}}
   out_file = tmp_path / "test_multi.py"

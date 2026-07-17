@@ -59,6 +59,8 @@ class AttributeMixin(cst.CSTTransformer):
 
   def _simplify_reexports(self, node: cst.Attribute) -> cst.BaseExpression:
     """Detects and strips redundant internal modules.
+
+
     E.g. ``nnx.module.Module`` becomes ``nnx.Module``.
 
     Args:

@@ -68,8 +68,9 @@ def rewrite(rewriter, code):
 
 def test_compiler_decorator(rewriter):
   """Verify decorator replacement using looked up API.
+
   Input: @torch.compile(args)
-  Output: @custom.jit
+  Output: @custom.jit.
   """
   code = "@torch.compile(fullgraph=True)\ndef f(x): pass"
 

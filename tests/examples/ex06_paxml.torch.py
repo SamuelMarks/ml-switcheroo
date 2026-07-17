@@ -5,11 +5,12 @@ import torch.nn as nn
 
 class SimpleMLP(nn.Module):
   """A simple Multi-Layer Perceptron for PaxML conversion testing.
+
   Semantic pivot:
     - nn.Module -> praxis.base_layer.BaseLayer
     - __init__ -> setup
     - forward -> __call__
-    - nn.Linear -> praxis.layers.Linear
+    - nn.Linear -> praxis.layers.Linear.
   """
 
   def __init__(self, input_size, hidden_size, num_classes):

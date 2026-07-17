@@ -1,4 +1,5 @@
 """Tests for verify functionality (Harness Generation).
+
 Checks that the harness is generated correctly, compiles, and runs standalone.
 """
 
@@ -34,7 +35,8 @@ def test_harness_generation_file_creation(tmp_path):
 
 
 def test_harness_execution_standalone(tmp_path):
-  """Verify correctness by running the script in a subprocess WITHOUT adding
+  """Verify correctness by running the script in a subprocess WITHOUT adding.
+
   ml_switcheroo to PYTHONPATH. This proves it is portable.
   """
   # 1. Source
@@ -73,6 +75,7 @@ def my_op(x):
 
 def test_harness_execution_mismatch(tmp_path):
   """Verify that logic failures are still caught in the standalone script.
+
   Forces float input type so generated test does not use empty arrays, ensuring numeric mismatch logic triggers.
   """
   src_file = tmp_path / "mod_src.py"

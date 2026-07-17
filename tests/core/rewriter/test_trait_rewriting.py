@@ -88,7 +88,8 @@ def test_trait_module_inheritance_rewrite(rewriter_factory):
 
 
 def test_dynamic_base_discovery(rewriter_factory):
-  """Verifies that a completely unknown framework base ('ghost.Network')
+  """Verifies that a completely unknown framework base ('ghost.Network').
+
   is detected as a Module purely because it exists in the SemanticsManager config.
   """
   semantics = MockTraitSemantics()

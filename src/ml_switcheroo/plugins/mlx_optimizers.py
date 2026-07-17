@@ -82,6 +82,8 @@ def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 @register_hook("mlx_optimizer_step")
 def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel]:
   """Hook: Transforms `optimizer.step()` into an EscapeHatch pattern.
+
+
   Functional optimizers (like MLX/Optax) require explicit update calls `opt.update(model, state)`.
 
   Args:

@@ -1,6 +1,7 @@
 # tests/integration/test_new_ops.py
 
 """Integration Tests for Expanded Operations (Features 08+).
+
 Verifies specific mappings for Embedding, LayerNorm, GELU, and ArgMax.
 """
 

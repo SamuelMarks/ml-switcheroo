@@ -18,6 +18,7 @@ def extract(code: str) -> GraphExtractor:
 
 def test_provenance_input_args():
   """Scenario: Functional inputs via arguments.
+
   Expectation: `Input_x` maps to `cst.Param` node.
   """
   code = """
@@ -33,6 +34,7 @@ def forward(self, x):
 
 def test_provenance_layer_definition():
   """Scenario: Layer defined in __init__.
+
   Expectation: `conv` maps to `cst.Assign` node.
   """
   code = """
@@ -50,6 +52,7 @@ class Net:
 
 def test_provenance_functional_call():
   """Scenario: Functional call `F.relu`.
+
   Expectation: `func_relu` maps to `cst.Call`.
   """
   code = """
@@ -69,6 +72,7 @@ def forward(self, x):
 
 def test_provenance_script_constant():
   """Scenario: Top level script constant.
+
   Expectation: `Input_x` maps to `cst.Assign`.
   """
   code = "x = 1"
@@ -80,6 +84,7 @@ def test_provenance_script_constant():
 
 def test_provenance_return_output():
   """Scenario: Return statement implies Output node.
+
   Expectation: `output` maps to `cst.Return` node.
   """
   code = """
@@ -94,6 +99,7 @@ def forward(self, x):
 
 def test_provenance_implicit_script_input():
   """Scenario: Script calls function with var 'img'.
+
   Expectation: `Input_img` maps to `cst.Arg`.
   """
   code = "x = op(img)"

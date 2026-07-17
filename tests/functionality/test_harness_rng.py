@@ -68,6 +68,7 @@ def _make_flax_rngs(seed):
 @patch("ml_switcheroo.testing.harness_generator.get_adapter")
 def test_rng_injection_jax(mock_get_adapter, tmp_path):
   """Scenario:
+
       Source: def forward(x): ...
       Target: def forward(rng, x): ... (Transpiled with rng_threading plugin)
   Expectation:

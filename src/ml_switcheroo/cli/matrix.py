@@ -101,6 +101,8 @@ class CompatibilityMatrix:
 
   def render(self) -> None:
     """Generates and prints the compatibility table to the standard output.
+
+
     Uses ``rich.Table`` for formatting.
     """
     table = Table(title="ml-switcheroo Compatibility Matrix")

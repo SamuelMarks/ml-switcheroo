@@ -86,6 +86,8 @@ class FlaxNNXAdapter(JAXStackMixin):
   @property
   def import_alias(self) -> Tuple[str, str]:
     """Returns the base package and alias to guide import injection.
+
+
     Used by ImportFixer to map `flax.nnx` root usage to `nnx` alias.
 
     Returns:
@@ -155,6 +157,7 @@ class FlaxNNXAdapter(JAXStackMixin):
   @property
   def structural_traits(self) -> StructuralTraits:
     """Structural rewriting traits guiding the pivot rewriter.
+
     Explicitly defines `flax.nnx.Module` to ensure clean inheritance rewriting
     without internal submodule leakage.
 
@@ -191,6 +194,7 @@ class FlaxNNXAdapter(JAXStackMixin):
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """Static standard operation definitions specific to Flax NNX.
+
     Loaded dynamically from `frameworks/definitions/flax_nnx.json`.
 
     Returns:
@@ -215,6 +219,7 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   def convert(self, data: Any) -> Any:
     """Converts generic data to framework-specific Pytree/arrays.
+
     Contains self-contained logic to ensure safe extraction by the Harness Generator which
     does not preserve external dependencies like 'JaxCoreAdapter' class references.
 
@@ -322,6 +327,7 @@ class Qwen3VLPatchEmbed(nnx.Module):
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
     """Returns the official Flax documentation URL for a given API string.
+
     Defaults to ReadTheDocs search query for robustness with new NNX APIs.
 
     Args:

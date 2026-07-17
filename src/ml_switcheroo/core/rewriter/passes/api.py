@@ -328,7 +328,9 @@ class ApiTransformer(cst.CSTTransformer):
   # Use simple implementation for now without deduplication on identity which might be complex,
   # as simple set of strings works for identical injects.
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-    """Injects accumulated module-level preamble statements if they haven't been flushed yet
+    """Injects accumulated module-level preamble statements if they haven't been flushed yet.
+
+
     by a prior pass (like StructuralPass). We deduplicate based on string content.
     """
     if not self.context.module_preamble:
@@ -422,6 +424,7 @@ class ApiTransformer(cst.CSTTransformer):
 
   def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
     """Exit function scope.
+
     Flush any pending preamble statements requested by plugins during this pass.
     Also apply any pending signature injections (arguments).
     """
@@ -544,6 +547,7 @@ class ApiTransformer(cst.CSTTransformer):
 
   def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
     """Handle assignment rewriting.
+
     1. Track stateful initializations (e.g. self.layer = Linear...).
     2. Unwrap functional returns (e.g. y, state = layer.apply...).
     """
@@ -741,6 +745,7 @@ class ApiTransformer(cst.CSTTransformer):
     target_impl: Dict[str, Any],
   ) -> List[cst.Arg]:
     """Pivots arguments from source implementation -> Standard -> Target implementation.
+
     Handles renaming, reordering, and default injection.
     """
     # 1. Parse Standard Types

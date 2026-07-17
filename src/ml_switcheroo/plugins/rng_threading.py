@@ -28,6 +28,8 @@ from ml_switcheroo.frameworks.base import get_adapter
 
 def _remove_generator_arg(args: List[cst.Arg]) -> List[cst.Arg]:
   """Filters out the 'generator' keyword argument commonly used in PyTorch.
+
+
   JAX uses the 'key' semantics instead.
   """
   clean_args = []

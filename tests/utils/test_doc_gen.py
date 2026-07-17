@@ -105,9 +105,10 @@ def test_simple_match_row(generator):
 
 def test_argument_diff_logic(generator):
   """Verify argument renaming diffs are computed.
+
   Std: x, axis
   Torch: input, dim
-  JAX: a, axis
+  JAX: a, axis.
 
   Diffs:
   - input -> a
@@ -152,6 +153,7 @@ def test_tier_ordering(generator):
 
 def test_filtering_missing_source(generator):
   """Verify that if Source FW does not have the op, it is skipped entirely.
+
   If source is 'tensorflow' (unknown in mock), doc should represent that nothing was found
   (headers skipped because no ops valid).
   """

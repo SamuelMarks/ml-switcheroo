@@ -28,7 +28,9 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 def _supports_numpy_casting(ctx: HookContext) -> bool:
-  """Checks if the target framework configuration supports numpy-style
+  """Checks if the target framework configuration supports numpy-style.
+
+
   `.astype()` calling conventions via PluginTraits.
   """
   if not ctx.semantics:

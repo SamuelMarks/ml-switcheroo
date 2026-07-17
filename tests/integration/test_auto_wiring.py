@@ -25,10 +25,11 @@ def clean_env():
 
 
 def test_auto_wired_plugin_flow(tmp_path):
-  """Scenario: Define a custom plugin 'MagicSwap' that auto-wires itself to
+  """Scenario: Define a custom plugin 'MagicSwap' that auto-wires itself to.
+
   a new operation 'MagicOp'.
   Input: `torch.magic(x)`
-  Output: `jax.magic_swapped(x)`
+  Output: `jax.magic_swapped(x)`.
   """
 
   # 1. Define the Plugin with Auto-Wire Metadata

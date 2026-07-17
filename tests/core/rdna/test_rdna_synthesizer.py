@@ -125,8 +125,9 @@ def test_graph_to_rdna_unmapped(mock_semantics: MagicMock) -> None:
 
 
 def test_rdna_to_python_instruction() -> None:
-  """Input: v_add_f32 v0, v1, v2
-  Output: v0 = rdna.v_add_f32(v1, v2)
+  """Input: v_add_f32 v0, v1, v2.
+
+  Output: v0 = rdna.v_add_f32(v1, v2).
   """
   synth = RdnaSynthesizer(MagicMock())
   inst = Instruction("v_add_f32", [VGPR(0), VGPR(1), VGPR(2)])
@@ -136,8 +137,9 @@ def test_rdna_to_python_instruction() -> None:
 
 
 def test_rdna_to_python_ranges() -> None:
-  """Input: image_load v[0:3], v[4:7], s[0:3]
-  Output: v_0_3 = rdna.image_load(v_4_7, s_0_3)
+  """Input: image_load v[0:3], v[4:7], s[0:3].
+
+  Output: v_0_3 = rdna.image_load(v_4_7, s_0_3).
   """
   synth = RdnaSynthesizer(MagicMock())
   inst = Instruction("image_load", [VGPR(0, 4), VGPR(4, 4), SGPR(0, 4)])
@@ -149,8 +151,9 @@ def test_rdna_to_python_ranges() -> None:
 
 
 def test_rdna_to_python_label() -> None:
-  """Input: Label
-  Output: Comment marker
+  """Input: Label.
+
+  Output: Comment marker.
   """
   synth = RdnaSynthesizer(MagicMock())
   nodes = [Label("L_LOOP")]

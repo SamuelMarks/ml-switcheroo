@@ -1,4 +1,5 @@
 """Tests for Type-Aware Test Generation logic.
+
 Includes validation for Return Types (Output Verification).
 """
 
@@ -38,7 +39,8 @@ def gen(tmp_path):
 
 def test_code_gen_str_int():
   """Scenario: Type hint "int".
-  Expectation: `random.randint(...)`
+
+  Expectation: `random.randint(...)`.
   """
   code = generate_input_value_code("dim", "int")
   assert "random.randint" in code
@@ -46,7 +48,8 @@ def test_code_gen_str_int():
 
 def test_code_gen_str_bool():
   """Scenario: Type hint "bool".
-  Expectation: `bool(random.getrandbits(1))`
+
+  Expectation: `bool(random.getrandbits(1))`.
   """
   code = generate_input_value_code("keepdims", "bool")
   assert "bool(random.getrandbits(1))" in code
@@ -54,7 +57,8 @@ def test_code_gen_str_bool():
 
 def test_code_gen_str_float():
   """Scenario: Type hint "float".
-  Expectation: `random.uniform`
+
+  Expectation: `random.uniform`.
   """
   code = generate_input_value_code("alpha", "float")
   assert "random.uniform" in code
@@ -62,7 +66,8 @@ def test_code_gen_str_float():
 
 def test_code_gen_str_array():
   """Scenario: Type hint "Array" or "Tensor".
-  Expectation: `np.random.randn`
+
+  Expectation: `np.random.randn`.
   """
   code1 = generate_input_value_code("x", "Array")
   assert "np.random.randn" in code1
@@ -73,6 +78,7 @@ def test_code_gen_str_array():
 
 def test_code_gen_complex_list():
   """Scenario: Type hint "List[int]".
+
   Expectation: `[1, 2]` stub.
   """
   code = generate_input_value_code("pads", "List[int]")
@@ -81,6 +87,7 @@ def test_code_gen_complex_list():
 
 def test_code_gen_heuristic_fallback():
   """Scenario: Type hint "Any" or None.
+
   Expectation: Name-based heuristic (e.g. 'axis' -> '1').
   """
   # Name 'axis' -> heuristic returns 1
@@ -93,7 +100,8 @@ def test_code_gen_heuristic_fallback():
 
 
 def test_generate_integration_typed_args(gen, tmp_path):
-  """Integration test ensuring `generate` parses the `std_args` properly
+  """Integration test ensuring `generate` parses the `std_args` properly.
+
   and emits the typed code into the file.
   """
   # Mock Semantics with typed arguments

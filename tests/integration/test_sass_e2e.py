@@ -88,6 +88,7 @@ def python_engine(semantics):
 
 def test_python_to_sass_compilation(sass_engine):
   """Scenario: Convert Python logic `z = torch.add(x, y)` to SASS.
+
   Expectation:
   - Input comments.
   - FADD instruction with registers.
@@ -118,7 +119,8 @@ def kernel(x, y):
 
 def test_python_to_sass_unmapped_op_fallback(sass_engine):
   """Scenario: Op without SASS definition (e.g. unknown).
-  Expectation: Comment fallback `// Unmapped Op: ...`
+
+  Expectation: Comment fallback `// Unmapped Op: ...`.
   """
   source_code = "z = torch.unknown(x)"
 
@@ -132,6 +134,7 @@ def test_python_to_sass_unmapped_op_fallback(sass_engine):
 
 def test_sass_to_python_decompilation(python_engine):
   """Scenario: Convert SASS source `FADD R0, R1, R2;` to Python representation.
+
   Expectation: Class DecompiledModel with `asm.FADD` calls.
   """
   sass_source = "FADD R0, R1, R2;"
@@ -151,7 +154,7 @@ def test_sass_to_python_decompilation(python_engine):
 
 
 def test_full_chain_math(sass_engine):
-  """Scenario: Chained operations. `z = (x + y) * x`"""
+  """Scenario: Chained operations. `z = (x + y) * x`."""
   source_code = """
 import torch
 def f(x, y):

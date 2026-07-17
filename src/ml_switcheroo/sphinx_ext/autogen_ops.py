@@ -37,6 +37,8 @@ class IndentedDumper(yaml.SafeDumper):
 
 def _build_yaml_entry(op_name: str, definition: Dict[str, Any]) -> Dict[str, Any]:
   """Normalizes internal semantics data into clean ODL YAML structure.
+
+
   Safe sanitization of description strings to prevent broken RST references.
   """
   # 1. Normalize Arguments

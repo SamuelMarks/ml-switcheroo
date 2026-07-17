@@ -99,6 +99,8 @@ class PurityScanner(cst.CSTTransformer):
     updated_node: cst.SimpleStatementLine,
   ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel]:
     """Exits a statement line.
+
+
     If violations were found within this statement, wraps it in the EscapeHatch.
 
     Args:

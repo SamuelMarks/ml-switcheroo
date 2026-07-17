@@ -32,6 +32,7 @@ def validate_python(code: str) -> None:
 
 def test_synthesize_simple_chain(synthesizer: PythonBackend) -> None:
   """Scenario: Input -> Conv2d -> Output.
+
   Expectation: Fresh class generation with __init__ and forward.
   """
   g = LogicalGraph()
@@ -80,6 +81,7 @@ def test_synthesize_functional_mix(synthesizer: PythonBackend) -> None:
 
 def test_synthesize_metadata_args(synthesizer: PythonBackend) -> None:
   """Scenario: Nodes have argument metadata.
+
   Expectation: Arguments injected into init/call.
   """
   g = LogicalGraph()
@@ -100,6 +102,7 @@ def test_synthesize_metadata_args(synthesizer: PythonBackend) -> None:
 
 def test_synthesize_custom_input_name(synthesizer: PythonBackend) -> None:
   """Scenario: Input node has specific name 'img'.
+
   Expectation: forward argument is 'img'.
   """
   g = LogicalGraph()
@@ -119,6 +122,7 @@ def test_synthesize_custom_input_name(synthesizer: PythonBackend) -> None:
 
 def test_context_preservation(synthesizer: PythonBackend) -> None:
   """Scenario: Patching an existing class while keeping other methods/docstrings.
+
   Expectation: __init__ and forward are replaced, but helper methods and docs remain.
   """
   original_source = """
@@ -164,6 +168,7 @@ class MyNet(nn.Module):
 
 def test_missing_class_fallback(synthesizer: PythonBackend) -> None:
   """Scenario: Original tree provided, but target class name not found.
+
   Expectation: Fallback to fresh generation (or appending, depending on implementation).
   Current impl falls back to returning a fresh module string if patcher fails to return modified code?
   Actually, implementation creates new module if logic branches that way.

@@ -1,4 +1,5 @@
 """Tests for Generator Hardening requirements.
+
 Efficiently validates sw.op attribute handling and call structures.
 """
 
@@ -21,6 +22,7 @@ def gen_code(op: OperationNode) -> str:
 
 def test_sw_op_attribute_hardening():
   """Verify `sw.op` uses `type` attribute for complex dotted names.
+
   Scenario: x = torch.nn.Conv2d(...)
   Impact of Void Suppression: Unused result -> Expression Statement.
   """
@@ -39,6 +41,7 @@ def test_sw_op_attribute_hardening():
 
 def test_sw_call_method_chain_hardening():
   """Verify `sw.call` correctly handles callable stored in variable.
+
   Scenario:
       self.conv = ...
       x = self.conv(x)
@@ -65,7 +68,8 @@ def test_sw_call_method_chain_hardening():
 
 def test_sw_op_void_return():
   """Verify `sw.op` without results generates an Expression Statement.
-  Scenario: print("hello")
+
+  Scenario: print("hello").
   """
   op = OperationNode(
     name="sw.op",

@@ -93,6 +93,8 @@ class NumpyAdapter:
   @property
   def supported_tiers(self) -> List[SemanticTier]:
     """NumPy supports Arrays (Math) and Extras (IO).
+
+
     It does NOT support Neural layers structurally.
 
     Returns:
@@ -139,6 +141,7 @@ class NumpyAdapter:
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """Static definitions for NumPy mappings.
+
     Loaded dynamically from `frameworks/definitions/numpy.json`.
 
     Returns:

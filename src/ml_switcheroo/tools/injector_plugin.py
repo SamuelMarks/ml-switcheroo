@@ -54,6 +54,8 @@ TEMPLATE_FUNC_DEF = '@register_hook("{name}")\ndef {name}(node: {node_type}, ctx
 
 class BodyExtractor(cst.CSTVisitor):
   """Extracts the body of a specific function definition.
+
+
   Used to preserve user implementation logic during scaffolding updates.
   """
 
@@ -70,6 +72,7 @@ class BodyExtractor(cst.CSTVisitor):
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
     """Visits function definitions to find the target hook.
+
     If found, captures the body and stops recursion.
 
     Args:
@@ -100,6 +103,7 @@ class PluginGenerator:
 
   def _to_snake_case(self, name: str) -> str:
     """Converts PascalCase or camelCase to snake_case for filenames.
+
     e.g. MyPlugin -> my_plugin, HTTPResponse -> http_response.
 
     Args:

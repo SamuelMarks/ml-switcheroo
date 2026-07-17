@@ -7,6 +7,7 @@ class MockRewriter:
   """Docstring."""
 
   def __init__(self, strict_mode=False):  # noqa: D107
+    """Init."""
     self.source_fw = "src"
     self.target_fw = "jax"
     self.strict_mode = strict_mode
@@ -24,9 +25,11 @@ class MockRewriter:
     )()
 
   def _report_failure(self, msg):
+    """Report failure."""
     self.failures.append(msg)
 
   def _create_name_node(self, api):
+    """Create name node."""
     import libcst as cst
 
     return cst.Name(api)
@@ -36,6 +39,7 @@ class MockSigCtx:
   """Docstring."""
 
   def __init__(self, node=None):  # noqa: D102, D107
+    """Init."""
     self.node = node  # noqa: D107
     self.existing_args = []
     self.injected_args = []

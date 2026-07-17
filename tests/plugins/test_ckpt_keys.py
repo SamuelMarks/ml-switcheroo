@@ -48,8 +48,9 @@ def rewriter():
 
 
 def test_load_state_dict_rewrite(rewriter):
-  """Input: model.load_state_dict(sd)
-  Output: KeyMapper.from_torch(sd)
+  """Input: model.load_state_dict(sd).
+
+  Output: KeyMapper.from_torch(sd).
   """
   code = "model.load_state_dict(sd)"
   res = rewrite_code(rewriter, code)
@@ -60,8 +61,9 @@ def test_load_state_dict_rewrite(rewriter):
 
 
 def test_load_state_dict_kwargs(rewriter):
-  """Input: x.load_state_dict(state_dict=y, strict=False)
-  Output: KeyMapper.from_torch(y)
+  """Input: x.load_state_dict(state_dict=y, strict=False).
+
+  Output: KeyMapper.from_torch(y).
   """
   code = "x.load_state_dict(state_dict=y, strict=False)"
   res = rewrite_code(rewriter, code)

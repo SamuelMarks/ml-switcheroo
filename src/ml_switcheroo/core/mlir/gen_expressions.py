@@ -13,11 +13,14 @@ from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
 
 class ExpressionGeneratorMixin(BaseGeneratorMixin):
   """Mixin for generating LibCST Expressions from MLIR Operations.
+
+
   Assumes `self._resolve_operand` is available on the host class.
   """
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
     """Abstract placeholder.
+
     Must be implemented by the main Generator class to resolve variables.
 
     Args:
@@ -31,6 +34,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
   def _parse_keywords(self, op: OperationNode) -> List[Optional[str]]:
     """Extracts arg_keywords attribute from operation.
+
     Returns a list of strings (keyword names or empty strings).
 
     Args:
@@ -133,6 +137,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
   def _expr_sw_op(self, op: OperationNode) -> cst.BaseExpression:
     """Generates generic operation call (e.g. torch.add).
+
     Handles specialized binary operation mapping via `binop.` types.
 
     Args:

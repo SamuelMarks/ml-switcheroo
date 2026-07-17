@@ -87,6 +87,7 @@ def test_lift_unmapped_op() -> None:
 
 def test_lift_no_markers() -> None:
   """Scenario: Raw assembly without markers.
+
   Expect: Nodes for each instruction (1:1 lifting).
   """
   nodes: List[RdnaNode] = [make_inst("v_add_f32", VGPR(0), VGPR(1), VGPR(2))]

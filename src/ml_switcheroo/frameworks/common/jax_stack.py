@@ -55,6 +55,8 @@ class JAXStackMixin:
 
   def get_to_numpy_code(self) -> str:
     """Returns logic to convert JAX arrays to NumPy.
+
+
     Checks for `__array__` protocol which JAX arrays implement.
     """
     return "if hasattr(obj, '__array__'): return np.array(obj)"
@@ -88,12 +90,14 @@ class JAXStackMixin:
 
   def get_device_check_syntax(self) -> str:
     """Returns JAX syntax for checking if GPUs are available.
+
     Format: ``len(jax.devices('gpu')) > 0``.
     """
     return "len(jax.devices('gpu')) > 0"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """Returns JAX syntax for splitting a PRNG key.
+
     Format: ``rng, key = jax.random.split(rng)``.
     """
     return f"{rng_var}, {key_var} = jax.random.split({rng_var})"
@@ -134,6 +138,7 @@ class JAXStackMixin:
 
   def get_weight_load_code(self, path_var: str) -> str:
     """Returns python code to load a checkpoint from `path_var` into a variable named `raw_state`.
+
     The `raw_state` is a flat dictionary where keys are dot-separated strings (e.g. 'layer.weight').
     """
     return textwrap.dedent(  # pragma: no cover
@@ -158,7 +163,8 @@ class JAXStackMixin:
     return f"np.array({tensor_var})"  # pragma: no cover
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Returns python code to save the dictionary `state_var` (mapping flat keys to numpy arrays)
+    """Returns python code to save the dictionary `state_var` (mapping flat keys to numpy arrays).
+
     to `path_var`. It unstricts flat keys back to PyTree structure using `unflatten_dict` and saves via Orbax.
     """
     return textwrap.dedent(  # pragma: no cover
@@ -178,6 +184,7 @@ class JAXStackMixin:
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
     """Generates a default documentation URL for standard JAX APIs.
+
     Maps to ReadTheDocs autosummary path.
     NOTE: Subclasses (Flax/Pax) should override this for their specific namespaces.
 

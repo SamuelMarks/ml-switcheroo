@@ -56,6 +56,7 @@ LATEX_SOURCE_CONVNET = r"""
 @pytest.fixture
 def hydrated_semantics():
   """Returns a SemanticsManager formatted with all registered adapters.
+
   This ensures that the mappings defined in `LatexDSLAdapter.definitions` are loaded.
   """
   mgr = SemanticsManager()
@@ -146,7 +147,8 @@ def test_latex_to_torch_architecture_conversion(hydrated_semantics):
 
 
 def test_missing_mapping_fails_strict_mode(hydrated_semantics):
-  r"""Verifies that if LaTeX uses an unknown operation (e.g. \Attribute{x}{UnknownOp}),
+  r"""Verifies that if LaTeX uses an unknown operation (e.g. \Attribute{x}{UnknownOp}),.
+
   strict mode catches it.
   """
   bad_source = r"""

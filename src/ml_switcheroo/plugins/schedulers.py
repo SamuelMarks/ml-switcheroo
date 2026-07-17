@@ -38,6 +38,8 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:
   """Resolves the target keyword argument name.
+
+
   Checks the Semantic Knowledge Base (Variant Args) first, falls back to default.
   """
   if ctx.current_variant and ctx.current_variant.args:
@@ -228,6 +230,7 @@ def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> c
 @register_hook("scheduler_step_noop")
 def transform_scheduler_step(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """Hook: Replaces ``scheduler.step()`` with a no-op value (None).
+
   Triggered if the scheduler step operation is wired to `scheduler_step_noop`.
   """
   # Return explicit None. In an expression statement, `None` does nothing.

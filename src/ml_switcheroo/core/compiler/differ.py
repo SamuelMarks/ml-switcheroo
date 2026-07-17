@@ -32,6 +32,8 @@ class DeleteAction(PatchAction):
 @dataclass
 class ReplaceAction(PatchAction):
   """Instruction to replace an anchor node with new logic.
+
+
   For the Differ context, 'new_node' is the LogicalNode from the target graph.
   """
 

@@ -16,6 +16,8 @@ from ml_switcheroo.core.scanners import SimpleNameScanner, get_full_name
 @dataclass(frozen=True)
 class ImportReq:
   """Represents a normalized import requirement.
+
+
   Can represent `import module as alias` or `from module import sub as alias`.
   """
 

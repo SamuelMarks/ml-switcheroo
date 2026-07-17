@@ -46,6 +46,8 @@ MAX_SGPR = 106
 
 class RegisterAllocator:
   """Manages the mapping between symbolic variable names and physical registers.
+
+
   Maintains separate accounting for Scalar (SGPR) and Vector (VGPR) files.
   """
 
@@ -260,6 +262,7 @@ class RdnaSynthesizer:
 
 class RdnaBackend(CompilerBackend):
   """Compiler Backend implementation for AMD RDNA.
+
   Orchestrates the synthesis (Graph -> AST) and emission (AST -> Text).
   """
 

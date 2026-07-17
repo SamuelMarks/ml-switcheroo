@@ -156,6 +156,8 @@ class StableHloEmitter(PythonToMlirEmitter):
 
   def _resolve_sw_op(self, op: OperationNode) -> None:
     """Mutates a 'sw.op' node into a 'stablehlo' node if a mapping exists.
+
+
     Removes the 'type' attribute upon successful resolution.
 
     Args:

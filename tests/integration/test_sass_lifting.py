@@ -75,6 +75,7 @@ def test_sass_lifting_e2e(lifting_engine: ASTEngine) -> None:
 
 def test_sass_lifting_no_structural_markers(lifting_engine: ASTEngine) -> None:
   """Verifies fallback if SASS contains no high-level markers.
+
   Should produce low-level python calls (asm.FADD) inside a generic class wrapper.
   """
   raw_sass = "FADD R0, R1, R2;"

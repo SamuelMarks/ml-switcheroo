@@ -11,6 +11,8 @@ from ml_switcheroo.utils.node_diff import capture_node_source
 
 def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
   """Wraps an expression node with a subscript access for a specific integer index.
+
+
   Safe, structured alternative to string output adapters for tuple destructuring.
 
   Transformation:

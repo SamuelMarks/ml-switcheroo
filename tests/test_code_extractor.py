@@ -68,6 +68,7 @@ def test_normalize_imports_injection():
 
 def test_real_fuzzer_extraction():
   """Integration: Ensure we can extract the real InputFuzzer class.
+
   This is the primary use-case for the harness generator.
   """
   from ml_switcheroo.testing.fuzzer import InputFuzzer

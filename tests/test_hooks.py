@@ -1,4 +1,5 @@
 """Tests for Core Hooks API and Metadata Integrity.
+
 Verifies registration mechanism, Context object data structures, and Injection callbacks.
 Also tests Data-Driven logic access (PluginTraits, Variants).
 """
@@ -137,6 +138,7 @@ def test_hook_execution_signature():
 
 def test_overwrite_hook():
   """Verify that registering the same trigger twice overwrites the previous one.
+
   This allows user plugins to override default plugins.
   """
   trigger = "conflict"

@@ -32,6 +32,8 @@ PreambleInjectorType = Callable[[str], None]
 
 class AutoWireSpec(BaseModel):
   """Schema for plugin self-registration metadata.
+
+
   Allows a plugin to define the Semantic Operation it satisfies.
   """
 
@@ -110,6 +112,7 @@ class HookContext:
   @property
   def plugin_traits(self) -> PluginTraits:
     """Returns the capabilities of the current Target Framework.
+
     This allows plugins to check functionality (e.g. has_numpy_compatible_arrays)
     rather than checking the framework name string.
 
@@ -139,6 +142,7 @@ class HookContext:
   @property
   def current_variant(self) -> Optional[FrameworkVariant]:
     """Returns the Variant definition for the current operation/target.
+
     Allows plugins to read extra metadata defined in the JSON (e.g. pack_to_tuple).
 
     Returns:

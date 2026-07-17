@@ -21,7 +21,7 @@ EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
 
 
 def _load_files():
-  """Discover .py files in tests/examples/"""
+  """Discover .py files in tests/examples/."""
   if not EXAMPLES_DIR.exists():
     return []
   # Sort for deterministic order
@@ -30,6 +30,7 @@ def _load_files():
 
 class MockBidirectionalSemantics(SemanticsManager):
   """Injects deterministic mappings supporting BOTH directions (Torch <-> JAX).
+
   Includes expanded mappings for VAE (ex08), CNN (ex07), and Keras (ex09) support.
   """
 

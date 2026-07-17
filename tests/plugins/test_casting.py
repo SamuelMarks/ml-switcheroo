@@ -96,12 +96,13 @@ def rewriter():
 
 
 def test_float_cast(rewriter):
-  """Input: x.float()
+  """Input: x.float().
+
   Logic:
     1. Map .float() -> 'CastFloat'
     2. 'CastFloat' metadata -> 'Float32'
     3. Resolve 'Float32' (JAX) -> 'jax.numpy.float32'
-  Output: x.astype(jax.numpy.float32)
+  Output: x.astype(jax.numpy.float32).
   """
   # Rewriter requires context propagation
   rewriter.ctx.current_op_id = "CastFloat"
@@ -114,8 +115,9 @@ def test_float_cast(rewriter):
 
 
 def test_long_cast(rewriter):
-  """Input: x.long()
-  Logic: 'CastLong' -> 'Int64' -> 'jax.numpy.int64'
+  """Input: x.long().
+
+  Logic: 'CastLong' -> 'Int64' -> 'jax.numpy.int64'.
   """
   rewriter.ctx.current_op_id = "CastLong"
 
@@ -128,6 +130,7 @@ def test_long_cast(rewriter):
 
 def test_metadata_missing_fallback(rewriter):
   """Scenario: Op definition exists but metadata missing.
+
   Expectation: Return original node.
   """
   # Inject bad definition
@@ -148,6 +151,7 @@ def test_metadata_missing_fallback(rewriter):
 
 def test_type_resolution_failure(rewriter):
   """Scenario: Target Framework doesn't map the abstract type.
+
   Expectation: Return original node.
   """
   # Define cast asking for 'Int128'

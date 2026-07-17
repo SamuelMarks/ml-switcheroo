@@ -65,7 +65,8 @@ def rewrite_code(rewriter, code):
 
 
 def test_import_as_alias(rewriter):
-  """Scenario: `import torch as t; t.abs(x)`
+  """Scenario: `import torch as t; t.abs(x)`.
+
   Expectation: `t` resolves to `torch`, lookup `torch.abs` succeeds -> `jax.numpy.abs(x)`.
   """
   code = """
@@ -79,7 +80,8 @@ y = t.abs(x)
 
 
 def test_from_import_binding(rewriter):
-  """Scenario: `from torch import nn; nn.Linear(1, 2)`
+  """Scenario: `from torch import nn; nn.Linear(1, 2)`.
+
   Expectation: `nn` resolves to `torch.nn`, lookup `torch.nn.Linear` succeeds -> `flax.nnx.Linear(1, 2)`.
   """
   code = """
@@ -92,7 +94,8 @@ layer = nn.Linear(1, 2)
 
 
 def test_from_import_as_binding(rewriter):
-  """Scenario: `from torch import nn as n; n.Linear(1, 2)`
+  """Scenario: `from torch import nn as n; n.Linear(1, 2)`.
+
   Expectation: `n` -> `torch.nn` -> lookup `torch.nn.Linear`.
   """
   code = """
@@ -105,7 +108,8 @@ layer = n.Linear(1, 2)
 
 
 def test_deep_import_chains(rewriter):
-  """Scenario: `import torch.nn.functional as F; F.relu(x)`
+  """Scenario: `import torch.nn.functional as F; F.relu(x)`.
+
   Expectation: `F` -> `torch.nn.functional` -> lookup `torch.nn.functional.relu`.
   """
   code = """
@@ -118,7 +122,8 @@ y = F.relu(x)
 
 
 def test_standard_import_no_alias(rewriter):
-  """Scenario: `import torch; torch.abs(x)`
+  """Scenario: `import torch; torch.abs(x)`.
+
   Expectation: `torch` -> `torch` -> lookup `torch.abs`.
   """
   code = """
@@ -131,7 +136,8 @@ y = torch.abs(x)
 
 
 def test_relative_import_ignored(rewriter):
-  """Scenario: `from . import utils; utils.abs(x)`
+  """Scenario: `from . import utils; utils.abs(x)`.
+
   Expectation: Relative import ignored, map not updated. `utils.abs` looked up as-is (fails/ignored).
   """
   code = """
@@ -170,6 +176,7 @@ y2 = t.abs(x)
 
 def test_alias_shadowing_imported_name(rewriter):
   """Scenario: `from torch import nn` binds 'nn'.
+
   But `nn` usually resolves to `torch.nn` via explicit logic.
   """
   code = """

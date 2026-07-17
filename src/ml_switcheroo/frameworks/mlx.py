@@ -149,6 +149,8 @@ class MLXAdapter(MlxIOMixin):
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """Static definitions for MLX mappings.
+
+
     Loaded dynamically from `frameworks/definitions/mlx.json`.
 
     Returns:
@@ -303,6 +305,7 @@ class Qwen3VLPatchEmbed(nn.Module):
 
   def get_device_check_syntax(self) -> str:
     """Check if default device is GPU.
+
     Note: MLX Unified Memory doesn't have strict 'is_available' but we check backend.
 
     Returns:
@@ -312,7 +315,8 @@ class Qwen3VLPatchEmbed(nn.Module):
     return "mx.default_device() == mx.gpu"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """MLX usually uses implicit state, but if explicit mode is requested,
+    """MLX usually uses implicit state, but if explicit mode is requested,.
+
     return 'pass' as split logic differs significantly.
 
     Returns:

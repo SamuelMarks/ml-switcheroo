@@ -41,6 +41,7 @@ def test_console_singleton_proxy():
 
 def test_custom_console_injection():
   """Verify we can inject a capturing console and retrieve logs.
+
   This simulates how a Web API would capture logs for a response.
   """
   # 1. Create a capturing console
@@ -79,6 +80,7 @@ def test_reset_functionality():
 
 def test_logging_wrappers_format(capsys):
   """Verify semantic wrappers utilize the theme colors and prefixes.
+
   Note: We rely on capsys capturing stdout from the default console.
   """
   # Ensure default
@@ -99,7 +101,8 @@ def test_logging_wrappers_format(capsys):
 
 
 def test_proxy_getattr_delegation():
-  """Verify that accessing attributes not explicitly defined on the proxy
+  """Verify that accessing attributes not explicitly defined on the proxy.
+
   falls through to the backend via __getattr__.
   """
   # 'width' is a property of Rich Console, not defined on _ConsoleProxy

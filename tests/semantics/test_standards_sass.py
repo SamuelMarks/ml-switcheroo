@@ -10,6 +10,7 @@ from ml_switcheroo.frameworks.sass import SassAdapter
 
 def test_neural_ops_sass_variants() -> None:
   """Verify that Neural Network macros are registered in the SassAdapter definitions.
+
   These mappings (1-to-N) are injected programmatically by the adapter.
   """
   adapter = SassAdapter()

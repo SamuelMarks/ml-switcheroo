@@ -31,6 +31,7 @@ def basic_latex():
 
 def test_parser_end_to_end(basic_latex):
   """Verify complete transformation from LaTeX to Python AST.
+
   Checks for `midl` namespace usage.
   """
   parser = LatexParser(basic_latex)

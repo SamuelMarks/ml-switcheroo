@@ -70,9 +70,10 @@ def rewrite(rewriter, code):
 
 
 def test_structured_index_wrapping(rewriter):
-  """Scenario: `res = torch.split(x)`
+  """Scenario: `res = torch.split(x)`.
+
   Semantics: `jax.numpy.split` accessed via `output_select_index=0`.
-  Expectation: `res = jax.numpy.split(x)[0]` (Clean Subscript Syntax)
+  Expectation: `res = jax.numpy.split(x)[0]` (Clean Subscript Syntax).
   """
   code = "res = torch.split(x)"
   result = rewrite(rewriter, code)

@@ -21,8 +21,9 @@ from ml_switcheroo.config import RuntimeConfig
 
 class MockSemantics(SemanticsManager):
   """Mock Manager configured with:
+
   - 1 Working Op (good_op)
-  - 1 Failing Op (bad_op)
+  - 1 Failing Op (bad_op).
   """
 
   def __init__(self):
@@ -72,7 +73,8 @@ def rewrite_code(rewriter, code):
 
 def test_verbatim_preservation_on_partial_failure(rewriter):
   """Scenario: A statement contains one translatable call and one failing call.
-  Input: res = torch.good(x) + torch.bad(y)
+
+  Input: res = torch.good(x) + torch.bad(y).
 
   Behavior:
   - 'torch.good' visits first, rewrites to 'jax.good' (in updated_node).
@@ -111,7 +113,8 @@ def test_end_marker_presence(rewriter):
 
 def test_nested_call_failure_bubbling(rewriter):
   """Scenario: Failure deep inside a call.
-  Input: y = torch.good(torch.bad(x))
+
+  Input: y = torch.good(torch.bad(x)).
   """
   code = "y = torch.good(torch.bad(x))"
   result = rewrite_code(rewriter, code)

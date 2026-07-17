@@ -29,6 +29,7 @@ def test_variant_imports_structured():
 
 def test_variant_imports_dict_coercion():
   """Verify Pydantic coerces dicts to ImportReq objects automatically.
+
   This mimics loading from JSON.
   """
   data = {"api": "foo", "required_imports": [{"module": "pandas", "alias": "pd"}]}

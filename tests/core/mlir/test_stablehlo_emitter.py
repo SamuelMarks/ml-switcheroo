@@ -85,7 +85,7 @@ def forward(x: Tensor, i: int) -> float:
 
 
 def test_stablehlo_op_resolution():
-  """Scenario: torch.abs(x) -> stablehlo.abs(%x)"""
+  """Scenario: torch.abs(x) -> stablehlo.abs(%x)."""
   code = "y = torch.abs(x)"
   mlir = emit_code(code)
 
@@ -98,7 +98,7 @@ def test_stablehlo_op_resolution():
 
 
 def test_unknown_op_fallback():
-  """Scenario: torch.unknown(x) (No semantic mapping) -> sw.op"""
+  """Scenario: torch.unknown(x) (No semantic mapping) -> sw.op."""
   code = "y = torch.unknown(x)"
   mlir = emit_code(code)
 

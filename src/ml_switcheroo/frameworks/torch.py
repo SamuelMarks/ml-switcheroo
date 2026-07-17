@@ -192,6 +192,8 @@ class TorchAdapter(TorchIOMixin):
   @property
   def declared_magic_args(self) -> List[str]:
     """Returns list of framework-specific magic arguments.
+
+
     Torch emits no magic args; all state is implicit.
 
     Returns:
@@ -203,6 +205,7 @@ class TorchAdapter(TorchIOMixin):
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """The definitive mapping of Abstract Operations to PyTorch APIs.
+
     Loaded dynamically from `frameworks/definitions/torch.json`.
 
     Returns:
@@ -253,6 +256,7 @@ class TorchAdapter(TorchIOMixin):
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """Returns syntax for splitting RNG state.
+
     PyTorch uses global state-based randomness, so explicit splitting is a no-op.
 
     Args:
@@ -350,6 +354,7 @@ class TorchAdapter(TorchIOMixin):
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """Apply manual patches to the standard mappings if necessary.
+
     Used to inject complex behaviors not captured by simple API scanning.
 
     Args:

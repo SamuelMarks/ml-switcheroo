@@ -60,6 +60,8 @@ class SimpleNameScanner(cst.CSTVisitor):
 
   def visit_Import(self, node: cst.Import) -> None:
     """Flags entry into an ``import ...`` statement.
+
+
     Names appearing here are definitions, not usages.
     """
     self._in_import = True

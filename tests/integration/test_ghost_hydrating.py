@@ -25,6 +25,7 @@ from ml_switcheroo.frameworks.base import (
 
 class MockAdapter:
   """A minimal adapter implementation that supports the Hybrid Protocol.
+
   We inject logic here similar to what real adapters (Torch/JAX) will do.
   """
 
@@ -75,6 +76,7 @@ def snapshot_dir(tmp_path):
 @pytest.fixture
 def valid_snapshot(snapshot_dir):
   """Creates a valid snapshot file for 'mockfw'.
+
   Contains data that perfectly mimics the "Live" data to prove parity.
   """
   data = {
@@ -113,6 +115,7 @@ def test_load_snapshot_helper_finds_latest(valid_snapshot):
 
 def test_hybrid_mode_live():
   """Scenario: 'mockfw' is in sys.modules.
+
   Expectation: Adapter stays in LIVE mode and returns live data.
   """
   # Inject mock module
@@ -130,6 +133,7 @@ def test_hybrid_mode_live():
 
 def test_hybrid_mode_ghost(valid_snapshot):
   """Scenario: 'mockfw' is MISSING. Snapshot exists.
+
   Expectation: Adapter enters GHOST mode, loads snapshot, returns data matching Live structure.
   """
   # Ensure mockfw not present
@@ -157,6 +161,7 @@ def test_hybrid_mode_ghost(valid_snapshot):
 
 def test_ghost_mode_no_snapshot(snapshot_dir):
   """Scenario: 'mockfw' missing AND no snapshot file.
+
   Expectation: Graceful empty state.
   """
   with patch.dict(sys.modules):

@@ -30,6 +30,7 @@ def test_available_frameworks_reflects_registry():
 
 def test_auto_discovery_logic():
   """Verify that `_auto_register_adapters` iterates modules and imports them.
+
   We mock pkgutil and importlib to simulate finding a 'tinygrad' module.
   """
   # 1. Mock pkgutil to return a specific list of modules
@@ -56,7 +57,8 @@ def test_auto_discovery_logic():
 
 
 def test_broken_module_handling(capsys):
-  """Verify that if an adapter raises an Exception during import (e.g. SyntaxError
+  """Verify that if an adapter raises an Exception during import (e.g. SyntaxError.
+
   or runtime error), the scanning continues and logs a warning.
   """
   mock_modules = [(None, "broken_adapter", False)]

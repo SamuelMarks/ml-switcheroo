@@ -14,6 +14,8 @@ import re
 
 class NamingContext:
   """Tracks mapping between MLIR SSA IDs and Python variable names.
+
+
   Ensures generated names are valid identifiers and do not collide.
   """
 

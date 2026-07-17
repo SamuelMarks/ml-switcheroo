@@ -96,6 +96,7 @@ def test_generate_creates_directory(tmp_path):
 
 def test_generate_plugin_with_rules(plugin_dir):
   """Verify that plugins generated with declarative rules contain correct logic.
+
   Covers int, string, and bool value matching logic compilation.
   """
   gen = PluginGenerator(plugin_dir)
@@ -139,7 +140,8 @@ def test_generate_plugin_with_rules(plugin_dir):
 
 
 def test_preserves_user_logic(plugin_dir):
-  """Verify that if a user modifies the logic body, regenerating the plugin
+  """Verify that if a user modifies the logic body, regenerating the plugin.
+
   preserves that logic while updating the wrapper/metadata.
   """
   gen = PluginGenerator(plugin_dir)
@@ -219,6 +221,7 @@ def indent_test(node, ctx):
 
 def test_user_logic_trumps_rules(plugin_dir):
   """Scenario: User has written custom logic. Updates specify generated rules.
+
   Expectation: User logic is preserved, rules are ignored (preservation priority).
   """
   gen = PluginGenerator(plugin_dir)
@@ -245,6 +248,7 @@ def priority_test(node, ctx):
 
 def test_overwrite_on_syntax_error(plugin_dir, capsys):
   """Scenario: Existing file has syntax error (unparseable).
+
   Expectation: Generator logs warning and overwrites with default scaffold.
   """
   gen = PluginGenerator(plugin_dir)
@@ -266,6 +270,7 @@ def test_overwrite_on_syntax_error(plugin_dir, capsys):
 
 def test_auto_wire_generation(plugin_dir):
   """Scenario: scaffold_plugins entry contains 'auto_wire' dict.
+
   Expectation: Generated file includes `auto_wire={...}` in decorator.
   """
   gen = PluginGenerator(plugin_dir)

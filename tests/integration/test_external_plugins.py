@@ -16,10 +16,11 @@ from ml_switcheroo.core.hooks import load_plugins, get_hook
 @pytest.fixture
 def workspace(tmp_path):
   """Creates a mock project structure:
+
   /workspace
     pyproject.toml
     /extensions
-      custom_hook.py
+      custom_hook.py.
   """
   ws = tmp_path / "workspace"
   ws.mkdir()

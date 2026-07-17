@@ -72,6 +72,7 @@ def run_transpile(code: str, target: str) -> str:
 
 def test_type_constant_keras():
   """Verify torch.float32 -> np.float32.
+
   Expect: 'import numpy as np' injected because Keras relies on numpy types.
   """
   code = "dtype = torch.float32"

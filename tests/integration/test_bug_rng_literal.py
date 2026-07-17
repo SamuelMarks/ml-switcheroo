@@ -25,7 +25,8 @@ class MyLayer(nn.Module):
 
 
 def test_rng_variable_injection():
-  """Ensures that when converting to Flax NNX, the rngs argument passed to Linear
+  """Ensures that when converting to Flax NNX, the rngs argument passed to Linear.
+
   uses the variable name `rngs` provided in __init__, not a string literal.
   """
   semantics = SemanticsManager()

@@ -92,10 +92,11 @@ def rewrite(rewriter, code):
 
 
 def test_strip_to_call(rewriter):
-  """Input: x = tensor.to(device)
+  """Input: x = tensor.to(device).
+
   Effect: .to() stripped.
   Output: x = tensor
-          (Wrapped in warning markers)
+          (Wrapped in warning markers).
   """
   code = "x = tensor.to(device)"
   result = rewrite(rewriter, code)
@@ -113,9 +114,10 @@ def test_strip_to_call(rewriter):
 
 
 def test_warn_on_eval_train(rewriter):
-  """Input: model.eval()
+  """Input: model.eval().
+
   Effect: .eval() stripped (identity), warning attached.
-  Output: model
+  Output: model.
   """
   code = "model.eval()"
   result = rewrite(rewriter, code)
@@ -129,6 +131,7 @@ def test_warn_on_eval_train(rewriter):
 
 def test_version_constraint_check_min(rewriter):
   """Scenario: Op requires min_version="9.0.0". Target is "1.0.0".
+
   Expectation: Warning generated.
   """
   code = "y = torch.future(x)"
@@ -141,6 +144,7 @@ def test_version_constraint_check_min(rewriter):
 
 def test_deprecation_warning(rewriter):
   """Scenario: Op marked as deprecated.
+
   Expectation: Warning generated.
   """
   code = "y = torch.unsafe(x)"

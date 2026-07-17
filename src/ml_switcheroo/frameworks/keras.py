@@ -191,6 +191,8 @@ class KerasAdapter(KerasIOMixin):
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """Static mappings for Keras.
+
+
     Loaded dynamically from `frameworks/definitions/keras.json`.
 
     Returns:

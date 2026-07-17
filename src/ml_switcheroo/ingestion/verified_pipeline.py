@@ -11,13 +11,15 @@ from typing import Any, Dict  # pragma: no cover
 # pragma: no cover
 # pragma: no cover
 def run_verified_pipeline(source_code: str) -> Dict[str, Any]:  # pragma: no cover
-  """Runs the verified pipeline on raw Python source code.  # pragma: no cover
+  """Runs the verified pipeline on raw Python source code.  # pragma: no cover.
+
+
   # pragma: no cover
   Args:  # pragma: no cover
       source_code: The raw unstructured Python source code.  # pragma: no cover
   # pragma: no cover
   Returns:  # pragma: no cover
-      A dictionary mapping the normalized structures.  # pragma: no cover
+      A dictionary mapping the normalized structures.  # pragma: no cover.
   """  # pragma: no cover
   # 1. cdd-python AST Normalization (Structural Compiler)  # pragma: no cover
   try:  # pragma: no cover

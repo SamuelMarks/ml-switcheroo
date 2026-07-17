@@ -121,6 +121,7 @@ class Outer:
 
 def test_ignore_assignments_in_forward():
   """Even if assigned in forward, it should technically be in init for static guarantees.
+
   But specifically, we track assignments in __init__.
   If assigned in forward AND used in forward, it's missed by __init__ scan,
   so it should warn (as dynamic definition).
@@ -141,6 +142,7 @@ class Model:
 
 def test_module_level_constructs():
   """Scenario: Functions, assignments, and attributes exist outside a class.
+
   Expectation: Scope stack is empty. Lifecycle analysis safely ignores them.
   """
   code = """
