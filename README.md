@@ -52,37 +52,27 @@ flowchart TD
 
     subgraph L0 [Level 0: Representations]
         direction LR
-        HTML
-        TikZ
-        LaTeX
+        HTML ~~~ TikZ ~~~ LaTeX
     end
 
     subgraph L1 [Level 1: High-Level]
         direction LR
-        PyTorch
-        MLX
-        TensorFlow
-        Keras
-        FlaxNNX[Flax NNX]
-        Pax
+        PyTorch ~~~ MLX ~~~ TensorFlow ~~~ Keras ~~~ FlaxNNX[Flax NNX] ~~~ Pax
     end
 
     subgraph L2 [Level 2: Numeric only]
         direction LR
-        JAX
-        NumPy
+        JAX ~~~ NumPy
     end
 
     subgraph L3 [Level 3: Standard IR]
         direction LR
-        StableHLO[Stable HLO]
-        MLIR
+        StableHLO[Stable HLO] ~~~ MLIR
     end
 
     subgraph LBottom [Level 4: ASM]
         direction LR
-        SASS[NVIDIA SASS]
-        RDNA[AMD RDNA]
+        SASS[NVIDIA SASS] ~~~ RDNA[AMD RDNA]
     end
 
 %% --- 4. Connections ---

@@ -1,4 +1,4 @@
-"""Tests for tier a math."""
+"""Test tier A math operations."""
 
 __all__ = []
 
