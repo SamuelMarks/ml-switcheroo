@@ -1,11 +1,11 @@
-"""Module docstring."""
+"""Test suite for the Mlir Emitter Extra module."""
 
 import libcst as cst
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 
 
 def convert_code(code: str):
-  """Function docstring."""
+  """Converts code."""
   tree = cst.parse_module(code.strip())
   emitter = PythonToMlirEmitter()
   mlir_node = emitter.convert(tree)
@@ -13,130 +13,82 @@ def convert_code(code: str):
 
 
 def test_module_header_newline_and_trivia():
-  """Function docstring."""
-  code = """
-# A leading comment
-
-class A:
-    pass
-"""
+  """Verifies the behavior of module header newline and trivia."""
+  code = "\n# A leading comment\n\nclass A:\n    pass\n"
   mlir = convert_code(code)
   assert "sw.module" in mlir
   assert "// A leading comment" in mlir
 
 
 def test_statement_leading_trivia():
-  """Function docstring."""
-  code = """
-def func(a):
-
-    # Statement leading comment
-    return a
-"""
+  """Verifies the behavior of statement leading trivia."""
+  code = "\ndef func(a):\n\n    # Statement leading comment\n    return a\n"
   mlir = convert_code(code)
   assert "// Statement leading comment" in mlir
 
 
 def test_expr_statement_and_func_call():
-  """Function docstring."""
-  code = """
-def func(a):
-    print(a)
-    return a
-"""
+  """Verifies the behavior of expr statement and function call."""
+  code = "\ndef func(a):\n    print(a)\n    return a\n"
   mlir = convert_code(code)
   assert "sw.op" in mlir
   assert "print" in mlir
 
 
 def test_imports():
-  """Function docstring."""
-  code = """
-import numpy as np
-import os
-from math import pi as p, sqrt
-from some_module import *
-"""
+  """Verifies the behavior of imports."""
+  code = "\nimport numpy as np\nimport os\nfrom math import pi as p, sqrt\nfrom some_module import *\n"
   mlir = convert_code(code)
   assert "sw.import" in mlir
 
 
 def test_class_inheritance():
-  """Function docstring."""
-  code = """
-class MyLayer(nn.Module, Base):
-    pass
-"""
+  """Verifies the behavior of class inheritance."""
+  code = "\nclass MyLayer(nn.Module, Base):\n    pass\n"
   mlir = convert_code(code)
   assert 'bases = ["nn.Module", "Base"]' in mlir
 
 
 def test_attribute_assignment_unresolved():
-  """Function docstring."""
-  code = """
-def __init__(self):
-    unresolved.layer1 = 10
-"""
+  """Verifies the behavior of attribute assignment unresolved."""
+  code = "\ndef __init__(self):\n    unresolved.layer1 = 10\n"
   mlir = convert_code(code)
   assert "sw.setattr" not in mlir
 
 
 def test_attribute_assignment():
-  """Function docstring."""
-  code = """
-def __init__(self):
-    self.layer1 = 10
-"""
+  """Verifies the behavior of attribute assignment."""
+  code = "\ndef __init__(self):\n    self.layer1 = 10\n"
   mlir = convert_code(code)
   assert "sw.setattr" in mlir
 
 
 def test_flatten_attr_none():
-  """Function docstring."""
-  code = """
-def func(a):
-    return a().attr
-"""
+  """Verifies the behavior of flatten attribute none."""
+  code = "\ndef func(a):\n    return a().attr\n"
   mlir = convert_code(code)
-  # This invokes flatten_attr on a Call, which returns None.
-  # We just want to ensure it doesn't crash and covers the None branch.
   assert "sw.return" in mlir
 
 
 def test_all_binops():
-  """Function docstring."""
-  code = """
-def math_ops(a, b):
-    v1 = a - b
-    v2 = a // b
-    v3 = a % b
-    v4 = a ** b
-    v5 = a @ b
-    v6 = a << b
-    v7 = a >> b
-    v8 = a & b
-    v9 = a | b
-    v10 = a ^ b
-    return v10
-"""
+  """Verifies the behavior of all binops."""
+  code = "\ndef math_ops(a, b):\n    v1 = a - b\n    v2 = a // b\n    v3 = a % b\n    v4 = a ** b\n    v5 = a @ b\n    v6 = a << b\n    v7 = a >> b\n    v8 = a & b\n    v9 = a | b\n    v10 = a ^ b\n    return v10\n"
   mlir = convert_code(code)
   assert "binop.sub" in mlir
 
 
 def test_unknown_binop():
-  """Function docstring."""
+  """Verifies the behavior of unknown binop."""
 
-  # To hit the 'unknown' branch, we'll manually call _get_binop_str
-  # with an empty node
   class DummyBinOp(cst.BaseBinaryOp):
-    """Class docstring."""
+    """Dummy Bin Op class for testing purposes."""
 
     def _visit_and_replace_children(self, visitor):
-      """Function docstring."""
+      """Mock implementation of  visit and replace children."""
       return self
 
     def _codegen_impl(self, state, default):
-      """Function docstring."""
+      """Mock implementation of  codegen impl."""
       pass
 
   emitter = PythonToMlirEmitter()
@@ -144,75 +96,47 @@ def test_unknown_binop():
 
 
 def test_kwargs_in_call():
-  """Function docstring."""
-  code = """
-def forward(x):
-    return torch.nn.functional.relu(x, inplace=True)
-"""
+  """Verifies the behavior of keyword arguments in call."""
+  code = "\ndef forward(x):\n    return torch.nn.functional.relu(x, inplace=True)\n"
   mlir = convert_code(code)
   assert "arg_keywords" in mlir
 
 
 def test_call_local_variable():
-  """Function docstring."""
-  code = """
-def apply_func(func, x):
-    return func(x)
-"""
+  """Verifies the behavior of call local variable."""
+  code = "\ndef apply_func(func, x):\n    return func(x)\n"
   mlir = convert_code(code)
   assert "sw.call" in mlir
 
 
 def test_unhandled_expression():
-  """Function docstring."""
-  code = """
-def func():
-    return lambda y: y
-"""
+  """Verifies the behavior of unhandled expression."""
+  code = "\ndef func():\n    return lambda y: y\n"
   mlir = convert_code(code)
   assert "%error" in mlir
 
 
 def test_complex_type_annotation():
-  """Function docstring."""
-  code = """
-def f(x: torch.Tensor, y: List[int]):
-    pass
-"""
+  """Verifies the behavior of complex type annotation."""
+  code = "\ndef f(x: torch.Tensor, y: List[int]):\n    pass\n"
   mlir = convert_code(code)
   assert '!sw.type<"torch.Tensor">' in mlir
 
 
 def test_flatten_attr_none_cases():
-  """Function docstring."""
+  """Verifies the behavior of flatten attribute none cases."""
   emitter = PythonToMlirEmitter()
-
-  # 1. Base class is a Call
-  code = """
-class A(b()):
-    pass
-"""
+  code = "\nclass A(b()):\n    pass\n"
   emitter.convert(cst.parse_module(code.strip()))
-
-  # 2. Assign to an attribute of a call
-  code = """
-def f():
-    b().attr = 1
-"""
+  code = "\ndef f():\n    b().attr = 1\n"
   emitter.convert(cst.parse_module(code.strip()))
-
-  # 3. Call an attribute of a call
-  code = """
-def f():
-    b().attr()
-"""
+  code = "\ndef f():\n    b().attr()\n"
   emitter.convert(cst.parse_module(code.strip()))
 
 
 def test_extract_trivia_newlines():
-  """Function docstring."""
+  """Extracts trivia newlines."""
   emitter = PythonToMlirEmitter()
-  # We can craft an EmptyLine with a Newline object directly
   node = cst.SimpleStatementLine(
     body=[cst.Pass()], leading_lines=[cst.EmptyLine(indent=False, comment=None, newline=cst.Newline(value="\n"))]
   )

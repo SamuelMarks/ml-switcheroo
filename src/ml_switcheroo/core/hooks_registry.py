@@ -46,9 +46,9 @@ def get_all_hook_metadata() -> Dict[str, AutoWireSpec]:
 def clear_hooks() -> None:
   """Docstring."""
   global _PLUGINS_LOADED
-  _HOOKS.clear()  # pragma: no cover
-  _HOOK_METADATA.clear()  # pragma: no cover
-  _PLUGINS_LOADED = False  # pragma: no cover
+  _HOOKS.clear()
+  _HOOK_METADATA.clear()
+  _PLUGINS_LOADED = False
 
 
 def load_plugins(plugins_dir: Optional[Path] = None, extra_dirs: Optional[List[Path]] = None) -> int:
@@ -86,8 +86,8 @@ def _import_from_dir(directory: Path, base_package: Optional[str] = None) -> int
       else:
         importlib.import_module(full_mod_name)
       count += 1
-    except Exception as e:  # pragma: no cover
-      logging.getLogger("ml_switcheroo.hooks").warning(f"Failed to load plugin {py_file.name}: {e}")  # pragma: no cover
+    except Exception as e:
+      logging.getLogger("ml_switcheroo.hooks").warning(f"Failed to load plugin {py_file.name}: {e}")
 
   if base_package is None:
     sys.path.pop(0)

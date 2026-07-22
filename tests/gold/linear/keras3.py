@@ -1,19 +1,16 @@
-"""Module docstring."""
+"""Test suite for the Keras3 module."""
 
 import keras
 
 
 class Model(keras.Model):
-  """Class docstring."""
+  """Test suite for the Model component."""
 
   def __init__(self, in_features: int, out_features: int):
-    """Function docstring."""
+    """Initializes the Model instance."""
     super().__init__()
-    # <SWITCHEROO_FAILED_TO_TRANS>
-    # Keras 3 often infers input shape by default, but dense maps to Dense
     self.linear = keras.layers.Dense(out_features, input_dim=in_features)
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def call(self, x):
-    """Function docstring."""
+    """Helper to call."""
     return self.linear(x)

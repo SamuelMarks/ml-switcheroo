@@ -1,11 +1,11 @@
-"""Tests for QKV Fusion and Defusion Passes."""
+"""Test suite for the Fusion module."""
 
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.core.compiler.fusion import QKVFusionPass, QKVDefusionPass
 
 
 def test_qkv_fusion_pass():
-  """Tests fusing q_proj, k_proj, v_proj."""
+  """Verifies the behavior of qkv fusion pass."""
   graph = LogicalGraph(
     nodes=[
       LogicalNode(id="input", kind="Input"),
@@ -25,18 +25,14 @@ def test_qkv_fusion_pass():
       LogicalEdge("input", "other"),
     ],
   )
-
   pass_ = QKVFusionPass()
   fused_graph = pass_.apply(graph)
-
   node_ids = {n.id for n in fused_graph.nodes}
   assert "qkv_proj" in node_ids
   assert "q_proj" not in node_ids
   assert "k_proj" not in node_ids
   assert "v_proj" not in node_ids
   assert "other" in node_ids
-
-  # Ensure edges are rerouted
   edges = [(e.source, e.target) for e in fused_graph.edges]
   assert ("input", "qkv_proj") in edges
   assert ("qkv_proj", "attention") in edges
@@ -44,19 +40,15 @@ def test_qkv_fusion_pass():
 
 
 def test_qkv_fusion_pass_no_match():
-  """Tests fusion skips when not all QKV exist."""
-  graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="q_proj", kind="Linear"),
-    ]
-  )
+  """Verifies the behavior of qkv fusion pass no match."""
+  graph = LogicalGraph(nodes=[LogicalNode(id="q_proj", kind="Linear")])
   pass_ = QKVFusionPass()
   fused_graph = pass_.apply(graph)
   assert len(fused_graph.nodes) == 1
 
 
 def test_qkv_defusion_pass():
-  """Tests splitting qkv_proj back into Q, K, V."""
+  """Verifies the behavior of qkv defusion pass."""
   graph = LogicalGraph(
     nodes=[
       LogicalNode(id="input", kind="Input"),
@@ -64,23 +56,16 @@ def test_qkv_defusion_pass():
       LogicalNode(id="attention", kind="Attention"),
       LogicalNode(id="other", kind="Other"),
     ],
-    edges=[
-      LogicalEdge("input", "qkv_proj"),
-      LogicalEdge("qkv_proj", "attention"),
-      LogicalEdge("input", "other"),
-    ],
+    edges=[LogicalEdge("input", "qkv_proj"), LogicalEdge("qkv_proj", "attention"), LogicalEdge("input", "other")],
   )
-
   pass_ = QKVDefusionPass()
   defused_graph = pass_.apply(graph)
-
   node_ids = {n.id for n in defused_graph.nodes}
   assert "qkv_proj" not in node_ids
   assert "q_proj" in node_ids
   assert "k_proj" in node_ids
   assert "v_proj" in node_ids
   assert "other" in node_ids
-
   edges = [(e.source, e.target) for e in defused_graph.edges]
   assert ("input", "q_proj") in edges
   assert ("q_proj", "attention") in edges

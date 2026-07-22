@@ -1,39 +1,30 @@
-"""Integration Tests for TopK Semantics."""
+"""Test suite for the Topk module."""
 
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-
-# Fix: Import TestRewriter shim
 from tests.conftest import TestRewriter as PivotRewriter
-
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.topk import transform_topk
 
 
 def rewrite_code(rewriter, code):
-  """Function docstring."""
+  """Rewrites code."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter():
-  """Function docstring."""
+  """Provides a mock rewriter for testing."""
   hooks._HOOKS["topk_adapter"] = transform_topk
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   topk_def = {
     "variants": {
       "torch": {"api": "torch.topk"},
-      "jax": {
-        "api": "jax.lax.top_k",
-        "requires_plugin": "topk_adapter",
-      },
-      "tensorflow": {
-        "api": "tf.math.top_k",
-        "requires_plugin": "topk_adapter",
-      },
+      "jax": {"api": "jax.lax.top_k", "requires_plugin": "topk_adapter"},
+      "tensorflow": {"api": "tf.math.top_k", "requires_plugin": "topk_adapter"},
     }
   }
   mgr.get_definition.side_effect = lambda n: ("TopK", topk_def) if "topk" in n else None
@@ -45,7 +36,7 @@ def rewriter():
 
 
 def test_topk_rewrapping(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of topk rewrapping."""
   code = "res = torch.topk(x, 5)"
   res = rewrite_code(rewriter, code)
   assert "collections.namedtuple" in res
@@ -55,16 +46,15 @@ def test_topk_rewrapping(rewriter):
 
 
 def test_topk_strip_unsupported(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of topk strip unsupported."""
   code = "res = torch.topk(x, 5, sorted=True)"
   res = rewrite_code(rewriter, code)
   assert "sorted" not in res
-  # Assert presence of inner call
   assert "jax.lax.top_k(x, 5, )" in res or "jax.lax.top_k(x, 5)" in res
 
 
 def test_topk_functional_call(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of topk functional call."""
   code = "res = torch.topk(t, k)"
   res = rewrite_code(rewriter, code)
   assert "jax.lax.top_k(t, k)" in res

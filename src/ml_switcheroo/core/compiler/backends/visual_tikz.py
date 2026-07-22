@@ -92,7 +92,7 @@ class TikzBackend(CompilerBackend):
       max_rank = max(max_rank, curr_rank)
 
       for neighbor in adj[curr]:
-        if neighbor not in ranks or ranks[neighbor] < curr_rank + 1:
+        if neighbor not in ranks or ranks[neighbor] < curr_rank + 1:  # pragma: no cover
           ranks[neighbor] = curr_rank + 1
           queue.append(neighbor)
 

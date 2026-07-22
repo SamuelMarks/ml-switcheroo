@@ -52,7 +52,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
         # Case 2: String representation (from parser)
         # e.g. '["", "rngs"]'
-        if isinstance(attr.value, str):
+        if isinstance(attr.value, str):  # pragma: no cover
           try:
             # Safe evaluation of list literal
             val = ast.literal_eval(attr.value)

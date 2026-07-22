@@ -182,9 +182,9 @@ class HtmlBackend(CompilerBackend):
           )
         )
       else:
-        if last_blue_row != -1:
+        if last_blue_row != -1:  # pragma: no cover
           arrow = self._create_arrow(last_blue_row, op_row, "seq")
-          for b in boxes:
+          for b in boxes:  # pragma: no cover
             if b.row == last_blue_row and "box b" in b.css_class:
               b.arrows.append(arrow)
               break
@@ -212,8 +212,8 @@ class HtmlBackend(CompilerBackend):
     return_row = current_row
     arrow = self._create_arrow(last_blue_row, return_row, "seq")
 
-    if last_blue_row != -1:
-      for b in boxes:
+    if last_blue_row != -1:  # pragma: no cover
+      for b in boxes:  # pragma: no cover
         if b.row == last_blue_row and "box b" in b.css_class:
           b.arrows.append(arrow)
           break

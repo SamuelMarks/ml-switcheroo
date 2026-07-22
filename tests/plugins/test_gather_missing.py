@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Test suite for the Gather Missing module."""
 
 import libcst as cst
 from unittest.mock import MagicMock
@@ -7,7 +7,7 @@ from ml_switcheroo.core.hooks import HookContext
 
 
 def test_gather_no_target_api():
-  """Auto-generated doc."""
+  """Verifies the behavior of gather no target API."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
   node = cst.Call(func=cst.Name("gather"))
@@ -16,7 +16,7 @@ def test_gather_no_target_api():
 
 
 def test_gather_kwargs():
-  """Auto-generated doc."""
+  """Verifies the behavior of gather keyword arguments."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.take_along_axis"
   ctx.target_fw = "jax"
@@ -32,15 +32,10 @@ def test_gather_kwargs():
 
 
 def test_gather_missing_args():
-  """Auto-generated doc."""
+  """Verifies the behavior of gather missing arguments."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.take_along_axis"
   ctx.target_fw = "jax"
-  node = cst.Call(
-    func=cst.Name("gather"),
-    args=[
-      cst.Arg(value=cst.Name("x")),
-    ],
-  )
+  node = cst.Call(func=cst.Name("gather"), args=[cst.Arg(value=cst.Name("x"))])
   res = transform_gather(node, ctx)
   assert res == node

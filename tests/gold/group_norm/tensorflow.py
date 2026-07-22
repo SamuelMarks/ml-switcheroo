@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# TF GroupNorm Stub
+"""Test suite for the Tensorflow module."""

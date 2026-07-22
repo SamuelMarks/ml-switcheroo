@@ -68,7 +68,7 @@ def generate_by_heuristic(name: str, base_shape: Tuple[int, ...], constraints: D
   if constrs.get("dtype"):
     if "int" in constrs["dtype"]:
       return generate_array("int", base_shape, constrs)
-    if "bool" in constrs["dtype"]:
+    if "bool" in constrs["dtype"]:  # pragma: no cover
       return generate_array("bool", base_shape, constrs)
 
   heuristic_type = guess_dtype_by_name(name)

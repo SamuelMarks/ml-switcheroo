@@ -90,7 +90,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
       return node.value
     elif isinstance(node, cst.Attribute):
       base = self._cst_to_string(node.value)
-      if base:
+      if base:  # pragma: no cover
         return f"{base}.{node.attr.value}"
     return None
 

@@ -1,4 +1,4 @@
-"""Tests for Attribute/Constant Rewriting."""
+"""Test suite for the Rewriter Constants module."""
 
 import pytest
 import libcst as cst
@@ -8,37 +8,30 @@ from ml_switcheroo.config import RuntimeConfig
 
 
 class MockSemantics(SemanticsManager):
-  """Class docstring."""
+  """Mock Semantics class for testing purposes."""
 
   def __init__(self):
-    """Function docstring."""
-    # Skip init to avoid file load
+    """Initializes the MockSemantics instance."""
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
     self.framework_configs = {}
-
-    # 1. Constant: float32 -> float32
     self._inject_const("float32", {"torch": "torch.float32", "jax": "jax.numpy.float32"})
-
-    # 2. Function: abs -> abs
     self._inject_func("abs", {"torch": "torch.abs", "jax": "jax.numpy.abs"})
 
   def get_framework_config(self, framework: str):
-    """Function docstring."""
+    """Mock implementation of get framework configuration."""
     return self.framework_configs.get(framework, {})
 
   def _inject_const(self, name, mapping):
-    """Function docstring."""
-    # Constants have no std_args
+    """Mock implementation of  inject const."""
     self.data[name] = {"variants": {}}
     for fw, api in mapping.items():
       self.data[name]["variants"][fw] = {"api": api}
       self._reverse_index[api] = (name, self.data[name])
 
   def _inject_func(self, name, mapping):
-    """Function docstring."""
-    # Functions have std_args
+    """Mock implementation of  inject function."""
     self.data[name] = {"variants": {}, "std_args": ["x"]}
     for fw, api in mapping.items():
       self.data[name]["variants"][fw] = {"api": api}
@@ -47,22 +40,19 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter():
-  """Function docstring."""
+  """Provides a mock rewriter for testing."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(MockSemantics(), config)
 
 
 def rewrite(rewriter, code):
-  """Function docstring."""
+  """Rewrites ."""
   tree = cst.parse_module(code)
   return rewriter.convert(tree).code
 
 
 def test_constant_rewrite_assignment(rewriter):
-  """Input:  dtype = torch.float32.
-
-  Expect: dtype = jax.numpy.float32.
-  """
+  """Verifies the behavior of constant rewrite assignment."""
   code = "x = torch.float32"
   res = rewrite(rewriter, code)
   assert "jax.numpy.float32" in res
@@ -70,20 +60,14 @@ def test_constant_rewrite_assignment(rewriter):
 
 
 def test_constant_rewrite_argument(rewriter):
-  """Input:  init(dtype=torch.float32).
-
-  Expect: init(dtype=jax.numpy.float32).
-  """
+  """Verifies the behavior of constant rewrite argument."""
   code = "y = init(dtype=torch.float32)"
   res = rewrite(rewriter, code)
   assert "jax.numpy.float32" in res
 
 
 def test_function_call_rewrite(rewriter):
-  """Input:  y = torch.abs(x).
-
-  Expect: y = jax.numpy.abs(x).
-  """
+  """Verifies the behavior of function call rewrite."""
   code = "y = torch.abs(x)"
   res = rewrite(rewriter, code)
   assert "jax.numpy.abs(x)" in res

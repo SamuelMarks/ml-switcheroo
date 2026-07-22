@@ -1,11 +1,11 @@
-"""Auto-generated doc."""
+"""Test suite for the Config Extra2 module."""
 
 from pathlib import Path
 from unittest.mock import patch
 
 
 def test_config_plugin_paths_no_toml_dir():
-  """Auto-generated doc."""
+  """Verifies the behavior of configuration plugin paths no toml directory."""
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"plugin_paths": ["plugin1", "plugin2"]}, None)):
@@ -15,7 +15,7 @@ def test_config_plugin_paths_no_toml_dir():
 
 
 def test_config_tomllib_none():
-  """Auto-generated doc."""
+  """Verifies the behavior of configuration tomllib none."""
   with patch("ml_switcheroo.config.tomllib", None):
     from ml_switcheroo.config import _load_toml_settings
 
@@ -23,7 +23,7 @@ def test_config_tomllib_none():
 
 
 def test_config_validation_report_toml():
-  """Auto-generated doc."""
+  """Verifies the behavior of configuration validation report toml."""
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"validation_report": "report.json"}, Path("."))):
@@ -32,7 +32,7 @@ def test_config_validation_report_toml():
 
 
 def test_config_plugin_paths_toml_dir():
-  """Auto-generated doc."""
+  """Verifies the behavior of configuration plugin paths toml directory."""
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"plugin_paths": ["plugin1"]}, Path("."))):
@@ -42,12 +42,11 @@ def test_config_plugin_paths_toml_dir():
 
 
 def test_config_graph_optimization():
-  """Auto-generated doc."""
+  """Verifies the behavior of configuration graph optimization."""
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"enable_graph_optimization": True}, None)):
     config = RuntimeConfig.load(enable_graph_optimization=False)
     assert config.enable_graph_optimization is False
-
     config2 = RuntimeConfig.load()
     assert config2.enable_graph_optimization is True

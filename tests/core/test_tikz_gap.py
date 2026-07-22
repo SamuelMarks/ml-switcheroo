@@ -1,85 +1,66 @@
-"""Auto-generated doc."""
+"""Test suite for the Tikz Gap module."""
 
 import pytest
 from ml_switcheroo.core.tikz.parser import TikzParser, TokenKind
 
 
 def test_tikz_end_command():
-  """Auto-generated doc."""
-  parser = TikzParser(r"\end{tikzpicture}")
+  """Verifies the behavior of TikZ end command."""
+  parser = TikzParser("\\end{tikzpicture}")
   parser.parse()
-  # Should complete without error
 
 
 def test_tikz_peek_eof():
-  """Auto-generated doc."""
-  parser = TikzParser(r"\node (a) {};")
-  # offset past end
+  """Verifies the behavior of TikZ peek eof."""
+  parser = TikzParser("\\node (a) {};")
   token = parser._peek(offset=100)
   assert token.kind == TokenKind.EOF
 
 
 def test_tikz_expect_error():
-  """Auto-generated doc."""
-  parser = TikzParser(r"\node (a) {};")
+  """Verifies the behavior of TikZ expect correctly handling an error."""
+  parser = TikzParser("\\node (a) {};")
   with pytest.raises(SyntaxError):
     parser._expect(TokenKind.LBRACE)
 
 
 def test_tikz_node_at_coordinates():
-  """Auto-generated doc."""
-  parser = TikzParser(r"\node (a) at (1, 2) {Linear};")
+  """Verifies the behavior of TikZ node at coordinates."""
+  parser = TikzParser("\\node (a) at (1, 2) {Linear};")
   graph = parser.parse()
   assert len(graph.nodes) == 1
 
 
 def test_tikz_edge_unexpected_connector():
-  """Auto-generated doc."""
-  # Provide an edge without an arrow
-  parser = TikzParser(r"\draw (a) (b);")
+  """Verifies the behavior of TikZ edge unexpected connector."""
+  parser = TikzParser("\\draw (a) (b);")
   graph = parser.parse()
   assert len(graph.edges) == 0
 
 
 def test_tikz_scan_until_semicolon_eof():
-  """Auto-generated doc."""
-  parser = TikzParser(r"\draw (a) ")
-  # force scan to EOF
+  """Verifies the behavior of TikZ scan until semicolon eof."""
+  parser = TikzParser("\\draw (a) ")
   parser._scan_until_semicolon()
   assert parser._is_eof()
 
 
 def test_tikz_extract_metadata_empty():
-  """Auto-generated doc."""
-  parser = TikzParser(r"\node (a) {\textbf};")
+  """Verifies the behavior of TikZ extract metadata empty."""
+  parser = TikzParser("\\node (a) {\\textbf};")
   graph = parser.parse()
   assert len(graph.nodes) == 1
   assert graph.nodes[0].kind == "Unknown"
 
 
 def test_tikz_parser_gaps():
-  """Auto-generated doc."""
+  """Verifies the behavior of TikZ parser gaps."""
   from ml_switcheroo.core.tikz.parser import TikzParser
 
-  # Line 174: unknown command or unhandled structure
-  # In _parse(), if none of the if/elifs match, it falls to self._consume()
-  source = r"""
-\begin{tikzpicture}
-\unknowncommand
-\end{tikzpicture}
-"""
+  source = "\n\\begin{tikzpicture}\n\\unknowncommand\n\\end{tikzpicture}\n"
   parser = TikzParser(source)
-  # This shouldn't crash, should just consume and skip
   parser.parse()
-
-  # Line 267-268: node without ID
-  # \node [options] at (0,0) {Text}; -> no (id)
-  source2 = r"""
-\begin{tikzpicture}
-\node [draw] at (0,0) {Text};
-\end{tikzpicture}
-"""
+  source2 = "\n\\begin{tikzpicture}\n\\node [draw] at (0,0) {Text};\n\\end{tikzpicture}\n"
   parser2 = TikzParser(source2)
   graph2 = parser2.parse()
-  # It skips it to avoid noise, so nodes should be empty
   assert len(graph2.nodes) == 0

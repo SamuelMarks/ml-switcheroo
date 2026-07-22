@@ -1,8 +1,8 @@
-"""Auto-generated doc."""
+"""Test suite for the Init Coverage 3 module."""
 
 
 def test_convert_error():
-  """Auto-generated doc."""
+  """Converts correctly handling an error."""
   import ml_switcheroo
   from unittest.mock import patch
   from ml_switcheroo.core.conversion_result import ConversionResult

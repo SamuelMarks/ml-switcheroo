@@ -1,1 +1,1 @@
-"""Auto-generated doc."""
+"""Test suite for the Gap2 module."""

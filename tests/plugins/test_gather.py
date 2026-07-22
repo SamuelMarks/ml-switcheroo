@@ -1,18 +1,9 @@
-"""Tests for Gather Semantics Plugin (Decoupled).
-
-Verifies:
-1. Reordering of arguments works if mapping exists.
-2. Pass-through logic when mapping is missing (no hardcoded JAX).
-3. Keyword handling.
-"""
+"""Test suite for the Gather module."""
 
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-
-# Fix: Import TestRewriter shim
 from tests.conftest import TestRewriter as PivotRewriter
-
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.gather import transform_gather
@@ -20,65 +11,57 @@ from ml_switcheroo.frameworks.base import register_framework
 
 
 def rewrite_code(rewriter, code):
-  """Executes pipeline."""
+  """Rewrites code."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @register_framework("custom_fw")
 class CustomAdapter:
-  """Class docstring."""
+  """Test suite for the Custom Adapter component."""
 
   @property
   def harness_imports(self):
-    """Function docstring."""
+    """Helper to harness imports."""
     return []
 
   def get_harness_init_code(self):
-    """Function docstring."""
+    """Gets harness initialization code."""
     return ""
 
   def get_to_numpy_code(self) -> str:
-    """Implement required protocol method."""
+    """Gets to NumPy code."""
     return "return str(obj)"
 
   @property
   def declared_magic_args(self):
-    """Function docstring."""
+    """Helper to declared magic arguments."""
     return []
 
 
 @pytest.fixture
 def rewriter_factory():
-  """Function docstring."""
+  """Provides a mock rewriter factory for testing."""
   hooks._HOOKS["gather_adapter"] = transform_gather
   hooks._PLUGINS_LOADED = True
-
   mgr = MagicMock()
-
-  # Define variants
   gather_def = {
     "variants": {
       "torch": {"api": "torch.gather"},
       "jax": {"api": "jnp.take_along_axis", "requires_plugin": "gather_adapter"},
-      "custom_fw": {
-        "api": "custom.gather_nd",
-        "requires_plugin": "gather_adapter",
-      },
+      "custom_fw": {"api": "custom.gather_nd", "requires_plugin": "gather_adapter"},
     }
   }
 
-  # Mock Lookups
   def get_def(name):
-    """Function docstring."""
+    """Gets def."""
     if "gather" in name:
       return ("Gather", gather_def)
     return None
 
   mgr.get_definition.side_effect = get_def
 
-  # Wiring Logic
   def resolve(aid, fw):
-    """Function docstring."""
+    """Resolves ."""
     if aid == "Gather" and fw in gather_def["variants"]:
       return gather_def["variants"][fw]
     return None
@@ -86,12 +69,10 @@ def rewriter_factory():
   mgr.resolve_variant.side_effect = resolve
   mgr.get_known_apis.return_value = {"Gather": gather_def}
   mgr.is_verified.return_value = True
-
-  # Needed for utils.is_framework_module_node to detect torch vs x
   mgr.framework_configs = {"torch": {}, "jax": {}, "custom_fw": {}}
 
   def create(target):
-    """Function docstring."""
+    """Creates ."""
     cfg = RuntimeConfig(source_framework="torch", target_framework=target)
     return PivotRewriter(mgr, cfg)
 
@@ -99,41 +80,29 @@ def rewriter_factory():
 
 
 def test_gather_method_reorder_jax(rewriter_factory):
-  """Input: x.gather(1, indices).
-
-  Output: jnp.take_along_axis(x, indices, 1).
-  """
+  """Verifies the behavior of gather method reorder JAX."""
   rw = rewriter_factory("jax")
   code = "y = x.gather(1, indices)"
   res = rewrite_code(rw, code)
-
   assert "jnp.take_along_axis" in res
   clean = res.replace(" ", "")
   assert "(x,indices,1)" in clean or "(x,indices,1,)" in clean
 
 
 def test_gather_missing_target_passthrough(rewriter_factory):
-  """Scenario: Target 'numpy' (not defined in mock semantics).
-
-  Expectation: Return original node (no default to JAX).
-  """
+  """Verifies the behavior of gather missing target passthrough."""
   rw = rewriter_factory("numpy")
-  # Force context update
   rw.context.hook_context.target_fw = "numpy"
-
   code = "y = torch.gather(x, 1, idx)"
   res = rewrite_code(rw, code)
-
-  # Should remain torch.gather or return unmodified node which rewriter might keep as-is
   assert "torch.gather" in res
   assert "jnp" not in res
   assert "take_along_axis" not in res
 
 
 def test_gather_custom_fw_transpilation(rewriter_factory):
-  """Scenario: Target Custom Framework defined in semantics."""
+  """Verifies the behavior of gather custom framework transpilation."""
   rw = rewriter_factory("custom_fw")
   code = "y = torch.gather(x, 1, idx)"
   res = rewrite_code(rw, code)
-
   assert "custom.gather_nd" in res

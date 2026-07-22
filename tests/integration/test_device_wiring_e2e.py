@@ -1,8 +1,4 @@
-"""Integration Test for Device Allocator Wiring.
-
-Verifies that the "Device" abstract op correctly triggers the
-device_allocator plugin and maps platform specific strings.
-"""
+"""Test suite for the Device Wiring E2E module."""
 
 import pytest
 import importlib
@@ -13,7 +9,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture(autouse=True)
 def ensure_device_plugin():
-  """Robustness Fix to ensure plugin is loaded."""
+  """Helper to ensure device plugin."""
   import ml_switcheroo.core.hooks as hooks
   import ml_switcheroo.plugins.device_allocator
 
@@ -23,29 +19,25 @@ def ensure_device_plugin():
 
 @pytest.fixture(scope="module")
 def semantics():
-  """Function docstring."""
+  """Helper to semantics."""
   return SemanticsManager()
 
 
 def test_device_cuda_to_jax(semantics):
-  """Function docstring."""
+  """Verifies the behavior of device cuda to JAX."""
   code = "d = torch.device('cuda')"
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
   result = engine.run(code)
-
   assert result.success, f"Failed: {result.errors}"
-  # Should use JAX specific syntax
   assert "jax.devices('gpu')[0]" in result.code
 
 
 def test_device_cpu_to_jax(semantics):
-  """Function docstring."""
+  """Verifies the behavior of device cpu to JAX."""
   code = "d = torch.device('cpu')"
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
   result = engine.run(code)
-
   assert result.success
-  # Should use JAX CPU syntax
   assert "jax.devices('cpu')[0]" in result.code

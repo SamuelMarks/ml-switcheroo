@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# JAX WeightNorm Stub
+"""Test suite for the Flax Nnx module."""

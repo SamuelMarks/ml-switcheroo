@@ -1,82 +1,22 @@
-"""Integration Tests for EX01: Math Ops (Tier 1).
-
-Source: PyTorch
-Targets: JAX, TensorFlow, NumPy, MLX, Keras
-"""
+"""Test suite for the Ex01 Math Ops module."""
 
 import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-# --- Source Code ---
-# Derived from tests/examples/ex01_math_ops.torch.py
-SOURCE_TORCH = """
-import torch
-
-def compute_loss(prediction, target):
-    diff = torch.abs(prediction - target)
-    loss = torch.mean(diff)
-    return loss
-"""
-
-# --- Expected Outputs ---
-
-EXPECTED_JAX = """
-import jax.numpy as jnp
-
-def compute_loss(prediction, target):
-    diff = jnp.abs(prediction - target)
-    loss = jnp.mean(diff)
-    return loss
-"""
-
-EXPECTED_NUMPY = """
-import numpy as np
-
-def compute_loss(prediction, target):
-    diff = np.abs(prediction - target)
-    loss = np.mean(diff)
-    return loss
-"""
-
-EXPECTED_TENSORFLOW = """
-import tensorflow as tf
-
-def compute_loss(prediction, target):
-    diff = tf.abs(prediction - target)
-    loss = tf.math.reduce_mean(diff)
-    return loss
-"""
-
-EXPECTED_MLX = """
-import mlx.core as mx
-
-def compute_loss(prediction, target):
-    diff = mx.abs(prediction - target)
-    loss = mx.mean(diff)
-    return loss
-"""
-
-EXPECTED_KERAS = """
-import keras
-import numpy as np
-
-def compute_loss(prediction, target):
-    diff = keras.ops.abs(prediction - target)
-    loss = keras.ops.mean(diff)
-    return loss
-"""
+SOURCE_TORCH = "\nimport torch\n\ndef compute_loss(prediction, target):\n    diff = torch.abs(prediction - target)\n    loss = torch.mean(diff)\n    return loss\n"
+EXPECTED_JAX = "\nimport jax.numpy as jnp\n\ndef compute_loss(prediction, target):\n    diff = jnp.abs(prediction - target)\n    loss = jnp.mean(diff)\n    return loss\n"
+EXPECTED_NUMPY = "\nimport numpy as np\n\ndef compute_loss(prediction, target):\n    diff = np.abs(prediction - target)\n    loss = np.mean(diff)\n    return loss\n"
+EXPECTED_TENSORFLOW = "\nimport tensorflow as tf\n\ndef compute_loss(prediction, target):\n    diff = tf.abs(prediction - target)\n    loss = tf.math.reduce_mean(diff)\n    return loss\n"
+EXPECTED_MLX = "\nimport mlx.core as mx\n\ndef compute_loss(prediction, target):\n    diff = mx.abs(prediction - target)\n    loss = mx.mean(diff)\n    return loss\n"
+EXPECTED_KERAS = "\nimport keras\nimport numpy as np\n\ndef compute_loss(prediction, target):\n    diff = keras.ops.abs(prediction - target)\n    loss = keras.ops.mean(diff)\n    return loss\n"
 
 
 @pytest.fixture(scope="module")
 def semantics():
-  """Provides a SemanticsManager with explicitly defined Math operations."""
+  """Helper to semantics."""
   mgr = SemanticsManager()
-
-  # Inject manual definitions to ensure tests pass even if JSONs are corrupt/missing
-
-  # 1. Abs
   abs_def = {
     "std_args": ["x"],
     "variants": {
@@ -88,8 +28,6 @@ def semantics():
       "keras": {"api": "keras.ops.abs"},
     },
   }
-
-  # 2. Mean
   mean_def = {
     "std_args": ["x"],
     "variants": {
@@ -101,38 +39,24 @@ def semantics():
       "keras": {"api": "keras.ops.mean"},
     },
   }
-
   mgr.update_definition("Abs", abs_def)
   mgr.update_definition("Mean", mean_def)
-
   return mgr
 
 
 @pytest.mark.parametrize(
   "target_fw, expected_string",
-  [
-    ("jax", "jnp.abs"),
-    ("numpy", "np.abs"),
-    ("tensorflow", "tf.abs"),
-    ("mlx", "mx.abs"),
-    ("keras", "keras.ops.abs"),
-  ],
+  [("jax", "jnp.abs"), ("numpy", "np.abs"), ("tensorflow", "tf.abs"), ("mlx", "mx.abs"), ("keras", "keras.ops.abs")],
 )
 def test_ex01_math_transpilation(semantics, target_fw, expected_string):
-  """Verifies that basic math operations are correctly mapped to all supported backends."""
+  """Verifies the behavior of ex01 math transpilation."""
   config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
-
   result = engine.run(SOURCE_TORCH)
-
   assert result.success, f"Failed converting to {target_fw}: {result.errors}"
-
-  # Structural checks
   assert expected_string in result.code
   assert "compute_loss" in result.code
   assert "prediction - target" in result.code
-
-  # Check imports
   if target_fw == "jax":
     assert "import jax.numpy as jnp" in result.code
   elif target_fw == "numpy":

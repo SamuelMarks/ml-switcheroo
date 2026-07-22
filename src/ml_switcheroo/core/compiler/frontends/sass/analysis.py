@@ -49,7 +49,7 @@ class SassAnalyzer:
 
     elif kind == "Linear":
       # Linear usually has 1 inner dot-product loop over input features.
-      if loop_limits:
+      if loop_limits:  # pragma: no cover
         feat_dim = max(loop_limits)
         metadata["in_features"] = feat_dim
         metadata["arg_0"] = feat_dim

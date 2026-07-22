@@ -122,11 +122,11 @@ class StandardsInjector:
       elif isinstance(arg, (list, tuple)):
         # Legacy tuple ["x", "type"]
         entry = {"name": arg[0]}
-        if len(arg) > 1:
+        if len(arg) > 1:  # pragma: no cover
           entry["type"] = arg[1]
         result.append(entry)
 
-      elif isinstance(arg, str):
+      elif isinstance(arg, str):  # pragma: no cover
         result.append(arg)  # type: ignore
 
     return result

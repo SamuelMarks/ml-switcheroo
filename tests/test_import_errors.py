@@ -1,11 +1,11 @@
-"""Auto-generated doc."""
+"""Test suite for the Import Errors module."""
 
 from unittest.mock import patch
 import importlib
 
 
 def test_import_errors_frameworks():
-  """Auto-generated doc."""
+  """Verifies the behavior of import errors frameworks."""
   with patch.dict(
     "sys.modules",
     {
@@ -28,29 +28,22 @@ def test_import_errors_frameworks():
     import ml_switcheroo.frameworks.flax_nnx
 
     importlib.reload(ml_switcheroo.frameworks.flax_nnx)
-
     import ml_switcheroo.frameworks.jax
 
     importlib.reload(ml_switcheroo.frameworks.jax)
-
     import ml_switcheroo.frameworks.mlx
 
     importlib.reload(ml_switcheroo.frameworks.mlx)
-
     import ml_switcheroo.frameworks.paxml
 
     importlib.reload(ml_switcheroo.frameworks.paxml)
-
     import ml_switcheroo.frameworks.tensorflow
 
     importlib.reload(ml_switcheroo.frameworks.tensorflow)
-
     import ml_switcheroo.frameworks.torch
 
     importlib.reload(ml_switcheroo.frameworks.torch)
-
     from ml_switcheroo_ir.schema.ghost import SemanticTier
-
     import ml_switcheroo.frameworks.jax
 
     a1 = ml_switcheroo.frameworks.jax.JaxCoreAdapter()
@@ -63,7 +56,6 @@ def test_import_errors_frameworks():
       a1.collect_api(SemanticTier.NEURAL_OPS)
     except Exception:
       pass
-
     import ml_switcheroo.frameworks.torch
 
     a2 = ml_switcheroo.frameworks.torch.TorchAdapter()
@@ -72,7 +64,6 @@ def test_import_errors_frameworks():
       a2.collect_api(SemanticTier.NEURAL)
     except Exception:
       pass
-
     import ml_switcheroo.frameworks.tensorflow
 
     a3 = ml_switcheroo.frameworks.tensorflow.TensorFlowAdapter()
@@ -89,7 +80,6 @@ def test_import_errors_frameworks():
       a3.get_weight_load_code("a")
     except Exception:
       pass
-
     import ml_switcheroo.frameworks.mlx
 
     a4 = ml_switcheroo.frameworks.mlx.MLXAdapter()
@@ -102,7 +92,6 @@ def test_import_errors_frameworks():
       a4.collect_api(SemanticTier.NEURAL_OPS)
     except Exception:
       pass
-
     import ml_switcheroo.frameworks.paxml
 
     a5 = ml_switcheroo.frameworks.paxml.PaxmlAdapter()

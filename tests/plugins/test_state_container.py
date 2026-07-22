@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Test suite for the State Container module."""
 
 import libcst as cst
 from unittest.mock import patch
@@ -14,24 +14,21 @@ from ml_switcheroo.plugins.state_container import (
 
 
 class DummyContext:
-  """Auto-generated doc."""
+  """Dummy Context class for testing purposes."""
 
   def __init__(self, api_map=None):
-    """Auto-generated doc."""
+    """Initializes the DummyContext instance."""
     self.api_map = api_map or {}
 
   def lookup_api(self, op_id):
-    """Auto-generated doc."""
+    """Mock implementation of lookup API."""
     return self.api_map.get(op_id)
 
 
 def test_create_node():
-  """Auto-generated doc."""
-  # Valid expression
+  """Creates node."""
   node = _create_node("a.b.c")
   assert isinstance(node, cst.Attribute)
-
-  # Invalid expression, fallback to Name
   with patch("libcst.parse_expression", side_effect=Exception("Failed")):
     node = _create_node("fallback_name")
   assert isinstance(node, cst.Name)
@@ -39,43 +36,32 @@ def test_create_node():
 
 
 def test_get_receiver():
-  """Auto-generated doc."""
-  # Call with Attribute
+  """Gets receiver."""
   node = cst.parse_expression("self.register_buffer('name', tensor)")
   receiver = _get_receiver(node)
   assert isinstance(receiver, cst.Name)
   assert receiver.value == "self"
-
-  # Call with Name
   node = cst.parse_expression("register_buffer('name', tensor)")
   receiver = _get_receiver(node)
   assert receiver is None
 
 
 def test_convert_register_buffer():
-  """Auto-generated doc."""
-  # Missing args
+  """Converts register buffer."""
   node = cst.parse_expression("self.register_buffer('name')")
   ctx = DummyContext({"BatchStat": "flax.nnx.BatchStat"})
   assert convert_register_buffer(node, ctx) is node
-
-  # No receiver
   node = cst.parse_expression("register_buffer('name', t)")
   assert convert_register_buffer(node, ctx) is node
-
-  # No lookup
   node = cst.parse_expression("self.register_buffer('name', t)")
   ctx_empty = DummyContext()
   assert convert_register_buffer(node, ctx_empty) is node
-
-  # Valid
   node = cst.parse_expression("self.register_buffer('name', t)")
   ctx = DummyContext({"BatchStat": "flax.nnx.BatchStat"})
   result = convert_register_buffer(node, ctx)
   assert isinstance(result, cst.Call)
   assert result.func.value == "setattr"
   assert len(result.args) == 3
-  # Check wrapper call
   wrapper_call = result.args[2].value
   assert isinstance(wrapper_call, cst.Call)
   assert wrapper_call.func.attr.value == "BatchStat"
@@ -83,22 +69,15 @@ def test_convert_register_buffer():
 
 
 def test_convert_register_parameter():
-  """Auto-generated doc."""
-  # Missing args
+  """Converts register parameter."""
   node = cst.parse_expression("self.register_parameter('name')")
   ctx = DummyContext({"Param": "flax.nnx.Param"})
   assert convert_register_parameter(node, ctx) is node
-
-  # No receiver
   node = cst.parse_expression("register_parameter('name', p)")
   assert convert_register_parameter(node, ctx) is node
-
-  # No lookup
   node = cst.parse_expression("self.register_parameter('name', p)")
   ctx_empty = DummyContext()
   assert convert_register_parameter(node, ctx_empty) is node
-
-  # Valid
   node = cst.parse_expression("self.register_parameter('name', p)")
   ctx = DummyContext({"Param": "flax.nnx.Param"})
   result = convert_register_parameter(node, ctx)
@@ -108,18 +87,13 @@ def test_convert_register_parameter():
 
 
 def test_convert_state_dict():
-  """Auto-generated doc."""
-  # No receiver
+  """Converts state dictionary."""
   node = cst.parse_expression("state_dict()")
   ctx = DummyContext({"ModuleState": "flax.nnx.state"})
   assert convert_state_dict(node, ctx) is node
-
-  # No lookup
   node = cst.parse_expression("self.state_dict()")
   ctx_empty = DummyContext()
   assert convert_state_dict(node, ctx_empty) is node
-
-  # Valid
   node = cst.parse_expression("model.state_dict()")
   ctx = DummyContext({"ModuleState": "flax.nnx.state"})
   result = convert_state_dict(node, ctx)
@@ -131,22 +105,15 @@ def test_convert_state_dict():
 
 
 def test_convert_load_state_dict():
-  """Auto-generated doc."""
-  # No receiver
+  """Converts load state dictionary."""
   node = cst.parse_expression("load_state_dict(sd)")
   ctx = DummyContext({"UpdateState": "flax.nnx.update"})
   assert convert_load_state_dict(node, ctx) is node
-
-  # No args
   node = cst.parse_expression("self.load_state_dict()")
   assert convert_load_state_dict(node, ctx) is node
-
-  # No lookup
   node = cst.parse_expression("self.load_state_dict(sd)")
   ctx_empty = DummyContext()
   assert convert_load_state_dict(node, ctx_empty) is node
-
-  # Valid
   node = cst.parse_expression("model.load_state_dict(sd)")
   ctx = DummyContext({"UpdateState": "flax.nnx.update"})
   result = convert_load_state_dict(node, ctx)
@@ -156,22 +123,15 @@ def test_convert_load_state_dict():
 
 
 def test_convert_parameters():
-  """Auto-generated doc."""
-  # No receiver
+  """Converts parameters."""
   node = cst.parse_expression("parameters()")
   ctx = DummyContext({"ModuleState": "flax.nnx.state", "Param": "flax.nnx.Param"})
   assert convert_parameters(node, ctx) is node
-
-  # No lookup ModuleState
   node = cst.parse_expression("model.parameters()")
   ctx_missing_state = DummyContext({"Param": "flax.nnx.Param"})
   assert convert_parameters(node, ctx_missing_state) is node
-
-  # No lookup Param
   ctx_missing_param = DummyContext({"ModuleState": "flax.nnx.state"})
   assert convert_parameters(node, ctx_missing_param) is node
-
-  # Valid
   node = cst.parse_expression("model.parameters()")
   ctx = DummyContext({"ModuleState": "flax.nnx.state", "Param": "flax.nnx.Param"})
   result = convert_parameters(node, ctx)

@@ -1,4 +1,4 @@
-"""Tests for Functional Unwrapping logic in TestRewriter."""
+"""Test suite for the Rewriter Functional Unwrap module."""
 
 import pytest
 import libcst as cst
@@ -8,31 +8,27 @@ from ml_switcheroo.config import RuntimeConfig
 
 
 class MockUnwrapSemantics(SemanticsManager):
-  """Mock Manager for unwrapping tests."""
+  """Mock Unwrap Semantics class for testing purposes."""
 
   def __init__(self):
-    """Function docstring."""
+    """Initializes the MockUnwrapSemantics instance."""
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
     self.import_data = {}
-    self.framework_configs = {}  # No special config implies OOP default
+    self.framework_configs = {}
 
 
 @pytest.fixture
 def rewriter():
-  """Function docstring."""
+  """Provides a mock rewriter for testing."""
   semantics = MockUnwrapSemantics()
-  config = RuntimeConfig(
-    source_framework="jax",  # Validated Source
-    target_framework="jax",  # Targeting NNX (which is JAX but OOP)
-    strict_mode=False,
-  )
+  config = RuntimeConfig(source_framework="jax", target_framework="jax", strict_mode=False)
   return TestRewriter(semantics, config)
 
 
 def rewrite_code(rewriter, code):
-  """Function docstring."""
+  """Rewrites code."""
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)
@@ -42,26 +38,17 @@ def rewrite_code(rewriter, code):
 
 
 def test_unwrap_call_only(rewriter):
-  """Input: `z = self.layer.apply(variables, x) + 1`.
-
-  Output: `z = self.layer(x) + 1`.
-  """
+  """Verifies the behavior of unwrap call only."""
   code = "z = self.layer.apply(variables, x) + 1"
   result = rewrite_code(rewriter, code)
-
   assert "self.layer(x)" in result
   assert "apply" not in result
   assert "variables" not in result
 
 
 def test_unwrap_assignment_tuple(rewriter):
-  """Input: `y, updates = self.layer.apply(vars, x)`.
-
-  Output: `y = self.layer(x)`.
-  """
+  """Verifies the behavior of unwrap assignment tuple."""
   code = "y, updates = self.layer.apply(vars, x)"
   result = rewrite_code(rewriter, code)
-
-  # Must unwrap assignment target
   assert "y = self.layer(x)" in result
   assert "updates" not in result

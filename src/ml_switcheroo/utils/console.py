@@ -30,7 +30,7 @@ logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
 def _success(self, message, *args, **kwargs):
   """Method injected into Logger to support logger.success()."""
-  if self.isEnabledFor(SUCCESS_LEVEL_NUM):
+  if self.isEnabledFor(SUCCESS_LEVEL_NUM):  # pragma: no cover
     self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)
 
 

@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# Keras Cond Stub
+"""Test suite for the Keras3 module."""

@@ -1,20 +1,16 @@
-"""Tests for the Tracing System."""
+"""Test suite for the Trace module."""
 
 from ml_switcheroo.core.tracer import TraceLogger, TraceEventType
 
 
 def test_phase_nesting():
-  """Function docstring."""
+  """Verifies the behavior of phase nesting."""
   logger = TraceLogger()
-
   p1 = logger.start_phase("Parent")
   logger.start_phase("Child")
-  logger.end_phase()  # End Child
-  logger.end_phase()  # End Parent
-
+  logger.end_phase()
+  logger.end_phase()
   events = logger.export()
-
-  # 4 events: Start P, Start C, End C, End P
   assert len(events) == 4
   assert events[0]["type"] == TraceEventType.PHASE_START
   assert events[1]["parent_id"] == p1
@@ -22,10 +18,9 @@ def test_phase_nesting():
 
 
 def test_trace_logging_integration():
-  """Verify log_match records correct metadata."""
+  """Verifies the behavior of trace logging integration."""
   logger = TraceLogger()
   logger.log_match("torch.abs", "jax.numpy.abs", "abs")
-
   events = logger.export()
   assert len(events) == 1
   assert events[0]["type"] == TraceEventType.MATCH_SEMANTICS
@@ -33,10 +28,9 @@ def test_trace_logging_integration():
 
 
 def test_snapshot_includes_source_code():
-  """Verify snapshot event captures both mermaid AND source code."""
+  """Verifies the behavior of snapshot includes source code."""
   logger = TraceLogger()
   logger.log_snapshot("Test Snap", "graph TD", "x = 1")
-
   events = logger.export()
   assert len(events) == 1
   assert events[0]["type"] == TraceEventType.AST_SNAPSHOT

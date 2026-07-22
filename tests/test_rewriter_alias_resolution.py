@@ -1,12 +1,4 @@
-"""Tests for Alias-Aware Semantic Lookup in BaseRewriter (via TestRewriter).
-
-Verifies that:
-1. `import as` aliases are resolved correctly (e.g., `import torch as t; t.abs` -> `torch.abs`).
-2. `from ... import` bindings are resolved (e.g., `from torch import nn; nn.Linear` -> `torch.nn.Linear`).
-3. Standard imports without aliases bind the root correctly.
-4. Relative imports are ignored (safety fallback).
-5. Scoping rules are respected (last import wins in map, strict linear flow).
-"""
+"""Test suite for the Rewriter Alias Resolution module."""
 
 import pytest
 import libcst as cst
@@ -16,172 +8,97 @@ from ml_switcheroo.config import RuntimeConfig
 
 
 class MockAliasSemantics(SemanticsManager):
-  """Mock Manager with explicit definitions for alias testing."""
+  """Mock Alias Semantics class for testing purposes."""
 
   def __init__(self):
-    """Function docstring."""
-    # Skip init to avoid file loading
+    """Initializes the MockAliasSemantics instance."""
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
     self.import_data = {}
     self.framework_configs = {}
-
-    # 1. abs: torch.abs -> jax.numpy.abs
     self._inject("abs", "torch.abs", "jax.numpy.abs")
-
-    # 2. Linear: torch.nn.Linear -> flax.nnx.Linear
     self._inject("Linear", "torch.nn.Linear", "flax.nnx.Linear")
-
-    # 3. functional.relu: torch.nn.functional.relu -> jax.nn.relu
     self._inject("relu", "torch.nn.functional.relu", "jax.nn.relu")
 
   def get_framework_config(self, framework: str):
-    """Mock config return."""
+    """Mock implementation of get framework configuration."""
     return self.framework_configs.get(framework, {})
 
   def _inject(self, name, s_api, t_api):
-    """Function docstring."""
-    self.data[name] = {
-      "variants": {"torch": {"api": s_api}, "jax": {"api": t_api}},
-      "std_args": ["x"],
-    }
+    """Mock implementation of  inject."""
+    self.data[name] = {"variants": {"torch": {"api": s_api}, "jax": {"api": t_api}}, "std_args": ["x"]}
     self._reverse_index[s_api] = (name, self.data[name])
 
 
 @pytest.fixture
 def rewriter():
-  """Returns a configured TestRewriter."""
+  """Provides a mock rewriter for testing."""
   semantics = MockAliasSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(semantics, config)
 
 
 def rewrite_code(rewriter, code):
-  """Parses code, applies rewriter, and returns generated source."""
+  """Rewrites code."""
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
   return new_tree.code
 
 
 def test_import_as_alias(rewriter):
-  """Scenario: `import torch as t; t.abs(x)`.
-
-  Expectation: `t` resolves to `torch`, lookup `torch.abs` succeeds -> `jax.numpy.abs(x)`.
-  """
-  code = """
-import torch as t
-y = t.abs(x)
-"""
+  """Verifies the behavior of import as alias."""
+  code = "\nimport torch as t\ny = t.abs(x)\n"
   result = rewrite_code(rewriter, code)
-
-  # Check that t.abs became jax.numpy.abs
   assert "jax.numpy.abs(x)" in result
 
 
 def test_from_import_binding(rewriter):
-  """Scenario: `from torch import nn; nn.Linear(1, 2)`.
-
-  Expectation: `nn` resolves to `torch.nn`, lookup `torch.nn.Linear` succeeds -> `flax.nnx.Linear(1, 2)`.
-  """
-  code = """
-from torch import nn
-layer = nn.Linear(1, 2)
-"""
+  """Verifies the behavior of from import binding."""
+  code = "\nfrom torch import nn\nlayer = nn.Linear(1, 2)\n"
   result = rewrite_code(rewriter, code)
-
   assert "flax.nnx.Linear(1, 2)" in result
 
 
 def test_from_import_as_binding(rewriter):
-  """Scenario: `from torch import nn as n; n.Linear(1, 2)`.
-
-  Expectation: `n` -> `torch.nn` -> lookup `torch.nn.Linear`.
-  """
-  code = """
-from torch import nn as n
-layer = n.Linear(1, 2)
-"""
+  """Verifies the behavior of from import as binding."""
+  code = "\nfrom torch import nn as n\nlayer = n.Linear(1, 2)\n"
   result = rewrite_code(rewriter, code)
-
   assert "flax.nnx.Linear(1, 2)" in result
 
 
 def test_deep_import_chains(rewriter):
-  """Scenario: `import torch.nn.functional as F; F.relu(x)`.
-
-  Expectation: `F` -> `torch.nn.functional` -> lookup `torch.nn.functional.relu`.
-  """
-  code = """
-import torch.nn.functional as F
-y = F.relu(x)
-"""
+  """Verifies the behavior of deep import chains."""
+  code = "\nimport torch.nn.functional as F\ny = F.relu(x)\n"
   result = rewrite_code(rewriter, code)
-
   assert "jax.nn.relu(x)" in result
 
 
 def test_standard_import_no_alias(rewriter):
-  """Scenario: `import torch; torch.abs(x)`.
-
-  Expectation: `torch` -> `torch` -> lookup `torch.abs`.
-  """
-  code = """
-import torch
-y = torch.abs(x)
-"""
+  """Verifies the behavior of standard import no alias."""
+  code = "\nimport torch\ny = torch.abs(x)\n"
   result = rewrite_code(rewriter, code)
-
   assert "jax.numpy.abs(x)" in result
 
 
 def test_relative_import_ignored(rewriter):
-  """Scenario: `from . import utils; utils.abs(x)`.
-
-  Expectation: Relative import ignored, map not updated. `utils.abs` looked up as-is (fails/ignored).
-  """
-  code = """
-from . import utils
-# utils.abs in this context is likely local, so it shouldn't match torch.abs
-y = utils.abs(x)
-"""
+  """Verifies the behavior of relative import ignored."""
+  code = "\nfrom . import utils\n# utils.abs in this context is likely local, so it shouldn't match torch.abs\ny = utils.abs(x)\n"
   result = rewrite_code(rewriter, code)
-
-  # Should NOT be rewritten to jax
   assert "utils.abs(x)" in result
   assert "jax.numpy.abs" not in result
 
 
 def test_alias_redefinition(rewriter):
-  """Scenario: Alias redefined in file. Assumes linear execution flow for updating map."""
-  code = """
-import torch as t
-y1 = t.abs(x)
-
-import numpy as t
-y2 = t.abs(x)
-"""
-  # NOTE: LibCST visits nodes structurally.
-  # The visit_Import happens when encountered.
-  # So line 1 map: t->torch.
-  # Line 2 call: t.abs -> torch.abs (rewritten).
-  # Line 3 map: t->numpy.
-  # Line 4 call: t.abs -> numpy.abs (not in semantics -> ignored).
-
+  """Verifies the behavior of alias redefinition."""
+  code = "\nimport torch as t\ny1 = t.abs(x)\n\nimport numpy as t\ny2 = t.abs(x)\n"
   result = rewrite_code(rewriter, code)
-
   assert "y1 = jax.numpy.abs(x)" in result
-  assert "y2 = t.abs(x)" in result  # Not rewritten because map changed to numpy
+  assert "y2 = t.abs(x)" in result
 
 
 def test_alias_shadowing_imported_name(rewriter):
-  """Scenario: `from torch import nn` binds 'nn'.
-
-  But `nn` usually resolves to `torch.nn` via explicit logic.
-  """
-  code = """
-from torch import nn
-l = nn.Linear(1, 2)
-"""
+  """Verifies the behavior of alias shadowing imported name."""
+  code = "\nfrom torch import nn\nl = nn.Linear(1, 2)\n"
   result = rewrite_code(rewriter, code)
   assert "flax.nnx.Linear" in result

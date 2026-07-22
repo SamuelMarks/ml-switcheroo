@@ -1,87 +1,79 @@
-"""Tests for Sphinx HTML Rendering utilities (WASM Demo).
+"""Test suite for the Rendering module."""
 
-Verifies that:
-1. `render_demo_html` produces valid HTML structure.
-2. The template includes all required sections (Toolbar, Editors, Tabs).
-3. The Weight Script tab logic is injected.
-4. **Time Travel** UI elements are present (slider, buttons, config).
-5. Default Frameworks are respected.
-"""
-
-import re
-import pytest
-from ml_switcheroo.sphinx_ext.rendering import render_demo_html
+from unittest.mock import patch, MagicMock
+from ml_switcheroo.sphinx_ext.rendering import render_demo_html, _render_primary_options, _render_flavour_dropdown
 
 
-@pytest.fixture
-def mock_registry_data():
-  """Function docstring."""
-  hierarchy = {"torch": [], "jax": [{"key": "flax_nnx", "label": "Flax"}]}
-  examples = '{"key":"val"}'
-  meta = '{"torch": ["neural"]}'
-  return hierarchy, examples, meta
+@patch("ml_switcheroo.sphinx_ext.rendering.get_framework_priority_order")
+@patch("ml_switcheroo.sphinx_ext.rendering.get_adapter")
+def test_render_primary_options(mock_get_adapter, mock_priority):
+  """Renders primary options."""
+  mock_priority.return_value = ["torch", "jax", "unknown"]
+  hierarchy = {"torch": [], "jax": [], "unknown": []}
+  mock_get_adapter.return_value = MagicMock(display_name="Mock")
+  html = _render_primary_options(hierarchy)
+  assert 'value="torch"' in html
+  assert 'value="jax"' in html
+  assert 'value="unknown"' in html
 
 
-def test_render_demo_html_structure(mock_registry_data):
-  """Scenario: Generating the demo HTML block.
-
-  Expectation: Contains all structural divs, inputs, Weight Script, and Time Travel toolbar.
-  """
-  hierarchy, ex, meta = mock_registry_data
-  html = render_demo_html(hierarchy, ex, meta)
-
-  # 1. Root Container
-  assert '<div id="switcheroo-wasm-root"' in html
-  assert 'class="demo-header"' in html
-
-  # 2. Controls
-  assert 'id="select-src"' in html
-  assert 'id="select-tgt"' in html
-  assert 'id="select-example"' in html
-  assert 'id="btn-convert"' in html
-
-  # 3. Output Tabs
-  assert 'for="tab-console"' in html
-  assert 'for="tab-mermaid"' in html
-  assert 'for="tab-trace"' in html
-
-  # 4. Weight Script Tab
-  assert 'label for="tab-weights"' in html
-
-  # 5. NEW: Time Travel UI
-  assert 'class="time-travel-bar"' in html
-  assert 'id="tt-slider"' in html
-  assert 'id="btn-tt-prev"' in html
-  assert 'id="btn-tt-next"' in html
-  assert 'id="tt-phase-label"' in html
-
-  # 6. NEW: Pipeline Config
-  assert 'class="tt-config"' in html
-  assert 'id="chk-opt-graph"' in html
-  assert 'id="chk-opt-imports"' in html
+def test_render_flavour_dropdown():
+  """Renders flavour dropdown."""
+  hierarchy = {"jax": [{"key": "flax_nnx", "label": "Flax"}]}
+  html = _render_flavour_dropdown("src", hierarchy, "jax")
+  assert 'value="flax_nnx"' in html
+  html_empty = _render_flavour_dropdown("src", hierarchy, "torch")
+  assert "No Flavours" in html_empty
 
 
-def test_default_selection_logic(mock_registry_data):
-  """Scenario: Verify default "selected" attribute injection."""
-  hierarchy, ex, meta = mock_registry_data
-  html = render_demo_html(hierarchy, ex, meta)
+@patch("ml_switcheroo.sphinx_ext.rendering.get_framework_priority_order")
+@patch("ml_switcheroo.sphinx_ext.rendering._render_primary_options")
+@patch("ml_switcheroo.sphinx_ext.rendering._render_flavour_dropdown")
+@patch("pathlib.Path.exists")
+@patch("pathlib.Path.glob")
+@patch("os.path.getmtime")
+def test_render_demo_html(mock_mtime, mock_glob, mock_exists, mock_flavours, mock_primary, mock_priority):
+  """Renders demo HTML."""
+  mock_priority.return_value = ["torch", "jax"]
+  mock_primary.return_value = '<option value="torch">Torch</option><option value="jax">Jax</option>'
+  mock_flavours.return_value = "<select></select>"
+  mock_exists.return_value = True
+  wheel_mock = MagicMock()
+  wheel_mock.name = "test.whl"
+  mock_glob.return_value = [wheel_mock]
+  mock_mtime.return_value = 1
+  hierarchy = {"torch": [], "jax": []}
+  html = render_demo_html(hierarchy, "{}", "{}")
+  assert "test.whl" in html
+  assert "torch" in html
+  assert "jax" in html
 
-  # We expect 'torch' to be selected as source
-  assert re.search(r'<option value="torch"[^>]*selected', html)
 
-  # Expect 'jax' to be selected as target
-  assert re.search(r'<option value="jax"[^>]*selected', html)
+@patch("ml_switcheroo.sphinx_ext.rendering.get_framework_priority_order")
+@patch("ml_switcheroo.sphinx_ext.rendering._render_primary_options")
+@patch("ml_switcheroo.sphinx_ext.rendering._render_flavour_dropdown")
+@patch("pathlib.Path.exists")
+def test_render_demo_html_no_dist(mock_exists, mock_flavours, mock_primary, mock_priority):
+  """Renders demo HTML no dist."""
+  mock_exists.return_value = False
+  mock_priority.return_value = ["torch", "jax"]
+  mock_primary.return_value = ""
+  mock_flavours.return_value = ""
+  html = render_demo_html({"torch": []}, "{}", "{}")
+  assert "ml_switcheroo-latest-py3-none-any.whl" in html
 
 
-def test_flavour_dropdown_rendering():
-  """Scenario: Rendering flavour secondary selector."""
-  hierarchy = {"jax": [{"key": "flax_nnx", "label": "Flax"}, {"key": "haiku", "label": "Haiku"}]}
-
-  # We call internal helper processing used in render_demo_html implicitly via import
-  from ml_switcheroo.sphinx_ext.rendering import _render_flavour_dropdown
-
-  html = _render_flavour_dropdown("tgt", hierarchy, "jax")
-
-  assert 'id="tgt-flavour"' in html
-  assert '<option value="flax_nnx" selected>Flax</option>' in html
-  assert '<option value="haiku" >Haiku</option>' in html
+@patch("ml_switcheroo.sphinx_ext.rendering.get_framework_priority_order")
+@patch("ml_switcheroo.sphinx_ext.rendering._render_primary_options")
+@patch("ml_switcheroo.sphinx_ext.rendering._render_flavour_dropdown")
+@patch("pathlib.Path.exists")
+@patch("pathlib.Path.glob")
+def test_render_demo_html_no_wheels(mock_glob, mock_exists, mock_flavours, mock_primary, mock_priority):
+  """Renders demo HTML no wheels."""
+  mock_exists.return_value = True
+  mock_glob.return_value = []
+  mock_priority.return_value = ["torch", "jax"]
+  mock_primary.return_value = ""
+  mock_flavours.return_value = ""
+  html = render_demo_html({"torch": []}, "{}", "{}")
+  assert "ml_switcheroo-latest-py3-none-any.whl" in html

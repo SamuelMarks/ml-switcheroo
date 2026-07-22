@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for the Paxml module."""
 
 from praxis import base_layer
 from praxis.layers import convolutions
@@ -6,14 +6,14 @@ import jax.numpy as jnp
 
 
 class SameConvModel(base_layer.BaseLayer):
-  """Class docstring."""
+  """Test suite for the Same Conv Model component."""
 
   in_channels: int = 0
   out_channels: int = 0
   kernel_size: int = 3
 
   def setup(self):
-    """Function docstring."""
+    """Helper to setup."""
     self.create_child(
       "conv",
       convolutions.Conv2D.HParams(
@@ -22,5 +22,5 @@ class SameConvModel(base_layer.BaseLayer):
     )
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
-    """Function docstring."""
+    """Executes the callable instance."""
     return self.conv(x)

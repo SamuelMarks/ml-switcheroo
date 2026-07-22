@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# MLX GroupNorm Stub
+"""Test suite for the Mlx module."""

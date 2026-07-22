@@ -67,7 +67,7 @@ class GridParser(HTMLParser):
       self._buf_code += data
     if "Model:" in data:
       clean = data.replace("Model:", "").strip()
-      if clean:
+      if clean:  # pragma: no cover
         self.model_name = clean
 
   def _process_box(self) -> None:

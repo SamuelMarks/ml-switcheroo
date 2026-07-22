@@ -1,4 +1,4 @@
-"""Tests for Generic State Mechanism handling."""
+"""Test suite for the Rewriter State Mechanism module."""
 
 import pytest
 import libcst as cst
@@ -9,57 +9,31 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 class MockStateSemantics(SemanticsManager):
-  """Mock Manager with arbitrary state configurations."""
+  """Mock State Semantics class for testing purposes."""
 
   def __init__(self) -> None:
-    """Function docstring."""
+    """Initializes the MockStateSemantics instance."""
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
     self.import_data = {}
-
     self.framework_configs = {
       "tensorflow": {"stateful_call": {"method": "apply", "prepend_arg": "variables"}},
       "mlx": {
         "stateful_call": {"method": "call_fn", "prepend_arg": "ctx"},
-        # FIX: Add traits to enable arg injection in StructuralPass
-        "traits": {
-          "inject_magic_args": [("ctx", "custom.Context")],
-          "module_base": "mlx.nn.Module",
-        },
+        "traits": {"inject_magic_args": [("ctx", "custom.Context")], "module_base": "mlx.nn.Module"},
       },
-      # FIX: Add torch configuration so source class is detected
       "torch": {"traits": {"module_base": "torch.nn.Module"}},
     }
-
-    # Define a 'Linear' operation that is considered stateful (Tier=Neural)
-    self._inject(
-      "Linear",
-      SemanticTier.NEURAL,
-      "torch",
-      "torch.Linear",
-      "tensorflow",
-      "func.Dense",
-    )
-
-    # Add variant for MLX
+    self._inject("Linear", SemanticTier.NEURAL, "torch", "torch.Linear", "tensorflow", "func.Dense")
     self.data["Linear"]["variants"]["mlx"] = {"api": "custom.Layer"}
 
-  # --- FIX: Added method ---
   def get_framework_config(self, framework: str):
-    """Function docstring."""
+    """Mock implementation of get framework configuration."""
     return self.framework_configs.get(framework, {})
 
-  def _inject(
-    self,
-    name: str,
-    tier: SemanticTier,
-    s_fw: str,
-    s_api: str,
-    t_fw: str,
-    t_api: str,
-  ) -> None:
-    """Function docstring."""
+  def _inject(self, name: str, tier: SemanticTier, s_fw: str, s_api: str, t_fw: str, t_api: str) -> None:
+    """Mock implementation of  inject."""
     variants = {s_fw: {"api": s_api}, t_fw: {"api": t_api}}
     self.data[name] = {"variants": variants, "std_args": ["x"]}
     self._reverse_index[s_api] = (name, self.data[name])
@@ -68,14 +42,14 @@ class MockStateSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Rewriter defaulting to 'tensorflow' target (simulating functional)."""
+  """Provides a mock rewriter for testing."""
   semantics = MockStateSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow", strict_mode=False)
   return TestRewriter(semantics, config)
 
 
 def rewrite_code(rewriter: TestRewriter, code: str) -> str:
-  """Executes rewrite pipeline."""
+  """Rewrites code."""
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)
@@ -85,55 +59,26 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
 
 
 def test_signature_injection_missing_arg(rewriter: TestRewriter) -> None:
-  """Function docstring."""
-  code = """
-class Net:
-    def __init__(self):
-        self.layer = torch.Linear(10, 10)
-
-    def forward(self, x):
-        return self.layer(x)
-"""
+  """Verifies the behavior of signature injection missing argument."""
+  code = "\nclass Net:\n    def __init__(self):\n        self.layer = torch.Linear(10, 10)\n\n    def forward(self, x):\n        return self.layer(x)\n"
   result = rewrite_code(rewriter, code)
   assert "self.layer.apply(variables, x)" in result
 
 
 def test_signature_no_injection_if_present(rewriter: TestRewriter) -> None:
-  """Function docstring."""
-  code = """
-class Net:
-    def __init__(self):
-        self.layer = torch.Linear(10, 10)
-
-    def forward(self, variables, x):
-        return self.layer(x)
-"""
+  """Verifies the behavior of signature no injection if present."""
+  code = "\nclass Net:\n    def __init__(self):\n        self.layer = torch.Linear(10, 10)\n\n    def forward(self, variables, x):\n        return self.layer(x)\n"
   result = rewrite_code(rewriter, code)
   assert "self.layer.apply(variables, x)" in result
   assert "Injected missing state argument" not in result
 
 
 def test_custom_trait_injection() -> None:
-  """Function docstring."""
+  """Verifies the behavior of custom trait injection."""
   semantics = MockStateSemantics()
   config = RuntimeConfig(target_framework="mlx", strict_mode=False)
-  # Using TestRewriter shim
   custom_rewriter = TestRewriter(semantics, config)
-
-  # Note: 'func' is NOT a standard inference method (forward/call),
-  # so standard StructuralPass might skip injection unless we add it to known methods.
-  # However, for this test, we verify the CALL rewrite mostly. But the assertion checks signature.
-  # Let's use 'forward' to trigger the injection reliably.
-  code = """
-class Net(torch.nn.Module):
-    def __init__(self):
-        self.layer = torch.Linear(10)
-
-    def forward(self, input):
-        return self.layer(input)
-"""
+  code = "\nclass Net(torch.nn.Module):\n    def __init__(self):\n        self.layer = torch.Linear(10)\n\n    def forward(self, input):\n        return self.layer(input)\n"
   result = rewrite_code(custom_rewriter, code)
-
-  # Expect 'ctx' injection and 'call_fn' methods based on config
   assert "def forward(self, ctx, input):" in result or "def forward(self, input):" not in result
   assert "self.layer.call_fn(ctx, input)" in result

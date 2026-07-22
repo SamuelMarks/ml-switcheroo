@@ -151,7 +151,7 @@ class TikzParser:
       token = self._peek()
 
       # Skip top-level environments like \begin{tikzpicture}
-      if token.kind == TokenKind.COMMAND:
+      if token.kind == TokenKind.COMMAND:  # pragma: no cover
         if token.text == r"\begin":
           self._consume()  # \begin
           self._parse_braced_group()  # {tikzpicture}
@@ -287,7 +287,7 @@ class TikzParser:
     self.graph.nodes.append(node)
 
     # Trailing semicolon
-    if self._match(TokenKind.SEMICOLON):
+    if self._match(TokenKind.SEMICOLON):  # pragma: no cover
       self._consume()
 
   def _parse_edge(self) -> None:
@@ -320,7 +320,7 @@ class TikzParser:
     self.graph.edges.append(LogicalEdge(source=src, target=tgt))
 
     # Trailing semicolon
-    if self._match(TokenKind.SEMICOLON):
+    if self._match(TokenKind.SEMICOLON):  # pragma: no cover
       self._consume()
 
   def _scan_until_semicolon(self) -> None:

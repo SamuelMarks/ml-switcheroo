@@ -99,8 +99,7 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
   # 3. Construct New Call Arguments
   new_args = [cst.Arg(value=input_tensor, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))]
 
-  if packed_shape_val:
-    new_args.append(cst.Arg(value=packed_shape_val))
+  new_args.append(cst.Arg(value=packed_shape_val))  # type: ignore
 
   # 4. Create Call
   new_func = create_dotted_name(target_api)

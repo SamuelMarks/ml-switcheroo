@@ -1,7 +1,3 @@
-# zero-* Engine Core
-
-> **Note:** This repository serves as the core execution engine and abstract representation framework for the `zero-*` ecosystem.
-
 ml-switcheroo 🔄🦘
 ==================
 

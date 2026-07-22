@@ -1,8 +1,8 @@
-"""Module docstring."""
+"""Test suite for the Pytorch module."""
 
 import torch
 
 
 def relu_activation(x: torch.Tensor) -> torch.Tensor:
-  """Function docstring."""
+  """Helper to relu activation."""
   return torch.relu(x)

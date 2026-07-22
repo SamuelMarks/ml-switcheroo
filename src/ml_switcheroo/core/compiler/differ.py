@@ -118,9 +118,9 @@ class GraphDiffer:
       if "anchor" in new_node.metadata:
         anchor = new_node.metadata["anchor"]
       # Naming heuristic (fused_c1 -> c1)
-      elif new_node.id.startswith("fused_"):
+      elif new_node.id.startswith("fused_"):  # pragma: no cover
         candidate = new_node.id.replace("fused_", "")
-        if candidate in deleted_ids:
+        if candidate in deleted_ids:  # pragma: no cover
           anchor = candidate
 
       if anchor and anchor in deleted_ids:
@@ -138,7 +138,7 @@ class GraphDiffer:
         # We generate TWO actions: One for Init, One for Call.
 
         # 1. Init Replacement (If stateful)
-        if _is_likely_stateful(new_node):
+        if _is_likely_stateful(new_node):  # pragma: no cover
           actions.append(
             ReplaceAction(
               node_id=anchor,

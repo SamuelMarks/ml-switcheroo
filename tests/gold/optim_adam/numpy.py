@@ -1,16 +1,14 @@
-"""Module docstring."""
+"""Test suite for the Numpy module."""
 
 
 def setup_adam(model, lr: float = 0.001):
-  """Function docstring."""
+  """Helper to setup adam."""
 
-  # <SWITCHEROO_FAILED_TO_TRANS>
   class NumpyAdam:
-    """Class docstring."""
+    """Test suite for the Numpy Adam component."""
 
     def __init__(self, lr):
-      """Function docstring."""
+      """Initializes the NumpyAdam instance."""
       self.lr = lr
 
   return NumpyAdam(lr)
-  # </SWITCHEROO_FAILED_TO_TRANS>

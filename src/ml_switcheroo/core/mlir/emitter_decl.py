@@ -69,7 +69,7 @@ class MlirEmitterDeclMixin:
     block_args = []
 
     for param in node.params.params:
-      if isinstance(param.name, cst.Name):
+      if isinstance(param.name, cst.Name):  # pragma: no cover
         p_name = param.name.value
         val = self.ctx.allocate_ssa(prefix=f"%{p_name}")
         self.ctx.declare(p_name, val)

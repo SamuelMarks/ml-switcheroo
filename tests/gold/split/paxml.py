@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# PaxML Split Stub
+"""Test suite for the Paxml module."""

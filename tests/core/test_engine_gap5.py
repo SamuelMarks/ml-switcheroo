@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Test suite for the Engine Gap5 module."""
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
@@ -6,11 +6,10 @@ from unittest.mock import patch, MagicMock
 
 
 def test_engine_target_torch_sharding_compiler():
-  """Auto-generated doc."""
+  """Verifies the behavior of engine target PyTorch sharding compiler."""
   config = RuntimeConfig(enable_sharding=True, enable_graph_optimization=True)
   engine = ASTEngine(source="jax", target="torch", config=config)
   code = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
-
   with patch("ml_switcheroo.core.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
     with patch("ml_switcheroo.core.compiler.sharding_extractor.ShardingExtractionPass.apply"):
       with patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer") as MockOptCls:
@@ -25,11 +24,10 @@ def test_engine_target_torch_sharding_compiler():
 
 
 def test_engine_target_flax_sharding_compiler():
-  """Auto-generated doc."""
+  """Verifies the behavior of engine target Flax sharding compiler."""
   config = RuntimeConfig(enable_sharding=True, enable_graph_optimization=True)
   engine = ASTEngine(source="jax", target="flax", config=config)
   code = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
-
   with patch("ml_switcheroo.core.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
     with patch("ml_switcheroo.core.compiler.sharding_extractor.ShardingExtractionPass.apply"):
       with patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer") as MockOptCls:
@@ -44,11 +42,10 @@ def test_engine_target_flax_sharding_compiler():
 
 
 def test_engine_target_torch_sharding_rewriter_2():
-  """Auto-generated doc."""
+  """Verifies the behavior of engine target PyTorch sharding rewriter 2."""
   config = RuntimeConfig(enable_sharding=True, enable_graph_optimization=True)
   engine = ASTEngine(source="jax", target="torch", config=config)
   code = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
-
   with patch("ml_switcheroo.core.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
     with patch("ml_switcheroo.core.compiler.sharding_extractor.ShardingExtractionPass.apply"):
       with patch("ml_switcheroo.core.compiler.differ.GraphDiffer.diff", return_value=None):
@@ -60,7 +57,6 @@ def test_engine_target_torch_sharding_rewriter_2():
             g.nodes = ["n1"]
             MockExt.graph = g
             MockExt.node_map = {}
-
             with patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"):
               with patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"):
                 engine._run_rewriter_pipeline(code, MagicMock())

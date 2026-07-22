@@ -31,7 +31,7 @@ def _analyze_range_iterator(node: cst.BaseExpression) -> Tuple[bool, List[cst.Ar
 
   """
   if isinstance(node, cst.Call):
-    if isinstance(node.func, cst.Name) and node.func.value == "range":
+    if isinstance(node.func, cst.Name) and node.func.value == "range":  # pragma: no cover
       return True, list(node.args)
   return False, []
 

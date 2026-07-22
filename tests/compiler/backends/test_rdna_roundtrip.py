@@ -1,7 +1,4 @@
-"""Integration test for full RDNA Compiler Stack Roundtrip.
-
-Verifies: Graph -> RDNA Text -> Graph
-"""
+"""Test suite for the Rdna Roundtrip module."""
 
 import pytest
 from unittest.mock import MagicMock
@@ -14,11 +11,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def semantics_mgr():
-  """Function docstring."""
+  """Provides a mock semantics mgr for testing."""
   mgr = MagicMock(spec=SemanticsManager)
 
   def get_def(kind):
-    """Function docstring."""
+    """Gets def."""
     if kind == "Add":
       return ("Add", {})
     if "Conv2d" in kind:
@@ -26,7 +23,7 @@ def semantics_mgr():
     return None
 
   def resolve_var(aid, fw):
-    """Function docstring."""
+    """Resolves variable."""
     if fw == "rdna" and aid == "Add":
       return {"api": "v_add_f32"}
     return None
@@ -37,35 +34,22 @@ def semantics_mgr():
 
 
 def test_rdna_roundtrip_macro(semantics_mgr):
-  """Scenario: Input -> Conv2d(k=3) -> Output.
-
-  Roundtrip ensures markers and metadata recovery work.
-  """
+  """Verifies the behavior of RDNA roundtrip macro."""
   g_in = LogicalGraph()
   g_in.nodes = [LogicalNode("img", "Input"), LogicalNode("conv", "Conv2d", {"k": 3}), LogicalNode("out", "Output")]
   g_in.edges = [LogicalEdge("img", "conv"), LogicalEdge("conv", "out")]
-
-  # 1. Compile
   backend = RdnaBackend(semantics_mgr)
   rdna_text = backend.compile(g_in)
-
   assert "BEGIN Conv2d" in rdna_text
   assert "L_KY_conv" in rdna_text
-
-  # 2. Lift
   parser = RdnaParser(rdna_text)
   ast_nodes = parser.parse()
-
   lifter = RdnaLifter()
   g_out = lifter.lift(ast_nodes)
-
-  # 3. Verify
   assert len(g_out.nodes) == 3
   node_ids = [n.id for n in g_out.nodes]
   assert "img" in node_ids
   assert "conv" in node_ids
   assert "output" in node_ids
-
-  conv_node = next(n for n in g_out.nodes if n.id == "conv")
-  # Analyzer should recover kernel size from loop limits
+  conv_node = next((n for n in g_out.nodes if n.id == "conv"))
   assert conv_node.metadata["k"] == 3

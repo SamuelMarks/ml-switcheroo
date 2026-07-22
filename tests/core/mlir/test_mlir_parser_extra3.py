@@ -1,10 +1,10 @@
-"""Module docstring."""
+"""Test suite for the Mlir Parser Extra3 module."""
 
 from ml_switcheroo.core.mlir.parser import MlirParser
 
 
 def test_cov_287():
-  """Function docstring."""
+  """Verifies the behavior of cov 287."""
   parser = MlirParser("^bb0: ^bb1:")
   blk = parser.parse_block()
   assert blk.label == "^bb0"

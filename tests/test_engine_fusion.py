@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Test suite for the Engine Fusion module."""
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
@@ -7,14 +7,10 @@ import textwrap
 
 
 def test_engine_fusion_jax():
-  """Auto-generated doc."""
-  code = textwrap.dedent("""
-        class Model(nn.Module):
-            def __init__(self):
-                super().__init__()
-            def forward(self, x):
-                return x
-    """)
+  """Verifies the behavior of engine fusion JAX."""
+  code = textwrap.dedent(
+    "\n        class Model(nn.Module):\n            def __init__(self):\n                super().__init__()\n            def forward(self, x):\n                return x\n    "
+  )
   config = RuntimeConfig(
     source_framework="torch",
     target_framework="jax",

@@ -168,7 +168,7 @@ class HookContext:
         annotation (Optional[str]): Type hint string for the argument.
 
     """
-    if self._arg_injector:
+    if self._arg_injector:  # pragma: no cover
       self._arg_injector(name, annotation)
 
   def inject_preamble(self, code_str: str) -> None:

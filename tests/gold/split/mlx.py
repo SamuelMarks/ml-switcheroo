@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# MLX Split Stub
+"""Test suite for the Mlx module."""

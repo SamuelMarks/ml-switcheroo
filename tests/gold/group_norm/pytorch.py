@@ -1,18 +1,17 @@
-"""Module docstring."""
+"""Test suite for the Pytorch module."""
 
 import torch
 import torch.nn as nn
 
 
 class GNModel(nn.Module):
-  """Class docstring."""
+  """Test suite for the G N Model component."""
 
   def __init__(self, num_groups: int, num_channels: int):
-    """Function docstring."""
+    """Initializes the GNModel instance."""
     super().__init__()
-    # PyTorch takes groups first
     self.gn = nn.GroupNorm(num_groups, num_channels)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Function docstring."""
+    """Helper to forward."""
     return self.gn(x)

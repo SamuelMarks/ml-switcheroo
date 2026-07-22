@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Test suite for the Init Coverage module."""
 
 import pytest
 import ml_switcheroo
@@ -7,7 +7,7 @@ from unittest.mock import patch, MagicMock
 
 
 def test_convert_success():
-  """Auto-generated doc."""
+  """Converts successfully."""
   with patch("ml_switcheroo.ASTEngine") as MockEngine:
     MockEngine.return_value.run.return_value = MagicMock(success=True, code="test")
     result = ml_switcheroo.convert("code", source="torch", target="jax")
@@ -15,7 +15,7 @@ def test_convert_success():
 
 
 def test_convert_with_semantics():
-  """Auto-generated doc."""
+  """Converts with semantics."""
   manager = SemanticsManager()
   with patch("ml_switcheroo.ASTEngine") as MockEngine:
     MockEngine.return_value.run.return_value = MagicMock(success=True, code="test")
@@ -24,7 +24,7 @@ def test_convert_with_semantics():
 
 
 def test_convert_failure():
-  """Auto-generated doc."""
+  """Converts successfully handling failure."""
   with patch("ml_switcheroo.ASTEngine") as MockEngine:
     MockEngine.return_value.run.return_value = MagicMock(success=False, errors=["some error"])
     with pytest.raises(ValueError, match="Transpilation failed.*"):

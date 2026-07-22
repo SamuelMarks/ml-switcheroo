@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Test suite for the Engine Gap2 module."""
 
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.core.engine import ASTEngine
@@ -8,18 +8,16 @@ from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
 
 def get_tracer_mock():
-  """Auto-generated doc."""
+  """Gets tracer mock."""
   m = MagicMock()
   m.export.return_value = []
   return m
 
 
 def test_engine_target_torch_keras_sharding():
-  """Auto-generated doc."""
-  # 214-215 sharding logic for torch/keras targets
+  """Verifies the behavior of engine target PyTorch Keras sharding."""
   engine = ASTEngine(source="sass", target="keras")
   engine.config.enable_sharding = True
-
   with (
     patch("ml_switcheroo.core.engine.SassParser"),
     patch("ml_switcheroo.core.engine.SassLifter"),
@@ -33,7 +31,7 @@ def test_engine_target_torch_keras_sharding():
 
 
 def test_rewriter_loopback():
-  """Auto-generated doc."""
+  """Verifies the behavior of rewriter loopback."""
   engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   with (
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
@@ -53,7 +51,7 @@ def test_rewriter_loopback():
 
 
 def test_rewriter_loopback_sharding_jax():
-  """Auto-generated doc."""
+  """Verifies the behavior of rewriter loopback sharding JAX."""
   cfg = RuntimeConfig(strict_mode=False)
   cfg.enable_sharding = True
   engine = ASTEngine(config=cfg, source="torch", target="jax", enable_graph_optimization=True)
@@ -75,7 +73,7 @@ def test_rewriter_loopback_sharding_jax():
 
 
 def test_rewriter_loopback_sharding_torch():
-  """Auto-generated doc."""
+  """Verifies the behavior of rewriter loopback sharding PyTorch."""
   cfg = RuntimeConfig(strict_mode=False)
   cfg.enable_sharding = True
   engine = ASTEngine(config=cfg, source="jax", target="torch", enable_graph_optimization=True)
@@ -97,9 +95,8 @@ def test_rewriter_loopback_sharding_torch():
 
 
 def test_engine_target_rdna():
-  """Auto-generated doc."""
+  """Verifies the behavior of engine target RDNA."""
   engine = ASTEngine(source="rdna", target="keras")
-
   with (
     patch("ml_switcheroo.core.engine.RdnaParser"),
     patch("ml_switcheroo.core.engine.RdnaLifter"),

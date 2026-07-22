@@ -125,10 +125,10 @@ class SassLexer:
             ):
               # Fallback if digits check logic fails for specific mnemonics
               if not any(c.isdigit() for c in clean) and clean not in [  # pragma: no cover
-                "RZ",  # pragma: no cover
-                "PT",  # pragma: no cover
-              ]:  # pragma: no cover
-                kind = TokenType.IDENTIFIER  # pragma: no cover
+                "RZ",
+                "PT",
+              ]:
+                kind = TokenType.IDENTIFIER
 
           yield Token(kind, val, line_num, column)
 

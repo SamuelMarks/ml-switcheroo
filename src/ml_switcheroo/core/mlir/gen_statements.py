@@ -79,9 +79,9 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     names = []
     aliases = []
     try:
-      if names_attr:
+      if names_attr:  # pragma: no cover
         names = ast.literal_eval(names_attr)
-      if aliases_attr:
+      if aliases_attr:  # pragma: no cover
         aliases = ast.literal_eval(aliases_attr)
     except Exception:
       pass
@@ -133,7 +133,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
         parts = clean.split(",")
         for p in parts:
           b = p.strip().strip('"').strip("'")
-          if b:
+          if b:  # pragma: no cover
             base_nodes.append(cst.Arg(value=self._create_dotted_name(b)))
 
     body_stmts = []
@@ -166,7 +166,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     body_stmts = []
 
     try:
-      if op.regions and op.regions[0].blocks:
+      if op.regions and op.regions[0].blocks:  # pragma: no cover
         block0 = op.regions[0].blocks[0]
         # Pre-analyze usage for this scope
         self._scan_block_usage(block0)

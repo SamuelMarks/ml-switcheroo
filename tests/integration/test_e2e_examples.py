@@ -1,9 +1,8 @@
-"""End-to-End Integration Tests."""
+"""Test suite for the E2E Examples module."""
 
 import pytest
 from pathlib import Path
 from typing import Set, Dict, Tuple, Optional
-
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -13,7 +12,7 @@ EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
 
 
 def _read_code(filename: str) -> str:
-  """Function docstring."""
+  """Helper to  read code."""
   path = EXAMPLES_DIR / filename
   if not path.is_file():
     pytest.fail(f"Example file not found: {path}")
@@ -21,15 +20,13 @@ def _read_code(filename: str) -> str:
 
 
 class E2ESemantics(SemanticsManager):
-  """Class docstring."""
+  """Test suite for the E2 E Semantics component."""
 
   def __init__(self):
-    """Function docstring."""
+    """Initializes the E2ESemantics instance."""
     self.data = {}
     self._providers = {}
     self._source_registry = {}
-
-    # Fix: Added 'jax' and 'tensorflow' config to enable alias resolution and traits
     self.framework_configs = {
       "flax_nnx": {
         "alias": {"module": "flax.nnx", "name": "nnx"},
@@ -54,7 +51,6 @@ class E2ESemantics(SemanticsManager):
     self._key_origins = {}
     self._validation_status = {}
     self._known_rng_methods = set()
-
     self._add_op("abs", ["x"], torch="torch.abs", jax="jax.numpy.abs", keras="keras.ops.abs")
     self._add_op("mean", ["x"], torch="torch.mean", jax="jax.numpy.mean", keras="keras.ops.mean")
     self._add_op("sub", ["x", "y"], torch="torch.sub", jax="jax.numpy.subtract")
@@ -69,24 +65,19 @@ class E2ESemantics(SemanticsManager):
       keras="keras.layers.Dense",
       tier=SemanticTier.NEURAL,
     )
-
     self._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
     self._source_registry["flax.nnx"] = ("flax_nnx", SemanticTier.NEURAL)
     self._source_registry["jax.numpy"] = ("jax", SemanticTier.ARRAY_API)
     self._source_registry["jnp"] = ("jax", SemanticTier.ARRAY_API)
     self._source_registry["torch"] = ("torch", SemanticTier.ARRAY_API)
-
     self._providers.setdefault("flax_nnx", {})[SemanticTier.NEURAL] = {"root": "flax", "sub": "nnx", "alias": "nnx"}
     self._providers.setdefault("torch", {})[SemanticTier.NEURAL] = {"root": "torch", "sub": "nn", "alias": "nn"}
-
-    # Fix: Add JAX/TF providers
     self._providers.setdefault("jax", {})[SemanticTier.ARRAY_API] = {"root": "jax", "sub": "numpy", "alias": "jnp"}
     self._providers.setdefault("tensorflow", {})[SemanticTier.ARRAY_API] = {
       "root": "tensorflow",
       "sub": None,
       "alias": "tf",
     }
-
     self._add_op(
       "transpose", ["x", "axes"], torch="torch.permute", jax="jax.numpy.transpose", keras="keras.ops.transpose"
     )
@@ -104,25 +95,21 @@ class E2ESemantics(SemanticsManager):
     self._add_op("relu_f", ["x"], torch="torch.relu", jax="jax.nn.relu")
     self._add_op("log_softmax", ["x"], torch="torch.nn.functional.log_softmax", jax="jax.nn.log_softmax")
     self._add_op("max_pool2d_func", ["x"], torch="torch.nn.functional.max_pool2d", jax="jax.lax.reduce_window")
-
-    # Fix: Manually map 'jnp' to these alias roots for reverse lookup if needed
     self._alias("jnp.abs", "abs")
     self._alias("jnp.mean", "mean")
     self._alias("nn.Linear", "Linear")
     self._alias("nn.Module", "Module")
-    # ... more aliases omitted for brevity
 
   def get_all_rng_methods(self) -> Set[str]:
-    """Function docstring."""
+    """Gets all rng methods."""
     return self._known_rng_methods
 
   def get_framework_config(self, framework: str):
-    """Function docstring."""
+    """Gets framework configuration."""
     return self.framework_configs.get(framework, {})
 
   def get_framework_aliases(self) -> Dict[str, Tuple[str, str]]:
-    """Function docstring."""
-    # Mock the alias getter to return what we populated in framework_configs
+    """Gets framework aliases."""
     aliases = {}
     for fw, cfg in self.framework_configs.items():
       if "alias" in cfg:
@@ -130,7 +117,7 @@ class E2ESemantics(SemanticsManager):
     return aliases
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
-    """Function docstring."""
+    """Gets import map."""
     result = {}
     target_providers = self._providers.get(target_fw, {})
     for src_path, (src_fw, tier) in self._source_registry.items():
@@ -140,17 +127,12 @@ class E2ESemantics(SemanticsManager):
     return result
 
   def _add_op(self, name, args, tier=None, **variants):
-    """Function docstring."""
+    """Helper to  add op."""
     variant_data = {}
-    # 1. Update self.data first so _alias can reference it
     self.data[name] = {"std_args": args, "variants": variant_data}
-
-    # 2. Iterate variants to populate data AND alias index
     for fw, api in variants.items():
       variant_data[fw] = {"api": api}
       self._alias(api, name)
-
-    # 3. Set origins
     if tier:
       self._key_origins[name] = tier.value
     elif name[0].isupper():
@@ -159,19 +141,18 @@ class E2ESemantics(SemanticsManager):
       self._key_origins[name] = SemanticTier.ARRAY_API.value
 
   def _alias(self, api_str, abstract_name):
-    """Function docstring."""
+    """Helper to  alias."""
     if abstract_name in self.data:
       self._reverse_index[api_str] = (abstract_name, self.data[abstract_name])
 
 
 @pytest.fixture
 def engine_factory():
-  """Function docstring."""
+  """Provides a mock engine factory for testing."""
   semantics = E2ESemantics()
 
   def _create(source, target, strict=False):
-    """Function docstring."""
-    # Fix: Ensure source_flavour is handled if relevant, but basic tests use root
+    """Helper to  create."""
     cfg = RuntimeConfig(source_framework=source, target_framework=target, strict_mode=strict)
     return ASTEngine(semantics=semantics, config=cfg)
 
@@ -179,7 +160,7 @@ def engine_factory():
 
 
 def test_ex01_math_ops_torch_to_jax(engine_factory):
-  """Function docstring."""
+  """Verifies the behavior of ex01 math ops PyTorch to JAX."""
   code = _read_code("ex01_math_ops.torch.py")
   engine = engine_factory("torch", "jax")
   result = engine.run(code)
@@ -189,7 +170,7 @@ def test_ex01_math_ops_torch_to_jax(engine_factory):
 
 
 def test_ex01_math_ops_jax_to_torch(engine_factory):
-  """Function docstring."""
+  """Verifies the behavior of ex01 math ops JAX to PyTorch."""
   code = _read_code("ex01_math_ops.jax.py")
   engine = engine_factory("jax", "torch")
   result = engine.run(code)
@@ -199,7 +180,7 @@ def test_ex01_math_ops_jax_to_torch(engine_factory):
 
 
 def test_ex02_neural_net_torch_to_jax(engine_factory):
-  """Function docstring."""
+  """Verifies the behavior of ex02 neural net PyTorch to JAX."""
   code = _read_code("ex02_neural_net.torch.py")
   engine = engine_factory("torch", "flax_nnx")
   result = engine.run(code)
@@ -209,13 +190,11 @@ def test_ex02_neural_net_torch_to_jax(engine_factory):
 
 
 def test_ex02_neural_net_jax_to_torch(engine_factory):
-  """Function docstring."""
+  """Verifies the behavior of ex02 neural net JAX to PyTorch."""
   code = _read_code("ex02_neural_net.flax_nnx.py")
   engine = engine_factory("flax_nnx", "torch")
   result = engine.run(code)
   assert result.success
-
-  # Allow both valid import forms
   assert "import torch.nn as nn" in result.code or "from torch import nn" in result.code
   assert "class SimplePerceptron(nn.Module):" in result.code
   assert "def forward(self, x):" in result.code

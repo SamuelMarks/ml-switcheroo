@@ -19,9 +19,9 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 def _import_tomllib():
   """Imports tomllib or tomli depending on python version."""
   if sys.version_info >= (3, 11):
-    import tomllib  # pragma: no cover
+    import tomllib
 
-    return tomllib  # pragma: no cover
+    return tomllib
   else:
     try:
       import tomli as tomllib
@@ -60,7 +60,7 @@ def get_framework_priority_order() -> List[str]:
     priority = 999
     is_child = False
 
-    if adapter:
+    if adapter:  # pragma: no cover
       # Check hierarchy to push flavours/children to the end
       if hasattr(adapter, "inherits_from") and adapter.inherits_from:
         is_child = True

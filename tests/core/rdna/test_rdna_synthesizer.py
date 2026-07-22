@@ -1,34 +1,26 @@
-"""Module docstring."""
+"""Test suite for the Rdna Synthesizer module."""
 
 import pytest
 from unittest.mock import MagicMock
-
-from ml_switcheroo.core.compiler.backends.rdna.synthesizer import (
-  RegisterAllocator,
-  RdnaSynthesizer,
-  MAX_VGPR,
-  MAX_SGPR,
-)
+from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RegisterAllocator, RdnaSynthesizer, MAX_VGPR, MAX_SGPR
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.core.compiler.frontends.rdna.nodes import Instruction, VGPR, SGPR, Comment, Label
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_allocator_dual_pools() -> None:
-  """Verify distinct allocation for Scalar and Vector pools."""
+  """Verifies the behavior of allocator dual pools."""
   alloc = RegisterAllocator()
   v0 = alloc.get_vector_register("x")
   s0 = alloc.get_scalar_register("cnt")
-
   assert isinstance(v0, VGPR)
   assert v0.index == 0
-
   assert isinstance(s0, SGPR)
   assert s0.index == 0
 
 
 def test_allocator_reuse() -> None:
-  """Verify idempotency for same variable name."""
+  """Verifies the behavior of allocator reuse."""
   alloc = RegisterAllocator()
   v_a = alloc.get_vector_register("a")
   v_b = alloc.get_vector_register("a")
@@ -36,7 +28,7 @@ def test_allocator_reuse() -> None:
 
 
 def test_allocator_overflow_vgpr() -> None:
-  """Verify VGPR limit check."""
+  """Verifies the behavior of allocator overflow vgpr."""
   alloc = RegisterAllocator()
   alloc._next_vgpr = MAX_VGPR + 1
   with pytest.raises(ValueError, match="VGPR overflow"):
@@ -44,7 +36,7 @@ def test_allocator_overflow_vgpr() -> None:
 
 
 def test_allocator_overflow_sgpr() -> None:
-  """Verify SGPR limit check."""
+  """Verifies the behavior of allocator overflow sgpr."""
   alloc = RegisterAllocator()
   alloc._next_sgpr = MAX_SGPR + 1
   with pytest.raises(ValueError, match="SGPR overflow"):
@@ -52,31 +44,29 @@ def test_allocator_overflow_sgpr() -> None:
 
 
 def test_allocator_temps() -> None:
-  """Verify automatic temporary allocation."""
+  """Verifies the behavior of allocator temps."""
   alloc = RegisterAllocator()
   t1 = alloc.allocate_vector_temp()
   t2 = alloc.allocate_scalar_temp()
-
   assert t1.index == 0
   assert t2.index == 0
-  # Next should increment
   t3 = alloc.allocate_vector_temp()
   assert t3.index == 1
 
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Function docstring."""
+  """Provides a mock semantics for testing."""
   mgr = MagicMock(spec=SemanticsManager)
 
   def get_def(kind):
-    """Function docstring."""
+    """Gets def."""
     if kind == "Add":
       return ("Add", {})
     return None
 
   def resolve(aid, fw):
-    """Function docstring."""
+    """Resolves ."""
     if fw == "rdna" and aid == "Add":
       return {"api": "v_add_f32"}
     return None
@@ -87,48 +77,35 @@ def mock_semantics() -> MagicMock:
 
 
 def test_graph_to_rdna_basic_math(mock_semantics: MagicMock) -> None:
-  """Scenario: x -> Add(y) -> z."""
+  """Verifies the behavior of graph to RDNA basic math."""
   synth = RdnaSynthesizer(mock_semantics)
   g = LogicalGraph()
-  g.nodes = [
-    LogicalNode("x", "Input", {}),
-    LogicalNode("y", "Input", {}),
-    LogicalNode("z", "Add", {}),
-  ]
+  g.nodes = [LogicalNode("x", "Input", {}), LogicalNode("y", "Input", {}), LogicalNode("z", "Add", {})]
   g.edges = [LogicalEdge("x", "z"), LogicalEdge("y", "z")]
-
   nodes = synth.from_graph(g)
-
   assert len(nodes) == 3
-  # Check Inputs
   assert isinstance(nodes[0], Comment)
   assert "** Input x -> v0" in str(nodes[0]).replace(";", "**")
-
   inst = nodes[2]
   assert isinstance(inst, Instruction)
   assert inst.opcode == "v_add_f32"
-  # DST(v2), SRC(v0), SRC(v1)
   assert str(inst.operands[0]) == "v2"
   assert str(inst.operands[1]) == "v0"
   assert str(inst.operands[2]) == "v1"
 
 
 def test_graph_to_rdna_unmapped(mock_semantics: MagicMock) -> None:
-  """Verify fallback comment for unmapped ops."""
+  """Verifies the behavior of graph to RDNA unmapped."""
   synth = RdnaSynthesizer(mock_semantics)
   g = LogicalGraph()
   g.nodes = [LogicalNode("n1", "MysteryOp", {})]
-
   nodes = synth.from_graph(g)
   assert len(nodes) == 1
   assert "Unmapped Op: MysteryOp" in str(nodes[0])
 
 
 def test_rdna_to_python_instruction() -> None:
-  """Input: v_add_f32 v0, v1, v2.
-
-  Output: v0 = rdna.v_add_f32(v1, v2).
-  """
+  """Verifies the behavior of RDNA to python instruction."""
   synth = RdnaSynthesizer(MagicMock())
   inst = Instruction("v_add_f32", [VGPR(0), VGPR(1), VGPR(2)])
   mod = synth.to_python([inst])
@@ -137,24 +114,16 @@ def test_rdna_to_python_instruction() -> None:
 
 
 def test_rdna_to_python_ranges() -> None:
-  """Input: image_load v[0:3], v[4:7], s[0:3].
-
-  Output: v_0_3 = rdna.image_load(v_4_7, s_0_3).
-  """
+  """Verifies the behavior of RDNA to python ranges."""
   synth = RdnaSynthesizer(MagicMock())
   inst = Instruction("image_load", [VGPR(0, 4), VGPR(4, 4), SGPR(0, 4)])
-
   mod = synth.to_python([inst])
   code = mod.code
-
   assert "v_0_3 = rdna.image_load(v_4_7, s_0_3)" in code
 
 
 def test_rdna_to_python_label() -> None:
-  """Input: Label.
-
-  Output: Comment marker.
-  """
+  """Verifies the behavior of RDNA to python label."""
   synth = RdnaSynthesizer(MagicMock())
   nodes = [Label("L_LOOP")]
   mod = synth.to_python(nodes)

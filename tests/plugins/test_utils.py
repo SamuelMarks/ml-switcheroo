@@ -1,10 +1,4 @@
-"""Tests for Plugin Utilities (Dynamic Framework Detection).
-
-Verifies:
-1. create_dotted_name builds correct CST.
-2. is_framework_module_node detects configured source/target frameworks.
-3. is_framework_module_node detection dynamically checks Registered Semantics.
-"""
+"""Test suite for the Utils module."""
 
 import pytest
 import libcst as cst
@@ -16,16 +10,15 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_create_dotted_name_simple():
-  """Function docstring."""
+  """Creates dotted name simple."""
   node = create_dotted_name("numpy")
   assert isinstance(node, cst.Name)
   assert node.value == "numpy"
 
 
 def test_create_dotted_name_chained():
-  """Function docstring."""
+  """Creates dotted name chained."""
   node = create_dotted_name("jax.numpy.add")
-  # Structure: Attribute(value=Attribute(value=Name(jax), attr=numpy), attr=add)
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "add"
   assert node.value.attr.value == "numpy"
@@ -34,52 +27,44 @@ def test_create_dotted_name_chained():
 
 @pytest.fixture
 def mock_ctx():
-  """Function docstring."""
+  """Provides a mock ctx for testing."""
   semantics = MagicMock(spec=SemanticsManager)
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
-
-  # Configure mock semantics with some registered frameworks
   semantics.framework_configs = {
     "torch": {"alias": {"module": "torch", "name": "torch"}},
     "keras": {"alias": {"module": "keras", "name": "k"}},
-    "new_lib": {},  # No alias
+    "new_lib": {},
   }
-
   return HookContext(semantics, config)
 
 
 def test_detect_source_and_target(mock_ctx):
-  """Verify source_fw and target_fw from config are detected."""
-  # torch (source)
+  """Detects source and target."""
   node_torch = cst.Name("torch")
   assert is_framework_module_node(node_torch, mock_ctx)
-
-  # jax (target)
   node_jax = cst.Name("jax")
   assert is_framework_module_node(node_jax, mock_ctx)
 
 
 def test_detect_registered_framework(mock_ctx):
-  """Verify frameworks in registry are detected."""
+  """Detects registered framework."""
   node = cst.Name("new_lib")
   assert is_framework_module_node(node, mock_ctx)
 
 
 def test_detect_registered_alias(mock_ctx):
-  """Verify aliases in registry configuration are detected."""
-  # keras has alias 'k' in fixture
+  """Detects registered alias."""
   node = cst.Name("k")
   assert is_framework_module_node(node, mock_ctx)
 
 
 def test_reject_variable(mock_ctx):
-  """Verify random variables are rejected."""
+  """Verifies the behavior of reject variable."""
   node = cst.Name("x")
   assert not is_framework_module_node(node, mock_ctx)
 
 
 def test_detect_complex_expression(mock_ctx):
-  """Verify dot-separated modules are detected by root."""
-  # Check `torch.nn`
+  """Detects complex expression."""
   node = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn"))
   assert is_framework_module_node(node, mock_ctx)

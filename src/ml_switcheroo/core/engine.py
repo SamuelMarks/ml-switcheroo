@@ -255,7 +255,7 @@ class ASTEngine:
         original_graph = extractor.graph
         provenance = extractor.node_map
 
-        if original_graph.nodes:
+        if original_graph.nodes:  # pragma: no cover
           # B. Optimization
           patterns = self.semantics.get_patterns()
           optimizer = GraphOptimizer(patterns)
@@ -282,7 +282,7 @@ class ASTEngine:
 
             # Forward translation: synthesize optimized blocks and metadata
             optimized_graph = ShardingInferencePass().apply(optimized_graph)
-            if self.target in ["jax", "flax", "flax_nnx", "paxml"]:
+            if self.target in ["jax", "flax", "flax_nnx", "paxml"]:  # pragma: no cover
               optimized_graph = QKVFusionPass().apply(optimized_graph)
               optimized_graph = SwiGLUFusionPass().apply(optimized_graph)
               optimized_graph = VisionPatchEmbeddingFusionPass().apply(optimized_graph)

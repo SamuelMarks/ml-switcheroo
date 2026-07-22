@@ -13,7 +13,11 @@ Definitions are loaded from `frameworks/definitions/mlx.json`.
 """
 
 from typing import List, Tuple, Optional, Dict, Any
-import numpy as np
+
+try:
+  import numpy as np
+except Exception:  # pragma: no cover
+  np = None  # pragma: no cover
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
 from ml_switcheroo.frameworks.loader import load_definitions

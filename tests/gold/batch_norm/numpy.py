@@ -1,24 +1,21 @@
-"""Module docstring."""
+"""Test suite for the Numpy module."""
 
 import numpy as np
 
 
 class BNModel:
-  """Class docstring."""
+  """Test suite for the B N Model component."""
 
   def __init__(self, num_features: int, momentum: float = 0.1):
-    """Function docstring."""
-    # <SWITCHEROO_FAILED_TO_TRANS>
+    """Initializes the BNModel instance."""
     self.gamma = np.ones(num_features)
     self.beta = np.zeros(num_features)
     self.running_mean = np.zeros(num_features)
     self.running_var = np.ones(num_features)
     self.momentum = momentum
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def __call__(self, x: np.ndarray, training: bool = True) -> np.ndarray:
-    """Function docstring."""
-    # <SWITCHEROO_FAILED_TO_TRANS>
+    """Executes the callable instance."""
     if training:
       mean = np.mean(x, axis=(0, 1, 2))
       var = np.var(x, axis=(0, 1, 2))
@@ -27,7 +24,5 @@ class BNModel:
     else:
       mean = self.running_mean
       var = self.running_var
-
-    x_norm = (x - mean) / np.sqrt(var + 1e-5)
+    x_norm = (x - mean) / np.sqrt(var + 1e-05)
     return self.gamma * x_norm + self.beta
-    # </SWITCHEROO_FAILED_TO_TRANS>

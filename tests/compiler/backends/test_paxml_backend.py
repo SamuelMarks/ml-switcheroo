@@ -1,11 +1,11 @@
-"""Tests for PaxML Code Gen."""
+"""Test suite for the Paxml Backend module."""
 
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.core.compiler.backends.python import PythonBackend
 
 
 def test_synthesize_paxml_chain() -> None:
-  """Auto-generated doc."""
+  """Verifies the behavior of synthesize Paxml chain."""
   backend = PythonBackend(framework="paxml")
   g = LogicalGraph(
     nodes=[
@@ -23,7 +23,6 @@ def test_synthesize_paxml_chain() -> None:
     ],
   )
   code = backend.generate(g, "PaxNet")
-
   assert "class PaxNet(BaseLayer):" in code
   assert "def setup(self):" in code
   assert "self.create_child('conv1', pl.Conv2d(kernel_size=(3, 3), out_channels=16))" in code

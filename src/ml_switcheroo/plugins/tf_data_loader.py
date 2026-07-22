@@ -52,7 +52,7 @@ def _extract_tensor_dataset_inputs(
     if isinstance(node.func, cst.Name):
       func_name = node.func.value
     elif isinstance(node.func, cst.Attribute):  # pragma: no cover
-      func_name = node.func.attr.value
+      func_name = node.func.attr.value  # pragma: no cover
 
     if func_name == "TensorDataset":
       return [arg.value for arg in node.args]

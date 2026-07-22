@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Test suite for the Init Gap module."""
 
 import pytest
 import ml_switcheroo
@@ -7,7 +7,7 @@ from unittest.mock import patch, MagicMock
 
 
 def test_init_convert_success():
-  """Auto-generated doc."""
+  """Verifies the behavior of initialization convert successfully."""
   with patch("ml_switcheroo.ASTEngine") as MockEngine:
     with patch("ml_switcheroo.config.RuntimeConfig.load"):
       MockEngine.return_value.run.return_value = MagicMock(success=True, code="finalcode", errors=[])
@@ -16,7 +16,7 @@ def test_init_convert_success():
 
 
 def test_init_convert_failure():
-  """Auto-generated doc."""
+  """Verifies the behavior of initialization convert successfully handling failure."""
   with patch("ml_switcheroo.ASTEngine") as MockEngine:
     with patch("ml_switcheroo.config.RuntimeConfig.load"):
       MockEngine.return_value.run.return_value = MagicMock(success=False, errors=["boom"])
@@ -25,7 +25,7 @@ def test_init_convert_failure():
 
 
 def test_init_convert_semantics():
-  """Auto-generated doc."""
+  """Verifies the behavior of initialization convert semantics."""
   sm = SemanticsManager()
   with patch("ml_switcheroo.ASTEngine") as MockEngine:
     with patch("ml_switcheroo.config.RuntimeConfig.load"):

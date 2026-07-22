@@ -1,4 +1,4 @@
-"""Tests for ASTEngine Pipeline Routing."""
+"""Test suite for the Engine Routing module."""
 
 import pytest
 from unittest.mock import MagicMock, patch
@@ -10,14 +10,14 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 @pytest.fixture
 def mock_managers():
-  """Function docstring."""
+  """Provides a mock managers for testing."""
   sem = MagicMock(spec=SemanticsManager)
   sem.get_framework_config.return_value = {}
   return sem
 
 
 def test_routing_to_compiler_pipeline_target_isa(mock_managers):
-  """Target SASS -> Compiler Pipeline."""
+  """Verifies the behavior of routing to compiler pipeline target isa."""
   config = RuntimeConfig(source_framework="torch", target_framework="sass")
   engine = ASTEngine(mock_managers, config)
   engine._run_compiler_pipeline = MagicMock()
@@ -28,7 +28,7 @@ def test_routing_to_compiler_pipeline_target_isa(mock_managers):
 
 
 def test_routing_to_compiler_pipeline_source_isa(mock_managers):
-  """Source RDNA -> Compiler Pipeline."""
+  """Verifies the behavior of routing to compiler pipeline source isa."""
   config = RuntimeConfig(source_framework="rdna", target_framework="torch")
   engine = ASTEngine(mock_managers, config)
   engine._run_compiler_pipeline = MagicMock()
@@ -39,7 +39,7 @@ def test_routing_to_compiler_pipeline_source_isa(mock_managers):
 
 
 def test_routing_to_rewriter_pipeline_high_level(mock_managers):
-  """Torch -> JAX -> Rewriter Pipeline."""
+  """Verifies the behavior of routing to rewriter pipeline high level."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(mock_managers, config)
   engine._run_compiler_pipeline = MagicMock()
@@ -50,22 +50,12 @@ def test_routing_to_rewriter_pipeline_high_level(mock_managers):
 
 
 def test_python_frontend_invoked_in_compiler_pipeline(mock_managers):
-  """Verify python source ingestion logic when targeting an ISA.
-
-  If source is 'torch' and target is 'sass', we enter compiler pipeline,
-  and should use PythonFrontend because 'torch' is not an ISA source.
-  """
+  """Verifies the behavior of python frontend invoked in compiler pipeline."""
   config = RuntimeConfig(source_framework="torch", target_framework="sass")
   engine = ASTEngine(mock_managers, config)
-
-  # Mock dependencies inside _run_compiler_pipeline
   with patch("ml_switcheroo.core.engine.PythonFrontend") as MockFront:
     MockFront.return_value.parse_to_graph.return_value = LogicalGraph()
-
-    # Mock backend usage to avoid errors
     with patch("ml_switcheroo.core.engine.get_backend_class") as mock_get_backend:
       mock_get_backend.return_value = MagicMock()
       engine.run("x=1")
-
-      # Must invoke PythonFrontend
       MockFront.assert_called_with("x=1")

@@ -1,17 +1,16 @@
-"""Module docstring."""
+"""Test suite for the Keras3 module."""
 
 import keras
 
 
 class BNModel(keras.Model):
-  """Class docstring."""
+  """Test suite for the B N Model component."""
 
   def __init__(self, num_features: int):
-    """Function docstring."""
+    """Initializes the BNModel instance."""
     super().__init__()
-    # Input shape usually inferred or passed implicitly
     self.bn = keras.layers.BatchNormalization()
 
   def call(self, x, training=None):
-    """Function docstring."""
+    """Helper to call."""
     return self.bn(x, training=training)

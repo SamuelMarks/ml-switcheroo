@@ -1,15 +1,14 @@
-"""Auto-generated doc."""
+"""Test suite for the Enums Coverage module."""
 
 from ml_switcheroo.enums import SemanticTier, LogicOp
 
 
 def test_enums_member_access():
-  """Auto-generated doc."""
+  """Verifies the behavior of enums member access."""
   assert SemanticTier.ARRAY_API == "array"
   assert SemanticTier.NEURAL == "neural"
   assert SemanticTier.NEURAL_OPS == "neural_ops"
   assert SemanticTier.EXTRAS == "extras"
-
   assert LogicOp.EQ == "eq"
   assert LogicOp.NEQ == "neq"
   assert LogicOp.GT == "gt"

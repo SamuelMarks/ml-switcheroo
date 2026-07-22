@@ -1,8 +1,8 @@
-"""Auto-generated doc."""
+"""Test suite for the Injector Fw Utils Missing module."""
 
 
 def test_injector_fw_utils_missing():
-  """Auto-generated doc."""
+  """Verifies the behavior of injector framework utilities missing."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import (
     get_import_root,
@@ -12,10 +12,8 @@ def test_injector_fw_utils_missing():
   )
 
   assert get_import_root(cst.Integer("1")) == ""
-
   assert is_docstring(cst.SimpleStatementLine([]), 0) is False
   assert is_docstring(cst.SimpleStatementLine([cst.Pass()]), 0) is False
-
   assert is_future_import(cst.SimpleStatementLine([cst.Pass()])) is False
   assert (
     is_future_import(
@@ -24,13 +22,11 @@ def test_injector_fw_utils_missing():
     is False
   )
   assert is_future_import(cst.Integer("1")) is False
-
-  # 124, 129, 139 - test conversion fallbacks/failures
   with __import__("unittest.mock").mock.patch("libcst.parse_expression", side_effect=Exception("fail")):
     assert isinstance(convert_to_cst_literal("something"), cst.SimpleString)
 
   class UnrecognizedObject:
-    """Auto-generated doc."""
+    """Test suite for the Unrecognized Object component."""
 
     pass
 
@@ -38,7 +34,7 @@ def test_injector_fw_utils_missing():
 
 
 def test_injector_fw_utils_convert_complex():
-  """Auto-generated doc."""
+  """Verifies the behavior of injector framework utilities convert complex."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
 
@@ -54,17 +50,16 @@ def test_injector_fw_utils_convert_complex():
 
 
 def test_injector_fw_utils_get_import_root_name():
-  """Auto-generated doc."""
+  """Verifies the behavior of injector framework utilities get import root name."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import get_import_root, is_docstring
 
   assert get_import_root(cst.Name("foo")) == "foo"
-
   assert is_docstring(cst.SimpleStatementLine([cst.Expr(cst.SimpleString('""'))]), 0) is True
 
 
 def test_injector_fw_utils_is_future_import():
-  """Auto-generated doc."""
+  """Verifies the behavior of injector framework utilities is future import."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import is_future_import
 
@@ -79,17 +74,16 @@ def test_injector_fw_utils_is_future_import():
 
 
 def test_injector_fw_utils_get_import_root_attr():
-  """Auto-generated doc."""
+  """Verifies the behavior of injector framework utilities get import root attribute."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import get_import_root, is_docstring
 
   assert get_import_root(cst.Attribute(value=cst.Name("foo"), attr=cst.Name("bar"))) == "foo"
-
   assert is_docstring(cst.SimpleStatementLine([cst.Expr(cst.SimpleString('""'))]), 1) is False
 
 
 def test_injector_fw_utils_convert_negative():
-  """Auto-generated doc."""
+  """Verifies the behavior of injector framework utilities convert negative."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
 

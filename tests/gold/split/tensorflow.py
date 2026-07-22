@@ -1,10 +1,9 @@
-"""Module docstring."""
+"""Test suite for the Tensorflow module."""
 
 import tensorflow as tf
 
 
 def split_tensor(x: tf.Tensor, split_size: int, axis: int = -1):
-  """Function docstring."""
-  # TF tf.split splits into num_or_size_splits
+  """Splits tensor."""
   num_splits = x.shape[axis] // split_size
   return tf.split(x, num_splits, axis=axis)

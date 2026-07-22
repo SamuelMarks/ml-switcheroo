@@ -1,1 +1,1 @@
-"""Tests for the Compiler Package."""
+"""Initialization module for the package."""

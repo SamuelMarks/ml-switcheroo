@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Test suite for the Dummy Plugins Transform module."""
 
 import libcst as cst
 import inspect
@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 
 def test_all_plugin_fallbacks():
-  """Auto-generated doc."""
+  """Verifies the behavior of all plugin fallbacks."""
   import ml_switcheroo.plugins.auto_fsdp_wrapper as p1
   import ml_switcheroo.plugins.casting as p2
   import ml_switcheroo.plugins.clipping as p3
@@ -28,12 +28,11 @@ def test_all_plugin_fallbacks():
   plugins = []
   for mod in modules:
     for name, obj in inspect.getmembers(mod):
-      if inspect.isclass(obj) and hasattr(obj, "transform") and "Plugin" in name:
+      if inspect.isclass(obj) and hasattr(obj, "transform") and ("Plugin" in name):
         try:
           plugins.append(obj())
         except Exception:
           pass
-
   ctx = MagicMock()
   nodes = [
     cst.Name("dummy"),
@@ -41,7 +40,6 @@ def test_all_plugin_fallbacks():
     cst.Attribute(value=cst.Name("a"), attr=cst.Name("b")),
     cst.FunctionDef(name=cst.Name("dummy"), params=cst.Parameters(), body=cst.IndentedBlock(body=[])),
   ]
-
   for p in plugins:
     for n in nodes:
       try:

@@ -1,10 +1,8 @@
-"""Module docstring."""
+"""Test suite for the Tensorflow module."""
 
 import tensorflow as tf
 
 
 def gelu_activation(x: tf.Tensor, approximate: bool = False) -> tf.Tensor:
-  """Function docstring."""
-  # <SWITCHEROO_FAILED_TO_TRANS>
+  """Helper to gelu activation."""
   return tf.nn.gelu(x, approximate=approximate)
-  # </SWITCHEROO_FAILED_TO_TRANS>

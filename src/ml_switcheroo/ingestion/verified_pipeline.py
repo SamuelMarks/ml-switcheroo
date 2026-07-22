@@ -40,6 +40,7 @@ def run_verified_pipeline(source_code: str) -> Dict[str, Any]:  # pragma: no cov
     from griffe import parse_module  # pragma: no cover
 
     # pragma: no cover
+    # pragma: no cover
     griffe_available = True  # pragma: no cover
   except ImportError:  # pragma: no cover
     griffe_available = False  # pragma: no cover

@@ -1,13 +1,13 @@
-"""Module docstring."""
+"""Test suite for the Tensorflow module."""
 
 import tensorflow as tf
 
 
 class ResidualBlock(tf.keras.Model):
-  """Class docstring."""
+  """Test suite for the Residual Block component."""
 
   def __init__(self, channels: int):
-    """Function docstring."""
+    """Initializes the ResidualBlock instance."""
     super().__init__()
     self.conv1 = tf.keras.layers.Conv2D(channels, kernel_size=3, padding="same")
     self.bn1 = tf.keras.layers.BatchNormalization()
@@ -15,7 +15,7 @@ class ResidualBlock(tf.keras.Model):
     self.bn2 = tf.keras.layers.BatchNormalization()
 
   def call(self, x: tf.Tensor, training=None) -> tf.Tensor:
-    """Function docstring."""
+    """Helper to call."""
     residual = x
     out = self.conv1(x)
     out = self.bn1(out, training=training)

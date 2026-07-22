@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# Keras Clip Stub
+"""Test suite for the Keras3 module."""

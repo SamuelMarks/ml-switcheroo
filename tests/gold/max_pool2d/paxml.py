@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for the Paxml module."""
 
 from praxis import base_layer
 from praxis.layers import poolings
@@ -6,13 +6,13 @@ import jax.numpy as jnp
 
 
 class MaxPoolModel(base_layer.BaseLayer):
-  """Class docstring."""
+  """Test suite for the Max Pool Model component."""
 
   kernel_size: int = 2
   stride: int = 2
 
   def setup(self):
-    """Function docstring."""
+    """Helper to setup."""
     self.create_child(
       "pool",
       poolings.Pooling.HParams(
@@ -21,5 +21,5 @@ class MaxPoolModel(base_layer.BaseLayer):
     )
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
-    """Function docstring."""
+    """Executes the callable instance."""
     return self.pool(x)

@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for the Paxml module."""
 
 from praxis import base_layer
 from praxis.layers import attentions
@@ -6,20 +6,18 @@ import jax.numpy as jnp
 
 
 class AttentionModel(base_layer.BaseLayer):
-  """Class docstring."""
+  """Test suite for the Attention Model component."""
 
   embed_dim: int = 0
   num_heads: int = 0
 
   def setup(self):
-    """Function docstring."""
-    # <SWITCHEROO_FAILED_TO_TRANS>
+    """Helper to setup."""
     self.create_child(
       "mha",
       attentions.DotProductAttention.HParams(num_heads=self.num_heads, dim_per_head=self.embed_dim // self.num_heads),
     )
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def __call__(self, query: jnp.ndarray, key: jnp.ndarray, value: jnp.ndarray) -> jnp.ndarray:
-    """Function docstring."""
+    """Executes the callable instance."""
     return self.mha(query, key, value)

@@ -184,7 +184,7 @@ class OnnxSpecImporter:
         # (Some lines might be "<dt>X, Y, Z</dt>" but extraction needs singular args)
         arg_name = clean_name.split(" ")[0]
 
-        if arg_name:
+        if arg_name:  # pragma: no cover
           type_hint = self._map_onnx_type(raw_type)
           args.append((arg_name, type_hint))
 

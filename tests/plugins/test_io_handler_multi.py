@@ -1,94 +1,73 @@
-"""Tests for Multi-Backend IO Logic (Numpy, TF)."""
+"""Test suite for the Io Handler Multi module."""
 
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch
-
-# Import TestRewriter shim
 from tests.conftest import TestRewriter as PivotRewriter
-
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.io_handler import transform_io_calls
-
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
 from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
 
 def rewrite_code(rewriter, code):
-  """Executes pipeline."""
+  """Rewrites code."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def base_semantics():
-  """Function docstring."""
+  """Provides a mock base semantics for testing."""
   hooks._HOOKS["io_handler"] = transform_io_calls
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-
-  io_def = {
-    "variants": {
-      "numpy": {"requires_plugin": "io_handler"},
-      "tensorflow": {"requires_plugin": "io_handler"},
-    }
-  }
-
+  io_def = {"variants": {"numpy": {"requires_plugin": "io_handler"}, "tensorflow": {"requires_plugin": "io_handler"}}}
   mgr.get_definition.return_value = ("io", io_def)
   mgr.resolve_variant.side_effect = lambda aid, fw: io_def["variants"].get(fw)
   mgr.is_verified.return_value = True
   return mgr
 
 
-# Factory for rewriter with patched adapter
 def get_rw(mgr, target):
-  """Function docstring."""
+  """Gets rw."""
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)
   return PivotRewriter(mgr, cfg)
 
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_numpy_save(mock_get, base_semantics):
-  """Function docstring."""
+  """Verifies the behavior of NumPy save."""
   mock_get.side_effect = lambda n: NumpyAdapter() if n == "numpy" else None
-
   rw = get_rw(base_semantics, "numpy")
   res = rewrite_code(rw, "def f():\n  torch.save(t, 'f')")
-
   assert "import numpy as np" in res
   assert "np.save(file='f', arr=t)" in res
 
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_numpy_load(mock_get, base_semantics):
-  """Function docstring."""
+  """Verifies the behavior of NumPy load."""
   mock_get.side_effect = lambda n: NumpyAdapter() if n == "numpy" else None
-
   rw = get_rw(base_semantics, "numpy")
   res = rewrite_code(rw, "def f():\n  x = torch.load('f')")
-
   assert "np.load(file='f')" in res
 
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_tensorflow_save(mock_get, base_semantics):
-  """Function docstring."""
-  # Fix import scope for mock
+  """Verifies the behavior of TensorFlow save."""
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
-
   rw = get_rw(base_semantics, "tensorflow")
   res = rewrite_code(rw, "def f():\n  torch.save(d, 'p')")
-
   assert "import tensorflow as tf" in res
   assert "tf.io.write_file('p', d)" in res
 
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_tensorflow_load(mock_get, base_semantics):
-  """Function docstring."""
+  """Verifies the behavior of TensorFlow load."""
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
-
   rw = get_rw(base_semantics, "tensorflow")
   res = rewrite_code(rw, "def f():\n  x = torch.load('p')")
-
   assert "tf.io.read_file('p')" in res

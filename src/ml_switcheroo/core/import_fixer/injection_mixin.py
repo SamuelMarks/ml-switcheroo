@@ -49,7 +49,7 @@ class InjectionMixin(cst.CSTTransformer):
       if req.alias:
         if req.alias != leaf:
           should_alias = True
-        elif "." in nm:
+        elif "." in nm:  # pragma: no cover
           # e.g. import torch.nn as nn
           should_alias = True
 

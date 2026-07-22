@@ -1,32 +1,32 @@
-"""Auto-generated doc."""
+"""Test suite for the Utils Missing module."""
 
 
 def test_utils_missing():
-  """Auto-generated doc."""
+  """Verifies the behavior of utilities missing."""
   import libcst as cst
   from ml_switcheroo.plugins.utils import is_framework_module_node, _extract_root_name
   from ml_switcheroo.core.hooks import HookContext
 
   class DummyAlias:
-    """Auto-generated doc."""
+    """Dummy Alias class for testing purposes."""
 
     def model_dump(self):
-      """Auto-generated doc."""
+      """Mock implementation of model dump."""
       return {"name": "pd"}
 
   class DummyConf:
-    """Auto-generated doc."""
+    """Dummy Conf class for testing purposes."""
 
     alias = DummyAlias()
 
   class DummySM:
-    """Auto-generated doc."""
+    """Dummy S M class for testing purposes."""
 
     _source_registry = {"torch.nn": {}}
     framework_configs = {"pandas": DummyConf()}
 
   class DummyConfigObj:
-    """Auto-generated doc."""
+    """Dummy Config Obj class for testing purposes."""
 
     source_framework = "s"
     target_framework = "t"
@@ -34,13 +34,7 @@ def test_utils_missing():
     effective_target = "t"
 
   ctx = HookContext(DummySM(), DummyConfigObj())
-
-  # 60: empty extract root
   assert is_framework_module_node(cst.Integer("1"), ctx) is False
-
-  # 88-90, 100-102
   assert is_framework_module_node(cst.Name("pd"), ctx) is True
   assert is_framework_module_node(cst.Name("torch"), ctx) is True
-
-  # 113
   assert _extract_root_name(cst.Integer("1")) is None

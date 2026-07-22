@@ -53,7 +53,7 @@ def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
     old_name = ""
     if isinstance(node.func, cst.Name):
       old_name = node.func.value
-    elif isinstance(node.func, cst.Attribute):
+    elif isinstance(node.func, cst.Attribute):  # pragma: no cover
       old_name = node.func.attr.value
     target_api = f"mlx.optimizers.{old_name}"
 

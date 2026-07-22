@@ -60,7 +60,7 @@ def split_outside_brackets(text: str) -> List[str]:
       current = []
     else:
       current.append(char)
-  if current:
+  if current:  # pragma: no cover
     parts.append("".join(current).strip())
   return parts
 

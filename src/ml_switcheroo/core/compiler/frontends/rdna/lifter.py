@@ -44,7 +44,7 @@ class RdnaLifter:
       """Execute implementation detail."""
       nonlocal previous_node_id
       if node_id in seen_ids:
-        return  # pragma: no cover
+        return
 
       node = LogicalNode(id=node_id, kind=kind, metadata=meta or {})
       graph.nodes.append(node)
@@ -98,7 +98,7 @@ class RdnaLifter:
 
         # Return
         if self._RE_RETURN.search(text):
-          if "output" not in seen_ids:
+          if "output" not in seen_ids:  # pragma: no cover
             graph.nodes.append(LogicalNode(id="output", kind="Output"))
             if previous_node_id:
               graph.edges.append(LogicalEdge(source=previous_node_id, target="output"))

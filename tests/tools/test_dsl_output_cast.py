@@ -1,18 +1,15 @@
-"""Tests for ODL Schema Extension: Output Dtype Casting.
-
-Corresponds to Limitation #12 in the Architectural roadmap.
-"""
+"""Test suite for the Dsl Output Cast module."""
 
 from ml_switcheroo.core.dsl import FrameworkVariant
 
 
 def test_variant_output_cast_defaults_none():
-  """Verify 'output_cast' defaults to None."""
+  """Verifies the behavior of variant output cast defaults none."""
   v = FrameworkVariant(api="foo")
   assert v.output_cast is None
 
 
 def test_variant_output_cast_explicit():
-  """Verify 'output_cast' stores string validation."""
+  """Verifies the behavior of variant output cast explicit."""
   v = FrameworkVariant(api="argmax", output_cast="jnp.int64")
   assert v.output_cast == "jnp.int64"

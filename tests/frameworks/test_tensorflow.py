@@ -1,0 +1,104 @@
+"""Test suite for the Tensorflow module."""
+
+from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
+from ml_switcheroo.frameworks.base import InitMode
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+from unittest.mock import patch
+
+
+def test_tensorflow_adapter_init():
+  """Verifies the behavior of TensorFlow adapter initialization."""
+  adapter = TensorFlowAdapter()
+  assert adapter.display_name == "TensorFlow"
+  assert adapter.ui_priority == 30
+  assert adapter.inherits_from is None
+  assert adapter._mode in (InitMode.GHOST, InitMode.LIVE)
+
+
+def test_tensorflow_init_live(monkeypatch):
+  """Verifies the behavior of TensorFlow initialization live."""
+  monkeypatch.setattr("ml_switcheroo.frameworks.tensorflow.tf", True)
+  adapter = TensorFlowAdapter()
+  assert adapter._mode == InitMode.LIVE
+
+
+def test_tensorflow_properties():
+  """Verifies the behavior of TensorFlow properties."""
+  adapter = TensorFlowAdapter()
+  assert adapter.import_alias == ("tensorflow", "tf")
+  ns = adapter.import_namespaces
+  assert "tensorflow" in ns
+  assert ns["tensorflow"].recommended_alias == "tf"
+  config = adapter.test_config
+  assert "import tensorflow as tf" in config["import"]
+  assert adapter.harness_imports == []
+  assert adapter.get_harness_init_code() == ""
+  assert "hasattr(obj, 'numpy')" in adapter.get_to_numpy_code()
+  assert SemanticTier.ARRAY_API in adapter.supported_tiers
+  assert adapter.declared_magic_args == []
+  traits = adapter.structural_traits
+  assert traits.module_base == "keras.Layer"
+  assert traits.forward_method == "call"
+  defs = adapter.definitions
+  assert isinstance(defs, dict)
+  assert "set_seed" in adapter.rng_seed_methods
+
+
+def test_tensorflow_apply_wiring():
+  """Verifies the behavior of TensorFlow apply wiring."""
+  adapter = TensorFlowAdapter()
+  snapshot = {}
+  adapter.apply_wiring(snapshot)
+  assert snapshot == {}
+
+
+def test_tensorflow_device_syntax():
+  """Verifies the behavior of TensorFlow device syntax."""
+  adapter = TensorFlowAdapter()
+  assert "tf.device('GPU:0')" == adapter.get_device_syntax("cuda")
+  assert "tf.device('CPU:0')" == adapter.get_device_syntax("cpu")
+  assert "tf.device('GPU:1')" == adapter.get_device_syntax("cuda", "1")
+  assert "tf.device(f'GPU:{str(var)}')" == adapter.get_device_syntax("cuda", "var")
+
+
+def test_tensorflow_device_check_syntax():
+  """Verifies the behavior of TensorFlow device check syntax."""
+  adapter = TensorFlowAdapter()
+  assert "len(tf.config.list_physical_devices('GPU')) > 0" in adapter.get_device_check_syntax()
+
+
+def test_tensorflow_serialization():
+  """Verifies the behavior of TensorFlow serialization."""
+  adapter = TensorFlowAdapter()
+  assert "import tensorflow as tf" in adapter.get_serialization_imports()
+  assert "tf.io.write_file(f, obj)" == adapter.get_serialization_syntax("save", "f", "obj")
+  assert "tf.io.read_file(f)" == adapter.get_serialization_syntax("load", "f")
+
+
+def test_tensorflow_weight_load():
+  """Verifies the behavior of TensorFlow weight load."""
+  adapter = TensorFlowAdapter()
+  assert "tf.train.load_checkpoint" in adapter.get_weight_load_code("path")
+
+
+def test_tensorflow_convert():
+  """Verifies the behavior of TensorFlow convert."""
+  adapter = TensorFlowAdapter()
+  assert adapter.convert("test") == "test"
+
+
+def test_tensorflow_doc_url():
+  """Verifies the behavior of TensorFlow documentation URL."""
+  adapter = TensorFlowAdapter()
+  url = adapter.get_doc_url("tensorflow.math.abs")
+  assert "tf/math/abs" in url
+
+
+@patch("ml_switcheroo.frameworks.tensorflow_examples.get_tf_tiered_examples")
+def test_tensorflow_tiered_examples(mock_examples):
+  """Verifies the behavior of TensorFlow tiered examples."""
+  mock_examples.return_value = {"tier2_neural": "some_code"}
+  adapter = TensorFlowAdapter()
+  examples = adapter.get_tiered_examples()
+  assert "tier2_neural" in examples
+  mock_examples.assert_called_once()

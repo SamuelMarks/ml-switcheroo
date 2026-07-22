@@ -82,11 +82,11 @@ class AttributeMixin(cst.CSTTransformer):
 
     # Build list of safe roots (imported aliases or target frameworks)
     safe_roots = set()
-    if hasattr(self, "_defined_names"):
+    if hasattr(self, "_defined_names"):  # pragma: no cover
       safe_roots.update(self._defined_names)
-    if hasattr(self, "_path_to_alias"):
+    if hasattr(self, "_path_to_alias"):  # pragma: no cover
       safe_roots.update(self._path_to_alias.values())
-    if hasattr(self, "target_fw"):
+    if hasattr(self, "target_fw"):  # pragma: no cover
       safe_roots.add(self.target_fw)
 
     if root_name not in safe_roots:

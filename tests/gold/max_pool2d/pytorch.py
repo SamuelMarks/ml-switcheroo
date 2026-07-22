@@ -1,17 +1,17 @@
-"""Module docstring."""
+"""Test suite for the Pytorch module."""
 
 import torch
 import torch.nn as nn
 
 
 class MaxPoolModel(nn.Module):
-  """Class docstring."""
+  """Test suite for the Max Pool Model component."""
 
   def __init__(self, kernel_size: int = 2, stride: int = 2):
-    """Function docstring."""
+    """Initializes the MaxPoolModel instance."""
     super().__init__()
     self.pool = nn.MaxPool2d(kernel_size, stride=stride)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Function docstring."""
+    """Helper to forward."""
     return self.pool(x)

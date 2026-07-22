@@ -1,92 +1,59 @@
-"""Tests for MIDL Semantic Nodes.
+"""Test suite for the Latex Nodes module."""
 
-Verifies:
-1.  Data structure integrity.
-2.  Latex serialization logic (Macro generation).
-3.  Container nesting structure.
-"""
-
-from ml_switcheroo.core.latex.nodes import (
-  ModelContainer,
-  MemoryNode,
-  InputNode,
-  ComputeNode,
-  StateOpNode,
-  ReturnNode,
-)
+from ml_switcheroo.core.latex.nodes import ModelContainer, MemoryNode, InputNode, ComputeNode, StateOpNode, ReturnNode
 
 
 def test_memory_node_serialization():
-  r"""Verify \\Attribute rendering."""
-  # self.conv = nn.Conv2d(in=1, out=32)
+  """Verifies the behavior of memory node serialization."""
   node = MemoryNode(node_id="conv", op_type="Conv2d", config={"in": "1", "out": "32"})
   output = node.to_latex()
-
-  assert r"\Attribute{conv}{Conv2d}" in output
+  assert "\\Attribute{conv}{Conv2d}" in output
   assert "in=1" in output
   assert "out=32" in output
 
 
 def test_input_node_serialization():
-  r"""Verify \\Input rendering."""
+  """Verifies the behavior of input node serialization."""
   node = InputNode(name="x", shape="[B, 32]")
   output = node.to_latex()
-  assert output == r"\Input{x}{[B, 32]}"
+  assert output == "\\Input{x}{[B, 32]}"
 
 
 def test_compute_node_serialization():
-  r"""Verify \\Op rendering."""
-  # torch.flatten(x, start=1)
+  """Computes node serialization."""
   node = ComputeNode(node_id="s1", op_type="Flatten", args=["x", "start=1"], shape="[B, 1024]")
   output = node.to_latex()
-
-  # \Op{ID}{Type}{Args}{Shape}
-  assert output == r"\Op{s1}{Flatten}{x, start=1}{[B, 1024]}"
+  assert output == "\\Op{s1}{Flatten}{x, start=1}{[B, 1024]}"
 
 
 def test_state_op_node_serialization():
-  r"""Verify \\StateOp rendering."""
-  # self.conv(x)
+  """Verifies the behavior of state op node serialization."""
   node = StateOpNode(node_id="s2", attribute_id="conv", args=["x"], shape="[B, 32]")
   output = node.to_latex()
-
-  # \StateOp{ID}{Attr}{Args}{Shape}
-  assert output == r"\StateOp{s2}{conv}{x}{[B, 32]}"
+  assert output == "\\StateOp{s2}{conv}{x}{[B, 32]}"
 
 
 def test_return_node_serialization():
-  r"""Verify \\Return rendering."""
+  """Verifies the behavior of return node serialization."""
   node = ReturnNode(target_id="s2")
-  assert node.to_latex() == r"\Return{s2}"
+  assert node.to_latex() == "\\Return{s2}"
 
 
 def test_model_container_rendering():
-  """Verify full model structure with indentation."""
-  # Build complete graph
+  """Verifies the behavior of model container rendering."""
   m_conv = MemoryNode("conv", "Conv2d", {"k": "3"})
   m_fc = MemoryNode("fc", "Linear", {"out": "10"})
-
   i_x = InputNode("x", "[B, 1, 28, 28]")
-
   op_1 = StateOpNode("s1", "conv", ["x"], "[B, 32]")
   op_2 = ComputeNode("s2", "ReLU", ["s1"], "[B, 32]")
   op_3 = StateOpNode("s3", "fc", ["s2"], "[B, 10]")
-
   ret = ReturnNode("s3")
-
   model = ModelContainer(name="Net", children=[m_conv, m_fc, i_x, op_1, op_2, op_3, ret])
-
   code = model.to_latex()
-
-  # Check Environment
-  assert r"\begin{DefModel}{Net}" in code
-  assert r"\end{DefModel}" in code
-
-  # Check Indentation exists (at least 4 spaces)
+  assert "\\begin{DefModel}{Net}" in code
+  assert "\\end{DefModel}" in code
   lines = code.split("\n")
   assert lines[1].startswith("    ")
-
-  # Check content presence
-  assert r"\Attribute{conv}{Conv2d}{k=3}" in code
-  assert r"\Op{s2}{ReLU}{s1}{[B, 32]}" in code
-  assert r"\Return{s3}" in code
+  assert "\\Attribute{conv}{Conv2d}{k=3}" in code
+  assert "\\Op{s2}{ReLU}{s1}{[B, 32]}" in code
+  assert "\\Return{s3}" in code

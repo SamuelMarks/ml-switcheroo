@@ -1,11 +1,11 @@
-"""Auto-generated doc."""
+"""Test suite for the Parser Gap3 module."""
 
 from ml_switcheroo.core.mlir.parser import MlirParser, Token
 from ml_switcheroo.core.mlir.tokens import TokenKind
 
 
 def test_parser_gap3():
-  """Auto-generated doc."""
+  """Verifies the behavior of parser gap3."""
   p = MlirParser("{")
   p.tokens = [
     Token(TokenKind.SYMBOL, "{", 1, 0),

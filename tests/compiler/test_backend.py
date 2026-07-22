@@ -1,10 +1,4 @@
-"""Tests for Compiler Backend Protocol.
-
-Verifies:
-1. CompilerBackend abstract class enforcement.
-2. Implementation of a concrete backend (NoOpBackend).
-3. Interoperability with LogicalGraph IR.
-"""
+"""Test suite for the Backend module."""
 
 import pytest
 from typing import Any
@@ -13,35 +7,29 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 
 class NoOpBackend(CompilerBackend):
-  """A minimal backend that returns the graph node count as 'compiled' output."""
+  """Test suite for the No Op Backend component."""
 
   def compile(self, graph: LogicalGraph) -> Any:
-    """Function docstring."""
+    """Compiles ."""
     return f"Compiled {len(graph.nodes)} nodes."
 
 
 def test_backend_protocol_enforcement():
-  """Verify that CompilerBackend cannot be instantiated directly."""
+  """Verifies the behavior of backend protocol enforcement."""
   with pytest.raises(TypeError):
-    CompilerBackend()  # Abstract class
+    CompilerBackend()
 
 
 def test_noop_backend_compile():
-  """Verify that a concrete backend correctly accepts LogicalGraph."""
+  """Verifies the behavior of noop backend compile."""
   graph = LogicalGraph()
-  graph.nodes = [
-    LogicalNode(id="n1", kind="Input"),
-    LogicalNode(id="n2", kind="Output"),
-  ]
-
+  graph.nodes = [LogicalNode(id="n1", kind="Input"), LogicalNode(id="n2", kind="Output")]
   backend = NoOpBackend()
   result = backend.compile(graph)
-
   assert result == "Compiled 2 nodes."
 
 
 def test_backend_type_hints():
-  """Verify that the abstract method signature matches protocol."""
-  # This is implicit in the abc mechanism, but we verify method presence
+  """Verifies the behavior of backend type hints."""
   assert hasattr(CompilerBackend, "compile")
   assert CompilerBackend.compile.__isabstractmethod__

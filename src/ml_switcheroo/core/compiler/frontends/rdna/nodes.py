@@ -25,7 +25,7 @@ class Operand(RdnaNode):
 
   def __str__(self) -> str:
     """Execute implementation detail."""
-    return ""  # pragma: no cover
+    return ""
 
 
 @dataclass

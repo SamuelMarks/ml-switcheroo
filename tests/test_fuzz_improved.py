@@ -1,4 +1,4 @@
-"""Doc."""
+"""Test suite for the Fuzz Improved module."""
 
 import pytest
 import libcst as cst
@@ -12,7 +12,7 @@ pytest.skip("Too slow for pre-commit", allow_module_level=True)
 
 
 def get_all_classes_and_funcs():
-  """Doc."""
+  """Gets all classes and funcs."""
   callables = []
   for loader, module_name, is_pkg in pkgutil.walk_packages(ml_switcheroo.__path__, ml_switcheroo.__name__ + "."):
     try:
@@ -31,11 +31,9 @@ def get_all_classes_and_funcs():
 
 @pytest.mark.skip(reason="Too slow for pre-commit")
 def test_improved_fuzz():
-  """Doc."""
+  """Verifies the behavior of improved fuzz."""
   with open("massive_code.py", "r") as f:
     code = f.read()
-
-  # Also include all source code from the project to maximize CST types!
   import os
 
   for root, dirs, files in os.walk("src/ml_switcheroo"):
@@ -43,40 +41,31 @@ def test_improved_fuzz():
       if file.endswith(".py"):
         with open(os.path.join(root, file), "r") as f:
           code += f.read() + "\n\n"
-
   tree = cst.parse_module(code)
-
   nodes = []
 
   class NodeCollector(cst.CSTVisitor):
-    """Docstring."""
+    """Test suite for the Node Collector component."""
 
     def on_visit(self, node):
-      """Docstring."""
+      """Helper to on visit."""
       nodes.append(node)
       return True
 
   tree.visit(NodeCollector())
-
-  # select a subset of nodes (e.g., max 100 of each type)
   from collections import defaultdict
 
   node_by_type = defaultdict(list)
   for n in nodes:
     if len(node_by_type[type(n)]) < 10:
       node_by_type[type(n)].append(n)
-
   reduced_nodes = []
   for type_nodes in node_by_type.values():
     reduced_nodes.extend(type_nodes)
-
   callables = get_all_classes_and_funcs()
-
   mock_ctx = MagicMock()
   mock_semantics = MagicMock()
-
   for obj in callables:
-    # If it's a Visitor/Transformer
     if inspect.isclass(obj) and issubclass(obj, (cst.CSTVisitor, cst.CSTTransformer)):
       try:
         inst = obj()
@@ -91,14 +80,10 @@ def test_improved_fuzz():
               inst = obj(mock_semantics, "torch")
             except Exception:
               continue
-
-      # Visit the whole tree
       try:
         tree.visit(inst)
       except Exception:
         pass
-
-    # If it's a normal function, try calling it with different node types
     elif inspect.isfunction(obj):
       for n in reduced_nodes:
         try:
@@ -117,8 +102,6 @@ def test_improved_fuzz():
           obj(n, ctx=mock_ctx)
         except Exception:
           pass
-
-      # Try with Nones
       try:
         obj(None)
       except Exception:

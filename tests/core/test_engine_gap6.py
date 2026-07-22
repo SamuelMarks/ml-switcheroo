@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Test suite for the Engine Gap6 module."""
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
@@ -6,11 +6,10 @@ from unittest.mock import patch, MagicMock
 
 
 def test_engine_target_torch_sharding_rewriter_3():
-  """Auto-generated doc."""
+  """Verifies the behavior of engine target PyTorch sharding rewriter 3."""
   config = RuntimeConfig(enable_sharding=True, enable_graph_optimization=True)
   engine = ASTEngine(source="jax", target="torch", config=config)
   code = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
-
   with patch("ml_switcheroo.core.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
     with patch("ml_switcheroo.core.compiler.sharding_extractor.ShardingExtractionPass.apply"):
       with patch("ml_switcheroo.core.compiler.differ.GraphDiffer.diff", return_value=None):
@@ -22,6 +21,5 @@ def test_engine_target_torch_sharding_rewriter_3():
             g.nodes = ["n1"]
             MockExt.graph = g
             MockExt.node_map = {}
-
             engine._run_rewriter_pipeline(code, MagicMock())
             MockSharding.assert_called()

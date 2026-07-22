@@ -1,8 +1,8 @@
-"""Module docstring."""
+"""Test suite for the Keras3 module."""
 
 import keras
 
 
 def relu_activation(x):
-  """Function docstring."""
+  """Helper to relu activation."""
   return keras.activations.relu(x)

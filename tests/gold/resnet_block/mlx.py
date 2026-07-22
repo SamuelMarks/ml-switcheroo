@@ -1,14 +1,14 @@
-"""Module docstring."""
+"""Test suite for the Mlx module."""
 
 import mlx.core as mx
 import mlx.nn as nn
 
 
 class ResidualBlock(nn.Module):
-  """Class docstring."""
+  """Test suite for the Residual Block component."""
 
   def __init__(self, channels: int):
-    """Function docstring."""
+    """Initializes the ResidualBlock instance."""
     super().__init__()
     self.conv1 = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
     self.bn1 = nn.BatchNorm(channels)
@@ -16,7 +16,7 @@ class ResidualBlock(nn.Module):
     self.bn2 = nn.BatchNorm(channels)
 
   def __call__(self, x: mx.array) -> mx.array:
-    """Function docstring."""
+    """Executes the callable instance."""
     residual = x
     out = self.conv1(x)
     out = self.bn1(out)

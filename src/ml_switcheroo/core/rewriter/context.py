@@ -84,7 +84,7 @@ class RewriterContext:
 
   def _default_arg_injector(self, name: str, annotation: Optional[str]) -> None:
     """Default callback: Appends to the current signature context."""
-    if self.signature_stack:
+    if self.signature_stack:  # pragma: no cover
       # Avoid duplicates in list
       current_ctx = self.signature_stack[-1]
       existing = {n for n, _ in current_ctx.injected_args}

@@ -1,8 +1,4 @@
-"""End-to-End Integration Tests for PaxML (Praxis) Conversion.
-
-These tests focus on the structural rewrite from PyTorch to PaxML/Praxis,
-verifying 3-Tier Layer setup, `setup` method renaming, and functional forward pass.
-"""
+"""Test suite for the Paxml E2E module."""
 
 import pytest
 from pathlib import Path
@@ -15,28 +11,23 @@ EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
 
 
 def _read_code(filename: str) -> str:
-  """Function docstring."""
+  """Helper to  read code."""
   path = EXAMPLES_DIR / filename
   return path.read_text(encoding="utf-8")
 
 
 class PaxE2ESemantics(SemanticsManager):
-  """Mock Manager with PaxML structural traits."""
+  """Test suite for the Pax E2 E Semantics component."""
 
   def __init__(self):
-    """Function docstring."""
+    """Initializes the PaxE2ESemantics instance."""
     self.data = {}
-    # New attributes
     self._providers = {}
     self._source_registry = {}
-
     self.import_data = {}
     self._reverse_index = {}
     self._key_origins = {}
-    # Fix: Initialize required RNG set
     self._known_rng_methods = set()
-
-    # Configure Traits for PaxML
     self.framework_configs = {
       "paxml": {
         "traits": {
@@ -46,7 +37,6 @@ class PaxE2ESemantics(SemanticsManager):
           "requires_super_init": False,
         }
       },
-      # FIX: Define Source Framework Traits so torch.nn.Module is recognized
       "torch": {
         "traits": {
           "module_base": "torch.nn.Module",
@@ -56,12 +46,7 @@ class PaxE2ESemantics(SemanticsManager):
         }
       },
     }
-
-    # --- Neural Network Maps ---
-    # Remap Module
     self._add_op("Module", [], torch="torch.nn.Module", pax="praxis.base_layer.BaseLayer", tier=SemanticTier.NEURAL)
-
-    # Remap Linear
     self._add_op(
       "Linear",
       ["in_features", "out_features"],
@@ -69,86 +54,59 @@ class PaxE2ESemantics(SemanticsManager):
       pax="praxis.layers.Linear",
       tier=SemanticTier.NEURAL,
     )
-
-    # Remap ReLU
     self._add_op("ReLU", [], torch="torch.nn.ReLU", pax="praxis.layers.ReLU", tier=SemanticTier.NEURAL)
-
-    # Imports
     self._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
-
     if "paxml" not in self._providers:
       self._providers["paxml"] = {}
-
     self._providers["paxml"][SemanticTier.NEURAL] = {"root": "praxis", "sub": "layers", "alias": "nn"}
-
-    # Abstract mapping for alias 'nn.Module'
     self._alias("nn.Module", "Module")
     self._alias("nn.Linear", "Linear")
     self._alias("nn.ReLU", "ReLU")
 
-  # Fix: Implement required method for PurityScanner
   def get_all_rng_methods(self):
-    """Function docstring."""
+    """Gets all rng methods."""
     return self._known_rng_methods
 
   def get_framework_config(self, framework: str):
-    """Function docstring."""
+    """Gets framework configuration."""
     return self.framework_configs.get(framework, {})
 
   def _add_op(self, name, args, torch, pax, tier=None):
-    """Function docstring."""
-    self.data[name] = {
-      "std_args": args,
-      "variants": {"torch": {"api": torch}, "paxml": {"api": pax}},
-    }
+    """Helper to  add op."""
+    self.data[name] = {"std_args": args, "variants": {"torch": {"api": torch}, "paxml": {"api": pax}}}
     if torch:
       self._reverse_index[torch] = (name, self.data[name])
     if pax:
       self._reverse_index[pax] = (name, self.data[name])
-
     if tier:
       self._key_origins[name] = tier.value
     else:
       self._key_origins[name] = SemanticTier.ARRAY_API.value
 
   def _alias(self, api_str, abstract_name):
-    """Function docstring."""
+    """Helper to  alias."""
     if abstract_name in self.data:
       self._reverse_index[api_str] = (abstract_name, self.data[abstract_name])
 
 
 @pytest.fixture
 def pax_engine():
-  """Function docstring."""
+  """Provides a mock pax engine for testing."""
   semantics = PaxE2ESemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="paxml", strict_mode=False)
   return ASTEngine(semantics=semantics, config=config)
 
 
 def test_ex06_paxml_full_conversion(pax_engine):
-  """Runs the E2E conversion of ex06_paxml.torch.py."""
+  """Verifies the behavior of ex06 Paxml full conversion."""
   code = _read_code("ex06_paxml.torch.py")
   result = pax_engine.run(code)
-
   assert result.success, f"Conversion failed: {result.errors}"
   generated = result.code
-
-  # 1. Imports
   assert "import praxis" in generated or "from praxis" in generated
-
-  # 2. Class Structure (Inheritance Rewrite)
   assert "class SimpleMLP(praxis.base_layer.BaseLayer):" in generated
-
-  # 3. Setup Method (Renamed from __init__ via Plugin/Traits)
-  # This requires _in_module_class=True during processing
   assert "def setup(self, input_size, hidden_size, num_classes):" in generated
   assert "def __init__" not in generated
-
-  # 4. Super Strip
-  # Requires FuncStructureMixin to trigger off _in_module_class=True
   assert "super().__init__()" not in generated
-
-  # 5. Forward Renaming
-  # With traits loaded correctly, forward should become __call__
   assert "def __call__(self, x):" in generated
   assert "def forward" not in generated

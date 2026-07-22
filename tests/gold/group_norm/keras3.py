@@ -1,18 +1,16 @@
-"""Module docstring."""
+"""Test suite for the Keras3 module."""
 
 import keras
 
 
 class GNModel(keras.Model):
-  """Class docstring."""
+  """Test suite for the G N Model component."""
 
   def __init__(self, num_groups: int, num_channels: int):
-    """Function docstring."""
+    """Initializes the GNModel instance."""
     super().__init__()
-    # <SWITCHEROO_FAILED_TO_TRANS>
     self.gn = keras.layers.GroupNormalization(groups=num_groups)
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def call(self, x):
-    """Function docstring."""
+    """Helper to call."""
     return self.gn(x)

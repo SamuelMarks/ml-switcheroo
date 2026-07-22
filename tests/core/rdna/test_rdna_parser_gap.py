@@ -1,93 +1,82 @@
-"""Auto-generated doc."""
+"""Test suite for the Rdna Parser Gap module."""
 
 import pytest
 from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 
 
 def test_rdna_parser_unexpected_eof():
-  """Auto-generated doc."""
+  """Verifies the behavior of RDNA parser unexpected eof."""
   parser = RdnaParser(".text")
-  # Manually drain
   parser._consume()
   with pytest.raises(SyntaxError, match="Unexpected End of File"):
     parser._consume()
 
 
 def test_rdna_parser_expected_token_mismatch():
-  """Auto-generated doc."""
+  """Verifies the behavior of RDNA parser expected token mismatch."""
   parser = RdnaParser("v_add_f32")
   with pytest.raises(SyntaxError, match="Expected"):
-    parser._consume(kind=1)  # Using a wrong enum if it's enum
+    parser._consume(kind=1)
 
 
 def test_rdna_parser_parse_line_eof():
-  """Auto-generated doc."""
+  """Verifies the behavior of RDNA parser parse line eof."""
   parser = RdnaParser("")
   assert parser._parse_line() is None
 
 
 def test_rdna_parser_bad_token():
-  """Auto-generated doc."""
+  """Verifies the behavior of RDNA parser bad token."""
   parser = RdnaParser(",")
   with pytest.raises(SyntaxError, match="Unexpected token"):
     parser.parse()
 
 
 def test_rdna_parser_directive_eof():
-  """Auto-generated doc."""
+  """Verifies the behavior of RDNA parser directive eof."""
   parser = RdnaParser(".amdgcn_target")
   parser.parse()
 
 
 def test_rdna_parser_instruction_eof():
-  """Auto-generated doc."""
+  """Verifies the behavior of RDNA parser instruction eof."""
   parser = RdnaParser("v_add_f32")
   parser.parse()
 
 
 def test_rdna_parser_operand_eof():
-  """Auto-generated doc."""
+  """Verifies the behavior of RDNA parser operand eof."""
   RdnaParser("v_add_f32 ")
 
 
 def test_rdna_parser_special_reg():
-  """Auto-generated doc."""
+  """Verifies the behavior of RDNA parser special reg."""
   parser = RdnaParser("v_add_f32 exec")
   parser.parse()
 
 
 def test_rdna_parser_coverage_remaining():
-  """Auto-generated doc."""
+  """Verifies the behavior of RDNA parser coverage remaining."""
   parser = RdnaParser(".directive")
   parser.parse()
-
   parser = RdnaParser(".directive\nparam")
   parser.parse()
-
   parser = RdnaParser("v_add_f32 .directive")
   parser.parse()
-
   parser = RdnaParser("v_add_f32 ,")
   with pytest.raises(SyntaxError):
     parser.parse()
 
 
 def test_rdna_parser_directive_eof2():
-  """Auto-generated doc."""
+  """Verifies the behavior of RDNA parser directive eof2."""
   parser = RdnaParser(".directive")
-  # if we force `next_t` to evaluate to False inside the while loop
-  # We can patch `_peek` to return None specifically inside _parse_directive
-
-  # `_parse_directive` calls `_consume` then loops
-  # token list: [DIRECTIVE(.directive)]
-  # inside loop, `_peek()` returns `None`
   parser.parse()
 
 
 def test_rdna_parser_operand_eof2():
-  """Auto-generated doc."""
+  """Verifies the behavior of RDNA parser operand eof2."""
   parser = RdnaParser("v_add_f32 v0")
-  # if we force `_parse_operand` to receive None from `_peek`
   from unittest.mock import patch
 
   with patch.object(parser, "_peek", return_value=None):

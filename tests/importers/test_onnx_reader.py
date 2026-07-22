@@ -1,24 +1,23 @@
-"""Auto-generated doc."""
+"""Test suite for the Onnx Reader module."""
 
 import pytest
-
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
 
 
 @pytest.fixture
 def importer():
-  """Auto-generated doc."""
+  """Provides a mock importer for testing."""
   return OnnxSpecImporter()
 
 
 def test_parse_file_not_found(importer, tmp_path):
-  """Auto-generated doc."""
+  """Parses file not found."""
   missing_file = tmp_path / "missing.md"
   assert importer.parse_file(missing_file) == {}
 
 
 def test_parse_file_found(importer, tmp_path):
-  """Auto-generated doc."""
+  """Parses file found."""
   md_file = tmp_path / "Operators.md"
   md_file.write_text('### <a name="Add"></a>\n**Add**\nDesc')
   result = importer.parse_file(md_file)
@@ -26,7 +25,7 @@ def test_parse_file_found(importer, tmp_path):
 
 
 def test_parse_markdown_duplicate_op(importer, tmp_path):
-  """Auto-generated doc."""
+  """Parses markdown duplicate op."""
   md_file = tmp_path / "ops.md"
   md_file.write_text('### <a name="Add"></a>\n**Add**\nThis is v1\n### <a name="Add"></a>\n**Add**\nThis is v2\n')
   result = importer._parse_markdown(md_file)
@@ -35,19 +34,12 @@ def test_parse_markdown_duplicate_op(importer, tmp_path):
 
 
 def test_extract_summary(importer):
-  """Auto-generated doc."""
-  text = """
-<a name="Add"></a>
-**Add**
-This is a summary
-spanning multiple lines.
-
-#### Inputs
-Some input details.
-"""
+  """Extracts summary."""
+  text = (
+    '\n<a name="Add"></a>\n**Add**\nThis is a summary\nspanning multiple lines.\n\n#### Inputs\nSome input details.\n'
+  )
   summary = importer._extract_summary(text)
   assert summary == "This is a summary spanning multiple lines."
-
   long_text = "A" * 400
   long_summary = importer._extract_summary(long_text)
   assert len(long_summary) == 303
@@ -55,40 +47,25 @@ Some input details.
 
 
 def test_extract_section_keys(importer):
-  """Auto-generated doc."""
-  text = """
-#### Inputs
-<dl>
-<dt><tt>x</tt> : T</dt>
-<dt><b>y</b></dt>
-<dt>z:list of ints</dt>
-<dt><tt>alpha</tt> : float</dt>
-<dt>beta : Any</dt>
-</dl>
-#### Constraints
-"""
+  """Extracts section keys."""
+  text = "\n#### Inputs\n<dl>\n<dt><tt>x</tt> : T</dt>\n<dt><b>y</b></dt>\n<dt>z:list of ints</dt>\n<dt><tt>alpha</tt> : float</dt>\n<dt>beta : Any</dt>\n</dl>\n#### Constraints\n"
   args = importer._extract_section_keys(text, "Inputs")
   assert args == [("x", "Tensor"), ("y", "Any"), ("z", "List[int]"), ("alpha", "float"), ("beta", "Any")]
-
-  # No header found
   assert importer._extract_section_keys(text, "Attributes") == []
 
 
 def test_map_onnx_type(importer):
-  """Auto-generated doc."""
+  """Maps onnx type."""
   assert importer._map_onnx_type("list of ints") == "List[int]"
   assert importer._map_onnx_type("list of floats") == "List[float]"
   assert importer._map_onnx_type("list of strings") == "List[str]"
   assert importer._map_onnx_type("ints") == "List[int]"
   assert importer._map_onnx_type("floats") == "List[float]"
-
   assert importer._map_onnx_type("string") == "str"
   assert importer._map_onnx_type("bool") == "bool"
   assert importer._map_onnx_type("float") == "float"
   assert importer._map_onnx_type("int") == "int"
-
   assert importer._map_onnx_type("T") == "Tensor"
   assert importer._map_onnx_type("tensor(float)") == "float"
   assert importer._map_onnx_type("tensor") == "Tensor"
-
   assert importer._map_onnx_type("Unknown") == "Any"

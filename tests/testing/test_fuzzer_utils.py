@@ -1,8 +1,8 @@
-"""Auto-generated doc."""
+"""Test suite for the Fuzzer Utils module."""
 
 
 def test_is_pipe_top_level():
-  """Auto-generated doc."""
+  """Checks if is pipe top level."""
   from ml_switcheroo.testing.fuzzer.utils import is_pipe_top_level
 
   assert is_pipe_top_level("int | str")
@@ -12,7 +12,7 @@ def test_is_pipe_top_level():
 
 
 def test_split_outside_brackets():
-  """Auto-generated doc."""
+  """Splits outside brackets."""
   from ml_switcheroo.testing.fuzzer.utils import split_outside_brackets
 
   assert split_outside_brackets("int, str") == ["int", "str"]
@@ -21,7 +21,7 @@ def test_split_outside_brackets():
 
 
 def test_resolve_symbolic_shape():
-  """Auto-generated doc."""
+  """Resolves symbolic shape."""
   from ml_switcheroo.testing.fuzzer.utils import resolve_symbolic_shape
 
   sym_map = {}
@@ -30,29 +30,21 @@ def test_resolve_symbolic_shape():
   assert shape[1] == 32
   assert "B" in sym_map
   assert "N" in sym_map
-
-  # Check reuse
   shape2 = resolve_symbolic_shape("B, N", sym_map)
   assert shape2[0] == shape[0]
   assert shape2[1] == shape[2]
-
-  # complex non-ident
   shape3 = resolve_symbolic_shape("N+1", sym_map)
   assert len(shape3) == 1
-
-  # empty
   assert resolve_symbolic_shape("'', \"\"", sym_map) == ()
 
 
 def test_adjust_shape_rank():
-  """Auto-generated doc."""
+  """Verifies the behavior of adjust shape rank."""
   from ml_switcheroo.testing.fuzzer.utils import adjust_shape_rank
 
   assert adjust_shape_rank((2, 2), 2) == (2, 2)
-
   padded = adjust_shape_rank((2, 2), 4)
   assert len(padded) == 4
   assert padded[:2] == (2, 2)
-
   truncated = adjust_shape_rank((2, 2, 2, 2), 2)
   assert truncated == (2, 2)

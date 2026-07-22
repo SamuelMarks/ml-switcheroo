@@ -1,13 +1,4 @@
-"""Tests for Purity Analysis (JAX Safety Checks).
-
-Verifies Feature 051 & Global/Nonlocal Detection:
-1.  Detection of I/O (`print`, `input`).
-2.  Detection of Global state modification.
-3.  Detection of Nonlocal state modification.
-4.  Detection of standard In-place Mutation (`append`, `extend`).
-5.  Detection of Global RNG Seeding (`random.seed`).
-6.  Detection of **Framework Specific Impurities** (`add_`).
-"""
+"""Test suite for the Purity module."""
 
 import libcst as cst
 from ml_switcheroo.analysis.purity import PurityScanner
@@ -15,23 +6,22 @@ from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 
 class MockSemantics:
-  """Class docstring."""
+  """Mock Semantics class for testing purposes."""
 
   def get_all_rng_methods(self):
-    """Test case for get_all_rng_methods."""
+    """Mock implementation of get all rng methods."""
     return {"custom_seed"}
 
   def get_framework_config(self, framework):
-    """Test case for get_framework_config."""
+    """Mock implementation of get framework configuration."""
     if framework == "torch":
       return {"traits": {"impurity_methods": ["add_", "copy_"]}}
     return {}
 
 
 def analyze(code: str, use_semantics: bool = False) -> str:
-  """Helper to parse, scan, and re-emit code."""
+  """Analyzes ."""
   semantics = MockSemantics() if use_semantics else None
-
   tree = cst.parse_module(code)
   scanner = PurityScanner(semantics=semantics, source_fw="torch")
   new_tree = tree.visit(scanner)
@@ -39,7 +29,7 @@ def analyze(code: str, use_semantics: bool = False) -> str:
 
 
 def test_io_detection_print():
-  """Test case for test_io_detection_print."""
+  """Verifies the behavior of I/O detection print."""
   code = "print(x)"
   result = analyze(code)
   assert EscapeHatch.START_MARKER in result
@@ -47,7 +37,7 @@ def test_io_detection_print():
 
 
 def test_mutation_detection_list_append():
-  """Test case for test_mutation_detection_list_append."""
+  """Verifies the behavior of mutation detection list append."""
   code = "my_list.append(item)"
   result = analyze(code)
   assert EscapeHatch.START_MARKER in result
@@ -55,34 +45,23 @@ def test_mutation_detection_list_append():
 
 
 def test_global_keyword_detection():
-  """Test case for test_global_keyword_detection."""
-  # Use multiline string to ensure SimpleStatementLine wrapping occurs
-  code = """
-def f():
-    global x
-    x = 1
-"""
+  """Verifies the behavior of global keyword detection."""
+  code = "\ndef f():\n    global x\n    x = 1\n"
   result = analyze(code)
   assert EscapeHatch.START_MARKER in result
   assert "Global mutation (x)" in result
 
 
 def test_nonlocal_keyword_detection():
-  """Test case for test_nonlocal_keyword_detection."""
-  code = """
-def outer():
-    x = 0
-    def inner():
-        nonlocal x
-        x = 1
-"""
+  """Verifies the behavior of nonlocal keyword detection."""
+  code = "\ndef outer():\n    x = 0\n    def inner():\n        nonlocal x\n        x = 1\n"
   result = analyze(code)
   assert EscapeHatch.START_MARKER in result
   assert "Nonlocal mutation (x)" in result
 
 
 def test_rng_seed_detection_dynamic():
-  """Verification: Dynamic seed methods from SemanticsManager are caught."""
+  """Verifies the behavior of rng seed detection dynamic."""
   code = "lib.custom_seed(123)"
   result = analyze(code, use_semantics=True)
   assert EscapeHatch.START_MARKER in result
@@ -90,17 +69,15 @@ def test_rng_seed_detection_dynamic():
 
 
 def test_framework_specific_impurity():
-  """Verification: Framework-specific mutation methods (add_) defined in schema are caught."""
+  """Verifies the behavior of framework specific impurity."""
   code = "x.add_(y)"
   result = analyze(code, use_semantics=True)
-
-  # Should catch 'add_' because MockSemantics provides it for 'torch' source
   assert EscapeHatch.START_MARKER in result
   assert "State Mutation (. add_)" in result
 
 
 def test_pure_code_passes_clean():
-  """Test case for test_pure_code_passes_clean."""
+  """Verifies the behavior of pure code passes clean."""
   code = "def add(x, y): return x + y"
   result = analyze(code)
   assert EscapeHatch.START_MARKER not in result
@@ -108,7 +85,7 @@ def test_pure_code_passes_clean():
 
 
 def test_file_write_detection():
-  """Test case for test_file_write_detection."""
+  """Verifies the behavior of file write detection."""
   code = "f.write('data')"
   result = analyze(code)
   assert EscapeHatch.START_MARKER in result
@@ -116,27 +93,18 @@ def test_file_write_detection():
 
 
 class IncompleteSemantics:
-  """Mock semantics missing optional methods."""
+  """Test suite for the Incomplete Semantics component."""
 
   def get_framework_config(self, framework):
-    """Auto doc."""
+    """Gets framework configuration."""
     return {"other": "stuff"}
 
 
 def test_purity_missing_branches():
-  """Covers missing branches in PurityScanner."""
-  # Test with semantics missing get_all_rng_methods and traits
+  """Verifies the behavior of purity missing branches."""
   semantics = IncompleteSemantics()
   _scanner = PurityScanner(semantics=semantics, source_fw="torch")
-
-  # Test with semantics but NO source_fw
   _scanner2 = PurityScanner(semantics=MockSemantics(), source_fw=None)
-
-  # Test pure calls that shouldn't trigger anything
-  code = """
-my_func()  # Call with Name, but not I/O
-my_list.copy()  # Call with Attribute, but not mutating
-(lambda x: x)(1)  # Call with func that is not Name or Attribute
-"""
+  code = "\nmy_func()  # Call with Name, but not I/O\nmy_list.copy()  # Call with Attribute, but not mutating\n(lambda x: x)(1)  # Call with func that is not Name or Attribute\n"
   result = analyze(code, use_semantics=False)
   assert EscapeHatch.START_MARKER not in result

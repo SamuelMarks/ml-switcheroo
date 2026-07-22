@@ -1,9 +1,8 @@
-"""Module docstring."""
+"""Test suite for the Keras3 module."""
 
 import keras
 
 
 def bmm_einsum(x, y):
-  """Function docstring."""
-  # Keras ops
+  """Helper to bmm einsum."""
   return keras.ops.einsum("bik,bkj->bij", x, y)

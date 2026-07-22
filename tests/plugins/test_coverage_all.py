@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Test suite for the Coverage All module."""
 
 import libcst as cst
 from ml_switcheroo.core.hooks import HookContext, _HOOKS
@@ -9,18 +9,15 @@ _sem = SemanticsManager()
 
 
 def make_ctx(target="torch"):
-  """Auto-generated doc."""
+  """Helper to make ctx."""
   config = RuntimeConfig(source_framework="jax", target_framework=target)
-  hctx = HookContext(
-    semantics=_sem,
-    config=config,
-  )
+  hctx = HookContext(semantics=_sem, config=config)
   hctx.current_op_id = "Conv2d"
   return hctx
 
 
 def get_ast_nodes():
-  """Auto-generated doc."""
+  """Gets AST nodes."""
   return [
     cst.Call(func=cst.Name("func")),
     cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("y"))),
@@ -62,13 +59,10 @@ def get_ast_nodes():
 
 
 def test_plugin_coverage_fuzz():
-  """Auto-generated doc."""
-  # Fuzz all hooks with lots of configurations and variants
+  """Verifies the behavior of plugin coverage fuzz."""
   nodes = get_ast_nodes()
   targets = ["torch", "jax", "mlx", "tensorflow", "keras", "source_placeholder"]
-
   contexts = {tgt: make_ctx(target=tgt) for tgt in targets}
-
   for hook_name, hook_func in _HOOKS.items():
     for node in nodes:
       for tgt, ctx in contexts.items():

@@ -64,8 +64,8 @@ def handle_convert(
 
   """
   if not input_path.exists():
-    log_error(f"Input not found: {input_path}")  # pragma: no cover
-    return 1  # pragma: no cover
+    log_error(f"Input not found: {input_path}")
+    return 1
 
   # 1. Load Configuration (TOML + CLI overrides)
   config = RuntimeConfig.load(
@@ -81,9 +81,9 @@ def handle_convert(
   # 2. Wire External Plugins
   # If the user defined 'plugin_paths' in pyproject.toml, load them now so hooks are active.
   if config.plugin_paths:
-    loaded_count = load_plugins(extra_dirs=config.plugin_paths)  # pragma: no cover
+    loaded_count = load_plugins(extra_dirs=config.plugin_paths)
     if loaded_count > 0:  # pragma: no cover
-      log_info(f"Loaded {loaded_count} external plugins from configuration.")  # pragma: no cover
+      log_info(f"Loaded {loaded_count} external plugins from configuration.")
 
   semantics = SemanticsManager()
   batch_results: Dict[str, ConversionResult] = {}
@@ -96,34 +96,34 @@ def handle_convert(
       return 1
 
   elif input_path.is_dir():  # pragma: no cover
-    if not output_path:  # pragma: no cover
-      log_error("Directory conversion requires --out destination directory.")  # pragma: no cover
-      return 1  # pragma: no cover
+    if not output_path:
+      log_error("Directory conversion requires --out destination directory.")
+      return 1
 
-    py_files = list(input_path.rglob("*.py"))  # pragma: no cover
-    if not py_files:  # pragma: no cover
-      log_warning(f"No .py files found in {input_path}")  # pragma: no cover
-      return 0  # pragma: no cover
+    py_files = list(input_path.rglob("*.py"))
+    if not py_files:
+      log_warning(f"No .py files found in {input_path}")
+      return 0
 
-    log_info(f"Processing {len(py_files)} files from {input_path}...")  # pragma: no cover
+    log_info(f"Processing {len(py_files)} files from {input_path}...")
 
-    for src_file in py_files:  # pragma: no cover
-      rel_path = src_file.relative_to(input_path)  # pragma: no cover
-      dest_file = output_path / rel_path  # pragma: no cover
+    for src_file in py_files:
+      rel_path = src_file.relative_to(input_path)
+      dest_file = output_path / rel_path
 
-      batch_trace = None  # pragma: no cover
+      batch_trace = None
       if json_trace_path:  # pragma: no cover
         # If doing a directory batch, we cannot write all traces to one file.
         # Heuristic: if trace path provided, write side-by-side with output?
         # Or simply allow trace naming derived from output structure.
         if output_path:  # pragma: no cover
-          batch_trace = (output_path / rel_path).with_suffix(".trace.json")  # pragma: no cover
+          batch_trace = (output_path / rel_path).with_suffix(".trace.json")
 
-      result = _convert_single_file(src_file, dest_file, semantics, verify, config, batch_trace)  # pragma: no cover
-      batch_results[str(rel_path)] = result  # pragma: no cover
+      result = _convert_single_file(src_file, dest_file, semantics, verify, config, batch_trace)
+      batch_results[str(rel_path)] = result
 
-  _print_batch_summary(batch_results)  # pragma: no cover
-  return 0  # pragma: no cover
+  _print_batch_summary(batch_results)
+  return 0
 
 
 def _convert_single_file(
@@ -155,51 +155,51 @@ def _convert_single_file(
     result = engine.run(code)
 
     if json_trace_path and result.trace_events:
-      try:  # pragma: no cover
-        json_trace_path.parent.mkdir(parents=True, exist_ok=True)  # pragma: no cover
-        with open(json_trace_path, "wt", encoding="utf-8") as f:  # pragma: no cover
-          json.dump(result.trace_events, f, indent=2)  # pragma: no cover
-        log_info(f"Trace saved to [path]{json_trace_path}[/path]")  # pragma: no cover
-      except Exception as e:  # pragma: no cover
-        log_error(f"Failed to write trace: {e}")  # pragma: no cover
+      try:
+        json_trace_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(json_trace_path, "wt", encoding="utf-8") as f:
+          json.dump(result.trace_events, f, indent=2)
+        log_info(f"Trace saved to [path]{json_trace_path}[/path]")
+      except Exception as e:
+        log_error(f"Failed to write trace: {e}")
 
     if not result.success:
-      return result  # pragma: no cover
+      return result
 
     effective_out = output_path
     if verify and not effective_out:
       # If verify requested but no output, default to a temp-like name next to source
-      effective_out = input_path.with_name(f"{input_path.stem}_converted.py")  # pragma: no cover
+      effective_out = input_path.with_name(f"{input_path.stem}_converted.py")
 
     if output_path:
       output_path.parent.mkdir(parents=True, exist_ok=True)
       with open(output_path, "wt", encoding="utf-8") as f:
-        f.write(result.code)  # pragma: no cover
-      log_success(f"Transpiled: [path]{input_path}[/path] -> [path]{output_path}[/path]")  # pragma: no cover
+        f.write(result.code)
+      log_success(f"Transpiled: [path]{input_path}[/path] -> [path]{output_path}[/path]")
     else:
       # Print to stdout if no output
-      print(result.code)  # pragma: no cover
+      print(result.code)
 
-    if verify and effective_out:  # pragma: no cover
-      log_info(f"Verifying {effective_out.name}...")  # pragma: no cover
-      harness_gen = HarnessGenerator()  # pragma: no cover
-      harness_path = effective_out.parent / f"verify_{effective_out.stem}.py"  # pragma: no cover
-      harness_gen.generate(  # pragma: no cover
+    if verify and effective_out:
+      log_info(f"Verifying {effective_out.name}...")
+      harness_gen = HarnessGenerator()
+      harness_path = effective_out.parent / f"verify_{effective_out.stem}.py"
+      harness_gen.generate(
         source_file=input_path,
         target_file=effective_out,
         output_harness=harness_path,
         source_fw=config.source_framework,
         target_fw=config.target_framework,
       )
-      proc = subprocess.run([sys.executable, str(harness_path)], capture_output=True, text=True)  # pragma: no cover
-      if proc.returncode == 0:  # pragma: no cover
-        print("   ✨ Verification Passed")  # pragma: no cover
+      proc = subprocess.run([sys.executable, str(harness_path)], capture_output=True, text=True)
+      if proc.returncode == 0:
+        print("   ✨ Verification Passed")
       else:
-        print(f"   ❌ Verification Failed (See {harness_path})")  # pragma: no cover
+        print(f"   ❌ Verification Failed (See {harness_path})")
         # Attach verification error to result so batch summary sees it
-        result.errors.append("Verification Harness Failed")  # pragma: no cover
+        result.errors.append("Verification Harness Failed")
 
-    return result  # pragma: no cover
+    return result
   except Exception as e:
     log_error(f"Failed to convert {input_path}: {e}")
     return ConversionResult(success=False, errors=[str(e)])
@@ -212,25 +212,25 @@ def _print_batch_summary(results: Dict[str, ConversionResult]) -> None:
       results: Dictionary mapping filenames to conversion results.
 
   """
-  total = len(results)  # pragma: no cover
-  successes = sum(1 for r in results.values() if r.success and not r.has_errors)  # pragma: no cover
-  failures = sum(1 for r in results.values() if not r.success or r.has_errors)  # pragma: no cover
+  total = len(results)
+  successes = sum(1 for r in results.values() if r.success and not r.has_errors)
+  failures = sum(1 for r in results.values() if not r.success or r.has_errors)
 
-  if failures == 0:  # pragma: no cover
-    log_success(f"Batch Complete: {successes}/{total} files converted perfectly.")  # pragma: no cover
-    return  # pragma: no cover
+  if failures == 0:
+    log_success(f"Batch Complete: {successes}/{total} files converted perfectly.")
+    return
 
-  table = Table(title="Transpilation Report")  # pragma: no cover
-  table.add_column("File", style="cyan")  # pragma: no cover
-  table.add_column("Status", justify="center")  # pragma: no cover
-  table.add_column("Issues", style="red")  # pragma: no cover
+  table = Table(title="Transpilation Report")
+  table.add_column("File", style="cyan")
+  table.add_column("Status", justify="center")
+  table.add_column("Issues", style="red")
 
-  for filename, res in results.items():  # pragma: no cover
-    if res.success and not res.has_errors:  # pragma: no cover
+  for filename, res in results.items():
+    if res.success and not res.has_errors:
       continue  # pragma: no cover
-    status = "❌ Failed" if not res.success else "⚠️ Warnings"  # pragma: no cover
-    issues = "; ".join(res.errors) if res.errors else "Unknown Error"  # pragma: no cover
-    table.add_row(filename, status, issues)  # pragma: no cover
+    status = "❌ Failed" if not res.success else "⚠️ Warnings"
+    issues = "; ".join(res.errors) if res.errors else "Unknown Error"
+    table.add_row(filename, status, issues)
 
-  console.print(table)  # pragma: no cover
-  console.print(f"\n[bold]Summary:[/bold] {successes} Passed, {failures} with Issues.")  # pragma: no cover
+  console.print(table)
+  console.print(f"\n[bold]Summary:[/bold] {successes} Passed, {failures} with Issues.")

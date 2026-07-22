@@ -1,20 +1,18 @@
-"""Tests for Node Diff Utility."""
+"""Test suite for the Node Diff module."""
 
 import libcst as cst
 from ml_switcheroo.utils.node_diff import capture_node_source, diff_nodes
 
 
 def test_capture_simple_call():
-  """Verify source code capture for a detached Call node."""
+  """Verifies the behavior of capture simple call."""
   node = cst.Call(func=cst.Name("my_func"), args=[cst.Arg(cst.Integer("1"))])
   source = capture_node_source(node)
-
-  # whitespace might vary depending on LibCST defaults, usually no spaces for detached
   assert "my_func(1)" in source
 
 
 def test_capture_complex_assignment():
-  """Verify capture of an assignment structure."""
+  """Verifies the behavior of capture complex assignment."""
   target = cst.AssignTarget(target=cst.Name("x"))
   node = cst.Assign(targets=[target], value=cst.Integer("10"))
   source = capture_node_source(node)
@@ -22,32 +20,24 @@ def test_capture_complex_assignment():
 
 
 def test_diff_nodes_detection():
-  """Verify diff logic returns correct boolean."""
+  """Verifies the behavior of diff nodes detection."""
   node_a = cst.Call(func=cst.Name("foo"))
   node_b = cst.Call(func=cst.Name("bar"))
-
-  before, after, changed = diff_nodes(node_a, node_b)
-
+  (before, after, changed) = diff_nodes(node_a, node_b)
   assert changed is True
   assert before == "foo()"
   assert after == "bar()"
 
 
 def test_diff_nodes_no_change():
-  """Verify no change is detected for identical structures."""
+  """Verifies the behavior of diff nodes no change."""
   node_a = cst.Call(func=cst.Name("foo"))
   node_b = cst.Call(func=cst.Name("foo"))
-
-  _, _, changed = diff_nodes(node_a, node_b)
+  (_, _, changed) = diff_nodes(node_a, node_b)
   assert changed is False
 
 
 def test_capture_fallback():
-  """Verify robust handling of unrepresentable nodes."""
-  # It's hard to force LibCST to fail code generation on valid types,
-  # but we can try passing an object that isn't a CSTNode.
-  # capture_node_source calls code_for_node which expects CSTNode.
-
-  # Pass a string instead of a Node
-  res = capture_node_source("NotANode")  # type: ignore
+  """Verifies the behavior of capture fallback."""
+  res = capture_node_source("NotANode")
   assert "<Unrepresentable Node: str>" in res

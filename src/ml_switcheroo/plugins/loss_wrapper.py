@@ -62,7 +62,7 @@ def transform_loss_reduction(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
       if isinstance(arg.value, cst.SimpleString):
         val = arg.value.value.strip("'").strip('"')
         reduction_mode = val
-      elif isinstance(arg.value, cst.Name):
+      elif isinstance(arg.value, cst.Name):  # pragma: no cover
         # If variable passed (e.g. reduction=my_mode), we can't statically wrap.
         # We assume standard string literals for now.
         pass
@@ -110,7 +110,7 @@ def transform_loss_reduction(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     # Dynamic Lookup: Get the API for "Sum"
     wrapper_api = ctx.lookup_api("Sum")
 
-  elif reduction_mode == "none":
+  elif reduction_mode == "none":  # pragma: no cover
     # No wrapper needed
     return inner_call
 

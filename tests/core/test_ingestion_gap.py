@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Test suite for the Ingestion Gap module."""
 
 import pytest
 from unittest.mock import MagicMock, patch
@@ -6,9 +6,8 @@ from ml_switcheroo.core.ingestion import ingest_code
 
 
 def test_ingestion_adapter_exception():
-  """Auto-generated doc."""
+  """Verifies the behavior of ingestion adapter correctly handling an exception."""
   adapter = MagicMock()
-  # Ensure it's treated as having create_parser
   adapter.create_parser.side_effect = Exception("Adapter Error")
   tracer = MagicMock()
   with pytest.raises(Exception, match="Adapter Error"):
@@ -17,7 +16,7 @@ def test_ingestion_adapter_exception():
 
 
 def test_ingestion_mlir_exception():
-  """Auto-generated doc."""
+  """Verifies the behavior of ingestion MLIR correctly handling an exception."""
   tracer = MagicMock()
   with patch("ml_switcheroo.core.ingestion.MlirParser") as MockMlir:
     MockMlir.side_effect = Exception("MLIR Error")
@@ -27,7 +26,7 @@ def test_ingestion_mlir_exception():
 
 
 def test_ingestion_tikz_exception():
-  """Auto-generated doc."""
+  """Verifies the behavior of ingestion TikZ correctly handling an exception."""
   tracer = MagicMock()
   with patch("ml_switcheroo.core.ingestion.TikzParser") as MockTikz:
     MockTikz.side_effect = Exception("TikZ Error")
@@ -37,27 +36,23 @@ def test_ingestion_tikz_exception():
 
 
 def test_ingestion_tikz_success():
-  """Auto-generated doc."""
+  """Verifies the behavior of ingestion TikZ successfully."""
   tracer = MagicMock()
   with patch("ml_switcheroo.core.ingestion.TikzParser") as MockTikz:
     with patch("ml_switcheroo.core.ingestion.PythonBackend") as MockBackend:
       mock_parser = MagicMock()
       mock_parser.parse.return_value = "Graph"
       MockTikz.return_value = mock_parser
-
       mock_backend = MagicMock()
       mock_backend.generate.return_value = "def my_func(): pass"
       MockBackend.return_value = mock_backend
-
       tree = ingest_code("dummy code", "tikz", "jax", None, tracer)
       assert tree is not None
-
-      # test torch target
       ingest_code("dummy code", "tikz", "keras", None, tracer)
 
 
 def test_ingestion_python_exception():
-  """Auto-generated doc."""
+  """Verifies the behavior of ingestion python correctly handling an exception."""
   tracer = MagicMock()
   with pytest.raises(Exception):
     ingest_code("def foo(:", "torch", "jax", None, tracer)

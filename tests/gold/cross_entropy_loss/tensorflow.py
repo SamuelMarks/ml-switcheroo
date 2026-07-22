@@ -1,11 +1,9 @@
-"""Module docstring."""
+"""Test suite for the Tensorflow module."""
 
 import tensorflow as tf
 
 
 def compute_loss(logits: tf.Tensor, targets: tf.Tensor) -> tf.Tensor:
-  """Function docstring."""
-  # <SWITCHEROO_FAILED_TO_TRANS>
+  """Computes loss."""
   criterion = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
   return criterion(targets, logits)
-  # </SWITCHEROO_FAILED_TO_TRANS>

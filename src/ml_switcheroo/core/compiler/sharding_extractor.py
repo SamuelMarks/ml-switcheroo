@@ -69,7 +69,7 @@ class ShardingExtractionPass:
           # Edge from sharding constraint to output is wired from original source
           new_source = removal_map[e.source]
           new_edge = LogicalEdge(source=new_source, target=e.target)
-          if new_edge not in new_edges:
+          if new_edge not in new_edges:  # pragma: no cover
             new_edges.append(new_edge)
         else:
           new_edges.append(e)
@@ -86,7 +86,7 @@ class ShardingExtractionPass:
     try:
       # Use AST to parse the arguments safely
       tree = ast.parse(code, mode="eval")
-      if isinstance(tree.body, ast.Call):
+      if isinstance(tree.body, ast.Call):  # pragma: no cover
         axes: list[Any] = []
         for arg in tree.body.args:
           if isinstance(arg, ast.Constant):

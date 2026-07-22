@@ -1,14 +1,14 @@
-"""Module docstring."""
+"""Test suite for the Pytorch module."""
 
 import torch
 import torch.nn as nn
 
 
 class ResidualBlock(nn.Module):
-  """Class docstring."""
+  """Test suite for the Residual Block component."""
 
   def __init__(self, channels: int):
-    """Function docstring."""
+    """Initializes the ResidualBlock instance."""
     super().__init__()
     self.conv1 = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
     self.bn1 = nn.BatchNorm2d(channels)
@@ -17,7 +17,7 @@ class ResidualBlock(nn.Module):
     self.bn2 = nn.BatchNorm2d(channels)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Function docstring."""
+    """Helper to forward."""
     residual = x
     out = self.conv1(x)
     out = self.bn1(out)

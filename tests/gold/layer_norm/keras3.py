@@ -1,19 +1,16 @@
-"""Module docstring."""
+"""Test suite for the Keras3 module."""
 
 import keras
 
 
 class LayerNormModel(keras.Model):
-  """Class docstring."""
+  """Test suite for the Layer Norm Model component."""
 
   def __init__(self, normalized_shape: int):
-    """Function docstring."""
+    """Initializes the LayerNormModel instance."""
     super().__init__()
-    # <SWITCHEROO_FAILED_TO_TRANS>
-    # Keras LayerNormalization doesn't explicitly take normalized_shape in the constructor typically
     self.ln = keras.layers.LayerNormalization(axis=-1)
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def call(self, x):
-    """Function docstring."""
+    """Helper to call."""
     return self.ln(x)

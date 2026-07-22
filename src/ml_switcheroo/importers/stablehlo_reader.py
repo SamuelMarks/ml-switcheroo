@@ -96,11 +96,11 @@ class StableHloSpecImporter:
         # We look for the MLIR syntax line inside code blocks (naive heuristic)
         if "stablehlo." in line and "%" in line:
           syntax_match = self._SYNTAX_RE.search(line)
-          if syntax_match:
+          if syntax_match:  # pragma: no cover
             current_def["raw_syntax"] = syntax_match.group("args")
 
     # Finalize last op
-    if current_op and current_def:
+    if current_op and current_def:  # pragma: no cover
       self._finalize_op(semantics, current_op, current_def)
 
     return semantics

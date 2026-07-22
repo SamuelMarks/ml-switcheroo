@@ -1,4 +1,4 @@
-"""Tests for ODL Schema Extension: Verification Mode."""
+"""Test suite for the Dsl Verification module."""
 
 import pytest
 from pydantic import ValidationError
@@ -6,24 +6,18 @@ from ml_switcheroo.core.dsl import OperationDef
 
 
 def test_verification_mode_default():
-  """Function docstring."""
+  """Verifies the behavior of verification mode default."""
   op = OperationDef(operation="Add", description="Addition", std_args=[], variants={})
   assert op.verification_mode == "approx"
 
 
 def test_verification_mode_exact():
-  """Function docstring."""
+  """Verifies the behavior of verification mode exact."""
   op = OperationDef(operation="IsNan", description="Check nan", std_args=[], variants={}, verification_mode="exact")
   assert op.verification_mode == "exact"
 
 
 def test_verification_mode_invalid():
-  """Function docstring."""
+  """Verifies the behavior of verification mode invalid."""
   with pytest.raises(ValidationError):
-    OperationDef(
-      operation="Bad",
-      description="Bad",
-      std_args=[],
-      variants={},
-      verification_mode="loose",  # Invalid
-    )
+    OperationDef(operation="Bad", description="Bad", std_args=[], variants={}, verification_mode="loose")

@@ -69,7 +69,7 @@ def is_framework_module_node(node: cst.CSTNode, ctx: HookContext) -> bool:
   # 2. Check Semantics Registry (Dynamic)
   # This catches frameworks that are registered but not currently selected as source/target,
   # or secondary roots (e.g. "numpy" when targeting Keras).
-  if ctx.semantics:
+  if ctx.semantics:  # pragma: no cover
     # Check loaded framework configs
     configs = getattr(ctx.semantics, "framework_configs", {})
 
@@ -85,7 +85,7 @@ def is_framework_module_node(node: cst.CSTNode, ctx: HookContext) -> bool:
       else:
         # Assuming Pydantic model with .alias attribute
         alias_info = getattr(conf, "alias", None)
-        if alias_info and hasattr(alias_info, "model_dump"):
+        if alias_info and hasattr(alias_info, "model_dump"):  # pragma: no cover
           alias_info = alias_info.model_dump()
 
       if alias_info and isinstance(alias_info, dict):

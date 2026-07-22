@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# PaxML Cond Stub
+"""Test suite for the Paxml module."""

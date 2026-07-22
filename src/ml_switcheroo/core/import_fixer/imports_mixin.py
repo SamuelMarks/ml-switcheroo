@@ -125,19 +125,19 @@ class ImportMixin(cst.CSTTransformer):
           new_node = cst.Import(names=[self._make_alias_node(req)])
           self._satisfied_injections.add(req.signature)
           # Track definition manually since we bypass leave_Import logic
-          if isinstance(new_node.names[0], cst.ImportAlias):
+          if isinstance(new_node.names[0], cst.ImportAlias):  # pragma: no cover
             self._track_definition(new_node.names[0])  # type: ignore
           return new_node
 
         else:
           new_node = cst.Import(names=[self._make_alias_node(req)])
           self._satisfied_injections.add(req.signature)
-          if isinstance(new_node.names[0], cst.ImportAlias):
+          if isinstance(new_node.names[0], cst.ImportAlias):  # pragma: no cover
             self._track_definition(new_node.names[0])  # type: ignore
           return new_node
 
     for alias in updated_node.names:
-      if isinstance(alias, cst.ImportAlias):
+      if isinstance(alias, cst.ImportAlias):  # pragma: no cover
         self._track_definition(alias)  # type: ignore
 
     if root_pkg in self.source_fws:

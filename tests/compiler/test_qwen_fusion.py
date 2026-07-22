@@ -1,4 +1,4 @@
-"""Tests for Qwen-specific Graph Optimization Passes."""
+"""Test suite for the Qwen Fusion module."""
 
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.core.compiler.qwen_fusion import (
@@ -10,7 +10,7 @@ from ml_switcheroo.core.compiler.qwen_fusion import (
 
 
 def test_swiglu_fusion_pass():
-  """Tests fusing gate_proj and up_proj."""
+  """Verifies the behavior of swiglu fusion pass."""
   graph = LogicalGraph(
     nodes=[
       LogicalNode(id="input", kind="Input"),
@@ -27,16 +27,13 @@ def test_swiglu_fusion_pass():
       LogicalEdge("input", "other"),
     ],
   )
-
   pass_ = SwiGLUFusionPass()
   fused_graph = pass_.apply(graph)
-
   node_ids = {n.id for n in fused_graph.nodes}
   assert "mlp_swiglu" in node_ids
   assert "mlp_gate_proj" not in node_ids
   assert "mlp_up_proj" not in node_ids
   assert "other" in node_ids
-
   edges = [(e.source, e.target) for e in fused_graph.edges]
   assert ("input", "mlp_swiglu") in edges
   assert ("mlp_swiglu", "mlp_down_proj") in edges
@@ -44,7 +41,7 @@ def test_swiglu_fusion_pass():
 
 
 def test_swiglu_fusion_pass_no_match():
-  """Tests fusion skips when gate or up are missing."""
+  """Verifies the behavior of swiglu fusion pass no match."""
   graph = LogicalGraph(nodes=[LogicalNode(id="mlp_gate_proj", kind="Linear")])
   pass_ = SwiGLUFusionPass()
   fused_graph = pass_.apply(graph)
@@ -52,7 +49,7 @@ def test_swiglu_fusion_pass_no_match():
 
 
 def test_swiglu_defusion_pass():
-  """Tests splitting swiglu back into gate and up."""
+  """Verifies the behavior of swiglu defusion pass."""
   graph = LogicalGraph(
     nodes=[
       LogicalNode(id="input", kind="Input"),
@@ -60,22 +57,15 @@ def test_swiglu_defusion_pass():
       LogicalNode(id="mlp_down_proj", kind="Linear"),
       LogicalNode(id="other", kind="Other"),
     ],
-    edges=[
-      LogicalEdge("input", "mlp_swiglu"),
-      LogicalEdge("mlp_swiglu", "mlp_down_proj"),
-      LogicalEdge("input", "other"),
-    ],
+    edges=[LogicalEdge("input", "mlp_swiglu"), LogicalEdge("mlp_swiglu", "mlp_down_proj"), LogicalEdge("input", "other")],
   )
-
   pass_ = SwiGLUDefusionPass()
   defused_graph = pass_.apply(graph)
-
   node_ids = {n.id for n in defused_graph.nodes}
   assert "mlp_swiglu" not in node_ids
   assert "mlp_gate_proj" in node_ids
   assert "mlp_up_proj" in node_ids
   assert "other" in node_ids
-
   edges = [(e.source, e.target) for e in defused_graph.edges]
   assert ("input", "mlp_gate_proj") in edges
   assert ("input", "mlp_up_proj") in edges
@@ -85,7 +75,7 @@ def test_swiglu_defusion_pass():
 
 
 def test_vision_patch_fusion_pass():
-  """Tests elevating conv patch to vision patch embedding."""
+  """Verifies the behavior of vision patch fusion pass."""
   graph = LogicalGraph(
     nodes=[
       LogicalNode(id="input", kind="Input"),
@@ -93,21 +83,14 @@ def test_vision_patch_fusion_pass():
       LogicalNode(id="flatten", kind="Flatten"),
       LogicalNode(id="other", kind="Other"),
     ],
-    edges=[
-      LogicalEdge("input", "patch_conv"),
-      LogicalEdge("patch_conv", "flatten"),
-      LogicalEdge("input", "other"),
-    ],
+    edges=[LogicalEdge("input", "patch_conv"), LogicalEdge("patch_conv", "flatten"), LogicalEdge("input", "other")],
   )
-
   pass_ = VisionPatchEmbeddingFusionPass()
   fused_graph = pass_.apply(graph)
-
   node_ids = {n.id for n in fused_graph.nodes}
   assert "patch_patch_embed" in node_ids
   assert "patch_conv" not in node_ids
   assert "other" in node_ids
-
   edges = [(e.source, e.target) for e in fused_graph.edges]
   assert ("input", "patch_patch_embed") in edges
   assert ("patch_patch_embed", "flatten") in edges
@@ -115,7 +98,7 @@ def test_vision_patch_fusion_pass():
 
 
 def test_vision_patch_defusion_pass():
-  """Tests lowering vision patch embedding back to conv."""
+  """Verifies the behavior of vision patch defusion pass."""
   graph = LogicalGraph(
     nodes=[
       LogicalNode(id="input", kind="Input"),
@@ -129,15 +112,12 @@ def test_vision_patch_defusion_pass():
       LogicalEdge("input", "other"),
     ],
   )
-
   pass_ = VisionPatchEmbeddingDefusionPass()
   defused_graph = pass_.apply(graph)
-
   node_ids = {n.id for n in defused_graph.nodes}
   assert "patch_patch_embed" not in node_ids
   assert "patch_conv" in node_ids
   assert "other" in node_ids
-
   edges = [(e.source, e.target) for e in defused_graph.edges]
   assert ("input", "patch_conv") in edges
   assert ("patch_conv", "flatten") in edges

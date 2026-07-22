@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# Keras Scan Stub
+"""Test suite for the Keras3 module."""

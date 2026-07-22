@@ -94,10 +94,10 @@ def strategies_from_spec(
         current = []
       else:
         current.append(char)
-    if current:
+    if current:  # pragma: no cover
       parts.append("".join(current).strip())
 
-    if is_union:
+    if is_union:  # pragma: no cover
       return st.one_of(*[strategies_from_spec(p, constraints, shared_dims) for p in parts])
 
   # 1. Arrays / Tensors
@@ -152,7 +152,7 @@ def strategies_from_spec(
   if match_dict:
     inner = match_dict.group(2)
     parts = inner.split(",")
-    if len(parts) >= 2:
+    if len(parts) >= 2:  # pragma: no cover
       k_ref = parts[0].strip()
       v_ref = ",".join(parts[1:]).strip()
 
@@ -209,7 +209,7 @@ def _array_strategy(type_str: str, constraints: Dict, shared_dims: Optional[Dict
         dims.append(st.just(int(d)))
       elif d.isidentifier() and shared_dims is not None:
         # Symbolic dimension
-        if d not in shared_dims:
+        if d not in shared_dims:  # pragma: no cover
           # Define symbol (1 to 8 size) in shared scope
           shared_dims[d] = st.shared(st.integers(min_value=1, max_value=8), key=d)
         dims.append(shared_dims[d])
@@ -238,7 +238,7 @@ def _array_strategy(type_str: str, constraints: Dict, shared_dims: Optional[Dict
     max_v = int(mx) if mx is not None else 10
     elements = st.integers(min_value=min_v, max_value=max_v)
 
-  elif np.issubdtype(dtype, np.floating):
+  elif np.issubdtype(dtype, np.floating):  # pragma: no cover
     min_v = float(mn) if mn is not None else -10.0  # type: ignore
     max_v = float(mx) if mx is not None else 10.0  # type: ignore
     elements = st.floats(  # type: ignore

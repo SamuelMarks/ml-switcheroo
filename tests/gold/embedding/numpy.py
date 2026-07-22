@@ -1,20 +1,15 @@
-"""Module docstring."""
+"""Test suite for the Numpy module."""
 
 import numpy as np
 
 
 class EmbeddingModel:
-  """Class docstring."""
+  """Test suite for the Embedding Model component."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int):
-    """Function docstring."""
-    # <SWITCHEROO_FAILED_TO_TRANS>
+    """Initializes the EmbeddingModel instance."""
     self.weight = np.random.randn(num_embeddings, embedding_dim)
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def __call__(self, x: np.ndarray) -> np.ndarray:
-    """Function docstring."""
-    # <SWITCHEROO_FAILED_TO_TRANS>
-    # Fancy indexing is supported in numpy
+    """Executes the callable instance."""
     return self.weight[x]
-    # </SWITCHEROO_FAILED_TO_TRANS>

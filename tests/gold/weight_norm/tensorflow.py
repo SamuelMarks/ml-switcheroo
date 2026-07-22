@@ -1,20 +1,17 @@
-"""Module docstring."""
+"""Test suite for the Tensorflow module."""
 
 import tensorflow as tf
 import tensorflow_addons as tfa
 
 
 class WNModel(tf.keras.Model):
-  """Class docstring."""
+  """Test suite for the W N Model component."""
 
   def __init__(self, in_features: int, out_features: int):
-    """Function docstring."""
+    """Initializes the WNModel instance."""
     super().__init__()
-    # <SWITCHEROO_FAILED_TO_TRANS>
-    # TF requires an external Addons wrapper or manual implementation
     self.linear = tfa.layers.WeightNormalization(tf.keras.layers.Dense(out_features))
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def call(self, x: tf.Tensor) -> tf.Tensor:
-    """Function docstring."""
+    """Helper to call."""
     return self.linear(x)

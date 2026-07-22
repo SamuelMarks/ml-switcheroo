@@ -1,18 +1,17 @@
-"""Tests for Recursive CST Literal Generation in FrameworkInjector."""
+"""Test suite for the Injector Recursion module."""
 
 import libcst as cst
 from ml_switcheroo.tools.injector_fw import convert_to_cst_literal
 
 
 def render_node(node: cst.CSTNode) -> str:
-  """Helper to render standalone node source."""
+  """Renders node."""
   module = cst.parse_module("")
   return module.code_for_node(node)
 
 
 def test_primitive_recursion():
-  """Function docstring."""
-  # Int/Float/Bool/Str/None
+  """Verifies the behavior of primitive recursion."""
   assert render_node(convert_to_cst_literal(1)) == "1"
   assert render_node(convert_to_cst_literal(1.5)) == "1.5"
   assert render_node(convert_to_cst_literal(True)) == "True"
@@ -21,8 +20,7 @@ def test_primitive_recursion():
 
 
 def test_list_recursion():
-  """Function docstring."""
-  # Simple list
+  """Verifies the behavior of list recursion."""
   val = [1, 2, "a"]
   node = convert_to_cst_literal(val)
   code = render_node(node)
@@ -30,24 +28,19 @@ def test_list_recursion():
 
 
 def test_tuple_recursion():
-  """Function docstring."""
-  # Nested tuple
+  """Verifies the behavior of tuple recursion."""
   val = (1, (2, 3))
   node = convert_to_cst_literal(val)
   code = render_node(node)
-  # Note: LibCST rendering might vary slighty on spacing, but structural match is key
-  # We clean whitespace for assertion
   clean = code.replace(" ", "")
   assert clean == "(1,(2,3))"
 
 
 def test_dict_recursion():
-  """Function docstring."""
-  # Dictionary with mixed types
+  """Verifies the behavior of dictionary recursion."""
   val = {"alpha": 0.5, "dims": (1, 2), "flag": True}
   node = convert_to_cst_literal(val)
   code = render_node(node)
-
   clean = code.replace(" ", "")
   assert '"alpha":0.5' in clean
   assert '"dims":(1,2)' in clean
@@ -55,8 +48,7 @@ def test_dict_recursion():
 
 
 def test_deep_nesting():
-  """Function docstring."""
-  # Test depth
+  """Verifies the behavior of deep nesting."""
   val = [{"a": [1, 2]}, (None,)]
   node = convert_to_cst_literal(val)
   code = render_node(node)

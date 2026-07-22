@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for the Mlir Parser Extra2 module."""
 
 import pytest
 from ml_switcheroo.core.mlir.parser import MlirParser, Token
@@ -6,57 +6,45 @@ from ml_switcheroo.core.mlir.tokens import TokenKind
 
 
 def test_cov_287():
-  """Function docstring."""
-  # tk.text == Symbol.RBRACE and not is_top_level breaks at 280.
-  # To hit 287, tk.text == RBRACE and is_top_level=True!
+  """Verifies the behavior of cov 287."""
   parser = MlirParser("}")
   blk = parser.parse_block(is_top_level=True)
   assert len(blk.operations) == 0
 
 
 def test_cov_296_to_298():
-  """Function docstring."""
-  # offset loop in _is_region_start
-  # need { followed by whitespace/comments, then something else.
+  """Verifies the behavior of cov 296 to 298."""
   parser = MlirParser("{ \n // comment \n a = 1 }")
-  # it needs to be triggered from inside parse_operation!
   parser.parse_operation()
-  # "{" a = 1 "}" is parsed as region? No, "a" has no = after identifier scan.
-  # Actually just call _is_region_start directly:
   parser2 = MlirParser("{ \n // comment \n ^bb0: }")
-  parser2.consume()  # consume {
+  parser2.consume()
   assert parser2._is_region_start()
 
 
 def test_cov_324():
-  """Function docstring."""
-  # in _is_region_start, identifier followed by = -> dictionary
+  """Verifies the behavior of cov 324."""
   parser = MlirParser("{ a = 1 }")
   parser.consume()
   assert not parser._is_region_start()
 
 
 def test_cov_342():
-  """Function docstring."""
-  # EOF, NEWLINE, BLOCK_LABEL in lookahead
+  """Verifies the behavior of cov 342."""
   parser = MlirParser("%0 \n")
   assert parser.parse_operation() is None
-
   parser2 = MlirParser("%0 ^bb0: ")
   assert parser2.parse_operation() is None
 
 
 def test_cov_371():
-  """Function docstring."""
+  """Verifies the behavior of cov 371."""
   parser = MlirParser("%0 [ = sw.op")
   with pytest.raises(SyntaxError):
     parser.parse_operation()
 
 
 def test_cov_380():
-  """Function docstring."""
-  # op_name += "." + consume().text
-  # To avoid the tokenizer error, let's inject tokens.
+  """Verifies the behavior of cov 380."""
   parser = MlirParser("")
   parser.tokens = [
     Token(TokenKind.STRING, '"my"', 1, 1),
@@ -70,31 +58,26 @@ def test_cov_380():
 
 
 def test_cov_416():
-  """Function docstring."""
-  # if self.match(Symbol.RBRACE): break
+  """Verifies the behavior of cov 416."""
   parser = MlirParser("sw.op { }")
   op = parser.parse_operation()
   assert len(op.attributes) == 0
 
 
 def test_cov_431():
-  """Function docstring."""
-  # if tk.text == Symbol.LBRACKET:
+  """Verifies the behavior of cov 431."""
   parser = MlirParser("sw.op { a = [1] }")
   op = parser.parse_operation()
   assert op.attributes[0].value == "[1]"
 
 
 def test_cov_534():
-  """Function docstring."""
-  # if match(RBRACE): break  in parse_region empty block defensive loop
+  """Verifies the behavior of cov 534."""
   parser = MlirParser("{ }")
   parser.parse_region()
 
 
 def test_cov_543():
-  """Function docstring."""
-  # if match(RBRACE): self.consume() at end of parse_region
-  # This is hit when parse_region finishes and consumes }
+  """Verifies the behavior of cov 543."""
   parser = MlirParser("{ sw.op }")
   parser.parse_region()

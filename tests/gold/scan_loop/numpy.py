@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# NumPy Scan Stub
+"""Test suite for the Numpy module."""

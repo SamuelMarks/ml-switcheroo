@@ -1,9 +1,8 @@
-"""Module docstring."""
+"""Test suite for the Pytorch module."""
 
 import torch
 
 
 def bmm_einsum(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-  """Function docstring."""
-  # PyTorch
+  """Helper to bmm einsum."""
   return torch.einsum("bik,bkj->bij", x, y)

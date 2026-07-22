@@ -1,4 +1,4 @@
-"""Tests for ODL Default Argument Injection with Rich Types."""
+"""Test suite for the Rewriter Defaults module."""
 
 import pytest
 import libcst as cst
@@ -9,7 +9,7 @@ from ml_switcheroo.config import RuntimeConfig
 
 @pytest.fixture
 def manager():
-  """Mock Semantics Manager with ODL definitions containing rich defaults."""
+  """Provides a mock manager for testing."""
   mgr = SemanticsManager()
   mgr.data = {}
   mgr._reverse_index = {}
@@ -17,59 +17,47 @@ def manager():
   mgr.framework_configs = {}
   if not hasattr(mgr, "import_data"):
     mgr.import_data = {}
-
-  # 1. LayerNorm: float default (native float type in python)
   op = {
-    "std_args": [{"name": "x"}, {"name": "eps", "type": "float", "default": 1e-5}],
+    "std_args": [{"name": "x"}, {"name": "eps", "type": "float", "default": 1e-05}],
     "variants": {
       "torch": {"api": "torch.nn.LayerNorm", "args": {"eps": "eps"}},
       "jax": {"api": "jax.nn.layer_norm", "args": {"eps": "epsilon"}},
     },
   }
-
   mgr.data["LayerNorm"] = op
   mgr._reverse_index["torch.nn.LayerNorm"] = ("LayerNorm", op)
-
-  # 2. Dropout
   op_drop = {
     "std_args": [{"name": "x"}, {"name": "p", "type": "float", "default": 0.5}],
-    "variants": {
-      "torch": {"api": "torch.dropout"},
-      "jax": {"api": "jax.random.bernoulli", "args": {"p": "p"}},
-    },
+    "variants": {"torch": {"api": "torch.dropout"}, "jax": {"api": "jax.random.bernoulli", "args": {"p": "p"}}},
   }
   mgr.data["Dropout"] = op_drop
   mgr._reverse_index["torch.dropout"] = ("Dropout", op_drop)
-
-  # Mock aliasing
   mgr.framework_configs["torch"] = {"alias": {"module": "torch", "name": "t"}}
   mgr.framework_configs["jax"] = {}
-
   return mgr
 
 
 @pytest.fixture
 def rewriter(manager):
-  """Function docstring."""
+  """Provides a mock rewriter for testing."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(manager, config)
 
 
 def rewrite(rewriter, code):
-  """Function docstring."""
+  """Rewrites ."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 def test_inject_default_float(rewriter):
-  """Function docstring."""
+  """Injects default float."""
   code = "import torch\ny = torch.nn.LayerNorm(x)"
   res = rewrite(rewriter, code)
-  # Check for valid float repr
   assert "epsilon=1e-05" in res or "epsilon=0.00001" in res
 
 
 def test_preserve_explicit_eps(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of preserve explicit eps."""
   code = "import torch\ny = torch.nn.LayerNorm(x, eps=0.1)"
   res = rewrite(rewriter, code)
   assert "epsilon=0.1" in res
@@ -77,7 +65,7 @@ def test_preserve_explicit_eps(rewriter):
 
 
 def test_inject_default_dropout(rewriter):
-  """Function docstring."""
+  """Injects default dropout."""
   code = "import torch\ny = torch.dropout(x)"
   res = rewrite(rewriter, code)
   assert "p=0.5" in res

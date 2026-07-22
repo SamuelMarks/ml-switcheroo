@@ -89,7 +89,7 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.F
           if limit <= 16:  # Arbitrary small constant for safety
             is_static_range = True
         except ValueError:  # pragma: no cover
-          pass
+          pass  # pragma: no cover
 
   if not is_static_range:
     # Fallback to standard handler or return node

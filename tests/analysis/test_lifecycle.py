@@ -1,11 +1,11 @@
-"""Tests for InitializationTracker."""
+"""Test suite for the Lifecycle module."""
 
 import libcst as cst
 from ml_switcheroo.analysis.lifecycle import InitializationTracker
 
 
 def scan_code(code: str) -> list[str]:
-  """Test case for scan_code."""
+  """Scans code."""
   wrapper = cst.parse_module(code)
   tracker = InitializationTracker()
   wrapper.visit(tracker)
@@ -13,27 +13,15 @@ def scan_code(code: str) -> list[str]:
 
 
 def test_valid_init_usage():
-  """Test case for test_valid_init_usage."""
-  code = """
-class Model:
-    def __init__(self):
-        self.conv = 1
-    def forward(self, x):
-        return self.conv(x)
-"""
+  """Verifies the behavior of valid initialization usage."""
+  code = "\nclass Model:\n    def __init__(self):\n        self.conv = 1\n    def forward(self, x):\n        return self.conv(x)\n"
   warnings = scan_code(code)
   assert not warnings
 
 
 def test_missing_init():
-  """Test case for test_missing_init."""
-  code = """
-class Model:
-    def __init__(self):
-        pass
-    def forward(self, x):
-        return self.conv(x)
-"""
+  """Verifies the behavior of missing initialization."""
+  code = "\nclass Model:\n    def __init__(self):\n        pass\n    def forward(self, x):\n        return self.conv(x)\n"
   warnings = scan_code(code)
   assert len(warnings) == 1
   assert "Members used in forward/call but not initialized" in warnings[0]
@@ -41,28 +29,18 @@ class Model:
 
 
 def test_call_alias():
-  """Test case for test_call_alias."""
-  code = """
-class Model:
-    def __init__(self):
-        pass
-    def __call__(self, x):
-        return self.missing
-"""
+  """Verifies the behavior of call alias."""
+  code = (
+    "\nclass Model:\n    def __init__(self):\n        pass\n    def __call__(self, x):\n        return self.missing\n"
+  )
   warnings = scan_code(code)
   assert len(warnings) == 1
   assert "missing" in warnings[0]
 
 
 def test_multiple_missing():
-  """Test case for test_multiple_missing."""
-  code = """
-class Model:
-    def __init__(self):
-        self.ok = 1
-    def forward(self):
-        return self.ok + self.missing1 + self.missing2
-"""
+  """Verifies the behavior of multiple missing."""
+  code = "\nclass Model:\n    def __init__(self):\n        self.ok = 1\n    def forward(self):\n        return self.ok + self.missing1 + self.missing2\n"
   warnings = scan_code(code)
   assert len(warnings) == 1
   assert "missing1" in warnings[0]
@@ -70,117 +48,54 @@ class Model:
 
 
 def test_annotated_assignment():
-  """Test case for test_annotated_assignment."""
-  code = """
-class Model:
-    def __init__(self):
-        self.x: int = 1
-    def forward(self):
-        return self.x
-"""
+  """Verifies the behavior of annotated assignment."""
+  code = (
+    "\nclass Model:\n    def __init__(self):\n        self.x: int = 1\n    def forward(self):\n        return self.x\n"
+  )
   warnings = scan_code(code)
   assert not warnings
 
 
 def test_tuple_unpacking_assignment():
-  """Test case for test_tuple_unpacking_assignment."""
-  code = """
-class Model:
-    def __init__(self):
-        self.x, self.y = 1, 2
-    def forward(self):
-        return self.x + self.y
-"""
+  """Verifies the behavior of tuple unpacking assignment."""
+  code = "\nclass Model:\n    def __init__(self):\n        self.x, self.y = 1, 2\n    def forward(self):\n        return self.x + self.y\n"
   warnings = scan_code(code)
   assert not warnings
 
 
 def test_nested_classes():
-  """Test case for test_nested_classes."""
-  code = """
-class Outer:
-    def __init__(self):
-        self.outer_val = 1
-
-    class Inner:
-        def __init__(self):
-            pass
-        def forward(self):
-            return self.inner_missing  # Missing in Inner
-
-    def forward(self):
-        return self.outer_val
-"""
+  """Verifies the behavior of nested classes."""
+  code = "\nclass Outer:\n    def __init__(self):\n        self.outer_val = 1\n\n    class Inner:\n        def __init__(self):\n            pass\n        def forward(self):\n            return self.inner_missing  # Missing in Inner\n\n    def forward(self):\n        return self.outer_val\n"
   warnings = scan_code(code)
   assert len(warnings) == 1
   assert "Class 'Inner'" in warnings[0]
   assert "inner_missing" in warnings[0]
-  # Use distinct name 'outer_val' because prose contains 'a', 'b', etc.
   assert "outer_val" not in warnings[0]
 
 
 def test_ignore_assignments_in_forward():
-  """Even if assigned in forward, it should technically be in init for static guarantees.
-
-  But specifically, we track assignments in __init__.
-  If assigned in forward AND used in forward, it's missed by __init__ scan,
-  so it should warn (as dynamic definition).
-  """
-  code = """
-class Model:
-    def __init__(self):
-        pass
-    def forward(self):
-        self.dynamic = 1
-        return self.dynamic
-"""
+  """Verifies the behavior of ignore assignments in forward."""
+  code = "\nclass Model:\n    def __init__(self):\n        pass\n    def forward(self):\n        self.dynamic = 1\n        return self.dynamic\n"
   warnings = scan_code(code)
-  # self.dynamic is used, but not found in __init__. Should warn.
   assert len(warnings) == 1
   assert "dynamic" in warnings[0]
 
 
 def test_module_level_constructs():
-  """Scenario: Functions, assignments, and attributes exist outside a class.
-
-  Expectation: Scope stack is empty. Lifecycle analysis safely ignores them.
-  """
-  code = """
-def my_func():
-    pass
-
-def __init__():
-    pass
-
-self.x = 1
-self.y: int = 2
-
-z = self.x
-"""
+  """Verifies the behavior of module level constructs."""
+  code = "\ndef my_func():\n    pass\n\ndef __init__():\n    pass\n\nself.x = 1\nself.y: int = 2\n\nz = self.x\n"
   issues = scan_code(code)
   assert len(issues) == 0
 
 
 def test_defensive_leave_classdef():
-  """Auto-generated doc."""
+  """Verifies the behavior of defensive leave classdef."""
   tracker = InitializationTracker()
   tracker.leave_ClassDef(None)
 
 
 def test_other_branches():
-  """Hits remaining missing branches."""
-  code = """
-class Model:
-    def __init__(self):
-        x = 1
-        self.ok = 1
-
-    def other_method(self):
-        self.dynamic: int = 1
-
-    def forward(self, input_tensor):
-        shape = input_tensor.shape
-        return self.ok
-"""
+  """Verifies the behavior of other branches."""
+  code = "\nclass Model:\n    def __init__(self):\n        x = 1\n        self.ok = 1\n\n    def other_method(self):\n        self.dynamic: int = 1\n\n    def forward(self, input_tensor):\n        shape = input_tensor.shape\n        return self.ok\n"
   warnings = scan_code(code)
   assert not warnings

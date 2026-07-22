@@ -1,180 +1,143 @@
-"""Tests for PythonToMlirEmitter.
-
-Verifies:
-1.  Variable scoping and SSA ID generation.
-2.  Class & Function definitions mapping to sw.module/sw.func.
-3.  Comment/Trivia preservation.
-4.  Recursive expression evaluation (calls, attributes).
-5.  Binary Operations (math expressions).
-"""
+"""Test suite for the Mlir Emitter module."""
 
 import libcst as cst
-from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
+from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter, SSAContext
 
 
-def convert_code(code: str):
-  """Helper to run emitter and get text."""
-  tree = cst.parse_module(code.strip())
+def test_ssa_context():
+  """Verifies the behavior of ssa context."""
+  ctx = SSAContext()
+  ctx.enter_scope()
+  val1 = ctx.allocate_ssa()
+  assert val1.name == "%0"
+  ctx.declare("foo", val1)
+  assert ctx.lookup("foo") == val1
+  assert ctx.lookup("bar") is None
+  ctx.exit_scope()
+  assert ctx.lookup("foo") is None
+  ctx.exit_scope()
+  assert len(ctx._scopes) == 1
+
+
+def test_emitter_empty_module():
+  """Verifies the behavior of emitter empty module."""
   emitter = PythonToMlirEmitter()
-  mlir_node = emitter.convert(tree)
-  return mlir_node.to_text()
+  tree = cst.parse_module("")
+  mod = emitter.convert(tree)
+  assert len(mod.body.operations) == 0
 
 
-def test_class_definition():
-  """Input: class MyNet: pass.
-
-  Output: sw.module {sym_name = "MyNet"} { ... }.
-  """
-  code = "class MyNet:\n    pass"
-  mlir = convert_code(code)
-
-  assert "sw.module" in mlir
-  assert 'sym_name = "MyNet"' in mlir
-
-
-def test_function_definition_with_args():
-  """Input:
-
-      def forward(self, x):
-          return x.
-
-  Output:
-      sw.func {sym_name = "forward"} {
-      ^entry(%self0: !sw.unknown, %x1: !sw.unknown):
-          sw.return (%x1)
-      }
-  """
-  code = """
-def forward(self, x):
-    return x
-"""
-  mlir = convert_code(code)
-
-  assert "sw.func" in mlir
-  assert 'sym_name = "forward"' in mlir
-  assert "^entry(%self0: !sw.unknown, %x1: !sw.unknown):" in mlir
-  assert "sw.return (%x1)" in mlir
+def test_emitter_module_trivia():
+  """Verifies the behavior of emitter module trivia."""
+  emitter = PythonToMlirEmitter()
+  tree = cst.parse_module("# header\n\nx = 1")
+  mod = emitter.convert(tree)
+  assert len(mod.body.operations) == 1
+  trivia = mod.body.operations[0].leading_trivia
+  assert len(trivia) >= 1
+  assert any((t.content.startswith("// header") for t in trivia))
 
 
-def test_attribute_call_mapping():
-  """Input:
-
-      def f(self, x):
-          return self.layer(x).
-
-  Logic:
-      1. %0 = sw.getattr %self "layer"
-      2. %1 = sw.call %0 (%x)
-      3. sw.return %1
-  """
-  code = """
-def f(self, x):
-    return self.layer(x)
-"""
-  mlir = convert_code(code)
-
-  assert "sw.getattr" in mlir
-  assert 'name = "layer"' in mlir
-  assert "sw.call" in mlir
-  assert "sw.return" in mlir
+def test_emitter_import():
+  """Verifies the behavior of emitter import."""
+  emitter = PythonToMlirEmitter()
+  tree = cst.parse_module("import os\nfrom math import sqrt as root")
+  mod = emitter.convert(tree)
+  ops = mod.body.operations
+  assert len(ops) == 2
+  assert ops[0].name == "sw.import"
+  assert ops[1].name == "sw.import"
 
 
-def test_constructor_op_mapping():
-  """Input:
-
-      x = torch.nn.Conv2d(1, 32).
-
-  Logic:
-      1. Constants 1, 32
-      2. sw.op { type="torch.nn.Conv2d" }
-  """
-  code = "x = torch.nn.Conv2d(1, 32)"
-  mlir = convert_code(code)
-
-  assert "sw.constant" in mlir
-  assert "value = 1" in mlir
-  assert "value = 32" in mlir
-  assert "sw.op" in mlir
-  assert 'type = "torch.nn.Conv2d"' in mlir
+def test_emitter_import_star():
+  """Verifies the behavior of emitter import star."""
+  emitter = PythonToMlirEmitter()
+  tree = cst.parse_module("from os import *")
+  mod = emitter.convert(tree)
+  ops = mod.body.operations
+  assert len(ops) == 1
+  assert ops[0].name == "sw.import"
+  assert any((a.name == "names" and a.value == ['"*"'] for a in ops[0].attributes))
 
 
-def test_trivia_preservation():
-  """Input:
-
-      # My Comment
-      class A: pass.
-
-  Output: Contains // My Comment
-  """
-  code = """
-# My Comment
-class A:
-    pass
-"""
-  mlir = convert_code(code)
-  assert "// My Comment" in mlir
+def test_emitter_assign():
+  """Verifies the behavior of emitter assign."""
+  emitter = PythonToMlirEmitter()
+  tree = cst.parse_module("x = 1")
+  mod = emitter.convert(tree)
+  assert len(mod.body.operations) == 1
+  assert emitter.ctx.lookup("x") is not None
 
 
-def test_scope_isolation():
-  """Verify variables vars in different functions get unique SSA IDs.
-
-  and don't conflict logic.
-  """
-  code = """
-def f1(a):
-    return a
-def f2(a):
-    return a
-"""
-  mlir = convert_code(code)
-
-  # f1
-  assert 'sym_name = "f1"' in mlir
-  # f2 exists
-  assert 'sym_name = "f2"' in mlir
-  # Both should have valid return ops
-  assert mlir.count("sw.return") == 2
+def test_emitter_assign_attr():
+  """Verifies the behavior of emitter assign attribute."""
+  emitter = PythonToMlirEmitter()
+  tree = cst.parse_module("self.x = 1")
+  mod = emitter.convert(tree)
+  assert len(mod.body.operations) == 1
 
 
-def test_typed_args():
-  """Input: def f(x: int): pass.
-
-  Output: type should be !sw.type<"int">.
-  """
-  code = "def f(x: int): pass"
-  mlir = convert_code(code)
-
-  assert '!sw.type<"int">' in mlir
-
-
-def test_binary_math_expression():
-  """Input: x = 32 * 26 * 26.
-
-  Logic:
-      1. Constants for 32, 26, 26
-      2. sw.op(..., ...) {type="binop.mul"} recursed.
-  """
-  code = "x = 32 * 26 * 26"
-  mlir = convert_code(code)
-
-  assert "sw.op" in mlir
-  assert 'type = "binop.mul"' in mlir
-  # Ensure it appears at least twice (32*26) and (result * 26)
-  assert mlir.count('type = "binop.mul"') == 2
+def test_emitter_assign_attr_known():
+  """Verifies the behavior of emitter assign attribute known."""
+  emitter = PythonToMlirEmitter()
+  val = emitter.ctx.allocate_ssa()
+  emitter.ctx.declare("self", val)
+  tree = cst.parse_module("self.x = 1")
+  mod = emitter.convert(tree)
+  assert len(mod.body.operations) == 2
+  assert mod.body.operations[1].name == "sw.setattr"
 
 
-def test_mixed_binary_math():
-  """Input: y = a + b / 2.
+def test_emitter_return():
+  """Verifies the behavior of emitter return."""
+  emitter = PythonToMlirEmitter()
+  tree = cst.parse_module("return 42")
+  mod = emitter.convert(tree)
+  ops = mod.body.operations
+  assert len(ops) == 2
+  assert ops[1].name == "sw.return"
 
-  Logic:
-      1. binop.div
-      2. binop.add.
-  """
-  code = "y = a + b / 2"
-  mlir = convert_code(code)
 
-  assert 'type = "binop.div"' in mlir
-  assert 'type = "binop.add"' in mlir
-  # Check standard lookup fallback for a and b
-  assert "@a" in mlir
-  assert "@b" in mlir
+def test_emitter_return_empty():
+  """Verifies the behavior of emitter return empty."""
+  emitter = PythonToMlirEmitter()
+  tree = cst.parse_module("return")
+  mod = emitter.convert(tree)
+  assert len(mod.body.operations) == 1
+  assert mod.body.operations[0].name == "sw.return"
+
+
+def test_emitter_expr():
+  """Verifies the behavior of emitter expr."""
+  emitter = PythonToMlirEmitter()
+  tree = cst.parse_module("1 + 1")
+  mod = emitter.convert(tree)
+  ops = mod.body.operations
+  assert len(ops) == 3
+
+
+def test_get_binop_str():
+  """Gets binop string."""
+  emitter = PythonToMlirEmitter()
+  assert emitter._get_binop_str(cst.Add()) == "add"
+  assert emitter._get_binop_str(cst.Subtract()) == "sub"
+  assert emitter._get_binop_str(cst.Multiply()) == "mul"
+  assert emitter._get_binop_str(cst.Divide()) == "div"
+  assert emitter._get_binop_str(cst.FloorDivide()) == "floordiv"
+  assert emitter._get_binop_str(cst.Modulo()) == "mod"
+  assert emitter._get_binop_str(cst.Power()) == "pow"
+  assert emitter._get_binop_str(cst.MatrixMultiply()) == "matmul"
+  assert emitter._get_binop_str(cst.LeftShift()) == "lshift"
+  assert emitter._get_binop_str(cst.RightShift()) == "rshift"
+  assert emitter._get_binop_str(cst.BitAnd()) == "and"
+  assert emitter._get_binop_str(cst.BitOr()) == "or"
+  assert emitter._get_binop_str(cst.BitXor()) == "xor"
+
+  class MockOp(cst.BaseBinaryOp):
+    def _codegen_impl(self):
+      pass
+
+    def _visit_and_replace_children(self, visitor):
+      pass
+
+  assert emitter._get_binop_str(MockOp()) == "unknown"

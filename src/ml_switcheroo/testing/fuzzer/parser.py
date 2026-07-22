@@ -115,7 +115,7 @@ def generate_from_hint(
       type_str = "int"
     elif isinstance(default_val, float):
       type_str = "float"
-    elif isinstance(default_val, list):
+    elif isinstance(default_val, list):  # pragma: no cover
       # Inspect recursive type or fallback relative simple list
       if default_val and isinstance(default_val[0], int):
         type_str = "List[int]"
@@ -217,7 +217,7 @@ def generate_from_hint(
   # 9. Generic Arrays
   if type_str in ["Array", "Tensor", "np.ndarray"]:
     shape = base_shape
-    if constrs.get("rank"):
+    if constrs.get("rank"):  # pragma: no cover
       shape = adjust_shape_rank(shape, constrs["rank"])
     return generate_array("float", shape, constrs)
 

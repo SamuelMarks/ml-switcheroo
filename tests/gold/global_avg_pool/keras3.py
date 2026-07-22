@@ -1,11 +1,11 @@
-"""Module docstring."""
+"""Test suite for the Keras3 module."""
 
 import keras
 
 
 class GAPModel(keras.Model):
-  """Class docstring."""
+  """Test suite for the G A P Model component."""
 
   def call(self, x):
-    """Function docstring."""
+    """Helper to call."""
     return keras.ops.mean(x, axis=(1, 2))

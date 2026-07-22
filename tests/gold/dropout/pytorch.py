@@ -1,20 +1,17 @@
-"""Module docstring."""
+"""Test suite for the Pytorch module."""
 
 import torch
 import torch.nn as nn
 
 
 class DropoutModel(nn.Module):
-  """Class docstring."""
+  """Test suite for the Dropout Model component."""
 
   def __init__(self, p: float = 0.5):
-    """Function docstring."""
+    """Initializes the DropoutModel instance."""
     super().__init__()
     self.dropout = nn.Dropout(p)
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Function docstring."""
-    # <SWITCHEROO_FAILED_TO_TRANS>
-    # PyTorch relies on the global self.training flag
+    """Helper to forward."""
     return self.dropout(x)
-    # </SWITCHEROO_FAILED_TO_TRANS>

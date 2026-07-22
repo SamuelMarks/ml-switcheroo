@@ -10,7 +10,10 @@ Capabilities:
 3.  **Weight Migration**: Handling dict-based `.npz` archives via `get_weight_*` hooks.
 """
 
-import numpy as np
+try:
+  import numpy as np
+except Exception:  # pragma: no cover
+  np = None  # pragma: no cover
 import textwrap
 from typing import Union, List, Tuple, Optional, Dict, Any
 from ml_switcheroo_ir.schema.ghost import SemanticTier

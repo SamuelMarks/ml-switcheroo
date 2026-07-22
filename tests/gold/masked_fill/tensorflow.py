@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# TF Where Stub
+"""Test suite for the Tensorflow module."""

@@ -1,8 +1,7 @@
-"""Tests for Data-Driven Framework Alias Configuration."""
+"""Test suite for the Alias Config module."""
 
 import libcst as cst
 from unittest.mock import MagicMock
-
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.merging import merge_tier_data
 from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
@@ -11,7 +10,7 @@ from ml_switcheroo.frameworks import register_framework
 
 
 def test_manager_uses_registry_defaults():
-  """Function docstring."""
+  """Verifies the behavior of manager uses registry defaults."""
   mgr = SemanticsManager()
   mgr._reverse_index = {}
   aliases = mgr.get_framework_aliases()
@@ -20,15 +19,15 @@ def test_manager_uses_registry_defaults():
 
 
 def test_manager_picks_up_new_framework():
-  """Function docstring."""
+  """Verifies the behavior of manager picks up new framework."""
 
   class FastAIAdapter:
-    """Class docstring."""
+    """Test suite for the Fast A I Adapter component."""
 
     import_alias = ("fastai.vision", "fv")
 
     def convert(self, x):
-      """Function docstring."""
+      """Converts ."""
       return x
 
   register_framework("fastai_test")(FastAIAdapter)
@@ -39,18 +38,12 @@ def test_manager_picks_up_new_framework():
 
 
 def test_manager_parses_json_alias_override():
-  """Function docstring."""
+  """Verifies the behavior of manager parses JSON alias override."""
   mgr = SemanticsManager()
   mgr._reverse_index = {}
   if not hasattr(mgr, "import_data"):
     mgr.import_data = {}
-
-  mock_data = {
-    "__frameworks__": {
-      "jax": {"alias": {"module": "jax.custom", "name": "jc"}},
-    }
-  }
-
+  mock_data = {"__frameworks__": {"jax": {"alias": {"module": "jax.custom", "name": "jc"}}}}
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -58,29 +51,22 @@ def test_manager_parses_json_alias_override():
     new_content=mock_data,
     tier=SemanticTier.EXTRAS,
   )
-
   aliases = mgr.get_framework_aliases()
   assert aliases["jax"] == ("jax.custom", "jc")
 
 
 def test_import_fixer_uses_injected_aliases():
-  """Function docstring."""
+  """Verifies the behavior of import fixer uses injected aliases."""
   alias_map = {"jax": ("jaxoid", "jXd")}
-
   mgr = MagicMock(spec=SemanticsManager)
   mgr.get_framework_aliases.return_value = alias_map
   mgr.get_import_map.return_value = {}
-
   code = "y = jXd.array([1])"
   tree = cst.parse_module(code)
-
   resolver = ImportResolver(mgr)
   plan = resolver.resolve(tree, "jax")
-
   fixer = ImportFixer(plan=plan, source_fws={"torch"})
-
   new_tree = tree.visit(fixer)
   result = new_tree.code
-
   assert "import jaxoid as jXd" in result
   assert "import jax.numpy" not in result

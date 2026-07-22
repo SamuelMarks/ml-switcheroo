@@ -1,19 +1,16 @@
-"""Module docstring."""
+"""Test suite for the Keras3 module."""
 
 import keras
 
 
 class LSTMModel(keras.Model):
-  """Class docstring."""
+  """Test suite for the L S T M Model component."""
 
   def __init__(self, hidden_size: int):
-    """Function docstring."""
+    """Initializes the LSTMModel instance."""
     super().__init__()
-    # <SWITCHEROO_FAILED_TO_TRANS>
-    # Input shape usually inferred or passed to the layer directly
     self.lstm = keras.layers.LSTM(hidden_size, return_sequences=True)
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def call(self, x):
-    """Function docstring."""
+    """Helper to call."""
     return self.lstm(x)

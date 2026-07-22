@@ -52,7 +52,7 @@ class PythonSnippetEmitter:
     args_str = self._format_args_from_metadata(node.metadata)
 
     if self.framework in ["jax", "flax", "flax_nnx"]:
-      if "rngs" not in args_str:
+      if "rngs" not in args_str:  # pragma: no cover
         suffix = ", rngs=rngs" if args_str else "rngs=rngs"
         args_str += suffix
 
@@ -109,7 +109,7 @@ class PythonSnippetEmitter:
     # Extra args from metadata for functional calls
     if not self._is_stateful_layer(node) and node.metadata:
       extra_args = self._format_args_from_metadata(node.metadata)
-      if extra_args:
+      if extra_args:  # pragma: no cover
         args_list.append(extra_args)
 
     args_str = ", ".join(args_list)

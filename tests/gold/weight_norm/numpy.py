@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# NumPy WeightNorm Stub
+"""Test suite for the Numpy module."""

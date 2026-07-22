@@ -1,20 +1,18 @@
-"""Module docstring."""
+"""Test suite for the Pytorch module."""
 
 import torch
 import torch.nn as nn
 
 
 class LSTMModel(nn.Module):
-  """Class docstring."""
+  """Test suite for the L S T M Model component."""
 
   def __init__(self, input_size: int, hidden_size: int):
-    """Function docstring."""
+    """Initializes the LSTMModel instance."""
     super().__init__()
-    # <SWITCHEROO_FAILED_TO_TRANS>
     self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Function docstring."""
-    output, (hn, cn) = self.lstm(x)
+    """Helper to forward."""
+    (output, (hn, cn)) = self.lstm(x)
     return output

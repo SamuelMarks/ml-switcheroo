@@ -1,13 +1,10 @@
-"""Tests for ODL Schema Extension: Return Type Specification.
-
-Corresponds to Limitation #3 in the Architectural roadmap.
-"""
+"""Test suite for the Dsl Return Type module."""
 
 from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
 
 
 def test_op_return_type_default():
-  """Verify that return_type defaults to "Any"."""
+  """Verifies the behavior of op return type default."""
   op = OperationDef(
     operation="DefaultOp",
     description="Op with no return spec",
@@ -18,7 +15,7 @@ def test_op_return_type_default():
 
 
 def test_op_return_type_explicit():
-  """Verify that return_type can be set explicitly (e.g. 'bool')."""
+  """Verifies the behavior of op return type explicit."""
   op = OperationDef(
     operation="IsNan",
     description="Checks for NaNs",
@@ -30,7 +27,7 @@ def test_op_return_type_explicit():
 
 
 def test_op_return_type_complex():
-  """Verify complex type hints strings are accepted."""
+  """Verifies the behavior of op return type complex."""
   op = OperationDef(
     operation="TopK",
     description="Returns values and indices",

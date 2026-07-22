@@ -1,11 +1,4 @@
-"""Tests for RNG State Injection in Verification Harness.
-
-Verifies that:
-1. The harness detects when a target function signature has extra arguments
-   (`rng`, `key`, `rngs`) compared to the source.
-2. The harness automatically generates and injects valid JAX PRNG keys.
-3. Execution succeeds even when signatures mismatch due to plugin injection.
-"""
+"""Test suite for the Harness Rng module."""
 
 import sys
 import subprocess
@@ -18,180 +11,94 @@ from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
 
 def _run_harness(path: Path) -> subprocess.CompletedProcess:
-  """Runs the generated harness in a clean subprocess."""
+  """Helper to  run harness."""
   env = os.environ.copy()
   if "PYTHONPATH" in env:
     del env["PYTHONPATH"]
-
   return subprocess.run([sys.executable, str(path)], capture_output=True, text=True, env=env)
 
 
-# --- MOCK ADAPTERS FOR CI SAFETY ---
-# These override imports logic so the generated harness doesn't crash if libs missing in CI
-
-
 class SafeJaxCoreAdapter(JaxCoreAdapter):
-  """Class docstring."""
+  """Test suite for the Safe Jax Core Adapter component."""
 
   @property
   def harness_imports(self):
-    """Function docstring."""
-    # Return empty imports. Tests using this ensure JAX isn't required to run generated harness.
-    # The target file in test handles conditional imports itself.
+    """Helper to harness imports."""
     return []
 
   def get_harness_init_code(self):
-    """Function docstring."""
-    # Override to return simple string "mock_jax_key" without needing jax
-    return """
-def _make_jax_key(seed):
-    return "mock_jax_key"
-"""
+    """Gets harness initialization code."""
+    return '\ndef _make_jax_key(seed):\n    return "mock_jax_key"\n'
 
 
 class SafeFlaxAdapter(FlaxNNXAdapter):
-  """Class docstring."""
+  """Test suite for the Safe Flax Adapter component."""
 
   @property
   def harness_imports(self):
-    """Function docstring."""
+    """Helper to harness imports."""
     return []
 
   def get_harness_init_code(self):
-    """Function docstring."""
-    return """
-def _make_flax_rngs(seed):
-    return "mock_flax_rngs"
-"""
+    """Gets harness initialization code."""
+    return '\ndef _make_flax_rngs(seed):\n    return "mock_flax_rngs"\n'
 
 
 @patch("ml_switcheroo.testing.harness_generator.get_adapter")
 def test_rng_injection_jax(mock_get_adapter, tmp_path):
-  """Scenario:
-
-      Source: def forward(x): ...
-      Target: def forward(rng, x): ... (Transpiled with rng_threading plugin)
-  Expectation:
-      Harness detects 'rng' in target, creates jax.random.PRNGKey, and calls target.
-  """
-  # Use Safe Adapter
+  """Verifies the behavior of rng injection JAX."""
   adapter = SafeJaxCoreAdapter()
-
-  # We force 'rng' into magic args for this test case specifically
-  # Normally JAX uses 'key', but standardizing on 'rng' for this test logic
   with patch.object(SafeJaxCoreAdapter, "declared_magic_args", ["rng"]):
     mock_get_adapter.return_value = adapter
-
-    # 1. Source (Torch-like, no RNG arg)
     src_file = tmp_path / "model_rng_src.py"
-    src_file.write_text("""
-import numpy as np
-def forward(x):
-    # Deterministic op to match target logic for verification pass
-    return x * 2
-""")
-
-    # 2. Target (JAX-like, injected RNG arg)
-    tgt_file = tmp_path / "model_rng_tgt.py"
-    # We manually implement the helper function in the mock target because harness
-    # injection is what we are testing, specifically the invocation of _make_jax_key
-    tgt_file.write_text("""
-import numpy as np
-# Safe imports for target mock file
-try:
-    import jax
-    import jax.random
-except ImportError:
-    pass
-
-def forward(rng, x):
-    # Verify we got a valid PRNGKey or similar (e.g. fallback string in test env)
-    # The default impl of _make_jax_key returns a mock string if import fails.
-    if rng is None:
-        raise ValueError("RNG argument is None!")
-
-    if rng == "mock_jax_key" or hasattr(rng, 'tolist'): # Check valid key
-         return x * 2
-
-    raise ValueError(f"Received invalid rng: {rng}")
-""")
-
-    harness_path = tmp_path / "verify_rng.py"
-
-    # 3. Generate with target="jax" to trigger the logic
-    gen = HarnessGenerator()
-    gen.generate(
-      src_file,
-      tgt_file,
-      harness_path,
-      source_fw="numpy",
-      target_fw="jax",  # Trigger JAX logic
+    src_file.write_text(
+      "\nimport numpy as np\ndef forward(x):\n    # Deterministic op to match target logic for verification pass\n    return x * 2\n"
     )
-
-    # 4. Execute
+    tgt_file = tmp_path / "model_rng_tgt.py"
+    tgt_file.write_text(
+      '\nimport numpy as np\n# Safe imports for target mock file\ntry:\n    import jax\n    import jax.random\nexcept ImportError:\n    pass\n\ndef forward(rng, x):\n    # Verify we got a valid PRNGKey or similar (e.g. fallback string in test env)\n    # The default impl of _make_jax_key returns a mock string if import fails.\n    if rng is None:\n        raise ValueError("RNG argument is None!")\n\n    if rng == "mock_jax_key" or hasattr(rng, \'tolist\'): # Check valid key\n         return x * 2\n\n    raise ValueError(f"Received invalid rng: {rng}")\n'
+    )
+    harness_path = tmp_path / "verify_rng.py"
+    gen = HarnessGenerator()
+    gen.generate(src_file, tgt_file, harness_path, source_fw="numpy", target_fw="jax")
     result = _run_harness(harness_path)
-
     if result.returncode != 0:
       print("STDERR:", result.stderr)
       print("STDOUT:", result.stdout)
-
     assert result.returncode == 0
     assert "✅ forward: Match" in result.stdout
 
 
 @patch("ml_switcheroo.testing.harness_generator.get_adapter")
 def test_key_injection_alias(mock_get_adapter, tmp_path):
-  """Scenario: Target uses 'key' argument instead of 'rng'."""
+  """Verifies the behavior of key injection alias."""
   adapter = SafeJaxCoreAdapter()
-  # 'key' is standard for JAX adapter
   mock_get_adapter.return_value = adapter
-
   src_file = tmp_path / "model_key_src.py"
-  src_file.write_text("""
-def predict(x): return x
-""")
-
+  src_file.write_text("\ndef predict(x): return x\n")
   tgt_file = tmp_path / "model_key_tgt.py"
-  tgt_file.write_text("""
-def predict(key, x):
-    if key is None:
-        raise ValueError("Key missing")
-    return x
-""")
-
+  tgt_file.write_text(
+    '\ndef predict(key, x):\n    if key is None:\n        raise ValueError("Key missing")\n    return x\n'
+  )
   harness_path = tmp_path / "verify_key.py"
   gen = HarnessGenerator()
-
-  # Use JAX target
   gen.generate(src_file, tgt_file, harness_path, source_fw="numpy", target_fw="jax")
-
   result = _run_harness(harness_path)
-
   assert "TypeError" not in result.stdout
   assert "✅ predict: Match" in result.stdout
 
 
 @patch("ml_switcheroo.testing.harness_generator.get_adapter")
 def test_flax_rngs_injection(mock_get_adapter, tmp_path):
-  """Scenario: Target uses 'rngs' (Flax NNX pattern)."""
+  """Verifies the behavior of Flax rngs injection."""
   adapter = SafeFlaxAdapter()
   mock_get_adapter.return_value = adapter
-
   src_file = tmp_path / "model_nnx_src.py"
   src_file.write_text("def init(x): return x")
-
   tgt_file = tmp_path / "model_nnx_tgt.py"
-  tgt_file.write_text("""
-def init(rngs, x):
-    return x # Echo
-""")
-
+  tgt_file.write_text("\ndef init(rngs, x):\n    return x # Echo\n")
   harness_path = tmp_path / "verify_nnx.py"
   gen = HarnessGenerator()
-
-  # Use Flax target
   gen.generate(src_file, tgt_file, harness_path, source_fw="numpy", target_fw="flax_nnx")
-
   result = _run_harness(harness_path)
-
   assert "✅ init: Match" in result.stdout

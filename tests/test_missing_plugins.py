@@ -1,8 +1,6 @@
-"""Auto-generated doc."""
+"""Test suite for the Missing Plugins module."""
 
 from unittest.mock import MagicMock
-
-# Import the plugins
 from ml_switcheroo.plugins import (
   auto_fsdp_wrapper,
   batch_norm,
@@ -35,7 +33,7 @@ from ml_switcheroo.plugins import (
 
 
 def test_auto_fsdp():
-  """Auto-generated doc."""
+  """Verifies the behavior of auto FSDP."""
   try:
     auto_fsdp_wrapper.AutoFSDPWrapper().transform(MagicMock(), MagicMock())
   except Exception:

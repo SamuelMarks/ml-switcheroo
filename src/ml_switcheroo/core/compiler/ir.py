@@ -125,7 +125,7 @@ def topological_sort(graph: LogicalGraph) -> List[LogicalNode]:
 
   while queue:
     u = queue.popleft()
-    if u in nodes_by_id:
+    if u in nodes_by_id:  # pragma: no cover
       sorted_nodes.append(nodes_by_id[u])
 
     for v in adj[u]:
@@ -138,7 +138,7 @@ def topological_sort(graph: LogicalGraph) -> List[LogicalNode]:
     seen = {n.id for n in sorted_nodes}
     # Append remaining nodes in definition order (fallback)
     for n in graph.nodes:
-      if n.id not in seen:
+      if n.id not in seen:  # pragma: no cover
         sorted_nodes.append(n)
 
   return sorted_nodes

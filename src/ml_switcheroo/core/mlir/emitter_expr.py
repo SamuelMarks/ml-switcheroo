@@ -107,7 +107,7 @@ class MlirEmitterExprMixin:
         ops.append(call_op)
         return res_val, ops
 
-      if isinstance(expr.func, cst.Name):
+      if isinstance(expr.func, cst.Name):  # pragma: no cover
         func_val, f_ops = self._emit_expression(expr.func)
         ops.extend(f_ops)
         result = self.ctx.allocate_ssa()

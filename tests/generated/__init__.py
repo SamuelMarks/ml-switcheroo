@@ -1,1 +1,1 @@
-"""Module docstring."""
+"""Initialization module for the package."""

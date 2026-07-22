@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for the Pytorch module."""
 
 import torch
 import torch.nn as nn
@@ -6,16 +6,13 @@ from torch.nn.utils import weight_norm
 
 
 class WNModel(nn.Module):
-  """Class docstring."""
+  """Test suite for the W N Model component."""
 
   def __init__(self, in_features: int, out_features: int):
-    """Function docstring."""
+    """Initializes the WNModel instance."""
     super().__init__()
-    # <SWITCHEROO_FAILED_TO_TRANS>
-    # PyTorch wraps the layer
     self.linear = weight_norm(nn.Linear(in_features, out_features))
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Function docstring."""
+    """Helper to forward."""
     return self.linear(x)

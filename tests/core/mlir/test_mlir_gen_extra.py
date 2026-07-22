@@ -1,9 +1,8 @@
-"""Module docstring."""
+"""Test suite for the Mlir Gen Extra module."""
 
 import pytest
 import libcst as cst
 from collections import defaultdict
-
 from ml_switcheroo.core.mlir.nodes import OperationNode, BlockNode, AttributeNode, ValueNode
 from ml_switcheroo.core.mlir.gen_expressions import ExpressionGeneratorMixin
 from ml_switcheroo.core.mlir.gen_statements import StatementGeneratorMixin
@@ -11,33 +10,33 @@ from ml_switcheroo.core.mlir.naming import NamingContext
 
 
 class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
-  """Class docstring."""
+  """Dummy Generator class for testing purposes."""
 
   def __init__(self):
-    """Function docstring."""
+    """Initializes the DummyGenerator instance."""
     self.ctx = NamingContext()
     self.usage_counts = defaultdict(int)
     self.usage_consumers = {}
     self.resolved_values = {}
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-    """Function docstring."""
+    """Mock implementation of  resolve operand."""
     if ssa_name in self.resolved_values:
       return self.resolved_values[ssa_name]
     return cst.Name(f"res_{ssa_name.replace('%', '')}")
 
   def _convert_block(self, block: BlockNode):
-    """Function docstring."""
+    """Mock implementation of  convert block."""
     if not block.operations:
       return []
     return [cst.SimpleStatementLine(body=[cst.Pass()])]
 
   def _scan_block_usage(self, block: BlockNode) -> None:
-    """Function docstring."""
+    """Mock implementation of  scan block usage."""
     pass
 
   def _create_dotted_name(self, name: str) -> cst.BaseExpression:
-    """Function docstring."""
+    """Mock implementation of  create dotted name."""
     parts = name.split(".")
     if len(parts) == 1:
       return cst.Name(parts[0])
@@ -49,7 +48,7 @@ class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
       return cst.Attribute(value=val, attr=attr)
 
   def _get_attr(self, op: OperationNode, attr_name: str) -> str:
-    """Function docstring."""
+    """Mock implementation of  get attribute."""
     for a in op.attributes:
       if a.name == attr_name:
         return a.value
@@ -57,10 +56,10 @@ class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
 
 
 def test_expression_generator_mixin_unimplemented():
-  """Function docstring."""
+  """Verifies the behavior of expression generator mixin unimplemented."""
 
   class IncompleteGen(ExpressionGeneratorMixin):
-    """Class docstring."""
+    """Test suite for the Incomplete Gen component."""
 
     pass
 
@@ -70,10 +69,10 @@ def test_expression_generator_mixin_unimplemented():
 
 
 def test_statement_generator_mixin_unimplemented():
-  """Function docstring."""
+  """Verifies the behavior of statement generator mixin unimplemented."""
 
   class IncompleteGen(StatementGeneratorMixin):
-    """Class docstring."""
+    """Test suite for the Incomplete Gen component."""
 
     pass
 
@@ -87,9 +86,8 @@ def test_statement_generator_mixin_unimplemented():
 
 
 def test_parse_keywords():
-  """Function docstring."""
+  """Parses keywords."""
   gen = DummyGenerator()
-
   op1 = OperationNode(
     name="sw.call",
     attributes=[AttributeNode(name="arg_keywords", value=['"arg1"', '"arg2"'])],
@@ -98,7 +96,6 @@ def test_parse_keywords():
     regions=[],
   )
   assert gen._parse_keywords(op1) == ["arg1", "arg2"]
-
   op2 = OperationNode(
     name="sw.call",
     attributes=[AttributeNode(name="arg_keywords", value='["arg1", "arg2"]')],
@@ -107,12 +104,10 @@ def test_parse_keywords():
     regions=[],
   )
   assert gen._parse_keywords(op2) == ["arg1", "arg2"]
-
   op3 = OperationNode(
     name="sw.call", attributes=[AttributeNode(name="arg_keywords", value="[invalid")], operands=[], results=[], regions=[]
   )
   assert gen._parse_keywords(op3) == []
-
   op4 = OperationNode(
     name="sw.call",
     attributes=[AttributeNode(name="arg_keywords", value='"not a list"')],
@@ -124,7 +119,7 @@ def test_parse_keywords():
 
 
 def test_expr_sw_constant_exception():
-  """Function docstring."""
+  """Verifies the behavior of expr sw constant correctly handling an exception."""
   gen = DummyGenerator()
   op = OperationNode(
     name="sw.constant",
@@ -139,7 +134,7 @@ def test_expr_sw_constant_exception():
 
 
 def test_expr_sw_getattr_empty():
-  """Function docstring."""
+  """Verifies the behavior of expr sw getattr empty."""
   gen = DummyGenerator()
   op = OperationNode(name="sw.getattr", attributes=[], operands=[], results=[], regions=[])
   res = gen._expr_sw_getattr(op)
@@ -148,7 +143,7 @@ def test_expr_sw_getattr_empty():
 
 
 def test_expr_sw_call_empty():
-  """Function docstring."""
+  """Verifies the behavior of expr sw call empty."""
   gen = DummyGenerator()
   op = OperationNode(name="sw.call", attributes=[], operands=[], results=[], regions=[])
   res = gen._expr_sw_call(op)
@@ -158,16 +153,11 @@ def test_expr_sw_call_empty():
 
 
 def test_expr_sw_call_with_keywords():
-  """Function docstring."""
+  """Verifies the behavior of expr sw call with keywords."""
   gen = DummyGenerator()
   op = OperationNode(
     name="sw.call",
-    operands=[
-      ValueNode(name="%func"),
-      ValueNode(name="%arg1"),
-      ValueNode(name="%arg2"),
-      ValueNode(name="%arg3"),
-    ],
+    operands=[ValueNode(name="%func"), ValueNode(name="%arg1"), ValueNode(name="%arg2"), ValueNode(name="%arg3")],
     attributes=[AttributeNode(name="arg_keywords", value='["", "", "kw1"]')],
     results=[],
     regions=[],
@@ -179,9 +169,8 @@ def test_expr_sw_call_with_keywords():
 
 
 def test_expr_sw_op():
-  """Function docstring."""
+  """Verifies the behavior of expr sw op."""
   gen = DummyGenerator()
-
   op = OperationNode(
     name="sw.op",
     operands=[ValueNode(name="%arg1")],
@@ -193,7 +182,6 @@ def test_expr_sw_op():
   assert isinstance(res, cst.Call)
   assert len(res.args) == 1
   assert res.args[0].keyword.value == "kw1"
-
   op2 = OperationNode(
     name="sw.op",
     operands=[ValueNode(name="%1"), ValueNode(name="%2")],
@@ -207,9 +195,8 @@ def test_expr_sw_op():
 
 
 def test_expr_binop_all_ops():
-  """Function docstring."""
+  """Verifies the behavior of expr binop all ops."""
   gen = DummyGenerator()
-
   op_err = OperationNode(
     name="sw.op",
     operands=[ValueNode(name="%1")],
@@ -220,7 +207,6 @@ def test_expr_binop_all_ops():
   res_err = gen._expr_binop(op_err, "binop.add")
   assert isinstance(res_err, cst.Name)
   assert res_err.value == "error_binop"
-
   ops = {
     "add": cst.Add,
     "sub": cst.Subtract,
@@ -237,7 +223,6 @@ def test_expr_binop_all_ops():
     "xor": cst.BitXor,
     "unknown_op": cst.Add,
   }
-
   for op_name, expected_cst_op in ops.items():
     op = OperationNode(
       name="sw.op",
@@ -251,7 +236,7 @@ def test_expr_binop_all_ops():
 
 
 def test_convert_setattr_empty():
-  """Function docstring."""
+  """Converts setattr empty."""
   gen = DummyGenerator()
   op = OperationNode(name="sw.setattr", attributes=[], operands=[], results=[], regions=[])
   res = gen._convert_setattr(op)

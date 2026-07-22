@@ -176,14 +176,14 @@ class SassParser:
 
       peek = self._peek()
       if not peek or peek.line > op_tok.line or peek.kind == TokenType.COMMENT:
-        break  # pragma: no cover
+        break
 
       operands.append(self._parse_operand())
 
       if self._match(TokenType.COMMA):
         self._consume()
       else:
-        pass  # pragma: no cover
+        pass
 
     return Instruction(opcode=opcode, operands=operands, predicate=predicate)
 

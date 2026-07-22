@@ -1,16 +1,15 @@
-"""Auto-generated doc."""
+"""Test suite for the Audit module."""
 
 import libcst as cst
 from typing import Any
-
 from ml_switcheroo.analysis.audit import CoverageScanner
 
 
 class MockSemantics:
-  """Auto-generated doc."""
+  """Mock Semantics class for testing purposes."""
 
   def get_definition(self, fqn: str) -> Any:
-    """Auto-generated doc."""
+    """Mock implementation of get definition."""
     if fqn == "torch.add":
       return ("Add", {"variants": {"torch": {"api": "torch.add"}}})
     if fqn == "torch.sub":
@@ -21,32 +20,12 @@ class MockSemantics:
 
 
 def test_coverage_scanner():
-  """Auto-generated doc."""
+  """Verifies the behavior of coverage scanner."""
   semantics = MockSemantics()
-  scanner = CoverageScanner(semantics, {"torch", "jax"})  # type: ignore
-
-  code = """
-import torch
-import torch as th
-from torch import nn
-from torch.nn import functional as F
-from torch import *
-from sys import exit
-
-torch.add(1, 2)
-torch.sub(1, 2)
-torch.mul(1, 2)
-th.add(1, 2)
-nn.Linear(10, 10)
-F.relu(x)
-jax.numpy.sum(x)
-unknown_fw.foo()
-torch.float32
-exit()
-"""
+  scanner = CoverageScanner(semantics, {"torch", "jax"})
+  code = "\nimport torch\nimport torch as th\nfrom torch import nn\nfrom torch.nn import functional as F\nfrom torch import *\nfrom sys import exit\n\ntorch.add(1, 2)\ntorch.sub(1, 2)\ntorch.mul(1, 2)\nth.add(1, 2)\nnn.Linear(10, 10)\nF.relu(x)\njax.numpy.sum(x)\nunknown_fw.foo()\ntorch.float32\nexit()\n"
   tree = cst.parse_module(code)
   tree.visit(scanner)
-
   assert scanner.results["torch.add"] == (True, "torch")
   assert scanner.results["torch.nn.Linear"] == (False, "torch")
   assert scanner.results["torch.nn.functional.relu"] == (False, "torch")
@@ -55,8 +34,8 @@ exit()
 
 
 def test_import_from_no_module():
-  """Auto-generated doc."""
+  """Verifies the behavior of import from no module."""
   semantics = MockSemantics()
-  scanner = CoverageScanner(semantics, {"torch"})  # type: ignore
+  scanner = CoverageScanner(semantics, {"torch"})
   tree = cst.parse_module("from . import module")
   tree.visit(scanner)

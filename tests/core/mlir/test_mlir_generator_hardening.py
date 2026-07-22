@@ -1,99 +1,59 @@
-"""Tests for Generator Hardening requirements.
-
-Efficiently validates sw.op attribute handling and call structures.
-"""
+"""Test suite for the Mlir Generator Hardening module."""
 
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
-from ml_switcheroo.core.mlir.nodes import (
-  AttributeNode,
-  BlockNode,
-  ModuleNode,
-  OperationNode,
-  ValueNode,
-)
+from ml_switcheroo.core.mlir.nodes import AttributeNode, BlockNode, ModuleNode, OperationNode, ValueNode
 
 
 def gen_code(op: OperationNode) -> str:
-  """Helper to generate python code from a single Op node (wrapped in module)."""
+  """Helper to generation code."""
   mod = ModuleNode(body=BlockNode(label="", operations=[op]))
   gen = MlirToPythonGenerator()
   return gen.generate(mod).code
 
 
 def test_sw_op_attribute_hardening():
-  """Verify `sw.op` uses `type` attribute for complex dotted names.
-
-  Scenario: x = torch.nn.Conv2d(...)
-  Impact of Void Suppression: Unused result -> Expression Statement.
-  """
+  """Verifies the behavior of sw op attribute hardening."""
   op = OperationNode(
     name="sw.op",
     results=[ValueNode("%res")],
     attributes=[AttributeNode("type", '"torch.nn.Conv2d"')],
     operands=[ValueNode("%arg")],
   )
-
   code = gen_code(op)
-  # Checks updated for Void Supression: No assignment
   assert "torch.nn.Conv2d(_arg)" in code
   assert "=" not in code
 
 
 def test_sw_call_method_chain_hardening():
-  """Verify `sw.call` correctly handles callable stored in variable.
-
-  Scenario:
-      self.conv = ...
-      x = self.conv(x)
-  Impact of Void Suppression: Unused result -> Expression Statement.
-  """
-  # 1. Simulate naming context having 'self.conv' registered
+  """Verifies the behavior of sw call method chain hardening."""
   gen = MlirToPythonGenerator()
   gen.ctx._map["%self_conv"] = "self.conv"
-
-  # 2. Define %res = sw.call %self_conv (%x)
-  op = OperationNode(
-    name="sw.call",
-    results=[ValueNode("%res")],
-    operands=[ValueNode("%self_conv"), ValueNode("%x")],
-  )
-
+  op = OperationNode(name="sw.call", results=[ValueNode("%res")], operands=[ValueNode("%self_conv"), ValueNode("%x")])
   mod = ModuleNode(body=BlockNode(label="", operations=[op]))
   code = gen.generate(mod).code
-
-  # Expect it to resolve 'self.conv' into proper CST attributes
   assert "self.conv(_x)" in code
   assert "=" not in code
 
 
 def test_sw_op_void_return():
-  """Verify `sw.op` without results generates an Expression Statement.
-
-  Scenario: print("hello").
-  """
+  """Verifies the behavior of sw op void return."""
   op = OperationNode(
-    name="sw.op",
-    results=[],
-    attributes=[AttributeNode("type", '"print"')],
-    operands=[ValueNode("%arg")],
+    name="sw.op", results=[], attributes=[AttributeNode("type", '"print"')], operands=[ValueNode("%arg")]
   )
-
   code = gen_code(op)
-  # verify strictly no assignment "="
   assert "print(_arg)" in code
   assert "=" not in code
 
 
 def test_naming_context_reserved_words():
-  """Verify NamingContext avoids keywords if they appear as SSA hints."""
+  """Verifies the behavior of naming context reserved words."""
   gen = MlirToPythonGenerator()
-  # %0 -> hint="for" -> invalid python var
   name = gen.ctx.register("%0", hint="for")
   assert name == "_for" or name == "v_for"
 
 
 def test_naming_context_global_symbol():
-  """Verify global symbol references (@func) are stripped."""
+  """Verifies the behavior of naming context global symbol."""
   gen = MlirToPythonGenerator()
   name = gen.ctx.lookup("@my_global_func")
   assert name == "my_global_func"

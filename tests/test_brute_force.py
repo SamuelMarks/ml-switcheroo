@@ -1,4 +1,4 @@
-"""Doc."""
+"""Test suite for the Brute Force module."""
 
 import pytest
 import importlib
@@ -11,7 +11,7 @@ pytest.skip("Too slow for pre-commit", allow_module_level=True)
 
 
 def get_all_callables():
-  """Doc."""
+  """Gets all callables."""
   callables = []
   for loader, module_name, is_pkg in pkgutil.walk_packages(ml_switcheroo.__path__, ml_switcheroo.__name__ + "."):
     try:
@@ -26,11 +26,10 @@ def get_all_callables():
 
 
 def try_call(func, *args, **kwargs):
-  """Doc."""
+  """Helper to try call."""
   try:
     if inspect.isclass(func):
       obj = func(*args, **kwargs)
-      # Try to call its methods
       for name, method in inspect.getmembers(obj, predicate=inspect.ismethod):
         try:
           method()
@@ -48,22 +47,16 @@ def try_call(func, *args, **kwargs):
 
 @pytest.mark.skip(reason="Too slow")
 def test_brute_force():
-  """Doc."""
+  """Verifies the behavior of brute force."""
   callables = get_all_callables()
   for func in callables:
-    # Try with no args
     try_call(func)
-    # Try with one MagicMock
     try_call(func, MagicMock())
-    # Try with None
     try_call(func, None)
-    # Try with multiple mocks
     try_call(func, MagicMock(), MagicMock())
     try_call(func, None, None)
     try_call(func, MagicMock(), None)
     try_call(func, MagicMock(), MagicMock(), MagicMock())
-
-    # Try with some common keyword args just in case
     try_call(func, node=MagicMock())
     try_call(func, context=MagicMock())
     try_call(func, semantics=MagicMock())

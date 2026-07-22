@@ -1,12 +1,9 @@
-"""Tests for Padding Normalization Plugin."""
+"""Test suite for the Padding module."""
 
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-
-# Fix: Import TestRewriter shim
 from tests.conftest import TestRewriter as PivotRewriter
-
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.padding import transform_padding
@@ -14,29 +11,26 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def rewrite_code(rewriter, code):
-  """Function docstring."""
+  """Rewrites code."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter():
-  """Function docstring."""
+  """Provides a mock rewriter for testing."""
   hooks._HOOKS["padding_converter"] = transform_padding
   hooks._PLUGINS_LOADED = True
-
   mgr = MagicMock()
-
   pad_def = {
     "variants": {
       "torch": {"api": "torch.nn.functional.pad"},
       "jax": {"api": "jnp.pad", "requires_plugin": "padding_converter"},
     }
   }
-
   mgr.get_definition.side_effect = lambda n: ("Pad", pad_def) if "pad" in n else None
 
   def resolve(aid, fw):
-    """Function docstring."""
+    """Resolves ."""
     if aid == "Pad" and fw == "jax":
       return pad_def["variants"]["jax"]
     return None
@@ -45,21 +39,19 @@ def rewriter():
   mgr.get_known_apis.return_value = {"Pad": pad_def}
   mgr.is_verified.return_value = True
 
-  # Enable Traits
   def get_config(fw):
-    """Function docstring."""
+    """Gets configuration."""
     if fw == "jax":
       return {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}
     return {}
 
   mgr.get_framework_config.side_effect = get_config
-
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
 
 
 def test_padding_2d_nchw(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of padding 2d nchw."""
   code = "y = F.pad(x, (1, 2, 3, 4))"
   res = rewrite_code(rewriter, code)
   assert "jnp.pad" in res
@@ -67,11 +59,9 @@ def test_padding_2d_nchw(rewriter):
 
 
 def test_padding_passthrough_missing(rewriter):
-  """Function docstring."""
-  # Change target to one without definitions but keep rewriter valid config
+  """Verifies the behavior of padding passthrough missing."""
   rewriter.context.config.target_framework = "unknown"
   rewriter.context.hook_context.target_fw = "unknown"
-
   code = "y = F.pad(x, (1, 2, 3, 4))"
   res = rewrite_code(rewriter, code)
   assert "F.pad" in res

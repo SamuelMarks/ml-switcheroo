@@ -161,30 +161,28 @@ def main(argv: Optional[List[str]] = None) -> int:
     return commands.handle_matrix()
 
   elif args.command == "schema":
-    return handle_schema()  # pragma: no cover
+    return handle_schema()
 
   elif args.command == "suggest":
     return handle_suggest(args.api, out_dir=args.out_dir, batch_size=args.batch_size)
 
   elif args.command == "scaffold":
-    handle_scaffold(args)  # pragma: no cover
-    return 0  # pragma: no cover
+    handle_scaffold(args)
+    return 0
 
   elif args.command == "harvest":
-    handle_harvest(args)  # pragma: no cover
-    return 0  # pragma: no cover
+    handle_harvest(args)
+    return 0
 
   elif args.command == "verified-pipeline":
-    from ml_switcheroo.ingestion.verified_pipeline import run_verified_pipeline  # pragma: no cover
+    from ml_switcheroo.ingestion.verified_pipeline import run_verified_pipeline
 
-    # pragma: no cover
-    with open(args.path, "r") as f:  # pragma: no cover
-      result = run_verified_pipeline(f.read())  # pragma: no cover
-    import json  # pragma: no cover
+    with open(args.path, "r") as f:
+      result = run_verified_pipeline(f.read())
+    import json
 
-    # pragma: no cover
-    print(json.dumps(result, indent=2))  # pragma: no cover
-    return 0 if result.get("status") == "success" else 1  # pragma: no cover
+    print(json.dumps(result, indent=2))
+    return 0 if result.get("status") == "success" else 1
 
   elif args.command == "ci":
     return commands.handle_ci(args.update_readme, args.readme_path, args.json_report, args.repair)

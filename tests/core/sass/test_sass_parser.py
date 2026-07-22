@@ -1,20 +1,13 @@
-"""Module docstring."""
+"""Test suite for the Sass Parser module."""
 
 import pytest
 from ml_switcheroo.core.compiler.frontends.sass.tokens import SassLexer, TokenType
 from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
-from ml_switcheroo.core.compiler.frontends.sass.nodes import (
-  Instruction,
-  Label,
-  Directive,
-  Comment,
-  Register,
-  Immediate,
-)
+from ml_switcheroo.core.compiler.frontends.sass.nodes import Instruction, Label, Directive, Comment, Register, Immediate
 
 
 def test_lexer_simple_instruction():
-  """Function docstring."""
+  """Verifies the behavior of lexer simple instruction."""
   code = "FADD R1, R2, R3;"
   lexer = SassLexer()
   tokens = list(lexer.tokenize(code))
@@ -26,7 +19,7 @@ def test_lexer_simple_instruction():
 
 
 def test_lexer_modifiers():
-  """Function docstring."""
+  """Verifies the behavior of lexer modifiers."""
   code = "FFMA.FTZ.RN R0, R1, R2, RZ;"
   lexer = SassLexer()
   tokens = list(lexer.tokenize(code))
@@ -35,7 +28,7 @@ def test_lexer_modifiers():
 
 
 def test_lexer_memory_operands():
-  """Function docstring."""
+  """Verifies the behavior of lexer memory operands."""
   code = "LD R0, [R1 + 0x4]; LDC R2, c[0x0][0x140];"
   lexer = SassLexer()
   tokens = list(lexer.tokenize(code))
@@ -48,7 +41,7 @@ def test_lexer_memory_operands():
 
 
 def test_lexer_predicates_and_labels():
-  """Function docstring."""
+  """Verifies the behavior of lexer predicates and labels."""
   code = "@P0 BRA L_EXIT;"
   lexer = SassLexer()
   tokens = list(lexer.tokenize(code))
@@ -58,14 +51,8 @@ def test_lexer_predicates_and_labels():
 
 
 def test_parser_basic_block_structure():
-  """Function docstring."""
-  code = """
-    L_START:
-        FADD R0, R1, R2;
-        BRA L_END;
-    L_END:
-        EXIT;
-    """
+  """Verifies the behavior of parser basic block structure."""
+  code = "\n    L_START:\n        FADD R0, R1, R2;\n        BRA L_END;\n    L_END:\n        EXIT;\n    "
   parser = SassParser(code)
   nodes = parser.parse()
   assert len(nodes) == 5
@@ -79,7 +66,7 @@ def test_parser_basic_block_structure():
 
 
 def test_parser_operands_complexity():
-  """Function docstring."""
+  """Verifies the behavior of parser operands complexity."""
   code = "IADD3 R0, -R1, |R2|, 0x10;"
   parser = SassParser(code)
   nodes = parser.parse()
@@ -98,7 +85,7 @@ def test_parser_operands_complexity():
 
 
 def test_parser_predicates():
-  """Function docstring."""
+  """Verifies the behavior of parser predicates."""
   code = "@!P0 MOV R0, RZ;"
   parser = SassParser(code)
   nodes = parser.parse()
@@ -110,11 +97,8 @@ def test_parser_predicates():
 
 
 def test_parser_comments_preservation():
-  """Function docstring."""
-  code = """
-    // Init Loop
-    MOV R0, RZ; // Clear Accumulator
-    """
+  """Verifies the behavior of parser comments preservation."""
+  code = "\n    // Init Loop\n    MOV R0, RZ; // Clear Accumulator\n    "
   parser = SassParser(code)
   nodes = parser.parse()
   assert isinstance(nodes[0], Comment)
@@ -125,7 +109,7 @@ def test_parser_comments_preservation():
 
 
 def test_parser_directives():
-  """Function docstring."""
+  """Verifies the behavior of parser directives."""
   code = ".headerflags @0x100;"
   parser = SassParser(code)
   nodes = parser.parse()
@@ -135,7 +119,7 @@ def test_parser_directives():
 
 
 def test_parser_unexpected_token():
-  """Function docstring."""
+  """Verifies the behavior of parser unexpected token."""
   code = "FADD , "
   parser = SassParser(code)
   with pytest.raises(SyntaxError):

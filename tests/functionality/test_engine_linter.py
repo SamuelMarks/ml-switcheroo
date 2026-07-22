@@ -1,10 +1,4 @@
-"""Tests for Engine <-> Linter Integration.
-
-Verifies that:
-1. ASTEngine automatically calls StructuralLinter at the end of run().
-2. Leaked artifacts (imports, aliases) result in errors in ConversionResult.
-3. Trace logs capture linter warnings.
-"""
+"""Test suite for the Engine Linter module."""
 
 import pytest
 from ml_switcheroo.core.engine import ASTEngine
@@ -14,32 +8,31 @@ from unittest.mock import MagicMock, patch
 import libcst as cst
 
 
-# Define a concrete mock class to satisfy LibCST's visitor requirements
 class MockUsageScanner(cst.CSTVisitor):
-  """Class docstring."""
+  """Mock Usage Scanner class for testing purposes."""
 
   def __init__(self, *args, **kwargs):
-    """Function docstring."""
+    """Initializes the MockUsageScanner instance."""
     pass
 
   def get_result(self):
-    """Function docstring."""
+    """Mock implementation of get result."""
     return True
 
   def on_visit(self, node):
-    """Function docstring."""
+    """Mock implementation of on visit."""
     return False
 
   def on_leave(self, node):
-    """Function docstring."""
+    """Mock implementation of on leave."""
     pass
 
 
 class MockSemantics(SemanticsManager):
-  """Minimal semantics to handle basic ops."""
+  """Mock Semantics class for testing purposes."""
 
   def __init__(self):
-    """Function docstring."""
+    """Initializes the MockSemantics instance."""
     self.data = {}
     self.framework_configs = {}
     self.import_data = {}
@@ -52,44 +45,38 @@ class MockSemantics(SemanticsManager):
     self._source_registry = {}
 
   def get_import_map(self, target_fw):
-    """Function docstring."""
+    """Mock implementation of get import map."""
     return {}
 
   def get_framework_aliases(self):
-    """Function docstring."""
+    """Mock implementation of get framework aliases."""
     return {}
 
   def get_all_rng_methods(self):
-    """Function docstring."""
+    """Mock implementation of get all rng methods."""
     return set()
 
   def get_framework_config(self, fw):
-    """Function docstring."""
+    """Mock implementation of get framework configuration."""
     return {}
 
 
 @pytest.fixture
 def engine():
-  """Function docstring."""
+  """Provides a mock engine for testing."""
   mgr = MockSemantics()
-  # FIX: Enable strict_mode so linter runs for all tests using this fixture
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
-
-  # Setup robust mocks for adapters
   mock_torch = MagicMock()
   mock_torch.configure_mock(import_alias=("torch", "torch"), inherits_from=None)
-
-  # CRITICAL FIX: Ensure no parser/emitter is found to prevent engine from running custom hooks
   del mock_torch.create_emitter
   del mock_torch.create_parser
-
   mock_jax = MagicMock()
   mock_jax.configure_mock(import_alias=("jax.numpy", "jnp"), inherits_from=None)
   del mock_jax.create_emitter
   del mock_jax.create_parser
 
   def get_adapter_side_effect(name):
-    """Function docstring."""
+    """Gets adapter side effect."""
     if name == "torch":
       return mock_torch
     if name == "jax":
@@ -101,53 +88,29 @@ def engine():
 
 
 def test_engine_catches_leaked_import(engine):
-  """Scenario: Input has `import torch`. Rewriter fails to remove it.
-
-  Expectation: Engine returns result with Lint Violation errors.
-  """
-  code = """
-import torch
-x = 1
-"""
-  # We mock UsageScanner to ensure config doesn't bypass logic, but strict_mode is key
+  """Verifies the behavior of engine catches leaked import."""
+  code = "\nimport torch\nx = 1\n"
   with patch("ml_switcheroo.core.engine.UsageScanner", side_effect=MockUsageScanner):
     result = engine.run(code)
-
   assert result.success is True
-  # Expect failure due to linter violation in strict mode
   assert len(result.errors) > 0
-  assert any("Forbidden Import: 'torch'" in e for e in result.errors)
+  assert any(("Forbidden Import: 'torch'" in e for e in result.errors))
 
 
 def test_engine_catches_leaked_usage(engine):
-  """Scenario: Input has `torch.abs(x)`. No Semantics defined to map it.
-
-  Rewriter passes it through (Lax Mode).
-  Expectation: Linter catches 'torch.abs'.
-  """
-  code = """
-import torch
-y = torch.abs(x)
-"""
+  """Verifies the behavior of engine catches leaked usage."""
+  code = "\nimport torch\ny = torch.abs(x)\n"
   result = engine.run(code)
-
   assert "torch.abs(x)" in result.code
-  # Should have linter errors
   assert result.has_errors
   errors_str = str(result.errors)
   assert "Forbidden" in errors_str
 
 
 def test_linter_trace_event(engine):
-  """Verify linter execution is logged in trace.
-
-  The linter runs as a distinct phase "Structural Linter" in strict mode.
-  """
+  """Verifies the behavior of linter trace event."""
   code = "import torch"
-
   with patch("ml_switcheroo.core.engine.UsageScanner", side_effect=MockUsageScanner):
     result = engine.run(code)
-
-  # The linter runs a phase start "Structural Linter"
   phase_descriptions = [e["description"] for e in result.trace_events if e["type"] == "phase_start"]
   assert "Structural Linter" in phase_descriptions

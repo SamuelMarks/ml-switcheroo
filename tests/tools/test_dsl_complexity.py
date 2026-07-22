@@ -1,13 +1,10 @@
-"""Tests for ODL Schema Extension: Cost Complexity Metadata.
-
-Corresponds to Limitation #19 in the Architectural roadmap.
-"""
+"""Test suite for the Dsl Complexity module."""
 
 from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
 
 
 def test_complexity_field_storage():
-  """Verify 'complexity' field stores string values."""
+  """Verifies the behavior of complexity field storage."""
   op = OperationDef(
     operation="MatMul",
     description="Matrix Multiplication",
@@ -19,6 +16,6 @@ def test_complexity_field_storage():
 
 
 def test_complexity_default_none():
-  """Verify default complexity is None."""
+  """Verifies the behavior of complexity default none."""
   op = OperationDef(operation="Add", description="Addition", std_args=[], variants={})
   assert op.complexity is None

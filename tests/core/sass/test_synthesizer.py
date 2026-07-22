@@ -1,8 +1,7 @@
-"""Module docstring."""
+"""Test suite for the Synthesizer module."""
 
 import pytest
 from unittest.mock import MagicMock
-
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator, SassSynthesizer, MAX_REGISTERS
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.core.compiler.frontends.sass.nodes import Instruction, Register, Immediate, Comment, Label
@@ -10,7 +9,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_allocator_sequential():
-  """Function docstring."""
+  """Verifies the behavior of allocator sequential."""
   alloc = RegisterAllocator()
   r1 = alloc.get_register("x")
   r2 = alloc.get_register("y")
@@ -19,7 +18,7 @@ def test_allocator_sequential():
 
 
 def test_allocator_reuse():
-  """Function docstring."""
+  """Verifies the behavior of allocator reuse."""
   alloc = RegisterAllocator()
   r1 = alloc.get_register("x")
   r2 = alloc.get_register("x")
@@ -28,7 +27,7 @@ def test_allocator_reuse():
 
 
 def test_allocator_overflow():
-  """Function docstring."""
+  """Verifies the behavior of allocator overflow."""
   alloc = RegisterAllocator()
   alloc._free_pool = []
   with pytest.raises(ValueError, match="Register overflow"):
@@ -36,7 +35,7 @@ def test_allocator_overflow():
 
 
 def test_allocator_temp():
-  """Function docstring."""
+  """Verifies the behavior of allocator temp."""
   alloc = RegisterAllocator()
   t1 = alloc.allocate_temp()
   t2 = alloc.allocate_temp()
@@ -46,7 +45,7 @@ def test_allocator_temp():
 
 
 def test_allocator_reset():
-  """Function docstring."""
+  """Verifies the behavior of allocator reset."""
   alloc = RegisterAllocator()
   alloc.get_register("x")
   assert len(alloc._free_pool) == MAX_REGISTERS - 1
@@ -57,11 +56,11 @@ def test_allocator_reset():
 
 @pytest.fixture
 def mock_semantics():
-  """Function docstring."""
+  """Provides a mock semantics for testing."""
   mgr = MagicMock(spec=SemanticsManager)
 
   def resolve(kind, target):
-    """Function docstring."""
+    """Resolves ."""
     if target != "sass":
       return None
     if kind == "Add":
@@ -73,7 +72,7 @@ def mock_semantics():
   mgr.resolve_variant.side_effect = resolve
 
   def get_def(kind):
-    """Function docstring."""
+    """Gets def."""
     if "Conv2d" in kind:
       return ("Conv2d", {})
     if "Linear" in kind:
@@ -85,23 +84,17 @@ def mock_semantics():
 
 
 def test_graph_to_sass_linear_flow(mock_semantics):
-  """Function docstring."""
+  """Verifies the behavior of graph to SASS linear flow."""
   synth = SassSynthesizer(mock_semantics)
   g = LogicalGraph()
-  g.nodes = [
-    LogicalNode("x", "Input", {}),
-    LogicalNode("y", "Input", {}),
-    LogicalNode("z", "Add", {}),
-  ]
+  g.nodes = [LogicalNode("x", "Input", {}), LogicalNode("y", "Input", {}), LogicalNode("z", "Add", {})]
   g.edges = [LogicalEdge("x", "z"), LogicalEdge("y", "z")]
-
   nodes = synth.from_graph(g)
   assert len(nodes) == 3
   assert isinstance(nodes[0], Comment)
   assert "Input x -> R0" in str(nodes[0])
   assert isinstance(nodes[1], Comment)
   assert "Input y -> R1" in str(nodes[1])
-
   inst = nodes[2]
   assert isinstance(inst, Instruction)
   assert inst.opcode == "FADD"
@@ -111,7 +104,7 @@ def test_graph_to_sass_linear_flow(mock_semantics):
 
 
 def test_graph_to_sass_unmapped_op(mock_semantics):
-  """Function docstring."""
+  """Verifies the behavior of graph to SASS unmapped op."""
   synth = SassSynthesizer(mock_semantics)
   g = LogicalGraph()
   g.nodes = [LogicalNode("n1", "UnknownOp", {})]
@@ -122,7 +115,7 @@ def test_graph_to_sass_unmapped_op(mock_semantics):
 
 
 def test_graph_to_sass_macro_expansion(mock_semantics):
-  """Function docstring."""
+  """Verifies the behavior of graph to SASS macro expansion."""
   synth = SassSynthesizer(mock_semantics)
   g = LogicalGraph()
   g.nodes = [LogicalNode("conv1", "Conv2d", {"k": 3})]
@@ -131,14 +124,14 @@ def test_graph_to_sass_macro_expansion(mock_semantics):
   comments = [n.text for n in nodes if isinstance(n, Comment)]
   assert "BEGIN Conv2d (conv1)" in comments
   labels = [n.name for n in nodes if isinstance(n, Label)]
-  assert any("L_KY" in label for label in labels)
+  assert any(("L_KY" in label for label in labels))
   opcodes = [n.opcode for n in nodes if isinstance(n, Instruction)]
   assert "IMAD" in opcodes
   assert "FFMA" in opcodes
 
 
 def test_graph_to_sass_output_node(mock_semantics):
-  """Function docstring."""
+  """Verifies the behavior of graph to SASS output node."""
   synth = SassSynthesizer(mock_semantics)
   g = LogicalGraph()
   g.nodes = [LogicalNode("in1", "Input", {}), LogicalNode("out1", "Output", {})]
@@ -149,7 +142,7 @@ def test_graph_to_sass_output_node(mock_semantics):
 
 
 def test_sass_to_python_instruction():
-  """Function docstring."""
+  """Verifies the behavior of SASS to python instruction."""
   synth = SassSynthesizer(MagicMock())
   inst = Instruction("FADD", [Register("R0"), Register("R1"), Register("R2")])
   mod = synth.to_python([inst])
@@ -158,7 +151,7 @@ def test_sass_to_python_instruction():
 
 
 def test_sass_to_python_immediates():
-  """Function docstring."""
+  """Verifies the behavior of SASS to python immediates."""
   synth = SassSynthesizer(MagicMock())
   inst = Instruction("MOV", [Register("R0"), Immediate(16, is_hex=True)])
   mod = synth.to_python([inst])
@@ -167,14 +160,14 @@ def test_sass_to_python_immediates():
 
 
 def test_sass_to_python_no_dest():
-  """Function docstring."""
+  """Verifies the behavior of SASS to python no dest."""
   synth = SassSynthesizer(MagicMock())
 
   class LabelRef:
-    """Class docstring."""
+    """Test suite for the Label Ref component."""
 
     def __str__(self):
-      """Function docstring."""
+      """Helper to   string  ."""
       return "L_TARGET"
 
   inst = Instruction("BRA", [LabelRef()])
@@ -185,14 +178,14 @@ def test_sass_to_python_no_dest():
 
 
 def test_sass_to_python_complex_operand():
-  """Function docstring."""
+  """Verifies the behavior of SASS to python complex operand."""
   synth = SassSynthesizer(MagicMock())
 
   class ComplexMem:
-    """Class docstring."""
+    """Test suite for the Complex Mem component."""
 
     def __str__(self):
-      """Function docstring."""
+      """Helper to   string  ."""
       return "[R1 + 0x4]"
 
   inst = Instruction("LD", [Register("R0"), ComplexMem()])

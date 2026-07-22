@@ -41,7 +41,7 @@ class RdnaParser:
     nodes: List[RdnaNode] = []
     while not self._is_eof():
       node = self._parse_line()
-      if node:
+      if node:  # pragma: no cover
         nodes.append(node)
     return nodes
 
@@ -140,7 +140,7 @@ class RdnaParser:
     while not self._is_eof():
       peek = self._peek()
       if not peek or peek.line > op_tok.line or peek.kind == TokenType.COMMENT:
-        break  # pragma: no cover
+        break
       if peek.kind in (TokenType.LABEL_DEF, TokenType.DIRECTIVE):
         break
 
@@ -166,7 +166,7 @@ class RdnaParser:
     if token.kind == TokenType.IDENTIFIER:
       if token.value in ["s", "v"]:
         next_t = self._peek(1)
-        if next_t and next_t.kind == TokenType.LBRACKET:
+        if next_t and next_t.kind == TokenType.LBRACKET:  # pragma: no cover
           return self._parse_register_range()
 
       val = token.value

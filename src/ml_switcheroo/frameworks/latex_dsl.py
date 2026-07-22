@@ -101,20 +101,18 @@ class LatexDSLAdapter:
     from ml_switcheroo.core.dsl import ParameterDef
 
     specs = {}
-    if "Conv2d" not in specs:
-      specs["Conv2d"] = OperationDef(
-        operation="Conv2d",
-        description="2D Convolution",
-        std_args=[ParameterDef(name="in_channels"), ParameterDef(name="out_channels"), ParameterDef(name="kernel_size")],
-        variants={},
-      )
-    if "Linear" not in specs:
-      specs["Linear"] = OperationDef(
-        operation="Linear",
-        description="Linear Layer",
-        std_args=[ParameterDef(name="in_features"), ParameterDef(name="out_features")],
-        variants={},
-      )
+    specs["Conv2d"] = OperationDef(
+      operation="Conv2d",
+      description="2D Convolution",
+      std_args=[ParameterDef(name="in_channels"), ParameterDef(name="out_channels"), ParameterDef(name="kernel_size")],
+      variants={},
+    )
+    specs["Linear"] = OperationDef(
+      operation="Linear",
+      description="Linear Layer",
+      std_args=[ParameterDef(name="in_features"), ParameterDef(name="out_features")],
+      variants={},
+    )
     return specs
 
   @property

@@ -78,7 +78,7 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
     if not obj_arg or not file_arg:
       return node
 
-  elif op == "load":
+  else:  # op == "load"
     file_arg = _get_arg(args, 0, "f")  # Arg 0: f
     if not file_arg:
       return node

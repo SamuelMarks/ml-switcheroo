@@ -1,12 +1,9 @@
-"""Tests for Flatten Range Plugin."""
+"""Test suite for the Flatten module."""
 
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-
-# Fix: Import TestRewriter shim
 from tests.conftest import TestRewriter as PivotRewriter
-
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.flatten import transform_flatten
@@ -14,31 +11,23 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def rewrite_code(rewriter, code):
-  """Executes pipeline."""
+  """Rewrites code."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter():
-  """Function docstring."""
+  """Provides a mock rewriter for testing."""
   hooks._HOOKS["flatten_range"] = transform_flatten
   hooks._PLUGINS_LOADED = True
-
   mgr = MagicMock()
-
   flatten_def = {
-    "variants": {
-      "torch": {"api": "torch.flatten"},
-      "jax": {"api": "jnp.reshape", "requires_plugin": "flatten_range"},
-    }
+    "variants": {"torch": {"api": "torch.flatten"}, "jax": {"api": "jnp.reshape", "requires_plugin": "flatten_range"}}
   }
-
   mgr.get_definition.side_effect = lambda n: ("Flatten", flatten_def) if "flatten" in n else None
 
-  # Mock lookup_api context helper
   def resolve_variant(aid, fw):
-    """Function docstring."""
-    # Plugin looks up these IDs
+    """Resolves variant."""
     if fw == "jax":
       if aid == "flatten_range":
         return {"api": "jnp.reshape"}
@@ -52,7 +41,7 @@ def rewriter():
   mgr.is_verified.return_value = True
 
   def get_config(fw):
-    """Function docstring."""
+    """Gets configuration."""
     if fw == "jax":
       return {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}
     return {}
@@ -63,7 +52,7 @@ def rewriter():
 
 
 def test_flatten_batch_preserve(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of flatten batch preserve."""
   code = "y = torch.flatten(x, 1)"
   res = rewrite_code(rewriter, code)
   assert "jnp.reshape" in res
@@ -71,32 +60,26 @@ def test_flatten_batch_preserve(rewriter):
 
 
 def test_flatten_passthrough_missing_def(rewriter):
-  """Function docstring."""
-  # Switch target to one without definitions (e.g. numpy)
-  # Update configuration on shared context
+  """Verifies the behavior of flatten passthrough missing def."""
   rewriter.context.config.target_framework = "numpy"
-  # Update hook context (since it persists copy)
   rewriter.context.hook_context.target_fw = "numpy"
-
-  # Feature flag enabled, but lookups will fail because resolve_variant mock checks 'jax'
   rewriter.semantics.get_framework_config.side_effect = lambda f: {
     "plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)
   }
-
   code = "y = torch.flatten(x, 1)"
   res = rewrite_code(rewriter, code)
   assert "torch.flatten" in res
 
 
 def test_flatten_empty_args(rewriter):
-  """Test flatten with empty args."""
+  """Verifies the behavior of flatten empty arguments."""
   code = "y = torch.flatten()"
   res = rewrite_code(rewriter, code)
   assert "torch.flatten()" in res
 
 
 def test_flatten_positional_args_jax_collapse(rewriter):
-  """Test flatten with positional args mapping to JAX collapse."""
+  """Verifies the behavior of flatten positional arguments JAX collapse."""
   rewriter.context.hook_context.lookup_api = MagicMock(return_value="jax.lax.collapse")
   code = "y = torch.flatten(x, 1, 2)"
   node = cst.parse_module(code).body[0].body[0].value
@@ -106,7 +89,7 @@ def test_flatten_positional_args_jax_collapse(rewriter):
 
 
 def test_flatten_kwargs_jax_collapse(rewriter):
-  """Test flatten with kwargs mapping to JAX collapse."""
+  """Verifies the behavior of flatten keyword arguments JAX collapse."""
   rewriter.context.hook_context.lookup_api = MagicMock(return_value="jax.lax.collapse")
   code = "y = torch.flatten(x, start_dim=1, end_dim=-1)"
   node = cst.parse_module(code).body[0].body[0].value
@@ -116,7 +99,7 @@ def test_flatten_kwargs_jax_collapse(rewriter):
 
 
 def test_flatten_full_ravel(rewriter):
-  """Test flatten mapping to ravel."""
+  """Verifies the behavior of flatten full ravel."""
   rewriter.context.hook_context.lookup_api = MagicMock(return_value="jnp.ravel")
   code = "y = torch.flatten(x, 0, -1)"
   node = cst.parse_module(code).body[0].body[0].value
@@ -126,20 +109,18 @@ def test_flatten_full_ravel(rewriter):
 
 
 def test_flatten_value_errors(rewriter):
-  """Test value errors when parsing dims."""
+  """Verifies the behavior of flatten value errors."""
   ctx = rewriter.context.hook_context
   ctx.lookup_api = MagicMock(return_value="jax.lax.collapse")
-  # 0x1A will parse as cst.Integer but int('0x1A') raises ValueError (base 10)
   code = "y = torch.flatten(x, 0x1A, 0x1B)"
   node = cst.parse_module(code).body[0].body[0].value
   res_node = transform_flatten(node, ctx)
   res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res_node)])]).code
-  # Defaults 0, -1 used
   assert "jax.lax.collapse(x, 0, x.ndim)" in res
 
 
 def test_flatten_end_dim_kwarg(rewriter):
-  """Test end_dim kwarg parsing."""
+  """Verifies the behavior of flatten end dim keyword argument."""
   ctx = rewriter.context.hook_context
   ctx.lookup_api = MagicMock(return_value="jax.lax.collapse")
   code = "y = torch.flatten(x, start_dim=1, end_dim=2)"
@@ -150,12 +131,12 @@ def test_flatten_end_dim_kwarg(rewriter):
 
 
 def test_flatten_fallback_lookups():
-  """Test that fallback target API lookups work."""
+  """Verifies the behavior of flatten fallback lookups."""
   ctx = MagicMock()
   ctx.current_op_id = None
 
   def mock_lookup(aid):
-    """Auto-generated doc."""
+    """Provides a mock lookup for testing."""
     if aid == "flatten_full":
       return "jnp.ravel"
     return None
@@ -168,12 +149,12 @@ def test_flatten_fallback_lookups():
 
 
 def test_flatten_fallback_lookups_range():
-  """Test that fallback target API lookups work for flatten_range."""
+  """Verifies the behavior of flatten fallback lookups range."""
   ctx = MagicMock()
   ctx.current_op_id = None
 
   def mock_lookup(aid):
-    """Auto-generated doc."""
+    """Provides a mock lookup for testing."""
     if aid == "flatten_range":
       return "jnp.reshape"
     return None
@@ -186,14 +167,11 @@ def test_flatten_fallback_lookups_range():
 
 
 def test_flatten_comma_injection(rewriter):
-  """Test comma injection when start_dim=1 but input_arg has no comma."""
+  """Verifies the behavior of flatten comma injection."""
   ctx = rewriter.context.hook_context
   ctx.lookup_api = MagicMock(return_value="jnp.reshape")
-  # Construct a call manually where start_dim is from kwarg and x has no comma
-  # e.g., torch.flatten(x, start_dim=1)
   code = "y = torch.flatten(x, start_dim=1)"
   node = cst.parse_module(code).body[0].body[0].value
-  # Strip comma from x manually to trigger line 130
   arg_x = node.args[0].with_changes(comma=cst.MaybeSentinel.DEFAULT)
   node = node.with_changes(args=[arg_x, node.args[1]])
   res_node = transform_flatten(node, ctx)
@@ -202,7 +180,7 @@ def test_flatten_comma_injection(rewriter):
 
 
 def test_flatten_return_node_end():
-  """Test that node is returned if no matching strategies are found."""
+  """Verifies the behavior of flatten return node end."""
   ctx = MagicMock()
   ctx.current_op_id = None
   ctx.lookup_api.return_value = None
@@ -213,7 +191,7 @@ def test_flatten_return_node_end():
 
 
 def test_flatten_with_comma(rewriter):
-  """Test flatten where input_arg has a comma already."""
+  """Verifies the behavior of flatten with comma."""
   rewriter.context.hook_context.lookup_api = MagicMock(return_value="jnp.reshape")
   code = "y = torch.flatten(x, 1)"
   node = cst.parse_module(code).body[0].body[0].value

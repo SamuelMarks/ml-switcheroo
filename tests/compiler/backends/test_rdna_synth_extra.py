@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for the Rdna Synth Extra module."""
 
 import pytest
 from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 
 def test_rdna_synth_raw_opcode():
-  """Test function."""
+  """Verifies the behavior of RDNA synth raw opcode."""
   mock_semantics = MagicMock()
   mock_semantics.get_definition.return_value = ("rdna.v_add_f32", {})
   synth = RdnaSynthesizer(mock_semantics)
@@ -16,7 +16,7 @@ def test_rdna_synth_raw_opcode():
 
 
 def test_rdna_synth_invalid_opcode():
-  """Test function."""
+  """Verifies the behavior of RDNA synth invalid opcode."""
   mock_semantics = MagicMock()
   mock_semantics.get_definition.return_value = ("BadOp", {})
   mock_semantics.resolve_variant.return_value = {"api": "bad op code with spaces!"}

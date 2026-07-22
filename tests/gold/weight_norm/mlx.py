@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# MLX WeightNorm Stub
+"""Test suite for the Mlx module."""

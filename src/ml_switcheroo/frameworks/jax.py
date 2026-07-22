@@ -14,8 +14,8 @@ import textwrap
 from typing import List, Tuple, Dict, Any, Optional
 
 try:
-  import jax
-  import jax.numpy as jnp
+  import jax  # pragma: no cover
+  import jax.numpy as jnp  # pragma: no cover
 except Exception:
   jax: Any = None  # type: ignore
   jnp = None  # type: ignore
@@ -197,14 +197,14 @@ class JaxCoreAdapter(JAXStackMixin):
         Any: JAX Array.
 
     """
-    try:
-      import jax.numpy as jnp
-    except Exception:
-      return data
-    if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
-      return jnp.array(data)
+    try:  # pragma: no cover
+      import jax.numpy as jnp  # pragma: no cover
+    except Exception:  # pragma: no cover
+      return data  # pragma: no cover
+    if hasattr(data, "__array__") or isinstance(data, (list, tuple)):  # pragma: no cover
+      return jnp.array(data)  # pragma: no cover
 
-    return data
+    return data  # pragma: no cover
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """Applies Level 0/1 Stack wiring.

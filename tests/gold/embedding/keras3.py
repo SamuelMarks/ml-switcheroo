@@ -1,16 +1,16 @@
-"""Module docstring."""
+"""Test suite for the Keras3 module."""
 
 import keras
 
 
 class EmbeddingModel(keras.Model):
-  """Class docstring."""
+  """Test suite for the Embedding Model component."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int):
-    """Function docstring."""
+    """Initializes the EmbeddingModel instance."""
     super().__init__()
     self.emb = keras.layers.Embedding(input_dim=num_embeddings, output_dim=embedding_dim)
 
   def call(self, x):
-    """Function docstring."""
+    """Helper to call."""
     return self.emb(x)

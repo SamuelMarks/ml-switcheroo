@@ -1,15 +1,12 @@
-"""Module docstring."""
+"""Test suite for the Mlx module."""
 
 import mlx.core as mx
 import mlx.nn as nn
 
 
 class GAPModel(nn.Module):
-  """Class docstring."""
+  """Test suite for the G A P Model component."""
 
   def __call__(self, x: mx.array) -> mx.array:
-    """Function docstring."""
-    # <SWITCHEROO_FAILED_TO_TRANS>
-    # MLX assumes NHWC conventionally
+    """Executes the callable instance."""
     return mx.mean(x, axis=(1, 2))
-    # </SWITCHEROO_FAILED_TO_TRANS>

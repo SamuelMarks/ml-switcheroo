@@ -1,8 +1,8 @@
-"""Auto-generated doc."""
+"""Test suite for the Utils Coverage module."""
 
 
 def test_code_extractor_error():
-  """Auto-generated doc."""
+  """Verifies the behavior of code extractor correctly handling an error."""
   from ml_switcheroo.utils.code_extractor import CodeExtractor
   import pytest
 
@@ -13,7 +13,7 @@ def test_code_extractor_error():
 
 
 def test_code_extractor_normalize_harness_imports():
-  """Auto-generated doc."""
+  """Verifies the behavior of code extractor normalize harness imports."""
   from ml_switcheroo.utils.code_extractor import CodeExtractor
 
   ce = CodeExtractor()
@@ -22,22 +22,20 @@ def test_code_extractor_normalize_harness_imports():
 
 
 def test_doc_context_branches():
-  """Auto-generated doc."""
+  """Verifies the behavior of documentation context branches."""
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
-    """Auto-generated doc."""
+    """Dummy S M class for testing purposes."""
 
     def get_all_operations(self):
-      """Auto-generated doc."""
+      """Mock implementation of get all operations."""
       return {}
 
   b = DocContextBuilder(DummySM())
-
   res = b.build(
     "foo", {"variants": {"jax": None, "torch": {"transformation_type": "inline_lambda"}, "mlx": {"something": "else"}}}
   )
-
   assert len(res["variants"]) == 2
   for v in res["variants"]:
     if v["framework"] == "torch":
@@ -47,7 +45,7 @@ def test_doc_context_branches():
 
 
 def test_code_extractor_error_more():
-  """Auto-generated doc."""
+  """Verifies the behavior of code extractor correctly handling an error more."""
   from ml_switcheroo.utils.code_extractor import CodeExtractor
   import pytest
 
@@ -57,16 +55,15 @@ def test_code_extractor_error_more():
 
 
 def test_doc_context_more():
-  """Auto-generated doc."""
+  """Verifies the behavior of documentation context more."""
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
-    """Auto-generated doc."""
+    """Dummy S M class for testing purposes."""
 
     pass
 
   b = DocContextBuilder(DummySM())
-
   res = b.build(
     "foo",
     {
@@ -78,28 +75,24 @@ def test_doc_context_more():
       },
     },
   )
-
-  # Coverage for formatting args list
   assert "a" in res["args"][0]
   assert "b: int" in res["args"][1]
   assert "c: float = 1.0" in res["args"][2]
 
 
 def test_doc_context_more_variants():
-  """Auto-generated doc."""
+  """Verifies the behavior of documentation context more variants."""
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
-    """Auto-generated doc."""
+    """Dummy S M class for testing purposes."""
 
     pass
 
   b = DocContextBuilder(DummySM())
-
   res = b.build(
     "foo", {"variants": {"a": {"macro_template": "foo"}, "b": {"transformation_type": "infix", "operator": "+"}}}
   )
-
   for v in res["variants"]:
     if v["framework"] == "a":
       assert "Macro" in v.get("implementation_type", "")

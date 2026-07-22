@@ -1,11 +1,4 @@
-"""Tests for MLIR -> Python Generator.
-
-Verifies:
-1.  Structure: sw.module -> class, sw.func -> def.
-2.  Logic: Assignments, Returns, Calls.
-3.  Naming: SSA IDs mapped to plausible Python variables.
-4.  Trivia: Comments restored.
-"""
+"""Test suite for the Mlir Generator module."""
 
 from ml_switcheroo.core.mlir.nodes import (
   ModuleNode,
@@ -21,141 +14,84 @@ from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
 def gen_code(node: ModuleNode) -> str:
-  """Function docstring."""
+  """Helper to generation code."""
   gen = MlirToPythonGenerator()
   cst_mod = gen.generate(node)
   return cst_mod.code
 
 
 def test_module_to_class():
-  """Input: sw.module {sym_name = "MyClass"} {}.
-
-  Expect: class MyClass: pass.
-  """
+  """Verifies the behavior of module to class."""
   op = OperationNode(name="sw.module", attributes=[AttributeNode("sym_name", '"MyClass"')])
-  # Wrap in module structure
   mod = ModuleNode(body=BlockNode(label="", operations=[op]))
-
   code = gen_code(mod)
   assert "class MyClass:" in code
   assert "pass" in code
 
 
 def test_func_to_def_with_args():
-  """Input: sw.func {sym_name="forward"} ^entry(%x: !sw.unk): ...
-
-  Expect: def forward(x): ...
-  """
-  # 1. Create Func Body Block
-  # Need at least one op or pass logic handles it
+  """Verifies the behavior of function to def with arguments."""
   ret_op = OperationNode(name="sw.return", operands=[ValueNode("%x")])
-
   body_blk = BlockNode(label="^entry", arguments=[(ValueNode("%x"), TypeNode("!sw.unk"))], operations=[ret_op])
-
-  # 2. Create Func Op
   func_op = OperationNode(
     name="sw.func", attributes=[AttributeNode("sym_name", '"forward"')], regions=[RegionNode(blocks=[body_blk])]
   )
-
   mod = ModuleNode(body=BlockNode(label="", operations=[func_op]))
   code = gen_code(mod)
-
-  # Check def signature
   assert "def forward(x):" in code
-  # Check naming context mapping (%x -> x)
   assert "return x" in code
 
 
 def test_ops_assignment_and_call():
-  """Input:
-
-      %0 = sw.op {type="torch.add"} (%a, %b)
-      sw.return %0
-  Expect:
-      return torch.add(_a, _b) (Fused).
-  """
+  """Verifies the behavior of ops assignment and call."""
   op = OperationNode(
     name="sw.op",
     results=[ValueNode("%0")],
     operands=[ValueNode("%a"), ValueNode("%b")],
     attributes=[AttributeNode("type", '"torch.add"')],
   )
-
-  # Force usage to trigger assignment (Void suppression feature)
   use_op = OperationNode(name="sw.return", operands=[ValueNode("%0")])
-
   mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
   code = gen_code(mod)
-
-  # Generator applies Statement Fusion logic (inline single usage into return)
   assert "return torch.add(_a, _b)" in code
 
 
 def test_trivia_restoration():
-  """Input: // My Comment attached to op.
-
-  Expect: # My Comment.
-  """
+  """Verifies the behavior of trivia restoration."""
   op = OperationNode(name="sw.return", leading_trivia=[TriviaNode("// My Comment", "comment")])
   mod = ModuleNode(body=BlockNode("", operations=[op]))
   code = gen_code(mod)
-
   assert "# My Comment" in code
   assert "return" in code
 
 
 def test_constant_generation():
-  """Input: %c = sw.constant {value = 1}.
-
-  Expect: return 1 (Fused).
-  """
+  """Verifies the behavior of constant generation."""
   op = OperationNode(name="sw.constant", results=[ValueNode("%c")], attributes=[AttributeNode("value", "1")])
-
-  # Force usage
   use_op = OperationNode(name="sw.return", operands=[ValueNode("%c")])
-
   mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
   code = gen_code(mod)
-
   assert "return 1" in code
 
 
 def test_getattr_generation():
-  """Input:
-
-      %attr = sw.getattr %self {name = "layer"}
-  Expect:
-      return self.layer (Smart Heuristic inlines single usage).
-  """
+  """Verifies the behavior of getattr generation."""
   op = OperationNode(
     name="sw.getattr",
     results=[ValueNode("%attr")],
     operands=[ValueNode("%self")],
     attributes=[AttributeNode("name", '"layer"')],
   )
-
-  # Usage
   use_op = OperationNode(name="sw.return", operands=[ValueNode("%attr")])
-
   mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
   code = gen_code(mod)
-
-  # Heuristic uses hint="layer" for result name
-  # But smart heuristic inlines getattr if used once
   assert "return _self.layer" in code
 
 
 def test_sw_call_generation():
-  """Input: %res = sw.call %func (%arg).
-
-  Expect: return _func(_arg) (Fused).
-  """
+  """Verifies the behavior of sw call generation."""
   op = OperationNode(name="sw.call", results=[ValueNode("%res")], operands=[ValueNode("%func"), ValueNode("%arg")])
-
-  # Force usage
   use_op = OperationNode(name="sw.return", operands=[ValueNode("%res")])
-
   mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
   code = gen_code(mod)
-
   assert "return _func(_arg)" in code

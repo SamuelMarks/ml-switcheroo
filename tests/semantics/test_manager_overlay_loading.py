@@ -1,42 +1,19 @@
-"""Tests for Segmented Semantics Loading (Overlay Strategy).
-
-Verifies that:
-1. `SemanticsManager` loads base specs from `semantics/`.
-2. `SemanticsManager` scans `snapshots/` for `*_vlatest_map.json` files.
-3. Variants in overlay files are merged into the main knowledge definition.
-4. New operations in overlays (not in specs) are created as Extras.
-5. Metadata (`__framework__`) in overlays is respected to assign variants.
-
-Fixes:
-- Patched resolved paths in `ml_switcheroo.semantics.file_loader` instead of `manager`.
-"""
+"""Test suite for the Manager Overlay Loading module."""
 
 import json
 import pytest
 from unittest.mock import patch
-
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 @pytest.fixture
 def mock_root_tree(tmp_path):
-  """Creates a mock directory structure mimicking the distributed source tree.
-
-  /root
-    /semantics
-      odl/*.yaml            <-- Spec Definitions
-    /snapshots
-      torch_vlatest_map.json   <-- Framework Overlay
-      jax_vlatest_map.json     <-- Framework Overlay
-  """
+  """Provides a mock root tree for testing."""
   semantics_dir = tmp_path / "semantics"
   semantics_dir.mkdir()
   snapshots_dir = tmp_path / "snapshots"
   snapshots_dir.mkdir()
-
-  # 1. Create Base Spec (Spec-Only)
-  # Note: No 'variants' defined here, just abstract contract.
   spec_content = {
     "Abs": {"description": "Calculate absolute value", "std_args": ["x"]},
     "Add": {"description": "Addition", "std_args": ["a", "b"]},
@@ -47,116 +24,69 @@ def mock_root_tree(tmp_path):
   odl_dir.mkdir()
   (odl_dir / "add.yaml").write_text(yaml.dump({"Add": spec_content["Add"]}))
   (odl_dir / "abs.yaml").write_text(yaml.dump({"Abs": spec_content["Abs"]}))
-
-  # 2. Create Torch Overlay
-  # Uses dedicated __framework__ key
   torch_map = {
     "__framework__": "torch",
-    "mappings": {
-      "Abs": {"api": "torch.abs"},
-      "Add": {"api": "torch.add"},
-      # Op not in Spec
-      # Lowercase to ensure heuristic categorizes it as EXTRAS, not NEURAL
-      "custom_op": {"api": "torch.special"},
-    },
+    "mappings": {"Abs": {"api": "torch.abs"}, "Add": {"api": "torch.add"}, "custom_op": {"api": "torch.special"}},
   }
   (snapshots_dir / "torch_vlatest_map.json").write_text(json.dumps(torch_map))
-
-  # 3. Create JAX Overlay
-  # Uses filename inference if __framework__ missing? No, we enforce explicit struct test first.
   jax_map = {"__framework__": "jax", "mappings": {"Abs": {"api": "jax.numpy.abs"}, "Add": {"api": "jax.numpy.add"}}}
   (snapshots_dir / "jax_vlatest_map.json").write_text(json.dumps(jax_map))
-
   return semantics_dir
 
 
 @pytest.fixture
 def manager(mock_root_tree):
-  """Initializes manager with patched path resolution."""
-  # FIX: Patch file_loader directly as that is where resolve_* functions are used
+  """Provides a mock manager for testing."""
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_root_tree):
     with patch(
       "ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=mock_root_tree.parent / "snapshots"
     ):
-      # Must patch available_frameworks in registry_loader to prevent loading defaults from real registry
       with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
         yield SemanticsManager()
 
 
 def test_overlay_merging_logic(manager):
-  """Scenario: Load 'Abs' from Spec. Merge 'torch' and 'jax' from Snapshots.
-
-  Expectation: 'Abs' entry contains both variants.
-  """
-  # 1. Verify Spec loaded
+  """Verifies the behavior of overlay merging logic."""
   assert "Abs" in manager.data
   entry = manager.data["Abs"]
-
-  # 2. Verify Torch injected
   assert "torch" in entry["variants"]
   assert entry["variants"]["torch"]["api"] == "torch.abs"
-
-  # 3. Verify JAX injected
   assert "jax" in entry["variants"]
   assert entry["variants"]["jax"]["api"] == "jax.numpy.abs"
 
 
 def test_overlay_missing_op_handling(manager):
-  """Scenario: Overlay defines 'custom_op' which is NOT in the Spec files.
-
-  Expectation: Manager creates a new entry (Tier: Extras).
-  """
+  """Verifies the behavior of overlay missing op handling."""
   assert "custom_op" in manager.data
   entry = manager.data["custom_op"]
-
-  # Check source tracking
   assert manager._key_origins["custom_op"] == SemanticTier.EXTRAS.value
-
-  # Check variant
   assert entry["variants"]["torch"]["api"] == "torch.special"
-
-  # Check generated description
   assert "Auto-generated" in entry["description"]
 
 
 def test_filename_framework_inference(tmp_path):
-  """Scenario: Overlay file lacks "__framework__" key.
-
-  Expectation: Logic infers framework from filename 'numpy_vlatest_map.json' -> 'numpy'.
-  """
+  """Verifies the behavior of filename framework inference."""
   sem_dir = tmp_path / "semantics"
   sem_dir.mkdir()
   snap_dir = tmp_path / "snapshots"
   snap_dir.mkdir()
-
-  # Spec
   (sem_dir / "k_math.json").write_text(json.dumps({"Sin": {}}))
-
-  # Overlay (No __framework__ key)
   numpy_map = {"mappings": {"Sin": {"api": "numpy.sin"}}}
   (snap_dir / "numpy_vlatest_map.json").write_text(json.dumps(numpy_map))
-
-  # FIX: Patch file_loader directly
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
     with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap_dir):
       with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
         mgr = SemanticsManager()
         mgr._reverse_index = {}
-
         assert "Sin" in mgr.data
         assert "numpy" in mgr.data["Sin"]["variants"]
         assert mgr.data["Sin"]["variants"]["numpy"]["api"] == "numpy.sin"
 
 
 def test_reverse_index_integrity(manager):
-  """Scenario: Reverse check APIs loaded from Overlays.
-
-  Expectation: `get_definition("torch.abs")` returns ("Abs", data).
-  """
-  # Check reverse lookup
+  """Verifies the behavior of reverse index integrity."""
   lookup = manager.get_definition("torch.abs")
   assert lookup is not None
-
-  abstract_id, data = lookup
+  (abstract_id, data) = lookup
   assert abstract_id == "Abs"
   assert data["variants"]["torch"]["api"] == "torch.abs"

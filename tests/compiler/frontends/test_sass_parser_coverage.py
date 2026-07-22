@@ -1,10 +1,10 @@
-"""Auto-generated doc."""
+"""Test suite for the Sass Parser Coverage module."""
 
 from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
 
 
 def test_sass_parser_missing():
-  """Auto-generated doc."""
+  """Verifies the behavior of SASS parser missing."""
   parser = SassParser(".text\n.global main")
   try:
     from ml_switcheroo.core.compiler.frontends.sass.nodes import LabelRef as PLabelRef
@@ -13,8 +13,6 @@ def test_sass_parser_missing():
     assert str(r) == "test"
   except ImportError:
     pass
-
   parser.parse()
-
   parser = SassParser("MOV R0, R1\n.text")
   parser.parse()

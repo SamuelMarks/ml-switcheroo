@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# MLX Scan Stub
+"""Test suite for the Mlx module."""

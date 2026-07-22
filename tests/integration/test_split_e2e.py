@@ -1,7 +1,6 @@
-"""End-to-End Integration Test for Distributed Semantics."""
+"""Test suite for the Split E2E module."""
 
 import pytest
-
 
 LEGACY_MATH_JSON = {
   "Abs": {
@@ -14,13 +13,11 @@ LEGACY_MATH_JSON = {
 
 @pytest.fixture
 def legacy_env(tmp_path):
-  """Function docstring."""
+  """Provides a mock legacy environment for testing."""
   root = tmp_path / "src"
   sem_dir = root / "semantics"
   snap_dir = root / "snapshots"
-
   sem_dir.mkdir(parents=True)
-
   import yaml
 
   odl_dir = sem_dir / "odl"
@@ -28,5 +25,4 @@ def legacy_env(tmp_path):
   for k, v in LEGACY_MATH_JSON.items():
     v["operation"] = k
     (odl_dir / f"{k.replace('/', '_')}.yaml").write_text(yaml.dump(v))
-
-  return sem_dir, snap_dir
+  return (sem_dir, snap_dir)

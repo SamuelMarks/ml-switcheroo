@@ -20,6 +20,6 @@ def handle_schema() -> int:
       int: Exit code (0 for success).
 
   """
-  schema = OperationDef.model_json_schema()  # pragma: no cover
-  print(json.dumps(schema, indent=2))  # pragma: no cover
-  return 0  # pragma: no cover
+  schema = OperationDef.model_json_schema()
+  print(json.dumps(schema, indent=2))
+  return 0

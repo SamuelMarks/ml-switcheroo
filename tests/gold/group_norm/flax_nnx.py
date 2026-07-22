@@ -1,19 +1,16 @@
-"""Module docstring."""
+"""Test suite for the Flax Nnx module."""
 
 from flax import nnx
 import jax.numpy as jnp
 
 
 class GNModel(nnx.Module):
-  """Class docstring."""
+  """Test suite for the G N Model component."""
 
   def __init__(self, num_groups: int, num_channels: int, rngs: nnx.Rngs):
-    """Function docstring."""
-    # <SWITCHEROO_FAILED_TO_TRANS>
-    # Flax/JAX GroupNorm doesn't strictly require num_channels ahead of time usually, just num_groups
+    """Initializes the GNModel instance."""
     self.gn = nnx.GroupNorm(num_groups=num_groups, rngs=rngs)
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
-    """Function docstring."""
+    """Executes the callable instance."""
     return self.gn(x)

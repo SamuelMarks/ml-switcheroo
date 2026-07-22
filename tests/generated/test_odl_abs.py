@@ -1,2 +1,1 @@
-# No tests generated due to insufficient variants.
-"""Auto-generated module docstring."""
+"""Test suite for the Odl Abs module."""

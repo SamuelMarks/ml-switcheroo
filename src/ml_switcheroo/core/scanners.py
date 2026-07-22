@@ -194,7 +194,7 @@ class UsageScanner(cst.CSTVisitor):
     # Check relevancy
     if module_name == self.source_fw or module_name.startswith(f"{self.source_fw}."):
       for alias in node.names:  # type: ignore
-        if isinstance(alias, cst.ImportAlias):
+        if isinstance(alias, cst.ImportAlias):  # pragma: no cover
           if alias.asname:
             bound_name = alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else ""
           else:

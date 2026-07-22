@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# TF Transformer Stub
+"""Test suite for the Tensorflow module."""

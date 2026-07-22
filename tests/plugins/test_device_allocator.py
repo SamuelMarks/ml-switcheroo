@@ -1,19 +1,9 @@
-"""Tests for Device Allocator Plugin using Real Adapters logic.
-
-Verifies that:
-1. `torch.device('cuda')` delegates to JAX Adapter -> `jax.devices('gpu')[0]`.
-2. `torch.device('cuda:1')` splits string and delegates.
-3. `torch.device('cpu')` works.
-4. Variable passing relies on adapter robust string handling.
-"""
+"""Test suite for the Device Allocator module."""
 
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch
-
-# Fix: Import TestRewriter shim
 from tests.conftest import TestRewriter as PivotRewriter
-
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.device_allocator import transform_device_allocator
@@ -21,9 +11,8 @@ from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 
-# Helper to avoid import errors
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Executes the pipeline."""
+  """Rewrites code."""
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)
@@ -34,14 +23,10 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter():
-  """Function docstring."""
-  # 1. Register Hook
+  """Provides a mock rewriter for testing."""
   hooks._HOOKS["device_allocator"] = transform_device_allocator
   hooks._PLUGINS_LOADED = True
-
-  # 2. Mock Semantics
   mgr = MagicMock()
-
   device_def = {
     "requires_plugin": "device_allocator",
     "std_args": ["type"],
@@ -51,30 +36,22 @@ def rewriter():
       "numpy": {"api": "cpu", "requires_plugin": "device_allocator"},
     },
   }
-
-  # Lookup Logic
   mgr.get_definition.side_effect = lambda name: ("device", device_def) if name == "torch.device" else None
   mgr.get_known_apis.return_value = {"device": device_def}
   mgr.is_verified.return_value = True
 
-  # Resolution Logic
   def resolve_variant(aid, fw):
-    """Function docstring."""
-    # Return valid dict if variant exists
+    """Resolves variant."""
     if aid == "device" and fw in device_def["variants"]:
       return device_def["variants"][fw]
     return None
 
   mgr.resolve_variant.side_effect = resolve_variant
-
-  # 3. Config
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
-
-  # 4. Patch get_adapter to return REAL JAX/Numpy adapter logic
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get_adapter:
 
     def adapter_side_effect(name):
-      """Function docstring."""
+      """Helper to adapter side effect."""
       if name == "jax":
         return JaxCoreAdapter()
       if name == "numpy":
@@ -82,62 +59,55 @@ def rewriter():
       return None
 
     mock_get_adapter.side_effect = adapter_side_effect
-
     yield PivotRewriter(mgr, cfg)
 
 
 def test_cuda_mapping_default_index(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of cuda mapping default index."""
   code = "d = torch.device('cuda')"
   result = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[0]" in result
 
 
 def test_cuda_mapping_explicit_colon_index(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of cuda mapping explicit colon index."""
   code = "d = torch.device('cuda:1')"
   result = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[1]" in result
 
 
 def test_cpu_mapping(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of cpu mapping."""
   code = "d = torch.device('cpu')"
   result = rewrite_code(rewriter, code)
   assert "jax.devices('cpu')[0]" in result
 
 
 def test_variable_passthrough(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of variable passthrough."""
   code = "d = torch.device(my_backend)"
   result = rewrite_code(rewriter, code)
   assert "jax.devices(my_backend)[0]" in result
 
 
 def test_second_arg_index(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of second argument index."""
   code = "d = torch.device('cuda', 2)"
   result = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[2]" in result
 
 
 def test_mps_mapping(rewriter):
-  """Function docstring."""
+  """Verifies the behavior of mps mapping."""
   code = "d = torch.device('mps')"
   result = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[0]" in result
 
 
 def test_ignore_wrong_fw(rewriter):
-  """Function docstring."""
-  # Reconfigure context to generic numpy
-  # Note: Must use config setter to update PivotRewriter's property source
+  """Verifies the behavior of ignore wrong framework."""
   rewriter.context.config.target_framework = "numpy"
-  # Also update hook context explicitly if it was copied
   rewriter.context.hook_context.target_fw = "numpy"
-
   code = "d = torch.device('cuda')"
   result = rewrite_code(rewriter, code)
-
-  # Numpy adapter returns 'cpu' string code.
   assert "'cpu'" in result

@@ -1,10 +1,6 @@
-"""Module docstring."""
+"""Test suite for the Paxml module."""
 
 
 def train_step(task, x, y):
-  """Function docstring."""
-  # <SWITCHEROO_FAILED_TO_TRANS>
-  # PaxML relies on Tasks and Learners instead of raw custom loops usually
-  # FProp, BProp are structurally defined in the trainer context.
+  """Trains step."""
   pass
-  # </SWITCHEROO_FAILED_TO_TRANS>

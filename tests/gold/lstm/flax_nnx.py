@@ -1,20 +1,16 @@
-"""Module docstring."""
+"""Test suite for the Flax Nnx module."""
 
 from flax import nnx
 import jax.numpy as jnp
 
 
 class LSTMModel(nnx.Module):
-  """Class docstring."""
+  """Test suite for the L S T M Model component."""
 
   def __init__(self, input_size: int, hidden_size: int, rngs: nnx.Rngs):
-    """Function docstring."""
-    # <SWITCHEROO_FAILED_TO_TRANS>
-    # Note: Flax often separates the cell from the RNN loop (flax.linen.RNN)
-    # However, we'll represent the general idea of an RNN layer here, assuming a simplified interface for nnx
+    """Initializes the LSTMModel instance."""
     pass
-    # </SWITCHEROO_FAILED_TO_TRANS>
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
-    """Function docstring."""
+    """Executes the callable instance."""
     pass

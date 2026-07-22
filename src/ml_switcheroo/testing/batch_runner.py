@@ -132,7 +132,7 @@ class BatchValidator:
         hints[name] = annotation
 
       # Case 1: Simple String
-      elif isinstance(item, str):
+      elif isinstance(item, str):  # pragma: no cover
         params.append(item)
         # No hint available
 
@@ -163,7 +163,7 @@ class BatchValidator:
         content = py_file.read_text(encoding="utf-8")
         tree = ast.parse(content)
         for node in tree.body:
-          if (
+          if (  # pragma: no cover
             isinstance(node, ast.FunctionDef) and node.name.startswith("test_") and not node.name.startswith("test_gen_")
           ):
             # Extract 'matmul' from 'test_matmul'

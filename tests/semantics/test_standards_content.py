@@ -1,8 +1,4 @@
-"""Content Tests for Standards.
-
-Verifies that key operations are present in the loaded SemanticsManager.
-Replaces legacy checks against standards_internal.py.
-"""
+"""Test suite for the Standards Content module."""
 
 import pytest
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -10,23 +6,19 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture(scope="module")
 def mgr():
-  """Function docstring."""
+  """Helper to mgr."""
   return SemanticsManager()
 
 
 def test_functional_math_ops(mgr):
-  """Verify Array API defaults are loaded."""
+  """Verifies the behavior of functional math ops."""
   data = mgr.get_known_apis()
-  # Use get to avoid KeyError if files missing during bootstrap
   if not data:
     pytest.skip("No semantics loaded (Bootstrap needed)")
-
   assert "abs" in data
   assert "add" in data
   assert "Mean" in data
-
   abs_op = data["abs"]
-  # Handle list of dicts (new format) or strings
   args = []
   for arg in abs_op.get("std_args", []):
     if isinstance(arg, dict):
@@ -35,17 +27,15 @@ def test_functional_math_ops(mgr):
       args.append(arg)
     elif isinstance(arg, (tuple, list)):
       args.append(arg[0])
-
   assert "x" in args
 
 
 def test_neural_ops(mgr):
-  """Verify Neural Network layers are loaded."""
+  """Verifies the behavior of neural ops."""
   data = mgr.get_known_apis()
   assert "Conv2d" in data
   assert "Linear" in data
   assert "MultiheadAttention" in data
-
   conv = data["Conv2d"]
   args = []
   for arg in conv.get("std_args", []):
@@ -53,20 +43,15 @@ def test_neural_ops(mgr):
       args.append(arg.get("name"))
     elif isinstance(arg, str):
       args.append(arg)
-
-  # Argument can be 'in_channels' (Class) or 'input' (Functional), accept either as proof of load
-  # because bootstrapping might populate either based on what it found first.
   assert "in_channels" in args or "input" in args
-  # Accept 'kernel_size' OR 'weight' (functional variant arg name)
   assert "kernel_size" in args or "weight" in args
 
 
 def test_optimizer_standards(mgr):
-  """Verify Optimizers are present."""
+  """Verifies the behavior of optimizer standards."""
   data = mgr.get_known_apis()
   assert "Adam" in data
   assert "SGD" in data
-
   adam = data["Adam"]
   args = []
   for arg in adam.get("std_args", []):
@@ -74,14 +59,11 @@ def test_optimizer_standards(mgr):
       args.append(arg.get("name"))
     elif isinstance(arg, str):
       args.append(arg)
-
-  # Accept both 'lr' (standard abbreviation) and 'learning_rate' (long form)
-  # Also accept 'params' which is common first arg
   assert "lr" in args or "learning_rate" in args or "params" in args
 
 
 def test_io_constants(mgr):
-  """Verify Extras/IO."""
+  """Verifies the behavior of I/O constants."""
   data = mgr.get_known_apis()
   assert "Save" in data
   assert "Load" in data

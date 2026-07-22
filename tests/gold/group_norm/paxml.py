@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# PaxML GroupNorm Stub
+"""Test suite for the Paxml module."""

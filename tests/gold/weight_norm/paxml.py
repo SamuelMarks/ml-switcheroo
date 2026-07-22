@@ -1,3 +1,1 @@
-"""Module docstring."""
-
-# PaxML WeightNorm Stub
+"""Test suite for the Paxml module."""

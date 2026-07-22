@@ -1,4 +1,4 @@
-"""Tests for Python Backend."""
+"""Test suite for the Python Backend module."""
 
 import pytest
 import ast
@@ -9,12 +9,12 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdg
 
 @pytest.fixture
 def backend() -> PythonBackend:
-  """Fixture for backend."""
+  """Provides a mock backend for testing."""
   return PythonBackend()
 
 
 def validate_python(code: str) -> None:
-  """Validate python syntax."""
+  """Validates python."""
   try:
     ast.parse(code)
   except SyntaxError as e:
@@ -22,23 +22,17 @@ def validate_python(code: str) -> None:
 
 
 def test_compile_interface_implementation(backend: PythonBackend) -> None:
-  """Test compile interface."""
+  """Compiles interface implementation."""
   g = LogicalGraph()
   res = backend.compile(g)
   assert isinstance(res, str)
-  # LogicalGraph defaults name to "Model", so class will be "class Model" unless overwritten
-  # backend.compile uses g.name if present.
   assert "class Model" in res
 
 
 def test_synthesize_torch_chain(backend: PythonBackend) -> None:
-  """Test torch code gen."""
+  """Verifies the behavior of synthesize PyTorch chain."""
   g = LogicalGraph(
-    nodes=[
-      LogicalNode("x", "Input"),
-      LogicalNode("conv1", "Conv2d"),
-      LogicalNode("output", "Output"),
-    ],
+    nodes=[LogicalNode("x", "Input"), LogicalNode("conv1", "Conv2d"), LogicalNode("output", "Output")],
     edges=[LogicalEdge("x", "conv1"), LogicalEdge("conv1", "output")],
   )
   code = backend.generate(g, "SimpleNet")
@@ -50,14 +44,9 @@ def test_synthesize_torch_chain(backend: PythonBackend) -> None:
 
 
 def test_synthesize_flax_chain() -> None:
-  """Test flax nnx code gen."""
+  """Verifies the behavior of synthesize Flax chain."""
   backend = PythonBackend(framework="flax_nnx")
-  g = LogicalGraph(
-    nodes=[
-      LogicalNode("x", "Input"),
-      LogicalNode("fc", "Linear", {"out": "10"}),
-    ]
-  )
+  g = LogicalGraph(nodes=[LogicalNode("x", "Input"), LogicalNode("fc", "Linear", {"out": "10"})])
   code = backend.generate(g, "FlaxNet")
   validate_python(code)
   assert "class FlaxNet(nnx.Module):" in code
@@ -65,7 +54,7 @@ def test_synthesize_flax_chain() -> None:
 
 
 def test_context_preservation(backend: PythonBackend) -> None:
-  """Test class context prep."""
+  """Verifies the behavior of context preservation."""
   orig = "class MyNet(nn.Module): pass"
   tree = cst.parse_module(orig)
   g = LogicalGraph(nodes=[LogicalNode("x", "Input")])
@@ -75,7 +64,7 @@ def test_context_preservation(backend: PythonBackend) -> None:
 
 
 def test_python_backend_sharding():
-  """Verify sharding constraint generation in jax/flax framework."""
+  """Verifies the behavior of python backend sharding."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
   graph = LogicalGraph(name="ShardedNet")
@@ -85,16 +74,14 @@ def test_python_backend_sharding():
     LogicalNode(id="out", kind="Output"),
   ]
   graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
-
   backend = PythonBackend(framework="flax_nnx")
   code = backend.compile(graph)
-
   assert "jax.lax.with_sharding_constraint" in code
   assert "jax.sharding.PartitionSpec('data', ('model', 'tensor'))" in code
 
 
 def test_python_backend_sharding_none():
-  """Verify None axes format correctly."""
+  """Verifies the behavior of python backend sharding none."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
   graph = LogicalGraph(name="ShardedNet")
@@ -104,16 +91,14 @@ def test_python_backend_sharding_none():
     LogicalNode(id="out", kind="Output"),
   ]
   graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
-
   backend = PythonBackend(framework="jax")
   code = backend.compile(graph)
-
   assert "jax.lax.with_sharding_constraint" in code
   assert "jax.sharding.PartitionSpec(None, 'tensor')" in code
 
 
 def test_python_backend_sharding_torch():
-  """Verify sharding constraint generation in PyTorch DTensor format."""
+  """Verifies the behavior of python backend sharding PyTorch."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
   graph = LogicalGraph(name="ShardedNet")
@@ -123,17 +108,15 @@ def test_python_backend_sharding_torch():
     LogicalNode(id="out", kind="Output"),
   ]
   graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
-
   backend = PythonBackend(framework="torch")
   code = backend.compile(graph)
-
   assert "distribute_tensor" in code
   assert "Shard(0)" in code
   assert "Replicate()" in code
 
 
 def test_python_backend_sharding_tf_mlx():
-  """Verify sharding constraint generation in TF and MLX."""
+  """Verifies the behavior of python backend sharding tf MLX."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
   graph = LogicalGraph(name="ShardedNet")
@@ -143,18 +126,16 @@ def test_python_backend_sharding_tf_mlx():
     LogicalNode(id="out", kind="Output"),
   ]
   graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
-
   backend = PythonBackend(framework="tensorflow")
   code_tf = backend.compile(graph)
   assert "keras.distribution.layout" in code_tf
-
   backend = PythonBackend(framework="mlx")
   code_mlx = backend.compile(graph)
   assert "mx.distributed.shard" in code_mlx
 
 
 def test_python_backend_primitive_mapping_mlx():
-  """Verify advanced nodes fall back correctly in MLX."""
+  """Verifies the behavior of python backend primitive mapping MLX."""
   from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.backends.python import PythonBackend
 
@@ -164,10 +145,8 @@ def test_python_backend_primitive_mapping_mlx():
     LogicalNode(id="vision", kind="VisionPatchEmbedding"),
     LogicalNode(id="swiglu", kind="SwiGLU"),
   ]
-
   backend = PythonBackend(framework="mlx")
   code = backend.compile(graph)
-
   assert "self.rope = nn.RoPE()" in code
   assert "self.vision = nn.Conv2d()" in code
   assert "self.swiglu = nn.silu()" in code

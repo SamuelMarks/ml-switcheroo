@@ -103,11 +103,11 @@ def normalize_einsum(node: cst.Call, ctx: HookContext) -> cst.Call:
   # 5. Syntax Cleanup on remaining args
   # The argument that was previously at the end might have moved, or the one
   # before the equation might now be at the end.
-  if args:
+  if args:  # pragma: no cover
     # Ensure the current last argument doesn't have a trailing comma
     # (clean style, though Python allows it)
     last_arg = args[-1]
-    if last_arg.comma != cst.MaybeSentinel.DEFAULT:
+    if last_arg.comma != cst.MaybeSentinel.DEFAULT:  # pragma: no cover
       args[-1] = last_arg.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
   # Insert equation at the front

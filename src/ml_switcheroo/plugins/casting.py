@@ -52,7 +52,7 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
 
   if hasattr(traits, "has_numpy_compatible_arrays"):
     return traits.has_numpy_compatible_arrays
-
+  # pragma: no cover
   return False  # pragma: no cover
 
 

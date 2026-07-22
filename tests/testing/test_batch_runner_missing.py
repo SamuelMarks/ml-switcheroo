@@ -1,32 +1,25 @@
-"""Auto-generated doc."""
+"""Test suite for the Batch Runner Missing module."""
 
 
 def test_batch_runner_verbose():
-  """Auto-generated doc."""
+  """Verifies the behavior of batch runner verbose."""
   from ml_switcheroo.testing.batch_runner import BatchValidator
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
-
-  # We just want to mock run_all iterating over op names with verbose=True
-  # To avoid the execution loop, we can just mock out get_known_apis to return an empty dict
   with __import__("unittest.mock").mock.patch.object(sm, "get_known_apis", return_value={}):
     validator = BatchValidator(sm)
     validator.run_all(verbose=True)
 
 
 def test_batch_runner_unpack_args_dict():
-  """Auto-generated doc."""
+  """Verifies the behavior of batch runner unpack arguments dictionary."""
   from ml_switcheroo.testing.batch_runner import BatchValidator
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   validator = BatchValidator(SemanticsManager())
-  raw_args = [
-    {},  # 114-115
-    {"name": "a", "type": "int", "min": 0, "max": 10},  # 118-129
-    {"name": "b"},  # Missing type
-  ]
-  p, h, c = validator._unpack_args(raw_args)
+  raw_args = [{}, {"name": "a", "type": "int", "min": 0, "max": 10}, {"name": "b"}]
+  (p, h, c) = validator._unpack_args(raw_args)
   assert "a" in p
   assert "b" in p
   assert h["a"] == "int"
@@ -34,17 +27,16 @@ def test_batch_runner_unpack_args_dict():
 
 
 def test_batch_runner_scan_manual_tests_not_exist(tmp_path):
-  """Auto-generated doc."""
+  """Verifies the behavior of batch runner scan manual tests not exist."""
   from ml_switcheroo.testing.batch_runner import BatchValidator
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   validator = BatchValidator(SemanticsManager())
-  # Dir doesn't exist
   assert validator._scan_manual_tests(tmp_path / "fake_dir") == set()
 
 
 def test_batch_runner_scan_manual_tests_parse_error(tmp_path):
-  """Auto-generated doc."""
+  """Verifies the behavior of batch runner scan manual tests parse correctly handling an error."""
   from ml_switcheroo.testing.batch_runner import BatchValidator
   from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -53,5 +45,4 @@ def test_batch_runner_scan_manual_tests_parse_error(tmp_path):
   d.mkdir()
   f = d / "test_bad.py"
   f.write_text("def test_foo():\n    this is a syntax error\n")
-
   assert validator._scan_manual_tests(d) == set()

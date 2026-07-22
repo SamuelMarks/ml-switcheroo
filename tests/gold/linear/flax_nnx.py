@@ -1,16 +1,16 @@
-"""Module docstring."""
+"""Test suite for the Flax Nnx module."""
 
 from flax import nnx
 import jax.numpy as jnp
 
 
 class Model(nnx.Module):
-  """Class docstring."""
+  """Test suite for the Model component."""
 
   def __init__(self, in_features: int, out_features: int, rngs: nnx.Rngs):
-    """Function docstring."""
+    """Initializes the Model instance."""
     self.linear = nnx.Linear(in_features, out_features, rngs=rngs)
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
-    """Function docstring."""
+    """Executes the callable instance."""
     return self.linear(x)

@@ -1,4 +1,4 @@
-"""Tests for Tier C Loading and Integration."""
+"""Test suite for the Tier C Loading module."""
 
 import json
 import pytest
@@ -13,13 +13,8 @@ from ml_switcheroo.core.hooks import _HOOKS
 
 @pytest.fixture
 def mock_specs(tmp_path):
-  """Function docstring."""
-  # Specs
-  spec = {
-    "CustomLoader": {"std_args": []},
-    "MagicContext": {"std_args": []},
-    "DataLoader": {"std_args": ["dataset"]},
-  }
+  """Provides a mock specs for testing."""
+  spec = {"CustomLoader": {"std_args": []}, "MagicContext": {"std_args": []}, "DataLoader": {"std_args": ["dataset"]}}
   (tmp_path / "semantics").mkdir()
   import yaml
 
@@ -28,10 +23,7 @@ def mock_specs(tmp_path):
   for k, v in spec.items():
     v["operation"] = k
     (odl_dir / f"{k}.yaml").write_text(yaml.dump(v))
-
-  # Overlays
   (tmp_path / "snapshots").mkdir()
-
   torch_map = {
     "__framework__": "torch",
     "mappings": {
@@ -41,39 +33,32 @@ def mock_specs(tmp_path):
     },
   }
   (tmp_path / "snapshots" / "torch_vlatest_map.json").write_text(json.dumps(torch_map))
-
   jax_map = {
     "__framework__": "jax",
     "mappings": {
-      "CustomLoader": None,  # Explicit Disable
+      "CustomLoader": None,
       "MagicContext": {"requires_plugin": "magic_shim"},
       "DataLoader": {"api": "GenericDataLoader", "requires_plugin": "convert_dataloader"},
     },
   }
   (tmp_path / "snapshots" / "jax_vlatest_map.json").write_text(json.dumps(jax_map))
-
   return tmp_path
 
 
 @pytest.fixture
 def isolated_manager(mock_specs):
-  """Function docstring."""
+  """Provides a mock isolated manager for testing."""
   sem = mock_specs / "semantics"
   snap = mock_specs / "snapshots"
-
-  # FIX: Patch file_loader explicitly because resolve functions are imported there
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem):
     with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap):
-      # Prevent default registry loading from polluting test
       with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
         return SemanticsManager()
 
 
 def test_load_structure_from_extras(isolated_manager):
-  """Function docstring."""
-  # Check reverse lookup logic
+  """Loads structure from extras."""
   api = "torch.utils.data.DataLoader"
-
   defn = isolated_manager.get_definition(api)
   assert defn is not None
   abstract_id = defn[0]
@@ -81,52 +66,32 @@ def test_load_structure_from_extras(isolated_manager):
 
 
 def test_rewriter_integration_null_variant(isolated_manager):
-  """Function docstring."""
-  # CustomLoader maps JAX to None -> Escape Hatch
+  """Verifies the behavior of rewriter integration null variant."""
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   rw = PivotRewriter(isolated_manager, cfg)
-
-  # Let's forcefully point specific API to CustomLoader for this test
-  # 'torch.custom.loader' -> 'CustomLoader' variant
   isolated_manager.data["CustomLoader"]["variants"]["torch"]["api"] = "torch.custom.loader"
-  isolated_manager._reverse_index["torch.custom.loader"] = (
-    "CustomLoader",
-    isolated_manager.data["CustomLoader"],
-  )
-
+  isolated_manager._reverse_index["torch.custom.loader"] = ("CustomLoader", isolated_manager.data["CustomLoader"])
   res = rw.convert(cst.parse_module("y = torch.custom.loader(x)")).code
   assert "# <SWITCHEROO_FAILED_TO_TRANS>" in res
 
 
 def test_rewriter_integration_plugin_only(isolated_manager):
-  """Function docstring."""
+  """Verifies the behavior of rewriter integration plugin only."""
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   rw = PivotRewriter(isolated_manager, cfg)
-
   res = rw.convert(cst.parse_module("res = torch.magic()")).code
   assert "# <SWITCHEROO_FAILED_TO_TRANS>" in res
   assert "Missing required plugin" in res
 
 
 def test_rewriter_integration_dataloader_shim(isolated_manager):
-  """Function docstring."""
-  # Must register hook for this test
+  """Verifies the behavior of rewriter integration dataloader shim."""
   _HOOKS["convert_dataloader"] = transform_dataloader
-
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   rw = PivotRewriter(isolated_manager, cfg)
-
-  # Ensure DataLoader reverse index matches correct standard
   isolated_manager._build_index()
-
-  # NOTE: If multiple standards map to torch.utils.data.DataLoader, reverse index only keeps last one loaded.
-  # In 'mock_specs' fixture, both CustomLoader and DataLoader map to it.
-  # If CustomLoader wins (mapped to None), test fails. If DataLoader wins (Plugin), test passes.
-  # We delete CustomLoader variant to ensure determinism.
   del isolated_manager.data["CustomLoader"]["variants"]["torch"]
   isolated_manager._build_index()
-
   code = "import torch\ndl = torch.utils.data.DataLoader(x)"
   res = rw.convert(cst.parse_module(code)).code
-
   assert "class GenericDataLoader" in res

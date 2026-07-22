@@ -343,11 +343,11 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
 
   for group_name in GROUP_ORDER:
     if group_name not in grouped:
-      continue
+      continue  # pragma: no cover
 
     members = grouped[group_name]
     if not members:
-      continue
+      continue  # pragma: no cover
 
     html_parts.append(f'<optgroup label="{group_name}">')
     for root in members:
