@@ -17,7 +17,6 @@ from ml_switcheroo.core.compiler.frontends.sass.nodes import (
   SassNode,
 )
 from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
-from ml_switcheroo.core.compiler.frontends.sass.tokens import SassLexer, Token, TokenType
 from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
 from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 

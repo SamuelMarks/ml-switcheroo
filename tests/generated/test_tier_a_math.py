@@ -1,3 +1,2 @@
-"""Test suite for the Tier A Math module."""
-
+"""Generated tests."""
 # No tests generated due to insufficient variants.

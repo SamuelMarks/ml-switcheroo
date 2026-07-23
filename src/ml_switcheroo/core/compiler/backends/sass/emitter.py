@@ -5,7 +5,8 @@ Converts SASS AST nodes into formatted assembly text.
 
 from typing import List
 
-from ml_switcheroo.core.compiler.frontends.sass.nodes import Label, SassNode
+from ml_switcheroo.core.compiler.frontends.sass.nodes import SassNode
+from ml_switcheroo.core.compiler.backends.sass.printer import SassPrinter
 
 
 class SassEmitter:
@@ -14,10 +15,6 @@ class SassEmitter:
   def emit(self, nodes: List[SassNode]) -> str:
     """Generates the SASS source string from a list of nodes.
 
-    Formatting Rules:
-    - Labels (e.g. `L_1:`) are rendered flush-left.
-    - All other nodes are indented by 4 spaces.
-
     Args:
         nodes (List[SassNode]): AST nodes.
 
@@ -25,10 +22,5 @@ class SassEmitter:
         str: The formatted SASS source code string.
 
     """
-    lines = []
-    for node in nodes:
-      prefix = "" if isinstance(node, Label) else "    "
-      line = f"{prefix}{str(node)}"
-      lines.append(line)
-
-    return "\n".join(lines) + "\n"
+    printer = SassPrinter()
+    return printer.emit(nodes)

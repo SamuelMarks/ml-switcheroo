@@ -4,7 +4,9 @@ This module implements a Compiler Backend that synthesizes Python source code
 from the Logical Graph Internal Representation via LibCST.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
+
+from typing import Dict, List, Optional, Union
 import libcst as cst
 from libcst import matchers as m
 
@@ -177,7 +179,7 @@ class PythonBackend(CompilerBackend):
         cst.parse_statement("import praxis.layers.convolutions"),  # type: ignore
         cst.parse_statement("from praxis.base_layer import BaseLayer"),  # type: ignore
       ]
-    return []  # type: ignore
+    return []
 
   def _build_init(self, nodes: List[LogicalNode]) -> cst.FunctionDef:
     """Execute implementation detail."""
@@ -341,7 +343,7 @@ class PythonBackend(CompilerBackend):
         args_list.append(f"{key}={val}")
     return ", ".join(args_list)
 
-  def _format_partition_spec(self, sharding) -> str:
+  def _format_partition_spec(self, sharding: Any) -> str:
     """Execute implementation detail."""
     axes = []
     for axis in sharding.axes:
@@ -354,7 +356,7 @@ class PythonBackend(CompilerBackend):
         axes.append(f"({t_str})")
     return f"jax.sharding.PartitionSpec({', '.join(axes)})"
 
-  def _format_partition_spec_tf(self, sharding) -> str:
+  def _format_partition_spec_tf(self, sharding: Any) -> str:
     """Execute implementation detail."""
     placements = []
     for axis in sharding.axes:
@@ -366,7 +368,7 @@ class PythonBackend(CompilerBackend):
         placements.append("'*'")
     return f"[{', '.join(placements)}]"
 
-  def _format_partition_spec_torch(self, sharding) -> str:
+  def _format_partition_spec_torch(self, sharding: Any) -> str:
     """Execute implementation detail."""
     placements = []
     for axis in sharding.axes:

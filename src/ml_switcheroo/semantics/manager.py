@@ -10,10 +10,12 @@ Core Responsibilities:
 3.  **Coordination**: Triggers file loaders and code hydrators on initialization.
 """
 
+from typing import Any
+
 import json
 import yaml
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Any, Set, List
+from typing import Dict, Optional, Tuple, Set, List
 from pydantic import ValidationError
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -39,15 +41,15 @@ class SemanticsManager:
   def __init__(self) -> None:
     """Initializes the manager and loads all knowledge sources."""
     # Core Data Stores
-    self.data: Dict[str, Dict] = {}
-    self.framework_configs: Dict[str, Dict] = {}
-    self.test_templates: Dict[str, Dict] = {}
+    self.data: Dict[str, Dict[Any, Any]] = {}
+    self.framework_configs: Dict[str, Dict[Any, Any]] = {}
+    self.test_templates: Dict[str, Dict[Any, Any]] = {}
     self._known_rng_methods: Set[str] = set()
     self.known_magic_args: Set[str] = set()
     self.patterns: List[PatternDef] = []
 
     # Indexes
-    self._reverse_index: Dict[str, Tuple[str, Dict]] = {}
+    self._reverse_index: Dict[str, Tuple[str, Dict[Any, Any]]] = {}
     self._key_origins: Dict[str, str] = {}
     self._validation_status: Dict[str, bool] = {}
 
@@ -89,7 +91,7 @@ class SemanticsManager:
     alias_map["mx"] = "mlx.core"
     alias_map["nn"] = "torch.nn"
 
-    def get_priority(abs_id, details, tier):
+    def get_priority(abs_id: Any, details: Any, tier: Any) -> Any:
       """Determines indexing priority when multiple abstract ops map to the same target API.
 
       This handles overlaps between generic ops like `cat` vs `concat`.
@@ -145,7 +147,7 @@ class SemanticsManager:
         api_name = impl.get("api")
         if api_name:
 
-          def register_api(name):
+          def register_api(name: Any) -> Any:
             """Registers the target concrete API mapped back to its abstract concept.
 
             Uses tie-breaker scores when overlaps are found.
@@ -202,7 +204,7 @@ class SemanticsManager:
     """Finds parent framework key if exists."""
     conf = self.framework_configs.get(fw, {})
     if "extends" in conf:
-      return conf["extends"]
+      return str(conf["extends"])
 
     adapter = get_adapter(fw)
     if adapter and hasattr(adapter, "inherits_from"):
@@ -216,7 +218,7 @@ class SemanticsManager:
       return None
     variants = defn.get("variants", {})
     if target_fw in variants:
-      return variants[target_fw]
+      return variants[target_fw]  # type: ignore
 
     curr = target_fw
     limit = 5
@@ -225,7 +227,7 @@ class SemanticsManager:
       if not parent:
         return None
       if parent in variants:
-        return variants[parent]
+        return variants[parent]  # type: ignore
       curr = parent
       limit -= 1
     return None
@@ -233,13 +235,13 @@ class SemanticsManager:
   def is_verified(self, abstract_id: str) -> bool:
     """Returns True if the operation is marked verified (or untracked)."""
     status_map = getattr(self, "_validation_status", {})
-    return status_map.get(abstract_id, True)
+    return status_map.get(abstract_id, True)  # type: ignore
 
   def get_definition_by_id(self, abstract_id: str) -> Optional[Dict[str, Any]]:
     """Direct dictionary access."""
     return self.data.get(abstract_id)
 
-  def get_definition(self, api_name: str) -> Optional[Tuple[str, Dict]]:
+  def get_definition(self, api_name: str) -> Optional[Tuple[str, Dict[Any, Any]]]:
     """Reverse lookup from concrete API string or Abstract ID fallback."""
     res = self._reverse_index.get(api_name)
     if res:
@@ -250,7 +252,7 @@ class SemanticsManager:
 
     return None
 
-  def get_known_apis(self) -> Dict[str, Dict]:
+  def get_known_apis(self) -> Dict[str, Dict[Any, Any]]:
     """Returns full knowledge graph."""
     return self.data
 

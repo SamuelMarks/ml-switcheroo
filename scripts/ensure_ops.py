@@ -4,7 +4,7 @@ import yaml
 from pathlib import Path
 
 
-def run():
+def run() -> None:
   """Auto-generated doc."""
   base = Path("src/ml_switcheroo/semantics")
 

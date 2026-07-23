@@ -39,6 +39,7 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     self.marked = set()
 
   def _get_qualified_name(self, node):
+    """Get name."""
     if isinstance(node, cst.Name):
       return node.value
     if isinstance(node, cst.Attribute) and isinstance(node.value, cst.Name):
@@ -46,16 +47,20 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     return None
 
   def _mark_stateful(self, name):
+    """Mark."""
     self.marked.add(name)
 
   def _get_mapping(self, name, silent=False):
+    """Map."""
     (_, details) = self.semantics.get_definition(name) or (None, {})
     return details.get("variants", {}).get(self.target_fw)
 
   def _handle_variant_imports(self, impl):
+    """Imp."""
     pass
 
   def _create_dotted_name(self, name):
+    """Dot."""
     if "." in name:
       parts = name.split(".")
       return cst.Attribute(value=cst.Name(parts[0]), attr=cst.Name(parts[1]))
@@ -76,6 +81,8 @@ def test_leave_Assign_unwrap():
   """Verifies the behavior of leave Assign unwrap."""
 
   class Traits:
+    """Traits."""
+
     functional_execution_method = "apply"
 
   semantics = MockSemantics({}, {})

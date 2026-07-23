@@ -33,6 +33,7 @@ def test_register_hook():
 
   @register_hook("my_hook")
   def dummy():
+    """Dummy."""
     pass
 
   assert "my_hook" in _HOOKS
@@ -45,6 +46,7 @@ def test_register_hook_auto_wire():
 
   @register_hook("my_hook", auto_wire={"operation": "Op", "description": "doc", "variants": {}})
   def dummy():
+    """Dummy."""
     pass
 
   assert "my_hook" in _HOOKS
@@ -70,6 +72,7 @@ def test_get_all_metadata():
 
   @register_hook("my_hook", auto_wire={"operation": "Op", "description": "doc", "variants": {}})
   def dummy():
+    """Dummy."""
     pass
 
   meta = get_all_hook_metadata()

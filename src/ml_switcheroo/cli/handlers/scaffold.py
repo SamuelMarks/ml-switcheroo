@@ -3,12 +3,14 @@
 Heuristically scans a new library to generate a skeleton mapping.
 """
 
+from typing import Any
+
 import json
 from argparse import Namespace
 from ml_switcheroo.discovery.consensus import ConsensusEngine
 
 
-def handle_scaffold(args: Namespace):
+def handle_scaffold(args: Namespace) -> Any:
   """Handles the 'scaffold' CLI command."""
   fw_name = args.framework
   print(f"Scaffolding API mapping for framework: {fw_name}")

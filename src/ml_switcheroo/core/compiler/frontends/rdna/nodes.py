@@ -13,6 +13,9 @@ from typing import List, Optional, Union
 class RdnaNode(abc.ABC):
   """Abstract base class for all RDNA AST nodes."""
 
+  leading_trivia: str = ""
+  trailing_trivia: str = ""
+
   @abc.abstractmethod
   def __str__(self) -> str:
     """Returns the valid RDNA string representation of the node."""
@@ -188,17 +191,25 @@ class Instruction(RdnaNode):
 
   def __str__(self) -> str:
     """Execute implementation detail."""
-    if not self.operands:
-      return self.opcode
-    # Modifiers often appear without commas in some diassemblies, but standard
-    # assembly usually comma-separates or space-separates depending on the specific assembler version.
-    # We default to comma-separated for standard operands.
-    # Special handling: modifiers often just append at the end.
-    parts = []
-    for op in self.operands:
-      parts.append(str(op))
-    ops_str = ", ".join(parts)
-    return f"{self.opcode} {ops_str}"
+    ops_str = ""
+    for i, op in enumerate(self.operands):
+      op_leading = getattr(op, "leading_trivia", "")
+      op_trailing = getattr(op, "trailing_trivia", "")
+      op_str = f"{op_leading}{str(op)}{op_trailing}"
+
+      if i > 0 and not op_leading:
+        ops_str += ", " + op_str
+      else:
+        ops_str += op_str
+
+    res = self.opcode
+    if ops_str:
+      if not getattr(self.operands[0], "leading_trivia", ""):
+        res += " " + ops_str
+      else:
+        res += ops_str
+
+    return f"{self.leading_trivia}{res}{self.trailing_trivia}"
 
 
 @dataclass
@@ -216,7 +227,7 @@ class Label(RdnaNode):
 
   def __str__(self) -> str:
     """Execute implementation detail."""
-    return f"{self.name}:"
+    return f"{self.leading_trivia}{self.name}:{self.trailing_trivia}"
 
 
 @dataclass
@@ -239,7 +250,7 @@ class Directive(RdnaNode):
     out = f".{self.name}"
     if self.params:
       out += " " + ", ".join(self.params)
-    return out
+    return f"{self.leading_trivia}{out}{self.trailing_trivia}"
 
 
 @dataclass
@@ -259,4 +270,4 @@ class Comment(RdnaNode):
 
   def __str__(self) -> str:
     """Execute implementation detail."""
-    return f"; {self.text}"
+    return f"{self.leading_trivia}; {self.text}{self.trailing_trivia}"

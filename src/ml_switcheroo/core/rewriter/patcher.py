@@ -139,19 +139,19 @@ class GraphPatcher(cst.CSTTransformer):
     self, original_node: cst.Assign, updated_node: cst.Assign
   ) -> Union[cst.Assign, cst.SimpleStatementLine, cst.RemovalSentinel]:
     """Intercepts Assignment statements (e.g. `self.conv = ...`, `y = func(x)`)."""
-    return self._handle_node(original_node, updated_node)
+    return self._handle_node(original_node, updated_node)  # type: ignore
 
   def leave_Expr(  # type: ignore
     self, original_node: cst.Expr, updated_node: cst.Expr
   ) -> Union[cst.Expr, cst.SimpleStatementLine, cst.RemovalSentinel]:
     """Intercepts Expression statements (e.g. `func(x)` without assignment)."""
-    return self._handle_node(original_node, updated_node)
+    return self._handle_node(original_node, updated_node)  # type: ignore
 
   def leave_Call(  # type: ignore
     self, original_node: cst.Call, updated_node: cst.Call
   ) -> Union[cst.Call, cst.BaseExpression, cst.RemovalSentinel]:
     """Execute implementation detail."""
-    return self._handle_node(original_node, updated_node)
+    return self._handle_node(original_node, updated_node)  # type: ignore
 
   def leave_SimpleStatementLine(
     self, original_node: cst.SimpleStatementLine, updated_node: cst.SimpleStatementLine

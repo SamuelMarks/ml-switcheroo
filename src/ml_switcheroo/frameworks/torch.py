@@ -11,8 +11,10 @@ It provides:
     to/from NumPy format for interoperability.
 """
 
+from typing import Any
+
 import logging
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Optional
 
 try:
   import torch  # pragma: no cover
@@ -341,7 +343,7 @@ class TorchAdapter(TorchIOMixin):
         List of discovered GhostRef objects.
 
     """
-    results: list = []  # pragma: no cover  # type: ignore
+    results: list[Any] = []  # pragma: no cover  # type: ignore
     if category == SemanticTier.LOSS:  # pragma: no cover
       results.extend(getattr(self, "_scan_losses", lambda: [])())  # pragma: no cover
     elif category == SemanticTier.OPTIMIZER:  # pragma: no cover

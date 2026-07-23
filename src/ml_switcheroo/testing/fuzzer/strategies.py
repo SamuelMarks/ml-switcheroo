@@ -10,11 +10,27 @@ This module maps Operation Definition Language (ODL) type strings (e.g., ``Array
     across different arguments using a shared context.
 """
 
-import re
+from typing import Any
+
 import numpy as np
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as npst
-from typing import Any, Dict, Optional
+from typing import Dict, Optional, Union
+
+from ml_switcheroo.testing.fuzzer.type_parser import (
+  parse_type_annotation,
+  ParsedType,
+  AnyType,
+  NoneType,
+  PrimitiveType,
+  UnionType,
+  OptionalType,
+  TupleType,
+  ListType,
+  DictType,
+  TensorType,
+  CallableType,
+)
 
 
 def _get_dtype_strategy(dtype_str: Optional[str]) -> Any:
@@ -48,7 +64,7 @@ def _get_dtype_strategy(dtype_str: Optional[str]) -> Any:
 
 
 def strategies_from_spec(
-  type_str: str,
+  type_str: Union[str, ParsedType],
   constraints: Dict[str, Any],
   shared_dims: Optional[Dict[str, Any]] = None,
 ) -> st.SearchStrategy:
@@ -71,122 +87,92 @@ def strategies_from_spec(
   if "options" in constraints and constraints["options"]:
     return st.sampled_from(constraints["options"])
 
-  t_clean = str(type_str).strip()
+  if isinstance(type_str, str):
+    type_str = parse_type_annotation(type_str)
 
-  # 0. Union Types (A | B)
-  # Check for top-level pipes.
-  if "|" in t_clean:
-    # Simple parser for top-level split respecting brackets
-    parts = []
-    current = []
-    depth = 0
-    is_union = False
-    for char in t_clean:
-      if char == "[":
-        depth += 1
-        current.append(char)
-      elif char == "]":
-        depth -= 1
-        current.append(char)
-      elif char == "|" and depth == 0:
-        is_union = True
-        parts.append("".join(current).strip())
-        current = []
-      else:
-        current.append(char)
-    if current:  # pragma: no cover
-      parts.append("".join(current).strip())
-
-    if is_union:  # pragma: no cover
-      return st.one_of(*[strategies_from_spec(p, constraints, shared_dims) for p in parts])
+  # 0. Union Types
+  if isinstance(type_str, UnionType):
+    return st.one_of(*[strategies_from_spec(p, constraints, shared_dims) for p in type_str.types])
 
   # 1. Arrays / Tensors
-  if t_clean.startswith(("Array", "Tensor", "np.ndarray")):
-    return _array_strategy(t_clean, constraints, shared_dims)
+  if isinstance(type_str, TensorType):
+    return _array_strategy(type_str, constraints, shared_dims)
 
   # 2. Primitives
-  if t_clean in ("int", "integer"):
-    mn = constraints.get("min")
-    mx = constraints.get("max")
-    return st.integers(min_value=mn, max_value=mx)
+  if isinstance(type_str, PrimitiveType):
+    name = type_str.name
+    if name in ("int", "integer"):
+      mn = constraints.get("min")
+      mx = constraints.get("max")
+      return st.integers(min_value=mn, max_value=mx)
 
-  if t_clean in ("float", "double", "number"):
-    mn = float(constraints.get("min", -1e3))
-    mx = float(constraints.get("max", 1e3))
-    return st.floats(min_value=mn, max_value=mx, allow_nan=False, allow_infinity=False)
+    if name in ("float", "double", "number"):
+      mn = float(constraints.get("min", -1e3))
+      mx = float(constraints.get("max", 1e3))
+      return st.floats(min_value=mn, max_value=mx, allow_nan=False, allow_infinity=False)
 
-  if t_clean in ("bool", "boolean"):
-    return st.booleans()
+    if name in ("bool", "boolean"):
+      return st.booleans()
 
-  if t_clean in ("str", "string"):
-    # Exclude surrogate characters for safety
-    return st.text(alphabet=st.characters(blacklist_categories=("Cs",)), min_size=1, max_size=10)
+    if name in ("str", "string"):
+      return st.text(alphabet=st.characters(blacklist_categories=("Cs",)), min_size=1, max_size=10)
 
-  if t_clean in ("Callable", "func", "function") or t_clean.startswith("Callable"):
-    # Return identity function for functional placeholders
+    if "dtype" in name.lower():
+      return st.sampled_from([np.float32, np.int32, np.float64, np.bool_])
+
+  if isinstance(type_str, CallableType):
     return st.just(lambda x, *args, **kwargs: x)
 
-  # 3. Containers (Recursive)
-  match_opt = re.match(r"^Optional\[(.*)\]$", t_clean)
-  if match_opt:
-    inner = match_opt.group(1)
-    return st.one_of(st.none(), strategies_from_spec(inner, constraints, shared_dims))
+  # 3. Containers
+  if isinstance(type_str, NoneType):
+    return st.none()  # pragma: no cover
 
-  match_list = re.match(r"^List\[(.*)\]$", t_clean)
-  if match_list:
-    inner = match_list.group(1)
-    return st.lists(strategies_from_spec(inner, constraints, shared_dims), min_size=1, max_size=4)
+  if isinstance(type_str, OptionalType):
+    return st.one_of(st.none(), strategies_from_spec(type_str.inner, constraints, shared_dims))
 
-  match_tup_var = re.match(r"^Tuple\[(.*),\s*\.\.\.\]$", t_clean)
-  if match_tup_var:
-    inner = match_tup_var.group(1)
-    return st.lists(strategies_from_spec(inner, constraints, shared_dims), min_size=1, max_size=4).map(tuple)
+  if isinstance(type_str, ListType):
+    return st.lists(strategies_from_spec(type_str.inner, constraints, shared_dims), min_size=1, max_size=4)
 
-  match_tup_fixed = re.match(r"^Tuple\[(.*)\]$", t_clean)
-  if match_tup_fixed:
-    subs = [s.strip() for s in match_tup_fixed.group(1).split(",")]
-    sub_strats = [strategies_from_spec(s, constraints, shared_dims) for s in subs]
-    return st.tuples(*sub_strats)
+  if isinstance(type_str, TupleType):
+    if type_str.variadic:
+      inner = type_str.elements[0] if type_str.elements else AnyType()
+      return st.lists(strategies_from_spec(inner, constraints, shared_dims), min_size=1, max_size=4).map(tuple)
+    else:
+      sub_strats = [strategies_from_spec(s, constraints, shared_dims) for s in type_str.elements]
+      return st.tuples(*sub_strats)
 
-  match_dict = re.match(r"^(Dict|Mapping)\[(.*)\]$", t_clean)
-  if match_dict:
-    inner = match_dict.group(2)
-    parts = inner.split(",")
-    if len(parts) >= 2:  # pragma: no cover
-      k_ref = parts[0].strip()
-      v_ref = ",".join(parts[1:]).strip()
+  if isinstance(type_str, DictType):
+    k_ref = type_str.key_type
+    v_ref = type_str.value_type
 
-      key_strat = strategies_from_spec(k_ref, constraints, shared_dims)
-      # FORCE unhashable types (Arrays, Dicts, Lists) to strings to be valid dictionary keys
-      if k_ref.startswith(("Array", "Tensor", "np.ndarray")) or "List" in k_ref or "Dict" in k_ref or "Mapping" in k_ref:
-        key_strat = key_strat.map(str)
+    key_strat = strategies_from_spec(k_ref, constraints, shared_dims)
+    if isinstance(k_ref, (TensorType, ListType, DictType)):
+      key_strat = key_strat.map(str)
 
-      val_strat = strategies_from_spec(v_ref, constraints, shared_dims)
+    val_strat = strategies_from_spec(v_ref, constraints, shared_dims)
 
-      return st.dictionaries(
-        keys=key_strat,
-        values=val_strat,
-        min_size=1,
-        max_size=3,
-      )
-
-  # Dtype Objects
-  if "dtype" in t_clean.lower():
-    return st.sampled_from([np.float32, np.int32, np.float64, np.bool_])
+    return st.dictionaries(
+      keys=key_strat,
+      values=val_strat,
+      min_size=1,
+      max_size=3,
+    )
 
   # Inference fallback
   if "default" in constraints:
     return st.just(constraints["default"])
 
   # Fallback default
-  return _array_strategy("Array", constraints, shared_dims)
+  return _array_strategy(TensorType(dims=None), constraints, shared_dims)
 
 
-def _array_strategy(type_str: str, constraints: Dict, shared_dims: Optional[Dict]) -> st.SearchStrategy:
+def _array_strategy(
+  type_str: TensorType, constraints: Dict[Any, Any], shared_dims: Optional[Dict[Any, Any]]
+) -> st.SearchStrategy:
   """Constructs a numpy array strategy based on rank, symbolic shape, and element constraints.
 
   Args:
-      type_str: Type string (e.g. "Array['N']").
+      type_str: Parsed TensorType.
       constraints: User defined constraints (dtype, min, max).
       shared_dims: Dictionary for resolving shared symbolic dimensions.
 
@@ -197,16 +183,14 @@ def _array_strategy(type_str: str, constraints: Dict, shared_dims: Optional[Dict
   dtype = _get_dtype_strategy(constraints.get("dtype"))
 
   dims = None
-  match_sym = re.match(r"^(Array|Tensor)(?:\[(.*)\])?", type_str)
 
-  if match_sym and match_sym.group(2):
-    dims_str = match_sym.group(2)
+  if type_str.dims:
     dims = []
-    for d in dims_str.split(","):
+    for d in type_str.dims:
       d = d.strip().replace("'", "").replace('"', "")
       if d.isdigit():
         # Fixed dimension
-        dims.append(st.just(int(d)))
+        dims.append(st.just(int(d)))  # pragma: no cover
       elif d.isidentifier() and shared_dims is not None:
         # Symbolic dimension
         if d not in shared_dims:  # pragma: no cover

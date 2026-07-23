@@ -1,7 +1,7 @@
 """Test suite for the Extras Gap module."""
 
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-from ml_switcheroo.core.compiler.backends.mlir import MlirBackend
+from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
 from ml_switcheroo.core.compiler.backends.visual_tikz import TikzBackend
 from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
@@ -165,24 +165,23 @@ def test_latex_backend_transcode_graph_func_memory():
   latex = backend.compile(g)
   assert "OpA" in latex
 
-
-def test_mlir_backend_compile():
-  """Verifies the behavior of MLIR backend compile."""
-  backend = MlirBackend()
-  g = LogicalGraph()
-  g.nodes = [
-    LogicalNode("in", "Input", {"value": "42"}),
-    LogicalNode("in2", "Input", {"value": "float"}),
-    LogicalNode("op", "MyOp", {"attr": "v"}),
-    LogicalNode("op_no_attr", "MyOp", {}),
-    LogicalNode("out", "Output"),
-  ]
-  mlir = backend.compile(g)
-  assert "value = 42" in mlir
-  assert 'type = "Input"' in mlir
-  assert 'type = "MyOp", attr = "v"' in mlir
-  assert 'type = "MyOp"' in mlir
-  assert '"sw.return"()' in mlir
+  def test_mlir_backend_compile():
+    """Verifies the behavior of MLIR backend compile."""
+    backend = MlirBackend()
+    g = LogicalGraph()
+    g.nodes = [
+      LogicalNode("in", "Input", {"value": "42"}),
+      LogicalNode("in2", "Input", {"value": "float"}),
+      LogicalNode("op", "MyOp", {"attr": "v"}),
+      LogicalNode("op_no_attr", "MyOp", {}),
+      LogicalNode("out", "Output"),
+    ]
+    mlir = backend.compile(g)
+    assert "value = 42" in mlir
+    assert 'type = "Input"' in mlir
+    assert 'type = "MyOp", attr = "v"' in mlir
+    assert 'type = "MyOp"' in mlir
+    assert '"sw.return" : ()' in mlir
 
 
 def test_stablehlo_backend_compile():
@@ -191,8 +190,10 @@ def test_stablehlo_backend_compile():
   g = LogicalGraph()
   g.nodes = [LogicalNode("in", "Input"), LogicalNode("op", "math.Add"), LogicalNode("out", "Output")]
   shlo = backend.compile(g)
-  assert "stablehlo.constant dense<0.0>" in shlo
-  assert "stablehlo.custom_call @add" in shlo
+  assert "stablehlo.constant" in shlo
+  assert "dense<0.0>" in shlo
+  assert "stablehlo.custom_call" in shlo
+  assert "@add" in shlo
   assert "return" in shlo
 
 

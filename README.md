@@ -138,15 +138,13 @@ graph TD
     classDef ghost fill:#20344b,color:white,stroke-dasharray:2 2;
 
     %% 1. SOURCE
-    S_HEAD("<b>1. Source Code (PyTorch)</b>"):::src
-    S_HEAD:::title
+    S_HEAD("<b>1. Source Code (PyTorch)</b>"):::src,title
 
     S_CODE["import torch.nn as nn<br/>class ConvNet(nn.Module):<br/>  def __init__(self):<br/>    self.conv = nn.Conv2d(1, 32, 3)<br/>  def forward(self, x):<br/>    x = torch.flatten(x, 1)"]:::code
     S_HEAD --- S_CODE
 
     %% 2. PARSING & ANALYSIS
-    P_LIBCST("<b>LibCST Parser</b><br/><i>Generates AST</i>"):::eng
-    P_LIBCST:::title
+    P_LIBCST("<b>LibCST Parser</b><br/><i>Generates AST</i>"):::eng,title
     S_CODE --> P_LIBCST
 
     subgraph CONTEXT ["Reflection Context"]
@@ -158,8 +156,7 @@ graph TD
     LIVE -.->|" Introspection "|P_LIBCST
 
     %% 3. KNOWLEDGE LOOKUP
-    HUB_HEAD("<b>Semantics Manager</b>"):::hub
-    HUB_HEAD:::title
+    HUB_HEAD("<b>Semantics Manager</b>"):::hub,title
     P_LIBCST --> HUB_HEAD
 
     JSON_DB[("<b>Knowledge Base</b><br/><i>semantics/k_neural.json</i><br/><i>snapshots/jax_map.json</i>")]:::db
@@ -169,19 +166,16 @@ graph TD
     HUB_HEAD --- ABS_NODE
 
     %% 4. REWRITING REWIRING
-    REWRITE("<b>Rewriter Pipeline</b>"):::eng
-    REWRITE:::title
+    REWRITE("<b>Rewriter Pipeline</b>"):::eng,title
     ABS_NODE --> REWRITE
 
     subgraph PLUGINS ["Extension System"]
       direction TB
       target_trait("<b>Target Traits (JAX)</b><br/>requires_explicit_rng: True"):::db
 
-      HOOK_DEF("<b>Plugin: rng_threading</b><br/><i>Injects 'rngs' arg into<br/>stateful layer calls</i>"):::plug
-      HOOK_DEF:::title
+      HOOK_DEF("<b>Plugin: rng_threading</b><br/><i>Injects 'rngs' arg into<br/>stateful layer calls</i>"):::plug,title
 
-      HOOK_FLAT("<b>Plugin: flatten_range</b><br/><i>Maps flatten(x, 1)<br/>to nnx.Flatten</i>"):::plug
-      HOOK_FLAT:::title
+      HOOK_FLAT("<b>Plugin: flatten_range</b><br/><i>Maps flatten(x, 1)<br/>to nnx.Flatten</i>"):::plug,title
 
       target_trait -.-> HOOK_DEF
     end
@@ -190,13 +184,11 @@ graph TD
     REWRITE <-->|" API Swap "|HOOK_FLAT
 
     %% 5. REFINEMENT
-    FIXER("<b>Import Fixer</b><br/><i>Resolves 'nnx' alias</i>"):::plug
-    FIXER:::title
+    FIXER("<b>Import Fixer</b><br/><i>Resolves 'nnx' alias</i>"):::plug,title
     REWRITE --> FIXER
 
     %% 6. TARGET
-    T_HEAD("<b>Target Code (Flax NNX)</b>"):::tgt
-    T_HEAD:::title
+    T_HEAD("<b>Target Code (Flax NNX)</b>"):::tgt,title
     FIXER --> T_HEAD
 
     T_CODE["from flax import nnx<br/>class ConvNet(nnx.Module):<br/>  def __init__(self, rngs: nnx.Rngs):<br/>    # Variable Injection<br/>    self.conv = nnx.Conv(1, 32, 3, rngs=rngs)<br/>  def __call__(self, x):<br/>    x = nnx.Flatten(x, 1)"]:::code

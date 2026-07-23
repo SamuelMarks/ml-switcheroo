@@ -8,9 +8,11 @@ Feature 027 Update:
 Now extracts type hints (e.g. ``x: Array``, ``axis: int``) to support Better Fuzzing.
 """
 
+from typing import Any
+
 import ast
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 from ml_switcheroo.utils.console import log_info, log_warning
 
 
@@ -125,7 +127,7 @@ class ArrayApiSpecImporter:
     out = []
 
     # Helper to process a specific arg group
-    def process_group(group: List[ast.arg]):
+    def process_group(group: List[ast.arg]) -> Any:
       """Execute implementation detail."""
       for a in group:
         parsed_type = self._parse_annotation(a.annotation)

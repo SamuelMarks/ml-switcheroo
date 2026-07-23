@@ -5,6 +5,8 @@ It scans API surfaces, normalizes names, and clusters them using Levenshtein dis
 to propose candidate standards for the ODL.
 """
 
+from typing import Any
+
 import importlib
 import inspect
 import difflib
@@ -27,7 +29,7 @@ class ConsensusEngine:
     # Map of normalized token to original qualified paths
     self.vocabulary: Dict[str, List[str]] = {}
 
-  def ingest(self):
+  def ingest(self) -> None:
     """Step 1: Scans the API surface of all installed frameworks (Spokes)."""
     for fw in self.frameworks:
       try:
@@ -36,7 +38,7 @@ class ConsensusEngine:
       except ImportError:
         logger.warning(f"Could not import framework '{fw}' for ingestion.")
 
-  def _scan_module(self, mod, prefix: str, depth: int = 0):
+  def _scan_module(self, mod: Any, prefix: str, depth: int = 0) -> Any:
     """Auto-generated doc."""
     if depth > 2:  # Limit recursion
       return

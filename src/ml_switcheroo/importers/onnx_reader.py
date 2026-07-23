@@ -6,16 +6,15 @@ these definitions into the Semantic Knowledge Base format.
 
 Key Features:
 
-- **Markdown Splitting**: Identifies operators via specific HTML anchors.
+- **Markdown Splitting**: Identifies operators via structurally parsing headings and links.
 - **Input & Attribute Parsing**: Extracts definitions lists (``<dl>``).
 - **Type Extraction**: Parses HTML type signatures (e.g., ``<dt>x : T</dt>``)
   and maps them to ml-switcheroo/Fuzzer compatible type hints (e.g., ``Tensor``, ``int``).
 - **Sanitization**: Cleans HTML tags like ``<tt>``, ``<b>`` from names.
 """
 
-import re
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List
 from ml_switcheroo.utils.console import log_info, log_error
 
 
@@ -46,149 +45,70 @@ class OnnxSpecImporter:
     return self._parse_markdown(target_file)
 
   def _parse_markdown(self, fpath: Path) -> Dict[str, Any]:
-    """Splits the markdown content by operator anchors and extracts metadata.
+    """Parse markdown structurally.
 
     Args:
-        fpath: Path object to read.
+        fpath: Path to markdown file.
 
     Returns:
-        Serialized knowledge graph dictionary.
-
+        Dict: Extracted semantics.
     """
+    from markdown_it import MarkdownIt
+    from bs4 import BeautifulSoup
+
     content = fpath.read_text(encoding="utf-8")
-    semantics = {}
+    md = MarkdownIt()
+    tokens = md.parse(content)
 
-    # Regex explanation:
-    # ONNX docs use this anchor format for every operator header:
-    # ### <a name="OpName"></a> ... **OpName**
-    op_chunks = re.split(r'### <a name="([a-zA-Z0-9_]+)"></a>', content)
+    semantics: Dict[str, Any] = {}
+    current_op: str = ""
+    current_section: str = ""
 
-    # The split returns: [Preamble, Name1, Body1, Name2, Body2, ...]
-    # We start at index 1 and jump by 2
-    for i in range(1, len(op_chunks), 2):
-      op_name = op_chunks[i]
-      body_text = op_chunks[i + 1]
+    for i, token in enumerate(tokens):
+      if token.type == "heading_open" and token.tag == "h3":
+        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
+          inline_content = tokens[i + 1].content
+          soup = BeautifulSoup(inline_content, "html.parser")
+          a_tag = soup.find("a", attrs={"name": True})
+          if a_tag and isinstance(a_tag.get("name"), str):
+            current_op = a_tag["name"]  # type: ignore
+            if current_op not in semantics:
+              semantics[current_op] = {"from": fpath.name, "description": "", "std_args": [], "_raw_summary": []}
+            current_section = "Summary"
+      elif token.type == "heading_open" and token.tag == "h4":
+        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
+          current_section = tokens[i + 1].content.strip()
+      elif current_op:
+        if current_section == "Summary":
+          if token.type == "inline":
+            cast_list: List[str] = semantics[current_op]["_raw_summary"]
+            if not cast_list:
+              cast_list.append(token.content)
+        elif current_section in ("Inputs", "Attributes"):
+          if token.type == "html_block" or (token.type == "inline" and "<dl>" in token.content):
+            soup = BeautifulSoup(token.content, "html.parser")
+            dts = soup.find_all("dt")
+            for dt in dts:
+              text = dt.get_text()
+              if ":" in text:
+                raw_name, raw_type = text.split(":", 1)
+              else:
+                raw_name = text
+                raw_type = "Any"
+              arg_name = raw_name.strip().split()[0] if raw_name.strip().split() else ""
+              if arg_name:
+                type_hint = self._map_onnx_type(raw_type)
+                std_args: List[Any] = semantics[current_op]["std_args"]
+                std_args.append((arg_name, type_hint))
 
-      # If an op appears multiple times (versions), keep the first occurrence
-      # (assuming top-down document order prioritizes latest or canonical info).
-      if op_name in semantics:
-        continue
-
-      summary = self._extract_summary(body_text)
-
-      # Extract both Inputs (tensors) and Attributes (hyperparameters)
-      # merging them into a unified argument list for the function signature.
-      inputs = self._extract_section_keys(body_text, "Inputs")
-      attrs = self._extract_section_keys(body_text, "Attributes")
-
-      semantics[op_name] = {"from": fpath.name, "description": summary, "std_args": inputs + attrs}
+    for op in semantics.values():
+      if "_raw_summary" in op:
+        summary = " ".join(op["_raw_summary"]).strip()
+        max_len = 300
+        op["description"] = (summary[:max_len] + "...") if len(summary) > max_len else summary
+        del op["_raw_summary"]
 
     return semantics
-
-  def _extract_summary(self, text: str) -> str:
-    """Extracts the first paragraph describing the operator.
-
-    Args:
-        text: The full markdown body for a specific operator.
-
-    Returns:
-        A truncated string summary.
-
-    """
-    lines = text.strip().splitlines()
-
-    summary = []
-    for line in lines:
-      line = line.strip()
-      if not line:
-        continue
-
-      # Stop if we hit a sub-header (Inputs, Attributes, Constraints, etc)
-      if line.startswith("####"):
-        break
-
-      # Skip the <a name=...> line or bolded title if it lingers
-      if line.startswith("<a") or line.startswith("**"):
-        continue
-
-      summary.append(line)
-
-    # Join and truncate if too long
-    full_text = " ".join(summary)
-    max_len = 300
-    return (full_text[:max_len] + "...") if len(full_text) > max_len else full_text
-
-  def _extract_section_keys(self, text: str, header_name: str) -> List[Tuple[str, str]]:
-    """Parses definition lists under a specific markdown header including types.
-
-    Used for both 'Inputs' and 'Attributes'.
-    Structure matches standard HTML definition lists:
-        #### Header
-        <dl>
-        <dt><tt>arg_name</tt> : type</dt>
-        ...
-
-    Args:
-        text: The full operator markdown body.
-        header_name: The section title to search for (e.g., "Inputs", "Attributes").
-
-    Returns:
-        List of (name, type) tuples found in that section.
-
-    """
-    args = []
-    header_marker = f"#### {header_name}"
-
-    # Robust finder for the section
-    if header_marker not in text:
-      return []
-
-    # Grab text between '#### Header' and the next '####' (or end of string)
-    section_content = text.split(header_marker)[1]
-
-    # If there is another header later, cut off there
-    if "####" in section_content:
-      section_content = section_content.split("####")[0]
-
-    for line in section_content.splitlines():
-      line = line.strip()
-
-      # Logic: Match <dt>TAG</dt> or <dt>TAG : type</dt>
-      # ONNX often wraps names in <tt>...</tt> inside the <dt>
-      if line.startswith("<dt>"):
-        # 1. Strip outer Definition Term tags
-        clean = re.sub(r"</?dt>", "", line)
-
-        # 2. Split on colon (Name : Type)
-        if ":" in clean:
-          parts = clean.split(":", 1)
-          raw_name = parts[0]
-          raw_type = parts[1]
-        else:
-          raw_name = clean
-          raw_type = "Any"
-
-        # 3. Clean common HTML formatting inside the name part
-        # Remove <tt>, </tt>, bolding, backticks
-        clean_name = (
-          raw_name.replace("<tt>", "")
-          .replace("</tt>", "")
-          .replace("*", "")
-          .replace("`", "")
-          .replace("<b>", "")
-          .replace("</b>", "")
-          .strip()
-        )
-
-        # 4. Take the first valid word
-        # (Some lines might be "<dt>X, Y, Z</dt>" but extraction needs singular args)
-        arg_name = clean_name.split(" ")[0]
-
-        if arg_name:  # pragma: no cover
-          type_hint = self._map_onnx_type(raw_type)
-          args.append((arg_name, type_hint))
-
-    return args
 
   def _map_onnx_type(self, raw_type: str) -> str:
     """Maps ONNX Markdown type strings to Python/Fuzzer compatible hints.
@@ -214,7 +134,7 @@ class OnnxSpecImporter:
       return "List[float]"
     if "list" in raw and ("string" in raw or "strings" in raw):
       return "List[str]"
-    if "ints" in raw:  # Common shorthand
+    if "ints" in raw:
       return "List[int]"
     if "floats" in raw:
       return "List[float]"
@@ -230,7 +150,6 @@ class OnnxSpecImporter:
       return "int"
 
     # Tensors
-    # "T", "tensor", "tensor(T)", "tensor(float)"
     if "tensor" in raw or raw == "t":
       return "Tensor"
 

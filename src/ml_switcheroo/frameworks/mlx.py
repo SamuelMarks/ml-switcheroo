@@ -13,17 +13,20 @@ Definitions are loaded from `frameworks/definitions/mlx.json`.
 """
 
 from typing import List, Tuple, Optional, Dict, Any
-
-try:
-  import numpy as np
-except Exception:  # pragma: no cover
-  np = None  # pragma: no cover
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
 from ml_switcheroo.frameworks.loader import load_definitions
 
 
 from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
+
+np: Any
+try:
+  import numpy as _np
+
+  np = _np
+except Exception:  # pragma: no cover
+  np = None  # pragma: no cover
 
 
 @register_framework("mlx")
@@ -187,7 +190,7 @@ class MLXAdapter(MlxIOMixin):
       import mlx.core as mx
 
       if isinstance(data, (np.ndarray, list, tuple, np.generic)):  # pragma: no cover
-        return mx.array(data)  # type: ignore  # pragma: no cover
+        return mx.array(data)  # pragma: no cover
     except Exception:
       pass
     return data
@@ -338,7 +341,7 @@ class Qwen3VLPatchEmbed(nn.Module):
     """
     return ["import mlx.core as mx"]  # pragma: no cover
 
-  def apply_wiring(self, snapshot):
+  def apply_wiring(self, snapshot: Any) -> Any:
     """Overrides/Patches snapshot items that cannot be statically defined.
 
     Args:

@@ -104,3 +104,11 @@ def test_lifter_return_no_previous():
   assert len(graph.nodes) == 1
   assert graph.nodes[0].kind == "Output"
   assert len(graph.edges) == 0
+
+
+def test_lifter_invalid_comment():
+  """Verifies the behavior of lifter invalid comment."""
+  lifter = RdnaLifter()
+  nodes = [Comment("; Just a normal comment")]
+  graph = lifter.lift(nodes)
+  assert len(graph.nodes) == 0

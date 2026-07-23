@@ -5,15 +5,17 @@ Updated to remove legacy `create_parser` and `create_emitter` hooks,
 enforcing the new Pipeline Routing architecture.
 """
 
+from typing import Any
+
 import json
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import Any, Protocol, Type, Dict, List, Tuple, Optional, Union
+from typing import Protocol, Type, Dict, List, Tuple, Optional, Union
 from pydantic import BaseModel, Field
 from ml_switcheroo_ir.schema.ghost import SemanticTier, StandardMap, GhostRef
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
-from ml_switcheroo.core.dsl import OperationDef
+from ml_switcheroo.core.dsl import OperationDef as OperationDef
 
 SNAPSHOT_DIR = Path(__file__).resolve().parent.parent / "snapshots"
 
@@ -183,7 +185,7 @@ def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
   target = candidates[-1]
   try:
     with open(target, "r", encoding="utf-8") as f:
-      return json.load(f)
+      return json.load(f)  # type: ignore
   except Exception as e:
     logging.error(f"Failed to load snapshot {target}: {e}")
     return {}
@@ -192,10 +194,10 @@ def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
 _ADAPTER_REGISTRY: Dict[str, Type[FrameworkAdapter]] = {}
 
 
-def register_framework(name: str):
+def register_framework(name: str) -> Any:
   """Execute implementation detail."""
 
-  def wrapper(cls):
+  def wrapper(cls) -> Any:  # type: ignore
     """Execute implementation detail."""
     _ADAPTER_REGISTRY[name] = cls
     return cls

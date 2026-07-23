@@ -5,8 +5,10 @@ into final ReStructuredText (RST) content. It embeds custom HTML/CSS/JS logic to
 create an interactive "Vertical Tabs" layout for displaying framework variants side-by-side.
 """
 
+from typing import Any
+
 import textwrap
-from typing import Any, Dict
+from typing import Dict
 
 
 class OpPageRenderer:
@@ -58,7 +60,7 @@ class OpPageRenderer:
 
     return "\n".join(rst)
 
-  def _render_html_tabs(self, variants: list) -> str:
+  def _render_html_tabs(self, variants: list[Any]) -> str:
     """Generates the HTML structure for the vertical tabs UI.
 
     Structure:

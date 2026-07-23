@@ -1,8 +1,18 @@
-"""Docstring."""
+"""StableHLO Compiler Backend."""
 
 from typing import Any, Optional
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
+from ml_switcheroo.core.mlir.nodes import (
+  BlockNode,
+  ModuleNode,
+  OperationNode,
+  StableHloConstantOp,
+  AttributeNode,
+  ValueNode,
+  TypeNode,
+)
+from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
 
 
 class StableHloBackend(CompilerBackend):
@@ -10,6 +20,7 @@ class StableHloBackend(CompilerBackend):
 
   This implementation provides a direct Graph-to-StableHLO conversion path
   used when an ISA is the source format (e.g. SASS -> StableHLO).
+  It constructs an MLIR CST using StableHLO dialect nodes.
   """
 
   def __init__(self, semantics: Optional[Any] = None) -> None:
@@ -26,20 +37,31 @@ class StableHloBackend(CompilerBackend):
         str: MLIR code string using stablehlo dialect.
 
     """
-    lines = ["// Graph -> StableHLO compilation output"]
-    lines.append("module {")
-    lines.append("  func.func @main() {")
+    block = BlockNode(label="")
 
     for node in graph.nodes:
+      op: OperationNode
       if node.kind == "Input":
-        lines.append(f"    %{node.id} = stablehlo.constant dense<0.0> : tensor<f32>")
+        op = StableHloConstantOp(
+          name="stablehlo.constant",
+          results=[ValueNode(f"%{node.id}")],
+          attributes=[AttributeNode(name="value", value="dense<0.0>")],
+          result_types=[TypeNode("tensor<f32>")],
+        )
       elif node.kind == "Output":
-        lines.append("    return")
+        op = OperationNode(
+          name="return",
+        )
       else:
         # Attempt simpler mapping
         op_name = node.kind.lower().split(".")[-1]
-        lines.append(f"    %{node.id} = stablehlo.custom_call @{op_name}(...)")
+        op = OperationNode(
+          name="stablehlo.custom_call",
+          results=[ValueNode(f"%{node.id}")],
+          attributes=[AttributeNode(name="call_target_name", value=f'"@{op_name}"')],
+        )
+      block.operations.append(op)
 
-    lines.append("  }")
-    lines.append("}")
-    return "\n".join(lines)
+    module = ModuleNode(body=block)
+    printer = MlirPrinter()
+    return printer.emit(module, header="// Graph -> StableHLO compilation output\n")

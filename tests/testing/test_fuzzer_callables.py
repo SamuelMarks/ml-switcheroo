@@ -66,8 +66,9 @@ def test_callable_in_list(fuzzer, data):
 def test_fallback_depth_recursion(fuzzer):
   """Verifies the behavior of fallback depth recursion."""
   from ml_switcheroo.testing.fuzzer.parser import get_fallback_base_value
+  from ml_switcheroo.testing.fuzzer.type_parser import parse_type_annotation
 
-  val = get_fallback_base_value("Callable", (1, 1))
+  val = get_fallback_base_value(parse_type_annotation("Callable"), (1, 1))
   assert callable(val)
   assert val("test") == "test"
 

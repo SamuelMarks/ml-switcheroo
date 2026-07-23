@@ -33,8 +33,13 @@ def test_parse_file_valid(importer, tmp_path):
 
 def test_finalize_op_truncation(importer):
   """Verifies the behavior of finalize op truncation."""
+  from ml_switcheroo.core.mlir.nodes import OperationNode, ValueNode
+
   semantics = {}
-  details = {"description": ["A" * 100, "B" * 100, "C" * 150], "raw_syntax": "%x, %y"}
+  parsed = OperationNode(
+    name="stablehlo.my_op", results=[ValueNode(name="%res")], operands=[ValueNode(name="%x"), ValueNode(name="%y")]
+  )
+  details = {"description": ["A" * 100, "B" * 100, "C" * 150], "raw_syntax": "%x, %y", "parsed_op": parsed}
   importer._finalize_op(semantics, "MyOp", details)
   desc = semantics["MyOp"]["description"]
   assert len(desc) == 300
@@ -44,8 +49,15 @@ def test_finalize_op_truncation(importer):
 
 def test_finalize_op_args_filtering(importer):
   """Verifies the behavior of finalize op arguments filtering."""
+  from ml_switcheroo.core.mlir.nodes import OperationNode, ValueNode
+
   semantics = {}
-  details = {"description": ["Desc"], "raw_syntax": "%0 = stablehlo.add %lhs, %rhs, %result, %results"}
+  parsed = OperationNode(
+    name="stablehlo.add",
+    results=[ValueNode(name="%0"), ValueNode(name="%result"), ValueNode(name="%results")],
+    operands=[ValueNode(name="%lhs"), ValueNode(name="%rhs")],
+  )
+  details = {"description": ["Desc"], "raw_syntax": "%0 = stablehlo.add %lhs, %rhs", "parsed_op": parsed}
   importer._finalize_op(semantics, "Add", details)
   assert semantics["Add"]["std_args"] == ["lhs", "rhs"]
   assert semantics["Add"]["variants"]["stablehlo"]["api"] == "stablehlo.add"

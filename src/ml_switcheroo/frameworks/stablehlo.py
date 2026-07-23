@@ -20,7 +20,7 @@ class StableHloAdapter(FrameworkAdapter):
   display_name: str = "StableHLO (MLIR)"
   inherits_from: Optional[str] = None
   ui_priority: int = 95
-  _mode: InitMode = InitMode.GHOST
+  _mode: InitMode = InitMode.LIVE
 
   def __init__(self) -> None:
     """Execute implementation detail."""
@@ -32,18 +32,14 @@ class StableHloAdapter(FrameworkAdapter):
     return "stablehlo", "stablehlo"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
     """Execute implementation detail."""
     return {}
 
   @property
   def test_config(self) -> Dict[str, str]:
     """Execute implementation detail."""
-    return {
-      "import": "// module attributes",
-      "convert_input": "// input tensor {np_var}",
-      "to_numpy": "// result tensor {res_var}",
-    }
+    return {"import": "", "convert_input": "{np_var}", "to_numpy": "np.asarray({res_var})"}
 
   @property
   def harness_imports(self) -> List[str]:
@@ -52,11 +48,33 @@ class StableHloAdapter(FrameworkAdapter):
 
   def get_harness_init_code(self) -> str:
     """Execute implementation detail."""
-    return ""
+    return """
+import jax
+from jax.lib import xla_bridge
+import numpy as np
+
+_client = xla_bridge.get_backend()
+
+def _execute_mlir(mlir_code: str, *args):
+    # PJRT Compilation requires wrapping standard func in a main module if not already
+    if "module {" not in mlir_code:
+        mlir_code = f"module {{
+{mlir_code}
+}}"
+
+    executable = _client.compile(mlir_code)
+    # Convert numpy inputs to PJRT buffers
+    buffers = [_client.buffer_from_pyval(a) for a in args]
+    res = executable.execute(buffers)
+
+    if len(res) == 1:
+        return res[0]
+    return tuple(res)
+"""
 
   def get_to_numpy_code(self) -> str:
     """Execute implementation detail."""
-    return "return str(obj)"
+    return "return np.asarray(obj)"
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:

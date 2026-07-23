@@ -84,7 +84,10 @@ def test_torch_convert(monkeypatch):
   assert adapter.convert("test") == "test"
 
   class DummyNumpy:
+    """Dummy."""
+
     def __init__(self):
+      """Init."""
       pass
 
   arr = DummyNumpy()

@@ -18,7 +18,7 @@ class SassBackend(CompilerBackend):
   Orchestrates the synthesis (Graph -> AST) and emission (AST -> Text).
   """
 
-  def __init__(self, semantics: Optional["SemanticsManager"] = None) -> None:  # type: ignore
+  def __init__(self, semantics: Optional["SemanticsManager"] = None) -> None:
     """Execute implementation detail."""
     # Lazy load if not provided, but typically passed from Registry/Engine
     if semantics is None:

@@ -4,7 +4,9 @@ This module provides the `InputFuzzer` facade which now delegates generation log
 to Hypothesis Strategies. It maintains backward compatibility for casual usage via `generate_inputs`.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
+
+from typing import Dict, List, Optional
 import hypothesis.strategies as st
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.testing.fuzzer.strategies import strategies_from_spec
@@ -18,7 +20,7 @@ class InputFuzzer:
     self,
     params: List[str],
     hints: Optional[Dict[str, str]] = None,
-    constraints: Optional[Dict[str, Dict]] = None,
+    constraints: Optional[Dict[str, Dict[Any, Any]]] = None,
   ) -> Dict[str, st.SearchStrategy]:
     """Constructs a dictionary of Hypothesis strategies for the given parameters.
 

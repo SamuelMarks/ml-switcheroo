@@ -9,9 +9,11 @@ to a high-level neural network library like Flax or Haiku. It maps:
 It specifically enables `requires_explicit_rng` in plugin traits.
 """
 
+from typing import Any
+
 import logging
 import textwrap
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Optional
 
 try:
   import jax  # pragma: no cover
@@ -178,7 +180,7 @@ class JaxCoreAdapter(JAXStackMixin):
 
   def _collect_live(self, category: SemanticTier) -> List[GhostRef]:
     """Scans installed JAX/Optax modules."""
-    results: list = []  # pragma: no cover  # type: ignore
+    results: list[Any] = []  # pragma: no cover  # type: ignore
     if category == SemanticTier.LOSS:  # pragma: no cover
       results.extend(getattr(OptaxScanner, "scan_losses", lambda: [])())  # pragma: no cover
     elif category == SemanticTier.OPTIMIZER:  # pragma: no cover

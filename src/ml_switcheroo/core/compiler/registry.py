@@ -19,7 +19,7 @@ from ml_switcheroo.core.compiler.backends.rdna import RdnaBackend
 from ml_switcheroo.core.compiler.backends.python import PythonBackend
 from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-from ml_switcheroo.core.compiler.backends.mlir import MlirBackend
+from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
 from ml_switcheroo.core.compiler.backends.visual_tikz import TikzBackend
 from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
@@ -97,6 +97,7 @@ def is_isa_target(target: str) -> bool:
   Only Low-Level Assembly targets handling Registers or Visualization
   backends that strictly consume Graphs are routed here.
 
+
   Note: MLIR/StableHLO/TikZ/Latex/HTML/RDNA/SASS use this path for graph-based generation
   if selected as target in CLI, bypassing the CST rewriter.
 
@@ -107,7 +108,7 @@ def is_isa_target(target: str) -> bool:
       True if the target is an ISA or Graph-based format.
 
   """
-  return target in ["sass", "rdna", "html", "tikz", "latex_dsl", "mlir", "stablehlo"]
+  return target in ["sass", "rdna", "html", "tikz", "latex_dsl", "mlir"]
 
 
 def is_isa_source(source: str) -> bool:

@@ -63,7 +63,7 @@ class ApiTransformerAttrMixin:
 
     return updated_node
 
-  def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> Union[Attribute, Name, CSTNode]:  # type: ignore
+  def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> Union[Attribute, Name, CSTNode]:
     """Rewrites attributes and constants (e.g. torch.float32)."""
     name = self._get_qualified_name(original_node)  # type: ignore
     if not name:

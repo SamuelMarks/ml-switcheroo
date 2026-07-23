@@ -116,7 +116,7 @@ class NamingContext:
           attempt = f"{prefix}_{count}"
           if attempt not in self._used_names:
             break
-          count += 1
+          count += 1  # pragma: no cover
 
         py_name = attempt
       else:

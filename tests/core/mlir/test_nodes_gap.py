@@ -9,12 +9,11 @@ from ml_switcheroo.core.mlir.nodes import (
   TypeNode,
   RegionNode,
 )
-from ml_switcheroo.core.mlir.tokens import TokenKind
 
 
 def test_block_node_leading_trivia():
   """Verifies the behavior of block node leading trivia."""
-  blk = BlockNode(label="^bb0", leading_trivia=[TriviaNode(TokenKind.NEWLINE, "\n")])
+  blk = BlockNode(label="^bb0", leading_trivia=[TriviaNode("newline", "\n")])
   txt = blk.to_text()
   assert "\n" in txt
 
@@ -48,9 +47,9 @@ def test_operation_results():
 
 def test_operation_name_trivia():
   """Verifies the behavior of operation name trivia."""
-  op = OperationNode(name="sw.op", name_trivia=[TriviaNode(TokenKind.WHITESPACE, "   ")])
+  op = OperationNode(name="sw.op", name_trivia=[TriviaNode("whitespace", "   ")])
   txt = op.to_text()
-  assert "sw.opWHITESPACE" in txt
+  assert "sw.opwhitespace" in txt
 
 
 def test_operation_regions():
@@ -70,12 +69,12 @@ def test_operation_types():
   op2 = OperationNode(name="sw.op", result_types=[TypeNode("i32"), TypeNode("f32")])
   txt2 = op2.to_text()
   assert ": (i32, f32)" in txt2
-  op3 = OperationNode(name="sw.op", name_trivia=[TriviaNode(TokenKind.WHITESPACE, " ")], result_types=[TypeNode("i32")])
+  op3 = OperationNode(name="sw.op", name_trivia=[TriviaNode("whitespace", " ")], result_types=[TypeNode("i32")])
   txt3 = op3.to_text()
   assert ": i32" in txt3
 
 
 def test_operation_trailing_trivia():
   """Verifies the behavior of operation trailing trivia."""
-  op = OperationNode(name="sw.op", trailing_trivia=[TriviaNode(TokenKind.NEWLINE, "\n")])
+  op = OperationNode(name="sw.op", trailing_trivia=[TriviaNode("newline", "\n")])
   assert "\n" in op.to_text()

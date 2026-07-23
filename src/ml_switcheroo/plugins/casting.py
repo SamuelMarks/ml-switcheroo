@@ -48,10 +48,10 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
     return False
 
   if isinstance(traits, dict):
-    return traits.get("has_numpy_compatible_arrays", False)
+    return traits.get("has_numpy_compatible_arrays", False)  # type: ignore
 
   if hasattr(traits, "has_numpy_compatible_arrays"):
-    return traits.has_numpy_compatible_arrays
+    return traits.has_numpy_compatible_arrays  # type: ignore
   # pragma: no cover
   return False  # pragma: no cover
 

@@ -171,4 +171,4 @@ class MigrationGuideGenerator:
     """Safe formatter for API variant."""
     if not variant:
       return "—"
-    return variant.get("api", "—")
+    return variant.get("api", "—")  # type: ignore

@@ -17,6 +17,8 @@ It contains:
 3.  **RdnaBackend**: The CompilerBackend adapter for the Registry, including header generation.
 """
 
+from typing import Any
+
 from typing import Dict, List, Optional, Callable, TYPE_CHECKING
 import libcst as cst
 
@@ -109,7 +111,7 @@ class RdnaSynthesizer:
     """Execute implementation detail."""
     self.semantics = semantics
     self.allocator = RegisterAllocator()
-    self.macro_registry: Dict[str, Callable] = {
+    self.macro_registry: Dict[str, Callable[..., Any]] = {
       "Conv2d": expand_conv2d,
       "Linear": expand_linear,
     }

@@ -53,7 +53,7 @@ def test_model_container_rendering():
   assert "\\begin{DefModel}{Net}" in code
   assert "\\end{DefModel}" in code
   lines = code.split("\n")
-  assert lines[1].startswith("    ")
+  assert lines[1].startswith("  ")
   assert "\\Attribute{conv}{Conv2d}{k=3}" in code
   assert "\\Op{s2}{ReLU}{s1}{[B, 32]}" in code
   assert "\\Return{s3}" in code

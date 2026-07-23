@@ -5,6 +5,8 @@ This module implements the transformation logic for structural MLIR operations
 It operates as a mixin to be combined with expression generation logic in the main generator.
 """
 
+from typing import Any
+
 import libcst as cst
 from collections import defaultdict
 from typing import List
@@ -20,8 +22,8 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
 
   # Interface requirements from host class (MlirToPythonGenerator)
   ctx: NamingContext
-  usage_counts: defaultdict
-  usage_consumers: dict
+  usage_counts: defaultdict[Any, Any]
+  usage_consumers: dict[Any, Any]
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
     """Resolves an SSA value name to its Python expression.

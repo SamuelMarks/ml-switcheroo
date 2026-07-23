@@ -41,10 +41,10 @@ class InitializationTracker(cst.CSTVisitor):
   It maintains a stack of Class Contexts to handle nested class definitions correctly.
   """
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the tracker with empty state."""
-    self.warnings: List[str] = []  # type: ignore
-    self._scope_stack: List[_ClassContext] = []  # type: ignore
+    self.warnings: List[str] = []
+    self._scope_stack: List[_ClassContext] = []
 
   def visit_ClassDef(self, node: cst.ClassDef) -> None:
     """Enters a class definition.

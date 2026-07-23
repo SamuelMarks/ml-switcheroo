@@ -52,7 +52,7 @@ class RdnaAdapter(FrameworkAdapter):
     return "rdna", "asm"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
     """Execute implementation detail."""
     return {}
 

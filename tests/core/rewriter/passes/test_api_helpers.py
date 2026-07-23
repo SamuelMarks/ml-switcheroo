@@ -90,6 +90,7 @@ class MockHelper(ApiHelpersMixin):
     self.failures = []
 
   def _report_failure(self, msg):
+    """Fail."""
     self.failures.append(msg)
 
 

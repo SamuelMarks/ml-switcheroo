@@ -49,7 +49,7 @@ def generate_scalar_float(constraints: Dict[str, Any]) -> float:
   return val
 
 
-def generate_array(type_lbl: str, shape: Tuple[int, ...], constraints: Dict[str, Any]) -> np.ndarray:
+def generate_array(type_lbl: str, shape: Tuple[int, ...], constraints: Dict[str, Any]) -> Any:
   """Generates a random NumPy array bounded by constraints.
 
   Args:

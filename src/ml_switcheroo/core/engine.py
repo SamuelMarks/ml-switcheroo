@@ -13,7 +13,7 @@ from typing import Any, Dict, Optional, cast
 import libcst as cst
 
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.conversion_result import ConversionResult
+from ml_switcheroo.core.conversion_result import ConversionResult as ConversionResult
 from ml_switcheroo.core.hooks import load_plugins
 from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
 from ml_switcheroo.core.scanners import UsageScanner
@@ -104,11 +104,24 @@ class ASTEngine:
     try:
       if is_isa_source(self.source) or is_isa_target(self.target) or self.config.enable_sharding:
         result = self._run_compiler_pipeline(code, tracer)
+      elif self.target == "stablehlo":
+        # special bypass for CST to MLIR string translation
+        source_adapter = get_adapter(self.source)
+        tree = ingest_code(code, self.source, self.target, source_adapter, tracer)
+        from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
+
+        emitter = StableHloEmitter(self.semantics)
+        mlir_code = emitter.convert(tree).to_text()
+        result = ConversionResult(code=mlir_code, success=True, trace_events=tracer.export())
       else:
         result = self._run_rewriter_pipeline(code, tracer)
+
       tracer.end_phase()
       return result
     except Exception as e:
+      import traceback
+
+      traceback.print_exc()
       tracer.end_phase()
       return ConversionResult(
         code=code,
@@ -244,7 +257,7 @@ class ASTEngine:
       try:
         from ml_switcheroo.core.graph_optimizer import GraphOptimizer
         from ml_switcheroo.core.compiler.differ import GraphDiffer
-        from ml_switcheroo.core.rewriter.patcher import GraphPatcher  # type: ignore
+        from ml_switcheroo.core.rewriter.patcher import GraphPatcher
         from ml_switcheroo.core.compiler.backends.python_snippet import (
           PythonSnippetEmitter,
         )

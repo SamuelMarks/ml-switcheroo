@@ -13,27 +13,33 @@ Classes match the DSL macros:
     - ``ReturnNode``     -> ``\\Return``
 """
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass, field
 from typing import List, Dict
+from ml_switcheroo.utils.formatting import StructuredFormatter, escape_latex
 
 
 @dataclass
 class LatexNode(ABC):
   """Abstract base class for all MIDL nodes.
 
-  Enforces a ``to_latex()`` method for serialization support.
+  Enforces a ``emit()`` method for serialization support.
   """
 
-  @abstractmethod
-  def to_latex(self) -> str:
-    """Serializes the node object back into its LaTeX macro representation.
+  def emit(self, indent_level: int = 0) -> str:
+    """Serializes the node object back into its LaTeX macro representation with indentation.
+
+    Args:
+        indent_level: Current indentation depth.
 
     Returns:
         str: Valid LaTeX code string.
-
     """
-    pass
+    return ""
+
+  def to_latex(self) -> str:
+    """Convenience method to render to LaTeX string."""
+    return self.emit(0)
 
 
 @dataclass
@@ -57,11 +63,15 @@ class MemoryNode(LatexNode):
   config: Dict[str, str] = field(default_factory=dict)
   """Configuration parameters for the layer."""
 
-  def to_latex(self) -> str:
+  def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Attribute`` macro."""
+    fmt = StructuredFormatter()
     # Convert config dict to string "k=v, k2=v2"
-    config_str = ", ".join(f"{k}={v}" for k, v in self.config.items())
-    return f"\\Attribute{{{self.node_id}}}{{{self.op_type}}}{{{config_str}}}"
+    config_str = ", ".join(f"{escape_latex(k)}={escape_latex(v)}" for k, v in self.config.items())
+    safe_id = escape_latex(self.node_id)
+    safe_op = escape_latex(self.op_type)
+    fmt.add_line(f"\\Attribute{{{safe_id}}}{{{safe_op}}}{{{config_str}}}", indent_level)
+    return fmt.build()
 
 
 @dataclass
@@ -81,9 +91,13 @@ class InputNode(LatexNode):
   shape: str
   """Shape descriptor string."""
 
-  def to_latex(self) -> str:
+  def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Input`` macro."""
-    return f"\\Input{{{self.name}}}{{{self.shape}}}"
+    fmt = StructuredFormatter()
+    safe_name = escape_latex(self.name)
+    safe_shape = escape_latex(self.shape)
+    fmt.add_line(f"\\Input{{{safe_name}}}{{{safe_shape}}}", indent_level)
+    return fmt.build()
 
 
 @dataclass
@@ -109,10 +123,15 @@ class ComputeNode(LatexNode):
   shape: str
   """Resulting shape descriptor."""
 
-  def to_latex(self) -> str:
+  def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Op`` macro."""
-    args_str = ", ".join(self.args)
-    return f"\\Op{{{self.node_id}}}{{{self.op_type}}}{{{args_str}}}{{{self.shape}}}"
+    fmt = StructuredFormatter()
+    args_str = ", ".join(escape_latex(a) for a in self.args)
+    safe_id = escape_latex(self.node_id)
+    safe_op = escape_latex(self.op_type)
+    safe_shape = escape_latex(self.shape)
+    fmt.add_line(f"\\Op{{{safe_id}}}{{{safe_op}}}{{{args_str}}}{{{safe_shape}}}", indent_level)
+    return fmt.build()
 
 
 @dataclass
@@ -138,10 +157,15 @@ class StateOpNode(LatexNode):
   shape: str
   """Resulting shape descriptor."""
 
-  def to_latex(self) -> str:
+  def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\StateOp`` macro."""
-    args_str = ", ".join(self.args)
-    return f"\\StateOp{{{self.node_id}}}{{{self.attribute_id}}}{{{args_str}}}{{{self.shape}}}"
+    fmt = StructuredFormatter()
+    args_str = ", ".join(escape_latex(a) for a in self.args)
+    safe_id = escape_latex(self.node_id)
+    safe_attr = escape_latex(self.attribute_id)
+    safe_shape = escape_latex(self.shape)
+    fmt.add_line(f"\\StateOp{{{safe_id}}}{{{safe_attr}}}{{{args_str}}}{{{safe_shape}}}", indent_level)
+    return fmt.build()
 
 
 @dataclass
@@ -158,9 +182,12 @@ class ReturnNode(LatexNode):
   target_id: str
   """The variable ID to return."""
 
-  def to_latex(self) -> str:
+  def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Return`` macro."""
-    return f"\\Return{{{self.target_id}}}"
+    fmt = StructuredFormatter()
+    safe_tgt = escape_latex(self.target_id)
+    fmt.add_line(f"\\Return{{{safe_tgt}}}", indent_level)
+    return fmt.build()
 
 
 @dataclass
@@ -176,13 +203,14 @@ class ModelContainer(LatexNode):
   children: List[LatexNode] = field(default_factory=list)
   """List of body statements (Memory, Input, Ops, Return)."""
 
-  def to_latex(self) -> str:
+  def emit(self, indent_level: int = 0) -> str:
     r"""Render the full ``\\begin{DefModel}...\\end{DefModel}`` block."""
-    lines = [f"\\begin{{DefModel}}{{{self.name}}}"]
+    fmt = StructuredFormatter()
+    safe_name = escape_latex(self.name)
+    fmt.add_line(f"\\begin{{DefModel}}{{{safe_name}}}", indent_level)
 
-    # Indent children
     for child in self.children:
-      lines.append(f"    {child.to_latex()}")
+      fmt.add_line(child.emit(indent_level + 1), 0)
 
-    lines.append(r"\end{DefModel}")
-    return "\n".join(lines)
+    fmt.add_line(r"\end{DefModel}", indent_level)
+    return fmt.build()

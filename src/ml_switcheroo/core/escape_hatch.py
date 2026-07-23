@@ -12,6 +12,8 @@ Reliability Logic:
   to avoid emitting partially mutated (broken) code.
 """
 
+from typing import Any
+
 import libcst as cst
 from typing import Union
 
@@ -27,7 +29,7 @@ class EscapeHatch:
   END_MARKER = "# </SWITCHEROO_FAILED_TO_TRANS>"
 
   @staticmethod
-  def mark_failure(node: cst.CSTNode, reason: str) -> Union[cst.CSTNode, cst.FlattenSentinel]:
+  def mark_failure(node: cst.CSTNode, reason: str) -> Union[cst.CSTNode, cst.FlattenSentinel[Any]]:
     """Attaches warning comments to the node and appends an end marker.
 
     Transformation:

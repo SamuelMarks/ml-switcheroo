@@ -3,10 +3,12 @@
 Inspects manual test files written by developers to learn correct mappings.
 """
 
+from typing import Any
+
 from argparse import Namespace
 
 
-def handle_harvest(args: Namespace):
+def handle_harvest(args: Namespace) -> Any:
   """Handles the 'harvest' CLI command."""
   test_path = args.path
   print(f"Harvesting mappings from manual tests at: {test_path}")

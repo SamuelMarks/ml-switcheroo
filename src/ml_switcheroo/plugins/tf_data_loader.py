@@ -10,6 +10,8 @@ Transformation Overview:
     Output: `tf.data.Dataset.from_tensor_slices((x, y)).shuffle(1024).batch(64).prefetch(AUTOTUNE)`
 """
 
+from typing import Any
+
 import libcst as cst
 from typing import List, Optional, Union
 from ml_switcheroo.core.hooks import register_hook, HookContext
@@ -61,7 +63,7 @@ def _extract_tensor_dataset_inputs(
 
 
 @register_hook("tf_data_loader")
-def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel]:
+def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel[Any]]:
   """Plugin Hook: Rewrites DataLoader construction into a tf.data pipeline.
 
   Logic:

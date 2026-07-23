@@ -21,6 +21,8 @@ Process:
     5.  **Output**: Returns a ``cst.FlattenSentinel`` containing the list of statements.
 """
 
+from typing import Any
+
 import libcst as cst
 from typing import Union
 
@@ -49,7 +51,7 @@ class LoopVarReplacer(cst.CSTTransformer):
 
 
 @register_hook("transform_for_loop_static")
-def unroll_static_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.FlattenSentinel]:
+def unroll_static_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.FlattenSentinel[Any]]:
   """Hook: Unrolls loops with static ranges.
 
   Triggers:

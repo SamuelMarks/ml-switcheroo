@@ -1,6 +1,8 @@
 """Helpers for ApiTransformer."""
 
-from typing import Optional, Union, List, Dict, Any
+from typing import Any
+
+from typing import Optional, Union, List, Dict
 import libcst as cst
 import re
 from ml_switcheroo.core.tracer import get_tracer
@@ -35,7 +37,7 @@ class ApiHelpersMixin:
       canonical_root = self.context.alias_map[root]  # type: ignore
       if len(parts) > 1:
         return f"{canonical_root}.{'.'.join(parts[1:])}"
-      return canonical_root  # pragma: no cover
+      return str(canonical_root)  # pragma: no cover
 
     return full_str
 
@@ -149,7 +151,9 @@ class ApiHelpersMixin:
         self._report_failure(f"No mapping available for '{name}' -> '{self.target_fw}'")  # type: ignore
       return None
 
-    return target_impl
+    if isinstance(target_impl, dict):
+      return target_impl
+    return None  # pragma: no cover
 
   def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
     """Injects required imports defined in the variant."""
@@ -180,17 +184,17 @@ class ApiHelpersMixin:
       return False
 
     if getattr(self, "_known_module_bases", None) is None:
-      self._known_module_bases = set()  # type: ignore
+      self._known_module_bases = set()
       for _, config in self.semantics.framework_configs.items():  # type: ignore
         traits = config.get("traits")
         if traits:
           base = traits.get("module_base") if isinstance(traits, dict) else getattr(traits, "module_base", None)
           if base:  # pragma: no cover
-            self._known_module_bases.add(base)  # type: ignore
+            self._known_module_bases.add(base)
 
-    if name in self._known_module_bases:  # type: ignore
+    if name in self._known_module_bases:
       return True
-    for known in self._known_module_bases:  # type: ignore
+    for known in self._known_module_bases:
       if known.endswith(f".{name}"):
         return True
     return False
@@ -219,7 +223,7 @@ class ApiHelpersMixin:
     if not current:
       return None
 
-    def parse_v(v_str):
+    def parse_v(v_str: Any) -> Any:
       """Parses a version string into a tuple of integers."""
       parts = []
       # Fix: Use re module safely imported at global scope
@@ -257,7 +261,7 @@ class ApiHelpersMixin:
     if any(p.name.value == arg_name for p in params):
       return node
 
-    anno_node = cst.Annotation(annotation=self._create_dotted_name(annotation)) if annotation else None  # type: ignore
+    anno_node = cst.Annotation(annotation=self._create_dotted_name(annotation)) if annotation else None
 
     # Ensure comma on previous arg
     if insert_idx > 0 and params[insert_idx - 1].comma == cst.MaybeSentinel.DEFAULT:

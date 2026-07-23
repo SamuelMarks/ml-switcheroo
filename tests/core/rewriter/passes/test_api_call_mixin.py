@@ -48,6 +48,7 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     self.context = MockContext()
 
   def get_definition(self, name):
+    """Get."""
     """Mock implementation of get definition."""
     if name == "torch.known":
       return ("known_id", {"deprecated": True, "replaced_by": "other"})
@@ -56,6 +57,7 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     return None
 
   def _get_qualified_name(self, node):
+    """Get name."""
     if isinstance(node, cst.Name):
       return node.value
     if isinstance(node, cst.Attribute) and isinstance(node.value, cst.Name):
@@ -63,6 +65,7 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     return None
 
   def _get_mapping(self, name, silent=False):
+    """Map."""
     if name == "torch.known":
       return {"api": "jnp.known"}
     if name == "torch.nodep":
@@ -76,18 +79,23 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     return None
 
   def _report_warning(self, msg):
+    """Warn."""
     self.warnings.append(msg)
 
   def _report_failure(self, msg):
+    """Fail."""
     self.failures.append(msg)
 
   def _is_module_alias(self, node):
+    """Alias."""
     return False
 
   def _handle_variant_imports(self, mapping):
+    """Imp."""
     pass
 
   def _create_name_node(self, name):
+    """Create."""
     return cst.Name(name)
 
 

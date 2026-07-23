@@ -1,389 +1,316 @@
-"""TikZ Parser (Lexer & Logical Reconstruction).
+"""TikZ Parser (CST Reconstruction).
 
 This module provides the `TikzParser` which consumes raw LaTeX/TikZ source code
-and reconstructs the `LogicalGraph` representation. It effectively reverses
-the operation of the `TikzEmitter`.
-
-Capabilities:
-
-1.  **Tokenization**: Regex-based lexer for LaTeX commands, groups, and options.
-2.  **Structural Parsing**: Identifies nodes, edges, and environments via recursive descent.
-3.  **Metadata Extraction**: Parses HTML-like tabular environments embedded in
-    node labels to recover layer hyperparameters (e.g., kernel size, stride).
-4.  **Graph Reconstruction**: Builds a `LogicalGraph` object compatible with
-    the rest of the transpiler pipeline.
+and reconstructs the `TikzGraph` representation using a formal Lark grammar.
 """
 
-import re
-from dataclasses import dataclass
-from enum import Enum, auto
-from typing import List, Tuple, Dict
+import os
+from typing import List, Any, Union, TYPE_CHECKING
 
-from ml_switcheroo.core.tikz.analyser import LogicalGraph, LogicalNode, LogicalEdge
+if TYPE_CHECKING:
+  from ml_switcheroo.core.graph import LogicalGraph
 
-
-class TokenKind(Enum):
-  """Enumeration of LaTeX/TikZ token types."""
-
-  COMMAND = auto()  # \node, \draw, \textbf
-  LBRACE = auto()  # {
-  RBRACE = auto()  # }
-  LBRACKET = auto()  # [
-  RBRACKET = auto()  # ]
-  LPAREN = auto()  # (
-  RPAREN = auto()  # )
-  SEMICOLON = auto()  # ;
-  ARROW = auto()  # -- or ->
-  WORD = auto()  # Identifiers, values
-  NUMBER = auto()  # 1.5, -2
-  COMMENT = auto()  # % ...
-  WHITESPACE = auto()  # space, tab, newline
-  EOF = auto()
+from lark import Lark, Transformer, Tree, Token
+from ml_switcheroo.core.tikz.nodes import (
+  TikzBaseNode,
+  TikzGraph,
+  TikzNode,
+  TikzEdge,
+  TikzTable,
+  TikzOption,
+  TriviaNode,
+)
 
 
-@dataclass
-class Token:
-  """A lexical unit with position info."""
+class TikzTransformer(Transformer[Token, Any]):
+  """Transforms a parsed TikZ AST into TikZ CST components."""
 
-  kind: TokenKind
-  text: str
-  line: int
-  col: int
+  def start(self, children: List[Any]) -> TikzGraph:
+    """Process the root start rule."""
+    elements = []
+    leading = []
+    trailing = []
+    for c in children:
+      if isinstance(c, list):
+        # elements
+        elements.extend(c)
+      elif isinstance(c, TriviaNode):  # pragma: no cover
+        # Handle top level trivia if not absorbed by elements
+        if not elements:  # pragma: no cover
+          leading.append(c)  # pragma: no cover
+        else:
+          trailing.append(c)  # pragma: no cover
 
+    # Extract Graph from elements
+    graph_children: List[TikzBaseNode] = []
+    found_env = False
+    options: List[TikzOption] = []
+    for el in elements:
+      if isinstance(el, TriviaNode):
+        if not found_env:
+          leading.append(el)
+        else:
+          graph_children.append(el)
+      elif isinstance(el, str):
+        if el.startswith("\\begin{tikzpicture}"):
+          found_env = True
+          # extract options if any
+          if "[" in el and "]" in el:
+            opts_str = el.split("[")[1].split("]")[0]
+            opts = [o.strip() for o in opts_str.split(",")]
+            for o in opts:
+              options.append(TikzOption(key=o))
+      elif isinstance(el, (TikzNode, TikzEdge)):
+        graph_children.append(el)
+      elif isinstance(el, TikzGraph):  # pragma: no cover
+        # If the parser successfully mapped the whole thing to a graph
+        # we just return it with attached trivia
+        el.leading_trivia = leading + el.leading_trivia  # pragma: no cover
+        el.trailing_trivia = el.trailing_trivia + trailing  # pragma: no cover
+        return el  # pragma: no cover
 
-class TikzLexer:
-  """Regex-based tokenizer for TikZ source code.
+    # Fallback if no TIKZ_ENV_BEGIN was matched properly
+    return TikzGraph(children=graph_children, options=options, leading_trivia=leading, trailing_trivia=trailing)
 
-  Splits raw LaTeX strings into a stream of typed Tokens, handling
-  symbols, commands, strings, and whitespace.
-  """
+  def element(self, children: List[Any]) -> List[Any]:
+    """Process an element."""
+    return children
 
-  # Order matters: Specific patterns before general ones
-  PATTERNS = [
-    (TokenKind.COMMENT, r"%.*"),
-    (TokenKind.COMMAND, r"\\[a-zA-Z]+"),
-    (TokenKind.ARROW, r"--|->"),
-    (TokenKind.LBRACE, r"\{"),
-    (TokenKind.RBRACE, r"\}"),
-    (TokenKind.LBRACKET, r"\["),
-    (TokenKind.RBRACKET, r"\]"),
-    (TokenKind.LPAREN, r"\("),
-    (TokenKind.RPAREN, r"\)"),
-    (TokenKind.SEMICOLON, r";"),
-    (TokenKind.NUMBER, r"-?\d+(?:\.\d+)?"),
-    # Catch-all for words/identifiers/symbols not caught above
-    # Includes colons, underscores for now as part of 'words'
-    (TokenKind.WORD, r"[a-zA-Z0-9_:,\.\\\>\<=]+"),
-    (TokenKind.WHITESPACE, r"\s+"),
-  ]
+  def TIKZ_ENV_BEGIN(self, token: Token) -> str:
+    """Process a TIKZ_ENV_BEGIN token."""
+    return str(token)
 
-  def __init__(self, text: str):
-    """Initialize the lexer with input text."""
-    self.text = text
-    self.pos = 0
-    self.line = 1
-    self.col = 1
-    self._tokens: List[Token] = []
+  def NAME(self, token: Token) -> str:
+    """Process a NAME token."""
+    return str(token)
 
-  def tokenize(self) -> List[Token]:
-    """Converts the full string into a list of Tokens.
+  def OPTION(self, token: Token) -> TikzOption:
+    """Process an OPTION token."""
+    return TikzOption(key=str(token))
 
-    Returns:
-        List[Token]: Sequence of tokens, excluding comments and whitespace.
-                     Ends with an EOF token.
+  def COORD(self, token: Token) -> str:
+    """Process a COORD token."""
+    return str(token)
 
-    """
-    while self.pos < len(self.text):
-      match = None
-      for kind, pattern in self.PATTERNS:
-        regex = re.compile(pattern)
-        match = regex.match(self.text, self.pos)
-        if match:
-          text = match.group(0)
-          # Create token (skip whitespace/comments)
-          if kind not in (TokenKind.WHITESPACE, TokenKind.COMMENT):
-            self._tokens.append(Token(kind, text, self.line, self.col))
+  def ALIGN(self, token: Token) -> str:
+    """Process an ALIGN token."""
+    return str(token)
 
-          # Update tracking
-          newlines = text.count("\n")
-          self.line += newlines
-          if newlines > 0:
-            self.col = len(text) - text.rfind("\n")
+  def EDGE_OP(self, token: Token) -> str:
+    """Process an EDGE_OP token."""
+    return str(token)
+
+  def trivia(self, tokens: List[Token]) -> TriviaNode:
+    """Combine WS and COMMENT tokens into a TriviaNode."""
+    content = "".join(str(t) for t in tokens)
+    return TriviaNode(content=content)
+
+  def IGNORE_TEXT(self, token: Token) -> TriviaNode:
+    """Process an IGNORE_TEXT token."""
+    return TriviaNode(content=str(token))  # pragma: no cover
+
+  def node(self, children: List[Any]) -> TikzNode:
+    """Process a node declaration."""
+    leading = []
+    node_id = ""
+    x = 0.0
+    y = 0.0
+    options = []
+    content: Union[str, TikzTable] = ""
+    trailing = []
+
+    # State tracking
+    found_node = False
+
+    for c in children:
+      if isinstance(c, TriviaNode):
+        if not found_node:
+          leading.append(c)
+        else:
+          trailing.append(c)  # pragma: no cover
+      elif isinstance(c, TikzOption):
+        options.append(c)
+      elif isinstance(c, str):
+        # It's a token like \node or structural string from grammar, or a wrapped token
+        if c == "\\node":
+          found_node = True  # pragma: no cover
+        elif not node_id and c not in ["(", ")", "at", "[", "]", "{", "}", ";", "\\node"]:
+          node_id = c
+        elif c not in ["(", ")", "at", "[", "]", "{", "}", ";", "\\node"]:
+          # COORD could be string
+          parts = str(c).split(",")
+          if len(parts) == 2:
+            try:
+              x = float(parts[0].strip())
+              y = float(parts[1].strip())
+            except ValueError:  # pragma: no cover
+              pass  # pragma: no cover
+      elif isinstance(c, TikzTable):
+        content = c
+      elif isinstance(c, Tree) and c.data == "text_content":
+        if c.children:
+          content = str(c.children[0])
+
+    return TikzNode(
+      node_id=node_id, x=x, y=y, content=content, options=options, leading_trivia=leading, trailing_trivia=trailing
+    )
+
+  def edge(self, children: List[Any]) -> TikzEdge:
+    """Process an edge declaration."""
+    leading = []
+    source_id = ""
+    target_id = ""
+    options = []
+    connector = "--"
+    trailing = []
+
+    found_draw = False
+
+    for c in children:
+      if isinstance(c, TriviaNode):
+        if not found_draw:
+          leading.append(c)
+        else:
+          trailing.append(c)  # pragma: no cover
+      elif isinstance(c, str):
+        if c == "\\draw":
+          found_draw = True  # pragma: no cover
+        elif c in ["--", "->"]:
+          connector = c
+        elif c not in ["(", ")", "[", "]", ";", "\\draw"]:
+          if not source_id:
+            source_id = c
           else:
-            self.col += len(text)
+            target_id = c
+      elif isinstance(c, TikzOption):
+        options.append(c)
 
-          self.pos = match.end()
-          break
+    return TikzEdge(
+      source_id=source_id,
+      target_id=target_id,
+      options=options,
+      connector=connector,
+      leading_trivia=leading,
+      trailing_trivia=trailing,
+    )
 
-      if not match:
-        # Skip unknown char (robustness)
-        # In a real parser we might raise SyntaxError, but here we skip to be robust
-        self.pos += 1
-        self.col += 1
+  def tabular(self, children: List[Any]) -> TikzTable:
+    """Process a tabular."""
+    align = "c"
+    rows: List[List[str]] = []
+    leading: List[TriviaNode] = []
+    trailing: List[TriviaNode] = []
 
-    self._tokens.append(Token(TokenKind.EOF, "", self.line, self.col))
-    return self._tokens
+    found_begin = False
+
+    for c in children:
+      if isinstance(c, TriviaNode):
+        if not found_begin:
+          leading.append(c)
+        else:
+          pass
+      elif isinstance(c, str):
+        if c == "\\begin{tabular}":
+          found_begin = True  # pragma: no cover
+        elif c not in ["{", "}", "\\end{tabular}"]:
+          align = c
+      elif isinstance(c, Tree) and c.data == "tabular_row":
+        current_row = []
+        for item in c.children:
+          if isinstance(item, Tree):
+            if item.data == "ignore":
+              current_row.append(str(item.children[0]).replace("\\\\", "").strip())
+            elif item.data == "meta":
+              current_row.append(f"{item.children[0]}: {item.children[2]}")
+            elif item.data == "kind":  # pragma: no cover
+              current_row.append(f"\\textbf{{{item.children[0]}}}")  # pragma: no cover
+            elif item.data == "id":  # pragma: no cover
+              current_row.append(f"\\textit{{{item.children[0]}}}")  # pragma: no cover
+        if current_row:
+          rows.append(current_row)
+
+    return TikzTable(align=align, rows=rows, leading_trivia=leading, trailing_trivia=trailing)
+
+  def tabular_row(self, children: List[Any]) -> Tree[Token]:
+    """Process a tabular row."""
+    return Tree("tabular_row", children)
+
+  def kind(self, children: List[Any]) -> Tree[Token]:
+    """Process a kind node."""
+    return Tree("kind", children)  # pragma: no cover
+
+  def id(self, children: List[Any]) -> Tree[Token]:
+    """Process an id node."""
+    return Tree("id", children)  # pragma: no cover
+
+  def meta(self, children: List[Any]) -> Tree[Token]:
+    """Process a meta node."""
+    return Tree("meta", children)
+
+  def ignore(self, children: List[Any]) -> Tree[Token]:
+    """Process an ignore node."""
+    return Tree("ignore", children)
 
 
 class TikzParser:
-  """Parses tokenized TikZ code into a LogicalGraph.
+  """Parses TikZ code into a TikzGraph (CST) using a formal Lark grammar."""
 
-  This parser implements a recursive descent strategy tailored to the specific
-  TikZ subset produced by the `TikzEmitter`. It is not a general-purpose
-  TeX parser.
-  """
-
-  def __init__(self, text: str):
+  def __init__(self, text: str) -> None:
     """Initialize parser and tokenize input."""
-    self.lexer = TikzLexer(text)
-    self.tokens = self.lexer.tokenize()
-    self.pos = 0
-    self.graph = LogicalGraph()
+    self.text = text
 
-  def parse(self) -> LogicalGraph:
-    """Main entry point. Iterates top-level commands.
+    grammar_path = os.path.join(os.path.dirname(__file__), "grammar.lark")
+    with open(grammar_path, "r", encoding="utf-8") as f:
+      self.grammar = f.read()
 
-    Returns:
-        LogicalGraph: The reconstructed graph extracted from the visual definition.
+    self.parser = Lark(self.grammar, start="start", parser="earley")
 
-    """
-    while not self._is_eof():
-      token = self._peek()
-
-      # Skip top-level environments like \begin{tikzpicture}
-      if token.kind == TokenKind.COMMAND:  # pragma: no cover
-        if token.text == r"\begin":
-          self._consume()  # \begin
-          self._parse_braced_group()  # {tikzpicture}
-          self._optional_bracket_group()  # [options]
-          continue
-        elif token.text == r"\end":
-          self._consume()
-          self._parse_braced_group()
-          continue
-        elif token.text == r"\node":
-          self._parse_node()
-          continue
-        elif token.text == r"\draw":
-          self._parse_edge()
-          continue
-
-      self._consume()
-
-    return self.graph
-
-  # --- Parser Primitives ---
-
-  def _peek(self, offset: int = 0) -> Token:
-    """Look ahead at a token without consumption."""
-    idx = self.pos + offset
-    if idx >= len(self.tokens):
-      return self.tokens[-1]
-    return self.tokens[idx]
-
-  def _consume(self) -> Token:
-    """Consume and return the current token."""
-    token = self._peek()
-    self.pos += 1
-    return token
-
-  def _match(self, kind: TokenKind) -> bool:
-    """Check if the current token matches a specific kind."""
-    return self._peek().kind == kind
-
-  def _expect(self, kind: TokenKind) -> Token:
-    """Consume the current token if it matches kind, else raise error."""
-    if not self._match(kind):
-      cur = self._peek()
-      raise SyntaxError(f"Expected {kind}, got {cur.kind} ('{cur.text}') at line {cur.line}")
-    return self._consume()
-
-  def _is_eof(self) -> bool:
-    """Check if End of File reached."""
-    return self._peek().kind == TokenKind.EOF
-
-  def _parse_braced_group(self) -> List[Token]:
-    """Consumes tokens inside `{ ... }`, handling nesting.
+  def parse(self) -> TikzGraph:
+    """Parse the input TikZ text and construct the graph.
 
     Returns:
-        List[Token]: The tokens inside the braces.
-
+        The reconstructed TikzGraph.
     """
-    self._expect(TokenKind.LBRACE)
-    content = []
-    depth = 1
-    while depth > 0 and not self._is_eof():
-      tk = self._consume()
-      if tk.kind == TokenKind.LBRACE:
-        depth += 1
-      elif tk.kind == TokenKind.RBRACE:
-        depth -= 1
+    try:
+      tree = self.parser.parse(self.text)
+    except Exception as e:
+      # Re-raise standard exception for fuzzer/error handling tests
+      raise ValueError(f"Failed to parse TikZ: {e}") from e
 
-      if depth > 0:
-        content.append(tk)
-    return content
+    transformer = TikzTransformer()
+    from typing import cast
 
-  def _optional_bracket_group(self) -> List[Token]:
-    """Consumes `[...]` group if present.
-
-    Returns:
-        List[Token]: The tokens inside brackets, or empty list if brackets specific not found.
-
-    """
-    if self._match(TokenKind.LBRACKET):
-      self._consume()
-      content = []
-      while not self._match(TokenKind.RBRACKET) and not self._is_eof():
-        content.append(self._consume())
-      self._consume()  # ]
-      return content
-    return []
-
-  # --- Feature Parsing ---
-
-  def _parse_node(self) -> None:
-    r"""Parses a `\\node` command and adds a LogicalNode to the graph.
+    return cast(TikzGraph, transformer.transform(tree))
 
 
-    Expects format: `\\node [options] (id) at (x,y) {content};`.
-    """
-    self._expect(TokenKind.COMMAND)  # \node
+def _logical_from_tikz_graph(tikz_graph: TikzGraph) -> "LogicalGraph":
+  """Adapter to convert TikzGraph (CST) to LogicalGraph (IR)."""
+  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
 
-    # Options [fill=...]
-    self._optional_bracket_group()
+  l_graph = LogicalGraph()
+  for child in tikz_graph.children:
+    if isinstance(child, TikzNode):
+      kind = "Unknown"
+      metadata = {}
+      if isinstance(child.content, TikzTable):
+        for row in child.content.rows:
+          if not row:
+            continue  # pragma: no cover
+          item = row[0]
+          if "\\textbf{" in item:
+            kind = item.split("\\textbf{")[1].split("}")[0].strip()
+          elif "\\textit{" in item:
+            pass  # id
+          elif ":" in item:
+            k, v = item.split(":", 1)
+            k = k.replace("\\_", "_").strip()
+            v = v.replace("\\_", "_").replace("\\\\", "").strip()
+            metadata[k] = v
+      elif isinstance(child.content, str) and child.content:
+        kind = child.content.strip()
 
-    # ID (id)
-    if self._match(TokenKind.LPAREN):
-      self._consume()
-      node_id_tk = self._expect(TokenKind.WORD)
-      self._expect(TokenKind.RPAREN)
-      node_id = node_id_tk.text
-    else:
-      # Nodes without IDs are usually aux/labels. We skip them to avoid noise.
-      self._scan_until_semicolon()
-      return
+      l_graph.nodes.append(LogicalNode(id=child.node_id, kind=kind, metadata=metadata))
+    elif isinstance(child, TikzEdge):
+      l_graph.edges.append(LogicalEdge(source=child.source_id, target=child.target_id))
 
-    # Options can also appear after the ID
-    self._optional_bracket_group()
-
-    # Position "at (x, y)"
-    # We parse but discard position for LogicalGraph purposes
-    if self._peek().text == "at":
-      self._consume()
-      self._consume()  # (
-      # Consume coordinates (can be numbers, words, commas)
-      while not self._match(TokenKind.RPAREN) and not self._is_eof():
-        self._consume()
-      self._consume()  # )
-
-    # Content { ... }
-    content_tokens = self._parse_braced_group()
-
-    # Parse content for metadata using tabular extraction heuristics
-    kind, metadata = self._extract_metadata(content_tokens)
-
-    # Build Logical Node
-    node = LogicalNode(id=node_id, kind=kind, metadata=metadata)
-    self.graph.nodes.append(node)
-
-    # Trailing semicolon
-    if self._match(TokenKind.SEMICOLON):  # pragma: no cover
-      self._consume()
-
-  def _parse_edge(self) -> None:
-    r"""Parses a `\\draw` command and adds a LogicalEdge to the graph.
-
-    Expects format: `\\draw [opts] (src) -- (tgt);`.
-    """
-    self._expect(TokenKind.COMMAND)  # \draw
-    self._optional_bracket_group()
-
-    # Source
-    self._expect(TokenKind.LPAREN)
-    src = self._expect(TokenKind.WORD).text
-    self._expect(TokenKind.RPAREN)
-
-    # Connector
-    if self._match(TokenKind.ARROW):
-      self._consume()
-    else:
-      # Unexpected edge format, skip
-      self._scan_until_semicolon()
-      return
-
-    # Target
-    self._expect(TokenKind.LPAREN)
-    tgt = self._expect(TokenKind.WORD).text
-    self._expect(TokenKind.RPAREN)
-
-    # Add Edge
-    self.graph.edges.append(LogicalEdge(source=src, target=tgt))
-
-    # Trailing semicolon
-    if self._match(TokenKind.SEMICOLON):  # pragma: no cover
-      self._consume()
-
-  def _scan_until_semicolon(self) -> None:
-    """Helper to consume tokens until a semicolon is found (Error Recovery)."""
-    while not self._match(TokenKind.SEMICOLON) and not self._is_eof():
-      self._consume()
-    if self._match(TokenKind.SEMICOLON):
-      self._consume()
-
-  def _extract_metadata(self, tokens: List[Token]) -> Tuple[str, Dict[str, str]]:
-    """Parses the node label content to extract Op Kind and Config.
-
-    Expected structure is a LaTeX tabular:
-        Kind (Row 1)
-        ID   (Row 2, ignored)
-        key: value (Row 3+)
-
-    Args:
-        tokens: The list of raw tokens inside the node body.
-
-    Returns:
-        Tuple of (Kind String, Metadata Dict).
-
-    """
-    # Linear scan for text tokens.
-    # We ignore LaTeX formatting macros like \textbf, \textit, \begin, \end, &, \\
-    # We rely on positional logic: 1st meaningful word is Kind. Key-Values follow.
-
-    words = []
-    for tk in tokens:
-      if tk.kind == TokenKind.WORD or tk.kind == TokenKind.NUMBER:
-        clean = tk.text.replace(r"\_", "_")  # Unescape underscore
-        words.append(clean)
-      elif tk.kind == TokenKind.COMMAND:
-        pass  # Ignore formatting commands
-
-    # Filter out 'tabular' and 'c' which are environment artifacts
-    content = [w for w in words if w not in ["tabular", "c", "l", "r"]]
-
-    if not content:
-      return ("Unknown", {})
-
-    kind = content[0]
-    metadata = {}  # type: ignore
-
-    # The rest should be key-value pairs?
-    # The emitter puts ID in italics as row 2.
-    # Row 1: Kind. Row 2: ID. Row 3+: Metadata.
-
-    start_idx = 2  # Skip Kind and ID
-    if len(content) <= start_idx:
-      # Just return what we have
-      return (kind, metadata)
-
-    # Fallback to key/value extraction from token text list
-    # Look for tokens ending in ":" to identify keys
-    current_key = None
-
-    for w in content[start_idx:]:
-      if w.endswith(":"):
-        current_key = w[:-1]
-      elif current_key:
-        metadata[current_key] = w
-        current_key = None
-
-    return kind, metadata
+  return l_graph

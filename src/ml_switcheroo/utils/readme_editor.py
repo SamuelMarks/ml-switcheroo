@@ -4,9 +4,8 @@ This module provides logic to inject automated verification reports (the Compati
 directly into the `README.md` file, ensuring documentation stays valid with the code.
 """
 
-import re
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.console import log_error, log_success
@@ -17,7 +16,7 @@ class ReadmeEditor:
 
   It regenerates the "Compatibility Matrix" table based on the current state of
   the Knowledge Base and the results of the latest CI run, then splices it
-  into the README content using regex markers.
+  into the README content using structural parsing.
   """
 
   def __init__(self, semantics: SemanticsManager, readme_path: Path) -> None:
@@ -32,10 +31,10 @@ class ReadmeEditor:
     self.readme_path = readme_path
 
   def update_matrix(self, validation_results: Dict[str, bool]) -> bool:
-    """Regenerates the Markdown table and injects it into the README.
+    """Regenerates the Markdown table and injects it into the README structurally.
 
-    It looks for the section starting with `## ✅ Compatibility Matrix` and
-    replaces the content up to the next `## Header` or End of File.
+    It finds the Markdown heading `✅ Compatibility Matrix` and replaces the paragraph/table
+    following it up until the next heading.
 
     Args:
         validation_results: Dictionary mapping op_name -> boolean pass status.
@@ -57,38 +56,54 @@ class ReadmeEditor:
     # 1. Generate New Table
     new_table = self._generate_markdown_table(validation_results)
 
-    # 2. Inject via Regex search
-    # Pattern: Matches the Header line.
-    header_marker = "## ✅ Compatibility Matrix"
+    # 2. Inject structurally using markdown-it
+    from markdown_it import MarkdownIt
 
-    if header_marker not in content:
+    md = MarkdownIt()
+    tokens = md.parse(content)
+
+    header_marker = "✅ Compatibility Matrix"
+    target_idx = -1
+    next_heading_idx = -1
+
+    for i, token in enumerate(tokens):
+      if token.type == "heading_open":
+        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
+          if header_marker in tokens[i + 1].content:
+            target_idx = i
+            break
+
+    if target_idx == -1:
       log_error(f"Could not find '{header_marker}' section in README.")
       return False
 
-    # Splitting approach is more robust than regex grouping for large multiline blocks
-    parts = content.split(header_marker)
+    for i in range(target_idx + 3, len(tokens)):
+      if tokens[i].type == "heading_open":
+        next_heading_idx = i
+        break
 
-    # Pre-header content
-    pre_table = parts[0]
-    # Content after header
-    remainder = parts[1]
+    # We need to map tokens back to lines.
+    # tokens[target_idx].map contains the line numbers [start, end]
+    start_line = tokens[target_idx].map[1] if tokens[target_idx].map else -1  # type: ignore
 
-    # Find the start of the next section (## ...) inside remainder
-    # We look for a newline followed by ##
-    next_section_match = re.search(r"\n## ", remainder)
+    if start_line == -1:
+      log_error("Could not determine line mapping for header.")
+      return False
 
-    if next_section_match:
-      # Found next section, preserve everything after it
-      post_table = remainder[next_section_match.start() :]
-    else:
-      # No next section, table goes to EOF
-      post_table = ""
+    end_line = (
+      tokens[next_heading_idx].map[0]
+      if next_heading_idx != -1 and tokens[next_heading_idx].map
+      else len(content.splitlines())
+    )  # type: ignore
 
-    # Add buffering newlines for cleaner markdown format
-    new_content = f"{pre_table}{header_marker}\n\n{new_table}\n{post_table}"
+    lines = content.splitlines()
+    pre_lines = lines[:start_line]
+    post_lines = lines[end_line:] if end_line != len(lines) else []
+
+    new_lines = pre_lines + [""] + new_table.splitlines() + [""] + post_lines
 
     try:
-      self.readme_path.write_text(new_content, encoding="utf-8")
+      self.readme_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
       log_success(f"Updated README.md with {len(validation_results)} status entries.")
       return True
     except OSError as e:
@@ -119,7 +134,8 @@ class ReadmeEditor:
 
     # Header
     lines = [
-      "View the live matrix by running `ml_switcheroo matrix`\n",
+      "View the live matrix by running `ml_switcheroo matrix`",
+      "",
       "| Category | PyTorch | JAX | Verification |",
       "| :--- | :--- | :--- | :--- |",
     ]
@@ -163,7 +179,7 @@ class ReadmeEditor:
     return "\n".join(lines)
 
 
-def _guess_category(api_name: str, target_var: Optional[Dict]) -> str:
+def _guess_category(api_name: str, target_var: Optional[Dict[Any, Any]]) -> str:
   """Heuristic helper to categorize op based on API string contents.
 
   Args:

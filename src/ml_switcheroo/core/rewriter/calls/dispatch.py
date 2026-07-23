@@ -1,11 +1,13 @@
 """Logic for Conditional API Dispatch."""
 
-from typing import Any, List, Optional, Dict
+from typing import Any
+
+from typing import List, Optional, Dict
 import libcst as cst
 from ml_switcheroo.enums import LogicOp
 
 
-def evaluate_dispatch_rules(rewriter, node: cst.Call, rules: List[Any], details: Dict[str, Any]) -> Optional[str]:
+def evaluate_dispatch_rules(rewriter: Any, node: cst.Call, rules: List[Any], details: Dict[str, Any]) -> Optional[str]:
   """Evaluates conditional dispatch rules against the current call arguments.
 
   Args:
@@ -41,13 +43,13 @@ def evaluate_dispatch_rules(rewriter, node: cst.Call, rules: List[Any], details:
       continue
 
     if _check_rule_condition(arg_node, rule):
-      return rule.use_api
+      return rule.use_api  # type: ignore
 
   return None
 
 
 def _extract_argument_node(
-  rewriter,
+  rewriter: Any,
   node: cst.Call,
   src_name: str,
   std_name: str,
@@ -159,19 +161,19 @@ def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
   target = rule.is_val
 
   if op == LogicOp.EQ:
-    return val == target
+    return bool(val == target)
   elif op == LogicOp.NEQ:
-    return val != target
+    return bool(val != target)
   elif op == LogicOp.GT:
-    return val > target
+    return bool(val > target)
   elif op == LogicOp.LT:
-    return val < target
+    return bool(val < target)
   elif op == LogicOp.GTE:
-    return val >= target
+    return bool(val >= target)
   elif op == LogicOp.LTE:
-    return val <= target
+    return bool(val <= target)
   elif op == LogicOp.IN:
-    return val in target
+    return bool(val in target)
   elif op == LogicOp.NOT_IN:
     return val not in target
 

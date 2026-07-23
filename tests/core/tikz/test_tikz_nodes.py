@@ -1,6 +1,6 @@
 """Test suite for the Tikz Nodes module."""
 
-from ml_switcheroo.core.tikz.nodes import TriviaNode, TikzComment, TikzOption, TikzTable, TikzNode, TikzEdge, TikzGraph
+from ml_switcheroo.core.tikz.nodes import TriviaNode, TikzOption, TikzTable, TikzNode, TikzEdge, TikzGraph
 
 
 def test_trivia_node():
@@ -13,9 +13,9 @@ def test_trivia_node():
 
 def test_comment_node():
   """Verifies the behavior of comment node."""
-  c1 = TikzComment(text="Hello World")
+  c1 = TriviaNode(content="% Hello World\n", kind="comment")
   assert c1.to_text() == "% Hello World\n"
-  c2 = TikzComment(text="% Already has percent", trailing_newline=False)
+  c2 = TriviaNode(content="% Already has percent", kind="comment")
   assert c2.to_text() == "% Already has percent"
 
 
@@ -75,13 +75,12 @@ def test_graph_composition():
   edge = TikzEdge(source_id="a", target_id="b")
   graph = TikzGraph(
     options=[TikzOption("scale", "0.5")],
-    children=[TikzComment("Nodes"), node1, node2, TriviaNode("\n"), TikzComment("Edges"), edge],
+    children=[TriviaNode("\n% Nodes\n"), node1, node2, TriviaNode("\n"), TriviaNode("% Edges\n"), edge, TriviaNode("\n")],
   )
   text = graph.to_text()
   assert "\\begin{tikzpicture}[scale=0.5]" in text
   assert "\\end{tikzpicture}" in text
   lines = text.splitlines()
   assert lines[1].strip() == "% Nodes"
-  assert lines[1].startswith("    ")
   assert "\\node (a) at (0, 0) {A};" in text
   assert "\\draw (a) -- (b);" in text

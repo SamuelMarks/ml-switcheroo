@@ -1,5 +1,7 @@
 """Test suite for the Fuzzer Strategies module."""
 
+from ml_switcheroo.testing.fuzzer.type_parser import parse_type_annotation
+
 
 def test_get_dtype_strategy():
   """Gets dtype strategy."""
@@ -46,10 +48,10 @@ def test_array_strategy():
   from ml_switcheroo.testing.fuzzer.strategies import _array_strategy
 
   shared_dims = {}
-  _array_strategy("Array['N', 32, 'M']", {}, shared_dims)
-  _array_strategy("Array", {"rank": 2}, shared_dims)
-  _array_strategy("Array['N+1']", {}, shared_dims)
-  _array_strategy("Array", {}, shared_dims)
+  _array_strategy(parse_type_annotation("Array['N', 32, 'M']"), {}, shared_dims)
+  _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
+  _array_strategy(parse_type_annotation("Array['N+1']"), {}, shared_dims)
+  _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
 
 
 def test_strategies_from_spec_more():
@@ -60,4 +62,4 @@ def test_strategies_from_spec_more():
   strategies_from_spec("Array['N']", {})
   strategies_from_spec("Tensor['N']", {})
   strategies_from_spec("np.ndarray", {})
-  _array_strategy("Array", {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
+  _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})

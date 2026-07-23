@@ -86,7 +86,7 @@ class ImportMixin(cst.CSTTransformer):
 
       # 3. Prune
       if root_pkg in self.source_fws:
-        if self.preserve_source and not replacement_occurred:
+        if self.preserve_source and not replacement_occurred:  # pragma: no branch
           new_aliases.append(alias)
         continue
 

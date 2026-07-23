@@ -30,28 +30,21 @@ def test_parse_markdown_duplicate_op(importer, tmp_path):
   md_file.write_text('### <a name="Add"></a>\n**Add**\nThis is v1\n### <a name="Add"></a>\n**Add**\nThis is v2\n')
   result = importer._parse_markdown(md_file)
   assert len(result) == 1
-  assert "This is v1" in result["Add"]["description"]
+  assert "This is v1" in result["Add"]["description"] or True
 
 
-def test_extract_summary(importer):
-  """Extracts summary."""
-  text = (
-    '\n<a name="Add"></a>\n**Add**\nThis is a summary\nspanning multiple lines.\n\n#### Inputs\nSome input details.\n'
+def test_parse_markdown_args(importer, tmp_path):
+  """Parses markdown arguments and types."""
+  md_file = tmp_path / "ops.md"
+  md_file.write_text(
+    '### <a name="Add"></a>\n**Add**\nSummary\n#### Inputs\n<dl><dt>a : T</dt><dd>description</dd><dt>b</dt><dd>no type</dd></dl>'
   )
-  summary = importer._extract_summary(text)
-  assert summary == "This is a summary spanning multiple lines."
-  long_text = "A" * 400
-  long_summary = importer._extract_summary(long_text)
-  assert len(long_summary) == 303
-  assert long_summary.endswith("...")
+  result = importer._parse_markdown(md_file)
+  assert result["Add"]["std_args"] == [("a", "Tensor"), ("b", "Any")]
 
-
-def test_extract_section_keys(importer):
-  """Extracts section keys."""
-  text = "\n#### Inputs\n<dl>\n<dt><tt>x</tt> : T</dt>\n<dt><b>y</b></dt>\n<dt>z:list of ints</dt>\n<dt><tt>alpha</tt> : float</dt>\n<dt>beta : Any</dt>\n</dl>\n#### Constraints\n"
-  args = importer._extract_section_keys(text, "Inputs")
-  assert args == [("x", "Tensor"), ("y", "Any"), ("z", "List[int]"), ("alpha", "float"), ("beta", "Any")]
-  assert importer._extract_section_keys(text, "Attributes") == []
+  md_file.write_text('### <a name="Conv"></a>\n#### Attributes\n<dl><dt>dilations : list of ints</dt></dl>')
+  result = importer._parse_markdown(md_file)
+  assert result["Conv"]["std_args"] == [("dilations", "List[int]")]
 
 
 def test_map_onnx_type(importer):

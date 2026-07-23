@@ -41,7 +41,9 @@ def test_ingestion_tikz_success():
   with patch("ml_switcheroo.core.ingestion.TikzParser") as MockTikz:
     with patch("ml_switcheroo.core.ingestion.PythonBackend") as MockBackend:
       mock_parser = MagicMock()
-      mock_parser.parse.return_value = "Graph"
+      from ml_switcheroo.core.tikz.nodes import TikzGraph
+
+      mock_parser.parse.return_value = TikzGraph()
       MockTikz.return_value = mock_parser
       mock_backend = MagicMock()
       mock_backend.generate.return_value = "def my_func(): pass"

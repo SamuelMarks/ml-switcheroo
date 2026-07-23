@@ -12,8 +12,10 @@ Handles:
 - **Merging Patterns**.
 """
 
+from typing import Any
+
 import warnings
-from typing import Dict, Any, List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import ValidationError
 
@@ -49,7 +51,7 @@ def infer_tier_from_priority(priority: int) -> SemanticTier:
   return SemanticTier.EXTRAS
 
 
-def merge_frameworks(master_configs: Dict[str, Dict], new_configs: Dict[str, Any]) -> None:
+def merge_frameworks(master_configs: Dict[str, Dict[Any, Any]], new_configs: Dict[str, Any]) -> None:
   """Merges new framework configurations (from __frameworks__ block) into the master.
 
 
@@ -119,9 +121,9 @@ def _normalize_args(args_list: List[Any]) -> List[str]:
 
 
 def merge_tier_data(
-  data: Dict[str, Dict],
+  data: Dict[str, Dict[Any, Any]],
   key_origins: Dict[str, str],
-  framework_configs: Dict[str, Dict],
+  framework_configs: Dict[str, Dict[Any, Any]],
   new_content: Dict[str, Any],
   tier: SemanticTier,
   patterns: Optional[List[PatternDef]] = None,
@@ -271,10 +273,10 @@ def merge_tier_data(
 
 
 def merge_overlay_data(
-  data: Dict[str, Dict],
+  data: Dict[str, Dict[Any, Any]],
   key_origins: Dict[str, str],
-  framework_configs: Dict[str, Dict],
-  test_templates: Dict[str, Dict],
+  framework_configs: Dict[str, Dict[Any, Any]],
+  test_templates: Dict[str, Dict[Any, Any]],
   content: Dict[str, Any],
   filename: str,
 ) -> None:

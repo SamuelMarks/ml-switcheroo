@@ -41,6 +41,8 @@ def test_consensus_engine_scan_module_recursion():
   engine = ConsensusEngine([])
 
   class DummyModule:
+    """Dummy."""
+
     __name__ = "dummy"
 
   engine._scan_module(DummyModule(), "dummy", depth=3)
@@ -60,9 +62,13 @@ def test_consensus_engine_scan_submodule():
   engine = ConsensusEngine([])
 
   class Sub:
+    """Sub."""
+
     __name__ = "dummy.sub"
 
   class Dummy:
+    """Dummy."""
+
     __name__ = "dummy"
     sub = Sub()
 
@@ -74,6 +80,7 @@ def test_consensus_engine_scan_submodule():
     mock_gm.return_value = [("sub", Sub()), ("_priv", Sub()), ("myfunc", lambda: None)]
 
     def mock_is_m(obj):
+      """Mock."""
       return isinstance(obj, Sub)
 
     mock_ism.side_effect = mock_is_m

@@ -1,0 +1,41 @@
+start: element*
+
+element: node
+       | edge
+       | TIKZ_ENV_BEGIN
+       | TIKZ_ENV_END
+       | trivia
+       | IGNORE_TEXT
+
+trivia: (WS | COMMENT)+
+
+node: "\\node" trivia? ("(" NAME ")" trivia?)? ("[" OPTION "]" trivia?)? ("(" NAME ")" trivia?)? ("at" trivia? "(" COORD ")" trivia?)? "{" trivia? content trivia? "}" trivia? ";" trivia?
+edge: "\\draw" trivia? ("[" OPTION "]" trivia?)? "(" NAME ")" trivia? EDGE_OP trivia? "(" NAME ")" trivia? ";" trivia?
+
+content: "\\begin{tabular}" "{" ALIGN "}" trivia? tabular_row* "\\end{tabular}" -> tabular
+       | TEXT -> text_content
+
+tabular_row: item (trivia? "\\\\" trivia? item)* (trivia? "\\\\")? trivia?
+item: "\\textbf{" TABULAR_TEXT "}" -> kind
+    | "\\textit{" TABULAR_TEXT "}" -> id
+    | METADATA_KEY trivia? ":" trivia? METADATA_VALUE -> meta
+    | IGNORED_TABULAR_ITEM -> ignore
+
+OPTION: /[^\]]+/
+COORD: /[^)]+/
+ALIGN: /[^}]+/
+EDGE_OP: "--" | "->"
+
+METADATA_KEY: /[a-zA-Z_\\-]+/
+METADATA_VALUE: /[a-zA-Z0-9_\(\),\.\-+ \/\{\}\\\\]+/
+TABULAR_TEXT: /[a-zA-Z0-9_\(\),\.\-+ \/\{\}\\]+/
+IGNORED_TABULAR_ITEM: /[a-zA-Z0-9_\(\),\.\-+ \/\{\}\\:]+/
+TEXT: /[^{}\\]+/
+IGNORE_TEXT: /[^{}\\%\n]+/
+
+TIKZ_ENV_BEGIN: "\\begin{tikzpicture}" ("[" OPTION "]")?
+TIKZ_ENV_END: "\\end{tikzpicture}"
+COMMENT: /%.*/
+WS: /[ \t\f\r\n]+/
+
+%import common.CNAME -> NAME

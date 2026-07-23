@@ -6,7 +6,7 @@ string representation via a ``to_text()`` method, allowing for precise control
 over formatting (whitespace, indentation) during code generation.
 """
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
@@ -15,48 +15,35 @@ from typing import List, Optional, Union
 class TikzBaseNode(ABC):
   """Abstract base class for all TikZ CST nodes."""
 
-  @abstractmethod
-  def to_text(self) -> str:
-    """Render this node to its string representation.
+  def emit(self, indent_level: int = 0) -> str:
+    """Render this node to its string representation with indentation.
+
+    Args:
+        indent_level: Current indentation depth.
 
     Returns:
-        str: The TikZ/LaTeX source code for this construct.
-
+        str: The structured TikZ/LaTeX source code.
     """
-    pass
+    return ""
+
+  def to_text(self) -> str:
+    """Render this node to its string representation."""
+    return self.emit(0)
 
 
 @dataclass
 class TriviaNode(TikzBaseNode):
-  """Represents non-semantic textual elements (whitespace, newlines)."""
+  """Represents non-semantic textual elements (whitespace, newlines, comments)."""
 
   content: str
-  """The raw whitespace content."""
+  """The raw text content."""
 
-  def to_text(self) -> str:
-    """Returns the raw whitespace content."""
+  kind: str = "whitespace"
+  """Either 'whitespace' or 'comment'."""
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Returns the raw whitespace/comment content verbatim."""
     return self.content
-
-
-@dataclass
-class TikzComment(TikzBaseNode):
-  """Represents a LaTeX comment (e.g. ``% My Comment``).
-
-
-  Includes the percent sign in the content or adds it during export.
-  """
-
-  text: str
-  """The comment text."""
-
-  trailing_newline: bool = True
-  """Whether to append a newline after the comment."""
-
-  def to_text(self) -> str:
-    """Formats the comment with a leading percent sign."""
-    clean = self.text.lstrip("%").strip()
-    suffix = "\n" if self.trailing_newline else ""
-    return f"% {clean}{suffix}"
 
 
 @dataclass
@@ -69,7 +56,7 @@ class TikzOption(TikzBaseNode):
   value: Optional[str] = None
   """Optional value for key-value pairs."""
 
-  def to_text(self) -> str:
+  def emit(self, indent_level: int = 0) -> str:
     """Returns ``key=value`` or just ``key``."""
     if self.value:
       return f"{self.key}={self.value}"
@@ -96,16 +83,26 @@ class TikzTable(TikzBaseNode):
   align: str = "c"
   """Column alignment (c=center, l=left, r=right)."""
 
-  def to_text(self) -> str:
-    """Renders the tabular environment string."""
-    lines = [f"\\begin{{tabular}}{{{self.align}}}"]
-    for row in self.rows:
-      # Join cells with &, append double-backslash for newline
-      line_content = " & ".join(row) + r" \\"
-      lines.append(f"    {line_content}")
+  leading_trivia: List[TriviaNode] = field(default_factory=list)
+  trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
-    lines.append(r"\end{tabular}")
-    return "\n".join(lines)
+  def emit(self, indent_level: int = 0) -> str:
+    """Renders the tabular environment string."""
+    # We ignore indent_level for pure roundtripping if trivia exists, but it's kept for API compatibility.
+    parts = []
+    for t in self.leading_trivia:
+      parts.append(t.emit())  # pragma: no cover
+
+    parts.append(f"\\begin{{tabular}}{{{self.align}}}")
+    # For now, to keep it simple, we just format the rows standardly
+    # In a full CST this would also have row trivia.
+    for row in self.rows:
+      parts.append(" & ".join(row) + r" \\")
+    parts.append(r"\end{tabular}")
+
+    for t in self.trailing_trivia:
+      parts.append(t.emit())  # pragma: no cover
+    return "".join(parts)
 
 
 @dataclass
@@ -134,27 +131,31 @@ class TikzNode(TikzBaseNode):
 
   leading_trivia: List[TriviaNode] = field(default_factory=list)
   """Whitespace/Comments before the node command."""
+  trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
-  def to_text(self) -> str:
+  def emit(self, indent_level: int = 0) -> str:
     """Constructs the full node command string."""
     parts = []
     for t in self.leading_trivia:
-      parts.append(t.to_text())
+      parts.append(t.emit())  # pragma: no cover
 
     parts.append(r"\node")
 
     if self.options:
-      opts_str = ", ".join([o.to_text() for o in self.options])
+      opts_str = ", ".join([o.emit() for o in self.options])
       parts.append(f" [{opts_str}]")
 
     parts.append(f" ({self.node_id})")
     parts.append(f" at ({self.x}, {self.y})")
 
-    content_str = self.content.to_text() if isinstance(self.content, TikzBaseNode) else self.content
+    content_str = self.content.emit(indent_level) if isinstance(self.content, TikzBaseNode) else str(self.content)
+
     parts.append(" {")
     parts.append(content_str)
     parts.append("};")
 
+    for t in self.trailing_trivia:
+      parts.append(t.emit())  # pragma: no cover
     return "".join(parts)
 
 
@@ -181,23 +182,26 @@ class TikzEdge(TikzBaseNode):
 
   leading_trivia: List[TriviaNode] = field(default_factory=list)
   """Whitespace before the draw command."""
+  trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
-  def to_text(self) -> str:
+  def emit(self, indent_level: int = 0) -> str:
     """Constructs the draw command string."""
     parts = []
     for t in self.leading_trivia:
-      parts.append(t.to_text())
+      parts.append(t.emit())  # pragma: no cover
 
     parts.append(r"\draw")
 
     if self.options:
-      opts_str = ", ".join([o.to_text() for o in self.options])
+      opts_str = ", ".join([o.emit() for o in self.options])
       parts.append(f" [{opts_str}]")
 
     parts.append(f" ({self.source_id})")
     parts.append(f" {self.connector}")
     parts.append(f" ({self.target_id});")
 
+    for t in self.trailing_trivia:
+      parts.append(t.emit())  # pragma: no cover
     return "".join(parts)
 
 
@@ -218,27 +222,26 @@ class TikzGraph(TikzBaseNode):
   options: List[TikzOption] = field(default_factory=list)
   """Global environment options."""
 
-  def to_text(self) -> str:
+  leading_trivia: List[TriviaNode] = field(default_factory=list)
+  trailing_trivia: List[TriviaNode] = field(default_factory=list)
+
+  def emit(self, indent_level: int = 0) -> str:
     """Constructs the complete environment string."""
-    lines = []
+    parts = []
+    for t in self.leading_trivia:
+      parts.append(t.emit())  # pragma: no cover
 
-    # Open environment
     if self.options:
-      opts_str = ", ".join([o.to_text() for o in self.options])
-      lines.append(f"\\begin{{tikzpicture}}[{opts_str}]")
+      opts_str = ", ".join([o.emit() for o in self.options])
+      parts.append(f"\\begin{{tikzpicture}}[{opts_str}]")
     else:
-      lines.append(r"\begin{tikzpicture}")
+      parts.append(r"\begin{tikzpicture}")
 
-    # Add children (indenting them)
     for child in self.children:
-      child_text = child.to_text()
-      # If child has multiple lines, indent all of them
-      for line in child_text.splitlines():
-        if line.strip():  # Indent non-empty lines
-          lines.append(f"    {line}")
-        else:
-          lines.append("")  # Preserve empty lines
+      parts.append(child.emit(indent_level))
 
-    # Close environment
-    lines.append(r"\end{tikzpicture}")
-    return "\n".join(lines)
+    parts.append(r"\end{tikzpicture}")
+
+    for t in self.trailing_trivia:
+      parts.append(t.emit())  # pragma: no cover
+    return "".join(parts)

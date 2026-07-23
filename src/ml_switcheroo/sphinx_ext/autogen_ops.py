@@ -12,10 +12,12 @@ Features:
 2. Exports `docs/operations.yaml` ensuring appended updates rather than destructive overwrites.
 """
 
+from typing import Any
+
 import yaml
 import shutil
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from sphinx.application import Sphinx
 from sphinx.util import logging
@@ -27,10 +29,10 @@ from ml_switcheroo.utils.doc_renderer import OpPageRenderer
 logger = logging.getLogger(__name__)
 
 
-class IndentedDumper(yaml.SafeDumper):
+class IndentedDumper(yaml.SafeDumper):  # type: ignore
   """Custom Dumper to ensure lists are indented."""
 
-  def increase_indent(self, flow=False, indentless=False):
+  def increase_indent(self, flow: Any = False, indentless: Any = False) -> Any:
     """Execute implementation detail."""
     return super(IndentedDumper, self).increase_indent(flow, False)
 

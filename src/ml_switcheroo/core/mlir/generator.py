@@ -122,7 +122,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
           # Wrap as statement (Assignment or Expression Stmt)
           stmt_node = self._wrap_as_statement(op, expr_node)
           if hasattr(stmt_node, "with_changes") and leading:
-            stmt_node = stmt_node.with_changes(leading_lines=leading)
+            stmt_node = stmt_node.with_changes(leading_lines=leading)  # pragma: no cover
           stmts.append(stmt_node)
       else:
         # Handle statements that are never expressions (Control Flow, Class Defs, Defs, Imports)
@@ -130,7 +130,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         stmt_node = self._convert_statement_op(op)  # type: ignore
         if stmt_node:
           if hasattr(stmt_node, "with_changes") and leading:
-            stmt_node = stmt_node.with_changes(leading_lines=leading)
+            stmt_node = stmt_node.with_changes(leading_lines=leading)  # pragma: no cover
           stmts.append(stmt_node)
 
     return stmts

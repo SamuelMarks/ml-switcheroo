@@ -13,10 +13,12 @@ Features:
 - **Constraint Inference**: Uses `min`/`max` to govern random ranges.
 """
 
-from typing import Union, Dict, Any
+from typing import Any
+
+from typing import Union, Dict
 
 
-def parse_arg_def(arg: Union[str, tuple, dict]) -> Dict[str, Any]:
+def parse_arg_def(arg: Union[str, tuple[Any, ...], dict[Any, Any]]) -> Dict[str, Any]:
   """Normalizes a heterogeneous argument definition into a standard dictionary.
 
   Extracts `default`, `min`, `max` to help downstream inference.

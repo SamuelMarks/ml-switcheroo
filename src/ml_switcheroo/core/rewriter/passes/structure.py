@@ -80,7 +80,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     """Retrieve supported tiers (e.g. ['neural', 'array']) for the target."""
     config = self.context.semantics.get_framework_config(self.context.target_fw)
     if config and "tiers" in config:
-      return config["tiers"]
+      return config["tiers"]  # type: ignore
     return [SemanticTier.ARRAY_API.value, SemanticTier.NEURAL.value, SemanticTier.EXTRAS.value]
 
   def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
@@ -238,7 +238,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     # PivotRewriter wraps this. For standalone pass, this is final.
     if hasattr(super(), "leave_Attribute"):
       # If using multiple inheritance shim (PivotRewriter)
-      return super().leave_Attribute(original_node, updated_node)  # type: ignore
+      return super().leave_Attribute(original_node, updated_node)
 
     return updated_node
 

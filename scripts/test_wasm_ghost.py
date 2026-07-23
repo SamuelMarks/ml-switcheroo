@@ -22,7 +22,7 @@ for forbidden in ["torch", "jax", "tensorflow", "mlx"]:
 class TestWasmGhostMode(unittest.TestCase):
   """Test WASM Ghost Mode."""
 
-  def test_ghost_mode_loads_snapshots(self):
+  def test_ghost_mode_loads_snapshots(self) -> None:
     """Test that the manager can load the YAML/JSON knowledge base without ML libraries."""
     manager = SemanticsManager()
 
@@ -33,10 +33,13 @@ class TestWasmGhostMode(unittest.TestCase):
     # Test loading framework variants (JSON/YAML Snapshots)
     torch_variant = manager.resolve_variant("Conv2d", "torch")
     self.assertIsNotNone(torch_variant, "Failed to load Torch Conv2d variant.")
+    assert torch_variant is not None
     self.assertEqual(torch_variant.get("api"), "torch.nn.Conv2d")
 
     jax_variant = manager.resolve_variant("Conv2d", "jax")
     self.assertIsNotNone(jax_variant, "Failed to load JAX Conv2d variant.")
+    assert jax_variant is not None
+    self.assertEqual(jax_variant.get("api"), "jax.lax.conv")
 
 
 if __name__ == "__main__":

@@ -15,7 +15,9 @@ Operations flagged:
 Violations are marked via the `EscapeHatch` mechanism.
 """
 
-from typing import List, Optional, Set, Union, Any
+from typing import Any
+
+from typing import List, Optional, Set, Union
 import libcst as cst
 
 from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -97,7 +99,7 @@ class PurityScanner(cst.CSTTransformer):
     self,
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
-  ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel]:
+  ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel[Any]]:
     """Exits a statement line.
 
 

@@ -13,6 +13,9 @@ from typing import List, Optional, Union
 class SassNode(abc.ABC):
   """Abstract base class for all SASS AST nodes."""
 
+  leading_trivia: str = ""
+  trailing_trivia: str = ""
+
   @abc.abstractmethod
   def __str__(self) -> str:
     """Returns the valid SASS string representation of the node."""
@@ -88,14 +91,18 @@ class Immediate(Operand):
 
   def __str__(self) -> str:
     """Execute implementation detail."""
+    res = ""
     if self.is_hex:
       if isinstance(self.value, float):
         # Float hex representation requires struct packing usually,
         # but SASS often takes raw hex bytes for float encoding.
         # Here we assume user passes int representation of float bits if hex desired.
-        return hex(int(self.value))
-      return hex(int(self.value))
-    return str(self.value)
+        res = hex(int(self.value))
+      else:
+        res = hex(int(self.value))
+    else:
+      res = str(self.value)
+    return res
 
 
 @dataclass
@@ -117,16 +124,20 @@ class Memory(Operand):
   def __str__(self) -> str:
     """Execute implementation detail."""
     base_str = str(self.base)
+    res = ""
     # Constant Memory syntax: c[bank][offset]
     if isinstance(self.base, str) and self.base.startswith("c["):
       if self.offset is not None:
-        return f"{base_str}[{hex(self.offset)}]"
-      return f"{base_str}[0x0]"
-
-    # Register Memory syntax: [base] or [base + offset]
-    if self.offset:
-      return f"[{base_str} + {hex(self.offset)}]"
-    return f"[{base_str}]"
+        res = f"{base_str}[{hex(self.offset)}]"
+      else:
+        res = f"{base_str}[0x0]"
+    else:
+      # Register Memory syntax: [base] or [base + offset]
+      if self.offset:
+        res = f"[{base_str} + {hex(self.offset)}]"
+      else:
+        res = f"[{base_str}]"
+    return res
 
 
 @dataclass
@@ -153,9 +164,35 @@ class Instruction(SassNode):
 
   def __str__(self) -> str:
     """Execute implementation detail."""
-    pred_str = f"@{str(self.predicate)} " if self.predicate else ""
-    ops_str = ", ".join(str(op) for op in self.operands)
-    return f"{pred_str}{self.opcode} {ops_str};"
+    pred_str = f"@{str(self.predicate)}" if self.predicate else ""
+    ops_str = ""
+    for i, op in enumerate(self.operands):
+      op_leading = getattr(op, "leading_trivia", "")
+      op_trailing = getattr(op, "trailing_trivia", "")
+      op_str = f"{op_leading}{str(op)}{op_trailing}"
+
+      if i > 0 and not op_leading:
+        ops_str += ", " + op_str
+      else:
+        ops_str += op_str
+
+    res = pred_str
+    if pred_str and not self.leading_trivia:
+      res += " "
+    res += f"{self.leading_trivia}{self.opcode}"
+    if ops_str:
+      if not getattr(self.operands[0], "leading_trivia", ""):
+        res += " " + ops_str
+      else:
+        res += ops_str
+    else:
+      res += " "
+
+    if not self.trailing_trivia:
+      res += ";"
+
+    pred_trivia = getattr(self.predicate, "leading_trivia", "") if self.predicate else ""
+    return f"{pred_trivia}{res}{self.trailing_trivia}"
 
 
 @dataclass
@@ -173,7 +210,7 @@ class Label(Operand):
 
   def __str__(self) -> str:
     """Execute implementation detail."""
-    return f"{self.name}:"
+    return f"{self.leading_trivia}{self.name}:{self.trailing_trivia}"
 
 
 @dataclass
@@ -196,7 +233,7 @@ class Directive(SassNode):
     out = f".{self.name}"
     if self.params:
       out += " " + ", ".join(self.params)
-    return out
+    return f"{self.leading_trivia}{out}{self.trailing_trivia}"
 
 
 @dataclass
@@ -214,4 +251,4 @@ class Comment(SassNode):
 
   def __str__(self) -> str:
     """Execute implementation detail."""
-    return f"// {self.text}"
+    return f"{self.leading_trivia}// {self.text}{self.trailing_trivia}"

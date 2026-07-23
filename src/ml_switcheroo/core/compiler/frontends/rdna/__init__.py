@@ -21,7 +21,6 @@ from ml_switcheroo.core.compiler.frontends.rdna.nodes import (
   c_VGPR,
 )
 from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
-from ml_switcheroo.core.compiler.frontends.rdna.tokens import RdnaLexer, Token, TokenType
 from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
 

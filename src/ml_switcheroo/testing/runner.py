@@ -4,8 +4,10 @@ Uses ``hypothesis`` to generate property-based test cases for operations.
 Maps ODL definitions to Strategies and executes cross-framework comparison.
 """
 
+from typing import Any
+
 import importlib
-from typing import Dict, Any, Tuple, Optional, List
+from typing import Dict, Tuple, Optional, List
 import numpy as np
 
 from hypothesis import given, settings, strategies as st
@@ -25,7 +27,7 @@ class EquivalenceRunner:
     variants: Dict[str, Any],
     params: List[str],
     hints: Optional[Dict[str, str]] = None,
-    constraints: Optional[Dict[str, Dict]] = None,
+    constraints: Optional[Dict[str, Dict[Any, Any]]] = None,
     shape_calc: Optional[str] = None,
     rtol: float = 1e-3,
     atol: float = 1e-4,
@@ -39,7 +41,7 @@ class EquivalenceRunner:
 
     @settings(max_examples=20, deadline=None)
     @given(st.fixed_dictionaries(strat_dict))
-    def run_check(inputs):
+    def run_check(inputs: Any) -> Any:
       """Execute implementation detail."""
       # Shape Check (Feature 20)
       if shape_calc and len(inputs) > 0 and len(params) > 0:
@@ -88,8 +90,8 @@ class EquivalenceRunner:
               if hasattr(r, "shape"):  # pragma: no cover
                 s = tuple(r.shape) if hasattr(r.shape, "__iter__") else (r.shape,)
                 e = tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)  # type: ignore
-                if s != e:
-                  failure_msg.append(f"Shape Mismatch: {s} != {e}")
+                if s != e:  # type: ignore
+                  failure_msg.append(f"Shape Mismatch: {s} != {e}")  # type: ignore
         except Exception as e:
           failure_msg.append(f"Shape Calculation Error: {e}")
 
@@ -106,7 +108,7 @@ class EquivalenceRunner:
       # Hypothesis raises explicit errors when assertions fail
       return False, f"Verification Failed: {e}"
 
-  def _execute_api(self, api, kwargs):
+  def _execute_api(self, api: Any, kwargs: Any) -> Any:
     """Dynamically imports and calls the API."""
     if "." not in api:
       return None
@@ -114,11 +116,11 @@ class EquivalenceRunner:
     mod = importlib.import_module(m)
     return getattr(mod, f)(**kwargs)
 
-  def _remap_args(self, inputs, mapping):
+  def _remap_args(self, inputs: Any, mapping: Any) -> Any:
     """Execute implementation detail."""
     return {mapping.get(k, k): v for k, v in inputs.items()}
 
-  def _compare_results(self, results, rtol, atol, err_box):
+  def _compare_results(self, results: Any, rtol: Any, atol: Any, err_box: Any) -> Any:
     """Execute implementation detail."""
     if len(results) < 2:
       return
@@ -134,7 +136,7 @@ class EquivalenceRunner:
         err_box.append(m)
         raise AssertionError(m)
 
-  def _deep_compare(self, a, b, rtol=1e-3, atol=1e-4):
+  def _deep_compare(self, a: Any, b: Any, rtol: Any = 1e-3, atol: Any = 1e-4) -> Any:
     """Execute implementation detail."""
     if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
       return len(a) == len(b) and all(self._deep_compare(x, y, rtol, atol) for x, y in zip(a, b))

@@ -12,3 +12,7 @@ hypothesis
 python-cdd
 ml-switcheroo-ir @ git+https://github.com/SamuelMarks/ml-switcheroo-ir.git
 griffe
+lark>=1.1.9
+texsoup
+markdown-it-py
+beautifulsoup4

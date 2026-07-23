@@ -17,7 +17,7 @@ It defines the structure for:
 from typing import Dict, List, Optional, Any, Union, Tuple, Literal
 from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
-from ml_switcheroo.enums import LogicOp
+from ml_switcheroo.enums import LogicOp as LogicOp
 
 
 class OpType(str, Enum):

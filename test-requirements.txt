@@ -9,3 +9,7 @@ docutils
 hypothesis[numpy]
 sphinx
 griffe @ git+https://github.com/SamuelMarks/griffe.git@rest
+lark>=1.1.9
+texsoup
+markdown-it-py
+beautifulsoup4

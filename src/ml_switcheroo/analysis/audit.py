@@ -72,7 +72,7 @@ class CoverageScanner(cst.CSTVisitor):
     if isinstance(node.names, cst.ImportStar):
       return
 
-    for alias in node.names:  # type: ignore
+    for alias in node.names:
       import_name = alias.name.value if isinstance(alias.name, cst.Name) else ""
       local_name = (
         (alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else "") if alias.asname else import_name

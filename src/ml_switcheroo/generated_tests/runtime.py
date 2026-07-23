@@ -139,7 +139,7 @@ def verify_results(ref: Any, val: Any, rtol: float = 1e-3, atol: float = 1e-4, e
 
     # Float (f) or Complex (c) -> Fuzzy Match
     if kind in {"f", "c"}:
-      return np.allclose(np_ref, np_val, rtol=rtol, atol=atol, equal_nan=True)
+      return bool(np.allclose(np_ref, np_val, rtol=rtol, atol=atol, equal_nan=True))
 
     # Integer/Bool/String -> Exact Match
     return np.array_equal(np_ref, np_val)
@@ -147,6 +147,6 @@ def verify_results(ref: Any, val: Any, rtol: float = 1e-3, atol: float = 1e-4, e
   except Exception:
     # Fallback for types that fail numpy conversion (e.g. custom objects)
     try:
-      return ref == val
+      return bool(ref == val)
     except Exception:
       return False

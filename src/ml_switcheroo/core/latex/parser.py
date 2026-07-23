@@ -3,7 +3,8 @@
 Parses MIDL LaTeX macros into a LibCST Module representing a Python AST.
 """
 
-import re
+from typing import Any
+
 from typing import List, Dict
 import libcst as cst
 from ml_switcheroo.core.latex.nodes import (
@@ -18,13 +19,6 @@ from ml_switcheroo.core.latex.nodes import (
 class LatexParser:
   """Parses LaTeX source code containing MIDL macros into a Python CST."""
 
-  _START_ENV = re.compile(r"\\begin\{DefModel\}\{(?P<name>\w+)\}")
-  _ATTR_RE = re.compile(r"\\Attribute\{(?P<id>[\w\d_]+)\}\{(?P<type>[\w\d_\.]+)\}\{(?P<config>.*?)\}")
-  _INPUT_RE = re.compile(r"\\Input\{(?P<name>[\w\d_]+)\}\{(?P<shape>.*?)\}")
-  _OP_RE = re.compile(r"\\Op\{(?P<id>[\w\d_]+)\}\{(?P<type>[\w\d_\.]+)\}\{(?P<args>.*?)\}\{(?P<shape>.*?)\}")
-  _STATE_OP_RE = re.compile(r"\\StateOp\{(?P<id>[\w\d_]+)\}\{(?P<attr>[\w\d_]+)\}\{(?P<args>.*?)\}\{(?P<shape>.*?)\}")
-  _RETURN_RE = re.compile(r"\\Return\{(?P<id>[\w\d_]+)\}")
-
   def __init__(self, latex_source: str):
     """Initialize the parser with LaTeX source code."""
     self.source = latex_source
@@ -34,51 +28,45 @@ class LatexParser:
 
     Returns:
         cst.Module: A LibCST Module containing the synthesized Python class.
-
     """
+    from TexSoup import TexSoup
+
+    soup = TexSoup(self.source)
+
     model_name = "GeneratedModel"
     memory_nodes = []
     compute_nodes = []
     input_node = None
     return_node = None
 
-    for line in self.source.splitlines():
-      line = line.strip()
-      if not line or line.startswith("%"):
-        continue
+    env = soup.find("DefModel")
+    if env:
+      if env.args and len(env.args) > 0:  # pragma: no branch
+        model_name = str(env.args[0].string).strip()
 
-      m = self._START_ENV.search(line)
-      if m:
-        model_name = m.group("name")
-        continue
-
-      m = self._ATTR_RE.search(line)
-      if m:
-        d = m.groupdict()
-        memory_nodes.append(MemoryNode(d["id"], d["type"], self._parse_config_string(d["config"])))
-        continue
-
-      m = self._INPUT_RE.search(line)
-      if m:
-        input_node = InputNode(m.group("name"), m.group("shape"))
-        continue
-
-      m = self._OP_RE.search(line)
-      if m:
-        d = m.groupdict()
-        compute_nodes.append(ComputeNode(d["id"], d["type"], self._parse_arg_list(d["args"]), d["shape"]))
-        continue
-
-      m = self._STATE_OP_RE.search(line)
-      if m:
-        d = m.groupdict()
-        compute_nodes.append(StateOpNode(d["id"], d["attr"], self._parse_arg_list(d["args"]), d["shape"]))  # type: ignore
-        continue
-
-      m = self._RETURN_RE.search(line)
-      if m:
-        return_node = ReturnNode(m.group("id"))
-        continue
+      for child in env.expr.all:
+        if not hasattr(child, "name"):
+          continue  # pragma: no cover
+        if child.name == "Attribute":
+          args = [str(a.string) for a in child.args]
+          if len(args) >= 3:  # pragma: no branch
+            memory_nodes.append(MemoryNode(args[0], args[1], self._parse_config_string(args[2])))
+        elif child.name == "Input":
+          args = [str(a.string) for a in child.args]
+          if len(args) >= 2:  # pragma: no branch
+            input_node = InputNode(args[0], args[1])
+        elif child.name == "Op":
+          args = [str(a.string) for a in child.args]
+          if len(args) >= 4:  # pragma: no branch
+            compute_nodes.append(ComputeNode(args[0], args[1], self._parse_arg_list(args[2]), args[3]))
+        elif child.name == "StateOp":
+          args = [str(a.string) for a in child.args]
+          if len(args) >= 4:  # pragma: no branch
+            compute_nodes.append(StateOpNode(args[0], args[1], self._parse_arg_list(args[2]), args[3]))  # type: ignore
+        elif child.name == "Return":
+          args = [str(a.string) for a in child.args]
+          if len(args) >= 1:  # pragma: no branch
+            return_node = ReturnNode(args[0])
 
     class_def = self._synthesize_class(model_name, memory_nodes, input_node, compute_nodes, return_node)
 
@@ -177,7 +165,7 @@ class LatexParser:
 
     return cst.Call(func=fn, args=args)
 
-  def _synthesize_class(self, name, mem, inp, ops, ret) -> cst.ClassDef:
+  def _synthesize_class(self, name: Any, mem: Any, inp: Any, ops: Any, ret: Any) -> cst.ClassDef:
     """Combines logical components into a Python Class AST."""
     init_body = [cst.SimpleStatementLine([cst.Expr(cst.parse_expression("super().__init__()"))])]
     for m in mem:

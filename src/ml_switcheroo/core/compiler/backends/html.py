@@ -112,7 +112,7 @@ class HtmlBackend(CompilerBackend):
         parent_style="top:80px; left:50%;",
       )
 
-    return SvgArrow(0, 0, 0, 0, "", "", "")
+    return SvgArrow(x1=0, y1=0, x2=0, y2=0)
 
   def _layout_graph(self, graph: LogicalGraph) -> List[GridBox]:
     """Calculates grid positions for nodes."""

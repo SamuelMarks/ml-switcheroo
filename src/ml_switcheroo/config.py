@@ -8,20 +8,23 @@ This module resolves default Source and Target frameworks by querying the
 to the specific libraries installed.
 """
 
+from typing import Any
+
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar
+from typing import Dict, List, Optional, Tuple, Type, TypeVar
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
 
 # Optional TOML support
-def _import_tomllib():
+def _import_tomllib() -> Any:
   """Imports tomllib or tomli depending on python version."""
   if sys.version_info >= (3, 11):
-    import tomllib
+    import tomllib  # pragma: no cover
 
-    return tomllib
+    # pragma: no cover
+    return tomllib  # pragma: no cover
   else:
     try:
       import tomli as tomllib

@@ -28,7 +28,7 @@ def validate_file(filepath: Path) -> bool:
     return False
 
 
-def main():
+def main() -> None:
   """Auto-generated doc."""
   failed = False
   for arg in sys.argv[1:]:

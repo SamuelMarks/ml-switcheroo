@@ -14,7 +14,7 @@ from ml_switcheroo.core.tracer import get_tracer
 class ApiTransformerCallMixin:
   """Docstring."""
 
-  def leave_Call(  # type: ignore
+  def leave_Call(
     self,
     original_node: cst.Call,
     updated_node: cst.Call,

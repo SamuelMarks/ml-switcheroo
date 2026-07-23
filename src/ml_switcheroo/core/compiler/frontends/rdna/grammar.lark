@@ -1,0 +1,47 @@
+?start: rdna_lines
+
+rdna_lines: rdna_line*
+
+rdna_line: (directive | label_def | instruction | COMMENT) [NEWLINE+] | NEWLINE+
+
+directive: DIRECTIVE (param ("," param)*)?
+param: DIRECTIVE | IDENTIFIER | STRING | NUMBER
+
+label_def: IDENTIFIER ":"
+
+instruction: IDENTIFIER operands?
+operands: operand ("," operand)*
+operand: s_register_range | v_register_range | sgpr | vgpr | memory | immediate | modifier | special_reg | label_ref
+
+sgpr: SGPR
+vgpr: VGPR
+
+s_register_range: "s" "[" NUMBER ":" NUMBER "]"
+v_register_range: "v" "[" NUMBER ":" NUMBER "]"
+
+memory: "[" sgpr "]"
+      | "[" vgpr "]"
+      | "[" sgpr (PLUS|MINUS) NUMBER "]"
+      | "[" vgpr (PLUS|MINUS) NUMBER "]"
+
+immediate: NUMBER
+modifier: MODIFIER
+special_reg: SPECIAL_REG
+label_ref: IDENTIFIER
+
+DIRECTIVE: /\.[a-zA-Z_][a-zA-Z0-9_]*/
+SGPR.2: /\bs[0-9]+\b/
+VGPR.2: /\bv[0-9]+\b/
+SPECIAL_REG.2: /\b(exec|vcc|m0|scc|flat_scratch|xnack_mask)\b/
+MODIFIER.2: /\b(glc|slc|dlc|off)\b/ | /vmcnt\(\d+\)/ | /lgkmcnt\(\d+\)/
+PLUS: "+"
+MINUS: "-"
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_\.]*/
+NUMBER.2: /[-+]?0x[0-9a-fA-F]+/ | /[-+]?\d*\.\d+([eE][-+]?\d+)?/ | /[-+]?\d+/
+STRING: /"(?:[^"\\]|\\.)*"/
+
+COMMENT: /;.*/
+
+%import common.WS_INLINE
+%import common.NEWLINE
+%ignore WS_INLINE

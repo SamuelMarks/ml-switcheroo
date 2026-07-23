@@ -14,6 +14,7 @@ def test_scan_registry_no_candidates(mock_get_adapter, mock_priority, mock_avail
   mock_priority.return_value = ["torch"]
 
   def get_adapter_side_effect(name):
+    """Effect."""
     if name == "torch":
       adapter = MagicMock()
       adapter.inherits_from = None

@@ -4,12 +4,13 @@ Generates standalone verification scripts.
 Bundles fuzzer logic (including Hypothesis strategies).
 """
 
+from typing import Any
+
 import json
 import inspect
 import textwrap
-import re
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
 
 from ml_switcheroo.testing.harness_generator_template import HARNESS_TEMPLATE
 from ml_switcheroo.testing.fuzzer.core import InputFuzzer
@@ -22,6 +23,8 @@ import ml_switcheroo.testing.fuzzer.parser
 import ml_switcheroo.testing.fuzzer.heuristics
 import ml_switcheroo.testing.fuzzer.utils
 import ml_switcheroo.testing.fuzzer.strategies
+import ml_switcheroo.testing.fuzzer.type_parser
+from ml_switcheroo.testing.signature_extractor import SignatureExtractor
 
 
 class HarnessGenerator:
@@ -100,8 +103,57 @@ class HarnessGenerator:
     deps.append("import re")
     deps.append("import numpy as np")
     deps.append("from typing import Union, Any, Dict, List, Optional, Tuple, Callable")
+    deps.append("from dataclasses import dataclass")
+    deps.append("import typing")
+    deps.append("""
+@dataclass
+class ParsedType:
+    pass
 
-    def extract_module_functions(module):
+@dataclass
+class AnyType(ParsedType):
+    pass
+
+@dataclass
+class NoneType(ParsedType):
+    pass
+
+@dataclass
+class PrimitiveType(ParsedType):
+    name: str
+
+@dataclass
+class UnionType(ParsedType):
+    types: typing.List[ParsedType]
+
+@dataclass
+class OptionalType(ParsedType):
+    inner: ParsedType
+
+@dataclass
+class TupleType(ParsedType):
+    elements: typing.List[ParsedType]
+    variadic: bool
+
+@dataclass
+class ListType(ParsedType):
+    inner: ParsedType
+
+@dataclass
+class DictType(ParsedType):
+    key_type: ParsedType
+    value_type: ParsedType
+
+@dataclass
+class TensorType(ParsedType):
+    dims: typing.Optional[typing.List[str]]
+
+@dataclass
+class CallableType(ParsedType):
+    pass
+""")
+
+    def extract_module_functions(module: Any) -> Any:
       """Execute implementation detail."""
       funcs = inspect.getmembers(module, inspect.isfunction)
       for name, func in funcs:
@@ -117,6 +169,12 @@ class HarnessGenerator:
     extract_module_functions(ml_switcheroo.testing.fuzzer.strategies)
     extract_module_functions(ml_switcheroo.testing.fuzzer.generators)
     extract_module_functions(ml_switcheroo.testing.fuzzer.heuristics)
+
+    deps.append("import ast")
+    deps.append(
+      "class TypeAnnotationParser(ast.NodeVisitor):\n    def parse(self, type_str: str) -> ParsedType:\n        if not type_str or type_str.strip() == '':\n            return AnyType()\n        try:\n            tree = ast.parse(type_str.strip(), mode='eval')\n            return self.visit(tree.body)\n        except SyntaxError:\n            return PrimitiveType(name=type_str)\n    def visit_Name(self, node: ast.Name) -> ParsedType:\n        name = node.id\n        if name == 'Any': return AnyType()\n        if name in ('None', 'NoneType'): return NoneType()\n        if name in ('int', 'integer', 'float', 'double', 'number', 'bool', 'boolean', 'str', 'string'): return PrimitiveType(name=name)\n        if name in ('Array', 'Tensor', 'ndarray'): return TensorType(dims=None)\n        if name in ('Callable', 'func', 'function'): return CallableType()\n        if name in ('List', 'Sequence'): return ListType(inner=AnyType())\n        if name in ('Dict', 'Mapping'): return DictType(key_type=AnyType(), value_type=AnyType())\n        if name == 'Tuple': return TupleType(elements=[AnyType()], variadic=True)\n        if name == 'Optional': return OptionalType(inner=AnyType())\n        return PrimitiveType(name=name)\n    def visit_Attribute(self, node: ast.Attribute) -> ParsedType:\n        return PrimitiveType(name=node.attr)\n    def visit_Constant(self, node: ast.Constant) -> ParsedType:\n        if node.value is None: return NoneType()\n        if node.value is Ellipsis: return PrimitiveType(name='Ellipsis')\n        return PrimitiveType(name=str(node.value))\n    def visit_Subscript(self, node: ast.Subscript) -> ParsedType:\n        base = self.visit(node.value)\n        slice_val = node.slice\n        args = []\n        is_variadic = False\n        raw_dims = []\n        def _process(elt):\n            nonlocal is_variadic\n            if isinstance(elt, ast.Constant) and elt.value is Ellipsis: is_variadic = True\n            elif isinstance(elt, ast.Constant) and isinstance(elt.value, str): raw_dims.append(elt.value)\n            elif isinstance(elt, ast.Name) and elt.id != 'Ellipsis': raw_dims.append(elt.id)\n            args.append(self.visit(elt))\n        if isinstance(slice_val, ast.Tuple):\n            for elt in slice_val.elts: _process(elt)\n        elif hasattr(ast, 'Index') and isinstance(slice_val, getattr(ast, 'Index')):\n            _process(getattr(slice_val, 'value'))\n        else:\n            _process(slice_val)\n        if isinstance(base, OptionalType): return OptionalType(inner=args[0] if args else AnyType())\n        if isinstance(base, ListType): return ListType(inner=args[0] if args else AnyType())\n        if isinstance(base, TupleType):\n            elements = [a for a in args if not (isinstance(a, PrimitiveType) and a.name == 'Ellipsis')]\n            return TupleType(elements=elements, variadic=is_variadic)\n        if isinstance(base, DictType): return DictType(key_type=args[0], value_type=args[1]) if len(args) == 2 else DictType(key_type=AnyType(), value_type=AnyType())\n        if isinstance(base, TensorType): return TensorType(dims=raw_dims if raw_dims else None)\n        if isinstance(base, PrimitiveType) and base.name == 'Union': return UnionType(types=args)\n        return base\n    def visit_BinOp(self, node: ast.BinOp) -> ParsedType:\n        if isinstance(node.op, ast.BitOr):\n            left = self.visit(node.left)\n            right = self.visit(node.right)\n            types = []\n            types.extend(left.types if isinstance(left, UnionType) else [left])\n            types.extend(right.types if isinstance(right, UnionType) else [right])\n            return UnionType(types=types)\n        return PrimitiveType(name='Unknown')\n    def generic_visit(self, node: ast.AST) -> ParsedType:\n        return PrimitiveType(name='Unknown')\n\ndef parse_type_annotation(type_str: str) -> ParsedType:\n    return TypeAnnotationParser().parse(type_str)"
+    )
+
     extract_module_functions(ml_switcheroo.testing.fuzzer.parser)
 
     fuzzer_class = self.extractor.extract_class(InputFuzzer)
@@ -132,8 +190,7 @@ class HarnessGenerator:
     imports = getattr(adapter, "harness_imports", [])
     imports_str = "\n".join(imports)
     init_code = getattr(adapter, "get_harness_init_code", lambda: "")()
-    match = re.search(r"def\s+([a-zA-Z0-9_]+)\s*\(", init_code)
-    helper_name = match.group(1) if match else None
+    helper_name = SignatureExtractor.extract_first_function_name(init_code)
     magic_args = getattr(adapter, "declared_magic_args", [])
 
     injection_lines = []

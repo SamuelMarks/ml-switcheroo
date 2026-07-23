@@ -11,7 +11,7 @@ def test_stablehlo_adapter_init():
   assert adapter.display_name == "StableHLO (MLIR)"
   assert adapter.ui_priority == 95
   assert adapter.inherits_from is None
-  assert adapter._mode == InitMode.GHOST
+  assert adapter._mode == InitMode.LIVE
 
 
 def test_stablehlo_properties():
@@ -23,10 +23,10 @@ def test_stablehlo_properties():
   traits = adapter.structural_traits
   assert traits.module_base is None
   config = adapter.test_config
-  assert "// module attributes" in config["import"]
+  assert "import" in config
   assert adapter.harness_imports == []
-  assert adapter.get_harness_init_code() == ""
-  assert adapter.get_to_numpy_code() == "return str(obj)"
+  assert "xla_bridge" in adapter.get_harness_init_code()
+  assert "np.asarray(obj)" in adapter.get_to_numpy_code()
   assert adapter.declared_magic_args == []
   assert adapter.rng_seed_methods == []
   defs = adapter.definitions

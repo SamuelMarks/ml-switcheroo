@@ -13,8 +13,9 @@ It serves two primary purposes:
     integration, where logs must be captured and returned to the browser context.
 """
 
-import logging
 from typing import Any
+
+import logging
 
 from rich.console import Console
 from rich.logging import RichHandler
@@ -28,7 +29,7 @@ SUCCESS_LEVEL_NUM = 25
 logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
 
-def _success(self, message, *args, **kwargs):
+def _success(self, message: Any, *args, **kwargs) -> Any:  # type: ignore
   """Method injected into Logger to support logger.success()."""
   if self.isEnabledFor(SUCCESS_LEVEL_NUM):  # pragma: no cover
     self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)

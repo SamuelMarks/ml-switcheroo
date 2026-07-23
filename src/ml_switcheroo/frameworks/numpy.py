@@ -10,15 +10,20 @@ Capabilities:
 3.  **Weight Migration**: Handling dict-based `.npz` archives via `get_weight_*` hooks.
 """
 
-try:
-  import numpy as np
-except Exception:  # pragma: no cover
-  np = None  # pragma: no cover
+from typing import Any
 import textwrap
-from typing import Union, List, Tuple, Optional, Dict, Any
+from typing import Union, List, Tuple, Optional, Dict
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
 from ml_switcheroo.frameworks.loader import load_definitions
+
+np: Any
+try:
+  import numpy as _np
+
+  np = _np
+except Exception:  # pragma: no cover
+  np = None  # pragma: no cover
 
 
 @register_framework("numpy")
@@ -46,7 +51,7 @@ class NumpyAdapter:
     return "numpy", "np"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
     """Remaps imports to 'np' alias.
 
     Returns:

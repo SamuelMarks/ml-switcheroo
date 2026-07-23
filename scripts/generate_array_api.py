@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path("array-api/src").resolve()))
 
 
-def run():
+def run() -> None:
   """Auto-generated doc."""
   odl_dir = Path("src/ml_switcheroo/semantics/odl")
   mapping = {}
@@ -26,18 +26,18 @@ def run():
 
   from array_api_stubs import _draft as stub
 
-  ops = set()
+  ops_set = set()
   for name, obj in inspect.getmembers(stub):
     if not name.startswith("_"):
-      ops.add(name)
+      ops_set.add(name)
 
   from array_api_stubs._draft.array_object import array
 
   for name, obj in inspect.getmembers(array):
     # Include dunder methods
-    ops.add(name)
+    ops_set.add(name)
 
-  ops = sorted(list(ops))
+  ops = sorted(list(ops_set))
   print(f"Found {len(ops)} Array API ops.")
 
   for op in ops:

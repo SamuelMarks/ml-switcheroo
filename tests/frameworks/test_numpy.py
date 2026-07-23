@@ -136,7 +136,10 @@ def test_numpy_convert():
   assert isinstance(converted_tensor, list)
 
   class HasArray:
+    """Has."""
+
     def __array__(self):
+      """Arr."""
       return [3]
 
   converted_arr = adapter.convert(HasArray())

@@ -84,7 +84,7 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
       return node
 
   # Serialize args to Python strings for the adapter
-  f_str = capture_node_source(file_arg.value)  # type: ignore
+  f_str = capture_node_source(file_arg.value)
   obj_str = capture_node_source(obj_arg.value) if obj_arg else None
 
   # 1. Preamble Injection

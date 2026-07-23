@@ -6,7 +6,7 @@ from pathlib import Path
 import onnx
 
 
-def run():
+def run() -> None:
   """Auto-generated doc."""
   out_file = Path("src/ml_switcheroo/frameworks/definitions/onnx.json")
   if out_file.exists():
@@ -15,7 +15,7 @@ def run():
   else:
     mapping = {}
 
-  schemas = onnx.defs.get_all_schemas()
+  schemas = onnx.defs.get_all_schemas()  # type: ignore[attr-defined]
   print(f"Found {len(schemas)} ONNX schemas.")
 
   for s in schemas:

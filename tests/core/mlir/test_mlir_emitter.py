@@ -134,10 +134,14 @@ def test_get_binop_str():
   assert emitter._get_binop_str(cst.BitXor()) == "xor"
 
   class MockOp(cst.BaseBinaryOp):
+    """Mock."""
+
     def _codegen_impl(self):
+      """Codegen."""
       pass
 
     def _visit_and_replace_children(self, visitor):
+      """Visit."""
       pass
 
   assert emitter._get_binop_str(MockOp()) == "unknown"

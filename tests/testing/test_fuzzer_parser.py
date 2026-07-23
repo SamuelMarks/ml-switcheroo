@@ -1,21 +1,32 @@
 """Test suite for the Fuzzer Parser module."""
 
+from ml_switcheroo.testing.fuzzer.type_parser import (
+  parse_type_annotation,
+  PrimitiveType,
+  ListType,
+  TupleType,
+  DictType,
+  CallableType,
+)
+
 
 def test_get_fallback_base_value():
   """Gets fallback base value."""
   from ml_switcheroo.testing.fuzzer.parser import get_fallback_base_value
 
-  assert get_fallback_base_value("bool", ()) is False
-  assert get_fallback_base_value("int", ()) == 0
-  assert get_fallback_base_value("integer", ()) == 0
-  assert get_fallback_base_value("float", ()) == 0.0
-  assert get_fallback_base_value("str", ()) == ""
-  assert get_fallback_base_value("Array", (2,)).shape == (2,)
-  assert get_fallback_base_value("List[int]", ()) == []
-  assert get_fallback_base_value("Tuple[int]", ()) == ()
-  assert get_fallback_base_value("Dict[int, int]", ()) == {}
-  assert get_fallback_base_value("Callable", ()) is not None
-  assert get_fallback_base_value("unknown", ()) is None
+  assert get_fallback_base_value(PrimitiveType(name="bool"), ()) is False
+  assert get_fallback_base_value(PrimitiveType(name="int"), ()) == 0
+  assert get_fallback_base_value(parse_type_annotation("integer"), ()) == 0
+  assert get_fallback_base_value(PrimitiveType(name="float"), ()) == 0.0
+  assert get_fallback_base_value(PrimitiveType(name="str"), ()) == ""
+  assert get_fallback_base_value(parse_type_annotation("Array"), (2,)).shape == (2,)
+  assert get_fallback_base_value(ListType(inner=PrimitiveType(name="int")), ()) == []
+  assert get_fallback_base_value(TupleType(elements=[PrimitiveType(name="int")], variadic=False), ()) == ()
+  assert (
+    get_fallback_base_value(DictType(key_type=PrimitiveType(name="int"), value_type=PrimitiveType(name="int")), ()) == {}
+  )
+  assert get_fallback_base_value(CallableType(), ()) is not None
+  assert get_fallback_base_value(parse_type_annotation("unknown"), ()) is None
 
 
 def test_generate_from_hint():

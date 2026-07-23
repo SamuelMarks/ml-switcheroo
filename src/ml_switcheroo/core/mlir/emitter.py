@@ -21,10 +21,10 @@ from ml_switcheroo.core.scanners import get_full_name
 class SSAContext:
   """Manages Single Static Assignment (SSA) variable scopes and ID allocation."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initialize the context with a root scope."""
-    self._scopes: List[Dict[str, ValueNode]] = [{}]  # type: ignore
-    self._counter: int = 0  # type: ignore
+    self._scopes: List[Dict[str, ValueNode]] = [{}]
+    self._counter: int = 0
 
   def enter_scope(self) -> None:
     """Push a new variable scope onto the stack."""
@@ -85,7 +85,7 @@ from ml_switcheroo.core.mlir.emitter_decl import MlirEmitterDeclMixin  # noqa: E
 class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
   """Translates Python LibCST modules into MLIR structural nodes."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initialize the emitter with a fresh SSA context."""
     self.ctx = SSAContext()
 
@@ -177,10 +177,15 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     """
     results = []
+
     if isinstance(stmt, cst.ClassDef):
       results = [self._emit_class_def(stmt)]
     elif isinstance(stmt, cst.FunctionDef):
       results = [self._emit_func_def(stmt)]
+    elif isinstance(stmt, cst.If):
+      results = self._emit_if(stmt)
+    elif isinstance(stmt, cst.While):
+      results = self._emit_while(stmt)
     elif isinstance(stmt, cst.SimpleStatementLine):  # pragma: no cover
       if len(stmt.body) > 0:  # pragma: no cover
         node = stmt.body[0]
@@ -306,6 +311,14 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
             pass
 
     return ops
+
+  def _emit_while(self, node: cst.While) -> List[OperationNode]:
+    """Converts a while statement. Overridden in subclasses for specific dialects."""
+    return []  # pragma: no cover
+
+  def _emit_if(self, node: cst.If) -> List[OperationNode]:
+    """Converts an if statement. Overridden in subclasses for specific dialects."""
+    return []  # pragma: no cover
 
   def _emit_return(self, node: cst.Return) -> List[OperationNode]:
     """Converts a return statement to `sw.return`.

@@ -4,9 +4,11 @@ It orchestrates the generation of PyTest-compatible files that verify
 operations across multiple frameworks by using the semantic definitions.
 """
 
+from typing import Any
+
 import ast
 import pathlib
-from typing import Any, Dict
+from typing import Dict
 
 from ml_switcheroo.generated_tests.templates import get_template, is_static_arg
 from ml_switcheroo.generated_tests.inputs import parse_arg_def, generate_input_value_code
@@ -32,7 +34,7 @@ class TestCaseGenerator:
     """
     self.semantics_mgr = semantics_mgr
 
-  def _ensure_runtime_module(self, out_dir: pathlib.Path, frameworks=None) -> None:
+  def _ensure_runtime_module(self, out_dir: pathlib.Path, frameworks: Any = None) -> None:
     """Proxies request to runtime_builder."""
     ensure_runtime_module(out_dir, frameworks, self.semantics_mgr)
 
@@ -67,6 +69,7 @@ class TestCaseGenerator:
 
     # 3. Accumulate lines for file
     file_lines = [
+      '"""Generated tests."""',
       "import pytest",
       "import numpy as np",
       "import numpy",
@@ -249,6 +252,8 @@ class TestCaseGenerator:
       file_lines.append("")
 
     if not ops_generated and not existing_tests:
-      out_file.write_text("# No tests generated due to insufficient variants.\n", encoding="utf-8")
+      out_file.write_text(
+        '"""Generated tests."""\n# No tests generated due to insufficient variants.\n', encoding="utf-8"
+      )
     else:
       out_file.write_text("\n".join(file_lines), encoding="utf-8")

@@ -48,7 +48,9 @@ jobs:
       - name: Run Pytest
         run: |
           source .venv/bin/activate
-          pytest tests
+          pytest --cov=src --cov-fail-under=100 tests
+          mypy --strict src
+          interrogate -c pyproject.toml --fail-under 100
 
 # This code works but is disabled as I'm doing manual doc releases:
 #

@@ -8,9 +8,11 @@ Updated to handle Rich Parameter Constraints (dict items in std_args),
 including Dtype, Rank, and Symbolic Shape constraints.
 """
 
+from typing import Any
+
 import ast
 from pathlib import Path
-from typing import Dict, Any, Optional, Set, List, Tuple
+from typing import Dict, Optional, Set, List, Tuple
 
 from rich.progress import track
 
@@ -85,7 +87,7 @@ class BatchValidator:
 
     return results
 
-  def _unpack_args(self, raw_args: List[Any]) -> Tuple[List[str], Dict[str, str], Dict[str, Dict]]:
+  def _unpack_args(self, raw_args: List[Any]) -> Tuple[List[str], Dict[str, str], Dict[str, Dict[Any, Any]]]:
     """Separates argument names from type hints and extracts semantic constraints.
 
     Handles formats:

@@ -7,19 +7,25 @@ Defines the structure for the visual elements used in the HTML/SVG DSL:
 """
 
 from dataclasses import dataclass, field
-from operator import methodcaller
-from typing import List, Optional
+from typing import List, Optional, Any
+from ml_switcheroo.utils.formatting import StructuredFormatter, escape_html
 
 
 @dataclass
 class HtmlNode:
   """Abstract base class for all HTML DSL elements."""
 
-  def to_html(self) -> str:
-    """Render the node and its children to an HTML string.
+  leading_trivia: str = ""
+  trailing_trivia: str = ""
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Render the node and its children to an HTML string with indentation.
+
+    Args:
+        indent_level: The indentation level.
 
     Returns:
-        str: The raw HTML content.
+        str: The structured HTML content.
 
     Raises:
         NotImplementedError: If not implemented by subclass.
@@ -27,87 +33,165 @@ class HtmlNode:
     """
     raise NotImplementedError
 
+  def to_html(self) -> str:
+    """Convenience method to render HTML."""
+    return self.emit(0)
+
+
+@dataclass
+class TextNode(HtmlNode):
+  """Represents a raw text string in the DOM."""
+
+  content: str = ""
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Emit the text content."""
+    return f"{self.leading_trivia}{self.content}{self.trailing_trivia}"
+
+
+@dataclass
+class CommentNode(HtmlNode):
+  """Represents an HTML comment <!-- ... -->."""
+
+  content: str = ""
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Emit the HTML comment."""
+    return f"{self.leading_trivia}<!--{self.content}-->{self.trailing_trivia}"
+
+
+@dataclass
+class AttributeNode(HtmlNode):
+  """Represents an HTML tag attribute."""
+
+  name: str = ""
+  value: Optional[str] = None
+  quote_style: str = '"'  # '"', "'", or ""
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Emit the attribute."""
+    if self.value is None:
+      return f"{self.leading_trivia}{self.name}{self.trailing_trivia}"
+    return f"{self.leading_trivia}{self.name}={self.quote_style}{self.value}{self.quote_style}{self.trailing_trivia}"
+
+
+@dataclass
+class TagNode(HtmlNode):
+  """Represents an HTML Element."""
+
+  name: str = ""
+  attributes: List[AttributeNode] = field(default_factory=list)
+  children: List[HtmlNode] = field(default_factory=list)
+  self_closing: bool = False
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Emit the HTML tag."""
+    parts = [self.leading_trivia, f"<{self.name}"]
+    for attr in self.attributes:
+      if not attr.leading_trivia:
+        parts.append(" ")
+      parts.append(attr.emit())
+
+    if self.self_closing:
+      parts.append("/>")
+      parts.append(self.trailing_trivia)
+      return "".join(parts)
+
+    parts.append(">")
+    for child in self.children:
+      parts.append(child.emit(indent_level))
+
+    parts.append(f"</{self.name}>")
+    parts.append(self.trailing_trivia)
+    return "".join(parts)
+
 
 @dataclass
 class SvgArrow(HtmlNode):
   """Represents an SVG connection line between grid cells."""
 
-  x1: int
-  y1: int
-  x2: int
-  y2: int
-  style_class: str
-  marker_end: str
-  parent_style: str
+  x1: int = 0
+  y1: int = 0
+  x2: int = 0
+  y2: int = 0
+  style_class: str = ""
+  marker_end: str = ""
+  parent_style: str = ""
 
-  def to_html(self) -> str:
-    """Renders the arrow as an absolute SVG element.
+  def emit(self, indent_level: int = 0) -> str:
+    """Renders the arrow as an absolute SVG element."""
+    fmt = StructuredFormatter()
+    style = escape_html(self.parent_style)
+    cls = escape_html(self.style_class)
+    marker = escape_html(self.marker_end)
 
-
-    Adds 'sw-arrow' class for scoped styling.
-    """
-    return f"""
-    <svg class="sw-arrow" style="{self.parent_style}">
-      <line x1="{self.x1}" y1="{self.y1}" x2="{self.x2}" y2="{self.y2}" class="{self.style_class}" marker-end="{self.marker_end}" />
-    </svg>"""
+    fmt.add_line(f'<svg class="sw-arrow" style="{style}">', indent_level)
+    fmt.add_line(
+      f'<line x1="{self.x1}" y1="{self.y1}" x2="{self.x2}" y2="{self.y2}" class="{cls}" marker-end="{marker}" />',
+      indent_level + 1,
+    )
+    fmt.add_line("</svg>", indent_level)
+    return fmt.build()
 
 
 @dataclass
 class GridBox(HtmlNode):
   """Represents a content box positioned within the CSS Grid."""
 
-  row: int
-  col: int
-  css_class: str
-  header_text: str
+  row: int = 0
+  col: int = 0
+  css_class: str = ""
+  header_text: str = ""
   code_text: Optional[str] = None
   body_text: Optional[str] = None
   arrows: List[SvgArrow] = field(default_factory=list)
   z_index: Optional[int] = None
 
-  def to_html(self) -> str:
+  def emit(self, indent_level: int = 0) -> str:
     """Renders the grid cell div, its content, and attached arrows."""
+    fmt = StructuredFormatter()
     style = f"grid-row:{self.row}; grid-column:{self.col};"
     if self.z_index is not None:
       style += f" z-index:{self.z_index};"
 
-    content = []
+    safe_cls = escape_html(self.css_class)
+    safe_style = escape_html(style)
+
+    fmt.add_line(f'<div class="{safe_cls}" style="{safe_style}">', indent_level)
 
     # Handle 'circ' class special layout (flex centered single text)
+    safe_header = escape_html(self.header_text)
     if "circ" in self.css_class:
-      content.append(f"{self.header_text}")
+      fmt.add_line(f"{safe_header}", indent_level + 1)
     else:
-      content.append(f'<span class="header-txt">{self.header_text}</span>')
+      fmt.add_line(f'<span class="header-txt">{safe_header}</span>', indent_level + 1)
 
     if self.code_text:
-      # Wrap code text
-      content.append(f"<code>{self.code_text}</code>")
+      safe_code = escape_html(self.code_text)
+      fmt.add_line(f"<code>{safe_code}</code>", indent_level + 1)
 
     if self.body_text:
-      content.append(self.body_text.strip())
+      safe_body = escape_html(self.body_text.strip())
+      fmt.add_line(f"{safe_body}", indent_level + 1)
 
     # Render arrows inside the box div to allow relative positioning
-    arrow_html = "".join(a.to_html() for a in self.arrows)
+    for arrow in self.arrows:
+      fmt.add_line(
+        arrow.emit(indent_level + 1), 0
+      )  # Emit already handles its own internal indent, but here we just pass the block
 
-    return f"""
-  <div class="{self.css_class}" style="{style}">
-    {"".join(content)}
-    {arrow_html}
-  </div>"""
+    fmt.add_line("</div>", indent_level)
+    return fmt.build()
 
 
 @dataclass
 class HtmlDocument(HtmlNode):
   """Root container for the generated HTML."""
 
-  model_name: str
-  children: List[GridBox]
+  model_name: str = ""
+  children: List[Any] = field(default_factory=list)
 
   # CSS Definition
-  # Updates:
-  # 1. Scoped .grid -> .sw-grid to avoid conflicts.
-  # 2. Replaced global 'svg' selector with '.sw-arrow'.
-  # 3. Changed .col-mid-bg to 'grid-row: 1 / -1' for full height.
   _CSS = """
   .sw-grid {
     display: grid;
@@ -184,57 +268,76 @@ class HtmlDocument(HtmlNode):
   .sw-grid .s-green { stroke: #080; stroke-width: 2; stroke-dasharray: 4; fill: none; }
 """
 
-  def to_html(self) -> str:
-    """Renders the complete HTML document.
+  def emit(self, indent_level: int = 0) -> str:
+    """Renders the complete HTML document."""
+    # Check if we are a pure CST HtmlDocument representation (children are TagNodes)
+    # vs structured representation
+    is_pure_cst = bool(self.children) and all(isinstance(c, (TagNode, TextNode, CommentNode)) for c in self.children)
+    if is_pure_cst:
+      parts = [self.leading_trivia]
+      for child in self.children:
+        parts.append(child.emit(indent_level))
+      parts.append(self.trailing_trivia)
+      return "".join(parts)
 
-    Notes:
-    - Removed 'visibility:hidden' from markers block to enable correct rendering in some browsers
-      when injected via innerHTML. Use 0 sizes and pointer-events logic instead.
+    fmt = StructuredFormatter()
 
-    Returns:
-        The complete HTML string document.
-
-    """
-    # Determine strict grid height
     repeat_count = 0
     if self.children:
-      max_used = max(c.row for c in self.children)
+      max_used = max(getattr(c, "row", 0) for c in self.children if hasattr(c, "row"))
       repeat_count = max(0, max_used - 1)
 
-    return f"""<!DOCTYPE html>
-<html>
-<head>
-<style>
-{self._CSS}
-  /* Explicit Row Heights */
-  .sw-grid {{
-    grid-template-rows: 30px repeat({repeat_count}, 80px);
-  }}
-</style>
-</head>
-<body>
+    fmt.add_line("<!DOCTYPE html>", indent_level)
+    fmt.add_line("<html>", indent_level)
+    fmt.add_line("<head>", indent_level)
+    fmt.add_line("<style>", indent_level)
+    fmt.add_block(self._CSS.strip(), indent_level + 1)
+    fmt.add_line("/* Explicit Row Heights */", indent_level + 1)
+    fmt.add_line(".sw-grid {", indent_level + 1)
+    fmt.add_line(f"  grid-template-rows: 30px repeat({repeat_count}, 80px);", indent_level + 1)
+    fmt.add_line("}", indent_level + 1)
+    fmt.add_line("</style>", indent_level)
+    fmt.add_line("</head>", indent_level)
+    fmt.add_line("<body>", indent_level)
+    fmt.add_line("", indent_level)
+    fmt.add_line("<!-- MARKERS: Must be visible to DOM engine but hidden from layout -->", indent_level)
+    fmt.add_line('<svg style="width:0;height:0;position:absolute;overflow:hidden;" aria-hidden="true">', indent_level)
+    fmt.add_line("  <defs>", indent_level)
+    fmt.add_line(
+      '    <marker id="mr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#d00"/></marker>',
+      indent_level,
+    )
+    fmt.add_line(
+      '    <marker id="mb" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#00d"/></marker>',
+      indent_level,
+    )
+    fmt.add_line(
+      '    <marker id="mg" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#080"/></marker>',
+      indent_level,
+    )
+    fmt.add_line("  </defs>", indent_level)
+    fmt.add_line("</svg>", indent_level)
+    fmt.add_line("", indent_level)
 
-<!-- MARKERS: Must be visible to DOM engine but hidden from layout -->
-<svg style="width:0;height:0;position:absolute;overflow:hidden;" aria-hidden="true">
-  <defs>
-    <marker id="mr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#d00"/></marker>
-    <marker id="mb" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#00d"/></marker>
-    <marker id="mg" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#080"/></marker>
-  </defs>
-</svg>
+    safe_name = escape_html(self.model_name)
+    fmt.add_line(f"<h3>Model: {safe_name}</h3>", indent_level)
+    fmt.add_line("", indent_level)
+    fmt.add_line('<div class="sw-grid">', indent_level)
+    fmt.add_line('  <div class="col-mid-bg"></div>', indent_level)
+    fmt.add_line("", indent_level)
+    fmt.add_line("  <!-- HEADERS -->", indent_level)
+    fmt.add_line('  <div style="grid-row:1; grid-column:1;"><h3>Memory (Init)</h3></div>', indent_level)
+    fmt.add_line(
+      '  <div style="grid-row:1; grid-column:2; text-align:center;"><h3>Computer (forward)</h3></div>', indent_level
+    )
+    fmt.add_line('  <div style="grid-row:1; grid-column:3;"><h3>Data (shape)</h3></div>', indent_level)
+    fmt.add_line("", indent_level)
 
-<h3>Model: {self.model_name}</h3>
+    for child in self.children:
+      fmt.add_line(child.emit(indent_level + 1), 0)
 
-<div class="sw-grid">
-  <div class="col-mid-bg"></div>
-
-  <!-- HEADERS -->
-  <div style="grid-row:1; grid-column:1;"><h3>Memory (Init)</h3></div>
-  <div style="grid-row:1; grid-column:2; text-align:center;"><h3>Computer (forward)</h3></div>
-  <div style="grid-row:1; grid-column:3;"><h3>Data (shape)</h3></div>
-
-  {"".join(map(methodcaller("to_html"), self.children))}
-</div>
-
-</body>
-</html>"""
+    fmt.add_line("</div>", indent_level)
+    fmt.add_line("", indent_level)
+    fmt.add_line("</body>", indent_level)
+    fmt.add_line("</html>", indent_level)
+    return fmt.build()

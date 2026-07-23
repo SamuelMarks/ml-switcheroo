@@ -191,7 +191,7 @@ class WeightScriptGenerator:
     load_code = textwrap.indent(self.source_adapter.get_weight_load_code("input_path"), "    ")  # type: ignore
     save_code = textwrap.indent(
       self.target_adapter.get_weight_save_code("converted_state", "output_path") if self.target_adapter else "", "    "
-    )  # type: ignore
+    )
     to_numpy_expr = self.source_adapter.get_tensor_to_numpy_expr("raw_val")  # type: ignore
 
     rules_repr = pprint.pformat(rules, indent=4, width=100)

@@ -8,8 +8,6 @@ Feature 085: Enforces PEP8 Filenaming (Snake Case).
 Feature 086: Auto-Wire Dictionary injection.
 """
 
-import re
-import textwrap
 from pathlib import Path
 from typing import List, Optional
 import libcst as cst
@@ -42,19 +40,38 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
     return node
 """
 
-# Adjusted templates to ensure exact whitespace control (no trailing spaces)
-TEMPLATE_HEADER = (
-  '"""\n{doc}\n"""\nimport libcst as cst\nfrom ml_switcheroo.core.hooks import register_hook, HookContext\n\n'
-)
 
-TEMPLATE_FUNC_DEF_AUTO_WIRE = '@register_hook(trigger="{name}", auto_wire={auto_wire})\ndef {name}(node: {node_type}, ctx: HookContext) -> cst.CSTNode:\n    """\n    Plugin Hook: {doc}\n    """\n'
+class NameMangler:
+  """Utility to safely transform string cases without regex."""
 
-TEMPLATE_FUNC_DEF = '@register_hook("{name}")\ndef {name}(node: {node_type}, ctx: HookContext) -> cst.CSTNode:\n    """\n    Plugin Hook: {doc}\n    """\n'
+  @staticmethod
+  def to_snake_case(name: str) -> str:
+    """Converts PascalCase or camelCase to snake_case.
+
+    Args:
+        name (str): The input name.
+
+    Returns:
+        str: The snake_case version of the name.
+    """
+    if "_" in name and name.islower():
+      return name
+
+    result: List[str] = []
+    for i, char in enumerate(name):
+      if char.isupper():
+        if i > 0:
+          prev_char = name[i - 1]
+          next_char = name[i + 1] if i + 1 < len(name) else ""
+          if prev_char.islower() or prev_char.isdigit() or (next_char.islower() and next_char.isalpha()):
+            result.append("_")
+      result.append(char.lower())
+
+    return "".join(result)
 
 
 class BodyExtractor(cst.CSTVisitor):
   """Extracts the body of a specific function definition.
-
 
   Used to preserve user implementation logic during scaffolding updates.
   """
@@ -101,28 +118,6 @@ class PluginGenerator:
     """
     self.plugins_dir = plugins_dir
 
-  def _to_snake_case(self, name: str) -> str:
-    """Converts PascalCase or camelCase to snake_case for filenames.
-
-    e.g. MyPlugin -> my_plugin, HTTPResponse -> http_response.
-
-    Args:
-        name (str): The input name.
-
-    Returns:
-        str: The snake_case version of the name.
-
-    """
-    # Handle simple lowercase existing
-    if "_" in name and name.islower():
-      return name
-
-    # 1. Add underscore before capitals preceded by lowercase
-    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
-    # 2. Add underscore before capitals preceded by uppercase/numbers
-    s2 = re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
-    return s2
-
   def generate(self, scaffold: PluginScaffoldDef) -> bool:
     """Creates or updates a plugin file.
 
@@ -136,79 +131,33 @@ class PluginGenerator:
         bool: True if file was written/updated.
 
     """
-    clean_filename = self._to_snake_case(scaffold.name)
+    clean_filename = NameMangler.to_snake_case(scaffold.name)
     filename = f"{clean_filename}.py"
     target_path = self.plugins_dir / filename
-    preserved_body_code = None
+    preserved_body_node = None
 
     if target_path.exists():
-      # Attempt Body Extraction
       try:
         old_code = target_path.read_text("utf-8")
         wrapper = cst.parse_module(old_code)
         extractor = BodyExtractor(scaffold.name)
         wrapper.visit(extractor)
 
-        if extractor.found and extractor.body_node:  # pragma: no cover
-          preserved_body_code = self._render_body_without_docstring(extractor.body_node)
+        if extractor.found and extractor.body_node:
+          preserved_body_node = extractor.body_node
       except Exception as e:
         print(f"⚠️ Failed to parse existing plugin {filename}: {e}. Overwriting.")
 
     if not self.plugins_dir.exists():
       self.plugins_dir.mkdir(parents=True, exist_ok=True)
 
-    content = self._build_content(scaffold, preserved_body_code)
+    content = self._build_cst_content(scaffold, preserved_body_node)
 
     target_path.write_text(content, encoding="utf-8")
     return True
 
-  def _render_body_without_docstring(self, body_node: cst.BaseSuite) -> str:
-    """Serializes a Body Node into source code string, stripping the docstring.
-
-    Args:
-        body_node: The function body (IndentedBlock or SimpleStatementSuite).
-
-    Returns:
-        str: The indented source code of the body logic.
-
-    """
-    stmts = []
-    if isinstance(body_node, cst.IndentedBlock):
-      stmts = list(body_node.body)
-    elif isinstance(body_node, cst.SimpleStatementSuite):  # pragma: no cover
-      stmts = list(body_node.body)  # type: ignore
-
-    # Strip Docstring (First stmt is expression string)
-    if stmts:  # pragma: no cover
-      first = stmts[0]
-      is_doc = False
-      if isinstance(first, cst.SimpleStatementLine) and len(first.body) == 1:
-        expr = first.body[0]
-        if isinstance(expr, cst.Expr) and isinstance(expr.value, (cst.SimpleString, cst.ConcatenatedString)):
-          is_doc = True
-
-      if is_doc:
-        # Skip the docstring statement
-        stmts = stmts[1:]
-
-    if not stmts:
-      # Empty body or just docstring -> return 'return node' default or pass
-      return "    return node"
-
-    # Render back to string using a temporary module container
-    # We construct a module from the statements to leverage LibCST's code generation
-    temp_mod = cst.Module(body=stmts)  # type: ignore
-    code = temp_mod.code
-
-    # The code extracted might contain inconsistent indentation
-    # We strip common indentation and enforce standardized 4-space indent
-    dedented = textwrap.dedent(code)
-    indented = textwrap.indent(dedented, "    ")
-    # Strip Trailing newlines to ensure clean insertion
-    return indented.rstrip()
-
-  def _build_content(self, scaffold: PluginScaffoldDef, preserved_body: Optional[str] = None) -> str:
-    """Constructs the full python source for the file.
+  def _build_cst_content(self, scaffold: PluginScaffoldDef, preserved_body: Optional[cst.BaseSuite] = None) -> str:
+    """Constructs the full python source for the file using CST.
 
     Args:
         scaffold: The plugin definition.
@@ -218,64 +167,81 @@ class PluginGenerator:
         str: The complete file source string.
 
     """
-    parts = []
+    # Build initial module layout
+    base_module_str = (
+      f'"""\n{scaffold.doc}\n"""\nimport libcst as cst\nfrom ml_switcheroo.core.hooks import register_hook, HookContext\n'
+    )
+    module = cst.parse_module(base_module_str)
 
-    # 1. Header
-    parts.append(TEMPLATE_HEADER.format(doc=scaffold.doc))
-
-    # 2. Helpers (only if rules present or preserved code relied on them?)
-    # Simplest strategy: Always include helpers if rules are defined in scaffold.
+    # 2. Helpers
+    helpers_stmts: List[cst.BaseStatement] = []
     if scaffold.rules:
-      parts.append(HELPER_LOGIC)
+      helpers_mod = cst.parse_module(HELPER_LOGIC)
+      helpers_stmts = list(helpers_mod.body)
 
     # 3. Function Definition
     node_type = "cst.Call" if scaffold.type == PluginType.CALL else "cst.CSTNode"
 
     if scaffold.auto_wire:
-      # Use json dumps to get double quotes matching test expectations
-      # and generally being standard for JSON-like config in Python.
       import json
 
       json_str = json.dumps(scaffold.auto_wire)
-      # Fix Python literals
       safe_repr = json_str.replace("true", "True").replace("false", "False").replace("null", "None")
-
-      parts.append(
-        TEMPLATE_FUNC_DEF_AUTO_WIRE.format(name=scaffold.name, doc=scaffold.doc, node_type=node_type, auto_wire=safe_repr)
-      )
+      func_stub = f'@register_hook(trigger="{scaffold.name}", auto_wire={safe_repr})\ndef {scaffold.name}(node: {node_type}, ctx: HookContext) -> cst.CSTNode:\n    pass'
     else:
-      parts.append(TEMPLATE_FUNC_DEF.format(name=scaffold.name, doc=scaffold.doc, node_type=node_type))
+      func_stub = f'@register_hook("{scaffold.name}")\ndef {scaffold.name}(node: {node_type}, ctx: HookContext) -> cst.CSTNode:\n    pass'
 
-    # 4. Body (Preserved or Generated)
-    if preserved_body and preserved_body.strip():
-      # Ensure newline before body
-      if not preserved_body.startswith("\n"):  # pragma: no cover
-        parts.append("\n")
-      parts.append(preserved_body)
-      # Ensure newline at end
-      if not preserved_body.endswith("\n"):  # pragma: no cover
-        parts.append("\n")
+    func_def = cst.parse_statement(func_stub)
+
+    # 4. Body
+    doc_stmt = cst.parse_statement(f'"""\n    Plugin Hook: {scaffold.doc}\n    """')
+
+    if preserved_body:
+      stmts = []
+      if isinstance(preserved_body, cst.IndentedBlock):
+        stmts = list(preserved_body.body)
+      elif isinstance(preserved_body, cst.SimpleStatementSuite):  # pragma: no cover
+        stmts = [cst.SimpleStatementLine(body=list(preserved_body.body))]
+
+      # Strip existing docstring
+      if stmts:
+        first = stmts[0]
+        is_doc = False
+        if isinstance(first, cst.SimpleStatementLine) and len(first.body) == 1:
+          expr = first.body[0]
+          if isinstance(expr, cst.Expr) and isinstance(expr.value, (cst.SimpleString, cst.ConcatenatedString)):
+            is_doc = True
+        if is_doc:
+          stmts = stmts[1:]
+
+      if not stmts:
+        stmts = [cst.parse_statement("return node")]
+
+      new_body = [doc_stmt] + stmts
+      func_def = func_def.with_changes(body=cst.IndentedBlock(body=new_body))
     else:
-      body = self._generate_body_logic(scaffold.rules)
-      parts.append(body)
+      generated_stmts = self._generate_cst_body_logic(scaffold.rules)
+      func_def = func_def.with_changes(body=cst.IndentedBlock(body=[doc_stmt] + generated_stmts))
 
-    return "".join(parts)
+    final_body = list(module.body) + helpers_stmts + [func_def]
+    module = module.with_changes(body=final_body)
+    return module.code
 
-  def _generate_body_logic(self, rules: List[Rule]) -> str:
-    """Compiles declarative rules into Python if statements.
+  def _generate_cst_body_logic(self, rules: List[Rule]) -> List[cst.BaseStatement]:
+    """Compiles declarative rules into CST statements.
 
     Args:
         rules: List of dispatch rules.
 
     Returns:
-        str: Generated python code string for the logic body.
-
+        List[cst.BaseStatement]: Generated python CST statements.
     """
     if not rules:
-      return "    # TODO: Implement custom logic\n    return node\n"
-
-    lines = []
-    lines.append("    # Auto-Generated Conditional Logic")
+      mod = cst.parse_module("def __temp():\n    # TODO: Implement custom logic\n    return node\n")
+      func_def = mod.body[0]
+      if isinstance(func_def, cst.FunctionDef) and isinstance(func_def.body, cst.IndentedBlock):
+        return list(func_def.body.body)
+      return []
 
     op_map = {
       LogicOp.EQ: "==",
@@ -288,14 +254,17 @@ class PluginGenerator:
       LogicOp.NOT_IN: "not in",
     }
 
+    lines = []
+    lines.append("def __temp():")
+    lines.append("    # Auto-Generated Conditional Logic")
+
     for i, rule in enumerate(rules):
-      keyword = "if" if i == 0 else "elif"
+      keyword = "if"
       val_repr = repr(rule.is_val)
       py_op = op_map.get(rule.op, "==")
 
       lines.append(f'    val_{i} = _get_kwarg_value(node, "{rule.if_arg}")')
 
-      # Safety Wrapper for None comparisons
       if rule.op in [LogicOp.GT, LogicOp.LT, LogicOp.GTE, LogicOp.LTE]:
         lines.append(f"    {keyword} val_{i} is not None and val_{i} {py_op} {val_repr}:")
       else:
@@ -304,7 +273,11 @@ class PluginGenerator:
       lines.append(f'        new_func = _create_dotted_name("{rule.use_api}")')
       lines.append("        return node.with_changes(func=new_func)")
 
-    lines.append("    ")
-    lines.append("    return node\n")
+    lines.append("    return node")
 
-    return "\n".join(lines)
+    code = "\n".join(lines)
+    mod = cst.parse_module(code)
+    func_def = mod.body[0]
+    if isinstance(func_def, cst.FunctionDef) and isinstance(func_def.body, cst.IndentedBlock):
+      return list(func_def.body.body)
+    return []

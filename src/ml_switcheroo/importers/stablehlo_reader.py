@@ -10,7 +10,7 @@ It parses the specific structure of OpenXLA docs:
 - Syntax: `#### Syntax` blocks containing MLIR signatures.
 """
 
-import re
+from typing import Union
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -21,11 +21,9 @@ class StableHloSpecImporter:
   """Parses StableHLO Markdown specification files."""
 
   # Regex to find headers like ### `abs`
-  _HEADER_RE = re.compile(r"^### `(?P<name>[a-zA-Z0-9_]+)`$")
 
   # Regex to extract MLIR syntax: %result = stablehlo.abs %operand : tensor<...>
   # Captures the arguments roughly
-  _SYNTAX_RE = re.compile(r"stablehlo\.[a-z_]+\s+(?P<args>.*?)\s+:")
 
   def parse_file(self, target_file: Path) -> Dict[str, Any]:
     """Parses `spec.md` from the StableHLO repository.
@@ -45,62 +43,52 @@ class StableHloSpecImporter:
     return self._parse_markdown(target_file)
 
   def _parse_markdown(self, fpath: Path) -> Dict[str, Any]:
-    """Iterates usage of the markdown file line-by-line to build op definitions.
+    """Parse markdown."""
+    from markdown_it import MarkdownIt
 
-    Args:
-        fpath: Path to the markdown file.
-
-    Returns:
-        Dictionary of semantic operation definitions.
-
-    """
     content = fpath.read_text(encoding="utf-8")
-    lines = content.splitlines()
+    md = MarkdownIt()
+    tokens = md.parse(content)
 
     semantics: Dict[str, Any] = {}
-    current_op: str | None = None  # type: ignore
+    current_op: Union[str, None] = None
     current_def: Dict[str, Any] = {}
 
-    # Parse Loop
-    for line in lines:
-      line = line.strip()
+    for i, token in enumerate(tokens):
+      if token.type == "heading_open" and token.tag == "h3":
+        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":  # pragma: no branch
+          inline = tokens[i + 1]
+          if inline.children and len(inline.children) >= 1:  # pragma: no branch
+            child = inline.children[0]
+            if child.type == "code_inline":  # pragma: no branch
+              raw_name = child.content.strip()
+              if current_op and current_def:
+                self._finalize_op(semantics, current_op, current_def)
+              current_op = self._normalize_op_name(raw_name)
+              current_def = {"description": [], "raw_syntax": "", "std_args": []}
+      elif current_op:  # pragma: no branch
+        if token.type == "paragraph_open":
+          if i + 1 < len(tokens) and tokens[i + 1].type == "inline":  # pragma: no branch
+            if not current_def["description"]:  # pragma: no branch
+              current_def["description"].append(tokens[i + 1].content)
+        elif token.type == "fence":
+          # Syntax Block
+          if "mlir" in token.info.lower() or "stablehlo" in token.content:  # pragma: no branch
+            from ml_switcheroo.core.mlir.parser import MlirParser
 
-      # 1. Detect Header (New Operation)
-      match = self._HEADER_RE.match(line)
-      if match:
-        # Save previous
-        if current_op and current_def:
-          self._finalize_op(semantics, current_op, current_def)
+            for line in token.content.splitlines():
+              if "stablehlo." in line:  # pragma: no branch
+                try:
+                  parser = MlirParser(line.strip())
+                  module = parser.parse()
+                  parsed_op = module.body.operations[0]
+                  current_def["raw_syntax"] = line.strip()
+                  current_def["parsed_op"] = parsed_op
+                except Exception:  # pragma: no cover
+                  # Fallback to saving raw string if parse fails  # pragma: no cover
+                  current_def["raw_syntax"] = line.strip()  # pragma: no cover
 
-        # Start new
-        # Op names are lower_case (e.g. 'add'). We capitalize for Abstract ID 'Add'.
-        raw_name = match.group("name")
-        current_op = self._normalize_op_name(raw_name)
-        current_def = {"description": [], "raw_syntax": "", "std_args": []}
-        continue
-
-      # 2. Capture Description (if inside op)
-      if current_op:
-        # Heuristic: Capture logic text until the next Header or syntax block
-        if line.startswith("#"):
-          # Sub-headers like #### Semantics, #### Inputs
-          pass
-        elif line.startswith("```"):
-          # Code block limiters
-          pass
-        elif not current_def["description"] and line:
-          # First non-empty paragraph is usually the summary
-          current_def["description"].append(line)
-
-        # 3. Capture Syntax Block (Basic Argument Inference)
-        # We look for the MLIR syntax line inside code blocks (naive heuristic)
-        if "stablehlo." in line and "%" in line:
-          syntax_match = self._SYNTAX_RE.search(line)
-          if syntax_match:  # pragma: no cover
-            current_def["raw_syntax"] = syntax_match.group("args")
-
-    # Finalize last op
-    if current_op and current_def:  # pragma: no cover
+    if current_op and current_def:  # pragma: no branch
       self._finalize_op(semantics, current_op, current_def)
 
     return semantics
@@ -121,19 +109,17 @@ class StableHloSpecImporter:
       desc = desc[:297] + "..."
 
     # 2. Extract Args from Syntax string
-    # Syntax usually looks like: "%lhs, %rhs" or "(%lhs, %rhs)"
     args = []
-    raw_syntax = details.get("raw_syntax", "")
-    if raw_syntax:
-      # Find tokens starting with %
-      vars_found = re.findall(r"%([a-zA-Z0-9_]+)", raw_syntax)
-      for v in vars_found:
-        # Filter out 'result' or '0' if they appear in valid position
-        # '0', '1' are often results or intermediate SSAs
-        if not v.isdigit() and v not in ["result", "results"]:
-          args.append(v)
 
-    # Fallback if parsing failed
+    if "parsed_op" in details:
+      parsed_op = details["parsed_op"]
+      # Use parsed operands, filtering out numeric intermediate values if any (though typically operands are named)
+      for v in parsed_op.operands:
+        v_name = v.to_text().strip("%").strip()
+        if not v_name.isdigit() and v_name not in ["result", "results"]:  # pragma: no branch
+          args.append(v_name)
+
+    # Fallback if parsing failed or no arguments found
     if not args:
       args = ["input"]
 

@@ -3,22 +3,23 @@
 import json
 import yaml
 from pathlib import Path
+from typing import Any
 
 
-def run():
+def run() -> None:
   """Auto-generated doc."""
   sem_dir = Path("src/ml_switcheroo/semantics")
   odl_dir = sem_dir / "odl"
   quarantine_file = sem_dir / "quarantine.json"
 
-  k_nn = {}
-  k_extras = {}
+  k_nn: dict[str, Any] = {}
+  k_extras: dict[str, Any] = {}
 
   if odl_dir.exists():
     for yaml_file in odl_dir.glob("*.yaml"):
       try:
-        with open(yaml_file, "r") as f:
-          data = yaml.safe_load(f)
+        with open(yaml_file, "r") as yaml_f:
+          data = yaml.safe_load(yaml_f)
           if data:
             op_name = data.get("operation", yaml_file.stem)
             k_nn[op_name] = data
@@ -106,16 +107,16 @@ def run():
 
   # Rewrite odl files
   if odl_dir.exists():
-    for f in odl_dir.glob("*.yaml"):
-      f.unlink()
+    for existing_file in odl_dir.glob("*.yaml"):
+      existing_file.unlink()
 
   for k, v in new_k_nn.items():
-    yaml_file = odl_dir / f"{k.replace('/', '_')}.yaml"
-    with open(yaml_file, "w") as f:
-      yaml.dump(v, f, sort_keys=False, indent=2)
+    out_yaml_file = odl_dir / f"{k.replace('/', '_')}.yaml"
+    with open(out_yaml_file, "w") as out_f:
+      yaml.dump(v, out_f, sort_keys=False, indent=2)
 
-  with open(quarantine_file, "w") as f:
-    json.dump(quarantine, f, indent=2)
+  with open(quarantine_file, "w") as qu_f:
+    json.dump(quarantine, qu_f, indent=2)
 
 
 if __name__ == "__main__":

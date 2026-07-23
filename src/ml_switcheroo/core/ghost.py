@@ -11,8 +11,10 @@ Updates:
 - Sanitizes default values to avoid serializing memory addresses.
 """
 
+from typing import Any
+
 import inspect
-from typing import Any, List, Optional, Union, Callable
+from typing import List, Optional, Union, Callable
 from pydantic import BaseModel, Field
 
 
@@ -60,7 +62,7 @@ class GhostInspector:
   """
 
   @staticmethod
-  def inspect(obj: Union[Any, Callable], api_path: str) -> "GhostRef":
+  def inspect(obj: Union[Any, Callable[..., Any]], api_path: str) -> "GhostRef":
     """Creates a GhostRef from a live Python object.
 
 
@@ -151,7 +153,7 @@ class GhostInspector:
     return GhostRef(name=name, api_path=api_path, kind=kind, params=params, docstring=doc, has_varargs=has_varargs)
 
   @staticmethod
-  def hydrate(data: dict) -> "GhostRef":
+  def hydrate(data: dict[Any, Any]) -> "GhostRef":
     """Creates a GhostRef from a dictionary (JSON snapshot).
 
     Args:

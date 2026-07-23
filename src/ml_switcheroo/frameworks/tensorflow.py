@@ -73,7 +73,7 @@ class TensorFlowAdapter:
     return "tensorflow", "tf"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
     """Defines the semantic roles of TensorFlow namespaces.
 
     This config guides the ``ImportFixer`` in resolving source imports

@@ -18,6 +18,7 @@ def test_plugins_init_discovery():
     with patch("importlib.import_module") as mock_import:
 
       def side_effect(name, package):
+        """Effect."""
         if "broken_plugin" in name:
           raise ImportError("mock error")
 

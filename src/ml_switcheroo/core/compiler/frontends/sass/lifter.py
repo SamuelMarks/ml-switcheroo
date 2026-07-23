@@ -11,8 +11,9 @@ Updates:
 - **FIX**: Preserves register destinations as node IDs for faithful variables.
 """
 
-import re
-from typing import List, Optional, Pattern
+from typing import Any
+
+from typing import List, Optional
 
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.compiler.frontends.sass.nodes import (
@@ -22,16 +23,22 @@ from ml_switcheroo.core.compiler.frontends.sass.nodes import (
   Register,
 )
 from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+from ml_switcheroo.core.compiler.frontends.semantic_parser import (
+  SemanticCommentParser,
+  SemanticInput,
+  SemanticBegin,
+  SemanticEnd,
+  SemanticUnmapped,
+  SemanticReturn,
+)
 
 
 class SassLifter:
   """Reconstructs a LogicalGraph from a sequence of SASS AST nodes."""
 
-  _RE_INPUT: Pattern = re.compile(r"Input\s+(\w+)\s+->")
-  _RE_BEGIN: Pattern = re.compile(r"BEGIN\s+(\w+)\s+\((\w+)\)")
-  _RE_END: Pattern = re.compile(r"END\s+(\w+)\s+\((\w+)\)")
-  _RE_UNMAPPED: Pattern = re.compile(r"Unmapped Op:\s+([\w\.]+)\s+\((\w+)\)")
-  _RE_RETURN: Pattern = re.compile(r"Return:")
+  def __init__(self) -> None:
+    """Initialize SassLifter."""
+    self.comment_parser = SemanticCommentParser()
 
   def lift(self, nodes: List[SassNode]) -> LogicalGraph:
     """Parses a list of SASS nodes to build a LogicalGraph.
@@ -49,7 +56,7 @@ class SassLifter:
     current_block_kind: Optional[str] = None
     current_instructions: List[Instruction] = []
 
-    def commit_node(node_id: str, kind: str, meta=None) -> None:
+    def commit_node(node_id: str, kind: str, meta: Any = None) -> None:
       """Execute implementation detail."""
       nonlocal previous_node_id
       if node_id in seen_ids:
@@ -67,28 +74,24 @@ class SassLifter:
 
     for node in nodes:
       if isinstance(node, Comment):
-        text = node.text.strip()
+        text = node.text.lstrip(";/ ").strip()
+        marker = self.comment_parser.parse(text)
 
-        # Input
-        match_input = self._RE_INPUT.search(text)
-        if match_input:
-          var_name = match_input.group(1)
-          commit_node(var_name, "Input", {"name": var_name})
+        if not marker:
           continue
 
-        # Block Start
-        match_begin = self._RE_BEGIN.search(text)
-        if match_begin:
-          current_block_kind = match_begin.group(1)
-          current_block_id = match_begin.group(2)
+        if isinstance(marker, SemanticInput):
+          commit_node(marker.name, "Input", {"name": marker.name})
+          continue
+
+        if isinstance(marker, SemanticBegin):
+          current_block_kind = marker.kind
+          current_block_id = marker.id
           current_instructions = []
           continue
 
-        # Block End (Trigger Analysis)
-        match_end = self._RE_END.search(text)
-        if match_end:
-          target_id = match_end.group(2)
-          if target_id == current_block_id and current_block_kind:  # pragma: no cover
+        if isinstance(marker, SemanticEnd):
+          if marker.id == current_block_id and current_block_kind:  # pragma: no cover
             # Analyze collected instructions
             meta = SassAnalyzer.analyze_block(current_block_kind, current_instructions)
             commit_node(current_block_id, current_block_kind, meta)
@@ -99,22 +102,17 @@ class SassLifter:
             current_instructions = []
           continue
 
-        # Unmapped Ops
-        match_unmapped = self._RE_UNMAPPED.search(text)
-        if match_unmapped:
-          api = match_unmapped.group(1)
-          nid = match_unmapped.group(2)
+        if isinstance(marker, SemanticUnmapped):
           # For unmapped, we assume default args (no instructions available)
           # Special Case: Flatten default start_dim=1 in PyTorch context
           meta = {}
-          if "flatten" in api:  # pragma: no cover
+          if "flatten" in marker.api:  # pragma: no cover
             meta["arg_1"] = 1
 
-          commit_node(nid, api, meta)
+          commit_node(marker.id, marker.api, meta)
           continue
 
-        # Return
-        if self._RE_RETURN.search(text):
+        if isinstance(marker, SemanticReturn):
           if "output" not in seen_ids:  # pragma: no cover
             # No Logic, simple sink
             graph.nodes.append(LogicalNode(id="output", kind="Output"))

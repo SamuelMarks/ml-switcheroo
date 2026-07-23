@@ -3,6 +3,8 @@
 Handles impedance mismatches for Functional Optimizers.
 """
 
+from typing import Any
+
 import libcst as cst
 from typing import Union
 
@@ -80,7 +82,7 @@ def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 
 @register_hook("mlx_optimizer_step")
-def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel]:
+def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel[Any]]:
   """Hook: Transforms `optimizer.step()` into an EscapeHatch pattern.
 
 

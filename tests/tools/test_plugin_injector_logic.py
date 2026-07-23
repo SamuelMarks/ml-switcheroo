@@ -26,8 +26,8 @@ def test_generate_logic_operators(plugin_dir):
   content = (plugin_dir / "logic_hook.py").read_text("utf-8")
   assert 'val_0 = _get_kwarg_value(node, "size")' in content
   assert "if val_0 is not None and val_0 > 512:" in content
-  assert "elif val_1 in ['a', 'b']:" in content
-  assert "elif val_2 != 0:" in content
+  assert "if val_1 in ['a', 'b']:" in content
+  assert "if val_2 != 0:" in content
   assert '_create_dotted_name("large_algo")' in content
   assert '_create_dotted_name("ab_mode")' in content
 

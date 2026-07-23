@@ -21,6 +21,8 @@ It contains:
  **SassBackend**: The CompilerBackend adapter for the Registry.
 """
 
+from typing import Any
+
 from typing import Dict, List, Optional, Union, Callable, TYPE_CHECKING
 import libcst as cst
 
@@ -130,7 +132,7 @@ class SassSynthesizer:
 
     # Registry of Kernel Macros for 1-to-N expansion
     # Maps Abstract Operation IDs to expansion functions
-    self.macro_registry: Dict[str, Callable] = {
+    self.macro_registry: Dict[str, Callable[..., Any]] = {
       "Conv2d": expand_conv2d,
       "Linear": expand_linear,
     }

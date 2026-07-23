@@ -30,7 +30,7 @@ def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
   # Safe conversion to string for Integer node construction
   idx_node = cst.Integer(str(index))
 
-  return cst.Subscript(  # type: ignore
+  return cst.Subscript(
     value=inner_node,  # type: ignore
     slice=[cst.SubscriptElement(slice=cst.Index(value=idx_node))],
   )

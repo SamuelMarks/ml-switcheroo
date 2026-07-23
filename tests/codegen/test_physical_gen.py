@@ -107,3 +107,10 @@ def test_skip_existing_manual_test(generator, sample_spec, tmp_path):
   content = out_file.read_text()
   assert "def test_gen_abs" not in content
   assert "def test_gen_mean" in content
+
+
+def test_empty_semantics(generator, tmp_path):
+  """Verifies empty semantics early exit."""
+  out_file = tmp_path / "test_empty.py"
+  generator.generate({}, out_file)
+  assert not out_file.exists()

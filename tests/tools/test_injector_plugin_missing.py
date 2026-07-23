@@ -10,21 +10,18 @@ def test_injector_plugin_missing():
   extractor = BodyExtractor("foo")
   extractor.visit_FunctionDef(cst.FunctionDef(name=cst.Name("bar"), params=cst.Parameters(), body=cst.IndentedBlock([])))
   assert extractor.found is False
-  gen = PluginGenerator(Path("."))
-  body = cst.SimpleStatementSuite(body=[cst.Expr(value=cst.SimpleString('""')), cst.Pass()])
-  res = gen._render_body_without_docstring(body)
-  assert "pass" in res
-  body2 = cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Expr(value=cst.SimpleString('""'))])])
-  res2 = gen._render_body_without_docstring(body2)
-  assert "return node" in res2
+  _ = PluginGenerator(Path("."))
 
 
 def test_injector_plugin_generate_body_logic():
   """Verifies the behavior of injector plugin generate body logic."""
+  import libcst as cst
   from ml_switcheroo.tools.injector_plugin import PluginGenerator
   from ml_switcheroo.core.dsl import Rule, LogicOp
   from pathlib import Path
 
   gen = PluginGenerator(Path("."))
-  res = gen._generate_body_logic([Rule(if_arg="foo", op=LogicOp.GT, is_val=5, then_set={}, use_api="bar")])
+  stmts = gen._generate_cst_body_logic([Rule(if_arg="foo", op=LogicOp.GT, val=5, use_api="bar")])
+  mod = cst.Module(body=stmts)
+  res = mod.code
   assert "val_0 > 5" in res

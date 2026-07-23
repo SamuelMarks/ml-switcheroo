@@ -35,7 +35,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return "html_dsl", "dsl"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
     """Execute implementation detail."""
     return {"html_dsl": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="dsl")}
 

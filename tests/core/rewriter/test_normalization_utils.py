@@ -53,7 +53,10 @@ def test_convert_value_to_cst_fallback():
   """Converts value to cst fallback."""
 
   class Dummy:
+    """Dummy."""
+
     def __str__(self):
+      """Str."""
       return "dummy"
 
   node = convert_value_to_cst(Dummy())
@@ -270,6 +273,8 @@ def test_normalize_arguments_default_exception():
   call_node = tree.body[0].body[0].value
 
   class Unconvertible:
+    """Unconvertible."""
+
     pass
 
   op_details = {"std_args": [{"name": "a", "default": Unconvertible()}]}

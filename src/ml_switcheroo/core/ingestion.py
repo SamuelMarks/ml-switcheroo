@@ -56,7 +56,7 @@ def ingest_code(
       tree = parser.parse()
       tracer.log_mutation("Transformed Ingestion", "(Raw Source)", "(AST Parsed)")
       tracer.end_phase()
-      return tree
+      return tree  # type: ignore
     except Exception as e:
       tracer.end_phase()
       raise e
@@ -81,7 +81,10 @@ def ingest_code(
     tracer.start_phase("TikZ Ingest", "TikZ Text -> Logical Graph -> Python CST")
     try:
       parser = TikzParser(code)
-      graph = parser.parse()
+      tikz_graph = parser.parse()
+      from ml_switcheroo.core.tikz.parser import _logical_from_tikz_graph
+
+      graph = _logical_from_tikz_graph(tikz_graph)
       # Determine synthesis flavour
       synth_target = "jax" if target_fw in ["jax", "flax", "flax_nnx"] else "torch"
       synthesizer = PythonBackend(framework=synth_target)

@@ -95,7 +95,7 @@ class FrameworkInjector:
 
     try:
       with open(self.json_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        return json.load(f)  # type: ignore
     except json.JSONDecodeError:
       log_warning(f"Corrupt JSON at {self.json_path}. Overwriting with new data.")
       return {}

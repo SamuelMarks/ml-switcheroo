@@ -1,0 +1,37 @@
+?start: sass_lines
+
+sass_lines: sass_line*
+
+sass_line: (directive | label_def | instruction | COMMENT) [";"]
+
+directive: DIRECTIVE (param ("," param)*)?
+param: DIRECTIVE | IDENTIFIER | STRING | NUMBER
+
+label_def: IDENTIFIER ":"
+
+instruction: [PREDICATE] IDENTIFIER operands?
+operands: operand ("," operand)*
+operand: register | memory | immediate | predicate | label_ref | label_ref_colon
+
+register: MINUS? BAR? REGISTER BAR?
+MINUS: "-"
+BAR: "|"
+memory: "c" "[" NUMBER "]" "[" NUMBER "]"
+      | "c" "[" NUMBER "]"
+      | "[" REGISTER "]"
+      | "[" REGISTER "+" NUMBER "]"
+immediate: NUMBER
+predicate: PREDICATE
+label_ref: IDENTIFIER
+label_ref_colon: IDENTIFIER ":"
+
+DIRECTIVE: /\.[a-zA-Z_][a-zA-Z0-9_]*/
+REGISTER.2: /[RU]?[RZS]\w*/ | "PT"
+PREDICATE.2: /@[!]?[a-zA-Z0-9_]+/
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_\.]*/
+NUMBER.2: /[-+]?0x[0-9a-fA-F]+/ | /[-+]?\d*\.\d+([eE][-+]?\d+)?/ | /[-+]?\d+/
+STRING: /"(?:[^"\\]|\\.)*"/
+
+COMMENT: /\/\/.*/
+%import common.WS
+%ignore WS

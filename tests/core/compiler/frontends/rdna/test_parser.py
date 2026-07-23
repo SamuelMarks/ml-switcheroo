@@ -1,6 +1,5 @@
 """Test suite for the Parser module."""
 
-import pytest
 from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 from ml_switcheroo.core.compiler.frontends.rdna.nodes import (
   Comment,
@@ -125,57 +124,6 @@ def test_parse_special_reg():
   nodes = parser.parse()
   assert isinstance(nodes[0].operands[0], LabelRef)
   assert nodes[0].operands[0].name == "exec"
-
-
-def test_parse_unexpected_eof():
-  """Parses unexpected eof."""
-  parser = RdnaParser("v_add [v0 +")
-  with pytest.raises(SyntaxError):
-    parser.parse()
-
-
-def test_parse_unexpected_token():
-  """Parses unexpected token."""
-  parser = RdnaParser(",")
-  with pytest.raises(SyntaxError):
-    parser.parse()
-
-
-def test_parse_missing_bracket():
-  """Parses missing bracket."""
-  parser = RdnaParser("v_add [v0 + 4 foo")
-  with pytest.raises(SyntaxError, match="Expected ]"):
-    parser.parse()
-
-
-def test_parse_immediate_float():
-  """Parses immediate float."""
-  parser = RdnaParser("v_add 1.5")
-  nodes = parser.parse()
-  assert nodes[0].operands[0].value == 1.5
-
-
-def test_parse_memory_bad_imm():
-  """Parses memory bad imm."""
-  parser = RdnaParser("v_add [v0 + v1]")
-  with pytest.raises(SyntaxError, match="Expected immediate after"):
-    parser.parse()
-
-
-def test_parse_bad_operand():
-  """Parses bad operand."""
-  parser = RdnaParser("v_add +")
-  with pytest.raises(SyntaxError):
-    parser.parse()
-
-
-def test_consume_unexpected():
-  """Verifies the behavior of consume unexpected."""
-  from ml_switcheroo.core.compiler.frontends.rdna.tokens import TokenType
-
-  parser = RdnaParser("v_add")
-  with pytest.raises(SyntaxError, match="Expected"):
-    parser._consume(kind=TokenType.PLUS)
 
 
 def test_parse_directive_multiline():

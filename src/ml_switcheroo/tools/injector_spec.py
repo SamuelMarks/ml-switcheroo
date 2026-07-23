@@ -6,8 +6,10 @@ Knowledge Base JSON files (The Hub) with new operation definitions.
 It replaces the legacy LibCST-based injector that modified `standards_internal.py`.
 """
 
+from typing import Any
+
 import yaml
-from typing import Any, Dict, List, Union, Tuple
+from typing import Dict, List, Union, Tuple
 
 from ml_switcheroo.core.dsl import OperationDef, ParameterDef
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -102,7 +104,7 @@ class StandardsInjector:
 
     return out
 
-  def _serialize_args(self, args: List[Union[str, Tuple, Dict, Any]]) -> List[Any]:
+  def _serialize_args(self, args: List[Union[str, Tuple[Any, ...], Dict[Any, Any], Any]]) -> List[Any]:
     """Normalizes argument list to clean dictionaries or strings."""
     result = []
     for arg in args:

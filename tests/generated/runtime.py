@@ -33,6 +33,9 @@ RDNA_AVAILABLE = True
 # --- sass ---
 SASS_AVAILABLE = True
 
+# --- stablehlo ---
+STABLEHLO_AVAILABLE = True
+
 # --- tensorflow ---
 TENSORFLOW_AVAILABLE = importlib.util.find_spec("tensorflow") is not None
 

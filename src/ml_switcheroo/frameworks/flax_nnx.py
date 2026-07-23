@@ -97,7 +97,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     return "flax.nnx", "nnx"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
     """Declares self namespaces with tiers and recommended aliases.
 
     Returns:

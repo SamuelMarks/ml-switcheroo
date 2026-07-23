@@ -36,7 +36,7 @@ class MlirAdapter(FrameworkAdapter):
     return "mlir", "sw"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
     """Execute implementation detail."""
     return {}
 
@@ -154,7 +154,7 @@ class MlirAdapter(FrameworkAdapter):
 sw.module {
 ^entry:
     sw.func {sym_name = "main"} {
-        %0 = sw.op {type = "torch.abs"} (%x)
+        %0 = sw.op(%x) {type = "torch.abs"}
     }
 }"""
 

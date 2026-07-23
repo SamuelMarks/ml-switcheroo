@@ -81,10 +81,51 @@ def test_emit_call_multi_input(emitter_torch):
   assert "c = torch.add(a, b)" in src
 
 
-def test_resolve_api_heuristics(emitter_torch, emitter_flax):
-  """Resolves API heuristics."""
-  assert emitter_torch._resolve_api_name("Conv2d") == "nn.Conv2d"
-  assert emitter_torch._resolve_api_name("abs") == "torch.abs"
-  assert emitter_torch._resolve_api_name("custom.pkg.Layer") == "custom.pkg.Layer"
-  assert emitter_flax._resolve_api_name("Conv") == "nnx.Conv"
-  assert emitter_flax._resolve_api_name("abs") == "jnp.abs"
+def test_emit_call_input_vars(emitter_torch):
+  """Emits call input vars."""
+  node = LogicalNode(id="x", kind="Input")
+  stmt1 = emitter_torch.emit_call(node, input_vars=["x"], output_var="x")
+  from ml_switcheroo.utils.node_diff import capture_node_source
+
+  assert capture_node_source(stmt1).strip() == "pass"
+
+  stmt2 = emitter_torch.emit_call(node, input_vars=["x_in"], output_var="x")
+  assert capture_node_source(stmt2).strip() == "x = x_in"
+
+
+def test_emit_expression_syntax_error(emitter_torch):
+  """Emits expression syntax error fallback."""
+  node = LogicalNode(id="bad", kind="func_bad")
+  expr = emitter_torch.emit_expression(node, input_vars=["*invalid syntax*"])
+  from ml_switcheroo.utils.node_diff import capture_node_source
+
+  assert capture_node_source(expr).strip() == "None"
+
+
+def test_is_stateful_layer_checks(emitter_torch):
+  """Checks stateful layer logic."""
+  assert not emitter_torch._is_stateful_layer(LogicalNode(id="o", kind="Output"))
+  assert not emitter_torch._is_stateful_layer(LogicalNode(id="i", kind="functional_add"))
+  assert not emitter_torch._is_stateful_layer(LogicalNode(id="o", kind="ops_something"))
+  assert not emitter_torch._is_stateful_layer(LogicalNode(id="l", kind="lower"))
+
+
+def test_resolve_api_keras():
+  """Resolves api keras."""
+  emitter_keras = PythonSnippetEmitter("keras")
+  assert emitter_keras._resolve_api_name("Dense") == "keras.layers.Dense"
+  assert emitter_keras._resolve_api_name("add") == "keras.ops.add"
+
+  emitter_other = PythonSnippetEmitter("numpy")
+  assert emitter_other._resolve_api_name("add") == "add"
+
+
+def test_resolve_api_dotted_and_jax(emitter_flax):
+  """Resolves dotted api and jax api."""
+  assert emitter_flax._resolve_api_name("jax.numpy.add") == "jax.numpy.add"
+  assert emitter_flax._resolve_api_name("add") == "jnp.add"
+
+
+def test_format_args_from_metadata_empty(emitter_torch):
+  """Tests format args from metadata empty."""
+  assert emitter_torch._format_args_from_metadata({}) == ""

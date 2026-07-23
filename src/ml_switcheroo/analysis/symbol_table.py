@@ -12,6 +12,8 @@ The `SymbolTableAnalyzer` visitor populates a `SymbolTable` by tracking:
 4.  **Control Flow**: Handling type ambiguity in branches (Phi nodes) via Union types.
 """
 
+from typing import Any
+
 import libcst as cst
 from typing import Dict, Optional
 
@@ -25,9 +27,9 @@ from ml_switcheroo.analysis.symbol_types import SymbolType, TensorType, ModuleTy
 class SymbolTable:
   """Container for analysis results. Maps CST Nodes (by identity) to inferred Types."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes an empty node map."""
-    self._node_types: Dict[cst.CSTNode, SymbolType] = {}  # type: ignore
+    self._node_types: Dict[cst.CSTNode, SymbolType] = {}
 
   def record_type(self, node: cst.CSTNode, sym_type: SymbolType) -> None:
     """Associates a CST node with a type.
@@ -210,7 +212,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
     types = []
 
-    def collect(t):
+    def collect(t: Any) -> Any:
       """Execute implementation detail."""
       if isinstance(t, UnionType):
         types.extend(t.types)
@@ -262,7 +264,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     if isinstance(node.names, cst.ImportStar):
       return
 
-    for alias in node.names:  # type: ignore
+    for alias in node.names:
       import_name = alias.name.value if isinstance(alias.name, cst.Name) else ""
       bind_name = (
         (alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else "") if alias.asname else import_name

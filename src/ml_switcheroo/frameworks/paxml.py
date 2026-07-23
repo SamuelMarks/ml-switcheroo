@@ -90,7 +90,7 @@ class PaxmlAdapter(JAXStackMixin):
     return "praxis.layers", "pl"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:  # type: ignore
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
     """Defines the semantic roles of Praxis namespaces.
 
     Returns:

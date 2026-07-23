@@ -107,7 +107,7 @@ class HookContext:
       return "Tensor"  # pragma: no cover
     if "Module" in sym.name:  # pragma: no cover
       return "Module"  # pragma: no cover
-    return sym.name  # pragma: no cover
+    return str(sym.name)  # pragma: no cover
 
   @property
   def plugin_traits(self) -> PluginTraits:
@@ -228,7 +228,7 @@ class HookContext:
     if not target_variant:
       return None
 
-    return target_variant.get("api")
+    return target_variant.get("api")  # type: ignore
 
   def lookup_signature(self, op_name: str) -> List[str]:
     """Retrieves standard argument list for a given operation.

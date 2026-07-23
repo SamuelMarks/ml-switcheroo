@@ -6,6 +6,7 @@ import json
 import itertools
 from pathlib import Path
 import logging
+from typing import Any
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -35,7 +36,7 @@ FOCUS_DIRS = {
 TMP_DIR = Path("tmp/repos")
 
 
-def clone_repos():
+def clone_repos() -> None:
   """Auto-generated doc."""
   TMP_DIR.mkdir(parents=True, exist_ok=True)
   for name, url in REPOS.items():
@@ -91,7 +92,7 @@ def extract_api_surface(repo_name: str, focus_dirs: list[str]) -> list[str]:
   return sorted(list(set(api_nodes)))
 
 
-def generate_mappings():
+def generate_mappings() -> None:
   """Auto-generated doc."""
   logging.info("Extracting APIs...")
   apis = {}
@@ -110,7 +111,7 @@ def generate_mappings():
   zoos = ["transformers", "maxtext"]
 
   total_steps = 0
-  all_mappings = {}
+  all_mappings: dict[str, Any] = {}
 
   with plan_path.open("w", encoding="utf-8") as f:
     f.write("# The 10,000+ Step Universal Transmutation Plan\n\n")

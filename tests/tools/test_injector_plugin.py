@@ -87,10 +87,10 @@ def test_generate_plugin_with_rules(plugin_dir):
   assert "if val_0 == 'nearest':" in content
   assert 'new_func = _create_dotted_name("jax.image.resize_nearest")' in content
   assert 'val_1 = _get_kwarg_value(node, "antialias")' in content
-  assert "elif val_1 == True:" in content
+  assert "if val_1 == True:" in content
   assert 'new_func = _create_dotted_name("jax.image.resize_antialias")' in content
   assert 'val_2 = _get_kwarg_value(node, "count")' in content
-  assert "elif val_2 == 0:" in content
+  assert "if val_2 == 0:" in content
   assert 'new_func = _create_dotted_name("jax.noop")' in content
   assert "return node.with_changes(func=new_func)" in content
   assert content.strip().endswith("return node")

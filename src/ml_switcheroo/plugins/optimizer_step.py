@@ -24,6 +24,8 @@ Transformations:
     - Strips the call completely (No-Op), as functional gradients don't accumulate state.
 """
 
+from typing import Any
+
 import libcst as cst
 from typing import Union
 
@@ -70,7 +72,7 @@ def transform_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 
 @register_hook("optimizer_step")
-def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel]:
+def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel[Any]]:
   """Hook to rewrite ``optimizer.step()``.
 
   Since `step()` logic implies side-effects on the optimizer state and parameters,

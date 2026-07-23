@@ -127,9 +127,9 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
         cst.Arg(
           value=arg_expr,
           keyword=kw_node,
-          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace(""))  # type: ignore
+          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace(""))
           if kw_node
-          else None,
+          else cst.MaybeSentinel.DEFAULT,
         )
       )
 
@@ -167,9 +167,9 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
         cst.Arg(
           value=arg_expr,
           keyword=kw_node,
-          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace(""))  # type: ignore
+          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace(""))
           if kw_node
-          else None,
+          else cst.MaybeSentinel.DEFAULT,
         )
       )
 

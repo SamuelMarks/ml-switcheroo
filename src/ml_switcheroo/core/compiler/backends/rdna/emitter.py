@@ -4,7 +4,8 @@ Converts RDNA AST nodes into formatted assembly text.
 """
 
 from typing import List
-from ml_switcheroo.core.compiler.frontends.rdna.nodes import Label, RdnaNode
+from ml_switcheroo.core.compiler.frontends.rdna.nodes import RdnaNode
+from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
 
 
 class RdnaEmitter:
@@ -12,10 +13,5 @@ class RdnaEmitter:
 
   def emit(self, nodes: List[RdnaNode]) -> str:
     """Generates the RDNA source string from a list of nodes."""
-    lines = []
-    for node in nodes:
-      prefix = "" if isinstance(node, Label) else "    "
-      line = f"{prefix}{str(node)}"
-      lines.append(line)
-
-    return "\n".join(lines) + "\n"
+    printer = RdnaPrinter()
+    return printer.emit(nodes)

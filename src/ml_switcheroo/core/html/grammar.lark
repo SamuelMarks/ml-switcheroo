@@ -1,0 +1,19 @@
+start: element*
+
+element: text | tag_start | tag_end | tag_self_closing | comment | script_style | doctype | ws
+
+text: /[^<\s]+/
+
+doctype: "<!" IDENTIFIER ws? IDENTIFIER? ">"
+tag_start: "<" IDENTIFIER attribute* ws? ">"
+tag_end: "</" IDENTIFIER ws? ">"
+tag_self_closing: "<" IDENTIFIER attribute* ws? "/>"
+
+attribute: ws IDENTIFIER [ws? "=" ws? (STRING | IDENTIFIER)]
+comment: /<!--(.|\n)*?-->/
+script_style: /<(script|style)[^>]*>(.|\n)*?<\/\1>/
+
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_\-]*/
+STRING: /"[^"]*"/ | /'[^']*'/
+ws: WS
+WS: /[ \t\r\n]+/

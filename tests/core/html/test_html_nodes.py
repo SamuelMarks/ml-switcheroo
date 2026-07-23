@@ -1,6 +1,15 @@
 """Test suite for the Html Nodes module."""
 
-from ml_switcheroo.core.html.nodes import SvgArrow, GridBox, HtmlDocument
+from ml_switcheroo.core.html.nodes import (
+  SvgArrow,
+  GridBox,
+  HtmlDocument,
+  HtmlNode,
+  TextNode,
+  CommentNode,
+  AttributeNode,
+  TagNode,
+)
 
 
 def test_svg_arrow_render():
@@ -49,3 +58,54 @@ def test_document_render_structure():
   assert "sw-grid" in html
   assert ">A</span>" in html
   assert ">B</span>" in html
+
+
+def test_html_node_base():
+  """Test HtmlNode base methods raise NotImplementedError."""
+  node = HtmlNode()
+  try:
+    node.emit()
+  except NotImplementedError:
+    pass
+
+  try:
+    node.to_html()
+  except NotImplementedError:
+    pass
+
+
+def test_text_node():
+  """Test TextNode emit."""
+  node = TextNode(content="hello")
+  assert node.emit() == "hello"
+
+
+def test_comment_node():
+  """Test CommentNode emit."""
+  node = CommentNode(content=" test ")
+  assert node.emit() == "<!-- test -->"
+
+
+def test_attribute_node():
+  """Test AttributeNode emit."""
+  attr = AttributeNode(name="class", value="test", quote_style="'")
+  assert attr.emit() == "class='test'"
+  attr2 = AttributeNode(name="disabled")
+  assert attr2.emit() == "disabled"
+
+
+def test_tag_node():
+  """Test TagNode emit."""
+  tag = TagNode(name="br", self_closing=True)
+  assert tag.emit() == "<br/>"
+  tag2 = TagNode(name="div", children=[TextNode(content="hello")])
+  assert tag2.emit() == "<div>hello</div>"
+
+
+def test_tag_node_with_children():
+  """Test TagNode emit with children."""
+  child = TagNode(name="span", children=[TextNode(content="A")])
+  tag = TagNode(name="div", attributes=[AttributeNode(name="id", value="main")], children=[child])
+  html = tag.emit()
+  assert 'div id="main"' in html
+  assert "<span>A</span>" in html

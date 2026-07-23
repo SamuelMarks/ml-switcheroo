@@ -10,7 +10,6 @@ represent neural network graphs with high fidelity. It supports:
 from ml_switcheroo.core.tikz.nodes import (
   TikzBaseNode,
   TriviaNode,
-  TikzComment,
   TikzOption,
   TikzTable,
   TikzNode,
@@ -21,7 +20,6 @@ from ml_switcheroo.core.tikz.nodes import (
 __all__ = [
   "TikzBaseNode",
   "TriviaNode",
-  "TikzComment",
   "TikzOption",
   "TikzTable",
   "TikzNode",

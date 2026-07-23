@@ -86,7 +86,7 @@ def test_latex_node_to_text():
       """Mock implementation of to LaTeX."""
       return super().to_latex()
 
-  assert DummyNode().to_latex() is None
+  assert DummyNode().to_latex() == ""
 
 
 def test_mlir_dialect_validate_false():
@@ -168,7 +168,7 @@ def test_tikz_nodes_coverage():
       """Mock implementation of to text."""
       return super().to_text()
 
-  assert DummyNode().to_text() is None
+  assert DummyNode().to_text() == ""
   tn = TikzNode("n1", 0.0, 0.0, "content", leading_trivia=[TriviaNode(" ")])
   assert " " in tn.to_text()
   tg = TikzGraph(options=[])
@@ -211,7 +211,7 @@ def test_html_parser_more_edges():
   """Verifies the behavior of HTML parser more edges."""
   from ml_switcheroo.core.html.parser import HtmlParser
 
-  html = '\n    Model: MyAwesomeModel\n    <div class="box b">\n        <span class="header-txt">Call (conv)</span>\n        <code>args: x</code>\n    </div>\n    <div class="box b">\n        <span class="header-txt">Call</span>\n        <code></code>\n    </div>\n    '
+  html = '\n    <h3>Model: MyAwesomeModel</h3>\n    <div class="box b">\n        <span class="header-txt">Call (conv)</span>\n        <code>args: x</code>\n    </div>\n    <div class="box b">\n        <span class="header-txt">Call</span>\n        <code></code>\n    </div>\n    '
   parser = HtmlParser(html)
   mod = parser.parse()
   assert "MyAwesomeModel" in mod.code

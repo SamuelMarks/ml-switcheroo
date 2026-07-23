@@ -18,7 +18,10 @@ def test_operand_base():
   """Verifies the behavior of operand base."""
 
   class DummyNode(SassNode):
+    """Dummy."""
+
     def __str__(self):
+      """Str."""
       return "dummy"
 
   d = DummyNode()
