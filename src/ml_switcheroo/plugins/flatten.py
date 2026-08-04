@@ -12,7 +12,15 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Helper to create a CST Attribute chain from string."""
+  """Helper to create a CST Attribute chain from string.
+
+  Args:
+      name_str: A dot-separated string representing the target API name,
+          such as "jax.lax.collapse".
+
+  Returns:
+      A LibCST expression node representing the dotted attribute chain.
+  """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -22,7 +30,22 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("flatten_range")
 def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Hook: Transforms `flatten(x, start, end)` into target-specific logic."""
+  """Hook: Transforms `flatten(x, start, end)` into target-specific logic.
+
+  This function identifies flattening operations, parses their arguments (including
+  start and end dimension specifications), looks up the configured target API,
+  and transforms the LibCST call into target-specific patterns (e.g., JAX collapse,
+  Ravel, or Reshape with shape calculations).
+
+  Args:
+      node: The original LibCST Call node representing the flatten operation.
+      ctx: The translation HookContext holding API configurations, state,
+          and lookup methods.
+
+  Returns:
+      The transformed LibCST Call node or the original node if no target
+      API was found or transformation is not applicable.
+  """
   args = list(node.args)
   if not args:
     return node
@@ -35,7 +58,7 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   end_dim = -1
 
   # Extract positional args
-  if len(args) > 1:  # pragma: no cover
+  if len(args) > 1:
     try:
       if isinstance(args[1].value, cst.Integer):
         start_dim = int(args[1].value.value)

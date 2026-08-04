@@ -64,7 +64,7 @@ class BaseImportFixer(cst.CSTTransformer):
     """
     if alias_node.asname:
       target = alias_node.asname.name
-      if isinstance(target, cst.Name):  # pragma: no cover
+      if isinstance(target, cst.Name):
         self._defined_names.add(target.value)
     else:
       name_val = get_full_name(alias_node.name)

@@ -23,13 +23,13 @@ class QKVFusionPass:
 
     # For simplicity, if we find any matching Q, K, V, we fuse the first ones we find.
     # A robust implementation would group by source input.
-    for q_id, q_node in q_nodes.items():  # pragma: no cover
+    for q_id, q_node in q_nodes.items():
       # Try to find corresponding K and V with same prefix or structural group
       prefix = q_id.replace("q_proj", "")
       k_id = prefix + "k_proj"
       v_id = prefix + "v_proj"
 
-      if k_id in k_nodes and v_id in v_nodes:  # pragma: no cover
+      if k_id in k_nodes and v_id in v_nodes:
         k_nodes[k_id]
         v_nodes[v_id]
 

@@ -1,4 +1,4 @@
-"""RDNA Instruction Analyzer.
+"""RDNA RdnaInstruction Analyzer.
 
 This module implements heuristics to extract high-level semantic parameters
 (like Loop Bounds, Kernel Sizes) by analyzing the raw RDNA instructions
@@ -10,14 +10,14 @@ from `s_cmp_lt_i32 sX, 3` instructions inside a loop structure.
 
 from typing import Any, Dict, List
 
-from ml_switcheroo.core.compiler.frontends.rdna.nodes import Immediate, Instruction
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
 
 class RdnaAnalyzer:
   """Analyzes sequences of RDNA instructions to reverse-engineer high-level parameters."""
 
   @staticmethod
-  def analyze_block(kind: str, instructions: List["Instruction"]) -> Dict[str, Any]:
+  def analyze_block(kind: str, instructions: List["RdnaInstruction"]) -> Dict[str, Any]:
     """Extracts metadata from a block of instructions based on the operation kind.
 
     Args:
@@ -33,7 +33,7 @@ class RdnaAnalyzer:
     for inst in instructions:
       if inst.opcode == "s_cmp_lt_i32":
         for op in inst.operands:
-          if isinstance(op, Immediate):
+          if isinstance(op, RdnaImmediate):
             loop_limits.append(op.value)
 
     if not loop_limits:
@@ -45,7 +45,7 @@ class RdnaAnalyzer:
       metadata["arg_2"] = k_size
 
     elif kind == "Linear":
-      if loop_limits:  # pragma: no cover
+      if loop_limits:
         feat_dim = max(loop_limits)
         metadata["in_features"] = feat_dim
         metadata["arg_0"] = feat_dim

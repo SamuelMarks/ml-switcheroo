@@ -26,8 +26,8 @@ def rewriter():
     },
   }
   mgr.get_definition.side_effect = lambda n: ("Clamp", clamp_def) if "clamp" in n or "clip" in n else None
-  mgr.resolve_variant.side_effect = (
-    lambda aid, fw: clamp_def["variants"]["jax"] if aid == "Clamp" and fw == "jax" else None
+  mgr.resolve_variant.side_effect = lambda aid, fw: (
+    clamp_def["variants"]["jax"] if aid == "Clamp" and fw == "jax" else None
   )
   mgr.is_verified.return_value = True
   mgr.get_known_apis.return_value = {"Clamp": clamp_def}

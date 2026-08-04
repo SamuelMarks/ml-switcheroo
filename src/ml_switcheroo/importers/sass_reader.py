@@ -19,7 +19,12 @@ class SassHtmlParser(HTMLParser):
   """State-machine based HTML parser for extracting SASS Instruction tables."""
 
   def __init__(self) -> None:
-    """Execute implementation detail."""
+    """Initializes the HTML parser state and buffers.
+
+    Sets up boolean flags for tracking parser state within table structures,
+    an empty buffer for cell text, and an empty list to accumulate extracted
+    SASS operations.
+    """
     super().__init__()
     self.in_table = False
     self.in_tbody = False
@@ -30,7 +35,15 @@ class SassHtmlParser(HTMLParser):
     self.cell_buffer = ""
 
   def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
-    """Execute implementation detail."""
+    """Handles the start of an HTML tag.
+
+    Tracks entry into tables, table bodies, rows, and cells to selectively
+    extract data from relevant instruction tables.
+
+    Args:
+        tag: The name of the HTML tag being processed (e.g., 'table', 'tr', 'td').
+        attrs: A list of (name, value) tuples containing the tag's attributes.
+    """
     if tag == "table":
       # Heuristic: Check if table has a summary or class indicating instruction set
       # The provided HTML uses generic classes like 'table-no-stripes', so we grab all
@@ -41,12 +54,19 @@ class SassHtmlParser(HTMLParser):
     elif tag == "tr" and self.in_tbody:
       self.in_row = True
       self.current_row_cells = []
-    elif tag == "td" and self.in_row:  # pragma: no cover
+    elif tag == "td" and self.in_row:
       self.in_cell = True
       self.cell_buffer = ""
 
   def handle_endtag(self, tag: str) -> None:
-    """Execute implementation detail."""
+    """Handles the closing of an HTML tag.
+
+    Processes cell contents on closed 'td' tags, and extracts and filters
+    SASS instruction opcodes and descriptions upon closing 'tr' tags.
+
+    Args:
+        tag: The name of the HTML tag being closed (e.g., 'td', 'tr').
+    """
     if tag == "td" and self.in_cell:
       self.in_cell = False
       # Clean up content (remove newlines, extra spaces)
@@ -67,17 +87,23 @@ class SassHtmlParser(HTMLParser):
             self.extracted_ops.append((opcode, desc))
     elif tag == "tbody":
       self.in_tbody = False
-    elif tag == "table":  # pragma: no cover
+    elif tag == "table":
       self.in_table = False
 
   def handle_data(self, data: str) -> None:
-    """Execute implementation detail."""
+    """Handles textual data inside HTML tags.
+
+    Accumulates text content within active table cells into the cell buffer.
+
+    Args:
+        data: The text data encountered inside an HTML element.
+    """
     if self.in_cell:
       self.cell_buffer += data
 
 
 class SassSpecImporter:
-  """Facade for importing SASS specifications."""
+  """Facade for importing, parsing, and normalizing SASS specifications from HTML files."""
 
   # Mapping logic: Substring pattern in Description -> Abstract Op Name
   _DESCRIPTION_MAP = [
@@ -98,12 +124,16 @@ class SassSpecImporter:
   def parse_file(self, html_path: Path) -> Dict[str, Any]:
     """Parses an HTML file containing SASS documentation.
 
+    Reads the specified HTML documentation file, parses the SASS instruction
+    tables, normalizes/maps the operations to abstract operation identifiers,
+    and returns a structured dictionary of the extracted instructions.
+
     Args:
-        html_path: Path to the .html file.
+        html_path: Path to the .html file containing SASS documentation.
 
     Returns:
-        Dictionary mapping Abstract Operations to SASS implementations.
-
+        A dictionary mapping abstract operation names or TitleCase mnemonics to
+        their corresponding SASS instruction representation (with 'api' keys).
     """
     if not html_path.exists():
       log_error(f"File not found: {html_path}")
@@ -139,7 +169,7 @@ class SassSpecImporter:
       # Conflict resolution: Prefer FP32 versions for generic math ops if collisions occur
       if key in mappings:
         prev_desc = mappings[key]["_description"]
-        if "FP32" in desc and "FP32" not in prev_desc:  # pragma: no cover
+        if "FP32" in desc and "FP32" not in prev_desc:
           mappings[key] = entry
       else:
         mappings[key] = entry
@@ -154,7 +184,19 @@ class SassSpecImporter:
     return final_map
 
   def _infer_abstract_op(self, opcode: str, desc: str) -> Optional[str]:
-    """Derives the Abstract Operation ID (e.g. 'Add') from the SASS text."""
+    """Derives the Abstract Operation ID (e.g., 'Add') from the SASS text.
+
+    Uses mnemonic rules and substring/pattern analysis of the instruction description
+    to map raw SASS operations to standard ML-Switcheroo abstract operations.
+
+    Args:
+        opcode: The raw SASS opcode string (e.g., 'FADD', 'FMUL').
+        desc: The instruction's description text containing functionality details.
+
+    Returns:
+        The matched Abstract Operation string (e.g., 'Add', 'Mul', 'CastFloat'),
+        or None if no standard mapping could be inferred.
+    """
     # 1. Check Mnemonics directly
     if opcode == "FADD":
       return "Add"
@@ -182,9 +224,9 @@ class SassSpecImporter:
 
     # Handle the specific regex cases that were modified to substrings:
     if "convert" in desc_lower and "integer" in desc_lower and "fp32" in desc_lower:
-      if desc_lower.find("integer") < desc_lower.find("fp32"):  # pragma: no cover
-        return "CastFloat"  # pragma: no cover
-      else:  # pragma: no cover
-        return "CastInt"  # pragma: no cover
+      if desc_lower.find("integer") < desc_lower.find("fp32"):
+        return "CastFloat"
+      else:
+        return "CastInt"
 
     return None

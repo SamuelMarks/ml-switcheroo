@@ -83,6 +83,23 @@ def test_get_root_package_non_name(scanner):
   assert res == ""
 
 
+def test_import_from_no_module_name(scanner):
+  """Tests ImportFrom where module is None."""
+  code = "from ... import module"
+  unknowns = scan_code(scanner, code)
+  assert len(unknowns) == 0
+
+
+def test_is_stdlib_fallback_3_10(scanner):
+  """Checks if is stdlib fallback on python 3.10+"""
+  with patch.object(sys, "version_info", (3, 10)):
+    # Mock sys.stdlib_module_names if not available
+    if not hasattr(sys, "stdlib_module_names"):
+      sys.stdlib_module_names = frozenset({"os", "sys"})
+    assert scanner._is_stdlib("os") is True
+    assert scanner._is_stdlib("unknown_lib") is False
+
+
 def test_validate_package_empty(scanner):
   """Validates package empty."""
   scanner._validate_package("")
@@ -102,3 +119,16 @@ def test_no_semantics():
   """Verifies the behavior of no semantics."""
   scanner = DependencyScanner(None, source_fw="torch")
   assert len(scanner._known_semantic_roots) == 0
+
+
+def test_ignore_relative_imports_missing_module(scanner):
+  """Verifies the behavior of ignore relative imports when module is None."""
+  from libcst import ImportFrom
+  from unittest.mock import MagicMock
+
+  node = MagicMock(spec=ImportFrom)
+  node.module = None
+  node.relative = ()
+
+  scanner.visit_ImportFrom(node)
+  assert len(scanner.unknown_imports) == 0

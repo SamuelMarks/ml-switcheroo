@@ -78,6 +78,31 @@ def test_load_knowledge_graph_errors(mock_snap_dir, mock_sem_dir, tmp_path):
   loader.load_knowledge_graph()
 
 
+@patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir")
+@patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir")
+def test_load_knowledge_graph_json_fallback(mock_snap_dir, mock_sem_dir, tmp_path):
+  """Tests loading json file from semantics directory."""
+  sem_dir = tmp_path / "sem"
+  sem_dir.mkdir()
+  mock_sem_dir.return_value = sem_dir
+  snap_dir = tmp_path / "snap"
+  snap_dir.mkdir()
+  mock_snap_dir.return_value = snap_dir
+
+  # To reach the else branch for JSON parsing, we need to mock Path.rglob
+  # to return a file with a .json suffix, because rglob("*.yaml") wouldn't find it natively.
+  json_file = sem_dir / "test.json"
+  json_file.write_text(json.dumps({"Add": {"operation": "Add", "description": "json file"}}))
+
+  mgr = MagicMock()
+  loader = KnowledgeBaseLoader(mgr)
+
+  with patch("pathlib.Path.rglob", return_value=[json_file]):
+    with patch.object(loader, "_load_tier_content") as mock_load_tier:
+      loader.load_knowledge_graph()
+      mock_load_tier.assert_called_once()
+
+
 def test_load_tier_content():
   """Loads tier content."""
   mgr = MagicMock()

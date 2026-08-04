@@ -70,3 +70,27 @@ def test_qkv_defusion_pass():
   assert ("input", "q_proj") in edges
   assert ("q_proj", "attention") in edges
   assert ("input", "other") in edges
+
+
+def test_qkv_fusion_pass_unmatched_prefix():
+  """Verifies the behavior when q, k, v exist but prefixes don't match."""
+  graph = LogicalGraph(
+    nodes=[
+      LogicalNode(id="layer1_q_proj", kind="Linear"),
+      LogicalNode(id="layer2_k_proj", kind="Linear"),
+      LogicalNode(id="layer3_v_proj", kind="Linear"),
+    ],
+    edges=[],
+  )
+  pass_ = QKVFusionPass()
+  fused_graph = pass_.apply(graph)
+  # No fusion should occur
+  assert len(fused_graph.nodes) == 3
+
+
+def test_qkv_defusion_pass_no_match():
+  """Verifies the behavior when qkv_proj doesn't exist."""
+  graph = LogicalGraph(nodes=[LogicalNode(id="q_proj", kind="Linear")])
+  pass_ = QKVDefusionPass()
+  defused = pass_.apply(graph)
+  assert len(defused.nodes) == 1

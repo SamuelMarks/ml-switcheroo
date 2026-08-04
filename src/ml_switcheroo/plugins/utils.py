@@ -69,7 +69,7 @@ def is_framework_module_node(node: cst.CSTNode, ctx: HookContext) -> bool:
   # 2. Check Semantics Registry (Dynamic)
   # This catches frameworks that are registered but not currently selected as source/target,
   # or secondary roots (e.g. "numpy" when targeting Keras).
-  if ctx.semantics:  # pragma: no cover
+  if ctx.semantics:
     # Check loaded framework configs
     configs = getattr(ctx.semantics, "framework_configs", {})
 
@@ -85,7 +85,7 @@ def is_framework_module_node(node: cst.CSTNode, ctx: HookContext) -> bool:
       else:
         # Assuming Pydantic model with .alias attribute
         alias_info = getattr(conf, "alias", None)
-        if alias_info and hasattr(alias_info, "model_dump"):  # pragma: no cover
+        if alias_info and hasattr(alias_info, "model_dump"):
           alias_info = alias_info.model_dump()
 
       if alias_info and isinstance(alias_info, dict):
@@ -104,7 +104,14 @@ def is_framework_module_node(node: cst.CSTNode, ctx: HookContext) -> bool:
 
 
 def _extract_root_name(node: cst.CSTNode) -> Optional[str]:
-  """Recursively extracts the root identifier from a Name or Attribute chain."""
+  """Recursively extracts the root identifier from a Name or Attribute chain.
+
+  Args:
+      node (cst.CSTNode): The CST node (Name or Attribute) to inspect.
+
+  Returns:
+      Optional[str]: The name of the root identifier if found; otherwise, None.
+  """
   if isinstance(node, cst.Name):
     return node.value
   if isinstance(node, cst.Attribute):

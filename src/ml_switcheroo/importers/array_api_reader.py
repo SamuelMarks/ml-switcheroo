@@ -99,10 +99,10 @@ class ArrayApiSpecImporter:
 
           # Look ahead for Docstring (Expr -> Constant string)
           summary = f"Constant: {name}"
-          if i + 1 < len(tree.body):  # pragma: no cover
+          if i + 1 < len(tree.body):
             next_node = tree.body[i + 1]
-            if isinstance(next_node, ast.Expr) and isinstance(next_node.value, ast.Constant):  # pragma: no cover
-              if isinstance(next_node.value.value, str):  # pragma: no cover
+            if isinstance(next_node, ast.Expr) and isinstance(next_node.value, ast.Constant):
+              if isinstance(next_node.value.value, str):
                 summary = self._clean_docstring(next_node.value.value)
 
           semantics[name] = {
@@ -128,7 +128,14 @@ class ArrayApiSpecImporter:
 
     # Helper to process a specific arg group
     def process_group(group: List[ast.arg]) -> Any:
-      """Execute implementation detail."""
+      """Parses type annotations for a list of arguments and appends them to out.
+
+      Args:
+          group: A list of AST argument nodes to process.
+
+      Returns:
+          None.
+      """
       for a in group:
         parsed_type = self._parse_annotation(a.annotation)
         out.append((a.arg, parsed_type))
@@ -143,8 +150,7 @@ class ArrayApiSpecImporter:
     return out
 
   def _parse_annotation(self, annotation: Optional[ast.AST]) -> str:
-    """Recursively resolves AST type annotations to a readable string string.
-
+    """Recursively resolves AST type annotations to a readable string representation.
 
     e.g. ``Name('int')`` -> 'int'
          ``BinOp(Subscript('Optional'), 'int')`` -> 'Optional[int]'  (simplified).
@@ -182,7 +188,7 @@ class ArrayApiSpecImporter:
 
     elif isinstance(annotation, ast.BinOp):
       # e.g. int | float (Python 3.10+ Union style)
-      if isinstance(annotation.op, ast.BitOr):  # pragma: no cover
+      if isinstance(annotation.op, ast.BitOr):
         left = self._parse_annotation(annotation.left)
         right = self._parse_annotation(annotation.right)
         return f"{left} | {right}"
@@ -212,7 +218,7 @@ class ArrayApiSpecImporter:
     return None
 
   def _clean_docstring(self, doc: Optional[str]) -> str:
-    """Cleans up a docstring return just the first paragraph summary.
+    """Cleans up a docstring to return just the first paragraph summary.
 
     Args:
         doc: The full docstring.

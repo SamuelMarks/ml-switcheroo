@@ -17,14 +17,18 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 @dataclass
 class PatchAction:
-  """Base patch operation."""
+  """Base patch operation representing a generic transformation step.
+
+  Attributes:
+      node_id (str): The identifier of the node targeted by this action.
+  """
 
   node_id: str
 
 
 @dataclass
 class DeleteAction(PatchAction):
-  """Instruction to remove a node."""
+  """Instruction to remove a node from the logical graph."""
 
   pass
 
@@ -33,8 +37,14 @@ class DeleteAction(PatchAction):
 class ReplaceAction(PatchAction):
   """Instruction to replace an anchor node with new logic.
 
-
   For the Differ context, 'new_node' is the LogicalNode from the target graph.
+
+  Attributes:
+      new_node (Any): The target LogicalNode that replaces the original anchor node.
+      input_vars (List[str]): A list of input variables/edge source IDs for this replacement.
+      output_var (str): The output variable/target ID name of the replaced block.
+      is_init (bool): A boolean flag indicating whether this is an initialization
+          (stateful setup) replacement. Defaults to False.
   """
 
   new_node: Any  # LogicalNode
@@ -46,49 +56,43 @@ class ReplaceAction(PatchAction):
 class GraphDiffer:
   """Calculates transformation steps to migrate from Source Graph to Target Graph.
 
-    Assumption:
-
-  Optimization is mostly fusion/deletion.
-
-  New nodes (fused) are distinct by ID or metadata.
-
-  We anchor rewrites to the *last* node of a fused chain (the sink).
+  Assumption:
+      Optimization is mostly fusion/deletion.
+      New nodes (fused) are distinct by ID or metadata.
+      We anchor rewrites to the *last* node of a fused chain (the sink).
   """
 
   def diff(self, source: LogicalGraph, target: LogicalGraph) -> List[PatchAction]:
     """Compare graphs and return list of actions.
 
-        Algorithm:
+    Algorithm:
+        Identify Removed IDs: `source_ids - target_ids`.
+        Identify Added/Changed Nodes.
+        Match Added Nodes to Removed Nodes (Find Anchor).
+        Heuristic: If FusedNode depends on input X, and RemovedNode N depends on input X,
+                 they might be related.
+        Current Heuristic: Use provenance or manual mapping supplied by Optimizer?
+        Simpler Heuristic: Fused nodes usually REPLACE a subgraph. The "output" variable
+                 usually stays consistent flow-wise, or we replace the Sink of the subgraph.
 
-    Identify Removed IDs: `source_ids - target_ids`.
+    For this implementation, we rely on the Optimizer naming convention or graph
+    structure. Since graph optimization logic isn't fully inspectable here,
+    we implement a Diff strategy based on ID presence.
 
-    Identify Added/Changed Nodes.
+    Strategies:
+        If ID is missing in Target -> DELETE.
+        If ID is new/fused in Target -> REPLACE.
+        We need an Anchor in Source to attach the Replacement.
+        We attach the Replacement to the *first available* deleted node that matches topology?
+        Better: If Optimizer produced FusedNode `fused_c1`, and `c1` is deleted, `c1` is anchor?
 
-    Match Added Nodes to Removed Nodes (Find Anchor).
+    Args:
+        source (LogicalGraph): The source logical graph representation before transformation.
+        target (LogicalGraph): The target logical graph representation after transformation.
 
-    Heuristic: If FusedNode depends on input X, and RemovedNode N depends on input X,
-             they might be related.
-
-    Current Heuristic: Use provenance or manual mapping supplied by Optimizer?
-
-    Simpler Heuristic: Fused nodes usually REPLACE a subgraph. The "output" variable
-             usually stays consistent flow-wise, or we replace the Sink of the subgraph.
-
-        For this implementation, we rely on the Optimizer naming convention or graph
-        structure. Since graph optimization logic isn't fully inspectable here,
-        we implement a Diff strategy based on ID presence.
-
-        Strategies:
-
-    If ID is missing in Target -> DELETE.
-
-    If ID is new/fused in Target -> REPLACE.
-
-    We need an Anchor in Source to attach the Replacement.
-
-    We attach the Replacement to the *first available* deleted node that matches topology?
-
-    Better: If Optimizer produced FusedNode `fused_c1`, and `c1` is deleted, `c1` is anchor?
+    Returns:
+        List[PatchAction]: A list of PatchAction objects representing the deletions and
+        replacements needed to migrate from the source graph to the target graph.
     """
     actions: List[PatchAction] = []
 
@@ -118,9 +122,9 @@ class GraphDiffer:
       if "anchor" in new_node.metadata:
         anchor = new_node.metadata["anchor"]
       # Naming heuristic (fused_c1 -> c1)
-      elif new_node.id.startswith("fused_"):  # pragma: no cover
+      elif new_node.id.startswith("fused_"):
         candidate = new_node.id.replace("fused_", "")
-        if candidate in deleted_ids:  # pragma: no cover
+        if candidate in deleted_ids:
           anchor = candidate
 
       if anchor and anchor in deleted_ids:
@@ -138,7 +142,7 @@ class GraphDiffer:
         # We generate TWO actions: One for Init, One for Call.
 
         # 1. Init Replacement (If stateful)
-        if _is_likely_stateful(new_node):  # pragma: no cover
+        if _is_likely_stateful(new_node):
           actions.append(
             ReplaceAction(
               node_id=anchor,
@@ -170,5 +174,15 @@ class GraphDiffer:
 
 
 def _is_likely_stateful(node: Any) -> bool:
-  """Heuristic for statefulness based on kind (naming convention)."""
-  return node.kind and node.kind[0].isupper() or "Fused" in node.kind
+  """Heuristic for statefulness based on kind (naming convention).
+
+  Args:
+      node (Any): The logical node object whose kind is evaluated for statefulness.
+
+  Returns:
+      bool: True if the node is deemed likely stateful based on naming or kind heuristics,
+      False otherwise.
+  """
+  if not node.kind:
+    return False
+  return node.kind[0].isupper() or "Fused" in node.kind

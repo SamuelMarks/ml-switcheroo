@@ -18,7 +18,15 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Helper to create a CST Attribute chain from string."""
+  """Helper to create a CST Attribute chain from string.
+
+  Args:
+      name_str: A string representing a dotted name path (e.g., "jax.numpy.reshape").
+
+  Returns:
+      A CST BaseExpression representing the dotted name, constructed as either
+      a Name node or a nested chain of Attribute nodes.
+  """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -38,6 +46,15 @@ def transform_view_semantics(node: cst.Call, ctx: HookContext) -> cst.Call:
   Decoupling:
       Lookup precedence: "Reshape" -> "View".
       If lookup fails, aborts transformation.
+
+  Args:
+      node: The CST Call node representing the original `view` call.
+      ctx: The hook context containing target API maps, runtime configuration,
+        and plugin traits.
+
+  Returns:
+      The transformed CST Call node representing the reshaped/view operation,
+      potentially with an appended strict materialization method call.
   """
   # 0. Resolve Target API
   target_api = ctx.lookup_api("Reshape") or ctx.lookup_api("View")

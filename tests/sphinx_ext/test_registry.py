@@ -8,6 +8,29 @@ import json
 @patch("ml_switcheroo.sphinx_ext.registry.available_frameworks")
 @patch("ml_switcheroo.sphinx_ext.registry.get_framework_priority_order")
 @patch("ml_switcheroo.sphinx_ext.registry.get_adapter")
+def test_scan_registry_else_fallback(mock_get_adapter, mock_priority, mock_avail):
+  """Tests the else fallback when no other candidates are in the priority list."""
+  mock_avail.return_value = ["torch", "custom1", "custom2"]
+  mock_priority.return_value = ["torch", "custom1"]
+
+  def get_adapter_side_effect(name):
+    adapter = MagicMock()
+    adapter.inherits_from = None
+    adapter.display_name = name.title()
+    adapter.supported_tiers = None
+    adapter.get_tiered_examples.return_value = {"example1": f"{name}_code"}
+    return adapter
+
+  mock_get_adapter.side_effect = get_adapter_side_effect
+  (hierarchy, examples_json, tier_metadata_json) = scan_registry()
+  examples = json.loads(examples_json)
+  # torch will fall back to custom1 (first candidate)
+  assert examples["torch_example1"]["tgtFw"] == "custom1"
+
+
+@patch("ml_switcheroo.sphinx_ext.registry.available_frameworks")
+@patch("ml_switcheroo.sphinx_ext.registry.get_framework_priority_order")
+@patch("ml_switcheroo.sphinx_ext.registry.get_adapter")
 def test_scan_registry(mock_get_adapter, mock_priority, mock_avail):
   """Scans registry."""
   mock_avail.return_value = ["torch", "jax", "flax_nnx", "unknown"]

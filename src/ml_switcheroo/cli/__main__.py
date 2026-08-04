@@ -193,8 +193,8 @@ def main(argv: Optional[List[str]] = None) -> int:
   elif args.command == "gen-tests":
     return commands.handle_gen_tests(args.out)
 
-  return 0  # pragma: no cover
+  return 0
 
 
 if __name__ == "__main__":
-  sys.exit(main())  # pragma: no cover
+  sys.exit(main())

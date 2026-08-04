@@ -52,7 +52,6 @@ class ApiPass(RewriterPass):
 
     Returns:
         The transformed CST.
-
     """
     transformer = ApiTransformer(context)
     return module.visit(transformer)
@@ -72,7 +71,6 @@ class ApiTransformer(cst.CSTTransformer):
 
     Args:
         context: The shared rewriter context.
-
     """
     self.context = context
     self._cached_source_traits: Optional[StructuralTraits] = None
@@ -83,32 +81,56 @@ class ApiTransformer(cst.CSTTransformer):
 
   @property
   def semantics(self) -> SemanticsManager:
-    """Accessor for semantics manager."""
+    """Accessor for semantics manager.
+
+    Returns:
+        The semantics manager instance bound to the current context.
+    """
     return self.context.semantics
 
   @property
   def config(self) -> RuntimeConfig:
-    """Accessor for runtime config."""
+    """Accessor for runtime config.
+
+    Returns:
+        The runtime configuration instance bound to the current context.
+    """
     return self.context.config
 
   @property
   def source_fw(self) -> str:
-    """Accessor for source framework key."""
+    """Accessor for source framework key.
+
+    Returns:
+        The string identifier for the source framework (e.g., 'torch').
+    """
     return self.context.source_fw
 
   @property
   def target_fw(self) -> str:
-    """Accessor for target framework key."""
+    """Accessor for target framework key.
+
+    Returns:
+        The string identifier for the target framework (e.g., 'jax').
+    """
     return self.context.target_fw
 
   @property
   def strict_mode(self) -> bool:
-    """Accessor for strict mode flag."""
+    """Accessor for strict mode flag.
+
+    Returns:
+        True if strict mode is enabled, False otherwise.
+    """
     return self.config.strict_mode
 
   @property
   def source_traits(self) -> StructuralTraits:
-    """Lazily loads source framework traits."""
+    """Lazily loads source framework traits.
+
+    Returns:
+        The structural traits configuration of the source framework.
+    """
     if self._cached_source_traits:
       return self._cached_source_traits
 
@@ -120,7 +142,11 @@ class ApiTransformer(cst.CSTTransformer):
     return self._cached_source_traits
 
   def _get_target_traits(self) -> StructuralTraits:
-    """Lazily loads target framework traits."""
+    """Lazily loads target framework traits.
+
+    Returns:
+        The structural traits configuration of the target framework.
+    """
     if self._cached_target_traits:
       return self._cached_target_traits
 
@@ -133,7 +159,13 @@ class ApiTransformer(cst.CSTTransformer):
     return self._cached_target_traits
 
   def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
-    """Returns strip and warn method sets for lifecycle management."""
+    """Returns strip and warn method sets for lifecycle management.
+
+    Returns:
+        A tuple containing two sets:
+        - The first set contains method names that should be stripped.
+        - The second set contains method names that should trigger a warning.
+    """
     traits = self.source_traits
     return (
       set(traits.lifecycle_strip_methods),
@@ -141,15 +173,30 @@ class ApiTransformer(cst.CSTTransformer):
     )
 
   def _report_failure(self, reason: str) -> None:
-    """Records a failure in the context error buffer."""
+    """Records a failure in the context error buffer.
+
+    Args:
+        reason: A message describing the cause of the failure.
+    """
     self.context.current_stmt_errors.append(reason)
 
   def _report_warning(self, reason: str) -> None:
-    """Records a warning in the context warning buffer."""
+    """Records a warning in the context warning buffer.
+
+    Args:
+        reason: A message describing the warning condition.
+    """
     self.context.current_stmt_warnings.append(reason)
 
   def _cst_to_string(self, node: cst.BaseExpression) -> Optional[str]:
-    """Flattens CST nodes (Name/Attribute) to string."""
+    """Flattens CST nodes (Name/Attribute) to string.
+
+    Args:
+        node: The CST expression node to convert.
+
+    Returns:
+        The flattened string representation, or None if the node cannot be flattened.
+    """
     if isinstance(node, cst.Name):
       return node.value
     elif isinstance(node, cst.Attribute):
@@ -162,7 +209,14 @@ class ApiTransformer(cst.CSTTransformer):
     return None
 
   def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
-    """Resolves aliases to get the Fully Qualified Name (FQN)."""
+    """Resolves aliases to get the Fully Qualified Name (FQN).
+
+    Args:
+        node: The CST expression node representing an API name or attribute.
+
+    Returns:
+        The fully qualified name as a string, or None if it cannot be resolved.
+    """
     full_str = self._cst_to_string(node)
     if not full_str:
       return None
@@ -179,7 +233,14 @@ class ApiTransformer(cst.CSTTransformer):
     return full_str
 
   def _create_name_node(self, api_path: str) -> cst.BaseExpression:
-    """Constructs a CST node structure for a dotted API path."""
+    """Constructs a CST node structure for a dotted API path.
+
+    Args:
+        api_path: The dotted string path (e.g., 'torch.nn.functional').
+
+    Returns:
+        A CST node representing the complete path (Name or nested Attributes).
+    """
     parts = api_path.split(".")
     node = cst.Name(parts[0])
     for part in parts[1:]:
@@ -187,12 +248,27 @@ class ApiTransformer(cst.CSTTransformer):
     return node
 
   def _create_dotted_name(self, name_str: str) -> Union[cst.Name, cst.Attribute]:
-    """Alias for create_name_node used by plugins."""
+    """Alias for _create_name_node used by plugins.
+
+    Args:
+        name_str: The dotted string path.
+
+    Returns:
+        A CST Name or Attribute node representing the dotted path.
+    """
     # Type ignored because _create_name_node returns BaseExpression but plugins expect union subset
     return self._create_name_node(name_str)  # type: ignore
 
   def _get_mapping(self, name: str, silent: bool = False) -> Optional[Dict[str, Any]]:
-    """Queries the Semantics Manager for the target implementation of the API."""
+    """Queries the Semantics Manager for the target implementation of the API.
+
+    Args:
+        name: The fully qualified name of the source API.
+        silent: If True, suppresses failure reporting if the mapping is missing or unsafe.
+
+    Returns:
+        A dictionary containing the target implementation mapping details, or None if not found or skipped.
+    """
     lookup = self.semantics.get_definition(name)
     if not lookup:
       is_known_source_prefix = False
@@ -227,7 +303,11 @@ class ApiTransformer(cst.CSTTransformer):
     return target_impl
 
   def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
-    """Injects required imports defined in the variant."""
+    """Injects required imports defined in the variant.
+
+    Args:
+        variant: The target variant mapping dictionary which may specify required imports.
+    """
     reqs = variant.get("required_imports", [])
     for r in reqs:
       stmt = ""
@@ -237,20 +317,28 @@ class ApiTransformer(cst.CSTTransformer):
           stmt = clean
         else:
           stmt = f"import {clean}"
-      elif isinstance(r, dict):  # pragma: no cover
+      elif isinstance(r, dict):
         mod = r.get("module")
         alias = r.get("alias")
-        if mod:  # pragma: no cover
+        if mod:
           if alias:
             stmt = f"import {mod} as {alias}"
           else:
             stmt = f"import {mod}"
 
-      if stmt:  # pragma: no cover
+      if stmt:
         self.context.hook_context.inject_preamble(stmt)
 
   def check_version_constraints(self, min_v: Optional[str], max_v: Optional[str]) -> Optional[str]:
-    """Checks if target version requirements are met."""
+    """Checks if target version requirements are met.
+
+    Args:
+        min_v: The minimum required target version string, or None if unconstrained.
+        max_v: The maximum supported target version string, or None if unconstrained.
+
+    Returns:
+        A warning message string if the constraint is violated, or None if constraints are met or unchecked.
+    """
     if not min_v and not max_v:
       return None
 
@@ -263,23 +351,30 @@ class ApiTransformer(cst.CSTTransformer):
       import importlib.metadata
 
       pkg = self.target_fw
-      if pkg == "flax_nnx":  # pragma: no branch
+      if pkg == "flax_nnx":
         pkg = "flax"
       try:
-        current = importlib.metadata.version(pkg)  # pragma: no cover
-      except Exception:  # pragma: no cover
+        current = importlib.metadata.version(pkg)
+      except Exception:
         pass
 
-    if not current:  # pragma: no cover
+    if not current:
       return None
 
     def parse_v(v_str: str) -> tuple[int, ...]:
-      """Parses a version string into a tuple of integers."""
+      """Parses a version string into a tuple of integers.
+
+      Args:
+          v_str: The version string to parse (e.g., '1.2.3').
+
+      Returns:
+          A tuple of integers representing the version parts.
+      """
       parts = []
       # Fix: Use re module safely imported at global scope
       tokens = re.split(r"[^\d]+", v_str)
       for t in tokens:
-        if t:  # pragma: no cover
+        if t:
           parts.append(int(t))
       return tuple(parts)
 
@@ -289,14 +384,23 @@ class ApiTransformer(cst.CSTTransformer):
       if curr_tuple < parse_v(min_v):
         return f"Target {self.target_fw}@{current} is older than required {min_v}"
 
-    if max_v:  # pragma: no cover
+    if max_v:
       if curr_tuple >= parse_v(max_v):
         return f"Target {self.target_fw}@{current} exceeds max supported {max_v}"
 
     return None
 
   def _is_framework_base(self, name: str) -> bool:
-    """Checks if a class name corresponds to any known framework Module base. Copied from Structural to support detection here."""
+    """Checks if a class name corresponds to any known framework Module base.
+
+    Copied from Structural to support detection here.
+
+    Args:
+        name: The fully qualified class name or base class string.
+
+    Returns:
+        True if the name identifies a known framework base class, False otherwise.
+    """
     if not name:
       return False
 
@@ -331,8 +435,15 @@ class ApiTransformer(cst.CSTTransformer):
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
     """Injects accumulated module-level preamble statements if they haven't been flushed yet.
 
+    If preambles were gathered during traversal, inject them into the module's body.
+    We deduplicate based on string content.
 
-    by a prior pass (like StructuralPass). We deduplicate based on string content.
+    Args:
+        original_node: The CST node representing the original module before traversal.
+        updated_node: The transformed CST module node.
+
+    Returns:
+        The final transformed CST module containing any newly injected preamble statements.
     """
     if not self.context.module_preamble:
       return updated_node
@@ -360,12 +471,23 @@ class ApiTransformer(cst.CSTTransformer):
   # --- Scoping Logic ---
 
   def _mark_stateful(self, var_name: str) -> None:
-    """Marks variable as stateful in current scope."""
-    if self.context.scope_stack:  # pragma: no cover
+    """Marks variable as stateful in current scope.
+
+    Args:
+        var_name: The name of the variable being assigned a stateful component.
+    """
+    if self.context.scope_stack:
       self.context.scope_stack[-1].add(var_name)
 
   def _is_stateful(self, var_name: str) -> bool:
-    """Checks if variable is stateful (traversing up scopes)."""
+    """Checks if variable is stateful (traversing up scopes).
+
+    Args:
+        var_name: The name of the variable to check.
+
+    Returns:
+        True if the variable is marked stateful in the current or any enclosing scope.
+    """
     for scope in reversed(self.context.scope_stack):
       if var_name in scope:
         return True
@@ -374,7 +496,14 @@ class ApiTransformer(cst.CSTTransformer):
   # --- Context Stack Mirroring (Essential for Preamble Injection in Logic Plugins) ---
 
   def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
-    """Enter class scope and detect Module."""
+    """Enter class scope and detect Module.
+
+    Args:
+        node: The CST ClassDef node being visited.
+
+    Returns:
+        True to continue traversing children.
+    """
     self.context.scope_stack.append(set())
 
     is_module = False
@@ -398,19 +527,34 @@ class ApiTransformer(cst.CSTTransformer):
     return True
 
   def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
-    """Exit class scope."""
+    """Exit class scope.
+
+    Args:
+        original_node: The CST ClassDef node prior to visiting children.
+        updated_node: The transformed CST ClassDef node after visiting children.
+
+    Returns:
+        The updated CST ClassDef node.
+    """
     self.context.scope_stack.pop()
     if self.context.in_module_class:
       self.context.in_module_class = False
     return updated_node
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """Enter function scope."""
+    """Enter function scope.
+
+    Args:
+        node: The CST FunctionDef node being visited.
+
+    Returns:
+        True to continue traversing children.
+    """
     self.context.scope_stack.append(set())
 
     existing_args = set()
     for param in node.params.params:
-      if isinstance(param.name, cst.Name):  # pragma: no cover
+      if isinstance(param.name, cst.Name):
         existing_args.add(param.name.value)
 
     is_init = node.name.value == "__init__"
@@ -428,10 +572,17 @@ class ApiTransformer(cst.CSTTransformer):
 
     Flush any pending preamble statements requested by plugins during this pass.
     Also apply any pending signature injections (arguments).
+
+    Args:
+        original_node: The CST FunctionDef node prior to visiting children.
+        updated_node: The transformed CST FunctionDef node.
+
+    Returns:
+        The updated CST FunctionDef node with any injected arguments or preamble statements.
     """
     self.context.scope_stack.pop()
 
-    if self.context.signature_stack:  # pragma: no cover
+    if self.context.signature_stack:
       sig_ctx = self.context.signature_stack.pop()
 
       # 1. Apply Argument Injection (e.g. from Plugins like rng_threading)
@@ -449,7 +600,16 @@ class ApiTransformer(cst.CSTTransformer):
   def _inject_argument_to_signature(
     self, node: cst.FunctionDef, arg_name: str, annotation: Optional[str]
   ) -> cst.FunctionDef:
-    """Injects a new argument after 'self' (or at start)."""
+    """Injects a new argument after 'self' (or at start).
+
+    Args:
+        node: The CST FunctionDef node to modify.
+        arg_name: The name of the argument to inject.
+        annotation: Optional string representing the argument's type annotation.
+
+    Returns:
+        The updated CST FunctionDef node with the newly injected argument.
+    """
     params = list(node.params.params)
     insert_idx = 0
     if params and params[0].name.value == "self":
@@ -473,7 +633,7 @@ class ApiTransformer(cst.CSTTransformer):
     params.insert(insert_idx, new_param)
 
     # Fix trailing comma structure
-    if params:  # pragma: no cover
+    if params:
       params[-1] = params[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
     new_params_node = node.params.with_changes(params=params)
@@ -482,7 +642,14 @@ class ApiTransformer(cst.CSTTransformer):
   # --- Error Handling & Statement Processing ---
 
   def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> Optional[bool]:
-    """Reset statement-level error buffers."""
+    """Reset statement-level error buffers.
+
+    Args:
+        node: The CST SimpleStatementLine node being visited.
+
+    Returns:
+        True to continue traversing children.
+    """
     self.context.current_stmt_errors = []
     self.context.current_stmt_warnings = []
     return True
@@ -492,7 +659,15 @@ class ApiTransformer(cst.CSTTransformer):
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
   ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel[Any]]:
-    """Check for errors generated by child expressions and wrap if needed."""
+    """Check for errors generated by child expressions and wrap if needed.
+
+    Args:
+        original_node: The CST node prior to transformation.
+        updated_node: The transformed CST node.
+
+    Returns:
+        The transformed line, possibly wrapped via EscapeHatch if errors or warnings were logged.
+    """
     if self.context.current_stmt_errors:
       unique_errors = list(dict.fromkeys(self.context.current_stmt_errors))
       message = "; ".join(unique_errors)
@@ -508,7 +683,14 @@ class ApiTransformer(cst.CSTTransformer):
   # --- Resolver Logic ---
 
   def visit_Import(self, node: cst.Import) -> Optional[bool]:
-    """Track import aliases."""
+    """Track import aliases.
+
+    Args:
+        node: The CST Import node being visited.
+
+    Returns:
+        False to prevent deeper traversal, since aliases are fully captured here.
+    """
     for alias in node.names:
       full_name = self._cst_to_string(alias.name)
       if not full_name:
@@ -523,7 +705,14 @@ class ApiTransformer(cst.CSTTransformer):
     return False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> Optional[bool]:
-    """Track from-import aliases."""
+    """Track from-import aliases.
+
+    Args:
+        node: The CST ImportFrom node being visited.
+
+    Returns:
+        False to prevent deeper traversal.
+    """
     if node.relative:
       return False
 
@@ -551,6 +740,13 @@ class ApiTransformer(cst.CSTTransformer):
 
     1. Track stateful initializations (e.g. self.layer = Linear...).
     2. Unwrap functional returns (e.g. y, state = layer.apply...).
+
+    Args:
+        original_node: The CST Assign node prior to transformation.
+        updated_node: The transformed CST Assign node.
+
+    Returns:
+        The potentially modified CST Assign node (e.g. unwrapped).
     """
     # 1. Stateful Tracking
     if isinstance(original_node.value, cst.Call):
@@ -564,7 +760,7 @@ class ApiTransformer(cst.CSTTransformer):
           if tier == SemanticTier.NEURAL.value:
             for target in original_node.targets:
               target_name = self._get_qualified_name(target.target)
-              if target_name:  # pragma: no cover
+              if target_name:
                 if target_name.startswith("self.") and len(self.context.scope_stack) > 1:
                   # Track stateful variable in the class scope (parent of init scope)
                   self.context.scope_stack[-2].add(target_name)
@@ -581,11 +777,11 @@ class ApiTransformer(cst.CSTTransformer):
 
       unwrap_method = traits.functional_execution_method
       if is_functional_apply(original_node.value, unwrap_method):
-        if len(updated_node.targets) == 1:  # pragma: no cover
+        if len(updated_node.targets) == 1:
           target = updated_node.targets[0].target  # type: ignore
-          if isinstance(target, (cst.Tuple, cst.List)):  # pragma: no cover
+          if isinstance(target, (cst.Tuple, cst.List)):
             elements = target.elements
-            if len(elements) > 0:  # pragma: no cover
+            if len(elements) > 0:
               primary_target = elements[0].value
               new_target = cst.AssignTarget(target=primary_target)
               new_node = updated_node.with_changes(targets=[new_target])
@@ -597,7 +793,15 @@ class ApiTransformer(cst.CSTTransformer):
     return updated_node
 
   def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> Attribute | Name | CSTNode:  # type: ignore
-    """Rewrites attributes and constants (e.g. torch.float32)."""
+    """Rewrites attributes and constants (e.g. torch.float32).
+
+    Args:
+        original_node: The CST Attribute node before transformation.
+        updated_node: The CST Attribute node after its children were visited.
+
+    Returns:
+        The rewritten attribute or constant node mapping to the target framework, or the unchanged node.
+    """
     name = self._get_qualified_name(original_node)
     if not name:
       return updated_node
@@ -630,7 +834,7 @@ class ApiTransformer(cst.CSTTransformer):
         return self._create_dotted_name(target_impl["api"])
 
         # Support macros for constants (e.g. inf -> float('inf'))
-      if "macro_template" in target_impl:  # pragma: no cover
+      if "macro_template" in target_impl:
         try:
           from ml_switcheroo.core.rewriter.calls.transformers import rewrite_as_macro
 
@@ -646,7 +850,15 @@ class ApiTransformer(cst.CSTTransformer):
   def leave_Call(  # type: ignore
     self, original_node: cst.Call, updated_node: cst.Call
   ) -> Union[cst.Call, cst.BinaryOperation, cst.UnaryOperation, cst.CSTNode]:
-    """Main entry point for function call rewriting."""
+    """Main entry point for function call rewriting.
+
+    Args:
+        original_node: The CST Call node prior to transformation.
+        updated_node: The CST Call node after children were transformed.
+
+    Returns:
+        The fully transformed Call, Macro, or Operator node reflecting the target API mapping.
+    """
     # 1. Identify Function
     func_name = self._get_qualified_name(original_node.func)
 
@@ -664,7 +876,7 @@ class ApiTransformer(cst.CSTTransformer):
       guessed_name = resolve_implicit_method(self, original_node, func_name)
       if guessed_name:
         mapping = self._get_mapping(guessed_name, silent=True)
-        if mapping:  # pragma: no cover
+        if mapping:
           func_name = guessed_name
 
     if not mapping:
@@ -710,7 +922,14 @@ class ApiTransformer(cst.CSTTransformer):
   # --- Argument Normalization (Helper required by Strategy) ---
 
   def _is_module_alias(self, node: cst.CSTNode) -> bool:
-    """Determines if a node is a module reference (not a variable)."""
+    """Determines if a node is a module reference (not a variable).
+
+    Args:
+        node: The CST Node to evaluate.
+
+    Returns:
+        True if the node represents a known imported module alias, False otherwise.
+    """
     name = self._cst_to_string(node)  # type: ignore
     if not name:
       return False
@@ -719,20 +938,20 @@ class ApiTransformer(cst.CSTTransformer):
       return True
 
     known_roots = set()
-    if self.config:  # pragma: no cover
+    if self.config:
       known_roots.add(self.config.source_framework)
       known_roots.add(self.config.target_framework)
       if self.config.source_flavour:
         known_roots.add(self.config.source_flavour.split(".")[0])
 
-    if self.semantics:  # pragma: no cover
+    if self.semantics:
       configs = getattr(self.semantics, "framework_configs", {})
       for fw_key, conf in configs.items():
         known_roots.add(fw_key)
         alias_conf = conf.get("alias")
         if alias_conf and isinstance(alias_conf, dict):
           mod = alias_conf.get("module")
-          if mod:  # pragma: no cover
+          if mod:
             known_roots.add(mod.split(".")[0])
 
     root = name.split(".")[0]
@@ -748,6 +967,15 @@ class ApiTransformer(cst.CSTTransformer):
     """Pivots arguments from source implementation -> Standard -> Target implementation.
 
     Handles renaming, reordering, and default injection.
+
+    Args:
+        original_node: The original CST Call node for reference.
+        updated_node: The intermediate CST Call node after children were transformed.
+        op_details: The semantic specification defining standard argument structures.
+        target_impl: The dictionary detailing target-specific argument overrides and injections.
+
+    Returns:
+        A list of mapped CST arguments adjusted for the target framework call signature.
     """
     # 1. Parse Standard Types
     std_args_raw = op_details.get("std_args", [])
@@ -758,7 +986,7 @@ class ApiTransformer(cst.CSTTransformer):
     for item in std_args_raw:
       if isinstance(item, dict):
         name = item.get("name")
-        if name:  # pragma: no cover
+        if name:
           std_args_order.append(name)
           if item.get("is_variadic"):
             variadic_arg_name = name
@@ -800,17 +1028,17 @@ class ApiTransformer(cst.CSTTransformer):
           if arg.keyword:
             k_name = arg.keyword.value
             mapped = lib_to_std.get(k_name) or (k_name if k_name == first_std_arg else None)
-            if mapped == first_std_arg:  # pragma: no cover
+            if mapped == first_std_arg:
               arg_provided = True
               break
 
         if not arg_provided:
-          if isinstance(original_node.func, cst.Attribute):  # pragma: no cover
+          if isinstance(original_node.func, cst.Attribute):
             rec = original_node.func.value
             found_args[first_std_arg] = cst.Arg(value=rec)
             receiver_injected = True
       else:
-        if isinstance(original_node.func, cst.Attribute):  # pragma: no cover
+        if isinstance(original_node.func, cst.Attribute):
           extra_args.append(cst.Arg(value=original_node.func.value))
 
     # 4. Process Args
@@ -827,7 +1055,7 @@ class ApiTransformer(cst.CSTTransformer):
             packing_mode = True
             variadic_buffer.append(upd_arg)
           else:
-            if std_name not in found_args:  # pragma: no cover
+            if std_name not in found_args:
               found_args[std_name] = upd_arg
             pos_idx += 1
         else:
@@ -852,7 +1080,7 @@ class ApiTransformer(cst.CSTTransformer):
         )
 
       is_list = pack_as_type == "List"
-      if elements:  # pragma: no cover
+      if elements:
         trailing_comma = cst.MaybeSentinel.DEFAULT
         if not is_list and len(elements) == 1:
           trailing_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))  # type: ignore
@@ -909,7 +1137,7 @@ class ApiTransformer(cst.CSTTransformer):
           # If val_options is a dict, it's an enum mapping (val -> code)
           if isinstance(val_options, dict):
             raw_key = extract_primitive_key(current_arg.value)
-            if raw_key is not None and str(raw_key) in val_options:  # pragma: no cover
+            if raw_key is not None and str(raw_key) in val_options:
               target_code = val_options[str(raw_key)]
               final_val_node = cst.parse_expression(target_code)
           # Otherwise it's a constant injection (literal override)
@@ -1000,7 +1228,11 @@ class ApiTransformer(cst.CSTTransformer):
   # --- Hook Accessors (Proxy) ---
   @property
   def ctx(self) -> Any:
-    """Expose hook context for strategy invocation."""
+    """Expose hook context for strategy invocation.
+
+    Returns:
+        The hook context associated with this traversal.
+    """
     return self.context.hook_context
 
   # --- Preamble and Signature Logic ---
@@ -1008,7 +1240,15 @@ class ApiTransformer(cst.CSTTransformer):
   # but structural application logic (injection into node) resides in leave_FunctionDef.
 
   def _apply_preamble(self, node: cst.FunctionDef, stmts_code: List[str]) -> cst.FunctionDef:
-    """Injects source code statements at the start of the function body."""
+    """Injects source code statements at the start of the function body.
+
+    Args:
+        node: The CST FunctionDef node to update.
+        stmts_code: A list of code strings to inject at the start.
+
+    Returns:
+        The updated CST FunctionDef node containing the injected statements.
+    """
     new_stmts = []  # type: ignore
     for code in stmts_code:
       try:
@@ -1020,7 +1260,15 @@ class ApiTransformer(cst.CSTTransformer):
     return self._inject_stmts_to_body(node, new_stmts)
 
   def _inject_stmts_to_body(self, node: cst.FunctionDef, new_stmts: List[cst.BaseStatement]) -> cst.FunctionDef:
-    """Helper to insert statements respecting docstrings."""
+    """Helper to insert statements respecting docstrings.
+
+    Args:
+        node: The CST FunctionDef node to modify.
+        new_stmts: The parsed CST statements to inject.
+
+    Returns:
+        The modified CST FunctionDef with the injected statements placed properly.
+    """
     if isinstance(node.body, cst.SimpleStatementSuite):
       node = self._convert_to_indented_block(node)
 
@@ -1036,7 +1284,14 @@ class ApiTransformer(cst.CSTTransformer):
     return node.with_changes(body=node.body.with_changes(body=final_body))
 
   def _convert_to_indented_block(self, node: cst.FunctionDef) -> cst.FunctionDef:
-    """Unwraps simple one-liners to indented blocks for injection."""
+    """Unwraps simple one-liners to indented blocks for injection.
+
+    Args:
+        node: The CST FunctionDef node which might have a SimpleStatementSuite body.
+
+    Returns:
+        A CST FunctionDef converted to use an IndentedBlock if it was previously one-liner.
+    """
     if isinstance(node.body, cst.SimpleStatementSuite):
       new_stmts = [cst.SimpleStatementLine(body=[s]) for s in node.body.body]
       return node.with_changes(body=cst.IndentedBlock(body=new_stmts))

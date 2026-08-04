@@ -98,16 +98,16 @@ class HookContext:
     if not self._symbol_table:
       return None
 
-    sym = self._symbol_table.get_type(node)  # pragma: no cover
-    if not sym:  # pragma: no cover
-      return None  # pragma: no cover
-    # pragma: no cover
-    # Return simple string type indicator  # pragma: no cover
-    if "Tensor" in sym.name:  # pragma: no cover
-      return "Tensor"  # pragma: no cover
-    if "Module" in sym.name:  # pragma: no cover
-      return "Module"  # pragma: no cover
-    return str(sym.name)  # pragma: no cover
+    sym = self._symbol_table.get_type(node)
+    if not sym:
+      return None
+
+    # Return simple string type indicator
+    if "Tensor" in sym.name:
+      return "Tensor"
+    if "Module" in sym.name:
+      return "Module"
+    return str(sym.name)
 
   @property
   def plugin_traits(self) -> PluginTraits:
@@ -150,7 +150,7 @@ class HookContext:
 
     """
     if not self.semantics or not self.current_op_id:
-      return None  # pragma: no cover
+      return None
 
     # Access definition
     # Use low-level retrieval to avoid recursion
@@ -168,7 +168,7 @@ class HookContext:
         annotation (Optional[str]): Type hint string for the argument.
 
     """
-    if self._arg_injector:  # pragma: no cover
+    if self._arg_injector:
       self._arg_injector(name, annotation)
 
   def inject_preamble(self, code_str: str) -> None:
@@ -219,7 +219,7 @@ class HookContext:
 
     """
     if not self.semantics:
-      return None  # pragma: no cover
+      return None
 
     # Use the inheritance-aware resolve_variant method
     # instead of direct dict access to support child frameworks (e.g. flax_nnx -> jax mapping)
@@ -241,7 +241,7 @@ class HookContext:
 
     """
     if not self.semantics:
-      return []  # pragma: no cover
+      return []
     # get_definition_by_id checks main data store
     details = self.semantics.get_definition_by_id(op_name)
     if not details:
@@ -253,9 +253,9 @@ class HookContext:
         cleaned_args.append(item[0])
       elif isinstance(item, dict):
         # Handle ParameterDef dict or object
-        name = item.get("name")  # pragma: no cover
-        if name:  # pragma: no cover
-          cleaned_args.append(name)  # pragma: no cover
+        name = item.get("name")
+        if name:
+          cleaned_args.append(name)
       else:
         cleaned_args.append(item)
     return cleaned_args

@@ -20,24 +20,32 @@ def setup(app: Any) -> Dict[str, Any]:
   """Sphinx Extension Setup Hook.
 
   Registers directives, connects build events, and adds static assets.
+
+  Args:
+      app: The Sphinx application object being configured.
+
+  Returns:
+      A dictionary containing extension metadata, including its version and
+      parallel execution safety flags.
   """
   # --- Directives ---
   app.add_directive("switcheroo_demo", SwitcherooDemo)
 
   # --- CodeMirror Assets (Editor) ---
   # Base
-  app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css")
-  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js")
+  app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js")
 
   # Modes
-  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js")
-  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js")
-  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js")
-  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js")
-  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/xml/xml.min.js")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/javascript/javascript.min.js")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/css/css.min.js")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/htmlmixed/htmlmixed.min.js")
 
   # --- Mermaid JS (AST Visualizer) ---
-  app.add_js_file("https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js")
+  # app.add_js_file("https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js")
+  app.add_js_file("https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.min.js")
 
   # --- TikZJax (Graph Renderer) ---
   # Use CDN for fonts to fix relative path issues

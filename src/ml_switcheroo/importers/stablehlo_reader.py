@@ -10,20 +10,15 @@ It parses the specific structure of OpenXLA docs:
 - Syntax: `#### Syntax` blocks containing MLIR signatures.
 """
 
-from typing import Union
+import re
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from ml_switcheroo.utils.console import log_error, log_info
 
 
 class StableHloSpecImporter:
   """Parses StableHLO Markdown specification files."""
-
-  # Regex to find headers like ### `abs`
-
-  # Regex to extract MLIR syntax: %result = stablehlo.abs %operand : tensor<...>
-  # Captures the arguments roughly
 
   def parse_file(self, target_file: Path) -> Dict[str, Any]:
     """Parses `spec.md` from the StableHLO repository.
@@ -33,7 +28,6 @@ class StableHloSpecImporter:
 
     Returns:
         Dictionary mapping Operator IDs (e.g. 'Abs') to ODL definitions.
-
     """
     if not target_file.exists():
       log_error(f"File not found: {target_file}")
@@ -43,7 +37,14 @@ class StableHloSpecImporter:
     return self._parse_markdown(target_file)
 
   def _parse_markdown(self, fpath: Path) -> Dict[str, Any]:
-    """Parse markdown."""
+    """Parse markdown structures directly into semantic definitions.
+
+    Args:
+        fpath: Path to the markdown file.
+
+    Returns:
+        Dictionary mapping Operator IDs to definitions.
+    """
     from markdown_it import MarkdownIt
 
     content = fpath.read_text(encoding="utf-8")
@@ -56,39 +57,40 @@ class StableHloSpecImporter:
 
     for i, token in enumerate(tokens):
       if token.type == "heading_open" and token.tag == "h3":
-        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":  # pragma: no branch
+        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
           inline = tokens[i + 1]
-          if inline.children and len(inline.children) >= 1:  # pragma: no branch
+          if inline.children and len(inline.children) >= 1:
             child = inline.children[0]
-            if child.type == "code_inline":  # pragma: no branch
+            if child.type in ("code_inline", "text") and re.match(r"^[a-z0-9_]+$", child.content.strip()):
               raw_name = child.content.strip()
               if current_op and current_def:
                 self._finalize_op(semantics, current_op, current_def)
               current_op = self._normalize_op_name(raw_name)
               current_def = {"description": [], "raw_syntax": "", "std_args": []}
-      elif current_op:  # pragma: no branch
+      elif current_op:
         if token.type == "paragraph_open":
-          if i + 1 < len(tokens) and tokens[i + 1].type == "inline":  # pragma: no branch
-            if not current_def["description"]:  # pragma: no branch
+          if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
+            if not current_def["description"]:
               current_def["description"].append(tokens[i + 1].content)
         elif token.type == "fence":
           # Syntax Block
-          if "mlir" in token.info.lower() or "stablehlo" in token.content:  # pragma: no branch
+          if "mlir" in token.info.lower() or "stablehlo" in token.content:
             from ml_switcheroo.core.mlir.parser import MlirParser
 
             for line in token.content.splitlines():
-              if "stablehlo." in line:  # pragma: no branch
+              if "stablehlo." in line:
                 try:
                   parser = MlirParser(line.strip())
                   module = parser.parse()
-                  parsed_op = module.body.operations[0]
+                  if module.body and module.body.operations:
+                    parsed_op = module.body.operations[0]
+                    current_def["raw_syntax"] = line.strip()
+                    current_def["parsed_op"] = parsed_op
+                except Exception:
+                  # Fallback to saving raw string if parse fails
                   current_def["raw_syntax"] = line.strip()
-                  current_def["parsed_op"] = parsed_op
-                except Exception:  # pragma: no cover
-                  # Fallback to saving raw string if parse fails  # pragma: no cover
-                  current_def["raw_syntax"] = line.strip()  # pragma: no cover
 
-    if current_op and current_def:  # pragma: no branch
+    if current_op and current_def:
       self._finalize_op(semantics, current_op, current_def)
 
     return semantics
@@ -100,7 +102,6 @@ class StableHloSpecImporter:
         semantics: The accumulator dictionary to update.
         name: The operation name (Abstract ID).
         details: The raw extracted details (description list, syntax string).
-
     """
     # 1. Clean Description
     desc_list: List[str] = details.get("description", [])
@@ -115,21 +116,14 @@ class StableHloSpecImporter:
       parsed_op = details["parsed_op"]
       # Use parsed operands, filtering out numeric intermediate values if any (though typically operands are named)
       for v in parsed_op.operands:
-        v_name = v.to_text().strip("%").strip()
-        if not v_name.isdigit() and v_name not in ["result", "results"]:  # pragma: no branch
+        v_name = v.name.strip("%")
+        if not v_name.isdigit() and v_name not in ["result", "results"]:
           args.append(v_name)
 
     # Fallback if parsing failed or no arguments found
     if not args:
       args = ["input"]
 
-    # Infer base name for StableHLO API from ODL name if possible,
-    # but really we should use the map or derive it.
-    # However, the extraction loop normalized the name for the key.
-    # We need the original snake_case for the API.
-    # Since we lost it in _normalize_op_name, we reconstruct or store it?
-    # Reconstructing from PascalCase is hard if acronyms involved.
-    # Ideally _normalize_op_name handled it, but here we can just lower().
     stablehlo_api_suffix = name.lower()
     if name == "Add":
       stablehlo_api_suffix = "add"
@@ -141,7 +135,6 @@ class StableHloSpecImporter:
       stablehlo_api_suffix = "divide"
     elif name == "Pow":
       stablehlo_api_suffix = "power"
-    # For others produced by capitalize loop (e.g. Abs -> abs), lower() works.
 
     semantics[name] = {
       "description": desc,
@@ -153,7 +146,6 @@ class StableHloSpecImporter:
   def _normalize_op_name(self, name: str) -> str:
     """Converts 'abs' -> 'Abs', 'log_plus_one' -> 'LogPlusOne'.
 
-
     StableHLO uses snake_case. ODL uses PascalCase for Abstract IDs.
 
     Args:
@@ -161,7 +153,6 @@ class StableHloSpecImporter:
 
     Returns:
         str: The PascalCase name (e.g. 'LogPlusOne').
-
     """
     # Manual overrides for consistency with existing Hub standards
     overrides = {

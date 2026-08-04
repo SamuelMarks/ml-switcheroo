@@ -33,9 +33,41 @@ def test_coverage_scanner():
   assert "exit" not in scanner.results
 
 
-def test_import_from_no_module():
-  """Verifies the behavior of import from no module."""
+def test_coverage_scanner_unresolvable_fqn():
+  """Verifies the behavior of coverage scanner when fqn cannot be resolved."""
+  from ml_switcheroo.analysis.audit import CoverageScanner
+
   semantics = MockSemantics()
   scanner = CoverageScanner(semantics, {"torch"})
-  tree = cst.parse_module("from . import module")
+
+  # A complex Call node where get_full_name returns None (e.g. function is a lambda or complex expression)
+  code = "(lambda x: x)(1, 2)"
+  tree = cst.parse_module(code)
   tree.visit(scanner)
+  assert len(scanner.results) == 0
+
+
+def test_coverage_scanner_unresolvable_attribute():
+  """Verifies the behavior of coverage scanner when attribute cannot be resolved."""
+  from ml_switcheroo.analysis.audit import CoverageScanner
+
+  semantics = MockSemantics()
+  scanner = CoverageScanner(semantics, {"torch"})
+
+  # Attribute on a non-Name/Attribute node
+  code = "[].append(1)"
+  tree = cst.parse_module(code)
+  tree.visit(scanner)
+  assert len(scanner.results) == 0
+
+
+def test_coverage_scanner_relative_import():
+  """Verifies the behavior of coverage scanner with relative imports."""
+  from ml_switcheroo.analysis.audit import CoverageScanner
+
+  semantics = MockSemantics()
+  scanner = CoverageScanner(semantics, {"torch"})
+  code = "from . import foo\nfrom .foo import bar\n"
+  tree = cst.parse_module(code)
+  tree.visit(scanner)
+  assert len(scanner.results) == 0

@@ -21,21 +21,34 @@ from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
 from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-from ml_switcheroo.core.compiler.backends.visual_tikz import TikzBackend
-from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
+from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend, LatexBackend
 
 
 class BaseFrontend:
-  """Abstract base for registry typing."""
+  """Abstract base class for compiler frontends in the registry.
+
+  This class serves as a marker/typing base for all source-to-IR frontends.
+  """
 
   pass
 
 
 class GraphFrontend(BaseFrontend):
-  """Produces LogicalGraph from code via parse/lift chain."""
+  """Produces LogicalGraph from code via parse/lift chain.
+
+  This frontend takes source code strings and converts them into
+  logical graph representations used by compiler backends.
+  """
 
   def parse_to_graph(self, code: str) -> Any:
-    """Execute implementation detail."""
+    """Parses source code into a logical graph representation.
+
+    Args:
+        code: The source code string to parse.
+
+    Returns:
+        The generated logical graph or equivalent representation.
+    """
     ...
 
 

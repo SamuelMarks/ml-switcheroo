@@ -23,14 +23,28 @@ class ClassBodyReplacer(cst.CSTTransformer):
     new_init: cst.FunctionDef,
     new_forward: cst.FunctionDef,
   ) -> None:
-    """Execute implementation detail."""
+    """Initialize ClassBodyReplacer.
+
+    Args:
+        target_class: The name of the class to replace.
+        new_init: The AST node for the new __init__ method.
+        new_forward: The AST node for the new forward method.
+    """
     self.target_class = target_class
     self.new_init = new_init
     self.new_forward = new_forward
     self.found = False
 
   def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
-    """Execute implementation detail."""
+    """Process and modify a class definition.
+
+    Args:
+        original_node: The original CST ClassDef node.
+        updated_node: The updated CST ClassDef node.
+
+    Returns:
+        The modified CST ClassDef node.
+    """
     if original_node.name.value == self.target_class:
       self.found = True
 
@@ -43,10 +57,10 @@ class ClassBodyReplacer(cst.CSTTransformer):
         # Inline bodies contain SmallStatements (e.g. Pass, Expr).
         # We wrap them in SimpleStatementLine logic.
         for stmt in current_body.body:
-          if isinstance(stmt, (cst.Pass, cst.Expr, cst.Assign, cst.AnnAssign, cst.Return)):  # pragma: no cover
+          if isinstance(stmt, (cst.Pass, cst.Expr, cst.Assign, cst.AnnAssign, cst.Return)):
             # SmallStatement -> SimpleStatementLine
             stmts_list.append(cst.SimpleStatementLine(body=[stmt]))
-      elif isinstance(current_body, cst.IndentedBlock):  # pragma: no cover
+      elif isinstance(current_body, cst.IndentedBlock):
         stmts_list = list(current_body.body)  # type: ignore
 
       new_body_stmts = []
@@ -92,11 +106,23 @@ class PythonBackend(CompilerBackend):
   """Synthesizes a Python CST Module from a LogicalGraph."""
 
   def __init__(self, framework: str = "torch", semantics: Any = None) -> None:
-    """Execute implementation detail."""
+    """Initialize the PythonBackend.
+
+    Args:
+        framework: Target ML framework (e.g., 'torch', 'jax').
+        semantics: Optional semantics configuration.
+    """
     self.framework = framework
 
   def compile(self, graph: LogicalGraph) -> str:
-    """Execute implementation detail."""
+    """Compile the given LogicalGraph to a Python string.
+
+    Args:
+        graph: The source LogicalGraph.
+
+    Returns:
+        Python source code string.
+    """
     # Use graph name if available, else default
     name = graph.name if graph.name else "SwitcherooNet"
     return self.generate(graph, class_name=name)
@@ -107,7 +133,16 @@ class PythonBackend(CompilerBackend):
     class_name: str = "SwitcherooNet",
     original_tree: Optional[cst.Module] = None,
   ) -> str:
-    """Execute implementation detail."""
+    """Generate code for the given graph and class name.
+
+    Args:
+        graph: The LogicalGraph to compile.
+        class_name: The name for the generated Python class.
+        original_tree: An optional parsed CST tree to patch.
+
+    Returns:
+        The generated Python source code string.
+    """
     ordered_nodes = topological_sort(graph)
     # Ensure graph input/output conventions are respected
     init_func = self._build_init(ordered_nodes)
@@ -152,7 +187,11 @@ class PythonBackend(CompilerBackend):
     return module.code
 
   def _generate_imports(self) -> List[cst.SimpleStatementLine]:
-    """Execute implementation detail."""
+    """Generate import statements for the chosen framework.
+
+    Returns:
+        A list of CST statement nodes for imports.
+    """
     if self.framework == "torch":
       return [
         cst.parse_statement("import torch"),  # type: ignore
@@ -182,7 +221,14 @@ class PythonBackend(CompilerBackend):
     return []
 
   def _build_init(self, nodes: List[LogicalNode]) -> cst.FunctionDef:
-    """Execute implementation detail."""
+    """Build the __init__ or setup method for the class.
+
+    Args:
+        nodes: List of logical nodes in topological order.
+
+    Returns:
+        A CST FunctionDef node.
+    """
     stmts: List[cst.BaseStatement] = []
     if self.framework in ["torch", "keras"]:
       stmts.append(cst.parse_statement("super().__init__()"))
@@ -212,7 +258,14 @@ class PythonBackend(CompilerBackend):
     )
 
   def _build_forward(self, nodes: List[LogicalNode]) -> cst.FunctionDef:
-    """Execute implementation detail."""
+    """Build the forward pass or __call__ method for the class.
+
+    Args:
+        nodes: List of logical nodes in topological order.
+
+    Returns:
+        A CST FunctionDef node.
+    """
     stmts: List[cst.BaseStatement] = []
     input_nodes = [n for n in nodes if n.kind == "Input"]
     input_arg_name = "x"
@@ -238,7 +291,7 @@ class PythonBackend(CompilerBackend):
         args_str = current_var
         if node.metadata:
           extra_args = self._format_args_from_metadata(node.metadata)
-          if extra_args:  # pragma: no cover
+          if extra_args:
             args_str += f", {extra_args}"
         line = f"{current_var} = {func_api}({args_str})"
         stmts.append(cst.parse_statement(line))
@@ -262,7 +315,7 @@ class PythonBackend(CompilerBackend):
           # We emit an actual statement because LibCST parse_statement rejects standalone comments easily
           sharding_line = f"pass  # {current_var} = keras.distribution.layout({spec_str})"
           stmts.append(cst.parse_statement(sharding_line))
-        elif self.framework == "mlx":  # pragma: no cover
+        elif self.framework == "mlx":
           sharding_line = f"pass  # MLX: mx.distributed.shard({current_var})"
           stmts.append(cst.parse_statement(sharding_line))
 
@@ -288,7 +341,14 @@ class PythonBackend(CompilerBackend):
     )
 
   def _is_stateful_layer(self, node: LogicalNode) -> bool:
-    """Execute implementation detail."""
+    """Check if a node represents a stateful layer.
+
+    Args:
+        node: The node to evaluate.
+
+    Returns:
+        True if stateful, False otherwise.
+    """
     if node.kind in ["Input", "Output"]:
       return False
     if "." in node.kind and not node.kind.startswith("nn."):
@@ -296,9 +356,16 @@ class PythonBackend(CompilerBackend):
     return True
 
   def _generate_layer_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
-    """Execute implementation detail."""
+    """Generate the initialization assignment for a stateful layer.
+
+    Args:
+        node: The stateful logical node.
+
+    Returns:
+        A CST SimpleStatementLine node.
+    """
     kind = node.kind
-    if "." not in kind:  # pragma: no cover
+    if "." not in kind:
       if self.framework == "torch":
         kind = f"nn.{kind}"
       elif self.framework in ["jax", "flax", "flax_nnx"]:
@@ -320,7 +387,7 @@ class PythonBackend(CompilerBackend):
 
     args_str = self._format_args_from_metadata(node.metadata)
     if self.framework in ["jax", "flax", "flax_nnx"]:
-      if "rngs" not in args_str:  # pragma: no cover
+      if "rngs" not in args_str:
         suffix = ", rngs=rngs" if args_str else "rngs=rngs"
         args_str += suffix
 
@@ -331,7 +398,14 @@ class PythonBackend(CompilerBackend):
     return cst.parse_statement(code)  # type: ignore
 
   def _format_args_from_metadata(self, metadata: Dict[str, Any]) -> str:
-    """Execute implementation detail."""
+    """Format node metadata dictionary into a Python arguments string.
+
+    Args:
+        metadata: The metadata dictionary.
+
+    Returns:
+        Formatted arguments string.
+    """
     if not metadata:
       return ""
     args_list = []
@@ -344,20 +418,34 @@ class PythonBackend(CompilerBackend):
     return ", ".join(args_list)
 
   def _format_partition_spec(self, sharding: Any) -> str:
-    """Execute implementation detail."""
+    """Format JAX partition spec from abstract sharding.
+
+    Args:
+        sharding: The abstract sharding definition.
+
+    Returns:
+        JAX PartitionSpec code string.
+    """
     axes = []
     for axis in sharding.axes:
       if axis is None:
         axes.append("None")
       elif isinstance(axis, str):
         axes.append(f"'{axis}'")
-      elif isinstance(axis, tuple):  # pragma: no cover
+      elif isinstance(axis, tuple):
         t_str = ", ".join(f"'{a}'" for a in axis)
         axes.append(f"({t_str})")
     return f"jax.sharding.PartitionSpec({', '.join(axes)})"
 
   def _format_partition_spec_tf(self, sharding: Any) -> str:
-    """Execute implementation detail."""
+    """Format TensorFlow layout specification.
+
+    Args:
+        sharding: The abstract sharding definition.
+
+    Returns:
+        TensorFlow layout code string.
+    """
     placements = []
     for axis in sharding.axes:
       if axis is None:
@@ -369,7 +457,14 @@ class PythonBackend(CompilerBackend):
     return f"[{', '.join(placements)}]"
 
   def _format_partition_spec_torch(self, sharding: Any) -> str:
-    """Execute implementation detail."""
+    """Format PyTorch distribution specification.
+
+    Args:
+        sharding: The abstract sharding definition.
+
+    Returns:
+        PyTorch sharding code string.
+    """
     placements = []
     for axis in sharding.axes:
       if axis is None:

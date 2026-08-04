@@ -38,7 +38,14 @@ class HtmlBackend(CompilerBackend):
     return doc.to_html()
 
   def _format_args(self, metadata: Dict[str, str]) -> str:
-    """Format metadata dict into string."""
+    """Format metadata dict into string.
+
+    Args:
+        metadata: Node metadata arguments.
+
+    Returns:
+        Formatted argument string.
+    """
     parts = []
     for k, v in metadata.items():
       if k.startswith("arg_"):
@@ -48,7 +55,14 @@ class HtmlBackend(CompilerBackend):
     return ", ".join(parts)
 
   def _is_stateful(self, node: LogicalNode) -> bool:
-    """Determine if a node represents state (Red box) vs Op (Blue box)."""
+    """Determine if a node represents state (Red box) vs Op (Blue box).
+
+    Args:
+        node: The node to check.
+
+    Returns:
+        True if the node is stateful, False otherwise.
+    """
     if node.kind in ["Input", "Output"]:
       return False
     if node.id.startswith("func_"):
@@ -61,7 +75,14 @@ class HtmlBackend(CompilerBackend):
     return False
 
   def _clean_kind(self, kind: str) -> str:
-    """Clean operation kind string."""
+    """Clean operation kind string.
+
+    Args:
+        kind: The original operation kind.
+
+    Returns:
+        The cleaned operation kind string.
+    """
     if kind.startswith("func_"):
       kind = kind[5:]
     if "." in kind:
@@ -69,7 +90,16 @@ class HtmlBackend(CompilerBackend):
     return kind.capitalize()
 
   def _create_arrow(self, start_row: int, end_row: int, arrow_type: str = "seq") -> SvgArrow:
-    """Factory for SvgArrows based on row distance."""
+    """Factory for SvgArrows based on row distance.
+
+    Args:
+        start_row: The starting row index.
+        end_row: The ending row index.
+        arrow_type: Type of arrow to create ('def', 'data', 'seq').
+
+    Returns:
+        A generated SvgArrow.
+    """
     if arrow_type == "def":
       # Red -> Blue (Right and Down)
       return SvgArrow(
@@ -115,7 +145,14 @@ class HtmlBackend(CompilerBackend):
     return SvgArrow(x1=0, y1=0, x2=0, y2=0)
 
   def _layout_graph(self, graph: LogicalGraph) -> List[GridBox]:
-    """Calculates grid positions for nodes."""
+    """Calculates grid positions for nodes.
+
+    Args:
+        graph: The logical graph.
+
+    Returns:
+        A list of GridBox elements representing the layout.
+    """
     boxes = []
     ordered = topological_sort(graph)
     current_row = 2  # Row 1 is Headers
@@ -182,9 +219,9 @@ class HtmlBackend(CompilerBackend):
           )
         )
       else:
-        if last_blue_row != -1:  # pragma: no cover
+        if last_blue_row != -1:
           arrow = self._create_arrow(last_blue_row, op_row, "seq")
-          for b in boxes:  # pragma: no cover
+          for b in boxes:
             if b.row == last_blue_row and "box b" in b.css_class:
               b.arrows.append(arrow)
               break
@@ -212,8 +249,8 @@ class HtmlBackend(CompilerBackend):
     return_row = current_row
     arrow = self._create_arrow(last_blue_row, return_row, "seq")
 
-    if last_blue_row != -1:  # pragma: no cover
-      for b in boxes:  # pragma: no cover
+    if last_blue_row != -1:
+      for b in boxes:
         if b.row == last_blue_row and "box b" in b.css_class:
           b.arrows.append(arrow)
           break

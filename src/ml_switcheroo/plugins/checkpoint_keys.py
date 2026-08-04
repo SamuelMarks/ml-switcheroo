@@ -23,8 +23,18 @@ import numpy as np
 import re
 
 class KeyMapper:
+  '''A utility class to remap PyTorch checkpoint keys and values to runtime formats.'''
+
   @staticmethod
   def map_name(name):
+    '''Standardizes parameter name conventions from PyTorch to target frameworks.
+
+    Args:
+        name (str): The original parameter key from the state dictionary.
+
+    Returns:
+        str: The standardized parameter name, or None if not standardizing.
+    '''
     # 1. Standardize replacements
     name = name.replace("weight", "kernel")
     name = name.replace("running_mean", "mean")
@@ -47,6 +57,15 @@ class KeyMapper:
 
   @staticmethod
   def map_value(key, val):
+    '''Converts and transposes parameter values into standardized NumPy arrays.
+
+    Args:
+        key (str): The parameter key associated with the value.
+        val (any): The parameter tensor or array.
+
+    Returns:
+        np.ndarray: The converted and transposed parameter value.
+    '''
     try:
         # Convert Torch tensors or other formats to numpy
         if hasattr(val, 'cpu'):
@@ -70,6 +89,14 @@ class KeyMapper:
 
   @classmethod
   def from_torch(cls, state_dict):
+      '''Converts a complete PyTorch state dictionary to mapped names and values.
+
+      Args:
+          state_dict (dict): The original PyTorch state dictionary.
+
+      Returns:
+          dict: A dictionary mapping standardized keys to NumPy array values.
+      '''
       new_dict = {}
       for k, v in state_dict.items():
         nk = cls.map_name(k)
@@ -88,6 +115,13 @@ def transform_checkpoint_keys(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   Triggers if mapped via `requires_plugin="checkpoint_mapper"`.
   Injects KeyMapper source code once per file.
+
+  Args:
+      node (cst.Call): The libcst Call node representing load_state_dict.
+      ctx (HookContext): The current hook transformation context.
+
+  Returns:
+      cst.CSTNode: The transformed node calling KeyMapper.from_torch.
   """
   # 1. Identify 'state_dict' argument (usually arg 0)
   args = list(node.args)

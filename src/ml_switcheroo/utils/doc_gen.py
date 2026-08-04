@@ -86,7 +86,16 @@ class MigrationGuideGenerator:
     return "\n".join(md_lines)
 
   def _has_variants(self, op_name: str, source: str) -> bool:
-    """Checks if an operation has definitions for at least the source framework."""
+    """Checks if an operation has definitions for at least the source framework.
+
+    Args:
+        op_name: Abstract operation ID.
+        source: Source framework name.
+
+    Returns:
+        True if the operation has a definition for the source framework, False
+        otherwise.
+    """
     details = self.semantics.get_definition_by_id(op_name)
     if not details:
       return False
@@ -95,7 +104,15 @@ class MigrationGuideGenerator:
     return source in variants
 
   def _generate_table_header(self, source: str, target: str) -> str:
-    """Creates the Markdown table header."""
+    """Creates the Markdown table header.
+
+    Args:
+        source: The name of the source framework.
+        target: The name of the target framework.
+
+    Returns:
+        The Markdown table header string.
+    """
     s_title = source.capitalize()
     t_title = target.capitalize()
     return f"| {s_title} API | {t_title} API | Argument Changes |\n| :--- | :--- | :--- |"
@@ -168,7 +185,14 @@ class MigrationGuideGenerator:
     return f"| `{src_api}` | `{tgt_api}` | {diff_str} |"
 
   def _fmt_api(self, variant: Optional[Dict[str, Any]]) -> str:
-    """Safe formatter for API variant."""
+    """Safe formatter for API variant.
+
+    Args:
+        variant: The API variant definition dictionary, or None.
+
+    Returns:
+        The formatted API path string.
+    """
     if not variant:
       return "—"
     return variant.get("api", "—")  # type: ignore

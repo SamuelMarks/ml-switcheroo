@@ -7,13 +7,13 @@ transforms Python LibCST trees into the MLIR CST object model.
 import libcst as cst
 from typing import Dict, List, Optional, Union, Sequence
 
-from ml_switcheroo.core.mlir.nodes import (
+from ml_switcheroo.core.cst.base import Trivia
+from ml_switcheroo.core.mlir.cst import (
   ModuleNode,
   OperationNode,
   BlockNode,
   ValueNode,
   AttributeNode,
-  TriviaNode,
 )
 from ml_switcheroo.core.scanners import get_full_name
 
@@ -48,7 +48,6 @@ class SSAContext:
   def lookup(self, name: str) -> Optional[ValueNode]:
     """Resolve a Python variable name to its current SSA value.
 
-
     Searches scopes from innermost to outermost.
 
     Args:
@@ -64,7 +63,7 @@ class SSAContext:
     return None
 
   def allocate_ssa(self, prefix: str = "%") -> ValueNode:
-    """Generates a new unique SSA value.
+    """Generate a new unique SSA value.
 
     Args:
         prefix: String prefix for the ID (default "%").
@@ -102,15 +101,15 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     body_block = self._emit_block(node.body)
 
     # Capture module header comments
-    if hasattr(node, "header"):  # pragma: no cover
+    if hasattr(node, "header"):
       header_trivia = []
       for line in node.header:
         if line.comment:
           text = line.comment.value.replace("#", "//", 1)
-          header_trivia.append(TriviaNode(text, kind="comment"))
-          header_trivia.append(TriviaNode("\n", kind="newline"))
-        elif line.newline:  # pragma: no cover
-          header_trivia.append(TriviaNode("\n", kind="newline"))
+          header_trivia.append(Trivia(text))
+          header_trivia.append(Trivia("\n"))
+        elif line.newline:
+          header_trivia.append(Trivia("\n"))
 
       # Attach to first op
       if header_trivia and body_block.operations:
@@ -118,32 +117,32 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     return ModuleNode(body=body_block)
 
-  def _extract_trivia(self, node: cst.CSTNode) -> List[TriviaNode]:
-    """Extracts comments and newlines from a CST node's leading lines.
+  def _extract_trivia(self, node: cst.CSTNode) -> List[Trivia]:
+    """Extract comments and newlines from a CST node's leading lines.
 
     Args:
         node: The CST node to inspect.
 
     Returns:
-        A list of MLIR TriviaNodes (comments translated to `//` syntax).
+        A list of MLIR Trivias (comments translated to `//` syntax).
 
     """
     trivia = []
-    if hasattr(node, "leading_lines"):  # pragma: no cover
+    if hasattr(node, "leading_lines"):
       for line in node.leading_lines:
         if line.comment:
           text = line.comment.value.replace("#", "//", 1)
-          trivia.append(TriviaNode(text, kind="comment"))
-          trivia.append(TriviaNode("\n", kind="newline"))
-        elif line.newline:  # pragma: no cover
+          trivia.append(Trivia(text))
+          trivia.append(Trivia("\n"))
+        elif line.newline:
           # Persist empty lines for formatting niceness
           if line.newline.value:
-            trivia.append(TriviaNode("\n", kind="newline"))
+            trivia.append(Trivia("\n"))
 
     return trivia
 
   def _emit_block(self, body_enc: Union[cst.BaseSuite, Sequence[cst.CSTNode]], label: str = "") -> BlockNode:
-    """Converts a sequence of statements (or a Suite) into an MLIR Block.
+    """Convert a sequence of statements (or a Suite) into an MLIR Block.
 
     Args:
         body_enc: A CST Suite (IndentedBlock) or list of statements.
@@ -157,7 +156,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     stmts = []  # type: ignore
     if isinstance(body_enc, (cst.IndentedBlock, cst.SimpleStatementSuite, cst.Module)):
       stmts = body_enc.body  # type: ignore
-    elif isinstance(body_enc, (list, tuple)):  # pragma: no cover
+    elif isinstance(body_enc, (list, tuple)):
       stmts = body_enc  # type: ignore
 
     for stmt in stmts:
@@ -186,8 +185,8 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
       results = self._emit_if(stmt)
     elif isinstance(stmt, cst.While):
       results = self._emit_while(stmt)
-    elif isinstance(stmt, cst.SimpleStatementLine):  # pragma: no cover
-      if len(stmt.body) > 0:  # pragma: no cover
+    elif isinstance(stmt, cst.SimpleStatementLine):
+      if len(stmt.body) > 0:
         node = stmt.body[0]
         results = self._dispatch_small_stmt(node)
 
@@ -199,7 +198,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     return results
 
   def _dispatch_small_stmt(self, node: cst.CSTNode) -> List[OperationNode]:
-    """Handles small statements inside simple lines (Assign, Return, Expr).
+    """Handle small statements inside simple lines (Assign, Return, Expr).
 
     Args:
         node: The inner statement node.
@@ -220,7 +219,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     return []
 
   def _emit_import(self, node: Union[cst.Import, cst.ImportFrom]) -> OperationNode:
-    """Converts Import/ImportFrom to `sw.import`.
+    """Convert Import/ImportFrom to `sw.import`.
 
     Args:
         node: The Import or ImportFrom CST node.
@@ -264,7 +263,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     return OperationNode(name="sw.import", attributes=attrs)
 
   def _emit_assign(self, node: cst.Assign) -> List[OperationNode]:
-    """Converts an assignment statement.
+    """Convert an assignment statement.
 
     Emits expression operations and registers the result in the SSA context.
     Handles both variable assignment (`x = y`) and attribute assignment (`x.attr = y`)
@@ -287,7 +286,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
         self.ctx.declare(t.value, val)
 
       # Attribute Assignment: self.x = ...
-      elif isinstance(t, cst.Attribute):  # pragma: no cover
+      elif isinstance(t, cst.Attribute):
         # Check if base is known (e.g. self)
         base_name = self._flatten_attr(t.value)
         if base_name:
@@ -298,7 +297,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
           if base_val:
             attr_name = t.attr.value
             set_op = OperationNode(
-              name="sw.setattr", operands=[base_val, val], attributes=[AttributeNode("name", f'"{attr_name}"')]
+              name="sw.setattr", operands=[base_val, val], attributes=[AttributeNode(name="name", value=f'"{attr_name}"')]
             )
             ops.append(set_op)
 
@@ -306,22 +305,35 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
             # This allows subsequent `self.layer` access to map back to this val if needed
             # But SSA logic handles lookup by name. self.layer is complex.
             pass
-          else:
-            # Fallback if base not resolved
-            pass
 
     return ops
 
   def _emit_while(self, node: cst.While) -> List[OperationNode]:
-    """Converts a while statement. Overridden in subclasses for specific dialects."""
-    return []  # pragma: no cover
+    """Convert a while statement. Overridden in subclasses for specific dialects.
+
+    Args:
+        node: The While CST node.
+
+    Returns:
+        List of generated OperationNodes.
+
+    """
+    return []
 
   def _emit_if(self, node: cst.If) -> List[OperationNode]:
-    """Converts an if statement. Overridden in subclasses for specific dialects."""
-    return []  # pragma: no cover
+    """Convert an if statement. Overridden in subclasses for specific dialects.
+
+    Args:
+        node: The If CST node.
+
+    Returns:
+        List of generated OperationNodes.
+
+    """
+    return []
 
   def _emit_return(self, node: cst.Return) -> List[OperationNode]:
-    """Converts a return statement to `sw.return`.
+    """Convert a return statement to `sw.return`.
 
     Args:
         node: The Return node.
@@ -343,7 +355,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     return ops
 
   def _flatten_attr(self, node: cst.CSTNode) -> Optional[str]:
-    """Helper to flatten a Name or Attribute chain into a string.
+    """Flatten a Name or Attribute chain into a string.
 
     Args:
         node: CST node.
@@ -361,7 +373,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     return None
 
   def _get_binop_str(self, operator: cst.BaseBinaryOp) -> str:
-    """Maps LibCST binary operator classes to string codes.
+    """Map LibCST binary operator classes to string codes.
 
     Args:
         operator: The CST binary operator node.

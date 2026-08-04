@@ -35,21 +35,23 @@ class AuxiliaryPass(RewriterPass):
 
     Returns:
         The transformed CST.
-
     """
     transformer = AuxiliaryTransformer(context)
     return module.visit(transformer)
 
 
 class AuxiliaryTransformer(cst.CSTTransformer):
-  """LibCST Transformer for auxiliary constructs."""
+  """LibCST Transformer for auxiliary constructs.
+
+  Attributes:
+      context: The shared execution context.
+  """
 
   def __init__(self, context: RewriterContext) -> None:
     """Initialize.
 
     Args:
         context: The execution context.
-
     """
     self.context = context
     self._cached_traits: Optional[StructuralTraits] = None
@@ -57,47 +59,74 @@ class AuxiliaryTransformer(cst.CSTTransformer):
   # --- Properties ---
 
   def _get_traits(self) -> StructuralTraits:
-    """Lazily loads target structural traits."""
-    if self._cached_traits:  # pragma: no cover
-      return self._cached_traits  # pragma: no cover
-    # pragma: no cover
-    conf = self.context.semantics.get_framework_config(self.context.target_fw)  # pragma: no cover
-    if conf and "traits" in conf:  # pragma: no cover
-      self._cached_traits = StructuralTraits.model_validate(conf["traits"])  # pragma: no cover
-    else:  # pragma: no cover
-      self._cached_traits = StructuralTraits()  # pragma: no cover
-    # pragma: no cover
-    return self._cached_traits  # pragma: no cover
+    """Lazily loads target structural traits.
+
+    Returns:
+        The StructuralTraits instance for the target framework.
+    """
+    if self._cached_traits:
+      return self._cached_traits
+
+    conf = self.context.semantics.get_framework_config(self.context.target_fw)
+    if conf and "traits" in conf:
+      self._cached_traits = StructuralTraits.model_validate(conf["traits"])
+    else:
+      self._cached_traits = StructuralTraits()
+
+    return self._cached_traits
 
   def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
-    """Resolves node to string using context alias map."""
+    """Resolves node to string using context alias map.
+
+    Args:
+        node: The CST expression node to resolve.
+
+    Returns:
+        The canonical qualified name as a dot-separated string, or None if the
+        expression cannot be resolved.
+    """
     full_str = self._cst_to_string(node)
     if not full_str:
-      return None  # pragma: no cover
+      return None
 
     parts = full_str.split(".")
     root = parts[0]
 
     if root in self.context.alias_map:
-      canonical_root = self.context.alias_map[root]  # pragma: no cover
-      if len(parts) > 1:  # pragma: no cover
-        return f"{canonical_root}.{'.'.join(parts[1:])}"  # pragma: no cover
-      return canonical_root  # pragma: no cover
+      canonical_root = self.context.alias_map[root]
+      if len(parts) > 1:
+        return f"{canonical_root}.{'.'.join(parts[1:])}"
+      return canonical_root
 
     return full_str
 
   def _cst_to_string(self, node: cst.BaseExpression) -> Optional[str]:
-    """Flatten CST to dot-string."""
+    """Flatten CST to dot-string.
+
+    Args:
+        node: The CST expression node to flatten.
+
+    Returns:
+        The flattened dot-separated string representation of the node, or None
+        if the node type is not supported.
+    """
     if isinstance(node, cst.Name):
       return node.value
     elif isinstance(node, cst.Attribute):
       base = self._cst_to_string(node.value)
-      if base:  # pragma: no cover
+      if base:
         return f"{base}.{node.attr.value}"
-    return None  # pragma: no cover
+    return None
 
   def _create_dotted_name(self, name_str: str) -> cst.BaseExpression:
-    """Creates CST node from string."""
+    """Creates CST node from string.
+
+    Args:
+        name_str: A dot-separated name string.
+
+    Returns:
+        The constructed CST expression node representing the dotted name.
+    """
     parts = name_str.split(".")
     node = cst.Name(parts[0])
     for part in parts[1:]:
@@ -107,15 +136,30 @@ class AuxiliaryTransformer(cst.CSTTransformer):
   # --- Error Handling ---
 
   def _report_failure(self, reason: str) -> None:
-    """Report error to context."""
+    """Report error to context.
+
+    Args:
+        reason: The error message string describing the failure.
+    """
     self.context.current_stmt_errors.append(reason)
 
   def _report_warning(self, reason: str) -> None:
-    """Report warning to context."""
-    self.context.current_stmt_warnings.append(reason)  # pragma: no cover
+    """Report warning to context.
+
+    Args:
+        reason: The warning message string describing the issue.
+    """
+    self.context.current_stmt_warnings.append(reason)
 
   def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> Optional[bool]:
-    """Reset statement buffers."""
+    """Reset statement buffers.
+
+    Args:
+        node: The SimpleStatementLine node being visited.
+
+    Returns:
+        True to continue visiting children, or None to stop.
+    """
     self.context.current_stmt_errors = []
     self.context.current_stmt_warnings = []
     return True
@@ -125,20 +169,28 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
   ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel[Any]]:
-    """Process statement errors."""
+    """Process statement errors.
+
+    Args:
+        original_node: The original SimpleStatementLine node.
+        updated_node: The updated SimpleStatementLine node.
+
+    Returns:
+        The updated node, or an error-marked node if warnings/errors occurred.
+    """
     # Check warnings
     if self.context.current_stmt_warnings:
-      unique = list(dict.fromkeys(self.context.current_stmt_warnings))  # pragma: no cover
-      msg = "; ".join(unique)  # pragma: no cover
-      return EscapeHatch.mark_failure(updated_node, msg)  # type: ignore  # pragma: no cover
+      unique = list(dict.fromkeys(self.context.current_stmt_warnings))
+      msg = "; ".join(unique)
+      return EscapeHatch.mark_failure(updated_node, msg)  # type: ignore
 
     # Check errors (Priority over warnings for reversion logic structure)
     if self.context.current_stmt_errors:
-      unique = list(dict.fromkeys(self.context.current_stmt_errors))  # pragma: no cover
-      msg = "; ".join(unique)  # pragma: no cover
-      return EscapeHatch.mark_failure(original_node, msg)  # type: ignore  # pragma: no cover
+      unique = list(dict.fromkeys(self.context.current_stmt_errors))
+      msg = "; ".join(unique)
+      return EscapeHatch.mark_failure(original_node, msg)  # type: ignore
 
-    return updated_node
+    return updated_node  # pragma: no cover
 
   # --- Decorator Logic ---
 
@@ -147,15 +199,12 @@ class AuxiliaryTransformer(cst.CSTTransformer):
   ) -> Union[cst.Decorator, cst.RemovalSentinel]:
     """Rewrites decorators.
 
-        Logic:
+    Args:
+        original_node: The original Decorator node.
+        updated_node: The updated Decorator node.
 
-    Resolve decorator name (e.g. `torch.jit.script`).
-
-    Lookup semantics.
-
-    If target variant is None -> Remove.
-
-    If target variant has API -> Rename.
+    Returns:
+        The renamed decorator, a removal sentinel, or the unchanged node.
     """
     # Extract expression
     expr = original_node.decorator
@@ -167,7 +216,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
 
     lookup = self.context.semantics.get_definition(name)
     if not lookup:
-      return updated_node
+      return updated_node  # pragma: no cover
 
     _, details = lookup
     variants = details.get("variants", {})
@@ -194,33 +243,39 @@ class AuxiliaryTransformer(cst.CSTTransformer):
 
       return updated_node.with_changes(decorator=new_expr)
 
-    return updated_node  # pragma: no cover
+    return updated_node
 
   # --- Control Flow Logic ---
 
-  # Fix: Ensure leave_For handles error bubbling since it isn't a SimpleStatementLine
   def leave_For(self, original_node: cst.For, updated_node: cst.For) -> Union[cst.For, cst.CSTNode, cst.FlattenSentinel]:  # type: ignore
-    """Processes 'for' loops for safety checks and unrolling."""
+    """Processes 'for' loops for safety checks and unrolling.
+
+    Args:
+        original_node: The original For loop node.
+        updated_node: The updated For loop node.
+
+    Returns:
+        The transformed loop node, unrolled statement list, or the original node in case of errors.
+    """
     # 1. Attempt Static Unroll (Optimization Hook)
     static_hook = get_hook("transform_for_loop_static")
     if static_hook:
       try:
         new_node = static_hook(updated_node, self.context.hook_context)
-        if new_node is not updated_node:
+        if new_node is not updated_node:  # pragma: no cover
           return new_node
-      except Exception as e:  # pragma: no cover
-        import traceback  # pragma: no cover
+      except Exception as e:
+        import traceback
 
-        # pragma: no cover
-        traceback.print_exc()  # pragma: no cover
-        self._report_warning(f"Static loop unrolling failed: {str(e)}")  # pragma: no cover
+        traceback.print_exc()
+        self._report_warning(f"Static loop unrolling failed: {str(e)}")
 
     # -  General Safety Check Hook
     hook = get_hook("transform_for_loop")
-    if hook:  # pragma: no branch
+    if hook:
       try:
         new_node = hook(updated_node, self.context.hook_context)
-        if new_node is not updated_node:
+        if new_node is not updated_node:  # pragma: no cover
           return new_node
       except Exception as e:
         self._report_failure(f"Loop transformation failed: {str(e)}")

@@ -1,7 +1,7 @@
 """Test suite for the Differ module."""
 
-from ml_switcheroo.core.compiler.differ import GraphDiffer, _is_likely_stateful
-from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.differ import GraphDiffer, _is_likely_stateful, DeleteAction, ReplaceAction
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 
 
 def test_differ_no_changes():
@@ -19,7 +19,7 @@ def test_differ_deleted_node():
   g2 = LogicalGraph(nodes=[], edges=[])
   actions = differ.diff(g1, g2)
   assert len(actions) > 0
-  assert actions[0].__class__.__name__ == "DeleteAction"
+  assert isinstance(actions[0], DeleteAction)
 
 
 def test_differ_replace_node():
@@ -28,8 +28,22 @@ def test_differ_replace_node():
   g1 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
   g2 = LogicalGraph(nodes=[LogicalNode("fused_a", "Linear")], edges=[])
   actions = differ.diff(g1, g2)
-  assert len(actions) > 0
-  assert actions[0].__class__.__name__ == "ReplaceAction"
+  assert len(actions) == 2  # One init, one call, since Linear is stateful
+  assert isinstance(actions[0], ReplaceAction)
+  assert actions[0].is_init
+  assert isinstance(actions[1], ReplaceAction)
+  assert not actions[1].is_init
+
+
+def test_differ_replace_node_stateless():
+  """Verifies replace node that is stateless."""
+  differ = GraphDiffer()
+  g1 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
+  g2 = LogicalGraph(nodes=[LogicalNode("fused_a", "add")], edges=[])
+  actions = differ.diff(g1, g2)
+  assert len(actions) == 1
+  assert isinstance(actions[0], ReplaceAction)
+  assert not actions[0].is_init
 
 
 def test_differ_insert_node():
@@ -50,6 +64,17 @@ def test_differ_complex_replace():
   )
   actions = differ.diff(g1, g2)
   assert len(actions) > 0
+  assert any(isinstance(a, DeleteAction) and a.node_id == "b" for a in actions)
+
+
+def test_differ_unmatched_new():
+  """Verifies behavior when new node doesn't match any anchor."""
+  differ = GraphDiffer()
+  g1 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
+  g2 = LogicalGraph(nodes=[LogicalNode("fused_b", "Linear")], edges=[])
+  actions = differ.diff(g1, g2)
+  assert len(actions) == 1
+  assert isinstance(actions[0], DeleteAction)
 
 
 def test__is_likely_stateful():
@@ -59,3 +84,4 @@ def test__is_likely_stateful():
   assert _is_likely_stateful(LogicalNode("3", "fused_add")) is False
   assert _is_likely_stateful(LogicalNode("4", "my_FusedOp")) is True
   assert _is_likely_stateful(LogicalNode("5", "")) is False
+  assert _is_likely_stateful(LogicalNode("6", None)) is False

@@ -110,7 +110,7 @@ class CoverageScanner(cst.CSTVisitor):
     """
     fqn = self._resolve_fqn(node)
     if not fqn:
-      return  # pragma: no cover
+      return
 
     # Check Root filtering
     root = fqn.split(".")[0]
@@ -153,7 +153,7 @@ class CoverageScanner(cst.CSTVisitor):
     # 1. Flatten CST to string
     raw_name = get_full_name(node)  # type: ignore
     if not raw_name:
-      return ""  # pragma: no cover
+      return ""
 
     # 2. Resolve Alias
     parts = raw_name.split(".")

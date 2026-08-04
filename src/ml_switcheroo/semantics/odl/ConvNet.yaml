@@ -1,0 +1,6 @@
+operation: ConvNet
+description: Definition for ConvNet
+std_args: []
+variants:
+  latex_dsl:
+    api: midl.ConvNet

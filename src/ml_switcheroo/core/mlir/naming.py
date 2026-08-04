@@ -85,10 +85,10 @@ class NamingContext:
       # We distinguish explicit semantic hints from SSA hints by checking structure
       if not ssa_name.endswith(hint) and not hint.startswith("_") and not ssa_name.startswith(f"%{hint}"):
         # This implies 'hint' came from op type, not ssa ID
-        if not base.startswith("_"):  # pragma: no cover
+        if not base.startswith("_"):
           base = f"_{base}"
 
-    elif ssa_name.startswith("%"):  # pragma: no cover
+    elif ssa_name.startswith("%"):
       base = "_" + ssa_name[1:]
 
     py_name = base
@@ -108,15 +108,15 @@ class NamingContext:
         while True:
           # Clean might be undefined if hint was None
           prefix = "v"
-          if hint:  # pragma: no cover
+          if hint:
             prefix = hint.lstrip("%").replace(".", "_")
-            if not prefix.startswith("_"):  # pragma: no cover
+            if not prefix.startswith("_"):
               prefix = f"_{prefix}"
 
           attempt = f"{prefix}_{count}"
           if attempt not in self._used_names:
             break
-          count += 1  # pragma: no cover
+          count += 1
 
         py_name = attempt
       else:

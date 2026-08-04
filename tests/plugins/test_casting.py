@@ -151,6 +151,19 @@ def test_object_traits_false(rewriter):
   assert res is node
 
 
+def test_object_traits_missing_attr(rewriter):
+  """Verifies behavior when traits object lacks the attribute."""
+
+  class EmptyTraits:
+    pass
+
+  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": EmptyTraits()}
+  rewriter.ctx.current_op_id = "CastFloat"
+  node = cst.parse_expression("x.float()")
+  res = transform_casting(node, rewriter.ctx)
+  assert res is node
+
+
 def test_non_attribute_call(rewriter):
   """Verifies the behavior of non attribute call."""
   rewriter.ctx.current_op_id = "CastFloat"

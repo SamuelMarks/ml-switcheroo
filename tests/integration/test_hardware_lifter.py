@@ -14,7 +14,7 @@ class TestHardwareLifters(unittest.TestCase):
     """Verifies the behavior of SASS lifter conv2d."""
     sass_code = "\nL_KY_conv:\n  MOV R2, RZ;\nL_KX_conv:\n  FFMA R0, R5, R6, R0;\n  ISETP.LT.AND P0, PT, R2, 3, PT;\n  BRA L_KX_conv;\n        "
     parser = SassParser(sass_code)
-    ast_nodes = parser.parse()
+    ast_nodes = parser.parse().statements
     lifter = SassLifter()
     graph = lifter.lift(ast_nodes)
     self.assertIsNotNone(graph)
@@ -25,7 +25,7 @@ class TestHardwareLifters(unittest.TestCase):
     """Verifies the behavior of RDNA lifter conv2d."""
     rdna_code = "\nv_mov_b32 v0, 0\nv_add_f32 v1, v2, v3\ns_cbranch_vccnz L_KX_conv\n        "
     parser = RdnaParser(rdna_code)
-    ast_nodes = parser.parse()
+    ast_nodes = parser.parse().statements
     lifter = RdnaLifter()
     graph = lifter.lift(ast_nodes)
     self.assertIsNotNone(graph)

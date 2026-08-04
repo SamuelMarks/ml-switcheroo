@@ -142,4 +142,4 @@ def test_extract_trivia_newlines():
   )
   trivia = emitter._extract_trivia(node)
   assert len(trivia) == 1
-  assert trivia[0].content == "\n"
+  assert trivia[0].text == "\n"

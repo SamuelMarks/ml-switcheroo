@@ -125,7 +125,7 @@ def strategies_from_spec(
 
   # 3. Containers
   if isinstance(type_str, NoneType):
-    return st.none()  # pragma: no cover
+    return st.none()
 
   if isinstance(type_str, OptionalType):
     return st.one_of(st.none(), strategies_from_spec(type_str.inner, constraints, shared_dims))
@@ -190,10 +190,10 @@ def _array_strategy(
       d = d.strip().replace("'", "").replace('"', "")
       if d.isdigit():
         # Fixed dimension
-        dims.append(st.just(int(d)))  # pragma: no cover
+        dims.append(st.just(int(d)))
       elif d.isidentifier() and shared_dims is not None:
         # Symbolic dimension
-        if d not in shared_dims:  # pragma: no cover
+        if d not in shared_dims:
           # Define symbol (1 to 8 size) in shared scope
           shared_dims[d] = st.shared(st.integers(min_value=1, max_value=8), key=d)
         dims.append(shared_dims[d])
@@ -222,7 +222,7 @@ def _array_strategy(
     max_v = int(mx) if mx is not None else 10
     elements = st.integers(min_value=min_v, max_value=max_v)
 
-  elif np.issubdtype(dtype, np.floating):  # pragma: no cover
+  elif np.issubdtype(dtype, np.floating):
     min_v = float(mn) if mn is not None else -10.0  # type: ignore
     max_v = float(mx) if mx is not None else 10.0  # type: ignore
     elements = st.floats(  # type: ignore

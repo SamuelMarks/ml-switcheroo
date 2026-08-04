@@ -18,7 +18,11 @@ from ml_switcheroo.config import get_framework_priority_order
 
 
 class DocContextBuilder:
-  """Prepares view data for operation documentation pages."""
+  """Prepares view data for operation documentation pages.
+
+  This builder transforms internal operation definitions into a structured
+  view context dictionary that can be used directly by documentation generators.
+  """
 
   def __init__(self, semantics: SemanticsManager):
     """Initialize the builder.
@@ -62,6 +66,9 @@ class DocContextBuilder:
     - Tuple: ("x", "int")
     - Dict: {"name": "x", "type": "int", "default": "-1"}
 
+    Args:
+        std_args: List of standard arguments in various ODL formats.
+
     Returns:
         List of strings like ["x: Tensor", "dim: int = -1"].
 
@@ -76,9 +83,9 @@ class DocContextBuilder:
         name = arg
       elif isinstance(arg, (list, tuple)) and len(arg) > 0:
         name = arg[0]
-        if len(arg) > 1:  # pragma: no cover
+        if len(arg) > 1:
           type_hint = arg[1]
-      elif isinstance(arg, dict):  # pragma: no cover
+      elif isinstance(arg, dict):
         name = arg.get("name", "unknown")
         type_hint = arg.get("type")
         default_val = arg.get("default")
@@ -153,7 +160,7 @@ class DocContextBuilder:
         variant: The variant definition dictionary.
 
     Returns:
-        A readable string string (e.g. "Direct Mapping", "Plugin (...)").
+        A readable string (e.g. "Direct Mapping", "Plugin (...)").
 
     """
     if "requires_plugin" in variant:

@@ -19,7 +19,15 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Helper: Creates a CST Attribute chain from string."""
+  """Helper: Creates a CST Attribute chain from string.
+
+  Args:
+      name_str (str): A dot-separated name string (e.g., 'jax.numpy.float32').
+
+  Returns:
+      cst.BaseExpression: The constructed LibCST expression node representable
+          as an Attribute or Name chain.
+  """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -30,8 +38,14 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 def _supports_numpy_casting(ctx: HookContext) -> bool:
   """Checks if the target framework configuration supports numpy-style.
 
+  Uses `.astype()` calling conventions via PluginTraits.
 
-  `.astype()` calling conventions via PluginTraits.
+  Args:
+      ctx (HookContext): The current rewriting hook context containing semantics and target framework.
+
+  Returns:
+      bool: True if the target framework configuration supports numpy-style
+          casting, False otherwise.
   """
   if not ctx.semantics:
     return False
@@ -52,8 +66,8 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
 
   if hasattr(traits, "has_numpy_compatible_arrays"):
     return traits.has_numpy_compatible_arrays  # type: ignore
-  # pragma: no cover
-  return False  # pragma: no cover
+
+  return False
 
 
 @register_hook("type_methods")
@@ -73,7 +87,6 @@ def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       cst.Call: The transformed node utilizing `.astype()`.
-
   """
   # 0. Capability Check (Decoupled from hardcoded strings)
   if not _supports_numpy_casting(ctx):
@@ -118,7 +131,7 @@ def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   if not target_type_id:
     # If metadata is missing/resolvable, we cannot safely transform.
-    return node  # pragma: no cover
+    return node
 
   # 2. Resolve Target Dtype API
   # Ask the semantics manager: "How does target_fw implement 'Float32'?"

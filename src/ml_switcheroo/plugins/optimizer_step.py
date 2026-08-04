@@ -34,7 +34,15 @@ from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Helper to create a CST Attribute chain."""
+  """Helper to create a CST Attribute chain.
+
+  Args:
+      name_str: A dot-separated string representing a hierarchical name
+          (e.g., "torch.optim.Adam").
+
+  Returns:
+      A LibCST expression node representing the attribute chain.
+  """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -118,7 +126,15 @@ def strip_zero_grad(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
 
 def _get_func_name(node: cst.Call) -> str:
-  """Helper to extract function name from Call node."""
+  """Helper to extract function name from Call node.
+
+  Args:
+      node: The LibCST Call node to inspect.
+
+  Returns:
+      The extracted function/method name as a string, or "step" if it cannot
+      be extracted.
+  """
   if isinstance(node.func, cst.Attribute):
     return node.func.attr.value
   return "step"

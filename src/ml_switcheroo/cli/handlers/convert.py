@@ -67,7 +67,19 @@ def handle_convert(
     log_error(f"Input not found: {input_path}")
     return 1
 
-  # 1. Load Configuration (TOML + CLI overrides)
+  # 1. Infer source from extension if omitted
+  if not source and input_path.is_file():
+    ext = input_path.suffix.lower()
+    ext_map = {".html": "html", ".tex": "latex_dsl", ".mlir": "mlir", ".sass": "sass", ".s": "rdna"}
+    if ext in ext_map:
+      inferred = ext_map[ext]
+      from ml_switcheroo.frameworks.base import available_frameworks
+
+      if inferred in available_frameworks():
+        source = inferred
+        log_info(f"Inferred source framework '{source}' from file extension.")
+
+  # 2. Load Configuration (TOML + CLI overrides)
   config = RuntimeConfig.load(
     source=source,
     target=target,
@@ -82,7 +94,7 @@ def handle_convert(
   # If the user defined 'plugin_paths' in pyproject.toml, load them now so hooks are active.
   if config.plugin_paths:
     loaded_count = load_plugins(extra_dirs=config.plugin_paths)
-    if loaded_count > 0:  # pragma: no cover
+    if loaded_count > 0:
       log_info(f"Loaded {loaded_count} external plugins from configuration.")
 
   semantics = SemanticsManager()
@@ -95,7 +107,7 @@ def handle_convert(
     if not result.success:
       return 1
 
-  elif input_path.is_dir():  # pragma: no cover
+  elif input_path.is_dir():
     if not output_path:
       log_error("Directory conversion requires --out destination directory.")
       return 1
@@ -112,11 +124,11 @@ def handle_convert(
       dest_file = output_path / rel_path
 
       batch_trace = None
-      if json_trace_path:  # pragma: no cover
+      if json_trace_path:
         # If doing a directory batch, we cannot write all traces to one file.
         # Heuristic: if trace path provided, write side-by-side with output?
         # Or simply allow trace naming derived from output structure.
-        if output_path:  # pragma: no cover
+        if output_path:
           batch_trace = (output_path / rel_path).with_suffix(".trace.json")
 
       result = _convert_single_file(src_file, dest_file, semantics, verify, config, batch_trace)
@@ -227,7 +239,7 @@ def _print_batch_summary(results: Dict[str, ConversionResult]) -> None:
 
   for filename, res in results.items():
     if res.success and not res.has_errors:
-      continue  # pragma: no cover
+      continue
     status = "❌ Failed" if not res.success else "⚠️ Warnings"
     issues = "; ".join(res.errors) if res.errors else "Unknown Error"
     table.add_row(filename, status, issues)

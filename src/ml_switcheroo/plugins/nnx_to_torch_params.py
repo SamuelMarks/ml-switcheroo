@@ -23,7 +23,16 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Creates a CST attribute chain from a string string."""
+  """Creates a CST attribute chain from a dot-separated string name.
+
+  Args:
+      name_str: A dot-separated string representation of the attribute chain
+          (e.g., "torch.nn.Parameter").
+
+  Returns:
+      cst.BaseExpression: The constructed CST BaseExpression, which will be a
+          nested cst.Attribute structure (or cst.Name if there are no dots).
+  """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -32,13 +41,21 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 def _extract_leaf_name(node: cst.BaseExpression) -> Optional[str]:
-  """Helper to extract the right-most name from a call signature."""
+  """Helper to extract the right-most name from a call signature.
+
+  Args:
+      node: The CST BaseExpression to extract the leaf name from.
+
+  Returns:
+      Optional[str]: The name string of the right-most attribute/name,
+          or None if the node is of an unsupported type.
+  """
   if isinstance(node, cst.Name):
     return node.value
   elif isinstance(node, cst.Attribute):
     return node.attr.value
   else:
-    return None  # pragma: no cover
+    return None
 
 
 @register_hook("nnx_param_to_torch")

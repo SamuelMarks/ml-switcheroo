@@ -68,5 +68,6388 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "DsAddF32": {
+    "api": "ds_add_f32",
+    "description": "Auto-mapped instruction DS_ADD_F32"
+  },
+  "DsAddF64": {
+    "api": "ds_add_f64",
+    "description": "Auto-mapped instruction DS_ADD_F64"
+  },
+  "DsAddGsRegRtn": {
+    "api": "ds_add_gs_reg_rtn",
+    "description": "Auto-mapped instruction DS_ADD_GS_REG_RTN"
+  },
+  "DsAddRtnF32": {
+    "api": "ds_add_rtn_f32",
+    "description": "Auto-mapped instruction DS_ADD_RTN_F32"
+  },
+  "DsAddRtnF64": {
+    "api": "ds_add_rtn_f64",
+    "description": "Auto-mapped instruction DS_ADD_RTN_F64"
+  },
+  "DsAddRtnU32": {
+    "api": "ds_add_rtn_u32",
+    "description": "Auto-mapped instruction DS_ADD_RTN_U32"
+  },
+  "DsAddRtnU64": {
+    "api": "ds_add_rtn_u64",
+    "description": "Auto-mapped instruction DS_ADD_RTN_U64"
+  },
+  "DsAddSrc2F32": {
+    "api": "ds_add_src2_f32",
+    "description": "Auto-mapped instruction DS_ADD_SRC2_F32"
+  },
+  "DsAddSrc2U32": {
+    "api": "ds_add_src2_u32",
+    "description": "Auto-mapped instruction DS_ADD_SRC2_U32"
+  },
+  "DsAddSrc2U64": {
+    "api": "ds_add_src2_u64",
+    "description": "Auto-mapped instruction DS_ADD_SRC2_U64"
+  },
+  "DsAddU32": {
+    "api": "ds_add_u32",
+    "description": "Auto-mapped instruction DS_ADD_U32"
+  },
+  "DsAddU64": {
+    "api": "ds_add_u64",
+    "description": "Auto-mapped instruction DS_ADD_U64"
+  },
+  "DsAndB32": {
+    "api": "ds_and_b32",
+    "description": "Auto-mapped instruction DS_AND_B32"
+  },
+  "DsAndB64": {
+    "api": "ds_and_b64",
+    "description": "Auto-mapped instruction DS_AND_B64"
+  },
+  "DsAndRtnB32": {
+    "api": "ds_and_rtn_b32",
+    "description": "Auto-mapped instruction DS_AND_RTN_B32"
+  },
+  "DsAndRtnB64": {
+    "api": "ds_and_rtn_b64",
+    "description": "Auto-mapped instruction DS_AND_RTN_B64"
+  },
+  "DsAndSrc2B32": {
+    "api": "ds_and_src2_b32",
+    "description": "Auto-mapped instruction DS_AND_SRC2_B32"
+  },
+  "DsAndSrc2B64": {
+    "api": "ds_and_src2_b64",
+    "description": "Auto-mapped instruction DS_AND_SRC2_B64"
+  },
+  "DsAppend": {
+    "api": "ds_append",
+    "description": "Auto-mapped instruction DS_APPEND"
+  },
+  "DsAtomicAsyncBarrierArriveB64": {
+    "api": "ds_atomic_async_barrier_arrive_b64",
+    "description": "Auto-mapped instruction DS_ATOMIC_ASYNC_BARRIER_ARRIVE_B64"
+  },
+  "DsAtomicBarrierArriveRtnB64": {
+    "api": "ds_atomic_barrier_arrive_rtn_b64",
+    "description": "Auto-mapped instruction DS_ATOMIC_BARRIER_ARRIVE_RTN_B64"
+  },
+  "DsBpermuteB32": {
+    "api": "ds_bpermute_b32",
+    "description": "Auto-mapped instruction DS_BPERMUTE_B32"
+  },
+  "DsBpermuteFiB32": {
+    "api": "ds_bpermute_fi_b32",
+    "description": "Auto-mapped instruction DS_BPERMUTE_FI_B32"
+  },
+  "DsBvhStackPush8Pop1RtnB32": {
+    "api": "ds_bvh_stack_push8_pop1_rtn_b32",
+    "description": "Auto-mapped instruction DS_BVH_STACK_PUSH8_POP1_RTN_B32"
+  },
+  "DsBvhStackPush8Pop2RtnB64": {
+    "api": "ds_bvh_stack_push8_pop2_rtn_b64",
+    "description": "Auto-mapped instruction DS_BVH_STACK_PUSH8_POP2_RTN_B64"
+  },
+  "DsBvhStackRtnB32": {
+    "api": "ds_bvh_stack_rtn_b32",
+    "description": "Auto-mapped instruction DS_BVH_STACK_RTN_B32"
+  },
+  "DsCmpstoreB32": {
+    "api": "ds_cmpstore_b32",
+    "description": "Auto-mapped instruction DS_CMPSTORE_B32"
+  },
+  "DsCmpstoreB64": {
+    "api": "ds_cmpstore_b64",
+    "description": "Auto-mapped instruction DS_CMPSTORE_B64"
+  },
+  "DsCmpstoreF32": {
+    "api": "ds_cmpstore_f32",
+    "description": "Auto-mapped instruction DS_CMPSTORE_F32"
+  },
+  "DsCmpstoreF64": {
+    "api": "ds_cmpstore_f64",
+    "description": "Auto-mapped instruction DS_CMPSTORE_F64"
+  },
+  "DsCmpstoreRtnB32": {
+    "api": "ds_cmpstore_rtn_b32",
+    "description": "Auto-mapped instruction DS_CMPSTORE_RTN_B32"
+  },
+  "DsCmpstoreRtnB64": {
+    "api": "ds_cmpstore_rtn_b64",
+    "description": "Auto-mapped instruction DS_CMPSTORE_RTN_B64"
+  },
+  "DsCmpstoreRtnF32": {
+    "api": "ds_cmpstore_rtn_f32",
+    "description": "Auto-mapped instruction DS_CMPSTORE_RTN_F32"
+  },
+  "DsCmpstoreRtnF64": {
+    "api": "ds_cmpstore_rtn_f64",
+    "description": "Auto-mapped instruction DS_CMPSTORE_RTN_F64"
+  },
+  "DsCmpstB32": {
+    "api": "ds_cmpst_b32",
+    "description": "Auto-mapped instruction DS_CMPST_B32"
+  },
+  "DsCmpstB64": {
+    "api": "ds_cmpst_b64",
+    "description": "Auto-mapped instruction DS_CMPST_B64"
+  },
+  "DsCmpstF32": {
+    "api": "ds_cmpst_f32",
+    "description": "Auto-mapped instruction DS_CMPST_F32"
+  },
+  "DsCmpstF64": {
+    "api": "ds_cmpst_f64",
+    "description": "Auto-mapped instruction DS_CMPST_F64"
+  },
+  "DsCmpstRtnB32": {
+    "api": "ds_cmpst_rtn_b32",
+    "description": "Auto-mapped instruction DS_CMPST_RTN_B32"
+  },
+  "DsCmpstRtnB64": {
+    "api": "ds_cmpst_rtn_b64",
+    "description": "Auto-mapped instruction DS_CMPST_RTN_B64"
+  },
+  "DsCmpstRtnF32": {
+    "api": "ds_cmpst_rtn_f32",
+    "description": "Auto-mapped instruction DS_CMPST_RTN_F32"
+  },
+  "DsCmpstRtnF64": {
+    "api": "ds_cmpst_rtn_f64",
+    "description": "Auto-mapped instruction DS_CMPST_RTN_F64"
+  },
+  "DsCondxchg32RtnB64": {
+    "api": "ds_condxchg32_rtn_b64",
+    "description": "Auto-mapped instruction DS_CONDXCHG32_RTN_B64"
+  },
+  "DsCondSubRtnU32": {
+    "api": "ds_cond_sub_rtn_u32",
+    "description": "Auto-mapped instruction DS_COND_SUB_RTN_U32"
+  },
+  "DsCondSubU32": {
+    "api": "ds_cond_sub_u32",
+    "description": "Auto-mapped instruction DS_COND_SUB_U32"
+  },
+  "DsConsume": {
+    "api": "ds_consume",
+    "description": "Auto-mapped instruction DS_CONSUME"
+  },
+  "DsDecRtnU32": {
+    "api": "ds_dec_rtn_u32",
+    "description": "Auto-mapped instruction DS_DEC_RTN_U32"
+  },
+  "DsDecRtnU64": {
+    "api": "ds_dec_rtn_u64",
+    "description": "Auto-mapped instruction DS_DEC_RTN_U64"
+  },
+  "DsDecSrc2U32": {
+    "api": "ds_dec_src2_u32",
+    "description": "Auto-mapped instruction DS_DEC_SRC2_U32"
+  },
+  "DsDecSrc2U64": {
+    "api": "ds_dec_src2_u64",
+    "description": "Auto-mapped instruction DS_DEC_SRC2_U64"
+  },
+  "DsDecU32": {
+    "api": "ds_dec_u32",
+    "description": "Auto-mapped instruction DS_DEC_U32"
+  },
+  "DsDecU64": {
+    "api": "ds_dec_u64",
+    "description": "Auto-mapped instruction DS_DEC_U64"
+  },
+  "DsGwsBarrier": {
+    "api": "ds_gws_barrier",
+    "description": "Auto-mapped instruction DS_GWS_BARRIER"
+  },
+  "DsGwsInit": {
+    "api": "ds_gws_init",
+    "description": "Auto-mapped instruction DS_GWS_INIT"
+  },
+  "DsGwsSemaBr": {
+    "api": "ds_gws_sema_br",
+    "description": "Auto-mapped instruction DS_GWS_SEMA_BR"
+  },
+  "DsGwsSemaP": {
+    "api": "ds_gws_sema_p",
+    "description": "Auto-mapped instruction DS_GWS_SEMA_P"
+  },
+  "DsGwsSemaReleaseAll": {
+    "api": "ds_gws_sema_release_all",
+    "description": "Auto-mapped instruction DS_GWS_SEMA_RELEASE_ALL"
+  },
+  "DsGwsSemaV": {
+    "api": "ds_gws_sema_v",
+    "description": "Auto-mapped instruction DS_GWS_SEMA_V"
+  },
+  "DsIncRtnU32": {
+    "api": "ds_inc_rtn_u32",
+    "description": "Auto-mapped instruction DS_INC_RTN_U32"
+  },
+  "DsIncRtnU64": {
+    "api": "ds_inc_rtn_u64",
+    "description": "Auto-mapped instruction DS_INC_RTN_U64"
+  },
+  "DsIncSrc2U32": {
+    "api": "ds_inc_src2_u32",
+    "description": "Auto-mapped instruction DS_INC_SRC2_U32"
+  },
+  "DsIncSrc2U64": {
+    "api": "ds_inc_src2_u64",
+    "description": "Auto-mapped instruction DS_INC_SRC2_U64"
+  },
+  "DsIncU32": {
+    "api": "ds_inc_u32",
+    "description": "Auto-mapped instruction DS_INC_U32"
+  },
+  "DsIncU64": {
+    "api": "ds_inc_u64",
+    "description": "Auto-mapped instruction DS_INC_U64"
+  },
+  "DsLoadTr16B128": {
+    "api": "ds_load_tr16_b128",
+    "description": "Auto-mapped instruction DS_LOAD_TR16_B128"
+  },
+  "DsLoadTr4B64": {
+    "api": "ds_load_tr4_b64",
+    "description": "Auto-mapped instruction DS_LOAD_TR4_B64"
+  },
+  "DsLoadTr6B96": {
+    "api": "ds_load_tr6_b96",
+    "description": "Auto-mapped instruction DS_LOAD_TR6_B96"
+  },
+  "DsLoadTr8B64": {
+    "api": "ds_load_tr8_b64",
+    "description": "Auto-mapped instruction DS_LOAD_TR8_B64"
+  },
+  "DsMaxF32": {
+    "api": "ds_max_f32",
+    "description": "Auto-mapped instruction DS_MAX_F32"
+  },
+  "DsMaxF64": {
+    "api": "ds_max_f64",
+    "description": "Auto-mapped instruction DS_MAX_F64"
+  },
+  "DsMaxI32": {
+    "api": "ds_max_i32",
+    "description": "Auto-mapped instruction DS_MAX_I32"
+  },
+  "DsMaxI64": {
+    "api": "ds_max_i64",
+    "description": "Auto-mapped instruction DS_MAX_I64"
+  },
+  "DsMaxRtnF32": {
+    "api": "ds_max_rtn_f32",
+    "description": "Auto-mapped instruction DS_MAX_RTN_F32"
+  },
+  "DsMaxRtnF64": {
+    "api": "ds_max_rtn_f64",
+    "description": "Auto-mapped instruction DS_MAX_RTN_F64"
+  },
+  "DsMaxRtnI32": {
+    "api": "ds_max_rtn_i32",
+    "description": "Auto-mapped instruction DS_MAX_RTN_I32"
+  },
+  "DsMaxRtnI64": {
+    "api": "ds_max_rtn_i64",
+    "description": "Auto-mapped instruction DS_MAX_RTN_I64"
+  },
+  "DsMaxRtnU32": {
+    "api": "ds_max_rtn_u32",
+    "description": "Auto-mapped instruction DS_MAX_RTN_U32"
+  },
+  "DsMaxRtnU64": {
+    "api": "ds_max_rtn_u64",
+    "description": "Auto-mapped instruction DS_MAX_RTN_U64"
+  },
+  "DsMaxSrc2F32": {
+    "api": "ds_max_src2_f32",
+    "description": "Auto-mapped instruction DS_MAX_SRC2_F32"
+  },
+  "DsMaxSrc2F64": {
+    "api": "ds_max_src2_f64",
+    "description": "Auto-mapped instruction DS_MAX_SRC2_F64"
+  },
+  "DsMaxSrc2I32": {
+    "api": "ds_max_src2_i32",
+    "description": "Auto-mapped instruction DS_MAX_SRC2_I32"
+  },
+  "DsMaxSrc2I64": {
+    "api": "ds_max_src2_i64",
+    "description": "Auto-mapped instruction DS_MAX_SRC2_I64"
+  },
+  "DsMaxSrc2U32": {
+    "api": "ds_max_src2_u32",
+    "description": "Auto-mapped instruction DS_MAX_SRC2_U32"
+  },
+  "DsMaxSrc2U64": {
+    "api": "ds_max_src2_u64",
+    "description": "Auto-mapped instruction DS_MAX_SRC2_U64"
+  },
+  "DsMaxU32": {
+    "api": "ds_max_u32",
+    "description": "Auto-mapped instruction DS_MAX_U32"
+  },
+  "DsMaxU64": {
+    "api": "ds_max_u64",
+    "description": "Auto-mapped instruction DS_MAX_U64"
+  },
+  "DsMinF32": {
+    "api": "ds_min_f32",
+    "description": "Auto-mapped instruction DS_MIN_F32"
+  },
+  "DsMinF64": {
+    "api": "ds_min_f64",
+    "description": "Auto-mapped instruction DS_MIN_F64"
+  },
+  "DsMinI32": {
+    "api": "ds_min_i32",
+    "description": "Auto-mapped instruction DS_MIN_I32"
+  },
+  "DsMinI64": {
+    "api": "ds_min_i64",
+    "description": "Auto-mapped instruction DS_MIN_I64"
+  },
+  "DsMinRtnF32": {
+    "api": "ds_min_rtn_f32",
+    "description": "Auto-mapped instruction DS_MIN_RTN_F32"
+  },
+  "DsMinRtnF64": {
+    "api": "ds_min_rtn_f64",
+    "description": "Auto-mapped instruction DS_MIN_RTN_F64"
+  },
+  "DsMinRtnI32": {
+    "api": "ds_min_rtn_i32",
+    "description": "Auto-mapped instruction DS_MIN_RTN_I32"
+  },
+  "DsMinRtnI64": {
+    "api": "ds_min_rtn_i64",
+    "description": "Auto-mapped instruction DS_MIN_RTN_I64"
+  },
+  "DsMinRtnU32": {
+    "api": "ds_min_rtn_u32",
+    "description": "Auto-mapped instruction DS_MIN_RTN_U32"
+  },
+  "DsMinRtnU64": {
+    "api": "ds_min_rtn_u64",
+    "description": "Auto-mapped instruction DS_MIN_RTN_U64"
+  },
+  "DsMinSrc2F32": {
+    "api": "ds_min_src2_f32",
+    "description": "Auto-mapped instruction DS_MIN_SRC2_F32"
+  },
+  "DsMinSrc2F64": {
+    "api": "ds_min_src2_f64",
+    "description": "Auto-mapped instruction DS_MIN_SRC2_F64"
+  },
+  "DsMinSrc2I32": {
+    "api": "ds_min_src2_i32",
+    "description": "Auto-mapped instruction DS_MIN_SRC2_I32"
+  },
+  "DsMinSrc2I64": {
+    "api": "ds_min_src2_i64",
+    "description": "Auto-mapped instruction DS_MIN_SRC2_I64"
+  },
+  "DsMinSrc2U32": {
+    "api": "ds_min_src2_u32",
+    "description": "Auto-mapped instruction DS_MIN_SRC2_U32"
+  },
+  "DsMinSrc2U64": {
+    "api": "ds_min_src2_u64",
+    "description": "Auto-mapped instruction DS_MIN_SRC2_U64"
+  },
+  "DsMinU32": {
+    "api": "ds_min_u32",
+    "description": "Auto-mapped instruction DS_MIN_U32"
+  },
+  "DsMinU64": {
+    "api": "ds_min_u64",
+    "description": "Auto-mapped instruction DS_MIN_U64"
+  },
+  "DsMskorB32": {
+    "api": "ds_mskor_b32",
+    "description": "Auto-mapped instruction DS_MSKOR_B32"
+  },
+  "DsMskorB64": {
+    "api": "ds_mskor_b64",
+    "description": "Auto-mapped instruction DS_MSKOR_B64"
+  },
+  "DsMskorRtnB32": {
+    "api": "ds_mskor_rtn_b32",
+    "description": "Auto-mapped instruction DS_MSKOR_RTN_B32"
+  },
+  "DsMskorRtnB64": {
+    "api": "ds_mskor_rtn_b64",
+    "description": "Auto-mapped instruction DS_MSKOR_RTN_B64"
+  },
+  "DsNop": {
+    "api": "ds_nop",
+    "description": "Auto-mapped instruction DS_NOP"
+  },
+  "DsOrderedCount": {
+    "api": "ds_ordered_count",
+    "description": "Auto-mapped instruction DS_ORDERED_COUNT"
+  },
+  "DsOrB32": {
+    "api": "ds_or_b32",
+    "description": "Auto-mapped instruction DS_OR_B32"
+  },
+  "DsOrB64": {
+    "api": "ds_or_b64",
+    "description": "Auto-mapped instruction DS_OR_B64"
+  },
+  "DsOrRtnB32": {
+    "api": "ds_or_rtn_b32",
+    "description": "Auto-mapped instruction DS_OR_RTN_B32"
+  },
+  "DsOrRtnB64": {
+    "api": "ds_or_rtn_b64",
+    "description": "Auto-mapped instruction DS_OR_RTN_B64"
+  },
+  "DsOrSrc2B32": {
+    "api": "ds_or_src2_b32",
+    "description": "Auto-mapped instruction DS_OR_SRC2_B32"
+  },
+  "DsOrSrc2B64": {
+    "api": "ds_or_src2_b64",
+    "description": "Auto-mapped instruction DS_OR_SRC2_B64"
+  },
+  "DsPermuteB32": {
+    "api": "ds_permute_b32",
+    "description": "Auto-mapped instruction DS_PERMUTE_B32"
+  },
+  "DsPkAddBf16": {
+    "api": "ds_pk_add_bf16",
+    "description": "Auto-mapped instruction DS_PK_ADD_BF16"
+  },
+  "DsPkAddF16": {
+    "api": "ds_pk_add_f16",
+    "description": "Auto-mapped instruction DS_PK_ADD_F16"
+  },
+  "DsPkAddRtnBf16": {
+    "api": "ds_pk_add_rtn_bf16",
+    "description": "Auto-mapped instruction DS_PK_ADD_RTN_BF16"
+  },
+  "DsPkAddRtnF16": {
+    "api": "ds_pk_add_rtn_f16",
+    "description": "Auto-mapped instruction DS_PK_ADD_RTN_F16"
+  },
+  "DsRead2st64B32": {
+    "api": "ds_read2st64_b32",
+    "description": "Auto-mapped instruction DS_READ2ST64_B32"
+  },
+  "DsRead2st64B64": {
+    "api": "ds_read2st64_b64",
+    "description": "Auto-mapped instruction DS_READ2ST64_B64"
+  },
+  "DsRead2B32": {
+    "api": "ds_read2_b32",
+    "description": "Auto-mapped instruction DS_READ2_B32"
+  },
+  "DsRead2B64": {
+    "api": "ds_read2_b64",
+    "description": "Auto-mapped instruction DS_READ2_B64"
+  },
+  "DsReadAddtidB32": {
+    "api": "ds_read_addtid_b32",
+    "description": "Auto-mapped instruction DS_READ_ADDTID_B32"
+  },
+  "DsReadB128": {
+    "api": "ds_read_b128",
+    "description": "Auto-mapped instruction DS_READ_B128"
+  },
+  "DsReadB32": {
+    "api": "ds_read_b32",
+    "description": "Auto-mapped instruction DS_READ_B32"
+  },
+  "DsReadB64": {
+    "api": "ds_read_b64",
+    "description": "Auto-mapped instruction DS_READ_B64"
+  },
+  "DsReadB64TrB16": {
+    "api": "ds_read_b64_tr_b16",
+    "description": "Auto-mapped instruction DS_READ_B64_TR_B16"
+  },
+  "DsReadB64TrB4": {
+    "api": "ds_read_b64_tr_b4",
+    "description": "Auto-mapped instruction DS_READ_B64_TR_B4"
+  },
+  "DsReadB64TrB8": {
+    "api": "ds_read_b64_tr_b8",
+    "description": "Auto-mapped instruction DS_READ_B64_TR_B8"
+  },
+  "DsReadB96": {
+    "api": "ds_read_b96",
+    "description": "Auto-mapped instruction DS_READ_B96"
+  },
+  "DsReadB96TrB6": {
+    "api": "ds_read_b96_tr_b6",
+    "description": "Auto-mapped instruction DS_READ_B96_TR_B6"
+  },
+  "DsReadI16": {
+    "api": "ds_read_i16",
+    "description": "Auto-mapped instruction DS_READ_I16"
+  },
+  "DsReadI8": {
+    "api": "ds_read_i8",
+    "description": "Auto-mapped instruction DS_READ_I8"
+  },
+  "DsReadI8D16": {
+    "api": "ds_read_i8_d16",
+    "description": "Auto-mapped instruction DS_READ_I8_D16"
+  },
+  "DsReadI8D16Hi": {
+    "api": "ds_read_i8_d16_hi",
+    "description": "Auto-mapped instruction DS_READ_I8_D16_HI"
+  },
+  "DsReadU16": {
+    "api": "ds_read_u16",
+    "description": "Auto-mapped instruction DS_READ_U16"
+  },
+  "DsReadU16D16": {
+    "api": "ds_read_u16_d16",
+    "description": "Auto-mapped instruction DS_READ_U16_D16"
+  },
+  "DsReadU16D16Hi": {
+    "api": "ds_read_u16_d16_hi",
+    "description": "Auto-mapped instruction DS_READ_U16_D16_HI"
+  },
+  "DsReadU8": {
+    "api": "ds_read_u8",
+    "description": "Auto-mapped instruction DS_READ_U8"
+  },
+  "DsReadU8D16": {
+    "api": "ds_read_u8_d16",
+    "description": "Auto-mapped instruction DS_READ_U8_D16"
+  },
+  "DsReadU8D16Hi": {
+    "api": "ds_read_u8_d16_hi",
+    "description": "Auto-mapped instruction DS_READ_U8_D16_HI"
+  },
+  "DsRsubRtnU32": {
+    "api": "ds_rsub_rtn_u32",
+    "description": "Auto-mapped instruction DS_RSUB_RTN_U32"
+  },
+  "DsRsubRtnU64": {
+    "api": "ds_rsub_rtn_u64",
+    "description": "Auto-mapped instruction DS_RSUB_RTN_U64"
+  },
+  "DsRsubSrc2U32": {
+    "api": "ds_rsub_src2_u32",
+    "description": "Auto-mapped instruction DS_RSUB_SRC2_U32"
+  },
+  "DsRsubSrc2U64": {
+    "api": "ds_rsub_src2_u64",
+    "description": "Auto-mapped instruction DS_RSUB_SRC2_U64"
+  },
+  "DsRsubU32": {
+    "api": "ds_rsub_u32",
+    "description": "Auto-mapped instruction DS_RSUB_U32"
+  },
+  "DsRsubU64": {
+    "api": "ds_rsub_u64",
+    "description": "Auto-mapped instruction DS_RSUB_U64"
+  },
+  "DsSubClampRtnU32": {
+    "api": "ds_sub_clamp_rtn_u32",
+    "description": "Auto-mapped instruction DS_SUB_CLAMP_RTN_U32"
+  },
+  "DsSubClampU32": {
+    "api": "ds_sub_clamp_u32",
+    "description": "Auto-mapped instruction DS_SUB_CLAMP_U32"
+  },
+  "DsSubGsRegRtn": {
+    "api": "ds_sub_gs_reg_rtn",
+    "description": "Auto-mapped instruction DS_SUB_GS_REG_RTN"
+  },
+  "DsSubRtnU32": {
+    "api": "ds_sub_rtn_u32",
+    "description": "Auto-mapped instruction DS_SUB_RTN_U32"
+  },
+  "DsSubRtnU64": {
+    "api": "ds_sub_rtn_u64",
+    "description": "Auto-mapped instruction DS_SUB_RTN_U64"
+  },
+  "DsSubSrc2U32": {
+    "api": "ds_sub_src2_u32",
+    "description": "Auto-mapped instruction DS_SUB_SRC2_U32"
+  },
+  "DsSubSrc2U64": {
+    "api": "ds_sub_src2_u64",
+    "description": "Auto-mapped instruction DS_SUB_SRC2_U64"
+  },
+  "DsSubU32": {
+    "api": "ds_sub_u32",
+    "description": "Auto-mapped instruction DS_SUB_U32"
+  },
+  "DsSubU64": {
+    "api": "ds_sub_u64",
+    "description": "Auto-mapped instruction DS_SUB_U64"
+  },
+  "DsSwizzleB32": {
+    "api": "ds_swizzle_b32",
+    "description": "Auto-mapped instruction DS_SWIZZLE_B32"
+  },
+  "DsWrapRtnB32": {
+    "api": "ds_wrap_rtn_b32",
+    "description": "Auto-mapped instruction DS_WRAP_RTN_B32"
+  },
+  "DsWrite2st64B32": {
+    "api": "ds_write2st64_b32",
+    "description": "Auto-mapped instruction DS_WRITE2ST64_B32"
+  },
+  "DsWrite2st64B64": {
+    "api": "ds_write2st64_b64",
+    "description": "Auto-mapped instruction DS_WRITE2ST64_B64"
+  },
+  "DsWrite2B32": {
+    "api": "ds_write2_b32",
+    "description": "Auto-mapped instruction DS_WRITE2_B32"
+  },
+  "DsWrite2B64": {
+    "api": "ds_write2_b64",
+    "description": "Auto-mapped instruction DS_WRITE2_B64"
+  },
+  "DsWriteAddtidB32": {
+    "api": "ds_write_addtid_b32",
+    "description": "Auto-mapped instruction DS_WRITE_ADDTID_B32"
+  },
+  "DsWriteB128": {
+    "api": "ds_write_b128",
+    "description": "Auto-mapped instruction DS_WRITE_B128"
+  },
+  "DsWriteB16": {
+    "api": "ds_write_b16",
+    "description": "Auto-mapped instruction DS_WRITE_B16"
+  },
+  "DsWriteB16D16Hi": {
+    "api": "ds_write_b16_d16_hi",
+    "description": "Auto-mapped instruction DS_WRITE_B16_D16_HI"
+  },
+  "DsWriteB32": {
+    "api": "ds_write_b32",
+    "description": "Auto-mapped instruction DS_WRITE_B32"
+  },
+  "DsWriteB64": {
+    "api": "ds_write_b64",
+    "description": "Auto-mapped instruction DS_WRITE_B64"
+  },
+  "DsWriteB8": {
+    "api": "ds_write_b8",
+    "description": "Auto-mapped instruction DS_WRITE_B8"
+  },
+  "DsWriteB8D16Hi": {
+    "api": "ds_write_b8_d16_hi",
+    "description": "Auto-mapped instruction DS_WRITE_B8_D16_HI"
+  },
+  "DsWriteB96": {
+    "api": "ds_write_b96",
+    "description": "Auto-mapped instruction DS_WRITE_B96"
+  },
+  "DsWriteSrc2B32": {
+    "api": "ds_write_src2_b32",
+    "description": "Auto-mapped instruction DS_WRITE_SRC2_B32"
+  },
+  "DsWriteSrc2B64": {
+    "api": "ds_write_src2_b64",
+    "description": "Auto-mapped instruction DS_WRITE_SRC2_B64"
+  },
+  "DsWrxchg2st64RtnB32": {
+    "api": "ds_wrxchg2st64_rtn_b32",
+    "description": "Auto-mapped instruction DS_WRXCHG2ST64_RTN_B32"
+  },
+  "DsWrxchg2st64RtnB64": {
+    "api": "ds_wrxchg2st64_rtn_b64",
+    "description": "Auto-mapped instruction DS_WRXCHG2ST64_RTN_B64"
+  },
+  "DsWrxchg2RtnB32": {
+    "api": "ds_wrxchg2_rtn_b32",
+    "description": "Auto-mapped instruction DS_WRXCHG2_RTN_B32"
+  },
+  "DsWrxchg2RtnB64": {
+    "api": "ds_wrxchg2_rtn_b64",
+    "description": "Auto-mapped instruction DS_WRXCHG2_RTN_B64"
+  },
+  "DsWrxchgRtnB32": {
+    "api": "ds_wrxchg_rtn_b32",
+    "description": "Auto-mapped instruction DS_WRXCHG_RTN_B32"
+  },
+  "DsWrxchgRtnB64": {
+    "api": "ds_wrxchg_rtn_b64",
+    "description": "Auto-mapped instruction DS_WRXCHG_RTN_B64"
+  },
+  "DsXorB32": {
+    "api": "ds_xor_b32",
+    "description": "Auto-mapped instruction DS_XOR_B32"
+  },
+  "DsXorB64": {
+    "api": "ds_xor_b64",
+    "description": "Auto-mapped instruction DS_XOR_B64"
+  },
+  "DsXorRtnB32": {
+    "api": "ds_xor_rtn_b32",
+    "description": "Auto-mapped instruction DS_XOR_RTN_B32"
+  },
+  "DsXorRtnB64": {
+    "api": "ds_xor_rtn_b64",
+    "description": "Auto-mapped instruction DS_XOR_RTN_B64"
+  },
+  "DsXorSrc2B32": {
+    "api": "ds_xor_src2_b32",
+    "description": "Auto-mapped instruction DS_XOR_SRC2_B32"
+  },
+  "DsXorSrc2B64": {
+    "api": "ds_xor_src2_b64",
+    "description": "Auto-mapped instruction DS_XOR_SRC2_B64"
+  },
+  "FlatAtomicAdd": {
+    "api": "flat_atomic_add",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_ADD"
+  },
+  "FlatAtomicAddF32": {
+    "api": "flat_atomic_add_f32",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_ADD_F32"
+  },
+  "FlatAtomicAddF64": {
+    "api": "flat_atomic_add_f64",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_ADD_F64"
+  },
+  "FlatAtomicAddX2": {
+    "api": "flat_atomic_add_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_ADD_X2"
+  },
+  "FlatAtomicAnd": {
+    "api": "flat_atomic_and",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_AND"
+  },
+  "FlatAtomicAndX2": {
+    "api": "flat_atomic_and_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_AND_X2"
+  },
+  "FlatAtomicCmpswap": {
+    "api": "flat_atomic_cmpswap",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_CMPSWAP"
+  },
+  "FlatAtomicCmpswapX2": {
+    "api": "flat_atomic_cmpswap_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_CMPSWAP_X2"
+  },
+  "FlatAtomicCondSubU32": {
+    "api": "flat_atomic_cond_sub_u32",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_COND_SUB_U32"
+  },
+  "FlatAtomicCsubU32": {
+    "api": "flat_atomic_csub_u32",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_CSUB_U32"
+  },
+  "FlatAtomicDec": {
+    "api": "flat_atomic_dec",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_DEC"
+  },
+  "FlatAtomicDecX2": {
+    "api": "flat_atomic_dec_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_DEC_X2"
+  },
+  "FlatAtomicFcmpswap": {
+    "api": "flat_atomic_fcmpswap",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_FCMPSWAP"
+  },
+  "FlatAtomicFcmpswapX2": {
+    "api": "flat_atomic_fcmpswap_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_FCMPSWAP_X2"
+  },
+  "FlatAtomicFmax": {
+    "api": "flat_atomic_fmax",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_FMAX"
+  },
+  "FlatAtomicFmaxX2": {
+    "api": "flat_atomic_fmax_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_FMAX_X2"
+  },
+  "FlatAtomicFmin": {
+    "api": "flat_atomic_fmin",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_FMIN"
+  },
+  "FlatAtomicFminX2": {
+    "api": "flat_atomic_fmin_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_FMIN_X2"
+  },
+  "FlatAtomicInc": {
+    "api": "flat_atomic_inc",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_INC"
+  },
+  "FlatAtomicIncX2": {
+    "api": "flat_atomic_inc_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_INC_X2"
+  },
+  "FlatAtomicMaxF64": {
+    "api": "flat_atomic_max_f64",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_MAX_F64"
+  },
+  "FlatAtomicMinF64": {
+    "api": "flat_atomic_min_f64",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_MIN_F64"
+  },
+  "FlatAtomicOr": {
+    "api": "flat_atomic_or",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_OR"
+  },
+  "FlatAtomicOrX2": {
+    "api": "flat_atomic_or_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_OR_X2"
+  },
+  "FlatAtomicPkAddBf16": {
+    "api": "flat_atomic_pk_add_bf16",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_PK_ADD_BF16"
+  },
+  "FlatAtomicPkAddF16": {
+    "api": "flat_atomic_pk_add_f16",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_PK_ADD_F16"
+  },
+  "FlatAtomicSmax": {
+    "api": "flat_atomic_smax",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_SMAX"
+  },
+  "FlatAtomicSmaxX2": {
+    "api": "flat_atomic_smax_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_SMAX_X2"
+  },
+  "FlatAtomicSmin": {
+    "api": "flat_atomic_smin",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_SMIN"
+  },
+  "FlatAtomicSminX2": {
+    "api": "flat_atomic_smin_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_SMIN_X2"
+  },
+  "FlatAtomicSub": {
+    "api": "flat_atomic_sub",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_SUB"
+  },
+  "FlatAtomicSubX2": {
+    "api": "flat_atomic_sub_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_SUB_X2"
+  },
+  "FlatAtomicSwap": {
+    "api": "flat_atomic_swap",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_SWAP"
+  },
+  "FlatAtomicSwapX2": {
+    "api": "flat_atomic_swap_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_SWAP_X2"
+  },
+  "FlatAtomicUmax": {
+    "api": "flat_atomic_umax",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_UMAX"
+  },
+  "FlatAtomicUmaxX2": {
+    "api": "flat_atomic_umax_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_UMAX_X2"
+  },
+  "FlatAtomicUmin": {
+    "api": "flat_atomic_umin",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_UMIN"
+  },
+  "FlatAtomicUminX2": {
+    "api": "flat_atomic_umin_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_UMIN_X2"
+  },
+  "FlatAtomicXor": {
+    "api": "flat_atomic_xor",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_XOR"
+  },
+  "FlatAtomicXorX2": {
+    "api": "flat_atomic_xor_x2",
+    "description": "Auto-mapped instruction FLAT_ATOMIC_XOR_X2"
+  },
+  "FlatLoadDword": {
+    "api": "flat_load_dword",
+    "description": "Auto-mapped instruction FLAT_LOAD_DWORD"
+  },
+  "FlatLoadDwordx2": {
+    "api": "flat_load_dwordx2",
+    "description": "Auto-mapped instruction FLAT_LOAD_DWORDX2"
+  },
+  "FlatLoadDwordx2Ci": {
+    "api": "flat_load_dwordx2_ci",
+    "description": "Auto-mapped instruction FLAT_LOAD_DWORDX2_ci"
+  },
+  "FlatLoadDwordx3": {
+    "api": "flat_load_dwordx3",
+    "description": "Auto-mapped instruction FLAT_LOAD_DWORDX3"
+  },
+  "FlatLoadDwordx3Ci": {
+    "api": "flat_load_dwordx3_ci",
+    "description": "Auto-mapped instruction FLAT_LOAD_DWORDX3_ci"
+  },
+  "FlatLoadDwordx4": {
+    "api": "flat_load_dwordx4",
+    "description": "Auto-mapped instruction FLAT_LOAD_DWORDX4"
+  },
+  "FlatLoadDwordx4Ci": {
+    "api": "flat_load_dwordx4_ci",
+    "description": "Auto-mapped instruction FLAT_LOAD_DWORDX4_ci"
+  },
+  "FlatLoadDwordCi": {
+    "api": "flat_load_dword_ci",
+    "description": "Auto-mapped instruction FLAT_LOAD_DWORD_ci"
+  },
+  "FlatLoadMonitorB128": {
+    "api": "flat_load_monitor_b128",
+    "description": "Auto-mapped instruction FLAT_LOAD_MONITOR_B128"
+  },
+  "FlatLoadMonitorB32": {
+    "api": "flat_load_monitor_b32",
+    "description": "Auto-mapped instruction FLAT_LOAD_MONITOR_B32"
+  },
+  "FlatLoadMonitorB64": {
+    "api": "flat_load_monitor_b64",
+    "description": "Auto-mapped instruction FLAT_LOAD_MONITOR_B64"
+  },
+  "FlatLoadSbyte": {
+    "api": "flat_load_sbyte",
+    "description": "Auto-mapped instruction FLAT_LOAD_SBYTE"
+  },
+  "FlatLoadSbyteD16": {
+    "api": "flat_load_sbyte_d16",
+    "description": "Auto-mapped instruction FLAT_LOAD_SBYTE_D16"
+  },
+  "FlatLoadSbyteD16Hi": {
+    "api": "flat_load_sbyte_d16_hi",
+    "description": "Auto-mapped instruction FLAT_LOAD_SBYTE_D16_HI"
+  },
+  "FlatLoadSbyteCi": {
+    "api": "flat_load_sbyte_ci",
+    "description": "Auto-mapped instruction FLAT_LOAD_SBYTE_ci"
+  },
+  "FlatLoadShortD16": {
+    "api": "flat_load_short_d16",
+    "description": "Auto-mapped instruction FLAT_LOAD_SHORT_D16"
+  },
+  "FlatLoadShortD16Hi": {
+    "api": "flat_load_short_d16_hi",
+    "description": "Auto-mapped instruction FLAT_LOAD_SHORT_D16_HI"
+  },
+  "FlatLoadSshort": {
+    "api": "flat_load_sshort",
+    "description": "Auto-mapped instruction FLAT_LOAD_SSHORT"
+  },
+  "FlatLoadSshortCi": {
+    "api": "flat_load_sshort_ci",
+    "description": "Auto-mapped instruction FLAT_LOAD_SSHORT_ci"
+  },
+  "FlatLoadUbyte": {
+    "api": "flat_load_ubyte",
+    "description": "Auto-mapped instruction FLAT_LOAD_UBYTE"
+  },
+  "FlatLoadUbyteD16": {
+    "api": "flat_load_ubyte_d16",
+    "description": "Auto-mapped instruction FLAT_LOAD_UBYTE_D16"
+  },
+  "FlatLoadUbyteD16Hi": {
+    "api": "flat_load_ubyte_d16_hi",
+    "description": "Auto-mapped instruction FLAT_LOAD_UBYTE_D16_HI"
+  },
+  "FlatLoadUbyteCi": {
+    "api": "flat_load_ubyte_ci",
+    "description": "Auto-mapped instruction FLAT_LOAD_UBYTE_ci"
+  },
+  "FlatLoadUshort": {
+    "api": "flat_load_ushort",
+    "description": "Auto-mapped instruction FLAT_LOAD_USHORT"
+  },
+  "FlatLoadUshortCi": {
+    "api": "flat_load_ushort_ci",
+    "description": "Auto-mapped instruction FLAT_LOAD_USHORT_ci"
+  },
+  "FlatPrefetchB8": {
+    "api": "flat_prefetch_b8",
+    "description": "Auto-mapped instruction FLAT_PREFETCH_B8"
+  },
+  "FlatStoreByte": {
+    "api": "flat_store_byte",
+    "description": "Auto-mapped instruction FLAT_STORE_BYTE"
+  },
+  "FlatStoreByteD16Hi": {
+    "api": "flat_store_byte_d16_hi",
+    "description": "Auto-mapped instruction FLAT_STORE_BYTE_D16_HI"
+  },
+  "FlatStoreByteCi": {
+    "api": "flat_store_byte_ci",
+    "description": "Auto-mapped instruction FLAT_STORE_BYTE_ci"
+  },
+  "FlatStoreDword": {
+    "api": "flat_store_dword",
+    "description": "Auto-mapped instruction FLAT_STORE_DWORD"
+  },
+  "FlatStoreDwordx2": {
+    "api": "flat_store_dwordx2",
+    "description": "Auto-mapped instruction FLAT_STORE_DWORDX2"
+  },
+  "FlatStoreDwordx2Ci": {
+    "api": "flat_store_dwordx2_ci",
+    "description": "Auto-mapped instruction FLAT_STORE_DWORDX2_ci"
+  },
+  "FlatStoreDwordx3": {
+    "api": "flat_store_dwordx3",
+    "description": "Auto-mapped instruction FLAT_STORE_DWORDX3"
+  },
+  "FlatStoreDwordx3Ci": {
+    "api": "flat_store_dwordx3_ci",
+    "description": "Auto-mapped instruction FLAT_STORE_DWORDX3_ci"
+  },
+  "FlatStoreDwordx4": {
+    "api": "flat_store_dwordx4",
+    "description": "Auto-mapped instruction FLAT_STORE_DWORDX4"
+  },
+  "FlatStoreDwordx4Ci": {
+    "api": "flat_store_dwordx4_ci",
+    "description": "Auto-mapped instruction FLAT_STORE_DWORDX4_ci"
+  },
+  "FlatStoreDwordCi": {
+    "api": "flat_store_dword_ci",
+    "description": "Auto-mapped instruction FLAT_STORE_DWORD_ci"
+  },
+  "FlatStoreShort": {
+    "api": "flat_store_short",
+    "description": "Auto-mapped instruction FLAT_STORE_SHORT"
+  },
+  "FlatStoreShortD16Hi": {
+    "api": "flat_store_short_d16_hi",
+    "description": "Auto-mapped instruction FLAT_STORE_SHORT_D16_HI"
+  },
+  "FlatStoreShortCi": {
+    "api": "flat_store_short_ci",
+    "description": "Auto-mapped instruction FLAT_STORE_SHORT_ci"
+  },
+  "GlobalAtomicAdd": {
+    "api": "global_atomic_add",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_ADD"
+  },
+  "GlobalAtomicAddF32": {
+    "api": "global_atomic_add_f32",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_ADD_F32"
+  },
+  "GlobalAtomicAddF64": {
+    "api": "global_atomic_add_f64",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_ADD_F64"
+  },
+  "GlobalAtomicAddX2": {
+    "api": "global_atomic_add_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_ADD_X2"
+  },
+  "GlobalAtomicAnd": {
+    "api": "global_atomic_and",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_AND"
+  },
+  "GlobalAtomicAndX2": {
+    "api": "global_atomic_and_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_AND_X2"
+  },
+  "GlobalAtomicCmpswap": {
+    "api": "global_atomic_cmpswap",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_CMPSWAP"
+  },
+  "GlobalAtomicCmpswapX2": {
+    "api": "global_atomic_cmpswap_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_CMPSWAP_X2"
+  },
+  "GlobalAtomicCondSubU32": {
+    "api": "global_atomic_cond_sub_u32",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_COND_SUB_U32"
+  },
+  "GlobalAtomicCsub": {
+    "api": "global_atomic_csub",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_CSUB"
+  },
+  "GlobalAtomicDec": {
+    "api": "global_atomic_dec",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_DEC"
+  },
+  "GlobalAtomicDecX2": {
+    "api": "global_atomic_dec_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_DEC_X2"
+  },
+  "GlobalAtomicFcmpswap": {
+    "api": "global_atomic_fcmpswap",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_FCMPSWAP"
+  },
+  "GlobalAtomicFcmpswapX2": {
+    "api": "global_atomic_fcmpswap_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_FCMPSWAP_X2"
+  },
+  "GlobalAtomicFmax": {
+    "api": "global_atomic_fmax",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_FMAX"
+  },
+  "GlobalAtomicFmaxX2": {
+    "api": "global_atomic_fmax_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_FMAX_X2"
+  },
+  "GlobalAtomicFmin": {
+    "api": "global_atomic_fmin",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_FMIN"
+  },
+  "GlobalAtomicFminX2": {
+    "api": "global_atomic_fmin_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_FMIN_X2"
+  },
+  "GlobalAtomicInc": {
+    "api": "global_atomic_inc",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_INC"
+  },
+  "GlobalAtomicIncX2": {
+    "api": "global_atomic_inc_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_INC_X2"
+  },
+  "GlobalAtomicMaxF64": {
+    "api": "global_atomic_max_f64",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_MAX_F64"
+  },
+  "GlobalAtomicMinF64": {
+    "api": "global_atomic_min_f64",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_MIN_F64"
+  },
+  "GlobalAtomicOr": {
+    "api": "global_atomic_or",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_OR"
+  },
+  "GlobalAtomicOrderedAddB64": {
+    "api": "global_atomic_ordered_add_b64",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_ORDERED_ADD_B64"
+  },
+  "GlobalAtomicOrX2": {
+    "api": "global_atomic_or_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_OR_X2"
+  },
+  "GlobalAtomicPkAddBf16": {
+    "api": "global_atomic_pk_add_bf16",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_PK_ADD_BF16"
+  },
+  "GlobalAtomicPkAddF16": {
+    "api": "global_atomic_pk_add_f16",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_PK_ADD_F16"
+  },
+  "GlobalAtomicSmax": {
+    "api": "global_atomic_smax",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_SMAX"
+  },
+  "GlobalAtomicSmaxX2": {
+    "api": "global_atomic_smax_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_SMAX_X2"
+  },
+  "GlobalAtomicSmin": {
+    "api": "global_atomic_smin",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_SMIN"
+  },
+  "GlobalAtomicSminX2": {
+    "api": "global_atomic_smin_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_SMIN_X2"
+  },
+  "GlobalAtomicSub": {
+    "api": "global_atomic_sub",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_SUB"
+  },
+  "GlobalAtomicSubX2": {
+    "api": "global_atomic_sub_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_SUB_X2"
+  },
+  "GlobalAtomicSwap": {
+    "api": "global_atomic_swap",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_SWAP"
+  },
+  "GlobalAtomicSwapX2": {
+    "api": "global_atomic_swap_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_SWAP_X2"
+  },
+  "GlobalAtomicUmax": {
+    "api": "global_atomic_umax",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_UMAX"
+  },
+  "GlobalAtomicUmaxX2": {
+    "api": "global_atomic_umax_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_UMAX_X2"
+  },
+  "GlobalAtomicUmin": {
+    "api": "global_atomic_umin",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_UMIN"
+  },
+  "GlobalAtomicUminX2": {
+    "api": "global_atomic_umin_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_UMIN_X2"
+  },
+  "GlobalAtomicXor": {
+    "api": "global_atomic_xor",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_XOR"
+  },
+  "GlobalAtomicXorX2": {
+    "api": "global_atomic_xor_x2",
+    "description": "Auto-mapped instruction GLOBAL_ATOMIC_XOR_X2"
+  },
+  "GlobalInv": {
+    "api": "global_inv",
+    "description": "Auto-mapped instruction GLOBAL_INV"
+  },
+  "GlobalLoadAsyncToLdsB128": {
+    "api": "global_load_async_to_lds_b128",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_ASYNC_TO_LDS_B128"
+  },
+  "GlobalLoadAsyncToLdsB32": {
+    "api": "global_load_async_to_lds_b32",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_ASYNC_TO_LDS_B32"
+  },
+  "GlobalLoadAsyncToLdsB64": {
+    "api": "global_load_async_to_lds_b64",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_ASYNC_TO_LDS_B64"
+  },
+  "GlobalLoadAsyncToLdsB8": {
+    "api": "global_load_async_to_lds_b8",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_ASYNC_TO_LDS_B8"
+  },
+  "GlobalLoadBlock": {
+    "api": "global_load_block",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_BLOCK"
+  },
+  "GlobalLoadDword": {
+    "api": "global_load_dword",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_DWORD"
+  },
+  "GlobalLoadDwordx2": {
+    "api": "global_load_dwordx2",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_DWORDX2"
+  },
+  "GlobalLoadDwordx3": {
+    "api": "global_load_dwordx3",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_DWORDX3"
+  },
+  "GlobalLoadDwordx4": {
+    "api": "global_load_dwordx4",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_DWORDX4"
+  },
+  "GlobalLoadDwordAddtid": {
+    "api": "global_load_dword_addtid",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_DWORD_ADDTID"
+  },
+  "GlobalLoadLdsDword": {
+    "api": "global_load_lds_dword",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_LDS_DWORD"
+  },
+  "GlobalLoadLdsDwordx3": {
+    "api": "global_load_lds_dwordx3",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_LDS_DWORDX3"
+  },
+  "GlobalLoadLdsDwordx4": {
+    "api": "global_load_lds_dwordx4",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_LDS_DWORDX4"
+  },
+  "GlobalLoadLdsSbyte": {
+    "api": "global_load_lds_sbyte",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_LDS_SBYTE"
+  },
+  "GlobalLoadLdsSshort": {
+    "api": "global_load_lds_sshort",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_LDS_SSHORT"
+  },
+  "GlobalLoadLdsUbyte": {
+    "api": "global_load_lds_ubyte",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_LDS_UBYTE"
+  },
+  "GlobalLoadLdsUshort": {
+    "api": "global_load_lds_ushort",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_LDS_USHORT"
+  },
+  "GlobalLoadMonitorB128": {
+    "api": "global_load_monitor_b128",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_MONITOR_B128"
+  },
+  "GlobalLoadMonitorB32": {
+    "api": "global_load_monitor_b32",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_MONITOR_B32"
+  },
+  "GlobalLoadMonitorB64": {
+    "api": "global_load_monitor_b64",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_MONITOR_B64"
+  },
+  "GlobalLoadSbyte": {
+    "api": "global_load_sbyte",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_SBYTE"
+  },
+  "GlobalLoadSbyteD16": {
+    "api": "global_load_sbyte_d16",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_SBYTE_D16"
+  },
+  "GlobalLoadSbyteD16Hi": {
+    "api": "global_load_sbyte_d16_hi",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_SBYTE_D16_HI"
+  },
+  "GlobalLoadShortD16": {
+    "api": "global_load_short_d16",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_SHORT_D16"
+  },
+  "GlobalLoadShortD16Hi": {
+    "api": "global_load_short_d16_hi",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_SHORT_D16_HI"
+  },
+  "GlobalLoadSshort": {
+    "api": "global_load_sshort",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_SSHORT"
+  },
+  "GlobalLoadTr4B64": {
+    "api": "global_load_tr4_b64",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_TR4_B64"
+  },
+  "GlobalLoadTr6B96": {
+    "api": "global_load_tr6_b96",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_TR6_B96"
+  },
+  "GlobalLoadTrB128W32": {
+    "api": "global_load_tr_b128_w32",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_TR_B128_w32"
+  },
+  "GlobalLoadTrB128W64": {
+    "api": "global_load_tr_b128_w64",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_TR_B128_w64"
+  },
+  "GlobalLoadTrB64W32": {
+    "api": "global_load_tr_b64_w32",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_TR_B64_w32"
+  },
+  "GlobalLoadTrB64W64": {
+    "api": "global_load_tr_b64_w64",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_TR_B64_w64"
+  },
+  "GlobalLoadUbyte": {
+    "api": "global_load_ubyte",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_UBYTE"
+  },
+  "GlobalLoadUbyteD16": {
+    "api": "global_load_ubyte_d16",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_UBYTE_D16"
+  },
+  "GlobalLoadUbyteD16Hi": {
+    "api": "global_load_ubyte_d16_hi",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_UBYTE_D16_HI"
+  },
+  "GlobalLoadUshort": {
+    "api": "global_load_ushort",
+    "description": "Auto-mapped instruction GLOBAL_LOAD_USHORT"
+  },
+  "GlobalPrefetchB8": {
+    "api": "global_prefetch_b8",
+    "description": "Auto-mapped instruction GLOBAL_PREFETCH_B8"
+  },
+  "GlobalStoreAsyncFromLdsB128": {
+    "api": "global_store_async_from_lds_b128",
+    "description": "Auto-mapped instruction GLOBAL_STORE_ASYNC_FROM_LDS_B128"
+  },
+  "GlobalStoreAsyncFromLdsB32": {
+    "api": "global_store_async_from_lds_b32",
+    "description": "Auto-mapped instruction GLOBAL_STORE_ASYNC_FROM_LDS_B32"
+  },
+  "GlobalStoreAsyncFromLdsB64": {
+    "api": "global_store_async_from_lds_b64",
+    "description": "Auto-mapped instruction GLOBAL_STORE_ASYNC_FROM_LDS_B64"
+  },
+  "GlobalStoreAsyncFromLdsB8": {
+    "api": "global_store_async_from_lds_b8",
+    "description": "Auto-mapped instruction GLOBAL_STORE_ASYNC_FROM_LDS_B8"
+  },
+  "GlobalStoreBlock": {
+    "api": "global_store_block",
+    "description": "Auto-mapped instruction GLOBAL_STORE_BLOCK"
+  },
+  "GlobalStoreByte": {
+    "api": "global_store_byte",
+    "description": "Auto-mapped instruction GLOBAL_STORE_BYTE"
+  },
+  "GlobalStoreByteD16Hi": {
+    "api": "global_store_byte_d16_hi",
+    "description": "Auto-mapped instruction GLOBAL_STORE_BYTE_D16_HI"
+  },
+  "GlobalStoreDword": {
+    "api": "global_store_dword",
+    "description": "Auto-mapped instruction GLOBAL_STORE_DWORD"
+  },
+  "GlobalStoreDwordx2": {
+    "api": "global_store_dwordx2",
+    "description": "Auto-mapped instruction GLOBAL_STORE_DWORDX2"
+  },
+  "GlobalStoreDwordx3": {
+    "api": "global_store_dwordx3",
+    "description": "Auto-mapped instruction GLOBAL_STORE_DWORDX3"
+  },
+  "GlobalStoreDwordx4": {
+    "api": "global_store_dwordx4",
+    "description": "Auto-mapped instruction GLOBAL_STORE_DWORDX4"
+  },
+  "GlobalStoreDwordAddtid": {
+    "api": "global_store_dword_addtid",
+    "description": "Auto-mapped instruction GLOBAL_STORE_DWORD_ADDTID"
+  },
+  "GlobalStoreShort": {
+    "api": "global_store_short",
+    "description": "Auto-mapped instruction GLOBAL_STORE_SHORT"
+  },
+  "GlobalStoreShortD16Hi": {
+    "api": "global_store_short_d16_hi",
+    "description": "Auto-mapped instruction GLOBAL_STORE_SHORT_D16_HI"
+  },
+  "GlobalWb": {
+    "api": "global_wb",
+    "description": "Auto-mapped instruction GLOBAL_WB"
+  },
+  "GlobalWbinv": {
+    "api": "global_wbinv",
+    "description": "Auto-mapped instruction GLOBAL_WBINV"
+  },
+  "ScratchLoadBlock": {
+    "api": "scratch_load_block",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_BLOCK"
+  },
+  "ScratchLoadDword": {
+    "api": "scratch_load_dword",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_DWORD"
+  },
+  "ScratchLoadDwordx2": {
+    "api": "scratch_load_dwordx2",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_DWORDX2"
+  },
+  "ScratchLoadDwordx3": {
+    "api": "scratch_load_dwordx3",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_DWORDX3"
+  },
+  "ScratchLoadDwordx4": {
+    "api": "scratch_load_dwordx4",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_DWORDX4"
+  },
+  "ScratchLoadLdsDword": {
+    "api": "scratch_load_lds_dword",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_LDS_DWORD"
+  },
+  "ScratchLoadLdsSbyte": {
+    "api": "scratch_load_lds_sbyte",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_LDS_SBYTE"
+  },
+  "ScratchLoadLdsSshort": {
+    "api": "scratch_load_lds_sshort",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_LDS_SSHORT"
+  },
+  "ScratchLoadLdsUbyte": {
+    "api": "scratch_load_lds_ubyte",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_LDS_UBYTE"
+  },
+  "ScratchLoadLdsUshort": {
+    "api": "scratch_load_lds_ushort",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_LDS_USHORT"
+  },
+  "ScratchLoadSbyte": {
+    "api": "scratch_load_sbyte",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_SBYTE"
+  },
+  "ScratchLoadSbyteD16": {
+    "api": "scratch_load_sbyte_d16",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_SBYTE_D16"
+  },
+  "ScratchLoadSbyteD16Hi": {
+    "api": "scratch_load_sbyte_d16_hi",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_SBYTE_D16_HI"
+  },
+  "ScratchLoadShortD16": {
+    "api": "scratch_load_short_d16",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_SHORT_D16"
+  },
+  "ScratchLoadShortD16Hi": {
+    "api": "scratch_load_short_d16_hi",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_SHORT_D16_HI"
+  },
+  "ScratchLoadSshort": {
+    "api": "scratch_load_sshort",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_SSHORT"
+  },
+  "ScratchLoadUbyte": {
+    "api": "scratch_load_ubyte",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_UBYTE"
+  },
+  "ScratchLoadUbyteD16": {
+    "api": "scratch_load_ubyte_d16",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_UBYTE_D16"
+  },
+  "ScratchLoadUbyteD16Hi": {
+    "api": "scratch_load_ubyte_d16_hi",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_UBYTE_D16_HI"
+  },
+  "ScratchLoadUshort": {
+    "api": "scratch_load_ushort",
+    "description": "Auto-mapped instruction SCRATCH_LOAD_USHORT"
+  },
+  "ScratchStoreBlock": {
+    "api": "scratch_store_block",
+    "description": "Auto-mapped instruction SCRATCH_STORE_BLOCK"
+  },
+  "ScratchStoreByte": {
+    "api": "scratch_store_byte",
+    "description": "Auto-mapped instruction SCRATCH_STORE_BYTE"
+  },
+  "ScratchStoreByteD16Hi": {
+    "api": "scratch_store_byte_d16_hi",
+    "description": "Auto-mapped instruction SCRATCH_STORE_BYTE_D16_HI"
+  },
+  "ScratchStoreDword": {
+    "api": "scratch_store_dword",
+    "description": "Auto-mapped instruction SCRATCH_STORE_DWORD"
+  },
+  "ScratchStoreDwordx2": {
+    "api": "scratch_store_dwordx2",
+    "description": "Auto-mapped instruction SCRATCH_STORE_DWORDX2"
+  },
+  "ScratchStoreDwordx3": {
+    "api": "scratch_store_dwordx3",
+    "description": "Auto-mapped instruction SCRATCH_STORE_DWORDX3"
+  },
+  "ScratchStoreDwordx4": {
+    "api": "scratch_store_dwordx4",
+    "description": "Auto-mapped instruction SCRATCH_STORE_DWORDX4"
+  },
+  "ScratchStoreShort": {
+    "api": "scratch_store_short",
+    "description": "Auto-mapped instruction SCRATCH_STORE_SHORT"
+  },
+  "ScratchStoreShortD16Hi": {
+    "api": "scratch_store_short_d16_hi",
+    "description": "Auto-mapped instruction SCRATCH_STORE_SHORT_D16_HI"
+  },
+  "SAbsdiffI32": {
+    "api": "s_absdiff_i32",
+    "description": "Auto-mapped instruction S_ABSDIFF_I32"
+  },
+  "SAbsI32": {
+    "api": "s_abs_i32",
+    "description": "Auto-mapped instruction S_ABS_I32"
+  },
+  "SAddcU32": {
+    "api": "s_addc_u32",
+    "description": "Auto-mapped instruction S_ADDC_U32"
+  },
+  "SAddkI32": {
+    "api": "s_addk_i32",
+    "description": "Auto-mapped instruction S_ADDK_I32"
+  },
+  "SAddF16": {
+    "api": "s_add_f16",
+    "description": "Auto-mapped instruction S_ADD_F16"
+  },
+  "SAddF32": {
+    "api": "s_add_f32",
+    "description": "Auto-mapped instruction S_ADD_F32"
+  },
+  "SAddI32": {
+    "api": "s_add_i32",
+    "description": "Auto-mapped instruction S_ADD_I32"
+  },
+  "SAddPcI64": {
+    "api": "s_add_pc_i64",
+    "description": "Auto-mapped instruction S_ADD_PC_I64"
+  },
+  "SAddU32": {
+    "api": "s_add_u32",
+    "description": "Auto-mapped instruction S_ADD_U32"
+  },
+  "SAddU64": {
+    "api": "s_add_u64",
+    "description": "Auto-mapped instruction S_ADD_U64"
+  },
+  "SAllocVgpr": {
+    "api": "s_alloc_vgpr",
+    "description": "Auto-mapped instruction S_ALLOC_VGPR"
+  },
+  "SAndn1SaveexecB32": {
+    "api": "s_andn1_saveexec_b32",
+    "description": "Auto-mapped instruction S_ANDN1_SAVEEXEC_B32"
+  },
+  "SAndn1SaveexecB64": {
+    "api": "s_andn1_saveexec_b64",
+    "description": "Auto-mapped instruction S_ANDN1_SAVEEXEC_B64"
+  },
+  "SAndn1WrexecB32": {
+    "api": "s_andn1_wrexec_b32",
+    "description": "Auto-mapped instruction S_ANDN1_WREXEC_B32"
+  },
+  "SAndn1WrexecB64": {
+    "api": "s_andn1_wrexec_b64",
+    "description": "Auto-mapped instruction S_ANDN1_WREXEC_B64"
+  },
+  "SAndn2B32": {
+    "api": "s_andn2_b32",
+    "description": "Auto-mapped instruction S_ANDN2_B32"
+  },
+  "SAndn2B64": {
+    "api": "s_andn2_b64",
+    "description": "Auto-mapped instruction S_ANDN2_B64"
+  },
+  "SAndn2SaveexecB32": {
+    "api": "s_andn2_saveexec_b32",
+    "description": "Auto-mapped instruction S_ANDN2_SAVEEXEC_B32"
+  },
+  "SAndn2SaveexecB64": {
+    "api": "s_andn2_saveexec_b64",
+    "description": "Auto-mapped instruction S_ANDN2_SAVEEXEC_B64"
+  },
+  "SAndn2WrexecB32": {
+    "api": "s_andn2_wrexec_b32",
+    "description": "Auto-mapped instruction S_ANDN2_WREXEC_B32"
+  },
+  "SAndn2WrexecB64": {
+    "api": "s_andn2_wrexec_b64",
+    "description": "Auto-mapped instruction S_ANDN2_WREXEC_B64"
+  },
+  "SAndB32": {
+    "api": "s_and_b32",
+    "description": "Auto-mapped instruction S_AND_B32"
+  },
+  "SAndB64": {
+    "api": "s_and_b64",
+    "description": "Auto-mapped instruction S_AND_B64"
+  },
+  "SAndSaveexecB32": {
+    "api": "s_and_saveexec_b32",
+    "description": "Auto-mapped instruction S_AND_SAVEEXEC_B32"
+  },
+  "SAndSaveexecB64": {
+    "api": "s_and_saveexec_b64",
+    "description": "Auto-mapped instruction S_AND_SAVEEXEC_B64"
+  },
+  "SAshrI32": {
+    "api": "s_ashr_i32",
+    "description": "Auto-mapped instruction S_ASHR_I32"
+  },
+  "SAshrI64": {
+    "api": "s_ashr_i64",
+    "description": "Auto-mapped instruction S_ASHR_I64"
+  },
+  "SBarrier": {
+    "api": "s_barrier",
+    "description": "Auto-mapped instruction S_BARRIER"
+  },
+  "SBarrierInitImm": {
+    "api": "s_barrier_init_imm",
+    "description": "Auto-mapped instruction S_BARRIER_INIT_IMM"
+  },
+  "SBarrierInitM0": {
+    "api": "s_barrier_init_m0",
+    "description": "Auto-mapped instruction S_BARRIER_INIT_M0"
+  },
+  "SBarrierJoinImm": {
+    "api": "s_barrier_join_imm",
+    "description": "Auto-mapped instruction S_BARRIER_JOIN_IMM"
+  },
+  "SBarrierJoinM0": {
+    "api": "s_barrier_join_m0",
+    "description": "Auto-mapped instruction S_BARRIER_JOIN_M0"
+  },
+  "SBarrierLeave": {
+    "api": "s_barrier_leave",
+    "description": "Auto-mapped instruction S_BARRIER_LEAVE"
+  },
+  "SBarrierLeaveImm": {
+    "api": "s_barrier_leave_imm",
+    "description": "Auto-mapped instruction S_BARRIER_LEAVE_IMM"
+  },
+  "SBarrierSignalImm": {
+    "api": "s_barrier_signal_imm",
+    "description": "Auto-mapped instruction S_BARRIER_SIGNAL_IMM"
+  },
+  "SBarrierSignalIsfirstImm": {
+    "api": "s_barrier_signal_isfirst_imm",
+    "description": "Auto-mapped instruction S_BARRIER_SIGNAL_ISFIRST_IMM"
+  },
+  "SBarrierSignalIsfirstM0": {
+    "api": "s_barrier_signal_isfirst_m0",
+    "description": "Auto-mapped instruction S_BARRIER_SIGNAL_ISFIRST_M0"
+  },
+  "SBarrierSignalM0": {
+    "api": "s_barrier_signal_m0",
+    "description": "Auto-mapped instruction S_BARRIER_SIGNAL_M0"
+  },
+  "SBarrierWait": {
+    "api": "s_barrier_wait",
+    "description": "Auto-mapped instruction S_BARRIER_WAIT"
+  },
+  "SBcnt0I32B32": {
+    "api": "s_bcnt0_i32_b32",
+    "description": "Auto-mapped instruction S_BCNT0_I32_B32"
+  },
+  "SBcnt0I32B64": {
+    "api": "s_bcnt0_i32_b64",
+    "description": "Auto-mapped instruction S_BCNT0_I32_B64"
+  },
+  "SBcnt1I32B32": {
+    "api": "s_bcnt1_i32_b32",
+    "description": "Auto-mapped instruction S_BCNT1_I32_B32"
+  },
+  "SBcnt1I32B64": {
+    "api": "s_bcnt1_i32_b64",
+    "description": "Auto-mapped instruction S_BCNT1_I32_B64"
+  },
+  "SBfeI32": {
+    "api": "s_bfe_i32",
+    "description": "Auto-mapped instruction S_BFE_I32"
+  },
+  "SBfeI64": {
+    "api": "s_bfe_i64",
+    "description": "Auto-mapped instruction S_BFE_I64"
+  },
+  "SBfeU32": {
+    "api": "s_bfe_u32",
+    "description": "Auto-mapped instruction S_BFE_U32"
+  },
+  "SBfeU64": {
+    "api": "s_bfe_u64",
+    "description": "Auto-mapped instruction S_BFE_U64"
+  },
+  "SBfmB32": {
+    "api": "s_bfm_b32",
+    "description": "Auto-mapped instruction S_BFM_B32"
+  },
+  "SBfmB64": {
+    "api": "s_bfm_b64",
+    "description": "Auto-mapped instruction S_BFM_B64"
+  },
+  "SBitcmp0B32": {
+    "api": "s_bitcmp0_b32",
+    "description": "Auto-mapped instruction S_BITCMP0_B32"
+  },
+  "SBitcmp0B64": {
+    "api": "s_bitcmp0_b64",
+    "description": "Auto-mapped instruction S_BITCMP0_B64"
+  },
+  "SBitcmp1B32": {
+    "api": "s_bitcmp1_b32",
+    "description": "Auto-mapped instruction S_BITCMP1_B32"
+  },
+  "SBitcmp1B64": {
+    "api": "s_bitcmp1_b64",
+    "description": "Auto-mapped instruction S_BITCMP1_B64"
+  },
+  "SBitreplicateB64B32": {
+    "api": "s_bitreplicate_b64_b32",
+    "description": "Auto-mapped instruction S_BITREPLICATE_B64_B32"
+  },
+  "SBitset0B32": {
+    "api": "s_bitset0_b32",
+    "description": "Auto-mapped instruction S_BITSET0_B32"
+  },
+  "SBitset0B64": {
+    "api": "s_bitset0_b64",
+    "description": "Auto-mapped instruction S_BITSET0_B64"
+  },
+  "SBitset1B32": {
+    "api": "s_bitset1_b32",
+    "description": "Auto-mapped instruction S_BITSET1_B32"
+  },
+  "SBitset1B64": {
+    "api": "s_bitset1_b64",
+    "description": "Auto-mapped instruction S_BITSET1_B64"
+  },
+  "SBranch": {
+    "api": "s_branch",
+    "description": "Auto-mapped instruction S_BRANCH"
+  },
+  "SBrevB32": {
+    "api": "s_brev_b32",
+    "description": "Auto-mapped instruction S_BREV_B32"
+  },
+  "SBrevB64": {
+    "api": "s_brev_b64",
+    "description": "Auto-mapped instruction S_BREV_B64"
+  },
+  "SCallB64": {
+    "api": "s_call_b64",
+    "description": "Auto-mapped instruction S_CALL_B64"
+  },
+  "SCbranchCdbgsys": {
+    "api": "s_cbranch_cdbgsys",
+    "description": "Auto-mapped instruction S_CBRANCH_CDBGSYS"
+  },
+  "SCbranchCdbgsysAndUser": {
+    "api": "s_cbranch_cdbgsys_and_user",
+    "description": "Auto-mapped instruction S_CBRANCH_CDBGSYS_AND_USER"
+  },
+  "SCbranchCdbgsysOrUser": {
+    "api": "s_cbranch_cdbgsys_or_user",
+    "description": "Auto-mapped instruction S_CBRANCH_CDBGSYS_OR_USER"
+  },
+  "SCbranchCdbguser": {
+    "api": "s_cbranch_cdbguser",
+    "description": "Auto-mapped instruction S_CBRANCH_CDBGUSER"
+  },
+  "SCbranchExecnz": {
+    "api": "s_cbranch_execnz",
+    "description": "Auto-mapped instruction S_CBRANCH_EXECNZ"
+  },
+  "SCbranchExecz": {
+    "api": "s_cbranch_execz",
+    "description": "Auto-mapped instruction S_CBRANCH_EXECZ"
+  },
+  "SCbranchGFork": {
+    "api": "s_cbranch_g_fork",
+    "description": "Auto-mapped instruction S_CBRANCH_G_FORK"
+  },
+  "SCbranchIFork": {
+    "api": "s_cbranch_i_fork",
+    "description": "Auto-mapped instruction S_CBRANCH_I_FORK"
+  },
+  "SCbranchJoin": {
+    "api": "s_cbranch_join",
+    "description": "Auto-mapped instruction S_CBRANCH_JOIN"
+  },
+  "SCbranchScc0": {
+    "api": "s_cbranch_scc0",
+    "description": "Auto-mapped instruction S_CBRANCH_SCC0"
+  },
+  "SCbranchScc1": {
+    "api": "s_cbranch_scc1",
+    "description": "Auto-mapped instruction S_CBRANCH_SCC1"
+  },
+  "SCbranchVccnz": {
+    "api": "s_cbranch_vccnz",
+    "description": "Auto-mapped instruction S_CBRANCH_VCCNZ"
+  },
+  "SCbranchVccz": {
+    "api": "s_cbranch_vccz",
+    "description": "Auto-mapped instruction S_CBRANCH_VCCZ"
+  },
+  "SCeilF16": {
+    "api": "s_ceil_f16",
+    "description": "Auto-mapped instruction S_CEIL_F16"
+  },
+  "SCeilF32": {
+    "api": "s_ceil_f32",
+    "description": "Auto-mapped instruction S_CEIL_F32"
+  },
+  "SClause": {
+    "api": "s_clause",
+    "description": "Auto-mapped instruction S_CLAUSE"
+  },
+  "SCmovkI32": {
+    "api": "s_cmovk_i32",
+    "description": "Auto-mapped instruction S_CMOVK_I32"
+  },
+  "SCmovB32": {
+    "api": "s_cmov_b32",
+    "description": "Auto-mapped instruction S_CMOV_B32"
+  },
+  "SCmovB64": {
+    "api": "s_cmov_b64",
+    "description": "Auto-mapped instruction S_CMOV_B64"
+  },
+  "SCmpkEqI32": {
+    "api": "s_cmpk_eq_i32",
+    "description": "Auto-mapped instruction S_CMPK_EQ_I32"
+  },
+  "SCmpkEqU32": {
+    "api": "s_cmpk_eq_u32",
+    "description": "Auto-mapped instruction S_CMPK_EQ_U32"
+  },
+  "SCmpkGeI32": {
+    "api": "s_cmpk_ge_i32",
+    "description": "Auto-mapped instruction S_CMPK_GE_I32"
+  },
+  "SCmpkGeU32": {
+    "api": "s_cmpk_ge_u32",
+    "description": "Auto-mapped instruction S_CMPK_GE_U32"
+  },
+  "SCmpkGtI32": {
+    "api": "s_cmpk_gt_i32",
+    "description": "Auto-mapped instruction S_CMPK_GT_I32"
+  },
+  "SCmpkGtU32": {
+    "api": "s_cmpk_gt_u32",
+    "description": "Auto-mapped instruction S_CMPK_GT_U32"
+  },
+  "SCmpkLeI32": {
+    "api": "s_cmpk_le_i32",
+    "description": "Auto-mapped instruction S_CMPK_LE_I32"
+  },
+  "SCmpkLeU32": {
+    "api": "s_cmpk_le_u32",
+    "description": "Auto-mapped instruction S_CMPK_LE_U32"
+  },
+  "SCmpkLgI32": {
+    "api": "s_cmpk_lg_i32",
+    "description": "Auto-mapped instruction S_CMPK_LG_I32"
+  },
+  "SCmpkLgU32": {
+    "api": "s_cmpk_lg_u32",
+    "description": "Auto-mapped instruction S_CMPK_LG_U32"
+  },
+  "SCmpkLtI32": {
+    "api": "s_cmpk_lt_i32",
+    "description": "Auto-mapped instruction S_CMPK_LT_I32"
+  },
+  "SCmpkLtU32": {
+    "api": "s_cmpk_lt_u32",
+    "description": "Auto-mapped instruction S_CMPK_LT_U32"
+  },
+  "SCmpEqF16": {
+    "api": "s_cmp_eq_f16",
+    "description": "Auto-mapped instruction S_CMP_EQ_F16"
+  },
+  "SCmpEqF32": {
+    "api": "s_cmp_eq_f32",
+    "description": "Auto-mapped instruction S_CMP_EQ_F32"
+  },
+  "SCmpEqI32": {
+    "api": "s_cmp_eq_i32",
+    "description": "Auto-mapped instruction S_CMP_EQ_I32"
+  },
+  "SCmpEqU32": {
+    "api": "s_cmp_eq_u32",
+    "description": "Auto-mapped instruction S_CMP_EQ_U32"
+  },
+  "SCmpEqU64": {
+    "api": "s_cmp_eq_u64",
+    "description": "Auto-mapped instruction S_CMP_EQ_U64"
+  },
+  "SCmpGeF16": {
+    "api": "s_cmp_ge_f16",
+    "description": "Auto-mapped instruction S_CMP_GE_F16"
+  },
+  "SCmpGeF32": {
+    "api": "s_cmp_ge_f32",
+    "description": "Auto-mapped instruction S_CMP_GE_F32"
+  },
+  "SCmpGeI32": {
+    "api": "s_cmp_ge_i32",
+    "description": "Auto-mapped instruction S_CMP_GE_I32"
+  },
+  "SCmpGeU32": {
+    "api": "s_cmp_ge_u32",
+    "description": "Auto-mapped instruction S_CMP_GE_U32"
+  },
+  "SCmpGtF16": {
+    "api": "s_cmp_gt_f16",
+    "description": "Auto-mapped instruction S_CMP_GT_F16"
+  },
+  "SCmpGtF32": {
+    "api": "s_cmp_gt_f32",
+    "description": "Auto-mapped instruction S_CMP_GT_F32"
+  },
+  "SCmpGtI32": {
+    "api": "s_cmp_gt_i32",
+    "description": "Auto-mapped instruction S_CMP_GT_I32"
+  },
+  "SCmpGtU32": {
+    "api": "s_cmp_gt_u32",
+    "description": "Auto-mapped instruction S_CMP_GT_U32"
+  },
+  "SCmpLeF16": {
+    "api": "s_cmp_le_f16",
+    "description": "Auto-mapped instruction S_CMP_LE_F16"
+  },
+  "SCmpLeF32": {
+    "api": "s_cmp_le_f32",
+    "description": "Auto-mapped instruction S_CMP_LE_F32"
+  },
+  "SCmpLeI32": {
+    "api": "s_cmp_le_i32",
+    "description": "Auto-mapped instruction S_CMP_LE_I32"
+  },
+  "SCmpLeU32": {
+    "api": "s_cmp_le_u32",
+    "description": "Auto-mapped instruction S_CMP_LE_U32"
+  },
+  "SCmpLgF16": {
+    "api": "s_cmp_lg_f16",
+    "description": "Auto-mapped instruction S_CMP_LG_F16"
+  },
+  "SCmpLgF32": {
+    "api": "s_cmp_lg_f32",
+    "description": "Auto-mapped instruction S_CMP_LG_F32"
+  },
+  "SCmpLgI32": {
+    "api": "s_cmp_lg_i32",
+    "description": "Auto-mapped instruction S_CMP_LG_I32"
+  },
+  "SCmpLgU32": {
+    "api": "s_cmp_lg_u32",
+    "description": "Auto-mapped instruction S_CMP_LG_U32"
+  },
+  "SCmpLgU64": {
+    "api": "s_cmp_lg_u64",
+    "description": "Auto-mapped instruction S_CMP_LG_U64"
+  },
+  "SCmpLtF16": {
+    "api": "s_cmp_lt_f16",
+    "description": "Auto-mapped instruction S_CMP_LT_F16"
+  },
+  "SCmpLtF32": {
+    "api": "s_cmp_lt_f32",
+    "description": "Auto-mapped instruction S_CMP_LT_F32"
+  },
+  "SCmpLtI32": {
+    "api": "s_cmp_lt_i32",
+    "description": "Auto-mapped instruction S_CMP_LT_I32"
+  },
+  "SCmpLtU32": {
+    "api": "s_cmp_lt_u32",
+    "description": "Auto-mapped instruction S_CMP_LT_U32"
+  },
+  "SCmpNeqF16": {
+    "api": "s_cmp_neq_f16",
+    "description": "Auto-mapped instruction S_CMP_NEQ_F16"
+  },
+  "SCmpNeqF32": {
+    "api": "s_cmp_neq_f32",
+    "description": "Auto-mapped instruction S_CMP_NEQ_F32"
+  },
+  "SCmpNgeF16": {
+    "api": "s_cmp_nge_f16",
+    "description": "Auto-mapped instruction S_CMP_NGE_F16"
+  },
+  "SCmpNgeF32": {
+    "api": "s_cmp_nge_f32",
+    "description": "Auto-mapped instruction S_CMP_NGE_F32"
+  },
+  "SCmpNgtF16": {
+    "api": "s_cmp_ngt_f16",
+    "description": "Auto-mapped instruction S_CMP_NGT_F16"
+  },
+  "SCmpNgtF32": {
+    "api": "s_cmp_ngt_f32",
+    "description": "Auto-mapped instruction S_CMP_NGT_F32"
+  },
+  "SCmpNleF16": {
+    "api": "s_cmp_nle_f16",
+    "description": "Auto-mapped instruction S_CMP_NLE_F16"
+  },
+  "SCmpNleF32": {
+    "api": "s_cmp_nle_f32",
+    "description": "Auto-mapped instruction S_CMP_NLE_F32"
+  },
+  "SCmpNlgF16": {
+    "api": "s_cmp_nlg_f16",
+    "description": "Auto-mapped instruction S_CMP_NLG_F16"
+  },
+  "SCmpNlgF32": {
+    "api": "s_cmp_nlg_f32",
+    "description": "Auto-mapped instruction S_CMP_NLG_F32"
+  },
+  "SCmpNltF16": {
+    "api": "s_cmp_nlt_f16",
+    "description": "Auto-mapped instruction S_CMP_NLT_F16"
+  },
+  "SCmpNltF32": {
+    "api": "s_cmp_nlt_f32",
+    "description": "Auto-mapped instruction S_CMP_NLT_F32"
+  },
+  "SCmpOF16": {
+    "api": "s_cmp_o_f16",
+    "description": "Auto-mapped instruction S_CMP_O_F16"
+  },
+  "SCmpOF32": {
+    "api": "s_cmp_o_f32",
+    "description": "Auto-mapped instruction S_CMP_O_F32"
+  },
+  "SCmpUF16": {
+    "api": "s_cmp_u_f16",
+    "description": "Auto-mapped instruction S_CMP_U_F16"
+  },
+  "SCmpUF32": {
+    "api": "s_cmp_u_f32",
+    "description": "Auto-mapped instruction S_CMP_U_F32"
+  },
+  "SCodeEnd": {
+    "api": "s_code_end",
+    "description": "Auto-mapped instruction S_CODE_END"
+  },
+  "SCselectB32": {
+    "api": "s_cselect_b32",
+    "description": "Auto-mapped instruction S_CSELECT_B32"
+  },
+  "SCselectB64": {
+    "api": "s_cselect_b64",
+    "description": "Auto-mapped instruction S_CSELECT_B64"
+  },
+  "SCvtF16F32": {
+    "api": "s_cvt_f16_f32",
+    "description": "Auto-mapped instruction S_CVT_F16_F32"
+  },
+  "SCvtF32F16": {
+    "api": "s_cvt_f32_f16",
+    "description": "Auto-mapped instruction S_CVT_F32_F16"
+  },
+  "SCvtF32I32": {
+    "api": "s_cvt_f32_i32",
+    "description": "Auto-mapped instruction S_CVT_F32_I32"
+  },
+  "SCvtF32U32": {
+    "api": "s_cvt_f32_u32",
+    "description": "Auto-mapped instruction S_CVT_F32_U32"
+  },
+  "SCvtHiF32F16": {
+    "api": "s_cvt_hi_f32_f16",
+    "description": "Auto-mapped instruction S_CVT_HI_F32_F16"
+  },
+  "SCvtI32F32": {
+    "api": "s_cvt_i32_f32",
+    "description": "Auto-mapped instruction S_CVT_I32_F32"
+  },
+  "SCvtPkRtzF16F32": {
+    "api": "s_cvt_pk_rtz_f16_f32",
+    "description": "Auto-mapped instruction S_CVT_PK_RTZ_F16_F32"
+  },
+  "SCvtU32F32": {
+    "api": "s_cvt_u32_f32",
+    "description": "Auto-mapped instruction S_CVT_U32_F32"
+  },
+  "SDecperflevel": {
+    "api": "s_decperflevel",
+    "description": "Auto-mapped instruction S_DECPERFLEVEL"
+  },
+  "SDelayAlu": {
+    "api": "s_delay_alu",
+    "description": "Auto-mapped instruction S_DELAY_ALU"
+  },
+  "SDenormMode": {
+    "api": "s_denorm_mode",
+    "description": "Auto-mapped instruction S_DENORM_MODE"
+  },
+  "SEndpgm": {
+    "api": "s_endpgm",
+    "description": "Auto-mapped instruction S_ENDPGM"
+  },
+  "SEndpgmOrderedPsDone": {
+    "api": "s_endpgm_ordered_ps_done",
+    "description": "Auto-mapped instruction S_ENDPGM_ORDERED_PS_DONE"
+  },
+  "SEndpgmSaved": {
+    "api": "s_endpgm_saved",
+    "description": "Auto-mapped instruction S_ENDPGM_SAVED"
+  },
+  "SFf0I32B32": {
+    "api": "s_ff0_i32_b32",
+    "description": "Auto-mapped instruction S_FF0_I32_B32"
+  },
+  "SFf0I32B64": {
+    "api": "s_ff0_i32_b64",
+    "description": "Auto-mapped instruction S_FF0_I32_B64"
+  },
+  "SFf1I32B32": {
+    "api": "s_ff1_i32_b32",
+    "description": "Auto-mapped instruction S_FF1_I32_B32"
+  },
+  "SFf1I32B64": {
+    "api": "s_ff1_i32_b64",
+    "description": "Auto-mapped instruction S_FF1_I32_B64"
+  },
+  "SFlbitI32": {
+    "api": "s_flbit_i32",
+    "description": "Auto-mapped instruction S_FLBIT_I32"
+  },
+  "SFlbitI32B32": {
+    "api": "s_flbit_i32_b32",
+    "description": "Auto-mapped instruction S_FLBIT_I32_B32"
+  },
+  "SFlbitI32B64": {
+    "api": "s_flbit_i32_b64",
+    "description": "Auto-mapped instruction S_FLBIT_I32_B64"
+  },
+  "SFlbitI32I64": {
+    "api": "s_flbit_i32_i64",
+    "description": "Auto-mapped instruction S_FLBIT_I32_I64"
+  },
+  "SFloorF16": {
+    "api": "s_floor_f16",
+    "description": "Auto-mapped instruction S_FLOOR_F16"
+  },
+  "SFloorF32": {
+    "api": "s_floor_f32",
+    "description": "Auto-mapped instruction S_FLOOR_F32"
+  },
+  "SFmaakF32": {
+    "api": "s_fmaak_f32",
+    "description": "Auto-mapped instruction S_FMAAK_F32"
+  },
+  "SFmacF16": {
+    "api": "s_fmac_f16",
+    "description": "Auto-mapped instruction S_FMAC_F16"
+  },
+  "SFmacF32": {
+    "api": "s_fmac_f32",
+    "description": "Auto-mapped instruction S_FMAC_F32"
+  },
+  "SFmamkF32": {
+    "api": "s_fmamk_f32",
+    "description": "Auto-mapped instruction S_FMAMK_F32"
+  },
+  "SGetpcB64": {
+    "api": "s_getpc_b64",
+    "description": "Auto-mapped instruction S_GETPC_B64"
+  },
+  "SGetregB32": {
+    "api": "s_getreg_b32",
+    "description": "Auto-mapped instruction S_GETREG_B32"
+  },
+  "SGetregB32Const": {
+    "api": "s_getreg_b32_const",
+    "description": "Auto-mapped instruction S_GETREG_B32_const"
+  },
+  "SGetregRegrdB32": {
+    "api": "s_getreg_regrd_b32",
+    "description": "Auto-mapped instruction S_GETREG_REGRD_B32"
+  },
+  "SGetBarrierStateImm": {
+    "api": "s_get_barrier_state_imm",
+    "description": "Auto-mapped instruction S_GET_BARRIER_STATE_IMM"
+  },
+  "SGetBarrierStateM0": {
+    "api": "s_get_barrier_state_m0",
+    "description": "Auto-mapped instruction S_GET_BARRIER_STATE_M0"
+  },
+  "SGetShaderCyclesU64": {
+    "api": "s_get_shader_cycles_u64",
+    "description": "Auto-mapped instruction S_GET_SHADER_CYCLES_U64"
+  },
+  "SIcacheInv": {
+    "api": "s_icache_inv",
+    "description": "Auto-mapped instruction S_ICACHE_INV"
+  },
+  "SIncperflevel": {
+    "api": "s_incperflevel",
+    "description": "Auto-mapped instruction S_INCPERFLEVEL"
+  },
+  "SInstPrefetch": {
+    "api": "s_inst_prefetch",
+    "description": "Auto-mapped instruction S_INST_PREFETCH"
+  },
+  "SLshl1AddU32": {
+    "api": "s_lshl1_add_u32",
+    "description": "Auto-mapped instruction S_LSHL1_ADD_U32"
+  },
+  "SLshl2AddU32": {
+    "api": "s_lshl2_add_u32",
+    "description": "Auto-mapped instruction S_LSHL2_ADD_U32"
+  },
+  "SLshl3AddU32": {
+    "api": "s_lshl3_add_u32",
+    "description": "Auto-mapped instruction S_LSHL3_ADD_U32"
+  },
+  "SLshl4AddU32": {
+    "api": "s_lshl4_add_u32",
+    "description": "Auto-mapped instruction S_LSHL4_ADD_U32"
+  },
+  "SLshlB32": {
+    "api": "s_lshl_b32",
+    "description": "Auto-mapped instruction S_LSHL_B32"
+  },
+  "SLshlB64": {
+    "api": "s_lshl_b64",
+    "description": "Auto-mapped instruction S_LSHL_B64"
+  },
+  "SLshrB32": {
+    "api": "s_lshr_b32",
+    "description": "Auto-mapped instruction S_LSHR_B32"
+  },
+  "SLshrB64": {
+    "api": "s_lshr_b64",
+    "description": "Auto-mapped instruction S_LSHR_B64"
+  },
+  "SMaximumF16": {
+    "api": "s_maximum_f16",
+    "description": "Auto-mapped instruction S_MAXIMUM_F16"
+  },
+  "SMaximumF32": {
+    "api": "s_maximum_f32",
+    "description": "Auto-mapped instruction S_MAXIMUM_F32"
+  },
+  "SMaxF16": {
+    "api": "s_max_f16",
+    "description": "Auto-mapped instruction S_MAX_F16"
+  },
+  "SMaxF32": {
+    "api": "s_max_f32",
+    "description": "Auto-mapped instruction S_MAX_F32"
+  },
+  "SMaxI32": {
+    "api": "s_max_i32",
+    "description": "Auto-mapped instruction S_MAX_I32"
+  },
+  "SMaxU32": {
+    "api": "s_max_u32",
+    "description": "Auto-mapped instruction S_MAX_U32"
+  },
+  "SMinimumF16": {
+    "api": "s_minimum_f16",
+    "description": "Auto-mapped instruction S_MINIMUM_F16"
+  },
+  "SMinimumF32": {
+    "api": "s_minimum_f32",
+    "description": "Auto-mapped instruction S_MINIMUM_F32"
+  },
+  "SMinF16": {
+    "api": "s_min_f16",
+    "description": "Auto-mapped instruction S_MIN_F16"
+  },
+  "SMinF32": {
+    "api": "s_min_f32",
+    "description": "Auto-mapped instruction S_MIN_F32"
+  },
+  "SMinI32": {
+    "api": "s_min_i32",
+    "description": "Auto-mapped instruction S_MIN_I32"
+  },
+  "SMinU32": {
+    "api": "s_min_u32",
+    "description": "Auto-mapped instruction S_MIN_U32"
+  },
+  "SMonitorSleep": {
+    "api": "s_monitor_sleep",
+    "description": "Auto-mapped instruction S_MONITOR_SLEEP"
+  },
+  "SMovkI32": {
+    "api": "s_movk_i32",
+    "description": "Auto-mapped instruction S_MOVK_I32"
+  },
+  "SMovreldB32": {
+    "api": "s_movreld_b32",
+    "description": "Auto-mapped instruction S_MOVRELD_B32"
+  },
+  "SMovreldB64": {
+    "api": "s_movreld_b64",
+    "description": "Auto-mapped instruction S_MOVRELD_B64"
+  },
+  "SMovrelsd2B32": {
+    "api": "s_movrelsd_2_b32",
+    "description": "Auto-mapped instruction S_MOVRELSD_2_B32"
+  },
+  "SMovrelsB32": {
+    "api": "s_movrels_b32",
+    "description": "Auto-mapped instruction S_MOVRELS_B32"
+  },
+  "SMovrelsB64": {
+    "api": "s_movrels_b64",
+    "description": "Auto-mapped instruction S_MOVRELS_B64"
+  },
+  "SMovB32": {
+    "api": "s_mov_b32",
+    "description": "Auto-mapped instruction S_MOV_B32"
+  },
+  "SMovB32Sideeffects": {
+    "api": "s_mov_b32_sideeffects",
+    "description": "Auto-mapped instruction S_MOV_B32_sideeffects"
+  },
+  "SMovB64": {
+    "api": "s_mov_b64",
+    "description": "Auto-mapped instruction S_MOV_B64"
+  },
+  "SMulkI32": {
+    "api": "s_mulk_i32",
+    "description": "Auto-mapped instruction S_MULK_I32"
+  },
+  "SMulF16": {
+    "api": "s_mul_f16",
+    "description": "Auto-mapped instruction S_MUL_F16"
+  },
+  "SMulF32": {
+    "api": "s_mul_f32",
+    "description": "Auto-mapped instruction S_MUL_F32"
+  },
+  "SMulHiI32": {
+    "api": "s_mul_hi_i32",
+    "description": "Auto-mapped instruction S_MUL_HI_I32"
+  },
+  "SMulHiU32": {
+    "api": "s_mul_hi_u32",
+    "description": "Auto-mapped instruction S_MUL_HI_U32"
+  },
+  "SMulI32": {
+    "api": "s_mul_i32",
+    "description": "Auto-mapped instruction S_MUL_I32"
+  },
+  "SMulI64I32": {
+    "api": "s_mul_i64_i32",
+    "description": "Auto-mapped instruction S_MUL_I64_I32"
+  },
+  "SMulU64": {
+    "api": "s_mul_u64",
+    "description": "Auto-mapped instruction S_MUL_U64"
+  },
+  "SMulU64U32": {
+    "api": "s_mul_u64_u32",
+    "description": "Auto-mapped instruction S_MUL_U64_U32"
+  },
+  "SNandB32": {
+    "api": "s_nand_b32",
+    "description": "Auto-mapped instruction S_NAND_B32"
+  },
+  "SNandB64": {
+    "api": "s_nand_b64",
+    "description": "Auto-mapped instruction S_NAND_B64"
+  },
+  "SNandSaveexecB32": {
+    "api": "s_nand_saveexec_b32",
+    "description": "Auto-mapped instruction S_NAND_SAVEEXEC_B32"
+  },
+  "SNandSaveexecB64": {
+    "api": "s_nand_saveexec_b64",
+    "description": "Auto-mapped instruction S_NAND_SAVEEXEC_B64"
+  },
+  "SNop": {
+    "api": "s_nop",
+    "description": "Auto-mapped instruction S_NOP"
+  },
+  "SNorB32": {
+    "api": "s_nor_b32",
+    "description": "Auto-mapped instruction S_NOR_B32"
+  },
+  "SNorB64": {
+    "api": "s_nor_b64",
+    "description": "Auto-mapped instruction S_NOR_B64"
+  },
+  "SNorSaveexecB32": {
+    "api": "s_nor_saveexec_b32",
+    "description": "Auto-mapped instruction S_NOR_SAVEEXEC_B32"
+  },
+  "SNorSaveexecB64": {
+    "api": "s_nor_saveexec_b64",
+    "description": "Auto-mapped instruction S_NOR_SAVEEXEC_B64"
+  },
+  "SNotB32": {
+    "api": "s_not_b32",
+    "description": "Auto-mapped instruction S_NOT_B32"
+  },
+  "SNotB64": {
+    "api": "s_not_b64",
+    "description": "Auto-mapped instruction S_NOT_B64"
+  },
+  "SOrn1SaveexecB32": {
+    "api": "s_orn1_saveexec_b32",
+    "description": "Auto-mapped instruction S_ORN1_SAVEEXEC_B32"
+  },
+  "SOrn1SaveexecB64": {
+    "api": "s_orn1_saveexec_b64",
+    "description": "Auto-mapped instruction S_ORN1_SAVEEXEC_B64"
+  },
+  "SOrn2B32": {
+    "api": "s_orn2_b32",
+    "description": "Auto-mapped instruction S_ORN2_B32"
+  },
+  "SOrn2B64": {
+    "api": "s_orn2_b64",
+    "description": "Auto-mapped instruction S_ORN2_B64"
+  },
+  "SOrn2SaveexecB32": {
+    "api": "s_orn2_saveexec_b32",
+    "description": "Auto-mapped instruction S_ORN2_SAVEEXEC_B32"
+  },
+  "SOrn2SaveexecB64": {
+    "api": "s_orn2_saveexec_b64",
+    "description": "Auto-mapped instruction S_ORN2_SAVEEXEC_B64"
+  },
+  "SOrB32": {
+    "api": "s_or_b32",
+    "description": "Auto-mapped instruction S_OR_B32"
+  },
+  "SOrB64": {
+    "api": "s_or_b64",
+    "description": "Auto-mapped instruction S_OR_B64"
+  },
+  "SOrSaveexecB32": {
+    "api": "s_or_saveexec_b32",
+    "description": "Auto-mapped instruction S_OR_SAVEEXEC_B32"
+  },
+  "SOrSaveexecB64": {
+    "api": "s_or_saveexec_b64",
+    "description": "Auto-mapped instruction S_OR_SAVEEXEC_B64"
+  },
+  "SPackHhB32B16": {
+    "api": "s_pack_hh_b32_b16",
+    "description": "Auto-mapped instruction S_PACK_HH_B32_B16"
+  },
+  "SPackHlB32B16": {
+    "api": "s_pack_hl_b32_b16",
+    "description": "Auto-mapped instruction S_PACK_HL_B32_B16"
+  },
+  "SPackLhB32B16": {
+    "api": "s_pack_lh_b32_b16",
+    "description": "Auto-mapped instruction S_PACK_LH_B32_B16"
+  },
+  "SPackLlB32B16": {
+    "api": "s_pack_ll_b32_b16",
+    "description": "Auto-mapped instruction S_PACK_LL_B32_B16"
+  },
+  "SQuadmaskB32": {
+    "api": "s_quadmask_b32",
+    "description": "Auto-mapped instruction S_QUADMASK_B32"
+  },
+  "SQuadmaskB64": {
+    "api": "s_quadmask_b64",
+    "description": "Auto-mapped instruction S_QUADMASK_B64"
+  },
+  "SRfeB64": {
+    "api": "s_rfe_b64",
+    "description": "Auto-mapped instruction S_RFE_B64"
+  },
+  "SRfeRestoreB64": {
+    "api": "s_rfe_restore_b64",
+    "description": "Auto-mapped instruction S_RFE_RESTORE_B64"
+  },
+  "SRndneF16": {
+    "api": "s_rndne_f16",
+    "description": "Auto-mapped instruction S_RNDNE_F16"
+  },
+  "SRndneF32": {
+    "api": "s_rndne_f32",
+    "description": "Auto-mapped instruction S_RNDNE_F32"
+  },
+  "SRoundMode": {
+    "api": "s_round_mode",
+    "description": "Auto-mapped instruction S_ROUND_MODE"
+  },
+  "SSendmsg": {
+    "api": "s_sendmsg",
+    "description": "Auto-mapped instruction S_SENDMSG"
+  },
+  "SSendmsghalt": {
+    "api": "s_sendmsghalt",
+    "description": "Auto-mapped instruction S_SENDMSGHALT"
+  },
+  "SSendmsgRtnB32": {
+    "api": "s_sendmsg_rtn_b32",
+    "description": "Auto-mapped instruction S_SENDMSG_RTN_B32"
+  },
+  "SSendmsgRtnB64": {
+    "api": "s_sendmsg_rtn_b64",
+    "description": "Auto-mapped instruction S_SENDMSG_RTN_B64"
+  },
+  "SSethalt": {
+    "api": "s_sethalt",
+    "description": "Auto-mapped instruction S_SETHALT"
+  },
+  "SSetkill": {
+    "api": "s_setkill",
+    "description": "Auto-mapped instruction S_SETKILL"
+  },
+  "SSetpcB64": {
+    "api": "s_setpc_b64",
+    "description": "Auto-mapped instruction S_SETPC_B64"
+  },
+  "SSetpcB64Return": {
+    "api": "s_setpc_b64_return",
+    "description": "Auto-mapped instruction S_SETPC_B64_return"
+  },
+  "SSetprio": {
+    "api": "s_setprio",
+    "description": "Auto-mapped instruction S_SETPRIO"
+  },
+  "SSetprioIncWg": {
+    "api": "s_setprio_inc_wg",
+    "description": "Auto-mapped instruction S_SETPRIO_INC_WG"
+  },
+  "SSetregB32": {
+    "api": "s_setreg_b32",
+    "description": "Auto-mapped instruction S_SETREG_B32"
+  },
+  "SSetregB32Mode": {
+    "api": "s_setreg_b32_mode",
+    "description": "Auto-mapped instruction S_SETREG_B32_mode"
+  },
+  "SSetregImm32B32": {
+    "api": "s_setreg_imm32_b32",
+    "description": "Auto-mapped instruction S_SETREG_IMM32_B32"
+  },
+  "SSetregImm32B32Mode": {
+    "api": "s_setreg_imm32_b32_mode",
+    "description": "Auto-mapped instruction S_SETREG_IMM32_B32_mode"
+  },
+  "SSetvskip": {
+    "api": "s_setvskip",
+    "description": "Auto-mapped instruction S_SETVSKIP"
+  },
+  "SSetGprIdxIdx": {
+    "api": "s_set_gpr_idx_idx",
+    "description": "Auto-mapped instruction S_SET_GPR_IDX_IDX"
+  },
+  "SSetGprIdxMode": {
+    "api": "s_set_gpr_idx_mode",
+    "description": "Auto-mapped instruction S_SET_GPR_IDX_MODE"
+  },
+  "SSetGprIdxOff": {
+    "api": "s_set_gpr_idx_off",
+    "description": "Auto-mapped instruction S_SET_GPR_IDX_OFF"
+  },
+  "SSetGprIdxOn": {
+    "api": "s_set_gpr_idx_on",
+    "description": "Auto-mapped instruction S_SET_GPR_IDX_ON"
+  },
+  "SSetVgprMsb": {
+    "api": "s_set_vgpr_msb",
+    "description": "Auto-mapped instruction S_SET_VGPR_MSB"
+  },
+  "SSextI32I16": {
+    "api": "s_sext_i32_i16",
+    "description": "Auto-mapped instruction S_SEXT_I32_I16"
+  },
+  "SSextI32I8": {
+    "api": "s_sext_i32_i8",
+    "description": "Auto-mapped instruction S_SEXT_I32_I8"
+  },
+  "SSleep": {
+    "api": "s_sleep",
+    "description": "Auto-mapped instruction S_SLEEP"
+  },
+  "SSleepVar": {
+    "api": "s_sleep_var",
+    "description": "Auto-mapped instruction S_SLEEP_VAR"
+  },
+  "SSubbU32": {
+    "api": "s_subb_u32",
+    "description": "Auto-mapped instruction S_SUBB_U32"
+  },
+  "SSubvectorLoopBegin": {
+    "api": "s_subvector_loop_begin",
+    "description": "Auto-mapped instruction S_SUBVECTOR_LOOP_BEGIN"
+  },
+  "SSubvectorLoopEnd": {
+    "api": "s_subvector_loop_end",
+    "description": "Auto-mapped instruction S_SUBVECTOR_LOOP_END"
+  },
+  "SSubF16": {
+    "api": "s_sub_f16",
+    "description": "Auto-mapped instruction S_SUB_F16"
+  },
+  "SSubF32": {
+    "api": "s_sub_f32",
+    "description": "Auto-mapped instruction S_SUB_F32"
+  },
+  "SSubI32": {
+    "api": "s_sub_i32",
+    "description": "Auto-mapped instruction S_SUB_I32"
+  },
+  "SSubU32": {
+    "api": "s_sub_u32",
+    "description": "Auto-mapped instruction S_SUB_U32"
+  },
+  "SSubU64": {
+    "api": "s_sub_u64",
+    "description": "Auto-mapped instruction S_SUB_U64"
+  },
+  "SSwappcB64": {
+    "api": "s_swappc_b64",
+    "description": "Auto-mapped instruction S_SWAPPC_B64"
+  },
+  "STrap": {
+    "api": "s_trap",
+    "description": "Auto-mapped instruction S_TRAP"
+  },
+  "STruncF16": {
+    "api": "s_trunc_f16",
+    "description": "Auto-mapped instruction S_TRUNC_F16"
+  },
+  "STruncF32": {
+    "api": "s_trunc_f32",
+    "description": "Auto-mapped instruction S_TRUNC_F32"
+  },
+  "STtracedata": {
+    "api": "s_ttracedata",
+    "description": "Auto-mapped instruction S_TTRACEDATA"
+  },
+  "STtracedataImm": {
+    "api": "s_ttracedata_imm",
+    "description": "Auto-mapped instruction S_TTRACEDATA_IMM"
+  },
+  "SVersion": {
+    "api": "s_version",
+    "description": "Auto-mapped instruction S_VERSION"
+  },
+  "SWaitcnt": {
+    "api": "s_waitcnt",
+    "description": "Auto-mapped instruction S_WAITCNT"
+  },
+  "SWaitcntDepctr": {
+    "api": "s_waitcnt_depctr",
+    "description": "Auto-mapped instruction S_WAITCNT_DEPCTR"
+  },
+  "SWaitcntExpcnt": {
+    "api": "s_waitcnt_expcnt",
+    "description": "Auto-mapped instruction S_WAITCNT_EXPCNT"
+  },
+  "SWaitcntLgkmcnt": {
+    "api": "s_waitcnt_lgkmcnt",
+    "description": "Auto-mapped instruction S_WAITCNT_LGKMCNT"
+  },
+  "SWaitcntVmcnt": {
+    "api": "s_waitcnt_vmcnt",
+    "description": "Auto-mapped instruction S_WAITCNT_VMCNT"
+  },
+  "SWaitcntVscnt": {
+    "api": "s_waitcnt_vscnt",
+    "description": "Auto-mapped instruction S_WAITCNT_VSCNT"
+  },
+  "SWaitcntVscntSoft": {
+    "api": "s_waitcnt_vscnt_soft",
+    "description": "Auto-mapped instruction S_WAITCNT_VSCNT_soft"
+  },
+  "SWaitcntLdsDirect": {
+    "api": "s_waitcnt_lds_direct",
+    "description": "Auto-mapped instruction S_WAITCNT_lds_direct"
+  },
+  "SWaitcntSoft": {
+    "api": "s_waitcnt_soft",
+    "description": "Auto-mapped instruction S_WAITCNT_soft"
+  },
+  "SWaitAsynccnt": {
+    "api": "s_wait_asynccnt",
+    "description": "Auto-mapped instruction S_WAIT_ASYNCCNT"
+  },
+  "SWaitBvhcnt": {
+    "api": "s_wait_bvhcnt",
+    "description": "Auto-mapped instruction S_WAIT_BVHCNT"
+  },
+  "SWaitBvhcntSoft": {
+    "api": "s_wait_bvhcnt_soft",
+    "description": "Auto-mapped instruction S_WAIT_BVHCNT_soft"
+  },
+  "SWaitDscnt": {
+    "api": "s_wait_dscnt",
+    "description": "Auto-mapped instruction S_WAIT_DSCNT"
+  },
+  "SWaitDscntSoft": {
+    "api": "s_wait_dscnt_soft",
+    "description": "Auto-mapped instruction S_WAIT_DSCNT_soft"
+  },
+  "SWaitEvent": {
+    "api": "s_wait_event",
+    "description": "Auto-mapped instruction S_WAIT_EVENT"
+  },
+  "SWaitExpcnt": {
+    "api": "s_wait_expcnt",
+    "description": "Auto-mapped instruction S_WAIT_EXPCNT"
+  },
+  "SWaitIdle": {
+    "api": "s_wait_idle",
+    "description": "Auto-mapped instruction S_WAIT_IDLE"
+  },
+  "SWaitKmcnt": {
+    "api": "s_wait_kmcnt",
+    "description": "Auto-mapped instruction S_WAIT_KMCNT"
+  },
+  "SWaitKmcntSoft": {
+    "api": "s_wait_kmcnt_soft",
+    "description": "Auto-mapped instruction S_WAIT_KMCNT_soft"
+  },
+  "SWaitLoadcnt": {
+    "api": "s_wait_loadcnt",
+    "description": "Auto-mapped instruction S_WAIT_LOADCNT"
+  },
+  "SWaitLoadcntDscnt": {
+    "api": "s_wait_loadcnt_dscnt",
+    "description": "Auto-mapped instruction S_WAIT_LOADCNT_DSCNT"
+  },
+  "SWaitLoadcntSoft": {
+    "api": "s_wait_loadcnt_soft",
+    "description": "Auto-mapped instruction S_WAIT_LOADCNT_soft"
+  },
+  "SWaitSamplecnt": {
+    "api": "s_wait_samplecnt",
+    "description": "Auto-mapped instruction S_WAIT_SAMPLECNT"
+  },
+  "SWaitSamplecntSoft": {
+    "api": "s_wait_samplecnt_soft",
+    "description": "Auto-mapped instruction S_WAIT_SAMPLECNT_soft"
+  },
+  "SWaitStorecnt": {
+    "api": "s_wait_storecnt",
+    "description": "Auto-mapped instruction S_WAIT_STORECNT"
+  },
+  "SWaitStorecntDscnt": {
+    "api": "s_wait_storecnt_dscnt",
+    "description": "Auto-mapped instruction S_WAIT_STORECNT_DSCNT"
+  },
+  "SWaitStorecntSoft": {
+    "api": "s_wait_storecnt_soft",
+    "description": "Auto-mapped instruction S_WAIT_STORECNT_soft"
+  },
+  "SWaitTensorcnt": {
+    "api": "s_wait_tensorcnt",
+    "description": "Auto-mapped instruction S_WAIT_TENSORCNT"
+  },
+  "SWaitXcnt": {
+    "api": "s_wait_xcnt",
+    "description": "Auto-mapped instruction S_WAIT_XCNT"
+  },
+  "SWaitXcntSoft": {
+    "api": "s_wait_xcnt_soft",
+    "description": "Auto-mapped instruction S_WAIT_XCNT_soft"
+  },
+  "SWakeup": {
+    "api": "s_wakeup",
+    "description": "Auto-mapped instruction S_WAKEUP"
+  },
+  "SWakeupBarrierImm": {
+    "api": "s_wakeup_barrier_imm",
+    "description": "Auto-mapped instruction S_WAKEUP_BARRIER_IMM"
+  },
+  "SWakeupBarrierM0": {
+    "api": "s_wakeup_barrier_m0",
+    "description": "Auto-mapped instruction S_WAKEUP_BARRIER_M0"
+  },
+  "SWakeupImm": {
+    "api": "s_wakeup_imm",
+    "description": "Auto-mapped instruction S_WAKEUP_imm"
+  },
+  "SWqmB32": {
+    "api": "s_wqm_b32",
+    "description": "Auto-mapped instruction S_WQM_B32"
+  },
+  "SWqmB64": {
+    "api": "s_wqm_b64",
+    "description": "Auto-mapped instruction S_WQM_B64"
+  },
+  "SXnorB32": {
+    "api": "s_xnor_b32",
+    "description": "Auto-mapped instruction S_XNOR_B32"
+  },
+  "SXnorB64": {
+    "api": "s_xnor_b64",
+    "description": "Auto-mapped instruction S_XNOR_B64"
+  },
+  "SXnorSaveexecB32": {
+    "api": "s_xnor_saveexec_b32",
+    "description": "Auto-mapped instruction S_XNOR_SAVEEXEC_B32"
+  },
+  "SXnorSaveexecB64": {
+    "api": "s_xnor_saveexec_b64",
+    "description": "Auto-mapped instruction S_XNOR_SAVEEXEC_B64"
+  },
+  "SXorB32": {
+    "api": "s_xor_b32",
+    "description": "Auto-mapped instruction S_XOR_B32"
+  },
+  "SXorB64": {
+    "api": "s_xor_b64",
+    "description": "Auto-mapped instruction S_XOR_B64"
+  },
+  "SXorSaveexecB32": {
+    "api": "s_xor_saveexec_b32",
+    "description": "Auto-mapped instruction S_XOR_SAVEEXEC_B32"
+  },
+  "SXorSaveexecB64": {
+    "api": "s_xor_saveexec_b64",
+    "description": "Auto-mapped instruction S_XOR_SAVEEXEC_B64"
+  },
+  "VAccvgprMovB32": {
+    "api": "v_accvgpr_mov_b32",
+    "description": "Auto-mapped instruction V_ACCVGPR_MOV_B32"
+  },
+  "VAdd3U32": {
+    "api": "v_add3_u32",
+    "description": "Auto-mapped instruction V_ADD3_U32"
+  },
+  "VAddcCoU32": {
+    "api": "v_addc_co_u32",
+    "description": "Auto-mapped instruction V_ADDC_CO_U32"
+  },
+  "VAddcU32": {
+    "api": "v_addc_u32",
+    "description": "Auto-mapped instruction V_ADDC_U32"
+  },
+  "VAddCoCiU32": {
+    "api": "v_add_co_ci_u32",
+    "description": "Auto-mapped instruction V_ADD_CO_CI_U32"
+  },
+  "VAddCoU32": {
+    "api": "v_add_co_u32",
+    "description": "Auto-mapped instruction V_ADD_CO_U32"
+  },
+  "VAddF16": {
+    "api": "v_add_f16",
+    "description": "Auto-mapped instruction V_ADD_F16"
+  },
+  "VAddF32": {
+    "api": "v_add_f32",
+    "description": "Auto-mapped instruction V_ADD_F32"
+  },
+  "VAddF64": {
+    "api": "v_add_f64",
+    "description": "Auto-mapped instruction V_ADD_F64"
+  },
+  "VAddI16": {
+    "api": "v_add_i16",
+    "description": "Auto-mapped instruction V_ADD_I16"
+  },
+  "VAddI32": {
+    "api": "v_add_i32",
+    "description": "Auto-mapped instruction V_ADD_I32"
+  },
+  "VAddLshlU32": {
+    "api": "v_add_lshl_u32",
+    "description": "Auto-mapped instruction V_ADD_LSHL_U32"
+  },
+  "VAddMaxI32": {
+    "api": "v_add_max_i32",
+    "description": "Auto-mapped instruction V_ADD_MAX_I32"
+  },
+  "VAddMaxU32": {
+    "api": "v_add_max_u32",
+    "description": "Auto-mapped instruction V_ADD_MAX_U32"
+  },
+  "VAddMinI32": {
+    "api": "v_add_min_i32",
+    "description": "Auto-mapped instruction V_ADD_MIN_I32"
+  },
+  "VAddMinU32": {
+    "api": "v_add_min_u32",
+    "description": "Auto-mapped instruction V_ADD_MIN_U32"
+  },
+  "VAddNcI16": {
+    "api": "v_add_nc_i16",
+    "description": "Auto-mapped instruction V_ADD_NC_I16"
+  },
+  "VAddNcI32": {
+    "api": "v_add_nc_i32",
+    "description": "Auto-mapped instruction V_ADD_NC_I32"
+  },
+  "VAddNcU16": {
+    "api": "v_add_nc_u16",
+    "description": "Auto-mapped instruction V_ADD_NC_U16"
+  },
+  "VAddNcU32": {
+    "api": "v_add_nc_u32",
+    "description": "Auto-mapped instruction V_ADD_NC_U32"
+  },
+  "VAddU16": {
+    "api": "v_add_u16",
+    "description": "Auto-mapped instruction V_ADD_U16"
+  },
+  "VAddU32": {
+    "api": "v_add_u32",
+    "description": "Auto-mapped instruction V_ADD_U32"
+  },
+  "VAddU64": {
+    "api": "v_add_u64",
+    "description": "Auto-mapped instruction V_ADD_U64"
+  },
+  "VAlignbitB32": {
+    "api": "v_alignbit_b32",
+    "description": "Auto-mapped instruction V_ALIGNBIT_B32"
+  },
+  "VAlignbitB32Opsel": {
+    "api": "v_alignbit_b32_opsel",
+    "description": "Auto-mapped instruction V_ALIGNBIT_B32_opsel"
+  },
+  "VAlignbyteB32": {
+    "api": "v_alignbyte_b32",
+    "description": "Auto-mapped instruction V_ALIGNBYTE_B32"
+  },
+  "VAlignbyteB32Fake16": {
+    "api": "v_alignbyte_b32_fake16",
+    "description": "Auto-mapped instruction V_ALIGNBYTE_B32_fake16"
+  },
+  "VAlignbyteB32Opsel": {
+    "api": "v_alignbyte_b32_opsel",
+    "description": "Auto-mapped instruction V_ALIGNBYTE_B32_opsel"
+  },
+  "VAlignbyteB32T16": {
+    "api": "v_alignbyte_b32_t16",
+    "description": "Auto-mapped instruction V_ALIGNBYTE_B32_t16"
+  },
+  "VAndB16": {
+    "api": "v_and_b16",
+    "description": "Auto-mapped instruction V_AND_B16"
+  },
+  "VAndB16Fake16": {
+    "api": "v_and_b16_fake16",
+    "description": "Auto-mapped instruction V_AND_B16_fake16"
+  },
+  "VAndB16T16": {
+    "api": "v_and_b16_t16",
+    "description": "Auto-mapped instruction V_AND_B16_t16"
+  },
+  "VAndB32": {
+    "api": "v_and_b32",
+    "description": "Auto-mapped instruction V_AND_B32"
+  },
+  "VAndOrB32": {
+    "api": "v_and_or_b32",
+    "description": "Auto-mapped instruction V_AND_OR_B32"
+  },
+  "VAshrrevI16": {
+    "api": "v_ashrrev_i16",
+    "description": "Auto-mapped instruction V_ASHRREV_I16"
+  },
+  "VAshrrevI32": {
+    "api": "v_ashrrev_i32",
+    "description": "Auto-mapped instruction V_ASHRREV_I32"
+  },
+  "VAshrrevI64": {
+    "api": "v_ashrrev_i64",
+    "description": "Auto-mapped instruction V_ASHRREV_I64"
+  },
+  "VAshrI32": {
+    "api": "v_ashr_i32",
+    "description": "Auto-mapped instruction V_ASHR_I32"
+  },
+  "VAshrI64": {
+    "api": "v_ashr_i64",
+    "description": "Auto-mapped instruction V_ASHR_I64"
+  },
+  "VAshrPkI8I32": {
+    "api": "v_ashr_pk_i8_i32",
+    "description": "Auto-mapped instruction V_ASHR_PK_I8_I32"
+  },
+  "VAshrPkU8I32": {
+    "api": "v_ashr_pk_u8_i32",
+    "description": "Auto-mapped instruction V_ASHR_PK_U8_I32"
+  },
+  "VBcntU32B32": {
+    "api": "v_bcnt_u32_b32",
+    "description": "Auto-mapped instruction V_BCNT_U32_B32"
+  },
+  "VBfeI32": {
+    "api": "v_bfe_i32",
+    "description": "Auto-mapped instruction V_BFE_I32"
+  },
+  "VBfeU32": {
+    "api": "v_bfe_u32",
+    "description": "Auto-mapped instruction V_BFE_U32"
+  },
+  "VBfiB32": {
+    "api": "v_bfi_b32",
+    "description": "Auto-mapped instruction V_BFI_B32"
+  },
+  "VBfmB32": {
+    "api": "v_bfm_b32",
+    "description": "Auto-mapped instruction V_BFM_B32"
+  },
+  "VBfrevB32": {
+    "api": "v_bfrev_b32",
+    "description": "Auto-mapped instruction V_BFREV_B32"
+  },
+  "VBitop3B16": {
+    "api": "v_bitop3_b16",
+    "description": "Auto-mapped instruction V_BITOP3_B16"
+  },
+  "VBitop3B32": {
+    "api": "v_bitop3_b32",
+    "description": "Auto-mapped instruction V_BITOP3_B32"
+  },
+  "VCeilF16": {
+    "api": "v_ceil_f16",
+    "description": "Auto-mapped instruction V_CEIL_F16"
+  },
+  "VCeilF16Fake16": {
+    "api": "v_ceil_f16_fake16",
+    "description": "Auto-mapped instruction V_CEIL_F16_fake16"
+  },
+  "VCeilF16T16": {
+    "api": "v_ceil_f16_t16",
+    "description": "Auto-mapped instruction V_CEIL_F16_t16"
+  },
+  "VCeilF32": {
+    "api": "v_ceil_f32",
+    "description": "Auto-mapped instruction V_CEIL_F32"
+  },
+  "VCeilF64": {
+    "api": "v_ceil_f64",
+    "description": "Auto-mapped instruction V_CEIL_F64"
+  },
+  "VClrexcp": {
+    "api": "v_clrexcp",
+    "description": "Auto-mapped instruction V_CLREXCP"
+  },
+  "VClsI32": {
+    "api": "v_cls_i32",
+    "description": "Auto-mapped instruction V_CLS_I32"
+  },
+  "VClzI32U32": {
+    "api": "v_clz_i32_u32",
+    "description": "Auto-mapped instruction V_CLZ_I32_U32"
+  },
+  "VCmpsxEqF32": {
+    "api": "v_cmpsx_eq_f32",
+    "description": "Auto-mapped instruction V_CMPSX_EQ_F32"
+  },
+  "VCmpsxEqF64": {
+    "api": "v_cmpsx_eq_f64",
+    "description": "Auto-mapped instruction V_CMPSX_EQ_F64"
+  },
+  "VCmpsxFF32": {
+    "api": "v_cmpsx_f_f32",
+    "description": "Auto-mapped instruction V_CMPSX_F_F32"
+  },
+  "VCmpsxFF64": {
+    "api": "v_cmpsx_f_f64",
+    "description": "Auto-mapped instruction V_CMPSX_F_F64"
+  },
+  "VCmpsxGeF32": {
+    "api": "v_cmpsx_ge_f32",
+    "description": "Auto-mapped instruction V_CMPSX_GE_F32"
+  },
+  "VCmpsxGeF64": {
+    "api": "v_cmpsx_ge_f64",
+    "description": "Auto-mapped instruction V_CMPSX_GE_F64"
+  },
+  "VCmpsxGtF32": {
+    "api": "v_cmpsx_gt_f32",
+    "description": "Auto-mapped instruction V_CMPSX_GT_F32"
+  },
+  "VCmpsxGtF64": {
+    "api": "v_cmpsx_gt_f64",
+    "description": "Auto-mapped instruction V_CMPSX_GT_F64"
+  },
+  "VCmpsxLeF32": {
+    "api": "v_cmpsx_le_f32",
+    "description": "Auto-mapped instruction V_CMPSX_LE_F32"
+  },
+  "VCmpsxLeF64": {
+    "api": "v_cmpsx_le_f64",
+    "description": "Auto-mapped instruction V_CMPSX_LE_F64"
+  },
+  "VCmpsxLgF32": {
+    "api": "v_cmpsx_lg_f32",
+    "description": "Auto-mapped instruction V_CMPSX_LG_F32"
+  },
+  "VCmpsxLgF64": {
+    "api": "v_cmpsx_lg_f64",
+    "description": "Auto-mapped instruction V_CMPSX_LG_F64"
+  },
+  "VCmpsxLtF32": {
+    "api": "v_cmpsx_lt_f32",
+    "description": "Auto-mapped instruction V_CMPSX_LT_F32"
+  },
+  "VCmpsxLtF64": {
+    "api": "v_cmpsx_lt_f64",
+    "description": "Auto-mapped instruction V_CMPSX_LT_F64"
+  },
+  "VCmpsxNeqF32": {
+    "api": "v_cmpsx_neq_f32",
+    "description": "Auto-mapped instruction V_CMPSX_NEQ_F32"
+  },
+  "VCmpsxNeqF64": {
+    "api": "v_cmpsx_neq_f64",
+    "description": "Auto-mapped instruction V_CMPSX_NEQ_F64"
+  },
+  "VCmpsxNgeF32": {
+    "api": "v_cmpsx_nge_f32",
+    "description": "Auto-mapped instruction V_CMPSX_NGE_F32"
+  },
+  "VCmpsxNgeF64": {
+    "api": "v_cmpsx_nge_f64",
+    "description": "Auto-mapped instruction V_CMPSX_NGE_F64"
+  },
+  "VCmpsxNgtF32": {
+    "api": "v_cmpsx_ngt_f32",
+    "description": "Auto-mapped instruction V_CMPSX_NGT_F32"
+  },
+  "VCmpsxNgtF64": {
+    "api": "v_cmpsx_ngt_f64",
+    "description": "Auto-mapped instruction V_CMPSX_NGT_F64"
+  },
+  "VCmpsxNleF32": {
+    "api": "v_cmpsx_nle_f32",
+    "description": "Auto-mapped instruction V_CMPSX_NLE_F32"
+  },
+  "VCmpsxNleF64": {
+    "api": "v_cmpsx_nle_f64",
+    "description": "Auto-mapped instruction V_CMPSX_NLE_F64"
+  },
+  "VCmpsxNlgF32": {
+    "api": "v_cmpsx_nlg_f32",
+    "description": "Auto-mapped instruction V_CMPSX_NLG_F32"
+  },
+  "VCmpsxNlgF64": {
+    "api": "v_cmpsx_nlg_f64",
+    "description": "Auto-mapped instruction V_CMPSX_NLG_F64"
+  },
+  "VCmpsxNltF32": {
+    "api": "v_cmpsx_nlt_f32",
+    "description": "Auto-mapped instruction V_CMPSX_NLT_F32"
+  },
+  "VCmpsxNltF64": {
+    "api": "v_cmpsx_nlt_f64",
+    "description": "Auto-mapped instruction V_CMPSX_NLT_F64"
+  },
+  "VCmpsxOF32": {
+    "api": "v_cmpsx_o_f32",
+    "description": "Auto-mapped instruction V_CMPSX_O_F32"
+  },
+  "VCmpsxOF64": {
+    "api": "v_cmpsx_o_f64",
+    "description": "Auto-mapped instruction V_CMPSX_O_F64"
+  },
+  "VCmpsxTruF32": {
+    "api": "v_cmpsx_tru_f32",
+    "description": "Auto-mapped instruction V_CMPSX_TRU_F32"
+  },
+  "VCmpsxTruF64": {
+    "api": "v_cmpsx_tru_f64",
+    "description": "Auto-mapped instruction V_CMPSX_TRU_F64"
+  },
+  "VCmpsxUF32": {
+    "api": "v_cmpsx_u_f32",
+    "description": "Auto-mapped instruction V_CMPSX_U_F32"
+  },
+  "VCmpsxUF64": {
+    "api": "v_cmpsx_u_f64",
+    "description": "Auto-mapped instruction V_CMPSX_U_F64"
+  },
+  "VCmpsEqF32": {
+    "api": "v_cmps_eq_f32",
+    "description": "Auto-mapped instruction V_CMPS_EQ_F32"
+  },
+  "VCmpsEqF64": {
+    "api": "v_cmps_eq_f64",
+    "description": "Auto-mapped instruction V_CMPS_EQ_F64"
+  },
+  "VCmpsFF32": {
+    "api": "v_cmps_f_f32",
+    "description": "Auto-mapped instruction V_CMPS_F_F32"
+  },
+  "VCmpsFF64": {
+    "api": "v_cmps_f_f64",
+    "description": "Auto-mapped instruction V_CMPS_F_F64"
+  },
+  "VCmpsGeF32": {
+    "api": "v_cmps_ge_f32",
+    "description": "Auto-mapped instruction V_CMPS_GE_F32"
+  },
+  "VCmpsGeF64": {
+    "api": "v_cmps_ge_f64",
+    "description": "Auto-mapped instruction V_CMPS_GE_F64"
+  },
+  "VCmpsGtF32": {
+    "api": "v_cmps_gt_f32",
+    "description": "Auto-mapped instruction V_CMPS_GT_F32"
+  },
+  "VCmpsGtF64": {
+    "api": "v_cmps_gt_f64",
+    "description": "Auto-mapped instruction V_CMPS_GT_F64"
+  },
+  "VCmpsLeF32": {
+    "api": "v_cmps_le_f32",
+    "description": "Auto-mapped instruction V_CMPS_LE_F32"
+  },
+  "VCmpsLeF64": {
+    "api": "v_cmps_le_f64",
+    "description": "Auto-mapped instruction V_CMPS_LE_F64"
+  },
+  "VCmpsLgF32": {
+    "api": "v_cmps_lg_f32",
+    "description": "Auto-mapped instruction V_CMPS_LG_F32"
+  },
+  "VCmpsLgF64": {
+    "api": "v_cmps_lg_f64",
+    "description": "Auto-mapped instruction V_CMPS_LG_F64"
+  },
+  "VCmpsLtF32": {
+    "api": "v_cmps_lt_f32",
+    "description": "Auto-mapped instruction V_CMPS_LT_F32"
+  },
+  "VCmpsLtF64": {
+    "api": "v_cmps_lt_f64",
+    "description": "Auto-mapped instruction V_CMPS_LT_F64"
+  },
+  "VCmpsNeqF32": {
+    "api": "v_cmps_neq_f32",
+    "description": "Auto-mapped instruction V_CMPS_NEQ_F32"
+  },
+  "VCmpsNeqF64": {
+    "api": "v_cmps_neq_f64",
+    "description": "Auto-mapped instruction V_CMPS_NEQ_F64"
+  },
+  "VCmpsNgeF32": {
+    "api": "v_cmps_nge_f32",
+    "description": "Auto-mapped instruction V_CMPS_NGE_F32"
+  },
+  "VCmpsNgeF64": {
+    "api": "v_cmps_nge_f64",
+    "description": "Auto-mapped instruction V_CMPS_NGE_F64"
+  },
+  "VCmpsNgtF32": {
+    "api": "v_cmps_ngt_f32",
+    "description": "Auto-mapped instruction V_CMPS_NGT_F32"
+  },
+  "VCmpsNgtF64": {
+    "api": "v_cmps_ngt_f64",
+    "description": "Auto-mapped instruction V_CMPS_NGT_F64"
+  },
+  "VCmpsNleF32": {
+    "api": "v_cmps_nle_f32",
+    "description": "Auto-mapped instruction V_CMPS_NLE_F32"
+  },
+  "VCmpsNleF64": {
+    "api": "v_cmps_nle_f64",
+    "description": "Auto-mapped instruction V_CMPS_NLE_F64"
+  },
+  "VCmpsNlgF32": {
+    "api": "v_cmps_nlg_f32",
+    "description": "Auto-mapped instruction V_CMPS_NLG_F32"
+  },
+  "VCmpsNlgF64": {
+    "api": "v_cmps_nlg_f64",
+    "description": "Auto-mapped instruction V_CMPS_NLG_F64"
+  },
+  "VCmpsNltF32": {
+    "api": "v_cmps_nlt_f32",
+    "description": "Auto-mapped instruction V_CMPS_NLT_F32"
+  },
+  "VCmpsNltF64": {
+    "api": "v_cmps_nlt_f64",
+    "description": "Auto-mapped instruction V_CMPS_NLT_F64"
+  },
+  "VCmpsOF32": {
+    "api": "v_cmps_o_f32",
+    "description": "Auto-mapped instruction V_CMPS_O_F32"
+  },
+  "VCmpsOF64": {
+    "api": "v_cmps_o_f64",
+    "description": "Auto-mapped instruction V_CMPS_O_F64"
+  },
+  "VCmpsTruF32": {
+    "api": "v_cmps_tru_f32",
+    "description": "Auto-mapped instruction V_CMPS_TRU_F32"
+  },
+  "VCmpsTruF64": {
+    "api": "v_cmps_tru_f64",
+    "description": "Auto-mapped instruction V_CMPS_TRU_F64"
+  },
+  "VCmpsUF32": {
+    "api": "v_cmps_u_f32",
+    "description": "Auto-mapped instruction V_CMPS_U_F32"
+  },
+  "VCmpsUF64": {
+    "api": "v_cmps_u_f64",
+    "description": "Auto-mapped instruction V_CMPS_U_F64"
+  },
+  "VCmpxClassF16": {
+    "api": "v_cmpx_class_f16",
+    "description": "Auto-mapped instruction V_CMPX_CLASS_F16"
+  },
+  "VCmpxClassF32": {
+    "api": "v_cmpx_class_f32",
+    "description": "Auto-mapped instruction V_CMPX_CLASS_F32"
+  },
+  "VCmpxClassF64": {
+    "api": "v_cmpx_class_f64",
+    "description": "Auto-mapped instruction V_CMPX_CLASS_F64"
+  },
+  "VCmpxEqF16": {
+    "api": "v_cmpx_eq_f16",
+    "description": "Auto-mapped instruction V_CMPX_EQ_F16"
+  },
+  "VCmpxEqF32": {
+    "api": "v_cmpx_eq_f32",
+    "description": "Auto-mapped instruction V_CMPX_EQ_F32"
+  },
+  "VCmpxEqF64": {
+    "api": "v_cmpx_eq_f64",
+    "description": "Auto-mapped instruction V_CMPX_EQ_F64"
+  },
+  "VCmpxEqI16": {
+    "api": "v_cmpx_eq_i16",
+    "description": "Auto-mapped instruction V_CMPX_EQ_I16"
+  },
+  "VCmpxEqI32": {
+    "api": "v_cmpx_eq_i32",
+    "description": "Auto-mapped instruction V_CMPX_EQ_I32"
+  },
+  "VCmpxEqI64": {
+    "api": "v_cmpx_eq_i64",
+    "description": "Auto-mapped instruction V_CMPX_EQ_I64"
+  },
+  "VCmpxEqU16": {
+    "api": "v_cmpx_eq_u16",
+    "description": "Auto-mapped instruction V_CMPX_EQ_U16"
+  },
+  "VCmpxEqU32": {
+    "api": "v_cmpx_eq_u32",
+    "description": "Auto-mapped instruction V_CMPX_EQ_U32"
+  },
+  "VCmpxEqU64": {
+    "api": "v_cmpx_eq_u64",
+    "description": "Auto-mapped instruction V_CMPX_EQ_U64"
+  },
+  "VCmpxFF16": {
+    "api": "v_cmpx_f_f16",
+    "description": "Auto-mapped instruction V_CMPX_F_F16"
+  },
+  "VCmpxFF32": {
+    "api": "v_cmpx_f_f32",
+    "description": "Auto-mapped instruction V_CMPX_F_F32"
+  },
+  "VCmpxFF64": {
+    "api": "v_cmpx_f_f64",
+    "description": "Auto-mapped instruction V_CMPX_F_F64"
+  },
+  "VCmpxFI16": {
+    "api": "v_cmpx_f_i16",
+    "description": "Auto-mapped instruction V_CMPX_F_I16"
+  },
+  "VCmpxFI32": {
+    "api": "v_cmpx_f_i32",
+    "description": "Auto-mapped instruction V_CMPX_F_I32"
+  },
+  "VCmpxFI64": {
+    "api": "v_cmpx_f_i64",
+    "description": "Auto-mapped instruction V_CMPX_F_I64"
+  },
+  "VCmpxFU16": {
+    "api": "v_cmpx_f_u16",
+    "description": "Auto-mapped instruction V_CMPX_F_U16"
+  },
+  "VCmpxFU32": {
+    "api": "v_cmpx_f_u32",
+    "description": "Auto-mapped instruction V_CMPX_F_U32"
+  },
+  "VCmpxFU64": {
+    "api": "v_cmpx_f_u64",
+    "description": "Auto-mapped instruction V_CMPX_F_U64"
+  },
+  "VCmpxGeF16": {
+    "api": "v_cmpx_ge_f16",
+    "description": "Auto-mapped instruction V_CMPX_GE_F16"
+  },
+  "VCmpxGeF32": {
+    "api": "v_cmpx_ge_f32",
+    "description": "Auto-mapped instruction V_CMPX_GE_F32"
+  },
+  "VCmpxGeF64": {
+    "api": "v_cmpx_ge_f64",
+    "description": "Auto-mapped instruction V_CMPX_GE_F64"
+  },
+  "VCmpxGeI16": {
+    "api": "v_cmpx_ge_i16",
+    "description": "Auto-mapped instruction V_CMPX_GE_I16"
+  },
+  "VCmpxGeI32": {
+    "api": "v_cmpx_ge_i32",
+    "description": "Auto-mapped instruction V_CMPX_GE_I32"
+  },
+  "VCmpxGeI64": {
+    "api": "v_cmpx_ge_i64",
+    "description": "Auto-mapped instruction V_CMPX_GE_I64"
+  },
+  "VCmpxGeU16": {
+    "api": "v_cmpx_ge_u16",
+    "description": "Auto-mapped instruction V_CMPX_GE_U16"
+  },
+  "VCmpxGeU32": {
+    "api": "v_cmpx_ge_u32",
+    "description": "Auto-mapped instruction V_CMPX_GE_U32"
+  },
+  "VCmpxGeU64": {
+    "api": "v_cmpx_ge_u64",
+    "description": "Auto-mapped instruction V_CMPX_GE_U64"
+  },
+  "VCmpxGtF16": {
+    "api": "v_cmpx_gt_f16",
+    "description": "Auto-mapped instruction V_CMPX_GT_F16"
+  },
+  "VCmpxGtF32": {
+    "api": "v_cmpx_gt_f32",
+    "description": "Auto-mapped instruction V_CMPX_GT_F32"
+  },
+  "VCmpxGtF64": {
+    "api": "v_cmpx_gt_f64",
+    "description": "Auto-mapped instruction V_CMPX_GT_F64"
+  },
+  "VCmpxGtI16": {
+    "api": "v_cmpx_gt_i16",
+    "description": "Auto-mapped instruction V_CMPX_GT_I16"
+  },
+  "VCmpxGtI32": {
+    "api": "v_cmpx_gt_i32",
+    "description": "Auto-mapped instruction V_CMPX_GT_I32"
+  },
+  "VCmpxGtI64": {
+    "api": "v_cmpx_gt_i64",
+    "description": "Auto-mapped instruction V_CMPX_GT_I64"
+  },
+  "VCmpxGtU16": {
+    "api": "v_cmpx_gt_u16",
+    "description": "Auto-mapped instruction V_CMPX_GT_U16"
+  },
+  "VCmpxGtU32": {
+    "api": "v_cmpx_gt_u32",
+    "description": "Auto-mapped instruction V_CMPX_GT_U32"
+  },
+  "VCmpxGtU64": {
+    "api": "v_cmpx_gt_u64",
+    "description": "Auto-mapped instruction V_CMPX_GT_U64"
+  },
+  "VCmpxLeF16": {
+    "api": "v_cmpx_le_f16",
+    "description": "Auto-mapped instruction V_CMPX_LE_F16"
+  },
+  "VCmpxLeF32": {
+    "api": "v_cmpx_le_f32",
+    "description": "Auto-mapped instruction V_CMPX_LE_F32"
+  },
+  "VCmpxLeF64": {
+    "api": "v_cmpx_le_f64",
+    "description": "Auto-mapped instruction V_CMPX_LE_F64"
+  },
+  "VCmpxLeI16": {
+    "api": "v_cmpx_le_i16",
+    "description": "Auto-mapped instruction V_CMPX_LE_I16"
+  },
+  "VCmpxLeI32": {
+    "api": "v_cmpx_le_i32",
+    "description": "Auto-mapped instruction V_CMPX_LE_I32"
+  },
+  "VCmpxLeI64": {
+    "api": "v_cmpx_le_i64",
+    "description": "Auto-mapped instruction V_CMPX_LE_I64"
+  },
+  "VCmpxLeU16": {
+    "api": "v_cmpx_le_u16",
+    "description": "Auto-mapped instruction V_CMPX_LE_U16"
+  },
+  "VCmpxLeU32": {
+    "api": "v_cmpx_le_u32",
+    "description": "Auto-mapped instruction V_CMPX_LE_U32"
+  },
+  "VCmpxLeU64": {
+    "api": "v_cmpx_le_u64",
+    "description": "Auto-mapped instruction V_CMPX_LE_U64"
+  },
+  "VCmpxLgF16": {
+    "api": "v_cmpx_lg_f16",
+    "description": "Auto-mapped instruction V_CMPX_LG_F16"
+  },
+  "VCmpxLgF32": {
+    "api": "v_cmpx_lg_f32",
+    "description": "Auto-mapped instruction V_CMPX_LG_F32"
+  },
+  "VCmpxLgF64": {
+    "api": "v_cmpx_lg_f64",
+    "description": "Auto-mapped instruction V_CMPX_LG_F64"
+  },
+  "VCmpxLtF16": {
+    "api": "v_cmpx_lt_f16",
+    "description": "Auto-mapped instruction V_CMPX_LT_F16"
+  },
+  "VCmpxLtF32": {
+    "api": "v_cmpx_lt_f32",
+    "description": "Auto-mapped instruction V_CMPX_LT_F32"
+  },
+  "VCmpxLtF64": {
+    "api": "v_cmpx_lt_f64",
+    "description": "Auto-mapped instruction V_CMPX_LT_F64"
+  },
+  "VCmpxLtI16": {
+    "api": "v_cmpx_lt_i16",
+    "description": "Auto-mapped instruction V_CMPX_LT_I16"
+  },
+  "VCmpxLtI32": {
+    "api": "v_cmpx_lt_i32",
+    "description": "Auto-mapped instruction V_CMPX_LT_I32"
+  },
+  "VCmpxLtI64": {
+    "api": "v_cmpx_lt_i64",
+    "description": "Auto-mapped instruction V_CMPX_LT_I64"
+  },
+  "VCmpxLtU16": {
+    "api": "v_cmpx_lt_u16",
+    "description": "Auto-mapped instruction V_CMPX_LT_U16"
+  },
+  "VCmpxLtU32": {
+    "api": "v_cmpx_lt_u32",
+    "description": "Auto-mapped instruction V_CMPX_LT_U32"
+  },
+  "VCmpxLtU64": {
+    "api": "v_cmpx_lt_u64",
+    "description": "Auto-mapped instruction V_CMPX_LT_U64"
+  },
+  "VCmpxNeqF16": {
+    "api": "v_cmpx_neq_f16",
+    "description": "Auto-mapped instruction V_CMPX_NEQ_F16"
+  },
+  "VCmpxNeqF32": {
+    "api": "v_cmpx_neq_f32",
+    "description": "Auto-mapped instruction V_CMPX_NEQ_F32"
+  },
+  "VCmpxNeqF64": {
+    "api": "v_cmpx_neq_f64",
+    "description": "Auto-mapped instruction V_CMPX_NEQ_F64"
+  },
+  "VCmpxNeI16": {
+    "api": "v_cmpx_ne_i16",
+    "description": "Auto-mapped instruction V_CMPX_NE_I16"
+  },
+  "VCmpxNeI32": {
+    "api": "v_cmpx_ne_i32",
+    "description": "Auto-mapped instruction V_CMPX_NE_I32"
+  },
+  "VCmpxNeI64": {
+    "api": "v_cmpx_ne_i64",
+    "description": "Auto-mapped instruction V_CMPX_NE_I64"
+  },
+  "VCmpxNeU16": {
+    "api": "v_cmpx_ne_u16",
+    "description": "Auto-mapped instruction V_CMPX_NE_U16"
+  },
+  "VCmpxNeU32": {
+    "api": "v_cmpx_ne_u32",
+    "description": "Auto-mapped instruction V_CMPX_NE_U32"
+  },
+  "VCmpxNeU64": {
+    "api": "v_cmpx_ne_u64",
+    "description": "Auto-mapped instruction V_CMPX_NE_U64"
+  },
+  "VCmpxNgeF16": {
+    "api": "v_cmpx_nge_f16",
+    "description": "Auto-mapped instruction V_CMPX_NGE_F16"
+  },
+  "VCmpxNgeF32": {
+    "api": "v_cmpx_nge_f32",
+    "description": "Auto-mapped instruction V_CMPX_NGE_F32"
+  },
+  "VCmpxNgeF64": {
+    "api": "v_cmpx_nge_f64",
+    "description": "Auto-mapped instruction V_CMPX_NGE_F64"
+  },
+  "VCmpxNgtF16": {
+    "api": "v_cmpx_ngt_f16",
+    "description": "Auto-mapped instruction V_CMPX_NGT_F16"
+  },
+  "VCmpxNgtF32": {
+    "api": "v_cmpx_ngt_f32",
+    "description": "Auto-mapped instruction V_CMPX_NGT_F32"
+  },
+  "VCmpxNgtF64": {
+    "api": "v_cmpx_ngt_f64",
+    "description": "Auto-mapped instruction V_CMPX_NGT_F64"
+  },
+  "VCmpxNleF16": {
+    "api": "v_cmpx_nle_f16",
+    "description": "Auto-mapped instruction V_CMPX_NLE_F16"
+  },
+  "VCmpxNleF32": {
+    "api": "v_cmpx_nle_f32",
+    "description": "Auto-mapped instruction V_CMPX_NLE_F32"
+  },
+  "VCmpxNleF64": {
+    "api": "v_cmpx_nle_f64",
+    "description": "Auto-mapped instruction V_CMPX_NLE_F64"
+  },
+  "VCmpxNlgF16": {
+    "api": "v_cmpx_nlg_f16",
+    "description": "Auto-mapped instruction V_CMPX_NLG_F16"
+  },
+  "VCmpxNlgF32": {
+    "api": "v_cmpx_nlg_f32",
+    "description": "Auto-mapped instruction V_CMPX_NLG_F32"
+  },
+  "VCmpxNlgF64": {
+    "api": "v_cmpx_nlg_f64",
+    "description": "Auto-mapped instruction V_CMPX_NLG_F64"
+  },
+  "VCmpxNltF16": {
+    "api": "v_cmpx_nlt_f16",
+    "description": "Auto-mapped instruction V_CMPX_NLT_F16"
+  },
+  "VCmpxNltF32": {
+    "api": "v_cmpx_nlt_f32",
+    "description": "Auto-mapped instruction V_CMPX_NLT_F32"
+  },
+  "VCmpxNltF64": {
+    "api": "v_cmpx_nlt_f64",
+    "description": "Auto-mapped instruction V_CMPX_NLT_F64"
+  },
+  "VCmpxOF16": {
+    "api": "v_cmpx_o_f16",
+    "description": "Auto-mapped instruction V_CMPX_O_F16"
+  },
+  "VCmpxOF32": {
+    "api": "v_cmpx_o_f32",
+    "description": "Auto-mapped instruction V_CMPX_O_F32"
+  },
+  "VCmpxOF64": {
+    "api": "v_cmpx_o_f64",
+    "description": "Auto-mapped instruction V_CMPX_O_F64"
+  },
+  "VCmpxTruF16": {
+    "api": "v_cmpx_tru_f16",
+    "description": "Auto-mapped instruction V_CMPX_TRU_F16"
+  },
+  "VCmpxTruF32": {
+    "api": "v_cmpx_tru_f32",
+    "description": "Auto-mapped instruction V_CMPX_TRU_F32"
+  },
+  "VCmpxTruF64": {
+    "api": "v_cmpx_tru_f64",
+    "description": "Auto-mapped instruction V_CMPX_TRU_F64"
+  },
+  "VCmpxTF16": {
+    "api": "v_cmpx_t_f16",
+    "description": "Auto-mapped instruction V_CMPX_T_F16"
+  },
+  "VCmpxTF32": {
+    "api": "v_cmpx_t_f32",
+    "description": "Auto-mapped instruction V_CMPX_T_F32"
+  },
+  "VCmpxTF64": {
+    "api": "v_cmpx_t_f64",
+    "description": "Auto-mapped instruction V_CMPX_T_F64"
+  },
+  "VCmpxTI16": {
+    "api": "v_cmpx_t_i16",
+    "description": "Auto-mapped instruction V_CMPX_T_I16"
+  },
+  "VCmpxTI32": {
+    "api": "v_cmpx_t_i32",
+    "description": "Auto-mapped instruction V_CMPX_T_I32"
+  },
+  "VCmpxTI64": {
+    "api": "v_cmpx_t_i64",
+    "description": "Auto-mapped instruction V_CMPX_T_I64"
+  },
+  "VCmpxTU16": {
+    "api": "v_cmpx_t_u16",
+    "description": "Auto-mapped instruction V_CMPX_T_U16"
+  },
+  "VCmpxTU32": {
+    "api": "v_cmpx_t_u32",
+    "description": "Auto-mapped instruction V_CMPX_T_U32"
+  },
+  "VCmpxTU64": {
+    "api": "v_cmpx_t_u64",
+    "description": "Auto-mapped instruction V_CMPX_T_U64"
+  },
+  "VCmpxUF16": {
+    "api": "v_cmpx_u_f16",
+    "description": "Auto-mapped instruction V_CMPX_U_F16"
+  },
+  "VCmpxUF32": {
+    "api": "v_cmpx_u_f32",
+    "description": "Auto-mapped instruction V_CMPX_U_F32"
+  },
+  "VCmpxUF64": {
+    "api": "v_cmpx_u_f64",
+    "description": "Auto-mapped instruction V_CMPX_U_F64"
+  },
+  "VCmpClassF16": {
+    "api": "v_cmp_class_f16",
+    "description": "Auto-mapped instruction V_CMP_CLASS_F16"
+  },
+  "VCmpClassF32": {
+    "api": "v_cmp_class_f32",
+    "description": "Auto-mapped instruction V_CMP_CLASS_F32"
+  },
+  "VCmpClassF64": {
+    "api": "v_cmp_class_f64",
+    "description": "Auto-mapped instruction V_CMP_CLASS_F64"
+  },
+  "VCmpEqF16": {
+    "api": "v_cmp_eq_f16",
+    "description": "Auto-mapped instruction V_CMP_EQ_F16"
+  },
+  "VCmpEqF32": {
+    "api": "v_cmp_eq_f32",
+    "description": "Auto-mapped instruction V_CMP_EQ_F32"
+  },
+  "VCmpEqF64": {
+    "api": "v_cmp_eq_f64",
+    "description": "Auto-mapped instruction V_CMP_EQ_F64"
+  },
+  "VCmpEqI16": {
+    "api": "v_cmp_eq_i16",
+    "description": "Auto-mapped instruction V_CMP_EQ_I16"
+  },
+  "VCmpEqI32": {
+    "api": "v_cmp_eq_i32",
+    "description": "Auto-mapped instruction V_CMP_EQ_I32"
+  },
+  "VCmpEqI64": {
+    "api": "v_cmp_eq_i64",
+    "description": "Auto-mapped instruction V_CMP_EQ_I64"
+  },
+  "VCmpEqU16": {
+    "api": "v_cmp_eq_u16",
+    "description": "Auto-mapped instruction V_CMP_EQ_U16"
+  },
+  "VCmpEqU32": {
+    "api": "v_cmp_eq_u32",
+    "description": "Auto-mapped instruction V_CMP_EQ_U32"
+  },
+  "VCmpEqU64": {
+    "api": "v_cmp_eq_u64",
+    "description": "Auto-mapped instruction V_CMP_EQ_U64"
+  },
+  "VCmpFF16": {
+    "api": "v_cmp_f_f16",
+    "description": "Auto-mapped instruction V_CMP_F_F16"
+  },
+  "VCmpFF32": {
+    "api": "v_cmp_f_f32",
+    "description": "Auto-mapped instruction V_CMP_F_F32"
+  },
+  "VCmpFF64": {
+    "api": "v_cmp_f_f64",
+    "description": "Auto-mapped instruction V_CMP_F_F64"
+  },
+  "VCmpFI16": {
+    "api": "v_cmp_f_i16",
+    "description": "Auto-mapped instruction V_CMP_F_I16"
+  },
+  "VCmpFI32": {
+    "api": "v_cmp_f_i32",
+    "description": "Auto-mapped instruction V_CMP_F_I32"
+  },
+  "VCmpFI64": {
+    "api": "v_cmp_f_i64",
+    "description": "Auto-mapped instruction V_CMP_F_I64"
+  },
+  "VCmpFU16": {
+    "api": "v_cmp_f_u16",
+    "description": "Auto-mapped instruction V_CMP_F_U16"
+  },
+  "VCmpFU32": {
+    "api": "v_cmp_f_u32",
+    "description": "Auto-mapped instruction V_CMP_F_U32"
+  },
+  "VCmpFU64": {
+    "api": "v_cmp_f_u64",
+    "description": "Auto-mapped instruction V_CMP_F_U64"
+  },
+  "VCmpGeF16": {
+    "api": "v_cmp_ge_f16",
+    "description": "Auto-mapped instruction V_CMP_GE_F16"
+  },
+  "VCmpGeF32": {
+    "api": "v_cmp_ge_f32",
+    "description": "Auto-mapped instruction V_CMP_GE_F32"
+  },
+  "VCmpGeF64": {
+    "api": "v_cmp_ge_f64",
+    "description": "Auto-mapped instruction V_CMP_GE_F64"
+  },
+  "VCmpGeI16": {
+    "api": "v_cmp_ge_i16",
+    "description": "Auto-mapped instruction V_CMP_GE_I16"
+  },
+  "VCmpGeI32": {
+    "api": "v_cmp_ge_i32",
+    "description": "Auto-mapped instruction V_CMP_GE_I32"
+  },
+  "VCmpGeI64": {
+    "api": "v_cmp_ge_i64",
+    "description": "Auto-mapped instruction V_CMP_GE_I64"
+  },
+  "VCmpGeU16": {
+    "api": "v_cmp_ge_u16",
+    "description": "Auto-mapped instruction V_CMP_GE_U16"
+  },
+  "VCmpGeU32": {
+    "api": "v_cmp_ge_u32",
+    "description": "Auto-mapped instruction V_CMP_GE_U32"
+  },
+  "VCmpGeU64": {
+    "api": "v_cmp_ge_u64",
+    "description": "Auto-mapped instruction V_CMP_GE_U64"
+  },
+  "VCmpGtF16": {
+    "api": "v_cmp_gt_f16",
+    "description": "Auto-mapped instruction V_CMP_GT_F16"
+  },
+  "VCmpGtF32": {
+    "api": "v_cmp_gt_f32",
+    "description": "Auto-mapped instruction V_CMP_GT_F32"
+  },
+  "VCmpGtF64": {
+    "api": "v_cmp_gt_f64",
+    "description": "Auto-mapped instruction V_CMP_GT_F64"
+  },
+  "VCmpGtI16": {
+    "api": "v_cmp_gt_i16",
+    "description": "Auto-mapped instruction V_CMP_GT_I16"
+  },
+  "VCmpGtI32": {
+    "api": "v_cmp_gt_i32",
+    "description": "Auto-mapped instruction V_CMP_GT_I32"
+  },
+  "VCmpGtI64": {
+    "api": "v_cmp_gt_i64",
+    "description": "Auto-mapped instruction V_CMP_GT_I64"
+  },
+  "VCmpGtU16": {
+    "api": "v_cmp_gt_u16",
+    "description": "Auto-mapped instruction V_CMP_GT_U16"
+  },
+  "VCmpGtU32": {
+    "api": "v_cmp_gt_u32",
+    "description": "Auto-mapped instruction V_CMP_GT_U32"
+  },
+  "VCmpGtU64": {
+    "api": "v_cmp_gt_u64",
+    "description": "Auto-mapped instruction V_CMP_GT_U64"
+  },
+  "VCmpLeF16": {
+    "api": "v_cmp_le_f16",
+    "description": "Auto-mapped instruction V_CMP_LE_F16"
+  },
+  "VCmpLeF32": {
+    "api": "v_cmp_le_f32",
+    "description": "Auto-mapped instruction V_CMP_LE_F32"
+  },
+  "VCmpLeF64": {
+    "api": "v_cmp_le_f64",
+    "description": "Auto-mapped instruction V_CMP_LE_F64"
+  },
+  "VCmpLeI16": {
+    "api": "v_cmp_le_i16",
+    "description": "Auto-mapped instruction V_CMP_LE_I16"
+  },
+  "VCmpLeI32": {
+    "api": "v_cmp_le_i32",
+    "description": "Auto-mapped instruction V_CMP_LE_I32"
+  },
+  "VCmpLeI64": {
+    "api": "v_cmp_le_i64",
+    "description": "Auto-mapped instruction V_CMP_LE_I64"
+  },
+  "VCmpLeU16": {
+    "api": "v_cmp_le_u16",
+    "description": "Auto-mapped instruction V_CMP_LE_U16"
+  },
+  "VCmpLeU32": {
+    "api": "v_cmp_le_u32",
+    "description": "Auto-mapped instruction V_CMP_LE_U32"
+  },
+  "VCmpLeU64": {
+    "api": "v_cmp_le_u64",
+    "description": "Auto-mapped instruction V_CMP_LE_U64"
+  },
+  "VCmpLgF16": {
+    "api": "v_cmp_lg_f16",
+    "description": "Auto-mapped instruction V_CMP_LG_F16"
+  },
+  "VCmpLgF32": {
+    "api": "v_cmp_lg_f32",
+    "description": "Auto-mapped instruction V_CMP_LG_F32"
+  },
+  "VCmpLgF64": {
+    "api": "v_cmp_lg_f64",
+    "description": "Auto-mapped instruction V_CMP_LG_F64"
+  },
+  "VCmpLtF16": {
+    "api": "v_cmp_lt_f16",
+    "description": "Auto-mapped instruction V_CMP_LT_F16"
+  },
+  "VCmpLtF32": {
+    "api": "v_cmp_lt_f32",
+    "description": "Auto-mapped instruction V_CMP_LT_F32"
+  },
+  "VCmpLtF64": {
+    "api": "v_cmp_lt_f64",
+    "description": "Auto-mapped instruction V_CMP_LT_F64"
+  },
+  "VCmpLtI16": {
+    "api": "v_cmp_lt_i16",
+    "description": "Auto-mapped instruction V_CMP_LT_I16"
+  },
+  "VCmpLtI32": {
+    "api": "v_cmp_lt_i32",
+    "description": "Auto-mapped instruction V_CMP_LT_I32"
+  },
+  "VCmpLtI64": {
+    "api": "v_cmp_lt_i64",
+    "description": "Auto-mapped instruction V_CMP_LT_I64"
+  },
+  "VCmpLtU16": {
+    "api": "v_cmp_lt_u16",
+    "description": "Auto-mapped instruction V_CMP_LT_U16"
+  },
+  "VCmpLtU32": {
+    "api": "v_cmp_lt_u32",
+    "description": "Auto-mapped instruction V_CMP_LT_U32"
+  },
+  "VCmpLtU64": {
+    "api": "v_cmp_lt_u64",
+    "description": "Auto-mapped instruction V_CMP_LT_U64"
+  },
+  "VCmpNeqF16": {
+    "api": "v_cmp_neq_f16",
+    "description": "Auto-mapped instruction V_CMP_NEQ_F16"
+  },
+  "VCmpNeqF32": {
+    "api": "v_cmp_neq_f32",
+    "description": "Auto-mapped instruction V_CMP_NEQ_F32"
+  },
+  "VCmpNeqF64": {
+    "api": "v_cmp_neq_f64",
+    "description": "Auto-mapped instruction V_CMP_NEQ_F64"
+  },
+  "VCmpNeI16": {
+    "api": "v_cmp_ne_i16",
+    "description": "Auto-mapped instruction V_CMP_NE_I16"
+  },
+  "VCmpNeI32": {
+    "api": "v_cmp_ne_i32",
+    "description": "Auto-mapped instruction V_CMP_NE_I32"
+  },
+  "VCmpNeI64": {
+    "api": "v_cmp_ne_i64",
+    "description": "Auto-mapped instruction V_CMP_NE_I64"
+  },
+  "VCmpNeU16": {
+    "api": "v_cmp_ne_u16",
+    "description": "Auto-mapped instruction V_CMP_NE_U16"
+  },
+  "VCmpNeU32": {
+    "api": "v_cmp_ne_u32",
+    "description": "Auto-mapped instruction V_CMP_NE_U32"
+  },
+  "VCmpNeU64": {
+    "api": "v_cmp_ne_u64",
+    "description": "Auto-mapped instruction V_CMP_NE_U64"
+  },
+  "VCmpNgeF16": {
+    "api": "v_cmp_nge_f16",
+    "description": "Auto-mapped instruction V_CMP_NGE_F16"
+  },
+  "VCmpNgeF32": {
+    "api": "v_cmp_nge_f32",
+    "description": "Auto-mapped instruction V_CMP_NGE_F32"
+  },
+  "VCmpNgeF64": {
+    "api": "v_cmp_nge_f64",
+    "description": "Auto-mapped instruction V_CMP_NGE_F64"
+  },
+  "VCmpNgtF16": {
+    "api": "v_cmp_ngt_f16",
+    "description": "Auto-mapped instruction V_CMP_NGT_F16"
+  },
+  "VCmpNgtF32": {
+    "api": "v_cmp_ngt_f32",
+    "description": "Auto-mapped instruction V_CMP_NGT_F32"
+  },
+  "VCmpNgtF64": {
+    "api": "v_cmp_ngt_f64",
+    "description": "Auto-mapped instruction V_CMP_NGT_F64"
+  },
+  "VCmpNleF16": {
+    "api": "v_cmp_nle_f16",
+    "description": "Auto-mapped instruction V_CMP_NLE_F16"
+  },
+  "VCmpNleF32": {
+    "api": "v_cmp_nle_f32",
+    "description": "Auto-mapped instruction V_CMP_NLE_F32"
+  },
+  "VCmpNleF64": {
+    "api": "v_cmp_nle_f64",
+    "description": "Auto-mapped instruction V_CMP_NLE_F64"
+  },
+  "VCmpNlgF16": {
+    "api": "v_cmp_nlg_f16",
+    "description": "Auto-mapped instruction V_CMP_NLG_F16"
+  },
+  "VCmpNlgF32": {
+    "api": "v_cmp_nlg_f32",
+    "description": "Auto-mapped instruction V_CMP_NLG_F32"
+  },
+  "VCmpNlgF64": {
+    "api": "v_cmp_nlg_f64",
+    "description": "Auto-mapped instruction V_CMP_NLG_F64"
+  },
+  "VCmpNltF16": {
+    "api": "v_cmp_nlt_f16",
+    "description": "Auto-mapped instruction V_CMP_NLT_F16"
+  },
+  "VCmpNltF32": {
+    "api": "v_cmp_nlt_f32",
+    "description": "Auto-mapped instruction V_CMP_NLT_F32"
+  },
+  "VCmpNltF64": {
+    "api": "v_cmp_nlt_f64",
+    "description": "Auto-mapped instruction V_CMP_NLT_F64"
+  },
+  "VCmpOF16": {
+    "api": "v_cmp_o_f16",
+    "description": "Auto-mapped instruction V_CMP_O_F16"
+  },
+  "VCmpOF32": {
+    "api": "v_cmp_o_f32",
+    "description": "Auto-mapped instruction V_CMP_O_F32"
+  },
+  "VCmpOF64": {
+    "api": "v_cmp_o_f64",
+    "description": "Auto-mapped instruction V_CMP_O_F64"
+  },
+  "VCmpTruF16": {
+    "api": "v_cmp_tru_f16",
+    "description": "Auto-mapped instruction V_CMP_TRU_F16"
+  },
+  "VCmpTruF32": {
+    "api": "v_cmp_tru_f32",
+    "description": "Auto-mapped instruction V_CMP_TRU_F32"
+  },
+  "VCmpTruF64": {
+    "api": "v_cmp_tru_f64",
+    "description": "Auto-mapped instruction V_CMP_TRU_F64"
+  },
+  "VCmpTF16": {
+    "api": "v_cmp_t_f16",
+    "description": "Auto-mapped instruction V_CMP_T_F16"
+  },
+  "VCmpTF32": {
+    "api": "v_cmp_t_f32",
+    "description": "Auto-mapped instruction V_CMP_T_F32"
+  },
+  "VCmpTF64": {
+    "api": "v_cmp_t_f64",
+    "description": "Auto-mapped instruction V_CMP_T_F64"
+  },
+  "VCmpTI16": {
+    "api": "v_cmp_t_i16",
+    "description": "Auto-mapped instruction V_CMP_T_I16"
+  },
+  "VCmpTI32": {
+    "api": "v_cmp_t_i32",
+    "description": "Auto-mapped instruction V_CMP_T_I32"
+  },
+  "VCmpTI64": {
+    "api": "v_cmp_t_i64",
+    "description": "Auto-mapped instruction V_CMP_T_I64"
+  },
+  "VCmpTU16": {
+    "api": "v_cmp_t_u16",
+    "description": "Auto-mapped instruction V_CMP_T_U16"
+  },
+  "VCmpTU32": {
+    "api": "v_cmp_t_u32",
+    "description": "Auto-mapped instruction V_CMP_T_U32"
+  },
+  "VCmpTU64": {
+    "api": "v_cmp_t_u64",
+    "description": "Auto-mapped instruction V_CMP_T_U64"
+  },
+  "VCmpUF16": {
+    "api": "v_cmp_u_f16",
+    "description": "Auto-mapped instruction V_CMP_U_F16"
+  },
+  "VCmpUF32": {
+    "api": "v_cmp_u_f32",
+    "description": "Auto-mapped instruction V_CMP_U_F32"
+  },
+  "VCmpUF64": {
+    "api": "v_cmp_u_f64",
+    "description": "Auto-mapped instruction V_CMP_U_F64"
+  },
+  "VCndmaskB16": {
+    "api": "v_cndmask_b16",
+    "description": "Auto-mapped instruction V_CNDMASK_B16"
+  },
+  "VCndmaskB16Fake16": {
+    "api": "v_cndmask_b16_fake16",
+    "description": "Auto-mapped instruction V_CNDMASK_B16_fake16"
+  },
+  "VCndmaskB16T16": {
+    "api": "v_cndmask_b16_t16",
+    "description": "Auto-mapped instruction V_CNDMASK_B16_t16"
+  },
+  "VCndmaskB32": {
+    "api": "v_cndmask_b32",
+    "description": "Auto-mapped instruction V_CNDMASK_B32"
+  },
+  "VCosBf16": {
+    "api": "v_cos_bf16",
+    "description": "Auto-mapped instruction V_COS_BF16"
+  },
+  "VCosF16": {
+    "api": "v_cos_f16",
+    "description": "Auto-mapped instruction V_COS_F16"
+  },
+  "VCosF32": {
+    "api": "v_cos_f32",
+    "description": "Auto-mapped instruction V_COS_F32"
+  },
+  "VCtzI32B32": {
+    "api": "v_ctz_i32_b32",
+    "description": "Auto-mapped instruction V_CTZ_I32_B32"
+  },
+  "VCubeidF32": {
+    "api": "v_cubeid_f32",
+    "description": "Auto-mapped instruction V_CUBEID_F32"
+  },
+  "VCubemaF32": {
+    "api": "v_cubema_f32",
+    "description": "Auto-mapped instruction V_CUBEMA_F32"
+  },
+  "VCubescF32": {
+    "api": "v_cubesc_f32",
+    "description": "Auto-mapped instruction V_CUBESC_F32"
+  },
+  "VCubetcF32": {
+    "api": "v_cubetc_f32",
+    "description": "Auto-mapped instruction V_CUBETC_F32"
+  },
+  "VCvtF16Bf8": {
+    "api": "v_cvt_f16_bf8",
+    "description": "Auto-mapped instruction V_CVT_F16_BF8"
+  },
+  "VCvtF16F32": {
+    "api": "v_cvt_f16_f32",
+    "description": "Auto-mapped instruction V_CVT_F16_F32"
+  },
+  "VCvtF16F32Fake16": {
+    "api": "v_cvt_f16_f32_fake16",
+    "description": "Auto-mapped instruction V_CVT_F16_F32_fake16"
+  },
+  "VCvtF16F32T16": {
+    "api": "v_cvt_f16_f32_t16",
+    "description": "Auto-mapped instruction V_CVT_F16_F32_t16"
+  },
+  "VCvtF16F8Fake16Profile": {
+    "api": "v_cvt_f16_f8_fake16_profile",
+    "description": "Auto-mapped instruction V_CVT_F16_F8_Fake16_Profile"
+  },
+  "VCvtF16F8Profile": {
+    "api": "v_cvt_f16_f8_profile",
+    "description": "Auto-mapped instruction V_CVT_F16_F8_Profile"
+  },
+  "VCvtF16F8True16Profile": {
+    "api": "v_cvt_f16_f8_true16_profile",
+    "description": "Auto-mapped instruction V_CVT_F16_F8_True16_Profile"
+  },
+  "VCvtF16Fp8": {
+    "api": "v_cvt_f16_fp8",
+    "description": "Auto-mapped instruction V_CVT_F16_FP8"
+  },
+  "VCvtF16I16": {
+    "api": "v_cvt_f16_i16",
+    "description": "Auto-mapped instruction V_CVT_F16_I16"
+  },
+  "VCvtF16U16": {
+    "api": "v_cvt_f16_u16",
+    "description": "Auto-mapped instruction V_CVT_F16_U16"
+  },
+  "VCvtF32Bf16": {
+    "api": "v_cvt_f32_bf16",
+    "description": "Auto-mapped instruction V_CVT_F32_BF16"
+  },
+  "VCvtF32Bf16Gfx1250Fake16": {
+    "api": "v_cvt_f32_bf16_gfx1250_fake16",
+    "description": "Auto-mapped instruction V_CVT_F32_BF16_gfx1250_fake16"
+  },
+  "VCvtF32Bf16Gfx1250T16": {
+    "api": "v_cvt_f32_bf16_gfx1250_t16",
+    "description": "Auto-mapped instruction V_CVT_F32_BF16_gfx1250_t16"
+  },
+  "VCvtF32Bf8": {
+    "api": "v_cvt_f32_bf8",
+    "description": "Auto-mapped instruction V_CVT_F32_BF8"
+  },
+  "VCvtF32Bf8OpSel": {
+    "api": "v_cvt_f32_bf8_op_sel",
+    "description": "Auto-mapped instruction V_CVT_F32_BF8_op_sel"
+  },
+  "VCvtF32F16": {
+    "api": "v_cvt_f32_f16",
+    "description": "Auto-mapped instruction V_CVT_F32_F16"
+  },
+  "VCvtF32F16Fake16": {
+    "api": "v_cvt_f32_f16_fake16",
+    "description": "Auto-mapped instruction V_CVT_F32_F16_fake16"
+  },
+  "VCvtF32F16T16": {
+    "api": "v_cvt_f32_f16_t16",
+    "description": "Auto-mapped instruction V_CVT_F32_F16_t16"
+  },
+  "VCvtF32F64": {
+    "api": "v_cvt_f32_f64",
+    "description": "Auto-mapped instruction V_CVT_F32_F64"
+  },
+  "VCvtF32Fp8": {
+    "api": "v_cvt_f32_fp8",
+    "description": "Auto-mapped instruction V_CVT_F32_FP8"
+  },
+  "VCvtF32Fp8OpSel": {
+    "api": "v_cvt_f32_fp8_op_sel",
+    "description": "Auto-mapped instruction V_CVT_F32_FP8_op_sel"
+  },
+  "VCvtF32I32": {
+    "api": "v_cvt_f32_i32",
+    "description": "Auto-mapped instruction V_CVT_F32_I32"
+  },
+  "VCvtF32U32": {
+    "api": "v_cvt_f32_u32",
+    "description": "Auto-mapped instruction V_CVT_F32_U32"
+  },
+  "VCvtF32Ubyte0": {
+    "api": "v_cvt_f32_ubyte0",
+    "description": "Auto-mapped instruction V_CVT_F32_UBYTE0"
+  },
+  "VCvtF32Ubyte1": {
+    "api": "v_cvt_f32_ubyte1",
+    "description": "Auto-mapped instruction V_CVT_F32_UBYTE1"
+  },
+  "VCvtF32Ubyte2": {
+    "api": "v_cvt_f32_ubyte2",
+    "description": "Auto-mapped instruction V_CVT_F32_UBYTE2"
+  },
+  "VCvtF32Ubyte3": {
+    "api": "v_cvt_f32_ubyte3",
+    "description": "Auto-mapped instruction V_CVT_F32_UBYTE3"
+  },
+  "VCvtF64F32": {
+    "api": "v_cvt_f64_f32",
+    "description": "Auto-mapped instruction V_CVT_F64_F32"
+  },
+  "VCvtF64I32": {
+    "api": "v_cvt_f64_i32",
+    "description": "Auto-mapped instruction V_CVT_F64_I32"
+  },
+  "VCvtF64U32": {
+    "api": "v_cvt_f64_u32",
+    "description": "Auto-mapped instruction V_CVT_F64_U32"
+  },
+  "VCvtFloorI32F32": {
+    "api": "v_cvt_floor_i32_f32",
+    "description": "Auto-mapped instruction V_CVT_FLOOR_I32_F32"
+  },
+  "VCvtFlrI32F32": {
+    "api": "v_cvt_flr_i32_f32",
+    "description": "Auto-mapped instruction V_CVT_FLR_I32_F32"
+  },
+  "VCvtI16F16": {
+    "api": "v_cvt_i16_f16",
+    "description": "Auto-mapped instruction V_CVT_I16_F16"
+  },
+  "VCvtI32F32": {
+    "api": "v_cvt_i32_f32",
+    "description": "Auto-mapped instruction V_CVT_I32_F32"
+  },
+  "VCvtI32F64": {
+    "api": "v_cvt_i32_f64",
+    "description": "Auto-mapped instruction V_CVT_I32_F64"
+  },
+  "VCvtI32I16": {
+    "api": "v_cvt_i32_i16",
+    "description": "Auto-mapped instruction V_CVT_I32_I16"
+  },
+  "VCvtNearestI32F32": {
+    "api": "v_cvt_nearest_i32_f32",
+    "description": "Auto-mapped instruction V_CVT_NEAREST_I32_F32"
+  },
+  "VCvtNormI16F16": {
+    "api": "v_cvt_norm_i16_f16",
+    "description": "Auto-mapped instruction V_CVT_NORM_I16_F16"
+  },
+  "VCvtNormU16F16": {
+    "api": "v_cvt_norm_u16_f16",
+    "description": "Auto-mapped instruction V_CVT_NORM_U16_F16"
+  },
+  "VCvtOffF32I4": {
+    "api": "v_cvt_off_f32_i4",
+    "description": "Auto-mapped instruction V_CVT_OFF_F32_I4"
+  },
+  "VCvtPkaccumU8F32": {
+    "api": "v_cvt_pkaccum_u8_f32",
+    "description": "Auto-mapped instruction V_CVT_PKACCUM_U8_F32"
+  },
+  "VCvtPknormI16F16": {
+    "api": "v_cvt_pknorm_i16_f16",
+    "description": "Auto-mapped instruction V_CVT_PKNORM_I16_F16"
+  },
+  "VCvtPknormI16F32": {
+    "api": "v_cvt_pknorm_i16_f32",
+    "description": "Auto-mapped instruction V_CVT_PKNORM_I16_F32"
+  },
+  "VCvtPknormU16F16": {
+    "api": "v_cvt_pknorm_u16_f16",
+    "description": "Auto-mapped instruction V_CVT_PKNORM_U16_F16"
+  },
+  "VCvtPknormU16F32": {
+    "api": "v_cvt_pknorm_u16_f32",
+    "description": "Auto-mapped instruction V_CVT_PKNORM_U16_F32"
+  },
+  "VCvtPkrtzF16F32": {
+    "api": "v_cvt_pkrtz_f16_f32",
+    "description": "Auto-mapped instruction V_CVT_PKRTZ_F16_F32"
+  },
+  "VCvtPkBf16F32": {
+    "api": "v_cvt_pk_bf16_f32",
+    "description": "Auto-mapped instruction V_CVT_PK_BF16_F32"
+  },
+  "VCvtPkBf8F16": {
+    "api": "v_cvt_pk_bf8_f16",
+    "description": "Auto-mapped instruction V_CVT_PK_BF8_F16"
+  },
+  "VCvtPkBf8F32": {
+    "api": "v_cvt_pk_bf8_f32",
+    "description": "Auto-mapped instruction V_CVT_PK_BF8_F32"
+  },
+  "VCvtPkF16Bf8": {
+    "api": "v_cvt_pk_f16_bf8",
+    "description": "Auto-mapped instruction V_CVT_PK_F16_BF8"
+  },
+  "VCvtPkF16F32": {
+    "api": "v_cvt_pk_f16_f32",
+    "description": "Auto-mapped instruction V_CVT_PK_F16_F32"
+  },
+  "VCvtPkF16Fp8": {
+    "api": "v_cvt_pk_f16_fp8",
+    "description": "Auto-mapped instruction V_CVT_PK_F16_FP8"
+  },
+  "VCvtPkF32Bf8": {
+    "api": "v_cvt_pk_f32_bf8",
+    "description": "Auto-mapped instruction V_CVT_PK_F32_BF8"
+  },
+  "VCvtPkF32Bf8Fake16": {
+    "api": "v_cvt_pk_f32_bf8_fake16",
+    "description": "Auto-mapped instruction V_CVT_PK_F32_BF8_fake16"
+  },
+  "VCvtPkF32Bf8T16": {
+    "api": "v_cvt_pk_f32_bf8_t16",
+    "description": "Auto-mapped instruction V_CVT_PK_F32_BF8_t16"
+  },
+  "VCvtPkF32Fp8": {
+    "api": "v_cvt_pk_f32_fp8",
+    "description": "Auto-mapped instruction V_CVT_PK_F32_FP8"
+  },
+  "VCvtPkF32Fp8Fake16": {
+    "api": "v_cvt_pk_f32_fp8_fake16",
+    "description": "Auto-mapped instruction V_CVT_PK_F32_FP8_fake16"
+  },
+  "VCvtPkF32Fp8T16": {
+    "api": "v_cvt_pk_f32_fp8_t16",
+    "description": "Auto-mapped instruction V_CVT_PK_F32_FP8_t16"
+  },
+  "VCvtPkFp8F16": {
+    "api": "v_cvt_pk_fp8_f16",
+    "description": "Auto-mapped instruction V_CVT_PK_FP8_F16"
+  },
+  "VCvtPkFp8F32": {
+    "api": "v_cvt_pk_fp8_f32",
+    "description": "Auto-mapped instruction V_CVT_PK_FP8_F32"
+  },
+  "VCvtPkI16F32": {
+    "api": "v_cvt_pk_i16_f32",
+    "description": "Auto-mapped instruction V_CVT_PK_I16_F32"
+  },
+  "VCvtPkI16I32": {
+    "api": "v_cvt_pk_i16_i32",
+    "description": "Auto-mapped instruction V_CVT_PK_I16_I32"
+  },
+  "VCvtPkNormI16F16": {
+    "api": "v_cvt_pk_norm_i16_f16",
+    "description": "Auto-mapped instruction V_CVT_PK_NORM_I16_F16"
+  },
+  "VCvtPkNormI16F32": {
+    "api": "v_cvt_pk_norm_i16_f32",
+    "description": "Auto-mapped instruction V_CVT_PK_NORM_I16_F32"
+  },
+  "VCvtPkNormU16F16": {
+    "api": "v_cvt_pk_norm_u16_f16",
+    "description": "Auto-mapped instruction V_CVT_PK_NORM_U16_F16"
+  },
+  "VCvtPkNormU16F32": {
+    "api": "v_cvt_pk_norm_u16_f32",
+    "description": "Auto-mapped instruction V_CVT_PK_NORM_U16_F32"
+  },
+  "VCvtPkRtzF16F32": {
+    "api": "v_cvt_pk_rtz_f16_f32",
+    "description": "Auto-mapped instruction V_CVT_PK_RTZ_F16_F32"
+  },
+  "VCvtPkU16F32": {
+    "api": "v_cvt_pk_u16_f32",
+    "description": "Auto-mapped instruction V_CVT_PK_U16_F32"
+  },
+  "VCvtPkU16U32": {
+    "api": "v_cvt_pk_u16_u32",
+    "description": "Auto-mapped instruction V_CVT_PK_U16_U32"
+  },
+  "VCvtPkU8F32": {
+    "api": "v_cvt_pk_u8_f32",
+    "description": "Auto-mapped instruction V_CVT_PK_U8_F32"
+  },
+  "VCvtRpiI32F32": {
+    "api": "v_cvt_rpi_i32_f32",
+    "description": "Auto-mapped instruction V_CVT_RPI_I32_F32"
+  },
+  "VCvtScalef322xpk16Bf6F32": {
+    "api": "v_cvt_scalef32_2xpk16_bf6_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_2XPK16_BF6_F32"
+  },
+  "VCvtScalef322xpk16Fp6F32": {
+    "api": "v_cvt_scalef32_2xpk16_fp6_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_2XPK16_FP6_F32"
+  },
+  "VCvtScalef32F16Bf8": {
+    "api": "v_cvt_scalef32_f16_bf8",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_F16_BF8"
+  },
+  "VCvtScalef32F16Fp8": {
+    "api": "v_cvt_scalef32_f16_fp8",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_F16_FP8"
+  },
+  "VCvtScalef32F32Bf8": {
+    "api": "v_cvt_scalef32_f32_bf8",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_F32_BF8"
+  },
+  "VCvtScalef32F32Fp8": {
+    "api": "v_cvt_scalef32_f32_fp8",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_F32_FP8"
+  },
+  "VCvtScalef32Pk16Bf6Bf16": {
+    "api": "v_cvt_scalef32_pk16_bf6_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK16_BF6_BF16"
+  },
+  "VCvtScalef32Pk16Bf6F16": {
+    "api": "v_cvt_scalef32_pk16_bf6_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK16_BF6_F16"
+  },
+  "VCvtScalef32Pk16Bf6F32": {
+    "api": "v_cvt_scalef32_pk16_bf6_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK16_BF6_F32"
+  },
+  "VCvtScalef32Pk16Fp6Bf16": {
+    "api": "v_cvt_scalef32_pk16_fp6_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK16_FP6_BF16"
+  },
+  "VCvtScalef32Pk16Fp6F16": {
+    "api": "v_cvt_scalef32_pk16_fp6_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK16_FP6_F16"
+  },
+  "VCvtScalef32Pk16Fp6F32": {
+    "api": "v_cvt_scalef32_pk16_fp6_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK16_FP6_F32"
+  },
+  "VCvtScalef32Pk32Bf16Bf6": {
+    "api": "v_cvt_scalef32_pk32_bf16_bf6",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_BF16_BF6"
+  },
+  "VCvtScalef32Pk32Bf16Fp6": {
+    "api": "v_cvt_scalef32_pk32_bf16_fp6",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_BF16_FP6"
+  },
+  "VCvtScalef32Pk32Bf6Bf16": {
+    "api": "v_cvt_scalef32_pk32_bf6_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_BF6_BF16"
+  },
+  "VCvtScalef32Pk32Bf6F16": {
+    "api": "v_cvt_scalef32_pk32_bf6_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_BF6_F16"
+  },
+  "VCvtScalef32Pk32Bf6F32": {
+    "api": "v_cvt_scalef32_pk32_bf6_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_BF6_F32"
+  },
+  "VCvtScalef32Pk32F16Bf6": {
+    "api": "v_cvt_scalef32_pk32_f16_bf6",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_F16_BF6"
+  },
+  "VCvtScalef32Pk32F16Fp6": {
+    "api": "v_cvt_scalef32_pk32_f16_fp6",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_F16_FP6"
+  },
+  "VCvtScalef32Pk32F32Bf6": {
+    "api": "v_cvt_scalef32_pk32_f32_bf6",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_F32_BF6"
+  },
+  "VCvtScalef32Pk32F32Fp6": {
+    "api": "v_cvt_scalef32_pk32_f32_fp6",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_F32_FP6"
+  },
+  "VCvtScalef32Pk32Fp6Bf16": {
+    "api": "v_cvt_scalef32_pk32_fp6_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_FP6_BF16"
+  },
+  "VCvtScalef32Pk32Fp6F16": {
+    "api": "v_cvt_scalef32_pk32_fp6_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_FP6_F16"
+  },
+  "VCvtScalef32Pk32Fp6F32": {
+    "api": "v_cvt_scalef32_pk32_fp6_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK32_FP6_F32"
+  },
+  "VCvtScalef32Pk8Bf8Bf16": {
+    "api": "v_cvt_scalef32_pk8_bf8_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK8_BF8_BF16"
+  },
+  "VCvtScalef32Pk8Bf8F16": {
+    "api": "v_cvt_scalef32_pk8_bf8_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK8_BF8_F16"
+  },
+  "VCvtScalef32Pk8Bf8F32": {
+    "api": "v_cvt_scalef32_pk8_bf8_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK8_BF8_F32"
+  },
+  "VCvtScalef32Pk8Fp4Bf16": {
+    "api": "v_cvt_scalef32_pk8_fp4_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK8_FP4_BF16"
+  },
+  "VCvtScalef32Pk8Fp4F16": {
+    "api": "v_cvt_scalef32_pk8_fp4_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK8_FP4_F16"
+  },
+  "VCvtScalef32Pk8Fp4F32": {
+    "api": "v_cvt_scalef32_pk8_fp4_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK8_FP4_F32"
+  },
+  "VCvtScalef32Pk8Fp8Bf16": {
+    "api": "v_cvt_scalef32_pk8_fp8_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK8_FP8_BF16"
+  },
+  "VCvtScalef32Pk8Fp8F16": {
+    "api": "v_cvt_scalef32_pk8_fp8_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK8_FP8_F16"
+  },
+  "VCvtScalef32Pk8Fp8F32": {
+    "api": "v_cvt_scalef32_pk8_fp8_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK8_FP8_F32"
+  },
+  "VCvtScalef32PkBf16Bf8": {
+    "api": "v_cvt_scalef32_pk_bf16_bf8",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_BF16_BF8"
+  },
+  "VCvtScalef32PkBf16Fp4": {
+    "api": "v_cvt_scalef32_pk_bf16_fp4",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_BF16_FP4"
+  },
+  "VCvtScalef32PkBf16Fp8": {
+    "api": "v_cvt_scalef32_pk_bf16_fp8",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_BF16_FP8"
+  },
+  "VCvtScalef32PkBf8Bf16": {
+    "api": "v_cvt_scalef32_pk_bf8_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_BF8_BF16"
+  },
+  "VCvtScalef32PkBf8F16": {
+    "api": "v_cvt_scalef32_pk_bf8_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_BF8_F16"
+  },
+  "VCvtScalef32PkBf8F32": {
+    "api": "v_cvt_scalef32_pk_bf8_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_BF8_F32"
+  },
+  "VCvtScalef32PkF16Bf8": {
+    "api": "v_cvt_scalef32_pk_f16_bf8",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_F16_BF8"
+  },
+  "VCvtScalef32PkF16Fp4": {
+    "api": "v_cvt_scalef32_pk_f16_fp4",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_F16_FP4"
+  },
+  "VCvtScalef32PkF16Fp8": {
+    "api": "v_cvt_scalef32_pk_f16_fp8",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_F16_FP8"
+  },
+  "VCvtScalef32PkF32Bf8": {
+    "api": "v_cvt_scalef32_pk_f32_bf8",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_F32_BF8"
+  },
+  "VCvtScalef32PkF32Fp4": {
+    "api": "v_cvt_scalef32_pk_f32_fp4",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_F32_FP4"
+  },
+  "VCvtScalef32PkF32Fp8": {
+    "api": "v_cvt_scalef32_pk_f32_fp8",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_F32_FP8"
+  },
+  "VCvtScalef32PkFp4Bf16": {
+    "api": "v_cvt_scalef32_pk_fp4_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_FP4_BF16"
+  },
+  "VCvtScalef32PkFp4F16": {
+    "api": "v_cvt_scalef32_pk_fp4_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_FP4_F16"
+  },
+  "VCvtScalef32PkFp4F32": {
+    "api": "v_cvt_scalef32_pk_fp4_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_FP4_F32"
+  },
+  "VCvtScalef32PkFp8Bf16": {
+    "api": "v_cvt_scalef32_pk_fp8_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_FP8_BF16"
+  },
+  "VCvtScalef32PkFp8F16": {
+    "api": "v_cvt_scalef32_pk_fp8_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_FP8_F16"
+  },
+  "VCvtScalef32PkFp8F32": {
+    "api": "v_cvt_scalef32_pk_fp8_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_PK_FP8_F32"
+  },
+  "VCvtScalef32SrBf8Bf16": {
+    "api": "v_cvt_scalef32_sr_bf8_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_BF8_BF16"
+  },
+  "VCvtScalef32SrBf8F16": {
+    "api": "v_cvt_scalef32_sr_bf8_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_BF8_F16"
+  },
+  "VCvtScalef32SrBf8F32": {
+    "api": "v_cvt_scalef32_sr_bf8_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_BF8_F32"
+  },
+  "VCvtScalef32SrFp8Bf16": {
+    "api": "v_cvt_scalef32_sr_fp8_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_FP8_BF16"
+  },
+  "VCvtScalef32SrFp8F16": {
+    "api": "v_cvt_scalef32_sr_fp8_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_FP8_F16"
+  },
+  "VCvtScalef32SrFp8F32": {
+    "api": "v_cvt_scalef32_sr_fp8_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_FP8_F32"
+  },
+  "VCvtScalef32SrPk16Bf6Bf16": {
+    "api": "v_cvt_scalef32_sr_pk16_bf6_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK16_BF6_BF16"
+  },
+  "VCvtScalef32SrPk16Bf6F16": {
+    "api": "v_cvt_scalef32_sr_pk16_bf6_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK16_BF6_F16"
+  },
+  "VCvtScalef32SrPk16Bf6F32": {
+    "api": "v_cvt_scalef32_sr_pk16_bf6_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK16_BF6_F32"
+  },
+  "VCvtScalef32SrPk16Fp6Bf16": {
+    "api": "v_cvt_scalef32_sr_pk16_fp6_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK16_FP6_BF16"
+  },
+  "VCvtScalef32SrPk16Fp6F16": {
+    "api": "v_cvt_scalef32_sr_pk16_fp6_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK16_FP6_F16"
+  },
+  "VCvtScalef32SrPk16Fp6F32": {
+    "api": "v_cvt_scalef32_sr_pk16_fp6_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK16_FP6_F32"
+  },
+  "VCvtScalef32SrPk32Bf6Bf16": {
+    "api": "v_cvt_scalef32_sr_pk32_bf6_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK32_BF6_BF16"
+  },
+  "VCvtScalef32SrPk32Bf6F16": {
+    "api": "v_cvt_scalef32_sr_pk32_bf6_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK32_BF6_F16"
+  },
+  "VCvtScalef32SrPk32Bf6F32": {
+    "api": "v_cvt_scalef32_sr_pk32_bf6_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK32_BF6_F32"
+  },
+  "VCvtScalef32SrPk32Fp6Bf16": {
+    "api": "v_cvt_scalef32_sr_pk32_fp6_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK32_FP6_BF16"
+  },
+  "VCvtScalef32SrPk32Fp6F16": {
+    "api": "v_cvt_scalef32_sr_pk32_fp6_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK32_FP6_F16"
+  },
+  "VCvtScalef32SrPk32Fp6F32": {
+    "api": "v_cvt_scalef32_sr_pk32_fp6_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK32_FP6_F32"
+  },
+  "VCvtScalef32SrPk8Bf8Bf16": {
+    "api": "v_cvt_scalef32_sr_pk8_bf8_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK8_BF8_BF16"
+  },
+  "VCvtScalef32SrPk8Bf8F16": {
+    "api": "v_cvt_scalef32_sr_pk8_bf8_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK8_BF8_F16"
+  },
+  "VCvtScalef32SrPk8Bf8F32": {
+    "api": "v_cvt_scalef32_sr_pk8_bf8_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK8_BF8_F32"
+  },
+  "VCvtScalef32SrPk8Fp4Bf16": {
+    "api": "v_cvt_scalef32_sr_pk8_fp4_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK8_FP4_BF16"
+  },
+  "VCvtScalef32SrPk8Fp4F16": {
+    "api": "v_cvt_scalef32_sr_pk8_fp4_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK8_FP4_F16"
+  },
+  "VCvtScalef32SrPk8Fp4F32": {
+    "api": "v_cvt_scalef32_sr_pk8_fp4_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK8_FP4_F32"
+  },
+  "VCvtScalef32SrPk8Fp8Bf16": {
+    "api": "v_cvt_scalef32_sr_pk8_fp8_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK8_FP8_BF16"
+  },
+  "VCvtScalef32SrPk8Fp8F16": {
+    "api": "v_cvt_scalef32_sr_pk8_fp8_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK8_FP8_F16"
+  },
+  "VCvtScalef32SrPk8Fp8F32": {
+    "api": "v_cvt_scalef32_sr_pk8_fp8_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK8_FP8_F32"
+  },
+  "VCvtScalef32SrPkFp4Bf16": {
+    "api": "v_cvt_scalef32_sr_pk_fp4_bf16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK_FP4_BF16"
+  },
+  "VCvtScalef32SrPkFp4F16": {
+    "api": "v_cvt_scalef32_sr_pk_fp4_f16",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK_FP4_F16"
+  },
+  "VCvtScalef32SrPkFp4F32": {
+    "api": "v_cvt_scalef32_sr_pk_fp4_f32",
+    "description": "Auto-mapped instruction V_CVT_SCALEF32_SR_PK_FP4_F32"
+  },
+  "VCvtScalePk16Bf16Bf6": {
+    "api": "v_cvt_scale_pk16_bf16_bf6",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK16_BF16_BF6"
+  },
+  "VCvtScalePk16Bf16Fp6": {
+    "api": "v_cvt_scale_pk16_bf16_fp6",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK16_BF16_FP6"
+  },
+  "VCvtScalePk16F16Bf6": {
+    "api": "v_cvt_scale_pk16_f16_bf6",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK16_F16_BF6"
+  },
+  "VCvtScalePk16F16Fp6": {
+    "api": "v_cvt_scale_pk16_f16_fp6",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK16_F16_FP6"
+  },
+  "VCvtScalePk16F32Bf6": {
+    "api": "v_cvt_scale_pk16_f32_bf6",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK16_F32_BF6"
+  },
+  "VCvtScalePk16F32Fp6": {
+    "api": "v_cvt_scale_pk16_f32_fp6",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK16_F32_FP6"
+  },
+  "VCvtScalePk8Bf16Bf8": {
+    "api": "v_cvt_scale_pk8_bf16_bf8",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK8_BF16_BF8"
+  },
+  "VCvtScalePk8Bf16Fp4": {
+    "api": "v_cvt_scale_pk8_bf16_fp4",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK8_BF16_FP4"
+  },
+  "VCvtScalePk8Bf16Fp8": {
+    "api": "v_cvt_scale_pk8_bf16_fp8",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK8_BF16_FP8"
+  },
+  "VCvtScalePk8F16Bf8": {
+    "api": "v_cvt_scale_pk8_f16_bf8",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK8_F16_BF8"
+  },
+  "VCvtScalePk8F16Fp4": {
+    "api": "v_cvt_scale_pk8_f16_fp4",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK8_F16_FP4"
+  },
+  "VCvtScalePk8F16Fp8": {
+    "api": "v_cvt_scale_pk8_f16_fp8",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK8_F16_FP8"
+  },
+  "VCvtScalePk8F32Bf8": {
+    "api": "v_cvt_scale_pk8_f32_bf8",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK8_F32_BF8"
+  },
+  "VCvtScalePk8F32Fp4": {
+    "api": "v_cvt_scale_pk8_f32_fp4",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK8_F32_FP4"
+  },
+  "VCvtScalePk8F32Fp8": {
+    "api": "v_cvt_scale_pk8_f32_fp8",
+    "description": "Auto-mapped instruction V_CVT_SCALE_PK8_F32_FP8"
+  },
+  "VCvtSrBf16F32": {
+    "api": "v_cvt_sr_bf16_f32",
+    "description": "Auto-mapped instruction V_CVT_SR_BF16_F32"
+  },
+  "VCvtSrBf8F16": {
+    "api": "v_cvt_sr_bf8_f16",
+    "description": "Auto-mapped instruction V_CVT_SR_BF8_F16"
+  },
+  "VCvtSrBf8F32": {
+    "api": "v_cvt_sr_bf8_f32",
+    "description": "Auto-mapped instruction V_CVT_SR_BF8_F32"
+  },
+  "VCvtSrF16F32": {
+    "api": "v_cvt_sr_f16_f32",
+    "description": "Auto-mapped instruction V_CVT_SR_F16_F32"
+  },
+  "VCvtSrFp8F16": {
+    "api": "v_cvt_sr_fp8_f16",
+    "description": "Auto-mapped instruction V_CVT_SR_FP8_F16"
+  },
+  "VCvtSrFp8F32": {
+    "api": "v_cvt_sr_fp8_f32",
+    "description": "Auto-mapped instruction V_CVT_SR_FP8_F32"
+  },
+  "VCvtSrPkBf16F32": {
+    "api": "v_cvt_sr_pk_bf16_f32",
+    "description": "Auto-mapped instruction V_CVT_SR_PK_BF16_F32"
+  },
+  "VCvtSrPkF16F32": {
+    "api": "v_cvt_sr_pk_f16_f32",
+    "description": "Auto-mapped instruction V_CVT_SR_PK_F16_F32"
+  },
+  "VCvtU16F16": {
+    "api": "v_cvt_u16_f16",
+    "description": "Auto-mapped instruction V_CVT_U16_F16"
+  },
+  "VCvtU32F32": {
+    "api": "v_cvt_u32_f32",
+    "description": "Auto-mapped instruction V_CVT_U32_F32"
+  },
+  "VCvtU32F64": {
+    "api": "v_cvt_u32_f64",
+    "description": "Auto-mapped instruction V_CVT_U32_F64"
+  },
+  "VCvtU32U16": {
+    "api": "v_cvt_u32_u16",
+    "description": "Auto-mapped instruction V_CVT_U32_U16"
+  },
+  "VDivFixupF16": {
+    "api": "v_div_fixup_f16",
+    "description": "Auto-mapped instruction V_DIV_FIXUP_F16"
+  },
+  "VDivFixupF32": {
+    "api": "v_div_fixup_f32",
+    "description": "Auto-mapped instruction V_DIV_FIXUP_F32"
+  },
+  "VDivFixupF64": {
+    "api": "v_div_fixup_f64",
+    "description": "Auto-mapped instruction V_DIV_FIXUP_F64"
+  },
+  "VDivFixupLegacyF16": {
+    "api": "v_div_fixup_legacy_f16",
+    "description": "Auto-mapped instruction V_DIV_FIXUP_LEGACY_F16"
+  },
+  "VDivFmasF32": {
+    "api": "v_div_fmas_f32",
+    "description": "Auto-mapped instruction V_DIV_FMAS_F32"
+  },
+  "VDivFmasF64": {
+    "api": "v_div_fmas_f64",
+    "description": "Auto-mapped instruction V_DIV_FMAS_F64"
+  },
+  "VDivScaleF32": {
+    "api": "v_div_scale_f32",
+    "description": "Auto-mapped instruction V_DIV_SCALE_F32"
+  },
+  "VDivScaleF64": {
+    "api": "v_div_scale_f64",
+    "description": "Auto-mapped instruction V_DIV_SCALE_F64"
+  },
+  "VDot2accF32F16": {
+    "api": "v_dot2acc_f32_f16",
+    "description": "Auto-mapped instruction V_DOT2ACC_F32_F16"
+  },
+  "VDot2cF32Bf16": {
+    "api": "v_dot2c_f32_bf16",
+    "description": "Auto-mapped instruction V_DOT2C_F32_BF16"
+  },
+  "VDot2cF32F16": {
+    "api": "v_dot2c_f32_f16",
+    "description": "Auto-mapped instruction V_DOT2C_F32_F16"
+  },
+  "VDot2cI32I16": {
+    "api": "v_dot2c_i32_i16",
+    "description": "Auto-mapped instruction V_DOT2C_I32_I16"
+  },
+  "VDot2Bf16Bf16": {
+    "api": "v_dot2_bf16_bf16",
+    "description": "Auto-mapped instruction V_DOT2_BF16_BF16"
+  },
+  "VDot2F16F16": {
+    "api": "v_dot2_f16_f16",
+    "description": "Auto-mapped instruction V_DOT2_F16_F16"
+  },
+  "VDot4cI32I8": {
+    "api": "v_dot4c_i32_i8",
+    "description": "Auto-mapped instruction V_DOT4C_I32_I8"
+  },
+  "VDot8cI32I4": {
+    "api": "v_dot8c_i32_i4",
+    "description": "Auto-mapped instruction V_DOT8C_I32_I4"
+  },
+  "VExpBf16": {
+    "api": "v_exp_bf16",
+    "description": "Auto-mapped instruction V_EXP_BF16"
+  },
+  "VExpF16": {
+    "api": "v_exp_f16",
+    "description": "Auto-mapped instruction V_EXP_F16"
+  },
+  "VExpF16Fake16": {
+    "api": "v_exp_f16_fake16",
+    "description": "Auto-mapped instruction V_EXP_F16_fake16"
+  },
+  "VExpF16T16": {
+    "api": "v_exp_f16_t16",
+    "description": "Auto-mapped instruction V_EXP_F16_t16"
+  },
+  "VExpF32": {
+    "api": "v_exp_f32",
+    "description": "Auto-mapped instruction V_EXP_F32"
+  },
+  "VExpLegacyF32": {
+    "api": "v_exp_legacy_f32",
+    "description": "Auto-mapped instruction V_EXP_LEGACY_F32"
+  },
+  "VFfbhI32": {
+    "api": "v_ffbh_i32",
+    "description": "Auto-mapped instruction V_FFBH_I32"
+  },
+  "VFfbhU32": {
+    "api": "v_ffbh_u32",
+    "description": "Auto-mapped instruction V_FFBH_U32"
+  },
+  "VFfblB32": {
+    "api": "v_ffbl_b32",
+    "description": "Auto-mapped instruction V_FFBL_B32"
+  },
+  "VFloorF16": {
+    "api": "v_floor_f16",
+    "description": "Auto-mapped instruction V_FLOOR_F16"
+  },
+  "VFloorF16Fake16": {
+    "api": "v_floor_f16_fake16",
+    "description": "Auto-mapped instruction V_FLOOR_F16_fake16"
+  },
+  "VFloorF16T16": {
+    "api": "v_floor_f16_t16",
+    "description": "Auto-mapped instruction V_FLOOR_F16_t16"
+  },
+  "VFloorF32": {
+    "api": "v_floor_f32",
+    "description": "Auto-mapped instruction V_FLOOR_F32"
+  },
+  "VFloorF64": {
+    "api": "v_floor_f64",
+    "description": "Auto-mapped instruction V_FLOOR_F64"
+  },
+  "VFmaakF16": {
+    "api": "v_fmaak_f16",
+    "description": "Auto-mapped instruction V_FMAAK_F16"
+  },
+  "VFmaakF16Fake16": {
+    "api": "v_fmaak_f16_fake16",
+    "description": "Auto-mapped instruction V_FMAAK_F16_fake16"
+  },
+  "VFmaakF16T16": {
+    "api": "v_fmaak_f16_t16",
+    "description": "Auto-mapped instruction V_FMAAK_F16_t16"
+  },
+  "VFmaakF32": {
+    "api": "v_fmaak_f32",
+    "description": "Auto-mapped instruction V_FMAAK_F32"
+  },
+  "VFmaakF64": {
+    "api": "v_fmaak_f64",
+    "description": "Auto-mapped instruction V_FMAAK_F64"
+  },
+  "VFmacDx9ZeroF32": {
+    "api": "v_fmac_dx9_zero_f32",
+    "description": "Auto-mapped instruction V_FMAC_DX9_ZERO_F32"
+  },
+  "VFmacF16": {
+    "api": "v_fmac_f16",
+    "description": "Auto-mapped instruction V_FMAC_F16"
+  },
+  "VFmacF16Fake16": {
+    "api": "v_fmac_f16_fake16",
+    "description": "Auto-mapped instruction V_FMAC_F16_fake16"
+  },
+  "VFmacF16T16": {
+    "api": "v_fmac_f16_t16",
+    "description": "Auto-mapped instruction V_FMAC_F16_t16"
+  },
+  "VFmacF32": {
+    "api": "v_fmac_f32",
+    "description": "Auto-mapped instruction V_FMAC_F32"
+  },
+  "VFmacF64": {
+    "api": "v_fmac_f64",
+    "description": "Auto-mapped instruction V_FMAC_F64"
+  },
+  "VFmacLegacyF32": {
+    "api": "v_fmac_legacy_f32",
+    "description": "Auto-mapped instruction V_FMAC_LEGACY_F32"
+  },
+  "VFmamkF16": {
+    "api": "v_fmamk_f16",
+    "description": "Auto-mapped instruction V_FMAMK_F16"
+  },
+  "VFmamkF16Fake16": {
+    "api": "v_fmamk_f16_fake16",
+    "description": "Auto-mapped instruction V_FMAMK_F16_fake16"
+  },
+  "VFmamkF16T16": {
+    "api": "v_fmamk_f16_t16",
+    "description": "Auto-mapped instruction V_FMAMK_F16_t16"
+  },
+  "VFmamkF32": {
+    "api": "v_fmamk_f32",
+    "description": "Auto-mapped instruction V_FMAMK_F32"
+  },
+  "VFmamkF64": {
+    "api": "v_fmamk_f64",
+    "description": "Auto-mapped instruction V_FMAMK_F64"
+  },
+  "VFmaDx9ZeroF32": {
+    "api": "v_fma_dx9_zero_f32",
+    "description": "Auto-mapped instruction V_FMA_DX9_ZERO_F32"
+  },
+  "VFmaF16": {
+    "api": "v_fma_f16",
+    "description": "Auto-mapped instruction V_FMA_F16"
+  },
+  "VFmaF32": {
+    "api": "v_fma_f32",
+    "description": "Auto-mapped instruction V_FMA_F32"
+  },
+  "VFmaF64": {
+    "api": "v_fma_f64",
+    "description": "Auto-mapped instruction V_FMA_F64"
+  },
+  "VFmaLegacyF16": {
+    "api": "v_fma_legacy_f16",
+    "description": "Auto-mapped instruction V_FMA_LEGACY_F16"
+  },
+  "VFmaLegacyF32": {
+    "api": "v_fma_legacy_f32",
+    "description": "Auto-mapped instruction V_FMA_LEGACY_F32"
+  },
+  "VFractF16": {
+    "api": "v_fract_f16",
+    "description": "Auto-mapped instruction V_FRACT_F16"
+  },
+  "VFractF32": {
+    "api": "v_fract_f32",
+    "description": "Auto-mapped instruction V_FRACT_F32"
+  },
+  "VFractF64": {
+    "api": "v_fract_f64",
+    "description": "Auto-mapped instruction V_FRACT_F64"
+  },
+  "VFrexpExpI16F16": {
+    "api": "v_frexp_exp_i16_f16",
+    "description": "Auto-mapped instruction V_FREXP_EXP_I16_F16"
+  },
+  "VFrexpExpI32F32": {
+    "api": "v_frexp_exp_i32_f32",
+    "description": "Auto-mapped instruction V_FREXP_EXP_I32_F32"
+  },
+  "VFrexpExpI32F64": {
+    "api": "v_frexp_exp_i32_f64",
+    "description": "Auto-mapped instruction V_FREXP_EXP_I32_F64"
+  },
+  "VFrexpMantF16": {
+    "api": "v_frexp_mant_f16",
+    "description": "Auto-mapped instruction V_FREXP_MANT_F16"
+  },
+  "VFrexpMantF32": {
+    "api": "v_frexp_mant_f32",
+    "description": "Auto-mapped instruction V_FREXP_MANT_F32"
+  },
+  "VFrexpMantF64": {
+    "api": "v_frexp_mant_f64",
+    "description": "Auto-mapped instruction V_FREXP_MANT_F64"
+  },
+  "VInterpMovF32": {
+    "api": "v_interp_mov_f32",
+    "description": "Auto-mapped instruction V_INTERP_MOV_F32"
+  },
+  "VInterpP1llF16": {
+    "api": "v_interp_p1ll_f16",
+    "description": "Auto-mapped instruction V_INTERP_P1LL_F16"
+  },
+  "VInterpP1lvF16": {
+    "api": "v_interp_p1lv_f16",
+    "description": "Auto-mapped instruction V_INTERP_P1LV_F16"
+  },
+  "VInterpP1F32": {
+    "api": "v_interp_p1_f32",
+    "description": "Auto-mapped instruction V_INTERP_P1_F32"
+  },
+  "VInterpP2F16": {
+    "api": "v_interp_p2_f16",
+    "description": "Auto-mapped instruction V_INTERP_P2_F16"
+  },
+  "VInterpP2F16Opsel": {
+    "api": "v_interp_p2_f16_opsel",
+    "description": "Auto-mapped instruction V_INTERP_P2_F16_opsel"
+  },
+  "VInterpP2F32": {
+    "api": "v_interp_p2_f32",
+    "description": "Auto-mapped instruction V_INTERP_P2_F32"
+  },
+  "VInterpP2LegacyF16": {
+    "api": "v_interp_p2_legacy_f16",
+    "description": "Auto-mapped instruction V_INTERP_P2_LEGACY_F16"
+  },
+  "VLdexpF16": {
+    "api": "v_ldexp_f16",
+    "description": "Auto-mapped instruction V_LDEXP_F16"
+  },
+  "VLdexpF16Fake16": {
+    "api": "v_ldexp_f16_fake16",
+    "description": "Auto-mapped instruction V_LDEXP_F16_fake16"
+  },
+  "VLdexpF16T16": {
+    "api": "v_ldexp_f16_t16",
+    "description": "Auto-mapped instruction V_LDEXP_F16_t16"
+  },
+  "VLdexpF32": {
+    "api": "v_ldexp_f32",
+    "description": "Auto-mapped instruction V_LDEXP_F32"
+  },
+  "VLdexpF64": {
+    "api": "v_ldexp_f64",
+    "description": "Auto-mapped instruction V_LDEXP_F64"
+  },
+  "VLerpU8": {
+    "api": "v_lerp_u8",
+    "description": "Auto-mapped instruction V_LERP_U8"
+  },
+  "VLogBf16": {
+    "api": "v_log_bf16",
+    "description": "Auto-mapped instruction V_LOG_BF16"
+  },
+  "VLogClampF32": {
+    "api": "v_log_clamp_f32",
+    "description": "Auto-mapped instruction V_LOG_CLAMP_F32"
+  },
+  "VLogF16": {
+    "api": "v_log_f16",
+    "description": "Auto-mapped instruction V_LOG_F16"
+  },
+  "VLogF16Fake16": {
+    "api": "v_log_f16_fake16",
+    "description": "Auto-mapped instruction V_LOG_F16_fake16"
+  },
+  "VLogF16T16": {
+    "api": "v_log_f16_t16",
+    "description": "Auto-mapped instruction V_LOG_F16_t16"
+  },
+  "VLogF32": {
+    "api": "v_log_f32",
+    "description": "Auto-mapped instruction V_LOG_F32"
+  },
+  "VLogLegacyF32": {
+    "api": "v_log_legacy_f32",
+    "description": "Auto-mapped instruction V_LOG_LEGACY_F32"
+  },
+  "VLshlrevB16": {
+    "api": "v_lshlrev_b16",
+    "description": "Auto-mapped instruction V_LSHLREV_B16"
+  },
+  "VLshlrevB32": {
+    "api": "v_lshlrev_b32",
+    "description": "Auto-mapped instruction V_LSHLREV_B32"
+  },
+  "VLshlrevB64": {
+    "api": "v_lshlrev_b64",
+    "description": "Auto-mapped instruction V_LSHLREV_B64"
+  },
+  "VLshlAddU32": {
+    "api": "v_lshl_add_u32",
+    "description": "Auto-mapped instruction V_LSHL_ADD_U32"
+  },
+  "VLshlAddU64": {
+    "api": "v_lshl_add_u64",
+    "description": "Auto-mapped instruction V_LSHL_ADD_U64"
+  },
+  "VLshlAddU64Prof": {
+    "api": "v_lshl_add_u64_prof",
+    "description": "Auto-mapped instruction V_LSHL_ADD_U64_PROF"
+  },
+  "VLshlB32": {
+    "api": "v_lshl_b32",
+    "description": "Auto-mapped instruction V_LSHL_B32"
+  },
+  "VLshlB64": {
+    "api": "v_lshl_b64",
+    "description": "Auto-mapped instruction V_LSHL_B64"
+  },
+  "VLshlOrB32": {
+    "api": "v_lshl_or_b32",
+    "description": "Auto-mapped instruction V_LSHL_OR_B32"
+  },
+  "VLshrrevB16": {
+    "api": "v_lshrrev_b16",
+    "description": "Auto-mapped instruction V_LSHRREV_B16"
+  },
+  "VLshrrevB32": {
+    "api": "v_lshrrev_b32",
+    "description": "Auto-mapped instruction V_LSHRREV_B32"
+  },
+  "VLshrrevB64": {
+    "api": "v_lshrrev_b64",
+    "description": "Auto-mapped instruction V_LSHRREV_B64"
+  },
+  "VLshrB32": {
+    "api": "v_lshr_b32",
+    "description": "Auto-mapped instruction V_LSHR_B32"
+  },
+  "VLshrB64": {
+    "api": "v_lshr_b64",
+    "description": "Auto-mapped instruction V_LSHR_B64"
+  },
+  "VMacF16": {
+    "api": "v_mac_f16",
+    "description": "Auto-mapped instruction V_MAC_F16"
+  },
+  "VMacF32": {
+    "api": "v_mac_f32",
+    "description": "Auto-mapped instruction V_MAC_F32"
+  },
+  "VMacLegacyF32": {
+    "api": "v_mac_legacy_f32",
+    "description": "Auto-mapped instruction V_MAC_LEGACY_F32"
+  },
+  "VMadakF16": {
+    "api": "v_madak_f16",
+    "description": "Auto-mapped instruction V_MADAK_F16"
+  },
+  "VMadakF32": {
+    "api": "v_madak_f32",
+    "description": "Auto-mapped instruction V_MADAK_F32"
+  },
+  "VMadmkF16": {
+    "api": "v_madmk_f16",
+    "description": "Auto-mapped instruction V_MADMK_F16"
+  },
+  "VMadmkF32": {
+    "api": "v_madmk_f32",
+    "description": "Auto-mapped instruction V_MADMK_F32"
+  },
+  "VMadCoI64I32": {
+    "api": "v_mad_co_i64_i32",
+    "description": "Auto-mapped instruction V_MAD_CO_I64_I32"
+  },
+  "VMadCoU64U32": {
+    "api": "v_mad_co_u64_u32",
+    "description": "Auto-mapped instruction V_MAD_CO_U64_U32"
+  },
+  "VMadF16": {
+    "api": "v_mad_f16",
+    "description": "Auto-mapped instruction V_MAD_F16"
+  },
+  "VMadF32": {
+    "api": "v_mad_f32",
+    "description": "Auto-mapped instruction V_MAD_F32"
+  },
+  "VMadI16": {
+    "api": "v_mad_i16",
+    "description": "Auto-mapped instruction V_MAD_I16"
+  },
+  "VMadI32I16": {
+    "api": "v_mad_i32_i16",
+    "description": "Auto-mapped instruction V_MAD_I32_I16"
+  },
+  "VMadI32I24": {
+    "api": "v_mad_i32_i24",
+    "description": "Auto-mapped instruction V_MAD_I32_I24"
+  },
+  "VMadI64I32": {
+    "api": "v_mad_i64_i32",
+    "description": "Auto-mapped instruction V_MAD_I64_I32"
+  },
+  "VMadLegacyF16": {
+    "api": "v_mad_legacy_f16",
+    "description": "Auto-mapped instruction V_MAD_LEGACY_F16"
+  },
+  "VMadLegacyF32": {
+    "api": "v_mad_legacy_f32",
+    "description": "Auto-mapped instruction V_MAD_LEGACY_F32"
+  },
+  "VMadLegacyI16": {
+    "api": "v_mad_legacy_i16",
+    "description": "Auto-mapped instruction V_MAD_LEGACY_I16"
+  },
+  "VMadLegacyU16": {
+    "api": "v_mad_legacy_u16",
+    "description": "Auto-mapped instruction V_MAD_LEGACY_U16"
+  },
+  "VMadNcI64I32": {
+    "api": "v_mad_nc_i64_i32",
+    "description": "Auto-mapped instruction V_MAD_NC_I64_I32"
+  },
+  "VMadNcU64U32": {
+    "api": "v_mad_nc_u64_u32",
+    "description": "Auto-mapped instruction V_MAD_NC_U64_U32"
+  },
+  "VMadU16": {
+    "api": "v_mad_u16",
+    "description": "Auto-mapped instruction V_MAD_U16"
+  },
+  "VMadU32": {
+    "api": "v_mad_u32",
+    "description": "Auto-mapped instruction V_MAD_U32"
+  },
+  "VMadU32Prof": {
+    "api": "v_mad_u32_prof",
+    "description": "Auto-mapped instruction V_MAD_U32_PROF"
+  },
+  "VMadU32U16": {
+    "api": "v_mad_u32_u16",
+    "description": "Auto-mapped instruction V_MAD_U32_U16"
+  },
+  "VMadU32U24": {
+    "api": "v_mad_u32_u24",
+    "description": "Auto-mapped instruction V_MAD_U32_U24"
+  },
+  "VMadU64U32": {
+    "api": "v_mad_u64_u32",
+    "description": "Auto-mapped instruction V_MAD_U64_U32"
+  },
+  "VMax3F16": {
+    "api": "v_max3_f16",
+    "description": "Auto-mapped instruction V_MAX3_F16"
+  },
+  "VMax3F32": {
+    "api": "v_max3_f32",
+    "description": "Auto-mapped instruction V_MAX3_F32"
+  },
+  "VMax3I16": {
+    "api": "v_max3_i16",
+    "description": "Auto-mapped instruction V_MAX3_I16"
+  },
+  "VMax3I32": {
+    "api": "v_max3_i32",
+    "description": "Auto-mapped instruction V_MAX3_I32"
+  },
+  "VMax3NumF16": {
+    "api": "v_max3_num_f16",
+    "description": "Auto-mapped instruction V_MAX3_NUM_F16"
+  },
+  "VMax3NumF32": {
+    "api": "v_max3_num_f32",
+    "description": "Auto-mapped instruction V_MAX3_NUM_F32"
+  },
+  "VMax3U16": {
+    "api": "v_max3_u16",
+    "description": "Auto-mapped instruction V_MAX3_U16"
+  },
+  "VMax3U32": {
+    "api": "v_max3_u32",
+    "description": "Auto-mapped instruction V_MAX3_U32"
+  },
+  "VMaximum3F16": {
+    "api": "v_maximum3_f16",
+    "description": "Auto-mapped instruction V_MAXIMUM3_F16"
+  },
+  "VMaximum3F32": {
+    "api": "v_maximum3_f32",
+    "description": "Auto-mapped instruction V_MAXIMUM3_F32"
+  },
+  "VMaximumminimumF16": {
+    "api": "v_maximumminimum_f16",
+    "description": "Auto-mapped instruction V_MAXIMUMMINIMUM_F16"
+  },
+  "VMaximumminimumF32": {
+    "api": "v_maximumminimum_f32",
+    "description": "Auto-mapped instruction V_MAXIMUMMINIMUM_F32"
+  },
+  "VMaximumF16": {
+    "api": "v_maximum_f16",
+    "description": "Auto-mapped instruction V_MAXIMUM_F16"
+  },
+  "VMaximumF32": {
+    "api": "v_maximum_f32",
+    "description": "Auto-mapped instruction V_MAXIMUM_F32"
+  },
+  "VMaximumF64": {
+    "api": "v_maximum_f64",
+    "description": "Auto-mapped instruction V_MAXIMUM_F64"
+  },
+  "VMaxminF16": {
+    "api": "v_maxmin_f16",
+    "description": "Auto-mapped instruction V_MAXMIN_F16"
+  },
+  "VMaxminF32": {
+    "api": "v_maxmin_f32",
+    "description": "Auto-mapped instruction V_MAXMIN_F32"
+  },
+  "VMaxminI32": {
+    "api": "v_maxmin_i32",
+    "description": "Auto-mapped instruction V_MAXMIN_I32"
+  },
+  "VMaxminNumF16": {
+    "api": "v_maxmin_num_f16",
+    "description": "Auto-mapped instruction V_MAXMIN_NUM_F16"
+  },
+  "VMaxminNumF32": {
+    "api": "v_maxmin_num_f32",
+    "description": "Auto-mapped instruction V_MAXMIN_NUM_F32"
+  },
+  "VMaxminU32": {
+    "api": "v_maxmin_u32",
+    "description": "Auto-mapped instruction V_MAXMIN_U32"
+  },
+  "VMaxF16": {
+    "api": "v_max_f16",
+    "description": "Auto-mapped instruction V_MAX_F16"
+  },
+  "VMaxF32": {
+    "api": "v_max_f32",
+    "description": "Auto-mapped instruction V_MAX_F32"
+  },
+  "VMaxF64": {
+    "api": "v_max_f64",
+    "description": "Auto-mapped instruction V_MAX_F64"
+  },
+  "VMaxI16": {
+    "api": "v_max_i16",
+    "description": "Auto-mapped instruction V_MAX_I16"
+  },
+  "VMaxI32": {
+    "api": "v_max_i32",
+    "description": "Auto-mapped instruction V_MAX_I32"
+  },
+  "VMaxI64": {
+    "api": "v_max_i64",
+    "description": "Auto-mapped instruction V_MAX_I64"
+  },
+  "VMaxLegacyF32": {
+    "api": "v_max_legacy_f32",
+    "description": "Auto-mapped instruction V_MAX_LEGACY_F32"
+  },
+  "VMaxNumF16": {
+    "api": "v_max_num_f16",
+    "description": "Auto-mapped instruction V_MAX_NUM_F16"
+  },
+  "VMaxNumF32": {
+    "api": "v_max_num_f32",
+    "description": "Auto-mapped instruction V_MAX_NUM_F32"
+  },
+  "VMaxNumF64": {
+    "api": "v_max_num_f64",
+    "description": "Auto-mapped instruction V_MAX_NUM_F64"
+  },
+  "VMaxU16": {
+    "api": "v_max_u16",
+    "description": "Auto-mapped instruction V_MAX_U16"
+  },
+  "VMaxU32": {
+    "api": "v_max_u32",
+    "description": "Auto-mapped instruction V_MAX_U32"
+  },
+  "VMaxU64": {
+    "api": "v_max_u64",
+    "description": "Auto-mapped instruction V_MAX_U64"
+  },
+  "VMbcntHiU32B32": {
+    "api": "v_mbcnt_hi_u32_b32",
+    "description": "Auto-mapped instruction V_MBCNT_HI_U32_B32"
+  },
+  "VMbcntLoU32B32": {
+    "api": "v_mbcnt_lo_u32_b32",
+    "description": "Auto-mapped instruction V_MBCNT_LO_U32_B32"
+  },
+  "VMed3F16": {
+    "api": "v_med3_f16",
+    "description": "Auto-mapped instruction V_MED3_F16"
+  },
+  "VMed3F32": {
+    "api": "v_med3_f32",
+    "description": "Auto-mapped instruction V_MED3_F32"
+  },
+  "VMed3I16": {
+    "api": "v_med3_i16",
+    "description": "Auto-mapped instruction V_MED3_I16"
+  },
+  "VMed3I32": {
+    "api": "v_med3_i32",
+    "description": "Auto-mapped instruction V_MED3_I32"
+  },
+  "VMed3NumF16": {
+    "api": "v_med3_num_f16",
+    "description": "Auto-mapped instruction V_MED3_NUM_F16"
+  },
+  "VMed3NumF32": {
+    "api": "v_med3_num_f32",
+    "description": "Auto-mapped instruction V_MED3_NUM_F32"
+  },
+  "VMed3U16": {
+    "api": "v_med3_u16",
+    "description": "Auto-mapped instruction V_MED3_U16"
+  },
+  "VMed3U32": {
+    "api": "v_med3_u32",
+    "description": "Auto-mapped instruction V_MED3_U32"
+  },
+  "VMin3F16": {
+    "api": "v_min3_f16",
+    "description": "Auto-mapped instruction V_MIN3_F16"
+  },
+  "VMin3F32": {
+    "api": "v_min3_f32",
+    "description": "Auto-mapped instruction V_MIN3_F32"
+  },
+  "VMin3I16": {
+    "api": "v_min3_i16",
+    "description": "Auto-mapped instruction V_MIN3_I16"
+  },
+  "VMin3I32": {
+    "api": "v_min3_i32",
+    "description": "Auto-mapped instruction V_MIN3_I32"
+  },
+  "VMin3NumF16": {
+    "api": "v_min3_num_f16",
+    "description": "Auto-mapped instruction V_MIN3_NUM_F16"
+  },
+  "VMin3NumF32": {
+    "api": "v_min3_num_f32",
+    "description": "Auto-mapped instruction V_MIN3_NUM_F32"
+  },
+  "VMin3U16": {
+    "api": "v_min3_u16",
+    "description": "Auto-mapped instruction V_MIN3_U16"
+  },
+  "VMin3U32": {
+    "api": "v_min3_u32",
+    "description": "Auto-mapped instruction V_MIN3_U32"
+  },
+  "VMinimum3F16": {
+    "api": "v_minimum3_f16",
+    "description": "Auto-mapped instruction V_MINIMUM3_F16"
+  },
+  "VMinimum3F32": {
+    "api": "v_minimum3_f32",
+    "description": "Auto-mapped instruction V_MINIMUM3_F32"
+  },
+  "VMinimummaximumF16": {
+    "api": "v_minimummaximum_f16",
+    "description": "Auto-mapped instruction V_MINIMUMMAXIMUM_F16"
+  },
+  "VMinimummaximumF32": {
+    "api": "v_minimummaximum_f32",
+    "description": "Auto-mapped instruction V_MINIMUMMAXIMUM_F32"
+  },
+  "VMinimumF16": {
+    "api": "v_minimum_f16",
+    "description": "Auto-mapped instruction V_MINIMUM_F16"
+  },
+  "VMinimumF32": {
+    "api": "v_minimum_f32",
+    "description": "Auto-mapped instruction V_MINIMUM_F32"
+  },
+  "VMinimumF64": {
+    "api": "v_minimum_f64",
+    "description": "Auto-mapped instruction V_MINIMUM_F64"
+  },
+  "VMinmaxF16": {
+    "api": "v_minmax_f16",
+    "description": "Auto-mapped instruction V_MINMAX_F16"
+  },
+  "VMinmaxF32": {
+    "api": "v_minmax_f32",
+    "description": "Auto-mapped instruction V_MINMAX_F32"
+  },
+  "VMinmaxI32": {
+    "api": "v_minmax_i32",
+    "description": "Auto-mapped instruction V_MINMAX_I32"
+  },
+  "VMinmaxNumF16": {
+    "api": "v_minmax_num_f16",
+    "description": "Auto-mapped instruction V_MINMAX_NUM_F16"
+  },
+  "VMinmaxNumF32": {
+    "api": "v_minmax_num_f32",
+    "description": "Auto-mapped instruction V_MINMAX_NUM_F32"
+  },
+  "VMinmaxU32": {
+    "api": "v_minmax_u32",
+    "description": "Auto-mapped instruction V_MINMAX_U32"
+  },
+  "VMinF16": {
+    "api": "v_min_f16",
+    "description": "Auto-mapped instruction V_MIN_F16"
+  },
+  "VMinF32": {
+    "api": "v_min_f32",
+    "description": "Auto-mapped instruction V_MIN_F32"
+  },
+  "VMinF64": {
+    "api": "v_min_f64",
+    "description": "Auto-mapped instruction V_MIN_F64"
+  },
+  "VMinI16": {
+    "api": "v_min_i16",
+    "description": "Auto-mapped instruction V_MIN_I16"
+  },
+  "VMinI32": {
+    "api": "v_min_i32",
+    "description": "Auto-mapped instruction V_MIN_I32"
+  },
+  "VMinI64": {
+    "api": "v_min_i64",
+    "description": "Auto-mapped instruction V_MIN_I64"
+  },
+  "VMinLegacyF32": {
+    "api": "v_min_legacy_f32",
+    "description": "Auto-mapped instruction V_MIN_LEGACY_F32"
+  },
+  "VMinNumF16": {
+    "api": "v_min_num_f16",
+    "description": "Auto-mapped instruction V_MIN_NUM_F16"
+  },
+  "VMinNumF32": {
+    "api": "v_min_num_f32",
+    "description": "Auto-mapped instruction V_MIN_NUM_F32"
+  },
+  "VMinNumF64": {
+    "api": "v_min_num_f64",
+    "description": "Auto-mapped instruction V_MIN_NUM_F64"
+  },
+  "VMinU16": {
+    "api": "v_min_u16",
+    "description": "Auto-mapped instruction V_MIN_U16"
+  },
+  "VMinU32": {
+    "api": "v_min_u32",
+    "description": "Auto-mapped instruction V_MIN_U32"
+  },
+  "VMinU64": {
+    "api": "v_min_u64",
+    "description": "Auto-mapped instruction V_MIN_U64"
+  },
+  "VMovreldB32": {
+    "api": "v_movreld_b32",
+    "description": "Auto-mapped instruction V_MOVRELD_B32"
+  },
+  "VMovrelsd2B32": {
+    "api": "v_movrelsd_2_b32",
+    "description": "Auto-mapped instruction V_MOVRELSD_2_B32"
+  },
+  "VMovrelsdB32": {
+    "api": "v_movrelsd_b32",
+    "description": "Auto-mapped instruction V_MOVRELSD_B32"
+  },
+  "VMovrelsB32": {
+    "api": "v_movrels_b32",
+    "description": "Auto-mapped instruction V_MOVRELS_B32"
+  },
+  "VMovB16": {
+    "api": "v_mov_b16",
+    "description": "Auto-mapped instruction V_MOV_B16"
+  },
+  "VMovB16T16": {
+    "api": "v_mov_b16_t16",
+    "description": "Auto-mapped instruction V_MOV_B16_t16"
+  },
+  "VMovB32": {
+    "api": "v_mov_b32",
+    "description": "Auto-mapped instruction V_MOV_B32"
+  },
+  "VMovB32IndirectRead": {
+    "api": "v_mov_b32_indirect_read",
+    "description": "Auto-mapped instruction V_MOV_B32_indirect_read"
+  },
+  "VMovB32IndirectWrite": {
+    "api": "v_mov_b32_indirect_write",
+    "description": "Auto-mapped instruction V_MOV_B32_indirect_write"
+  },
+  "VMovB64": {
+    "api": "v_mov_b64",
+    "description": "Auto-mapped instruction V_MOV_B64"
+  },
+  "VMqsadPkU16U8": {
+    "api": "v_mqsad_pk_u16_u8",
+    "description": "Auto-mapped instruction V_MQSAD_PK_U16_U8"
+  },
+  "VMqsadU32U8": {
+    "api": "v_mqsad_u32_u8",
+    "description": "Auto-mapped instruction V_MQSAD_U32_U8"
+  },
+  "VMsadU8": {
+    "api": "v_msad_u8",
+    "description": "Auto-mapped instruction V_MSAD_U8"
+  },
+  "VMullitF32": {
+    "api": "v_mullit_f32",
+    "description": "Auto-mapped instruction V_MULLIT_F32"
+  },
+  "VMulDx9ZeroF32": {
+    "api": "v_mul_dx9_zero_f32",
+    "description": "Auto-mapped instruction V_MUL_DX9_ZERO_F32"
+  },
+  "VMulF16": {
+    "api": "v_mul_f16",
+    "description": "Auto-mapped instruction V_MUL_F16"
+  },
+  "VMulF32": {
+    "api": "v_mul_f32",
+    "description": "Auto-mapped instruction V_MUL_F32"
+  },
+  "VMulF64": {
+    "api": "v_mul_f64",
+    "description": "Auto-mapped instruction V_MUL_F64"
+  },
+  "VMulHiI32": {
+    "api": "v_mul_hi_i32",
+    "description": "Auto-mapped instruction V_MUL_HI_I32"
+  },
+  "VMulHiI32I24": {
+    "api": "v_mul_hi_i32_i24",
+    "description": "Auto-mapped instruction V_MUL_HI_I32_I24"
+  },
+  "VMulHiU32": {
+    "api": "v_mul_hi_u32",
+    "description": "Auto-mapped instruction V_MUL_HI_U32"
+  },
+  "VMulHiU32U24": {
+    "api": "v_mul_hi_u32_u24",
+    "description": "Auto-mapped instruction V_MUL_HI_U32_U24"
+  },
+  "VMulI32I24": {
+    "api": "v_mul_i32_i24",
+    "description": "Auto-mapped instruction V_MUL_I32_I24"
+  },
+  "VMulLegacyF32": {
+    "api": "v_mul_legacy_f32",
+    "description": "Auto-mapped instruction V_MUL_LEGACY_F32"
+  },
+  "VMulLoI32": {
+    "api": "v_mul_lo_i32",
+    "description": "Auto-mapped instruction V_MUL_LO_I32"
+  },
+  "VMulLoU16": {
+    "api": "v_mul_lo_u16",
+    "description": "Auto-mapped instruction V_MUL_LO_U16"
+  },
+  "VMulLoU32": {
+    "api": "v_mul_lo_u32",
+    "description": "Auto-mapped instruction V_MUL_LO_U32"
+  },
+  "VMulU32U24": {
+    "api": "v_mul_u32_u24",
+    "description": "Auto-mapped instruction V_MUL_U32_U24"
+  },
+  "VMulU64": {
+    "api": "v_mul_u64",
+    "description": "Auto-mapped instruction V_MUL_U64"
+  },
+  "VNop": {
+    "api": "v_nop",
+    "description": "Auto-mapped instruction V_NOP"
+  },
+  "VNotB16": {
+    "api": "v_not_b16",
+    "description": "Auto-mapped instruction V_NOT_B16"
+  },
+  "VNotB32": {
+    "api": "v_not_b32",
+    "description": "Auto-mapped instruction V_NOT_B32"
+  },
+  "VOr3B32": {
+    "api": "v_or3_b32",
+    "description": "Auto-mapped instruction V_OR3_B32"
+  },
+  "VOrB16": {
+    "api": "v_or_b16",
+    "description": "Auto-mapped instruction V_OR_B16"
+  },
+  "VOrB16Fake16": {
+    "api": "v_or_b16_fake16",
+    "description": "Auto-mapped instruction V_OR_B16_fake16"
+  },
+  "VOrB16T16": {
+    "api": "v_or_b16_t16",
+    "description": "Auto-mapped instruction V_OR_B16_t16"
+  },
+  "VOrB32": {
+    "api": "v_or_b32",
+    "description": "Auto-mapped instruction V_OR_B32"
+  },
+  "VPackB32F16": {
+    "api": "v_pack_b32_f16",
+    "description": "Auto-mapped instruction V_PACK_B32_F16"
+  },
+  "VPermlane16B32": {
+    "api": "v_permlane16_b32",
+    "description": "Auto-mapped instruction V_PERMLANE16_B32"
+  },
+  "VPermlane16SwapB32": {
+    "api": "v_permlane16_swap_b32",
+    "description": "Auto-mapped instruction V_PERMLANE16_SWAP_B32"
+  },
+  "VPermlane16VarB32": {
+    "api": "v_permlane16_var_b32",
+    "description": "Auto-mapped instruction V_PERMLANE16_VAR_B32"
+  },
+  "VPermlane32SwapB32": {
+    "api": "v_permlane32_swap_b32",
+    "description": "Auto-mapped instruction V_PERMLANE32_SWAP_B32"
+  },
+  "VPermlane64B32": {
+    "api": "v_permlane64_b32",
+    "description": "Auto-mapped instruction V_PERMLANE64_B32"
+  },
+  "VPermlanex16B32": {
+    "api": "v_permlanex16_b32",
+    "description": "Auto-mapped instruction V_PERMLANEX16_B32"
+  },
+  "VPermlanex16VarB32": {
+    "api": "v_permlanex16_var_b32",
+    "description": "Auto-mapped instruction V_PERMLANEX16_VAR_B32"
+  },
+  "VPermlaneBcastB32": {
+    "api": "v_permlane_bcast_b32",
+    "description": "Auto-mapped instruction V_PERMLANE_BCAST_B32"
+  },
+  "VPermlaneDownB32": {
+    "api": "v_permlane_down_b32",
+    "description": "Auto-mapped instruction V_PERMLANE_DOWN_B32"
+  },
+  "VPermlaneIdxGenB32": {
+    "api": "v_permlane_idx_gen_b32",
+    "description": "Auto-mapped instruction V_PERMLANE_IDX_GEN_B32"
+  },
+  "VPermlaneUpB32": {
+    "api": "v_permlane_up_b32",
+    "description": "Auto-mapped instruction V_PERMLANE_UP_B32"
+  },
+  "VPermlaneXorB32": {
+    "api": "v_permlane_xor_b32",
+    "description": "Auto-mapped instruction V_PERMLANE_XOR_B32"
+  },
+  "VPermB32": {
+    "api": "v_perm_b32",
+    "description": "Auto-mapped instruction V_PERM_B32"
+  },
+  "VPermPk16B4U4": {
+    "api": "v_perm_pk16_b4_u4",
+    "description": "Auto-mapped instruction V_PERM_PK16_B4_U4"
+  },
+  "VPermPk16B6U4": {
+    "api": "v_perm_pk16_b6_u4",
+    "description": "Auto-mapped instruction V_PERM_PK16_B6_U4"
+  },
+  "VPermPk16B8U4": {
+    "api": "v_perm_pk16_b8_u4",
+    "description": "Auto-mapped instruction V_PERM_PK16_B8_U4"
+  },
+  "VPipeflush": {
+    "api": "v_pipeflush",
+    "description": "Auto-mapped instruction V_PIPEFLUSH"
+  },
+  "VPkFmacF16": {
+    "api": "v_pk_fmac_f16",
+    "description": "Auto-mapped instruction V_PK_FMAC_F16"
+  },
+  "VPrngB32": {
+    "api": "v_prng_b32",
+    "description": "Auto-mapped instruction V_PRNG_B32"
+  },
+  "VQsadPkU16U8": {
+    "api": "v_qsad_pk_u16_u8",
+    "description": "Auto-mapped instruction V_QSAD_PK_U16_U8"
+  },
+  "VRcpBf16": {
+    "api": "v_rcp_bf16",
+    "description": "Auto-mapped instruction V_RCP_BF16"
+  },
+  "VRcpClampF32": {
+    "api": "v_rcp_clamp_f32",
+    "description": "Auto-mapped instruction V_RCP_CLAMP_F32"
+  },
+  "VRcpClampF64": {
+    "api": "v_rcp_clamp_f64",
+    "description": "Auto-mapped instruction V_RCP_CLAMP_F64"
+  },
+  "VRcpF16": {
+    "api": "v_rcp_f16",
+    "description": "Auto-mapped instruction V_RCP_F16"
+  },
+  "VRcpF16Fake16": {
+    "api": "v_rcp_f16_fake16",
+    "description": "Auto-mapped instruction V_RCP_F16_fake16"
+  },
+  "VRcpF16T16": {
+    "api": "v_rcp_f16_t16",
+    "description": "Auto-mapped instruction V_RCP_F16_t16"
+  },
+  "VRcpF32": {
+    "api": "v_rcp_f32",
+    "description": "Auto-mapped instruction V_RCP_F32"
+  },
+  "VRcpF64": {
+    "api": "v_rcp_f64",
+    "description": "Auto-mapped instruction V_RCP_F64"
+  },
+  "VRcpIflagF32": {
+    "api": "v_rcp_iflag_f32",
+    "description": "Auto-mapped instruction V_RCP_IFLAG_F32"
+  },
+  "VRcpLegacyF32": {
+    "api": "v_rcp_legacy_f32",
+    "description": "Auto-mapped instruction V_RCP_LEGACY_F32"
+  },
+  "VReadfirstlaneB32": {
+    "api": "v_readfirstlane_b32",
+    "description": "Auto-mapped instruction V_READFIRSTLANE_B32"
+  },
+  "VReadlaneB32": {
+    "api": "v_readlane_b32",
+    "description": "Auto-mapped instruction V_READLANE_B32"
+  },
+  "VRndneF16": {
+    "api": "v_rndne_f16",
+    "description": "Auto-mapped instruction V_RNDNE_F16"
+  },
+  "VRndneF32": {
+    "api": "v_rndne_f32",
+    "description": "Auto-mapped instruction V_RNDNE_F32"
+  },
+  "VRndneF64": {
+    "api": "v_rndne_f64",
+    "description": "Auto-mapped instruction V_RNDNE_F64"
+  },
+  "VRsqBf16": {
+    "api": "v_rsq_bf16",
+    "description": "Auto-mapped instruction V_RSQ_BF16"
+  },
+  "VRsqClampF32": {
+    "api": "v_rsq_clamp_f32",
+    "description": "Auto-mapped instruction V_RSQ_CLAMP_F32"
+  },
+  "VRsqClampF64": {
+    "api": "v_rsq_clamp_f64",
+    "description": "Auto-mapped instruction V_RSQ_CLAMP_F64"
+  },
+  "VRsqF16": {
+    "api": "v_rsq_f16",
+    "description": "Auto-mapped instruction V_RSQ_F16"
+  },
+  "VRsqF16Fake16": {
+    "api": "v_rsq_f16_fake16",
+    "description": "Auto-mapped instruction V_RSQ_F16_fake16"
+  },
+  "VRsqF16T16": {
+    "api": "v_rsq_f16_t16",
+    "description": "Auto-mapped instruction V_RSQ_F16_t16"
+  },
+  "VRsqF32": {
+    "api": "v_rsq_f32",
+    "description": "Auto-mapped instruction V_RSQ_F32"
+  },
+  "VRsqF64": {
+    "api": "v_rsq_f64",
+    "description": "Auto-mapped instruction V_RSQ_F64"
+  },
+  "VRsqLegacyF32": {
+    "api": "v_rsq_legacy_f32",
+    "description": "Auto-mapped instruction V_RSQ_LEGACY_F32"
+  },
+  "VSadHiU8": {
+    "api": "v_sad_hi_u8",
+    "description": "Auto-mapped instruction V_SAD_HI_U8"
+  },
+  "VSadU16": {
+    "api": "v_sad_u16",
+    "description": "Auto-mapped instruction V_SAD_U16"
+  },
+  "VSadU32": {
+    "api": "v_sad_u32",
+    "description": "Auto-mapped instruction V_SAD_U32"
+  },
+  "VSadU8": {
+    "api": "v_sad_u8",
+    "description": "Auto-mapped instruction V_SAD_U8"
+  },
+  "VSatPk4I4I8": {
+    "api": "v_sat_pk4_i4_i8",
+    "description": "Auto-mapped instruction V_SAT_PK4_I4_I8"
+  },
+  "VSatPk4U4U8": {
+    "api": "v_sat_pk4_u4_u8",
+    "description": "Auto-mapped instruction V_SAT_PK4_U4_U8"
+  },
+  "VSatPkU8I16": {
+    "api": "v_sat_pk_u8_i16",
+    "description": "Auto-mapped instruction V_SAT_PK_U8_I16"
+  },
+  "VScreenPartition4seB32": {
+    "api": "v_screen_partition_4se_b32",
+    "description": "Auto-mapped instruction V_SCREEN_PARTITION_4SE_B32"
+  },
+  "VSinBf16": {
+    "api": "v_sin_bf16",
+    "description": "Auto-mapped instruction V_SIN_BF16"
+  },
+  "VSinF16": {
+    "api": "v_sin_f16",
+    "description": "Auto-mapped instruction V_SIN_F16"
+  },
+  "VSinF32": {
+    "api": "v_sin_f32",
+    "description": "Auto-mapped instruction V_SIN_F32"
+  },
+  "VSqrtBf16": {
+    "api": "v_sqrt_bf16",
+    "description": "Auto-mapped instruction V_SQRT_BF16"
+  },
+  "VSqrtF16": {
+    "api": "v_sqrt_f16",
+    "description": "Auto-mapped instruction V_SQRT_F16"
+  },
+  "VSqrtF16Fake16": {
+    "api": "v_sqrt_f16_fake16",
+    "description": "Auto-mapped instruction V_SQRT_F16_fake16"
+  },
+  "VSqrtF16T16": {
+    "api": "v_sqrt_f16_t16",
+    "description": "Auto-mapped instruction V_SQRT_F16_t16"
+  },
+  "VSqrtF32": {
+    "api": "v_sqrt_f32",
+    "description": "Auto-mapped instruction V_SQRT_F32"
+  },
+  "VSqrtF64": {
+    "api": "v_sqrt_f64",
+    "description": "Auto-mapped instruction V_SQRT_F64"
+  },
+  "VSubbrevCoU32": {
+    "api": "v_subbrev_co_u32",
+    "description": "Auto-mapped instruction V_SUBBREV_CO_U32"
+  },
+  "VSubbrevU32": {
+    "api": "v_subbrev_u32",
+    "description": "Auto-mapped instruction V_SUBBREV_U32"
+  },
+  "VSubbCoU32": {
+    "api": "v_subb_co_u32",
+    "description": "Auto-mapped instruction V_SUBB_CO_U32"
+  },
+  "VSubbU32": {
+    "api": "v_subb_u32",
+    "description": "Auto-mapped instruction V_SUBB_U32"
+  },
+  "VSubrevCoCiU32": {
+    "api": "v_subrev_co_ci_u32",
+    "description": "Auto-mapped instruction V_SUBREV_CO_CI_U32"
+  },
+  "VSubrevCoU32": {
+    "api": "v_subrev_co_u32",
+    "description": "Auto-mapped instruction V_SUBREV_CO_U32"
+  },
+  "VSubrevF16": {
+    "api": "v_subrev_f16",
+    "description": "Auto-mapped instruction V_SUBREV_F16"
+  },
+  "VSubrevF32": {
+    "api": "v_subrev_f32",
+    "description": "Auto-mapped instruction V_SUBREV_F32"
+  },
+  "VSubrevI32": {
+    "api": "v_subrev_i32",
+    "description": "Auto-mapped instruction V_SUBREV_I32"
+  },
+  "VSubrevNcU32": {
+    "api": "v_subrev_nc_u32",
+    "description": "Auto-mapped instruction V_SUBREV_NC_U32"
+  },
+  "VSubrevU16": {
+    "api": "v_subrev_u16",
+    "description": "Auto-mapped instruction V_SUBREV_U16"
+  },
+  "VSubrevU32": {
+    "api": "v_subrev_u32",
+    "description": "Auto-mapped instruction V_SUBREV_U32"
+  },
+  "VSubCoCiU32": {
+    "api": "v_sub_co_ci_u32",
+    "description": "Auto-mapped instruction V_SUB_CO_CI_U32"
+  },
+  "VSubCoU32": {
+    "api": "v_sub_co_u32",
+    "description": "Auto-mapped instruction V_SUB_CO_U32"
+  },
+  "VSubF16": {
+    "api": "v_sub_f16",
+    "description": "Auto-mapped instruction V_SUB_F16"
+  },
+  "VSubF32": {
+    "api": "v_sub_f32",
+    "description": "Auto-mapped instruction V_SUB_F32"
+  },
+  "VSubI16": {
+    "api": "v_sub_i16",
+    "description": "Auto-mapped instruction V_SUB_I16"
+  },
+  "VSubI32": {
+    "api": "v_sub_i32",
+    "description": "Auto-mapped instruction V_SUB_I32"
+  },
+  "VSubNcI16": {
+    "api": "v_sub_nc_i16",
+    "description": "Auto-mapped instruction V_SUB_NC_I16"
+  },
+  "VSubNcI32": {
+    "api": "v_sub_nc_i32",
+    "description": "Auto-mapped instruction V_SUB_NC_I32"
+  },
+  "VSubNcU16": {
+    "api": "v_sub_nc_u16",
+    "description": "Auto-mapped instruction V_SUB_NC_U16"
+  },
+  "VSubNcU32": {
+    "api": "v_sub_nc_u32",
+    "description": "Auto-mapped instruction V_SUB_NC_U32"
+  },
+  "VSubU16": {
+    "api": "v_sub_u16",
+    "description": "Auto-mapped instruction V_SUB_U16"
+  },
+  "VSubU32": {
+    "api": "v_sub_u32",
+    "description": "Auto-mapped instruction V_SUB_U32"
+  },
+  "VSubU64": {
+    "api": "v_sub_u64",
+    "description": "Auto-mapped instruction V_SUB_U64"
+  },
+  "VSwaprelB32": {
+    "api": "v_swaprel_b32",
+    "description": "Auto-mapped instruction V_SWAPREL_B32"
+  },
+  "VSwapB16": {
+    "api": "v_swap_b16",
+    "description": "Auto-mapped instruction V_SWAP_B16"
+  },
+  "VSwapB32": {
+    "api": "v_swap_b32",
+    "description": "Auto-mapped instruction V_SWAP_B32"
+  },
+  "VSExpF16": {
+    "api": "v_s_exp_f16",
+    "description": "Auto-mapped instruction V_S_EXP_F16"
+  },
+  "VSExpF32": {
+    "api": "v_s_exp_f32",
+    "description": "Auto-mapped instruction V_S_EXP_F32"
+  },
+  "VSLogF16": {
+    "api": "v_s_log_f16",
+    "description": "Auto-mapped instruction V_S_LOG_F16"
+  },
+  "VSLogF32": {
+    "api": "v_s_log_f32",
+    "description": "Auto-mapped instruction V_S_LOG_F32"
+  },
+  "VSRcpF16": {
+    "api": "v_s_rcp_f16",
+    "description": "Auto-mapped instruction V_S_RCP_F16"
+  },
+  "VSRcpF32": {
+    "api": "v_s_rcp_f32",
+    "description": "Auto-mapped instruction V_S_RCP_F32"
+  },
+  "VSRsqF16": {
+    "api": "v_s_rsq_f16",
+    "description": "Auto-mapped instruction V_S_RSQ_F16"
+  },
+  "VSRsqF32": {
+    "api": "v_s_rsq_f32",
+    "description": "Auto-mapped instruction V_S_RSQ_F32"
+  },
+  "VSSqrtF16": {
+    "api": "v_s_sqrt_f16",
+    "description": "Auto-mapped instruction V_S_SQRT_F16"
+  },
+  "VSSqrtF32": {
+    "api": "v_s_sqrt_f32",
+    "description": "Auto-mapped instruction V_S_SQRT_F32"
+  },
+  "VTanhBf16": {
+    "api": "v_tanh_bf16",
+    "description": "Auto-mapped instruction V_TANH_BF16"
+  },
+  "VTanhF16": {
+    "api": "v_tanh_f16",
+    "description": "Auto-mapped instruction V_TANH_F16"
+  },
+  "VTanhF32": {
+    "api": "v_tanh_f32",
+    "description": "Auto-mapped instruction V_TANH_F32"
+  },
+  "VTransBf16Profile": {
+    "api": "v_trans_bf16_profile",
+    "description": "Auto-mapped instruction V_TRANS_BF16_Profile"
+  },
+  "VTransBf16Fake16Profile": {
+    "api": "v_trans_bf16_fake16_profile",
+    "description": "Auto-mapped instruction V_TRANS_BF16_fake16_Profile"
+  },
+  "VTransBf16T16Profile": {
+    "api": "v_trans_bf16_t16_profile",
+    "description": "Auto-mapped instruction V_TRANS_BF16_t16_Profile"
+  },
+  "VTrigPreopF64": {
+    "api": "v_trig_preop_f64",
+    "description": "Auto-mapped instruction V_TRIG_PREOP_F64"
+  },
+  "VTruncF16": {
+    "api": "v_trunc_f16",
+    "description": "Auto-mapped instruction V_TRUNC_F16"
+  },
+  "VTruncF32": {
+    "api": "v_trunc_f32",
+    "description": "Auto-mapped instruction V_TRUNC_F32"
+  },
+  "VTruncF64": {
+    "api": "v_trunc_f64",
+    "description": "Auto-mapped instruction V_TRUNC_F64"
+  },
+  "VWritelaneB32": {
+    "api": "v_writelane_b32",
+    "description": "Auto-mapped instruction V_WRITELANE_B32"
+  },
+  "VXadU32": {
+    "api": "v_xad_u32",
+    "description": "Auto-mapped instruction V_XAD_U32"
+  },
+  "VXnorB32": {
+    "api": "v_xnor_b32",
+    "description": "Auto-mapped instruction V_XNOR_B32"
+  },
+  "VXor3B32": {
+    "api": "v_xor3_b32",
+    "description": "Auto-mapped instruction V_XOR3_B32"
+  },
+  "VXorB16": {
+    "api": "v_xor_b16",
+    "description": "Auto-mapped instruction V_XOR_B16"
+  },
+  "VXorB16Fake16": {
+    "api": "v_xor_b16_fake16",
+    "description": "Auto-mapped instruction V_XOR_B16_fake16"
+  },
+  "VXorB16T16": {
+    "api": "v_xor_b16_t16",
+    "description": "Auto-mapped instruction V_XOR_B16_t16"
+  },
+  "VXorB32": {
+    "api": "v_xor_b32",
+    "description": "Auto-mapped instruction V_XOR_B32"
+  },
+  "Conv2d": {
+    "api": "; Macro.Conv2d"
   }
 }

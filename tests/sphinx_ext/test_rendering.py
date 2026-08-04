@@ -19,10 +19,11 @@ def test_render_primary_options(mock_get_adapter, mock_priority):
 
 def test_render_flavour_dropdown():
   """Renders flavour dropdown."""
-  hierarchy = {"jax": [{"key": "flax_nnx", "label": "Flax"}]}
+  hierarchy = {"jax": [{"key": "flax_nnx", "label": "Flax"}], "torch": []}
   html = _render_flavour_dropdown("src", hierarchy, "jax")
   assert 'value="flax_nnx"' in html
-  html_empty = _render_flavour_dropdown("src", hierarchy, "torch")
+
+  html_empty = _render_flavour_dropdown("src", {"torch": []}, "torch")
   assert "No Flavours" in html_empty
 
 
@@ -47,6 +48,21 @@ def test_render_demo_html(mock_mtime, mock_glob, mock_exists, mock_flavours, moc
   assert "test.whl" in html
   assert "torch" in html
   assert "jax" in html
+
+
+@patch("ml_switcheroo.sphinx_ext.rendering.get_framework_priority_order")
+@patch("ml_switcheroo.sphinx_ext.rendering._render_primary_options")
+@patch("ml_switcheroo.sphinx_ext.rendering._render_flavour_dropdown")
+@patch("pathlib.Path.exists")
+def test_render_demo_html_no_priority_fallback(mock_exists, mock_flavours, mock_primary, mock_priority):
+  """Renders demo HTML with empty priority fallback."""
+  mock_exists.return_value = False
+  mock_priority.return_value = []
+  mock_primary.return_value = '<option value="source_placeholder">Placeholder</option>'
+  mock_flavours.return_value = ""
+  # custom doesn't trigger torch or jax shortcuts
+  html = render_demo_html({"custom": []}, "{}", "{}")
+  assert "source_placeholder" in html
 
 
 @patch("ml_switcheroo.sphinx_ext.rendering.get_framework_priority_order")

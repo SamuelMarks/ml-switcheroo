@@ -11,9 +11,9 @@ from typing import List, Optional, Set
 
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
-from ml_switcheroo.core.compiler.frontends.rdna.nodes import (
-  Comment,
-  Instruction,
+from ml_switcheroo.core.compiler.frontends.rdna.cst import (
+  RdnaComment,
+  RdnaInstruction,
   RdnaNode,
 )
 from ml_switcheroo.core.compiler.frontends.semantic_parser import (
@@ -27,14 +27,31 @@ from ml_switcheroo.core.compiler.frontends.semantic_parser import (
 
 
 class RdnaLifter:
-  """Reconstructs a LogicalGraph from a sequence of RDNA AST nodes."""
+  """Reconstructs a LogicalGraph from a sequence of RDNA AST nodes.
+
+  This lifter processes sequential RDNA abstract syntax tree (AST) nodes,
+  interprets semantic comment markers, and organizes raw instructions into a
+  graph representation suitable for high-level compiler analysis.
+  """
 
   def __init__(self) -> None:
-    """Initialize RdnaLifter."""
+    """Initialize the RdnaLifter.
+
+    Returns:
+        None
+    """
     self.comment_parser = SemanticCommentParser()
 
   def lift(self, nodes: List[RdnaNode]) -> LogicalGraph:
-    """Parses a list of RDNA nodes to build a LogicalGraph."""
+    """Parses a list of RDNA nodes to build a LogicalGraph.
+
+    Args:
+        nodes (List[RdnaNode]): A list of low-level RDNA AST nodes (instructions,
+            comments, etc.) to process.
+
+    Returns:
+        LogicalGraph: The reconstructed high-level logical computation graph.
+    """
     # Set default name to match expected Python Class Name in tests
     graph = LogicalGraph(name="DecompiledNet")
     previous_node_id: Optional[str] = None
@@ -43,12 +60,25 @@ class RdnaLifter:
     # State for block capture
     current_block_id: Optional[str] = None
     current_block_kind: Optional[str] = None
-    current_instructions: List[Instruction] = []
+    current_instructions: List[RdnaInstruction] = []
 
     instruction_counter = 0
 
     def commit_node(node_id: str, kind: str, meta: Any = None) -> None:
-      """Execute implementation detail."""
+      """Creates a logical node and appends it to the graph.
+
+      Also creates a logical edge connecting the previously committed node to
+      the newly created node to capture the control flow.
+
+      Args:
+          node_id (str): The unique identifier for the new logical node.
+          kind (str): The operation kind of the new logical node.
+          meta (Any, optional): Metadata dictionary for the logical node.
+              Defaults to None.
+
+      Returns:
+          None
+      """
       nonlocal previous_node_id
       if node_id in seen_ids:
         return
@@ -62,7 +92,7 @@ class RdnaLifter:
       previous_node_id = node_id
 
     for node in nodes:
-      if isinstance(node, Comment):
+      if isinstance(node, RdnaComment):
         text = node.text.lstrip(";/ ").strip()
         marker = self.comment_parser.parse(text)
 
@@ -80,7 +110,7 @@ class RdnaLifter:
           continue
 
         if isinstance(marker, SemanticEnd):
-          if marker.id == current_block_id and current_block_kind:  # pragma: no branch
+          if marker.id == current_block_id and current_block_kind:
             meta = RdnaAnalyzer.analyze_block(current_block_kind, current_instructions)
             commit_node(current_block_id, current_block_kind, meta)
             current_block_id = None
@@ -96,17 +126,17 @@ class RdnaLifter:
           continue
 
         if isinstance(marker, SemanticReturn):
-          if "output" not in seen_ids:  # pragma: no cover
+          if "output" not in seen_ids:
             graph.nodes.append(LogicalNode(id="output", kind="Output"))
             if previous_node_id:
               graph.edges.append(LogicalEdge(source=previous_node_id, target="output"))
             seen_ids.add("output")
           continue
 
-      if current_block_id is not None and isinstance(node, Instruction):
+      if current_block_id is not None and isinstance(node, RdnaInstruction):
         current_instructions.append(node)
 
-      elif isinstance(node, Instruction):
+      elif isinstance(node, RdnaInstruction):
         op_id = f"inst_{instruction_counter}"
         instruction_counter += 1
         kind = f"rdna.{node.opcode}"

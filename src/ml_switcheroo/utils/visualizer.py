@@ -20,6 +20,10 @@ class MermaidGenerator(cst.CSTVisitor):
 
   It traverses the tree and emits nodes and edges formatted with specific
   branding colors.
+
+  Attributes:
+      COLORS (dict): A dictionary mapping color names to hex codes for branding.
+      STYLES (str): The Mermaid style definition block applied to the graphs.
   """
 
   # Branding Colors
@@ -51,7 +55,7 @@ class MermaidGenerator(cst.CSTVisitor):
     """
 
   def __init__(self) -> None:
-    """Initializes the generator with empty buffers."""
+    """Initializes the generator with empty buffers and default structures."""
     self.nodes: List[str] = []
     self.edges: List[str] = []
     self.stack: List[str] = []
@@ -138,40 +142,80 @@ class MermaidGenerator(cst.CSTVisitor):
       return f"<{type(node).__name__}>"
 
   def visit_Module(self, node: cst.Module) -> Optional[bool]:
-    """Visits Module root."""
+    """Visits Module root.
+
+    Args:
+        node (cst.Module): The module node being visited.
+
+    Returns:
+        Optional[bool]: True to visit children, False/None otherwise.
+    """
     uid = self._add_node("Module", "modNode")
     self.stack.append(uid)
     return True
 
   def leave_Module(self, node: cst.Module) -> None:
-    """Leaves Module root."""
-    if self.stack:  # pragma: no cover
+    """Leaves Module root.
+
+    Args:
+        node (cst.Module): The module node being left.
+    """
+    if self.stack:
       self.stack.pop()
 
   def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
-    """Visits Class Definitions."""
+    """Visits Class Definitions.
+
+    Args:
+        node (cst.ClassDef): The class definition node being visited.
+
+    Returns:
+        Optional[bool]: True to visit children, False/None otherwise.
+    """
     uid = self._add_node(f"Class: {node.name.value}", "classNode")
     self.stack.append(uid)
     return True
 
   def leave_ClassDef(self, node: cst.ClassDef) -> None:
-    """Leaves Class Definitions."""
-    if self.stack:  # pragma: no cover
+    """Leaves Class Definitions.
+
+    Args:
+        node (cst.ClassDef): The class definition node being left.
+    """
+    if self.stack:
       self.stack.pop()
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """Visits Function Definitions."""
+    """Visits Function Definitions.
+
+    Args:
+        node (cst.FunctionDef): The function definition node being visited.
+
+    Returns:
+        Optional[bool]: True to visit children, False/None otherwise.
+    """
     uid = self._add_node(f"Def: {node.name.value}", "funcNode")
     self.stack.append(uid)
     return True
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Leaves Function Definitions."""
-    if self.stack:  # pragma: no cover
+    """Leaves Function Definitions.
+
+    Args:
+        node (cst.FunctionDef): The function definition node being left.
+    """
+    if self.stack:
       self.stack.pop()
 
   def visit_Call(self, node: cst.Call) -> Optional[bool]:
-    """Visits Function Calls."""
+    """Visits Function Calls.
+
+    Args:
+        node (cst.Call): The function call node being visited.
+
+    Returns:
+        Optional[bool]: True to visit arguments, False/None otherwise.
+    """
     # Helper to get name
     try:
       name = self._node_to_str(node.func)
@@ -189,12 +233,23 @@ class MermaidGenerator(cst.CSTVisitor):
     return True  # Visit args
 
   def leave_Call(self, node: cst.Call) -> None:
-    """Leaves Function Calls."""
-    if self.stack:  # pragma: no cover
+    """Leaves Function Calls.
+
+    Args:
+        node (cst.Call): The function call node being left.
+    """
+    if self.stack:
       self.stack.pop()
 
   def visit_Arg(self, node: cst.Arg) -> Optional[bool]:
-    """Visits Arguments inside a Call."""
+    """Visits Arguments inside a Call.
+
+    Args:
+        node (cst.Arg): The argument node being visited.
+
+    Returns:
+        Optional[bool]: True to recurse into complex value nodes, False if simple literal.
+    """
     # Try to summarize arg key
     label = "arg"
     if node.keyword:
@@ -227,12 +282,23 @@ class MermaidGenerator(cst.CSTVisitor):
     return True
 
   def leave_Arg(self, node: cst.Arg) -> None:
-    """Leaves Arguments."""
-    if self.stack:  # pragma: no cover
+    """Leaves Arguments.
+
+    Args:
+        node (cst.Arg): The argument node being left.
+    """
+    if self.stack:
       self.stack.pop()
 
   def visit_Import(self, node: cst.Import) -> Optional[bool]:
-    """Visits Import statements (collapsing them into single nodes)."""
+    """Visits Import statements (collapsing them into single nodes).
+
+    Args:
+        node (cst.Import): The import statement node being visited.
+
+    Returns:
+        Optional[bool]: False to avoid recursing further.
+    """
     names = [n.name.value for n in node.names if isinstance(n.name, cst.Name)]
     if not names:
       names = ["..."]
@@ -240,14 +306,21 @@ class MermaidGenerator(cst.CSTVisitor):
     return False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> Optional[bool]:
-    """Visits From-Import statements (collapsed)."""
+    """Visits From-Import statements (collapsed).
+
+    Args:
+        node (cst.ImportFrom): The import-from statement node being visited.
+
+    Returns:
+        Optional[bool]: False to avoid recursing further.
+    """
     mod = self._node_to_str(node.module) if node.module else "."
     names = []
     if isinstance(node.names, cst.ImportStar):
       names.append("*")
     else:
       for n in node.names:
-        if hasattr(n, "name") and hasattr(n.name, "value"):  # pragma: no cover
+        if hasattr(n, "name") and hasattr(n.name, "value"):
           names.append(n.name.value)  # type: ignore
 
     display_names = ", ".join(names[:3])
@@ -258,18 +331,36 @@ class MermaidGenerator(cst.CSTVisitor):
     return False
 
   def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
-    """Visits Assignment statements."""
+    """Visits Assignment statements.
+
+    Args:
+        node (cst.Assign): The assignment statement node being visited.
+
+    Returns:
+        Optional[bool]: True to visit children.
+    """
     uid = self._add_node("Assign (=)", "stmtNode")
     self.stack.append(uid)
     return True
 
   def leave_Assign(self, node: cst.Assign) -> None:
-    """Leaves Assignment statements."""
+    """Leaves Assignment statements.
+
+    Args:
+        node (cst.Assign): The assignment statement node being left.
+    """
     if self.stack:
       self.stack.pop()
 
   def visit_SimpleString(self, node: cst.SimpleString) -> Optional[bool]:
-    """Visits Strings to allow visualizing constant values directly in the graph."""
+    """Visits Strings to allow visualizing constant values directly in the graph.
+
+    Args:
+        node (cst.SimpleString): The simple string node being visited.
+
+    Returns:
+        Optional[bool]: False as this is a leaf node and has no children to visit.
+    """
     val = self._node_to_str(node)
     self._add_node(val, "valNode")
     # Leaf node - don't stack

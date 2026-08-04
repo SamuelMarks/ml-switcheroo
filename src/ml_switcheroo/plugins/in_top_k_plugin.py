@@ -1,4 +1,7 @@
-"""Generic plugin for `in_top_k`. Checks if target indices are present in `top_k(predictions)`."""
+"""Generic plugin for `in_top_k`.
+
+Checks if target indices are present in `top_k(predictions)`.
+"""
 
 import libcst as cst
 from ml_switcheroo.core.hooks import register_hook, HookContext
@@ -6,6 +9,19 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 @register_hook("in_top_k_plugin")
 def in_top_k_plugin(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Plugin Hook: Generic plugin for `in_top_k`. Checks if target indices are present in `top_k(predictions)`."""
+  """Plugin Hook: Generic plugin for `in_top_k`.
+
+  Checks if target indices are present in `top_k(predictions)`.
+
+  Args:
+    node: The CST Call node representing the `in_top_k` operation to be
+      processed.
+    ctx: The hook context containing metadata, configuration, and translation
+      environment details.
+
+  Returns:
+    The transformed CST node, or the original node if no transformation was
+    applied.
+  """
   # TODO: Implement custom logic
   return node

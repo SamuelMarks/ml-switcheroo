@@ -1,0 +1,8 @@
+description: Auto-generated mapping for DefModel.
+op_type: function
+operation: DefModel
+std_args: []
+variants:
+  latex_dsl:
+    api: midl.DefModel
+    required_imports: []

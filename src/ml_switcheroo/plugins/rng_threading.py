@@ -29,8 +29,13 @@ from ml_switcheroo.frameworks.base import get_adapter
 def _remove_generator_arg(args: List[cst.Arg]) -> List[cst.Arg]:
   """Filters out the 'generator' keyword argument commonly used in PyTorch.
 
-
   JAX uses the 'key' semantics instead.
+
+  Args:
+      args: A list of CST Call arguments to filter.
+
+  Returns:
+      A list of CST Call arguments with 'generator' keyword arguments removed.
   """
   clean_args = []
   for arg in args:
@@ -75,10 +80,10 @@ def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   # 3. Request Preamble Injection (Delegated to Adapter)
   adapter = get_adapter(ctx.target_fw)
-  if adapter:  # pragma: no cover
+  if adapter:
     # Ask adapter for the syntax: "rng, key = jax.random.split(rng)"
     split_stmt = adapter.get_rng_split_syntax(rng_arg, key_var)
-    if split_stmt and split_stmt != "pass":  # pragma: no cover
+    if split_stmt and split_stmt != "pass":
       ctx.inject_preamble(split_stmt)
 
   # 4. Clean Arguments

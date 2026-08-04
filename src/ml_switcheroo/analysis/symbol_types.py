@@ -1,4 +1,4 @@
-"""Symbol Types and Scopes."""
+"""Symbol types and scopes used for static analysis and type inference."""
 
 from dataclasses import dataclass
 from typing import Dict, List, Optional
@@ -11,11 +11,22 @@ class SymbolType:
   """A string representation of the type (e.g., 'Tensor')."""
 
   def __str__(self) -> str:
-    """Returns the type name."""
+    """Returns the type name.
+
+    Returns:
+        The string representation of the symbol type.
+    """
     return getattr(self, "name", "Unknown")
 
   def __eq__(self, other: object) -> bool:
-    """Execute implementation detail."""
+    """Check equality with another symbol type based on name.
+
+    Args:
+        other: The other object to compare.
+
+    Returns:
+        True if other is a SymbolType and names match, False otherwise.
+    """
     if not isinstance(other, SymbolType):
       return False
     return getattr(self, "name", "") == getattr(other, "name", "")
@@ -30,7 +41,15 @@ class TensorType(SymbolType):
   """The framework key (e.g. "torch" or "jax") responsible for this tensor."""
 
   def __eq__(self, other: object) -> bool:
-    """Execute implementation detail."""
+    """Check equality with another tensor type.
+
+    Args:
+        other: The other object to compare.
+
+    Returns:
+        True if other is a TensorType with matching name and framework,
+        False otherwise.
+    """
     if not isinstance(other, TensorType):
       return False
     return self.name == other.name and self.framework == other.framework
@@ -45,7 +64,14 @@ class ModuleType(SymbolType):
   """Fully qualified path string (e.g. "torch.nn")."""
 
   def __eq__(self, other: object) -> bool:
-    """Execute implementation detail."""
+    """Check equality with another module type.
+
+    Args:
+        other: The other object to compare.
+
+    Returns:
+        True if other is a ModuleType with matching name and path, False otherwise.
+    """
     if not isinstance(other, ModuleType):
       return False
     return self.name == other.name and self.path == other.path
@@ -59,12 +85,24 @@ class UnionType(SymbolType):
   name: str = "Union"
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Get string representation of the union type.
+
+    Returns:
+        A formatted string of unique types enclosed in Union[...].
+    """
     unique_names = sorted(list(set(str(t) for t in self.types)))
     return f"Union[{', '.join(unique_names)}]"
 
   def __eq__(self, other: object) -> bool:
-    """Execute implementation detail."""
+    """Check equality with another union type.
+
+    Args:
+        other: The other object to compare.
+
+    Returns:
+        True if other is a UnionType containing equivalent types regardless of
+        order, False otherwise.
+    """
     if not isinstance(other, UnionType):
       return False
     # Set based comparison for equivalence ignoring order
@@ -113,5 +151,9 @@ class Scope:
     return None
 
   def snapshot(self) -> Dict[str, SymbolType]:
-    """Returns a shallow copy of the current symbol table for branching."""
+    """Returns a shallow copy of the current symbol table for branching.
+
+    Returns:
+        A dictionary mapping symbol names to their types in the current scope.
+    """
     return self.symbols.copy()

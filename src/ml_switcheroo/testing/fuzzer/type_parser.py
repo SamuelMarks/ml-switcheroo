@@ -33,28 +33,45 @@ class NoneType(ParsedType):
 
 @dataclass
 class PrimitiveType(ParsedType):
-  """Represents a primitive type like int, float, str, bool."""
+  """Represents a primitive type like int, float, str, bool.
+
+  Attributes:
+      name: The string name of the primitive type.
+  """
 
   name: str
 
 
 @dataclass
 class UnionType(ParsedType):
-  """Represents a Union type (e.g., A | B or Union[A, B])."""
+  """Represents a Union type (e.g., A | B or Union[A, B]).
+
+  Attributes:
+      types: A list of ParsedType elements that comprise the union.
+  """
 
   types: List[ParsedType]
 
 
 @dataclass
 class OptionalType(ParsedType):
-  """Represents an Optional type (e.g., Optional[T])."""
+  """Represents an Optional type (e.g., Optional[T]).
+
+  Attributes:
+      inner: The ParsedType that is wrapped as optional.
+  """
 
   inner: ParsedType
 
 
 @dataclass
 class TupleType(ParsedType):
-  """Represents a Tuple type."""
+  """Represents a Tuple type.
+
+  Attributes:
+      elements: A list of ParsedType elements within the tuple.
+      variadic: A boolean flag indicating if the tuple is variadic.
+  """
 
   elements: List[ParsedType]
   variadic: bool
@@ -62,14 +79,23 @@ class TupleType(ParsedType):
 
 @dataclass
 class ListType(ParsedType):
-  """Represents a List or Sequence type."""
+  """Represents a List or Sequence type.
+
+  Attributes:
+      inner: The ParsedType representing the list element type.
+  """
 
   inner: ParsedType
 
 
 @dataclass
 class DictType(ParsedType):
-  """Represents a Dict or Mapping type."""
+  """Represents a Dict or Mapping type.
+
+  Attributes:
+      key_type: The ParsedType representing the dictionary keys.
+      value_type: The ParsedType representing the dictionary values.
+  """
 
   key_type: ParsedType
   value_type: ParsedType
@@ -77,7 +103,11 @@ class DictType(ParsedType):
 
 @dataclass
 class TensorType(ParsedType):
-  """Represents an Array or Tensor type, optionally with symbolic dimensions."""
+  """Represents an Array or Tensor type, optionally with symbolic dimensions.
+
+  Attributes:
+      dims: A list of strings representing the dimensions, or None.
+  """
 
   dims: Optional[List[str]]
 
@@ -114,7 +144,14 @@ class TypeAnnotationParser:
       return PrimitiveType(name=type_str)
 
   def visit(self, node: cst.CSTNode) -> ParsedType:
-    """Visits a CST node and converts it to a ParsedType."""
+    """Visits a CST node and converts it to a ParsedType.
+
+    Args:
+        node: The CSTNode representing a component of the type annotation.
+
+    Returns:
+        A ParsedType representation of the visited node.
+    """
     if isinstance(node, cst.Name):
       return self.visit_Name(node)
     elif isinstance(node, (cst.Integer, cst.Float, cst.SimpleString)):
@@ -135,7 +172,14 @@ class TypeAnnotationParser:
     return res
 
   def visit_Name(self, node: cst.Name) -> ParsedType:
-    """Visit a simple name node."""
+    """Visit a simple name node.
+
+    Args:
+        node: The CST Name node representing a simple type identifier.
+
+    Returns:
+        A ParsedType representing the parsed name identifier.
+    """
     name = node.value
     res: ParsedType
     if name in ("Any",):
@@ -163,7 +207,14 @@ class TypeAnnotationParser:
     return res
 
   def visit_Constant(self, node: cst.CSTNode) -> ParsedType:
-    """Visit a constant node."""
+    """Visit a constant node.
+
+    Args:
+        node: The CSTNode representing a constant literal expression.
+
+    Returns:
+        A PrimitiveType capturing the constant value.
+    """
     val = ""
     if isinstance(node, cst.SimpleString):
       val = node.value.strip("'\"")
@@ -175,7 +226,14 @@ class TypeAnnotationParser:
     return res
 
   def visit_Attribute(self, node: cst.Attribute) -> ParsedType:
-    """Visit an attribute node (e.g., np.ndarray)."""
+    """Visit an attribute node (e.g., np.ndarray).
+
+    Args:
+        node: The CST Attribute node representing a dotted attribute access.
+
+    Returns:
+        A ParsedType representing the attribute path.
+    """
     full_name = self._get_full_name(node)
     res: ParsedType
     if full_name == "np.ndarray":
@@ -186,7 +244,14 @@ class TypeAnnotationParser:
     return res
 
   def _get_full_name(self, node: cst.CSTNode) -> str:
-    """Get name."""
+    """Get the full dotted name string recursively from a Name or Attribute node.
+
+    Args:
+        node: The CSTNode representation of a Name or Attribute path.
+
+    Returns:
+        The full dotted name as a string.
+    """
     if isinstance(node, cst.Name):
       return node.value
     elif isinstance(node, cst.Attribute):
@@ -194,7 +259,14 @@ class TypeAnnotationParser:
     return ""
 
   def visit_Subscript(self, node: cst.Subscript) -> ParsedType:
-    """Visit a subscripted node (e.g., List[int])."""
+    """Visit a subscripted node (e.g., List[int]).
+
+    Args:
+        node: The CST Subscript node representing a generic or parameterized type.
+
+    Returns:
+        A ParsedType containing the base type and its parameterized arguments.
+    """
     base = self.visit(node.value)
 
     args: List[ParsedType] = []
@@ -202,7 +274,11 @@ class TypeAnnotationParser:
     raw_dims: List[str] = []
 
     def _process_slice_elt(elt: cst.CSTNode) -> None:
-      """Process."""
+      """Process a subscript slice element inside a Subscript node.
+
+      Args:
+          elt: The CSTNode representing the subscript slice element to process.
+      """
       nonlocal is_variadic
 
       # In libcst, node.slice is a list of SubscriptElement
@@ -211,7 +287,7 @@ class TypeAnnotationParser:
       if isinstance(elt, cst.Index):
         val = elt.value
       else:
-        val = elt  # pragma: no cover
+        val = elt
 
       if isinstance(val, cst.Ellipsis):
         is_variadic = True
@@ -249,7 +325,14 @@ class TypeAnnotationParser:
     return res
 
   def visit_BinOp(self, node: cst.BinaryOperation) -> ParsedType:
-    """Visit a binary operation (e.g., A | B for Unions)."""
+    """Visit a binary operation (e.g., A | B for Unions).
+
+    Args:
+        node: The CST BinaryOperation node representing the operation.
+
+    Returns:
+        A ParsedType containing UnionType if BitOr, else PrimitiveType("Unknown").
+    """
     if isinstance(node.operator, cst.BitOr):
       left = self.visit(node.left)
       right = self.visit(node.right)
@@ -261,7 +344,7 @@ class TypeAnnotationParser:
         types.append(left)
 
       if isinstance(right, UnionType):
-        types.extend(right.types)  # pragma: no cover
+        types.extend(right.types)
       else:
         types.append(right)
 

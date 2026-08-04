@@ -33,15 +33,29 @@ class IndentedDumper(yaml.SafeDumper):  # type: ignore
   """Custom Dumper to ensure lists are indented."""
 
   def increase_indent(self, flow: Any = False, indentless: Any = False) -> Any:
-    """Execute implementation detail."""
+    """Increase the indentation level for YAML serialization, forcing list indentation.
+
+    Args:
+        flow: If True, writes the next collection in flow style.
+        indentless: If True, indicates that the current list has no extra indentation.
+
+    Returns:
+        The updated indentation state from the parent dumper class.
+    """
     return super(IndentedDumper, self).increase_indent(flow, False)
 
 
 def _build_yaml_entry(op_name: str, definition: Dict[str, Any]) -> Dict[str, Any]:
   """Normalizes internal semantics data into clean ODL YAML structure.
 
+  Provides safe sanitization of description strings to prevent broken RST references.
 
-  Safe sanitization of description strings to prevent broken RST references.
+  Args:
+      op_name: The name of the abstract operation.
+      definition: The dictionary containing the raw semantic definition of the operation.
+
+  Returns:
+      A dictionary representing the cleaned, normalized ODL YAML structure ready for YAML export.
   """
   # 1. Normalize Arguments
   yaml_args = []
@@ -89,7 +103,16 @@ def _build_yaml_entry(op_name: str, definition: Dict[str, Any]) -> Dict[str, Any
 
 
 def _write_yaml_update(out_path: Path, new_entries: List[Dict[str, Any]]) -> None:
-  """Merges accumulated operations into the existing YAML file (Upsert logic)."""
+  """Merges accumulated operations into the existing YAML file (Upsert logic).
+
+  Reads the existing YAML file if it exists, updates it with the new entries,
+  sorts the list of operations alphabetically, and writes the updated list
+  back to the file.
+
+  Args:
+      out_path: The filesystem path where the YAML file is located or should be written.
+      new_entries: A list of normalized YAML entry dictionaries to be merged.
+  """
   existing_map = {}
 
   if out_path.exists():
@@ -98,7 +121,7 @@ def _write_yaml_update(out_path: Path, new_entries: List[Dict[str, Any]]) -> Non
         loaded = yaml.safe_load(f)
         if isinstance(loaded, list):
           for item in loaded:
-            if "operation" in item:  # pragma: no cover
+            if "operation" in item:
               existing_map[item["operation"]] = item
     except Exception as e:
       logger.warning(f"[ml-switcheroo] Could not read existing YAML: {e}. Overwriting.")

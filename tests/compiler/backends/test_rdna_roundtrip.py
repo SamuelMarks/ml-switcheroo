@@ -43,7 +43,7 @@ def test_rdna_roundtrip_macro(semantics_mgr):
   assert "BEGIN Conv2d" in rdna_text
   assert "L_KY_conv" in rdna_text
   parser = RdnaParser(rdna_text)
-  ast_nodes = parser.parse()
+  ast_nodes = parser.parse().statements
   lifter = RdnaLifter()
   g_out = lifter.lift(ast_nodes)
   assert len(g_out.nodes) == 3

@@ -96,3 +96,12 @@ def test_packing_missing_passthrough(rewriter_factory):
   code = "y = x.view(1, 2)"
   res = rewrite_code(rw, code)
   assert "x.view(1, 2)" in res
+
+
+def test_packing_function_call(rewriter_factory):
+  """Verifies behavior when called as a function (e.g. torch.view) instead of a method."""
+  rw = rewriter_factory("jax")
+  code = "y = torch.view(x, 1, 2)"
+  res = rewrite_code(rw, code)
+  assert "jnp.reshape(x" in res
+  assert "(1, 2)" in res

@@ -1,7 +1,7 @@
 """Tests for MLIR dialect coverage."""
 
 from ml_switcheroo.core.mlir.dialect import OpSchema
-from ml_switcheroo.core.mlir.nodes import OperationNode
+from ml_switcheroo.core.mlir.cst import OperationNode
 
 
 def test_opschema_validate_wrong_name():

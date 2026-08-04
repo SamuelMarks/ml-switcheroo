@@ -29,10 +29,14 @@ def test_readme_editor_read_error():
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   class DuckPath:
+    """Mock Path for testing read error."""
+
     def exists(self):
+      """Check if exists."""
       return True
 
     def read_text(self, *args, **kwargs):
+      """Read text."""
       raise OSError("fail")
 
   ed = ReadmeEditor(type("Dummy", (), {"get_known_apis": lambda *args: {"op": {}}})(), DuckPath())  # type: ignore
@@ -45,19 +49,25 @@ def test_readme_editor_no_map():
   import markdown_it
 
   class DuckPath:
+    """Mock Path for testing no map."""
+
     def exists(self):
+      """Check if exists."""
       return True
 
     def read_text(self, *args, **kwargs):
+      """Read text."""
       return "## ✅ Compatibility Matrix\n"
 
     def write_text(self, *args, **kwargs):
+      """Write text."""
       return True
 
   # Patch the markdown parser to return tokens with no map
   original_parse = markdown_it.MarkdownIt.parse
 
   def mock_parse(self, content):
+    """Mock parse returning no map."""
     tokens = original_parse(self, content)
     for t in tokens:
       t.map = None

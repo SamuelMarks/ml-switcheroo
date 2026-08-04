@@ -96,7 +96,21 @@ class ASTEngine:
     load_plugins()
 
   def run(self, code: str) -> ConversionResult:
-    """Main execution point."""
+    """Executes the complete conversion pipeline on the input code.
+
+    This method initiates the translation process from the source framework to
+    the target framework. Depending on the configuration and targets, it
+    routes the code through either the compiler pipeline (for ISAs or when
+    sharding is enabled), a specialized stablehlo bypass, or the standard
+    rewriter pipeline.
+
+    Args:
+        code: The input source code string to be converted.
+
+    Returns:
+        A ConversionResult object containing the converted code, success status,
+        and any collected execution trace events or error messages.
+    """
     reset_tracer()
     tracer = get_tracer()
     tracer.start_phase("Pipeline Start", f"{self.source} -> {self.target}")
@@ -131,19 +145,57 @@ class ASTEngine:
       )
 
   def parse(self, code: str) -> cst.Module:
-    """Parses python string to CST Module."""
+    """Parses a Python source code string into a LibCST Module.
+
+    Args:
+        code: The Python source code as a string.
+
+    Returns:
+        A libcst.Module representation of the input source code.
+    """
     return cst.parse_module(code)
 
   def to_source(self, tree: cst.Module) -> str:
-    """Converts CST Module back to string."""
+    """Converts a LibCST Module back into its source code string representation.
+
+    Args:
+        tree: The LibCST Module to be serialized.
+
+    Returns:
+        The generated source code as a string.
+    """
     return tree.code
 
   def _graph_to_mermaid(self, tree: cst.CSTNode) -> str:
-    """Helper to generate mermaid definition from CST."""
+    """Generates a Mermaid diagram definition representing the CST structure.
+
+    Args:
+        tree: The LibCST node to visualize.
+
+    Returns:
+        A string containing the Mermaid diagram definition.
+    """
     return MermaidGenerator().generate(tree)
 
   def _run_compiler_pipeline(self, code: str, tracer: Any) -> ConversionResult:
-    """Runs the Graph-based compiler pipeline for ISAs."""
+    """Runs the Graph-based compiler pipeline for Instruction Set Architectures (ISAs).
+
+    This pipeline handles conversion for targets like SASS, RDNA, or graph-level
+    optimizations such as sharding. It parses the source into a graph, optimizes it
+    (if enabled), applies sharding inference, and then runs a compiler backend
+    to emit target code.
+
+    Args:
+        code: The input source code string.
+        tracer: The execution tracer to log phases and mutations.
+
+    Returns:
+        A ConversionResult containing the compiled target code and execution trace.
+
+    Raises:
+        NotImplementedError: If no frontend is available for the source framework.
+        ValueError: If no backend is found for the target framework.
+    """
     tracer.start_phase("Compiler Pipeline", f"{self.source}->Graph->{self.target}")
     graph = None
     if not is_isa_source(self.source):
@@ -176,12 +228,12 @@ class ASTEngine:
       # ISA Source (SASS/RDNA) logic
       if self.source == "sass":
         parser = SassParser(code)
-        nodes = parser.parse()
+        nodes = parser.parse().statements
         lifter: Any = SassLifter()
         graph = lifter.lift(nodes)
       elif self.source == "rdna":
         parser = RdnaParser(code)  # type: ignore
-        nodes = parser.parse()
+        nodes = parser.parse().statements
         lifter = RdnaLifter()
         graph = lifter.lift(nodes)
       else:
@@ -243,7 +295,21 @@ class ASTEngine:
     return ConversionResult(code=output_code, success=True, trace_events=tracer.export())
 
   def _run_rewriter_pipeline(self, code: str, tracer: Any) -> ConversionResult:
-    """Structural pipeline with optional graph loopback."""
+    """Runs the structural rewriter pipeline with optional graph loopback optimization.
+
+    This pipeline performs AST-to-AST rewriting for high-level frameworks. It
+    first ingests the code into a CST, optionally extracts and optimizes the
+    computation graph (loopback), patches the CST with the optimized graph, and
+    then applies structural, API, and auxiliary passes followed by import fixing.
+
+    Args:
+        code: The input source code string.
+        tracer: The execution tracer to log phases and mutations.
+
+    Returns:
+        A ConversionResult containing the rewritten code, status, and any
+        warnings or validation errors.
+    """
     tracer.start_phase("Rewriter Pipeline", "AST Transformation")
 
     # 1. Ingestion
@@ -268,7 +334,7 @@ class ASTEngine:
         original_graph = extractor.graph
         provenance = extractor.node_map
 
-        if original_graph.nodes:  # pragma: no cover
+        if original_graph.nodes:
           # B. Optimization
           patterns = self.semantics.get_patterns()
           optimizer = GraphOptimizer(patterns)
@@ -295,7 +361,7 @@ class ASTEngine:
 
             # Forward translation: synthesize optimized blocks and metadata
             optimized_graph = ShardingInferencePass().apply(optimized_graph)
-            if self.target in ["jax", "flax", "flax_nnx", "paxml"]:  # pragma: no cover
+            if self.target in ["jax", "flax", "flax_nnx", "paxml"]:
               optimized_graph = QKVFusionPass().apply(optimized_graph)
               optimized_graph = SwiGLUFusionPass().apply(optimized_graph)
               optimized_graph = VisionPatchEmbeddingFusionPass().apply(optimized_graph)
@@ -408,5 +474,9 @@ class ASTEngine:
 
   @property
   def strict_mode(self) -> bool:
-    """Helper property for strict mode config."""
+    """Helper property to retrieve the strict mode setting from config.
+
+    Returns:
+        True if strict mode is enabled, False otherwise.
+    """
     return self.config.strict_mode

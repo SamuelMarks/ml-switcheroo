@@ -95,3 +95,15 @@ def test_graph_sharding_attributes():
   graph = LogicalGraph(nodes=[node], mesh=mesh)
   assert graph.mesh.shape["data"] == 8
   assert graph.nodes[0].sharding.axes == ("data", None)
+
+
+def test_topological_sort_missing_node():
+  """Verifies the behavior when an edge points to a non-existent node."""
+  g = LogicalGraph()
+  n_a = LogicalNode(id="a", kind="op")
+  g.nodes = [n_a]
+  # edge points to "b" which is not in nodes
+  g.edges = [LogicalEdge("a", "b")]
+  sorted_nodes = topological_sort(g)
+  assert len(sorted_nodes) == 1
+  assert sorted_nodes[0].id == "a"

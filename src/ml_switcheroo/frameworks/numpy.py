@@ -22,8 +22,8 @@ try:
   import numpy as _np
 
   np = _np
-except Exception:  # pragma: no cover
-  np = None  # pragma: no cover
+except Exception:
+  np = None
 
 
 @register_framework("numpy")
@@ -102,7 +102,6 @@ class NumpyAdapter:
   def supported_tiers(self) -> List[SemanticTier]:
     """NumPy supports Arrays (Math) and Extras (IO).
 
-
     It does NOT support Neural layers structurally.
 
     Returns:
@@ -139,7 +138,7 @@ class NumpyAdapter:
         PluginTraits: Capabilities.
 
     """
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=False,
       requires_functional_state=False,
@@ -188,7 +187,7 @@ class NumpyAdapter:
         str: "False".
 
     """
-    return "False"  # pragma: no cover
+    return "False"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """No-op for NumPy.
@@ -201,7 +200,7 @@ class NumpyAdapter:
         str: "pass".
 
     """
-    return "pass"  # pragma: no cover
+    return "pass"
 
   def get_serialization_imports(self) -> List[str]:
     """Returns imports for IO.
@@ -228,15 +227,28 @@ class NumpyAdapter:
       return f"np.save(file={file_arg}, arr={object_arg})"
     elif op == "load":
       return f"np.load(file={file_arg})"
-    return ""  # pragma: no cover
+    return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """Execute implementation detail."""
-    return ["import numpy as np"]  # pragma: no cover
+    """Returns imports required for weight conversion.
+
+    Returns:
+        List[str]: Import statements.
+
+    """
+    return ["import numpy as np"]
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """Loads .npz files into a dictionary."""
-    return textwrap.dedent(  # pragma: no cover
+    """Loads .npz files into a dictionary.
+
+    Args:
+        path_var: Variable name or path to the file.
+
+    Returns:
+        str: Code string to perform weight load.
+
+    """
+    return textwrap.dedent(
       f"""
             loaded = np.load({path_var}, allow_pickle=True)
             # If NpzFile wrapper, convert to dict
@@ -251,15 +263,37 @@ class NumpyAdapter:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Execute implementation detail."""
-    return f"{tensor_var}"  # pragma: no cover
+    """Returns expression to convert tensor to numpy.
+
+    Args:
+        tensor_var: Variable name of the tensor.
+
+    Returns:
+        str: Expression string.
+
+    """
+    return f"{tensor_var}"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Saves dictionary to compressed .npz."""
-    return f"np.savez_compressed({path_var}, **{state_var})"  # pragma: no cover
+    """Saves dictionary to compressed .npz.
+
+    Args:
+        state_var: Variable name of the state dict.
+        path_var: Variable name of the output path.
+
+    Returns:
+        str: Code string to save the dictionary.
+
+    """
+    return f"np.savez_compressed({path_var}, **{state_var})"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """No dynamic wiring needed for NumPy."""
+    """No dynamic wiring needed for NumPy.
+
+    Args:
+        snapshot: Snapshot dictionary containing state.
+
+    """
     pass
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
@@ -291,18 +325,18 @@ class NumpyAdapter:
     if hasattr(data, "detach"):
       try:
         return data.detach().cpu().numpy()
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
+      except Exception:
+        pass
     if hasattr(data, "numpy"):
-      try:  # pragma: no cover
-        return data.numpy()  # pragma: no cover
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
+      try:
+        return data.numpy()
+      except Exception:
+        pass
     if hasattr(data, "__array__"):
       try:
         return np.array(data)
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
+      except Exception:
+        pass
     return data
 
   def get_tiered_examples(self) -> Dict[str, str]:

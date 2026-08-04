@@ -24,11 +24,11 @@ class SwiGLUFusionPass:
     if not (gate_nodes and up_nodes):
       return graph
 
-    for gate_id, gate_node in list(gate_nodes.items()):  # pragma: no cover
+    for gate_id, gate_node in list(gate_nodes.items()):
       prefix = gate_id.replace("gate_proj", "")
       up_id = prefix + "up_proj"
 
-      if up_id in up_nodes:  # pragma: no cover
+      if up_id in up_nodes:
         # Create fused node
         fused_id = prefix + "swiglu"
         fused_node = LogicalNode(

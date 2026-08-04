@@ -1,0 +1,326 @@
+{
+  "Abs": {
+    "api": "stablehlo.abs"
+  },
+  "Add": {
+    "api": "stablehlo.add"
+  },
+  "AfterAll": {
+    "api": "stablehlo.after_all"
+  },
+  "AllGather": {
+    "api": "stablehlo.all_gather"
+  },
+  "AllReduce": {
+    "api": "stablehlo.all_reduce"
+  },
+  "AllToAll": {
+    "api": "stablehlo.all_to_all"
+  },
+  "And": {
+    "api": "stablehlo.and"
+  },
+  "AsyncDone": {
+    "api": "stablehlo.async_done"
+  },
+  "AsyncStart": {
+    "api": "stablehlo.async_start"
+  },
+  "Atan2": {
+    "api": "stablehlo.atan2"
+  },
+  "BatchNormGrad": {
+    "api": "stablehlo.batch_norm_grad"
+  },
+  "BatchNormInference": {
+    "api": "stablehlo.batch_norm_inference"
+  },
+  "BatchNormTraining": {
+    "api": "stablehlo.batch_norm_training"
+  },
+  "BitcastConvert": {
+    "api": "stablehlo.bitcast_convert"
+  },
+  "BroadcastInDim": {
+    "api": "stablehlo.broadcast_in_dim"
+  },
+  "Case": {
+    "api": "stablehlo.case"
+  },
+  "Cbrt": {
+    "api": "stablehlo.cbrt"
+  },
+  "Ceil": {
+    "api": "stablehlo.ceil"
+  },
+  "Cholesky": {
+    "api": "stablehlo.cholesky"
+  },
+  "Clamp": {
+    "api": "stablehlo.clamp"
+  },
+  "CollectiveBroadcast": {
+    "api": "stablehlo.collective_broadcast"
+  },
+  "CollectivePermute": {
+    "api": "stablehlo.collective_permute"
+  },
+  "Compare": {
+    "api": "stablehlo.compare"
+  },
+  "Complex": {
+    "api": "stablehlo.complex"
+  },
+  "Composite": {
+    "api": "stablehlo.composite"
+  },
+  "Concatenate": {
+    "api": "stablehlo.concatenate"
+  },
+  "Constant": {
+    "api": "stablehlo.constant"
+  },
+  "Convert": {
+    "api": "stablehlo.convert"
+  },
+  "Convolution": {
+    "api": "stablehlo.convolution"
+  },
+  "Cosine": {
+    "api": "stablehlo.cosine"
+  },
+  "CountLeadingZeros": {
+    "api": "stablehlo.count_leading_zeros"
+  },
+  "CustomCall": {
+    "api": "stablehlo.custom_call"
+  },
+  "Div": {
+    "api": "stablehlo.divide"
+  },
+  "DotGeneral": {
+    "api": "stablehlo.dot_general"
+  },
+  "DynamicBroadcastInDim": {
+    "api": "stablehlo.dynamic_broadcast_in_dim"
+  },
+  "DynamicConv": {
+    "api": "stablehlo.dynamic_conv"
+  },
+  "DynamicGather": {
+    "api": "stablehlo.dynamic_gather"
+  },
+  "DynamicIota": {
+    "api": "stablehlo.dynamic_iota"
+  },
+  "DynamicPad": {
+    "api": "stablehlo.dynamic_pad"
+  },
+  "DynamicReshape": {
+    "api": "stablehlo.dynamic_reshape"
+  },
+  "DynamicSlice": {
+    "api": "stablehlo.dynamic_slice"
+  },
+  "DynamicUpdateSlice": {
+    "api": "stablehlo.dynamic_update_slice"
+  },
+  "Exponential": {
+    "api": "stablehlo.exponential"
+  },
+  "ExponentialMinusOne": {
+    "api": "stablehlo.exponential_minus_one"
+  },
+  "Fft": {
+    "api": "stablehlo.fft"
+  },
+  "Floor": {
+    "api": "stablehlo.floor"
+  },
+  "Gather": {
+    "api": "stablehlo.gather"
+  },
+  "GetDimensionSize": {
+    "api": "stablehlo.get_dimension_size"
+  },
+  "GetTupleElement": {
+    "api": "stablehlo.get_tuple_element"
+  },
+  "If": {
+    "api": "stablehlo.if"
+  },
+  "Imag": {
+    "api": "stablehlo.imag"
+  },
+  "Infeed": {
+    "api": "stablehlo.infeed"
+  },
+  "Iota": {
+    "api": "stablehlo.iota"
+  },
+  "IsFinite": {
+    "api": "stablehlo.is_finite"
+  },
+  "Log": {
+    "api": "stablehlo.log"
+  },
+  "LogPlusOne": {
+    "api": "stablehlo.log_plus_one"
+  },
+  "Logistic": {
+    "api": "stablehlo.logistic"
+  },
+  "Map": {
+    "api": "stablehlo.map"
+  },
+  "Maximum": {
+    "api": "stablehlo.maximum"
+  },
+  "Minimum": {
+    "api": "stablehlo.minimum"
+  },
+  "Mul": {
+    "api": "stablehlo.multiply"
+  },
+  "Negate": {
+    "api": "stablehlo.negate"
+  },
+  "Not": {
+    "api": "stablehlo.not"
+  },
+  "OptimizationBarrier": {
+    "api": "stablehlo.optimization_barrier"
+  },
+  "Or": {
+    "api": "stablehlo.or"
+  },
+  "Outfeed": {
+    "api": "stablehlo.outfeed"
+  },
+  "Pad": {
+    "api": "stablehlo.pad"
+  },
+  "PartitionId": {
+    "api": "stablehlo.partition_id"
+  },
+  "Popcnt": {
+    "api": "stablehlo.popcnt"
+  },
+  "Pow": {
+    "api": "stablehlo.power"
+  },
+  "Real": {
+    "api": "stablehlo.real"
+  },
+  "Recv": {
+    "api": "stablehlo.recv"
+  },
+  "Reduce": {
+    "api": "stablehlo.reduce"
+  },
+  "ReducePrecision": {
+    "api": "stablehlo.reduce_precision"
+  },
+  "ReduceScatter": {
+    "api": "stablehlo.reduce_scatter"
+  },
+  "ReduceWindow": {
+    "api": "stablehlo.reduce_window"
+  },
+  "Remainder": {
+    "api": "stablehlo.remainder"
+  },
+  "ReplicaId": {
+    "api": "stablehlo.replica_id"
+  },
+  "Reshape": {
+    "api": "stablehlo.reshape"
+  },
+  "Reverse": {
+    "api": "stablehlo.reverse"
+  },
+  "Rng": {
+    "api": "stablehlo.rng"
+  },
+  "RngBitGenerator": {
+    "api": "stablehlo.rng_bit_generator"
+  },
+  "RoundNearestAfz": {
+    "api": "stablehlo.round_nearest_afz"
+  },
+  "RoundNearestEven": {
+    "api": "stablehlo.round_nearest_even"
+  },
+  "Rsqrt": {
+    "api": "stablehlo.rsqrt"
+  },
+  "Scatter": {
+    "api": "stablehlo.scatter"
+  },
+  "Select": {
+    "api": "stablehlo.select"
+  },
+  "SelectAndScatter": {
+    "api": "stablehlo.select_and_scatter"
+  },
+  "Send": {
+    "api": "stablehlo.send"
+  },
+  "ShiftLeft": {
+    "api": "stablehlo.shift_left"
+  },
+  "ShiftRightArithmetic": {
+    "api": "stablehlo.shift_right_arithmetic"
+  },
+  "ShiftRightLogical": {
+    "api": "stablehlo.shift_right_logical"
+  },
+  "Sign": {
+    "api": "stablehlo.sign"
+  },
+  "Sine": {
+    "api": "stablehlo.sine"
+  },
+  "Slice": {
+    "api": "stablehlo.slice"
+  },
+  "Sort": {
+    "api": "stablehlo.sort"
+  },
+  "Sqrt": {
+    "api": "stablehlo.sqrt"
+  },
+  "Sub": {
+    "api": "stablehlo.subtract"
+  },
+  "Tan": {
+    "api": "stablehlo.tan"
+  },
+  "Tanh": {
+    "api": "stablehlo.tanh"
+  },
+  "Transpose": {
+    "api": "stablehlo.transpose"
+  },
+  "TriangularSolve": {
+    "api": "stablehlo.triangular_solve"
+  },
+  "Tuple": {
+    "api": "stablehlo.tuple"
+  },
+  "UniformDequantize": {
+    "api": "stablehlo.uniform_dequantize"
+  },
+  "UniformQuantize": {
+    "api": "stablehlo.uniform_quantize"
+  },
+  "While": {
+    "api": "stablehlo.while"
+  },
+  "Xor": {
+    "api": "stablehlo.xor"
+  },
+  "Neg": {
+    "api": "stablehlo.negate"
+  }
+}

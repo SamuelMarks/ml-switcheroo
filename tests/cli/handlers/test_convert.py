@@ -1,10 +1,66 @@
 """Test suite for the Convert module."""
 
 import pytest
+import tempfile
+from unittest import mock
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.cli.handlers.convert import handle_convert, _convert_single_file, _print_batch_summary
 from ml_switcheroo.core.engine import ConversionResult
+
+
+def test_handle_convert_infer_source(monkeypatch):
+  """Tests inferring the source framework from file extension."""
+  with tempfile.TemporaryDirectory() as tmp:
+    in_file = Path(tmp) / "input.mlir"
+    in_file.write_text("module {}")
+    out_file = Path(tmp) / "output.py"
+
+    import ml_switcheroo.cli.handlers.convert
+
+    mock_load = mock.MagicMock(return_value=0)
+    monkeypatch.setattr(ml_switcheroo.cli.handlers.convert, "load_plugins", mock_load)
+
+    # We need to mock the entire execution basically, so just mock process_file
+    with mock.patch("ml_switcheroo.cli.handlers.convert._convert_single_file") as mock_proc:
+      # Also mock RuntimeConfig.load
+      with mock.patch("ml_switcheroo.config.RuntimeConfig.load") as mock_conf:
+        mock_conf.return_value = mock.MagicMock(plugin_paths=None, strict=False, source="mlir", target="jax")
+        handle_convert(
+          in_file,
+          out_file,
+          source=None,
+          target="jax",
+          verify=False,
+          strict=None,
+          intermediate=None,
+          plugin_settings={},
+          json_trace_path=None,
+          enable_sharding=False,
+        )
+        mock_proc.assert_called_once()
+        mock_conf.assert_called_once()
+        assert mock_conf.call_args[1]["source"] == "mlir"
+
+    # Test unknown extension inference failure
+    in_file2 = Path(tmp) / "input.unknown"
+    in_file2.write_text("module {}")
+    with mock.patch("ml_switcheroo.cli.handlers.convert._convert_single_file") as mock_proc:
+      with mock.patch("ml_switcheroo.config.RuntimeConfig.load") as mock_conf:
+        mock_conf.return_value = mock.MagicMock(plugin_paths=None, strict=False, source=None, target="jax")
+        handle_convert(
+          in_file2,
+          out_file,
+          source=None,
+          target="jax",
+          verify=False,
+          strict=None,
+          intermediate=None,
+          plugin_settings={},
+          json_trace_path=None,
+          enable_sharding=False,
+        )
+        assert mock_conf.call_args[1]["source"] is None
 
 
 @pytest.fixture
@@ -24,6 +80,61 @@ def mock_engine():
   """Provides a mock engine for testing."""
   with patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as mock:
     yield mock
+
+
+def test_handle_convert_plugins_and_batch(monkeypatch, tmp_path):
+  """Tests loading external plugins and processing a directory."""
+  in_dir = tmp_path / "src"
+  in_dir.mkdir()
+  (in_dir / "a.py").write_text("import torch")
+  out_dir = tmp_path / "out"
+
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+  import ml_switcheroo.cli.handlers.convert
+
+  mock_load = mock.MagicMock(return_value=1)  # simulating 1 plugin loaded
+  monkeypatch.setattr(ml_switcheroo.cli.handlers.convert, "load_plugins", mock_load)
+
+  with mock.patch("ml_switcheroo.cli.handlers.convert._convert_single_file") as mock_convert:
+    mock_convert.return_value = ConversionResult(success=True, code="source", errors=[])
+
+    with mock.patch("ml_switcheroo.config.RuntimeConfig.load") as mock_conf:
+      mock_conf.return_value = mock.MagicMock(plugin_paths=["/my/plugins"], strict=False, source="torch", target="jax")
+
+      # Test batch directory conversion with a JSON trace path specified
+      handle_convert(
+        in_dir,
+        out_dir,
+        source=None,
+        target="jax",
+        verify=False,
+        strict=None,
+        intermediate=None,
+        plugin_settings={},
+        json_trace_path=Path("trace.json"),
+        enable_sharding=False,
+      )
+
+      mock_load.assert_called_once_with(extra_dirs=["/my/plugins"])
+      mock_convert.assert_called_once()
+      assert mock_convert.call_args[0][0].name == "a.py"
+      assert mock_convert.call_args[0][1].name == "a.py"
+      assert mock_convert.call_args[0][5].name == "a.trace.json"
+
+
+def test_print_batch_summary_warnings():
+  """Tests the batch summary output for warnings and errors."""
+  from ml_switcheroo.cli.handlers.convert import _print_batch_summary
+
+  results = {
+    "file1.py": ConversionResult(success=True, code="code", errors=[]),  # success
+    "file2.py": ConversionResult(success=True, code="code", errors=["Warning!"]),  # warnings
+    "file3.py": ConversionResult(success=False, code="", errors=["Error!"]),  # error
+  }
+  with mock.patch("ml_switcheroo.cli.handlers.convert.console.print") as mock_print:
+    _print_batch_summary(results)
+    # The table is printed, just verify it's called
+    assert mock_print.call_count >= 1
 
 
 def test_handle_convert_input_not_found(mock_config):

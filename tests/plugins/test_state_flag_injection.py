@@ -127,6 +127,27 @@ def test_inject_training_flag_call_default_comma():
   assert len(res.args) == 2
 
 
+def test_inject_training_flag_call_duplicate():
+  """Verifies that flag is not injected if already present."""
+  node = cst.Call(
+    func=cst.Name("model"),
+    args=[cst.Arg(value=cst.Name("x")), cst.Arg(keyword=cst.Name("training"), value=cst.Name("False"))],
+  )
+  ctx = HookContext(semantics=MagicMock(), config=MagicMock())
+  ctx.metadata["state_flag_injection"] = {"model": {"training": cst.Name("True")}}
+  res = inject_training_flag_call(node, ctx)
+  assert len(res.args) == 2
+  assert res.args[1].value.value == "False"
+
+
+def test_capture_eval_state_func_name_none():
+  """Verifies behavior when _get_func_name returns None during capture."""
+  node = cst.Call(func=cst.Attribute(value=cst.Call(func=cst.Name("foo")), attr=cst.Name("eval")))
+  ctx = HookContext(semantics=MagicMock(), config=MagicMock())
+  res = capture_eval_state(node, ctx)
+  assert res is node
+
+
 def test_capture_eval_state_unknown_method():
   """Verifies the behavior of capture eval state unknown method."""
   node = cst.Call(func=cst.Attribute(value=cst.Name("model"), attr=cst.Name("unknown")))

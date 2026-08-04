@@ -35,7 +35,7 @@ def test_emitter_module_trivia():
   assert len(mod.body.operations) == 1
   trivia = mod.body.operations[0].leading_trivia
   assert len(trivia) >= 1
-  assert any((t.content.startswith("// header") for t in trivia))
+  assert any((t.text.startswith("// header") for t in trivia))
 
 
 def test_emitter_import():

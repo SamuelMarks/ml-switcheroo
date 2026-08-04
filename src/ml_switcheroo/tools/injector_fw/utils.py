@@ -85,7 +85,7 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
       node = convert_to_cst_literal(item)
       elements.append(cst.Element(value=node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
 
-    if elements:  # pragma: no cover
+    if elements:
       # Strip trailing comma from last element for cleaner syntax
       last = elements[-1]
       elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
@@ -109,7 +109,7 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
         )
       )
 
-    if elements:  # pragma: no cover
+    if elements:
       last = elements[-1]
       elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 

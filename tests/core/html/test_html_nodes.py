@@ -109,3 +109,45 @@ def test_tag_node_with_children():
   html = tag.emit()
   assert 'div id="main"' in html
   assert "<span>A</span>" in html
+
+
+def test_tag_node_manipulation():
+  """Test TagNode manipulation methods (append, remove, modify attributes)."""
+  tag = TagNode(name="div")
+
+  # Attribute manipulation
+  tag.set_attribute("class", "box")
+  assert tag.get_attribute("class") == "box"
+
+  tag.set_attribute("class", "container")
+  assert tag.get_attribute("class") == "container"
+
+  tag.remove_attribute("class")
+  assert tag.get_attribute("class") is None
+
+  tag.set_attribute("hidden")
+  assert tag.get_attribute("hidden") is None
+  assert len(tag.attributes) == 1
+  assert tag.attributes[0].name == "hidden"
+
+  # Children manipulation
+  child1 = TextNode("first")
+  child2 = TextNode("second")
+
+  tag.append_child(child1)
+  assert len(tag.children) == 1
+  assert tag.children[0] == child1
+
+  tag.append_child(child2)
+  assert len(tag.children) == 2
+
+  tag.remove_child(child1)
+  assert len(tag.children) == 1
+  assert tag.children[0] == child2
+
+  # Remove non-existent
+  try:
+    tag.remove_child(child1)
+    assert False, "Should raise ValueError"
+  except ValueError:
+    pass

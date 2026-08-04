@@ -68,4 +68,4 @@ def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.
     return cst.Call(func=wrapper_func, args=args)
 
   # Return unmodified if no logic matches
-  return node  # pragma: no cover
+  return node

@@ -135,8 +135,8 @@ def test_assign_attribute(analyzer):
 def test_call_on_tensor(analyzer):
   """Verifies the behavior of call on tensor."""
   code = "\nimport torch\nx = torch.randn(1)\ny = x.view()\n"
-  analyzer.semantics.get_definition.side_effect = (
-    lambda n: ("op", {"return_type": "Tensor"}) if "view" in n or "randn" in n else None
+  analyzer.semantics.get_definition.side_effect = lambda n: (
+    ("op", {"return_type": "Tensor"}) if "view" in n or "randn" in n else None
   )
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("y")

@@ -67,6 +67,22 @@ def test_auto_fsdp_wrapper_not_supported():
   assert result.func.value == "Activation"
 
 
+def test_auto_fsdp_wrapper_unknown_api():
+  """Verifies the behavior of auto FSDP wrapper with unknown API."""
+  node = cst.Call(func=cst.Name("Linear"), args=[])
+  op_def = OperationDef(
+    operation="Linear", description="Linear Layer", op_type=OpType.CLASS, sharding_supported=True, variants={}
+  )
+  mock_semantics = MagicMock()
+  mock_semantics.get_operation.return_value = op_def
+  mock_semantics.get_framework_config.return_value = {"plugin_traits": {"sharding_wrapper_api": "unknown.api"}}
+  mock_config = RuntimeConfig(target_framework="torch", source_framework="jax")
+  ctx = HookContext(semantics=mock_semantics, config=mock_config)
+  ctx.current_op_id = "Linear"
+  result = wrap_with_sharding(node, ctx)
+  assert result is node
+
+
 def test_auto_fsdp_wrapper_no_op_id():
   """Verifies the behavior of auto FSDP wrapper no op id."""
   node = cst.Call(func=cst.Name("Unknown"), args=[])

@@ -61,21 +61,39 @@ class SimpleNameScanner(cst.CSTVisitor):
   def visit_Import(self, node: cst.Import) -> None:
     """Flags entry into an ``import ...`` statement.
 
-
     Names appearing here are definitions, not usages.
+
+    Args:
+      node: The CST Import node being visited.
+
     """
     self._in_import = True
 
   def leave_Import(self, node: cst.Import) -> None:
-    """Flags exit from an ``import ...`` statement."""
+    """Flags exit from an ``import ...`` statement.
+
+    Args:
+      node: The CST Import node being left.
+
+    """
     self._in_import = False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """Flags entry into a ``from ... import ...`` statement."""
+    """Flags entry into a ``from ... import ...`` statement.
+
+    Args:
+      node: The CST ImportFrom node being visited.
+
+    """
     self._in_import = True
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """Flags exit from a ``from ... import ...`` statement."""
+    """Flags exit from a ``from ... import ...`` statement.
+
+    Args:
+      node: The CST ImportFrom node being left.
+
+    """
     self._in_import = False
 
   def visit_Name(self, node: cst.Name) -> None:
@@ -94,6 +112,9 @@ class SimpleNameScanner(cst.CSTVisitor):
 
   def should_traverse(self, _node: cst.CSTNode) -> bool:
     """Optimization hook to stop traversal once found.
+
+    Args:
+      _node: The CST node whose children are about to be visited.
 
     Returns:
       bool: False if the target has already been found, effectively
@@ -171,7 +192,12 @@ class UsageScanner(cst.CSTVisitor):
         self._tracked_aliases.add(bound_name)
 
   def leave_Import(self, node: cst.Import) -> None:
-    """Exit import scope."""
+    """Exit import scope.
+
+    Args:
+      node: The import node being left.
+
+    """
     self._in_import = False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
@@ -194,7 +220,7 @@ class UsageScanner(cst.CSTVisitor):
     # Check relevancy
     if module_name == self.source_fw or module_name.startswith(f"{self.source_fw}."):
       for alias in node.names:  # type: ignore
-        if isinstance(alias, cst.ImportAlias):  # pragma: no cover
+        if isinstance(alias, cst.ImportAlias):
           if alias.asname:
             bound_name = alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else ""
           else:
@@ -202,7 +228,12 @@ class UsageScanner(cst.CSTVisitor):
           self._tracked_aliases.add(bound_name)
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """Exit import-from scope."""
+    """Exit import-from scope.
+
+    Args:
+      node: The import-from node being left.
+
+    """
     self._in_import = False
 
   def visit_Name(self, node: cst.Name) -> None:

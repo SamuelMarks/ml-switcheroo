@@ -1,0 +1,8 @@
+description: Auto-generated mapping for SeedGenerator.
+op_type: function
+operation: SeedGenerator
+std_args: []
+variants:
+  keras:
+    api: keras.random.SeedGenerator
+    required_imports: []

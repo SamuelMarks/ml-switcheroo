@@ -1,0 +1,8 @@
+description: Auto-generated mapping for from_tensor_slices.
+op_type: function
+operation: from_tensor_slices
+std_args: []
+variants:
+  tensorflow:
+    api: tf.data.Dataset.from_tensor_slices
+    required_imports: []

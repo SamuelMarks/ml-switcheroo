@@ -61,6 +61,35 @@ def test_ignore_other_methods(rewriter):
   assert "x.other()" in rewrite_code(rewriter, "x.other()")
 
 
+def test_obj_type_not_tensor(rewriter):
+  """Verifies that the method is not rewritten if the receiver is known to not be a tensor."""
+  rewriter.ctx.resolve_type = MagicMock(return_value="Module")
+  node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("size")))
+  res = transform_method_to_property(node, rewriter.ctx)
+  assert res is node
+
+
+def test_missing_target_prop(rewriter):
+  """Verifies that the method is not rewritten if lookup_api fails."""
+  rewriter.ctx.resolve_type = MagicMock(return_value="Tensor")
+  rewriter.ctx.lookup_api = MagicMock(return_value=None)
+  node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("size")))
+  res = transform_method_to_property(node, rewriter.ctx)
+  assert res is node
+
+
+def test_too_many_args(rewriter):
+  """Verifies that the method is not rewritten if it has multiple args."""
+  rewriter.ctx.resolve_type = MagicMock(return_value="Tensor")
+  rewriter.ctx.lookup_api = MagicMock(return_value="shape")
+  node = cst.Call(
+    func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("size")),
+    args=[cst.Arg(cst.Integer("0")), cst.Arg(cst.Integer("1"))],
+  )
+  res = transform_method_to_property(node, rewriter.ctx)
+  assert res is node
+
+
 def test_data_ptr_mapping(rewriter):
   """Verifies the behavior of data ptr mapping."""
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("data_ptr")))

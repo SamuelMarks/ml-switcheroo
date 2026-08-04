@@ -3,7 +3,7 @@
 Formats MLIR CST nodes into standardized MLIR text.
 """
 
-from ml_switcheroo.core.mlir.nodes import MlirNode, ModuleNode, OperationNode
+from ml_switcheroo.core.mlir.cst import MlirNode, ModuleNode, OperationNode
 
 
 class MlirPrinter:

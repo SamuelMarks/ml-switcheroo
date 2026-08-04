@@ -6,11 +6,11 @@ generates robustly formatted textual assembly output.
 
 from typing import List
 
-from ml_switcheroo.core.compiler.frontends.sass.nodes import (
-  Comment,
-  Directive,
-  Instruction,
-  Label,
+from ml_switcheroo.core.compiler.frontends.sass.cst import (
+  SassComment,
+  SassDirective,
+  SassInstruction,
+  SassLabel,
   SassNode,
 )
 
@@ -36,34 +36,76 @@ class SassPrinter:
     return "\n".join(lines) + "\n"
 
   def _visit(self, node: SassNode) -> str:
-    """Dispatches to the correct visitor method."""
-    if isinstance(node, Label):
+    """Dispatches to the correct visitor method based on the node type.
+
+    Args:
+        node: The SASS AST node to visit.
+
+    Returns:
+        str: Formatted SASS assembly text of the node.
+    """
+    if isinstance(node, SassLabel):
       return self.visit_Label(node)
-    elif isinstance(node, Instruction):
+    elif isinstance(node, SassInstruction):
       return self.visit_Instruction(node)
-    elif isinstance(node, Directive):
+    elif isinstance(node, SassDirective):
       return self.visit_Directive(node)
-    elif isinstance(node, Comment):
+    elif isinstance(node, SassComment):
       return self.visit_Comment(node)
     else:
       return self.visit_Fallback(node)
 
-  def visit_Label(self, node: Label) -> str:
-    """Visits a Label node (flush left)."""
+  def visit_Label(self, node: SassLabel) -> str:
+    """Visits a SassLabel node (flush left).
+
+    Args:
+        node: The SassLabel node to visit.
+
+    Returns:
+        str: Formatted SASS label assembly text.
+    """
     return str(node)
 
-  def visit_Instruction(self, node: Instruction) -> str:
-    """Visits an Instruction node (indented)."""
+  def visit_Instruction(self, node: SassInstruction) -> str:
+    """Visits an SassInstruction node (indented).
+
+    Args:
+        node: The SassInstruction node to visit.
+
+    Returns:
+        str: Formatted SASS instruction assembly text with indentation.
+    """
     return f"    {str(node)}"
 
-  def visit_Directive(self, node: Directive) -> str:
-    """Visits a Directive node (indented)."""
+  def visit_Directive(self, node: SassDirective) -> str:
+    """Visits a SassDirective node (indented).
+
+    Args:
+        node: The SassDirective node to visit.
+
+    Returns:
+        str: Formatted SASS directive assembly text with indentation.
+    """
     return f"    {str(node)}"
 
-  def visit_Comment(self, node: Comment) -> str:
-    """Visits a Comment node (indented)."""
+  def visit_Comment(self, node: SassComment) -> str:
+    """Visits a SassComment node (indented).
+
+    Args:
+        node: The SassComment node to visit.
+
+    Returns:
+        str: Formatted SASS comment assembly text with indentation.
+    """
     return f"    {str(node)}"
 
   def visit_Fallback(self, node: SassNode) -> str:
-    """Fallback handler for generic or custom nodes."""
+    """Fallback handler for generic or custom nodes.
+
+    Args:
+        node: The custom or generic SassNode to visit.
+
+    Returns:
+        str: Formatted generic node assembly text with indentation.
+    """
     return f"    {str(node)}"

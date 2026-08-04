@@ -120,6 +120,15 @@ def test_leave_Attribute():
   assert new_tree.body[0].body[0].value.attr.value == "func"
 
 
+def test_leave_Attribute_no_name():
+  """Verifies the behavior when _get_qualified_name returns None."""
+  semantics = MockSemantics({}, {})
+  transformer = MockTransformer(semantics, MockContext())
+  tree = cst.parse_module("a.b.c")
+  new_tree = tree.visit(transformer)
+  assert new_tree.body[0].body[0].value.attr.value == "c"
+
+
 def test_leave_Attribute_macro_exception():
   """Verifies the behavior of leave Attribute macro correctly handling an exception."""
   semantics = MockSemantics(

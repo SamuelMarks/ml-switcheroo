@@ -24,17 +24,24 @@ class RegistryLoader:
 
     Args:
         manager: The parent SemanticsManager instance.
-
     """
     self.mgr = manager
 
   def hydrate(self) -> None:
-    """Main entry point. Scans adapters and plugins."""
+    """Main entry point. Scans adapters and plugins.
+
+    Returns:
+        None
+    """
     self._hydrate_adapters()
     self._hydrate_plugins()
 
   def _hydrate_adapters(self) -> None:
-    """Iterates over registered FrameworkAdapters to extract Traits and Mappings."""
+    """Iterates over registered FrameworkAdapters to extract Traits and Mappings.
+
+    Returns:
+        None
+    """
     for fw_name in available_frameworks():
       adapter = get_adapter(fw_name)
       if not adapter:
@@ -64,7 +71,15 @@ class RegistryLoader:
       self._apply_wiring(fw_name, adapter)
 
   def _load_adapter_traits(self, fw_name: str, adapter: Any) -> None:
-    """Extracts import aliases, supported tiers, and structural traits."""
+    """Extracts import aliases, supported tiers, and structural traits.
+
+    Args:
+        fw_name: The name of the framework.
+        adapter: The active framework adapter instance.
+
+    Returns:
+        None
+    """
     config = self.mgr.framework_configs[fw_name]
 
     if hasattr(adapter, "import_alias") and adapter.import_alias:
@@ -77,7 +92,7 @@ class RegistryLoader:
     if hasattr(adapter, "structural_traits"):
       try:
         traits = adapter.structural_traits
-        if traits:  # pragma: no cover
+        if traits:
           config["traits"] = traits.model_dump(exclude_unset=True)
       except Exception as e:
         print(f"⚠️ Failed to load structural traits for {fw_name}: {e}")
@@ -92,7 +107,14 @@ class RegistryLoader:
       self.mgr.known_magic_args.update(adapter.declared_magic_args)
 
   def _load_adapter_specs(self, adapter: Any) -> None:
-    """Loads abstract operations defined by the adapter."""
+    """Loads abstract operations defined by the adapter.
+
+    Args:
+        adapter: The active framework adapter instance.
+
+    Returns:
+        None
+    """
     if hasattr(adapter, "specifications") and adapter.specifications:
       specs = adapter.specifications
       # Default to Extras unless inferred otherwise
@@ -101,7 +123,7 @@ class RegistryLoader:
 
       for op_key, op_model in specs.items():
         spec_content[op_key] = op_model.model_dump(by_alias=True, exclude_unset=True)
-        if op_key[0].isupper():  # pragma: no cover
+        if op_key[0].isupper():
           tier = SemanticTier.NEURAL
 
       merge_tier_data(
@@ -113,7 +135,15 @@ class RegistryLoader:
       )
 
   def _load_adapter_definitions(self, fw_name: str, adapter: Any) -> None:
-    """Loads concrete implementations defined by the adapter."""
+    """Loads concrete implementations defined by the adapter.
+
+    Args:
+        fw_name: The name of the framework.
+        adapter: The active framework adapter instance.
+
+    Returns:
+        None
+    """
     if hasattr(adapter, "definitions") and adapter.definitions:
       defs = adapter.definitions
       mappings = {k: v.model_dump(exclude_unset=True) for k, v in defs.items()}
@@ -137,7 +167,15 @@ class RegistryLoader:
       )
 
   def _load_import_namespaces(self, fw_name: str, adapter: Any) -> None:
-    """Registers framework namespaces for import abstraction."""
+    """Registers framework namespaces for import abstraction.
+
+    Args:
+        fw_name: The name of the framework.
+        adapter: The active framework adapter instance.
+
+    Returns:
+        None
+    """
     if not hasattr(adapter, "import_namespaces") or not adapter.import_namespaces:
       return
 
@@ -146,11 +184,11 @@ class RegistryLoader:
       alias = None
 
       # Only accept structured ImportConfig objects
-      if isinstance(config_obj, ImportConfig):  # pragma: no cover
+      if isinstance(config_obj, ImportConfig):
         tier = config_obj.tier
         alias = config_obj.recommended_alias
 
-      if tier:  # pragma: no cover
+      if tier:
         # 1. Register PROVIDER capabilities
         if fw_name not in self.mgr._providers:
           self.mgr._providers[fw_name] = {}
@@ -174,7 +212,15 @@ class RegistryLoader:
         self.mgr._source_registry[path] = (fw_name, tier)
 
   def _apply_wiring(self, fw_name: str, adapter: Any) -> None:
-    """Executes manual wiring callback on the adapter."""
+    """Executes manual wiring callback on the adapter.
+
+    Args:
+        fw_name: The name of the framework.
+        adapter: The active framework adapter instance.
+
+    Returns:
+        None
+    """
     if hasattr(adapter, "apply_wiring"):
       dummy_snap = {"__framework__": fw_name}
       try:
@@ -191,7 +237,11 @@ class RegistryLoader:
         print(f"⚠️ Failed to apply wiring for {fw_name}: {e}")
 
   def _hydrate_plugins(self) -> None:
-    """Loads definitions from plugins that utilize auto-wire metadata."""
+    """Loads definitions from plugins that utilize auto-wire metadata.
+
+    Returns:
+        None
+    """
     plugin_metadata = hooks.get_all_hook_metadata()
     for _, spec in plugin_metadata.items():
       for op_name, op_details in spec.ops.items():

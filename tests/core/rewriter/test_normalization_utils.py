@@ -266,6 +266,32 @@ def test_normalize_arguments_extra_args():
   assert new_args[1].keyword.value == "extra"
 
 
+def test_normalize_arguments_method_missing_receiver():
+  """Test logic when method's first arg is provided via keyword, preventing receiver injection."""
+  code = "x.add(a=2)"
+  tree = cst.parse_module(code)
+  call_node = tree.body[0].body[0].value
+  op_details = {"std_args": ["a"]}
+  target_impl = {"args": {"a": "a"}}
+  new_args = normalize_arguments(call_node, call_node, op_details, target_impl, "torch", lambda x: False)
+  # 'a' is the first std_arg, provided via keyword, so it hits arg_provided = True (line 192).
+  # The receiver 'x' is not injected.
+  assert len(new_args) == 1
+  assert new_args[0].keyword.value == "a"
+
+
+def test_normalize_arguments_target_kwarg_mapping():
+  """Test that extra kwargs fall back to their original name if not in kwargs_map."""
+  code = "foo(unmapped=42)"
+  tree = cst.parse_module(code)
+  call_node = tree.body[0].body[0].value
+  op_details = {"std_args": []}
+  target_impl = {"kwargs_map": {"mapped": "other"}}
+  new_args = normalize_arguments(call_node, call_node, op_details, target_impl, "torch", lambda x: False)
+  assert len(new_args) == 1
+  assert new_args[0].keyword.value == "unmapped"
+
+
 def test_normalize_arguments_default_exception():
   """Verifies the behavior of normalize arguments default correctly handling an exception."""
   code = "foo()"

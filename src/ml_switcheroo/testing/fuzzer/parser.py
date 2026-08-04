@@ -63,7 +63,7 @@ def get_fallback_base_value(parsed: ParsedType, base_shape: Tuple[int, ...]) -> 
     if parsed.name in ["str", "string"]:
       return ""
     if "dtype" in parsed.name.lower():
-      return np.float32  # pragma: no cover
+      return np.float32
 
   if isinstance(parsed, TensorType):
     return np.zeros(base_shape, dtype=np.float32)
@@ -130,7 +130,7 @@ def generate_from_hint(
       type_hint = PrimitiveType(name="int")
     elif isinstance(default_val, float):
       type_hint = PrimitiveType(name="float")
-    elif isinstance(default_val, list):  # pragma: no cover
+    elif isinstance(default_val, list):
       if default_val and isinstance(default_val[0], int):
         type_hint = ListType(inner=PrimitiveType(name="int"))
       else:

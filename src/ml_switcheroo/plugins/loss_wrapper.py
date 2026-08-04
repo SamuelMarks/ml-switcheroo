@@ -25,7 +25,14 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Helper to create CST attribute chain."""
+  """Helper to create CST attribute chain.
+
+  Args:
+      name_str: A dot-separated string representing the name (e.g., "jnp.mean").
+
+  Returns:
+      A LibCST BaseExpression representing the parsed dotted attribute chain.
+  """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -62,7 +69,7 @@ def transform_loss_reduction(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
       if isinstance(arg.value, cst.SimpleString):
         val = arg.value.value.strip("'").strip('"')
         reduction_mode = val
-      elif isinstance(arg.value, cst.Name):  # pragma: no cover
+      elif isinstance(arg.value, cst.Name):
         # If variable passed (e.g. reduction=my_mode), we can't statically wrap.
         # We assume standard string literals for now.
         pass
@@ -110,7 +117,7 @@ def transform_loss_reduction(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     # Dynamic Lookup: Get the API for "Sum"
     wrapper_api = ctx.lookup_api("Sum")
 
-  elif reduction_mode == "none":  # pragma: no cover
+  elif reduction_mode == "none":
     # No wrapper needed
     return inner_call
 

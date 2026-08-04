@@ -200,7 +200,7 @@ class PluginGenerator:
       stmts = []
       if isinstance(preserved_body, cst.IndentedBlock):
         stmts = list(preserved_body.body)
-      elif isinstance(preserved_body, cst.SimpleStatementSuite):  # pragma: no cover
+      elif isinstance(preserved_body, cst.SimpleStatementSuite):
         stmts = [cst.SimpleStatementLine(body=list(preserved_body.body))]
 
       # Strip existing docstring

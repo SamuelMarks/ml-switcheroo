@@ -11,7 +11,8 @@ from ml_switcheroo.core.compiler.backends.cpp.cst import (
   FunctionDefinition,
   FunctionArgument,
   TypeIdentifier,
-  RawStatement,
+  PyBindDef,
+  PyBindModule,
   CppNode,
 )
 
@@ -31,12 +32,12 @@ class TorchCppExtensionGenerator:
       IncludeDirective(path="vector", system=True),
     ]
 
-  def generate_forward_function(self, args: List[Dict[str, str]], body_statements: List[str]) -> FunctionDefinition:
+  def generate_forward_function(self, args: List[Dict[str, str]], body_nodes: List[CppNode]) -> FunctionDefinition:
     """Generates the main forward pass function.
 
     Args:
         args: List of dictionaries with 'name' and 'type' keys.
-        body_statements: List of raw C++ statement strings.
+        body_nodes: List of CppNode statements.
 
     Returns:
         FunctionDefinition: The constructed function.
@@ -46,25 +47,19 @@ class TorchCppExtensionGenerator:
     # For torch wrappers, we typically return a tensor or vector of tensors
     ret_type = TypeIdentifier(name="torch::Tensor")
 
-    body_nodes: List[CppNode] = [RawStatement(code=stmt) for stmt in body_statements]
-
     return FunctionDefinition(return_type=ret_type, name="forward", arguments=cpp_args, body=body_nodes)
 
-  def generate_pybind_module(self, func_name: str) -> RawStatement:
+  def generate_pybind_module(self, func_name: str) -> PyBindModule:
     """Generates the PYBIND11_MODULE block binding the C++ function to Python.
 
     Args:
         func_name: The name of the C++ function to bind.
 
     Returns:
-        RawStatement: The pybind macro block.
+        PyBindModule: The pybind module definition node.
     """
-    code = (
-      f"PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {{\n"
-      f'    m.def("forward", &{func_name}, "{self.module_name} forward");\n'
-      f"}}"
-    )
-    return RawStatement(code=code)
+    d = PyBindDef(name="forward", function_ref=func_name, docstring=f"{self.module_name} forward")
+    return PyBindModule(name="TORCH_EXTENSION_NAME", module_var="m", defs=[d])
 
   def build_module(self, forward_func: FunctionDefinition) -> CppModule:
     """Assembles the full C++ module.

@@ -30,7 +30,11 @@ class GraphExtractor(cst.CSTVisitor):
   """
 
   def __init__(self) -> None:
-    """Initialize the extractor state."""
+    """Initialize the extractor state.
+
+    Sets up the internal state including the target logical graph, the layer
+    registry, and tracking of variable provenance.
+    """
     self.graph = LogicalGraph()
 
     # State Tracking
@@ -42,24 +46,40 @@ class GraphExtractor(cst.CSTVisitor):
     self._in_forward = False
 
   def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
-    """Capture the model class name."""
+    """Capture the model class name.
+
+    Args:
+      node: The class definition CST node being visited.
+
+    Returns:
+      True to continue traversing children of the class definition, or None.
+    """
     self.model_name = node.name.value
     return True
 
   def leave_Module(self, original_node: cst.Module) -> None:
     """Finalize graph construction after visiting the whole module.
 
-
     This ensures nodes are populated even if there is no forward pass.
+
+    Args:
+      original_node: The module CST node that was visited.
     """
     self._finalize_graph()
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """Detects entry into lifecycle methods (__init__, forward, etc)."""
+    """Detects entry into lifecycle methods (__init__, forward, etc).
+
+    Args:
+      node: The function definition CST node being visited.
+
+    Returns:
+      True to continue traversing children of the function definition, or None.
+    """
     name = node.name.value
     if name in ["__init__", "setup"]:
       self._in_init = True
-    elif name in ["forward", "__call__", "call"]:  # pragma: no cover
+    elif name in ["forward", "__call__", "call"]:
       self._in_init = False  # Safety reset
       self._in_forward = True
       # Reset provenance for new forward pass analysis
@@ -69,17 +89,28 @@ class GraphExtractor(cst.CSTVisitor):
     return True
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Resets context flags upon exiting methods."""
+    """Resets context flags upon exiting methods.
+
+    Args:
+      node: The function definition CST node that was visited.
+    """
     if self._in_init:
       self._in_init = False
-    elif self._in_forward:  # pragma: no cover
+    elif self._in_forward:
       self._in_forward = False
 
   def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
-    """Handles assignment logic for both layer definition and data flow."""
+    """Handles assignment logic for both layer definition and data flow.
+
+    Args:
+      node: The assignment CST node being visited.
+
+    Returns:
+      True to continue traversing children, or None.
+    """
     if self._in_init:
       self._analyze_layer_def(node)
-    elif self._in_forward:  # pragma: no cover
+    elif self._in_forward:
       self._analyze_data_flow(node)
     return True
 
@@ -87,8 +118,14 @@ class GraphExtractor(cst.CSTVisitor):
     """Handles return statements in forward pass to create Output nodes.
 
     Also handles case where return contains a functional call directly.
+
+    Args:
+      node: The return statement CST node being visited.
+
+    Returns:
+      False to stop traversing children since return is fully handled, or None.
     """
-    if self._in_forward and node.value:  # pragma: no cover
+    if self._in_forward and node.value:
       # 1. Check if returning a direct call (e.g. return self.layer(x))
       if isinstance(node.value, cst.Call):
         # Analyze the call to generate edges, assigning implicit result to 'output'
@@ -96,10 +133,10 @@ class GraphExtractor(cst.CSTVisitor):
         # The _analyze_call_expression logic creates edges to the *layer*.
         # We need to link that layer to Output.
         layer_name = self._resolve_layer_or_func_name(node.value.func)
-        if layer_name:  # pragma: no cover
+        if layer_name:
           # Link layer -> Output
           out_id = "output"
-          if out_id not in self.layer_registry:  # pragma: no cover
+          if out_id not in self.layer_registry:
             self.layer_registry[out_id] = LogicalNode(out_id, "Output", {})
           self.graph.edges.append(LogicalEdge(layer_name, out_id))
         return False
@@ -109,14 +146,18 @@ class GraphExtractor(cst.CSTVisitor):
       if var_name and var_name in self.provenance:
         source_id = self.provenance[var_name]
         out_id = "output"
-        if out_id not in self.layer_registry:  # pragma: no cover
+        if out_id not in self.layer_registry:
           self.layer_registry[out_id] = LogicalNode(out_id, "Output", {})
         self.graph.edges.append(LogicalEdge(source_id, out_id))
 
     return False
 
   def _extract_input_args(self, node: cst.FunctionDef) -> None:
-    """Registers function arguments as input sources."""
+    """Registers function arguments as input sources.
+
+    Args:
+      node: The function definition CST node containing the parameters.
+    """
     # Always register the primary input node with ID "input"
     # This matches the expectation of visualizers and tests.
     input_id = "input"
@@ -130,7 +171,11 @@ class GraphExtractor(cst.CSTVisitor):
       self.provenance[arg_name] = input_id
 
   def _analyze_layer_def(self, node: cst.Assign) -> None:
-    """Parses `self.conv = nn.Conv2d(...)` lines."""
+    """Parses `self.conv = nn.Conv2d(...)` lines.
+
+    Args:
+      node: The assignment CST node to analyze.
+    """
     # 1. Identify Target (must be self.something)
     target = node.targets[0].target
     if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):  # type: ignore
@@ -161,7 +206,11 @@ class GraphExtractor(cst.CSTVisitor):
     self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, metadata)
 
   def _analyze_data_flow(self, node: cst.Assign) -> None:
-    """Parses `x = self.layer(x)` assignments."""
+    """Parses `x = self.layer(x)` assignments.
+
+    Args:
+      node: The assignment CST node to analyze.
+    """
     # Support simple assignment: target = call
     if not isinstance(node.value, cst.Call):
       return
@@ -170,13 +219,21 @@ class GraphExtractor(cst.CSTVisitor):
     targets = []
     for target in node.targets:
       out_var_name = self._get_var_name(target.target)
-      if out_var_name:  # pragma: no cover
+      if out_var_name:
         targets.append(out_var_name)
 
     self._analyze_call_expression(node.value, targets)
 
   def _resolve_layer_or_func_name(self, func_node: cst.BaseExpression) -> Optional[str]:
-    """Resolves `self.layer` -> `layer` or `F.relu` -> `func_relu`."""
+    """Resolves `self.layer` -> `layer` or `F.relu` -> `func_relu`.
+
+    Args:
+      func_node: The CST expression representing the called function/layer.
+
+    Returns:
+      The resolved layer name or functional node identifier if found,
+      otherwise None.
+    """
     # 1. Method call on self (Registered Layer)
     if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):  # type: ignore
       return func_node.attr.value  # type: ignore
@@ -188,14 +245,19 @@ class GraphExtractor(cst.CSTVisitor):
       # Create ad-hoc functional node
       layer_name = f"func_{func_name.split('.')[-1].lower()}"
       # Register if new
-      if layer_name not in self.layer_registry:  # pragma: no cover
+      if layer_name not in self.layer_registry:
         self.layer_registry[layer_name] = LogicalNode(layer_name, func_name, {})
       return layer_name
 
     return None
 
   def _analyze_call_expression(self, call: cst.Call, output_vars: List[str]) -> None:
-    """Common logic to trace edges from a Call usage."""
+    """Common logic to trace edges from a Call usage.
+
+    Args:
+      call: The call expression CST node to analyze.
+      output_vars: The list of variable names assigned the result of this call.
+    """
     layer_name = self._resolve_layer_or_func_name(call.func)
 
     if not layer_name:
@@ -213,7 +275,14 @@ class GraphExtractor(cst.CSTVisitor):
       self.provenance[out_var] = layer_name
 
   def _get_var_name(self, node: cst.BaseExpression) -> Optional[str]:
-    """Extracts variable name if simple identifier."""
+    """Extracts variable name if simple identifier.
+
+    Args:
+      node: The CST expression to extract a variable name from.
+
+    Returns:
+      The variable name if the node is a simple identifier, otherwise None.
+    """
     if isinstance(node, cst.Name):
       return node.value
     return None
@@ -222,10 +291,16 @@ class GraphExtractor(cst.CSTVisitor):
     """Extracts source string representation of an AST Node.
 
     Handles complex expressions by capturing exact source via utility.
+
+    Args:
+      node: The CST node to convert to a string.
+
+    Returns:
+      The string representation of the source code for the node.
     """
     return capture_node_source(node)
 
   def _finalize_graph(self) -> None:
     """Populates the graph nodes list from the registry."""
-    if self.layer_registry:  # pragma: no cover
+    if self.layer_registry:
       self.graph.nodes = list(self.layer_registry.values())

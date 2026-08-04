@@ -30,7 +30,7 @@ def evaluate_dispatch_rules(rewriter: Any, node: cst.Call, rules: List[Any], det
       std_args_order.append(item[0])
     elif isinstance(item, dict):
       name = item.get("name")
-      if name:  # pragma: no cover
+      if name:
         std_args_order.append(name)
     else:
       std_args_order.append(item)
@@ -83,9 +83,9 @@ def _extract_argument_node(
     if is_method and std_order and std_order[0] == "x":
       call_idx = idx - 1
 
-    if call_idx >= 0 and call_idx < len(node.args):  # pragma: no cover
+    if call_idx >= 0 and call_idx < len(node.args):
       arg = node.args[call_idx]
-      if not arg.keyword:  # pragma: no cover
+      if not arg.keyword:
         return arg.value
   except ValueError:
     pass
@@ -115,7 +115,7 @@ def _node_to_literal(node: cst.CSTNode) -> Any:
       return None
   if isinstance(node, cst.SimpleString):
     return node.value.strip("'").strip('"')
-  if isinstance(node, cst.Name):  # pragma: no cover
+  if isinstance(node, cst.Name):
     if node.value == "True":
       return True
     if node.value == "False":

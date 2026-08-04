@@ -40,3 +40,51 @@ def test_rdna_properties():
   examples = adapter.get_tiered_examples()
   assert "tier1_math" in examples
   assert "v_add_f32" in examples["tier1_math"]
+
+
+def test_rdna_missing_coverage():
+  """Verifies the remaining untested methods of RDNA adapter."""
+  adapter = RdnaAdapter()
+
+  # Traits
+  assert adapter.plugin_traits is not None
+
+  # Device & RNG
+  assert adapter.get_device_syntax("gpu") == "; Target Device: gpu"
+  assert adapter.get_device_check_syntax() == "True"
+  assert adapter.get_rng_split_syntax("rng", "key") == ""
+
+  # Serialization
+  assert adapter.get_serialization_imports() == []
+  assert adapter.get_serialization_syntax("save", "file.pt") == ""
+  assert adapter.get_weight_conversion_imports() == []
+  assert adapter.get_weight_load_code("path") == "; Weights loading not supported in RDNA adapter"
+  assert adapter.get_tensor_to_numpy_expr("my_var") == "my_var"
+  assert adapter.get_weight_save_code("state", "path") == "; Weights saving not supported in RDNA adapter"
+
+  # Documentation
+  assert adapter.get_doc_url("my_api") == "https://gpuopen.com/learn/rdna-performance-guide/?q=my_api"
+
+  # Convert
+  assert adapter.convert(123) == "123"
+
+  # Graph parsing
+  code = """
+  // comment
+  v_add_f32 v0, v1, v2
+  s_cbranch_vccnz label
+  v_mac_f32 v3, v4, v5
+  """
+  graph_loop = adapter.parse_rdna_to_graph(code)
+  nodes_loop = list(graph_loop.nodes.values())
+  assert len(nodes_loop) == 2
+  assert nodes_loop[0].op_type == "LoopControl"
+  assert nodes_loop[1].op_type == "Conv2d"
+
+  code_no_loop = """
+  v_fmac_f32 v3, v4, v5
+  """
+  graph_no_loop = adapter.parse_rdna_to_graph(code_no_loop)
+  nodes_no_loop = list(graph_no_loop.nodes.values())
+  assert len(nodes_no_loop) == 1
+  assert nodes_no_loop[0].op_type == "Linear"

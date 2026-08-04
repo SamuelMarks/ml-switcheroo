@@ -66,7 +66,7 @@ class TypeInferencePass(cst.CSTVisitor):
 
     for target in node.targets:
       t = target.target
-      if isinstance(t, cst.Name):  # pragma: no branch
+      if isinstance(t, cst.Name):
         self.env[t.value] = inferred_type
 
   def visit_Return(self, node: cst.Return) -> None:

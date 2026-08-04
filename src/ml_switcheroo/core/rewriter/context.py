@@ -38,7 +38,6 @@ class RewriterContext:
         symbol_table: Pre-computed symbol table for type resolution.
         arg_injector: Callback to inject arguments into the current function scope.
         preamble_injector: Callback to inject code blocks into the current scope.
-
     """
     self.semantics = semantics
     self.config = config
@@ -83,8 +82,16 @@ class RewriterContext:
     self._hydrate_source_aliases()
 
   def _default_arg_injector(self, name: str, annotation: Optional[str]) -> None:
-    """Default callback: Appends to the current signature context."""
-    if self.signature_stack:  # pragma: no cover
+    """Default callback: Appends to the current signature context.
+
+    Args:
+        name: Name of the argument to inject.
+        annotation: Optional type annotation for the argument.
+
+    Returns:
+        None
+    """
+    if self.signature_stack:
       # Avoid duplicates in list
       current_ctx = self.signature_stack[-1]
       existing = {n for n, _ in current_ctx.injected_args}
@@ -92,7 +99,14 @@ class RewriterContext:
         current_ctx.injected_args.append((name, annotation))
 
   def _default_preamble_injector(self, code: str) -> None:
-    """Default callback: Injects to function body or module header."""
+    """Default callback: Injects to function body or module header.
+
+    Args:
+        code: The block of code to inject.
+
+    Returns:
+        None
+    """
     is_import = code.lstrip().startswith("import ") or code.lstrip().startswith("from ")
     if self.signature_stack and not is_import:
       # Inside a function: queue for body injection
@@ -109,16 +123,28 @@ class RewriterContext:
 
   @property
   def source_fw(self) -> str:
-    """Returns effective source framework string."""
+    """Returns effective source framework string.
+
+    Returns:
+        The source framework identifier as a string.
+    """
     return str(self.config.effective_source)
 
   @property
   def target_fw(self) -> str:
-    """Returns effective target framework string."""
+    """Returns effective target framework string.
+
+    Returns:
+        The target framework identifier as a string.
+    """
     return str(self.config.effective_target)
 
   def _hydrate_source_aliases(self) -> None:
-    """Loads default aliases for the source framework from semantics config."""
+    """Loads default aliases for the source framework from semantics config.
+
+    Returns:
+        None
+    """
     try:
       fw_conf = self.semantics.get_framework_config(self.source_fw)
       if not fw_conf:

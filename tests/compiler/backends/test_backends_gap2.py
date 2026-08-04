@@ -35,18 +35,25 @@ def test_rdna_synthesizer_gaps():
 def test_rdna_synthesizer_py_translation():
   """Verifies the behavior of RDNA synthesizer py translation."""
   from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RdnaSynthesizer
-  from ml_switcheroo.core.compiler.frontends.rdna.nodes import Instruction, Label, Immediate, VGPR, SGPR, Memory
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import (
+    RdnaInstruction as Instruction,
+    RdnaLabel as Label,
+    RdnaImmediate as Immediate,
+    RdnaVGPR as VGPR,
+    RdnaSGPR as SGPR,
+    RdnaMemory as Memory,
+  )
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   synth = RdnaSynthesizer(SemanticsManager())
   nodes = [
-    Instruction("v_add_f32", []),
-    Instruction("store_dword", [VGPR(0, 1), Immediate(5, True)]),
-    Instruction("branch", [Label("L1")]),
-    Instruction("v_mov_b32", [VGPR(1, 1), Immediate(3.14, False)]),
-    Instruction("v_mov_b32", [VGPR(2, 1), Immediate(42, False)]),
-    Instruction("s_load", [SGPR(0, 2), Memory(VGPR(3, 1))]),
-    Label("L1"),
+    Instruction(opcode="v_add_f32", operands=[]),
+    Instruction(opcode="store_dword", operands=[VGPR(index=0, count=1), Immediate(value=5, is_hex=True)]),
+    Instruction(opcode="branch", operands=[Label(name="L1")]),
+    Instruction(opcode="v_mov_b32", operands=[VGPR(index=1, count=1), Immediate(value=3.14, is_hex=False)]),
+    Instruction(opcode="v_mov_b32", operands=[VGPR(index=2, count=1), Immediate(value=42, is_hex=False)]),
+    Instruction(opcode="s_load", operands=[SGPR(index=0, count=2), Memory(base=VGPR(index=3, count=1))]),
+    Label(name="L1"),
   ]
   mod = synth.to_python(nodes)
   from ml_switcheroo.core.compiler.backends.sass.backend import SassBackend
@@ -73,7 +80,7 @@ def test_rdna_synthesizer_io():
   )
   nodes = synth.from_graph(g)
   assert len(nodes) > 0
-  from ml_switcheroo.core.compiler.frontends.rdna.nodes import LabelRef
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaLabelRef as LabelRef
 
   res = synth._convert_operand_to_py(LabelRef("[var]"))
   assert res.value == "_var"
@@ -120,7 +127,14 @@ def test_sass_macros_linear():
 def test_sass_synthesizer_gaps():
   """Verifies the behavior of SASS synthesizer gaps."""
   from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator, SassSynthesizer
-  from ml_switcheroo.core.compiler.frontends.sass.nodes import Instruction, Label, Comment, Immediate, Register, Memory
+  from ml_switcheroo.core.compiler.frontends.sass.cst import (
+    SassInstruction as Instruction,
+    SassLabel as Label,
+    SassComment as Comment,
+    SassImmediate as Immediate,
+    SassRegister as Register,
+    SassMemory as Memory,
+  )
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
   alloc = RegisterAllocator()
@@ -151,15 +165,15 @@ def test_sass_synthesizer_gaps():
   assert len(nodes) > 0
   assert "Unmapped Op:" in str(nodes[0])
   nodes = [
-    Instruction("FADD", []),
-    Instruction("FADD", [Register("R1")], predicate="P0"),
-    Comment("test"),
-    Label("L1"),
-    Instruction("STG", [Memory(Register("R1")), Immediate(1)]),
-    Instruction("BRA", [Label("L1")]),
-    Instruction("MOV", [Register("R2"), Immediate(1, True)]),
-    Instruction("FMUL", [Register("R3"), Immediate(3.14, False)]),
-    Instruction("MOV", [Register("R4"), Register("R1")]),
+    Instruction(opcode="FADD", operands=[]),
+    Instruction(opcode="FADD", operands=[Register(name="R1")], predicate="P0"),
+    Comment(text="test"),
+    Label(name="L1"),
+    Instruction(opcode="STG", operands=[Memory(base=Register(name="R1")), Immediate(value=1)]),
+    Instruction(opcode="BRA", operands=[Label(name="L1")]),
+    Instruction(opcode="MOV", operands=[Register(name="R2"), Immediate(value=1, is_hex=True)]),
+    Instruction(opcode="FMUL", operands=[Register(name="R3"), Immediate(value=3.14, is_hex=False)]),
+    Instruction(opcode="MOV", operands=[Register(name="R4"), Register(name="R1")]),
   ]
   mod = synth.to_python(nodes)
   from ml_switcheroo.core.compiler.backends.sass.backend import SassBackend

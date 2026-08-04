@@ -88,8 +88,8 @@ class KnowledgeBaseLoader:
               else:
                 content = yaml_content
           else:
-            with open(fpath, "r", encoding="utf-8") as f:  # pragma: no cover
-              content = json.load(f)  # pragma: no cover
+            with open(fpath, "r", encoding="utf-8") as f:
+              content = json.load(f)
           tier = infer_tier_from_priority(priority)
           self._load_tier_content(content, tier)
         except Exception as e:

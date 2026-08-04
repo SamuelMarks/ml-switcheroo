@@ -17,7 +17,7 @@ files = ["requirements.txt"]
 
 [tool.hatch.metadata.hooks.requirements_txt.optional-dependencies]
 test = ["test-requirements.txt"]
-docs = ["docs/requirements.txt"]
+docs = ["docs/docs-requirements.txt"]
 
 [project.scripts]
 ml_switcheroo = "ml_switcheroo.cli.__main__:main"

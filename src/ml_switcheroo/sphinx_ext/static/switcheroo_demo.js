@@ -159,7 +159,7 @@ async function initEngine() {
 
     try {
         // 1. Load Pyodide
-        if (!window.loadPyodide) await loadScript("https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js");
+        if (!window.loadPyodide) await loadScript("https://cdn.jsdelivr.net/pyodide/v314.0.3/full/pyodide.js");
         if (!pyodide) pyodide = await loadPyodide();
 
         // 2. Load TikZJax (Lazy with Smart Path Resolution)
@@ -202,7 +202,17 @@ importlib.util.find_spec("ml_switcheroo") is not None
                 const reqRes = await fetch("_static/requirements.txt");
                 if (reqRes.ok) {
                     const reqText = await reqRes.text();
-                    const reqs = reqText.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+                    const reqs = reqText.split('\n')
+                        .map(l => l.trim())
+                        .filter(l => l && !l.startsWith('#'))
+                        .map(l => {
+                            if (l.includes(' @ ') && !l.split(' @ ')[1].startsWith('http')) {
+                                const parts = l.split(' @ ');
+                                const url = new URL(`_static/${parts[1]}`, window.location.href).href;
+                                return `${parts[0]} @ ${url}`;
+                            }
+                            return l;
+                        });
                     await micropip.install("numpy");
                     if (reqs.length > 0) await micropip.install(reqs);
                 } else {
@@ -316,10 +326,37 @@ function initFrameworkListeners() {
     const handler = (type) => {
         const sel = document.getElementById(`select-${type}`);
         const region = document.getElementById(`${type}-flavour-region`);
+        const flavourSel = document.getElementById(`${type}-flavour`);
 
-        if (region) {
-             const hasFlavours = ['jax', 'flax'].includes(sel.value);
-             region.style.display = hasFlavours ? 'inline-block' : 'none';
+        if (region && flavourSel) {
+            const rootValue = sel.value;
+            let hasVisibleFlavours = false;
+            let firstVisibleFlavour = null;
+
+            // Show only options that belong to the selected framework
+            for (let i = 0; i < flavourSel.options.length; i++) {
+                const opt = flavourSel.options[i];
+                if (opt.getAttribute('data-parent') === rootValue) {
+                    opt.style.display = '';
+                    hasVisibleFlavours = true;
+                    if (!firstVisibleFlavour) firstVisibleFlavour = opt;
+                } else if (opt.getAttribute('data-parent')) { // Don't hide the "No Flavours" if it exists without data-parent
+                    opt.style.display = 'none';
+                }
+            }
+
+            if (hasVisibleFlavours) {
+                region.style.display = 'inline-block';
+                flavourSel.style.display = 'inline-block';
+
+                // If current selected option is hidden, select the first visible one
+                if (flavourSel.options[flavourSel.selectedIndex].style.display === 'none') {
+                     flavourSel.value = firstVisibleFlavour.value;
+                }
+            } else {
+                region.style.display = 'none';
+                flavourSel.style.display = 'none';
+            }
         }
         updateRenderTabVisibility();
     };
@@ -392,17 +429,24 @@ function setSelectValue(el, val) {
 function swapContext() {
     const s = document.getElementById("select-src");
     const t = document.getElementById("select-tgt");
+
+    // Store current flavour values before swapping root frameworks
+    const sf = document.getElementById("src-flavour");
+    const tf = document.getElementById("tgt-flavour");
+    const sfValue = sf ? sf.value : null;
+    const tfValue = tf ? tf.value : null;
+
+    // Swap root frameworks
     [s.value, t.value] = [t.value, s.value];
 
+    // Trigger change events which will update the visible flavour options
     s.dispatchEvent(new Event("change"));
     t.dispatchEvent(new Event("change"));
 
-    const sf = document.getElementById("src-flavour");
-    const tf = document.getElementById("tgt-flavour");
+    // Now restore the swapped flavour values if applicable
     if (sf && tf) {
-        const temp = sf.value;
-        sf.value = tf.value;
-        tf.value = temp;
+        sf.value = tfValue;
+        tf.value = sfValue;
         sf.dispatchEvent(new Event("change"));
         tf.dispatchEvent(new Event("change"));
     }
@@ -646,143 +690,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("btn-ast-next")?.addEventListener("click", (e) => {
     });
-});
-
-// --- Material 3 Stepper Logic ---
-function switchStep(stepId) {
-    // Hide all contents
-    document.querySelectorAll('.m3-step-content').forEach(el => {
-        el.style.display = 'none';
-        el.classList.remove('active');
-    });
-
-    // Update navigation styles
-    document.querySelectorAll('.m3-step').forEach(el => {
-        el.classList.remove('active');
-
-        // Mark as completed if it's before the current step
-        const currentStepNum = parseInt(stepId.replace('step-', ''));
-        const thisStepNum = parseInt(el.getAttribute('data-target').replace('step-', ''));
-
-        if (thisStepNum < currentStepNum) {
-            el.classList.add('completed');
-        } else {
-            el.classList.remove('completed');
-        }
-    });
-
-    // Show current content
-    const targetEl = document.getElementById(stepId);
-    if (targetEl) {
-        targetEl.style.display = 'block';
-        targetEl.classList.add('active');
-    }
-
-    // Activate nav item
-    const navEl = document.querySelector(`.m3-step[data-target="${stepId}"]`);
-    if (navEl) {
-        navEl.classList.add('active');
-    }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    // Nav Click
-    document.querySelectorAll('.m3-step').forEach(el => {
-        el.addEventListener('click', () => {
-            switchStep(el.getAttribute('data-target'));
-        });
-    });
-
-    // Step 0 -> Step 1
-    const btnNextStep1 = document.getElementById('btn-next-step1');
-    if (btnNextStep1) {
-        btnNextStep1.addEventListener('click', () => {
-            // Copy right hand side of Step 0 to left hand side of Step 1
-            const tgtCode = window.tgtEditor ? window.tgtEditor.getValue() : document.getElementById('code-target').value;
-            const step1Src = document.getElementById('code-step1-source');
-            if (step1Src) {
-                step1Src.value = tgtCode || "# Run translation in Step 0 first to see output here.";
-            }
-
-            // Mock ONNX generation
-            const step1Tgt = document.getElementById('code-step1-target');
-            if (step1Tgt) {
-                step1Tgt.value = "ir_version: 8\nproducer_name: \"ml-switcheroo-onnx\"\ngraph {\n  node {\n    input: \"x\"\n    output: \"y\"\n    op_type: \"Abs\"\n  }\n  name: \"main_graph\"\n  input {\n    name: \"x\"\n    type {\n      tensor_type {\n        elem_type: 1\n        shape {\n          dim {\n            dim_value: 1\n          }\n        }\n      }\n    }\n  }\n  output {\n    name: \"y\"\n    type {\n      tensor_type {\n        elem_type: 1\n        shape {\n          dim {\n            dim_value: 1\n          }\n        }\n      }\n    }\n  }\n}";
-            }
-
-            switchStep('step-1');
-        });
-    }
-
-    // Step 1 -> Step 2
-    const btnNextStep2 = document.getElementById('btn-next-step2');
-    if (btnNextStep2) {
-        btnNextStep2.addEventListener('click', () => {
-            switchStep('step-2');
-
-            // Simulate Compilation Log
-            const logEl = document.getElementById('compile-log');
-            if (logEl) {
-                logEl.innerHTML = "[INFO] Starting ONNX transpilation...\n";
-                let step = 0;
-                const messages = [
-                    "[INFO] Parsing ONNX graph 'main_graph'...",
-                    "[INFO] Validating graph topology...",
-                    "[INFO] Performing Liveness Analysis...",
-                    "[INFO] Allocating static memory arena (Size: 1.2 MB)...",
-                    "[INFO] Generating C++23 Forward Pass...",
-                    "[INFO] Generating C++23 Backward Pass (Autograd)...",
-                    "[INFO] Compiling C++ to WebAssembly via Emscripten...",
-                    "[INFO] Optimizing WASM binary (SIMD enabled)...",
-                    "[SUCCESS] WASM compilation complete! Binary size: 45KB."
-                ];
-
-                const interval = setInterval(() => {
-                    if (step < messages.length) {
-                        logEl.innerHTML += messages[step] + "\n";
-                        logEl.scrollTop = logEl.scrollHeight;
-                        step++;
-                    } else {
-                        clearInterval(interval);
-                    }
-                }, 400);
-            }
-        });
-    }
-
-    // Step 2 -> Step 3
-    const btnNextStep3 = document.getElementById('btn-next-step3');
-    if (btnNextStep3) {
-        btnNextStep3.addEventListener('click', () => {
-            switchStep('step-3');
-
-            // Update Live UI based on selection
-            const execType = document.getElementById('select-execution').value;
-            const modality = document.getElementById('select-modality').value;
-
-            const liveUi = document.getElementById('live-system-ui');
-            if (liveUi) {
-                if (execType === 'download') {
-                    liveUi.innerHTML = `
-                        <div style="font-size: 48px; margin-bottom: 15px;">💾</div>
-                        <h3 style="margin: 0 0 10px 0;">Ready for Download</h3>
-                        <p style="color: #666; margin: 0;">Your ${modality} model is compiled and ready to be served on your PC/Servers.</p>
-                        <div style="margin-top: 20px;">
-                            <button class="md-btn md-btn-accent">Download WASM Bundle (.zip)</button>
-                        </div>
-                    `;
-                } else {
-                    liveUi.innerHTML = `
-                        <div style="font-size: 48px; margin-bottom: 15px;">🚀</div>
-                        <h3 style="margin: 0 0 10px 0;">Model Ready</h3>
-                        <p style="color: #666; margin: 0;">Training and serving locally in your browser via WebAssembly (${modality} modality).</p>
-                        <div style="margin-top: 20px; display:flex; gap: 10px;">
-                            <button class="md-btn" style="background: white; border: 1px solid #ccc; color: #333;">Interact with Model</button>
-                            <button class="md-btn md-btn-accent">Visualize Metrics</button>
-                        </div>
-                    `;
-                }
-            }
-        });
-    }
 });

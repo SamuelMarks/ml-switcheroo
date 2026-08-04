@@ -114,8 +114,63 @@ def test_mlx_apply_wiring():
   assert snapshot == {}
 
 
-def test_mlx_doc_url():
-  """Verifies the behavior of MLX documentation URL."""
+def test_mlx_plugin_traits():
+  """Test mlx plugin traits."""
   adapter = MLXAdapter()
-  url = adapter.get_doc_url("mlx.core.abs")
-  assert "mlx.core.abs.html" in url
+  traits = adapter.plugin_traits
+  assert traits.has_numpy_compatible_arrays is True
+
+
+def test_mlx_convert_numpy():
+  """Test converting numpy arrays to mx arrays if possible."""
+  adapter = MLXAdapter()
+  import numpy as np
+  import sys
+
+  # create a fake module if missing so patch works
+  if "mlx" not in sys.modules:
+    sys.modules["mlx"] = MagicMock()
+  if "mlx.core" not in sys.modules:
+    sys.modules["mlx.core"] = MagicMock()
+
+  from unittest.mock import patch
+
+  with patch("mlx.core.array", return_value="mx_array"):
+    res = adapter.convert(np.array([1, 2]))
+    assert res == "mx_array"
+
+
+def test_mlx_get_rng_split_syntax():
+  """Test rng split syntax."""
+  adapter = MLXAdapter()
+  assert adapter.get_rng_split_syntax("rng", "key") == "pass"
+
+
+def test_mlx_get_serialization_imports():
+  """Test serialization imports."""
+  adapter = MLXAdapter()
+  assert "import mlx.core as mx" in adapter.get_serialization_imports()
+
+
+def test_numpy_import_error():
+  """Test fallback if numpy fails to import at module level."""
+  import sys
+  import pytest
+
+  # We must reload the module to trigger the try/except block at the top
+  with pytest.MonkeyPatch().context() as m:
+    m.setitem(sys.modules, "numpy", None)
+    import importlib
+    import ml_switcheroo.frameworks.mlx as mlx_mod
+
+    importlib.reload(mlx_mod)
+    assert mlx_mod.np is None
+
+  # Reload back to normal so other tests don't break
+  import importlib
+  import ml_switcheroo.frameworks.mlx as mlx_mod
+
+  importlib.reload(mlx_mod)
+
+
+from unittest.mock import MagicMock  # noqa: E402

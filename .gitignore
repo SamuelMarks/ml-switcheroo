@@ -81,7 +81,7 @@ coverage.xml
 # Un-ignore intentionally tracked files
 !requirements.txt
 !test-requirements.txt
-!docs/requirements.txt
+!docs/docs-requirements.txt
 !tests/integration/__snapshots__/*.txt
 !src/ml_switcheroo/utils/doc_*.py
 

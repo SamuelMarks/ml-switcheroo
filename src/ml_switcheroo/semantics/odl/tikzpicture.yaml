@@ -1,0 +1,8 @@
+description: Auto-generated mapping for tikzpicture.
+op_type: function
+operation: tikzpicture
+std_args: []
+variants:
+  tikz:
+    api: tikz.tikzpicture
+    required_imports: []

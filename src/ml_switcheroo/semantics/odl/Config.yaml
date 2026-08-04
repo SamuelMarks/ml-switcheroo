@@ -1,0 +1,6 @@
+description: Definition for Config
+operation: Config
+std_args: []
+variants:
+  paxml:
+    api: praxis.pax_fiddle.Config

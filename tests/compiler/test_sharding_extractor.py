@@ -102,3 +102,101 @@ def test_sharding_extraction_pass_no_partition_spec():
   pass_ = ShardingExtractionPass()
   extracted_graph = pass_.apply(graph)
   assert "func_sharding" in {n.id for n in extracted_graph.nodes}
+
+
+def test_sharding_extractor_no_source():
+  """Verifies the behavior when source node is not found."""
+  graph = LogicalGraph(
+    nodes=[LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data')"})],
+    edges=[],
+  )
+  pass_ = ShardingExtractionPass()
+  extracted = pass_.apply(graph)
+  # should not remove anything since source not found
+  assert len(extracted.nodes) == 1
+
+
+def test_sharding_extractor_invalid_ast():
+  """Verifies the behavior when AST parsing fails."""
+  graph = LogicalGraph(
+    nodes=[
+      LogicalNode(id="source", kind="Linear"),
+      LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec("}),
+    ],
+    edges=[LogicalEdge("source", "sharding1")],
+  )
+  pass_ = ShardingExtractionPass()
+  extracted = pass_.apply(graph)
+  assert len(extracted.nodes) == 2
+
+
+def test_sharding_extractor_no_partition_spec():
+  """Verifies the behavior when PartitionSpec is not in code."""
+  graph = LogicalGraph(
+    nodes=[
+      LogicalNode(id="source", kind="Linear"),
+      LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "something_else()"}),
+    ],
+    edges=[LogicalEdge("source", "sharding1")],
+  )
+  pass_ = ShardingExtractionPass()
+  extracted = pass_.apply(graph)
+  assert len(extracted.nodes) == 2
+
+
+def test_sharding_extractor_tuple_arg():
+  """Verifies the behavior when PartitionSpec has tuple."""
+  graph = LogicalGraph(
+    nodes=[
+      LogicalNode(id="source", kind="Linear"),
+      LogicalNode(
+        id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data', ('model', 'tensor'))"}
+      ),
+    ],
+    edges=[LogicalEdge("source", "sharding1")],
+  )
+  pass_ = ShardingExtractionPass()
+  extracted = pass_.apply(graph)
+  assert len(extracted.nodes) == 1
+  assert extracted.nodes[0].sharding.axes == ("data", ("model", "tensor"))
+
+
+def test_sharding_extractor_none_arg():
+  """Verifies the behavior when PartitionSpec has None."""
+  graph = LogicalGraph(
+    nodes=[
+      LogicalNode(id="source", kind="Linear"),
+      LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec(None)"}),
+    ],
+    edges=[LogicalEdge("source", "sharding1")],
+  )
+  pass_ = ShardingExtractionPass()
+  extracted = pass_.apply(graph)
+  assert len(extracted.nodes) == 1
+  assert extracted.nodes[0].sharding.axes == (None,)
+
+
+def test_sharding_extractor_unsupported_arg():
+  """Verifies the behavior when PartitionSpec has unsupported arg type."""
+  graph = LogicalGraph(
+    nodes=[
+      LogicalNode(id="source", kind="Linear"),
+      LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec(unsupported_var)"}),
+    ],
+    edges=[LogicalEdge("source", "sharding1")],
+  )
+  pass_ = ShardingExtractionPass()
+  extracted = pass_.apply(graph)
+  assert len(extracted.nodes) == 1
+  assert extracted.nodes[0].sharding.axes == (None,)
+
+
+def test_sharding_extractor_source_node_not_found():
+  """Verifies the behavior when source node id is found but node object not in graph."""
+  graph = LogicalGraph(
+    nodes=[LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data')"})],
+    edges=[LogicalEdge("missing_source", "sharding1")],
+  )
+  pass_ = ShardingExtractionPass()
+  extracted = pass_.apply(graph)
+  assert len(extracted.nodes) == 1

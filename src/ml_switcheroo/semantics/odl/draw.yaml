@@ -1,0 +1,8 @@
+description: Auto-generated mapping for draw.
+op_type: function
+operation: draw
+std_args: []
+variants:
+  tikz:
+    api: tikz.draw
+    required_imports: []

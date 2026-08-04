@@ -17,9 +17,9 @@ import logging
 from typing import List, Tuple, Dict, Optional
 
 try:
-  import torch  # pragma: no cover
-  import torch.nn as nn  # pragma: no cover
-  import torch.optim as optim  # pragma: no cover
+  import torch
+  import torch.nn as nn
+  import torch.optim as optim
 except Exception:
   torch: Any = None  # type: ignore
   nn = None  # type: ignore
@@ -65,7 +65,7 @@ class TorchAdapter(TorchIOMixin):
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("torch")
       if not self._snapshot_data:
-        logging.warning("PyTorch not installed and no snapshot found. Scanning unavailable.")  # pragma: no cover
+        logging.warning("PyTorch not installed and no snapshot found. Scanning unavailable.")
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -173,7 +173,7 @@ class TorchAdapter(TorchIOMixin):
         Configuration object for plugin logic.
 
     """
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=False,
       requires_explicit_rng=False,
       requires_functional_state=False,
@@ -216,15 +216,15 @@ class TorchAdapter(TorchIOMixin):
     """
     defs = load_definitions("torch")
     if "ReLU" not in defs:
-      defs["ReLU"] = StandardMap(api="torch.nn.ReLU")  # pragma: no cover
+      defs["ReLU"] = StandardMap(api="torch.nn.ReLU")
     if "relu" not in defs:
-      defs["relu"] = StandardMap(api="torch.nn.functional.relu")  # pragma: no cover
+      defs["relu"] = StandardMap(api="torch.nn.functional.relu")
     if "Linear" not in defs:
-      defs["Linear"] = StandardMap(  # pragma: no cover
+      defs["Linear"] = StandardMap(
         api="torch.nn.Linear", args={"in_features": "in_features", "out_features": "out_features"}
       )
     if "Conv2d" not in defs:
-      defs["Conv2d"] = StandardMap(  # pragma: no cover
+      defs["Conv2d"] = StandardMap(
         api="torch.nn.Conv2d",
         args={"in_channels": "in_channels", "out_channels": "out_channels", "kernel_size": "kernel_size"},
       )
@@ -269,7 +269,7 @@ class TorchAdapter(TorchIOMixin):
         'pass' string (No-op).
 
     """
-    return "pass"  # pragma: no cover
+    return "pass"
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
     """Returns the official PyTorch documentation URL.
@@ -301,22 +301,22 @@ class TorchAdapter(TorchIOMixin):
         Converted PyTorch Tensor or original data if conversion fails.
 
     """
-    try:  # pragma: no cover
-      import torch  # pragma: no cover
-      import numpy as np  # pragma: no cover
+    try:
+      import torch
+      import numpy as np
     except Exception:
       return data
-    if isinstance(data, (np.ndarray, np.generic)):  # pragma: no cover
-      try:  # pragma: no cover
-        return torch.from_numpy(data)  # pragma: no cover
-      except Exception:  # pragma: no cover
-        return torch.tensor(data)  # pragma: no cover
-    if isinstance(data, (list, tuple)):  # pragma: no cover
-      try:  # pragma: no cover
-        return torch.tensor(data)  # pragma: no cover
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
-    return data  # pragma: no cover
+    if isinstance(data, (np.ndarray, np.generic)):
+      try:
+        return torch.from_numpy(data)
+      except Exception:
+        return torch.tensor(data)
+    if isinstance(data, (list, tuple)):
+      try:
+        return torch.tensor(data)
+      except Exception:
+        pass
+    return data
 
   def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:
     """Loads definitions from JSON snapshot.
@@ -328,10 +328,10 @@ class TorchAdapter(TorchIOMixin):
         List of hydrated GhostRef objects.
 
     """
-    if not self._snapshot_data:  # pragma: no cover
-      return []  # pragma: no cover
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
-    return [GhostRef.model_validate(item) for item in raw_list]  # pragma: no cover
+    if not self._snapshot_data:
+      return []
+    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    return [GhostRef.model_validate(item) for item in raw_list]
 
   def _collect_live(self, category: SemanticTier) -> List[GhostRef]:
     """Introspects live torch modules.
@@ -343,16 +343,16 @@ class TorchAdapter(TorchIOMixin):
         List of discovered GhostRef objects.
 
     """
-    results: list[Any] = []  # pragma: no cover  # type: ignore
-    if category == SemanticTier.LOSS:  # pragma: no cover
-      results.extend(getattr(self, "_scan_losses", lambda: [])())  # pragma: no cover
-    elif category == SemanticTier.OPTIMIZER:  # pragma: no cover
-      results.extend(getattr(self, "_scan_optimizers", lambda: [])())  # pragma: no cover
-    elif category == SemanticTier.ACTIVATION:  # pragma: no cover
-      results.extend(getattr(self, "_scan_activations", lambda: [])())  # pragma: no cover
-    elif category == SemanticTier.LAYER:  # pragma: no cover
-      results.extend(getattr(self, "_scan_layers", lambda: [])())  # pragma: no cover
-    return results  # pragma: no cover
+    results: list[Any] = []  # type: ignore
+    if category == SemanticTier.LOSS:
+      results.extend(getattr(self, "_scan_losses", lambda: [])())
+    elif category == SemanticTier.OPTIMIZER:
+      results.extend(getattr(self, "_scan_optimizers", lambda: [])())
+    elif category == SemanticTier.ACTIVATION:
+      results.extend(getattr(self, "_scan_activations", lambda: [])())
+    elif category == SemanticTier.LAYER:
+      results.extend(getattr(self, "_scan_layers", lambda: [])())
+    return results
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """Apply manual patches to the standard mappings if necessary.

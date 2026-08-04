@@ -11,6 +11,7 @@ def test_plugins_init_discovery():
   mock_modules = [
     (None, "_protected", False),
     (None, "some_utils", False),
+    (None, "my_helpers", False),
     (None, "valid_plugin", False),
     (None, "broken_plugin", False),
   ]

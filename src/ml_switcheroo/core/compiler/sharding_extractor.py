@@ -15,7 +15,20 @@ class ShardingExtractionPass:
   """Extracts inline sharding constraints and updates node metadata."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to extract sharding constraints."""
+    """Mutates graph to extract sharding constraints.
+
+    This method identifies any nodes representing sharding constraints in the
+    logical graph, extracts their PartitionSpec parameters, associates that
+    sharding information directly with the source nodes feeding into them,
+    and removes the redundant constraint nodes from the graph.
+
+    Args:
+        graph (LogicalGraph): The logical graph to process.
+
+    Returns:
+        LogicalGraph: The updated logical graph with sharding constraints
+        extracted and represented directly on the nodes.
+    """
     sharding_nodes = {n.id: n for n in graph.nodes if "with_sharding_constraint" in n.kind}
 
     if not sharding_nodes:
@@ -69,7 +82,7 @@ class ShardingExtractionPass:
           # Edge from sharding constraint to output is wired from original source
           new_source = removal_map[e.source]
           new_edge = LogicalEdge(source=new_source, target=e.target)
-          if new_edge not in new_edges:  # pragma: no cover
+          if new_edge not in new_edges:
             new_edges.append(new_edge)
         else:
           new_edges.append(e)
@@ -79,14 +92,23 @@ class ShardingExtractionPass:
     return graph
 
   def _parse_partition_spec(self, code: str) -> Optional[PartitionSpec]:
-    """Extracts tuple from PartitionSpec string via AST."""
+    """Extracts tuple from PartitionSpec string via AST.
+
+    Args:
+        code (str): The string representing the partition specification code
+          to parse, e.g., "jax.sharding.PartitionSpec('data', None)".
+
+    Returns:
+        Optional[PartitionSpec]: The parsed PartitionSpec instance if successful,
+        otherwise None.
+    """
     if not ("PartitionSpec" in code or "NamedSharding" in code):
       return None
 
     try:
       # Use AST to parse the arguments safely
       tree = ast.parse(code, mode="eval")
-      if isinstance(tree.body, ast.Call):  # pragma: no cover
+      if isinstance(tree.body, ast.Call):
         axes: list[Any] = []
         for arg in tree.body.args:
           if isinstance(arg, ast.Constant):

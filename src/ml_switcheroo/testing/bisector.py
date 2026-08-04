@@ -90,7 +90,7 @@ class SemanticsBisector:
         if len(arg) > 1:
           hints[name] = str(arg[1])
 
-      elif isinstance(arg, str):  # pragma: no cover
+      elif isinstance(arg, str):
         params.append(arg)
 
     # Iterate steps

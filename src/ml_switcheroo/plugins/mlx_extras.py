@@ -12,7 +12,14 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Helper: Creates a CST Attribute chain from string."""
+  """Helper: Creates a CST Attribute chain from string.
+
+  Args:
+      name_str: A dot-separated string representing the target name (e.g., "mlx.core.compile").
+
+  Returns:
+      A LibCST expression node corresponding to the dotted name structure.
+  """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -32,6 +39,13 @@ def transform_compiler(node: Union[cst.Decorator, cst.Call], ctx: HookContext) -
 
   Decoupling:
       Looks up the `Compile` operation API in semantics (e.g. `mlx.core.compile`).
+
+  Args:
+      node: The CST decorator or call node representing the JIT compilation target.
+      ctx: The hook context containing helper methods for looking up target API mappings.
+
+  Returns:
+      The transformed CST node compatible with the MLX JIT compiler.
   """
   # Resolve Target API dynamically
   target_api = ctx.lookup_api("Compile") or "mlx.core.compile"
@@ -64,6 +78,13 @@ def transform_synchronize(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   MLX is lazy, but `torch.cuda.synchronize()` implies a global device barrier.
   Equivalent `mx.eval()` requires arguments. Since we cannot infer state variables here,
   we replace the call with a print statement to alert the user.
+
+  Args:
+      node: The CST call node representing the CUDA synchronization invocation.
+      ctx: The hook context.
+
+  Returns:
+      A transformed CST node containing a print statement warning about global synchronization.
   """
   message_str = "# [Switcheroo] Global sync requires explicit tensor args in target framework."
 

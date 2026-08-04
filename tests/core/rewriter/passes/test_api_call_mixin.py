@@ -70,6 +70,8 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
       return {"api": "jnp.known"}
     if name == "torch.nodep":
       return {"api": "jnp.nodep", "min_version": "1.0", "max_version": "2.0"}
+    if name == "torch.missing_def":
+      return {"api": "jnp.missing_def"}
     return None
 
   def check_version_constraints(self, min_v, max_v):
@@ -181,3 +183,38 @@ def test_leave_Call_implicit_method():
     tree = cst.parse_module("x.nodep()")
     new_tree = tree.visit(transformer)
     assert new_tree.body[0].body[0].value.func.value == "implicit_ok"
+
+
+def test_leave_Call_missing_def():
+  """Verifies the behavior when definition lookup fails."""
+  transformer = MockTransformer()
+  with pytest.MonkeyPatch().context() as m:
+    import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
+
+    m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
+    tree = cst.parse_module("torch.missing_def()")
+    new_tree = tree.visit(transformer)
+    assert new_tree.body[0].body[0].value.func.attr.value == "missing_def"
+
+
+def test_docstrings_are_not_placeholders():
+  """Verifies that the module, class, and method docstrings are fully documented and not placeholders."""
+  import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
+
+  # Module docstring
+  assert mixin.__doc__ is not None
+  assert "Mixin for ApiTransformer Call rewriting" in mixin.__doc__
+  assert "Docstring" not in mixin.__doc__
+
+  # Class docstring
+  cls_doc = mixin.ApiTransformerCallMixin.__doc__
+  assert cls_doc is not None
+  assert "Docstring" not in cls_doc
+  assert "ApiTransformer" in cls_doc or "mixin" in cls_doc.lower()
+
+  # Method docstring
+  method_doc = mixin.ApiTransformerCallMixin.leave_Call.__doc__
+  assert method_doc is not None
+  assert "leave_Call" in method_doc or "rewriting" in method_doc.lower() or "Intercepts" in method_doc
+  assert "Args:" in method_doc
+  assert "Returns:" in method_doc

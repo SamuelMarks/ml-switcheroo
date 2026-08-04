@@ -65,3 +65,37 @@ def test_padding_passthrough_missing(rewriter):
   code = "y = F.pad(x, (1, 2, 3, 4))"
   res = rewrite_code(rewriter, code)
   assert "F.pad" in res
+
+
+def test_padding_missing_args(rewriter):
+  """Verifies behavior when there are fewer than 2 arguments."""
+  code = "y = F.pad(x)"
+  res = rewrite_code(rewriter, code)
+  assert "F.pad(x)" in res
+
+
+def test_padding_missing_comma(rewriter):
+  """Verifies the comma is added when it is missing on the input arg."""
+  # We construct a node directly to bypass cst parsing which normally adds commas
+  node = cst.Call(
+    func=cst.Name("pad"),
+    args=[
+      cst.Arg(cst.Name("x"), comma=cst.MaybeSentinel.DEFAULT),
+      cst.Arg(
+        cst.Tuple(
+          [
+            cst.Element(cst.Integer("1")),
+            cst.Element(cst.Integer("2")),
+            cst.Element(cst.Integer("3")),
+            cst.Element(cst.Integer("4")),
+          ]
+        )
+      ),
+    ],
+  )
+  ctx = MagicMock()
+  ctx.target_fw = "jax"
+  ctx.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}
+  ctx.lookup_api.return_value = "jnp.pad"
+  res = transform_padding(node, ctx)
+  assert isinstance(res.args[0].comma, cst.Comma)

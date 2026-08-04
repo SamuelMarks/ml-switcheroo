@@ -20,7 +20,14 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Creates a CST attribute chain from a dotted string."""
+  """Creates a CST attribute chain from a dotted string.
+
+  Args:
+      name_str: A dot-separated string representing the full API path.
+
+  Returns:
+      A CST expression node (either a Name or an Attribute chain) representing the dotted path.
+  """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -31,9 +38,11 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 def _resolve_target_class(ctx: HookContext) -> Optional[cst.BaseExpression]:
   """Look up 'MultiheadAttention' implementation from the Knowledge Base.
 
+  Args:
+      ctx: The HookContext providing API lookup capabilities.
+
   Returns:
       CST Node for the target class, or None if mapping is missing.
-
   """
   api = ctx.lookup_api("MultiheadAttention")
   if not api:
@@ -42,7 +51,14 @@ def _resolve_target_class(ctx: HookContext) -> Optional[cst.BaseExpression]:
 
 
 def _is_constructor_signature(args: list[Any]) -> bool:
-  """Heuristic to detect initialization vs forward call."""
+  """Heuristic to detect initialization vs forward call.
+
+  Args:
+      args: A list of CST Arg nodes representing the call arguments.
+
+  Returns:
+      True if the arguments indicate a constructor call, False otherwise.
+  """
   for arg in args:
     if arg.keyword and arg.keyword.value in ["embed_dim", "num_heads", "key_dim"]:
       return True
@@ -75,7 +91,6 @@ def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       Transformed Call node, or original if dependencies missing.
-
   """
   args = list(node.args)
 
@@ -115,7 +130,7 @@ def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
     new_args.append(v_arg_clean)
 
     # Convert Key to kwarg
-    if k_arg:  # pragma: no cover
+    if k_arg:
       k_val = k_arg.value
       k_kw = cst.Arg(
         keyword=cst.Name("key"),
@@ -162,7 +177,6 @@ def repack_attn_flax(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       Transformed Call node, or original if dependencies missing.
-
   """
   args = list(node.args)
 
@@ -207,6 +221,13 @@ def repack_attn_torch(node: cst.Call, ctx: HookContext) -> cst.Call:
   **Call (Inference):**
   - Remaps `(q, k, v)` to standard positional args.
   - Renames `attention_mask` and `mask` to `attn_mask`.
+
+  Args:
+      node: Original Call node.
+      ctx: HookContext for API lookup.
+
+  Returns:
+      Transformed Call node, or original if dependencies missing.
   """
   args = list(node.args)
   if _is_constructor_signature(args):

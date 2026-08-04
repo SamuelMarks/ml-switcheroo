@@ -110,14 +110,21 @@ def test_generate_write_error(mock_config, mock_semantics, tmp_path):
 def test_flatten_mapping_rules_variations(mock_config, mock_semantics):
   """Verifies the behavior of flatten mapping rules variations."""
   generator = WeightScriptGenerator(mock_semantics, mock_config)
-  mock_config.effective_source = "jax"
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  generator.source_adapter = MagicMock()
-  generator.target_adapter = MagicMock()
   layer_registry = {"l1": LogicalNode(id="l1", kind="Linear")}
+
+  # When source = torch, it computes perm from OI->IO directly
+  mock_config.effective_source = "torch"
   rules = generator._flatten_mapping_rules(layer_registry)
   assert len(rules) == 5
   assert rules[0]["perm"] == (1, 0)
+
+  # When source = jax, it computes perm reversed
+  mock_config.effective_source = "jax"
+  generator = WeightScriptGenerator(mock_semantics, mock_config)
+  rules = generator._flatten_mapping_rules(layer_registry)
+  assert len(rules) == 5
+  assert rules[0]["perm"] == (1, 0)  # IO->OI is also (1, 0)
+
   mock_semantics.get_definition.side_effect = [None, None]
   rules = generator._flatten_mapping_rules(layer_registry)
   assert len(rules) == 0

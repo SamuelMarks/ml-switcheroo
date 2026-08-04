@@ -16,7 +16,7 @@ import pytest
 def test_trivia_to_text() -> None:
   """Test Trivia to_text method."""
   t = Trivia("foo")
-  assert t.to_text() == "foo"
+  assert t.text == "foo"
 
 
 def test_semantic_marker_abstract() -> None:

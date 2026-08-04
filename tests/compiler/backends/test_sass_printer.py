@@ -1,10 +1,10 @@
 """Test suite for the SassPrinter module."""
 
-from ml_switcheroo.core.compiler.frontends.sass.nodes import (
-  Comment,
-  Directive,
-  Instruction,
-  Label,
+from ml_switcheroo.core.compiler.frontends.sass.cst import (
+  SassComment as Comment,
+  SassDirective as Directive,
+  SassInstruction as Instruction,
+  SassLabel as Label,
   SassNode,
 )
 from ml_switcheroo.core.compiler.backends.sass.printer import SassPrinter
@@ -31,7 +31,7 @@ def test_sass_printer_emit_instruction():
   node = Instruction(opcode="FADD")
   printer = SassPrinter()
   output = printer.emit([node])
-  assert output == "    FADD ;\n"
+  assert output == "    FADD;\n"
 
 
 def test_sass_printer_emit_directive():
@@ -63,5 +63,5 @@ def test_sass_printer_emit_multiple():
   nodes = [Directive(name="headerflags", params=[]), Label(name="L_1"), Instruction(opcode="FADD")]
   printer = SassPrinter()
   output = printer.emit(nodes)
-  expected = "    .headerflags\nL_1:\n    FADD ;\n"
+  expected = "    .headerflags\nL_1:\n    FADD;\n"
   assert output == expected

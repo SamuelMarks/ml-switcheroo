@@ -32,3 +32,55 @@ def test_sass_synth_liveness_tracking() -> None:
   synth.from_graph(g)
   assert synth.allocator._liveness_map["n1"] == 0
   assert len(synth.allocator._free_pool) == 254
+
+
+def test_sass_macro_mean() -> None:
+  """Verifies the behavior of SASS mean macro expansion."""
+  from ml_switcheroo.core.compiler.backends.sass.macros import expand_mean
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
+
+  alloc = RegisterAllocator()
+  nodes = expand_mean(alloc, "n1", {"elements": 10})
+  assert any(n.opcode == "FADD" for n in nodes if hasattr(n, "opcode"))
+  assert any(n.opcode == "FMUL" for n in nodes if hasattr(n, "opcode"))
+
+
+def test_sass_macro_relu() -> None:
+  """Verifies the behavior of SASS relu macro expansion."""
+  from ml_switcheroo.core.compiler.backends.sass.macros import expand_relu
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
+
+  alloc = RegisterAllocator()
+  nodes = expand_relu(alloc, "n1", {})
+  assert any(n.opcode == "FMAX" for n in nodes if hasattr(n, "opcode"))
+
+
+def test_sass_macro_flatten() -> None:
+  """Verifies the behavior of SASS flatten macro expansion."""
+  from ml_switcheroo.core.compiler.backends.sass.macros import expand_flatten
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
+
+  alloc = RegisterAllocator()
+  nodes = expand_flatten(alloc, "n1", {})
+  assert any(n.opcode == "MOV" for n in nodes if hasattr(n, "opcode"))
+
+
+def test_sass_macro_reshape() -> None:
+  """Verifies the behavior of SASS reshape macro expansion."""
+  from ml_switcheroo.core.compiler.backends.sass.macros import expand_reshape
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
+
+  alloc = RegisterAllocator()
+  nodes = expand_reshape(alloc, "n1", {})
+  assert any(n.opcode == "MOV" for n in nodes if hasattr(n, "opcode"))
+
+
+def test_sass_macro_conv3d() -> None:
+  """Verifies the behavior of SASS conv3d macro expansion."""
+  from ml_switcheroo.core.compiler.backends.sass.macros import expand_conv3d
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
+
+  alloc = RegisterAllocator()
+  nodes = expand_conv3d(alloc, "n1", {"k": 3})
+  assert any(n.opcode == "FFMA" for n in nodes if hasattr(n, "opcode"))
+  assert any(n.opcode == "IMAD" for n in nodes if hasattr(n, "opcode"))

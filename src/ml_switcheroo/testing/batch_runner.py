@@ -21,7 +21,12 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 
 
 class BatchValidator:
-  """Orchestrates the validation of the entire knowledge base."""
+  """Orchestrates the validation of the entire knowledge base.
+
+  Attributes:
+      semantics: The loaded SemanticsManager containing API definitions.
+      runner: The EquivalenceRunner instance used for checking equivalence.
+  """
 
   def __init__(self, semantics: SemanticsManager):
     """Initializes the validator.
@@ -95,6 +100,10 @@ class BatchValidator:
     2. Tuple types: `[("x", "Array"), ("axis", "int")]`
     3. Rich Dictionaries: `[{"name": "x", "min": 0}, {"name": "axis", "type": "int"}]`
 
+    Args:
+        raw_args: A list of arguments or constraints which can be plain strings,
+            type tuples, or rich constraint dictionaries.
+
     Returns:
         A tuple containing:
             - List of argument names [str].
@@ -134,7 +143,7 @@ class BatchValidator:
         hints[name] = annotation
 
       # Case 1: Simple String
-      elif isinstance(item, str):  # pragma: no cover
+      elif isinstance(item, str):
         params.append(item)
         # No hint available
 
@@ -165,7 +174,7 @@ class BatchValidator:
         content = py_file.read_text(encoding="utf-8")
         tree = ast.parse(content)
         for node in tree.body:
-          if (  # pragma: no cover
+          if (
             isinstance(node, ast.FunctionDef) and node.name.startswith("test_") and not node.name.startswith("test_gen_")
           ):
             # Extract 'matmul' from 'test_matmul'

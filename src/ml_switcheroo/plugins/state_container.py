@@ -24,7 +24,14 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_node(code: str) -> cst.BaseExpression:
-  """Helper to parse a simple expression string into a CST node."""
+  """Parses a simple expression string into a CST node.
+
+  Args:
+      code: The expression string to parse.
+
+  Returns:
+      The parsed LibCST expression node, or a `cst.Name` fallback if parsing fails.
+  """
   try:
     return cst.parse_expression(code)
   except Exception:
@@ -33,7 +40,14 @@ def _create_node(code: str) -> cst.BaseExpression:
 
 
 def _get_receiver(node: cst.Call) -> Optional[cst.BaseExpression]:
-  """Helper to extract the object instance being called (e.g. 'self' or 'model')."""
+  """Extracts the object instance being called (e.g., 'self' or 'model').
+
+  Args:
+      node: The CST Call node representing the method invocation.
+
+  Returns:
+      The receiver expression node if the call is an attribute access, or None.
+  """
   if isinstance(node.func, cst.Attribute):
     return node.func.value
   return None
@@ -46,6 +60,14 @@ def convert_register_buffer(node: cst.Call, ctx: HookContext) -> cst.Call:
   Target: `setattr(self, 'name', Wrapper(tensor))`
 
   Abstract Op Lookup: "BatchStat"
+
+  Args:
+      node: The CST Call node representing the `register_buffer` invocation.
+      ctx: The HookContext containing context and looking up APIs.
+
+  Returns:
+      The transformed CST node using `setattr`, or the original node if conditions
+      or lookups fail.
   """
   # Check args: expected (name, tensor)
   if len(node.args) < 2:
@@ -86,6 +108,14 @@ def convert_register_parameter(node: cst.Call, ctx: HookContext) -> cst.Call:
   Target: `setattr(self, 'name', ParamWrapper(param))`
 
   Abstract Op Lookup: "Param"
+
+  Args:
+      node: The CST Call node representing the `register_parameter` invocation.
+      ctx: The HookContext containing context and looking up APIs.
+
+  Returns:
+      The transformed CST node using `setattr`, or the original node if conditions
+      or lookups fail.
   """
   if len(node.args) < 2:
     return node
@@ -123,6 +153,14 @@ def convert_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
   Target: `StateFunc(model).to_pure_dict()`
 
   Abstract Op Lookup: "ModuleState"
+
+  Args:
+      node: The CST Call node representing the `state_dict` invocation.
+      ctx: The HookContext containing context and looking up APIs.
+
+  Returns:
+      The transformed CST node invoking `.to_pure_dict()` on the module state,
+      or the original node if conditions or lookups fail.
   """
   receiver = _get_receiver(node)
   if not receiver:
@@ -148,6 +186,14 @@ def convert_load_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
   Target: `UpdateFunc(model, state)`
 
   Abstract Op Lookup: "UpdateState"
+
+  Args:
+      node: The CST Call node representing the `load_state_dict` invocation.
+      ctx: The HookContext containing context and looking up APIs.
+
+  Returns:
+      The transformed CST node invoking the update state function, or the original
+      node if conditions or lookups fail.
   """
   receiver = _get_receiver(node)
   if not receiver:
@@ -180,6 +226,14 @@ def convert_parameters(node: cst.Call, ctx: HookContext) -> cst.Call:
   Target: `StateFunc(model, ParamType).values()`
 
   Abstract Op Lookup: "ModuleState", "Param"
+
+  Args:
+      node: The CST Call node representing the `parameters` invocation.
+      ctx: The HookContext containing context and looking up APIs.
+
+  Returns:
+      The transformed CST node retrieving the values of the module state with parameter
+      types, or the original node if conditions or lookups fail.
   """
   receiver = _get_receiver(node)
   if not receiver:

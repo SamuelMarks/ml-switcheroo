@@ -1,16 +1,17 @@
-"""MLIR Parser using Lark CST.
+"""MLIR parser module.
 
-This module parses text-based MLIR code into the CST object model defined in `nodes.py`.
-It utilizes Lark's Earley parser to handle explicit whitespace preservation without conflicts,
-and transforms the resulting AST into strongly-typed CST nodes.
+This module implements a lexer and parser for MLIR text format,
+producing a Concrete Syntax Tree (CST) using the pure-Python Lark parsing library.
 """
 
-import os
-from typing import Any, List, Optional, Tuple, Union, cast
+import re
+from typing import List, Any, cast
 
-from lark import Lark, Token, Transformer, v_args
+from lark import Lark, Transformer, v_args
+from lark.lexer import Lexer, Token
 
-from ml_switcheroo.core.mlir.nodes import (
+from ml_switcheroo.core.cst.base import Trivia
+from ml_switcheroo.core.mlir.cst import (
   ModuleNode,
   BlockNode,
   RegionNode,
@@ -18,370 +19,322 @@ from ml_switcheroo.core.mlir.nodes import (
   ValueNode,
   TypeNode,
   AttributeNode,
-  TriviaNode,
 )
 
+TOKEN_REGEX = [
+  ("COMMENT", r"//[^\n]*"),
+  ("WS", r"[ \t\f\r\n]+"),
+  ("BLOCK_LABEL", r"\^[a-zA-Z_0-9]+"),
+  ("VAL_ID", r"%[a-zA-Z_0-9]+|%\d+"),
+  ("SYM_ID", r"@[a-zA-Z_0-9]+"),
+  ("TYPE", r"!sw\.type<[^>]+>|tensor<[^>]+>|![a-zA-Z_0-9\.<>]+|[iuf]\d+|index|none"),
+  ("NUMBER", r"-?\d+(?:\.\d+)?"),
+  ("STRING", r'"(?:[^"\\]|\\.)*"'),
+  ("IDENTIFIER", r"[a-zA-Z_][a-zA-Z0-9_$.]*"),
+  ("ARROW", r"->"),
+  ("PUNCTUATION", r"[=,(){}\[\]:]"),
+  ("MISMATCH", r"."),
+]
+tok_regex = "|".join("(?P<%s>%s)" % pair for pair in TOKEN_REGEX)
 
-class MlirTransformer(Transformer[Token, Any]):
-  """Transforms parsed MLIR AST into a CST with trivia."""
 
-  @v_args(inline=True)
-  def trivia(self, *tokens: Token) -> List[TriviaNode]:
-    """Combine WS and COMMENT tokens into TriviaNodes.
+class MlirToken(Token):
+  """Custom token that carries its leading trivia."""
+
+  __slots__ = ("leading_trivia",)
+
+  leading_trivia: List[Trivia]
+
+
+class MlirLexer(Lexer):
+  """Custom Lexer preserving trivia and matching MLIR tokens."""
+
+  def __init__(self, lexer_conf: Any):
+    """Init.
 
     Args:
-        tokens: The lexed tokens (whitespace, comments).
+        lexer_conf: Configuration for the lexer.
+    """
+    self.lexer_conf = lexer_conf
+
+  def lex(self, data: str) -> Any:  # type: ignore[override]
+    """Tokenize the input string and attach trivia.
+
+    Args:
+        data (str): The input string to lex.
+
+    Yields:
+        Any: The next matched token carrying its leading trivia.
+    """
+    leading: List[Trivia] = []
+    for mo in re.finditer(tok_regex, data):
+      kind = mo.lastgroup
+      val = mo.group()
+      if kind == "MISMATCH":
+        raise ValueError(f"Unexpected '{val}'")
+      if kind in ("WS", "COMMENT"):
+        assert val is not None
+        leading.append(Trivia(val))
+      else:
+        if kind == "PUNCTUATION":
+          punct_map = {
+            "=": "EQ",
+            ",": "COMMA",
+            "(": "LPAREN",
+            ")": "RPAREN",
+            "{": "LBRACE",
+            "}": "RBRACE",
+            "[": "LBRACK",
+            "]": "RBRACK",
+            ":": "COLON",
+          }
+          kind = punct_map[val]
+
+        assert kind is not None
+        assert val is not None
+        t = MlirToken(kind, val)
+        t.leading_trivia = list(leading)
+        leading.clear()
+        yield t
+
+
+GRAMMAR = r"""
+    ?start: module
+    module: operation*
+
+    operation: [results EQ] op_name [SYM_ID] [operands] [attributes] op_tail*
+
+    ?op_tail: regions | COLON result_types | ARROW result_types
+
+    results: VAL_ID (COMMA VAL_ID)*
+    op_name: IDENTIFIER | STRING | SYM_ID
+
+    operands: LPAREN [operand (COMMA operand)*] RPAREN
+            | operand (COMMA operand)*
+
+    operand: VAL_ID [COLON TYPE]
+
+    attributes: LBRACE [attribute (COMMA attribute)*] RBRACE
+    attribute: attr_name EQ attr_value
+    attr_name: IDENTIFIER | STRING
+    attr_value: STRING | NUMBER | TYPE | LBRACK [attr_value (COMMA attr_value)*] RBRACK
+
+    regions: region+
+    region: LBRACE block* RBRACE
+
+    block: [BLOCK_LABEL [block_args] COLON] operation*
+    block_args: LPAREN [block_arg (COMMA block_arg)*] RPAREN
+    block_arg: VAL_ID COLON TYPE
+
+    result_types: TYPE
+                | LPAREN [TYPE (COMMA TYPE)*] RPAREN
+                | LPAREN [TYPE (COMMA TYPE)*] RPAREN ARROW TYPE
+                | LPAREN [TYPE (COMMA TYPE)*] RPAREN ARROW LPAREN [TYPE (COMMA TYPE)*] RPAREN
+
+    EQ: "="
+    COMMA: ","
+    LPAREN: "("
+    RPAREN: ")"
+    LBRACE: "{"
+    RBRACE: "}"
+    LBRACK: "["
+    RBRACK: "]"
+    COLON: ":"
+    ARROW: "->"
+
+    VAL_ID: /%./
+    SYM_ID: /@./
+    TYPE: /!./
+    NUMBER: /1/
+    STRING: /"."/
+    IDENTIFIER: /a/
+    BLOCK_LABEL: /\^./
+"""
+
+
+def _get_trivia(node: Any) -> List[Trivia]:
+  """Extract leading trivia from a token or the first token in a tree.
+
+  Args:
+      node: The Lark AST Node or Token.
+
+  Returns:
+      A list of trivia items.
+  """
+  if hasattr(node, "leading_trivia"):
+    res = node.leading_trivia
+    node.leading_trivia = []
+    return cast(List[Trivia], res)
+
+  if hasattr(node, "children") and node.children:
+    # Recursively find the first token with trivia
+    return _get_trivia(node.children[0])
+
+  return []
+
+
+class MlirTransformer(Transformer[Any, Any]):
+  """Transforms parsed AST nodes into MlirNode classes."""
+
+  @v_args(inline=False)
+  def module(self, children: List[Any]) -> ModuleNode:
+    """Transform the top-level module rule.
+
+    Args:
+        children: Parsed children.
 
     Returns:
-        List[TriviaNode]: A single TriviaNode containing the concatenated text.
+        The ModuleNode.
     """
-    content = "".join(str(t) for t in tokens)
-    return [TriviaNode(content=content)]
+    ops = [c for c in children if isinstance(c, OperationNode)]
+    leading = _get_trivia(children[0]) if children else []
+    return ModuleNode(body=BlockNode(label="", operations=ops), leading_trivia=leading)
 
-  def module(self, children: List[Any]) -> ModuleNode:
-    """Build a ModuleNode."""
-    ops: List[OperationNode] = []
-    leading: List[TriviaNode] = []
-    trailing: List[TriviaNode] = []
-
-    for c in children:
-      if isinstance(c, list) and (len(c) == 0 or isinstance(c[0], TriviaNode)):
-        if not ops:
-          leading = c
-        else:
-          trailing = c
-      elif isinstance(c, OperationNode):
-        ops.append(c)
-
-    # We create an implicit top-level block
-    block = BlockNode(label="", operations=ops)
-    return ModuleNode(body=block, leading_trivia=leading, trailing_trivia=trailing)
-
+  @v_args(inline=False)
   def operation(self, children: List[Any]) -> OperationNode:
-    """Build an OperationNode."""
-    results_clause_dict: Optional[dict[str, Any]] = None
-    name = ""
-    name_trivia: List[TriviaNode] = []
-    operands: List[ValueNode] = []
-    attributes: List[AttributeNode] = []
-    regions: List[RegionNode] = []
-    result_types: List[TypeNode] = []
-    trailing: List[TriviaNode] = []
+    """Transform an operation rule into an OperationNode.
 
-    # Simple state machine to capture the tokens
-    # Because of our grammar:
-    # results_clause? (IDENTIFIER | STRING) trivia? operands_clause? attributes_clause? regions_clause? types_clause? trivia?
-    found_name = False
+    Args:
+        children: Parsed children.
 
+    Returns:
+        The constructed OperationNode.
+    """
+    op = OperationNode()
     for c in children:
-      if isinstance(c, dict) and "results" in c:
-        results_clause_dict = c
-      elif isinstance(c, str):
-        name = c
-        found_name = True
-      elif isinstance(c, list):
-        if not found_name:
-          pass  # Should not happen based on grammar  # pragma: no cover
-        elif not operands and not attributes and not regions and not result_types and not trailing:
-          name_trivia = c
+      if c is not None:
+        op.leading_trivia = _get_trivia(c)
+        break
+
+    i = 0
+    while i < len(children):
+      c = children[i]
+      if isinstance(c, Token) and c.type == "EQ":
+        pass
+      elif getattr(c, "data", None) == "results":
+        op.results = [ValueNode(name=v.value, leading_trivia=_get_trivia(v)) for v in c.children if v.type == "VAL_ID"]
+      elif getattr(c, "data", None) == "op_name":
+        op.name = c.children[0].value
+      elif isinstance(c, Token) and c.type == "SYM_ID":
+        # Usually `@main` after op_name, we can just append it to name or name_trivia
+        triv = _get_trivia(c)
+        op.name_trivia.extend(triv)
+        op.name_trivia.append(Trivia(c.value))
+      elif getattr(c, "data", None) == "operands":
+        if c.children and isinstance(c.children[0], Token) and c.children[0].type == "LPAREN":
+          op.has_parens = True
         else:
-          trailing = c
-      elif isinstance(c, tuple) and len(c) > 0 and c[0] == "operands":
-        operands = c[1]
-      elif isinstance(c, tuple) and len(c) > 0 and c[0] == "attributes":
-        attributes = c[1]
-      elif isinstance(c, tuple) and len(c) > 0 and c[0] == "regions":
-        regions = c[1]
-      elif isinstance(c, tuple) and len(c) > 0 and c[0] == "types":
-        result_types = c[1]
-
-    op = OperationNode(
-      name=name,
-      leading_trivia=[],
-      name_trivia=name_trivia or [],
-      trailing_trivia=trailing or [],
-      results=results_clause_dict["results"] if results_clause_dict else [],
-      operands=operands,
-      attributes=attributes,
-      regions=regions,
-      result_types=result_types,
-    )
-    if results_clause_dict:
-      op.leading_trivia = results_clause_dict["leading"]
-
+          op.has_parens = False
+        for val in c.children:
+          if getattr(val, "data", None) == "operand":
+            v_tok = val.children[0]
+            type_node = None
+            colon_triv = []
+            if len(val.children) > 2 and getattr(val.children[2], "type", None) == "TYPE":
+              colon_triv = _get_trivia(val.children[1])
+              type_node = TypeNode(body=val.children[2].value, leading_trivia=_get_trivia(val.children[2]))
+            op.operands.append(
+              ValueNode(name=v_tok.value, leading_trivia=_get_trivia(v_tok), type_node=type_node, colon_trivia=colon_triv)
+            )
+      elif isinstance(c, list):
+        if len(c) > 0 and isinstance(c[0], AttributeNode):
+          op.attributes = c
+        elif len(c) > 0 and isinstance(c[0], RegionNode):
+          op.regions.extend(c)
+      elif getattr(c, "data", None) == "op_tail":
+        op.op_tail_str = c.children[0].value
+        op.op_tail_trivia = _get_trivia(c.children[0])
+        for tail_child in c.children:
+          if getattr(tail_child, "data", None) == "result_types":
+            for t in tail_child.children:
+              if getattr(t, "type", None) == "TYPE":
+                op.result_types.append(TypeNode(body=t.value, leading_trivia=_get_trivia(t)))
+      i += 1
     return op
 
-  def results_clause(self, children: List[Any]) -> dict[str, Any]:
-    """Build results clause."""
-    results: List[ValueNode] = []
-    trivia1: List[TriviaNode] = []
-    trivia2: List[TriviaNode] = []
-    for c in children:
-      if isinstance(c, list) and isinstance(c[0], ValueNode):
-        results = c
-      elif isinstance(c, list) and isinstance(c[0], TriviaNode):
-        if not trivia1:
-          trivia1 = c
-        else:
-          trivia2 = c
-
-    leading_trivia = []
-    if results and results[0].leading_trivia:
-      leading_trivia = results[0].leading_trivia  # pragma: no cover
-      results[0].leading_trivia = []  # pragma: no cover
-
-    if results and (trivia1 or trivia2):
-      t = (trivia1 or []) + (trivia2 or [])
-      results[-1].trailing_trivia.extend(t)
-
-    return {"results": results, "leading": leading_trivia}
-
-  def operands_clause(self, children: List[Any]) -> Tuple[str, List[ValueNode]]:
-    """Build operands clause."""
-    operands = []
-    trivia = []
-    for c in children:
-      if isinstance(c, list) and len(c) > 0 and isinstance(c[0], ValueNode):
-        operands = c
-      elif isinstance(c, list) and len(c) > 0 and isinstance(c[0], TriviaNode):
-        trivia = c
-    if operands and trivia:
-      operands[-1].trailing_trivia.extend(trivia)
-    return ("operands", operands)
-
-  def attributes_clause(self, children: List[Any]) -> Tuple[str, List[AttributeNode]]:
-    """Build attributes clause."""
-    attributes = []
-    trivia = []
-    for c in children:
-      if isinstance(c, list) and len(c) > 0 and isinstance(c[0], AttributeNode):
-        attributes = c
-      elif isinstance(c, list) and len(c) > 0 and isinstance(c[0], TriviaNode):
-        trivia = c
-    if attributes and trivia:
-      attributes[-1].trailing_trivia.extend(trivia)
-    return ("attributes", attributes)
-
-  def regions_clause(self, children: List[Any]) -> Tuple[str, List[RegionNode]]:
-    """Build regions clause."""
-    regions = []
-    trivia = []
-    for c in children:
-      if isinstance(c, list) and len(c) > 0 and isinstance(c[0], RegionNode):
-        regions = c
-      elif isinstance(c, list) and len(c) > 0 and isinstance(c[0], TriviaNode):  # pragma: no cover
-        trivia = c  # pragma: no cover
-    if regions and trivia:
-      regions[-1].trailing_trivia.extend(trivia)  # pragma: no cover
-    return ("regions", regions)
-
-  def types_clause(self, children: List[Any]) -> Tuple[str, List[TypeNode]]:
-    """Build types clause."""
-    types = []
-    trivia = []
-    for c in children:
-      if isinstance(c, list) and len(c) > 0 and isinstance(c[0], TypeNode):
-        types = c
-      elif isinstance(c, list) and len(c) > 0 and isinstance(c[0], TriviaNode):
-        trivia = c
-    if types and trivia:
-      types[0].leading_trivia = trivia + types[0].leading_trivia
-    return ("types", types)
-
-  def results(self, children: List[Any]) -> List[ValueNode]:
-    """Build results list."""
-    vals = []
-    for c in children:
-      if isinstance(c, ValueNode):
-        vals.append(c)
-      elif isinstance(c, list):  # trivia  # pragma: no cover
-        if vals:  # pragma: no cover
-          vals[-1].trailing_trivia.extend(c)  # pragma: no cover
-    return vals
-
-  def operands(self, children: List[Any]) -> List[ValueNode]:
-    """Build operands list."""
-    vals = []
-    for c in children:
-      if isinstance(c, ValueNode):
-        vals.append(c)
-      elif isinstance(c, list):  # trivia
-        if vals:
-          vals[-1].trailing_trivia.extend(c)
-        else:
-          # Leading trivia for the first operand
-          pass  # Complex, handled by parent typically  # pragma: no cover
-    return vals
-
+  @v_args(inline=False)
   def attributes(self, children: List[Any]) -> List[AttributeNode]:
-    """Build attributes list."""
+    """Transform the attributes rule into a list of AttributeNode.
+
+    Args:
+        children: Parsed children.
+
+    Returns:
+        List of parsed attributes.
+    """
     attrs = []
     for c in children:
-      if isinstance(c, AttributeNode):
-        attrs.append(c)
-      elif isinstance(c, list):
-        if attrs:
-          attrs[-1].trailing_trivia.extend(c)
+      if getattr(c, "data", None) == "attribute":
+        name = c.children[0].children[0].value
+        val_node = c.children[2]
+
+        if len(val_node.children) == 1:
+          val = val_node.children[0].value
+        else:
+          # Array of values
+          val = [v.children[0].value for v in val_node.children if getattr(v, "data", None) == "attr_value"]
+
+        attr = AttributeNode(name=name, value=val, leading_trivia=_get_trivia(c.children[0]))
+        attrs.append(attr)
     return attrs
 
-  def attribute(self, children: List[Any]) -> AttributeNode:
-    """Build attribute node."""
-    name = ""
-    val: Union[str, List[str]] = ""
-    trivia: List[TriviaNode] = []
-    for c in children:
-      if isinstance(c, str) and not name:
-        name = c
-      elif isinstance(c, list) and (len(c) == 0 or isinstance(c[0], TriviaNode)):
-        trivia.extend(c)
-      else:
-        val = cast(Union[str, List[str]], c)
-    attr = AttributeNode(name=name, value=val)
-    attr.trailing_trivia = trivia
-    return attr
-
-  def array_attr(self, children: List[Any]) -> List[str]:
-    """Build array attribute."""
-    # Simplified string matching for now, preserving the CST values
-    vals = []  # pragma: no cover
-    for c in children:  # pragma: no cover
-      if isinstance(c, str):  # pragma: no cover
-        vals.append(c)  # pragma: no cover
-    return vals  # pragma: no cover
-
-  def regions(self, children: List[Any]) -> List[RegionNode]:
-    """Build regions list."""
-    regs = []
-    for c in children:
-      if isinstance(c, RegionNode):
-        regs.append(c)
-      elif isinstance(c, list):  # pragma: no cover
-        if regs:  # pragma: no cover
-          regs[-1].trailing_trivia.extend(c)  # pragma: no cover
-    return regs
-
+  @v_args(inline=False)
   def region(self, children: List[Any]) -> RegionNode:
-    """Build region node."""
-    blocks: List[BlockNode] = []
-    leading: List[TriviaNode] = []
-    trailing: List[TriviaNode] = []
-    for c in children:
-      if isinstance(c, BlockNode):
-        blocks.append(c)
-      elif isinstance(c, list):
-        if not blocks:
-          # It's leading trivia for the region content
-          leading = c
-        else:
-          blocks[-1].trailing_trivia.extend(c)  # pragma: no cover
-    # The last block's trailing trivia could also just be the region's trailing trivia
-    # depending on spacing, but we handle it structurally for now.
-    return RegionNode(blocks=blocks, leading_trivia=leading, trailing_trivia=trailing)
+    """Transform a region.
 
+    Args:
+        children: Parsed children.
+
+    Returns:
+        The constructed RegionNode.
+    """
+    leading = _get_trivia(children[0])
+    trailing = _get_trivia(children[-1])
+    blocks = [b for b in children if isinstance(b, BlockNode)]
+    r = RegionNode(blocks=blocks)
+    r.leading_trivia = leading
+    r.trailing_trivia = trailing
+    return r
+
+  @v_args(inline=False)
+  def regions(self, children: List[Any]) -> List[RegionNode]:
+    """Transform the regions rule into a list of RegionNode.
+
+    Args:
+        children: Parsed children.
+
+    Returns:
+        List of parsed regions.
+    """
+    return [c for c in children if isinstance(c, RegionNode)]
+
+  @v_args(inline=False)
   def block(self, children: List[Any]) -> BlockNode:
-    """Build block node."""
+    """Transform the block rule into a BlockNode.
+
+    Args:
+        children: Parsed children.
+
+    Returns:
+        The constructed BlockNode.
+    """
     label = ""
     args = []
     ops = []
-    leading = []
     for c in children:
-      if isinstance(c, dict) and "label" in c:
-        label = c["label"]
-        args = c["args"]
-        leading = c["leading"]
+      if isinstance(c, Token) and c.type == "BLOCK_LABEL":
+        label = c.value
+      elif getattr(c, "data", None) == "block_args":
+        for arg in c.children:
+          if getattr(arg, "data", None) == "block_arg":
+            v = ValueNode(name=arg.children[0].value, leading_trivia=_get_trivia(arg.children[0]))
+            t = TypeNode(body=arg.children[2].value, leading_trivia=_get_trivia(arg.children[2]))
+            args.append((v, t))
       elif isinstance(c, OperationNode):
         ops.append(c)
+
+    leading = _get_trivia(children[0]) if children else []
     return BlockNode(label=label, arguments=args, operations=ops, leading_trivia=leading)
-
-  def block_label_clause(self, children: List[Any]) -> dict[str, Any]:
-    """Build block label clause."""
-    name = ""
-    args_clause: List[Tuple[ValueNode, TypeNode]] = []
-    trivia1: List[TriviaNode] = []
-    trivia2: List[TriviaNode] = []
-    for c in children:
-      if isinstance(c, str):
-        name = c
-      elif isinstance(c, list) and (len(c) == 0 or isinstance(c[0], TriviaNode)):
-        if not args_clause:
-          trivia1 = c
-        else:
-          trivia2 = c
-      elif isinstance(c, list):
-        # args clause is a list of tuples
-        args_clause = c
-    return {"label": name, "args": args_clause, "leading": (trivia1 or []) + (trivia2 or [])}
-
-  def block_args_clause(self, children: List[Any]) -> List[Tuple[ValueNode, TypeNode]]:
-    """Build block args clause."""
-    for c in children:
-      if isinstance(c, list) and len(c) > 0 and isinstance(c[0], tuple):
-        return c
-    return []  # pragma: no cover
-
-  def block_arg_list(self, children: List[Any]) -> List[Tuple[ValueNode, TypeNode]]:
-    """Build block arg list."""
-    args = []
-    for c in children:
-      if isinstance(c, tuple):
-        args.append(c)
-    return args
-
-  def block_arg(self, children: List[Any]) -> Tuple[ValueNode, TypeNode]:
-    """Build block arg."""
-    val = ""
-    typ = ""
-    trivia1 = []
-    trivia2 = []
-    for c in children:
-      if isinstance(c, ValueNode):
-        val = c.name
-      elif isinstance(c, str):
-        typ = c
-      elif isinstance(c, list) and (len(c) == 0 or isinstance(c[0], TriviaNode)):
-        if not typ:
-          trivia1 = c
-        else:
-          trivia2 = c  # pragma: no cover
-    v = ValueNode(name=str(val), trailing_trivia=trivia1 or [])
-    t = TypeNode(body=str(typ), leading_trivia=trivia2 or [])
-    return (v, t)
-
-  def types(self, children: List[Any]) -> List[TypeNode]:
-    """Build types list."""
-    typs = []
-    for c in children:
-      if isinstance(c, str):
-        typs.append(TypeNode(body=c))
-      elif isinstance(c, list):
-        if typs:
-          typs[-1].trailing_trivia.extend(c)
-    return typs
-
-  # Terminal wrappers for simple types
-  def IDENTIFIER(self, token: Token) -> str:
-    """Wrap IDENTIFIER."""
-    return str(token)
-
-  def STRING(self, token: Token) -> str:
-    """Wrap STRING."""
-    return str(token)
-
-  def NUMBER(self, token: Token) -> str:
-    """Wrap NUMBER."""
-    return str(token)
-
-  def TYPE(self, token: Token) -> str:
-    """Wrap TYPE."""
-    return str(token)
-
-  def VAL_ID(self, token: Token) -> ValueNode:
-    """Wrap VAL_ID."""
-    return ValueNode(name=str(token))
-
-  def BLOCK_LABEL(self, token: Token) -> str:
-    """Wrap BLOCK_LABEL."""
-    return str(token)
 
 
 class MlirParser:
@@ -394,10 +347,7 @@ class MlirParser:
         text (str): The MLIR source code to parse.
     """
     self.text = text
-    grammar_path = os.path.join(os.path.dirname(__file__), "grammar.lark")
-    with open(grammar_path, "r", encoding="utf-8") as f:
-      self.grammar = f.read()
-    self.parser = Lark(self.grammar, parser="earley", maybe_placeholders=True)
+    self.parser = Lark(GRAMMAR, parser="earley", lexer=MlirLexer)
     self.transformer = MlirTransformer()
 
   def parse(self) -> ModuleNode:
@@ -406,7 +356,9 @@ class MlirParser:
     Returns:
         ModuleNode: The root of the MLIR CST.
     """
-    tree = self.parser.parse(self.text)
-    from typing import cast
+    if not self.text.strip():
+      return ModuleNode()
 
-    return cast(ModuleNode, self.transformer.transform(tree))
+    tree = self.parser.parse(self.text)
+    node = self.transformer.transform(tree)
+    return node  # type: ignore

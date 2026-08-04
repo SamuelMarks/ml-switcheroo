@@ -15,7 +15,7 @@ _pkg_dir = Path(__file__).parent
 for _, module_name, _ in pkgutil.iter_modules([str(_pkg_dir)]):  # type: ignore
   # Skip potential future protected modules if necessary
   if module_name.startswith("_") or "utils" in module_name or "helpers" in module_name:
-    continue  # pragma: no cover
+    continue
 
   try:
     importlib.import_module(f".{module_name}", package=__name__)

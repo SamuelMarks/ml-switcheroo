@@ -15,7 +15,11 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_zero_pad() -> cst.Element:
-  """Helper to create (0, 0) tuple element."""
+  """Helper to create (0, 0) tuple element.
+
+  Returns:
+      cst.Element: A CST element representing a (0, 0) tuple.
+  """
   return cst.Element(
     value=cst.Tuple(
       elements=[
@@ -27,7 +31,15 @@ def _create_zero_pad() -> cst.Element:
 
 
 def _create_dim_pad(before: cst.BaseExpression, after: cst.BaseExpression) -> cst.Element:
-  """Helper to create (before, after) tuple element."""
+  """Helper to create (before, after) tuple element.
+
+  Args:
+      before: The CST expression representing padding before the dimension.
+      after: The CST expression representing padding after the dimension.
+
+  Returns:
+      cst.Element: A CST element representing a (before, after) tuple.
+  """
   return cst.Element(
     value=cst.Tuple(
       elements=[
@@ -39,7 +51,14 @@ def _create_dim_pad(before: cst.BaseExpression, after: cst.BaseExpression) -> cs
 
 
 def _supports_numpy_padding(ctx: HookContext) -> bool:
-  """Checks if target supports tuple-of-tuples padding via PluginTraits."""
+  """Checks if target supports tuple-of-tuples padding via PluginTraits.
+
+  Args:
+      ctx: Hook context containing the semantics and target framework.
+
+  Returns:
+      bool: True if the target framework configuration supports NumPy-style padding, False otherwise.
+  """
   if not ctx.semantics:
     return False
 
@@ -87,7 +106,7 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   args = list(node.args)
   if len(args) < 2:
-    return node  # pragma: no cover
+    return node
 
   input_arg = args[0]
   pad_arg = args[1]
@@ -117,7 +136,7 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
 
     # Update argument list
     if input_arg.comma == cst.MaybeSentinel.DEFAULT:
-      args[0] = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))  # pragma: no cover
+      args[0] = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
     args[1] = pad_arg.with_changes(value=new_pad_tuple)
 

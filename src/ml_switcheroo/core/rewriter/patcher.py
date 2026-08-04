@@ -19,7 +19,11 @@ from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmi
 
 @dataclass
 class PatchAction:
-  """Base class for patch instructions."""
+  """Base class for patch instructions.
+
+  Attributes:
+      node_id: The identifier of the logical node in the graph targeted by the action.
+  """
 
   node_id: str
 
@@ -27,7 +31,6 @@ class PatchAction:
 @dataclass
 class DeleteAction(PatchAction):
   """Instruction to remove a node from the AST.
-
 
   Used for nodes that have been fused into others or pruned.
   """
@@ -49,7 +52,6 @@ class ReplaceAction(PatchAction):
       output_var: The variable name to assign result to.
       is_init: If True, uses `emit_init` logic (assignments).
                If False, uses `emit_call` logic (executions).
-
   """
 
   new_node: LogicalNode
@@ -78,7 +80,6 @@ class GraphPatcher(cst.CSTTransformer):
         plan: Ordered list of actions to perform.
         provenance: Mapping of LogicalNode ID -> Original CST Node.
         emitter: Logic for synthesizing new Python code.
-
     """
     self.plan = plan
     self.provenance = provenance
@@ -130,7 +131,7 @@ class GraphPatcher(cst.CSTTransformer):
     id_to_action = {a.node_id: a for a in self.plan}
 
     for node_id, cst_node in self.provenance.items():
-      if node_id in id_to_action:  # pragma: no cover
+      if node_id in id_to_action:
         self._action_map[id(cst_node)] = id_to_action[node_id]
 
   # --- Statement Level Hooks ---
@@ -138,32 +139,75 @@ class GraphPatcher(cst.CSTTransformer):
   def leave_Assign(  # type: ignore
     self, original_node: cst.Assign, updated_node: cst.Assign
   ) -> Union[cst.Assign, cst.SimpleStatementLine, cst.RemovalSentinel]:
-    """Intercepts Assignment statements (e.g. `self.conv = ...`, `y = func(x)`)."""
+    """Intercepts Assignment statements (e.g. `self.conv = ...`, `y = func(x)`).
+
+    Args:
+        original_node: The original CST Assign node before transformation.
+        updated_node: The updated CST Assign node after potential child transformations.
+
+    Returns:
+        The replaced Assign node, SimpleStatementLine, or RemovalSentinel if deleted.
+    """
     return self._handle_node(original_node, updated_node)  # type: ignore
 
   def leave_Expr(  # type: ignore
     self, original_node: cst.Expr, updated_node: cst.Expr
   ) -> Union[cst.Expr, cst.SimpleStatementLine, cst.RemovalSentinel]:
-    """Intercepts Expression statements (e.g. `func(x)` without assignment)."""
+    """Intercepts Expression statements (e.g. `func(x)` without assignment).
+
+    Args:
+        original_node: The original CST Expr node before transformation.
+        updated_node: The updated CST Expr node after potential child transformations.
+
+    Returns:
+        The replaced Expr node, SimpleStatementLine, or RemovalSentinel if deleted.
+    """
     return self._handle_node(original_node, updated_node)  # type: ignore
 
   def leave_Call(  # type: ignore
     self, original_node: cst.Call, updated_node: cst.Call
   ) -> Union[cst.Call, cst.BaseExpression, cst.RemovalSentinel]:
-    """Execute implementation detail."""
+    """Execute implementation detail for call expression patching.
+
+    Args:
+        original_node: The original CST Call node before transformation.
+        updated_node: The updated CST Call node after potential child transformations.
+
+    Returns:
+        The replaced Call expression, BaseExpression, or RemovalSentinel if deleted.
+    """
     return self._handle_node(original_node, updated_node)  # type: ignore
 
   def leave_SimpleStatementLine(
     self, original_node: cst.SimpleStatementLine, updated_node: cst.SimpleStatementLine
   ) -> Union[cst.SimpleStatementLine, cst.RemovalSentinel]:
-    """Cleans up statements that became empty due to children deletion."""
+    """Cleans up statements that became empty due to children deletion.
+
+    Args:
+        original_node: The original CST SimpleStatementLine node.
+        updated_node: The updated CST SimpleStatementLine node.
+
+    Returns:
+        The cleaned SimpleStatementLine, or a RemovalSentinel if empty.
+    """
     # If logic removed the inner assign/expr, `updated_node.body` is empty list
     if not updated_node.body:
       return cst.RemoveFromParent()
     return updated_node
 
   def _handle_node(self, original: cst.CSTNode, updated: cst.CSTNode) -> Any:
-    """Core dispatch logic."""
+    """Core dispatch logic for performing patch mutations.
+
+    Identifies if a node matches an action in the index, then dispatches
+    either deletion or substitution based replacement.
+
+    Args:
+        original: The original CST node being processed.
+        updated: The updated CST node from normal LibCST traversal.
+
+    Returns:
+        The newly generated CST structure, the original updated node, or a RemovalSentinel.
+    """
     oid = id(original)
     if oid not in self._action_map:
       return updated
@@ -200,6 +244,14 @@ class GraphPatcher(cst.CSTTransformer):
     """Helper: If we are replacing a node that is already inside a SimpleStatementLine body list.
 
     (like Assign or Expr), we should return the inner component to avoid double wrapping.
+
+    Args:
+        context_node: The parent/original node determining the structural context.
+        new_stmt: The newly emitted statement line structure.
+
+    Returns:
+        A FlattenSentinel containing the unwrapped inner body nodes if applicable,
+        or the original new_stmt object.
     """
     if isinstance(context_node, (cst.Assign, cst.Expr)):
       if new_stmt.body and len(new_stmt.body) > 0:

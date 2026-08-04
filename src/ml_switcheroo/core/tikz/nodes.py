@@ -27,7 +27,11 @@ class TikzBaseNode(ABC):
     return ""
 
   def to_text(self) -> str:
-    """Render this node to its string representation."""
+    """Render this node to its string representation.
+
+    Returns:
+        str: The full structured text of this node.
+    """
     return self.emit(0)
 
 
@@ -42,7 +46,14 @@ class TriviaNode(TikzBaseNode):
   """Either 'whitespace' or 'comment'."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Returns the raw whitespace/comment content verbatim."""
+    """Returns the raw whitespace/comment content verbatim.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The raw trivia content.
+    """
     return self.content
 
 
@@ -57,10 +68,47 @@ class TikzOption(TikzBaseNode):
   """Optional value for key-value pairs."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Returns ``key=value`` or just ``key``."""
+    """Returns ``key=value`` or just ``key``.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The formatted TikZ option.
+    """
     if self.value:
       return f"{self.key}={self.value}"
     return self.key
+
+
+@dataclass
+class TikzTextNode(TikzBaseNode):
+  """Represents text with basic LaTeX styling inside TikZ."""
+
+  content: str
+  """The raw text content."""
+
+  bold: bool = False
+  """Whether to render the text in bold."""
+
+  italic: bool = False
+  """Whether to render the text in italics."""
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Emits the text node with styling.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The styled LaTeX text.
+    """
+    res = self.content
+    if self.italic:
+      res = f"\\textit{{{res}}}"
+    if self.bold:
+      res = f"\\textbf{{{res}}}"
+    return res
 
 
 @dataclass
@@ -77,31 +125,44 @@ class TikzTable(TikzBaseNode):
       \\end{tabular}
   """
 
-  rows: List[List[str]] = field(default_factory=list)
-  """List of rows, where each row is a list of cell strings."""
+  rows: List[List[Union[str, TikzTextNode]]] = field(default_factory=list)
+  """List of rows, where each row is a list of cell items."""
 
   align: str = "c"
   """Column alignment (c=center, l=left, r=right)."""
 
   leading_trivia: List[TriviaNode] = field(default_factory=list)
+  """Trivia elements appearing before the table environment."""
+
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
+  """Trivia elements appearing after the table environment."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Renders the tabular environment string."""
+    """Renders the tabular environment string.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The formatted LaTeX tabular string.
+    """
     # We ignore indent_level for pure roundtripping if trivia exists, but it's kept for API compatibility.
     parts = []
     for t in self.leading_trivia:
-      parts.append(t.emit())  # pragma: no cover
+      parts.append(t.emit())
 
     parts.append(f"\\begin{{tabular}}{{{self.align}}}")
     # For now, to keep it simple, we just format the rows standardly
     # In a full CST this would also have row trivia.
     for row in self.rows:
-      parts.append(" & ".join(row) + r" \\")
+      emitted_row = []
+      for cell in row:
+        emitted_row.append(cell.emit() if isinstance(cell, TikzBaseNode) else str(cell))
+      parts.append(" & ".join(emitted_row) + r" \\")
     parts.append(r"\end{tabular}")
 
     for t in self.trailing_trivia:
-      parts.append(t.emit())  # pragma: no cover
+      parts.append(t.emit())
     return "".join(parts)
 
 
@@ -131,13 +192,22 @@ class TikzNode(TikzBaseNode):
 
   leading_trivia: List[TriviaNode] = field(default_factory=list)
   """Whitespace/Comments before the node command."""
+
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
+  """Whitespace/Comments after the node command."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Constructs the full node command string."""
+    """Constructs the full node command string.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The full LaTeX/TikZ node command.
+    """
     parts = []
     for t in self.leading_trivia:
-      parts.append(t.emit())  # pragma: no cover
+      parts.append(t.emit())
 
     parts.append(r"\node")
 
@@ -155,7 +225,7 @@ class TikzNode(TikzBaseNode):
     parts.append("};")
 
     for t in self.trailing_trivia:
-      parts.append(t.emit())  # pragma: no cover
+      parts.append(t.emit())
     return "".join(parts)
 
 
@@ -182,13 +252,22 @@ class TikzEdge(TikzBaseNode):
 
   leading_trivia: List[TriviaNode] = field(default_factory=list)
   """Whitespace before the draw command."""
+
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
+  """Whitespace/Comments after the draw command."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Constructs the draw command string."""
+    """Constructs the draw command string.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The full LaTeX/TikZ draw command.
+    """
     parts = []
     for t in self.leading_trivia:
-      parts.append(t.emit())  # pragma: no cover
+      parts.append(t.emit())
 
     parts.append(r"\draw")
 
@@ -201,7 +280,7 @@ class TikzEdge(TikzBaseNode):
     parts.append(f" ({self.target_id});")
 
     for t in self.trailing_trivia:
-      parts.append(t.emit())  # pragma: no cover
+      parts.append(t.emit())
     return "".join(parts)
 
 
@@ -223,13 +302,23 @@ class TikzGraph(TikzBaseNode):
   """Global environment options."""
 
   leading_trivia: List[TriviaNode] = field(default_factory=list)
+  """Whitespace/Comments before the tikzpicture environment."""
+
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
+  """Whitespace/Comments after the tikzpicture environment."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Constructs the complete environment string."""
+    """Constructs the complete environment string.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The complete formatted tikzpicture environment.
+    """
     parts = []
     for t in self.leading_trivia:
-      parts.append(t.emit())  # pragma: no cover
+      parts.append(t.emit())
 
     if self.options:
       opts_str = ", ".join([o.emit() for o in self.options])
@@ -243,5 +332,5 @@ class TikzGraph(TikzBaseNode):
     parts.append(r"\end{tikzpicture}")
 
     for t in self.trailing_trivia:
-      parts.append(t.emit())  # pragma: no cover
+      parts.append(t.emit())
     return "".join(parts)

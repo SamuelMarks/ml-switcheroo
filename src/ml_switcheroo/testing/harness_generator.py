@@ -12,7 +12,8 @@ import textwrap
 from pathlib import Path
 from typing import Dict, Optional
 
-from ml_switcheroo.testing.harness_generator_template import HARNESS_TEMPLATE
+import libcst as cst
+from ml_switcheroo.testing.harness_generator_template import get_harness_skeleton
 from ml_switcheroo.testing.fuzzer.core import InputFuzzer
 from ml_switcheroo.utils.code_extractor import CodeExtractor
 from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY, get_adapter
@@ -25,6 +26,144 @@ import ml_switcheroo.testing.fuzzer.utils
 import ml_switcheroo.testing.fuzzer.strategies
 import ml_switcheroo.testing.fuzzer.type_parser
 from ml_switcheroo.testing.signature_extractor import SignatureExtractor
+
+
+class HarnessInjector(cst.CSTTransformer):
+  """Injects dynamic blocks into the harness skeleton."""
+
+  def __init__(
+    self,
+    fuzzer_block: str,
+    imports_block: str,
+    init_helpers_block: str,
+    injection_block: str,
+    to_numpy_block: str,
+    source_path: str,
+    target_path: str,
+    source_fw: str,
+    target_fw: str,
+    hints_json: str,
+  ) -> None:
+    """Initialize the injector with code blocks and metadata.
+
+    Args:
+        fuzzer_block: Standalone code block containing fuzzer logic.
+        imports_block: Import statements required for the target framework.
+        init_helpers_block: Initialization helper code block.
+        injection_block: Block containing parameter injection logic.
+        to_numpy_block: Logic for converting framework outputs to NumPy arrays.
+        source_path: File path of the source framework code.
+        target_path: File path of the target framework code.
+        source_fw: Name of the source framework (e.g., 'torch').
+        target_fw: Name of the target framework (e.g., 'jax').
+        hints_json: JSON string mapping ops to standard parameter types.
+    """
+    self.fuzzer_block = fuzzer_block
+    self.imports_block = imports_block
+    self.init_helpers_block = init_helpers_block
+    self.injection_block = injection_block
+    self.to_numpy_block = to_numpy_block
+    self.source_path = source_path
+    self.target_path = target_path
+    self.source_fw = source_fw
+    self.target_fw = target_fw
+    self.hints_json = hints_json
+
+  def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
+    """Injects imports, fuzzer, and helpers at the module level.
+
+    Args:
+        original_node: The original LibCST Module node.
+        updated_node: The updated LibCST Module node after visiting children.
+
+    Returns:
+        The modified LibCST Module with injected blocks.
+    """
+    # Find the index of the first function definition (def to_numpy) to insert before it
+    insert_idx = 0
+    for i, stmt in enumerate(updated_node.body):
+      if isinstance(stmt, cst.FunctionDef) and stmt.name.value == "to_numpy":
+        insert_idx = i
+        break
+
+    nodes = []
+    if self.imports_block.strip():
+      nodes.extend(cst.parse_module(self.imports_block).body)
+    if self.init_helpers_block.strip():
+      nodes.extend(cst.parse_module(self.init_helpers_block).body)
+    if self.fuzzer_block.strip():
+      nodes.extend(cst.parse_module(self.fuzzer_block).body)
+
+    new_body = list(updated_node.body[:insert_idx]) + nodes + list(updated_node.body[insert_idx:])
+    return updated_node.with_changes(body=new_body)
+
+  def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.CSTNode:
+    """Injects to_numpy logic into the to_numpy function definition.
+
+    Args:
+        original_node: The original LibCST FunctionDef node.
+        updated_node: The updated LibCST FunctionDef node.
+
+    Returns:
+        The modified function node with injected normalization logic,
+        or the updated node if no logic is injected.
+    """
+    if original_node.name.value == "to_numpy":
+      if not self.to_numpy_block.strip():
+        return updated_node
+      parsed_logic = cst.parse_module(self.to_numpy_block).body
+      # Find the try-except block
+      insert_idx = 1
+      new_body = (
+        list(updated_node.body.body[:insert_idx]) + list(parsed_logic) + list(updated_node.body.body[insert_idx:])
+      )
+      return updated_node.with_changes(body=updated_node.body.with_changes(body=new_body))
+    return updated_node
+
+  def leave_If(self, original_node: cst.If, updated_node: cst.If) -> cst.CSTNode:
+    """Injects the param injection logic replacing the target `if tp not in tgt_inputs: pass`.
+
+    Args:
+        original_node: The original LibCST If node.
+        updated_node: The updated LibCST If node.
+
+    Returns:
+        The modified If node containing the injected parameter logic,
+        or the updated node unchanged.
+    """
+    if isinstance(original_node.test, cst.Comparison) and len(original_node.test.comparisons) == 1:
+      comp = original_node.test.comparisons[0]
+      if (
+        isinstance(comp.operator, cst.NotIn)
+        and isinstance(comp.comparator, cst.Name)
+        and comp.comparator.value == "tgt_inputs"
+      ):
+        if self.injection_block.strip() != "pass":
+          parsed = cst.parse_module(self.injection_block).body
+          return updated_node.with_changes(body=updated_node.body.with_changes(body=parsed))
+    return updated_node
+
+  def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.CSTNode:
+    """Modifies the run_verification arguments to use dynamic paths and frameworks.
+
+    Args:
+        original_node: The original LibCST Call node.
+        updated_node: The updated LibCST Call node.
+
+    Returns:
+        The modified Call node with updated keyword arguments,
+        or the updated node unchanged.
+    """
+    if isinstance(original_node.func, cst.Name) and original_node.func.value == "run_verification":
+      args = [
+        cst.Arg(value=cst.SimpleString(f'r"{self.source_path}"'), keyword=cst.Name("source_path")),
+        cst.Arg(value=cst.SimpleString(f'r"{self.target_path}"'), keyword=cst.Name("target_path")),
+        cst.Arg(value=cst.SimpleString(f'"{self.source_fw}"'), keyword=cst.Name("source_fw")),
+        cst.Arg(value=cst.SimpleString(f'"{self.target_fw}"'), keyword=cst.Name("target_fw")),
+        cst.Arg(value=cst.SimpleString(f"r'{self.hints_json}'"), keyword=cst.Name("hints_json_str")),
+      ]
+      return updated_node.with_changes(args=args)
+    return updated_node
 
 
 class HarnessGenerator:
@@ -43,7 +182,16 @@ class HarnessGenerator:
     target_fw: str = "jax",
     semantics: Optional[Dict[str, Any]] = None,
   ) -> None:
-    """Creates the verification harness file."""
+    """Creates the verification harness file and writes it to disk.
+
+    Args:
+        source_file: Path to the source framework script.
+        target_file: Path to the target framework script.
+        output_harness: Target Path where the harness script will be saved.
+        source_fw: Name of the source framework. Defaults to "torch".
+        target_fw: Name of the target framework. Defaults to "jax".
+        semantics: Optional dictionary of semantic operator details for parameter types.
+    """
     fuzzer_code = self._bundle_fuzzer_dependencies()
 
     hints_map = {}
@@ -54,13 +202,13 @@ class HarnessGenerator:
         for arg in args_data:
           if isinstance(arg, (list, tuple)) and len(arg) == 2:
             func_hints[arg[0]] = arg[1]
-          elif isinstance(arg, dict):  # pragma: no cover
+          elif isinstance(arg, dict):
             # Support rich ODL parameter definitions
             name = arg.get("name")
             typ = arg.get("type")
             if name and typ:
               func_hints[name] = typ
-        if func_hints:  # pragma: no cover
+        if func_hints:
           hints_map[op_name] = func_hints
 
     hints_json = json.dumps(hints_map).replace("'", '"')
@@ -71,18 +219,23 @@ class HarnessGenerator:
     imports_block, init_helpers_block, injection_logic_block = self._build_dynamic_init(target_fw)
     to_numpy_block = self._build_result_normalization(source_fw, target_fw)
 
-    script_content = HARNESS_TEMPLATE.format(
+    skeleton = get_harness_skeleton()
+    module = cst.parse_module(skeleton)
+    injector = HarnessInjector(
+      fuzzer_block=fuzzer_block,
+      imports_block=imports_block,
+      init_helpers_block=init_helpers_block,
+      injection_block=injection_logic_block,
+      to_numpy_block=to_numpy_block,
       source_path=source_file.resolve().as_posix(),
       target_path=target_file.resolve().as_posix(),
       source_fw=source_fw,
       target_fw=target_fw,
       hints_json=hints_json,
-      fuzzer_implementation=fuzzer_block,
-      imports=imports_block,
-      init_helpers=init_helpers_block,
-      param_injection_logic=injection_logic_block,
-      to_numpy_logic=to_numpy_block,
     )
+
+    modified_module = module.visit(injector)
+    script_content = modified_module.code
 
     output_harness.parent.mkdir(parents=True, exist_ok=True)
     with open(output_harness, "wt", encoding="utf-8") as f:
@@ -91,8 +244,11 @@ class HarnessGenerator:
   def _bundle_fuzzer_dependencies(self) -> str:
     """Extracts all helper functions required by InputFuzzer.
 
-
     Injects Hypothesis and typing imports globally for the bundle.
+
+    Returns:
+        A single combined string containing imports, classes, and helper
+        functions needed to run the InputFuzzer standalone.
     """
     deps = []
 
@@ -154,7 +310,11 @@ class CallableType(ParsedType):
 """)
 
     def extract_module_functions(module: Any) -> Any:
-      """Execute implementation detail."""
+      """Extracts and de-indents all top-level functions from the given module.
+
+      Args:
+          module: The Python module object to extract functions from.
+      """
       funcs = inspect.getmembers(module, inspect.isfunction)
       for name, func in funcs:
         if func.__module__ == module.__name__:
@@ -182,7 +342,17 @@ class CallableType(ParsedType):
     return "\n\n".join(deps + [fuzzer_class])
 
   def _build_dynamic_init(self, target_fw: str) -> tuple[str, str, str]:
-    """Execute implementation detail."""
+    """Builds initialization helpers and parameter injection logic for the target framework.
+
+    Args:
+        target_fw: Name of the target framework.
+
+    Returns:
+        A tuple containing:
+            - The imports block string.
+            - The helper initialization functions block string.
+            - The injection logic block string.
+    """
     adapter = get_adapter(target_fw)
     if not adapter:
       return "", "", "pass"
@@ -207,12 +377,20 @@ class CallableType(ParsedType):
 
     final_logic = injection_lines[0]
     for line in injection_lines[1:]:
-      final_logic += "\n                    " + line
+      final_logic += "\n" + line
 
     return imports_str, init_code, final_logic
 
   def _build_result_normalization(self, source_fw: str, target_fw: str) -> str:
-    """Execute implementation detail."""
+    """Aggregates NumPy normalization helper codes for the involved frameworks.
+
+    Args:
+        source_fw: Name of the source framework.
+        target_fw: Name of the target framework.
+
+    Returns:
+        A combined string of normalization functions for converting outputs to NumPy.
+    """
     blocks = []
     unique_fws = set([source_fw, target_fw])
     if "flax_nnx" in unique_fws:
@@ -227,13 +405,17 @@ class CallableType(ParsedType):
         except Exception:
           pass
       if code:
-        indented = textwrap.indent(code, "    ")
-        blocks.append(f"# Framework: {fw}\n{indented}")
+        blocks.append(f"# Framework: {fw}\n{code}")
 
-    return "\n    ".join(blocks)
+    return "\n".join(blocks)
 
   def _generate_adapter_shim(self) -> str:
-    """Execute implementation detail."""
+    """Generates a standalone mock/shim of get_adapter for the generated harness.
+
+    Returns:
+        A string containing a Python function definition that returns a
+        generic adapter compatible with registered frameworks.
+    """
     shim_lines = [
       "# Shim for missing get_adapter",
       "def get_adapter(framework):",
@@ -262,8 +444,8 @@ class CallableType(ParsedType):
       clean_block = textwrap.dedent(method_source)
       lines = clean_block.splitlines()
       body_start = 0
-      for i, line in enumerate(lines):  # pragma: no cover
-        if line.strip().startswith("def convert"):  # pragma: no cover
+      for i, line in enumerate(lines):
+        if line.strip().startswith("def convert"):
           body_start = i + 1
           break
 

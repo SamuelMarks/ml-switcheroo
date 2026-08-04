@@ -31,11 +31,21 @@ class TestCaseGenerator:
     Args:
         semantics_mgr: Manager for semantics and templates.
 
+    Returns:
+        None
     """
     self.semantics_mgr = semantics_mgr
 
   def _ensure_runtime_module(self, out_dir: pathlib.Path, frameworks: Any = None) -> None:
-    """Proxies request to runtime_builder."""
+    """Proxies request to runtime_builder.
+
+    Args:
+        out_dir: The directory where the runtime module should be created.
+        frameworks: The collection or list of frameworks to configure.
+
+    Returns:
+        None
+    """
     ensure_runtime_module(out_dir, frameworks, self.semantics_mgr)
 
   def generate(self, semantics: Dict[str, Any], out_file: pathlib.Path) -> None:
@@ -45,6 +55,8 @@ class TestCaseGenerator:
         semantics: Dictionary mapping operator names to their definitions.
         out_file: Path to write the generated Python file.
 
+    Returns:
+        None
     """
     if not semantics:
       return
@@ -62,7 +74,7 @@ class TestCaseGenerator:
       try:
         tree = ast.parse(original_content)
         for node in tree.body:
-          if isinstance(node, ast.FunctionDef) and node.name.startswith("test_gen_"):  # pragma: no cover
+          if isinstance(node, ast.FunctionDef) and node.name.startswith("test_gen_"):
             existing_tests.add(node.name)
       except SyntaxError:
         pass
@@ -166,7 +178,7 @@ class TestCaseGenerator:
               static_indices.append(idx)
           static_argnums = f"{tuple(static_indices)}" if static_indices else "None"
 
-          if "{fn}" in jit_tmpl:  # pragma: no cover
+          if "{fn}" in jit_tmpl:
             # e.g. "jax.jit({fn})" -> jax.jit(fn)
             jit_wrapper = jit_tmpl.format(fn=api_to_call, static_argnums=static_argnums)
             fn_call_expr = f"{jit_wrapper}({', '.join(call_args)})"
@@ -223,7 +235,7 @@ class TestCaseGenerator:
           file_lines.append("    for fw, val in results.items():")
           file_lines.append("        assert np.issubdtype(np.array(val).dtype, bool) or isinstance(val, bool)")
           file_lines.append("")
-        elif return_type in ["Tensor", "Array"]:  # pragma: no cover
+        elif return_type in ["Tensor", "Array"]:
           file_lines.append("    # Type Check")
           file_lines.append("    # Expected Array/Tensor")
           file_lines.append("    for fw, val in results.items():")

@@ -2,10 +2,15 @@
 
 import pytest
 import numpy as np
-from jax.lib import xla_bridge
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
+
+jax = pytest.importorskip("jax")
+try:
+  from jax.lib import xla_bridge
+except ImportError:
+  xla_bridge = None
 
 
 def requires_pjrt():

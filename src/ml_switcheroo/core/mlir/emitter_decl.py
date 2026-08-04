@@ -1,30 +1,63 @@
-"""MLIR Emitter Declaration Mixin."""
+"""MLIR Emitter Declaration Mixin.
+
+This module provides the MlirEmitterDeclMixin class, which is a mixin
+offering capabilities to convert Python class and function definitions
+into MLIR operation nodes (such as sw.module and sw.func).
+"""
 
 import libcst as cst
 from typing import TYPE_CHECKING, Any
-from ml_switcheroo.core.mlir.nodes import OperationNode, RegionNode, AttributeNode, TypeNode
+from ml_switcheroo.core.mlir.cst import OperationNode, RegionNode, AttributeNode, TypeNode
 
 
 class MlirEmitterDeclMixin:
-  """Docstring."""
+  """Mixin class providing MLIR emission capabilities for Python declarations.
+
+  This mixin contains methods for converting Python high-level AST constructs
+  like class definitions and function definitions into corresponding MLIR
+  structural constructs (operations, regions, and blocks).
+  """
 
   if TYPE_CHECKING:
     ctx: Any
 
     def _flatten_attr(self, attr: Any) -> Any:
-      """Docstring."""
+      """Flatten a Name or Attribute chain into a string.
+
+      Args:
+          attr: A LibCST Name or Attribute node representing an identifier chain.
+
+      Returns:
+          A dotted string representation of the chain (e.g. "self.layer"),
+          or None if the attribute chain cannot be flattened.
+      """
       ...
 
     def _emit_block(self, block: Any, label: str = "^bb0") -> Any:
-      """Docstring."""
+      """Convert a sequence of statements or a suite into an MLIR Block.
+
+      Args:
+          block: A CST Suite or list of statement nodes.
+          label: Optional label for the generated block (defaults to "^bb0").
+
+      Returns:
+          A BlockNode representing the populated MLIR Block.
+      """
       ...
 
     def _annotation_to_string(self, ann: Any) -> str:
-      """Docstring."""
+      """Convert a type annotation node to its string representation.
+
+      Args:
+          ann: The type annotation CST node (typically a Name or Attribute).
+
+      Returns:
+          The string representation of the type annotation, or "Any" if not flattenable.
+      """
       ...
 
   def _emit_class_def(self, node: cst.ClassDef) -> OperationNode:
-    """Converts a Python class definition to `sw.module`.
+    """Convert a Python class definition to `sw.module`.
 
     Args:
         node: The ClassDef node.
@@ -55,7 +88,7 @@ class MlirEmitterDeclMixin:
     return op
 
   def _emit_func_def(self, node: cst.FunctionDef) -> OperationNode:
-    """Converts a Python function definition to `sw.func`.
+    """Convert a Python function definition to `sw.func`.
 
     Args:
         node: The FunctionDef node.
@@ -69,19 +102,21 @@ class MlirEmitterDeclMixin:
     block_args = []
 
     for param in node.params.params:
-      if isinstance(param.name, cst.Name):  # pragma: no cover
+      if isinstance(param.name, cst.Name):
         p_name = param.name.value
         val = self.ctx.allocate_ssa(prefix=f"%{p_name}")
         self.ctx.declare(p_name, val)
         t_str = "!sw.unknown"
         if param.annotation:
           t_str = f'!sw.type<"{self._annotation_to_string(param.annotation.annotation)}">'
-        block_args.append((val, TypeNode(t_str)))
+        block_args.append((val, TypeNode(body=t_str)))
 
     body_block = self._emit_block(node.body, label="^entry")
     body_block.arguments = block_args
     op = OperationNode(
-      name="sw.func", attributes=[AttributeNode("sym_name", f'"{func_name}"')], regions=[RegionNode(blocks=[body_block])]
+      name="sw.func",
+      attributes=[AttributeNode(name="sym_name", value=f'"{func_name}"')],
+      regions=[RegionNode(blocks=[body_block])],
     )
     self.ctx.exit_scope()
     return op

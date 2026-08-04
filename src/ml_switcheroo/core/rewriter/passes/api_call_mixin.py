@@ -1,4 +1,11 @@
-"""Mixin for ApiTransformer Call rewriting."""
+"""Mixin for ApiTransformer Call rewriting.
+
+This module provides the `ApiTransformerCallMixin` class, which implements
+the logic for intercepting and rewriting function call nodes (`cst.Call`) during the
+CST transformation pass. It coordinates pre-checks, mapping resolution, version constraints,
+deprecation checks, and strategy execution to convert source-framework APIs into their
+target-framework equivalents.
+"""
 
 from typing import Union
 import libcst as cst
@@ -12,14 +19,48 @@ from ml_switcheroo.core.tracer import get_tracer
 
 
 class ApiTransformerCallMixin:
-  """Docstring."""
+  """Mixin class that handles rewriting function call nodes during CST traversal.
+
+  This class contains the `leave_Call` visitor method that intercepts call expressions.
+  It is designed to be mixed into `ApiTransformer` or mock transformers for testing.
+  It relies on duck typing and expects the inheriting class to provide attributes and
+  methods such as:
+      - `strict_mode` (bool): Whether to fail on unmapped source APIs.
+      - `source_fw` (str): Name of the source framework (e.g., 'torch').
+      - `target_fw` (str): Name of the target framework (e.g., 'jax').
+      - `semantics` (SemanticsManager): Semantic lookup dictionary/object.
+      - `_get_qualified_name(node)`: Resolves fully-qualified names of functions.
+      - `_get_mapping(name)`: Retrieves API translation details/mappings.
+      - `check_version_constraints(min_v, max_v)`: Validates version constraints.
+      - `_report_warning(msg)`: Handles issuing warnings.
+      - `_report_failure(msg)`: Handles throwing or logging failures.
+  """
 
   def leave_Call(
     self,
     original_node: cst.Call,
     updated_node: cst.Call,
   ) -> Union[cst.Call, cst.BinaryOperation, cst.UnaryOperation, cst.CSTNode]:
-    """Main entry point for function call rewriting."""
+    """Intercepts and rewrites a function call node during CST traversal.
+
+    The rewriting process consists of the following phases:
+    1. Resolve the qualified name of the original function callable.
+    2. Execute pre-checks and optional functional unwrappings (e.g. `layer.apply`).
+    3. Retrieve the target API mapping from the semantics registry, falling back to implicit
+       method resolution if needed.
+    4. Validate version compatibility constraints and log deprecation warnings.
+    5. Execute the designated transformation strategy (e.g. inline lambda, macro templates).
+    6. Run post-processing hooks to finalized the rewritten node structure.
+
+    Args:
+        original_node: The original LibCST Call node before traversal.
+        updated_node: The updated LibCST Call node with children visited.
+
+    Returns:
+        The fully rewritten AST node (e.g., cst.Call, cst.BinaryOperation,
+        cst.UnaryOperation) representing the target-framework equivalent,
+        or the original/updated node if no rewrite is performed.
+    """
     # 1. Identify Function
     func_name = self._get_qualified_name(original_node.func)  # type: ignore
 
@@ -37,17 +78,17 @@ class ApiTransformerCallMixin:
       guessed_name = resolve_implicit_method(self, original_node, func_name)
       if guessed_name:
         mapping = self._get_mapping(guessed_name, silent=True)  # type: ignore
-        if mapping:  # pragma: no cover
+        if mapping:
           func_name = guessed_name
 
     if not mapping:
       if is_super_call(original_node):
         return updated_node
 
-      if func_name and not is_builtin(func_name):  # pragma: no cover
+      if func_name and not is_builtin(func_name):
         get_tracer().log_inspection(node_str=func_name, outcome="Skipped", detail="No Entry in Semantics Knowledge Base")
 
-      if self.strict_mode and func_name and func_name.startswith(f"{self.source_fw}."):  # type: ignore  # pragma: no cover
+      if self.strict_mode and func_name and func_name.startswith(f"{self.source_fw}."):  # type: ignore
         self._report_failure(f"API '{func_name}' not found in semantics.")  # type: ignore
 
       return updated_node
@@ -61,13 +102,13 @@ class ApiTransformerCallMixin:
 
     lookup = self.semantics.get_definition(func_name)  # type: ignore
     if not lookup:
-      return updated_node  # pragma: no cover
+      return updated_node
 
     abstract_id, details = lookup
 
     if details.get("deprecated", False):
       msg = f"Usage of deprecated operation '{abstract_id}'."
-      if details.get("replaced_by"):  # pragma: no cover
+      if details.get("replaced_by"):
         msg += f" Consider using '{details['replaced_by']}' instead."
       self._report_warning(msg)  # type: ignore
 

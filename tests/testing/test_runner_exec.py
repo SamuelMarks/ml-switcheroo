@@ -116,3 +116,14 @@ def test_crash_reporting(mock_frameworks):
   assert not passed
   assert "Crash in torch" in msg
   assert "Mock Crash" in msg
+
+
+def test_runner_skip_invalid_variants(mock_frameworks):
+  """Verifies that invalid variants are skipped gracefully."""
+  runner = EquivalenceRunner()
+  # Include invalid details that aren't dicts or lack 'api'
+  variants = {"torch": {"api": "torch.sum"}, "jax": "not_a_dict", "flax": {"other": "stuff"}}
+  # This shouldn't crash
+  (passed, msg) = runner.verify(variants, params=["x"])
+  assert passed
+  assert "✅ Verified" in msg

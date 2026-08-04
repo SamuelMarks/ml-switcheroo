@@ -16,12 +16,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 try:
   import keras
-  import keras.activations  # pragma: no cover
-  import keras.layers  # pragma: no cover
-  import keras.losses  # pragma: no cover
-  import keras.ops  # pragma: no cover
-  import keras.optimizers  # pragma: no cover
-  import keras.random  # pragma: no cover
+  import keras.activations
+  import keras.layers
+  import keras.losses
+  import keras.ops
+  import keras.optimizers
+  import keras.random
 except Exception:
   keras = None
 from ml_switcheroo_ir.schema.ghost import GhostRef
@@ -56,6 +56,10 @@ class KerasAdapter(KerasIOMixin):
 
     Detects if Keras is installed. If not, attempts to load a static snapshot
     for Ghost Mode operation. Logs at DEBUG level if missing to avoid CLI noise.
+
+    Returns:
+        None
+
     """
     self._mode = InitMode.LIVE
     self._snapshot_data: Dict[str, Any] = {}
@@ -63,7 +67,7 @@ class KerasAdapter(KerasIOMixin):
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("keras")
       if not self._snapshot_data:
-        logging.debug("Keras not installed and no snapshot found. Adapter disabled.")  # pragma: no cover
+        logging.debug("Keras not installed and no snapshot found. Adapter disabled.")
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -179,9 +183,9 @@ class KerasAdapter(KerasIOMixin):
         PluginTraits: Object defining capabilities.
 
     """
-    from ml_switcheroo.semantics.schema import PluginTraits  # pragma: no cover
+    from ml_switcheroo.semantics.schema import PluginTraits
 
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=False,
       requires_functional_state=False,
@@ -200,8 +204,8 @@ class KerasAdapter(KerasIOMixin):
 
     """
     defs = load_definitions("keras")
-    if "ReLU" not in defs:
-      defs["ReLU"] = StandardMap(api="keras.layers.ReLU")  # pragma: no cover
+    if "ReLU" not in defs:  # pragma: no cover
+      defs["ReLU"] = StandardMap(api="keras.layers.ReLU")
     return defs
 
   @property
@@ -224,10 +228,10 @@ class KerasAdapter(KerasIOMixin):
         List[GhostRef]: Hydrated references.
 
     """
-    if not self._snapshot_data:  # pragma: no cover
-      return []  # pragma: no cover
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
-    return [GhostRef.model_validate(item) for item in raw_list]  # pragma: no cover
+    if not self._snapshot_data:
+      return []
+    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    return [GhostRef.model_validate(item) for item in raw_list]
 
   def _collect_live(self, category: SemanticTier) -> List[GhostRef]:
     """Scans live modules.
@@ -239,30 +243,30 @@ class KerasAdapter(KerasIOMixin):
         List[GhostRef]: Found items.
 
     """
-    results: list["Any"] = []  # pragma: no cover
-    if category == SemanticTier.LOSS:  # pragma: no cover
+    results: list["Any"] = []
+    if category == SemanticTier.LOSS:
       results.extend(
         getattr(self, "_scan_module", lambda *args, **kwargs: [])(
           keras.losses, "keras.losses", kind="class", block_list={"Loss", "Container"}
         )
-      )  # pragma: no cover
-    elif category == SemanticTier.OPTIMIZER:  # pragma: no cover
-      results.extend(  # pragma: no cover
+      )
+    elif category == SemanticTier.OPTIMIZER:
+      results.extend(
         getattr(self, "_scan_module", lambda *args, **kwargs: [])(
           keras.optimizers, "keras.optimizers", kind="class", block_list={"Optimizer", "TFOptimizer"}
         )
       )
-    elif category == SemanticTier.ACTIVATION:  # pragma: no cover
+    elif category == SemanticTier.ACTIVATION:
       results.extend(
         getattr(self, "_scan_module", lambda *args, **kwargs: [])(keras.activations, "keras.activations", kind="function")
-      )  # pragma: no cover
-    elif category == SemanticTier.LAYER:  # pragma: no cover
+      )
+    elif category == SemanticTier.LAYER:
       results.extend(
         getattr(self, "_scan_module", lambda *args, **kwargs: [])(
           keras.layers, "keras.layers", kind="class", block_list={"Layer"}
         )
-      )  # pragma: no cover
-    return results  # pragma: no cover
+      )
+    return results
 
   def convert(self, data: Any) -> Any:
     """Converts input data to Keras Tensor.
@@ -274,12 +278,12 @@ class KerasAdapter(KerasIOMixin):
         Any: Keras Tensor or original data.
 
     """
-    try:  # pragma: no cover
-      import keras  # pragma: no cover
+    try:
+      import keras
 
-      return keras.ops.convert_to_tensor(data)  # pragma: no cover
-    except (ImportError, AttributeError):  # pragma: no cover
-      return data  # pragma: no cover
+      return keras.ops.convert_to_tensor(data)
+    except (ImportError, AttributeError):
+      return data
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Syntax for device scoping.
@@ -307,17 +311,24 @@ class KerasAdapter(KerasIOMixin):
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """Keras handles RNG state internally.
 
+    Args:
+        rng_var (str): The name of the input random generator/state variable.
+        key_var (str): The variable name to bind the split keys to.
+
     Returns:
-        str: "pass".
+        str: Syntax to pass or execute, which is "pass" here since it is handled internally.
 
     """
-    return "pass"  # pragma: no cover
+    return "pass"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """Applies configuration wiring.
 
     Args:
-        snapshot: Snapshot dict.
+        snapshot (Dict[str, Any]): The snapshot configuration data to apply.
+
+    Returns:
+        None
 
     """
     pass
@@ -335,7 +346,12 @@ class KerasAdapter(KerasIOMixin):
     return f"https://keras.io/search.html?q={api_name}"
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Returns example snippets for each semantic tier."""
+    """Returns example snippets for each semantic tier.
+
+    Returns:
+        Dict[str, str]: Example snippets categorized by semantic tier.
+
+    """
     from ml_switcheroo.frameworks.keras_examples import get_keras_tiered_examples
 
     return get_keras_tiered_examples()

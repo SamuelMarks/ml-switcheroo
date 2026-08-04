@@ -84,11 +84,14 @@ def test_from_toml_path():
   with tempfile.TemporaryDirectory() as d:
     p = Path(d) / "pyproject.toml"
     with open(p, "w") as f:
-      f.write('[tool.ml_switcheroo]\nsource_framework = "jax"\ntarget_framework = "torch"\nenable_sharding = true')
+      f.write(
+        '[tool.ml_switcheroo]\nsource_framework = "jax"\ntarget_framework = "torch"\nenable_sharding = true\nvalidation_report = "custom_report.json"'
+      )
     cfg = RuntimeConfig.load(search_path=Path(d))
     assert cfg.source_framework == "jax"
     assert cfg.target_framework == "torch"
     assert cfg.enable_sharding is True
+    assert str(cfg.validation_report) == "custom_report.json"
     with open(p, "w") as f:
       f.write("malformed [")
     RuntimeConfig.load(search_path=Path(d))

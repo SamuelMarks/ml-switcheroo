@@ -127,7 +127,7 @@ def get_random_shape(seed_shape: Optional[Tuple[int, ...]] = None) -> Tuple[int,
   """Selects a random rank (1-4) and random dimensions (2-5).
 
   Args:
-      seed_shape (Optional[Tuple]): Optional fixed shape to return.
+      seed_shape (Optional[Tuple[int, ...]]): Optional fixed shape to return.
 
   Returns:
       Tuple[int, ...]: The random or seeded shape.
@@ -148,11 +148,11 @@ def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tupl
   varied valid broadcasting patterns (e.g. (A, 1, C) vs (1, B, C)).
 
   Args:
-      base_shape: The target accumulated shape.
-      salt: Integer to vary the random choice (arg index).
+      base_shape (Tuple[int, ...]): The target accumulated shape.
+      salt (int): Integer to vary the random choice (arg index). Defaults to 0.
 
   Returns:
-      A new shape tuple.
+      Tuple[int, ...]: A new shape tuple broadcast-compatible with the base shape.
 
   """
   # Use local random instance to not affect global state
@@ -177,5 +177,15 @@ def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tupl
 
 
 def generate_fake_callable(constraints: Dict[str, Any] = None) -> Any:  # type: ignore
-  """Generates a dummy function (identity) for functional ops."""
+  """Generates a dummy function (identity) for functional ops.
+
+  Args:
+      constraints (Dict[str, Any], optional): Optional constraints which are ignored
+          by the dummy function but provided for interface consistency. Defaults to None.
+
+  Returns:
+      Callable[[Any, ...], Any]: A lambda function that acts as an identity function,
+          returning its first positional argument and accepting any extra arguments.
+
+  """
   return lambda x, *args, **kwargs: x

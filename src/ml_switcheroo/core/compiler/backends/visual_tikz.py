@@ -1,10 +1,10 @@
 """Docstring."""
 
 from collections import defaultdict, deque
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.tikz.nodes import TikzNode, TikzEdge, TriviaNode, TikzOption, TikzGraph, TikzTable
+from ml_switcheroo.core.tikz.nodes import TikzNode, TikzEdge, TriviaNode, TikzOption, TikzGraph, TikzTable, TikzTextNode
 
 
 class TikzBackend(CompilerBackend):
@@ -131,7 +131,7 @@ class TikzBackend(CompilerBackend):
       options.append(TikzOption("fill", "blue!5"))
 
     sanitized_kind = self._sanitize(node.kind)
-    rows = [[rf"\textbf{{{sanitized_kind}}}"]]
+    rows: List[List[Union[str, TikzTextNode]]] = [[rf"\textbf{{{sanitized_kind}}}"]]
     sanitized_id = self._sanitize(node.id)
     rows.append([rf"\textit{{{sanitized_id}}}"])
 

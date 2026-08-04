@@ -31,7 +31,7 @@ jobs:
       - name: Install build tools and deps
         run: |
           python3 -m pip install build
-          python3 -m pip install -r requirements.txt -r docs/requirements.txt
+          python3 -m pip install -r requirements.txt -r docs/docs-requirements.txt
 
       - name: Build Wheel
         # This matches the logic inside your scripts/build_docs.py

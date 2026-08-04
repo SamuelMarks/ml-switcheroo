@@ -45,7 +45,7 @@ def handle_pre_checks(
     unwrap_method = source_traits.functional_execution_method
 
     if is_functional_apply(original, unwrap_method):
-      if isinstance(updated.func, cst.Attribute):  # pragma: no cover
+      if isinstance(updated.func, cst.Attribute):
         receiver = updated.func.value
         # Strip the first argument (variables/params) and use receiver as callable
         # e.g. layer.apply(vars, x) -> layer(x)
@@ -69,7 +69,7 @@ def handle_pre_checks(
   if func_name:
     # Use rewriter._get_mapping logic if available
     mapping = None
-    if hasattr(rewriter, "_get_mapping"):  # pragma: no cover
+    if hasattr(rewriter, "_get_mapping"):
       mapping = rewriter._get_mapping(func_name, silent=True)
 
     if mapping and "requires_plugin" in mapping:
@@ -91,9 +91,9 @@ def handle_pre_checks(
 
   if should_unroll:
     hook = get_hook("unroll_inplace_ops")
-    if hook:  # pragma: no cover
+    if hook:
       new_node = hook(updated, rewriter.context.hook_context)
-      if new_node != updated:  # pragma: no cover
+      if new_node != updated:
         log_diff("In-place Unroll", updated, new_node)
         return True, new_node
 
@@ -105,14 +105,14 @@ def handle_pre_checks(
       method_name = original.func.attr.value
 
       if method_name in strip_set:
-        if isinstance(updated.func, cst.Attribute):  # pragma: no cover
+        if isinstance(updated.func, cst.Attribute):
           rewriter._report_warning(f"Stripped framework-specific lifecycle method '.{method_name}()'.")
           result_node = updated.func.value  # type: ignore
           log_diff("Lifecycle Strip", original, result_node)
           return True, result_node
 
       if method_name in warn_set:
-        if isinstance(updated.func, cst.Attribute):  # pragma: no cover
+        if isinstance(updated.func, cst.Attribute):
           rewriter._report_warning(f"Ignored model state method '.{method_name}()'.")
           result_node = updated.func.value  # type: ignore
           log_diff("Lifecycle Warn", original, result_node)
@@ -151,23 +151,23 @@ def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Option
 
     # Check if module alias (requires rewriter alias checker)
     is_module = False
-    if hasattr(rewriter, "_is_module_alias"):  # pragma: no cover
+    if hasattr(rewriter, "_is_module_alias"):
       is_module = rewriter._is_module_alias(receiver)
 
     if not is_self and not is_module:
       # --- 1. Symbol Table Inference ---
       if hasattr(rewriter, "context") and rewriter.context.symbol_table:
         sym_type = rewriter.context.symbol_table.get_type(receiver)
-        if sym_type:  # pragma: no cover
+        if sym_type:
           # Construct API path based on inferred type
           candidate_api = f"{sym_type.name}.{leaf_method}"
 
           if "Tensor" in sym_type.name and hasattr(sym_type, "framework"):
             candidate_api = f"{sym_type.framework}.Tensor.{leaf_method}"
 
-          if hasattr(rewriter, "_get_mapping"):  # pragma: no cover
+          if hasattr(rewriter, "_get_mapping"):
             mapping = rewriter._get_mapping(candidate_api, silent=True)
-            if mapping:  # pragma: no cover
+            if mapping:
               return candidate_api
 
       # --- 2. Legacy Heuristic Fallback ---
@@ -186,7 +186,7 @@ def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Option
 
         for root in implicit_roots:
           candidate_api = f"{root}.{leaf_method}"
-          if hasattr(rewriter, "_get_mapping"):  # pragma: no cover
+          if hasattr(rewriter, "_get_mapping"):
             mapping = rewriter._get_mapping(candidate_api, silent=True)
             if mapping:
               return candidate_api

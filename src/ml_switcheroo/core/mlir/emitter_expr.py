@@ -1,45 +1,72 @@
-"""MLIR Emitter Expression Mixin."""
+"""MLIR Emitter Expression Mixin.
+
+This module provides the `MlirEmitterExprMixin` class, which handles the
+translation of standard Python expressions (via LibCST AST representation)
+into MLIR operations and values.
+"""
 
 import libcst as cst
 from typing import Tuple, List, TYPE_CHECKING, Any
-from ml_switcheroo.core.mlir.nodes import ValueNode, OperationNode, AttributeNode
+from ml_switcheroo.core.mlir.cst import ValueNode, OperationNode, AttributeNode
 
 
 class MlirEmitterExprMixin:
-  """Docstring."""
+  """Mixin class for emitting MLIR operations from LibCST expressions.
+
+  This mixin provides capabilities to process, lower, and compile various
+  Python expression structures—including name accesses, call operations,
+  binary expressions, and numeric constants—into an equivalent list of
+  supporting MLIR operations and their final evaluated values.
+  """
 
   if TYPE_CHECKING:
     ctx: Any
 
     def _flatten_attr(self, attr: Any) -> Any:
-      """Docstring."""
+      """Flattens a Name or Attribute chain into a dotted string.
+
+      Args:
+          attr: The LibCST node representing the attribute or name to flatten.
+
+      Returns:
+          A dotted string representation of the attribute chain (e.g., "self.layer")
+          or None if it cannot be flattened.
+      """
       ...
 
     def _get_binop_str(self, op: Any) -> str:
-      """Docstring."""
+      """Maps a LibCST binary operator node to its corresponding string identifier.
+
+      Args:
+          op: The LibCST binary operator node (e.g., cst.Add, cst.Multiply).
+
+      Returns:
+          The string identifier (e.g., "add", "mul", "matmul") for the operator.
+      """
       ...
 
   def _emit_expression(self, expr: cst.BaseExpression) -> Tuple[ValueNode, List[OperationNode]]:
-    """Recursively converts an expression into a value and a list of supporting operations.
+    """Recursively converts an expression into a value node and a list of supporting operations.
 
-    Handles:
-    - Variables (Names)
-    - Function Calls (capturing keywords)
-    - Binary Operations
-    - Constants
+    Handles the translation of:
+    - Variable references (Names)
+    - Function and method calls (including keyword arguments)
+    - Binary operations
+    - Numeric constants (Integers and Floats)
 
     Args:
-        expr: The expression node.
+        expr: The LibCST base expression node to be processed.
 
     Returns:
-        Tuple (ResultValue, List[Ops]).
-
+        A tuple containing:
+            - The resulting ValueNode representing the evaluated expression.
+            - A list of OperationNode objects generated to evaluate the expression.
     """
     ops = []  # type: ignore
     if isinstance(expr, cst.Name):
       val = self.ctx.lookup(expr.value)
       if not val:
-        val = ValueNode(f"@{expr.value}")
+        val = ValueNode(name=f"@{expr.value}")
       return val, ops
     elif isinstance(expr, cst.Call):
       operands = []
@@ -71,11 +98,11 @@ class MlirEmitterExprMixin:
         # "arg_keywords" = ["a", "", "b"]
         # We store as list of quoted strings
         kw_vals = [f'"{k}"' for k in arg_keywords]
-        common_attrs.append(AttributeNode("arg_keywords", kw_vals))
+        common_attrs.append(AttributeNode(name="arg_keywords", value=kw_vals))
 
       if is_static_op:
         result = self.ctx.allocate_ssa()
-        attrs = [AttributeNode("type", f'"{flat_name}"')] + common_attrs
+        attrs = [AttributeNode(name="type", value=f'"{flat_name}"')] + common_attrs
         op = OperationNode(
           name="sw.op",
           results=[result],
@@ -93,7 +120,7 @@ class MlirEmitterExprMixin:
           name="sw.getattr",
           results=[attr_val],
           operands=[obj],
-          attributes=[AttributeNode("name", f'"{expr.func.attr.value}"')],
+          attributes=[AttributeNode(name="name", value=f'"{expr.func.attr.value}"')],
         )
         ops.append(get_op)
         res_val = self.ctx.allocate_ssa()
@@ -107,7 +134,7 @@ class MlirEmitterExprMixin:
         ops.append(call_op)
         return res_val, ops
 
-      if isinstance(expr.func, cst.Name):  # pragma: no cover
+      if isinstance(expr.func, cst.Name):
         func_val, f_ops = self._emit_expression(expr.func)
         ops.extend(f_ops)
         result = self.ctx.allocate_ssa()
@@ -127,7 +154,7 @@ class MlirEmitterExprMixin:
         name="sw.op",
         results=[res_val],
         operands=[lhs_val, rhs_val],
-        attributes=[AttributeNode("type", f'"binop.{op_str}"')],
+        attributes=[AttributeNode(name="type", value=f'"binop.{op_str}"')],
       )
       ops.append(op)
       return res_val, ops
@@ -135,15 +162,22 @@ class MlirEmitterExprMixin:
     elif isinstance(expr, (cst.Integer, cst.Float)):
       val = self.ctx.allocate_ssa(prefix="%cst")
       op = OperationNode(
-        name="sw.constant", results=[val], attributes=[AttributeNode("value", getattr(expr, "value", "0"))]
+        name="sw.constant", results=[val], attributes=[AttributeNode(name="value", value=getattr(expr, "value", "0"))]
       )
       ops.append(op)
       return val, ops
 
-    return ValueNode("%error"), []
+    return ValueNode(name="%error"), []
 
   def _annotation_to_string(self, node: cst.CSTNode) -> str:
-    """Flattens a type annotation node to a string representation."""
+    """Flattens a type annotation node into its corresponding string representation.
+
+    Args:
+        node: The LibCST node representing the type annotation.
+
+    Returns:
+        A string representation of the type annotation (e.g., "int", "Any").
+    """
     if isinstance(node, cst.Name):
       return node.value
     elif isinstance(node, cst.Attribute):

@@ -9,7 +9,7 @@ Handles:
 - Merging Snapshot Overlays (Framework mappings).
 - Conflict resolution and prioritization (Warning vs Silencing).
 - Merging Framework Traits and Import Maps.
-- **Merging Patterns**.
+- Merging Patterns.
 """
 
 from typing import Any
@@ -54,13 +54,14 @@ def infer_tier_from_priority(priority: int) -> SemanticTier:
 def merge_frameworks(master_configs: Dict[str, Dict[Any, Any]], new_configs: Dict[str, Any]) -> None:
   """Merges new framework configurations (from __frameworks__ block) into the master.
 
-
   Updates in-place.
 
   Args:
-      master_configs: The central framework definitions dictionary.
-      new_configs: Dictionary of framework traits to merge.
+      master_configs (Dict[str, Dict[Any, Any]]): The central framework definitions dictionary.
+      new_configs (Dict[str, Any]): Dictionary of framework traits to merge.
 
+  Returns:
+      None
   """
   for fw_name, traits in new_configs.items():
     if fw_name not in master_configs:
@@ -80,7 +81,15 @@ def merge_frameworks(master_configs: Dict[str, Dict[Any, Any]], new_configs: Dic
 
 
 def merge_patterns(master_patterns: List[PatternDef], new_patterns: List[Any]) -> None:
-  """Append new patterns to the master list, avoiding duplicates by name."""
+  """Append new patterns to the master list, avoiding duplicates by name.
+
+  Args:
+      master_patterns (List[PatternDef]): The master list of PatternDef objects to update.
+      new_patterns (List[Any]): A list of raw dictionaries representing new patterns.
+
+  Returns:
+      None
+  """
   existing_names = {p.name for p in master_patterns}
 
   for raw in new_patterns:
@@ -101,10 +110,10 @@ def _normalize_args(args_list: List[Any]) -> List[str]:
   - [{"name": "x", "type": "int"}, "y"] -> ["x", "y"]
 
   Args:
-      args_list: List of argument definitions (strings, dicts, or tuples).
+      args_list (List[Any]): List of argument definitions (strings, dicts, or tuples).
 
   Returns:
-      List of argument names.
+      List[str]: List of argument names.
 
   """
   names = []
@@ -137,14 +146,16 @@ def merge_tier_data(
   Otherwise, prefers the richer signature (Superset/Length).
 
   Args:
-      data: Master dictionary of operations.
-      key_origins: Dict tracking where an op was defined (Math vs Neural).
-      framework_configs: Master dictionary of framework traits.
-      new_content: The JSON content being loaded.
-      tier: The Semantic Tier of the file being loaded.
-      patterns: Master list of fusion patterns (optional).
-      is_internal: If True, marks entries as internal defaults which can be silently overwritten.
+      data (Dict[str, Dict[Any, Any]]): Master dictionary of operations.
+      key_origins (Dict[str, str]): Dict tracking where an op was defined (Math vs Neural).
+      framework_configs (Dict[str, Dict[Any, Any]]): Master dictionary of framework traits.
+      new_content (Dict[str, Any]): The JSON content being loaded.
+      tier (SemanticTier): The Semantic Tier of the file being loaded.
+      patterns (Optional[List[PatternDef]]): Master list of fusion patterns (optional).
+      is_internal (bool): If True, marks entries as internal defaults which can be silently overwritten.
 
+  Returns:
+      None
   """
   # Safety check: Guard against malformed content (e.g. strings or lists)
   if not isinstance(new_content, dict):
@@ -286,13 +297,15 @@ def merge_overlay_data(
   that attach to the Abstract Operations ("Hub").
 
   Args:
-      data: Master dictionary of operations.
-      key_origins: Dict tracking tier origins.
-      framework_configs: Master dictionary of framework traits.
-      test_templates: Master dictionary of testing templates.
-      content: The JSON content of the snapshot file.
-      filename: Filename for metadata inference if needed.
+      data (Dict[str, Dict[Any, Any]]): Master dictionary of operations.
+      key_origins (Dict[str, str]): Dict tracking tier origins.
+      framework_configs (Dict[str, Dict[Any, Any]]): Master dictionary of framework traits.
+      test_templates (Dict[str, Dict[Any, Any]]): Master dictionary of testing templates.
+      content (Dict[str, Any]): The JSON content of the snapshot file.
+      filename (str): Filename for metadata inference if needed.
 
+  Returns:
+      None
   """
   target_fw = content.get("__framework__")
 

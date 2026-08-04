@@ -26,13 +26,36 @@ def test_device_syntax_cpu_index():
 def test_serialization_syntax_orbax():
   """Verifies the behavior of serialization syntax orbax."""
   adapter = MockHighLevelAdapter()
-  assert "import orbax.checkpoint" in adapter.get_serialization_imports()[0]
-  save_code = adapter.get_serialization_syntax("save", "dir", "model_state")
-  assert "PyTreeCheckpointer().save" in save_code
-  assert "directory=dir" in save_code
-  assert "item=model_state" in save_code
-  load_code = adapter.get_serialization_syntax("load", "dir")
-  assert "PyTreeCheckpointer().restore(dir)" in load_code
+  # Use the mixin's newly added weight code
+  save_code = adapter.get_weight_save_code("state", "dir")
+  assert "PyTreeCheckpointer" in save_code
+  assert "tuple_params" in save_code
+
+
+def test_weight_load_code():
+  """Test get weight load code."""
+  adapter = MockHighLevelAdapter()
+  code = adapter.get_weight_load_code("path")
+  assert "orbax.checkpoint.PyTreeCheckpointer" in code
+  assert "raw_tree = checkpointer.restore(path)" in code
+  assert "flatten_dict" in code
+
+
+def test_tensor_conversion_syntax():
+  """Test tensor conversion syntax."""
+  adapter = MockHighLevelAdapter()
+  code = adapter.get_tensor_to_numpy_expr("x")
+  assert code == "np.array(x)"
+
+
+def test_weight_save_code():
+  """Test weight save code."""
+  adapter = MockHighLevelAdapter()
+  code = adapter.get_weight_save_code("state", "path")
+  assert "tuple_params =" in code
+  assert "unflatten_dict(tuple_params)" in code
+  assert "orbax.checkpoint.PyTreeCheckpointer" in code
+  assert "checkpointer.save(path" in code
 
 
 def test_wiring_injection():

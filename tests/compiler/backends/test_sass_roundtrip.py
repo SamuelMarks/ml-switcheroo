@@ -43,7 +43,7 @@ def test_round_trip_math_op(semantics_mgr):
   assert "FADD" in sass_text
   assert "Input x" in sass_text
   parser = SassParser(sass_text)
-  ast_nodes = parser.parse()
+  ast_nodes = parser.parse().statements
   assert len(ast_nodes) > 0
   assert "FADD" in sass_text
 
@@ -58,7 +58,7 @@ def test_round_trip_macro_block(semantics_mgr):
   assert "BEGIN Conv2d" in sass_text
   assert "L_KY_conv" in sass_text
   parser = SassParser(sass_text)
-  ast_nodes = parser.parse()
+  ast_nodes = parser.parse().statements
   lifter = SassLifter()
   g_out = lifter.lift(ast_nodes)
   assert len(g_out.nodes) == 3

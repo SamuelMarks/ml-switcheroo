@@ -1,10 +1,10 @@
 """Test suite for the RdnaPrinter module."""
 
-from ml_switcheroo.core.compiler.frontends.rdna.nodes import (
-  Comment,
-  Directive,
-  Instruction,
-  Label,
+from ml_switcheroo.core.compiler.frontends.rdna.cst import (
+  RdnaComment as Comment,
+  RdnaDirective as Directive,
+  RdnaInstruction as Instruction,
+  RdnaLabel as Label,
   RdnaNode,
 )
 from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter

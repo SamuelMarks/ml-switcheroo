@@ -1,0 +1,7 @@
+operation: FromTensorSlices
+description: Definition for from_tensor_slices
+std_args:
+- tensors
+variants:
+  tensorflow:
+    api: tf.data.Dataset.from_tensor_slices

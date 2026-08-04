@@ -1,6 +1,6 @@
 """Test suite for the MlirPrinter module."""
 
-from ml_switcheroo.core.mlir.nodes import ModuleNode, BlockNode, OperationNode, ValueNode, AttributeNode, TypeNode
+from ml_switcheroo.core.mlir.cst import ModuleNode, BlockNode, OperationNode, ValueNode, AttributeNode, TypeNode
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
 
 
@@ -9,7 +9,7 @@ def test_mlir_printer_emit_module_wrapper():
   block = BlockNode(label="")
   op = OperationNode(
     name='"sw.op"',
-    results=[ValueNode("%out")],
+    results=[ValueNode(name="%out")],
     attributes=[AttributeNode("type", '"Input"')],
     result_types=[TypeNode("!sw.unknown")],
   )

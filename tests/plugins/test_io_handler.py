@@ -65,3 +65,31 @@ def test_ignored_if_wrong_target(rewriter):
   with patch("ml_switcheroo.plugins.io_handler.get_adapter", return_value=None):
     code = "torch.save(m, 'p')"
     assert "torch.save" in rewrite_code(rewriter, code)
+
+
+def test_missing_func_name(rewriter):
+  """Verifies behavior when _get_func_name returns None."""
+  node = cst.Call(func=cst.SimpleString("'string'"))
+  ctx = MagicMock()
+  ctx.target_fw = "jax"
+  with patch("ml_switcheroo.plugins.io_handler.get_adapter") as mock_get:
+    mock_get.return_value = JaxCoreAdapter()
+    res = transform_io_calls(node, ctx)
+    assert res is node
+
+
+def test_missing_serialization_syntax(rewriter):
+  """Verifies behavior when adapter returns None for serialization syntax."""
+  node = cst.Call(
+    func=cst.Attribute(value=cst.Name("torch"), attr=cst.Name("save")),
+    args=[cst.Arg(cst.Name("m")), cst.Arg(cst.SimpleString("'p'"))],
+  )
+  ctx = MagicMock()
+  ctx.target_fw = "jax"
+  with patch("ml_switcheroo.plugins.io_handler.get_adapter") as mock_get:
+    mock_adapter = MagicMock()
+    mock_adapter.get_serialization_imports.return_value = []
+    mock_adapter.get_serialization_syntax.return_value = None
+    mock_get.return_value = mock_adapter
+    res = transform_io_calls(node, ctx)
+    assert res is node

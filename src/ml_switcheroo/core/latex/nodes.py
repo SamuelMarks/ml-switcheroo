@@ -38,14 +38,94 @@ class LatexNode(ABC):
     return ""
 
   def to_latex(self) -> str:
-    """Convenience method to render to LaTeX string."""
+    """Convenience method to render to LaTeX string.
+
+    Returns:
+        str: Valid LaTeX code string representing the node.
+    """
     return self.emit(0)
+
+
+@dataclass
+class TextNode(LatexNode):
+  """Raw text node for comments and literals."""
+
+  content: str
+  """The raw text content of the node."""
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Emits raw text.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The raw text representation.
+    """
+    fmt = StructuredFormatter()
+    fmt.add_line(self.content, indent_level)
+    return fmt.build()
+
+
+@dataclass
+class MacroNode(LatexNode):
+  r"""Represents a generic LaTeX macro (e.g. \Macro{arg1}{arg2})."""
+
+  name: str
+  """The name of the LaTeX macro."""
+  args: List[str] = field(default_factory=list)
+  """Arguments passed inside curly braces ``{}``."""
+  options: List[str] = field(default_factory=list)
+  """Optional arguments passed inside square brackets ``[]``."""
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Renders the macro.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: Renders macro representation as valid LaTeX.
+    """
+    fmt = StructuredFormatter()
+    opts = f"[{', '.join(self.options)}]" if self.options else ""
+    args_str = "".join(f"{{{a}}}" for a in self.args)
+    fmt.add_line(f"\\{self.name}{opts}{args_str}", indent_level)
+    return fmt.build()
+
+
+@dataclass
+class EnvironmentNode(LatexNode):
+  r"""Represents a LaTeX environment (e.g. \begin{env}...\end{env})."""
+
+  name: str
+  """The name of the LaTeX environment."""
+  args: List[str] = field(default_factory=list)
+  """Arguments for the environment block inside curly braces ``{}``."""
+  children: List[LatexNode] = field(default_factory=list)
+  """Child nodes nested within the environment."""
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Renders the environment.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The environment representation as valid LaTeX.
+    """
+    fmt = StructuredFormatter()
+    args_str = "".join(f"{{{a}}}" for a in self.args)
+    fmt.add_line(f"\\begin{{{self.name}}}{args_str}", indent_level)
+    for child in self.children:
+      fmt.add_line(child.emit(indent_level + 1), 0)
+    fmt.add_line(f"\\end{{{self.name}}}", indent_level)
+    return fmt.build()
 
 
 @dataclass
 class MemoryNode(LatexNode):
   r"""Represents stateful memory allocation (e.g., Weights/Layers).
-
 
   Maps to the ``\\Attribute`` macro.
 
@@ -64,14 +144,18 @@ class MemoryNode(LatexNode):
   """Configuration parameters for the layer."""
 
   def emit(self, indent_level: int = 0) -> str:
-    r"""Render to ``\\Attribute`` macro."""
-    fmt = StructuredFormatter()
-    # Convert config dict to string "k=v, k2=v2"
+    r"""Render to ``\\Attribute`` macro.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The attribute macro representation as valid LaTeX.
+    """
     config_str = ", ".join(f"{escape_latex(k)}={escape_latex(v)}" for k, v in self.config.items())
     safe_id = escape_latex(self.node_id)
     safe_op = escape_latex(self.op_type)
-    fmt.add_line(f"\\Attribute{{{safe_id}}}{{{safe_op}}}{{{config_str}}}", indent_level)
-    return fmt.build()
+    return MacroNode("Attribute", [safe_id, safe_op, config_str]).emit(indent_level)
 
 
 @dataclass
@@ -92,12 +176,17 @@ class InputNode(LatexNode):
   """Shape descriptor string."""
 
   def emit(self, indent_level: int = 0) -> str:
-    r"""Render to ``\\Input`` macro."""
-    fmt = StructuredFormatter()
+    r"""Render to ``\\Input`` macro.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The input macro representation as valid LaTeX.
+    """
     safe_name = escape_latex(self.name)
     safe_shape = escape_latex(self.shape)
-    fmt.add_line(f"\\Input{{{safe_name}}}{{{safe_shape}}}", indent_level)
-    return fmt.build()
+    return MacroNode("Input", [safe_name, safe_shape]).emit(indent_level)
 
 
 @dataclass
@@ -124,14 +213,19 @@ class ComputeNode(LatexNode):
   """Resulting shape descriptor."""
 
   def emit(self, indent_level: int = 0) -> str:
-    r"""Render to ``\\Op`` macro."""
-    fmt = StructuredFormatter()
+    r"""Render to ``\\Op`` macro.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The compute operation macro representation as valid LaTeX.
+    """
     args_str = ", ".join(escape_latex(a) for a in self.args)
     safe_id = escape_latex(self.node_id)
     safe_op = escape_latex(self.op_type)
     safe_shape = escape_latex(self.shape)
-    fmt.add_line(f"\\Op{{{safe_id}}}{{{safe_op}}}{{{args_str}}}{{{safe_shape}}}", indent_level)
-    return fmt.build()
+    return MacroNode("Op", [safe_id, safe_op, args_str, safe_shape]).emit(indent_level)
 
 
 @dataclass
@@ -158,14 +252,19 @@ class StateOpNode(LatexNode):
   """Resulting shape descriptor."""
 
   def emit(self, indent_level: int = 0) -> str:
-    r"""Render to ``\\StateOp`` macro."""
-    fmt = StructuredFormatter()
+    r"""Render to ``\\StateOp`` macro.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The stateful operation macro representation as valid LaTeX.
+    """
     args_str = ", ".join(escape_latex(a) for a in self.args)
     safe_id = escape_latex(self.node_id)
     safe_attr = escape_latex(self.attribute_id)
     safe_shape = escape_latex(self.shape)
-    fmt.add_line(f"\\StateOp{{{safe_id}}}{{{safe_attr}}}{{{args_str}}}{{{safe_shape}}}", indent_level)
-    return fmt.build()
+    return MacroNode("StateOp", [safe_id, safe_attr, args_str, safe_shape]).emit(indent_level)
 
 
 @dataclass
@@ -183,11 +282,35 @@ class ReturnNode(LatexNode):
   """The variable ID to return."""
 
   def emit(self, indent_level: int = 0) -> str:
-    r"""Render to ``\\Return`` macro."""
-    fmt = StructuredFormatter()
+    r"""Render to ``\\Return`` macro.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The return macro representation as valid LaTeX.
+    """
     safe_tgt = escape_latex(self.target_id)
-    fmt.add_line(f"\\Return{{{safe_tgt}}}", indent_level)
-    return fmt.build()
+    return MacroNode("Return", [safe_tgt]).emit(indent_level)
+
+
+@dataclass
+class DocumentNode(LatexNode):
+  """Root container representing the full LaTeX document."""
+
+  children: List[LatexNode] = field(default_factory=list)
+  """List of child nodes comprising the document."""
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Emits the sequence of document nodes.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The concatenated LaTeX code for all child nodes.
+    """
+    return "\n".join(child.emit(indent_level) for child in self.children)
 
 
 @dataclass
@@ -204,13 +327,13 @@ class ModelContainer(LatexNode):
   """List of body statements (Memory, Input, Ops, Return)."""
 
   def emit(self, indent_level: int = 0) -> str:
-    r"""Render the full ``\\begin{DefModel}...\\end{DefModel}`` block."""
-    fmt = StructuredFormatter()
+    r"""Render the full ``\\begin{DefModel}...\\end{DefModel}`` block.
+
+    Args:
+        indent_level: Current indentation depth.
+
+    Returns:
+        str: The model container block representation as valid LaTeX.
+    """
     safe_name = escape_latex(self.name)
-    fmt.add_line(f"\\begin{{DefModel}}{{{safe_name}}}", indent_level)
-
-    for child in self.children:
-      fmt.add_line(child.emit(indent_level + 1), 0)
-
-    fmt.add_line(r"\end{DefModel}", indent_level)
-    return fmt.build()
+    return EnvironmentNode("DefModel", [safe_name], self.children).emit(indent_level)

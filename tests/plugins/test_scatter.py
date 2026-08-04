@@ -74,3 +74,14 @@ def test_ignore_tf_target(rewriter):
   code = "x.scatter_(1, i, v)"
   res = rewrite_code(rewriter, code)
   assert ".at[" not in res
+
+
+def test_missing_attribute_func():
+  """Verifies behavior when node.func is not an Attribute."""
+  node = cst.Call(
+    func=cst.Name("scatter"), args=[cst.Arg(cst.Integer("1")), cst.Arg(cst.Integer("2")), cst.Arg(cst.Integer("3"))]
+  )
+  ctx = MagicMock()
+  ctx.target_fw = "jax"
+  res = transform_scatter(node, ctx)
+  assert res is node

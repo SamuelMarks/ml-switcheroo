@@ -20,6 +20,15 @@ def test_extract_tensor_dataset_inputs():
   assert len(res) == 2
 
 
+def test_extract_tensor_dataset_inputs_attribute():
+  """Extracts tensor dataset inputs when func is an attribute."""
+  node = cst.Call(
+    func=cst.Attribute(value=cst.Name("data"), attr=cst.Name("TensorDataset")), args=[cst.Arg(cst.Name("x"))]
+  )
+  res = _extract_tensor_dataset_inputs(node)
+  assert len(res) == 1
+
+
 def test_extract_tensor_dataset_inputs_other():
   """Extracts tensor dataset inputs other."""
   node = cst.Call(func=cst.Name("OtherDataset"), args=[cst.Arg(cst.Name("x"))])

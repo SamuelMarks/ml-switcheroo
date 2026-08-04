@@ -22,7 +22,14 @@ from ml_switcheroo.plugins.utils import create_dotted_name, is_framework_module_
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Helper to create a CST Attribute chain from string."""
+  """Helper to create a CST Attribute chain from string.
+
+  Args:
+      name_str: The dot-separated string representation of the attribute chain (e.g., "jnp.reshape").
+
+  Returns:
+      cst.BaseExpression: A libcst Name or Attribute node representing the chain.
+  """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -65,7 +72,7 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
   is_method = False
   if isinstance(node.func, cst.Attribute):
     if is_framework_module_node(node.func.value, ctx):
-      is_method = False  # pragma: no cover
+      is_method = False
     else:
       is_method = True
 

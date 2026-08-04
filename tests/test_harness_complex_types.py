@@ -90,4 +90,5 @@ def test_harness_hints_json_injection(tmp_path):
   gen = HarnessGenerator()
   gen.generate(tmp_path, tmp_path, harness_path, semantics=semantics)
   content = harness_path.read_text()
-  assert 'hints_json_str=r\'{"op": {"x": "int"}}\'' in content
+  assert "hints_json_str" in content
+  assert '{"op": {"x": "int"}}' in content

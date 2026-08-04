@@ -102,6 +102,9 @@ def test_union():
   assert parse_type_annotation("int | float | str") == UnionType(
     types=[PrimitiveType(name="int"), PrimitiveType(name="float"), PrimitiveType(name="str")]
   )
+  assert parse_type_annotation("int | (float | str)") == UnionType(
+    types=[PrimitiveType(name="int"), PrimitiveType(name="float"), PrimitiveType(name="str")]
+  )
   # typing.Union
   assert parse_type_annotation("Union[int, float]") == UnionType(
     types=[PrimitiveType(name="int"), PrimitiveType(name="float")]
@@ -157,6 +160,14 @@ def test_complex_nesting():
     )
   )
   assert parse_type_annotation(type_str) == expected
+
+
+def test_slice_subscript():
+  """Test subscript with a slice to cover the non-Index path."""
+  # In 'Array[1:2]', 1:2 is a cst.Slice, not cst.Index
+  res = parse_type_annotation("Array[1:2]")
+  assert isinstance(res, TensorType)
+  assert res.dims is None
 
 
 def test_parsed_type_base():

@@ -20,12 +20,19 @@ from typing import List
 from dataclasses import dataclass, field
 
 # We reuse the CST nodes but wrap them in semantic validators
-from ml_switcheroo.core.mlir.nodes import OperationNode
+from ml_switcheroo.core.mlir.cst import OperationNode
 
 
 @dataclass
 class OpSchema:
-  """Validation schema for a MLIR operation."""
+  """Validation schema for a MLIR operation.
+
+  Attributes:
+      name: The name of the operation (e.g., 'sw.op').
+      num_regions: The expected number of regions in the operation.
+      required_attributes: List of attribute names required by this operation.
+      has_results: Whether the operation is expected to have one or more results.
+  """
 
   name: str
   num_regions: int = 0
@@ -33,7 +40,16 @@ class OpSchema:
   has_results: bool = False
 
   def validate(self, node: OperationNode) -> bool:
-    """Checks if the CST node conforms to the dialect schema."""
+    """Checks if the CST node conforms to the dialect schema.
+
+    Args:
+        node (OperationNode): The CST node to be validated.
+
+    Returns:
+        bool: True if the node matches the schema name, has the correct number of
+            regions, contains all required attributes, and meets the results
+            requirement if applicable. False otherwise.
+    """
     if node.name != self.name:
       return False
 
@@ -93,7 +109,12 @@ SW_IMPORT = OpSchema(name="sw.import", required_attributes=["names"], has_result
 
 
 class DialectRegistry:
-  """Central registry for dialect validation."""
+  """Central registry for dialect validation.
+
+  This registry maps operation names to their respective OpSchema instances and
+  provides utility methods to validate AST/CST nodes and resolve abstract
+  operation types.
+  """
 
   _OPS = {
     "sw.module": SW_MODULE,
@@ -111,8 +132,14 @@ class DialectRegistry:
   def validate_op(cls, node: OperationNode) -> bool:
     """Validates a single operation node against the schema.
 
+    Args:
+        node (OperationNode): The operation node to validate.
 
-    Returns False if op is unknown or invalid.
+    Returns:
+        bool: True if the operation is valid according to its schema or is an
+            allowable non-dialect (non-sw) operation. False if the operation
+            is a known but invalid 'sw.*' operation, or an unknown 'sw.*'
+            operation.
     """
     schema = cls._OPS.get(node.name)
     if not schema:
@@ -128,6 +155,10 @@ class DialectRegistry:
   def get_abstract_op(cls, op_name: str) -> str:
     """Maps a high-level framework op string (e.g. 'Linear') to the canonical dialect op.
 
-    Currently they all map to 'sw.op' with type attributes, but this allows future expansion.
+    Args:
+        op_name (str): The high-level framework operation name.
+
+    Returns:
+        str: The canonical dialect operation name ('sw.op').
     """
     return "sw.op"

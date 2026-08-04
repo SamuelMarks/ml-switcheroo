@@ -7,7 +7,7 @@ from typing import List, Optional
 import libcst as cst
 import ast
 
-from ml_switcheroo.core.mlir.nodes import OperationNode
+from ml_switcheroo.core.mlir.cst import OperationNode
 from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
 
 
@@ -52,7 +52,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
         # Case 2: String representation (from parser)
         # e.g. '["", "rngs"]'
-        if isinstance(attr.value, str):  # pragma: no cover
+        if isinstance(attr.value, str):
           try:
             # Safe evaluation of list literal
             val = ast.literal_eval(attr.value)

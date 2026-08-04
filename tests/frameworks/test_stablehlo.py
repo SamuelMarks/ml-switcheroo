@@ -39,3 +39,31 @@ def test_stablehlo_properties():
   examples = adapter.get_tiered_examples()
   assert "tier1_math" in examples
   assert "stablehlo.abs" in examples["tier1_math"]
+
+
+def test_stablehlo_missing_coverage():
+  """Verifies untested methods of StableHloAdapter."""
+  adapter = StableHloAdapter()
+
+  # Traits
+  assert adapter.plugin_traits is not None
+
+  # Device & RNG
+  assert adapter.get_device_syntax("cpu") == "// Target: cpu"
+  assert adapter.get_device_check_syntax() == "True"
+  assert adapter.get_rng_split_syntax("rng", "key") == ""
+
+  # Serialization
+  assert adapter.get_serialization_imports() == []
+  assert adapter.get_serialization_syntax("load", "path") == ""
+  assert adapter.get_weight_conversion_imports() == []
+  assert adapter.get_weight_load_code("path") == "# Weights not supported in StableHLO mode"
+  assert adapter.get_tensor_to_numpy_expr("my_tensor") == "my_tensor"
+  assert adapter.get_weight_save_code("state", "path") == "# Weights not supported in StableHLO mode"
+
+  # Documentation
+  assert adapter.get_doc_url("stablehlo.abs") == "https://github.com/openxla/stablehlo/blob/main/docs/spec.md#abs"
+  assert adapter.get_doc_url("other") is None
+
+  # Convert
+  assert adapter.convert(456) == "456"

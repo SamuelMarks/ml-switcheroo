@@ -53,12 +53,20 @@ class _QualNameScanner(cst.CSTVisitor):
   """Execute implementation detail."""
 
   def __init__(self, target_path: str):
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Args:
+        target_path (str): The target attribute path to scan for.
+    """
     self.target_path = target_path
     self.found = False
 
   def visit_Attribute(self, node: cst.Attribute) -> None:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Args:
+        node (cst.Attribute): The CST Attribute node.
+    """
     if self.found:
       return
     try:
@@ -69,7 +77,11 @@ class _QualNameScanner(cst.CSTVisitor):
       pass
 
   def visit_Name(self, node: cst.Name) -> None:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Args:
+        node (cst.Name): The CST Name node.
+    """
     if self.found:
       return
     if node.value == self.target_path:
@@ -80,11 +92,23 @@ class ImportResolver:
   """Execute implementation detail."""
 
   def __init__(self, semantics: SemanticsManager):
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Args:
+        semantics (SemanticsManager): The semantics manager to use for resolution.
+    """
     self.semantics = semantics
 
   def resolve(self, tree: cst.Module, target_fw: str) -> ResolutionPlan:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Args:
+        tree (cst.Module): The CST module to scan.
+        target_fw (str): The target framework name.
+
+    Returns:
+        ResolutionPlan: The planned resolution for imports.
+    """
     required: List[ImportReq] = []
     path_to_alias: Dict[str, str] = {}
     mappings: Dict[str, ImportReq] = {}
@@ -134,20 +158,43 @@ class ImportResolver:
     return ResolutionPlan(required_imports=_deduplicate(required), mappings=mappings, path_to_alias=path_to_alias)
 
   def _is_used(self, tree: cst.Module, name: str) -> bool:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Args:
+        tree (cst.Module): The CST module to scan.
+        name (str): The name to search for.
+
+    Returns:
+        bool: True if the name is used in the module.
+    """
     scanner = SimpleNameScanner(name)
     tree.visit(scanner)
     return scanner.found
 
   def _is_path_used(self, tree: cst.Module, path: str) -> bool:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Args:
+        tree (cst.Module): The CST module to scan.
+        path (str): The path to search for.
+
+    Returns:
+        bool: True if the path is used in the module.
+    """
     scanner = _QualNameScanner(path)
     tree.visit(scanner)
     return scanner.found
 
 
 def _deduplicate(reqs: List[ImportReq]) -> List[ImportReq]:
-  """Execute implementation detail."""
+  """Execute implementation detail.
+
+  Args:
+      reqs (List[ImportReq]): The list of import requirements to deduplicate.
+
+  Returns:
+      List[ImportReq]: The deduplicated list of import requirements.
+  """
   seen = set()
   out = []
   for r in reqs:

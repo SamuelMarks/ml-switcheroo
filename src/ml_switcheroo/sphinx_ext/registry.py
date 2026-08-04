@@ -111,16 +111,16 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
             curr_idx = priorities.index(src_fw)
             rotated = priorities[curr_idx + 1 :] + priorities[:curr_idx]
             for c in rotated:
-              if c in candidates:  # pragma: no branch
+              if c in candidates:
                 tgt_fw = c
                 break
-            else:  # pragma: no cover
-              tgt_fw = candidates[0]  # pragma: no cover
+            else:
+              tgt_fw = candidates[0]
           except ValueError:
             tgt_fw = candidates[0]
 
         if not tgt_fw:
-          tgt_fw = "target_placeholder"  # pragma: no cover
+          tgt_fw = "target_placeholder"
 
         if tgt_fw in final_hierarchy and final_hierarchy[tgt_fw]:
           tgt_flavour = final_hierarchy[tgt_fw][0]["key"]

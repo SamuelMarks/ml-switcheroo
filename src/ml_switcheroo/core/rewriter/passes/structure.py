@@ -65,7 +65,12 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
   @property
   def target_traits(self) -> StructuralTraits:
-    """Lazily load structural traits for the target framework."""
+    """Lazily load structural traits for the target framework.
+
+    Returns:
+        The structural traits of the target framework configuration, or default traits
+        if not specified.
+    """
     if self._cached_target_traits:
       return self._cached_target_traits
 
@@ -77,14 +82,29 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     return self._cached_target_traits
 
   def _get_target_tiers(self) -> List[str]:
-    """Retrieve supported tiers (e.g. ['neural', 'array']) for the target."""
+    """Retrieve supported tiers (e.g. ['neural', 'array']) for the target framework.
+
+    Returns:
+        A list of semantic tier names supported by the target framework.
+    """
     config = self.context.semantics.get_framework_config(self.context.target_fw)
     if config and "tiers" in config:
       return config["tiers"]  # type: ignore
     return [SemanticTier.ARRAY_API.value, SemanticTier.NEURAL.value, SemanticTier.EXTRAS.value]
 
   def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
-    """Resolves a CST node to a dotted string using context aliases."""
+    """Resolves a CST node to a dotted string using context aliases.
+
+    This maps any shorthand imports or alias paths back to their fully qualified,
+    canonical representation as tracked in the context's alias map.
+
+    Args:
+        node: The AST expression node representing the name to qualify.
+
+    Returns:
+        The fully qualified dotted string representation of the node, or None if the
+        node could not be flattened.
+    """
     full_str = self._cst_to_string(node)
     if not full_str:
       return None
@@ -101,17 +121,32 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     return full_str
 
   def _cst_to_string(self, node: cst.BaseExpression) -> Optional[str]:
-    """Helper to flatten Attribute chains."""
+    """Helper to flatten Attribute chains into a dot-separated string.
+
+    Args:
+        node: The AST expression node (typically Attribute or Name chains) to flatten.
+
+    Returns:
+        A dot-separated string representation of the attribute chain, or None if
+        the node is of an unsupported type.
+    """
     if isinstance(node, cst.Name):
       return node.value
     elif isinstance(node, cst.Attribute):
       base = self._cst_to_string(node.value)
-      if base:  # pragma: no cover
+      if base:
         return f"{base}.{node.attr.value}"
     return None
 
   def _create_dotted_name(self, name_str: str) -> cst.BaseExpression:
-    """Constructs a CST node sequence from a dotted string."""
+    """Constructs a CST node sequence from a dotted string.
+
+    Args:
+        name_str: A dot-separated string representing the name path.
+
+    Returns:
+        A LibCST expression node corresponding to the given dotted path structure.
+    """
     parts = name_str.split(".")
     node = cst.Name(parts[0])
     for part in parts[1:]:
@@ -119,7 +154,17 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     return node
 
   def _is_framework_base(self, name: str) -> bool:
-    """Checks if a class name corresponds to any known framework Module base."""
+    """Checks if a class name corresponds to any known framework Module base.
+
+    This is used to determine if a class inheritance hierarchy matches a framework
+    neural network module base (like `torch.nn.Module`).
+
+    Args:
+        name: The string name of the class base to verify.
+
+    Returns:
+        True if the name matches a registered framework module base, False otherwise.
+    """
     if not name:
       return False
 
@@ -149,17 +194,30 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     return False
 
   def _get_source_inference_methods(self) -> Set[str]:
-    """Gets inference methods for source framework (e.g. forward)."""
+    """Gets inference/forward methods for the source framework.
+
+    Returns:
+        A set of method names identified as the main execution/inference hooks in
+        the source framework (e.g., {'forward', '__call__', 'call'}).
+    """
     defaults = {"forward", "__call__", "call"}
     config = self.context.semantics.get_framework_config(self.context.source_fw)
     if config and "traits" in config:
       traits = StructuralTraits.model_validate(config["traits"])
-      if traits.known_inference_methods:  # pragma: no cover
+      if traits.known_inference_methods:
         return traits.known_inference_methods
     return defaults
 
   def _get_type_mapping(self, name: str) -> Optional[Dict[str, Any]]:
-    """Looks up type definition in semantics."""
+    """Looks up the semantic type definition mapping in the database.
+
+    Args:
+        name: The fully qualified name of the source type.
+
+    Returns:
+        A dictionary containing the resolved type target variant details, or None
+        if no mapping was found.
+    """
     lookup = self.context.semantics.get_definition(name)
     if not lookup:
       return None
@@ -169,11 +227,18 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
   # --- Visitor Logic: Module Preamble Injection ---
 
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-    """Injects accumulated module-level preamble statements (e.g. imports, shim classes).
+    """Injects accumulated module-level preamble statements into the transformed module.
 
+    Flushes and clears the internal preamble buffer to prevent double injection in
+    subsequent passes. Prepends any generated imports or shim classes to the beginning
+    of the module body.
 
-    requested by plugins during the rewrite.
-    Flushes and clears the buffer to prevent double injection in subsequent passes.
+    Args:
+        original_node: The original CST Module node.
+        updated_node: The transformed CST Module node.
+
+    Returns:
+        The finalized CST Module node with prepended preamble statements.
     """
     if not self.context.module_preamble:
       return updated_node
@@ -200,20 +265,47 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
   # --- Visitor Logic: Types ---
 
   def visit_Annotation(self, node: cst.Annotation) -> Optional[bool]:
-    """Flag entry into a type annotation context."""
+    """Flag entry into a type annotation context.
+
+    Args:
+        node: The CST Annotation node being entered.
+
+    Returns:
+        True to continue visiting children, or None.
+    """
     self._in_annotation = True
     return True
 
   def leave_Annotation(self, original_node: cst.Annotation, updated_node: cst.Annotation) -> cst.Annotation:
-    """Flag exit from a type annotation context."""
+    """Flag exit from a type annotation context.
+
+    Args:
+        original_node: The original CST Annotation node.
+        updated_node: The transformed CST Annotation node.
+
+    Returns:
+        The updated CST Annotation node.
+    """
     self._in_annotation = False
     return updated_node
 
   def leave_Name(self, original_node: cst.Name, updated_node: cst.Name) -> cst.BaseExpression:
-    """Rewrite type names if inside an annotation."""
+    """Rewrite type names if inside a type annotation.
+
+    Checks the current annotation flag and maps known framework types back to their
+    target equivalent counterparts.
+
+    Args:
+        original_node: The original CST Name node.
+        updated_node: The transformed CST Name node.
+
+    Returns:
+        The mapped CST expression representing the target type, or the updated node
+        if no mapping was applicable.
+    """
     if self._in_annotation:
       full_name = self._get_qualified_name(original_node)
-      if full_name:  # pragma: no cover
+      if full_name:
         mapping = self._get_type_mapping(full_name)
         if mapping and "api" in mapping:
           return self._create_dotted_name(mapping["api"])
@@ -222,12 +314,20 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
   def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
     """Rewrite dotted type attributes (e.g. torch.Tensor) if inside an annotation.
 
-    This fixes issue where complex types like torch.Tensor fail to rewrite because
-    leave_Name only handles the leaves individually without context.
+    This ensures complex type paths are cleanly mapped as whole identifiers
+    rather than treating attribute parts in isolation.
+
+    Args:
+        original_node: The original CST Attribute node.
+        updated_node: The transformed CST Attribute node.
+
+    Returns:
+        The mapped CST expression representing the target type, or the updated node
+        if no mapping was found.
     """
     if self._in_annotation:
       full_name = self._get_qualified_name(original_node)
-      if full_name:  # pragma: no cover
+      if full_name:
         mapping = self._get_type_mapping(full_name)
         if mapping and "api" in mapping:
           return self._create_dotted_name(mapping["api"])
@@ -245,7 +345,18 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
   # --- Visitor Logic: Classes ---
 
   def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
-    """Detect Module inheritance to set processing state."""
+    """Detect Module inheritance to set internal class transformation states.
+
+    Initializes the local scope and checks if the class inherits from a framework-specific
+    module. Records error messages if the target framework does not support the required
+    semantic tiers (such as neural networks).
+
+    Args:
+        node: The CST ClassDef node being visited.
+
+    Returns:
+        True to continue traversing children, or None.
+    """
     self.context.scope_stack.append(set())
 
     is_module = False
@@ -276,7 +387,19 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     return True
 
   def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> Union[cst.ClassDef, cst.CSTNode]:  # type: ignore
-    """Rewrite class inheritance if necessary."""
+    """Rewrite class inheritance bases when leaving a class definition.
+
+    Updates base classes to inherit from the target framework's base module, or registers
+    a failure using escape hatch indicators if transformation errors were encountered.
+
+    Args:
+        original_node: The original CST ClassDef node.
+        updated_node: The transformed CST ClassDef node.
+
+    Returns:
+        The updated class definition node with mapped inheritance bases, or an EscapeHatch
+        failure node if any validation errors occurred.
+    """
     self.context.scope_stack.pop()
 
     if self.context.in_module_class:
@@ -306,12 +429,22 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
   # --- Visitor Logic: Functions ---
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """Push function context onto signature stack."""
+    """Push local function context onto signature and scope stacks.
+
+    Extracts existing parameter arguments and prepares a `SignatureContext` detailing
+    whether the function represents an initializer or a framework module method.
+
+    Args:
+        node: The CST FunctionDef node being visited.
+
+    Returns:
+        True to traverse function children, or None.
+    """
     self.context.scope_stack.append(set())
 
     existing_args = set()
     for param in node.params.params:
-      if isinstance(param.name, cst.Name):  # pragma: no cover
+      if isinstance(param.name, cst.Name):
         existing_args.add(param.name.value)
 
     is_init = node.name.value == "__init__"
@@ -325,7 +458,19 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     return True
 
   def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
-    """Apply signature, name, and body writes to functions."""
+    """Apply signature transformations, renaming, and body injections when leaving functions.
+
+    Performs method renaming for lifecycle hooks (like forward to __call__), strips or injects
+    magic framework parameters, configures super init calls, prepends body statements,
+    and updates any associated docstrings.
+
+    Args:
+        original_node: The original CST FunctionDef node.
+        updated_node: The transformed CST FunctionDef node.
+
+    Returns:
+        The fully restructured, renamed, and formatted CST FunctionDef node.
+    """
     self.context.scope_stack.pop()
     if not self.context.signature_stack:
       return updated_node
@@ -351,7 +496,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       for arg_name, arg_type in traits.inject_magic_args:
         if arg_name not in sig_ctx.existing_args:
           found_injected = any(n == arg_name for n, _ in sig_ctx.injected_args)
-          if not found_injected:  # pragma: no cover
+          if not found_injected:
             sig_ctx.injected_args.append((arg_name, arg_type))
 
       # Strip Magic Args

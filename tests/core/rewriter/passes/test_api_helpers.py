@@ -186,6 +186,11 @@ def test_check_version_constraints():
     m.setattr(importlib.metadata, "version", lambda x: 1 / 0)
     assert helper.check_version_constraints("1.0", None) is None
 
+    # test flax_nnx substitution
+    helper.target_fw = "flax_nnx"
+    m.setattr(importlib.metadata, "version", lambda x: "2.0.0" if x == "flax" else None)
+    assert helper.check_version_constraints("1.0", None) is None
+
 
 def test_apply_preamble():
   """Applies preamble."""
@@ -214,9 +219,45 @@ def test_inject_argument_exists():
   assert len(new_func.params.params) == 2
 
 
-def test_inject_stmts_to_body_oneliner():
-  """Injects stmts to body oneliner."""
+def test_apply_preamble_exception():
+  """Tests fallback when cst.parse_module throws an error inside _apply_preamble."""
   helper = MockHelper()
-  func = cst.parse_module("def foo(): pass").body[0]
-  new_func = helper._inject_stmts_to_body(func, [cst.parse_module("x = 1").body[0]])
-  assert isinstance(new_func.body, cst.IndentedBlock)
+  func = cst.parse_module("def foo():\n  pass").body[0]
+  # Using invalid syntax to trigger parse error
+  new_func = helper._apply_preamble(func, ["x = 1", "invalid syntax!"])
+  assert len(new_func.body.body) == 2  # pass, and x=1
+
+
+def test_convert_to_indented_block_fallback():
+  """Tests _convert_to_indented_block when body is already IndentedBlock."""
+  helper = MockHelper()
+  func = cst.parse_module("def foo():\n  pass").body[0]
+  # Function body is an IndentedBlock
+  res = helper._convert_to_indented_block(func)
+  assert res is func
+
+
+def test_get_mapping_not_dict():
+  """Tests _get_mapping when target_impl is present but not a dict."""
+  helper = MockHelper()
+
+  class FakeImpl:
+    def get(self, *args, **kwargs):
+      return "fake_api"
+
+  helper.semantics.defs["numpy.stringmap"] = ("numpy.stringmap", {"verified": True, "variants": {"jax": FakeImpl()}})
+  assert helper._get_mapping("numpy.stringmap") is None
+
+
+def test_cst_to_string_fallback():
+  """Tests _cst_to_string with unsupported node type."""
+  helper = MockHelper()
+  # Pass() is not supported, should return None
+  assert helper._cst_to_string(cst.Pass()) is None
+
+
+def test_version_parse_empty():
+  """Tests check_version_constraints with an empty version string which raises error during parse."""
+  helper = MockHelper()
+  helper.semantics.framework_configs["jax"]["version"] = ""
+  assert helper.check_version_constraints("1.0", None) is None

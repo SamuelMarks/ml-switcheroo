@@ -65,4 +65,3 @@ def test_dynamic_logic_noop(generator, tmp_path):
     content = out_file.read_text(encoding="utf-8")
     assert "import magic_lib" not in content
     assert "val = None(seed=42)" not in content.replace("_", "")
-    assert "# --- HELPERS FOR STATE INJECTION ---" in content

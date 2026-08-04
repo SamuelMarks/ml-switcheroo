@@ -60,3 +60,36 @@ def test_safety_limit(rewriter):
   code = "for i in range(100):\n    pass"
   res = rewrite_code(rewriter, code)
   assert "range(100)" in res
+
+
+def test_unroll_value_error(rewriter):
+  """Verifies handling of ValueError during integer parsing."""
+  node = cst.For(
+    target=cst.Name("i"),
+    iter=cst.Call(func=cst.Name("range"), args=[cst.Arg(cst.Integer("0"))]),
+    body=cst.IndentedBlock(body=[cst.SimpleStatementLine([cst.Pass()])]),
+  )
+  from unittest.mock import patch, PropertyMock
+
+  with patch.object(cst.Integer, "value", new_callable=PropertyMock) as mock_val:
+    mock_val.return_value = "not an integer"
+    res = unroll_static_loops(node, rewriter.ctx)
+  assert res is node
+
+
+def test_unroll_target_not_name(rewriter):
+  """Verifies behavior when loop target is not a Name."""
+  code = "for i, j in range(2):\n    pass"
+  res = rewrite_code(rewriter, code)
+  assert "for i, j in range(2):" in res
+
+
+def test_unroll_body_not_indented(rewriter):
+  """Verifies behavior when loop body is not an IndentedBlock."""
+  node = cst.For(
+    target=cst.Name("i"),
+    iter=cst.Call(func=cst.Name("range"), args=[cst.Arg(cst.Integer("2"))]),
+    body=cst.SimpleStatementSuite(body=[cst.Pass()]),
+  )
+  res = unroll_static_loops(node, rewriter.ctx)
+  assert res is node

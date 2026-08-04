@@ -45,6 +45,9 @@ class JAXStackMixin:
     - `convert_input`: Syntax to convert Numpy array to JAX array.
     - `to_numpy`: Identity transform (preserves PyTrees for Chex comparison).
     - `jit_template`: Detailed JAX JIT syntax with static argument support.
+
+    Returns:
+        Dict[str, str]: A dictionary mapping configuration keys to syntax templates.
     """
     return {
       "import": "import jax\nimport jax.numpy as jnp\ntry:\n    import chex\nexcept ImportError:\n    pass",
@@ -56,8 +59,10 @@ class JAXStackMixin:
   def get_to_numpy_code(self) -> str:
     """Returns logic to convert JAX arrays to NumPy.
 
-
     Checks for `__array__` protocol which JAX arrays implement.
+
+    Returns:
+        str: Python code string representing the conversion logic.
     """
     return "if hasattr(obj, '__array__'): return np.array(obj)"
 
@@ -74,8 +79,7 @@ class JAXStackMixin:
         device_index: Optional index string (e.g., "0").
 
     Returns:
-        Python code string constructing the device object: ``jax.devices('gpu')[0]``.
-
+        str: Python code string constructing the device object: ``jax.devices('gpu')[0]``.
     """
     # Clean quotes if present to check value
     clean_type = device_type.strip("'\"").lower()
@@ -92,6 +96,9 @@ class JAXStackMixin:
     """Returns JAX syntax for checking if GPUs are available.
 
     Format: ``len(jax.devices('gpu')) > 0``.
+
+    Returns:
+        str: Python code string representing the GPU check syntax.
     """
     return "len(jax.devices('gpu')) > 0"
 
@@ -99,13 +106,24 @@ class JAXStackMixin:
     """Returns JAX syntax for splitting a PRNG key.
 
     Format: ``rng, key = jax.random.split(rng)``.
+
+    Args:
+        rng_var: Variable name for the input and output PRNG key.
+        key_var: Variable name for the split-off child key.
+
+    Returns:
+        str: Python code string representing the split operation.
     """
     return f"{rng_var}, {key_var} = jax.random.split({rng_var})"
 
   # --- IO Serialization (Level 1 - Orbax) ---
 
   def get_serialization_imports(self) -> List[str]:
-    """Returns standard imports for JAX serialization via Orbax."""
+    """Returns standard imports for JAX serialization via Orbax.
+
+    Returns:
+        List[str]: List of standard import statement strings.
+    """
     return ["import orbax.checkpoint"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
@@ -117,20 +135,23 @@ class JAXStackMixin:
         object_arg: The PyTree to save (required for save).
 
     Returns:
-        Python code string.
-
+        str: Python code string.
     """
     if op == "save" and object_arg:
       return f"orbax.checkpoint.PyTreeCheckpointer().save(directory={file_arg}, item={object_arg})"
     elif op == "load":
       return f"orbax.checkpoint.PyTreeCheckpointer().restore({file_arg})"
-    return ""  # pragma: no cover
+    return ""
 
   # --- Weight Migration (Adapter) ---
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """Returns imports required for the generated weight migration script."""
-    return [  # pragma: no cover
+    """Returns imports required for the generated weight migration script.
+
+    Returns:
+        List[str]: List of import statements.
+    """
+    return [
       "import jax.numpy as jnp",
       "import orbax.checkpoint",
       "from flax.traverse_util import unflatten_dict, flatten_dict",
@@ -140,8 +161,14 @@ class JAXStackMixin:
     """Returns python code to load a checkpoint from `path_var` into a variable named `raw_state`.
 
     The `raw_state` is a flat dictionary where keys are dot-separated strings (e.g. 'layer.weight').
+
+    Args:
+        path_var: Variable name containing the directory path to load.
+
+    Returns:
+        str: Python code snippet representing weight loading logic.
     """
-    return textwrap.dedent(  # pragma: no cover
+    return textwrap.dedent(
       f"""
             # Load with Orbax and Flatten
             checkpointer = orbax.checkpoint.PyTreeCheckpointer()
@@ -159,15 +186,29 @@ class JAXStackMixin:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Returns a python expression string that converts `tensor_var` from JAX array to numpy array."""
-    return f"np.array({tensor_var})"  # pragma: no cover
+    """Returns a python expression string that converts `tensor_var` from JAX array to numpy array.
+
+    Args:
+        tensor_var: Variable name of the JAX array.
+
+    Returns:
+        str: Python expression string.
+    """
+    return f"np.array({tensor_var})"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """Returns python code to save the dictionary `state_var` (mapping flat keys to numpy arrays).
 
     to `path_var`. It unstricts flat keys back to PyTree structure using `unflatten_dict` and saves via Orbax.
+
+    Args:
+        state_var: Name of the dictionary mapping flat keys to numpy arrays.
+        path_var: Target path variable.
+
+    Returns:
+        str: Python code snippet representing weight saving logic.
     """
-    return textwrap.dedent(  # pragma: no cover
+    return textwrap.dedent(
       f"""
             # Restructure PyTree
             # Convert dot keys back to tuple keys
@@ -192,8 +233,7 @@ class JAXStackMixin:
         api_name: The fully qualified API path (e.g. 'jax.numpy.abs').
 
     Returns:
-        String URL or None.
-
+        Optional[str]: String URL or None.
     """
     return f"https://jax.readthedocs.io/en/latest/_autosummary/{api_name}.html"
 
@@ -212,6 +252,8 @@ class JAXStackMixin:
         snapshot: The semantic snapshot dictionary to mutate.
                   Expected structure: {'mappings': {}, 'templates': {}}
 
+    Returns:
+        None (mutates the snapshot dictionary in-place).
     """
     mappings = snapshot.setdefault("mappings", {})
     templates = snapshot.setdefault("templates", {})

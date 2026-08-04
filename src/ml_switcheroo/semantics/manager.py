@@ -71,18 +71,14 @@ class SemanticsManager:
     self._build_index()
 
   def _build_index(self) -> None:
-    """Constructs the reverse index mapping from concrete API endpoints.
-
-
-    back to their abstract definitions.
-    """
+    """Constructs the reverse index mapping from concrete API endpoints back to their abstract definitions."""
     self._reverse_index.clear()
     alias_map = {}
     for fw, config in self.framework_configs.items():
       if "alias" in config:
         mod = config["alias"].get("module")
         name = config["alias"].get("name")
-        if mod and name:  # pragma: no cover
+        if mod and name:
           alias_map[name] = mod
 
     alias_map["tf"] = "tensorflow"
@@ -95,6 +91,14 @@ class SemanticsManager:
       """Determines indexing priority when multiple abstract ops map to the same target API.
 
       This handles overlaps between generic ops like `cat` vs `concat`.
+
+      Args:
+          abs_id: The abstract operation identifier.
+          details: The details of the abstract operation.
+          tier: The semantic tier of the abstract operation.
+
+      Returns:
+          An integer priority score (higher score wins).
       """
       score = 0
       if abs_id == "cat":
@@ -151,6 +155,9 @@ class SemanticsManager:
             """Registers the target concrete API mapped back to its abstract concept.
 
             Uses tie-breaker scores when overlaps are found.
+
+            Args:
+                name: The concrete API name or fully qualified name to register.
             """
             if name in self._reverse_index:
               existing_id, existing_details = self._reverse_index[name]
@@ -176,7 +183,6 @@ class SemanticsManager:
 
     Returns:
         Dict mapping source import paths to (root, sub, alias) tuples.
-
     """
     result = {}
     target_providers = self._providers.get(target_fw, {})
@@ -195,13 +201,20 @@ class SemanticsManager:
         sub = target_config.get("sub")
         alias = target_config.get("alias")
 
-        if root:  # pragma: no cover
+        if root:
           result[src_path] = (root, sub, alias)
 
     return result
 
   def _resolve_inheritance(self, fw: str) -> Optional[str]:
-    """Finds parent framework key if exists."""
+    """Finds parent framework key if exists.
+
+    Args:
+        fw: The framework name/key to check.
+
+    Returns:
+        The parent framework key as a string, or None if no inheritance exists.
+    """
     conf = self.framework_configs.get(fw, {})
     if "extends" in conf:
       return str(conf["extends"])
@@ -212,7 +225,16 @@ class SemanticsManager:
     return None
 
   def resolve_variant(self, abstract_id: str, target_fw: str) -> Optional[Dict[str, Any]]:
-    """Resolves the implementation of an abstract operation."""
+    """Resolves the implementation of an abstract operation.
+
+    Args:
+        abstract_id: The unique identifier of the abstract operation.
+        target_fw: The target framework name to resolve the variant for.
+
+    Returns:
+        A dictionary containing the implementation variant details, or None if
+        the variant cannot be resolved.
+    """
     defn = self.data.get(abstract_id)
     if not defn:
       return None
@@ -233,16 +255,39 @@ class SemanticsManager:
     return None
 
   def is_verified(self, abstract_id: str) -> bool:
-    """Returns True if the operation is marked verified (or untracked)."""
+    """Returns True if the operation is marked verified (or untracked).
+
+    Args:
+        abstract_id: The unique identifier of the abstract operation.
+
+    Returns:
+        True if the operation is verified or untracked, False otherwise.
+    """
     status_map = getattr(self, "_validation_status", {})
     return status_map.get(abstract_id, True)  # type: ignore
 
   def get_definition_by_id(self, abstract_id: str) -> Optional[Dict[str, Any]]:
-    """Direct dictionary access."""
+    """Direct dictionary access.
+
+    Args:
+        abstract_id: The unique identifier of the abstract operation.
+
+    Returns:
+        The dictionary containing the definition of the abstract operation, or
+        None if not found.
+    """
     return self.data.get(abstract_id)
 
   def get_definition(self, api_name: str) -> Optional[Tuple[str, Dict[Any, Any]]]:
-    """Reverse lookup from concrete API string or Abstract ID fallback."""
+    """Reverse lookup from concrete API string or Abstract ID fallback.
+
+    Args:
+        api_name: The concrete API endpoint string or abstract ID fallback.
+
+    Returns:
+        A tuple of (abstract_id, definition_dict) if resolved, or None if not
+        found.
+    """
     res = self._reverse_index.get(api_name)
     if res:
       return res
@@ -253,53 +298,94 @@ class SemanticsManager:
     return None
 
   def get_known_apis(self) -> Dict[str, Dict[Any, Any]]:
-    """Returns full knowledge graph."""
+    """Returns full knowledge graph.
+
+    Returns:
+        A dictionary mapping abstract IDs to their full operation definitions.
+    """
     return self.data
 
   def get_framework_config(self, framework: str) -> Dict[str, Any]:
-    """Returns definition of framework traits."""
+    """Returns definition of framework traits.
+
+    Args:
+        framework: The name of the target framework.
+
+    Returns:
+        A dictionary representing the framework configuration and traits.
+    """
     return self.framework_configs.get(framework, {})
 
   def get_test_template(self, framework: str) -> Optional[Dict[str, str]]:
-    """Returns testing codegen templates."""
+    """Returns testing codegen templates.
+
+    Args:
+        framework: The name of the target framework.
+
+    Returns:
+        A dictionary mapping template names to template strings if available,
+        or None.
+    """
     return self.test_templates.get(framework)
 
   def get_framework_aliases(self) -> Dict[str, Tuple[str, str]]:
-    """Returns a map of {fw: (module, alias)}."""
+    """Returns a map of {fw: (module, alias)}.
+
+    Returns:
+        A dictionary mapping framework identifiers to a tuple containing the
+        importable module path and its designated import alias.
+    """
     result: Dict[str, Tuple[str, str]] = {}
     for fw, config in self.framework_configs.items():
       alias_conf = config.get("alias")
       if alias_conf and isinstance(alias_conf, dict):
         mod = alias_conf.get("module")
         alias = alias_conf.get("name")
-        if mod and alias:  # pragma: no cover
+        if mod and alias:
           result[fw] = (mod, alias)
     return result
 
   def get_all_rng_methods(self) -> Set[str]:
-    """Returns aggregate list of random seeding methods."""
+    """Returns aggregate list of random seeding methods.
+
+    Returns:
+        A set of random number generator method names.
+    """
     return self._known_rng_methods
 
   def get_patterns(self) -> List[PatternDef]:
-    """Returns the list of loaded fusion patterns."""
+    """Returns the list of loaded fusion patterns.
+
+    Returns:
+        A list of PatternDef objects defining fusion patterns.
+    """
     return self.patterns
 
   def load_validation_report(self, report_path: Path) -> None:
-    """Loads a CI verification report to gate unavailable operations."""
+    """Loads a CI verification report to gate unavailable operations.
+
+    Args:
+        report_path: The filesystem path to the validation report JSON file.
+    """
     if not report_path.exists():
       print(f"⚠️ Validation report not found at {report_path}. Skipping gating.")
       return
     try:
       with open(report_path, "r", encoding="utf-8") as f:
         report = json.load(f)
-        if isinstance(report, dict):  # pragma: no cover
+        if isinstance(report, dict):
           self._validation_status.update(report)
           print(f"🔒 Loaded {len(report)} verification statuses.")
     except Exception as e:
       print(f"❌ Error loading validation report: {e}")
 
   def update_definition(self, abstract_id: str, new_data: Dict[str, Any]) -> None:
-    """Updates an operation definition in memory and persists to disk."""
+    """Updates an operation definition in memory and persists to disk.
+
+    Args:
+        abstract_id: The unique identifier of the abstract operation.
+        new_data: The dictionary containing the updated operation details.
+    """
     # Create a copy to inject defaults without mutating input
     details_to_validate = new_data.copy()
 
@@ -323,7 +409,7 @@ class SemanticsManager:
     self.data[abstract_id] = final_data
     variants = final_data.get("variants", {})
     for _, impl in variants.items():
-      if isinstance(impl, dict) and "api" in impl:  # pragma: no cover
+      if isinstance(impl, dict) and "api" in impl:
         self._reverse_index[impl["api"]] = (abstract_id, final_data)
 
     safe_name = abstract_id.replace("/", "_")

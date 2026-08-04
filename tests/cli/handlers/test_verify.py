@@ -45,6 +45,23 @@ def test_handle_ci_success(mock_config, mock_semantics, mock_validator, mock_loa
   assert handle_ci(False, Path("README.md"), None, False) == 0
 
 
+def test_handle_ci_plugin_load_none(mock_config, mock_semantics, mock_validator, mock_load_plugins):
+  """Handles ci when loaded plugins is 0."""
+  mock_load_plugins.return_value = 0
+  mock_val_instance = mock_validator.return_value
+  mock_val_instance.run_all.return_value = {}
+  assert handle_ci(False, Path("README.md"), None, False) == 0
+
+
+def test_handle_ci_repair_no_defn(mock_config, mock_semantics, mock_validator):
+  """Handles ci repair when no definition is found."""
+  mock_val_instance = mock_validator.return_value
+  mock_val_instance.run_all.return_value = {"Op1": False}
+  mock_sem_instance = mock_semantics.return_value
+  mock_sem_instance.get_definition_by_id.return_value = None
+  assert handle_ci(False, Path("README.md"), None, True) == 0
+
+
 def test_handle_ci_config_error(mock_config, mock_semantics, mock_validator):
   """Handles ci configuration correctly handling an error."""
   mock_config.side_effect = Exception("boom")
@@ -71,7 +88,7 @@ def test_handle_ci_repair_no_fixes(mock_config, mock_semantics, mock_validator):
   mock_val_instance = mock_validator.return_value
   mock_val_instance.run_all.return_value = {"Op1": True, "Op2": False}
   mock_sem_instance = mock_semantics.return_value
-  mock_sem_instance.get_definition_by_id.return_value = {}
+  mock_sem_instance.get_definition_by_id.return_value = {"some": "definition"}
   with patch("ml_switcheroo.cli.handlers.verify.SemanticsBisector") as mock_bisector:
     mock_bis_inst = mock_bisector.return_value
     mock_bis_inst.propose_fix.return_value = None

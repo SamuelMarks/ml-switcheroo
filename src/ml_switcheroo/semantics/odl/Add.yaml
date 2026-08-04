@@ -1,13 +1,54 @@
+operation: Add
 description: Calculates the sum for each element ``x1_i`` of the input array ``x1``
   with the respective element ``x2_i`` of the input array ``x2``.
 std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x1
+- name: x1
   type: Union[array, int, float, complex]
-- is_variadic: false
+  is_variadic: false
   kind: positional_or_keyword
-  name: x2
+- name: x2
   type: Union[array, int, float, complex]
-variants: {}
-operation: Add
+  is_variadic: false
+  kind: positional_or_keyword
+variants:
+  torch:
+    api: torch.add
+    args:
+      self: self
+      x: x
+      y: y
+  rdna:
+    api: v_add_f32
+    required_imports: []
+  sass:
+    api: FADD
+  numpy:
+    api: numpy.add
+    macro_template: numpy.add({input}, {other} * {alpha})
+  tensorflow:
+    api: tf.math.add
+    macro_template: tf.math.add({input}, {other} * {alpha})
+  paxml:
+    api: jax.numpy.add
+    macro_template: jax.numpy.add({input}, {other} * {alpha})
+    required_imports: []
+  jax:
+    api: jax.numpy.add
+    args: {}
+    macro_template: jax.numpy.add({input}, {other} * {alpha})
+  mlx:
+    api: mlx.core.add
+    args:
+      args: args
+      kwargs: kwargs
+    macro_template: mlx.core.add({input}, {other} * {alpha})
+  flax_nnx:
+    api: jax.numpy.add
+    args: {}
+    macro_template: jax.numpy.add({input}, {other} * {alpha})
+  keras:
+    api: keras.ops.add
+    args:
+      inputs: inputs
+      kwargs: kwargs
+    macro_template: keras.ops.add({input}, {other} * {alpha})

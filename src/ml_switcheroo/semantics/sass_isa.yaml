@@ -1,7 +1,69 @@
+ACQBULK:
+  alu: acqbulk
+ACQSHMINIT:
+  alu: acqshminit
+ATOM:
+  memory: atom
+ATOMG:
+  memory: atomg
+ATOMS:
+  memory: atoms
+B2R:
+  alu: b2r
 BAR:
   control_flow: barrier
+BGMMA:
+  tensor_core: bgmma
+BMMA:
+  tensor_core: bmma
+BMOV:
+  alu: bmov
+BMSK:
+  alu: bmsk
+BPT:
+  alu: bpt
 BRA:
   control_flow: branch
+BREAK:
+  alu: break
+BREV:
+  alu: brev
+BRX:
+  control_flow: brx
+BRXU:
+  control_flow: brxu
+BSSY:
+  alu: bssy
+BSYNC:
+  alu: bsync
+CALL:
+  control_flow: call
+CCTL:
+  alu: cctl
+CCTLL:
+  alu: cctll
+CCTLT:
+  alu: cctlt
+CGAERRBAR:
+  alu: cgaerrbar
+CREDUX:
+  alu: credux
+CS2R:
+  alu: cs2r
+CS2UR:
+  alu: cs2ur
+DADD:
+  alu: dadd
+DEPBAR:
+  alu: depbar
+DFMA:
+  alu: dfma
+DMMA:
+  tensor_core: dmma
+DMUL:
+  alu: dmul
+DSETP:
+  alu: dsetp
 DUMMY_SASS_INST_0:
   alu: dummy_0
 DUMMY_SASS_INST_1:
@@ -72,29 +134,387 @@ DUMMY_SASS_INST_8:
   alu: dummy_8
 DUMMY_SASS_INST_9:
   alu: dummy_9
+ELECT:
+  alu: elect
+ENDCOLLECTIVE:
+  alu: endcollective
+ERRBAR:
+  alu: errbar
+EXIT:
+  control_flow: exit
+F2F:
+  alu: f2f
+F2I:
+  alu: f2i
+F2IP:
+  alu: castint
 FADD:
   alu: float_add
+FCHK:
+  alu: fchk
+FENCE:
+  alu: fence
 FFMA:
   alu: fused_multiply_add
+FFMA32I:
+  alu: fusedmultiplyadd
+FLO:
+  alu: flo
+FMNMX:
+  alu: minmax
+FMNMX3:
+  alu: fmnmx3
 FMUL:
   alu: float_multiply
+FRND:
+  alu: frnd
+FSEL:
+  alu: fsel
+FSET:
+  alu: fset
+FSETP:
+  alu: fsetp
+FSWZADD:
+  alu: fswzadd
+GETLMEMBASE:
+  alu: getlmembase
+HADD2:
+  alu: hadd2
+HADD2_32I:
+  alu: hadd2_32i
+HFMA2:
+  alu: hfma2
+HFMA2_32I:
+  alu: hfma2_32i
+HGMMA:
+  tensor_core: hgmma
 HMMA:
   tensor_core: half_mma
+HMNMX2:
+  alu: hmnmx2
+HMUL2:
+  alu: hmul2
+HMUL2_32I:
+  alu: hmul2_32i
+HSET2:
+  alu: hset2
+HSETP2:
+  alu: hsetp2
+I2F:
+  alu: i2f
+I2FP:
+  alu: castfloat
+I2I:
+  alu: i2i
+I2IP:
+  alu: i2ip
+IABS:
+  alu: abs
+IDP:
+  alu: idp
+IDP4A:
+  alu: idp4a
+IGMMA:
+  tensor_core: igmma
 IMAD:
   alu: integer_multiply_add
 IMMA:
   tensor_core: int_mma
+IMNMX:
+  alu: imnmx
+ISETP:
+  alu: isetp
 ISETP.LT.AND:
   control_flow: loop_cond
+JMP:
+  control_flow: jmp
+JMX:
+  control_flow: jmx
+JMXU:
+  control_flow: jmxu
+KILL:
+  alu: kill
+LD:
+  memory: ld
+LDC:
+  memory: ldc
+LDCU:
+  memory: ldcu
 LDG:
   memory: load
+LDGDEPBAR:
+  memory: ldgdepbar
+LDGMC:
+  memory: ldgmc
+LDGSTS:
+  memory: ldgsts
+LDL:
+  memory: ldl
+LDS:
+  memory: lds
+LDSM:
+  memory: ldsm
+LDT:
+  memory: ldt
+LDTM:
+  memory: ldtm
+LEA:
+  alu: lea
+LEPC:
+  alu: lepc
+LOP:
+  alu: bitwiseop
 LOP3:
   alu: logic_op3
+MATCH:
+  alu: match
+MEMBAR:
+  memory: membar
+MOV32I:
+  alu: mov32i
+MOVM:
+  alu: movm
 MUFU:
   alu: multifunction
+NANOSLEEP:
+  alu: nanosleep
+NOP:
+  alu: nop
+OMMA:
+  tensor_core: omma
+P2R:
+  alu: p2r
+PMTRIG:
+  alu: pmtrig
+POPC:
+  alu: popc
+PREEXIT:
+  alu: preexit
+PRMT:
+  alu: prmt
+PSETP:
+  alu: psetp
+QGMMA:
+  tensor_core: qgmma
+QMMA:
+  tensor_core: qmma
+QSPC:
+  alu: qspc
+R2B:
+  alu: r2b
+R2P:
+  alu: r2p
+R2UR:
+  alu: r2ur
+RED:
+  alu: red
+REDAS:
+  alu: redas
+REDG:
+  alu: redg
+REDUX:
+  alu: redux
+RET:
+  control_flow: ret
+RPCMOV:
+  alu: rpcmov
+RTT:
+  alu: rtt
+S2R:
+  alu: s2r
+S2UR:
+  alu: s2ur
+SEL:
+  alu: sel
+SETCTAID:
+  alu: setctaid
+SETLMEMBASE:
+  alu: setlmembase
+SGXT:
+  alu: sgxt
 SHF:
   alu: shift
+SHFL:
+  alu: shfl
+SHL:
+  alu: shl
+SHR:
+  alu: shr
+ST:
+  memory: st
+STAS:
+  memory: stas
 STG:
   memory: store
+STL:
+  memory: stl
+STS:
+  memory: sts
+STSM:
+  memory: stsm
+STT:
+  memory: stt
+STTM:
+  memory: sttm
+SUATOM:
+  alu: suatom
+SULD:
+  alu: suld
+SURED:
+  alu: sured
+SUST:
+  alu: sust
 SYNC:
   control_flow: sync
+SYNCS:
+  alu: syncs
+TEX:
+  alu: tex
+TLD:
+  alu: tld
+TLD4:
+  alu: tld4
+TMML:
+  alu: tmml
+TXD:
+  alu: txd
+TXQ:
+  alu: txq
+UBLKCP:
+  alu: ublkcp
+UBLKPF:
+  alu: ublkpf
+UBLKRED:
+  alu: ublkred
+UBMSK:
+  alu: ubmsk
+UBREV:
+  alu: ubrev
+UCGABAR_ARV:
+  alu: ucgabar_arv
+UCGABAR_WAIT:
+  alu: ucgabar_wait
+UCLEA:
+  alu: uclea
+UF2F:
+  alu: uf2f
+UF2FP:
+  alu: uf2fp
+UF2I:
+  alu: uf2i
+UFFMA:
+  alu: uffma
+UFLO:
+  alu: uflo
+UFMNMX:
+  alu: ufmnmx
+UFRND:
+  alu: ufrnd
+UFSEL:
+  alu: ufsel
+UFSET:
+  alu: ufset
+UFSETP:
+  alu: ufsetp
+UGETNEXTWORKID:
+  alu: ugetnextworkid
+UI2F:
+  alu: ui2f
+UI2I:
+  alu: ui2i
+UI2IP:
+  alu: ui2ip
+UIMAD:
+  alu: uimad
+UIMNMX:
+  alu: uimnmx
+UISETP:
+  alu: uisetp
+ULDC:
+  alu: uldc
+ULEA:
+  alu: ulea
+ULEPC:
+  alu: ulepc
+UMEMSETS:
+  alu: umemsets
+UMOV:
+  alu: umov
+UP2UR:
+  alu: up2ur
+UPOPC:
+  alu: upopc
+UPRMT:
+  alu: uprmt
+UR2UP:
+  alu: ur2up
+UREDGR:
+  alu: uredgr
+USEL:
+  alu: usel
+USETMAXREG:
+  alu: usetmaxreg
+USGXT:
+  alu: usgxt
+USHF:
+  alu: ushf
+USHL:
+  alu: ushl
+USHR:
+  alu: ushr
+USTGR:
+  alu: ustgr
+UTCATOMSWS:
+  alu: utcatomsws
+UTCBAR:
+  alu: utcbar
+UTCCP:
+  alu: utccp
+UTCHMMA:
+  tensor_core: utchmma
+UTCIMMA:
+  tensor_core: utcimma
+UTCOMMA:
+  tensor_core: utcomma
+UTCQMMA:
+  tensor_core: utcqmma
+UTCSHIFT:
+  alu: utcshift
+UTMACCTL:
+  alu: utmacctl
+UTMACMDFLUSH:
+  alu: utmacmdflush
+UTMALDG:
+  alu: utmaldg
+UTMAPF:
+  alu: utmapf
+UTMAREDG:
+  alu: utmaredg
+UTMASTG:
+  alu: utmastg
+UVIMNMX:
+  alu: uvimnmx
+UVIRTCOUNT:
+  alu: uvirtcount
+VABSDIFF:
+  alu: vabsdiff
+VABSDIFF4:
+  alu: vabsdiff4
+VHMNMX:
+  alu: vhmnmx
+VIMNMX:
+  alu: vimnmx
+VIMNMX3:
+  alu: vimnmx3
+VOTE:
+  alu: vote
+VOTEU:
+  alu: voteu
+WARPGROUP:
+  alu: warpgroup
+WARPGROUPSET:
+  alu: warpgroupset
+WARPSYNC:
+  alu: warpsync
+YIELD:
+  control_flow: yield

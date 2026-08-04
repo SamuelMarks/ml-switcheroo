@@ -3,8 +3,8 @@
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
 from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-from ml_switcheroo.core.compiler.backends.visual_tikz import TikzBackend
-from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
+from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend
+from ml_switcheroo.core.compiler.backends.visual_backends import LatexBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 
 

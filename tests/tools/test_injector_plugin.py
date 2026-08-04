@@ -130,6 +130,61 @@ def test_preserves_logic_with_complex_indentation(plugin_dir):
   assert "\n    if True:" in content
 
 
+def test_preserves_logic_with_simple_statement_suite(plugin_dir):
+  """Test preserving logic from a single-line function body (SimpleStatementSuite)."""
+  gen = PluginGenerator(plugin_dir)
+  scaffold = PluginScaffoldDef(name="simple_stmt", type=PluginType.CALL, doc="Doc")
+  file_path = plugin_dir / "simple_stmt.py"
+  # Single line body: def simple_stmt(node, ctx): pass
+  user_code = '\n@register_hook("simple_stmt")\ndef simple_stmt(node, ctx): pass\n'
+  file_path.write_text(user_code.strip(), encoding="utf-8")
+  gen.generate(scaffold)
+  content = file_path.read_text("utf-8")
+  assert "pass" in content
+  # It gets converted to an IndentedBlock
+  assert "    pass" in content
+
+
+def test_preserves_logic_empty_body(plugin_dir):
+  """Test preserving logic when body becomes empty after docstring strip."""
+  gen = PluginGenerator(plugin_dir)
+  scaffold = PluginScaffoldDef(name="empty_body", type=PluginType.CALL, doc="New Doc")
+  file_path = plugin_dir / "empty_body.py"
+  user_code = '\n@register_hook("empty_body")\ndef empty_body(node, ctx):\n    """Old Docstring."""\n'
+  file_path.write_text(user_code.strip(), encoding="utf-8")
+  gen.generate(scaffold)
+  content = file_path.read_text("utf-8")
+  assert "return node" in content
+
+
+def test_injector_plugin_edge_cases(plugin_dir):
+  """Test injector plugin edge cases for body extraction."""
+  from ml_switcheroo.tools.injector_plugin import PluginGenerator
+
+  gen = PluginGenerator(plugin_dir)
+
+  # Cover line 244 and 283 by overriding cst.parse_module
+  import libcst as cst
+  import pytest
+
+  with pytest.MonkeyPatch().context() as m:
+    m.setattr(
+      cst,
+      "parse_module",
+      lambda x: cst.Module(
+        body=[
+          cst.FunctionDef(
+            name=cst.Name("temp"), params=cst.Parameters(), body=cst.SimpleStatementSuite(body=[cst.Pass()])
+          )
+        ]
+      ),
+    )
+    assert gen._generate_cst_body_logic([]) == []
+    from ml_switcheroo.core.dsl import Rule
+
+    assert gen._generate_cst_body_logic([Rule(if_arg="x", is_val=1, use_api="y")]) == []
+
+
 def test_user_logic_trumps_rules(plugin_dir):
   """Verifies the behavior of user logic trumps rules."""
   gen = PluginGenerator(plugin_dir)

@@ -49,6 +49,7 @@ def test_array_strategy():
 
   shared_dims = {}
   _array_strategy(parse_type_annotation("Array['N', 32, 'M']"), {}, shared_dims)
+  _array_strategy(parse_type_annotation("Array['8']"), {}, shared_dims)
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
   _array_strategy(parse_type_annotation("Array['N+1']"), {}, shared_dims)
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
@@ -62,4 +63,5 @@ def test_strategies_from_spec_more():
   strategies_from_spec("Array['N']", {})
   strategies_from_spec("Tensor['N']", {})
   strategies_from_spec("np.ndarray", {})
+  strategies_from_spec("None", {})
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})

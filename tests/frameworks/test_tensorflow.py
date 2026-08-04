@@ -51,6 +51,12 @@ def test_tensorflow_apply_wiring():
   adapter.apply_wiring(snapshot)
   assert snapshot == {}
 
+  # Test with mappings
+  snapshot2 = {"mappings": {"op1": {"api": "tensorflow.math.add"}, "op2": {"api": "other.add"}, "op3": None}}
+  adapter.apply_wiring(snapshot2)
+  assert snapshot2["mappings"]["op1"]["api"] == "tf.math.add"
+  assert snapshot2["mappings"]["op2"]["api"] == "other.add"
+
 
 def test_tensorflow_device_syntax():
   """Verifies the behavior of TensorFlow device syntax."""
@@ -73,6 +79,8 @@ def test_tensorflow_serialization():
   assert "import tensorflow as tf" in adapter.get_serialization_imports()
   assert "tf.io.write_file(f, obj)" == adapter.get_serialization_syntax("save", "f", "obj")
   assert "tf.io.read_file(f)" == adapter.get_serialization_syntax("load", "f")
+  assert adapter.get_serialization_syntax("save", "f") == ""
+  assert adapter.get_serialization_syntax("unknown", "f") == ""
 
 
 def test_tensorflow_weight_load():
@@ -81,9 +89,19 @@ def test_tensorflow_weight_load():
   assert "tf.train.load_checkpoint" in adapter.get_weight_load_code("path")
 
 
-def test_tensorflow_convert():
+def test_tensorflow_convert(monkeypatch):
   """Verifies the behavior of TensorFlow convert."""
+  import tensorflow as tf
+  import sys
+
   adapter = TensorFlowAdapter()
+
+  # When TF is present, it returns a Tensor
+  res = adapter.convert("test")
+  assert isinstance(res, tf.Tensor)
+
+  # When TF fails to import, it returns the original string
+  monkeypatch.setitem(sys.modules, "tensorflow", None)
   assert adapter.convert("test") == "test"
 
 
@@ -102,3 +120,25 @@ def test_tensorflow_tiered_examples(mock_examples):
   examples = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
   mock_examples.assert_called_once()
+
+
+def test_tensorflow_missing_coverage():
+  """Verifies missing coverage methods."""
+  adapter = TensorFlowAdapter()
+
+  # Plugin Traits
+  traits = adapter.plugin_traits
+  assert traits.has_numpy_compatible_arrays is True
+
+  # RNG split
+  assert adapter.get_rng_split_syntax("rng", "key") == "pass"
+
+  # Weight conversion imports
+  assert "import numpy as np" in adapter.get_weight_conversion_imports()
+
+  # Tensor to numpy
+  expr = adapter.get_tensor_to_numpy_expr("var")
+  assert "var.numpy() if hasattr(var, 'numpy') else np.array(var)" == expr
+
+  # Weight save
+  assert "WARNING: Saving raw dictionary" in adapter.get_weight_save_code("s", "p")

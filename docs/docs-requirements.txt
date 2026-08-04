@@ -1,0 +1,9 @@
+autodoc_pydantic
+docutils>=0.19
+linkify-it-py>=2
+myst-parser>=4
+sphinx>=8,<9
+sphinx-autoapi>=3.6
+sphinx-copybutton>=0.5
+sphinx-material>=0.0.36
+sphinxcontrib-mermaid>=1.2

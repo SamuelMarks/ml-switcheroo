@@ -1,4 +1,8 @@
-"""HTML Rendering logic for the WASM demo."""
+"""HTML Rendering logic for the WASM demo.
+
+This module provides utility functions to construct and render the HTML interface
+and dropdown elements for the live ML Switcheroo WebAssembly transpiler demo.
+"""
 
 import os
 from collections import defaultdict
@@ -42,7 +46,16 @@ GROUP_ORDER = [
 
 
 def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_json: str) -> str:
-  """Constructs the full HTML block for the switcheroo demo."""
+  """Constructs the full HTML block for the switcheroo demo.
+
+  Args:
+    hierarchy: A dictionary mapping root frameworks to their list of flavours.
+    examples_json: A JSON string containing preloaded code examples.
+    tier_metadata_json: A JSON string containing framework tier metadata.
+
+  Returns:
+    str: The fully rendered HTML block as a string.
+  """
   root_dir = Path(__file__).parents[3]
   dist_dir = root_dir / "dist"
   wheel_name = "ml_switcheroo-latest-py3-none-any.whl"
@@ -59,13 +72,13 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   if "torch" in available_roots:
     def_source = "torch"
   else:
-    def_source = priority_order[0] if priority_order else "source_placeholder"  # pragma: no cover
+    def_source = priority_order[0] if priority_order else "source_placeholder"
 
   if "jax" in available_roots and def_source != "jax":
     def_target = "jax"
   else:
-    candidates = [fw for fw in priority_order if fw != def_source]  # pragma: no cover
-    def_target = candidates[0] if candidates else def_source  # pragma: no cover
+    candidates = [fw for fw in priority_order if fw != def_source]
+    def_target = candidates[0] if candidates else def_source
 
   # 3. Generate HTML Blocks
   primary_opts = _render_primary_options(hierarchy)
@@ -101,28 +114,8 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
 
             <div id="demo-interface" style="display:none;">
 
-                <!-- Material 3 Stepper Navigation -->
-                <div class="m3-stepper">
-                    <div class="m3-step active" data-target="step-0" id="nav-step-0">
-                        <div class="m3-step-circle">0</div>
-                        <div class="m3-step-label">Python ML framework et al.</div>
-                    </div>
-                    <div class="m3-step" data-target="step-1" id="nav-step-1">
-                        <div class="m3-step-circle">1</div>
-                        <div class="m3-step-label">ONNX System</div>
-                    </div>
-                    <div class="m3-step" data-target="step-2" id="nav-step-2">
-                        <div class="m3-step-circle">2</div>
-                        <div class="m3-step-label">Compilation</div>
-                    </div>
-                    <div class="m3-step" data-target="step-3" id="nav-step-3">
-                        <div class="m3-step-circle">3</div>
-                        <div class="m3-step-label">Live System</div>
-                    </div>
-                </div>
-
-                <!-- Step 0 Content: Existing Interface -->
-                <div id="step-0" class="m3-step-content active">
+                <!-- Main Interface -->
+                <div id="main-interface-content" class="active">
                     <!-- Toolbar -->
                     <div class="translate-toolbar">
                         <div class="select-wrapper">
@@ -176,7 +169,6 @@ class Model(nn.Module):
                         </label>
 
                         <button id="btn-convert" class="md-btn md-btn-accent" disabled>Run Translation</button>
-                        <button id="btn-next-step1" class="md-btn md-btn-primary" style="margin-left: 10px;">Next: ONNX System ➔</button>
                     </div>
 
                     <!-- Output Tabs -->
@@ -250,73 +242,6 @@ class Model(nn.Module):
                     </div>
                 </div>
 
-                <!-- Step 1 Content -->
-                <div id="step-1" class="m3-step-content" style="display:none;">
-                    <div class="demo-header" style="margin-bottom: 15px;">
-                        <h4 style="margin:0">ONNX Transpilation Engine</h4>
-                    </div>
-                    <div class="editor-grid">
-                        <div class="editor-group source-group">
-                            <div class="label" style="font-weight:bold; margin-bottom:5px;">Last Target Code</div>
-                            <textarea id="code-step1-source" readonly class="material-input output-bg" placeholder="Waiting for Step 0 target output..."></textarea>
-                        </div>
-                        <div class="editor-group target-group">
-                            <div class="label" style="font-weight:bold; margin-bottom:5px;">Generated ONNX IR</div>
-                            <textarea id="code-step1-target" readonly class="material-input output-bg" placeholder="Generating ONNX IR representation..."></textarea>
-                        </div>
-                    </div>
-                    <div class="controls-bar" style="margin-top: 20px; flex-wrap: wrap; gap: 10px;">
-                        <div>
-                            <span class="label">Modality:</span>
-                            <select id="select-modality" class="material-select-sm">
-                                <option value="image">Image</option>
-                                <option value="video">Video</option>
-                                <option value="text">Text</option>
-                                <option value="image_text">Image+text</option>
-                                <option value="mimetypes">Mimetypes</option>
-                            </select>
-                        </div>
-                        <div>
-                            <span class="label">Execution:</span>
-                            <select id="select-execution" class="material-select-sm">
-                                <option value="browser">Train in browser</option>
-                                <option value="download">Download for PC/Servers</option>
-                            </select>
-                        </div>
-                        <div style="flex-grow: 1; text-align: right;">
-                            <button id="btn-next-step2" class="md-btn md-btn-accent">Compile ➔</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 2 Content -->
-                <div id="step-2" class="m3-step-content" style="display:none;">
-                    <div class="demo-header" style="margin-bottom: 15px;">
-                        <h4 style="margin:0">Compilation Log</h4>
-                    </div>
-                    <pre id="compile-log" class="material-input output-bg" style="height: 300px; overflow-y: auto;">Waiting to start compilation...</pre>
-                    <div class="controls-bar" style="margin-top: 20px; text-align: right; display: block;">
-                        <button id="btn-next-step3" class="md-btn md-btn-primary">Launch Live System ➔</button>
-                    </div>
-                </div>
-
-                <!-- Step 3 Content -->
-                <div id="step-3" class="m3-step-content" style="display:none;">
-                    <div class="demo-header" style="margin-bottom: 15px;">
-                        <h4 style="margin:0">Live Interactive System</h4>
-                        <span id="live-status" class="status-badge" style="background:#34a853; color:#fff;">Live</span>
-                    </div>
-                    <div id="live-system-ui" style="border: 2px dashed #4285f4; border-radius: 8px; padding: 40px; text-align: center; min-height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8f9fa;">
-                        <div style="font-size: 48px; margin-bottom: 15px;">🚀</div>
-                        <h3 style="margin: 0 0 10px 0;">Model Ready</h3>
-                        <p style="color: #666; margin: 0;">Training and serving locally in your browser via WebAssembly.</p>
-                        <div style="margin-top: 20px; display:flex; gap: 10px;">
-                            <button class="md-btn" style="background: white; border: 1px solid #ccc; color: #333;">Interact (Placeholder)</button>
-                            <button class="md-btn md-btn-accent">Visualize Metrics</button>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
         """
@@ -325,8 +250,13 @@ class Model(nn.Module):
 def _render_primary_options(hierarchy: HierarchyMap) -> str:
   """Renders the top-level <option> elements for root frameworks.
 
-
   Organizes frameworks into <optgroup> categories based on their semantic level.
+
+  Args:
+    hierarchy: A dictionary mapping root frameworks to their list of flavours.
+
+  Returns:
+    str: An HTML string containing grouped option elements.
   """
   # Organizes roots into buckets
   grouped: Dict[str, List[str]] = defaultdict(list)
@@ -343,11 +273,11 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
 
   for group_name in GROUP_ORDER:
     if group_name not in grouped:
-      continue  # pragma: no cover
+      continue
 
     members = grouped[group_name]
     if not members:
-      continue  # pragma: no cover
+      continue
 
     html_parts.append(f'<optgroup label="{group_name}">')
     for root in members:
@@ -360,19 +290,37 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
 
 
 def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: str) -> str:
-  """Renders the secondary dropdown for Framework Flavours."""
+  """Renders the secondary dropdown for Framework Flavours.
+
+  Renders options for all frameworks, using data-parent to allow JS to filter.
+
+  Args:
+    side: The interface side, typically "src" (source) or "tgt" (target).
+    hierarchy: A dictionary mapping root frameworks to their list of flavours.
+    active_root: The active framework root whose flavours are initially visible.
+
+  Returns:
+    str: An HTML string containing the secondary dropdown element.
+  """
   children = hierarchy.get(active_root, [])
 
   style = "display:inline-block;" if children else "display:none;"
   style += " background:#f0f4c3;"
 
   opts = []
-  if children:
-    for i, child in enumerate(children):
-      sel = "selected" if i == 0 else ""
-      opts.append(f'<option value="{child["key"]}" {sel}>{child["label"]}</option>')
+
+  has_any_children = any(len(v) > 0 for v in hierarchy.values())
+  if not has_any_children:
+    opts.append('<option value="" disabled selected data-parent="">No Flavours</option>')
   else:
-    opts.append('<option value="" disabled selected>No Flavours</option>')
+    for root, root_children in hierarchy.items():
+      if root_children:
+        for i, child in enumerate(root_children):
+          sel = "selected" if root == active_root and i == 0 else ""
+          hidden = "display:none;" if root != active_root else ""
+          opts.append(
+            f'<option value="{child["key"]}" data-parent="{root}" {sel} style="{hidden}">{child["label"]}</option>'
+          )
 
   return f"""
         <select id="{side}-flavour" class="material-select-sm" style="{style}">

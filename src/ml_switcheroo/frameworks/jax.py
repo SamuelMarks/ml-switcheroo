@@ -16,8 +16,8 @@ import textwrap
 from typing import List, Tuple, Dict, Optional
 
 try:
-  import jax  # pragma: no cover
-  import jax.numpy as jnp  # pragma: no cover
+  import jax
+  import jax.numpy as jnp
 except Exception:
   jax: Any = None  # type: ignore
   jnp = None  # type: ignore
@@ -55,7 +55,6 @@ class JaxCoreAdapter(JAXStackMixin):
   def __init__(self) -> None:
     """Initializes the JAX adapter.
 
-
     Detects installation status to toggle between LIVE and GHOST modes.
     """
     self._mode = InitMode.LIVE
@@ -64,11 +63,16 @@ class JaxCoreAdapter(JAXStackMixin):
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("jax")
       if not self._snapshot_data:
-        logging.warning("JAX not installed and no snapshot found. Scanning unavailable.")  # pragma: no cover
+        logging.warning("JAX not installed and no snapshot found. Scanning unavailable.")
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Defines the canonical import alias ('jax.numpy', 'jnp')."""
+    """Defines the canonical import alias ('jax.numpy', 'jnp').
+
+    Returns:
+        Tuple[str, str]: A tuple containing the canonical module name and its
+            recommended import alias (e.g., ("jax.numpy", "jnp")).
+    """
     return "jax.numpy", "jnp"
 
   @property
@@ -77,7 +81,6 @@ class JaxCoreAdapter(JAXStackMixin):
 
     Returns:
         Dict[str, ImportConfig]: Map of paths to configuration.
-
     """
     return {
       "jax.numpy": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="jnp"),
@@ -87,16 +90,28 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """Returns standard JIT-enabled test templates."""
+    """Returns standard JIT-enabled test templates.
+
+    Returns:
+        Dict[str, str]: A dictionary containing standard JIT-enabled test configuration.
+    """
     return self.jax_test_config
 
   @property
   def harness_imports(self) -> List[str]:
-    """Imports required for JAX initialization logic."""
+    """Imports required for JAX initialization logic.
+
+    Returns:
+        List[str]: A list of import statement strings required for the harness.
+    """
     return ["import jax", "import jax.random"]
 
   def get_harness_init_code(self) -> str:
-    """Returns logic to create JAX PRNG Keys."""
+    """Returns logic to create JAX PRNG Keys.
+
+    Returns:
+        str: A string of JAX harness initialization helper code.
+    """
     return textwrap.dedent(
       """
             def _make_jax_key(seed):
@@ -110,7 +125,11 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """Returns `key` as a magic state argument."""
+    """Returns `key` as a magic state argument.
+
+    Returns:
+        List[str]: A list of magic state argument names.
+    """
     return ["key"]
 
   @property
@@ -121,7 +140,6 @@ class JaxCoreAdapter(JAXStackMixin):
 
     Returns:
         StructuralTraits: Configuration object.
-
     """
     return StructuralTraits(
       module_base=None,
@@ -143,9 +161,8 @@ class JaxCoreAdapter(JAXStackMixin):
 
     Returns:
         PluginTraits: Configuration flags.
-
     """
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=True,
       requires_functional_control_flow=True,
@@ -156,7 +173,11 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """JAX does not use global seeding methods in the imperative sense."""
+    """JAX does not use global seeding methods in the imperative sense.
+
+    Returns:
+        List[str]: Empty list as JAX relies on explicit functional PRNG keys.
+    """
     return []
 
   @property
@@ -167,27 +188,40 @@ class JaxCoreAdapter(JAXStackMixin):
 
     Returns:
         Dict[str, StandardMap]: Mapping of definitions.
-
     """
     return load_definitions("jax")
 
   def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:
-    """Loads from snapshot."""
-    if not self._snapshot_data:  # pragma: no cover
-      return []  # pragma: no cover
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
-    return [GhostRef.model_validate(item) for item in raw_list]  # pragma: no cover
+    """Loads ghost references from the snapshot for the given semantic category.
+
+    Args:
+        category (SemanticTier): The semantic category of definitions to collect.
+
+    Returns:
+        List[GhostRef]: A list of matching ghost references.
+    """
+    if not self._snapshot_data:
+      return []
+    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    return [GhostRef.model_validate(item) for item in raw_list]
 
   def _collect_live(self, category: SemanticTier) -> List[GhostRef]:
-    """Scans installed JAX/Optax modules."""
-    results: list[Any] = []  # pragma: no cover  # type: ignore
-    if category == SemanticTier.LOSS:  # pragma: no cover
-      results.extend(getattr(OptaxScanner, "scan_losses", lambda: [])())  # pragma: no cover
-    elif category == SemanticTier.OPTIMIZER:  # pragma: no cover
-      results.extend(getattr(OptaxScanner, "scan_optimizers", lambda: [])())  # pragma: no cover
-    elif category == SemanticTier.ACTIVATION:  # pragma: no cover
-      results.extend(getattr(self, "_scan_jax_activations", lambda: [])())  # pragma: no cover
-    return results  # pragma: no cover
+    """Scans installed JAX/Optax modules to collect live references.
+
+    Args:
+        category (SemanticTier): The semantic category of definitions to collect.
+
+    Returns:
+        List[GhostRef]: A list of scanned live references.
+    """
+    results: list[Any] = []  # type: ignore
+    if category == SemanticTier.LOSS:
+      results.extend(getattr(OptaxScanner, "scan_losses", lambda: [])())
+    elif category == SemanticTier.OPTIMIZER:
+      results.extend(getattr(OptaxScanner, "scan_optimizers", lambda: [])())
+    elif category == SemanticTier.ACTIVATION:
+      results.extend(getattr(self, "_scan_jax_activations", lambda: [])())
+    return results
 
   def convert(self, data: Any) -> Any:
     """Converts input data to a JAX array for verification.
@@ -197,16 +231,15 @@ class JaxCoreAdapter(JAXStackMixin):
 
     Returns:
         Any: JAX Array.
-
     """
-    try:  # pragma: no cover
-      import jax.numpy as jnp  # pragma: no cover
-    except Exception:  # pragma: no cover
-      return data  # pragma: no cover
-    if hasattr(data, "__array__") or isinstance(data, (list, tuple)):  # pragma: no cover
-      return jnp.array(data)  # pragma: no cover
+    try:
+      import jax.numpy as jnp
+    except Exception:
+      return data
+    if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
+      return jnp.array(data)
 
-    return data  # pragma: no cover
+    return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """Applies Level 0/1 Stack wiring.
@@ -215,7 +248,6 @@ class JaxCoreAdapter(JAXStackMixin):
 
     Args:
         snapshot (Dict[str, Any]): The snapshot to modify.
-
     """
     self._apply_stack_wiring(snapshot)
 
@@ -224,7 +256,6 @@ class JaxCoreAdapter(JAXStackMixin):
 
     Returns:
         Dict[str, str]: Mapping of tier name to source code.
-
     """
     return {
       "tier1_math": """import jax.numpy as jnp
@@ -266,6 +297,5 @@ optimizer = optax.adam(learning_rate=0.01)""",
 
     Returns:
         Optional[str]: URL string.
-
     """
     return super().get_doc_url(api_name)

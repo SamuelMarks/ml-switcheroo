@@ -96,9 +96,9 @@ def test_python_snippet_emitter():
   assert emitter_keras._resolve_api_name("relu") == "keras.ops.relu"
   node_func = LogicalNode("f", "func_relu", {"arg_0": "True", "dim": 1})
   expr_func = emitter.emit_expression(node_func, ["x"])
-  assert (
-    "relu(x, True, dim=1)" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=expr_func)])]).code.strip()
-  )
+  assert "relu(x,True,dim=1)" in cst.Module(
+    body=[cst.SimpleStatementLine(body=[cst.Expr(value=expr_func)])]
+  ).code.strip().replace(" ", "")
 
 
 def test_python_backend_class_body_replacer_methods():
@@ -169,7 +169,7 @@ def test_python_snippet_emitter_gap():
   """Verifies the behavior of python snippet emitter gap."""
   emitter = PythonSnippetEmitter(framework="mlx")
   assert emitter._resolve_api_name("relu") == "relu"
-  assert emitter._format_args_from_metadata(None) == ""
+  assert emitter._build_args_from_metadata({}) == []
 
 
 def test_python_backend_unknown_fw_import():

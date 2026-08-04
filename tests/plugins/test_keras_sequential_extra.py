@@ -27,6 +27,17 @@ def test_keras_sequential_empty_args():
   assert not res.args
 
 
+def test_keras_sequential_list_args():
+  """Verifies behavior when arguments are already in a list."""
+  node = cst.Call(func=cst.Name("Sequential"), args=[cst.Arg(cst.List([cst.Element(cst.Name("L"))]))])
+  ctx = HookContext(semantics=MagicMock(), config=MagicMock())
+  ctx.lookup_api = MagicMock(return_value="my.Seq")
+  res = transform_keras_sequential(node, ctx)
+  assert res.func.value.value == "my"
+  assert res.func.attr.value == "Seq"
+  assert isinstance(res.args[0].value, cst.List)
+
+
 def test_keras_sequential_keyword_args():
   """Verifies the behavior of Keras sequential keyword arguments."""
   node = cst.Call(

@@ -13,12 +13,14 @@ from ml_switcheroo.testing.fuzzer.type_parser import (
 def test_get_fallback_base_value():
   """Gets fallback base value."""
   from ml_switcheroo.testing.fuzzer.parser import get_fallback_base_value
+  import numpy as np
 
   assert get_fallback_base_value(PrimitiveType(name="bool"), ()) is False
   assert get_fallback_base_value(PrimitiveType(name="int"), ()) == 0
   assert get_fallback_base_value(parse_type_annotation("integer"), ()) == 0
   assert get_fallback_base_value(PrimitiveType(name="float"), ()) == 0.0
   assert get_fallback_base_value(PrimitiveType(name="str"), ()) == ""
+  assert get_fallback_base_value(PrimitiveType(name="dtype"), ()) == np.float32
   assert get_fallback_base_value(parse_type_annotation("Array"), (2,)).shape == (2,)
   assert get_fallback_base_value(ListType(inner=PrimitiveType(name="int")), ()) == []
   assert get_fallback_base_value(TupleType(elements=[PrimitiveType(name="int")], variadic=False), ()) == ()

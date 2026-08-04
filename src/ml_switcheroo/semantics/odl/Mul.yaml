@@ -1,4 +1,10 @@
+operation: mul
 description: Auto-generated mapping for mul.
 std_args: []
-variants: {}
-operation: mul
+variants:
+  jax:
+    api: lax.mul
+  keras:
+    requires_plugin: jax_decompose
+  sass:
+    api: FMUL

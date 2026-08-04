@@ -6,7 +6,6 @@ and Structured Index Selection.
 
 import libcst as cst
 from typing import List, Union
-from ml_switcheroo.utils.node_diff import capture_node_source
 
 
 def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
@@ -58,11 +57,43 @@ def rewrite_as_inline_lambda(lambda_str: str, args: list[cst.Arg]) -> cst.Call:
     raise ValueError(f"Invalid lambda syntax in semantics: {lambda_str}")
 
 
-def rewrite_as_macro(template: str, args_list: list[cst.Arg], std_arg_names: list[str]) -> cst.CSTNode:
-  """Replaces an operation call with a python expression defined in the template.
+class MacroSubstitutionTransformer(cst.CSTTransformer):
+  """Substitutes variables inside a parsed macro expression with CST nodes."""
 
-  Arguments are substituted into the template string using placeholders matching
-  the standard argument names (e.g. `{x}`).
+  def __init__(self, arg_map: dict[str, cst.BaseExpression]):
+    """Initialize the transformer with an argument map.
+
+    Args:
+        arg_map (dict[str, cst.BaseExpression]): A mapping from standardized argument names
+            to their corresponding parsed CST expression nodes.
+    """
+    self.arg_map = arg_map
+
+  def leave_Name(self, original_node: cst.Name, updated_node: cst.Name) -> cst.BaseExpression:
+    """Replaces Name nodes with mapped values if they match the safe macro prefix.
+
+    Args:
+        original_node (cst.Name): The original un-modified name node.
+        updated_node (cst.Name): The updated name node.
+
+    Returns:
+        cst.BaseExpression: The corresponding CST node from the argument map,
+        or the original node if it was not a macro variable.
+    """
+    if original_node.value.startswith("_MACRO_VAR_") and original_node.value.endswith("_"):
+      field_name = original_node.value[11:-1]
+      if field_name in self.arg_map:
+        return self.arg_map[field_name]
+    return updated_node
+
+
+def rewrite_as_macro(template: str, args_list: list[cst.Arg], std_arg_names: list[str]) -> cst.BaseExpression:
+  """Replaces an operation call with a Python expression defined in the template.
+
+  Arguments are substituted into the template string structurally by first parsing
+  a sanitized version of the template into a Concrete Syntax Tree, and then
+  replacing placeholder identifiers with the actual argument CST nodes. This
+  prevents syntax injection vulnerabilities and parser crashes during expansion.
 
   Args:
       template (str): The macro string (e.g. "{x} * jax.nn.sigmoid({x})").
@@ -70,51 +101,38 @@ def rewrite_as_macro(template: str, args_list: list[cst.Arg], std_arg_names: lis
       std_arg_names (list[str]): The names of standard arguments in order.
 
   Returns:
-      cst.CSTNode: The constructed expression logic.
+      cst.BaseExpression: The constructed expression logic.
 
   Raises:
-      ValueError: If arguments required by the template are missing.
-      cst.ParserSyntaxError: If the resulting string is invalid Python.
-
+      ValueError: If arguments required by the template are missing, or if the
+          resulting template produces invalid Python syntax.
   """
-  # 1. Map args
-  arg_map = {}
-
-  # Basic positional mapping. Logic assumes `args_list` from NormalizationMixin
-  # is positional aligned with `std_args` or has correct keywords.
-  # However, normalization output is a list of cst.Arg objects.
-  # Some might be positional (aligned), some keywords.
-
-  # We iterate over the STANDARD names. We look for a match in args_list.
-  # NormalizationMixin usually produces a list in std_args order.
-
-  # Robust mapping strategy:
-  # 1. Zip positional args with std names.
-  # 2. Extract keyword args into map.
+  arg_map: dict[str, cst.BaseExpression] = {}
 
   for i, (std_name, arg) in enumerate(zip(std_arg_names, args_list)):
-    # We assume the rewriter normalized them to position/keywords matching target expectations
-    # But since macros define their own structure, they might refer to ANY arg.
-    # If normalization mixin did its job, `args_list` elements correspond to `std_arg_names`
-    # unless skipped/variadic?
-    # Assuming normalization respects std order.
+    arg_map[std_name] = arg.value
 
-    # We need the source string of the value expression
-    arg_val = arg.value
-    # Capture the source code of the argument expression
-    arg_map[std_name] = capture_node_source(arg_val)
+  import string
 
-  # 2. Format Template
+  parsed_format = list(string.Formatter().parse(template))
+  clean_template = ""
+  for literal_text, field_name, format_spec, conversion in parsed_format:
+    clean_template += literal_text
+    if field_name is not None:
+      if field_name not in arg_map:
+        raise ValueError(f"Macro template requires argument '{field_name}' but it was missing/unresolvable.")
+
+      # Inject a unique safe identifier that can be reliably found in the CST
+      safe_id = f"_MACRO_VAR_{field_name}_"
+      clean_template += safe_id
+
   try:
-    code = template.format(**arg_map)
-  except KeyError as e:
-    raise ValueError(f"Macro template requires argument {e} but it was missing/unresolvable.")
+    base_expr = cst.parse_expression(clean_template)
+    from typing import cast
 
-  # 3. Parse back to CST
-  try:
-    return cst.parse_expression(code)
+    return cast(cst.BaseExpression, base_expr.visit(MacroSubstitutionTransformer(arg_map)))
   except cst.ParserSyntaxError:
-    raise ValueError(f"Macro template output produced invalid python: {code}")
+    raise ValueError(f"Macro template output produced invalid python: {clean_template}")
 
 
 def rewrite_as_infix(

@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import MagicMock
 from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RegisterAllocator, RdnaSynthesizer, MAX_VGPR, MAX_SGPR
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.compiler.frontends.rdna.nodes import Instruction, VGPR, SGPR, Comment, Label
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaVGPR, RdnaSGPR, RdnaComment, RdnaLabel
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -13,9 +13,9 @@ def test_allocator_dual_pools() -> None:
   alloc = RegisterAllocator()
   v0 = alloc.get_vector_register("x")
   s0 = alloc.get_scalar_register("cnt")
-  assert isinstance(v0, VGPR)
+  assert isinstance(v0, RdnaVGPR)
   assert v0.index == 0
-  assert isinstance(s0, SGPR)
+  assert isinstance(s0, RdnaSGPR)
   assert s0.index == 0
 
 
@@ -31,7 +31,7 @@ def test_allocator_overflow_vgpr() -> None:
   """Verifies the behavior of allocator overflow vgpr."""
   alloc = RegisterAllocator()
   alloc._next_vgpr = MAX_VGPR + 1
-  with pytest.raises(ValueError, match="VGPR overflow"):
+  with pytest.raises(ValueError, match="RdnaVGPR overflow"):
     alloc.get_vector_register("fail")
 
 
@@ -39,7 +39,7 @@ def test_allocator_overflow_sgpr() -> None:
   """Verifies the behavior of allocator overflow sgpr."""
   alloc = RegisterAllocator()
   alloc._next_sgpr = MAX_SGPR + 1
-  with pytest.raises(ValueError, match="SGPR overflow"):
+  with pytest.raises(ValueError, match="RdnaSGPR overflow"):
     alloc.get_scalar_register("fail")
 
 
@@ -84,10 +84,10 @@ def test_graph_to_rdna_basic_math(mock_semantics: MagicMock) -> None:
   g.edges = [LogicalEdge("x", "z"), LogicalEdge("y", "z")]
   nodes = synth.from_graph(g)
   assert len(nodes) == 3
-  assert isinstance(nodes[0], Comment)
+  assert isinstance(nodes[0], RdnaComment)
   assert "** Input x -> v0" in str(nodes[0]).replace(";", "**")
   inst = nodes[2]
-  assert isinstance(inst, Instruction)
+  assert isinstance(inst, RdnaInstruction)
   assert inst.opcode == "v_add_f32"
   assert str(inst.operands[0]) == "v2"
   assert str(inst.operands[1]) == "v0"
@@ -107,7 +107,7 @@ def test_graph_to_rdna_unmapped(mock_semantics: MagicMock) -> None:
 def test_rdna_to_python_instruction() -> None:
   """Verifies the behavior of RDNA to python instruction."""
   synth = RdnaSynthesizer(MagicMock())
-  inst = Instruction("v_add_f32", [VGPR(0), VGPR(1), VGPR(2)])
+  inst = RdnaInstruction(opcode="v_add_f32", operands=[RdnaVGPR(index=0), RdnaVGPR(index=1), RdnaVGPR(index=2)])
   mod = synth.to_python([inst])
   code = mod.code
   assert "v0 = rdna.v_add_f32(v1, v2)" in code
@@ -116,7 +116,9 @@ def test_rdna_to_python_instruction() -> None:
 def test_rdna_to_python_ranges() -> None:
   """Verifies the behavior of RDNA to python ranges."""
   synth = RdnaSynthesizer(MagicMock())
-  inst = Instruction("image_load", [VGPR(0, 4), VGPR(4, 4), SGPR(0, 4)])
+  inst = RdnaInstruction(
+    opcode="image_load", operands=[RdnaVGPR(index=0, count=4), RdnaVGPR(index=4, count=4), RdnaSGPR(index=0, count=4)]
+  )
   mod = synth.to_python([inst])
   code = mod.code
   assert "v_0_3 = rdna.image_load(v_4_7, s_0_3)" in code
@@ -125,7 +127,7 @@ def test_rdna_to_python_ranges() -> None:
 def test_rdna_to_python_label() -> None:
   """Verifies the behavior of RDNA to python label."""
   synth = RdnaSynthesizer(MagicMock())
-  nodes = [Label("L_LOOP")]
+  nodes = [RdnaLabel(name="L_LOOP")]
   mod = synth.to_python(nodes)
   code = mod.code
-  assert "# Label: L_LOOP" in code
+  assert "# RdnaLabel: L_LOOP" in code

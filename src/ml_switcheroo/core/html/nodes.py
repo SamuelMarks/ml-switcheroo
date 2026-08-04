@@ -13,7 +13,12 @@ from ml_switcheroo.utils.formatting import StructuredFormatter, escape_html
 
 @dataclass
 class HtmlNode:
-  """Abstract base class for all HTML DSL elements."""
+  """Abstract base class for all HTML DSL elements.
+
+  Attributes:
+      leading_trivia: Whitespace or comments preceding this node.
+      trailing_trivia: Whitespace or comments succeeding this node.
+  """
 
   leading_trivia: str = ""
   trailing_trivia: str = ""
@@ -29,47 +34,85 @@ class HtmlNode:
 
     Raises:
         NotImplementedError: If not implemented by subclass.
-
     """
     raise NotImplementedError
 
   def to_html(self) -> str:
-    """Convenience method to render HTML."""
+    """Convenience method to render HTML.
+
+    Returns:
+        str: The rendered HTML string.
+    """
     return self.emit(0)
 
 
 @dataclass
 class TextNode(HtmlNode):
-  """Represents a raw text string in the DOM."""
+  """Represents a raw text string in the DOM.
+
+  Attributes:
+      content: The raw text content.
+  """
 
   content: str = ""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Emit the text content."""
+    """Emit the text content.
+
+    Args:
+        indent_level: The current indentation level (unused in this node).
+
+    Returns:
+        str: The raw text content with leading and trailing trivia.
+    """
     return f"{self.leading_trivia}{self.content}{self.trailing_trivia}"
 
 
 @dataclass
 class CommentNode(HtmlNode):
-  """Represents an HTML comment <!-- ... -->."""
+  """Represents an HTML comment <!-- ... -->.
+
+  Attributes:
+      content: The content within the HTML comment.
+  """
 
   content: str = ""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Emit the HTML comment."""
+    """Emit the HTML comment.
+
+    Args:
+        indent_level: The current indentation level (unused in this node).
+
+    Returns:
+        str: The formatted HTML comment with leading and trailing trivia.
+    """
     return f"{self.leading_trivia}<!--{self.content}-->{self.trailing_trivia}"
 
 
 @dataclass
 class AttributeNode(HtmlNode):
-  """Represents an HTML tag attribute."""
+  """Represents an HTML tag attribute.
+
+  Attributes:
+      name: The name of the HTML attribute.
+      value: The value of the attribute, or None if it has no value.
+      quote_style: The quote style to use ('"', "'", or empty).
+  """
 
   name: str = ""
   value: Optional[str] = None
   quote_style: str = '"'  # '"', "'", or ""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Emit the attribute."""
+    """Emit the attribute.
+
+    Args:
+        indent_level: The current indentation level (unused in this node).
+
+    Returns:
+        str: The rendered attribute string with leading and trailing trivia.
+    """
     if self.value is None:
       return f"{self.leading_trivia}{self.name}{self.trailing_trivia}"
     return f"{self.leading_trivia}{self.name}={self.quote_style}{self.value}{self.quote_style}{self.trailing_trivia}"
@@ -77,15 +120,83 @@ class AttributeNode(HtmlNode):
 
 @dataclass
 class TagNode(HtmlNode):
-  """Represents an HTML Element."""
+  """Represents an HTML Element.
+
+  Attributes:
+      name: The HTML tag name.
+      attributes: A list of attributes for the element.
+      children: A list of child nodes contained within the element.
+      self_closing: True if the element is self-closing, False otherwise.
+  """
 
   name: str = ""
   attributes: List[AttributeNode] = field(default_factory=list)
   children: List[HtmlNode] = field(default_factory=list)
   self_closing: bool = False
 
+  def append_child(self, child: HtmlNode) -> None:
+    """Appends a child node to the end of the children list.
+
+    Args:
+        child: The HTML node to append.
+    """
+    self.children.append(child)
+
+  def remove_child(self, child: HtmlNode) -> None:
+    """Removes a child node from the children list.
+
+    Args:
+        child: The HTML node to remove.
+
+    Raises:
+        ValueError: If the child is not found.
+    """
+    self.children.remove(child)
+
+  def get_attribute(self, name: str) -> Optional[str]:
+    """Gets the value of an attribute by name.
+
+    Args:
+        name: The name of the attribute.
+
+    Returns:
+        Optional[str]: The value of the attribute, or None if not found or value-less.
+    """
+    for attr in self.attributes:
+      if attr.name == name:
+        return attr.value
+    return None
+
+  def set_attribute(self, name: str, value: Optional[str] = None) -> None:
+    """Sets or updates the value of an attribute by name.
+
+    Args:
+        name: The name of the attribute.
+        value: The value of the attribute.
+    """
+    for attr in self.attributes:
+      if attr.name == name:
+        attr.value = value
+        return
+    self.attributes.append(AttributeNode(name=name, value=value))
+
+  def remove_attribute(self, name: str) -> None:
+    """Removes an attribute by name. Does nothing if not found.
+
+    Args:
+        name: The name of the attribute to remove.
+    """
+    self.attributes = [a for a in self.attributes if a.name != name]
+
   def emit(self, indent_level: int = 0) -> str:
-    """Emit the HTML tag."""
+    """Emit the HTML tag.
+
+    Args:
+        indent_level: The indentation level for the tag children.
+
+    Returns:
+        str: The fully rendered HTML tag string.
+    """
     parts = [self.leading_trivia, f"<{self.name}"]
     for attr in self.attributes:
       if not attr.leading_trivia:
@@ -108,7 +219,17 @@ class TagNode(HtmlNode):
 
 @dataclass
 class SvgArrow(HtmlNode):
-  """Represents an SVG connection line between grid cells."""
+  """Represents an SVG connection line between grid cells.
+
+  Attributes:
+      x1: The starting X coordinate.
+      y1: The starting Y coordinate.
+      x2: The ending X coordinate.
+      y2: The ending Y coordinate.
+      style_class: The CSS class to apply to the line.
+      marker_end: The marker-end attribute value for arrowheads.
+      parent_style: The CSS style attribute for the enclosing SVG container.
+  """
 
   x1: int = 0
   y1: int = 0
@@ -118,25 +239,59 @@ class SvgArrow(HtmlNode):
   marker_end: str = ""
   parent_style: str = ""
 
-  def emit(self, indent_level: int = 0) -> str:
-    """Renders the arrow as an absolute SVG element."""
-    fmt = StructuredFormatter()
-    style = escape_html(self.parent_style)
-    cls = escape_html(self.style_class)
-    marker = escape_html(self.marker_end)
+  def to_tag(self) -> TagNode:
+    """Converts the arrow to a pure CST TagNode.
 
-    fmt.add_line(f'<svg class="sw-arrow" style="{style}">', indent_level)
-    fmt.add_line(
-      f'<line x1="{self.x1}" y1="{self.y1}" x2="{self.x2}" y2="{self.y2}" class="{cls}" marker-end="{marker}" />',
-      indent_level + 1,
+    Returns:
+        TagNode: The corresponding tag element structure representing the SVG.
+    """
+    line = TagNode(
+      name="line",
+      self_closing=True,
+      attributes=[
+        AttributeNode(name="x1", value=str(self.x1)),
+        AttributeNode(name="y1", value=str(self.y1)),
+        AttributeNode(name="x2", value=str(self.x2)),
+        AttributeNode(name="y2", value=str(self.y2)),
+        AttributeNode(name="class", value=self.style_class),
+        AttributeNode(name="marker-end", value=self.marker_end),
+      ],
     )
-    fmt.add_line("</svg>", indent_level)
-    return fmt.build()
+    return TagNode(
+      name="svg",
+      attributes=[
+        AttributeNode(name="class", value="sw-arrow"),
+        AttributeNode(name="style", value=self.parent_style),
+      ],
+      children=[line],
+    )
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Renders the arrow as an absolute SVG element.
+
+    Args:
+        indent_level: The indentation level for the rendering.
+
+    Returns:
+        str: The rendered SVG string representation of the arrow.
+    """
+    return self.to_tag().emit(indent_level)
 
 
 @dataclass
 class GridBox(HtmlNode):
-  """Represents a content box positioned within the CSS Grid."""
+  """Represents a content box positioned within the CSS Grid.
+
+  Attributes:
+      row: The CSS grid row index.
+      col: The CSS grid column index.
+      css_class: The CSS class to apply to the element.
+      header_text: Header label for the box.
+      code_text: Optional code block content.
+      body_text: Optional body content text.
+      arrows: Connection arrows stemming from this grid box.
+      z_index: Optional z-index styling.
+  """
 
   row: int = 0
   col: int = 0
@@ -147,46 +302,71 @@ class GridBox(HtmlNode):
   arrows: List[SvgArrow] = field(default_factory=list)
   z_index: Optional[int] = None
 
-  def emit(self, indent_level: int = 0) -> str:
-    """Renders the grid cell div, its content, and attached arrows."""
-    fmt = StructuredFormatter()
+  def to_tag(self) -> TagNode:
+    """Converts the grid box to a pure CST TagNode.
+
+    Returns:
+        TagNode: The corresponding tag element structure for the GridBox.
+    """
     style = f"grid-row:{self.row}; grid-column:{self.col};"
     if self.z_index is not None:
       style += f" z-index:{self.z_index};"
 
-    safe_cls = escape_html(self.css_class)
-    safe_style = escape_html(style)
-
-    fmt.add_line(f'<div class="{safe_cls}" style="{safe_style}">', indent_level)
-
-    # Handle 'circ' class special layout (flex centered single text)
     safe_header = escape_html(self.header_text)
+
+    children: List[HtmlNode] = []
+
     if "circ" in self.css_class:
-      fmt.add_line(f"{safe_header}", indent_level + 1)
+      children.append(TextNode(content=safe_header))
     else:
-      fmt.add_line(f'<span class="header-txt">{safe_header}</span>', indent_level + 1)
+      children.append(
+        TagNode(
+          name="span",
+          attributes=[AttributeNode(name="class", value="header-txt")],
+          children=[TextNode(content=safe_header)],
+        )
+      )
 
     if self.code_text:
       safe_code = escape_html(self.code_text)
-      fmt.add_line(f"<code>{safe_code}</code>", indent_level + 1)
+      children.append(TagNode(name="code", children=[TextNode(content=safe_code)]))
 
     if self.body_text:
       safe_body = escape_html(self.body_text.strip())
-      fmt.add_line(f"{safe_body}", indent_level + 1)
+      children.append(TextNode(content=safe_body))
 
-    # Render arrows inside the box div to allow relative positioning
     for arrow in self.arrows:
-      fmt.add_line(
-        arrow.emit(indent_level + 1), 0
-      )  # Emit already handles its own internal indent, but here we just pass the block
+      children.append(arrow.to_tag())
 
-    fmt.add_line("</div>", indent_level)
-    return fmt.build()
+    return TagNode(
+      name="div",
+      attributes=[
+        AttributeNode(name="class", value=self.css_class),
+        AttributeNode(name="style", value=style),
+      ],
+      children=children,
+    )
+
+  def emit(self, indent_level: int = 0) -> str:
+    """Renders the grid cell div, its content, and attached arrows.
+
+    Args:
+        indent_level: The indentation level for the children rendering.
+
+    Returns:
+        str: The rendered HTML string representation of the grid box.
+    """
+    return self.to_tag().emit(indent_level)
 
 
 @dataclass
 class HtmlDocument(HtmlNode):
-  """Root container for the generated HTML."""
+  """Root container for the generated HTML.
+
+  Attributes:
+      model_name: Name of the model representing the content.
+      children: Child elements inside the HTML document.
+  """
 
   model_name: str = ""
   children: List[Any] = field(default_factory=list)
@@ -269,7 +449,14 @@ class HtmlDocument(HtmlNode):
 """
 
   def emit(self, indent_level: int = 0) -> str:
-    """Renders the complete HTML document."""
+    """Renders the complete HTML document.
+
+    Args:
+        indent_level: The indentation level for the rendering.
+
+    Returns:
+        str: The fully rendered HTML document string.
+    """
     # Check if we are a pure CST HtmlDocument representation (children are TagNodes)
     # vs structured representation
     is_pure_cst = bool(self.children) and all(isinstance(c, (TagNode, TextNode, CommentNode)) for c in self.children)

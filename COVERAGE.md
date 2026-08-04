@@ -650,8 +650,8 @@
 - [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:141` - # pragma: no cover
 - [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:143` - A LibCST expression representing the operation.  # pragma: no cover
 - [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:158` - if i < len(keywords) and keywords[i]:  # pragma: no cover
-- [x] `src/ml_switcheroo/core/mlir/nodes.py:21` - pass  # pragma: no cover
-- [x] `src/ml_switcheroo/core/mlir/nodes.py:75` - val_str = f"[{', '.join(self.value)}]"  # pragma: no cover
+- [x] `src/ml_switcheroo.core.mlir.cst.py:21` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo.core.mlir.cst.py:75` - val_str = f"[{', '.join(self.value)}]"  # pragma: no cover
 - [x] `src/ml_switcheroo/core/mlir/stablehlo_emitter.py:172` - return  # pragma: no cover
 - [x] `src/ml_switcheroo/core/mlir/stablehlo_emitter.py:207` - return None  # pragma: no cover
 - [x] `src/ml_switcheroo/core/mlir/stablehlo_emitter.py:225` - return "i1"  # pragma: no cover

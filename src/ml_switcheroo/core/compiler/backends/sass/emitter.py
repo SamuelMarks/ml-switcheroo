@@ -5,7 +5,7 @@ Converts SASS AST nodes into formatted assembly text.
 
 from typing import List
 
-from ml_switcheroo.core.compiler.frontends.sass.nodes import SassNode
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassNode
 from ml_switcheroo.core.compiler.backends.sass.printer import SassPrinter
 
 

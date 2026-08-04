@@ -1,0 +1,8 @@
+description: Auto-generated mapping for func.
+op_type: function
+operation: func
+std_args: []
+variants:
+  mlir:
+    api: sw.func
+    required_imports: []

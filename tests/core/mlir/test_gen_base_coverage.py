@@ -2,7 +2,7 @@
 
 import libcst as cst
 from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
-from ml_switcheroo.core.mlir.nodes import OperationNode, AttributeNode
+from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode
 
 
 class DummyGen(BaseGeneratorMixin):
@@ -17,7 +17,11 @@ def test_get_attr_list():
   """Test get attr list."""
   gen = DummyGen()
   op = OperationNode(
-    name="test", operands=[], results=[], attributes=[AttributeNode("k", ["v1", "v2"], "str")], regions=[]
+    name="test",
+    operands=[],
+    results=[],
+    attributes=[AttributeNode(name="k", value=["v1", "v2"], type_annotation="str")],
+    regions=[],
   )
   assert gen._get_attr(op, "k") == "[v1, v2]"
 

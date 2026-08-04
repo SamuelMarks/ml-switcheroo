@@ -1,12 +1,38 @@
 operation: multiply
-description: Definition for multiply
+description: Calculates the product for each element ``x1_i`` of the input array ``x1``
+  with the respective element ``x2_i`` of the input array ``x2``.
 std_args:
-- lhs
-- rhs
+- name: x1
+  type: Union[array, int, float, complex]
+  is_variadic: false
+  kind: positional_or_keyword
+- name: x2
+  type: Union[array, int, float, complex]
+  is_variadic: false
+  kind: positional_or_keyword
 variants:
   jax:
-    api: jnp.multiply
+    api: jax.numpy.multiply
   torch:
     api: torch.multiply
   stablehlo:
     api: stablehlo.multiply
+  numpy:
+    api: numpy.ma.core.multiply
+    args: {}
+  tensorflow:
+    api: tf.multiply
+  mlx:
+    api: mlx.core.multiply
+    args:
+      args: args
+      kwargs: kwargs
+  flax_nnx:
+    api: jax.numpy.multiply
+  keras:
+    api: keras.layers.multiply
+    args:
+      inputs: inputs
+      kwargs: kwargs
+  sass:
+    api: FMUL

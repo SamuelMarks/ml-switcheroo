@@ -74,10 +74,10 @@ def rewrite_stateful_call(rewriter: Any, node: cst.Call, instance_name: str, con
   if hasattr(rewriter, "context") and hasattr(rewriter.context, "signature_stack"):
     sig_stack = rewriter.context.signature_stack
   # Fallback for legacy shim (if using internal attributes directly)
-  elif hasattr(rewriter, "_signature_stack"):  # pragma: no cover
+  elif hasattr(rewriter, "_signature_stack"):
     sig_stack = rewriter._signature_stack
 
-  if sig_stack:  # pragma: no cover
+  if sig_stack:
     sig_ctx = sig_stack[-1]
     if target_arg_name not in sig_ctx.existing_args:
       found = any(n == target_arg_name for n, _ in sig_ctx.injected_args)
@@ -192,7 +192,7 @@ def is_super_call(node: cst.Call) -> bool:
     # Case: super().method()
     receiver = node.func.value
     if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
-      if receiver.func.value == "super":  # pragma: no cover
+      if receiver.func.value == "super":
         return True
   elif isinstance(node.func, cst.Name):
     # Case: super()
@@ -339,7 +339,7 @@ def inject_permute_call(
         )
       )
     # Clean last comma for cleanliness
-    if elements:  # pragma: no cover
+    if elements:
       elements[-1] = elements[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
     tuple_node = cst.Tuple(elements=elements)

@@ -59,3 +59,49 @@ def test_main_fallback():
   with patch("sys.argv", ["ml_switcheroo"]):
     with pytest.raises(SystemExit):
       main([])
+
+
+def test_main_gen_docs():
+  """Verifies the behavior of main gen-docs."""
+  with patch("ml_switcheroo.cli.__main__.commands.handle_docs") as mock_handle:
+    mock_handle.return_value = 0
+    assert main(["gen-docs"]) == 0
+    mock_handle.assert_called_once()
+
+
+def test_main_gen_tests():
+  """Verifies the behavior of main gen-tests."""
+  with patch("ml_switcheroo.cli.__main__.commands.handle_gen_tests") as mock_handle:
+    mock_handle.return_value = 0
+    assert main(["gen-tests"]) == 0
+    mock_handle.assert_called_once()
+
+
+def test_main_unknown_command():
+  """Verifies the behavior of main with an unknown command (if argparser doesn't catch it)."""
+  # To test the final return 0 fallback, we need to bypass argparse validation
+  import argparse
+
+  with patch.object(argparse.ArgumentParser, "parse_args") as mock_parse:
+
+    class DummyArgs:
+      command = "unknown_cmd"
+      verbose = False
+      log_file = None
+      no_color = False
+
+    mock_parse.return_value = DummyArgs()
+    assert main(["unknown_cmd"]) == 0
+
+
+def test_main_cli_execution():
+  """Tests running the module directly"""
+  import runpy
+  import sys
+
+  with patch("sys.exit") as mock_exit:
+    with patch.object(sys, "argv", ["ml_switcheroo", "schema"]):
+      # run_path will parse the file, execute it in __main__ namespace
+      # which calls main() -> handle_schema() -> prints schema -> sys.exit(0)
+      runpy.run_path("src/ml_switcheroo/cli/__main__.py", run_name="__main__")
+      mock_exit.assert_called_once_with(0)

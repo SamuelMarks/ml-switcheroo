@@ -122,3 +122,41 @@ def test_vision_patch_defusion_pass():
   assert ("input", "patch_conv") in edges
   assert ("patch_conv", "flatten") in edges
   assert ("input", "other") in edges
+
+
+def test_swiglu_fusion_pass_no_match_prefix():
+  """Verifies the behavior when prefixes don't match."""
+  graph = LogicalGraph(
+    nodes=[
+      LogicalNode(id="layer1_gate_proj", kind="Linear"),
+      LogicalNode(id="layer2_up_proj", kind="Linear"),
+    ],
+    edges=[],
+  )
+  pass_ = SwiGLUFusionPass()
+  fused = pass_.apply(graph)
+  assert len(fused.nodes) == 2
+
+
+def test_swiglu_defusion_pass_no_match():
+  """Verifies the behavior when no swiglu exists."""
+  graph = LogicalGraph(nodes=[LogicalNode(id="gate_proj", kind="Linear")])
+  pass_ = SwiGLUDefusionPass()
+  defused = pass_.apply(graph)
+  assert len(defused.nodes) == 1
+
+
+def test_vision_patch_fusion_no_match():
+  """Verifies the behavior when no patch node exists."""
+  graph = LogicalGraph(nodes=[LogicalNode(id="conv1", kind="Conv2d")])
+  pass_ = VisionPatchEmbeddingFusionPass()
+  fused = pass_.apply(graph)
+  assert len(fused.nodes) == 1
+
+
+def test_vision_patch_defusion_no_match():
+  """Verifies the behavior when no patch embed node exists."""
+  graph = LogicalGraph(nodes=[LogicalNode(id="conv1", kind="Conv2d")])
+  pass_ = VisionPatchEmbeddingDefusionPass()
+  defused = pass_.apply(graph)
+  assert len(defused.nodes) == 1

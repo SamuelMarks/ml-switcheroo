@@ -1,6 +1,5 @@
 """Runtime Configuration Store.
 
-
 Supports Dynamic Defaults, TOML loading, and Framework Flavours.
 
 This module resolves default Source and Target frameworks by querying the
@@ -19,12 +18,15 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 
 # Optional TOML support
 def _import_tomllib() -> Any:
-  """Imports tomllib or tomli depending on python version."""
-  if sys.version_info >= (3, 11):
-    import tomllib  # pragma: no cover
+  """Imports tomllib or tomli depending on python version.
 
-    # pragma: no cover
-    return tomllib  # pragma: no cover
+  Returns:
+      Any: The imported tomllib/tomli module, or None if neither is available.
+  """
+  if sys.version_info >= (3, 11):
+    import tomllib
+
+    return tomllib
   else:
     try:
       import tomli as tomllib
@@ -58,12 +60,19 @@ def get_framework_priority_order() -> List[str]:
   frameworks = available_frameworks()
 
   def sort_key(name: str) -> Tuple[int, str]:
-    """Execute implementation detail."""
+    """Helper to generate a sorting key for a framework name.
+
+    Args:
+        name (str): The framework name/key.
+
+    Returns:
+        Tuple[int, str]: A tuple of (priority, name) for sorting.
+    """
     adapter = get_adapter(name)
     priority = 999
     is_child = False
 
-    if adapter:  # pragma: no cover
+    if adapter:
       # Check hierarchy to push flavours/children to the end
       if hasattr(adapter, "inherits_from") and adapter.inherits_from:
         is_child = True
@@ -112,7 +121,22 @@ def _resolve_default_target() -> str:
 
 
 class RuntimeConfig(BaseModel):
-  """Global configuration container for the translation engine."""
+  """Global configuration container for the translation engine.
+
+  Attributes:
+      source_framework (str): The primary source framework key.
+      target_framework (str): The primary target framework key.
+      source_flavour (Optional[str]): Detailed source sub-framework.
+      target_flavour (Optional[str]): Detailed target sub-framework.
+      strict_mode (bool): If True, fail on unknown APIs.
+      intermediate (Optional[str]): Intermediate representation layer for round-trip verification.
+      enable_graph_optimization (bool): If True, performs graph-level optimization and fusion.
+      enable_import_fixer (bool): If True, performs import resolution, pruning, and injection.
+      enable_sharding (bool): If True, enables distributed sharding logic and related fusions.
+      plugin_settings (Dict[str, Any]): Configuration passed to plugins.
+      plugin_paths (List[Path]): External directories to scan for plugins.
+      validation_report (Optional[Path]): Path to a verification lockfile.
+  """
 
   source_framework: str = Field(
     default_factory=_resolve_default_source,

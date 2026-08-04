@@ -18,6 +18,9 @@ KERAS_AVAILABLE = importlib.util.find_spec("keras") is not None
 # --- latex_dsl ---
 LATEX_DSL_AVAILABLE = True
 
+# --- mlir ---
+MLIR_AVAILABLE = True
+
 # --- mlx ---
 MLX_AVAILABLE = importlib.util.find_spec("mlx") is not None and importlib.util.find_spec("numpy") is not None
 
@@ -38,6 +41,9 @@ STABLEHLO_AVAILABLE = True
 
 # --- tensorflow ---
 TENSORFLOW_AVAILABLE = importlib.util.find_spec("tensorflow") is not None
+
+# --- tikz ---
+TIKZ_AVAILABLE = True
 
 # --- torch ---
 TORCH_AVAILABLE = importlib.util.find_spec("torch") is not None

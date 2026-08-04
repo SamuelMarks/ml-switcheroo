@@ -5,7 +5,7 @@ Defines the mixin with common helper functions used by Expression and Statement 
 
 from typing import Optional
 import libcst as cst
-from ml_switcheroo.core.mlir.nodes import OperationNode
+from ml_switcheroo.core.mlir.cst import OperationNode
 
 
 class BaseGeneratorMixin:

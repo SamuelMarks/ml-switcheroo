@@ -1,21 +1,23 @@
 """Test suite for the Stablehlo Reader module."""
 
 import pytest
+from pathlib import Path
+from typing import Dict, Any
 from ml_switcheroo.importers.stablehlo_reader import StableHloSpecImporter
 
 
 @pytest.fixture
-def importer():
+def importer() -> StableHloSpecImporter:
   """Provides a mock importer for testing."""
   return StableHloSpecImporter()
 
 
-def test_parse_file_not_found(importer, tmp_path):
+def test_parse_file_not_found(importer: StableHloSpecImporter, tmp_path: Path) -> None:
   """Parses file not found."""
   assert importer.parse_file(tmp_path / "missing.md") == {}
 
 
-def test_parse_file_valid(importer, tmp_path):
+def test_parse_file_valid(importer: StableHloSpecImporter, tmp_path: Path) -> None:
   """Parses file valid."""
   md_file = tmp_path / "spec.md"
   md_file.write_text(
@@ -31,11 +33,22 @@ def test_parse_file_valid(importer, tmp_path):
   assert result["LogPlusOne"]["variants"]["stablehlo"]["api"] == "stablehlo.logplusone"
 
 
-def test_finalize_op_truncation(importer):
-  """Verifies the behavior of finalize op truncation."""
-  from ml_switcheroo.core.mlir.nodes import OperationNode, ValueNode
+def test_parse_invalid_mlir(importer: StableHloSpecImporter, tmp_path: Path) -> None:
+  """Parses invalid MLIR to trigger fallback exception block."""
+  md_file = tmp_path / "spec_bad.md"
+  # This syntax shouldn't parse cleanly, causing a failure that falls back to raw_syntax
+  md_file.write_text("### `bad_op`\n```mlir\nstablehlo.bad_op ::: <<invalid>>\n```")
+  result = importer.parse_file(md_file)
+  assert "BadOp" in result
+  # The parser failed, so it shouldn't extract std_args from the parsed_op
+  assert result["BadOp"]["std_args"] == ["input"]
 
-  semantics = {}
+
+def test_finalize_op_truncation(importer: StableHloSpecImporter) -> None:
+  """Verifies the behavior of finalize op truncation."""
+  from ml_switcheroo.core.mlir.cst import OperationNode, ValueNode
+
+  semantics: Dict[str, Any] = {}
   parsed = OperationNode(
     name="stablehlo.my_op", results=[ValueNode(name="%res")], operands=[ValueNode(name="%x"), ValueNode(name="%y")]
   )
@@ -47,11 +60,11 @@ def test_finalize_op_truncation(importer):
   assert semantics["MyOp"]["std_args"] == ["x", "y"]
 
 
-def test_finalize_op_args_filtering(importer):
+def test_finalize_op_args_filtering(importer: StableHloSpecImporter) -> None:
   """Verifies the behavior of finalize op arguments filtering."""
-  from ml_switcheroo.core.mlir.nodes import OperationNode, ValueNode
+  from ml_switcheroo.core.mlir.cst import OperationNode, ValueNode
 
-  semantics = {}
+  semantics: Dict[str, Any] = {}
   parsed = OperationNode(
     name="stablehlo.add",
     results=[ValueNode(name="%0"), ValueNode(name="%result"), ValueNode(name="%results")],
@@ -63,18 +76,18 @@ def test_finalize_op_args_filtering(importer):
   assert semantics["Add"]["variants"]["stablehlo"]["api"] == "stablehlo.add"
 
 
-def test_finalize_op_args_fallback(importer):
+def test_finalize_op_args_fallback(importer: StableHloSpecImporter) -> None:
   """Verifies the behavior of finalize op arguments fallback."""
-  semantics = {}
+  semantics: Dict[str, Any] = {}
   details = {"description": ["Desc"], "raw_syntax": ""}
   importer._finalize_op(semantics, "Sub", details)
   assert semantics["Sub"]["std_args"] == ["input"]
   assert semantics["Sub"]["variants"]["stablehlo"]["api"] == "stablehlo.subtract"
 
 
-def test_finalize_op_api_suffix(importer):
+def test_finalize_op_api_suffix(importer: StableHloSpecImporter) -> None:
   """Verifies the behavior of finalize op API suffix."""
-  semantics = {}
+  semantics: Dict[str, Any] = {}
   importer._finalize_op(semantics, "Add", {})
   assert semantics["Add"]["variants"]["stablehlo"]["api"] == "stablehlo.add"
   importer._finalize_op(semantics, "Sub", {})
@@ -87,7 +100,7 @@ def test_finalize_op_api_suffix(importer):
   assert semantics["Pow"]["variants"]["stablehlo"]["api"] == "stablehlo.power"
 
 
-def test_normalize_op_name(importer):
+def test_normalize_op_name(importer: StableHloSpecImporter) -> None:
   """Verifies the behavior of normalize op name."""
   assert importer._normalize_op_name("abs") == "Abs"
   assert importer._normalize_op_name("add") == "Add"
@@ -97,3 +110,25 @@ def test_normalize_op_name(importer):
   assert importer._normalize_op_name("power") == "Pow"
   assert importer._normalize_op_name("log_plus_one") == "LogPlusOne"
   assert importer._normalize_op_name("custom_op_name") == "CustomOpName"
+
+
+def test_parse_markdown_edge_cases(importer: StableHloSpecImporter, tmp_path: Path) -> None:
+  """Test edge cases in markdown parsing for branch coverage."""
+  md_file = tmp_path / "spec_edge.md"
+  md_file.write_text(
+    "###\n\n"  # Empty h3
+    "### **bold_name**\n\n"  # h3 with non text/code child
+    "### `bad name`\n\n"  # h3 with invalid characters for op name
+    "Some text before op.\n\n"  # Paragraph without current_op
+    "```python\nprint(1)\n```\n\n"  # Code block without current_op
+    "### `valid_op`\n"
+    "Desc 1.\n\n"
+    "Desc 2.\n"  # Append to existing description (will be ignored)
+    "```javascript\nfoo\n```\n\n"  # Fence without mlir/stablehlo
+    "```mlir\nnot stablehlo\n```\n\n"  # Fence with mlir but no stablehlo string
+    "### `valid_op_2`\n"  # Finalize previous
+  )
+  result = importer.parse_file(md_file)
+  assert "ValidOp" in result
+  assert "ValidOp2" in result
+  assert result["ValidOp"]["description"] == "Desc 1."

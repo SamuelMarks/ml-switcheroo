@@ -2,18 +2,18 @@
 
 from typing import List
 from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
-from ml_switcheroo.core.compiler.frontends.sass.nodes import Comment, Instruction, Register, SassNode
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassRegister, SassNode
 
 
 def test_lift_simple_chain() -> None:
   """Lifts simple chain."""
   nodes: List[SassNode] = [
-    Comment("Input x -> R0"),
-    Instruction("MOV", [Register("R1"), Register("RZ")]),
-    Comment("BEGIN Conv2d (conv1)"),
-    Instruction("FADD", [Register("R1"), Register("R1"), Register("R0")]),
-    Comment("END Conv2d (conv1)"),
-    Comment("Return: R1"),
+    SassComment(text="Input x -> R0"),
+    SassInstruction(opcode="MOV", operands=[SassRegister(name="R1"), SassRegister(name="RZ")]),
+    SassComment(text="BEGIN Conv2d (conv1)"),
+    SassInstruction(opcode="FADD", operands=[SassRegister(name="R1"), SassRegister(name="R1"), SassRegister(name="R0")]),
+    SassComment(text="END Conv2d (conv1)"),
+    SassComment(text="Return: R1"),
   ]
   lifter = SassLifter()
   graph = lifter.lift(nodes)
@@ -32,13 +32,13 @@ def test_lift_simple_chain() -> None:
 def test_lift_complex_snippet() -> None:
   """Lifts complex snippet."""
   nodes: List[SassNode] = [
-    Comment("Input x -> R0"),
-    Comment("BEGIN Conv2d (conv)"),
-    Comment("END Conv2d (conv)"),
-    Comment("Unmapped Op: torch.flatten (func_flatten)"),
-    Comment("BEGIN Linear (fc)"),
-    Comment("END Linear (fc)"),
-    Comment("Return: R7"),
+    SassComment(text="Input x -> R0"),
+    SassComment(text="BEGIN Conv2d (conv)"),
+    SassComment(text="END Conv2d (conv)"),
+    SassComment(text="Unmapped Op: torch.flatten (func_flatten)"),
+    SassComment(text="BEGIN Linear (fc)"),
+    SassComment(text="END Linear (fc)"),
+    SassComment(text="Return: R7"),
   ]
   lifter = SassLifter()
   graph = lifter.lift(nodes)
@@ -54,10 +54,10 @@ def test_lift_complex_snippet() -> None:
 def test_lift_duplicate_markers_ignored() -> None:
   """Lifts duplicate markers ignored."""
   nodes: List[SassNode] = [
-    Comment("BEGIN Layer (l1)"),
-    Comment("END Layer (l1)"),
-    Comment("BEGIN Layer (l1)"),
-    Comment("END Layer (l1)"),
+    SassComment(text="BEGIN Layer (l1)"),
+    SassComment(text="END Layer (l1)"),
+    SassComment(text="BEGIN Layer (l1)"),
+    SassComment(text="END Layer (l1)"),
   ]
   lifter = SassLifter()
   graph = lifter.lift(nodes)
@@ -67,7 +67,10 @@ def test_lift_duplicate_markers_ignored() -> None:
 
 def test_lift_no_comments() -> None:
   """Lifts no comments."""
-  nodes: List[SassNode] = [Instruction("FADD", [Register("R0"), Register("R1")]), Comment("Just a normal comment")]
+  nodes: List[SassNode] = [
+    SassInstruction(opcode="FADD", operands=[SassRegister(name="R0"), SassRegister(name="R1")]),
+    SassComment(text="Just a normal comment"),
+  ]
   lifter = SassLifter()
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 1

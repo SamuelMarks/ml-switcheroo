@@ -47,25 +47,25 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
   targets: List[Tuple[str, Dict[str, Any]]] = []
 
   if api_path.endswith(".*"):
-    module_name = api_path[:-2]  # pragma: no cover
-    try:  # pragma: no cover
-      module = importlib.import_module(module_name)  # pragma: no cover
-      # Scan public members  # pragma: no cover
-      for name, obj in inspect.getmembers(module):  # pragma: no cover
-        if name.startswith("_"):  # pragma: no cover
-          continue  # pragma: no cover
-        full_path = f"{module_name}.{name}"  # pragma: no cover
-        try:  # pragma: no cover
-          # We skip modules/builtins that might clutter unless they look like ops  # pragma: no cover
-          if inspect.ismodule(obj):  # pragma: no cover
-            continue  # pragma: no cover
-          info = _extract_metadata(obj)  # pragma: no cover
-          targets.append((full_path, info))  # pragma: no cover
-        except Exception:  # pragma: no cover
-          continue  # pragma: no cover
-    except ImportError as e:  # pragma: no cover
-      log_error(f"Could not import module '{module_name}': {e}")  # pragma: no cover
-      return 1  # pragma: no cover
+    module_name = api_path[:-2]
+    try:
+      module = importlib.import_module(module_name)
+      # Scan public members
+      for name, obj in inspect.getmembers(module):
+        if name.startswith("_"):
+          continue
+        full_path = f"{module_name}.{name}"
+        try:
+          # We skip modules/builtins that might clutter unless they look like ops
+          if inspect.ismodule(obj):
+            continue
+          info = _extract_metadata(obj)
+          targets.append((full_path, info))
+        except Exception:
+          continue
+    except ImportError as e:
+      log_error(f"Could not import module '{module_name}': {e}")
+      return 1
   else:
     # Single mode
     try:
@@ -76,8 +76,8 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
       return 1
 
   if not targets:
-    log_error(f"No valid API targets found for '{api_path}'.")  # pragma: no cover
-    return 1  # pragma: no cover
+    log_error(f"No valid API targets found for '{api_path}'.")
+    return 1
 
   # Sort deterministically
   targets.sort(key=lambda x: x[0])
@@ -98,19 +98,19 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
   chunks = [targets[i : i + batch_size] for i in range(0, len(targets), batch_size)]
 
   if out_dir:
-    if not out_dir.exists():  # pragma: no cover
+    if not out_dir.exists():
       out_dir.mkdir(parents=True, exist_ok=True)
 
-    for i, chunk in enumerate(chunks):  # pragma: no cover
-      content = [header_text]  # pragma: no cover
-      for path, info in chunk:  # pragma: no cover
-        content.append(_build_target_block(path, info))  # pragma: no cover
-      content.append(footer_text)  # pragma: no cover
-      # pragma: no cover
-      filename = out_dir / f"suggest_{base_name}_{i + 1:03d}.md"  # pragma: no cover
-      with open(filename, "w", encoding="utf-8") as f:  # pragma: no cover
-        f.write("\n".join(content))  # pragma: no cover
-      print(f"Generated {filename}")  # pragma: no cover
+    for i, chunk in enumerate(chunks):
+      content = [header_text]
+      for path, info in chunk:
+        content.append(_build_target_block(path, info))
+      content.append(footer_text)
+
+      filename = out_dir / f"suggest_{base_name}_{i + 1:03d}.md"
+      with open(filename, "w", encoding="utf-8") as f:
+        f.write("\n".join(content))
+      print(f"Generated {filename}")
 
   else:
     # Stdout Logic (Same structure, single stream)
@@ -141,9 +141,9 @@ def _extract_metadata(obj: Any) -> Dict[str, Any]:
   try:
     # signature() returns the parameter list e.g. "(x, y=1)"
     sig = str(inspect.signature(obj))
-  except (ValueError, TypeError):  # pragma: no cover
-    # Fallback for C-extensions  # pragma: no cover
-    pass  # pragma: no cover
+  except (ValueError, TypeError):
+    # Fallback for C-extensions
+    pass
 
   return {
     "signature": sig,
@@ -177,7 +177,14 @@ def _inspect_live_object(api_path: str) -> Dict[str, Any]:
 
 
 def _build_header(schema_json: str) -> str:
-  """Returns the static prompt header with Context and Examples."""
+  """Returns the static prompt header with Context and Examples.
+
+  Args:
+      schema_json (str): The JSON schema string for OperationDef.
+
+  Returns:
+      str: The formatted prompt header.
+  """
   return f"""You are an expert AI assistant for the 'ml-switcheroo' transpiler project.
 Your task is to generate valid YAML definitions—for: PyTorch, MLX, Keras, TensorFlow (if different from Keras),
 Flax NNX (if different from JAX), and Pax (if different from JAX)—using the Operation Definition Language (ODL).
@@ -218,7 +225,15 @@ variants:
 
 
 def _build_target_block(api_path: str, info: Dict[str, Any]) -> str:
-  """Returns the descriptive block for a single operation."""
+  """Returns the descriptive block for a single operation.
+
+  Args:
+      api_path (str): The full dotted path to the API object.
+      info (Dict[str, Any]): Dictionary containing metadata ('signature', 'docstring', 'kind').
+
+  Returns:
+      str: The formatted target operation block.
+  """
   op_name = api_path.split(".")[-1]
   newline = "\n"
 
@@ -235,7 +250,14 @@ Docstring:
 
 
 def _build_footer(source_fw: str) -> str:
-  """Returns the final instructions."""
+  """Returns the final instructions.
+
+  Args:
+      source_fw (str): The name of the source framework (e.g. 'torch', 'jax').
+
+  Returns:
+      str: The formatted instructions footer.
+  """
   return f"""
 --- INSTRUCTIONS ---
 1. Analyze the Target Operations listed above.

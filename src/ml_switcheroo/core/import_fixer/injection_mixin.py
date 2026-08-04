@@ -18,13 +18,26 @@ from ml_switcheroo.core.import_fixer.utils import (
 
 
 class InjectionMixin(cst.CSTTransformer):
-  """Mixin for injecting imports at the Module level."""
+  """Mixin for injecting imports at the Module level.
+
+  Attributes:
+    plan: The resolution plan containing required imports.
+    _satisfied_injections: Set of import signatures already processed.
+  """
 
   plan: ResolutionPlan
   _satisfied_injections: "set[str]"
 
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-    """Post-process module to inject imports from the plan."""
+    """Post-process module to inject imports from the plan.
+
+    Args:
+      original_node: The original CST Module node before transformation.
+      updated_node: The updated CST Module node after transformation.
+
+    Returns:
+      The modified CST Module node containing the injected imports.
+    """
     injections: List[cst.CSTNode] = []
 
     for req in self.plan.required_imports:
@@ -49,7 +62,7 @@ class InjectionMixin(cst.CSTTransformer):
       if req.alias:
         if req.alias != leaf:
           should_alias = True
-        elif "." in nm:  # pragma: no cover
+        elif "." in nm:
           # e.g. import torch.nn as nn
           should_alias = True
 
@@ -108,5 +121,10 @@ class InjectionMixin(cst.CSTTransformer):
     return updated_node.with_changes(body=clean_body)
 
   def _append_injection(self, injections_list: List[cst.CSTNode], node: cst.CSTNode) -> None:
-    """Execute implementation detail."""
+    """Execute implementation detail by appending an injection node.
+
+    Args:
+      injections_list: The list of injection CST nodes to append to.
+      node: The CST node to be injected.
+    """
     injections_list.append(node)

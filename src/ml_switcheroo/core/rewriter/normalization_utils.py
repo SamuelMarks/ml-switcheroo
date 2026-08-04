@@ -62,7 +62,7 @@ def convert_value_to_cst(val: Any) -> cst.BaseExpression:
 
     # Fix trailing comma for the last element based on Python style preferences
     # Usually strict JSON-like structures don't strictly need one, but LibCST allows exact control.
-    if elements:  # pragma: no cover
+    if elements:
       last = elements[-1]
       elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
@@ -85,7 +85,7 @@ def convert_value_to_cst(val: Any) -> cst.BaseExpression:
         )
       )
 
-    if elements:  # pragma: no cover
+    if elements:
       last = elements[-1]
       elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
@@ -119,8 +119,23 @@ def normalize_arguments(
 ) -> List[cst.Arg]:
   """Pivots arguments from source implementation -> Standard -> Target implementation.
 
-
   Handles renaming, reordering, and default injection.
+
+  Args:
+      original_node: The original call node from the source AST.
+      updated_node: The updated call node being processed.
+      op_details: A dictionary containing details of the standard operation, including
+          standard arguments (`std_args`) and variants (`variants`).
+      target_impl: A dictionary containing configuration details for the target
+          implementation, including argument mappings (`args`), default values (`arg_values`),
+          injected arguments (`inject_args`), and packing settings (`pack_to_tuple`).
+      source_fw: The name of the source framework (e.g., 'pytorch', 'tensorflow', 'jax').
+      is_module_alias_fn: A function or callable used to determine if a node represents
+          a module alias or namespace.
+
+  Returns:
+      A list of LibCST Argument (`cst.Arg`) nodes aligned, named, and formatted
+      for the target framework's implementation.
   """
   # 1. Parse Standard Types
   std_args_raw = op_details.get("std_args", [])
@@ -131,7 +146,7 @@ def normalize_arguments(
   for item in std_args_raw:
     if isinstance(item, dict):
       name = item.get("name")
-      if name:  # pragma: no cover
+      if name:
         std_args_order.append(name)
         if item.get("is_variadic"):
           variadic_arg_name = name
@@ -174,16 +189,16 @@ def normalize_arguments(
           k_name = arg.keyword.value
           mapped = lib_to_std.get(k_name) or (k_name if k_name == first_std_arg else None)
           if mapped == first_std_arg:
-            arg_provided = True  # pragma: no cover
-            break  # pragma: no cover
+            arg_provided = True
+            break
 
-      if not arg_provided:  # pragma: no cover
-        if isinstance(original_node.func, cst.Attribute):  # pragma: no cover
+      if not arg_provided:
+        if isinstance(original_node.func, cst.Attribute):
           rec = original_node.func.value
           found_args[first_std_arg] = cst.Arg(value=rec)
           receiver_injected = True
     else:
-      if isinstance(original_node.func, cst.Attribute):  # pragma: no cover
+      if isinstance(original_node.func, cst.Attribute):
         extra_args.append(cst.Arg(value=original_node.func.value))
 
   # 4. Process Args
@@ -200,7 +215,7 @@ def normalize_arguments(
           packing_mode = True
           variadic_buffer.append(upd_arg)
         else:
-          if std_name not in found_args:  # pragma: no cover
+          if std_name not in found_args:
             found_args[std_name] = upd_arg
           pos_idx += 1
       else:
@@ -225,7 +240,7 @@ def normalize_arguments(
       )
 
     is_list = pack_as_type == "List"
-    if elements:  # pragma: no cover
+    if elements:
       trailing_comma = cst.MaybeSentinel.DEFAULT
       if not is_list and len(elements) == 1:
         trailing_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))  # type: ignore
@@ -282,7 +297,7 @@ def normalize_arguments(
         # If val_options is a dict, it's an enum mapping (val -> code)
         if isinstance(val_options, dict):
           raw_key = extract_primitive_key(current_arg.value)
-          if raw_key is not None and str(raw_key) in val_options:  # pragma: no cover
+          if raw_key is not None and str(raw_key) in val_options:
             target_code = val_options[str(raw_key)]
             final_val_node = cst.parse_expression(target_code)
         # Otherwise it's a constant injection (literal override)
@@ -326,7 +341,7 @@ def normalize_arguments(
     for arg in extra_args:
       if arg.keyword and arg.keyword.value in kwargs_map and kwargs_map[arg.keyword.value] is None:
         continue
-      filtered_extras.append(arg)  # pragma: no cover
+      filtered_extras.append(arg)
     extra_args = filtered_extras
 
   new_args_list.extend(extra_args)

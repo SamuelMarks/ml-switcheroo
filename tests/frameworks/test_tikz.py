@@ -40,3 +40,27 @@ def test_tikz_properties():
   examples = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
   assert "\\begin{tikzpicture}" in examples["tier2_neural"]
+
+
+def test_tikz_missing_coverage():
+  """Verifies untested methods of TikzAdapter."""
+  adapter = TikzAdapter()
+
+  # Traits
+  assert adapter.plugin_traits is not None
+
+  # Device & RNG
+  assert adapter.get_device_syntax("cpu") == ""
+  assert adapter.get_device_check_syntax() == "True"
+  assert adapter.get_rng_split_syntax("rng", "key") == ""
+
+  # Serialization
+  assert adapter.get_serialization_imports() == []
+  assert adapter.get_serialization_syntax("save", "path") == ""
+  assert adapter.get_weight_conversion_imports() == []
+  assert adapter.get_weight_load_code("path") == "# Weights not supported in TikZ mode"
+  assert adapter.get_tensor_to_numpy_expr("my_tensor") == "my_tensor"
+  assert adapter.get_weight_save_code("state", "path") == "# Weights not supported in TikZ mode"
+
+  # Convert
+  assert adapter.convert(123) == "123"

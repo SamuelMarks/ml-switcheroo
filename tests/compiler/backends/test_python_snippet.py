@@ -23,8 +23,8 @@ def test_emit_init_stateful_torch(emitter_torch):
   stmt = emitter_torch.emit_init(node)
   from ml_switcheroo.utils.node_diff import capture_node_source
 
-  src = capture_node_source(stmt)
-  assert "self.conv1 = nn.Conv2d" in src
+  src = capture_node_source(stmt).replace(" ", "")
+  assert "self.conv1=nn.Conv2d" in src
   assert "in_channels=3" in src
   assert "out_channels=64" in src
 
@@ -35,8 +35,8 @@ def test_emit_init_stateful_flax_rng(emitter_flax):
   stmt = emitter_flax.emit_init(node)
   from ml_switcheroo.utils.node_diff import capture_node_source
 
-  src = capture_node_source(stmt)
-  assert "self.fc1 = nnx.Linear" in src
+  src = capture_node_source(stmt).replace(" ", "")
+  assert "self.fc1=nnx.Linear" in src
   assert "features=10" in src
   assert "rngs=rngs" in src
 
@@ -128,4 +128,4 @@ def test_resolve_api_dotted_and_jax(emitter_flax):
 
 def test_format_args_from_metadata_empty(emitter_torch):
   """Tests format args from metadata empty."""
-  assert emitter_torch._format_args_from_metadata({}) == ""
+  assert emitter_torch._build_args_from_metadata({}) == []

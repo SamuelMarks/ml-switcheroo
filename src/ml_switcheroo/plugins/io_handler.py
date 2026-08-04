@@ -21,7 +21,14 @@ from ml_switcheroo.utils.node_diff import capture_node_source
 
 
 def _get_func_name(node: cst.Call) -> Optional[str]:
-  """Helper to get function name from Call node (Attribute or Name)."""
+  """Helper to get function name from Call node (Attribute or Name).
+
+  Args:
+      node: The Call node representing the function call.
+
+  Returns:
+      The name of the function as a string, or None if it cannot be determined.
+  """
   if isinstance(node.func, cst.Name):
     return node.func.value
   if isinstance(node.func, cst.Attribute):
@@ -30,7 +37,16 @@ def _get_func_name(node: cst.Call) -> Optional[str]:
 
 
 def _get_arg(args: List[cst.Arg], index: int, name: str) -> Optional[cst.Arg]:
-  """Retrieves argument by position or keyword."""
+  """Retrieves argument by position or keyword.
+
+  Args:
+      args: The list of arguments from the function call.
+      index: The expected positional index of the argument.
+      name: The keyword name of the argument.
+
+  Returns:
+      The matching Arg node, or None if the argument is not found.
+  """
   for arg in args:
     if arg.keyword and arg.keyword.value == name:
       return arg
@@ -47,6 +63,15 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Triggers:
       `torch.save` and `torch.load`.
+
+  Args:
+      node: The Call node representing the IO call to be transformed.
+      ctx: The HookContext containing context and utilities for the
+        transformation.
+
+  Returns:
+      The rewritten CST Call node or parsed expression, or the original node if
+      no transformation was applied.
   """
   target_fw = ctx.target_fw
   adapter = get_adapter(target_fw)
@@ -57,7 +82,7 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   func_name = _get_func_name(node)
   if not func_name:
-    return node  # pragma: no cover
+    return node
 
   # Determine Operation Type
   op = "save" if "save" in func_name else ("load" if "load" in func_name else None)
@@ -96,7 +121,7 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
   try:
     new_code = adapter.get_serialization_syntax(op, f_str, obj_str)
     if not new_code:
-      return node  # pragma: no cover
+      return node
 
     # 3. Parse back to CST
     return cst.parse_expression(new_code)  # type: ignore

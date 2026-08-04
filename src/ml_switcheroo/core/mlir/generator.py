@@ -4,15 +4,14 @@ This module provides the `MlirToPythonGenerator` class, which consumes the
 MLIR CST object model and reconstructs valid Python code via LibCST.
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from collections import defaultdict
 import libcst as cst
 
-from ml_switcheroo.core.mlir.nodes import (
+from ml_switcheroo.core.mlir.cst import (
   BlockNode,
   ModuleNode,
   OperationNode,
-  TriviaNode,
 )
 
 # Import modular components
@@ -67,11 +66,18 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     """Traverses the MLIR tree to count SSAs usage.
 
     Populates self.usage_counts.
+
+    Args:
+        mod: The root MLIR ModuleNode to analyze.
     """
     self._scan_block_usage(mod.body)
 
   def _scan_block_usage(self, block: BlockNode) -> None:
-    """Recursively scans op operands to update usage counts."""
+    """Recursively scans op operands to update usage counts.
+
+    Args:
+        block: The BlockNode whose operations and regions are to be scanned.
+    """
     for op in block.operations:
       # Count operand usage
       for operand in op.operands:
@@ -84,17 +90,26 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         for b in region.blocks:
           self._scan_block_usage(b)
 
-  def _convert_trivia(self, trivia: List[TriviaNode]) -> List[cst.EmptyLine]:
+  def _convert_trivia(self, trivia: List[Any]) -> List[cst.EmptyLine]:
     """Converts MLIR comments (//) to Python comments (#).
 
     Ignores layout whitespace as LibCST handles indentation.
+
+    Args:
+        trivia: A list of Trivia or TriviaNode elements from MLIR.
+
+    Returns:
+        A list of LibCST EmptyLine objects containing the Python comments.
     """
     lines = []
     for t in trivia:
-      content = t.content.strip()
+      if hasattr(t, "content"):
+        content = t.content.strip()
+      else:
+        content = t.text.strip()
       # Only process comments, not just newlines
-      if t.kind == "comment" or content.startswith("//"):  # pragma: no cover
-        if content.startswith("//"):  # pragma: no cover
+      if content.startswith("//") or content.startswith("%"):
+        if content.startswith("//"):
           content = "#" + content[2:]
         lines.append(cst.EmptyLine(comment=cst.Comment(content), newline=cst.Newline()))
     return lines
@@ -103,6 +118,12 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     """Converts operations in a block to a list of Python statements.
 
     Applies expression folding where possible.
+
+    Args:
+        block: The MLIR BlockNode containing operations to convert.
+
+    Returns:
+        A list of LibCST BaseStatement objects representing Python statements.
     """
     stmts: List[cst.BaseStatement] = []
 
@@ -122,7 +143,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
           # Wrap as statement (Assignment or Expression Stmt)
           stmt_node = self._wrap_as_statement(op, expr_node)
           if hasattr(stmt_node, "with_changes") and leading:
-            stmt_node = stmt_node.with_changes(leading_lines=leading)  # pragma: no cover
+            stmt_node = stmt_node.with_changes(leading_lines=leading)
           stmts.append(stmt_node)
       else:
         # Handle statements that are never expressions (Control Flow, Class Defs, Defs, Imports)
@@ -130,7 +151,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         stmt_node = self._convert_statement_op(op)  # type: ignore
         if stmt_node:
           if hasattr(stmt_node, "with_changes") and leading:
-            stmt_node = stmt_node.with_changes(leading_lines=leading)  # pragma: no cover
+            stmt_node = stmt_node.with_changes(leading_lines=leading)
           stmts.append(stmt_node)
 
     return stmts
@@ -143,6 +164,13 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     2.  **Statement Fusion**: Inline if the consumer is a "Terminal Statement"
         like `sw.setattr` or `sw.return`.
     3.  **Default**: Do not inline (sequential generation).
+
+    Args:
+        op: The MLIR OperationNode to consider inlining.
+        expr: The parsed LibCST expression representing the operation.
+
+    Returns:
+        True if the expression should be inlined/folded, False otherwise.
     """
     if not op.results:
       return False  # No result to inline
@@ -180,6 +208,12 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
     If previously deferred, returns the AST node (folding).
     Else returns a Name or Attribute reference.
+
+    Args:
+        ssa_name: The SSA value name to resolve.
+
+    Returns:
+        A LibCST BaseExpression representing the resolved reference.
     """
     if ssa_name in self.deferred_exprs:
       # Retrieve deferred expression
@@ -199,6 +233,13 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     """Attempts to map an Op to a Python Expression (e.g. Call, BinaryOp, Attribute).
 
     Delegates to ExpressionGeneratorMixin.
+
+    Args:
+        op: The MLIR OperationNode to convert into an expression.
+
+    Returns:
+        The resulting LibCST BaseExpression, or None if the operation does
+        not represent an expression.
     """
     op_name = op.name.strip('"')
 
@@ -214,7 +255,15 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     return None
 
   def _convert_statement_op(self, op: OperationNode) -> Optional[cst.BaseStatement]:
-    """Maps structural ops to Statements. Delegates to StatementGeneratorMixin."""
+    """Maps structural ops to Statements. Delegates to StatementGeneratorMixin.
+
+    Args:
+        op: The MLIR OperationNode to convert.
+
+    Returns:
+        The resulting LibCST BaseStatement representing the structural operation,
+        or None if the operation is not recognized as a statement op.
+    """
     op_name = op.name.strip('"')
 
     if op_name == "sw.module":
@@ -234,6 +283,13 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     """Wraps an expression into a statement (Assign or Expr).
 
     Extracts semantic hints from 'type' attribute to produce readable variable names.
+
+    Args:
+        op: The MLIR OperationNode whose result is being wrapped.
+        expr: The LibCST expression to be wrapped.
+
+    Returns:
+        A LibCST BaseStatement representing the assignment or simple expression statement.
     """
     if op.results:
       res_ssa = op.results[0].name
@@ -258,7 +314,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
       # 2. Check for 'name' attribute
       elif op.name.strip('"') == "sw.getattr":
         raw_n = self._get_attr(op, "name")
-        if raw_n:  # pragma: no cover
+        if raw_n:
           hint = raw_n.strip('"')
 
       # 3. Fallback for constants: cst
@@ -272,13 +328,20 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
       return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
 
   def _is_void_call(self, expr: cst.BaseExpression) -> bool:
-    """Heuristic detection of calls that return None/Void (like super().__init__)."""
+    """Heuristic detection of calls that return None/Void (like super().__init__).
+
+    Args:
+        expr: The LibCST expression to evaluate.
+
+    Returns:
+        True if the expression is detected as a void-returning call, False otherwise.
+    """
     if isinstance(expr, cst.Call):
       # Detect super().__init__()
       if isinstance(expr.func, cst.Attribute):
         if expr.func.attr.value == "__init__":
           receiver = expr.func.value
-          if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):  # pragma: no cover
-            if receiver.func.value == "super":  # pragma: no cover
+          if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
+            if receiver.func.value == "super":
               return True
     return False

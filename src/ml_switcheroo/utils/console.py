@@ -29,9 +29,19 @@ SUCCESS_LEVEL_NUM = 25
 logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
 
-def _success(self, message: Any, *args, **kwargs) -> Any:  # type: ignore
-  """Method injected into Logger to support logger.success()."""
-  if self.isEnabledFor(SUCCESS_LEVEL_NUM):  # pragma: no cover
+def _success(self, message: Any, *args: Any, **kwargs: Any) -> Any:  # type: ignore
+  """Method injected into Logger to support logger.success().
+
+  Args:
+      self: The logger instance.
+      message (Any): The message content to be logged.
+      *args (Any): Variable length argument list passed to the underlying logger.
+      **kwargs (Any): Arbitrary keyword arguments passed to the underlying logger.
+
+  Returns:
+      Any: The return value of the underlying log call.
+  """
+  if self.isEnabledFor(SUCCESS_LEVEL_NUM):
     self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)
 
 
@@ -66,7 +76,11 @@ class _ConsoleProxy:
   """
 
   def __init__(self) -> None:
-    """Initializes the proxy with a default Standard Output console."""
+    """Initializes the proxy with a default Standard Output console.
+
+    Returns:
+        None
+    """
     self._backend: Console = Console(theme=_THEME)
     self._configure_logging()
 
@@ -76,12 +90,18 @@ class _ConsoleProxy:
     Args:
         new_console (Console): The new Rich Console instance to use.
 
+    Returns:
+        None
     """
     self._backend = new_console
     self._configure_logging()
 
   def reset(self) -> None:
-    """Resets the proxy to use a fresh standard output console."""
+    """Resets the proxy to use a fresh standard output console.
+
+    Returns:
+        None
+    """
     self._backend = Console(theme=_THEME)
     self._configure_logging()
 
@@ -91,15 +111,17 @@ class _ConsoleProxy:
 
     Returns:
         Console: The currently active implementation.
-
     """
     return self._backend
 
   def _configure_logging(self) -> None:
-    """Configures or re-configures the standard python logging library.
+    """Configures or reconfigures the standard Python logging library.
 
+    This updates the logging root handler to route messages to the currently active
+    backend console.
 
-    to direct output to the current backend console.
+    Returns:
+        None
     """
     # Remove existing RichHandlers to prevent duplicate logs/wrong destinations
     root_logger = logging.getLogger()
@@ -125,9 +147,11 @@ class _ConsoleProxy:
     """Forwards ``print`` calls to the active backend.
 
     Args:
-        *args: Positional arguments for Rich print.
-        **kwargs: Keyword arguments for Rich print.
+        *args (Any): Positional arguments for Rich print.
+        **kwargs (Any): Keyword arguments for Rich print.
 
+    Returns:
+        None
     """
     self._backend.print(*args, **kwargs)
 
@@ -139,7 +163,6 @@ class _ConsoleProxy:
 
     Returns:
         Style: The resolved style object.
-
     """
     return self._backend.get_style(name)
 
@@ -147,11 +170,10 @@ class _ConsoleProxy:
     """Forwards ``export_text`` (useful for log capturing).
 
     Args:
-        **kwargs: Options passed to console.export_text.
+        **kwargs (Any): Options passed to console.export_text.
 
     Returns:
         str: The captured text output.
-
     """
     return self._backend.export_text(**kwargs)
 
@@ -159,11 +181,10 @@ class _ConsoleProxy:
     """Forwards ``export_html`` (useful for web rendering).
 
     Args:
-        **kwargs: Options passed to console.export_html.
+        **kwargs (Any): Options passed to console.export_html.
 
     Returns:
         str: The captured HTML output.
-
     """
     return self._backend.export_html(**kwargs)
 
@@ -175,7 +196,6 @@ class _ConsoleProxy:
 
     Returns:
         Any: The attribute from the backend console.
-
     """
     return getattr(self._backend, name)
 
@@ -196,12 +216,18 @@ def set_console(new_console: Console) -> None:
   Args:
       new_console (Console): The configured Rich console to use globally.
 
+  Returns:
+      None
   """
   console.set_backend(new_console)
 
 
 def reset_console() -> None:
-  """Global helper to reset logging and console to standard output."""
+  """Global helper to reset logging and console to standard output.
+
+  Returns:
+      None
+  """
   console.reset()
 
 
@@ -210,7 +236,6 @@ def get_console() -> Console:
 
   Returns:
       Console: The active Rich Console.
-
   """
   return console.backend
 
@@ -221,6 +246,8 @@ def log_info(msg: str) -> None:
   Args:
       msg (str): The message content. Can include rich markup like [bold].
 
+  Returns:
+      None
   """
   logging.info(f"ℹ️  {msg}", extra={"markup": True})
 
@@ -231,6 +258,8 @@ def log_success(msg: str) -> None:
   Args:
       msg (str): The message content.
 
+  Returns:
+      None
   """
   logging.log(SUCCESS_LEVEL_NUM, f"✅ {msg}", extra={"markup": True})
 
@@ -241,6 +270,8 @@ def log_warning(msg: str) -> None:
   Args:
       msg (str): The message content.
 
+  Returns:
+      None
   """
   logging.warning(f"⚠️  {msg}", extra={"markup": True})
 
@@ -251,5 +282,7 @@ def log_error(msg: str) -> None:
   Args:
       msg (str): The message content.
 
+  Returns:
+      None
   """
   logging.error(f"❌ {msg}", extra={"markup": True})

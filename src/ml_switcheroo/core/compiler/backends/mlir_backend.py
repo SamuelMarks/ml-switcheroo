@@ -3,7 +3,7 @@
 from typing import Any, Optional
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
-from ml_switcheroo.core.mlir.nodes import (
+from ml_switcheroo.core.mlir.cst import (
   BlockNode,
   ModuleNode,
   OperationNode,
@@ -22,7 +22,11 @@ class MlirBackend(CompilerBackend):
   """
 
   def __init__(self, semantics: Optional[Any] = None) -> None:
-    """Initialize."""
+    """Initialize the MLIR backend.
+
+    Args:
+        semantics: Optional semantics manager to configure generation behaviors.
+    """
     self.semantics = semantics
 
   def compile(self, graph: LogicalGraph) -> str:
@@ -48,19 +52,19 @@ class MlirBackend(CompilerBackend):
         if str(val).isdigit():
           op = OperationNode(
             name='"sw.constant"',
-            results=[ValueNode(f"%{node.id}")],
+            results=[ValueNode(name=f"%{node.id}")],
             attributes=[AttributeNode(name="value", value=str(val))],
-            result_types=[TypeNode("i32")],
+            result_types=[TypeNode(body="i32")],
           )
         else:
-          op = OperationNode(  # pragma: no cover
+          op = OperationNode(
             name='"sw.op"',
-            results=[ValueNode(f"%{node.id}")],
+            results=[ValueNode(name=f"%{node.id}")],
             attributes=[AttributeNode(name="type", value='"Input"')],
-            result_types=[TypeNode("!sw.unknown")],
+            result_types=[TypeNode(body="!sw.unknown")],
           )
       elif node.kind == "Output":
-        op = OperationNode(name='"sw.return"', result_types=[TypeNode("()")])
+        op = OperationNode(name='"sw.return"', result_types=[TypeNode(body="()")])
       else:
         # Generic Op
         attrs = [AttributeNode(name="type", value=f'"{node.kind}"')]
@@ -68,7 +72,10 @@ class MlirBackend(CompilerBackend):
           attrs.append(AttributeNode(name=k, value=f'"{v}"'))
 
         op = OperationNode(
-          name='"sw.op"', results=[ValueNode(f"%{node.id}")], attributes=attrs, result_types=[TypeNode("!sw.unknown")]
+          name='"sw.op"',
+          results=[ValueNode(name=f"%{node.id}")],
+          attributes=attrs,
+          result_types=[TypeNode(body="!sw.unknown")],
         )
       block.operations.append(op)
 

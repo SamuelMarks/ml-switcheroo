@@ -28,7 +28,15 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Creates a CST Attribute/Name node from a dotted string."""
+  """Creates a CST Attribute/Name node from a dotted string.
+
+  Args:
+      name_str: A dot-separated string representation of the target name
+          (e.g., 'optax.exponential_decay').
+
+  Returns:
+      A LibCST expression node corresponding to the dotted name structure.
+  """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -39,8 +47,15 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:
   """Resolves the target keyword argument name.
 
-
   Checks the Semantic Knowledge Base (Variant Args) first, falls back to default.
+
+  Args:
+      ctx: The hook context containing current variant arguments mapping.
+      std_name: The standard argument name in the source framework.
+      default: The default argument name to fall back to if no variant mapping is found.
+
+  Returns:
+      The mapped target argument name or the default value.
   """
   if ctx.current_variant and ctx.current_variant.args:
     return ctx.current_variant.args.get(std_name, default)  # type: ignore
@@ -55,12 +70,11 @@ def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   Now fully decoupled: reads target API and argument names from `ctx`.
 
   Args:
-      node: Original CST call.
-      ctx: Hook context containing operation ID.
+      node: Original CST call representing the scheduler constructor.
+      ctx: Hook context containing operation ID and metadata.
 
   Returns:
-      Transformed CST call.
-
+      Transformed CST node with target scheduler construction.
   """
   op_id = ctx.current_op_id or ""
   target_api = ctx.lookup_api(op_id)
@@ -82,6 +96,14 @@ def _transform_step_lr(node: cst.Call, ctx: HookContext, target_api: str) -> cst
 
   Source: StepLR(optim, step_size, gamma)
   Target: target_api(init_value=1.0, transition_steps=step_size, decay_rate=gamma, staircase=True)
+
+  Args:
+      node: Original CST Call node representing StepLR instantiation.
+      ctx: Hook context for looking up variant argument configurations.
+      target_api: The resolved target API dotted name.
+
+  Returns:
+      The transformed CST Call node with mapped learning rate scheduler parameters.
   """
   # Parse Args
   args = list(node.args)
@@ -115,11 +137,11 @@ def _transform_step_lr(node: cst.Call, ctx: HookContext, target_api: str) -> cst
       step_size_arg = arg
     elif kw == "gamma":
       gamma_arg = arg
-    elif not kw:  # pragma: no cover
+    elif not kw:
       # Positional mapping assumes step_size is 1st remaining, gamma is 2nd
       if step_size_arg is None:
         step_size_arg = arg
-      elif gamma_arg is None:  # pragma: no cover
+      elif gamma_arg is None:
         gamma_arg = arg
 
   if step_size_arg:
@@ -164,6 +186,14 @@ def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> c
 
   Source: CosineAnnealingLR(optim, T_max, eta_min)
   Target: target_api(init_value=1.0, decay_steps=T_max, alpha=eta_min/1.0)
+
+  Args:
+      node: Original CST Call node representing CosineAnnealingLR instantiation.
+      ctx: Hook context for looking up variant argument configurations.
+      target_api: The resolved target API dotted name.
+
+  Returns:
+      The transformed CST Call node with mapped cosine annealing parameters.
   """
   args = list(node.args)
   if args:
@@ -191,10 +221,10 @@ def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> c
       t_max_arg = arg
     elif kw == "eta_min":
       eta_min_arg = arg
-    elif not kw:  # pragma: no cover
+    elif not kw:
       if t_max_arg is None:
         t_max_arg = arg
-      elif eta_min_arg is None:  # pragma: no cover
+      elif eta_min_arg is None:
         eta_min_arg = arg
 
   if t_max_arg:
@@ -232,6 +262,13 @@ def transform_scheduler_step(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """Hook: Replaces ``scheduler.step()`` with a no-op value (None).
 
   Triggered if the scheduler step operation is wired to `scheduler_step_noop`.
+
+  Args:
+      node: Original CST Call node representing the step method call.
+      ctx: Hook context associated with the transformation.
+
+  Returns:
+      A CST Name node representing `None`.
   """
   # Return explicit None. In an expression statement, `None` does nothing.
   return cst.Name("None")

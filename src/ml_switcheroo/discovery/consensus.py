@@ -17,7 +17,12 @@ logger = logging.getLogger(__name__)
 
 
 class ConsensusEngine:
-  """The Consensus Engine for automated API mapping discovery."""
+  """The Consensus Engine for automated API mapping discovery.
+
+  Attributes:
+      frameworks: List of framework modules to scan.
+      vocabulary: Map of normalized token to original qualified paths.
+  """
 
   def __init__(self, frameworks: List[str]):
     """Initializes the engine with a list of framework names to scan.
@@ -30,7 +35,14 @@ class ConsensusEngine:
     self.vocabulary: Dict[str, List[str]] = {}
 
   def ingest(self) -> None:
-    """Step 1: Scans the API surface of all installed frameworks (Spokes)."""
+    """Step 1: Scans the API surface of all installed frameworks (Spokes).
+
+    Iterates through the registered frameworks, imports them dynamically,
+    and initiates recursive scanning of their public API surfaces.
+
+    Returns:
+        None.
+    """
     for fw in self.frameworks:
       try:
         mod = importlib.import_module(fw)
@@ -39,7 +51,20 @@ class ConsensusEngine:
         logger.warning(f"Could not import framework '{fw}' for ingestion.")
 
   def _scan_module(self, mod: Any, prefix: str, depth: int = 0) -> Any:
-    """Auto-generated doc."""
+    """Recursively scans a module's members to populate the vocabulary.
+
+    Inspects all members of the given module. If a member is a function or a class,
+    its normalized name is added to the vocabulary mapping with its fully qualified name.
+    If a member is a submodule, it recursively scans it up to a limit of depth 2.
+
+    Args:
+        mod: The module object to inspect.
+        prefix: The fully qualified name prefix for the current module level.
+        depth: The current recursion depth (default 0, limited to 2).
+
+    Returns:
+        None.
+    """
     if depth > 2:  # Limit recursion
       return
 
@@ -65,11 +90,15 @@ class ConsensusEngine:
   def normalize(self, name: str) -> str:
     """Step 2: Strips framework-specific prefixes/suffixes.
 
+    Normalizes API name by converting it to lowercase, removing common suffixes
+    (such as '_loss', 'loss', '_fn', 'function') and prefixes (such as 'torch_',
+    'tf_', 'jax_'), and removing underscores.
+
     Args:
         name: Raw API name.
 
     Returns:
-        Normalized token.
+        Normalized token string with common prefixes, suffixes, and underscores removed.
     """
     # Strip common suffixes/prefixes
     name = name.lower()
@@ -113,7 +142,7 @@ class ConsensusEngine:
       # Propose the shortest token in the cluster as the Standard Name
       standard_name = min(matches, key=len).capitalize()
 
-      if standard_name not in clusters:  # pragma: no cover
+      if standard_name not in clusters:
         clusters[standard_name] = []
 
       for match in matches:

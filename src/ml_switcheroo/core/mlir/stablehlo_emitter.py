@@ -10,7 +10,7 @@ from typing import List, Tuple, Optional, TYPE_CHECKING, Any, Union
 
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 from ml_switcheroo.core.mlir.types import FunctionType
-from ml_switcheroo.core.mlir.nodes import (
+from ml_switcheroo.core.mlir.cst import (
   BlockNode,
   OperationNode,
   AttributeNode,
@@ -77,7 +77,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     input_types = []
 
     for param in node.params.params:
-      if isinstance(param.name, cst.Name):  # pragma: no branch
+      if isinstance(param.name, cst.Name):
         p_name = param.name.value
         val = self.ctx.allocate_ssa(prefix=f"%{p_name}")
         self.ctx.declare(p_name, val)
@@ -90,7 +90,7 @@ class StableHloEmitter(PythonToMlirEmitter):
 
         initial_env[p_name] = mlir_type
         input_types.append(mlir_type)
-        block_args.append((val, TypeNode(mlir_type.to_string())))
+        block_args.append((val, TypeNode(body=mlir_type.to_string())))
 
     # Pre-pass type inference
     infer_pass = TypeInferencePass(initial_env=initial_env)
@@ -105,11 +105,11 @@ class StableHloEmitter(PythonToMlirEmitter):
     if node.returns:
       rt_str = self._annotation_to_string(node.returns.annotation)
       mlir_res_type = parse_py_type_to_mlir(rt_str)
-      result_types.append(TypeNode(mlir_res_type.to_string()))
+      result_types.append(TypeNode(body=mlir_res_type.to_string()))
       mlir_res_types.append(mlir_res_type)
     elif infer_pass.return_types:
       for rt in infer_pass.return_types:
-        result_types.append(TypeNode(rt.to_string()))
+        result_types.append(TypeNode(body=rt.to_string()))
         mlir_res_types.append(rt)
 
     func_type = FunctionType(inputs=input_types, results=mlir_res_types)
@@ -152,7 +152,7 @@ class StableHloEmitter(PythonToMlirEmitter):
 
     # 2. Body Region
     body_block = self._emit_block(node.body)
-    if not body_block.operations or body_block.operations[-1].name not in (  # pragma: no branch
+    if not body_block.operations or body_block.operations[-1].name not in (
       "func.return",
       "sw.return",
       "stablehlo.return",
@@ -190,7 +190,7 @@ class StableHloEmitter(PythonToMlirEmitter):
 
     # MLIR regions require a terminator. For now, we inject a dummy if none exists
     # A true implementation must track mutated state across branches.
-    if not true_block.operations or true_block.operations[-1].name not in (  # pragma: no branch
+    if not true_block.operations or true_block.operations[-1].name not in (
       "func.return",
       "sw.return",
       "stablehlo.return",
@@ -204,7 +204,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     if getattr(node, "orelse", None):
       if isinstance(node.orelse, cst.Else):
         false_block = self._emit_block(node.orelse.body)
-        if not false_block.operations or false_block.operations[-1].name not in (  # pragma: no branch
+        if not false_block.operations or false_block.operations[-1].name not in (
           "func.return",
           "sw.return",
           "stablehlo.return",
@@ -212,10 +212,10 @@ class StableHloEmitter(PythonToMlirEmitter):
           false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
         false_region = RegionNode(blocks=[false_block])
         regions.append(false_region)
-      elif isinstance(node.orelse, cst.If):  # pragma: no branch
+      elif isinstance(node.orelse, cst.If):
         # To be strictly compliant with stablehlo.if vs case, we handle elif as nested here
         false_block = BlockNode(label="", operations=self._emit_if(node.orelse))
-        if not false_block.operations or false_block.operations[-1].name not in (  # pragma: no branch
+        if not false_block.operations or false_block.operations[-1].name not in (
           "func.return",
           "sw.return",
           "stablehlo.return",
@@ -245,7 +245,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     """
     ops = []
     operands = []
-    if node.value:  # pragma: no cover
+    if node.value:
       val, expr_ops = self._emit_expression(node.value)
       ops.extend(expr_ops)
       operands.append(val)
@@ -275,7 +275,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     for op in ops:
       if op.name == "sw.op":
         self._resolve_sw_op(op)  # pragma: no cover
-      elif op.name == "sw.constant":  # pragma: no branch
+      elif op.name == "sw.constant":
         self._resolve_sw_constant(op)
       resolved_ops.append(op)
 
@@ -292,7 +292,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     """
     # StableHLO backend doesn't support 'sw.import', ignore it in generated MLIR
     # Return a dummy OperationNode that will be filtered out, or just pass
-    return OperationNode(name="stablehlo.dummy_import", operands=[], attributes=[])  # pragma: no cover
+    return OperationNode(name="stablehlo.dummy_import", operands=[], attributes=[])
 
   def _emit_statement(self, stmt: cst.CSTNode) -> List[OperationNode]:
     """Emit a statement, filtering out dummy imports.
@@ -316,11 +316,11 @@ class StableHloEmitter(PythonToMlirEmitter):
     """
     op.name = "stablehlo.constant"
     val_attr = next((a for a in op.attributes if a.name == "value"), None)
-    if val_attr:  # pragma: no branch
+    if val_attr:
       raw_val = val_attr.value
       # If string is quoted, unquote it
       if isinstance(raw_val, str) and raw_val.startswith('"') and raw_val.endswith('"'):
-        raw_val = raw_val[1:-1]  # pragma: no cover
+        raw_val = raw_val[1:-1]
 
       # Determine if it's a float or int
       is_float = "." in str(raw_val)
@@ -328,8 +328,8 @@ class StableHloEmitter(PythonToMlirEmitter):
 
       val_attr.value = f"dense<{raw_val}>"
 
-      if not op.result_types:  # pragma: no branch
-        op.result_types = [TypeNode(mlir_type)]
+      if not op.result_types:
+        op.result_types = [TypeNode(body=mlir_type)]
 
   def _resolve_sw_op(self, op: OperationNode) -> None:
     """Mutates a 'sw.op' node into a 'stablehlo' node if a mapping exists.
@@ -344,18 +344,18 @@ class StableHloEmitter(PythonToMlirEmitter):
     # Find type attribute
     type_attr = next((a for a in op.attributes if a.name == "type"), None)
     if not type_attr:
-      return  # pragma: no cover
+      return
 
     api_name = str(type_attr.value).strip('"').strip("'")
     mapped_name = self._lookup_stablehlo_op(api_name)
 
     if mapped_name:
-      op.name = mapped_name  # pragma: no cover
-      # Remove the 'type' attribute as it is now encoded in the op name  # pragma: no cover
-      op.attributes = [a for a in op.attributes if a.name != "type"]  # pragma: no cover
+      op.name = mapped_name
+      # Remove the 'type' attribute as it is now encoded in the op name
+      op.attributes = [a for a in op.attributes if a.name != "type"]
       # Inject default tensor result type if missing
-      if not op.result_types:  # pragma: no cover
-        op.result_types = [TypeNode("tensor<*xf32>")]
+      if not op.result_types:
+        op.result_types = [TypeNode(body="tensor<*xf32>")]
 
   def _lookup_stablehlo_op(self, api_name: str) -> Optional[str]:
     """Queries the SemanticsManager for the StableHLO variant of the given API.
@@ -379,7 +379,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     if "stablehlo" in variants and variants["stablehlo"]:
       return variants["stablehlo"].get("api")  # type: ignore
 
-    return None  # pragma: no cover
+    return None
 
   def _map_py_type_to_mlir(self, type_str: str) -> str:
     """Maps Python type strings to MLIR types.
@@ -391,7 +391,7 @@ class StableHloEmitter(PythonToMlirEmitter):
         MLIR Type string (e.g. 'f32').
 
     """
-    return parse_py_type_to_mlir(type_str).to_string()  # pragma: no cover
+    return parse_py_type_to_mlir(type_str).to_string()
 
   def _emit_call(self, expr: cst.Call) -> Tuple[ValueNode, List[OperationNode]]:
     """Handles semantic calls mapping them to StableHLO with specific attribute processing.
@@ -415,7 +415,7 @@ class StableHloEmitter(PythonToMlirEmitter):
         if op.name == "sw.op":
           self._resolve_sw_op(op)
         elif op.name == "sw.constant":  # pragma: no cover
-          self._resolve_sw_constant(op)
+          self._resolve_sw_constant(op)  # pragma: no cover
         resolved_ops.append(op)
       return val, resolved_ops
 
@@ -439,12 +439,12 @@ class StableHloEmitter(PythonToMlirEmitter):
           # Emit Lambda body into a region
           lambda_block = BlockNode(label="^bb0")
           # Basic assumption of lambda args matching reduction signature
-          l_args = []
+          l_args = []  # pragma: no cover
           for p in arg.value.params.params:
             pname = p.name.value
             pval = self.ctx.allocate_ssa(prefix=f"%{pname}")
             self.ctx.declare(pname, pval)
-            l_args.append((pval, TypeNode("tensor<*xf32>")))
+            l_args.append((pval, TypeNode(body="tensor<*xf32>")))
 
           lambda_block.arguments = l_args
 
@@ -478,7 +478,7 @@ class StableHloEmitter(PythonToMlirEmitter):
       operands=operands,
       attributes=processed_attrs,
       regions=regions,
-      result_types=[TypeNode("tensor<*xf32>")],  # Default return, needs refinement if needed
+      result_types=[TypeNode(body="tensor<*xf32>")],  # Default return, needs refinement if needed
     )
     ops.append(op)
     return result, ops
@@ -492,5 +492,5 @@ class StableHloEmitter(PythonToMlirEmitter):
     elif isinstance(node, cst.SimpleString):
       return node.value.strip("\"'")
     elif isinstance(node, (cst.List, cst.Tuple)):
-      return [self._extract_literal(el.value) for el in node.elements]
-    return "%error"  # pragma: no cover
+      return [self._extract_literal(el.value) for el in node.elements]  # pragma: no cover
+    return "%error"

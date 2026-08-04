@@ -65,6 +65,16 @@ def test_nnx_param_leaf_name_fallback():
   assert len(res.args) == 0
 
 
+def test_nnx_param_unsupported_type():
+  """Verifies that an unsupported func node type returns None from _get_leaf_name."""
+  node = cst.Call(func=cst.SimpleString("'string'"))
+  ctx = HookContext(semantics=MagicMock(), config=MagicMock())
+  ctx.lookup_api = MagicMock(return_value="torch.nn.Parameter")
+  res = transform_nnx_param(node, ctx)
+  assert res.func.value.value.value == "torch"
+  assert res.func.attr.value == "Parameter"
+
+
 def test_nnx_param_batch_stat_no_args():
   """Verifies the behavior of NNX parameter batch statistic no arguments."""
   node = cst.Call(func=cst.Attribute(value=cst.Name("nnx"), attr=cst.Name("BatchStat")))

@@ -49,15 +49,20 @@ class PythonSnippetEmitter:
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
     kind = self._resolve_api_name(node.kind)
-    args_str = self._format_args_from_metadata(node.metadata)
+    func_node = cst.parse_expression(kind)
+
+    args_list = self._build_args_from_metadata(node.metadata)
 
     if self.framework in ["jax", "flax", "flax_nnx"]:
-      if "rngs" not in args_str:  # pragma: no cover
-        suffix = ", rngs=rngs" if args_str else "rngs=rngs"
-        args_str += suffix
+      # Needs rngs=rngs, inject it directly if it doesn't already exist.
+      if not any(isinstance(a.keyword, cst.Name) and a.keyword.value == "rngs" for a in args_list):
+        args_list.append(cst.Arg(keyword=cst.Name("rngs"), equal=cst.AssignEqual(), value=cst.Name("rngs")))
 
-    code = f"self.{node.id} = {kind}({args_str})"
-    return cst.parse_statement(code)  # type: ignore
+    call_node = cst.Call(func=func_node, args=args_list)
+    assign_target = cst.AssignTarget(target=cst.Attribute(value=cst.Name("self"), attr=cst.Name(node.id)))
+    assign = cst.Assign(targets=[assign_target], value=call_node)
+
+    return cst.SimpleStatementLine(body=[assign])
 
   def emit_call(
     self,
@@ -78,12 +83,13 @@ class PythonSnippetEmitter:
     """
     if node.kind == "Input":
       if input_vars and input_vars[0] != output_var:
-        return cst.parse_statement(f"{output_var} = {input_vars[0]}")  # type: ignore
+        return cst.SimpleStatementLine(
+          body=[cst.Assign(targets=[cst.AssignTarget(target=cst.Name(output_var))], value=cst.Name(input_vars[0]))]
+        )
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
     call_expr = self.emit_expression(node, input_vars)
 
-    # We manually construct the Assign node
     return cst.SimpleStatementLine(
       body=[cst.Assign(targets=[cst.AssignTarget(target=cst.Name(output_var))], value=call_expr)]
     )
@@ -99,29 +105,35 @@ class PythonSnippetEmitter:
         A LibCST expression node.
 
     """
-    if self._is_stateful_layer(node):
-      func_name = f"self.{node.id}"
-    else:
-      func_name = self._resolve_api_name(node.kind)
-
-    args_list = list(input_vars)
-
-    # Extra args from metadata for functional calls
-    if not self._is_stateful_layer(node) and node.metadata:
-      extra_args = self._format_args_from_metadata(node.metadata)
-      if extra_args:  # pragma: no cover
-        args_list.append(extra_args)
-
-    args_str = ", ".join(args_list)
-    code = f"{func_name}({args_str})"
-
     try:
-      return cst.parse_expression(code)
-    except cst.ParserSyntaxError:
+      func_node: cst.BaseExpression
+      if self._is_stateful_layer(node):
+        func_node = cst.Attribute(value=cst.Name("self"), attr=cst.Name(node.id))
+      else:
+        func_name = self._resolve_api_name(node.kind)
+        func_node = cst.parse_expression(func_name)
+
+      args_list = []
+      for v in input_vars:
+        args_list.append(cst.Arg(value=cst.parse_expression(v)))
+
+      if not self._is_stateful_layer(node) and node.metadata:
+        extra_args = self._build_args_from_metadata(node.metadata)
+        args_list.extend(extra_args)
+
+      return cst.Call(func=func_node, args=args_list)
+    except (cst.ParserSyntaxError, Exception):
       return cst.Name("None")
 
   def _is_stateful_layer(self, node: LogicalNode) -> bool:
-    """Execute implementation detail."""
+    """Determine if a logical node represents a stateful layer.
+
+    Args:
+        node: The logical node to check.
+
+    Returns:
+        True if stateful, False otherwise.
+    """
     if node.kind in ["Input", "Output"]:
       return False
     if node.kind.startswith("func_") or "functional" in node.kind or "ops" in node.kind:
@@ -132,7 +144,14 @@ class PythonSnippetEmitter:
     return False
 
   def _resolve_api_name(self, kind: str) -> str:
-    """Execute implementation detail."""
+    """Resolve the API name based on the framework.
+
+    Args:
+        kind: The original kind string.
+
+    Returns:
+        The resolved fully qualified API string.
+    """
     if "." in kind:
       return kind
 
@@ -157,15 +176,23 @@ class PythonSnippetEmitter:
 
     return clean_kind
 
-  def _format_args_from_metadata(self, metadata: Dict[str, Any]) -> str:
-    """Execute implementation detail."""
+  def _build_args_from_metadata(self, metadata: Dict[str, Any]) -> List[cst.Arg]:
+    """Build libcst arguments from node metadata.
+
+    Args:
+        metadata: The dictionary of metadata values.
+
+    Returns:
+        A list of libcst Arg nodes.
+    """
     if not metadata:
-      return ""
+      return []
     args_list = []
     for key in sorted(metadata.keys()):
       val = str(metadata[key])
+      val_node = cst.parse_expression(val)
       if key.startswith("arg_"):
-        args_list.append(val)
+        args_list.append(cst.Arg(value=val_node))
       else:
-        args_list.append(f"{key}={val}")
-    return ", ".join(args_list)
+        args_list.append(cst.Arg(keyword=cst.Name(key), equal=cst.AssignEqual(), value=val_node))
+    return args_list

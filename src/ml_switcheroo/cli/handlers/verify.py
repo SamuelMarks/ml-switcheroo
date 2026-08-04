@@ -33,7 +33,7 @@ def handle_ci(update_readme: bool, readme_path: Path, json_report: Optional[Path
     config = RuntimeConfig.load()
     if config.plugin_paths:
       loaded = load_plugins(extra_dirs=config.plugin_paths)
-      if loaded > 0:  # pragma: no cover
+      if loaded > 0:
         log_info(f"Loaded {loaded} external extensions for CI environment.")
   except Exception as e:
     log_warning(f"Could not load project config: {e}")
@@ -68,7 +68,7 @@ def handle_ci(update_readme: bool, readme_path: Path, json_report: Optional[Path
         repaired_count += 1
         log_success(f"Repaired '{op_name}' with new constraints.")
       else:
-        log_warning(f"Could not repair '{op_name}'.")  # pragma: no cover
+        log_warning(f"Could not repair '{op_name}'.")
 
     if repaired_count > 0:
       log_success(f"Auto-Repair completed. Fixed {repaired_count} operations.")

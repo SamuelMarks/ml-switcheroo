@@ -1,0 +1,8 @@
+description: Auto-generated mapping for Attribute.
+op_type: function
+operation: Attribute
+std_args: []
+variants:
+  latex_dsl:
+    api: midl.Attribute
+    required_imports: []

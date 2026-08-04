@@ -84,7 +84,15 @@ class StandardsInjector:
     return True
 
   def _serialize_op(self, op: OperationDef) -> Dict[str, Any]:
-    """Converts the OperationDef to a JSON-dict optimized for storage."""
+    """Converts the OperationDef to a JSON-dict optimized for storage.
+
+    Args:
+        op: The operation definition model to serialize.
+
+    Returns:
+        Dict[str, Any]: A serialized dictionary representing the operation, omitting
+            fields that match defaults.
+    """
     # Basic fields
     out = {
       "description": op.description,
@@ -105,7 +113,16 @@ class StandardsInjector:
     return out
 
   def _serialize_args(self, args: List[Union[str, Tuple[Any, ...], Dict[Any, Any], Any]]) -> List[Any]:
-    """Normalizes argument list to clean dictionaries or strings."""
+    """Normalizes argument list to clean dictionaries or strings.
+
+    Args:
+        args: A list of operation arguments in various formats, such as ParameterDef
+            objects, raw dictionaries, legacy tuples, or plain strings.
+
+    Returns:
+        List[Any]: A list of normalized argument specifications formatted as either
+            dictionaries or strings.
+    """
     result = []
     for arg in args:
       if isinstance(arg, (ParameterDef, dict)):
@@ -124,11 +141,11 @@ class StandardsInjector:
       elif isinstance(arg, (list, tuple)):
         # Legacy tuple ["x", "type"]
         entry = {"name": arg[0]}
-        if len(arg) > 1:  # pragma: no cover
+        if len(arg) > 1:
           entry["type"] = arg[1]
         result.append(entry)
 
-      elif isinstance(arg, str):  # pragma: no cover
+      elif isinstance(arg, str):
         result.append(arg)  # type: ignore
 
     return result

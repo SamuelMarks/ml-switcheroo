@@ -53,6 +53,11 @@ def test_torch_apply_wiring():
   adapter.apply_wiring(snapshot)
   assert "mappings" in snapshot
 
+  # Test loops in apply_wiring (which does nothing currently except setdefault)
+  snapshot2 = {"mappings": {"op1": {"api": "torch.Tensor"}}}
+  adapter.apply_wiring(snapshot2)
+  assert "op1" in snapshot2["mappings"]
+
 
 def test_torch_device_syntax():
   """Verifies the behavior of PyTorch device syntax."""
@@ -80,6 +85,8 @@ def test_torch_doc_url():
 def test_torch_convert(monkeypatch):
   """Verifies the behavior of PyTorch convert."""
   adapter = TorchAdapter()
+
+  # When torch is mocked as None
   monkeypatch.setattr("ml_switcheroo.frameworks.torch.torch", None)
   assert adapter.convert("test") == "test"
 
@@ -93,6 +100,13 @@ def test_torch_convert(monkeypatch):
   arr = DummyNumpy()
   converted = adapter.convert(arr)
   assert converted is arr
+
+  # Test successful convert with real torch
+  import torch
+
+  monkeypatch.setattr("ml_switcheroo.frameworks.torch.torch", torch)
+  res = adapter.convert([1, 2])
+  assert isinstance(res, torch.Tensor)
 
 
 @patch("ml_switcheroo.frameworks.torch_examples.get_torch_tiered_examples")
@@ -110,3 +124,27 @@ def test_torch_init_live(monkeypatch):
   monkeypatch.setattr("ml_switcheroo.frameworks.torch.torch", True)
   adapter = TorchAdapter()
   assert adapter._mode == InitMode.LIVE
+
+
+def test_torch_missing_coverage():
+  """Verifies missing coverage methods for TorchAdapter."""
+  adapter = TorchAdapter()
+
+  # Traits
+  assert adapter.plugin_traits.has_numpy_compatible_arrays is False
+
+  # RNG split
+  assert adapter.get_rng_split_syntax("rng", "key") == "pass"
+
+  # Serialization
+  assert "import torch" in adapter.get_serialization_imports()
+  assert "torch.save(obj, f)" == adapter.get_serialization_syntax("save", "f", "obj")
+  assert "torch.load(f)" == adapter.get_serialization_syntax("load", "f")
+  assert adapter.get_serialization_syntax("save", "f") == ""
+  assert adapter.get_serialization_syntax("unknown", "f") == ""
+
+  # Weight Conversion
+  assert "import torch" in adapter.get_weight_conversion_imports()
+  assert "torch.load" in adapter.get_weight_load_code("path")
+  assert "var.detach().cpu().numpy()" in adapter.get_tensor_to_numpy_expr("var")
+  assert "torch.save" in adapter.get_weight_save_code("state", "path")

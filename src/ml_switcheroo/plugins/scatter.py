@@ -49,7 +49,7 @@ def transform_scatter(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   # Extract Receiver (tensor)
   if not isinstance(node.func, cst.Attribute):
-    return node  # pragma: no cover
+    return node
   receiver = node.func.value
 
   # Extract Arguments (Assume Positional or Keyword 'index', 'src')

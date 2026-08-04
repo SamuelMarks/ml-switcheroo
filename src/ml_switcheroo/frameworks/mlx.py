@@ -25,8 +25,8 @@ try:
   import numpy as _np
 
   np = _np
-except Exception:  # pragma: no cover
-  np = None  # pragma: no cover
+except Exception:
+  np = None
 
 
 @register_framework("mlx")
@@ -146,7 +146,7 @@ class MLXAdapter(MlxIOMixin):
         PluginTraits: Config object.
 
     """
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=False,
       requires_functional_state=False,
@@ -189,8 +189,8 @@ class MLXAdapter(MlxIOMixin):
     try:
       import mlx.core as mx
 
-      if isinstance(data, (np.ndarray, list, tuple, np.generic)):  # pragma: no cover
-        return mx.array(data)  # pragma: no cover
+      if isinstance(data, (np.ndarray, list, tuple, np.generic)):
+        return mx.array(data)
     except Exception:
       pass
     return data
@@ -326,11 +326,15 @@ class Qwen3VLPatchEmbed(nn.Module):
 
     return 'pass' as split logic differs significantly.
 
+    Args:
+        rng_var (str): The RNG variable to split.
+        key_var (str): The key variable to store the split result.
+
     Returns:
         str: "pass".
 
     """
-    return "pass"  # pragma: no cover
+    return "pass"
 
   def get_serialization_imports(self) -> List[str]:
     """Returns imports for serialization.
@@ -339,7 +343,7 @@ class Qwen3VLPatchEmbed(nn.Module):
         List[str]: Imports.
 
     """
-    return ["import mlx.core as mx"]  # pragma: no cover
+    return ["import mlx.core as mx"]
 
   def apply_wiring(self, snapshot: Any) -> Any:
     """Overrides/Patches snapshot items that cannot be statically defined.

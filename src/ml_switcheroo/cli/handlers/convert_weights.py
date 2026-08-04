@@ -153,7 +153,7 @@ class WeightScriptGenerator:
         # If switching direction, invert it.
         if p_name in tgt_layout:
           rule = tgt_layout[p_name]  # e.g. "OIHW->HWIO"
-          if "->" in rule:  # pragma: no cover
+          if "->" in rule:
             fmt_in, fmt_out = rule.split("->")
             if is_torch_src:
               perm = compute_permutation(fmt_in.strip(), fmt_out.strip())
