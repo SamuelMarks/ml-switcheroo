@@ -204,7 +204,7 @@ class KerasAdapter(KerasIOMixin):
 
     """
     defs = load_definitions("keras")
-    if "ReLU" not in defs:  # pragma: no cover
+    if "ReLU" not in defs:
       defs["ReLU"] = StandardMap(api="keras.layers.ReLU")
     return defs
 

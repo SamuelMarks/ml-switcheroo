@@ -107,6 +107,7 @@ def test_auxiliary_for_loop_static_hook(mock_get_hook):
   )
 
   def hook_mock(node, hook_ctx):
+    """Mocks the hook."""
     if hook_ctx is ctx.hook_context:
       return cst.Pass()
     return node
@@ -128,6 +129,7 @@ def test_auxiliary_for_loop_static_hook_exception(mock_get_hook):
   )
 
   def hook_mock(node, hook_ctx):
+    """Mocks the hook."""
     raise ValueError("static error")
 
   mock_get_hook.side_effect = lambda name: hook_mock if name == "transform_for_loop_static" else None
@@ -147,6 +149,7 @@ def test_auxiliary_for_loop_hook(mock_get_hook):
   )
 
   def hook_mock(node, hook_ctx):
+    """Mocks the hook."""
     return cst.Pass()
 
   mock_get_hook.side_effect = lambda name: hook_mock if name == "transform_for_loop" else None
@@ -166,6 +169,7 @@ def test_auxiliary_for_loop_hook_exception(mock_get_hook):
   )
 
   def hook_mock(node, hook_ctx):
+    """Mocks the hook."""
     raise ValueError("loop error")
 
   mock_get_hook.side_effect = lambda name: hook_mock if name == "transform_for_loop" else None
@@ -213,6 +217,7 @@ def test_auxiliary_for_loop_static_hook_new_node(mock_get_hook):
   )
 
   def hook_mock(node, hook_ctx):
+    """Mocks the hook."""
     return cst.Pass()
 
   mock_get_hook.side_effect = lambda name: hook_mock if name == "transform_for_loop_static" else None

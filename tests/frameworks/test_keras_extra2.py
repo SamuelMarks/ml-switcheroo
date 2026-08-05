@@ -49,6 +49,7 @@ def test_keras_convert_import_error():
   real_import = __import__
 
   def mock_import(name, *args, **kwargs):
+    """Mocks __import__ to raise ImportError."""
     if name == "keras":
       raise ImportError("Fail")
     return real_import(name, *args, **kwargs)
@@ -67,6 +68,7 @@ def test_keras_collect_live_all(monkeypatch):
   monkeypatch.setattr(keras_fw, "keras", mock_keras)
 
   def mock_scan(module, prefix, kind, block_list=None):
+    """Mocks _scan_module."""
     from ml_switcheroo_ir.schema.ghost import GhostRef
 
     return [GhostRef(api=prefix + ".X", api_path=prefix + ".X", name="X", kind=kind, group=kind, params=[])]

@@ -190,7 +190,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
       msg = "; ".join(unique)
       return EscapeHatch.mark_failure(original_node, msg)  # type: ignore
 
-    return updated_node  # pragma: no cover
+    return updated_node
 
   # --- Decorator Logic ---
 
@@ -212,17 +212,17 @@ class AuxiliaryTransformer(cst.CSTTransformer):
 
     name = self._get_qualified_name(func_node)
     if not name:
-      return updated_node  # pragma: no cover
+      return updated_node
 
     lookup = self.context.semantics.get_definition(name)
     if not lookup:
-      return updated_node  # pragma: no cover
+      return updated_node
 
     _, details = lookup
     variants = details.get("variants", {})
 
     if self.context.target_fw not in variants:
-      return updated_node  # pragma: no cover
+      return updated_node
 
     target_variant = variants[self.context.target_fw]
 
@@ -262,7 +262,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     if static_hook:
       try:
         new_node = static_hook(updated_node, self.context.hook_context)
-        if new_node is not updated_node:  # pragma: no cover
+        if new_node is not updated_node:
           return new_node
       except Exception as e:
         import traceback
@@ -275,7 +275,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     if hook:
       try:
         new_node = hook(updated_node, self.context.hook_context)
-        if new_node is not updated_node:  # pragma: no cover
+        if new_node is not updated_node:
           return new_node
       except Exception as e:
         self._report_failure(f"Loop transformation failed: {str(e)}")

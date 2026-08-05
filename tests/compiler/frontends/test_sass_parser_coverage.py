@@ -263,11 +263,17 @@ def test_sass_parser_missing_coverage_9():
   from ml_switcheroo.core.compiler.frontends.sass.parser import _get_trivia
 
   class DummyChild:
+    """A dummy child node."""
+
     def __init__(self):
+      """Initializes DummyChild."""
       self.leading_trivia = ["trivia"]
 
   class DummyNode:
+    """A dummy node."""
+
     def __init__(self):
+      """Initializes DummyNode."""
       self.children = [DummyChild()]
 
   assert _get_trivia(DummyNode()) == ["trivia"]

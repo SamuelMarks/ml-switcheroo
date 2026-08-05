@@ -155,6 +155,8 @@ def test_object_traits_missing_attr(rewriter):
   """Verifies behavior when traits object lacks the attribute."""
 
   class EmptyTraits:
+    """Empty traits."""
+
     pass
 
   rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": EmptyTraits()}

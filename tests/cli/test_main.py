@@ -54,6 +54,46 @@ def test_main_verified_pipeline_failure():
     assert main(["verified-pipeline", "some_path.py"]) == 1
 
 
+def test_main_convert():
+  """Verifies the behavior of main convert."""
+  with patch("ml_switcheroo.cli.__main__.commands.handle_convert") as mock_handle:
+    mock_handle.return_value = 0
+    assert main(["convert", "model.py", "--source", "torch", "--target", "jax"]) == 0
+    mock_handle.assert_called_once()
+
+
+def test_main_gen_weight_script():
+  """Verifies the behavior of main gen-weight-script."""
+  with patch("ml_switcheroo.cli.__main__.commands.handle_gen_weight_script") as mock_handle:
+    mock_handle.return_value = 0
+    assert main(["gen-weight-script", "model.py", "--out", "out.py", "--source", "torch", "--target", "jax"]) == 0
+    mock_handle.assert_called_once()
+
+
+def test_main_matrix():
+  """Verifies the behavior of main matrix."""
+  with patch("ml_switcheroo.cli.__main__.commands.handle_matrix") as mock_handle:
+    mock_handle.return_value = 0
+    assert main(["matrix"]) == 0
+    mock_handle.assert_called_once()
+
+
+def test_main_suggest():
+  """Verifies the behavior of main suggest."""
+  with patch("ml_switcheroo.cli.__main__.handle_suggest") as mock_handle:
+    mock_handle.return_value = 0
+    assert main(["suggest", "torch.nn.Linear"]) == 0
+    mock_handle.assert_called_once()
+
+
+def test_main_ci():
+  """Verifies the behavior of main ci."""
+  with patch("ml_switcheroo.cli.__main__.commands.handle_ci") as mock_handle:
+    mock_handle.return_value = 0
+    assert main(["ci"]) == 0
+    mock_handle.assert_called_once()
+
+
 def test_main_fallback():
   """Verifies the behavior of main fallback."""
   with patch("sys.argv", ["ml_switcheroo"]):
@@ -85,6 +125,8 @@ def test_main_unknown_command():
   with patch.object(argparse.ArgumentParser, "parse_args") as mock_parse:
 
     class DummyArgs:
+      """A dummy arguments class for mocking."""
+
       command = "unknown_cmd"
       verbose = False
       log_file = None

@@ -115,6 +115,8 @@ def test_rdna_parser_missing_coverage_extra():
 
   # line 113
   class DummyNode:
+    """A dummy node."""
+
     pass
 
   assert _get_trivia(DummyNode()) == []

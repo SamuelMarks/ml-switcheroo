@@ -29,24 +29,18 @@ def test_sass_roundtrip_new_macros() -> None:
 
   # A dummy semantics manager that maps directly
   class DummySemantics:
+    """A dummy semantics manager for testing."""
+
     def get_definition(self, kind):
+      """Gets a mock definition."""
       return (kind, {})
 
     def resolve_variant(self, aid, fw):
+      """Resolves a mock variant."""
       if fw == "sass":
-        # For Abs we use FABS, others use Macro.<name> if they are macros
         if aid == "Abs":
           return {"api": "FABS"}
-        if aid == "Conv3d":
-          return {"api": "Macro.Conv3d"}
-        if aid == "ReLU":
-          return {"api": "Macro.ReLU"}
-        if aid == "Flatten":
-          return {"api": "Macro.Flatten"}
-        if aid == "Reshape":
-          return {"api": "Macro.Reshape"}
-        if aid == "Mean":
-          return {"api": "Macro.Mean"}
+        return {"api": f"Macro.{aid}"}
       return None
 
   mgr = DummySemantics()

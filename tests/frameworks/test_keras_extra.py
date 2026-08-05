@@ -23,6 +23,7 @@ def test_keras_collect_live(monkeypatch):
 
   # Mock _scan_module on the adapter
   def mock_scan_module(module, prefix, kind, block_list=None):
+    """Mocks _scan_module."""
     from ml_switcheroo_ir.schema.ghost import GhostRef
 
     return [GhostRef(api_path=prefix + ".Test", name="Test", kind=kind, group=kind, params=[])]

@@ -53,13 +53,18 @@ def test_copy_wheel_and_reqs_full(tmp_path, monkeypatch):
   app.builder.outdir = str(outdir)
 
   class MockResponse:
+    """A mock HTTP response."""
+
     def __enter__(self):
+      """Enters context."""
       return self
 
     def __exit__(self, *args):
+      """Exits context."""
       pass
 
     def read(self, *args):
+      """Reads data."""
       return b"data"
 
   with patch("urllib.request.urlopen") as mock_url:

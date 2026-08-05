@@ -274,7 +274,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     resolved_ops = []
     for op in ops:
       if op.name == "sw.op":
-        self._resolve_sw_op(op)  # pragma: no cover
+        self._resolve_sw_op(op)
       elif op.name == "sw.constant":
         self._resolve_sw_constant(op)
       resolved_ops.append(op)
@@ -414,8 +414,8 @@ class StableHloEmitter(PythonToMlirEmitter):
       for op in ops:
         if op.name == "sw.op":
           self._resolve_sw_op(op)
-        elif op.name == "sw.constant":  # pragma: no cover
-          self._resolve_sw_constant(op)  # pragma: no cover
+        elif op.name == "sw.constant":
+          self._resolve_sw_constant(op)
         resolved_ops.append(op)
       return val, resolved_ops
 
@@ -439,7 +439,7 @@ class StableHloEmitter(PythonToMlirEmitter):
           # Emit Lambda body into a region
           lambda_block = BlockNode(label="^bb0")
           # Basic assumption of lambda args matching reduction signature
-          l_args = []  # pragma: no cover
+          l_args = []
           for p in arg.value.params.params:
             pname = p.name.value
             pval = self.ctx.allocate_ssa(prefix=f"%{pname}")
@@ -469,7 +469,7 @@ class StableHloEmitter(PythonToMlirEmitter):
       elif isinstance(attr.value, str):
         processed_attrs.append(AttributeNode(name=attr.name, value=f'"{attr.value}"'))
       else:
-        processed_attrs.append(AttributeNode(name=attr.name, value=str(attr.value)))  # pragma: no cover
+        processed_attrs.append(AttributeNode(name=attr.name, value=str(attr.value)))
 
     result = self.ctx.allocate_ssa()
     op = OperationNode(
@@ -488,9 +488,9 @@ class StableHloEmitter(PythonToMlirEmitter):
     if isinstance(node, cst.Integer):
       return int(node.value)
     elif isinstance(node, cst.Float):
-      return float(node.value)  # pragma: no cover
+      return float(node.value)
     elif isinstance(node, cst.SimpleString):
       return node.value.strip("\"'")
     elif isinstance(node, (cst.List, cst.Tuple)):
-      return [self._extract_literal(el.value) for el in node.elements]  # pragma: no cover
+      return [self._extract_literal(el.value) for el in node.elements]
     return "%error"

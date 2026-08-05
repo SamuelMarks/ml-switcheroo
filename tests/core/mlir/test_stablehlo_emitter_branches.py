@@ -12,6 +12,7 @@ def test_stablehlo_branches():
 
   # Mock some behavior
   def mock_get_def(name):
+    """Mocks get_definition."""
     return ("dummy", {"variants": {}})
 
   semantics.get_definition = mock_get_def

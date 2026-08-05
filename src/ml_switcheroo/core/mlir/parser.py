@@ -19,20 +19,23 @@ from ml_switcheroo.core.mlir.cst import (
   ValueNode,
   TypeNode,
   AttributeNode,
+  AttributeAliasDefNode,
 )
 
 TOKEN_REGEX = [
   ("COMMENT", r"//[^\n]*"),
   ("WS", r"[ \t\f\r\n]+"),
-  ("BLOCK_LABEL", r"\^[a-zA-Z_0-9]+"),
+  ("CARET_ID", r"\^[a-zA-Z_0-9]+"),
   ("VAL_ID", r"%[a-zA-Z_0-9]+|%\d+"),
   ("SYM_ID", r"@[a-zA-Z_0-9]+"),
+  ("ATTR_ALIAS_ID", r"#[a-zA-Z_0-9$._-]+"),
   ("TYPE", r"!sw\.type<[^>]+>|tensor<[^>]+>|![a-zA-Z_0-9\.<>]+|[iuf]\d+|index|none"),
   ("NUMBER", r"-?\d+(?:\.\d+)?"),
   ("STRING", r'"(?:[^"\\]|\\.)*"'),
+  ("OPAQUE_DIALECT_CONTENTS", r"<[^>]+>"),
   ("IDENTIFIER", r"[a-zA-Z_][a-zA-Z0-9_$.]*"),
   ("ARROW", r"->"),
-  ("PUNCTUATION", r"[=,(){}\[\]:]"),
+  ("PUNCTUATION", r"[=,(){}\[\]:<>]"),
   ("MISMATCH", r"."),
 ]
 tok_regex = "|".join("(?P<%s>%s)" % pair for pair in TOKEN_REGEX)
@@ -87,6 +90,8 @@ class MlirLexer(Lexer):
             "[": "LBRACK",
             "]": "RBRACK",
             ":": "COLON",
+            "<": "LANGLE",
+            ">": "RANGLE",
           }
           kind = punct_map[val]
 
@@ -100,36 +105,86 @@ class MlirLexer(Lexer):
 
 GRAMMAR = r"""
     ?start: module
-    module: operation*
+    module: (operation | attribute_alias_def)*
 
-    operation: [results EQ] op_name [SYM_ID] [operands] [attributes] op_tail*
+    operation: [results EQ] op_name [SYM_ID] [operands] [dictionary_attribute] op_tail*
+
+    attribute_alias_def: ATTR_ALIAS_ID EQ attr_value
 
     ?op_tail: regions | COLON result_types | ARROW result_types
 
     results: VAL_ID (COMMA VAL_ID)*
     op_name: IDENTIFIER | STRING | SYM_ID
+    bare_id_list: IDENTIFIER (COMMA IDENTIFIER)*
 
     operands: LPAREN [operand (COMMA operand)*] RPAREN
             | operand (COMMA operand)*
 
     operand: VAL_ID [COLON TYPE]
 
-    attributes: LBRACE [attribute (COMMA attribute)*] RBRACE
-    attribute: attr_name EQ attr_value
+    dictionary_attribute: LBRACE [attribute_entry (COMMA attribute_entry)*] RBRACE
+    attribute_entry: attr_name EQ attr_value
     attr_name: IDENTIFIER | STRING
-    attr_value: STRING | NUMBER | TYPE | LBRACK [attr_value (COMMA attr_value)*] RBRACK
+    attr_value: STRING | NUMBER | decimal_literal | TYPE | LBRACK [attr_value (COMMA attr_value)*] RBRACK | ATTR_ALIAS_ID | IDENTIFIER | dialect_attribute
+    decimal_literal: NUMBER
+
+    dialect_attribute: ATTR_ALIAS_ID (OPAQUE_DIALECT_CONTENTS | DOT IDENTIFIER)
 
     regions: region+
     region: LBRACE block* RBRACE
 
-    block: [BLOCK_LABEL [block_args] COLON] operation*
+    block: [block_id [block_args] COLON] operation*
     block_args: LPAREN [block_arg (COMMA block_arg)*] RPAREN
     block_arg: VAL_ID COLON TYPE
+    block_id: CARET_ID
 
     result_types: TYPE
                 | LPAREN [TYPE (COMMA TYPE)*] RPAREN
                 | LPAREN [TYPE (COMMA TYPE)*] RPAREN ARROW TYPE
                 | LPAREN [TYPE (COMMA TYPE)*] RPAREN ARROW LPAREN [TYPE (COMMA TYPE)*] RPAREN
+
+    // Missing grammar rules from LangRef
+    dialect_type: "!" (opaque_dialect_type | pretty_dialect_type)
+    dialect_type_body: LANGLE dialect_type_contents+ RANGLE
+    dialect_type_contents: dialect_type_body | IDENTIFIER
+    dictionary_properties: LANGLE dictionary_attribute RANGLE
+    entry_block: operation+
+    function_type: (TYPE | type_list_parens) ARROW (TYPE | type_list_parens)
+    generic_operation: STRING [LPAREN value_use_list RPAREN] [successor_list]
+    op_result: VAL_ID [COLON NUMBER]
+    op_result_list: op_result (COMMA op_result)* EQ
+    opaque_dialect_attribute: dialect_namespace dialect_attribute_body
+    opaque_dialect_type: dialect_namespace dialect_type_body
+    pretty_dialect_attribute: dialect_namespace DOT pretty_dialect_attribute_lead_ident
+    pretty_dialect_attribute_lead_ident: IDENTIFIER
+    pretty_dialect_type: dialect_namespace DOT pretty_dialect_type_lead_ident
+    pretty_dialect_type_lead_ident: IDENTIFIER
+    region_list: LPAREN region (COMMA region)* RPAREN
+    ssa_use: value_use
+    ssa_use_and_type: ssa_use COLON TYPE
+    ssa_use_and_type_list: ssa_use_and_type (COMMA ssa_use_and_type)*
+    successor: CARET_ID [COLON block_args]
+    successor_list: LBRACK successor (COMMA successor)* RBRACK
+    trailing_location: "loc" LPAREN STRING RPAREN
+    type_alias: "!" IDENTIFIER
+    type_alias_def: type_alias EQ TYPE
+    type_list_no_parens: TYPE (COMMA TYPE)*
+    type_list_parens: LPAREN [TYPE (COMMA TYPE)*] RPAREN
+    value_id_and_type: VAL_ID COLON TYPE
+    value_id_and_type_list: value_id_and_type (COMMA value_id_and_type)*
+    value_id_list: VAL_ID (COMMA VAL_ID)*
+    value_use: VAL_ID [ATTR_ALIAS_ID NUMBER]
+    value_use_list: value_use (COMMA value_use)*
+    dialect_namespace: IDENTIFIER
+    dialect_attribute_body: LANGLE dialect_attribute_contents+ RANGLE
+    dialect_attribute_contents: dialect_attribute_body | IDENTIFIER
+
+    digit: /[0-9]/
+    hex_digit: /[0-9a-fA-F]/
+    hexadecimal_literal: /0x[0-9a-fA-F]+/
+    id_punct: /[$._-]/
+    letter: /[a-zA-Z]/
+    suffix_id: /[0-9]+|([a-zA-Z$._-][a-zA-Z0-9$._-]*)/
 
     EQ: "="
     COMMA: ","
@@ -141,14 +196,19 @@ GRAMMAR = r"""
     RBRACK: "]"
     COLON: ":"
     ARROW: "->"
+    LANGLE: "<"
+    RANGLE: ">"
+    DOT: "."
 
     VAL_ID: /%./
     SYM_ID: /@./
+    ATTR_ALIAS_ID: /#./
     TYPE: /!./
     NUMBER: /1/
     STRING: /"."/
+    OPAQUE_DIALECT_CONTENTS: /<./
     IDENTIFIER: /a/
-    BLOCK_LABEL: /\^./
+    CARET_ID: /\^./
 """
 
 
@@ -187,8 +247,47 @@ class MlirTransformer(Transformer[Any, Any]):
         The ModuleNode.
     """
     ops = [c for c in children if isinstance(c, OperationNode)]
+    aliases = [c for c in children if isinstance(c, AttributeAliasDefNode)]
     leading = _get_trivia(children[0]) if children else []
-    return ModuleNode(body=BlockNode(label="", operations=ops), leading_trivia=leading)
+    return ModuleNode(body=BlockNode(label="", operations=ops), aliases=aliases, leading_trivia=leading)
+
+  @v_args(inline=False)
+  def attribute_alias_def(self, children: List[Any]) -> "AttributeAliasDefNode":
+    """Transform an attribute alias definition.
+
+    Args:
+        children: Parsed children.
+
+    Returns:
+        The AttributeAliasDefNode.
+    """
+    # ATTR_ALIAS_ID trivia? "=" trivia? attribute_value trivia?
+    name_token = children[0]
+    name = name_token.value
+
+    # Find attribute_value
+    val_node = next(c for c in children if getattr(c, "data", None) == "attr_value")
+    if len(val_node.children) == 1:
+      val = val_node.children[0]
+      if hasattr(val, "value"):
+        val_str = val.value
+      else:
+        val_str = str(val)
+    else:
+      # Array of values or something else
+      val_str = str(val_node)
+
+    leading = _get_trivia(children[0])
+
+    # Handle trivia on trailing elements
+    trailing = []
+    if len(children) > 1 and getattr(children[-1], "data", None) == "trivia":
+      trailing = _get_trivia(children[-1])
+
+    # The "=" token is not captured, trivia after "=" is part of children if it matches trivia rule.
+    # To keep it simple, we store raw string for now.
+
+    return AttributeAliasDefNode(name=name, value_str=val_str, leading_trivia=leading, trailing_trivia=trailing)
 
   @v_args(inline=False)
   def operation(self, children: List[Any]) -> OperationNode:
@@ -253,8 +352,8 @@ class MlirTransformer(Transformer[Any, Any]):
     return op
 
   @v_args(inline=False)
-  def attributes(self, children: List[Any]) -> List[AttributeNode]:
-    """Transform the attributes rule into a list of AttributeNode.
+  def dictionary_attribute(self, children: List[Any]) -> List[AttributeNode]:
+    """Transform the dictionary_attribute rule into a list of AttributeNode.
 
     Args:
         children: Parsed children.
@@ -264,12 +363,15 @@ class MlirTransformer(Transformer[Any, Any]):
     """
     attrs = []
     for c in children:
-      if getattr(c, "data", None) == "attribute":
+      if getattr(c, "data", None) == "attribute_entry":
         name = c.children[0].children[0].value
         val_node = c.children[2]
 
         if len(val_node.children) == 1:
-          val = val_node.children[0].value
+          if hasattr(val_node.children[0], "value"):
+            val = val_node.children[0].value
+          else:
+            val = "".join(t.value for t in val_node.children[0].scan_values(lambda v: isinstance(v, Token)))
         else:
           # Array of values
           val = [v.children[0].value for v in val_node.children if getattr(v, "data", None) == "attr_value"]
@@ -322,8 +424,8 @@ class MlirTransformer(Transformer[Any, Any]):
     args = []
     ops = []
     for c in children:
-      if isinstance(c, Token) and c.type == "BLOCK_LABEL":
-        label = c.value
+      if getattr(c, "data", None) == "block_id":
+        label = c.children[0].value
       elif getattr(c, "data", None) == "block_args":
         for arg in c.children:
           if getattr(arg, "data", None) == "block_arg":

@@ -23,7 +23,10 @@ def test_flax_nnx_convert_branch():
   adapter = FlaxNNXAdapter()
 
   class ObjWithArray:
+    """An object with __array__."""
+
     def __array__(self):
+      """Gets the array."""
       return [1, 2, 3]
 
   mock_jnp = MagicMock()
@@ -42,6 +45,7 @@ def test_flax_nnx_convert_no_import():
   real_import = __import__
 
   def mock_import(name, *args, **kwargs):
+    """Mocks __import__ to raise ImportError for jax.numpy."""
     if name == "jax.numpy":
       raise ImportError("No module named jax.numpy")
     return real_import(name, *args, **kwargs)

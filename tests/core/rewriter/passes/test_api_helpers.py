@@ -242,7 +242,10 @@ def test_get_mapping_not_dict():
   helper = MockHelper()
 
   class FakeImpl:
+    """A fake implementation object."""
+
     def get(self, *args, **kwargs):
+      """Gets fake api."""
       return "fake_api"
 
   helper.semantics.defs["numpy.stringmap"] = ("numpy.stringmap", {"verified": True, "variants": {"jax": FakeImpl()}})

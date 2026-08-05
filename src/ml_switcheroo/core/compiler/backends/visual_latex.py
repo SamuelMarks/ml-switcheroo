@@ -96,7 +96,7 @@ class LatexBackend(CompilerBackend):
         children.append(StateOpNode(step_id, target_id, args, "[_]"))
       else:
         meta_args = []
-        if node_data:  # pragma: no cover
+        if node_data:
           for k, v in node_data.metadata.items():
             if k.startswith("arg"):
               meta_args.append(v)
@@ -106,7 +106,7 @@ class LatexBackend(CompilerBackend):
         clean_type = op_type
         if clean_type.startswith("func_"):
           clean_type = clean_type[5:]
-        elif "." in clean_type:  # pragma: no cover
+        elif "." in clean_type:
           clean_type = clean_type.split(".")[-1]
         clean_type = clean_type.capitalize()
         children.append(ComputeNode(step_id, clean_type, final_args, "[_]"))

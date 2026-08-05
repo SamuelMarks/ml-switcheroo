@@ -19,7 +19,7 @@ class SassNode(abc.ABC):
   @abc.abstractmethod
   def __str__(self) -> str:
     """Returns the valid SASS string representation of the node."""
-    pass  # pragma: no cover
+    pass
 
 
 @dataclass

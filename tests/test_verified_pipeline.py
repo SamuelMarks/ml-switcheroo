@@ -30,11 +30,14 @@ def test_verified_pipeline_griffe_error(monkeypatch):
   """Test pipeline when Griffe throws an error during parsing."""
 
   def mock_parse_module(code):
+    """Mocks parse_module to throw an error."""
     raise ValueError("mock error")
 
   import sys
 
   class MockGriffe:
+    """Mock Griffe module."""
+
     parse_module = mock_parse_module
 
   monkeypatch.setitem(sys.modules, "griffe", MockGriffe())

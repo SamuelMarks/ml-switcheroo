@@ -16,6 +16,7 @@ def test_paxml_init_missing(monkeypatch):
   real_import = __import__
 
   def fake_import(name, *args, **kwargs):
+    """Mocks __import__."""
     if name == "praxis":
       raise ImportError("Fail praxis")
     return real_import(name, *args, **kwargs)
@@ -92,6 +93,8 @@ def test_paxml_defs_missing():
     assert "ReLU" in defs
 
     class MockLinear:
+      """A mock linear module."""
+
       args = None
 
     mock_load.return_value = {"Linear": MockLinear(), "Sequential": "s", "ReLU": "r"}

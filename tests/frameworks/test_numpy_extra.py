@@ -37,48 +37,69 @@ def test_numpy_convert(monkeypatch):
   assert adapter.convert({"a": 1}) == {"a": 1}
 
   class MockTorch:
+    """A mock Torch tensor."""
+
     def detach(self):
+      """Mocks detach."""
       return self
 
     def cpu(self):
+      """Mocks cpu."""
       return self
 
     def numpy(self):
+      """Mocks numpy."""
       return "numpy_tensor"
 
   assert adapter.convert(MockTorch()) == "numpy_tensor"
 
   class FailTorch:
+    """A fake failing torch tensor."""
+
     def detach(self):
+      """Mocks detach."""
       raise Exception("Fail")
 
   f = FailTorch()
   assert adapter.convert(f) is f
 
   class MockTF:
+    """A mock TF tensor."""
+
     def numpy(self):
+      """Mocks numpy."""
       return "tf_tensor"
 
   assert adapter.convert(MockTF()) == "tf_tensor"
 
   class FailTF:
+    """A failing TF tensor."""
+
     def numpy(self):
+      """Mocks numpy."""
       raise Exception("Fail")
 
   f2 = FailTF()
   assert adapter.convert(f2) is f2
 
   class MockArray:
+    """A mock numpy array interface."""
+
     def __array__(self):
+      """Gets array."""
       return []
 
   assert adapter.convert(MockArray()) == "mock_array"
 
   class FailArray:
+    """A failing array."""
+
     def __array__(self):
+      """Gets array."""
       return []  # trigger the lambda then raise
 
   def failing_array(x):
+    """Mocks numpy array creation."""
     if isinstance(x, FailArray):
       raise Exception("Fail")
     return "mock_array2"

@@ -50,7 +50,10 @@ def test_flax_nnx_array_exception():
   adapter = FlaxNNXAdapter()
 
   class FakeArray:
+    """A fake array class."""
+
     def __array__(self):
+      """Gets the array."""
       return [1, 2, 3]
 
   # Actually just patching sys.modules

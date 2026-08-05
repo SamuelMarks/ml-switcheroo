@@ -12,7 +12,7 @@ import logging
 import textwrap
 from typing import Union, List, Tuple, Dict, Any, Optional
 
-try:  # pragma: no cover
+try:
   import praxis
   import praxis.layers
   import praxis.base_layer

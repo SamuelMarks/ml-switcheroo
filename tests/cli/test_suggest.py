@@ -22,6 +22,7 @@ def test_suggest_with_module_and_exception(tmp_path):
   original = getattr(ml_switcheroo.cli.handlers.suggest, "_extract_metadata")
 
   def mock_extract(obj):
+    """Mocks _extract_metadata for testing exceptions."""
     if getattr(obj, "__name__", "") == "system":
       raise Exception("Mock error")
     return original(obj)

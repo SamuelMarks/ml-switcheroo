@@ -3,7 +3,7 @@
 
 import json
 from pathlib import Path
-import onnx
+import onnx.defs  # type: ignore
 
 
 def run() -> None:
@@ -15,7 +15,7 @@ def run() -> None:
   else:
     mapping = {}
 
-  schemas = onnx.defs.get_all_schemas()  # type: ignore[attr-defined]
+  schemas = onnx.defs.get_all_schemas()
   print(f"Found {len(schemas)} ONNX schemas.")
 
   for s in schemas:

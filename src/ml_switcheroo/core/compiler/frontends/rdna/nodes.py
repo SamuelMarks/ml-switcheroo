@@ -19,7 +19,7 @@ class RdnaNode(abc.ABC):
   @abc.abstractmethod
   def __str__(self) -> str:
     """Returns the valid RDNA string representation of the node."""
-    pass  # pragma: no cover
+    pass
 
 
 @dataclass

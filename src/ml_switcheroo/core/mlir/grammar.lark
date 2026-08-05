@@ -1,10 +1,12 @@
 ?start: module
 
-module: trivia? operation* trivia?
+module: trivia? (operation | attribute_alias_def)* trivia?
 
 trivia: (WS | COMMENT)+
 
 operation: results_clause? (IDENTIFIER | STRING) trivia? operands_clause? attributes_clause? regions_clause? types_clause? trivia?
+
+attribute_alias_def: ATTR_ALIAS_ID trivia? "=" trivia? attribute_value trivia?
 
 results_clause: results trivia? "=" trivia?
 operands_clause: operands trivia?
@@ -15,7 +17,8 @@ types_clause: ":" trivia? types
 results: VAL_ID (trivia? "," trivia? VAL_ID)*
 operands: "(" trivia? [VAL_ID (trivia? "," trivia? VAL_ID)* trivia?] ")" | VAL_ID (trivia? "," trivia? VAL_ID)*
 attributes: "{" trivia? attribute (trivia? "," trivia? attribute)* trivia? "}"
-attribute: IDENTIFIER trivia? "=" trivia? (STRING | NUMBER | TYPE | array_attr)
+attribute: IDENTIFIER trivia? "=" trivia? attribute_value
+attribute_value: STRING | NUMBER | TYPE | array_attr | ATTR_ALIAS_ID
 array_attr: "[" trivia? [NUMBER (trivia? "," trivia? NUMBER)* trivia?] "]"
 
 regions: region (trivia? region)*
@@ -33,6 +36,7 @@ types: TYPE | "(" trivia? [TYPE (trivia? "," trivia? TYPE)* trivia?] ")" trivia?
 VAL_ID: /%[a-zA-Z_0-9]+/ | /%\d+/
 BLOCK_LABEL: /\^[a-zA-Z_0-9]+/
 SYM_ID: /@[a-zA-Z_0-9]+/
+ATTR_ALIAS_ID: /#[a-zA-Z_0-9$._-]+/
 IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_$.]*|"[^"]+"/ | SYM_ID
 STRING: /"(?:[^"\\]|\\.)*"/
 TYPE: /![a-zA-Z_0-9\.<>]+/ | /!sw\.type<[^>]+>/ | /tensor<[^>]+>/ | /[iuf]\d+/ | "index" | "none"

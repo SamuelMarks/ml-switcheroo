@@ -270,14 +270,37 @@ class StableHloConstantOp(OperationNode):
 
 
 @dataclass
+class AttributeAliasDefNode(MlirNode):
+  """Represents a top-level attribute alias definition."""
+
+  name: str = ""
+  value_node: Optional[MlirNode] = None
+  value_str: str = ""
+
+  def to_text(self) -> str:
+    """Return textual representation."""
+    out = "".join(t.text for t in self.leading_trivia)
+    out += f"{self.name} = "
+    if self.value_node:
+      out += self.value_node.to_text()
+    else:
+      out += self.value_str
+    out += "".join(t.text for t in self.trailing_trivia)
+    return out
+
+
+@dataclass
 class ModuleNode(MlirNode):
   """Top-level container."""
 
   body: BlockNode = field(default_factory=BlockNode)
+  aliases: List[AttributeAliasDefNode] = field(default_factory=list)
 
   def to_text(self) -> str:
     """Return textual representation of the node."""
     out = "".join(t.text for t in self.leading_trivia)
+    for alias in self.aliases:
+      out += alias.to_text()
     out += self.body.to_text()
     out += "".join(t.text for t in self.trailing_trivia)
     return out

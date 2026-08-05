@@ -15,6 +15,7 @@ def test_tensorflow_init_missing(monkeypatch):
   real_import = __import__
 
   def mock_import(name, *args, **kwargs):
+    """Mocks __import__."""
     if name == "tensorflow":
       raise ImportError("Fail TF")
     return real_import(name, *args, **kwargs)
@@ -45,6 +46,7 @@ def test_tensorflow_collect_live(monkeypatch):
   adapter._mode = "LIVE"
 
   def mock_scan(module, prefix, kind, block_list=None):
+    """Mocks _scan_module."""
     from ml_switcheroo_ir.schema.ghost import GhostRef
 
     return [GhostRef(api_path=prefix + ".X", name="X", kind=kind, group=kind, params=[])]
@@ -85,43 +87,63 @@ def test_tensorflow_convert_logic(monkeypatch):
   assert adapter.convert({"a": 1}) == {"a": 1}
 
   class MockTorch:
+    """A mock Torch tensor."""
+
     def detach(self):
+      """Mocks detach."""
       return self
 
     def cpu(self):
+      """Mocks cpu."""
       return self
 
     def numpy(self):
+      """Mocks numpy."""
       return "numpy_tensor"
 
   assert type(adapter.convert(MockTorch())).__name__ == "MockTorch"
 
   class FailTorch:
+    """A failing Torch tensor."""
+
     def detach(self):
+      """Mocks detach."""
       raise Exception("Fail")
 
   f = FailTorch()
   assert adapter.convert(f) is f
 
   class MockTF:
+    """A mock TF tensor."""
+
     def numpy(self):
+      """Mocks numpy."""
       return "already_tf_tensor"
 
   class FailTF:
+    """A failing TF tensor."""
+
     def numpy(self):
+      """Mocks numpy."""
       raise Exception("Fail")
 
   f2 = FailTF()
   assert adapter.convert(f2) is f2
 
   class MockArray:
+    """A mock array."""
+
     def __array__(self):
+      """Gets array."""
       return []
 
   assert type(adapter.convert(MockArray())).__name__ == "MockArray"
 
   class FailArray:
+    """A failing array."""
+
     def __array__(self):
+      """Gets array."""
       raise Exception("Fail")
 
   f3 = FailArray()

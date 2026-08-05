@@ -9,6 +9,10 @@ description = "Deterministic AST Transpiler for PyTorch <-> JAX"
 requires-python = ">=3.10"
 dynamic = ["dependencies", "optional-dependencies"]
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/ml_switcheroo"]
+include-package-data = true
+
 [tool.hatch.metadata]
 allow-direct-references = true
 

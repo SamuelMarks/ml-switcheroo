@@ -16,6 +16,8 @@ def test_base_node():
   """Test function."""
 
   class DummyNode(TikzBaseNode):
+    """A dummy node."""
+
     pass
 
   node = DummyNode()

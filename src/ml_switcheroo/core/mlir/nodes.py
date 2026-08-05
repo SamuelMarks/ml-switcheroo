@@ -46,7 +46,7 @@ class ValueNode(MlirNode):
     out = [t.to_text() for t in self.leading_trivia]
     out.append(self.name)
     for t in self.trailing_trivia:
-      out.append(t.to_text())  # pragma: no cover
+      out.append(t.to_text())
     return "".join(out)
 
 
@@ -63,7 +63,7 @@ class TypeNode(MlirNode):
     out = [t.to_text() for t in self.leading_trivia]
     out.append(self.body)
     for t in self.trailing_trivia:
-      out.append(t.to_text())  # pragma: no cover
+      out.append(t.to_text())
     return "".join(out)
 
 
@@ -98,7 +98,7 @@ class AttributeNode(MlirNode):
     out.append(f"{self.name} = {val_str}{suffix}")
 
     for t in self.trailing_trivia:
-      out.append(t.to_text())  # pragma: no cover
+      out.append(t.to_text())
     return "".join(out)
 
 
@@ -138,7 +138,7 @@ class BlockNode(MlirNode):
       out.append(op.to_text())
 
     for t in self.trailing_trivia:
-      out.append(t.to_text())  # pragma: no cover
+      out.append(t.to_text())
 
     return "".join(out)
 
@@ -159,7 +159,7 @@ class RegionNode(MlirNode):
       out.append(b.to_text())
     out.append("}")
     for t in self.trailing_trivia:
-      out.append(t.to_text())  # pragma: no cover
+      out.append(t.to_text())
     return "".join(out)
 
 
@@ -273,7 +273,7 @@ class StableHloConstantOp(OperationNode):
 
     if self.name_trivia:
       for t in self.name_trivia:
-        parts.append(t.to_text())  # pragma: no cover
+        parts.append(t.to_text())
 
     # Constant has no operands or regions, just the bare attribute value
     if self.attributes:
@@ -289,11 +289,11 @@ class StableHloConstantOp(OperationNode):
         parts.append(self.result_types[0].to_text())
       else:
         t_names = [t.to_text() for t in self.result_types]
-        parts.append(f"({', '.join(t_names)})")  # pragma: no cover
+        parts.append(f"({', '.join(t_names)})")
 
     if self.trailing_trivia:
       for t in self.trailing_trivia:
-        parts.append(t.to_text())  # pragma: no cover
+        parts.append(t.to_text())
 
     if not parts or not parts[-1].endswith("\n"):
       parts.append("\n")
@@ -314,5 +314,5 @@ class ModuleNode(MlirNode):
     out = [t.to_text() for t in self.leading_trivia]
     out.append(self.body.to_text())
     for t in self.trailing_trivia:
-      out.append(t.to_text())  # pragma: no cover
+      out.append(t.to_text())
     return "".join(out)

@@ -14,6 +14,7 @@ def test_scan_registry_else_fallback(mock_get_adapter, mock_priority, mock_avail
   mock_priority.return_value = ["torch", "custom1"]
 
   def get_adapter_side_effect(name):
+    """Effect."""
     adapter = MagicMock()
     adapter.inherits_from = None
     adapter.display_name = name.title()
