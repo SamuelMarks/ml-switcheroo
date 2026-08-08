@@ -62,3 +62,60 @@ def test_injector_dry_run(target_json, sample_variant, capsys):
   assert "LogSoftmax" in captured.out
   content = json.loads(target_json.read_text())
   assert "LogSoftmax" not in content
+
+
+def test_injector_idempotency(target_json, sample_variant):
+  """Verifies behavior when entry already exists and is identical."""
+  # Add the sample_variant to target_json
+  content = json.loads(target_json.read_text())
+  content["LogSoftmax"] = sample_variant.model_dump(exclude_none=True)
+  target_json.write_text(json.dumps(content))
+
+  with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
+    injector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
+    success = injector.inject(dry_run=False)
+    assert success is True
+
+
+def test_injector_update_existing_different(target_json, sample_variant):
+  """Hits line 65 where existing entry is updated."""
+  # Add the LogSoftmax but with different data
+  content = json.loads(target_json.read_text())
+  content["LogSoftmax"] = {"api": "torch.wrong"}
+  target_json.write_text(json.dumps(content))
+
+  with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
+    injector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
+    success = injector.inject(dry_run=False)
+    assert success is True
+    new_content = json.loads(target_json.read_text())
+    assert new_content["LogSoftmax"]["api"] == "torch.nn.functional.log_softmax"
+
+
+def test_injector_write_error(target_json, sample_variant):
+  """Verifies error handling during file write."""
+  original_open = open
+
+  def mock_open(*args, **kwargs):
+    if len(args) > 1 and args[1] == "w":
+      raise OSError("Permission denied")
+    return original_open(*args, **kwargs)
+
+  with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
+    with patch("builtins.open", side_effect=mock_open):
+      injector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
+      success = injector.inject(dry_run=False)
+      assert success is False
+
+
+def test_injector_load_corrupt_json(target_json, sample_variant):
+  """Verifies behavior when loading corrupt JSON."""
+  target_json.write_text("{invalid json}")
+  with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
+    injector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
+    success = injector.inject(dry_run=False)
+    assert success is True
+    # The file should be overwritten
+    content = json.loads(target_json.read_text())
+    assert "LogSoftmax" in content
+    assert "OldOp" not in content

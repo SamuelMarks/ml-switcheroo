@@ -3,6 +3,14 @@
 from unittest.mock import patch
 import importlib
 
+try:
+  import torch  # noqa: F401
+  import jax  # noqa: F401
+  import tensorflow  # noqa: F401
+  import flax  # noqa: F401
+except ImportError:
+  pass
+
 
 def test_import_errors_frameworks():
   """Verifies the behavior of import errors frameworks."""

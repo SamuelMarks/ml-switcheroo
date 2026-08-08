@@ -6,7 +6,11 @@ from ml_switcheroo.cli.__main__ import main
 
 
 def mock_run_verified_pipeline(code):
-  """Provides a mock run verified pipeline for testing."""
+  """Provides a mock run verified pipeline for testing.
+
+  Args:
+      code: ...
+  """
   return {"status": "success"}
 
 

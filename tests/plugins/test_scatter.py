@@ -85,3 +85,15 @@ def test_missing_attribute_func():
   ctx.target_fw = "jax"
   res = transform_scatter(node, ctx)
   assert res is node
+
+
+def test_missing_args():
+  """Verifies behavior when there are fewer than 3 arguments."""
+  node = cst.Call(
+    func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("scatter")),
+    args=[cst.Arg(cst.Integer("1")), cst.Arg(cst.Name("idx"))],
+  )
+  ctx = MagicMock()
+  ctx.target_fw = "jax"
+  res = transform_scatter(node, ctx)
+  assert res is node

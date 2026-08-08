@@ -12,7 +12,14 @@ class QKVFusionPass:
   """Fuses separate q_proj, k_proj, v_proj nodes into a single qkv_proj node."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to fuse QKV."""
+    """Mutates graph to fuse QKV.
+
+    Args:
+        graph (LogicalGraph): The input logical graph.
+
+    Returns:
+        LogicalGraph: The mutated graph.
+    """
     # Find all Linear nodes
     q_nodes = {n.id: n for n in graph.nodes if n.kind == "Linear" and "q_proj" in n.id.lower()}
     k_nodes = {n.id: n for n in graph.nodes if n.kind == "Linear" and "k_proj" in n.id.lower()}
@@ -71,7 +78,14 @@ class QKVDefusionPass:
   """Splits a qkv_proj node into separate q_proj, k_proj, and v_proj nodes."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to de-fuse QKV."""
+    """Mutates graph to de-fuse QKV.
+
+    Args:
+        graph (LogicalGraph): The input logical graph.
+
+    Returns:
+        LogicalGraph: The mutated graph.
+    """
     qkv_nodes = {n.id: n for n in graph.nodes if n.kind == "Linear" and "qkv_proj" in n.id.lower()}
 
     for qkv_id, qkv_node in qkv_nodes.items():

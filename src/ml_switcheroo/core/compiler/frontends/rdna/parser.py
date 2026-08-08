@@ -68,8 +68,11 @@ class RdnaLexer(Lexer):
     Args:
         data: The source string to tokenize.
 
-    Returns:
-        Any: A generator of RdnaToken objects.
+    Yields:
+        RdnaToken: Tokens.
+
+    Raises:
+        ValueError: Value error.
     """
     leading: List[Trivia] = []
     for mo in re.finditer(tok_regex, data):
@@ -551,6 +554,9 @@ class RdnaParser:
 
     Returns:
         RdnaModule: The root CST node.
+
+    Raises:
+        ValueError: Parse error.
     """
     if not self.code.strip():
       return RdnaModule()

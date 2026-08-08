@@ -21,22 +21,6 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 from ml_switcheroo.plugins.utils import create_dotted_name, is_framework_module_node
 
 
-def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Helper to create a CST Attribute chain from string.
-
-  Args:
-      name_str: The dot-separated string representation of the attribute chain (e.g., "jnp.reshape").
-
-  Returns:
-      cst.BaseExpression: A libcst Name or Attribute node representing the chain.
-  """
-  parts = name_str.split(".")
-  node = cst.Name(parts[0])
-  for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
-  return node
-
-
 @register_hook("pack_shape_args")
 def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
   """Hook: Packs trailing positional arguments into a shape tuple.

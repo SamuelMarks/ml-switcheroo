@@ -71,6 +71,9 @@ def _parse_device_args(node: cst.Call) -> Tuple[Optional[cst.BaseExpression], Op
   - `torch.device('cuda')`
   - `torch.device('cuda', 0)`
   - `torch.device('cuda:0')` -> splits literal string into type 'cuda' and index '0' nodes.
+
+  Args:
+      node: The original CST Call node.
   """
   if not node.args:
     return None, None

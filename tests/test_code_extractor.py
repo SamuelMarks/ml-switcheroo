@@ -1,6 +1,7 @@
 """Test suite for the Code Extractor module."""
 
 import pytest
+from unittest import mock
 from ml_switcheroo.utils.code_extractor import CodeExtractor
 
 
@@ -45,13 +46,30 @@ def test_not_a_class_raises_error():
     CodeExtractor.extract_class(inst)
 
 
+def test_extract_class_oserror():
+  """Verifies OSError from inspect.getsource is handled."""
+  with mock.patch("inspect.getsource", side_effect=OSError("fake error")):
+    with pytest.raises(OSError, match="Could not get source for MockClass: fake error"):
+      CodeExtractor.extract_class(MockClass)
+
+
+def test_extract_class_dedent():
+  """Hits line 45 where textwrap.dedent cleans up indentation."""
+  indented_source = "    class Indented:\n        def f():\n            pass\n"
+  with mock.patch("inspect.getsource", return_value=indented_source):
+    # Pass any object since getsource is mocked
+    res = CodeExtractor.extract_class(MockClass)
+    assert res.startswith("class Indented:")
+
+
 def test_normalize_imports_injection():
   """Verifies the behavior of normalize imports injection."""
   source = "class Foo: pass"
-  mods = ["numpy", "random"]
+  mods = ["numpy", "random", "os.path"]
   res = CodeExtractor.normalize_harness_imports(source, mods)
   assert "import numpy" in res
   assert "import random" in res
+  assert "import os.path" in res
   assert "class Foo: pass" in res
 
 

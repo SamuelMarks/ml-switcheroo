@@ -24,13 +24,13 @@ class ASTToCppMapper:
     """Maps a Python AST expression to a C++ CST Expression.
 
     Args:
-      node: The Python AST expression node to map.
+        node: The Python AST expression node to map.
 
     Returns:
-      The mapped C++ CST Expression node.
+        Expression: The mapped C++ CST Expression node.
 
     Raises:
-      ValueError: If the AST node type is not supported.
+        ValueError: If the AST node type is not supported.
     """
     if isinstance(node, ast.Name):
       return Identifier(name=node.id)

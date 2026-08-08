@@ -1,4 +1,8 @@
-"""Auto-generated doc."""
+"""Generates a 10,000+ step plan mapping operations across different ML frameworks.
+
+This script clones repositories for popular ML frameworks, extracts their API surfaces,
+and generates a comprehensive Markdown plan and JSON mapping file.
+"""
 
 import subprocess
 import ast
@@ -37,7 +41,7 @@ TMP_DIR = Path("tmp/repos")
 
 
 def clone_repos() -> None:
-  """Auto-generated doc."""
+  """Clone necessary ML framework repositories into a temporary directory."""
   TMP_DIR.mkdir(parents=True, exist_ok=True)
   for name, url in REPOS.items():
     repo_path = TMP_DIR / name
@@ -54,7 +58,15 @@ def clone_repos() -> None:
 
 
 def extract_api_surface(repo_name: str, focus_dirs: list[str]) -> list[str]:
-  """Auto-generated doc."""
+  """Extract API surface (classes and functions) from specified repository directories.
+
+  Args:
+    repo_name: Name of the repository to process.
+    focus_dirs: List of directory or file paths within the repository to parse.
+
+  Returns:
+    A sorted list of API node strings (e.g., 'module.ClassName').
+  """
   repo_path = TMP_DIR / repo_name
   api_nodes = []
 
@@ -93,7 +105,7 @@ def extract_api_surface(repo_name: str, focus_dirs: list[str]) -> list[str]:
 
 
 def generate_mappings() -> None:
-  """Auto-generated doc."""
+  """Generate a detailed 10k step plan and universal mapping JSON file."""
   logging.info("Extracting APIs...")
   apis = {}
   for name in REPOS.keys():

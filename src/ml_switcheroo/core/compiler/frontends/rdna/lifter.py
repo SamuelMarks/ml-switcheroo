@@ -35,11 +35,7 @@ class RdnaLifter:
   """
 
   def __init__(self) -> None:
-    """Initialize the RdnaLifter.
-
-    Returns:
-        None
-    """
+    """Initialize the RdnaLifter."""
     self.comment_parser = SemanticCommentParser()
 
   def lift(self, nodes: List[RdnaNode]) -> LogicalGraph:
@@ -73,11 +69,9 @@ class RdnaLifter:
       Args:
           node_id (str): The unique identifier for the new logical node.
           kind (str): The operation kind of the new logical node.
-          meta (Any, optional): Metadata dictionary for the logical node.
+          meta: Metadata dictionary for the logical node.
               Defaults to None.
 
-      Returns:
-          None
       """
       nonlocal previous_node_id
       if node_id in seen_ids:

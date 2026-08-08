@@ -32,8 +32,6 @@ class RegisterAllocatorProtocol(Protocol):
     Args:
         var_name (str): The identifier of the variable.
 
-    Returns:
-        RdnaVGPR: The allocated or retrieved vector register.
     """
     ...
 
@@ -43,25 +41,15 @@ class RegisterAllocatorProtocol(Protocol):
     Args:
         var_name (str): The identifier of the variable.
 
-    Returns:
-        RdnaSGPR: The allocated or retrieved scalar register.
     """
     ...
 
   def allocate_vector_temp(self) -> RdnaVGPR:
-    """Allocates a temporary, unmapped vector register (VGPR).
-
-    Returns:
-        RdnaVGPR: The newly allocated temporary vector register.
-    """
+    """Allocates a temporary, unmapped vector register (VGPR)."""
     ...
 
   def allocate_scalar_temp(self) -> RdnaSGPR:
-    """Allocates a temporary, unmapped scalar register (SGPR).
-
-    Returns:
-        RdnaSGPR: The newly allocated temporary scalar register.
-    """
+    """Allocates a temporary, unmapped scalar register (SGPR)."""
     ...
 
 
@@ -76,11 +64,11 @@ def expand_conv2d(
   kernel loop with register allocation, memory loads, and accumulation.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register allocator to use for
-        managing temporary and variable registers.
-      node_id (str): A unique identifier for the convolution operation node.
-      metadata (Dict[str, Any]): Metadata containing configuration details
-        such as "k" (kernel size).
+      allocator: The register allocator to use for
+            managing temporary and variable registers.
+      node_id: A unique identifier for the convolution operation node.
+      metadata: Metadata containing configuration details
+            such as "k" (kernel size).
 
   Returns:
       List[RdnaNode]: A list of RDNA CST nodes representing the compiled 2D
@@ -150,11 +138,11 @@ def expand_linear(
   reduction loop for a linear fully-connected layer.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register allocator to use for
-        managing temporary and variable registers.
-      node_id (str): A unique identifier for the linear operation node.
-      metadata (Dict[str, Any]): Metadata containing configuration details
-        such as "in_features" (input feature size) and "bias" (boolean flag).
+      allocator: The register allocator to use for
+          managing temporary and variable registers.
+      node_id: A unique identifier for the linear operation node.
+      metadata: Metadata containing configuration details
+          such as "in_features" (input feature size) and "bias" (boolean flag).
 
   Returns:
       List[RdnaNode]: A list of RDNA CST nodes representing the compiled linear

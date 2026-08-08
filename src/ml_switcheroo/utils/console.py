@@ -147,8 +147,8 @@ class _ConsoleProxy:
     """Forwards ``print`` calls to the active backend.
 
     Args:
-        *args (Any): Positional arguments for Rich print.
-        **kwargs (Any): Keyword arguments for Rich print.
+        args (Any): Positional arguments for Rich print.
+        kwargs (Any): Keyword arguments for Rich print.
 
     Returns:
         None
@@ -170,7 +170,7 @@ class _ConsoleProxy:
     """Forwards ``export_text`` (useful for log capturing).
 
     Args:
-        **kwargs (Any): Options passed to console.export_text.
+        kwargs (Any): Options passed to console.export_text.
 
     Returns:
         str: The captured text output.
@@ -181,7 +181,7 @@ class _ConsoleProxy:
     """Forwards ``export_html`` (useful for web rendering).
 
     Args:
-        **kwargs (Any): Options passed to console.export_html.
+        kwargs (Any): Options passed to console.export_html.
 
     Returns:
         str: The captured HTML output.

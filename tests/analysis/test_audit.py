@@ -9,7 +9,11 @@ class MockSemantics:
   """Mock Semantics class for testing purposes."""
 
   def get_definition(self, fqn: str) -> Any:
-    """Mock implementation of get definition."""
+    """Mock implementation of get definition.
+
+    Args:
+      fqn: ...
+    """
     if fqn == "torch.add":
       return ("Add", {"variants": {"torch": {"api": "torch.add"}}})
     if fqn == "torch.sub":

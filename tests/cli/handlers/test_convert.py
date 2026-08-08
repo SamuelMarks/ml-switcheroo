@@ -10,7 +10,11 @@ from ml_switcheroo.core.engine import ConversionResult
 
 
 def test_handle_convert_infer_source(monkeypatch):
-  """Tests inferring the source framework from file extension."""
+  """Tests inferring the source framework from file extension.
+
+  Args:
+      monkeypatch: ...
+  """
   with tempfile.TemporaryDirectory() as tmp:
     in_file = Path(tmp) / "input.mlir"
     in_file.write_text("module {}")
@@ -83,7 +87,12 @@ def mock_engine():
 
 
 def test_handle_convert_plugins_and_batch(monkeypatch, tmp_path):
-  """Tests loading external plugins and processing a directory."""
+  """Tests loading external plugins and processing a directory.
+
+  Args:
+      monkeypatch: ...
+      tmp_path: ...
+  """
   in_dir = tmp_path / "src"
   in_dir.mkdir()
   (in_dir / "a.py").write_text("import torch")
@@ -138,12 +147,22 @@ def test_print_batch_summary_warnings():
 
 
 def test_handle_convert_input_not_found(mock_config):
-  """Handles convert input not found."""
+  """Handles convert input not found.
+
+  Args:
+      mock_config: ...
+  """
   assert handle_convert(Path("nonexistent.py"), None, None, None, False, None, None, {}) == 1
 
 
 def test_handle_convert_single_file_success(mock_config, mock_engine, tmp_path):
-  """Handles convert a single file successfully."""
+  """Handles convert a single file successfully.
+
+  Args:
+      mock_config: ...
+      mock_engine: ...
+      tmp_path: ...
+  """
   input_file = tmp_path / "in.py"
   input_file.write_text("x = 1")
   mock_instance = mock_engine.return_value
@@ -152,7 +171,13 @@ def test_handle_convert_single_file_success(mock_config, mock_engine, tmp_path):
 
 
 def test_handle_convert_single_file_with_output(mock_config, mock_engine, tmp_path):
-  """Handles convert a single file with output."""
+  """Handles convert a single file with output.
+
+  Args:
+      mock_config: ...
+      mock_engine: ...
+      tmp_path: ...
+  """
   input_file = tmp_path / "in.py"
   input_file.write_text("x = 1")
   out_file = tmp_path / "out.py"
@@ -164,7 +189,13 @@ def test_handle_convert_single_file_with_output(mock_config, mock_engine, tmp_pa
 
 
 def test_handle_convert_single_file_failure(mock_config, mock_engine, tmp_path):
-  """Handles convert a single file successfully handling failure."""
+  """Handles convert a single file successfully handling failure.
+
+  Args:
+      mock_config: ...
+      mock_engine: ...
+      tmp_path: ...
+  """
   input_file = tmp_path / "in.py"
   input_file.write_text("x = 1")
   mock_instance = mock_engine.return_value
@@ -173,7 +204,13 @@ def test_handle_convert_single_file_failure(mock_config, mock_engine, tmp_path):
 
 
 def test_handle_convert_single_file_failure_exit(mock_config, mock_engine, tmp_path):
-  """Handles convert a single file successfully handling failure exit."""
+  """Handles convert a single file successfully handling failure exit.
+
+  Args:
+      mock_config: ...
+      mock_engine: ...
+      tmp_path: ...
+  """
   input_file = tmp_path / "in.py"
   input_file.write_text("x = 1")
   mock_instance = mock_engine.return_value
@@ -182,14 +219,24 @@ def test_handle_convert_single_file_failure_exit(mock_config, mock_engine, tmp_p
 
 
 def test_handle_convert_dir_no_out(mock_config, tmp_path):
-  """Handles convert a directory no output."""
+  """Handles convert a directory no output.
+
+  Args:
+      mock_config: ...
+      tmp_path: ...
+  """
   input_dir = tmp_path / "src"
   input_dir.mkdir()
   assert handle_convert(input_dir, None, None, None, False, None, None, {}) == 1
 
 
 def test_handle_convert_dir_empty(mock_config, tmp_path):
-  """Handles convert a directory empty."""
+  """Handles convert a directory empty.
+
+  Args:
+      mock_config: ...
+      tmp_path: ...
+  """
   input_dir = tmp_path / "src"
   input_dir.mkdir()
   out_dir = tmp_path / "out"
@@ -197,7 +244,13 @@ def test_handle_convert_dir_empty(mock_config, tmp_path):
 
 
 def test_handle_convert_dir_success(mock_config, mock_engine, tmp_path):
-  """Handles convert a directory successfully."""
+  """Handles convert a directory successfully.
+
+  Args:
+      mock_config: ...
+      mock_engine: ...
+      tmp_path: ...
+  """
   input_dir = tmp_path / "src"
   input_dir.mkdir()
   (input_dir / "in.py").write_text("x = 1")
@@ -209,7 +262,12 @@ def test_handle_convert_dir_success(mock_config, mock_engine, tmp_path):
 
 
 def test_convert_single_file_exception(mock_config, tmp_path):
-  """Converts a single file correctly handling an exception."""
+  """Converts a single file correctly handling an exception.
+
+  Args:
+      mock_config: ...
+      tmp_path: ...
+  """
   input_file = tmp_path / "in.py"
   input_file.write_text("x = 1")
   with patch("ml_switcheroo.cli.handlers.convert.ASTEngine", side_effect=ValueError("boom")):
@@ -219,7 +277,13 @@ def test_convert_single_file_exception(mock_config, tmp_path):
 
 
 def test_convert_single_file_json_trace(mock_config, mock_engine, tmp_path):
-  """Converts a single file JSON trace."""
+  """Converts a single file JSON trace.
+
+  Args:
+      mock_config: ...
+      mock_engine: ...
+      tmp_path: ...
+  """
   input_file = tmp_path / "in.py"
   input_file.write_text("x = 1")
   trace_file = tmp_path / "trace.json"
@@ -230,7 +294,13 @@ def test_convert_single_file_json_trace(mock_config, mock_engine, tmp_path):
 
 
 def test_convert_single_file_json_trace_error(mock_config, mock_engine, tmp_path):
-  """Converts a single file JSON trace correctly handling an error."""
+  """Converts a single file JSON trace correctly handling an error.
+
+  Args:
+      mock_config: ...
+      mock_engine: ...
+      tmp_path: ...
+  """
   input_file = tmp_path / "in.py"
   input_file.write_text("x = 1")
   trace_file = tmp_path / "ro" / "trace.json"
@@ -241,7 +311,13 @@ def test_convert_single_file_json_trace_error(mock_config, mock_engine, tmp_path
 
 
 def test_convert_single_file_verify_success(mock_config, mock_engine, tmp_path):
-  """Converts a single file verify successfully."""
+  """Converts a single file verify successfully.
+
+  Args:
+      mock_config: ...
+      mock_engine: ...
+      tmp_path: ...
+  """
   input_file = tmp_path / "in.py"
   input_file.write_text("x = 1")
   mock_instance = mock_engine.return_value
@@ -253,7 +329,13 @@ def test_convert_single_file_verify_success(mock_config, mock_engine, tmp_path):
 
 
 def test_convert_single_file_verify_failure(mock_config, mock_engine, tmp_path):
-  """Converts a single file verify successfully handling failure."""
+  """Converts a single file verify successfully handling failure.
+
+  Args:
+      mock_config: ...
+      mock_engine: ...
+      tmp_path: ...
+  """
   input_file = tmp_path / "in.py"
   input_file.write_text("x = 1")
   mock_instance = mock_engine.return_value
@@ -271,7 +353,13 @@ def test_print_batch_summary():
 
 
 def test_load_plugins(mock_config, mock_engine, tmp_path):
-  """Loads plugins."""
+  """Loads plugins.
+
+  Args:
+      mock_config: ...
+      mock_engine: ...
+      tmp_path: ...
+  """
   input_file = tmp_path / "in.py"
   input_file.write_text("x = 1")
   mock_config.return_value.plugin_paths = ["some/path"]

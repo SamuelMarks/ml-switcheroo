@@ -31,6 +31,18 @@ def test_filename_normalization(plugin_dir):
   assert "def MyCustomHook(" in content
 
 
+def test_func_finder_other_func():
+  """Verifies the behavior when node.name.value != self.func_name."""
+  import libcst as cst
+  from ml_switcheroo.tools.injector_plugin import BodyExtractor
+
+  code = "def other_func(): pass\ndef target_func(): pass"
+  tree = cst.parse_module(code)
+  finder = BodyExtractor("target_func")
+  tree.visit(finder)
+  assert finder.found is True
+
+
 def test_generate_call_plugin(plugin_dir):
   """Generates call plugin."""
   gen = PluginGenerator(plugin_dir)

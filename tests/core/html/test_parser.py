@@ -329,3 +329,11 @@ def test_htmlparser_safe_val_eval_exception():
   # "some_unknown_var" parses as Name, but eval("some_unknown_var") raises NameError.
   # So it should return the parsed expression rather than evaluating and converting to literal.
   assert "dsl.Op(x, some_unknown_var)" in code
+
+
+def test_htmlparser_unclosed_tags():
+  """Tests that HtmlParser.parse() correctly handles unclosed tags in the internal stack."""
+  html = "<div><span>unclosed"
+  parser = HtmlParser(html)
+  cst_mod = parser.parse()
+  assert cst_mod is not None

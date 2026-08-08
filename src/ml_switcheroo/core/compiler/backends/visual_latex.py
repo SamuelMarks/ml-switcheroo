@@ -18,17 +18,35 @@ class LatexBackend(CompilerBackend):
   """Transforms Logical Graphs into MIDL LaTeX format."""
 
   def __init__(self, semantics: Optional[Any] = None) -> None:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Args:
+        semantics: SemanticsManager.
+    """
     pass
 
   def compile(self, graph: LogicalGraph) -> str:
-    """Compiles graph to LaTeX."""
+    """Compiles graph to LaTeX.
+
+    Args:
+        graph: Graph to compile.
+
+    Returns:
+        str: Latex string.
+    """
     name = graph.name or "GeneratedNet"
     container = self._transcode_graph(graph, name)
     return self._wrap_document(container.to_latex())
 
   def _wrap_document(self, content: str) -> str:
-    """Wraps content in Latex standalone document."""
+    """Wraps content in Latex standalone document.
+
+    Args:
+        content: Latex content.
+
+    Returns:
+        str: Wrapped string.
+    """
     comment_block = (
       r"% ------------------------------------------------------------------"
       "\n"
@@ -48,7 +66,15 @@ class LatexBackend(CompilerBackend):
     return comment_block + header + content + footer
 
   def _transcode_graph(self, graph: LogicalGraph, name: str) -> ModelContainer:
-    """Transforms LogicalNodes to LatexNode hierarchy."""
+    """Transforms LogicalNodes to LatexNode hierarchy.
+
+    Args:
+        graph: Graph.
+        name: Name.
+
+    Returns:
+        ModelContainer: Model.
+    """
     children: List[LatexNode] = []
     # Reconstruct registry as graph nodes list
     state_registry = {n.id: n for n in graph.nodes}

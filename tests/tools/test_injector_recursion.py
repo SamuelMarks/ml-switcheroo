@@ -17,6 +17,59 @@ def test_primitive_recursion():
   assert render_node(convert_to_cst_literal(True)) == "True"
   assert render_node(convert_to_cst_literal(None)) == "None"
   assert render_node(convert_to_cst_literal("foo")) == '"foo"'
+  assert render_node(convert_to_cst_literal(-5)) == "-5"
+  assert render_node(convert_to_cst_literal(-3.14)) == "-3.14"
+
+  class CustomObj:
+    def __str__(self):
+      return "custom"
+
+  assert render_node(convert_to_cst_literal(CustomObj())) == "'custom'"
+
+
+def test_get_import_root():
+  """Tests get_import_root."""
+  from ml_switcheroo.tools.injector_fw.utils import get_import_root
+  import libcst as cst
+
+  assert get_import_root(cst.Name("torch")) == "torch"
+  attr = cst.Attribute(value=cst.Name("scipy"), attr=cst.Name("special"))
+  assert get_import_root(attr) == "scipy"
+  assert get_import_root(cst.Integer("1")) == ""
+
+
+def test_is_docstring():
+  """Tests is_docstring."""
+  from ml_switcheroo.tools.injector_fw.utils import is_docstring
+  import libcst as cst
+
+  # Not index 0
+  assert is_docstring(cst.Name("test"), 1) is False
+
+  # Correct format
+  doc = cst.SimpleStatementLine(body=[cst.Expr(value=cst.SimpleString('"""Doc"""'))])
+  assert is_docstring(doc, 0) is True
+
+  # Wrong type
+  wrong = cst.SimpleStatementLine(body=[cst.Pass()])
+  assert is_docstring(wrong, 0) is False
+
+
+def test_is_future_import():
+  """Tests is_future_import."""
+  from ml_switcheroo.tools.injector_fw.utils import is_future_import
+  import libcst as cst
+
+  # Future import
+  tree = cst.parse_module("from __future__ import annotations")
+  assert is_future_import(tree.body[0]) is True
+
+  # Normal import
+  tree = cst.parse_module("from os import path")
+  assert is_future_import(tree.body[0]) is False
+
+  # Not a SimpleStatementLine
+  assert is_future_import(cst.Pass()) is False
 
 
 def test_list_recursion():

@@ -66,3 +66,17 @@ def test_fallback_defaults(rewriter):
   res_code = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res_node)])]).code
   assert "nnx.Param(x)" in res_code
   assert "torch.nn.Parameter" not in res_code
+
+
+def test_param_conversion_name(rewriter):
+  """Verifies conversion when the function is a direct Name (e.g. Param(x))."""
+  res = rewrite_code(rewriter, "w = Param(x)")
+  assert "custom.Parameter(x)" in res
+
+
+def test_param_conversion_unsupported_func(rewriter):
+  """Verifies that the hook ignores calls with unsupported function types."""
+  code = "w = func_list[0](x)"
+  call_node = cst.parse_module(code).body[0].body[0].value
+  res = transform_nnx_param(call_node, rewriter.ctx)
+  assert isinstance(res, cst.Call)

@@ -38,7 +38,14 @@ def mock_load_plugins():
 
 
 def test_handle_ci_success(mock_config, mock_semantics, mock_validator, mock_load_plugins):
-  """Handles ci successfully."""
+  """Handles ci successfully.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      mock_validator: ...
+      mock_load_plugins: ...
+  """
   mock_load_plugins.return_value = 1
   mock_val_instance = mock_validator.return_value
   mock_val_instance.run_all.return_value = {"Op1": True, "Op2": False}
@@ -46,7 +53,14 @@ def test_handle_ci_success(mock_config, mock_semantics, mock_validator, mock_loa
 
 
 def test_handle_ci_plugin_load_none(mock_config, mock_semantics, mock_validator, mock_load_plugins):
-  """Handles ci when loaded plugins is 0."""
+  """Handles ci when loaded plugins is 0.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      mock_validator: ...
+      mock_load_plugins: ...
+  """
   mock_load_plugins.return_value = 0
   mock_val_instance = mock_validator.return_value
   mock_val_instance.run_all.return_value = {}
@@ -54,7 +68,13 @@ def test_handle_ci_plugin_load_none(mock_config, mock_semantics, mock_validator,
 
 
 def test_handle_ci_repair_no_defn(mock_config, mock_semantics, mock_validator):
-  """Handles ci repair when no definition is found."""
+  """Handles ci repair when no definition is found.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      mock_validator: ...
+  """
   mock_val_instance = mock_validator.return_value
   mock_val_instance.run_all.return_value = {"Op1": False}
   mock_sem_instance = mock_semantics.return_value
@@ -63,7 +83,13 @@ def test_handle_ci_repair_no_defn(mock_config, mock_semantics, mock_validator):
 
 
 def test_handle_ci_config_error(mock_config, mock_semantics, mock_validator):
-  """Handles ci configuration correctly handling an error."""
+  """Handles ci configuration correctly handling an error.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      mock_validator: ...
+  """
   mock_config.side_effect = Exception("boom")
   mock_val_instance = mock_validator.return_value
   mock_val_instance.run_all.return_value = {}
@@ -71,7 +97,13 @@ def test_handle_ci_config_error(mock_config, mock_semantics, mock_validator):
 
 
 def test_handle_ci_repair(mock_config, mock_semantics, mock_validator):
-  """Handles ci repair."""
+  """Handles ci repair.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      mock_validator: ...
+  """
   mock_val_instance = mock_validator.return_value
   mock_val_instance.run_all.return_value = {"Op1": True, "Op2": False, "Op3": False}
   mock_sem_instance = mock_semantics.return_value
@@ -84,7 +116,13 @@ def test_handle_ci_repair(mock_config, mock_semantics, mock_validator):
 
 
 def test_handle_ci_repair_no_fixes(mock_config, mock_semantics, mock_validator):
-  """Handles ci repair no fixes."""
+  """Handles ci repair no fixes.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      mock_validator: ...
+  """
   mock_val_instance = mock_validator.return_value
   mock_val_instance.run_all.return_value = {"Op1": True, "Op2": False}
   mock_sem_instance = mock_semantics.return_value
@@ -96,7 +134,13 @@ def test_handle_ci_repair_no_fixes(mock_config, mock_semantics, mock_validator):
 
 
 def test_handle_ci_update_readme(mock_config, mock_semantics, mock_validator):
-  """Handles ci update readme."""
+  """Handles ci update readme.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      mock_validator: ...
+  """
   mock_val_instance = mock_validator.return_value
   mock_val_instance.run_all.return_value = {}
   with patch("ml_switcheroo.cli.handlers.verify.ReadmeEditor") as mock_editor:
@@ -105,7 +149,14 @@ def test_handle_ci_update_readme(mock_config, mock_semantics, mock_validator):
 
 
 def test_handle_ci_json_report(mock_config, mock_semantics, mock_validator, tmp_path):
-  """Handles ci JSON report."""
+  """Handles ci JSON report.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      mock_validator: ...
+      tmp_path: ...
+  """
   mock_val_instance = mock_validator.return_value
   mock_val_instance.run_all.return_value = {"Op1": True}
   report_path = tmp_path / "report.json"
@@ -114,7 +165,14 @@ def test_handle_ci_json_report(mock_config, mock_semantics, mock_validator, tmp_
 
 
 def test_handle_ci_json_report_error(mock_config, mock_semantics, mock_validator, tmp_path):
-  """Handles ci JSON report correctly handling an error."""
+  """Handles ci JSON report correctly handling an error.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      mock_validator: ...
+      tmp_path: ...
+  """
   mock_val_instance = mock_validator.return_value
   mock_val_instance.run_all.return_value = {"Op1": True}
   report_path = tmp_path / "report.json"
@@ -123,7 +181,13 @@ def test_handle_ci_json_report_error(mock_config, mock_semantics, mock_validator
 
 
 def test_handle_ci_no_tests_dir(mock_config, mock_semantics, mock_validator):
-  """Handles ci no tests directory."""
+  """Handles ci no tests directory.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      mock_validator: ...
+  """
   mock_val_instance = mock_validator.return_value
   mock_val_instance.run_all.return_value = {}
   with patch("pathlib.Path.exists", return_value=False):

@@ -163,7 +163,6 @@ def _inspect_live_object(api_path: str) -> Dict[str, Any]:
 
   Raises:
       ImportError: If module cannot be loaded or path format is invalid.
-      AttributeError: If object not found in module.
 
   """
   if "." not in api_path:

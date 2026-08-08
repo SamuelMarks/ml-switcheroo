@@ -13,7 +13,11 @@ def analyzer():
   sem = MagicMock()
 
   def get_def(name):
-    """Gets def."""
+    """Gets def.
+
+    Args:
+        name: ...
+    """
     if "randn" in name or "view" in name:
       return ("op", {"return_type": "Tensor"})
     return None
@@ -26,7 +30,11 @@ def analyzer():
 
 
 def test_for_else(analyzer):
-  """Verifies the behavior of for else."""
+  """Verifies the behavior of for else.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nimport torch\nx = torch.nn\nfor i in range(10):\n    pass\nelse:\n    x = torch.randn(1)\n"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("x")
@@ -34,7 +42,11 @@ def test_for_else(analyzer):
 
 
 def test_while_loop(analyzer):
-  """Verifies the behavior of while loop."""
+  """Verifies the behavior of while loop.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nimport torch\nx = torch.nn\nwhile True:\n    x = torch.randn(1)\n"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("x")
@@ -42,7 +54,11 @@ def test_while_loop(analyzer):
 
 
 def test_while_loop_else(analyzer):
-  """Verifies the behavior of while loop else."""
+  """Verifies the behavior of while loop else.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nimport torch\nx = torch.nn\nwhile True:\n    pass\nelse:\n    x = torch.randn(1)\n"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("x")
@@ -50,7 +66,11 @@ def test_while_loop_else(analyzer):
 
 
 def test_ifexp_partial(analyzer):
-  """Verifies the behavior of ifexp partial."""
+  """Verifies the behavior of ifexp partial.
+
+  Args:
+      analyzer: ...
+  """
   code = (
     "\nimport torch\nx = torch.randn(1) if True else untyped_func()\ny = untyped_func() if True else torch.randn(1)\n"
   )
@@ -60,7 +80,11 @@ def test_ifexp_partial(analyzer):
 
 
 def test_merge_states_b_only(analyzer):
-  """Merges states b only."""
+  """Merges states b only.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nimport torch\nif True:\n    pass\nelse:\n    z = torch.randn(1)\n"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("z")
@@ -68,14 +92,22 @@ def test_merge_states_b_only(analyzer):
 
 
 def test_make_union_same(analyzer):
-  """Verifies the behavior of make union same."""
+  """Verifies the behavior of make union same.
+
+  Args:
+      analyzer: ...
+  """
   t1 = TensorType("Tensor", "torch")
   res = analyzer._make_union(t1, t1)
   assert res == t1
 
 
 def test_make_union_nested(analyzer):
-  """Verifies the behavior of make union nested."""
+  """Verifies the behavior of make union nested.
+
+  Args:
+      analyzer: ...
+  """
   t1 = TensorType("Tensor", "torch")
   m1 = ModuleType("Module", "torch.nn")
   u1 = UnionType([t1, m1])
@@ -85,7 +117,11 @@ def test_make_union_nested(analyzer):
 
 
 def test_make_union_dedup_single(analyzer):
-  """Verifies the behavior of make union dedup single."""
+  """Verifies the behavior of make union dedup single.
+
+  Args:
+      analyzer: ...
+  """
   t1 = TensorType("Tensor", "torch")
   t2 = TensorType("Tensor", "torch")
   u1 = UnionType([t1])
@@ -94,7 +130,11 @@ def test_make_union_dedup_single(analyzer):
 
 
 def test_import_from(analyzer):
-  """Verifies the behavior of import from."""
+  """Verifies the behavior of import from.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nfrom torch import nn, optim as opt\nfrom . import local_module\n"
   analyze(code, analyzer)
   assert isinstance(analyzer.current_scope.get("nn"), ModuleType)
@@ -103,14 +143,22 @@ def test_import_from(analyzer):
 
 
 def test_assign_untyped(analyzer):
-  """Verifies the behavior of assign untyped."""
+  """Verifies the behavior of assign untyped.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nuntyped_var = untyped_func()\n"
   analyze(code, analyzer)
   assert analyzer.current_scope.get("untyped_var") is None
 
 
 def test_assign_attribute(analyzer):
-  """Verifies the behavior of assign attribute."""
+  """Verifies the behavior of assign attribute.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nimport torch\nclass A:\n    def __init__(self):\n        self.x = torch.randn(1)\n"
   tree = analyze(code, analyzer)
 
@@ -122,7 +170,11 @@ def test_assign_attribute(analyzer):
       self.nodes = []
 
     def visit_Attribute(self, node):
-      """Helper to visit Attribute."""
+      """Helper to visit Attribute.
+
+      Args:
+          node: ...
+      """
       if node.attr.value == "x":
         self.nodes.append(node)
 
@@ -133,7 +185,11 @@ def test_assign_attribute(analyzer):
 
 
 def test_call_on_tensor(analyzer):
-  """Verifies the behavior of call on tensor."""
+  """Verifies the behavior of call on tensor.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nimport torch\nx = torch.randn(1)\ny = x.view()\n"
   analyzer.semantics.get_definition.side_effect = lambda n: (
     ("op", {"return_type": "Tensor"}) if "view" in n or "randn" in n else None
@@ -144,20 +200,32 @@ def test_call_on_tensor(analyzer):
 
 
 def test_ifexp_both_unknown(analyzer):
-  """Verifies the behavior of ifexp both unknown."""
+  """Verifies the behavior of ifexp both unknown.
+
+  Args:
+      analyzer: ...
+  """
   code = "x = unknown() if True else unknown2()"
   analyze(code, analyzer)
   assert analyzer.current_scope.get("x") is None
 
 
 def test_assign_subscript(analyzer):
-  """Verifies the behavior of assign subscript."""
+  """Verifies the behavior of assign subscript.
+
+  Args:
+      analyzer: ...
+  """
   code = "import torch\nmy_list[0] = torch.randn(1)"
   analyze(code, analyzer)
 
 
 def test_call_non_tensor_return(analyzer):
-  """Verifies the behavior of call non tensor return."""
+  """Verifies the behavior of call non tensor return.
+
+  Args:
+      analyzer: ...
+  """
   analyzer.semantics.get_key_origins.return_value = {}
   code = "import torch\nx = torch.get_int()"
   analyzer.semantics.get_definition.side_effect = lambda n: ("op", {"return_type": "int"}) if "get_int" in n else None
@@ -166,13 +234,21 @@ def test_call_non_tensor_return(analyzer):
 
 
 def test_import_star(analyzer):
-  """Verifies the behavior of import star."""
+  """Verifies the behavior of import star.
+
+  Args:
+      analyzer: ...
+  """
   code = "from torch import *"
   analyze(code, analyzer)
 
 
 def test_union_no_tensor(analyzer):
-  """Verifies the behavior of union no tensor."""
+  """Verifies the behavior of union no tensor.
+
+  Args:
+      analyzer: ...
+  """
   x_node = cst.parse_expression("x")
   u_type = UnionType([ModuleType("Module", "torch.nn")])
   analyzer.table.record_type(x_node, u_type)
@@ -182,7 +258,12 @@ def test_union_no_tensor(analyzer):
 
 
 def analyze(code, analyzer):
-  """Analyzes ."""
+  """Analyzes .
+
+  Args:
+      code: ...
+      analyzer: ...
+  """
   tree = cst.parse_module(code)
   tree.visit(analyzer)
   return tree

@@ -7,8 +7,35 @@ parentheses omission for operations, custom op tail string rendering, and specia
 stablehlo constant operations.
 """
 
-from ml_switcheroo.core.mlir.cst import TypeNode, ValueNode, AttributeNode, OperationNode, StableHloConstantOp
+from ml_switcheroo.core.mlir.cst import (
+  TypeNode,
+  ValueNode,
+  AttributeNode,
+  OperationNode,
+  StableHloConstantOp,
+  AttributeAliasDefNode,
+  ModuleNode,
+  BlockNode,
+)
 from ml_switcheroo.core.cst.base import Trivia
+
+
+def test_attribute_alias_def_node():
+  """Verify the formatting of AttributeAliasDefNode."""
+  # Test with value_str
+  alias1 = AttributeAliasDefNode(name="#alias1", value_str="dense<1.0>")
+  assert alias1.to_text() == "#alias1 = dense<1.0>"
+
+  # Test with value_node
+  alias2 = AttributeAliasDefNode(name="#alias2", value_node=TypeNode(body="f32"))
+  assert alias2.to_text() == "#alias2 = f32"
+
+
+def test_module_node_aliases():
+  """Verify the formatting of ModuleNode with aliases."""
+  alias1 = AttributeAliasDefNode(name="#alias", value_str="1", trailing_trivia=[Trivia("\n")])
+  mod = ModuleNode(aliases=[alias1], body=BlockNode())
+  assert mod.to_text() == "#alias = 1\n"
 
 
 def test_value_node_with_type():

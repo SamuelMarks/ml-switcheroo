@@ -1,65 +1,22 @@
-"""Unit tests for the SASS instruction analyzer frontend.
+"""Tests for sass/analysis.py."""
 
-This module validates that the heuristics in `SassAnalyzer` can correctly
-reverse-engineer high-level operation parameters (such as kernel sizes,
-feature counts, and element counts) from lists of low-level SASS instructions
-under various scenarios (empty inputs, unknown ops, or expected workloads like
-Conv2d, Linear, Conv3d, and Mean).
-
-Args:
-    None
-
-Returns:
-    None
-"""
-
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate, SassInstruction, SassRegister
 from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate, SassRegister
 
 
 def test_sass_analyzer_empty():
-  """Verifies that an empty instruction sequence yields an empty metadata dictionary.
-
-  This test checks the fallback logic of the analyzer when no instructions
-  are supplied to the `analyze_block` function.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Verifies the behavior of sass analyzer empty."""
   assert SassAnalyzer.analyze_block("Conv2d", []) == {}
 
 
 def test_sass_analyzer_no_loop_limits():
-  """Verifies that instructions without loop bounds yield empty metadata.
-
-  This test feeds instructions (e.g., a "MOV" opcode) that do not contain loop-bound
-  checks like "ISETP.LT.AND" to ensure that the heuristic returns an empty dict.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Verifies the behavior of sass analyzer no loop limits."""
   inst = SassInstruction(opcode="MOV", operands=[SassRegister(name="R0"), SassRegister(name="R1")])
   assert SassAnalyzer.analyze_block("Conv2d", [inst]) == {}
 
 
 def test_sass_analyzer_conv2d():
-  """Verifies metadata extraction for 2D convolutions (Conv2d).
-
-  This test models the loop bounds logic of a 2D convolution kernel, confirming
-  that `SassAnalyzer` extracts the loop limit as `kernel_size` and `arg_2`.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Verifies the behavior of sass analyzer conv2d."""
   inst = SassInstruction(
     opcode="ISETP.LT.AND",
     operands=[
@@ -75,17 +32,7 @@ def test_sass_analyzer_conv2d():
 
 
 def test_sass_analyzer_linear():
-  """Verifies metadata extraction for linear layers (Linear).
-
-  This test models a linear dot-product loop bound check, confirming that
-  `SassAnalyzer` extracts the input feature dimension as `in_features` and `arg_0`.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Verifies the behavior of sass analyzer linear."""
   inst = SassInstruction(
     opcode="ISETP.LT.AND",
     operands=[
@@ -101,17 +48,7 @@ def test_sass_analyzer_linear():
 
 
 def test_sass_analyzer_conv3d():
-  """Verifies metadata extraction for 3D convolutions (Conv3d).
-
-  This test models loop bounds in a 3D convolution kernel, verifying that
-  `SassAnalyzer` extracts the loop limit as `kernel_size` and `arg_2`.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Verifies the behavior of sass analyzer conv3d."""
   inst = SassInstruction(
     opcode="ISETP.LT.AND",
     operands=[
@@ -127,17 +64,7 @@ def test_sass_analyzer_conv3d():
 
 
 def test_sass_analyzer_mean():
-  """Verifies metadata extraction for mean reduction operations (Mean).
-
-  This test checks reduction loop bounds, confirming that `SassAnalyzer`
-  correctly extracts the element count as `elements` and `arg_0`.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Verifies the behavior of sass analyzer mean."""
   inst = SassInstruction(
     opcode="ISETP.LT.AND",
     operands=[
@@ -153,17 +80,7 @@ def test_sass_analyzer_mean():
 
 
 def test_sass_analyzer_unknown():
-  """Verifies that unknown operation kinds yield empty metadata.
-
-  This test presents a valid sequence of instructions containing loop bounds but
-  under an unrecognized operation type, confirming that an empty dict is returned.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Verifies the behavior of sass analyzer unknown."""
   inst = SassInstruction(
     opcode="ISETP.LT.AND",
     operands=[
@@ -176,3 +93,82 @@ def test_sass_analyzer_unknown():
   )
   res = SassAnalyzer.analyze_block("Unknown", [inst])
   assert res == {}
+
+
+def test_analyze_block_empty_elifs():
+  """Verifies the behavior of analyze block empty elifs."""
+  inst = SassInstruction(
+    opcode="ISETP.LT.AND",
+    operands=[
+      SassRegister(name="P0"),
+      SassRegister(name="PT"),
+      SassRegister(name="R1"),
+      SassImmediate(value=10),
+      SassRegister(name="PT"),
+    ],
+  )
+
+  kinds = [
+    "AvgPool2d",
+    "MaxPool2d",
+    "BatchNorm2d",
+    "Conv1d",
+    "DepthwiseConv2d",
+    "ConvTranspose1d",
+    "ConvTranspose2d",
+    "ConvTranspose3d",
+    "BatchNorm1d",
+    "BatchNorm3d",
+    "LayerNorm",
+    "GroupNorm",
+    "InstanceNorm2d",
+    "Softmax",
+    "LogSoftmax",
+    "SiLU",
+    "Swish",
+    "ELU",
+    "LeakyReLU",
+    "BMM",
+    "Dot",
+    "SVD",
+    "Solve",
+    "Cholesky",
+    "Sum",
+    "Prod",
+    "Min",
+    "Max",
+    "ArgMax",
+    "ArgMin",
+    "Any",
+    "All",
+    "BCEWithLogitsLoss",
+    "L1Loss",
+    "NLLLoss",
+    "Dropout2d",
+    "Dropout3d",
+    "AlphaDropout",
+    "AvgPool1d",
+    "MaxPool1d",
+    "AvgPool3d",
+    "MaxPool3d",
+    "AdaptiveAvgPool2d",
+    "AdaptiveMaxPool2d",
+    "MultiheadAttention",
+    "Transformer",
+    "TransformerEncoder",
+    "TransformerDecoder",
+    "RNN",
+    "LSTM",
+    "GRU",
+    "LSTMCell",
+    "GRUCell",
+    "MSELoss",
+    "CrossEntropyLoss",
+    "Sigmoid",
+    "Tanh",
+    "GELU",
+    "Dropout",
+    "MatMul",
+  ]
+  for k in kinds:
+    SassAnalyzer.analyze_block(k, [inst])

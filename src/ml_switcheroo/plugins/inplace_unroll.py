@@ -81,6 +81,10 @@ def unroll_inplace_ops(
      However, standard PyTorch in-place ops `x.add_(y)` return `x`.
      So `z = x.add_(y)` -> `z = x.add(y)` is semantically correct conversion to functional.
      The only "Loss" is that `x` itself isn't updated in the scope.
+
+  Args:
+      node: The original CST node.
+      ctx: HookContext for target framework access.
   """
   # 1. Identify Method Call
   method_name = _get_method_name(node)  # type: ignore

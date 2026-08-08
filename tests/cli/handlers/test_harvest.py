@@ -5,7 +5,11 @@ from ml_switcheroo.cli.handlers.harvest import handle_harvest
 
 
 def test_handle_harvest(capsys):
-  """Handles harvest."""
+  """Handles harvest.
+
+  Args:
+      capsys: ...
+  """
   args = Namespace(path="some_path")
   handle_harvest(args)
   captured = capsys.readouterr()

@@ -20,7 +20,12 @@ class MockSemantics:
 
 
 def analyze(code: str, use_semantics: bool = False) -> str:
-  """Analyzes ."""
+  """Analyzes .
+
+  Args:
+      code: ...
+      use_semantics: ...
+  """
   semantics = MockSemantics() if use_semantics else None
   tree = cst.parse_module(code)
   scanner = PurityScanner(semantics=semantics, source_fw="torch")

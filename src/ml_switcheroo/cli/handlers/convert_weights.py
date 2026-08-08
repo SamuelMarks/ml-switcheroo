@@ -99,7 +99,7 @@ class WeightScriptGenerator:
   def _flatten_mapping_rules(self, layer_registry: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Constructs mapping rules for each layer found in the AST.
 
-    Arg:
+    Args:
         layer_registry: Dictionary of LogicalNodes extracted from source AST.
 
     Returns:

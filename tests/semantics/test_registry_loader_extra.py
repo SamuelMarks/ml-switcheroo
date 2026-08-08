@@ -48,3 +48,44 @@ def test_registry_loader_exceptions(monkeypatch, capsys):
   (out, err) = capsys.readouterr()
   assert "Failed to load structural traits for dummy_traits" in out
   assert "Failed to apply wiring for dummy_wiring" in out
+
+
+def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch):
+  """Verifies the pre-labeling of lowercase keys and plugin metadata loading."""
+  # test pre-label
+  manager = MagicMock()
+  manager._key_origins = {}
+  loader = RegistryLoader(manager)
+
+  # For pre-labeling to happen in _hydrate_adapters, we need a valid adapter with definitions
+  class ValidAdapter:
+    @property
+    def definitions(self):
+      class MockDef:
+        def model_dump(self, **kwargs):
+          return {}
+
+      return {"lower_case_op": MockDef(), "UpperCaseOp": MockDef()}
+
+  monkeypatch.setattr(registry_loader, "get_adapter", lambda _: ValidAdapter())
+  monkeypatch.setattr(registry_loader, "available_frameworks", lambda: ["valid"])
+  manager.framework_configs = {"valid": {}}
+
+  loader._hydrate_adapters()
+
+  # Check line 157
+  assert manager._key_origins.get("lower_case_op") == "array"
+  assert manager._key_origins.get("UpperCaseOp") == "neural"
+
+  # Check lines 247-248
+  # mock hooks.get_all_hook_metadata
+  class MockSpec:
+    ops = {"plugin_op": {"frameworks": {"jax": {}}}}
+
+  monkeypatch.setattr(registry_loader.hooks, "get_all_hook_metadata", lambda: {"my_plugin": MockSpec()})
+  manager.data = {}
+  loader._hydrate_plugins()
+
+  # verify merge_tier_data was called by inspecting the mocked merge or side effect
+  # since we use MagicMock, we just check that manager._key_origins got the new origin
+  assert manager._key_origins.get("plugin_op") == "extras"

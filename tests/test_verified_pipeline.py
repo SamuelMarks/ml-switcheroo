@@ -56,3 +56,19 @@ def test_verified_pipeline_griffe_not_available(monkeypatch):
   res = verified_pipeline.run_verified_pipeline("def foo(): pass")
   assert res["status"] == "success"
   assert res["griffe_analysis"] is True  # The value is a string, which is not None
+
+
+def test_verified_pipeline_cdd_error(monkeypatch):
+  """Test pipeline when cdd is not installed."""
+  import builtins
+
+  original_import = builtins.__import__
+
+  def mock_import(name, *args, **kwargs):
+    if name == "cdd":
+      raise ImportError("Mocked ImportError")
+    return original_import(name, *args, **kwargs)
+
+  monkeypatch.setattr(builtins, "__import__", mock_import)
+  res = verified_pipeline.run_verified_pipeline("def foo(): pass")
+  assert res == {"error": "cdd-python not installed"}

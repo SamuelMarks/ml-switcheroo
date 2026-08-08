@@ -59,3 +59,27 @@ def test_variable_equation_ignored(rewriter):
   """Verifies the behavior of variable equation ignored."""
   res = rewrite_code(rewriter, "torch.einsum(x, eq)")
   assert "(x, eq)" in res
+
+
+def test_empty_args(rewriter):
+  """Verifies behavior when called with no args."""
+  res = rewrite_code(rewriter, "y = torch.einsum()")
+  assert "jax.numpy.einsum()" in res
+
+
+def test_equation_only(rewriter):
+  """Verifies behavior with only equation string."""
+  res = rewrite_code(rewriter, 'y = torch.einsum("ii")')
+  assert 'jax.numpy.einsum("ii")' in res
+
+
+def test_trailing_comma(rewriter):
+  """Verifies behavior with trailing comma."""
+  res = rewrite_code(rewriter, 'y = torch.einsum(x, "ii",)')
+  assert 'jax.numpy.einsum("ii", x)' in res
+
+
+def test_equation_in_middle(rewriter):
+  """Verifies behavior when equation is in the middle."""
+  res = rewrite_code(rewriter, 'y = torch.einsum(x, "ii", z)')
+  assert 'jax.numpy.einsum("ii", x, z)' in res

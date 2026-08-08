@@ -66,97 +66,79 @@ To support a new library (e.g., `tinygrad`, `custom_engine`), you create a Pytho
 
 ```python
 from typing import Dict, Tuple, List, Set, Any
-from ml_switcheroo.frameworks.base import (
-    register_framework,
-    FrameworkAdapter,
-    StandardMap,
-    ImportConfig
-)
+from ml_switcheroo.frameworks.base import register_framework, FrameworkAdapter, StandardMap, ImportConfig
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 from ml_switcheroo.enums import SemanticTier
 
+
 @register_framework("my_lib")
 class MyLibAdapter:
-    display_name = "My Library"
+  display_name = "My Library"
 
-    # Optional: Inherit implementation behavior (e.g., 'flax_nnx' inherits 'jax' math)
-    inherits_from = None
+  # Optional: Inherit implementation behavior (e.g., 'flax_nnx' inherits 'jax' math)
+  inherits_from = None
 
-    # Discovery configuration
-    ui_priority = 100
+  # Discovery configuration
+  ui_priority = 100
 
-    # --- 1. Import Logic ---
-    @property
-    def import_alias(self) -> Tuple[str, str]:
-        # How is the library imported? (Package Name, Common Alias)
-        return ("my_lib", "ml")
+  # --- 1. Import Logic ---
+  @property
+  def import_alias(self) -> Tuple[str, str]:
+    # How is the library imported? (Package Name, Common Alias)
+    return ("my_lib", "ml")
 
-    @property
-    def import_namespaces(self) -> Dict[str, ImportConfig]:
-        # Declare namespaces for the Import Fixer
-        return {
-            "my_lib": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="ml"),
-            "my_lib.layers": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="layers"),
-        }
+  @property
+  def import_namespaces(self) -> Dict[str, ImportConfig]:
+    # Declare namespaces for the Import Fixer
+    return {
+      "my_lib": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="ml"),
+      "my_lib.layers": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="layers"),
+    }
 
-    # --- 2. Static Mappings (The "Definitions") ---
-    # This property allows Ghost Mode to work without the library installed.
-    # Alternatively, populate src/ml_switcheroo/frameworks/definitions/my_lib.json
-    @property
-    def definitions(self) -> Dict[str, StandardMap]:
-        return {
-            # Simple 1:1 Mapping
-            "Abs": StandardMap(api="ml.abs"),
+  # --- 2. Static Mappings (The "Definitions") ---
+  # This property allows Ghost Mode to work without the library installed.
+  # Alternatively, populate src/ml_switcheroo/frameworks/definitions/my_lib.json
+  @property
+  def definitions(self) -> Dict[str, StandardMap]:
+    return {
+      # Simple 1:1 Mapping
+      "Abs": StandardMap(api="ml.abs"),
+      # Argument Renaming
+      "Linear": StandardMap(api="ml.layers.Dense", args={"in_features": "input_dim", "out_features": "units"}),
+      # DSL Feature: Argument Packing (Variadic -> Tuple)
+      "permute_dims": StandardMap(api="ml.transpose", pack_to_tuple="axes"),
+      # DSL Feature: Inline Macro
+      "SiLU": StandardMap(macro_template="{x} * ml.sigmoid({x})"),
+      # Linking to a Custom Plugin (Logic located in src/plugins/)
+      "SpecialOp": StandardMap(requires_plugin="my_custom_logic"),
+    }
 
-            # Argument Renaming
-            "Linear": StandardMap(
-                api="ml.layers.Dense",
-                args={"in_features": "input_dim", "out_features": "units"}
-            ),
+  # --- 3. Structural Traits ---
+  # Configure how Classes/Functions are rewritten without custom code
+  @property
+  def structural_traits(self) -> StructuralTraits:
+    return StructuralTraits(
+      module_base="ml.Module",  # Base class for layers
+      forward_method="call",  # Inference method name
+      requires_super_init=True,  # Inject super().__init__()?
+      inject_magic_args=[],  # No special context args
+      lifecycle_strip_methods=["gpu"],  # Methods to silently remove
+      impurity_methods=["add_"],  # Methods flagged as side-effects
+    )
 
-            # DSL Feature: Argument Packing (Variadic -> Tuple)
-            "permute_dims": StandardMap(
-                api="ml.transpose",
-                pack_to_tuple="axes"
-            ),
+  # --- 4. Plugin Traits ---
+  # Configure how generic plugins interact with this framework
+  @property
+  def plugin_traits(self) -> PluginTraits:
+    return PluginTraits(
+      has_numpy_compatible_arrays=True,  # Supports .astype() casting?
+      requires_explicit_rng=False,  # Requires JAX-style keys?
+      requires_functional_state=False,  # Requires BatchNorm unrolling?
+    )
 
-            # DSL Feature: Inline Macro
-            "SiLU": StandardMap(
-                macro_template="{x} * ml.sigmoid({x})"
-            ),
-
-            # Linking to a Custom Plugin (Logic located in src/plugins/)
-            "SpecialOp": StandardMap(
-                requires_plugin="my_custom_logic"
-            )
-        }
-
-    # --- 3. Structural Traits ---
-    # Configure how Classes/Functions are rewritten without custom code
-    @property
-    def structural_traits(self) -> StructuralTraits:
-        return StructuralTraits(
-            module_base="ml.Module",           # Base class for layers
-            forward_method="call",             # Inference method name
-            requires_super_init=True,          # Inject super().__init__()?
-            inject_magic_args=[],              # No special context args
-            lifecycle_strip_methods=["gpu"],   # Methods to silently remove
-            impurity_methods=["add_"]          # Methods flagged as side-effects
-        )
-
-    # --- 4. Plugin Traits ---
-    # Configure how generic plugins interact with this framework
-    @property
-    def plugin_traits(self) -> PluginTraits:
-        return PluginTraits(
-            has_numpy_compatible_arrays=True,    # Supports .astype() casting?
-            requires_explicit_rng=False,         # Requires JAX-style keys?
-            requires_functional_state=False      # Requires BatchNorm unrolling?
-        )
-
-    @property
-    def supported_tiers(self) -> List[SemanticTier]:
-        return [SemanticTier.ARRAY_API, SemanticTier.NEURAL]
+  @property
+  def supported_tiers(self) -> List[SemanticTier]:
+    return [SemanticTier.ARRAY_API, SemanticTier.NEURAL]
 ```
 
 ---
@@ -175,31 +157,32 @@ Plugins are functions decorated with `@register_hook`. They receive the current 
 import libcst as cst
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
+
 @register_hook("my_custom_logic")
 def transform_special_op(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-    """
-    Example: Transforms `special_op(x)` into `context_wrapper(x)`
-    """
-    # 1. Inspect Context
-    # Check framework capabilities or configuration
-    if not ctx.plugin_traits.has_numpy_compatible_arrays:
-        return node
-
-    # Look up API path dynamically (Decoupling)
-    target_api = ctx.lookup_api("SpecialOp") or "default.op"
-
-    # 2. Inject Dependencies (Preamble)
-    if not ctx.metadata.get("my_helper_injected"):
-        ctx.inject_preamble("import my_helper_lib")
-        ctx.metadata["my_helper_injected"] = True
-
-    # 3. Modify AST
-    # Change function name
-    # Ensure you import logic for creating dotted names
-    # from ml_switcheroo.plugins.utils import create_dotted_name
-    pass
-
+  """
+  Example: Transforms `special_op(x)` into `context_wrapper(x)`
+  """
+  # 1. Inspect Context
+  # Check framework capabilities or configuration
+  if not ctx.plugin_traits.has_numpy_compatible_arrays:
     return node
+
+  # Look up API path dynamically (Decoupling)
+  target_api = ctx.lookup_api("SpecialOp") or "default.op"
+
+  # 2. Inject Dependencies (Preamble)
+  if not ctx.metadata.get("my_helper_injected"):
+    ctx.inject_preamble("import my_helper_lib")
+    ctx.metadata["my_helper_injected"] = True
+
+  # 3. Modify AST
+  # Change function name
+  # Ensure you import logic for creating dotted names
+  # from ml_switcheroo.plugins.utils import create_dotted_name
+  pass
+
+  return node
 ```
 
 ### The Hook Context (`ctx`)
@@ -219,20 +202,17 @@ You can register a hook and inject its semantic mapping ("Hub entry") in one pla
 
 ```python
 @register_hook(
-    trigger="custom_reshape",
-    auto_wire={
-        "ops": {
-            "Reshape": {
-                "std_args": ["x", "shape"],
-                "variants": {
-                    "torch": {"api": "torch.reshape"},
-                    "jax": {"requires_plugin": "custom_reshape"}
-                }
-            }
-        }
+  trigger="custom_reshape",
+  auto_wire={
+    "ops": {
+      "Reshape": {
+        "std_args": ["x", "shape"],
+        "variants": {"torch": {"api": "torch.reshape"}, "jax": {"requires_plugin": "custom_reshape"}},
+      }
     }
+  },
 )
 def transform_reshape(node: cst.Call, ctx: HookContext) -> cst.Call:
-    # Logic here...
-    return node
+  # Logic here...
+  return node
 ```

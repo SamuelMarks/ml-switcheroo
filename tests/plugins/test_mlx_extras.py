@@ -87,3 +87,11 @@ def test_sync_warning(rewriter):
   res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res_node)])]).code
   assert "print(" in res
   assert "Global sync requires explicit" in res
+
+
+def test_compiler_invalid_node(rewriter):
+  """Verifies that the hook returns the original node if it's not a Decorator or Call."""
+  node = cst.Name("torch_compile")
+  rewriter.ctx.lookup_api = MagicMock(return_value="custom.jit")
+  res_node = transform_compiler(node, rewriter.ctx)
+  assert res_node is node

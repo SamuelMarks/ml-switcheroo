@@ -12,12 +12,18 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdg
 class SwiGLUFusionPass:
   """Fuses separate gate_proj and up_proj nodes into a single SwiGLU node.
 
-
   Matches standard JAX/Flax Bonsai idioms.
   """
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to fuse SwiGLU."""
+    """Mutates graph to fuse SwiGLU.
+
+    Args:
+        graph: The logical graph to mutate.
+
+    Returns:
+        The mutated graph.
+    """
     gate_nodes = {n.id: n for n in graph.nodes if n.kind == "Linear" and "gate_proj" in n.id.lower()}
     up_nodes = {n.id: n for n in graph.nodes if n.kind == "Linear" and "up_proj" in n.id.lower()}
 
@@ -67,7 +73,14 @@ class SwiGLUDefusionPass:
   """Splits a SwiGLU node into separate gate_proj and up_proj nodes."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to de-fuse SwiGLU."""
+    """Mutates graph to de-fuse SwiGLU.
+
+    Args:
+        graph: The logical graph to mutate.
+
+    Returns:
+        The mutated graph.
+    """
     swiglu_nodes = {n.id: n for n in graph.nodes if n.kind == "SwiGLU"}
 
     for fused_id, fused_node in list(swiglu_nodes.items()):
@@ -101,7 +114,14 @@ class VisionPatchEmbeddingFusionPass:
   """Elevates Conv2d patch layers to native VisionPatchEmbedding multi-modal ops."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to elevate VisionPatchEmbedding."""
+    """Mutates graph to elevate VisionPatchEmbedding.
+
+    Args:
+        graph: The logical graph to mutate.
+
+    Returns:
+        The mutated graph.
+    """
     conv_nodes = {n.id: n for n in graph.nodes if n.kind == "Conv2d" and "patch" in n.id.lower()}
 
     for conv_id, conv_node in list(conv_nodes.items()):
@@ -136,7 +156,14 @@ class VisionPatchEmbeddingDefusionPass:
   """Lowers VisionPatchEmbedding back to structural Conv2d equivalents."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to defuse VisionPatchEmbedding."""
+    """Mutates graph to defuse VisionPatchEmbedding.
+
+    Args:
+        graph: The logical graph to mutate.
+
+    Returns:
+        The mutated graph.
+    """
     patch_nodes = {n.id: n for n in graph.nodes if n.kind == "VisionPatchEmbedding"}
 
     for patch_id, patch_node in list(patch_nodes.items()):

@@ -29,8 +29,8 @@ class CppNode:
   def to_text(self) -> str:
     """Renders the node to a C++ code string.
 
-    Returns:
-        str: C++ code.
+    Raises:
+        NotImplementedError: For the base class.
     """
     raise NotImplementedError("Subclasses must implement to_text()")
 
@@ -42,7 +42,11 @@ class TypeIdentifier(CppNode):
   name: str
 
   def to_text(self) -> str:
-    """Returns the type name."""
+    """Returns the type name.
+
+    Returns:
+        str: The type name.
+    """
     return self.name
 
 
@@ -60,7 +64,11 @@ class Identifier(Expression):
   name: str
 
   def to_text(self) -> str:
-    """Returns the identifier name as text."""
+    """Returns the identifier name as text.
+
+    Returns:
+        str: The identifier name.
+    """
     return self.name
 
 
@@ -73,7 +81,11 @@ class BinaryExpression(Expression):
   right: Expression
 
   def to_text(self) -> str:
-    """Returns the binary expression as text."""
+    """Returns the binary expression as text.
+
+    Returns:
+        str: The binary expression.
+    """
     return f"{self.left.to_text()} {self.operator} {self.right.to_text()}"
 
 
@@ -85,7 +97,11 @@ class MethodCall(Expression):
   arguments: List[Expression] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Returns the method call as text."""
+    """Returns the method call as text.
+
+    Returns:
+        str: The method call.
+    """
     args_str = ", ".join(a.to_text() for a in self.arguments)
     return f"{self.name}({args_str})"
 
@@ -97,7 +113,11 @@ class ReturnStatement(CppNode):
   value: Optional[Expression] = None
 
   def to_text(self) -> str:
-    """Returns the return statement as text."""
+    """Returns the return statement as text.
+
+    Returns:
+        str: The return statement.
+    """
     if self.value:
       return f"return {self.value.to_text()};"
     return "return;"
@@ -112,7 +132,11 @@ class VariableDeclaration(CppNode):
   initializer: Optional[Union[str, Expression]] = None
 
   def to_text(self) -> str:
-    """Renders the declaration."""
+    """Renders the declaration.
+
+    Returns:
+        str: The declaration.
+    """
     base = f"{self.type_id.to_text()} {self.name}"
     if self.initializer:
       init_text = self.initializer.to_text() if isinstance(self.initializer, Expression) else self.initializer
@@ -128,7 +152,11 @@ class FunctionArgument(CppNode):
   name: str
 
   def to_text(self) -> str:
-    """Renders the argument."""
+    """Renders the argument.
+
+    Returns:
+        str: The argument.
+    """
     return f"{self.type_id.to_text()} {self.name}"
 
 
@@ -142,7 +170,11 @@ class FunctionDefinition(CppNode):
   body: List[CppNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Renders the function."""
+    """Renders the function.
+
+    Returns:
+        str: The function.
+    """
     args_str = ", ".join(arg.to_text() for arg in self.arguments)
     lines = [f"{self.return_type.to_text()} {self.name}({args_str}) {{"]
     for stmt in self.body:
@@ -158,7 +190,11 @@ class RawStatement(CppNode):
   code: str
 
   def to_text(self) -> str:
-    """Renders the raw code."""
+    """Renders the raw code.
+
+    Returns:
+        str: The raw code.
+    """
     return self.code
 
 
@@ -170,7 +206,11 @@ class MacroDefinition(CppNode):
   value: str
 
   def to_text(self) -> str:
-    """Renders the macro definition."""
+    """Renders the macro definition.
+
+    Returns:
+        str: The macro definition.
+    """
     return f"#define {self.name} {self.value}"
 
 
@@ -181,7 +221,11 @@ class BlockStatement(CppNode):
   statements: List[CppNode]
 
   def to_text(self) -> str:
-    """Renders the block."""
+    """Renders the block.
+
+    Returns:
+        str: The block.
+    """
     lines = ["{"]
     for s in self.statements:
       lines.append(f"    {s.to_text()}")
@@ -198,7 +242,11 @@ class PyBindDef(CppNode):
   docstring: str
 
   def to_text(self) -> str:
-    """Renders the m.def() call."""
+    """Renders the m.def() call.
+
+    Returns:
+        str: The m.def() call.
+    """
     return f'm.def("{self.name}", &{self.function_ref}, "{self.docstring}");'
 
 
@@ -211,7 +259,11 @@ class PyBindModule(CppNode):
   defs: List[PyBindDef]
 
   def to_text(self) -> str:
-    """Renders the PYBIND11_MODULE block."""
+    """Renders the PYBIND11_MODULE block.
+
+    Returns:
+        str: The module block.
+    """
     lines = [f"PYBIND11_MODULE({self.name}, {self.module_var}) {{"]
     for d in self.defs:
       lines.append(f"    {d.to_text()}")
@@ -227,14 +279,22 @@ class IncludeDirective(CppNode):
   system: bool = False
 
   def __post_init__(self) -> None:
-    """Enforces typing rules."""
+    """Enforces typing rules.
+
+    Raises:
+        ValueError: If path is invalid.
+    """
     if not isinstance(self.path, str) or not self.path.strip():
       raise ValueError("Include path must be a non-empty string.")
     if "<" in self.path or ">" in self.path or '"' in self.path:
       raise ValueError('Include path must not contain delimiters like <, >, or ".')
 
   def to_text(self) -> str:
-    """Renders the include."""
+    """Renders the include.
+
+    Returns:
+        str: The include directive.
+    """
     if self.system:
       return f"#include <{self.path}>"
     return f'#include "{self.path}"'
@@ -248,7 +308,11 @@ class CppModule(CppNode):
   body: List[CppNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Renders the entire module."""
+    """Renders the entire module.
+
+    Returns:
+        str: The module source code.
+    """
     lines = [inc.to_text() for inc in self.includes]
     if lines:
       lines.append("")

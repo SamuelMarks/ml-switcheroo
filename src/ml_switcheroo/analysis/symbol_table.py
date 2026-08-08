@@ -28,11 +28,7 @@ class SymbolTable:
   """Container for static analysis results that maps CST nodes to inferred symbol types."""
 
   def __init__(self) -> None:
-    """Initializes an empty symbol table mapping.
-
-    Returns:
-        None.
-    """
+    """Initializes an empty symbol table mapping."""
     self._node_types: Dict[cst.CSTNode, SymbolType] = {}
 
   def record_type(self, node: cst.CSTNode, sym_type: SymbolType) -> None:
@@ -42,8 +38,6 @@ class SymbolTable:
         node: The CST node for which to record type information.
         sym_type: The determined type of the given AST node.
 
-    Returns:
-        None.
     """
     self._node_types[node] = sym_type
 
@@ -72,8 +66,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         semantics: Reference to semantic knowledge base for type inference rules.
 
-    Returns:
-        None.
     """
     self.semantics = semantics
     self.table = SymbolTable()
@@ -88,8 +80,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The ClassDef CST node representing the class definition.
 
-    Returns:
-        None.
     """
     self.current_scope = Scope(parent=self.current_scope, name=f"class_{node.name.value}")
 
@@ -99,8 +89,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The ClassDef CST node representing the class definition.
 
-    Returns:
-        None.
     """
     assert self.current_scope.parent is not None
     self.current_scope = self.current_scope.parent
@@ -111,8 +99,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The FunctionDef CST node representing the function definition.
 
-    Returns:
-        None.
     """
     self.current_scope = Scope(parent=self.current_scope, name=f"func_{node.name.value}")
 
@@ -122,8 +108,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The FunctionDef CST node representing the function definition.
 
-    Returns:
-        None.
     """
     assert self.current_scope.parent is not None
     self.current_scope = self.current_scope.parent
@@ -228,8 +212,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The IfExp CST node representing the ternary expression.
 
-    Returns:
-        None.
     """
     t1 = self.table.get_type(node.body)
     t2 = self.table.get_type(node.orelse)
@@ -298,8 +280,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       Args:
           t: The SymbolType to inspect and collect components from.
 
-      Returns:
-          None.
       """
       if isinstance(t, UnionType):
         types.extend(t.types)
@@ -331,8 +311,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The Import CST node representing the import statement.
 
-    Returns:
-        None.
     """
     for alias in node.names:
       full_path = get_full_name(alias.name)
@@ -349,8 +327,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The ImportFrom CST node representing the from-import statement.
 
-    Returns:
-        None.
     """
     if not node.module:
       return
@@ -373,8 +349,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The Assign CST node representing the assignment statement.
 
-    Returns:
-        None.
     """
     rhs_type = self.table.get_type(node.value)
     if not rhs_type:
@@ -398,8 +372,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The Name CST node representing the variable usage.
 
-    Returns:
-        None.
     """
     sym_type = self.current_scope.get(node.value)
     if sym_type:
@@ -413,8 +385,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The Attribute CST node representing the attribute access.
 
-    Returns:
-        None.
     """
     base_type = self.table.get_type(node.value)
     if isinstance(base_type, ModuleType):
@@ -429,8 +399,6 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Args:
         node: The Call CST node representing the function or method call.
 
-    Returns:
-        None.
     """
     api_path = None
 

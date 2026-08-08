@@ -1,5 +1,6 @@
 """Tests for the SASS Concrete Syntax Tree nodes."""
 
+import pytest
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassModule,
   SassInstruction,
@@ -81,6 +82,28 @@ def test_instruction_to_text() -> None:
     trailing_trivia=[Trivia(";")],
   )
   assert inst.to_text() == "  @P0 FADD R0, R1;"
+
+
+def test_instruction_to_text_no_trivia() -> None:
+  """Test instruction serialization with missing trivia to trigger default spacing."""
+  inst = SassInstruction(
+    predicate=SassPredicate(name="P0", is_guard=True),
+    opcode="FADD",
+    operands=[
+      SassRegister(name="R0"),
+      SassRegister(name="R1"),
+    ],
+  )
+  assert inst.to_text() == "@P0 FADD R0, R1;"
+
+  inst2 = SassInstruction(opcode="NOP")
+  assert inst2.to_text() == "NOP;"
+
+
+def test_instruction_invalid_opcode() -> None:
+  """Test validation of opcode string."""
+  with pytest.raises(ValueError, match="Invalid SASS opcode"):
+    SassInstruction(opcode="FADD R0")
 
 
 def test_label_to_text() -> None:

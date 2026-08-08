@@ -29,3 +29,26 @@ def test_scan_registry_no_candidates(mock_get_adapter, mock_priority, mock_avail
   examples = json.loads(examples_json)
   assert "torch_tier3_extras" in examples
   assert examples["torch_tier3_extras"]["requiredTier"] == "extras"
+
+
+@patch("ml_switcheroo.sphinx_ext.registry.available_frameworks")
+@patch("ml_switcheroo.sphinx_ext.registry.get_framework_priority_order")
+@patch("ml_switcheroo.sphinx_ext.registry.get_adapter")
+def test_scan_registry_else_branch(mock_get_adapter, mock_priority, mock_avail):
+  """Hits the else branch when candidates are not in priorities."""
+  mock_avail.return_value = ["torch", "unknown_fw"]
+  mock_priority.return_value = ["torch", "other_fw"]
+
+  def get_adapter_side_effect(name):
+    adapter = MagicMock()
+    adapter.inherits_from = None
+    adapter.display_name = name
+    adapter.supported_tiers = None
+    if name == "torch":
+      adapter.get_tiered_examples.return_value = {"tier3_extras": "torch_extras"}
+    else:
+      adapter.get_tiered_examples.return_value = {"tier3_extras": "unknown_extras"}
+    return adapter
+
+  mock_get_adapter.side_effect = get_adapter_side_effect
+  scan_registry()

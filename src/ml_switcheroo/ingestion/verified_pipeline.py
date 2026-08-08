@@ -21,7 +21,7 @@ def run_verified_pipeline(source_code: str) -> Dict[str, Any]:
   """
   # 1. cdd-python AST Normalization (Structural Compiler)
   try:
-    pass
+    import cdd  # noqa: F401
   except ImportError:
     # Fallback if not available, though it should be since it's a core requirement
     return {"error": "cdd-python not installed"}

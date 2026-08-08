@@ -9,6 +9,22 @@ class MockHighLevelAdapter(JAXStackMixin):
   pass
 
 
+def test_get_serialization_imports():
+  """Verifies the behavior of get_serialization_imports."""
+  adapter = MockHighLevelAdapter()
+  imports = adapter.get_serialization_imports()
+  assert "import orbax.checkpoint" in imports
+
+
+def test_get_weight_conversion_imports():
+  """Verifies the behavior of get_weight_conversion_imports."""
+  adapter = MockHighLevelAdapter()
+  imports = adapter.get_weight_conversion_imports()
+  assert "import jax.numpy as jnp" in imports
+  assert "import orbax.checkpoint" in imports
+  assert "from flax.traverse_util import unflatten_dict, flatten_dict" in imports
+
+
 def test_device_syntax_cuda():
   """Verifies the behavior of device syntax cuda."""
   adapter = MockHighLevelAdapter()
@@ -26,6 +42,14 @@ def test_device_syntax_cpu_index():
 def test_serialization_syntax_orbax():
   """Verifies the behavior of serialization syntax orbax."""
   adapter = MockHighLevelAdapter()
+
+  # test direct call branch
+  save_code_direct = adapter.get_serialization_syntax("save", "dir", "state")
+  assert "checkpointer().save" in save_code_direct.lower()
+
+  load_code_direct = adapter.get_serialization_syntax("load", "dir")
+  assert "checkpointer().restore" in load_code_direct.lower()
+
   # Use the mixin's newly added weight code
   save_code = adapter.get_weight_save_code("state", "dir")
   assert "PyTreeCheckpointer" in save_code

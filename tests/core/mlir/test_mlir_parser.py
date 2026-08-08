@@ -104,13 +104,23 @@ sw.func {
 
 def test_parse_attribute_alias_def():
   """Parses an attribute alias definition at the module level."""
-  code = '#map = "my_string"\nsw.module {\n}'
+  code = '#map = "my_string"\n#map2 = [1, 2]\n#map3 = f32\nsw.module {\n}'
   parser = MlirParser(code)
   module = parser.parse()
-  assert len(module.aliases) == 1
+  assert len(module.aliases) == 3
+
   alias = module.aliases[0]
   assert alias.name == "#map"
   assert alias.value_str == '"my_string"'
+
+  alias2 = module.aliases[1]
+  assert alias2.name == "#map2"
+  assert "Tree" in alias2.value_str
+
+  alias3 = module.aliases[2]
+  assert alias3.name == "#map3"
+  assert alias3.value_str == "f32"
+
   assert module.body.operations[0].name == "sw.module"
 
 
@@ -124,6 +134,18 @@ def test_parse_attribute_alias_use():
   assert len(op.attributes) == 1
   assert op.attributes[0].name == "map"
   assert op.attributes[0].value == "#map"
+
+
+def test_parse_typed_operands():
+  """Parses an operation with typed operands."""
+  code = '%0 = "std.add"(%arg0 : i32, %arg1 : f32)'
+  parser = MlirParser(code)
+  module = parser.parse()
+  op = module.body.operations[0]
+  assert op.operands[0].name == "%arg0"
+  assert op.operands[0].type_node.body == "i32"
+  assert op.operands[1].name == "%arg1"
+  assert op.operands[1].type_node.body == "f32"
 
 
 def test_parse_bare_id_list():
@@ -153,6 +175,37 @@ def test_parse_bare_id_list_attr():
   op = module.body.operations[0]
   assert op.attributes[0].name == "items"
   assert op.attributes[0].value == ["a", "b", "c"]
+
+
+def test_mlir_transformer_edge_cases():
+  """Test method."""
+  from lark import Tree
+  from ml_switcheroo.core.mlir.parser import MlirTransformer
+  from ml_switcheroo.core.cst.base import Trivia
+
+  transformer = MlirTransformer()
+
+  # Hit line 275: len(children) == 1, no value
+  mock_val = Tree("some_tree", [])
+  val_node = Tree("attr_value", [mock_val])
+
+  # mock leading trivia for first token
+  t1 = Tree("dummy", [])
+  t1.value = "#foo"
+  t1.leading_trivia = []
+
+  alias_node = transformer.attribute_alias_def([t1, val_node])
+  assert alias_node.name == "#foo"
+  assert "Tree" in alias_node.value_str
+
+  # Hit line 285: trailing trivia
+  t2 = Tree("dummy", [])
+  t2.value = "// comment"
+  t2.leading_trivia = [Trivia("// comment")]
+  trivia_node = Tree("trivia", [t2])
+  alias_node_trivia = transformer.attribute_alias_def([t1, val_node, trivia_node])
+  assert len(alias_node_trivia.trailing_trivia) == 1
+  assert alias_node_trivia.trailing_trivia[0].text == "// comment"
 
 
 def test_parse_custom_operation():

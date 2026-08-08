@@ -12,6 +12,13 @@ class RdnaEmitter:
   """Converts RDNA AST nodes into textual assembly code."""
 
   def emit(self, nodes: List[RdnaNode]) -> str:
-    """Generates the RDNA source string from a list of nodes."""
+    """Generates the RDNA source string from a list of nodes.
+
+    Args:
+        nodes: A list of RdnaNode instances to format.
+
+    Returns:
+        str: The generated RDNA assembly text.
+    """
     printer = RdnaPrinter()
     return printer.emit(nodes)

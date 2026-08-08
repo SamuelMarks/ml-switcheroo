@@ -12,7 +12,11 @@ def analyzer():
   semantics = MagicMock()
 
   def get_def(name):
-    """Gets def."""
+    """Gets def.
+
+    Args:
+        name: ...
+    """
     if "randn" in name or "add" in name or "abs" in name:
       return ("op", {"return_type": "Tensor"})
     return None
@@ -22,14 +26,23 @@ def analyzer():
 
 
 def analyze(code, analyzer):
-  """Analyzes ."""
+  """Analyzes .
+
+  Args:
+      code: ...
+      analyzer: ...
+  """
   tree = cst.parse_module(code)
   tree.visit(analyzer)
   return tree
 
 
 def test_import_tracking(analyzer):
-  """Verifies the behavior of import tracking."""
+  """Verifies the behavior of import tracking.
+
+  Args:
+      analyzer: ...
+  """
   code = "import torch.nn as nn"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("nn")
@@ -38,7 +51,11 @@ def test_import_tracking(analyzer):
 
 
 def test_assignment_tracking(analyzer):
-  """Verifies the behavior of assignment tracking."""
+  """Verifies the behavior of assignment tracking.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nimport torch\nx = torch.randn(1)\n"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("x")
@@ -47,7 +64,11 @@ def test_assignment_tracking(analyzer):
 
 
 def test_control_flow_union(analyzer):
-  """Verifies the behavior of control flow union."""
+  """Verifies the behavior of control flow union.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nimport torch\nif True:\n    x = torch.randn(1)\nelse:\n    x = torch.nn\n"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("x")
@@ -58,7 +79,11 @@ def test_control_flow_union(analyzer):
 
 
 def test_control_flow_ambiguity(analyzer):
-  """Verifies the behavior of control flow ambiguity."""
+  """Verifies the behavior of control flow ambiguity.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nimport torch\nif True:\n    y = torch.randn(1)\n"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("y")
@@ -66,7 +91,11 @@ def test_control_flow_ambiguity(analyzer):
 
 
 def test_ternary_expression_union(analyzer):
-  """Verifies the behavior of ternary expression union."""
+  """Verifies the behavior of ternary expression union.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nimport torch\nx = torch.randn() if True else torch.nn\n"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("x")
@@ -77,7 +106,11 @@ def test_ternary_expression_union(analyzer):
 
 
 def test_loop_state_merge(analyzer):
-  """Verifies the behavior of loop state merge."""
+  """Verifies the behavior of loop state merge.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nimport torch\nx = torch.nn\nfor i in range(10):\n    x = torch.randn()\n"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("x")
@@ -88,7 +121,11 @@ def test_loop_state_merge(analyzer):
 
 
 def test_implicit_tensor_method_on_union(analyzer):
-  """Verifies the behavior of implicit tensor method on union."""
+  """Verifies the behavior of implicit tensor method on union.
+
+  Args:
+      analyzer: ...
+  """
   x_node = cst.parse_expression("x")
   u_type = UnionType([TensorType("Tensor", "torch"), ModuleType("Module", "torch")])
   analyzer.table.record_type(x_node, u_type)
@@ -165,7 +202,11 @@ def test_scope_resolution_parent():
 
 
 def test_class_and_function_scope(analyzer):
-  """Verifies the behavior of class and function scope."""
+  """Verifies the behavior of class and function scope.
+
+  Args:
+      analyzer: ...
+  """
   code = "\nclass MyClass:\n    a = torch.randn(1)\n    def my_func(self):\n        b = torch.randn(1)\n"
   analyze(code, analyzer)
   assert analyzer.current_scope.name == "global"

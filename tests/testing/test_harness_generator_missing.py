@@ -112,3 +112,100 @@ def test_harness_generate_adapter_shim_no_convert():
     hg._generate_adapter_shim()
   finally:
     del _ADAPTER_REGISTRY["fake_fw"]
+
+
+def test_harness_build_dynamic_init_with_magic_args():
+  """Test method."""
+  from ml_switcheroo.testing.harness_generator import HarnessGenerator
+  import unittest.mock as mock
+
+  class MockAdapter:
+    """Test class."""
+
+    harness_imports = ["import something"]
+    declared_magic_args = ["my_magic_arg"]
+
+    def get_harness_init_code(self):
+      return "def my_helper(): pass"
+
+  hg = HarnessGenerator()
+  with mock.patch("ml_switcheroo.testing.harness_generator.get_adapter", return_value=MockAdapter()):
+    with mock.patch(
+      "ml_switcheroo.testing.signature_extractor.SignatureExtractor.extract_first_function_name", return_value="my_helper"
+    ):
+      imports_str, init_code, final_logic = hg._build_dynamic_init("mock_fw")
+      assert "import something" in imports_str
+      assert "my_helper" in init_code
+      assert "tgt_inputs[tp] = val" in final_logic
+      assert "val = None" in final_logic
+
+
+def test_harness_injector_leave_module():
+  """Test method."""
+  import libcst as cst
+  from ml_switcheroo.testing.harness_generator import HarnessInjector
+
+  injector = HarnessInjector(
+    imports_block="import sys\n",
+    init_helpers_block="def helper(): pass\n",
+    fuzzer_block="",
+    to_numpy_block="",
+    injection_block="",
+    source_fw="jax",
+    target_fw="torch",
+    source_path="in.py",
+    target_path="out.py",
+    hints_json="{}",
+  )
+  module_code = "def to_numpy(): pass\n"
+  module = cst.parse_module(module_code)
+  updated_module = module.visit(injector)
+  updated_code = updated_module.code
+  assert "import sys" in updated_code
+  assert "def helper" in updated_code
+
+
+def test_harness_injector_leave_functiondef_no_block():
+  """Test method."""
+  import libcst as cst
+  from ml_switcheroo.testing.harness_generator import HarnessInjector
+
+  injector = HarnessInjector(
+    imports_block="",
+    init_helpers_block="",
+    fuzzer_block="",
+    to_numpy_block="   ",
+    injection_block="",
+    source_fw="jax",
+    target_fw="torch",
+    source_path="in.py",
+    target_path="out.py",
+    hints_json="{}",
+  )
+  module_code = "def to_numpy(): pass\n"
+  module = cst.parse_module(module_code)
+  updated_module = module.visit(injector)
+  assert updated_module.code == module.code
+
+
+def test_harness_injector_leave_if_with_injection():
+  """Test method."""
+  import libcst as cst
+  from ml_switcheroo.testing.harness_generator import HarnessInjector
+
+  injector = HarnessInjector(
+    imports_block="",
+    init_helpers_block="",
+    fuzzer_block="",
+    to_numpy_block="",
+    injection_block="tgt_inputs[tp] = 42\n",
+    source_fw="jax",
+    target_fw="torch",
+    source_path="in.py",
+    target_path="out.py",
+    hints_json="{}",
+  )
+  module_code = "if tp not in tgt_inputs:\n    pass\n"
+  module = cst.parse_module(module_code)
+  updated_module = module.visit(injector)
+  assert "tgt_inputs[tp] = 42" in updated_module.code

@@ -113,7 +113,8 @@ class StructuralLinter(cst.CSTVisitor):
           # Wildcard import from forbidden module contaminates global namespace blindly
           self.violations.append(f"Forbidden Wildcard Import from '{root}'")
         else:
-          for alias in node.names:
+          aliases = list(node.names)
+          for alias in aliases:
             if isinstance(alias, cst.ImportAlias):
               local_name = (
                 (alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else "")
@@ -154,11 +155,9 @@ class StructuralLinter(cst.CSTVisitor):
 
     # Check for direct usage of forbidden roots if implicit import (e.g. built-ins or leaked)
     elif node.value in self.forbidden_roots:
-      # Don't duplicate if already caught via alias logic (case where alias == root)
-      if node.value not in self._local_aliases:
-        msg = f"Forbidden Usage: Direct access '{node.value}'"
-        if msg not in self.violations:
-          self.violations.append(msg)
+      msg = f"Forbidden Usage: Direct access '{node.value}'"
+      if msg not in self.violations:
+        self.violations.append(msg)
 
   def visit_Attribute(self, node: cst.Attribute) -> None:
     """Checks attributes to provide more specific error messages (e.g. `torch.abs`).
@@ -184,7 +183,14 @@ class StructuralLinter(cst.CSTVisitor):
           self.violations.append(msg)
 
   def _get_root_name(self, node: cst.BaseExpression) -> str:
-    """Extracts root package from dotted path node (e.g. 'torch' from 'torch.nn')."""
+    """Extracts root package from dotted path node (e.g. 'torch' from 'torch.nn').
+
+    Args:
+        node: The expression node.
+
+    Returns:
+        The root package string.
+    """
     if isinstance(node, cst.Name):
       return node.value
     if isinstance(node, cst.Attribute):
@@ -192,7 +198,14 @@ class StructuralLinter(cst.CSTVisitor):
     return ""
 
   def _get_full_name_from_node(self, node: cst.BaseExpression) -> str:
-    """Recursively resolves CST node to dot-separated string."""
+    """Recursively resolves CST node to dot-separated string.
+
+    Args:
+        node: The CST node to resolve.
+
+    Returns:
+        The full dot-separated string name.
+    """
     if isinstance(node, cst.Name):
       return node.value
     if isinstance(node, cst.Attribute):

@@ -91,3 +91,53 @@ def test_attribute_resolution(rewriter_factory):
   r = rewriter_factory()
   res = rewrite(r, "self.l.eval(); self.l(x)")
   assert "training=False" in res
+
+
+def test_missing_state_returns_node(rewriter_factory):
+  """Verifies that missing state doesn't crash but returns the original node."""
+  r = rewriter_factory()
+  # m1.eval() populates store for m1, but we call m2
+  res = rewrite(r, "m1.eval(); m2(x)")
+  assert "m2(x)" in res
+  assert "training=" not in res
+
+
+def test_kwarg_already_exists(rewriter_factory):
+  """Verifies that the flag is not duplicated if already present."""
+  r = rewriter_factory()
+  res = rewrite(r, "m.eval(); m(x, training=True)")
+  assert "m(x, training=True)" in res
+  # Ensure we don't have training=True, training=False
+  assert res.count("training=") == 1
+
+
+def test_unsupported_node_type_in_capture():
+  """Verifies behavior when node.func is not an Attribute in capture_eval_state."""
+  node = cst.Call(func=cst.Name("eval"), args=[])
+  ctx = MagicMock()
+  res = capture_eval_state(node, ctx)
+  assert res is node
+
+
+def test_unsupported_receiver_name():
+  """Verifies behavior when receiver name cannot be extracted."""
+  # e.g., func_list[0].eval()
+  node = cst.Call(
+    func=cst.Attribute(
+      value=cst.Subscript(
+        value=cst.Name("func_list"), slice=[cst.SubscriptElement(slice=cst.Index(value=cst.Integer("0")))]
+      ),
+      attr=cst.Name("eval"),
+    ),
+    args=[],
+  )
+  ctx = MagicMock()
+  res = capture_eval_state(node, ctx)
+  assert res is node
+
+
+def test_train_with_args(rewriter_factory):
+  """Verifies the behavior of train() with arguments."""
+  r = rewriter_factory()
+  res = rewrite(r, "m.train(mode_var); m(x)")
+  assert "training=mode_var" in res

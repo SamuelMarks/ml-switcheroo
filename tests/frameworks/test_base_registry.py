@@ -5,7 +5,28 @@ import json
 import logging
 from pathlib import Path
 from unittest.mock import patch
-from ml_switcheroo.frameworks.base import register_framework, get_adapter, load_snapshot_for_adapter, _ADAPTER_REGISTRY
+from ml_switcheroo.frameworks.base import (
+  register_framework,
+  get_adapter,
+  load_snapshot_for_adapter,
+  _ADAPTER_REGISTRY,
+  available_frameworks,
+)
+
+
+def test_available_frameworks():
+  """Verifies the behavior of available_frameworks."""
+  key = "test_framework_avail"
+
+  @register_framework(key)
+  class TestAdapterAvail:
+    """Test Adapter."""
+
+    pass
+
+  available = available_frameworks()
+  assert key in available
+  assert isinstance(available, list)
 
 
 def test_registry_mechanics():

@@ -17,6 +17,9 @@ class SemanticTier(str, Enum):
   NEURAL = "neural"
   NEURAL_OPS = "neural_ops"  # Functional neural ops (activations, functional layers)
   EXTRAS = "extras"
+  LOSS = "loss"
+  OPTIMIZER = "optimizer"
+  ACTIVATION = "activation"
 
 
 class LogicOp(str, Enum):

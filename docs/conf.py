@@ -1,4 +1,4 @@
-"""Auto-generated doc."""
+"""Sphinx configuration for ml-switcheroo documentation."""
 
 import os
 import sys
@@ -108,8 +108,16 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- Linkcode Resolution Logic -----------------------------------------------
 def linkcode_resolve(domain, info):
-  """Resolve a GitHub URL for the given Python object.
+  """Determine a GitHub URL for the given Python object.
+
   Required by sphinx.ext.linkcode to generate [source] links.
+
+  Args:
+      domain: The Sphinx domain (e.g., 'py').
+      info: Dictionary with 'module' and 'fullname' keys.
+
+  Returns:
+      The URL as a string, or None if it cannot be resolved.
   """
   if domain != "py":
     return None

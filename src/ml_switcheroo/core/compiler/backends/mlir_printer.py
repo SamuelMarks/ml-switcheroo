@@ -29,7 +29,15 @@ class MlirPrinter:
     return node.to_text()
 
   def _emit_module(self, module: ModuleNode, header: str) -> str:
-    """Emits a module with standard formatting."""
+    """Emits a module with standard formatting.
+
+    Args:
+        module: The module to emit.
+        header: The header string to add.
+
+    Returns:
+        str: The generated MLIR text.
+    """
     # We can inject a file-level comment or simply use the existing to_text()
     # Currently, `ModuleNode.to_text` just delegates to its block.
     # We explicitly emit a module wrapper if the block isn't already inside one.

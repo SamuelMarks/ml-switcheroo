@@ -6,7 +6,11 @@ from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
 
 
 def test_handle_scaffold(capsys):
-  """Handles scaffold."""
+  """Handles scaffold.
+
+  Args:
+      capsys: ...
+  """
   args = Namespace(framework="jax.numpy")
   with (
     patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine") as MockEngine,

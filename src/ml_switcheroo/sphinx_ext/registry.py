@@ -114,8 +114,6 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
               if c in candidates:
                 tgt_fw = c
                 break
-            else:
-              tgt_fw = candidates[0]
           except ValueError:
             tgt_fw = candidates[0]
 

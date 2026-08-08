@@ -6,7 +6,11 @@ from ml_switcheroo.cli.handlers.suggest import handle_suggest, _inspect_live_obj
 
 
 def test_handle_suggest_single_success(capsys):
-  """Handles suggest single successfully."""
+  """Handles suggest single successfully.
+
+  Args:
+      capsys: ...
+  """
   with patch("ml_switcheroo.cli.handlers.suggest._inspect_live_object") as mock_inspect:
     mock_inspect.return_value = {"signature": "()", "docstring": "docs", "kind": "function"}
     assert handle_suggest("foo.bar") == 0

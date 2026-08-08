@@ -807,7 +807,13 @@ def expand_tanh(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for Tanh."""
+  """Generates the SASS assembly kernel for Tanh.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()
@@ -825,7 +831,13 @@ def expand_gelu(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for GELU."""
+  """Generates the SASS assembly kernel for GELU.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()
@@ -854,6 +866,11 @@ def expand_mseloss(
   """Generates the SASS assembly kernel for MSELoss.
 
   Accumulates (pred - target)^2 over N elements.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
   """
   nodes: List[SassNode] = []
   r_acc = allocator.get_register(node_id)
@@ -921,7 +938,13 @@ def expand_crossentropyloss(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for CrossEntropyLoss."""
+  """Generates the SASS assembly kernel for CrossEntropyLoss.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_acc = allocator.get_register(node_id)
   r_counter = allocator.allocate_temp()
@@ -978,6 +1001,11 @@ def expand_rnn(
   """Generates the SASS assembly kernel for a basic RNN cell over time.
 
   h_t = tanh(W_ih * x_t + b_ih + W_hh * h_{t-1} + b_hh)
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
   """
   nodes: List[SassNode] = []
   r_h = allocator.get_register(node_id)
@@ -1020,7 +1048,13 @@ def expand_lstm(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for LSTM over time."""
+  """Generates the SASS assembly kernel for LSTM over time.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_h = allocator.get_register(node_id)
   r_c = allocator.allocate_temp()
@@ -1060,7 +1094,13 @@ def expand_gru(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for GRU over time."""
+  """Generates the SASS assembly kernel for GRU over time.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_h = allocator.get_register(node_id)
   r_t = allocator.allocate_temp()
@@ -1097,7 +1137,13 @@ def expand_multiheadattention(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for MultiheadAttention."""
+  """Generates the SASS assembly kernel for MultiheadAttention.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_out = allocator.get_register(node_id)
   r_q = allocator.allocate_temp()
@@ -1128,7 +1174,13 @@ def expand_transformer(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for a Transformer block."""
+  """Generates the SASS assembly kernel for a Transformer block.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_out = allocator.get_register(node_id)
   r_in = allocator.allocate_temp()
@@ -1154,7 +1206,13 @@ def expand_transformerencoder(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for TransformerEncoder."""
+  """Generates the SASS assembly kernel for TransformerEncoder.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_out = allocator.get_register(node_id)
   nodes.append(SassComment(text=f"BEGIN TransformerEncoder ({node_id})"))
@@ -1169,7 +1227,13 @@ def expand_transformerdecoder(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for TransformerDecoder."""
+  """Generates the SASS assembly kernel for TransformerDecoder.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_out = allocator.get_register(node_id)
   nodes.append(SassComment(text=f"BEGIN TransformerDecoder ({node_id})"))
@@ -1184,7 +1248,13 @@ def expand_conv1d(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for 1D Convolution."""
+  """Generates the SASS assembly kernel for 1D Convolution.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_acc = allocator.get_register(node_id)
   r_kx = allocator.allocate_temp()
@@ -1217,7 +1287,13 @@ def expand_depthwiseconv2d(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for DepthwiseConv2d."""
+  """Generates the SASS assembly kernel for DepthwiseConv2d.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_acc = allocator.get_register(node_id)
   r_kx = allocator.allocate_temp()
@@ -1250,7 +1326,13 @@ def expand_convtranspose(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates the SASS assembly kernel for ConvTranspose (generic representation)."""
+  """Generates the SASS assembly kernel for ConvTranspose (generic representation).
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(SassComment(text=f"BEGIN ConvTranspose ({node_id})"))
@@ -1264,7 +1346,13 @@ def expand_pool1d(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates SASS kernel for 1D Pooling."""
+  """Generates SASS kernel for 1D Pooling.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(SassComment(text=f"BEGIN Pool1d ({node_id})"))
@@ -1278,7 +1366,13 @@ def expand_pool3d(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates SASS kernel for 3D Pooling."""
+  """Generates SASS kernel for 3D Pooling.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(SassComment(text=f"BEGIN Pool3d ({node_id})"))
@@ -1292,7 +1386,13 @@ def expand_adaptivepool(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """Generates SASS kernel for Adaptive Pooling."""
+  """Generates SASS kernel for Adaptive Pooling.
+
+  Args:
+      allocator (RegisterAllocatorProtocol): The register manager.
+      node_id (str): The unique ID of the operation node (used for output reg).
+      metadata (Dict[str, Any]): Layer configuration.
+  """
   nodes: List[SassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(SassComment(text=f"BEGIN AdaptivePool ({node_id})"))
@@ -1301,85 +1401,45 @@ def expand_adaptivepool(
   return nodes
 
 
-def expand_generic_norm(
-  allocator: RegisterAllocatorProtocol,
-  node_id: str,
-  metadata: Dict[str, Any],
-) -> List[SassNode]:
-  """Generates SASS kernel for generic Normalization."""
-  nodes: List[SassNode] = []
-  r_acc = allocator.get_register(node_id)
-  nodes.append(SassComment(text=f"BEGIN Norm ({node_id})"))
-  nodes.append(SassInstruction(opcode="MOV", operands=[r_acc, SassRegister(name="R3")]))
-  nodes.append(SassComment(text=f"END Norm ({node_id})"))
-  return nodes
+def _make_generic_expand(name: str):
+  """Creates a generic macro expansion function for SASS.
+
+  Args:
+      name (str): The name of the operation.
+
+  Returns:
+      Callable: The generated expansion function.
+  """
+
+  def expand(
+    allocator: RegisterAllocatorProtocol,
+    node_id: str,
+    metadata: Dict[str, Any],
+  ) -> List[SassNode]:
+    """Generates a generic SASS kernel.
+
+    Args:
+        allocator (RegisterAllocatorProtocol): The register manager.
+        node_id (str): The unique ID of the operation node (used for output reg).
+        metadata (Dict[str, Any]): Layer configuration.
+
+    Returns:
+        List[SassNode]: The list of SASS nodes.
+    """
+    nodes: List[SassNode] = []
+
+    r_acc = allocator.get_register(node_id)
+    nodes.append(SassComment(text=f"BEGIN {name} ({node_id})"))
+    nodes.append(SassInstruction(opcode="MOV", operands=[r_acc, SassRegister(name="R3")]))
+    nodes.append(SassComment(text=f"END {name} ({node_id})"))
+    return nodes
+
+  return expand
 
 
-def expand_generic_activation(
-  allocator: RegisterAllocatorProtocol,
-  node_id: str,
-  metadata: Dict[str, Any],
-) -> List[SassNode]:
-  """Generates SASS kernel for generic Activation."""
-  nodes: List[SassNode] = []
-  r_acc = allocator.get_register(node_id)
-  nodes.append(SassComment(text=f"BEGIN Activation ({node_id})"))
-  nodes.append(SassInstruction(opcode="MOV", operands=[r_acc, SassRegister(name="R3")]))
-  nodes.append(SassComment(text=f"END Activation ({node_id})"))
-  return nodes
-
-
-def expand_generic_linalg(
-  allocator: RegisterAllocatorProtocol,
-  node_id: str,
-  metadata: Dict[str, Any],
-) -> List[SassNode]:
-  """Generates SASS kernel for generic Linear Algebra op."""
-  nodes: List[SassNode] = []
-  r_acc = allocator.get_register(node_id)
-  nodes.append(SassComment(text=f"BEGIN LinAlg ({node_id})"))
-  nodes.append(SassInstruction(opcode="MOV", operands=[r_acc, SassRegister(name="R3")]))
-  nodes.append(SassComment(text=f"END LinAlg ({node_id})"))
-  return nodes
-
-
-def expand_generic_reduction(
-  allocator: RegisterAllocatorProtocol,
-  node_id: str,
-  metadata: Dict[str, Any],
-) -> List[SassNode]:
-  """Generates SASS kernel for generic Reduction."""
-  nodes: List[SassNode] = []
-  r_acc = allocator.get_register(node_id)
-  nodes.append(SassComment(text=f"BEGIN Reduction ({node_id})"))
-  nodes.append(SassInstruction(opcode="MOV", operands=[r_acc, SassRegister(name="R3")]))
-  nodes.append(SassComment(text=f"END Reduction ({node_id})"))
-  return nodes
-
-
-def expand_generic_loss(
-  allocator: RegisterAllocatorProtocol,
-  node_id: str,
-  metadata: Dict[str, Any],
-) -> List[SassNode]:
-  """Generates SASS kernel for generic Loss."""
-  nodes: List[SassNode] = []
-  r_acc = allocator.get_register(node_id)
-  nodes.append(SassComment(text=f"BEGIN Loss ({node_id})"))
-  nodes.append(SassInstruction(opcode="MOV", operands=[r_acc, SassRegister(name="R3")]))
-  nodes.append(SassComment(text=f"END Loss ({node_id})"))
-  return nodes
-
-
-def expand_generic_dropout(
-  allocator: RegisterAllocatorProtocol,
-  node_id: str,
-  metadata: Dict[str, Any],
-) -> List[SassNode]:
-  """Generates SASS kernel for generic Dropout."""
-  nodes: List[SassNode] = []
-  r_acc = allocator.get_register(node_id)
-  nodes.append(SassComment(text=f"BEGIN DropoutVar ({node_id})"))
-  nodes.append(SassInstruction(opcode="MOV", operands=[r_acc, SassRegister(name="R3")]))
-  nodes.append(SassComment(text=f"END DropoutVar ({node_id})"))
-  return nodes
+expand_generic_norm = _make_generic_expand("Norm")
+expand_generic_activation = _make_generic_expand("Activation")
+expand_generic_linalg = _make_generic_expand("LinAlg")
+expand_generic_reduction = _make_generic_expand("Reduction")
+expand_generic_loss = _make_generic_expand("Loss")
+expand_generic_dropout = _make_generic_expand("DropoutVar")

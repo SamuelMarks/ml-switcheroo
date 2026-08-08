@@ -35,7 +35,13 @@ def mock_semantics():
 
 
 def test_generate_success(mock_config, mock_semantics, tmp_path):
-  """Generates successfully."""
+  """Generates successfully.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      tmp_path: ...
+  """
   source_file = tmp_path / "model.py"
   source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    self.l1 = nn.Linear(10, 10)\n")
   out_file = tmp_path / "script.py"
@@ -55,14 +61,26 @@ def test_generate_success(mock_config, mock_semantics, tmp_path):
 
 
 def test_generate_no_adapters(mock_config, mock_semantics, tmp_path):
-  """Generates no adapters."""
+  """Generates no adapters.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      tmp_path: ...
+  """
   generator = WeightScriptGenerator(mock_semantics, mock_config)
   generator.source_adapter = None
   assert generator.generate(Path("src.py"), Path("out.py")) is False
 
 
 def test_generate_read_error(mock_config, mock_semantics, tmp_path):
-  """Generates read correctly handling an error."""
+  """Generates read correctly handling an error.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      tmp_path: ...
+  """
   generator = WeightScriptGenerator(mock_semantics, mock_config)
   generator.source_adapter = MagicMock()
   generator.target_adapter = MagicMock()
@@ -70,7 +88,13 @@ def test_generate_read_error(mock_config, mock_semantics, tmp_path):
 
 
 def test_generate_parse_error(mock_config, mock_semantics, tmp_path):
-  """Generates parse correctly handling an error."""
+  """Generates parse correctly handling an error.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      tmp_path: ...
+  """
   source_file = tmp_path / "model.py"
   source_file.write_text("invalid python code [")
   out_file = tmp_path / "script.py"
@@ -81,7 +105,13 @@ def test_generate_parse_error(mock_config, mock_semantics, tmp_path):
 
 
 def test_generate_no_layers(mock_config, mock_semantics, tmp_path):
-  """Generates no layers."""
+  """Generates no layers.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      tmp_path: ...
+  """
   source_file = tmp_path / "model.py"
   source_file.write_text("x = 1")
   out_file = tmp_path / "script.py"
@@ -96,7 +126,13 @@ def test_generate_no_layers(mock_config, mock_semantics, tmp_path):
 
 
 def test_generate_write_error(mock_config, mock_semantics, tmp_path):
-  """Generates write correctly handling an error."""
+  """Generates write correctly handling an error.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+      tmp_path: ...
+  """
   source_file = tmp_path / "model.py"
   source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    self.l1 = nn.Linear(10, 10)\n")
   out_file = tmp_path / "read_only_dir" / "script.py"
@@ -108,7 +144,12 @@ def test_generate_write_error(mock_config, mock_semantics, tmp_path):
 
 
 def test_flatten_mapping_rules_variations(mock_config, mock_semantics):
-  """Verifies the behavior of flatten mapping rules variations."""
+  """Verifies the behavior of flatten mapping rules variations.
+
+  Args:
+      mock_config: ...
+      mock_semantics: ...
+  """
   generator = WeightScriptGenerator(mock_semantics, mock_config)
   layer_registry = {"l1": LogicalNode(id="l1", kind="Linear")}
 

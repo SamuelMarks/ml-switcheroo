@@ -138,7 +138,7 @@ def test_numpy_convert():
   class HasArray:
     """Has."""
 
-    def __array__(self):
+    def __array__(self, dtype=None, copy=None):
       """Arr."""
       return [3]
 

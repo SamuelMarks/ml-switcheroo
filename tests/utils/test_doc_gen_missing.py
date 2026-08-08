@@ -33,3 +33,16 @@ def test_doc_gen_missing_tuple_arg():
   m = MigrationGuideGenerator(DummySM())
   res = m._generate_op_row("foo", "jax", "torch")
   assert res is not None
+
+
+def test_doc_gen_missing_dict_arg():
+  """Verifies the behavior of documentation generation missing dictionary argument."""
+  from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
+
+  class DummySM:
+    def get_definition_by_id(self, op_name):
+      return {"std_args": [{"name": "a", "type": "int"}]}
+
+  m = MigrationGuideGenerator(DummySM())
+  res = m._generate_op_row("foo", "jax", "torch")
+  assert res is not None

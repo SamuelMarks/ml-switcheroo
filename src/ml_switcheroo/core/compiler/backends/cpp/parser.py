@@ -85,11 +85,11 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform the top-level module rule.
 
     Args:
-      children: The parsed child nodes of the module, representing statements,
-        functions, macros, or imports.
+          children: The parsed child nodes of the module, representing statements,
+            functions, macros, or imports.
 
     Returns:
-      A CppModule instance holding the grouped includes and other body nodes.
+        CppModule: A CppModule instance holding the grouped includes and other body nodes.
     """
     includes = [c for c in children if isinstance(c, IncludeDirective)]
     body = [c for c in children if not isinstance(c, IncludeDirective) and c is not None]
@@ -100,46 +100,46 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a system include.
 
     Args:
-      children: The parsed child nodes, which should contain the system header path identifier.
+          children: The parsed child nodes, which should contain the system header path identifier.
 
     Returns:
-      An IncludeDirective representing a system include (e.g., <vector>).
+        IncludeDirective: An IncludeDirective representing a system include (e.g., <vector>).
 
     Raises:
-      AssertionError: If the system header path is not found in the children.
+        AssertionError: If child token is missing.
     """
     for c in children:
       if getattr(c, "type", None) == "IDENTIFIER_PATH":
         return IncludeDirective(path=c.value, system=True)
-    raise AssertionError("Unreachable")
+    raise AssertionError("No IDENTIFIER_PATH found")
 
   @v_args(inline=False)
   def include_local(self, children: List[Any]) -> IncludeDirective:
     """Transform a local include.
 
     Args:
-      children: The parsed child nodes, which should contain the local header path identifier.
+          children: The parsed child nodes, which should contain the local header path identifier.
 
     Returns:
-      An IncludeDirective representing a local include (e.g., "my_header.h").
+        IncludeDirective: An IncludeDirective representing a local include (e.g., "my_header.h").
 
     Raises:
-      AssertionError: If the local header path is not found in the children.
+        AssertionError: If child token is missing.
     """
     for c in children:
       if getattr(c, "type", None) == "IDENTIFIER_PATH":
         return IncludeDirective(path=c.value, system=False)
-    raise AssertionError("Unreachable")
+    raise AssertionError("No IDENTIFIER_PATH found")
 
   @v_args(inline=False)
   def macro_define(self, children: List[Any]) -> MacroDefinition:
     """Transform a macro definition with a value.
 
     Args:
-      children: The parsed child nodes containing the macro identifier and its value (string/number).
+          children: The parsed child nodes containing the macro identifier and its value (string/number).
 
     Returns:
-      A MacroDefinition representing the macro with its name and defined value.
+        MacroDefinition: A MacroDefinition representing the macro with its name and defined value.
     """
     name, val = "", ""
     for c in children:
@@ -154,10 +154,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform an empty macro definition.
 
     Args:
-      children: The parsed child nodes containing the macro identifier.
+          children: The parsed child nodes containing the macro identifier.
 
     Returns:
-      A MacroDefinition representing the empty macro with its name and an empty value string.
+        MacroDefinition: A MacroDefinition representing the empty macro with its name and an empty value string.
     """
     name = ""
     for c in children:
@@ -170,11 +170,11 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a function definition.
 
     Args:
-      children: The parsed child nodes including the return type, function name,
-        optional arguments, and the statements in the function body.
+          children: The parsed child nodes including the return type, function name,
+            optional arguments, and the statements in the function body.
 
     Returns:
-      A FunctionDefinition representing the full C++ function definition.
+        FunctionDefinition: A FunctionDefinition representing the full C++ function definition.
     """
     ret_type = children[0]
     name = ""
@@ -197,10 +197,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform function arguments list.
 
     Args:
-      children: The list of parsed individual function arguments.
+          children: The list of parsed individual function arguments.
 
     Returns:
-      A list of FunctionArgument nodes.
+        List[FunctionArgument]: A list of FunctionArgument nodes.
     """
     return [c for c in children if isinstance(c, FunctionArgument)]
 
@@ -209,10 +209,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a single function argument.
 
     Args:
-      children: The parsed child nodes containing the argument type identifier and name.
+          children: The parsed child nodes containing the argument type identifier and name.
 
     Returns:
-      A FunctionArgument representing the argument.
+        FunctionArgument: A FunctionArgument representing the argument.
     """
     name = ""
     for c in children[1:]:
@@ -226,10 +226,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a type identifier.
 
     Args:
-      children: A list containing the parsed type identifier token.
+          children: A list containing the parsed type identifier token.
 
     Returns:
-      A TypeIdentifier AST node containing the type name.
+        TypeIdentifier: A TypeIdentifier AST node containing the type name.
     """
     return TypeIdentifier(name=children[0].value)
 
@@ -238,11 +238,11 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a PYBIND11_MODULE.
 
     Args:
-      children: The parsed child nodes of the pybind module, containing the module
-        name, variable name, and optional pybind definitions.
+          children: The parsed child nodes of the pybind module, containing the module
+            name, variable name, and optional pybind definitions.
 
     Returns:
-      A PyBindModule node representing the module export.
+        PyBindModule: A PyBindModule node representing the module export.
     """
     name = ""
     module_var = ""
@@ -261,11 +261,11 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a m.def() call.
 
     Args:
-      children: The parsed child nodes of the pybind method definition, including
-        the exported name, the function reference, and the docstring.
+          children: The parsed child nodes of the pybind method definition, including
+            the exported name, the function reference, and the docstring.
 
     Returns:
-      A PyBindDef node representing the registered pybind method.
+        PyBindDef: A PyBindDef node representing the registered pybind method.
     """
     strings = [c.value.strip('"') for c in children if getattr(c, "type", None) == "STRING"]
     idents = [c.value for c in children if getattr(c, "type", None) == "IDENTIFIER"]
@@ -278,10 +278,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform an empty return statement.
 
     Args:
-      children: The parsed children (typically empty or containing semicolon/return tokens).
+          children: The parsed children (typically empty or containing semicolon/return tokens).
 
     Returns:
-      A ReturnStatement representing a void return statement.
+        ReturnStatement: A ReturnStatement representing a void return statement.
     """
     return ReturnStatement()
 
@@ -290,10 +290,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a return statement with an expression.
 
     Args:
-      children: The parsed children containing the expression to return.
+          children: The parsed children containing the expression to return.
 
     Returns:
-      A ReturnStatement containing the returned expression.
+        ReturnStatement: A ReturnStatement containing the returned expression.
     """
     expr = next(c for c in children if isinstance(c, Expression))
     return ReturnStatement(value=expr)
@@ -303,10 +303,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a variable declaration.
 
     Args:
-      children: The parsed child nodes including the variable's type and its name identifier.
+          children: The parsed child nodes including the variable's type and its name identifier.
 
     Returns:
-      A VariableDeclaration node without an initializer.
+        VariableDeclaration: A VariableDeclaration node without an initializer.
     """
     name = ""
     for c in children[1:]:
@@ -319,11 +319,11 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a variable declaration with initialization.
 
     Args:
-      children: The parsed child nodes including the variable's type, its name identifier,
-        and the initial value expression.
+          children: The parsed child nodes including the variable's type, its name identifier,
+            and the initial value expression.
 
     Returns:
-      A VariableDeclaration node with its associated initializer expression.
+        VariableDeclaration: A VariableDeclaration node with its associated initializer expression.
     """
     name = ""
     for c in children[1:]:
@@ -342,10 +342,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a raw statement.
 
     Args:
-      children: The parsed child token representing the raw unparsed C++ statement.
+          children: The parsed child token representing the raw unparsed C++ statement.
 
     Returns:
-      A RawStatement containing the raw string code.
+        RawStatement: A RawStatement containing the raw string code.
     """
     return RawStatement(code=children[0].value.strip())
 
@@ -354,10 +354,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform an identifier.
 
     Args:
-      children: The parsed token containing the identifier name.
+          children: The parsed token containing the identifier name.
 
     Returns:
-      An Identifier AST node wrapping the name.
+        Identifier: An Identifier AST node wrapping the name.
     """
     return Identifier(name=children[0].value)
 
@@ -366,10 +366,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a number literal into an identifier.
 
     Args:
-      children: The parsed token containing the numeric literal.
+          children: The parsed token containing the numeric literal.
 
     Returns:
-      An Identifier AST node wrapping the number literal as its name.
+        Identifier: An Identifier AST node wrapping the number literal as its name.
     """
     return Identifier(name=children[0].value)
 
@@ -378,10 +378,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a string literal into an identifier.
 
     Args:
-      children: The parsed token containing the string literal.
+          children: The parsed token containing the string literal.
 
     Returns:
-      An Identifier AST node wrapping the string literal as its name.
+        Identifier: An Identifier AST node wrapping the string literal as its name.
     """
     return Identifier(name=children[0].value)
 
@@ -390,11 +390,11 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a method call.
 
     Args:
-      children: The parsed child nodes representing the called function/method name,
-        followed by its arguments.
+          children: The parsed child nodes representing the called function/method name,
+            followed by its arguments.
 
     Returns:
-      A MethodCall AST node wrapping the name and arguments.
+        MethodCall: A MethodCall AST node wrapping the name and arguments.
     """
     name = children[0].name
     args = [c for c in children[1:] if isinstance(c, Expression)]
@@ -405,10 +405,10 @@ class CppTransformer(Transformer[Any, Any]):
     """Transform a binary expression.
 
     Args:
-      children: The parsed child nodes containing the left operand, operator token, and right operand.
+          children: The parsed child nodes containing the left operand, operator token, and right operand.
 
     Returns:
-      A BinaryExpression AST node.
+        BinaryExpression: A BinaryExpression AST node.
     """
     op = ""
     for c in children:
@@ -426,7 +426,7 @@ class CppParser:
     """Initialize the parser with the given source code.
 
     Args:
-      text: The raw C++ source code string to be parsed.
+        text: The raw C++ source code string to be parsed.
     """
     self.text = text
     self.parser = Lark(GRAMMAR, parser="earley")
@@ -436,10 +436,10 @@ class CppParser:
     """Parse the source code and return a CppModule.
 
     Returns:
-      A parsed CppModule representing the abstract syntax tree of the C++ code.
+        CppModule: A parsed CppModule representing the abstract syntax tree of the C++ code.
 
     Raises:
-      ValueError: If parsing fails or an unexpected token is encountered.
+        ValueError: If parsing fails or an unexpected token is encountered.
     """
     if not self.text.strip():
       return CppModule()

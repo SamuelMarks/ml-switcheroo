@@ -66,3 +66,23 @@ def test_topk_passthrough_missing_target(rewriter_factory):
   res = rewrite_code(rewriter, code)
   assert "torch.topk" in res
   assert "collections.namedtuple" not in res
+
+
+def test_topk_kwargs_stripping(rewriter_factory):
+  """Verifies that kwargs like largest, sorted, out are stripped."""
+  r = rewriter_factory("jax")
+  code = "y = x.topk(5, largest=True, sorted=False, out=None, dim=1)"
+  res = rewrite_code(r, code)
+  assert "largest=" not in res
+  assert "sorted=" not in res
+  assert "out=" not in res
+  assert "dim=1" in res
+
+
+def test_topk_missing_api():
+  """Verifies behavior when target API is missing."""
+  node = cst.Call(func=cst.Name("topk"), args=[])
+  ctx = MagicMock()
+  ctx.lookup_api.return_value = None
+  res = transform_topk(node, ctx)
+  assert res is node

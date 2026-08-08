@@ -21,7 +21,7 @@ class PythonFrontend:
     """Initializes the PythonFrontend with the target source code.
 
     Args:
-      code: The Python source code string to be parsed and analyzed.
+        code: The Python source code string to be parsed and analyzed.
     """
     self.code = code
 
@@ -34,7 +34,7 @@ class PythonFrontend:
     it safely falls back and returns an empty LogicalGraph.
 
     Returns:
-      A LogicalGraph representing the extracted computation graph structure.
+        LogicalGraph: A LogicalGraph representing the extracted computation graph structure.
     """
     try:
       tree = cst.parse_module(self.code)

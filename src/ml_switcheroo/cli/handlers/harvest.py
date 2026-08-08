@@ -3,12 +3,10 @@
 Inspects manual test files written by developers to learn correct mappings.
 """
 
-from typing import Any
-
 from argparse import Namespace
 
 
-def handle_harvest(args: Namespace) -> Any:
+def handle_harvest(args: Namespace) -> None:
   """Handles the 'harvest' CLI command.
 
   This function orchestrates the harvesting of framework mapping definitions from
@@ -19,11 +17,9 @@ def handle_harvest(args: Namespace) -> Any:
 
   Args:
       args: A Namespace object containing the parsed command-line arguments.
-        It must contain a `path` attribute specifying the location of the
-        manual test files to inspect.
+          It must contain a `path` attribute specifying the location of the
+          manual test files to inspect.
 
-  Returns:
-      Any: The result of the harvest operation. Currently returns None.
   """
   test_path = args.path
   print(f"Harvesting mappings from manual tests at: {test_path}")

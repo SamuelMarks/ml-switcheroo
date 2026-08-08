@@ -36,7 +36,14 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 def _is_string(node: cst.CSTNode) -> bool:
-  """Checks if a node is a string literal (Simple or Concatenated)."""
+  """Checks if a node is a string literal (Simple or Concatenated).
+
+  Args:
+      node: The CST node to check.
+
+  Returns:
+      True if string literal.
+  """
   return isinstance(node, (cst.SimpleString, cst.ConcatenatedString))
 
 
@@ -103,12 +110,11 @@ def normalize_einsum(node: cst.Call, ctx: HookContext) -> cst.Call:
   # 5. Syntax Cleanup on remaining args
   # The argument that was previously at the end might have moved, or the one
   # before the equation might now be at the end.
-  if args:
-    # Ensure the current last argument doesn't have a trailing comma
-    # (clean style, though Python allows it)
-    last_arg = args[-1]
-    if last_arg.comma != cst.MaybeSentinel.DEFAULT:
-      args[-1] = last_arg.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+  # Ensure the current last argument doesn't have a trailing comma
+  # (clean style, though Python allows it)
+  last_arg = args[-1]
+  if last_arg.comma != cst.MaybeSentinel.DEFAULT:
+    args[-1] = last_arg.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
   # Insert equation at the front
   args.insert(0, eq_arg)

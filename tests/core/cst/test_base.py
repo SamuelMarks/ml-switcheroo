@@ -59,6 +59,22 @@ def test_cstnode_base() -> None:
   with pytest.raises(NotImplementedError):
     node.to_text()
 
+  with pytest.raises(NotImplementedError):
+    str(node)
+
+
+def test_trivia_coercion() -> None:
+  """Test that __post_init__ properly coerces str and None trivia inputs."""
+  node_str = DummyNode(name="test", leading_trivia="  ", trailing_trivia="\n")
+  assert len(node_str.leading_trivia) == 1
+  assert node_str.leading_trivia[0].text == "  "
+  assert len(node_str.trailing_trivia) == 1
+  assert node_str.trailing_trivia[0].text == "\n"
+
+  node_none = DummyNode(name="test", leading_trivia=None, trailing_trivia=None)
+  assert node_none.leading_trivia == []
+  assert node_none.trailing_trivia == []
+
 
 def test_visitor() -> None:
   """Test the CSTVisitor traversal logic."""

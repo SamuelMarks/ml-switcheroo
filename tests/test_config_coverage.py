@@ -8,6 +8,7 @@ from ml_switcheroo.config import (
   _resolve_default_target,
   parse_cli_key_values,
   _load_toml_settings,
+  _import_tomllib,
 )
 from unittest.mock import patch
 
@@ -77,3 +78,40 @@ def test_load_toml_settings_error(tmp_path):
     (settings, path) = _load_toml_settings(tmp_path)
     assert settings == {}
     assert path is None
+
+
+def test_import_tomllib():
+  """Tests _import_tomllib behavior under different environments."""
+  # Python 3.11+ mock
+  with patch("sys.version_info", (3, 11)):
+    with patch("builtins.__import__") as mock_import:
+      _import_tomllib()
+      assert mock_import.call_args[0][0] == "tomllib"
+
+  # Python < 3.11 but tomli not installed
+  with patch("sys.version_info", (3, 9)):
+    import builtins
+
+    original_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+      if name == "tomli":
+        raise ImportError("No module named tomli")
+      return original_import(name, *args, **kwargs)
+
+    with patch("builtins.__import__", side_effect=fake_import):
+      assert _import_tomllib() is None
+
+
+def test_runtime_config_load_overrides(tmp_path):
+  """Tests the overrides passed to load()."""
+  toml_file = tmp_path / "pyproject.toml"
+  toml_file.write_text("""
+[tool.ml_switcheroo]
+plugin_paths = ["custom_plugins"]
+  """)
+  config = RuntimeConfig.load(strict_mode=True, enable_graph_optimization=True, search_path=tmp_path)
+  assert config.strict_mode is True
+  assert config.enable_graph_optimization is True
+  assert len(config.plugin_paths) == 1
+  assert config.plugin_paths[0].name == "custom_plugins"

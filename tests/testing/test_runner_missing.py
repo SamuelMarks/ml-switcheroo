@@ -71,10 +71,21 @@ def test_runner_run_details_not_dict():
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
   sr = EquivalenceRunner()
-  variants = {"jax": "string", "torch": {"api": "torch.add"}}
+  # Hit line 93: details is dict but missing "api" key
+  variants = {"jax": "string", "torch": {"api": "torch.add"}, "mlx": {"not_api": "something"}}
   with __import__("unittest.mock").mock.patch.object(sr, "_execute_api", return_value=1):
     (res, msg) = sr.verify(variants, [], {}, {})
     assert "Verified" in msg or "Failures" in msg
+
+
+def test_runner_deep_compare_shape_mismatch():
+  """Verifies behavior when arrays have different shapes."""
+  from ml_switcheroo.testing.runner import EquivalenceRunner
+  import numpy as np
+
+  sr = EquivalenceRunner()
+  # Hit line 228
+  assert sr._deep_compare(np.array([1, 2]), np.array([1, 2, 3])) is False
 
 
 def test_runner_run_shape_calculation_error():

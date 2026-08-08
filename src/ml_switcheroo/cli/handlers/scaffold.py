@@ -3,14 +3,12 @@
 Heuristically scans a new library to generate a skeleton mapping.
 """
 
-from typing import Any
-
 import json
 from argparse import Namespace
 from ml_switcheroo.discovery.consensus import ConsensusEngine
 
 
-def handle_scaffold(args: Namespace) -> Any:
+def handle_scaffold(args: Namespace) -> None:
   """Handles the 'scaffold' CLI command.
 
   This function orchestrates the process of scaffolding API mappings for a specified
@@ -20,12 +18,9 @@ def handle_scaffold(args: Namespace) -> Any:
 
   Args:
       args: The namespace object containing parsed command-line arguments.
-        Specifically, `args.framework` must contain the string name of the target
-        framework to be scaffolded.
+          Specifically, `args.framework` must contain the string name of the target
+          framework to be scaffolded.
 
-  Returns:
-      Any: The result of the scaffolding handler, which implicitly returns None
-      after writing the skeleton JSON file to the file system.
   """
   fw_name = args.framework
   print(f"Scaffolding API mapping for framework: {fw_name}")

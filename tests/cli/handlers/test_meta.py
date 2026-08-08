@@ -5,7 +5,11 @@ import json
 
 
 def test_handle_schema(capsys):
-  """Handles schema."""
+  """Handles schema.
+
+  Args:
+      capsys: ...
+  """
   assert handle_schema() == 0
   captured = capsys.readouterr()
   data = json.loads(captured.out)

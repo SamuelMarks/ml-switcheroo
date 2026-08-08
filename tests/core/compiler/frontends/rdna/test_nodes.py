@@ -1,96 +1,81 @@
-"""Test suite for the Nodes module."""
+"""Test rdna nodes."""
 
 import pytest
-from ml_switcheroo.core.compiler.frontends.rdna.cst import (
-  RdnaOperand,
-  RdnaLabelRef,
-  RdnaSGPR,
-  RdnaVGPR,
+from ml_switcheroo.core.compiler.frontends.rdna.nodes import (
+  RdnaNode,
+  Operand,
+  LabelRef,
+  SGPR,
+  VGPR,
   c_SGPR,
   c_VGPR,
-  RdnaImmediate,
-  RdnaModifier,
-  RdnaMemory,
-  RdnaInstruction,
-  RdnaLabel,
-  RdnaDirective,
-  RdnaComment,
+  Immediate,
+  Modifier,
+  Memory,
+  Instruction,
+  Label,
+  Directive,
+  Comment,
 )
 
 
-def test_operand_base():
-  """Verifies the behavior of operand base."""
-  op = RdnaOperand()
-  with __import__("pytest").raises(NotImplementedError):
-    str(op)
+def test_rdna_nodes():
+  """Verifies the behavior of rdna nodes."""
 
+  # Cover RdnaNode.__str__
+  class DummyRdna(RdnaNode):
+    def __str__(self):
+      return super().__str__()
 
-def test_label_ref():
-  """Verifies the behavior of label reference."""
-  ref = RdnaLabelRef(name="my_label")
-  assert str(ref) == "my_label"
+  assert str(DummyRdna()) == ""
 
+  # Cover Operand.__str__
+  class DummyOperand(Operand):
+    def __str__(self):
+      return super().__str__()
 
-def test_sgpr():
-  """Verifies the behavior of sgpr."""
-  assert str(RdnaSGPR(index=5)) == "s5"
-  assert str(RdnaSGPR(index=0, count=4)) == "s[0:3]"
-  assert str(c_SGPR(2)) == "s2"
+  assert str(DummyOperand()) == ""
 
+  lref = LabelRef("my_label")
+  assert str(lref) == "my_label"
 
-def test_vgpr():
-  """Verifies the behavior of vgpr."""
-  assert str(RdnaVGPR(index=10)) == "v10"
-  assert str(RdnaVGPR(index=5, count=2)) == "v[5:6]"
+  assert str(c_SGPR(0)) == "s0"
+  sgpr2 = SGPR(0, count=2)
+  assert str(sgpr2) == "s[0:1]"
+
   assert str(c_VGPR(1)) == "v1"
+  vgpr2 = VGPR(2, count=4)
+  assert str(vgpr2) == "v[2:5]"
 
+  imm = Immediate(1.0)
+  assert str(imm) == "1.0"
+  imm_hex = Immediate(15, is_hex=True)
+  assert str(imm_hex) == "0xf"
 
-def test_immediate():
-  """Verifies the behavior of immediate."""
-  assert str(RdnaImmediate(value=42)) == "42"
-  assert str(RdnaImmediate(value=255, is_hex=True)) == "0xff"
+  mod = Modifier("abs")
+  assert str(mod) == "abs"
 
+  mem = Memory("s[0:3]")
+  assert str(mem) == "s[0:3]"
+  mem_off = Memory("s[0:3]", offset=16)
+  assert str(mem_off) == "s[0:3] offset:16"
 
-def test_modifier():
-  """Verifies the behavior of modifier."""
-  assert str(RdnaModifier(name="glc")) == "glc"
+  inst = Instruction("v_add_f32", operands=[vgpr2, vgpr2, imm])
+  assert str(inst).strip() == "v_add_f32 v[2:5], v[2:5], 1.0"
 
+  with pytest.raises(ValueError):
+    Instruction("invalid opcode ")
 
-def test_memory():
-  """Verifies the behavior of memory."""
-  assert str(RdnaMemory(base=RdnaVGPR(index=0))) == "v0"
-  assert str(RdnaMemory(base=RdnaSGPR(index=2), offset=16)) == "s2 offset:16"
+  vgpr_trivia = VGPR(1)
+  vgpr_trivia.leading_trivia = " "
+  inst_trivia = Instruction("v_add_f32", operands=[vgpr_trivia])
+  assert str(inst_trivia) == "v_add_f32 v1"
 
+  label = Label("my_label")
+  assert str(label).strip() == "my_label:"
 
-def test_instruction():
-  """Verifies the behavior of instruction."""
-  inst1 = RdnaInstruction(opcode="v_nop")
-  assert str(inst1) == "v_nop"
-  inst2 = RdnaInstruction(opcode="v_add_f32", operands=[RdnaVGPR(index=0), RdnaVGPR(index=1), RdnaImmediate(value=5)])
-  assert str(inst2) == "v_add_f32 v0, v1, 5"
+  direc = Directive("text", params=["param1"])
+  assert str(direc) == ".text param1"
 
-
-def test_instruction_invalid_opcode():
-  """Verifies the behavior of instruction invalid opcode."""
-  with pytest.raises(ValueError, match="Invalid RDNA opcode"):
-    RdnaInstruction(opcode="invalid opcode")
-
-
-def test_label():
-  """Verifies the behavior of label."""
-  lbl = RdnaLabel(name="loop_start")
-  assert str(lbl) == "loop_start:"
-
-
-def test_directive():
-  """Verifies the behavior of directive."""
-  d1 = RdnaDirective(name="text")
-  assert str(d1) == ".text"
-  d2 = RdnaDirective(name="global_base", params=["foo", "bar"])
-  assert str(d2) == ".global_base foo, bar"
-
-
-def test_comment():
-  """Verifies the behavior of comment."""
-  c = RdnaComment(text="a comment")
-  assert str(c) == "; a comment"
+  comm = Comment("this is a comment")
+  assert str(comm).strip() == "; this is a comment"

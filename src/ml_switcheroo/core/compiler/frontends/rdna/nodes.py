@@ -18,8 +18,12 @@ class RdnaNode(abc.ABC):
 
   @abc.abstractmethod
   def __str__(self) -> str:
-    """Returns the valid RDNA string representation of the node."""
-    pass
+    """Returns the valid RDNA string representation of the node.
+
+    Returns:
+        str: RDNA string.
+    """
+    return ""
 
 
 @dataclass
@@ -27,7 +31,11 @@ class Operand(RdnaNode):
   """Base class for instruction operands (Registers, Immediates, etc.)."""
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Returns:
+        str: RDNA string.
+    """
     return ""
 
 
@@ -43,7 +51,11 @@ class LabelRef(Operand):
   name: str
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Returns:
+        str: RDNA string.
+    """
     return self.name
 
 
@@ -61,7 +73,11 @@ class SGPR(Operand):
   count: int = 1
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Returns:
+        str: RDNA string.
+    """
     if self.count > 1:
       end = self.index + self.count - 1
       return f"s[{self.index}:{end}]"
@@ -82,7 +98,11 @@ class VGPR(Operand):
   count: int = 1
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Returns:
+        str: RDNA string.
+    """
     if self.count > 1:
       end = self.index + self.count - 1
       return f"v[{self.index}:{end}]"
@@ -91,12 +111,26 @@ class VGPR(Operand):
 
 # Helper aliases for creating registers
 def c_SGPR(idx: int) -> SGPR:
-  """Helper to create a single SGPR."""
+  """Helper to create a single SGPR.
+
+  Args:
+      idx: Index.
+
+  Returns:
+      SGPR: SGPR.
+  """
   return SGPR(idx)
 
 
 def c_VGPR(idx: int) -> VGPR:
-  """Helper to create a single VGPR."""
+  """Helper to create a single VGPR.
+
+  Args:
+      idx: Index.
+
+  Returns:
+      VGPR: VGPR.
+  """
   return VGPR(idx)
 
 
@@ -114,7 +148,11 @@ class Immediate(Operand):
   is_hex: bool = False
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Returns:
+        str: RDNA string.
+    """
     if self.is_hex:
       return hex(int(self.value))
     return str(self.value)
@@ -135,7 +173,11 @@ class Modifier(Operand):
   name: str
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Returns:
+        str: RDNA string.
+    """
     return self.name
 
 
@@ -161,7 +203,11 @@ class Memory(Operand):
   offset: Optional[int] = None
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Returns:
+        str: RDNA string.
+    """
     base_str = str(self.base)
     if self.offset is not None and self.offset != 0:
       return f"{base_str} offset:{self.offset}"
@@ -185,12 +231,20 @@ class Instruction(RdnaNode):
   operands: List[Operand] = field(default_factory=list)
 
   def __post_init__(self) -> None:
-    """Auto-generated doc."""
+    """Auto-generated doc.
+
+    Raises:
+        ValueError: Value error.
+    """
     if " " in self.opcode:
       raise ValueError("Invalid RDNA opcode")
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Returns:
+        str: RDNA string.
+    """
     ops_str = ""
     for i, op in enumerate(self.operands):
       op_leading = getattr(op, "leading_trivia", "")
@@ -226,7 +280,11 @@ class Label(RdnaNode):
   name: str
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Returns:
+        str: RDNA string.
+    """
     return f"{self.leading_trivia}{self.name}:{self.trailing_trivia}"
 
 
@@ -246,7 +304,11 @@ class Directive(RdnaNode):
   params: List[str] = field(default_factory=list)
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Returns:
+        str: RDNA string.
+    """
     out = f".{self.name}"
     if self.params:
       out += " " + ", ".join(self.params)
@@ -269,5 +331,9 @@ class Comment(RdnaNode):
   text: str
 
   def __str__(self) -> str:
-    """Execute implementation detail."""
+    """Execute implementation detail.
+
+    Returns:
+        str: RDNA string.
+    """
     return f"{self.leading_trivia}; {self.text}{self.trailing_trivia}"

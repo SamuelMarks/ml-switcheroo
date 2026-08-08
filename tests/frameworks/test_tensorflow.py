@@ -6,6 +6,26 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from unittest.mock import patch
 
 
+def test_tensorflow_import_exception():
+  """Verifies the behavior when tensorflow fails to import during module load."""
+  from importlib import reload
+  import ml_switcheroo.frameworks.tensorflow as tf_module
+
+  real_import = __import__
+
+  def mock_import(name, *args, **kwargs):
+    """Mocks python import builtin."""
+    if name == "tensorflow":
+      raise Exception("Simulated TF load failure")
+    return real_import(name, *args, **kwargs)
+
+  with patch("builtins.__import__", mock_import):
+    reload(tf_module)
+    assert tf_module.tf is None
+
+  reload(tf_module)  # restore
+
+
 def test_tensorflow_adapter_init():
   """Verifies the behavior of TensorFlow adapter initialization."""
   adapter = TensorFlowAdapter()
@@ -20,6 +40,16 @@ def test_tensorflow_init_live(monkeypatch):
   monkeypatch.setattr("ml_switcheroo.frameworks.tensorflow.tf", True)
   adapter = TensorFlowAdapter()
   assert adapter._mode == InitMode.LIVE
+
+
+def test_tensorflow_init_ghost_no_snapshot(monkeypatch):
+  """Verifies the behavior of TensorFlow initialization ghost no snapshot."""
+  monkeypatch.setattr("ml_switcheroo.frameworks.tensorflow.tf", None)
+  monkeypatch.setattr("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", lambda _: {})
+  with patch("logging.debug") as mock_debug:
+    adapter = TensorFlowAdapter()
+    assert adapter._mode == InitMode.GHOST
+    mock_debug.assert_called_once_with("TensorFlow not installed and no snapshot found.")
 
 
 def test_tensorflow_properties():
@@ -52,10 +82,14 @@ def test_tensorflow_apply_wiring():
   assert snapshot == {}
 
   # Test with mappings
-  snapshot2 = {"mappings": {"op1": {"api": "tensorflow.math.add"}, "op2": {"api": "other.add"}, "op3": None}}
+  snapshot2 = {
+    "mappings": {"op1": {"api": "tensorflow.math.add"}, "op2": {"api": "other.add"}, "op3": None, "op4": {"not_api": 1}}
+  }
   adapter.apply_wiring(snapshot2)
   assert snapshot2["mappings"]["op1"]["api"] == "tf.math.add"
   assert snapshot2["mappings"]["op2"]["api"] == "other.add"
+  assert snapshot2["mappings"]["op3"] is None
+  assert snapshot2["mappings"]["op4"] == {"not_api": 1}
 
 
 def test_tensorflow_device_syntax():

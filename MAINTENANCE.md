@@ -163,8 +163,8 @@ error, the Harvester can extract the rule back into the JSONs.
 1. **Write/Fix a test** in `tests/examples/`:
    ```python
    def test_custom_add():
-       # You manually fixed arguments: alpha -> scale
-       jax.numpy.add(x, y, scale=0.5)
+     # You manually fixed arguments: alpha -> scale
+     jax.numpy.add(x, y, scale=0.5)
    ```
 2. **Run the extractor**:
    ```bash

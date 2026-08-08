@@ -292,21 +292,89 @@ def test_normalize_arguments_target_kwarg_mapping():
   assert new_args[0].keyword.value == "unmapped"
 
 
-def test_normalize_arguments_default_exception():
-  """Verifies the behavior of normalize arguments default correctly handling an exception."""
-  code = "foo()"
+def test_normalize_arguments_std_args_list_item():
+  """Hits line 156 where std_arg item is a list/tuple."""
+  code = "foo(1)"
   tree = cst.parse_module(code)
   call_node = tree.body[0].body[0].value
+  op_details = {"std_args": [["a", "Tensor"]]}
+  new_args = normalize_arguments(call_node, call_node, op_details, {}, "torch", lambda x: False)
+  assert len(new_args) == 1
+  assert new_args[0].value.value == "1"
 
-  class Unconvertible:
-    """Unconvertible."""
 
-    pass
+def test_normalize_arguments_method_no_args():
+  """Hits lines 201-202 where original_node is method but no std args exist."""
+  code = "x.foo()"
+  tree = cst.parse_module(code)
+  call_node = tree.body[0].body[0].value
+  op_details = {"std_args": []}
+  new_args = normalize_arguments(call_node, call_node, op_details, {}, "torch", lambda x: False)
+  assert len(new_args) == 1
+  assert getattr(new_args[0].value, "value", None) == "x"
 
-  op_details = {"std_args": [{"name": "a", "default": Unconvertible()}]}
+
+def test_normalize_arguments_map_value_error():
+  """Hits lines 276-277 where convert_value_to_cst raises an error."""
+  code = "foo(1)"
+  tree = cst.parse_module(code)
+  call_node = tree.body[0].body[0].value
+  op_details = {"std_args": ["a"]}
+  target_impl = {"arg_values": {"a": "1/0"}}
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.normalization_utils as utils
 
-    m.setattr(utils, "convert_value_to_cst", lambda x: 1 / 0)
+    def faulty_convert(*args, **kwargs):
+      raise ValueError("simulated error")
+
+    m.setattr(utils, "convert_value_to_cst", faulty_convert)
+    new_args = normalize_arguments(call_node, call_node, op_details, target_impl, "torch", lambda x: False)
+    assert len(new_args) == 1
+    assert isinstance(new_args[0].value, cst.BinaryOperation)
+
+
+def test_normalize_arguments_default_value_cst_error():
+  """Hits lines 276-277 where convert_value_to_cst raises on a default."""
+  code = "foo(1)"
+  tree = cst.parse_module(code)
+  call_node = tree.body[0].body[0].value
+  op_details = {"std_args": ["a", {"name": "b", "default": "bad_def"}]}
+
+  with pytest.MonkeyPatch().context() as m:
+    import ml_switcheroo.core.rewriter.normalization_utils as utils
+
+    def faulty_convert(val):
+      if val == "bad_def":
+        raise ValueError("simulated")
+      return cst.Name("ok")
+
+    m.setattr(utils, "convert_value_to_cst", faulty_convert)
     new_args = normalize_arguments(call_node, call_node, op_details, {}, "torch", lambda x: False)
-  assert len(new_args) == 0
+    # The default fails, so it doesn't get added, len is just 1.
+    assert len(new_args) == 1
+
+
+def test_normalize_arguments_pos_extra():
+  """Hits line 222 where a positional arg is passed but exceeds std_args."""
+  code = "foo(1, 2)"
+  tree = cst.parse_module(code)
+  call_node = tree.body[0].body[0].value
+  op_details = {"std_args": ["a"]}
+  new_args = normalize_arguments(call_node, call_node, op_details, {}, "torch", lambda x: False)
+  assert len(new_args) == 2
+  assert new_args[1].value.value == "2"
+
+
+def test_normalize_imports_injection_comma():
+  """Hits line 367 where an injected arg requires a comma on the preceding arg."""
+  code = "foo(1)"
+  tree = cst.parse_module(code)
+  _call_node = tree.body[0].body[0].value
+  # To bypass the cst parser adding a comma implicitly, we construct the node manually
+  manual_call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Integer("1"), comma=cst.MaybeSentinel.DEFAULT)])
+  op_details = {"std_args": ["a"]}
+  target_impl = {"inject_args": {"new_arg": "100"}}
+  new_args = normalize_arguments(manual_call, manual_call, op_details, target_impl, "torch", lambda x: False)
+  assert len(new_args) == 2
+  assert isinstance(new_args[0].comma, cst.Comma)
+  assert new_args[1].keyword.value == "new_arg"

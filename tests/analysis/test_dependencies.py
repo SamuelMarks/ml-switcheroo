@@ -24,35 +24,56 @@ def scanner():
 
 
 def scan_code(scanner, code):
-  """Scans code."""
+  """Scans code.
+
+  Args:
+      scanner: ...
+      code: ...
+  """
   tree = cst.parse_module(code)
   tree.visit(scanner)
   return scanner.unknown_imports
 
 
 def test_ignore_stdlib(scanner):
-  """Verifies the behavior of ignore stdlib."""
+  """Verifies the behavior of ignore stdlib.
+
+  Args:
+      scanner: ...
+  """
   code = "\nimport os\nimport sys\nfrom typing import Union, List\nfrom datetime import datetime\n"
   unknowns = scan_code(scanner, code)
   assert len(unknowns) == 0
 
 
 def test_ignore_source_framework(scanner):
-  """Verifies the behavior of ignore source framework."""
+  """Verifies the behavior of ignore source framework.
+
+  Args:
+      scanner: ...
+  """
   code = "\nimport torch\nimport torch.nn as nn\nfrom torch import optim\n"
   unknowns = scan_code(scanner, code)
   assert len(unknowns) == 0
 
 
 def test_ignore_mapped_dependencies(scanner):
-  """Verifies the behavior of ignore mapped dependencies."""
+  """Verifies the behavior of ignore mapped dependencies.
+
+  Args:
+      scanner: ...
+  """
   code = "\nimport numpy as np\nimport PIL\nfrom PIL import Image\n"
   unknowns = scan_code(scanner, code)
   assert len(unknowns) == 0
 
 
 def test_flag_unmapped_third_party(scanner):
-  """Verifies the behavior of flag unmapped third party."""
+  """Verifies the behavior of flag unmapped third party.
+
+  Args:
+      scanner: ...
+  """
   code = "\nimport pandas as pd\nimport cv2\n"
   unknowns = scan_code(scanner, code)
   assert "pandas" in unknowns
@@ -61,14 +82,22 @@ def test_flag_unmapped_third_party(scanner):
 
 
 def test_flag_deep_imports(scanner):
-  """Verifies the behavior of flag deep imports."""
+  """Verifies the behavior of flag deep imports.
+
+  Args:
+      scanner: ...
+  """
   code = "from sklearn.metrics import f1_score"
   unknowns = scan_code(scanner, code)
   assert "sklearn" in unknowns
 
 
 def test_ignore_relative_imports(scanner):
-  """Verifies the behavior of ignore relative imports."""
+  """Verifies the behavior of ignore relative imports.
+
+  Args:
+      scanner: ...
+  """
   code1 = "from . import x"
   unknowns1 = scan_code(scanner, code1)
   assert len(unknowns1) == 0
@@ -78,20 +107,32 @@ def test_ignore_relative_imports(scanner):
 
 
 def test_get_root_package_non_name(scanner):
-  """Gets root package non name."""
+  """Gets root package non name.
+
+  Args:
+      scanner: ...
+  """
   res = scanner._get_root_package(cst.Integer("1"))
   assert res == ""
 
 
 def test_import_from_no_module_name(scanner):
-  """Tests ImportFrom where module is None."""
+  """Tests ImportFrom where module is None.
+
+  Args:
+      scanner: ...
+  """
   code = "from ... import module"
   unknowns = scan_code(scanner, code)
   assert len(unknowns) == 0
 
 
 def test_is_stdlib_fallback_3_10(scanner):
-  """Checks if is stdlib fallback on python 3.10+"""
+  """Checks if is stdlib fallback on python 3.10+
+
+  Args:
+      scanner: ...
+  """
   with patch.object(sys, "version_info", (3, 10)):
     # Mock sys.stdlib_module_names if not available
     if not hasattr(sys, "stdlib_module_names"):
@@ -101,13 +142,21 @@ def test_is_stdlib_fallback_3_10(scanner):
 
 
 def test_validate_package_empty(scanner):
-  """Validates package empty."""
+  """Validates package empty.
+
+  Args:
+      scanner: ...
+  """
   scanner._validate_package("")
   assert len(scanner.unknown_imports) == 0
 
 
 def test_is_stdlib_fallback(scanner):
-  """Checks if is stdlib fallback."""
+  """Checks if is stdlib fallback.
+
+  Args:
+      scanner: ...
+  """
   with patch.object(sys, "version_info", (3, 9)):
     assert scanner._is_stdlib("os") is True
     assert scanner._is_stdlib("unknown_lib") is False
@@ -122,7 +171,11 @@ def test_no_semantics():
 
 
 def test_ignore_relative_imports_missing_module(scanner):
-  """Verifies the behavior of ignore relative imports when module is None."""
+  """Verifies the behavior of ignore relative imports when module is None.
+
+  Args:
+      scanner: ...
+  """
   from libcst import ImportFrom
   from unittest.mock import MagicMock
 

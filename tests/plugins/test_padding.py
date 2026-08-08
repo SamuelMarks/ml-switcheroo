@@ -99,3 +99,75 @@ def test_padding_missing_comma(rewriter):
   ctx.lookup_api.return_value = "jnp.pad"
   res = transform_padding(node, ctx)
   assert isinstance(res.args[0].comma, cst.Comma)
+
+
+def test_no_semantics(rewriter):
+  """Verifies behavior when ctx.semantics is None."""
+  code = "y = F.pad(x, (1, 2, 3, 4))"
+  call_node = cst.parse_module(code).body[0].body[0].value
+  rewriter.ctx.semantics = None
+  res = transform_padding(call_node, rewriter.ctx)
+  assert res is call_node
+
+
+def test_no_config(rewriter):
+  """Verifies behavior when get_framework_config returns None."""
+  code = "y = F.pad(x, (1, 2, 3, 4))"
+  call_node = cst.parse_module(code).body[0].body[0].value
+  rewriter.ctx.semantics.get_framework_config = MagicMock(return_value=None)
+  res = transform_padding(call_node, rewriter.ctx)
+  assert res is call_node
+
+
+def test_no_traits(rewriter):
+  """Verifies behavior when plugin_traits is missing."""
+  code = "y = F.pad(x, (1, 2, 3, 4))"
+  call_node = cst.parse_module(code).body[0].body[0].value
+  rewriter.ctx.semantics.get_framework_config = MagicMock(return_value={"plugin_traits": None})
+  res = transform_padding(call_node, rewriter.ctx)
+  assert res is call_node
+
+
+def test_traits_is_dict(rewriter):
+  """Verifies behavior when traits is a dict."""
+  code = "y = F.pad(x, (1, 2, 3, 4))"
+  call_node = cst.parse_module(code).body[0].body[0].value
+  rewriter.ctx.semantics.get_framework_config = MagicMock(
+    return_value={"plugin_traits": {"has_numpy_compatible_arrays": True}}
+  )
+  res = transform_padding(call_node, rewriter.ctx)
+  assert "jnp.pad" in cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res)])]).code
+
+
+def test_traits_no_attr(rewriter):
+  """Verifies behavior when traits object lacks has_numpy_compatible_arrays."""
+  code = "y = F.pad(x, (1, 2, 3, 4))"
+  call_node = cst.parse_module(code).body[0].body[0].value
+  rewriter.ctx.semantics.get_framework_config = MagicMock(return_value={"plugin_traits": object()})
+  res = transform_padding(call_node, rewriter.ctx)
+  assert res is call_node
+
+
+def test_no_target_api(rewriter):
+  """Verifies behavior when lookup_api fails."""
+  code = "y = F.pad(x, (1, 2, 3, 4))"
+  call_node = cst.parse_module(code).body[0].body[0].value
+  rewriter.ctx.lookup_api = MagicMock(return_value=None)
+  res = transform_padding(call_node, rewriter.ctx)
+  assert res is call_node
+
+
+def test_pad_not_tuple(rewriter):
+  """Verifies behavior when padding arg is not a tuple."""
+  code = "y = F.pad(x, pad_val)"
+  call_node = cst.parse_module(code).body[0].body[0].value
+  res = transform_padding(call_node, rewriter.ctx)
+  assert res is call_node
+
+
+def test_pad_wrong_length(rewriter):
+  """Verifies behavior when padding tuple is not length 4."""
+  code = "y = F.pad(x, (1, 2))"
+  call_node = cst.parse_module(code).body[0].body[0].value
+  res = transform_padding(call_node, rewriter.ctx)
+  assert res is call_node

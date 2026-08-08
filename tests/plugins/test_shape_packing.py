@@ -105,3 +105,73 @@ def test_packing_function_call(rewriter_factory):
   res = rewrite_code(rw, code)
   assert "jnp.reshape(x" in res
   assert "(1, 2)" in res
+
+
+def test_packing_fallback_to_view():
+  """Verifies behavior when Reshape is missing but View is present."""
+  node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("view")), args=[cst.Arg(cst.Integer("1"))])
+  ctx = MagicMock()
+  ctx.current_op_id = "Reshape"
+
+  def lookup(op_id):
+    if op_id == "Reshape":
+      return None
+    if op_id == "View":
+      return "jnp.view_api"
+    return None
+
+  ctx.lookup_api.side_effect = lookup
+  res = transform_shape_packing(node, ctx)
+  assert res.func.attr.value == "view_api"
+
+
+def test_packing_missing_target_api():
+  """Verifies behavior when target API is missing."""
+  node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("view")), args=[cst.Arg(cst.Integer("1"))])
+  ctx = MagicMock()
+  ctx.current_op_id = "Reshape"
+  ctx.lookup_api.return_value = None
+  res = transform_shape_packing(node, ctx)
+  assert res is node
+
+
+def test_packing_function_missing_args():
+  """Verifies behavior when called as function without args."""
+  node = cst.Call(func=cst.Name("torch_view"), args=[])
+  ctx = MagicMock()
+  ctx.current_op_id = "Reshape"
+  ctx.lookup_api.return_value = "jnp.reshape"
+
+  from unittest.mock import patch
+
+  with patch("ml_switcheroo.plugins.shape_packing.is_framework_module_node", return_value=True):
+    node = node.with_changes(func=cst.Attribute(value=cst.Name("torch"), attr=cst.Name("view")))
+    res = transform_shape_packing(node, ctx)
+  assert res is node
+
+
+def test_packing_method_missing_args():
+  """Verifies behavior when called as method without shape args."""
+  node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("view")), args=[])
+  ctx = MagicMock()
+  ctx.current_op_id = "Reshape"
+  ctx.lookup_api.return_value = "jnp.reshape"
+  res = transform_shape_packing(node, ctx)
+  assert res is node
+
+
+def test_packing_one_int_arg(rewriter_factory):
+  """Verifies behavior when shape is a single integer."""
+  rw = rewriter_factory("jax")
+  code = "y = x.view(1)"
+  res = rewrite_code(rw, code)
+  assert "jnp.reshape(x" in res
+  assert "(1, )" in res
+
+
+def test_packing_one_tuple_arg(rewriter_factory):
+  """Verifies behavior when shape is already packed in a tuple/variable."""
+  rw = rewriter_factory("jax")
+  code = "y = x.view(shape)"
+  res = rewrite_code(rw, code)
+  assert "jnp.reshape(x, shape)" in res

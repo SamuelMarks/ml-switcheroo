@@ -7,6 +7,8 @@ framework operations. This parsing allows the compiler to rebuild or match
 logical sections during model translation or execution tracing.
 """
 
+import pytest
+
 from ml_switcheroo.core.compiler.frontends.semantic_parser import (
   SemanticCommentParser,
   SemanticInput,
@@ -14,6 +16,7 @@ from ml_switcheroo.core.compiler.frontends.semantic_parser import (
   SemanticEnd,
   SemanticUnmapped,
   SemanticReturn,
+  SemanticMarker,
   Trivia,
 )
 
@@ -62,6 +65,10 @@ def test_semantic_parser_begin():
   assert marker.id == "block1"
   assert marker.to_text() == "BEGIN Conv2d(block1)"
 
+  marker2 = parser.parse("BEGIN Conv2d ( block1 ) ")
+  assert isinstance(marker2, SemanticBegin)
+  assert marker2.to_text() == "BEGIN Conv2d ( block1 ) "
+
 
 def test_semantic_parser_end():
   """Verifies that 'END' annotations are correctly parsed into SemanticEnd markers.
@@ -81,6 +88,10 @@ def test_semantic_parser_end():
   assert marker.kind == "Conv2d"
   assert marker.id == "block1"
   assert marker.to_text() == "END Conv2d(block1)"
+
+  marker2 = parser.parse("END Conv2d ( block1 ) ")
+  assert isinstance(marker2, SemanticEnd)
+  assert marker2.to_text() == "END Conv2d ( block1 ) "
 
 
 def test_semantic_parser_unmapped():
@@ -108,6 +119,10 @@ def test_semantic_parser_unmapped():
   assert marker2.api == "torch.nn.functional.relu"
   assert marker2.id == "node2"
   assert marker2.to_text() == " Unmapped Op: torch.nn.functional.relu(node2) "
+
+  marker3 = parser.parse("Unmapped Op: Linear ( node1 ) ")
+  assert isinstance(marker3, SemanticUnmapped)
+  assert marker3.to_text() == "Unmapped Op: Linear ( node1 ) "
 
 
 def test_semantic_parser_return():
@@ -164,3 +179,10 @@ def test_semantic_parser_invalid():
   parser = SemanticCommentParser()
   assert parser.parse("Invalid comment") is None
   assert parser.parse("BEGIN Conv2d block1)") is None  # missing lparen
+
+
+def test_semantic_marker_base():
+  """Verifies the base class NotImplementedError for to_text."""
+  marker = SemanticMarker()
+  with pytest.raises(NotImplementedError):
+    marker.to_text()

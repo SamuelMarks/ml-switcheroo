@@ -13,11 +13,10 @@ def mock_sys_modules():
   """Provides a mock system modules for testing."""
   torch_mock = MagicMock()
   tf_mock = MagicMock()
-  sys.modules["torch"] = torch_mock
-  sys.modules["tensorflow"] = tf_mock
-  yield (torch_mock, tf_mock)
-  del sys.modules["torch"]
-  del sys.modules["tensorflow"]
+  from unittest.mock import patch
+
+  with patch.dict(sys.modules, {"torch": torch_mock, "tensorflow": tf_mock}):
+    yield (torch_mock, tf_mock)
 
 
 def test_ensure_determinism_auto(mock_sys_modules):
@@ -29,16 +28,19 @@ def test_ensure_determinism_auto(mock_sys_modules):
   else:
     func = rt.ensure_determinism.__wrapped__
   mlx_mock = MagicMock()
-  sys.modules["mlx"] = mlx_mock
-  sys.modules["mlx.core"] = mlx_mock.core
+  from unittest.mock import patch
+
+  with patch.dict(sys.modules, {"mlx": mlx_mock, "mlx.core": mlx_mock.core}):
+    func()
+    torch_mock.manual_seed.side_effect = Exception("boom")
+    tf_mock.random.set_seed.side_effect = Exception("boom")
+    mlx_mock.core.random.seed.side_effect = Exception("boom")
+    func()
+
+  with patch.dict(sys.modules, {"mlx": mlx_mock}):
+    func()
+
   func()
-  torch_mock.manual_seed.side_effect = Exception("boom")
-  tf_mock.random.set_seed.side_effect = Exception("boom")
-  mlx_mock.core.random.seed.side_effect = Exception("boom")
-  func()
-  del sys.modules["mlx.core"]
-  func()
-  del sys.modules["mlx"]
 
 
 def test_verify_results_shape_mismatch():

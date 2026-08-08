@@ -92,11 +92,7 @@ class RegisterAllocator:
   """
 
   def __init__(self) -> None:
-    """Initializes the allocator with a free pool.
-
-    Returns:
-        None
-    """
+    """Initializes the allocator with a free pool."""
     self._var_to_reg: Dict[str, str] = {}
     self._free_pool: List[str] = [f"R{i}" for i in range(MAX_REGISTERS)]
     self._liveness_map: Dict[str, int] = {}
@@ -107,8 +103,6 @@ class RegisterAllocator:
     Args:
         var_name (str): The symbolic name of the variable whose register is to be freed.
 
-    Returns:
-        None
     """
     if var_name in self._var_to_reg:
       reg = self._var_to_reg.pop(var_name)
@@ -153,8 +147,6 @@ class RegisterAllocator:
     Clears all symbolic-to-physical mappings, reinitializes the register pool,
     and clears the liveness tracking map.
 
-    Returns:
-        None
     """
     self._var_to_reg.clear()
     self._free_pool = [f"R{i}" for i in range(MAX_REGISTERS)]
@@ -166,8 +158,6 @@ class RegisterAllocator:
     Args:
         graph (LogicalGraph): The logical computation graph to analyze.
 
-    Returns:
-        None
     """
     self._liveness_map.clear()
     for edge in graph.edges:
@@ -181,8 +171,6 @@ class RegisterAllocator:
     Args:
         var_name (str): The name of the variable being referenced.
 
-    Returns:
-        None
     """
     if var_name in self._liveness_map:
       self._liveness_map[var_name] -= 1
@@ -208,8 +196,6 @@ class SassSynthesizer:
     Args:
         semantics (SemanticsManager): The knowledge base for Opcode lookups.
 
-    Returns:
-        None
     """
     self.semantics = semantics
     self.allocator = RegisterAllocator()

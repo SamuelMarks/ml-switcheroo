@@ -32,7 +32,7 @@ ROOT_FILES = (
 
 
 def clean() -> None:
-  """Cleans the build directory and temporary artifacts."""
+  """Clean the build directory and temporary artifacts."""
   if BUILD_DIR.exists():
     shutil.rmtree(BUILD_DIR)
 
@@ -53,7 +53,7 @@ def clean() -> None:
 
 
 def copy_root_files() -> None:
-  """Copies essential Markdown files from the project root to the docs directory."""
+  """Copy essential Markdown files from the project root to the docs directory."""
   print("📋 Copying root Markdown files to docs/...")
   for fname in ROOT_FILES:
     src = PROJECT_ROOT / fname
@@ -65,7 +65,7 @@ def copy_root_files() -> None:
 
 
 def build_wheel() -> None:
-  """Builds the pure Python wheel for the WASM demo."""
+  """Build the pure Python wheel for the WASM demo."""
   print("📦 Building Python Wheel for WASM...")
   dist_dir = PROJECT_ROOT / "dist"
   if dist_dir.exists():
@@ -82,7 +82,7 @@ def build_wheel() -> None:
 
 
 def calculate_unique_variants() -> None:
-  """Calculates the unique cross-framework variants across all semantics files."""
+  """Calculate the unique cross-framework variants across all semantics files."""
   try:
     from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -98,7 +98,14 @@ def calculate_unique_variants() -> None:
 
 
 def build(build_all: bool = False) -> int:
-  """Executes the Sphinx build process."""
+  """Execute the Sphinx build process.
+
+  Args:
+      build_all: Whether to perform a full build.
+
+  Returns:
+      The return code from the sphinx-build command.
+  """
   calculate_unique_variants()
   build_wheel()
 
@@ -127,7 +134,7 @@ def build(build_all: bool = False) -> int:
 
 
 def main() -> None:
-  """Auto-generated doc."""
+  """Run the documentation build process."""
   import argparse
 
   parser = argparse.ArgumentParser(description="Build ml-switcheroo documentation.")

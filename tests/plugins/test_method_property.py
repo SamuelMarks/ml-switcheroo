@@ -96,3 +96,17 @@ def test_data_ptr_mapping(rewriter):
   res = transform_method_to_property(node, rewriter.ctx)
   assert isinstance(res, cst.Attribute)
   assert res.attr.value == "data"
+
+
+def test_func_not_attribute(rewriter):
+  """Verifies the behavior when node.func is not an Attribute."""
+  node = cst.Call(func=cst.Name("size"))
+  res = transform_method_to_property(node, rewriter.ctx)
+  assert res is node
+
+
+def test_unknown_method(rewriter):
+  """Verifies the behavior when the method name is not recognized."""
+  node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("unknown_method")))
+  res = transform_method_to_property(node, rewriter.ctx)
+  assert res is node

@@ -17,7 +17,14 @@ except ImportError as e:
 
 
 def validate_file(filepath: Path) -> bool:
-  """Auto-generated doc."""
+  """Validate a single JSON file against the SemanticsFile schema.
+
+  Args:
+    filepath: Path to the JSON file to validate.
+
+  Returns:
+    True if the file is valid, False otherwise.
+  """
   try:
     with open(filepath, "r", encoding="utf-8") as f:
       content = json.load(f)
@@ -29,7 +36,11 @@ def validate_file(filepath: Path) -> bool:
 
 
 def main() -> None:
-  """Auto-generated doc."""
+  """Execute validation for ODL JSON semantics files.
+
+  Expects a list of file paths as command line arguments.
+  Exits with code 1 if any semantics JSON file fails validation.
+  """
   failed = False
   for arg in sys.argv[1:]:
     filepath = Path(arg)

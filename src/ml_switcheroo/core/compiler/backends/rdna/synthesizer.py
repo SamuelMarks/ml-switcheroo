@@ -53,11 +53,7 @@ class RegisterAllocator:
   """
 
   def __init__(self) -> None:
-    """Initializes the allocator with empty maps and counters.
-
-    Returns:
-        None
-    """
+    """Initializes the allocator with empty maps and counters."""
     self._var_to_vgpr: Dict[str, int] = {}
     self._var_to_sgpr: Dict[str, int] = {}
     self._next_vgpr = 0
@@ -65,6 +61,9 @@ class RegisterAllocator:
 
   def get_vector_register(self, var_name: str) -> RdnaVGPR:
     """Retrieves or allocates a Vector register (RdnaVGPR) for a symbolic variable.
+
+    Raises:
+        ValueError: If register limit is exceeded.
 
     Args:
         var_name: The symbolic name of the variable.
@@ -85,6 +84,9 @@ class RegisterAllocator:
 
   def get_scalar_register(self, var_name: str) -> RdnaSGPR:
     """Retrieves or allocates a Scalar register (RdnaSGPR) for a symbolic variable.
+
+    Raises:
+        ValueError: If register limit is exceeded.
 
     Args:
         var_name: The symbolic name of the variable.
@@ -122,11 +124,7 @@ class RegisterAllocator:
     return self.get_scalar_register(name)
 
   def reset(self) -> None:
-    """Resets all allocation state.
-
-    Returns:
-        None
-    """
+    """Resets all allocation state."""
     self._var_to_vgpr.clear()
     self._var_to_sgpr.clear()
     self._next_vgpr = 0
