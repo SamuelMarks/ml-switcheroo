@@ -95,6 +95,7 @@ def test_import_tomllib():
     original_import = builtins.__import__
 
     def fake_import(name, *args, **kwargs):
+      """Fake import."""
       if name == "tomli":
         raise ImportError("No module named tomli")
       return original_import(name, *args, **kwargs)

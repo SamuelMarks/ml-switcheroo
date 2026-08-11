@@ -200,3 +200,78 @@ def test_sharding_extractor_source_node_not_found():
   pass_ = ShardingExtractionPass()
   extracted = pass_.apply(graph)
   assert len(extracted.nodes) == 1
+
+
+def test_sharding_extractor_duplicate_edge():
+  # Hit 85->77
+  """Test sharding extractor duplicate edge."""
+  from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+
+  g = LogicalGraph("Test")
+  g.nodes.append(LogicalNode("A", "Op"))
+  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"spec": "PartitionSpec()"}))
+  g.nodes.append(LogicalNode("B", "Op"))
+  g.edges.append(LogicalEdge("A", "Shard"))
+  g.edges.append(LogicalEdge("Shard", "B"))
+  # duplicate edge from A to B directly
+  g.edges.append(LogicalEdge("A", "B"))
+  ShardingExtractionPass().apply(g)
+
+
+def test_sharding_extractor_ast_not_call():
+  # Hit 111->128
+  """Test sharding extractor ast not call."""
+  from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
+
+  # The string must contain PartitionSpec to pass the substring check
+  res = ShardingExtractionPass()._parse_partition_spec("'PartitionSpec'")
+  assert res is None
+
+
+def test_sharding_extractor_duplicate_edge_not_in_new_edges():
+  # Hit 85->77 (if new_edge in new_edges is True -> does not append)
+  """Test sharding extractor duplicate edge not in new edges."""
+  from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+
+  g = LogicalGraph("Test")
+  g.nodes.append(LogicalNode("A", "Op"))
+  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"spec": "PartitionSpec()"}))
+  g.nodes.append(LogicalNode("B", "Op"))
+  g.edges.append(LogicalEdge("A", "Shard"))
+  g.edges.append(LogicalEdge("A", "B"))  # Add the new_edge to new_edges first
+  g.edges.append(LogicalEdge("Shard", "B"))  # Then when this is processed, new_edge is already in new_edges
+  ShardingExtractionPass().apply(g)
+
+
+def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact():
+  # Hit 85->77 (if new_edge in new_edges is True -> does not append)
+  """Test sharding extractor duplicate edge not in new edges exact."""
+  from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+
+  g = LogicalGraph("Test")
+  g.nodes.append(LogicalNode("A", "Op"))
+  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"spec": "PartitionSpec()"}))
+  g.nodes.append(LogicalNode("B", "Op"))
+  g.edges.append(LogicalEdge("A", "Shard"))
+  g.edges.append(LogicalEdge("A", "B"))  # Will be in new_edges
+  g.edges.append(LogicalEdge("Shard", "B"))  # Will create new_edge A->B and check if in new_edges
+  ShardingExtractionPass().apply(g)
+
+
+def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact_dataclass():
+  # Hit 85->77 by making sure equality holds
+  """Test sharding extractor duplicate edge not in new edges exact dataclass."""
+  from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+
+  g = LogicalGraph("Test")
+  g.nodes.append(LogicalNode("A", "Op"))
+  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"spec": "PartitionSpec()"}))
+  g.nodes.append(LogicalNode("B", "Op"))
+  g.edges.append(LogicalEdge(source="A", target="Shard"))
+  g.edges.append(LogicalEdge(source="A", target="B"))  # Will be in new_edges
+  g.edges.append(LogicalEdge(source="Shard", target="B"))  # Will create new_edge A->B and check if in new_edges
+  ShardingExtractionPass().apply(g)

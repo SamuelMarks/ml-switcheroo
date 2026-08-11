@@ -325,6 +325,7 @@ def test_normalize_arguments_map_value_error():
     import ml_switcheroo.core.rewriter.normalization_utils as utils
 
     def faulty_convert(*args, **kwargs):
+      """Faulty convert."""
       raise ValueError("simulated error")
 
     m.setattr(utils, "convert_value_to_cst", faulty_convert)
@@ -344,6 +345,7 @@ def test_normalize_arguments_default_value_cst_error():
     import ml_switcheroo.core.rewriter.normalization_utils as utils
 
     def faulty_convert(val):
+      """Faulty convert."""
       if val == "bad_def":
         raise ValueError("simulated")
       return cst.Name("ok")

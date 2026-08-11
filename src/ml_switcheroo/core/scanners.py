@@ -24,13 +24,10 @@ def get_full_name(node: Union[cst.Name, cst.Attribute]) -> str:
   comparable with import definitions.
 
   Args:
-    node: The CST node representing the identifier.
-      Typically a ``cst.Name`` (e.g., ``x``) or ``cst.Attribute`` (e.g., ``x.y``).
+      node: The CST node representing the identifier. Typically a ``cst.Name`` (e.g., ``x``) or ``cst.Attribute`` (e.g., ``x.y``).
 
   Returns:
-    str: The fully qualified string representation (e.g., "torch.nn.functional").
-    Returns an empty string if the node structure is not a supported Name/Attribute chain.
-
+      The fully qualified string representation (e.g., "torch.nn.functional"). Returns an empty string if the node structure is not a supported Name/Attribute chain.
   """
   if isinstance(node, cst.Name):
     return node.value
@@ -51,7 +48,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     """Initializes the scanner.
 
     Args:
-      target_name: The string alias to search for.
+        target_name: The string alias to search for.
 
     """
     self.target_name = target_name
@@ -64,7 +61,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     Names appearing here are definitions, not usages.
 
     Args:
-      node: The CST Import node being visited.
+        node: The CST Import node being visited.
 
     """
     self._in_import = True
@@ -73,7 +70,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     """Flags exit from an ``import ...`` statement.
 
     Args:
-      node: The CST Import node being left.
+        node: The CST Import node being left.
 
     """
     self._in_import = False
@@ -82,7 +79,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     """Flags entry into a ``from ... import ...`` statement.
 
     Args:
-      node: The CST ImportFrom node being visited.
+        node: The CST ImportFrom node being visited.
 
     """
     self._in_import = True
@@ -91,7 +88,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     """Flags exit from a ``from ... import ...`` statement.
 
     Args:
-      node: The CST ImportFrom node being left.
+        node: The CST ImportFrom node being left.
 
     """
     self._in_import = False
@@ -103,7 +100,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     definition, we mark ``found = True``.
 
     Args:
-      node: The name node being visited.
+        node: The name node being visited.
 
     """
     if not self._in_import and not self.found:
@@ -114,11 +111,11 @@ class SimpleNameScanner(cst.CSTVisitor):
     """Optimization hook to stop traversal once found.
 
     Args:
-      _node: The CST node whose children are about to be visited.
+        _node: The CST node whose children are about to be visited.
 
     Returns:
-      bool: False if the target has already been found, effectively
-      short-circuiting the rest of the AST traversal.
+        bool: False if the target has already been found, effectively
+        short-circuiting the rest of the AST traversal.
 
     """
     return not self.found
@@ -143,7 +140,7 @@ class UsageScanner(cst.CSTVisitor):
     """Initializes the UsageScanner.
 
     Args:
-      source_fw: The framework string (e.g., 'torch').
+        source_fw: The framework string (e.g., 'torch').
 
     """
     self.source_fw = source_fw
@@ -158,7 +155,7 @@ class UsageScanner(cst.CSTVisitor):
     """Returns the scan result.
 
     Returns:
-      bool: True if any tracked alias was found used in the body.
+        bool: True if any tracked alias was found used in the body.
 
     """
     return len(self.found_usages) > 0
@@ -172,7 +169,7 @@ class UsageScanner(cst.CSTVisitor):
       - ``import torch.nn as nn`` -> tracks 'nn' (because it stems from torch).
 
     Args:
-      node: The import node.
+        node: The import node.
 
     """
     self._in_import = True
@@ -195,7 +192,7 @@ class UsageScanner(cst.CSTVisitor):
     """Exit import scope.
 
     Args:
-      node: The import node being left.
+        node: The import node being left.
 
     """
     self._in_import = False
@@ -208,7 +205,7 @@ class UsageScanner(cst.CSTVisitor):
       - ``from torch.nn import Linear`` -> tracks 'Linear'.
 
     Args:
-      node: The import-from node.
+        node: The import-from node.
 
     """
     self._in_import = True
@@ -231,7 +228,7 @@ class UsageScanner(cst.CSTVisitor):
     """Exit import-from scope.
 
     Args:
-      node: The import-from node being left.
+        node: The import-from node being left.
 
     """
     self._in_import = False
@@ -242,7 +239,7 @@ class UsageScanner(cst.CSTVisitor):
     If found, it is recorded in ``found_usages``.
 
     Args:
-      node: The name node.
+        node: The name node.
 
     """
     if not self._in_import:

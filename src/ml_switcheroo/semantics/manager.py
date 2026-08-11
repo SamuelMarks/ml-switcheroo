@@ -12,6 +12,7 @@ Core Responsibilities:
 
 from typing import Any
 
+import os
 import json
 import yaml
 from pathlib import Path
@@ -74,6 +75,12 @@ class SemanticsManager:
     """Constructs the reverse index mapping from concrete API endpoints back to their abstract definitions."""
     self._reverse_index.clear()
     alias_map = {}
+
+    aliases_json_path = os.path.join(os.path.dirname(__file__), "aliases.json")
+    if os.path.exists(aliases_json_path):
+      with open(aliases_json_path, "r", encoding="utf-8") as f:
+        alias_map.update(json.load(f))
+
     for fw, config in self.framework_configs.items():
       if "alias" in config:
         mod = config["alias"].get("module")
@@ -81,11 +88,11 @@ class SemanticsManager:
         if mod and name:
           alias_map[name] = mod
 
-    alias_map["tf"] = "tensorflow"
-    alias_map["jnp"] = "jax.numpy"
-    alias_map["np"] = "numpy"
-    alias_map["mx"] = "mlx.core"
-    alias_map["nn"] = "torch.nn"
+    priority_scores = {}
+    priority_json_path = os.path.join(os.path.dirname(__file__), "priority_scores.json")
+    if os.path.exists(priority_json_path):
+      with open(priority_json_path, "r", encoding="utf-8") as f:
+        priority_scores = json.load(f)
 
     def get_priority(abs_id: Any, details: Any, tier: Any) -> Any:
       """Determines indexing priority when multiple abstract ops map to the same target API.
@@ -100,35 +107,7 @@ class SemanticsManager:
       Returns:
           An integer priority score (higher score wins).
       """
-      score = 0
-      if abs_id == "cat":
-        score += 1000
-      elif abs_id == "Append":
-        score -= 1000
-      elif abs_id == "concat":
-        score -= 500
-
-      if abs_id == "Mean":
-        score += 1000
-      elif abs_id == "Average":
-        score -= 1000
-      elif abs_id == "mean":
-        score -= 500
-
-      if abs_id == "relu":
-        score += 100
-      elif abs_id == "ReLU":
-        score -= 100
-
-      if abs_id == "MultiHeadAttention":
-        score += 1000
-      elif abs_id == "AttentionLayer":
-        score -= 1000
-
-      if abs_id == "Dropout":
-        score += 1000
-      elif abs_id == "Dropout_":
-        score -= 1000
+      score = priority_scores.get(abs_id, 0)
 
       if tier == SemanticTier.ARRAY_API.value:
         score += 50
@@ -170,10 +149,17 @@ class SemanticsManager:
 
           register_api(api_name)
 
+          # Forward mapping: short to long (e.g. tf.abs -> tensorflow.abs)
           parts = api_name.split(".")
           if parts[0] in alias_map:
             fqn = alias_map[parts[0]] + "." + ".".join(parts[1:])
             register_api(fqn)
+
+          # Reverse mapping: long to short (e.g. torch.nn.Conv2d -> nn.Conv2d)
+          for alias_name, module_path in alias_map.items():
+            if api_name.startswith(module_path + "."):
+              fqn = alias_name + api_name[len(module_path) :]
+              register_api(fqn)
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
     """Generates the import mapping for the ImportFixer based on Tier linking.

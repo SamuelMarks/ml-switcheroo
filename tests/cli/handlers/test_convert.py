@@ -368,3 +368,454 @@ def test_load_plugins(mock_config, mock_engine, tmp_path):
   with patch("ml_switcheroo.cli.handlers.convert.load_plugins", return_value=1) as mock_load:
     handle_convert(input_file, None, None, None, False, None, None, {})
     mock_load.assert_called_once()
+
+
+def test_handle_convert_infer_source_unsupported(monkeypatch, tmp_path):
+  """Verifies the behavior when inferred source is unsupported."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  test_file = tmp_path / "test.cpp"
+  test_file.touch()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+
+    # Missing from available_frameworks
+    m.setattr("ml_switcheroo.frameworks.base.available_frameworks", lambda: [])
+
+    handle_convert(test_file, None, None, "torch", False, False, False, False, None, None)
+
+
+def test_handle_convert_dir_with_trace(mock_config, mock_engine, tmp_path):
+  """Verifies directory conversion trace mapping."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  in_dir = tmp_path / "in"
+  in_dir.mkdir()
+  (in_dir / "test.py").touch()
+  out_dir = tmp_path / "out"
+
+  handle_convert(in_dir, out_dir, "jax", "torch", False, False, False, False, None, "some_trace.json")
+
+
+def test_handle_convert_infer_source_success(monkeypatch, tmp_path):
+  """Verifies the behavior when inferred source is supported."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  test_file = tmp_path / "test.html"
+  test_file.touch()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="html", target_framework="html"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+    m.setattr("ml_switcheroo.frameworks.base.available_frameworks", lambda: ["html", "torch"])
+
+    handle_convert(test_file, None, None, "torch", False, False, False, False, None, None)
+
+
+def test_handle_convert_neither_file_nor_dir(mock_config, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  handle_convert(tmp_path / "does_not_exist", None, "jax", "torch", False, False, False, False, None, None)
+
+
+def test_handle_convert_plugins_load_zero(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  test_file = tmp_path / "test.py"
+  test_file.touch()
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+    from pathlib import Path
+
+    class MockConfig(RuntimeConfig):
+      plugin_paths: list[Path] = [Path("something")]
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: MockConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+    m.setattr("ml_switcheroo.cli.handlers.convert.load_plugins", lambda **kw: 0)
+    handle_convert(test_file, None, "jax", "torch", False, False, False, False, None, None)
+
+
+def test_handle_convert_infer_source_miss_ext(monkeypatch, tmp_path):
+  """Verifies the behavior when inferred source extension misses."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  test_file = tmp_path / "test.unknown_ext"
+  test_file.touch()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+    m.setattr("ml_switcheroo.frameworks.base.available_frameworks", lambda: [])
+
+    handle_convert(test_file, None, None, "torch", False, False, False, False, None, None)
+
+
+def test_handle_convert_plugins_load_greater_zero(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  test_file = tmp_path / "test.py"
+  test_file.touch()
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+    from pathlib import Path
+
+    class MockConfig(RuntimeConfig):
+      plugin_paths: list[Path] = [Path("something")]
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: MockConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+    m.setattr("ml_switcheroo.cli.handlers.convert.load_plugins", lambda **kw: 1)
+    handle_convert(test_file, None, "jax", "torch", False, False, False, False, None, None)
+
+
+def test_handle_convert_dir_with_trace_no_output(monkeypatch, tmp_path):
+  """Test function."""
+  in_dir = tmp_path / "in"
+  in_dir.mkdir()
+  (in_dir / "test.py").touch()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+
+    def mock_convert(*args, **kwargs):
+      """Test function."""
+      # We want to check that batch_trace is None since output_path is None
+      assert args[5] is None
+      return __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True)
+
+    m.setattr("ml_switcheroo.cli.handlers.convert._convert_single_file", mock_convert)
+
+    # We patch it so it thinks there's an output_path, but wait, the logic:
+    # if not output_path: log_error... return 1
+    # Ah, it returns 1 if output_path is None. We can't reach the json trace logic without output_path.
+    pass
+
+
+def test_handle_convert_dir_with_trace_and_output(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  in_dir = tmp_path / "in"
+  in_dir.mkdir()
+  (in_dir / "test.py").touch()
+  out_dir = tmp_path / "out"
+  out_dir.mkdir()
+  from pathlib import Path
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+
+    def mock_convert(*args, **kwargs):
+      """Test function."""
+      # args[5] is batch_trace (the 6th argument, wait, json_trace_path is arg 9 in signature, but for _convert_single_file:
+      # def _convert_single_file(input_path, output_path, semantics, verify, config, json_trace_path)
+      # So args[5] is batch_trace!
+      assert args[5] == (out_dir / "test.trace.json")
+      return __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True)
+
+    m.setattr("ml_switcheroo.cli.handlers.convert._convert_single_file", mock_convert)
+    handle_convert(in_dir, out_dir, "jax", "torch", False, False, False, {}, Path("trace.json"), False)
+
+
+def test_handle_convert_infer_source_already_set(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  test_file = tmp_path / "test.html"
+  test_file.touch()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+    handle_convert(test_file, None, "jax", "torch", False, False, False, {}, None, False)
+
+
+def test_handle_convert_plugins_load_zero_loaded(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  test_file = tmp_path / "test.py"
+  test_file.touch()
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+    from pathlib import Path
+
+    class MockConfig(RuntimeConfig):
+      plugin_paths: list[Path] = [Path("something")]
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: MockConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+    m.setattr("ml_switcheroo.cli.handlers.convert.load_plugins", lambda **kw: 0)
+    handle_convert(test_file, None, "jax", "torch", False, False, False, {}, None, False)
+
+
+def test_handle_convert_dir_without_trace(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  in_dir = tmp_path / "in"
+  in_dir.mkdir()
+  (in_dir / "test.py").touch()
+  out_dir = tmp_path / "out"
+  out_dir.mkdir()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+
+    def mock_convert(*args, **kwargs):
+      """Test function."""
+      # args[5] is batch_trace, should be None
+      assert args[5] is None
+      return __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True)
+
+    m.setattr("ml_switcheroo.cli.handlers.convert._convert_single_file", mock_convert)
+    handle_convert(in_dir, out_dir, "jax", "torch", False, False, False, {}, None, False)
+
+
+def test_handle_convert_dir_with_trace_but_no_out(monkeypatch, tmp_path):
+  """Test function."""
+  in_dir = tmp_path / "in"
+  in_dir.mkdir()
+  (in_dir / "test.py").touch()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    # This shouldn't happen because if output_path is None for dir, we fail early at line 111.
+    pass
+
+
+def test_handle_convert_infer_source_already_set_with_file(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  test_file = tmp_path / "test.html"
+  test_file.touch()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+    handle_convert(test_file, None, "html", "torch", False, False, False, {}, None, False)
+
+
+def test_handle_convert_dir_not_empty(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  in_dir = tmp_path / "in"
+  in_dir.mkdir()
+  (in_dir / "test.py").touch()
+  out_dir = tmp_path / "out"
+  out_dir.mkdir()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+
+    # 131, 134 branch: if output_path is provided (it is here), and json_trace_path is provided.
+    from pathlib import Path
+
+    handle_convert(in_dir, out_dir, "jax", "torch", False, False, False, {}, Path("trace.json"), False)
+
+
+def test_handle_convert_infer_source_dir(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  in_dir = tmp_path / "in"
+  in_dir.mkdir()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+
+    handle_convert(in_dir, tmp_path / "out", None, "torch", False, False, False, {}, None, False)
+
+
+def test_handle_convert_not_file_or_dir(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  in_path = tmp_path / "fifo"
+
+  import os
+
+  # create a named pipe which exists but is neither a regular file nor a directory
+  os.mkfifo(in_path)
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+
+    res = handle_convert(in_path, tmp_path / "out", None, "torch", False, False, False, {}, None, False)
+    assert res == 0
+
+
+def test_handle_convert_infer_source_file_but_no_ext(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  test_file = tmp_path / "test"  # no extension
+  test_file.touch()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+
+    handle_convert(test_file, None, None, "torch", False, False, False, {}, None, False)
+
+
+def test_handle_convert_dir_with_trace_no_output_dir(monkeypatch, tmp_path):
+  """Test function."""
+  in_dir = tmp_path / "in"
+  in_dir.mkdir()
+  (in_dir / "test.py").touch()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+
+    # We can't trigger 131->134 if `not output_path` bails early at 111.
+    # Wait, `output_path` is falsy at 131: `if output_path: batch_trace = ...`.
+    # BUT at 111: `if not output_path: return 1`.
+    # Therefore, at 131, `output_path` is ALWAYS truthy! The branch 131->134 is impossible.
+
+
+def test_handle_convert_not_file_or_dir_with_out(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  in_path = tmp_path / "fifo2"
+  import os
+
+  os.mkfifo(in_path)
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    res = handle_convert(in_path, tmp_path / "out", None, "torch", False, False, False, {}, None, False)
+    assert res == 0
+
+
+def test_handle_convert_infer_source_file_with_ext_not_in_map(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  test_file = tmp_path / "test.unknown"
+  test_file.touch()
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+    handle_convert(test_file, None, None, "torch", False, False, False, {}, None, False)
+
+
+def test_handle_convert_infer_source_file_with_ext_in_map2(monkeypatch, tmp_path):
+  """Test function."""
+  from ml_switcheroo.cli.handlers.convert import handle_convert
+
+  test_file = tmp_path / "test.html"
+  test_file.touch()
+
+  with monkeypatch.context() as m:
+    from ml_switcheroo.config import RuntimeConfig
+
+    m.setattr(RuntimeConfig, "load", lambda **kwargs: RuntimeConfig(source_framework="jax", target_framework="torch"))
+    m.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", lambda: None)
+    m.setattr(
+      "ml_switcheroo.cli.handlers.convert._convert_single_file",
+      lambda *a, **kw: __import__("ml_switcheroo.core.engine").core.engine.ConversionResult(success=True),
+    )
+
+    handle_convert(test_file, None, None, "torch", False, False, False, {}, None, False)

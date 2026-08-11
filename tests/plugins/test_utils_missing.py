@@ -20,6 +20,8 @@ def test_utils_missing():
     alias = DummyAlias()
 
   class DummyConfNoDump:
+    """Dummy conf no dump."""
+
     alias = object()
 
   class DummySM:

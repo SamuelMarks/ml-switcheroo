@@ -176,4 +176,4 @@ def linkcode_resolve(domain, info):
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
-suppress_warnings = ["config.cache"]
+suppress_warnings.append("config.cache")

@@ -21,7 +21,10 @@ def test_primitive_recursion():
   assert render_node(convert_to_cst_literal(-3.14)) == "-3.14"
 
   class CustomObj:
+    """Custom obj."""
+
     def __str__(self):
+      """Str."""
       return "custom"
 
   assert render_node(convert_to_cst_literal(CustomObj())) == "'custom'"

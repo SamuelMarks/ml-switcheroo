@@ -214,7 +214,7 @@ class StableHloEmitter(PythonToMlirEmitter):
         regions.append(false_region)
       else:  # isinstance(node.orelse, cst.If)
         # To be strictly compliant with stablehlo.if vs case, we handle elif as nested here
-        false_block = BlockNode(label="", operations=self._emit_if(node.orelse))
+        false_block = BlockNode(label="", operations=self._emit_if(node.orelse))  # type: ignore
         if not false_block.operations or false_block.operations[-1].name not in (  # pragma: no branch
           "func.return",
           "sw.return",
@@ -484,7 +484,14 @@ class StableHloEmitter(PythonToMlirEmitter):
     return result, ops
 
   def _extract_literal(self, node: cst.CSTNode) -> Any:
-    """Extracts python literal from CST node."""
+    """Extracts python literal from CST node.
+
+    Args:
+        node: The CST node containing a literal value.
+
+    Returns:
+        The extracted Python literal value.
+    """
     if isinstance(node, cst.Integer):
       return int(node.value)
     elif isinstance(node, cst.Float):

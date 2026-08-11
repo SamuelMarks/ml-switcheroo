@@ -109,12 +109,14 @@ def test_hooks_resolve_type_with_symbol_table():
     """Test class."""
 
     def __init__(self, name):
+      """Init."""
       self.name = name
 
   class MockSymbolTable:
     """Test class."""
 
     def get_type(self, node):
+      """Get type."""
       if node == "tensor":
         return DummySym("SomeTensorType")
       elif node == "module":
@@ -230,6 +232,7 @@ def test_hooks_inject_signature_arg():
   calls = []
 
   def mock_injector(name, ann):
+    """Mock injector."""
     calls.append((name, ann))
 
   ctx._arg_injector = mock_injector

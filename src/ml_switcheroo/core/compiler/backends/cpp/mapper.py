@@ -4,6 +4,9 @@ Maps standard Python AST nodes (used as semantic operations) to C++ CST nodes.
 """
 
 import ast
+import json
+import os
+
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
   Expression,
   Identifier,
@@ -19,6 +22,14 @@ class ASTToCppMapper:
   and converts them into their corresponding C++ Concrete Syntax Tree (CST)
   representations.
   """
+
+  def __init__(self) -> None:
+    """Initializes the AST mapper and loads the operator mappings."""
+    self.op_map = {}
+    operators_json_path = os.path.join(os.path.dirname(__file__), "operators.json")
+    if os.path.exists(operators_json_path):
+      with open(operators_json_path, "r", encoding="utf-8") as f:
+        self.op_map = json.load(f)
 
   def map_expression(self, node: ast.expr) -> Expression:
     """Maps a Python AST expression to a C++ CST Expression.
@@ -37,13 +48,8 @@ class ASTToCppMapper:
     elif isinstance(node, ast.BinOp):
       left = self.map_expression(node.left)
       right = self.map_expression(node.right)
-      op_map = {
-        ast.Add: "+",
-        ast.Sub: "-",
-        ast.Mult: "*",
-        ast.Div: "/",
-      }
-      op = op_map.get(type(node.op), "+")
+      op_name = type(node.op).__name__
+      op = self.op_map.get(op_name, "+")
       return BinaryExpression(left=left, operator=op, right=right)
     elif isinstance(node, ast.Call):
       if isinstance(node.func, ast.Name):

@@ -1,0 +1,7 @@
+{
+  "tf": "tensorflow",
+  "jnp": "jax.numpy",
+  "np": "numpy",
+  "mx": "mlx.core",
+  "nn": "torch.nn"
+}

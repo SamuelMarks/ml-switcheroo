@@ -126,6 +126,7 @@ def test_harness_build_dynamic_init_with_magic_args():
     declared_magic_args = ["my_magic_arg"]
 
     def get_harness_init_code(self):
+      """Get harness init code."""
       return "def my_helper(): pass"
 
   hg = HarnessGenerator()

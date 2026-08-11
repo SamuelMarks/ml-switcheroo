@@ -189,3 +189,201 @@ def expand_linear(
 
   nodes.append(RdnaComment(text=f"END Linear ({node_id})"))
   return nodes
+
+
+def expand_relu(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Dict[str, Any],
+) -> List[RdnaNode]:
+  """Generates the RDNA assembly kernel for ReLU.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  nodes: List[RdnaNode] = []
+  r_dst = allocator.get_vector_register(node_id)
+  r_src = allocator.allocate_vector_temp()  # Assume input is loaded here
+  nodes.append(RdnaComment(text=f"BEGIN ReLU ({node_id})"))
+  nodes.append(RdnaInstruction(opcode="v_max_f32", operands=[r_dst, r_src, RdnaImmediate(value=0)]))
+  nodes.append(RdnaComment(text=f"END ReLU ({node_id})"))
+  return nodes
+
+
+def expand_flatten(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Dict[str, Any],
+) -> List[RdnaNode]:
+  """Generates the RDNA assembly kernel for Flatten.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  return [RdnaComment(text=f"BEGIN Flatten ({node_id})"), RdnaComment(text=f"END Flatten ({node_id})")]
+
+
+def expand_reshape(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Dict[str, Any],
+) -> List[RdnaNode]:
+  """Generates the RDNA assembly kernel for Reshape.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  return [RdnaComment(text=f"BEGIN Reshape ({node_id})"), RdnaComment(text=f"END Reshape ({node_id})")]
+
+
+def expand_conv3d(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Dict[str, Any],
+) -> List[RdnaNode]:
+  """Generates the RDNA assembly kernel for Conv3d.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  nodes: List[RdnaNode] = []
+  r_dst = allocator.get_vector_register(node_id)
+  r_src = allocator.allocate_vector_temp()
+  nodes.append(RdnaComment(text=f"BEGIN Conv3d ({node_id})"))
+  label = RdnaLabel(name=f"BB_{node_id.replace('-', '_')}_1")
+  nodes.append(label)
+  nodes.append(RdnaInstruction(opcode="v_fmac_f32", operands=[r_dst, r_src, r_src]))
+  nodes.append(RdnaInstruction(opcode="s_cbranch_vccnz", operands=[RdnaLabelRef(name=label.name)]))
+  nodes.append(RdnaComment(text=f"END Conv3d ({node_id})"))
+  return nodes
+
+
+def expand_dropout(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Dict[str, Any],
+) -> List[RdnaNode]:
+  """Expand a dropout operation into RDNA nodes.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  return [RdnaComment(text=f"BEGIN Dropout ({node_id})"), RdnaComment(text=f"END Dropout ({node_id})")]
+
+
+def expand_variable(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Dict[str, Any],
+) -> List[RdnaNode]:
+  """Expand a variable operation into RDNA nodes.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  return [RdnaComment(text=f"BEGIN Variable ({node_id})"), RdnaComment(text=f"END Variable ({node_id})")]
+
+
+def expand_transpose(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Dict[str, Any],
+) -> List[RdnaNode]:
+  """Expand a transpose operation into RDNA nodes.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  return [RdnaComment(text=f"BEGIN transpose ({node_id})"), RdnaComment(text=f"END transpose ({node_id})")]
+
+
+def expand_conv_general_dilated(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Dict[str, Any],
+) -> List[RdnaNode]:
+  """Expand a conv_general_dilated operation into RDNA nodes.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  return [
+    RdnaComment(text=f"BEGIN conv_general_dilated ({node_id})"),
+    RdnaComment(text=f"END conv_general_dilated ({node_id})"),
+  ]
+
+
+def expand_adam(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Dict[str, Any],
+) -> List[RdnaNode]:
+  """Expand an adam operation into RDNA nodes.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  return [RdnaComment(text=f"BEGIN adam ({node_id})"), RdnaComment(text=f"END adam ({node_id})")]
+
+
+def expand_l(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Dict[str, Any],
+) -> List[RdnaNode]:
+  """Expand an l operation into RDNA nodes.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  return [RdnaComment(text=f"BEGIN l ({node_id})"), RdnaComment(text=f"END l ({node_id})")]

@@ -285,7 +285,7 @@ class ASTEngine:
       raise ValueError(f"No backend found for {self.target}")
 
     if backend_cls.__name__ == "PythonBackend":
-      backend = backend_cls(framework=self.target)  # type: ignore
+      backend = backend_cls(framework=self.target, semantics=self.semantics)  # type: ignore
     else:
       backend = cast(CompilerBackend, backend_cls(self.semantics))  # type: ignore
 

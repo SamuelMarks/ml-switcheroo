@@ -17,7 +17,7 @@ class MlirPrinter:
     """Emits the textual representation for an MLIR node.
 
     Args:
-        node (MlirNode): The root MLIR node to print.
+        node (~ml_switcheroo.core.mlir.cst.MlirNode): The root MLIR node to print.
         header (str): Optional header string for modules.
 
     Returns:

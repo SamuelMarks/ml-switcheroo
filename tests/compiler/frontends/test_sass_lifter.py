@@ -153,3 +153,70 @@ def test_sass_lifter_end_without_begin():
   ]
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
+
+
+def test_sass_lifter_return_already_seen():
+  # Hit 134->144 (actually 135->141)
+  """Test sass lifter return already seen."""
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
+
+  lifter = SassLifter()
+  nodes = [SassComment(text="; Return: ")]
+  pass
+  nodes.append(SassComment(text="; Return: "))
+  pass
+  graph = lifter.lift(nodes)
+  assert len([n for n in graph.nodes if n.kind == "Output"]) == 1
+
+
+def test_sass_lifter_return_no_previous():
+  # Hit 138->140 (no previous node)
+  """Test sass lifter return no previous."""
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
+
+  lifter = SassLifter()
+  nodes = [SassComment(text="hi")]
+  pass
+  graph = lifter.lift(nodes)
+  assert len(graph.edges) == 0
+
+
+def test_sass_lifter_instruction_in_block():
+  # Hit 148->94 (node is label so it's not an instruction, skips 148 and loops to 94)
+  # Wait, the node loop starts around 89
+  """Test sass lifter instruction in block."""
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassLabel
+
+  lifter = SassLifter()
+  nodes = [SassLabel("lbl")]
+  graph = lifter.lift(nodes)
+  assert len(graph.nodes) == 0
+
+
+def test_sass_lifter_comment_no_marker():
+  """Test sass lifter comment no marker."""
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+  from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
+
+  lifter = SassLifter()
+  nodes = [SassComment(text="hi")]
+  nodes[0].semantic_marker = SemanticMarker()
+  graph = lifter.lift(nodes)
+  assert len(graph.nodes) == 0
+
+
+def test_sass_lifter_comment_unknown_marker(monkeypatch):
+  """Test sass lifter comment unknown marker."""
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+  from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
+
+  lifter = SassLifter()
+  nodes = [SassComment(text="hi")]
+  monkeypatch.setattr(lifter.comment_parser, "parse", lambda x: SemanticMarker())
+  graph = lifter.lift(nodes)
+  assert len(graph.nodes) == 0

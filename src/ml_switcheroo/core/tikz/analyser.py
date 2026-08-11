@@ -49,10 +49,10 @@ class GraphExtractor(cst.CSTVisitor):
     """Capture the model class name.
 
     Args:
-      node: The class definition CST node being visited.
+        node: The class definition CST node being visited.
 
     Returns:
-      True to continue traversing children of the class definition, or None.
+        True to continue traversing children of the class definition, or None.
     """
     self.model_name = node.name.value
     return True
@@ -63,7 +63,7 @@ class GraphExtractor(cst.CSTVisitor):
     This ensures nodes are populated even if there is no forward pass.
 
     Args:
-      original_node: The module CST node that was visited.
+        original_node: The module CST node that was visited.
     """
     self._finalize_graph()
 
@@ -71,10 +71,10 @@ class GraphExtractor(cst.CSTVisitor):
     """Detects entry into lifecycle methods (__init__, forward, etc).
 
     Args:
-      node: The function definition CST node being visited.
+        node: The function definition CST node being visited.
 
     Returns:
-      True to continue traversing children of the function definition, or None.
+        True to continue traversing children of the function definition, or None.
     """
     name = node.name.value
     if name in ["__init__", "setup"]:
@@ -92,7 +92,7 @@ class GraphExtractor(cst.CSTVisitor):
     """Resets context flags upon exiting methods.
 
     Args:
-      node: The function definition CST node that was visited.
+        node: The function definition CST node that was visited.
     """
     if self._in_init:
       self._in_init = False
@@ -103,10 +103,10 @@ class GraphExtractor(cst.CSTVisitor):
     """Handles assignment logic for both layer definition and data flow.
 
     Args:
-      node: The assignment CST node being visited.
+        node: The assignment CST node being visited.
 
     Returns:
-      True to continue traversing children, or None.
+        True to continue traversing children, or None.
     """
     if self._in_init:
       self._analyze_layer_def(node)
@@ -120,10 +120,10 @@ class GraphExtractor(cst.CSTVisitor):
     Also handles case where return contains a functional call directly.
 
     Args:
-      node: The return statement CST node being visited.
+        node: The return statement CST node being visited.
 
     Returns:
-      False to stop traversing children since return is fully handled, or None.
+        False to stop traversing children since return is fully handled, or None.
     """
     if self._in_forward and node.value:
       # 1. Check if returning a direct call (e.g. return self.layer(x))
@@ -156,7 +156,7 @@ class GraphExtractor(cst.CSTVisitor):
     """Registers function arguments as input sources.
 
     Args:
-      node: The function definition CST node containing the parameters.
+        node: The function definition CST node containing the parameters.
     """
     # Always register the primary input node with ID "input"
     # This matches the expectation of visualizers and tests.
@@ -174,7 +174,7 @@ class GraphExtractor(cst.CSTVisitor):
     """Parses `self.conv = nn.Conv2d(...)` lines.
 
     Args:
-      node: The assignment CST node to analyze.
+        node: The assignment CST node to analyze.
     """
     # 1. Identify Target (must be self.something)
     target = node.targets[0].target
@@ -209,7 +209,7 @@ class GraphExtractor(cst.CSTVisitor):
     """Parses `x = self.layer(x)` assignments.
 
     Args:
-      node: The assignment CST node to analyze.
+        node: The assignment CST node to analyze.
     """
     # Support simple assignment: target = call
     if not isinstance(node.value, cst.Call):
@@ -228,11 +228,10 @@ class GraphExtractor(cst.CSTVisitor):
     """Resolves `self.layer` -> `layer` or `F.relu` -> `func_relu`.
 
     Args:
-      func_node: The CST expression representing the called function/layer.
+        func_node: The CST expression representing the called function/layer.
 
     Returns:
-      The resolved layer name or functional node identifier if found,
-      otherwise None.
+        The resolved layer name or functional node identifier if found, otherwise None.
     """
     # 1. Method call on self (Registered Layer)
     if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):  # type: ignore
@@ -255,8 +254,8 @@ class GraphExtractor(cst.CSTVisitor):
     """Common logic to trace edges from a Call usage.
 
     Args:
-      call: The call expression CST node to analyze.
-      output_vars: The list of variable names assigned the result of this call.
+        call: The call expression CST node to analyze.
+        output_vars: The list of variable names assigned the result of this call.
     """
     layer_name = self._resolve_layer_or_func_name(call.func)
 
@@ -278,10 +277,10 @@ class GraphExtractor(cst.CSTVisitor):
     """Extracts variable name if simple identifier.
 
     Args:
-      node: The CST expression to extract a variable name from.
+        node: The CST expression to extract a variable name from.
 
     Returns:
-      The variable name if the node is a simple identifier, otherwise None.
+        The variable name if the node is a simple identifier, otherwise None.
     """
     if isinstance(node, cst.Name):
       return node.value
@@ -293,10 +292,10 @@ class GraphExtractor(cst.CSTVisitor):
     Handles complex expressions by capturing exact source via utility.
 
     Args:
-      node: The CST node to convert to a string.
+        node: The CST node to convert to a string.
 
     Returns:
-      The string representation of the source code for the node.
+        The string representation of the source code for the node.
     """
     return capture_node_source(node)
 

@@ -28,6 +28,7 @@ class ApiTransformerAttrMixin:
   and context/scope tracking (`self.context`).
 
   It implements:
+
   1. Assignment interception to track neural network state variable instantiation
      and scope tracking.
   2. Assignment unwrapping from functional style execution (e.g., returning state and output)
@@ -40,6 +41,7 @@ class ApiTransformerAttrMixin:
     """Intercepts and post-processes CST assignment nodes during traversal.
 
     This method performs two distinct transformations:
+
     1. Stateful Variable Tracking: It checks if the right-hand side of the assignment
        is a functional call to a neural network component (based on the framework's semantic tier).
        If so, it tracks the variable name inside the corresponding context scope.

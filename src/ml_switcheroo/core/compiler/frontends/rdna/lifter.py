@@ -42,7 +42,7 @@ class RdnaLifter:
     """Parses a list of RDNA nodes to build a LogicalGraph.
 
     Args:
-        nodes (List[RdnaNode]): A list of low-level RDNA AST nodes (instructions,
+        nodes (List[~ml_switcheroo.core.compiler.frontends.rdna.cst.RdnaNode]): A list of low-level RDNA AST nodes (instructions,
             comments, etc.) to process.
 
     Returns:

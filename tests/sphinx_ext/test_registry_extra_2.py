@@ -40,6 +40,7 @@ def test_scan_registry_else_branch(mock_get_adapter, mock_priority, mock_avail):
   mock_priority.return_value = ["torch", "other_fw"]
 
   def get_adapter_side_effect(name):
+    """Get adapter side effect."""
     adapter = MagicMock()
     adapter.inherits_from = None
     adapter.display_name = name

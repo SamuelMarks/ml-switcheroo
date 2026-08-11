@@ -94,3 +94,33 @@ def test_latex_backend_output_node_bypass():
   res = backend.compile(graph)
   assert "Foo" in res
   assert "non_arg=123" in res
+
+
+def test_visual_latex_no_node_data():
+  # Hit 125->131
+  """Test visual latex no node data."""
+  from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalEdge
+
+  g = LogicalGraph("Test")
+  # A graph with an edge but no nodes in graph.nodes.
+  # target_id will not be found in node_dict, so node_data = None
+  g.edges.append(LogicalEdge("in", "target"))
+  backend = LatexBackend()
+  code = backend.compile(g)
+  assert "op_target" in code
+
+
+def test_visual_latex_clean_type_no_dot_no_func():
+  # Hit 135->137
+  """Test visual latex clean type no dot no func."""
+  from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+
+  g = LogicalGraph("Test")
+  g.nodes.append(LogicalNode("in", "Input"))
+  g.nodes.append(LogicalNode("target", "simple"))
+  g.edges.append(LogicalEdge("in", "target"))
+  backend = LatexBackend()
+  code = backend.compile(g)
+  assert "op_target = Simple" in code or "op_target" in code

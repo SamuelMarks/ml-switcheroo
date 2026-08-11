@@ -119,3 +119,46 @@ def test_sass_analyzer_unknown_kind():
   insts = [SassInstruction(opcode="ISETP.LT.AND", operands=[SassRegister(name="R0"), SassImmediate(value=10)])]
   meta = SassAnalyzer.analyze_block("UnknownKind", insts)
   assert meta == {}
+
+
+def test_sass_analysis_all_pass_blocks():
+  """Test sass analysis all pass blocks."""
+  from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate
+
+  _analyzer = SassAnalyzer()
+
+  inst = SassInstruction(opcode="ISETP.LT.AND", operands=[SassImmediate(value=10)])
+
+  kinds = [
+    "Conv3d",
+    "AvgPool2d",
+    "BatchNorm2d",
+    "Conv1d",
+    "BatchNorm1d",
+    "Softmax",
+    "BMM",
+    "Sum",
+    "BCEWithLogitsLoss",
+    "Dropout2d",
+    "AvgPool1d",
+    "MultiheadAttention",
+    "RNN",
+    "MSELoss",
+    "Sigmoid",
+    "Dropout",
+  ]
+
+  for kind in kinds:
+    res = SassAnalyzer.analyze_block(kind, [inst])
+    if kind in ["Conv3d", "AvgPool2d", "MSELoss"]:
+      assert "kernel_size" in res or "elements" in res
+
+
+def test_sass_analysis_linear_no_loop_limits():
+  # Hit 52->116 (Linear with no limits)
+  """Test sass analysis linear no loop limits."""
+  from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+
+  res = SassAnalyzer.analyze_block("Linear", [])
+  assert res == {}

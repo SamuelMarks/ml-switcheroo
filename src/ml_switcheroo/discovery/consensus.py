@@ -91,8 +91,8 @@ class ConsensusEngine:
     """Step 2: Strips framework-specific prefixes/suffixes.
 
     Normalizes API name by converting it to lowercase, removing common suffixes
-    (such as '_loss', 'loss', '_fn', 'function') and prefixes (such as 'torch_',
-    'tf_', 'jax_'), and removing underscores.
+    (such as `_loss`, `loss`, `_fn`, `function`) and prefixes (such as `torch_`,
+    `tf_`, `jax_`), and removing underscores.
 
     Args:
         name: Raw API name.

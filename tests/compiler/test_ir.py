@@ -107,3 +107,20 @@ def test_topological_sort_missing_node():
   sorted_nodes = topological_sort(g)
   assert len(sorted_nodes) == 1
   assert sorted_nodes[0].id == "a"
+
+
+def test_ir_topological_sort_cycle():
+  # Hit 133->131 (in_degree != 0) and 141->140 (n.id in seen)
+  """Test ir topological sort cycle."""
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, topological_sort
+
+  g = LogicalGraph("Test")
+  g.nodes.append(LogicalNode("A", "Op"))
+  g.nodes.append(LogicalNode("B", "Op"))
+  g.nodes.append(LogicalNode("C", "Op"))
+  # A -> B, B -> C, C -> B (cycle)
+  g.edges.append(LogicalEdge("A", "B"))
+  g.edges.append(LogicalEdge("B", "C"))
+  g.edges.append(LogicalEdge("C", "B"))
+  sorted_nodes = topological_sort(g)
+  assert len(sorted_nodes) == 3

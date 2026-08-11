@@ -24,14 +24,20 @@ def test_rdna_nodes():
 
   # Cover RdnaNode.__str__
   class DummyRdna(RdnaNode):
+    """Dummy rdna."""
+
     def __str__(self):
+      """Str."""
       return super().__str__()
 
   assert str(DummyRdna()) == ""
 
   # Cover Operand.__str__
   class DummyOperand(Operand):
+    """Dummy operand."""
+
     def __str__(self):
+      """Str."""
       return super().__str__()
 
   assert str(DummyOperand()) == ""

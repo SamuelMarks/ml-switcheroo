@@ -17,12 +17,15 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
 from ml_switcheroo.frameworks.loader import load_definitions
 
+_np_mod: Any
 np: Any
 try:
   import numpy as _np
 
+  _np_mod = _np
   np = _np
 except Exception:
+  _np_mod = None
   np = None
 
 

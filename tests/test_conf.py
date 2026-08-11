@@ -74,6 +74,8 @@ def test_linkcode_resolve_unwrap_and_inspect_error(monkeypatch):
 
   # Setup an object with __wrapped__ that throws TypeError on inspect
   class DummyObj:
+    """Dummy obj."""
+
     pass
 
   inner_obj = DummyObj()
@@ -84,6 +86,7 @@ def test_linkcode_resolve_unwrap_and_inspect_error(monkeypatch):
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   def mock_getsourcefile(obj):
+    """Mock getsourcefile."""
     raise TypeError()
 
   monkeypatch.setattr(inspect, "getsourcefile", mock_getsourcefile)
@@ -156,6 +159,7 @@ def test_linkcode_resolve_value_error(monkeypatch):
   monkeypatch.setattr(inspect, "getsourcelines", lambda o: (["line"], 1))
 
   def mock_relpath(path, start):
+    """Mock relpath."""
     raise ValueError("Paths on different drives")
 
   monkeypatch.setattr(os.path, "relpath", mock_relpath)

@@ -45,3 +45,21 @@ def test_tikz_backend_unconnected_cycle():
   ]
   res = backend.compile(graph)
   assert "Isolated1" in res
+
+
+def test_visual_tikz_rank_existing_higher():
+  # Hit 116->115
+  """Test visual tikz rank existing higher."""
+  from ml_switcheroo.core.compiler.backends.visual_tikz import TikzBackend
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+
+  g = LogicalGraph("Test")
+  g.nodes.append(LogicalNode("A", "Input"))
+  g.nodes.append(LogicalNode("B", "Input"))
+  g.nodes.append(LogicalNode("C", "Linear"))
+  # A -> C, B -> C
+  g.edges.append(LogicalEdge("A", "C"))
+  g.edges.append(LogicalEdge("B", "C"))
+
+  backend = TikzBackend()
+  backend._calculate_layout(g)

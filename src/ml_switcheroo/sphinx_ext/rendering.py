@@ -49,12 +49,12 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   """Constructs the full HTML block for the switcheroo demo.
 
   Args:
-    hierarchy: A dictionary mapping root frameworks to their list of flavours.
-    examples_json: A JSON string containing preloaded code examples.
-    tier_metadata_json: A JSON string containing framework tier metadata.
+      hierarchy: A dictionary mapping root frameworks to their list of flavours.
+      examples_json: A JSON string containing preloaded code examples.
+      tier_metadata_json: A JSON string containing framework tier metadata.
 
   Returns:
-    str: The fully rendered HTML block as a string.
+      The fully rendered HTML block as a string.
   """
   root_dir = Path(__file__).parents[3]
   dist_dir = root_dir / "dist"
@@ -253,10 +253,10 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
   Organizes frameworks into <optgroup> categories based on their semantic level.
 
   Args:
-    hierarchy: A dictionary mapping root frameworks to their list of flavours.
+      hierarchy: A dictionary mapping root frameworks to their list of flavours.
 
   Returns:
-    str: An HTML string containing grouped option elements.
+      An HTML string containing grouped option elements.
   """
   # Organizes roots into buckets
   grouped: Dict[str, List[str]] = defaultdict(list)
@@ -276,8 +276,6 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
       continue
 
     members = grouped[group_name]
-    if not members:
-      continue
 
     html_parts.append(f'<optgroup label="{group_name}">')
     for root in members:
@@ -295,12 +293,12 @@ def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: st
   Renders options for all frameworks, using data-parent to allow JS to filter.
 
   Args:
-    side: The interface side, typically "src" (source) or "tgt" (target).
-    hierarchy: A dictionary mapping root frameworks to their list of flavours.
-    active_root: The active framework root whose flavours are initially visible.
+      side: The interface side, typically "src" (source) or "tgt" (target).
+      hierarchy: A dictionary mapping root frameworks to their list of flavours.
+      active_root: The active framework root whose flavours are initially visible.
 
   Returns:
-    str: An HTML string containing the secondary dropdown element.
+      An HTML string containing the secondary dropdown element.
   """
   children = hierarchy.get(active_root, [])
 

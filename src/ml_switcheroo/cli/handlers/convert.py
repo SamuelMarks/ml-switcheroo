@@ -72,12 +72,8 @@ def handle_convert(
     ext = input_path.suffix.lower()
     ext_map = {".html": "html", ".tex": "latex_dsl", ".mlir": "mlir", ".sass": "sass", ".s": "rdna"}
     if ext in ext_map:
-      inferred = ext_map[ext]
-      from ml_switcheroo.frameworks.base import available_frameworks
-
-      if inferred in available_frameworks():
-        source = inferred
-        log_info(f"Inferred source framework '{source}' from file extension.")
+      source = ext_map[ext]
+      log_info(f"Inferred source framework '{source}' from file extension.")
 
   # 2. Load Configuration (TOML + CLI overrides)
   config = RuntimeConfig.load(
@@ -126,10 +122,8 @@ def handle_convert(
       batch_trace = None
       if json_trace_path:
         # If doing a directory batch, we cannot write all traces to one file.
-        # Heuristic: if trace path provided, write side-by-side with output?
-        # Or simply allow trace naming derived from output structure.
-        if output_path:
-          batch_trace = (output_path / rel_path).with_suffix(".trace.json")
+        # Heuristic: write side-by-side with output
+        batch_trace = (output_path / rel_path).with_suffix(".trace.json")
 
       result = _convert_single_file(src_file, dest_file, semantics, verify, config, batch_trace)
       batch_results[str(rel_path)] = result

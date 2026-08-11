@@ -40,7 +40,10 @@ def test_doc_gen_missing_dict_arg():
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
   class DummySM:
+    """Dummy sm."""
+
     def get_definition_by_id(self, op_name):
+      """Get definition by id."""
       return {"std_args": [{"name": "a", "type": "int"}]}
 
   m = MigrationGuideGenerator(DummySM())

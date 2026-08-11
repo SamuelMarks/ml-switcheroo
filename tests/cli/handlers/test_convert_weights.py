@@ -169,3 +169,109 @@ def test_flatten_mapping_rules_variations(mock_config, mock_semantics):
   mock_semantics.get_definition.side_effect = [None, None]
   rules = generator._flatten_mapping_rules(layer_registry)
   assert len(rules) == 0
+
+
+def test_flatten_mapping_rules_without_arrow(mock_config, mock_semantics):
+  """Test function."""
+  generator = WeightScriptGenerator(mock_semantics, mock_config)
+  layer_registry = {"l1": LogicalNode(id="l1", kind="Linear")}
+
+  mock_semantics.get_definition.return_value = (
+    "Linear",
+    {
+      "variants": {
+        "torch": {"args": {"weight": "weight"}},
+        "jax": {"args": {"weight": "kernel"}, "layout_map": {"weight": "NO_ARROW_RULE"}},
+      }
+    },
+  )
+
+  rules = generator._flatten_mapping_rules(layer_registry)
+  assert rules[0]["perm"] is None
+
+
+def test_generate_extractor_has_layers(mock_config, mock_semantics, tmp_path):
+  """Test function."""
+  source_file = tmp_path / "model.py"
+  source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    self.l1 = nn.Linear(10, 10)\n")
+  out_file = tmp_path / "script.py"
+  generator = WeightScriptGenerator(mock_semantics, mock_config)
+  generator.source_adapter = MagicMock()
+  generator.target_adapter = MagicMock()
+
+  with patch("ml_switcheroo.cli.handlers.convert_weights.cst.parse_module") as mock_parse:
+    mock_tree = MagicMock()
+    mock_parse.return_value = mock_tree
+
+    with patch("ml_switcheroo.cli.handlers.convert_weights.GraphExtractor") as mock_extractor_class:
+      mock_instance = MagicMock()
+      mock_instance.layer_registry = {"l1": LogicalNode(id="l1", kind="Linear")}
+      mock_extractor_class.return_value = mock_instance
+
+      generator.generate(source_file, out_file)
+      assert out_file.exists()
+
+
+def test_generate_extractor_has_layers_and_writes(mock_config, mock_semantics, tmp_path):
+  """Test function."""
+  source_file = tmp_path / "model.py"
+  source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    self.l1 = nn.Linear(10, 10)\n")
+  out_file = tmp_path / "script.py"
+  generator = WeightScriptGenerator(mock_semantics, mock_config)
+  generator.source_adapter = MagicMock()
+  generator.target_adapter = MagicMock()
+
+  with patch("ml_switcheroo.cli.handlers.convert_weights.cst.parse_module") as mock_parse:
+    mock_tree = MagicMock()
+    mock_parse.return_value = mock_tree
+
+    with patch("ml_switcheroo.cli.handlers.convert_weights.GraphExtractor") as mock_extractor_class:
+      mock_instance = MagicMock()
+      mock_instance.layer_registry = {"l1": LogicalNode(id="l1", kind="Linear")}
+      mock_extractor_class.return_value = mock_instance
+
+      generator.generate(source_file, out_file)
+      assert out_file.exists()
+
+
+def test_generate_extractor_has_layers_but_no_rules(mock_config, mock_semantics, tmp_path):
+  """Test function."""
+  source_file = tmp_path / "model.py"
+  source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    self.l1 = nn.Linear(10, 10)\n")
+  out_file = tmp_path / "script.py"
+  generator = WeightScriptGenerator(mock_semantics, mock_config)
+  generator.source_adapter = MagicMock()
+  generator.target_adapter = MagicMock()
+
+  with patch("ml_switcheroo.cli.handlers.convert_weights.cst.parse_module") as mock_parse:
+    mock_tree = MagicMock()
+    mock_parse.return_value = mock_tree
+
+    with patch("ml_switcheroo.cli.handlers.convert_weights.GraphExtractor") as mock_extractor_class:
+      mock_instance = MagicMock()
+      mock_instance.layer_registry = {"l1": LogicalNode(id="l1", kind="Linear")}
+      mock_extractor_class.return_value = mock_instance
+
+      with patch.object(generator, "_flatten_mapping_rules", return_value=[]):
+        assert generator.generate(source_file, out_file) is True
+
+
+def test_generate_extractor_has_no_layers(mock_config, mock_semantics, tmp_path):
+  """Test function."""
+  source_file = tmp_path / "model.py"
+  source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    pass\n")
+  out_file = tmp_path / "script.py"
+  generator = WeightScriptGenerator(mock_semantics, mock_config)
+  generator.source_adapter = MagicMock()
+  generator.target_adapter = MagicMock()
+
+  with patch("ml_switcheroo.cli.handlers.convert_weights.cst.parse_module") as mock_parse:
+    mock_tree = MagicMock()
+    mock_parse.return_value = mock_tree
+
+    with patch("ml_switcheroo.cli.handlers.convert_weights.GraphExtractor") as mock_extractor_class:
+      mock_instance = MagicMock()
+      mock_instance.layer_registry = {}
+      mock_extractor_class.return_value = mock_instance
+
+      assert generator.generate(source_file, out_file) is False

@@ -25,15 +25,16 @@ class ApiTransformerCallMixin:
   It is designed to be mixed into `ApiTransformer` or mock transformers for testing.
   It relies on duck typing and expects the inheriting class to provide attributes and
   methods such as:
-      - `strict_mode` (bool): Whether to fail on unmapped source APIs.
-      - `source_fw` (str): Name of the source framework (e.g., 'torch').
-      - `target_fw` (str): Name of the target framework (e.g., 'jax').
-      - `semantics` (SemanticsManager): Semantic lookup dictionary/object.
-      - `_get_qualified_name(node)`: Resolves fully-qualified names of functions.
-      - `_get_mapping(name)`: Retrieves API translation details/mappings.
-      - `check_version_constraints(min_v, max_v)`: Validates version constraints.
-      - `_report_warning(msg)`: Handles issuing warnings.
-      - `_report_failure(msg)`: Handles throwing or logging failures.
+
+  - `strict_mode` (bool): Whether to fail on unmapped source APIs.
+  - `source_fw` (str): Name of the source framework (e.g., 'torch').
+  - `target_fw` (str): Name of the target framework (e.g., 'jax').
+  - `semantics` (SemanticsManager): Semantic lookup dictionary/object.
+  - `_get_qualified_name(node)`: Resolves fully-qualified names of functions.
+  - `_get_mapping(name)`: Retrieves API translation details/mappings.
+  - `check_version_constraints(min_v, max_v)`: Validates version constraints.
+  - `_report_warning(msg)`: Handles issuing warnings.
+  - `_report_failure(msg)`: Handles throwing or logging failures.
   """
 
   def leave_Call(
@@ -44,6 +45,7 @@ class ApiTransformerCallMixin:
     """Intercepts and rewrites a function call node during CST traversal.
 
     The rewriting process consists of the following phases:
+
     1. Resolve the qualified name of the original function callable.
     2. Execute pre-checks and optional functional unwrappings (e.g. `layer.apply`).
     3. Retrieve the target API mapping from the semantics registry, falling back to implicit

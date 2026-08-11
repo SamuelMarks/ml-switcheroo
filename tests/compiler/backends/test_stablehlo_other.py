@@ -65,3 +65,57 @@ def test_other_operations(backend: StableHloBackend, logical_op: str, expected_m
   assert "stablehlo.constant" in mlir_code
   assert "return" in mlir_code
   assert "%op_node =" in mlir_code
+
+
+def test_stablehlo_semantics_not_found():
+  # Hit 75->83
+  """Test stablehlo semantics not found."""
+  from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+
+  class SemanticsNoDef:
+    """Semantics no def."""
+
+    def get_definition(self, kind):
+      """Get definition."""
+      return None
+
+  backend = StableHloBackend(SemanticsNoDef())
+  g = LogicalGraph("Test")
+  g.nodes.append(LogicalNode(id="n1", kind="not_found"))
+  res = backend.compile(g)
+  assert "stablehlo.custom_call" in res
+
+
+def test_stablehlo_semantics_no_api():
+  # Hit 80->83
+  """Test stablehlo semantics no api."""
+  from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+
+  class SemanticsNoApi:
+    """Semantics no api."""
+
+    def get_definition(self, kind):
+      """Get definition."""
+      return ("abs", {"variants": {"stablehlo": {}}})
+
+  backend = StableHloBackend(SemanticsNoApi())
+  g = LogicalGraph("Test")
+  g.nodes.append(LogicalNode(id="n1", kind="not_found"))
+  res = backend.compile(g)
+  assert "stablehlo.custom_call" in res
+
+
+def test_stablehlo_semantics_none():
+  # Hit 75->83 (self.semantics is None)
+  """Test stablehlo semantics none."""
+  from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+
+  backend = StableHloBackend()
+  backend.semantics = None
+  g = LogicalGraph("Test")
+  g.nodes.append(LogicalNode(id="n1", kind="not_found"))
+  res = backend.compile(g)
+  assert "stablehlo.custom_call" in res

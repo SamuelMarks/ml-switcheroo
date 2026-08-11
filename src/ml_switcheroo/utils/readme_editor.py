@@ -91,7 +91,7 @@ class ReadmeEditor:
       return False
 
     end_line = (
-      tokens[next_heading_idx].map[0]
+      tokens[next_heading_idx].map[0]  # type: ignore
       if next_heading_idx != -1 and tokens[next_heading_idx].map
       else len(content.splitlines())
     )  # type: ignore

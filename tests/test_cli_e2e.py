@@ -139,6 +139,8 @@ def test_cli_e2e_unknown_command():
   with patch.object(argparse.ArgumentParser, "parse_args") as mock_parse:
 
     class DummyArgs:
+      """Dummy args."""
+
       command = "unknown_cmd"
       verbose = False
       log_file = None

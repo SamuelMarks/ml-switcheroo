@@ -39,43 +39,9 @@ from ml_switcheroo.core.compiler.frontends.sass.cst import (
 
 # Import IR directly to avoid parsing overhead and cycles with core.graph
 from ml_switcheroo.core.compiler.ir import LogicalGraph, topological_sort
-from ml_switcheroo.core.compiler.backends.sass.macros import (
-  expand_conv2d,
-  expand_linear,
-  expand_mean,
-  expand_relu,
-  expand_flatten,
-  expand_reshape,
-  expand_conv3d,
-  expand_avgpool2d,
-  expand_maxpool2d,
-  expand_batchnorm2d,
-  expand_dropout,
-  expand_sigmoid,
-  expand_tanh,
-  expand_gelu,
-  expand_mseloss,
-  expand_crossentropyloss,
-  expand_rnn,
-  expand_lstm,
-  expand_gru,
-  expand_multiheadattention,
-  expand_transformer,
-  expand_transformerencoder,
-  expand_transformerdecoder,
-  expand_conv1d,
-  expand_depthwiseconv2d,
-  expand_convtranspose,
-  expand_pool1d,
-  expand_pool3d,
-  expand_adaptivepool,
-  expand_generic_norm,
-  expand_generic_activation,
-  expand_generic_linalg,
-  expand_generic_reduction,
-  expand_generic_loss,
-  expand_generic_dropout,
-)
+import ml_switcheroo.core.compiler.backends.sass.macros as sass_macros
+import json
+import os
 
 if TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -202,97 +168,15 @@ class SassSynthesizer:
 
     # Registry of Kernel Macros for 1-to-N expansion
     # Maps Abstract Operation IDs to expansion functions
-    self.macro_registry: Dict[str, Callable[..., Any]] = {
-      "Conv2d": expand_conv2d,
-      "Linear": expand_linear,
-      "Mean": expand_mean,
-      "mean": expand_mean,
-      "ReLU": expand_relu,
-      "relu": expand_relu,
-      "Flatten": expand_flatten,
-      "flatten": expand_flatten,
-      "Reshape": expand_reshape,
-      "reshape": expand_reshape,
-      "Conv3d": expand_conv3d,
-      "conv3d": expand_conv3d,
-      "AvgPool2d": expand_avgpool2d,
-      "avgpool2d": expand_avgpool2d,
-      "MaxPool2d": expand_maxpool2d,
-      "maxpool2d": expand_maxpool2d,
-      "BatchNorm2d": expand_batchnorm2d,
-      "batchnorm2d": expand_batchnorm2d,
-      "Sigmoid": expand_sigmoid,
-      "sigmoid": expand_sigmoid,
-      "Tanh": expand_tanh,
-      "tanh": expand_tanh,
-      "MSELoss": expand_mseloss,
-      "mseloss": expand_mseloss,
-      "RNN": expand_rnn,
-      "rnn": expand_rnn,
-      "LSTM": expand_lstm,
-      "lstm": expand_lstm,
-      "MultiheadAttention": expand_multiheadattention,
-      "multiheadattention": expand_multiheadattention,
-      "Transformer": expand_transformer,
-      "transformer": expand_transformer,
-      "TransformerEncoder": expand_transformerencoder,
-      "transformerencoder": expand_transformerencoder,
-      "Conv1d": expand_conv1d,
-      "DepthwiseConv2d": expand_depthwiseconv2d,
-      "ConvTranspose1d": expand_convtranspose,
-      "ConvTranspose2d": expand_convtranspose,
-      "ConvTranspose3d": expand_convtranspose,
-      "AvgPool1d": expand_pool1d,
-      "MaxPool1d": expand_pool1d,
-      "AvgPool3d": expand_pool3d,
-      "MaxPool3d": expand_pool3d,
-      "AdaptiveAvgPool2d": expand_adaptivepool,
-      "AdaptiveMaxPool2d": expand_adaptivepool,
-      "BatchNorm1d": expand_generic_norm,
-      "BatchNorm3d": expand_generic_norm,
-      "LayerNorm": expand_generic_norm,
-      "GroupNorm": expand_generic_norm,
-      "InstanceNorm2d": expand_generic_norm,
-      "Softmax": expand_generic_activation,
-      "LogSoftmax": expand_generic_activation,
-      "SiLU": expand_generic_activation,
-      "Swish": expand_generic_activation,
-      "ELU": expand_generic_activation,
-      "LeakyReLU": expand_generic_activation,
-      "BMM": expand_generic_linalg,
-      "Dot": expand_generic_linalg,
-      "SVD": expand_generic_linalg,
-      "Solve": expand_generic_linalg,
-      "Cholesky": expand_generic_linalg,
-      "Sum": expand_generic_reduction,
-      "Prod": expand_generic_reduction,
-      "Min": expand_generic_reduction,
-      "Max": expand_generic_reduction,
-      "ArgMax": expand_generic_reduction,
-      "ArgMin": expand_generic_reduction,
-      "Any": expand_generic_reduction,
-      "All": expand_generic_reduction,
-      "BCEWithLogitsLoss": expand_generic_loss,
-      "L1Loss": expand_generic_loss,
-      "NLLLoss": expand_generic_loss,
-      "Dropout2d": expand_generic_dropout,
-      "Dropout3d": expand_generic_dropout,
-      "AlphaDropout": expand_generic_dropout,
-      "TransformerDecoder": expand_transformerdecoder,
-      "transformerdecoder": expand_transformerdecoder,
-      "GRU": expand_gru,
-      "gru": expand_gru,
-      "LSTMCell": expand_lstm,
-      "GRUCell": expand_gru,
-      "CrossEntropyLoss": expand_crossentropyloss,
-      "crossentropyloss": expand_crossentropyloss,
-      "GELU": expand_gelu,
-      "gelu": expand_gelu,
-      "Dropout": expand_dropout,
-      "dropout": expand_dropout,
-      "MatMul": expand_linear,
-      "matmul": expand_linear,
-    }
+    self.macro_registry: Dict[str, Callable[..., Any]] = {}
+    macros_json_path = os.path.join(os.path.dirname(__file__), "macros.json")
+    if os.path.exists(macros_json_path):
+      with open(macros_json_path, "r", encoding="utf-8") as f:
+        mapping = json.load(f)
+
+      for key, func_name in mapping.items():
+        if hasattr(sass_macros, func_name):
+          self.macro_registry[key] = getattr(sass_macros, func_name)
 
   def from_graph(self, graph: LogicalGraph) -> List[SassNode]:
     """Converts a LogicalGraph into a list of SASS AST nodes.
@@ -316,7 +200,7 @@ class SassSynthesizer:
            graph (LogicalGraph): The input computation graph.
 
     Returns:
-           List[SassNode]: A structured list of assembly nodes.
+           List[~ml_switcheroo.core.compiler.frontends.sass.cst.SassNode]: A structured list of assembly nodes.
 
     """
     self.allocator.reset()
@@ -376,6 +260,17 @@ class SassSynthesizer:
           self.allocator.record_usage(src_id)
         continue
 
+      # Try suffix macro match for method calls like `hidden_states.reshape`
+      suffix_id = abstract_id.split(".")[-1] if abstract_id else ""
+      if suffix_id and suffix_id in self.macro_registry:
+        expander = self.macro_registry[suffix_id]
+        kernel_nodes = expander(self.allocator, node.id, node.metadata)
+        output_nodes.extend(kernel_nodes)
+        sources = input_map.get(node.id, [])
+        for src_id in sources:
+          self.allocator.record_usage(src_id)
+        continue
+
       # --- 1:1 SassInstruction Path ---
 
       # 3. Resolve SASS variant opcode
@@ -419,7 +314,7 @@ class SassSynthesizer:
         `R0 = sass.FADD(R1, R2)`
 
     Args:
-        sass_nodes (List[SassNode]): List of parsed SASS nodes.
+        sass_nodes (List[~ml_switcheroo.core.compiler.frontends.sass.cst.SassNode]): List of parsed SASS nodes.
 
     Returns:
         cst.Module: A LibCST module containing the Python representation.

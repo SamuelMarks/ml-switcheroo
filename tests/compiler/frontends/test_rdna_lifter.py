@@ -150,3 +150,101 @@ def test_rdna_lifter_end_without_begin():
   ]
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
+
+
+def test_rdna_analysis_no_loop_limits():
+  # Hit analysis 40
+  """Test rdna analysis no loop limits."""
+  from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction
+
+  inst = RdnaInstruction(opcode="v_add_f32", operands=[])
+  res = RdnaAnalyzer.analyze_block("Linear", [inst])
+  assert res == {}
+
+
+def test_rdna_analysis_other_kind():
+  # Hit 47->53
+  """Test rdna analysis other kind."""
+  from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaImmediate
+
+  inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate("10")])
+  res = RdnaAnalyzer.analyze_block("OtherKind", [inst])
+  assert res == {}
+
+
+def test_rdna_lifter_return_already_seen():
+  """Test rdna lifter return already seen."""
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+
+  lifter = RdnaLifter()
+  nodes = [
+    RdnaComment(text="; Return:"),
+    RdnaComment(text="; Return:"),
+  ]
+  graph = lifter.lift(nodes)
+  assert len([n for n in graph.nodes if n.kind == "Output"]) == 1
+
+
+def test_rdna_lifter_return_no_previous():
+  """Test rdna lifter return no previous."""
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+
+  lifter = RdnaLifter()
+  nodes = [
+    RdnaComment(text="; Return:"),
+  ]
+  graph = lifter.lift(nodes)
+  assert len(graph.edges) == 0
+
+
+def test_rdna_lifter_instruction_no_block_or_marker():
+  """Test rdna lifter instruction no block or marker."""
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction
+
+  lifter = RdnaLifter()
+  nodes = [RdnaInstruction(opcode="v_add_f32", operands=[])]
+  graph = lifter.lift(nodes)
+  assert len(graph.nodes) == 1
+  assert graph.nodes[0].kind == "rdna.v_add_f32"
+
+
+def test_rdna_lifter_instruction_in_block():
+  """Test rdna lifter instruction in block."""
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaLabel
+
+  lifter = RdnaLifter()
+  nodes = [RdnaLabel("lbl")]
+  graph = lifter.lift(nodes)
+  assert len(graph.nodes) == 0
+
+
+def test_rdna_lifter_comment_no_marker():
+  """Test rdna lifter comment no marker."""
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+
+  lifter = RdnaLifter()
+  nodes = [RdnaComment(text="hi")]
+  nodes[0].semantic_marker = SemanticMarker()
+  graph = lifter.lift(nodes)
+  assert len(graph.nodes) == 0
+
+
+def test_rdna_lifter_comment_unknown_marker(monkeypatch):
+  """Test rdna lifter comment unknown marker."""
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+
+  lifter = RdnaLifter()
+  nodes = [RdnaComment(text="hi")]
+  monkeypatch.setattr(lifter.comment_parser, "parse", lambda x: SemanticMarker())
+  graph = lifter.lift(nodes)
+  assert len(graph.nodes) == 0

@@ -36,7 +36,9 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.backends.rdna.emitter import RdnaEmitter
 from ml_switcheroo.core.compiler.ir import LogicalGraph, topological_sort
-from ml_switcheroo.core.compiler.backends.rdna.macros import expand_conv2d, expand_linear
+import ml_switcheroo.core.compiler.backends.rdna.macros as rdna_macros
+import json
+import os
 
 if TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -142,10 +144,15 @@ class RdnaSynthesizer:
     """
     self.semantics = semantics
     self.allocator = RegisterAllocator()
-    self.macro_registry: Dict[str, Callable[..., Any]] = {
-      "Conv2d": expand_conv2d,
-      "Linear": expand_linear,
-    }
+    self.macro_registry: Dict[str, Callable[..., Any]] = {}
+    macros_json_path = os.path.join(os.path.dirname(__file__), "macros.json")
+    if os.path.exists(macros_json_path):
+      with open(macros_json_path, "r", encoding="utf-8") as f:
+        mapping = json.load(f)
+
+      for key, func_name in mapping.items():
+        if hasattr(rdna_macros, func_name):
+          self.macro_registry[key] = getattr(rdna_macros, func_name)
 
   def from_graph(self, graph: LogicalGraph) -> List[RdnaNode]:
     """Converts a LogicalGraph into a list of RDNA AST nodes.
@@ -191,6 +198,13 @@ class RdnaSynthesizer:
       # --- Macro Expansion ---
       if abstract_id in self.macro_registry:
         expander = self.macro_registry[abstract_id]
+        kernel_nodes = expander(self.allocator, node.id, node.metadata)
+        output_nodes.extend(kernel_nodes)
+        continue
+
+      suffix_id = abstract_id.split(".")[-1] if abstract_id else ""
+      if suffix_id and suffix_id in self.macro_registry:
+        expander = self.macro_registry[suffix_id]
         kernel_nodes = expander(self.allocator, node.id, node.metadata)
         output_nodes.extend(kernel_nodes)
         continue

@@ -14,14 +14,14 @@ def in_top_k_plugin(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   Checks if target indices are present in `top_k(predictions)`.
 
   Args:
-    node: The CST Call node representing the `in_top_k` operation to be
-      processed.
-    ctx: The hook context containing metadata, configuration, and translation
-      environment details.
+      node: The CST Call node representing the `in_top_k` operation to be
+          processed.
+      ctx: The hook context containing metadata, configuration, and translation
+          environment details.
 
   Returns:
-    The transformed CST node, or the original node if no transformation was
-    applied.
+      The transformed CST node, or the original node if no transformation was
+          applied.
   """
   # TODO: Implement custom logic
   return node

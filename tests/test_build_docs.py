@@ -108,6 +108,8 @@ def test_calculate_unique_variants_success(monkeypatch, capsys):
   """Tests variant calculation success."""
 
   class MockManager:
+    """Mock manager."""
+
     _reverse_index = [1, 2, 3]
 
   # Create a dummy module to avoid importing the real SemanticsManager which could fail or change
@@ -127,6 +129,8 @@ def test_calculate_unique_variants_ci_fail(monkeypatch, capsys):
   """Tests variant calculation failure in CI."""
 
   class MockManager:
+    """Mock manager."""
+
     _reverse_index = [1, 2, 3]  # Below 1860
 
   import sys

@@ -1,0 +1,14 @@
+{
+  "cat": 1000,
+  "Append": -1000,
+  "concat": -500,
+  "Mean": 1000,
+  "Average": -1000,
+  "mean": -500,
+  "relu": 100,
+  "ReLU": -100,
+  "MultiHeadAttention": 1000,
+  "AttentionLayer": -1000,
+  "Dropout": 1000,
+  "Dropout_": -1000
+}

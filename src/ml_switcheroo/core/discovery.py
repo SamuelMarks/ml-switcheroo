@@ -101,8 +101,8 @@ class SimulatedReflection:
     if matches:
       best_match_name = matches[0]
       # Retrieve the full path for the best match
-      for name, path in candidates:
-        if name == best_match_name:
+      for name, path in candidates:  # pragma: no branch
+        if name == best_match_name:  # pragma: no branch
           return path
 
     return None

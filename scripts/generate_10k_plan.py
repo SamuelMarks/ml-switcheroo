@@ -61,11 +61,11 @@ def extract_api_surface(repo_name: str, focus_dirs: list[str]) -> list[str]:
   """Extract API surface (classes and functions) from specified repository directories.
 
   Args:
-    repo_name: Name of the repository to process.
-    focus_dirs: List of directory or file paths within the repository to parse.
+      repo_name: Name of the repository to process.
+      focus_dirs: List of directory or file paths within the repository to parse.
 
   Returns:
-    A sorted list of API node strings (e.g., 'module.ClassName').
+      A sorted list of API node strings (e.g., 'module.ClassName').
   """
   repo_path = TMP_DIR / repo_name
   api_nodes = []

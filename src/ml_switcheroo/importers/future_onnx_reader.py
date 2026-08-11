@@ -54,7 +54,7 @@ class OnnxSpecImporter:
         Dict: Extracted semantics.
     """
     from markdown_it import MarkdownIt
-    from bs4 import BeautifulSoup
+    from bs4 import BeautifulSoup, Tag
 
     content = fpath.read_text(encoding="utf-8")
     md = MarkdownIt()
@@ -73,8 +73,8 @@ class OnnxSpecImporter:
             inline_content = tokens[i + 1].content
             soup = BeautifulSoup(inline_content, "html.parser")
             a_tag = soup.find("a", attrs={"name": True})
-            if a_tag and isinstance(a_tag.get("name"), str):
-              current_op = str(a_tag.get("name"))
+            if isinstance(a_tag, Tag) and isinstance(a_tag.get("name"), str):
+              current_op = str(a_tag.get("name"))  # type: ignore
               if current_op not in semantics:
                 semantics[current_op] = {"from": fpath.name, "description": "", "std_args": [], "_raw_summary": []}
               current_section = "Summary"

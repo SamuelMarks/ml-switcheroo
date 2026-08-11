@@ -150,3 +150,58 @@ def test_python_backend_primitive_mapping_mlx():
   assert "self.rope = nn.RoPE()" in code
   assert "self.vision = nn.Conv2d()" in code
   assert "self.swiglu = nn.silu()" in code
+
+
+def test_python_backend_class_updater_inline_body():
+  """Test function."""
+  import libcst as cst
+  from ml_switcheroo.core.compiler.backends.python import ClassBodyReplacer
+
+  # A class with inline body methods
+  code = "class MyModel:\n  def __init__(self): pass\n  def forward(self, x): return x"
+  tree = cst.parse_module(code)
+
+  new_init = cst.parse_module("def __init__(self):\n  self.new_layer = 1").body[0]
+  new_forward = cst.parse_module("def forward(self, x):\n  return x + 1").body[0]
+
+  updater = ClassBodyReplacer("MyModel", new_init, new_forward)
+  modified = tree.visit(updater)
+
+  assert "self.new_layer = 1" in modified.code
+
+
+def test_python_backend_class_updater_inline_body_missing_branch():
+  """Test function."""
+  import libcst as cst
+  from ml_switcheroo.core.compiler.backends.python import ClassBodyReplacer
+
+  # A class with inline body that contains a SmallStatement we don't care about or that wraps safely
+  code = "class MyModel: pass\n"
+  tree = cst.parse_module(code)
+
+  new_init = cst.parse_module("def __init__(self):\n  pass").body[0]
+  new_forward = cst.parse_module("def forward(self, x):\n  return x").body[0]
+
+  updater = ClassBodyReplacer("MyModel", new_init, new_forward)
+  modified = tree.visit(updater)
+
+  assert "def __init__" in modified.code
+
+
+def test_python_backend_class_updater_inline_body_missing_branch2():
+  """Test function."""
+  import libcst as cst
+  from ml_switcheroo.core.compiler.backends.python import ClassBodyReplacer
+
+  # A class with inline body that contains a SmallStatement we don't care about (e.g., break/continue which aren't in the tuple)
+  code = "class MyModel:\n  def __init__(self): break"
+  tree = cst.parse_module(code)
+
+  new_init = cst.parse_module("def __init__(self):\n  pass").body[0]
+  new_forward = cst.parse_module("def forward(self, x):\n  return x").body[0]
+
+  updater = ClassBodyReplacer("MyModel", new_init, new_forward)
+  modified = tree.visit(updater)
+
+  # Ensure it doesn't crash on the missing branch for 'break' stmt
+  assert "class MyModel:" in modified.code

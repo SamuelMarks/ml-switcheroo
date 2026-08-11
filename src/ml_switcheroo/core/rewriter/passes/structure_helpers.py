@@ -26,13 +26,14 @@ class StructuralTransformerHelpersMixin:
       """Creates a dotted name or attribute node from a dot-separated string representation.
 
       Args:
+          self: The mixin instance.
           name: A dot-separated string representing the name (e.g., 'foo.bar.baz').
 
       Returns:
           A CST node representation of the dotted name, typically a `cst.Attribute`
           or `cst.Name` node.
       """
-      ...
+      return None
 
   def _strip_argument_from_signature(self, node: cst.FunctionDef, arg_name: str) -> cst.FunctionDef:
     """Removes an argument by name from the function definition signature.

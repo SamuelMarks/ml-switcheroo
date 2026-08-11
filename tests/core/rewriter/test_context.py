@@ -66,7 +66,10 @@ def test_rewriter_context_hydrate_aliases():
 
   # Provide an object with model_dump
   class MockAliasInfo:
+    """Mock alias info."""
+
     def model_dump(self):
+      """Model dump."""
       return {"name": "my_alias"}
 
   semantics.get_framework_config.return_value = {"alias": MockAliasInfo()}
@@ -80,7 +83,10 @@ def test_rewriter_context_hydrate_aliases():
   semantics.get_framework_config.return_value = {"alias": {"name": "bad"}}
 
   class FailingAliasMap(dict):
+    """Failing alias map."""
+
     def __setitem__(self, key, value):
+      """Setitem."""
       raise ValueError("Test Error")
 
   ctx.alias_map = FailingAliasMap()

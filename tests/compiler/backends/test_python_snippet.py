@@ -129,3 +129,18 @@ def test_resolve_api_dotted_and_jax(emitter_flax):
 def test_format_args_from_metadata_empty(emitter_torch):
   """Tests format args from metadata empty."""
   assert emitter_torch._build_args_from_metadata({}) == []
+
+
+def test_python_snippet_emit_init_flax_with_rngs():
+  """Test function."""
+  from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
+  from ml_switcheroo.core.graph import LogicalNode
+
+  # To cover the 'any(...)' branch evaluating to True, we provide 'rngs' in metadata
+  # Note: `_build_args_from_metadata` processes metadata
+  node = LogicalNode("l1", "nn.Linear", metadata={"in_features": 10, "rngs": "rngs"})
+  backend = PythonSnippetEmitter(framework="flax")
+  stmt = backend.emit_init(node)
+  # ensure it generated correctly without crashing
+  code = __import__("libcst").Module(body=[stmt]).code
+  assert "rngs" in code

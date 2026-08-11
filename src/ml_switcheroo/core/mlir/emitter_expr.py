@@ -26,24 +26,26 @@ class MlirEmitterExprMixin:
       """Flattens a Name or Attribute chain into a dotted string.
 
       Args:
+          self: The mixin instance.
           attr: The LibCST node representing the attribute or name to flatten.
 
       Returns:
           A dotted string representation of the attribute chain (e.g., "self.layer")
           or None if it cannot be flattened.
       """
-      ...
+      return None
 
     def _get_binop_str(self, op: Any) -> str:
       """Maps a LibCST binary operator node to its corresponding string identifier.
 
       Args:
+          self: The mixin instance.
           op: The LibCST binary operator node (e.g., cst.Add, cst.Multiply).
 
       Returns:
           The string identifier (e.g., "add", "mul", "matmul") for the operator.
       """
-      ...
+      return ""
 
   def _emit_expression(self, expr: cst.BaseExpression) -> Tuple[ValueNode, List[OperationNode]]:
     """Recursively converts an expression into a value node and a list of supporting operations.

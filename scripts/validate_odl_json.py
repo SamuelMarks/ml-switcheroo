@@ -20,10 +20,10 @@ def validate_file(filepath: Path) -> bool:
   """Validate a single JSON file against the SemanticsFile schema.
 
   Args:
-    filepath: Path to the JSON file to validate.
+      filepath: Path to the JSON file to validate.
 
   Returns:
-    True if the file is valid, False otherwise.
+      True if the file is valid, False otherwise.
   """
   try:
     with open(filepath, "r", encoding="utf-8") as f:

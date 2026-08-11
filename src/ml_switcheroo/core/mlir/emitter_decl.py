@@ -25,36 +25,39 @@ class MlirEmitterDeclMixin:
       """Flatten a Name or Attribute chain into a string.
 
       Args:
+          self: The mixin instance.
           attr: A LibCST Name or Attribute node representing an identifier chain.
 
       Returns:
           A dotted string representation of the chain (e.g. "self.layer"),
           or None if the attribute chain cannot be flattened.
       """
-      ...
+      return None
 
     def _emit_block(self, block: Any, label: str = "^bb0") -> Any:
       """Convert a sequence of statements or a suite into an MLIR Block.
 
       Args:
+          self: The mixin instance.
           block: A CST Suite or list of statement nodes.
           label: Optional label for the generated block (defaults to "^bb0").
 
       Returns:
           A BlockNode representing the populated MLIR Block.
       """
-      ...
+      return None
 
     def _annotation_to_string(self, ann: Any) -> str:
       """Convert a type annotation node to its string representation.
 
       Args:
+          self: The mixin instance.
           ann: The type annotation CST node (typically a Name or Attribute).
 
       Returns:
           The string representation of the type annotation, or "Any" if not flattenable.
       """
-      ...
+      return "Any"
 
   def _emit_class_def(self, node: cst.ClassDef) -> OperationNode:
     """Convert a Python class definition to `sw.module`.

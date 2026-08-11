@@ -21,8 +21,8 @@ class InjectionMixin(cst.CSTTransformer):
   """Mixin for injecting imports at the Module level.
 
   Attributes:
-    plan: The resolution plan containing required imports.
-    _satisfied_injections: Set of import signatures already processed.
+      plan: The resolution plan containing required imports.
+      _satisfied_injections: Set of import signatures already processed.
   """
 
   plan: ResolutionPlan
@@ -32,11 +32,11 @@ class InjectionMixin(cst.CSTTransformer):
     """Post-process module to inject imports from the plan.
 
     Args:
-      original_node: The original CST Module node before transformation.
-      updated_node: The updated CST Module node after transformation.
+        original_node: The original CST Module node before transformation.
+        updated_node: The updated CST Module node after transformation.
 
     Returns:
-      The modified CST Module node containing the injected imports.
+        The modified CST Module node containing the injected imports.
     """
     injections: List[cst.CSTNode] = []
 
@@ -124,7 +124,7 @@ class InjectionMixin(cst.CSTTransformer):
     """Execute implementation detail by appending an injection node.
 
     Args:
-      injections_list: The list of injection CST nodes to append to.
-      node: The CST node to be injected.
+        injections_list: The list of injection CST nodes to append to.
+        node: The CST node to be injected.
     """
     injections_list.append(node)

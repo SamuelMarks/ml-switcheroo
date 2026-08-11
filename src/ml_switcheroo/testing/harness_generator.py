@@ -86,7 +86,7 @@ class HarnessInjector(cst.CSTTransformer):
         insert_idx = i
         break
 
-    nodes = []
+    nodes: list = []
     if self.imports_block.strip():
       nodes.extend(cst.parse_module(self.imports_block).body)
     if self.init_helpers_block.strip():
@@ -97,7 +97,7 @@ class HarnessInjector(cst.CSTTransformer):
     new_body = list(updated_node.body[:insert_idx]) + nodes + list(updated_node.body[insert_idx:])
     return updated_node.with_changes(body=new_body)
 
-  def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.CSTNode:
+  def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Any:
     """Injects to_numpy logic into the to_numpy function definition.
 
     Args:
@@ -120,7 +120,7 @@ class HarnessInjector(cst.CSTTransformer):
       return updated_node.with_changes(body=updated_node.body.with_changes(body=new_body))
     return updated_node
 
-  def leave_If(self, original_node: cst.If, updated_node: cst.If) -> cst.CSTNode:
+  def leave_If(self, original_node: cst.If, updated_node: cst.If) -> Any:
     """Injects the param injection logic replacing the target `if tp not in tgt_inputs: pass`.
 
     Args:
@@ -143,7 +143,7 @@ class HarnessInjector(cst.CSTTransformer):
           return updated_node.with_changes(body=updated_node.body.with_changes(body=parsed))
     return updated_node
 
-  def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.CSTNode:
+  def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> Any:
     """Modifies the run_verification arguments to use dynamic paths and frameworks.
 
     Args:

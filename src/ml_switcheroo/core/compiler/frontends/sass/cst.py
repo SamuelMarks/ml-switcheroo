@@ -31,7 +31,7 @@ class SassRegister(SassOperand):
   Attributes:
       name (str): The register identifier (e.g., "R0", "RZ").
       negated (bool): If True, prepends a negation sign (e.g., "-R0").
-      absolute (bool): If True, wraps in absolute value pipes (e.g., "|R0|").
+      absolute (bool): If True, wraps in absolute value pipes (e.g., `|R0|`).
   """
 
   name: str = ""

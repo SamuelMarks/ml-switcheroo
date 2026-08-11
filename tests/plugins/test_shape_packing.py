@@ -114,6 +114,7 @@ def test_packing_fallback_to_view():
   ctx.current_op_id = "Reshape"
 
   def lookup(op_id):
+    """Lookup."""
     if op_id == "Reshape":
       return None
     if op_id == "View":

@@ -65,6 +65,7 @@ def test_verified_pipeline_cdd_error(monkeypatch):
   original_import = builtins.__import__
 
   def mock_import(name, *args, **kwargs):
+    """Mock import."""
     if name == "cdd":
       raise ImportError("Mocked ImportError")
     return original_import(name, *args, **kwargs)

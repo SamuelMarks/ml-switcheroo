@@ -66,25 +66,23 @@ class GraphDiffer:
     """Compare graphs and return list of actions.
 
     Algorithm:
-        Identify Removed IDs: `source_ids - target_ids`.
-        Identify Added/Changed Nodes.
-        Match Added Nodes to Removed Nodes (Find Anchor).
-        Heuristic: If FusedNode depends on input X, and RemovedNode N depends on input X,
-                 they might be related.
-        Current Heuristic: Use provenance or manual mapping supplied by Optimizer?
-        Simpler Heuristic: Fused nodes usually REPLACE a subgraph. The "output" variable
-                 usually stays consistent flow-wise, or we replace the Sink of the subgraph.
+    - Identify Removed IDs: `source_ids - target_ids`.
+    - Identify Added/Changed Nodes.
+    - Match Added Nodes to Removed Nodes (Find Anchor).
+    - Heuristic: If FusedNode depends on input X, and RemovedNode N depends on input X, they might be related.
+    - Current Heuristic: Use provenance or manual mapping supplied by Optimizer?
+    - Simpler Heuristic: Fused nodes usually REPLACE a subgraph. The "output" variable usually stays consistent flow-wise, or we replace the Sink of the subgraph.
 
     For this implementation, we rely on the Optimizer naming convention or graph
     structure. Since graph optimization logic isn't fully inspectable here,
     we implement a Diff strategy based on ID presence.
 
     Strategies:
-        If ID is missing in Target -> DELETE.
-        If ID is new/fused in Target -> REPLACE.
-        We need an Anchor in Source to attach the Replacement.
-        We attach the Replacement to the *first available* deleted node that matches topology?
-        Better: If Optimizer produced FusedNode `fused_c1`, and `c1` is deleted, `c1` is anchor?
+    - If ID is missing in Target -> DELETE.
+    - If ID is new/fused in Target -> REPLACE.
+    - We need an Anchor in Source to attach the Replacement.
+    - We attach the Replacement to the *first available* deleted node that matches topology?
+    - Better: If Optimizer produced FusedNode `fused_c1`, and `c1` is deleted, `c1` is anchor?
 
     Args:
         source (LogicalGraph): The source logical graph representation before transformation.

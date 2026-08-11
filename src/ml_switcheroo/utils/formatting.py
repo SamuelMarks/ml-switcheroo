@@ -21,7 +21,7 @@ class StructuredFormatter:
     """Initializes the structured formatter with a custom indentation size.
 
     Args:
-      indent_size: The number of spaces representing a single level of
+        indent_size: The number of spaces representing a single level of
         indentation. Defaults to 2.
     """
     self.lines: List[str] = []
@@ -31,8 +31,8 @@ class StructuredFormatter:
     """Adds a line of text with the specified indentation level.
 
     Args:
-      text: The text content of the line to add.
-      indent_level: The level of indentation to apply to the line. Defaults to 0.
+        text: The text content of the line to add.
+        indent_level: The level of indentation to apply to the line. Defaults to 0.
     """
     if not text.strip() and not text:
       self.lines.append("")
@@ -44,8 +44,8 @@ class StructuredFormatter:
     """Adds a block of text, properly indenting each line within the block.
 
     Args:
-      text: The multi-line block of text to add.
-      indent_level: The level of indentation to apply to all lines in the block.
+        text: The multi-line block of text to add.
+        indent_level: The level of indentation to apply to all lines in the block.
         Defaults to 0.
     """
     for line in text.splitlines():
@@ -55,7 +55,7 @@ class StructuredFormatter:
     """Returns the constructed structured string.
 
     Returns:
-      The complete constructed output with lines joined by newline characters.
+        The complete constructed output with lines joined by newline characters.
     """
     return "\n".join(self.lines)
 
@@ -64,10 +64,10 @@ def escape_html(text: str) -> str:
   """Escapes HTML special characters in the given text safely.
 
   Args:
-    text: The raw text containing potential HTML special characters.
+      text: The raw text containing potential HTML special characters.
 
   Returns:
-    The HTML-escaped string.
+      The HTML-escaped string.
   """
   return html.escape(str(text))
 
@@ -80,10 +80,10 @@ def escape_latex(text: str) -> str:
   Let's escape only a few core ones if needed. For now, replace % with \\%.
 
   Args:
-    text: The raw text containing potential LaTeX special characters.
+      text: The raw text containing potential LaTeX special characters.
 
   Returns:
-    The LaTeX-escaped string.
+      The LaTeX-escaped string.
   """
   # In actual LaTeX escaping, there are many characters (e.g. % $ # _ { } ~ ^ \).
   # We will just do a basic one or pass through if it's considered safe in our DSL.

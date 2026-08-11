@@ -85,3 +85,25 @@ def test__is_likely_stateful():
   assert _is_likely_stateful(LogicalNode("4", "my_FusedOp")) is True
   assert _is_likely_stateful(LogicalNode("5", "")) is False
   assert _is_likely_stateful(LogicalNode("6", None)) is False
+
+
+def test_differ_diff_no_anchor():
+  # Hit 123->128
+  """Test differ diff no anchor."""
+  from ml_switcheroo.core.compiler.differ import GraphDiffer
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+
+  g1 = LogicalGraph("g1")
+  g1.nodes.append(LogicalNode("A", "Op"))
+
+  g2 = LogicalGraph("g2")
+  g2.nodes.append(LogicalNode("B", "Op"))  # neither metadata anchor, nor starts with fused_
+  # or starts with fused_ but candidate not in deleted_ids
+  g2.nodes.append(LogicalNode("fused_C", "Op"))
+
+  differ = GraphDiffer()
+  # It will identify 'A' as deleted, 'B' and 'fused_C' as added.
+  # When looping over new_nodes, it will check 'B' -> hits 123->128 (starts with fused == False)
+  # Then 'fused_C' -> hits 123->128 ('C' not in deleted_ids)
+  diffs = differ.diff(g1, g2)
+  assert len(diffs) > 0

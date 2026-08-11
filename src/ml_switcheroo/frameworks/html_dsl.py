@@ -42,10 +42,10 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Factory for creating an HTML Parser used by Ingestion.
 
     Args:
-      code: The HTML visual DSL code string to be parsed.
+        code: The HTML visual DSL code string to be parsed.
 
     Returns:
-      An instance of HtmlParser configured with the provided HTML code.
+        An instance of HtmlParser configured with the provided HTML code.
     """
     return HtmlParser(code)
 
@@ -54,8 +54,8 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Retrieve the default import alias for this framework.
 
     Returns:
-      A tuple containing the target module name and its recommended import alias
-      (e.g., ("html_dsl", "dsl")).
+        A tuple containing the target module name and its recommended import alias
+        (e.g., ("html_dsl", "dsl")).
     """
     return "html_dsl", "dsl"
 
@@ -64,8 +64,8 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Get the namespace import configurations for this framework.
 
     Returns:
-      A dictionary mapping namespace names to their ImportConfig settings or
-      alias sub-dictionaries.
+        A dictionary mapping namespace names to their ImportConfig settings or
+        alias sub-dictionaries.
     """
     return {"html_dsl": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="dsl")}
 
@@ -74,7 +74,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Get the semantic tiers supported by this framework.
 
     Returns:
-      A list of supported SemanticTier values (e.g., [SemanticTier.NEURAL]).
+        A list of supported SemanticTier values (e.g., [SemanticTier.NEURAL]).
     """
     return [SemanticTier.NEURAL]
 
@@ -83,8 +83,8 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Get structural traits of modules/layers within this framework.
 
     Returns:
-      A StructuralTraits object specifying the module base class, forward method,
-      initializer name, and whether a parent init call is required.
+        A StructuralTraits object specifying the module base class, forward method,
+        initializer name, and whether a parent init call is required.
     """
     return StructuralTraits(
       module_base="html_dsl.Module", forward_method="forward", init_method_name="__init__", requires_super_init=True
@@ -95,7 +95,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Get custom plugin traits required by this framework.
 
     Returns:
-      An empty PluginTraits object configuration.
+        An empty PluginTraits object configuration.
     """
     return PluginTraits()
 
@@ -104,7 +104,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Get the test configuration parameters for this adapter.
 
     Returns:
-      An empty dictionary containing the test configuration options.
+        An empty dictionary containing the test configuration options.
     """
     return {}
 
@@ -113,7 +113,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Get additional imports required for the test harness.
 
     Returns:
-      An empty list of Python import statements or module names.
+        An empty list of Python import statements or module names.
     """
     return []
 
@@ -121,7 +121,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Generate initialization code required for the test harness.
 
     Returns:
-      An empty string representing standard initialization statements.
+        An empty string representing standard initialization statements.
     """
     return ""
 
@@ -129,8 +129,8 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Generate python code used to convert framework objects to NumPy arrays.
 
     Returns:
-      A Python code snippet as a string that converts objects to standard
-      string representations.
+        A Python code snippet as a string that converts objects to standard
+        string representations.
     """
     return "return str(obj)"
 
@@ -139,7 +139,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Get the list of declared magic arguments handled by this framework.
 
     Returns:
-      An empty list of argument name strings.
+        An empty list of argument name strings.
     """
     return []
 
@@ -148,7 +148,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Get the names of methods used for random number generator seeding.
 
     Returns:
-      An empty list of API names.
+        An empty list of API names.
     """
     return []
 
@@ -157,8 +157,8 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Retrieve standard operator and layer mapping definitions.
 
     Returns:
-      A dictionary mapping layer names (e.g., 'Module', 'Conv2d') to their
-      StandardMap definitions.
+        A dictionary mapping layer names (e.g., 'Module', 'Conv2d') to their
+        StandardMap definitions.
     """
     defs = load_definitions("html_dsl")
     if "Module" not in defs:
@@ -174,7 +174,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Retrieve specifications for custom DSL operators.
 
     Returns:
-      An empty dictionary mapping operator names to their OperationDef specifications.
+        An empty dictionary mapping operator names to their OperationDef specifications.
     """
     return {}
 
@@ -182,10 +182,10 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Convert external data/tensors into the framework's native format.
 
     Args:
-      data: The input data to convert.
+        data: The input data to convert.
 
     Returns:
-      The converted data, which is represented as a string in HTML mode.
+        The converted data, which is represented as a string in HTML mode.
     """
     return str(data)
 
@@ -193,11 +193,11 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Generate syntax for targeting specific hardware devices.
 
     Args:
-      device_type: The target device type (e.g., 'cpu', 'gpu').
-      device_index: Optional index or identifier of the specific device.
+        device_type: The target device type (e.g., 'cpu', 'gpu').
+        device_index: Optional index or identifier of the specific device.
 
     Returns:
-      An empty string representing the device selection syntax.
+        An empty string representing the device selection syntax.
     """
     return ""
 
@@ -205,7 +205,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Generate syntax to check the active device of a tensor.
 
     Returns:
-      A string containing the expression 'False' to indicate device assignment is unsupported.
+        A string containing the expression 'False' to indicate device assignment is unsupported.
     """
     return "False"
 
@@ -213,11 +213,11 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Generate syntax for splitting random number generator states.
 
     Args:
-      rng_var: Variable holding the parent RNG state.
-      key_var: Name of the variable to store the split sub-key.
+        rng_var: Variable holding the parent RNG state.
+        key_var: Name of the variable to store the split sub-key.
 
     Returns:
-      An empty string containing the split statement.
+        An empty string containing the split statement.
     """
     return ""
 
@@ -225,7 +225,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Get imports required for serialization routines.
 
     Returns:
-      An empty list of import statement strings.
+        An empty list of import statement strings.
     """
     return []
 
@@ -233,12 +233,12 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Generate syntax for serialization or deserialization of models/states.
 
     Args:
-      op: The operation name (e.g., 'load', 'save').
-      file_arg: Path or file-like object argument.
-      object_arg: Optional name of the object variable to serialize.
+        op: The operation name (e.g., 'load', 'save').
+        file_arg: Path or file-like object argument.
+        object_arg: Optional name of the object variable to serialize.
 
     Returns:
-      An empty string containing the target statement.
+        An empty string containing the target statement.
     """
     return ""
 
@@ -246,7 +246,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Get imports needed for weight conversion processes.
 
     Returns:
-      An empty list of import statements.
+        An empty list of import statements.
     """
     return []
 
@@ -254,10 +254,10 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Generate code snippet for loading weights.
 
     Args:
-      path_var: String variable referencing the path to the weight file.
+        path_var: String variable referencing the path to the weight file.
 
     Returns:
-      A string snippet indicating weights are not supported in HTML mode.
+        A string snippet indicating weights are not supported in HTML mode.
     """
     return "# Weights not supported in HTML mode"
 
@@ -265,10 +265,10 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Generate syntax for converting a tensor variable to a NumPy array.
 
     Args:
-      tensor_var: Name of the tensor variable.
+        tensor_var: Name of the tensor variable.
 
     Returns:
-      A string expression representing the conversion logic.
+        A string expression representing the conversion logic.
     """
     return tensor_var
 
@@ -276,11 +276,11 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Generate code snippet for saving model weights.
 
     Args:
-      state_var: Name of the state/weight dictionary variable.
-      path_var: Variable referencing the destination file path.
+        state_var: Name of the state/weight dictionary variable.
+        path_var: Variable referencing the destination file path.
 
     Returns:
-      A string snippet indicating weights are not supported in HTML mode.
+        A string snippet indicating weights are not supported in HTML mode.
     """
     return "# Weights not supported in HTML mode"
 
@@ -288,7 +288,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Apply snapshot parameter wiring to resolve framework structures.
 
     Args:
-      snapshot: A dictionary containing snapshot state configuration.
+        snapshot: A dictionary containing snapshot state configuration.
     """
     pass
 
@@ -296,10 +296,10 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Retrieve documentation URLs for standard operations/APIs.
 
     Args:
-      api_name: Name of the API or operator.
+        api_name: Name of the API or operator.
 
     Returns:
-      None, as HTML documentation URLs are not supported.
+        None, as HTML documentation URLs are not supported.
     """
     return None
 
@@ -307,7 +307,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """Retrieve example snippets categorized by semantic tier.
 
     Returns:
-      A dictionary mapping tier names to illustrative visual code blocks.
+        A dictionary mapping tier names to illustrative visual code blocks.
     """
     return {
       "tier2_neural": """

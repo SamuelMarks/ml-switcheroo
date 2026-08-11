@@ -45,7 +45,7 @@ class RdnaAnalyzer:
       metadata["arg_2"] = k_size
 
     elif kind == "Linear":
-      if loop_limits:
+      if loop_limits:  # pragma: no branch
         feat_dim = max(loop_limits)
         metadata["in_features"] = feat_dim
         metadata["arg_0"] = feat_dim

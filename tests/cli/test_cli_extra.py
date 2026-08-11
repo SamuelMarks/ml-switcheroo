@@ -22,7 +22,11 @@ def test_dev_handlers():
     assert handle_matrix() == 0
     mock_matrix.render.assert_called_once()
 
-  with patch("ml_switcheroo.cli.handlers.dev.MigrationGuideGenerator") as MockGen, patch("builtins.open", mock_open()):
+  with (
+    patch("ml_switcheroo.cli.handlers.dev.MigrationGuideGenerator") as MockGen,
+    patch("builtins.open", mock_open()),
+    patch("ml_switcheroo.cli.handlers.dev.SemanticsManager"),
+  ):
     mock_gen_instance = MagicMock()
     mock_gen_instance.generate.return_value = "Docs"
     MockGen.return_value = mock_gen_instance

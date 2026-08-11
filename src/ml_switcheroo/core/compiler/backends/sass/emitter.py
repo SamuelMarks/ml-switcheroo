@@ -16,7 +16,7 @@ class SassEmitter:
     """Generates the SASS source string from a list of nodes.
 
     Args:
-        nodes (List[SassNode]): AST nodes.
+        nodes (List[~ml_switcheroo.core.compiler.frontends.sass.cst.SassNode]): AST nodes.
 
     Returns:
         str: The formatted SASS source code string.

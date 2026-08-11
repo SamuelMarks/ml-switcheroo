@@ -6,6 +6,9 @@ normalization, exact matching against exported public members, fuzzy matching us
 similarity metrics, and error boundary handling when modules cannot be imported.
 """
 
+from unittest.mock import patch, Mock
+
+
 from ml_switcheroo.core.discovery import SimulatedReflection
 
 
@@ -45,7 +48,7 @@ def test_discovery_normalize():
   assert reflection._normalize("abs_") == "abs"
 
 
-def test_discovery_exact_match(mocker):
+def test_discovery_exact_match():
   """Tests exact-matching/normalization-matching in SimulatedReflection discovery.
 
   This test mocks the framework's internal structure to simulate the presence of public
@@ -61,23 +64,22 @@ def test_discovery_exact_match(mocker):
       None
   """
   # Mock importlib to return a fake module
-  mock_mod = mocker.Mock()
-  mock_mod.log_softmax = mocker.Mock()
+  mock_mod = Mock()
+  mock_mod.log_softmax = Mock()
   # Also add a private member to ensure it's skipped
-  mock_mod._private = mocker.Mock()
+  mock_mod._private = Mock()
 
-  mocker.patch(
-    "inspect.getmembers", return_value=[("log_softmax", mock_mod.log_softmax), ("_private", mock_mod._private)]
-  )
-  mocker.patch("importlib.import_module", return_value=mock_mod)
+  with (
+    patch("inspect.getmembers", return_value=[("log_softmax", mock_mod.log_softmax), ("_private", mock_mod._private)]),
+    patch("importlib.import_module", return_value=mock_mod),
+  ):
+    reflection = SimulatedReflection("torch")
+    reflection.search_modules = ["torch.nn.functional"]
+    result = reflection.discover("LogSoftmax")
+    assert result == "torch.nn.functional.log_softmax"
 
-  reflection = SimulatedReflection("torch")
-  reflection.search_modules = ["torch.nn.functional"]
-  result = reflection.discover("LogSoftmax")
-  assert result == "torch.nn.functional.log_softmax"
 
-
-def test_discovery_fuzzy_match(mocker):
+def test_discovery_fuzzy_match():
   """Tests fuzzy-matching fallbacks in SimulatedReflection discovery.
 
   This test mocks the framework's module contents and verifies that when an exact match is
@@ -91,18 +93,18 @@ def test_discovery_fuzzy_match(mocker):
   Returns:
       None
   """
-  mock_mod = mocker.Mock()
-  mock_mod.abs = mocker.Mock()
+  mock_mod = Mock()
+  mock_mod.abs = Mock()
 
-  mocker.patch("inspect.getmembers", return_value=[("absolute", mock_mod.abs)])
-  mocker.patch("importlib.import_module", return_value=mock_mod)
+  patch("inspect.getmembers", return_value=[("absolute", mock_mod.abs)])
+  patch("importlib.import_module", return_value=mock_mod)
 
   reflection = SimulatedReflection("numpy")
   result = reflection.discover("absolut")
   assert result == "numpy.absolute"
 
 
-def test_discovery_no_match(mocker):
+def test_discovery_no_match():
   """Tests discovery behavior when no matching API endpoint is found.
 
   This test simulates import failures when trying to load framework modules,
@@ -116,7 +118,7 @@ def test_discovery_no_match(mocker):
   Returns:
       None
   """
-  mocker.patch("importlib.import_module", side_effect=ImportError)
+  patch("importlib.import_module", side_effect=ImportError)
 
   reflection = SimulatedReflection("torch")
   result = reflection.discover("NonExistent")

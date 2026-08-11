@@ -186,3 +186,39 @@ def test_semantic_marker_base():
   marker = SemanticMarker()
   with pytest.raises(NotImplementedError):
     marker.to_text()
+
+
+def test_semantic_parser_input_no_trivia():
+  """Test semantic parser input no trivia."""
+  from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticInput
+
+  # Hit 76->78 and 79->81 (missing kw_input_trivia and name_trivia)
+  inp = SemanticInput(name="n")
+  assert inp.to_text() == "Inputn->"
+
+
+def test_semantic_parser_begin_no_trivia():
+  """Test semantic parser begin no trivia."""
+  from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticBegin
+
+  # Hit 116->118
+  b = SemanticBegin(kind="k", id="i")
+  assert b.to_text() == "BEGINk(i)"
+
+
+def test_semantic_parser_end_no_trivia():
+  """Test semantic parser end no trivia."""
+  from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticEnd
+
+  # Hit 162->164
+  e = SemanticEnd(kind="k", id="i")
+  assert e.to_text() == "ENDk(i)"
+
+
+def test_semantic_parser_unmapped_no_trivia():
+  """Test semantic parser unmapped no trivia."""
+  from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticUnmapped
+
+  # Hit 210->212 and 213->215
+  u = SemanticUnmapped(api="api", id="i")
+  assert u.to_text() == "UnmappedOp:api(i)"

@@ -97,6 +97,7 @@ def test_injector_write_error(target_json, sample_variant):
   original_open = open
 
   def mock_open(*args, **kwargs):
+    """Mock open."""
     if len(args) > 1 and args[1] == "w":
       raise OSError("Permission denied")
     return original_open(*args, **kwargs)

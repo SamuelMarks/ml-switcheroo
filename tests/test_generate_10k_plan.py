@@ -92,6 +92,7 @@ def test_generate_mappings(mock_env: Path, monkeypatch: pytest.MonkeyPatch, tmp_
 
   # Mock extract_api_surface to return predetermined APIs
   def mock_extract(repo_name, focus_dirs):
+    """Mock extract."""
     if repo_name == "pytorch":
       return ["module.Dense", "module.Relu"]
     elif repo_name == "keras":
@@ -106,6 +107,7 @@ def test_generate_mappings(mock_env: Path, monkeypatch: pytest.MonkeyPatch, tmp_
   original_open = Path.open
 
   def mock_open(self, *args, **kwargs):
+    """Mock open."""
     if self.name == "10000_STEP_PLAN.md":
       return original_open(plan_path, *args, **kwargs)
     elif self.name == "universal_mapping.json":

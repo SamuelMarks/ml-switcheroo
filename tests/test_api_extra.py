@@ -8,17 +8,24 @@ def test_api_transformer_version_exceptions(monkeypatch):
   import importlib.metadata
 
   class MockSemantics:
+    """Mock semantics."""
+
     def get_framework_config(self, fw):
+      """Get framework config."""
       return {}
 
   class DummyContext:
+    """Dummy context."""
+
     def __init__(self):
+      """Init."""
       self.target_fw = "flax_nnx"
       self.semantics = MockSemantics()
 
   p = ApiTransformer(context=DummyContext())
 
   def mock_version(pkg):
+    """Mock version."""
     raise Exception("Mocked Exception")
 
   monkeypatch.setattr(importlib.metadata, "version", mock_version)

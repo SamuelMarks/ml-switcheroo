@@ -1,18 +1,68 @@
-"""Test suite for the Rdna Macros Extra module."""
+"""Module docstring."""
 
-from ml_switcheroo.core.compiler.backends.rdna.macros import expand_conv2d, expand_linear
-from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RegisterAllocator
+from ml_switcheroo.core.compiler.backends.rdna.macros import (
+  RegisterAllocatorProtocol,
+  RdnaVGPR,
+  RdnaSGPR,
+  expand_conv2d,
+  expand_linear,
+  expand_relu,
+  expand_flatten,
+  expand_reshape,
+  expand_conv3d,
+  expand_dropout,
+  expand_variable,
+  expand_transpose,
+  expand_conv_general_dilated,
+  expand_adam,
+  expand_l,
+)
 
 
-def test_expand_conv2d():
-  """Verifies the behavior of expand conv2d."""
-  alloc = RegisterAllocator()
-  nodes = expand_conv2d(alloc, "conv1", {})
-  assert len(nodes) > 0
+class MockAllocator(RegisterAllocatorProtocol):
+  """Mock allocator."""
+
+  def __init__(self):
+    """Init."""
+    self.vc = 0
+    self.sc = 0
+
+  def get_vector_register(self, var_name: str) -> RdnaVGPR:
+    """Get vector register."""
+    return RdnaVGPR(index=0)
+
+  def get_scalar_register(self, var_name: str) -> RdnaSGPR:
+    """Get scalar register."""
+    return RdnaSGPR(index=0)
+
+  def allocate_vector_temp(self) -> RdnaVGPR:
+    """Allocate vector temp."""
+    self.vc += 1
+    return RdnaVGPR(index=self.vc)
+
+  def allocate_scalar_temp(self) -> RdnaSGPR:
+    """Allocate scalar temp."""
+    self.sc += 1
+    return RdnaSGPR(index=self.sc)
 
 
-def test_expand_linear():
-  """Verifies the behavior of expand linear."""
-  alloc = RegisterAllocator()
-  nodes = expand_linear(alloc, "lin1", {})
-  assert len(nodes) > 0
+def test_expand_all_macros():
+  """Test expand all macros."""
+  alloc = MockAllocator()
+  funcs = [
+    expand_conv2d,
+    expand_linear,
+    expand_relu,
+    expand_flatten,
+    expand_reshape,
+    expand_conv3d,
+    expand_dropout,
+    expand_variable,
+    expand_transpose,
+    expand_conv_general_dilated,
+    expand_adam,
+    expand_l,
+  ]
+  for func in funcs:
+    nodes = func(alloc, "node1", {})
+    assert len(nodes) > 0

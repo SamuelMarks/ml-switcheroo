@@ -15,10 +15,10 @@ def get_required_packages(imp_str: str) -> List[str]:
   """Parse an import string and return a list of required top-level packages.
 
   Args:
-    imp_str: The import string to parse.
+      imp_str: The import string to parse.
 
   Returns:
-    A list of top-level package names.
+      A list of top-level package names.
 
   """
   try:

@@ -42,7 +42,8 @@ def test_rdna_compiler_pipeline(compiler_semantics):
   assert "global_load_dword" in code
   assert "s_waitcnt" in code
   assert "; END Conv2d (conv)" in code
-  assert "; Unmapped Op: torch.flatten" in code or "; Unmapped Op: Flatten" in code
+  assert "; BEGIN Flatten (func_flatten)" in code
+  assert "; END Flatten (func_flatten)" in code
   assert "; BEGIN Linear (fc)" in code
   assert "L_GEMM_fc:" in code
   assert "v0" in code

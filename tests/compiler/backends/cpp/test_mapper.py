@@ -60,3 +60,14 @@ def test_ast_to_cpp_mapper():
   tree5 = ast.parse("a.b.c(x)", mode="eval").body
   cpp_expr5 = mapper.map_expression(tree5)
   assert cpp_expr5.to_text() == "c(x)"
+
+
+def test_ast_to_cpp_mapper_no_operators_json(monkeypatch):
+  """Test function."""
+  from ml_switcheroo.core.compiler.backends.cpp.mapper import ASTToCppMapper
+  import os
+
+  with monkeypatch.context() as m:
+    m.setattr(os.path, "exists", lambda path: False)
+    mapper = ASTToCppMapper()
+    assert mapper.op_map == {}

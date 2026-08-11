@@ -43,7 +43,7 @@ class OpSchema:
     """Checks if the CST node conforms to the dialect schema.
 
     Args:
-        node (OperationNode): The CST node to be validated.
+        node (~ml_switcheroo.core.mlir.cst.OperationNode): The CST node to be validated.
 
     Returns:
         bool: True if the node matches the schema name, has the correct number of
@@ -133,7 +133,7 @@ class DialectRegistry:
     """Validates a single operation node against the schema.
 
     Args:
-        node (OperationNode): The operation node to validate.
+        node (~ml_switcheroo.core.mlir.cst.OperationNode): The operation node to validate.
 
     Returns:
         bool: True if the operation is valid according to its schema or is an

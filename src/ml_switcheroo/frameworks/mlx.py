@@ -20,12 +20,15 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
+_np_mod: Any
 np: Any
 try:
   import numpy as _np
 
+  _np_mod = _np
   np = _np
 except Exception:
+  _np_mod = None
   np = None
 
 

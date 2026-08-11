@@ -59,10 +59,17 @@ def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch):
 
   # For pre-labeling to happen in _hydrate_adapters, we need a valid adapter with definitions
   class ValidAdapter:
+    """Valid adapter."""
+
     @property
     def definitions(self):
+      """Definitions."""
+
       class MockDef:
+        """Mock def."""
+
         def model_dump(self, **kwargs):
+          """Model dump."""
           return {}
 
       return {"lower_case_op": MockDef(), "UpperCaseOp": MockDef()}
@@ -80,6 +87,8 @@ def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch):
   # Check lines 247-248
   # mock hooks.get_all_hook_metadata
   class MockSpec:
+    """Mock spec."""
+
     ops = {"plugin_op": {"frameworks": {"jax": {}}}}
 
   monkeypatch.setattr(registry_loader.hooks, "get_all_hook_metadata", lambda: {"my_plugin": MockSpec()})
