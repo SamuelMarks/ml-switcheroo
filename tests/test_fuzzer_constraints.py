@@ -97,3 +97,26 @@ def test_tensor_alias_support(fuzzer, data):
   inputs = data.draw(st.fixed_dictionaries(strats))
   assert isinstance(inputs["x"], np.ndarray)
   assert len(inputs["x"].shape) == 1
+
+
+def test_fuzzer_parser_extra_coverage():
+  """Test fuzzer parser missing branches."""
+  from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
+  from ml_switcheroo.testing.fuzzer.type_parser import OptionalType, PrimitiveType, AnyType
+
+  # Optional return None
+  import random
+
+  random.seed(42)  # Try to hit < 0.2
+  for _ in range(20):
+    if (
+      generate_from_hint(
+        OptionalType(inner=PrimitiveType(name="int")), base_shape=[2], depth=0, max_depth=5, symbol_map={}
+      )
+      is None
+    ):
+      break
+
+  # default_val = list of strings (not int)
+  generate_from_hint(AnyType(), base_shape=[2], depth=0, max_depth=5, symbol_map={}, constraints={"default": ["a", "b"]})
+  # this will hit the ListType(AnyType()) path

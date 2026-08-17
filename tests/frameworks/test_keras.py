@@ -140,3 +140,37 @@ def test_keras_init_live_mode(monkeypatch):
   monkeypatch.setattr("ml_switcheroo.frameworks.keras.keras", True)
   adapter = KerasAdapter()
   assert adapter._mode == InitMode.LIVE
+
+
+def test_keras_import_exception():
+  """Test keras import block exception."""
+  import sys
+  import importlib
+  import ml_switcheroo.frameworks.keras as k_fw
+
+  # Store original
+  old_keras = sys.modules.get("keras")
+
+  # Force exception on import
+  class FailDict(dict):
+    def __getitem__(self, key):
+      if key == "keras":
+        raise Exception("import fail")
+      return super().__getitem__(key)
+
+  try:
+    sys.modules["keras"] = None
+    del sys.modules["keras"]
+  except KeyError:
+    pass
+
+  old_modules = sys.modules
+  sys.modules = FailDict(sys.modules)
+
+  try:
+    importlib.reload(k_fw)
+    assert k_fw.keras is None
+  finally:
+    sys.modules = old_modules
+    if old_keras is not None:
+      sys.modules["keras"] = old_keras

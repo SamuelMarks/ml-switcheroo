@@ -132,6 +132,7 @@ def test_mlx_convert_numpy():
     sys.modules["mlx"] = MagicMock()
   if "mlx.core" not in sys.modules:
     sys.modules["mlx.core"] = MagicMock()
+  sys.modules["mlx"].core = sys.modules["mlx.core"]
 
   from unittest.mock import patch
 

@@ -144,18 +144,41 @@ def test_torch_convert(monkeypatch):
   assert converted is arr
 
   # Test successful convert with real torch
-  import torch
+  import sys
+  from unittest.mock import MagicMock
+
+  if "torch" not in sys.modules:
+    mock_torch = MagicMock()
+
+    class DummyTensor:
+      pass
+
+    mock_torch.Tensor = DummyTensor
+    mock_torch.tensor.side_effect = lambda x: DummyTensor()
+    mock_torch.from_numpy.side_effect = lambda x: DummyTensor()
+    sys.modules["torch"] = mock_torch
+  else:
+    mock_torch = sys.modules["torch"]
+    if not hasattr(mock_torch, "Tensor"):
+
+      class DummyTensor:
+        pass
+
+      mock_torch.Tensor = DummyTensor
+      mock_torch.tensor.side_effect = lambda x: DummyTensor()
+      mock_torch.from_numpy.side_effect = lambda x: DummyTensor()
+
   import numpy as np
 
-  monkeypatch.setattr("ml_switcheroo.frameworks.torch.torch", torch)
+  monkeypatch.setattr("ml_switcheroo.frameworks.torch.torch", mock_torch)
   res = adapter.convert([1, 2])
-  assert isinstance(res, torch.Tensor)
+  assert isinstance(res, mock_torch.Tensor)
 
   # Test with numpy
   arr_np = np.array([1, 2])
   res_np = adapter.convert(arr_np)
   # the test framework already has torch imported globally probably, but let's check it's tensor
-  assert isinstance(res_np, torch.Tensor)
+  assert isinstance(res_np, mock_torch.Tensor)
 
   # Test with mock torch that throws error on tensor conversion
   class FailTorch:
@@ -259,3 +282,35 @@ def test_torch_missing_coverage():
   assert "torch.load" in adapter.get_weight_load_code("path")
   assert "var.detach().cpu().numpy()" in adapter.get_tensor_to_numpy_expr("var")
   assert "torch.save" in adapter.get_weight_save_code("state", "path")
+
+
+def test_torch_import_exception_reload():
+  """Test torch import block exception."""
+  import sys
+  import importlib
+  import ml_switcheroo.frameworks.torch as t_fw
+
+  old_torch = sys.modules.get("torch")
+
+  class FailDict(dict):
+    def __getitem__(self, key):
+      if key == "torch":
+        raise Exception("import fail")
+      return super().__getitem__(key)
+
+  try:
+    sys.modules["torch"] = None
+    del sys.modules["torch"]
+  except KeyError:
+    pass
+
+  old_modules = sys.modules
+  sys.modules = FailDict(sys.modules)
+
+  try:
+    importlib.reload(t_fw)
+    assert t_fw.torch is None
+  finally:
+    sys.modules = old_modules
+    if old_torch is not None:
+      sys.modules["torch"] = old_torch

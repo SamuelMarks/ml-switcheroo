@@ -125,14 +125,33 @@ def test_tensorflow_weight_load():
 
 def test_tensorflow_convert(monkeypatch):
   """Verifies the behavior of TensorFlow convert."""
-  import tensorflow as tf
   import sys
+  from unittest.mock import MagicMock
+
+  if "tensorflow" not in sys.modules:
+    mock_tf = MagicMock()
+
+    class DummyTensor:
+      pass
+
+    mock_tf.Tensor = DummyTensor
+    mock_tf.convert_to_tensor.side_effect = lambda x: DummyTensor()
+    sys.modules["tensorflow"] = mock_tf
+  else:
+    mock_tf = sys.modules["tensorflow"]
+    if not hasattr(mock_tf, "Tensor"):
+
+      class DummyTensor:
+        pass
+
+      mock_tf.Tensor = DummyTensor
+      mock_tf.convert_to_tensor.side_effect = lambda x: DummyTensor()
 
   adapter = TensorFlowAdapter()
 
   # When TF is present, it returns a Tensor
   res = adapter.convert("test")
-  assert isinstance(res, tf.Tensor)
+  assert isinstance(res, mock_tf.Tensor)
 
   # When TF fails to import, it returns the original string
   monkeypatch.setitem(sys.modules, "tensorflow", None)

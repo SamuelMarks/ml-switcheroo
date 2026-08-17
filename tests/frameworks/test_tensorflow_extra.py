@@ -79,11 +79,24 @@ def test_tensorflow_convert_logic(monkeypatch):
 
   adapter = tf_fw.TensorFlowAdapter()
 
-  mock_tf = MagicMock()
-  pass
-  monkeypatch.setattr(tf_fw, "tf", mock_tf)
+  import sys
 
-  assert "Tensor" in str(type(adapter.convert([1, 2, 3])))  # recursion test logic
+  mock_tf = MagicMock()
+
+  class DummyTensor:
+    pass
+
+  mock_tf.Tensor = DummyTensor
+
+  def fake_convert(x):
+    if type(x).__name__ not in ("list", "ndarray"):
+      raise ValueError("Unsupported type")
+    return DummyTensor()
+
+  mock_tf.convert_to_tensor.side_effect = fake_convert
+  monkeypatch.setitem(sys.modules, "tensorflow", mock_tf)
+
+  assert "DummyTensor" in str(type(adapter.convert([1, 2, 3])))  # recursion test logic
   assert adapter.convert({"a": 1}) == {"a": 1}
 
   class MockTorch:

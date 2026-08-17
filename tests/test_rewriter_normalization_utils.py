@@ -19,6 +19,7 @@ def test_convert_value_to_cst_branches():
   assert isinstance(convert_value_to_cst(None), cst.Name)
   assert isinstance(convert_value_to_cst(1), cst.Integer)
   assert isinstance(convert_value_to_cst(1.5), cst.Float)
+  assert isinstance(convert_value_to_cst(-1.5), cst.UnaryOperation)
   assert isinstance(convert_value_to_cst("abc"), cst.SimpleString)
 
   lst_node = convert_value_to_cst([1, 2])

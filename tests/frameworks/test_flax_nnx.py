@@ -112,3 +112,54 @@ def test_flax_nnx_doc_url():
   adapter = FlaxNNXAdapter()
   url = adapter.get_doc_url("flax.nnx.relu")
   assert "search.html?q=flax.nnx.relu" in url
+
+
+def test_flax_nnx_convert_logic(monkeypatch):
+  """Test flax nnx convert and logging coverage."""
+  import sys
+  from unittest.mock import MagicMock
+  import logging
+
+  # test logging warning
+  adapter = FlaxNNXAdapter()
+
+  with monkeypatch.context() as m:
+    m.setitem(sys.modules, "flax.nnx", None)
+    import ml_switcheroo.frameworks.flax_nnx as fn_fw
+
+    m.setattr(fn_fw, "flax_nnx", None)
+
+    # intercept load_snapshot_for_adapter returning None
+    m.setattr(fn_fw, "load_snapshot_for_adapter", lambda x: None)
+
+    # Test warning
+    with m.context() as m2:
+      m2.setattr(logging, "warning", MagicMock())
+      # adapter2 = fn_fw.FlaxNNXAdapter()
+      fn_fw.FlaxNNXAdapter()
+      logging.warning.assert_called()
+
+      # also cover live branch
+      m2.setattr(fn_fw, "flax_nnx", MagicMock())
+      # adapter3 = fn_fw.FlaxNNXAdapter()
+      fn_fw.FlaxNNXAdapter()
+
+  # test convert
+  import ml_switcheroo.frameworks.flax_nnx as fn_fw
+
+  adapter = fn_fw.FlaxNNXAdapter()
+  assert adapter.convert({"a": 1}) == {"a": 1}
+
+  class FakeJNP:
+    def array(self, x):
+      if x == [1, 2]:
+        return "jnp_array"
+      raise Exception("fail")
+
+  mock_jax_numpy = FakeJNP()
+  mock_jax = MagicMock()
+  mock_jax.numpy = mock_jax_numpy
+  monkeypatch.setitem(sys.modules, "jax", mock_jax)
+  monkeypatch.setitem(sys.modules, "jax.numpy", mock_jax_numpy)
+  assert adapter.convert([1, 2]) == "jnp_array"
+  assert adapter.convert([3, 4]) == [3, 4]

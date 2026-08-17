@@ -66,14 +66,19 @@ def test_injector_spec_write_parent_not_exist():
 
     def __init__(self, *args, **kwargs):
       """Initializes the MockPath instance."""
-      self.parent = type("MockParent", (), {"exists": lambda: False, "mkdir": lambda parents, exist_ok: None})()
+      self.parent = type(
+        "MockParent", (), {"exists": lambda self: False, "mkdir": lambda self, parents=False, exist_ok=False: None}
+      )()
 
     def exists(self):
       """Mock implementation of exists."""
       return False
 
+    def __truediv__(self, other):
+      return self
+
   with __import__("unittest.mock").mock.patch(
-    "ml_switcheroo.tools.injector_spec.Path", side_effect=lambda *args: MockPath()
+    "ml_switcheroo.tools.injector_spec.resolve_semantics_dir", return_value=MockPath()
   ):
     with __import__("unittest.mock").mock.patch("builtins.open", __import__("unittest.mock").mock.mock_open()):
       injector.inject(dry_run=False)
