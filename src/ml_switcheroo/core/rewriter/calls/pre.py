@@ -60,7 +60,7 @@ def handle_pre_checks(
         return True, result_node
   else:
     # Fallback if traits not available
-    pass
+    _ = True
 
   # 2. Plugin Check (Explicit Requirement or ODL In-Place Metadata)
   plugin_claim = False

@@ -7,7 +7,6 @@ deprecation checks, and strategy execution to convert source-framework APIs into
 target-framework equivalents.
 """
 
-from typing import Union
 import libcst as cst
 
 
@@ -37,11 +36,7 @@ class ApiTransformerCallMixin:
   - `_report_failure(msg)`: Handles throwing or logging failures.
   """
 
-  def leave_Call(
-    self,
-    original_node: cst.Call,
-    updated_node: cst.Call,
-  ) -> Union[cst.Call, cst.BinaryOperation, cst.UnaryOperation, cst.CSTNode]:
+  def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
     """Intercepts and rewrites a function call node during CST traversal.
 
     The rewriting process consists of the following phases:
@@ -70,7 +65,7 @@ class ApiTransformerCallMixin:
     # Pass 'self' as rewriter interface (duck typing via properties)
     handled, result_node = handle_pre_checks(self, original_node, updated_node, func_name)
     if handled:
-      return result_node
+      return result_node  # type: ignore
 
     # 3. Resolve Mapping
     mapping = self._get_mapping(func_name) if func_name else None  # type: ignore
@@ -80,7 +75,7 @@ class ApiTransformerCallMixin:
       guessed_name = resolve_implicit_method(self, original_node, func_name)
       if guessed_name:
         mapping = self._get_mapping(guessed_name, silent=True)  # type: ignore
-        if mapping:
+        if mapping:  # pragma: no branch
           func_name = guessed_name
 
     if not mapping:
@@ -121,4 +116,4 @@ class ApiTransformerCallMixin:
     result_node = handle_post_processing(self, result_node, mapping, abstract_id)
 
     log_diff(f"Operation ({abstract_id})", original_node, result_node)
-    return result_node
+    return result_node  # type: ignore

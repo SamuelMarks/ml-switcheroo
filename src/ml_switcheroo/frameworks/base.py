@@ -17,7 +17,7 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier, StandardMap, GhostRef
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 from ml_switcheroo.core.dsl import OperationDef as OperationDef
 
-SNAPSHOT_DIR = Path(__file__).resolve().parent.parent / "snapshots"
+SNAPSHOT_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "ml-compiler-snapshots"
 
 
 class InitMode(str, Enum):

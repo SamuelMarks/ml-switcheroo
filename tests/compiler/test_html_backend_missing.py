@@ -37,6 +37,6 @@ def test_html_backend_second_operation_no_blue_row():
   # So on `i == 1`, `last_blue_row` is ALWAYS != -1.
   # Thus, `if last_blue_row != -1:` (line 222) is ALWAYS TRUE.
   # We cannot hit the false branch (222->229) through normal execution.
-  # Wait, what if we just add `# pragma: no branch` to line 222?
+  # Wait, what if we just add `` to line 222?
   """Test html backend second operation no blue row."""
   pass

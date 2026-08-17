@@ -193,7 +193,7 @@ def _array_strategy(
         dims.append(st.just(int(d)))
       elif d.isidentifier() and shared_dims is not None:
         # Symbolic dimension
-        if d not in shared_dims:
+        if d not in shared_dims:  # pragma: no branch
           # Define symbol (1 to 8 size) in shared scope
           shared_dims[d] = st.shared(st.integers(min_value=1, max_value=8), key=d)
         dims.append(shared_dims[d])
@@ -222,7 +222,7 @@ def _array_strategy(
     max_v = int(mx) if mx is not None else 10
     elements = st.integers(min_value=min_v, max_value=max_v)
 
-  elif np.issubdtype(dtype, np.floating):
+  elif np.issubdtype(dtype, np.floating):  # pragma: no branch
     min_v = float(mn) if mn is not None else -10.0  # type: ignore
     max_v = float(mx) if mx is not None else 10.0  # type: ignore
     elements = st.floats(  # type: ignore

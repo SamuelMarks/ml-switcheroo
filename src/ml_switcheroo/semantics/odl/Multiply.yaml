@@ -11,10 +11,6 @@ std_args:
   is_variadic: false
   kind: positional_or_keyword
 variants:
-  jax:
-    api: jax.numpy.multiply
-  torch:
-    api: torch.multiply
   stablehlo:
     api: stablehlo.multiply
   numpy:
@@ -22,11 +18,6 @@ variants:
     args: {}
   tensorflow:
     api: tf.multiply
-  mlx:
-    api: mlx.core.multiply
-    args:
-      args: args
-      kwargs: kwargs
   flax_nnx:
     api: jax.numpy.multiply
   keras:

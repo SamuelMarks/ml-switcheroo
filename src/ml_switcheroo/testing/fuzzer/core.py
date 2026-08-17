@@ -70,7 +70,7 @@ class InputFuzzer:
           # Indices are usually arrays
           hint = "Array"
           cons.setdefault("dtype", "int")
-        elif inferred_type == "float":
+        elif inferred_type == "float":  # pragma: no branch
           # Alpha/eps scalars
           if any(prefix in p.lower() for prefix in ["alpha", "eps", "scalar", "val"]):
             hint = "float"

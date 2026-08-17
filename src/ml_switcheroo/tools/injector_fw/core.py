@@ -50,7 +50,7 @@ class FrameworkInjector:
 
     """
     if not self.json_path.parent.exists():
-      if not dry_run:
+      if not dry_run:  # pragma: no branch
         self.json_path.parent.mkdir(parents=True, exist_ok=True)
 
     data = self._load_current()

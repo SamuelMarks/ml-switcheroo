@@ -396,3 +396,19 @@ def test_sass_backend_default_init():
   """
   backend = SassBackend()
   assert backend.synthesizer.semantics is not None
+
+
+def test_sass_synthesizer_empty_output():
+  """Test SASS synthesizer with an Output node with no inputs."""
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+
+  semantics = SemanticsManager()
+  synthesizer = SassSynthesizer(semantics)
+
+  graph = LogicalGraph(name="test")
+  graph.nodes.append(LogicalNode(id="out", kind="Output"))
+
+  res = synthesizer.from_graph(graph)
+  assert res is not None

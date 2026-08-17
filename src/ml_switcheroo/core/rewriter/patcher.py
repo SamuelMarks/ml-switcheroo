@@ -131,7 +131,7 @@ class GraphPatcher(cst.CSTTransformer):
     id_to_action = {a.node_id: a for a in self.plan}
 
     for node_id, cst_node in self.provenance.items():
-      if node_id in id_to_action:
+      if node_id in id_to_action:  # pragma: no branch
         self._action_map[id(cst_node)] = id_to_action[node_id]
 
   # --- Statement Level Hooks ---

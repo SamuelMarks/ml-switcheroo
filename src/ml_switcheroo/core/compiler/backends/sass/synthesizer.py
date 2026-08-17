@@ -226,81 +226,80 @@ class SassSynthesizer:
         # Extract original variable name from metadata if available
         var_name = node.metadata.get("name", node.id)
         output_nodes.append(SassComment(text=f"Input {var_name} -> {reg.name}"))
-        continue
 
-      if node.kind == "Output":
+      elif node.kind == "Output":
         # Output nodes are usually sinks, just comment on location
         sources = input_map.get(node.id, [])
         if sources:
           src_reg = self.allocator.get_register(sources[0])
           output_nodes.append(SassComment(text=f"Return: {src_reg.name}"))
           self.allocator.record_usage(sources[0])
-        continue
 
-      # Look up Abstract ID
-      # 1. Try treating node.kind as an API path (e.g. "torch.nn.Conv2d")
-      # to find Abstract ID ("Conv2d")
-      defn = self.semantics.get_definition(node.kind)
-      abstract_id = None
-      if defn:
-        abstract_id = defn[0]
       else:
-        # 2. Try treating node.kind as Abstract ID directly
-        abstract_id = node.kind
+        # Look up Abstract ID
+        # 1. Try treating node.kind as an API path (e.g. "torch.nn.Conv2d")
+        # to find Abstract ID ("Conv2d")
+        defn = self.semantics.get_definition(node.kind)
+        abstract_id = None
+        if defn:
+          abstract_id = defn[0]
+        else:
+          # 2. Try treating node.kind as Abstract ID directly
+          abstract_id = node.kind
 
-      # --- Macro Expansion Path ---
-      if abstract_id in self.macro_registry:
-        expander = self.macro_registry[abstract_id]
-        # Expand macro using the Allocator protocol.
-        # Note: Macros handle their own internal register allocation for loops/etc.
-        kernel_nodes = expander(self.allocator, node.id, node.metadata)
-        output_nodes.extend(kernel_nodes)
+        # --- Macro Expansion Path ---
+        if abstract_id in self.macro_registry:
+          expander = self.macro_registry[abstract_id]
+          # Expand macro using the Allocator protocol.
+          # Note: Macros handle their own internal register allocation for loops/etc.
+          kernel_nodes = expander(self.allocator, node.id, node.metadata)
+          output_nodes.extend(kernel_nodes)
+          sources = input_map.get(node.id, [])
+          for src_id in sources:
+            self.allocator.record_usage(src_id)
+          continue
+
+        # Try suffix macro match for method calls like `hidden_states.reshape`
+        suffix_id = abstract_id.split(".")[-1] if abstract_id else ""
+        if suffix_id and suffix_id in self.macro_registry:
+          expander = self.macro_registry[suffix_id]
+          kernel_nodes = expander(self.allocator, node.id, node.metadata)
+          output_nodes.extend(kernel_nodes)
+          sources = input_map.get(node.id, [])
+          for src_id in sources:
+            self.allocator.record_usage(src_id)
+          continue
+
+        # --- 1:1 SassInstruction Path ---
+
+        # 3. Resolve SASS variant opcode
+        variant = None
+        if abstract_id:
+          variant = self.semantics.resolve_variant(abstract_id, "sass")
+
+        if not variant or not variant.get("api"):
+          # Fallback: Emit comment for unmapped op
+          output_nodes.append(SassComment(text=f"Unmapped Op: {node.kind} ({node.id})"))
+          continue
+
+        opcode = variant["api"]
+
+        # Resolve Operands
+        # SASS Convention: OPCODE DST, SRC1, SRC2
+        # DST is the register assigned to the current node
+        dst_reg = self.allocator.get_register(node.id)
+
+        operands: List[SassOperand] = [dst_reg]
+
+        # Sources
         sources = input_map.get(node.id, [])
         for src_id in sources:
+          src_reg = self.allocator.get_register(src_id)
+          operands.append(src_reg)
           self.allocator.record_usage(src_id)
-        continue
 
-      # Try suffix macro match for method calls like `hidden_states.reshape`
-      suffix_id = abstract_id.split(".")[-1] if abstract_id else ""
-      if suffix_id and suffix_id in self.macro_registry:
-        expander = self.macro_registry[suffix_id]
-        kernel_nodes = expander(self.allocator, node.id, node.metadata)
-        output_nodes.extend(kernel_nodes)
-        sources = input_map.get(node.id, [])
-        for src_id in sources:
-          self.allocator.record_usage(src_id)
-        continue
-
-      # --- 1:1 SassInstruction Path ---
-
-      # 3. Resolve SASS variant opcode
-      variant = None
-      if abstract_id:
-        variant = self.semantics.resolve_variant(abstract_id, "sass")
-
-      if not variant or not variant.get("api"):
-        # Fallback: Emit comment for unmapped op
-        output_nodes.append(SassComment(text=f"Unmapped Op: {node.kind} ({node.id})"))
-        continue
-
-      opcode = variant["api"]
-
-      # Resolve Operands
-      # SASS Convention: OPCODE DST, SRC1, SRC2
-      # DST is the register assigned to the current node
-      dst_reg = self.allocator.get_register(node.id)
-
-      operands: List[SassOperand] = [dst_reg]
-
-      # Sources
-      sources = input_map.get(node.id, [])
-      for src_id in sources:
-        src_reg = self.allocator.get_register(src_id)
-        operands.append(src_reg)
-        self.allocator.record_usage(src_id)
-
-      inst = SassInstruction(opcode=opcode, operands=operands)
-      output_nodes.append(inst)
+        inst = SassInstruction(opcode=opcode, operands=operands)
+        output_nodes.append(inst)
 
     return output_nodes
 

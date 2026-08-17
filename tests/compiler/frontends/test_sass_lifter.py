@@ -220,3 +220,35 @@ def test_sass_lifter_comment_unknown_marker(monkeypatch):
   monkeypatch.setattr(lifter.comment_parser, "parse", lambda x: SemanticMarker())
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
+
+
+def test_sass_lifter_mismatched_end():
+  """Test SassLifter with a mismatched SemanticEnd."""
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
+
+  cst_nodes = [
+    SassComment(text="; BEGIN Relu (relu1)"),
+    SassComment(text="; END Relu (wrong_id)"),  # Mismatched ID
+    SassComment(text="; END None (None)"),  # No block kind
+  ]
+  lifter = SassLifter()
+  graph = lifter.lift(cst_nodes)
+  # It shouldn't commit the block since it was mismatched
+  assert len(graph.nodes) == 0
+
+
+def test_sass_lifter_multiple_returns():
+  """Test SassLifter with multiple SemanticReturns."""
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
+
+  cst_nodes = [
+    SassComment(text="; Return:"),
+    SassComment(text="; Return:"),
+  ]
+  lifter = SassLifter()
+  graph = lifter.lift(cst_nodes)
+  # Only one output node should be created
+  assert len(graph.nodes) == 1
+  assert graph.nodes[0].kind == "Output"

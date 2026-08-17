@@ -75,7 +75,7 @@ class TikzTransformer(Transformer[Token, Any]):
           ended_env = True
       elif isinstance(el, (TikzNode, TikzEdge)):
         graph_children.append(el)
-      elif isinstance(el, TikzGraph):
+      elif isinstance(el, TikzGraph):  # pragma: no branch
         # If the parser successfully mapped the whole thing to a graph
         # we just return it with attached trivia
         el.leading_trivia = leading + el.leading_trivia

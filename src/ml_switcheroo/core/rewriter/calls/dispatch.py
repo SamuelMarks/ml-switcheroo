@@ -116,12 +116,8 @@ def _node_to_literal(node: cst.CSTNode) -> Any:
   if isinstance(node, cst.SimpleString):
     return node.value.strip("'").strip('"')
   if isinstance(node, cst.Name):
-    if node.value == "True":
-      return True
-    if node.value == "False":
-      return False
-    if node.value == "None":
-      return None
+    name_map = {"True": True, "False": False, "None": None}
+    return name_map.get(node.value, None)
   return None
 
 
@@ -160,21 +156,18 @@ def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
 
   target = rule.is_val
 
-  if op == LogicOp.EQ:
-    return bool(val == target)
-  elif op == LogicOp.NEQ:
-    return bool(val != target)
-  elif op == LogicOp.GT:
-    return bool(val > target)
-  elif op == LogicOp.LT:
-    return bool(val < target)
-  elif op == LogicOp.GTE:
-    return bool(val >= target)
-  elif op == LogicOp.LTE:
-    return bool(val <= target)
-  elif op == LogicOp.IN:
-    return bool(val in target)
-  elif op == LogicOp.NOT_IN:
-    return val not in target
+  op_map = {
+    LogicOp.EQ: lambda v, t: bool(v == t),
+    LogicOp.NEQ: lambda v, t: bool(v != t),
+    LogicOp.GT: lambda v, t: bool(v > t),
+    LogicOp.LT: lambda v, t: bool(v < t),
+    LogicOp.GTE: lambda v, t: bool(v >= t),
+    LogicOp.LTE: lambda v, t: bool(v <= t),
+    LogicOp.IN: lambda v, t: bool(v in t),
+    LogicOp.NOT_IN: lambda v, t: bool(v not in t),
+  }
+
+  if op in op_map:
+    return op_map[op](val, target)
 
   return False

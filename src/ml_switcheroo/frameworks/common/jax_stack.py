@@ -262,12 +262,12 @@ class JAXStackMixin:
       templates.update(self.jax_test_config)
 
     # 1. Core JAX Operation rewrites (Level 0)
-    mappings["Abs"] = {"api": "jnp.abs"}
-    mappings["abs"] = {"api": "jnp.abs"}
-    mappings["permute_dims"] = {"api": "jnp.transpose", "pack_to_tuple": "axes"}
-    mappings["size"] = {"api": "shape", "requires_plugin": "method_to_property"}
-    mappings["data_ptr"] = {"api": "data", "requires_plugin": "method_to_property"}
-    mappings["Einsum"] = {"api": "jnp.einsum", "requires_plugin": "einsum_normalizer"}
+    # mappings["Abs"] = {"api": "jax.numpy.abs"}
+    # mappings["abs"] = {"api": "jax.numpy.abs"}
+    # mappings["permute_dims"] = {"api": "jax.numpy.transpose", "pack_to_tuple": "axes"}
+    # mappings["size"] = {"api": "shape", "requires_plugin": "method_to_property"}
+    # mappings["data_ptr"] = {"api": "data", "requires_plugin": "method_to_property"}
+    # mappings["Einsum"] = {"api": "jax.numpy.einsum", "requires_plugin": "einsum_normalizer"}
 
     # 2. Optax Wiring (Level 1)
     mappings["step"] = {"requires_plugin": "optimizer_step"}

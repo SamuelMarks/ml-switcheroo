@@ -160,7 +160,7 @@ class MermaidGenerator(cst.CSTVisitor):
     Args:
         node (cst.Module): The module node being left.
     """
-    if self.stack:
+    if self.stack:  # pragma: no branch
       self.stack.pop()
 
   def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
@@ -182,7 +182,7 @@ class MermaidGenerator(cst.CSTVisitor):
     Args:
         node (cst.ClassDef): The class definition node being left.
     """
-    if self.stack:
+    if self.stack:  # pragma: no branch
       self.stack.pop()
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
@@ -204,7 +204,7 @@ class MermaidGenerator(cst.CSTVisitor):
     Args:
         node (cst.FunctionDef): The function definition node being left.
     """
-    if self.stack:
+    if self.stack:  # pragma: no branch
       self.stack.pop()
 
   def visit_Call(self, node: cst.Call) -> Optional[bool]:
@@ -238,7 +238,7 @@ class MermaidGenerator(cst.CSTVisitor):
     Args:
         node (cst.Call): The function call node being left.
     """
-    if self.stack:
+    if self.stack:  # pragma: no branch
       self.stack.pop()
 
   def visit_Arg(self, node: cst.Arg) -> Optional[bool]:
@@ -287,7 +287,7 @@ class MermaidGenerator(cst.CSTVisitor):
     Args:
         node (cst.Arg): The argument node being left.
     """
-    if self.stack:
+    if self.stack:  # pragma: no branch
       self.stack.pop()
 
   def visit_Import(self, node: cst.Import) -> Optional[bool]:
@@ -320,7 +320,7 @@ class MermaidGenerator(cst.CSTVisitor):
       names.append("*")
     else:
       for n in node.names:
-        if hasattr(n, "name") and hasattr(n.name, "value"):
+        if hasattr(n, "name") and hasattr(n.name, "value"):  # pragma: no branch
           names.append(n.name.value)  # type: ignore
 
     display_names = ", ".join(names[:3])

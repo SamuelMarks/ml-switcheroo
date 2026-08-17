@@ -130,7 +130,7 @@ def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
     new_args.append(v_arg_clean)
 
     # Convert Key to kwarg
-    if k_arg:
+    if k_arg:  # pragma: no branch
       k_val = k_arg.value
       k_kw = cst.Arg(
         keyword=cst.Name("key"),

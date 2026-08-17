@@ -137,11 +137,11 @@ def _transform_step_lr(node: cst.Call, ctx: HookContext, target_api: str) -> cst
       step_size_arg = arg
     elif kw == "gamma":
       gamma_arg = arg
-    elif not kw:
+    elif not kw:  # pragma: no branch
       # Positional mapping assumes step_size is 1st remaining, gamma is 2nd
       if step_size_arg is None:
         step_size_arg = arg
-      elif gamma_arg is None:
+      elif gamma_arg is None:  # pragma: no branch
         gamma_arg = arg
 
   if step_size_arg:
@@ -221,10 +221,10 @@ def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> c
       t_max_arg = arg
     elif kw == "eta_min":
       eta_min_arg = arg
-    elif not kw:
+    elif not kw:  # pragma: no branch
       if t_max_arg is None:
         t_max_arg = arg
-      elif eta_min_arg is None:
+      elif eta_min_arg is None:  # pragma: no branch
         eta_min_arg = arg
 
   if t_max_arg:

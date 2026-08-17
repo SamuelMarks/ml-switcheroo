@@ -112,6 +112,10 @@ class NamingContext:
             prefix = hint.lstrip("%").replace(".", "_")
             if not prefix.startswith("_"):
               prefix = f"_{prefix}"
+          elif ssa_name.startswith("%"):
+            prefix = "_" + ssa_name[1:]
+          else:
+            prefix = f"_{prefix}"
 
           attempt = f"{prefix}_{count}"
           if attempt not in self._used_names:

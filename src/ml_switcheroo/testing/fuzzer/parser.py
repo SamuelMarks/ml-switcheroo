@@ -130,7 +130,7 @@ def generate_from_hint(
       type_hint = PrimitiveType(name="int")
     elif isinstance(default_val, float):
       type_hint = PrimitiveType(name="float")
-    elif isinstance(default_val, list):
+    elif isinstance(default_val, list):  # pragma: no branch
       if default_val and isinstance(default_val[0], int):
         type_hint = ListType(inner=PrimitiveType(name="int"))
       else:
@@ -218,7 +218,7 @@ def generate_from_hint(
     return generate_fake_callable(constrs)
 
   # 10. Primitives
-  if isinstance(type_hint, PrimitiveType):
+  if isinstance(type_hint, PrimitiveType):  # pragma: no branch
     name = type_hint.name
     if name in ["int", "integer"]:
       return generate_scalar_int(constrs)

@@ -61,7 +61,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
           if isinstance(stmt, (cst.Pass, cst.Expr, cst.Assign, cst.AnnAssign, cst.Return)):
             # SmallStatement -> SimpleStatementLine
             stmts_list.append(cst.SimpleStatementLine(body=[stmt]))
-      elif isinstance(current_body, cst.IndentedBlock):  # pragma: no branch
+      else:
         stmts_list = list(current_body.body)  # type: ignore
 
       new_body_stmts = []

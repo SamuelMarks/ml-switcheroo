@@ -210,7 +210,7 @@ def test_sharding_extractor_duplicate_edge():
 
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("A", "Op"))
-  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"spec": "PartitionSpec()"}))
+  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"arg_1": "PartitionSpec()"}))
   g.nodes.append(LogicalNode("B", "Op"))
   g.edges.append(LogicalEdge("A", "Shard"))
   g.edges.append(LogicalEdge("Shard", "B"))
@@ -237,7 +237,7 @@ def test_sharding_extractor_duplicate_edge_not_in_new_edges():
 
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("A", "Op"))
-  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"spec": "PartitionSpec()"}))
+  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"arg_1": "PartitionSpec()"}))
   g.nodes.append(LogicalNode("B", "Op"))
   g.edges.append(LogicalEdge("A", "Shard"))
   g.edges.append(LogicalEdge("A", "B"))  # Add the new_edge to new_edges first
@@ -253,7 +253,7 @@ def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact():
 
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("A", "Op"))
-  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"spec": "PartitionSpec()"}))
+  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"arg_1": "PartitionSpec()"}))
   g.nodes.append(LogicalNode("B", "Op"))
   g.edges.append(LogicalEdge("A", "Shard"))
   g.edges.append(LogicalEdge("A", "B"))  # Will be in new_edges
@@ -269,9 +269,37 @@ def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact_dataclass():
 
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("A", "Op"))
-  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"spec": "PartitionSpec()"}))
+  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"arg_1": "PartitionSpec()"}))
   g.nodes.append(LogicalNode("B", "Op"))
   g.edges.append(LogicalEdge(source="A", target="Shard"))
   g.edges.append(LogicalEdge(source="A", target="B"))  # Will be in new_edges
   g.edges.append(LogicalEdge(source="Shard", target="B"))  # Will create new_edge A->B and check if in new_edges
   ShardingExtractionPass().apply(g)
+
+
+def test_sharding_extractor_duplicate_edge_2():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+  from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
+
+  graph = LogicalGraph(name="test")
+  # source -> sharding -> target
+  # AND another path to same target?
+  # If the sharding node has two identical outgoing edges to the same target:
+  graph.nodes.append(LogicalNode("source", "Linear"))
+  graph.nodes.append(LogicalNode("shard", "with_sharding_constraint", {"mesh": "a"}))
+  graph.nodes.append(LogicalNode("target", "relu"))
+
+  graph.edges.append(LogicalEdge("source", "shard"))
+  graph.edges.append(LogicalEdge("shard", "target"))
+  graph.edges.append(LogicalEdge("shard", "target"))  # Duplicate edge
+
+  # Or an edge directly from source to target
+  graph.edges.append(LogicalEdge("source", "target"))
+
+  pass_ = ShardingExtractionPass()
+  new_graph = pass_.apply(graph)
+
+  # Verify that edges are deduplicated
+  edges = [(e.source, e.target) for e in new_graph.edges]
+  assert edges.count(("source", "target")) == 1

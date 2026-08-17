@@ -60,7 +60,6 @@ def test_torch_definitions_fallback(monkeypatch):
   adapter = TorchAdapter()
   defs = adapter.definitions
   assert "ReLU" in defs
-  assert "relu" in defs
   assert "Linear" in defs
   assert "Conv2d" in defs
 

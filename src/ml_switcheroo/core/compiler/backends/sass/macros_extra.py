@@ -24,7 +24,7 @@ def expand_rnn(
   h_t = tanh(W_ih * x_t + b_ih + W_hh * h_{t-1} + b_hh)
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -75,7 +75,7 @@ def expand_lstm(
   """Generates the SASS assembly kernel for LSTM over time.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -124,7 +124,7 @@ def expand_gru(
   """Generates the SASS assembly kernel for GRU over time.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -170,7 +170,7 @@ def expand_multiheadattention(
   """Generates the SASS assembly kernel for MultiheadAttention.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -210,7 +210,7 @@ def expand_transformer(
   """Generates the SASS assembly kernel for a Transformer block.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -245,7 +245,7 @@ def expand_transformerencoder(
   """Generates the SASS assembly kernel for TransformerEncoder.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -269,7 +269,7 @@ def expand_transformerdecoder(
   """Generates the SASS assembly kernel for TransformerDecoder.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -293,7 +293,7 @@ def expand_conv1d(
   """Generates the SASS assembly kernel for 1D Convolution.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -335,7 +335,7 @@ def expand_depthwiseconv2d(
   """Generates the SASS assembly kernel for DepthwiseConv2d.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -377,7 +377,7 @@ def expand_convtranspose(
   """Generates the SASS assembly kernel for ConvTranspose (generic representation).
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -400,7 +400,7 @@ def expand_pool1d(
   """Generates SASS kernel for 1D Pooling.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -423,7 +423,7 @@ def expand_pool3d(
   """Generates SASS kernel for 3D Pooling.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -446,7 +446,7 @@ def expand_adaptivepool(
   """Generates SASS kernel for Adaptive Pooling.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -479,7 +479,7 @@ def _make_generic_expand(name: str):
     """Generates a generic SASS kernel.
 
     Args:
-        allocator (RegisterAllocatorProtocol): The register manager.
+        allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
         node_id (str): The unique ID of the operation node (used for output reg).
         metadata (Dict[str, Any]): Layer configuration.
 

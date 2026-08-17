@@ -447,3 +447,20 @@ def test_rdna_backend_default_init():
   backend = RdnaBackend()
   assert backend.synthesizer.semantics is not None
   assert backend.target_arch == "gfx1030"
+
+
+def test_rdna_synthesizer_empty_output():
+  """Test RDNA synthesizer with an Output node with no inputs."""
+  from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RdnaSynthesizer
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+
+  semantics = SemanticsManager()
+  synthesizer = RdnaSynthesizer(semantics)
+
+  graph = LogicalGraph(name="test")
+  graph.nodes.append(LogicalNode(id="out", kind="Output"))
+
+  print("I RAN!!!")
+  res = synthesizer.from_graph(graph)
+  assert res is not None

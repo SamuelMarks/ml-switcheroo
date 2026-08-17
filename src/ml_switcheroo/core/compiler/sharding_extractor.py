@@ -82,7 +82,7 @@ class ShardingExtractionPass:
           # Edge from sharding constraint to output is wired from original source
           new_source = removal_map[e.source]
           new_edge = LogicalEdge(source=new_source, target=e.target)
-          if new_edge not in new_edges:  # pragma: no branch
+          if new_edge not in new_edges:
             new_edges.append(new_edge)
         else:
           new_edges.append(e)

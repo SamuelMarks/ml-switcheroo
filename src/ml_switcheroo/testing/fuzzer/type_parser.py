@@ -218,7 +218,7 @@ class TypeAnnotationParser:
     val = ""
     if isinstance(node, cst.SimpleString):
       val = node.value.strip("'\"")
-    elif hasattr(node, "value"):
+    elif hasattr(node, "value"):  # pragma: no branch
       val = str(getattr(node, "value"))
 
     res = PrimitiveType(name=val)

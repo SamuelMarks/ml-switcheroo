@@ -1,5 +1,6 @@
 """Test suite for the Api Extra2 module."""
 
+from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 import libcst as cst
 from unittest.mock import MagicMock, patch, PropertyMock
 from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
@@ -212,7 +213,9 @@ def test_leave_call_handled_pre_check():
   """Verifies the behavior of leave call handled pre check."""
   (t, _, _) = get_transformer()
   call = cst.Call(func=cst.Name("a"))
-  with patch("ml_switcheroo.core.rewriter.passes.api.handle_pre_checks", return_value=(True, cst.Name("handled"))):
+  with patch(
+    "ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_pre_checks", return_value=(True, cst.Name("handled"))
+  ):
     res = t.leave_Call(call, call)
     assert isinstance(res, cst.Name)
     assert res.value == "handled"
@@ -223,8 +226,8 @@ def test_leave_call_implicit_method():
   (t, s, _) = get_transformer()
   call = cst.Call(func=cst.Name("a"))
   with (
-    patch("ml_switcheroo.core.rewriter.passes.api.handle_pre_checks", return_value=(False, call)),
-    patch("ml_switcheroo.core.rewriter.passes.api.resolve_implicit_method", return_value="b"),
+    patch("ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_pre_checks", return_value=(False, call)),
+    patch("ml_switcheroo.core.rewriter.passes.api_call_mixin.resolve_implicit_method", return_value="b"),
     patch.object(t, "_get_mapping", side_effect=lambda x, **kwargs: {"api": "b"} if x == "b" else None),
   ):
     res = t.leave_Call(call, call)
@@ -236,9 +239,9 @@ def test_leave_call_is_super():
   (t, _, _) = get_transformer()
   call = cst.Call(func=cst.Name("super"))
   with (
-    patch("ml_switcheroo.core.rewriter.passes.api.handle_pre_checks", return_value=(False, call)),
-    patch("ml_switcheroo.core.rewriter.passes.api.resolve_implicit_method", return_value=None),
-    patch("ml_switcheroo.core.rewriter.passes.api.is_super_call", return_value=True),
+    patch("ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_pre_checks", return_value=(False, call)),
+    patch("ml_switcheroo.core.rewriter.passes.api_call_mixin.resolve_implicit_method", return_value=None),
+    patch("ml_switcheroo.core.rewriter.passes.api_call_mixin.is_super_call", return_value=True),
   ):
     res = t.leave_Call(call, call)
     assert res is call
@@ -249,7 +252,7 @@ def test_leave_call_version_warning():
   (t, s, c) = get_transformer()
   call = cst.Call(func=cst.Name("func"))
   with (
-    patch("ml_switcheroo.core.rewriter.passes.api.handle_pre_checks", return_value=(False, call)),
+    patch("ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_pre_checks", return_value=(False, call)),
     patch.object(t, "_get_qualified_name", return_value="func"),
     patch.object(t, "_get_mapping", return_value={"min_version": "1.0", "max_version": "2.0"}),
     patch.object(t, "check_version_constraints", return_value="Version mismatch!"),
@@ -265,7 +268,7 @@ def test_leave_call_no_lookup():
   (t, s, _) = get_transformer()
   call = cst.Call(func=cst.Name("func"))
   with (
-    patch("ml_switcheroo.core.rewriter.passes.api.handle_pre_checks", return_value=(False, call)),
+    patch("ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_pre_checks", return_value=(False, call)),
     patch.object(t, "_get_qualified_name", return_value="func"),
     patch.object(t, "_get_mapping", return_value={}),
   ):
@@ -293,6 +296,6 @@ def test_normalize_arguments_types():
   call = cst.Call(func=cst.Name("func"))
   with patch.object(t, "_is_module_alias", return_value=False):
     try:
-      t._normalize_arguments(call, call, op_details, {})
+      normalize_arguments(call, call, op_details, {})
     except Exception:
       pass

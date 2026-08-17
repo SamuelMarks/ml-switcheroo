@@ -219,7 +219,7 @@ class JaxCoreAdapter(JAXStackMixin):
       results.extend(getattr(OptaxScanner, "scan_losses", lambda: [])())
     elif category == SemanticTier.OPTIMIZER:
       results.extend(getattr(OptaxScanner, "scan_optimizers", lambda: [])())
-    elif category == SemanticTier.ACTIVATION:
+    elif category == SemanticTier.ACTIVATION:  # pragma: no branch
       results.extend(getattr(self, "_scan_jax_activations", lambda: [])())
     return results
 

@@ -231,10 +231,6 @@
       "keras": {
         "api": "keras.layers.Flatten"
       },
-      "mlx": {
-        "api": "mlx.nn.Flatten",
-        "missing_message": "Use reshape"
-      },
       "tensorflow": {
         "api": "tf.keras.layers.Flatten"
       },

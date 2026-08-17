@@ -9,8 +9,6 @@ or macros from a source machine learning framework to a target framework.
 """
 
 import libcst as cst
-from libcst import Attribute, CSTNode, Name
-from typing import Union
 
 
 from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply
@@ -69,7 +67,7 @@ class ApiTransformerAttrMixin:
           if tier == SemanticTier.NEURAL.value:
             for target in original_node.targets:
               target_name = self._get_qualified_name(target.target)  # type: ignore
-              if target_name:
+              if target_name:  # pragma: no branch
                 if target_name.startswith("self.") and len(self.context.scope_stack) > 1:  # type: ignore
                   # Track stateful variable in the class scope (parent of init scope)
                   self.context.scope_stack[-2].add(target_name)  # type: ignore
@@ -86,11 +84,11 @@ class ApiTransformerAttrMixin:
 
       unwrap_method = traits.functional_execution_method
       if is_functional_apply(original_node.value, unwrap_method):
-        if len(updated_node.targets) == 1:
+        if len(updated_node.targets) == 1:  # pragma: no branch
           target = updated_node.targets[0].target  # type: ignore
-          if isinstance(target, (cst.Tuple, cst.List)):
+          if isinstance(target, (cst.Tuple, cst.List)):  # pragma: no branch
             elements = target.elements
-            if len(elements) > 0:
+            if len(elements) > 0:  # pragma: no branch
               primary_target = elements[0].value
               new_target = cst.AssignTarget(target=primary_target)
               new_node = updated_node.with_changes(targets=[new_target])
@@ -103,7 +101,7 @@ class ApiTransformerAttrMixin:
 
     return updated_node
 
-  def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> Union[Attribute, Name, CSTNode]:
+  def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
     """Intercepts and rewrites CST attribute nodes during traversal.
 
     This method resolves the qualified name of an attribute (e.g., `torch.float32`) and

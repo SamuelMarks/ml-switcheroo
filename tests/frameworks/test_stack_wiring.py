@@ -23,11 +23,10 @@ def test_core_math_mappings(adapter):
   snapshot = {}
   adapter.apply_wiring(snapshot)
   mappings = snapshot["mappings"]
-  assert "Abs" in mappings
-  assert mappings["Abs"]["api"] == "jnp.abs"
-  assert "size" in mappings
-  assert mappings["size"]["api"] == "shape"
-  assert mappings["size"]["requires_plugin"] == "method_to_property"
+  assert "Adam" in mappings
+  assert mappings["Adam"]["api"] == "optax.adam"
+  assert "step" in mappings
+  assert mappings["step"]["requires_plugin"] == "optimizer_step"
 
 
 def test_optax_autowiring(adapter):

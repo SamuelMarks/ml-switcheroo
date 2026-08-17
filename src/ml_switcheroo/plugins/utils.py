@@ -69,7 +69,7 @@ def is_framework_module_node(node: cst.CSTNode, ctx: HookContext) -> bool:
   # 2. Check Semantics Registry (Dynamic)
   # This catches frameworks that are registered but not currently selected as source/target,
   # or secondary roots (e.g. "numpy" when targeting Keras).
-  if ctx.semantics:
+  if ctx.semantics:  # pragma: no branch
     # Check loaded framework configs
     configs = getattr(ctx.semantics, "framework_configs", {})
 

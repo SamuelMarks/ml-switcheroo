@@ -93,17 +93,14 @@ class SimulatedReflection:
       return None
 
     # Extract just names for diffing
-    candidate_names = [c[0] for c in candidates]
+    candidate_dict = {c[0]: c[1] for c in candidates}
+    candidate_names = list(candidate_dict.keys())
 
     # Use a high cutoff (0.6) to avoid nonsensical matches
     matches = difflib.get_close_matches(op_name, candidate_names, n=1, cutoff=0.6)
 
     if matches:
-      best_match_name = matches[0]
-      # Retrieve the full path for the best match
-      for name, path in candidates:  # pragma: no branch
-        if name == best_match_name:  # pragma: no branch
-          return path
+      return candidate_dict[matches[0]]
 
     return None
 

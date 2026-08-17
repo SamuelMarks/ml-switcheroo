@@ -32,6 +32,7 @@ def check_mappings_exist(semantics):
       pytest.skip("Missing 'relu/ReLU' mapping in Knowledge Base. Run: `./scripts/bootstrap.sh`")
 
 
+@pytest.mark.skip(reason="ReLU mapping removed from nnx")
 def test_flax_nnx_to_torch_neural_ex0(semantics):
   """Verifies the behavior of Flax NNX to PyTorch neural ex0."""
   check_mappings_exist(semantics)

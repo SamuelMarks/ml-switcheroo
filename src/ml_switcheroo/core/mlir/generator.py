@@ -108,9 +108,11 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
       else:
         content = t.text.strip()
       # Only process comments, not just newlines
-      if content.startswith("//") or content.startswith("%"):
-        if content.startswith("//"):
-          content = "#" + content[2:]
+      if content.startswith("//"):
+        content = "#" + content[2:]
+        lines.append(cst.EmptyLine(comment=cst.Comment(content), newline=cst.Newline()))
+      elif content.startswith("%"):
+        content = "#" + content
         lines.append(cst.EmptyLine(comment=cst.Comment(content), newline=cst.Newline()))
     return lines
 

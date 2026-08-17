@@ -248,3 +248,44 @@ def test_rdna_lifter_comment_unknown_marker(monkeypatch):
   monkeypatch.setattr(lifter.comment_parser, "parse", lambda x: SemanticMarker())
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
+
+
+def test_rdna_analyzer_linear_no_loop_limits():
+  """Test RdnaAnalyzer for Linear kind with empty loop limits."""
+  from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
+
+  analyzer = RdnaAnalyzer()
+  metadata = analyzer.analyze_block("Linear", [])
+  assert "in_features" not in metadata
+
+
+def test_rdna_lifter_mismatched_end():
+  """Test RdnaLifter with a mismatched SemanticEnd."""
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+
+  cst_nodes = [
+    RdnaComment(text="; BEGIN Relu (relu1)"),
+    RdnaComment(text="; END Relu (wrong_id)"),  # Mismatched ID
+    RdnaComment(text="; END None (None)"),  # No block kind
+  ]
+  lifter = RdnaLifter()
+  graph = lifter.lift(cst_nodes)
+  # It shouldn't commit the block since it was mismatched
+  assert len(graph.nodes) == 0
+
+
+def test_rdna_lifter_multiple_returns():
+  """Test RdnaLifter with multiple SemanticReturns."""
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+
+  cst_nodes = [
+    RdnaComment(text="; Return:"),
+    RdnaComment(text="; Return:"),
+  ]
+  lifter = RdnaLifter()
+  graph = lifter.lift(cst_nodes)
+  # Only one output node should be created
+  assert len(graph.nodes) == 1
+  assert graph.nodes[0].kind == "Output"

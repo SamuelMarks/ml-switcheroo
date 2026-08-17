@@ -1,5 +1,7 @@
 """Test suite for the Api Extra3 module."""
 
+from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
+
 import libcst as cst
 from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
 from ml_switcheroo.core.rewriter.context import RewriterContext
@@ -49,7 +51,7 @@ def test_normalize_arguments_method_call_arg_provided():
     args=[cst.Arg(keyword=cst.Name("x"), value=cst.Name("a"))],
   )
   op_details = {"std_args": ["input", "other"], "variants": {"torch": {"args": {"input": "x"}}}}
-  args = t._normalize_arguments(original_node, original_node, op_details, {})
+  args = normalize_arguments(original_node, original_node, op_details, {}, "torch", t._is_module_alias)
   assert len(args) == 1
   assert args[0].keyword.value == "input"
 
@@ -60,7 +62,7 @@ def test_normalize_arguments_method_call_no_std_args():
   t._is_module_alias = lambda x: False
   original_node = cst.Call(func=cst.Attribute(value=cst.Name("tensor"), attr=cst.Name("method")), args=[])
   op_details = {}
-  args = t._normalize_arguments(original_node, original_node, op_details, {})
+  args = normalize_arguments(original_node, original_node, op_details, {}, "torch", t._is_module_alias)
   assert len(args) == 1
   assert isinstance(args[0].value, cst.Name)
 
@@ -72,7 +74,7 @@ def test_normalize_arguments_pack_variadics_no_list_single():
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(value=cst.Name("a"))])
   op_details = {"std_args": [{"name": "dim", "is_variadic": True}]}
   api_mapping = {"pack_to_tuple": "dims", "pack_as": "Tuple"}
-  args = t._normalize_arguments(original_node, original_node, op_details, api_mapping)
+  args = normalize_arguments(original_node, original_node, op_details, api_mapping, "torch", t._is_module_alias)
   assert len(args) == 1
 
 
@@ -86,7 +88,7 @@ def test_normalize_arguments_reconstruct_defaults_error():
       {"name": "input", "default": type("RaiseStr", (), {"__str__": lambda self: (_ for _ in ()).throw(ValueError)})()}
     ]
   }
-  args = t._normalize_arguments(original_node, original_node, op_details, {})
+  args = normalize_arguments(original_node, original_node, op_details, {}, "torch", t._is_module_alias)
   assert len(args) == 0
 
 
@@ -97,7 +99,7 @@ def test_normalize_arguments_reconstruct_no_alias():
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(value=cst.Name("a"))])
   op_details = {"std_args": ["input"]}
   api_mapping = {"args": {"input": None}}
-  args = t._normalize_arguments(original_node, original_node, op_details, api_mapping)
+  args = normalize_arguments(original_node, original_node, op_details, api_mapping, "torch", t._is_module_alias)
   assert len(args) == 0
 
 
@@ -108,13 +110,13 @@ def test_normalize_arguments_reconstruct_val_map():
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(keyword=cst.Name("x"), value=cst.Name("a"))])
   op_details = {"std_args": ["input"], "variants": {"torch": {"args": {"input": "x"}}}}
   api_mapping1 = {"arg_values": {"input": {"a": "b"}}}
-  t._normalize_arguments(original_node, original_node, op_details, api_mapping1)
+  normalize_arguments(original_node, original_node, op_details, api_mapping1, "torch", t._is_module_alias)
   api_mapping2 = {"arg_values": {"input": "c + d"}}
-  t._normalize_arguments(original_node, original_node, op_details, api_mapping2)
+  normalize_arguments(original_node, original_node, op_details, api_mapping2, "torch", t._is_module_alias)
   api_mapping3 = {"arg_values": {"input": "invalid syntax +++"}}
-  t._normalize_arguments(original_node, original_node, op_details, api_mapping3)
+  normalize_arguments(original_node, original_node, op_details, api_mapping3, "torch", t._is_module_alias)
   api_mapping4 = {"arg_values": {"input": 42}}
-  t._normalize_arguments(original_node, original_node, op_details, api_mapping4)
+  normalize_arguments(original_node, original_node, op_details, api_mapping4, "torch", t._is_module_alias)
 
 
 def test_normalize_arguments_reconstruct_different_val():
@@ -124,7 +126,7 @@ def test_normalize_arguments_reconstruct_different_val():
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(value=cst.Name("a"))])
   op_details = {"std_args": ["input"]}
   api_mapping = {"arg_values": {"input": 42}}
-  args = t._normalize_arguments(original_node, original_node, op_details, api_mapping)
+  args = normalize_arguments(original_node, original_node, op_details, api_mapping, "torch", t._is_module_alias)
   assert isinstance(args[0].value, cst.Integer)
 
 
@@ -135,7 +137,7 @@ def test_normalize_arguments_inject_args():
   original_node = cst.Call(func=cst.Name("func"), args=[])
   op_details = {"std_args": []}
   api_mapping = {"arg_values": {"new_arg1": "a + b"}, "inject_args": {"new_arg2": 42, "new_arg3": "invalid_syntax()"}}
-  args = t._normalize_arguments(original_node, original_node, op_details, api_mapping)
+  args = normalize_arguments(original_node, original_node, op_details, api_mapping, "torch", t._is_module_alias)
   assert len(args) == 3
 
 

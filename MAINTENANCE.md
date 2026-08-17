@@ -131,7 +131,7 @@ ml_switcheroo sync-standards --categories layer activation loss optimizer
 ## 🔗 Phase 2: Mapping (The Spokes)
 
 Once the Hub (Specs) is populated, we link specific frameworks to it defining **HOW** operations are implemented. These
-mappings live in `src/ml_switcheroo/snapshots/`.
+mappings live in `../ml-compiler-snapshots/`.
 
 ### Mapping a Framework (`sync`)
 
@@ -185,7 +185,7 @@ JSON files. This data allows the `GhostInspector` to simulate the presence of th
 
 ```bash
 # Generates files like snapshots/torch_v2.1.0.json
-ml_switcheroo snapshot --out-dir src/ml_switcheroo/snapshots
+ml_switcheroo snapshot --out-dir ../ml-compiler-snapshots
 ```
 
 *Note: `bootstrap.sh` runs this automatically.*

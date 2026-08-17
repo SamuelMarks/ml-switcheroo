@@ -386,8 +386,11 @@ class ASTEngine:
               self._graph_to_mermaid(tree),
               self.to_source(tree),
             )
+          else:
+            tracer.log_mutation("Graph Patching", "No Plan", "Skipped")
       except Exception as e:
         tracer.log_warning(f"Graph Optimization failed, proceeding with raw CST: {e}")
+
       tracer.end_phase()
 
     # - Analysis

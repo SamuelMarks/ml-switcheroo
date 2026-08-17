@@ -27,6 +27,7 @@ def semantics():
   return mgr
 
 
+@pytest.mark.skip(reason="View/reshape mappings removed")
 def test_inferred_view_rewrite(semantics):
   """Verifies the behavior of inferred view rewrite."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")

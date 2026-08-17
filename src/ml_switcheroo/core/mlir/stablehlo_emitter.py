@@ -77,7 +77,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     input_types = []
 
     for param in node.params.params:
-      if isinstance(param.name, cst.Name):  # pragma: no branch
+      if isinstance(param.name, cst.Name):
         p_name = param.name.value
         val = self.ctx.allocate_ssa(prefix=f"%{p_name}")
         self.ctx.declare(p_name, val)
@@ -152,11 +152,9 @@ class StableHloEmitter(PythonToMlirEmitter):
 
     # 2. Body Region
     body_block = self._emit_block(node.body)
-    if not body_block.operations or body_block.operations[-1].name not in (
-      "func.return",
-      "sw.return",
-      "stablehlo.return",
-    ):
+    if not body_block.operations:
+      body_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
+    elif body_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):
       body_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
     body_region = RegionNode(blocks=[body_block])
 
@@ -190,11 +188,9 @@ class StableHloEmitter(PythonToMlirEmitter):
 
     # MLIR regions require a terminator. For now, we inject a dummy if none exists
     # A true implementation must track mutated state across branches.
-    if not true_block.operations or true_block.operations[-1].name not in (
-      "func.return",
-      "sw.return",
-      "stablehlo.return",
-    ):
+    if not true_block.operations:
+      true_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
+    elif true_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):
       true_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
 
     true_region = RegionNode(blocks=[true_block])
@@ -204,22 +200,18 @@ class StableHloEmitter(PythonToMlirEmitter):
     if getattr(node, "orelse", None):
       if isinstance(node.orelse, cst.Else):
         false_block = self._emit_block(node.orelse.body)
-        if not false_block.operations or false_block.operations[-1].name not in (  # pragma: no branch
-          "func.return",
-          "sw.return",
-          "stablehlo.return",
-        ):
+        if not false_block.operations:
+          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
+        elif false_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):
           false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
         false_region = RegionNode(blocks=[false_block])
         regions.append(false_region)
       else:  # isinstance(node.orelse, cst.If)
         # To be strictly compliant with stablehlo.if vs case, we handle elif as nested here
         false_block = BlockNode(label="", operations=self._emit_if(node.orelse))  # type: ignore
-        if not false_block.operations or false_block.operations[-1].name not in (  # pragma: no branch
-          "func.return",
-          "sw.return",
-          "stablehlo.return",
-        ):
+        if not false_block.operations:
+          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
+        elif false_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):  # pragma: no branch
           false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
         false_region = RegionNode(blocks=[false_block])
         regions.append(false_region)
@@ -328,7 +320,7 @@ class StableHloEmitter(PythonToMlirEmitter):
 
       val_attr.value = f"dense<{raw_val}>"
 
-      if not op.result_types:  # pragma: no branch
+      if not op.result_types:
         op.result_types = [TypeNode(body=mlir_type)]
 
   def _resolve_sw_op(self, op: OperationNode) -> None:
@@ -354,7 +346,7 @@ class StableHloEmitter(PythonToMlirEmitter):
       # Remove the 'type' attribute as it is now encoded in the op name
       op.attributes = [a for a in op.attributes if a.name != "type"]
       # Inject default tensor result type if missing
-      if not op.result_types:  # pragma: no branch
+      if not op.result_types:
         op.result_types = [TypeNode(body="tensor<*xf32>")]
 
   def _lookup_stablehlo_op(self, api_name: str) -> Optional[str]:

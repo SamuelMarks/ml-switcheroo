@@ -44,7 +44,7 @@ def test_resolve_snapshots_dir():
   """Resolves snapshots directory."""
   with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir") as mock_resolve:
     mock_resolve.return_value = Path("/foo/bar/semantics")
-    assert resolve_snapshots_dir() == Path("/foo/bar/snapshots")
+    assert resolve_snapshots_dir() == Path("/ml-compiler-snapshots")
 
 
 def test_python_old():

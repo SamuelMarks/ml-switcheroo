@@ -46,7 +46,7 @@ SCRIPT_LOCATION=$(get_abs_script_path)
 ROOT_DIR=$(dirname -- "$SCRIPT_LOCATION")
 
 VENV_DIR="${VENV_DIR:-$ROOT_DIR}"
-SNAPSHOTS_DIR="$ROOT_DIR/src/ml_switcheroo/snapshots"
+SNAPSHOTS_DIR="$ROOT_DIR/../ml-compiler-snapshots"
 SEMANTICS_DIR="$ROOT_DIR/src/ml_switcheroo/semantics"
 TEMP_DIR="_bootstrap_temp"
 

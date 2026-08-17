@@ -103,15 +103,17 @@ class SassLifter:
           commit_node(marker.name, "Input", {"name": marker.name})
           continue
 
-        if isinstance(marker, SemanticBegin):
+        elif isinstance(marker, SemanticBegin):
           current_block_kind = marker.kind
           current_block_id = marker.id
           current_instructions = []
           continue
 
-        if isinstance(marker, SemanticEnd):
-          if marker.id == current_block_id and current_block_kind:
+        elif isinstance(marker, SemanticEnd):
+          if marker.id == current_block_id:
             # Analyze collected instructions
+            assert current_block_kind is not None
+            assert current_block_id is not None
             meta = SassAnalyzer.analyze_block(current_block_kind, current_instructions)
             commit_node(current_block_id, current_block_kind, meta)
 
@@ -119,9 +121,8 @@ class SassLifter:
             current_block_id = None
             current_block_kind = None
             current_instructions = []
-          continue
 
-        if isinstance(marker, SemanticUnmapped):
+        elif isinstance(marker, SemanticUnmapped):
           # For unmapped, we assume default args (no instructions available)
           # Special Case: Flatten default start_dim=1 in PyTorch context
           meta = {}
@@ -131,14 +132,13 @@ class SassLifter:
           commit_node(marker.id, marker.api, meta)
           continue
 
-        if isinstance(marker, SemanticReturn):
+        elif isinstance(marker, SemanticReturn):
           if "output" not in seen_ids:
             # No Logic, simple sink
             graph.nodes.append(LogicalNode(id="output", kind="Output"))
             if "previous_node_id" in locals() and previous_node_id:
               graph.edges.append(LogicalEdge(source=previous_node_id, target="output"))
             seen_ids.add("output")
-          continue
 
       # 2. Accumulate Instructions if inside a block
       if current_block_id is not None and isinstance(node, SassInstruction):

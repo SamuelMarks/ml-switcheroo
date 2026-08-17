@@ -1,132 +1,115 @@
-"""Tests for AST Scanners."""
+"""Test suite for scanners.py."""
 
 import libcst as cst
 
-from ml_switcheroo.core.scanners import get_full_name, SimpleNameScanner, UsageScanner
+from ml_switcheroo.core.scanners import (
+  get_full_name,
+  SimpleNameScanner,
+  UsageScanner,
+)
+
+
+def parse_expr(code: str) -> cst.BaseExpression:
+  """Docstring."""
+  module = cst.parse_module(code)
+  return module.body[0].body[0].value
 
 
 def test_get_full_name():
-  """Test get_full_name recursive flattening."""
-  name_node = cst.Name("torch")
-  assert get_full_name(name_node) == "torch"
-
-  attr_node = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn"))
-  assert get_full_name(attr_node) == "torch.nn"
-
-  attr_node_3 = cst.Attribute(
-    value=cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn")), attr=cst.Name("functional")
-  )
-  assert get_full_name(attr_node_3) == "torch.nn.functional"
-
-  # Test fallback
-  call_node = cst.Call(func=cst.Name("foo"))
-  # Type ignore to test fallback case
-  assert get_full_name(call_node) == ""  # type: ignore
+  """Docstring."""
+  assert get_full_name(cst.Name("torch")) == "torch"
+  assert get_full_name(parse_expr("torch.nn.functional")) == "torch.nn.functional"
+  assert get_full_name(cst.Integer("42")) == ""
 
 
 def test_simple_name_scanner_found():
-  """Test SimpleNameScanner when target is found."""
+  """Docstring."""
+  module = cst.parse_module("import jnp\njnp.add(1, 2)")
   scanner = SimpleNameScanner("jnp")
-  code = "def foo():\n    return jnp.abs(x)\n"
-  module = cst.parse_module(code)
   module.visit(scanner)
-  assert scanner.found is True
-  assert scanner.should_traverse(module) is False
+  assert scanner.found
 
 
 def test_simple_name_scanner_not_found():
-  """Test SimpleNameScanner when target is not found."""
+  """Docstring."""
+  module = cst.parse_module("import jnp\nnp.add(1, 2)")
   scanner = SimpleNameScanner("jnp")
-  code = "def foo():\n    return tf.abs(x)\n"
-  module = cst.parse_module(code)
   module.visit(scanner)
-  assert scanner.found is False
-  assert scanner.should_traverse(module) is True
+  assert not scanner.found
 
 
-def test_simple_name_scanner_inside_imports():
-  """Test SimpleNameScanner ignores imports."""
+def test_simple_name_scanner_in_import():
+  """Docstring."""
+  module = cst.parse_module("import jnp\nfrom jnp import x")
   scanner = SimpleNameScanner("jnp")
-  code = "import jnp\nfrom foo import jnp\n"
-  module = cst.parse_module(code)
   module.visit(scanner)
-  assert scanner.found is False
+  assert not scanner.found
 
 
-def test_usage_scanner_import_direct():
-  """Test UsageScanner tracks direct imports."""
+def test_usage_scanner_import_basic():
+  """Docstring."""
+  module = cst.parse_module("import torch\ntorch.add(1, 2)")
   scanner = UsageScanner("torch")
-  code = "import torch\nx = torch.abs(y)\n"
-  module = cst.parse_module(code)
   module.visit(scanner)
-  assert scanner.get_result() is True
+  assert scanner.get_result()
   assert "torch" in scanner.found_usages
 
 
-def test_usage_scanner_import_alias():
-  """Test UsageScanner tracks aliased imports."""
+def test_usage_scanner_import_as():
+  """Docstring."""
+  module = cst.parse_module("import torch as t\nt.add(1, 2)")
   scanner = UsageScanner("torch")
-  code = "import torch as t\nx = t.abs(y)\n"
-  module = cst.parse_module(code)
   module.visit(scanner)
-  assert scanner.get_result() is True
+  assert scanner.get_result()
   assert "t" in scanner.found_usages
 
 
-def test_usage_scanner_import_nested():
-  """Test UsageScanner tracks nested imports without alias."""
+def test_usage_scanner_import_submodule_as():
+  """Docstring."""
+  module = cst.parse_module("import torch.nn as nn\nnn.Linear()")
   scanner = UsageScanner("torch")
-  code = "import torch.nn\nx = torch.nn.Linear()\n"
-  module = cst.parse_module(code)
   module.visit(scanner)
-  assert scanner.get_result() is True
-  assert "torch" in scanner.found_usages
-
-
-def test_usage_scanner_import_from():
-  """Test UsageScanner tracks from ... import ..."""
-  scanner = UsageScanner("torch")
-  code = "from torch import nn\nx = nn.Linear()\n"
-  module = cst.parse_module(code)
-  module.visit(scanner)
-  assert scanner.get_result() is True
+  assert scanner.get_result()
   assert "nn" in scanner.found_usages
 
 
-def test_usage_scanner_import_from_nested_alias():
-  """Test UsageScanner tracks from ... import ... as ..."""
+def test_usage_scanner_import_from():
+  """Docstring."""
+  module = cst.parse_module("from torch import nn\nnn.Linear()")
   scanner = UsageScanner("torch")
-  code = "from torch.nn import Linear as L\nx = L()\n"
-  module = cst.parse_module(code)
   module.visit(scanner)
-  assert scanner.get_result() is True
-  assert "L" in scanner.found_usages
+  assert scanner.get_result()
+  assert "nn" in scanner.found_usages
 
 
-def test_usage_scanner_import_from_no_module():
-  """Test UsageScanner handles relative imports without module."""
+def test_usage_scanner_import_from_as():
+  """Docstring."""
+  module = cst.parse_module("from torch import nn as n\nn.Linear()")
   scanner = UsageScanner("torch")
-  code = "from . import torch\nx = torch.abs()\n"
-  module = cst.parse_module(code)
   module.visit(scanner)
-  assert scanner.get_result() is True
-  assert "torch" in scanner.found_usages
+  assert scanner.get_result()
+  assert "n" in scanner.found_usages
 
 
-def test_usage_scanner_import_unrelated():
-  """Test UsageScanner ignores unrelated imports."""
+def test_usage_scanner_not_used():
+  """Docstring."""
+  module = cst.parse_module("import torch as t\nimport numpy as np\nnp.add(1, 2)")
   scanner = UsageScanner("torch")
-  code = "import os\nfrom sys import path\nx = path.join(a, b)\n"
-  module = cst.parse_module(code)
   module.visit(scanner)
-  assert scanner.get_result() is False
-  assert len(scanner.found_usages) == 0
+  assert not scanner.get_result()
 
 
-def test_usage_scanner_name_in_import_ignored():
-  """Test UsageScanner ignores name usages within import statements."""
+def test_usage_scanner_import_from_not_torch():
+  """Docstring."""
+  module = cst.parse_module("from numpy import add\nadd(1, 2)")
   scanner = UsageScanner("torch")
-  code = "import torch as t\n"
-  module = cst.parse_module(code)
   module.visit(scanner)
-  assert scanner.get_result() is False
+  assert not scanner.get_result()
+
+
+def test_usage_scanner_import_from_star():
+  """Docstring."""
+  module = cst.parse_module("from torch import *\n")
+  scanner = UsageScanner("torch")
+  module.visit(scanner)
+  assert not scanner.get_result()

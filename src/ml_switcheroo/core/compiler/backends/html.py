@@ -219,12 +219,11 @@ class HtmlBackend(CompilerBackend):
           )
         )
       else:
-        if last_blue_row != -1:  # pragma: no branch
-          arrow = self._create_arrow(last_blue_row, op_row, "seq")
-          for b in boxes:
-            if b.row == last_blue_row and "box b" in b.css_class:
-              b.arrows.append(arrow)
-              break
+        arrow = self._create_arrow(last_blue_row, op_row, "seq")
+        for b in boxes:
+          if b.row == last_blue_row and "box b" in b.css_class:
+            b.arrows.append(arrow)
+            break
 
       op_box.arrows.append(self._create_arrow(0, 0, "data"))
       boxes.append(op_box)
@@ -249,11 +248,10 @@ class HtmlBackend(CompilerBackend):
     return_row = current_row
     arrow = self._create_arrow(last_blue_row, return_row, "seq")
 
-    if last_blue_row != -1:  # pragma: no branch
-      for b in boxes:
-        if b.row == last_blue_row and "box b" in b.css_class:
-          b.arrows.append(arrow)
-          break
+    for b in boxes:
+      if b.row == last_blue_row and "box b" in b.css_class:
+        b.arrows.append(arrow)
+        break
 
     return_circle = GridBox(
       row=return_row,

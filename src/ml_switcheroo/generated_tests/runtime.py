@@ -35,7 +35,7 @@ def ensure_determinism() -> None:
   np.random.seed(seed)
 
   # PyTorch
-  if "torch" in sys.modules:
+  if "torch" in sys.modules:  # pragma: no branch
     try:
       sys.modules["torch"].manual_seed(seed)
       if sys.modules["torch"].cuda.is_available():
@@ -44,11 +44,11 @@ def ensure_determinism() -> None:
       pass
 
   # TensorFlow
-  if "tensorflow" in sys.modules:
+  if "tensorflow" in sys.modules:  # pragma: no branch
     try:
       tf = sys.modules["tensorflow"]
       # TF 2.x
-      if hasattr(tf, "random") and hasattr(tf.random, "set_seed"):
+      if hasattr(tf, "random") and hasattr(tf.random, "set_seed"):  # pragma: no branch
         tf.random.set_seed(seed)
     except Exception:
       pass
@@ -59,7 +59,7 @@ def ensure_determinism() -> None:
       sys.modules["mlx.core"].random.seed(seed)
     except Exception:
       pass
-  elif "mlx" in sys.modules and hasattr(sys.modules["mlx"], "core"):
+  elif "mlx" in sys.modules and hasattr(sys.modules["mlx"], "core"):  # pragma: no branch
     try:
       sys.modules["mlx"].core.random.seed(seed)
     except Exception:

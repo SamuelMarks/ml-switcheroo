@@ -121,7 +121,7 @@ def _write_yaml_update(out_path: Path, new_entries: List[Dict[str, Any]]) -> Non
         loaded = yaml.safe_load(f)
         if isinstance(loaded, list):
           for item in loaded:
-            if "operation" in item:
+            if "operation" in item:  # pragma: no branch
               existing_map[item["operation"]] = item
     except Exception as e:
       logger.warning(f"[ml-switcheroo] Could not read existing YAML: {e}. Overwriting.")

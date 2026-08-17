@@ -162,3 +162,12 @@ def test_sass_analysis_linear_no_loop_limits():
 
   res = SassAnalyzer.analyze_block("Linear", [])
   assert res == {}
+
+
+def test_sass_analyzer_linear_no_loop_limits():
+  """Test SassAnalyzer for Linear kind with empty loop limits."""
+  from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+
+  analyzer = SassAnalyzer()
+  metadata = analyzer.analyze_block("Linear", [])
+  assert "in_features" not in metadata

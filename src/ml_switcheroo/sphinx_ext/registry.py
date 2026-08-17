@@ -110,8 +110,8 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
           try:
             curr_idx = priorities.index(src_fw)
             rotated = priorities[curr_idx + 1 :] + priorities[:curr_idx]
-            for c in rotated:
-              if c in candidates:
+            for c in rotated:  # pragma: no branch
+              if c in candidates:  # pragma: no branch
                 tgt_fw = c
                 break
           except ValueError:

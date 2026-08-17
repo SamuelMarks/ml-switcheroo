@@ -31,7 +31,7 @@ def test_resolve_snapshots_dir():
     mock_instance = MagicMock()
     mock_resolve.return_value = mock_instance
     resolve_snapshots_dir()
-    mock_instance.parent.__truediv__.assert_called_once_with("snapshots")
+    mock_instance.parent.parent.parent.parent.__truediv__.assert_called_once_with("ml-compiler-snapshots")
 
 
 def test_resolve_semantics_dir_fallback():

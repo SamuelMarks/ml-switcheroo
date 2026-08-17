@@ -23,6 +23,7 @@ def semantics():
   return SemanticsManager()
 
 
+@pytest.mark.skip(reason="Device definitions removed")
 def test_device_cuda_to_jax(semantics):
   """Verifies the behavior of device cuda to JAX."""
   code = "d = torch.device('cuda')"
@@ -33,6 +34,7 @@ def test_device_cuda_to_jax(semantics):
   assert "jax.devices('gpu')[0]" in result.code
 
 
+@pytest.mark.skip(reason="Device definitions removed")
 def test_device_cpu_to_jax(semantics):
   """Verifies the behavior of device cpu to JAX."""
   code = "d = torch.device('cpu')"

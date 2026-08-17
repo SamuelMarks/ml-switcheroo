@@ -48,10 +48,8 @@ def resolve_snapshots_dir() -> Path:
   """Locates the directory containing framework snapshots and mapping overlays.
 
 
-  Defaults to the sibling 'snapshots' directory relative to 'semantics'.
-
   Returns:
       Path: The absolute path to the 'snapshots' directory.
 
   """
-  return resolve_semantics_dir().parent / "snapshots"
+  return resolve_semantics_dir().parent.parent.parent.parent / "ml-compiler-snapshots"

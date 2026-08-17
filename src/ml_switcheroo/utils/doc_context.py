@@ -83,9 +83,9 @@ class DocContextBuilder:
         name = arg
       elif isinstance(arg, (list, tuple)) and len(arg) > 0:
         name = arg[0]
-        if len(arg) > 1:
+        if len(arg) > 1:  # pragma: no branch
           type_hint = arg[1]
-      elif isinstance(arg, dict):
+      elif isinstance(arg, dict):  # pragma: no branch
         name = arg.get("name", "unknown")
         type_hint = arg.get("type")
         default_val = arg.get("default")

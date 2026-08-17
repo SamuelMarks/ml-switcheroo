@@ -201,3 +201,19 @@ def test_htmldocument_pure_cst() -> None:
   doc = HtmlDocument(children=[TextNode(content="pure html")])
   html = doc.emit()
   assert html == "pure html"
+
+
+def test_tagnode_set_attribute_multiple():
+  """Verifies set_attribute behavior when other attributes exist."""
+  from ml_switcheroo.core.html.nodes import TagNode, AttributeNode
+
+  tag = TagNode(name="div")
+  tag.attributes.append(AttributeNode(name="id", value="test"))
+  # Loop condition attr.name == name is False
+  tag.set_attribute("class", "container")
+  # Loop condition attr.name == name is True
+  tag.set_attribute("id", "updated")
+
+  assert len(tag.attributes) == 2
+  assert tag.get_attribute("id") == "updated"
+  assert tag.get_attribute("class") == "container"

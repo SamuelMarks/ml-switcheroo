@@ -202,7 +202,7 @@ class OperationNode(MlirNode):
     # 4. Operands
     if self.operands:
       # Canonical formatting: Force space before operands if no trivia exists
-      if not self.name_trivia:  # pragma: no branch
+      if not self.name_trivia:
         parts.append(" ")
       op_names = [o.to_text() for o in self.operands]
       parts.append(f"({', '.join(op_names)})")
@@ -210,7 +210,7 @@ class OperationNode(MlirNode):
     # 5. Attributes
     if self.attributes:
       # Canonical formatting: Force space before attributes
-      if not self.name_trivia:  # pragma: no branch
+      if not self.name_trivia:
         parts.append(" ")
 
       parts.append("{")
@@ -220,7 +220,7 @@ class OperationNode(MlirNode):
 
     # 6. Regions
     if self.regions:
-      if parts and not parts[-1].endswith(" "):  # pragma: no branch
+      if parts and not parts[-1].endswith(" "):
         parts.append(" ")
 
       for reg in self.regions:
@@ -247,7 +247,7 @@ class OperationNode(MlirNode):
 
     # Robust Newline handling
     # Ensure there is a newline at the end if one wasn't in trailing trivia rules
-    if not parts or not parts[-1].endswith("\n"):  # pragma: no branch
+    if not parts or not parts[-1].endswith("\n"):
       parts.append("\n")
 
     return "".join(parts)

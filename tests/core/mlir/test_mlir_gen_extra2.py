@@ -1,6 +1,5 @@
 """Test suite for the Mlir Gen Extra2 module."""
 
-import pytest
 import libcst as cst
 from collections import defaultdict
 from ml_switcheroo.core.mlir.cst import OperationNode, BlockNode, RegionNode, AttributeNode, ValueNode
@@ -107,8 +106,8 @@ def test_convert_import():
     results=[],
     regions=[],
   )
-  with pytest.raises(cst.CSTValidationError):
-    gen._convert_import(op_exc)
+  res_exc = gen._convert_import(op_exc)
+  assert isinstance(res_exc.body[0], cst.Pass)
 
 
 def test_convert_class_def_bases():

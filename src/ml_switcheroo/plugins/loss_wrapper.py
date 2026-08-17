@@ -117,7 +117,7 @@ def transform_loss_reduction(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     # Dynamic Lookup: Get the API for "Sum"
     wrapper_api = ctx.lookup_api("Sum")
 
-  elif reduction_mode == "none":
+  elif reduction_mode == "none":  # pragma: no branch
     # No wrapper needed
     return inner_call
 

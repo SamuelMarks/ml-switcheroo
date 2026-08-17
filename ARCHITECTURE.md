@@ -87,7 +87,7 @@ Defines **WHAT** an operation is. Populated from `src/ml_switcheroo/semantics/*.
 ### The Spokes: Framework Overlays
 
 Defines **HOW** a specific framework implements the standard. Populated from `src/ml_switcheroo/frameworks/*.py` (Live)
-or `src/ml_switcheroo/snapshots/` (Ghost).
+or `../ml-compiler-snapshots/` (Ghost).
 
 * **API Path:** E.g., `torch.abs`, `jax.numpy.abs`.
 * **Argument Map:** E.g., `{"input": "x", "dim": "axis"}`.

@@ -32,7 +32,7 @@ def get_required_packages(imp_str: str) -> List[str]:
       for alias in node.names:
         packages.append(alias.name.split(".")[0])
     elif isinstance(node, ast.ImportFrom):
-      if node.module:
+      if node.module:  # pragma: no branch
         packages.append(node.module.split(".")[0])
 
   return list(dict.fromkeys(packages))

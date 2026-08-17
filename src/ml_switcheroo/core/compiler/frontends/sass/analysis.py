@@ -49,10 +49,9 @@ class SassAnalyzer:
 
     elif kind == "Linear":
       # Linear usually has 1 inner dot-product loop over input features.
-      if loop_limits:  # pragma: no branch
-        feat_dim = max(loop_limits)
-        metadata["in_features"] = feat_dim
-        metadata["arg_0"] = feat_dim
+      feat_dim = max(loop_limits)
+      metadata["in_features"] = feat_dim
+      metadata["arg_0"] = feat_dim
 
     elif kind == "Conv3d":
       k_size = max(loop_limits)

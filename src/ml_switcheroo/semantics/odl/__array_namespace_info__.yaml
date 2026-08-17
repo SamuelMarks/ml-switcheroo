@@ -1,4 +1,0 @@
-description: Returns a namespace with Array API namespace inspection utilities.
-std_args: []
-variants: {}
-operation: __array_namespace_info__

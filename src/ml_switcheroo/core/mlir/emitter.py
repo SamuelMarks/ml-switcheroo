@@ -101,15 +101,15 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     body_block = self._emit_block(node.body)
 
     # Capture module header comments
-    if hasattr(node, "header"):
-      header_trivia = []
-      for line in node.header:
-        if line.comment:
-          text = line.comment.value.replace("#", "//", 1)
-          header_trivia.append(Trivia(text))
-          header_trivia.append(Trivia("\n"))
-        elif line.newline:
-          header_trivia.append(Trivia("\n"))
+    header_trivia = []
+    header = getattr(node, "header", [])
+    for line in header:
+      if line.comment:
+        text = line.comment.value.replace("#", "//", 1)
+        header_trivia.append(Trivia(text))
+        header_trivia.append(Trivia("\n"))
+      else:
+        header_trivia.append(Trivia("\n"))
 
       # Attach to first op
       if header_trivia and body_block.operations:
@@ -128,7 +128,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     """
     trivia = []
-    if hasattr(node, "leading_lines"):
+    if hasattr(node, "leading_lines"):  # pragma: no branch
       for line in node.leading_lines:
         if line.comment:
           text = line.comment.value.replace("#", "//", 1)
@@ -382,30 +382,19 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
         String identifier (e.g. "add", "mul", "matmul").
 
     """
-    if isinstance(operator, cst.Add):
-      return "add"
-    if isinstance(operator, cst.Subtract):
-      return "sub"
-    if isinstance(operator, cst.Multiply):
-      return "mul"
-    if isinstance(operator, cst.Divide):
-      return "div"
-    if isinstance(operator, cst.FloorDivide):
-      return "floordiv"
-    if isinstance(operator, cst.Modulo):
-      return "mod"
-    if isinstance(operator, cst.Power):
-      return "pow"
-    if isinstance(operator, cst.MatrixMultiply):
-      return "matmul"
-    if isinstance(operator, cst.LeftShift):
-      return "lshift"
-    if isinstance(operator, cst.RightShift):
-      return "rshift"
-    if isinstance(operator, cst.BitAnd):
-      return "and"
-    if isinstance(operator, cst.BitOr):
-      return "or"
-    if isinstance(operator, cst.BitXor):
-      return "xor"
-    return "unknown"
+    op_map = {
+      cst.Add: "add",
+      cst.Subtract: "sub",
+      cst.Multiply: "mul",
+      cst.Divide: "div",
+      cst.FloorDivide: "floordiv",
+      cst.Modulo: "mod",
+      cst.Power: "pow",
+      cst.MatrixMultiply: "matmul",
+      cst.LeftShift: "lshift",
+      cst.RightShift: "rshift",
+      cst.BitAnd: "and",
+      cst.BitOr: "or",
+      cst.BitXor: "xor",
+    }
+    return op_map.get(type(operator), "unknown")

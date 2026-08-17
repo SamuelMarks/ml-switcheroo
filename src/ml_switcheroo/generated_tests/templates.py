@@ -44,7 +44,7 @@ def get_template(manager: Any, framework: str) -> Dict[str, str]:
 
   """
   tmpl: Optional[Dict[str, str]] = None
-  if manager:
+  if manager:  # pragma: no branch
     try:
       tmpl = manager.get_test_template(framework)
     except Exception:

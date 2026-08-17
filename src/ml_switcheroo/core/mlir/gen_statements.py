@@ -129,11 +129,19 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
       import_aliases.append(cst.ImportAlias(name=self._create_dotted_name(n), asname=asname))  # type: ignore
 
     if module_val:
-      return cst.SimpleStatementLine(
-        body=[cst.ImportFrom(module=self._create_dotted_name(module_val), names=import_aliases)]  # type: ignore
-      )
+      if import_aliases:
+        return cst.SimpleStatementLine(
+          body=[cst.ImportFrom(module=self._create_dotted_name(module_val), names=import_aliases)]  # type: ignore
+        )
+      else:
+        return cst.SimpleStatementLine(
+          body=[cst.Import(names=[cst.ImportAlias(name=self._create_dotted_name(module_val))])]  # type: ignore
+        )
     else:
-      return cst.SimpleStatementLine(body=[cst.Import(names=import_aliases)])
+      if import_aliases:
+        return cst.SimpleStatementLine(body=[cst.Import(names=import_aliases)])
+      else:
+        return cst.SimpleStatementLine(body=[cst.Pass()])
 
   def _convert_return(self, op: OperationNode) -> cst.SimpleStatementLine:
     """Converts a `sw.return` operation to a Python return statement.

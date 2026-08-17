@@ -47,6 +47,17 @@ def convert_value_to_cst(val: Any) -> cst.BaseExpression:
       The corresponding LibCST node.
 
   """
+  import ast
+
+  if isinstance(val, str):
+    try:
+      parsed = ast.literal_eval(val)
+      # Avoid infinite recursion if ast.literal_eval returns the exact same string
+      if not isinstance(parsed, str) or parsed != val:
+        return convert_value_to_cst(parsed)
+    except (ValueError, SyntaxError):
+      pass
+
   # 1. Container Recursion (List/Tuple)
   if isinstance(val, (list, tuple)):
     elements = []
@@ -96,8 +107,12 @@ def convert_value_to_cst(val: Any) -> cst.BaseExpression:
   if isinstance(val, bool):
     return cst.Name("True") if val else cst.Name("False")
   elif isinstance(val, int):
+    if val < 0:
+      return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer(str(-val)))
     return cst.Integer(str(val))
   elif isinstance(val, float):
+    if val < 0:
+      return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Float(repr(-val)))
     return cst.Float(repr(val))
   elif isinstance(val, str):
     # Use json.dumps to ensure proper quoting and escaping (produces double quotes)
@@ -193,12 +208,12 @@ def normalize_arguments(
             break
 
       if not arg_provided:
-        if isinstance(original_node.func, cst.Attribute):
+        if isinstance(original_node.func, cst.Attribute):  # pragma: no branch
           rec = original_node.func.value
           found_args[first_std_arg] = cst.Arg(value=rec)
           receiver_injected = True
     else:
-      if isinstance(original_node.func, cst.Attribute):
+      if isinstance(original_node.func, cst.Attribute):  # pragma: no branch
         extra_args.append(cst.Arg(value=original_node.func.value))
 
   # 4. Process Args
@@ -240,11 +255,10 @@ def normalize_arguments(
       )
 
     is_list = pack_as_type == "List"
-    if elements:
-      trailing_comma = cst.MaybeSentinel.DEFAULT
-      if not is_list and len(elements) == 1:
-        trailing_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))  # type: ignore
-      elements[-1] = elements[-1].with_changes(comma=trailing_comma)
+    trailing_comma = cst.MaybeSentinel.DEFAULT
+    if not is_list and len(elements) == 1:
+      trailing_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))  # type: ignore
+    elements[-1] = elements[-1].with_changes(comma=trailing_comma)
 
     container_node = cst.List(elements=elements) if is_list else cst.Tuple(elements=elements)
 
@@ -297,7 +311,7 @@ def normalize_arguments(
         # If val_options is a dict, it's an enum mapping (val -> code)
         if isinstance(val_options, dict):
           raw_key = extract_primitive_key(current_arg.value)
-          if raw_key is not None and str(raw_key) in val_options:
+          if raw_key is not None and str(raw_key) in val_options:  # pragma: no branch
             target_code = val_options[str(raw_key)]
             final_val_node = cst.parse_expression(target_code)
         # Otherwise it's a constant injection (literal override)

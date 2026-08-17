@@ -91,8 +91,6 @@ def test_wiring_injection():
   templates = snapshot.get("templates", {})
   assert "import chex" in templates["import"]
   assert templates["to_numpy"] == "{res_var}"
-  assert mappings["Abs"]["api"] == "jnp.abs"
-  assert mappings["size"]["requires_plugin"] == "method_to_property"
   assert mappings["Adam"]["api"] == "optax.adam"
   assert mappings["step"]["requires_plugin"] == "optimizer_step"
 

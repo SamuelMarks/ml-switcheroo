@@ -8,10 +8,10 @@ std_args:
     type: "Tensor"
   - name: "start_dim"
     type: "int"
-    default: "0"
+    default: 0
   - name: "end_dim"
     type: "int"
-    default: "-1"
+    default: -1
 
 variants:
   torch:
@@ -43,3 +43,6 @@ variants:
     op_type: "class"
   mlx:
     api: "mlx.core.flatten"
+    args:
+      start_dim: "start_axis"
+      end_dim: "end_axis"

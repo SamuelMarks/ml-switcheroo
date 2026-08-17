@@ -217,8 +217,8 @@ class TorchAdapter(TorchIOMixin):
     defs = load_definitions("torch")
     if "ReLU" not in defs:
       defs["ReLU"] = StandardMap(api="torch.nn.ReLU")
-    if "relu" not in defs:
-      defs["relu"] = StandardMap(api="torch.nn.functional.relu")
+    # if "relu" not in defs:
+    #   defs["relu"] = StandardMap(api="torch.relu")
     if "Linear" not in defs:
       defs["Linear"] = StandardMap(
         api="torch.nn.Linear", args={"in_features": "in_features", "out_features": "out_features"}

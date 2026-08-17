@@ -68,7 +68,7 @@ class ReadmeEditor:
 
     for i, token in enumerate(tokens):
       if token.type == "heading_open":
-        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
+        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":  # pragma: no branch
           if header_marker in tokens[i + 1].content:
             target_idx = i
             break

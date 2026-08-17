@@ -118,9 +118,8 @@ class ImportMixin(cst.CSTTransformer):
       if root_pkg in self.source_fws:
         if self.preserve_source and not replacement_occurred:
           new_aliases.append(alias)
-        continue
-
-      new_aliases.append(alias)
+      else:
+        new_aliases.append(alias)
 
     if not new_aliases:
       return cst.RemoveFromParent()
@@ -167,20 +166,17 @@ class ImportMixin(cst.CSTTransformer):
           new_node = cst.Import(names=[self._make_alias_node(req)])
           self._satisfied_injections.add(req.signature)
           # Track definition manually since we bypass leave_Import logic
-          if isinstance(new_node.names[0], cst.ImportAlias):
-            self._track_definition(new_node.names[0])  # type: ignore
+          self._track_definition(new_node.names[0])  # type: ignore
           return new_node
 
         else:
           new_node = cst.Import(names=[self._make_alias_node(req)])
           self._satisfied_injections.add(req.signature)
-          if isinstance(new_node.names[0], cst.ImportAlias):
-            self._track_definition(new_node.names[0])  # type: ignore
+          self._track_definition(new_node.names[0])  # type: ignore
           return new_node
 
     for alias in updated_node.names:
-      if isinstance(alias, cst.ImportAlias):
-        self._track_definition(alias)  # type: ignore
+      self._track_definition(alias)  # type: ignore
 
     if root_pkg in self.source_fws:
       if self.preserve_source:

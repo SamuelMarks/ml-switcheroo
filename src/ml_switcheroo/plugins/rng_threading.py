@@ -80,10 +80,10 @@ def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   # 3. Request Preamble Injection (Delegated to Adapter)
   adapter = get_adapter(ctx.target_fw)
-  if adapter:
+  if adapter:  # pragma: no branch
     # Ask adapter for the syntax: "rng, key = jax.random.split(rng)"
     split_stmt = adapter.get_rng_split_syntax(rng_arg, key_var)
-    if split_stmt and split_stmt != "pass":
+    if split_stmt and split_stmt != "pass":  # pragma: no branch
       ctx.inject_preamble(split_stmt)
 
   # 4. Clean Arguments

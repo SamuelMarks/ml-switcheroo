@@ -141,6 +141,15 @@ except Exception as e:
 json_output = json.dumps(response)
 `;
 
+function getStaticPath(filename) {
+    if (window.DOCUMENTATION_OPTIONS && window.DOCUMENTATION_OPTIONS.URL_ROOT) {
+        const root = window.DOCUMENTATION_OPTIONS.URL_ROOT;
+        const safeRoot = root.endsWith('/') ? root : root + '/';
+        return `${safeRoot}_static/${filename}`;
+    }
+    return `_static/${filename}`;
+}
+
 /**
  * Initializes the Python environment (Pyodide) and installs dependencies.
  * Triggered by the "Initialize Engine" button.
@@ -199,7 +208,7 @@ importlib.util.find_spec("ml_switcheroo") is not None
 
             // Attempt to load local requirements or fallback to minimal set
             try {
-                const reqRes = await fetch("_static/requirements.txt");
+                const reqRes = await fetch(getStaticPath("requirements.txt"));
                 if (reqRes.ok) {
                     const reqText = await reqRes.text();
                     const reqs = reqText.split('\n')
@@ -208,7 +217,7 @@ importlib.util.find_spec("ml_switcheroo") is not None
                         .map(l => {
                             if (l.includes(' @ ') && !l.split(' @ ')[1].startsWith('http')) {
                                 const parts = l.split(' @ ');
-                                const url = new URL(`_static/${parts[1]}`, window.location.href).href;
+                                const url = new URL(getStaticPath(parts[1]), window.location.href).href;
                                 return `${parts[0]} @ ${url}`;
                             }
                             return l;
@@ -223,7 +232,7 @@ importlib.util.find_spec("ml_switcheroo") is not None
             }
 
             statusEl.innerText = "Installing Engine...";
-            const wheelUrl = new URL(`_static/${wheelName}`, window.location.href).href;
+            const wheelUrl = new URL(getStaticPath(wheelName), window.location.href).href;
             await micropip.install(wheelUrl);
         }
 

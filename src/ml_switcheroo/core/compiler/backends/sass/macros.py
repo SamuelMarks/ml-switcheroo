@@ -65,7 +65,7 @@ def expand_conv2d(
   8.  Store result.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration (k, stride, etc).
 
@@ -167,7 +167,7 @@ def expand_linear(
   6. Add Bias (if present).
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node.
       metadata (Dict[str, Any]): Attributes (in_features, out_features).
 
@@ -250,7 +250,7 @@ def expand_mean(
   the reciprocal of the number of elements to compute the average.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Operation metadata (expects "elements" key).
 
@@ -304,7 +304,7 @@ def expand_relu(
   Performs element-wise maximum comparison against zero using `FMAX`.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer metadata.
 
@@ -332,7 +332,7 @@ def expand_flatten(
   by moving the source pointer value to the destination register.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer metadata.
 
@@ -361,7 +361,7 @@ def expand_reshape(
   by moving the source pointer value to the destination register.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer metadata.
 
@@ -395,7 +395,7 @@ def expand_conv3d(
   6. Increment loop counters, verify bounds, and conditional branch back.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer metadata (expects "k" for kernel size).
 
@@ -492,7 +492,7 @@ def expand_avgpool2d(
   5. Multiply accumulator by 1/(Kx*Ky) (FMUL).
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration (k, stride, etc).
 
@@ -572,7 +572,7 @@ def expand_maxpool2d(
   4. Maximize with accumulator (FMAX).
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration (k, stride, etc).
 
@@ -647,7 +647,7 @@ def expand_batchnorm2d(
   4. Compute (x - mean) * inv_std * gamma + beta.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -717,7 +717,7 @@ def expand_dropout(
   4. Scale output or set to 0.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -769,7 +769,7 @@ def expand_sigmoid(
   1 / (1 + exp(-x)) -> 1 / (1 + exp2(-x * log2(e)))
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node.
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -810,7 +810,7 @@ def expand_tanh(
   """Generates the SASS assembly kernel for Tanh.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -837,7 +837,7 @@ def expand_gelu(
   """Generates the SASS assembly kernel for GELU.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -874,7 +874,7 @@ def expand_mseloss(
   Accumulates (pred - target)^2 over N elements.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 
@@ -950,7 +950,7 @@ def expand_crossentropyloss(
   """Generates the SASS assembly kernel for CrossEntropyLoss.
 
   Args:
-      allocator (RegisterAllocatorProtocol): The register manager.
+      allocator (~ml_switcheroo.core.compiler.backends.sass.macros.RegisterAllocatorProtocol): The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
       metadata (Dict[str, Any]): Layer configuration.
 

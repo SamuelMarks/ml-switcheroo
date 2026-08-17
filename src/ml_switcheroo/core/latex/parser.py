@@ -62,32 +62,25 @@ class LatexParser:
             depth = 1
             start_arg = pos
             while pos < len(self.source) and depth > 0:
-              if self.source[pos] == "{":
+              char = self.source[pos]
+              if char == "{":
                 depth += 1
-              elif self.source[pos] == "}":
+              elif char == "}":
                 depth -= 1
               pos += 1
             model_name = self.source[start_arg : pos - 1].strip()
-        continue
-
-      if self.source.startswith(r"\end{", pos):
+      elif self.source.startswith(r"\end{", pos):
         end = self.source.find("}", pos)
         name = self.source[pos + 5 : end]
         pos = end + 1
         if name == "DefModel":
           in_def_model = False
-        continue
-
-      if self.source.startswith(r"\%", pos):
+      elif self.source.startswith(r"\%", pos):
         pos += 2
-        continue
-
-      if self.source[pos] == "%":
+      elif self.source[pos] == "%":
         end = self.source.find("\n", pos)
         pos = end if end != -1 else len(self.source)
-        continue
-
-      if self.source[pos] == "\\":
+      elif self.source[pos] == "\\":
         pos += 1
         start = pos
         if pos < len(self.source) and not self.source[pos].isalpha():
@@ -109,9 +102,10 @@ class LatexParser:
             depth = 1
             start_arg = pos
             while pos < len(self.source) and depth > 0:
-              if self.source[pos] == "{":
+              char = self.source[pos]
+              if char == "{":
                 depth += 1
-              elif self.source[pos] == "}":
+              elif char == "}":
                 depth -= 1
               pos += 1
             args.append(self.source[start_arg : pos - 1])
@@ -120,9 +114,10 @@ class LatexParser:
             depth = 1
             start_arg = pos
             while pos < len(self.source) and depth > 0:
-              if self.source[pos] == "[":
+              char = self.source[pos]
+              if char == "[":
                 depth += 1
-              elif self.source[pos] == "]":
+              elif char == "]":
                 depth -= 1
               pos += 1
             args.append("[" + self.source[start_arg : pos - 1] + "]")
@@ -141,9 +136,8 @@ class LatexParser:
             compute_nodes.append(StateOpNode(args[0], args[1], self._parse_arg_list(args[2]), args[3]))
           elif macro_name == "Return" and len(args) >= 1:
             return_node = ReturnNode(args[0])
-        continue
-
-      pos += 1
+      else:
+        pos += 1
 
     class_def = self._synthesize_class(model_name, memory_nodes, input_node, compute_nodes, return_node)
 
