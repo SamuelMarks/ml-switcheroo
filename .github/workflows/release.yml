@@ -13,6 +13,7 @@ jobs:
   build-and-release:
     name: Build Wheel and Release
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     # Permissions required to upload files to GitHub Releases
     permissions:
@@ -24,7 +25,7 @@ jobs:
 
       # other workflow uses uv, by using non-uv this is another test so let's keep heterogeneity
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
