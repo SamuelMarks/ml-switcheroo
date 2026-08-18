@@ -37,6 +37,12 @@ filterwarnings = [
     "ignore::FutureWarning:tensorflow.*",
     "ignore::FutureWarning:keras.*",
     "ignore::FutureWarning:tensorboard.*",
+    "ignore::FutureWarning:google.api_core.*",
+    "ignore::FutureWarning:google.auth.*",
+    "ignore::FutureWarning:google.oauth2.*",
+    "ignore::DeprecationWarning:tensorflow.lite.python.util",
+    "ignore::DeprecationWarning:matplotlib.*",
+    "ignore:.*ml_switcheroo\\.cli\\.__main__.*:RuntimeWarning",
 
 #    "error"
 ]

@@ -76,6 +76,10 @@ def main(argv: Optional[List[str]] = None) -> int:
   )
 
   # --- Command: DEFINE ---
+  cmd_def = subparsers.add_parser("define", help="Inject a new ODL definition into the Knowledge Base")
+  cmd_def.add_argument("path", type=Path, help="Path to the ODL YAML file")
+
+  # --- Command: GEN_WEIGHT_SCRIPT ---
   cmd_wgt = subparsers.add_parser("gen-weight-script", help="Generate a checkpoint migration script.")
   cmd_wgt.add_argument("source_file", type=Path, help="Path to the model source code file.")
   cmd_wgt.add_argument("--out", type=Path, required=True, help="Output path for the generated script.")
@@ -153,6 +157,9 @@ def main(argv: Optional[List[str]] = None) -> int:
       args.json_trace,
       args.sharding,
     )
+
+  elif args.command == "define":
+    return commands.handle_define(args.path)
 
   elif args.command == "gen-weight-script":
     return commands.handle_gen_weight_script(args.source_file, args.out, args.source, args.target)

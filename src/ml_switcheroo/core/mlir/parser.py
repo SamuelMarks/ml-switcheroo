@@ -35,7 +35,7 @@ TOKEN_REGEX = [
   ("OPAQUE_DIALECT_CONTENTS", r"<[^>]+>"),
   ("IDENTIFIER", r"[a-zA-Z_][a-zA-Z0-9_$.]*"),
   ("ARROW", r"->"),
-  ("PUNCTUATION", r"[=,(){}\[\]:<>]"),
+  ("PUNCTUATION", r"[=,(){}\[\]:<>.]"),
   ("MISMATCH", r"."),
 ]
 tok_regex = "|".join("(?P<%s>%s)" % pair for pair in TOKEN_REGEX)
@@ -92,6 +92,7 @@ class MlirLexer(Lexer):
             ":": "COLON",
             "<": "LANGLE",
             ">": "RANGLE",
+            ".": "DOT",
           }
           kind = punct_map[val]
 
@@ -117,15 +118,17 @@ GRAMMAR = r"""
     op_name: IDENTIFIER | STRING | SYM_ID
     bare_id_list: IDENTIFIER (COMMA IDENTIFIER)*
 
-    operands: LPAREN [operand (COMMA operand)*] RPAREN
-            | operand (COMMA operand)*
+    operands: LPAREN [operand_list] RPAREN
+            | LPAREN DOT DOT DOT RPAREN
+            | operand_list
+    operand_list: operand (COMMA operand)*
 
-    operand: VAL_ID [COLON TYPE]
+    operand: (VAL_ID | SYM_ID) [COLON TYPE]
 
     dictionary_attribute: LBRACE [attribute_entry (COMMA attribute_entry)*] RBRACE
     attribute_entry: attr_name EQ attr_value
     attr_name: IDENTIFIER | STRING
-    attr_value: STRING | NUMBER | decimal_literal | TYPE | LBRACK [attr_value (COMMA attr_value)*] RBRACK | ATTR_ALIAS_ID | IDENTIFIER | dialect_attribute
+    attr_value: STRING | NUMBER | decimal_literal | TYPE | type_list_parens | function_type | LBRACK [attr_value (COMMA attr_value)*] RBRACK | ATTR_ALIAS_ID | IDENTIFIER | dialect_attribute
     decimal_literal: NUMBER
 
     dialect_attribute: ATTR_ALIAS_ID (OPAQUE_DIALECT_CONTENTS | DOT IDENTIFIER)
@@ -324,17 +327,28 @@ class MlirTransformer(Transformer[Any, Any]):
           op.has_parens = True
         else:
           op.has_parens = False
+
+        # Determine the operand_list node
+        operand_list_node = None
         for val in c.children:
-          if getattr(val, "data", None) == "operand":
-            v_tok = val.children[0]
-            type_node = None
-            colon_triv = []
-            if len(val.children) > 2 and getattr(val.children[2], "type", None) == "TYPE":
-              colon_triv = _get_trivia(val.children[1])
-              type_node = TypeNode(body=val.children[2].value, leading_trivia=_get_trivia(val.children[2]))
-            op.operands.append(
-              ValueNode(name=v_tok.value, leading_trivia=_get_trivia(v_tok), type_node=type_node, colon_trivia=colon_triv)
-            )
+          if getattr(val, "data", None) == "operand_list":
+            operand_list_node = val
+            break
+
+        if operand_list_node is not None:
+          for op_val in operand_list_node.children:
+            if getattr(op_val, "data", None) == "operand":
+              v_tok = op_val.children[0]
+              type_node = None
+              colon_triv = []
+              if len(op_val.children) > 2 and getattr(op_val.children[2], "type", None) == "TYPE":
+                colon_triv = _get_trivia(op_val.children[1])
+                type_node = TypeNode(body=op_val.children[2].value, leading_trivia=_get_trivia(op_val.children[2]))
+              op.operands.append(
+                ValueNode(
+                  name=v_tok.value, leading_trivia=_get_trivia(v_tok), type_node=type_node, colon_trivia=colon_triv
+                )
+              )
       elif isinstance(c, list):
         if len(c) > 0 and isinstance(c[0], AttributeNode):
           op.attributes = c

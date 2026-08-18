@@ -146,31 +146,23 @@ def test_keras_import_exception():
   """Test keras import block exception."""
   import sys
   import importlib
+  import builtins
+  from unittest import mock
   import ml_switcheroo.frameworks.keras as k_fw
 
-  # Store original
-  old_keras = sys.modules.get("keras")
+  real_import = builtins.__import__
 
-  # Force exception on import
-  class FailDict(dict):
-    def __getitem__(self, key):
-      if key == "keras":
-        raise Exception("import fail")
-      return super().__getitem__(key)
+  def mock_import(name, globals=None, locals=None, fromlist=(), level=0):
+    if name == "keras" or name.startswith("keras."):
+      raise Exception("import fail")
+    return real_import(name, globals, locals, fromlist, level)
 
-  try:
-    sys.modules["keras"] = None
-    del sys.modules["keras"]
-  except KeyError:
-    pass
-
-  old_modules = sys.modules
-  sys.modules = FailDict(sys.modules)
-
-  try:
-    importlib.reload(k_fw)
-    assert k_fw.keras is None
-  finally:
-    sys.modules = old_modules
-    if old_keras is not None:
-      sys.modules["keras"] = old_keras
+  with mock.patch("builtins.__import__", side_effect=mock_import):
+    # Ensure it's not cached in sys.modules so importlib.reload actually re-evaluates the try/except
+    old_keras = sys.modules.pop("keras", None)
+    try:
+      importlib.reload(k_fw)
+      assert k_fw.keras is None
+    finally:
+      if old_keras is not None:
+        sys.modules["keras"] = old_keras

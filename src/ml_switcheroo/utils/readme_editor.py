@@ -94,7 +94,7 @@ class ReadmeEditor:
       tokens[next_heading_idx].map[0]  # type: ignore
       if next_heading_idx != -1 and tokens[next_heading_idx].map
       else len(content.splitlines())
-    )  # type: ignore
+    )
 
     lines = content.splitlines()
     pre_lines = lines[:start_line]

@@ -236,6 +236,13 @@ class ASTEngine:
         nodes = parser.parse().statements
         lifter = RdnaLifter()
         graph = lifter.lift(nodes)
+      elif self.source == "stablehlo":
+        # StableHLO parses via ingest_code to Python CST, then frontend parses to graph
+        source_adapter = get_adapter(self.source)
+        cst_tree = ingest_code(code, self.source, self.target, source_adapter, tracer)
+        code_for_graph = self.to_source(cst_tree)
+        frontend = PythonFrontend(code_for_graph)
+        graph = frontend.parse_to_graph()
       else:
         raise NotImplementedError(f"No frontend for {self.source}")
 

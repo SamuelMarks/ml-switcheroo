@@ -13,6 +13,7 @@ from ml_switcheroo.cli.handlers.convert import (
 
 # New export
 from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
+from ml_switcheroo.cli.handlers.define import handle_define
 from ml_switcheroo.cli.handlers.verify import handle_ci
 from ml_switcheroo.cli.handlers.dev import (
   handle_matrix,
@@ -60,6 +61,7 @@ __all__ = [
   "_print_batch_summary",
   "handle_ci",
   "handle_convert",
+  "handle_define",
   "handle_docs",
   "handle_gen_tests",
   "handle_gen_weight_script",

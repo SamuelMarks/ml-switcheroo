@@ -29,7 +29,7 @@ from ml_switcheroo.utils.doc_renderer import OpPageRenderer
 logger = logging.getLogger(__name__)
 
 
-class IndentedDumper(yaml.SafeDumper):  # type: ignore
+class IndentedDumper(yaml.SafeDumper):
   """Custom Dumper to ensure lists are indented."""
 
   def increase_indent(self, flow: Any = False, indentless: Any = False) -> Any:

@@ -218,7 +218,7 @@ class UsageScanner(cst.CSTVisitor):
     if module_name == self.source_fw or module_name.startswith(f"{self.source_fw}."):
       if isinstance(node.names, cst.ImportStar):
         return
-      for alias in node.names:  # type: ignore
+      for alias in node.names:
         if isinstance(alias, cst.ImportAlias):  # pragma: no branch
           if alias.asname:
             bound_name = alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else ""

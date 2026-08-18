@@ -12,6 +12,7 @@ import libcst as cst
 # MLIR Bridge
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 from ml_switcheroo.core.mlir.parser import MlirParser
+from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
 
 # TikZ Bridge
 from ml_switcheroo.core.tikz.parser import TikzParser
@@ -62,14 +63,18 @@ def ingest_code(
       raise e
 
   # 2. MLIR source
-  if source_fw == "mlir":
-    tracer.start_phase("MLIR Ingest", "MLIR Text -> Python CST")
+  if source_fw in ["mlir", "stablehlo"]:
+    tracer.start_phase(f"{source_fw.upper()} Ingest", f"{source_fw.upper()} Text -> Python CST")
     try:
-      parser = MlirParser(code)
-      mlir_mod = parser.parse()
+      if source_fw == "stablehlo":
+        _parser: Any = StableHloParser(code)
+        mlir_mod = _parser.parse()
+      else:
+        _parser = MlirParser(code)
+        mlir_mod = _parser.parse()
       gen = MlirToPythonGenerator()
       tree = gen.generate(mlir_mod)
-      tracer.log_mutation("Ingestion", "(MLIR Text)", "(Python CST)")
+      tracer.log_mutation("Ingestion", f"({source_fw.upper()} Text)", "(Python CST)")
       tracer.end_phase()
       return tree
     except Exception as e:

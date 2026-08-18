@@ -46,19 +46,17 @@ jobs:
           uv pip install -r requirements.txt -r docs/docs-requirements.txt -r test-requirements.txt
           uv pip install -e ".[test]"
 
-      - name: Run Pytest (with coverage)
-        if: matrix.python-version == '3.12'
-        run: |
-          source .venv/bin/activate
-          pytest -n auto --durations=10 --cov=src --cov-fail-under=100 tests
-          mypy --strict src
-          interrogate -c pyproject.toml --fail-under 100
-
       - name: Run Pytest (fast, no coverage)
-        if: matrix.python-version != '3.12'
         run: |
           source .venv/bin/activate
           pytest -n auto --durations=10 tests
+
+      - name: Run mypy and interrogate
+        if: matrix.python-version == '3.12'
+        run: |
+          source .venv/bin/activate
+          mypy --strict src
+          interrogate -c pyproject.toml --fail-under 100
 
 # This code works but is disabled as I'm doing manual doc releases:
 #

@@ -22,6 +22,7 @@ from ml_switcheroo.core.compiler.backends.html import HtmlBackend
 from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
 from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend, LatexBackend
+from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
 
 
 class BaseFrontend:
@@ -88,6 +89,7 @@ _FRONTENDS: Dict[str, Any] = {
   # ISAs use Parser+Lifter tuple strategy handled by engine
   "sass": (SassParser, SassLifter),
   "rdna": (RdnaParser, RdnaLifter),
+  "stablehlo": StableHloParser,
 }
 
 
@@ -128,7 +130,7 @@ def is_isa_source(source: str) -> bool:
   """Determines if the source requires Lifting (ASM -> Graph -> AST).
 
 
-  Only SASS and RDNA are treated as low-level source inputs.
+  Only SASS, RDNA, and StableHLO are treated as low-level source inputs.
 
   Args:
       source: The source framework identifier.
@@ -137,4 +139,4 @@ def is_isa_source(source: str) -> bool:
       True if the source is an ISA requiring lifting.
 
   """
-  return source in ["sass", "rdna"]
+  return source in ["sass", "rdna", "stablehlo"]

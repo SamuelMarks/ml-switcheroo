@@ -214,7 +214,7 @@ class JaxCoreAdapter(JAXStackMixin):
     Returns:
         List[GhostRef]: A list of scanned live references.
     """
-    results: list[Any] = []  # type: ignore
+    results: list[Any] = []
     if category == SemanticTier.LOSS:
       results.extend(getattr(OptaxScanner, "scan_losses", lambda: [])())
     elif category == SemanticTier.OPTIMIZER:

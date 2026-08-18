@@ -4,7 +4,7 @@ Parses the HTML DSL structure using a formal Lark grammar to construct an HTML C
 and extracts high-level model logic into a Python LibCST Module.
 """
 
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Optional
 
 import libcst as cst
 from html.parser import HTMLParser as BaseHTMLParser
@@ -15,13 +15,13 @@ from ml_switcheroo.core.html.nodes import HtmlDocument, TagNode, TextNode, Comme
 class InternalHtmlParser(BaseHTMLParser):
   """Builds the HtmlDocument CST from SAX-like events."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initialize the parser."""
     super().__init__()
-    self.root_children = []
-    self.stack = []
+    self.root_children: List[HtmlNode] = []
+    self.stack: List[TagNode] = []
 
-  def handle_starttag(self, tag, attrs):
+  def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
     """Handle a start tag in the HTML document.
 
     Args:
@@ -59,7 +59,7 @@ class InternalHtmlParser(BaseHTMLParser):
     else:
       self.stack.append(node)
 
-  def handle_endtag(self, tag):
+  def handle_endtag(self, tag: str) -> None:
     """Handle an end tag in the HTML document.
 
     Args:
@@ -77,7 +77,7 @@ class InternalHtmlParser(BaseHTMLParser):
         self._append_node(node)
         break
 
-  def handle_startendtag(self, tag, attrs):
+  def handle_startendtag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
     """Handle a self-closing tag in the HTML document.
 
     Args:
@@ -93,7 +93,7 @@ class InternalHtmlParser(BaseHTMLParser):
     node = TagNode(name=tag, attributes=attributes, self_closing=True)
     self._append_node(node)
 
-  def handle_data(self, data):
+  def handle_data(self, data: str) -> None:
     """Handle text data in the HTML document.
 
     Args:
@@ -101,7 +101,7 @@ class InternalHtmlParser(BaseHTMLParser):
     """
     self._append_node(TextNode(content=data))
 
-  def handle_comment(self, data):
+  def handle_comment(self, data: str) -> None:
     """Handle an HTML comment.
 
     Args:
@@ -109,7 +109,7 @@ class InternalHtmlParser(BaseHTMLParser):
     """
     self._append_node(CommentNode(content=data))
 
-  def handle_decl(self, decl):
+  def handle_decl(self, decl: str) -> None:
     """Handle an HTML declaration.
 
     Args:
@@ -118,7 +118,7 @@ class InternalHtmlParser(BaseHTMLParser):
     node = TagNode(name="!" + decl, self_closing=True)
     self._append_node(node)
 
-  def _append_node(self, node):
+  def _append_node(self, node: HtmlNode) -> None:
     """Append a node.
 
     Args:

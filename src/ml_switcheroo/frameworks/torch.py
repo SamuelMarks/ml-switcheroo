@@ -343,7 +343,7 @@ class TorchAdapter(TorchIOMixin):
         List of discovered GhostRef objects.
 
     """
-    results: list[Any] = []  # type: ignore
+    results: list[Any] = []
     if category == SemanticTier.LOSS:
       results.extend(getattr(self, "_scan_losses", lambda: [])())
     elif category == SemanticTier.OPTIMIZER:

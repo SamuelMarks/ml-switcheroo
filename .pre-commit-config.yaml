@@ -53,3 +53,10 @@ repos:
         language: system
         files: ^(src/ml_switcheroo/semantics/odl/.*\.yaml|src/ml_switcheroo/frameworks/definitions/.*\.json|src/ml_switcheroo/frameworks/.*\.py)$
         pass_filenames: false
+
+      - id: pytest-coverage
+        name: pytest-coverage
+        entry: uv run pytest -n auto --cov=src --cov-fail-under=100 tests
+        language: system
+        pass_filenames: false
+        always_run: true

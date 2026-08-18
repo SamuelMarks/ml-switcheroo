@@ -1,6 +1,6 @@
 """SASS Macro Expansion Logic - Extra Macros."""
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Callable
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassOperand,
   SassInstruction,
@@ -461,7 +461,7 @@ def expand_adaptivepool(
   return nodes
 
 
-def _make_generic_expand(name: str):
+def _make_generic_expand(name: str) -> Callable[[RegisterAllocatorProtocol, str, Dict[str, Any]], List[SassNode]]:
   """Creates a generic macro expansion function for SASS.
 
   Args:

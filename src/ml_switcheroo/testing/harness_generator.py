@@ -86,7 +86,7 @@ class HarnessInjector(cst.CSTTransformer):
         insert_idx = i
         break
 
-    nodes: list = []
+    nodes: list[Any] = []
     if self.imports_block.strip():
       nodes.extend(cst.parse_module(self.imports_block).body)
     if self.init_helpers_block.strip():

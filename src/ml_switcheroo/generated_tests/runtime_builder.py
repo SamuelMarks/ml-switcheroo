@@ -43,8 +43,7 @@ _SHARED_RUNTIME_LOGIC = r'''
 # --- Determinism ---
 @pytest.fixture(autouse=True)
 def ensure_determinism():
-  """
-  Auto-injects fixed seeds for reproducibility at the start of every test.
+  """Auto-injects fixed seeds for reproducibility at the start of every test.
   Covers Python random, NumPy, Torch, TensorFlow, and MLX.
   """
   # Core Python & NumPy
@@ -82,10 +81,10 @@ def ensure_determinism():
     except Exception:
       pass
 
+
 # --- Verification Logic ---
 def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
-  """
-  Cross-framework comparison helper.
+  """Cross-framework comparison helper.
 
   Recursively compares data structures (Lists, Dicts, Tuples).
   If 'exact' is True, enforces strict equality for all types (np.array_equal).
@@ -99,6 +98,7 @@ def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
   if importlib.util.find_spec("chex") is not None:
     try:
       import chex as chex_mod
+
       if exact:
         chex_mod.assert_trees_all_close(ref, val, rtol=0, atol=0)
       else:
@@ -212,9 +212,9 @@ def ensure_runtime_module(
   imports_str = "\n".join(imports_block)
 
   # Combine parts
-  code = '"""Shared runtime flags for generated tests (Auto-Generated)."""\n'
+  code = '"""Shared runtime flags for generated tests (Auto-Generated)."""\n\n'
   code += "import sys\nimport pytest\nimport random\nimport numpy as np\nimport importlib.util\n\n"
-  code += imports_str
+  code += imports_str + "\n"
   code += _SHARED_RUNTIME_LOGIC
 
   runtime_path.write_text(code, encoding="utf-8")

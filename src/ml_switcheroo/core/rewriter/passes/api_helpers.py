@@ -271,7 +271,7 @@ class ApiHelpersMixin:
       return False
 
     if getattr(self, "_known_module_bases", None) is None:
-      self._known_module_bases = set()  # type: ignore
+      self._known_module_bases = set()
       for _, config in self.semantics.framework_configs.items():  # type: ignore
         traits = config.get("traits")
         if traits:

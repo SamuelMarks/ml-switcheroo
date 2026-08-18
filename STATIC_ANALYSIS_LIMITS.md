@@ -38,23 +38,24 @@ The rewriter can statically infer that `Linear(10, 5)` outputs a shape of `(B, 5
 import torch
 import torch.nn as nn
 
+
 class DataDependentMasking(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.fc = nn.Linear(10, 10)
+  def __init__(self):
+    super().__init__()
+    self.fc = nn.Linear(10, 10)
 
-    def forward(self, x):
-        out = self.fc(x)
+  def forward(self, x):
+    out = self.fc(x)
 
-        # 🚨 DYNAMIC SHAPE: The size of 'filtered_out' is determined by runtime values.
-        mask = out > 0
-        filtered_out = out[mask]
+    # 🚨 DYNAMIC SHAPE: The size of 'filtered_out' is determined by runtime values.
+    mask = out > 0
+    filtered_out = out[mask]
 
-        # Static CST analysis cannot resolve this branch safely for AOT compilation.
-        if filtered_out.numel() > 0:
-            return filtered_out.mean()
-        else:
-            return torch.tensor(0.0)
+    # Static CST analysis cannot resolve this branch safely for AOT compilation.
+    if filtered_out.numel() > 0:
+      return filtered_out.mean()
+    else:
+      return torch.tensor(0.0)
 ```
 
 ## 2. Value-Dependent Control Flow (e.g., Dynamic Routing, MoE)
@@ -68,22 +69,23 @@ In eager PyTorch, standard Python `if/else` statements act as the control flow m
 import torch
 import torch.nn as nn
 
+
 class DynamicRoutingMoE(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.expert_1 = nn.Linear(10, 5)
-        self.expert_2 = nn.Linear(10, 5)
-        self.router = nn.Linear(10, 1)
+  def __init__(self):
+    super().__init__()
+    self.expert_1 = nn.Linear(10, 5)
+    self.expert_2 = nn.Linear(10, 5)
+    self.router = nn.Linear(10, 1)
 
-    def forward(self, x):
-        route_score = torch.sigmoid(self.router(x))
+  def forward(self, x):
+    route_score = torch.sigmoid(self.router(x))
 
-        # 🚨 DYNAMIC CONTROL FLOW: Branch resolution requires concretized values.
-        # Translating this statically to JAX will fail during JIT tracing.
-        if route_score.mean() > 0.5:
-            return self.expert_1(x)
-        else:
-            return self.expert_2(x)
+    # 🚨 DYNAMIC CONTROL FLOW: Branch resolution requires concretized values.
+    # Translating this statically to JAX will fail during JIT tracing.
+    if route_score.mean() > 0.5:
+      return self.expert_1(x)
+    else:
+      return self.expert_2(x)
 ```
 
 ## 3. Data-Dependent Loops and Autoregressive Generation
@@ -96,23 +98,24 @@ Similar to `if/else`, Python `while` loops that check a tensor's state cannot be
 ```python
 import torch
 
+
 class AdaptiveComputationTime(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.cell = torch.nn.Linear(10, 10)
-        self.halting_layer = torch.nn.Linear(10, 1)
+  def __init__(self):
+    super().__init__()
+    self.cell = torch.nn.Linear(10, 10)
+    self.halting_layer = torch.nn.Linear(10, 1)
 
-    def forward(self, x):
-        state = x
-        ponder_cost = 0.0
+  def forward(self, x):
+    state = x
+    ponder_cost = 0.0
 
-        # 🚨 UNBOUNDED LOOP: Condition relies on a dynamically computed tensor value.
-        while ponder_cost < 0.9:
-            state = self.cell(state)
-            halt_prob = torch.sigmoid(self.halting_layer(state))
-            ponder_cost += halt_prob.item() # .item() forces a graph break in JIT
+    # 🚨 UNBOUNDED LOOP: Condition relies on a dynamically computed tensor value.
+    while ponder_cost < 0.9:
+      state = self.cell(state)
+      halt_prob = torch.sigmoid(self.halting_layer(state))
+      ponder_cost += halt_prob.item()  # .item() forces a graph break in JIT
 
-        return state
+    return state
 ```
 
 ## 4. Imperative State Mutations and Aliasing
@@ -125,16 +128,17 @@ JAX requires pure functions and immutable data structures (using `tensor.at[...]
 ```python
 import torch
 
+
 def imperative_mutation(x):
-    # 'y' is a view of 'x'. They share memory.
-    y = x.view(-1)
+  # 'y' is a view of 'x'. They share memory.
+  y = x.view(-1)
 
-    # 🚨 IN-PLACE MUTATION: This modifies 'x' implicitly.
-    # ml-switcheroo translating line-by-line might miss that
-    # 'x' must also be functionally updated and returned in the target framework.
-    y[0] = 100.0
+  # 🚨 IN-PLACE MUTATION: This modifies 'x' implicitly.
+  # ml-switcheroo translating line-by-line might miss that
+  # 'x' must also be functionally updated and returned in the target framework.
+  y[0] = 100.0
 
-    return x.sum()
+  return x.sum()
 ```
 
 ## 5. Autograd in the Forward Pass (Meta-Learning)
@@ -148,27 +152,25 @@ When `ml-switcheroo` inspects the CST, it only sees the forward network definiti
 import torch
 import torch.nn as nn
 
+
 class GradientPenaltyNetwork(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.net = nn.Sequential(nn.Linear(10, 50), nn.Linear(50, 1))
+  def __init__(self):
+    super().__init__()
+    self.net = nn.Sequential(nn.Linear(10, 50), nn.Linear(50, 1))
 
-    def forward(self, real_data, fake_data):
-        alpha = torch.rand(real_data.size(0), 1)
-        interpolates = (alpha * real_data + ((1 - alpha) * fake_data)).requires_grad_(True)
+  def forward(self, real_data, fake_data):
+    alpha = torch.rand(real_data.size(0), 1)
+    interpolates = (alpha * real_data + ((1 - alpha) * fake_data)).requires_grad_(True)
 
-        disc_interpolates = self.net(interpolates)
+    disc_interpolates = self.net(interpolates)
 
-        # 🚨 DYNAMIC GRAPH RESOLUTION: The operations to calculate 'gradients'
-        # are not in the AST. They are generated dynamically by traversing the backward graph.
-        gradients = torch.autograd.grad(
-            outputs=disc_interpolates,
-            inputs=interpolates,
-            grad_outputs=torch.ones_like(disc_interpolates),
-            create_graph=True
-        )[0]
+    # 🚨 DYNAMIC GRAPH RESOLUTION: The operations to calculate 'gradients'
+    # are not in the AST. They are generated dynamically by traversing the backward graph.
+    gradients = torch.autograd.grad(
+      outputs=disc_interpolates, inputs=interpolates, grad_outputs=torch.ones_like(disc_interpolates), create_graph=True
+    )[0]
 
-        return ((gradients.norm(2, dim=1) - 1) ** 2).mean()
+    return ((gradients.norm(2, dim=1) - 1) ** 2).mean()
 ```
 
 ## Conclusion
