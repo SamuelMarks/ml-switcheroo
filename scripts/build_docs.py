@@ -114,6 +114,8 @@ def build(build_all: bool = False) -> int:
     sys.executable,
     "-m",
     "sphinx",
+    "-j",
+    "auto",
     "-b",
     "html",
     str(DOCS_DIR),

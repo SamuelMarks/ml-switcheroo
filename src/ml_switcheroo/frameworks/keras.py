@@ -16,12 +16,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 try:
   import keras
-  import keras.activations
-  import keras.layers
-  import keras.losses
-  import keras.ops
-  import keras.optimizers
-  import keras.random
+  import keras.activations  # pragma: no cover
+  import keras.layers  # pragma: no cover
+  import keras.losses  # pragma: no cover
+  import keras.ops  # pragma: no cover
+  import keras.optimizers  # pragma: no cover
+  import keras.random  # pragma: no cover
 except Exception:
   keras = None
 from ml_switcheroo_ir.schema.ghost import GhostRef

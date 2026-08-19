@@ -18,7 +18,7 @@ def test_linear_layer_paxml_mapping(semantics):
   pax_variant = defn.get("variants", {}).get("paxml")
   if not pax_variant:
     pytest.skip("PaxML variant not present in Linear definition.")
-  assert pax_variant["api"] == "paxml.layers.Linear"
+  assert pax_variant["api"] == "praxis.layers.Linear"
   args_map = pax_variant.get("args", {})
   assert args_map["in_features"] == "input_dims"
   assert args_map["out_features"] == "output_dims"

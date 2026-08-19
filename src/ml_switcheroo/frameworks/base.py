@@ -9,6 +9,7 @@ from typing import Any
 
 import json
 import logging
+from functools import lru_cache
 from enum import Enum
 from pathlib import Path
 from typing import Protocol, Type, Dict, List, Tuple, Optional, Union
@@ -390,6 +391,7 @@ def available_frameworks() -> List[str]:
   return list(_ADAPTER_REGISTRY.keys())
 
 
+@lru_cache(maxsize=None)
 def get_adapter(name: str) -> Optional[FrameworkAdapter]:
   """Instantiate and return the registered FrameworkAdapter subclass corresponding to the given name.
 

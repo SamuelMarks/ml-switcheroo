@@ -429,7 +429,6 @@ class ASTEngine:
       usage_scanner = UsageScanner(self.source)
       tree.visit(usage_scanner)
       should_preserve = usage_scanner.get_result()
-      print(f"DEBUG: should_preserve={should_preserve}")
       resolver = ImportResolver(self.semantics)
       plan = resolver.resolve(tree, self.target)  # type: ignore
       fixer = ImportFixer(
@@ -450,7 +449,6 @@ class ASTEngine:
         preserve_source=should_preserve,
       )
       tree = tree.visit(fixer)
-      print(f"AFTER Import Fixing: {'optax' in tree.code}")
       tracer.log_snapshot("After Import Fixing", self._graph_to_mermaid(tree), self.to_source(tree))
 
     # 5. Emission

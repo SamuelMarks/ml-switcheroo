@@ -20,6 +20,16 @@ class ApiHelpersMixin:
   CST nodes representing API calls, variables, modules, and signatures.
   """
 
+  # Mypy duck typing
+  semantics: Any
+  target_fw: Any
+  source_fw: Any
+  strict_mode: Any
+  context: Any
+  config: Any
+  _report_failure: Any
+  _report_warning: Any
+
   def _cst_to_string(self, node: cst.BaseExpression) -> Optional[str]:
     """Flattens CST nodes (Name/Attribute) to string.
 
@@ -224,7 +234,14 @@ class ApiHelpersMixin:
       )
     else:
       if self.strict_mode and not silent:  # type: ignore
-        self._report_failure(f"No mapping available for '{name}' -> '{self.target_fw}'")  # type: ignore
+        origins = getattr(self.semantics, "_key_origins", {})
+        tier = origins.get(abstract_id)
+        if tier in ("neural", "neural_ops") and self.target_fw in ("numpy", "jax"):
+          self._report_failure(
+            f"Cannot map neural network abstraction '{name}' directly to pure math backend '{self.target_fw}'. Use a framework like Flax or Keras."
+          )  # type: ignore
+        else:
+          self._report_failure(f"No mapping available for '{name}' -> '{self.target_fw}'")  # type: ignore
       return None
 
     if isinstance(target_impl, dict):

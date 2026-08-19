@@ -120,3 +120,50 @@ def test_apply_layout_transformations_no_arrow():
   # "->" not in rule, so it should bypass both if statements
   res = _apply_layout_permutation(node, mapping, details, rewriter)
   assert res.args[0].value.value == "x"
+
+
+def test_strategy_missing_api_custom_message():
+  """Docstring."""
+  rewriter = DummyRewriter()
+  call = cst.parse_statement("foo()").body[0].value
+  mapping = {"missing_message": "Custom error message"}
+  rewriter.last_failure = None
+
+  def mock_report_failure(msg):
+    rewriter.last_failure = msg
+
+  rewriter._report_failure = mock_report_failure
+  execute_strategy(rewriter, call, call, mapping, {}, "foo")
+  assert rewriter.last_failure == "Custom error message"
+
+
+def test_strategy_missing_api_default_message():
+  """Docstring."""
+  rewriter = DummyRewriter()
+  call = cst.parse_statement("foo()").body[0].value
+  mapping = {}
+  rewriter.last_failure = None
+
+  def mock_report_failure(msg):
+    rewriter.last_failure = msg
+
+  rewriter._report_failure = mock_report_failure
+  execute_strategy(rewriter, call, call, mapping, {}, "foo")
+  assert rewriter.last_failure == "No mapping available for 'foo' -> 'jax'"
+
+
+def test_strategy_neural_rejection():
+  """Docstring."""
+  rewriter = DummyRewriter()
+  rewriter.target_fw = "jax"
+  rewriter.semantics._key_origins = {"op1": "neural"}
+  call = cst.parse_statement("f()").body[0].value
+  mapping = {}  # No api key
+  rewriter.last_failure = None
+
+  def mock_report_failure(msg):
+    rewriter.last_failure = msg
+
+  rewriter._report_failure = mock_report_failure
+  execute_strategy(rewriter, call, call, mapping, {}, "op1")
+  assert "Cannot map neural network abstraction" in rewriter.last_failure

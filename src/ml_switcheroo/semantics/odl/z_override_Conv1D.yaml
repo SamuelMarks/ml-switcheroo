@@ -1,0 +1,59 @@
+operation: "Conv1D"
+description: "1D convolution layer."
+op_type: "class"
+std_args:
+  - name: "in_channels"
+    type: "int"
+  - name: "filters"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int]]"
+  - name: "strides"
+    type: "int"
+    default: 1
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "dilation_rate"
+    type: "int"
+    default: 1
+  - name: "groups"
+    type: "int"
+    default: 1
+  - name: "use_bias"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    api: "torch.nn.Conv1d"
+    args:
+      in_channels: "in_channels"
+      filters: "out_channels"
+      kernel_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      dilation_rate: "dilation"
+      groups: "groups"
+      use_bias: "bias"
+  keras:
+    api: "keras.layers.Conv1D"
+    args:
+      in_channels: null
+      filters: "filters"
+      kernel_size: "kernel_size"
+      strides: "strides"
+      padding: "padding"
+      dilation_rate: "dilation_rate"
+      groups: "groups"
+      use_bias: "use_bias"
+  tensorflow:
+    api: "tf.keras.layers.Conv1D"
+    args:
+      in_channels: null
+      filters: "filters"
+      kernel_size: "kernel_size"
+      strides: "strides"
+      padding: "padding"
+      dilation_rate: "dilation_rate"
+      groups: "groups"
+      use_bias: "use_bias"

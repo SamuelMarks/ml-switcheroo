@@ -1,0 +1,26 @@
+operation: "Linear"
+description: "Applies a linear transformation to the incoming data."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+    rank: 0
+  - name: "out_features"
+    type: "int"
+    rank: 0
+  - name: "bias"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    api: "torch.nn.Linear"
+    args:
+      in_features: "in_features"
+      out_features: "out_features"
+      bias: "bias"
+  paxml:
+    api: "praxis.layers.Linear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+      bias: null

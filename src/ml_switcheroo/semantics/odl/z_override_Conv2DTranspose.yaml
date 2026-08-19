@@ -1,0 +1,63 @@
+operation: "Conv2DTranspose"
+description: "2D transposed convolution layer."
+op_type: "class"
+std_args:
+  - name: "in_channels"
+    type: "int"
+  - name: "filters"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int, int]]"
+  - name: "strides"
+    type: "Union[int, Tuple[int, int]]"
+    default: [1, 1]
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "output_padding"
+    type: "Union[int, Tuple[int, int]]"
+    default: [0, 0]
+  - name: "groups"
+    type: "int"
+    default: 1
+  - name: "use_bias"
+    type: "bool"
+    default: true
+  - name: "dilation_rate"
+    type: "Union[int, Tuple[int, int]]"
+    default: [1, 1]
+variants:
+  torch:
+    api: "torch.nn.ConvTranspose2d"
+    args:
+      in_channels: "in_channels"
+      filters: "out_channels"
+      kernel_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      output_padding: "output_padding"
+      groups: "groups"
+      use_bias: "bias"
+      dilation_rate: "dilation"
+  keras:
+    api: "keras.layers.Conv2DTranspose"
+    args:
+      in_channels: null
+      filters: "filters"
+      kernel_size: "kernel_size"
+      strides: "strides"
+      padding: "padding"
+      output_padding: "output_padding"
+      use_bias: "use_bias"
+      dilation_rate: "dilation_rate"
+  tensorflow:
+    api: "tf.keras.layers.Conv2DTranspose"
+    args:
+      in_channels: null
+      filters: "filters"
+      kernel_size: "kernel_size"
+      strides: "strides"
+      padding: "padding"
+      output_padding: "output_padding"
+      use_bias: "use_bias"
+      dilation_rate: "dilation_rate"

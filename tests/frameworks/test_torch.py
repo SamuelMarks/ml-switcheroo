@@ -41,10 +41,10 @@ def test_torch_init_ghost_no_snapshot(monkeypatch):
   """Verifies the behavior of PyTorch initialization ghost no snapshot."""
   monkeypatch.setattr("ml_switcheroo.frameworks.torch.torch", None)
   monkeypatch.setattr("ml_switcheroo.frameworks.torch.load_snapshot_for_adapter", lambda _: {})
-  with patch("logging.warning") as mock_warn:
+  with patch("logging.debug") as mock_debug:
     adapter = TorchAdapter()
     assert adapter._mode == InitMode.GHOST
-    mock_warn.assert_called_once_with("PyTorch not installed and no snapshot found. Scanning unavailable.")
+    mock_debug.assert_called_once_with("PyTorch not installed and no snapshot found. Scanning unavailable.")
 
 
 def test_torch_init_ghost(monkeypatch):

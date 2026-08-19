@@ -63,7 +63,7 @@ class JaxCoreAdapter(JAXStackMixin):
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("jax")
       if not self._snapshot_data:
-        logging.warning("JAX not installed and no snapshot found. Scanning unavailable.")
+        logging.debug("JAX not installed and no snapshot found. Scanning unavailable.")
 
   @property
   def import_alias(self) -> Tuple[str, str]:

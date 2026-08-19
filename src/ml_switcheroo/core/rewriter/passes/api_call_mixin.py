@@ -8,6 +8,7 @@ target-framework equivalents.
 """
 
 import libcst as cst
+from typing import Any
 
 
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
@@ -35,6 +36,17 @@ class ApiTransformerCallMixin:
   - `_report_warning(msg)`: Handles issuing warnings.
   - `_report_failure(msg)`: Handles throwing or logging failures.
   """
+
+  # Mypy duck typing
+  semantics: Any
+  source_fw: Any
+  target_fw: Any
+  strict_mode: Any
+  _report_failure: Any
+  _report_warning: Any
+  _get_qualified_name: Any
+  _get_mapping: Any
+  check_version_constraints: Any
 
   def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
     """Intercepts and rewrites a function call node during CST traversal.
@@ -86,7 +98,27 @@ class ApiTransformerCallMixin:
         get_tracer().log_inspection(node_str=func_name, outcome="Skipped", detail="No Entry in Semantics Knowledge Base")
 
       if self.strict_mode and func_name and func_name.startswith(f"{self.source_fw}."):  # type: ignore
-        self._report_failure(f"API '{func_name}' not found in semantics.")  # type: ignore
+        abstract_id = (
+          self.semantics.resolve_op_id(self.source_fw, func_name) if hasattr(self.semantics, "resolve_op_id") else None
+        )  # type: ignore
+
+        # If we can't map a neural layer to numpy/jax, fail with a clear decomposition error
+        origins = getattr(self.semantics, "_key_origins", {})
+
+        # In case we can't find abstract_id, try to infer it from func_name
+        lookup_id = abstract_id
+        if not lookup_id and func_name:
+          parts = func_name.split(".")
+          lookup_id = parts[-1]
+
+        tier = origins.get(lookup_id)
+
+        if tier in ("neural", "neural_ops") and self.target_fw in ("numpy", "jax"):
+          self._report_failure(
+            f"Cannot map neural network abstraction '{func_name}' directly to pure math backend '{self.target_fw}'. Use a framework like Flax or Keras."
+          )  # type: ignore
+        else:
+          self._report_failure(f"API '{func_name}' not found in semantics.")  # type: ignore
 
       return updated_node
 

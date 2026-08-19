@@ -28,6 +28,13 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   return node
 
 
+def _create_integer(val: int) -> cst.BaseExpression:
+  """Creates a CST node for an integer, handling negative values."""
+  if val < 0:
+    return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer(str(-val)))
+  return cst.Integer(str(val))
+
+
 @register_hook("flatten_range")
 def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   """Hook: Transforms `flatten(x, start, end)` into target-specific logic.
@@ -62,6 +69,12 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
     try:
       if isinstance(args[1].value, cst.Integer):
         start_dim = int(args[1].value.value)
+      elif (
+        isinstance(args[1].value, cst.UnaryOperation)
+        and isinstance(args[1].value.operator, cst.Minus)
+        and isinstance(args[1].value.expression, cst.Integer)
+      ):
+        start_dim = -int(args[1].value.expression.value)
     except ValueError:
       pass
 
@@ -69,16 +82,36 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
     try:
       if isinstance(args[2].value, cst.Integer):
         end_dim = int(args[2].value.value)
+      elif (
+        isinstance(args[2].value, cst.UnaryOperation)
+        and isinstance(args[2].value.operator, cst.Minus)
+        and isinstance(args[2].value.expression, cst.Integer)
+      ):
+        end_dim = -int(args[2].value.expression.value)
     except ValueError:
       pass
 
   # Extract keyword args
   for arg in args:
     if arg.keyword:
-      if arg.keyword.value == "start_dim" and isinstance(arg.value, cst.Integer):
-        start_dim = int(arg.value.value)
-      if arg.keyword.value == "end_dim" and isinstance(arg.value, cst.Integer):
-        end_dim = int(arg.value.value)
+      if arg.keyword.value == "start_dim":
+        if isinstance(arg.value, cst.Integer):
+          start_dim = int(arg.value.value)
+        elif (
+          isinstance(arg.value, cst.UnaryOperation)
+          and isinstance(arg.value.operator, cst.Minus)
+          and isinstance(arg.value.expression, cst.Integer)
+        ):
+          start_dim = -int(arg.value.expression.value)
+      if arg.keyword.value == "end_dim":
+        if isinstance(arg.value, cst.Integer):
+          end_dim = int(arg.value.value)
+        elif (
+          isinstance(arg.value, cst.UnaryOperation)
+          and isinstance(arg.value.operator, cst.Minus)
+          and isinstance(arg.value.expression, cst.Integer)
+        ):
+          end_dim = -int(arg.value.expression.value)
 
   # Lookup the API configured in ODL/Semantics
   target_api = None
@@ -105,27 +138,51 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
     arg0 = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
     # Arg 2: start_dim
-    arg1_val = cst.Integer(str(start_dim))
+    arg1_val = _create_integer(start_dim)
     arg1 = cst.Arg(value=arg1_val, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
     # Arg 3: stop_dimension
     # PyTorch 'end_dim' is inclusive. JAX 'stop_dimension' is exclusive.
     # If end_dim == -1, it means "until the end", which corresponds to x.ndim in JAX.
+    arg2_val: cst.BaseExpression
     if end_dim == -1:
       # Generate: x.ndim
       arg2_val = cst.Attribute(value=input_val, attr=cst.Name("ndim"))
     else:
       # Generate: end_dim + 1
-      arg2_val = cst.Integer(str(end_dim + 1))  # type: ignore
+      arg2_val = _create_integer(end_dim + 1)
 
     arg2 = cst.Arg(value=arg2_val)
 
     return node.with_changes(func=new_func, args=[arg0, arg1, arg2])
 
+  # --- STRATEGY: MLX core flatten ---
+  # mlx.core.flatten(x, start_axis, end_axis)
+  if target_api == "mlx.core.flatten":
+    new_func = _create_dotted_name(target_api)
+    arg0 = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+    arg1 = cst.Arg(value=_create_integer(start_dim), comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+    arg2 = cst.Arg(value=_create_integer(end_dim))
+    return node.with_changes(func=new_func, args=[arg0, arg1, arg2])
+
+  # --- STRATEGY: Callable Class (Keras / TensorFlow / Paxml) ---
+  # keras.layers.Flatten()(x)
+  target_variant = ctx.current_variant
+  is_class = False
+  if target_variant and hasattr(target_variant, "op_type") and target_variant.op_type:
+    is_class = target_variant.op_type.value == "class"
+  if is_class or target_api.endswith(".Flatten"):
+    # Create the class instantiation: tf.keras.layers.Flatten()
+    class_name = _create_dotted_name(target_api)
+    instantiation = cst.Call(func=class_name, args=[])
+    # Call it with the input: tf.keras.layers.Flatten()(x)
+    clean_input_arg = input_arg.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+    return cst.Call(func=instantiation, args=[clean_input_arg])
+
   # --- STRATEGY: Ravel (Full Flatten) ---
   # flatten(x) or flatten(x, 0, -1) -> ravel(x)
   if start_dim == 0 and end_dim == -1:
-    if "ravel" in target_api or "flatten" in target_api:
+    if "ravel" in target_api.lower() or "flatten" in target_api.lower():
       new_func = _create_dotted_name(target_api)
       return node.with_changes(func=new_func, args=[input_arg])
 

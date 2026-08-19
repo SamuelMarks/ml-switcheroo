@@ -32,7 +32,7 @@ except Exception:
 try:
   import flax.nnx
 
-  flax_nnx = flax.nnx
+  flax_nnx = flax.nnx  # pragma: no cover
 except Exception:
   flax_nnx = None  # type: ignore
 
@@ -66,7 +66,7 @@ class FlaxNNXAdapter(JAXStackMixin):
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("flax_nnx")
       if not self._snapshot_data:
-        logging.warning("Flax NNX not installed and no snapshot found.")
+        logging.debug("Flax NNX not installed and no snapshot found.")
 
   def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:
     """Hydrate API ghosts from snapshot data.

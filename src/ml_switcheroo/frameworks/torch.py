@@ -18,12 +18,12 @@ from typing import List, Tuple, Dict, Optional
 
 try:
   import torch
-  import torch.nn as nn
-  import torch.optim as optim
+  import torch.nn as nn  # pragma: no cover
+  import torch.optim as optim  # pragma: no cover
 except Exception:
   torch: Any = None  # type: ignore
   nn = None  # type: ignore
-  optim = None  # type: ignore
+  optim = None  # type: ignore  # pragma: no cover
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -65,7 +65,7 @@ class TorchAdapter(TorchIOMixin):
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("torch")
       if not self._snapshot_data:
-        logging.warning("PyTorch not installed and no snapshot found. Scanning unavailable.")
+        logging.debug("PyTorch not installed and no snapshot found. Scanning unavailable.")
 
   @property
   def import_alias(self) -> Tuple[str, str]:

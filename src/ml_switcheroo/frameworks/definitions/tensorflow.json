@@ -1638,13 +1638,19 @@
     "api": "tf.keras.layers.Conv1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "args": {
+      "in_channels": null
+    }
   },
   "Conv1DTranspose": {
     "api": "tf.keras.layers.Conv1DTranspose",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "args": {
+      "in_channels": null
+    }
   },
   "Conv1d": {
     "api": "tf.keras.layers.Convolution1D",
@@ -1663,18 +1669,25 @@
     "api": "tf.keras.layers.Conv2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "args": {
+      "in_channels": null
+    }
   },
   "Conv2DTranspose": {
     "api": "tf.keras.layers.Conv2DTranspose",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "args": {
+      "in_channels": null
+    }
   },
   "Conv2d": {
     "api": "tf.keras.layers.Conv2D",
     "args": {
-      "out_channels": "filters"
+      "out_channels": "filters",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1684,7 +1697,10 @@
     "api": "keras.layers.Conv3DTranspose",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "args": {
+      "in_channels": null
+    }
   },
   "Conv3d": {
     "api": "tf.keras.layers.Conv3D",
@@ -1793,7 +1809,10 @@
     "api": "keras.layers.Convolution1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "args": {
+      "in_channels": null
+    }
   },
   "Convolution1DTranspose": {
     "api": "keras.layers.Convolution1DTranspose",
@@ -1805,7 +1824,10 @@
     "api": "keras.layers.Convolution2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "args": {
+      "in_channels": null
+    }
   },
   "Convolution2DTranspose": {
     "api": "keras.layers.Convolution2DTranspose",
@@ -1817,7 +1839,10 @@
     "api": "keras.layers.Convolution3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "args": {
+      "in_channels": null
+    }
   },
   "Convolution3DTranspose": {
     "api": "keras.layers.Convolution3DTranspose",
@@ -1829,7 +1854,10 @@
     "api": "tf.keras.layers.Convolution3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "args": {
+      "in_channels": null
+    }
   },
   "Convolution3dTranspose": {
     "api": "tf.keras.layers.Convolution3DTranspose",

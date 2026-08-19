@@ -134,10 +134,10 @@ def test_flax_nnx_convert_logic(monkeypatch):
 
     # Test warning
     with m.context() as m2:
-      m2.setattr(logging, "warning", MagicMock())
+      m2.setattr(logging, "debug", MagicMock())
       # adapter2 = fn_fw.FlaxNNXAdapter()
       fn_fw.FlaxNNXAdapter()
-      logging.warning.assert_called()
+      logging.debug.assert_called()
 
       # also cover live branch
       m2.setattr(fn_fw, "flax_nnx", MagicMock())

@@ -1136,8 +1136,9 @@
     "api": "praxis.layers.Conv1D",
     "args": {
       "bias": "use_bias",
-      "in_channels": "input_dims",
-      "out_channels": "output_dims"
+      "in_channels": null,
+      "out_channels": "filter_dims",
+      "kernel_size": "filter_shape"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1167,8 +1168,8 @@
     "api": "praxis.layers.Conv2D",
     "args": {
       "in_channels": null,
-      "kernel_size": null,
-      "out_channels": null,
+      "kernel_size": "filter_shape",
+      "out_channels": "filter_dims",
       "padding": "padding",
       "stride": "filter_stride"
     },
@@ -1180,8 +1181,9 @@
     "api": "praxis.layers.Conv3D",
     "args": {
       "bias": "use_bias",
-      "in_channels": "input_dims",
-      "out_channels": "output_dims"
+      "in_channels": null,
+      "out_channels": "filter_dims",
+      "kernel_size": "filter_shape"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -3284,7 +3286,7 @@
     "required_imports": []
   },
   "Linear": {
-    "api": "paxml.layers.Linear",
+    "api": "praxis.layers.Linear",
     "args": {
       "bias": "use_bias",
       "in_features": "input_dims",

@@ -182,6 +182,8 @@ def test_build_not_all(mock_env, monkeypatch):
     sys.executable,
     "-m",
     "sphinx",
+    "-j",
+    "auto",
     "-b",
     "html",
     str(docs_dir),
@@ -207,7 +209,17 @@ def test_build_all(mock_env, monkeypatch):
   build_docs.build(build_all=True)
 
   cmd = mock_run.call_args[0][0]
-  assert cmd == [sys.executable, "-m", "sphinx", "-b", "html", str(docs_dir), str(build_dir / "html")]
+  assert cmd == [
+    sys.executable,
+    "-m",
+    "sphinx",
+    "-j",
+    "auto",
+    "-b",
+    "html",
+    str(docs_dir),
+    str(build_dir / "html"),
+  ]
 
 
 def test_main_success(mock_env, monkeypatch, capsys):

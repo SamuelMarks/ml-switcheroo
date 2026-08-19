@@ -2146,7 +2146,8 @@
       "kwargs": "kwargs",
       "padding": "padding",
       "strides": "strides",
-      "use_bias": "use_bias"
+      "use_bias": "use_bias",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2171,7 +2172,8 @@
       "output_padding": "output_padding",
       "padding": "padding",
       "strides": "strides",
-      "use_bias": "use_bias"
+      "use_bias": "use_bias",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2181,7 +2183,8 @@
     "api": "keras.ops.conv",
     "args": {
       "input": "inputs",
-      "weight": "kernel"
+      "weight": "kernel",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2206,7 +2209,8 @@
       "kwargs": "kwargs",
       "padding": "padding",
       "strides": "strides",
-      "use_bias": "use_bias"
+      "use_bias": "use_bias",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2231,7 +2235,8 @@
       "output_padding": "output_padding",
       "padding": "padding",
       "strides": "strides",
-      "use_bias": "use_bias"
+      "use_bias": "use_bias",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2242,7 +2247,8 @@
     "args": {
       "kernel_size": "kernel_size",
       "out_channels": "filters",
-      "stride": "strides"
+      "stride": "strides",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2267,7 +2273,8 @@
       "output_padding": "output_padding",
       "padding": "padding",
       "strides": "strides",
-      "use_bias": "use_bias"
+      "use_bias": "use_bias",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2475,7 +2482,8 @@
       "dilation": "dilation_rate",
       "input": "x",
       "stride": "strides",
-      "weight": "kernel"
+      "weight": "kernel",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "layout_map": {
@@ -2504,7 +2512,8 @@
       "kwargs": "kwargs",
       "padding": "padding",
       "strides": "strides",
-      "use_bias": "use_bias"
+      "use_bias": "use_bias",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2554,7 +2563,8 @@
       "kwargs": "kwargs",
       "padding": "padding",
       "strides": "strides",
-      "use_bias": "use_bias"
+      "use_bias": "use_bias",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2604,7 +2614,8 @@
       "kwargs": "kwargs",
       "padding": "padding",
       "strides": "strides",
-      "use_bias": "use_bias"
+      "use_bias": "use_bias",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2640,7 +2651,8 @@
     "args": {
       "bias": "use_bias",
       "out_channels": "filters",
-      "stride": "strides"
+      "stride": "strides",
+      "in_channels": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",

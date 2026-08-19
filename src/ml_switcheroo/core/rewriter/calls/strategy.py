@@ -110,10 +110,16 @@ def execute_strategy(
   else:
     target_api = mapping.get("api")
     if not target_api:
-      msg = mapping.get(
-        "missing_message",
-        f"No mapping available for '{abstract_id}' -> '{rewriter.target_fw}'",
-      )
+      origins = getattr(rewriter.semantics, "_key_origins", {})
+      tier = origins.get(abstract_id)
+
+      if tier in ("neural", "neural_ops") and rewriter.target_fw in ("numpy", "jax"):
+        msg = f"Cannot map neural network abstraction '{abstract_id}' directly to pure math backend '{rewriter.target_fw}'. Use a framework like Flax or Keras."
+      else:
+        msg = mapping.get(
+          "missing_message",
+          f"No mapping available for '{abstract_id}' -> '{rewriter.target_fw}'",
+        )
       rewriter._report_failure(msg)
       return updated
 

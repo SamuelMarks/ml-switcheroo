@@ -134,3 +134,15 @@ def test_fuzzer_parser_int_inference():
   symbol_map = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
     generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42})
+
+
+def test_fuzzer_parser_float_inference():
+  """Test fuzzer parser infers float from default."""
+  from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
+  from ml_switcheroo.testing.fuzzer.type_parser import AnyType
+  from unittest import mock
+
+  # Force the code to take the type inference branch instead of just returning default
+  with mock.patch("random.random", return_value=0.5):
+    val = generate_from_hint(AnyType(), {}, 0, 3, {}, {"default": 3.14})
+    assert isinstance(val, float)

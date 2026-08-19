@@ -83,7 +83,13 @@ def _build_yaml_entry(op_name: str, definition: Dict[str, Any]) -> Dict[str, Any
   variants = definition.get("variants", {})
   for fw, details in variants.items():
     if details:
-      clean_variants[fw] = dict(sorted(details.items()))
+      clean_details = {}
+      for k, v in details.items():
+        if hasattr(v, "value"):
+          clean_details[k] = v.value  # pragma: no cover
+        else:
+          clean_details[k] = v
+      clean_variants[fw] = dict(sorted(clean_details.items()))
 
   # Sanitize Description (Escape single backticks for RST safety)
   raw_desc = definition.get("description", "").strip()
@@ -215,7 +221,7 @@ def generate_op_docs(app: Sphinx) -> None:
     # Case-insensitive collision check logic
     # e.g., 'Abs' vs 'abs'
     if safe_name.lower() in seen_safe_names:
-      logger.info(f"[ml-switcheroo] Skipping {op_name} (File collision with {safe_name.lower()})")
+      logger.debug(f"[ml-switcheroo] Skipping {op_name} (File collision with {safe_name.lower()})")
       continue
 
     seen_safe_names.add(safe_name.lower())

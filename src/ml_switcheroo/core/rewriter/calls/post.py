@@ -66,7 +66,6 @@ def handle_post_processing(
     tier = origins.get(abstract_id)
     traits = rewriter._get_target_traits()
     is_neural = tier in (SemanticTier.NEURAL.value, "neural_ops")
-    print(f"DEBUG: abstract_id={abstract_id} tier={tier} is_neural={is_neural} result_node_type={type(result_node)}")
 
     force = False
     if isinstance(result_node, cst.Call):
@@ -80,7 +79,6 @@ def handle_post_processing(
           break
 
     if is_neural or force:
-      print(f"DEBUG: INJECTING MAGIC ARGS FOR {abstract_id}")
       if isinstance(result_node, cst.Call):
         # A. Inject Magic Arguments
         for arg_name, _ in traits.inject_magic_args:
