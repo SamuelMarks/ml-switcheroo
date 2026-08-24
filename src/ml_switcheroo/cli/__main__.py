@@ -1,4 +1,4 @@
-"""Main Entry Point for ml-switcheroo CLI.
+"""Execute Entry Point for ml-switcheroo CLI.
 
 This module handles argument parsing and dispatches to specific command
 handlers defined in `ml_switcheroo.cli.commands` and `ml_switcheroo.cli.handlers`.
@@ -21,7 +21,7 @@ from ml_switcheroo import __version__
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-  """Main CLI entry point.
+  """Execute CLI entry point.
 
   Parses arguments via argparse and calls the appropriate handler function.
 

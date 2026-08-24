@@ -40,7 +40,7 @@ class SemanticsManager:
   """
 
   def __init__(self) -> None:
-    """Initializes the manager and loads all knowledge sources."""
+    """Initialize the manager and loads all knowledge sources."""
     # Core Data Stores
     self.data: Dict[str, Dict[Any, Any]] = {}
     self.framework_configs: Dict[str, Dict[Any, Any]] = {}
@@ -72,7 +72,7 @@ class SemanticsManager:
     self._build_index()
 
   def _build_index(self) -> None:
-    """Constructs the reverse index mapping from concrete API endpoints back to their abstract definitions."""
+    """Construct the reverse index mapping from concrete API endpoints back to their abstract definitions."""
     self._reverse_index.clear()
     alias_map = {}
 
@@ -95,7 +95,7 @@ class SemanticsManager:
         priority_scores = json.load(f)
 
     def get_priority(abs_id: Any, details: Any, tier: Any) -> Any:
-      """Determines indexing priority when multiple abstract ops map to the same target API.
+      """Determine indexing priority when multiple abstract ops map to the same target API.
 
       This handles overlaps between generic ops like `cat` vs `concat`.
 
@@ -131,7 +131,7 @@ class SemanticsManager:
         if api_name:
 
           def register_api(name: Any) -> Any:
-            """Registers the target concrete API mapped back to its abstract concept.
+            """Register the target concrete API mapped back to its abstract concept.
 
             Uses tie-breaker scores when overlaps are found.
 
@@ -162,7 +162,7 @@ class SemanticsManager:
               register_api(fqn)
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
-    """Generates the import mapping for the ImportFixer based on Tier linking.
+    """Generate the import mapping for the ImportFixer based on Tier linking.
 
     Args:
         target_fw: The framework being targeted.
@@ -193,7 +193,7 @@ class SemanticsManager:
     return result
 
   def _resolve_inheritance(self, fw: str) -> Optional[str]:
-    """Finds parent framework key if exists.
+    """Find parent framework key if exists.
 
     Args:
         fw: The framework name/key to check.
@@ -211,7 +211,7 @@ class SemanticsManager:
     return None
 
   def resolve_variant(self, abstract_id: str, target_fw: str) -> Optional[Dict[str, Any]]:
-    """Resolves the implementation of an abstract operation.
+    """Resolve the implementation of an abstract operation.
 
     Args:
         abstract_id: The unique identifier of the abstract operation.
@@ -241,7 +241,7 @@ class SemanticsManager:
     return None
 
   def is_verified(self, abstract_id: str) -> bool:
-    """Returns True if the operation is marked verified (or untracked).
+    """Return True if the operation is marked verified (or untracked).
 
     Args:
         abstract_id: The unique identifier of the abstract operation.
@@ -284,7 +284,7 @@ class SemanticsManager:
     return None
 
   def get_known_apis(self) -> Dict[str, Dict[Any, Any]]:
-    """Returns full knowledge graph.
+    """Return full knowledge graph.
 
     Returns:
         A dictionary mapping abstract IDs to their full operation definitions.
@@ -292,7 +292,7 @@ class SemanticsManager:
     return self.data
 
   def get_framework_config(self, framework: str) -> Dict[str, Any]:
-    """Returns definition of framework traits.
+    """Return definition of framework traits.
 
     Args:
         framework: The name of the target framework.
@@ -303,7 +303,7 @@ class SemanticsManager:
     return self.framework_configs.get(framework, {})
 
   def get_test_template(self, framework: str) -> Optional[Dict[str, str]]:
-    """Returns testing codegen templates.
+    """Return testing codegen templates.
 
     Args:
         framework: The name of the target framework.
@@ -315,7 +315,7 @@ class SemanticsManager:
     return self.test_templates.get(framework)
 
   def get_framework_aliases(self) -> Dict[str, Tuple[str, str]]:
-    """Returns a map of {fw: (module, alias)}.
+    """Return a map of {fw: (module, alias)}.
 
     Returns:
         A dictionary mapping framework identifiers to a tuple containing the
@@ -332,7 +332,7 @@ class SemanticsManager:
     return result
 
   def get_all_rng_methods(self) -> Set[str]:
-    """Returns aggregate list of random seeding methods.
+    """Return aggregate list of random seeding methods.
 
     Returns:
         A set of random number generator method names.
@@ -340,7 +340,7 @@ class SemanticsManager:
     return self._known_rng_methods
 
   def get_patterns(self) -> List[PatternDef]:
-    """Returns the list of loaded fusion patterns.
+    """Return the list of loaded fusion patterns.
 
     Returns:
         A list of PatternDef objects defining fusion patterns.
@@ -348,7 +348,7 @@ class SemanticsManager:
     return self.patterns
 
   def load_validation_report(self, report_path: Path) -> None:
-    """Loads a CI verification report to gate unavailable operations.
+    """Load a CI verification report to gate unavailable operations.
 
     Args:
         report_path: The filesystem path to the validation report JSON file.
@@ -366,7 +366,7 @@ class SemanticsManager:
       print(f"❌ Error loading validation report: {e}")
 
   def update_definition(self, abstract_id: str, new_data: Dict[str, Any]) -> None:
-    """Updates an operation definition in memory and persists to disk.
+    """Update an operation definition in memory and persists to disk.
 
     Args:
         abstract_id: The unique identifier of the abstract operation.

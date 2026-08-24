@@ -261,7 +261,10 @@ def test_normalization_utils_extra():
 
   # 276:
   class BadCST:
+    """Docstring."""
+
     def __repr__(self):
+      """Docstring."""
       raise Exception("fail")
 
   details = {"std_args": [{"name": "a", "default": BadCST()}]}
@@ -332,3 +335,13 @@ def test_normalization_utils_more_coverage():
   target = {"inject_args": {"b": "1", "c": "2"}}
   original = parse_call("func(a=1,)")
   normalize_arguments(original, original, details, target, "torch", lambda x: False)
+
+
+def test_convert_value_to_cst_negative_int():
+  """Docstring."""
+  from ml_switcheroo.core.rewriter.normalization_utils import convert_value_to_cst
+  import libcst as cst
+
+  node = convert_value_to_cst(-5)
+  assert isinstance(node, cst.UnaryOperation)
+  assert isinstance(node.expression, cst.Integer)

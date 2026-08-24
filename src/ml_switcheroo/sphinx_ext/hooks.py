@@ -12,7 +12,7 @@ from typing import Any, Optional
 
 
 def add_static_path(app: Any) -> None:
-  """Adds the extension's static directory to HTML build configuration.
+  """Add the extension's static directory to HTML build configuration.
 
   Connected to 'builder-inited' event.
 

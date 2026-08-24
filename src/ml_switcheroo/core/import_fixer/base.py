@@ -24,7 +24,7 @@ class BaseImportFixer(cst.CSTTransformer):
     source_fws: Optional[Union[str, Set[str]]] = None,
     preserve_source: bool = False,
   ):
-    """Initializes the fixer state.
+    """Initialize the fixer state.
 
     Args:
         plan: The pre-calculated ResolutionPlan describing required imports and mappings.
@@ -53,7 +53,7 @@ class BaseImportFixer(cst.CSTTransformer):
     self._path_to_alias = self.plan.path_to_alias
 
   def _track_definition(self, alias_node: cst.ImportAlias) -> None:
-    """Records a name being defined by an import statement.
+    """Record a name being defined by an import statement.
 
     If `import torch.nn as nn`, records 'nn'.
     If `import torch`, records 'torch'.

@@ -7,7 +7,7 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 def test_numpy_adapter_init():
   """Verifies the behavior of NumPy adapter initialization."""
   adapter = NumpyAdapter()
-  assert adapter.display_name == "NumPy"
+  assert adapter.display_name == "numpy"
 
 
 def test_numpy_import_alias():

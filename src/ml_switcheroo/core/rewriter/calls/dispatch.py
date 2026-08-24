@@ -8,7 +8,7 @@ from ml_switcheroo.enums import LogicOp
 
 
 def evaluate_dispatch_rules(rewriter: Any, node: cst.Call, rules: List[Any], details: Dict[str, Any]) -> Optional[str]:
-  """Evaluates conditional dispatch rules against the current call arguments.
+  """Evaluate conditional dispatch rules against the current call arguments.
 
   Args:
       rewriter: The calling transformer object.
@@ -55,7 +55,7 @@ def _extract_argument_node(
   std_name: str,
   std_order: List[str],
 ) -> Optional[cst.CSTNode]:
-  """Extracts the argument node for a given parameter name.
+  """Extract the argument node for a given parameter name.
 
   Args:
       rewriter: The calling transformer object.
@@ -94,7 +94,7 @@ def _extract_argument_node(
 
 
 def _node_to_literal(node: cst.CSTNode) -> Any:
-  """Converts a CST node into a basic Python literal type if possible.
+  """Convert a CST node into a basic Python literal type if possible.
 
   Args:
       node: The CSTNode to attempt converting to a literal.
@@ -122,7 +122,7 @@ def _node_to_literal(node: cst.CSTNode) -> Any:
 
 
 def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
-  """Checks if a given CSTNode meets the condition specified by a rule.
+  """Check if a given CSTNode meets the condition specified by a rule.
 
   Args:
       node: The CSTNode extracted from a call argument.

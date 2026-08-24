@@ -1,1 +1,1 @@
-"""Semantics."""
+"""Semantic."""

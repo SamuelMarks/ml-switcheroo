@@ -13,7 +13,7 @@ class TorchIOMixin:
   """
 
   def get_serialization_imports(self) -> List[str]:
-    """Returns Python import statements required for PyTorch IO operations.
+    """Return Python import statements required for PyTorch IO operations.
 
     Returns:
         List[str]: A list of Python import statements needed to serialize or
@@ -22,7 +22,7 @@ class TorchIOMixin:
     return ["import torch"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Generates PyTorch-specific syntax for save and load operations.
+    """Generate PyTorch-specific syntax for save and load operations.
 
     Args:
         op (str): The operation to perform, either "save" or "load".
@@ -41,20 +41,20 @@ class TorchIOMixin:
     return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """Returns Python imports required for weight migration script logic.
+    """Return Python imports required for weight migration script logic.
 
     Returns:
         List[str]: A list of PyTorch-related import statements necessary
             for running generated weight migration or conversion scripts.
     """
-    return ["import torch"]
+    return ["import torch", "try:", "    import safetensors.torch", "except ImportError:", "    pass"]
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """Generates PyTorch-specific python code to load checkpoint weights into a dictionary.
+    """Generate PyTorch-specific python code to load checkpoint weights into a dictionary.
 
     Args:
         path_var (str): The variable name containing the file path of the
-            checkpoint (.pth/.pt) file to be loaded.
+            checkpoint (.pth/.pt/.safetensors) file to be loaded.
 
     Returns:
         str: PyTorch code representing checkpoint loading logic, CPU mapping to avoid
@@ -62,8 +62,11 @@ class TorchIOMixin:
     """
     return textwrap.dedent(
       f"""
-            # Load PyTorch checkpoint to CPU to avoid CUDA dependency
-            loaded = torch.load({path_var}, map_location='cpu')
+            if str({path_var}).endswith(".safetensors"):
+                loaded = safetensors.torch.load_file({path_var})
+            else:
+                # Load PyTorch checkpoint to CPU to avoid CUDA dependency
+                loaded = torch.load({path_var}, map_location='cpu', weights_only=True)
 
             # Unwrap common checkpoint formats
             if isinstance(loaded, dict) and 'state_dict' in loaded:
@@ -77,7 +80,7 @@ class TorchIOMixin:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Generates the PyTorch expression for converting a tensor to a NumPy array.
+    """Generate the PyTorch expression for converting a tensor to a NumPy array.
 
     Args:
         tensor_var (str): The name of the PyTorch tensor variable.
@@ -89,7 +92,7 @@ class TorchIOMixin:
     return f"{tensor_var}.detach().cpu().numpy()"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Generates PyTorch-specific python code to save dictionary weights.
+    """Generate PyTorch-specific python code to save dictionary weights.
 
     Args:
         state_var (str): The name of the dictionary variable containing NumPy arrays.
@@ -98,11 +101,14 @@ class TorchIOMixin:
 
     Returns:
         str: Python code that converts each NumPy array in the state dictionary
-            to a PyTorch tensor, and saves the resulting dictionary using torch.save.
+            to a PyTorch tensor, and saves the resulting dictionary using torch.save or safetensors.
     """
     return textwrap.dedent(
       f"""
             converted_state = {{k: torch.from_numpy(v) for k, v in {state_var}.items()}}
-            torch.save(converted_state, {path_var})
+            if str({path_var}).endswith(".safetensors"):
+                safetensors.torch.save_file(converted_state, {path_var})
+            else:
+                torch.save(converted_state, {path_var})
             """
     )

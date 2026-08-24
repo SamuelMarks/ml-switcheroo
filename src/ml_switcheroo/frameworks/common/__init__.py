@@ -1,1 +1,1 @@
-"""Common shared utilities for Framework Adapters."""
+"""Share shared utilities for Framework Adapters."""

@@ -16,11 +16,11 @@ from typing import Any, List, Type
 
 
 class CodeExtractor:
-  """Extracts self-contained source code for Python classes or functions."""
+  """Extract self-contained source code for Python classes or functions."""
 
   @staticmethod
   def extract_class(cls_obj: Type[Any]) -> str:
-    """Reads the source code of a class and formats it for injection.
+    """Read the source code of a class and formats it for injection.
 
     Args:
         cls_obj (Type[Any]): The class object to extract (e.g. `InputFuzzer`).
@@ -46,7 +46,7 @@ class CodeExtractor:
 
   @staticmethod
   def normalize_harness_imports(source_code: str, required_modules: List[str]) -> str:
-    """Prepends necessary imports to a code block to ensure it is standalone.
+    """Prepend necessary imports to a code block to ensure it is standalone.
 
     Since extracted code loses its module-level imports, we must reinject them.
 

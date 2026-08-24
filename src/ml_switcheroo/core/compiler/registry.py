@@ -35,14 +35,14 @@ class BaseFrontend:
 
 
 class GraphFrontend(BaseFrontend):
-  """Produces LogicalGraph from code via parse/lift chain.
+  """Produce LogicalGraph from code via parse/lift chain.
 
   This frontend takes source code strings and converts them into
   logical graph representations used by compiler backends.
   """
 
   def parse_to_graph(self, code: str) -> Any:
-    """Parses source code into a logical graph representation.
+    """Parse source code into a logical graph representation.
 
     Args:
         code: The source code string to parse.
@@ -94,7 +94,7 @@ _FRONTENDS: Dict[str, Any] = {
 
 
 def get_backend_class(target: str) -> Optional[Type[CompilerBackend]]:
-  """Returns the backend class for the target (e.g. 'sass').
+  """Return the backend class for the target (e.g. 'sass').
 
   Args:
       target: The target framework identifier.
@@ -107,7 +107,7 @@ def get_backend_class(target: str) -> Optional[Type[CompilerBackend]]:
 
 
 def is_isa_target(target: str) -> bool:
-  """Determines if the target requires the Graph Compiler pipeline.
+  """Determine if the target requires the Graph Compiler pipeline.
 
   Only Low-Level Assembly targets handling Registers or Visualization
   backends that strictly consume Graphs are routed here.
@@ -127,8 +127,7 @@ def is_isa_target(target: str) -> bool:
 
 
 def is_isa_source(source: str) -> bool:
-  """Determines if the source requires Lifting (ASM -> Graph -> AST).
-
+  """Determine if the source requires Lifting (ASM -> Graph -> AST).
 
   Only SASS, RDNA, and StableHLO are treated as low-level source inputs.
 

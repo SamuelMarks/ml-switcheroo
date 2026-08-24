@@ -13,7 +13,7 @@ T = TypeVar("T")
 
 @dataclass
 class Trivia:
-  """Represents non-semantic tokens, such as whitespace and comments.
+  """Represent non-semantic tokens, such as whitespace and comments.
 
   Attributes:
       text (str): The literal string content of the trivia (e.g., "   " or "// comment").
@@ -24,7 +24,7 @@ class Trivia:
 
 @dataclass
 class CSTNode:
-  """The base class for all nodes in the Concrete Syntax Tree.
+  """Execute base class for all nodes in the Concrete Syntax Tree.
 
   Attributes:
       leading_trivia (List[Trivia]): Trivia immediately preceding this node.
@@ -35,7 +35,7 @@ class CSTNode:
   trailing_trivia: List[Trivia] = field(default_factory=list)
 
   def __post_init__(self) -> None:
-    """Ensures trivia is properly typed."""
+    """Ensure trivia is properly typed."""
     if isinstance(self.leading_trivia, str):
       self.leading_trivia = [Trivia(self.leading_trivia)]
     elif self.leading_trivia is None:
@@ -46,7 +46,7 @@ class CSTNode:
       self.trailing_trivia = []
 
   def to_text(self) -> str:
-    """Converts the node back to its exact string representation.
+    """Convert the node back to its exact string representation.
 
     This method must be implemented by all subclasses.
 
@@ -56,7 +56,7 @@ class CSTNode:
     raise NotImplementedError("Subclasses must implement to_text()")
 
   def __str__(self) -> str:
-    """Alias for to_text() to integrate easily with built-ins."""
+    """Alia for to_text() to integrate easily with built-ins."""
     return self.to_text()
 
 
@@ -68,7 +68,7 @@ class CSTVisitor:
   """
 
   def visit(self, node: CSTNode) -> None:
-    """Visits a node and all of its children.
+    """Visit a node and all of its children.
 
     Args:
         node (CSTNode): The node to visit.
@@ -78,7 +78,7 @@ class CSTVisitor:
     visit_method(node)
 
   def generic_visit(self, node: CSTNode) -> None:
-    """The default visitation logic if no specific method is found.
+    """Execute default visitation logic if no specific method is found.
 
     Args:
         node (CSTNode): The node whose children should be visited.
@@ -100,7 +100,7 @@ class CSTTransformer:
   """
 
   def transform(self, node: CSTNode) -> CSTNode:
-    """Transforms a node and its children.
+    """Transform a node and its children.
 
     Args:
         node (CSTNode): The node to transform.
@@ -113,7 +113,7 @@ class CSTTransformer:
     return transform_method(node)
 
   def generic_transform(self, node: CSTNode) -> CSTNode:
-    """The default transformation logic if no specific method is found.
+    """Execute default transformation logic if no specific method is found.
 
     Args:
         node (CSTNode): The node whose children should be transformed.

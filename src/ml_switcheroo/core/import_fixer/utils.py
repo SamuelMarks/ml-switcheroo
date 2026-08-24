@@ -1,4 +1,4 @@
-"""Utilities for the Import Fixer.
+"""Utility for the Import Fixer.
 
 Contains static helper functions for analyzing AST nodes, extracting names,
 generating signatures for deduplication, and creating CST nodes.
@@ -33,7 +33,7 @@ def get_root_name(node: Union[cst.Name, cst.Attribute]) -> str:
 
 
 def create_dotted_name(name_str: str) -> Union[cst.Name, cst.Attribute]:
-  """Creates a CST node structure for a dotted path string.
+  """Create a CST node structure for a dotted path string.
 
   Args:
       name_str (str): Dot-separated path (e.g. "jax.numpy").
@@ -50,7 +50,7 @@ def create_dotted_name(name_str: str) -> Union[cst.Name, cst.Attribute]:
 
 
 def get_signature(node: cst.CSTNode) -> str:
-  """Computes a deduplication signature for an AST node (usually an Import statement).
+  """Compute a deduplication signature for an AST node (usually an Import statement).
 
   It normalizes the source code representation to ignore basic formatting differences,
   allowing detection of duplicate import injections.
@@ -72,7 +72,7 @@ def get_signature(node: cst.CSTNode) -> str:
 
 
 def is_docstring(node: cst.CSTNode, idx: int) -> bool:
-  """Determines if a statement node represents a module docstring.
+  """Determine if a statement node represents a module docstring.
 
   Args:
       node: The statement node from the module body.
@@ -93,7 +93,7 @@ def is_docstring(node: cst.CSTNode, idx: int) -> bool:
 
 
 def is_future_import(node: cst.CSTNode) -> bool:
-  """Determines if a statement is a `from __future__ import ...` directive.
+  """Determine if a statement is a `from __future__ import ...` directive.
 
   Args:
       node: The statement node.

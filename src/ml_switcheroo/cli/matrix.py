@@ -26,7 +26,7 @@ class CompatibilityMatrix:
   """
 
   def __init__(self, semantics: SemanticsManager):
-    """Initializes the Matrix generator.
+    """Initialize the Matrix generator.
 
     Args:
         semantics (SemanticsManager): The loaded semantics manager.
@@ -36,7 +36,7 @@ class CompatibilityMatrix:
     self.console = Console()
 
   def _get_sorted_engines(self) -> List[str]:
-    """Returns list of frameworks sorted for UI consistency.
+    """Return list of frameworks sorted for UI consistency.
 
     Delegates to ``ml_switcheroo.config.get_framework_priority_order`` which
     inspects ``ui_priority`` on registered adapters.
@@ -48,7 +48,7 @@ class CompatibilityMatrix:
     return get_framework_priority_order()
 
   def get_json(self) -> List[Dict[str, str]]:
-    """Returns the compatibility matrix as properly structured data.
+    """Return the compatibility matrix as properly structured data.
 
     Useful for downstream tools, web frontends, or CI parsers.
 
@@ -100,8 +100,7 @@ class CompatibilityMatrix:
     return rows
 
   def render(self) -> None:
-    """Generates and prints the compatibility table to the standard output.
-
+    """Generate and prints the compatibility table to the standard output.
 
     Uses ``rich.Table`` for formatting.
     """
@@ -131,7 +130,7 @@ class CompatibilityMatrix:
     self.console.print(table)
 
   def _get_status_icon(self, variant_info: Optional[Dict[str, Any]]) -> str:
-    """Determines the visual status icon for a mapping entry.
+    """Determine the visual status icon for a mapping entry.
 
     Args:
         variant_info (Optional[Dict]): The dictionary describing the variant's implementation.

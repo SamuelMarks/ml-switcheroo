@@ -29,12 +29,20 @@ def test_astengine_stablehlo_missing_branches(monkeypatch):
   monkeypatch.setattr(ml_switcheroo.core.engine, "ingest_code", lambda *args: cst.parse_module("def foo(): pass"))
 
   class MockEmitter:
+    """Docstring."""
+
     def __init__(self, semantics):
+      """Docstring."""
       pass
 
     def convert(self, tree):
+      """Docstring."""
+
       class TextObj:
+        """Docstring."""
+
         def to_text(self):
+          """Docstring."""
           return "mlir"
 
       return TextObj()

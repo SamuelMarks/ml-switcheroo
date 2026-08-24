@@ -40,17 +40,25 @@ def test_verify_results_fallback():
   """Verifies the fallback exception block."""
 
   class BadThing:
+    """Docstring."""
+
     def __eq__(self, other):
+      """Docstring."""
       raise ValueError("Bad")
 
   class VeryBadThing:
+    """Docstring."""
+
     def __init__(self, val):
+      """Docstring."""
       self.val = val
 
     def __array__(self):
+      """Docstring."""
       raise RuntimeError("No array")
 
     def __eq__(self, other):
+      """Docstring."""
       raise RuntimeError("No eq")
 
   assert not verify_results(VeryBadThing(1), VeryBadThing(2))

@@ -19,7 +19,7 @@ class MLIRType(ABC):
 
 @dataclass(frozen=True)
 class IntegerType(MLIRType):
-  """Represents an MLIR Integer Type (e.g., i1, i32, i64)."""
+  """Represent an MLIR Integer Type (e.g., i1, i32, i64)."""
 
   width: int
 
@@ -30,7 +30,7 @@ class IntegerType(MLIRType):
 
 @dataclass(frozen=True)
 class FloatType(MLIRType):
-  """Represents an MLIR Float Type (e.g., f32, f64, bf16)."""
+  """Represent an MLIR Float Type (e.g., f32, f64, bf16)."""
 
   name: str
 
@@ -41,7 +41,7 @@ class FloatType(MLIRType):
 
 @dataclass(frozen=True)
 class ComplexType(MLIRType):
-  """Represents an MLIR Complex Type (e.g., complex<f32>)."""
+  """Represent an MLIR Complex Type (e.g., complex<f32>)."""
 
   element_type: FloatType
 
@@ -52,7 +52,7 @@ class ComplexType(MLIRType):
 
 @dataclass(frozen=True)
 class TensorType(MLIRType):
-  """Represents an MLIR Tensor Type (e.g., tensor<2x?xi32>)."""
+  """Represent an MLIR Tensor Type (e.g., tensor<2x?xi32>)."""
 
   element_type: MLIRType
   shape: Optional[List[Union[int, str]]] = None  # None means unranked (*), '?' means dynamic dimension
@@ -72,7 +72,7 @@ class TensorType(MLIRType):
 
 @dataclass(frozen=True)
 class FunctionType(MLIRType):
-  """Represents an MLIR Function Type (e.g., (tensor<f32>) -> tensor<f32>)."""
+  """Represent an MLIR Function Type (e.g., (tensor<f32>) -> tensor<f32>)."""
 
   inputs: List[MLIRType]
   results: List[MLIRType]

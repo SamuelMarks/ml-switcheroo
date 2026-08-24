@@ -27,7 +27,7 @@ from ml_switcheroo.frameworks.base import get_adapter
 
 
 def _remove_generator_arg(args: List[cst.Arg]) -> List[cst.Arg]:
-  """Filters out the 'generator' keyword argument commonly used in PyTorch.
+  """Filter out the 'generator' keyword argument commonly used in PyTorch.
 
   JAX uses the 'key' semantics instead.
 
@@ -47,7 +47,7 @@ def _remove_generator_arg(args: List[cst.Arg]) -> List[cst.Arg]:
 
 @register_hook("inject_prng")
 def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Plugin Hook: Thread PRNG keys for stochastic operations.
+  """Plugin Transform Thread PRNG keys for stochastic operations.
 
   Triggers:
       Operations marked with `requires_plugin: "inject_prng"` in the Semantic Knowledge Base.

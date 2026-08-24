@@ -1,4 +1,4 @@
-"""Helpers for ApiTransformer.
+"""Support for ApiTransformer.
 
 This module provides helper utilities and mixin classes used by ApiTransformer
 to perform CST string/node conversions, resolve API paths to FQNs, map APIs
@@ -31,7 +31,7 @@ class ApiHelpersMixin:
   _report_warning: Any
 
   def _cst_to_string(self, node: cst.BaseExpression) -> Optional[str]:
-    """Flattens CST nodes (Name/Attribute) to string.
+    """Flatten CST nodes (Name/Attribute) to string.
 
     Args:
         node: The CST expression node to convert.
@@ -52,7 +52,7 @@ class ApiHelpersMixin:
     return None
 
   def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
-    """Resolves aliases to get the Fully Qualified Name (FQN).
+    """Resolve aliases to get the Fully Qualified Name (FQN).
 
     Args:
         node: The CST expression node representing the name or attribute.
@@ -67,8 +67,8 @@ class ApiHelpersMixin:
     parts = full_str.split(".")
     root = parts[0]
 
-    if root in self.context.alias_map:  # type: ignore
-      canonical_root = self.context.alias_map[root]  # type: ignore
+    if root in self.context.alias_map:
+      canonical_root = self.context.alias_map[root]
       if len(parts) > 1:
         return f"{canonical_root}.{'.'.join(parts[1:])}"
       return str(canonical_root)
@@ -76,7 +76,7 @@ class ApiHelpersMixin:
     return full_str
 
   def _create_name_node(self, api_path: str) -> cst.BaseExpression:
-    """Constructs a CST node structure for a dotted API path.
+    """Construct a CST node structure for a dotted API path.
 
     Args:
         api_path: The dotted API path string (e.g., 'foo.bar.baz').
@@ -91,7 +91,7 @@ class ApiHelpersMixin:
     return node
 
   def _create_dotted_name(self, name_str: str) -> Union[cst.Name, cst.Attribute]:
-    """Alias for create_name_node used by plugins.
+    """Alia for create_name_node used by plugins.
 
     Args:
         name_str: The dotted name string to convert to a CST node structure.
@@ -103,7 +103,7 @@ class ApiHelpersMixin:
     return self._create_name_node(name_str)  # type: ignore
 
   def _is_module_alias(self, node: cst.CSTNode) -> bool:
-    """Determines if a node is a module reference (not a variable).
+    """Determine if a node is a module reference (not a variable).
 
     Args:
         node: The CST node to inspect.
@@ -115,18 +115,18 @@ class ApiHelpersMixin:
     if not name:
       return False
 
-    if name in self.context.alias_map:  # type: ignore
+    if name in self.context.alias_map:
       return True
 
     known_roots = set()
-    if self.config:  # type: ignore  # pragma: no branch
-      known_roots.add(self.config.source_framework)  # type: ignore
-      known_roots.add(self.config.target_framework)  # type: ignore
-      if self.config.source_flavour:  # type: ignore
-        known_roots.add(self.config.source_flavour.split(".")[0])  # type: ignore
+    if self.config:  # pragma: no branch
+      known_roots.add(self.config.source_framework)
+      known_roots.add(self.config.target_framework)
+      if self.config.source_flavour:
+        known_roots.add(self.config.source_flavour.split(".")[0])
 
-    if self.semantics:  # type: ignore  # pragma: no branch
-      configs = getattr(self.semantics, "framework_configs", {})  # type: ignore
+    if self.semantics:  # pragma: no branch
+      configs = getattr(self.semantics, "framework_configs", {})
       for fw_key, conf in configs.items():
         known_roots.add(fw_key)
         alias_conf = conf.get("alias")
@@ -139,7 +139,7 @@ class ApiHelpersMixin:
     return root in known_roots
 
   def _apply_preamble(self, node: cst.FunctionDef, stmts_code: List[str]) -> cst.FunctionDef:
-    """Injects source code statements at the start of the function body.
+    """Inject source code statements at the start of the function body.
 
     Args:
         node: The target function definition node.
@@ -159,7 +159,7 @@ class ApiHelpersMixin:
     return self._inject_stmts_to_body(node, new_stmts)
 
   def _inject_stmts_to_body(self, node: cst.FunctionDef, new_stmts: List[cst.BaseStatement]) -> cst.FunctionDef:
-    """Helper to insert statements respecting docstrings.
+    """Support to insert statements respecting docstrings.
 
     Args:
         node: The function definition node where statements are injected.
@@ -183,7 +183,7 @@ class ApiHelpersMixin:
     return node.with_changes(body=node.body.with_changes(body=final_body))
 
   def _convert_to_indented_block(self, node: cst.FunctionDef) -> cst.FunctionDef:
-    """Unwraps simple one-liners to indented blocks for injection.
+    """Unwrap simple one-liners to indented blocks for injection.
 
     Args:
         node: The function definition node to convert.
@@ -197,7 +197,7 @@ class ApiHelpersMixin:
     return node
 
   def _get_mapping(self, name: str, silent: bool = False) -> Optional[Dict[str, Any]]:
-    """Queries the Semantics Manager for the target implementation of the API.
+    """Query the Semantics Manager for the target implementation of the API.
 
     Args:
         name: The fully qualified name of the API to map.
@@ -206,25 +206,25 @@ class ApiHelpersMixin:
     Returns:
         The target implementation mapping dictionary if found and verified, otherwise None.
     """
-    lookup = self.semantics.get_definition(name)  # type: ignore
+    lookup = self.semantics.get_definition(name)
     if not lookup:
       is_known_source_prefix = False
       root = name.split(".")[0]
-      if root == self.source_fw or (self.context.alias_map and root in self.context.alias_map):  # type: ignore
+      if root == self.source_fw or (self.context.alias_map and root in self.context.alias_map):
         is_known_source_prefix = True
 
-      if self.strict_mode and is_known_source_prefix and not silent:  # type: ignore
-        self._report_failure(f"API '{name}' not found in semantics.")  # type: ignore
+      if self.strict_mode and is_known_source_prefix and not silent:
+        self._report_failure(f"API '{name}' not found in semantics.")
       return None
 
     abstract_id, details = lookup
 
-    if not self.semantics.is_verified(abstract_id):  # type: ignore
+    if not self.semantics.is_verified(abstract_id):
       if not silent:
-        self._report_failure(f"Skipped '{name}': Marked unsafe by verification report.")  # type: ignore
+        self._report_failure(f"Skipped '{name}': Marked unsafe by verification report.")
       return None
 
-    target_impl = self.semantics.resolve_variant(abstract_id, self.target_fw)  # type: ignore
+    target_impl = self.semantics.resolve_variant(abstract_id, self.target_fw)
 
     if target_impl:
       get_tracer().log_match(
@@ -233,15 +233,15 @@ class ApiHelpersMixin:
         abstract_op=abstract_id,
       )
     else:
-      if self.strict_mode and not silent:  # type: ignore
+      if self.strict_mode and not silent:
         origins = getattr(self.semantics, "_key_origins", {})
         tier = origins.get(abstract_id)
-        if tier in ("neural", "neural_ops") and self.target_fw in ("numpy", "jax"):
-          self._report_failure(
+        if tier in ("neural", "neural_ops") and self.target_fw in ("NumPy", "jax"):
+          self._report_failure(  # pragma: no cover
             f"Cannot map neural network abstraction '{name}' directly to pure math backend '{self.target_fw}'. Use a framework like Flax or Keras."
-          )  # type: ignore
+          )
         else:
-          self._report_failure(f"No mapping available for '{name}' -> '{self.target_fw}'")  # type: ignore
+          self._report_failure(f"No mapping available for '{name}' -> '{self.target_fw}'")
       return None
 
     if isinstance(target_impl, dict):
@@ -249,7 +249,7 @@ class ApiHelpersMixin:
     return None
 
   def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
-    """Injects required imports defined in the variant.
+    """Inject required imports defined in the variant.
 
     Args:
         variant: The target variant dictionary containing import requirements.
@@ -273,10 +273,10 @@ class ApiHelpersMixin:
             stmt = f"import {mod}"
 
       if stmt:  # pragma: no branch
-        self.context.hook_context.inject_preamble(stmt)  # type: ignore
+        self.context.hook_context.inject_preamble(stmt)
 
   def _is_framework_base(self, name: str) -> bool:
-    """Checks if a class name corresponds to any known framework Module base.
+    """Check if a class name corresponds to any known framework Module base.
 
     Args:
         name: The name of the class to check.
@@ -289,7 +289,7 @@ class ApiHelpersMixin:
 
     if getattr(self, "_known_module_bases", None) is None:
       self._known_module_bases = set()
-      for _, config in self.semantics.framework_configs.items():  # type: ignore
+      for _, config in self.semantics.framework_configs.items():
         traits = config.get("traits")
         if traits:
           base = traits.get("module_base") if isinstance(traits, dict) else getattr(traits, "module_base", None)
@@ -304,7 +304,7 @@ class ApiHelpersMixin:
     return False
 
   def check_version_constraints(self, min_v: Optional[str], max_v: Optional[str]) -> Optional[str]:
-    """Checks if target version requirements are met.
+    """Check if target version requirements are met.
 
     Args:
         min_v: The minimum required version string, if any.
@@ -318,13 +318,13 @@ class ApiHelpersMixin:
 
     # Try Getting Version
     current = None
-    fw_conf = self.semantics.get_framework_config(self.target_fw)  # type: ignore
+    fw_conf = self.semantics.get_framework_config(self.target_fw)
     if fw_conf and "version" in fw_conf:
       current = fw_conf["version"]
     else:
       import importlib.metadata
 
-      pkg = self.target_fw  # type: ignore
+      pkg = self.target_fw
       if pkg == "flax_nnx":
         pkg = "flax"
       try:
@@ -336,7 +336,7 @@ class ApiHelpersMixin:
       return None
 
     def parse_v(v_str: Any) -> Any:
-      """Parses a version string into a tuple of integers.
+      """Parse a version string into a tuple of integers.
 
       Args:
           v_str: The version string (e.g., '1.2.3') or version-like object to parse.
@@ -356,11 +356,11 @@ class ApiHelpersMixin:
 
     if min_v:
       if curr_tuple < parse_v(min_v):
-        return f"Target {self.target_fw}@{current} is older than required {min_v}"  # type: ignore
+        return f"Target {self.target_fw}@{current} is older than required {min_v}"
 
     if max_v:
       if curr_tuple >= parse_v(max_v):
-        return f"Target {self.target_fw}@{current} exceeds max supported {max_v}"  # type: ignore
+        return f"Target {self.target_fw}@{current} exceeds max supported {max_v}"
 
     return None
 
@@ -370,7 +370,7 @@ class ApiHelpersMixin:
     arg_name: str,
     annotation: Optional[str],
   ) -> cst.FunctionDef:
-    """Injects a new argument after 'self' (or at start).
+    """Inject a new argument after 'self' (or at start).
 
     Args:
         node: The function definition node to modify.

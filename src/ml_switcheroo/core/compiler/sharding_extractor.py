@@ -12,10 +12,10 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalEdge, PartitionS
 
 
 class ShardingExtractionPass:
-  """Extracts inline sharding constraints and updates node metadata."""
+  """Extract inline sharding constraints and updates node metadata."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to extract sharding constraints.
+    """Mutate graph to extract sharding constraints.
 
     This method identifies any nodes representing sharding constraints in the
     logical graph, extracts their PartitionSpec parameters, associates that
@@ -92,7 +92,7 @@ class ShardingExtractionPass:
     return graph
 
   def _parse_partition_spec(self, code: str) -> Optional[PartitionSpec]:
-    """Extracts tuple from PartitionSpec string via AST.
+    """Extract tuple from PartitionSpec string via AST.
 
     Args:
         code (str): The string representing the partition specification code

@@ -28,7 +28,7 @@ DEFAULT_TEST_TEMPLATES = {
 
 
 def get_template(manager: Any, framework: str) -> Dict[str, str]:
-  """Retrieves the code generation template for a specific framework.
+  """Retrieve the code generation template for a specific framework.
 
   Priority:
   1. SemanticsManager lookup (loaded from snapshots).
@@ -50,14 +50,14 @@ def get_template(manager: Any, framework: str) -> Dict[str, str]:
     except Exception:
       pass
 
-  if tmpl:
+  if tmpl:  # pragma: no branch
     return tmpl
 
   return DEFAULT_TEST_TEMPLATES.get(framework, {})
 
 
 def is_static_arg(arg_info: Dict[str, Any]) -> bool:
-  """Determines if an argument should be marked static for JIT compilation.
+  """Determine if an argument should be marked static for JIT compilation.
 
   Heuristic checks for primitive types (int, bool, str) or specific names
   common to axis/dimension arguments.

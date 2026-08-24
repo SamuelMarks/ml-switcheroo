@@ -1,4 +1,13 @@
-"""HTML Visualizer Backend."""
+"""HTML Visualizer Backend.
+
+This module provides the `HtmlBackend` for rendering a `LogicalGraph` into a static
+HTML/CSS Grid representation. It generates visual block diagrams of the model's
+architecture.
+
+Note: This compiler target generates static diagrams. It is completely independent
+of the 'Time-Travel' WASM interactive demo, which is a separate Sphinx documentation
+extension (`ml_switcheroo.sphinx_ext`) and not an artifact produced by this backend.
+"""
 
 from typing import Any, Dict, Optional, List
 from ml_switcheroo.core.compiler.backend import CompilerBackend
@@ -7,7 +16,7 @@ from ml_switcheroo.core.html.nodes import SvgArrow, GridBox, HtmlDocument
 
 
 class HtmlBackend(CompilerBackend):
-  """Orchestrates the conversion of Logical Graphs to the HTML visual DSL."""
+  """Orchestrate the conversion of Logical Graphs to the HTML visual DSL."""
 
   # Layout Constants
   ROW_HEIGHT = 80
@@ -23,7 +32,7 @@ class HtmlBackend(CompilerBackend):
     pass
 
   def compile(self, graph: LogicalGraph) -> str:
-    """Compiles the graph into an HTML string document.
+    """Compile the graph into an HTML string document.
 
     Args:
         graph: The logical graph.
@@ -90,7 +99,7 @@ class HtmlBackend(CompilerBackend):
     return kind.capitalize()
 
   def _create_arrow(self, start_row: int, end_row: int, arrow_type: str = "seq") -> SvgArrow:
-    """Factory for SvgArrows based on row distance.
+    """Create for SvgArrows based on row distance.
 
     Args:
         start_row: The starting row index.
@@ -145,7 +154,7 @@ class HtmlBackend(CompilerBackend):
     return SvgArrow(x1=0, y1=0, x2=0, y2=0)
 
   def _layout_graph(self, graph: LogicalGraph) -> List[GridBox]:
-    """Calculates grid positions for nodes.
+    """Calculate grid positions for nodes.
 
     Args:
         graph: The logical graph.

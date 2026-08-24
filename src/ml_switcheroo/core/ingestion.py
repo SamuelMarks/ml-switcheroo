@@ -27,7 +27,7 @@ def ingest_code(
   source_adapter: Optional[FrameworkAdapter],
   tracer: Any,
 ) -> cst.Module:
-  """Parses input code handles non-python sources via adapters.
+  """Parse input code handles non-python sources via adapters.
 
   Supports:
   1. Adapter-specific parsers (e.g. LaTeX).

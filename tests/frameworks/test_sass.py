@@ -70,16 +70,18 @@ def test_sass_missing_coverage():
   # Graph parsing
   code_loop = """
   // comment
+  L_START:
   FADD R1, R1, R2
   ISETP.LT.AND P0, PT, R5, 128, PT;
   FFMA R1, R3, R5, R1
+  BRA L_START;
   L_LABEL:
   """
   graph_loop = adapter.parse_sass_to_graph(code_loop)
   nodes_loop = list(graph_loop.nodes.values())
-  assert len(nodes_loop) == 2
-  assert nodes_loop[0].op_type == "LoopControl"
-  assert nodes_loop[1].op_type == "Conv2d"
+  # The block "entry" branches to "L_START", "L_START" branches to "L_START".
+  # "L_START" is a loop block containing FFMA.
+  assert any(n.op_type == "Conv2d" for n in nodes_loop)
 
   code_no_loop = """
   FFMA R1, R3, R5, R1

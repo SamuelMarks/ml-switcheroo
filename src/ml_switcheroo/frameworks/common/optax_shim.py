@@ -19,4 +19,4 @@ except Exception:
 
 
 class OptaxScanner:
-  """Helper to inspect Optax APIs for the discovery system."""
+  """Support to inspect Optax APIs for the discovery system."""

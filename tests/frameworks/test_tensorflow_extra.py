@@ -84,11 +84,14 @@ def test_tensorflow_convert_logic(monkeypatch):
   mock_tf = MagicMock()
 
   class DummyTensor:
+    """Docstring."""
+
     pass
 
   mock_tf.Tensor = DummyTensor
 
   def fake_convert(x):
+    """Docstring."""
     if type(x).__name__ not in ("list", "ndarray"):
       raise ValueError("Unsupported type")
     return DummyTensor()

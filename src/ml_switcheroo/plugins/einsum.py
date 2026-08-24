@@ -19,7 +19,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Creates a CST attribute chain from a dotted string string.
+  """Create a CST attribute chain from a dotted string string.
 
   Args:
       name_str: Dotted path (e.g. 'jax.numpy.einsum').
@@ -36,7 +36,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 def _is_string(node: cst.CSTNode) -> bool:
-  """Checks if a node is a string literal (Simple or Concatenated).
+  """Check if a node is a string literal (Simple or Concatenated).
 
   Args:
       node: The CST node to check.
@@ -49,7 +49,7 @@ def _is_string(node: cst.CSTNode) -> bool:
 
 @register_hook("einsum_normalizer")
 def normalize_einsum(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Plugin Hook: Rotates arguments to place the equation string first and renames function.
+  """Plugin Transform Rotates arguments to place the equation string first and renames function.
 
   Triggers:
       Operations mapping to `Einsum` with `requires_plugin: "einsum_normalizer"`.

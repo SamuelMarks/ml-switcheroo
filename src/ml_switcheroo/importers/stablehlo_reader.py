@@ -18,10 +18,10 @@ from ml_switcheroo.utils.console import log_error, log_info
 
 
 class StableHloSpecImporter:
-  """Parses StableHLO Markdown specification files."""
+  """Parse StableHLO Markdown specification files."""
 
   def parse_file(self, target_file: Path) -> Dict[str, Any]:
-    """Parses `spec.md` from the StableHLO repository.
+    """Parse `spec.md` from the StableHLO repository.
 
     Args:
         target_file: Path to the markdown file.
@@ -144,7 +144,7 @@ class StableHloSpecImporter:
     }
 
   def _normalize_op_name(self, name: str) -> str:
-    """Converts 'abs' -> 'Abs', 'log_plus_one' -> 'LogPlusOne'.
+    """Convert 'abs' -> 'Abs', 'log_plus_one' -> 'LogPlusOne'.
 
     StableHLO uses snake_case. ODL uses PascalCase for Abstract IDs.
 

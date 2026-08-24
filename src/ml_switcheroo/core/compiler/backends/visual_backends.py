@@ -34,7 +34,7 @@ from ml_switcheroo.core.latex.nodes import (
 
 
 class TikzBackend(CompilerBackend):
-  """Orchestrates the conversion of a LogicalGraph to TikZ source code.
+  """Orchestrate the conversion of a LogicalGraph to TikZ source code.
 
   Verified to use Rank-Based Layout.
   """
@@ -232,7 +232,7 @@ class TikzBackend(CompilerBackend):
 
 
 class LatexBackend(CompilerBackend):
-  """Transforms Logical Graphs into MIDL LaTeX format.
+  """Transform Logical Graphs into MIDL LaTeX format.
 
   Generates structured Machine Intelligence Definition Language (MIDL) LaTeX documents
   from a logical graph.

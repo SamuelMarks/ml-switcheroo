@@ -4,7 +4,7 @@ from typing import Dict
 
 
 def get_torch_tiered_examples() -> Dict[str, str]:
-  """Provides code snippets for "Wizard" or "Demo" usage."""
+  """Provide code snippets for "Wizard" or "Demo" usage."""
   return {
     "tier1_math": """import torch
 

@@ -16,7 +16,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Creates a CST attribute chain from a string string.
+  """Create a CST attribute chain from a string string.
 
   Args:
       name_str: The dotted path (e.g., 'contextlib.nullcontext').
@@ -34,7 +34,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("context_to_function_wrap")
 def transform_context_manager(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Plugin Hook: Transforms valid Source context managers into JAX-compatible shims.
+  """Plugin Transform Transforms valid Source context managers into JAX-compatible shims.
 
   **Triggers**
 

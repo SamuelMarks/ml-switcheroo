@@ -34,6 +34,8 @@ def test_convert_operand_to_py_brackets():
   synth = RdnaSynthesizer(None)
 
   class DummyOp(RdnaOperand):
+    """Docstring."""
+
     def __str__(self):
       """Test function."""
       return "v[1:2]"
@@ -47,6 +49,8 @@ def test_convert_operand_to_py_fallback():
   synth = RdnaSynthesizer(None)
 
   class DummyOp(RdnaOperand):
+    """Docstring."""
+
     def __str__(self):
       """Test function."""
       return "some-weird-str!"

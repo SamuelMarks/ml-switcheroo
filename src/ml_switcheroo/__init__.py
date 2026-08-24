@@ -50,7 +50,7 @@ def convert(
   plugin_settings: Optional[Dict[str, Any]] = None,
   semantics: Optional[SemanticsManager] = None,
 ) -> str:
-  """Transpiles a string of Python code from one framework to another.
+  """Transpile a string of Python code from one framework to another.
 
   This is a high-level convenience wrapper around the `ASTEngine`. For file-based
   conversions or batch processing, consider using `ml_switcheroo.cli` or using

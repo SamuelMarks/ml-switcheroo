@@ -35,9 +35,11 @@ class MockRewriter:
     self._handle_variant_imports = MagicMock()
 
   def _create_name_node(self, api_str):
+    """Docstring."""
     return cst.Name(api_str)
 
   def _is_module_alias(self, node):
+    """Docstring."""
     return False
 
 

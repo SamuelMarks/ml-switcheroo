@@ -23,7 +23,7 @@ from ml_switcheroo.plugins.utils import create_dotted_name, is_framework_module_
 
 @register_hook("pack_shape_args")
 def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Hook: Packs trailing positional arguments into a shape tuple.
+  """Transform Packs trailing positional arguments into a shape tuple.
 
   Logic:
   1.  Resolve Target API via "Reshape" or "View". Abort if missing.

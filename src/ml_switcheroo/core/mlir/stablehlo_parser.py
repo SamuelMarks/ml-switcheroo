@@ -9,7 +9,7 @@ from ml_switcheroo.core.mlir.cst import ModuleNode
 
 
 class StableHloParser:
-  """Parses StableHLO textual representation."""
+  """Parse StableHLO textual representation."""
 
   def __init__(self, text: str):
     """Initialize the StableHLO parser.
@@ -20,7 +20,7 @@ class StableHloParser:
     self.parser = MlirParser(text)
 
   def parse(self) -> ModuleNode:
-    """Parses the text into an MLIR CST ModuleNode.
+    """Parse the text into an MLIR CST ModuleNode.
 
     Returns:
         ModuleNode: The root node of the parsed CST.

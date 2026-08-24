@@ -19,7 +19,7 @@ _EXCLUDED_MODULES = {"base", "__init__", "common", "optax_shim", "loader"}
 
 
 def _auto_register_adapters() -> None:
-  """Scans the current package for modules and imports them.
+  """Scan the current package for modules and imports them.
 
   Importing the module triggers the @register_framework decorator defined
   within the adapter implementation, populating the global registry.

@@ -70,7 +70,7 @@ class ParameterDef(BaseModel):
   )
   dtype: Optional[str] = Field(
     None,
-    description="Required numpy-style dtype for tensor inputs (e.g. 'int64', 'bool', 'float32').",
+    description="Required NumPy-style dtype for tensor inputs (e.g. 'int64', 'bool', 'float32').",
   )
 
   # --- Feature: Symbolic Dimensions (Limitation #3 Implementation) ---
@@ -92,7 +92,6 @@ class ParameterDef(BaseModel):
 
 class Rule(BaseModel):
   """Declarative rule for conditional logic within a variant or plugin.
-
 
   Evaluated at runtime to dynamically switch APIs.
   """

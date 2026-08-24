@@ -18,7 +18,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 @register_hook("batch_norm_unwrap")
 def transform_batch_norm(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Hook: Wraps BatchNorm calls to handle functional state returns.
+  """Transform Wraps BatchNorm calls to handle functional state returns.
 
   Transformation:
       Input:  `self.bn1(x)`

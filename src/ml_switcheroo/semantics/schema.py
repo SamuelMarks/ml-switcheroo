@@ -20,13 +20,13 @@ from ml_switcheroo.core.dsl import (
 
 
 class PluginTraits(BaseModel):
-  """Defines capability flags for a framework to guide plugin logic."""
+  """Define capability flags for a framework to guide plugin logic."""
 
   model_config = ConfigDict(extra="allow")
 
   has_numpy_compatible_arrays: bool = Field(
     False,
-    description="If True, supports .astype(), numpy-style padding, and array properties.",
+    description="If True, supports .astype(), NumPy-style padding, and array properties.",
   )
   requires_explicit_rng: bool = Field(
     False,
@@ -54,7 +54,7 @@ class PluginTraits(BaseModel):
 
 
 class StructuralTraits(BaseModel):
-  """Defines structural patterns for a framework to guide generic rewriters."""
+  """Define structural patterns for a framework to guide generic rewriters."""
 
   model_config = ConfigDict(extra="allow")
 
@@ -65,7 +65,7 @@ class StructuralTraits(BaseModel):
     description="Set of method names recognized as model inference entry points.",
   )
   functional_execution_method: Optional[str] = Field(
-    default="apply",
+    default=None,
     description="Method name used for functional execution (e.g. 'apply'). Rewriter unwraps this pattern.",
   )
   requires_super_init: bool = Field(default=False, description="If True, injects super().__init__() in constructors.")

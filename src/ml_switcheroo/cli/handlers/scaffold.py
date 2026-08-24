@@ -9,7 +9,7 @@ from ml_switcheroo.discovery.consensus import ConsensusEngine
 
 
 def handle_scaffold(args: Namespace) -> None:
-  """Handles the 'scaffold' CLI command.
+  """Handle the 'scaffold' CLI command.
 
   This function orchestrates the process of scaffolding API mappings for a specified
   framework. It initializes the ConsensusEngine, performs ingestion, clusters the discovered

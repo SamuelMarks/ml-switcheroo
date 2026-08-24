@@ -21,7 +21,7 @@ class MlirNode(ABC):
 
 @dataclass
 class TriviaNode(MlirNode):
-  """Represents non-semantic tokens (whitespace, comments)."""
+  """Represent non-semantic tokens (whitespace, comments)."""
 
   content: str
   kind: str = "whitespace"
@@ -33,7 +33,7 @@ class TriviaNode(MlirNode):
 
 @dataclass
 class ValueNode(MlirNode):
-  """Represents an SSA Value identifier (e.g. %0)."""
+  """Represent an SSA Value identifier (e.g. %0)."""
 
   name: str
   leading_trivia: List[TriviaNode] = field(default_factory=list)
@@ -52,7 +52,7 @@ class ValueNode(MlirNode):
 
 @dataclass
 class TypeNode(MlirNode):
-  """Represents a type annotation."""
+  """Represent a type annotation."""
 
   body: str
   leading_trivia: List[TriviaNode] = field(default_factory=list)
@@ -69,8 +69,7 @@ class TypeNode(MlirNode):
 
 @dataclass
 class AttributeNode(MlirNode):
-  """Represents a named attribute.
-
+  """Represent a named attribute.
 
   Value can be a string literal or a list of string literals (e.g. for bases).
   """
@@ -104,7 +103,7 @@ class AttributeNode(MlirNode):
 
 @dataclass
 class BlockNode(MlirNode):
-  """Represents a Basic Block within a Region."""
+  """Represent a Basic Block within a Region."""
 
   label: str
   operations: List["OperationNode"] = field(default_factory=list)
@@ -113,7 +112,7 @@ class BlockNode(MlirNode):
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Formats the block including label, arguments, and operations."""
+    """Format the block including label, arguments, and operations."""
     out = []
     for t in self.leading_trivia:
       out.append(t.to_text())
@@ -145,14 +144,14 @@ class BlockNode(MlirNode):
 
 @dataclass
 class RegionNode(MlirNode):
-  """Represents a Region containing Blocks."""
+  """Represent a Region containing Blocks."""
 
   blocks: List[BlockNode] = field(default_factory=list)
   leading_trivia: List[TriviaNode] = field(default_factory=list)
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Formats the region enclosed in braces."""
+    """Format the region enclosed in braces."""
     out = [t.to_text() for t in self.leading_trivia]
     out.append("{")
     for b in self.blocks:
@@ -165,7 +164,7 @@ class RegionNode(MlirNode):
 
 @dataclass
 class OperationNode(MlirNode):
-  """Represents a specific MLIR Operation."""
+  """Represent a specific MLIR Operation."""
 
   name: str
   results: List[ValueNode] = field(default_factory=list)
@@ -178,7 +177,7 @@ class OperationNode(MlirNode):
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Formats the operation string following MLIR syntax rules."""
+    """Format the operation string following MLIR syntax rules."""
     parts = []
 
     # 1. Leading Trivia
@@ -258,7 +257,7 @@ class StableHloConstantOp(OperationNode):
   """Specialized node for stablehlo.constant preserving dialect trivia."""
 
   def to_text(self) -> str:
-    """Formats constant operation without brace encapsulation for attributes."""
+    """Format constant operation without brace encapsulation for attributes."""
     parts = []
 
     for t in self.leading_trivia:

@@ -1,4 +1,4 @@
-"""Numpy Framework Adapter.
+"""NumPy Framework Adapter.
 
 This module provides the implementation definitions for the NumPy API.
 It maps abstract operations for Math and Extras to ``numpy.*`` functions
@@ -24,9 +24,9 @@ try:
 
   _np_mod = _np
   np = _np
-except Exception:
-  _np_mod = None
-  np = None
+except Exception:  # pragma: no cover
+  _np_mod = None  # pragma: no cover
+  np = None  # pragma: no cover
 
 
 @register_framework("numpy")
@@ -39,13 +39,13 @@ class NumpyAdapter:
   3.  **IO**: Save/Load operations.
   """
 
-  display_name: str = "NumPy"
+  display_name: str = "numpy"
   inherits_from: Optional[str] = None
   ui_priority: int = 20
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Returns import tuple.
+    """Return import tuple.
 
     Returns:
         Tuple[str, str]: ("numpy", "np").
@@ -93,7 +93,7 @@ class NumpyAdapter:
     return ""
 
   def get_to_numpy_code(self) -> str:
-    """Returns identity code for NumPy arrays.
+    """Return identity code for NumPy arrays.
 
     Returns:
         str: Code string.
@@ -103,7 +103,7 @@ class NumpyAdapter:
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """NumPy supports Arrays (Math) and Extras (IO).
+    """The NumPy framework supports Arrays (Math) and Extras (IO).
 
     It does NOT support Neural layers structurally.
 
@@ -115,7 +115,7 @@ class NumpyAdapter:
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """Returns list of magic args.
+    """Return list of magic args.
 
     Returns:
         List[str]: Empty.
@@ -125,7 +125,7 @@ class NumpyAdapter:
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """Returns default structural traits (no class rewriting).
+    """Return default structural traits (no class rewriting).
 
     Returns:
         StructuralTraits: Traits.
@@ -162,7 +162,7 @@ class NumpyAdapter:
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Returns seed methods.
+    """Return seed methods.
 
     Returns:
         List[str]: Methods list.
@@ -171,7 +171,7 @@ class NumpyAdapter:
     return ["seed"]
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """Returns CPU syntax ignoring device requests (NumPy is CPU-only).
+    """Return CPU syntax ignoring device requests (NumPy is CPU-only).
 
     Args:
         device_type: Device.
@@ -184,7 +184,7 @@ class NumpyAdapter:
     return "'cpu'"
 
   def get_device_check_syntax(self) -> str:
-    """NumPy does not support GPUs.
+    """Return False because NumPy does not support GPUs.
 
     Returns:
         str: "False".
@@ -206,7 +206,7 @@ class NumpyAdapter:
     return "pass"
 
   def get_serialization_imports(self) -> List[str]:
-    """Returns imports for IO.
+    """Return imports for IO.
 
     Returns:
         List[str]: Imports.
@@ -215,7 +215,7 @@ class NumpyAdapter:
     return ["import numpy as np"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Returns np.save/load syntax.
+    """Return np.save/load syntax.
 
     Args:
         op: 'save' or 'load'.
@@ -233,7 +233,7 @@ class NumpyAdapter:
     return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """Returns imports required for weight conversion.
+    """Return imports required for weight conversion.
 
     Returns:
         List[str]: Import statements.
@@ -242,7 +242,7 @@ class NumpyAdapter:
     return ["import numpy as np"]
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """Loads .npz files into a dictionary.
+    """Load .npz files into a dictionary.
 
     Args:
         path_var: Variable name or path to the file.
@@ -266,7 +266,7 @@ class NumpyAdapter:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Returns expression to convert tensor to numpy.
+    """Return expression to convert tensor to numpy.
 
     Args:
         tensor_var: Variable name of the tensor.
@@ -278,7 +278,7 @@ class NumpyAdapter:
     return f"{tensor_var}"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Saves dictionary to compressed .npz.
+    """Save dictionary to compressed .npz.
 
     Args:
         state_var: Variable name of the state dict.
@@ -300,7 +300,7 @@ class NumpyAdapter:
     pass
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """Generates NumPy documentation URL.
+    """Generate NumPy documentation URL.
 
     Args:
         api_name: API Path.
@@ -312,13 +312,13 @@ class NumpyAdapter:
     return f"https://numpy.org/doc/stable/reference/generated/{api_name}.html"
 
   def convert(self, data: Any) -> Any:
-    """Attempts to convert input data to a NumPy array.
+    """Attempt to convert input data to a NumPy array.
 
     Args:
         data (Any): Input.
 
     Returns:
-        Any: Numpy array or original.
+        Any: NumPy array or original.
 
     """
     if isinstance(data, (list, tuple)):
@@ -343,7 +343,7 @@ class NumpyAdapter:
     return data
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Returns NumPy idiomatic examples.
+    """Return NumPy idiomatic examples.
 
     Returns:
         Dict[str, str]: Examples.

@@ -15,7 +15,7 @@ from ml_switcheroo.sphinx_ext.types import HierarchyMap
 
 
 def scan_registry() -> Tuple[HierarchyMap, str, str]:
-  """Scans registered adapters to build hierarchy, examples, and tier metadata.
+  """Scan registered adapters to build hierarchy, examples, and tier metadata.
 
   Returns:
       Tuple[HierarchyMap, str, str]:

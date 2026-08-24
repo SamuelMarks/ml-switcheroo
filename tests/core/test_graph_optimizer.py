@@ -1,79 +1,187 @@
-"""Test suite for the Graph Optimizer module."""
+"""Test module."""
 
-import pytest
+from ml_switcheroo.core.graph import LogicalNode, LogicalEdge, LogicalGraph
 from ml_switcheroo.core.graph_optimizer import GraphOptimizer
-from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.core.dsl import PatternDef
 
 
-@pytest.fixture
-def patterns():
-  """Provides a mock patterns for testing."""
-  return [
-    PatternDef(name="CBR", sequence=["Conv2d", "BatchNorm", "ReLU"], replace_with="FusedCBR"),
-    PatternDef(name="NormAct", sequence=["LayerNorm", "ReLU"], replace_with="FusedNormAct"),
-  ]
-
-
-@pytest.fixture
-def graph():
-  """Provides a mock graph for testing."""
+def build_test_graph():
+  """Test element."""
+  # Input -> Conv2d -> BatchNorm -> ReLU -> Output
   g = LogicalGraph()
   g.nodes = [
     LogicalNode("in", "Input"),
-    LogicalNode("c1", "Conv2d", {"k": "3"}),
-    LogicalNode("b1", "BatchNorm", {"eps": "1e-5"}),
-    LogicalNode("r1", "ReLU", {}),
-    LogicalNode("l1", "LayerNorm", {"d": "64"}),
-    LogicalNode("r2", "ReLU", {}),
+    LogicalNode("conv", "Conv2d", {"arg_0": "3", "arg_1": "16"}),
+    LogicalNode("bn", "BatchNorm", {"eps": "1e-5"}),
+    LogicalNode("relu", "ReLU"),
     LogicalNode("out", "Output"),
   ]
-  g.edges = [
-    LogicalEdge("in", "c1"),
-    LogicalEdge("c1", "b1"),
-    LogicalEdge("b1", "r1"),
-    LogicalEdge("r1", "l1"),
-    LogicalEdge("l1", "r2"),
-    LogicalEdge("r2", "out"),
-  ]
+  g.edges = [LogicalEdge("in", "conv"), LogicalEdge("conv", "bn"), LogicalEdge("bn", "relu"), LogicalEdge("relu", "out")]
   return g
 
 
-def test_pattern_match_and_replace(graph, patterns):
-  """Verifies the behavior of pattern match and replace."""
-  optimizer = GraphOptimizer(patterns)
-  new_graph = optimizer.optimize(graph)
-  assert len(new_graph.nodes) == 4
-  node_ids = {n.id for n in new_graph.nodes}
+def test_graph_optimizer_no_patterns():
+  """Test element."""
+  g = build_test_graph()
+  opt = GraphOptimizer([])
+  res = opt.optimize(g)
+  # The original graph object is returned directly
+  assert res is g
+
+
+def test_graph_optimizer_single_pattern():
+  """Test element."""
+  g = build_test_graph()
+  patterns = [
+    PatternDef(name="CBR", sequence=["Conv2d", "BatchNorm", "ReLU"], replace_with="Conv2dBNReLU", description="test")
+  ]
+  opt = GraphOptimizer(patterns)
+  res = opt.optimize(g)
+
+  node_ids = {n.id: n for n in res.nodes}
+  assert "fused_conv" in node_ids
+  assert node_ids["fused_conv"].kind == "Conv2dBNReLU"
+  assert "conv" not in node_ids
+  assert "bn" not in node_ids
+  assert "relu" not in node_ids
   assert "in" in node_ids
   assert "out" in node_ids
-  assert "fused_c1" in node_ids
-  assert "fused_l1" in node_ids
-  cbr = next((n for n in new_graph.nodes if n.id == "fused_c1"))
-  assert cbr.kind == "FusedCBR"
-  assert cbr.metadata["k"] == "3"
-  assert cbr.metadata["eps"] == "1e-5"
-  edges = new_graph.edges
-  assert len(edges) == 3
-  assert edges[0].source == "in" and edges[0].target == "fused_c1"
-  assert edges[1].source == "fused_c1" and edges[1].target == "fused_l1"
-  assert edges[2].source == "fused_l1" and edges[2].target == "out"
+
+  edges = [(e.source, e.target) for e in res.edges]
+  assert ("in", "fused_conv") in edges
+  assert ("fused_conv", "out") in edges
+  assert len(edges) == 2
+
+  # Metadata merging
+  fused_meta = node_ids["fused_conv"].metadata
+  assert fused_meta["arg_0"] == "3"
+  assert fused_meta["eps"] == "1e-5"
 
 
-def test_no_match(graph):
-  """Verifies the behavior of no match."""
-  opt = GraphOptimizer([])
-  res = opt.optimize(graph)
-  assert len(res.nodes) == len(graph.nodes)
-
-
-def test_partial_sequence_no_match():
-  """Verifies the behavior of partial sequence no match."""
-  pat = [PatternDef(name="CB", sequence=["Conv2d", "BatchNorm"], replace_with="Fused")]
-  g = LogicalGraph()
-  g.nodes = [LogicalNode("c", "Conv2d"), LogicalNode("r", "ReLU")]
-  g.edges = [LogicalEdge("c", "r")]
-  opt = GraphOptimizer(pat)
+def test_graph_optimizer_no_match():
+  """Test element."""
+  g = build_test_graph()
+  patterns = [PatternDef(name="LinearReLU", sequence=["Linear", "ReLU"], replace_with="LinearReLU", description="test")]
+  opt = GraphOptimizer(patterns)
   res = opt.optimize(g)
-  assert len(res.nodes) == 2
-  assert res.nodes[0].kind == "Conv2d"
+
+  assert len(res.nodes) == 5
+  assert len(res.edges) == 4
+
+
+def test_graph_optimizer_multiple_patterns():
+  """Test element."""
+  # Input -> Linear -> ReLU -> Linear -> Output
+  g = LogicalGraph()
+  g.nodes = [
+    LogicalNode("in", "Input"),
+    LogicalNode("l1", "Linear"),
+    LogicalNode("r1", "ReLU"),
+    LogicalNode("l2", "Linear"),
+    LogicalNode("out", "Output"),
+  ]
+  g.edges = [LogicalEdge("in", "l1"), LogicalEdge("l1", "r1"), LogicalEdge("r1", "l2"), LogicalEdge("l2", "out")]
+
+  patterns = [PatternDef(name="LinearReLU", sequence=["Linear", "ReLU"], replace_with="LinearReLU", description="test")]
+  opt = GraphOptimizer(patterns)
+  res = opt.optimize(g)
+
+  node_ids = {n.id: n for n in res.nodes}
+  assert "fused_l1" in node_ids
+  assert "l2" in node_ids
+
+  edges = [(e.source, e.target) for e in res.edges]
+  assert ("in", "fused_l1") in edges
+  assert ("fused_l1", "l2") in edges
+  assert ("l2", "out") in edges
+
+
+def test_match_sequence_fail_empty_seq():
+  """Test element."""
+  opt = GraphOptimizer([])
+  n = LogicalNode("x", "X")
+  assert opt._match_sequence(n, [], {}, {}, set()) is None
+
+
+def test_match_sequence_fail_first_node():
+  """Test element."""
+  opt = GraphOptimizer([])
+  n = LogicalNode("x", "X")
+  assert opt._match_sequence(n, ["Y", "Z"], {}, {}, set()) is None
+
+
+def test_match_sequence_fail_missing_target():
+  """Test element."""
+  opt = GraphOptimizer([])
+  n = LogicalNode("x", "X")
+  node_map = {"x": n, "y": LogicalNode("y", "Y")}
+  # No out edge from x to y
+  out_edges = {"x": []}
+  assert opt._match_sequence(n, ["X", "Y"], node_map, out_edges, set()) is None
+
+
+def test_match_sequence_fail_already_processed():
+  """Test element."""
+  opt = GraphOptimizer([])
+  n = LogicalNode("x", "X")
+  y = LogicalNode("y", "Y")
+  node_map = {"x": n, "y": y}
+  out_edges = {"x": ["y"]}
+  assert opt._match_sequence(n, ["X", "Y"], node_map, out_edges, {"y"}) is None
+
+
+def test_match_sequence_fail_wrong_kind():
+  """Test element."""
+  opt = GraphOptimizer([])
+  n = LogicalNode("x", "X")
+  y = LogicalNode("y", "Z")  # Wrong kind
+  node_map = {"x": n, "y": y}
+  out_edges = {"x": ["y"]}
+  assert opt._match_sequence(n, ["X", "Y"], node_map, out_edges, set()) is None
+
+
+def test_optimizer_branching_edge_drops():
+  """Test element."""
+  # Check that edges internal to fusion block drop
+  # And check cross-fusion links drop if internal
+  g = LogicalGraph()
+  g.nodes = [LogicalNode("A", "OpA"), LogicalNode("B", "OpB"), LogicalNode("C", "OpC")]
+  # A -> B -> C
+  # A -> C (bypass edge, originates from internal part)
+  g.edges = [LogicalEdge("A", "B"), LogicalEdge("B", "C"), LogicalEdge("A", "C")]
+
+  p = PatternDef(name="AB", sequence=["OpA", "OpB"], replace_with="OpAB", description="")
+  opt = GraphOptimizer([p])
+
+  res = opt.optimize(g)
+
+  edges = [(e.source, e.target) for e in res.edges]
+  # fused_A represents A+B. A was head, B was tail.
+  # The A->B edge is internal.
+  # The B->C edge is (fused_A.tail) -> C, so it becomes fused_A -> C
+  # The A->C edge is (fused_A.head) -> C, which is internal non-tail, so it drops
+
+  assert ("fused_A", "C") in edges
+  assert ("A", "C") not in edges
+  assert ("fused_A", "B") not in edges
+  assert len(edges) == 1
+
+
+def test_optimizer_double_fusion_link():
+  """Test element."""
+  g = LogicalGraph()
+  g.nodes = [LogicalNode("A1", "A"), LogicalNode("B1", "B"), LogicalNode("A2", "A"), LogicalNode("B2", "B")]
+  g.edges = [
+    LogicalEdge("A1", "B1"),
+    LogicalEdge("B1", "A2"),
+    LogicalEdge("A2", "B2"),
+    LogicalEdge("A1", "B2"),  # A1 to B2 is internal to both, should drop
+  ]
+  p = PatternDef(name="AB", sequence=["A", "B"], replace_with="AB", description="")
+  opt = GraphOptimizer([p])
+  res = opt.optimize(g)
+
+  edges = [(e.source, e.target) for e in res.edges]
+  # B1 (tail of fused_A1) -> A2 (head of fused_A2) -> fused_A1 -> fused_A2
+  assert ("fused_A1", "fused_A2") in edges
+  assert len(edges) == 1

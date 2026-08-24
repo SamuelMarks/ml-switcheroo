@@ -117,7 +117,7 @@ def test_calculate_unique_variants_success(monkeypatch, capsys):
 
   mock_module = type(sys)("ml_switcheroo.semantics.manager")
   mock_module.SemanticsManager = MockManager
-  sys.modules["ml_switcheroo.semantics.manager"] = mock_module
+  monkeypatch.setitem(sys.modules, "ml_switcheroo.semantics.manager", mock_module)
   monkeypatch.setenv("CI", "false")
 
   build_docs.calculate_unique_variants()
@@ -137,7 +137,7 @@ def test_calculate_unique_variants_ci_fail(monkeypatch, capsys):
 
   mock_module = type(sys)("ml_switcheroo.semantics.manager")
   mock_module.SemanticsManager = MockManager
-  sys.modules["ml_switcheroo.semantics.manager"] = mock_module
+  monkeypatch.setitem(sys.modules, "ml_switcheroo.semantics.manager", mock_module)
   monkeypatch.setenv("CI", "true")
 
   with pytest.raises(SystemExit):

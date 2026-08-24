@@ -19,7 +19,7 @@ def apply_strict_guards(
   details: Dict[str, Any],
   target_impl: Dict[str, Any],
 ) -> List[cst.Arg]:
-  """Wraps arguments with rank assertion helper calls if required by strict mode.
+  """Wrap arguments with rank assertion helper calls if required by strict mode.
 
   Args:
       rewriter (Any): The CST rewriter instance containing context.

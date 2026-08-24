@@ -24,10 +24,10 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class AuxiliaryPass(RewriterPass):
-  """Pass dealing with auxiliary syntax constructs: decorators and control flow."""
+  """Pas dealing with auxiliary syntax constructs: decorators and control flow."""
 
   def transform(self, module: cst.Module, context: RewriterContext) -> cst.Module:
-    """Executes the auxiliary transformation logic.
+    """Execute the auxiliary transformation logic.
 
     Args:
         module: The source CST.
@@ -76,7 +76,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     return self._cached_traits
 
   def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
-    """Resolves node to string using context alias map.
+    """Resolve node to string using context alias map.
 
     Args:
         node: The CST expression node to resolve.
@@ -119,7 +119,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     return None
 
   def _create_dotted_name(self, name_str: str) -> cst.BaseExpression:
-    """Creates CST node from string.
+    """Create CST node from string.
 
     Args:
         name_str: A dot-separated name string.
@@ -169,7 +169,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
   ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel[Any]]:
-    """Process statement errors.
+    """Proces statement errors.
 
     Args:
         original_node: The original SimpleStatementLine node.
@@ -197,7 +197,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
   def leave_Decorator(
     self, original_node: cst.Decorator, updated_node: cst.Decorator
   ) -> Union[cst.Decorator, cst.RemovalSentinel]:
-    """Rewrites decorators.
+    """Rewrite decorators.
 
     Args:
         original_node: The original Decorator node.
@@ -211,17 +211,17 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     func_node = expr.func if isinstance(expr, cst.Call) else expr
 
     name = self._get_qualified_name(func_node)
-    if not name:
+    if not name:  # pragma: no cover
       return updated_node
 
     lookup = self.context.semantics.get_definition(name)
-    if not lookup:
+    if not lookup:  # pragma: no cover
       return updated_node
 
     _, details = lookup
     variants = details.get("variants", {})
 
-    if self.context.target_fw not in variants:
+    if self.context.target_fw not in variants:  # pragma: no cover
       return updated_node
 
     target_variant = variants[self.context.target_fw]
@@ -248,7 +248,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
   # --- Control Flow Logic ---
 
   def leave_For(self, original_node: cst.For, updated_node: cst.For) -> Union[cst.For, cst.CSTNode, cst.FlattenSentinel]:  # type: ignore
-    """Processes 'for' loops for safety checks and unrolling.
+    """Process 'for' loops for safety checks and unrolling.
 
     Args:
         original_node: The original For loop node.

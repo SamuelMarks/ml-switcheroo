@@ -30,7 +30,7 @@ class MlirBackend(CompilerBackend):
     self.semantics = semantics
 
   def compile(self, graph: LogicalGraph) -> str:
-    """Compiles the LogicalGraph into an MLIR string representation.
+    """Compile the LogicalGraph into an MLIR string representation.
 
     It emits a simple `module` structure with a single block, mapping each
     logical node to an `sw.op` operation. Inputs are generated as

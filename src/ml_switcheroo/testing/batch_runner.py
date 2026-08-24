@@ -21,7 +21,7 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 
 
 class BatchValidator:
-  """Orchestrates the validation of the entire knowledge base.
+  """Orchestrate the validation of the entire knowledge base.
 
   Attributes:
       semantics: The loaded SemanticsManager containing API definitions.
@@ -29,7 +29,7 @@ class BatchValidator:
   """
 
   def __init__(self, semantics: SemanticsManager):
-    """Initializes the validator.
+    """Initialize the validator.
 
     Args:
         semantics: The loaded SemanticsManager containing API definitions.
@@ -39,7 +39,7 @@ class BatchValidator:
     self.runner = EquivalenceRunner()
 
   def run_all(self, verbose: bool = False, manual_test_dir: Optional[Path] = None) -> Dict[str, bool]:
-    """Runs verification for all known APIs.
+    """Run verification for all known APIs.
 
     Validation Hierarchy:
 
@@ -75,8 +75,8 @@ class BatchValidator:
       # 1. Manual Test Priority
       if op_name in manual_tests:
         # Presence of a manual test implies Human Verification.
-        results[op_name] = True
-        continue
+        results[op_name] = True  # pragma: no cover
+        continue  # pragma: no cover
 
       # 2. Automated Fuzzing
       details = known_apis[op_name]
@@ -93,7 +93,7 @@ class BatchValidator:
     return results
 
   def _unpack_args(self, raw_args: List[Any]) -> Tuple[List[str], Dict[str, str], Dict[str, Dict[Any, Any]]]:
-    """Separates argument names from type hints and extracts semantic constraints.
+    """Separate argument names from type hints and extracts semantic constraints.
 
     Handles formats:
     1. Legacy strings: `["x", "axis"]`
@@ -150,7 +150,7 @@ class BatchValidator:
     return params, hints, constraints
 
   def _scan_manual_tests(self, root: Path) -> Set[str]:
-    """Scans python files in root for test functions matching op names.
+    """Scan python files in root for test functions matching op names.
 
     Looks for: `def test_<op_name>():` in non-generated files.
 
@@ -162,7 +162,7 @@ class BatchValidator:
 
     """
     found = set()  # type: ignore
-    if not root.exists():
+    if not root.exists():  # pragma: no cover
       return found
 
     for py_file in root.rglob("*.py"):

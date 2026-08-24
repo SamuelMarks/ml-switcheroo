@@ -20,14 +20,14 @@ from ml_switcheroo.core.compiler.ir import LogicalNode
 
 
 class PythonSnippetEmitter:
-  """Generates isolated Python statements from LogicalNodes.
+  """Generate isolated Python statements from LogicalNodes.
 
   Adapts generation logic based on the target framework to ensure
   idiomatic code (e.g., injecting `rngs` for Flax, `nn.` prefix for Torch).
   """
 
   def __init__(self, framework: str = "torch") -> None:
-    """Initializes the snippet emitter.
+    """Initialize the snippet emitter.
 
     Args:
         framework: The target framework key (e.g., 'torch', 'jax', 'flax_nnx').
@@ -36,7 +36,7 @@ class PythonSnippetEmitter:
     self.framework = framework
 
   def emit_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
-    """Generates the initialization statement for a stateful layer.
+    """Generate the initialization statement for a stateful layer.
 
     Args:
         node: The logical node describing the layer.
@@ -70,7 +70,7 @@ class PythonSnippetEmitter:
     input_vars: List[str],
     output_var: str,
   ) -> cst.SimpleStatementLine:
-    """Generates the execution call statement (Assignment).
+    """Generate the execution call statement (Assignment).
 
     Args:
         node: The logical node.
@@ -95,7 +95,7 @@ class PythonSnippetEmitter:
     )
 
   def emit_expression(self, node: LogicalNode, input_vars: List[str]) -> cst.BaseExpression:
-    """Generates the function call expression (without assignment).
+    """Generate the function call expression (without assignment).
 
     Args:
         node: The logical node.

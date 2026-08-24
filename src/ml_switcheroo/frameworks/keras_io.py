@@ -1,4 +1,4 @@
-"""Keras IO Mixin and serialization helpers.
+"""Kera IO Mixin and serialization helpers.
 
 This module provides the `KerasIOMixin` class, which implements helper methods
 for Keras-specific serialization, checkpoint handling, and weight migrations.
@@ -19,7 +19,7 @@ class KerasIOMixin:
   """
 
   def get_serialization_imports(self) -> List[str]:
-    """Returns Python import statements required for Keras serialization operations.
+    """Return Python import statements required for Keras serialization operations.
 
     Returns:
         List[str]: A list of Python import statements needed to serialize or
@@ -28,7 +28,7 @@ class KerasIOMixin:
     return ["import keras"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Generates Keras-specific syntax for model save and load operations.
+    """Generate Keras-specific syntax for model save and load operations.
 
     Args:
         op (str): The operation to perform, either "save" or "load".
@@ -47,7 +47,7 @@ class KerasIOMixin:
     return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """Returns Python imports required for Keras weight migration and conversion scripts.
+    """Return Python imports required for Keras weight migration and conversion scripts.
 
     Returns:
         List[str]: A list of import statements necessary for executing weight
@@ -56,7 +56,7 @@ class KerasIOMixin:
     return ["import keras", "import numpy as np", "import h5py"]
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """Generates Keras-specific Python code to load checkpoint weights into a dictionary.
+    """Generate Keras-specific Python code to load checkpoint weights into a dictionary.
 
     The generated code attempts to load the checkpoint as a compiled/uncompiled Keras
     model first. If that fails, it falls back to raw HDF5 weight extraction via h5py.
@@ -93,7 +93,7 @@ class KerasIOMixin:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Generates the expression for converting a Keras tensor to a NumPy array.
+    """Generate the expression for converting a Keras tensor to a NumPy array.
 
     Args:
         tensor_var (str): The name of the Keras/TensorFlow tensor variable.
@@ -105,7 +105,7 @@ class KerasIOMixin:
     return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Generates Python code to save state dictionary weights to a Keras-compatible HDF5 file.
+    """Generate Python code to save state dictionary weights to a Keras-compatible HDF5 file.
 
     Args:
         state_var (str): The name of the variable holding the dictionary of weights

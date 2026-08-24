@@ -21,7 +21,7 @@ from ml_switcheroo.utils.console import log_error
 
 
 def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: int = 50) -> int:
-  """Generates an LLM prompt for defining new operations.
+  """Generate an LLM prompt for defining new operations.
 
   Supports both single API paths (e.g. ``torch.nn.Linear``) and
   module wildcards (e.g. ``jax.numpy.*``).
@@ -125,7 +125,7 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
 
 
 def _extract_metadata(obj: Any) -> Dict[str, Any]:
-  """Extracts signature and docstring from a live object.
+  """Extract signature and docstring from a live object.
 
   Args:
       obj: The Python object to inspect.
@@ -153,7 +153,7 @@ def _extract_metadata(obj: Any) -> Dict[str, Any]:
 
 
 def _inspect_live_object(api_path: str) -> Dict[str, Any]:
-  """Locates and inspects a python object by path.
+  """Locate and inspects a python object by path.
 
   Args:
       api_path: Dotted string path (e.g. 'torch.nn.Linear').
@@ -176,7 +176,7 @@ def _inspect_live_object(api_path: str) -> Dict[str, Any]:
 
 
 def _build_header(schema_json: str) -> str:
-  """Returns the static prompt header with Context and Examples.
+  """Return the static prompt header with Context and Examples.
 
   Args:
       schema_json (str): The JSON schema string for OperationDef.
@@ -215,8 +215,8 @@ variants:
     api: "keras.ops.abs" # Keras 3 backend-agnostic ops
   tensorflow:
     api: "tf.abs"
-  numpy:
-    api: "numpy.abs"
+  NumPy:
+    api: "NumPy.abs"
   mlx:
     api: "mlx.core.abs"
 ```
@@ -224,7 +224,7 @@ variants:
 
 
 def _build_target_block(api_path: str, info: Dict[str, Any]) -> str:
-  """Returns the descriptive block for a single operation.
+  """Return the descriptive block for a single operation.
 
   Args:
       api_path (str): The full dotted path to the API object.
@@ -249,7 +249,7 @@ Docstring:
 
 
 def _build_footer(source_fw: str) -> str:
-  """Returns the final instructions.
+  """Return the final instructions.
 
   Args:
       source_fw (str): The name of the source framework (e.g. 'torch', 'jax').

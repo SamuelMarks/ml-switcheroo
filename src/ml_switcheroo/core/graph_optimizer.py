@@ -28,7 +28,7 @@ from ml_switcheroo.core.dsl import PatternDef
 
 
 class GraphOptimizer:
-  """Optimizes a LogicalGraph by fusing subgraphs based on defined patterns."""
+  """Optimize a LogicalGraph by fusing subgraphs based on defined patterns."""
 
   def __init__(self, patterns: List[PatternDef]):
     """Initialize with a list of fusion patterns.
@@ -40,7 +40,7 @@ class GraphOptimizer:
     self.patterns = patterns
 
   def optimize(self, graph: LogicalGraph) -> LogicalGraph:
-    """Runs the fusion pass on the graph.
+    """Run the fusion pass on the graph.
 
     Args:
         graph: The input `LogicalGraph`.
@@ -59,7 +59,7 @@ class GraphOptimizer:
     return fused
 
   def _apply_fusion_pass(self, graph: LogicalGraph) -> LogicalGraph:
-    """Executes a single pass of greedy pattern matching.
+    """Execute a single pass of greedy pattern matching.
 
     Args:
         graph: The input graph.
@@ -193,8 +193,7 @@ class GraphOptimizer:
     out_edges: Dict[str, List[str]],
     processed_ids: Set[str],
   ) -> Optional[List[str]]:
-    """Checks if a sequence of Op Kinds exists starting from `start_node`.
-
+    """Check if a sequence of Op Kinds exists starting from `start_node`.
 
     Enforces linear chain constraint (A->B->C).
 

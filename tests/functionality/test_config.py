@@ -28,6 +28,8 @@ def test_config_ui_priority_invalid(monkeypatch):
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
+    """Docstring."""
+
     inherits_from = None
     ui_priority = "not_an_int"
 
@@ -55,6 +57,8 @@ def test_config_ui_priority_has_adapter_but_no_ui_priority(monkeypatch):
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
+    """Docstring."""
+
     inherits_from = None
     # no ui_priority
 
@@ -70,6 +74,8 @@ def test_config_ui_priority_has_adapter_with_value_error(monkeypatch):
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
+    """Docstring."""
+
     inherits_from = None
     ui_priority = "not_an_int"
 
@@ -85,6 +91,8 @@ def test_config_ui_priority_has_adapter_with_type_error(monkeypatch):
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
+    """Docstring."""
+
     inherits_from = None
     ui_priority = [1]  # list cannot be passed to int() natively, raises TypeError
 

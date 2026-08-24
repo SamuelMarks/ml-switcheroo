@@ -14,7 +14,7 @@ from ml_switcheroo.plugins.utils import create_dotted_name
 
 @register_hook("auto_fsdp_wrapper")
 def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.BaseExpression]:
-  """Wraps module instantiations in distributed sharding primitives based on target framework.
+  """Wrap module instantiations in distributed sharding primitives based on target framework.
 
   If the target is PyTorch, it wraps the layer instantiation in FSDP.
   If the target is JAX/Flax, it uses pjit mappings.

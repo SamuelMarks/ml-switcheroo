@@ -25,7 +25,7 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class PurityScanner(cst.CSTTransformer):
-  """Scans CST for impurities and wraps violations in EscapeHatch markers.
+  """Scan CST for impurities and wraps violations in EscapeHatch markers.
 
   Attributes:
       _current_violations (List[str]): Accumulator of errors for the current statement.
@@ -54,7 +54,7 @@ class PurityScanner(cst.CSTTransformer):
   _DEFAULT_RNG_METHODS: Set[str] = {"seed"}
 
   def __init__(self, semantics: Any = None, source_fw: Optional[str] = None):
-    """Initializes the PurityScanner.
+    """Initialize the PurityScanner.
 
     Args:
         semantics: SemanticsManager instance to load dynamic configs.
@@ -83,7 +83,7 @@ class PurityScanner(cst.CSTTransformer):
           self._dynamic_impurity_methods.update(traits.impurity_methods)
 
   def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> Optional[bool]:
-    """Enters a statement line. Resets violation tracking.
+    """Enter a statement line. Resets violation tracking.
 
     Args:
         node: The statement line node.
@@ -100,8 +100,7 @@ class PurityScanner(cst.CSTTransformer):
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
   ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel[Any]]:
-    """Exits a statement line.
-
+    """Exit a statement line.
 
     If violations were found within this statement, wraps it in the EscapeHatch.
 
@@ -124,7 +123,7 @@ class PurityScanner(cst.CSTTransformer):
     return updated_node
 
   def visit_Global(self, node: cst.Global) -> Optional[bool]:
-    """Detects usage of the 'global' keyword.
+    """Detect usage of the 'global' keyword.
 
     Args:
         node: The global statement node.
@@ -138,7 +137,7 @@ class PurityScanner(cst.CSTTransformer):
     return False
 
   def visit_Nonlocal(self, node: cst.Nonlocal) -> Optional[bool]:
-    """Detects usage of the 'nonlocal' keyword.
+    """Detect usage of the 'nonlocal' keyword.
 
     Args:
         node: The nonlocal statement node.
@@ -152,7 +151,7 @@ class PurityScanner(cst.CSTTransformer):
     return False
 
   def visit_Call(self, node: cst.Call) -> Optional[bool]:
-    """Inspects calls for I/O functions, list mutations, or global RNG seeding.
+    """Inspect calls for I/O functions, list mutations, or global RNG seeding.
 
     Args:
         node: The call expression node.

@@ -15,7 +15,7 @@ from ml_switcheroo.core.latex.nodes import (
 
 
 class LatexBackend(CompilerBackend):
-  """Transforms Logical Graphs into MIDL LaTeX format."""
+  """Transform Logical Graphs into MIDL LaTeX format."""
 
   def __init__(self, semantics: Optional[Any] = None) -> None:
     """Execute implementation detail.
@@ -26,7 +26,7 @@ class LatexBackend(CompilerBackend):
     pass
 
   def compile(self, graph: LogicalGraph) -> str:
-    """Compiles graph to LaTeX.
+    """Compile graph to LaTeX.
 
     Args:
         graph: Graph to compile.
@@ -39,7 +39,7 @@ class LatexBackend(CompilerBackend):
     return self._wrap_document(container.to_latex())
 
   def _wrap_document(self, content: str) -> str:
-    """Wraps content in Latex standalone document.
+    """Wrap content in Latex standalone document.
 
     Args:
         content: Latex content.
@@ -66,7 +66,7 @@ class LatexBackend(CompilerBackend):
     return comment_block + header + content + footer
 
   def _transcode_graph(self, graph: LogicalGraph, name: str) -> ModelContainer:
-    """Transforms LogicalNodes to LatexNode hierarchy.
+    """Transform LogicalNodes to LatexNode hierarchy.
 
     Args:
         graph: Graph.

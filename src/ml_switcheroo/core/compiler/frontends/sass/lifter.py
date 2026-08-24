@@ -34,7 +34,7 @@ from ml_switcheroo.core.compiler.frontends.semantic_parser import (
 
 
 class SassLifter:
-  """Reconstructs a LogicalGraph from a sequence of SASS AST nodes."""
+  """Reconstruct a LogicalGraph from a sequence of SASS AST nodes."""
 
   def __init__(self) -> None:
     """Initialize SassLifter.
@@ -44,7 +44,7 @@ class SassLifter:
     self.comment_parser = SemanticCommentParser()
 
   def lift(self, nodes: List[SassNode]) -> LogicalGraph:
-    """Parses a list of SASS nodes to build a LogicalGraph.
+    """Parse a list of SASS nodes to build a LogicalGraph.
 
     Captures instructions within BEGIN/END blocks to feed into the Analyzer.
     Captures orphan instructions into individual functional nodes (1:1 mapping).
@@ -66,7 +66,7 @@ class SassLifter:
     current_instructions: List[SassInstruction] = []
 
     def commit_node(node_id: str, kind: str, meta: Any = None) -> None:
-      """Helper function to commit a LogicalNode and its transition edge to the graph.
+      """Support function to commit a LogicalNode and its transition edge to the graph.
 
       Checks if the node has already been seen to prevent duplication, instantiates
       a LogicalNode with the provided id, kind, and metadata, appends it to the graph,

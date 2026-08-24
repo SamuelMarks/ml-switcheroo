@@ -10,7 +10,7 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 class PythonFrontend:
-  """Ingests Python source code into a LogicalGraph.
+  """Ingest Python source code into a LogicalGraph.
 
   This class acts as the frontend interface for converting Python source code
   into a Logical Graph intermediate representation (IR) by utilizing a LibCST
@@ -18,7 +18,7 @@ class PythonFrontend:
   """
 
   def __init__(self, code: str) -> None:
-    """Initializes the PythonFrontend with the target source code.
+    """Initialize the PythonFrontend with the target source code.
 
     Args:
         code: The Python source code string to be parsed and analyzed.
@@ -26,7 +26,7 @@ class PythonFrontend:
     self.code = code
 
   def parse_to_graph(self) -> LogicalGraph:
-    """Parses the Python source code and extracts the computation graph.
+    """Parse the Python source code and extracts the computation graph.
 
     This method parses the stored Python code into a concrete syntax tree (CST)
     and uses the GraphExtractor to visit the tree nodes, building up the

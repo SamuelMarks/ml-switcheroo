@@ -12,7 +12,7 @@ import numpy as np
 
 
 def generate_scalar_int(constraints: Dict[str, Any]) -> int:
-  """Generates a random integer within constrained bounds.
+  """Generate a random integer within constrained bounds.
 
   Args:
       constraints (Dict[str, Any]): Dictionary containing optional 'min' and 'max'.
@@ -28,7 +28,7 @@ def generate_scalar_int(constraints: Dict[str, Any]) -> int:
 
 
 def generate_scalar_float(constraints: Dict[str, Any]) -> float:
-  """Generates a random float within constrained bounds.
+  """Generate a random float within constrained bounds.
 
   Args:
       constraints (Dict[str, Any]): Dictionary containing optional 'min' and 'max'.
@@ -50,7 +50,7 @@ def generate_scalar_float(constraints: Dict[str, Any]) -> float:
 
 
 def generate_array(type_lbl: str, shape: Tuple[int, ...], constraints: Dict[str, Any]) -> Any:
-  """Generates a random NumPy array bounded by constraints.
+  """Generate a random NumPy array bounded by constraints.
 
   Args:
       type_lbl (str): General type category ('float', 'int', 'bool').
@@ -124,7 +124,7 @@ def generate_array(type_lbl: str, shape: Tuple[int, ...], constraints: Dict[str,
 
 
 def get_random_shape(seed_shape: Optional[Tuple[int, ...]] = None) -> Tuple[int, ...]:
-  """Selects a random rank (1-4) and random dimensions (2-5).
+  """Select a random rank (1-4) and random dimensions (2-5).
 
   Args:
       seed_shape (Optional[Tuple[int, ...]]): Optional fixed shape to return.
@@ -141,7 +141,7 @@ def get_random_shape(seed_shape: Optional[Tuple[int, ...]] = None) -> Tuple[int,
 
 
 def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tuple[int, ...]:
-  """Derives a shape that is broadcast-compatible with the base_shape.
+  """Derive a shape that is broadcast-compatible with the base_shape.
 
   For each dimension, there is a probability it becomes 1 (broadcasting dimension).
   The 'salt' ensures arguments don't all degenerate to 1s in the same way, creating
@@ -177,7 +177,7 @@ def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tupl
 
 
 def generate_fake_callable(constraints: Dict[str, Any] = None) -> Any:  # type: ignore
-  """Generates a dummy function (identity) for functional ops.
+  """Generate a dummy function (identity) for functional ops.
 
   Args:
       constraints (Dict[str, Any], optional): Optional constraints which are ignored

@@ -27,14 +27,14 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 try:
   import jax
-except Exception:
-  jax: Any = None  # type: ignore
+except Exception:  # pragma: no cover
+  jax: Any = None  # type: ignore  # pragma: no cover
 try:
   import flax.nnx
 
   flax_nnx = flax.nnx  # pragma: no cover
-except Exception:
-  flax_nnx = None  # type: ignore
+except Exception:  # pragma: no cover
+  flax_nnx = None  # type: ignore  # pragma: no cover
 
 
 @register_framework("flax_nnx")
@@ -52,7 +52,7 @@ class FlaxNNXAdapter(JAXStackMixin):
   ui_priority: int = 15
 
   def __init__(self) -> None:
-    """Initializes the adapter.
+    """Initialize the adapter.
 
     - Chooses LIVE mode if `flax.nnx` can be imported.
     - Otherwise, falls back to GHOST mode and loads an API snapshot.
@@ -85,8 +85,7 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Returns the base package and alias to guide import injection.
-
+    """Return the base package and alias to guide import injection.
 
     Used by ImportFixer to map `flax.nnx` root usage to `nnx` alias.
 
@@ -98,7 +97,7 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
-    """Declares self namespaces with tiers and recommended aliases.
+    """Declare self namespaces with tiers and recommended aliases.
 
     Returns:
         Dict[str, ImportConfig]: Mapping of package paths to configs.
@@ -123,7 +122,7 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def harness_imports(self) -> List[str]:
-    """Imports for Harness generation."""
+    """Import for Harness generation."""
     return ["from flax import nnx"]
 
   def get_harness_init_code(self) -> str:
@@ -151,7 +150,7 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """Returns list of argument names that represent injected state ('rngs')."""
+    """Return list of argument names that represent injected state ('rngs')."""
     return ["rngs"]
 
   @property
@@ -218,13 +217,13 @@ class FlaxNNXAdapter(JAXStackMixin):
     return defs
 
   def convert(self, data: Any) -> Any:
-    """Converts generic data to framework-specific Pytree/arrays.
+    """Convert generic data to framework-specific Pytree/arrays.
 
     Contains self-contained logic to ensure safe extraction by the Harness Generator which
     does not preserve external dependencies like 'JaxCoreAdapter' class references.
 
     Args:
-        data (Any): Input data (numpy/list).
+        data (Any): Input data (NumPy/list).
 
     Returns:
         Converted data tailored to JAX/Flax ecosystem.
@@ -242,7 +241,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Applies manual wiring and modifies the snapshot to alias 'flax.nnx.' to 'nnx.'.
+    """Apply manual wiring and modifies the snapshot to alias 'flax.nnx.' to 'nnx.'.
 
     Adds plugin wiring for key interface methods ensuring correctness during
     Ghost Mode synchronization.
@@ -268,7 +267,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     mappings.setdefault("parameters", {"requires_plugin": "torch_parameters_to_nnx"})
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Provides tier-specific example usages for documentation and tests.
+    """Provide tier-specific example usages for documentation and tests.
 
     Returns:
         Dict[str, str]: Dictionary mapping tier names to code snippets.
@@ -326,7 +325,7 @@ class Qwen3VLPatchEmbed(nnx.Module):
     }
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """Returns the official Flax documentation URL for a given API string.
+    """Return the official Flax documentation URL for a given API string.
 
     Defaults to ReadTheDocs search query for robustness with new NNX APIs.
 

@@ -30,10 +30,10 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 class LoopVarReplacer(cst.CSTTransformer):
-  """Helper visitor to replace loop variable instances with a constant integer."""
+  """Support visitor to replace loop variable instances with a constant integer."""
 
   def __init__(self, var_name: str, value: int):
-    """Initializes the replacer.
+    """Initialize the replacer.
 
     Args:
         var_name: The identifier string of the loop variable.
@@ -61,7 +61,7 @@ class LoopVarReplacer(cst.CSTTransformer):
 
 @register_hook("transform_for_loop_static")
 def unroll_static_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.FlattenSentinel[Any]]:
-  """Hook: Unrolls loops with static ranges.
+  """Transform Unrolls loops with static ranges.
 
   Triggers:
       Invoked by ``ControlFlowMixin`` via the ``transform_for_loop_static`` key.

@@ -19,7 +19,7 @@ from ml_switcheroo.core.hooks import get_hook
 def handle_pre_checks(
   rewriter: Any, original: cst.Call, updated: cst.Call, func_name: Optional[str]
 ) -> Tuple[bool, cst.CSTNode]:
-  """Executes pre-lookup checks and transformations.
+  """Execute pre-lookup checks and transformations.
 
   Args:
       rewriter: The calling transformer (duck typing: needs _get_source_traits,
@@ -131,7 +131,7 @@ def handle_pre_checks(
 
 
 def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Optional[str]) -> Optional[str]:
-  """Attempts to resolve method calls on objects to full API paths.
+  """Attempt to resolve method calls on objects to full API paths.
 
   Args:
       rewriter: The calling transformer object.

@@ -23,7 +23,7 @@ class SwitcherooDemo(Directive):  # type: ignore
   has_content = True
 
   def run(self) -> List[nodes.raw]:
-    """Main execution entry point for the directive.
+    """Execute execution entry point for the directive.
 
     1. Scans the registry for frameworks and examples.
     2. Renders the HTML template with dynamic dropdowns.

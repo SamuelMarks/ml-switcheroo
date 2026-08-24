@@ -14,11 +14,11 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaIn
 
 
 class RdnaAnalyzer:
-  """Analyzes sequences of RDNA instructions to reverse-engineer high-level parameters."""
+  """Analyze sequences of RDNA instructions to reverse-engineer high-level parameters."""
 
   @staticmethod
   def analyze_block(kind: str, instructions: List["RdnaInstruction"]) -> Dict[str, Any]:
-    """Extracts metadata from a block of instructions based on the operation kind.
+    """Extract metadata from a block of instructions based on the operation kind.
 
     Args:
         kind (str): The operation type (e.g. "Conv2d", "Linear").

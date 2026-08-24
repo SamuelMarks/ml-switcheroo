@@ -11,11 +11,11 @@ from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate, SassIn
 
 
 class SassAnalyzer:
-  """Analyzes sequences of SASS instructions to reverse-engineer high-level parameters."""
+  """Analyze sequences of SASS instructions to reverse-engineer high-level parameters."""
 
   @staticmethod
   def analyze_block(kind: str, instructions: List["SassInstruction"]) -> Dict[str, Any]:
-    """Extracts metadata from a block of instructions based on the operation kind.
+    """Extract metadata from a block of instructions based on the operation kind.
 
     Args:
         kind (str): The operation type (e.g. "Conv2d", "Linear").

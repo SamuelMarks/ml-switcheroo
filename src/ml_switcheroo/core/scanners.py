@@ -37,7 +37,7 @@ def get_full_name(node: Union[cst.Name, cst.Attribute]) -> str:
 
 
 class SimpleNameScanner(cst.CSTVisitor):
-  """Scans for the usage of a specific identifier in the code body.
+  """Scan for the usage of a specific identifier in the code body.
 
   This visitor is designed to check for the presence of variables or aliases
   (like ``jnp``, ``tf``, ``mx``) *outside* of import statements. It is used to
@@ -45,7 +45,7 @@ class SimpleNameScanner(cst.CSTVisitor):
   """
 
   def __init__(self, target_name: str) -> None:
-    """Initializes the scanner.
+    """Initialize the scanner.
 
     Args:
         target_name: The string alias to search for.
@@ -56,7 +56,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     self._in_import = False
 
   def visit_Import(self, node: cst.Import) -> None:
-    """Flags entry into an ``import ...`` statement.
+    """Flag entry into an ``import ...`` statement.
 
     Names appearing here are definitions, not usages.
 
@@ -67,7 +67,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     self._in_import = True
 
   def leave_Import(self, node: cst.Import) -> None:
-    """Flags exit from an ``import ...`` statement.
+    """Flag exit from an ``import ...`` statement.
 
     Args:
         node: The CST Import node being left.
@@ -76,7 +76,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     self._in_import = False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """Flags entry into a ``from ... import ...`` statement.
+    """Flag entry into a ``from ... import ...`` statement.
 
     Args:
         node: The CST ImportFrom node being visited.
@@ -85,7 +85,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     self._in_import = True
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """Flags exit from a ``from ... import ...`` statement.
+    """Flag exit from a ``from ... import ...`` statement.
 
     Args:
         node: The CST ImportFrom node being left.
@@ -94,7 +94,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     self._in_import = False
 
   def visit_Name(self, node: cst.Name) -> None:
-    """Checks if the visited name matches the target.
+    """Check if the visited name matches the target.
 
     If the name matches ``target_name`` and we are NOT currently inside an import
     definition, we mark ``found = True``.
@@ -122,7 +122,7 @@ class SimpleNameScanner(cst.CSTVisitor):
 
 
 class UsageScanner(cst.CSTVisitor):
-  """Scans the AST for usages of a specific framework root or its local aliases.
+  """Scan the AST for usages of a specific framework root or its local aliases.
 
   This class implements a multi-pass logic during a single traversal:
 
@@ -137,7 +137,7 @@ class UsageScanner(cst.CSTVisitor):
   """
 
   def __init__(self, source_fw: str) -> None:
-    """Initializes the UsageScanner.
+    """Initialize the UsageScanner.
 
     Args:
         source_fw: The framework string (e.g., 'torch').
@@ -152,7 +152,7 @@ class UsageScanner(cst.CSTVisitor):
     self._in_import = False
 
   def get_result(self) -> bool:
-    """Returns the scan result.
+    """Return the scan result.
 
     Returns:
         bool: True if any tracked alias was found used in the body.
@@ -161,7 +161,7 @@ class UsageScanner(cst.CSTVisitor):
     return len(self.found_usages) > 0
 
   def visit_Import(self, node: cst.Import) -> None:
-    """Catalogs names bound by ``import ...``.
+    """Catalog names bound by ``import ...``.
 
     Logic:
       - ``import torch`` -> tracks 'torch'.
@@ -198,7 +198,7 @@ class UsageScanner(cst.CSTVisitor):
     self._in_import = False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """Catalogs names bound by ``from ... import ...``.
+    """Catalog names bound by ``from ... import ...``.
 
     Logic:
       - ``from torch import nn`` -> tracks 'nn'.
@@ -236,7 +236,7 @@ class UsageScanner(cst.CSTVisitor):
     self._in_import = False
 
   def visit_Name(self, node: cst.Name) -> None:
-    """Checks if a name in the body matches one of our tracked aliases.
+    """Check if a name in the body matches one of our tracked aliases.
 
     If found, it is recorded in ``found_usages``.
 

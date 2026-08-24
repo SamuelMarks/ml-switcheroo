@@ -23,7 +23,7 @@ from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 
 def _analyze_range_iterator(node: cst.BaseExpression) -> Tuple[bool, List[cst.Arg]]:
-  """Determines if an expression is a call to `range(...)`.
+  """Determine if an expression is a call to `range(...)`.
 
   Args:
       node: The CST expression node of the iterator.
@@ -40,7 +40,7 @@ def _analyze_range_iterator(node: cst.BaseExpression) -> Tuple[bool, List[cst.Ar
 
 @register_hook("transform_for_loop")
 def transform_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.FlattenSentinel[Any]]:
-  """Plugin Hook: Transforms or Flags `for` loops for functional compliance.
+  """Plugin Transform Transforms or Flags `for` loops for functional compliance.
 
   Triggered by the `ControlFlowMixin` when visiting `For` nodes.
 

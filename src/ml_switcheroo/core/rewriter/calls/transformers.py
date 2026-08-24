@@ -9,8 +9,7 @@ from typing import List, Union
 
 
 def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
-  """Wraps an expression node with a subscript access for a specific integer index.
-
+  """Wrap an expression node with a subscript access for a specific integer index.
 
   Safe, structured alternative to string output adapters for tuple destructuring.
 
@@ -36,7 +35,7 @@ def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
 
 
 def rewrite_as_inline_lambda(lambda_str: str, args: list[cst.Arg]) -> cst.Call:
-  """Wraps arguments in an Immediately Invoked Lambda Expression (IIFE).
+  """Wrap arguments in an Immediately Invoked Lambda Expression (IIFE).
 
   Args:
       lambda_str (str): The string representation of the lambda function.
@@ -58,7 +57,7 @@ def rewrite_as_inline_lambda(lambda_str: str, args: list[cst.Arg]) -> cst.Call:
 
 
 class MacroSubstitutionTransformer(cst.CSTTransformer):
-  """Substitutes variables inside a parsed macro expression with CST nodes."""
+  """Substitute variables inside a parsed macro expression with CST nodes."""
 
   def __init__(self, arg_map: dict[str, cst.BaseExpression]):
     """Initialize the transformer with an argument map.
@@ -70,7 +69,7 @@ class MacroSubstitutionTransformer(cst.CSTTransformer):
     self.arg_map = arg_map
 
   def leave_Name(self, original_node: cst.Name, updated_node: cst.Name) -> cst.BaseExpression:
-    """Replaces Name nodes with mapped values if they match the safe macro prefix.
+    """Replace Name nodes with mapped values if they match the safe macro prefix.
 
     Args:
         original_node (cst.Name): The original un-modified name node.
@@ -88,7 +87,7 @@ class MacroSubstitutionTransformer(cst.CSTTransformer):
 
 
 def rewrite_as_macro(template: str, args_list: list[cst.Arg], std_arg_names: list[str]) -> cst.BaseExpression:
-  """Replaces an operation call with a Python expression defined in the template.
+  """Replace an operation call with a Python expression defined in the template.
 
   Arguments are substituted into the template string structurally by first parsing
   a sanitized version of the template into a Concrete Syntax Tree, and then
@@ -141,7 +140,7 @@ def rewrite_as_infix(
   op_symbol: str,
   std_args: List[str],
 ) -> Union[cst.BinaryOperation, cst.UnaryOperation]:
-  """Transforms a functional call into an infix (binary) or prefix (unary) expression.
+  """Transform a functional call into an infix (binary) or prefix (unary) expression.
 
   Args:
       _original_node (cst.Call): The original call node.

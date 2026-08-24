@@ -67,7 +67,7 @@ class KeyMapper:
         np.ndarray: The converted and transposed parameter value.
     '''
     try:
-        # Convert Torch tensors or other formats to numpy
+        # Convert Torch tensors or other formats to NumPy
         if hasattr(val, 'cpu'):
             val = val.detach().cpu().numpy()
         else:
@@ -84,7 +84,7 @@ class KeyMapper:
         # Conv2d: (O, I, H, W) -> (H, W, I, O)
         val = val.transpose((2, 3, 1, 0))
 
-    # Return as numpy array. Target frameworks (JAX, TF, etc) handle numpy inputs.
+    # Return as NumPy array. Target frameworks (JAX, TF, etc) handle NumPy inputs.
     return val
 
   @classmethod
@@ -108,7 +108,7 @@ class KeyMapper:
 
 @register_hook("checkpoint_mapper")
 def transform_checkpoint_keys(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Hook: Transforms load_state_dict calls to KeyMapper usage.
+  """Transform Transforms load_state_dict calls to KeyMapper usage.
 
   **Transformation**
   `model.load_state_dict(state, strict=True)` -> `KeyMapper.from_torch(state)`

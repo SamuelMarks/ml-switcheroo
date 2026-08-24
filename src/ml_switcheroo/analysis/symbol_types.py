@@ -11,7 +11,7 @@ class SymbolType:
   """A string representation of the type (e.g., 'Tensor')."""
 
   def __str__(self) -> str:
-    """Returns the type name.
+    """Return the type name.
 
     Returns:
         The string representation of the symbol type.
@@ -34,11 +34,11 @@ class SymbolType:
 
 @dataclass
 class TensorType(SymbolType):
-  """Represents a Tensor object from a specific framework."""
+  """Represent a Tensor object from a specific framework."""
 
   name: str = "Tensor"
   framework: str = "unknown"
-  """The framework key (e.g. "torch" or "jax") responsible for this tensor."""
+  """Execute framework key (e.g. "torch" or "jax") responsible for this tensor."""
 
   def __eq__(self, other: object) -> bool:
     """Check equality with another tensor type.
@@ -57,7 +57,7 @@ class TensorType(SymbolType):
 
 @dataclass
 class ModuleType(SymbolType):
-  """Represents an imported module or sub-module."""
+  """Represent an imported module or sub-module."""
 
   path: str
   name: str = "Module"
@@ -79,7 +79,7 @@ class ModuleType(SymbolType):
 
 @dataclass
 class UnionType(SymbolType):
-  """Represents a union of potential types resulting from control flow divergence."""
+  """Represent a union of potential types resulting from control flow divergence."""
 
   types: List[SymbolType]
   name: str = "Union"
@@ -110,7 +110,7 @@ class UnionType(SymbolType):
 
 
 class Scope:
-  """Represents a variable scope (Global, Class, or Function)."""
+  """Represent a variable scope (Global, Class, or Function)."""
 
   def __init__(self, parent: Optional["Scope"] = None, name: str = "<root>"):
     """Initialize the scope.
@@ -151,7 +151,7 @@ class Scope:
     return None
 
   def snapshot(self) -> Dict[str, SymbolType]:
-    """Returns a shallow copy of the current symbol table for branching.
+    """Return a shallow copy of the current symbol table for branching.
 
     Returns:
         A dictionary mapping symbol names to their types in the current scope.

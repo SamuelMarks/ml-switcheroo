@@ -132,6 +132,8 @@ def test_tensorflow_convert(monkeypatch):
     mock_tf = MagicMock()
 
     class DummyTensor:
+      """Docstring."""
+
       pass
 
     mock_tf.Tensor = DummyTensor
@@ -142,6 +144,8 @@ def test_tensorflow_convert(monkeypatch):
     if not hasattr(mock_tf, "Tensor"):
 
       class DummyTensor:
+        """Docstring."""
+
         pass
 
       mock_tf.Tensor = DummyTensor

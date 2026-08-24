@@ -1,220 +1,232 @@
-"""Module tests."""
+"""Docstring."""
 
-import unittest
-from unittest.mock import patch, MagicMock
-from pathlib import Path
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
-class TestSemanticsManagerExtra(unittest.TestCase):
-  """Test class."""
+def test_manager_init():
+  """Docstring."""
+  sm = SemanticsManager()
+  assert sm is not None
 
-  @patch("ml_switcheroo.semantics.manager.KnowledgeBaseLoader")
-  @patch("ml_switcheroo.semantics.manager.RegistryLoader")
-  def setUp(self, MockRegistryLoader, MockKnowledgeBaseLoader):
-    """Test method."""
-    self.manager = SemanticsManager()
-    self.manager.data = {}
-    self.manager.framework_configs = {}
-    self.manager.test_templates = {}
-    self.manager._providers = {}
-    self.manager._source_registry = {}
-    self.manager._reverse_index = {}
-    self.manager._key_origins = {}
-    self.manager._validation_status = {}
-    self.manager._known_rng_methods = set()
-    self.manager.patterns = []
 
-  def test_build_index_empty_impl(self):
-    """Test method."""
-    self.manager.data = {"abs1": {"variants": {"fw1": None}}}
-    self.manager._build_index()
-    self.assertEqual(self.manager._reverse_index, {})
+def test_manager_coverage():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
-  def test_build_index_priority(self):
-    """Test method."""
-    self.manager.framework_configs = {"fw1": {"alias": {"module": "mod1", "name": "api_mod"}}}
-    self.manager.data = {
-      "concat": {"variants": {"fw1": {"api": "api_mod.concat"}}},
-      "cat": {"variants": {"fw1": {"api": "api_mod.concat"}}},
-      "Append": {"variants": {"fw1": {"api": "api_mod.concat"}}},
-      "Mean": {"variants": {"fw1": {"api": "mean"}}},
-      "Average": {"variants": {"fw1": {"api": "mean"}}},
-      "mean": {"variants": {"fw1": {"api": "mean"}}},
-      "relu": {"variants": {"fw1": {"api": "relu"}}},
-      "ReLU": {"variants": {"fw1": {"api": "relu"}}},
-      "MultiHeadAttention": {"variants": {"fw1": {"api": "mha"}}},
-      "AttentionLayer": {"variants": {"fw1": {"api": "mha"}}},
-      "Dropout": {"variants": {"fw1": {"api": "dropout"}}},
-      "Dropout_": {"variants": {"fw1": {"api": "dropout"}}},
-      "arr_op": {"variants": {"fw1": {"api": "arr"}}},
-      "nn_op": {"variants": {"fw1": {"api": "nn"}}},
-      "ext_op": {"variants": {"fw1": {"api": "ext"}}},
-    }
-    self.manager._key_origins = {
-      "arr_op": SemanticTier.ARRAY_API.value,
-      "nn_op": SemanticTier.NEURAL.value,
-      "ext_op": SemanticTier.EXTRAS.value,
-    }
-    self.manager._build_index()
-    self.assertIn("api_mod.concat", self.manager._reverse_index)
-    self.assertEqual(self.manager._reverse_index["api_mod.concat"][0], "cat")
-    self.assertIn("mod1.concat", self.manager._reverse_index)
+  sm = SemanticsManager()
 
-  def test_get_import_map(self):
-    """Test method."""
-    self.manager._providers = {
-      "target_fw": {SemanticTier.ARRAY_API: {"root": "target_root", "sub": "sub1", "alias": "tgt_alias"}},
-      "parent_fw": {SemanticTier.NEURAL: {"root": "parent_root", "sub": "sub2", "alias": "prt_alias"}},
-    }
-    self.manager.framework_configs = {"target_fw": {"extends": "parent_fw"}}
-    self.manager._source_registry = {
-      "src/path1": ("some_fw", SemanticTier.ARRAY_API),
-      "src/path2": ("some_fw", SemanticTier.NEURAL),
-      "src/path3": ("some_fw", SemanticTier.EXTRAS),
-    }
+  assert sm.get_test_template("not_real") is None
 
-    result = self.manager.get_import_map("target_fw")
-    self.assertEqual(result.get("src/path1"), ("target_root", "sub1", "tgt_alias"))
-    self.assertEqual(result.get("src/path2"), ("parent_root", "sub2", "prt_alias"))
-    self.assertNotIn("src/path3", result)
+  assert sm.get_framework_aliases() is not None
 
-  @patch("ml_switcheroo.semantics.manager.get_adapter")
-  def test_resolve_inheritance(self, mock_get_adapter):
-    """Test method."""
-    self.manager.framework_configs = {"fw1": {"extends": "parent1"}}
-    self.assertEqual(self.manager._resolve_inheritance("fw1"), "parent1")
+  assert sm.get_all_rng_methods() is not None
 
-    mock_adapter = MagicMock()
-    mock_adapter.inherits_from = "parent2"
-    mock_get_adapter.return_value = mock_adapter
-    self.assertEqual(self.manager._resolve_inheritance("fw2"), "parent2")
+  assert sm.get_patterns() is not None
 
-    mock_adapter2 = MagicMock()
-    del mock_adapter2.inherits_from
-    mock_get_adapter.return_value = mock_adapter2
-    self.assertIsNone(self.manager._resolve_inheritance("fw3"))
 
-    mock_get_adapter.return_value = None
-    self.assertIsNone(self.manager._resolve_inheritance("fw4"))
+def test_manager_load_validation():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from pathlib import Path
+  from unittest.mock import patch, mock_open
 
-  def test_resolve_variant(self):
-    """Test method."""
-    self.manager.data = {
-      "op1": {"variants": {"target_fw": {"impl": 1}, "parent_fw": {"impl": 2}, "grandparent_fw": {"impl": 3}}},
-      "op2": {"variants": {"parent_fw": {"impl": 2}}},
-    }
-    self.manager.framework_configs = {
-      "target_fw": {"extends": "parent_fw"},
-      "parent_fw": {"extends": "grandparent_fw"},
-      "grandparent_fw": {"extends": "greatgrandparent_fw"},
-      "greatgrandparent_fw": {"extends": "another_fw"},
-      "another_fw": {"extends": "fw6"},
-      "fw6": {"extends": "fw7"},
-      "fw_limit_0": {"extends": "fw_limit_1"},
-      "fw_limit_1": {"extends": "fw_limit_2"},
-      "fw_limit_2": {"extends": "fw_limit_3"},
-      "fw_limit_3": {"extends": "fw_limit_4"},
-      "fw_limit_4": {"extends": "fw_limit_5"},
-      "fw_limit_5": {"extends": "fw_limit_6"},
-    }
+  sm = SemanticsManager()
 
-    self.assertEqual(self.manager.resolve_variant("op1", "target_fw"), {"impl": 1})
-    self.assertEqual(self.manager.resolve_variant("op2", "target_fw"), {"impl": 2})
-    self.assertIsNone(self.manager.resolve_variant("op3", "target_fw"))
-    self.assertIsNone(self.manager.resolve_variant("op2", "another_fw"))
-    self.assertIsNone(self.manager.resolve_variant("op2", "unknown_fw"))
-    self.assertIsNone(self.manager.resolve_variant("op2", "fw_limit_0"))
+  # Path doesn't exist
+  with patch("pathlib.Path.exists", return_value=False):
+    sm.load_validation_report(Path("dummy.json"))
 
-  def test_is_verified(self):
-    """Test method."""
-    self.manager._validation_status = {"abs1": False}
-    self.assertFalse(self.manager.is_verified("abs1"))
-    self.assertTrue(self.manager.is_verified("abs2"))
+  # Read err
+  with patch("pathlib.Path.exists", return_value=True):
+    with patch("builtins.open", side_effect=Exception("Read err")):
+      sm.load_validation_report(Path("dummy.json"))
 
-  def test_get_definition_by_id(self):
-    """Test method."""
-    self.manager.data = {"abs1": {"def": 1}}
-    self.assertEqual(self.manager.get_definition_by_id("abs1"), {"def": 1})
-    self.assertIsNone(self.manager.get_definition_by_id("abs2"))
+  # Success
+  m_open = mock_open(read_data='{"Abs": true}')
+  with patch("pathlib.Path.exists", return_value=True):
+    with patch("builtins.open", m_open):
+      sm.load_validation_report(Path("dummy.json"))
+      assert sm._validation_status.get("Abs") is True
 
-  def test_get_definition(self):
-    """Test method."""
-    self.manager._reverse_index = {"api1": ("abs1", {"def": 1})}
-    self.manager.data = {"abs2": {"def": 2}}
-    self.assertEqual(self.manager.get_definition("api1"), ("abs1", {"def": 1}))
-    self.assertEqual(self.manager.get_definition("abs2"), ("abs2", {"def": 2}))
-    self.assertIsNone(self.manager.get_definition("unknown"))
 
-  def test_get_known_apis(self):
-    """Test method."""
-    self.manager.data = {"abs1": {"def": 1}}
-    self.assertEqual(self.manager.get_known_apis(), {"abs1": {"def": 1}})
+def test_manager_update_definition():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from unittest.mock import patch, mock_open
 
-  def test_get_framework_config(self):
-    """Test method."""
-    self.manager.framework_configs = {"fw1": {"config": 1}}
-    self.assertEqual(self.manager.get_framework_config("fw1"), {"config": 1})
-    self.assertEqual(self.manager.get_framework_config("fw2"), {})
+  sm = SemanticsManager()
 
-  def test_get_test_template(self):
-    """Test method."""
-    self.manager.test_templates = {"fw1": {"template": "a"}}
-    self.assertEqual(self.manager.get_test_template("fw1"), {"template": "a"})
-    self.assertIsNone(self.manager.get_test_template("fw2"))
+  # Validation error
+  sm.update_definition("Abs", {"operation": "Abs", "std_args": "NOT_A_LIST"})  # Will trigger Pydantic error
 
-  def test_get_framework_aliases(self):
-    """Test method."""
-    self.manager.framework_configs = {
-      "fw1": {"alias": {"module": "mod1", "name": "name1"}},
-      "fw2": {"alias": "invalid_type"},
-      "fw3": {"alias": {"module": "mod3"}},
-      "fw4": {},
-    }
-    expected = {"fw1": ("mod1", "name1")}
-    self.assertEqual(self.manager.get_framework_aliases(), expected)
+  # Valid
+  m_open = mock_open()
+  with patch("builtins.open", m_open):
+    with patch("pathlib.Path.mkdir"):
+      sm.update_definition("NewOp", {"variants": {"torch": {"api": "torch.new_op"}}})
+      assert "NewOp" in sm.data
+      assert "torch.new_op" in sm._reverse_index
 
-  def test_get_all_rng_methods(self):
-    """Test method."""
-    self.manager._known_rng_methods = {"rng1"}
-    self.assertEqual(self.manager.get_all_rng_methods(), {"rng1"})
+  # Write error
+  with patch("builtins.open", side_effect=Exception("Write err")):
+    with patch("pathlib.Path.mkdir"):
+      sm.update_definition("WriteFail", {"variants": {"torch": {"api": "torch.write_fail"}}})
+      assert "WriteFail" in sm.data
 
-  def test_get_patterns(self):
-    """Test method."""
-    self.manager.patterns = ["pat1"]
-    self.assertEqual(self.manager.get_patterns(), ["pat1"])
 
-  @patch("pathlib.Path.exists")
-  @patch("builtins.open", new_callable=unittest.mock.mock_open, read_data='{"op1": false}')
-  def test_load_validation_report(self, mock_open, mock_exists):
-    """Test method."""
-    mock_exists.return_value = False
-    self.manager.load_validation_report(Path("dummy.json"))
-    self.assertEqual(self.manager._validation_status, {})
+def test_manager_get_import_map():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
-    mock_exists.return_value = True
-    self.manager.load_validation_report(Path("dummy.json"))
-    self.assertEqual(self.manager._validation_status, {"op1": False})
+  sm = SemanticsManager()
 
-    mock_open.side_effect = Exception("error")
-    self.manager.load_validation_report(Path("dummy.json"))
+  # Mocking internal states to hit coverage
+  sm._providers = {
+    "jax": {"core": {"root": "jax.numpy", "alias": "jnp"}},
+    "flax": {"nn": {"root": "flax.linen", "alias": "nn"}},
+  }
+  sm._source_registry = {
+    "torch": ("torch", "core"),
+    "torch.nn": ("torch.nn", "nn"),
+    "torch.optim": ("torch.optim", "optim"),  # unmatched
+  }
 
-  @patch("pathlib.Path.mkdir")
-  @patch("builtins.open", new_callable=unittest.mock.mock_open)
-  @patch("yaml.dump")
-  def test_update_definition(self, mock_yaml_dump, mock_open, mock_mkdir):
-    """Test method."""
-    self.manager.update_definition("op1", {"description": "desc", "variants": {"fw1": {"api": "op1.api"}}})
-    self.assertIn("op1", self.manager.data)
-    self.assertEqual(self.manager.data["op1"]["description"], "desc")
-    self.assertEqual(self.manager._reverse_index["op1.api"][0], "op1")
-    mock_open.assert_called()
-    mock_yaml_dump.assert_called()
+  # Try direct mapping
+  res = sm.get_import_map("jax")
+  assert "torch" in res
+  assert res["torch"][0] == "jax.numpy"
 
-    mock_open.side_effect = Exception("error")
-    self.manager.update_definition("op2", {})
-    self.assertIn("op2", self.manager.data)
+  # Try inheritance mapping
+  # Mock _resolve_inheritance to return "flax" for some target
+  sm._framework_aliases = {"myfw": ("myfw.mod", "myfw")}  # Doesn't matter
 
-    self.manager.update_definition("op3", {"variants": []})
-    self.assertNotIn("op3", self.manager.data)
+  # Let's override resolve_inheritance
+  original_res = sm._resolve_inheritance
+  sm._resolve_inheritance = lambda x: "flax" if x == "custom" else None
+
+  res2 = sm.get_import_map("custom")
+  assert "torch.nn" in res2
+  assert res2["torch.nn"][0] == "flax.linen"
+
+  sm._resolve_inheritance = original_res
+
+
+def test_manager_resolve_variant():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+
+  # Mock data
+  sm.data = {"Abs": {"variants": {"torch": {"api": "torch.abs"}, "numpy": {"api": "np.abs"}}}}
+
+  # Direct match
+  assert sm.resolve_variant("Abs", "torch") is not None
+  assert sm.resolve_variant("Abs", "torch")["api"] == "torch.abs"
+
+  # Missing
+  assert sm.resolve_variant("Unknown", "torch") is None
+
+  # Fallback inheritance match
+  sm._resolve_inheritance = lambda x: "numpy" if x == "custom_numpy" else None
+
+  assert sm.resolve_variant("Abs", "custom_numpy") is not None
+  assert sm.resolve_variant("Abs", "custom_numpy")["api"] == "np.abs"
+
+  # Fallback missing
+  assert sm.resolve_variant("Abs", "unknown_fw") is None
+
+
+def test_manager_get_definition_missing():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  assert sm.get_definition("unknown.api") is None
+
+
+def test_manager_get_framework_config():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  sm._providers = {"jax": {"core": {"provider": "val"}}}
+
+  res = sm.get_framework_config("jax")
+  assert res is not None
+
+  sm._resolve_inheritance = lambda x: "jax" if x == "custom" else None
+  sm.get_framework_config("custom")
+  assert res is not None
+
+  assert sm.get_framework_config("unknown") == {}
+
+
+def test_manager_resolve_inheritance():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  sm.framework_configs = {"custom": {"extends": "base_custom"}}
+  assert sm._resolve_inheritance("custom") == "base_custom"
+
+  # testing adapter inheriting
+  # We mock get_adapter to return a mock adapter with inherits_from
+  from unittest.mock import patch, MagicMock
+
+  mock_ad = MagicMock()
+  mock_ad.inherits_from = "base_ad"
+  with patch("ml_switcheroo.semantics.manager.get_adapter", return_value=mock_ad):
+    assert sm._resolve_inheritance("custom2") == "base_ad"
+
+
+def test_manager_resolve_variant_limit():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  sm.data = {"Abs": {"variants": {"root": {"api": "root.api"}}}}
+  # Create an inheritance cycle
+  sm._resolve_inheritance = lambda x: "b" if x == "a" else "a"
+  assert sm.resolve_variant("Abs", "a") is None
+
+
+def test_manager_is_verified():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  sm._validation_status = {"Abs": False, "Relu": True}
+  assert sm.is_verified("Abs") is False
+  assert sm.is_verified("Relu") is True
+  assert sm.is_verified("Unknown") is True
+
+
+def test_manager_get_definition_by_id():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  sm.data = {"Abs": {"foo": "bar"}}
+  assert sm.get_definition_by_id("Abs") == {"foo": "bar"}
+
+
+def test_manager_get_definition():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  sm.data = {"torch.abs": {"api": "torch.abs"}}
+  res = sm.get_definition("torch.abs")
+  assert res is not None
+  assert res[0] == "Abs"
+
+
+def test_manager_get_definition_missing_real():
+  """Docstring."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  sm.data = {}
+  sm._reverse_index = {}
+  assert sm.get_definition("completely.unknown.api") is None

@@ -12,7 +12,7 @@ import libcst as cst
 
 
 def extract_primitive_key(node: cst.BaseExpression) -> Optional[str]:
-  """Extracts a string representation of a primitive AST node for Enum key lookup.
+  """Extract a string representation of a primitive AST node for Enum key lookup.
 
   Handles simple strings strings, integers, and simple names (identifiers).
 
@@ -53,7 +53,7 @@ def convert_value_to_cst(val: Any) -> cst.BaseExpression:
     try:
       parsed = ast.literal_eval(val)
       # Avoid infinite recursion if ast.literal_eval returns the exact same string
-      if not isinstance(parsed, str) or parsed != val:
+      if not isinstance(parsed, str) or parsed != val:  # pragma: no cover
         return convert_value_to_cst(parsed)
     except (ValueError, SyntaxError):
       pass
@@ -132,7 +132,7 @@ def normalize_arguments(
   source_fw: str,
   is_module_alias_fn: Any,
 ) -> List[cst.Arg]:
-  """Pivots arguments from source implementation -> Standard -> Target implementation.
+  """Pivot arguments from source implementation -> Standard -> Target implementation.
 
   Handles renaming, reordering, and default injection.
 

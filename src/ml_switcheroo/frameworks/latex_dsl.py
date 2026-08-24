@@ -26,7 +26,7 @@ class LatexDSLAdapter:
     pass
 
   def create_parser(self, code: str) -> LatexParser:
-    """Factory for the LaTeX Parser.
+    """Create for the LaTeX Parser.
 
     Args:
         code: The string containing the LaTeX mathematical expression or DSL code to parse.
@@ -83,7 +83,7 @@ class LatexDSLAdapter:
     return ""
 
   def get_to_numpy_code(self) -> str:
-    """Get Python code snippet that converts the output back to a numpy format or string representation.
+    """Get Python code snippet that converts the output back to a NumPy format or string representation.
 
     Returns:
         str: A Python code snippet that converts the output to a string representation.

@@ -85,7 +85,7 @@ class GraphExtractor(cst.CSTVisitor):
     self._finalize_graph()
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """Detects entry into lifecycle methods.
+    """Detect entry into lifecycle methods.
 
     Identifies if we are entering initialization (`__init__`, `setup`) or forward
     methods (`forward`, `__call__`, etc.), managing scoping and initializing
@@ -111,7 +111,7 @@ class GraphExtractor(cst.CSTVisitor):
     return True
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Resets context flags upon exiting methods.
+    """Reset context flags upon exiting methods.
 
     Args:
         node: The function definition node being exited.
@@ -123,7 +123,7 @@ class GraphExtractor(cst.CSTVisitor):
       self._in_forward = False
 
   def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
-    """Handles assignment logic for both layer definition and data flow.
+    """Handle assignment logic for both layer definition and data flow.
 
     Triggers layer definition analysis when within an init block, data flow analysis
     when within a forward block, or top-level data flow analysis at module scope.
@@ -143,7 +143,7 @@ class GraphExtractor(cst.CSTVisitor):
     return True
 
   def visit_Expr(self, node: cst.Expr) -> Optional[bool]:
-    """Handles standalone expression statements (e.g. `func(x)` without assignment).
+    """Handle standalone expression statements (e.g. `func(x)` without assignment).
 
     Used for 1:1 translations where top-level expressions are valid (e.g. MLIR roundtrips).
 
@@ -160,7 +160,7 @@ class GraphExtractor(cst.CSTVisitor):
     return True
 
   def visit_Return(self, node: cst.Return) -> Optional[bool]:
-    """Handles return statements to identify Output nodes.
+    """Handle return statements to identify Output nodes.
 
     Constructs terminal LogicalEdges that connect the final output tensor(s) to
     the Output node in the DAG.
@@ -200,7 +200,7 @@ class GraphExtractor(cst.CSTVisitor):
   # --- Extraction Helpers ---
 
   def _extract_input_args(self, node: cst.FunctionDef) -> None:
-    """Registers function arguments as input sources.
+    """Register function arguments as input sources.
 
     Args:
         node: The function definition containing parameters to extract.
@@ -220,7 +220,7 @@ class GraphExtractor(cst.CSTVisitor):
       self.provenance[arg_name] = input_id
 
   def _analyze_layer_def(self, node: cst.Assign) -> None:
-    """Parses self.layer = ... lines.
+    """Parse self.layer = ... lines.
 
     Extracts sub-layer or operation instantiations, parsing positional and keyword
     arguments into LogicalNode metadata.
@@ -254,7 +254,7 @@ class GraphExtractor(cst.CSTVisitor):
     self.node_map[attr_name] = node
 
   def _analyze_data_flow(self, node: cst.Assign) -> None:
-    """Parses x = self.layer(x) logic.
+    """Parse x = self.layer(x) logic.
 
     Dispatches to call analysis or handles simple direct assignments of literals
     and names to construct implicit input nodes.
@@ -290,7 +290,7 @@ class GraphExtractor(cst.CSTVisitor):
   def _resolve_layer_or_func_name(
     self, func_node: cst.BaseExpression, context_node: Optional[cst.CSTNode] = None
   ) -> Optional[str]:
-    """Resolves identifier to node ID. Creates functional nodes on fly.
+    """Resolve identifier to node ID. Creates functional nodes on fly.
 
     Resolves callable targets (e.g. `self.conv` or global functions/modules `F.relu`)
     into identifiers within the layer registry, creating dynamic functional nodes for
@@ -342,7 +342,7 @@ class GraphExtractor(cst.CSTVisitor):
   def _analyze_call_expression(
     self, call: cst.Call, output_vars: List[str], context_node: Optional[cst.CSTNode] = None
   ) -> None:
-    """Traces edges from call inputs to the layer node.
+    """Trac edges from call inputs to the layer node.
 
     Examines call arguments to identify incoming data dependencies (edges) and maps
     assigned output variables back to this node to register provenance.
@@ -394,7 +394,7 @@ class GraphExtractor(cst.CSTVisitor):
     return None
 
   def _finalize_graph(self) -> None:
-    """Copies registry values to the graph object.
+    """Copy registry values to the graph object.
 
     Constructs the final list of LogicalNode definitions in the graph and assigns
     the resolved model class name.

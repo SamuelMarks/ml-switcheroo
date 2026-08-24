@@ -25,7 +25,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Helper to create CST attribute chain.
+  """Create a CST attribute chain.
 
   Args:
       name_str: A dot-separated string representing the name (e.g., "jnp.mean").
@@ -42,7 +42,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("loss_reduction")
 def transform_loss_reduction(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Hook: Wraps loss functions to apply reduction.
+  """Wrap loss functions to apply reduction.
 
   Trigger: Operations mapped with `requires_plugin: "loss_reduction"`.
   Target: Frameworks requiring explicit reduction (JAX, Flax).
@@ -85,7 +85,7 @@ def transform_loss_reduction(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   loss_op_id = ctx.current_op_id
 
   # Fallback heuristic if context is empty (e.g. raw test usage)
-  if not loss_op_id:
+  if loss_op_id is None:
     # Assume CrossEntropy as default test case
     loss_op_id = "CrossEntropyLoss"
 

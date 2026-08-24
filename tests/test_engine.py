@@ -419,6 +419,7 @@ def test_run_rewriter_pipeline_opt_no_plan_1(mock_ingest):
   reset_tracer()
 
   def mock_diff(*args, **kwargs):
+    """Docstring."""
     print("MOCK DIFF CALLED!")
     return []
 

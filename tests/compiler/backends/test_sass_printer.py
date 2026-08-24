@@ -65,3 +65,30 @@ def test_sass_printer_emit_multiple():
   output = printer.emit(nodes)
   expected = "    .headerflags\nL_1:\n    FADD;\n"
   assert output == expected
+
+
+def test_sass_printer_all_nodes():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.sass.printer import SassPrinter
+  from ml_switcheroo.core.compiler.frontends.sass.cst import (
+    SassLabel,
+    SassInstruction,
+    SassDirective,
+    SassComment,
+    SassRegister,
+  )
+
+  printer = SassPrinter()
+  nodes = [
+    SassLabel(name="L1"),
+    SassInstruction(opcode="MOV", operands=[SassRegister("R0")]),
+    SassDirective(name=".global", params=["main"]),
+    SassComment(text="// test"),
+    SassRegister("R0"),  # test fallback
+  ]
+  txt = printer.emit(nodes)
+  assert "L1:" in txt
+  assert "MOVR0" in txt
+  assert "..global main" in txt
+  assert "// // test" in txt
+  assert "R0" in txt

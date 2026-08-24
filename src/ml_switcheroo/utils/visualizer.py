@@ -16,7 +16,7 @@ import libcst as cst
 
 
 class MermaidGenerator(cst.CSTVisitor):
-  """Generates a Mermaid Graph TD string from a CST Node tree.
+  """Generate a Mermaid Graph TD string from a CST Node tree.
 
   It traverses the tree and emits nodes and edges formatted with specific
   branding colors.
@@ -55,7 +55,7 @@ class MermaidGenerator(cst.CSTVisitor):
     """
 
   def __init__(self) -> None:
-    """Initializes the generator with empty buffers and default structures."""
+    """Initialize the generator with empty buffers and default structures."""
     self.nodes: List[str] = []
     self.edges: List[str] = []
     self.stack: List[str] = []
@@ -63,7 +63,7 @@ class MermaidGenerator(cst.CSTVisitor):
     self._renderer = cst.Module([])
 
   def generate(self, tree: cst.CSTNode) -> str:
-    """Converts a CST Node into a Mermaid graph definition string.
+    """Convert a CST Node into a Mermaid graph definition string.
 
     Args:
         tree (cst.CSTNode): The root node of the tree to visualize.
@@ -82,7 +82,7 @@ class MermaidGenerator(cst.CSTVisitor):
     return f"graph TD\n{self.STYLES}\n" + "\n".join(self.nodes + self.edges)
 
   def _add_node(self, label: str, style_class: str = "default") -> str:
-    """Helper to register a node in the graph and link it to its parent.
+    """Support to register a node in the graph and link it to its parent.
 
     Args:
         label (str): Text display for the node.
@@ -112,7 +112,6 @@ class MermaidGenerator(cst.CSTVisitor):
   def _node_to_str(self, node: cst.CSTNode) -> str:
     """Robustly extracts a string representation of a Name, Attribute, or complex expression.
 
-
     Avoids LibCST code generation for simple cases to prevent crashes on detached nodes.
 
     Args:
@@ -138,11 +137,11 @@ class MermaidGenerator(cst.CSTVisitor):
     # Fallback to code generator for complex expressions (e.g. calls, tuples)
     try:
       return self._renderer.code_for_node(node).strip()
-    except Exception:
+    except Exception:  # pragma: no cover
       return f"<{type(node).__name__}>"
 
   def visit_Module(self, node: cst.Module) -> Optional[bool]:
-    """Visits Module root.
+    """Visit Module root.
 
     Args:
         node (cst.Module): The module node being visited.
@@ -155,7 +154,7 @@ class MermaidGenerator(cst.CSTVisitor):
     return True
 
   def leave_Module(self, node: cst.Module) -> None:
-    """Leaves Module root.
+    """Leave Module root.
 
     Args:
         node (cst.Module): The module node being left.
@@ -164,7 +163,7 @@ class MermaidGenerator(cst.CSTVisitor):
       self.stack.pop()
 
   def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
-    """Visits Class Definitions.
+    """Visit Class Definitions.
 
     Args:
         node (cst.ClassDef): The class definition node being visited.
@@ -177,7 +176,7 @@ class MermaidGenerator(cst.CSTVisitor):
     return True
 
   def leave_ClassDef(self, node: cst.ClassDef) -> None:
-    """Leaves Class Definitions.
+    """Leave Class Definitions.
 
     Args:
         node (cst.ClassDef): The class definition node being left.
@@ -186,7 +185,7 @@ class MermaidGenerator(cst.CSTVisitor):
       self.stack.pop()
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """Visits Function Definitions.
+    """Visit Function Definitions.
 
     Args:
         node (cst.FunctionDef): The function definition node being visited.
@@ -199,7 +198,7 @@ class MermaidGenerator(cst.CSTVisitor):
     return True
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Leaves Function Definitions.
+    """Leave Function Definitions.
 
     Args:
         node (cst.FunctionDef): The function definition node being left.
@@ -208,7 +207,7 @@ class MermaidGenerator(cst.CSTVisitor):
       self.stack.pop()
 
   def visit_Call(self, node: cst.Call) -> Optional[bool]:
-    """Visits Function Calls.
+    """Visit Function Calls.
 
     Args:
         node (cst.Call): The function call node being visited.
@@ -225,7 +224,7 @@ class MermaidGenerator(cst.CSTVisitor):
       else:
         # Standardize prefix "Call" to satisfy test expectations and clarity
         name = f"Call: {name}()"
-    except Exception:
+    except Exception:  # pragma: no cover
       name = "Call"
 
     uid = self._add_node(name, "callNode")
@@ -233,7 +232,7 @@ class MermaidGenerator(cst.CSTVisitor):
     return True  # Visit args
 
   def leave_Call(self, node: cst.Call) -> None:
-    """Leaves Function Calls.
+    """Leave Function Calls.
 
     Args:
         node (cst.Call): The function call node being left.
@@ -242,7 +241,7 @@ class MermaidGenerator(cst.CSTVisitor):
       self.stack.pop()
 
   def visit_Arg(self, node: cst.Arg) -> Optional[bool]:
-    """Visits Arguments inside a Call.
+    """Visit Arguments inside a Call.
 
     Args:
         node (cst.Arg): The argument node being visited.
@@ -269,7 +268,7 @@ class MermaidGenerator(cst.CSTVisitor):
         else:
           label += val_code
         is_simple = True
-      except Exception:
+      except Exception:  # pragma: no cover
         pass
 
     # Always add node and push to stack to maintain symmetry for leave_Arg
@@ -282,7 +281,7 @@ class MermaidGenerator(cst.CSTVisitor):
     return True
 
   def leave_Arg(self, node: cst.Arg) -> None:
-    """Leaves Arguments.
+    """Leave Arguments.
 
     Args:
         node (cst.Arg): The argument node being left.
@@ -291,7 +290,7 @@ class MermaidGenerator(cst.CSTVisitor):
       self.stack.pop()
 
   def visit_Import(self, node: cst.Import) -> Optional[bool]:
-    """Visits Import statements (collapsing them into single nodes).
+    """Visit Import statements (collapsing them into single nodes).
 
     Args:
         node (cst.Import): The import statement node being visited.
@@ -306,7 +305,7 @@ class MermaidGenerator(cst.CSTVisitor):
     return False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> Optional[bool]:
-    """Visits From-Import statements (collapsed).
+    """Visit From-Import statements (collapsed).
 
     Args:
         node (cst.ImportFrom): The import-from statement node being visited.
@@ -331,7 +330,7 @@ class MermaidGenerator(cst.CSTVisitor):
     return False
 
   def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
-    """Visits Assignment statements.
+    """Visit Assignment statements.
 
     Args:
         node (cst.Assign): The assignment statement node being visited.
@@ -344,7 +343,7 @@ class MermaidGenerator(cst.CSTVisitor):
     return True
 
   def leave_Assign(self, node: cst.Assign) -> None:
-    """Leaves Assignment statements.
+    """Leave Assignment statements.
 
     Args:
         node (cst.Assign): The assignment statement node being left.
@@ -353,7 +352,7 @@ class MermaidGenerator(cst.CSTVisitor):
       self.stack.pop()
 
   def visit_SimpleString(self, node: cst.SimpleString) -> Optional[bool]:
-    """Visits Strings to allow visualizing constant values directly in the graph.
+    """Visit Strings to allow visualizing constant values directly in the graph.
 
     Args:
         node (cst.SimpleString): The simple string node being visited.

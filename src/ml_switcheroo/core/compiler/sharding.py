@@ -11,7 +11,7 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalMesh, PartitionS
 
 
 class ShardingInferencePass:
-  """Analyzes a graph and injects LogicalMesh and PartitionSpec annotations.
+  """Analyze a graph and injects LogicalMesh and PartitionSpec annotations.
 
   Heuristics:
   - Linear layers with 'q_proj', 'k_proj', 'v_proj', 'gate_proj', 'up_proj' -> Column Parallel (None, "tensor").
@@ -29,7 +29,7 @@ class ShardingInferencePass:
     self.mesh = mesh or LogicalMesh(shape={"data": 1, "tensor": 1})
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates the graph by injecting sharding annotations.
+    """Mutate the graph by injecting sharding annotations.
 
     Args:
         graph: The LogicalGraph to annotate.

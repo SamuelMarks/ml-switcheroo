@@ -12,7 +12,7 @@ class BaseGeneratorMixin:
   """Base class providing common string manipulation and attribute retrieval helpers for code generation."""
 
   def _get_attr(self, op: OperationNode, key: str) -> Optional[str]:
-    """Retrieves the value of a specific attribute from an OperationNode.
+    """Retrieve the value of a specific attribute from an OperationNode.
 
     Args:
         op: The operation node to inspect.
@@ -30,7 +30,7 @@ class BaseGeneratorMixin:
     return None
 
   def _create_dotted_name(self, path: str) -> cst.BaseExpression:
-    """Creates a LibCST Name/Attribute chain from a dot-separated string.
+    """Create a LibCST Name/Attribute chain from a dot-separated string.
 
     Args:
         path: The python path string (e.g. "torch.nn.Conv2d").

@@ -1,4 +1,4 @@
-"""Utilities for updating the project README.
+"""Utility for updating the project README.
 
 This module provides logic to inject automated verification reports (the Compatibility Matrix)
 directly into the `README.md` file, ensuring documentation stays valid with the code.
@@ -20,7 +20,7 @@ class ReadmeEditor:
   """
 
   def __init__(self, semantics: SemanticsManager, readme_path: Path) -> None:
-    """Initializes the editor.
+    """Initialize the editor.
 
     Args:
         semantics: The loaded semantics manager used to fetch API details.
@@ -31,7 +31,7 @@ class ReadmeEditor:
     self.readme_path = readme_path
 
   def update_matrix(self, validation_results: Dict[str, bool]) -> bool:
-    """Regenerates the Markdown table and injects it into the README structurally.
+    """Regenerate the Markdown table and injects it into the README structurally.
 
     It finds the Markdown heading `✅ Compatibility Matrix` and replaces the paragraph/table
     following it up until the next heading.
@@ -111,7 +111,7 @@ class ReadmeEditor:
       return False
 
   def _generate_markdown_table(self, results: Dict[str, bool]) -> str:
-    """Constructs the ASCII Markdown table from semantics data.
+    """Construct the ASCII Markdown table from semantics data.
 
     Generates a table row for every operation known in the SemanticsManager.
 

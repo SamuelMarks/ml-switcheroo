@@ -31,7 +31,7 @@ class MlirAdapter(FrameworkAdapter):
   _mode: InitMode = InitMode.GHOST
 
   def __init__(self) -> None:
-    """Initializes the MLIR framework adapter.
+    """Initialize the MLIR framework adapter.
 
     Since MLIR is metadata-only in this adapter, this constructor performs
     no operations.
@@ -40,7 +40,7 @@ class MlirAdapter(FrameworkAdapter):
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Defines the canonical import alias prefix and name for MLIR.
+    """Define the canonical import alias prefix and name for MLIR.
 
     Returns:
         Tuple[str, str]: A tuple containing the module name and its recommended
@@ -60,7 +60,7 @@ class MlirAdapter(FrameworkAdapter):
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """Returns standard test config templates for MLIR.
+    """Return standard test config templates for MLIR.
 
     Returns:
         Dict[str, str]: Map containing the test harness configuration templates
@@ -74,7 +74,7 @@ class MlirAdapter(FrameworkAdapter):
 
   @property
   def harness_imports(self) -> List[str]:
-    """Specifies the import list required for the MLIR test harness.
+    """Specify the import list required for the MLIR test harness.
 
     Returns:
         List[str]: List of required python import statements.
@@ -82,7 +82,7 @@ class MlirAdapter(FrameworkAdapter):
     return []
 
   def get_harness_init_code(self) -> str:
-    """Generates the initialization code needed in the test harness.
+    """Generate the initialization code needed in the test harness.
 
     Returns:
         str: Test harness initialization code snippet.
@@ -90,7 +90,7 @@ class MlirAdapter(FrameworkAdapter):
     return ""
 
   def get_to_numpy_code(self) -> str:
-    """Generates Python code to convert results to NumPy format.
+    """Generate Python code to convert results to NumPy format.
 
     Returns:
         str: The Python code snippet used to perform the NumPy conversion.
@@ -99,7 +99,7 @@ class MlirAdapter(FrameworkAdapter):
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """Identifies the semantic tiers supported by the MLIR adapter.
+    """Identify the semantic tiers supported by the MLIR adapter.
 
     Returns:
         List[SemanticTier]: List of supported SemanticTier enum values.
@@ -108,7 +108,7 @@ class MlirAdapter(FrameworkAdapter):
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """Lists magic or contextual arguments declared by this framework.
+    """List magic or contextual arguments declared by this framework.
 
     Returns:
         List[str]: A list of magic argument name strings.
@@ -117,7 +117,7 @@ class MlirAdapter(FrameworkAdapter):
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """Returns the structural traits configuration for MLIR.
+    """Return the structural traits configuration for MLIR.
 
     Returns:
         StructuralTraits: The structural traits model instance.
@@ -126,7 +126,7 @@ class MlirAdapter(FrameworkAdapter):
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """Returns the plugin traits configuration for MLIR.
+    """Return the plugin traits configuration for MLIR.
 
     Returns:
         PluginTraits: The plugin traits model instance.
@@ -135,7 +135,7 @@ class MlirAdapter(FrameworkAdapter):
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """Loads and returns operation definitions registered for MLIR.
+    """Load and returns operation definitions registered for MLIR.
 
     Returns:
         Dict[str, StandardMap]: Map of operation keys to their standard mapping.
@@ -144,7 +144,7 @@ class MlirAdapter(FrameworkAdapter):
 
   @property
   def specifications(self) -> Dict[str, OperationDef]:
-    """Gets the dictionary of operation specifications for MLIR.
+    """Get the dictionary of operation specifications for MLIR.
 
     Returns:
         Dict[str, OperationDef]: Mapping of operation keys to definition details.
@@ -153,7 +153,7 @@ class MlirAdapter(FrameworkAdapter):
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Returns methods used to seed random number generation in MLIR.
+    """Return methods used to seed random number generation in MLIR.
 
     Returns:
         List[str]: A list of method strings.
@@ -161,7 +161,7 @@ class MlirAdapter(FrameworkAdapter):
     return []
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """Generates the device syntax for MLIR device placement.
+    """Generate the device syntax for MLIR device placement.
 
     Args:
         device_type: The target hardware type (e.g., "cpu", "gpu", "tpu").
@@ -173,7 +173,7 @@ class MlirAdapter(FrameworkAdapter):
     return f"// Target: {device_type}"
 
   def get_device_check_syntax(self) -> str:
-    """Generates device validation/check syntax for MLIR.
+    """Generate device validation/check syntax for MLIR.
 
     Returns:
         str: Python-compatible code snippet checking device status.
@@ -181,7 +181,7 @@ class MlirAdapter(FrameworkAdapter):
     return "True"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """Generates the syntax needed for splitting RNG state.
+    """Generate the syntax needed for splitting RNG state.
 
     Args:
         rng_var: Variable name for the input random state.
@@ -193,7 +193,7 @@ class MlirAdapter(FrameworkAdapter):
     return f"// Split RNG: {rng_var} -> {key_var}"
 
   def get_serialization_imports(self) -> List[str]:
-    """Defines imports needed for model serialization/deserialization.
+    """Define imports needed for model serialization/deserialization.
 
     Returns:
         List[str]: List of required import strings.
@@ -201,7 +201,7 @@ class MlirAdapter(FrameworkAdapter):
     return []
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Provides serialization syntax for loading or saving MLIR models.
+    """Provide serialization syntax for loading or saving MLIR models.
 
     Args:
         op: Operation type, either "save" or "load".
@@ -216,7 +216,7 @@ class MlirAdapter(FrameworkAdapter):
     return f"// Load from {file_arg}"
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """Retrieves imports needed for converting weights.
+    """Retrieve imports needed for converting weights.
 
     Returns:
         List[str]: List of import statements.
@@ -224,7 +224,7 @@ class MlirAdapter(FrameworkAdapter):
     return []
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """Retrieves weight loading code snippet.
+    """Retrieve weight loading code snippet.
 
     Args:
         path_var: Variable name containing path to weight file.
@@ -235,7 +235,7 @@ class MlirAdapter(FrameworkAdapter):
     return "# Weights loading not supported in MLIR adapter"
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Constructs expression that converts a tensor to a NumPy array.
+    """Construct expression that converts a tensor to a NumPy array.
 
     Args:
         tensor_var: Variable name of the source tensor.
@@ -246,7 +246,7 @@ class MlirAdapter(FrameworkAdapter):
     return tensor_var
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Retrieves weight saving code snippet.
+    """Retrieve weight saving code snippet.
 
     Args:
         state_var: Variable representing the model weight state.
@@ -258,7 +258,7 @@ class MlirAdapter(FrameworkAdapter):
     return "# Weights saving not supported in MLIR adapter"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Applies a framework wiring snapshot.
+    """Apply a framework wiring snapshot.
 
     Args:
         snapshot: A dict containing metadata/snapshots to wire.
@@ -266,7 +266,7 @@ class MlirAdapter(FrameworkAdapter):
     pass
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """Retrieves documentation URL for a specific MLIR API call.
+    """Retrieve documentation URL for a specific MLIR API call.
 
     Args:
         api_name: Name of the API to look up.
@@ -277,7 +277,7 @@ class MlirAdapter(FrameworkAdapter):
     return None
 
   def convert(self, data: Any) -> Any:
-    """Converts input data representation to MLIR compatible format.
+    """Convert input data representation to MLIR compatible format.
 
     Args:
         data: Arbitrary input data.
@@ -289,7 +289,7 @@ class MlirAdapter(FrameworkAdapter):
 
   @classmethod
   def get_example_code(cls) -> str:
-    """Returns a basic example of MLIR framework code syntax.
+    """Return a basic example of MLIR framework code syntax.
 
     Returns:
         str: Example code block for MLIR module.
@@ -303,7 +303,7 @@ sw.module {
 }"""
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Returns tiered examples mapped to individual semantic tiers.
+    """Return tiered examples mapped to individual semantic tiers.
 
     Returns:
         Dict[str, str]: Mapping of tier name to example code string.

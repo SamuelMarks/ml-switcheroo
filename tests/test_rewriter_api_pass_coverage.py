@@ -25,15 +25,20 @@ def test_apitransformer_methods():
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemanticsNone:
+    """Docstring."""
+
     framework_configs = {"torch": {"traits": {"module_base": "torch.nn.Module"}}}
 
     def get_definition(self, name):
+      """Docstring."""
       return None
 
     def is_verified(self, name):
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw):
+      """Docstring."""
       return None
 
   semantics_none = DummySemanticsNone()
@@ -50,15 +55,20 @@ def test_apitransformer_methods():
   transformer._get_target_traits()
 
   class DummySemanticsTraits:
+    """Docstring."""
+
     framework_configs = {}
 
     def get_definition(self, name):
+      """Docstring."""
       return None
 
     def is_verified(self, name):
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw):
+      """Docstring."""
       return {"traits": {}}
 
   semantics_traits = DummySemanticsTraits()
@@ -129,20 +139,26 @@ def test_api_attr_mixin_leave_Assign():
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
+    """Docstring."""
+
     framework_configs = {}
 
     def get_definition(self, name):
+      """Docstring."""
       if name == "torch.tensor":
         return ("tensor", {"traits": {"lifecycle": ["module"]}})
       return None
 
     def is_verified(self, name):
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw):
+      """Docstring."""
       return {}
 
     def resolve_variant(self, *args, **kwargs):
+      """Docstring."""
       return {"target": "jax.numpy.float32"}
 
   context = RewriterContext(semantics=DummySemantics(), config=config)
@@ -165,20 +181,26 @@ def test_api_attr_mixin_leave_Attribute():
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
+    """Docstring."""
+
     framework_configs = {}
 
     def get_definition(self, name):
+      """Docstring."""
       if name == "torch.float32":
         return ("float32", {"target": "jax.numpy.float32"})
       return None
 
     def is_verified(self, name):
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw):
+      """Docstring."""
       return {}
 
     def resolve_variant(self, *args, **kwargs):
+      """Docstring."""
       return {"target": "jax.numpy.float32"}
 
   context = RewriterContext(semantics=DummySemantics(), config=config)
@@ -196,20 +218,26 @@ def test_api_call_mixin_leave_Call():
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
+    """Docstring."""
+
     framework_configs = {}
 
     def get_definition(self, name):
+      """Docstring."""
       if name == "torch.abs":
         return ("abs", {"target": "jax.numpy.abs"})
       return None
 
     def is_verified(self, name):
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw):
+      """Docstring."""
       return {}
 
     def resolve_variant(self, *args, **kwargs):
+      """Docstring."""
       return {"target": "jax.numpy.float32"}
 
   context = RewriterContext(semantics=DummySemantics(), config=config)
@@ -227,17 +255,22 @@ def test_api_attr_mixin_leave_Attribute_plugin():
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
+    """Docstring."""
+
     framework_configs = {}
 
     def get_definition(self, name):
+      """Docstring."""
       if name == "torch.plugin_attr":
         return ("plugin_attr", {"variants": {"jax": {"requires_plugin": True}}})
       return None
 
     def is_verified(self, name):
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw):
+      """Docstring."""
       return {}
 
   context = RewriterContext(semantics=DummySemantics(), config=config)
@@ -252,18 +285,23 @@ def test_api_attr_mixin_leave_Assign_unwrapping():
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
+    """Docstring."""
+
     framework_configs = {}
     _key_origins = {"nn_call": "neural"}
 
     def get_definition(self, name):
+      """Docstring."""
       if name == "torch.nn.call":
         return ("nn_call", {})
       return None
 
     def is_verified(self, name):
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw):
+      """Docstring."""
       return {}
 
   context = RewriterContext(semantics=DummySemantics(), config=config)

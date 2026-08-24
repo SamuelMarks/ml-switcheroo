@@ -6,12 +6,12 @@ ml-switcheroo 🔄🦘
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](https://opensource.org/license/apache-2-0)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Test and release](https://github.com/SamuelMarks/ml-switcheroo/actions/workflows/test_and_release.yml/badge.svg)](https://github.com/SamuelMarks/ml-switcheroo/actions/workflows/test_and_release.yml)
-![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)
+[![Coverage Status](https://coveralls.io/repos/github/SamuelMarks/ml-switcheroo/badge.svg?branch=master)](https://coveralls.io/github/SamuelMarks/ml-switcheroo?branch=master)
 ![Doc Coverage: 100%](https://img.shields.io/badge/doc%20coverage-100%25-brightgreen.svg)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Interactive docs](https://img.shields.io/badge/interactive-docs-orange)](https://samuelmarks.github.io/ml-switcheroo/)
 
-**ml-switcheroo** has evolved from a simple AST transpiler into a deterministic **Universal Compiler** for Machine Learning. It enables loss-less conversion between distinct levels of the ML stack: from high-level frameworks (PyTorch, JAX), to intermediate representations (StableHLO), down to hardware assembly (SASS, RDNA), and even into visual documentation formats (TikZ, HTML).
+**ml-switcheroo** has evolved from a simple AST transpiler into a deterministic **Universal Compiler** for Machine Learning. It enables conversion between distinct levels of the ML stack: from high-level frameworks (PyTorch, JAX), down to hardware assembly (SASS, RDNA), and even into visual documentation formats (TikZ, HTML). **Note: Conversion to intermediate representations like StableHLO is currently in alpha/experimental state and is not yet loss-less.**
 
 It solves the $O(N^2)$ interoperability problem using a **Hub-and-Spoke** architecture. Instead of writing translators for every pair of languages, we map every dialect to a central **Abstract Standard** (Hub).
 
@@ -103,18 +103,24 @@ Convert model code between frameworks with semantic fidelity.
 ### 2. Architecture Visualization (Python → Visuals)
 Compile your Python code directly into diagramming languages.
 *   **Target: TikZ**: Generates professional LaTeX code for academic papers.
-*   **Target: HTML**: Generates interactive Grid CSS layouts for documentation, including a **Time-Travel Interface** (via WASM) to interactively explore each compiler phase.
+*   **Target: HTML**: Generates static Grid CSS layouts to visually map the architecture. *(Note: The interactive **Time-Travel Interface** (via WASM) is a feature of the `sphinx_ext` documentation generator, not a standalone compiler output).*
 
 ### 3. Assembly Decompilation (ASM → Python)
 Lift low-level hardware instructions into readable high-level logic.
 *   **Sources**: NVIDIA SASS (Ampere/Hopper), AMD RDNA (GFX10/11).
-*   Reconstructs loops (e.g. `Conv2d` kernels) from raw assembly streams using topological graph analysis.
+*   Reconstructs loops (e.g. `Conv2d` kernels) from raw assembly streams using proper Control Flow Graph (CFG) reconstruction, basic block separation, and dominator analysis.
 
 ### 4. Weight Migration (Checkpointing)
 Generate standalone scripts to convert model weights between formats.
 *   Reads source AST to determine layer mappings.
-*   Generates `orbax` / `torch.save` / `safetensors` / `h5py` (`.keras`) migration logic.
+*   Generates `orbax` / `torch.save` / `safetensors` (PyTorch, JAX, MLX) / `h5py` (`.keras`) migration logic.
 *   Automatically handles NCHW ↔ NHWC layout permutation.
+
+### 5. Auto-Sharding & Distributed Semantics
+Automatically infer distributed sharding constraints for large models.
+*   Uses `ShardingInferencePass` to analyze unannotated graphs (e.g., standard PyTorch models).
+*   Injects `LogicalMesh` and `PartitionSpec` annotations using tensor-parallel and FSDP heuristics.
+*   Enables zero-effort distributed training when targeting frameworks like PaxML or MaxText.
 
 ---
 
@@ -225,6 +231,9 @@ ml_switcheroo convert ./models/transformer.py --target tikz --out ./diagram.tex
 
 # Decompilation: SASS -> Python
 ml_switcheroo convert ./kernels/gemm.sass --source sass --target python
+
+# Sharding Inference: PyTorch -> PaxML (distributed)
+ml_switcheroo convert ./models/llama.py --target paxml --sharding --out ./llama_pax.py
 ```
 
 ### 2. Weight Migration (`gen-weight-script`)
@@ -261,6 +270,23 @@ ml_switcheroo suggest 'torch.nn.functional.scaled_dot_product_attention' > promp
 ml_switcheroo define new_ops.yaml
 ```
 
+### 5. Advanced Tooling / SDK
+ml-switcheroo provides developer-focused tools for mapping new libraries and maintaining semantics.
+
+```bash
+# Scaffold an API mapping template for a new library based on __all__ exports
+ml_switcheroo scaffold my_custom_lib
+
+# Harvest mappings and behavioral constraints from manual unit tests
+ml_switcheroo harvest ./tests/my_custom_lib/
+
+# Generate documentation for the current compatibility matrix
+ml_switcheroo gen-docs ./docs/matrix.md
+
+# Generate physical Python test files based on the semantic definitions
+ml_switcheroo gen-tests ./tests/generated/
+```
+
 ---
 
 ## ✅ Compatibility Matrix
@@ -289,7 +315,7 @@ ml_switcheroo matrix
 
 ### Functional Unwrapping
 Frameworks like **JAX** require pure functions. ml-switcheroo automatically detects stateful imperative patterns (like `drop_last=True` in loops or in-place lists) and warns via the **Purity Scanner**.
-When converting **Flax NNX** (functional) to **Torch** (OO), it unwraps `layer.apply(params, x)` calls into standard `layer(x)` calls using `Assign` restructuring.
+When converting functional paradigms (like **Flax Linen**) to Object-Oriented paradigms (like **PyTorch** or **Flax NNX**), it unwraps `layer.apply(params, x)` calls into standard `layer(x)` calls using `Assign` restructuring.
 
 ### Graph-Guided Rewriting (Loopback Bridge)
 The **Loopback Bridge** enables high-level architectural optimizations (like fusion) to be applied directly to the low-level source code preservation layer, bridging graph analysis with AST manipulation.

@@ -27,7 +27,7 @@ class CppCSTTransformer:
   """Base visitor/transformer for CppNode trees."""
 
   def visit(self, node: CppNode) -> CppNode:
-    """Visits a node and dispatches to the correct visit_* method.
+    """Visit a node and dispatches to the correct visit_* method.
 
     Args:
         node (CppNode): The concrete syntax tree node to visit.

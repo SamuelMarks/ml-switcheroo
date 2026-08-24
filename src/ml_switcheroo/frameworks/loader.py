@@ -16,7 +16,7 @@ DEFINITIONS_DIR = Path(__file__).parent / "definitions"
 
 @lru_cache(maxsize=None)
 def load_definitions(framework: str) -> Dict[str, StandardMap]:
-  """Loads static definitions for a specific framework from its JSON file.
+  """Load static definitions for a specific framework from its JSON file.
 
   Uses `functools.lru_cache` to ensure the file is read and parsed only once per execution.
   Converts raw JSON dictionaries into `StandardMap` Pydantic objects.
@@ -42,8 +42,7 @@ def load_definitions(framework: str) -> Dict[str, StandardMap]:
 
 
 def clear_definition_cache() -> None:
-  """Clears the LRU cache for definitions.
-
+  """Clear the LRU cache for definitions.
 
   Useful for tests or hot-reloading scenarios.
   """
@@ -51,7 +50,7 @@ def clear_definition_cache() -> None:
 
 
 def get_definitions_path(framework: str) -> Path:
-  """Returns the resolved path for a framework's definition JSON.
+  """Return the resolved path for a framework's definition JSON.
 
   Args:
       framework (str): The framework key.

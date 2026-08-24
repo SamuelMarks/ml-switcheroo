@@ -17,10 +17,10 @@ from ml_switcheroo.utils.console import log_info, log_warning
 
 
 class ArrayApiSpecImporter:
-  """Parses Python stub files (``*.py``) using the built-in ``ast`` module."""
+  """Parse Python stub files (``*.py``) using the built-in ``ast`` module."""
 
   def parse_folder(self, root_dir: Path) -> Dict[str, Any]:
-    """Parses Array API Python Stubs (``*.py``) in the target directory.
+    """Parse Array API Python Stubs (``*.py``) in the target directory.
 
     Args:
         root_dir: Path to the folder containing .py stubs
@@ -40,7 +40,7 @@ class ArrayApiSpecImporter:
     return self._parse_stubs(py_files, root_dir)
 
   def _parse_stubs(self, files: List[Path], root: Path) -> Dict[str, Any]:
-    """Iterates over files and extracts AST nodes.
+    """Iterate over files and extracts AST nodes.
 
     Processes both function definitions and constant assignments (e.g. math constants).
 
@@ -115,7 +115,7 @@ class ArrayApiSpecImporter:
     return semantics
 
   def _extract_args(self, args: ast.arguments) -> List[Tuple[str, str]]:
-    """Combines Positional-Only, Standard, and Keyword-Only args alongside their type hints.
+    """Combine Positional-Only, Standard, and Keyword-Only args alongside their type hints.
 
     Args:
         args: The arguments node from a function definition.
@@ -128,7 +128,7 @@ class ArrayApiSpecImporter:
 
     # Helper to process a specific arg group
     def process_group(group: List[ast.arg]) -> Any:
-      """Parses type annotations for a list of arguments and appends them to out.
+      """Parse type annotations for a list of arguments and appends them to out.
 
       Args:
           group: A list of AST argument nodes to process.
@@ -200,7 +200,7 @@ class ArrayApiSpecImporter:
     return "Any"  # Fallback for complex structures
 
   def _get_assignment_name(self, node: ast.AST) -> Optional[str]:
-    """Extracts variable name from Assign (x=1) or AnnAssign (x:int=1).
+    """Extract variable name from Assign (x=1) or AnnAssign (x:int=1).
 
     Args:
         node: The assignment node.
@@ -218,7 +218,7 @@ class ArrayApiSpecImporter:
     return None
 
   def _clean_docstring(self, doc: Optional[str]) -> str:
-    """Cleans up a docstring to return just the first paragraph summary.
+    """Clean up a docstring to return just the first paragraph summary.
 
     Args:
         doc: The full docstring.

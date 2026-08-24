@@ -1,4 +1,4 @@
-"""Semantics Bisector: Automated Spec Repair.
+"""Semantic Bisector: Automated Spec Repair.
 
 This module implements a feedback loop ("Bisector") that attempts to fix failing
 verification tests by incrementally relaxing the constraints in the ODL specifications.
@@ -37,7 +37,7 @@ class SemanticsBisector:
     self.logger = logging.getLogger(__name__)
 
   def propose_fix(self, op_name: str, op_def: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """Attempts to satisfy verification by mutating verification parameters.
+    """Attempt to satisfy verification by mutating verification parameters.
 
     Strategies:
     1. Increase tolerances (1e-3 -> 1e-2 -> 1e-1).

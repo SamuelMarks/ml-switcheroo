@@ -18,7 +18,7 @@ def handle_post_processing(
   mapping: Dict[str, Any],
   abstract_id: str,
 ) -> cst.CSTNode:
-  """Applies post-rewrite modifications to the result node, such as type casting or state threading.
+  """Apply post-rewrite modifications to the result node, such as type casting or state threading.
 
   Args:
       rewriter (Any): The CST rewriter instance containing context.

@@ -21,7 +21,7 @@ from ml_switcheroo.utils.node_diff import capture_node_source
 
 @register_hook("device_allocator")
 def transform_device_allocator(node: cst.Call, ctx: HookContext) -> cst.BaseExpression:
-  """Plugin Hook: Transforms device construction calls via Adapter delegation.
+  """Plugin Transform Transforms device construction calls via Adapter delegation.
 
   Triggers:
       Operations marked with `requires_plugin: "device_allocator"` (e.g., `torch.device`).
@@ -65,7 +65,7 @@ def transform_device_allocator(node: cst.Call, ctx: HookContext) -> cst.BaseExpr
 
 
 def _parse_device_args(node: cst.Call) -> Tuple[Optional[cst.BaseExpression], Optional[cst.BaseExpression]]:
-  """Extracts (device_type_node, index_node) from `torch.device` call arguments.
+  """Extract (device_type_node, index_node) from `torch.device` call arguments.
 
   Handles:
   - `torch.device('cuda')`

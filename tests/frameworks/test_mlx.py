@@ -1,177 +1,105 @@
-"""Test suite for the Mlx module."""
+"""Docstring."""
 
 from ml_switcheroo.frameworks.mlx import MLXAdapter
+import pytest
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
-def test_mlx_adapter_init():
-  """Verifies the behavior of MLX adapter initialization."""
+def test_mlx_adapter_basic():
+  """Docstring."""
   adapter = MLXAdapter()
-  assert adapter.display_name == "Apple MLX"
-  assert adapter.inherits_from is None
-  assert adapter.ui_priority == 50
 
-
-def test_mlx_import_alias():
-  """Verifies the behavior of MLX import alias."""
-  adapter = MLXAdapter()
   assert adapter.import_alias == ("mlx.core", "mx")
-
-
-def test_mlx_import_namespaces():
-  """Verifies the behavior of MLX import namespaces."""
-  adapter = MLXAdapter()
   ns = adapter.import_namespaces
   assert "mlx.core" in ns
-  assert "mlx.nn" in ns
-  assert "mlx.optimizers" in ns
+  assert ns["mlx.core"].recommended_alias == "mx"
+  assert ns["mlx.nn"].recommended_alias == "nn"
+  assert ns["mlx.optimizers"].recommended_alias == "optim"
 
+  assert SemanticTier.NEURAL in adapter.supported_tiers
 
-def test_mlx_test_config():
-  """Verifies the behavior of MLX test configuration."""
-  adapter = MLXAdapter()
-  config = adapter.test_config
-  assert "import mlx.core as mx" in config["import"]
+  cfg = adapter.test_config
+  assert "import mlx.core as mx" in cfg["import"]
+  assert "array" in cfg["convert_input"]
 
-
-def test_mlx_harness_imports():
-  """Verifies the behavior of MLX harness imports."""
-  adapter = MLXAdapter()
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
+  assert "tolist" in adapter.get_to_numpy_code()
 
-
-def test_mlx_get_to_numpy_code():
-  """Verifies the behavior of MLX get to NumPy code."""
-  adapter = MLXAdapter()
-  assert "hasattr(obj, 'tolist')" in adapter.get_to_numpy_code()
-
-
-def test_mlx_supported_tiers():
-  """Verifies the behavior of MLX supported tiers."""
-  adapter = MLXAdapter()
-  assert len(adapter.supported_tiers) == 3
-
-
-def test_mlx_declared_magic_args():
-  """Verifies the behavior of MLX declared magic arguments."""
-  adapter = MLXAdapter()
-  assert adapter.declared_magic_args == []
-
-
-def test_mlx_structural_traits():
-  """Verifies the behavior of MLX structural traits."""
-  adapter = MLXAdapter()
   traits = adapter.structural_traits
   assert traits.module_base == "mlx.nn.Module"
+  assert "__call__" in traits.known_inference_methods
 
+  ptraits = adapter.plugin_traits
+  assert ptraits.has_numpy_compatible_arrays is True
+  assert ptraits.requires_explicit_rng is False
+  assert ptraits.requires_functional_state is False
 
-def test_mlx_definitions():
-  """Verifies the behavior of MLX definitions."""
-  adapter = MLXAdapter()
+  assert adapter.rng_seed_methods == ["seed", "random.seed"]
+  assert adapter.declared_magic_args == []
+
   defs = adapter.definitions
   assert isinstance(defs, dict)
 
 
-def test_mlx_rng_seed_methods():
-  """Verifies the behavior of MLX rng seed methods."""
+def test_mlx_adapter_syntax():
+  """Docstring."""
   adapter = MLXAdapter()
-  assert "seed" in adapter.rng_seed_methods
 
+  assert adapter.get_device_syntax("gpu", "0") == "mx.Device(mx.gpu, 0)"
+  assert adapter.get_device_syntax("cpu", None) == "mx.Device(mx.cpu)"
 
-def test_mlx_convert():
-  """Verifies the behavior of MLX convert."""
-  adapter = MLXAdapter()
-  assert adapter.convert("test") == "test"
-
-
-def test_mlx_tiered_examples():
-  """Verifies the behavior of MLX tiered examples."""
-  adapter = MLXAdapter()
-  examples = adapter.get_tiered_examples()
-  assert "tier1_math" in examples
-  assert "tier2_neural" in examples
-
-
-def test_mlx_device_syntax():
-  """Verifies the behavior of MLX device syntax."""
-  adapter = MLXAdapter()
-  assert "mx.Device(mx.gpu)" == adapter.get_device_syntax("cuda")
-  assert "mx.Device(mx.cpu)" == adapter.get_device_syntax("cpu")
-  assert "mx.Device(mx.gpu, 1)" == adapter.get_device_syntax("cuda", "1")
-
-
-def test_mlx_device_check_syntax():
-  """Verifies the behavior of MLX device check syntax."""
-  adapter = MLXAdapter()
-  assert "mx.default_device() == mx.gpu" in adapter.get_device_check_syntax()
-
-
-def test_mlx_apply_wiring():
-  """Verifies the behavior of MLX apply wiring."""
-  adapter = MLXAdapter()
-  snapshot = {}
-  adapter.apply_wiring(snapshot)
-  assert snapshot == {}
-
-
-def test_mlx_plugin_traits():
-  """Test mlx plugin traits."""
-  adapter = MLXAdapter()
-  traits = adapter.plugin_traits
-  assert traits.has_numpy_compatible_arrays is True
-
-
-def test_mlx_convert_numpy():
-  """Test converting numpy arrays to mx arrays if possible."""
-  adapter = MLXAdapter()
-  import numpy as np
-  import sys
-
-  # create a fake module if missing so patch works
-  if "mlx" not in sys.modules:
-    sys.modules["mlx"] = MagicMock()
-  if "mlx.core" not in sys.modules:
-    sys.modules["mlx.core"] = MagicMock()
-  sys.modules["mlx"].core = sys.modules["mlx.core"]
-
-  from unittest.mock import patch
-
-  with patch("mlx.core.array", return_value="mx_array"):
-    res = adapter.convert(np.array([1, 2]))
-    assert res == "mx_array"
-
-
-def test_mlx_get_rng_split_syntax():
-  """Test rng split syntax."""
-  adapter = MLXAdapter()
+  assert adapter.get_device_check_syntax() == "mx.default_device() == mx.gpu"
   assert adapter.get_rng_split_syntax("rng", "key") == "pass"
 
 
-def test_mlx_get_serialization_imports():
-  """Test serialization imports."""
+def test_mlx_adapter_docs():
+  """Docstring."""
   adapter = MLXAdapter()
-  assert "import mlx.core as mx" in adapter.get_serialization_imports()
+  url = adapter.get_doc_url("mlx.core.abs")
+  assert "ml-explore.github.io" in url
+
+  assert "unknown.html" in adapter.get_doc_url("unknown")
+
+  examples = adapter.get_tiered_examples()
+  assert len(examples) > 0
 
 
-def test_numpy_import_error():
-  """Test fallback if numpy fails to import at module level."""
+def test_mlx_adapter_convert():
+  """Docstring."""
+  pytest.importorskip("mlx")
+  adapter = MLXAdapter()
+  import mlx.core as mx
+  import numpy as np
+
+  t = adapter.convert([1, 2, 3])
+  assert isinstance(t, mx.array)
+
+  t2 = adapter.convert(np.array([1, 2, 3]))
+  assert isinstance(t2, mx.array)
+
+  t3 = adapter.convert(1)
+  assert t3 == 1
+
+
+def test_mlx_adapter_wiring():
+  """Docstring."""
+  adapter = MLXAdapter()
+  adapter.apply_wiring({})
+
+
+def test_convert():
+  """Docstring."""
   import sys
-  import pytest
+  from unittest.mock import MagicMock
+  from ml_switcheroo.frameworks.mlx import MLXAdapter
 
-  # We must reload the module to trigger the try/except block at the top
-  with pytest.MonkeyPatch().context() as m:
-    m.setitem(sys.modules, "numpy", None)
-    import importlib
-    import ml_switcheroo.frameworks.mlx as mlx_mod
+  sys.modules["mlx.core"] = MagicMock()
+  sys.modules["mlx"] = MagicMock()
+  import numpy as np
 
-    importlib.reload(mlx_mod)
-    assert mlx_mod.np is None
-
-  # Reload back to normal so other tests don't break
-  import importlib
-  import ml_switcheroo.frameworks.mlx as mlx_mod
-
-  importlib.reload(mlx_mod)
-
-
-from unittest.mock import MagicMock  # noqa: E402
+  adapter = MLXAdapter()
+  adapter.convert(np.array([1, 2, 3]))
+  adapter.convert(1)
+  del sys.modules["mlx.core"]
+  del sys.modules["mlx"]

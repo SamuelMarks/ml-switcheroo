@@ -38,7 +38,7 @@ class HtmlNode:
     raise NotImplementedError
 
   def to_html(self) -> str:
-    """Convenience method to render HTML.
+    """Provide method to render HTML.
 
     Returns:
         str: The rendered HTML string.
@@ -48,7 +48,7 @@ class HtmlNode:
 
 @dataclass
 class TextNode(HtmlNode):
-  """Represents a raw text string in the DOM.
+  """Represent a raw text string in the DOM.
 
   Attributes:
       content: The raw text content.
@@ -70,7 +70,7 @@ class TextNode(HtmlNode):
 
 @dataclass
 class CommentNode(HtmlNode):
-  """Represents an HTML comment <!-- ... -->.
+  """Represent an HTML comment <!-- ... -->.
 
   Attributes:
       content: The content within the HTML comment.
@@ -92,7 +92,7 @@ class CommentNode(HtmlNode):
 
 @dataclass
 class AttributeNode(HtmlNode):
-  """Represents an HTML tag attribute.
+  """Represent an HTML tag attribute.
 
   Attributes:
       name: The name of the HTML attribute.
@@ -120,7 +120,7 @@ class AttributeNode(HtmlNode):
 
 @dataclass
 class TagNode(HtmlNode):
-  """Represents an HTML Element.
+  """Represent an HTML Element.
 
   Attributes:
       name: The HTML tag name.
@@ -135,7 +135,7 @@ class TagNode(HtmlNode):
   self_closing: bool = False
 
   def append_child(self, child: HtmlNode) -> None:
-    """Appends a child node to the end of the children list.
+    """Append a child node to the end of the children list.
 
     Args:
         child: The HTML node to append.
@@ -143,7 +143,7 @@ class TagNode(HtmlNode):
     self.children.append(child)
 
   def remove_child(self, child: HtmlNode) -> None:
-    """Removes a child node from the children list.
+    """Remove a child node from the children list.
 
     Args:
         child: The HTML node to remove.
@@ -154,7 +154,7 @@ class TagNode(HtmlNode):
     self.children.remove(child)
 
   def get_attribute(self, name: str) -> Optional[str]:
-    """Gets the value of an attribute by name.
+    """Get the value of an attribute by name.
 
     Args:
         name: The name of the attribute.
@@ -168,7 +168,7 @@ class TagNode(HtmlNode):
     return None
 
   def set_attribute(self, name: str, value: Optional[str] = None) -> None:
-    """Sets or updates the value of an attribute by name.
+    """Set or updates the value of an attribute by name.
 
     Args:
         name: The name of the attribute.
@@ -181,7 +181,7 @@ class TagNode(HtmlNode):
     self.attributes.append(AttributeNode(name=name, value=value))
 
   def remove_attribute(self, name: str) -> None:
-    """Removes an attribute by name. Does nothing if not found.
+    """Remove an attribute by name. Does nothing if not found.
 
     Args:
         name: The name of the attribute to remove.
@@ -219,7 +219,7 @@ class TagNode(HtmlNode):
 
 @dataclass
 class SvgArrow(HtmlNode):
-  """Represents an SVG connection line between grid cells.
+  """Represent an SVG connection line between grid cells.
 
   Attributes:
       x1: The starting X coordinate.
@@ -240,7 +240,7 @@ class SvgArrow(HtmlNode):
   parent_style: str = ""
 
   def to_tag(self) -> TagNode:
-    """Converts the arrow to a pure CST TagNode.
+    """Convert the arrow to a pure CST TagNode.
 
     Returns:
         TagNode: The corresponding tag element structure representing the SVG.
@@ -267,7 +267,7 @@ class SvgArrow(HtmlNode):
     )
 
   def emit(self, indent_level: int = 0) -> str:
-    """Renders the arrow as an absolute SVG element.
+    """Render the arrow as an absolute SVG element.
 
     Args:
         indent_level: The indentation level for the rendering.
@@ -280,7 +280,7 @@ class SvgArrow(HtmlNode):
 
 @dataclass
 class GridBox(HtmlNode):
-  """Represents a content box positioned within the CSS Grid.
+  """Represent a content box positioned within the CSS Grid.
 
   Attributes:
       row: The CSS grid row index.
@@ -303,7 +303,7 @@ class GridBox(HtmlNode):
   z_index: Optional[int] = None
 
   def to_tag(self) -> TagNode:
-    """Converts the grid box to a pure CST TagNode.
+    """Convert the grid box to a pure CST TagNode.
 
     Returns:
         TagNode: The corresponding tag element structure for the GridBox.
@@ -348,7 +348,7 @@ class GridBox(HtmlNode):
     )
 
   def emit(self, indent_level: int = 0) -> str:
-    """Renders the grid cell div, its content, and attached arrows.
+    """Render the grid cell div, its content, and attached arrows.
 
     Args:
         indent_level: The indentation level for the children rendering.
@@ -449,7 +449,7 @@ class HtmlDocument(HtmlNode):
 """
 
   def emit(self, indent_level: int = 0) -> str:
-    """Renders the complete HTML document.
+    """Render the complete HTML document.
 
     Args:
         indent_level: The indentation level for the rendering.

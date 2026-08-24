@@ -101,3 +101,27 @@ def test_sw_call_generation():
   mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
   code = gen_code(mod)
   assert "return _func(_arg)" in code
+
+
+def test_trivia_restoration_percent():
+  """Docstring."""
+  from ml_switcheroo.core.mlir.nodes import OperationNode, ModuleNode, BlockNode
+  from ml_switcheroo.core.cst.base import Trivia
+  from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
+
+  op = OperationNode(name="sw.return", leading_trivia=[Trivia(text="% comment")])
+  mod = ModuleNode(body=BlockNode("", operations=[op]))
+  code = MlirToPythonGenerator().generate(mod).code
+  assert "#% comment" in code
+
+
+def test_trivia_restoration_no_content():
+  """Docstring."""
+  from ml_switcheroo.core.mlir.nodes import OperationNode, ModuleNode, BlockNode
+  from ml_switcheroo.core.cst.base import Trivia
+  from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
+
+  op = OperationNode(name="sw.return", leading_trivia=[Trivia(text="// no content comment")])
+  mod = ModuleNode(body=BlockNode("", operations=[op]))
+  code = MlirToPythonGenerator().generate(mod).code
+  assert "# no content comment" in code

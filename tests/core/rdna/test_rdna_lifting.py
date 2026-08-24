@@ -79,3 +79,91 @@ def test_lift_no_markers() -> None:
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
   assert graph.nodes[0].kind == "rdna.v_add_f32"
+
+
+def test_rdna_analysis_conv2d_fallback():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaImmediate
+
+  # We need loop_limits to be populated. The code checks for s_cmp_lt_i32
+  inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=3)])
+
+  meta = RdnaAnalyzer.analyze_block("Conv2d", [inst])
+  assert meta["k"] == 3
+
+
+def test_rdna_analysis_linear_fallback():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaImmediate
+
+  inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=10)])
+
+  meta = RdnaAnalyzer.analyze_block("Linear", [inst])
+  assert meta["in_features"] == 10
+
+
+def test_rdna_analysis_unknown_kind():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaImmediate
+
+  inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=10)])
+
+  meta = RdnaAnalyzer.analyze_block("UnknownKind", [inst])
+  assert meta == {}
+
+
+def test_rdna_analysis_no_loop_limits():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaSGPR
+
+  inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaSGPR(index=0)])
+
+  meta = RdnaAnalyzer.analyze_block("Conv2d", [inst])
+  assert meta == {}
+
+
+def test_rdna_lifter_seen_ids():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+
+  lifter = RdnaLifter()
+  nodes = [
+    RdnaComment(text="; BEGIN Add (Add_0)"),
+    RdnaComment(text="; END Add (Add_0)"),
+    RdnaComment(text="; BEGIN Add (Add_0)"),
+    RdnaComment(text="; END Add (Add_0)"),
+  ]
+
+  graph = lifter.lift(nodes)
+  assert len(graph.nodes) == 1
+
+
+def test_rdna_lifter_unmapped():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+
+  lifter = RdnaLifter()
+  nodes = [RdnaComment(text="; Unmapped Op: flatten (flatten_0)")]
+
+  graph = lifter.lift(nodes)
+  assert len(graph.nodes) == 1
+  assert graph.nodes[0].metadata.get("arg_1") == 1
+
+
+def test_rdna_lifter_input():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+
+  lifter = RdnaLifter()
+  nodes = [RdnaComment(text="; Input arg_0 ->")]
+
+  graph = lifter.lift(nodes)
+  assert len(graph.nodes) == 1
+  assert graph.nodes[0].kind == "Input"

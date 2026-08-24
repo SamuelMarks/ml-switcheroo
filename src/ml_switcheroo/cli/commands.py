@@ -33,7 +33,7 @@ from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapsho
 def handle_gen_weight_script(
   source_file: Path, out_script: Path, source_fw: Optional[str] = None, target_fw: Optional[str] = None
 ) -> int:
-  """Handler for generating weight migration script.
+  """Manage for generating weight migration script.
 
   Delegates to the `WeightScriptGenerator` class.
 

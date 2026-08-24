@@ -26,7 +26,7 @@ def execute_strategy(
   details: Dict[str, Any],
   abstract_id: str,
 ) -> cst.CSTNode:
-  """Applies the appropriate transformation strategy.
+  """Apply the appropriate transformation strategy.
 
   Args:
       rewriter (Any): The rewriter context.
@@ -150,7 +150,7 @@ def _apply_layout_permutation(
   details: Dict[str, Any],
   rewriter: Any,
 ) -> cst.Call:
-  """Applies layout permutation to the arguments of a call based on the provided mapping.
+  """Apply layout permutation to the arguments of a call based on the provided mapping.
 
   Args:
       node (cst.Call): The call node.

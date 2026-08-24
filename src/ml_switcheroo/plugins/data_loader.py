@@ -24,7 +24,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def get_shim_code() -> str:
-  """Returns the source code for the `GenericDataLoader` class.
+  """Return the source code for the `GenericDataLoader` class.
 
   This code string is injected into the preamble of generated files by the
   `convert_dataloader` plugin when a target framework maps `DataLoader`

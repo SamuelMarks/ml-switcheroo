@@ -39,7 +39,7 @@ class StableHloBackend(CompilerBackend):
     self.semantics = semantics
 
   def compile(self, graph: LogicalGraph) -> str:
-    """Compiles the graph to StableHLO-flavored MLIR.
+    """Compile the graph to StableHLO-flavored MLIR.
 
     Args:
         graph: The logical graph to compile.

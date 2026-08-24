@@ -108,9 +108,12 @@ GRAMMAR = r"""
     ?start: module
     module: (operation | attribute_alias_def)*
 
-    operation: [results EQ] op_name [SYM_ID] [operands] [dictionary_attribute] op_tail*
+    operation: [results EQ] custom_operation
 
-    attribute_alias_def: ATTR_ALIAS_ID EQ attr_value
+    custom_operation: op_name [SYM_ID] [operands] [dictionary_attribute] op_tail*
+
+    attribute_alias: ATTR_ALIAS_ID
+    attribute_alias_def: attribute_alias EQ attribute_value
 
     ?op_tail: regions | COLON result_types | ARROW result_types
 
@@ -126,9 +129,9 @@ GRAMMAR = r"""
     operand: (VAL_ID | SYM_ID) [COLON TYPE]
 
     dictionary_attribute: LBRACE [attribute_entry (COMMA attribute_entry)*] RBRACE
-    attribute_entry: attr_name EQ attr_value
+    attribute_entry: attr_name EQ attribute_value
     attr_name: IDENTIFIER | STRING
-    attr_value: STRING | NUMBER | decimal_literal | TYPE | type_list_parens | function_type | LBRACK [attr_value (COMMA attr_value)*] RBRACK | ATTR_ALIAS_ID | IDENTIFIER | dialect_attribute
+    attribute_value: STRING | NUMBER | decimal_literal | TYPE | type_list_parens | function_type | LBRACK [attribute_value (COMMA attribute_value)*] RBRACK | attribute_alias | IDENTIFIER | dialect_attribute
     decimal_literal: NUMBER
 
     dialect_attribute: ATTR_ALIAS_ID (OPAQUE_DIALECT_CONTENTS | DOT IDENTIFIER)
@@ -136,8 +139,9 @@ GRAMMAR = r"""
     regions: region+
     region: LBRACE block* RBRACE
 
-    block: [block_id [block_args] COLON] operation*
-    block_args: LPAREN [block_arg (COMMA block_arg)*] RPAREN
+    block_label: block_id [block_arg_list] COLON
+    block: [block_label] operation*
+    block_arg_list: LPAREN [block_arg (COMMA block_arg)*] RPAREN
     block_arg: VAL_ID COLON TYPE
     block_id: CARET_ID
 
@@ -166,7 +170,7 @@ GRAMMAR = r"""
     ssa_use: value_use
     ssa_use_and_type: ssa_use COLON TYPE
     ssa_use_and_type_list: ssa_use_and_type (COMMA ssa_use_and_type)*
-    successor: CARET_ID [COLON block_args]
+    successor: CARET_ID [COLON block_arg_list]
     successor_list: LBRACK successor (COMMA successor)* RBRACK
     trailing_location: "loc" LPAREN STRING RPAREN
     type_alias: "!" IDENTIFIER
@@ -237,7 +241,7 @@ def _get_trivia(node: Any) -> List[Trivia]:
 
 
 class MlirTransformer(Transformer[Any, Any]):
-  """Transforms parsed AST nodes into MlirNode classes."""
+  """Transform parsed AST nodes into MlirNode classes."""
 
   @v_args(inline=False)
   def module(self, children: List[Any]) -> ModuleNode:
@@ -265,11 +269,11 @@ class MlirTransformer(Transformer[Any, Any]):
         The AttributeAliasDefNode.
     """
     # ATTR_ALIAS_ID trivia? "=" trivia? attribute_value trivia?
-    name_token = children[0]
+    name_token = children[0].children[0]
     name = name_token.value
 
     # Find attribute_value
-    val_node = next(c for c in children if getattr(c, "data", None) == "attr_value")
+    val_node = next(c for c in children if getattr(c, "data", None) == "attribute_value")
     if len(val_node.children) == 1:
       val = val_node.children[0]
       if hasattr(val, "value"):
@@ -311,6 +315,9 @@ class MlirTransformer(Transformer[Any, Any]):
     i = 0
     while i < len(children):
       c = children[i]
+      if getattr(c, "data", None) == "custom_operation":
+        children = children[:i] + c.children + children[i + 1 :]
+        continue
       if isinstance(c, Token) and c.type == "EQ":
         pass
       elif getattr(c, "data", None) == "results":
@@ -388,7 +395,7 @@ class MlirTransformer(Transformer[Any, Any]):
             val = "".join(t.value for t in val_node.children[0].scan_values(lambda v: isinstance(v, Token)))
         else:
           # Array of values
-          val = [v.children[0].value for v in val_node.children if getattr(v, "data", None) == "attr_value"]
+          val = [v.children[0].value for v in val_node.children if getattr(v, "data", None) == "attribute_value"]
 
         attr = AttributeNode(name=name, value=val, leading_trivia=_get_trivia(c.children[0]))
         attrs.append(attr)
@@ -438,14 +445,16 @@ class MlirTransformer(Transformer[Any, Any]):
     args = []
     ops = []
     for c in children:
-      if getattr(c, "data", None) == "block_id":
-        label = c.children[0].value
-      elif getattr(c, "data", None) == "block_args":
-        for arg in c.children:
-          if getattr(arg, "data", None) == "block_arg":
-            v = ValueNode(name=arg.children[0].value, leading_trivia=_get_trivia(arg.children[0]))
-            t = TypeNode(body=arg.children[2].value, leading_trivia=_get_trivia(arg.children[2]))
-            args.append((v, t))
+      if getattr(c, "data", None) == "block_label":
+        for child in c.children:
+          if getattr(child, "data", None) == "block_id":
+            label = child.children[0].value
+          elif getattr(child, "data", None) == "block_arg_list":
+            for arg in child.children:
+              if getattr(arg, "data", None) == "block_arg":
+                v = ValueNode(name=arg.children[0].value, leading_trivia=_get_trivia(arg.children[0]))
+                t = TypeNode(body=arg.children[2].value, leading_trivia=_get_trivia(arg.children[2]))
+                args.append((v, t))
       elif isinstance(c, OperationNode):
         ops.append(c)
 
@@ -454,7 +463,7 @@ class MlirTransformer(Transformer[Any, Any]):
 
 
 class MlirParser:
-  """Parses a stream of MLIR tokens into a Concrete Syntax Tree."""
+  """Parse a stream of MLIR tokens into a Concrete Syntax Tree."""
 
   def __init__(self, text: str):
     """Initialize the parser.

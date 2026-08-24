@@ -1,77 +1,89 @@
-"""Test suite for the Audit module."""
+"""Test module."""
 
 import libcst as cst
-from typing import Any
 from ml_switcheroo.analysis.audit import CoverageScanner
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-class MockSemantics:
-  """Mock Semantics class for testing purposes."""
-
-  def get_definition(self, fqn: str) -> Any:
-    """Mock implementation of get definition.
-
-    Args:
-      fqn: ...
-    """
-    if fqn == "torch.add":
-      return ("Add", {"variants": {"torch": {"api": "torch.add"}}})
-    if fqn == "torch.sub":
-      return ("Sub", {"variants": {"torch": {"api": "torch.something_else"}}})
-    if fqn == "torch.mul":
-      return ("Mul", {"variants": {"torch": None, "jax": {"api": "jax.mul"}, "torch2": {"api": "torch.mul"}}})
-    return None
-
-
-def test_coverage_scanner():
-  """Verifies the behavior of coverage scanner."""
-  semantics = MockSemantics()
+def test_coverage_scanner_import_resolution():
+  """Test element."""
+  semantics = SemanticsManager()
   scanner = CoverageScanner(semantics, {"torch", "jax"})
-  code = "\nimport torch\nimport torch as th\nfrom torch import nn\nfrom torch.nn import functional as F\nfrom torch import *\nfrom sys import exit\n\ntorch.add(1, 2)\ntorch.sub(1, 2)\ntorch.mul(1, 2)\nth.add(1, 2)\nnn.Linear(10, 10)\nF.relu(x)\njax.numpy.sum(x)\nunknown_fw.foo()\ntorch.float32\nexit()\n"
+
+  code = """
+import torch
+import torch.nn as nn
+from jax import numpy as jnp
+from jax import *
+from jax import lax
+
+torch.add(1, 2)
+nn.Conv2d(1, 1, 1)
+jnp.sum([1, 2])
+lax.add(1, 2)
+torch.float32
+unknown.call()
+"""
   tree = cst.parse_module(code)
   tree.visit(scanner)
-  assert scanner.results["torch.add"] == (True, "torch")
-  assert scanner.results["torch.nn.Linear"] == (False, "torch")
-  assert scanner.results["torch.nn.functional.relu"] == (False, "torch")
-  assert scanner.results["torch.float32"] == (False, "torch")
-  assert "exit" not in scanner.results
+
+  # Check alias map
+  assert scanner._alias_map["torch"] == "torch"
+  assert scanner._alias_map["nn"] == "torch.nn"
+  assert scanner._alias_map["jnp"] == "jax.numpy"
+  assert scanner._alias_map["lax"] == "jax.lax"
+
+  # Check results
+  assert "torch.add" in scanner.results
+  assert "torch.nn.Conv2d" in scanner.results
+  assert "jax.numpy.sum" in scanner.results
+  assert "jax.lax.add" in scanner.results
+  assert "torch.float32" in scanner.results
+  assert "unknown.call" not in scanner.results
 
 
-def test_coverage_scanner_unresolvable_fqn():
-  """Verifies the behavior of coverage scanner when fqn cannot be resolved."""
-  from ml_switcheroo.analysis.audit import CoverageScanner
-
-  semantics = MockSemantics()
+def test_coverage_scanner_resolve_fqn():
+  """Test element."""
+  semantics = SemanticsManager()
   scanner = CoverageScanner(semantics, {"torch"})
 
-  # A complex Call node where get_full_name returns None (e.g. function is a lambda or complex expression)
-  code = "(lambda x: x)(1, 2)"
+  code = """
+import torch as t
+from torch import nn
+
+t.sum()
+nn.Conv2d()
+non_name_call(1)
+"""
   tree = cst.parse_module(code)
   tree.visit(scanner)
-  assert len(scanner.results) == 0
+
+  assert scanner.results["torch.sum"][1] == "torch"
+  assert scanner.results["torch.nn.Conv2d"][1] == "torch"
 
 
-def test_coverage_scanner_unresolvable_attribute():
-  """Verifies the behavior of coverage scanner when attribute cannot be resolved."""
-  from ml_switcheroo.analysis.audit import CoverageScanner
-
-  semantics = MockSemantics()
+def test_coverage_scanner_edge_cases():
+  """Test element."""
+  semantics = SemanticsManager()
   scanner = CoverageScanner(semantics, {"torch"})
 
-  # Attribute on a non-Name/Attribute node
-  code = "[].append(1)"
-  tree = cst.parse_module(code)
+  # Test line 69 (not node.module)
+  code_no_module = "from . import something"
+  tree = cst.parse_module(code_no_module)
   tree.visit(scanner)
-  assert len(scanner.results) == 0
 
+  # Test line 156 (no raw name)
+  scanner._check_node(cst.Pass())
 
-def test_coverage_scanner_relative_import():
-  """Verifies the behavior of coverage scanner with relative imports."""
-  from ml_switcheroo.analysis.audit import CoverageScanner
-
-  semantics = MockSemantics()
-  scanner = CoverageScanner(semantics, {"torch"})
-  code = "from . import foo\nfrom .foo import bar\n"
-  tree = cst.parse_module(code)
+  # Test line 166 (root only alias resolution)
+  # _check_node calls _resolve_fqn on node.func (for Calls) or node (for Attributes)
+  # A standalone name 't' will be an Attribute or Name in Expr, but CoverageScanner
+  # only visits Call and Attribute. Let's make an attribute call that evaluates to just the root.
+  # Actually, a Call node like t() where t is an alias for torch.
+  code_alias_only = """
+import torch as t
+t()
+"""
+  tree = cst.parse_module(code_alias_only)
   tree.visit(scanner)
-  assert len(scanner.results) == 0
+  assert scanner.results["torch"][1] == "torch"

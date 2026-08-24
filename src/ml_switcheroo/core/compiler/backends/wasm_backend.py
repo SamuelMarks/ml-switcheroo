@@ -36,7 +36,7 @@ class WasmBackend(CompilerBackend):
     self.semantics = semantics
 
   def compile(self, graph: LogicalGraph) -> str:
-    """Compiles the LogicalGraph into a WAT string.
+    """Compile the LogicalGraph into a WAT string.
 
     This method translates a logical representation of operations (nodes and edges) into
     WebAssembly instructions, structures the inputs as function parameters, maps intermediate

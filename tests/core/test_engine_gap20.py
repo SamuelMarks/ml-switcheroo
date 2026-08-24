@@ -22,13 +22,18 @@ def test_astengine_fusion_target_branches_mocked(monkeypatch):
   import ml_switcheroo.core.engine
 
   class FakeBackend:
+    """Docstring."""
+
     def __init__(self, semantics):
+      """Docstring."""
       pass
 
     def set_mode(self, *args, **kwargs):
+      """Docstring."""
       pass
 
     def compile(self, graph):
+      """Docstring."""
       from ml_switcheroo.core.compiler.backends.base import BackendResult
 
       return BackendResult(code="COMP", imports=["A"], attrs=[])
@@ -90,12 +95,20 @@ def test_astengine_run_branches(monkeypatch):
   monkeypatch.setattr(ml_switcheroo.core.engine, "ingest_code", lambda *args: cst.parse_module("def foo(): pass"))
 
   class MockEmitter:
+    """Docstring."""
+
     def __init__(self, semantics):
+      """Docstring."""
       pass
 
     def convert(self, tree):
+      """Docstring."""
+
       class MockText:
+        """Docstring."""
+
         def to_text(self):
+          """Docstring."""
           return "mock"
 
       return MockText()

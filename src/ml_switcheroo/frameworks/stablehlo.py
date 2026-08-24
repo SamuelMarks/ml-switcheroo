@@ -28,7 +28,7 @@ class StableHloAdapter(FrameworkAdapter):
   _mode: InitMode = InitMode.LIVE
 
   def __init__(self) -> None:
-    """Initializes the StableHLO adapter.
+    """Initialize the StableHLO adapter.
 
     Does not require any custom state initialization.
     """
@@ -36,7 +36,7 @@ class StableHloAdapter(FrameworkAdapter):
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Gets the import alias mapping for StableHLO.
+    """Get the import alias mapping for StableHLO.
 
     Returns:
         A tuple of (local_name, import_name) for stablehlo.
@@ -45,7 +45,7 @@ class StableHloAdapter(FrameworkAdapter):
 
   @property
   def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
-    """Gets the import namespaces mapping for StableHLO.
+    """Get the import namespaces mapping for StableHLO.
 
     Returns:
         A dictionary mapping namespace strings to their configurations.
@@ -54,7 +54,7 @@ class StableHloAdapter(FrameworkAdapter):
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """Gets the testing-related configurations for StableHLO.
+    """Get the testing-related configurations for StableHLO.
 
     Returns:
         A dictionary containing keys like "import", "convert_input", and "to_numpy".
@@ -63,7 +63,7 @@ class StableHloAdapter(FrameworkAdapter):
 
   @property
   def harness_imports(self) -> List[str]:
-    """Gets the default list of module imports required by the test harness.
+    """Get the default list of module imports required by the test harness.
 
     Returns:
         A list of python import statement strings.
@@ -71,7 +71,7 @@ class StableHloAdapter(FrameworkAdapter):
     return []
 
   def get_harness_init_code(self) -> str:
-    """Gets the initialization Python code for the JAX/XLA/PJRT compilation and execution harness.
+    """Get the initialization Python code for the JAX/XLA/PJRT compilation and execution harness.
 
     Returns:
         A string of executable Python code that sets up XLA compilation, execution of MLIR,
@@ -92,7 +92,7 @@ def _execute_mlir(mlir_code: str, *args):
 }}"
 
     executable = _client.compile(mlir_code)
-    # Convert numpy inputs to PJRT buffers
+    # Convert NumPy inputs to PJRT buffers
     buffers = [_client.buffer_from_pyval(a) for a in args]
     res = executable.execute(buffers)
 
@@ -102,7 +102,7 @@ def _execute_mlir(mlir_code: str, *args):
 """
 
   def get_to_numpy_code(self) -> str:
-    """Gets the code snippet to convert a framework-specific tensor/object to a NumPy array.
+    """Get the code snippet to convert a framework-specific tensor/object to a NumPy array.
 
     Returns:
         A Python code snippet as a string that converts `obj` to a NumPy array.
@@ -111,7 +111,7 @@ def _execute_mlir(mlir_code: str, *args):
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """Gets the semantic tiers supported by the StableHLO framework.
+    """Get the semantic tiers supported by the StableHLO framework.
 
     Returns:
         A list of SemanticTier instances representing the supported tiers.
@@ -120,7 +120,7 @@ def _execute_mlir(mlir_code: str, *args):
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """Gets any special / magic arguments declared for StableHLO.
+    """Get any special / magic arguments declared for StableHLO.
 
     Returns:
         A list of magic argument name strings.
@@ -129,7 +129,7 @@ def _execute_mlir(mlir_code: str, *args):
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """Gets the structural configuration and traits of StableHLO operations.
+    """Get the structural configuration and traits of StableHLO operations.
 
     Returns:
         A StructuralTraits object containing layout and structural properties.
@@ -138,7 +138,7 @@ def _execute_mlir(mlir_code: str, *args):
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """Gets the plugin-specific configuration and traits of StableHLO.
+    """Get the plugin-specific configuration and traits of StableHLO.
 
     Returns:
         A PluginTraits object detailing supported hooks and extensions.
@@ -147,7 +147,7 @@ def _execute_mlir(mlir_code: str, *args):
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """Loads and returns the standard operation definitions for StableHLO.
+    """Load and returns the standard operation definitions for StableHLO.
 
     Returns:
         A dictionary mapping operation names to StandardMap configurations.
@@ -156,7 +156,7 @@ def _execute_mlir(mlir_code: str, *args):
 
   @property
   def specifications(self) -> Dict[str, OperationDef]:
-    """Gets the inline specifications for StableHLO operations.
+    """Get the inline specifications for StableHLO operations.
 
     Returns:
         A dictionary mapping operation names to OperationDef specifications.
@@ -165,7 +165,7 @@ def _execute_mlir(mlir_code: str, *args):
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Gets the names of methods used for seed management in random number generation.
+    """Get the names of methods used for seed management in random number generation.
 
     Returns:
         A list of method name strings.
@@ -173,7 +173,7 @@ def _execute_mlir(mlir_code: str, *args):
     return []
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """Generates the syntax representing device selection or targeting in StableHLO.
+    """Generate the syntax representing device selection or targeting in StableHLO.
 
     Args:
         device_type: The type of the target device (e.g., "cpu", "gpu", "tpu").
@@ -185,7 +185,7 @@ def _execute_mlir(mlir_code: str, *args):
     return f"// Target: {device_type}"
 
   def get_device_check_syntax(self) -> str:
-    """Gets the code or syntax used to check device compatibility or availability.
+    """Get the code or syntax used to check device compatibility or availability.
 
     Returns:
         A string containing the device check statement or expression.
@@ -193,7 +193,7 @@ def _execute_mlir(mlir_code: str, *args):
     return "True"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """Generates the syntax or expression for splitting a random number generator key.
+    """Generate the syntax or expression for splitting a random number generator key.
 
     Args:
         rng_var: The name of the random number generator variable.
@@ -205,7 +205,7 @@ def _execute_mlir(mlir_code: str, *args):
     return ""
 
   def get_serialization_imports(self) -> List[str]:
-    """Gets any necessary package imports for serialization in StableHLO.
+    """Get any necessary package imports for serialization in StableHLO.
 
     Returns:
         A list of import statement strings.
@@ -213,7 +213,7 @@ def _execute_mlir(mlir_code: str, *args):
     return []
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Generates the syntax needed for serializing StableHLO operations/modules.
+    """Generate the syntax needed for serializing StableHLO operations/modules.
 
     Args:
         op: The serialization operation or method name.
@@ -226,7 +226,7 @@ def _execute_mlir(mlir_code: str, *args):
     return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """Gets the required imports for converting or processing weights.
+    """Get the required imports for converting or processing weights.
 
     Returns:
         A list of import statement strings.
@@ -234,7 +234,7 @@ def _execute_mlir(mlir_code: str, *args):
     return []
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """Generates code for loading weights in the framework.
+    """Generate code for loading weights in the framework.
 
     Args:
         path_var: The variable or string representing the path to load from.
@@ -245,7 +245,7 @@ def _execute_mlir(mlir_code: str, *args):
     return "# Weights not supported in StableHLO mode"
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Generates the expression to convert a tensor variable to a numpy representation.
+    """Generate the expression to convert a tensor variable to a NumPy representation.
 
     Args:
         tensor_var: The name of the tensor variable.
@@ -256,7 +256,7 @@ def _execute_mlir(mlir_code: str, *args):
     return tensor_var
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Generates code for saving weights from the framework.
+    """Generate code for saving weights from the framework.
 
     Args:
         state_var: The variable representing the state or weights to save.
@@ -268,7 +268,7 @@ def _execute_mlir(mlir_code: str, *args):
     return "# Weights not supported in StableHLO mode"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Applies wiring modifications or links using snapshot data.
+    """Apply wiring modifications or links using snapshot data.
 
     Args:
         snapshot: A dictionary containing the snapshot mappings and traits.
@@ -276,7 +276,7 @@ def _execute_mlir(mlir_code: str, *args):
     pass
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """Gets the official documentation URL for a given StableHLO operation or API name.
+    """Get the official documentation URL for a given StableHLO operation or API name.
 
     Args:
         api_name: The fully qualified name of the API or operation (e.g., "stablehlo.abs").
@@ -290,7 +290,7 @@ def _execute_mlir(mlir_code: str, *args):
     return None
 
   def convert(self, data: Any) -> Any:
-    """Converts the input data to a representation suitable for StableHLO (e.g., string representation).
+    """Convert the input data to a representation suitable for StableHLO (e.g., string representation).
 
     Args:
         data: The input data or node to be converted.
@@ -301,7 +301,7 @@ def _execute_mlir(mlir_code: str, *args):
     return str(data)
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Gets standard examples of code snippets for StableHLO across different semantic tiers.
+    """Get standard examples of code snippets for StableHLO across different semantic tiers.
 
     Returns:
         A dictionary mapping tier names to code example strings.

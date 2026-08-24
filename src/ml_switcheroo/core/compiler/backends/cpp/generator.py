@@ -18,10 +18,10 @@ from ml_switcheroo.core.compiler.backends.cpp.cst import (
 
 
 class TorchCppExtensionGenerator:
-  """Generates a complete torch.nn.cpp.ModuleWrapper extension."""
+  """Generate a complete torch.nn.cpp.ModuleWrapper extension."""
 
   def __init__(self, module_name: str) -> None:
-    """Initializes the generator.
+    """Initialize the generator.
 
     Args:
         module_name: The name of the Python module to be generated.
@@ -33,7 +33,7 @@ class TorchCppExtensionGenerator:
     ]
 
   def generate_forward_function(self, args: List[Dict[str, str]], body_nodes: List[CppNode]) -> FunctionDefinition:
-    """Generates the main forward pass function.
+    """Generate the main forward pass function.
 
     Args:
         args: List of dictionaries with 'name' and 'type' keys.
@@ -50,7 +50,7 @@ class TorchCppExtensionGenerator:
     return FunctionDefinition(return_type=ret_type, name="forward", arguments=cpp_args, body=body_nodes)
 
   def generate_pybind_module(self, func_name: str) -> PyBindModule:
-    """Generates the PYBIND11_MODULE block binding the C++ function to Python.
+    """Generate the PYBIND11_MODULE block binding the C++ function to Python.
 
     Args:
         func_name: The name of the C++ function to bind.
@@ -62,7 +62,7 @@ class TorchCppExtensionGenerator:
     return PyBindModule(name="TORCH_EXTENSION_NAME", module_var="m", defs=[d])
 
   def build_module(self, forward_func: FunctionDefinition) -> CppModule:
-    """Assembles the full C++ module.
+    """Assemble the full C++ module.
 
     Args:
         forward_func: The primary function to expose.

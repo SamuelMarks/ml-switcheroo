@@ -16,7 +16,7 @@ from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module
 
 
 class TestCaseGenerator:
-  """Generates PyTest files for ML operators across frameworks (Torch, JAX, etc.).
+  """Generate PyTest files for ML operators across frameworks (Torch, JAX, etc.).
 
   Handles argument constraints, type checking, gradient verification, and
   runtime environment setup via helper modules.
@@ -37,7 +37,7 @@ class TestCaseGenerator:
     self.semantics_mgr = semantics_mgr
 
   def _ensure_runtime_module(self, out_dir: pathlib.Path, frameworks: Any = None) -> None:
-    """Proxies request to runtime_builder.
+    """Proxy request to runtime_builder.
 
     Args:
         out_dir: The directory where the runtime module should be created.

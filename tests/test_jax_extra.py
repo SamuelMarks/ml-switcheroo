@@ -1,5 +1,7 @@
 """Tests for the Jax framework adapter extra features."""
 
+from unittest.mock import patch
+from ml_switcheroo.frameworks.base import InitMode
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.enums import SemanticTier
 
@@ -43,3 +45,61 @@ def test_jax_extra(monkeypatch):
 
   res_live_act = adapter._collect_live(SemanticTier.ACTIVATION)
   assert isinstance(res_live_act, list)
+
+
+def test_jax_adapter_ghost_init_empty():
+  """Test element."""
+  with patch("ml_switcheroo.frameworks.jax.jax", None):
+    with patch("ml_switcheroo.frameworks.jax.load_snapshot_for_adapter", return_value={}):
+      adapter = JaxCoreAdapter()
+      assert adapter._mode == InitMode.GHOST
+
+
+def test_jax_adapter_properties():
+  """Test element."""
+  adapter = JaxCoreAdapter()
+  assert adapter.import_alias == ("jax.numpy", "jnp")
+  assert "jax.numpy" in adapter.import_namespaces
+  assert "import" in adapter.test_config
+  assert "import jax" in adapter.harness_imports
+  assert "jax.random.PRNGKey" in adapter.get_harness_init_code()
+  pass
+  adapter.get_device_syntax("cpu")
+  adapter.get_device_syntax("gpu", "1")
+  adapter.get_device_check_syntax()
+  adapter.get_serialization_imports()
+  adapter.get_serialization_syntax("load", "path")
+  adapter.get_serialization_syntax("save", "path")
+  adapter.get_serialization_syntax("other", "path")
+  adapter.get_weight_conversion_imports()
+  adapter.get_weight_load_code("path")
+  adapter.get_tensor_to_numpy_expr("t")
+  adapter.get_weight_save_code("t", "path")
+  assert "jax.numpy.add.html" in adapter.get_doc_url("jax.numpy.add")
+  assert "optax" in adapter.get_tiered_examples()["tier3_extras"]
+
+
+def test_jax_missing_methods():
+  """Test element."""
+  adapter = JaxCoreAdapter()
+  adapter.declared_magic_args
+  adapter.rng_seed_methods
+  adapter.structural_traits
+  adapter.plugin_traits
+  adapter.definitions
+  adapter.convert([1, 2, 3])
+  adapter.apply_wiring({})
+
+
+def test_jax_convert_exception():
+  """Test element."""
+  adapter = JaxCoreAdapter()
+  real_import = __builtins__["__import__"]
+
+  def mock_import(name, globals=None, locals=None, fromlist=(), level=0):
+    if name == "jax.numpy":
+      raise ImportError("mock")
+    return real_import(name, globals, locals, fromlist, level)
+
+  with patch("builtins.__import__", side_effect=mock_import):
+    assert adapter.convert([1, 2, 3]) == [1, 2, 3]

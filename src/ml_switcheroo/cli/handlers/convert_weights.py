@@ -11,6 +11,7 @@ and determines tensor layout permutations (e.g., NCHW -> NHWC).
 Supported Directions:
 - PyTorch -> JAX (Flax)
 - JAX (Flax) -> PyTorch
+- Both pipelines inherently support reading and writing `.safetensors` alongside standard formats.
 
 Unsupported combinations degrade gracefully by returning False.
 """
@@ -30,10 +31,10 @@ from ml_switcheroo.frameworks import get_adapter
 
 
 class WeightScriptGenerator:
-  """Generates a Python script to migrate weights between frameworks."""
+  """Generate a Python script to migrate weights between frameworks."""
 
   def __init__(self, semantics: SemanticsManager, config: RuntimeConfig):
-    """Initializes the generator.
+    """Initialize the generator.
 
     Args:
         semantics: The loaded semantics manager.
@@ -47,7 +48,7 @@ class WeightScriptGenerator:
     self.target_adapter = get_adapter(self.target_fw)
 
   def generate(self, source_path: Path, output_script: Path) -> bool:
-    """Main entry point to generate the migration script.
+    """Execute entry point to generate the migration script.
 
     Args:
         source_path: Path to the Python file containing the source model definition.
@@ -97,7 +98,7 @@ class WeightScriptGenerator:
       return False
 
   def _flatten_mapping_rules(self, layer_registry: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Constructs mapping rules for each layer found in the AST.
+    """Construct mapping rules for each layer found in the AST.
 
     Args:
         layer_registry: Dictionary of LogicalNodes extracted from source AST.
@@ -176,7 +177,7 @@ class WeightScriptGenerator:
     return rules
 
   def _generate_script(self, rules: List[Dict[str, Any]]) -> str:
-    """Generates the migration script using Adapter primitives.
+    """Generate the migration script using Adapter primitives.
 
     Args:
         rules: The list of mapping rules to embed in the script.
@@ -225,7 +226,7 @@ def migrate(input_path, output_path):
 
         raw_val = raw_state[src_key]
 
-        # Convert to Numpy
+        # Convert to NumPy
         np_val = {to_numpy_expr}
 
         # Permute if needed

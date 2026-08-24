@@ -11,7 +11,7 @@ from ml_switcheroo.core.mlir.types import (
 
 
 def parse_py_type_to_mlir(type_str: str) -> MLIRType:
-  """Parses a Python type annotation string into an MLIRType.
+  """Parse a Python type annotation string into an MLIRType.
 
   Supports basic forms like 'int', 'float', 'bool', and naive tensor parsing
   like 'Tensor[f32]' or fallback to unranked `tensor<*xf32>`.
@@ -82,7 +82,7 @@ class TypeInferencePass(cst.CSTVisitor):
       pass
 
   def _infer_expression(self, node: cst.BaseExpression) -> MLIRType:
-    """Helper to infer the type of an expression.
+    """Support to infer the type of an expression.
 
     Args:
         node: The expression node.

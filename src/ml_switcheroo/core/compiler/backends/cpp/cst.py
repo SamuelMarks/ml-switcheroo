@@ -13,7 +13,7 @@ class CppNode:
 
   @classmethod
   def parse(cls, code: str) -> "CppNode":
-    """Parses a string of C++ code into a CppNode tree.
+    """Parse a string of C++ code into a CppNode tree.
 
     Args:
         code: The C++ source code to parse.
@@ -27,7 +27,7 @@ class CppNode:
     return parser.parse()
 
   def to_text(self) -> str:
-    """Renders the node to a C++ code string.
+    """Render the node to a C++ code string.
 
     Raises:
         NotImplementedError: For the base class.
@@ -37,12 +37,12 @@ class CppNode:
 
 @dataclass
 class TypeIdentifier(CppNode):
-  """Represents a C++ type identifier (e.g., 'int', 'torch::Tensor')."""
+  """Represent a C++ type identifier (e.g., 'int', 'torch::Tensor')."""
 
   name: str
 
   def to_text(self) -> str:
-    """Returns the type name.
+    """Return the type name.
 
     Returns:
         str: The type name.
@@ -59,12 +59,12 @@ class Expression(CppNode):
 
 @dataclass
 class Identifier(Expression):
-  """Represents a simple variable or identifier."""
+  """Represent a simple variable or identifier."""
 
   name: str
 
   def to_text(self) -> str:
-    """Returns the identifier name as text.
+    """Return the identifier name as text.
 
     Returns:
         str: The identifier name.
@@ -74,14 +74,14 @@ class Identifier(Expression):
 
 @dataclass
 class BinaryExpression(Expression):
-  """Represents a binary expression like a + b."""
+  """Represent a binary expression like a + b."""
 
   left: Expression
   operator: str
   right: Expression
 
   def to_text(self) -> str:
-    """Returns the binary expression as text.
+    """Return the binary expression as text.
 
     Returns:
         str: The binary expression.
@@ -91,13 +91,13 @@ class BinaryExpression(Expression):
 
 @dataclass
 class MethodCall(Expression):
-  """Represents a method call or function invocation."""
+  """Represent a method call or function invocation."""
 
   name: str
   arguments: List[Expression] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Returns the method call as text.
+    """Return the method call as text.
 
     Returns:
         str: The method call.
@@ -108,12 +108,12 @@ class MethodCall(Expression):
 
 @dataclass
 class ReturnStatement(CppNode):
-  """Represents a return statement."""
+  """Represent a return statement."""
 
   value: Optional[Expression] = None
 
   def to_text(self) -> str:
-    """Returns the return statement as text.
+    """Return the return statement as text.
 
     Returns:
         str: The return statement.
@@ -125,14 +125,14 @@ class ReturnStatement(CppNode):
 
 @dataclass
 class VariableDeclaration(CppNode):
-  """Represents a variable declaration."""
+  """Represent a variable declaration."""
 
   type_id: TypeIdentifier
   name: str
   initializer: Optional[Union[str, Expression]] = None
 
   def to_text(self) -> str:
-    """Renders the declaration.
+    """Render the declaration.
 
     Returns:
         str: The declaration.
@@ -146,13 +146,13 @@ class VariableDeclaration(CppNode):
 
 @dataclass
 class FunctionArgument(CppNode):
-  """Represents an argument in a function signature."""
+  """Represent an argument in a function signature."""
 
   type_id: TypeIdentifier
   name: str
 
   def to_text(self) -> str:
-    """Renders the argument.
+    """Render the argument.
 
     Returns:
         str: The argument.
@@ -162,7 +162,7 @@ class FunctionArgument(CppNode):
 
 @dataclass
 class FunctionDefinition(CppNode):
-  """Represents a C++ function definition."""
+  """Represent a C++ function definition."""
 
   return_type: TypeIdentifier
   name: str
@@ -170,7 +170,7 @@ class FunctionDefinition(CppNode):
   body: List[CppNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Renders the function.
+    """Render the function.
 
     Returns:
         str: The function.
@@ -190,7 +190,7 @@ class RawStatement(CppNode):
   code: str
 
   def to_text(self) -> str:
-    """Renders the raw code.
+    """Render the raw code.
 
     Returns:
         str: The raw code.
@@ -200,13 +200,13 @@ class RawStatement(CppNode):
 
 @dataclass
 class MacroDefinition(CppNode):
-  """Represents a preprocessor macro definition."""
+  """Represent a preprocessor macro definition."""
 
   name: str
   value: str
 
   def to_text(self) -> str:
-    """Renders the macro definition.
+    """Render the macro definition.
 
     Returns:
         str: The macro definition.
@@ -216,12 +216,12 @@ class MacroDefinition(CppNode):
 
 @dataclass
 class BlockStatement(CppNode):
-  """Represents a block of C++ code wrapped in braces."""
+  """Represent a block of C++ code wrapped in braces."""
 
   statements: List[CppNode]
 
   def to_text(self) -> str:
-    """Renders the block.
+    """Render the block.
 
     Returns:
         str: The block.
@@ -235,14 +235,14 @@ class BlockStatement(CppNode):
 
 @dataclass
 class PyBindDef(CppNode):
-  """Represents a pybind11 module method definition."""
+  """Represent a pybind11 module method definition."""
 
   name: str
   function_ref: str
   docstring: str
 
   def to_text(self) -> str:
-    """Renders the m.def() call.
+    """Render the m.def() call.
 
     Returns:
         str: The m.def() call.
@@ -252,14 +252,14 @@ class PyBindDef(CppNode):
 
 @dataclass
 class PyBindModule(CppNode):
-  """Represents a PYBIND11_MODULE block."""
+  """Represent a PYBIND11_MODULE block."""
 
   name: str
   module_var: str
   defs: List[PyBindDef]
 
   def to_text(self) -> str:
-    """Renders the PYBIND11_MODULE block.
+    """Render the PYBIND11_MODULE block.
 
     Returns:
         str: The module block.
@@ -273,13 +273,13 @@ class PyBindModule(CppNode):
 
 @dataclass
 class IncludeDirective(CppNode):
-  """Represents an #include directive."""
+  """Represent an #include directive."""
 
   path: str
   system: bool = False
 
   def __post_init__(self) -> None:
-    """Enforces typing rules.
+    """Enforc typing rules.
 
     Raises:
         ValueError: If path is invalid.
@@ -290,7 +290,7 @@ class IncludeDirective(CppNode):
       raise ValueError('Include path must not contain delimiters like <, >, or ".')
 
   def to_text(self) -> str:
-    """Renders the include.
+    """Render the include.
 
     Returns:
         str: The include directive.
@@ -302,13 +302,13 @@ class IncludeDirective(CppNode):
 
 @dataclass
 class CppModule(CppNode):
-  """Represents a complete C++ source file."""
+  """Represent a complete C++ source file."""
 
   includes: List[IncludeDirective] = field(default_factory=list)
   body: List[CppNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Renders the entire module.
+    """Render the entire module.
 
     Returns:
         str: The module source code.

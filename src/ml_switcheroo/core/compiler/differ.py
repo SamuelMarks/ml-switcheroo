@@ -54,7 +54,7 @@ class ReplaceAction(PatchAction):
 
 
 class GraphDiffer:
-  """Calculates transformation steps to migrate from Source Graph to Target Graph.
+  """Calculate transformation steps to migrate from Source Graph to Target Graph.
 
   Assumption:
       Optimization is mostly fusion/deletion.

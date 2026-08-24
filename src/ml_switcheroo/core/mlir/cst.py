@@ -20,7 +20,7 @@ class MlirNode(CSTNode):
 
 @dataclass
 class TypeNode(MlirNode):
-  """Represents a type annotation."""
+  """Represent a type annotation."""
 
   body: str = ""
 
@@ -34,7 +34,7 @@ class TypeNode(MlirNode):
 
 @dataclass
 class ValueNode(MlirNode):
-  """Represents an SSA Value identifier (e.g. %0)."""
+  """Represent an SSA Value identifier (e.g. %0)."""
 
   name: str = ""
   type_node: Optional[TypeNode] = None
@@ -54,7 +54,7 @@ class ValueNode(MlirNode):
 
 @dataclass
 class AttributeNode(MlirNode):
-  """Represents a named attribute."""
+  """Represent a named attribute."""
 
   name: str = ""
   value: Union[str, List[str]] = ""
@@ -77,7 +77,7 @@ class AttributeNode(MlirNode):
 
 @dataclass
 class BlockNode(MlirNode):
-  """Represents a Basic Block within a Region."""
+  """Represent a Basic Block within a Region."""
 
   label: str = ""
   operations: List["OperationNode"] = field(default_factory=list)
@@ -109,7 +109,7 @@ class BlockNode(MlirNode):
 
 @dataclass
 class RegionNode(MlirNode):
-  """Represents a Region containing Blocks."""
+  """Represent a Region containing Blocks."""
 
   blocks: List[BlockNode] = field(default_factory=list)
 
@@ -126,7 +126,7 @@ class RegionNode(MlirNode):
 
 @dataclass
 class OperationNode(MlirNode):
-  """Represents a specific MLIR Operation."""
+  """Represent a specific MLIR Operation."""
 
   name: str = ""
   results: List[ValueNode] = field(default_factory=list)
@@ -271,7 +271,7 @@ class StableHloConstantOp(OperationNode):
 
 @dataclass
 class AttributeAliasDefNode(MlirNode):
-  """Represents a top-level attribute alias definition."""
+  """Represent a top-level attribute alias definition."""
 
   name: str = ""
   value_node: Optional[MlirNode] = None

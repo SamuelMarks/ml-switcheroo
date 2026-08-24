@@ -14,7 +14,7 @@ from ml_switcheroo.plugins.utils import create_dotted_name
 
 @register_hook("jax_decompose")
 def decompose_via_jax(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.BaseExpression]:
-  """Translates an unsupported API call by routing it through JAX AST semantics.
+  """Translate an unsupported API call by routing it through JAX AST semantics.
 
   This acts as a fallback for complex math ops (e.g. `Hardswish`) when migrating to
   frameworks that lack them. Since JAX acts as our universal mathematical IR, we

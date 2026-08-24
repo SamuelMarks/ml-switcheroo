@@ -14,8 +14,7 @@ from ml_switcheroo.utils.console import log_info, log_success
 
 
 def handle_matrix() -> int:
-  """Handles 'matrix' command.
-
+  """Handle 'matrix' command.
 
   Prints the compatibility table to stdout.
 
@@ -30,7 +29,7 @@ def handle_matrix() -> int:
 
 
 def handle_docs(source: str, target: str, out_path: Path) -> int:
-  """Handles 'gen-docs' command.
+  """Handle 'gen-docs' command.
 
   Generates a migration guide Markdown file.
 
@@ -54,7 +53,7 @@ def handle_docs(source: str, target: str, out_path: Path) -> int:
 
 
 def handle_gen_tests(out: Path) -> int:
-  """Handles 'gen-tests' command.
+  """Handle 'gen-tests' command.
 
   Generates physical test files for known APIs.
 

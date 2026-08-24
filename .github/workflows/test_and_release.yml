@@ -46,10 +46,10 @@ jobs:
           uv pip install -r requirements.txt -r docs/docs-requirements.txt -r test-requirements.txt
           uv pip install -e ".[test]"
 
-      - name: Run Pytest (fast, no coverage)
+      - name: Run Pytest (with coverage)
         run: |
           source .venv/bin/activate
-          pytest -n auto --durations=10 tests
+          pytest -n auto --durations=10 --cov=src --cov-fail-under=100 tests
 
       - name: Run mypy and interrogate
         if: matrix.python-version == '3.12'

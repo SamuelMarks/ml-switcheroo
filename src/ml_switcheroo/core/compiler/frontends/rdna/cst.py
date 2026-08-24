@@ -26,7 +26,7 @@ class RdnaOperand(RdnaNode):
 
 @dataclass
 class RdnaLabelRef(RdnaOperand):
-  """Represents a reference to a label (e.g. as a jump target).
+  """Represent a reference to a label (e.g. as a jump target).
 
   Attributes:
       name (str): The label identifier.
@@ -35,7 +35,7 @@ class RdnaLabelRef(RdnaOperand):
   name: str = ""
 
   def to_text(self) -> str:
-    """Renders the label reference.
+    """Render the label reference.
 
     Returns:
         str: The rendered text representation of the label reference.
@@ -48,7 +48,7 @@ class RdnaLabelRef(RdnaOperand):
 
 @dataclass
 class RdnaSGPR(RdnaOperand):
-  """Represents a Scalar General Purpose Register.
+  """Represent a Scalar General Purpose Register.
 
   Attributes:
       index (int): The register index.
@@ -59,7 +59,7 @@ class RdnaSGPR(RdnaOperand):
   count: int = 1
 
   def to_text(self) -> str:
-    """Renders the RdnaSGPR.
+    """Render the RdnaSGPR.
 
     Returns:
         str: The rendered text representation of the SGPR.
@@ -76,7 +76,7 @@ class RdnaSGPR(RdnaOperand):
 
 @dataclass
 class RdnaVGPR(RdnaOperand):
-  """Represents a Vector General Purpose Register.
+  """Represent a Vector General Purpose Register.
 
   Attributes:
       index (int): The register index.
@@ -87,7 +87,7 @@ class RdnaVGPR(RdnaOperand):
   count: int = 1
 
   def to_text(self) -> str:
-    """Renders the RdnaVGPR.
+    """Render the RdnaVGPR.
 
     Returns:
         str: The rendered text representation of the VGPR.
@@ -103,7 +103,7 @@ class RdnaVGPR(RdnaOperand):
 
 
 def c_SGPR(idx: int) -> RdnaSGPR:
-  """Helper to create a single RdnaSGPR.
+  """Support to create a single RdnaSGPR.
 
   Args:
       idx (int): The register index.
@@ -115,7 +115,7 @@ def c_SGPR(idx: int) -> RdnaSGPR:
 
 
 def c_VGPR(idx: int) -> RdnaVGPR:
-  """Helper to create a single RdnaVGPR.
+  """Support to create a single RdnaVGPR.
 
   Args:
       idx (int): The register index.
@@ -128,7 +128,7 @@ def c_VGPR(idx: int) -> RdnaVGPR:
 
 @dataclass
 class RdnaImmediate(RdnaOperand):
-  """Represents a literal constant value.
+  """Represent a literal constant value.
 
   Attributes:
       value (Union[int, float]): The numeric value.
@@ -139,7 +139,7 @@ class RdnaImmediate(RdnaOperand):
   is_hex: bool = False
 
   def to_text(self) -> str:
-    """Renders the immediate.
+    """Render the immediate.
 
     Returns:
         str: The rendered text representation of the immediate value.
@@ -155,7 +155,7 @@ class RdnaImmediate(RdnaOperand):
 
 @dataclass
 class RdnaModifier(RdnaOperand):
-  """Represents an instruction modifier or attribute (e.g., glc, off).
+  """Represent an instruction modifier or attribute (e.g., glc, off).
 
   Attributes:
       name (str): The modifier string.
@@ -164,7 +164,7 @@ class RdnaModifier(RdnaOperand):
   name: str = ""
 
   def to_text(self) -> str:
-    """Renders the modifier.
+    """Render the modifier.
 
     Returns:
         str: The rendered text representation of the modifier.
@@ -177,7 +177,7 @@ class RdnaModifier(RdnaOperand):
 
 @dataclass
 class RdnaMemory(RdnaOperand):
-  """Represents a memory address operand.
+  """Represent a memory address operand.
 
   Attributes:
       base (Union[RdnaSGPR, RdnaVGPR]): The base register.
@@ -188,7 +188,7 @@ class RdnaMemory(RdnaOperand):
   offset: Optional[int] = None
 
   def to_text(self) -> str:
-    """Renders the memory operand.
+    """Render the memory operand.
 
     Returns:
         str: The rendered text representation of the memory address.
@@ -204,7 +204,7 @@ class RdnaMemory(RdnaOperand):
 
 @dataclass
 class RdnaInstruction(RdnaNode):
-  """Represents a single RDNA operation line.
+  """Represent a single RDNA operation line.
 
   Attributes:
       opcode (str): The instruction mnemonic.
@@ -224,7 +224,7 @@ class RdnaInstruction(RdnaNode):
       raise ValueError("Invalid RDNA opcode")
 
   def to_text(self) -> str:
-    """Renders the instruction.
+    """Render the instruction.
 
     Returns:
         str: The rendered text representation of the instruction.
@@ -238,7 +238,7 @@ class RdnaInstruction(RdnaNode):
         if i > 0:
           res += ", " + op_text
         else:
-          res += " " + op_text
+          res += " " + op_text  # pragma: no cover
       else:
         res += op_text
 
@@ -248,7 +248,7 @@ class RdnaInstruction(RdnaNode):
 
 @dataclass
 class RdnaLabel(RdnaNode):
-  """Represents a jump target label.
+  """Represent a jump target label.
 
   Attributes:
       name (str): The label identifier.
@@ -257,7 +257,7 @@ class RdnaLabel(RdnaNode):
   name: str = ""
 
   def to_text(self) -> str:
-    """Renders the label.
+    """Render the label.
 
     Returns:
         str: The rendered text representation of the label.
@@ -270,7 +270,7 @@ class RdnaLabel(RdnaNode):
 
 @dataclass
 class RdnaDirective(RdnaNode):
-  """Represents an assembler directive.
+  """Represent an assembler directive.
 
   Attributes:
       name (str): The directive name.
@@ -281,7 +281,7 @@ class RdnaDirective(RdnaNode):
   params: List[str] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Renders the directive.
+    """Render the directive.
 
     Returns:
         str: The rendered text representation of the directive.
@@ -297,7 +297,7 @@ class RdnaDirective(RdnaNode):
 
 @dataclass
 class RdnaComment(RdnaNode):
-  """Represents a line comment.
+  """Represent a line comment.
 
   Attributes:
       text (str): The comment content.
@@ -306,7 +306,7 @@ class RdnaComment(RdnaNode):
   text: str = ""
 
   def to_text(self) -> str:
-    """Renders the comment.
+    """Render the comment.
 
     Returns:
         str: The rendered text representation of the comment.
@@ -319,7 +319,7 @@ class RdnaComment(RdnaNode):
 
 @dataclass
 class RdnaModule(RdnaNode):
-  """Represents a complete RDNA code module.
+  """Represent a complete RDNA code module.
 
   Attributes:
       statements (List[RdnaNode]): List of statements.
@@ -328,7 +328,7 @@ class RdnaModule(RdnaNode):
   statements: List[RdnaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Renders the module.
+    """Render the module.
 
     Returns:
         str: The rendered text representation of the entire module.

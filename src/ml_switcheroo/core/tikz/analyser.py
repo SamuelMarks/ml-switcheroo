@@ -68,7 +68,7 @@ class GraphExtractor(cst.CSTVisitor):
     self._finalize_graph()
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """Detects entry into lifecycle methods (__init__, forward, etc).
+    """Detect entry into lifecycle methods (__init__, forward, etc).
 
     Args:
         node: The function definition CST node being visited.
@@ -89,7 +89,7 @@ class GraphExtractor(cst.CSTVisitor):
     return True
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Resets context flags upon exiting methods.
+    """Reset context flags upon exiting methods.
 
     Args:
         node: The function definition CST node that was visited.
@@ -100,7 +100,7 @@ class GraphExtractor(cst.CSTVisitor):
       self._in_forward = False
 
   def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
-    """Handles assignment logic for both layer definition and data flow.
+    """Handle assignment logic for both layer definition and data flow.
 
     Args:
         node: The assignment CST node being visited.
@@ -115,7 +115,7 @@ class GraphExtractor(cst.CSTVisitor):
     return True
 
   def visit_Return(self, node: cst.Return) -> Optional[bool]:
-    """Handles return statements in forward pass to create Output nodes.
+    """Handle return statements in forward pass to create Output nodes.
 
     Also handles case where return contains a functional call directly.
 
@@ -153,7 +153,7 @@ class GraphExtractor(cst.CSTVisitor):
     return False
 
   def _extract_input_args(self, node: cst.FunctionDef) -> None:
-    """Registers function arguments as input sources.
+    """Register function arguments as input sources.
 
     Args:
         node: The function definition CST node containing the parameters.
@@ -171,7 +171,7 @@ class GraphExtractor(cst.CSTVisitor):
       self.provenance[arg_name] = input_id
 
   def _analyze_layer_def(self, node: cst.Assign) -> None:
-    """Parses `self.conv = nn.Conv2d(...)` lines.
+    """Parse `self.conv = nn.Conv2d(...)` lines.
 
     Args:
         node: The assignment CST node to analyze.
@@ -206,7 +206,7 @@ class GraphExtractor(cst.CSTVisitor):
     self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, metadata)
 
   def _analyze_data_flow(self, node: cst.Assign) -> None:
-    """Parses `x = self.layer(x)` assignments.
+    """Parse `x = self.layer(x)` assignments.
 
     Args:
         node: The assignment CST node to analyze.
@@ -225,7 +225,7 @@ class GraphExtractor(cst.CSTVisitor):
     self._analyze_call_expression(node.value, targets)
 
   def _resolve_layer_or_func_name(self, func_node: cst.BaseExpression) -> Optional[str]:
-    """Resolves `self.layer` -> `layer` or `F.relu` -> `func_relu`.
+    """Resolve `self.layer` -> `layer` or `F.relu` -> `func_relu`.
 
     Args:
         func_node: The CST expression representing the called function/layer.
@@ -251,7 +251,7 @@ class GraphExtractor(cst.CSTVisitor):
     return None
 
   def _analyze_call_expression(self, call: cst.Call, output_vars: List[str]) -> None:
-    """Common logic to trace edges from a Call usage.
+    """Share logic to trace edges from a Call usage.
 
     Args:
         call: The call expression CST node to analyze.
@@ -274,7 +274,7 @@ class GraphExtractor(cst.CSTVisitor):
       self.provenance[out_var] = layer_name
 
   def _get_var_name(self, node: cst.BaseExpression) -> Optional[str]:
-    """Extracts variable name if simple identifier.
+    """Extract variable name if simple identifier.
 
     Args:
         node: The CST expression to extract a variable name from.
@@ -287,7 +287,7 @@ class GraphExtractor(cst.CSTVisitor):
     return None
 
   def _node_to_string(self, node: cst.CSTNode) -> str:
-    """Extracts source string representation of an AST Node.
+    """Extract source string representation of an AST Node.
 
     Handles complex expressions by capturing exact source via utility.
 
@@ -300,6 +300,6 @@ class GraphExtractor(cst.CSTVisitor):
     return capture_node_source(node)
 
   def _finalize_graph(self) -> None:
-    """Populates the graph nodes list from the registry."""
+    """Populate the graph nodes list from the registry."""
     if self.layer_registry:  # pragma: no branch
       self.graph.nodes = list(self.layer_registry.values())

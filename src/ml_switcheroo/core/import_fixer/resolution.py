@@ -15,8 +15,7 @@ from ml_switcheroo.core.scanners import SimpleNameScanner, get_full_name
 
 @dataclass(frozen=True)
 class ImportReq:
-  """Represents a normalized import requirement.
-
+  """Represent a normalized import requirement.
 
   Can represent `import module as alias` or `from module import sub as alias`.
   """
@@ -42,7 +41,7 @@ class ImportReq:
 
 @dataclass
 class ResolutionPlan:
-  """The strategy for the ImportFixer to execute."""
+  """Execute strategy for the ImportFixer to execute."""
 
   required_imports: List[ImportReq] = field(default_factory=list)
   mappings: Dict[str, ImportReq] = field(default_factory=dict)

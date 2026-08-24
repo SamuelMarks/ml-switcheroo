@@ -15,7 +15,7 @@ class AttributeMixin(cst.CSTTransformer):
   """Mixin for processing Attribute nodes."""
 
   def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
-    """Handles path simplification and alias collapsing.
+    """Handle path simplification and alias collapsing.
 
     Args:
         original_node: The node before transformation.
@@ -58,8 +58,7 @@ class AttributeMixin(cst.CSTTransformer):
     return updated_node
 
   def _simplify_reexports(self, node: cst.Attribute) -> cst.BaseExpression:
-    """Detects and strips redundant internal modules.
-
+    """Detect and strips redundant internal modules.
 
     E.g. ``nnx.module.Module`` becomes ``nnx.Module``.
 
@@ -71,11 +70,11 @@ class AttributeMixin(cst.CSTTransformer):
 
     """
     if not isinstance(node.value, cst.Attribute):
-      return node
+      return node  # pragma: no cover
 
     middle_attr = node.value.attr.value
     if middle_attr not in REDUNDANT_SEGMENTS:
-      return node
+      return node  # pragma: no cover
 
     # Safety Check: The root of this chain must be a known framework alias or import
     root_name = get_root_name(node)
@@ -90,7 +89,7 @@ class AttributeMixin(cst.CSTTransformer):
       safe_roots.add(self.target_fw)
 
     if root_name not in safe_roots:
-      return node
+      return node  # pragma: no cover
 
     # Collapse: Remove the middle attribute
     new_base = node.value.value

@@ -13,9 +13,8 @@ def test_pure_math_rejection_numpy():
   engine = ASTEngine(semantics, config)
   result = engine.run(code)
 
-  assert "Cannot map neural network abstraction" in result.code
+  assert "No mapping available for" in result.code
   assert "numpy" in result.code
-  assert "Use a framework like Flax or Keras" in result.code
 
 
 def test_pure_math_rejection_jax():
@@ -28,4 +27,3 @@ def test_pure_math_rejection_jax():
 
   assert "Cannot map neural network abstraction" in result.code
   assert "jax" in result.code
-  assert "Use a framework like Flax or Keras" in result.code

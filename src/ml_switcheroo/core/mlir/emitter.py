@@ -19,7 +19,7 @@ from ml_switcheroo.core.scanners import get_full_name
 
 
 class SSAContext:
-  """Manages Single Static Assignment (SSA) variable scopes and ID allocation."""
+  """Manage Single Static Assignment (SSA) variable scopes and ID allocation."""
 
   def __init__(self) -> None:
     """Initialize the context with a root scope."""
@@ -82,7 +82,7 @@ from ml_switcheroo.core.mlir.emitter_decl import MlirEmitterDeclMixin  # noqa: E
 
 
 class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
-  """Translates Python LibCST modules into MLIR structural nodes."""
+  """Translate Python LibCST modules into MLIR structural nodes."""
 
   def __init__(self) -> None:
     """Initialize the emitter with a fresh SSA context."""
@@ -166,7 +166,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     return block
 
   def _emit_statement(self, stmt: cst.CSTNode) -> List[OperationNode]:
-    """Dispatches statement nodes to specific handlers.
+    """Dispatch statement nodes to specific handlers.
 
     Args:
         stmt: The statement node (ClassDef, FunctionDef, Assign, etc.).

@@ -43,7 +43,7 @@ from ml_switcheroo.testing.fuzzer.utils import (
 
 
 def get_fallback_base_value(parsed: ParsedType, base_shape: Tuple[int, ...]) -> Any:
-  """Returns a minimal valid value to terminate recursion when depth limit is reached.
+  """Return a minimal valid value to terminate recursion when depth limit is reached.
 
   Args:
       parsed: The parsed type hint.

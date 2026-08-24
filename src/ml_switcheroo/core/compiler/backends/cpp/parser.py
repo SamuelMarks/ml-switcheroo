@@ -78,7 +78,7 @@ GRAMMAR = r"""
 
 
 class CppTransformer(Transformer[Any, Any]):
-  """Transforms parsed AST nodes into CppNode classes."""
+  """Transform parsed AST nodes into CppNode classes."""
 
   @v_args(inline=False)
   def module(self, children: List[Any]) -> CppModule:

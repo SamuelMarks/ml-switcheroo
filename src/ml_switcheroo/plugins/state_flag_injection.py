@@ -23,7 +23,7 @@ _PLUGIN_KEY = "state_flag_injection"
 
 
 def _get_func_name(node: cst.BaseExpression) -> Optional[str]:
-  """Refines a CST expression node into a string identifier.
+  """Refine a CST expression node into a string identifier.
 
   Args:
       node: CST node (Name or Attribute).
@@ -44,7 +44,7 @@ def _get_func_name(node: cst.BaseExpression) -> Optional[str]:
 
 @register_hook("inject_training_flag")
 def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Hook: Injects `training=True/False` kwargs into function calls.
+  """Transform Injects `training=True/False` kwargs into function calls.
 
   This hook is triggered on function calls (like `model(x)` or `model.forward(x)`) if
   they map to an abstract operation configured with `requires_plugin="inject_training_flag"`.
@@ -119,7 +119,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("capture_eval_state")
 def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Hook: Intercepts `eval()`/`train()` calls to track state removal.
+  """Transform Intercepts `eval()`/`train()` calls to track state removal.
 
   Action:
 

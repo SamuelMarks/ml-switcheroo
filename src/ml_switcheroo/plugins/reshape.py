@@ -18,7 +18,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Helper to create a CST Attribute chain from string.
+  """Support to create a CST Attribute chain from string.
 
   Args:
       name_str: A string representing a dotted name path (e.g., "jax.numpy.reshape").
@@ -36,7 +36,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("view_semantics")
 def transform_view_semantics(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Hook: Maps `view` -> `reshape` with optional strictness injections.
+  """Transform Maps `view` -> `reshape` with optional strictness injections.
 
   Transformation:
       Input: `x.view(a, b)`

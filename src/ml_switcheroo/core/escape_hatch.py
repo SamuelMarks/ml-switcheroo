@@ -19,8 +19,7 @@ from typing import Union
 
 
 class EscapeHatch:
-  """Handles the "Pass-Through" Protocol.
-
+  """Handle the "Pass-Through" Protocol.
 
   Wraps untranslatable nodes with standardized comment flags and valid Python syntax markers.
   """
@@ -30,7 +29,7 @@ class EscapeHatch:
 
   @staticmethod
   def mark_failure(node: cst.CSTNode, reason: str) -> Union[cst.CSTNode, cst.FlattenSentinel[Any]]:
-    """Attaches warning comments to the node and appends an end marker.
+    """Attach warning comments to the node and appends an end marker.
 
     Transformation:
         original_stmt()

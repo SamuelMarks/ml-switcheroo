@@ -17,7 +17,7 @@ from ml_switcheroo.semantics.merging import merge_tier_data, merge_overlay_data
 
 
 class RegistryLoader:
-  """Hydrates the SemanticsManager from python objects (Adapters/Plugins)."""
+  """Hydrate the SemanticsManager from python objects (Adapters/Plugins)."""
 
   def __init__(self, manager: Any):
     """Initialize the loader.
@@ -28,7 +28,7 @@ class RegistryLoader:
     self.mgr = manager
 
   def hydrate(self) -> None:
-    """Main entry point. Scans adapters and plugins.
+    """Execute entry point. Scans adapters and plugins.
 
     Returns:
         None
@@ -37,7 +37,7 @@ class RegistryLoader:
     self._hydrate_plugins()
 
   def _hydrate_adapters(self) -> None:
-    """Iterates over registered FrameworkAdapters to extract Traits and Mappings.
+    """Iterate over registered FrameworkAdapters to extract Traits and Mappings.
 
     Returns:
         None
@@ -71,7 +71,7 @@ class RegistryLoader:
       self._apply_wiring(fw_name, adapter)
 
   def _load_adapter_traits(self, fw_name: str, adapter: Any) -> None:
-    """Extracts import aliases, supported tiers, and structural traits.
+    """Extract import aliases, supported tiers, and structural traits.
 
     Args:
         fw_name: The name of the framework.
@@ -107,7 +107,7 @@ class RegistryLoader:
       self.mgr.known_magic_args.update(adapter.declared_magic_args)
 
   def _load_adapter_specs(self, adapter: Any) -> None:
-    """Loads abstract operations defined by the adapter.
+    """Load abstract operations defined by the adapter.
 
     Args:
         adapter: The active framework adapter instance.
@@ -135,7 +135,7 @@ class RegistryLoader:
       )
 
   def _load_adapter_definitions(self, fw_name: str, adapter: Any) -> None:
-    """Loads concrete implementations defined by the adapter.
+    """Load concrete implementations defined by the adapter.
 
     Args:
         fw_name: The name of the framework.
@@ -167,7 +167,7 @@ class RegistryLoader:
       )
 
   def _load_import_namespaces(self, fw_name: str, adapter: Any) -> None:
-    """Registers framework namespaces for import abstraction.
+    """Register framework namespaces for import abstraction.
 
     Args:
         fw_name: The name of the framework.
@@ -212,7 +212,7 @@ class RegistryLoader:
         self.mgr._source_registry[path] = (fw_name, tier)
 
   def _apply_wiring(self, fw_name: str, adapter: Any) -> None:
-    """Executes manual wiring callback on the adapter.
+    """Execute manual wiring callback on the adapter.
 
     Args:
         fw_name: The name of the framework.
@@ -237,7 +237,7 @@ class RegistryLoader:
         print(f"⚠️ Failed to apply wiring for {fw_name}: {e}")
 
   def _hydrate_plugins(self) -> None:
-    """Loads definitions from plugins that utilize auto-wire metadata.
+    """Load definitions from plugins that utilize auto-wire metadata.
 
     Returns:
         None

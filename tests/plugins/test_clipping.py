@@ -59,3 +59,10 @@ def test_ignores_if_traits_missing(rewriter):
   code = "torch.nn.utils.clip_grad_norm_(g, 1.0)"
   res = rewrite_code(rewriter, code)
   assert "optax" not in res
+
+
+def test_clip_with_missing_args(rewriter):
+  """Verifies the behavior of clip with missing arguments."""
+  code = "torch.nn.utils.clip_grad_norm_(grads)"
+  res = rewrite_code(rewriter, code)
+  assert "optax" not in res

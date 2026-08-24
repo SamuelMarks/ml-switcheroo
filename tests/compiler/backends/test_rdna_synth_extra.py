@@ -157,3 +157,80 @@ def test_rdna_backend_semantics_provided():
   sem = SemanticsManager()
   backend = RdnaBackend(semantics=sem)
   assert backend.synthesizer.semantics is sem
+
+
+class MockAllocator:
+  """Docstring."""
+
+  def get_vector_register(self, var_name):
+    """Docstring."""
+    from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR
+
+    return RdnaVGPR(0)
+
+  def get_scalar_register(self, var_name):
+    """Docstring."""
+    from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaSGPR
+
+    return RdnaSGPR(0)
+
+  def allocate_vector_temp(self):
+    """Docstring."""
+    from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR
+
+    return RdnaVGPR(1)
+
+  def allocate_scalar_temp(self):
+    """Docstring."""
+    from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaSGPR
+
+    return RdnaSGPR(1)
+
+
+def test_rdna_emit_relu_mock_fail():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.rdna.macros import expand_relu
+  import pytest
+
+  with pytest.raises(AttributeError):
+    expand_relu(allocator="not_an_allocator", node_id="n1", metadata={})
+
+
+def test_rdna_macros_all():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.rdna.macros import (
+    expand_conv2d,
+    expand_linear,
+    expand_relu,
+    expand_flatten,
+    expand_reshape,
+    expand_conv3d,
+    expand_dropout,
+    expand_variable,
+    expand_transpose,
+    expand_conv_general_dilated,
+    expand_adam,
+    expand_l,
+  )
+
+  alloc = MockAllocator()
+  assert len(expand_conv2d(alloc, "n1", {"k": 3})) > 0
+  assert len(expand_linear(alloc, "n1", {"in_features": 3})) > 0
+  assert len(expand_relu(alloc, "n1", {})) > 0
+  assert len(expand_flatten(alloc, "n1", {})) > 0
+  assert len(expand_reshape(alloc, "n1", {})) > 0
+  assert len(expand_conv3d(alloc, "n1", {"k": 3})) > 0
+  assert len(expand_dropout(alloc, "n1", {})) > 0
+  assert len(expand_variable(alloc, "n1", {})) > 0
+  assert len(expand_transpose(alloc, "n1", {})) > 0
+  assert len(expand_conv_general_dilated(alloc, "n1", {})) > 0
+  assert len(expand_adam(alloc, "n1", {})) > 0
+  assert len(expand_l(alloc, "n1", {})) > 0
+
+
+def test_rdna_macros_linear_bias():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.rdna.macros import expand_linear
+
+  alloc = MockAllocator()
+  assert len(expand_linear(alloc, "n1", {"in_features": 3, "bias": True})) > 0

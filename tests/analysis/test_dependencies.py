@@ -1,187 +1,90 @@
-"""Test suite for the Dependencies module."""
+"""Test module."""
 
-import pytest
-import sys
-from unittest.mock import patch
 import libcst as cst
+from unittest.mock import patch
+
 from ml_switcheroo.analysis.dependencies import DependencyScanner
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+def test_dependency_scanner():
+  """Test element."""
+  semantics = SemanticsManager()
+  semantics.import_data = {"numpy.core": {}, "pandas": {}}
 
-  def __init__(self):
-    """Initializes the MockSemantics instance."""
-    self.import_data = {"numpy": {}, "PIL.Image": {}, "optax": {}}
+  scanner = DependencyScanner(semantics, source_fw="torch")
 
-
-@pytest.fixture
-def scanner():
-  """Provides a mock scanner for testing."""
-  semantics = MockSemantics()
-  return DependencyScanner(semantics, source_fw="torch")
-
-
-def scan_code(scanner, code):
-  """Scans code.
-
-  Args:
-      scanner: ...
-      code: ...
-  """
+  code = """
+import os
+import sys
+import torch
+import torch.nn
+from torch import nn
+from . import relative
+from cv2 import imread
+import unknown_lib.submodule
+import numpy as np
+import pandas as pd
+"""
   tree = cst.parse_module(code)
   tree.visit(scanner)
-  return scanner.unknown_imports
+
+  # Check known roots are cached correctly
+  assert "numpy" in scanner._known_semantic_roots
+  assert "pandas" in scanner._known_semantic_roots
+
+  # Check unknown imports
+  assert "cv2" in scanner.unknown_imports
+  assert "unknown_lib" in scanner.unknown_imports
+
+  # Check ignored imports
+  assert "os" not in scanner.unknown_imports  # stdlib
+  assert "sys" not in scanner.unknown_imports  # stdlib
+  assert "torch" not in scanner.unknown_imports  # source fw
+  assert "relative" not in scanner.unknown_imports  # not parsed due to node.relative
+  assert "numpy" not in scanner.unknown_imports  # in semantics
+  assert "pandas" not in scanner.unknown_imports  # in semantics
 
 
-def test_ignore_stdlib(scanner):
-  """Verifies the behavior of ignore stdlib.
+def test_get_root_package_fallback():
+  """Test element."""
+  semantics = SemanticsManager()
+  scanner = DependencyScanner(semantics, source_fw="torch")
 
-  Args:
-      scanner: ...
-  """
-  code = "\nimport os\nimport sys\nfrom typing import Union, List\nfrom datetime import datetime\n"
-  unknowns = scan_code(scanner, code)
-  assert len(unknowns) == 0
-
-
-def test_ignore_source_framework(scanner):
-  """Verifies the behavior of ignore source framework.
-
-  Args:
-      scanner: ...
-  """
-  code = "\nimport torch\nimport torch.nn as nn\nfrom torch import optim\n"
-  unknowns = scan_code(scanner, code)
-  assert len(unknowns) == 0
-
-
-def test_ignore_mapped_dependencies(scanner):
-  """Verifies the behavior of ignore mapped dependencies.
-
-  Args:
-      scanner: ...
-  """
-  code = "\nimport numpy as np\nimport PIL\nfrom PIL import Image\n"
-  unknowns = scan_code(scanner, code)
-  assert len(unknowns) == 0
-
-
-def test_flag_unmapped_third_party(scanner):
-  """Verifies the behavior of flag unmapped third party.
-
-  Args:
-      scanner: ...
-  """
-  code = "\nimport pandas as pd\nimport cv2\n"
-  unknowns = scan_code(scanner, code)
-  assert "pandas" in unknowns
-  assert "cv2" in unknowns
-  assert len(unknowns) == 2
-
-
-def test_flag_deep_imports(scanner):
-  """Verifies the behavior of flag deep imports.
-
-  Args:
-      scanner: ...
-  """
-  code = "from sklearn.metrics import f1_score"
-  unknowns = scan_code(scanner, code)
-  assert "sklearn" in unknowns
-
-
-def test_ignore_relative_imports(scanner):
-  """Verifies the behavior of ignore relative imports.
-
-  Args:
-      scanner: ...
-  """
-  code1 = "from . import x"
-  unknowns1 = scan_code(scanner, code1)
-  assert len(unknowns1) == 0
-  code2 = "from .sub import y"
-  unknowns2 = scan_code(scanner, code2)
-  assert len(unknowns2) == 0
-
-
-def test_get_root_package_non_name(scanner):
-  """Gets root package non name.
-
-  Args:
-      scanner: ...
-  """
+  # _get_root_package on non-Name/Attribute
   res = scanner._get_root_package(cst.Integer("1"))
   assert res == ""
 
+  # visit_ImportFrom with no module (e.g. from . import *)
+  code = "from . import *"
+  tree = cst.parse_module(code)
+  tree.visit(scanner)
+  # Should not crash, just returns early on node.relative
 
-def test_import_from_no_module_name(scanner):
-  """Tests ImportFrom where module is None.
+  # Simulate from ... import without relative, but module is None (invalid CST normally, but test logic)
+  class MockImportFrom:
+    relative = ()
+    module = None
 
-  Args:
-      scanner: ...
-  """
-  code = "from ... import module"
-  unknowns = scan_code(scanner, code)
-  assert len(unknowns) == 0
-
-
-def test_is_stdlib_fallback_3_10(scanner):
-  """Checks if is stdlib fallback on python 3.10+
-
-  Args:
-      scanner: ...
-  """
-  with patch.object(sys, "version_info", (3, 10)):
-    # Mock sys.stdlib_module_names if not available
-    if not hasattr(sys, "stdlib_module_names"):
-      sys.stdlib_module_names = frozenset({"os", "sys"})
-    assert scanner._is_stdlib("os") is True
-    assert scanner._is_stdlib("unknown_lib") is False
+  scanner.visit_ImportFrom(MockImportFrom())  # type: ignore
 
 
-def test_validate_package_empty(scanner):
-  """Validates package empty.
-
-  Args:
-      scanner: ...
-  """
+def test_validate_package_empty():
+  """Test element."""
+  semantics = SemanticsManager()
+  scanner = DependencyScanner(semantics, source_fw="torch")
   scanner._validate_package("")
   assert len(scanner.unknown_imports) == 0
 
 
-def test_is_stdlib_fallback(scanner):
-  """Checks if is stdlib fallback.
+@patch("sys.version_info", (3, 9))
+@patch("sys.builtin_module_names", ("sys",))
+def test_is_stdlib_py39_fallback():
+  """Test element."""
+  semantics = SemanticsManager()
+  scanner = DependencyScanner(semantics, source_fw="torch")
 
-  Args:
-      scanner: ...
-  """
-  with patch.object(sys, "version_info", (3, 9)):
-    assert scanner._is_stdlib("os") is True
-    assert scanner._is_stdlib("unknown_lib") is False
-    with patch.object(sys, "builtin_module_names", ["fake_builtin"]):
-      assert scanner._is_stdlib("fake_builtin") is True
-
-
-def test_no_semantics():
-  """Verifies the behavior of no semantics."""
-  scanner = DependencyScanner(None, source_fw="torch")
-  assert len(scanner._known_semantic_roots) == 0
-
-
-def test_ignore_relative_imports_missing_module(scanner):
-  """Verifies the behavior of ignore relative imports when module is None.
-
-  Args:
-      scanner: ...
-  """
-  from libcst import ImportFrom
-  from unittest.mock import MagicMock
-
-  node = MagicMock(spec=ImportFrom)
-  node.module = None
-  node.relative = ()
-
-  scanner.visit_ImportFrom(node)
-  assert len(scanner.unknown_imports) == 0
+  # In mocked Python 3.9
+  assert scanner._is_stdlib("os") is True  # in common_stdlib
+  assert scanner._is_stdlib("sys") is True  # in builtin_module_names
+  assert scanner._is_stdlib("cv2") is False

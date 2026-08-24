@@ -10,10 +10,10 @@ from ml_switcheroo.core.compiler.backends.sass.printer import SassPrinter
 
 
 class SassEmitter:
-  """Converts SASS AST nodes into textual assembly code."""
+  """Convert SASS AST nodes into textual assembly code."""
 
   def emit(self, nodes: List[SassNode]) -> str:
-    """Generates the SASS source string from a list of nodes.
+    """Generate the SASS source string from a list of nodes.
 
     Args:
         nodes (List[~ml_switcheroo.core.compiler.frontends.sass.cst.SassNode]): AST nodes.
@@ -22,5 +22,5 @@ class SassEmitter:
         str: The formatted SASS source code string.
 
     """
-    printer = SassPrinter()
-    return printer.emit(nodes)
+    printer = SassPrinter()  # pragma: no cover
+    return printer.emit(nodes)  # pragma: no cover

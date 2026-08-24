@@ -8,8 +8,7 @@ from ml_switcheroo.core.tikz.nodes import TikzNode, TikzEdge, TriviaNode, TikzOp
 
 
 class TikzBackend(CompilerBackend):
-  """Orchestrates the conversion of a LogicalGraph to TikZ source code.
-
+  """Orchestrate the conversion of a LogicalGraph to TikZ source code.
 
   Verified to use Rank-Based Layout.
   """
@@ -137,7 +136,7 @@ class TikzBackend(CompilerBackend):
     return positions
 
   def _create_tikz_node(self, node: LogicalNode, x: float, y: float) -> TikzNode:
-    """Creates a TikzNode AST object.
+    """Create a TikzNode AST object.
 
     Args:
         node: Node.
@@ -181,7 +180,7 @@ class TikzBackend(CompilerBackend):
     )
 
   def _create_tikz_edge(self, edge: LogicalEdge) -> TikzEdge:
-    """Creates a TikzEdge AST object.
+    """Create a TikzEdge AST object.
 
     Args:
         edge: Edge.

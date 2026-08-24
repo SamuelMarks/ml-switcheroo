@@ -13,7 +13,7 @@ from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Creates a CST attribute chain from a string string.
+  """Create a CST attribute chain from a string string.
 
   Args:
       name_str (str): The dotted path (e.g. 'mlx.optimizers.Adam').
@@ -31,7 +31,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("mlx_optimizer_init")
 def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Hook: Transforms Optimizer Constructor.
+  """Transform Transforms Optimizer Constructor.
 
   1. Renames API based on context lookup or dynamic class construction.
   2. Strips parameter argument (Arg 0).
@@ -83,8 +83,7 @@ def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("mlx_optimizer_step")
 def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel[Any]]:
-  """Hook: Transforms `optimizer.step()` into an EscapeHatch pattern.
-
+  """Transform Transforms `optimizer.step()` into an EscapeHatch pattern.
 
   Functional optimizers (like MLX/Optax) require explicit update calls `opt.update(model, state)`.
 
@@ -115,7 +114,7 @@ def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.
 
 @register_hook("mlx_zero_grad")
 def transform_mlx_zero_grad(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Hook: Transforms `optimizer.zero_grad()` into `None` (No-Op).
+  """Transform Transforms `optimizer.zero_grad()` into `None` (No-Op).
 
   Args:
       node (cst.Call): Original CST call.

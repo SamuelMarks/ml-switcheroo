@@ -14,7 +14,7 @@ from collections import defaultdict, deque
 
 @dataclass
 class LogicalAxis:
-  """Represents a named dimension for tensor sizes and sharding (e.g., 'batch', 'embed', 'heads')."""
+  """Represent a named dimension for tensor sizes and sharding (e.g., 'batch', 'embed', 'heads')."""
 
   name: str
   """Name of the logical axis."""
@@ -25,7 +25,7 @@ class LogicalAxis:
 
 @dataclass
 class PartitionSpec:
-  """Describes how a tensor's dimensions are mapped to a logical mesh.
+  """Describe how a tensor's dimensions are mapped to a logical mesh.
 
   Each element in `axes` corresponds to a tensor dimension. An element can be:
   - A string representing the mesh axis name (e.g., 'data').
@@ -39,7 +39,7 @@ class PartitionSpec:
 
 @dataclass
 class LogicalMesh:
-  """Represents a multi-dimensional grid of devices for distributed execution."""
+  """Represent a multi-dimensional grid of devices for distributed execution."""
 
   shape: Dict[str, int]
   """Mapping of mesh axis names to their sizes (e.g., {'data': 4, 'model': 2})."""
@@ -47,7 +47,7 @@ class LogicalMesh:
 
 @dataclass
 class LogicalNode:
-  """Represents a computation unit (Layer) in the graph."""
+  """Represent a computation unit (Layer) in the graph."""
 
   id: str
   """Unique identifier (e.g. 'conv1')."""
@@ -64,7 +64,7 @@ class LogicalNode:
 
 @dataclass
 class LogicalEdge:
-  """Represents data flow between two nodes."""
+  """Represent data flow between two nodes."""
 
   source: str
   """Source node ID."""
@@ -91,7 +91,7 @@ class LogicalGraph:
 
 
 def topological_sort(graph: LogicalGraph) -> List[LogicalNode]:
-  """Sorts graph nodes by dependency order.
+  """Sort graph nodes by dependency order.
 
   Ensures that for every edge u -> v, u appears before v in the returned list.
   Handles disconnected components and cycles gracefully by appending

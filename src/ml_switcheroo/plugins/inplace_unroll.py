@@ -17,7 +17,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _get_receiver_name(node: cst.Call) -> Optional[cst.BaseExpression]:
-  """Extracts the receiver object from a method call.
+  """Extract the receiver object from a method call.
 
   Args:
       node (cst.Call): The function call node.
@@ -33,7 +33,7 @@ def _get_receiver_name(node: cst.Call) -> Optional[cst.BaseExpression]:
 
 
 def _get_method_name(node: cst.Call) -> Optional[str]:
-  """Extracts the method name string.
+  """Extract the method name string.
 
   Args:
       node (cst.Call): The function call node.
@@ -51,7 +51,7 @@ def _get_method_name(node: cst.Call) -> Optional[str]:
 def unroll_inplace_ops(
   node: Union[cst.Call, cst.Expr], ctx: HookContext
 ) -> Union[cst.Call, cst.Assign, cst.Expr, cst.BinaryOperation]:
-  """Plugin Hook: Transforms in-place method calls to functional assignments.
+  """Plugin Transform Transforms in-place method calls to functional assignments.
 
   **Scope**
 

@@ -65,6 +65,9 @@
   "CollectivePermute": {
     "api": "stablehlo.collective_permute"
   },
+  "CollectiveReduce": {
+    "api": "stablehlo.collective_reduce"
+  },
   "Compare": {
     "api": "stablehlo.compare"
   },

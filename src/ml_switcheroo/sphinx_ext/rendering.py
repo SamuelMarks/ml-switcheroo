@@ -46,7 +46,7 @@ GROUP_ORDER = [
 
 
 def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_json: str) -> str:
-  """Constructs the full HTML block for the switcheroo demo.
+  """Construct the full HTML block for the switcheroo demo.
 
   Args:
       hierarchy: A dictionary mapping root frameworks to their list of flavours.
@@ -248,7 +248,7 @@ class Model(nn.Module):
 
 
 def _render_primary_options(hierarchy: HierarchyMap) -> str:
-  """Renders the top-level <option> elements for root frameworks.
+  """Render the top-level <option> elements for root frameworks.
 
   Organizes frameworks into <optgroup> categories based on their semantic level.
 
@@ -288,7 +288,7 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
 
 
 def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: str) -> str:
-  """Renders the secondary dropdown for Framework Flavours.
+  """Render the secondary dropdown for Framework Flavours.
 
   Renders options for all frameworks, using data-parent to allow JS to filter.
 

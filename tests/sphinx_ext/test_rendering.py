@@ -146,7 +146,10 @@ def test_render_demo_html_empty_wheels_and_fallback(tmp_path: Path):
   dist_dir.mkdir()
 
   class MockAdapter:
+    """Docstring."""
+
     def __init__(self, name):
+      """Docstring."""
       self.display_name = name.capitalize()
 
   with mock.patch("ml_switcheroo.sphinx_ext.rendering.get_adapter", side_effect=MockAdapter):
@@ -169,7 +172,10 @@ def test_render_demo_html_no_priority_order(tmp_path: Path):
   hierarchy = {"numpy": []}
 
   class MockAdapter:
+    """Docstring."""
+
     def __init__(self, name):
+      """Docstring."""
       self.display_name = name.capitalize()
 
   with mock.patch("ml_switcheroo.sphinx_ext.rendering.get_adapter", side_effect=MockAdapter):

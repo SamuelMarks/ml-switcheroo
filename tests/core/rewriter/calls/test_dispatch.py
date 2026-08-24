@@ -142,7 +142,10 @@ def test_extract_argument_node_method():
   """Test extracting arguments for methods where first arg 'x' is skipped."""
 
   class MethodRewriter(DummyRewriter):
+    """Docstring."""
+
     def _is_module_alias(self, name):
+      """Docstring."""
       return False
 
   rewriter = MethodRewriter("torch")

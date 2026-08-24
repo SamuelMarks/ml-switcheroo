@@ -1,4 +1,4 @@
-"""Consensus Engine for Automated Discovery.
+"""Consensu Engine for Automated Discovery.
 
 Implements the "Cyborg Workflow" consensus algorithm described in the research paper.
 It scans API surfaces, normalizes names, and clusters them using Levenshtein distance
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConsensusEngine:
-  """The Consensus Engine for automated API mapping discovery.
+  """Execute Consensus Engine for automated API mapping discovery.
 
   Attributes:
       frameworks: List of framework modules to scan.
@@ -25,7 +25,7 @@ class ConsensusEngine:
   """
 
   def __init__(self, frameworks: List[str]):
-    """Initializes the engine with a list of framework names to scan.
+    """Initialize the engine with a list of framework names to scan.
 
     Args:
         frameworks: List of framework modules (e.g., ['torch', 'jax.numpy']).

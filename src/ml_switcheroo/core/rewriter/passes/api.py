@@ -38,7 +38,7 @@ class ApiPass(RewriterPass):
   """
 
   def transform(self, module: cst.Module, context: RewriterContext) -> cst.Module:
-    """Executes the API transformation logic.
+    """Execute the API transformation logic.
 
     Args:
         module: The source CST.
@@ -59,6 +59,8 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
   - Tracking scope/state.
   - Rewriting Calls, Attributes, and Assignments.
   """
+
+  context: RewriterContext
 
   def __init__(self, context: RewriterContext) -> None:
     """Initialize the transformer.
@@ -152,7 +154,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
     return self._cached_target_traits
 
   def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
-    """Returns strip and warn method sets for lifecycle management.
+    """Return strip and warn method sets for lifecycle management.
 
     Returns:
         A tuple containing two sets:
@@ -166,7 +168,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
     )
 
   def _report_failure(self, reason: str) -> None:
-    """Records a failure in the context error buffer.
+    """Record a failure in the context error buffer.
 
     Args:
         reason: A message describing the cause of the failure.
@@ -174,7 +176,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
     self.context.current_stmt_errors.append(reason)
 
   def _report_warning(self, reason: str) -> None:
-    """Records a warning in the context warning buffer.
+    """Record a warning in the context warning buffer.
 
     Args:
         reason: A message describing the warning condition.
@@ -185,7 +187,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
   # Use simple implementation for now without deduplication on identity which might be complex,
   # as simple set of strings works for identical injects.
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-    """Injects accumulated module-level preamble statements if they haven't been flushed yet.
+    """Inject accumulated module-level preamble statements if they haven't been flushed yet.
 
     If preambles were gathered during traversal, inject them into the module's body.
     We deduplicate based on string content.
@@ -223,7 +225,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
   # --- Scoping Logic ---
 
   def _mark_stateful(self, var_name: str) -> None:
-    """Marks variable as stateful in current scope.
+    """Mark variable as stateful in current scope.
 
     Args:
         var_name: The name of the variable being assigned a stateful component.
@@ -232,7 +234,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
       self.context.scope_stack[-1].add(var_name)
 
   def _is_stateful(self, var_name: str) -> bool:
-    """Checks if variable is stateful (traversing up scopes).
+    """Check if variable is stateful (traversing up scopes).
 
     Args:
         var_name: The name of the variable to check.

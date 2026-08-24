@@ -19,6 +19,8 @@ def test_class_body_replacer_else_branch():
   assert "print(1)" in res.code
 
   class DummyNode(cst.ClassDef):
+    """Docstring."""
+
     def __init__(self):
       """Test function."""
       super().__init__(name=cst.Name("Dummy"), body=cst.IndentedBlock(body=[]))

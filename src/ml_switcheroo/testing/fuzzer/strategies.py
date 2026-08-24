@@ -1,10 +1,10 @@
-"""Hypothesis Strategies for ODL Types.
+"""Hypothesi Strategies for ODL Types.
 
 This module maps Operation Definition Language (ODL) type strings (e.g., ``Array['N']``,
 ``List[int]``) into executable Hypothesis search strategies. It handles:
 
 1.  **Primitives**: Constraints-aware generation for ints, floats, bools.
-2.  **Tensors**: Numpy array generation with specific dtypes, ranks, and symbolic shapes.
+2.  **Tensors**: NumPy array generation with specific dtypes, ranks, and symbolic shapes.
 3.  **Containers**: Recursive generation of Lists, Tuples, and Dictionaries.
 4.  **Symbolic Consistency**: Ensuring named dimensions (e.g., 'N') resolve consistently
     across different arguments using a shared context.
@@ -34,13 +34,13 @@ from ml_switcheroo.testing.fuzzer.type_parser import (
 
 
 def _get_dtype_strategy(dtype_str: Optional[str]) -> Any:
-  """Resolves a string dtype representation to a Numpy dtype or type class.
+  """Resolve a string dtype representation to a NumPy dtype or type class.
 
   Args:
       dtype_str: The type string (e.g. 'float32', 'int').
 
   Returns:
-      The corresponding numpy dtype object or type class.
+      The corresponding NumPy dtype object or type class.
       Defaults to ``np.float32`` if unknown or None.
 
   """
@@ -68,7 +68,7 @@ def strategies_from_spec(
   constraints: Dict[str, Any],
   shared_dims: Optional[Dict[str, Any]] = None,
 ) -> st.SearchStrategy:
-  """Constructs a Hypothesis strategy from a type string and constraints.
+  """Construct a Hypothesis strategy from a type string and constraints.
 
   Recursively parses complex types (e.g., ``List[int]``) and delegates
   array creation to `_array_strategy`.
@@ -169,7 +169,7 @@ def strategies_from_spec(
 def _array_strategy(
   type_str: TensorType, constraints: Dict[Any, Any], shared_dims: Optional[Dict[Any, Any]]
 ) -> st.SearchStrategy:
-  """Constructs a numpy array strategy based on rank, symbolic shape, and element constraints.
+  """Construct a NumPy array strategy based on rank, symbolic shape, and element constraints.
 
   Args:
       type_str: Parsed TensorType.

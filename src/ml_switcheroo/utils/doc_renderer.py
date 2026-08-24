@@ -12,10 +12,10 @@ from typing import Dict
 
 
 class OpPageRenderer:
-  """Renders RST/HTML for a single Operation documentation page."""
+  """Render RST/HTML for a single Operation documentation page."""
 
   def render_rst(self, context: Dict[str, Any]) -> str:
-    """Generates the full .rst content for the operation.
+    """Generate the full .rst content for the operation.
 
     Args:
         context: View Model dict containing name, description, args, and variants.
@@ -43,7 +43,8 @@ class OpPageRenderer:
     if args:
       rst.append("**Abstract Signature:**")
       rst.append("")
-      rst.append(f"``{op_name}({', '.join(args)})``")
+      args_str = ", ".join([(a if isinstance(a, str) else a.get("name", "")) for a in args])
+      rst.append(f"``{op_name}({args_str})``")
       rst.append("")
 
     # 3. Variants (Interactive HTML Block)
@@ -61,7 +62,7 @@ class OpPageRenderer:
     return "\n".join(rst)
 
   def _render_html_tabs(self, variants: list[Any]) -> str:
-    """Generates the HTML structure for the vertical tabs UI.
+    """Generate the HTML structure for the vertical tabs UI.
 
     Structure:
       <div class="op-tabs-container">
@@ -87,8 +88,8 @@ class OpPageRenderer:
       is_active = "active" if idx == 0 else ""
       fw_label = v["framework"]
       api = v["api"]
-      impl_type = v["implementation_type"]
-      link = v["doc_url"]
+      impl_type = v.get("implementation_type", "Unknown")
+      link = v.get("doc_url")
 
       # Build Button
       btn = f'<button class="op-tab-btn {is_active}" onclick="openOpTab(event, \'{fw_label}_{idx}\')">{fw_label}</button>'

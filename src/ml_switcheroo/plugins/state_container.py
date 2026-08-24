@@ -24,7 +24,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_node(code: str) -> cst.BaseExpression:
-  """Parses a simple expression string into a CST node.
+  """Parse a simple expression string into a CST node.
 
   Args:
       code: The expression string to parse.
@@ -40,7 +40,7 @@ def _create_node(code: str) -> cst.BaseExpression:
 
 
 def _get_receiver(node: cst.Call) -> Optional[cst.BaseExpression]:
-  """Extracts the object instance being called (e.g., 'self' or 'model').
+  """Extract the object instance being called (e.g., 'self' or 'model').
 
   Args:
       node: The CST Call node representing the method invocation.
@@ -55,7 +55,7 @@ def _get_receiver(node: cst.Call) -> Optional[cst.BaseExpression]:
 
 @register_hook("torch_register_buffer_to_nnx")
 def convert_register_buffer(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Transforms `register_buffer`.
+  """Transform `register_buffer`.
 
   Target: `setattr(self, 'name', Wrapper(tensor))`
 
@@ -103,7 +103,7 @@ def convert_register_buffer(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("torch_register_parameter_to_nnx")
 def convert_register_parameter(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Transforms `register_parameter`.
+  """Transform `register_parameter`.
 
   Target: `setattr(self, 'name', ParamWrapper(param))`
 
@@ -148,7 +148,7 @@ def convert_register_parameter(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("torch_state_dict_to_nnx")
 def convert_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Transforms `state_dict`.
+  """Transform `state_dict`.
 
   Target: `StateFunc(model).to_pure_dict()`
 
@@ -181,7 +181,7 @@ def convert_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("torch_load_state_dict_to_nnx")
 def convert_load_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Transforms `load_state_dict`.
+  """Transform `load_state_dict`.
 
   Target: `UpdateFunc(model, state)`
 
@@ -221,7 +221,7 @@ def convert_load_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("torch_parameters_to_nnx")
 def convert_parameters(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Transforms `parameters`.
+  """Transform `parameters`.
 
   Target: `StateFunc(model, ParamType).values()`
 

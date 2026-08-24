@@ -65,3 +65,30 @@ def test_rdna_printer_emit_multiple():
   output = printer.emit(nodes)
   expected = "    .text\nL_1:\n    v_add_f32\n"
   assert output == expected
+
+
+def test_rdna_printer_all_nodes():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import (
+    RdnaLabel,
+    RdnaInstruction,
+    RdnaDirective,
+    RdnaComment,
+    c_SGPR,
+  )
+
+  printer = RdnaPrinter()
+  nodes = [
+    RdnaLabel(name="L1"),
+    RdnaInstruction(opcode="v_add_f32", operands=[c_SGPR(0)]),
+    RdnaDirective(name=".global", params=["main"]),
+    RdnaComment(text="; test"),
+    c_SGPR(0),  # test fallback
+  ]
+  txt = printer.emit(nodes)
+  assert "L1:" in txt
+  assert "v_add_f32 s0" in txt
+  assert ".global main" in txt
+  assert "; test" in txt
+  assert "s0" in txt

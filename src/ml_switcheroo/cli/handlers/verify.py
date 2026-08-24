@@ -17,7 +17,7 @@ from ml_switcheroo.utils.console import log_info, log_success, log_warning, log_
 
 
 def handle_ci(update_readme: bool, readme_path: Path, json_report: Optional[Path], repair: bool = False) -> int:
-  """Handles 'ci' command.
+  """Handle 'ci' command.
 
   Args:
       update_readme: If True, updates the compatibility matrix in the README.

@@ -40,22 +40,38 @@ def test_sass_parse_sass_to_graph():
   """Test function."""
   adapter = SassAdapter()
 
-  # 293-323 lines
+  # Test empty graph
+  empty_graph = adapter.parse_sass_to_graph("// just a comment")
+  assert len(empty_graph.nodes) == 0
+
+  # Code with a loop
+  # entry block (implicit) falls through to L_LOOP
+  # L_LOOP has no FFMA, so it gets LoopControl
+  # L_BODY has FFMA and branches back to L_LOOP
   code = """
     // comment
+    entry:
+    MOV R0, R0
 
-    L_LABEL:
+    L_LOOP:
     ISETP.LT.AND P1, PT, R0, 0x10, PT
+    BRA L_BODY
+
+    L_BODY:
     FFMA R1, R2, R3, R4
+    BRA L_LOOP
     """
 
-  # code with loop
   graph1 = adapter.parse_sass_to_graph(code)
   assert graph1.name == "Model"
   nodes1 = list(graph1.nodes.values())
+  # L_LOOP is in loop, no FFMA -> LoopControl
+  # L_BODY is in loop, has FFMA -> Conv2d
+  # entry is not in loop, no FFMA -> no node added
   assert len(nodes1) == 2
-  assert nodes1[0].op_type == "LoopControl"
-  assert nodes1[1].op_type == "Conv2d"
+  op_types = {n.op_type for n in nodes1}
+  assert "LoopControl" in op_types
+  assert "Conv2d" in op_types
 
   # code without loop
   code_no_loop = """

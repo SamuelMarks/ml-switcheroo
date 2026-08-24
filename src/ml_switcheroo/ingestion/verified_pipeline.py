@@ -9,9 +9,7 @@ from typing import Any, Dict
 
 
 def run_verified_pipeline(source_code: str) -> Dict[str, Any]:
-  """Runs the verified pipeline on raw Python source code..
-
-
+  """Run the verified pipeline on raw Python source code..
 
   Args:
       source_code: The raw unstructured Python source code.

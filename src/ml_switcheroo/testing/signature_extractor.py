@@ -11,7 +11,7 @@ import libcst as cst
 
 
 class FunctionDefVisitor(cst.CSTVisitor):
-  """Visits CST to find the first FunctionDef node."""
+  """Visit CST to find the first FunctionDef node."""
 
   def __init__(self) -> None:
     """Initialize the visitor."""
@@ -38,7 +38,7 @@ class SignatureExtractor:
 
   @staticmethod
   def extract_first_function_name(code: str) -> Optional[str]:
-    """Extracts the name of the first function defined in the source code.
+    """Extract the name of the first function defined in the source code.
 
     Args:
         code: The Python source code string.

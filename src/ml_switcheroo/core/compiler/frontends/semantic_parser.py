@@ -12,7 +12,7 @@ from lark import Lark, Transformer, v_args, Token
 
 @dataclass
 class Trivia:
-  """Represents non-semantic formatting tokens.
+  """Represent non-semantic formatting tokens.
 
   Attributes:
       text: The raw formatting string.
@@ -39,7 +39,7 @@ class SemanticMarker:
   leading_trivia: str = ""
 
   def to_text(self) -> str:
-    """Reconstructs the original text representation of the marker.
+    """Reconstruct the original text representation of the marker.
 
     Returns:
         The reconstructed string representation.
@@ -52,7 +52,7 @@ class SemanticMarker:
 
 @dataclass
 class SemanticInput(SemanticMarker):
-  """Represents an Input marker.
+  """Represent an Input marker.
 
   Attributes:
       name: The name of the input.
@@ -67,7 +67,7 @@ class SemanticInput(SemanticMarker):
   tail: Optional[Trivia] = None
 
   def to_text(self) -> str:
-    """Reconstructs the original text of the Input marker.
+    """Reconstruct the original text of the Input marker.
 
     Returns:
         The reconstructed string representation.
@@ -86,7 +86,7 @@ class SemanticInput(SemanticMarker):
 
 @dataclass
 class SemanticBegin(SemanticMarker):
-  """Represents a BEGIN block marker.
+  """Represent a BEGIN block marker.
 
   Attributes:
       kind: The kind/type of the block.
@@ -107,7 +107,7 @@ class SemanticBegin(SemanticMarker):
   tail: Optional[Trivia] = None
 
   def to_text(self) -> str:
-    """Reconstructs the original text of the BEGIN block marker.
+    """Reconstruct the original text of the BEGIN block marker.
 
     Returns:
         The reconstructed string representation.
@@ -132,7 +132,7 @@ class SemanticBegin(SemanticMarker):
 
 @dataclass
 class SemanticEnd(SemanticMarker):
-  """Represents an END block marker.
+  """Represent an END block marker.
 
   Attributes:
       kind: The kind/type of the block.
@@ -153,7 +153,7 @@ class SemanticEnd(SemanticMarker):
   tail: Optional[Trivia] = None
 
   def to_text(self) -> str:
-    """Reconstructs the original text of the END block marker.
+    """Reconstruct the original text of the END block marker.
 
     Returns:
         The reconstructed string representation.
@@ -178,7 +178,7 @@ class SemanticEnd(SemanticMarker):
 
 @dataclass
 class SemanticUnmapped(SemanticMarker):
-  """Represents an Unmapped Op marker.
+  """Represent an Unmapped Op marker.
 
   Attributes:
       api: The API/operation name.
@@ -201,7 +201,7 @@ class SemanticUnmapped(SemanticMarker):
   tail: Optional[Trivia] = None
 
   def to_text(self) -> str:
-    """Reconstructs the original text of the Unmapped Op marker.
+    """Reconstruct the original text of the Unmapped Op marker.
 
     Returns:
         The reconstructed string representation.
@@ -229,7 +229,7 @@ class SemanticUnmapped(SemanticMarker):
 
 @dataclass
 class SemanticReturn(SemanticMarker):
-  """Represents a Return marker.
+  """Represent a Return marker.
 
   Attributes:
       tail: Optional trailing trivia/content.
@@ -238,7 +238,7 @@ class SemanticReturn(SemanticMarker):
   tail: Optional[Trivia] = None
 
   def to_text(self) -> str:
-    """Reconstructs the original text of the Return marker.
+    """Reconstruct the original text of the Return marker.
 
     Returns:
         The reconstructed string representation.
@@ -294,7 +294,7 @@ def _opt_trivia(token: Optional[Token]) -> Optional[Trivia]:
 
 
 class _SemanticTransformer(Transformer[Any, Any]):
-  """Transforms parsed AST nodes into semantic marker instances."""
+  """Transform parsed AST nodes into semantic marker instances."""
 
   @v_args(inline=False)
   def input(self, children: List[Optional[Token]]) -> SemanticInput:
@@ -406,7 +406,7 @@ class _SemanticTransformer(Transformer[Any, Any]):
 
 
 class SemanticCommentParser:
-  """Parses semantic comments.
+  """Parse semantic comments.
 
   Attributes:
       parser: The Lark LALR parser instance.

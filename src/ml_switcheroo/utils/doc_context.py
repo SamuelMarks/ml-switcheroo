@@ -18,7 +18,7 @@ from ml_switcheroo.config import get_framework_priority_order
 
 
 class DocContextBuilder:
-  """Prepares view data for operation documentation pages.
+  """Prepare view data for operation documentation pages.
 
   This builder transforms internal operation definitions into a structured
   view context dictionary that can be used directly by documentation generators.
@@ -34,7 +34,7 @@ class DocContextBuilder:
     self.semantics = semantics
 
   def build(self, op_name: str, definition: Dict[str, Any]) -> Dict[str, Any]:
-    """Constructs the documentation context for a single operation.
+    """Construct the documentation context for a single operation.
 
     Args:
         op_name: The abstract operation ID (e.g. "Linear").
@@ -59,7 +59,7 @@ class DocContextBuilder:
     }
 
   def _format_args(self, std_args: List[Any]) -> List[str]:
-    """Formats the standard arguments list into human-readable signature strings.
+    """Format the standard arguments list into human-readable signature strings.
 
     Handles various ODL formats:
     - String: "x"
@@ -102,7 +102,7 @@ class DocContextBuilder:
     return formatted
 
   def _resolve_variants(self, variants_map: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Processes the raw variants dictionary into display-ready objects.
+    """Process the raw variants dictionary into display-ready objects.
 
     Sorts frameworks by UI priority, retrieves display names,
     classifies implementation types, and resolves doc URLs.
@@ -154,7 +154,7 @@ class DocContextBuilder:
     return results
 
   def _determine_impl_type(self, variant: Dict[str, Any]) -> str:
-    """Classifies the implementation strategy.
+    """Classify the implementation strategy.
 
     Args:
         variant: The variant definition dictionary.

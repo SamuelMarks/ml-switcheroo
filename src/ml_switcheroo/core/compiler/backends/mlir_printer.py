@@ -7,14 +7,14 @@ from ml_switcheroo.core.mlir.cst import MlirNode, ModuleNode, OperationNode
 
 
 class MlirPrinter:
-  """Prints MLIR CST to textual representation.
+  """Print MLIR CST to textual representation.
 
   Ensures consistent formatting and layout, acting as an alternative or
   wrapper around `node.to_text()` that enforces file-level consistency.
   """
 
   def emit(self, node: MlirNode, header: str = "// Graph -> MLIR compilation output\n") -> str:
-    """Emits the textual representation for an MLIR node.
+    """Emit the textual representation for an MLIR node.
 
     Args:
         node (~ml_switcheroo.core.mlir.cst.MlirNode): The root MLIR node to print.
@@ -29,7 +29,7 @@ class MlirPrinter:
     return node.to_text()
 
   def _emit_module(self, module: ModuleNode, header: str) -> str:
-    """Emits a module with standard formatting.
+    """Emit a module with standard formatting.
 
     Args:
         module: The module to emit.

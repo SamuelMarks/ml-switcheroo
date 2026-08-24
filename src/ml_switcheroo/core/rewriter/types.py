@@ -6,7 +6,7 @@ from typing import List, Optional, Set, Tuple
 
 @dataclass
 class SignatureContext:
-  """Tracks the state of the current function scope being visited.
+  """Track the state of the current function scope being visited.
 
   Used by the StructureMixin to maintain context about arguments,
   injections, and initialization status during AST traversal.

@@ -22,8 +22,7 @@ class InputFuzzer:
     hints: Optional[Dict[str, str]] = None,
     constraints: Optional[Dict[str, Dict[Any, Any]]] = None,
   ) -> Dict[str, st.SearchStrategy]:
-    """Constructs a dictionary of Hypothesis strategies for the given parameters.
-
+    """Construct a dictionary of Hypothesis strategies for the given parameters.
 
     Automatically handles shared symbolic dimensions (e.g. Array['N']).
 
@@ -83,7 +82,7 @@ class InputFuzzer:
     return strategies
 
   def adapt_to_framework(self, kwargs: Dict[str, Any], framework: str) -> Dict[str, Any]:
-    """Delegates to Framework Adapter to convert Numpy/Native inputs to Tensors.
+    """Delegate to Framework Adapter to convert NumPy/Native inputs to Tensors.
 
     Args:
         kwargs: Dictionary of input values.

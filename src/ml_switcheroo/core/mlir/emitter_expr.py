@@ -23,7 +23,7 @@ class MlirEmitterExprMixin:
     ctx: Any
 
     def _flatten_attr(self, attr: Any) -> Any:
-      """Flattens a Name or Attribute chain into a dotted string.
+      """Flatten a Name or Attribute chain into a dotted string.
 
       Args:
           self: The mixin instance.
@@ -36,7 +36,7 @@ class MlirEmitterExprMixin:
       return None
 
     def _get_binop_str(self, op: Any) -> str:
-      """Maps a LibCST binary operator node to its corresponding string identifier.
+      """Map a LibCST binary operator node to its corresponding string identifier.
 
       Args:
           self: The mixin instance.
@@ -172,7 +172,7 @@ class MlirEmitterExprMixin:
     return ValueNode(name="%error"), []
 
   def _annotation_to_string(self, node: cst.CSTNode) -> str:
-    """Flattens a type annotation node into its corresponding string representation.
+    """Flatten a type annotation node into its corresponding string representation.
 
     Args:
         node: The LibCST node representing the type annotation.

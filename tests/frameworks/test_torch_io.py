@@ -16,11 +16,17 @@ def test_torch_io_methods():
   assert mixin.get_serialization_syntax("invalid", "my_file.pth") == ""
 
   # Test get_weight_conversion_imports
-  assert mixin.get_weight_conversion_imports() == ["import torch"]
+  assert mixin.get_weight_conversion_imports() == [
+    "import torch",
+    "try:",
+    "    import safetensors.torch",
+    "except ImportError:",
+    "    pass",
+  ]
 
   # Test get_weight_load_code
   load_code = mixin.get_weight_load_code("path_to_checkpoint")
-  assert "torch.load(path_to_checkpoint, map_location='cpu')" in load_code
+  assert "torch.load(path_to_checkpoint, map_location='cpu', weights_only=True)" in load_code
   assert "loaded['state_dict']" in load_code
 
   # Test get_tensor_to_numpy_expr

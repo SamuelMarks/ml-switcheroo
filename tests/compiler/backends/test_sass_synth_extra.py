@@ -296,3 +296,95 @@ def test_sass_synth_to_cst_other_non_label_non_comment():
   synth = SassSynthesizer(None)
   mod = synth.to_python([CustomNode()])
   assert len(mod.body) == 0
+
+
+def test_sass_allocator_overflow():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
+  import pytest
+
+  allocator = RegisterAllocator()
+  # It has 255 registers. Allocate them all
+  with pytest.raises(ValueError):
+    for i in range(256):
+      allocator.allocate_temp()
+
+
+def test_sass_synth_float_immediate():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate
+  import libcst as cst
+
+  synth = SassSynthesizer(None)
+  res = synth._convert_operand_to_py(SassImmediate(value=3.14))
+  assert isinstance(res, cst.Float)
+  assert res.value == "3.14"
+
+
+def test_sass_synth_expr_statement():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate
+  import libcst as cst
+
+  synth = SassSynthesizer(None)
+  # Give it an instruction with operands, but where dest is not a Register
+  # So it hits the else branch "Expression Statement"
+  inst = SassInstruction(opcode="MOV", operands=[SassImmediate(value=0), SassImmediate(value=1)])
+  stmt = synth._convert_instruction_to_py(inst)
+  assert isinstance(stmt, cst.SimpleStatementLine)
+  assert isinstance(stmt.body[0], cst.Expr)
+
+
+def test_sass_synth_no_operands():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction
+  import libcst as cst
+
+  synth = SassSynthesizer(None)
+  inst = SassInstruction(opcode="NOP", operands=[])
+  stmt = synth._convert_instruction_to_py(inst)
+  assert isinstance(stmt, cst.SimpleStatementLine)
+  assert isinstance(stmt.body[0], cst.Expr)
+
+
+def test_sass_synth_nop():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate
+  import libcst as cst
+
+  synth = SassSynthesizer(None)
+  inst = SassInstruction(opcode="NOP", operands=[SassImmediate(value=0)])
+  stmt = synth._convert_instruction_to_py(inst)
+  assert isinstance(stmt, cst.SimpleStatementLine)
+  assert isinstance(stmt.body[0], cst.Expr)
+
+
+def test_sass_synth_hex_immediate():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate
+  import libcst as cst
+
+  synth = SassSynthesizer(None)
+  # Hex immediate
+  res = synth._convert_operand_to_py(SassImmediate(value=10, is_hex=True))
+  assert isinstance(res, cst.Integer)
+  assert res.value == hex(10)
+
+
+def test_sass_synth_output_with_sources():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+
+  synth = SassSynthesizer(None)
+  g = LogicalGraph("Test")
+  g.nodes.append(LogicalNode(id="src_node", kind="Input"))
+  g.nodes.append(LogicalNode(id="out", kind="Output"))
+  g.edges.append(LogicalEdge(source="src_node", target="out"))
+  res = synth.from_graph(g)
+  assert len(res) > 0

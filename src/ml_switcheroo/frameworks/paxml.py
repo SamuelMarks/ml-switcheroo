@@ -14,10 +14,10 @@ from typing import Union, List, Tuple, Dict, Any, Optional
 
 try:
   import praxis
-  import praxis.layers
-  import praxis.base_layer
-  import praxis.layers.activations
-  import praxis.layers.normalizations
+  import praxis.layers  # pragma: no cover
+  import praxis.base_layer  # pragma: no cover
+  import praxis.layers.activations  # pragma: no cover
+  import praxis.layers.normalizations  # pragma: no cover
 except Exception:
   praxis = None
 from ml_switcheroo.frameworks.base import (
@@ -65,7 +65,7 @@ class PaxmlAdapter(JAXStackMixin):
         logging.debug("PaxML (Praxis) not installed and no snapshot found.")
 
   def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:
-    """Loads API signatures from the JSON snapshot in Ghost Mode.
+    """Load API signatures from the JSON snapshot in Ghost Mode.
 
     Args:
         category (SemanticTier): The category to retrieve.
@@ -81,7 +81,7 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Returns the primary import alias for the framework.
+    """Return the primary import alias for the framework.
 
     Returns:
         Tuple[str, str]: ``("praxis.layers", "pl")``.
@@ -91,7 +91,7 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
-    """Defines the semantic roles of Praxis namespaces.
+    """Define the semantic roles of Praxis namespaces.
 
     Returns:
         Dict[str, ImportConfig]: Mapping of namespaces to tiers.
@@ -104,8 +104,7 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """Returns templates for generating physical test files.
-
+    """Return templates for generating physical test files.
 
     Extends the JAX base config with Praxis imports.
 
@@ -119,7 +118,7 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def harness_imports(self) -> List[str]:
-    """Returns imports required for the verification harness.
+    """Return imports required for the verification harness.
 
     Returns:
         List[str]: ``['import jax', 'import jax.random']``.
@@ -128,7 +127,7 @@ class PaxmlAdapter(JAXStackMixin):
     return ["import jax", "import jax.random"]
 
   def get_harness_init_code(self) -> str:
-    """Returns Python code helper for initializing JAX random keys in the harness.
+    """Return Python code helper for initializing JAX random keys in the harness.
 
     Returns:
         str: Source code for ``_make_jax_key``.
@@ -147,7 +146,7 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def supported_tiers(self) -> List[Any]:
-    """Returns supported semantic tiers.
+    """Return supported semantic tiers.
 
     Returns:
         List[SemanticTier]: Array API, Neural, and Extras.
@@ -157,7 +156,7 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """Returns list of magic arguments to strip.
+    """Return list of magic arguments to strip.
 
     Praxis usually handles RNG context internally or differently than Flax.
 
@@ -169,7 +168,7 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """Defines structural rewriting rules for Praxis.
+    """Define structural rewriting rules for Praxis.
 
     Key Differences:
     -   **Module Base**: ``praxis.base_layer.BaseLayer``.
@@ -192,7 +191,7 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """Returns plugin capability flags.
+    """Return plugin capability flags.
 
     Enables functional control flow and purity analysis (inherited from JAX requirements).
 
@@ -209,7 +208,7 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """Returns static definitions for Praxis Layers.
+    """Return static definitions for Praxis Layers.
 
     Ensures that 'Linear' maps 'bias' to 'use_bias' to satisfy tests.
 
@@ -231,7 +230,7 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Returns list of global RNG seed methods (Empty for PaxML).
+    """Return list of global RNG seed methods (Empty for PaxML).
 
     Returns:
         List[str]: Empty list.
@@ -240,10 +239,10 @@ class PaxmlAdapter(JAXStackMixin):
     return []
 
   def convert(self, data: Any) -> Any:
-    """Converts input data to JAX arrays.
+    """Convert input data to JAX arrays.
 
     Args:
-        data (Any): Input data (numpy/list).
+        data (Any): Input data (NumPy/list).
 
     Returns:
         Any: JAX Array.
@@ -252,7 +251,7 @@ class PaxmlAdapter(JAXStackMixin):
     return JaxCoreAdapter().convert(data)
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Applies JAX Stack wiring.
+    """Apply JAX Stack wiring.
 
     Injects core JAX math operations and Optax optimizer mappings into the snapshot.
 
@@ -263,7 +262,7 @@ class PaxmlAdapter(JAXStackMixin):
     self._apply_stack_wiring(snapshot)
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """Generates GitHub search URL for PaxML APIs since documentation is sparse.
+    """Generate GitHub search URL for PaxML APIs since documentation is sparse.
 
     Args:
         api_name: API Path.
@@ -275,7 +274,7 @@ class PaxmlAdapter(JAXStackMixin):
     return f"https://github.com/search?q=repo%3Agoogle%2Fpaxml+{api_name}&type=code"
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Returns tiered example code snippets for documentation.
+    """Return tiered example code snippets for documentation.
 
     Returns:
         Dict[str, str]: Mapping of tier IDs to code.

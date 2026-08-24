@@ -7,7 +7,7 @@ from argparse import Namespace
 
 
 def handle_harvest(args: Namespace) -> None:
-  """Handles the 'harvest' CLI command.
+  """Handle the 'harvest' CLI command.
 
   This function orchestrates the harvesting of framework mapping definitions from
   developer-written manual test files. It processes the specified test path to

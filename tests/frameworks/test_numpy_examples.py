@@ -35,7 +35,7 @@ def test_tier2_neural_validity(adapter):
   code = adapter.get_tiered_examples()["tier2_neural"]
   ast.parse(code)
   assert "Out of Scope" in code
-  assert "NumPy" in code
+  assert "numpy" in code
 
 
 def test_tier3_extras_validity(adapter):

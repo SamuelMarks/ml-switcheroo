@@ -75,6 +75,7 @@ def test_injector_spec_write_parent_not_exist():
       return False
 
     def __truediv__(self, other):
+      """Docstring."""
       return self
 
   with __import__("unittest.mock").mock.patch(

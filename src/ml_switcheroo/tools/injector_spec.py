@@ -18,14 +18,14 @@ from ml_switcheroo.utils.console import log_info, log_success
 
 
 class StandardsInjector:
-  """Injects a new operation definition into the Semantic Knowledge Base (JSON).
+  """Inject a new operation definition into the Semantic Knowledge Base (JSON).
 
   It determines the correct JSON file based on naming heuristics or provided tier,
   serializes the `OperationDef` to JSON-compatible dict, and updates the file.
   """
 
   def __init__(self, op_def: OperationDef, tier: SemanticTier = SemanticTier.EXTRAS):
-    """Initializes the injector.
+    """Initialize the injector.
 
     Args:
         op_def: The definition model containing metadata and signatures.
@@ -39,7 +39,7 @@ class StandardsInjector:
     self.found = False
 
   def inject(self, dry_run: bool = False) -> bool:
-    """Executes the injection.
+    """Execute the injection.
 
     Args:
         dry_run: If True, prints intended changes without writing to disk.
@@ -84,7 +84,7 @@ class StandardsInjector:
     return True
 
   def _serialize_op(self, op: OperationDef) -> Dict[str, Any]:
-    """Converts the OperationDef to a JSON-dict optimized for storage.
+    """Convert the OperationDef to a JSON-dict optimized for storage.
 
     Args:
         op: The operation definition model to serialize.
@@ -113,7 +113,7 @@ class StandardsInjector:
     return out
 
   def _serialize_args(self, args: List[Union[str, Tuple[Any, ...], Dict[Any, Any], Any]]) -> List[Any]:
-    """Normalizes argument list to clean dictionaries or strings.
+    """Normalize argument list to clean dictionaries or strings.
 
     Args:
         args: A list of operation arguments in various formats, such as ParameterDef

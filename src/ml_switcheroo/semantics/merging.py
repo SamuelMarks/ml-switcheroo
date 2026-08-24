@@ -35,7 +35,7 @@ TIER_PRECEDENCE = {
 
 
 def infer_tier_from_priority(priority: int) -> SemanticTier:
-  """Maps a loading priority integer to a Semantic Tier.
+  """Map a loading priority integer to a Semantic Tier.
 
   Args:
       priority (int): Loading order (10=Math, 20=Neural, etc).
@@ -52,7 +52,7 @@ def infer_tier_from_priority(priority: int) -> SemanticTier:
 
 
 def merge_frameworks(master_configs: Dict[str, Dict[Any, Any]], new_configs: Dict[str, Any]) -> None:
-  """Merges new framework configurations (from __frameworks__ block) into the master.
+  """Merge new framework configurations (from __frameworks__ block) into the master.
 
   Updates in-place.
 
@@ -103,7 +103,7 @@ def merge_patterns(master_patterns: List[PatternDef], new_patterns: List[Any]) -
 
 
 def _normalize_args(args_list: List[Any]) -> List[str]:
-  """Simplifies argument definitions to a list of names for relaxed comparison.
+  """Simplify argument definitions to a list of names for relaxed comparison.
 
   Converts:
   - ["x", "y"] -> ["x", "y"]
@@ -138,7 +138,7 @@ def merge_tier_data(
   patterns: Optional[List[PatternDef]] = None,
   is_internal: bool = False,
 ) -> None:
-  """Merges content from a Specification file (hub) into the manager state.
+  """Merge content from a Specification file (hub) into the manager state.
 
   Handles precedence logic: Neural definitions overwrite Array definitions silently
   for upgrades. Duplicate definitions at the same tier level with conflicting signatures
@@ -291,7 +291,7 @@ def merge_overlay_data(
   content: Dict[str, Any],
   filename: str,
 ) -> None:
-  """Merges a mapping overlay file (snapshot) into the main data.
+  """Merge a mapping overlay file (snapshot) into the main data.
 
   Snapshots contain framework-specific implementation overlays ("Spokes")
   that attach to the Abstract Operations ("Hub").

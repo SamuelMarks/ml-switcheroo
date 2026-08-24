@@ -12,12 +12,20 @@ def test_astengine_stablehlo_branch(monkeypatch):
 
   # We mock StableHloEmitter so we don't need its implementation
   class MockEmitter:
+    """Docstring."""
+
     def __init__(self, semantics):
+      """Docstring."""
       pass
 
     def convert(self, tree):
+      """Docstring."""
+
       class TextObj:
+        """Docstring."""
+
         def to_text(self):
+          """Docstring."""
           return "mlir"
 
       return TextObj()

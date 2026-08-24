@@ -13,7 +13,7 @@ from ml_switcheroo.core.html.nodes import HtmlDocument, TagNode, TextNode, Comme
 
 
 class InternalHtmlParser(BaseHTMLParser):
-  """Builds the HtmlDocument CST from SAX-like events."""
+  """Build the HtmlDocument CST from SAX-like events."""
 
   def __init__(self) -> None:
     """Initialize the parser."""
@@ -132,7 +132,7 @@ class InternalHtmlParser(BaseHTMLParser):
 
 
 class GridExtractor:
-  """Extracts logical operations from an HtmlDocument CST."""
+  """Extract logical operations from an HtmlDocument CST."""
 
   def __init__(self) -> None:
     """Initialize the GridExtractor."""

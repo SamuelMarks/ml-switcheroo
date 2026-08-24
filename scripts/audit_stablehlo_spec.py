@@ -29,7 +29,9 @@ definitions_dir = Path("src/ml_switcheroo/frameworks/definitions")
 if (definitions_dir / "stablehlo.json").exists():
   with open(definitions_dir / "stablehlo.json") as f:
     data = json.load(f)
-    implemented = set(data.keys())
+    for v in data.values():
+      if "api" in v and v["api"].startswith("stablehlo."):
+        implemented.add(v["api"].replace("stablehlo.", ""))
 
 missing = sorted(list(set(ops) - implemented))
 bt = chr(96)

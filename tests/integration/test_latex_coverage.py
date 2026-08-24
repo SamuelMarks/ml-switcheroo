@@ -37,7 +37,10 @@ def test_latex_nodes_missing():
     n.__str__()
 
   class DummyNode(LatexNode):
+    """Docstring."""
+
     def emit(self, indent_level: int = 0) -> str:
+      """Docstring."""
       return "dummy"
 
   DummyNode().__str__()
@@ -151,6 +154,8 @@ def test_latex_parser_missing():
 
   # Hit line 327 missing fallback in synthesize class
   class DummyOp:
+    """Docstring."""
+
     node_id = "d"
 
   LatexParser("")._synthesize_class("N", [], None, [DummyOp()], None)  # type: ignore

@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 def patch_json_spec(file_path: Path, op_name: str, fw_name: str, new_tol: float) -> bool:
-  """Updates the tolerances of a specific framework variant in a JSON specification file.
+  """Update the tolerances of a specific framework variant in a JSON specification file.
 
   Preserves JSON formatting/indentation and logs the semantic drift event.
 

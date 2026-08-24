@@ -199,3 +199,72 @@ def test_flatten_with_comma(rewriter):
   res_node = transform_flatten(node, rewriter.context.hook_context)
   res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res_node)])]).code
   assert "jnp.reshape" in res
+
+
+def test_flatten_kwarg_start_dim_negative(rewriter):
+  """Verifies start_dim negative parsing."""
+  rewriter.context.hook_context.target_fw = "jax"
+  rewriter.context.config.target_framework = "jax"
+  rewriter.context.hook_context.current_op_id = "Flatten"
+  code = "torch.flatten(x, start_dim=-2)"
+  from ml_switcheroo.plugins.flatten import transform_flatten
+
+  module = cst.parse_module(code)
+  node = module.body[0].body[0].value
+  rewriter.context.hook_context.lookup_api = lambda x: "jnp.reshape"
+  res = transform_flatten(node, rewriter.context.hook_context)
+  assert "flatten" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
+
+
+def test_flatten_kwarg_end_dim_negative(rewriter):
+  """Verifies end_dim negative parsing."""
+  rewriter.context.hook_context.target_fw = "jax"
+  rewriter.context.config.target_framework = "jax"
+  rewriter.context.hook_context.current_op_id = "Flatten"
+  code = "torch.flatten(x, end_dim=-2)"
+  from ml_switcheroo.plugins.flatten import transform_flatten
+
+  module = cst.parse_module(code)
+  node = module.body[0].body[0].value
+  rewriter.context.hook_context.lookup_api = lambda x: "jnp.reshape"
+  res = transform_flatten(node, rewriter.context.hook_context)
+  assert "flatten" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
+
+
+def test_flatten_ravel_exact(rewriter):
+  """Verifies ravel transformation."""
+  rewriter.context.hook_context.target_fw = "numpy"
+  rewriter.context.config.target_framework = "numpy"
+  rewriter.context.hook_context.current_op_id = "Flatten"
+  code = "torch.flatten(x)"
+  from ml_switcheroo.plugins.flatten import transform_flatten
+
+  module = cst.parse_module(code)
+  node = module.body[0].body[0].value
+  rewriter.context.hook_context.lookup_api = lambda x: "numpy.ravel"
+  res = transform_flatten(node, rewriter.context.hook_context)
+  assert "ravel" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
+
+
+def test_flatten_callable_class(rewriter):
+  """Verifies callable class instantiation."""
+  rewriter.context.hook_context.target_fw = "tensorflow"
+  rewriter.context.config.target_framework = "tensorflow"
+  rewriter.context.hook_context._current_variant = MagicMock(op_type=MagicMock(value="class"))
+
+  def resolve_variant(aid, fw):
+    """Docstring."""
+    if aid == "Flatten":
+      return {"api": "tf.keras.layers.Flatten"}
+    return None
+
+  rewriter.semantics.resolve_variant.side_effect = resolve_variant
+  rewriter.context.hook_context.current_op_id = "Flatten"
+  code = "torch.flatten(x)"
+  from ml_switcheroo.plugins.flatten import transform_flatten
+
+  module = cst.parse_module(code)
+  node = module.body[0].body[0].value
+  rewriter.context.hook_context.lookup_api = lambda x: "tf.keras.layers.Flatten"
+  res = transform_flatten(node, rewriter.context.hook_context)
+  assert "tf.keras.layers.Flatten()(x)" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code

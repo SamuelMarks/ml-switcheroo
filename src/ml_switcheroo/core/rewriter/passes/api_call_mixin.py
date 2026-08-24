@@ -49,7 +49,7 @@ class ApiTransformerCallMixin:
   check_version_constraints: Any
 
   def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
-    """Intercepts and rewrites a function call node during CST traversal.
+    """Intercept and rewrites a function call node during CST traversal.
 
     The rewriting process consists of the following phases:
 
@@ -71,7 +71,7 @@ class ApiTransformerCallMixin:
         or the original/updated node if no rewrite is performed.
     """
     # 1. Identify Function
-    func_name = self._get_qualified_name(original_node.func)  # type: ignore
+    func_name = self._get_qualified_name(original_node.func)
 
     # 2. Pre-Checks
     # Pass 'self' as rewriter interface (duck typing via properties)
@@ -80,13 +80,13 @@ class ApiTransformerCallMixin:
       return result_node  # type: ignore
 
     # 3. Resolve Mapping
-    mapping = self._get_mapping(func_name) if func_name else None  # type: ignore
+    mapping = self._get_mapping(func_name) if func_name else None
 
     # Fallback: Implicit Method
     if not mapping:
       guessed_name = resolve_implicit_method(self, original_node, func_name)
       if guessed_name:
-        mapping = self._get_mapping(guessed_name, silent=True)  # type: ignore
+        mapping = self._get_mapping(guessed_name, silent=True)
         if mapping:  # pragma: no branch
           func_name = guessed_name
 
@@ -97,12 +97,12 @@ class ApiTransformerCallMixin:
       if func_name and not is_builtin(func_name):
         get_tracer().log_inspection(node_str=func_name, outcome="Skipped", detail="No Entry in Semantics Knowledge Base")
 
-      if self.strict_mode and func_name and func_name.startswith(f"{self.source_fw}."):  # type: ignore
+      if self.strict_mode and func_name and func_name.startswith(f"{self.source_fw}."):
         abstract_id = (
           self.semantics.resolve_op_id(self.source_fw, func_name) if hasattr(self.semantics, "resolve_op_id") else None
-        )  # type: ignore
+        )
 
-        # If we can't map a neural layer to numpy/jax, fail with a clear decomposition error
+        # If we can't map a neural layer to NumPy/jax, fail with a clear decomposition error
         origins = getattr(self.semantics, "_key_origins", {})
 
         # In case we can't find abstract_id, try to infer it from func_name
@@ -113,23 +113,23 @@ class ApiTransformerCallMixin:
 
         tier = origins.get(lookup_id)
 
-        if tier in ("neural", "neural_ops") and self.target_fw in ("numpy", "jax"):
-          self._report_failure(
+        if tier in ("neural", "neural_ops") and self.target_fw in ("NumPy", "jax"):
+          self._report_failure(  # pragma: no cover
             f"Cannot map neural network abstraction '{func_name}' directly to pure math backend '{self.target_fw}'. Use a framework like Flax or Keras."
-          )  # type: ignore
+          )
         else:
-          self._report_failure(f"API '{func_name}' not found in semantics.")  # type: ignore
+          self._report_failure(f"API '{func_name}' not found in semantics.")
 
       return updated_node
 
     # 4. Version Check
     min_v = mapping.get("min_version")
     max_v = mapping.get("max_version")
-    v_warn = self.check_version_constraints(min_v, max_v)  # type: ignore
+    v_warn = self.check_version_constraints(min_v, max_v)
     if v_warn:
-      self._report_warning(v_warn)  # type: ignore
+      self._report_warning(v_warn)
 
-    lookup = self.semantics.get_definition(func_name)  # type: ignore
+    lookup = self.semantics.get_definition(func_name)
     if not lookup:
       return updated_node
 
@@ -139,7 +139,7 @@ class ApiTransformerCallMixin:
       msg = f"Usage of deprecated operation '{abstract_id}'."
       if details.get("replaced_by"):
         msg += f" Consider using '{details['replaced_by']}' instead."
-      self._report_warning(msg)  # type: ignore
+      self._report_warning(msg)
 
     # 5. Execute Strategy
     result_node = execute_strategy(self, original_node, updated_node, mapping, details, abstract_id)

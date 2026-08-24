@@ -9,6 +9,8 @@ def test_python_backend_base_class_resolution():
   b = PythonBackend(framework="paxml")
 
   class DummyTraits:
+    """Docstring."""
+
     def __init__(self):
       """Test function."""
       self.module_base = "praxis.base_layer.BaseLayer"
@@ -22,6 +24,8 @@ def test_python_backend_base_class_resolution():
   b = PythonBackend(framework="keras")
 
   class DummyTraitsKeras:
+    """Docstring."""
+
     def __init__(self):
       """Test function."""
       self.module_base = "keras.Layer"
@@ -40,6 +44,8 @@ def test_python_backend_forward_init_fallback():
   b._is_stateful_layer = lambda x: False
 
   class DummyTraits:
+    """Docstring."""
+
     def __init__(self):
       """Test function."""
       self.module_base = "nn.Module"

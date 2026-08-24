@@ -11,10 +11,10 @@ from ml_switcheroo.core.rewriter.context import RewriterContext
 
 
 class RewriterPipeline:
-  """Manages a sequence of rewriting passes and executes them in order."""
+  """Manage a sequence of rewriting passes and executes them in order."""
 
   def __init__(self, passes: List[RewriterPass]) -> None:
-    """Initializes the pipeline with a list of passes.
+    """Initialize the pipeline with a list of passes.
 
     Args:
         passes: Sequenced list of passes to execute.
@@ -23,7 +23,7 @@ class RewriterPipeline:
     self.passes = passes
 
   def run(self, module: cst.Module, context: RewriterContext) -> cst.Module:
-    """Executes all registered passes sequentially on the module.
+    """Execute all registered passes sequentially on the module.
 
     Args:
         module: The source AST to transform.

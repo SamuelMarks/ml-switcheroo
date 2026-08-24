@@ -187,3 +187,100 @@ def test_importmixin_leave_importfrom_empty_module():
   node = node.with_changes(module=None)
   result = fixer.leave_ImportFrom(node, node)
   assert result is node
+
+
+def test_importmixin_preserve_source():
+  """Test that preserve_source configuration works."""
+  fixer = MockFixer()
+  fixer.preserve_source = True
+
+  # 1. leave_ImportFrom
+  # If the root package is in source_fws and preserve_source is true, it shouldn't remove it
+  fixer.plan.mappings = {}  # Clear mappings so no replacement occurs
+  from_node = cst.parse_statement("from torch import unknown").body[0]
+  res = fixer.leave_ImportFrom(from_node, from_node)
+  # The aliases are kept, but deep equality fails sometimes on CST nodes, so just check type
+  assert isinstance(res, cst.ImportFrom)
+  assert len(res.names) == 1
+
+  # 2. leave_Import
+  import_node = cst.parse_statement("import torch").body[0]
+  res2 = fixer.leave_Import(import_node, import_node)
+  assert isinstance(res2, cst.Import)
+  assert len(res2.names) == 1
+
+
+def test_importmixin_leave_ImportFrom_preserve_alias():
+  """Test preserving an existing alias during replacement."""
+  fixer = MockFixer()
+  fixer.plan.mappings["torch.sub"] = ImportReq(module="jax", subcomponent="sub")
+
+  from_node = cst.parse_statement("import torch.sub as my_sub").body[0]
+  res = fixer.leave_Import(from_node, from_node)
+
+  # Should be transformed to `import jax.sub as my_sub`
+  assert isinstance(res, cst.Import)
+  assert len(res.names) == 1
+  assert res.names[0].asname is not None
+  assert res.names[0].asname.name.value == "my_sub"
+
+  """Test preserving source in leave_ImportFrom."""
+  fixer = MockFixer()
+  fixer.preserve_source = True
+
+  from_node = cst.parse_statement("from torch import unknown").body[0]
+  res = fixer.leave_ImportFrom(from_node, from_node)
+  assert res == from_node
+
+
+def test_importmixin_remove_from_parent():
+  """Test when no aliases remain, RemoveFromParent is returned."""
+  fixer = MockFixer()
+  # It removes source_fws aliases if not preserve_source
+  import_node = cst.parse_statement("import torch.unknown").body[0]
+  res = fixer.leave_Import(import_node, import_node)
+  assert isinstance(res, type(cst.RemoveFromParent()))
+
+  from_node = cst.parse_statement("from torch import unknown").body[0]
+  res2 = fixer.leave_ImportFrom(from_node, from_node)
+  assert isinstance(res2, type(cst.RemoveFromParent()))
+
+
+def test_importmixin_leave_Import_preserve_source():
+  """Test preserve source on leave_Import."""
+  fixer = MockFixer()
+  fixer.preserve_source = True
+  # We need it to NOT hit the root_pkg not in source_fws so it hits line 186
+  # and we need it to NOT have any replacements happen
+  import_node = cst.parse_statement("import torch").body[0]
+  res = fixer.leave_Import(import_node, import_node)
+  # The aliases are kept
+  assert isinstance(res, cst.Import)
+
+
+def test_importmixin_leave_ImportFrom_preserve_source_else():
+  """Test preserving source in leave_ImportFrom when root_pkg not in source_fws."""
+  fixer = MockFixer()
+
+  from_node = cst.parse_statement("from unknown import sub").body[0]
+  res = fixer.leave_ImportFrom(from_node, from_node)
+  assert res == from_node
+
+
+def test_importmixin_leave_ImportFrom_remove():
+  """Test removing an ImportFrom when it's a source framework and not preserved."""
+  fixer = MockFixer()
+  # It removes source_fws aliases if not preserve_source
+  from_node = cst.parse_statement("from torch import unknown").body[0]
+  res = fixer.leave_ImportFrom(from_node, from_node)
+  # The RemoveFromParent logic isn't tested correctly earlier, so let's hit it here
+  assert isinstance(res, type(cst.RemoveFromParent()))
+
+
+def test_importmixin_leave_Import_remove():
+  """Test removing an Import when it's a source framework and not preserved."""
+  fixer = MockFixer()
+  # It removes source_fws aliases if not preserve_source
+  import_node = cst.parse_statement("import torch.unknown").body[0]
+  res = fixer.leave_Import(import_node, import_node)
+  assert isinstance(res, type(cst.RemoveFromParent()))

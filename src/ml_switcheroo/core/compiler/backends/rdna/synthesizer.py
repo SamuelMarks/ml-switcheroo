@@ -49,20 +49,20 @@ MAX_SGPR = 106
 
 
 class RegisterAllocator:
-  """Manages the mapping between symbolic variable names and physical registers.
+  """Manage the mapping between symbolic variable names and physical registers.
 
   Maintains separate accounting for Scalar (RdnaSGPR) and Vector (RdnaVGPR) files.
   """
 
   def __init__(self) -> None:
-    """Initializes the allocator with empty maps and counters."""
+    """Initialize the allocator with empty maps and counters."""
     self._var_to_vgpr: Dict[str, int] = {}
     self._var_to_sgpr: Dict[str, int] = {}
     self._next_vgpr = 0
     self._next_sgpr = 0
 
   def get_vector_register(self, var_name: str) -> RdnaVGPR:
-    """Retrieves or allocates a Vector register (RdnaVGPR) for a symbolic variable.
+    """Retrieve or allocates a Vector register (RdnaVGPR) for a symbolic variable.
 
     Raises:
         ValueError: If register limit is exceeded.
@@ -85,7 +85,7 @@ class RegisterAllocator:
     return RdnaVGPR(index=idx)
 
   def get_scalar_register(self, var_name: str) -> RdnaSGPR:
-    """Retrieves or allocates a Scalar register (RdnaSGPR) for a symbolic variable.
+    """Retrieve or allocates a Scalar register (RdnaSGPR) for a symbolic variable.
 
     Raises:
         ValueError: If register limit is exceeded.
@@ -108,7 +108,7 @@ class RegisterAllocator:
     return RdnaSGPR(index=idx)
 
   def allocate_vector_temp(self) -> RdnaVGPR:
-    """Allocates an anonymous temporary RdnaVGPR.
+    """Allocate an anonymous temporary RdnaVGPR.
 
     Returns:
         RdnaVGPR: The newly allocated temporary vector register.
@@ -117,7 +117,7 @@ class RegisterAllocator:
     return self.get_vector_register(name)
 
   def allocate_scalar_temp(self) -> RdnaSGPR:
-    """Allocates an anonymous temporary RdnaSGPR.
+    """Allocate an anonymous temporary RdnaSGPR.
 
     Returns:
         RdnaSGPR: The newly allocated temporary scalar register.
@@ -126,7 +126,7 @@ class RegisterAllocator:
     return self.get_scalar_register(name)
 
   def reset(self) -> None:
-    """Resets all allocation state."""
+    """Reset all allocation state."""
     self._var_to_vgpr.clear()
     self._var_to_sgpr.clear()
     self._next_vgpr = 0
@@ -155,7 +155,7 @@ class RdnaSynthesizer:
           self.macro_registry[key] = getattr(rdna_macros, func_name)
 
   def from_graph(self, graph: LogicalGraph) -> List[RdnaNode]:
-    """Converts a LogicalGraph into a list of RDNA AST nodes.
+    """Convert a LogicalGraph into a list of RDNA AST nodes.
 
     Args:
         graph: The LogicalGraph representing the operations to compile.
@@ -235,7 +235,7 @@ class RdnaSynthesizer:
     return output_nodes
 
   def to_python(self, rdna_nodes: List[RdnaNode]) -> cst.Module:
-    """Converts RDNA AST nodes into a Python source structure representation.
+    """Convert RDNA AST nodes into a Python source structure representation.
 
     Args:
         rdna_nodes: A list of RDNA AST nodes to be converted.
@@ -366,7 +366,7 @@ class RdnaBackend(CompilerBackend):
     self.target_arch = "gfx1030"
 
   def compile(self, graph: LogicalGraph) -> str:
-    """Compiles LogicalGraph to RDNA Assembly string.
+    """Compile LogicalGraph to RDNA Assembly string.
 
     Args:
         graph: The intermediate representation.

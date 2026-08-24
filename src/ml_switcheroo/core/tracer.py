@@ -66,7 +66,7 @@ class TraceEvent:
 
 
 class TraceLogger:
-  """Records transpilation events for visualization.
+  """Record transpilation events for visualization.
 
   Designed to be injected into the Engine and Rewriter.
 
@@ -75,7 +75,7 @@ class TraceLogger:
   """
 
   def __init__(self) -> None:
-    """Initializes a new TraceLogger instance.
+    """Initialize a new TraceLogger instance.
 
     Sets up an empty list to store logged events and an empty stack to
     keep track of active nested phases.
@@ -84,7 +84,7 @@ class TraceLogger:
     self._active_phases: List[str] = []  # Stack of phase IDs
 
   def start_phase(self, name: str, description: str = "") -> str:
-    """Starts a nested phase (e.g., 'Rewriting Function X').
+    """Start a nested phase (e.g., 'Rewriting Function X').
 
     Args:
         name (str): The name of the phase.
@@ -111,7 +111,7 @@ class TraceLogger:
     return phase_id
 
   def end_phase(self) -> None:
-    """Ends the current active phase.
+    """End the current active phase.
 
     Pops the phase ID from the stack and logs an end event.
     """
@@ -135,7 +135,7 @@ class TraceLogger:
     abstract_op: str,
     lineno: Optional[int] = None,
   ) -> None:
-    """Logs a Semantic Match event.
+    """Log a Semantic Match event.
 
     Args:
         source_api (str): The source function name (e.g. `torch.abs`).
@@ -151,7 +151,7 @@ class TraceLogger:
     )
 
   def log_mutation(self, node_type: str, before: str, after: str, lineno: Optional[int] = None) -> None:
-    """Logs an AST transformation with code diffs.
+    """Log an AST transformation with code diffs.
 
     Args:
         node_type (str): Description of node being changed (e.g. "Call").
@@ -167,7 +167,7 @@ class TraceLogger:
     )
 
   def log_warning(self, message: str, lineno: Optional[int] = None) -> None:
-    """Logs an analysis warning.
+    """Log an analysis warning.
 
     Args:
         message (str): The warning text.
@@ -181,7 +181,7 @@ class TraceLogger:
     )
 
   def log_inspection(self, node_str: str, outcome: str, detail: str = "") -> None:
-    """Logs a decision point where no change occurred (for debugging).
+    """Log a decision point where no change occurred (for debugging).
 
     Args:
         node_str (str): The code element being inspected.
@@ -195,7 +195,7 @@ class TraceLogger:
     )
 
   def log_snapshot(self, description: str, mermaid_graph: str, code_snapshot: Optional[str] = None) -> None:
-    """Logs a full AST snapshot for visualization.
+    """Log a full AST snapshot for visualization.
 
     Args:
         description (str): Label for the snapshot (e.g. "Before Pivot").
@@ -215,7 +215,7 @@ class TraceLogger:
     meta: Dict[str, Any],
     lineno: Optional[int] = None,
   ) -> None:
-    """Helper to create and append events.
+    """Support to create and append events.
 
     Args:
         evt_type (TraceEventType): The category of trace event.
@@ -237,7 +237,7 @@ class TraceLogger:
     )
 
   def export(self) -> List[Dict[str, Any]]:
-    """Exports the event log as a list of dictionaries.
+    """Export the event log as a list of dictionaries.
 
     Returns:
         List[Dict[str, Any]]: JSON-serializable event stream.
@@ -250,7 +250,7 @@ _GLOBAL_TRACER = TraceLogger()
 
 
 def get_tracer() -> TraceLogger:
-  """Returns the global singleton TraceLogger instance.
+  """Return the global singleton TraceLogger instance.
 
   Returns:
       TraceLogger: The global singleton tracer instance.
@@ -259,7 +259,7 @@ def get_tracer() -> TraceLogger:
 
 
 def reset_tracer() -> None:
-  """Resets the global tracer state. Useful between runs or tests.
+  """Reset the global tracer state. Useful between runs or tests.
 
   This creates a brand new instance of TraceLogger and assigns it to the global
   tracer, clearing any recorded trace history.

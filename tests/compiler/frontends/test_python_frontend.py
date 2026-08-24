@@ -1,17 +1,30 @@
-"""Test suite for the Python Frontend module."""
+"""Docstring."""
 
 from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
+from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
-def test_python_frontend_parse_success():
-  """Verifies the behavior of python frontend parse successfully."""
-  fe = PythonFrontend("def foo():\n    pass")
-  graph = fe.parse_to_graph()
-  assert graph is not None
+def test_python_frontend_parse_valid():
+  """Docstring."""
+  code = "import torch\nx = torch.add(a, b)"
+  frontend = PythonFrontend(code)
+  graph = frontend.parse_to_graph()
+  assert isinstance(graph, LogicalGraph)
+  # GraphExtractor should pull something
+  assert len(graph.nodes) > 0
 
 
-def test_python_frontend_parse_failure():
-  """Verifies the behavior of python frontend parse successfully handling failure."""
-  fe = PythonFrontend("invalid syntax ( {")
-  graph = fe.parse_to_graph()
+def test_python_frontend_parse_invalid():
+  """Docstring."""
+  code = "this is not valid python"
+  frontend = PythonFrontend(code)
+  graph = frontend.parse_to_graph()
+  assert isinstance(graph, LogicalGraph)
   assert len(graph.nodes) == 0
+
+
+def test_python_frontend_empty():
+  """Docstring."""
+  frontend = PythonFrontend("")
+  graph = frontend.parse_to_graph()
+  assert isinstance(graph, LogicalGraph)

@@ -27,7 +27,7 @@ class RegisterAllocatorProtocol(Protocol):
   """
 
   def get_vector_register(self, var_name: str) -> RdnaVGPR:
-    """Gets or allocates a vector register (VGPR) associated with a variable name.
+    """Get or allocates a vector register (VGPR) associated with a variable name.
 
     Args:
         var_name (str): The identifier of the variable.
@@ -36,7 +36,7 @@ class RegisterAllocatorProtocol(Protocol):
     ...
 
   def get_scalar_register(self, var_name: str) -> RdnaSGPR:
-    """Gets or allocates a scalar register (SGPR) associated with a variable name.
+    """Get or allocates a scalar register (SGPR) associated with a variable name.
 
     Args:
         var_name (str): The identifier of the variable.
@@ -45,11 +45,11 @@ class RegisterAllocatorProtocol(Protocol):
     ...
 
   def allocate_vector_temp(self) -> RdnaVGPR:
-    """Allocates a temporary, unmapped vector register (VGPR)."""
+    """Allocate a temporary, unmapped vector register (VGPR)."""
     ...
 
   def allocate_scalar_temp(self) -> RdnaSGPR:
-    """Allocates a temporary, unmapped scalar register (SGPR)."""
+    """Allocate a temporary, unmapped scalar register (SGPR)."""
     ...
 
 
@@ -58,7 +58,7 @@ def expand_conv2d(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[RdnaNode]:
-  """Generates the RDNA assembly kernel for a 2D Convolution loop.
+  """Generate the RDNA assembly kernel for a 2D Convolution loop.
 
   Constructs the sequence of CST nodes implementing a nested 2D convolution
   kernel loop with register allocation, memory loads, and accumulation.
@@ -132,7 +132,7 @@ def expand_linear(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[RdnaNode]:
-  """Generates the RDNA assembly kernel for a Linear Layer.
+  """Generate the RDNA assembly kernel for a Linear Layer.
 
   Constructs the sequence of CST nodes implementing a matrix-vector or vector-vector
   reduction loop for a linear fully-connected layer.
@@ -196,7 +196,7 @@ def expand_relu(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[RdnaNode]:
-  """Generates the RDNA assembly kernel for ReLU.
+  """Generate the RDNA assembly kernel for ReLU.
 
   Args:
       allocator: The register allocator to use for managing temporary and variable registers.
@@ -220,7 +220,7 @@ def expand_flatten(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[RdnaNode]:
-  """Generates the RDNA assembly kernel for Flatten.
+  """Generate the RDNA assembly kernel for Flatten.
 
   Args:
       allocator: The register allocator to use for managing temporary and variable registers.
@@ -238,7 +238,7 @@ def expand_reshape(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[RdnaNode]:
-  """Generates the RDNA assembly kernel for Reshape.
+  """Generate the RDNA assembly kernel for Reshape.
 
   Args:
       allocator: The register allocator to use for managing temporary and variable registers.
@@ -256,7 +256,7 @@ def expand_conv3d(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[RdnaNode]:
-  """Generates the RDNA assembly kernel for Conv3d.
+  """Generate the RDNA assembly kernel for Conv3d.
 
   Args:
       allocator: The register allocator to use for managing temporary and variable registers.

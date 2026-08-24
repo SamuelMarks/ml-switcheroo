@@ -14,7 +14,7 @@ class CompilerBackend(ABC):
 
   @abstractmethod
   def compile(self, graph: LogicalGraph) -> Any:
-    """Compiles the Logical Intermediate Representation (IR) into a target artifact.
+    """Compile the Logical Intermediate Representation (IR) into a target artifact.
 
     Args:
         graph (LogicalGraph): The intermediate representation of the model structure.

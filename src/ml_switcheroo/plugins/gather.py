@@ -22,7 +22,7 @@ from ml_switcheroo.plugins.utils import create_dotted_name, is_framework_module_
 
 @register_hook("gather_adapter")
 def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Hook: Adapts gather calls to take_along_axis semantics.
+  """Transform Adapts gather calls to take_along_axis semantics.
 
   Target API Convention: `func(input, indices, axis)`.
   Source (Torch) Convention: `func(input, dim, index)`.

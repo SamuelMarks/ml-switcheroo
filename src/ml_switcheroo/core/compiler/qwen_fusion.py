@@ -10,13 +10,13 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdg
 
 
 class SwiGLUFusionPass:
-  """Fuses separate gate_proj and up_proj nodes into a single SwiGLU node.
+  """Fus separate gate_proj and up_proj nodes into a single SwiGLU node.
 
   Matches standard JAX/Flax Bonsai idioms.
   """
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to fuse SwiGLU.
+    """Mutate graph to fuse SwiGLU.
 
     Args:
         graph: The logical graph to mutate.
@@ -70,10 +70,10 @@ class SwiGLUFusionPass:
 
 
 class SwiGLUDefusionPass:
-  """Splits a SwiGLU node into separate gate_proj and up_proj nodes."""
+  """Split a SwiGLU node into separate gate_proj and up_proj nodes."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to de-fuse SwiGLU.
+    """Mutate graph to de-fuse SwiGLU.
 
     Args:
         graph: The logical graph to mutate.
@@ -111,10 +111,10 @@ class SwiGLUDefusionPass:
 
 
 class VisionPatchEmbeddingFusionPass:
-  """Elevates Conv2d patch layers to native VisionPatchEmbedding multi-modal ops."""
+  """Elevate Conv2d patch layers to native VisionPatchEmbedding multi-modal ops."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to elevate VisionPatchEmbedding.
+    """Mutate graph to elevate VisionPatchEmbedding.
 
     Args:
         graph: The logical graph to mutate.
@@ -153,10 +153,10 @@ class VisionPatchEmbeddingFusionPass:
 
 
 class VisionPatchEmbeddingDefusionPass:
-  """Lowers VisionPatchEmbedding back to structural Conv2d equivalents."""
+  """Lower VisionPatchEmbedding back to structural Conv2d equivalents."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to defuse VisionPatchEmbedding.
+    """Mutate graph to defuse VisionPatchEmbedding.
 
     Args:
         graph: The logical graph to mutate.

@@ -37,16 +37,16 @@ class TikzBaseNode(ABC):
 
 @dataclass
 class TriviaNode(TikzBaseNode):
-  """Represents non-semantic textual elements (whitespace, newlines, comments)."""
+  """Represent non-semantic textual elements (whitespace, newlines, comments)."""
 
   content: str
-  """The raw text content."""
+  """Execute raw text content."""
 
   kind: str = "whitespace"
   """Either 'whitespace' or 'comment'."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Returns the raw whitespace/comment content verbatim.
+    """Return the raw whitespace/comment content verbatim.
 
     Args:
         indent_level: Current indentation depth.
@@ -59,7 +59,7 @@ class TriviaNode(TikzBaseNode):
 
 @dataclass
 class TikzOption(TikzBaseNode):
-  """Represents a TikZ option like ``[draw=black]`` or ``[circle]``."""
+  """Represent a TikZ option like ``[draw=black]`` or ``[circle]``."""
 
   key: str
   """Option key."""
@@ -68,7 +68,7 @@ class TikzOption(TikzBaseNode):
   """Optional value for key-value pairs."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Returns ``key=value`` or just ``key``.
+    """Return ``key=value`` or just ``key``.
 
     Args:
         indent_level: Current indentation depth.
@@ -83,10 +83,10 @@ class TikzOption(TikzBaseNode):
 
 @dataclass
 class TikzTextNode(TikzBaseNode):
-  """Represents text with basic LaTeX styling inside TikZ."""
+  """Represent text with basic LaTeX styling inside TikZ."""
 
   content: str
-  """The raw text content."""
+  """Execute raw text content."""
 
   bold: bool = False
   """Whether to render the text in bold."""
@@ -95,7 +95,7 @@ class TikzTextNode(TikzBaseNode):
   """Whether to render the text in italics."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Emits the text node with styling.
+    """Emit the text node with styling.
 
     Args:
         indent_level: Current indentation depth.
@@ -113,7 +113,7 @@ class TikzTextNode(TikzBaseNode):
 
 @dataclass
 class TikzTable(TikzBaseNode):
-  r"""Represents an HTML-like table structure used inside TikZ Node labels.
+  r"""Represent an HTML-like table structure used inside TikZ Node labels.
 
   Uses LaTeX tabular environment syntax.
 
@@ -138,7 +138,7 @@ class TikzTable(TikzBaseNode):
   """Trivia elements appearing after the table environment."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Renders the tabular environment string.
+    """Render the tabular environment string.
 
     Args:
         indent_level: Current indentation depth.
@@ -168,7 +168,7 @@ class TikzTable(TikzBaseNode):
 
 @dataclass
 class TikzNode(TikzBaseNode):
-  r"""Represents a ``\\node`` command.
+  r"""Represent a ``\\node`` command.
 
   Structure::
 
@@ -197,7 +197,7 @@ class TikzNode(TikzBaseNode):
   """Whitespace/Comments after the node command."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Constructs the full node command string.
+    """Construct the full node command string.
 
     Args:
         indent_level: Current indentation depth.
@@ -231,7 +231,7 @@ class TikzNode(TikzBaseNode):
 
 @dataclass
 class TikzEdge(TikzBaseNode):
-  r"""Represents a ``\\draw`` command connecting two nodes.
+  r"""Represent a ``\\draw`` command connecting two nodes.
 
   Structure::
 
@@ -257,7 +257,7 @@ class TikzEdge(TikzBaseNode):
   """Whitespace/Comments after the draw command."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Constructs the draw command string.
+    """Construct the draw command string.
 
     Args:
         indent_level: Current indentation depth.
@@ -286,7 +286,7 @@ class TikzEdge(TikzBaseNode):
 
 @dataclass
 class TikzGraph(TikzBaseNode):
-  r"""The root container representing the ``tikzpicture`` environment.
+  r"""Execute root container representing the ``tikzpicture`` environment.
 
   Structure::
 
@@ -308,7 +308,7 @@ class TikzGraph(TikzBaseNode):
   """Whitespace/Comments after the tikzpicture environment."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Constructs the complete environment string.
+    """Construct the complete environment string.
 
     Args:
         indent_level: Current indentation depth.

@@ -14,7 +14,6 @@ from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
 class ExpressionGeneratorMixin(BaseGeneratorMixin):
   """Mixin for generating LibCST Expressions from MLIR Operations.
 
-
   Assumes `self._resolve_operand` is available on the host class.
   """
 
@@ -33,7 +32,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     raise NotImplementedError
 
   def _parse_keywords(self, op: OperationNode) -> List[Optional[str]]:
-    """Extracts arg_keywords attribute from operation.
+    """Extract arg_keywords attribute from operation.
 
     Returns a list of strings (keyword names or empty strings).
 
@@ -65,7 +64,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     return []
 
   def _expr_sw_constant(self, op: OperationNode) -> cst.BaseExpression:
-    """Generates constant literal expression.
+    """Generate constant literal expression.
 
     Args:
         op: The operation node representing the constant.
@@ -81,7 +80,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
       return cst.Name(val_str)
 
   def _expr_sw_getattr(self, op: OperationNode) -> cst.BaseExpression:
-    """Generates attribute access (e.g. self.layer).
+    """Generate attribute access (e.g. self.layer).
 
     Args:
         op: The operation node for getattr.
@@ -97,7 +96,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     return cst.Attribute(value=obj_expr, attr=cst.Name(attr_name))
 
   def _expr_sw_call(self, op: OperationNode) -> cst.BaseExpression:
-    """Generates function call expression.
+    """Generate function call expression.
 
     Args:
         op: The operation node representing the call.
@@ -136,7 +135,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     return cst.Call(func=func_expr, args=args)
 
   def _expr_sw_op(self, op: OperationNode) -> cst.BaseExpression:
-    """Generates generic operation call (e.g. torch.add).
+    """Generate generic operation call (e.g. torch.add).
 
     Handles specialized binary operation mapping via `binop.` types.
 
@@ -176,7 +175,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     return cst.Call(func=func_node, args=args)
 
   def _expr_binop(self, op: OperationNode, type_attr: str) -> cst.BaseExpression:
-    """Generates binary operation expression (e.g. a + b).
+    """Generate binary operation expression (e.g. a + b).
 
     Args:
         op: The binary operation node.

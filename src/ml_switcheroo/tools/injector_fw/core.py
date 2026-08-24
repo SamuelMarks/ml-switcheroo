@@ -16,7 +16,7 @@ from ml_switcheroo.utils.console import log_info, log_success, log_warning
 
 
 class FrameworkInjector:
-  """Injects a `FrameworkVariant` entry into the framework's JSON definitions.
+  """Inject a `FrameworkVariant` entry into the framework's JSON definitions.
 
   It handles:
   1. Loading the existing JSON mapping.
@@ -25,7 +25,7 @@ class FrameworkInjector:
   """
 
   def __init__(self, target_fw: str, op_name: str, variant: FrameworkVariant):
-    """Initializes the injector.
+    """Initialize the injector.
 
     Args:
         target_fw: Key identifier for the framework (e.g., "torch").
@@ -40,7 +40,7 @@ class FrameworkInjector:
     self.found = False  # Track if update logic ran successfully
 
   def inject(self, dry_run: bool = False) -> bool:
-    """Executes the injection process.
+    """Execute the injection process.
 
     Args:
         dry_run: If True, prints changes to console instead of writing file.

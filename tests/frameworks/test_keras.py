@@ -153,6 +153,7 @@ def test_keras_import_exception():
   real_import = builtins.__import__
 
   def mock_import(name, globals=None, locals=None, fromlist=(), level=0):
+    """Docstring."""
     if name == "keras" or name.startswith("keras."):
       raise Exception("import fail")
     return real_import(name, globals, locals, fromlist, level)

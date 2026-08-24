@@ -1,4 +1,4 @@
-"""Hooks Registry Module.
+"""Hook Registry Module.
 
 This module provides the global registry and dynamic loading mechanisms for
 translation hooks defined in plugins. It manages hook registration, metadata storage,
@@ -21,7 +21,7 @@ _PLUGINS_LOADED = False
 
 
 def register_hook(trigger: str, auto_wire: Optional[Dict[str, Any]] = None) -> Callable[[Any], Any]:
-  """Decorator to register a custom translation hook for a specific trigger.
+  """Register a custom translation hook for a specific trigger.
 
   Args:
       trigger (str): The name or identifier of the framework function/operation
@@ -35,7 +35,7 @@ def register_hook(trigger: str, auto_wire: Optional[Dict[str, Any]] = None) -> C
   """
 
   def decorator(func: Any) -> Any:
-    """Registers the decorated function as a translation hook for the trigger.
+    """Register the decorated function as a translation hook for the trigger.
 
     Args:
         func (Any): The hook function to be registered.
@@ -54,7 +54,7 @@ def register_hook(trigger: str, auto_wire: Optional[Dict[str, Any]] = None) -> C
 
 
 def get_hook(trigger: str) -> Optional[Callable[..., cst.CSTNode]]:
-  """Retrieves a registered translation hook for the given trigger, loading plugins if needed.
+  """Retrieve a registered translation hook for the given trigger, loading plugins if needed.
 
   If plugins have not been loaded yet, calling this function will automatically trigger
   the loading of all plugins.
@@ -75,7 +75,7 @@ def get_hook(trigger: str) -> Optional[Callable[..., cst.CSTNode]]:
 
 
 def get_all_hook_metadata() -> Dict[str, AutoWireSpec]:
-  """Retrieves the metadata for all registered hooks.
+  """Retrieve the metadata for all registered hooks.
 
   Returns:
       Dict[str, AutoWireSpec]: A dictionary mapping hook triggers to their corresponding
@@ -86,7 +86,7 @@ def get_all_hook_metadata() -> Dict[str, AutoWireSpec]:
 
 
 def clear_hooks() -> None:
-  """Clears all registered hooks and their metadata from the global registry.
+  """Clear all registered hooks and their metadata from the global registry.
 
   This also resets the internal plugin loading status, allowing plugins to be
   reloaded on subsequent hook requests.
@@ -129,7 +129,7 @@ def load_plugins(plugins_dir: Optional[Path] = None, extra_dirs: Optional[List[P
 
 
 def _import_from_dir(directory: Path, base_package: Optional[str] = None) -> int:
-  """Helper function to discover and import/reload all Python modules in a directory.
+  """Support function to discover and import/reload all Python modules in a directory.
 
   If `base_package` is specified, it performs a package-relative import. Otherwise,
   it temporarily adds the directory to `sys.path` to allow direct top-level imports.

@@ -32,7 +32,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
   usage_consumers: dict[Any, Any]
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-    """Resolves an SSA value name to its Python expression.
+    """Resolve an SSA value name to its Python expression.
 
     Args:
         ssa_name: The name of the SSA value.
@@ -43,7 +43,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     raise NotImplementedError
 
   def _convert_block(self, block: BlockNode) -> List[cst.BaseStatement]:
-    """Converts a block of MLIR operations into a list of Python statements.
+    """Convert a block of MLIR operations into a list of Python statements.
 
     Args:
         block: The MLIR block node.
@@ -54,7 +54,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     raise NotImplementedError
 
   def _scan_block_usage(self, block: BlockNode) -> None:
-    """Scans a block to analyze variable usage.
+    """Scan a block to analyze variable usage.
 
     Args:
         block: The MLIR block node.
@@ -65,7 +65,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     raise NotImplementedError
 
   def _convert_setattr(self, op: OperationNode) -> cst.SimpleStatementLine:
-    """Converts a `sw.setattr` operation to a Python assignment statement.
+    """Convert a `sw.setattr` operation to a Python assignment statement.
 
     Args:
         op: The MLIR operation node representing the `sw.setattr` instruction.
@@ -85,7 +85,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     return cst.SimpleStatementLine(body=[assign])
 
   def _convert_import(self, op: OperationNode) -> cst.SimpleStatementLine:
-    """Converts `sw.import` back to Import/ImportFrom statement.
+    """Convert `sw.import` back to Import/ImportFrom statement.
 
     Args:
         op: The MLIR operation node representing the import statement.
@@ -133,18 +133,18 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
         return cst.SimpleStatementLine(
           body=[cst.ImportFrom(module=self._create_dotted_name(module_val), names=import_aliases)]  # type: ignore
         )
-      else:
+      else:  # pragma: no cover
         return cst.SimpleStatementLine(
           body=[cst.Import(names=[cst.ImportAlias(name=self._create_dotted_name(module_val))])]  # type: ignore
         )
     else:
       if import_aliases:
         return cst.SimpleStatementLine(body=[cst.Import(names=import_aliases)])
-      else:
+      else:  # pragma: no cover
         return cst.SimpleStatementLine(body=[cst.Pass()])
 
   def _convert_return(self, op: OperationNode) -> cst.SimpleStatementLine:
-    """Converts a `sw.return` operation to a Python return statement.
+    """Convert a `sw.return` operation to a Python return statement.
 
     Args:
         op: The MLIR operation node representing the return instruction.
@@ -158,7 +158,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     return cst.SimpleStatementLine(body=[cst.Return(value=val_node)])
 
   def _convert_class_def(self, op: OperationNode) -> cst.ClassDef:
-    """Converts a `sw.module` operation to a Python Class definition.
+    """Convert a `sw.module` operation to a Python Class definition.
 
     Args:
         op: The MLIR operation node representing the module/class definition.
@@ -191,7 +191,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     return cst.ClassDef(name=cst.Name(class_name), bases=base_nodes, body=cst.IndentedBlock(body=body_stmts))
 
   def _convert_func_def(self, op: OperationNode) -> cst.FunctionDef:
-    """Converts a `sw.func` operation to a Python Function definition.
+    """Convert a `sw.func` operation to a Python Function definition.
 
     Args:
         op: The MLIR operation node representing the function definition.

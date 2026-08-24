@@ -19,7 +19,7 @@ class SassHtmlParser(HTMLParser):
   """State-machine based HTML parser for extracting SASS Instruction tables."""
 
   def __init__(self) -> None:
-    """Initializes the HTML parser state and buffers.
+    """Initialize the HTML parser state and buffers.
 
     Sets up boolean flags for tracking parser state within table structures,
     an empty buffer for cell text, and an empty list to accumulate extracted
@@ -35,7 +35,7 @@ class SassHtmlParser(HTMLParser):
     self.cell_buffer = ""
 
   def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
-    """Handles the start of an HTML tag.
+    """Handle the start of an HTML tag.
 
     Tracks entry into tables, table bodies, rows, and cells to selectively
     extract data from relevant instruction tables.
@@ -59,7 +59,7 @@ class SassHtmlParser(HTMLParser):
       self.cell_buffer = ""
 
   def handle_endtag(self, tag: str) -> None:
-    """Handles the closing of an HTML tag.
+    """Handle the closing of an HTML tag.
 
     Processes cell contents on closed 'td' tags, and extracts and filters
     SASS instruction opcodes and descriptions upon closing 'tr' tags.
@@ -91,7 +91,7 @@ class SassHtmlParser(HTMLParser):
       self.in_table = False
 
   def handle_data(self, data: str) -> None:
-    """Handles textual data inside HTML tags.
+    """Handle textual data inside HTML tags.
 
     Accumulates text content within active table cells into the cell buffer.
 
@@ -122,7 +122,7 @@ class SassSpecImporter:
   ]
 
   def parse_file(self, html_path: Path) -> Dict[str, Any]:
-    """Parses an HTML file containing SASS documentation.
+    """Parse an HTML file containing SASS documentation.
 
     Reads the specified HTML documentation file, parses the SASS instruction
     tables, normalizes/maps the operations to abstract operation identifiers,
@@ -184,7 +184,7 @@ class SassSpecImporter:
     return final_map
 
   def _infer_abstract_op(self, opcode: str, desc: str) -> Optional[str]:
-    """Derives the Abstract Operation ID (e.g., 'Add') from the SASS text.
+    """Derive the Abstract Operation ID (e.g., 'Add') from the SASS text.
 
     Uses mnemonic rules and substring/pattern analysis of the instruction description
     to map raw SASS operations to standard ML-Switcheroo abstract operations.

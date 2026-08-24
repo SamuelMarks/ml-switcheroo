@@ -76,3 +76,13 @@ def test_func_def_multiple_params() -> None:
   code = "def foo(a, b):\n  pass"
   tree = cst.parse_module(code)
   emitter._emit_func_def(tree.body[0])
+
+
+def test_stablehlo_parser():
+  """Docstring."""
+  from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
+
+  parser = StableHloParser("module {}")
+  mod = parser.parse()
+  assert len(mod.body.operations) == 1
+  assert mod.body.operations[0].name == "module"

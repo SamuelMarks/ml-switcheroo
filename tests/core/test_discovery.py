@@ -96,12 +96,11 @@ def test_discovery_fuzzy_match():
   mock_mod = Mock()
   mock_mod.abs = Mock()
 
-  patch("inspect.getmembers", return_value=[("absolute", mock_mod.abs)])
-  patch("importlib.import_module", return_value=mock_mod)
-
-  reflection = SimulatedReflection("numpy")
-  result = reflection.discover("absolut")
-  assert result == "numpy.absolute"
+  with patch("inspect.getmembers", return_value=[("absolute", mock_mod.abs)]):
+    with patch("importlib.import_module", return_value=mock_mod):
+      reflection = SimulatedReflection("numpy")
+      result = reflection.discover("absolut")
+      assert result == "numpy.absolute"
 
 
 def test_discovery_no_match():

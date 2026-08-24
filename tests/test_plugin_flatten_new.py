@@ -10,10 +10,15 @@ def get_context(api_name: str, op_type: str = "function") -> HookContext:
   """Get a mock hook context for testing."""
 
   class MockSemantics:
+    """Docstring."""
+
     def resolve_variant(self, op_name, target_fw):
+      """Docstring."""
       return {"api": api_name, "op_type": op_type}
 
   class MockConfig(RuntimeConfig):
+    """Docstring."""
+
     source_framework: str = "torch"
     target_framework: str = "numpy"
 

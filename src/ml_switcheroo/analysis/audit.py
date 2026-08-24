@@ -15,7 +15,7 @@ from ml_switcheroo.core.scanners import get_full_name
 
 
 class CoverageScanner(cst.CSTVisitor):
-  """Scans a file to identify API calls and checks if they exist in the Semantics Manager.
+  """Scan a file to identify API calls and checks if they exist in the Semantics Manager.
 
   It tracks import aliases to correctly resolve calls like `jnp.sum` back to
   `jax.numpy.sum` before querying the knowledge base.
@@ -25,7 +25,7 @@ class CoverageScanner(cst.CSTVisitor):
   """Dictionary mapping Fully Qualified Names (FQN) to a tuple of (is_supported, framework_key)."""
 
   def __init__(self, semantics: SemanticsManager, allowed_roots: Set[str]):
-    """Initializes the scanner.
+    """Initialize the scanner.
 
     Args:
         semantics: The knowledge base manager used to verify support.
@@ -43,7 +43,7 @@ class CoverageScanner(cst.CSTVisitor):
     self.results = {}
 
   def visit_Import(self, node: cst.Import) -> None:
-    """Visits `import ...` statements to populate the alias map.
+    """Visit `import ...` statements to populate the alias map.
 
     Args:
         node: The CST import node.
@@ -59,7 +59,7 @@ class CoverageScanner(cst.CSTVisitor):
       self._alias_map[local_name] = full_name
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """Visits `from ... import ...` statements to populate the alias map.
+    """Visit `from ... import ...` statements to populate the alias map.
 
     Args:
         node: The CST import-from node.
@@ -81,7 +81,7 @@ class CoverageScanner(cst.CSTVisitor):
       self._alias_map[local_name] = full_path
 
   def visit_Call(self, node: cst.Call) -> None:
-    """Visits function call nodes to check the invoked function.
+    """Visit function call nodes to check the invoked function.
 
     Args:
         node: The CST call node.
@@ -90,7 +90,7 @@ class CoverageScanner(cst.CSTVisitor):
     self._check_node(node.func)
 
   def visit_Attribute(self, node: cst.Attribute) -> None:
-    """Visits attributes to check for framework constants.
+    """Visit attributes to check for framework constants.
 
     This allows detecting usage like `torch.float32` which are not calls
     but still require support. Checks are idempotent via the results dictionary.
@@ -102,7 +102,7 @@ class CoverageScanner(cst.CSTVisitor):
     self._check_node(node)
 
   def _check_node(self, node: cst.CSTNode) -> None:
-    """Resolves the FQN of a node and records its support status.
+    """Resolve the FQN of a node and records its support status.
 
     Args:
         node: The AST node to inspect (Name or Attribute).
@@ -138,7 +138,7 @@ class CoverageScanner(cst.CSTVisitor):
     self.results[fqn] = (is_supported, framework)
 
   def _resolve_fqn(self, node: cst.CSTNode) -> str:
-    """Resolves a CST node to its Fully Qualified Name string.
+    """Resolve a CST node to its Fully Qualified Name string.
 
     Applies alias rewriting (e.g. `jnp.abs` -> `jax.numpy.abs`) based on
     imports found earlier in the file.

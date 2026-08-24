@@ -36,7 +36,10 @@ def test_tikz_nodes_missing():
       n.emit()
 
   class DummyTikz(TikzBaseNode):
+    """Docstring."""
+
     def emit(self, indent_level: int = 0) -> str:
+      """Docstring."""
       return "d"
 
   DummyTikz().emit()
@@ -126,7 +129,10 @@ def test_tikz_parser_missing():
     pass
 
   class DummyTree:
+    """Docstring."""
+
     def __init__(self, data, children):
+      """Docstring."""
       self.data = data
       self.children = children
 

@@ -28,7 +28,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Creates a CST Attribute/Name node from a dotted string.
+  """Create a CST Attribute/Name node from a dotted string.
 
   Args:
       name_str: A dot-separated string representation of the target name
@@ -45,7 +45,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:
-  """Resolves the target keyword argument name.
+  """Resolve the target keyword argument name.
 
   Checks the Semantic Knowledge Base (Variant Args) first, falls back to default.
 
@@ -64,7 +64,7 @@ def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:
 
 @register_hook("scheduler_rewire")
 def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Hook: Transforms Scheduler instantiation.
+  """Transform Transforms Scheduler instantiation.
 
   Logic routes based on detected Operation ID in context (StepLR vs Cosine).
   Now fully decoupled: reads target API and argument names from `ctx`.
@@ -259,7 +259,7 @@ def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> c
 
 @register_hook("scheduler_step_noop")
 def transform_scheduler_step(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Hook: Replaces ``scheduler.step()`` with a no-op value (None).
+  """Transform Replaces ``scheduler.step()`` with a no-op value (None).
 
   Triggered if the scheduler step operation is wired to `scheduler_step_noop`.
 

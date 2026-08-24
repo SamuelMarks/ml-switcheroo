@@ -187,14 +187,16 @@ def test_mlir_transformer_edge_cases():
 
   # Hit line 275: len(children) == 1, no value
   mock_val = Tree("some_tree", [])
-  val_node = Tree("attr_value", [mock_val])
+  val_node = Tree("attribute_value", [mock_val])
 
   # mock leading trivia for first token
   t1 = Tree("dummy", [])
   t1.value = "#foo"
   t1.leading_trivia = []
 
-  alias_node = transformer.attribute_alias_def([t1, val_node])
+  alias_tree = Tree("attribute_alias", [t1])
+
+  alias_node = transformer.attribute_alias_def([alias_tree, val_node])
   assert alias_node.name == "#foo"
   assert "Tree" in alias_node.value_str
 
@@ -203,7 +205,7 @@ def test_mlir_transformer_edge_cases():
   t2.value = "// comment"
   t2.leading_trivia = [Trivia("// comment")]
   trivia_node = Tree("trivia", [t2])
-  alias_node_trivia = transformer.attribute_alias_def([t1, val_node, trivia_node])
+  alias_node_trivia = transformer.attribute_alias_def([alias_tree, val_node, trivia_node])
   assert len(alias_node_trivia.trailing_trivia) == 1
   assert alias_node_trivia.trailing_trivia[0].text == "// comment"
 

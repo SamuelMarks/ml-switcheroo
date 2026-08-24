@@ -34,6 +34,8 @@ def test_convert_value_to_cst_branches():
 
   # Unknown
   class Unknown:
+    """Docstring."""
+
     pass
 
   assert isinstance(convert_value_to_cst(Unknown()), cst.SimpleString)

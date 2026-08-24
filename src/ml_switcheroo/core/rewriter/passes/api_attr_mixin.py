@@ -36,7 +36,7 @@ class ApiTransformerAttrMixin:
   """
 
   def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
-    """Intercepts and post-processes CST assignment nodes during traversal.
+    """Intercept and post-processes CST assignment nodes during traversal.
 
     This method performs two distinct transformations:
 
@@ -102,7 +102,7 @@ class ApiTransformerAttrMixin:
     return updated_node
 
   def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
-    """Intercepts and rewrites CST attribute nodes during traversal.
+    """Intercept and rewrites CST attribute nodes during traversal.
 
     This method resolves the qualified name of an attribute (e.g., `torch.float32`) and
     maps it to the equivalent representation in the target framework (e.g., `jax.numpy.float32`

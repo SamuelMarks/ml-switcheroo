@@ -18,7 +18,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _get_arg_by_name(args: List[cst.Arg], name: str) -> Optional[cst.Arg]:
-  """Retrieves an argument node by its keyword name.
+  """Retrieve an argument node by its keyword name.
 
   Args:
       args: List of call arguments.
@@ -64,7 +64,7 @@ def _extract_tensor_dataset_inputs(
 
 @register_hook("tf_data_loader")
 def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel[Any]]:
-  """Plugin Hook: Rewrites DataLoader construction into a tf.data pipeline.
+  """Plugin Transform Rewrites DataLoader construction into a tf.data pipeline.
 
   Logic:
   1.  Extracts the dataset argument (assumed to be position 0).

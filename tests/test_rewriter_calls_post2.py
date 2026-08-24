@@ -21,7 +21,10 @@ class DummyContext:
     """Docstring."""
 
     class Sig:
+      """Docstring."""
+
       def __init__(self, i, m):
+        """Docstring."""
         self.is_init = i
         self.is_module_method = m
 
@@ -49,14 +52,17 @@ class DummyRewriter:
     self.report = report
 
   def _create_dotted_name(self, name):
+    """Docstring."""
     if name == "error":
       raise ValueError("bad type")
     return cst.Name(name)
 
   def _report_failure(self, msg):
+    """Docstring."""
     pass
 
   def _get_target_traits(self):
+    """Docstring."""
     return self.traits
 
 

@@ -27,7 +27,7 @@ class LatexNode(ABC):
   """
 
   def emit(self, indent_level: int = 0) -> str:
-    """Serializes the node object back into its LaTeX macro representation with indentation.
+    """Serialize the node object back into its LaTeX macro representation with indentation.
 
     Args:
         indent_level: Current indentation depth.
@@ -38,7 +38,7 @@ class LatexNode(ABC):
     return ""
 
   def to_latex(self) -> str:
-    """Convenience method to render to LaTeX string.
+    """Provide method to render to LaTeX string.
 
     Returns:
         str: Valid LaTeX code string representing the node.
@@ -51,10 +51,10 @@ class TextNode(LatexNode):
   """Raw text node for comments and literals."""
 
   content: str
-  """The raw text content of the node."""
+  """Execute raw text content of the node."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Emits raw text.
+    """Emit raw text.
 
     Args:
         indent_level: Current indentation depth.
@@ -69,17 +69,17 @@ class TextNode(LatexNode):
 
 @dataclass
 class MacroNode(LatexNode):
-  r"""Represents a generic LaTeX macro (e.g. \Macro{arg1}{arg2})."""
+  r"""Represent a generic LaTeX macro (e.g. \Macro{arg1}{arg2})."""
 
   name: str
-  """The name of the LaTeX macro."""
+  """Execute name of the LaTeX macro."""
   args: List[str] = field(default_factory=list)
-  """Arguments passed inside curly braces ``{}``."""
+  """Argument passed inside curly braces ``{}``."""
   options: List[str] = field(default_factory=list)
   """Optional arguments passed inside square brackets ``[]``."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Renders the macro.
+    """Render the macro.
 
     Args:
         indent_level: Current indentation depth.
@@ -96,17 +96,17 @@ class MacroNode(LatexNode):
 
 @dataclass
 class EnvironmentNode(LatexNode):
-  r"""Represents a LaTeX environment (e.g. \begin{env}...\end{env})."""
+  r"""Represent a LaTeX environment (e.g. \begin{env}...\end{env})."""
 
   name: str
-  """The name of the LaTeX environment."""
+  """Execute name of the LaTeX environment."""
   args: List[str] = field(default_factory=list)
-  """Arguments for the environment block inside curly braces ``{}``."""
+  """Argument for the environment block inside curly braces ``{}``."""
   children: List[LatexNode] = field(default_factory=list)
   """Child nodes nested within the environment."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Renders the environment.
+    """Render the environment.
 
     Args:
         indent_level: Current indentation depth.
@@ -125,7 +125,7 @@ class EnvironmentNode(LatexNode):
 
 @dataclass
 class MemoryNode(LatexNode):
-  r"""Represents stateful memory allocation (e.g., Weights/Layers).
+  r"""Represent stateful memory allocation (e.g., Weights/Layers).
 
   Maps to the ``\\Attribute`` macro.
 
@@ -135,10 +135,10 @@ class MemoryNode(LatexNode):
   """
 
   node_id: str
-  """The unique identifier for the attribute."""
+  """Execute unique identifier for the attribute."""
 
   op_type: str
-  """The operation type (e.g., 'Conv2d')."""
+  """Execute operation type (e.g., 'Conv2d')."""
 
   config: Dict[str, str] = field(default_factory=dict)
   """Configuration parameters for the layer."""
@@ -160,7 +160,7 @@ class MemoryNode(LatexNode):
 
 @dataclass
 class InputNode(LatexNode):
-  r"""Represents the model input definition.
+  r"""Represent the model input definition.
 
   Maps to the ``\\Input`` macro.
 
@@ -191,7 +191,7 @@ class InputNode(LatexNode):
 
 @dataclass
 class ComputeNode(LatexNode):
-  r"""Represents a stateless operation call.
+  r"""Represent a stateless operation call.
 
   Maps to the ``\\Op`` macro.
 
@@ -201,10 +201,10 @@ class ComputeNode(LatexNode):
   """
 
   node_id: str
-  """The unique identifier to assign the result to."""
+  """Execute unique identifier to assign the result to."""
 
   op_type: str
-  """The operation type (e.g., 'Flatten')."""
+  """Execute operation type (e.g., 'Flatten')."""
 
   args: List[str]
   """List of arguments passed to the operation."""
@@ -230,7 +230,7 @@ class ComputeNode(LatexNode):
 
 @dataclass
 class StateOpNode(LatexNode):
-  r"""Represents a call to a stateful layer defined in Memory.
+  r"""Represent a call to a stateful layer defined in Memory.
 
   Maps to the ``\\StateOp`` macro.
 
@@ -240,10 +240,10 @@ class StateOpNode(LatexNode):
   """
 
   node_id: str
-  """The unique identifier to assign the result to."""
+  """Execute unique identifier to assign the result to."""
 
   attribute_id: str
-  """The ID of the attribute being called."""
+  """Execute ID of the attribute being called."""
 
   args: List[str]
   """List of arguments passed to the call."""
@@ -269,7 +269,7 @@ class StateOpNode(LatexNode):
 
 @dataclass
 class ReturnNode(LatexNode):
-  r"""Represents the output return statement.
+  r"""Represent the output return statement.
 
   Maps to the ``\\Return`` macro.
 
@@ -279,7 +279,7 @@ class ReturnNode(LatexNode):
   """
 
   target_id: str
-  """The variable ID to return."""
+  """Execute variable ID to return."""
 
   def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Return`` macro.
@@ -302,7 +302,7 @@ class DocumentNode(LatexNode):
   """List of child nodes comprising the document."""
 
   def emit(self, indent_level: int = 0) -> str:
-    """Emits the sequence of document nodes.
+    """Emit the sequence of document nodes.
 
     Args:
         indent_level: Current indentation depth.
@@ -321,7 +321,7 @@ class ModelContainer(LatexNode):
   """
 
   name: str = field()
-  """The model class name."""
+  """Execute model class name."""
 
   children: List[LatexNode] = field(default_factory=list)
   """List of body statements (Memory, Input, Ops, Return)."""

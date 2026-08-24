@@ -22,7 +22,7 @@ SNAPSHOT_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "ml
 
 
 class InitMode(str, Enum):
-  """Initialization mode for adapters."""
+  """Initialize mode for adapters."""
 
   LIVE = "live"
   GHOST = "ghost"

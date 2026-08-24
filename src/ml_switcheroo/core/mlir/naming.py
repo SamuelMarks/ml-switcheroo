@@ -13,8 +13,7 @@ import re
 
 
 class NamingContext:
-  """Tracks mapping between MLIR SSA IDs and Python variable names.
-
+  """Track mapping between MLIR SSA IDs and Python variable names.
 
   Ensures generated names are valid identifiers and do not collide.
   """
@@ -41,7 +40,7 @@ class NamingContext:
     }
 
   def register(self, ssa_name: str, hint: Optional[str] = None) -> str:
-    """Assigns a valid Python name to an SSA value.
+    """Assign a valid Python name to an SSA value.
 
     Naming Strategy:
 
@@ -131,7 +130,7 @@ class NamingContext:
     return py_name
 
   def lookup(self, ssa_name: str) -> str:
-    """Retrieves Python name for SSA ID.
+    """Retrieve Python name for SSA ID.
 
     Args:
         ssa_name: The MLIR variable name.

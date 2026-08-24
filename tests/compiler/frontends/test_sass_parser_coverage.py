@@ -8,13 +8,6 @@ from ml_switcheroo.core.compiler.frontends.sass.cst import SassMemory, SassRegis
 def test_sass_parser_missing():
   """Verifies the behavior of SASS parser missing."""
   parser = SassParser(".text\n.global main")
-  try:
-    from ml_switcheroo.core.compiler.frontends.sass.nodes import LabelRef as PLabelRef
-
-    r = PLabelRef("test")
-    assert str(r) == "test"
-  except ImportError:
-    pass
   parser.parse()
   parser = SassParser("MOV R0, R1\n.text")
   parser.parse()
@@ -275,8 +268,9 @@ def test_sass_parser_missing_coverage_9():
     def __init__(self):
       """Initializes DummyNode."""
       self.children = [DummyChild()]
+      self.leading_trivia = ["mytrivia"]
 
-  assert _get_trivia(DummyNode()) == ["trivia"]
+  assert _get_trivia(DummyNode()) == ["mytrivia"]
 
   # test directive param list fallback (line 240, 242)
   # Not sure exactly how to hit it from parser, so we'll mock or force it via parser
@@ -307,3 +301,85 @@ def test_sass_parser_branch_coverage():
   # instruction with all None children (300->305)
   i = transformer.instruction([None, None])
   assert i.opcode == ""
+
+
+def test_sass_cst_print():
+  """Docstring."""
+  mod = SassParser("main:\n  MOV R0, R1\n.text\n// foo\n").parse()
+  assert "MOV" in str(mod)
+  assert "main:" in str(mod)
+  assert ".text" in str(mod)
+
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate, SassPredicate, SassRegister, SassMemory
+
+  imm = SassImmediate(value=42, is_hex=False)
+  assert str(imm) == "42"
+  imm_hex = SassImmediate(value=42, is_hex=True)
+  assert str(imm_hex) == "0x2a"
+  imm_neg = SassImmediate(value=-42, is_hex=False)
+  assert str(imm_neg) == "-42"
+  imm_neg_hex = SassImmediate(value=-42, is_hex=True)
+  assert str(imm_neg_hex) == "-0x2a"
+
+  pred = SassPredicate(name="PT", negated=False)
+  assert str(pred) == "PT"
+  pred_neg = SassPredicate(name="PT", negated=True)
+  assert str(pred_neg) == "!PT"
+
+  reg = SassRegister(name="R0", negated=False, absolute=False)
+  assert str(reg) == "R0"
+  reg_neg = SassRegister(name="R0", negated=True)
+  assert str(reg_neg) == "-R0"
+  reg_abs = SassRegister(name="R0", absolute=True)
+  assert str(reg_abs) == "|R0|"
+  reg_abs_neg = SassRegister(name="R0", absolute=True, negated=True)
+  assert str(reg_abs_neg) == "-|R0|"
+
+  mem = SassMemory(base=reg, offset=0)
+  assert "[R0]" in str(mem)
+  mem2 = SassMemory(base=reg, offset=4)
+  assert "[R0 + 0x4]" in str(mem2)
+  mem3 = SassMemory(base=reg, offset=-4)
+  assert "[R0 + -0x4]" in str(mem3)
+
+  mem_bank = SassMemory(base="c[0x0]", offset=8)
+  assert "c[0x0][0x8]" in str(mem_bank)
+
+  mem_bank_zero = SassMemory(base="c[0x0]", offset=None)
+  assert "c[0x0][0x0]" in str(mem_bank_zero)
+
+
+def test_sass_parser_mem_bank_single():
+  """Docstring."""
+  mod = SassParser("FADD R0, c[0x0]").parse()
+  assert mod.statements[0].operands[1].offset is None
+
+
+def test_sass_parser_semi_instruction():
+  """Docstring."""
+  mod = SassParser("MOV R0, R1;").parse()
+  assert mod.statements[0].opcode == "MOV"
+
+
+def test_sass_cst_extra_coverage():
+  """Docstring."""
+  from ml_switcheroo.core.cst.base import Trivia
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassPredicate, SassImmediate, SassDirective
+  import pytest
+
+  with pytest.raises(ValueError, match="Invalid SASS opcode"):
+    SassInstruction(opcode="BAD OPCODE", operands=[])
+
+  pred = SassPredicate(name="PT")
+  pred.is_guard = True
+  inst = SassInstruction(opcode="MOV", operands=[], predicate=pred)
+  assert "@PT MOV;" in str(inst)
+
+  op1 = SassImmediate(value=1, is_hex=False)
+  op2 = SassImmediate(value=2, is_hex=False)
+  op2.leading_trivia = [Trivia(" ")]
+  inst2 = SassInstruction(opcode="MOV", operands=[op1, op2])
+  assert "MOV 1 2;" in str(inst2)
+
+  d = SassDirective(name="text", params=["a", "b"])
+  assert ".text a, b" in str(d)

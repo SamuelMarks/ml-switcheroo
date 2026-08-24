@@ -293,9 +293,11 @@ class RdnaAdapter(FrameworkAdapter):
     return str(data)
 
   def parse_rdna_to_graph(self, rdna_code: str) -> LogicalGraph:
-    """Parses `amdasm` output strings into a valid `LogicalGraph`.
+    """Parse `amdasm` output strings into a valid `LogicalGraph`.
 
-    This reconstructs high-level semantics from AMD RDNA3 instruction streams.
+    This reconstructs high-level semantics from AMD RDNA3 instruction streams
+    using proper CFG reconstruction and dominator analysis rather than naive
+    string heuristics.
 
     Args:
         rdna_code: The raw AMD assembly code string.
@@ -303,35 +305,74 @@ class RdnaAdapter(FrameworkAdapter):
     Returns:
         A LogicalGraph containing reconstructed semantic nodes.
     """
-    graph = LogicalGraph()
+    from ml_switcheroo.analysis.cfg import ControlFlowGraph, BasicBlock
+    from ml_switcheroo.analysis.dominators import build_dominator_sets, find_back_edges
+
+    cfg = ControlFlowGraph()
+    current_block: Optional[BasicBlock] = None
+
     lines = rdna_code.splitlines()
-
-    in_loop = "s_cbranch_vccnz" in rdna_code
-
     for line in lines:
       line = line.strip()
-      if not line or line.startswith("//"):
+      if not line or line.startswith(";") or line.startswith("//"):
         continue
 
-      if line.startswith("L_") or line.startswith("BB"):
-        pass  # Label
-      elif "s_cbranch_vccnz" in line:
-        node = LogicalNode(id=f"node_{len(graph.nodes)}", op_type="LoopControl", attributes={"condition": line})
+      # RDNA labels typically end with a colon or are just BB_X_Y
+      if line.startswith("L_") or line.startswith("BB") or line.endswith(":"):
+        label_name = line.strip(":")
+        new_block = cfg.get_or_create_block(label_name)
+        if current_block:
+          # Fallthrough
+          current_block.add_successor(new_block)
+        current_block = new_block
+      else:
+        if current_block is None:
+          current_block = cfg.get_or_create_block("entry")
+
+        current_block.add_instruction(line)
+
+        # Handle explicit branches in RDNA (e.g. s_cbranch_vccnz, s_branch)
+        if "branch" in line:
+          parts = line.split()
+          if len(parts) > 1:
+            # The target label is usually the last token
+            target = parts[-1]
+            target_block = cfg.get_or_create_block(target)
+            current_block.add_successor(target_block)
+
+    # If no blocks were created (empty), return empty graph
+    if not cfg.blocks:
+      return LogicalGraph()
+
+    # Analyze for loops using dominators
+    doms = build_dominator_sets(cfg)
+    back_edges = find_back_edges(cfg, doms)
+
+    loop_nodes = set()
+    for src, dst in back_edges:
+      loop_nodes.add(src)
+      loop_nodes.add(dst)
+
+    graph = LogicalGraph()
+    for block_id, block in cfg.blocks.items():
+      is_in_loop = block_id in loop_nodes
+      has_fmac = any("fmac" in inst or "mac" in inst for inst in block.instructions)
+
+      if is_in_loop and has_fmac:
+        node = LogicalNode(
+          id=f"node_{len(graph.nodes)}", op_type="Conv2d", attributes={"inferred_from": "FMAC inside loop"}
+        )
         graph.nodes[node.id] = node
-      elif "v_fmac_f32" in line or "v_mac_f32" in line:
-        if in_loop:
-          node = LogicalNode(
-            id=f"node_{len(graph.nodes)}",
-            op_type="Conv2d",
-            attributes={"inferred_from": "FMAC inside loop"},
-          )
-        else:
-          node = LogicalNode(
-            id=f"node_{len(graph.nodes)}",
-            op_type="Linear",
-            attributes={"inferred_from": "FMAC outside loop"},
-          )
+      elif has_fmac:
+        node = LogicalNode(
+          id=f"node_{len(graph.nodes)}", op_type="Linear", attributes={"inferred_from": "FMAC outside loop"}
+        )
         graph.nodes[node.id] = node
+
+      if is_in_loop and not has_fmac:
+        node = LogicalNode(id=f"node_{len(graph.nodes)}", op_type="LoopControl", attributes={"block": block_id})
+        graph.nodes[node.id] = node
+
     return graph
 
   def get_tiered_examples(self) -> Dict[str, str]:

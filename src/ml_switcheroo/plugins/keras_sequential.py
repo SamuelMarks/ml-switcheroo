@@ -15,7 +15,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Helper function to create a CST node representing a dotted name (e.g., 'keras.Sequential').
+  """Support function to create a CST node representing a dotted name (e.g., 'keras.Sequential').
 
   Args:
       name_str: The dot-separated string representation.
@@ -33,7 +33,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("keras_sequential_pack")
 def transform_keras_sequential(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Plugin Hook: Transforms Sequential container initialization.
+  """Plugin Transform Transforms Sequential container initialization.
 
   Transformation:
       Input: `Sequential(layer1, layer2, ...)`

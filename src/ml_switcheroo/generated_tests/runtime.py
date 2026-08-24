@@ -6,7 +6,7 @@ arbitrary data structures (Arrays, Lists, Dicts) across different frameworks.
 
 It also defines the ``ensure_determinism`` fixture, which is injected into
 generated tests to enforce reproducibility by seeding RNGs for Torch, JAX,
-TensorFlow, Numpy, and Python.
+TensorFlow, NumPy, and Python.
 """
 
 from typing import Any
@@ -67,7 +67,7 @@ def ensure_determinism() -> None:
 
 
 def verify_results(ref: Any, val: Any, rtol: float = 1e-3, atol: float = 1e-4, exact: bool = False) -> bool:
-  """Cross-framework comparison helper.
+  """Cros-framework comparison helper.
 
   Recursively compares data structures (Lists, Dicts, Tuples, Arrays).
 
@@ -145,7 +145,7 @@ def verify_results(ref: Any, val: Any, rtol: float = 1e-3, atol: float = 1e-4, e
     return np.array_equal(np_ref, np_val)
 
   except Exception:
-    # Fallback for types that fail numpy conversion (e.g. custom objects)
+    # Fallback for types that fail NumPy conversion (e.g. custom objects)
     try:
       return bool(ref == val)
     except Exception:

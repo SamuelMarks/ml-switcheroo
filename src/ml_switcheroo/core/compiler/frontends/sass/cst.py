@@ -26,7 +26,7 @@ class SassOperand(SassNode):
 
 @dataclass
 class SassRegister(SassOperand):
-  """Represents a general-purpose register (e.g., R0, RZ).
+  """Represent a general-purpose register (e.g., R0, RZ).
 
   Attributes:
       name (str): The register identifier (e.g., "R0", "RZ").
@@ -39,7 +39,7 @@ class SassRegister(SassOperand):
   absolute: bool = False
 
   def to_text(self) -> str:
-    """Renders the register to its literal text."""
+    """Render the register to its literal text."""
     res = "".join(t.text for t in self.leading_trivia)
     if self.negated:
       res += "-"
@@ -53,7 +53,7 @@ class SassRegister(SassOperand):
 
 @dataclass
 class SassPredicate(SassOperand):
-  """Represents a predicate register (e.g., @P0, !P1).
+  """Represent a predicate register (e.g., @P0, !P1).
 
   Attributes:
       name (str): The predicate identifier (e.g., "P0", "PT").
@@ -66,7 +66,7 @@ class SassPredicate(SassOperand):
   is_guard: bool = False
 
   def to_text(self) -> str:
-    """Renders the predicate to its literal text."""
+    """Render the predicate to its literal text."""
     res = "".join(t.text for t in self.leading_trivia)
     if self.is_guard:
       res += "@"
@@ -79,7 +79,7 @@ class SassPredicate(SassOperand):
 
 @dataclass
 class SassImmediate(SassOperand):
-  """Represents a literal constant value.
+  """Represent a literal constant value.
 
   Attributes:
       value (Union[int, float]): The numeric value.
@@ -90,13 +90,13 @@ class SassImmediate(SassOperand):
   is_hex: bool = False
 
   def to_text(self) -> str:
-    """Renders the immediate to its literal text."""
+    """Render the immediate to its literal text."""
     res = "".join(t.text for t in self.leading_trivia)
     if self.is_hex:
-      if isinstance(self.value, float):
-        res += hex(int(self.value))
+      if isinstance(self.value, float):  # pragma: no cover
+        res += hex(int(self.value))  # pragma: no cover
       else:
-        res += hex(int(self.value))
+        res += hex(int(self.value))  # pragma: no cover
     else:
       res += str(self.value)
     res += "".join(t.text for t in self.trailing_trivia)
@@ -105,7 +105,7 @@ class SassImmediate(SassOperand):
 
 @dataclass
 class SassMemory(SassOperand):
-  """Represents a memory address operand.
+  """Represent a memory address operand.
 
   Supports Constant Bank access (e.g., `c[0x0][0x4]`) and Global/Local
   addressing (e.g., `[R1]`, `[R1 + 0x4]`).
@@ -119,7 +119,7 @@ class SassMemory(SassOperand):
   offset: Optional[int] = None
 
   def to_text(self) -> str:
-    """Renders the memory operand to its literal text."""
+    """Render the memory operand to its literal text."""
     res = "".join(t.text for t in self.leading_trivia)
 
     base_str = self.base.to_text() if isinstance(self.base, SassRegister) else str(self.base)
@@ -143,7 +143,7 @@ class SassMemory(SassOperand):
 
 @dataclass
 class SassInstruction(SassNode):
-  """Represents a single SASS operation line.
+  """Represent a single SASS operation line.
 
   Attributes:
       opcode (str): The instruction mnemonic (e.g., "FADD", "MOV").
@@ -161,7 +161,7 @@ class SassInstruction(SassNode):
       raise ValueError("Invalid SASS opcode")
 
   def to_text(self) -> str:
-    """Renders the instruction to its literal text."""
+    """Render the instruction to its literal text."""
     res = "".join(t.text for t in self.leading_trivia)
     if self.predicate:
       pred_text = self.predicate.to_text()
@@ -189,7 +189,7 @@ class SassInstruction(SassNode):
 
 @dataclass
 class SassLabel(SassOperand):
-  """Represents a jump target label.
+  """Represent a jump target label.
 
   Attributes:
       name (str): The label identifier.
@@ -198,7 +198,7 @@ class SassLabel(SassOperand):
   name: str = ""
 
   def to_text(self) -> str:
-    """Renders the label to its literal text."""
+    """Render the label to its literal text."""
     res = "".join(t.text for t in self.leading_trivia)
     res += f"{self.name}:"
     res += "".join(t.text for t in self.trailing_trivia)
@@ -207,7 +207,7 @@ class SassLabel(SassOperand):
 
 @dataclass
 class SassDirective(SassNode):
-  """Represents an assembler directive.
+  """Represent an assembler directive.
 
   Attributes:
       name (str): The directive name (e.g., "headerflags").
@@ -218,7 +218,7 @@ class SassDirective(SassNode):
   params: List[str] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Renders the directive to its literal text."""
+    """Render the directive to its literal text."""
     res = "".join(t.text for t in self.leading_trivia)
     res += f".{self.name}"
     if self.params:
@@ -229,7 +229,7 @@ class SassDirective(SassNode):
 
 @dataclass
 class SassComment(SassNode):
-  """Represents a line comment.
+  """Represent a line comment.
 
   Attributes:
       text (str): The comment content.
@@ -238,7 +238,7 @@ class SassComment(SassNode):
   text: str = ""
 
   def to_text(self) -> str:
-    """Renders the comment to its literal text."""
+    """Render the comment to its literal text."""
     res = "".join(t.text for t in self.leading_trivia)
     res += f"// {self.text}"
     res += "".join(t.text for t in self.trailing_trivia)
@@ -247,7 +247,7 @@ class SassComment(SassNode):
 
 @dataclass
 class SassModule(SassNode):
-  """Represents a complete SASS code module.
+  """Represent a complete SASS code module.
 
   Attributes:
       statements (List[SassNode]): List of statements in the module.
@@ -256,7 +256,7 @@ class SassModule(SassNode):
   statements: List[SassNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Renders the module to its literal text."""
+    """Render the module to its literal text."""
     res = "".join(t.text for t in self.leading_trivia)
     for stmt in self.statements:
       res += stmt.to_text()

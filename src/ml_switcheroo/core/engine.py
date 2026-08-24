@@ -48,7 +48,7 @@ from ml_switcheroo.utils.visualizer import MermaidGenerator
 
 
 class ASTEngine:
-  """The main driver for the conversion process."""
+  """Execute main driver for the conversion process."""
 
   def __init__(
     self,
@@ -61,7 +61,7 @@ class ASTEngine:
     plugin_config: Optional[Dict[str, Any]] = None,
     intermediate: Optional[str] = None,
   ) -> None:
-    """Initializes the engine with semantics and configuration.
+    """Initialize the engine with semantics and configuration.
 
     Args:
         semantics: Valid SemanticsManager instance.
@@ -96,7 +96,7 @@ class ASTEngine:
     load_plugins()
 
   def run(self, code: str) -> ConversionResult:
-    """Executes the complete conversion pipeline on the input code.
+    """Execute the complete conversion pipeline on the input code.
 
     This method initiates the translation process from the source framework to
     the target framework. Depending on the configuration and targets, it
@@ -145,7 +145,7 @@ class ASTEngine:
       )
 
   def parse(self, code: str) -> cst.Module:
-    """Parses a Python source code string into a LibCST Module.
+    """Parse a Python source code string into a LibCST Module.
 
     Args:
         code: The Python source code as a string.
@@ -156,7 +156,7 @@ class ASTEngine:
     return cst.parse_module(code)
 
   def to_source(self, tree: cst.Module) -> str:
-    """Converts a LibCST Module back into its source code string representation.
+    """Convert a LibCST Module back into its source code string representation.
 
     Args:
         tree: The LibCST Module to be serialized.
@@ -167,7 +167,7 @@ class ASTEngine:
     return tree.code
 
   def _graph_to_mermaid(self, tree: cst.CSTNode) -> str:
-    """Generates a Mermaid diagram definition representing the CST structure.
+    """Generate a Mermaid diagram definition representing the CST structure.
 
     Args:
         tree: The LibCST node to visualize.
@@ -178,7 +178,7 @@ class ASTEngine:
     return MermaidGenerator().generate(tree)
 
   def _run_compiler_pipeline(self, code: str, tracer: Any) -> ConversionResult:
-    """Runs the Graph-based compiler pipeline for Instruction Set Architectures (ISAs).
+    """Run the Graph-based compiler pipeline for Instruction Set Architectures (ISAs).
 
     This pipeline handles conversion for targets like SASS, RDNA, or graph-level
     optimizations such as sharding. It parses the source into a graph, optimizes it
@@ -302,7 +302,7 @@ class ASTEngine:
     return ConversionResult(code=output_code, success=True, trace_events=tracer.export())
 
   def _run_rewriter_pipeline(self, code: str, tracer: Any) -> ConversionResult:
-    """Runs the structural rewriter pipeline with optional graph loopback optimization.
+    """Run the structural rewriter pipeline with optional graph loopback optimization.
 
     This pipeline performs AST-to-AST rewriting for high-level frameworks. It
     first ingests the code into a CST, optionally extracts and optimizes the
@@ -482,7 +482,7 @@ class ASTEngine:
 
   @property
   def strict_mode(self) -> bool:
-    """Helper property to retrieve the strict mode setting from config.
+    """Support property to retrieve the strict mode setting from config.
 
     Returns:
         True if strict mode is enabled, False otherwise.

@@ -36,3 +36,13 @@ def test_sass_synthesizer_macro_exact_match():
     if isinstance(n, SassComment) and n.text == "mock_my_macro":
       found = True
   assert found
+
+
+def test_sass_backend_semantics_provided():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.backends.sass.backend import SassBackend
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sem = SemanticsManager()
+  backend = SassBackend(semantics=sem)
+  assert backend.synthesizer.semantics is sem

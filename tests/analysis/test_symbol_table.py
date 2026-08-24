@@ -1,212 +1,340 @@
-"""Test suite for the Symbol Table module."""
+"""Test module."""
 
-import pytest
 import libcst as cst
-from unittest.mock import MagicMock
-from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer, ModuleType, TensorType, UnionType, SymbolType, Scope
+from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer, SymbolTable
+from ml_switcheroo.analysis.symbol_types import TensorType, ModuleType, UnionType
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-@pytest.fixture
-def analyzer():
-  """Provides a mock analyzer for testing."""
-  semantics = MagicMock()
-
-  def get_def(name):
-    """Gets def.
-
-    Args:
-        name: ...
-    """
-    if "randn" in name or "add" in name or "abs" in name:
-      return ("op", {"return_type": "Tensor"})
-    return None
-
-  semantics.get_definition.side_effect = get_def
-  return SymbolTableAnalyzer(semantics)
+def test_symbol_table_basic():
+  """Test element."""
+  table = SymbolTable()
+  node = cst.Name("test")
+  sym = TensorType(framework="torch")
+  table.record_type(node, sym)
+  assert table.get_type(node) == sym
+  assert table.get_type(cst.Name("other")) is None
 
 
-def analyze(code, analyzer):
-  """Analyzes .
+def test_symbol_table_analyzer_imports():
+  """Test element."""
+  semantics = SemanticsManager()
+  analyzer = SymbolTableAnalyzer(semantics)
 
-  Args:
-      code: ...
-      analyzer: ...
-  """
+  code = """
+import torch
+import torch.nn as nn
+from jax import numpy as jnp
+from jax import *
+from jax import lax
+
+torch.add(1, 2)
+nn.Conv2d(1, 1, 1)
+"""
   tree = cst.parse_module(code)
   tree.visit(analyzer)
-  return tree
+
+  scope = analyzer.current_scope
+  assert scope.get("torch") == ModuleType(path="torch", name="Module")
+  assert scope.get("nn") == ModuleType(path="torch.nn", name="Module")
+  assert scope.get("jnp") == ModuleType(path="jax.numpy", name="Module")
+  assert scope.get("lax") == ModuleType(path="jax.lax", name="Module")
 
 
-def test_import_tracking(analyzer):
-  """Verifies the behavior of import tracking.
+def test_symbol_table_analyzer_assignments():
+  """Test element."""
+  semantics = SemanticsManager()
+  # Fake semantics to return Tensor for torch.randn
+  semantics._key_origins = {"torch.randn": "neural"}
+  semantics.data = {"torch.randn": {"return_type": "Tensor", "variants": {"torch": {"api": "torch.randn"}}}}
+  semantics._reverse_index = {"torch.randn": ("torch.randn", semantics.data["torch.randn"])}
 
-  Args:
-      analyzer: ...
-  """
-  code = "import torch.nn as nn"
-  analyze(code, analyzer)
-  sym = analyzer.current_scope.get("nn")
-  assert isinstance(sym, ModuleType)
-  assert sym.path == "torch.nn"
+  analyzer = SymbolTableAnalyzer(semantics)
 
+  code = """
+import torch
+x = torch.randn(10)
+self.y = x
+"""
+  tree = cst.parse_module(code)
+  tree.visit(analyzer)
 
-def test_assignment_tracking(analyzer):
-  """Verifies the behavior of assignment tracking.
+  scope = analyzer.current_scope
+  assert scope.get("x") == TensorType(framework="torch")
 
-  Args:
-      analyzer: ...
-  """
-  code = "\nimport torch\nx = torch.randn(1)\n"
-  analyze(code, analyzer)
-  sym = analyzer.current_scope.get("x")
-  assert isinstance(sym, TensorType)
-  assert sym.framework == "torch"
-
-
-def test_control_flow_union(analyzer):
-  """Verifies the behavior of control flow union.
-
-  Args:
-      analyzer: ...
-  """
-  code = "\nimport torch\nif True:\n    x = torch.randn(1)\nelse:\n    x = torch.nn\n"
-  analyze(code, analyzer)
-  sym = analyzer.current_scope.get("x")
-  assert isinstance(sym, UnionType)
-  types_str = [str(t) for t in sym.types]
-  assert "Tensor" in types_str
-  assert "Module" in types_str
+  # We can check that the table has self.y recorded
+  # It's an Attribute, we need to find the node.
+  assigns = [
+    node
+    for node in analyzer.table._node_types.keys()
+    if isinstance(node, cst.Attribute) and getattr(node.attr, "value", "") == "y"
+  ]
+  assert len(assigns) == 1
+  assert analyzer.table.get_type(assigns[0]) == TensorType(framework="torch")
 
 
-def test_control_flow_ambiguity(analyzer):
-  """Verifies the behavior of control flow ambiguity.
+def test_symbol_table_analyzer_scopes():
+  """Test element."""
+  semantics = SemanticsManager()
+  analyzer = SymbolTableAnalyzer(semantics)
 
-  Args:
-      analyzer: ...
-  """
-  code = "\nimport torch\nif True:\n    y = torch.randn(1)\n"
-  analyze(code, analyzer)
-  sym = analyzer.current_scope.get("y")
-  assert isinstance(sym, TensorType)
-
-
-def test_ternary_expression_union(analyzer):
-  """Verifies the behavior of ternary expression union.
-
-  Args:
-      analyzer: ...
-  """
-  code = "\nimport torch\nx = torch.randn() if True else torch.nn\n"
-  analyze(code, analyzer)
-  sym = analyzer.current_scope.get("x")
-  assert isinstance(sym, UnionType)
-  types_str = [str(t) for t in sym.types]
-  assert "Tensor" in types_str
-  assert "Module" in types_str
-
-
-def test_loop_state_merge(analyzer):
-  """Verifies the behavior of loop state merge.
-
-  Args:
-      analyzer: ...
-  """
-  code = "\nimport torch\nx = torch.nn\nfor i in range(10):\n    x = torch.randn()\n"
-  analyze(code, analyzer)
-  sym = analyzer.current_scope.get("x")
-  assert isinstance(sym, UnionType)
-  types_str = [str(t) for t in sym.types]
-  assert "Tensor" in types_str
-  assert "Module" in types_str
-
-
-def test_implicit_tensor_method_on_union(analyzer):
-  """Verifies the behavior of implicit tensor method on union.
-
-  Args:
-      analyzer: ...
-  """
-  x_node = cst.parse_expression("x")
-  u_type = UnionType([TensorType("Tensor", "torch"), ModuleType("Module", "torch")])
-  analyzer.table.record_type(x_node, u_type)
-  call_node = cst.Call(func=cst.Attribute(value=x_node, attr=cst.Name("view")))
-  analyzer.leave_Call(call_node)
-  analyzer.semantics.get_definition.side_effect = lambda n: ("op", {"return_type": "Tensor"})
-  analyzer.leave_Call(call_node)
-  res_type = analyzer.table.get_type(call_node)
-  assert isinstance(res_type, TensorType)
-
-
-def test_symbol_type_equality():
-  """Verifies the behavior of symbol type equality."""
-  s1 = SymbolType()
-  s1.name = "Test"
-  s2 = SymbolType()
-  s2.name = "Test"
-  s3 = SymbolType()
-  s3.name = "Other"
-  assert s1 == s2
-  assert s1 != s3
-  assert s1 != "Test"
-
-
-def test_tensor_type_equality():
-  """Verifies the behavior of tensor type equality."""
-  t1 = TensorType("Tensor", "torch")
-  t2 = TensorType("Tensor", "torch")
-  t3 = TensorType("Tensor", "jax")
-  assert t1 == t2
-  assert t1 != t3
-  assert t1 != "Tensor"
-
-
-def test_module_type_equality():
-  """Verifies the behavior of module type equality."""
-  m1 = ModuleType("Module", "torch.nn")
-  m2 = ModuleType("Module", "torch.nn")
-  m3 = ModuleType("Module", "jax.nn")
-  assert m1 == m2
-  assert m1 != m3
-  assert m1 != "Module"
-
-
-def test_union_type_equality_and_str():
-  """Verifies the behavior of union type equality and string."""
-  u1 = UnionType([TensorType("Tensor", "torch"), ModuleType("Module", "torch.nn")])
-  u2 = UnionType([ModuleType("Module", "torch.nn"), TensorType("Tensor", "torch")])
-  u3 = UnionType([TensorType("Tensor", "jax")])
-  assert u1 == u2
-  assert u1 != u3
-  assert u1 != "Union"
-  assert (
-    str(u1) == "Union[Module, Tensor]"
-    or str(u1) == "Union[Tensor, torch.nn]"
-    or str(u1) == "Union[Module, torch.nn, Tensor]"
-    or ("Union" in str(u1))
-  )
-
-
-def test_scope_resolution_parent():
-  """Verifies the behavior of scope resolution parent."""
-  parent = Scope(name="parent")
-  pt = SymbolType()
-  pt.name = "ParentType"
-  parent.set("x", pt)
-  child = Scope(parent=parent, name="child")
-  ct = SymbolType()
-  ct.name = "ChildType"
-  child.set("y", ct)
-  assert child.get("y").name == "ChildType"
-  assert child.get("x").name == "ParentType"
-  assert child.get("z") is None
-
-
-def test_class_and_function_scope(analyzer):
-  """Verifies the behavior of class and function scope.
-
-  Args:
-      analyzer: ...
-  """
-  code = "\nclass MyClass:\n    a = torch.randn(1)\n    def my_func(self):\n        b = torch.randn(1)\n"
-  analyze(code, analyzer)
+  code = """
+x = 1
+class MyClass:
+    y = 2
+    def my_func():
+        z = 3
+"""
+  tree = cst.parse_module(code)
+  tree.visit(analyzer)
+  # The analyzer restores the scope after visiting.
   assert analyzer.current_scope.name == "global"
+
+
+def test_symbol_table_analyzer_control_flow_if():
+  """Test element."""
+  semantics = SemanticsManager()
+  analyzer = SymbolTableAnalyzer(semantics)
+
+  code = """
+import torch
+import jax
+
+if True:
+    x = torch.randn()
+else:
+    x = jax.numpy.zeros()
+"""
+  # Need to mock the semantics to recognize torch.randn and jax.numpy.zeros
+  semantics.data = {"torch.randn": {"return_type": "Tensor"}, "jax.numpy.zeros": {"return_type": "Tensor"}}
+  semantics._reverse_index = {
+    "torch.randn": ("torch.randn", semantics.data["torch.randn"]),
+    "jax.numpy.zeros": ("jax.numpy.zeros", semantics.data["jax.numpy.zeros"]),
+  }
+  semantics._key_origins = {"torch.randn": "neural", "jax.numpy.zeros": "array"}
+
+  tree = cst.parse_module(code)
+  tree.visit(analyzer)
+
+  sym = analyzer.current_scope.get("x")
+  assert isinstance(sym, UnionType)
+  assert len(sym.types) == 2
+  assert any(t.framework == "torch" for t in sym.types)
+  assert any(t.framework == "jax" for t in sym.types)
+
+
+def test_symbol_table_analyzer_control_flow_loops():
+  """Test element."""
+  semantics = SemanticsManager()
+  analyzer = SymbolTableAnalyzer(semantics)
+
+  code = """
+import torch
+for i in range(10):
+    x = torch.randn()
+
+while True:
+    y = torch.randn()
+"""
+  semantics.data = {"torch.randn": {"return_type": "Tensor"}}
+  semantics._reverse_index = {"torch.randn": ("torch.randn", semantics.data["torch.randn"])}
+  semantics._key_origins = {"torch.randn": "neural"}
+
+  tree = cst.parse_module(code)
+  tree.visit(analyzer)
+
+  # After loops, variables defined inside might exist.
+  # Start state didn't have x, end state has x = Tensor.
+  # Merge should keep Tensor (optimistic).
+  assert analyzer.current_scope.get("x") == TensorType(framework="torch")
+  assert analyzer.current_scope.get("y") == TensorType(framework="torch")
+
+
+def test_symbol_table_analyzer_ifexp():
+  """Test element."""
+  semantics = SemanticsManager()
+  analyzer = SymbolTableAnalyzer(semantics)
+
+  code = """
+import torch
+import jax
+x = torch.randn() if True else jax.numpy.zeros()
+"""
+  semantics.data = {"torch.randn": {"return_type": "Tensor"}, "jax.numpy.zeros": {"return_type": "Tensor"}}
+  semantics._reverse_index = {
+    "torch.randn": ("torch.randn", semantics.data["torch.randn"]),
+    "jax.numpy.zeros": ("jax.numpy.zeros", semantics.data["jax.numpy.zeros"]),
+  }
+  semantics._key_origins = {"torch.randn": "neural", "jax.numpy.zeros": "array"}
+
+  tree = cst.parse_module(code)
+  tree.visit(analyzer)
+
+  # Find the IfExp node in the table
+  ifexp_nodes = [node for node in analyzer.table._node_types.keys() if isinstance(node, cst.IfExp)]
+  assert len(ifexp_nodes) == 1
+  sym = analyzer.table.get_type(ifexp_nodes[0])
+  assert isinstance(sym, UnionType)
+
+
+def test_symbol_table_analyzer_call_methods():
+  """Test element."""
+  semantics = SemanticsManager()
+  analyzer = SymbolTableAnalyzer(semantics)
+
+  code = """
+import torch
+x = torch.randn()
+y = x.view()
+"""
+  semantics.data = {"torch.randn": {"return_type": "Tensor"}, "torch.Tensor.view": {"return_type": "Tensor"}}
+  semantics._reverse_index = {
+    "torch.randn": ("torch.randn", semantics.data["torch.randn"]),
+    "torch.Tensor.view": ("torch.Tensor.view", semantics.data["torch.Tensor.view"]),
+  }
+  semantics._key_origins = {"torch.randn": "neural", "torch.Tensor.view": "array"}
+
+  tree = cst.parse_module(code)
+  tree.visit(analyzer)
+
+  assert analyzer.current_scope.get("y") == TensorType(framework="torch")
+
+
+def test_make_union():
+  """Test element."""
+  analyzer = SymbolTableAnalyzer(SemanticsManager())
+  t1 = TensorType(framework="torch")
+  t2 = TensorType(framework="torch")
+
+  # Identical
+  res = analyzer._make_union(t1, t2)
+  assert res == t1
+
+  # Different
+  t3 = TensorType(framework="jax")
+  res = analyzer._make_union(t1, t3)
+  assert isinstance(res, UnionType)
+  assert len(res.types) == 2
+
+  # Nested Union
+  res2 = analyzer._make_union(res, t3)
+  assert isinstance(res2, UnionType)
+  assert len(res2.types) == 2  # Deduplicated!
+
+
+def test_symbol_table_analyzer_missing_branches():
+  """Test element."""
+  semantics = SemanticsManager()
+  analyzer = SymbolTableAnalyzer(semantics)
+
+  # Test For/While with orelse
+  code = """
+for i in range(1):
+    x = 1
+else:
+    y = 2
+
+while False:
+    z = 3
+else:
+    w = 4
+
+# Test IfExp with missing parts (impossible in valid Python, but we mock the types)
+"""
+  tree = cst.parse_module(code)
+  tree.visit(analyzer)
+
+
+def test_symbol_table_analyzer_ifexp_partials():
+  """Test element."""
+  analyzer = SymbolTableAnalyzer(SemanticsManager())
+
+  ifexp = cst.IfExp(body=cst.Name("a"), test=cst.Name("b"), orelse=cst.Name("c"))
+
+  t = TensorType(framework="torch")
+
+  # only t1
+  analyzer.table.record_type(ifexp.body, t)
+  analyzer.leave_IfExp(ifexp)
+  assert analyzer.table.get_type(ifexp) == t
+
+  # clean table
+  analyzer.table = SymbolTable()
+  # only t2
+  analyzer.table.record_type(ifexp.orelse, t)
+  analyzer.leave_IfExp(ifexp)
+  assert analyzer.table.get_type(ifexp) == t
+
+
+def test_symbol_table_analyzer_merge_states_missing_b():
+  """Test element."""
+  analyzer = SymbolTableAnalyzer(SemanticsManager())
+  state_a = {"x": TensorType(framework="torch")}
+  state_b = {}
+  res = analyzer._merge_states(state_a, state_b)
+  assert "x" in res
+
+
+def test_symbol_table_analyzer_importfrom_edge():
+  """Test element."""
+  analyzer = SymbolTableAnalyzer(SemanticsManager())
+  code = "from . import something"
+  tree = cst.parse_module(code)
+  tree.visit(analyzer)
+  # no module
+
+
+def test_symbol_table_analyzer_union_call():
+  """Test element."""
+  semantics = SemanticsManager()
+  semantics.data = {"torch.Tensor.view": {"return_type": "Tensor"}}
+  semantics._reverse_index = {"torch.Tensor.view": ("torch.Tensor.view", semantics.data["torch.Tensor.view"])}
+  semantics._key_origins = {"torch.Tensor.view": "array"}
+
+  analyzer = SymbolTableAnalyzer(semantics)
+
+  code = "x.view()"
+  tree = cst.parse_module(code)
+
+  # Manually inject a UnionType for x
+  x_node = tree.body[0].body[0].value.func.value
+  u = UnionType(types=[TensorType(framework="torch"), ModuleType(path="sys")])
+  analyzer.table.record_type(x_node, u)
+
+  tree.visit(analyzer)
+
+  call_node = tree.body[0].body[0].value
+  assert analyzer.table.get_type(call_node) == TensorType(framework="torch")
+
+
+def test_symbol_table_analyzer_loose_lookup():
+  """Test element."""
+  semantics = SemanticsManager()
+  # Provide a definition for 'view' but not 'torch.Tensor.view'
+  semantics.data = {"view": {"return_type": "Tensor"}}
+  semantics._reverse_index = {"view": ("view", semantics.data["view"])}
+  semantics._key_origins = {"view": "array"}
+
+  analyzer = SymbolTableAnalyzer(semantics)
+
+  code = "x.view()"
+  tree = cst.parse_module(code)
+
+  # Inject TensorType for x
+  x_node = tree.body[0].body[0].value.func.value
+  analyzer.table.record_type(x_node, TensorType(framework="torch"))
+
+  tree.visit(analyzer)
+
+  call_node = tree.body[0].body[0].value
+  assert analyzer.table.get_type(call_node) == TensorType(framework="torch")
+
+
+def test_make_union_len_one():
+  """Test element."""
+  analyzer = SymbolTableAnalyzer(SemanticsManager())
+  t1 = TensorType(framework="torch")
+  u2 = UnionType([t1])
+  # The union of t1 and u2 should return t1
+  res = analyzer._make_union(t1, u2)
+  assert isinstance(res, TensorType)

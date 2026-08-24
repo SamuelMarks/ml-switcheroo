@@ -19,7 +19,7 @@ from ml_switcheroo.utils.console import log_info, log_error
 
 
 class OnnxSpecImporter:
-  """Parses ONNX Markdown specification files into semantic JSON structures.
+  """Parse ONNX Markdown specification files into semantic JSON structures.
 
   This class reads Markdown files (like `Operators.md`), identifies operator
   blocks, and parses their Inputs and Attributes sections to build a rich
@@ -27,7 +27,7 @@ class OnnxSpecImporter:
   """
 
   def parse_file(self, target_file: Path) -> Dict[str, Any]:
-    """Parses a specific ONNX Markdown file (e.g. Operators.md).
+    """Parse a specific ONNX Markdown file (e.g. Operators.md).
 
     Args:
         target_file: Path to the .md file to parse.
@@ -131,7 +131,7 @@ class OnnxSpecImporter:
     return semantics
 
   def _map_onnx_type(self, raw_type: str) -> str:
-    """Maps ONNX Markdown type strings to Python/Fuzzer compatible hints.
+    """Map ONNX Markdown type strings to Python/Fuzzer compatible hints.
 
     Examples:
         'T' -> 'Tensor'

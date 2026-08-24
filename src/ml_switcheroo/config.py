@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 
 # Optional TOML support
 def _import_tomllib() -> Any:
-  """Imports tomllib or tomli depending on python version.
+  """Import tomllib or tomli depending on python version.
 
   Returns:
       Any: The imported tomllib/tomli module, or None if neither is available.
@@ -42,7 +42,7 @@ T = TypeVar("T", bound=BaseModel)
 
 
 def get_framework_priority_order() -> List[str]:
-  """Returns a list of framework keys sorted by UI Priority.
+  """Return a list of framework keys sorted by UI Priority.
 
   The sort order is determined by the ``ui_priority`` attribute of the
   registered FrameworkAdapter. Lower numbers appear first (Source default).
@@ -60,7 +60,7 @@ def get_framework_priority_order() -> List[str]:
   frameworks = available_frameworks()
 
   def sort_key(name: str) -> Tuple[int, str]:
-    """Helper to generate a sorting key for a framework name.
+    """Support to generate a sorting key for a framework name.
 
     Args:
         name (str): The framework name/key.
@@ -95,7 +95,7 @@ def get_framework_priority_order() -> List[str]:
 
 
 def _resolve_default_source() -> str:
-  """Resolves the default source framework.
+  """Resolve the default source framework.
 
   Returns:
       str: The highest priority framework key (Index 0 in sorted list),
@@ -107,7 +107,7 @@ def _resolve_default_source() -> str:
 
 
 def _resolve_default_target() -> str:
-  """Resolves the default target framework.
+  """Resolve the default target framework.
 
   Returns:
       str: The second highest priority framework key (Index 1),
@@ -171,7 +171,7 @@ class RuntimeConfig(BaseModel):
   @field_validator("source_framework", "target_framework")
   @classmethod
   def validate_framework(cls, v: str) -> str:
-    """Ensures the framework is registered in the system.
+    """Ensure the framework is registered in the system.
 
     Args:
         v (str): The framework key to validate.
@@ -196,7 +196,7 @@ class RuntimeConfig(BaseModel):
 
   @property
   def effective_source(self) -> str:
-    """Returns the resolved source framework key.
+    """Return the resolved source framework key.
 
     Prioritizes ``source_flavour`` if present, otherwise returns ``source_framework``.
 
@@ -208,7 +208,7 @@ class RuntimeConfig(BaseModel):
 
   @property
   def effective_target(self) -> str:
-    """Returns the resolved target framework key.
+    """Return the resolved target framework key.
 
     Prioritizes ``target_flavour`` if present, otherwise returns ``target_framework``.
 
@@ -219,7 +219,7 @@ class RuntimeConfig(BaseModel):
     return self.target_flavour if self.target_flavour else self.target_framework
 
   def parse_plugin_settings(self, schema: Type[T]) -> T:
-    """Validates plugin settings against a Pydantic model.
+    """Validate plugin settings against a Pydantic model.
 
     Args:
         schema (Type[T]): The Pydantic model class defining the settings schema.
@@ -251,7 +251,7 @@ class RuntimeConfig(BaseModel):
     validation_report: Optional[Path] = None,
     search_path: Optional[Path] = None,
   ) -> "RuntimeConfig":
-    """Loads configuration from ``pyproject.toml``, overriding with CLI arguments.
+    """Load configuration from ``pyproject.toml``, overriding with CLI arguments.
 
     Defaults are calculated dynamically via factory methods if not found.
 
@@ -379,7 +379,7 @@ def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path
 
 
 def parse_cli_key_values(items: Optional[List[str]]) -> Dict[str, Any]:
-  """Parses a list of 'key=value' strings into a dictionary with type inference.
+  """Parse a list of 'key=value' strings into a dictionary with type inference.
 
   Args:
       items (Optional[List[str]]): List of strings in "key=value" format.

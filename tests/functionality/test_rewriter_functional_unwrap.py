@@ -16,7 +16,7 @@ class MockUnwrapSemantics(SemanticsManager):
     self._reverse_index = {}
     self._key_origins = {}
     self.import_data = {}
-    self.framework_configs = {}
+    self.framework_configs = {"jax": {"traits": {"functional_execution_method": "apply"}}}
 
 
 @pytest.fixture

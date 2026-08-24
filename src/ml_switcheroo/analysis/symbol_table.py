@@ -28,11 +28,11 @@ class SymbolTable:
   """Container for static analysis results that maps CST nodes to inferred symbol types."""
 
   def __init__(self) -> None:
-    """Initializes an empty symbol table mapping."""
+    """Initialize an empty symbol table mapping."""
     self._node_types: Dict[cst.CSTNode, SymbolType] = {}
 
   def record_type(self, node: cst.CSTNode, sym_type: SymbolType) -> None:
-    """Associates a libcst CSTNode with its inferred SymbolType.
+    """Associate a libcst CSTNode with its inferred SymbolType.
 
     Args:
         node: The CST node for which to record type information.
@@ -42,7 +42,7 @@ class SymbolTable:
     self._node_types[node] = sym_type
 
   def get_type(self, node: cst.CSTNode) -> Optional[SymbolType]:
-    """Retrieves the inferred SymbolType for a specific CSTNode.
+    """Retrieve the inferred SymbolType for a specific CSTNode.
 
     Args:
         node: The CST node whose type needs to be looked up.
@@ -61,7 +61,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   """
 
   def __init__(self, semantics: SemanticsManager):
-    """Initializes the symbol table analyzer with a semantics manager and root scope.
+    """Initialize the symbol table analyzer with a semantics manager and root scope.
 
     Args:
         semantics: Reference to semantic knowledge base for type inference rules.
@@ -75,7 +75,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   # --- Scoping ---
 
   def visit_ClassDef(self, node: cst.ClassDef) -> None:
-    """Enters class scope, creating and pushing a new nested scope.
+    """Enter class scope, creating and pushing a new nested scope.
 
     Args:
         node: The ClassDef CST node representing the class definition.
@@ -84,7 +84,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     self.current_scope = Scope(parent=self.current_scope, name=f"class_{node.name.value}")
 
   def leave_ClassDef(self, node: cst.ClassDef) -> None:
-    """Exits the class scope, restoring the parent scope.
+    """Exit the class scope, restoring the parent scope.
 
     Args:
         node: The ClassDef CST node representing the class definition.
@@ -94,7 +94,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     self.current_scope = self.current_scope.parent
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Enters a function scope, creating and pushing a new nested scope.
+    """Enter a function scope, creating and pushing a new nested scope.
 
     Args:
         node: The FunctionDef CST node representing the function definition.
@@ -103,7 +103,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     self.current_scope = Scope(parent=self.current_scope, name=f"func_{node.name.value}")
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Exits the function scope, restoring the parent scope.
+    """Exit the function scope, restoring the parent scope.
 
     Args:
         node: The FunctionDef CST node representing the function definition.
@@ -115,7 +115,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   # --- Control Flow Support ---
 
   def visit_If(self, node: cst.If) -> bool:
-    """Handles branching logic for an If node.
+    """Handle branching logic for an If node.
 
     This method takes snapshots of the active symbol table state prior to visiting the
     then and else branches, traverses both branches manually, and merges the resulting symbol
@@ -154,7 +154,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     return False  # Manual traversal done
 
   def visit_For(self, node: cst.For) -> bool:
-    """Handles looping logic for a For node, managing potential type ambiguity.
+    """Handle looping logic for a For node, managing potential type ambiguity.
 
     Since loops can execute zero or many times, this method merges the symbols before the loop with the
     symbols after visiting the loop's body and orelse blocks, using Union types where necessary.
@@ -185,7 +185,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     return False
 
   def visit_While(self, node: cst.While) -> bool:
-    """Handles loop logic for a While node, managing potential type ambiguity.
+    """Handle loop logic for a While node, managing potential type ambiguity.
 
     This method merges the symbols in the scope before executing the loop with the symbols in the scope after
     traversing the loop's body and orelse blocks.
@@ -207,7 +207,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     return False
 
   def leave_IfExp(self, node: cst.IfExp) -> None:
-    """Infers and records the symbol type for a ternary conditional expression (A if C else B).
+    """Infer and records the symbol type for a ternary conditional expression (A if C else B).
 
     Args:
         node: The IfExp CST node representing the ternary expression.
@@ -225,7 +225,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       self.table.record_type(node, t2)
 
   def _merge_states(self, state_a: Dict[str, SymbolType], state_b: Dict[str, SymbolType]) -> Dict[str, SymbolType]:
-    """Merges two symbol dictionary states, generating UnionType for conflicting variables.
+    """Merge two symbol dictionary states, generating UnionType for conflicting variables.
 
     When a symbol exists in both states but with different types, this method creates a UnionType
     containing both types. If a symbol is present in only one branch, we optimistically retain its type.
@@ -259,7 +259,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     return merged
 
   def _make_union(self, t1: SymbolType, t2: SymbolType) -> SymbolType:
-    """Creates a deduplicated, flattened UnionType from two given SymbolTypes.
+    """Create a deduplicated, flattened UnionType from two given SymbolTypes.
 
     Args:
         t1: The first SymbolType.
@@ -289,14 +289,11 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     collect(t1)
     collect(t2)
 
-    # Deduplicate by string representation (simplistic equality)
+    # Deduplicate by actual equality, not string representation
     unique = []
-    seen = set()
     for t in types:
-      s = str(t)
-      if s not in seen:
+      if t not in unique:
         unique.append(t)
-        seen.add(s)
 
     if len(unique) == 1:
       return unique[0]
@@ -306,7 +303,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   # --- Definition Tracking ---
 
   def leave_Import(self, node: cst.Import) -> None:
-    """Tracks imported modules and binds their alias names to ModuleType instances in the current scope.
+    """Track imported modules and binds their alias names to ModuleType instances in the current scope.
 
     Args:
         node: The Import CST node representing the import statement.
@@ -322,7 +319,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       self.current_scope.set(bind_name, ModuleType(name="Module", path=full_path))
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """Tracks relative/from imports and binds imported names in the current scope.
+    """Track relative/from imports and binds imported names in the current scope.
 
     Args:
         node: The ImportFrom CST node representing the from-import statement.
@@ -344,7 +341,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       self.current_scope.set(bind_name, ModuleType(name="Module", path=full_path))
 
   def leave_Assign(self, node: cst.Assign) -> None:
-    """Propagates and binds the inferred type from the right-hand side of an assignment to the targets.
+    """Propagate and binds the inferred type from the right-hand side of an assignment to the targets.
 
     Args:
         node: The Assign CST node representing the assignment statement.
@@ -367,7 +364,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   # --- Usage Resolution ---
 
   def leave_Name(self, node: cst.Name) -> None:
-    """Looks up a variable's type by name in the active scopes and records it on the CST node.
+    """Look up a variable's type by name in the active scopes and records it on the CST node.
 
     Args:
         node: The Name CST node representing the variable usage.
@@ -378,7 +375,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       self.table.record_type(node, sym_type)
 
   def leave_Attribute(self, node: cst.Attribute) -> None:
-    """Resolves and records attribute types based on the receiver's inferred type.
+    """Resolve and records attribute types based on the receiver's inferred type.
 
     For module receivers, resolves sub-module or property paths.
 
@@ -392,7 +389,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       self.table.record_type(node, ModuleType(name="Module", path=new_path))
 
   def leave_Call(self, node: cst.Call) -> None:
-    """Infers and records the return type of a call expression using semantics definitions.
+    """Infer and records the return type of a call expression using semantics definitions.
 
     It handles function calls on modules as well as methods invoked on tensors or union of tensors.
 

@@ -46,7 +46,7 @@ class NameMangler:
 
   @staticmethod
   def to_snake_case(name: str) -> str:
-    """Converts PascalCase or camelCase to snake_case.
+    """Convert PascalCase or camelCase to snake_case.
 
     Args:
         name (str): The input name.
@@ -73,13 +73,13 @@ class NameMangler:
 
 
 class BodyExtractor(cst.CSTVisitor):
-  """Extracts the body of a specific function definition.
+  """Extract the body of a specific function definition.
 
   Used to preserve user implementation logic during scaffolding updates.
   """
 
   def __init__(self, func_name: str):
-    """Initializes the extractor to look for a function by name.
+    """Initialize the extractor to look for a function by name.
 
     Args:
         func_name (str): The name of the function to extract.
@@ -90,7 +90,7 @@ class BodyExtractor(cst.CSTVisitor):
     self.found = False
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """Visits function definitions to find the target hook.
+    """Visit function definitions to find the target hook.
 
     If found, captures the body and stops recursion.
 
@@ -109,10 +109,10 @@ class BodyExtractor(cst.CSTVisitor):
 
 
 class PluginGenerator:
-  """Writes Python plugin files to disk based on scaffold definitions."""
+  """Write Python plugin files to disk based on scaffold definitions."""
 
   def __init__(self, plugins_dir: Path):
-    """Initializes the generator.
+    """Initialize the generator.
 
     Args:
         plugins_dir: Target directory path.
@@ -121,7 +121,7 @@ class PluginGenerator:
     self.plugins_dir = plugins_dir
 
   def generate(self, scaffold: PluginScaffoldDef) -> bool:
-    """Creates or updates a plugin file.
+    """Create or updates a plugin file.
 
     If the file exists, it attempts to preserve the existing function body logic
     while updating the wrapper (docstrings/decorators/imports).
@@ -159,7 +159,7 @@ class PluginGenerator:
     return True
 
   def _build_cst_content(self, scaffold: PluginScaffoldDef, preserved_body: Optional[cst.BaseSuite] = None) -> str:
-    """Constructs the full python source for the file using CST.
+    """Construct the full python source for the file using CST.
 
     Args:
         scaffold: The plugin definition.
@@ -196,7 +196,7 @@ class PluginGenerator:
     func_def = cst.parse_statement(func_stub)
 
     # 4. Body
-    doc_stmt = cst.parse_statement(f'"""\n    Plugin Hook: {scaffold.doc}\n    """')
+    doc_stmt = cst.parse_statement(f'"""\n    Plugin Transform {scaffold.doc}\n    """')
 
     if preserved_body:
       stmts = []
@@ -230,7 +230,7 @@ class PluginGenerator:
     return module.code
 
   def _generate_cst_body_logic(self, rules: List[Rule]) -> List[cst.BaseStatement]:
-    """Compiles declarative rules into CST statements.
+    """Compile declarative rules into CST statements.
 
     Args:
         rules: List of dispatch rules.

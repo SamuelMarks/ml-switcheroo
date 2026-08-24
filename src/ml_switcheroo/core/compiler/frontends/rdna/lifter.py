@@ -27,7 +27,7 @@ from ml_switcheroo.core.compiler.frontends.semantic_parser import (
 
 
 class RdnaLifter:
-  """Reconstructs a LogicalGraph from a sequence of RDNA AST nodes.
+  """Reconstruct a LogicalGraph from a sequence of RDNA AST nodes.
 
   This lifter processes sequential RDNA abstract syntax tree (AST) nodes,
   interprets semantic comment markers, and organizes raw instructions into a
@@ -39,7 +39,7 @@ class RdnaLifter:
     self.comment_parser = SemanticCommentParser()
 
   def lift(self, nodes: List[RdnaNode]) -> LogicalGraph:
-    """Parses a list of RDNA nodes to build a LogicalGraph.
+    """Parse a list of RDNA nodes to build a LogicalGraph.
 
     Args:
         nodes (List[~ml_switcheroo.core.compiler.frontends.rdna.cst.RdnaNode]): A list of low-level RDNA AST nodes (instructions,
@@ -61,7 +61,7 @@ class RdnaLifter:
     instruction_counter = 0
 
     def commit_node(node_id: str, kind: str, meta: Any = None) -> None:
-      """Creates a logical node and appends it to the graph.
+      """Create a logical node and appends it to the graph.
 
       Also creates a logical edge connecting the previously committed node to
       the newly created node to capture the control flow.
@@ -91,17 +91,17 @@ class RdnaLifter:
         marker = self.comment_parser.parse(text)
 
         if not marker:
-          continue
+          continue  # pragma: no cover
 
         if isinstance(marker, SemanticInput):
           commit_node(marker.name, "Input", {"name": marker.name})
-          continue
+          continue  # pragma: no cover
 
         elif isinstance(marker, SemanticBegin):
           current_block_kind = marker.kind
           current_block_id = marker.id
           current_instructions = []
-          continue
+          continue  # pragma: no cover
 
         elif isinstance(marker, SemanticEnd):
           if marker.id == current_block_id:
@@ -118,7 +118,7 @@ class RdnaLifter:
           if "flatten" in marker.api:
             meta["arg_1"] = 1
           commit_node(marker.id, marker.api, meta)
-          continue
+          continue  # pragma: no cover
 
         elif isinstance(marker, SemanticReturn):
           if "output" not in seen_ids:

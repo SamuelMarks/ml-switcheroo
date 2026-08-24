@@ -18,7 +18,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Creates a CST node structure representing a dotted path.
+  """Create a CST node structure representing a dotted path.
 
   Args:
       name_str: The dotted string (e.g. 'collections.namedtuple').
@@ -36,7 +36,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("topk_adapter")
 def transform_topk(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Hook: Wraps target top_k call in a NamedTuple constructor.
+  """Transform Wraps target top_k call in a NamedTuple constructor.
 
   Orchestrates the following:
 

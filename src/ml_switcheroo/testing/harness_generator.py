@@ -29,7 +29,7 @@ from ml_switcheroo.testing.signature_extractor import SignatureExtractor
 
 
 class HarnessInjector(cst.CSTTransformer):
-  """Injects dynamic blocks into the harness skeleton."""
+  """Inject dynamic blocks into the harness skeleton."""
 
   def __init__(
     self,
@@ -70,7 +70,7 @@ class HarnessInjector(cst.CSTTransformer):
     self.hints_json = hints_json
 
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-    """Injects imports, fuzzer, and helpers at the module level.
+    """Inject imports, fuzzer, and helpers at the module level.
 
     Args:
         original_node: The original LibCST Module node.
@@ -98,7 +98,7 @@ class HarnessInjector(cst.CSTTransformer):
     return updated_node.with_changes(body=new_body)
 
   def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Any:
-    """Injects to_numpy logic into the to_numpy function definition.
+    """Inject to_numpy logic into the to_numpy function definition.
 
     Args:
         original_node: The original LibCST FunctionDef node.
@@ -121,7 +121,7 @@ class HarnessInjector(cst.CSTTransformer):
     return updated_node
 
   def leave_If(self, original_node: cst.If, updated_node: cst.If) -> Any:
-    """Injects the param injection logic replacing the target `if tp not in tgt_inputs: pass`.
+    """Inject the param injection logic replacing the target `if tp not in tgt_inputs: pass`.
 
     Args:
         original_node: The original LibCST If node.
@@ -144,7 +144,7 @@ class HarnessInjector(cst.CSTTransformer):
     return updated_node
 
   def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> Any:
-    """Modifies the run_verification arguments to use dynamic paths and frameworks.
+    """Modify the run_verification arguments to use dynamic paths and frameworks.
 
     Args:
         original_node: The original LibCST Call node.
@@ -167,10 +167,10 @@ class HarnessInjector(cst.CSTTransformer):
 
 
 class HarnessGenerator:
-  """Generates standalone verification scripts tailored to the target framework."""
+  """Generate standalone verification scripts tailored to the target framework."""
 
   def __init__(self) -> None:
-    """Initializes the generator instance and its code extractor utility."""
+    """Initialize the generator instance and its code extractor utility."""
     self.extractor = CodeExtractor()
 
   def generate(
@@ -182,7 +182,7 @@ class HarnessGenerator:
     target_fw: str = "jax",
     semantics: Optional[Dict[str, Any]] = None,
   ) -> None:
-    """Creates the verification harness file and writes it to disk.
+    """Create the verification harness file and writes it to disk.
 
     Args:
         source_file: Path to the source framework script.
@@ -242,7 +242,7 @@ class HarnessGenerator:
       f.write(script_content)
 
   def _bundle_fuzzer_dependencies(self) -> str:
-    """Extracts all helper functions required by InputFuzzer.
+    """Extract all helper functions required by InputFuzzer.
 
     Injects Hypothesis and typing imports globally for the bundle.
 
@@ -310,7 +310,7 @@ class CallableType(ParsedType):
 """)
 
     def extract_module_functions(module: Any) -> Any:
-      """Extracts and de-indents all top-level functions from the given module.
+      """Extract and de-indents all top-level functions from the given module.
 
       Args:
           module: The Python module object to extract functions from.
@@ -342,7 +342,7 @@ class CallableType(ParsedType):
     return "\n\n".join(deps + [fuzzer_class])
 
   def _build_dynamic_init(self, target_fw: str) -> tuple[str, str, str]:
-    """Builds initialization helpers and parameter injection logic for the target framework.
+    """Build initialization helpers and parameter injection logic for the target framework.
 
     Args:
         target_fw: Name of the target framework.
@@ -382,7 +382,7 @@ class CallableType(ParsedType):
     return imports_str, init_code, final_logic
 
   def _build_result_normalization(self, source_fw: str, target_fw: str) -> str:
-    """Aggregates NumPy normalization helper codes for the involved frameworks.
+    """Aggregate NumPy normalization helper codes for the involved frameworks.
 
     Args:
         source_fw: Name of the source framework.
@@ -410,7 +410,7 @@ class CallableType(ParsedType):
     return "\n".join(blocks)
 
   def _generate_adapter_shim(self) -> str:
-    """Generates a standalone mock/shim of get_adapter for the generated harness.
+    """Generate a standalone mock/shim of get_adapter for the generated harness.
 
     Returns:
         A string containing a Python function definition that returns a

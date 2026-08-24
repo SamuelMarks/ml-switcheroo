@@ -28,8 +28,8 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 try:
   import tensorflow as tf
-except Exception:
-  tf = None
+except Exception:  # pragma: no cover
+  tf = None  # pragma: no cover
 
 
 @register_framework("tensorflow")
@@ -47,7 +47,8 @@ class TensorFlowAdapter:
   ui_priority: int = 30
 
   def __init__(self) -> None:
-    """Initializes the adapter.
+    # pragma: no cover
+    """Initialize the adapter.
 
     Detects if TensorFlow is installed to determine the initialization mode:
     -   **LIVE**: If ``tensorflow`` is importable, introspection runs on live objects.
@@ -64,7 +65,7 @@ class TensorFlowAdapter:
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Returns the primary import statement configuration.
+    """Return the primary import statement configuration.
 
     Returns:
         Tuple[str, str]: The module name and its standard alias (e.g. ``('tensorflow', 'tf')``).
@@ -74,7 +75,7 @@ class TensorFlowAdapter:
 
   @property
   def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
-    """Defines the semantic roles of TensorFlow namespaces.
+    """Define the semantic roles of TensorFlow namespaces.
 
     This config guides the ``ImportFixer`` in resolving source imports
     to target imports based on their Semantic Tier.
@@ -90,7 +91,7 @@ class TensorFlowAdapter:
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """Returns templates for generating physical verification tests.
+    """Return templates for generating physical verification tests.
 
     These templates are used by ``gen-tests`` to create executable Python files
     that verify semantic correctness.
@@ -107,8 +108,7 @@ class TensorFlowAdapter:
 
   @property
   def harness_imports(self) -> List[str]:
-    """Returns extra imports required for the verification harness.
-
+    """Return extra imports required for the verification harness.
 
     TensorFlow requires no special initialization imports beyond the standard test config.
 
@@ -119,7 +119,7 @@ class TensorFlowAdapter:
     return []
 
   def get_harness_init_code(self) -> str:
-    """Returns initialization logic for the verification harness.
+    """Return initialization logic for the verification harness.
 
     TensorFlow handles state implicitly, so no RNG setup code is needed.
 
@@ -130,7 +130,7 @@ class TensorFlowAdapter:
     return ""
 
   def get_to_numpy_code(self) -> str:
-    """Returns code to convert TF tensors to NumPy.
+    """Return code to convert TF tensors to NumPy.
 
     Returns:
         str: Code string using safe attribute check.
@@ -140,7 +140,7 @@ class TensorFlowAdapter:
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """Returns list of framework-specific 'magic' arguments to be stripped from other frameworks.
+    """Return list of framework-specific 'magic' arguments to be stripped from other frameworks.
 
     TensorFlow generally uses explicit arguments or class attributes, not injected magic args.
 
@@ -152,7 +152,7 @@ class TensorFlowAdapter:
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """Returns structural transformation rules for TensorFlow/Keras.
+    """Return structural transformation rules for TensorFlow/Keras.
 
     Defines how classes should be rewritten (e.g. inheriting from ``keras.Layer``),
     what the forward method is named (``call``), and initialization requirements.
@@ -167,7 +167,7 @@ class TensorFlowAdapter:
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """Returns capability flags for the TensorFlow ecosystem.
+    """Return capability flags for the TensorFlow ecosystem.
 
     Indicates support for NumPy-compatible methods (allowing ``.astype`` via ops)
     but lack of functional state requirements.
@@ -185,7 +185,7 @@ class TensorFlowAdapter:
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """Returns the Semantic Tiers supported by this adapter.
+    """Return the Semantic Tiers supported by this adapter.
 
     Returns:
         List[SemanticTier]: Array API, Neural, and Extras.
@@ -195,7 +195,7 @@ class TensorFlowAdapter:
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """Returns the static dictionary of Operation Mappings.
+    """Return the static dictionary of Operation Mappings.
 
     Loaded dynamically from `frameworks/definitions/tensorflow.json`.
 
@@ -207,7 +207,7 @@ class TensorFlowAdapter:
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Returns list of methods used to set global random seeds.
+    """Return list of methods used to set global random seeds.
 
     Used by the PurityScanner to detect side-effects.
 
@@ -219,7 +219,7 @@ class TensorFlowAdapter:
     return ["set_seed", "random.set_seed"]
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Applies manual wiring patches to the generated snapshot.
+    """Apply manual wiring patches to the generated snapshot.
 
     Updates `tensorflow.` API prefixes to `tf.` to match standard aliases.
 
@@ -238,13 +238,13 @@ class TensorFlowAdapter:
         entry["api"] = new_api
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Returns example snippets for each semantic tier."""
+    """Return example snippets for each semantic tier."""
     from ml_switcheroo.frameworks.tensorflow_examples import get_tf_tiered_examples
 
     return get_tf_tiered_examples()
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """Generates Python code for defining a device context in TensorFlow.
+    """Generate Python code for defining a device context in TensorFlow.
 
     Example: ``tf.device('GPU:0')``
 
@@ -269,7 +269,7 @@ class TensorFlowAdapter:
     return f"tf.device('{tf_type}:{idx_str}')"
 
   def get_device_check_syntax(self) -> str:
-    """Returns Python code to check for GPU availability.
+    """Return Python code to check for GPU availability.
 
     Returns:
         str: ``len(tf.config.list_physical_devices('GPU')) > 0``
@@ -279,7 +279,7 @@ class TensorFlowAdapter:
     return "len(tf.config.list_physical_devices('GPU')) > 0"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """Returns syntax for splitting RNG state.
+    """Return syntax for splitting RNG state.
 
     Since TF uses internal state, this returns 'pass' (no-op).
 
@@ -294,7 +294,7 @@ class TensorFlowAdapter:
     return "pass"
 
   def get_serialization_imports(self) -> List[str]:
-    """Returns imports required for IO operations.
+    """Return imports required for IO operations.
 
     Returns:
         List[str]: ``['import tensorflow as tf']``
@@ -303,7 +303,7 @@ class TensorFlowAdapter:
     return ["import tensorflow as tf"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Generates code for saving or loading artifacts.
+    """Generate code for saving or loading artifacts.
 
     Args:
         op (str): Operation type ('save' or 'load').
@@ -321,7 +321,7 @@ class TensorFlowAdapter:
     return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """Returns imports required for the generated weight migration script.
+    """Return imports required for the generated weight migration script.
 
     Returns:
         List[str]: List of import statements.
@@ -330,7 +330,7 @@ class TensorFlowAdapter:
     return ["import tensorflow as tf", "import numpy as np"]
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """Returns Python code to load a TF checkpoint into a raw state dictionary.
+    """Return Python code to load a TF checkpoint into a raw state dictionary.
 
     Attempt to load variable map if available.
 
@@ -354,7 +354,7 @@ class TensorFlowAdapter:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Returns expression to convert a TF tensor to a NumPy array.
+    """Return expression to convert a TF tensor to a NumPy array.
 
     Args:
         tensor_var: Variable name of the tensor.
@@ -367,7 +367,7 @@ class TensorFlowAdapter:
     return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Returns logic (stubbed with warning) for saving weights.
+    """Return logic (stubbed with warning) for saving weights.
 
     TensorFlow checkpoint saving generally requires a model instance structure,
     so raw dictionary saving is not supported in the standalone migration script.
@@ -389,7 +389,7 @@ class TensorFlowAdapter:
     )
 
   def convert(self, data: Any) -> Any:
-    """Converts input data (NumPy/List) into TensorFlow Tensors.
+    """Convert input data (NumPy/List) into TensorFlow Tensors.
 
     Used by the Fuzzer for validation.
 
@@ -409,7 +409,7 @@ class TensorFlowAdapter:
       return data
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """Generates TensorFlow API documentation URL.
+    """Generate TensorFlow API documentation URL.
 
     Corrects internal `tensorflow` path to `tf` for doc references.
 

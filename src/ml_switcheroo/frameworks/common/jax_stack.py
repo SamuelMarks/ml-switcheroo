@@ -38,11 +38,11 @@ class JAXStackMixin:
 
   @property
   def jax_test_config(self) -> Dict[str, str]:
-    """Returns standard JAX test generation templates using JIT wrapping.
+    """Return standard JAX test generation templates using JIT wrapping.
 
     Defines:
     - `import`: Libraries to import (including opt-in Chex support).
-    - `convert_input`: Syntax to convert Numpy array to JAX array.
+    - `convert_input`: Syntax to convert NumPy array to JAX array.
     - `to_numpy`: Identity transform (preserves PyTrees for Chex comparison).
     - `jit_template`: Detailed JAX JIT syntax with static argument support.
 
@@ -57,7 +57,7 @@ class JAXStackMixin:
     }
 
   def get_to_numpy_code(self) -> str:
-    """Returns logic to convert JAX arrays to NumPy.
+    """Return logic to convert JAX arrays to NumPy.
 
     Checks for `__array__` protocol which JAX arrays implement.
 
@@ -69,7 +69,7 @@ class JAXStackMixin:
   # --- Hardware Abstraction (Level 0) ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """Returns JAX-compliant syntax for device specification.
+    """Return JAX-compliant syntax for device specification.
 
     Maps 'cuda'/'gpu' to 'gpu' backend.
     Maps 'cpu' to 'cpu' backend.
@@ -93,7 +93,7 @@ class JAXStackMixin:
     return f"jax.devices({type_code})[{idx_code}]"
 
   def get_device_check_syntax(self) -> str:
-    """Returns JAX syntax for checking if GPUs are available.
+    """Return JAX syntax for checking if GPUs are available.
 
     Format: ``len(jax.devices('gpu')) > 0``.
 
@@ -103,7 +103,7 @@ class JAXStackMixin:
     return "len(jax.devices('gpu')) > 0"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """Returns JAX syntax for splitting a PRNG key.
+    """Return JAX syntax for splitting a PRNG key.
 
     Format: ``rng, key = jax.random.split(rng)``.
 
@@ -119,7 +119,7 @@ class JAXStackMixin:
   # --- IO Serialization (Level 1 - Orbax) ---
 
   def get_serialization_imports(self) -> List[str]:
-    """Returns standard imports for JAX serialization via Orbax.
+    """Return standard imports for JAX serialization via Orbax.
 
     Returns:
         List[str]: List of standard import statement strings.
@@ -127,7 +127,7 @@ class JAXStackMixin:
     return ["import orbax.checkpoint"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Returns Orbax syntax for save/load operations.
+    """Return Orbax syntax for save/load operations.
 
     Args:
         op: Operation name ('save' or 'load').
@@ -146,7 +146,7 @@ class JAXStackMixin:
   # --- Weight Migration (Adapter) ---
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """Returns imports required for the generated weight migration script.
+    """Return imports required for the generated weight migration script.
 
     Returns:
         List[str]: List of import statements.
@@ -155,10 +155,14 @@ class JAXStackMixin:
       "import jax.numpy as jnp",
       "import orbax.checkpoint",
       "from flax.traverse_util import unflatten_dict, flatten_dict",
+      "try:",
+      "    import safetensors.flax",
+      "except ImportError:",
+      "    pass",
     ]
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """Returns python code to load a checkpoint from `path_var` into a variable named `raw_state`.
+    """Return python code to load a checkpoint from `path_var` into a variable named `raw_state`.
 
     The `raw_state` is a flat dictionary where keys are dot-separated strings (e.g. 'layer.weight').
 
@@ -170,9 +174,13 @@ class JAXStackMixin:
     """
     return textwrap.dedent(
       f"""
-            # Load with Orbax and Flatten
-            checkpointer = orbax.checkpoint.PyTreeCheckpointer()
-            raw_tree = checkpointer.restore({path_var})
+            if str({path_var}).endswith(".safetensors"):
+                raw_tree = safetensors.flax.load_file({path_var})
+            else:
+                # Load with Orbax and Flatten
+                checkpointer = orbax.checkpoint.PyTreeCheckpointer()
+                raw_tree = checkpointer.restore({path_var})
+
             if 'params' in raw_tree:
                 raw_tree = raw_tree['params']
 
@@ -186,7 +194,7 @@ class JAXStackMixin:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Returns a python expression string that converts `tensor_var` from JAX array to numpy array.
+    """Return a python expression string that converts `tensor_var` from JAX array to NumPy array.
 
     Args:
         tensor_var: Variable name of the JAX array.
@@ -197,12 +205,12 @@ class JAXStackMixin:
     return f"np.array({tensor_var})"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Returns python code to save the dictionary `state_var` (mapping flat keys to numpy arrays).
+    """Return python code to save the dictionary `state_var` (mapping flat keys to NumPy arrays).
 
-    to `path_var`. It unstricts flat keys back to PyTree structure using `unflatten_dict` and saves via Orbax.
+    to `path_var`. It unstricts flat keys back to PyTree structure using `unflatten_dict` and saves via Orbax or safetensors.
 
     Args:
-        state_var: Name of the dictionary mapping flat keys to numpy arrays.
+        state_var: Name of the dictionary mapping flat keys to NumPy arrays.
         path_var: Target path variable.
 
     Returns:
@@ -214,17 +222,20 @@ class JAXStackMixin:
             # Convert dot keys back to tuple keys
             tuple_params = {{tuple(k.split('.')): v for k, v in {state_var}.items()}}
             params_tree = unflatten_dict(tuple_params)
-            final_tree = {{'params': params_tree}}
 
-            checkpointer = orbax.checkpoint.PyTreeCheckpointer()
-            checkpointer.save({path_var}, final_tree)
+            if str({path_var}).endswith(".safetensors"):
+                safetensors.flax.save_file(params_tree, {path_var})
+            else:
+                final_tree = {{'params': params_tree}}
+                checkpointer = orbax.checkpoint.PyTreeCheckpointer()
+                checkpointer.save({path_var}, final_tree)
             """
     )
 
   # --- Documentation Linking ---
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """Generates a default documentation URL for standard JAX APIs.
+    """Generate a default documentation URL for standard JAX APIs.
 
     Maps to ReadTheDocs autosummary path.
     NOTE: Subclasses (Flax/Pax) should override this for their specific namespaces.
@@ -240,7 +251,7 @@ class JAXStackMixin:
   # --- Manual Wiring (Semantics Injection / Legacy Support) ---
 
   def _apply_stack_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Injects mappings common to all JAX frameworks (JNP, Optax, JIT).
+    """Inject mappings common to all JAX frameworks (JNP, Optax, JIT).
 
     This method populates the semantic snapshot with rules for translating
     Torch/NumPy concepts to the JAX ecosystem equivalents.

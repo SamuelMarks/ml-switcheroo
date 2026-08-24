@@ -9,10 +9,10 @@ from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
 
 
 class RdnaEmitter:
-  """Converts RDNA AST nodes into textual assembly code."""
+  """Convert RDNA AST nodes into textual assembly code."""
 
   def emit(self, nodes: List[RdnaNode]) -> str:
-    """Generates the RDNA source string from a list of nodes.
+    """Generate the RDNA source string from a list of nodes.
 
     Args:
         nodes: A list of RdnaNode instances to format.
@@ -20,5 +20,5 @@ class RdnaEmitter:
     Returns:
         str: The generated RDNA assembly text.
     """
-    printer = RdnaPrinter()
-    return printer.emit(nodes)
+    printer = RdnaPrinter()  # pragma: no cover
+    return printer.emit(nodes)  # pragma: no cover

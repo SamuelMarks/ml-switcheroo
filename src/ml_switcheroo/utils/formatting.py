@@ -18,7 +18,7 @@ class StructuredFormatter:
   """
 
   def __init__(self, indent_size: int = 2):
-    """Initializes the structured formatter with a custom indentation size.
+    """Initialize the structured formatter with a custom indentation size.
 
     Args:
         indent_size: The number of spaces representing a single level of
@@ -28,7 +28,7 @@ class StructuredFormatter:
     self.indent_size = indent_size
 
   def add_line(self, text: str, indent_level: int = 0) -> None:
-    """Adds a line of text with the specified indentation level.
+    """Add a line of text with the specified indentation level.
 
     Args:
         text: The text content of the line to add.
@@ -41,7 +41,7 @@ class StructuredFormatter:
       self.lines.append(f"{indent}{text}")
 
   def add_block(self, text: str, indent_level: int = 0) -> None:
-    """Adds a block of text, properly indenting each line within the block.
+    """Add a block of text, properly indenting each line within the block.
 
     Args:
         text: The multi-line block of text to add.
@@ -52,7 +52,7 @@ class StructuredFormatter:
       self.add_line(line, indent_level)
 
   def build(self) -> str:
-    """Returns the constructed structured string.
+    """Return the constructed structured string.
 
     Returns:
         The complete constructed output with lines joined by newline characters.
@@ -61,7 +61,7 @@ class StructuredFormatter:
 
 
 def escape_html(text: str) -> str:
-  """Escapes HTML special characters in the given text safely.
+  """Escape HTML special characters in the given text safely.
 
   Args:
       text: The raw text containing potential HTML special characters.
@@ -73,7 +73,7 @@ def escape_html(text: str) -> str:
 
 
 def escape_latex(text: str) -> str:
-  r"""Escapes LaTeX content safely. Simple implementation.
+  r"""Escape LaTeX content safely. Simple implementation.
 
   In actual LaTeX escaping, there are many characters (e.g. % $ # _ { } ~ ^ \\).
   We will just do a basic one or pass through if it's considered safe in our DSL.

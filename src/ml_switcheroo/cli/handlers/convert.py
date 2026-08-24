@@ -42,7 +42,7 @@ def handle_convert(
   json_trace_path: Optional[Path] = None,
   enable_sharding: bool = False,
 ) -> int:
-  """Handles the 'convert' command execution.
+  """Handle the 'convert' command execution.
 
   Orchestrates the loading of configuration, initialization of the semantic
   knowledge base, and the execution of the transpilation engine on files or directories.
@@ -140,7 +140,7 @@ def _convert_single_file(
   config: RuntimeConfig,
   json_trace_path: Optional[Path] = None,
 ) -> ConversionResult:
-  """Helper to execute transpilation logic on a single file.
+  """Support to execute transpilation logic on a single file.
 
   Args:
       input_path: Source file path.
@@ -212,7 +212,7 @@ def _convert_single_file(
 
 
 def _print_batch_summary(results: Dict[str, ConversionResult]) -> None:
-  """Renders a summary table of conversion results to the console.
+  """Render a summary table of conversion results to the console.
 
   Args:
       results: Dictionary mapping filenames to conversion results.

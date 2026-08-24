@@ -9,10 +9,10 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdg
 
 
 class QKVFusionPass:
-  """Fuses separate q_proj, k_proj, v_proj nodes into a single qkv_proj node."""
+  """Fus separate q_proj, k_proj, v_proj nodes into a single qkv_proj node."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to fuse QKV.
+    """Mutate graph to fuse QKV.
 
     Args:
         graph (LogicalGraph): The input logical graph.
@@ -75,10 +75,10 @@ class QKVFusionPass:
 
 
 class QKVDefusionPass:
-  """Splits a qkv_proj node into separate q_proj, k_proj, and v_proj nodes."""
+  """Split a qkv_proj node into separate q_proj, k_proj, and v_proj nodes."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
-    """Mutates graph to de-fuse QKV.
+    """Mutate graph to de-fuse QKV.
 
     Args:
         graph (LogicalGraph): The input logical graph.

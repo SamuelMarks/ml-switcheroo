@@ -19,7 +19,7 @@ class MlxIOMixin:
   """
 
   def get_serialization_imports(self) -> List[str]:
-    """Returns Python import statements required for MLX IO operations.
+    """Return Python import statements required for MLX IO operations.
 
     Returns:
         List[str]: A list of Python import statements needed to serialize or
@@ -28,7 +28,7 @@ class MlxIOMixin:
     return ["import mlx.core as mx"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Generates MLX-specific syntax for save and load operations.
+    """Generate MLX-specific syntax for save and load operations.
 
     Args:
         op (str): The operation to perform, either "save" or "load".
@@ -47,7 +47,7 @@ class MlxIOMixin:
     return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """Returns Python imports required for MLX weight migration and conversion scripts.
+    """Return Python imports required for MLX weight migration and conversion scripts.
 
     Returns:
         List[str]: A list of MLX-related import statements necessary
@@ -56,7 +56,7 @@ class MlxIOMixin:
     return ["import mlx.core as mx"]
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """Generates MLX-specific Python code to load checkpoint weights into a dictionary.
+    """Generate MLX-specific Python code to load checkpoint weights into a dictionary.
 
     The generated code handles standard .npz loading as well as default MLX load mechanisms,
     and returns a wrapped state dictionary.
@@ -85,7 +85,7 @@ class MlxIOMixin:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Generates the MLX expression for converting a tensor/array to a NumPy array.
+    """Generate the MLX expression for converting a tensor/array to a NumPy array.
 
     Args:
         tensor_var (str): The name of the MLX array variable.
@@ -96,9 +96,9 @@ class MlxIOMixin:
     return f"np.array({tensor_var})"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """Generates MLX-specific Python code to save dictionary weights.
+    """Generate MLX-specific Python code to save dictionary weights.
 
-    The generated code converts numpy arrays in the state dictionary to MLX arrays,
+    The generated code converts NumPy arrays in the state dictionary to MLX arrays,
     and saves them in the Safetensors format.
 
     Args:
@@ -112,7 +112,7 @@ class MlxIOMixin:
     """
     return textwrap.dedent(
       f"""
-            # Convert to MLX arrays if numpy
+            # Convert to MLX arrays if NumPy
             mlx_state = {{k: mx.array(v) for k, v in {state_var}.items()}}
             mx.save_safetensors({path_var}, mlx_state)
             """

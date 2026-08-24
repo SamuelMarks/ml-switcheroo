@@ -15,7 +15,7 @@ from ml_switcheroo.testing.fuzzer.generators import (
 
 
 def guess_dtype_by_name(name: str) -> str:
-  """Guesses the logical type of an argument based on its name.
+  """Guess the logical type of an argument based on its name.
 
   Args:
       name (str): The argument name.
@@ -33,7 +33,7 @@ def guess_dtype_by_name(name: str) -> str:
 
 
 def generate_by_heuristic(name: str, base_shape: Tuple[int, ...], constraints: Dict[str, Any] = None) -> Any:  # type: ignore
-  """Generates a value based on the argument name when no type hint is provided.
+  """Generate a value based on the argument name when no type hint is provided.
 
   Respects provided constraints if any.
 

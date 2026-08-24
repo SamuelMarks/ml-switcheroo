@@ -1,4 +1,4 @@
-"""Enumerations for ml-switcheroo.
+"""Enumeration for ml-switcheroo.
 
 This module defines standard enumerations used across the codebase for
 semantic categorization and framework identification.
@@ -24,7 +24,6 @@ class SemanticTier(str, Enum):
 
 class LogicOp(str, Enum):
   """Supported operators for conditional logic rules in operations.
-
 
   Used for Conditional API Dispatch.
   """

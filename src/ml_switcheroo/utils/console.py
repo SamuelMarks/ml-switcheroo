@@ -30,7 +30,7 @@ logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
 
 def _success(self, message: Any, *args: Any, **kwargs: Any) -> Any:  # type: ignore
-  """Method injected into Logger to support logger.success().
+  """Output injected into Logger to support logger.success().
 
   Args:
       self: The logger instance.
@@ -76,7 +76,7 @@ class _ConsoleProxy:
   """
 
   def __init__(self) -> None:
-    """Initializes the proxy with a default Standard Output console.
+    """Initialize the proxy with a default Standard Output console.
 
     Returns:
         None
@@ -85,7 +85,7 @@ class _ConsoleProxy:
     self._configure_logging()
 
   def set_backend(self, new_console: Console) -> None:
-    """Injects a new Console backend and updates logging handlers.
+    """Inject a new Console backend and updates logging handlers.
 
     Args:
         new_console (Console): The new Rich Console instance to use.
@@ -97,7 +97,7 @@ class _ConsoleProxy:
     self._configure_logging()
 
   def reset(self) -> None:
-    """Resets the proxy to use a fresh standard output console.
+    """Reset the proxy to use a fresh standard output console.
 
     Returns:
         None
@@ -107,7 +107,7 @@ class _ConsoleProxy:
 
   @property
   def backend(self) -> Console:
-    """Access the raw backend console.
+    """Acces the raw backend console.
 
     Returns:
         Console: The currently active implementation.
@@ -115,7 +115,7 @@ class _ConsoleProxy:
     return self._backend
 
   def _configure_logging(self) -> None:
-    """Configures or reconfigures the standard Python logging library.
+    """Configure or reconfigures the standard Python logging library.
 
     This updates the logging root handler to route messages to the currently active
     backend console.
@@ -144,7 +144,7 @@ class _ConsoleProxy:
     root_logger.addHandler(rich_handler)
 
   def print(self, *args: Any, **kwargs: Any) -> None:
-    """Forwards ``print`` calls to the active backend.
+    """Forward ``print`` calls to the active backend.
 
     Args:
         args (Any): Positional arguments for Rich print.
@@ -156,7 +156,7 @@ class _ConsoleProxy:
     self._backend.print(*args, **kwargs)
 
   def get_style(self, name: str) -> Style:
-    """Forwards ``get_style`` calls to the active backend.
+    """Forward ``get_style`` calls to the active backend.
 
     Args:
         name (str): The name of the style to look up.
@@ -167,7 +167,7 @@ class _ConsoleProxy:
     return self._backend.get_style(name)
 
   def export_text(self, **kwargs: Any) -> str:
-    """Forwards ``export_text`` (useful for log capturing).
+    """Forward ``export_text`` (useful for log capturing).
 
     Args:
         kwargs (Any): Options passed to console.export_text.
@@ -178,7 +178,7 @@ class _ConsoleProxy:
     return self._backend.export_text(**kwargs)
 
   def export_html(self, **kwargs: Any) -> str:
-    """Forwards ``export_html`` (useful for web rendering).
+    """Forward ``export_html`` (useful for web rendering).
 
     Args:
         kwargs (Any): Options passed to console.export_html.
@@ -232,7 +232,7 @@ def reset_console() -> None:
 
 
 def get_console() -> Console:
-  """Retrieves the currently active console backend.
+  """Retrieve the currently active console backend.
 
   Returns:
       Console: The active Rich Console.
@@ -241,7 +241,7 @@ def get_console() -> Console:
 
 
 def log_info(msg: str) -> None:
-  """Logs an informational message via standard logging.
+  """Log an informational message via standard logging.
 
   Args:
       msg (str): The message content. Can include rich markup like [bold].
@@ -253,7 +253,7 @@ def log_info(msg: str) -> None:
 
 
 def log_success(msg: str) -> None:
-  """Logs a success message via standard logging.
+  """Log a success message via standard logging.
 
   Args:
       msg (str): The message content.
@@ -265,7 +265,7 @@ def log_success(msg: str) -> None:
 
 
 def log_warning(msg: str) -> None:
-  """Logs a warning message via standard logging.
+  """Log a warning message via standard logging.
 
   Args:
       msg (str): The message content.
@@ -277,7 +277,7 @@ def log_warning(msg: str) -> None:
 
 
 def log_error(msg: str) -> None:
-  """Logs an error message via standard logging.
+  """Log an error message via standard logging.
 
   Args:
       msg (str): The message content.

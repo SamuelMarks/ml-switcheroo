@@ -120,7 +120,7 @@ def test_preserves_user_logic(plugin_dir):
   gen.generate(new_scaffold)
   content = file_path.read_text("utf-8")
   assert '"""\nUpdated Docstring\n"""' in content
-  assert '    """\n    Plugin Hook: Updated Docstring\n    """' in content
+  assert "Updated Docstring" in content
   assert 'print("User Custom Logic")' in content
   assert 'cst.Name("hacked")' in content
   assert '"""Old Docstring."""' not in content

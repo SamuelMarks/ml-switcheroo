@@ -24,10 +24,10 @@ from ml_switcheroo.core.tikz.nodes import (
 
 
 class TikzTransformer(Transformer[Token, Any]):
-  """Transforms a parsed TikZ AST into TikZ CST components."""
+  """Transform a parsed TikZ AST into TikZ CST components."""
 
   def start(self, children: List[Any]) -> TikzGraph:
-    """Process the root start rule.
+    """Proces the root start rule.
 
     Args:
         children: A list of parsed elements, environments, or trivia nodes.
@@ -86,7 +86,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return TikzGraph(children=graph_children, options=options, leading_trivia=leading, trailing_trivia=trailing)
 
   def element(self, children: List[Any]) -> List[Any]:
-    """Process an element.
+    """Proces an element.
 
     Args:
         children: The parsed contents of the element.
@@ -97,7 +97,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return children
 
   def TIKZ_ENV_BEGIN(self, token: Token) -> str:
-    """Process a TIKZ_ENV_BEGIN token.
+    """Proces a TIKZ_ENV_BEGIN token.
 
     Args:
         token: The raw token representing the environment start.
@@ -108,7 +108,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return str(token)
 
   def TIKZ_ENV_END(self, token: Token) -> str:
-    """Process a TIKZ_ENV_END token.
+    """Proces a TIKZ_ENV_END token.
 
     Args:
         token: The raw token representing the environment end.
@@ -119,7 +119,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return str(token)
 
   def NAME(self, token: Token) -> str:
-    """Process a NAME token.
+    """Proces a NAME token.
 
     Args:
         token: The parsed NAME token.
@@ -130,7 +130,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return str(token)
 
   def OPTION(self, token: Token) -> TikzOption:
-    """Process an OPTION token.
+    """Proces an OPTION token.
 
     Args:
         token: The parsed OPTION token.
@@ -141,7 +141,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return TikzOption(key=str(token))
 
   def COORD(self, token: Token) -> str:
-    """Process a COORD token.
+    """Proces a COORD token.
 
     Args:
         token: The coordinate token.
@@ -152,7 +152,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return str(token)
 
   def ALIGN(self, token: Token) -> str:
-    """Process an ALIGN token.
+    """Proces an ALIGN token.
 
     Args:
         token: The alignment token.
@@ -163,7 +163,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return str(token)
 
   def EDGE_OP(self, token: Token) -> str:
-    """Process an EDGE_OP token.
+    """Proces an EDGE_OP token.
 
     Args:
         token: The edge operator token.
@@ -186,7 +186,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return TriviaNode(content=content)
 
   def IGNORE_TEXT(self, token: Token) -> TriviaNode:
-    """Process an IGNORE_TEXT token.
+    """Proces an IGNORE_TEXT token.
 
     Args:
         token: The raw IGNORE_TEXT token.
@@ -197,7 +197,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return TriviaNode(content=str(token))
 
   def node(self, children: List[Any]) -> TikzNode:
-    """Process a node declaration.
+    """Proces a node declaration.
 
     Args:
         children: The parsed children components of a node, including
@@ -252,7 +252,7 @@ class TikzTransformer(Transformer[Token, Any]):
     )
 
   def edge(self, children: List[Any]) -> TikzEdge:
-    """Process an edge declaration.
+    """Proces an edge declaration.
 
     Args:
         children: The parsed components of an edge, including source,
@@ -299,7 +299,7 @@ class TikzTransformer(Transformer[Token, Any]):
     )
 
   def tabular(self, children: List[Any]) -> TikzTable:
-    """Process a tabular.
+    """Proces a tabular.
 
     Args:
         children: The parsed tabular components including row elements and layout details.
@@ -343,7 +343,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return TikzTable(align=align, rows=rows, leading_trivia=leading, trailing_trivia=trailing)
 
   def tabular_row(self, children: List[Any]) -> Tree[Token]:
-    """Process a tabular row.
+    """Proces a tabular row.
 
     Args:
         children: The cell components of the row.
@@ -354,7 +354,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return Tree("tabular_row", children)
 
   def kind(self, children: List[Any]) -> Tree[Token]:
-    """Process a kind node.
+    """Proces a kind node.
 
     Args:
         children: Children of the kind node.
@@ -365,7 +365,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return Tree("kind", children)
 
   def id(self, children: List[Any]) -> Tree[Token]:
-    """Process an id node.
+    """Proces an id node.
 
     Args:
         children: Children of the id node.
@@ -376,7 +376,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return Tree("id", children)
 
   def meta(self, children: List[Any]) -> Tree[Token]:
-    """Process a meta node.
+    """Proces a meta node.
 
     Args:
         children: Children of the meta node containing key-value pairings.
@@ -387,7 +387,7 @@ class TikzTransformer(Transformer[Token, Any]):
     return Tree("meta", children)
 
   def ignore(self, children: List[Any]) -> Tree[Token]:
-    """Process an ignore node.
+    """Proces an ignore node.
 
     Args:
         children: Children of the ignored node.
@@ -399,7 +399,7 @@ class TikzTransformer(Transformer[Token, Any]):
 
 
 class TikzParser:
-  """Parses TikZ code into a TikzGraph (CST) using a formal Lark grammar."""
+  """Parse TikZ code into a TikzGraph (CST) using a formal Lark grammar."""
 
   def __init__(self, text: str) -> None:
     """Initialize parser and tokenize input.

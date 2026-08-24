@@ -84,7 +84,7 @@ def ensure_determinism():
 
 # --- Verification Logic ---
 def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
-  """Cross-framework comparison helper.
+  """Cros-framework comparison helper.
 
   Recursively compares data structures (Lists, Dicts, Tuples).
   If 'exact' is True, enforces strict equality for all types (np.array_equal).
@@ -157,7 +157,7 @@ def ensure_runtime_module(
   frameworks: Optional[List[str]] = None,
   mgr: Any = None,
 ) -> None:
-  """Creates or updates the `runtime.py` module in the output directory.
+  """Create or updates the `runtime.py` module in the output directory.
 
   Injects:
   1. Safe import blocks for all used frameworks (try/except ImportError).

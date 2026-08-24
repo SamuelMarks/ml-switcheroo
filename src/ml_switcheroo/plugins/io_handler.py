@@ -21,7 +21,7 @@ from ml_switcheroo.utils.node_diff import capture_node_source
 
 
 def _get_func_name(node: cst.Call) -> Optional[str]:
-  """Helper to get function name from Call node (Attribute or Name).
+  """Support to get function name from Call node (Attribute or Name).
 
   Args:
       node: The Call node representing the function call.
@@ -37,7 +37,7 @@ def _get_func_name(node: cst.Call) -> Optional[str]:
 
 
 def _get_arg(args: List[cst.Arg], index: int, name: str) -> Optional[cst.Arg]:
-  """Retrieves argument by position or keyword.
+  """Retrieve argument by position or keyword.
 
   Args:
       args: The list of arguments from the function call.
@@ -59,7 +59,7 @@ def _get_arg(args: List[cst.Arg], index: int, name: str) -> Optional[cst.Arg]:
 
 @register_hook("io_handler")
 def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Hook to rewrite save/load calls using Adapter-specific logic.
+  """Transform to rewrite save/load calls using Adapter-specific logic.
 
   Triggers:
       `torch.save` and `torch.load`.

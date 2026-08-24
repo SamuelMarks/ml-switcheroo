@@ -45,3 +45,38 @@ def test_analyze_no_loop_found():
   insts = [make_inst("FADD", SassRegister(name="R0"), SassRegister(name="R1"), SassRegister(name="R2"))]
   meta = SassAnalyzer.analyze_block("Linear", insts)
   assert meta == {}
+
+
+def test_sass_analysis_other_kinds():
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate
+
+  inst = SassInstruction(opcode="ISETP.LT.AND", operands=[SassImmediate(value=5)])
+
+  meta = SassAnalyzer.analyze_block("Conv3d", [inst])
+  assert meta["kernel_size"] == 5
+
+  meta = SassAnalyzer.analyze_block("AvgPool2d", [inst])
+  assert meta["kernel_size"] == 5
+
+  SassAnalyzer.analyze_block("BatchNorm2d", [inst])
+  SassAnalyzer.analyze_block("Conv1d", [inst])
+  SassAnalyzer.analyze_block("BatchNorm1d", [inst])
+  SassAnalyzer.analyze_block("Softmax", [inst])
+  SassAnalyzer.analyze_block("BMM", [inst])
+  SassAnalyzer.analyze_block("Sum", [inst])
+  SassAnalyzer.analyze_block("BCEWithLogitsLoss", [inst])
+  SassAnalyzer.analyze_block("Dropout2d", [inst])
+  SassAnalyzer.analyze_block("AvgPool1d", [inst])
+  SassAnalyzer.analyze_block("MultiheadAttention", [inst])
+  SassAnalyzer.analyze_block("RNN", [inst])
+
+  meta = SassAnalyzer.analyze_block("MSELoss", [inst])
+  assert meta["elements"] == 5
+
+  SassAnalyzer.analyze_block("Sigmoid", [inst])
+  SassAnalyzer.analyze_block("Dropout", [inst])
+
+  meta = SassAnalyzer.analyze_block("Mean", [inst])
+  assert meta["elements"] == 5

@@ -13,10 +13,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MigrationGuideGenerator:
-  """Generates a Markdown Migration Guide by diffing semantic specifications."""
+  """Generate a Markdown Migration Guide by diffing semantic specifications."""
 
   def __init__(self, semantics: SemanticsManager):
-    """Initializes the generator.
+    """Initialize the generator.
 
     Args:
         semantics: The knowledge base manager.
@@ -25,7 +25,7 @@ class MigrationGuideGenerator:
     self.semantics = semantics
 
   def generate(self, source_fw: str, target_fw: str) -> str:
-    """Produces the Markdown content for the migration guide.
+    """Produce the Markdown content for the migration guide.
 
     It groups operations by their Semantic Tier (Math, Neural, Extras),
     sorts them alphabetically, and generates a comparison table for each tier.
@@ -86,7 +86,7 @@ class MigrationGuideGenerator:
     return "\n".join(md_lines)
 
   def _has_variants(self, op_name: str, source: str) -> bool:
-    """Checks if an operation has definitions for at least the source framework.
+    """Check if an operation has definitions for at least the source framework.
 
     Args:
         op_name: Abstract operation ID.
@@ -104,7 +104,7 @@ class MigrationGuideGenerator:
     return source in variants
 
   def _generate_table_header(self, source: str, target: str) -> str:
-    """Creates the Markdown table header.
+    """Create the Markdown table header.
 
     Args:
         source: The name of the source framework.
@@ -118,7 +118,7 @@ class MigrationGuideGenerator:
     return f"| {s_title} API | {t_title} API | Argument Changes |\n| :--- | :--- | :--- |"
 
   def _generate_op_row(self, op_name: str, source: str, target: str) -> str:
-    """Calculates the diff row for a single operation.
+    """Calculate the diff row for a single operation.
 
     Args:
         op_name: Abstract operation ID.

@@ -4,7 +4,7 @@ from typing import Dict
 
 
 def get_tf_tiered_examples() -> Dict[str, str]:
-  """Returns example snippets for each semantic tier."""
+  """Return example snippets for each semantic tier."""
   return {
     "tier1_math": """import tensorflow as tf
 

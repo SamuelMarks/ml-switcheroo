@@ -40,7 +40,7 @@ class OpSchema:
   has_results: bool = False
 
   def validate(self, node: OperationNode) -> bool:
-    """Checks if the CST node conforms to the dialect schema.
+    """Check if the CST node conforms to the dialect schema.
 
     Args:
         node (~ml_switcheroo.core.mlir.cst.OperationNode): The CST node to be validated.
@@ -130,7 +130,7 @@ class DialectRegistry:
 
   @classmethod
   def validate_op(cls, node: OperationNode) -> bool:
-    """Validates a single operation node against the schema.
+    """Validate a single operation node against the schema.
 
     Args:
         node (~ml_switcheroo.core.mlir.cst.OperationNode): The operation node to validate.
@@ -153,7 +153,7 @@ class DialectRegistry:
 
   @classmethod
   def get_abstract_op(cls, op_name: str) -> str:
-    """Maps a high-level framework op string (e.g. 'Linear') to the canonical dialect op.
+    """Map a high-level framework op string (e.g. 'Linear') to the canonical dialect op.
 
     Args:
         op_name (str): The high-level framework operation name.

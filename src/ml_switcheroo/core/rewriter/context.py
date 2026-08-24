@@ -30,7 +30,7 @@ class RewriterContext:
     arg_injector: Optional[Callable[[str, Optional[str]], None]] = None,
     preamble_injector: Optional[Callable[[str], None]] = None,
   ):
-    """Initializes the context.
+    """Initialize the context.
 
     Args:
         semantics: The Semantic Knowledge Base manager.
@@ -82,7 +82,7 @@ class RewriterContext:
     self._hydrate_source_aliases()
 
   def _default_arg_injector(self, name: str, annotation: Optional[str]) -> None:
-    """Default callback: Appends to the current signature context.
+    """Supply callback: Appends to the current signature context.
 
     Args:
         name: Name of the argument to inject.
@@ -99,7 +99,7 @@ class RewriterContext:
         current_ctx.injected_args.append((name, annotation))
 
   def _default_preamble_injector(self, code: str) -> None:
-    """Default callback: Injects to function body or module header.
+    """Supply callback: Injects to function body or module header.
 
     Args:
         code: The block of code to inject.
@@ -123,7 +123,7 @@ class RewriterContext:
 
   @property
   def source_fw(self) -> str:
-    """Returns effective source framework string.
+    """Return effective source framework string.
 
     Returns:
         The source framework identifier as a string.
@@ -132,7 +132,7 @@ class RewriterContext:
 
   @property
   def target_fw(self) -> str:
-    """Returns effective target framework string.
+    """Return effective target framework string.
 
     Returns:
         The target framework identifier as a string.
@@ -140,7 +140,7 @@ class RewriterContext:
     return str(self.config.effective_target)
 
   def _hydrate_source_aliases(self) -> None:
-    """Loads default aliases for the source framework from semantics config.
+    """Load default aliases for the source framework from semantics config.
 
     Returns:
         None

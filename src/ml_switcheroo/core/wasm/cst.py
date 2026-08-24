@@ -16,7 +16,7 @@ class WatNode:
   """Base node for all WAT components."""
 
   def to_text(self, indent: int = 0) -> str:
-    """Renders the component to WAT text.
+    """Render the component to WAT text.
 
     Args:
         indent: Indentation level.
@@ -29,7 +29,7 @@ class WatNode:
 
 @dataclass
 class WatParam(WatNode):
-  """Represents a parameter in a WAT function.
+  """Represent a parameter in a WAT function.
 
   Attributes:
       name: The register name of the parameter.
@@ -40,7 +40,7 @@ class WatParam(WatNode):
   type_id: str
 
   def to_text(self, indent: int = 0) -> str:
-    """Renders the param.
+    """Render the param.
 
     Args:
         indent: Indentation level.
@@ -53,7 +53,7 @@ class WatParam(WatNode):
 
 @dataclass
 class WatResult(WatNode):
-  """Represents a return result in a WAT function.
+  """Represent a return result in a WAT function.
 
   Attributes:
       type_id: The type identifier of the return result.
@@ -62,7 +62,7 @@ class WatResult(WatNode):
   type_id: str
 
   def to_text(self, indent: int = 0) -> str:
-    """Renders the result.
+    """Render the result.
 
     Args:
         indent: Indentation level.
@@ -75,7 +75,7 @@ class WatResult(WatNode):
 
 @dataclass
 class WatLocal(WatNode):
-  """Represents a local variable definition in a WAT function.
+  """Represent a local variable definition in a WAT function.
 
   Attributes:
       name: The register name of the local variable.
@@ -86,7 +86,7 @@ class WatLocal(WatNode):
   type_id: str
 
   def to_text(self, indent: int = 0) -> str:
-    """Renders the local.
+    """Render the local.
 
     Args:
         indent: Indentation level.
@@ -99,7 +99,7 @@ class WatLocal(WatNode):
 
 @dataclass
 class WatInstr(WatNode):
-  """Represents a single WebAssembly instruction.
+  """Represent a single WebAssembly instruction.
 
   Attributes:
       opcode: The instruction operation code.
@@ -110,7 +110,7 @@ class WatInstr(WatNode):
   args: List[WasmArgument] = field(default_factory=list)
 
   def to_text(self, indent: int = 0) -> str:
-    """Renders the instruction.
+    """Render the instruction.
 
     Args:
         indent: Indentation level.
@@ -127,7 +127,7 @@ class WatInstr(WatNode):
 
 @dataclass
 class WatFunc(WatNode):
-  """Represents a WebAssembly function.
+  """Represent a WebAssembly function.
 
   Attributes:
       name: Name of the function.
@@ -146,7 +146,7 @@ class WatFunc(WatNode):
   export: bool = False
 
   def to_text(self, indent: int = 0) -> str:
-    """Renders the function.
+    """Render the function.
 
     Args:
         indent: Indentation level.
@@ -181,7 +181,7 @@ class WatFunc(WatNode):
 
 @dataclass
 class WatModule(WatNode):
-  """Represents a WebAssembly module.
+  """Represent a WebAssembly module.
 
   Attributes:
       functions: List of functions in the module.
@@ -190,7 +190,7 @@ class WatModule(WatNode):
   functions: List[WatFunc] = field(default_factory=list)
 
   def to_text(self, indent: int = 0) -> str:
-    """Renders the module.
+    """Render the module.
 
     Args:
         indent: Indentation level.
@@ -206,7 +206,7 @@ class WatModule(WatNode):
 
 
 class WatParser:
-  """Parses WAT strings into WatModule CST."""
+  """Parse WAT strings into WatModule CST."""
 
   def __init__(self, text: str) -> None:
     """Initialize parser with source text.

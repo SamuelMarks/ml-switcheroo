@@ -20,7 +20,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 @register_hook("scatter_indexer")
 def transform_scatter(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """Hook: Transforms scatter method calls into index-update syntax (JAX style).
+  """Transform Transforms scatter method calls into index-update syntax (JAX style).
 
   Trigger: Operations mapped with `requires_plugin: "scatter_indexer"`.
 

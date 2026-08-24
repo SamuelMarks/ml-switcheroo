@@ -25,7 +25,7 @@ DISCOVERED_FILENAMES = {"k_discovered.yaml"}
 
 
 class KnowledgeBaseLoader:
-  """Handles the I/O operations for populating the SemanticsManager."""
+  """Handle the I/O operations for populating the SemanticsManager."""
 
   def __init__(self, manager: Any):
     """Initialize the loader.
@@ -37,7 +37,7 @@ class KnowledgeBaseLoader:
     self.mgr = manager
 
   def load_knowledge_graph(self) -> None:
-    """Scans the semantics directory for JSON specifications.
+    """Scan the semantics directory for JSON specifications.
 
     Loads files in priority order:
     1. Array API (Math) - Priority 10
@@ -102,7 +102,7 @@ class KnowledgeBaseLoader:
     self._load_overlays()
 
   def _load_overlays(self) -> None:
-    """Scans the snapshots directory for framework mapping overlays."""
+    """Scan the snapshots directory for framework mapping overlays."""
     snap_dir = resolve_snapshots_dir()
     if not snap_dir.exists():
       return
@@ -117,7 +117,7 @@ class KnowledgeBaseLoader:
         print(f"⚠️ Error loading overlay {fpath.name}: {e}")
 
   def _load_tier_content(self, content: Dict[str, Any], tier: SemanticTier) -> None:
-    """Merges a specification dictionary into the manager.
+    """Merge a specification dictionary into the manager.
 
     Args:
         content: The JSON content.
@@ -133,7 +133,7 @@ class KnowledgeBaseLoader:
     )
 
   def _load_overlay_content(self, content: Dict[str, Any], filename: str) -> None:
-    """Merges a snapshot overlay into the manager.
+    """Merge a snapshot overlay into the manager.
 
     Args:
         content: The JSON content.

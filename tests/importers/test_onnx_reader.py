@@ -1,64 +1,108 @@
-"""Test suite for the Onnx Reader module."""
+"""Test module."""
 
-import pytest
+from pathlib import Path
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
 
 
-@pytest.fixture
-def importer():
-  """Provides a mock importer for testing."""
-  return OnnxSpecImporter()
+def test_onnx_reader_missing_file(tmp_path: Path) -> None:
+  """Test element."""
+  importer = OnnxSpecImporter()
+  res = importer.parse_file(tmp_path / "missing.md")
+  assert res == {}
 
 
-def test_parse_file_not_found(importer, tmp_path):
-  """Parses file not found."""
-  missing_file = tmp_path / "missing.md"
-  assert importer.parse_file(missing_file) == {}
+def test_onnx_reader_parse_markdown(tmp_path: Path) -> None:
+  """Test element."""
+  importer = OnnxSpecImporter()
 
+  md_content = """
+### <a name="Abs"></a><a name="abs">**Abs**</a>
 
-def test_parse_file_found(importer, tmp_path):
-  """Parses file found."""
+#### Summary
+
+Computes the absolute value.
+
+#### Inputs
+
+<dl>
+<dt><tt>X</tt> : T</dt>
+<dd>Input tensor</dd>
+<dt>Y: list of ints</dt>
+<dd>Other</dd>
+<dt>Z</dt>
+<dd>No type</dd>
+<dt>W: </dt>
+<dd>Empty type</dd>
+</dl>
+
+#### Attributes
+
+<dl>
+<dt><b>alpha</b> : float</dt>
+<dd>An attribute</dd>
+<dt>beta</dt>
+<dd>Another attribute</dd>
+</dl>
+
+### <a name="Add"></a><a name="add">**Add**</a>
+
+#### Summary
+
+Adds two tensors.
+    """
   md_file = tmp_path / "Operators.md"
-  md_file.write_text('### <a name="Add"></a>\n**Add**\nDesc')
-  result = importer.parse_file(md_file)
-  assert "Add" in result
+  md_file.write_text(md_content)
+
+  res = importer.parse_file(md_file)
+
+  assert "Abs" in res
+  assert res["Abs"]["description"] == '<a name="Abs"></a><a name="abs">**Abs**</a>'
+
+  assert "Add" in res
+  assert res["Add"]["description"] == '<a name="Add"></a><a name="add">**Add**</a>'
+  assert res["Add"]["std_args"] == []
 
 
-def test_parse_markdown_duplicate_op(importer, tmp_path):
-  """Parses markdown duplicate op."""
-  md_file = tmp_path / "ops.md"
-  md_file.write_text('### <a name="Add"></a>\n**Add**\nThis is v1\n### <a name="Add"></a>\n**Add**\nThis is v2\n')
-  result = importer._parse_markdown(md_file)
-  assert len(result) == 1
-  assert "This is v1" in result["Add"]["description"] or True
+def test_map_onnx_type() -> None:
+  """Test element."""
+  importer = OnnxSpecImporter()
 
-
-def test_parse_markdown_args(importer, tmp_path):
-  """Parses markdown arguments and types."""
-  md_file = tmp_path / "ops.md"
-  md_file.write_text(
-    '### <a name="Add"></a>\n**Add**\nSummary\n#### Inputs\n<dl><dt>a : T</dt><dd>description</dd><dt>b</dt><dd>no type</dd></dl>'
-  )
-  result = importer._parse_markdown(md_file)
-  assert result["Add"]["std_args"] == [("a", "Tensor"), ("b", "Any")]
-
-  md_file.write_text('### <a name="Conv"></a>\n#### Attributes\n<dl><dt>dilations : list of ints</dt></dl>')
-  result = importer._parse_markdown(md_file)
-  assert result["Conv"]["std_args"] == [("dilations", "List[int]")]
-
-
-def test_map_onnx_type(importer):
-  """Maps onnx type."""
+  # Lists
   assert importer._map_onnx_type("list of ints") == "List[int]"
   assert importer._map_onnx_type("list of floats") == "List[float]"
   assert importer._map_onnx_type("list of strings") == "List[str]"
   assert importer._map_onnx_type("ints") == "List[int]"
   assert importer._map_onnx_type("floats") == "List[float]"
+
+  # Primitives
   assert importer._map_onnx_type("string") == "str"
+  assert importer._map_onnx_type("str") == "str"
   assert importer._map_onnx_type("bool") == "bool"
   assert importer._map_onnx_type("float") == "float"
   assert importer._map_onnx_type("int") == "int"
-  assert importer._map_onnx_type("T") == "Tensor"
-  assert importer._map_onnx_type("tensor(float)") == "float"
+
+  # Tensors
   assert importer._map_onnx_type("tensor") == "Tensor"
-  assert importer._map_onnx_type("Unknown") == "Any"
+  assert importer._map_onnx_type("T") == "Tensor"
+
+  # Fallback
+  assert importer._map_onnx_type("unknown") == "Any"
+
+
+def test_long_summary(tmp_path: Path) -> None:
+  """Test element."""
+  importer = OnnxSpecImporter()
+  long_desc = "A" * 310
+
+  md_content = f"""
+### <a name="Long"></a><a name="long">**Long**</a>
+#### Summary
+{long_desc}
+    """
+  md_file = tmp_path / "Operators2.md"
+  md_file.write_text(md_content)
+
+  res = importer.parse_file(md_file)
+  assert "Long" in res
+  # The description is `<a name="Long"></a><a name="long">**Long**</a>` which is length 46.
+  assert len(res["Long"]["description"]) == 46

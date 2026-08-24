@@ -16,13 +16,13 @@ from ml_switcheroo.core.compiler.frontends.sass.cst import (
 
 
 class SassPrinter:
-  """Prints SASS AST nodes into structured assembly strings using the Visitor pattern.
+  """Print SASS AST nodes into structured assembly strings using the Visitor pattern.
 
   Ensures consistent indentation and layout rules across all output.
   """
 
   def emit(self, nodes: List[SassNode]) -> str:
-    """Emits the full SASS text for a sequence of nodes.
+    """Emit the full SASS text for a sequence of nodes.
 
     Args:
         nodes: A list of SASS AST nodes.
@@ -36,7 +36,7 @@ class SassPrinter:
     return "\n".join(lines) + "\n"
 
   def _visit(self, node: SassNode) -> str:
-    """Dispatches to the correct visitor method based on the node type.
+    """Dispatch to the correct visitor method based on the node type.
 
     Args:
         node: The SASS AST node to visit.
@@ -56,7 +56,7 @@ class SassPrinter:
       return self.visit_Fallback(node)
 
   def visit_Label(self, node: SassLabel) -> str:
-    """Visits a SassLabel node (flush left).
+    """Visit a SassLabel node (flush left).
 
     Args:
         node: The SassLabel node to visit.
@@ -67,7 +67,7 @@ class SassPrinter:
     return str(node)
 
   def visit_Instruction(self, node: SassInstruction) -> str:
-    """Visits an SassInstruction node (indented).
+    """Visit an SassInstruction node (indented).
 
     Args:
         node: The SassInstruction node to visit.
@@ -78,7 +78,7 @@ class SassPrinter:
     return f"    {str(node)}"
 
   def visit_Directive(self, node: SassDirective) -> str:
-    """Visits a SassDirective node (indented).
+    """Visit a SassDirective node (indented).
 
     Args:
         node: The SassDirective node to visit.
@@ -89,7 +89,7 @@ class SassPrinter:
     return f"    {str(node)}"
 
   def visit_Comment(self, node: SassComment) -> str:
-    """Visits a SassComment node (indented).
+    """Visit a SassComment node (indented).
 
     Args:
         node: The SassComment node to visit.

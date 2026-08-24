@@ -93,7 +93,7 @@ def ensure_determinism():
 
 # --- Verification Logic ---
 def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
-  """Cross-framework comparison helper.
+  """Cros-framework comparison helper.
 
   Recursively compares data structures (Lists, Dicts, Tuples).
   If 'exact' is True, enforces strict equality for all types (np.array_equal).

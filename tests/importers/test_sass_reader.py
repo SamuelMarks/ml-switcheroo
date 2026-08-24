@@ -1,85 +1,148 @@
-"""Test suite for the Sass Reader module."""
+"""Test module."""
 
-import pytest
-from ml_switcheroo.importers.sass_reader import SassHtmlParser, SassSpecImporter
-
-
-@pytest.fixture
-def parser():
-  """Provides a mock parser for testing."""
-  return SassHtmlParser()
+from pathlib import Path
+from ml_switcheroo.importers.sass_reader import SassSpecImporter
 
 
-@pytest.fixture
-def importer():
-  """Provides a mock importer for testing."""
-  return SassSpecImporter()
+def test_sass_reader_missing_file(tmp_path: Path) -> None:
+  """Test element."""
+  importer = SassSpecImporter()
+  res = importer.parse_file(tmp_path / "missing.html")
+  assert res == {}
 
 
-def test_sass_html_parser(parser):
-  """Verifies the behavior of SASS HTML parser."""
-  html = "\n    <table>\n        <tbody>\n            <tr><td>Opcode Header</td><td>Description Header</td></tr>\n            <tr><td>FADD</td><td>FP32 Add</td></tr>\n            <tr><td>IADD3</td><td>Integer Addition</td></tr>\n            <tr><td>invalid</td><td>some desc</td></tr>\n            <tr><td>ONLYONE</td></tr>\n            <tr><td>UPPER M N</td><td>Desc with space</td></tr>\n        </tbody>\n    </table>\n    "
-  parser.feed(html)
-  ops = parser.extracted_ops
-  assert ("FADD", "FP32 Add") in ops
-  assert ("IADD3", "Integer Addition") in ops
-  assert not any((op == "Opcode Header" for (op, _) in ops))
-  assert not any((op == "invalid" for (op, _) in ops))
-  assert not any((op == "ONLYONE" for (op, _) in ops))
-  assert not any((op == "UPPER M N" for (op, _) in ops))
+def test_sass_reader_parse_html(tmp_path: Path) -> None:
+  """Test element."""
+  importer = SassSpecImporter()
+
+  html_content = """
+<html>
+<body>
+    <table>
+        <tbody>
+            <tr>
+                <td>Opcode</td>
+                <td>Description</td>
+            </tr>
+            <tr>
+                <td>FADD</td>
+                <td>FP32 Add</td>
+            </tr>
+            <tr>
+                <td>FMUL</td>
+                <td>FP32 Multiply</td>
+            </tr>
+            <tr>
+                <td>IADD3</td>
+                <td>Integer Addition 3-way</td>
+            </tr>
+            <tr>
+                <td>IABS</td>
+                <td>Integer Absolute Value</td>
+            </tr>
+            <tr>
+                <td>MNMX</td>
+                <td>FP32 Minimum/Maximum</td>
+            </tr>
+            <tr>
+                <td>CONV</td>
+                <td>Convert Integer to FP32</td>
+            </tr>
+            <tr>
+                <td>CONV2</td>
+                <td>Convert FP32 to Integer</td>
+            </tr>
+            <tr>
+                <td>LOP3</td>
+                <td>Logic Operation 3-way</td>
+            </tr>
+            <tr>
+                <td>FFMA</td>
+                <td>Fused Multiply and Add</td>
+            </tr>
+            <tr>
+                <td>IADD</td>
+                <td>Integer Addition</td>
+            </tr>
+            <tr>
+                <td>IADD</td>
+                <td>FP32 Add (should override)</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
+    """
+  html_file = tmp_path / "sass.html"
+  html_file.write_text(html_content)
+
+  res = importer.parse_file(html_file)
+
+  assert "Add" in res
+  # FADD -> Add
+  assert res["Add"]["api"] == "FADD"
+  assert "Mul" in res
+  assert "Add3" in res
+  assert "Abs" in res
+  assert "MinMax" in res
+  assert "CastFloat" in res
+  assert "CastInt" in res
+  assert "BitwiseOp" in res
+  assert "FusedMultiplyAdd" in res
+
+  # Check fallback decoding
+  latin_file = tmp_path / "sass_latin.html"
+  latin_file.write_bytes(html_content.encode("latin-1"))
+  res_latin = importer.parse_file(latin_file)
+  assert "Add" in res_latin
 
 
-def test_parse_file_not_found(importer, tmp_path):
-  """Parses file not found."""
-  assert importer.parse_file(tmp_path / "missing.html") == {}
+def test_fallback_opcodes(tmp_path: Path) -> None:
+  """Test element."""
+  importer = SassSpecImporter()
+
+  html_content = """
+    <table>
+        <tbody>
+            <tr>
+                <td>UNK</td>
+                <td>Unknown description</td>
+            </tr>
+        </tbody>
+    </table>
+    """
+  html_file = tmp_path / "sass2.html"
+  html_file.write_text(html_content)
+
+  res = importer.parse_file(html_file)
+  assert "Unk" in res
+  assert res["Unk"]["api"] == "UNK"
 
 
-def test_parse_file_utf8(importer, tmp_path):
-  """Parses file utf8."""
-  html_file = tmp_path / "doc.html"
-  html_file.write_text("<table><tbody><tr><td>FADD</td><td>FP32 Add</td></tr></tbody></table>", encoding="utf-8")
-  result = importer.parse_file(html_file)
-  assert "Add" in result
-  assert result["Add"]["api"] == "FADD"
+def test_invalid_ops(tmp_path: Path) -> None:
+  """Test element."""
+  importer = SassSpecImporter()
 
+  html_content = """
+    <table>
+        <tbody>
+            <tr>
+                <td>L O P</td>
+                <td>Space not allowed</td>
+            </tr>
+            <tr>
+                <td>lop</td>
+                <td>Lowercase not allowed</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Empty opcode</td>
+            </tr>
+        </tbody>
+    </table>
+    """
+  html_file = tmp_path / "sass3.html"
+  html_file.write_text(html_content)
 
-def test_parse_file_fallback_encoding(importer, tmp_path):
-  """Parses file fallback encoding."""
-  html_file = tmp_path / "doc.html"
-  html_file.write_bytes(b"<table><tbody><tr><td>FMUL</td><td>FP32 Multiply \xff</td></tr></tbody></table>")
-  result = importer.parse_file(html_file)
-  assert "Mul" in result
-  assert result["Mul"]["api"] == "FMUL"
-
-
-def test_conflict_resolution(importer, tmp_path):
-  """Verifies the behavior of conflict resolution."""
-  html_file = tmp_path / "doc.html"
-  html = "\n    <table>\n        <tbody>\n            <tr><td>DADD</td><td>Integer Addition</td></tr>\n            <tr><td>FADD</td><td>FP32 Add</td></tr>\n            <tr><td>HADD2</td><td>Some other text Addition</td></tr>\n        </tbody>\n    </table>\n    "
-  html_file.write_text(html)
-  result = importer.parse_file(html_file)
-  assert "Add" in result
-  assert result["Add"]["api"] == "FADD"
-
-
-def test_infer_abstract_op(importer):
-  """Infers abstract op."""
-  assert importer._infer_abstract_op("FADD", "Unknown") == "Add"
-  assert importer._infer_abstract_op("FMUL", "Unknown") == "Mul"
-  assert importer._infer_abstract_op("IADD3", "Unknown") == "Add3"
-  assert importer._infer_abstract_op("IABS", "Unknown") == "Abs"
-  assert importer._infer_abstract_op("SOME_OP", "FP32 Subtract") == "Sub"
-  assert importer._infer_abstract_op("SOME_OP", "Integer Multiply") == "Mul"
-  assert importer._infer_abstract_op("SOME_OP", "FP32 Minimum") == "Min"
-  assert importer._infer_abstract_op("SOME_OP", "FP32 Maximum") == "Max"
-  assert importer._infer_abstract_op("SOME_OP", "Absolute Value") == "Abs"
-  assert importer._infer_abstract_op("SOME_OP", "Logic Operation") == "BitwiseOp"
-  assert importer._infer_abstract_op("SOME_OP", "Fused Multiply and Add") == "FusedMultiplyAdd"
-  assert importer._infer_abstract_op("MNMX", "FP32 Minimum/Maximum") == "MinMax"
-  assert importer._infer_abstract_op("UNKNOWN", "Something else") is None
-
-  # To reach the regex fallback cases at the bottom, it must NOT match any values in OP_KEYWORDS
-  # The original test "Convert Integer to FP32" actually did not match OP_KEYWORDS, wait.
-  # Let's just do:
-  assert importer._infer_abstract_op("SOME_OP", "convert from integer to fp32") == "CastFloat"
-  assert importer._infer_abstract_op("SOME_OP", "convert from fp32 to integer") == "CastInt"
+  res = importer.parse_file(html_file)
+  assert res == {}

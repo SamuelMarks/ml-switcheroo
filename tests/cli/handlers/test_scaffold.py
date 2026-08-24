@@ -1,25 +1,26 @@
-"""Test suite for the Scaffold module."""
+"""Docstring."""
 
-from argparse import Namespace
-from unittest.mock import patch, mock_open
+from unittest.mock import MagicMock, patch
 from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
 
 
-def test_handle_scaffold(capsys):
-  """Handles scaffold.
+def test_handle_scaffold(tmp_path):
+  """Docstring."""
+  args = MagicMock()
+  args.framework = "test_fw"
 
-  Args:
-      capsys: ...
-  """
-  args = Namespace(framework="jax.numpy")
-  with (
-    patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine") as MockEngine,
-    patch("builtins.open", mock_open()) as mock_file,
-  ):
-    mock_instance = MockEngine.return_value
-    mock_instance.cluster.return_value = {"add": ["jax.numpy.add"], "sub": []}
-    handle_scaffold(args)
-    mock_file.assert_called_with("jax.numpy_skeleton.json", "w")
-    captured = capsys.readouterr()
-    assert "Scaffolding API mapping for framework: jax.numpy" in captured.out
-    assert "Skeleton written to jax.numpy_skeleton.json (Found 2 candidate ops)" in captured.out
+  with patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine") as MockEngine:
+    engine = MockEngine.return_value
+    engine.cluster.return_value = {"std_name": ["test_fw.path"]}
+
+    # We need to mock open to not write to current dir
+    import builtins
+
+    mock_open = MagicMock()
+    mock_file = MagicMock()
+    mock_open.return_value.__enter__.return_value = mock_file
+
+    with patch.object(builtins, "open", mock_open):
+      with patch("ml_switcheroo.cli.handlers.scaffold.json.dump") as mock_dump:
+        handle_scaffold(args)
+        mock_dump.assert_called_once()

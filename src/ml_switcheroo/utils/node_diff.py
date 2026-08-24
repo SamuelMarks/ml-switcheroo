@@ -13,7 +13,7 @@ _RENDER_CTX = cst.parse_module("")
 
 
 def capture_node_source(node: cst.CSTNode) -> str:
-  """Renders a LibCST node into its Python source code string representation.
+  """Render a LibCST node into its Python source code string representation.
 
   This handles both original nodes (which might carry whitespace info)
   and constructed nodes (detached from the original tree).
@@ -34,7 +34,7 @@ def capture_node_source(node: cst.CSTNode) -> str:
 
 
 def diff_nodes(original: cst.CSTNode, modified: cst.CSTNode) -> tuple[str, str, bool]:
-  """Compares two nodes and returns their source strings if they differ.
+  """Compare two nodes and returns their source strings if they differ.
 
   Args:
       original: The node before transformation.

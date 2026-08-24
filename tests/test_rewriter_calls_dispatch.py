@@ -73,7 +73,10 @@ def test_extract_argument_node_branches():
   assert _extract_argument_node(rewriter, node2, "a", "a", ["a", "b"]) is not None
 
   class RewriterWithModuleAlias:
+    """Docstring."""
+
     def _is_module_alias(self, val):
+      """Docstring."""
       return True
 
   rewriter2 = RewriterWithModuleAlias()
@@ -82,7 +85,10 @@ def test_extract_argument_node_branches():
   node3 = cst.parse_statement("obj.f(2)").body[0].value
 
   class RewriterNotModule:
+    """Docstring."""
+
     def _is_module_alias(self, val):
+      """Docstring."""
       return False
 
   rewriter3 = RewriterNotModule()
@@ -107,17 +113,23 @@ def test_node_to_literal():
   assert _node_to_literal(cst.Pass()) is None
 
   class BadInt(cst.Integer):
+    """Docstring."""
+
     def __init__(self, *args, **kwargs):
+      """Docstring."""
       super().__init__(*args, **kwargs)
 
     @property
     def value(self):
+      """Docstring."""
       return "bad"
 
     def _visit_and_replace_children(self, visitor):
+      """Docstring."""
       return self
 
     def _codegen_impl(self, state, default_semi):
+      """Docstring."""
       pass
 
   try:
@@ -126,17 +138,23 @@ def test_node_to_literal():
     pass
 
   class BadFloat(cst.Float):
+    """Docstring."""
+
     def __init__(self, *args, **kwargs):
+      """Docstring."""
       super().__init__(*args, **kwargs)
 
     @property
     def value(self):
+      """Docstring."""
       return "bad"
 
     def _visit_and_replace_children(self, visitor):
+      """Docstring."""
       return self
 
     def _codegen_impl(self, state, default_semi):
+      """Docstring."""
       pass
 
   try:
@@ -189,3 +207,25 @@ def test_check_rule_condition_branches():
   assert _check_rule_condition(cst.Integer("3"), DummyRule("a", [1, 2], "f", LogicOp.NOT_IN))
 
   assert not _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", "UNKNOWN"))
+
+
+def test_node_to_literal_valueerror():
+  """Test element."""
+  from ml_switcheroo.core.rewriter.calls.dispatch import _node_to_literal
+  import libcst as cst
+
+  class HackyInt(cst.Integer):
+    def _validate(self) -> None:
+      pass
+
+  class HackyFloat(cst.Float):
+    def _validate(self) -> None:
+      pass
+
+  # integer ValueError
+  int_node = HackyInt("not_an_int")
+  assert _node_to_literal(int_node) is None
+
+  # float ValueError
+  float_node = HackyFloat("not_a_float")
+  assert _node_to_literal(float_node) is None

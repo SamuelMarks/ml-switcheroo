@@ -10,7 +10,7 @@ import random
 
 
 def is_pipe_top_level(text: str) -> bool:
-  """Checks if a pipe `|` exists outside of brackets `[]`.
+  """Check if a pipe `|` exists outside of brackets `[]`.
 
   Used to detect Union types (A | B) in Python 3.10+ syntax without
   getting confused by nested types like `List[int | str]`.
@@ -34,7 +34,7 @@ def is_pipe_top_level(text: str) -> bool:
 
 
 def split_outside_brackets(text: str) -> List[str]:
-  """Splits a string by commas, respecting nested brackets.
+  """Split a string by commas, respecting nested brackets.
 
   Used to parse generic arguments (e.g., `Tuple[int, List[int]]` -> `['int', 'List[int]']`).
 
@@ -66,7 +66,7 @@ def split_outside_brackets(text: str) -> List[str]:
 
 
 def resolve_symbolic_shape(dims_str: str, symbol_map: Dict[str, int]) -> Tuple[int, ...]:
-  """Parses dimension strings like "'B', 32" or "N, M" into integer tuples.
+  """Parse dimension strings like "'B', 32" or "N, M" into integer tuples.
 
   Resolves symbolic names using the provided `symbol_map`. If a symbol
   is encountered for the first time, a random size is assigned and stored
@@ -112,7 +112,7 @@ def resolve_symbolic_shape(dims_str: str, symbol_map: Dict[str, int]) -> Tuple[i
 
 
 def adjust_shape_rank(shape: Tuple[int, ...], required_rank: int) -> Tuple[int, ...]:
-  """Adjusts a shape tuple to match a required rank by padding or truncation.
+  """Adjust a shape tuple to match a required rank by padding or truncation.
 
   Args:
       shape (Tuple[int, ...]): The base shape.

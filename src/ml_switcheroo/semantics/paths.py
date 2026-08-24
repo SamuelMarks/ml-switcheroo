@@ -15,7 +15,7 @@ else:
 
 
 def resolve_semantics_dir() -> Path:
-  """Locates the directory containing semantic JSON definitions.
+  """Locate the directory containing semantic JSON definitions.
 
   Prioritizes the local file system (relative to this file) to ensure
   tests and editable installs find the source of truth correctly.
@@ -45,8 +45,7 @@ def resolve_semantics_dir() -> Path:
 
 
 def resolve_snapshots_dir() -> Path:
-  """Locates the directory containing framework snapshots and mapping overlays.
-
+  """Locate the directory containing framework snapshots and mapping overlays.
 
   Returns:
       Path: The absolute path to the 'snapshots' directory.

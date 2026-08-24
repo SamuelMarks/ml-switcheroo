@@ -16,7 +16,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 @register_hook("method_to_property")
 def transform_method_to_property(node: cst.Call, ctx: HookContext) -> Union[cst.Attribute, cst.Subscript, cst.Call]:
-  """Plugin Hook: Transforms a method call into an attribute access or subscript.
+  """Plugin Transform Transforms a method call into an attribute access or subscript.
 
   Triggers:
       Operations like `size` mapped with `requires_plugin: "method_to_property"`.

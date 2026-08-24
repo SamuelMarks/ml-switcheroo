@@ -1,4 +1,4 @@
-"""Helper utilities and structural manipulation tools for StructuralTransformer.
+"""Support utilities and structural manipulation tools for StructuralTransformer.
 
 This module provides `StructuralTransformerHelpersMixin`, a mixin class that
 houses several AST-manipulation helpers using `libcst`. It assists in altering
@@ -23,7 +23,7 @@ class StructuralTransformerHelpersMixin:
   if TYPE_CHECKING:
 
     def _create_dotted_name(self, name: str) -> Any:
-      """Creates a dotted name or attribute node from a dot-separated string representation.
+      """Create a dotted name or attribute node from a dot-separated string representation.
 
       Args:
           self: The mixin instance.
@@ -36,7 +36,7 @@ class StructuralTransformerHelpersMixin:
       return None
 
   def _strip_argument_from_signature(self, node: cst.FunctionDef, arg_name: str) -> cst.FunctionDef:
-    """Removes an argument by name from the function definition signature.
+    """Remove an argument by name from the function definition signature.
 
     Args:
         node: The original `cst.FunctionDef` node whose signature is to be modified.
@@ -52,7 +52,7 @@ class StructuralTransformerHelpersMixin:
   def _inject_argument_to_signature(
     self, node: cst.FunctionDef, arg_name: str, annotation: Optional[str]
   ) -> cst.FunctionDef:
-    """Injects a new argument after 'self' in the function's parameter list.
+    """Inject a new argument after 'self' in the function's parameter list.
 
     If the first parameter is 'self', the new parameter is inserted immediately after it.
     Otherwise, it is inserted at the beginning of the parameter list.
@@ -77,7 +77,7 @@ class StructuralTransformerHelpersMixin:
     return self._fix_comma(node, params)
 
   def _fix_comma(self, node: cst.FunctionDef, params: List[cst.Param]) -> cst.FunctionDef:
-    """Ensures that syntax commas are logically correct and properly spaced for parameter lists.
+    """Ensure that syntax commas are logically correct and properly spaced for parameter lists.
 
     This method walks through the list of parameters, ensuring that trailing commas are
     only present on non-terminal parameters and that spacing whitespace after commas is
@@ -103,7 +103,7 @@ class StructuralTransformerHelpersMixin:
     return node.with_changes(params=new_params_node)
 
   def _apply_preamble(self, node: cst.FunctionDef, stmts_code: List[str]) -> cst.FunctionDef:
-    """Injects source code statements at the start of the function body.
+    """Inject source code statements at the start of the function body.
 
     Parses the list of statement strings using LibCST and prepends them as AST nodes
     immediately at the start of the target function body (respecting any existing docstring).
@@ -126,7 +126,7 @@ class StructuralTransformerHelpersMixin:
     return self._inject_stmts_to_body(node, new_stmts)
 
   def _inject_stmts_to_body(self, node: cst.FunctionDef, new_stmts: List[cst.BaseStatement]) -> cst.FunctionDef:
-    """Inserts a list of statements into a function's body while respecting any existing docstring.
+    """Insert a list of statements into a function's body while respecting any existing docstring.
 
     If the function body is a single-line statement suite, it will be converted to an
     indented block first. If the first statement of the function is a docstring, the
@@ -154,7 +154,7 @@ class StructuralTransformerHelpersMixin:
     return node.with_changes(body=node.body.with_changes(body=final_body))
 
   def _convert_to_indented_block(self, node: cst.FunctionDef) -> cst.FunctionDef:
-    """Unwraps a simple, single-line function body into a multi-line indented block.
+    """Unwrap a simple, single-line function body into a multi-line indented block.
 
     This is a prerequisite for injecting multiple statements into a previously one-line function.
 
@@ -171,7 +171,7 @@ class StructuralTransformerHelpersMixin:
     return node
 
   def _ensure_super_init(self, node: cst.FunctionDef) -> cst.FunctionDef:
-    """Injects a call to `super().__init__()` at the start of the function if not already present.
+    """Inject a call to `super().__init__()` at the start of the function if not already present.
 
     Ensures that inherited initialization logic is preserved by prepending a call to
     `super().__init__()` in the body, placing it after any existing docstring.
@@ -193,7 +193,7 @@ class StructuralTransformerHelpersMixin:
     return self._inject_stmts_to_body(node, [stmt])
 
   def _strip_super_init(self, node: cst.FunctionDef) -> cst.FunctionDef:
-    """Removes the `super().__init__()` call from the function body.
+    """Remove the `super().__init__()` call from the function body.
 
     Useful when restructuring initializer sequences where a standard `super()` call is no
     longer desired or is replaced.
@@ -213,7 +213,7 @@ class StructuralTransformerHelpersMixin:
     return node.with_changes(body=node.body.with_changes(body=new_body))
 
   def _has_super_init(self, node: cst.FunctionDef) -> bool:
-    """Checks for the presence of a `super().__init__()` call within the function body.
+    """Check for the presence of a `super().__init__()` call within the function body.
 
     Walks through the high-level statements in the body of the function to detect if
     a super class initialization is being invoked.
@@ -231,7 +231,7 @@ class StructuralTransformerHelpersMixin:
     return False
 
   def _is_super_init_call(self, stmt: cst.CSTNode) -> bool:
-    """Detects if a given statement node is an invocation of `super().__init__()`.
+    """Detect if a given statement node is an invocation of `super().__init__()`.
 
     Args:
         stmt: The CST node representing a statement to inspect.
@@ -251,7 +251,7 @@ class StructuralTransformerHelpersMixin:
     return False
 
   def _update_docstring(self, node: cst.FunctionDef, args: List[Tuple[str, Optional[str]]]) -> cst.FunctionDef:
-    """Appends descriptive definitions for injected arguments to the existing docstring.
+    """Append descriptive definitions for injected arguments to the existing docstring.
 
     Modifies the function's docstring if it exists, inserting formatted parameter entries
     for newly introduced arguments.

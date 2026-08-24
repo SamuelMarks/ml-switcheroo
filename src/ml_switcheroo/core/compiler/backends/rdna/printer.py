@@ -16,13 +16,13 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
 
 
 class RdnaPrinter:
-  """Prints RDNA AST nodes into structured assembly strings using the Visitor pattern.
+  """Print RDNA AST nodes into structured assembly strings using the Visitor pattern.
 
   Ensures consistent indentation and layout rules across all output.
   """
 
   def emit(self, nodes: List[RdnaNode]) -> str:
-    """Emits the full RDNA text for a sequence of nodes.
+    """Emit the full RDNA text for a sequence of nodes.
 
     Args:
         nodes: A list of RDNA AST nodes.
@@ -36,7 +36,7 @@ class RdnaPrinter:
     return "\n".join(lines) + "\n"
 
   def _visit(self, node: RdnaNode) -> str:
-    """Dispatches to the correct visitor method.
+    """Dispatch to the correct visitor method.
 
     Args:
         node: The RDNA node to visit.
@@ -56,7 +56,7 @@ class RdnaPrinter:
       return self.visit_Fallback(node)
 
   def visit_Label(self, node: RdnaLabel) -> str:
-    """Visits a RdnaLabel node (flush left).
+    """Visit a RdnaLabel node (flush left).
 
     Args:
         node: The RDNA label node to process.
@@ -67,7 +67,7 @@ class RdnaPrinter:
     return str(node)
 
   def visit_Instruction(self, node: RdnaInstruction) -> str:
-    """Visits an RdnaInstruction node (indented).
+    """Visit an RdnaInstruction node (indented).
 
     Args:
         node: The RDNA instruction node to process.
@@ -78,7 +78,7 @@ class RdnaPrinter:
     return f"    {str(node)}"
 
   def visit_Directive(self, node: RdnaDirective) -> str:
-    """Visits a RdnaDirective node (indented).
+    """Visit a RdnaDirective node (indented).
 
     Args:
         node: The RDNA directive node to process.
@@ -89,7 +89,7 @@ class RdnaPrinter:
     return f"    {str(node)}"
 
   def visit_Comment(self, node: RdnaComment) -> str:
-    """Visits a RdnaComment node (indented).
+    """Visit a RdnaComment node (indented).
 
     Args:
         node: The RDNA comment node to process.

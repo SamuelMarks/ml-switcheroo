@@ -5,7 +5,6 @@ import libcst as cst
 from unittest.mock import MagicMock
 from tests.conftest import TestRewriter as PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
-import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.loop_unroll import transform_loops
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -22,10 +21,16 @@ def rewrite_code(rewriter, code: str) -> str:
 @pytest.fixture
 def rewriter_factory():
   """Provides a mock rewriter factory for testing."""
-  hooks._HOOKS.clear()
-  hooks._HOOK_METADATA.clear()
-  hooks._HOOKS["transform_for_loop"] = transform_loops
-  hooks._PLUGINS_LOADED = True
+  from ml_switcheroo.core.hooks_registry import clear_hooks, _HOOKS
+
+  clear_hooks()
+  _HOOKS["transform_for_loop"] = transform_loops
+  _HOOKS["transform_for_loop_static"] = None
+
+  import ml_switcheroo.core.hooks_registry as hr
+
+  hr._PLUGINS_LOADED = True
+
   mgr = MagicMock(spec=SemanticsManager)
   mgr.get_definition.return_value = None
 

@@ -15,7 +15,7 @@ from ml_switcheroo.utils.console import log_error, log_success
 
 
 def handle_define(path: Path) -> int:
-  """Handles the 'define' command.
+  """Handle the 'define' command.
 
   Reads a YAML file, validates it against the ODL schema, and copies it
   to the semantics directory.

@@ -10,7 +10,7 @@ from ml_switcheroo.core.dsl import OperationDef
 
 
 def handle_schema() -> int:
-  """Exports the Operation Definition Language (ODL) JSON Schema.
+  """Export the Operation Definition Language (ODL) JSON Schema.
 
   Prints the JSON schema derived from the Pydantic model `OperationDef`
   to standard output. This schema defines the structure required for

@@ -18,9 +18,9 @@ from typing import List, Tuple, Dict, Optional
 try:
   import jax
   import jax.numpy as jnp
-except Exception:
-  jax: Any = None  # type: ignore
-  jnp = None  # type: ignore
+except Exception:  # pragma: no cover
+  jax: Any = None  # type: ignore  # pragma: no cover
+  jnp = None  # type: ignore  # pragma: no cover
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
@@ -53,7 +53,7 @@ class JaxCoreAdapter(JAXStackMixin):
   ui_priority: int = 10
 
   def __init__(self) -> None:
-    """Initializes the JAX adapter.
+    """Initialize the JAX adapter.
 
     Detects installation status to toggle between LIVE and GHOST modes.
     """
@@ -67,7 +67,7 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Defines the canonical import alias ('jax.numpy', 'jnp').
+    """Define the canonical import alias ('jax.numpy', 'jnp').
 
     Returns:
         Tuple[str, str]: A tuple containing the canonical module name and its
@@ -90,7 +90,7 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """Returns standard JIT-enabled test templates.
+    """Return standard JIT-enabled test templates.
 
     Returns:
         Dict[str, str]: A dictionary containing standard JIT-enabled test configuration.
@@ -99,7 +99,7 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def harness_imports(self) -> List[str]:
-    """Imports required for JAX initialization logic.
+    """Import required for JAX initialization logic.
 
     Returns:
         List[str]: A list of import statement strings required for the harness.
@@ -107,7 +107,7 @@ class JaxCoreAdapter(JAXStackMixin):
     return ["import jax", "import jax.random"]
 
   def get_harness_init_code(self) -> str:
-    """Returns logic to create JAX PRNG Keys.
+    """Return logic to create JAX PRNG Keys.
 
     Returns:
         str: A string of JAX harness initialization helper code.
@@ -125,7 +125,7 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """Returns `key` as a magic state argument.
+    """Return `key` as a magic state argument.
 
     Returns:
         List[str]: A list of magic state argument names.
@@ -134,7 +134,7 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """Defines JAX structural behavior (Transformation rules).
+    """Define JAX structural behavior (Transformation rules).
 
     Specifies JIT static arguments for compilation safety.
 
@@ -144,6 +144,7 @@ class JaxCoreAdapter(JAXStackMixin):
     return StructuralTraits(
       module_base=None,
       forward_method="__call__",
+      functional_execution_method="apply",
       inject_magic_args=[],
       requires_super_init=False,
       lifecycle_strip_methods=[],
@@ -153,7 +154,7 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """Defines logic capabilities for plugins.
+    """Define logic capabilities for plugins.
 
     Enables NumPy compatibility and explicit RNG threading.
 
@@ -192,7 +193,7 @@ class JaxCoreAdapter(JAXStackMixin):
     return load_definitions("jax")
 
   def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:
-    """Loads ghost references from the snapshot for the given semantic category.
+    """Load ghost references from the snapshot for the given semantic category.
 
     Args:
         category (SemanticTier): The semantic category of definitions to collect.
@@ -206,7 +207,7 @@ class JaxCoreAdapter(JAXStackMixin):
     return [GhostRef.model_validate(item) for item in raw_list]
 
   def _collect_live(self, category: SemanticTier) -> List[GhostRef]:
-    """Scans installed JAX/Optax modules to collect live references.
+    """Scan installed JAX/Optax modules to collect live references.
 
     Args:
         category (SemanticTier): The semantic category of definitions to collect.
@@ -224,7 +225,7 @@ class JaxCoreAdapter(JAXStackMixin):
     return results
 
   def convert(self, data: Any) -> Any:
-    """Converts input data to a JAX array for verification.
+    """Convert input data to a JAX array for verification.
 
     Args:
         data (Any): Input data.
@@ -242,7 +243,7 @@ class JaxCoreAdapter(JAXStackMixin):
     return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Applies Level 0/1 Stack wiring.
+    """Apply Level 0/1 Stack wiring.
 
     Populates the JSON snapshot with manually wired logic.
 
@@ -252,7 +253,7 @@ class JaxCoreAdapter(JAXStackMixin):
     self._apply_stack_wiring(snapshot)
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Provides default tiered examples for the base adapter.
+    """Provide default tiered examples for the base adapter.
 
     Returns:
         Dict[str, str]: Mapping of tier name to source code.
@@ -290,7 +291,7 @@ optimizer = optax.adam(learning_rate=0.01)""",
     }
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """Generates JAX core documentation URL.
+    """Generate JAX core documentation URL.
 
     Args:
         api_name (str): API path.

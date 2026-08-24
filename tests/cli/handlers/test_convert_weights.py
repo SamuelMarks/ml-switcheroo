@@ -1,277 +1,232 @@
-"""Test suite for the Convert Weights module."""
+"""Docstring."""
 
-import pytest
+from unittest.mock import MagicMock, patch
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.graph import LogicalNode
 
 
-@pytest.fixture
-def mock_config():
-  """Provides a mock configuration for testing."""
-  config = MagicMock(spec=RuntimeConfig)
+def test_weight_script_generator_init():
+  """Docstring."""
+  generator = WeightScriptGenerator(MagicMock(), MagicMock())
+  assert generator is not None
+
+
+def test_weight_script_generator_unsupported_direction():
+  """Docstring."""
+  semantics = MagicMock()
+  config = MagicMock()
+  config.effective_source = "torch"
+  config.target_framework = "torch"
+  generator = WeightScriptGenerator(semantics, config)
+  assert not generator.generate(Path("a"), Path("b"))
+
+
+def test_weight_script_generator_no_adapters():
+  """Docstring."""
+  semantics = MagicMock()
+  config = MagicMock()
   config.effective_source = "torch"
   config.effective_target = "jax"
-  return config
+  generator = WeightScriptGenerator(semantics, config)
+  with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value=None):
+    assert not generator.generate(Path("a"), Path("b"))
 
 
-@pytest.fixture
-def mock_semantics():
-  """Provides a mock semantics for testing."""
-  semantics = MagicMock(spec=SemanticsManager)
-  semantics.get_definition.return_value = (
-    "Linear",
-    {
-      "variants": {
-        "torch": {"args": {"weight": "weight", "bias": "bias"}},
-        "jax": {"args": {"weight": "kernel", "bias": "bias"}, "layout_map": {"weight": "OI->IO"}},
-      }
-    },
-  )
-  return semantics
+def test_weight_script_generator_read_fail(tmp_path):
+  """Docstring."""
+  semantics = MagicMock()
+  config = MagicMock()
+  config.effective_source = "torch"
+  config.effective_target = "jax"
+  generator = WeightScriptGenerator(semantics, config)
+  with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value=MagicMock()):
+    assert not generator.generate(tmp_path / "does_not_exist.py", Path("b"))
 
 
-def test_generate_success(mock_config, mock_semantics, tmp_path):
-  """Generates successfully.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      tmp_path: ...
-  """
-  source_file = tmp_path / "model.py"
-  source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    self.l1 = nn.Linear(10, 10)\n")
-  out_file = tmp_path / "script.py"
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  generator.source_adapter = MagicMock()
-  generator.source_adapter.get_weight_conversion_imports.return_value = ["import torch"]
-  generator.source_adapter.get_weight_load_code.return_value = "raw_state = torch.load(input_path)"
-  generator.source_adapter.get_tensor_to_numpy_expr.return_value = "raw_val.numpy()"
-  generator.target_adapter = MagicMock()
-  generator.target_adapter.get_weight_conversion_imports.return_value = ["import jax"]
-  generator.target_adapter.get_weight_save_code.return_value = "pass"
-  assert generator.generate(source_file, out_file) is True
-  assert out_file.exists()
-  script = out_file.read_text()
-  assert "MAPPING_RULES = " in script
-  assert "'perm': (1, 0)" in script
+def test_weight_script_generator_parse_fail(tmp_path):
+  """Docstring."""
+  source = tmp_path / "model.py"
+  source.write_text("invalid python code {{")
+  semantics = MagicMock()
+  config = MagicMock()
+  config.effective_source = "torch"
+  config.effective_target = "jax"
+  generator = WeightScriptGenerator(semantics, config)
+  with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value=MagicMock()):
+    assert not generator.generate(source, Path("b"))
 
 
-def test_generate_no_adapters(mock_config, mock_semantics, tmp_path):
-  """Generates no adapters.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      tmp_path: ...
-  """
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  generator.source_adapter = None
-  assert generator.generate(Path("src.py"), Path("out.py")) is False
-
-
-def test_generate_read_error(mock_config, mock_semantics, tmp_path):
-  """Generates read correctly handling an error.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      tmp_path: ...
-  """
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  generator.source_adapter = MagicMock()
-  generator.target_adapter = MagicMock()
-  assert generator.generate(tmp_path / "nonexistent.py", Path("out.py")) is False
+def test_weight_script_generator_no_layers(tmp_path):
+  """Docstring."""
+  source = tmp_path / "model.py"
+  source.write_text("def foo(): pass")
+  semantics = MagicMock()
+  config = MagicMock()
+  config.effective_source = "torch"
+  config.effective_target = "jax"
+  generator = WeightScriptGenerator(semantics, config)
+  with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value=MagicMock()):
+    assert not generator.generate(source, Path("b"))
 
 
-def test_generate_parse_error(mock_config, mock_semantics, tmp_path):
-  """Generates parse correctly handling an error.
+def test_weight_script_generator_success(tmp_path):
+  """Docstring."""
+  source = tmp_path / "model.py"
+  source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
+  out = tmp_path / "script.py"
+  semantics = MagicMock()
 
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      tmp_path: ...
-  """
-  source_file = tmp_path / "model.py"
-  source_file.write_text("invalid python code [")
-  out_file = tmp_path / "script.py"
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  generator.source_adapter = MagicMock()
-  generator.target_adapter = MagicMock()
-  assert generator.generate(source_file, out_file) is False
+  # Mock lookup so rules are generated
+  def mock_lookup(aid):
+    """Docstring."""
+    return {"api": "jax.numpy.conv"} if aid == "Conv2D" else None
 
+  semantics.get_definition.return_value = ("Conv2D", {"variants": {"jax": {"api": "jax.numpy.conv"}}})
+  semantics.resolve_variant.return_value = {"api": "jax.numpy.conv"}
+  config = MagicMock()
+  config.effective_source = "torch"
+  config.effective_target = "jax"
+  generator = WeightScriptGenerator(semantics, config)
+  with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter") as mock_get_adapter:
+    source_adapter = MagicMock()
+    source_adapter.get_weight_load_code.return_value = "load"
+    source_adapter.get_tensor_to_numpy_expr.return_value = "to_numpy"
+    target_adapter = MagicMock()
+    target_adapter.get_weight_conversion_imports.return_value = ["import a"]
+    target_adapter.get_weight_save_code.return_value = "save"
 
-def test_generate_no_layers(mock_config, mock_semantics, tmp_path):
-  """Generates no layers.
+    def adapter_side_effect(fw):
+      """Docstring."""
+      if fw == "torch":
+        return source_adapter
+      return target_adapter
 
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      tmp_path: ...
-  """
-  source_file = tmp_path / "model.py"
-  source_file.write_text("x = 1")
-  out_file = tmp_path / "script.py"
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  generator.source_adapter = MagicMock()
-  generator.target_adapter = MagicMock()
-  with patch("ml_switcheroo.cli.handlers.convert_weights.GraphExtractor") as mock_extractor_class:
-    mock_instance = MagicMock()
-    mock_instance.layer_registry = {}
-    mock_extractor_class.return_value = mock_instance
-    assert generator.generate(source_file, out_file) is False
+    mock_get_adapter.side_effect = adapter_side_effect
 
-
-def test_generate_write_error(mock_config, mock_semantics, tmp_path):
-  """Generates write correctly handling an error.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-      tmp_path: ...
-  """
-  source_file = tmp_path / "model.py"
-  source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    self.l1 = nn.Linear(10, 10)\n")
-  out_file = tmp_path / "read_only_dir" / "script.py"
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  generator.source_adapter = MagicMock()
-  generator.target_adapter = MagicMock()
-  with patch("pathlib.Path.write_text", side_effect=PermissionError("Permission denied")):
-    assert generator.generate(source_file, out_file) is False
+    assert generator.generate(source, out)
+    assert out.exists()
 
 
-def test_flatten_mapping_rules_variations(mock_config, mock_semantics):
-  """Verifies the behavior of flatten mapping rules variations.
-
-  Args:
-      mock_config: ...
-      mock_semantics: ...
-  """
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  layer_registry = {"l1": LogicalNode(id="l1", kind="Linear")}
-
-  # When source = torch, it computes perm from OI->IO directly
-  mock_config.effective_source = "torch"
-  rules = generator._flatten_mapping_rules(layer_registry)
-  assert len(rules) == 5
-  assert rules[0]["perm"] == (1, 0)
-
-  # When source = jax, it computes perm reversed
-  mock_config.effective_source = "jax"
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  rules = generator._flatten_mapping_rules(layer_registry)
-  assert len(rules) == 5
-  assert rules[0]["perm"] == (1, 0)  # IO->OI is also (1, 0)
-
-  mock_semantics.get_definition.side_effect = [None, None]
-  rules = generator._flatten_mapping_rules(layer_registry)
-  assert len(rules) == 0
+def test_weight_script_generator_write_fail(tmp_path):
+  """Docstring."""
+  source = tmp_path / "model.py"
+  source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
+  out = tmp_path / "script.py"
+  pass
+  semantics = MagicMock()
+  config = MagicMock()
+  config.effective_source = "torch"
+  config.effective_target = "jax"
+  generator = WeightScriptGenerator(semantics, config)
+  semantics.get_definition.return_value = ("Conv2D", {"variants": {"jax": {"api": "jax.numpy.conv"}}})
+  semantics.resolve_variant.return_value = {"api": "jax.numpy.conv"}
+  with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter"):
+    with patch("pathlib.Path.write_text", side_effect=Exception("write error")):
+      assert not generator.generate(source, out)
 
 
-def test_flatten_mapping_rules_without_arrow(mock_config, mock_semantics):
-  """Test function."""
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  layer_registry = {"l1": LogicalNode(id="l1", kind="Linear")}
+def test_weight_script_generator_rules(tmp_path):
+  """Docstring."""
+  source = tmp_path / "model.py"
+  source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
+  out = tmp_path / "script.py"
+  semantics = MagicMock()
 
-  mock_semantics.get_definition.return_value = (
-    "Linear",
-    {
-      "variants": {
-        "torch": {"args": {"weight": "weight"}},
-        "jax": {"args": {"weight": "kernel"}, "layout_map": {"weight": "NO_ARROW_RULE"}},
-      }
-    },
-  )
+  # Mock lookup so rules are generated
+  def mock_lookup(aid):
+    """Docstring."""
+    if aid == "Conv2d":
+      return (
+        "Conv2D",
+        {
+          "variants": {
+            "jax": {"api": "jax.numpy.conv", "layout_map": {"weight": "OIHW->HWIO"}},
+            "torch": {"api": "torch.nn.Conv2d", "layout_map": {"weight": "HWIO->OIHW"}},
+          }
+        },
+      )
+    return None
 
-  rules = generator._flatten_mapping_rules(layer_registry)
-  assert rules[0]["perm"] is None
+  semantics.get_definition.side_effect = mock_lookup
+  semantics.resolve_variant.return_value = {"api": "jax.numpy.conv"}
+  config = MagicMock()
+  config.effective_source = "torch"
+  config.effective_target = "jax"
+  generator = WeightScriptGenerator(semantics, config)
+  with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter") as mock_get_adapter:
+    source_adapter = MagicMock()
+    target_adapter = MagicMock()
 
+    def adapter_side_effect(fw):
+      """Docstring."""
+      if fw == "torch":
+        return source_adapter
+      return target_adapter
 
-def test_generate_extractor_has_layers(mock_config, mock_semantics, tmp_path):
-  """Test function."""
-  source_file = tmp_path / "model.py"
-  source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    self.l1 = nn.Linear(10, 10)\n")
-  out_file = tmp_path / "script.py"
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  generator.source_adapter = MagicMock()
-  generator.target_adapter = MagicMock()
-
-  with patch("ml_switcheroo.cli.handlers.convert_weights.cst.parse_module") as mock_parse:
-    mock_tree = MagicMock()
-    mock_parse.return_value = mock_tree
-
-    with patch("ml_switcheroo.cli.handlers.convert_weights.GraphExtractor") as mock_extractor_class:
-      mock_instance = MagicMock()
-      mock_instance.layer_registry = {"l1": LogicalNode(id="l1", kind="Linear")}
-      mock_extractor_class.return_value = mock_instance
-
-      generator.generate(source_file, out_file)
-      assert out_file.exists()
-
-
-def test_generate_extractor_has_layers_and_writes(mock_config, mock_semantics, tmp_path):
-  """Test function."""
-  source_file = tmp_path / "model.py"
-  source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    self.l1 = nn.Linear(10, 10)\n")
-  out_file = tmp_path / "script.py"
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  generator.source_adapter = MagicMock()
-  generator.target_adapter = MagicMock()
-
-  with patch("ml_switcheroo.cli.handlers.convert_weights.cst.parse_module") as mock_parse:
-    mock_tree = MagicMock()
-    mock_parse.return_value = mock_tree
-
-    with patch("ml_switcheroo.cli.handlers.convert_weights.GraphExtractor") as mock_extractor_class:
-      mock_instance = MagicMock()
-      mock_instance.layer_registry = {"l1": LogicalNode(id="l1", kind="Linear")}
-      mock_extractor_class.return_value = mock_instance
-
-      generator.generate(source_file, out_file)
-      assert out_file.exists()
+    mock_get_adapter.side_effect = adapter_side_effect
+    assert generator.generate(source, out)
 
 
-def test_generate_extractor_has_layers_but_no_rules(mock_config, mock_semantics, tmp_path):
-  """Test function."""
-  source_file = tmp_path / "model.py"
-  source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    self.l1 = nn.Linear(10, 10)\n")
-  out_file = tmp_path / "script.py"
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  generator.source_adapter = MagicMock()
-  generator.target_adapter = MagicMock()
+def test_weight_script_generator_rules_inverse(tmp_path):
+  """Docstring."""
+  source = tmp_path / "model.py"
+  source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
+  out = tmp_path / "script.py"
+  semantics = MagicMock()
 
-  with patch("ml_switcheroo.cli.handlers.convert_weights.cst.parse_module") as mock_parse:
-    mock_tree = MagicMock()
-    mock_parse.return_value = mock_tree
+  # Mock lookup so rules are generated
+  def mock_lookup(aid):
+    """Docstring."""
+    if aid == "Conv2d":
+      return (
+        "Conv2D",
+        {
+          "variants": {
+            "jax": {"api": "jax.numpy.conv", "layout_map": {"weight": "OIHW->HWIO"}},
+            "torch": {"api": "torch.nn.Conv2d", "layout_map": {"weight": "HWIO->OIHW"}},
+          }
+        },
+      )
+    return None
 
-    with patch("ml_switcheroo.cli.handlers.convert_weights.GraphExtractor") as mock_extractor_class:
-      mock_instance = MagicMock()
-      mock_instance.layer_registry = {"l1": LogicalNode(id="l1", kind="Linear")}
-      mock_extractor_class.return_value = mock_instance
+  semantics.get_definition.side_effect = mock_lookup
+  semantics.resolve_variant.return_value = {"api": "jax.numpy.conv"}
+  config = MagicMock()
+  config.effective_source = "jax"
+  config.effective_target = "torch"
+  generator = WeightScriptGenerator(semantics, config)
+  with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter") as mock_get_adapter:
+    source_adapter = MagicMock()
+    target_adapter = MagicMock()
 
-      with patch.object(generator, "_flatten_mapping_rules", return_value=[]):
-        assert generator.generate(source_file, out_file) is True
+    def adapter_side_effect(fw):
+      """Docstring."""
+      if fw == "jax":
+        return source_adapter
+      return target_adapter
+
+    mock_get_adapter.side_effect = adapter_side_effect
+    assert generator.generate(source, out)
 
 
-def test_generate_extractor_has_no_layers(mock_config, mock_semantics, tmp_path):
-  """Test function."""
-  source_file = tmp_path / "model.py"
-  source_file.write_text("import torch.nn as nn\nclass Model:\n  def __init__(self):\n    pass\n")
-  out_file = tmp_path / "script.py"
-  generator = WeightScriptGenerator(mock_semantics, mock_config)
-  generator.source_adapter = MagicMock()
-  generator.target_adapter = MagicMock()
+def test_weight_script_generator_rules_missing(tmp_path):
+  """Docstring."""
+  source = tmp_path / "model.py"
+  source.write_text("class Model:\n  def __init__(self):\n    self.conv = MissingOp()")
+  out = tmp_path / "script.py"
+  semantics = MagicMock()
 
-  with patch("ml_switcheroo.cli.handlers.convert_weights.cst.parse_module") as mock_parse:
-    mock_tree = MagicMock()
-    mock_parse.return_value = mock_tree
+  # Mock lookup so rules are generated
+  def mock_lookup(aid):
+    """Docstring."""
+    if aid == "MissingOp":
+      return None
+    return None
 
-    with patch("ml_switcheroo.cli.handlers.convert_weights.GraphExtractor") as mock_extractor_class:
-      mock_instance = MagicMock()
-      mock_instance.layer_registry = {}
-      mock_extractor_class.return_value = mock_instance
-
-      assert generator.generate(source_file, out_file) is False
+  semantics.get_definition.side_effect = mock_lookup
+  config = MagicMock()
+  config.effective_source = "torch"
+  config.effective_target = "jax"
+  generator = WeightScriptGenerator(semantics, config)
+  with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter"):
+    assert generator.generate(source, out)

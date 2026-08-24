@@ -1,4 +1,4 @@
-"""Utilities for AST Node Construction and Inspection.
+"""Utility for AST Node Construction and Inspection.
 
 This module provides helper functions to convert Python runtime objects (dictionaries,
 lists, primitives) into LibCST nodes, as well as utilities for inspecting import definitions.
@@ -27,7 +27,7 @@ def get_import_root(node: Union[cst.Name, cst.Attribute]) -> str:
 
 
 def is_docstring(node: cst.CSTNode, idx: int) -> bool:
-  """Checks if a statement node represents a module docstring.
+  """Check if a statement node represents a module docstring.
 
   Args:
       node: The statement node to check.
@@ -47,7 +47,7 @@ def is_docstring(node: cst.CSTNode, idx: int) -> bool:
 
 
 def is_future_import(node: cst.CSTNode) -> bool:
-  """Checks if a statement is a `from __future__ import ...` directive.
+  """Check if a statement is a `from __future__ import ...` directive.
 
   Args:
       node: The statement node to check.
@@ -66,7 +66,6 @@ def is_future_import(node: cst.CSTNode) -> bool:
 
 def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
   """Recursively converts a python primitive or container to a CST node.
-
 
   Robustly handles strings using standard JSON encoding to prevent syntax errors
   and ensure double-quotes are used (matching test expectations).

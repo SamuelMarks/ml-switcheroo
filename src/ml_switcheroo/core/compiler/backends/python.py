@@ -37,7 +37,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
     self.found = False
 
   def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
-    """Process and modify a class definition.
+    """Proces and modify a class definition.
 
     Args:
         original_node: The original CST ClassDef node.
@@ -104,7 +104,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
 
 
 class PythonBackend(CompilerBackend):
-  """Synthesizes a Python CST Module from a LogicalGraph."""
+  """Synthesize a Python CST Module from a LogicalGraph."""
 
   def __init__(self, framework: str = "torch", semantics: Any = None) -> None:
     """Initialize the PythonBackend.

@@ -42,7 +42,7 @@ class GhostRef(BaseModel):
   has_varargs: bool = Field(False, description="True if signature accepts *args.")
 
   def has_arg(self, arg_name: str) -> bool:
-    """Checks if a specific argument exists in the signature.
+    """Check if a specific argument exists in the signature.
 
     Args:
         arg_name: The argument name to find.
@@ -63,8 +63,7 @@ class GhostInspector:
 
   @staticmethod
   def inspect(obj: Union[Any, Callable[..., Any]], api_path: str) -> "GhostRef":
-    """Creates a GhostRef from a live Python object.
-
+    """Create a GhostRef from a live Python object.
 
     Gracefully handles C-Extensions and builtins that resist introspection.
 
@@ -154,7 +153,7 @@ class GhostInspector:
 
   @staticmethod
   def hydrate(data: dict[Any, Any]) -> "GhostRef":
-    """Creates a GhostRef from a dictionary (JSON snapshot).
+    """Create a GhostRef from a dictionary (JSON snapshot).
 
     Args:
         data: The dictionary data.

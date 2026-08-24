@@ -17,6 +17,8 @@ def test_python_backend_frameworks_base_class():
   backend = PythonBackend(framework="paxml")
 
   class DummyTraits:
+    """Docstring."""
+
     def __init__(self):
       """Test function."""
       self.module_base = "praxis.base_layer.BaseLayer"
@@ -29,6 +31,8 @@ def test_python_backend_frameworks_base_class():
   backend = PythonBackend(framework="keras")
 
   class DummyTraitsKeras:
+    """Docstring."""
+
     def __init__(self):
       """Test function."""
       self.module_base = "keras.Layer"

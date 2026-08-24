@@ -6,7 +6,7 @@ skeleton for running `source_func(x) == target_func(x)` checks.
 
 
 def get_harness_skeleton() -> str:
-  """Returns the pure Python skeleton to be parsed and modified via CST."""
+  """Return the pure Python skeleton to be parsed and modified via CST."""
   return r"""import sys
 import importlib.util
 import inspect

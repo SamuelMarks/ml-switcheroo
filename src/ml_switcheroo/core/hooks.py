@@ -33,7 +33,6 @@ PreambleInjectorType = Callable[[str], None]
 class AutoWireSpec(BaseModel):
   """Schema for plugin self-registration metadata.
 
-
   Allows a plugin to define the Semantic Operation it satisfies.
   """
 
@@ -62,7 +61,7 @@ class HookContext:
     preamble_injector: Optional[PreambleInjectorType] = None,
     symbol_table: Optional[SymbolTableType] = None,
   ):
-    """Initializes the hook context.
+    """Initialize the hook context.
 
     Args:
         semantics: Reference to the SemanticsManager.
@@ -86,7 +85,7 @@ class HookContext:
     self.current_op_id: Optional[str] = None
 
   def resolve_type(self, node: Any) -> Optional[str]:
-    """Queries the Symbol Table for the inferred type of a node.
+    """Query the Symbol Table for the inferred type of a node.
 
     Args:
         node: The LibCST node to inspect.
@@ -111,7 +110,7 @@ class HookContext:
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """Returns the capabilities of the current Target Framework.
+    """Return the capabilities of the current Target Framework.
 
     This allows plugins to check functionality (e.g. has_numpy_compatible_arrays)
     rather than checking the framework name string.
@@ -141,7 +140,7 @@ class HookContext:
 
   @property
   def current_variant(self) -> Optional[FrameworkVariant]:
-    """Returns the Variant definition for the current operation/target.
+    """Return the Variant definition for the current operation/target.
 
     Allows plugins to read extra metadata defined in the JSON (e.g. pack_to_tuple).
 
@@ -161,7 +160,7 @@ class HookContext:
     return FrameworkVariant.model_validate(data)
 
   def inject_signature_arg(self, name: str, annotation: Optional[str] = None) -> None:
-    """Requests injection of argument into the current function signature.
+    """Request injection of argument into the current function signature.
 
     Args:
         name (str): The name of the argument to inject.
@@ -172,7 +171,7 @@ class HookContext:
       self._arg_injector(name, annotation)
 
   def inject_preamble(self, code_str: str) -> None:
-    """Requests injection of a statement at the beginning of the function body.
+    """Request injection of a statement at the beginning of the function body.
 
     Args:
         code_str (str): Python source code string to inject.
@@ -195,7 +194,7 @@ class HookContext:
     return self._runtime_config.plugin_settings.get(key, default)
 
   def validate_settings(self, model: Type[T]) -> T:
-    """Validates global config against a Plugin-specific Pydantic schema.
+    """Validate global config against a Plugin-specific Pydantic schema.
 
     Args:
         model (Type[T]): Pydantic model definition.
@@ -209,7 +208,7 @@ class HookContext:
     return model.model_validate(subset)
 
   def lookup_api(self, op_name: str) -> Optional[str]:
-    """Resolves target framework's API string for a given standard operation.
+    """Resolve target framework's API string for a given standard operation.
 
     Args:
         op_name (str): Standard operation ID.
@@ -231,7 +230,7 @@ class HookContext:
     return target_variant.get("api")  # type: ignore
 
   def lookup_signature(self, op_name: str) -> List[str]:
-    """Retrieves standard argument list for a given operation.
+    """Retrieve standard argument list for a given operation.
 
     Args:
         op_name (str): Standard operation ID.

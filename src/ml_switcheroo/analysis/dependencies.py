@@ -24,10 +24,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class DependencyScanner(cst.CSTVisitor):
-  """Scans for 3rd-party imports not covered by the Semantic Knowledge Base."""
+  """Scan for 3rd-party imports not covered by the Semantic Knowledge Base."""
 
   def __init__(self, semantics: SemanticsManager, source_fw: str):
-    """Initializes the scanner.
+    """Initialize the scanner.
 
     Args:
         semantics: The semantics manager containing valid import maps.
@@ -48,8 +48,7 @@ class DependencyScanner(cst.CSTVisitor):
         self._known_semantic_roots.add(root)
 
   def visit_Import(self, node: cst.Import) -> None:
-    """Visits ``import x``, ``import x.y``.
-
+    """Visit ``import x``, ``import x.y``.
 
     Checks the root package name.
 
@@ -62,7 +61,7 @@ class DependencyScanner(cst.CSTVisitor):
       self._validate_package(root_pkg)
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """Visits ``from x import y``.
+    """Visit ``from x import y``.
 
     Checks the module root package name.
 
@@ -81,7 +80,7 @@ class DependencyScanner(cst.CSTVisitor):
     self._validate_package(root_pkg)
 
   def _get_root_package(self, node: cst.BaseExpression) -> str:
-    """Extracts the root package string from a CST node.
+    """Extract the root package string from a CST node.
 
     e.g., ``Attribute(Name(os), Name(path))`` -> "os".
 
@@ -103,7 +102,7 @@ class DependencyScanner(cst.CSTVisitor):
     return ""
 
   def _validate_package(self, pkg_name: str) -> None:
-    """Filters and checks the package name.
+    """Filter and checks the package name.
 
     If it's external and unmapped, adds to unknown_imports.
 
@@ -131,7 +130,7 @@ class DependencyScanner(cst.CSTVisitor):
     self.unknown_imports.add(pkg_name)
 
   def _is_stdlib(self, name: str) -> bool:
-    """Determines if a package is part of the Python Standard Library.
+    """Determine if a package is part of the Python Standard Library.
 
     Uses ``sys.stdlib_module_names`` on Python 3.10+, falls back to known list.
 

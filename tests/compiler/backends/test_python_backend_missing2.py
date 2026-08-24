@@ -52,6 +52,8 @@ def test_python_backend_sharding_and_metadata():
   b = PythonBackend(framework="torch")
 
   class FakeSharding:
+    """Docstring."""
+
     def __init__(self):
       """Test function."""
       self.axes = ["x"]
@@ -75,6 +77,8 @@ def test_python_backend_sharding_jax():
   b = PythonBackend(framework="jax")
 
   class FakeSharding:
+    """Docstring."""
+
     def __init__(self):
       """Test function."""
       self.axes = ["x"]
@@ -95,6 +99,8 @@ def test_python_backend_sharding_keras():
   b = PythonBackend(framework="keras")
 
   class FakeSharding:
+    """Docstring."""
+
     def __init__(self):
       """Test function."""
       self.axes = ["x"]
@@ -115,6 +121,8 @@ def test_python_backend_sharding_mlx():
   b = PythonBackend(framework="mlx")
 
   class FakeSharding:
+    """Docstring."""
+
     def __init__(self):
       """Test function."""
       self.axes = ["x"]

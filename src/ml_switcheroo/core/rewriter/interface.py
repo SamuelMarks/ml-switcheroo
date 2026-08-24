@@ -18,7 +18,7 @@ class RewriterPass(ABC):
 
   @abstractmethod
   def transform(self, module: cst.Module, context: RewriterContext) -> cst.Module:
-    """Executes the transformation logic on the given CST module.
+    """Execute the transformation logic on the given CST module.
 
     Args:
         module: The input LibCST module.
@@ -28,4 +28,4 @@ class RewriterPass(ABC):
         The transformed LibCST module.
 
     """
-    pass
+    pass  # pragma: no cover

@@ -19,21 +19,21 @@ class ParsedType:
 
 @dataclass
 class AnyType(ParsedType):
-  """Represents 'Any' or unknown types."""
+  """Represent 'Any' or unknown types."""
 
   pass
 
 
 @dataclass
 class NoneType(ParsedType):
-  """Represents 'None'."""
+  """Represent 'None'."""
 
   pass
 
 
 @dataclass
 class PrimitiveType(ParsedType):
-  """Represents a primitive type like int, float, str, bool.
+  """Represent a primitive type like int, float, str, bool.
 
   Attributes:
       name: The string name of the primitive type.
@@ -44,7 +44,7 @@ class PrimitiveType(ParsedType):
 
 @dataclass
 class UnionType(ParsedType):
-  """Represents a Union type (e.g., A | B or Union[A, B]).
+  """Represent a Union type (e.g., A | B or Union[A, B]).
 
   Attributes:
       types: A list of ParsedType elements that comprise the union.
@@ -55,7 +55,7 @@ class UnionType(ParsedType):
 
 @dataclass
 class OptionalType(ParsedType):
-  """Represents an Optional type (e.g., Optional[T]).
+  """Represent an Optional type (e.g., Optional[T]).
 
   Attributes:
       inner: The ParsedType that is wrapped as optional.
@@ -66,7 +66,7 @@ class OptionalType(ParsedType):
 
 @dataclass
 class TupleType(ParsedType):
-  """Represents a Tuple type.
+  """Represent a Tuple type.
 
   Attributes:
       elements: A list of ParsedType elements within the tuple.
@@ -79,7 +79,7 @@ class TupleType(ParsedType):
 
 @dataclass
 class ListType(ParsedType):
-  """Represents a List or Sequence type.
+  """Represent a List or Sequence type.
 
   Attributes:
       inner: The ParsedType representing the list element type.
@@ -90,7 +90,7 @@ class ListType(ParsedType):
 
 @dataclass
 class DictType(ParsedType):
-  """Represents a Dict or Mapping type.
+  """Represent a Dict or Mapping type.
 
   Attributes:
       key_type: The ParsedType representing the dictionary keys.
@@ -103,7 +103,7 @@ class DictType(ParsedType):
 
 @dataclass
 class TensorType(ParsedType):
-  """Represents an Array or Tensor type, optionally with symbolic dimensions.
+  """Represent an Array or Tensor type, optionally with symbolic dimensions.
 
   Attributes:
       dims: A list of strings representing the dimensions, or None.
@@ -114,16 +114,16 @@ class TensorType(ParsedType):
 
 @dataclass
 class CallableType(ParsedType):
-  """Represents a Callable type."""
+  """Represent a Callable type."""
 
   pass
 
 
 class TypeAnnotationParser:
-  """Parses type annotation strings into ParsedType AST nodes using libcst."""
+  """Parse type annotation strings into ParsedType AST nodes using libcst."""
 
   def parse(self, type_str: str) -> ParsedType:
-    """Parses a type annotation string.
+    """Parse a type annotation string.
 
     Args:
         type_str: The type annotation string (e.g., 'List[int]', 'Optional[Dict[str, Any]]').
@@ -144,7 +144,7 @@ class TypeAnnotationParser:
       return PrimitiveType(name=type_str)
 
   def visit(self, node: cst.CSTNode) -> ParsedType:
-    """Visits a CST node and converts it to a ParsedType.
+    """Visit a CST node and converts it to a ParsedType.
 
     Args:
         node: The CSTNode representing a component of the type annotation.
@@ -274,7 +274,7 @@ class TypeAnnotationParser:
     raw_dims: List[str] = []
 
     def _process_slice_elt(elt: cst.CSTNode) -> None:
-      """Process a subscript slice element inside a Subscript node.
+      """Proces a subscript slice element inside a Subscript node.
 
       Args:
           elt: The CSTNode representing the subscript slice element to process.
@@ -358,7 +358,7 @@ class TypeAnnotationParser:
 
 
 def parse_type_annotation(type_str: str) -> ParsedType:
-  """Helper function to parse a type annotation string.
+  """Support function to parse a type annotation string.
 
   Args:
       type_str: The type annotation string.

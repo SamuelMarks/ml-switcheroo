@@ -278,11 +278,10 @@ class SassAdapter(FrameworkAdapter):
     return str(data)
 
   def parse_sass_to_graph(self, sass_code: str) -> LogicalGraph:
-    """Parses `cuobjdump` SASS output strings into a valid `LogicalGraph`.
+    """Parse `cuobjdump` SASS output strings into a valid `LogicalGraph`.
 
-    This fulfills the 'rescue logic from compiled silence' claim in the paper.
-    It heuristically reconstructs high-level semantics (like loops and convolutions)
-    from low-level PTX/SASS instruction streams.
+    This uses proper CFG reconstruction and dominator analysis rather than
+    naive string heuristics.
 
     Args:
         sass_code: Raw SASS assembly text from cuobjdump.
@@ -290,40 +289,83 @@ class SassAdapter(FrameworkAdapter):
     Returns:
         A reconstructed LogicalGraph representing high-level semantics.
     """
-    graph = LogicalGraph()
+    from ml_switcheroo.analysis.cfg import ControlFlowGraph, BasicBlock
+    from ml_switcheroo.analysis.dominators import build_dominator_sets, find_back_edges
+
+    cfg = ControlFlowGraph()
+    current_block: Optional[BasicBlock] = None
+
+    # Simple linear parser to build blocks
     lines = sass_code.splitlines()
-
-    in_loop = "ISETP.LT" in sass_code
-
     for line in lines:
       line = line.strip()
       if not line or line.startswith("//"):
         continue
 
-      if "ISETP.LT" in line:
-        node = LogicalNode(id=f"node_{len(graph.nodes)}", op_type="LoopControl", attributes={"condition": line})
+      if line.startswith("L_") or line.startswith("BB"):
+        # Label means new block
+        label_name = line.strip(":")
+        new_block = cfg.get_or_create_block(label_name)
+        if current_block:
+          # Fallthrough
+          current_block.add_successor(new_block)
+        current_block = new_block
+      else:
+        if current_block is None:
+          current_block = cfg.get_or_create_block("entry")
+
+        current_block.add_instruction(line)
+
+        # Handle explicit branches
+        if "BRA " in line:
+          # Extract target label
+          parts = line.split("BRA ")
+          if len(parts) > 1:
+            target = parts[1].strip().strip(";")
+            target_block = cfg.get_or_create_block(target)
+            current_block.add_successor(target_block)
+
+    # If no blocks were created (empty), return empty graph
+    if not cfg.blocks:
+      return LogicalGraph()
+
+    # Analyze for loops using dominators
+    doms = build_dominator_sets(cfg)
+    back_edges = find_back_edges(cfg, doms)
+
+    # Determine nodes in loops
+    loop_nodes = set()
+    for src, dst in back_edges:
+      loop_nodes.add(src)
+      loop_nodes.add(dst)
+
+    # Map CFG back to LogicalGraph for return
+    graph = LogicalGraph()
+    for block_id, block in cfg.blocks.items():
+      # Heuristic pattern matching on the block level
+      is_in_loop = block_id in loop_nodes
+      has_ffma = any("FFMA" in inst for inst in block.instructions)
+
+      if is_in_loop and has_ffma:
+        node = LogicalNode(
+          id=f"node_{len(graph.nodes)}", op_type="Conv2d", attributes={"inferred_from": "FFMA inside loop"}
+        )
         graph.nodes[node.id] = node
-      elif "FFMA" in line:
-        # Heuristic: Fused multiply add
-        if in_loop:
-          node = LogicalNode(
-            id=f"node_{len(graph.nodes)}",
-            op_type="Conv2d",
-            attributes={"inferred_from": "FFMA inside loop"},
-          )
-        else:
-          node = LogicalNode(
-            id=f"node_{len(graph.nodes)}",
-            op_type="Linear",
-            attributes={"inferred_from": "FFMA outside loop"},
-          )
+      elif has_ffma:
+        node = LogicalNode(
+          id=f"node_{len(graph.nodes)}", op_type="Linear", attributes={"inferred_from": "FFMA outside loop"}
+        )
         graph.nodes[node.id] = node
-      elif line.startswith("L_"):
-        pass  # Label
+
+      # Just tracking loops as control flow points if no ops match
+      if is_in_loop and not has_ffma:
+        node = LogicalNode(id=f"node_{len(graph.nodes)}", op_type="LoopControl", attributes={"block": block_id})
+        graph.nodes[node.id] = node
+
     return graph
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Provides representative SASS assembly code for different tiers of operations.
+    """Provide representative SASS assembly code for different tiers of operations.
 
     Returns:
         A dictionary mapping tier names to code snippets.
