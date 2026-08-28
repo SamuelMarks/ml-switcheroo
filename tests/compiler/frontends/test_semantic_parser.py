@@ -8,6 +8,7 @@ logical sections during model translation or execution tracing.
 """
 
 import pytest
+import typing
 
 from ml_switcheroo.core.compiler.frontends.semantic_parser import (
   SemanticCommentParser,
@@ -21,7 +22,7 @@ from ml_switcheroo.core.compiler.frontends.semantic_parser import (
 )
 
 
-def test_semantic_parser_input():
+def test_semantic_parser_input() -> None:
   """Verifies that input annotations are correctly parsed into SemanticInput markers.
 
   This test checks that comments matching the 'Input <name> ->' pattern are parsed,
@@ -34,18 +35,18 @@ def test_semantic_parser_input():
       None
   """
   parser = SemanticCommentParser()
-  marker = parser.parse("Input x ->")
+  marker: typing.Optional[SemanticMarker] = parser.parse("Input x ->")
   assert isinstance(marker, SemanticInput)
   assert marker.name == "x"
   assert marker.to_text() == "Input x ->"
 
-  marker2 = parser.parse("  Input my_var -> ")
+  marker2: typing.Optional[SemanticMarker] = parser.parse("  Input my_var -> ")
   assert isinstance(marker2, SemanticInput)
   assert marker2.name == "my_var"
   assert marker2.to_text() == "  Input my_var -> "
 
 
-def test_semantic_parser_begin():
+def test_semantic_parser_begin() -> None:
   """Verifies that 'BEGIN' annotations are correctly parsed into SemanticBegin markers.
 
   This test validates that block start annotations (e.g. 'BEGIN Conv2d(block1)')
@@ -59,18 +60,18 @@ def test_semantic_parser_begin():
       None
   """
   parser = SemanticCommentParser()
-  marker = parser.parse("BEGIN Conv2d(block1)")
+  marker: typing.Optional[SemanticMarker] = parser.parse("BEGIN Conv2d(block1)")
   assert isinstance(marker, SemanticBegin)
   assert marker.kind == "Conv2d"
   assert marker.id == "block1"
   assert marker.to_text() == "BEGIN Conv2d(block1)"
 
-  marker2 = parser.parse("BEGIN Conv2d ( block1 ) ")
+  marker2: typing.Optional[SemanticMarker] = parser.parse("BEGIN Conv2d ( block1 ) ")
   assert isinstance(marker2, SemanticBegin)
   assert marker2.to_text() == "BEGIN Conv2d ( block1 ) "
 
 
-def test_semantic_parser_end():
+def test_semantic_parser_end() -> None:
   """Verifies that 'END' annotations are correctly parsed into SemanticEnd markers.
 
   This test checks that block termination annotations (e.g. 'END Conv2d(block1)')
@@ -83,18 +84,18 @@ def test_semantic_parser_end():
       None
   """
   parser = SemanticCommentParser()
-  marker = parser.parse("END Conv2d(block1)")
+  marker: typing.Optional[SemanticMarker] = parser.parse("END Conv2d(block1)")
   assert isinstance(marker, SemanticEnd)
   assert marker.kind == "Conv2d"
   assert marker.id == "block1"
   assert marker.to_text() == "END Conv2d(block1)"
 
-  marker2 = parser.parse("END Conv2d ( block1 ) ")
+  marker2: typing.Optional[SemanticMarker] = parser.parse("END Conv2d ( block1 ) ")
   assert isinstance(marker2, SemanticEnd)
   assert marker2.to_text() == "END Conv2d ( block1 ) "
 
 
-def test_semantic_parser_unmapped():
+def test_semantic_parser_unmapped() -> None:
   """Verifies that unmapped operations are correctly parsed into SemanticUnmapped markers.
 
   This test checks that custom/unmapped library annotations (e.g. 'Unmapped Op: Linear(node1)'
@@ -108,24 +109,24 @@ def test_semantic_parser_unmapped():
       None
   """
   parser = SemanticCommentParser()
-  marker = parser.parse("Unmapped Op: Linear(node1)")
+  marker: typing.Optional[SemanticMarker] = parser.parse("Unmapped Op: Linear(node1)")
   assert isinstance(marker, SemanticUnmapped)
   assert marker.api == "Linear"
   assert marker.id == "node1"
   assert marker.to_text() == "Unmapped Op: Linear(node1)"
 
-  marker2 = parser.parse(" Unmapped Op: torch.nn.functional.relu(node2) ")
+  marker2: typing.Optional[SemanticMarker] = parser.parse(" Unmapped Op: torch.nn.functional.relu(node2) ")
   assert isinstance(marker2, SemanticUnmapped)
   assert marker2.api == "torch.nn.functional.relu"
   assert marker2.id == "node2"
   assert marker2.to_text() == " Unmapped Op: torch.nn.functional.relu(node2) "
 
-  marker3 = parser.parse("Unmapped Op: Linear ( node1 ) ")
+  marker3: typing.Optional[SemanticMarker] = parser.parse("Unmapped Op: Linear ( node1 ) ")
   assert isinstance(marker3, SemanticUnmapped)
   assert marker3.to_text() == "Unmapped Op: Linear ( node1 ) "
 
 
-def test_semantic_parser_return():
+def test_semantic_parser_return() -> None:
   """Verifies that return annotations are correctly parsed into SemanticReturn markers.
 
   This test validates that comments marking function outputs (e.g. 'Return:' or
@@ -138,16 +139,16 @@ def test_semantic_parser_return():
       None
   """
   parser = SemanticCommentParser()
-  marker = parser.parse("Return:")
+  marker: typing.Optional[SemanticMarker] = parser.parse("Return:")
   assert isinstance(marker, SemanticReturn)
   assert marker.to_text() == "Return:"
 
-  marker2 = parser.parse(" Return: output_var ")
+  marker2: typing.Optional[SemanticMarker] = parser.parse(" Return: output_var ")
   assert isinstance(marker2, SemanticReturn)
   assert marker2.to_text() == " Return: output_var "
 
 
-def test_semantic_parser_trivia():
+def test_semantic_parser_trivia() -> None:
   """Verifies the behavior of the Trivia semantic marker class.
 
   This test checks that Trivia markers represent arbitrary text comment blocks
@@ -163,7 +164,7 @@ def test_semantic_parser_trivia():
   assert trivia.to_text() == "test"
 
 
-def test_semantic_parser_invalid():
+def test_semantic_parser_invalid() -> None:
   """Verifies that invalid or malformed comments return None during parsing.
 
   This test ensures that comments not matching any recognized semantic syntax,
@@ -181,14 +182,14 @@ def test_semantic_parser_invalid():
   assert parser.parse("BEGIN Conv2d block1)") is None  # missing lparen
 
 
-def test_semantic_marker_base():
+def test_semantic_marker_base() -> None:
   """Verifies the base class NotImplementedError for to_text."""
   marker = SemanticMarker()
   with pytest.raises(NotImplementedError):
     marker.to_text()
 
 
-def test_semantic_parser_input_no_trivia():
+def test_semantic_parser_input_no_trivia() -> None:
   """Test semantic parser input no trivia."""
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticInput
 
@@ -197,7 +198,7 @@ def test_semantic_parser_input_no_trivia():
   assert inp.to_text() == "Inputn->"
 
 
-def test_semantic_parser_begin_no_trivia():
+def test_semantic_parser_begin_no_trivia() -> None:
   """Test semantic parser begin no trivia."""
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticBegin
 
@@ -206,7 +207,7 @@ def test_semantic_parser_begin_no_trivia():
   assert b.to_text() == "BEGINk(i)"
 
 
-def test_semantic_parser_end_no_trivia():
+def test_semantic_parser_end_no_trivia() -> None:
   """Test semantic parser end no trivia."""
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticEnd
 
@@ -215,7 +216,7 @@ def test_semantic_parser_end_no_trivia():
   assert e.to_text() == "ENDk(i)"
 
 
-def test_semantic_parser_unmapped_no_trivia():
+def test_semantic_parser_unmapped_no_trivia() -> None:
   """Test semantic parser unmapped no trivia."""
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticUnmapped
 

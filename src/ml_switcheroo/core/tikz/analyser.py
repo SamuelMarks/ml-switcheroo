@@ -178,17 +178,17 @@ class GraphExtractor(cst.CSTVisitor):
     """
     # 1. Identify Target (must be self.something)
     target = node.targets[0].target
-    if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):  # type: ignore
+    if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):
       return
 
-    attr_name = target.attr.value  # type: ignore
+    attr_name = target.attr.value
 
     # 2. Identify Op Type
     call = node.value
     if not isinstance(call, cst.Call):
       return
 
-    op_type = get_full_name(call.func)  # type: ignore
+    op_type = get_full_name(call.func)
     # Simplify name (e.g. torch.nn.Conv2d -> Conv2d)
     if "." in op_type:
       op_type = op_type.split(".")[-1]
@@ -234,12 +234,12 @@ class GraphExtractor(cst.CSTVisitor):
         The resolved layer name or functional node identifier if found, otherwise None.
     """
     # 1. Method call on self (Registered Layer)
-    if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):  # type: ignore
-      return func_node.attr.value  # type: ignore
+    if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):
+      return func_node.attr.value
 
     # 2. Functional Call (Ephemeral Node)
     # Simplified: tracing only explicit layers from init + functional if identified
-    func_name = get_full_name(func_node)  # type: ignore
+    func_name = get_full_name(func_node)
     if func_name:
       # Create ad-hoc functional node
       layer_name = f"func_{func_name.split('.')[-1].lower()}"

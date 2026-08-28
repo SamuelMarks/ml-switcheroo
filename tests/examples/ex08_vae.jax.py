@@ -7,11 +7,12 @@ reconstruction loss, and the Kullback-Leibler (KL) divergence loss for normal
 distributions.
 """
 
+import jax
 import jax.numpy as jnp
 from jax import random
 
 
-def sample_latent(mean, logvar, key):
+def sample_latent(mean: jax.Array, logvar: jax.Array, key: jax.Array) -> jax.Array:
   """VAE Reparameterization Trick.
 
   Samples from the latent Gaussian distribution N(mean, exp(logvar)) by scaling
@@ -30,12 +31,12 @@ def sample_latent(mean, logvar, key):
       A JAX array of the same shape as `mean` representing the sampled latent
       vectors.
   """
-  std = jnp.exp(0.5 * logvar)
-  eps = random.normal(key, logvar.shape)
+  std: jax.Array = jnp.exp(0.5 * logvar)
+  eps: jax.Array = random.normal(key, logvar.shape)
   return mean + eps * std
 
 
-def binary_cross_entropy(logits, x):
+def binary_cross_entropy(logits: jax.Array, x: jax.Array) -> jax.Array:
   """Computes the element-wise binary cross-entropy reconstruction loss.
 
   Calculates the negative log-likelihood of the target data `x` given the
@@ -55,7 +56,7 @@ def binary_cross_entropy(logits, x):
   return -jnp.sum(x * jnp.log(logits) + (1 - x) * jnp.log(1 - logits))
 
 
-def gaussian_kl(mean, logvar):
+def gaussian_kl(mean: jax.Array, logvar: jax.Array) -> jax.Array:
   """Computes the Kullback-Leibler (KL) divergence.
 
   Calculates the KL divergence between a parameterized diagonal Gaussian

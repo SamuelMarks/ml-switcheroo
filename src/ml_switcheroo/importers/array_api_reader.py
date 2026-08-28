@@ -10,16 +10,20 @@ Now extracts type hints (e.g. ``x: Array``, ``axis: int``) to support Better Fuz
 
 from typing import Any
 
+
+import typing
+
+
 import ast
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 from ml_switcheroo.utils.console import log_info, log_warning
 
 
 class ArrayApiSpecImporter:
   """Parse Python stub files (``*.py``) using the built-in ``ast`` module."""
 
-  def parse_folder(self, root_dir: Path) -> Dict[str, Any]:
+  def parse_folder(self, root_dir: Path) -> typing.Dict[str, dict]:
     """Parse Array API Python Stubs (``*.py``) in the target directory.
 
     Args:
@@ -39,7 +43,7 @@ class ArrayApiSpecImporter:
     log_info(f"Parsing {len(py_files)} stub files...")
     return self._parse_stubs(py_files, root_dir)
 
-  def _parse_stubs(self, files: List[Path], root: Path) -> Dict[str, Any]:
+  def _parse_stubs(self, files: typing.List[Path], root: Path) -> typing.Dict[str, dict]:
     """Iterate over files and extracts AST nodes.
 
     Processes both function definitions and constant assignments (e.g. math constants).
@@ -52,7 +56,7 @@ class ArrayApiSpecImporter:
         A dictionary of parsed semantic definitions.
 
     """
-    semantics = {}
+    semantics: Any = {}
 
     for fpath in files:
       # Skip internal files (like _types.py), but keep magic methods (__init__ usually re-exports, skip it too)
@@ -109,7 +113,7 @@ class ArrayApiSpecImporter:
             "from": rel_path,
             "description": summary,
             "std_args": [],  # Constants have no args
-            "variants": {},  # type: ignore
+            "variants": {},
           }
 
     return semantics
@@ -127,7 +131,7 @@ class ArrayApiSpecImporter:
     out = []
 
     # Helper to process a specific arg group
-    def process_group(group: List[ast.arg]) -> Any:
+    def process_group(group: typing.List[ast.arg]) -> None:
       """Parse type annotations for a list of arguments and appends them to out.
 
       Args:

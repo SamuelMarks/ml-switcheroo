@@ -1,7 +1,6 @@
 """Test suite for the Backend module."""
 
 import pytest
-from typing import Any
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
@@ -9,27 +8,27 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 class NoOpBackend(CompilerBackend):
   """Test suite for the No Op Backend component."""
 
-  def compile(self, graph: LogicalGraph) -> Any:
+  def compile(self, graph: LogicalGraph) -> str:
     """Compiles ."""
     return f"Compiled {len(graph.nodes)} nodes."
 
 
-def test_backend_protocol_enforcement():
+def test_backend_protocol_enforcement() -> None:
   """Verifies the behavior of backend protocol enforcement."""
   with pytest.raises(TypeError):
-    CompilerBackend()
+    CompilerBackend()  # type: ignore
 
 
-def test_noop_backend_compile():
+def test_noop_backend_compile() -> None:
   """Verifies the behavior of noop backend compile."""
   graph = LogicalGraph()
   graph.nodes = [LogicalNode(id="n1", kind="Input"), LogicalNode(id="n2", kind="Output")]
   backend = NoOpBackend()
-  result = backend.compile(graph)
+  result: str = backend.compile(graph)
   assert result == "Compiled 2 nodes."
 
 
-def test_backend_type_hints():
+def test_backend_type_hints() -> None:
   """Verifies the behavior of backend type hints."""
   assert hasattr(CompilerBackend, "compile")
-  assert CompilerBackend.compile.__isabstractmethod__
+  assert CompilerBackend.compile.__isabstractmethod__  # type: ignore

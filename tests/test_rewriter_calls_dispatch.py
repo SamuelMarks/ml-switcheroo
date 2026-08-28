@@ -8,12 +8,13 @@ from ml_switcheroo.core.rewriter.calls.dispatch import (
   _node_to_literal,
 )
 from ml_switcheroo.enums import LogicOp
+from typing import Any, Dict
 
 
 class DummyRule:
   """Docstring."""
 
-  def __init__(self, if_arg, if_value, use_api, op=LogicOp.EQ):
+  def __init__(self, if_arg: str, if_value: Any, use_api: str, op: str = LogicOp.EQ.value) -> None:
     """Docstring."""
     self.if_arg = if_arg
     self.is_val = if_value
@@ -24,83 +25,83 @@ class DummyRule:
 class DummyRewriter:
   """Docstring."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Docstring."""
     self.source_fw = "torch"
 
 
-def test_dispatch_rules_branches():
+def test_dispatch_rules_branches() -> None:
   """Docstring."""
-  rewriter = DummyRewriter()
-  node = cst.parse_statement("f()").body[0].value
+  rewriter: DummyRewriter = DummyRewriter()
+  node: cst.Call = getattr(getattr(cst.parse_statement("f()"), "body")[0], "value")
 
   # 29 -> 31
   # 31 -> 32
   # 33 -> 28
   # 33 -> 34
-  details1 = {"variants": {"torch": {"args": {}}}, "std_args": [{"name": "a"}, {"other": "b"}]}
+  details1: Dict[str, Any] = {"variants": {"torch": {"args": {}}}, "std_args": [{"name": "a"}, {"other": "b"}]}
   evaluate_dispatch_rules(rewriter, node, [], details1)
 
   # 31 -> 36
-  details2 = {"variants": {"torch": {"args": {}}}, "std_args": ["c"]}
+  details2: Dict[str, Any] = {"variants": {"torch": {"args": {}}}, "std_args": ["c"]}
   evaluate_dispatch_rules(rewriter, node, [], details2)
 
   # 42 -> 43
-  rule1 = DummyRule(if_arg="missing", if_value=1, use_api="f1")
+  rule1: DummyRule = DummyRule(if_arg="missing", if_value=1, use_api="f1")
   evaluate_dispatch_rules(rewriter, node, [rule1], details1)
 
-  details_various = {"variants": {"torch": {"args": {"a": "a_src"}}}, "std_args": [("a", "int")]}
+  details_various: Dict[str, Any] = {"variants": {"torch": {"args": {"a": "a_src"}}}, "std_args": [("a", "int")]}
 
-  rule1 = DummyRule(if_arg="a", if_value=1, use_api="f1")
-  node_with_a_1 = cst.parse_statement("f(a_src=1)").body[0].value
+  rule1_val: DummyRule = DummyRule(if_arg="a", if_value=1, use_api="f1")
+  node_with_a_1: cst.Call = getattr(getattr(cst.parse_statement("f(a_src=1)"), "body")[0], "value")
 
   # 45 -> 46
-  assert evaluate_dispatch_rules(rewriter, node_with_a_1, [rule1], details_various) == "f1"
+  assert evaluate_dispatch_rules(rewriter, node_with_a_1, [rule1_val], details_various) == "f1"
 
   # 45 -> 38
-  rule2 = DummyRule(if_arg="a", if_value=2, use_api="f2")
+  rule2: DummyRule = DummyRule(if_arg="a", if_value=2, use_api="f2")
   assert evaluate_dispatch_rules(rewriter, node_with_a_1, [rule2], details_various) is None
 
 
-def test_extract_argument_node_branches():
+def test_extract_argument_node_branches() -> None:
   """Docstring."""
-  rewriter = DummyRewriter()
-  node = cst.parse_statement("obj.f(a=1, b=2)").body[0].value
+  rewriter: DummyRewriter = DummyRewriter()
+  node: cst.Call = getattr(getattr(cst.parse_statement("obj.f(a=1, b=2)"), "body")[0], "value")
 
   assert _extract_argument_node(rewriter, node, "a", "a", ["a", "b"]) is not None
 
-  node2 = cst.parse_statement("obj.f(1, 2)").body[0].value
+  node2: cst.Call = getattr(getattr(cst.parse_statement("obj.f(1, 2)"), "body")[0], "value")
   assert _extract_argument_node(rewriter, node2, "a", "a", ["a", "b"]) is not None
 
   class RewriterWithModuleAlias:
     """Docstring."""
 
-    def _is_module_alias(self, val):
+    def _is_module_alias(self, val: Any) -> bool:
       """Docstring."""
       return True
 
-  rewriter2 = RewriterWithModuleAlias()
+  rewriter2: RewriterWithModuleAlias = RewriterWithModuleAlias()
   assert _extract_argument_node(rewriter2, node2, "a", "a", ["a", "b"]) is not None
 
-  node3 = cst.parse_statement("obj.f(2)").body[0].value
+  node3: cst.Call = getattr(getattr(cst.parse_statement("obj.f(2)"), "body")[0], "value")
 
   class RewriterNotModule:
     """Docstring."""
 
-    def _is_module_alias(self, val):
+    def _is_module_alias(self, val: Any) -> bool:
       """Docstring."""
       return False
 
-  rewriter3 = RewriterNotModule()
+  rewriter3: RewriterNotModule = RewriterNotModule()
   assert _extract_argument_node(rewriter3, node3, "b", "b", ["x", "b"]) is not None
 
   assert _extract_argument_node(rewriter3, node3, "c", "c", ["x", "b", "c"]) is None
 
-  node5 = cst.Call(func=cst.Name("f"), args=[cst.Arg(value=cst.Integer("1"), keyword=cst.Name("wrong"))])
+  node5: cst.Call = cst.Call(func=cst.Name("f"), args=[cst.Arg(value=cst.Integer("1"), keyword=cst.Name("wrong"))])
   assert _extract_argument_node(rewriter3, node5, "target", "target", ["target"]) is None
 
 
-def test_node_to_literal():
+def test_node_to_literal() -> None:
   """Docstring."""
   assert _node_to_literal(cst.Integer("1")) == 1
   assert _node_to_literal(cst.Float("1.5")) == 1.5
@@ -115,20 +116,20 @@ def test_node_to_literal():
   class BadInt(cst.Integer):
     """Docstring."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
       """Docstring."""
       super().__init__(*args, **kwargs)
 
     @property
-    def value(self):
+    def value(self) -> str:
       """Docstring."""
       return "bad"
 
-    def _visit_and_replace_children(self, visitor):
+    def _visit_and_replace_children(self, visitor: Any) -> "BadInt":
       """Docstring."""
       return self
 
-    def _codegen_impl(self, state, default_semi):
+    def _codegen_impl(self, state: Any, default_semi: Any) -> None:
       """Docstring."""
       pass
 
@@ -140,20 +141,20 @@ def test_node_to_literal():
   class BadFloat(cst.Float):
     """Docstring."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
       """Docstring."""
       super().__init__(*args, **kwargs)
 
     @property
-    def value(self):
+    def value(self) -> str:
       """Docstring."""
       return "bad"
 
-    def _visit_and_replace_children(self, visitor):
+    def _visit_and_replace_children(self, visitor: Any) -> "BadFloat":
       """Docstring."""
       return self
 
-    def _codegen_impl(self, state, default_semi):
+    def _codegen_impl(self, state: Any, default_semi: Any) -> None:
       """Docstring."""
       pass
 
@@ -163,53 +164,53 @@ def test_node_to_literal():
     pass
 
 
-def test_check_rule_condition_branches():
+def test_check_rule_condition_branches() -> None:
   """Docstring."""
-  rule_int = DummyRule("a", "int", "f", LogicOp.IS_TYPE)
+  rule_int: DummyRule = DummyRule("a", "int", "f", LogicOp.IS_TYPE.value)
   assert _check_rule_condition(cst.Integer("1"), rule_int)
   assert not _check_rule_condition(cst.Float("1.0"), rule_int)
 
-  rule_float = DummyRule("a", "float", "f", LogicOp.IS_TYPE)
+  rule_float: DummyRule = DummyRule("a", "float", "f", LogicOp.IS_TYPE.value)
   assert _check_rule_condition(cst.Float("1.0"), rule_float)
   assert not _check_rule_condition(cst.Integer("1"), rule_float)
 
-  rule_str = DummyRule("a", "str", "f", LogicOp.IS_TYPE)
+  rule_str: DummyRule = DummyRule("a", "str", "f", LogicOp.IS_TYPE.value)
   assert _check_rule_condition(cst.SimpleString('"abc"'), rule_str)
   assert not _check_rule_condition(cst.Integer("1"), rule_str)
 
-  rule_list = DummyRule("a", "list", "f", LogicOp.IS_TYPE)
+  rule_list: DummyRule = DummyRule("a", "list", "f", LogicOp.IS_TYPE.value)
   assert _check_rule_condition(cst.List([]), rule_list)
   assert _check_rule_condition(cst.Tuple([]), rule_list)
   assert not _check_rule_condition(cst.Integer("1"), rule_list)
 
-  rule_dict = DummyRule("a", "dict", "f", LogicOp.IS_TYPE)
+  rule_dict: DummyRule = DummyRule("a", "dict", "f", LogicOp.IS_TYPE.value)
   assert _check_rule_condition(cst.Dict([]), rule_dict)
   assert not _check_rule_condition(cst.Integer("1"), rule_dict)
 
-  rule_bool = DummyRule("a", "bool", "f", LogicOp.IS_TYPE)
+  rule_bool: DummyRule = DummyRule("a", "bool", "f", LogicOp.IS_TYPE.value)
   assert _check_rule_condition(cst.Name("True"), rule_bool)
   assert _check_rule_condition(cst.Name("False"), rule_bool)
   assert not _check_rule_condition(cst.Name("None"), rule_bool)
 
-  rule_eq = DummyRule("a", 1, "f", LogicOp.EQ)
+  rule_eq: DummyRule = DummyRule("a", 1, "f", LogicOp.EQ.value)
   assert not _check_rule_condition(cst.Name("other"), rule_eq)
 
-  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.EQ))
-  assert not _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.NEQ))
-  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 2, "f", LogicOp.NEQ))
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.EQ.value))
+  assert not _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.NEQ.value))
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 2, "f", LogicOp.NEQ.value))
 
-  assert _check_rule_condition(cst.Integer("2"), DummyRule("a", 1, "f", LogicOp.GT))
-  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 2, "f", LogicOp.LT))
-  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.GTE))
-  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.LTE))
+  assert _check_rule_condition(cst.Integer("2"), DummyRule("a", 1, "f", LogicOp.GT.value))
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 2, "f", LogicOp.LT.value))
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.GTE.value))
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", LogicOp.LTE.value))
 
-  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", [1, 2], "f", LogicOp.IN))
-  assert _check_rule_condition(cst.Integer("3"), DummyRule("a", [1, 2], "f", LogicOp.NOT_IN))
+  assert _check_rule_condition(cst.Integer("1"), DummyRule("a", [1, 2], "f", LogicOp.IN.value))
+  assert _check_rule_condition(cst.Integer("3"), DummyRule("a", [1, 2], "f", LogicOp.NOT_IN.value))
 
   assert not _check_rule_condition(cst.Integer("1"), DummyRule("a", 1, "f", "UNKNOWN"))
 
 
-def test_node_to_literal_valueerror():
+def test_node_to_literal_valueerror() -> None:
   """Test element."""
   from ml_switcheroo.core.rewriter.calls.dispatch import _node_to_literal
   import libcst as cst
@@ -223,9 +224,9 @@ def test_node_to_literal_valueerror():
       pass
 
   # integer ValueError
-  int_node = HackyInt("not_an_int")
+  int_node: HackyInt = HackyInt("not_an_int")
   assert _node_to_literal(int_node) is None
 
   # float ValueError
-  float_node = HackyFloat("not_a_float")
+  float_node: HackyFloat = HackyFloat("not_a_float")
   assert _node_to_literal(float_node) is None

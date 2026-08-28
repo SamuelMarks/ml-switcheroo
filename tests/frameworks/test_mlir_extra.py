@@ -1,16 +1,17 @@
 """Test module."""
 
+import typing
 from ml_switcheroo.frameworks.mlir import MlirAdapter
 from ml_switcheroo.semantics.schema import PluginTraits
 
 
-def test_mlir_adapter_missing_methods():
+def test_mlir_adapter_missing_methods() -> None:
   """Test function."""
   adapter = MlirAdapter()
 
   assert adapter.import_namespaces == {}
 
-  test_cfg = adapter.test_config
+  test_cfg: dict[str, typing.Any] = adapter.test_config
   assert "import" in test_cfg
 
   assert adapter.harness_imports == []
@@ -18,7 +19,7 @@ def test_mlir_adapter_missing_methods():
   assert adapter.get_to_numpy_code() == "return str(obj)"
   assert adapter.declared_magic_args == []
 
-  traits = adapter.structural_traits
+  traits: typing.Any = adapter.structural_traits
   assert traits.module_base is None
 
   assert isinstance(adapter.plugin_traits, PluginTraits)

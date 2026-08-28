@@ -7,15 +7,23 @@ from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapsho
 import ml_switcheroo.semantics.paths as paths
 
 
-def test_resolve_semantics_dir_local(tmp_path):
-  """Resolves semantics a directory local."""
+def test_resolve_semantics_dir_local(tmp_path: Path) -> None:
+  """Resolves semantics a directory local.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+  """
   with patch("ml_switcheroo.semantics.paths.__file__", str(tmp_path / "paths.py")):
     (tmp_path / "odl").mkdir()
     assert resolve_semantics_dir() == tmp_path
 
 
-def test_resolve_semantics_dir_fallback(tmp_path):
-  """Resolves semantics a directory fallback."""
+def test_resolve_semantics_dir_fallback(tmp_path: Path) -> None:
+  """Resolves semantics a directory fallback.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+  """
   with patch("ml_switcheroo.semantics.paths.__file__", str(tmp_path / "paths.py")):
     if sys.version_info >= (3, 9):
       with patch("ml_switcheroo.semantics.paths.files") as mock_files:
@@ -23,8 +31,12 @@ def test_resolve_semantics_dir_fallback(tmp_path):
         assert resolve_semantics_dir() == Path("mock_path")
 
 
-def test_resolve_semantics_dir_fallback_exception(tmp_path):
-  """Resolves semantics a directory fallback correctly handling an exception."""
+def test_resolve_semantics_dir_fallback_exception(tmp_path: Path) -> None:
+  """Resolves semantics a directory fallback correctly handling an exception.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+  """
   with patch("ml_switcheroo.semantics.paths.__file__", str(tmp_path / "paths.py")):
     if sys.version_info >= (3, 9):
       with patch("ml_switcheroo.semantics.paths.files") as mock_files:
@@ -32,22 +44,26 @@ def test_resolve_semantics_dir_fallback_exception(tmp_path):
         assert resolve_semantics_dir() == tmp_path
 
 
-def test_resolve_semantics_dir_no_files(tmp_path):
-  """Resolves semantics a directory no files."""
+def test_resolve_semantics_dir_no_files(tmp_path: Path) -> None:
+  """Resolves semantics a directory no files.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+  """
   with patch("ml_switcheroo.semantics.paths.__file__", str(tmp_path / "paths.py")):
     with patch("ml_switcheroo.semantics.paths.sys") as mock_sys:
       mock_sys.version_info = (3, 8)
       assert resolve_semantics_dir() == tmp_path
 
 
-def test_resolve_snapshots_dir():
+def test_resolve_snapshots_dir() -> None:
   """Resolves snapshots directory."""
   with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir") as mock_resolve:
     mock_resolve.return_value = Path("/foo/bar/semantics")
     assert resolve_snapshots_dir() == Path("/ml-compiler-snapshots")
 
 
-def test_python_old():
+def test_python_old() -> None:
   """Verifies the behavior of python old."""
   import importlib
 

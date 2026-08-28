@@ -1,5 +1,6 @@
 """Test suite for the Mlir Gen Extra2 module."""
 
+import typing
 import libcst as cst
 from collections import defaultdict
 from ml_switcheroo.core.mlir.cst import OperationNode, BlockNode, RegionNode, AttributeNode, ValueNode
@@ -11,12 +12,12 @@ from ml_switcheroo.core.mlir.naming import NamingContext
 class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
   """Dummy Generator class for testing purposes."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the DummyGenerator instance."""
     self.ctx = NamingContext()
-    self.usage_counts = defaultdict(int)
-    self.usage_consumers = {}
-    self.resolved_values = {}
+    self.usage_counts: typing.DefaultDict[str, int] = defaultdict(int)
+    self.usage_consumers: dict[str, typing.Any] = {}
+    self.resolved_values: dict[str, cst.BaseExpression] = {}
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
     """Mock implementation of  resolve operand."""
@@ -24,7 +25,7 @@ class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
       return self.resolved_values[ssa_name]
     return cst.Name(f"res_{ssa_name.replace('%', '')}")
 
-  def _convert_block(self, block: BlockNode):
+  def _convert_block(self, block: BlockNode) -> list[cst.BaseStatement]:
     """Mock implementation of  convert block."""
     if not block.operations:
       return []
@@ -36,17 +37,17 @@ class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
 
   def _create_dotted_name(self, name: str) -> cst.BaseExpression:
     """Mock implementation of  create dotted name."""
-    parts = name.split(".")
+    parts: list[str] = name.split(".")
     if len(parts) == 1:
       return cst.Name(parts[0])
     else:
       attr = cst.Name(parts[-1])
-      val = cst.Name(parts[0])
+      val: typing.Any = cst.Name(parts[0])
       for p in parts[1:-1]:
         val = cst.Attribute(value=val, attr=cst.Name(p))
       return cst.Attribute(value=val, attr=attr)
 
-  def _get_attr(self, op: OperationNode, attr_name: str) -> str:
+  def _get_attr(self, op: OperationNode, attr_name: str) -> typing.Optional[str]:
     """Mock implementation of  get attribute."""
     for a in op.attributes:
       if a.name == attr_name:
@@ -54,7 +55,7 @@ class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
     return None
 
 
-def test_convert_import():
+def test_convert_import() -> None:
   """Converts import."""
   gen = DummyGenerator()
   op_star = OperationNode(
@@ -68,7 +69,7 @@ def test_convert_import():
     results=[],
     regions=[],
   )
-  res_star = gen._convert_import(op_star)
+  res_star: typing.Any = gen._convert_import(op_star)
   assert isinstance(res_star.body[0], cst.ImportFrom)
   assert isinstance(res_star.body[0].names, cst.ImportStar)
   op_alias = OperationNode(
@@ -82,7 +83,7 @@ def test_convert_import():
     results=[],
     regions=[],
   )
-  res_alias = gen._convert_import(op_alias)
+  res_alias: typing.Any = gen._convert_import(op_alias)
   assert isinstance(res_alias.body[0], cst.ImportFrom)
   assert res_alias.body[0].names[0].name.value == "numpy"
   assert res_alias.body[0].names[0].asname.name.value == "np"
@@ -93,7 +94,7 @@ def test_convert_import():
     results=[],
     regions=[],
   )
-  res_direct = gen._convert_import(op_direct)
+  res_direct: typing.Any = gen._convert_import(op_direct)
   assert isinstance(res_direct.body[0], cst.Import)
   assert res_direct.body[0].names[0].name.value == "sys"
   op_exc = OperationNode(
@@ -106,11 +107,11 @@ def test_convert_import():
     results=[],
     regions=[],
   )
-  res_exc = gen._convert_import(op_exc)
+  res_exc: typing.Any = gen._convert_import(op_exc)
   assert isinstance(res_exc.body[0], cst.Pass)
 
 
-def test_convert_class_def_bases():
+def test_convert_class_def_bases() -> None:
   """Converts class def bases."""
   gen = DummyGenerator()
   op = OperationNode(
@@ -123,22 +124,22 @@ def test_convert_class_def_bases():
     results=[],
     regions=[],
   )
-  res = gen._convert_class_def(op)
+  res: typing.Any = gen._convert_class_def(op)
   assert res.name.value == "MyClass"
   assert len(res.bases) == 2
   assert isinstance(res.body.body[0].body[0], cst.Pass)
 
 
-def test_convert_func_def_annotations():
+def test_convert_func_def_annotations() -> None:
   """Converts function def annotations."""
   gen = DummyGenerator()
   arg1 = ValueNode(name="%arg0")
-  arg1_type = type("DummyType", (), {"body": '!sw.type<"torch.Tensor">'})
+  arg1_type: typing.Any = type("DummyType", (), {"body": '!sw.type<"torch.Tensor">'})
   arg2 = ValueNode(name="%arg1")
-  arg2_type = type("DummyType", (), {"body": '!sw.type<"Any">'})
+  arg2_type: typing.Any = type("DummyType", (), {"body": '!sw.type<"Any">'})
   arg3 = ValueNode(name="%arg2")
-  arg3_type = type("DummyType", (), {"body": ""})
-  block = BlockNode(label="^bb0", arguments=[(arg1, arg1_type), (arg2, arg2_type), (arg3, arg3_type)], operations=[])
+  arg3_type: typing.Any = type("DummyType", (), {"body": ""})
+  block = BlockNode(label="^bb0", arguments=[(arg1, arg1_type), (arg2, arg2_type), (arg3, arg3_type)], operations=[])  # type: ignore
   region = RegionNode(blocks=[block])
   op = OperationNode(
     name="sw.func",
@@ -147,7 +148,7 @@ def test_convert_func_def_annotations():
     results=[],
     regions=[region],
   )
-  res = gen._convert_func_def(op)
+  res: typing.Any = gen._convert_func_def(op)
   assert res.name.value == "my_func"
   assert len(res.params.params) == 3
   assert res.params.params[0].annotation is not None
@@ -156,17 +157,17 @@ def test_convert_func_def_annotations():
   assert isinstance(res.body.body[0].body[0], cst.Pass)
 
 
-def test_expr_sw_constant_invalid_expr():
+def test_expr_sw_constant_invalid_expr() -> None:
   """Verifies the behavior of expr sw constant invalid expr."""
   gen = DummyGenerator()
   op = OperationNode(
     name="sw.constant", operands=[], attributes=[AttributeNode(name="value", value="yield")], results=[], regions=[]
   )
-  res = gen._expr_sw_constant(op)
+  res: typing.Any = gen._expr_sw_constant(op)
   assert isinstance(res, cst.Name)
 
 
-def test_convert_class_def_with_body():
+def test_convert_class_def_with_body() -> None:
   """Converts class def with body."""
   gen = DummyGenerator()
   block = BlockNode(label="bb0")
@@ -178,40 +179,40 @@ def test_convert_class_def_with_body():
     results=[],
     regions=[RegionNode(blocks=[block])],
   )
-  res = gen._convert_class_def(op)
+  res: typing.Any = gen._convert_class_def(op)
   assert isinstance(res, cst.ClassDef)
   assert len(res.body.body) > 0
 
 
-def test_expr_sw_getattr_empty_operands():
+def test_expr_sw_getattr_empty_operands() -> None:
   """Verifies the behavior of expr sw getattr empty operands."""
   gen = DummyGenerator()
   op = OperationNode(
     name="sw.getattr", operands=[], attributes=[AttributeNode(name="name", value='"attr"')], results=[], regions=[]
   )
-  res = gen._expr_sw_getattr(op)
+  res: typing.Any = gen._expr_sw_getattr(op)
   assert isinstance(res, cst.Name)
   assert res.value == "error"
 
 
-def test_stmt_setattr_few_operands():
+def test_stmt_setattr_few_operands() -> None:
   """Verifies the behavior of stmt setattr few operands."""
   gen = DummyGenerator()
   op = OperationNode(name="sw.setattr", operands=[], attributes=[], results=[], regions=[])
-  res = gen._convert_setattr(op)
+  res: typing.Any = gen._convert_setattr(op)
   assert isinstance(res.body[0], cst.Pass)
 
 
-def test_convert_return_no_operands():
+def test_convert_return_no_operands() -> None:
   """Converts return no operands."""
   gen = DummyGenerator()
   op = OperationNode(name="sw.return", operands=[], attributes=[], results=[], regions=[])
-  res = gen._convert_return(op)
+  res: typing.Any = gen._convert_return(op)
   assert isinstance(res.body[0], cst.Return)
   assert res.body[0].value is None
 
 
-def test_expr_sw_getattr_happy():
+def test_expr_sw_getattr_happy() -> None:
   """Verifies the behavior of expr sw getattr happy."""
   gen = DummyGenerator()
   op = OperationNode(
@@ -221,11 +222,11 @@ def test_expr_sw_getattr_happy():
     results=[],
     regions=[],
   )
-  res = gen._expr_sw_getattr(op)
+  res: typing.Any = gen._expr_sw_getattr(op)
   assert isinstance(res, cst.Attribute)
 
 
-def test_stmt_setattr_happy():
+def test_stmt_setattr_happy() -> None:
   """Verifies the behavior of stmt setattr happy."""
   gen = DummyGenerator()
   op = OperationNode(
@@ -235,14 +236,14 @@ def test_stmt_setattr_happy():
     results=[],
     regions=[],
   )
-  res = gen._convert_setattr(op)
+  res: typing.Any = gen._convert_setattr(op)
   assert isinstance(res.body[0], cst.Assign)
 
 
-def test_convert_return_with_operands():
+def test_convert_return_with_operands() -> None:
   """Converts return with operands."""
   gen = DummyGenerator()
   op = OperationNode(name="sw.return", operands=[ValueNode(name="%val")], attributes=[], results=[], regions=[])
-  res = gen._convert_return(op)
+  res: typing.Any = gen._convert_return(op)
   assert isinstance(res.body[0], cst.Return)
   assert res.body[0].value is not None

@@ -1,14 +1,15 @@
 """Test suite for the Init module."""
 
 from unittest.mock import patch
+import typing
 
 
-def test_plugins_init_discovery():
+def test_plugins_init_discovery() -> None:
   """Verifies the behavior of plugins initialization discovery."""
   import ml_switcheroo.plugins as plugins_pkg
   import importlib
 
-  mock_modules = [
+  mock_modules: list[tuple[typing.Optional[str], str, bool]] = [
     (None, "_protected", False),
     (None, "some_utils", False),
     (None, "my_helpers", False),
@@ -18,7 +19,7 @@ def test_plugins_init_discovery():
   with patch("pkgutil.iter_modules", return_value=mock_modules):
     with patch("importlib.import_module") as mock_import:
 
-      def side_effect(name, package):
+      def side_effect(name: str, package: typing.Optional[str] = None) -> typing.Any:
         """Effect."""
         if "broken_plugin" in name:
           raise ImportError("mock error")

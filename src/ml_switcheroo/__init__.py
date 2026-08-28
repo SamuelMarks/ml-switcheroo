@@ -32,14 +32,14 @@ Usage:
             print(f"Errors: {res.errors}")
 """
 
-from typing import Any, Dict, Optional
+from typing import Optional
 
 # Core Engine Components
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-__version__ = "0.0.2"
+__version__: str = "0.0.2"
 
 
 def convert(
@@ -47,7 +47,7 @@ def convert(
   source: Optional[str] = None,
   target: Optional[str] = None,
   strict: bool = False,
-  plugin_settings: Optional[Dict[str, Any]] = None,
+  plugin_settings: Optional[dict[str, str]] = None,
   semantics: Optional[SemanticsManager] = None,
 ) -> str:
   """Transpile a string of Python code from one framework to another.
@@ -79,7 +79,7 @@ def convert(
   """
   # 1. Configure
   # RuntimeConfig.load handles dynamic resolution if source/target are None
-  config = RuntimeConfig.load(
+  config: RuntimeConfig = RuntimeConfig.load(
     source=source,
     target=target,
     strict_mode=strict,
@@ -88,21 +88,21 @@ def convert(
 
   # 2. Initialize Engine
   # Note: SemanticsManager loads the knowledge base from JSONs on init.
-  manager = semantics or SemanticsManager()
-  engine = ASTEngine(semantics=manager, config=config)
+  manager: SemanticsManager = semantics or SemanticsManager()
+  engine: ASTEngine = ASTEngine(semantics=manager, config=config)
 
   # 3. Execute
-  result = engine.run(code)
+  result: ConversionResult = engine.run(code)
 
   # 4. Handle Result
   if not result.success:
-    error_msg = "\n".join(result.errors)
+    error_msg: str = "\n".join(result.errors)
     raise ValueError(f"Transpilation failed:\n{error_msg}")
 
   return result.code
 
 
-__all__ = [
+__all__: list[str] = [
   "convert",
   "__version__",
   "RuntimeConfig",

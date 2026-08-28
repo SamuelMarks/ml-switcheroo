@@ -1,5 +1,5 @@
 operation: permute_dims
-description: Definition for permute_dims
+description: Permute tensor dimensions.
 std_args:
 - x
 - name: axes
@@ -8,6 +8,9 @@ variants:
   jax:
     api: jnp.transpose
     pack_to_tuple: axes
+  tensorflow:
+    api: tf.transpose
+    pack_to_tuple: perm
   numpy:
     api: numpy.transpose
     pack_to_tuple: axes

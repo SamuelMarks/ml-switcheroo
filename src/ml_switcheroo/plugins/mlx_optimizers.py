@@ -3,10 +3,7 @@
 Handles impedance mismatches for Functional Optimizers.
 """
 
-from typing import Any
-
 import libcst as cst
-from typing import Union
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -25,7 +22,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
+    node = cst.Attribute(value=node, attr=cst.Name(part))
   return node
 
 
@@ -82,7 +79,7 @@ def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 
 @register_hook("mlx_optimizer_step")
-def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel[Any]]:
+def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """Transform Transforms `optimizer.step()` into an EscapeHatch pattern.
 
   Functional optimizers (like MLX/Optax) require explicit update calls `opt.update(model, state)`.
@@ -109,7 +106,7 @@ def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.
   new_call = cst.Call(func=new_func, args=args)
 
   reason = "Functional optimizers require explicit `update(model, grads)`. Variables inferred placeholders."
-  return EscapeHatch.mark_failure(new_call, reason)  # type: ignore
+  return EscapeHatch.mark_failure(new_call, reason)
 
 
 @register_hook("mlx_zero_grad")

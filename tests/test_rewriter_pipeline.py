@@ -7,21 +7,21 @@ from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.core.rewriter.context import RewriterContext
 
 
-def test_rewriter_pipeline():
+def test_rewriter_pipeline() -> None:
   """Test element."""
   # Setup
-  pass1 = MagicMock(spec=RewriterPass)
-  pass2 = MagicMock(spec=RewriterPass)
-  pipeline = RewriterPipeline([pass1, pass2])
+  pass1: MagicMock = MagicMock(spec=RewriterPass)
+  pass2: MagicMock = MagicMock(spec=RewriterPass)
+  pipeline: RewriterPipeline = RewriterPipeline([pass1, pass2])
 
-  module_mock = MagicMock(spec=cst.Module)
-  context_mock = MagicMock(spec=RewriterContext)
+  module_mock: MagicMock = MagicMock(spec=cst.Module)
+  context_mock: MagicMock = MagicMock(spec=RewriterContext)
 
   pass1.transform.return_value = "module_1"
   pass2.transform.return_value = "module_2"
 
   # Run
-  result = pipeline.run(module_mock, context_mock)
+  result: cst.CSTNode = pipeline.run(module_mock, context_mock)
 
   # Assert
   assert result == "module_2"

@@ -2,10 +2,11 @@
 
 import libcst as cst
 import inspect
+from typing import List
 from unittest.mock import MagicMock
 
 
-def test_all_plugin_fallbacks():
+def test_all_plugin_fallbacks() -> None:
   """Verifies the behavior of all plugin fallbacks."""
   import ml_switcheroo.plugins.auto_fsdp_wrapper as p1
   import ml_switcheroo.plugins.casting as p2
@@ -24,8 +25,10 @@ def test_all_plugin_fallbacks():
   import ml_switcheroo.plugins.static_unroll as p15
   import ml_switcheroo.plugins.tf_data_loader as p16
 
-  modules = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]
-  plugins = []
+  import types
+
+  modules: List[types.ModuleType] = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]
+  plugins: List[cst.CSTTransformer] = []
   for mod in modules:
     for name, obj in inspect.getmembers(mod):
       if inspect.isclass(obj) and hasattr(obj, "transform") and ("Plugin" in name):
@@ -33,8 +36,8 @@ def test_all_plugin_fallbacks():
           plugins.append(obj())
         except Exception:
           pass
-  ctx = MagicMock()
-  nodes = [
+  ctx: MagicMock = MagicMock()
+  nodes: List[cst.CSTNode] = [
     cst.Name("dummy"),
     cst.Call(func=cst.Name("dummy"), args=[]),
     cst.Attribute(value=cst.Name("a"), attr=cst.Name("b")),

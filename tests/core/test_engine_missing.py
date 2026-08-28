@@ -1,11 +1,13 @@
 """Tests for missing engine code coverage."""
 
-from ml_switcheroo.core.engine import ASTEngine
+import typing
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from unittest import mock
+import pytest
 
 
-def test_astengine_init_missing_branches():
+def test_astengine_init_missing_branches() -> None:
   """Test ASTEngine initialization missing branches."""
   engine1 = ASTEngine(source="torch", target="jax", intermediate="onnx")
   assert engine1.config.intermediate == "onnx"
@@ -19,7 +21,7 @@ def test_astengine_init_missing_branches():
   assert not cfg2.validation_report
 
 
-def test_astengine_stablehlo_missing_branches(monkeypatch):
+def test_astengine_stablehlo_missing_branches(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test ASTEngine stablehlo missing branches."""
   import ml_switcheroo.core.engine
 
@@ -31,17 +33,17 @@ def test_astengine_stablehlo_missing_branches(monkeypatch):
   class MockEmitter:
     """Docstring."""
 
-    def __init__(self, semantics):
+    def __init__(self, semantics: typing.Any) -> None:
       """Docstring."""
       pass
 
-    def convert(self, tree):
+    def convert(self, tree: typing.Any) -> typing.Any:
       """Docstring."""
 
       class TextObj:
         """Docstring."""
 
-        def to_text(self):
+        def to_text(self) -> str:
           """Docstring."""
           return "mlir"
 
@@ -49,11 +51,11 @@ def test_astengine_stablehlo_missing_branches(monkeypatch):
 
   monkeypatch.setattr("ml_switcheroo.core.mlir.stablehlo_emitter.StableHloEmitter", MockEmitter)
   monkeypatch.setattr("ml_switcheroo.core.engine.get_adapter", lambda *args: None)
-  result = engine.run("def f(): pass")
+  result: ConversionResult = engine.run("def f(): pass")
   assert result.success
 
 
-def test_astengine_sass_unsupported_missing_branches(monkeypatch):
+def test_astengine_sass_unsupported_missing_branches(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test ASTEngine sass unsupported target missing branches."""
   import ml_switcheroo.core.engine
 
@@ -71,6 +73,7 @@ def test_astengine_sass_unsupported_missing_branches(monkeypatch):
   ):
     mock_parser.return_value.parse.return_value.statements = []
     mock_lifter.return_value.lift.return_value = mock.MagicMock()
-    result = engine.run("sass code")
+    result: ConversionResult = engine.run("sass code")
     assert not result.success
+    assert result.errors is not None
     assert any("No backend found" in e for e in result.errors)

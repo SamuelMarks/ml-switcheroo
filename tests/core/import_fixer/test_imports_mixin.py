@@ -5,6 +5,7 @@ are correctly parsed, replaced, removed, or preserved according to the target fr
 source frameworks, and other configuration settings in the `ResolutionPlan`.
 """
 
+import typing
 import libcst as cst
 from ml_switcheroo.core.import_fixer.imports_mixin import ImportMixin
 from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan, ImportReq
@@ -18,22 +19,22 @@ class MockFixer(ImportMixin):
   transformation logic of the `ImportMixin` class.
   """
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the MockFixer with pre-configured resolution plans and mock settings.
 
     This sets up default mappings, such as mapping `"torch.nn"` to `"jax.nn"`, setting the source
     framework to `"torch"`, and initializing tracking structures like definition sets and satisfied injections.
     """
     self.plan = ResolutionPlan()
-    self.source_fws = ["torch"]
+    self.source_fws: set[str] = {"torch"}
     self.preserve_source = False
-    self._defined_names = set()
-    self._satisfied_injections = set()
+    self._defined_names: set[str] = set()
+    self._satisfied_injections: set[str] = set()
 
     self.plan.mappings["torch.nn"] = ImportReq(module="jax", subcomponent="nn", alias="nn")
     self.plan.required_imports.append(ImportReq(module="jax", subcomponent="numpy", alias="jnp"))
 
-  def _track_definition(self, node):
+  def _track_definition(self, node: typing.Any) -> None:
     """Tracks node definitions within the mock fixer (stub implementation).
 
     Args:
@@ -42,38 +43,39 @@ class MockFixer(ImportMixin):
     pass
 
 
-def test_importmixin_leave_import_replacement():
+def test_importmixin_leave_import_replacement() -> None:
   """Tests that a standard import of a source framework subcomponent is correctly replaced.
 
   This test verifies that `import torch.nn` is replaced with `import jax.nn as nn` according
   to the configured resolution plan, and that the target import is registered as a satisfied injection.
   """
   fixer = MockFixer()
-  node = cst.parse_statement("import torch.nn").body[0]
+  node = typing.cast(cst.Import, cst.parse_statement("import torch.nn").body[0])  # type: ignore
 
   result = fixer.leave_Import(node, node)
   assert isinstance(result, cst.Import)
   assert len(result.names) == 1
-  assert result.names[0].name.value.value == "jax"
-  assert result.names[0].name.attr.value == "nn"
-  assert result.names[0].asname.name.value == "nn"
+  assert typing.cast(cst.Attribute, result.names[0].name).value.value == "jax"  # type: ignore
+  assert typing.cast(cst.Attribute, result.names[0].name).attr.value == "nn"
+  assert result.names[0].asname is not None
+  assert typing.cast(cst.Name, result.names[0].asname.name).value == "nn"
   assert "jax.nn" in fixer._satisfied_injections
 
 
-def test_importmixin_leave_import_remove():
+def test_importmixin_leave_import_remove() -> None:
   """Tests that an unmapped standard import of a source framework is removed.
 
   This test verifies that when `preserve_source` is `False`, importing an unmapped source framework
   module like `import torch` returns a `RemovalSentinel` to prune it from the final AST.
   """
   fixer = MockFixer()
-  node = cst.parse_statement("import torch")
+  node = typing.cast(cst.SimpleStatementLine, cst.parse_statement("import torch"))
 
-  result = fixer.leave_Import(node.body[0], node.body[0])
+  result = fixer.leave_Import(typing.cast(cst.Import, node.body[0]), typing.cast(cst.Import, node.body[0]))
   assert isinstance(result, cst.RemovalSentinel)
 
 
-def test_importmixin_leave_import_preserve():
+def test_importmixin_leave_import_preserve() -> None:
   """Tests that standard imports of a source framework are preserved when `preserve_source` is True.
 
   This test verifies that `import torch` is left unmodified when the fixer is configured to
@@ -81,57 +83,58 @@ def test_importmixin_leave_import_preserve():
   """
   fixer = MockFixer()
   fixer.preserve_source = True
-  node = cst.parse_statement("import torch").body[0]
+  node = typing.cast(cst.Import, cst.parse_statement("import torch").body[0])  # type: ignore
 
   result = fixer.leave_Import(node, node)
-  assert cst.Module([]).code_for_node(result) == cst.Module([]).code_for_node(node)
+  assert cst.Module([]).code_for_node(typing.cast(cst.Import, result)) == cst.Module([]).code_for_node(node)
 
 
-def test_importmixin_leave_importfrom_remove_star():
+def test_importmixin_leave_importfrom_remove_star() -> None:
   """Tests that wildcard/star imports from a source framework are removed.
 
   This test verifies that `from torch import *` is pruned (returns a `RemovalSentinel`) during
   the transformation to avoid polluting the target namespace with unmapped symbols.
   """
   fixer = MockFixer()
-  node = cst.parse_statement("from torch import *")
+  node = typing.cast(cst.SimpleStatementLine, cst.parse_statement("from torch import *"))
 
-  result = fixer.leave_ImportFrom(node.body[0], node.body[0])
+  result = fixer.leave_ImportFrom(typing.cast(cst.ImportFrom, node.body[0]), typing.cast(cst.ImportFrom, node.body[0]))
   assert isinstance(result, cst.RemovalSentinel)
 
 
-def test_importmixin_leave_importfrom_preserve_star():
+def test_importmixin_leave_importfrom_preserve_star() -> None:
   """Tests that wildcard/star imports from a source framework are preserved when `preserve_source` is True.
 
   This test verifies that `from torch import *` remains unmodified when source preservation is enabled.
   """
   fixer = MockFixer()
   fixer.preserve_source = True
-  node = cst.parse_statement("from torch import *")
+  node = typing.cast(cst.SimpleStatementLine, cst.parse_statement("from torch import *"))
 
-  result = fixer.leave_ImportFrom(node.body[0], node.body[0])
-  assert cst.Module([]).code_for_node(result) == cst.Module([]).code_for_node(node.body[0])
+  result = fixer.leave_ImportFrom(typing.cast(cst.ImportFrom, node.body[0]), typing.cast(cst.ImportFrom, node.body[0]))
+  assert cst.Module([]).code_for_node(typing.cast(cst.CSTNode, result)) == cst.Module([]).code_for_node(node.body[0])
 
 
-def test_importmixin_leave_importfrom_replacement_subcomp():
+def test_importmixin_leave_importfrom_replacement_subcomp() -> None:
   """Tests `from ... import` replacement when the mapping specifies a target subcomponent.
 
   This test verifies that `from torch import nn` is successfully transformed into `import jax.nn as nn`
   when the resolution plan maps `torch.nn` to `jax.nn`.
   """
   fixer = MockFixer()
-  node = cst.parse_statement("from torch import nn")
+  node = typing.cast(cst.SimpleStatementLine, cst.parse_statement("from torch import nn"))
 
-  result = fixer.leave_ImportFrom(node.body[0], node.body[0])
+  result = fixer.leave_ImportFrom(typing.cast(cst.ImportFrom, node.body[0]), typing.cast(cst.ImportFrom, node.body[0]))
   assert isinstance(result, cst.Import)
   assert len(result.names) == 1
-  assert result.names[0].name.value.value == "jax"
-  assert result.names[0].name.attr.value == "nn"
-  assert result.names[0].asname.name.value == "nn"
+  assert typing.cast(cst.Attribute, result.names[0].name).value.value == "jax"  # type: ignore
+  assert typing.cast(cst.Attribute, result.names[0].name).attr.value == "nn"
+  assert result.names[0].asname is not None
+  assert typing.cast(cst.Name, result.names[0].asname.name).value == "nn"
   assert "jax.nn" in fixer._satisfied_injections
 
 
-def test_importmixin_leave_importfrom_replacement_no_subcomp():
+def test_importmixin_leave_importfrom_replacement_no_subcomp() -> None:
   """Tests `from ... import` replacement when the mapping does not specify a target subcomponent.
 
   This test verifies that `from torch import nn` is transformed into `import jax as jnn` when the
@@ -139,57 +142,58 @@ def test_importmixin_leave_importfrom_replacement_no_subcomp():
   """
   fixer = MockFixer()
   fixer.plan.mappings["torch.nn"] = ImportReq(module="jax", subcomponent="", alias="jnn")
-  node = cst.parse_statement("from torch import nn")
+  node = typing.cast(cst.SimpleStatementLine, cst.parse_statement("from torch import nn"))
 
-  result = fixer.leave_ImportFrom(node.body[0], node.body[0])
+  result = fixer.leave_ImportFrom(typing.cast(cst.ImportFrom, node.body[0]), typing.cast(cst.ImportFrom, node.body[0]))
   assert isinstance(result, cst.Import)
   assert len(result.names) == 1
-  assert result.names[0].name.value == "jax"
-  assert result.names[0].asname.name.value == "jnn"
+  assert typing.cast(cst.Name, result.names[0].name).value == "jax"
+  assert result.names[0].asname is not None
+  assert typing.cast(cst.Name, result.names[0].asname.name).value == "jnn"
   assert "jax : jnn" in fixer._satisfied_injections
 
 
-def test_importmixin_leave_importfrom_remove():
+def test_importmixin_leave_importfrom_remove() -> None:
   """Tests that unmapped name imports from a source framework are removed.
 
   This test verifies that `from torch import tensor` returns a `RemovalSentinel` because the
   imported symbol/module has no corresponding resolution mapping.
   """
   fixer = MockFixer()
-  node = cst.parse_statement("from torch import tensor")
+  node = typing.cast(cst.SimpleStatementLine, cst.parse_statement("from torch import tensor"))
 
-  result = fixer.leave_ImportFrom(node.body[0], node.body[0])
+  result = fixer.leave_ImportFrom(typing.cast(cst.ImportFrom, node.body[0]), typing.cast(cst.ImportFrom, node.body[0]))
   assert isinstance(result, cst.RemovalSentinel)
 
 
-def test_importmixin_leave_importfrom_preserve():
+def test_importmixin_leave_importfrom_preserve() -> None:
   """Tests that unmapped name imports from a source framework are preserved when `preserve_source` is True.
 
   This test verifies that `from torch import tensor` remains intact when source preservation is enabled.
   """
   fixer = MockFixer()
   fixer.preserve_source = True
-  node = cst.parse_statement("from torch import tensor")
+  node = typing.cast(cst.SimpleStatementLine, cst.parse_statement("from torch import tensor"))
 
-  result = fixer.leave_ImportFrom(node.body[0], node.body[0])
+  result = fixer.leave_ImportFrom(typing.cast(cst.ImportFrom, node.body[0]), typing.cast(cst.ImportFrom, node.body[0]))
   assert result is node.body[0]
 
 
-def test_importmixin_leave_importfrom_empty_module():
+def test_importmixin_leave_importfrom_empty_module() -> None:
   """Tests that relative imports with an empty module name are left unmodified.
 
   This test verifies that relative imports such as `from . import module` (represented as an `ImportFrom`
   node with `module=None`) are returned as-is by the `leave_ImportFrom` handler.
   """
   fixer = MockFixer()
-  node = cst.parse_statement("from . import module").body[0]
+  node = typing.cast(cst.ImportFrom, cst.parse_statement("from . import module").body[0])  # type: ignore
 
   node = node.with_changes(module=None)
   result = fixer.leave_ImportFrom(node, node)
   assert result is node
 
 
-def test_importmixin_preserve_source():
+def test_importmixin_preserve_source() -> None:
   """Test that preserve_source configuration works."""
   fixer = MockFixer()
   fixer.preserve_source = True
@@ -197,90 +201,90 @@ def test_importmixin_preserve_source():
   # 1. leave_ImportFrom
   # If the root package is in source_fws and preserve_source is true, it shouldn't remove it
   fixer.plan.mappings = {}  # Clear mappings so no replacement occurs
-  from_node = cst.parse_statement("from torch import unknown").body[0]
+  from_node = typing.cast(cst.ImportFrom, cst.parse_statement("from torch import unknown").body[0])  # type: ignore
   res = fixer.leave_ImportFrom(from_node, from_node)
   # The aliases are kept, but deep equality fails sometimes on CST nodes, so just check type
   assert isinstance(res, cst.ImportFrom)
-  assert len(res.names) == 1
+  assert len(res.names) == 1  # type: ignore
 
   # 2. leave_Import
-  import_node = cst.parse_statement("import torch").body[0]
+  import_node = typing.cast(cst.Import, cst.parse_statement("import torch").body[0])  # type: ignore
   res2 = fixer.leave_Import(import_node, import_node)
   assert isinstance(res2, cst.Import)
   assert len(res2.names) == 1
 
 
-def test_importmixin_leave_ImportFrom_preserve_alias():
+def test_importmixin_leave_ImportFrom_preserve_alias() -> None:
   """Test preserving an existing alias during replacement."""
   fixer = MockFixer()
   fixer.plan.mappings["torch.sub"] = ImportReq(module="jax", subcomponent="sub")
 
-  from_node = cst.parse_statement("import torch.sub as my_sub").body[0]
+  from_node = typing.cast(cst.Import, cst.parse_statement("import torch.sub as my_sub").body[0])  # type: ignore
   res = fixer.leave_Import(from_node, from_node)
 
   # Should be transformed to `import jax.sub as my_sub`
   assert isinstance(res, cst.Import)
   assert len(res.names) == 1
   assert res.names[0].asname is not None
-  assert res.names[0].asname.name.value == "my_sub"
+  assert typing.cast(cst.Name, res.names[0].asname.name).value == "my_sub"
 
   """Test preserving source in leave_ImportFrom."""
   fixer = MockFixer()
   fixer.preserve_source = True
 
-  from_node = cst.parse_statement("from torch import unknown").body[0]
-  res = fixer.leave_ImportFrom(from_node, from_node)
-  assert res == from_node
+  from_node2 = typing.cast(cst.ImportFrom, cst.parse_statement("from torch import unknown").body[0])  # type: ignore
+  res2 = fixer.leave_ImportFrom(from_node2, from_node2)
+  assert res2 == from_node2
 
 
-def test_importmixin_remove_from_parent():
+def test_importmixin_remove_from_parent() -> None:
   """Test when no aliases remain, RemoveFromParent is returned."""
   fixer = MockFixer()
   # It removes source_fws aliases if not preserve_source
-  import_node = cst.parse_statement("import torch.unknown").body[0]
+  import_node = typing.cast(cst.Import, cst.parse_statement("import torch.unknown").body[0])  # type: ignore
   res = fixer.leave_Import(import_node, import_node)
   assert isinstance(res, type(cst.RemoveFromParent()))
 
-  from_node = cst.parse_statement("from torch import unknown").body[0]
+  from_node = typing.cast(cst.ImportFrom, cst.parse_statement("from torch import unknown").body[0])  # type: ignore
   res2 = fixer.leave_ImportFrom(from_node, from_node)
   assert isinstance(res2, type(cst.RemoveFromParent()))
 
 
-def test_importmixin_leave_Import_preserve_source():
+def test_importmixin_leave_Import_preserve_source() -> None:
   """Test preserve source on leave_Import."""
   fixer = MockFixer()
   fixer.preserve_source = True
   # We need it to NOT hit the root_pkg not in source_fws so it hits line 186
   # and we need it to NOT have any replacements happen
-  import_node = cst.parse_statement("import torch").body[0]
+  import_node = typing.cast(cst.Import, cst.parse_statement("import torch").body[0])  # type: ignore
   res = fixer.leave_Import(import_node, import_node)
   # The aliases are kept
   assert isinstance(res, cst.Import)
 
 
-def test_importmixin_leave_ImportFrom_preserve_source_else():
+def test_importmixin_leave_ImportFrom_preserve_source_else() -> None:
   """Test preserving source in leave_ImportFrom when root_pkg not in source_fws."""
   fixer = MockFixer()
 
-  from_node = cst.parse_statement("from unknown import sub").body[0]
+  from_node = typing.cast(cst.ImportFrom, cst.parse_statement("from unknown import sub").body[0])  # type: ignore
   res = fixer.leave_ImportFrom(from_node, from_node)
   assert res == from_node
 
 
-def test_importmixin_leave_ImportFrom_remove():
+def test_importmixin_leave_ImportFrom_remove() -> None:
   """Test removing an ImportFrom when it's a source framework and not preserved."""
   fixer = MockFixer()
   # It removes source_fws aliases if not preserve_source
-  from_node = cst.parse_statement("from torch import unknown").body[0]
+  from_node = typing.cast(cst.ImportFrom, cst.parse_statement("from torch import unknown").body[0])  # type: ignore
   res = fixer.leave_ImportFrom(from_node, from_node)
   # The RemoveFromParent logic isn't tested correctly earlier, so let's hit it here
   assert isinstance(res, type(cst.RemoveFromParent()))
 
 
-def test_importmixin_leave_Import_remove():
+def test_importmixin_leave_Import_remove() -> None:
   """Test removing an Import when it's a source framework and not preserved."""
   fixer = MockFixer()
   # It removes source_fws aliases if not preserve_source
-  import_node = cst.parse_statement("import torch.unknown").body[0]
+  import_node = typing.cast(cst.Import, cst.parse_statement("import torch.unknown").body[0])  # type: ignore
   res = fixer.leave_Import(import_node, import_node)
   assert isinstance(res, type(cst.RemoveFromParent()))

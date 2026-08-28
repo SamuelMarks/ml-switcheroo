@@ -1,5 +1,6 @@
 """Tests for MLIR gen base coverage."""
 
+import typing
 import libcst as cst
 from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
 from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode
@@ -8,27 +9,27 @@ from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode
 class DummyGen(BaseGeneratorMixin):
   """Dummy generator."""
 
-  def map_op(self, op):
+  def map_op(self, op: OperationNode) -> None:
     """Map operation."""
     pass
 
 
-def test_get_attr_list():
+def test_get_attr_list() -> None:
   """Test get attr list."""
   gen = DummyGen()
   op = OperationNode(
     name="test",
     operands=[],
     results=[],
-    attributes=[AttributeNode(name="k", value=["v1", "v2"], type_annotation="str")],
+    attributes=[AttributeNode(name="k", value="[v1, v2]", type_annotation="str")],
     regions=[],
   )
   assert gen._get_attr(op, "k") == "[v1, v2]"
 
 
-def test_create_dotted_name_empty():
+def test_create_dotted_name_empty() -> None:
   """Test create dotted name empty."""
   gen = DummyGen()
-  node = gen._create_dotted_name("")
+  node: typing.Any = gen._create_dotted_name("")
   assert isinstance(node, cst.Name)
   assert node.value == "unknown"

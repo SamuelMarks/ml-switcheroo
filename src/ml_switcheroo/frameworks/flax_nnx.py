@@ -8,9 +8,12 @@ Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 - Wires important plugins and structural traits.
 """
 
+import typing
+
+
 import logging
 import textwrap
-from typing import Union, List, Tuple, Dict, Any, Optional
+from typing import Union, List, Tuple, Dict, Optional
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
@@ -28,13 +31,13 @@ from ml_switcheroo.frameworks.loader import load_definitions
 try:
   import jax
 except Exception:  # pragma: no cover
-  jax: Any = None  # type: ignore  # pragma: no cover
+  jax = None  # pragma: no cover
 try:
   import flax.nnx
 
   flax_nnx = flax.nnx  # pragma: no cover
 except Exception:  # pragma: no cover
-  flax_nnx = None  # type: ignore  # pragma: no cover
+  flax_nnx = None  # pragma: no cover
 
 
 @register_framework("flax_nnx")
@@ -58,7 +61,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     - Otherwise, falls back to GHOST mode and loads an API snapshot.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data: Dict[str, Any] = {}
+    self._snapshot_data = {}
     if flax_nnx is not None:
       self._flax_available = True
     else:
@@ -216,7 +219,9 @@ class FlaxNNXAdapter(JAXStackMixin):
     defs["relu"] = StandardMap(api="flax.nnx.relu")
     return defs
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert generic data to framework-specific Pytree/arrays.
 
     Contains self-contained logic to ensure safe extraction by the Harness Generator which
@@ -240,7 +245,7 @@ class FlaxNNXAdapter(JAXStackMixin):
         pass
     return data
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply manual wiring and modifies the snapshot to alias 'flax.nnx.' to 'nnx.'.
 
     Adds plugin wiring for key interface methods ensuring correctness during

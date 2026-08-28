@@ -2,7 +2,7 @@
 
 import pytest
 import numpy as np
-from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -13,27 +13,27 @@ except ImportError:
   xla_bridge = None
 
 
-def requires_pjrt():
+def requires_pjrt() -> bool:
   """Check if JAX PJRT CPU backend is available."""
   try:
-    xla_bridge.get_backend()
+    xla_bridge.get_backend()  # type: ignore
     return True
   except Exception:
     return False
 
 
 @pytest.fixture(scope="module")
-def semantics():
+def semantics() -> SemanticsManager:
   """Provide a SemanticsManager instance for the tests."""
   mgr = SemanticsManager()
   return mgr
 
 
 @pytest.mark.skipif(not requires_pjrt(), reason="JAX PJRT cpu backend not available.")
-def test_stablehlo_abs_execution(semantics):
+def test_stablehlo_abs_execution(semantics: SemanticsManager) -> None:
   """Verify that PJRT execution wrapping works properly for stablehlo.abs."""
   # This verifies PJRT execution wrapping works properly
-  mlir_code = """
+  mlir_code: str = """
 module {
   func.func @main(%x: tensor<3xf32>) -> tensor<3xf32> {
     %0 = "stablehlo.abs"(%x) : (tensor<3xf32>) -> tensor<3xf32>
@@ -41,10 +41,10 @@ module {
   }
 }
 """
-  _client = xla_bridge.get_backend()
+  _client = xla_bridge.get_backend()  # type: ignore
   _executable = _client.compile(mlir_code)
 
-  def forward(x):
+  def forward(x: np.ndarray) -> np.ndarray:  # type: ignore[type-arg]
     """Execute the compiled StableHLO module for abs."""
     buf = _client.buffer_from_pyval(x)
     res = _executable.execute([buf])
@@ -56,9 +56,9 @@ module {
 
 
 @pytest.mark.skipif(not requires_pjrt(), reason="JAX PJRT cpu backend not available.")
-def test_stablehlo_math_parity(semantics):
+def test_stablehlo_math_parity(semantics: SemanticsManager) -> None:
   """Test StableHLO execution parity for basic math operations."""
-  mlir_code = """
+  mlir_code: str = """
 module {
   func.func @main(%x: tensor<3xf32>, %y: tensor<3xf32>) -> tensor<3xf32> {
     %0 = "stablehlo.multiply"(%y, %x) : (tensor<3xf32>, tensor<3xf32>) -> tensor<3xf32>
@@ -67,10 +67,10 @@ module {
   }
 }
 """
-  _client = xla_bridge.get_backend()
+  _client = xla_bridge.get_backend()  # type: ignore
   _executable = _client.compile(mlir_code)
 
-  def forward(x, y):
+  def forward(x: np.ndarray, y: np.ndarray) -> np.ndarray:  # type: ignore[type-arg]
     """Execute the compiled StableHLO module for math operations."""
     buf_x = _client.buffer_from_pyval(x)
     buf_y = _client.buffer_from_pyval(y)
@@ -84,12 +84,12 @@ module {
 
 
 @pytest.mark.skipif(not requires_pjrt(), reason="JAX PJRT cpu backend not available.")
-def test_stablehlo_while_parity(semantics):
+def test_stablehlo_while_parity(semantics: SemanticsManager) -> None:
   """Test the structural generation of stablehlo.while loop."""
   # This is a basic structural test for while compilation parity
-  code = "import torch\ndef forward(x: torch.Tensor, count: torch.Tensor):\n    while count:\n        x = torch.abs(x)\n    return x\n"
+  code: str = "import torch\ndef forward(x: torch.Tensor, count: torch.Tensor):\n    while count:\n        x = torch.abs(x)\n    return x\n"
   config = RuntimeConfig(source_framework="torch", target_framework="stablehlo", strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
-  result = engine.run(code)
+  result: ConversionResult = engine.run(code)
   assert result.success
   assert "stablehlo.while" in result.code

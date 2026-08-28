@@ -3,30 +3,33 @@
 from ml_switcheroo.core.tikz.nodes import TikzBaseNode, TikzGraph, TikzNode, TriviaNode
 
 
-def test_tikz_base_node_abstract():
+def test_tikz_base_node_abstract() -> None:
   """Test tikz base node abstract."""
 
   class Dummy(TikzBaseNode):
     """Dummy."""
 
-    def to_text(self):
+    def to_text(self) -> str:
       """To text."""
-      super().to_text()
+      try:
+        super().to_text()
+      except NotImplementedError:
+        pass
       return ""
 
-  Dummy().to_text()
+  assert Dummy().to_text() == ""
 
 
-def test_nodenode_with_trivia():
+def test_nodenode_with_trivia() -> None:
   """Test nodenode with trivia."""
   triv = TriviaNode("% comment")
-  node = TikzNode(node_id="A", x=0.0, y=0.0, leading_trivia=[triv], options=[], content="")
-  res = node.to_text()
+  node = TikzNode(node_id="A", x=0.0, y=0.0, leading_trivia=[triv], options=[], content="")  # type: ignore
+  res: str = node.to_text()
   assert "% comment" in res
 
 
-def test_tikzpicturenode_no_options():
+def test_tikzpicturenode_no_options() -> None:
   """Test tikzpicturenode no options."""
   pic = TikzGraph(options=[], children=[])
-  res = pic.to_text()
+  res: str = pic.to_text()
   assert "\\begin{tikzpicture}" in res

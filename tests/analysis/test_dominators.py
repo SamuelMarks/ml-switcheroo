@@ -1,22 +1,22 @@
 """Test module."""
 
-from ml_switcheroo.analysis.cfg import ControlFlowGraph
+from ml_switcheroo.analysis.cfg import ControlFlowGraph, BasicBlock
 from ml_switcheroo.analysis.dominators import build_dominator_sets, find_immediate_dominators, find_back_edges
 
 
-def build_test_cfg():
+def build_test_cfg() -> ControlFlowGraph:
   """Test element."""
-  cfg = ControlFlowGraph()
+  cfg: ControlFlowGraph = ControlFlowGraph()
   # 1 -> 2 -> 3 -> 4
   # |    ^    |
   # v    |    v
   # 5 ---+    6
-  b1 = cfg.get_or_create_block("1")
-  b2 = cfg.get_or_create_block("2")
-  b3 = cfg.get_or_create_block("3")
-  b4 = cfg.get_or_create_block("4")
-  b5 = cfg.get_or_create_block("5")
-  b6 = cfg.get_or_create_block("6")
+  b1: BasicBlock = cfg.get_or_create_block("1")
+  b2: BasicBlock = cfg.get_or_create_block("2")
+  b3: BasicBlock = cfg.get_or_create_block("3")
+  b4: BasicBlock = cfg.get_or_create_block("4")
+  b5: BasicBlock = cfg.get_or_create_block("5")
+  b6: BasicBlock = cfg.get_or_create_block("6")
 
   b1.add_successor(b2)
   b1.add_successor(b5)
@@ -32,10 +32,10 @@ def build_test_cfg():
   return cfg
 
 
-def test_build_dominator_sets():
+def test_build_dominator_sets() -> None:
   """Test element."""
-  cfg = build_test_cfg()
-  doms = build_dominator_sets(cfg)
+  cfg: ControlFlowGraph = build_test_cfg()
+  doms: dict[str, set[str]] = build_dominator_sets(cfg)
 
   # 1 dominates everything
   assert "1" in doms["1"]
@@ -55,29 +55,29 @@ def test_build_dominator_sets():
   assert doms["5"] == {"1", "5"}
 
 
-def test_build_dominator_sets_empty_cfg():
+def test_build_dominator_sets_empty_cfg() -> None:
   """Test element."""
-  cfg = ControlFlowGraph()
-  doms = build_dominator_sets(cfg)
+  cfg: ControlFlowGraph = ControlFlowGraph()
+  doms: dict[str, set[str]] = build_dominator_sets(cfg)
   assert doms == {}
 
 
-def test_build_dominator_sets_unreachable():
+def test_build_dominator_sets_unreachable() -> None:
   """Test element."""
-  cfg = ControlFlowGraph()
+  cfg: ControlFlowGraph = ControlFlowGraph()
   cfg.get_or_create_block("1")
   cfg.get_or_create_block("2")  # unreachable
-  doms = build_dominator_sets(cfg)
+  doms: dict[str, set[str]] = build_dominator_sets(cfg)
   assert (
     "2" in doms["2"]
   )  # node 2 is unreachable, so doms initialization will eventually prune strictly to itself when updating if it has no predecessors
 
 
-def test_find_immediate_dominators():
+def test_find_immediate_dominators() -> None:
   """Test element."""
-  cfg = build_test_cfg()
-  doms = build_dominator_sets(cfg)
-  idoms = find_immediate_dominators(cfg, doms)
+  cfg: ControlFlowGraph = build_test_cfg()
+  doms: dict[str, set[str]] = build_dominator_sets(cfg)
+  idoms: dict[str, str | None] = find_immediate_dominators(cfg, doms)
 
   assert idoms["1"] is None
   assert idoms["2"] == "1"
@@ -87,14 +87,14 @@ def test_find_immediate_dominators():
   assert idoms["6"] == "3"
 
 
-def test_find_back_edges():
+def test_find_back_edges() -> None:
   """Test element."""
-  cfg = build_test_cfg()
+  cfg: ControlFlowGraph = build_test_cfg()
   # Add a loop 3 -> 2
   cfg.blocks["3"].add_successor(cfg.blocks["2"])
 
-  doms = build_dominator_sets(cfg)
-  back_edges = find_back_edges(cfg, doms)
+  doms: dict[str, set[str]] = build_dominator_sets(cfg)
+  back_edges: list[tuple[str, str]] = find_back_edges(cfg, doms)
 
   assert len(back_edges) == 1
   assert back_edges[0] == ("3", "2")

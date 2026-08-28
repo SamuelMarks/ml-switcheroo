@@ -1,17 +1,18 @@
 """Test suite for the Roundtrip Silu module."""
 
 import pytest
-from ml_switcheroo.core.engine import ASTEngine
+import typing
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 @pytest.fixture
-def semantics_env():
+def semantics_env() -> SemanticsManager:
   """Provides a mock semantics environment for testing."""
   mgr = SemanticsManager()
-  silu_def = {
+  silu_def: dict[str, typing.Any] = {
     "std_args": [{"name": "x", "type": "Tensor"}],
     "variants": {
       "flax_nnx": {"api": "flax.nnx.silu"},
@@ -28,32 +29,32 @@ def semantics_env():
   return mgr
 
 
-def test_silu_flax_to_torch(semantics_env):
+def test_silu_flax_to_torch(semantics_env: SemanticsManager) -> None:
   """Verifies the behavior of silu Flax to PyTorch."""
-  source = "y = flax.nnx.silu(x)"
+  source: str = "y = flax.nnx.silu(x)"
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="torch")
   engine = ASTEngine(semantics=semantics_env, config=config)
-  result = engine.run(source)
+  result: ConversionResult = engine.run(source)
   assert result.success
   assert "F.silu(" in result.code or "torch.nn.functional.silu" in result.code
 
 
-def test_silu_flax_to_numpy_macro(semantics_env):
+def test_silu_flax_to_numpy_macro(semantics_env: SemanticsManager) -> None:
   """Verifies the behavior of silu Flax to NumPy macro."""
-  source = "y = flax.nnx.silu(x)"
+  source: str = "y = flax.nnx.silu(x)"
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="numpy")
   engine = ASTEngine(semantics=semantics_env, config=config)
-  result = engine.run(source)
+  result: ConversionResult = engine.run(source)
   assert result.success
   assert "np.exp" in result.code
   assert "1 + np.exp" in result.code
 
 
-def test_silu_flax_to_tensorflow(semantics_env):
+def test_silu_flax_to_tensorflow(semantics_env: SemanticsManager) -> None:
   """Verifies the behavior of silu Flax to TensorFlow."""
-  source = "y = flax.nnx.silu(x)"
+  source: str = "y = flax.nnx.silu(x)"
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="tensorflow")
   engine = ASTEngine(semantics=semantics_env, config=config)
-  result = engine.run(source)
+  result: ConversionResult = engine.run(source)
   assert result.success
   assert "nn.silu(x)" in result.code

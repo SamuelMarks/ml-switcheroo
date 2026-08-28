@@ -21,9 +21,7 @@ It contains:
  **SassBackend**: The CompilerBackend adapter for the Registry.
 """
 
-from typing import Any
-
-from typing import Dict, List, Optional, Union, Callable, TYPE_CHECKING
+from typing import Dict, List, Optional, Union, TYPE_CHECKING
 import libcst as cst
 
 # Direct Import from Frontend to avoid circular dependency via core shims
@@ -168,7 +166,7 @@ class SassSynthesizer:
 
     # Registry of Kernel Macros for 1-to-N expansion
     # Maps Abstract Operation IDs to expansion functions
-    self.macro_registry: Dict[str, Callable[..., Any]] = {}
+    self.macro_registry = {}
     macros_json_path = os.path.join(os.path.dirname(__file__), "macros.json")
     if os.path.exists(macros_json_path):
       with open(macros_json_path, "r", encoding="utf-8") as f:

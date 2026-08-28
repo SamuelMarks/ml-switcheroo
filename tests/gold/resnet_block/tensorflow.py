@@ -1,20 +1,21 @@
 """Test suite for the Tensorflow module."""
 
+import typing
 import tensorflow as tf
 
 
-class ResidualBlock(tf.keras.Model):
+class ResidualBlock(tf.keras.Model):  # type: ignore
   """Test suite for the Residual Block component."""
 
-  def __init__(self, channels: int):
+  def __init__(self, channels: int) -> None:
     """Initializes the ResidualBlock instance."""
     super().__init__()
-    self.conv1 = tf.keras.layers.Conv2D(channels, kernel_size=3, padding="same")
-    self.bn1 = tf.keras.layers.BatchNormalization()
-    self.conv2 = tf.keras.layers.Conv2D(channels, kernel_size=3, padding="same")
-    self.bn2 = tf.keras.layers.BatchNormalization()
+    self.conv1: typing.Any = tf.keras.layers.Conv2D(channels, kernel_size=3, padding="same")
+    self.bn1: typing.Any = tf.keras.layers.BatchNormalization()
+    self.conv2: typing.Any = tf.keras.layers.Conv2D(channels, kernel_size=3, padding="same")
+    self.bn2: typing.Any = tf.keras.layers.BatchNormalization()
 
-  def call(self, x: tf.Tensor, training=None) -> tf.Tensor:
+  def call(self, x: typing.Any, training: typing.Optional[bool] = None) -> typing.Any:
     """Helper to call."""
     residual = x
     out = self.conv1(x)

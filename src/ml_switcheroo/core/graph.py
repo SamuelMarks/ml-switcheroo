@@ -229,15 +229,15 @@ class GraphExtractor(cst.CSTVisitor):
         node: The assignment node defining the layer.
     """
     target = node.targets[0].target
-    if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):  # type: ignore
+    if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):
       return
 
-    attr_name = target.attr.value  # type: ignore
+    attr_name = target.attr.value
     call = node.value
     if not isinstance(call, cst.Call):
       return
 
-    op_type = get_full_name(call.func)  # type: ignore
+    op_type = get_full_name(call.func)
     if "." in op_type:
       op_type = op_type.split(".")[-1]
 
@@ -304,10 +304,10 @@ class GraphExtractor(cst.CSTVisitor):
     Returns:
         The registered string identifier of the layer/function node, or None if unresolved.
     """
-    if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):  # type: ignore
-      return func_node.attr.value  # type: ignore
+    if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):
+      return func_node.attr.value
 
-    func_name = get_full_name(func_node)  # type: ignore
+    func_name = get_full_name(func_node)
     if func_name:
       layer_name = f"func_{func_name.split('.')[-1].lower()}"
       if layer_name not in self.layer_registry:

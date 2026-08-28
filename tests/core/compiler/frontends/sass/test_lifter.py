@@ -5,11 +5,18 @@ nodes (comments, instructions, registers, and immediates) into a unified `Logica
 with correct nodes, kind prefixes, metadata, and connectivity.
 """
 
+from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassRegister, SassImmediate
+from ml_switcheroo.core.compiler.frontends.sass.cst import (
+  SassComment,
+  SassInstruction,
+  SassRegister,
+  SassImmediate,
+  SassNode,
+)
 
 
-def test_sass_lifter_unmapped():
+def test_sass_lifter_unmapped() -> None:
   """Verify that SassLifter correctly processes unmapped custom operations from comments.
 
   This test checks that a SASS comment representing an unmapped operation (using the
@@ -17,20 +24,20 @@ def test_sass_lifter_unmapped():
   with the correct ID and operation kind in the returned `LogicalGraph`.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   lifter = SassLifter()
-  nodes = [SassComment(text="// Unmapped Op: custom.op (custom_id)")]
-  graph = lifter.lift(nodes)
+  nodes: list[SassNode] = [SassComment(text="// Unmapped Op: custom.op (custom_id)")]
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "custom_id"
   assert graph.nodes[0].kind == "custom.op"
 
 
-def test_sass_lifter_flatten():
+def test_sass_lifter_flatten() -> None:
   """Verify that SassLifter defaults the start_dim of a flattened op to 1 in PyTorch context.
 
   This test checks that when a comment contains the `torch.flatten` unmapped operation,
@@ -38,19 +45,19 @@ def test_sass_lifter_flatten():
   start_dim.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   lifter = SassLifter()
-  nodes = [SassComment(text="// Unmapped Op: torch.flatten (flat_id)")]
-  graph = lifter.lift(nodes)
+  nodes: list[SassNode] = [SassComment(text="// Unmapped Op: torch.flatten (flat_id)")]
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
   assert graph.nodes[0].metadata["arg_1"] == 1
 
 
-def test_sass_lifter_instruction_only():
+def test_sass_lifter_instruction_only() -> None:
   """Verify that standalone ALU instructions are correctly parsed and converted to LogicalNodes.
 
   This test validates that standalone ALU instructions (e.g., IADD3) use the destination
@@ -58,16 +65,16 @@ def test_sass_lifter_instruction_only():
   all input registers correctly in the node's metadata.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   lifter = SassLifter()
   inst = SassInstruction(
     opcode="IADD3", operands=[SassRegister(name="R0"), SassRegister(name="R1"), SassRegister(name="R2")]
   )
-  graph = lifter.lift([inst])
+  graph: LogicalGraph = lifter.lift([inst])
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "R0"
   assert graph.nodes[0].kind == "asm.IADD3"
@@ -76,7 +83,7 @@ def test_sass_lifter_instruction_only():
   assert graph.nodes[0].metadata["arg_2"] == "R2"
 
 
-def test_sass_lifter_non_alu():
+def test_sass_lifter_non_alu() -> None:
   """Verify that non-ALU standalone instructions generate generic node IDs and capture operands.
 
   This test checks that a branch instruction (e.g., BRA) which has no destination register
@@ -84,21 +91,21 @@ def test_sass_lifter_non_alu():
   and stores the correct operands (such as SassImmediate values) in its metadata.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   lifter = SassLifter()
   inst = SassInstruction(opcode="BRA", operands=[SassImmediate(value=10)])
-  graph = lifter.lift([inst])
+  graph: LogicalGraph = lifter.lift([inst])
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "inst_0"
   assert graph.nodes[0].kind == "asm.BRA"
   assert graph.nodes[0].metadata["arg_0"] == "10"
 
 
-def test_sass_lifter_invalid_marker():
+def test_sass_lifter_invalid_marker() -> None:
   """Verify that SASS comments without valid semantic markers are ignored during lifting.
 
   This test ensures that arbitrary comments that do not contain any recognizable semantic
@@ -106,40 +113,40 @@ def test_sass_lifter_invalid_marker():
   being added to the output graph.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   lifter = SassLifter()
-  nodes = [SassComment(text="// Just a comment without marker")]
-  graph = lifter.lift(nodes)
+  nodes: list[SassNode] = [SassComment(text="// Just a comment without marker")]
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
 
 
-def test_sass_lifter_return_already_seen():
+def test_sass_lifter_return_already_seen() -> None:
   """Verify that duplicate return statements are deduplicated in the generated graph.
 
   This test ensures that when multiple return comment markers are encountered in the input,
   only a single output node with the ID "output" is registered in the graph to avoid duplicates.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   lifter = SassLifter()
-  nodes = [
+  nodes: list[SassNode] = [
     SassComment(text="// Return: output"),
     SassComment(text="// Return: output"),
   ]
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "output"
 
 
-def test_sass_lifter_duplicate_node():
+def test_sass_lifter_duplicate_node() -> None:
   """Verify that multiple duplicate nodes (e.g., inputs) are deduplicated.
 
   This test checks that if the same semantic node is declared multiple times (e.g.,
@@ -147,16 +154,16 @@ def test_sass_lifter_duplicate_node():
   subsequent ones are correctly ignored to maintain uniqueness.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   lifter = SassLifter()
-  nodes = [
+  nodes: list[SassNode] = [
     SassComment(text="// Input x -> x"),
     SassComment(text="// Input x -> x"),
   ]
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "x"

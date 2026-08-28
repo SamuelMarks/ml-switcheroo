@@ -5,13 +5,16 @@ Provides lifecycle hooks to:
 2. Copy the distribution wheel to the static directory for the WASM demo.
 """
 
+import typing
+
+
 import os
+import sphinx
 import shutil
 from pathlib import Path
-from typing import Any, Optional
 
 
-def add_static_path(app: Any) -> None:
+def add_static_path(app: "sphinx.application.Sphinx") -> None:
   """Add the extension's static directory to HTML build configuration.
 
   Connected to 'builder-inited' event.
@@ -24,7 +27,7 @@ def add_static_path(app: Any) -> None:
     app.config.html_static_path.append(str(static_path.resolve()))
 
 
-def copy_wheel_and_reqs(app: Any, exception: Optional[Exception]) -> None:
+def copy_wheel_and_reqs(app: "sphinx.application.Sphinx", exception: typing.Optional[Exception]) -> None:
   """Post-build hook to copy the latest .whl file into _static for WASM usage.
 
   Connected to 'build-finished' event.

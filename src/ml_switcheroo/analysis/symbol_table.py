@@ -12,8 +12,6 @@ The `SymbolTableAnalyzer` visitor populates a `SymbolTable` by tracking:
 4.  **Control Flow**: Handling type ambiguity in branches (Phi nodes) via Union types.
 """
 
-from typing import Any
-
 import libcst as cst
 from typing import Dict, Optional
 
@@ -274,7 +272,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
     types = []
 
-    def collect(t: Any) -> Any:
+    def collect(t: SymbolType) -> None:
       """Recursively extracts and flattens types from nested UnionType instances into a list.
 
       Args:

@@ -1,23 +1,28 @@
 """Test suite for the Init Discovery module."""
 
 import pytest
+import typing
 from unittest.mock import MagicMock, patch
 import ml_switcheroo.frameworks as frameworks_pkg
 
 
-def test_available_frameworks_reflects_registry():
+def test_available_frameworks_reflects_registry() -> None:
   """Verifies the behavior of available frameworks reflects registry."""
-  mock_registry = {"mock_fw_1": MagicMock(), "mock_fw_2": MagicMock()}
+  mock_registry: dict[str, typing.Any] = {"mock_fw_1": MagicMock(), "mock_fw_2": MagicMock()}
   with patch("ml_switcheroo.frameworks.base._ADAPTER_REGISTRY", mock_registry):
-    fws = frameworks_pkg.available_frameworks()
+    fws: list[str] = frameworks_pkg.available_frameworks()
   assert "mock_fw_1" in fws
   assert "mock_fw_2" in fws
   assert len(fws) == 2
 
 
-def test_auto_discovery_logic():
+def test_auto_discovery_logic() -> None:
   """Verifies the behavior of auto discovery logic."""
-  mock_modules = [(None, "base", False), (None, "tinygrad", False), (None, "custom_lib", False)]
+  mock_modules: list[tuple[typing.Any, str, bool]] = [
+    (None, "base", False),
+    (None, "tinygrad", False),
+    (None, "custom_lib", False),
+  ]
   with patch("pkgutil.iter_modules", return_value=mock_modules):
     with patch("importlib.import_module") as mock_import:
       frameworks_pkg._auto_register_adapters()
@@ -27,9 +32,9 @@ def test_auto_discovery_logic():
       mock_import.assert_any_call(".custom_lib", package="ml_switcheroo.frameworks")
 
 
-def test_broken_module_handling(capsys):
+def test_broken_module_handling(capsys: pytest.CaptureFixture[str]) -> None:
   """Verifies the behavior of broken module handling."""
-  mock_modules = [(None, "broken_adapter", False)]
+  mock_modules: list[tuple[typing.Any, str, bool]] = [(None, "broken_adapter", False)]
   with patch("pkgutil.iter_modules", return_value=mock_modules):
     with patch("importlib.import_module", side_effect=ImportError("Missing dependency")):
       try:
@@ -38,7 +43,7 @@ def test_broken_module_handling(capsys):
         pytest.fail(f"Discovery crashed on broken module: {e}")
 
 
-def test_helpers_are_exported():
+def test_helpers_are_exported() -> None:
   """Verifies the behavior of helpers are exported."""
   assert "get_adapter" in frameworks_pkg.__all__
   assert "register_framework" in frameworks_pkg.__all__

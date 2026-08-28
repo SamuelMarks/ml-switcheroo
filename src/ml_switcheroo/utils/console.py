@@ -13,7 +13,8 @@ It serves two primary purposes:
     integration, where logs must be captured and returned to the browser context.
 """
 
-from typing import Any
+import typing
+
 
 import logging
 
@@ -29,7 +30,7 @@ SUCCESS_LEVEL_NUM = 25
 logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
 
-def _success(self, message: Any, *args: Any, **kwargs: Any) -> Any:  # type: ignore
+def _success(self: "logging.Logger", message: typing.Any, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
   """Output injected into Logger to support logger.success().
 
   Args:
@@ -143,7 +144,7 @@ class _ConsoleProxy:
     root_logger.setLevel(logging.INFO)
     root_logger.addHandler(rich_handler)
 
-  def print(self, *args: Any, **kwargs: Any) -> None:
+  def print(self, *args: typing.Any, **kwargs: typing.Any) -> None:
     """Forward ``print`` calls to the active backend.
 
     Args:
@@ -166,7 +167,7 @@ class _ConsoleProxy:
     """
     return self._backend.get_style(name)
 
-  def export_text(self, **kwargs: Any) -> str:
+  def export_text(self, **kwargs: typing.Any) -> str:
     """Forward ``export_text`` (useful for log capturing).
 
     Args:
@@ -177,7 +178,7 @@ class _ConsoleProxy:
     """
     return self._backend.export_text(**kwargs)
 
-  def export_html(self, **kwargs: Any) -> str:
+  def export_html(self, **kwargs: typing.Any) -> str:
     """Forward ``export_html`` (useful for web rendering).
 
     Args:
@@ -188,7 +189,7 @@ class _ConsoleProxy:
     """
     return self._backend.export_html(**kwargs)
 
-  def __getattr__(self, name: str) -> Any:
+  def __getattr__(self, name: str) -> typing.Any:
     """Fallback to forward any other attributes/methods to the backend.
 
     Args:

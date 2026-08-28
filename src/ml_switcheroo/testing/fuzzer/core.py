@@ -6,6 +6,7 @@ to Hypothesis Strategies. It maintains backward compatibility for casual usage v
 
 from typing import Any
 
+
 from typing import Dict, List, Optional
 import hypothesis.strategies as st
 from ml_switcheroo.frameworks import get_adapter
@@ -20,7 +21,7 @@ class InputFuzzer:
     self,
     params: List[str],
     hints: Optional[Dict[str, str]] = None,
-    constraints: Optional[Dict[str, Dict[Any, Any]]] = None,
+    constraints=None,
   ) -> Dict[str, st.SearchStrategy]:
     """Construct a dictionary of Hypothesis strategies for the given parameters.
 
@@ -40,7 +41,7 @@ class InputFuzzer:
     strategies = {}
 
     # Shared Context for dimension symbols
-    shared_dims = {}  # type: ignore
+    shared_dims: dict[Any, Any] = {}
 
     for p in params:
       hint = hints.get(p)
@@ -81,7 +82,7 @@ class InputFuzzer:
 
     return strategies
 
-  def adapt_to_framework(self, kwargs: Dict[str, Any], framework: str) -> Dict[str, Any]:
+  def adapt_to_framework(self, kwargs: dict, framework: str) -> dict:
     """Delegate to Framework Adapter to convert NumPy/Native inputs to Tensors.
 
     Args:

@@ -14,7 +14,7 @@ import json
 import importlib
 import inspect
 from pathlib import Path
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional, Any
 
 from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo.utils.console import log_error
@@ -44,7 +44,7 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
 
   """
   # 1. Resolve Targets
-  targets: List[Tuple[str, Dict[str, Any]]] = []
+  targets = []
 
   if api_path.endswith(".*"):
     module_name = api_path[:-2]
@@ -69,7 +69,7 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
   else:
     # Single mode
     try:
-      info = _inspect_live_object(api_path)
+      info = _inspect_live_object(api_path)  # type: ignore
       targets.append((api_path, info))
     except (ImportError, AttributeError) as e:
       log_error(f"Could not inspect '{api_path}': {e}. Is the library installed?")
@@ -124,7 +124,7 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
   return 0
 
 
-def _extract_metadata(obj: Any) -> Dict[str, Any]:
+def _extract_metadata(obj: Any) -> dict[str, Any]:
   """Extract signature and docstring from a live object.
 
   Args:
@@ -152,7 +152,7 @@ def _extract_metadata(obj: Any) -> Dict[str, Any]:
   }
 
 
-def _inspect_live_object(api_path: str) -> Dict[str, Any]:
+def _inspect_live_object(api_path: str) -> Optional[dict[str, Any]]:
   """Locate and inspects a python object by path.
 
   Args:
@@ -223,7 +223,7 @@ variants:
 """
 
 
-def _build_target_block(api_path: str, info: Dict[str, Any]) -> str:
+def _build_target_block(api_path: str, info) -> str:
   """Return the descriptive block for a single operation.
 
   Args:

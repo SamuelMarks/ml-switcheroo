@@ -1,12 +1,14 @@
 """Test suite for the Keras module."""
 
+import typing
 from ml_switcheroo.frameworks.keras import KerasAdapter
 from ml_switcheroo.frameworks.base import InitMode
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+import pytest
 from unittest.mock import patch
 
 
-def test_keras_adapter_init():
+def test_keras_adapter_init() -> None:
   """Verifies the behavior of Keras adapter initialization."""
   adapter = KerasAdapter()
   assert adapter.display_name == "Keras"
@@ -14,135 +16,136 @@ def test_keras_adapter_init():
   assert adapter.ui_priority == 25
 
 
-def test_keras_import_alias():
+def test_keras_import_alias() -> None:
   """Verifies the behavior of Keras import alias."""
   adapter = KerasAdapter()
   assert adapter.import_alias == ("keras", "keras")
 
 
-def test_keras_import_namespaces():
+def test_keras_import_namespaces() -> None:
   """Verifies the behavior of Keras import namespaces."""
   adapter = KerasAdapter()
-  ns = adapter.import_namespaces
+  ns: typing.Any = adapter.import_namespaces
   assert "keras" in ns
   assert "keras.ops" in ns
   assert "keras.layers" in ns
   assert "numpy" in ns
 
 
-def test_keras_test_config():
+def test_keras_test_config() -> None:
   """Verifies the behavior of Keras test configuration."""
   adapter = KerasAdapter()
-  config = adapter.test_config
+  config: dict[str, typing.Any] = adapter.test_config
   assert "import keras" in config["import"]
   assert "keras.ops.convert_to_tensor" in config["convert_input"]
 
 
-def test_keras_harness_imports():
+def test_keras_harness_imports() -> None:
   """Verifies the behavior of Keras harness imports."""
   adapter = KerasAdapter()
   assert adapter.harness_imports == []
 
 
-def test_keras_harness_init_code():
+def test_keras_harness_init_code() -> None:
   """Verifies the behavior of Keras harness initialization code."""
   adapter = KerasAdapter()
   assert adapter.get_harness_init_code() == ""
 
 
-def test_keras_get_to_numpy_code():
+def test_keras_get_to_numpy_code() -> None:
   """Verifies the behavior of Keras get to NumPy code."""
   adapter = KerasAdapter()
   assert "hasattr(obj, 'numpy')" in adapter.get_to_numpy_code()
 
 
-def test_keras_supported_tiers():
+def test_keras_supported_tiers() -> None:
   """Verifies the behavior of Keras supported tiers."""
   adapter = KerasAdapter()
-  tiers = adapter.supported_tiers
+  tiers: set[SemanticTier] = adapter.supported_tiers
   assert SemanticTier.ARRAY_API in tiers
   assert SemanticTier.NEURAL in tiers
 
 
-def test_keras_declared_magic_args():
+def test_keras_declared_magic_args() -> None:
   """Verifies the behavior of Keras declared magic arguments."""
   adapter = KerasAdapter()
   assert adapter.declared_magic_args == []
 
 
-def test_keras_structural_traits():
+def test_keras_structural_traits() -> None:
   """Verifies the behavior of Keras structural traits."""
   adapter = KerasAdapter()
-  traits = adapter.structural_traits
+  traits: typing.Any = adapter.structural_traits
   assert traits.module_base == "keras.Layer"
   assert traits.forward_method == "call"
   assert traits.requires_super_init
 
 
-def test_keras_rng_seed_methods():
+def test_keras_rng_seed_methods() -> None:
   """Verifies the behavior of Keras rng seed methods."""
   adapter = KerasAdapter()
   assert "utils.set_random_seed" in adapter.rng_seed_methods
 
 
-def test_keras_definitions(monkeypatch):
+def test_keras_definitions(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of Keras definitions."""
   adapter = KerasAdapter()
-  defs = adapter.definitions
+  defs: typing.Any = adapter.definitions
   assert isinstance(defs, dict)
 
 
-def test_keras_device_syntax():
+def test_keras_device_syntax() -> None:
   """Verifies the behavior of Keras device syntax."""
   adapter = KerasAdapter()
   assert "keras.name_scope('gpu')" == adapter.get_device_syntax("cuda")
   assert "keras.name_scope('cpu')" == adapter.get_device_syntax("cpu")
 
 
-def test_keras_device_check_syntax():
+def test_keras_device_check_syntax() -> None:
   """Verifies the behavior of Keras device check syntax."""
   adapter = KerasAdapter()
   assert "keras.config.list_logical_devices" in adapter.get_device_check_syntax()
 
 
-def test_keras_apply_wiring():
+def test_keras_apply_wiring() -> None:
   """Verifies the behavior of Keras apply wiring."""
   adapter = KerasAdapter()
   adapter.apply_wiring({})
 
 
-def test_keras_doc_url():
+def test_keras_doc_url() -> None:
   """Verifies the behavior of Keras documentation URL."""
   adapter = KerasAdapter()
-  url = adapter.get_doc_url("keras.layers.Dense")
+  url: typing.Optional[str] = adapter.get_doc_url("keras.layers.Dense")
+  assert url is not None
   assert "search.html?q=keras.layers.Dense" in url
 
 
 @patch("ml_switcheroo.frameworks.keras_examples.get_keras_tiered_examples")
-def test_keras_tiered_examples(mock_examples):
+def test_keras_tiered_examples(mock_examples: typing.Any) -> None:
   """Verifies the behavior of Keras tiered examples."""
   mock_examples.return_value = {"tier2_neural": "some_code"}
   adapter = KerasAdapter()
-  examples = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
   mock_examples.assert_called_once()
 
 
-def test_keras_init_ghost_mode(monkeypatch):
+def test_keras_init_ghost_mode(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of Keras initialization ghost mode."""
   monkeypatch.setattr("ml_switcheroo.frameworks.keras.keras", None)
   adapter = KerasAdapter()
   assert adapter._mode == InitMode.GHOST
 
 
-def test_keras_init_live_mode(monkeypatch):
+def test_keras_init_live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of Keras initialization live mode."""
   monkeypatch.setattr("ml_switcheroo.frameworks.keras.keras", True)
   adapter = KerasAdapter()
   assert adapter._mode == InitMode.LIVE
 
 
-def test_keras_import_exception():
+def test_keras_import_exception() -> None:
   """Test keras import block exception."""
   import sys
   import importlib
@@ -152,7 +155,9 @@ def test_keras_import_exception():
 
   real_import = builtins.__import__
 
-  def mock_import(name, globals=None, locals=None, fromlist=(), level=0):
+  def mock_import(
+    name: str, globals: typing.Any = None, locals: typing.Any = None, fromlist: typing.Any = (), level: int = 0
+  ) -> typing.Any:
     """Docstring."""
     if name == "keras" or name.startswith("keras."):
       raise Exception("import fail")

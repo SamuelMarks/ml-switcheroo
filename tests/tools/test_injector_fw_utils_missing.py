@@ -1,7 +1,7 @@
 """Test suite for the Injector Fw Utils Missing module."""
 
 
-def test_injector_fw_utils_missing():
+def test_injector_fw_utils_missing() -> None:
   """Verifies the behavior of injector framework utilities missing."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import (
@@ -33,7 +33,7 @@ def test_injector_fw_utils_missing():
   assert isinstance(convert_to_cst_literal(UnrecognizedObject()), cst.SimpleString)
 
 
-def test_injector_fw_utils_convert_complex():
+def test_injector_fw_utils_convert_complex() -> None:
   """Verifies the behavior of injector framework utilities convert complex."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
@@ -42,14 +42,14 @@ def test_injector_fw_utils_convert_complex():
   assert isinstance(convert_to_cst_literal((1, 2)), cst.Tuple)
   assert isinstance(convert_to_cst_literal({"a": 1, "b": 2}), cst.Dict)
   assert isinstance(convert_to_cst_literal(None), cst.Name)
-  assert convert_to_cst_literal(None).value == "None"
+  assert getattr(convert_to_cst_literal(None), "value") == "None"
   assert isinstance(convert_to_cst_literal(True), cst.Name)
-  assert convert_to_cst_literal(True).value == "True"
+  assert getattr(convert_to_cst_literal(True), "value") == "True"
   assert isinstance(convert_to_cst_literal(1.0), cst.Float)
   assert isinstance(convert_to_cst_literal(1), cst.Integer)
 
 
-def test_injector_fw_utils_get_import_root_name():
+def test_injector_fw_utils_get_import_root_name() -> None:
   """Verifies the behavior of injector framework utilities get import root name."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import get_import_root, is_docstring
@@ -58,7 +58,7 @@ def test_injector_fw_utils_get_import_root_name():
   assert is_docstring(cst.SimpleStatementLine([cst.Expr(cst.SimpleString('""'))]), 0) is True
 
 
-def test_injector_fw_utils_is_future_import():
+def test_injector_fw_utils_is_future_import() -> None:
   """Verifies the behavior of injector framework utilities is future import."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import is_future_import
@@ -73,7 +73,7 @@ def test_injector_fw_utils_is_future_import():
   )
 
 
-def test_injector_fw_utils_get_import_root_attr():
+def test_injector_fw_utils_get_import_root_attr() -> None:
   """Verifies the behavior of injector framework utilities get import root attribute."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import get_import_root, is_docstring
@@ -82,7 +82,7 @@ def test_injector_fw_utils_get_import_root_attr():
   assert is_docstring(cst.SimpleStatementLine([cst.Expr(cst.SimpleString('""'))]), 1) is False
 
 
-def test_injector_fw_utils_convert_negative():
+def test_injector_fw_utils_convert_negative() -> None:
   """Verifies the behavior of injector framework utilities convert negative."""
   import libcst as cst
   from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal

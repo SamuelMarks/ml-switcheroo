@@ -5,7 +5,10 @@ MLIR, TikZ, Custom DSLs) and normalizing them into a LibCST Module to be process
 by the core Transpilation Engine.
 """
 
-from typing import Any, Optional
+from typing import Any
+
+
+from typing import Optional, TYPE_CHECKING
 
 import libcst as cst
 
@@ -19,13 +22,16 @@ from ml_switcheroo.core.tikz.parser import TikzParser
 from ml_switcheroo.core.compiler.backends.python import PythonBackend
 from ml_switcheroo.frameworks.base import FrameworkAdapter
 
+if TYPE_CHECKING:
+  from ml_switcheroo.core.tracer import TraceLogger
+
 
 def ingest_code(
   code: str,
   source_fw: str,
   target_fw: str,
   source_adapter: Optional[FrameworkAdapter],
-  tracer: Any,
+  tracer: "TraceLogger",
 ) -> cst.Module:
   """Parse input code handles non-python sources via adapters.
 
@@ -57,7 +63,7 @@ def ingest_code(
       tree = parser.parse()
       tracer.log_mutation("Transformed Ingestion", "(Raw Source)", "(AST Parsed)")
       tracer.end_phase()
-      return tree  # type: ignore
+      return tree
     except Exception as e:
       tracer.end_phase()
       raise e

@@ -1,11 +1,12 @@
 """Test suite for the Stablehlo module."""
 
+import typing
 from ml_switcheroo.frameworks.stablehlo import StableHloAdapter
 from ml_switcheroo.frameworks.base import InitMode
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
-def test_stablehlo_adapter_init():
+def test_stablehlo_adapter_init() -> None:
   """Verifies the behavior of StableHLO adapter initialization."""
   adapter = StableHloAdapter()
   assert adapter.display_name == "StableHLO (MLIR)"
@@ -14,34 +15,34 @@ def test_stablehlo_adapter_init():
   assert adapter._mode == InitMode.LIVE
 
 
-def test_stablehlo_properties():
+def test_stablehlo_properties() -> None:
   """Verifies the behavior of StableHLO properties."""
   adapter = StableHloAdapter()
   assert adapter.import_alias == ("stablehlo", "stablehlo")
   assert adapter.import_namespaces == {}
   assert SemanticTier.ARRAY_API in adapter.supported_tiers
-  traits = adapter.structural_traits
+  traits: typing.Any = adapter.structural_traits
   assert traits.module_base is None
-  config = adapter.test_config
+  config: dict[str, typing.Any] = adapter.test_config
   assert "import" in config
   assert adapter.harness_imports == []
   assert "xla_bridge" in adapter.get_harness_init_code()
   assert "np.asarray(obj)" in adapter.get_to_numpy_code()
   assert adapter.declared_magic_args == []
   assert adapter.rng_seed_methods == []
-  defs = adapter.definitions
+  defs: typing.Any = adapter.definitions
   assert isinstance(defs, dict)
-  specs = adapter.specifications
+  specs: typing.Any = adapter.specifications
   assert specs == {}
-  snapshot = {}
+  snapshot: dict[str, typing.Any] = {}
   adapter.apply_wiring(snapshot)
   assert snapshot == {}
-  examples = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
   assert "stablehlo.abs" in examples["tier1_math"]
 
 
-def test_stablehlo_missing_coverage():
+def test_stablehlo_missing_coverage() -> None:
   """Verifies untested methods of StableHloAdapter."""
   adapter = StableHloAdapter()
 

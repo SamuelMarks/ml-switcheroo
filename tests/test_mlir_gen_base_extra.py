@@ -10,10 +10,10 @@ class TestGenerator(BaseGeneratorMixin):
   pass
 
 
-def test_get_attr_continue():
+def test_get_attr_continue() -> None:
   """Test element."""
-  gen = TestGenerator()
-  op = OperationNode(
+  gen: TestGenerator = TestGenerator()
+  op: OperationNode = OperationNode(
     name="test.op", attributes=[AttributeNode(name="other", value="val"), AttributeNode(name="foo", value="bar")]
   )
   assert gen._get_attr(op, "foo") == "bar"

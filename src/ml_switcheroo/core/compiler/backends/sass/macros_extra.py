@@ -1,6 +1,6 @@
 """SASS Macro Expansion Logic - Extra Macros."""
 
-from typing import List, Dict, Any, Callable
+from typing import List
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassOperand,
   SassInstruction,
@@ -17,7 +17,7 @@ from .macros import RegisterAllocatorProtocol
 def expand_rnn(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for a basic RNN cell over time.
 
@@ -70,7 +70,7 @@ def expand_rnn(
 def expand_lstm(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for LSTM over time.
 
@@ -119,7 +119,7 @@ def expand_lstm(
 def expand_gru(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for GRU over time.
 
@@ -165,7 +165,7 @@ def expand_gru(
 def expand_multiheadattention(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for MultiheadAttention.
 
@@ -205,7 +205,7 @@ def expand_multiheadattention(
 def expand_transformer(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for a Transformer block.
 
@@ -240,7 +240,7 @@ def expand_transformer(
 def expand_transformerencoder(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for TransformerEncoder.
 
@@ -264,7 +264,7 @@ def expand_transformerencoder(
 def expand_transformerdecoder(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for TransformerDecoder.
 
@@ -288,7 +288,7 @@ def expand_transformerdecoder(
 def expand_conv1d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for 1D Convolution.
 
@@ -330,7 +330,7 @@ def expand_conv1d(
 def expand_depthwiseconv2d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for DepthwiseConv2d.
 
@@ -372,7 +372,7 @@ def expand_depthwiseconv2d(
 def expand_convtranspose(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for ConvTranspose (generic representation).
 
@@ -395,7 +395,7 @@ def expand_convtranspose(
 def expand_pool1d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate SASS kernel for 1D Pooling.
 
@@ -418,7 +418,7 @@ def expand_pool1d(
 def expand_pool3d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate SASS kernel for 3D Pooling.
 
@@ -441,7 +441,7 @@ def expand_pool3d(
 def expand_adaptivepool(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate SASS kernel for Adaptive Pooling.
 
@@ -461,7 +461,7 @@ def expand_adaptivepool(
   return nodes
 
 
-def _make_generic_expand(name: str) -> Callable[[RegisterAllocatorProtocol, str, Dict[str, Any]], List[SassNode]]:
+def _make_generic_expand(name: str):
   """Create a generic macro expansion function for SASS.
 
   Args:
@@ -474,7 +474,7 @@ def _make_generic_expand(name: str) -> Callable[[RegisterAllocatorProtocol, str,
   def expand(
     allocator: RegisterAllocatorProtocol,
     node_id: str,
-    metadata: Dict[str, Any],
+    metadata,
   ) -> List[SassNode]:
     """Generate a generic SASS kernel.
 
@@ -508,7 +508,7 @@ expand_generic_dropout = _make_generic_expand("DropoutVar")
 def expand_variable(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Expand a variable operation into SASS nodes.
 
@@ -526,7 +526,7 @@ def expand_variable(
 def expand_transpose(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Expand a transpose operation into SASS nodes.
 
@@ -544,7 +544,7 @@ def expand_transpose(
 def expand_conv_general_dilated(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Expand a conv_general_dilated operation into SASS nodes.
 
@@ -565,7 +565,7 @@ def expand_conv_general_dilated(
 def expand_adam(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Expand an adam operation into SASS nodes.
 
@@ -583,7 +583,7 @@ def expand_adam(
 def expand_l(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Expand an l operation into SASS nodes.
 

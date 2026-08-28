@@ -5,18 +5,19 @@ and generation correctness for remaining operations defined in the plan.
 """
 
 import pytest
+import typing
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
-def backend():
+def backend() -> StableHloBackend:
   """Provides a StableHLO Backend with a loaded SemanticsManager."""
   return StableHloBackend(SemanticsManager())
 
 
-OTHER_OPS = [
+OTHER_OPS: list[tuple[str, str]] = [
   ("AfterAll", "stablehlo.after_all"),
   ("And", "stablehlo.and"),
   ("AsyncDone", "stablehlo.async_done"),
@@ -46,7 +47,7 @@ OTHER_OPS = [
 
 
 @pytest.mark.parametrize("logical_op, expected_mlir_op", OTHER_OPS)
-def test_other_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str):
+def test_other_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str) -> None:
   """Verifies that other operations are correctly mapped to StableHLO syntax.
 
   This ensures both mapping resolution and operand generation are correct.
@@ -56,7 +57,7 @@ def test_other_operations(backend: StableHloBackend, logical_op: str, expected_m
   g.nodes = [LogicalNode("in_node", "Input"), LogicalNode("op_node", logical_op), LogicalNode("out_node", "Output")]
   g.edges = [LogicalEdge("in_node", "op_node"), LogicalEdge("op_node", "out_node")]
 
-  mlir_code = backend.compile(g)
+  mlir_code: str = backend.compile(g)
 
   # 1. Operation exists in MLIR output
   assert expected_mlir_op in mlir_code
@@ -67,55 +68,48 @@ def test_other_operations(backend: StableHloBackend, logical_op: str, expected_m
   assert "%op_node =" in mlir_code
 
 
-def test_stablehlo_semantics_not_found():
+def test_stablehlo_semantics_not_found() -> None:
   # Hit 75->83
   """Test stablehlo semantics not found."""
-  from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
   class SemanticsNoDef:
     """Semantics no def."""
 
-    def get_definition(self, kind):
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
       """Get definition."""
       return None
 
-  backend = StableHloBackend(SemanticsNoDef())
+  backend = StableHloBackend(SemanticsNoDef())  # type: ignore
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode(id="n1", kind="not_found"))
-  res = backend.compile(g)
+  res: str = backend.compile(g)
   assert "stablehlo.custom_call" in res
 
 
-def test_stablehlo_semantics_no_api():
+def test_stablehlo_semantics_no_api() -> None:
   # Hit 80->83
   """Test stablehlo semantics no api."""
-  from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
   class SemanticsNoApi:
     """Semantics no api."""
 
-    def get_definition(self, kind):
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
       """Get definition."""
       return ("abs", {"variants": {"stablehlo": {}}})
 
-  backend = StableHloBackend(SemanticsNoApi())
+  backend = StableHloBackend(SemanticsNoApi())  # type: ignore
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode(id="n1", kind="not_found"))
-  res = backend.compile(g)
+  res: str = backend.compile(g)
   assert "stablehlo.custom_call" in res
 
 
-def test_stablehlo_semantics_none():
+def test_stablehlo_semantics_none() -> None:
   # Hit 75->83 (self.semantics is None)
   """Test stablehlo semantics none."""
-  from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
-
   backend = StableHloBackend()
   backend.semantics = None
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode(id="n1", kind="not_found"))
-  res = backend.compile(g)
+  res: str = backend.compile(g)
   assert "stablehlo.custom_call" in res

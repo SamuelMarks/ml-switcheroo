@@ -2,7 +2,7 @@
 
 import pytest
 from dataclasses import dataclass, field
-from typing import List, Any
+from typing import List
 
 from ml_switcheroo.core.cst.base import CSTNode, CSTVisitor, CSTTransformer, Trivia
 
@@ -12,9 +12,9 @@ class DummyNode(CSTNode):
   """A simple node for testing."""
 
   name: str = ""
-  child: "CSTNode" = None  # type: ignore
+  child: "CSTNode" = None
   children: List["CSTNode"] = field(default_factory=list)
-  mixed_list: List[Any] = field(default_factory=list)
+  mixed_list: List["CSTNode"] = field(default_factory=list)
 
   def to_text(self) -> str:
     """Returns the text representation."""
@@ -109,8 +109,8 @@ def test_transformer() -> None:
 
   assert isinstance(transformed_root, DummyNode)
   assert transformed_root.name == "ROOT"
-  assert transformed_root.children[0].name == "CHILD1"  # type: ignore
-  assert transformed_root.children[1].name == "CHILD2"  # type: ignore
+  assert transformed_root.children[0].name == "CHILD1"
+  assert transformed_root.children[1].name == "CHILD2"
   assert getattr(transformed_root.children[1], "child").name == "GRANDCHILD"
   assert transformed_root.mixed_list[0] == "string"
   assert transformed_root.mixed_list[1].name == "CHILD1"

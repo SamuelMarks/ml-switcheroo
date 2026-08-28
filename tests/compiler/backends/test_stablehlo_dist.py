@@ -12,12 +12,12 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
-def backend():
+def backend() -> StableHloBackend:
   """Provides a StableHLO Backend with a loaded SemanticsManager."""
   return StableHloBackend(SemanticsManager())
 
 
-DIST_OPS = [
+DIST_OPS: list[tuple[str, str]] = [
   ("AllReduce", "stablehlo.all_reduce"),
   ("AllToAll", "stablehlo.all_to_all"),
   ("CollectivePermute", "stablehlo.collective_permute"),
@@ -29,7 +29,7 @@ DIST_OPS = [
 
 
 @pytest.mark.parametrize("logical_op, expected_mlir_op", DIST_OPS)
-def test_dist_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str):
+def test_dist_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str) -> None:
   """Verifies that distributed operations are correctly mapped to StableHLO syntax.
 
   This ensures both mapping resolution and operand generation are correct.
@@ -39,7 +39,7 @@ def test_dist_operations(backend: StableHloBackend, logical_op: str, expected_ml
   g.nodes = [LogicalNode("in_node", "Input"), LogicalNode("op_node", logical_op), LogicalNode("out_node", "Output")]
   g.edges = [LogicalEdge("in_node", "op_node"), LogicalEdge("op_node", "out_node")]
 
-  mlir_code = backend.compile(g)
+  mlir_code: str = backend.compile(g)
 
   # 1. Operation exists in MLIR output
   assert expected_mlir_op in mlir_code

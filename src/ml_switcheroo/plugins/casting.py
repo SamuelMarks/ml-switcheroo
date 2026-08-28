@@ -13,7 +13,6 @@ Transformation:
 """
 
 import libcst as cst
-from typing import Dict, Any
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
@@ -31,7 +30,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
+    node = cst.Attribute(value=node, attr=cst.Name(part))
   return node
 
 
@@ -51,7 +50,7 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
     return False
 
   # Retrieve dict configuration for the active target framework
-  conf: Dict[str, Any] = ctx.semantics.get_framework_config(ctx.target_fw)
+  conf = ctx.semantics.get_framework_config(ctx.target_fw)
   if not conf:
     return False
 
@@ -62,10 +61,10 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
     return False  # pragma: no cover
 
   if isinstance(traits, dict):
-    return traits.get("has_numpy_compatible_arrays", False)  # type: ignore
+    return traits.get("has_numpy_compatible_arrays", False)
 
   if hasattr(traits, "has_numpy_compatible_arrays"):
-    return traits.has_numpy_compatible_arrays  # type: ignore
+    return traits.has_numpy_compatible_arrays
 
   return False
 

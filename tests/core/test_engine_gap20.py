@@ -1,11 +1,13 @@
 """Tests for engine gap 20."""
 
-from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 import ml_switcheroo.core.engine
 from ml_switcheroo.config import RuntimeConfig
+import pytest
+import typing
 
 
-def test_run_compiler_pipeline_rdna_mocked(monkeypatch):
+def test_run_compiler_pipeline_rdna_mocked(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test compiler pipeline with mocked RDNA."""
   import ml_switcheroo.core.engine
 
@@ -13,26 +15,26 @@ def test_run_compiler_pipeline_rdna_mocked(monkeypatch):
 
   engine = ASTEngine(source="rdna", target="jax")
   monkeypatch.setattr(ml_switcheroo.core.engine, "get_backend_class", lambda x: None)
-  result = engine.run("v_add_f32 v0, v1, v2")
+  result: ConversionResult = engine.run("v_add_f32 v0, v1, v2")
   assert not result.success
 
 
-def test_astengine_fusion_target_branches_mocked(monkeypatch):
+def test_astengine_fusion_target_branches_mocked(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test ASTEngine fusion target branches."""
   import ml_switcheroo.core.engine
 
   class FakeBackend:
     """Docstring."""
 
-    def __init__(self, semantics):
+    def __init__(self, semantics: typing.Any) -> None:
       """Docstring."""
       pass
 
-    def set_mode(self, *args, **kwargs):
+    def set_mode(self, *args: typing.Any, **kwargs: typing.Any) -> None:
       """Docstring."""
       pass
 
-    def compile(self, graph):
+    def compile(self, graph: typing.Any) -> typing.Any:
       """Docstring."""
       from ml_switcheroo.core.compiler.backends.base import BackendResult
 
@@ -56,23 +58,23 @@ def test_astengine_fusion_target_branches_mocked(monkeypatch):
   engine.run("v_add_f32 v0, v1, v2")
 
 
-def test_astengine_sass_unsupported_target(monkeypatch):
+def test_astengine_sass_unsupported_target(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test ASTEngine unsupported target for SASS."""
   monkeypatch.setattr(ml_switcheroo.core.engine, "get_backend_class", lambda x: None)
   engine = ASTEngine(source="sass", target="jax")
-  result = engine.run("v_add_f32 v0, v1, v2")
+  result: ConversionResult = engine.run("v_add_f32 v0, v1, v2")
   assert not result.success
 
 
-def test_astengine_unsupported_isa_frontend(monkeypatch):
+def test_astengine_unsupported_isa_frontend(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test ASTEngine unsupported ISA frontend."""
   engine = ASTEngine(source="torch", target="jax")
   monkeypatch.setattr(ml_switcheroo.core.engine, "is_isa_source", lambda x: True)
-  result = engine.run("def a(): pass")
+  result: ConversionResult = engine.run("def a(): pass")
   assert not result.success
 
 
-def test_astengine_init_branches(monkeypatch):
+def test_astengine_init_branches(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test ASTEngine init branches."""
   engine1 = ASTEngine(source="torch", target="jax", intermediate="onnx")
   assert engine1.config.intermediate == "onnx"
@@ -86,10 +88,10 @@ def test_astengine_init_branches(monkeypatch):
   assert not cfg2.validation_report
 
 
-def test_astengine_run_branches(monkeypatch):
+def test_astengine_run_branches(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test ASTEngine run branches."""
   engine = ASTEngine(source="torch", target="stablehlo")
-  code = "def my_func(): pass"
+  code: str = "def my_func(): pass"
   import libcst as cst
 
   monkeypatch.setattr(ml_switcheroo.core.engine, "ingest_code", lambda *args: cst.parse_module("def foo(): pass"))
@@ -97,17 +99,17 @@ def test_astengine_run_branches(monkeypatch):
   class MockEmitter:
     """Docstring."""
 
-    def __init__(self, semantics):
+    def __init__(self, semantics: typing.Any) -> None:
       """Docstring."""
       pass
 
-    def convert(self, tree):
+    def convert(self, tree: typing.Any) -> typing.Any:
       """Docstring."""
 
       class MockText:
         """Docstring."""
 
-        def to_text(self):
+        def to_text(self) -> str:
           """Docstring."""
           return "mock"
 

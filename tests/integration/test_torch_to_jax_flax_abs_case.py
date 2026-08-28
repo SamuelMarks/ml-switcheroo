@@ -1,6 +1,7 @@
 """Test suite for the Torch To Jax Flax Abs Case module."""
 
-from ml_switcheroo.core.engine import ASTEngine
+import typing
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.merging import merge_overlay_data
@@ -8,24 +9,24 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
 
-class FixedSemantics(SemanticsManager):
+class FixedSemantics(SemanticsManager):  # type: ignore[misc]
   """Test suite for the Fixed Semantics component."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the FixedSemantics instance."""
-    self.data = {}
-    self.framework_configs = {}
-    self.test_templates = {}
-    self._known_rng_methods = set()
-    self.known_magic_args = set()
-    self.patterns = []
-    self._reverse_index = {}
-    self._key_origins = {}
-    self._validation_status = {}
-    self._providers = {}
-    self._source_registry = {}
+    self.data: dict[str, typing.Any] = {}
+    self.framework_configs: dict[str, typing.Any] = {}
+    self.test_templates: dict[str, typing.Any] = {}
+    self._known_rng_methods: set[str] = set()
+    self.known_magic_args: set[str] = set()
+    self.patterns: list[typing.Any] = []
+    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self._key_origins: dict[str, str] = {}
+    self._validation_status: dict[str, typing.Any] = {}
+    self._providers: dict[str, typing.Any] = {}
+    self._source_registry: dict[str, typing.Any] = {}
     adapter = FlaxNNXAdapter()
-    snapshot = {"__framework__": "jax", "mappings": {}, "imports": {}}
+    snapshot: dict[str, typing.Any] = {"__framework__": "jax", "mappings": {}, "imports": {}}
     adapter.apply_wiring(snapshot)
     merge_overlay_data(
       data=self.data,
@@ -49,15 +50,15 @@ class FixedSemantics(SemanticsManager):
     self._providers["jax"][SemanticTier.NEURAL] = {"root": "flax", "sub": "nnx", "alias": "nnx"}
 
 
-def test_specific_abs_conversion():
+def test_specific_abs_conversion() -> None:
   """Verifies the behavior of specific abs conversion."""
-  input_torch = "\nimport torch\nimport torch.nn as nn\n\nclass Model(nn.Module):\n    def forward(self, x):\n        return torch.abs(x)\n"
+  input_torch: str = "\nimport torch\nimport torch.nn as nn\n\nclass Model(nn.Module):\n    def forward(self, x):\n        return torch.abs(x)\n"
   semantics = FixedSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
-  result = engine.run(input_torch)
+  result: ConversionResult = engine.run(input_torch)
   assert result.success
-  code = result.code
+  code: str = result.code
   assert "import jax.numpy as jnp" in code
   assert "import flax.nnx as nnx" in code or "from flax import nnx" in code
   assert "import torch" not in code

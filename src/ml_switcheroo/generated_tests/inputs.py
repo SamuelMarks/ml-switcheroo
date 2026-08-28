@@ -13,12 +13,10 @@ Features:
 - **Constraint Inference**: Uses `min`/`max` to govern random ranges.
 """
 
-from typing import Any
-
-from typing import Union, Dict
+import typing
 
 
-def parse_arg_def(arg: Union[str, tuple[Any, ...], dict[Any, Any]]) -> Dict[str, Any]:
+def parse_arg_def(arg: typing.Union[str, tuple, list, dict]) -> dict:
   """Normalize a heterogeneous argument definition into a standard dictionary.
 
   Extracts `default`, `min`, `max` to help downstream inference.
@@ -62,7 +60,7 @@ def parse_arg_def(arg: Union[str, tuple[Any, ...], dict[Any, Any]]) -> Dict[str,
   return {"name": "unknown", "type": "Array"}
 
 
-def _infer_type_from_default(default_val: Any) -> str:
+def _infer_type_from_default(default_val: typing.Union[bool, int, float, list, tuple, str, dict, None]) -> str:
   """Guess the ODL type string based on a python default value.
 
   Args:
@@ -86,7 +84,7 @@ def _infer_type_from_default(default_val: Any) -> str:
   return "Any"
 
 
-def generate_input_value_code(name: str, arg_def: Union[str, Dict[str, Any]]) -> str:
+def generate_input_value_code(name: str, arg_def: typing.Union[str, dict]) -> str:
   """Generate Python code string to instantiate inputs based on type/constraints.
 
   Prioritizes:
@@ -196,7 +194,7 @@ def _generate_dim_heuristic(name: str) -> str:
   return "1"
 
 
-def _generate_array_code(arg_def: Dict[str, Any]) -> str:
+def _generate_array_code(arg_def: dict) -> str:
   """Support for array code generation logic.
 
   Args:

@@ -6,7 +6,10 @@ Semantic Knowledge Base, calculating differences in API names and argument
 conventions (e.g., `dim` vs `axis`), and producing a structured migration guide.
 """
 
-from typing import Dict, Any, List, Optional
+import typing
+
+
+from typing import Dict, List
 from collections import defaultdict
 
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -15,7 +18,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 class MigrationGuideGenerator:
   """Generate a Markdown Migration Guide by diffing semantic specifications."""
 
-  def __init__(self, semantics: SemanticsManager):
+  def __init__(self, semantics: "SemanticsManager") -> None:
     """Initialize the generator.
 
     Args:
@@ -184,7 +187,7 @@ class MigrationGuideGenerator:
 
     return f"| `{src_api}` | `{tgt_api}` | {diff_str} |"
 
-  def _fmt_api(self, variant: Optional[Dict[str, Any]]) -> str:
+  def _fmt_api(self, variant: typing.Optional[typing.Dict[str, typing.Any]]) -> str:
     """Safe formatter for API variant.
 
     Args:
@@ -195,4 +198,4 @@ class MigrationGuideGenerator:
     """
     if not variant:
       return "—"
-    return variant.get("api", "—")  # type: ignore
+    return variant.get("api", "—")

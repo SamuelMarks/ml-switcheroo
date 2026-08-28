@@ -11,9 +11,7 @@ Updates:
 - **FIX**: Preserves register destinations as node IDs for faithful variables.
 """
 
-from typing import Any
-
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.compiler.frontends.sass.cst import (

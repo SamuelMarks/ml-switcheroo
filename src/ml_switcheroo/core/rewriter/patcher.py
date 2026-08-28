@@ -10,7 +10,7 @@ to graph nodes, and the **Snippet Emitter** to generate valid replacement code.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Union, Any
+from typing import Dict, List, Union
 
 import libcst as cst
 from ml_switcheroo.core.compiler.ir import LogicalNode
@@ -136,7 +136,7 @@ class GraphPatcher(cst.CSTTransformer):
 
   # --- Statement Level Hooks ---
 
-  def leave_Assign(  # type: ignore
+  def leave_Assign(
     self, original_node: cst.Assign, updated_node: cst.Assign
   ) -> Union[cst.Assign, cst.SimpleStatementLine, cst.RemovalSentinel]:
     """Intercept Assignment statements (e.g. `self.conv = ...`, `y = func(x)`).
@@ -148,9 +148,9 @@ class GraphPatcher(cst.CSTTransformer):
     Returns:
         The replaced Assign node, SimpleStatementLine, or RemovalSentinel if deleted.
     """
-    return self._handle_node(original_node, updated_node)  # type: ignore
+    return self._handle_node(original_node, updated_node)
 
-  def leave_Expr(  # type: ignore
+  def leave_Expr(
     self, original_node: cst.Expr, updated_node: cst.Expr
   ) -> Union[cst.Expr, cst.SimpleStatementLine, cst.RemovalSentinel]:
     """Intercept Expression statements (e.g. `func(x)` without assignment).
@@ -162,9 +162,9 @@ class GraphPatcher(cst.CSTTransformer):
     Returns:
         The replaced Expr node, SimpleStatementLine, or RemovalSentinel if deleted.
     """
-    return self._handle_node(original_node, updated_node)  # type: ignore
+    return self._handle_node(original_node, updated_node)
 
-  def leave_Call(  # type: ignore
+  def leave_Call(
     self, original_node: cst.Call, updated_node: cst.Call
   ) -> Union[cst.Call, cst.BaseExpression, cst.RemovalSentinel]:
     """Execute implementation detail for call expression patching.
@@ -176,7 +176,7 @@ class GraphPatcher(cst.CSTTransformer):
     Returns:
         The replaced Call expression, BaseExpression, or RemovalSentinel if deleted.
     """
-    return self._handle_node(original_node, updated_node)  # type: ignore
+    return self._handle_node(original_node, updated_node)
 
   def leave_SimpleStatementLine(
     self, original_node: cst.SimpleStatementLine, updated_node: cst.SimpleStatementLine
@@ -195,7 +195,7 @@ class GraphPatcher(cst.CSTTransformer):
       return cst.RemoveFromParent()
     return updated_node
 
-  def _handle_node(self, original: cst.CSTNode, updated: cst.CSTNode) -> Any:
+  def _handle_node(self, original: cst.CSTNode, updated: cst.CSTNode):
     """Core dispatch logic for performing patch mutations.
 
     Identifies if a node matches an action in the index, then dispatches
@@ -240,7 +240,7 @@ class GraphPatcher(cst.CSTTransformer):
 
     return updated  # pragma: no cover
 
-  def _unwrap_stmt_if_nested(self, context_node: cst.CSTNode, new_stmt: cst.SimpleStatementLine) -> Any:
+  def _unwrap_stmt_if_nested(self, context_node: cst.CSTNode, new_stmt: cst.SimpleStatementLine):
     """Support: If we are replacing a node that is already inside a SimpleStatementLine body list.
 
     (like Assign or Expr), we should return the inner component to avoid double wrapping.

@@ -5,9 +5,9 @@ from ml_switcheroo.frameworks.mlir import MlirAdapter
 from ml_switcheroo.frameworks.stablehlo import StableHloAdapter
 
 
-def test_mlir_adapter_properties():
+def test_mlir_adapter_properties() -> None:
   """Test element."""
-  adapter = MlirAdapter()
+  adapter: MlirAdapter = MlirAdapter()
   pass
   adapter.import_alias
   adapter.import_namespaces
@@ -45,9 +45,9 @@ def test_mlir_adapter_properties():
   pass
 
 
-def test_stablehlo_adapter_properties():
+def test_stablehlo_adapter_properties() -> None:
   """Test element."""
-  adapter = StableHloAdapter()
+  adapter: StableHloAdapter = StableHloAdapter()
   pass
   adapter.import_alias
   adapter.import_namespaces
@@ -85,14 +85,14 @@ def test_stablehlo_adapter_properties():
   pass
 
 
-def test_mlir_stablehlo_missing_methods():
+def test_mlir_stablehlo_missing_methods() -> None:
   """Test element."""
-  adapter = MlirAdapter()
+  adapter: MlirAdapter = MlirAdapter()
   adapter.get_serialization_syntax("save", "path", "obj")
   adapter.get_example_code()
   adapter.get_tiered_examples()
 
-  adapter2 = StableHloAdapter()
+  adapter2: StableHloAdapter = StableHloAdapter()
   adapter2.get_serialization_syntax("save", "path", "obj")
   adapter2.get_doc_url("test")
   adapter2.get_tiered_examples()

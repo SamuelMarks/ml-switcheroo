@@ -13,7 +13,7 @@ import sys
 import json
 import subprocess
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict
 
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.core.hooks import load_plugins
@@ -38,7 +38,7 @@ def handle_convert(
   verify: bool,
   strict: Optional[bool],
   intermediate: Optional[str],
-  plugin_settings: Dict[str, Any],
+  plugin_settings,
   json_trace_path: Optional[Path] = None,
   enable_sharding: bool = False,
 ) -> int:

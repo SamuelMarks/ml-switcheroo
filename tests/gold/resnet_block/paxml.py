@@ -1,18 +1,18 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
-from praxis.layers import convolutions
-from praxis.layers import normalizations
-from praxis.layers import activations
-import jax.numpy as jnp
+import typing
+from praxis import base_layer  # type: ignore
+from praxis.layers import convolutions  # type: ignore
+from praxis.layers import normalizations  # type: ignore
+from praxis.layers import activations  # type: ignore
 
 
-class ResidualBlock(base_layer.BaseLayer):
+class ResidualBlock(base_layer.BaseLayer):  # type: ignore
   """Test suite for the Residual Block component."""
 
   channels: int = 0
 
-  def setup(self):
+  def setup(self) -> None:
     """Helper to setup."""
     self.create_child(
       "conv1", convolutions.Conv2D.HParams(filter_shape=(3, 3, self.channels, self.channels), padding="SAME")
@@ -25,7 +25,7 @@ class ResidualBlock(base_layer.BaseLayer):
     self.create_child("bn2", normalizations.BatchNorm.HParams(dim=self.channels))
     self.create_child("relu2", activations.ReLU.HParams())
 
-  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
+  def __call__(self, x: typing.Any) -> typing.Any:
     """Executes the callable instance."""
     residual = x
     out = self.conv1(x)

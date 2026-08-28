@@ -15,7 +15,8 @@ from ml_switcheroo.core.compiler.backends.rdna.macros import (
   expand_l,
   RegisterAllocatorProtocol,
 )
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR, RdnaSGPR
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR, RdnaSGPR, RdnaNode
+from typing import List
 
 
 class DummyAllocator(RegisterAllocatorProtocol):
@@ -38,49 +39,49 @@ class DummyAllocator(RegisterAllocatorProtocol):
     return RdnaSGPR(index=1)
 
 
-def test_expand_macros():
+def test_expand_macros() -> None:
   """Docstring."""
-  allocator = DummyAllocator()
+  allocator: DummyAllocator = DummyAllocator()
 
-  nodes_conv2d = expand_conv2d(allocator, "conv", {"k": 3})
+  nodes_conv2d: List[RdnaNode] = expand_conv2d(allocator, "conv", {"k": 3})
   assert len(nodes_conv2d) > 0
 
-  nodes_linear = expand_linear(allocator, "lin", {"d_in": 10, "d_out": 10})
+  nodes_linear: List[RdnaNode] = expand_linear(allocator, "lin", {"d_in": 10, "d_out": 10})
   assert len(nodes_linear) > 0
 
-  nodes_relu = expand_relu(allocator, "relu", {})
+  nodes_relu: List[RdnaNode] = expand_relu(allocator, "relu", {})
   assert len(nodes_relu) > 0
 
-  nodes_flatten = expand_flatten(allocator, "flat", {})
+  nodes_flatten: List[RdnaNode] = expand_flatten(allocator, "flat", {})
   assert len(nodes_flatten) > 0
 
-  nodes_reshape = expand_reshape(allocator, "resh", {})
+  nodes_reshape: List[RdnaNode] = expand_reshape(allocator, "resh", {})
   assert len(nodes_reshape) > 0
 
-  nodes_conv3d = expand_conv3d(allocator, "conv3d", {})
+  nodes_conv3d: List[RdnaNode] = expand_conv3d(allocator, "conv3d", {})
   assert len(nodes_conv3d) > 0
 
-  nodes_dropout = expand_dropout(allocator, "drop", {})
+  nodes_dropout: List[RdnaNode] = expand_dropout(allocator, "drop", {})
   assert len(nodes_dropout) > 0
 
-  nodes_var = expand_variable(allocator, "var", {})
+  nodes_var: List[RdnaNode] = expand_variable(allocator, "var", {})
   assert len(nodes_var) > 0
 
-  nodes_trans = expand_transpose(allocator, "trans", {})
+  nodes_trans: List[RdnaNode] = expand_transpose(allocator, "trans", {})
   assert len(nodes_trans) > 0
 
-  nodes_conv_gen = expand_conv_general_dilated(allocator, "convgen", {})
+  nodes_conv_gen: List[RdnaNode] = expand_conv_general_dilated(allocator, "convgen", {})
   assert len(nodes_conv_gen) > 0
 
-  nodes_adam = expand_adam(allocator, "adam", {})
+  nodes_adam: List[RdnaNode] = expand_adam(allocator, "adam", {})
   assert len(nodes_adam) > 0
 
-  nodes_l = expand_l(allocator, "l", {})
+  nodes_l: List[RdnaNode] = expand_l(allocator, "l", {})
   assert len(nodes_l) > 0
 
 
-def test_expand_linear_bias():
+def test_expand_linear_bias() -> None:
   """Docstring."""
-  allocator = DummyAllocator()
-  nodes_linear = expand_linear(allocator, "lin_bias", {"d_in": 10, "d_out": 10, "bias": True})
+  allocator: DummyAllocator = DummyAllocator()
+  nodes_linear: List[RdnaNode] = expand_linear(allocator, "lin_bias", {"d_in": 10, "d_out": 10, "bias": True})
   assert len(nodes_linear) > 0

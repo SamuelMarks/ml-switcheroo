@@ -32,7 +32,7 @@ from ml_switcheroo.plugins import (
 )
 
 
-def test_auto_fsdp():
+def test_auto_fsdp() -> None:
   """Verifies the behavior of auto FSDP."""
   try:
     auto_fsdp_wrapper.AutoFSDPWrapper().transform(MagicMock(), MagicMock())

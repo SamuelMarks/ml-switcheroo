@@ -12,7 +12,10 @@ It supports:
 Definitions are loaded from `frameworks/definitions/mlx.json`.
 """
 
-from typing import List, Tuple, Optional, Dict, Any
+import typing
+
+
+from typing import List, Tuple, Optional, Dict
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
 from ml_switcheroo.frameworks.loader import load_definitions
@@ -20,8 +23,6 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
-_np_mod: Any
-np: Any
 try:
   import numpy as _np
 
@@ -178,7 +179,9 @@ class MLXAdapter(MlxIOMixin):
     """
     return ["seed", "random.seed"]
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert input data (NumPy/List) to MLX Tensor for verification.
 
     Args:
@@ -347,7 +350,7 @@ class Qwen3VLPatchEmbed(nn.Module):
     """
     return ["import mlx.core as mx"]  # pragma: no cover
 
-  def apply_wiring(self, snapshot: Any) -> Any:
+  def apply_wiring(self, snapshot):
     """Override/Patches snapshot items that cannot be statically defined.
 
     Args:

@@ -1,24 +1,27 @@
 """Test suite for the Auto Wiring module."""
 
 import pytest
+import typing
 import libcst as cst
+from pathlib import Path
 from unittest.mock import patch
 from ml_switcheroo.core.hooks import register_hook, HookContext
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 
 
 @pytest.fixture(autouse=True)
-def clean_env():
+def clean_env() -> typing.Generator[None, None, None]:
   """Helper to clean environment."""
-  pass
   yield
-  pass
 
 
-def test_auto_wired_plugin_flow(tmp_path):
+def test_auto_wired_plugin_flow(tmp_path: Path) -> None:
   """Verifies the behavior of auto wired plugin flow."""
+  import ml_switcheroo.semantics.manager as mgr_module
+
+  mgr_module._MANAGER_CACHE = None
 
   @register_hook(
     trigger="magic_swap",
@@ -46,12 +49,12 @@ def test_auto_wired_plugin_flow(tmp_path):
         mgr = SemanticsManager()
   assert "MagicOp" in mgr.data
   assert mgr.data["MagicOp"]["variants"]["jax"]["requires_plugin"] == "magic_swap"
-  lookup = mgr.get_definition("torch.magic")
+  lookup: typing.Optional[tuple[str, dict[str, typing.Any]]] = mgr.get_definition("torch.magic")
   assert lookup is not None
   assert lookup[0] == "MagicOp"
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(semantics=mgr, config=config)
-  code = "res = torch.magic(data)"
-  result = engine.run(code)
+  code: str = "res = torch.magic(data)"
+  result: ConversionResult = engine.run(code)
   assert result.success
   assert "wired_success(data)" in result.code

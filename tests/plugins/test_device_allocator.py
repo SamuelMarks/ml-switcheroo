@@ -1,6 +1,7 @@
 """Test suite for the Device Allocator module."""
 
 import pytest
+import typing
 import libcst as cst
 from unittest.mock import MagicMock, patch
 from tests.conftest import TestRewriter as PivotRewriter
@@ -16,18 +17,19 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)
-    return new_tree.code
+    return typing.cast(str, new_tree.code)
   except Exception as e:
     pytest.fail(f"Rewrite failed: {e}")
+    return ""
 
 
 @pytest.fixture
-def rewriter():
+def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   """Provides a mock rewriter for testing."""
   hooks._HOOKS["device_allocator"] = transform_device_allocator
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  device_def = {
+  device_def: dict[str, typing.Any] = {
     "requires_plugin": "device_allocator",
     "std_args": ["type"],
     "variants": {
@@ -40,17 +42,17 @@ def rewriter():
   mgr.get_known_apis.return_value = {"device": device_def}
   mgr.is_verified.return_value = True
 
-  def resolve_variant(aid, fw):
+  def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
     """Resolves variant."""
     if aid == "device" and fw in device_def["variants"]:
-      return device_def["variants"][fw]
+      return typing.cast(dict[str, typing.Any], device_def["variants"][fw])
     return None
 
   mgr.resolve_variant.side_effect = resolve_variant
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get_adapter:
 
-    def adapter_side_effect(name):
+    def adapter_side_effect(name: str) -> typing.Any:
       """Helper to adapter side effect."""
       if name == "jax":
         return JaxCoreAdapter()
@@ -62,90 +64,85 @@ def rewriter():
     yield PivotRewriter(mgr, cfg)
 
 
-def test_cuda_mapping_default_index(rewriter):
+def test_cuda_mapping_default_index(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of cuda mapping default index."""
-  code = "d = torch.device('cuda')"
-  result = rewrite_code(rewriter, code)
+  code: str = "d = torch.device('cuda')"
+  result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[0]" in result
 
 
-def test_cuda_mapping_explicit_colon_index(rewriter):
+def test_cuda_mapping_explicit_colon_index(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of cuda mapping explicit colon index."""
-  code = "d = torch.device('cuda:1')"
-  result = rewrite_code(rewriter, code)
+  code: str = "d = torch.device('cuda:1')"
+  result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[1]" in result
 
 
-def test_cpu_mapping(rewriter):
+def test_cpu_mapping(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of cpu mapping."""
-  code = "d = torch.device('cpu')"
-  result = rewrite_code(rewriter, code)
+  code: str = "d = torch.device('cpu')"
+  result: str = rewrite_code(rewriter, code)
   assert "jax.devices('cpu')[0]" in result
 
 
-def test_variable_passthrough(rewriter):
+def test_variable_passthrough(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of variable passthrough."""
-  code = "d = torch.device(my_backend)"
-  result = rewrite_code(rewriter, code)
+  code: str = "d = torch.device(my_backend)"
+  result: str = rewrite_code(rewriter, code)
   assert "jax.devices(my_backend)[0]" in result
 
 
-def test_second_arg_index(rewriter):
+def test_second_arg_index(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of second argument index."""
-  code = "d = torch.device('cuda', 2)"
-  result = rewrite_code(rewriter, code)
+  code: str = "d = torch.device('cuda', 2)"
+  result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[2]" in result
 
 
-def test_mps_mapping(rewriter):
+def test_mps_mapping(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of mps mapping."""
-  code = "d = torch.device('mps')"
-  result = rewrite_code(rewriter, code)
+  code: str = "d = torch.device('mps')"
+  result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[0]" in result
 
 
-def test_ignore_wrong_fw(rewriter):
+def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of ignore wrong framework."""
   rewriter.context.config.target_framework = "numpy"
   rewriter.context.hook_context.target_fw = "numpy"
-  code = "d = torch.device('cuda')"
-  result = rewrite_code(rewriter, code)
+  code: str = "d = torch.device('cuda')"
+  result: str = rewrite_code(rewriter, code)
   assert "'cpu'" in result
 
 
-def test_device_allocator_syntax_error(rewriter):
+def test_device_allocator_syntax_error(rewriter: PivotRewriter) -> None:
   """Verifies behavior when new syntax is invalid Python."""
-  node = cst.parse_expression("torch.device('cuda')")
+  node: cst.BaseExpression = cst.parse_expression("torch.device('cuda')")
   ctx = MagicMock()
   ctx.target_fw = "jax"
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get:
     mock_adapter = MagicMock()
     mock_adapter.get_device_syntax.return_value = "invalid syntax {{ {"
     mock_get.return_value = mock_adapter
-    res = transform_device_allocator(node, ctx)
+    res: cst.CSTNode = transform_device_allocator(node, ctx)
     assert res is node
 
 
-def test_device_allocator_adapter_exception(rewriter):
+def test_device_allocator_adapter_exception(rewriter: PivotRewriter) -> None:
   """Verifies behavior when adapter.get_device_syntax throws exception."""
-  node = cst.parse_expression("torch.device('cuda')")
+  node: cst.BaseExpression = cst.parse_expression("torch.device('cuda')")
   ctx = MagicMock()
   ctx.target_fw = "jax"
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get:
     mock_adapter = MagicMock()
     mock_adapter.get_device_syntax.side_effect = Exception("Adapter error")
     mock_get.return_value = mock_adapter
-    res = transform_device_allocator(node, ctx)
+    res: cst.CSTNode = transform_device_allocator(node, ctx)
     assert res is node
 
 
-def test_device_allocator_invalid_colon_index(rewriter):
+def test_device_allocator_invalid_colon_index(rewriter: PivotRewriter) -> None:
   """Verifies behavior when colon index is not an integer."""
-  code = "d = torch.device('cuda:foo')"
-  result = rewrite_code(rewriter, code)
-  # When it fails to parse as int, it passes 'cuda:foo' to adapter
-  # Jax adapter replaces cuda with gpu, but what does it do with 'cuda:foo'?
-  # The helper strips 'cuda' -> 'gpu', so if it's not separated, it's just 'cuda:foo'
-  # Actually, the jax adapter maps `s_type` which would be 'cuda:foo' since it didn't split
-  # Let's just assert it doesn't crash
+  code: str = "d = torch.device('cuda:foo')"
+  result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu:foo')[0]" in result or "jax.devices('cuda:foo')[0]" in result

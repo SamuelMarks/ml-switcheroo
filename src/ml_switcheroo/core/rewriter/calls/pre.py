@@ -4,7 +4,7 @@ Handles functional unwrapping, plugin claims, and lifecycle method stripping.
 Updated to remove dependencies on deleted legacy modules.
 """
 
-from typing import Tuple, Any, Optional
+from typing import Tuple, Optional, TYPE_CHECKING, Set
 
 import libcst as cst
 
@@ -15,10 +15,101 @@ from ml_switcheroo.core.rewriter.calls.utils import (
 )
 from ml_switcheroo.core.hooks import get_hook
 
+if TYPE_CHECKING:
+  # Structural typing for rewriter to avoid circular import
+  class SourceTraitsDummy:
+    """Dummy class."""
+
+    functional_execution_method: str
+    implicit_method_roots: list
+
+  class SemanticManagerDummy:
+    """Dummy class."""
+
+    def get_definition(self, func_name: str) -> Optional[Tuple[str, dict]]:
+      """Dummy."""
+      ...
+
+    def get_framework_config(self, target_fw: str) -> dict:
+      """Dummy."""
+      ...
+
+  class HookContextDummy:
+    """Dummy class."""
+
+    pass
+
+  class SignatureContextDummy:
+    """Dummy class."""
+
+    existing_args: set
+    injected_args: list
+
+  class RewriterContextDummy:
+    """Dummy class."""
+
+    hook_context: HookContextDummy
+    symbol_table: "SymbolTableDummy"
+    signature_stack: list[SignatureContextDummy]
+
+  class SymbolTypeDummy:
+    """Dummy class."""
+
+    name: str
+    framework: str
+
+  class SymbolTableDummy:
+    """Dummy class."""
+
+    def get_type(self, node: cst.CSTNode) -> Optional[SymbolTypeDummy]:
+      """Dummy."""
+      ...
+
+  class RewriterDummy:
+    """Dummy class."""
+
+    source_traits: SourceTraitsDummy
+    semantics: SemanticManagerDummy
+    target_fw: str
+    source_fw: str
+    context: RewriterContextDummy
+
+    def _get_source_traits(self) -> SourceTraitsDummy:
+      """Dummy."""
+      ...
+
+    def _get_mapping(self, func_name: str, silent: bool = False) -> Optional[dict]:
+      """Dummy."""
+      ...
+
+    def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
+      """Dummy."""
+      ...
+
+    def _report_warning(self, msg: str) -> None:
+      """Dummy."""
+      ...
+
+    def _is_stateful(self, func_name: str) -> bool:
+      """Dummy."""
+      ...
+
+    def _is_module_alias(self, name: cst.BaseExpression) -> bool:
+      """Dummy."""
+      ...
+
+    def _get_target_traits(self) -> "SourceTraitsDummy":
+      """Dummy."""
+      ...
+
+    def _create_dotted_name(self, name: str) -> cst.Attribute:
+      """Dummy."""
+      ...
+
 
 def handle_pre_checks(
-  rewriter: Any, original: cst.Call, updated: cst.Call, func_name: Optional[str]
-) -> Tuple[bool, cst.CSTNode]:
+  rewriter: "RewriterDummy", original: cst.Call, updated: cst.Call, func_name: Optional[str]
+) -> Tuple[bool, cst.BaseExpression]:
   """Execute pre-lookup checks and transformations.
 
   Args:
@@ -107,14 +198,14 @@ def handle_pre_checks(
       if method_name in strip_set:
         if isinstance(updated.func, cst.Attribute):
           rewriter._report_warning(f"Stripped framework-specific lifecycle method '.{method_name}()'.")
-          result_node = updated.func.value  # type: ignore
+          result_node = updated.func.value
           log_diff("Lifecycle Strip", original, result_node)
           return True, result_node
 
       if method_name in warn_set:
         if isinstance(updated.func, cst.Attribute):
           rewriter._report_warning(f"Ignored model state method '.{method_name}()'.")
-          result_node = updated.func.value  # type: ignore
+          result_node = updated.func.value
           log_diff("Lifecycle Warn", original, result_node)
           return True, result_node
 
@@ -123,14 +214,14 @@ def handle_pre_checks(
     fw_config = rewriter.semantics.get_framework_config(rewriter.target_fw)
     stateful_spec = fw_config.get("stateful_call")
     if stateful_spec:
-      result_node = rewrite_stateful_call(rewriter, updated, func_name, stateful_spec)
+      result_node = rewrite_stateful_call(rewriter, updated, func_name, stateful_spec)  # type: ignore[arg-type]
       log_diff("State Mechanism", original, result_node)
       return True, result_node
 
   return False, updated
 
 
-def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Optional[str]) -> Optional[str]:
+def resolve_implicit_method(rewriter: "RewriterDummy", original: cst.Call, func_name: Optional[str]) -> Optional[str]:
   """Attempt to resolve method calls on objects to full API paths.
 
   Args:
@@ -174,13 +265,13 @@ def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Option
       if hasattr(rewriter, "_get_target_traits"):
         # Note: Implicit roots usually belong to SOURCE traits
         if hasattr(rewriter, "source_traits"):
-          traits = rewriter.source_traits
+          traits = rewriter.source_traits  # type: ignore[assignment]
         else:
           # Fallback if property missing (shouldn't happen in ApiPass)
           config_dict = rewriter.semantics.get_framework_config(rewriter.source_fw)
           from ml_switcheroo.semantics.schema import StructuralTraits
 
-          traits = StructuralTraits.model_validate(config_dict.get("traits", {}))
+          traits = StructuralTraits.model_validate(config_dict.get("traits", {}))  # type: ignore[assignment]
 
         implicit_roots = traits.implicit_method_roots
 

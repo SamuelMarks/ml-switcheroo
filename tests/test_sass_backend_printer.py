@@ -9,24 +9,25 @@ from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassNode,
   SassRegister,
 )
+from typing import List, Any
 
 
 class MockSassNode(SassNode):
   """Test element."""
 
-  def __str__(self):
+  def __str__(self) -> str:
     """Test element."""
     return "mock_node"
 
-  def __eq__(self, other):
+  def __eq__(self, other: Any) -> bool:
     """Test element."""
     return isinstance(other, MockSassNode)
 
 
-def test_sass_printer_emit():
+def test_sass_printer_emit() -> None:
   """Test element."""
-  printer = SassPrinter()
-  nodes = [
+  printer: SassPrinter = SassPrinter()
+  nodes: List[SassNode] = [
     SassLabel(name="L1"),
     SassInstruction(opcode="MOV", operands=[SassRegister(name="R0"), SassRegister(name="R1")]),
     SassDirective(name="version", params=["1.0"]),
@@ -34,7 +35,7 @@ def test_sass_printer_emit():
     MockSassNode(),
   ]
 
-  result = printer.emit(nodes)
+  result: str = printer.emit(nodes)
 
-  expected = "L1:\n" "    MOV R0, R1;\n" "    .version 1.0\n" "    // comment\n" "    mock_node\n"
+  expected: str = "L1:\n    MOV R0, R1;\n    .version 1.0\n    // comment\n    mock_node\n"
   assert result == expected

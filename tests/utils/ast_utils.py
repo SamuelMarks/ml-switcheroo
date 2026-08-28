@@ -13,6 +13,7 @@ Functions:
 """
 
 from ast import AST
+from typing import Any
 
 
 class Undefined:
@@ -24,7 +25,7 @@ class Undefined:
   """
 
 
-def cmp_ast(node0, node1):
+def cmp_ast(node0: Any, node1: Any) -> bool:
   """Recursively compares two AST nodes or collections of AST nodes for structural equality.
 
   This function performs a deep structural comparison of AST nodes, lists/tuples of
@@ -48,10 +49,10 @@ def cmp_ast(node0, node1):
       if not cmp_ast(left, right):
         return False
   elif isinstance(node0, AST):
-    for field in node0._fields:
-      left = getattr(node0, field, Undefined)
-      right = getattr(node1, field, Undefined)
-      if not cmp_ast(left, right):
+    for field in getattr(node0, "_fields"):
+      left_val: Any = getattr(node0, field, Undefined)
+      right_val: Any = getattr(node1, field, Undefined)
+      if not cmp_ast(left_val, right_val):
         return False
   else:
     return node0 == node1

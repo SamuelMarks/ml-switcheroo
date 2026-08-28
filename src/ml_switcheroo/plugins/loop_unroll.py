@@ -13,10 +13,8 @@ The strategy is **Safety-First**:
     attempting unsafe auto-conversion (solving the "carry state" problem is often undecidable).
 """
 
-from typing import Any
-
 import libcst as cst
-from typing import Tuple, List, Union
+from typing import Tuple, List
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -39,7 +37,7 @@ def _analyze_range_iterator(node: cst.BaseExpression) -> Tuple[bool, List[cst.Ar
 
 
 @register_hook("transform_for_loop")
-def transform_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.FlattenSentinel[Any]]:
+def transform_loops(node: cst.For, ctx: HookContext) -> cst.CSTNode:
   """Plugin Transform Transforms or Flags `for` loops for functional compliance.
 
   Triggered by the `ControlFlowMixin` when visiting `For` nodes.
@@ -85,7 +83,7 @@ def transform_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.Flatt
       f"{target_fw_label} requires explicit functional loops (e.g. `fori_loop`) for stateful logic. "
       "Auto-conversion prevented due to missing dataflow analysis of 'carry' state."
     )
-    return EscapeHatch.mark_failure(node, warn_msg)  # type: ignore
+    return EscapeHatch.mark_failure(node, warn_msg)
 
   # 3. Fallback for Generic Iterators (Lists, Tensors, Zips)
   # Candidate for scan
@@ -93,4 +91,4 @@ def transform_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.Flatt
     f"Python 'for' loop in {target_fw_label} requires structural rewrite (e.g. `scan`). "
     "Unrolling this loop may break if it depends on external state."
   )
-  return EscapeHatch.mark_failure(node, warn_msg)  # type: ignore
+  return EscapeHatch.mark_failure(node, warn_msg)

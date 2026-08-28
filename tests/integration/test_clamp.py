@@ -1,6 +1,7 @@
 """Test suite for the Clamp module."""
 
 import pytest
+import typing
 import libcst as cst
 from unittest.mock import MagicMock
 from tests.conftest import TestRewriter as PivotRewriter
@@ -8,17 +9,17 @@ from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 
 
-def rewrite_code(rewriter, code):
+def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code."""
-  return rewriter.convert(cst.parse_module(code)).code
+  return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
-def rewriter():
+def rewriter() -> PivotRewriter:
   """Provides a mock rewriter for testing."""
-  hooks._PLUGINS_LOADED = True
+  hooks._PLUGINS_LOADED = True  # type: ignore
   mgr = MagicMock()
-  clamp_def = {
+  clamp_def: dict[str, typing.Any] = {
     "std_args": ["input", "min", "max"],
     "variants": {
       "torch": {"api": "torch.clamp"},
@@ -35,26 +36,26 @@ def rewriter():
   return PivotRewriter(mgr, cfg)
 
 
-def test_clamp_keyword_rename(rewriter):
+def test_clamp_keyword_rename(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of clamp keyword rename."""
-  code = "y = torch.clamp(x, min=0.0, max=1.0)"
-  res = rewrite_code(rewriter, code)
+  code: str = "y = torch.clamp(x, min=0.0, max=1.0)"
+  res: str = rewrite_code(rewriter, code)
   assert "jax.numpy.clip" in res
   assert "a_min=0.0" in res
   assert "a_max=1.0" in res
   assert " min=" not in res
 
 
-def test_clip_alias(rewriter):
+def test_clip_alias(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of clip alias."""
-  code = "y = torch.clip(x, 0, 1)"
-  res = rewrite_code(rewriter, code)
+  code: str = "y = torch.clip(x, 0, 1)"
+  res: str = rewrite_code(rewriter, code)
   assert "jax.numpy.clip" in res
 
 
-def test_method_clamp(rewriter):
+def test_method_clamp(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of method clamp."""
-  code = "y = x.clamp(min=0)"
-  res = rewrite_code(rewriter, code)
+  code: str = "y = x.clamp(min=0)"
+  res: str = rewrite_code(rewriter, code)
   assert "jax.numpy.clip" in res
   assert "a_min=0" in res

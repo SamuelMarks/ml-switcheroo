@@ -4,7 +4,8 @@ Uses ``hypothesis`` to generate property-based test cases for operations.
 Maps ODL definitions to Strategies and executes cross-framework comparison.
 """
 
-from typing import Any
+import typing
+
 
 import importlib
 from typing import Dict, Tuple, Optional, List
@@ -34,10 +35,10 @@ class EquivalenceRunner:
 
   def verify(
     self,
-    variants: Dict[str, Any],
+    variants,
     params: List[str],
     hints: Optional[Dict[str, str]] = None,
-    constraints: Optional[Dict[str, Dict[Any, Any]]] = None,
+    constraints=None,
     shape_calc: Optional[str] = None,
     rtol: float = 1e-3,
     atol: float = 1e-4,
@@ -67,7 +68,7 @@ class EquivalenceRunner:
 
     @settings(max_examples=20, deadline=None)
     @given(st.fixed_dictionaries(strat_dict))
-    def run_check(inputs: Any) -> Any:
+    def run_check(inputs):
       """Execute a single property-based test iteration using generated inputs.
 
       Runs the operation on all defined framework variants and performs equivalence
@@ -126,8 +127,8 @@ class EquivalenceRunner:
               if hasattr(r, "shape"):  # pragma: no branch
                 s = tuple(r.shape) if hasattr(r.shape, "__iter__") else (r.shape,)
                 e = tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)  # type: ignore
-                if s != e:  # type: ignore
-                  failure_msg.append(f"Shape Mismatch: {s} != {e}")  # type: ignore
+                if s != e:
+                  failure_msg.append(f"Shape Mismatch: {s} != {e}")
         except Exception as e:
           failure_msg.append(f"Shape Calculation Error: {e}")
 
@@ -144,7 +145,7 @@ class EquivalenceRunner:
       # Hypothesis raises explicit errors when assertions fail
       return False, f"Verification Failed: {e}"
 
-  def _execute_api(self, api: Any, kwargs: Any) -> Any:
+  def _execute_api(self, api: str, kwargs: dict) -> typing.Any:
     """Dynamically imports and calls a framework API function with specified arguments.
 
     Args:
@@ -160,7 +161,7 @@ class EquivalenceRunner:
     mod = importlib.import_module(m)
     return getattr(mod, f)(**kwargs)
 
-  def _remap_args(self, inputs: Any, mapping: Any) -> Any:
+  def _remap_args(self, inputs: dict, mapping: dict) -> dict:
     """Remap input argument names to match the expected parameter names of a framework variant.
 
     Args:
@@ -172,7 +173,7 @@ class EquivalenceRunner:
     """
     return {mapping.get(k, k): v for k, v in inputs.items()}
 
-  def _compare_results(self, results: Any, rtol: Any, atol: Any, err_box: Any) -> Any:
+  def _compare_results(self, results: dict, rtol: float, atol: float, err_box: typing.List[str]) -> None:
     """Compare execution results from different frameworks and records mismatches.
 
     Performs exhaustive pairwise deep comparisons between the outputs of all
@@ -202,7 +203,7 @@ class EquivalenceRunner:
         err_box.append(m)
         raise AssertionError(m)
 
-  def _deep_compare(self, a: Any, b: Any, rtol: Any = 1e-3, atol: Any = 1e-4) -> Any:
+  def _deep_compare(self, a: typing.Any, b: typing.Any, rtol: float = 1e-3, atol: float = 1e-4) -> bool:
     """Recursively checks two values for structural and numerical equivalence.
 
     Handles lists, tuples, scalar numbers, NumPy arrays, and other types with custom

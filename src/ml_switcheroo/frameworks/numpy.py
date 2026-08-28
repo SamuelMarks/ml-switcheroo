@@ -10,15 +10,15 @@ Capabilities:
 3.  **Weight Migration**: Handling dict-based `.npz` archives via `get_weight_*` hooks.
 """
 
-from typing import Any
+import typing
+
+
 import textwrap
 from typing import Union, List, Tuple, Optional, Dict
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
 from ml_switcheroo.frameworks.loader import load_definitions
 
-_np_mod: Any
-np: Any
 try:
   import numpy as _np
 
@@ -290,7 +290,7 @@ class NumpyAdapter:
     """
     return f"np.savez_compressed({path_var}, **{state_var})"
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """No dynamic wiring needed for NumPy.
 
     Args:
@@ -311,7 +311,9 @@ class NumpyAdapter:
     """
     return f"https://numpy.org/doc/stable/reference/generated/{api_name}.html"
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Attempt to convert input data to a NumPy array.
 
     Args:

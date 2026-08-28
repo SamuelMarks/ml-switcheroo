@@ -1,5 +1,6 @@
 """Test suite for the Parser module."""
 
+import typing
 from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
@@ -12,53 +13,54 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaLabelRef,
   RdnaModifier,
   RdnaMemory,
+  RdnaNode,
 )
 
 
-def test_parse_comment():
+def test_parse_comment() -> None:
   """Parses comment."""
   parser = RdnaParser("; hello world")
-  nodes = parser.parse().statements
+  nodes: list[RdnaNode] = parser.parse().statements
   assert len(nodes) == 1
   assert isinstance(nodes[0], RdnaComment)
   assert nodes[0].text == " hello world"
 
 
-def test_parse_label():
+def test_parse_label() -> None:
   """Parses label."""
   parser = RdnaParser("loop:")
-  nodes = parser.parse().statements
+  nodes: list[RdnaNode] = parser.parse().statements
   assert len(nodes) == 1
   assert isinstance(nodes[0], RdnaLabel)
   assert nodes[0].name == "loop"
 
 
-def test_parse_directive():
+def test_parse_directive() -> None:
   """Parses directive."""
   parser = RdnaParser(".global_base 1, 2")
-  nodes = parser.parse().statements
+  nodes: list[RdnaNode] = parser.parse().statements
   assert len(nodes) == 1
   assert isinstance(nodes[0], RdnaDirective)
   assert nodes[0].name == "global_base"
   assert nodes[0].params == ["1", "2"]
 
 
-def test_parse_instruction_simple():
+def test_parse_instruction_simple() -> None:
   """Parses instruction simple."""
   parser = RdnaParser("v_nop")
-  nodes = parser.parse().statements
+  nodes: list[RdnaNode] = parser.parse().statements
   assert len(nodes) == 1
   assert isinstance(nodes[0], RdnaInstruction)
   assert nodes[0].opcode == "v_nop"
   assert len(nodes[0].operands) == 0
 
 
-def test_parse_instruction_operands():
+def test_parse_instruction_operands() -> None:
   """Parses instruction operands."""
   parser = RdnaParser("v_add_f32 v0, v1, s0, 42, 0xff, my_label")
-  nodes = parser.parse().statements
+  nodes: list[RdnaNode] = parser.parse().statements
   assert len(nodes) == 1
-  inst = nodes[0]
+  inst = typing.cast(RdnaInstruction, nodes[0])
   assert inst.opcode == "v_add_f32"
   assert len(inst.operands) == 6
   assert isinstance(inst.operands[0], RdnaVGPR)
@@ -76,40 +78,44 @@ def test_parse_instruction_operands():
   assert inst.operands[5].name == "my_label"
 
 
-def test_parse_modifiers():
+def test_parse_modifiers() -> None:
   """Parses modifiers."""
   parser = RdnaParser("v_add_f32 v0, glc")
-  nodes = parser.parse().statements
-  assert len(nodes[0].operands) == 2
-  assert isinstance(nodes[0].operands[1], RdnaModifier)
-  assert nodes[0].operands[1].name == "glc"
+  nodes: list[RdnaNode] = parser.parse().statements
+  inst = typing.cast(RdnaInstruction, nodes[0])
+  assert len(inst.operands) == 2
+  assert isinstance(inst.operands[1], RdnaModifier)
+  assert inst.operands[1].name == "glc"
 
 
-def test_parse_memory():
+def test_parse_memory() -> None:
   """Parses memory."""
   parser = RdnaParser("v_add [v0 + 4]")
-  nodes = parser.parse().statements
-  assert isinstance(nodes[0].operands[0], RdnaMemory)
-  assert isinstance(nodes[0].operands[0].base, RdnaVGPR)
-  assert nodes[0].operands[0].offset == 4
+  nodes: list[RdnaNode] = parser.parse().statements
+  inst = typing.cast(RdnaInstruction, nodes[0])
+  assert isinstance(inst.operands[0], RdnaMemory)
+  assert isinstance(inst.operands[0].base, RdnaVGPR)
+  assert inst.operands[0].offset == 4
   parser2 = RdnaParser("v_add [v1 - 0x2]")
-  nodes2 = parser2.parse().statements
-  assert nodes2[0].operands[0].offset == -2
+  nodes2: list[RdnaNode] = parser2.parse().statements
+  inst2 = typing.cast(RdnaInstruction, nodes2[0])
+  assert getattr(inst2.operands[0], "offset", None) == -2
 
 
-def test_parse_memory_no_offset():
+def test_parse_memory_no_offset() -> None:
   """Parses memory no offset."""
   parser = RdnaParser("v_add [v0]")
-  nodes = parser.parse().statements
-  assert isinstance(nodes[0].operands[0], RdnaMemory)
-  assert nodes[0].operands[0].offset == 0
+  nodes: list[RdnaNode] = parser.parse().statements
+  inst = typing.cast(RdnaInstruction, nodes[0])
+  assert isinstance(inst.operands[0], RdnaMemory)
+  assert inst.operands[0].offset == 0
 
 
-def test_parse_register_range():
+def test_parse_register_range() -> None:
   """Parses register range."""
   parser = RdnaParser("s_mov_b64 s[0:1], v[10:11]")
-  nodes = parser.parse().statements
-  inst = nodes[0]
+  nodes: list[RdnaNode] = parser.parse().statements
+  inst = typing.cast(RdnaInstruction, nodes[0])
   assert isinstance(inst.operands[0], RdnaSGPR)
   assert inst.operands[0].index == 0
   assert inst.operands[0].count == 2
@@ -118,23 +124,24 @@ def test_parse_register_range():
   assert inst.operands[1].count == 2
 
 
-def test_parse_special_reg():
+def test_parse_special_reg() -> None:
   """Parses special reg."""
   parser = RdnaParser("s_mov_b32 exec, 1")
-  nodes = parser.parse().statements
-  assert isinstance(nodes[0].operands[0], RdnaLabelRef)
-  assert nodes[0].operands[0].name == "exec"
+  nodes: list[RdnaNode] = parser.parse().statements
+  inst = typing.cast(RdnaInstruction, nodes[0])
+  assert isinstance(inst.operands[0], RdnaLabelRef)
+  assert inst.operands[0].name == "exec"
 
 
-def test_parse_directive_multiline():
+def test_parse_directive_multiline() -> None:
   """Parses directive multiline."""
   parser = RdnaParser(".global_base 1 \n .global_base 2")
-  nodes = parser.parse().statements
+  nodes: list[RdnaNode] = parser.parse().statements
   assert len(nodes) == 2
 
 
-def test_parse_instruction_multiline():
+def test_parse_instruction_multiline() -> None:
   """Parses instruction multiline."""
   parser = RdnaParser("v_add \n v_sub")
-  nodes = parser.parse().statements
+  nodes: list[RdnaNode] = parser.parse().statements
   assert len(nodes) == 2

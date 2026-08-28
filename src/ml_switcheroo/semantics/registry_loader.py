@@ -5,7 +5,10 @@ from registered Framework Adapters and Plugin Hooks. This enables "Code-First"
 definitions alongside "Config-First" JSONs.
 """
 
-from typing import Any
+import ml_switcheroo
+import typing
+
+
 from ml_switcheroo.frameworks.base import (
   available_frameworks,
   get_adapter,
@@ -19,7 +22,7 @@ from ml_switcheroo.semantics.merging import merge_tier_data, merge_overlay_data
 class RegistryLoader:
   """Hydrate the SemanticsManager from python objects (Adapters/Plugins)."""
 
-  def __init__(self, manager: Any):
+  def __init__(self, manager: "ml_switcheroo.semantics.manager.SemanticsManager") -> None:
     """Initialize the loader.
 
     Args:
@@ -70,7 +73,7 @@ class RegistryLoader:
       # 6. Apply Dynamic Wiring logic
       self._apply_wiring(fw_name, adapter)
 
-  def _load_adapter_traits(self, fw_name: str, adapter: Any) -> None:
+  def _load_adapter_traits(self, fw_name: str, adapter: typing.Any) -> None:
     """Extract import aliases, supported tiers, and structural traits.
 
     Args:
@@ -106,7 +109,7 @@ class RegistryLoader:
     if hasattr(adapter, "declared_magic_args") and adapter.declared_magic_args:
       self.mgr.known_magic_args.update(adapter.declared_magic_args)
 
-  def _load_adapter_specs(self, adapter: Any) -> None:
+  def _load_adapter_specs(self, adapter: typing.Any) -> None:
     """Load abstract operations defined by the adapter.
 
     Args:
@@ -134,7 +137,7 @@ class RegistryLoader:
         tier=tier,
       )
 
-  def _load_adapter_definitions(self, fw_name: str, adapter: Any) -> None:
+  def _load_adapter_definitions(self, fw_name: str, adapter: typing.Any) -> None:
     """Load concrete implementations defined by the adapter.
 
     Args:
@@ -166,7 +169,7 @@ class RegistryLoader:
         filename=f"{fw_name}_code_defs",
       )
 
-  def _load_import_namespaces(self, fw_name: str, adapter: Any) -> None:
+  def _load_import_namespaces(self, fw_name: str, adapter: typing.Any) -> None:
     """Register framework namespaces for import abstraction.
 
     Args:
@@ -204,14 +207,14 @@ class RegistryLoader:
 
         self.mgr._providers[fw_name][tier] = {
           "root": root,
-          "sub": sub,
-          "alias": alias,
+          "sub": sub,  # type: ignore
+          "alias": alias,  # type: ignore
         }
 
         # 2. Register SOURCE identification
         self.mgr._source_registry[path] = (fw_name, tier)
 
-  def _apply_wiring(self, fw_name: str, adapter: Any) -> None:
+  def _apply_wiring(self, fw_name: str, adapter: typing.Any) -> None:
     """Execute manual wiring callback on the adapter.
 
     Args:
@@ -244,7 +247,7 @@ class RegistryLoader:
     """
     plugin_metadata = hooks.get_all_hook_metadata()
     for _, spec in plugin_metadata.items():
-      for op_name, op_details in spec.ops.items():
+      for op_name, op_details in spec.ops.items():  # type: ignore
         merge_tier_data(
           data=self.mgr.data,
           key_origins=self.mgr._key_origins,

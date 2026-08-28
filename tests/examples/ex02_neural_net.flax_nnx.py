@@ -4,6 +4,7 @@ This module defines a basic single-layer perceptron model which is utilized for
 demonstrating and testing translation capabilities from Flax NNX to PyTorch/JAX structures.
 """
 
+import jax
 from flax import nnx
 
 
@@ -16,7 +17,7 @@ class SimplePerceptron(nnx.Module):
     - __call__ -> forward.
   """
 
-  def __init__(self, in_features, out_features, rngs: nnx.Rngs):
+  def __init__(self, in_features: int, out_features: int, rngs: nnx.Rngs) -> None:
     """Initializes the SimplePerceptron layer with a linear transformation.
 
     Args:
@@ -26,7 +27,7 @@ class SimplePerceptron(nnx.Module):
     """
     self.layer = nnx.Linear(in_features, out_features, rngs=rngs)
 
-  def __call__(self, x):
+  def __call__(self, x: jax.Array) -> jax.Array:
     """Performs a forward pass of the neural network layer.
 
     Args:

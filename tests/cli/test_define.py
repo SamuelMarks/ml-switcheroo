@@ -1,44 +1,51 @@
 """Test module."""
 
+import typing
 import yaml
-from unittest.mock import patch
+from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 from ml_switcheroo.cli.handlers.define import handle_define
 
 
-def test_handle_define_not_found(tmp_path):
+def test_handle_define_not_found(tmp_path: Path) -> None:
   """Test element."""
-  res = handle_define(tmp_path / "missing.yaml")
+  res: int = handle_define(tmp_path / "missing.yaml")
   assert res == 1
 
 
 @patch("ml_switcheroo.cli.handlers.define.resolve_semantics_dir")
 @patch("ml_switcheroo.cli.handlers.define.shutil.copy2")
-def test_handle_define_success(mock_copy, mock_resolve, tmp_path):
+def test_handle_define_success(mock_copy: MagicMock, mock_resolve: MagicMock, tmp_path: Path) -> None:
   """Test element."""
   # Setup mock semantics dir
-  sem_dir = tmp_path / "semantics"
+  sem_dir: Path = tmp_path / "semantics"
   sem_dir.mkdir()
   mock_resolve.return_value = sem_dir
 
   # Create valid ODL yaml
-  in_file = tmp_path / "op.yaml"
-  data = {"operation": "TestOp", "tier": "neural_net", "description": "Test", "variants": {}}
+  in_file: Path = tmp_path / "op.yaml"
+  data: dict[str, typing.Union[str, dict[str, str]]] = {
+    "operation": "TestOp",
+    "tier": "neural_net",
+    "description": "Test",
+    "variants": {},
+  }
   with open(in_file, "w") as f:
     yaml.dump(data, f)
 
-  res = handle_define(in_file)
+  res: int = handle_define(in_file)
 
   assert res == 0
   mock_copy.assert_called_once_with(in_file, sem_dir / "odl" / "TestOp.yaml")
 
 
-def test_handle_define_invalid_schema(tmp_path):
+def test_handle_define_invalid_schema(tmp_path: Path) -> None:
   """Test element."""
-  in_file = tmp_path / "op.yaml"
-  data = {"invalid": "data"}  # missing 'operation'
+  in_file: Path = tmp_path / "op.yaml"
+  data: dict[str, str] = {"invalid": "data"}  # missing 'operation'
   with open(in_file, "w") as f:
     yaml.dump(data, f)
 
-  res = handle_define(in_file)
+  res: int = handle_define(in_file)
   assert res == 1

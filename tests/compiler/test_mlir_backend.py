@@ -6,71 +6,71 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.core.mlir.cst import ModuleNode, BlockNode, OperationNode
 
 
-def test_mlir_backend_init():
+def test_mlir_backend_init() -> None:
   """Test initialization."""
-  backend = MlirBackend(semantics="mock_semantics")
+  backend = MlirBackend(semantics="mock_semantics")  # type: ignore
   assert backend.semantics == "mock_semantics"
 
 
-def test_mlir_backend_compile_input_numeric():
+def test_mlir_backend_compile_input_numeric() -> None:
   """Test compile with numeric Input node."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", kind="Input", metadata={"value": "42"})
   graph.nodes.append(n1)
 
-  mlir_str = backend.compile(graph)
+  mlir_str: str = backend.compile(graph)
   assert "sw.constant" in mlir_str
   assert "value = 42" in mlir_str
   assert "i32" in mlir_str
   assert "%n1" in mlir_str
 
 
-def test_mlir_backend_compile_input_non_numeric():
+def test_mlir_backend_compile_input_non_numeric() -> None:
   """Test compile with non-numeric Input node."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", kind="Input", metadata={"value": "not_a_number"})
   graph.nodes.append(n1)
 
-  mlir_str = backend.compile(graph)
+  mlir_str: str = backend.compile(graph)
   assert "sw.op" in mlir_str
   assert 'type = "Input"' in mlir_str
   assert "!sw.unknown" in mlir_str
 
 
-def test_mlir_backend_compile_input_default_numeric():
+def test_mlir_backend_compile_input_default_numeric() -> None:
   """Test compile with Input node with no value in metadata (defaults to 1)."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", kind="Input")  # metadata missing "value", should default to "1"
   graph.nodes.append(n1)
 
-  mlir_str = backend.compile(graph)
+  mlir_str: str = backend.compile(graph)
   assert "sw.constant" in mlir_str
   assert "value = 1" in mlir_str
 
 
-def test_mlir_backend_compile_output():
+def test_mlir_backend_compile_output() -> None:
   """Test compile with Output node."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", kind="Output")
   graph.nodes.append(n1)
 
-  mlir_str = backend.compile(graph)
+  mlir_str: str = backend.compile(graph)
   assert "sw.return" in mlir_str
   assert "()" in mlir_str
 
 
-def test_mlir_backend_compile_generic_op():
+def test_mlir_backend_compile_generic_op() -> None:
   """Test compile with a generic operation node."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", kind="MyOp", metadata={"attr1": "val1", "attr2": "val2"})
   graph.nodes.append(n1)
 
-  mlir_str = backend.compile(graph)
+  mlir_str: str = backend.compile(graph)
   assert "sw.op" in mlir_str
   assert 'type = "MyOp"' in mlir_str
   assert 'attr1 = "val1"' in mlir_str
@@ -78,16 +78,16 @@ def test_mlir_backend_compile_generic_op():
   assert "%n1" in mlir_str
 
 
-def test_mlir_printer_emit_non_module():
+def test_mlir_printer_emit_non_module() -> None:
   """Test MlirPrinter with non-module node."""
   printer = MlirPrinter()
   # OperationNode.to_text() should be called
   op = OperationNode(name='"mock.op"')
-  text = printer.emit(op)
+  text: str = printer.emit(op)
   assert "mock.op" in text
 
 
-def test_mlir_printer_emit_module_with_module_op():
+def test_mlir_printer_emit_module_with_module_op() -> None:
   """Test MlirPrinter with a module node that already has a module operation."""
   printer = MlirPrinter()
   op = OperationNode(name="module")
@@ -95,13 +95,13 @@ def test_mlir_printer_emit_module_with_module_op():
   block.operations.append(op)
   module = ModuleNode(body=block)
 
-  text = printer.emit(module, header="// Header\n")
+  text: str = printer.emit(module, header="// Header\n")
   assert "// Header" in text
   assert "module" in text
   assert "func.func @main()" not in text
 
 
-def test_mlir_printer_emit_module_without_module_op():
+def test_mlir_printer_emit_module_without_module_op() -> None:
   """Test MlirPrinter with a module node that has normal ops."""
   printer = MlirPrinter()
   op = OperationNode(name='"some.op"')
@@ -109,7 +109,7 @@ def test_mlir_printer_emit_module_without_module_op():
   block.operations.append(op)
   module = ModuleNode(body=block)
 
-  text = printer.emit(module, header="")
+  text: str = printer.emit(module, header="")
   assert "module {" in text
   assert "func.func @main() {" in text
   assert "some.op" in text

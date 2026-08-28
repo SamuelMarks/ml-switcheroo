@@ -1,13 +1,14 @@
 """Extra tests for the Paxml framework adapter."""
 
 import sys
+import pytest
 
 
-def test_paxml_import_success(monkeypatch):
+def test_paxml_import_success(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test paxml framework imports when praxis is available."""
   import types
 
-  mock_praxis = types.ModuleType("praxis")
+  mock_praxis: types.ModuleType = types.ModuleType("praxis")
   mock_praxis.layers = types.ModuleType("praxis.layers")
   mock_praxis.base_layer = types.ModuleType("praxis.base_layer")
   mock_praxis.layers.activations = types.ModuleType("praxis.layers.activations")
@@ -28,11 +29,11 @@ def test_paxml_import_success(monkeypatch):
   assert paxml_mod.praxis is not None
 
 
-def test_paxml_methods_coverage():
+def test_paxml_methods_coverage() -> None:
   """Test element."""
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
-  adapter = PaxmlAdapter()
+  adapter: PaxmlAdapter = PaxmlAdapter()
 
   # 77-80 (ghost loading if needed)
   from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -71,35 +72,35 @@ def test_paxml_methods_coverage():
   adapter.get_tiered_examples()
 
 
-def test_paxml_extra_misses():
+def test_paxml_extra_misses() -> None:
   """Test element."""
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
   from ml_switcheroo_ir.schema.ghost import SemanticTier
 
-  adapter = PaxmlAdapter()
+  adapter: PaxmlAdapter = PaxmlAdapter()
   adapter._snapshot_data = {}
   adapter._collect_ghost(SemanticTier.NEURAL)
 
   adapter.definitions
 
 
-def test_paxml_definitions_fallback():
+def test_paxml_definitions_fallback() -> None:
   """Test element."""
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
   from unittest.mock import patch
 
-  adapter = PaxmlAdapter()
+  adapter: PaxmlAdapter = PaxmlAdapter()
   with patch("ml_switcheroo.frameworks.paxml.load_definitions", return_value={}):
     adapter.definitions
 
 
-def test_paxml_definitions_args_none():
+def test_paxml_definitions_args_none() -> None:
   """Test element."""
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
   from unittest.mock import patch, MagicMock
 
-  adapter = PaxmlAdapter()
-  mock_map = MagicMock()
+  adapter: PaxmlAdapter = PaxmlAdapter()
+  mock_map: MagicMock = MagicMock()
   mock_map.args = None
   with patch("ml_switcheroo.frameworks.paxml.load_definitions", return_value={"Linear": mock_map}):
     adapter.definitions

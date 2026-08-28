@@ -1,10 +1,11 @@
 """Test module."""
 
+import typing
 from ml_switcheroo.frameworks.rdna import RdnaAdapter
 from ml_switcheroo.semantics.schema import PluginTraits
 
 
-def test_rdna_missing_methods():
+def test_rdna_missing_methods() -> None:
   """Test function."""
   adapter = RdnaAdapter()
 
@@ -23,29 +24,31 @@ def test_rdna_missing_methods():
   assert adapter.convert("data") == "data"
   assert adapter.ui_priority == 151
 
-  defs = adapter.definitions
+  defs: typing.Any = adapter.definitions
   assert isinstance(defs, dict)
 
-  ex = adapter.get_tiered_examples()
+  ex: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in ex
   assert "tier2_neural_simple" in ex
   assert "tier3_extras" in ex
   pass
 
   adapter.apply_wiring({})
-  assert "gpuopen.com" in adapter.get_doc_url("api")
+  url: typing.Optional[str] = adapter.get_doc_url("api")
+  assert url is not None
+  assert "gpuopen.com" in url
 
 
-def test_rdna_parse_rdna_to_graph():
+def test_rdna_parse_rdna_to_graph() -> None:
   """Test parsing RDNA code to graph."""
   adapter = RdnaAdapter()
 
   # Test empty graph
-  empty_graph = adapter.parse_rdna_to_graph("; just a comment")
+  empty_graph: typing.Any = adapter.parse_rdna_to_graph("; just a comment")
   assert len(empty_graph.nodes) == 0
 
   # Code with a loop
-  code = """
+  code: str = """
     ; comment
     entry:
     s_mov_b32 s0, s0
@@ -59,19 +62,19 @@ def test_rdna_parse_rdna_to_graph():
     s_branch L_LOOP
     """
 
-  graph1 = adapter.parse_rdna_to_graph(code)
+  graph1: typing.Any = adapter.parse_rdna_to_graph(code)
   assert graph1.name == "Model"
-  nodes1 = list(graph1.nodes.values())
+  nodes1: list[typing.Any] = list(graph1.nodes.values())
   assert len(nodes1) == 2
-  op_types = {n.op_type for n in nodes1}
+  op_types: set[str] = {n.op_type for n in nodes1}
   assert "LoopControl" in op_types
   assert "Conv2d" in op_types
 
   # code without loop
-  code_no_loop = """
+  code_no_loop: str = """
     v_mac_f32 v1, v2, v3
     """
-  graph2 = adapter.parse_rdna_to_graph(code_no_loop)
-  nodes2 = list(graph2.nodes.values())
+  graph2: typing.Any = adapter.parse_rdna_to_graph(code_no_loop)
+  nodes2: list[typing.Any] = list(graph2.nodes.values())
   assert len(nodes2) == 1
   assert nodes2[0].op_type == "Linear"

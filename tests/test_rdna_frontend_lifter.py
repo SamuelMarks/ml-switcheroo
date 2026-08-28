@@ -1,14 +1,15 @@
 """Test module."""
 
 from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaImmediate, c_SGPR
-from ml_switcheroo.core.compiler.ir import LogicalGraph
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaImmediate, c_SGPR, RdnaNode
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+from typing import List
 
 
-def test_rdna_lifter_basic():
+def test_rdna_lifter_basic() -> None:
   """Test element."""
-  lifter = RdnaLifter()
-  nodes = [
+  lifter: RdnaLifter = RdnaLifter()
+  nodes: List[RdnaNode] = [
     RdnaComment(text="; Input x ->"),
     RdnaComment(text="; BEGIN Conv2d(block_1)"),
     RdnaInstruction(opcode="s_cmp_lt_i32", operands=[c_SGPR(0), RdnaImmediate(value=3)]),
@@ -16,91 +17,91 @@ def test_rdna_lifter_basic():
     RdnaComment(text="; Unmapped Op: flatten(flatten)"),
     RdnaComment(text="; Return:"),
   ]
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
 
   assert isinstance(graph, LogicalGraph)
   assert len(graph.nodes) > 0
 
-  node_ids = [n.id for n in graph.nodes]
+  node_ids: List[str] = [n.id for n in graph.nodes]
   assert "x" in node_ids
   assert "block_1" in node_ids
   assert "flatten" in node_ids
   assert "output" in node_ids
 
   # check if flatten has arg_1=1
-  flatten_node = next(n for n in graph.nodes if n.id == "flatten")
+  flatten_node: LogicalNode = next(n for n in graph.nodes if n.id == "flatten")
   assert flatten_node.metadata.get("arg_1") == 1
 
   # check if Conv2d has k=3
-  conv_node = next(n for n in graph.nodes if n.id == "block_1")
+  conv_node: LogicalNode = next(n for n in graph.nodes if n.id == "block_1")
   assert conv_node.metadata.get("k") == 3
 
 
-def test_rdna_lifter_seen_ids():
+def test_rdna_lifter_seen_ids() -> None:
   """Test element."""
-  lifter = RdnaLifter()
-  nodes = [
+  lifter: RdnaLifter = RdnaLifter()
+  nodes: List[RdnaNode] = [
     RdnaComment(text="; Input x ->"),
     RdnaComment(text="; Input x ->"),  # Duplicate ID
   ]
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
 
 
-def test_rdna_lifter_instruction():
+def test_rdna_lifter_instruction() -> None:
   """Test element."""
-  lifter = RdnaLifter()
-  nodes = [RdnaInstruction(opcode="v_add_f32", operands=[])]
-  graph = lifter.lift(nodes)
+  lifter: RdnaLifter = RdnaLifter()
+  nodes: List[RdnaNode] = [RdnaInstruction(opcode="v_add_f32", operands=[])]
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "inst_0"
 
 
-def test_rdna_lifter_multiple_return():
+def test_rdna_lifter_multiple_return() -> None:
   """Test element."""
-  lifter = RdnaLifter()
-  nodes = [
+  lifter: RdnaLifter = RdnaLifter()
+  nodes: List[RdnaNode] = [
     RdnaComment(text="; Input x ->"),
     RdnaComment(text="; Return:"),
     RdnaComment(text="; Return:"),  # Output already in seen_ids
   ]
-  graph = lifter.lift(nodes)
-  node_ids = [n.id for n in graph.nodes]
+  graph: LogicalGraph = lifter.lift(nodes)
+  node_ids: List[str] = [n.id for n in graph.nodes]
   assert "x" in node_ids
   assert "output" in node_ids
   assert len(graph.nodes) == 2
 
 
-def test_rdna_lifter_unmapped_other():
+def test_rdna_lifter_unmapped_other() -> None:
   """Test element."""
-  lifter = RdnaLifter()
-  nodes = [
+  lifter: RdnaLifter = RdnaLifter()
+  nodes: List[RdnaNode] = [
     RdnaComment(text="; Unmapped Op: other_op(other_op)"),
   ]
-  graph = lifter.lift(nodes)
-  node_ids = [n.id for n in graph.nodes]
+  graph: LogicalGraph = lifter.lift(nodes)
+  node_ids: List[str] = [n.id for n in graph.nodes]
   assert "other_op" in node_ids
-  other_node = next(n for n in graph.nodes if n.id == "other_op")
+  other_node: LogicalNode = next(n for n in graph.nodes if n.id == "other_op")
   assert "arg_1" not in other_node.metadata
 
 
-def test_rdna_lifter_return_no_previous():
+def test_rdna_lifter_return_no_previous() -> None:
   """Test element."""
-  lifter = RdnaLifter()
-  nodes = [
+  lifter: RdnaLifter = RdnaLifter()
+  nodes: List[RdnaNode] = [
     RdnaComment(text="; Return:"),
   ]
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "output"
   assert len(graph.edges) == 0
 
 
-def test_rdna_lifter_comment_unparsed():
+def test_rdna_lifter_comment_unparsed() -> None:
   """Test element."""
-  lifter = RdnaLifter()
-  nodes = [
+  lifter: RdnaLifter = RdnaLifter()
+  nodes: List[RdnaNode] = [
     RdnaComment(text="; JUST A NORMAL COMMENT"),
   ]
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 0

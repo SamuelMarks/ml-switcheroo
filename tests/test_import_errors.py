@@ -12,7 +12,7 @@ except ImportError:
   pass
 
 
-def test_import_errors_frameworks():
+def test_import_errors_frameworks() -> None:
   """Verifies the behavior of import errors frameworks."""
   with patch.dict(
     "sys.modules",
@@ -54,7 +54,7 @@ def test_import_errors_frameworks():
     from ml_switcheroo_ir.schema.ghost import SemanticTier
     import ml_switcheroo.frameworks.jax
 
-    a1 = ml_switcheroo.frameworks.jax.JaxCoreAdapter()
+    a1: ml_switcheroo.frameworks.jax.JaxCoreAdapter = ml_switcheroo.frameworks.jax.JaxCoreAdapter()
     a1.convert([1, 2, 3])
     try:
       a1.collect_api(SemanticTier.NEURAL)
@@ -66,7 +66,7 @@ def test_import_errors_frameworks():
       pass
     import ml_switcheroo.frameworks.torch
 
-    a2 = ml_switcheroo.frameworks.torch.TorchAdapter()
+    a2: ml_switcheroo.frameworks.torch.TorchAdapter = ml_switcheroo.frameworks.torch.TorchAdapter()
     a2.convert([1, 2, 3])
     try:
       a2.collect_api(SemanticTier.NEURAL)
@@ -74,7 +74,7 @@ def test_import_errors_frameworks():
       pass
     import ml_switcheroo.frameworks.tensorflow
 
-    a3 = ml_switcheroo.frameworks.tensorflow.TensorFlowAdapter()
+    a3: ml_switcheroo.frameworks.tensorflow.TensorFlowAdapter = ml_switcheroo.frameworks.tensorflow.TensorFlowAdapter()
     a3.convert([1, 2, 3])
     try:
       a3.collect_api(SemanticTier.NEURAL)
@@ -90,7 +90,7 @@ def test_import_errors_frameworks():
       pass
     import ml_switcheroo.frameworks.mlx
 
-    a4 = ml_switcheroo.frameworks.mlx.MLXAdapter()
+    a4: ml_switcheroo.frameworks.mlx.MLXAdapter = ml_switcheroo.frameworks.mlx.MLXAdapter()
     a4.convert([1, 2, 3])
     try:
       a4.collect_api(SemanticTier.NEURAL)
@@ -102,7 +102,7 @@ def test_import_errors_frameworks():
       pass
     import ml_switcheroo.frameworks.paxml
 
-    a5 = ml_switcheroo.frameworks.paxml.PaxmlAdapter()
+    a5: ml_switcheroo.frameworks.paxml.PaxmlAdapter = ml_switcheroo.frameworks.paxml.PaxmlAdapter()
     a5.convert([1, 2, 3])
     try:
       a5.collect_api(SemanticTier.NEURAL)

@@ -11,6 +11,9 @@ It specifically enables `requires_explicit_rng` in plugin traits.
 
 from typing import Any
 
+import typing
+
+
 import logging
 import textwrap
 from typing import List, Tuple, Dict, Optional
@@ -19,8 +22,8 @@ try:
   import jax
   import jax.numpy as jnp
 except Exception:  # pragma: no cover
-  jax: Any = None  # type: ignore  # pragma: no cover
-  jnp = None  # type: ignore  # pragma: no cover
+  jax = None  # pragma: no cover
+  jnp = None  # pragma: no cover
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
@@ -58,7 +61,7 @@ class JaxCoreAdapter(JAXStackMixin):
     Detects installation status to toggle between LIVE and GHOST modes.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data: Dict[str, Any] = {}
+    self._snapshot_data = {}
     if jax is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("jax")
@@ -224,7 +227,9 @@ class JaxCoreAdapter(JAXStackMixin):
       results.extend(getattr(self, "_scan_jax_activations", lambda: [])())
     return results
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert input data to a JAX array for verification.
 
     Args:
@@ -242,7 +247,7 @@ class JaxCoreAdapter(JAXStackMixin):
 
     return data
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply Level 0/1 Stack wiring.
 
     Populates the JSON snapshot with manually wired logic.

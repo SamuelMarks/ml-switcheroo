@@ -1,17 +1,17 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
-from praxis.layers import poolings
-import jax.numpy as jnp
+import typing
+from praxis import base_layer  # type: ignore
+from praxis.layers import poolings  # type: ignore
 
 
-class MaxPoolModel(base_layer.BaseLayer):
+class MaxPoolModel(base_layer.BaseLayer):  # type: ignore
   """Test suite for the Max Pool Model component."""
 
   kernel_size: int = 2
   stride: int = 2
 
-  def setup(self):
+  def setup(self) -> None:
     """Helper to setup."""
     self.create_child(
       "pool",
@@ -20,6 +20,6 @@ class MaxPoolModel(base_layer.BaseLayer):
       ),
     )
 
-  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
+  def __call__(self, x: typing.Any) -> typing.Any:
     """Executes the callable instance."""
     return self.pool(x)

@@ -5,7 +5,8 @@ This module implements the transformation logic for structural MLIR operations
 It operates as a mixin to be combined with expression generation logic in the main generator.
 """
 
-from typing import Any
+import typing
+
 
 import libcst as cst
 from collections import defaultdict
@@ -28,8 +29,6 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
 
   # Interface requirements from host class (MlirToPythonGenerator)
   ctx: NamingContext
-  usage_counts: defaultdict[Any, Any]
-  usage_consumers: dict[Any, Any]
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
     """Resolve an SSA value name to its Python expression.
@@ -119,23 +118,23 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
       if n == "*":
         # ImportStar
         return cst.SimpleStatementLine(
-          body=[cst.ImportFrom(module=self._create_dotted_name(module_val), names=cst.ImportStar())]  # type: ignore
+          body=[cst.ImportFrom(module=self._create_dotted_name(module_val or ""), names=cst.ImportStar())]
         )
 
       asname = None
       if a and a != n:
         asname = cst.AsName(name=cst.Name(a))
 
-      import_aliases.append(cst.ImportAlias(name=self._create_dotted_name(n), asname=asname))  # type: ignore
+      import_aliases.append(cst.ImportAlias(name=self._create_dotted_name(n), asname=asname))
 
     if module_val:
       if import_aliases:
         return cst.SimpleStatementLine(
-          body=[cst.ImportFrom(module=self._create_dotted_name(module_val), names=import_aliases)]  # type: ignore
+          body=[cst.ImportFrom(module=self._create_dotted_name(module_val or ""), names=import_aliases)]
         )
       else:  # pragma: no cover
         return cst.SimpleStatementLine(
-          body=[cst.Import(names=[cst.ImportAlias(name=self._create_dotted_name(module_val))])]  # type: ignore
+          body=[cst.Import(names=[cst.ImportAlias(name=self._create_dotted_name(module_val))])]
         )
     else:
       if import_aliases:
@@ -208,10 +207,10 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
 
     # Reset Usage Counts
     prev_usage_counts = self.usage_counts
-    self.usage_counts = defaultdict(int)
+    self.usage_counts: typing.Any = defaultdict(int)
     # Also reset consumers map
     prev_usage_consumers = self.usage_consumers
-    self.usage_consumers = {}
+    self.usage_consumers: typing.Any = {}
 
     params = []
     body_stmts = []

@@ -5,15 +5,15 @@ import ml_switcheroo
 from unittest.mock import patch, MagicMock
 
 
-def test_convert_success():
+def test_convert_success() -> None:
   """Converts successfully."""
   with patch("ml_switcheroo.ASTEngine") as MockEngine:
     MockEngine.return_value.run.return_value = MagicMock(success=True, code="test")
-    res = ml_switcheroo.convert("code", source="torch", target="jax")
+    res: str = ml_switcheroo.convert("code", source="torch", target="jax")
     assert res == "test"
 
 
-def test_convert_failure():
+def test_convert_failure() -> None:
   """Converts successfully handling failure."""
   with patch("ml_switcheroo.ASTEngine") as MockEngine:
     MockEngine.return_value.run.return_value = MagicMock(success=False, errors=["some error"])
@@ -21,9 +21,9 @@ def test_convert_failure():
       ml_switcheroo.convert("code", source="torch", target="jax")
 
 
-def test_convert_with_semantics():
+def test_convert_with_semantics() -> None:
   """Converts with semantics."""
   with patch("ml_switcheroo.ASTEngine") as MockEngine:
     MockEngine.return_value.run.return_value = MagicMock(success=True, code="test2")
-    res = ml_switcheroo.convert("code", source="torch", target="jax", semantics=MagicMock())
+    res: str = ml_switcheroo.convert("code", source="torch", target="jax", semantics=MagicMock())
     assert res == "test2"

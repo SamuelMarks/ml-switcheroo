@@ -11,7 +11,7 @@ from ml_switcheroo.core.import_fixer.base import BaseImportFixer
 from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 
 
-def test_baseimportfixer_init():
+def test_baseimportfixer_init() -> None:
   """Verifies the standard initialization of `BaseImportFixer`.
 
   Ensures that when the fixer is initialized with a ResolutionPlan, a single framework
@@ -35,7 +35,7 @@ def test_baseimportfixer_init():
   assert fixer._path_to_alias == plan.path_to_alias
 
 
-def test_baseimportfixer_init_list():
+def test_baseimportfixer_init_list() -> None:
   """Verifies `BaseImportFixer` initialization with a list of source frameworks.
 
   Ensures that when a list of multiple framework strings is passed, the internal
@@ -48,11 +48,11 @@ def test_baseimportfixer_init_list():
       None
   """
   plan = ResolutionPlan()
-  fixer = BaseImportFixer(plan=plan, source_fws=["torch", "numpy"])
+  fixer = BaseImportFixer(plan=plan, source_fws=["torch", "numpy"])  # type: ignore
   assert fixer.source_fws == {"torch", "numpy"}
 
 
-def test_baseimportfixer_init_none():
+def test_baseimportfixer_init_none() -> None:
   """Verifies `BaseImportFixer` initialization when no source frameworks are specified.
 
   Ensures that omitting `source_fws` during initialization defaults the
@@ -69,7 +69,7 @@ def test_baseimportfixer_init_none():
   assert fixer.source_fws == set()
 
 
-def test_baseimportfixer_track_definition_with_alias():
+def test_baseimportfixer_track_definition_with_alias() -> None:
   """Verifies name definition tracking for aliased imports.
 
   Tests that `_track_definition` correctly extracts and tracks the alias name (e.g., 'nn')
@@ -92,7 +92,7 @@ def test_baseimportfixer_track_definition_with_alias():
   assert "nn" in fixer._defined_names
 
 
-def test_baseimportfixer_track_definition_without_alias():
+def test_baseimportfixer_track_definition_without_alias() -> None:
   """Verifies name definition tracking for non-aliased imports.
 
   Tests that `_track_definition` correctly extracts and tracks the root package name

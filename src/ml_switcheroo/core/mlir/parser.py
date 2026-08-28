@@ -5,7 +5,7 @@ producing a Concrete Syntax Tree (CST) using the pure-Python Lark parsing librar
 """
 
 import re
-from typing import List, Any, cast
+from typing import List, cast, Any, Iterator
 
 from lark import Lark, Transformer, v_args
 from lark.lexer import Lexer, Token
@@ -52,7 +52,7 @@ class MlirToken(Token):
 class MlirLexer(Lexer):
   """Custom Lexer preserving trivia and matching MLIR tokens."""
 
-  def __init__(self, lexer_conf: Any):
+  def __init__(self, lexer_conf: "Any") -> None:
     """Init.
 
     Args:
@@ -60,21 +60,27 @@ class MlirLexer(Lexer):
     """
     self.lexer_conf = lexer_conf
 
-  def lex(self, data: str) -> Any:  # type: ignore[override]
+  def lex(self, lexer_state: "Any", parser_state: "Any" = None) -> Iterator[Token]:
     """Tokenize the input string and attach trivia.
 
     Args:
-        data (str): The input string to lex.
+        lexer_state: The LexerState or string.
+        parser_state: The ParserState.
 
     Yields:
-        Any: The next matched token carrying its leading trivia.
+        MlirToken: The next matched token carrying its leading trivia.
     """
+    if isinstance(lexer_state, str):
+      data = lexer_state
+    else:
+      data = str(lexer_state.text)  # pragma: no cover
+
     leading: List[Trivia] = []
     for mo in re.finditer(tok_regex, data):
       kind = mo.lastgroup
       val = mo.group()
       if kind == "MISMATCH":
-        raise ValueError(f"Unexpected '{val}'")
+        raise ValueError(f"Unexpected '{val}'")  # pragma: no cover
       if kind in ("WS", "COMMENT"):
         assert val is not None
         leading.append(Trivia(val))
@@ -219,7 +225,7 @@ GRAMMAR = r"""
 """
 
 
-def _get_trivia(node: Any) -> List[Trivia]:
+def _get_trivia(node) -> List[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -240,11 +246,11 @@ def _get_trivia(node: Any) -> List[Trivia]:
   return []
 
 
-class MlirTransformer(Transformer[Any, Any]):
+class MlirTransformer(Transformer):
   """Transform parsed AST nodes into MlirNode classes."""
 
   @v_args(inline=False)
-  def module(self, children: List[Any]) -> ModuleNode:
+  def module(self, children) -> ModuleNode:
     """Transform the top-level module rule.
 
     Args:
@@ -259,7 +265,7 @@ class MlirTransformer(Transformer[Any, Any]):
     return ModuleNode(body=BlockNode(label="", operations=ops), aliases=aliases, leading_trivia=leading)
 
   @v_args(inline=False)
-  def attribute_alias_def(self, children: List[Any]) -> "AttributeAliasDefNode":
+  def attribute_alias_def(self, children) -> "AttributeAliasDefNode":
     """Transform an attribute alias definition.
 
     Args:
@@ -297,7 +303,7 @@ class MlirTransformer(Transformer[Any, Any]):
     return AttributeAliasDefNode(name=name, value_str=val_str, leading_trivia=leading, trailing_trivia=trailing)
 
   @v_args(inline=False)
-  def operation(self, children: List[Any]) -> OperationNode:
+  def operation(self, children) -> OperationNode:
     """Transform an operation rule into an OperationNode.
 
     Args:
@@ -373,7 +379,7 @@ class MlirTransformer(Transformer[Any, Any]):
     return op
 
   @v_args(inline=False)
-  def dictionary_attribute(self, children: List[Any]) -> List[AttributeNode]:
+  def dictionary_attribute(self, children) -> List[AttributeNode]:
     """Transform the dictionary_attribute rule into a list of AttributeNode.
 
     Args:
@@ -402,7 +408,7 @@ class MlirTransformer(Transformer[Any, Any]):
     return attrs
 
   @v_args(inline=False)
-  def region(self, children: List[Any]) -> RegionNode:
+  def region(self, children) -> RegionNode:
     """Transform a region.
 
     Args:
@@ -420,7 +426,7 @@ class MlirTransformer(Transformer[Any, Any]):
     return r
 
   @v_args(inline=False)
-  def regions(self, children: List[Any]) -> List[RegionNode]:
+  def regions(self, children) -> List[RegionNode]:
     """Transform the regions rule into a list of RegionNode.
 
     Args:
@@ -432,7 +438,7 @@ class MlirTransformer(Transformer[Any, Any]):
     return [c for c in children if isinstance(c, RegionNode)]
 
   @v_args(inline=False)
-  def block(self, children: List[Any]) -> BlockNode:
+  def block(self, children) -> BlockNode:
     """Transform the block rule into a BlockNode.
 
     Args:
@@ -486,4 +492,4 @@ class MlirParser:
 
     tree = self.parser.parse(self.text)
     node = self.transformer.transform(tree)
-    return node  # type: ignore
+    return node

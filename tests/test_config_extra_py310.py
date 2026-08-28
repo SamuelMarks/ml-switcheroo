@@ -3,7 +3,7 @@
 from unittest import mock
 
 
-def test_config_tomli_import():
+def test_config_tomli_import() -> None:
   """Verifies the behavior of configuration tomli import."""
   from ml_switcheroo.config import _import_tomllib
 
@@ -11,11 +11,11 @@ def test_config_tomli_import():
     with mock.patch.dict("sys.modules", {"tomli": None, "tomllib": None}):
       assert _import_tomllib() is None
   with mock.patch("sys.version_info", (3, 10, 0, "final", 0)):
-    mock_tomli = mock.MagicMock()
+    mock_tomli: mock.MagicMock = mock.MagicMock()
     with mock.patch.dict("sys.modules", {"tomli": mock_tomli, "tomllib": None}):
       assert _import_tomllib() is mock_tomli
 
   with mock.patch("sys.version_info", (3, 11, 0, "final", 0)):
-    mock_tomllib = mock.MagicMock()
+    mock_tomllib: mock.MagicMock = mock.MagicMock()
     with mock.patch.dict("sys.modules", {"tomllib": mock_tomllib}):
       assert _import_tomllib() is mock_tomllib

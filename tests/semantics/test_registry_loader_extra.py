@@ -3,13 +3,27 @@
 from unittest.mock import MagicMock
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 import ml_switcheroo.semantics.registry_loader as registry_loader
+import pytest
+from typing import Any, Optional
 
 
-def test_registry_loader_exceptions(monkeypatch, capsys):
-  """Verifies the behavior of registry loader exceptions."""
+def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+  """Verifies the behavior of registry loader exceptions.
 
-  def mock_get(fw):
-    """Provides a mock get for testing."""
+  Args:
+      monkeypatch (pytest.MonkeyPatch): Pytest fixture.
+      capsys (pytest.CaptureFixture[str]): Pytest fixture.
+  """
+
+  def mock_get(fw: str) -> Optional[Any]:
+    """Provides a mock get for testing.
+
+    Args:
+        fw (str): Framework string.
+
+    Returns:
+        Optional[Any]: Adapter or None.
+    """
     if fw == "dummy":
       return None
     elif fw == "dummy_traits":
@@ -20,11 +34,18 @@ def test_registry_loader_exceptions(monkeypatch, capsys):
         class FakeTraits:
           """Fake Traits class for testing purposes."""
 
-          def model_dump(self, **kwargs):
-            """Mock implementation of model dump."""
+          def model_dump(self, **kwargs: Any) -> Any:
+            """Mock implementation of model dump.
+
+            Args:
+                **kwargs (Any): Keyword arguments.
+
+            Raises:
+                ValueError: Exception.
+            """
             raise ValueError("bad traits")
 
-        structural_traits = FakeTraits()
+        structural_traits: FakeTraits = FakeTraits()
 
       return BadTraitsAdapter()
     elif fw == "dummy_wiring":
@@ -32,8 +53,15 @@ def test_registry_loader_exceptions(monkeypatch, capsys):
       class BadWiringAdapter:
         """Test suite for the Bad Wiring Adapter component."""
 
-        def apply_wiring(self, snap):
-          """Applies wiring."""
+        def apply_wiring(self, snap: Any) -> None:
+          """Applies wiring.
+
+          Args:
+              snap (Any): Snapshot argument.
+
+          Raises:
+              ValueError: Exception.
+          """
           raise ValueError("bad wiring")
 
       return BadWiringAdapter()
@@ -41,35 +69,50 @@ def test_registry_loader_exceptions(monkeypatch, capsys):
 
   monkeypatch.setattr(registry_loader, "get_adapter", mock_get)
   monkeypatch.setattr(registry_loader, "available_frameworks", lambda: ["dummy", "dummy_traits", "dummy_wiring"])
-  manager = MagicMock()
+  manager: MagicMock = MagicMock()
   manager.framework_configs = {"dummy_traits": {}, "dummy_wiring": {}}
-  loader = RegistryLoader(manager)
+  loader: RegistryLoader = RegistryLoader(manager)
   loader._hydrate_adapters()
   (out, err) = capsys.readouterr()
   assert "Failed to load structural traits for dummy_traits" in out
   assert "Failed to apply wiring for dummy_wiring" in out
 
 
-def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch):
-  """Verifies the pre-labeling of lowercase keys and plugin metadata loading."""
+def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verifies the pre-labeling of lowercase keys and plugin metadata loading.
+
+  Args:
+      monkeypatch (pytest.MonkeyPatch): Pytest fixture.
+  """
   # test pre-label
-  manager = MagicMock()
+  manager: MagicMock = MagicMock()
   manager._key_origins = {}
-  loader = RegistryLoader(manager)
+  loader: RegistryLoader = RegistryLoader(manager)
 
   # For pre-labeling to happen in _hydrate_adapters, we need a valid adapter with definitions
   class ValidAdapter:
     """Valid adapter."""
 
     @property
-    def definitions(self):
-      """Definitions."""
+    def definitions(self) -> dict:
+      """Definitions.
+
+      Returns:
+          dict: Dictionary of definitions.
+      """
 
       class MockDef:
         """Mock def."""
 
-        def model_dump(self, **kwargs):
-          """Model dump."""
+        def model_dump(self, **kwargs: Any) -> dict:
+          """Model dump.
+
+          Args:
+              **kwargs (Any): Keyword arguments.
+
+          Returns:
+              dict: Empty dictionary.
+          """
           return {}
 
       return {"lower_case_op": MockDef(), "UpperCaseOp": MockDef()}
@@ -89,7 +132,7 @@ def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch):
   class MockSpec:
     """Mock spec."""
 
-    ops = {"plugin_op": {"frameworks": {"jax": {}}}}
+    ops: dict = {"plugin_op": {"frameworks": {"jax": {}}}}
 
   monkeypatch.setattr(registry_loader.hooks, "get_all_hook_metadata", lambda: {"my_plugin": MockSpec()})
   manager.data = {}

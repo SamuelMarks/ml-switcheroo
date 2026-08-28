@@ -1,25 +1,26 @@
 """Test suite for the Mlir Generator Void Suppression module."""
 
+import typing
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, ValueNode
 
 
 def gen_code_from_block(ops: list[OperationNode]) -> str:
   """Helper to generation code from block."""
-  mod = ModuleNode(body=BlockNode(label="", operations=ops))
+  mod = ModuleNode(body=BlockNode(label="", operations=ops))  # type: ignore
   gen = MlirToPythonGenerator()
-  return gen.generate(mod).code
+  return typing.cast(str, gen.generate(mod).code)
 
 
-def test_suppress_unused_result():
+def test_suppress_unused_result() -> None:
   """Verifies the behavior of suppress unused result."""
   op = OperationNode(name="sw.call", results=[ValueNode(name="%0")], operands=[ValueNode(name="%func")])
-  code = gen_code_from_block([op])
+  code: str = gen_code_from_block([op])
   assert "_func()" in code
   assert "=" not in code
 
 
-def test_assign_used_result():
+def test_assign_used_result() -> None:
   """Verifies the behavior of assign used result."""
   op1 = OperationNode(name="sw.call", results=[ValueNode(name="%0")], operands=[ValueNode(name="%foo")])
   op2 = OperationNode(
@@ -28,12 +29,12 @@ def test_assign_used_result():
   op3 = OperationNode(
     name="sw.call", results=[ValueNode(name="%2")], operands=[ValueNode(name="%baz"), ValueNode(name="%1")]
   )
-  code = gen_code_from_block([op1, op2, op3])
+  code: str = gen_code_from_block([op1, op2, op3])
   assert "_0 = _foo()" in code
   assert "_1 = _bar(_0)" in code
 
 
-def test_suppress_super_init():
+def test_suppress_super_init() -> None:
   """Verifies the behavior of suppress super initialization."""
   op_super = OperationNode(
     name="sw.op", results=[ValueNode(name="%0")], attributes=[AttributeNode(name="type", value='"super"')]
@@ -45,12 +46,12 @@ def test_suppress_super_init():
     attributes=[AttributeNode(name="name", value='"__init__"')],
   )
   op_call = OperationNode(name="sw.call", results=[ValueNode(name="%res")], operands=[ValueNode(name="%1")])
-  code = gen_code_from_block([op_super, op_attr, op_call])
+  code: str = gen_code_from_block([op_super, op_attr, op_call])
   assert "super().__init__()" in code
   assert "=" not in code
 
 
-def test_super_init_pattern_detection():
+def test_super_init_pattern_detection() -> None:
   """Verifies the behavior of super initialization pattern detection."""
   import libcst as cst
 

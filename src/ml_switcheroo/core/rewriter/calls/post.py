@@ -4,27 +4,70 @@ Handles output adaptation and state threading.
 Updated to prevent imports from legacy modules and removed deprecated output adapter hooks.
 """
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, List, Tuple
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.calls.transformers import apply_index_select
 from ml_switcheroo.core.rewriter.calls.utils import inject_kwarg, strip_kwarg
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
+if TYPE_CHECKING:
+  # Structural typing for rewriter to avoid circular import
+  class SemanticManagerDummy:
+    """Dummy class."""
+
+    known_magic_args: List[str]
+
+  class TargetTraitsDummy:
+    """Dummy class."""
+
+    strip_magic_args: List[str]
+    auto_strip_magic_args: bool
+    inject_magic_args: List[Tuple[str, str]]
+
+  class SignatureStackDummy:
+    """Dummy class."""
+
+    is_init: bool
+    is_module_method: bool
+
+  class RewriterContextDummy:
+    """Dummy class."""
+
+    signature_stack: List[SignatureStackDummy]
+
+  class RewriterDummy:
+    """Dummy class."""
+
+    semantics: SemanticManagerDummy
+    context: RewriterContextDummy
+
+    def _report_failure(self, msg: str) -> None:
+      """Dummy."""
+      ...
+
+    def _create_dotted_name(self, name: str) -> cst.Attribute:
+      """Dummy."""
+      ...
+
+    def _get_target_traits(self) -> TargetTraitsDummy:
+      """Dummy."""
+      ...
+
 
 def handle_post_processing(
-  rewriter: Any,
+  rewriter: "RewriterDummy",
   node: cst.CSTNode,
-  mapping: Dict[str, Any],
+  mapping: dict,
   abstract_id: str,
 ) -> cst.CSTNode:
   """Apply post-rewrite modifications to the result node, such as type casting or state threading.
 
   Args:
-      rewriter (Any): The CST rewriter instance containing context.
-      node (cst.CSTNode): The node being processed.
-      mapping (Dict[str, Any]): The configuration mapping for the rewrite.
-      abstract_id (str): The abstract ID of the operation.
+      rewriter: The CST rewriter instance containing context.
+      node: The node being processed.
+      mapping: The configuration mapping for the rewrite.
+      abstract_id: The abstract ID of the operation.
 
   Returns:
       cst.CSTNode: The modified result node.
@@ -48,7 +91,7 @@ def handle_post_processing(
     try:
       type_node = rewriter._create_dotted_name(mapping["output_cast"])
       result_node = cst.Call(
-        func=cst.Attribute(value=result_node, attr=cst.Name("astype")),  # type: ignore
+        func=cst.Attribute(value=result_node, attr=cst.Name("astype")),
         args=[cst.Arg(value=type_node)],
       )
     except Exception:

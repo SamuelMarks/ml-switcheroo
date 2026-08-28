@@ -1,25 +1,26 @@
 """Test suite for the compiler sharding pass."""
 
+from typing import List, Dict
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalMesh, PartitionSpec
 from ml_switcheroo.core.compiler.sharding import ShardingInferencePass
 
 
-def test_sharding_inference_pass_default_mesh():
+def test_sharding_inference_pass_default_mesh() -> None:
   """Test ShardingInferencePass with default mesh."""
-  pass_ = ShardingInferencePass()
+  pass_: ShardingInferencePass = ShardingInferencePass()
   assert pass_.mesh.shape == {"data": 1, "tensor": 1}
 
 
-def test_sharding_inference_pass_custom_mesh():
+def test_sharding_inference_pass_custom_mesh() -> None:
   """Test ShardingInferencePass with custom mesh."""
-  mesh = LogicalMesh(shape={"data": 2, "tensor": 4})
-  pass_ = ShardingInferencePass(mesh=mesh)
+  mesh: LogicalMesh = LogicalMesh(shape={"data": 2, "tensor": 4})
+  pass_: ShardingInferencePass = ShardingInferencePass(mesh=mesh)
   assert pass_.mesh.shape == {"data": 2, "tensor": 4}
 
 
-def test_sharding_inference_pass_apply():
+def test_sharding_inference_pass_apply() -> None:
   """Test ShardingInferencePass apply method on various nodes."""
-  nodes = [
+  nodes: List[LogicalNode] = [
     # Column Parallel matches
     LogicalNode(id="q_proj", kind="Linear"),
     LogicalNode(id="k_proj_layer", kind="Linear"),
@@ -38,14 +39,14 @@ def test_sharding_inference_pass_apply():
     # Ignored node
     LogicalNode(id="relu", kind="ReLU"),
   ]
-  graph = LogicalGraph(nodes=nodes, edges=[])
-  pass_ = ShardingInferencePass()
-  new_graph = pass_.apply(graph)
+  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
+  pass_: ShardingInferencePass = ShardingInferencePass()
+  new_graph: LogicalGraph = pass_.apply(graph)
 
   # Check if mesh is attached
   assert new_graph.mesh == pass_.mesh
 
-  node_dict = {n.id: n for n in new_graph.nodes}
+  node_dict: Dict[str, LogicalNode] = {n.id: n for n in new_graph.nodes}
 
   # Column parallel
   assert node_dict["q_proj"].sharding == PartitionSpec(axes=(None, "tensor"))

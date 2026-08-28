@@ -1,12 +1,13 @@
 """Test suite for the Rewriter Context module."""
 
+import typing
 from unittest.mock import MagicMock
 from ml_switcheroo.core.rewriter.context import RewriterContext, SignatureContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 
 
-def test_rewriter_context_inject_argument():
+def test_rewriter_context_inject_argument() -> None:
   """Verifies inject_argument correctly uses the signature stack."""
   semantics = MagicMock(spec=SemanticsManager)
   config = RuntimeConfig(target_framework="jax")
@@ -28,7 +29,7 @@ def test_rewriter_context_inject_argument():
   assert len(sig_ctx.injected_args) == 1
 
 
-def test_rewriter_context_preamble_injector():
+def test_rewriter_context_preamble_injector() -> None:
   """Verifies _default_preamble_injector."""
   semantics = MagicMock(spec=SemanticsManager)
   config = RuntimeConfig(target_framework="jax")
@@ -60,7 +61,7 @@ def test_rewriter_context_preamble_injector():
   assert "import sys" in ctx.module_preamble
 
 
-def test_rewriter_context_hydrate_aliases():
+def test_rewriter_context_hydrate_aliases() -> None:
   """Verifies _hydrate_aliases exception and model_dump branches."""
   semantics = MagicMock(spec=SemanticsManager)
 
@@ -68,7 +69,7 @@ def test_rewriter_context_hydrate_aliases():
   class MockAliasInfo:
     """Mock alias info."""
 
-    def model_dump(self):
+    def model_dump(self) -> dict[str, typing.Any]:
       """Model dump."""
       return {"name": "my_alias"}
 
@@ -82,10 +83,10 @@ def test_rewriter_context_hydrate_aliases():
   # Exception case: trigger exception in _hydrate_aliases
   semantics.get_framework_config.return_value = {"alias": {"name": "bad"}}
 
-  class FailingAliasMap(dict):
+  class FailingAliasMap(dict):  # type: ignore
     """Failing alias map."""
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: typing.Any, value: typing.Any) -> None:
       """Setitem."""
       raise ValueError("Test Error")
 

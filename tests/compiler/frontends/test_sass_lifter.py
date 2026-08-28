@@ -6,15 +6,18 @@ and raw instructions into an intermediate representation logical graph.
 """
 
 from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+from ml_switcheroo.core.compiler.ir import LogicalGraph
+import pytest
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassComment,
   SassInstruction,
   SassImmediate,
   SassRegister,
+  SassNode,
 )
 
 
-def test_sass_lifter_basic():
+def test_sass_lifter_basic() -> None:
   """Verifies the basic lifting functionality of SassLifter for unmapped comments.
 
   This test checks that unmapped operations in SASS comments are successfully identified
@@ -25,7 +28,7 @@ def test_sass_lifter_basic():
       None
   """
   lifter = SassLifter()
-  nodes = [
+  nodes: list[SassNode] = [
     # Unmapped marker
     SassComment(text="; Unmapped Op: Linear(node1)"),
     # Flatten unmapped (sets arg_1 = 1)
@@ -33,7 +36,7 @@ def test_sass_lifter_basic():
     # Duplicated node_id in unmapped should be skipped
     SassComment(text="; Unmapped Op: Linear(node1)"),
   ]
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 2
   assert graph.nodes[0].id == "node1"
   assert graph.nodes[0].kind == "Linear"
@@ -44,7 +47,7 @@ def test_sass_lifter_basic():
   assert graph.edges[0].target == "node2"
 
 
-def test_sass_lifter_input_return():
+def test_sass_lifter_input_return() -> None:
   """Verifies that SassLifter correctly parses input and return comments to form a graph.
 
   This test checks that input and return comments successfully translate to source and
@@ -55,13 +58,13 @@ def test_sass_lifter_input_return():
       None
   """
   lifter = SassLifter()
-  nodes = [
+  nodes: list[SassNode] = [
     SassComment(text="; Input x ->"),
     SassComment(text="; Return:"),
     # duplicate return output
     SassComment(text="; Return:"),
   ]
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 2
   assert graph.nodes[0].id == "x"
   assert graph.nodes[1].id == "output"
@@ -69,7 +72,7 @@ def test_sass_lifter_input_return():
   assert graph.edges[0].target == "output"
 
 
-def test_sass_lifter_block_capture():
+def test_sass_lifter_block_capture() -> None:
   """Verifies that block start/end comments are parsed to capture operation details.
 
   This test checks that instructions enclosed between 'BEGIN' and 'END' comments for
@@ -81,19 +84,19 @@ def test_sass_lifter_block_capture():
       None
   """
   lifter = SassLifter()
-  nodes = [
+  nodes: list[SassNode] = [
     SassComment(text="; BEGIN Conv2d(block1)"),
     SassInstruction(opcode="ISETP.LT.AND", operands=[SassRegister(name="R0"), SassImmediate(value=3)]),
     SassComment(text="; END Conv2d(block1)"),
   ]
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "block1"
   assert graph.nodes[0].kind == "Conv2d"
   assert graph.nodes[0].metadata == {"kernel_size": 3, "arg_2": 3}
 
 
-def test_sass_lifter_unrecognized_comment():
+def test_sass_lifter_unrecognized_comment() -> None:
   """Verifies lifting behavior when encountering unrecognized comments and standard instructions.
 
   This test confirms that regular, unrecognized comments are ignored by the lifter,
@@ -108,7 +111,7 @@ def test_sass_lifter_unrecognized_comment():
   class MockSassOperand:
     """Mock implementation of a SASS instruction operand for testing fallback paths."""
 
-    def __str__(self):
+    def __str__(self) -> str:
       """Returns a string representation of the mock operand.
 
       Returns:
@@ -116,12 +119,12 @@ def test_sass_lifter_unrecognized_comment():
       """
       return "mock_op"
 
-  nodes = [
+  nodes: list[SassNode] = [
     SassComment(text="; Just a regular comment"),
-    SassInstruction(opcode="FADD", operands=[SassRegister(name="R5"), MockSassOperand()]),
-    SassInstruction(opcode="FMUL", operands=[MockSassOperand()]),
+    SassInstruction(opcode="FADD", operands=[SassRegister(name="R5"), MockSassOperand()]),  # type: ignore
+    SassInstruction(opcode="FMUL", operands=[MockSassOperand()]),  # type: ignore
   ]
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 2
 
   assert graph.nodes[0].id == "R5"  # FADD uses destination register
@@ -137,7 +140,7 @@ def test_sass_lifter_unrecognized_comment():
   assert graph.edges[0].target == "inst_1"
 
 
-def test_sass_lifter_end_without_begin():
+def test_sass_lifter_end_without_begin() -> None:
   """Verifies that SassLifter handles unmatched block-end comments gracefully.
 
   This test checks that if an 'END' comment is parsed without a preceding matching
@@ -148,42 +151,42 @@ def test_sass_lifter_end_without_begin():
       None
   """
   lifter = SassLifter()
-  nodes = [
+  nodes: list[SassNode] = [
     SassComment(text="; END Conv2d(block1)"),
   ]
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
 
 
-def test_sass_lifter_return_already_seen():
+def test_sass_lifter_return_already_seen() -> None:
   # Hit 134->144 (actually 135->141)
   """Test sass lifter return already seen."""
   from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
 
   lifter = SassLifter()
-  nodes = [SassComment(text="; Return: ")]
+  nodes: list[SassNode] = [SassComment(text="; Return: ")]
   pass
   nodes.append(SassComment(text="; Return: "))
   pass
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len([n for n in graph.nodes if n.kind == "Output"]) == 1
 
 
-def test_sass_lifter_return_no_previous():
+def test_sass_lifter_return_no_previous() -> None:
   # Hit 138->140 (no previous node)
   """Test sass lifter return no previous."""
   from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
 
   lifter = SassLifter()
-  nodes = [SassComment(text="hi")]
+  nodes: list[SassNode] = [SassComment(text="hi")]
   pass
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.edges) == 0
 
 
-def test_sass_lifter_instruction_in_block():
+def test_sass_lifter_instruction_in_block() -> None:
   # Hit 148->94 (node is label so it's not an instruction, skips 148 and loops to 94)
   # Wait, the node loop starts around 89
   """Test sass lifter instruction in block."""
@@ -191,64 +194,64 @@ def test_sass_lifter_instruction_in_block():
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassLabel
 
   lifter = SassLifter()
-  nodes = [SassLabel("lbl")]
-  graph = lifter.lift(nodes)
+  nodes: list[SassNode] = [SassLabel("lbl")]
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
 
 
-def test_sass_lifter_comment_no_marker():
+def test_sass_lifter_comment_no_marker() -> None:
   """Test sass lifter comment no marker."""
   from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
 
   lifter = SassLifter()
-  nodes = [SassComment(text="hi")]
-  nodes[0].semantic_marker = SemanticMarker()
-  graph = lifter.lift(nodes)
+  nodes: list[SassNode] = [SassComment(text="hi")]
+  nodes[0].semantic_marker = SemanticMarker()  # type: ignore
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
 
 
-def test_sass_lifter_comment_unknown_marker(monkeypatch):
+def test_sass_lifter_comment_unknown_marker(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test sass lifter comment unknown marker."""
   from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
 
   lifter = SassLifter()
-  nodes = [SassComment(text="hi")]
+  nodes: list[SassNode] = [SassComment(text="hi")]
   monkeypatch.setattr(lifter.comment_parser, "parse", lambda x: SemanticMarker())
-  graph = lifter.lift(nodes)
+  graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
 
 
-def test_sass_lifter_mismatched_end():
+def test_sass_lifter_mismatched_end() -> None:
   """Test SassLifter with a mismatched SemanticEnd."""
   from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
 
-  cst_nodes = [
+  cst_nodes: list[SassNode] = [
     SassComment(text="; BEGIN Relu (relu1)"),
     SassComment(text="; END Relu (wrong_id)"),  # Mismatched ID
     SassComment(text="; END None (None)"),  # No block kind
   ]
   lifter = SassLifter()
-  graph = lifter.lift(cst_nodes)
+  graph: LogicalGraph = lifter.lift(cst_nodes)
   # It shouldn't commit the block since it was mismatched
   assert len(graph.nodes) == 0
 
 
-def test_sass_lifter_multiple_returns():
+def test_sass_lifter_multiple_returns() -> None:
   """Test SassLifter with multiple SemanticReturns."""
   from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
 
-  cst_nodes = [
+  cst_nodes: list[SassNode] = [
     SassComment(text="; Return:"),
     SassComment(text="; Return:"),
   ]
   lifter = SassLifter()
-  graph = lifter.lift(cst_nodes)
+  graph: LogicalGraph = lifter.lift(cst_nodes)
   # Only one output node should be created
   assert len(graph.nodes) == 1
   assert graph.nodes[0].kind == "Output"

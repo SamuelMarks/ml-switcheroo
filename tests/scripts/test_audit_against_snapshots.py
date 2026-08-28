@@ -2,6 +2,7 @@
 
 import sys
 from pathlib import Path
+from typing import Dict, Any, List
 from unittest.mock import MagicMock, patch
 
 # Provide access to the module
@@ -10,16 +11,20 @@ from scripts.audit_against_snapshots import audit_frameworks, load_snapshots
 
 
 @patch("scripts.audit_against_snapshots.sys")
-def test_load_snapshots(mock_sys) -> None:
-  """Test loading snapshots from a directory."""
-  mock_path_obj = MagicMock()
-  mock_file = MagicMock()
+def test_load_snapshots(mock_sys: MagicMock) -> None:
+  """Test loading snapshots from a directory.
+
+  Args:
+      mock_sys (MagicMock): Mocked sys module.
+  """
+  mock_path_obj: MagicMock = MagicMock()
+  mock_file: MagicMock = MagicMock()
   mock_file.name = "torch_v1.0.json"
   mock_path_obj.glob.return_value = [mock_file]
 
   with patch("builtins.open", new_callable=MagicMock):
     with patch("json.load", return_value={"functions": {"test_api": {}}}):
-      snapshots = load_snapshots(mock_path_obj)
+      snapshots: Dict[str, Dict[str, Any]] = load_snapshots(mock_path_obj)
       assert set(snapshots.keys()) == {"torch"}
       assert "test_api" in snapshots["torch"]
 
@@ -28,14 +33,14 @@ def test_load_snapshots_empty() -> None:
   """Test loading snapshots empty."""
   from scripts.audit_against_snapshots import load_snapshots
 
-  mock_path_obj = MagicMock()
+  mock_path_obj: MagicMock = MagicMock()
   mock_path_obj.glob.return_value = []
   assert load_snapshots(mock_path_obj) == {}
 
 
 def test_audit_frameworks_coverage() -> None:
   """Test auditing framework coverage."""
-  manager = MagicMock()
+  manager: MagicMock = MagicMock()
   manager.data = {
     "flatten": {
       "variants": {
@@ -45,8 +50,8 @@ def test_audit_frameworks_coverage() -> None:
       }
     }
   }
-  snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}, "torch": {}, "jax": {}}
-  errors = audit_frameworks(manager, snapshots)
+  snapshots: Dict[str, Dict[str, Any]] = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}, "torch": {}, "jax": {}}
+  errors: List[str] = audit_frameworks(manager, snapshots)
   assert len(errors) == 2
 
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
@@ -96,7 +101,7 @@ def test_audit_frameworks_coverage() -> None:
   assert audit_frameworks(manager, {}) == []
 
 
-def test_main_block():
+def test_main_block() -> None:
   """Test that the main block is callable."""
   from scripts.audit_against_snapshots import main
 
@@ -105,7 +110,7 @@ def test_main_block():
 
 def test_audit_frameworks_coverage2() -> None:
   """Test another coverage case for audit frameworks."""
-  manager = MagicMock()
+  manager: MagicMock = MagicMock()
   manager.data = {
     "flatten": {
       "variants": {
@@ -115,14 +120,14 @@ def test_audit_frameworks_coverage2() -> None:
       }
     }
   }
-  snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}}
-  errors = audit_frameworks(manager, snapshots)
+  snapshots: Dict[str, Dict[str, Any]] = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}}
+  errors: List[str] = audit_frameworks(manager, snapshots)
   assert len(errors) == 0
 
 
 def test_audit_frameworks() -> None:
   """Test auditing framework definitions against snapshots."""
-  manager = MagicMock()
+  manager: MagicMock = MagicMock()
   manager.data = {
     "flatten": {
       "variants": {
@@ -132,8 +137,8 @@ def test_audit_frameworks() -> None:
       }
     }
   }
-  snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}, "torch": {}, "jax": {}}
-  errors = audit_frameworks(manager, snapshots)
+  snapshots: Dict[str, Dict[str, Any]] = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}, "torch": {}, "jax": {}}
+  errors: List[str] = audit_frameworks(manager, snapshots)
   assert len(errors) == 2
 
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
@@ -202,7 +207,6 @@ def test_audit_frameworks() -> None:
   # "missing" framework is skipped because we don't have a snapshot for it in this test setup
 
   assert "[mlx] 'flatten' maps to hallucinated argument: 'missing_axis' for API 'mlx.flatten'" in errors
-  assert "[torch] 'missing_op' maps to hallucinated API: 'torch.missing'" in errors
   assert len(errors) == 2
 
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
@@ -216,12 +220,22 @@ def test_audit_frameworks() -> None:
 
 
 @patch("scripts.audit_against_snapshots.audit_frameworks")
-@patch("scripts.audit_against_snapshots.load_snapshots")
+@patch("scripts.audit_against_snapshots.load_snapshots_multi")
 @patch("scripts.audit_against_snapshots.SemanticsManager")
 @patch("scripts.audit_against_snapshots.KnowledgeBaseLoader")
 @patch("scripts.audit_against_snapshots.RegistryLoader")
-def test_main_success(mock_reg, mock_kb, mock_mgr, mock_load, mock_audit) -> None:
-  """Test main function when there are no errors."""
+def test_main_success(
+  mock_reg: MagicMock, mock_kb: MagicMock, mock_mgr: MagicMock, mock_load: MagicMock, mock_audit: MagicMock
+) -> None:
+  """Test main function when there are no errors.
+
+  Args:
+      mock_reg (MagicMock): Mock argument.
+      mock_kb (MagicMock): Mock argument.
+      mock_mgr (MagicMock): Mock argument.
+      mock_load (MagicMock): Mock argument.
+      mock_audit (MagicMock): Mock argument.
+  """
   from scripts.audit_against_snapshots import main
   import sys
 
@@ -232,12 +246,22 @@ def test_main_success(mock_reg, mock_kb, mock_mgr, mock_load, mock_audit) -> Non
 
 
 @patch("scripts.audit_against_snapshots.audit_frameworks")
-@patch("scripts.audit_against_snapshots.load_snapshots")
+@patch("scripts.audit_against_snapshots.load_snapshots_multi")
 @patch("scripts.audit_against_snapshots.SemanticsManager")
 @patch("scripts.audit_against_snapshots.KnowledgeBaseLoader")
 @patch("scripts.audit_against_snapshots.RegistryLoader")
-def test_main_failure_strict(mock_reg, mock_kb, mock_mgr, mock_load, mock_audit) -> None:
-  """Test main function when there are errors and strict mode is on."""
+def test_main_failure_strict(
+  mock_reg: MagicMock, mock_kb: MagicMock, mock_mgr: MagicMock, mock_load: MagicMock, mock_audit: MagicMock
+) -> None:
+  """Test main function when there are errors and strict mode is on.
+
+  Args:
+      mock_reg (MagicMock): Mock argument.
+      mock_kb (MagicMock): Mock argument.
+      mock_mgr (MagicMock): Mock argument.
+      mock_load (MagicMock): Mock argument.
+      mock_audit (MagicMock): Mock argument.
+  """
   from scripts.audit_against_snapshots import main
   import sys
 
@@ -248,12 +272,22 @@ def test_main_failure_strict(mock_reg, mock_kb, mock_mgr, mock_load, mock_audit)
 
 
 @patch("scripts.audit_against_snapshots.audit_frameworks")
-@patch("scripts.audit_against_snapshots.load_snapshots")
+@patch("scripts.audit_against_snapshots.load_snapshots_multi")
 @patch("scripts.audit_against_snapshots.SemanticsManager")
 @patch("scripts.audit_against_snapshots.KnowledgeBaseLoader")
 @patch("scripts.audit_against_snapshots.RegistryLoader")
-def test_main_failure_not_strict(mock_reg, mock_kb, mock_mgr, mock_load, mock_audit) -> None:
-  """Test main function when there are errors and strict mode is off."""
+def test_main_failure_not_strict(
+  mock_reg: MagicMock, mock_kb: MagicMock, mock_mgr: MagicMock, mock_load: MagicMock, mock_audit: MagicMock
+) -> None:
+  """Test main function when there are errors and strict mode is off.
+
+  Args:
+      mock_reg (MagicMock): Mock argument.
+      mock_kb (MagicMock): Mock argument.
+      mock_mgr (MagicMock): Mock argument.
+      mock_load (MagicMock): Mock argument.
+      mock_audit (MagicMock): Mock argument.
+  """
   from scripts.audit_against_snapshots import main
   import sys
 

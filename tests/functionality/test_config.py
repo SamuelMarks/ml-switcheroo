@@ -1,9 +1,10 @@
 """Test suite for the Config module."""
 
+import pytest
 from ml_switcheroo.config import RuntimeConfig
 
 
-def test_config_flags():
+def test_config_flags() -> None:
   """Verifies the behavior of configuration flags."""
   c = RuntimeConfig()
   assert c.enable_graph_optimization is False
@@ -11,19 +12,19 @@ def test_config_flags():
   assert c.enable_import_fixer is True
 
 
-def test_legacy_fusion_alias():
+def test_legacy_fusion_alias() -> None:
   """Verifies the behavior of legacy fusion alias."""
   c = RuntimeConfig(enable_graph_optimization=True)
   assert c.enable_graph_optimization is True
 
 
-def test_explicit_graph_opt():
+def test_explicit_graph_opt() -> None:
   """Verifies the behavior of explicit graph option."""
   c = RuntimeConfig(enable_graph_optimization=True)
   assert c.enable_graph_optimization is True
 
 
-def test_config_ui_priority_invalid(monkeypatch):
+def test_config_ui_priority_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior when ui_priority is invalid."""
   from ml_switcheroo.config import get_framework_priority_order
 
@@ -36,23 +37,23 @@ def test_config_ui_priority_invalid(monkeypatch):
   with monkeypatch.context() as m:
     m.setattr("ml_switcheroo.frameworks.base.get_adapter", lambda n: MockAdapter())
     m.setattr("ml_switcheroo.frameworks.base.available_frameworks", lambda: ["b", "a"])
-    res = get_framework_priority_order()
+    res: list[str] = get_framework_priority_order()
     # It will fallback to priority 999 and sort alphabetically for a tie
     assert res == ["a", "b"]
 
 
-def test_config_ui_priority_no_adapter(monkeypatch):
+def test_config_ui_priority_no_adapter(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   from ml_switcheroo.config import get_framework_priority_order
 
   with monkeypatch.context() as m:
     m.setattr("ml_switcheroo.frameworks.base.get_adapter", lambda n: None)
     m.setattr("ml_switcheroo.frameworks.base.available_frameworks", lambda: ["b", "a"])
-    res = get_framework_priority_order()
+    res: list[str] = get_framework_priority_order()
     assert res == ["a", "b"]
 
 
-def test_config_ui_priority_has_adapter_but_no_ui_priority(monkeypatch):
+def test_config_ui_priority_has_adapter_but_no_ui_priority(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   from ml_switcheroo.config import get_framework_priority_order
 
@@ -65,11 +66,11 @@ def test_config_ui_priority_has_adapter_but_no_ui_priority(monkeypatch):
   with monkeypatch.context() as m:
     m.setattr("ml_switcheroo.frameworks.base.get_adapter", lambda n: MockAdapter())
     m.setattr("ml_switcheroo.frameworks.base.available_frameworks", lambda: ["a"])
-    res = get_framework_priority_order()
+    res: list[str] = get_framework_priority_order()
     assert res == ["a"]
 
 
-def test_config_ui_priority_has_adapter_with_value_error(monkeypatch):
+def test_config_ui_priority_has_adapter_with_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   from ml_switcheroo.config import get_framework_priority_order
 
@@ -82,11 +83,11 @@ def test_config_ui_priority_has_adapter_with_value_error(monkeypatch):
   with monkeypatch.context() as m:
     m.setattr("ml_switcheroo.frameworks.base.get_adapter", lambda n: MockAdapter())
     m.setattr("ml_switcheroo.frameworks.base.available_frameworks", lambda: ["a"])
-    res = get_framework_priority_order()
+    res: list[str] = get_framework_priority_order()
     assert res == ["a"]
 
 
-def test_config_ui_priority_has_adapter_with_type_error(monkeypatch):
+def test_config_ui_priority_has_adapter_with_type_error(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   from ml_switcheroo.config import get_framework_priority_order
 
@@ -99,11 +100,11 @@ def test_config_ui_priority_has_adapter_with_type_error(monkeypatch):
   with monkeypatch.context() as m:
     m.setattr("ml_switcheroo.frameworks.base.get_adapter", lambda n: MockAdapter())
     m.setattr("ml_switcheroo.frameworks.base.available_frameworks", lambda: ["a"])
-    res = get_framework_priority_order()
+    res: list[str] = get_framework_priority_order()
     assert res == ["a"]
 
 
-def test_config_load_enable_sharding_none():
+def test_config_load_enable_sharding_none() -> None:
   """Test function."""
   from ml_switcheroo.config import RuntimeConfig
   from unittest.mock import patch
@@ -114,7 +115,7 @@ def test_config_load_enable_sharding_none():
     assert config.enable_sharding is True
 
 
-def test_config_load_enable_sharding_not_none():
+def test_config_load_enable_sharding_not_none() -> None:
   """Test function."""
   from ml_switcheroo.config import RuntimeConfig
   from unittest.mock import patch

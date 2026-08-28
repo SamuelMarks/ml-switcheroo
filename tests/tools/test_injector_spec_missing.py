@@ -1,12 +1,14 @@
 """Test suite for the Injector Spec Missing module."""
 
+from typing import Dict, Any, List
 
-def test_injector_spec_missing():
+
+def test_injector_spec_missing() -> None:
   """Verifies the behavior of injector spec missing."""
   from ml_switcheroo.tools.injector_spec import StandardsInjector
   from ml_switcheroo.core.dsl import OperationDef, ParameterDef, OpType
 
-  op_def = OperationDef(
+  op_def: OperationDef = OperationDef(
     operation="Foo",
     description="Foo",
     variants={},
@@ -14,18 +16,19 @@ def test_injector_spec_missing():
     return_type="int",
     is_inplace=True,
     output_shape_calc="lambda x: x",
-    std_args=[ParameterDef(name="a", type_hint="int"), {"name": "b", "type_hint": None}, ("c", "float"), "d"],
+    std_args=[ParameterDef(name="a", type="int"), {"name": "b", "type": None}, {"name": "c", "type": "float"}, "d"],
   )
-  injector = StandardsInjector(op_def)
-  out = injector._serialize_op(op_def)
+  injector: StandardsInjector = StandardsInjector(op_def)
+  out: Dict[str, Any] = injector._serialize_op(op_def)
   assert out["op_type"] == "class"
   assert out["return_type"] == "int"
   assert out["is_inplace"] is True
   assert out["output_shape_calc"] == "lambda x: x"
-  args = injector._serialize_args(op_def.std_args)
+  args: List[Any] = injector._serialize_args(getattr(op_def, "std_args"))
   assert args[1]["name"] == "b"
-  assert "type_hint" not in args[1]
-  assert args[2] == {"name": "c", "type": "float"}
+  assert "type" not in args[1]
+  assert args[2]["name"] == "c"
+  assert args[2]["type"] == "float"
   assert args[3] == "d"
   with __import__("unittest.mock").mock.patch("pathlib.Path.exists", return_value=True):
     with __import__("unittest.mock").mock.patch(
@@ -34,17 +37,17 @@ def test_injector_spec_missing():
       assert injector.inject(dry_run=True) is True
 
 
-def test_injector_spec_missing_more():
+def test_injector_spec_missing_more() -> None:
   """Verifies the behavior of injector spec missing more."""
   from ml_switcheroo.tools.injector_spec import StandardsInjector
 
   class DummyOpDef:
     """Dummy Op Def class for testing purposes."""
 
-    op_type = "function"
+    op_type: str = "function"
 
-  injector = StandardsInjector(DummyOpDef())
-  args = injector._serialize_args([{"name": "c", "foo": None}])
+  injector: StandardsInjector = StandardsInjector(DummyOpDef())
+  args: List[Any] = injector._serialize_args([{"name": "c", "foo": None}])
   assert args[0] == {"name": "c"}
   with __import__("unittest.mock").mock.patch("builtins.open", side_effect=OSError("fail")):
     import ml_switcheroo.tools.injector_spec
@@ -53,28 +56,28 @@ def test_injector_spec_missing_more():
     pass
 
 
-def test_injector_spec_write_parent_not_exist():
+def test_injector_spec_write_parent_not_exist() -> None:
   """Verifies the behavior of injector spec write parent not exist."""
   from ml_switcheroo.tools.injector_spec import StandardsInjector
   from ml_switcheroo.core.dsl import OperationDef
 
-  op_def = OperationDef(operation="Foo", description="Foo", variants={})
-  injector = StandardsInjector(op_def)
+  op_def: OperationDef = OperationDef(operation="Foo", description="Foo", variants={})
+  injector: StandardsInjector = StandardsInjector(op_def)
 
   class MockPath:
     """Mock Path class for testing purposes."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
       """Initializes the MockPath instance."""
-      self.parent = type(
+      self.parent: Any = type(
         "MockParent", (), {"exists": lambda self: False, "mkdir": lambda self, parents=False, exist_ok=False: None}
       )()
 
-    def exists(self):
+    def exists(self) -> bool:
       """Mock implementation of exists."""
       return False
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: Any) -> Any:
       """Docstring."""
       return self
 

@@ -3,17 +3,18 @@
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.testing.batch_runner import BatchValidator
 from pathlib import Path
+from typing import Tuple, List, Dict, Any
 
 
-def test_batch_runner_extract_sig():
+def test_batch_runner_extract_sig() -> None:
   """Test element."""
-  runner = BatchValidator(MagicMock())
-  runner.semantics.get_all_operations.return_value = ["foo"]
+  runner: BatchValidator = BatchValidator(MagicMock())
+  runner.semantics.get_all_operations.return_value = ["foo"]  # type: ignore
 
-  res = runner._unpack_args([{}])
+  res: Tuple[List[str], Dict[str, str], Dict[str, Any]] = runner._unpack_args([{}])
   assert res == ([], {}, {})
 
-  res2 = runner._unpack_args(
+  res2: Tuple[List[str], Dict[str, str], Dict[str, Any]] = runner._unpack_args(
     [
       {
         "name": "x",
@@ -34,15 +35,15 @@ def test_batch_runner_extract_sig():
   assert res2[2]["x"]["min"] == 1
 
 
-def test_batch_runner_scan_manual_tests():
+def test_batch_runner_scan_manual_tests() -> None:
   """Test element."""
-  runner = BatchValidator(MagicMock())
-  runner.semantics.get_all_operations.return_value = ["foo"]
-  mock_file = MagicMock()
+  runner: BatchValidator = BatchValidator(MagicMock())
+  runner.semantics.get_all_operations.return_value = ["foo"]  # type: ignore
+  mock_file: MagicMock = MagicMock()
   mock_file.parts = ["test_foo.py"]
   mock_file.read_text.return_value = "def test_foo(): pass"
   with patch("pathlib.Path.exists", return_value=True), patch("pathlib.Path.rglob", return_value=[mock_file]):
-    res = runner._scan_manual_tests(Path("/root"))
+    res: set = runner._scan_manual_tests(Path("/root"))
     assert "foo" in res
 
     mock_file.read_text.side_effect = Exception("mock")
@@ -53,16 +54,16 @@ def test_batch_runner_scan_manual_tests():
     runner._scan_manual_tests(Path("/root"))
 
 
-def test_batch_runner_run():
+def test_batch_runner_run() -> None:
   """Test element."""
-  runner = BatchValidator(MagicMock())
-  runner.semantics.get_all_operations.return_value = ["foo"]
+  runner: BatchValidator = BatchValidator(MagicMock())
+  runner.semantics.get_all_operations.return_value = ["foo"]  # type: ignore
 
-  runner._run_manual_tests = MagicMock(return_value=(0, 0, []))
-  runner._scan_manual_tests = MagicMock(return_value={"foo"})
+  runner._run_manual_tests = MagicMock(return_value=(0, 0, []))  # type: ignore
+  runner._scan_manual_tests = MagicMock(return_value={"foo"})  # type: ignore
 
   runner.run_all(manual_test_dir=Path("mock_dir"))
 
   with patch("ml_switcheroo.testing.batch_runner.track", return_value=["bar"]):
-    runner._verify_operation = MagicMock()
+    runner._verify_operation = MagicMock()  # type: ignore
     runner.run_all(manual_test_dir=None, verbose=True)

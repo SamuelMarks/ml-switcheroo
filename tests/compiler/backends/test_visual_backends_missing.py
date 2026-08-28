@@ -4,16 +4,16 @@ from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend, La
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 
 
-def test_calculate_layout_cycle():
+def test_calculate_layout_cycle() -> None:
   """Test function."""
   b = TikzBackend()
   g = LogicalGraph("T", nodes=[LogicalNode("n1", "Op"), LogicalNode("n2", "Op")])
   g.edges.extend([LogicalEdge("n1", "n2"), LogicalEdge("n2", "n1")])
-  ranks = b._calculate_layout(g)
+  ranks: dict[str, int] = b._calculate_layout(g)
   assert ranks
 
 
-def test_calculate_layout_disconnected_explicit():
+def test_calculate_layout_disconnected_explicit() -> None:
   """Test function."""
   b = TikzBackend()
   g = LogicalGraph("T")
@@ -26,11 +26,11 @@ def test_calculate_layout_disconnected_explicit():
   g.edges.append(LogicalEdge("c1", "c2"))
   g.edges.append(LogicalEdge("c2", "c1"))
 
-  ranks = b._calculate_layout(g)
+  ranks: dict[str, int] = b._calculate_layout(g)
   assert "c1" in ranks
 
 
-def test_latex_backend_formatting():
+def test_latex_backend_formatting() -> None:
   """Test function."""
   b = LatexBackend()
   g = LogicalGraph("T")
@@ -42,7 +42,7 @@ def test_latex_backend_formatting():
   b.compile(g)
 
 
-def test_latex_backend_duplicate_edge_and_noarg():
+def test_latex_backend_duplicate_edge_and_noarg() -> None:
   """Test function."""
   b = LatexBackend()
   g = LogicalGraph("T")
@@ -58,7 +58,7 @@ def test_latex_backend_duplicate_edge_and_noarg():
   b.compile(g)
 
 
-def test_force_transcode_lines():
+def test_force_transcode_lines() -> None:
   """Test function."""
   b = LatexBackend()
   g3 = LogicalGraph("T")
@@ -74,12 +74,9 @@ def test_force_transcode_lines():
   b._transcode_graph(g3, "T")
 
 
-def test_visual_backends_rank_existing_higher():
+def test_visual_backends_rank_existing_higher() -> None:
   # Hit 147->146
   """Test visual backends rank existing higher."""
-  from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("A", "Input"))
   g.nodes.append(LogicalNode("B", "Input"))
@@ -94,10 +91,10 @@ def test_visual_backends_rank_existing_higher():
   class DummyVisual(TikzBackend):
     """Dummy visual."""
 
-    def _get_shape(self, n):
+    def _get_shape(self, n: LogicalNode) -> str:
       """Docstring."""
       return "box"
 
   backend = DummyVisual()
-  # just run _layout_graph
+  # just run _calculate_layout
   backend._calculate_layout(g)

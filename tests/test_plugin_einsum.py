@@ -6,48 +6,50 @@ from ml_switcheroo.plugins.einsum import normalize_einsum, _create_dotted_name, 
 from ml_switcheroo.core.hooks import HookContext
 
 
-def test_is_string():
+def test_is_string() -> None:
   """Docstring."""
   assert _is_string(cst.SimpleString("'a'"))
   assert not _is_string(cst.Name("a"))
 
 
-def test_create_dotted_name():
+def test_create_dotted_name() -> None:
   """Docstring."""
-  node = _create_dotted_name("a.b")
+  node: cst.BaseExpression = _create_dotted_name("a.b")
   assert isinstance(node, cst.Attribute)
 
 
-def test_normalize_einsum_no_args():
+def test_normalize_einsum_no_args() -> None:
   """Docstring."""
-  node = cst.Call(func=cst.Name("einsum"))
-  ctx = MagicMock(spec=HookContext)
+  node: cst.Call = cst.Call(func=cst.Name("einsum"))
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.einsum"
 
-  result = normalize_einsum(node, ctx)
+  result: cst.CSTNode = normalize_einsum(node, ctx)
+  assert isinstance(result, cst.Call)
   assert isinstance(result.func, cst.Attribute)
   assert len(result.args) == 0
 
 
-def test_normalize_einsum_already_correct():
+def test_normalize_einsum_already_correct() -> None:
   """Docstring."""
-  node = cst.Call(
+  node: cst.Call = cst.Call(
     func=cst.Name("einsum"),
     args=[
       cst.Arg(value=cst.SimpleString("'ij,jk->ik'")),
       cst.Arg(value=cst.Name("x")),
     ],
   )
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.einsum"
 
-  result = normalize_einsum(node, ctx)
-  assert result.args[0].value.value == "'ij,jk->ik'"
+  result: cst.CSTNode = normalize_einsum(node, ctx)
+  assert isinstance(result, cst.Call)
+  assert getattr(result.args[0].value, "value", None) == "'ij,jk->ik'"
 
 
-def test_normalize_einsum_reorder():
+def test_normalize_einsum_reorder() -> None:
   """Docstring."""
-  node = cst.Call(
+  node: cst.Call = cst.Call(
     func=cst.Name("einsum"),
     args=[
       cst.Arg(value=cst.Name("x"), comma=cst.Comma()),
@@ -55,19 +57,20 @@ def test_normalize_einsum_reorder():
       cst.Arg(value=cst.SimpleString("'ij,jk->ik'")),
     ],
   )
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.einsum"
 
-  result = normalize_einsum(node, ctx)
-  assert result.args[0].value.value == "'ij,jk->ik'"
-  assert result.args[1].value.value == "x"
-  assert result.args[2].value.value == "y"
+  result: cst.CSTNode = normalize_einsum(node, ctx)
+  assert isinstance(result, cst.Call)
+  assert getattr(result.args[0].value, "value", None) == "'ij,jk->ik'"
+  assert getattr(result.args[1].value, "value", None) == "x"
+  assert getattr(result.args[2].value, "value", None) == "y"
   assert result.args[2].comma == cst.MaybeSentinel.DEFAULT
 
 
-def test_normalize_einsum_no_string():
+def test_normalize_einsum_no_string() -> None:
   """Docstring."""
-  node = cst.Call(
+  node: cst.Call = cst.Call(
     func=cst.Name("einsum"),
     args=[
       cst.Arg(value=cst.Name("x")),
@@ -75,8 +78,9 @@ def test_normalize_einsum_no_string():
       cst.Arg(value=cst.Name("eq")),
     ],
   )
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.einsum"
 
-  result = normalize_einsum(node, ctx)
-  assert result.args[0].value.value == "x"
+  result: cst.CSTNode = normalize_einsum(node, ctx)
+  assert isinstance(result, cst.Call)
+  assert getattr(result.args[0].value, "value", None) == "x"

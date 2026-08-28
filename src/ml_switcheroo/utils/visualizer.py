@@ -10,7 +10,7 @@ representation (like dotted imports) robustly.
 """
 
 import uuid
-from typing import List, Optional, Any
+from typing import List, Optional
 
 import libcst as cst
 
@@ -259,7 +259,7 @@ class MermaidGenerator(cst.CSTVisitor):
 
     # Check for simple literals to inline them into the Arg label
     is_simple = False
-    val_code: Any = ""
+    val_code = ""
     if isinstance(node.value, (cst.Name, cst.Integer, cst.Float, cst.SimpleString)):
       try:
         val_code = self._node_to_str(node.value)
@@ -320,7 +320,7 @@ class MermaidGenerator(cst.CSTVisitor):
     else:
       for n in node.names:
         if hasattr(n, "name") and hasattr(n.name, "value"):  # pragma: no branch
-          names.append(n.name.value)  # type: ignore
+          names.append(n.name.value)
 
     display_names = ", ".join(names[:3])
     if len(names) > 3:

@@ -4,7 +4,7 @@ from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode, RegionNode
 from ml_switcheroo.core.mlir.dialect import DialectRegistry
 
 
-def test_valid_module():
+def test_valid_module() -> None:
   """Verifies the behavior of valid module."""
   op = OperationNode(
     name="sw.module", attributes=[AttributeNode(name="sym_name", value='"MyMod"')], regions=[RegionNode()]
@@ -12,25 +12,25 @@ def test_valid_module():
   assert DialectRegistry.validate_op(op) is True
 
 
-def test_invalid_module_no_name():
+def test_invalid_module_no_name() -> None:
   """Verifies the behavior of invalid module no name."""
   op = OperationNode(name="sw.module", attributes=[], regions=[RegionNode()])
   assert DialectRegistry.validate_op(op) is False
 
 
-def test_valid_func():
+def test_valid_func() -> None:
   """Verifies the behavior of valid function."""
   op = OperationNode(name="sw.func", attributes=[AttributeNode(name="sym_name", value='"f"')], regions=[RegionNode()])
   assert DialectRegistry.validate_op(op) is True
 
 
-def test_invalid_func_no_region():
+def test_invalid_func_no_region() -> None:
   """Verifies the behavior of invalid function no region."""
   op = OperationNode(name="sw.func", attributes=[AttributeNode(name="sym_name", value='"f"')], regions=[])
   assert DialectRegistry.validate_op(op) is False
 
 
-def test_valid_op_instantiation():
+def test_valid_op_instantiation() -> None:
   """Verifies the behavior of valid op instantiation."""
   op = OperationNode(
     name="sw.op", results=[ValueNode(name="%0")], attributes=[AttributeNode(name="type", value='"Linear"')]
@@ -38,24 +38,24 @@ def test_valid_op_instantiation():
   assert DialectRegistry.validate_op(op) is True
 
 
-def test_invalid_op_no_result():
+def test_invalid_op_no_result() -> None:
   """Verifies the behavior of invalid op no result."""
   op = OperationNode(name="sw.op", results=[], attributes=[AttributeNode(name="type", value='"Linear"')])
   assert DialectRegistry.validate_op(op) is False
 
 
-def test_unknown_sw_op():
+def test_unknown_sw_op() -> None:
   """Verifies the behavior of unknown sw op."""
   op = OperationNode(name="sw.magic")
   assert DialectRegistry.validate_op(op) is False
 
 
-def test_external_dialect_allowed():
+def test_external_dialect_allowed() -> None:
   """Verifies the behavior of external dialect allowed."""
   op = OperationNode(name="std.add")
   assert DialectRegistry.validate_op(op) is True
 
 
-def test_abstract_mapping():
+def test_abstract_mapping() -> None:
   """Verifies the behavior of abstract mapping."""
   assert DialectRegistry.get_abstract_op("Linear") == "sw.op"

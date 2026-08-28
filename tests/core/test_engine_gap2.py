@@ -1,5 +1,6 @@
 """Test suite for the Engine Gap2 module."""
 
+import typing
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
@@ -7,14 +8,14 @@ import libcst as cst
 from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
 
-def get_tracer_mock():
+def get_tracer_mock() -> MagicMock:
   """Gets tracer mock."""
   m = MagicMock()
   m.export.return_value = []
   return m
 
 
-def test_engine_target_torch_keras_sharding():
+def test_engine_target_torch_keras_sharding() -> None:
   """Verifies the behavior of engine target PyTorch Keras sharding."""
   engine = ASTEngine(source="sass", target="keras")
   engine.config.enable_sharding = True
@@ -30,7 +31,7 @@ def test_engine_target_torch_keras_sharding():
     engine._run_compiler_pipeline("code", get_tracer_mock())
 
 
-def test_rewriter_loopback():
+def test_rewriter_loopback() -> None:
   """Verifies the behavior of rewriter loopback."""
   engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   with (
@@ -41,7 +42,7 @@ def test_rewriter_loopback():
     patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
     real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
-    real_map = {"a": None}
+    real_map: dict[str, typing.Any] = {"a": None}
     with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor:
       mock_extractor.return_value.graph = real_graph
       mock_extractor.return_value.node_map = real_map
@@ -50,7 +51,7 @@ def test_rewriter_loopback():
         engine._run_rewriter_pipeline("code", get_tracer_mock())
 
 
-def test_rewriter_loopback_sharding_jax():
+def test_rewriter_loopback_sharding_jax() -> None:
   """Verifies the behavior of rewriter loopback sharding JAX."""
   cfg = RuntimeConfig(strict_mode=False)
   cfg.enable_sharding = True
@@ -63,7 +64,7 @@ def test_rewriter_loopback_sharding_jax():
     patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
     real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
-    real_map = {"a": None}
+    real_map: dict[str, typing.Any] = {"a": None}
     with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor:
       mock_extractor.return_value.graph = real_graph
       mock_extractor.return_value.node_map = real_map
@@ -72,7 +73,7 @@ def test_rewriter_loopback_sharding_jax():
         engine._run_rewriter_pipeline("code", get_tracer_mock())
 
 
-def test_rewriter_loopback_sharding_torch():
+def test_rewriter_loopback_sharding_torch() -> None:
   """Verifies the behavior of rewriter loopback sharding PyTorch."""
   cfg = RuntimeConfig(strict_mode=False)
   cfg.enable_sharding = True
@@ -85,7 +86,7 @@ def test_rewriter_loopback_sharding_torch():
     patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
     real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
-    real_map = {"a": None}
+    real_map: dict[str, typing.Any] = {"a": None}
     with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor:
       mock_extractor.return_value.graph = real_graph
       mock_extractor.return_value.node_map = real_map
@@ -94,7 +95,7 @@ def test_rewriter_loopback_sharding_torch():
         engine._run_rewriter_pipeline("code", get_tracer_mock())
 
 
-def test_engine_target_rdna():
+def test_engine_target_rdna() -> None:
   """Verifies the behavior of engine target RDNA."""
   engine = ASTEngine(source="rdna", target="keras")
   with (

@@ -1,17 +1,18 @@
 """Test suite for the Consensus module."""
 
 from unittest.mock import patch, MagicMock
+import typing
 from ml_switcheroo.discovery.consensus import ConsensusEngine
 
 
-def test_consensus_engine_init():
+def test_consensus_engine_init() -> None:
   """Verifies the behavior of consensus engine initialization."""
   engine = ConsensusEngine(["torch", "jax.numpy"])
   assert engine.frameworks == ["torch", "jax.numpy"]
   assert engine.vocabulary == {}
 
 
-def test_consensus_engine_normalize():
+def test_consensus_engine_normalize() -> None:
   """Verifies the behavior of consensus engine normalize."""
   engine = ConsensusEngine([])
   assert engine.normalize("torch_add") == "add"
@@ -21,7 +22,7 @@ def test_consensus_engine_normalize():
   assert engine.normalize("TF_MSE_Loss") == "mse"
 
 
-def test_consensus_engine_ingest_success():
+def test_consensus_engine_ingest_success() -> None:
   """Verifies the behavior of consensus engine ingest successfully."""
   engine = ConsensusEngine(["json"])
   engine.ingest()
@@ -29,14 +30,14 @@ def test_consensus_engine_ingest_success():
   assert "load" in engine.vocabulary or "dump" in engine.vocabulary
 
 
-def test_consensus_engine_ingest_import_error():
+def test_consensus_engine_ingest_import_error() -> None:
   """Verifies the behavior of consensus engine ingest import correctly handling an error."""
   engine = ConsensusEngine(["nonexistent_fw"])
   engine.ingest()
   assert len(engine.vocabulary) == 0
 
 
-def test_consensus_engine_scan_module_recursion():
+def test_consensus_engine_scan_module_recursion() -> None:
   """Verifies the behavior of consensus engine scan module recursion."""
   engine = ConsensusEngine([])
 
@@ -45,11 +46,11 @@ def test_consensus_engine_scan_module_recursion():
 
     __name__ = "dummy"
 
-  engine._scan_module(DummyModule(), "dummy", depth=3)
+  engine._scan_module(DummyModule(), "dummy", depth=3)  # type: ignore
   assert len(engine.vocabulary) == 0
 
 
-def test_consensus_engine_scan_module_error():
+def test_consensus_engine_scan_module_error() -> None:
   """Verifies the behavior of consensus engine scan module correctly handling an error."""
   engine = ConsensusEngine([])
   with patch("inspect.getmembers", side_effect=Exception("boom")):
@@ -57,7 +58,7 @@ def test_consensus_engine_scan_module_error():
   assert len(engine.vocabulary) == 0
 
 
-def test_consensus_engine_scan_submodule():
+def test_consensus_engine_scan_submodule() -> None:
   """Verifies the behavior of consensus engine scan submodule."""
   engine = ConsensusEngine([])
 
@@ -79,17 +80,17 @@ def test_consensus_engine_scan_submodule():
   ):
     mock_gm.return_value = [("sub", Sub()), ("_priv", Sub()), ("myfunc", lambda: None)]
 
-    def mock_is_m(obj):
+    def mock_is_m(obj: typing.Any) -> bool:
       """Mock."""
       return isinstance(obj, Sub)
 
     mock_ism.side_effect = mock_is_m
     mock_isf.return_value = True
-    engine._scan_module(Dummy(), "dummy")
+    engine._scan_module(Dummy(), "dummy")  # type: ignore
   assert "myfunc" in engine.vocabulary
 
 
-def test_consensus_engine_cluster():
+def test_consensus_engine_cluster() -> None:
   """Verifies the behavior of consensus engine cluster."""
   engine = ConsensusEngine([])
   engine.vocabulary = {
@@ -99,23 +100,23 @@ def test_consensus_engine_cluster():
     "addition": ["other.addition"],
     "nonmatch": ["something"],
   }
-  clusters = engine.cluster(threshold=0.8)
+  clusters: dict[str, typing.Any] = engine.cluster(threshold=0.8)
   assert "Relu" in clusters or "Relufn" in clusters
   assert "Add" in clusters
 
 
-def test_consensus_engine_cluster_no_matches():
+def test_consensus_engine_cluster_no_matches() -> None:
   """Verifies the behavior of consensus engine cluster no matches."""
   engine = ConsensusEngine([])
   engine.vocabulary = {"a": ["a"]}
-  clusters = engine.cluster()
+  clusters: dict[str, typing.Any] = engine.cluster()
   assert "A" in clusters
 
 
-def test_consensus_engine_cluster_difflib_no_matches():
+def test_consensus_engine_cluster_difflib_no_matches() -> None:
   """Verifies the behavior of consensus engine cluster difflib no matches."""
   engine = ConsensusEngine([])
   engine.vocabulary = {"a": ["a"]}
   with patch("difflib.get_close_matches", return_value=[]):
-    clusters = engine.cluster()
+    clusters: dict[str, typing.Any] = engine.cluster()
     assert len(clusters) == 0

@@ -8,13 +8,15 @@ Verifies that:
 """
 
 from typing import Optional
-from ml_switcheroo.core.ghost import GhostInspector
+import pytest
+import typing
+from ml_switcheroo.core.ghost import GhostInspector, GhostRef
 
 
 # --- Mock Objects for Inspection ---
 
 
-def simple_func(x, y=10):
+def simple_func(x: typing.Any, y: int = 10) -> typing.Any:
   """A simple mock function used to test basic inspection of parameters and defaults.
 
   Args:
@@ -27,7 +29,7 @@ def simple_func(x, y=10):
   return x + y
 
 
-def typed_func(x: int, opt: Optional[str] = None):
+def typed_func(x: int, opt: Optional[str] = None) -> None:
   """A mock function with type annotations to test type hint stringification.
 
   Args:
@@ -47,7 +49,7 @@ class SimpleClass:
   initialization method containing multiple parameters.
   """
 
-  def __init__(self, output_dim, activation="relu"):
+  def __init__(self, output_dim: int, activation: str = "relu") -> None:
     """Initializes the SimpleClass instance.
 
     Args:
@@ -73,13 +75,13 @@ class BuiltinLike:
 # --- Tests ---
 
 
-def test_inspect_simple_function():
+def test_inspect_simple_function() -> None:
   """Verifies that basic function inspection extracts correct parameters, defaults, and attributes.
 
   Returns:
       None.
   """
-  ref = GhostInspector.inspect(simple_func, "test.simple_func")
+  ref: GhostRef = GhostInspector.inspect(simple_func, "test.simple_func")
 
   assert ref.name == "simple_func"
   assert ref.kind == "function"
@@ -90,7 +92,8 @@ def test_inspect_simple_function():
   )
 
   assert len(ref.params) == 2
-  p0, p1 = ref.params
+  p0 = ref.params[0]
+  p1 = ref.params[1]
 
   assert p0.name == "x"
   assert p0.default is None
@@ -99,13 +102,13 @@ def test_inspect_simple_function():
   assert p1.default == "10"
 
 
-def test_inspect_class_init():
+def test_inspect_class_init() -> None:
   """Verifies that class inspection inspects the __init__ signature and skips 'self'.
 
   Returns:
       None.
   """
-  ref = GhostInspector.inspect(SimpleClass, "test.SimpleClass")
+  ref: GhostRef = GhostInspector.inspect(SimpleClass, "test.SimpleClass")
 
   assert ref.name == "SimpleClass"
   assert ref.kind == "class"
@@ -122,13 +125,13 @@ def test_inspect_class_init():
   assert ref.params[1].default == "relu"
 
 
-def test_inspect_typed_signature():
+def test_inspect_typed_signature() -> None:
   """Verifies that type hints are successfully extracted and stringified by the inspector.
 
   Returns:
       None.
   """
-  ref = GhostInspector.inspect(typed_func, "test.typed")
+  ref: GhostRef = GhostInspector.inspect(typed_func, "test.typed")
 
   p0 = ref.params[0]
   assert p0.name == "x"
@@ -141,27 +144,27 @@ def test_inspect_typed_signature():
   assert "Optional" in p1.annotation or "Union" in p1.annotation or "None" in p1.annotation
 
 
-def test_ghost_hydration_roundtrip():
+def test_ghost_hydration_roundtrip() -> None:
   """Verifies that GhostRef can be serialized to a dict and hydrated back correctly.
 
   Returns:
       None.
   """
   # 1. Inspect Live
-  live_ref = GhostInspector.inspect(simple_func, "func")
+  live_ref: GhostRef = GhostInspector.inspect(simple_func, "func")
 
   # 2. Serialize
-  data = live_ref.model_dump()
+  data: dict[str, typing.Any] = live_ref.model_dump()
 
   # 3. Hydrate
-  ghost_ref = GhostInspector.hydrate(data)
+  ghost_ref: GhostRef = GhostInspector.hydrate(data)
 
   assert ghost_ref == live_ref
   assert ghost_ref.has_arg("y")
   assert not ghost_ref.has_arg("z")
 
 
-def test_inspect_failure_handling(monkeypatch):
+def test_inspect_failure_handling(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies that the inspector falls back safely when signature inspection raises ValueError.
 
   Args:
@@ -172,7 +175,7 @@ def test_inspect_failure_handling(monkeypatch):
   """
 
   # We patch signature to raise ValueError mimics C-ext failure
-  def mock_sig(obj):
+  def mock_sig(obj: typing.Any) -> typing.Any:
     """Mocks inspect.signature to simulate inspection failures.
 
     Args:
@@ -188,7 +191,7 @@ def test_inspect_failure_handling(monkeypatch):
 
   monkeypatch.setattr("inspect.signature", mock_sig)
 
-  ref = GhostInspector.inspect(BuiltinLike, "test.BuiltinLike")
+  ref: GhostRef = GhostInspector.inspect(BuiltinLike, "test.BuiltinLike")
 
   # Should return a valid Ref object with empty params
   assert ref.name == "BuiltinLike"
@@ -197,26 +200,26 @@ def test_inspect_failure_handling(monkeypatch):
   assert "mimicking" in (ref.docstring or "")
 
 
-def test_ghost_ref_helper_methods():
+def test_ghost_ref_helper_methods() -> None:
   """Verifies helper methods such as has_arg on the GhostRef class.
 
   Returns:
       None.
   """
-  ref = GhostInspector.inspect(simple_func, "foo")
+  ref: GhostRef = GhostInspector.inspect(simple_func, "foo")
 
   assert ref.has_arg("x") is True
   assert ref.has_arg("non_existent") is False
 
 
-def test_ghost_varargs():
+def test_ghost_varargs() -> None:
   """Verifies that GhostInspector correctly identifies functions with variable positional arguments (*args).
 
   Returns:
       None.
   """
 
-  def func_with_args(*args):
+  def func_with_args(*args: typing.Any) -> None:
     """A mock function accepting variable positional arguments.
 
     Args:
@@ -227,18 +230,18 @@ def test_ghost_varargs():
     """
     pass
 
-  ref = GhostInspector.inspect(func_with_args, "func_with_args")
+  ref: GhostRef = GhostInspector.inspect(func_with_args, "func_with_args")
   assert ref.has_varargs is True
 
 
-def test_ghost_callable_default():
+def test_ghost_callable_default() -> None:
   """Verifies that callables used as default values are treated as None to avoid serializing memory addresses.
 
   Returns:
       None.
   """
 
-  def some_callable():
+  def some_callable() -> None:
     """A mock callable default value.
 
     Returns:
@@ -246,7 +249,7 @@ def test_ghost_callable_default():
     """
     pass
 
-  def func_with_callable(cb=some_callable):
+  def func_with_callable(cb: typing.Any = some_callable) -> None:
     """A mock function with a callable as a default argument.
 
     Args:
@@ -257,11 +260,11 @@ def test_ghost_callable_default():
     """
     pass
 
-  ref = GhostInspector.inspect(func_with_callable, "func_with_callable")
+  ref: GhostRef = GhostInspector.inspect(func_with_callable, "func_with_callable")
   assert ref.params[0].default is None
 
 
-def test_ghost_unrepresentable_default():
+def test_ghost_unrepresentable_default() -> None:
   """Verifies handling of default arguments with unrepresentable string values.
 
   Returns:
@@ -275,7 +278,7 @@ def test_ghost_unrepresentable_default():
     or converted to None.
     """
 
-    def __repr__(self):
+    def __repr__(self) -> str:
       """Returns a safe representation of BadRepr.
 
       Returns:
@@ -283,7 +286,7 @@ def test_ghost_unrepresentable_default():
       """
       return "GoodRepr"
 
-    def __str__(self):
+    def __str__(self) -> str:
       """Returns a string representation that mimics a memory address.
 
       Returns:
@@ -297,7 +300,7 @@ def test_ghost_unrepresentable_default():
     Used to test robustness of default value string conversion.
     """
 
-    def __repr__(self):
+    def __repr__(self) -> str:
       """Returns a safe representation of ExplodingStr.
 
       Returns:
@@ -305,7 +308,7 @@ def test_ghost_unrepresentable_default():
       """
       return "SafeRepr"
 
-    def __str__(self):
+    def __str__(self) -> str:
       """Simulates a failure during string conversion.
 
       Returns:
@@ -316,7 +319,7 @@ def test_ghost_unrepresentable_default():
       """
       raise Exception("Boom")
 
-  def func_with_bad_str(x=BadRepr(), y=ExplodingStr()):
+  def func_with_bad_str(x: typing.Any = BadRepr(), y: typing.Any = ExplodingStr()) -> None:
     """A mock function with unrepresentable default values.
 
     Args:
@@ -328,12 +331,12 @@ def test_ghost_unrepresentable_default():
     """
     pass
 
-  ref = GhostInspector.inspect(func_with_bad_str, "func_with_bad_str")
+  ref: GhostRef = GhostInspector.inspect(func_with_bad_str, "func_with_bad_str")
   assert ref.params[0].default is None
   assert ref.params[1].default == "<unrepresentable>"
 
 
-def test_ghost_annotation_without_name():
+def test_ghost_annotation_without_name() -> None:
   """Verifies that annotations without a standard name attribute are serialized correctly using their string representation.
 
   Returns:
@@ -346,7 +349,7 @@ def test_ghost_annotation_without_name():
     Used to test fallback logic in type annotation stringification.
     """
 
-    def __str__(self):
+    def __str__(self) -> str:
       """Returns the string representation of the annotation object.
 
       Returns:
@@ -354,22 +357,17 @@ def test_ghost_annotation_without_name():
       """
       return "NoName"
 
-  def func_with_anno(x: NoNameAnnotation()):
-    """A mock function that uses a custom instance as a type annotation.
-
-    Args:
-        x: A parameter annotated with an instance of NoNameAnnotation.
-
-    Returns:
-        None.
-    """
+  def func_with_anno(x: typing.Any) -> None:  # Cannot annotate with instance
     pass
 
-  ref = GhostInspector.inspect(func_with_anno, "func_with_anno")
+  # We manually override annotations for the test
+  func_with_anno.__annotations__["x"] = NoNameAnnotation()
+
+  ref: GhostRef = GhostInspector.inspect(func_with_anno, "func_with_anno")
   assert ref.params[0].annotation == "NoName"
 
 
-def test_ghost_function_c_extension_fallback(monkeypatch):
+def test_ghost_function_c_extension_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies fallback parameter generation for regular functions when inspection raises ValueError (e.g. C-extensions).
 
   Args:
@@ -379,7 +377,7 @@ def test_ghost_function_c_extension_fallback(monkeypatch):
       None.
   """
 
-  def mock_sig(obj):
+  def mock_sig(obj: typing.Any) -> typing.Any:
     """Mocks inspect.signature to raise ValueError.
 
     Args:
@@ -395,7 +393,7 @@ def test_ghost_function_c_extension_fallback(monkeypatch):
 
   monkeypatch.setattr("inspect.signature", mock_sig)
 
-  def dummy_func():
+  def dummy_func() -> None:
     """A mock dummy function to test fallback behavior.
 
     Returns:
@@ -403,7 +401,7 @@ def test_ghost_function_c_extension_fallback(monkeypatch):
     """
     pass
 
-  ref = GhostInspector.inspect(dummy_func, "dummy_func")
+  ref: GhostRef = GhostInspector.inspect(dummy_func, "dummy_func")
   assert ref.name == "dummy_func"
   assert ref.has_varargs is True
   assert len(ref.params) == 2

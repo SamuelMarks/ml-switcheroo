@@ -4,13 +4,15 @@ import pytest
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.testing.batch_runner import BatchValidator
 from ml_switcheroo.semantics.manager import SemanticsManager
+import pathlib
+from typing import Dict, Any, List, Optional, Tuple
 
 
 @pytest.fixture
-def mock_semantics():
+def mock_semantics() -> MagicMock:
   """Provides a mock semantics for testing."""
-  mgr = MagicMock(spec=SemanticsManager)
-  kb = {
+  mgr: MagicMock = MagicMock(spec=SemanticsManager)
+  kb: Dict[str, Any] = {
     "auto_op": {"std_args": [("x", "int")], "variants": {"torch": {"api": "t.op"}}},
     "broken_op": {"std_args": ["x"], "variants": {"torch": {"api": "t.break"}}},
     "manual_op": {"std_args": ["x"], "variants": {}},
@@ -21,19 +23,25 @@ def mock_semantics():
 
 
 @pytest.fixture
-def validator(mock_semantics):
+def validator(mock_semantics: MagicMock) -> BatchValidator:
   """Provides a mock validator for testing."""
   return BatchValidator(mock_semantics)
 
 
-def test_batch_execution_flow(validator):
+def test_batch_execution_flow(validator: BatchValidator) -> None:
   """Verifies the behavior of batch execution flow."""
 
-  def mock_verify(variants, params, hints=None, constraints=None, shape_calc=None):
+  def mock_verify(
+    variants: Dict[str, Any],
+    params: List[str],
+    hints: Optional[Dict[str, str]] = None,
+    constraints: Optional[Dict[str, Any]] = None,
+    shape_calc: Optional[str] = None,
+  ) -> Tuple[bool, str]:
     """Provides a mock verify for testing."""
     if not variants:
       return (True, "Skipped")
-    api = list(variants.values())[0]["api"]
+    api: str = list(variants.values())[0]["api"]
     if api == "t.op":
       return (True, "OK")
     if api == "t.break":
@@ -45,7 +53,7 @@ def test_batch_execution_flow(validator):
     return (False, "Unknown")
 
   with patch.object(validator.runner, "verify", side_effect=mock_verify) as mock_run:
-    results = validator.run_all()
+    results: Dict[str, bool] = validator.run_all()
     assert results["auto_op"] is True
     assert results["broken_op"] is False
     assert results["shape_op"] is True
@@ -53,14 +61,16 @@ def test_batch_execution_flow(validator):
     assert mock_run.call_count == 4
 
 
-def test_extraction_of_shape_calc(validator):
+def test_extraction_of_shape_calc(validator: BatchValidator) -> None:
   """Verifies the behavior of extraction of shape calculation."""
   with patch.object(validator.runner, "verify", return_value=(True, "OK")) as mock_run:
     validator.run_all()
-    found_shape_call = False
+    found_shape_call: bool = False
     for call in mock_run.call_args_list:
-      (args, kwargs) = call
-      variants = args[0]
+      args: Tuple[Any, ...]
+      kwargs: Dict[str, Any]
+      args, kwargs = call
+      variants: Dict[str, Any] = args[0]
       if not variants:
         continue
       if variants["torch"]["api"] == "shape.op":
@@ -69,25 +79,25 @@ def test_extraction_of_shape_calc(validator):
     assert found_shape_call
 
 
-def test_manual_override_priority(validator, tmp_path):
+def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of manual override priority."""
-  test_dir = tmp_path / "tests"
+  test_dir: pathlib.Path = tmp_path / "tests"
   test_dir.mkdir()
   (test_dir / "test_manual.py").write_text("def test_manual_op(): pass")
 
-  def mock_verify(*args, **kwargs):
+  def mock_verify(*args: Any, **kwargs: Any) -> Tuple[bool, str]:
     """Provides a mock verify for testing."""
     return (True, "OK")
 
   with patch.object(validator.runner, "verify", side_effect=mock_verify) as mock_run:
-    results = validator.run_all(manual_test_dir=tmp_path)
+    results: Dict[str, bool] = validator.run_all(manual_test_dir=tmp_path)
     assert results["manual_op"] is True
     assert mock_run.call_count == 3
 
 
-def test_ignore_generated_tests(validator, tmp_path):
+def test_ignore_generated_tests(validator: BatchValidator, tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of ignore generated tests."""
-  gen_dir = tmp_path / "generated"
+  gen_dir: pathlib.Path = tmp_path / "generated"
   gen_dir.mkdir()
   (gen_dir / "test_gen_auto_op.py").write_text("def test_gen_auto_op(): pass")
   with patch.object(validator.runner, "verify", return_value=(True, "OK")) as mock_run:
@@ -95,10 +105,13 @@ def test_ignore_generated_tests(validator, tmp_path):
     assert mock_run.call_count == 4
 
 
-def test_unpack_args_logic(validator):
+def test_unpack_args_logic(validator: BatchValidator) -> None:
   """Verifies the behavior of unpack arguments logic."""
-  raw = [("x", "Array"), "axis", ("dims", "Tuple[int]")]
-  (params, hints, constraints) = validator._unpack_args(raw)
+  raw: List[Any] = [("x", "Array"), "axis", ("dims", "Tuple[int]")]
+  params: List[str]
+  hints: Dict[str, str]
+  constraints: Dict[str, Any]
+  params, hints, constraints = validator._unpack_args(raw)
   assert params == ["x", "axis", "dims"]
   assert hints["x"] == "Array"
   assert hints["dims"] == "Tuple[int]"

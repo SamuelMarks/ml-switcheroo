@@ -7,6 +7,9 @@ enforcing the new Pipeline Routing architecture.
 
 from typing import Any
 
+import typing
+
+
 import json
 import logging
 from functools import lru_cache
@@ -44,13 +47,15 @@ class FrameworkAdapter(Protocol):
   """
 
   _mode: InitMode = InitMode.LIVE
-  _snapshot_data: Dict[str, Any] = {}
+  _snapshot_data: dict[Any, Any] = {}
 
   def __init__(self) -> None:
     """Initialize the framework adapter instance."""
     ...
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert framework-specific or generic data structures.
 
     Args:
@@ -320,7 +325,7 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply dynamic bindings or overrides onto the adapter using snapshot data.
 
     Args:
@@ -329,7 +334,7 @@ class FrameworkAdapter(Protocol):
     ...
 
 
-def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
+def load_snapshot_for_adapter(fw_key: str):
   """Load the most recent snapshot JSON data for a given framework key from the SNAPSHOT_DIR.
 
   Args:
@@ -347,7 +352,7 @@ def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
   target = candidates[-1]
   try:
     with open(target, "r", encoding="utf-8") as f:
-      return json.load(f)  # type: ignore
+      return json.load(f)
   except Exception as e:
     logging.error(f"Failed to load snapshot {target}: {e}")
     return {}
@@ -356,7 +361,7 @@ def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
 _ADAPTER_REGISTRY: Dict[str, Type[FrameworkAdapter]] = {}
 
 
-def register_framework(name: str) -> Any:
+def register_framework(name: str):
   """Get a decorator to register concrete FrameworkAdapter classes under a specific name.
 
   Args:
@@ -367,7 +372,7 @@ def register_framework(name: str) -> Any:
       in the registry and returns the class itself.
   """
 
-  def wrapper(cls) -> Any:  # type: ignore
+  def wrapper(cls):
     """Register the decorated class in the framework adapter registry.
 
     Args:

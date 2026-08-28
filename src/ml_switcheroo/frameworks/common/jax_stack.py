@@ -18,7 +18,7 @@ Usage:
 """
 
 import textwrap
-from typing import Dict, Any, List, Optional
+from typing import Dict, List, Optional
 
 
 class JAXStackMixin:
@@ -250,7 +250,7 @@ class JAXStackMixin:
 
   # --- Manual Wiring (Semantics Injection / Legacy Support) ---
 
-  def _apply_stack_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def _apply_stack_wiring(self, snapshot) -> None:
     """Inject mappings common to all JAX frameworks (JNP, Optax, JIT).
 
     This method populates the semantic snapshot with rules for translating

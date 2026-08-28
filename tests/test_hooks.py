@@ -7,28 +7,30 @@ from pydantic import BaseModel, ValidationError
 from ml_switcheroo.core.hooks import register_hook, get_hook, HookContext, _HOOKS
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.schema import PluginTraits
+from ml_switcheroo.semantics.manager import SemanticsManager
+from typing import Generator, Optional, Callable
 
 
-class MockSemantics:
+class MockSemantics(SemanticsManager):
   """Mock Semantics class for testing purposes."""
 
   pass
 
 
 @pytest.fixture(autouse=True)
-def clean_registry():
+def clean_registry() -> Generator[None, None, None]:
   """Helper to clean registry."""
   pass
   yield
   pass
 
 
-def test_hook_context_metadata_isolation():
+def test_hook_context_metadata_isolation() -> None:
   """Verifies the behavior of hook context metadata isolation."""
-  semantics = MockSemantics()
-  config = RuntimeConfig(source_framework="torch", target_framework="jax")
-  ctx1 = HookContext(semantics, config)
-  ctx2 = HookContext(semantics, config)
+  semantics: MockSemantics = MockSemantics()
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  ctx1: HookContext = HookContext(semantics, config)
+  ctx2: HookContext = HookContext(semantics, config)
   ctx1.metadata["scope_id"] = 1
   ctx1.metadata.setdefault("plugin_data", {})["flag"] = True
   assert "scope_id" not in ctx2.metadata
@@ -37,11 +39,13 @@ def test_hook_context_metadata_isolation():
   assert ctx1.metadata["plugin_data"]["flag"] is True
 
 
-def test_hook_context_initialization():
+def test_hook_context_initialization() -> None:
   """Verifies the behavior of hook context initialization."""
-  semantics = MockSemantics()
-  config = RuntimeConfig(source_framework="torch", target_framework="jax", plugin_settings={"any_key": 123})
-  ctx = HookContext(semantics, config)
+  semantics: MockSemantics = MockSemantics()
+  config: RuntimeConfig = RuntimeConfig(
+    source_framework="torch", target_framework="jax", plugin_settings={"any_key": 123}
+  )
+  ctx: HookContext = HookContext(semantics, config)
   assert ctx.semantics is semantics
   assert ctx.source_fw == "torch"
   assert ctx.target_fw == "jax"
@@ -50,12 +54,12 @@ def test_hook_context_initialization():
   assert ctx.raw_config("any_key", default=999) == 123
 
 
-def test_registration_flow():
+def test_registration_flow() -> None:
   """Verifies the behavior of registration flow."""
-  trigger_name = "test_transformation"
+  trigger_name: str = "test_transformation"
 
   @register_hook(trigger_name)
-  def my_transformer(node, _ctx):
+  def my_transformer(node: cst.CSTNode, _ctx: HookContext) -> cst.CSTNode:
     """Helper to my transformer."""
     return node
 
@@ -64,132 +68,144 @@ def test_registration_flow():
   assert get_hook(trigger_name) == my_transformer
 
 
-def test_clear_hooks_resets_registry():
+def test_clear_hooks_resets_registry() -> None:
   """Verifies the behavior of clear hooks resets registry."""
   from unittest.mock import patch
 
   with patch.dict("ml_switcheroo.core.hooks_registry._HOOKS", {}, clear=True):
-    register_hook("temp")(lambda n, c: n)
+
+    @register_hook("temp")
+    def temp_hook(n: cst.CSTNode, c: HookContext) -> cst.CSTNode:
+      return n
+
     assert "temp" in _HOOKS
     _HOOKS.clear()
     assert len(_HOOKS) == 0
   assert get_hook("temp") is None
 
 
-def test_get_nonexistent_hook():
+def test_get_nonexistent_hook() -> None:
   """Gets nonexistent hook."""
   assert get_hook("unknown_magic") is None
 
 
-def test_hook_execution_signature():
+def test_hook_execution_signature() -> None:
   """Verifies the behavior of hook execution signature."""
-  trigger_name = "sig_test"
+  trigger_name: str = "sig_test"
 
   @register_hook(trigger_name)
-  def return_new_node(node: cst.Call, _ctx: HookContext):
+  def return_new_node(node: cst.Call, _ctx: HookContext) -> cst.Call:
     """Helper to return new node."""
-    new_name = cst.Name("visited")
+    new_name: cst.Name = cst.Name("visited")
     return node.with_changes(func=new_name)
 
-  hook = get_hook(trigger_name)
-  dummy_node = cst.Call(func=cst.Name("original"))
-  cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
-  dummy_ctx = HookContext(MockSemantics(), cfg)
-  result_node = hook(dummy_node, dummy_ctx)
+  hook: Optional[Callable[[cst.Call, HookContext], cst.Call]] = get_hook(trigger_name)
+  assert hook is not None
+  dummy_node: cst.Call = cst.Call(func=cst.Name("original"))
+  cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  dummy_ctx: HookContext = HookContext(MockSemantics(), cfg)
+  result_node: cst.Call = hook(dummy_node, dummy_ctx)
   assert isinstance(result_node, cst.Call)
-  assert result_node.func.value == "visited"
+  assert getattr(result_node.func, "value", None) == "visited"
 
 
-def test_overwrite_hook():
+def test_overwrite_hook() -> None:
   """Verifies the behavior of overwrite hook."""
-  trigger = "conflict"
+  trigger: str = "conflict"
 
   @register_hook(trigger)
-  def hook_a(_node, _ctx):
+  def hook_a(_node: Optional[cst.CSTNode], _ctx: Optional[HookContext]) -> str:
     """Helper to hook a."""
     return "A"
 
-  assert get_hook(trigger)(None, None) == "A"
+  hook_a_res = get_hook(trigger)
+  assert hook_a_res is not None
+  assert hook_a_res(None, None) == "A"
 
   @register_hook(trigger)
-  def hook_b(_node, _ctx):
+  def hook_b(_node: Optional[cst.CSTNode], _ctx: Optional[HookContext]) -> str:
     """Helper to hook b."""
     return "B"
 
-  assert get_hook(trigger)(None, None) == "B"
+  hook_b_res = get_hook(trigger)
+  assert hook_b_res is not None
+  assert hook_b_res(None, None) == "B"
 
 
-def test_injection_logic_dispatch():
+def test_injection_logic_dispatch() -> None:
   """Verifies the behavior of injection logic dispatch."""
-  mock_arg_injector = MagicMock()
-  mock_preamble_injector = MagicMock()
-  semantics = MockSemantics()
-  config = RuntimeConfig(source_framework="torch", target_framework="jax")
-  ctx = HookContext(semantics, config, arg_injector=mock_arg_injector, preamble_injector=mock_preamble_injector)
+  mock_arg_injector: MagicMock = MagicMock()
+  mock_preamble_injector: MagicMock = MagicMock()
+  semantics: MockSemantics = MockSemantics()
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  ctx: HookContext = HookContext(
+    semantics, config, arg_injector=mock_arg_injector, preamble_injector=mock_preamble_injector
+  )
   ctx.inject_signature_arg("rng", "jax.Array")
   mock_arg_injector.assert_called_once_with("rng", "jax.Array")
   ctx.inject_preamble("print('hello')")
   mock_preamble_injector.assert_called_once_with("print('hello')")
 
 
-def test_config_validation_failure():
+def test_config_validation_failure() -> None:
   """Verifies the behavior of configuration validation successfully handling failure."""
-  bad_config = RuntimeConfig(plugin_settings={"epsilon": "im_not_a_float"}, strict_mode=False)
+  bad_config: RuntimeConfig = RuntimeConfig(plugin_settings={"epsilon": "im_not_a_float"}, strict_mode=False)
 
   class PluginSchema(BaseModel):
     """Test suite for the Plugin Schema component."""
 
     epsilon: float
 
-  ctx = HookContext(MockSemantics(), bad_config)
+  ctx: HookContext = HookContext(MockSemantics(), bad_config)
   with pytest.raises(ValidationError):
     ctx.validate_settings(PluginSchema)
 
 
-def test_config_validation_success():
+def test_config_validation_success() -> None:
   """Verifies the behavior of configuration validation successfully."""
-  good_config = RuntimeConfig(plugin_settings={"epsilon": 0.001, "ignored": "val"}, strict_mode=False)
+  good_config: RuntimeConfig = RuntimeConfig(plugin_settings={"epsilon": 0.001, "ignored": "val"}, strict_mode=False)
 
   class PluginSchema(BaseModel):
     """Test suite for the Plugin Schema component."""
 
     epsilon: float = 1e-05
 
-  ctx = HookContext(MockSemantics(), good_config)
+  ctx: HookContext = HookContext(MockSemantics(), good_config)
   model = ctx.validate_settings(PluginSchema)
   assert model.epsilon == 0.001
   assert not hasattr(model, "ignored")
 
 
-def test_hook_context_traits_access():
+def test_hook_context_traits_access() -> None:
   """Verifies the behavior of hook context traits access."""
-  mgr = MagicMock()
+  mgr: MagicMock = MagicMock()
   mgr.get_framework_config.return_value = {"plugin_traits": {"requires_explicit_rng": True}}
-  config = RuntimeConfig(target_framework="jax")
-  ctx = HookContext(mgr, config)
-  traits = ctx.plugin_traits
+  config: RuntimeConfig = RuntimeConfig(target_framework="jax")
+  ctx: HookContext = HookContext(mgr, config)
+  traits: PluginTraits = ctx.plugin_traits
   assert isinstance(traits, PluginTraits)
   assert traits.requires_explicit_rng is True
   assert traits.has_numpy_compatible_arrays is False
 
 
-def test_hook_context_traits_access_defaults():
+def test_hook_context_traits_access_defaults() -> None:
   """Verifies the behavior of hook context traits access defaults."""
-  config = RuntimeConfig(target_framework="jax")
-  ctx = HookContext(None, config)
+  config: RuntimeConfig = RuntimeConfig(target_framework="jax")
+  ctx: HookContext = HookContext(MagicMock(), config)  # Can't use None if type requires SemanticsManager
+  ctx.semantics.get_framework_config.return_value = {}  # Mock it properly
   assert ctx.plugin_traits.requires_explicit_rng is False
-  mgr = MagicMock()
+  mgr: MagicMock = MagicMock()
   mgr.get_framework_config.return_value = {}
-  ctx2 = HookContext(mgr, config)
+  ctx2: HookContext = HookContext(mgr, config)
   assert ctx2.plugin_traits.requires_explicit_rng is False
 
 
-def test_hook_context_variant_lookup():
+def test_hook_context_variant_lookup() -> None:
   """Verifies the behavior of hook context variant lookup."""
-  mgr = MagicMock()
+  mgr: MagicMock = MagicMock()
   mgr.resolve_variant.return_value = {"api": "foo", "pack_to_tuple": "axes"}
-  config = RuntimeConfig(target_framework="jax")
-  ctx = HookContext(mgr, config)
+  config: RuntimeConfig = RuntimeConfig(target_framework="jax")
+  ctx: HookContext = HookContext(mgr, config)
   ctx.current_op_id = "Permute"
   var = ctx.current_variant
   assert var is not None
@@ -198,11 +214,11 @@ def test_hook_context_variant_lookup():
   mgr.resolve_variant.assert_called_with("Permute", "jax")
 
 
-def test_hook_context_variant_lookup_missing():
+def test_hook_context_variant_lookup_missing() -> None:
   """Verifies the behavior of hook context variant lookup missing."""
-  mgr = MagicMock()
+  mgr: MagicMock = MagicMock()
   mgr.resolve_variant.return_value = None
-  config = RuntimeConfig(target_framework="jax")
-  ctx = HookContext(mgr, config)
+  config: RuntimeConfig = RuntimeConfig(target_framework="jax")
+  ctx: HookContext = HookContext(mgr, config)
   ctx.current_op_id = "MissingOp"
   assert ctx.current_variant is None

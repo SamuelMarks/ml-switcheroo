@@ -9,20 +9,21 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaNode,
   RdnaVGPR,
 )
+from typing import List
 
 
 class DummyRdnaNode(RdnaNode):
   """Docstring."""
 
-  def to_text(self):
+  def to_text(self) -> str:
     """Docstring."""
     return "dummy"
 
 
-def test_rdna_printer():
+def test_rdna_printer() -> None:
   """Docstring."""
-  printer = RdnaPrinter()
-  nodes = [
+  printer: RdnaPrinter = RdnaPrinter()
+  nodes: List[RdnaNode] = [
     RdnaLabel(name="label1"),
     RdnaInstruction(opcode="v_add_f32", operands=[RdnaVGPR(index=0), RdnaVGPR(index=1)]),
     RdnaDirective(name=".global", params=[]),
@@ -30,7 +31,7 @@ def test_rdna_printer():
     DummyRdnaNode(),  # fallback
   ]
 
-  out = printer.emit(nodes)
+  out: str = printer.emit(nodes)
 
   assert "label1" in out
   assert "v_add_f32" in out

@@ -2,31 +2,31 @@
 
 import json
 import yaml
-from pathlib import Path
 from typing import Any
+from pathlib import Path
 
 
 def run() -> None:
   """Auto-generated doc."""
-  sem_dir = Path("src/ml_switcheroo/semantics")
-  odl_dir = sem_dir / "odl"
-  quarantine_file = sem_dir / "quarantine.json"
+  sem_dir: Path = Path("src/ml_switcheroo/semantics")
+  odl_dir: Path = sem_dir / "odl"
+  quarantine_file: Path = sem_dir / "quarantine.json"
 
-  k_nn: dict[str, Any] = {}
-  k_extras: dict[str, Any] = {}
+  k_nn: dict[str, dict[str, Any]] = {}
+  k_extras: dict[str, dict[str, Any]] = {}
 
   if odl_dir.exists():
     for yaml_file in odl_dir.glob("*.yaml"):
       try:
         with open(yaml_file, "r") as yaml_f:
-          data = yaml.safe_load(yaml_f)
+          data: Any = yaml.safe_load(yaml_f)
           if data:
-            op_name = data.get("operation", yaml_file.stem)
+            op_name: str = data.get("operation", yaml_file.stem)
             k_nn[op_name] = data
       except Exception:
         pass
 
-  verified_apis = {
+  verified_apis: set[str] = {
     "Conv1d",
     "Conv2d",
     "Conv3d",
@@ -73,8 +73,8 @@ def run() -> None:
     if v.get("variants"):
       verified_apis.add(k)
 
-  quarantine = {}
-  new_k_nn = {}
+  quarantine: dict[str, dict[str, Any]] = {}
+  new_k_nn: dict[str, dict[str, Any]] = {}
 
   for k, v in k_nn.items():
     if k in verified_apis:
@@ -87,7 +87,7 @@ def run() -> None:
 
   # Standardize args and variants
   for k, v in new_k_nn.items():
-    new_args = []
+    new_args: list[Any] = []
     for arg in v.get("std_args", []):
       if isinstance(arg, str):
         arg = {"name": arg, "type": "Any"}
@@ -111,7 +111,7 @@ def run() -> None:
       existing_file.unlink()
 
   for k, v in new_k_nn.items():
-    out_yaml_file = odl_dir / f"{k.replace('/', '_')}.yaml"
+    out_yaml_file: Path = odl_dir / f"{k.replace('/', '_')}.yaml"
     with open(out_yaml_file, "w") as out_f:
       yaml.dump(v, out_f, sort_keys=False, indent=2)
 

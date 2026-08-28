@@ -1,13 +1,14 @@
 """Docstring."""
 
 from unittest.mock import MagicMock, patch
+from pathlib import Path
 from ml_switcheroo.cli.handlers.suggest import handle_suggest
 
 
-def test_handle_suggest_single():
+def test_handle_suggest_single() -> None:
   """Docstring."""
   with patch("ml_switcheroo.cli.handlers.suggest.importlib.import_module") as mock_import:
-    mock_mod = MagicMock()
+    mock_mod: MagicMock = MagicMock()
     mock_mod.foo = MagicMock()
     mock_mod.foo.__doc__ = "doc"
     mock_import.return_value = mock_mod
@@ -19,10 +20,10 @@ def test_handle_suggest_single():
       assert handle_suggest("os.foo") == 0
 
 
-def test_handle_suggest_wildcard(tmp_path):
+def test_handle_suggest_wildcard(tmp_path: Path) -> None:
   """Docstring."""
   with patch("ml_switcheroo.cli.handlers.suggest.importlib.import_module"):
-    mock_mod = MagicMock()
+    mock_mod: MagicMock = MagicMock()
     mock_mod.foo = MagicMock()
     mock_mod.foo.__doc__ = "doc"
     mock_mod.foo.__module__ = "os"
@@ -33,23 +34,23 @@ def test_handle_suggest_wildcard(tmp_path):
     pass
 
 
-def test_handle_suggest_wildcard_fail(tmp_path):
+def test_handle_suggest_wildcard_fail(tmp_path: Path) -> None:
   """Docstring."""
   assert (
     handle_suggest("doesnt_exist.*") == 1
   )  # Can't mock easily here without patching builtins, wait, just let it fail to find anything valid.
 
 
-def test_handle_suggest_single_fail():
+def test_handle_suggest_single_fail() -> None:
   """Docstring."""
   assert handle_suggest("os.does_not_exist") == 1
 
 
-def test_handle_suggest_single_out_dir(tmp_path):
+def test_handle_suggest_single_out_dir(tmp_path: Path) -> None:
   """Docstring."""
-  out = tmp_path / "out"
+  out: Path = tmp_path / "out"
   with patch("ml_switcheroo.cli.handlers.suggest.importlib.import_module") as mock_import:
-    mock_mod = MagicMock()
+    mock_mod: MagicMock = MagicMock()
     mock_mod.foo = MagicMock()
     mock_mod.foo.__doc__ = "doc"
     mock_import.return_value = mock_mod

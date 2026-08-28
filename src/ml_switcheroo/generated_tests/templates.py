@@ -4,7 +4,11 @@ This module stores default code templates for supported frameworks and
 provides utilities to determine properties of test arguments (e.g., static JIT args).
 """
 
-from typing import Dict, Any, Optional
+import ml_switcheroo
+import typing
+
+
+from typing import Dict, Optional
 
 #: Default code templates used as fallbacks if the SemanticsManager is unavailable.
 DEFAULT_TEST_TEMPLATES = {
@@ -27,7 +31,9 @@ DEFAULT_TEST_TEMPLATES = {
 }
 
 
-def get_template(manager: Any, framework: str) -> Dict[str, str]:
+def get_template(
+  manager: typing.Optional["ml_switcheroo.semantics.manager.SemanticsManager"], framework: str
+) -> typing.Dict[str, str]:
   """Retrieve the code generation template for a specific framework.
 
   Priority:
@@ -56,7 +62,7 @@ def get_template(manager: Any, framework: str) -> Dict[str, str]:
   return DEFAULT_TEST_TEMPLATES.get(framework, {})
 
 
-def is_static_arg(arg_info: Dict[str, Any]) -> bool:
+def is_static_arg(arg_info: dict) -> bool:
   """Determine if an argument should be marked static for JIT compilation.
 
   Heuristic checks for primitive types (int, bool, str) or specific names

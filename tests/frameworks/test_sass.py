@@ -1,11 +1,12 @@
 """Test suite for the Sass module."""
 
+import typing
 from ml_switcheroo.frameworks.sass import SassAdapter
 from ml_switcheroo.frameworks.base import InitMode
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
-def test_sass_adapter_init():
+def test_sass_adapter_init() -> None:
   """Verifies the behavior of SASS adapter initialization."""
   adapter = SassAdapter()
   assert adapter.display_name == "NVIDIA SASS"
@@ -14,34 +15,34 @@ def test_sass_adapter_init():
   assert adapter._mode == InitMode.GHOST
 
 
-def test_sass_properties():
+def test_sass_properties() -> None:
   """Verifies the behavior of SASS properties."""
   adapter = SassAdapter()
   assert adapter.import_alias == ("sass", "asm")
   assert adapter.import_namespaces == {}
   assert SemanticTier.ARRAY_API in adapter.supported_tiers
-  traits = adapter.structural_traits
+  traits: typing.Any = adapter.structural_traits
   assert traits.module_base is None
-  config = adapter.test_config
+  config: dict[str, typing.Any] = adapter.test_config
   assert "// SASS Header" in config["import"]
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
   assert adapter.get_to_numpy_code() == "return str(obj)"
   assert adapter.declared_magic_args == []
   assert adapter.rng_seed_methods == []
-  defs = adapter.definitions
+  defs: typing.Any = adapter.definitions
   assert isinstance(defs, dict)
-  specs = adapter.specifications
+  specs: typing.Any = adapter.specifications
   assert specs == {}
-  snapshot = {}
+  snapshot: dict[str, typing.Any] = {}
   adapter.apply_wiring(snapshot)
   assert snapshot == {}
-  examples = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
   assert "FADD" in examples["tier1_math"]
 
 
-def test_sass_missing_coverage():
+def test_sass_missing_coverage() -> None:
   """Verifies the remaining untested methods of SASS adapter."""
   adapter = SassAdapter()
 
@@ -68,7 +69,7 @@ def test_sass_missing_coverage():
   assert adapter.convert(123) == "123"
 
   # Graph parsing
-  code_loop = """
+  code_loop: str = """
   // comment
   L_START:
   FADD R1, R1, R2
@@ -77,16 +78,16 @@ def test_sass_missing_coverage():
   BRA L_START;
   L_LABEL:
   """
-  graph_loop = adapter.parse_sass_to_graph(code_loop)
-  nodes_loop = list(graph_loop.nodes.values())
+  graph_loop: typing.Any = adapter.parse_sass_to_graph(code_loop)
+  nodes_loop: list[typing.Any] = list(graph_loop.nodes.values())
   # The block "entry" branches to "L_START", "L_START" branches to "L_START".
   # "L_START" is a loop block containing FFMA.
   assert any(n.op_type == "Conv2d" for n in nodes_loop)
 
-  code_no_loop = """
+  code_no_loop: str = """
   FFMA R1, R3, R5, R1
   """
-  graph_no_loop = adapter.parse_sass_to_graph(code_no_loop)
-  nodes_no_loop = list(graph_no_loop.nodes.values())
+  graph_no_loop: typing.Any = adapter.parse_sass_to_graph(code_no_loop)
+  nodes_no_loop: list[typing.Any] = list(graph_no_loop.nodes.values())
   assert len(nodes_no_loop) == 1
   assert nodes_no_loop[0].op_type == "Linear"

@@ -1,34 +1,35 @@
 """Test suite for the Variable Container module."""
 
 import pytest
+import typing
 import textwrap
-from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.core.hooks import _HOOKS
 from ml_switcheroo.plugins.nnx_to_torch_params import transform_nnx_param
 
-SOURCE_FLAX_VARIABLE = textwrap.dedent(
+SOURCE_FLAX_VARIABLE: str = textwrap.dedent(
   "\n  import flax.nnx as nnx\n\n  class MyLayer(nnx.Module):\n    def __init__(self, rngs: nnx.Rngs):\n        self.param = nnx.Param(1.0)\n        self.var = nnx.Variable(2.0)\n        self.cache = nnx.Cache(3.0)\n"
 )
 
 
 @pytest.fixture(autouse=True)
-def register_hooks():
+def register_hooks() -> None:
   """Helper to register hooks."""
   _HOOKS["nnx_param_to_torch"] = transform_nnx_param
 
 
 @pytest.fixture
-def semantics():
+def semantics() -> SemanticsManager:
   """Provides a mock semantics for testing."""
   mgr = SemanticsManager()
   mgr._key_origins["Variable"] = SemanticTier.NEURAL.value
   mgr._key_origins["Param"] = SemanticTier.NEURAL.value
   mgr._key_origins["Cache"] = SemanticTier.NEURAL.value
 
-  def add(name, std_args, variants):
+  def add(name: str, std_args: list[str], variants: dict[str, typing.Any]) -> None:
     """Adds ."""
     mgr.data[name] = {"std_args": std_args, "variants": variants}
     for fw, v in variants.items():
@@ -67,12 +68,12 @@ def semantics():
   return mgr
 
 
-def test_flax_variable_to_torch(semantics):
+def test_flax_variable_to_torch(semantics: SemanticsManager) -> None:
   """Verifies the behavior of Flax variable to PyTorch."""
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="torch", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
-  result = engine.run(SOURCE_FLAX_VARIABLE)
-  code = result.code
+  result: ConversionResult = engine.run(SOURCE_FLAX_VARIABLE)
+  code: str = result.code
   assert result.success
   assert "nn.Parameter(1.0)" in code
   assert "nn.Parameter(2.0, requires_grad=False)" in code

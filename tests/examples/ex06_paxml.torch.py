@@ -4,6 +4,7 @@ This module defines a basic MLP structure designed to demonstrate and verify the
 capabilities of translating PyTorch structures into PaxML (Praxis-based) layers.
 """
 
+import torch
 import torch.nn as nn
 
 
@@ -17,7 +18,7 @@ class SimpleMLP(nn.Module):
     - nn.Linear -> praxis.layers.Linear.
   """
 
-  def __init__(self, input_size, hidden_size, num_classes):
+  def __init__(self, input_size: int, hidden_size: int, num_classes: int) -> None:
     """Initializes the SimpleMLP model with specified layer sizes.
 
     Args:
@@ -33,7 +34,7 @@ class SimpleMLP(nn.Module):
     # Output layer
     self.fc2 = nn.Linear(hidden_size, num_classes)
 
-  def forward(self, x):
+  def forward(self, x: torch.Tensor) -> torch.Tensor:
     """Computes the forward pass of the MLP on the input tensor.
 
     Args:
@@ -42,7 +43,7 @@ class SimpleMLP(nn.Module):
     Returns:
       torch.Tensor: The output activation/logit tensor of shape (batch_size, num_classes).
     """
-    out = self.fc1(x)
+    out: torch.Tensor = self.fc1(x)
     out = self.relu(out)
     out = self.fc2(out)
     return out

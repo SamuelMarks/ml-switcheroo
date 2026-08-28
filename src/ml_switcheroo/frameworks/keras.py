@@ -11,8 +11,11 @@ It handles:
 5.  **Weight Migration**: Loading/saving .h5 or .keras files via h5py.
 """
 
+import typing
+
+
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, Any, List, Optional, Tuple
 
 try:
   import keras
@@ -62,7 +65,7 @@ class KerasAdapter(KerasIOMixin):
 
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data: Dict[str, Any] = {}
+    self._snapshot_data = {}
     if keras is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("keras")
@@ -176,7 +179,7 @@ class KerasAdapter(KerasIOMixin):
     )
 
   @property
-  def plugin_traits(self) -> Any:
+  def plugin_traits(self):
     """Plugin behavior flags.
 
     Returns:
@@ -267,7 +270,9 @@ class KerasAdapter(KerasIOMixin):
       )
     return results
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert input data to Keras Tensor.
 
     Args:
@@ -320,7 +325,7 @@ class KerasAdapter(KerasIOMixin):
     """
     return "pass"
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply configuration wiring.
 
     Args:

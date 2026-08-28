@@ -5,7 +5,10 @@ Control Flow Graphs from low-level assembly streams, replacing simple string
 heuristics with topological graph analysis.
 """
 
-from typing import List, Optional, Set, Dict, Any
+from typing import Any
+
+
+from typing import List, Optional, Set, Dict
 
 
 class BasicBlock:
@@ -28,7 +31,7 @@ class BasicBlock:
         block_id: The unique identifier for this block.
     """
     self.id: str = block_id
-    self.instructions: List[Any] = []
+    self.instructions: list[Any] = []
     self.successors: List["BasicBlock"] = []
     self.predecessors: List["BasicBlock"] = []
 
@@ -116,6 +119,11 @@ class ControlFlowGraph:
     result: List[BasicBlock] = []
 
     def dfs(block: BasicBlock) -> None:
+      """Traverse recursively in depth-first order.
+
+      Args:
+          block: The current basic block.
+      """
       if block.id in visited:
         return
       visited.add(block.id)

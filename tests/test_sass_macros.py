@@ -41,9 +41,11 @@ from ml_switcheroo.core.compiler.backends.sass.macros_extra import (
 )
 
 from ml_switcheroo.core.compiler.frontends.sass.cst import SassRegister
+from ml_switcheroo.core.compiler.backends.sass.macros import RegisterAllocatorProtocol
+from typing import Callable
 
 
-class DummyAllocator:
+class DummyAllocator(RegisterAllocatorProtocol):
   """Docstring."""
 
   def get_register(self, var_name: str) -> SassRegister:
@@ -59,9 +61,9 @@ class DummyAllocator:
     return SassRegister(name="P0", is_predicate=True)
 
 
-def test_sass_macros():
+def test_sass_macros() -> None:
   """Docstring."""
-  alloc = DummyAllocator()
+  alloc: DummyAllocator = DummyAllocator()
 
   # macros.py
   assert len(expand_conv2d(alloc, "conv", {"k": 3})) > 0
@@ -102,5 +104,5 @@ def test_sass_macros():
   assert len(expand_adam(alloc, "adam", {})) > 0
   assert len(expand_l(alloc, "l", {})) > 0
 
-  gen = _make_generic_expand("generic")
+  gen: Callable = _make_generic_expand("generic")
   assert len(gen(alloc, "g", {})) > 0

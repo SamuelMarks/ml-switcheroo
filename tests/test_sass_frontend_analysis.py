@@ -4,9 +4,9 @@ from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate, SassRegister
 
 
-def test_sass_analyzer():
+def test_sass_analyzer() -> None:
   """Test element."""
-  inst1 = SassInstruction(
+  inst1: SassInstruction = SassInstruction(
     opcode="ISETP.LT.AND",
     operands=[
       SassRegister(name="P0"),
@@ -16,7 +16,7 @@ def test_sass_analyzer():
       SassRegister(name="PT"),
     ],
   )
-  inst2 = SassInstruction(
+  inst2: SassInstruction = SassInstruction(
     opcode="ISETP.LT.AND",
     operands=[
       SassRegister(name="P0"),

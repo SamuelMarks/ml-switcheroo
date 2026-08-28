@@ -1,29 +1,30 @@
 """Test module."""
 
+import typing
 from ml_switcheroo.frameworks.latex_dsl import LatexDSLAdapter
 from ml_switcheroo.semantics.schema import PluginTraits
 
 
-def test_latex_dsl_adapter_get_device_check_syntax():
+def test_latex_dsl_adapter_get_device_check_syntax() -> None:
   """Test function."""
   adapter = LatexDSLAdapter()
   assert adapter.get_device_check_syntax() == "True"
 
 
-def test_latex_dsl_adapter_definitions():
+def test_latex_dsl_adapter_definitions() -> None:
   """Test function."""
   import ml_switcheroo.frameworks.latex_dsl as ldsl
   from unittest.mock import patch
 
   with patch("ml_switcheroo.frameworks.latex_dsl.load_definitions", return_value={}):
     adapter = ldsl.LatexDSLAdapter()
-    defs = adapter.definitions
+    defs: typing.Any = adapter.definitions
     assert "Module" in defs
     assert "Conv2d" in defs
     assert "Linear" in defs
 
 
-def test_latex_dsl_adapter_properties():
+def test_latex_dsl_adapter_properties() -> None:
   """Test function."""
   adapter = LatexDSLAdapter()
   assert adapter.get_device_syntax("cpu") == ""
@@ -37,7 +38,7 @@ def test_latex_dsl_adapter_properties():
   assert adapter.convert("data") == "data"
   assert isinstance(adapter.plugin_traits, PluginTraits)
 
-  examples = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
   assert "tier2_neural" in examples
   assert "tier3_extras" in examples

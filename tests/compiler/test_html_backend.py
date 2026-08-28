@@ -1,24 +1,25 @@
 """Tests for the HTML Compiler Backend."""
 
+import typing
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 
-def test_html_backend_init():
+def test_html_backend_init() -> None:
   """Test HTML backend initialization."""
   backend = HtmlBackend()
   assert backend is not None
 
 
-def test_html_backend_format_args():
+def test_html_backend_format_args() -> None:
   """Test format_args method."""
   backend = HtmlBackend()
-  metadata = {"arg_1": "val1", "other": "val2", "arg_3": "val3"}
-  formatted = backend._format_args(metadata)
+  metadata: dict[str, str] = {"arg_1": "val1", "other": "val2", "arg_3": "val3"}
+  formatted: str = backend._format_args(metadata)
   assert formatted == "val1, other=val2, val3"
 
 
-def test_html_backend_is_stateful():
+def test_html_backend_is_stateful() -> None:
   """Test is_stateful method."""
   backend = HtmlBackend()
 
@@ -41,7 +42,7 @@ def test_html_backend_is_stateful():
   assert backend._is_stateful(node_lower) is False
 
 
-def test_html_backend_clean_kind():
+def test_html_backend_clean_kind() -> None:
   """Test clean_kind method."""
   backend = HtmlBackend()
   assert backend._clean_kind("func_call") == "Call"
@@ -49,41 +50,41 @@ def test_html_backend_clean_kind():
   assert backend._clean_kind("relu") == "Relu"
 
 
-def test_html_backend_create_arrow():
+def test_html_backend_create_arrow() -> None:
   """Test create_arrow method."""
   backend = HtmlBackend()
 
-  arrow_def = backend._create_arrow(1, 2, "def")
+  arrow_def: typing.Any = backend._create_arrow(1, 2, "def")
   assert arrow_def.style_class == "s-red"
   assert arrow_def.x2 == 60
   assert arrow_def.y2 == 80
 
-  arrow_data = backend._create_arrow(1, 2, "data")
+  arrow_data: typing.Any = backend._create_arrow(1, 2, "data")
   assert arrow_data.style_class == "s-green"
   assert arrow_data.x2 == 60
   assert arrow_data.y2 == 0
 
-  arrow_seq = backend._create_arrow(1, 3, "seq")
+  arrow_seq: typing.Any = backend._create_arrow(1, 3, "seq")
   assert arrow_seq.style_class == "s-blue"
   assert arrow_seq.y2 == 50 + (3 - 1 - 1) * 120  # 3 - 1 = 2 -> 2 - 1 = 1 -> 50 + 1 * 120 = 170
 
-  arrow_unknown = backend._create_arrow(1, 2, "unknown")
+  arrow_unknown: typing.Any = backend._create_arrow(1, 2, "unknown")
   assert arrow_unknown.x2 == 0
   assert arrow_unknown.y2 == 0
 
 
-def test_html_backend_layout_graph_empty():
+def test_html_backend_layout_graph_empty() -> None:
   """Test layout_graph with empty graph or only inputs/outputs."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="test")
   graph.nodes.append(LogicalNode(id="in", kind="Input"))
   graph.nodes.append(LogicalNode(id="out", kind="Output"))
 
-  boxes = backend._layout_graph(graph)
+  boxes: list[typing.Any] = backend._layout_graph(graph)
   assert boxes == []
 
 
-def test_html_backend_layout_graph_nodes():
+def test_html_backend_layout_graph_nodes() -> None:
   """Test layout_graph with stateful and stateless nodes."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="test_graph")
@@ -97,7 +98,7 @@ def test_html_backend_layout_graph_nodes():
   # Add some dummy edges to satisfy topological sort if it cares (it might just return nodes if no edges)
   # Actually, topological_sort of disconnected nodes will just return them in some order.
 
-  boxes = backend._layout_graph(graph)
+  boxes: list[typing.Any] = backend._layout_graph(graph)
 
   # Expected boxes:
   # n1: 1 red, 1 blue, 1 green
@@ -111,40 +112,40 @@ def test_html_backend_layout_graph_nodes():
   assert boxes[-1].css_class == "circ"
 
 
-def test_html_backend_compile():
+def test_html_backend_compile() -> None:
   """Test compile method."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="MyModel")
   n1 = LogicalNode(id="n1", kind="relu")
   graph.nodes.append(n1)
 
-  html_str = backend.compile(graph)
+  html_str: str = backend.compile(graph)
   assert "MyModel" in html_str
 
 
-def test_html_backend_compile_default_name():
+def test_html_backend_compile_default_name() -> None:
   """Test compile method with default name."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="GeneratedNet")
   n1 = LogicalNode(id="n1", kind="relu")
   graph.nodes.append(n1)
 
-  html_str = backend.compile(graph)
+  html_str: str = backend.compile(graph)
   assert "ConvNet" in html_str
 
 
-def test_html_backend_compile_no_name():
+def test_html_backend_compile_no_name() -> None:
   """Test compile method with no name."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="")
   n1 = LogicalNode(id="n1", kind="relu")
   graph.nodes.append(n1)
 
-  html_str = backend.compile(graph)
+  html_str: str = backend.compile(graph)
   assert "ConvNet" in html_str
 
 
-def test_html_backend_layout_graph_no_last_blue_row():
+def test_html_backend_layout_graph_no_last_blue_row() -> None:
   """Test function."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
@@ -157,7 +158,7 @@ def test_html_backend_layout_graph_no_last_blue_row():
   backend._layout_graph(graph)
 
 
-def test_html_backend_layout_graph_break_loop():
+def test_html_backend_layout_graph_break_loop() -> None:
   """Test function."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
@@ -175,9 +176,9 @@ def test_html_backend_layout_graph_break_loop():
 
   orig_gridbox = GridBox
 
-  def mock_gridbox(*args, **kwargs):
+  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
     """Test function."""
-    css = kwargs.get("css_class", "")
+    css: str = kwargs.get("css_class", "")
     if "box b" in css:
       kwargs["css_class"] = "box mutated"
     return orig_gridbox(*args, **kwargs)
@@ -186,7 +187,7 @@ def test_html_backend_layout_graph_break_loop():
     backend._layout_graph(graph)
 
 
-def test_html_backend_layout_graph_no_match_last_blue_row2():
+def test_html_backend_layout_graph_no_match_last_blue_row2() -> None:
   """Test function."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
@@ -201,9 +202,9 @@ def test_html_backend_layout_graph_no_match_last_blue_row2():
 
   orig_gridbox = __import__("ml_switcheroo.core.compiler.backends.html", fromlist=["GridBox"]).GridBox
 
-  def mock_gridbox(*args, **kwargs):
+  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
     """Test function."""
-    css = kwargs.get("css_class", "")
+    css: str = kwargs.get("css_class", "")
     if "box b" in css:
       kwargs["css_class"] = "box mutated"
     return orig_gridbox(*args, **kwargs)
@@ -212,7 +213,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row2():
     backend._layout_graph(graph)
 
 
-def test_html_backend_layout_graph_no_match_last_blue_row3():
+def test_html_backend_layout_graph_no_match_last_blue_row3() -> None:
   """Test function."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
@@ -230,7 +231,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row3():
 
   orig_gridbox = html_mod.GridBox
 
-  def mock_gridbox(*args, **kwargs):
+  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
     """Test function."""
     box = orig_gridbox(*args, **kwargs)
     if "box b" in box.css_class:
@@ -241,7 +242,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row3():
     backend._layout_graph(graph)
 
 
-def test_html_backend_layout_graph_no_match_last_blue_row4():
+def test_html_backend_layout_graph_no_match_last_blue_row4() -> None:
   """Test function."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
@@ -259,7 +260,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row4():
 
   orig_gridbox = html_mod.GridBox
 
-  def mock_gridbox(*args, **kwargs):
+  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
     """Test function."""
     box = orig_gridbox(*args, **kwargs)
     if "box b" in box.css_class:
@@ -270,7 +271,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row4():
     backend._layout_graph(graph)
 
 
-def test_html_backend_layout_graph_no_match_last_blue_row5():
+def test_html_backend_layout_graph_no_match_last_blue_row5() -> None:
   """Test function."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
@@ -288,7 +289,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row5():
 
   orig_gridbox = html_mod.GridBox
 
-  def mock_gridbox(*args, **kwargs):
+  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
     """Test function."""
     box = orig_gridbox(*args, **kwargs)
     if "box b" in box.css_class:
@@ -299,7 +300,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row5():
     backend._layout_graph(graph)
 
 
-def test_html_backend_layout_graph_no_match_last_blue_row6():
+def test_html_backend_layout_graph_no_match_last_blue_row6() -> None:
   """Test function."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
@@ -317,7 +318,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row6():
 
   orig_gridbox = html_mod.GridBox
 
-  def mock_gridbox(*args, **kwargs):
+  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
     """Test function."""
     box = orig_gridbox(*args, **kwargs)
     if "box b" in box.css_class:
@@ -328,7 +329,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row6():
     backend._layout_graph(graph)
 
 
-def test_html_backend_layout_graph_no_match_last_blue_row7():
+def test_html_backend_layout_graph_no_match_last_blue_row7() -> None:
   """Test function."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
@@ -346,7 +347,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row7():
 
   orig_gridbox = html_mod.GridBox
 
-  def mock_gridbox(*args, **kwargs):
+  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
     """Test function."""
     box = orig_gridbox(*args, **kwargs)
     if "box b" in box.css_class:
@@ -357,7 +358,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row7():
     backend._layout_graph(graph)
 
 
-def test_html_backend_layout_graph_no_match_last_blue_row8():
+def test_html_backend_layout_graph_no_match_last_blue_row8() -> None:
   """Test function."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
@@ -375,7 +376,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row8():
 
   orig_gridbox = html_mod.GridBox
 
-  def mock_gridbox(*args, **kwargs):
+  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
     """Test function."""
     box = orig_gridbox(*args, **kwargs)
     if kwargs.get("css_class") == "box b" and kwargs.get("row") == 2:
@@ -386,7 +387,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row8():
     backend._layout_graph(graph)
 
 
-def test_html_backend_layout_graph_no_match_last_blue_row9():
+def test_html_backend_layout_graph_no_match_last_blue_row9() -> None:
   """Test function."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
@@ -403,7 +404,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row9():
 
   orig_gridbox = html_mod.GridBox
 
-  def mock_gridbox(*args, **kwargs):
+  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
     """Test function."""
     box = orig_gridbox(*args, **kwargs)
     # when creating the green box for row 2, it is added to the list.

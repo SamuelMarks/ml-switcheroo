@@ -1,5 +1,6 @@
 """Module docstring."""
 
+import typing
 from ml_switcheroo.core.tikz.nodes import (
   TikzBaseNode,
   TriviaNode,
@@ -14,9 +15,9 @@ from ml_switcheroo.core.tikz.parser import TikzParser, TikzTransformer
 from lark import Token
 
 
-def test_tikz_nodes_missing():
+def test_tikz_nodes_missing() -> None:
   """Docstring."""
-  nodes = [
+  nodes: list[typing.Any] = [
     TriviaNode(content=" "),
     TikzOption(key="a", value="b"),
     TikzOption(key="c"),
@@ -35,7 +36,7 @@ def test_tikz_nodes_missing():
     if hasattr(n, "emit"):
       n.emit()
 
-  class DummyTikz(TikzBaseNode):
+  class DummyTikz(TikzBaseNode):  # type: ignore[misc]
     """Docstring."""
 
     def emit(self, indent_level: int = 0) -> str:
@@ -45,9 +46,9 @@ def test_tikz_nodes_missing():
   DummyTikz().emit()
 
 
-def test_tikz_parser_missing():
+def test_tikz_parser_missing() -> None:
   """Docstring."""
-  cases = [
+  cases: list[str] = [
     r"\node",
     r"\node;",
     r"\node (a) at (0,0) {A};",
@@ -131,10 +132,10 @@ def test_tikz_parser_missing():
   class DummyTree:
     """Docstring."""
 
-    def __init__(self, data, children):
+    def __init__(self, data: str, children: list[typing.Any]) -> None:
       """Docstring."""
-      self.data = data
-      self.children = children
+      self.data: str = data
+      self.children: list[typing.Any] = children
 
   t.tabular([DummyTree("tabular_row", ["a", None, "b"]), DummyTree("kind", ["c"]), DummyTree("id", ["d"])])
 

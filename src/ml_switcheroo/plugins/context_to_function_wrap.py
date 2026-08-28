@@ -11,6 +11,9 @@ It provides a transformation hook that:
     remains valid Python syntax while effectively disabling gradient tracking semantics.
 """
 
+from typing import Any
+
+
 import libcst as cst
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
@@ -28,7 +31,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
+    node = cst.Attribute(value=node, attr=cst.Name(part))
   return node
 
 
@@ -59,6 +62,6 @@ def transform_context_manager(node: cst.Call, ctx: HookContext) -> cst.Call:
   new_func = _create_dotted_name("contextlib.nullcontext")
 
   # 3. Clear Arguments
-  empty_args = []  # type: ignore
+  empty_args: list[Any] = []
 
   return node.with_changes(func=new_func, args=empty_args)

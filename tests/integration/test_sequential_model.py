@@ -1,16 +1,17 @@
 """Test suite for the Sequential Model module."""
 
 import pytest
-from ml_switcheroo.core.engine import ASTEngine
+import typing
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
-class MockSequentialSemantics(SemanticsManager):
+class MockSequentialSemantics(SemanticsManager):  # type: ignore[misc]
   """Mock Sequential Semantics class for testing purposes."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the MockSequentialSemantics instance."""
     super().__init__()
     self.framework_configs["flax_nnx"] = {
@@ -21,15 +22,15 @@ class MockSequentialSemantics(SemanticsManager):
         "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
       },
     }
-    self._providers = {}
+    self._providers: dict[str, typing.Any] = {}
     self._providers["flax_nnx"] = {SemanticTier.NEURAL: {"root": "flax", "sub": "nnx", "alias": "nnx"}}
-    self._source_registry = {}
+    self._source_registry: dict[str, typing.Any] = {}
     self._inject_op("Sequential", ["layers"], "torch.nn.Sequential", "flax.nnx.Sequential", SemanticTier.NEURAL)
     self._inject_op("Linear", ["in", "out"], "torch.nn.Linear", "flax.nnx.Linear", SemanticTier.NEURAL)
     self._inject_op("Flatten", ["start", "end"], "torch.nn.Flatten", "flax.nnx.Flatten", SemanticTier.NEURAL)
     self._inject_op("ReLU", [], "torch.nn.ReLU", "flax.nnx.relu", SemanticTier.NEURAL)
 
-  def _inject_op(self, name, std_args, s_api, t_api, tier):
+  def _inject_op(self, name: str, std_args: list[str], s_api: str, t_api: str, tier: SemanticTier) -> None:
     """Mock implementation of  inject op."""
     if name not in self.data:
       self.data[name] = {"std_args": std_args, "variants": {}}
@@ -39,13 +40,13 @@ class MockSequentialSemantics(SemanticsManager):
     self._key_origins[name] = tier.value
     self._source_registry[s_api] = ("torch", tier)
 
-  def get_framework_config(self, framework: str):
+  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
     """Mock implementation of get framework configuration."""
-    return self.framework_configs.get(framework, {})
+    return typing.cast(dict[str, typing.Any], self.framework_configs.get(framework, {}))
 
-  def get_import_map(self, target_fw: str):
+  def get_import_map(self, target_fw: str) -> dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
     """Mock implementation of get import map."""
-    result = {}
+    result: dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]] = {}
     target_providers = self._providers.get(target_fw, {})
     for src_path, (src_fw, tier) in self._source_registry.items():
       if tier in target_providers:
@@ -55,18 +56,18 @@ class MockSequentialSemantics(SemanticsManager):
 
 
 @pytest.fixture
-def semantics_manager():
+def semantics_manager() -> MockSequentialSemantics:
   """Provides a mock semantics manager for testing."""
   return MockSequentialSemantics()
 
 
-def test_sequential_container_transpilation(semantics_manager):
+def test_sequential_container_transpilation(semantics_manager: MockSequentialSemantics) -> None:
   """Verifies the behavior of sequential container transpilation."""
-  source_code = "\nimport torch\nimport torch.nn as nn\n\nclass MLP(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.net = nn.Sequential(\n            nn.Flatten(),\n            nn.Linear(28 * 28, 512),\n            nn.ReLU(),\n            nn.Linear(512, 10)\n        )\n\n    def forward(self, x):\n        return self.net(x)\n"
+  source_code: str = "\nimport torch\nimport torch.nn as nn\n\nclass MLP(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.net = nn.Sequential(\n            nn.Flatten(),\n            nn.Linear(28 * 28, 512),\n            nn.ReLU(),\n            nn.Linear(512, 10)\n        )\n\n    def forward(self, x):\n        return self.net(x)\n"
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   engine = ASTEngine(semantics=semantics_manager, config=config)
-  result = engine.run(source_code)
-  code = result.code
+  result: ConversionResult = engine.run(source_code)
+  code: str = result.code
   assert result.success
   assert "from flax import nnx" in code or "import flax.nnx as nnx" in code
   assert "class MLP(nnx.Module):" in code

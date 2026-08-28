@@ -1,45 +1,46 @@
 """Integration tests for the compiler roundtrip."""
 
+import typing
 from ml_switcheroo.core.mlir.parser import MlirParser
 from ml_switcheroo.core.tikz.parser import TikzParser
 from ml_switcheroo.core.html.parser import HtmlParser
 from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticCommentParser
 
 
-def test_mlir_roundtrip():
+def test_mlir_roundtrip() -> None:
   """Test MLIR roundtrip."""
-  code = "sw.func { sw.return %1 }\\n"
+  code: str = "sw.func { sw.return %1 }\\n"
   parser = MlirParser(code)
   try:
-    module = parser.parse()
-    out = module.to_text()
+    module: typing.Any = parser.parse()
+    out: str = module.to_text()
     parser2 = MlirParser(out)
-    out2 = parser2.parse().to_text()
+    out2: str = parser2.parse().to_text()
     assert out.strip() == out2.strip()
   except Exception:
     pass  # ignore if it fails
 
 
-def test_tikz_roundtrip():
+def test_tikz_roundtrip() -> None:
   """Test TikZ roundtrip."""
-  code = r"""\begin{tikzpicture}
+  code: str = r"""\begin{tikzpicture}
     \node (node1) at (0.0, 0.0) {Text 1};
 \end{tikzpicture}
 """
   parser = TikzParser(code)
   try:
-    graph = parser.parse()
-    out = graph.to_text()
+    graph: typing.Any = parser.parse()
+    out: str = graph.to_text()
     parser2 = TikzParser(out)
-    out2 = parser2.parse().to_text()
+    out2: str = parser2.parse().to_text()
     assert out.strip() == out2.strip()
   except Exception:
     pass
 
 
-def test_html_roundtrip():
+def test_html_roundtrip() -> None:
   """Test HTML roundtrip."""
-  code = """
+  code: str = """
 <html>
   <body>
     <!-- A comment -->
@@ -50,15 +51,15 @@ def test_html_roundtrip():
 </html>
 """
   parser = HtmlParser(code)
-  doc = parser.parse_cst()
-  out = doc.emit()
+  doc: typing.Any = parser.parse_cst()
+  out: str = doc.emit()
   assert out == code
 
 
-def test_semantic_roundtrip():
+def test_semantic_roundtrip() -> None:
   """Test Semantic Comments roundtrip."""
-  code = "  BEGIN   Add ( node_1 ) // ok  "
+  code: str = "  BEGIN   Add ( node_1 ) // ok  "
   parser = SemanticCommentParser()
-  marker = parser.parse(code)
-  out = marker.to_text()
+  marker: typing.Any = parser.parse(code)
+  out: str = marker.to_text()
   assert out == code

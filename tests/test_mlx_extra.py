@@ -4,9 +4,9 @@ from unittest.mock import patch, MagicMock
 from ml_switcheroo.frameworks.mlx import MLXAdapter
 
 
-def test_mlx_adapter_properties():
+def test_mlx_adapter_properties() -> None:
   """Test element."""
-  adapter = MLXAdapter()
+  adapter: MLXAdapter = MLXAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -58,11 +58,11 @@ def test_mlx_adapter_properties():
   pass
 
 
-def test_mlx_missing_lines():
+def test_mlx_missing_lines() -> None:
   """Test element."""
   from ml_switcheroo.frameworks.mlx import MLXAdapter
 
-  adapter = MLXAdapter()
+  adapter: MLXAdapter = MLXAdapter()
   adapter.get_device_syntax("gpu", "1")
   adapter.get_device_syntax("gpu")
   adapter.get_serialization_imports()
@@ -71,9 +71,9 @@ def test_mlx_missing_lines():
   adapter.get_serialization_syntax("other", "path")
 
 
-def test_mlx_io_mixin_direct():
+def test_mlx_io_mixin_direct() -> None:
   """Test element."""
   from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
-  mixin = MlxIOMixin()
+  mixin: MlxIOMixin = MlxIOMixin()
   mixin.get_serialization_imports()

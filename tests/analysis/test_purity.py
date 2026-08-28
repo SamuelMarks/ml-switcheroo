@@ -8,104 +8,105 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 def get_hatch_message(tree: cst.Module) -> str:
   """Test element."""
   # We look for the escape hatch comment
-  lines = tree.code.splitlines()
+  lines: list[str] = tree.code.splitlines()
+  line: str
   for line in lines:
     if line.startswith("# Reason: Side-effect unsafe for JAX"):
       return line
   return ""
 
 
-def test_purity_io():
+def test_purity_io() -> None:
   """Test element."""
-  scanner = PurityScanner()
-  code = "print('hello')"
-  tree = cst.parse_module(code)
+  scanner: PurityScanner = PurityScanner()
+  code: str = "print('hello')"
+  tree: cst.Module = cst.parse_module(code)
   tree = tree.visit(scanner)
-  msg = get_hatch_message(tree)
+  msg: str = get_hatch_message(tree)
   assert "Side-effect unsafe for JAX" in msg
   assert "I/O Call (print)" in msg
 
 
-def test_purity_mutation():
+def test_purity_mutation() -> None:
   """Test element."""
-  scanner = PurityScanner()
-  code = "x.append(1)"
-  tree = cst.parse_module(code)
+  scanner: PurityScanner = PurityScanner()
+  code: str = "x.append(1)"
+  tree: cst.Module = cst.parse_module(code)
   tree = tree.visit(scanner)
-  msg = get_hatch_message(tree)
+  msg: str = get_hatch_message(tree)
   assert "In-place Mutation (. append)" in msg
 
 
-def test_purity_io_write():
+def test_purity_io_write() -> None:
   """Test element."""
-  scanner = PurityScanner()
-  code = "f.write('hello')"
-  tree = cst.parse_module(code)
+  scanner: PurityScanner = PurityScanner()
+  code: str = "f.write('hello')"
+  tree: cst.Module = cst.parse_module(code)
   tree = tree.visit(scanner)
-  msg = get_hatch_message(tree)
+  msg: str = get_hatch_message(tree)
   assert "I/O Call (.write)" in msg
 
 
-def test_purity_global():
+def test_purity_global() -> None:
   """Test element."""
-  scanner = PurityScanner()
-  code = "global x"
-  tree = cst.parse_module(code)
+  scanner: PurityScanner = PurityScanner()
+  code: str = "global x"
+  tree: cst.Module = cst.parse_module(code)
   tree = tree.visit(scanner)
-  msg = get_hatch_message(tree)
+  msg: str = get_hatch_message(tree)
   assert "Global mutation (x)" in msg
 
 
-def test_purity_nonlocal():
+def test_purity_nonlocal() -> None:
   """Test element."""
-  scanner = PurityScanner()
-  code = "nonlocal y, z"
-  tree = cst.parse_module(code)
+  scanner: PurityScanner = PurityScanner()
+  code: str = "nonlocal y, z"
+  tree: cst.Module = cst.parse_module(code)
   tree = tree.visit(scanner)
-  msg = get_hatch_message(tree)
+  msg: str = get_hatch_message(tree)
   assert "Nonlocal mutation (y, z)" in msg
 
 
-def test_purity_rng():
+def test_purity_rng() -> None:
   """Test element."""
-  scanner = PurityScanner()
-  code = "random.seed(42)"
-  tree = cst.parse_module(code)
+  scanner: PurityScanner = PurityScanner()
+  code: str = "random.seed(42)"
+  tree: cst.Module = cst.parse_module(code)
   tree = tree.visit(scanner)
-  msg = get_hatch_message(tree)
+  msg: str = get_hatch_message(tree)
   assert "Global RNG State (. seed)" in msg
 
 
-def test_purity_dynamic_config():
+def test_purity_dynamic_config() -> None:
   """Test element."""
-  semantics = SemanticsManager()
+  semantics: SemanticsManager = SemanticsManager()
   # Mock framework config
   semantics.framework_configs["torch"] = {"traits": {"impurity_methods": ["add_", "copy_"]}}
 
-  scanner = PurityScanner(semantics=semantics, source_fw="torch")
-  code = "x.add_(1)"
-  tree = cst.parse_module(code)
+  scanner: PurityScanner = PurityScanner(semantics=semantics, source_fw="torch")
+  code: str = "x.add_(1)"
+  tree: cst.Module = cst.parse_module(code)
   tree = tree.visit(scanner)
-  msg = get_hatch_message(tree)
+  msg: str = get_hatch_message(tree)
   assert "State Mutation (. add_)" in msg
 
 
-def test_purity_multiple_violations():
+def test_purity_multiple_violations() -> None:
   """Test element."""
-  scanner = PurityScanner()
-  code = "print(x.append(1))"  # Contrived, but shows multiple
-  tree = cst.parse_module(code)
+  scanner: PurityScanner = PurityScanner()
+  code: str = "print(x.append(1))"  # Contrived, but shows multiple
+  tree: cst.Module = cst.parse_module(code)
   tree = tree.visit(scanner)
-  msg = get_hatch_message(tree)
+  msg: str = get_hatch_message(tree)
   assert "I/O Call (print)" in msg
   assert "In-place Mutation (. append)" in msg
 
 
-def test_purity_safe():
+def test_purity_safe() -> None:
   """Test element."""
-  scanner = PurityScanner()
-  code = "x = y + z"
-  tree = cst.parse_module(code)
+  scanner: PurityScanner = PurityScanner()
+  code: str = "x = y + z"
+  tree: cst.Module = cst.parse_module(code)
   tree = tree.visit(scanner)
-  msg = get_hatch_message(tree)
+  msg: str = get_hatch_message(tree)
   assert msg == ""

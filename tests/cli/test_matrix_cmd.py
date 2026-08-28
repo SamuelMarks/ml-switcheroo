@@ -1,13 +1,13 @@
 """Test suite for the Matrix Cmd module."""
 
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 
 
-def test_compatibility_matrix():
+def test_compatibility_matrix() -> None:
   """Verifies the behavior of compatibility matrix."""
   with patch("ml_switcheroo.cli.matrix.SemanticsManager") as MockSemantics:
-    semantics = MockSemantics()
+    semantics: MagicMock = MockSemantics()
     semantics.get_known_apis.return_value = {
       "op1": {"variants": {"torch": {"api": "foo"}, "jax": {"requires_plugin": "foo"}}},
       "op2": {"variants": {"torch": None}},
@@ -15,7 +15,7 @@ def test_compatibility_matrix():
     semantics._key_origins = {"op1": "custom"}
     matrix = CompatibilityMatrix(semantics)
     with patch("ml_switcheroo.cli.matrix.get_framework_priority_order", return_value=["torch", "jax"]):
-      res = matrix.get_json()
+      res: list[dict[str, str]] = matrix.get_json()
       assert len(res) == 2
       matrix.render()
       assert matrix._get_status_icon(None) == "❌"

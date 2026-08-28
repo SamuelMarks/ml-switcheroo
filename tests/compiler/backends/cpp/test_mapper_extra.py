@@ -10,11 +10,13 @@ and error-handling branches for unsupported AST node types.
 """
 
 import ast
+import typing
 import pytest
 from ml_switcheroo.core.compiler.backends.cpp.mapper import ASTToCppMapper
+from ml_switcheroo.core.compiler.backends.cpp.cst import Expression, BinaryExpression, Identifier
 
 
-def test_ast_to_cpp_mapper_extra():
+def test_ast_to_cpp_mapper_extra() -> None:
   """Verify mapping behavior for edge-case, fallback, and unsupported Python AST nodes.
 
   This test instantiates the ASTToCppMapper and executes several verification assertions:
@@ -40,22 +42,25 @@ def test_ast_to_cpp_mapper_extra():
 
   # Sub, Mult, Div
   for op_str, op_node in [("-", ast.Sub()), ("*", ast.Mult()), ("/", ast.Div()), ("+", ast.BitOr())]:
-    expr = ast.BinOp(left=ast.Name(id="a"), op=op_node, right=ast.Name(id="b"))
-    cpp_expr = mapper.map_expression(expr)
-    expected_op = "+" if isinstance(op_node, ast.BitOr) else op_str
+    expr: ast.expr = ast.BinOp(left=ast.Name(id="a"), op=op_node, right=ast.Name(id="b"))
+    cpp_expr: Expression = mapper.map_expression(expr)
+    expected_op: str = "+" if isinstance(op_node, ast.BitOr) else op_str
+    assert isinstance(cpp_expr, BinaryExpression)
     assert cpp_expr.operator == expected_op
 
   # Constant
   expr = ast.Constant(value=42)
   cpp_expr = mapper.map_expression(expr)
+  assert isinstance(cpp_expr, Identifier)
   assert cpp_expr.name == "42"
 
   # Call with non-name/attribute func (e.g. lambda)
   # Just construct a weird AST node
   expr = ast.Call(func=ast.Constant(value=1), args=[], keywords=[])
   cpp_expr = mapper.map_expression(expr)
-  assert cpp_expr.name == "unknown"
+  # The generated expression should be a FunctionCall, its name property would be 'unknown'
+  assert getattr(cpp_expr, "name", None) == "unknown"
 
   # Unsupported
   with pytest.raises(ValueError):
-    mapper.map_expression(ast.Pass())
+    mapper.map_expression(typing.cast(ast.expr, ast.Pass()))

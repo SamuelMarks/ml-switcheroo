@@ -1,7 +1,7 @@
 """Test suite for the Utils Missing module."""
 
 
-def test_utils_missing():
+def test_utils_missing() -> None:
   """Verifies the behavior of utilities missing."""
   import libcst as cst
   from ml_switcheroo.plugins.utils import is_framework_module_node, _extract_root_name
@@ -10,25 +10,29 @@ def test_utils_missing():
   class DummyAlias:
     """Dummy Alias class for testing purposes."""
 
-    def model_dump(self):
-      """Mock implementation of model dump."""
+    def model_dump(self) -> dict:
+      """Mock implementation of model dump.
+
+      Returns:
+          dict: Mock data.
+      """
       return {"name": "pd"}
 
   class DummyConf:
     """Dummy Conf class for testing purposes."""
 
-    alias = DummyAlias()
+    alias: DummyAlias = DummyAlias()
 
   class DummyConfNoDump:
     """Dummy conf no dump."""
 
-    alias = object()
+    alias: object = object()
 
   class DummySM:
     """Dummy S M class for testing purposes."""
 
-    _source_registry = {"torch.nn": {}}
-    framework_configs = {
+    _source_registry: dict = {"torch.nn": {}}
+    framework_configs: dict = {
       "pandas": DummyConf(),
       "other": DummyConfNoDump(),
       "direct_dict": {"alias": {"name": "dd"}},
@@ -41,12 +45,12 @@ def test_utils_missing():
   class DummyConfigObj:
     """Dummy Config Obj class for testing purposes."""
 
-    source_framework = "s"
-    target_framework = "target_fw"
-    effective_source = "s"
-    effective_target = "target_fw"
+    source_framework: str = "s"
+    target_framework: str = "target_fw"
+    effective_source: str = "s"
+    effective_target: str = "target_fw"
 
-  ctx = HookContext(DummySM(), DummyConfigObj())
+  ctx: HookContext = HookContext(DummySM(), DummyConfigObj())  # type: ignore
   assert is_framework_module_node(cst.Integer("1"), ctx) is False
   assert is_framework_module_node(cst.Name("pd"), ctx) is True
   assert is_framework_module_node(cst.Name("torch"), ctx) is True
@@ -57,7 +61,7 @@ def test_utils_missing():
   assert _extract_root_name(cst.Integer("1")) is None
 
   # Also test complex extraction
-  attr_node = cst.Attribute(value=cst.Name("tf"), attr=cst.Name("math"))
+  attr_node: cst.Attribute = cst.Attribute(value=cst.Name("tf"), attr=cst.Name("math"))
   assert _extract_root_name(attr_node) == "tf"
 
   # And unknown root

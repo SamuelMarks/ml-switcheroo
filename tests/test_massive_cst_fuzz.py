@@ -1,24 +1,28 @@
 """Test suite for the Massive Cst Fuzz module."""
 
+import types
+
 import pytest
 import os
 import libcst as cst
+from typing import Set, List
 
 pytest.skip("Too slow for pre-commit", allow_module_level=True)
 
 
-def get_all_visitors():
+def get_all_visitors() -> Set[type]:
   """Gets all visitors."""
   import importlib
   import pkgutil
   import inspect
   import ml_switcheroo
 
-  visitors = []
+  visitors: List[type] = []
 
-  def iter_modules(package):
+  def iter_modules(package: types.ModuleType) -> None:
     """Helper to iter modules."""
-    for loader, module_name, is_pkg in pkgutil.walk_packages(package.__path__, package.__name__ + "."):
+    path: list[str] = getattr(package, "__path__", [])
+    for loader, module_name, is_pkg in pkgutil.walk_packages(path, package.__name__ + "."):
       try:
         module = importlib.import_module(module_name)
         for name, obj in inspect.getmembers(module):
@@ -36,21 +40,21 @@ def get_all_visitors():
 
 
 @pytest.mark.skip(reason="Too slow")
-def test_fuzz_all_visitors():
+def test_fuzz_all_visitors() -> None:
   """Verifies the behavior of fuzz all visitors."""
-  visitors = get_all_visitors()
-  code = ""
+  visitors: Set[type] = get_all_visitors()
+  code: str = ""
   for root, dirs, files in os.walk("src/ml_switcheroo"):
     for file in files:
       if file.endswith(".py"):
         with open(os.path.join(root, file), "r") as f:
           code += f.read() + "\n\n"
-  tree = cst.parse_module(code)
+  tree: cst.Module = cst.parse_module(code)
   for visitor_cls in visitors:
     try:
       import unittest.mock
 
-      mock_semantics = unittest.mock.MagicMock()
+      mock_semantics: unittest.mock.MagicMock = unittest.mock.MagicMock()
       mock_semantics.import_data = {"torch.foo": 1}
       try:
         visitor = visitor_cls()

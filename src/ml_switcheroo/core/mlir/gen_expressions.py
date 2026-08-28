@@ -120,7 +120,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
       kw_node = None
       if i < len(keywords) and keywords[i]:
-        kw_node = cst.Name(keywords[i])  # type: ignore
+        kw_node = cst.Name(keywords[i])
 
       args.append(
         cst.Arg(
@@ -160,7 +160,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
       arg_expr = self._resolve_operand(op_val.name)
       kw_node = None
       if i < len(keywords) and keywords[i]:
-        kw_node = cst.Name(keywords[i])  # type: ignore
+        kw_node = cst.Name(keywords[i])
 
       args.append(
         cst.Arg(

@@ -10,9 +10,12 @@ including Dtype, Rank, and Symbolic Shape constraints.
 
 from typing import Any
 
+import typing
+
+
 import ast
 from pathlib import Path
-from typing import Dict, Optional, Set, List, Tuple
+from typing import Dict, Optional, Set
 
 from rich.progress import track
 
@@ -28,7 +31,7 @@ class BatchValidator:
       runner: The EquivalenceRunner instance used for checking equivalence.
   """
 
-  def __init__(self, semantics: SemanticsManager):
+  def __init__(self, semantics: SemanticsManager) -> None:
     """Initialize the validator.
 
     Args:
@@ -69,7 +72,7 @@ class BatchValidator:
 
     iterator = op_names
     if verbose:
-      iterator = track(op_names, description="🧪 Verifying Semantics...")  # type: ignore
+      iterator = track(op_names, description="🧪 Verifying Semantics...")
 
     for op_name in iterator:
       # 1. Manual Test Priority
@@ -92,7 +95,9 @@ class BatchValidator:
 
     return results
 
-  def _unpack_args(self, raw_args: List[Any]) -> Tuple[List[str], Dict[str, str], Dict[str, Dict[Any, Any]]]:
+  def _unpack_args(
+    self, raw_args: typing.List[typing.Any]
+  ) -> typing.Tuple[typing.List[str], typing.Dict[str, str], typing.Dict[str, dict]]:
     """Separate argument names from type hints and extracts semantic constraints.
 
     Handles formats:
@@ -161,7 +166,7 @@ class BatchValidator:
         Set of operation names found in manual tests.
 
     """
-    found = set()  # type: ignore
+    found: set[Any] = set()
     if not root.exists():  # pragma: no cover
       return found
 

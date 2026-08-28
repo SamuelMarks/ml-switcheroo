@@ -7,7 +7,7 @@ implement high-level Neural Network layers like Convolution and Linear layers
 directly in assembly.
 """
 
-from typing import List, Protocol, Dict, Any
+from typing import List, Protocol
 
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassOperand,
@@ -50,7 +50,7 @@ class RegisterAllocatorProtocol(Protocol):
 def expand_conv2d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for a 2D Convolution loop.
 
@@ -154,7 +154,7 @@ def expand_conv2d(
 def expand_linear(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for a Linear Layer (Matrix Multiply).
 
@@ -244,7 +244,7 @@ def expand_linear(
 def expand_mean(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for a Mean reduction loop.
 
@@ -299,7 +299,7 @@ def expand_mean(
 def expand_relu(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for ReLU.
 
@@ -326,7 +326,7 @@ def expand_relu(
 def expand_flatten(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for Flatten.
 
@@ -355,7 +355,7 @@ def expand_flatten(
 def expand_reshape(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for Reshape.
 
@@ -384,7 +384,7 @@ def expand_reshape(
 def expand_conv3d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for 3D Convolution.
 
@@ -482,7 +482,7 @@ def expand_conv3d(
 def expand_avgpool2d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for AvgPool2d.
 
@@ -563,7 +563,7 @@ def expand_avgpool2d(
 def expand_maxpool2d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for MaxPool2d.
 
@@ -638,7 +638,7 @@ def expand_maxpool2d(
 def expand_batchnorm2d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for BatchNorm2d.
 
@@ -708,7 +708,7 @@ def expand_batchnorm2d(
 def expand_dropout(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for Dropout.
 
@@ -764,7 +764,7 @@ def expand_dropout(
 def expand_sigmoid(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for Sigmoid.
 
@@ -807,7 +807,7 @@ def expand_sigmoid(
 def expand_tanh(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for Tanh.
 
@@ -834,7 +834,7 @@ def expand_tanh(
 def expand_gelu(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for GELU.
 
@@ -869,7 +869,7 @@ def expand_gelu(
 def expand_mseloss(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for MSELoss.
 
@@ -947,7 +947,7 @@ def expand_mseloss(
 def expand_crossentropyloss(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Dict[str, Any],
+  metadata,
 ) -> List[SassNode]:
   """Generate the SASS assembly kernel for CrossEntropyLoss.
 

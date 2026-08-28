@@ -6,15 +6,15 @@ from ml_switcheroo.analysis.lifecycle import InitializationTracker
 
 def analyze(code: str) -> InitializationTracker:
   """Analyze code for initialization tracker."""
-  tree = cst.parse_module(code)
-  tracker = InitializationTracker()
+  tree: cst.Module = cst.parse_module(code)
+  tracker: InitializationTracker = InitializationTracker()
   tree.visit(tracker)
   return tracker
 
 
-def test_initialization_tracker_basic():
+def test_initialization_tracker_basic() -> None:
   """Test basic initialization tracker behavior."""
-  code = """
+  code: str = """
 class MyModule:
     def __init__(self):
         self.w = 1.0
@@ -22,13 +22,13 @@ class MyModule:
     def forward(self, x):
         return self.w * x
     """
-  tracker = analyze(code)
+  tracker: InitializationTracker = analyze(code)
   assert len(tracker.warnings) == 0
 
 
-def test_initialization_tracker_uninitialized():
+def test_initialization_tracker_uninitialized() -> None:
   """Test initialization tracker with uninitialized variables."""
-  code = """
+  code: str = """
 class MyModule:
     def __init__(self):
         pass
@@ -36,13 +36,13 @@ class MyModule:
     def forward(self, x):
         return self.w * x
     """
-  tracker = analyze(code)
+  tracker: InitializationTracker = analyze(code)
   assert len(tracker.warnings) == 1
 
 
-def test_initialization_tracker_complex():
+def test_initialization_tracker_complex() -> None:
   """Test initialization tracker with complex code."""
-  code = """
+  code: str = """
 class SubModule:
     def __init__(self):
         self.a = 2
@@ -56,5 +56,5 @@ class MyModule:
         self.d = 4 # late init
         return self.sub.a * self.w * x + self.d
     """
-  tracker = analyze(code)
+  tracker: InitializationTracker = analyze(code)
   assert len(tracker.warnings) > 0

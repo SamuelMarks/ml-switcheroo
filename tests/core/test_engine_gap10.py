@@ -1,15 +1,15 @@
 """Test suite for the Engine Gap10 module."""
 
-from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from unittest.mock import patch, MagicMock
 
 
-def test_engine_strict_mode_linter_errors():
+def test_engine_strict_mode_linter_errors() -> None:
   """Verifies the behavior of engine strict mode linter errors."""
   config = RuntimeConfig(strict_mode=True)
   engine = ASTEngine(source="jax", target="torch", config=config)
-  code = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
+  code: str = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
   with patch("ml_switcheroo.core.engine.StructuralLinter.check") as MockCheck:
     MockCheck.return_value = ["linter error"]
     with patch("ml_switcheroo.core.engine.ingest_code") as MockIngest:
@@ -23,15 +23,16 @@ def test_engine_strict_mode_linter_errors():
           mock_tree.visit.return_value = mock_fixer_visit
           MockIngest.return_value = mock_tree
           engine.config.enable_graph_optimization = False
-          res = engine._run_rewriter_pipeline(code, MagicMock())
+          res: ConversionResult = engine._run_rewriter_pipeline(code, MagicMock())
+          assert res.errors is not None
           assert "linter error" in res.errors[0]
 
 
-def test_engine_escape_hatches_detected():
+def test_engine_escape_hatches_detected() -> None:
   """Verifies the behavior of engine escape hatches detected."""
   config = RuntimeConfig()
   engine = ASTEngine(source="jax", target="torch", config=config)
-  code = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
+  code: str = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
   from ml_switcheroo.core.escape_hatch import EscapeHatch
 
   with patch("ml_switcheroo.core.engine.ingest_code") as MockIngest:
@@ -45,15 +46,16 @@ def test_engine_escape_hatches_detected():
         mock_tree.visit.return_value = mock_fixer_visit
         MockIngest.return_value = mock_tree
         engine.config.enable_graph_optimization = False
-        res = engine._run_rewriter_pipeline(code, MagicMock())
+        res: ConversionResult = engine._run_rewriter_pipeline(code, MagicMock())
+        assert res.errors is not None
         assert "Escape Hatches Detected" in res.errors[0]
 
 
-def test_engine_target_torch_sharding_compiler():
+def test_engine_target_torch_sharding_compiler() -> None:
   """Verifies the behavior of engine target PyTorch sharding compiler."""
   config = RuntimeConfig(enable_sharding=True, enable_graph_optimization=True)
   engine = ASTEngine(source="jax", target="torch", config=config)
-  code = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
+  code: str = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
   with patch("ml_switcheroo.core.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
     with patch("ml_switcheroo.core.compiler.sharding_extractor.ShardingExtractionPass.apply"):
       with patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer") as MockOptCls:

@@ -7,20 +7,20 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.core.rewriter.patcher import PatchAction
 
 
-def test_engine_roundtrip():
+def test_engine_roundtrip() -> None:
   """Verifies the behavior of engine roundtrip."""
   engine = ASTEngine(source="torch", target="torch")
-  source = "x = 5\nprint(x)"
-  result = engine.run(source)
+  source: str = "x = 5\nprint(x)"
+  result: ConversionResult = engine.run(source)
   assert isinstance(result, ConversionResult)
   assert result.success
   assert result.code == source
   assert not result.has_errors
 
 
-def test_graph_optimization_rewriter_path():
+def test_graph_optimization_rewriter_path() -> None:
   """Verifies the behavior of graph optimization rewriter path."""
-  source_code = "x = conv(x)"
+  source_code: str = "x = conv(x)"
   with (
     patch("ml_switcheroo.core.engine.GraphExtractor") as MockExtractor,
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer") as MockOptimizer,

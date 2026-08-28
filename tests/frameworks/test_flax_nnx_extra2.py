@@ -1,22 +1,23 @@
 """Test module."""
 
 import sys
+import typing
 from unittest.mock import MagicMock, patch
 
 
-def test_flax_nnx_definitions_no_mock():
+def test_flax_nnx_definitions_no_mock() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   with patch("ml_switcheroo.frameworks.flax_nnx.load_definitions", return_value={}):
     adapter = FlaxNNXAdapter()
-    d = adapter.definitions
+    d: typing.Any = adapter.definitions
     assert "ReLU" in d
     assert "Linear" in d
     assert "Conv2d" in d
 
 
-def test_flax_nnx_convert_branch():
+def test_flax_nnx_convert_branch() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
@@ -25,7 +26,7 @@ def test_flax_nnx_convert_branch():
   class ObjWithArray:
     """An object with __array__."""
 
-    def __array__(self):
+    def __array__(self) -> list[int]:
       """Gets the array."""
       return [1, 2, 3]
 
@@ -36,7 +37,7 @@ def test_flax_nnx_convert_branch():
     assert adapter.convert(obj) is obj
 
 
-def test_flax_nnx_convert_no_import():
+def test_flax_nnx_convert_no_import() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
@@ -44,7 +45,7 @@ def test_flax_nnx_convert_no_import():
 
   real_import = __import__
 
-  def mock_import(name, *args, **kwargs):
+  def mock_import(name: str, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
     """Mocks __import__ to raise ImportError for jax.numpy."""
     if name == "jax.numpy":
       raise ImportError("No module named jax.numpy")
@@ -54,7 +55,7 @@ def test_flax_nnx_convert_no_import():
     assert adapter.convert([1, 2, 3]) == [1, 2, 3]
 
 
-def test_flax_nnx_convert_not_array_like():
+def test_flax_nnx_convert_not_array_like() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
@@ -64,17 +65,19 @@ def test_flax_nnx_convert_not_array_like():
     assert adapter.convert("not_array_like") == "not_array_like"
 
 
-def test_flax_nnx_apply_wiring_branches():
+def test_flax_nnx_apply_wiring_branches() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   adapter = FlaxNNXAdapter()
-  snapshot = {
+  snapshot: dict[str, typing.Any] = {
     "mappings": {
       "test1": {"api": "flax.nnx.Test"},
       "test2": {"other": "flax.nnx.Test"},
       "test3": None,
       "forward": {"api": "fwd"},
+      "__call__": {},
+      "call": {},
     }
   }
   adapter.apply_wiring(snapshot)

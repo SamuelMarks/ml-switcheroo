@@ -4,11 +4,13 @@ Implements the "Verified Pipeline" (Unstructured Code -> cdd-python -> Structure
 as claimed in the Futureproofing Machine Learning paper.
 """
 
+import typing
+
+
 import ast
-from typing import Any, Dict
 
 
-def run_verified_pipeline(source_code: str) -> Dict[str, Any]:
+def run_verified_pipeline(source_code: str) -> typing.Dict[str, typing.Union[str, int, bool]]:
   """Run the verified pipeline on raw Python source code..
 
   Args:

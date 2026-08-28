@@ -1,6 +1,7 @@
 """Module docstring."""
 
 import libcst as cst
+import typing
 from ml_switcheroo.core.latex.nodes import (
   MacroNode,
   EnvironmentNode,
@@ -17,9 +18,9 @@ from ml_switcheroo.core.latex.nodes import (
 from ml_switcheroo.core.latex.parser import LatexParser
 
 
-def test_latex_nodes_missing():
+def test_latex_nodes_missing() -> None:
   """Docstring."""
-  nodes = [
+  nodes: list[typing.Any] = [
     MacroNode(name="foo", args=["a", "b"]),
     EnvironmentNode(name="env", args=[], children=[TextNode(content="text")]),
     DocumentNode(children=[]),
@@ -36,7 +37,7 @@ def test_latex_nodes_missing():
       n.emit()
     n.__str__()
 
-  class DummyNode(LatexNode):
+  class DummyNode(LatexNode):  # type: ignore[misc]
     """Docstring."""
 
     def emit(self, indent_level: int = 0) -> str:
@@ -50,42 +51,42 @@ def test_latex_nodes_missing():
   assert MacroNode(name="b").emit() == r"\b"
 
 
-def test_latex_parser_missing():
+def test_latex_parser_missing() -> None:
   """Docstring."""
   parser = LatexParser(r"")
 
   assert parser._parse_config_string("") == {}
-  res = parser._parse_config_string("k=v, k2=v2, just_key")
+  res: dict[str, str] = parser._parse_config_string("k=v, k2=v2, just_key")
   assert "k" in res
 
   assert parser._parse_arg_list("") == []
   assert parser._parse_arg_list("a, b, c") == ["a", "b", "c"]
 
-  val1 = parser._safe_value_node("...")
+  val1: typing.Any = parser._safe_value_node("...")
   assert isinstance(val1, cst.Ellipsis)
 
-  val2 = parser._safe_value_node("1")
+  val2: typing.Any = parser._safe_value_node("1")
   assert isinstance(val2, cst.Integer)
 
-  val3 = parser._safe_value_node("[1, 2]")
+  val3: typing.Any = parser._safe_value_node("[1, 2]")
   assert isinstance(val3, cst.List)
 
-  val4 = parser._safe_value_node("abc")
+  val4: typing.Any = parser._safe_value_node("abc")
   assert isinstance(val4, cst.Name)
 
-  call1 = parser._create_call("func")
+  call1: typing.Any = parser._create_call("func")
   assert isinstance(call1, cst.Call)
 
-  call2 = parser._create_call("func", config={"k": "1"})
+  call2: typing.Any = parser._create_call("func", config={"k": "1"})
   assert isinstance(call2, cst.Call)
 
-  call3 = parser._create_call("func", config={}, args_list=["1"])
+  call3: typing.Any = parser._create_call("func", config={}, args_list=["1"])
   assert isinstance(call3, cst.Call)
 
-  call4 = parser._create_call("func.subfunc", config={}, args_list=["1"])
+  call4: typing.Any = parser._create_call("func.subfunc", config={}, args_list=["1"])
   assert isinstance(call4, cst.Call)
 
-  doc = r"""
+  doc: str = r"""
 \begin{DefModel}
 \Attribute{conv1}{Conv2d}{in_channels=1, out_channels=32}
 \Input{x}{[B, 1, 28, 28]}
@@ -95,14 +96,16 @@ def test_latex_parser_missing():
 \end{DefModel}
 """
   parser = LatexParser(doc)
-  mod = parser.parse()
+  mod: typing.Any = parser.parse()
   assert isinstance(mod, cst.Module)
 
-  parser2 = LatexParser(r"""
+  parser2 = LatexParser(
+    r"""
 \Attribute{conv1}{Conv2d}{}
 \StateOp{s1}{conv1}{}{}
 \Op{s2}{Flatten}{}{}
-""")
+"""
+  )
   parser2.parse()
 
   parser3 = LatexParser(r"\begin{DefModel}{WithArgs}\begin{enumerate} \end{enumerate}\end{DefModel}")
@@ -158,4 +161,4 @@ def test_latex_parser_missing():
 
     node_id = "d"
 
-  LatexParser("")._synthesize_class("N", [], None, [DummyOp()], None)  # type: ignore
+  LatexParser("")._synthesize_class("N", [], None, [DummyOp()], None)

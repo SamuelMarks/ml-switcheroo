@@ -17,9 +17,7 @@ It contains:
 3.  **RdnaBackend**: The CompilerBackend adapter for the Registry, including header generation.
 """
 
-from typing import Any
-
-from typing import Dict, List, Optional, Callable, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING
 import libcst as cst
 
 # Direct Import from Frontend to avoid circular dependency via core shims
@@ -144,7 +142,7 @@ class RdnaSynthesizer:
     """
     self.semantics = semantics
     self.allocator = RegisterAllocator()
-    self.macro_registry: Dict[str, Callable[..., Any]] = {}
+    self.macro_registry = {}
     macros_json_path = os.path.join(os.path.dirname(__file__), "macros.json")
     if os.path.exists(macros_json_path):
       with open(macros_json_path, "r", encoding="utf-8") as f:

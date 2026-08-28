@@ -1,8 +1,9 @@
 """Test suite for the Engine Gap module."""
 
 import pytest
+import typing
 from unittest.mock import patch, MagicMock
-from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.import_fixer import ResolutionPlan
@@ -10,54 +11,55 @@ import libcst as cst
 from pathlib import Path
 
 
-def test_engine_init_coverage():
+def test_engine_init_coverage() -> None:
   """Verifies the behavior of engine initialization coverage."""
   cfg = RuntimeConfig(strict_mode=False)
   engine = ASTEngine(config=cfg, intermediate="onnx")
   assert engine.config.intermediate == "onnx"
   cfg2 = RuntimeConfig(strict_mode=False)
-  cfg2.validation_report = Path("/tmp/report.json")
+  cfg2.validation_report = str(Path("/tmp/report.json"))
   with patch.object(SemanticsManager, "load_validation_report") as mock_load:
     ASTEngine(config=cfg2)
-    mock_load.assert_called_once_with(Path("/tmp/report.json"))
+    mock_load.assert_called_once_with("/tmp/report.json")
 
 
-def test_engine_run_exception_coverage():
+def test_engine_run_exception_coverage() -> None:
   """Verifies the behavior of engine run correctly handling an exception coverage."""
   engine = ASTEngine(source="torch", target="jax")
   with patch.object(engine, "_run_rewriter_pipeline", side_effect=Exception("mocked error")):
-    res = engine.run("def foo(): pass")
+    res: ConversionResult = engine.run("def foo(): pass")
     assert res.success is False
+    assert res.errors is not None
     assert "mocked error" in res.errors[0]
 
 
-def test_engine_parse_coverage():
+def test_engine_parse_coverage() -> None:
   """Verifies the behavior of engine parse coverage."""
   engine = ASTEngine()
-  tree = engine.parse("x = 1")
+  tree: cst.Module = engine.parse("x = 1")
   assert isinstance(tree, cst.Module)
 
 
 class MockBackend:
   """Mock Backend class for testing purposes."""
 
-  def __init__(self, *args, **kwargs):
+  def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
     """Initializes the MockBackend instance."""
     pass
 
-  def compile(self, graph):
+  def compile(self, graph: typing.Any) -> str:
     """Mock implementation of compile."""
     return "compiled code"
 
 
-def get_tracer_mock():
+def get_tracer_mock() -> MagicMock:
   """Gets tracer mock."""
   m = MagicMock()
   m.export.return_value = []
   return m
 
 
-def test_compiler_pipeline_coverage():
+def test_compiler_pipeline_coverage() -> None:
   """Verifies the behavior of compiler pipeline coverage."""
   engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   with (
@@ -67,7 +69,7 @@ def test_compiler_pipeline_coverage():
   ):
     mock_frontend.return_value.parse_to_graph.return_value = MagicMock()
     mock_get_backend.return_value = MockBackend
-    res = engine._run_compiler_pipeline("code", get_tracer_mock())
+    res: ConversionResult = engine._run_compiler_pipeline("code", get_tracer_mock())
     assert res.code == "compiled code"
   engine_sass = ASTEngine(source="sass", target="rdna")
   with (
@@ -103,16 +105,16 @@ def test_compiler_pipeline_coverage():
 class MockPythonBackend:
   """Mock Python Backend class for testing purposes."""
 
-  def __init__(self, *args, **kwargs):
+  def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
     """Initializes the MockPythonBackend instance."""
     pass
 
-  def compile(self, graph):
+  def compile(self, graph: typing.Any) -> str:
     """Mock implementation of compile."""
     return "compiled py code"
 
 
-def test_compiler_pipeline_backend_coverage():
+def test_compiler_pipeline_backend_coverage() -> None:
   """Verifies the behavior of compiler pipeline backend coverage."""
   engine = ASTEngine(source="torch", target="jax")
   with (
@@ -131,11 +133,11 @@ def test_compiler_pipeline_backend_coverage():
     mock_py = MockPythonBackend
     mock_py.__name__ = "PythonBackend"
     mock_get_backend.return_value = mock_py
-    res = engine_py._run_compiler_pipeline("code", get_tracer_mock())
+    res: ConversionResult = engine_py._run_compiler_pipeline("code", get_tracer_mock())
     assert res.code == "compiled py code"
 
 
-def test_rewriter_pipeline_coverage():
+def test_rewriter_pipeline_coverage() -> None:
   """Verifies the behavior of rewriter pipeline coverage."""
   engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   with (
@@ -146,7 +148,7 @@ def test_rewriter_pipeline_coverage():
     patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
     patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
-    mock_extractor.return_value.graph.nodes = [1]
+    mock_extractor.return_value.graph.nodes = [1]  # type: ignore
     mock_differ.return_value.diff.return_value = True
     engine._run_rewriter_pipeline("code", get_tracer_mock())
   cfg = RuntimeConfig(strict_mode=False)
@@ -158,7 +160,7 @@ def test_rewriter_pipeline_coverage():
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
     patch("ml_switcheroo.core.compiler.differ.GraphDiffer") as mock_differ,
   ):
-    mock_extractor.return_value.graph.nodes = [1]
+    mock_extractor.return_value.graph.nodes = [1]  # type: ignore
     mock_differ.return_value.diff.return_value = False
     engine_shard._run_rewriter_pipeline("code", get_tracer_mock())
   engine_err = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
@@ -177,7 +179,7 @@ def test_rewriter_pipeline_coverage():
     patch("ml_switcheroo.core.engine.UsageScanner.get_result", return_value=False),
     patch(
       "ml_switcheroo.core.engine.ImportResolver.resolve",
-      return_value=ResolutionPlan(path_to_alias={}, required_imports=set()),
+      return_value=ResolutionPlan(path_to_alias={}, required_imports=[]),
     ),
   ):
     engine_import._run_rewriter_pipeline("code", get_tracer_mock())
@@ -190,7 +192,8 @@ def test_rewriter_pipeline_coverage():
     "ml_switcheroo.core.engine.ingest_code",
     return_value=cst.parse_module("# <SWITCHEROO_FAILED_TO_TRANS>\ndef foo(): pass"),
   ):
-    res = engine_hatch._run_rewriter_pipeline("code", get_tracer_mock())
+    res: ConversionResult = engine_hatch._run_rewriter_pipeline("code", get_tracer_mock())
+    assert res.errors is not None
     assert len(res.errors) > 0
     assert "Escape Hatches Detected" in res.errors[0]
   engine_strict = ASTEngine(source="torch", target="jax", strict_mode=True)
@@ -200,10 +203,11 @@ def test_rewriter_pipeline_coverage():
   ):
     mock_linter.return_value.check.return_value = ["linter err"]
     res = engine_strict._run_rewriter_pipeline("code", get_tracer_mock())
+    assert res.errors is not None
     assert "linter err" in res.errors
 
 
-def test_rewriter_sharding_torch_target():
+def test_rewriter_sharding_torch_target() -> None:
   """Verifies the behavior of rewriter sharding PyTorch target."""
   cfg = RuntimeConfig(strict_mode=False)
   cfg.enable_sharding = True
@@ -214,6 +218,6 @@ def test_rewriter_sharding_torch_target():
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
     patch("ml_switcheroo.core.compiler.differ.GraphDiffer") as mock_differ,
   ):
-    mock_extractor.return_value.graph.nodes = [1]
+    mock_extractor.return_value.graph.nodes = [1]  # type: ignore
     mock_differ.return_value.diff.return_value = False
     engine._run_rewriter_pipeline("code", get_tracer_mock())

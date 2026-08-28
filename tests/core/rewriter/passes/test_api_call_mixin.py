@@ -1,6 +1,7 @@
 """Test suite for the Api Call Mixin module."""
 
 import pytest
+import typing
 import libcst as cst
 from ml_switcheroo.core.rewriter.passes.api_call_mixin import ApiTransformerCallMixin
 
@@ -8,11 +9,11 @@ from ml_switcheroo.core.rewriter.passes.api_call_mixin import ApiTransformerCall
 class MockTracer:
   """Mock Tracer class for testing purposes."""
 
-  def log_inspection(self, *args, **kwargs):
+  def log_inspection(self, *args: typing.Any, **kwargs: typing.Any) -> None:
     """Mock implementation of log inspection."""
     pass
 
-  def log_mutation(self, *args, **kwargs):
+  def log_mutation(self, *args: typing.Any, **kwargs: typing.Any) -> None:
     """Mock implementation of log mutation."""
     pass
 
@@ -20,15 +21,15 @@ class MockTracer:
 class MockHookContext:
   """Mock Hook Context class for testing purposes."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the MockHookContext instance."""
-    self.current_op_id = None
+    self.current_op_id: typing.Optional[str] = None
 
 
 class MockContext:
   """Mock Context class for testing purposes."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the MockContext instance."""
     self.hook_context = MockHookContext()
     self.symbol_table = None
@@ -37,17 +38,17 @@ class MockContext:
 class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
   """Mock Transformer class for testing purposes."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the MockTransformer instance."""
     self.strict_mode = True
     self.source_fw = "torch"
     self.target_fw = "jax"
-    self.warnings = []
-    self.failures = []
+    self.warnings: list[str] = []
+    self.failures: list[str] = []
     self.semantics = self
     self.context = MockContext()
 
-  def get_definition(self, name):
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
     """Get."""
     """Mock implementation of get definition."""
     if name == "torch.known":
@@ -56,7 +57,7 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
       return ("nodep_id", {})
     return None
 
-  def _get_qualified_name(self, node):
+  def _get_qualified_name(self, node: typing.Any) -> typing.Optional[str]:
     """Get name."""
     if isinstance(node, cst.Name):
       return node.value
@@ -64,7 +65,7 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
       return f"{node.value.value}.{node.attr.value}"
     return None
 
-  def _get_mapping(self, name, silent=False):
+  def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[dict[str, typing.Any]]:
     """Map."""
     if name == "torch.known":
       return {"api": "jnp.known"}
@@ -74,34 +75,34 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
       return {"api": "jnp.missing_def"}
     return None
 
-  def check_version_constraints(self, min_v, max_v):
+  def check_version_constraints(self, min_v: str, max_v: str) -> typing.Optional[str]:
     """Mock implementation of check version constraints."""
     if min_v == "1.0":
       return "Version warning"
     return None
 
-  def _report_warning(self, msg):
+  def _report_warning(self, msg: str) -> None:
     """Warn."""
     self.warnings.append(msg)
 
-  def _report_failure(self, msg):
+  def _report_failure(self, msg: str) -> None:
     """Fail."""
     self.failures.append(msg)
 
-  def _is_module_alias(self, node):
+  def _is_module_alias(self, node: typing.Any) -> bool:
     """Alias."""
     return False
 
-  def _handle_variant_imports(self, mapping):
+  def _handle_variant_imports(self, mapping: typing.Any) -> None:
     """Imp."""
     pass
 
-  def _create_name_node(self, name):
+  def _create_name_node(self, name: str) -> cst.Name:
     """Create."""
     return cst.Name(name)
 
 
-def test_leave_Call_pre_check():
+def test_leave_Call_pre_check() -> None:
   """Verifies the behavior of leave Call pre check."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
@@ -109,19 +110,19 @@ def test_leave_Call_pre_check():
 
     m.setattr(mixin, "handle_pre_checks", lambda *args: (True, cst.Call(func=cst.Name("handled"), args=[])))
     tree = cst.parse_module("foo()")
-    new_tree = tree.visit(transformer)
+    new_tree: typing.Any = tree.visit(transformer)
     assert getattr(new_tree.body[0].body[0].value.func, "value", None) == "handled"
 
 
-def test_leave_Call_no_mapping_super():
+def test_leave_Call_no_mapping_super() -> None:
   """Verifies the behavior of leave Call no mapping super."""
   transformer = MockTransformer()
   tree = cst.parse_module("super()")
-  new_tree = tree.visit(transformer)
+  new_tree: typing.Any = tree.visit(transformer)
   assert new_tree.body[0].body[0].value.func.value == "super"
 
 
-def test_leave_Call_no_mapping_strict():
+def test_leave_Call_no_mapping_strict() -> None:
   """Verifies the behavior of leave Call no mapping strict."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
@@ -135,7 +136,7 @@ def test_leave_Call_no_mapping_strict():
     assert "not found in semantics" in transformer.failures[0]
 
 
-def test_leave_Call_with_mapping_deprecated():
+def test_leave_Call_with_mapping_deprecated() -> None:
   """Verifies the behavior of leave Call with mapping deprecated."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
@@ -146,13 +147,13 @@ def test_leave_Call_with_mapping_deprecated():
     m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
     m.setattr(mixin, "log_diff", lambda *args: None)
     tree = cst.parse_module("torch.known()")
-    new_tree = tree.visit(transformer)
+    new_tree: typing.Any = tree.visit(transformer)
     assert len(transformer.warnings) == 1
     assert "Usage of deprecated" in transformer.warnings[0]
     assert new_tree.body[0].body[0].value.func.value == "strategy_ok"
 
 
-def test_leave_Call_with_mapping_version_warn():
+def test_leave_Call_with_mapping_version_warn() -> None:
   """Verifies the behavior of leave Call with mapping version warn."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
@@ -163,13 +164,13 @@ def test_leave_Call_with_mapping_version_warn():
     m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
     m.setattr(mixin, "log_diff", lambda *args: None)
     tree = cst.parse_module("torch.nodep()")
-    new_tree = tree.visit(transformer)
+    new_tree: typing.Any = tree.visit(transformer)
     assert len(transformer.warnings) == 1
     assert transformer.warnings[0] == "Version warning"
     assert new_tree.body[0].body[0].value.func.value == "strategy_ok"
 
 
-def test_leave_Call_implicit_method():
+def test_leave_Call_implicit_method() -> None:
   """Verifies the behavior of leave Call implicit method."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
@@ -181,11 +182,11 @@ def test_leave_Call_implicit_method():
     m.setattr(mixin, "handle_post_processing", lambda s, n, *args: n)
     m.setattr(mixin, "log_diff", lambda *args: None)
     tree = cst.parse_module("x.nodep()")
-    new_tree = tree.visit(transformer)
+    new_tree: typing.Any = tree.visit(transformer)
     assert new_tree.body[0].body[0].value.func.value == "implicit_ok"
 
 
-def test_leave_Call_missing_def():
+def test_leave_Call_missing_def() -> None:
   """Verifies the behavior when definition lookup fails."""
   transformer = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
@@ -193,11 +194,11 @@ def test_leave_Call_missing_def():
 
     m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
     tree = cst.parse_module("torch.missing_def()")
-    new_tree = tree.visit(transformer)
+    new_tree: typing.Any = tree.visit(transformer)
     assert new_tree.body[0].body[0].value.func.attr.value == "missing_def"
 
 
-def test_docstrings_are_not_placeholders():
+def test_docstrings_are_not_placeholders() -> None:
   """Verifies that the module, class, and method docstrings are fully documented and not placeholders."""
   import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
 

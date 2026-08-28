@@ -9,7 +9,7 @@ This module consolidates all structural transformation logic, including:
 """
 
 import libcst as cst
-from typing import Optional, Set, List, Dict, Any, Union
+from typing import Optional, Set, List, Union
 
 from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.core.rewriter.passes.structure_helpers import StructuralTransformerHelpersMixin
@@ -89,7 +89,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     """
     config = self.context.semantics.get_framework_config(self.context.target_fw)
     if config and "tiers" in config:
-      return config["tiers"]  # type: ignore
+      return config["tiers"]
     return [SemanticTier.ARRAY_API.value, SemanticTier.NEURAL.value, SemanticTier.EXTRAS.value]
 
   def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
@@ -150,7 +150,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     parts = name_str.split(".")
     node = cst.Name(parts[0])
     for part in parts[1:]:
-      node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
+      node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
 
   def _is_framework_base(self, name: str) -> bool:
@@ -208,7 +208,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         return traits.known_inference_methods
     return defaults
 
-  def _get_type_mapping(self, name: str) -> Optional[Dict[str, Any]]:
+  def _get_type_mapping(self, name: str):
     """Look up the semantic type definition mapping in the database.
 
     Args:
@@ -243,7 +243,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if not self.context.module_preamble:
       return updated_node  # pragma: no cover # pragma: no cover # pragma: no cover
 
-    new_stmts = []  # type: ignore
+    new_stmts = []
     # Deduplication now handled at insertion time in Context, so order is preserved.
     for code in self.context.module_preamble:
       try:
@@ -386,7 +386,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
     return True
 
-  def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> Union[cst.ClassDef, cst.CSTNode]:  # type: ignore
+  def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> Union[cst.ClassDef, cst.CSTNode]:
     """Rewrite class inheritance bases when leaving a class definition.
 
     Updates base classes to inherit from the target framework's base module, or registers
@@ -409,7 +409,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       if self.context.current_stmt_errors:
         msg = "; ".join(self.context.current_stmt_errors)
         self.context.current_stmt_errors.clear()
-        return EscapeHatch.mark_failure(original_node, msg)  # type: ignore
+        return EscapeHatch.mark_failure(original_node, msg)
 
       target_base = self.target_traits.module_base
       new_bases = []

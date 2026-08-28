@@ -1,6 +1,7 @@
 """Test suite for the Topk module."""
 
 import pytest
+import typing
 import libcst as cst
 from unittest.mock import MagicMock
 from tests.conftest import TestRewriter as PivotRewriter
@@ -9,52 +10,62 @@ import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.topk import transform_topk
 
 
-def rewrite_code(rewriter, code):
+def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code."""
-  return rewriter.convert(cst.parse_module(code)).code
+  mod = cst.parse_module(code)
+  return typing.cast(str, rewriter.convert(mod).code)
 
 
 @pytest.fixture
-def rewriter():
+def rewriter() -> PivotRewriter:
   """Provides a mock rewriter for testing."""
   hooks._HOOKS["topk_adapter"] = transform_topk
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  topk_def = {
+  topk_def: dict[str, typing.Any] = {
     "variants": {
       "torch": {"api": "torch.topk"},
       "jax": {"api": "jax.lax.top_k", "requires_plugin": "topk_adapter"},
       "tensorflow": {"api": "tf.math.top_k", "requires_plugin": "topk_adapter"},
     }
   }
-  mgr.get_definition.side_effect = lambda n: ("TopK", topk_def) if "topk" in n else None
-  mgr.resolve_variant.side_effect = lambda aid, fw: topk_def["variants"]["jax"]
+
+  def get_def_side_effect(n: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+    """Gets definition."""
+    return ("TopK", topk_def) if "topk" in n else None
+
+  def resolve_variant_side_effect(aid: str, fw: str) -> dict[str, typing.Any]:
+    """Resolves variant."""
+    return typing.cast(dict[str, typing.Any], topk_def["variants"]["jax"])
+
+  mgr.get_definition.side_effect = get_def_side_effect
+  mgr.resolve_variant.side_effect = resolve_variant_side_effect
   mgr.get_known_apis.return_value = {"TopK": topk_def}
   mgr.is_verified.return_value = True
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
 
 
-def test_topk_rewrapping(rewriter):
+def test_topk_rewrapping(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of topk rewrapping."""
-  code = "res = torch.topk(x, 5)"
-  res = rewrite_code(rewriter, code)
+  code: str = "res = torch.topk(x, 5)"
+  res: str = rewrite_code(rewriter, code)
   assert "collections.namedtuple" in res
   assert '"TopK"' in res
   assert "jax.lax.top_k(x, 5)" in res
   assert "(*" in res
 
 
-def test_topk_strip_unsupported(rewriter):
+def test_topk_strip_unsupported(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of topk strip unsupported."""
-  code = "res = torch.topk(x, 5, sorted=True)"
-  res = rewrite_code(rewriter, code)
+  code: str = "res = torch.topk(x, 5, sorted=True)"
+  res: str = rewrite_code(rewriter, code)
   assert "sorted" not in res
   assert "jax.lax.top_k(x, 5, )" in res or "jax.lax.top_k(x, 5)" in res
 
 
-def test_topk_functional_call(rewriter):
+def test_topk_functional_call(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of topk functional call."""
-  code = "res = torch.topk(t, k)"
-  res = rewrite_code(rewriter, code)
+  code: str = "res = torch.topk(t, k)"
+  res: str = rewrite_code(rewriter, code)
   assert "jax.lax.top_k(t, k)" in res

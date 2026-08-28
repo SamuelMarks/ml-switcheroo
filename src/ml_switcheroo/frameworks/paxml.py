@@ -8,9 +8,12 @@ It inherits Level 0 (Core JAX) and Level 1 (Optax/Orbax) capabilities from
 such as the ``setup()`` lifecycle method for layer definition.
 """
 
+import typing
+
+
 import logging
 import textwrap
-from typing import Union, List, Tuple, Dict, Any, Optional
+from typing import Union, List, Tuple, Dict, Optional
 
 try:
   import praxis
@@ -57,7 +60,7 @@ class PaxmlAdapter(JAXStackMixin):
     cached snapshots to allow transpilation without installation.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data: Dict[str, Any] = {}
+    self._snapshot_data = {}
     if praxis is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("paxml")
@@ -145,7 +148,7 @@ class PaxmlAdapter(JAXStackMixin):
     ).strip()
 
   @property
-  def supported_tiers(self) -> List[Any]:
+  def supported_tiers(self):
     """Return supported semantic tiers.
 
     Returns:
@@ -238,7 +241,9 @@ class PaxmlAdapter(JAXStackMixin):
     """
     return []
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert input data to JAX arrays.
 
     Args:
@@ -250,7 +255,7 @@ class PaxmlAdapter(JAXStackMixin):
     """
     return JaxCoreAdapter().convert(data)
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply JAX Stack wiring.
 
     Injects core JAX math operations and Optax optimizer mappings into the snapshot.

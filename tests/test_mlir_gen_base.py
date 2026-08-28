@@ -11,35 +11,35 @@ class TestGenerator(BaseGeneratorMixin):
   pass
 
 
-def test_get_attr():
+def test_get_attr() -> None:
   """Test element."""
-  gen = TestGenerator()
-  op = OperationNode(name="test.op")
+  gen: TestGenerator = TestGenerator()
+  op: OperationNode = OperationNode(name="test.op")
   assert gen._get_attr(op, "missing") is None
 
-  op = OperationNode(name="test.op", attributes=[AttributeNode(name="foo", value="bar")])
-  assert gen._get_attr(op, "foo") == "bar"
+  op2: OperationNode = OperationNode(name="test.op", attributes=[AttributeNode(name="foo", value="bar")])
+  assert gen._get_attr(op2, "foo") == "bar"
 
-  op = OperationNode(name="test.op", attributes=[AttributeNode(name="arr", value=["1", "2"])])
-  assert gen._get_attr(op, "arr") == "[1, 2]"
+  op3: OperationNode = OperationNode(name="test.op", attributes=[AttributeNode(name="arr", value=["1", "2"])])
+  assert gen._get_attr(op3, "arr") == "[1, 2]"
 
 
-def test_create_dotted_name():
+def test_create_dotted_name() -> None:
   """Test element."""
-  gen = TestGenerator()
+  gen: TestGenerator = TestGenerator()
 
-  node = gen._create_dotted_name("")
+  node: cst.BaseExpression = gen._create_dotted_name("")
   assert isinstance(node, cst.Name)
   assert node.value == "unknown"
 
-  node = gen._create_dotted_name("torch")
-  assert isinstance(node, cst.Name)
-  assert node.value == "torch"
+  node2: cst.BaseExpression = gen._create_dotted_name("torch")
+  assert isinstance(node2, cst.Name)
+  assert node2.value == "torch"
 
-  node = gen._create_dotted_name("torch.nn.functional")
-  assert isinstance(node, cst.Attribute)
-  assert node.attr.value == "functional"
-  assert isinstance(node.value, cst.Attribute)
-  assert node.value.attr.value == "nn"
-  assert isinstance(node.value.value, cst.Name)
-  assert node.value.value.value == "torch"
+  node3: cst.BaseExpression = gen._create_dotted_name("torch.nn.functional")
+  assert isinstance(node3, cst.Attribute)
+  assert node3.attr.value == "functional"
+  assert isinstance(node3.value, cst.Attribute)
+  assert node3.value.attr.value == "nn"
+  assert isinstance(node3.value.value, cst.Name)
+  assert node3.value.value.value == "torch"

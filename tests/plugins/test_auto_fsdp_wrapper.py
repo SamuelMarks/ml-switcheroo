@@ -1,6 +1,7 @@
 """Test suite for the Auto Fsdp Wrapper module."""
 
 import libcst as cst
+import typing
 from unittest.mock import MagicMock
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.core.dsl import OperationDef, OpType
@@ -8,7 +9,7 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.plugins.auto_fsdp_wrapper import wrap_with_sharding
 
 
-def test_auto_fsdp_wrapper_pytorch():
+def test_auto_fsdp_wrapper_pytorch() -> None:
   """Verifies the behavior of auto FSDP wrapper pytorch."""
   node = cst.Call(func=cst.Name("Linear"), args=[])
   op_def = OperationDef(
@@ -22,15 +23,15 @@ def test_auto_fsdp_wrapper_pytorch():
   mock_config = RuntimeConfig(target_framework="torch", source_framework="jax")
   ctx = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = "Linear"
-  result = wrap_with_sharding(node, ctx)
+  result: typing.Any = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
   assert isinstance(result.func, cst.Attribute)
   assert result.func.attr.value == "FSDP"
   assert isinstance(result.args[0].value, cst.Call)
-  assert result.args[0].value.func.value == "Linear"
+  assert typing.cast(cst.Name, result.args[0].value.func).value == "Linear"
 
 
-def test_auto_fsdp_wrapper_jax():
+def test_auto_fsdp_wrapper_jax() -> None:
   """Verifies the behavior of auto FSDP wrapper JAX."""
   node = cst.Call(func=cst.Name("Dense"), args=[])
   op_def = OperationDef(
@@ -44,14 +45,14 @@ def test_auto_fsdp_wrapper_jax():
   mock_config = RuntimeConfig(target_framework="jax", source_framework="torch")
   ctx = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = "Dense"
-  result = wrap_with_sharding(node, ctx)
+  result: typing.Any = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
   assert isinstance(result.func, cst.Attribute)
   assert result.func.attr.value == "pjit"
-  assert result.args[0].value.func.value == "Dense"
+  assert typing.cast(cst.Name, typing.cast(cst.Call, result.args[0].value).func).value == "Dense"
 
 
-def test_auto_fsdp_wrapper_not_supported():
+def test_auto_fsdp_wrapper_not_supported() -> None:
   """Verifies the behavior of auto FSDP wrapper not supported."""
   node = cst.Call(func=cst.Name("Activation"), args=[])
   op_def = OperationDef(
@@ -62,12 +63,12 @@ def test_auto_fsdp_wrapper_not_supported():
   mock_config = RuntimeConfig(target_framework="torch", source_framework="jax")
   ctx = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = "Activation"
-  result = wrap_with_sharding(node, ctx)
+  result: typing.Any = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
-  assert result.func.value == "Activation"
+  assert typing.cast(cst.Name, result.func).value == "Activation"
 
 
-def test_auto_fsdp_wrapper_unknown_api():
+def test_auto_fsdp_wrapper_unknown_api() -> None:
   """Verifies the behavior of auto FSDP wrapper with unknown API."""
   node = cst.Call(func=cst.Name("Linear"), args=[])
   op_def = OperationDef(
@@ -79,17 +80,17 @@ def test_auto_fsdp_wrapper_unknown_api():
   mock_config = RuntimeConfig(target_framework="torch", source_framework="jax")
   ctx = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = "Linear"
-  result = wrap_with_sharding(node, ctx)
+  result: typing.Any = wrap_with_sharding(node, ctx)
   assert result is node
 
 
-def test_auto_fsdp_wrapper_no_op_id():
+def test_auto_fsdp_wrapper_no_op_id() -> None:
   """Verifies the behavior of auto FSDP wrapper no op id."""
   node = cst.Call(func=cst.Name("Unknown"), args=[])
   mock_semantics = MagicMock()
   mock_config = RuntimeConfig(target_framework="torch", source_framework="jax")
   ctx = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = None
-  result = wrap_with_sharding(node, ctx)
+  result: typing.Any = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
-  assert result.func.value == "Unknown"
+  assert typing.cast(cst.Name, result.func).value == "Unknown"

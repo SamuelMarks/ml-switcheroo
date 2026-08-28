@@ -1,28 +1,29 @@
 """Test module."""
 
 import libcst as cst
+import typing
 from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
 from ml_switcheroo.core.mlir.cst import OperationNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_stablehlo_branches():
+def test_stablehlo_branches() -> None:
   """Test function."""
   semantics = SemanticsManager()
 
   # Mock some behavior
-  def mock_get_def(name):
+  def mock_get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
     """Mocks get_definition."""
     return ("dummy", {"variants": {}})
 
-  semantics.get_definition = mock_get_def
+  semantics.get_definition = mock_get_def  # type: ignore
 
   emitter = StableHloEmitter(semantics)
 
   # 87->91 (if param.annotation is None)
   # 110->115 (elif infer_pass.return_types where it is empty)
-  code = "def foo(x):\n    pass"
-  tree = cst.parse_module(code)
+  code: str = "def foo(x):\n    pass"
+  tree: cst.Module = cst.parse_module(code)
   emitter.convert(tree)
 
   # 155->161 (if without else) -> tested in no_else? Wait, if getattr(node, 'orelse', None) is None.

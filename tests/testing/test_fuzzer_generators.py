@@ -1,7 +1,9 @@
 """Test suite for the Fuzzer Generators module."""
 
+from typing import Tuple, Callable
 
-def test_generate_scalar_int():
+
+def test_generate_scalar_int() -> None:
   """Generates scalar integer."""
   from ml_switcheroo.testing.fuzzer.generators import generate_scalar_int
 
@@ -9,11 +11,11 @@ def test_generate_scalar_int():
   assert generate_scalar_int({"min": 10, "max": 10}) == 10
 
 
-def test_generate_scalar_float():
+def test_generate_scalar_float() -> None:
   """Generates scalar float."""
   from ml_switcheroo.testing.fuzzer.generators import generate_scalar_float
 
-  res = generate_scalar_float({"min": 10, "max": 20})
+  res: float = generate_scalar_float({"min": 10, "max": 20})
   assert 10 <= res <= 20
   res = generate_scalar_float({"min": 10})
   assert res >= 10
@@ -23,12 +25,12 @@ def test_generate_scalar_float():
   assert isinstance(res, float)
 
 
-def test_generate_array():
+def test_generate_array() -> None:
   """Generates array."""
   from ml_switcheroo.testing.fuzzer.generators import generate_array
   import numpy as np
 
-  arr = generate_array("float", (2, 2), {})
+  arr: np.ndarray = generate_array("float", (2, 2), {})
   assert arr.shape == (2, 2)
   assert arr.dtype == np.float32
   arr = generate_array("int", (2, 2), {})
@@ -54,28 +56,28 @@ def test_generate_array():
   assert arr.dtype == np.float32
 
 
-def test_get_random_shape():
+def test_get_random_shape() -> None:
   """Gets random shape."""
   from ml_switcheroo.testing.fuzzer.generators import get_random_shape
 
-  shape = get_random_shape((3, 3))
+  shape: Tuple[int, ...] = get_random_shape((3, 3))
   assert shape == (3, 3)
   shape = get_random_shape()
   assert 1 <= len(shape) <= 4
 
 
-def test_make_broadcastable_shape():
+def test_make_broadcastable_shape() -> None:
   """Verifies the behavior of make broadcastable shape."""
   from ml_switcheroo.testing.fuzzer.generators import make_broadcastable_shape
 
-  shape = make_broadcastable_shape((10, 10, 10))
+  shape: Tuple[int, ...] = make_broadcastable_shape((10, 10, 10))
   assert len(shape) == 3
   assert all((d in (1, 10) for d in shape))
 
 
-def test_generate_fake_callable():
+def test_generate_fake_callable() -> None:
   """Generates fake callable."""
   from ml_switcheroo.testing.fuzzer.generators import generate_fake_callable
 
-  fn = generate_fake_callable()
+  fn: Callable = generate_fake_callable()
   assert fn(42) == 42

@@ -21,10 +21,10 @@ Process:
     5.  **Output**: Returns a ``cst.FlattenSentinel`` containing the list of statements.
 """
 
-from typing import Any
+import typing
+
 
 import libcst as cst
-from typing import Union
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
@@ -32,7 +32,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 class LoopVarReplacer(cst.CSTTransformer):
   """Support visitor to replace loop variable instances with a constant integer."""
 
-  def __init__(self, var_name: str, value: int):
+  def __init__(self, var_name: str, value: int) -> None:
     """Initialize the replacer.
 
     Args:
@@ -60,7 +60,7 @@ class LoopVarReplacer(cst.CSTTransformer):
 
 
 @register_hook("transform_for_loop_static")
-def unroll_static_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.FlattenSentinel[Any]]:
+def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For, cst.FlattenSentinel]:
   """Transform Unrolls loops with static ranges.
 
   Triggers:

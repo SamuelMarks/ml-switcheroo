@@ -32,7 +32,7 @@ def get_full_name(node: Union[cst.Name, cst.Attribute]) -> str:
   if isinstance(node, cst.Name):
     return node.value
   elif isinstance(node, cst.Attribute):
-    return f"{get_full_name(node.value)}.{node.attr.value}"  # type: ignore
+    return f"{get_full_name(node.value)}.{node.attr.value}"
   return ""
 
 

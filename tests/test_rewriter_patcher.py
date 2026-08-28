@@ -5,97 +5,108 @@ from unittest.mock import MagicMock
 from ml_switcheroo.core.rewriter.patcher import GraphPatcher, DeleteAction, ReplaceAction
 from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
 from ml_switcheroo.core.compiler.ir import LogicalNode
+from typing import Dict, Union
 
 
-def test_graph_patcher_delete():
+def test_graph_patcher_delete() -> None:
   """Test element."""
-  action = DeleteAction(node_id="test_node")
-  provenance = {"test_node": cst.Name("test")}
-  emitter = MagicMock(spec=PythonSnippetEmitter)
+  action: DeleteAction = DeleteAction(node_id="test_node")
+  provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
+  emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
 
-  patcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
+  patcher: GraphPatcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
 
   # Test dispatch delete
-  node = provenance["test_node"]
-  res = patcher._handle_node(node, node)
+  node: cst.CSTNode = provenance["test_node"]
+  res: Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel] = patcher._handle_node(node, node)
   assert isinstance(res, cst.RemovalSentinel)
 
 
-def test_graph_patcher_replace_init():
+def test_graph_patcher_replace_init() -> None:
   """Test element."""
-  logical_node = MagicMock(spec=LogicalNode)
-  action = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=True)
-  provenance = {"test_node": cst.Name("test")}
-  emitter = MagicMock(spec=PythonSnippetEmitter)
+  logical_node: MagicMock = MagicMock(spec=LogicalNode)
+  action: ReplaceAction = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=True)
+  provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
+  emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
 
-  new_stmt = cst.SimpleStatementLine(body=[cst.Assign(targets=[cst.AssignTarget(cst.Name("x"))], value=cst.Name("y"))])
+  new_stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(
+    body=[cst.Assign(targets=[cst.AssignTarget(cst.Name("x"))], value=cst.Name("y"))]
+  )
   emitter.emit_init.return_value = new_stmt
 
-  patcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
-  node = provenance["test_node"]
+  patcher: GraphPatcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
+  node: cst.CSTNode = provenance["test_node"]
 
-  res = patcher._handle_node(node, node)
+  res: Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel] = patcher._handle_node(node, node)
   assert res == new_stmt
 
   # Nested unwrap
-  assign_node = cst.Assign(targets=[cst.AssignTarget(cst.Name("a"))], value=cst.Name("b"))
-  res_nested = patcher._unwrap_stmt_if_nested(assign_node, new_stmt)
+  assign_node: cst.Assign = cst.Assign(targets=[cst.AssignTarget(cst.Name("a"))], value=cst.Name("b"))
+  res_nested: Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel] = patcher._unwrap_stmt_if_nested(
+    assign_node, new_stmt
+  )
   assert isinstance(res_nested, cst.FlattenSentinel)
 
 
-def test_graph_patcher_replace_call():
+def test_graph_patcher_replace_call() -> None:
   """Test element."""
-  logical_node = MagicMock(spec=LogicalNode)
-  action = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"])
-  provenance = {"test_node": cst.Call(func=cst.Name("test"))}
-  emitter = MagicMock(spec=PythonSnippetEmitter)
+  logical_node: MagicMock = MagicMock(spec=LogicalNode)
+  action: ReplaceAction = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"])
+  provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Call(func=cst.Name("test"))}
+  emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
 
-  new_expr = cst.Name("new_test")
+  new_expr: cst.Name = cst.Name("new_test")
   emitter.emit_expression.return_value = new_expr
 
-  patcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
-  node = provenance["test_node"]
+  patcher: GraphPatcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
+  node: cst.CSTNode = provenance["test_node"]
 
-  res = patcher._handle_node(node, node)
+  res: Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel] = patcher._handle_node(node, node)
   assert res == new_expr
 
 
-def test_graph_patcher_replace_call_stmt_like():
+def test_graph_patcher_replace_call_stmt_like() -> None:
   """Test element."""
-  logical_node = MagicMock(spec=LogicalNode)
-  action = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"], output_var="y")
-  provenance = {"test_node": cst.Assign(targets=[cst.AssignTarget(cst.Name("y"))], value=cst.Name("old"))}
-  emitter = MagicMock(spec=PythonSnippetEmitter)
+  logical_node: MagicMock = MagicMock(spec=LogicalNode)
+  action: ReplaceAction = ReplaceAction(
+    node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"], output_var="y"
+  )
+  provenance: Dict[str, cst.CSTNode] = {
+    "test_node": cst.Assign(targets=[cst.AssignTarget(cst.Name("y"))], value=cst.Name("old"))
+  }
+  emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
 
-  new_stmt = cst.SimpleStatementLine(body=[cst.Assign(targets=[cst.AssignTarget(cst.Name("y"))], value=cst.Name("new"))])
+  new_stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(
+    body=[cst.Assign(targets=[cst.AssignTarget(cst.Name("y"))], value=cst.Name("new"))]
+  )
   emitter.emit_call.return_value = new_stmt
 
-  patcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
-  node = provenance["test_node"]
+  patcher: GraphPatcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
+  node: cst.CSTNode = provenance["test_node"]
 
-  res = patcher._handle_node(node, node)
+  res: Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel] = patcher._handle_node(node, node)
   assert isinstance(res, cst.FlattenSentinel)
 
 
-def test_graph_patcher_leave_hooks():
+def test_graph_patcher_leave_hooks() -> None:
   """Test element."""
-  patcher = GraphPatcher([], {}, MagicMock())
+  patcher: GraphPatcher = GraphPatcher([], {}, MagicMock())
 
   # leave_Assign
-  assign = cst.Assign(targets=[cst.AssignTarget(cst.Name("x"))], value=cst.Name("x"))
+  assign: cst.Assign = cst.Assign(targets=[cst.AssignTarget(cst.Name("x"))], value=cst.Name("x"))
   assert patcher.leave_Assign(assign, assign) == assign
 
   # leave_Expr
-  expr = cst.Expr(value=cst.Name("x"))
+  expr: cst.Expr = cst.Expr(value=cst.Name("x"))
   assert patcher.leave_Expr(expr, expr) == expr
 
   # leave_Call
-  call = cst.Call(func=cst.Name("x"))
+  call: cst.Call = cst.Call(func=cst.Name("x"))
   assert patcher.leave_Call(call, call) == call
 
   # leave_SimpleStatementLine
-  stmt = cst.SimpleStatementLine(body=[expr])
+  stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(body=[expr])
   assert patcher.leave_SimpleStatementLine(stmt, stmt) == stmt
 
-  empty_stmt = cst.SimpleStatementLine(body=[])
+  empty_stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(body=[])
   assert isinstance(patcher.leave_SimpleStatementLine(stmt, empty_stmt), cst.RemovalSentinel)

@@ -5,7 +5,7 @@ and reconstructs the `TikzGraph` representation using a formal Lark grammar.
 """
 
 import os
-from typing import List, Any, Union, TYPE_CHECKING
+from typing import List, Union, TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
   from ml_switcheroo.core.graph import LogicalGraph
@@ -26,7 +26,7 @@ from ml_switcheroo.core.tikz.nodes import (
 class TikzTransformer(Transformer[Token, Any]):
   """Transform a parsed TikZ AST into TikZ CST components."""
 
-  def start(self, children: List[Any]) -> TikzGraph:
+  def start(self, children) -> TikzGraph:
     """Proces the root start rule.
 
     Args:
@@ -85,7 +85,7 @@ class TikzTransformer(Transformer[Token, Any]):
     # Fallback if no TIKZ_ENV_BEGIN was matched properly
     return TikzGraph(children=graph_children, options=options, leading_trivia=leading, trailing_trivia=trailing)
 
-  def element(self, children: List[Any]) -> List[Any]:
+  def element(self, children):
     """Proces an element.
 
     Args:
@@ -196,7 +196,7 @@ class TikzTransformer(Transformer[Token, Any]):
     """
     return TriviaNode(content=str(token))
 
-  def node(self, children: List[Any]) -> TikzNode:
+  def node(self, children) -> TikzNode:
     """Proces a node declaration.
 
     Args:
@@ -251,7 +251,7 @@ class TikzTransformer(Transformer[Token, Any]):
       node_id=node_id, x=x, y=y, content=content, options=options, leading_trivia=leading, trailing_trivia=trailing
     )
 
-  def edge(self, children: List[Any]) -> TikzEdge:
+  def edge(self, children) -> TikzEdge:
     """Proces an edge declaration.
 
     Args:
@@ -298,7 +298,7 @@ class TikzTransformer(Transformer[Token, Any]):
       trailing_trivia=trailing,
     )
 
-  def tabular(self, children: List[Any]) -> TikzTable:
+  def tabular(self, children) -> TikzTable:
     """Proces a tabular.
 
     Args:
@@ -342,7 +342,7 @@ class TikzTransformer(Transformer[Token, Any]):
 
     return TikzTable(align=align, rows=rows, leading_trivia=leading, trailing_trivia=trailing)
 
-  def tabular_row(self, children: List[Any]) -> Tree[Token]:
+  def tabular_row(self, children) -> Tree[Token]:
     """Proces a tabular row.
 
     Args:
@@ -353,7 +353,7 @@ class TikzTransformer(Transformer[Token, Any]):
     """
     return Tree("tabular_row", children)
 
-  def kind(self, children: List[Any]) -> Tree[Token]:
+  def kind(self, children) -> Tree[Token]:
     """Proces a kind node.
 
     Args:
@@ -364,7 +364,7 @@ class TikzTransformer(Transformer[Token, Any]):
     """
     return Tree("kind", children)
 
-  def id(self, children: List[Any]) -> Tree[Token]:
+  def id(self, children) -> Tree[Token]:
     """Proces an id node.
 
     Args:
@@ -375,7 +375,7 @@ class TikzTransformer(Transformer[Token, Any]):
     """
     return Tree("id", children)
 
-  def meta(self, children: List[Any]) -> Tree[Token]:
+  def meta(self, children) -> Tree[Token]:
     """Proces a meta node.
 
     Args:
@@ -386,7 +386,7 @@ class TikzTransformer(Transformer[Token, Any]):
     """
     return Tree("meta", children)
 
-  def ignore(self, children: List[Any]) -> Tree[Token]:
+  def ignore(self, children) -> Tree[Token]:
     """Proces an ignore node.
 
     Args:
@@ -454,14 +454,13 @@ def _logical_from_tikz_graph(tikz_graph: TikzGraph) -> "LogicalGraph":
   Returns:
       The reconstructed LogicalGraph IR representing the logical dataflow.
   """
-  from typing import Dict, Any
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
 
   l_graph = LogicalGraph()
   for child in tikz_graph.children:
     if isinstance(child, TikzNode):
       kind: str = "Unknown"
-      metadata: Dict[str, Any] = {}
+      metadata = {}
       if isinstance(child.content, TikzTable):
         for row in child.content.rows:
           if not row:

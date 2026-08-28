@@ -8,7 +8,7 @@ capabilities of mathematical functions from PyTorch to JAX.
 import torch
 
 
-def compute_loss(prediction, target):
+def compute_loss(prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
   """Calculates Mean Absolute Error.
 
   Semantic pivot: torch.abs, torch.mean -> jax.numpy.abs, jax.numpy.mean.
@@ -20,6 +20,6 @@ def compute_loss(prediction, target):
   Returns:
     torch.Tensor: A scalar tensor representing the Mean Absolute Error loss.
   """
-  diff = torch.abs(prediction - target)
-  loss = torch.mean(diff)
+  diff: torch.Tensor = torch.abs(prediction - target)
+  loss: torch.Tensor = torch.mean(diff)
   return loss

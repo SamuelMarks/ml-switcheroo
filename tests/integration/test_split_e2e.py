@@ -7,8 +7,10 @@ project file hierarchies for semantics configuration and snapshots.
 """
 
 import pytest
+import typing
+from pathlib import Path
 
-LEGACY_MATH_JSON = {
+LEGACY_MATH_JSON: dict[str, typing.Any] = {
   "Abs": {
     "description": "Absolute value",
     "std_args": ["x"],
@@ -18,7 +20,7 @@ LEGACY_MATH_JSON = {
 
 
 @pytest.fixture
-def legacy_env(tmp_path):
+def legacy_env(tmp_path: Path) -> tuple[Path, Path]:
   """Provides a temporary, mock legacy environment structure for integration testing.
 
   This fixture prepares the directory structure representing the semantics and

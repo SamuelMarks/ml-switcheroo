@@ -6,39 +6,39 @@ from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
 
 @pytest.fixture
-def adapter():
+def adapter() -> PaxmlAdapter:
   """Provides a mock adapter for testing."""
   return PaxmlAdapter()
 
 
-def test_paxml_examples_structure(adapter):
+def test_paxml_examples_structure(adapter: PaxmlAdapter) -> None:
   """Verifies the behavior of Paxml examples structure."""
-  examples = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert isinstance(examples, dict)
   assert "tier1_math" in examples
   assert "tier2_neural" in examples
   assert "tier3_extras" in examples
 
 
-def test_tier1_math_validity(adapter):
+def test_tier1_math_validity(adapter: PaxmlAdapter) -> None:
   """Verifies the behavior of tier1 math validity."""
-  code = adapter.get_tiered_examples()["tier1_math"]
+  code: str = adapter.get_tiered_examples()["tier1_math"]
   ast.parse(code)
   assert "import jax.numpy as jnp" in code
 
 
-def test_tier2_neural_validity(adapter):
+def test_tier2_neural_validity(adapter: PaxmlAdapter) -> None:
   """Verifies the behavior of tier2 neural validity."""
-  code = adapter.get_tiered_examples()["tier2_neural"]
+  code: str = adapter.get_tiered_examples()["tier2_neural"]
   ast.parse(code)
   assert "class SimpleMLP(base_layer.BaseLayer):" in code
   assert "def setup(self):" in code
   assert "pl.Linear" in code
 
 
-def test_tier3_extras_validity(adapter):
+def test_tier3_extras_validity(adapter: PaxmlAdapter) -> None:
   """Verifies the behavior of tier3 extras validity."""
-  code = adapter.get_tiered_examples()["tier3_extras"]
+  code: str = adapter.get_tiered_examples()["tier3_extras"]
   ast.parse(code)
   assert "pax_fiddle.Config" in code
   assert "input_dims" in code

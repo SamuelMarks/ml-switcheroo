@@ -1,6 +1,6 @@
 """Sphinx Directive for embedding the WASM Demo.
 
-Contains the `SwitcherooDemo` # type: ignore
+Contains the `SwitcherooDemo`
 class which ties the scanning and rendering logic
 into a Docutils node.
 """
@@ -13,7 +13,7 @@ from ml_switcheroo.sphinx_ext.registry import scan_registry
 from ml_switcheroo.sphinx_ext.rendering import render_demo_html
 
 
-class SwitcherooDemo(Directive):  # type: ignore
+class SwitcherooDemo(Directive):
   """Sphinx Directive to embed the interactive WASM demo.
 
   Usage:

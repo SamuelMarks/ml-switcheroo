@@ -24,10 +24,7 @@ Transformations:
     - Strips the call completely (No-Op), as functional gradients don't accumulate state.
 """
 
-from typing import Any
-
 import libcst as cst
-from typing import Union
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -46,7 +43,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
+    node = cst.Attribute(value=node, attr=cst.Name(part))
   return node
 
 
@@ -80,7 +77,7 @@ def transform_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 
 @register_hook("optimizer_step")
-def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel[Any]]:
+def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """Transform to rewrite ``optimizer.step()``.
 
   Since `step()` logic implies side-effects on the optimizer state and parameters,
@@ -103,7 +100,7 @@ def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call
     f"Imperative `{_get_func_name(node)}` cannot be automatically converted to functional update. "
     "Manual intervention required (e.g. `updates, state = opt.update(grads, state)`)."
   )
-  return EscapeHatch.mark_failure(node, reason)  # type: ignore
+  return EscapeHatch.mark_failure(node, reason)
 
 
 @register_hook("optimizer_zero_grad")

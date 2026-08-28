@@ -5,30 +5,32 @@ to perform CST string/node conversions, resolve API paths to FQNs, map APIs
 to target frameworks, inject imports, and handle version check constraints.
 """
 
-from typing import Any
-
-from typing import Optional, Union, List, Dict
+from typing import Optional, Union, List, Any
 import libcst as cst
 import re
 from ml_switcheroo.core.tracer import get_tracer
 
 
 class ApiHelpersMixin:
+  """Docstring."""
+
+  # Added for type checking
+  context: Any
+  config: Any
+  semantics: Any
+  source_fw: Any
+  target_fw: Any
+  strict_mode: Any
+
+  def _report_failure(self, msg: str) -> None:
+    """Dummy method."""
+    ...
+
   """Mixin providing CST string/node conversions and alias resolutions.
 
   This class contains utility methods for traversing, querying, and transforming
   CST nodes representing API calls, variables, modules, and signatures.
   """
-
-  # Mypy duck typing
-  semantics: Any
-  target_fw: Any
-  source_fw: Any
-  strict_mode: Any
-  context: Any
-  config: Any
-  _report_failure: Any
-  _report_warning: Any
 
   def _cst_to_string(self, node: cst.BaseExpression) -> Optional[str]:
     """Flatten CST nodes (Name/Attribute) to string.
@@ -87,7 +89,7 @@ class ApiHelpersMixin:
     parts = api_path.split(".")
     node = cst.Name(parts[0])
     for part in parts[1:]:
-      node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
+      node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
 
   def _create_dotted_name(self, name_str: str) -> Union[cst.Name, cst.Attribute]:
@@ -100,7 +102,7 @@ class ApiHelpersMixin:
         A Union of cst.Name or cst.Attribute representing the dotted name.
     """
     # Type ignored because _create_name_node returns BaseExpression but plugins expect union subset
-    return self._create_name_node(name_str)  # type: ignore
+    return self._create_name_node(name_str)
 
   def _is_module_alias(self, node: cst.CSTNode) -> bool:
     """Determine if a node is a module reference (not a variable).
@@ -111,7 +113,7 @@ class ApiHelpersMixin:
     Returns:
         True if the node is identified as a module alias, False otherwise.
     """
-    name = self._cst_to_string(node)  # type: ignore
+    name = self._cst_to_string(node)
     if not name:
       return False
 
@@ -148,7 +150,7 @@ class ApiHelpersMixin:
     Returns:
         A new function definition node with the preamble statements injected.
     """
-    new_stmts = []  # type: ignore
+    new_stmts = []
     for code in stmts_code:
       try:
         mod = cst.parse_module(code)
@@ -196,7 +198,7 @@ class ApiHelpersMixin:
       return node.with_changes(body=cst.IndentedBlock(body=new_stmts))
     return node
 
-  def _get_mapping(self, name: str, silent: bool = False) -> Optional[Dict[str, Any]]:
+  def _get_mapping(self, name: str, silent: bool = False):
     """Query the Semantics Manager for the target implementation of the API.
 
     Args:
@@ -248,7 +250,7 @@ class ApiHelpersMixin:
       return target_impl
     return None
 
-  def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
+  def _handle_variant_imports(self, variant) -> None:
     """Inject required imports defined in the variant.
 
     Args:
@@ -335,7 +337,7 @@ class ApiHelpersMixin:
     if not current:
       return None
 
-    def parse_v(v_str: Any) -> Any:
+    def parse_v(v_str):
       """Parse a version string into a tuple of integers.
 
       Args:

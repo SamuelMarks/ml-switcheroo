@@ -18,56 +18,56 @@ class CustomRdnaNode(RdnaNode):
     return "CustomNode"
 
 
-def test_rdna_printer_emit_label():
+def test_rdna_printer_emit_label() -> None:
   """Verifies that Label nodes are printed flush-left."""
   node = Label(name="L_1")
   printer = RdnaPrinter()
-  output = printer.emit([node])
+  output: str = printer.emit([node])
   assert output == "L_1:\n"
 
 
-def test_rdna_printer_emit_instruction():
+def test_rdna_printer_emit_instruction() -> None:
   """Verifies that Instruction nodes are printed indented."""
   node = Instruction(opcode="v_add_f32")
   printer = RdnaPrinter()
-  output = printer.emit([node])
+  output: str = printer.emit([node])
   assert output == "    v_add_f32\n"
 
 
-def test_rdna_printer_emit_directive():
+def test_rdna_printer_emit_directive() -> None:
   """Verifies that Directive nodes are printed indented."""
   node = Directive(name="text", params=[])
   printer = RdnaPrinter()
-  output = printer.emit([node])
+  output: str = printer.emit([node])
   assert output == "    .text\n"
 
 
-def test_rdna_printer_emit_comment():
+def test_rdna_printer_emit_comment() -> None:
   """Verifies that Comment nodes are printed indented."""
   node = Comment(text="This is a test")
   printer = RdnaPrinter()
-  output = printer.emit([node])
+  output: str = printer.emit([node])
   assert output == "    ; This is a test\n"
 
 
-def test_rdna_printer_emit_fallback():
+def test_rdna_printer_emit_fallback() -> None:
   """Verifies that unhandled node types fallback to indented str(node)."""
   node = CustomRdnaNode()
   printer = RdnaPrinter()
-  output = printer.emit([node])
+  output: str = printer.emit([node])
   assert output == "    CustomNode\n"
 
 
-def test_rdna_printer_emit_multiple():
+def test_rdna_printer_emit_multiple() -> None:
   """Verifies that multiple nodes are joined correctly."""
-  nodes = [Directive(name="text", params=[]), Label(name="L_1"), Instruction(opcode="v_add_f32")]
+  nodes: list[RdnaNode] = [Directive(name="text", params=[]), Label(name="L_1"), Instruction(opcode="v_add_f32")]
   printer = RdnaPrinter()
-  output = printer.emit(nodes)
-  expected = "    .text\nL_1:\n    v_add_f32\n"
+  output: str = printer.emit(nodes)
+  expected: str = "    .text\nL_1:\n    v_add_f32\n"
   assert output == expected
 
 
-def test_rdna_printer_all_nodes():
+def test_rdna_printer_all_nodes() -> None:
   """Docstring."""
   from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
   from ml_switcheroo.core.compiler.frontends.rdna.cst import (
@@ -79,14 +79,14 @@ def test_rdna_printer_all_nodes():
   )
 
   printer = RdnaPrinter()
-  nodes = [
+  nodes: list[RdnaNode] = [
     RdnaLabel(name="L1"),
     RdnaInstruction(opcode="v_add_f32", operands=[c_SGPR(0)]),
     RdnaDirective(name=".global", params=["main"]),
     RdnaComment(text="; test"),
     c_SGPR(0),  # test fallback
   ]
-  txt = printer.emit(nodes)
+  txt: str = printer.emit(nodes)
   assert "L1:" in txt
   assert "v_add_f32 s0" in txt
   assert ".global main" in txt

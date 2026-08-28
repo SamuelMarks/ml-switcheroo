@@ -4,7 +4,7 @@ This module provides the WasmBackend class, which compiles a LogicalGraph repres
 computational steps into its WebAssembly Text (WAT) equivalent.
 """
 
-from typing import Any, Optional
+from typing import Any
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.wasm.cst import (
@@ -27,7 +27,7 @@ class WasmBackend(CompilerBackend):
   handling parameters, local variables, and outputs.
   """
 
-  def __init__(self, semantics: Optional[Any] = None) -> None:
+  def __init__(self, semantics: Any = None) -> None:
     """Initialize the WebAssembly backend.
 
     Args:

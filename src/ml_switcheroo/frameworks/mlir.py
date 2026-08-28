@@ -3,7 +3,10 @@
 Simplified to only provide Metadata.
 """
 
-from typing import Union, Any, Dict, List, Optional, Tuple
+import typing
+
+
+from typing import Union, Dict, List, Optional, Tuple
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -257,7 +260,7 @@ class MlirAdapter(FrameworkAdapter):
     """
     return "# Weights saving not supported in MLIR adapter"
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply a framework wiring snapshot.
 
     Args:
@@ -276,7 +279,9 @@ class MlirAdapter(FrameworkAdapter):
     """
     return None
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert input data representation to MLIR compatible format.
 
     Args:

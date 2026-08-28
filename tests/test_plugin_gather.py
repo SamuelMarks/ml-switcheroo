@@ -7,41 +7,42 @@ from ml_switcheroo.core.hooks import HookContext
 
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
-def test_transform_gather_no_api(mock_is_framework):
+def test_transform_gather_no_api(mock_is_framework: MagicMock) -> None:
   """Docstring."""
-  node = cst.Call(func=cst.Name("gather"))
-  ctx = MagicMock(spec=HookContext)
+  node: cst.Call = cst.Call(func=cst.Name("gather"))
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
 
-  result = transform_gather(node, ctx)
+  result: cst.CSTNode = transform_gather(node, ctx)
   assert result is node
 
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
-def test_transform_gather_method(mock_is_framework):
+def test_transform_gather_method(mock_is_framework: MagicMock) -> None:
   """Docstring."""
   mock_is_framework.return_value = False
-  node = cst.Call(
+  node: cst.Call = cst.Call(
     func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("gather")),
     args=[
       cst.Arg(value=cst.Integer("1")),
       cst.Arg(value=cst.Name("idx")),
     ],
   )
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "take_along_axis"
 
-  result = transform_gather(node, ctx)
+  result: cst.CSTNode = transform_gather(node, ctx)
+  assert isinstance(result, cst.Call)
   assert len(result.args) == 3
-  assert result.args[0].value.value == "x"
-  assert result.args[1].value.value == "idx"
-  assert result.args[2].value.value == "1"
+  assert getattr(result.args[0].value, "value", None) == "x"
+  assert getattr(result.args[1].value, "value", None) == "idx"
+  assert getattr(result.args[2].value, "value", None) == "1"
 
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
-def test_transform_gather_function(mock_is_framework):
+def test_transform_gather_function(mock_is_framework: MagicMock) -> None:
   """Docstring."""
-  node = cst.Call(
+  node: cst.Call = cst.Call(
     func=cst.Name("gather"),
     args=[
       cst.Arg(value=cst.Name("x")),
@@ -49,20 +50,21 @@ def test_transform_gather_function(mock_is_framework):
       cst.Arg(value=cst.Name("idx")),
     ],
   )
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "take_along_axis"
 
-  result = transform_gather(node, ctx)
+  result: cst.CSTNode = transform_gather(node, ctx)
+  assert isinstance(result, cst.Call)
   assert len(result.args) == 3
-  assert result.args[0].value.value == "x"
-  assert result.args[1].value.value == "idx"
-  assert result.args[2].value.value == "1"
+  assert getattr(result.args[0].value, "value", None) == "x"
+  assert getattr(result.args[1].value, "value", None) == "idx"
+  assert getattr(result.args[2].value, "value", None) == "1"
 
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
-def test_transform_gather_keywords(mock_is_framework):
+def test_transform_gather_keywords(mock_is_framework: MagicMock) -> None:
   """Docstring."""
-  node = cst.Call(
+  node: cst.Call = cst.Call(
     func=cst.Name("gather"),
     args=[
       cst.Arg(value=cst.Name("x")),
@@ -70,27 +72,28 @@ def test_transform_gather_keywords(mock_is_framework):
       cst.Arg(keyword=cst.Name("dim"), value=cst.Integer("1")),
     ],
   )
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "take_along_axis"
 
-  result = transform_gather(node, ctx)
+  result: cst.CSTNode = transform_gather(node, ctx)
+  assert isinstance(result, cst.Call)
   assert len(result.args) == 3
-  assert result.args[0].value.value == "x"
-  assert result.args[1].value.value == "idx"
-  assert result.args[2].value.value == "1"
+  assert getattr(result.args[0].value, "value", None) == "x"
+  assert getattr(result.args[1].value, "value", None) == "idx"
+  assert getattr(result.args[2].value, "value", None) == "1"
 
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
-def test_transform_gather_missing_args(mock_is_framework):
+def test_transform_gather_missing_args(mock_is_framework: MagicMock) -> None:
   """Docstring."""
-  node = cst.Call(
+  node: cst.Call = cst.Call(
     func=cst.Name("gather"),
     args=[
       cst.Arg(value=cst.Name("x")),
     ],
   )
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "take_along_axis"
 
-  result = transform_gather(node, ctx)
+  result: cst.CSTNode = transform_gather(node, ctx)
   assert result is node

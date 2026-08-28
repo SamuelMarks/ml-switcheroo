@@ -1,9 +1,10 @@
 """Test suite for the Tensorflow module."""
 
+import typing
 import tensorflow as tf
 
 
-def split_tensor(x: tf.Tensor, split_size: int, axis: int = -1):
+def split_tensor(x: tf.Tensor, split_size: int, axis: int = -1) -> typing.Any:
   """Splits tensor."""
   num_splits = x.shape[axis] // split_size
   return tf.split(x, num_splits, axis=axis)

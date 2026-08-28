@@ -1,39 +1,41 @@
 """Test suite for the Utils Coverage module."""
 
+from typing import Dict, Any, List
 
-def test_code_extractor_error():
+
+def test_code_extractor_error() -> None:
   """Verifies the behavior of code extractor correctly handling an error."""
   from ml_switcheroo.utils.code_extractor import CodeExtractor
   import pytest
 
-  ce = CodeExtractor()
+  ce: CodeExtractor = CodeExtractor()
   with __import__("unittest.mock").mock.patch("inspect.getsource", side_effect=OSError("fail")):
     with pytest.raises(OSError):
       ce.extract_class(CodeExtractor)
 
 
-def test_code_extractor_normalize_harness_imports():
+def test_code_extractor_normalize_harness_imports() -> None:
   """Verifies the behavior of code extractor normalize harness imports."""
   from ml_switcheroo.utils.code_extractor import CodeExtractor
 
-  ce = CodeExtractor()
-  res = ce.normalize_harness_imports("pass", ["numpy", "torch.nn"])
+  ce: CodeExtractor = CodeExtractor()
+  res: List[str] = ce.normalize_harness_imports("pass", ["numpy", "torch.nn"])
   assert "import torch.nn" in res
 
 
-def test_doc_context_branches():
+def test_doc_context_branches() -> None:
   """Verifies the behavior of documentation context branches."""
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
     """Dummy S M class for testing purposes."""
 
-    def get_all_operations(self):
+    def get_all_operations(self) -> Dict[str, Any]:
       """Mock implementation of get all operations."""
       return {}
 
-  b = DocContextBuilder(DummySM())
-  res = b.build(
+  b: DocContextBuilder = DocContextBuilder(DummySM())
+  res: Dict[str, Any] = b.build(
     "foo", {"variants": {"jax": None, "torch": {"transformation_type": "inline_lambda"}, "mlx": {"something": "else"}}}
   )
   assert len(res["variants"]) == 2
@@ -44,17 +46,17 @@ def test_doc_context_branches():
       assert v["type"] == "Custom / Partial"
 
 
-def test_code_extractor_error_more():
+def test_code_extractor_error_more() -> None:
   """Verifies the behavior of code extractor correctly handling an error more."""
   from ml_switcheroo.utils.code_extractor import CodeExtractor
   import pytest
 
-  ce = CodeExtractor()
+  ce: CodeExtractor = CodeExtractor()
   with pytest.raises(TypeError):
     ce.extract_class(lambda: None)
 
 
-def test_doc_context_more():
+def test_doc_context_more() -> None:
   """Verifies the behavior of documentation context more."""
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
@@ -63,8 +65,8 @@ def test_doc_context_more():
 
     pass
 
-  b = DocContextBuilder(DummySM())
-  res = b.build(
+  b: DocContextBuilder = DocContextBuilder(DummySM())
+  res: Dict[str, Any] = b.build(
     "foo",
     {
       "std_args": ["a", ("b", "int"), {"name": "c", "type": "float", "default": 1.0}],
@@ -80,7 +82,7 @@ def test_doc_context_more():
   assert "c: float = 1.0" in res["args"][2]
 
 
-def test_doc_context_more_variants():
+def test_doc_context_more_variants() -> None:
   """Verifies the behavior of documentation context more variants."""
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
@@ -89,8 +91,8 @@ def test_doc_context_more_variants():
 
     pass
 
-  b = DocContextBuilder(DummySM())
-  res = b.build(
+  b: DocContextBuilder = DocContextBuilder(DummySM())
+  res: Dict[str, Any] = b.build(
     "foo", {"variants": {"a": {"macro_template": "foo"}, "b": {"transformation_type": "infix", "operator": "+"}}}
   )
   for v in res["variants"]:

@@ -1,19 +1,19 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
-from praxis.layers import normalizations
-import jax.numpy as jnp
+import typing
+from praxis import base_layer  # type: ignore
+from praxis.layers import normalizations  # type: ignore
 
 
-class LayerNormModel(base_layer.BaseLayer):
+class LayerNormModel(base_layer.BaseLayer):  # type: ignore
   """Test suite for the Layer Norm Model component."""
 
   normalized_shape: int = 0
 
-  def setup(self):
+  def setup(self) -> None:
     """Helper to setup."""
     self.create_child("ln", normalizations.LayerNorm.HParams(dim=self.normalized_shape))
 
-  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
+  def __call__(self, x: typing.Any) -> typing.Any:
     """Executes the callable instance."""
     return self.ln(x)

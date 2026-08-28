@@ -6,7 +6,10 @@ representation of the HTML Grid DSL, providing standard metadata, traits,
 and parsing capabilities without executing or compiling code.
 """
 
-from typing import Union, Dict, List, Tuple, Any, Optional
+import typing
+
+
+from typing import Union, Dict, List, Tuple, Optional
 from ml_switcheroo.frameworks.base import register_framework, FrameworkAdapter, StandardMap, ImportConfig, InitMode
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 from ml_switcheroo.core.dsl import OperationDef
@@ -36,7 +39,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     snapshot data dictionary.
     """
     self._mode = InitMode.GHOST
-    self._snapshot_data: Dict[str, Any] = {}
+    self._snapshot_data = {}
 
   def create_parser(self, code: str) -> HtmlParser:
     """Create for creating an HTML Parser used by Ingestion.
@@ -178,7 +181,9 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     return {}
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert external data/tensors into the framework's native format.
 
     Args:
@@ -284,7 +289,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     return "# Weights not supported in HTML mode"
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply snapshot parameter wiring to resolve framework structures.
 
     Args:

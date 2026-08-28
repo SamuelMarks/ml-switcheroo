@@ -4,17 +4,17 @@ import libcst as cst
 from ml_switcheroo.core.graph import GraphExtractor
 
 
-def get_extractor(code):
+def get_extractor(code: str) -> GraphExtractor:
   """Docstring."""
-  tree = cst.parse_module(code)
-  extractor = GraphExtractor()
+  tree: cst.Module = cst.parse_module(code)
+  extractor: GraphExtractor = GraphExtractor()
   tree.visit(extractor)
   return extractor
 
 
-def test_other_functions():
+def test_other_functions() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 class Net:
     def __init__(self):
         self.conv = nn.Conv2d(1)
@@ -23,33 +23,33 @@ class Net:
         1 + 1
         return y
 """
-  ex = get_extractor(code)
+  ex: GraphExtractor = get_extractor(code)
   assert not ex._in_forward
   assert not ex._in_init
 
 
-def test_expr_not_call():
+def test_expr_not_call() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 x = 1
 1 + 1
 """
-  ex = get_extractor(code)
+  ex: GraphExtractor = get_extractor(code)
   assert len(ex.graph.nodes) == 1
 
 
-def test_unsupported_return():
+def test_unsupported_return() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 def forward():
     return
 """
   get_extractor(code)
 
 
-def test_function_names():
+def test_function_names() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 class Net:
     def setup(self):
         self.layer = op()
@@ -59,10 +59,10 @@ class Net:
   get_extractor(code)
 
 
-def test_other_forward_names():
+def test_other_forward_names() -> None:
   """Docstring."""
   for name in ["kernel", "f", "__call__"]:
-    code = f"""
+    code: str = f"""
 class Net:
     def {name}(self, x):
         return x
@@ -70,9 +70,9 @@ class Net:
     get_extractor(code)
 
 
-def test_layer_def_edge_cases():
+def test_layer_def_edge_cases() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 class Net:
     def __init__(self):
         self.layer1 = nn.Conv2d(1, bias=False)
@@ -84,9 +84,9 @@ class Net:
   get_extractor(code)
 
 
-def test_data_flow_edge_cases():
+def test_data_flow_edge_cases() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 a = 1.0
 b = a
 (c, d) = (1, 2)
@@ -98,9 +98,9 @@ def forward():
   get_extractor(code)
 
 
-def test_returns():
+def test_returns() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 class Net:
     def forward(self, x):
         y = op(x)
@@ -120,37 +120,37 @@ class Net:
   get_extractor(code)
 
 
-def test_module_level_call():
+def test_module_level_call() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 F.relu(ext_var, kw=True)
 """
   get_extractor(code)
 
 
-def test_resolve_layer_or_func_name_context():
+def test_resolve_layer_or_func_name_context() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 def forward():
     F.relu(1)
 """
-  ex = get_extractor(code)
-  call_node = cst.parse_expression("F.relu(x)")
+  ex: GraphExtractor = get_extractor(code)
+  call_node: cst.BaseExpression = cst.parse_expression("F.relu(x)")
   # Context None
-  ex._resolve_layer_or_func_name(call_node.func, context_node=None)
+  ex._resolve_layer_or_func_name(getattr(call_node, "func", None), context_node=None)
   # Context not call, expr, assign (hit 322 -> 325 and 325 -> 334)
-  ex._resolve_layer_or_func_name(call_node.func, context_node=cst.Pass())
+  ex._resolve_layer_or_func_name(getattr(call_node, "func", None), context_node=cst.Pass())
 
 
-def test_empty_finalize():
+def test_empty_finalize() -> None:
   """Docstring."""
-  ex = get_extractor("")
+  ex: GraphExtractor = get_extractor("")
   assert len(ex.graph.nodes) == 0
 
 
-def test_implicit_external_input():
+def test_implicit_external_input() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 x = 1
 y = op(x, z)
 w = op(z)
@@ -169,9 +169,9 @@ v = op(z)
   get_extractor(code)
 
 
-def test_same_input_twice():
+def test_same_input_twice() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 class Net:
     def forward(self, x):
         pass
@@ -181,26 +181,26 @@ class Net:
   get_extractor(code)
 
 
-def test_complex_call():
+def test_complex_call() -> None:
   """Docstring."""
-  code = """
+  code: str = """
 def forward():
     (a[0])() # hits layer_name is None in analyze_call_expression
 """
   get_extractor(code)
 
 
-def test_resolve_layer_none_context():
+def test_resolve_layer_none_context() -> None:
   """Docstring."""
   from ml_switcheroo.core.graph import GraphExtractor
 
-  ex = GraphExtractor()
-  name = cst.Name("relu")
+  ex: GraphExtractor = GraphExtractor()
+  name: cst.Name = cst.Name("relu")
   # This will call _resolve_layer_or_func_name with context_node=None
-  res = ex._resolve_layer_or_func_name(name, None)
+  res: str = ex._resolve_layer_or_func_name(name, None)
   assert res == "func_relu"
 
   # also cover when context_node is some random node like cst.Pass()
-  name2 = cst.Name("sigmoid")
-  res2 = ex._resolve_layer_or_func_name(name2, cst.Pass())
+  name2: cst.Name = cst.Name("sigmoid")
+  res2: str = ex._resolve_layer_or_func_name(name2, cst.Pass())
   assert res2 == "func_sigmoid"

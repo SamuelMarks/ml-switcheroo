@@ -13,8 +13,9 @@ The plugin consists of two cooperating hooks:
 State is tracked via a metadata dictionary in `HookContext` keyed by the object name.
 """
 
-from typing import Dict, Optional, Any
+from typing import Optional
 import libcst as cst
+from typing import cast
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
@@ -65,7 +66,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
       The modified Call node with injected arguments, or the original if no state found.
 
   """
-  store = ctx.metadata.get(_PLUGIN_KEY, {})
+  store = cast(dict, ctx.metadata.get(_PLUGIN_KEY, {}))
   if not store:
     return node
 
@@ -88,7 +89,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
   flags = None
   for key in candidate_keys:
     if key in store:
-      flags = store[key]
+      flags = cast(dict, store[key])
       break
 
   if not flags:
@@ -149,7 +150,7 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     return node
 
   # 2. Determine State Value
-  state_updates: Dict[str, Any] = {}
+  state_updates = {}
 
   if method_name == "eval":
     state_updates["training"] = cst.Name("False")
@@ -161,11 +162,11 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
       # Simple heuristic: grab first arg.
       # If it's a literal 'False' or 'True', we use it.
       # For variables, we just passthrough the variable name node.
-      val = node.args[0].value  # type: ignore
+      val = node.args[0].value
     state_updates["training"] = val
 
   # 3. persist State in Context
-  store = ctx.metadata.setdefault(_PLUGIN_KEY, {})
+  store = cast(dict, ctx.metadata.setdefault(_PLUGIN_KEY, {}))
   if obj_name not in store:
     store[obj_name] = {}
 

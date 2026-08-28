@@ -7,11 +7,9 @@ This module resolves default Source and Target frameworks by querying the
 to the specific libraries installed.
 """
 
-from typing import Any
-
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Type, TypeVar
+from typing import Dict, List, Optional, Tuple, Type, TypeVar, Any
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
@@ -247,7 +245,7 @@ class RuntimeConfig(BaseModel):
     intermediate: Optional[str] = None,
     enable_graph_optimization: Optional[bool] = None,
     enable_sharding: Optional[bool] = None,
-    plugin_settings: Optional[Dict[str, Any]] = None,
+    plugin_settings=None,
     validation_report: Optional[Path] = None,
     search_path: Optional[Path] = None,
   ) -> "RuntimeConfig":

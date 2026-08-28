@@ -5,22 +5,23 @@ from ml_switcheroo.core.rewriter.normalization_utils import (
   convert_value_to_cst,
   normalize_arguments,
 )
+from typing import Dict, Any
 
 
-def test_convert_value_negative_int():
+def test_convert_value_negative_int() -> None:
   """Test element."""
   # Covers line 111
-  node = convert_value_to_cst(-42)
+  node: cst.CSTNode = convert_value_to_cst(-42)
   assert isinstance(node, cst.UnaryOperation)
 
 
-def test_normalize_arguments_various():
+def test_normalize_arguments_various() -> None:
   """Test element."""
   # Setup standard call
-  original_node = cst.parse_expression("obj.func(1, 2, kw=3, bad=4)")
-  updated_node = original_node
+  original_node: cst.Call = getattr(getattr(cst.parse_statement("obj.func(1, 2, kw=3, bad=4)"), "body")[0], "value")
+  updated_node: cst.Call = original_node
 
-  op_details = {
+  op_details: Dict[str, Any] = {
     "std_args": [
       {"name": ""},  # Empty name, covers 164->161
       {"name": "x", "is_variadic": False},  # Covers 166->168
@@ -31,26 +32,26 @@ def test_normalize_arguments_various():
     "variants": {"source_fw": {"args": {"kw": "z"}}},
   }
 
-  target_impl = {
+  target_impl: Dict[str, Any] = {
     "args": {"y": None},  # Covers 304
     "pack_to_tuple": "packed_v",
     "pack_as": "List",
   }
 
-  def is_module_alias_fn(node):
+  def is_module_alias_fn(node: Any) -> bool:
     return True  # Covers 196
 
   # Covers 196 (is_module_alias_fn returns True, so is_method_call = False)
   normalize_arguments(original_node, updated_node, op_details, target_impl, "source_fw", is_module_alias_fn)
 
 
-def test_normalize_arguments_packing():
+def test_normalize_arguments_packing() -> None:
   """Test element."""
   # covers 203->202, 226, 230-231, 248-265, 279-291, 297-298, 313-316, 324-329, 345-346, 380->383
-  original_node = cst.parse_expression("func(1, 2, 3, v1=4, v2='val')")
-  updated_node = cst.parse_expression("func(1, 2, 3, 4)")
+  original_node: cst.Call = getattr(getattr(cst.parse_statement("func(1, 2, 3, v1=4, v2='val')"), "body")[0], "value")
+  updated_node: cst.Call = getattr(getattr(cst.parse_statement("func(1, 2, 3, 4)"), "body")[0], "value")
 
-  op_details = {
+  op_details: Dict[str, Any] = {
     "std_args": [
       {"name": "a"},
       {"name": "v", "is_variadic": True},
@@ -58,7 +59,7 @@ def test_normalize_arguments_packing():
     ]
   }
 
-  target_impl = {
+  target_impl: Dict[str, Any] = {
     "pack_to_tuple": "v_packed",
     "pack_as": "Tuple",
     "arg_values": {
@@ -73,7 +74,7 @@ def test_normalize_arguments_packing():
   normalize_arguments(original_node, updated_node, op_details, target_impl, "source_fw", lambda x: False)
 
 
-def test_normalize_arguments_missing_branches():
+def test_normalize_arguments_missing_branches() -> None:
   """Test element."""
   # 203->202: is_method_call with positional args
   # 260: pack_as="Tuple" with exactly 1 element
@@ -81,10 +82,10 @@ def test_normalize_arguments_missing_branches():
   # 329: target_val_map with non-string value
   # 380->383: new_args_list[-1].comma == MaybeSentinel.DEFAULT
 
-  original_node = cst.parse_expression("obj.func(1)")
-  updated_node = cst.parse_expression("func(1)")
+  original_node: cst.Call = getattr(getattr(cst.parse_statement("obj.func(1)"), "body")[0], "value")
+  updated_node: cst.Call = getattr(getattr(cst.parse_statement("func(1)"), "body")[0], "value")
 
-  op_details = {
+  op_details: Dict[str, Any] = {
     "std_args": [
       {"name": "first"},
       {"name": "v", "is_variadic": True},
@@ -92,7 +93,7 @@ def test_normalize_arguments_missing_branches():
     ]
   }
 
-  target_impl = {
+  target_impl: Dict[str, Any] = {
     "pack_to_tuple": "v_packed",
     "pack_as": "Tuple",  # covers 260
     "arg_values": {
@@ -106,15 +107,15 @@ def test_normalize_arguments_missing_branches():
   normalize_arguments(original_node, updated_node, op_details, target_impl, "source_fw", lambda x: False)
 
 
-def test_normalize_arguments_empty_list_injection():
+def test_normalize_arguments_empty_list_injection() -> None:
   """Test element."""
   # Covers 380->383 where len(new_args_list) == 0
-  original_node = cst.parse_expression("func()")
-  updated_node = cst.parse_expression("func()")
+  original_node: cst.Call = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
+  updated_node: cst.Call = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
 
-  op_details = {"std_args": []}
+  op_details: Dict[str, Any] = {"std_args": []}
 
-  target_impl = {
+  target_impl: Dict[str, Any] = {
     "inject_args": {
       "inj1": "55",
     }

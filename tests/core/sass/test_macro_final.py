@@ -10,22 +10,23 @@ from ml_switcheroo.core.compiler.backends.sass.macros import (
 )
 from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction
 
 
 def test_sass_macro_final() -> None:
   """Verifies generic macros."""
   allocator = RegisterAllocator()
-  assert len(expand_generic_norm(allocator, "n1", {})) > 2
-  assert len(expand_generic_activation(allocator, "a1", {})) > 2
-  assert len(expand_generic_linalg(allocator, "l1", {})) > 2
-  assert len(expand_generic_reduction(allocator, "r1", {})) > 2
-  assert len(expand_generic_loss(allocator, "ls1", {})) > 2
-  assert len(expand_generic_dropout(allocator, "d1", {})) > 2
+  assert len(expand_generic_norm(allocator, "n1", {})) > 2  # type: ignore
+  assert len(expand_generic_activation(allocator, "a1", {})) > 2  # type: ignore
+  assert len(expand_generic_linalg(allocator, "l1", {})) > 2  # type: ignore
+  assert len(expand_generic_reduction(allocator, "r1", {})) > 2  # type: ignore
+  assert len(expand_generic_loss(allocator, "ls1", {})) > 2  # type: ignore
+  assert len(expand_generic_dropout(allocator, "d1", {})) > 2  # type: ignore
 
 
-def test_sass_analyzer_final():
+def test_sass_analyzer_final() -> None:
   """Verifies analyzer."""
-  instructions = []
+  instructions: list[SassInstruction] = []
   assert len(SassAnalyzer.analyze_block("BatchNorm1d", instructions)) == 0
   assert len(SassAnalyzer.analyze_block("Softmax", instructions)) == 0
   assert len(SassAnalyzer.analyze_block("BMM", instructions)) == 0

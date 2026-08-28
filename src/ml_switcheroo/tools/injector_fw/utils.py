@@ -4,7 +4,10 @@ This module provides helper functions to convert Python runtime objects (diction
 lists, primitives) into LibCST nodes, as well as utilities for inspecting import definitions.
 """
 
-from typing import Any, Union
+import typing
+
+
+from typing import Union
 import json
 import libcst as cst
 
@@ -22,7 +25,7 @@ def get_import_root(node: Union[cst.Name, cst.Attribute]) -> str:
   if isinstance(node, cst.Name):
     return node.value
   if isinstance(node, cst.Attribute):
-    return get_import_root(node.value)  # type: ignore
+    return get_import_root(node.value)
   return ""
 
 
@@ -64,7 +67,7 @@ def is_future_import(node: cst.CSTNode) -> bool:
   return False
 
 
-def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
+def convert_to_cst_literal(val: typing.Any) -> cst.BaseExpression:
   """Recursively converts a python primitive or container to a CST node.
 
   Robustly handles strings using standard JSON encoding to prevent syntax errors
@@ -101,7 +104,7 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
       k_node = convert_to_cst_literal(k)
       v_node = convert_to_cst_literal(v)
       elements.append(
-        cst.DictElement(  # type: ignore
+        cst.DictElement(
           key=k_node,
           value=v_node,
           comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
@@ -112,7 +115,7 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
       last = elements[-1]
       elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
-    return cst.Dict(elements=elements)  # type: ignore
+    return cst.Dict(elements=elements)
 
   # 3. Primitives
   if isinstance(val, bool):

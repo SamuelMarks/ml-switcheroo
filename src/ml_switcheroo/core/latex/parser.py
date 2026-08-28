@@ -3,7 +3,10 @@
 Parses MIDL LaTeX macros into a LibCST Module representing a Python AST.
 """
 
-from typing import Any, List, Dict, Optional, Union
+from typing import Any
+
+
+from typing import List, Dict, Optional, Union
 import libcst as cst
 from ml_switcheroo.core.latex.nodes import (
   MemoryNode,
@@ -42,7 +45,7 @@ class LatexParser:
     """
     model_name = "GeneratedModel"
     memory_nodes = []
-    compute_nodes: list[Any] = []
+    compute_nodes: Any = []
     input_node = None
     return_node = None
 

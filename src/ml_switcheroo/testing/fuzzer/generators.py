@@ -6,12 +6,18 @@ and dummy callables respecting specified constraints (min, max, dtype).
 Feature Update: Added broadcasting logic generator.
 """
 
+from typing import Any
+
+
+import typing
+
+
 import random
-from typing import Any, Dict, Tuple, Optional
+from typing import Tuple, Optional
 import numpy as np
 
 
-def generate_scalar_int(constraints: Dict[str, Any]) -> int:
+def generate_scalar_int(constraints: dict) -> int:
   """Generate a random integer within constrained bounds.
 
   Args:
@@ -27,7 +33,7 @@ def generate_scalar_int(constraints: Dict[str, Any]) -> int:
   return random.randint(min_v, max_v)
 
 
-def generate_scalar_float(constraints: Dict[str, Any]) -> float:
+def generate_scalar_float(constraints: dict) -> float:
   """Generate a random float within constrained bounds.
 
   Args:
@@ -49,7 +55,7 @@ def generate_scalar_float(constraints: Dict[str, Any]) -> float:
   return val
 
 
-def generate_array(type_lbl: str, shape: Tuple[int, ...], constraints: Dict[str, Any]) -> Any:
+def generate_array(type_lbl: str, shape: typing.Tuple[int, ...], constraints: dict) -> Any:
   """Generate a random NumPy array bounded by constraints.
 
   Args:
@@ -99,13 +105,13 @@ def generate_array(type_lbl: str, shape: Tuple[int, ...], constraints: Dict[str,
     return arr.astype(np.int32)
 
   # Float default
-  arr = np.random.randn(*shape)  # type: ignore
+  arr = np.random.randn(*shape)
 
   # Constraint Clipping logic
   if min_val is not None or max_val is not None:
     if min_val is not None and max_val is not None:
       # Uniform within bounds
-      arr = np.random.uniform(min_val, max_val, size=shape)  # type: ignore
+      arr = np.random.uniform(min_val, max_val, size=shape)
     else:
       # Clip standard normal
       safe_min = float(min_val) if min_val is not None else -np.inf
@@ -176,7 +182,7 @@ def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tupl
   return tuple(new_shape)
 
 
-def generate_fake_callable(constraints: Dict[str, Any] = None) -> Any:  # type: ignore
+def generate_fake_callable(constraints: typing.Optional[dict] = None) -> typing.Callable:
   """Generate a dummy function (identity) for functional ops.
 
   Args:

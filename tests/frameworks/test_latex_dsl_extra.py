@@ -4,7 +4,7 @@ from ml_switcheroo.frameworks.latex_dsl import LatexDSLAdapter
 from ml_switcheroo.semantics.schema import PluginTraits
 
 
-def test_latex_dsl_adapter_missing_methods():
+def test_latex_dsl_adapter_missing_methods() -> None:
   """Test function."""
   adapter = LatexDSLAdapter()
   assert adapter.get_device_syntax("cpu") == ""

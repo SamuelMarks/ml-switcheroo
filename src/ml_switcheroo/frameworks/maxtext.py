@@ -5,7 +5,7 @@ It inherits Level 0 (Core JAX) and Level 1 (Optax/Orbax) capabilities from
 ``JAXStackMixin`` and provides structural traits for distributed sharding.
 """
 
-from typing import Dict, Any, List
+from typing import Dict, List
 
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -84,7 +84,7 @@ class MaxTextAdapter(JAXStackMixin):
     """
     return {}
 
-  def discover_apis(self) -> Dict[str, Any]:
+  def discover_apis(self):
     """Dynamically discover MaxText APIs.
 
     Returns:

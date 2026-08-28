@@ -1,12 +1,13 @@
 """Tests."""
 
+import typing
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
 
 
-def test_sass_synthesizer_macro_exact_match():
+def test_sass_synthesizer_macro_exact_match() -> None:
   """Test function."""
   semantics = SemanticsManager()
   synth = SassSynthesizer(semantics)
@@ -21,15 +22,15 @@ def test_sass_synthesizer_macro_exact_match():
 
   original = semantics.get_definition
 
-  def mock_get_def(kind):
+  def mock_get_def(kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
     """Test function."""
     if kind == "my_macro":
       return ("my_macro", {})
     return original(kind)
 
-  semantics.get_definition = mock_get_def
+  semantics.get_definition = mock_get_def  # type: ignore
 
-  nodes = synth.from_graph(graph)
+  nodes: list[typing.Any] = synth.from_graph(graph)
 
   found = False
   for n in nodes:
@@ -38,7 +39,7 @@ def test_sass_synthesizer_macro_exact_match():
   assert found
 
 
-def test_sass_backend_semantics_provided():
+def test_sass_backend_semantics_provided() -> None:
   """Docstring."""
   from ml_switcheroo.core.compiler.backends.sass.backend import SassBackend
   from ml_switcheroo.semantics.manager import SemanticsManager

@@ -8,11 +8,12 @@ extraction of DSL module layers and execution graphs. Specifically, it tests:
 3. `HtmlParser` integration for complete parsing to AST and output generation.
 """
 
+import typing
 from ml_switcheroo.core.html.parser import HtmlParser, InternalHtmlParser, GridExtractor
 from ml_switcheroo.core.html.nodes import HtmlDocument, TagNode, TextNode, AttributeNode
 
 
-def test_internal_html_parser_basic():
+def test_internal_html_parser_basic() -> None:
   """Tests basic tag, attribute, text, and self-closing node parsing.
 
   Feeds a well-formed HTML segment containing nested div, image, and line-break
@@ -29,7 +30,7 @@ def test_internal_html_parser_basic():
   parser.feed('<div class="test">Hello<img src="img.png"/><br></div><!-- comment --><!DOCTYPE html>')
 
   assert len(parser.root_children) == 3
-  div = parser.root_children[0]
+  div = typing.cast(TagNode, parser.root_children[0])
   assert isinstance(div, TagNode)
   assert div.name == "div"
   assert len(div.attributes) == 1
@@ -40,18 +41,18 @@ def test_internal_html_parser_basic():
   assert isinstance(div.children[0], TextNode)
   assert div.children[0].content == "Hello"
 
-  img = div.children[1]
+  img = typing.cast(TagNode, div.children[1])
   assert isinstance(img, TagNode)
   assert img.name == "img"
   assert img.self_closing is True
 
-  br = div.children[2]
+  br = typing.cast(TagNode, div.children[2])
   assert isinstance(br, TagNode)
   assert br.name == "br"
   assert br.self_closing is True
 
 
-def test_internal_html_parser_unclosed():
+def test_internal_html_parser_unclosed() -> None:
   """Tests parsing behaviour with unclosed nested elements.
 
   Feeds HTML where an inner `span` tag is never closed before the outer
@@ -68,15 +69,15 @@ def test_internal_html_parser_unclosed():
   parser.feed("<div><span>Text</div>")
 
   assert len(parser.root_children) == 1
-  div = parser.root_children[0]
+  div = typing.cast(TagNode, parser.root_children[0])
   assert len(div.children) == 1
-  span = div.children[0]
+  span = typing.cast(TagNode, div.children[0])
   assert span.name == "span"
   assert len(span.children) == 1
-  assert span.children[0].content == "Text"
+  assert typing.cast(TextNode, span.children[0]).content == "Text"
 
 
-def test_internal_html_parser_unclosed_root():
+def test_internal_html_parser_unclosed_root() -> None:
   """Tests closing out dangling tags at the root of the document.
 
   Feeds HTML with an unclosed outer `div` element, then manually pops
@@ -96,18 +97,18 @@ def test_internal_html_parser_unclosed_root():
   while parser.stack:
     unclosed = parser.stack.pop()
     if parser.stack:
-      parser.stack[-1].children.append(unclosed)
+      typing.cast(TagNode, parser.stack[-1]).children.append(unclosed)
     else:
       parser.root_children.append(unclosed)
 
   assert len(parser.root_children) == 1
-  div = parser.root_children[0]
+  div = typing.cast(TagNode, parser.root_children[0])
   assert div.name == "div"
   assert len(div.children) == 1
-  assert div.children[0].content == "Text"
+  assert typing.cast(TextNode, div.children[0]).content == "Text"
 
 
-def test_grid_extractor_basic():
+def test_grid_extractor_basic() -> None:
   """Tests extracting model layers, stateful calls, and functional calls.
 
   Constructs a complete manual `HtmlDocument` containing model attribute metadata
@@ -152,7 +153,7 @@ def test_grid_extractor_basic():
   assert extractor.ops[1] == ("Relu", "")
 
 
-def test_grid_extractor_header_parsing():
+def test_grid_extractor_header_parsing() -> None:
   """Tests extraction of the model name from h3 headers.
 
   Validates that when the HTML contains a header element of form
@@ -175,7 +176,7 @@ def test_grid_extractor_header_parsing():
   assert extractor.model_name == "CustomNet"
 
 
-def test_grid_extractor_attr_no_colon():
+def test_grid_extractor_attr_no_colon() -> None:
   """Tests extraction of attributes missing the class name colon separator.
 
   Validates that if an attribute box does not contain a colon in its span tag
@@ -201,7 +202,7 @@ def test_grid_extractor_attr_no_colon():
   assert extractor.attrs[0] == ("just_name", "Unknown", "")
 
 
-def test_htmlparser_integration():
+def test_htmlparser_integration() -> None:
   """Tests the full compilation pipeline from HTML string to python DSL module.
 
   Feeds a multi-line HTML string representing a neural network layer structure and
@@ -215,7 +216,7 @@ def test_htmlparser_integration():
   Returns:
       None
   """
-  html = """
+  html: str = """
     <h3>Model: TestModel</h3>
     <div class="box r"><span>conv: Conv2d</span><code>args: x</code></div>
     <div class="box b"><span>Call (conv)</span><code>args: x</code></div>
@@ -224,9 +225,9 @@ def test_htmlparser_integration():
     """
 
   parser = HtmlParser(html)
-  cst_mod = parser.parse()
+  cst_mod: typing.Any = parser.parse()
 
-  code = cst_mod.code
+  code: str = cst_mod.code
 
   assert "class TestModel(dsl.Module):" in code
   assert "self.conv = dsl.Conv2d()" in code
@@ -236,7 +237,7 @@ def test_htmlparser_integration():
   assert "return add_out" in code
 
 
-def test_htmlparser_empty_config():
+def test_htmlparser_empty_config() -> None:
   """Tests that declaring layers with empty code/argument sections works.
 
   Validates that layers specified with empty arguments lists are declared
@@ -249,16 +250,16 @@ def test_htmlparser_empty_config():
   Returns:
       None
   """
-  html = """
+  html: str = """
     <div class="box r"><span>layer1: Linear</span><code></code></div>
     """
   parser = HtmlParser(html)
-  cst_mod = parser.parse()
-  code = cst_mod.code
+  cst_mod: typing.Any = parser.parse()
+  code: str = cst_mod.code
   assert "self.layer1 = dsl.Linear()" in code
 
 
-def test_htmlparser_safe_val_fallback():
+def test_htmlparser_safe_val_fallback() -> None:
   """Tests parser fallback mechanisms when meeting unparseable arguments.
 
   Verifies that if an operation arguments code contains non-Python syntax,
@@ -272,16 +273,16 @@ def test_htmlparser_safe_val_fallback():
       None
   """
   # Provide an invalid python expression for arguments to trigger _safe_val fallback
-  html = """
+  html: str = """
     <div class="box b"><span>Op</span><code>invalid syntax args</code></div>
     """
   parser = HtmlParser(html)
-  cst_mod = parser.parse()
-  code = cst_mod.code
+  cst_mod: typing.Any = parser.parse()
+  code: str = cst_mod.code
   assert "dsl.Op(x, 'invalid syntax args')" in code
 
 
-def test_htmlparser_empty():
+def test_htmlparser_empty() -> None:
   """Tests compiling an empty HTML document.
 
   Validates that parsing empty HTML defaults safely to a skeletal model class definition
@@ -293,47 +294,47 @@ def test_htmlparser_empty():
   Returns:
       None
   """
-  html = ""
+  html: str = ""
   parser = HtmlParser(html)
-  cst_mod = parser.parse()
-  code = cst_mod.code
+  cst_mod: typing.Any = parser.parse()
+  code: str = cst_mod.code
   assert "class Model(dsl.Module):" in code
   assert "pass" in code
   assert "return x" in code
 
 
-def test_internal_parser_missing_attribute_value():
+def test_internal_parser_missing_attribute_value() -> None:
   """Tests parsing HTML with attributes that have no value."""
   parser = InternalHtmlParser()
   # Use a self-closing tag with a valueless attribute and a normal tag with a valueless attribute
   parser.feed('<div disabled><img src="test.png" defer/></div>')
 
   assert len(parser.root_children) == 1
-  div = parser.root_children[0]
+  div = typing.cast(TagNode, parser.root_children[0])
   assert div.attributes[0].name == "disabled"
   assert div.attributes[0].value is None
 
-  img = div.children[0]
+  img = typing.cast(TagNode, div.children[0])
   assert img.attributes[1].name == "defer"
   assert img.attributes[1].value is None
 
 
-def test_htmlparser_safe_val_eval_exception():
+def test_htmlparser_safe_val_eval_exception() -> None:
   """Tests fallback when eval throws an error but parse_expression succeeds."""
-  html = """
+  html: str = """
     <div class="box b"><span>Op</span><code>some_unknown_var</code></div>
   """
   parser = HtmlParser(html)
-  cst_mod = parser.parse()
-  code = cst_mod.code
+  cst_mod: typing.Any = parser.parse()
+  code: str = cst_mod.code
   # "some_unknown_var" parses as Name, but eval("some_unknown_var") raises NameError.
   # So it should return the parsed expression rather than evaluating and converting to literal.
   assert "dsl.Op(x, some_unknown_var)" in code
 
 
-def test_htmlparser_unclosed_tags():
+def test_htmlparser_unclosed_tags() -> None:
   """Tests that HtmlParser.parse() correctly handles unclosed tags in the internal stack."""
-  html = "<div><span>unclosed"
+  html: str = "<div><span>unclosed"
   parser = HtmlParser(html)
-  cst_mod = parser.parse()
+  cst_mod: typing.Any = parser.parse()
   assert cst_mod is not None

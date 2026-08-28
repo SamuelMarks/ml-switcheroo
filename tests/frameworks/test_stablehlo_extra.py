@@ -1,10 +1,11 @@
 """Test module."""
 
+import typing
 from ml_switcheroo.frameworks.stablehlo import StableHloAdapter
 from ml_switcheroo.semantics.schema import PluginTraits
 
 
-def test_stablehlo_missing_methods():
+def test_stablehlo_missing_methods() -> None:
   """Test function."""
   adapter = StableHloAdapter()
 
@@ -22,10 +23,10 @@ def test_stablehlo_missing_methods():
   assert isinstance(adapter.plugin_traits, PluginTraits)
   assert adapter.convert("data") == "data"
 
-  defs = adapter.definitions
+  defs: typing.Any = adapter.definitions
   assert isinstance(defs, dict)
 
-  ex = adapter.get_tiered_examples()
+  ex: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in ex
   assert "tier2_neural" in ex
   assert "tier3_extras" in ex

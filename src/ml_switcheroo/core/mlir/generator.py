@@ -4,7 +4,10 @@ This module provides the `MlirToPythonGenerator` class, which consumes the
 MLIR CST object model and reconstructs valid Python code via LibCST.
 """
 
-from typing import Dict, List, Optional, Any
+from typing import Any
+
+
+from typing import Dict, List, Optional
 from collections import defaultdict
 import libcst as cst
 
@@ -35,7 +38,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     self.ctx = NamingContext()
 
     # Store usage counts for inlining logic: {ssa_name: count}
-    self.usage_counts: Dict[str, int] = defaultdict(int)  # type: ignore
+    self.usage_counts: Any = defaultdict(int)
     # Map of ssa_name -> consumer_op (single consumer context)
     self.usage_consumers: Dict[str, OperationNode] = {}
 
@@ -59,7 +62,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     stmt_body = self._convert_block(node.body)
 
     # Ensure we return a module with valid body sequence
-    return cst.Module(body=stmt_body)  # type: ignore
+    return cst.Module(body=stmt_body)
 
   def _analyze_module_usage(self, mod: ModuleNode) -> None:
     """Travers the MLIR tree to count SSAs usage.
@@ -89,7 +92,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         for b in region.blocks:
           self._scan_block_usage(b)
 
-  def _convert_trivia(self, trivia: List[Any]) -> List[cst.EmptyLine]:
+  def _convert_trivia(self, trivia) -> List[cst.EmptyLine]:
     """Convert MLIR comments (//) to Python comments (#).
 
     Ignores layout whitespace as LibCST handles indentation.
@@ -149,7 +152,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
       else:
         # Handle statements that are never expressions (Control Flow, Class Defs, Defs, Imports)
         # These are handled by StatementGeneratorMixin
-        stmt_node = self._convert_statement_op(op)  # type: ignore
+        stmt_node = self._convert_statement_op(op)
         if stmt_node:
           if hasattr(stmt_node, "with_changes") and leading:
             stmt_node = stmt_node.with_changes(leading_lines=leading)

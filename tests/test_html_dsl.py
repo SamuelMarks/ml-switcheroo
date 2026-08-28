@@ -15,39 +15,39 @@ from ml_switcheroo.core.html.parser import InternalHtmlParser, GridExtractor, Ht
 import libcst as cst
 
 
-def test_nodes_base_html_node():
+def test_nodes_base_html_node() -> None:
   """Docstring."""
-  node = HtmlNode()
+  node: HtmlNode = HtmlNode()
   with pytest.raises(NotImplementedError):
     node.emit()
   with pytest.raises(NotImplementedError):
     node.to_html()
 
 
-def test_nodes_text_node():
+def test_nodes_text_node() -> None:
   """Docstring."""
-  node = TextNode(content="hello", leading_trivia=" ", trailing_trivia=" ")
+  node: TextNode = TextNode(content="hello", leading_trivia=" ", trailing_trivia=" ")
   assert node.emit() == " hello "
 
 
-def test_nodes_comment_node():
+def test_nodes_comment_node() -> None:
   """Docstring."""
-  node = CommentNode(content="comment", leading_trivia="  ")
+  node: CommentNode = CommentNode(content="comment", leading_trivia="  ")
   assert node.emit() == "  <!--comment-->"
 
 
-def test_nodes_attribute_node():
+def test_nodes_attribute_node() -> None:
   """Docstring."""
-  node = AttributeNode(name="class", value="box", quote_style="'")
+  node: AttributeNode = AttributeNode(name="class", value="box", quote_style="'")
   assert node.emit() == "class='box'"
 
-  node_valueless = AttributeNode(name="disabled", value=None)
+  node_valueless: AttributeNode = AttributeNode(name="disabled", value=None)
   assert node_valueless.emit() == "disabled"
 
 
-def test_nodes_tag_node():
+def test_nodes_tag_node() -> None:
   """Docstring."""
-  tag = TagNode(name="div")
+  tag: TagNode = TagNode(name="div")
   assert tag.emit() == "<div></div>"
 
   tag.set_attribute("class", "box")
@@ -63,7 +63,7 @@ def test_nodes_tag_node():
 
   tag.remove_attribute("missing")
 
-  child = TextNode(content="hi")
+  child: TextNode = TextNode(content="hi")
   tag.append_child(child)
   assert tag.emit() == "<div>hi</div>"
 
@@ -82,32 +82,34 @@ def test_nodes_tag_node():
   assert tag.emit() == '<div class="x"/>'
 
 
-def test_nodes_svg_arrow():
+def test_nodes_svg_arrow() -> None:
   """Docstring."""
-  arrow = SvgArrow(x1=0, y1=1, x2=2, y2=3, style_class="s-blue", marker_end="url(#m)", parent_style="display:none")
-  tag = arrow.to_tag()
+  arrow: SvgArrow = SvgArrow(
+    x1=0, y1=1, x2=2, y2=3, style_class="s-blue", marker_end="url(#m)", parent_style="display:none"
+  )
+  tag: TagNode = arrow.to_tag()
   assert tag.name == "svg"
   assert "s-blue" in arrow.emit()
 
 
-def test_nodes_grid_box():
+def test_nodes_grid_box() -> None:
   """Docstring."""
-  box = GridBox(
+  box: GridBox = GridBox(
     row=1, col=2, css_class="box r", header_text="Call (conv)", code_text="args: x", body_text="Hello", z_index=5
   )
-  tag = box.to_tag()
+  tag: TagNode = box.to_tag()
   assert tag.name == "div"
   assert "Call (conv)" in box.emit()
 
-  box2 = GridBox(css_class="circ", header_text="X")
+  box2: GridBox = GridBox(css_class="circ", header_text="X")
   assert "header-txt" not in box2.emit()
   assert "X" in box2.emit()
 
 
-def test_nodes_html_document():
+def test_nodes_html_document() -> None:
   """Docstring."""
-  doc = HtmlDocument(model_name="TestModel")
-  html = doc.emit()
+  doc: HtmlDocument = HtmlDocument(model_name="TestModel")
+  html: str = doc.emit()
   assert "TestModel" in html
   assert "<!DOCTYPE html>" in html
 
@@ -119,12 +121,12 @@ def test_nodes_html_document():
   assert "<br/>" in doc.emit()
 
 
-def test_parser_internal():
+def test_parser_internal() -> None:
   """Docstring."""
-  parser = InternalHtmlParser()
+  parser: InternalHtmlParser = InternalHtmlParser()
   parser.feed("<div><!--cmt-->Text<br/><img></div>")
   assert len(parser.root_children) == 1
-  div = parser.root_children[0]
+  div: HtmlNode = parser.root_children[0]
   assert isinstance(div, TagNode)
   assert len(div.children) == 4
   assert isinstance(div.children[0], CommentNode)
@@ -140,9 +142,9 @@ def test_parser_internal():
   assert parser.root_children[1].self_closing
 
 
-def test_parser_grid_extractor():
+def test_parser_grid_extractor() -> None:
   """Docstring."""
-  doc = HtmlDocument(
+  doc: HtmlDocument = HtmlDocument(
     model_name="Test",
     children=[
       TagNode(name="h3", children=[TextNode(content="Model: AModel")]),
@@ -180,7 +182,7 @@ def test_parser_grid_extractor():
       ),
     ],
   )
-  ext = GridExtractor()
+  ext: GridExtractor = GridExtractor()
   ext.extract(doc)
   assert ext.model_name == "AModel"
   assert len(ext.attrs) == 2
@@ -191,9 +193,9 @@ def test_parser_grid_extractor():
   assert ext.ops[1] == ("relu", "alpha=0.1")
 
 
-def test_parser_facade():
+def test_parser_facade() -> None:
   """Docstring."""
-  html = """
+  html: str = """
     <h3>Model: TestModel</h3>
     <div class="box r"><span>my_layer: Linear</span><code>in_features=10, out_features=5</code></div>
     <div class="box r"><span>empty_layer: Empty</span><code>args: </code></div>
@@ -203,10 +205,10 @@ def test_parser_facade():
     <div class="box b"><span>tanh</span><code>x, !!error, foo='bar'</code></div>
     <div class="box b"><span>CallWrong</span><code></code></div>
     """
-  parser = HtmlParser(html)
-  tree = parser.parse()
+  parser: HtmlParser = HtmlParser(html)
+  tree: cst.Module = parser.parse()
   assert isinstance(tree, cst.Module)
-  code = tree.code
+  code: str = tree.code
   assert "class TestModel" in code
   assert "my_layer = dsl.Linear(in_features=10, out_features=5)" in code
   assert "empty_layer = dsl.Empty()" in code
@@ -214,39 +216,42 @@ def test_parser_facade():
   assert "relu_out = dsl.relu(empty_layer_out)" in code
 
 
-def test_parser_facade_no_init():
+def test_parser_facade_no_init() -> None:
   """Docstring."""
-  html = """<h3>Model: TestModel</h3>"""
-  parser = HtmlParser(html)
-  tree = parser.parse()
-  code = tree.code
+  html: str = """<h3>Model: TestModel</h3>"""
+  parser: HtmlParser = HtmlParser(html)
+  tree: cst.Module = parser.parse()
+  code: str = tree.code
   assert "pass" in code
 
 
-def test_parser_unclosed_tags():
+def test_parser_unclosed_tags() -> None:
   """Docstring."""
-  parser = HtmlParser("<div><span>unclosed text")
-  doc = parser.parse_cst()
+  parser: HtmlParser = HtmlParser("<div><span>unclosed text")
+  doc: HtmlDocument = parser.parse_cst()
   assert len(doc.children) == 1
-  assert doc.children[0].name == "div"
-  assert doc.children[0].children[0].name == "span"
-  assert doc.children[0].children[0].children[0].content == "unclosed text"
+  assert getattr(doc.children[0], "name", None) == "div"
+  assert getattr(getattr(doc.children[0], "children", [None])[0], "name", None) == "span"
+  assert (
+    getattr(getattr(getattr(doc.children[0], "children", [None])[0], "children", [None])[0], "content", None)
+    == "unclosed text"
+  )
 
 
-def test_internal_parser_endtag():
+def test_internal_parser_endtag() -> None:
   """Docstring."""
-  parser = InternalHtmlParser()
+  parser: InternalHtmlParser = InternalHtmlParser()
   parser.feed("<div><span>text</span></div>")
   assert len(parser.root_children) == 1
-  assert parser.root_children[0].name == "div"
+  assert getattr(parser.root_children[0], "name", None) == "div"
 
 
-def test_parser_facade_ops_missing_args():
+def test_parser_facade_ops_missing_args() -> None:
   """Docstring."""
-  html = """
+  html: str = """
     <h3>Model: TestModel</h3>
     <div class="box b"><span>relu</span><code></code></div>
     """
-  parser = HtmlParser(html)
-  tree = parser.parse()
+  parser: HtmlParser = HtmlParser(html)
+  tree: cst.Module = parser.parse()
   assert "relu_out = dsl.relu(x)" in tree.code

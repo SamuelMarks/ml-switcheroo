@@ -1,10 +1,11 @@
 """Tests for HTML DSL framework adapter."""
 
+import typing
 from ml_switcheroo.frameworks.html_dsl import HtmlDSLAdapter
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
-def test_html_dsl_adapter_basics():
+def test_html_dsl_adapter_basics() -> None:
   """Test standard properties and basic behavior."""
   adapter = HtmlDSLAdapter()
   assert adapter.display_name == "HTML Grid DSL"
@@ -17,27 +18,27 @@ def test_html_dsl_adapter_basics():
   assert adapter.rng_seed_methods == []
 
 
-def test_html_dsl_parser():
+def test_html_dsl_parser() -> None:
   """Test parser creation."""
   adapter = HtmlDSLAdapter()
-  parser = adapter.create_parser("<div></div>")
+  parser: typing.Any = adapter.create_parser("<div></div>")
   # Assuming HtmlParser just takes the code, checking if it doesn't fail
   assert parser is not None
 
 
-def test_html_dsl_traits_and_namespaces():
+def test_html_dsl_traits_and_namespaces() -> None:
   """Test structural and plugin traits and namespaces."""
   adapter = HtmlDSLAdapter()
   assert adapter.structural_traits.module_base == "html_dsl.Module"
   assert adapter.structural_traits.forward_method == "forward"
   assert adapter.plugin_traits is not None
 
-  namespaces = adapter.import_namespaces
+  namespaces: typing.Any = adapter.import_namespaces
   assert "html_dsl" in namespaces
   assert namespaces["html_dsl"].tier == SemanticTier.NEURAL
 
 
-def test_html_dsl_device_and_serialization():
+def test_html_dsl_device_and_serialization() -> None:
   """Test device, conversion and serialization methods."""
   adapter = HtmlDSLAdapter()
 
@@ -58,11 +59,11 @@ def test_html_dsl_device_and_serialization():
   assert adapter.get_weight_save_code("state", "path") == "# Weights not supported in HTML mode"
 
 
-def test_html_dsl_definitions_and_docs():
+def test_html_dsl_definitions_and_docs() -> None:
   """Test definitions, specifications and examples."""
   adapter = HtmlDSLAdapter()
 
-  defs = adapter.definitions
+  defs: typing.Any = adapter.definitions
   assert "Module" in defs
   assert "Conv2d" in defs
   assert defs["Conv2d"].api == "html_dsl.Conv2d"
@@ -70,7 +71,7 @@ def test_html_dsl_definitions_and_docs():
   assert adapter.specifications == {}
   assert adapter.get_doc_url("html_dsl.Module") is None
 
-  examples = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
   assert "conv: Conv2d" in examples["tier2_neural"]
 

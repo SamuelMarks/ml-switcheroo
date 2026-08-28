@@ -1,5 +1,6 @@
 """Tests for visual DSL framework adapters."""
 
+from typing import Dict, Any
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.frameworks.html_dsl import HtmlDSLAdapter
 from ml_switcheroo.frameworks.latex_dsl import LatexDSLAdapter
@@ -8,9 +9,9 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import InitMode
 
 
-def test_html_dsl_adapter():
+def test_html_dsl_adapter() -> None:
   """Test HtmlDSLAdapter."""
-  adapter = HtmlDSLAdapter()
+  adapter: HtmlDSLAdapter = HtmlDSLAdapter()
   assert adapter._mode == InitMode.GHOST
   assert adapter.import_alias == ("html_dsl", "dsl")
   assert "html_dsl" in adapter.import_namespaces
@@ -32,7 +33,7 @@ def test_html_dsl_adapter():
   assert adapter.rng_seed_methods == []
 
   with patch("ml_switcheroo.frameworks.html_dsl.load_definitions", return_value={"test": MagicMock()}):
-    defs = adapter.definitions
+    defs: Dict[str, dict[str, str]] = adapter.definitions
     assert isinstance(defs, dict)
 
   pass
@@ -50,16 +51,16 @@ def test_html_dsl_adapter():
   adapter.apply_wiring({})  # just pass
   assert adapter.get_doc_url("html_dsl.Module") is None
 
-  examples = adapter.get_tiered_examples()
+  examples: Dict[str, str] = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
 
-  parser = adapter.create_parser("<html>")
+  parser: Any = adapter.create_parser("<html>")
   assert parser is not None
 
 
-def test_latex_dsl_adapter():
+def test_latex_dsl_adapter() -> None:
   """Test LatexDSLAdapter."""
-  adapter = LatexDSLAdapter()
+  adapter: LatexDSLAdapter = LatexDSLAdapter()
   assert adapter._mode == InitMode.GHOST
   assert adapter.import_alias == ("midl", "midl")
   assert "midl" in adapter.import_namespaces
@@ -78,7 +79,7 @@ def test_latex_dsl_adapter():
   assert adapter.rng_seed_methods == []
 
   with patch("ml_switcheroo.frameworks.latex_dsl.load_definitions", return_value={"test": MagicMock()}):
-    defs = adapter.definitions
+    defs: Dict[str, dict[str, str]] = adapter.definitions
     assert isinstance(defs, dict)
 
   pass
@@ -96,15 +97,15 @@ def test_latex_dsl_adapter():
   adapter.apply_wiring({})
   assert adapter.get_doc_url("latex_dsl.Module") is None
 
-  examples = adapter.get_tiered_examples()
+  examples: Dict[str, str] = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
 
   pass
 
 
-def test_tikz_adapter():
+def test_tikz_adapter() -> None:
   """Test TikzAdapter."""
-  adapter = TikzAdapter()
+  adapter: TikzAdapter = TikzAdapter()
   assert adapter._mode == InitMode.GHOST
   assert adapter.import_alias == ("tikz", "tikz")
   assert adapter.import_namespaces == {}
@@ -122,7 +123,7 @@ def test_tikz_adapter():
   assert adapter.rng_seed_methods == []
 
   with patch("ml_switcheroo.frameworks.tikz.load_definitions", return_value={"test": MagicMock()}):
-    defs = adapter.definitions
+    defs: Dict[str, dict[str, str]] = adapter.definitions
     assert isinstance(defs, dict)
 
   pass
@@ -140,26 +141,26 @@ def test_tikz_adapter():
   adapter.apply_wiring({})
   assert adapter.get_doc_url("tikz.Module") is None
 
-  examples = adapter.get_tiered_examples()
+  examples: Dict[str, str] = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
 
   pass
 
 
-def test_latex_parser_create():
+def test_latex_parser_create() -> None:
   """Test element."""
-  adapter = LatexDSLAdapter()
+  adapter: LatexDSLAdapter = LatexDSLAdapter()
   assert adapter.create_parser("code") is not None
   adapter.plugin_traits
 
 
-def test_tikz_parser_create():
+def test_tikz_parser_create() -> None:
   """Test element."""
-  adapter = TikzAdapter()
+  adapter: TikzAdapter = TikzAdapter()
   adapter.plugin_traits
 
 
-def test_missing():
+def test_missing() -> None:
   """Test element."""
   HtmlDSLAdapter().get_device_check_syntax()
   LatexDSLAdapter().get_device_check_syntax()

@@ -4,7 +4,7 @@ from unittest import mock
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 
 
-def test_jax_import_success():
+def test_jax_import_success() -> None:
   """Verifies the behavior of JAX import successfully."""
   with mock.patch.dict("sys.modules", {"jax": mock.MagicMock(), "jax.numpy": mock.MagicMock()}):
     import ml_switcheroo.frameworks.jax as fjax
@@ -15,11 +15,11 @@ def test_jax_import_success():
     assert fjax.jnp is not None
 
 
-def test_jax_convert_fallback():
+def test_jax_convert_fallback() -> None:
   """Verifies the behavior of JAX convert fallback."""
-  mock_jax = mock.MagicMock()
-  mock_jnp = mock.MagicMock()
+  mock_jax: mock.MagicMock = mock.MagicMock()
+  mock_jnp: mock.MagicMock = mock.MagicMock()
   with mock.patch.dict("sys.modules", {"jax": mock_jax, "jax.numpy": mock_jnp}):
-    adapter = JaxCoreAdapter()
-    res = adapter.convert("not an array")
+    adapter: JaxCoreAdapter = JaxCoreAdapter()
+    res: str = adapter.convert("not an array")
     assert res == "not an array"

@@ -4,7 +4,7 @@ from ml_switcheroo.core.mlir.cst import ModuleNode, BlockNode, OperationNode, Va
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
 
 
-def test_mlir_printer_emit_module_wrapper():
+def test_mlir_printer_emit_module_wrapper() -> None:
   """Verifies that the printer emits a wrapper when there is no explicit module op."""
   block = BlockNode(label="")
   op = OperationNode(
@@ -17,7 +17,7 @@ def test_mlir_printer_emit_module_wrapper():
   module = ModuleNode(body=block)
 
   printer = MlirPrinter()
-  output = printer.emit(module)
+  output: str = printer.emit(module)
 
   assert "// Graph -> MLIR compilation output" in output
   assert "module {" in output
@@ -26,7 +26,7 @@ def test_mlir_printer_emit_module_wrapper():
   assert "}" in output
 
 
-def test_mlir_printer_emit_explicit_module():
+def test_mlir_printer_emit_explicit_module() -> None:
   """Verifies that the printer does not duplicate module wrappers."""
   block = BlockNode(label="")
   module_op = OperationNode(
@@ -36,17 +36,17 @@ def test_mlir_printer_emit_explicit_module():
   module = ModuleNode(body=block)
 
   printer = MlirPrinter()
-  output = printer.emit(module)
+  output: str = printer.emit(module)
 
   assert "// Graph -> MLIR compilation output" in output
   assert output.count("module {\n") == 0  # Should just use to_text() which omits braces for simple op
 
 
-def test_mlir_printer_emit_non_module():
+def test_mlir_printer_emit_non_module() -> None:
   """Verifies that emitting a non-module node delegates to to_text()."""
   op = OperationNode(name='"sw.return"', result_types=[TypeNode("()")])
 
   printer = MlirPrinter()
-  output = printer.emit(op)
+  output: str = printer.emit(op)
 
   assert '"sw.return" : ()' in output

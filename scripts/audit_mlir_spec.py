@@ -14,7 +14,7 @@ except Exception as e:
   print("Failed to download spec:", e)
   exit(1)
 
-grammar_rules = {}
+grammar_rules: dict[str, str] = {}
 
 # Extract all blocks with ::=
 in_block = False
@@ -66,7 +66,7 @@ with open("audit_mlir.json", "w") as f:
 
 # Now read the implemented grammar in src/ml_switcheroo/core/mlir/grammar.lark
 lark_path = Path("src/ml_switcheroo/core/mlir/grammar.lark")
-implemented_rules = set()
+implemented_rules: set[str] = set()
 if lark_path.exists():
   with open(lark_path) as f:
     lark_content = f.read()
@@ -79,7 +79,7 @@ if lark_path.exists():
       implemented_rules.add(name.replace("_", "-"))
 
 # Some manual mapping of Lark tokens to MLIR LangRef terms
-manual_mapping = {
+manual_mapping: dict[str, str] = {
   "string-literal": "string",
   "integer-literal": "number",
   "float-literal": "number",
@@ -97,8 +97,8 @@ for mlir_term, lark_term in manual_mapping.items():
     implemented_rules.add(mlir_term)
     implemented_rules.add(mlir_term.replace("-", "_"))
 
-missing_rules = []
-implemented_matches = []
+missing_rules: list[str] = []
+implemented_matches: list[str] = []
 for rule in grammar_rules.keys():
   rule_lower = rule.lower()
   # Normalize rules to ignore '-' vs '_'

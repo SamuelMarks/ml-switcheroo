@@ -7,7 +7,7 @@ and determinism fixtures.
 
 import pathlib
 import ast
-from typing import List, Optional, Any
+from typing import List, Optional
 from ml_switcheroo.generated_tests.templates import get_template
 
 
@@ -42,7 +42,7 @@ def get_required_packages(imp_str: str) -> List[str]:
 _SHARED_RUNTIME_LOGIC = r'''
 # --- Determinism ---
 @pytest.fixture(autouse=True)
-def ensure_determinism():
+def ensure_determinism() -> None:
   """Auto-injects fixed seeds for reproducibility at the start of every test.
   Covers Python random, NumPy, Torch, TensorFlow, and MLX.
   """
@@ -83,7 +83,7 @@ def ensure_determinism():
 
 
 # --- Verification Logic ---
-def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
+def verify_results(ref: typing.Union[int, float, str, bool, list, dict, tuple, np.ndarray], val: typing.Union[int, float, str, bool, list, dict, tuple, np.ndarray], rtol: float = 1e-3, atol: float = 1e-3, exact: bool = False) -> bool:
   """Cros-framework comparison helper.
 
   Recursively compares data structures (Lists, Dicts, Tuples).
@@ -155,7 +155,7 @@ def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
 def ensure_runtime_module(
   out_dir: pathlib.Path,
   frameworks: Optional[List[str]] = None,
-  mgr: Any = None,
+  mgr=None,
 ) -> None:
   """Create or updates the `runtime.py` module in the output directory.
 
@@ -213,7 +213,7 @@ def ensure_runtime_module(
 
   # Combine parts
   code = '"""Shared runtime flags for generated tests (Auto-Generated)."""\n\n'
-  code += "import sys\nimport pytest\nimport random\nimport numpy as np\nimport importlib.util\n\n"
+  code += "import sys\nimport pytest\nimport random\nimport numpy as np\nimport importlib.util\nimport typing\n\n"
   code += imports_str + "\n"
   code += _SHARED_RUNTIME_LOGIC
 

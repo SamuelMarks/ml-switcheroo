@@ -8,7 +8,7 @@ lazy-loading of plugins, and retrieval of hooks for AST transformations.
 import importlib
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Callable, Any, List
+from typing import Dict, Optional, Callable, List
 import libcst as cst
 from ml_switcheroo.core.hooks import AutoWireSpec
 
@@ -17,31 +17,33 @@ _HOOKS: Dict[str, Callable[..., cst.CSTNode]] = {}
 _HOOK_METADATA: Dict[str, AutoWireSpec] = {}
 
 
-_PLUGINS_LOADED = False
+_PLUGINS_LOADED: bool = False
 
 
-def register_hook(trigger: str, auto_wire: Optional[Dict[str, Any]] = None) -> Callable[[Any], Any]:
+def register_hook(
+  trigger: str, auto_wire: Optional[dict] = None
+) -> Callable[[Callable[..., cst.CSTNode]], Callable[..., cst.CSTNode]]:
   """Register a custom translation hook for a specific trigger.
 
   Args:
       trigger (str): The name or identifier of the framework function/operation
           that triggers this hook (e.g., 'jax.numpy.add').
-      auto_wire (Optional[Dict[str, Any]]): Optional configuration dictionary for
+      auto_wire (Optional[dict]): Optional configuration dictionary for
           auto-wiring the hook, validated against `AutoWireSpec`.
 
   Returns:
-      Callable[[Any], Any]: A decorator function that registers the target callable.
+      Callable[[Callable[..., cst.CSTNode]], Callable[..., cst.CSTNode]]: A decorator function that registers the target callable.
 
   """
 
-  def decorator(func: Any) -> Any:
+  def decorator(func: Callable[..., cst.CSTNode]) -> Callable[..., cst.CSTNode]:
     """Register the decorated function as a translation hook for the trigger.
 
     Args:
-        func (Any): The hook function to be registered.
+        func (Callable[..., cst.CSTNode]): The hook function to be registered.
 
     Returns:
-        Any: The registered hook function, unchanged.
+        Callable[..., cst.CSTNode]: The registered hook function, unchanged.
 
     """
     _HOOKS[trigger] = func

@@ -4,10 +4,15 @@ from ml_switcheroo.cli.__main__ import main
 from unittest.mock import patch, MagicMock, mock_open
 import runpy
 import sys
+from pathlib import Path
 
 
-def test_cli_e2e_suggest(tmp_path):
-  """Verifies the behavior of CLI end-to-end suggest."""
+def test_cli_e2e_suggest(tmp_path: Path) -> None:
+  """Verifies the behavior of CLI end-to-end suggest.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+  """
   try:
     main(["suggest", "torch.nn.Linear", "--out", str(tmp_path)])
   except SystemExit:
@@ -15,15 +20,20 @@ def test_cli_e2e_suggest(tmp_path):
 
 
 @patch("ml_switcheroo.cli.handlers.convert.ASTEngine")
-def test_cli_e2e_convert(mock_engine, tmp_path):
-  """Verifies the behavior of CLI end-to-end convert."""
-  out = tmp_path / "out_convert"
+def test_cli_e2e_convert(mock_engine: MagicMock, tmp_path: Path) -> None:
+  """Verifies the behavior of CLI end-to-end convert.
+
+  Args:
+      mock_engine (MagicMock): Mock argument.
+      tmp_path (Path): Tmp path pytest fixture.
+  """
+  out: Path = tmp_path / "out_convert"
   out.mkdir()
-  in_file = tmp_path / "model.py"
+  in_file: Path = tmp_path / "model.py"
   in_file.write_text("import torch; torch.nn.Linear(10, 10)\n")
-  mock_instance = MagicMock()
+  mock_instance: MagicMock = MagicMock()
   mock_engine.return_value = mock_instance
-  mock_res = MagicMock()
+  mock_res: MagicMock = MagicMock()
   mock_res.code = "import jax"
   mock_instance.convert.return_value = mock_res
   try:
@@ -33,35 +43,52 @@ def test_cli_e2e_convert(mock_engine, tmp_path):
 
 
 @patch("ml_switcheroo.cli.handlers.verify.BatchValidator.run_all", return_value={})
-def test_cli_e2e_ci(mock_run, tmp_path):
-  """Verifies the behavior of CLI end-to-end ci."""
-  out = tmp_path / "report.json"
+def test_cli_e2e_ci(mock_run: MagicMock, tmp_path: Path) -> None:
+  """Verifies the behavior of CLI end-to-end ci.
+
+  Args:
+      mock_run (MagicMock): Mock argument.
+      tmp_path (Path): Tmp path pytest fixture.
+  """
+  out: Path = tmp_path / "report.json"
   try:
     main(["ci", "--json-report", str(out)])
   except SystemExit:
     pass
 
 
-def test_cli_e2e_docs(tmp_path):
-  """Verifies the behavior of CLI end-to-end documentation."""
-  out = tmp_path / "MIGRATION.md"
+def test_cli_e2e_docs(tmp_path: Path) -> None:
+  """Verifies the behavior of CLI end-to-end documentation.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+  """
+  out: Path = tmp_path / "MIGRATION.md"
   try:
     main(["gen-docs", "--out", str(out)])
   except SystemExit:
     pass
 
 
-def test_cli_e2e_matrix(tmp_path):
-  """Verifies the behavior of CLI end-to-end matrix."""
+def test_cli_e2e_matrix(tmp_path: Path) -> None:
+  """Verifies the behavior of CLI end-to-end matrix.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+  """
   try:
     main(["matrix"])
   except SystemExit:
     pass
 
 
-def test_cli_e2e_audit(tmp_path):
-  """Verifies the behavior of CLI end-to-end audit."""
-  in_file = tmp_path / "model.py"
+def test_cli_e2e_audit(tmp_path: Path) -> None:
+  """Verifies the behavior of CLI end-to-end audit.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+  """
+  in_file: Path = tmp_path / "model.py"
   in_file.write_text("import torch\nclass Model: pass\n")
   try:
     main(["audit", str(in_file)])
@@ -70,47 +97,60 @@ def test_cli_e2e_audit(tmp_path):
 
 
 @patch("ml_switcheroo.generated_tests.generator.get_template", return_value=False)
-def test_cli_e2e_gen_tests(mock_get_template, tmp_path):
-  """Verifies the behavior of CLI end-to-end generation tests."""
+def test_cli_e2e_gen_tests(mock_get_template: MagicMock, tmp_path: Path) -> None:
+  """Verifies the behavior of CLI end-to-end generation tests.
+
+  Args:
+      mock_get_template (MagicMock): Mock argument.
+      tmp_path (Path): Tmp path pytest fixture.
+  """
   try:
     main(["gen-tests"])
   except SystemExit:
     pass
 
 
-def test_cli_e2e_weight_script(tmp_path):
-  """Verifies the behavior of CLI end-to-end weight script."""
-  in_file = tmp_path / "model.py"
+def test_cli_e2e_weight_script(tmp_path: Path) -> None:
+  """Verifies the behavior of CLI end-to-end weight script.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+  """
+  in_file: Path = tmp_path / "model.py"
   in_file.write_text("import torch\nclass Model: pass\n")
-  out = tmp_path / "weight.py"
+  out: Path = tmp_path / "weight.py"
   try:
     main(["gen-weight-script", str(in_file), "--out", str(out)])
   except SystemExit:
     pass
 
 
-def test_cli_e2e_schema():
+def test_cli_e2e_schema() -> None:
   """Verifies the behavior of CLI schema."""
   with patch("ml_switcheroo.cli.__main__.handle_schema", return_value=0) as mock_schema:
     assert main(["schema"]) == 0
     mock_schema.assert_called_once()
 
 
-def test_cli_e2e_scaffold():
+def test_cli_e2e_scaffold() -> None:
   """Verifies the behavior of CLI scaffold."""
   with patch("ml_switcheroo.cli.__main__.handle_scaffold") as mock_scaffold:
     assert main(["scaffold", "jax.numpy"]) == 0
     mock_scaffold.assert_called_once()
 
 
-def test_cli_e2e_harvest(tmp_path):
-  """Verifies the behavior of CLI harvest."""
+def test_cli_e2e_harvest(tmp_path: Path) -> None:
+  """Verifies the behavior of CLI harvest.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+  """
   with patch("ml_switcheroo.cli.__main__.handle_harvest") as mock_harvest:
     assert main(["harvest", str(tmp_path)]) == 0
     mock_harvest.assert_called_once()
 
 
-def test_cli_e2e_verified_pipeline_success():
+def test_cli_e2e_verified_pipeline_success() -> None:
   """Verifies the behavior of CLI verified pipeline successfully."""
   with (
     patch("builtins.open", mock_open(read_data="x = 1")),
@@ -121,7 +161,7 @@ def test_cli_e2e_verified_pipeline_success():
     assert main(["verified-pipeline", "some_path.py"]) == 0
 
 
-def test_cli_e2e_verified_pipeline_failure():
+def test_cli_e2e_verified_pipeline_failure() -> None:
   """Verifies the behavior of CLI verified pipeline successfully handling failure."""
   with (
     patch("builtins.open", mock_open(read_data="x = 1")),
@@ -132,7 +172,7 @@ def test_cli_e2e_verified_pipeline_failure():
     assert main(["verified-pipeline", "some_path.py"]) == 1
 
 
-def test_cli_e2e_unknown_command():
+def test_cli_e2e_unknown_command() -> None:
   """Verifies the behavior of main with an unknown command."""
   import argparse
 
@@ -141,16 +181,16 @@ def test_cli_e2e_unknown_command():
     class DummyArgs:
       """Dummy args."""
 
-      command = "unknown_cmd"
-      verbose = False
+      command: str = "unknown_cmd"
+      verbose: bool = False
       log_file = None
-      no_color = False
+      no_color: bool = False
 
     mock_parse.return_value = DummyArgs()
     assert main(["unknown_cmd"]) == 0
 
 
-def test_cli_e2e_module_execution():
+def test_cli_e2e_module_execution() -> None:
   """Tests running the module directly"""
   with patch("sys.exit") as mock_exit:
     with patch.object(sys, "argv", ["ml_switcheroo", "schema"]):

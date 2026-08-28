@@ -5,10 +5,11 @@ demonstrating the usage of JAX NumPy APIs and providing a translation target
 or source for framework mapping.
 """
 
+import jax
 import jax.numpy as jnp
 
 
-def compute_loss(prediction, target):
+def compute_loss(prediction: jax.Array, target: jax.Array) -> jax.Array:
   """Calculates Mean Absolute Error.
 
   Semantic pivot: jnp.abs, jnp.mean -> torch.abs, torch.mean.
@@ -20,6 +21,6 @@ def compute_loss(prediction, target):
   Returns:
     jax.Array: The calculated Mean Absolute Error loss as a scalar JAX array.
   """
-  diff = jnp.abs(prediction - target)
-  loss = jnp.mean(diff)
+  diff: jax.Array = jnp.abs(prediction - target)
+  loss: jax.Array = jnp.mean(diff)
   return loss

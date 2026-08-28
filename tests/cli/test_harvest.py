@@ -1,11 +1,12 @@
 """Test module."""
 
+import pytest
 from argparse import Namespace
 from pathlib import Path
 from ml_switcheroo.cli.handlers.harvest import handle_harvest
 
 
-def test_handle_harvest(capsys):
+def test_handle_harvest(capsys: pytest.CaptureFixture[str]) -> None:
   """Test element."""
   args = Namespace(path=Path("tests/manual"))
   handle_harvest(args)

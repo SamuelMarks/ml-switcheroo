@@ -4,8 +4,11 @@ This module provides logic to inject automated verification reports (the Compati
 directly into the `README.md` file, ensuring documentation stays valid with the code.
 """
 
+import typing
+
+
 from pathlib import Path
-from typing import Dict, Optional, Any
+from typing import Dict
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.console import log_error, log_success
@@ -84,14 +87,14 @@ class ReadmeEditor:
 
     # We need to map tokens back to lines.
     # tokens[target_idx].map contains the line numbers [start, end]
-    start_line = tokens[target_idx].map[1] if tokens[target_idx].map else -1  # type: ignore
+    start_line = tokens[target_idx].map[1] if tokens[target_idx].map else -1
 
     if start_line == -1:
       log_error("Could not determine line mapping for header.")
       return False
 
     end_line = (
-      tokens[next_heading_idx].map[0]  # type: ignore
+      tokens[next_heading_idx].map[0]
       if next_heading_idx != -1 and tokens[next_heading_idx].map
       else len(content.splitlines())
     )
@@ -179,7 +182,7 @@ class ReadmeEditor:
     return "\n".join(lines)
 
 
-def _guess_category(api_name: str, target_var: Optional[Dict[Any, Any]]) -> str:
+def _guess_category(api_name: str, target_var: typing.Optional[typing.Dict[str, typing.Any]]) -> str:
   """Heuristic helper to categorize op based on API string contents.
 
   Args:

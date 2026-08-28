@@ -11,12 +11,12 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
-def backend():
+def backend() -> StableHloBackend:
   """Provides a StableHLO Backend with a loaded SemanticsManager."""
   return StableHloBackend(SemanticsManager())
 
 
-NN_OPS = [
+NN_OPS: list[tuple[str, str]] = [
   ("BatchNormGrad", "stablehlo.batch_norm_grad"),
   ("BatchNormInference", "stablehlo.batch_norm_inference"),
   ("BatchNormTraining", "stablehlo.batch_norm_training"),
@@ -34,7 +34,7 @@ NN_OPS = [
 
 
 @pytest.mark.parametrize("logical_op, expected_mlir_op", NN_OPS)
-def test_nn_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str):
+def test_nn_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str) -> None:
   """Verifies that neural network operations are correctly mapped to StableHLO syntax.
 
   This ensures both mapping resolution and operand generation are correct.
@@ -44,7 +44,7 @@ def test_nn_operations(backend: StableHloBackend, logical_op: str, expected_mlir
   g.nodes = [LogicalNode("in_node", "Input"), LogicalNode("op_node", logical_op), LogicalNode("out_node", "Output")]
   g.edges = [LogicalEdge("in_node", "op_node"), LogicalEdge("op_node", "out_node")]
 
-  mlir_code = backend.compile(g)
+  mlir_code: str = backend.compile(g)
 
   # 1. Operation exists in MLIR output
   assert expected_mlir_op in mlir_code

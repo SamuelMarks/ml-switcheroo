@@ -13,6 +13,9 @@ It provides:
 
 from typing import Any
 
+import typing
+
+
 import logging
 from typing import List, Tuple, Dict, Optional
 
@@ -21,9 +24,9 @@ try:
   import torch.nn as nn  # pragma: no cover
   import torch.optim as optim  # pragma: no cover
 except Exception:  # pragma: no cover
-  torch: Any = None  # type: ignore  # pragma: no cover
-  nn = None  # type: ignore  # pragma: no cover
-  optim = None  # type: ignore  # pragma: no cover
+  torch = None  # pragma: no cover
+  nn = None  # pragma: no cover
+  optim = None  # pragma: no cover
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -60,7 +63,7 @@ class TorchAdapter(TorchIOMixin):
     and GHOST snapshot loading.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data: Dict[str, Any] = {}
+    self._snapshot_data = {}
     if torch is None:
       self._mode = InitMode.GHOST  # pragma: no cover
       self._snapshot_data = load_snapshot_for_adapter("torch")  # pragma: no cover
@@ -290,7 +293,9 @@ class TorchAdapter(TorchIOMixin):
 
     return get_torch_tiered_examples()
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert input data (NumPy, lists) into PyTorch Tensors for verification runners.
 
     Args:
@@ -353,7 +358,7 @@ class TorchAdapter(TorchIOMixin):
       results.extend(getattr(self, "_scan_layers", lambda: [])())  # pragma: no cover
     return results
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply manual patches to the standard mappings if necessary.
 
     Used to inject complex behaviors not captured by simple API scanning.

@@ -9,9 +9,11 @@ Updates:
 - Using explicit path resolution imports.
 """
 
+import ml_switcheroo
+
 import json
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import List, Tuple
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.semantics.merging import (
   merge_tier_data,
@@ -27,7 +29,7 @@ DISCOVERED_FILENAMES = {"k_discovered.yaml"}
 class KnowledgeBaseLoader:
   """Handle the I/O operations for populating the SemanticsManager."""
 
-  def __init__(self, manager: Any):
+  def __init__(self, manager: "ml_switcheroo.semantics.manager.SemanticsManager") -> None:
     """Initialize the loader.
 
     Args:
@@ -116,7 +118,7 @@ class KnowledgeBaseLoader:
       except Exception as e:
         print(f"⚠️ Error loading overlay {fpath.name}: {e}")
 
-  def _load_tier_content(self, content: Dict[str, Any], tier: SemanticTier) -> None:
+  def _load_tier_content(self, content: dict, tier: SemanticTier) -> None:
     """Merge a specification dictionary into the manager.
 
     Args:
@@ -132,7 +134,7 @@ class KnowledgeBaseLoader:
       tier=tier,
     )
 
-  def _load_overlay_content(self, content: Dict[str, Any], filename: str) -> None:
+  def _load_overlay_content(self, content: dict, filename: str) -> None:
     """Merge a snapshot overlay into the manager.
 
     Args:

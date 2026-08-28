@@ -4,11 +4,12 @@ It orchestrates the generation of PyTest-compatible files that verify
 operations across multiple frameworks by using the semantic definitions.
 """
 
-from typing import Any
+import ml_switcheroo
+import typing
+
 
 import ast
 import pathlib
-from typing import Dict
 
 from ml_switcheroo.generated_tests.templates import get_template, is_static_arg
 from ml_switcheroo.generated_tests.inputs import parse_arg_def, generate_input_value_code
@@ -25,7 +26,7 @@ class TestCaseGenerator:
   # Prevent pytest from trying to collect this class as a test suite
   __test__ = False
 
-  def __init__(self, semantics_mgr: Any = None) -> None:
+  def __init__(self, semantics_mgr: typing.Optional["ml_switcheroo.semantics.manager.SemanticsManager"] = None) -> None:
     """Initialize the TestCaseGenerator.
 
     Args:
@@ -36,7 +37,7 @@ class TestCaseGenerator:
     """
     self.semantics_mgr = semantics_mgr
 
-  def _ensure_runtime_module(self, out_dir: pathlib.Path, frameworks: Any = None) -> None:
+  def _ensure_runtime_module(self, out_dir: pathlib.Path, frameworks: typing.Optional[typing.List[str]] = None) -> None:
     """Proxy request to runtime_builder.
 
     Args:
@@ -48,7 +49,7 @@ class TestCaseGenerator:
     """
     ensure_runtime_module(out_dir, frameworks, self.semantics_mgr)
 
-  def generate(self, semantics: Dict[str, Any], out_file: pathlib.Path) -> None:
+  def generate(self, semantics: typing.Dict[str, dict], out_file: pathlib.Path) -> None:
     """Generate a test file based on the provided semantics.
 
     Args:

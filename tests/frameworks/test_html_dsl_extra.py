@@ -4,7 +4,7 @@ from ml_switcheroo.frameworks.html_dsl import HtmlDSLAdapter
 from ml_switcheroo.semantics.schema import PluginTraits
 
 
-def test_html_dsl_missing_methods():
+def test_html_dsl_missing_methods() -> None:
   """Test function."""
   adapter = HtmlDSLAdapter()
   assert isinstance(adapter.plugin_traits, PluginTraits)

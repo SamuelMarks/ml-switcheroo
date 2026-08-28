@@ -1,17 +1,18 @@
 """Test module."""
 
 import pytest
+import typing
 import libcst as cst
 from unittest.mock import patch, MagicMock
 
-from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.graph import LogicalGraph
 
 
 @patch("ml_switcheroo.core.engine.PythonFrontend")
 @patch("ml_switcheroo.core.engine.get_backend_class")
-def test_engine_run_compiler_pipeline_python(mock_get_backend, mock_frontend_class):
+def test_engine_run_compiler_pipeline_python(mock_get_backend: MagicMock, mock_frontend_class: MagicMock) -> None:
   """Test element."""
   mock_frontend = mock_frontend_class.return_value
   mock_graph = LogicalGraph()
@@ -29,7 +30,7 @@ def test_engine_run_compiler_pipeline_python(mock_get_backend, mock_frontend_cla
   # We mock ingest_code inside engine to just return a basic CST to avoid complex python parsing
   with patch("ml_switcheroo.core.engine.ingest_code") as mock_ingest:
     mock_ingest.return_value = cst.parse_module("code")
-    res = engine._run_compiler_pipeline("code", MagicMock())
+    res: ConversionResult = engine._run_compiler_pipeline("code", MagicMock())
 
     assert res.success is True
     assert res.code == "compiled_python"
@@ -38,7 +39,9 @@ def test_engine_run_compiler_pipeline_python(mock_get_backend, mock_frontend_cla
 @patch("ml_switcheroo.core.engine.SassParser")
 @patch("ml_switcheroo.core.engine.SassLifter")
 @patch("ml_switcheroo.core.engine.get_backend_class")
-def test_engine_run_compiler_pipeline_sass(mock_get_backend, mock_lifter_class, mock_parser_class):
+def test_engine_run_compiler_pipeline_sass(
+  mock_get_backend: MagicMock, mock_lifter_class: MagicMock, mock_parser_class: MagicMock
+) -> None:
   """Test element."""
   mock_parser = mock_parser_class.return_value
   mock_parser.parse.return_value.statements = []
@@ -52,7 +55,7 @@ def test_engine_run_compiler_pipeline_sass(mock_get_backend, mock_lifter_class, 
   mock_backend_class.return_value.compile.return_value = "compiled_sass"
 
   engine = ASTEngine(source="sass", target="html")
-  res = engine._run_compiler_pipeline("code", MagicMock())
+  res: ConversionResult = engine._run_compiler_pipeline("code", MagicMock())
 
   assert res.success is True
   assert res.code == "compiled_sass"
@@ -61,7 +64,9 @@ def test_engine_run_compiler_pipeline_sass(mock_get_backend, mock_lifter_class, 
 @patch("ml_switcheroo.core.engine.RdnaParser")
 @patch("ml_switcheroo.core.engine.RdnaLifter")
 @patch("ml_switcheroo.core.engine.get_backend_class")
-def test_engine_run_compiler_pipeline_rdna(mock_get_backend, mock_lifter_class, mock_parser_class):
+def test_engine_run_compiler_pipeline_rdna(
+  mock_get_backend: MagicMock, mock_lifter_class: MagicMock, mock_parser_class: MagicMock
+) -> None:
   """Test element."""
   mock_parser = mock_parser_class.return_value
   mock_parser.parse.return_value.statements = []
@@ -75,7 +80,7 @@ def test_engine_run_compiler_pipeline_rdna(mock_get_backend, mock_lifter_class, 
   mock_backend_class.return_value.compile.return_value = "compiled_rdna"
 
   engine = ASTEngine(source="rdna", target="html")
-  res = engine._run_compiler_pipeline("code", MagicMock())
+  res: ConversionResult = engine._run_compiler_pipeline("code", MagicMock())
 
   assert res.success is True
   assert res.code == "compiled_rdna"
@@ -84,7 +89,9 @@ def test_engine_run_compiler_pipeline_rdna(mock_get_backend, mock_lifter_class, 
 @patch("ml_switcheroo.core.engine.PythonFrontend")
 @patch("ml_switcheroo.core.engine.get_backend_class")
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_engine_run_compiler_pipeline_stablehlo(mock_ingest, mock_get_backend, mock_frontend_class):
+def test_engine_run_compiler_pipeline_stablehlo(
+  mock_ingest: MagicMock, mock_get_backend: MagicMock, mock_frontend_class: MagicMock
+) -> None:
   """Test element."""
   mock_ingest.return_value = cst.parse_module("code")
   mock_frontend = mock_frontend_class.return_value
@@ -96,7 +103,7 @@ def test_engine_run_compiler_pipeline_stablehlo(mock_ingest, mock_get_backend, m
   mock_get_backend.return_value = mock_backend_class
 
   engine = ASTEngine(source="stablehlo", target="html")
-  res = engine._run_compiler_pipeline("code", MagicMock())
+  res: ConversionResult = engine._run_compiler_pipeline("code", MagicMock())
 
   assert res.success is True
   assert res.code == "compiled_stablehlo"
@@ -107,7 +114,13 @@ def test_engine_run_compiler_pipeline_stablehlo(mock_ingest, mock_get_backend, m
 @patch("ml_switcheroo.core.engine.UsageScanner")
 @patch("ml_switcheroo.core.engine.ImportResolver")
 @patch("ml_switcheroo.core.engine.ImportFixer")
-def test_engine_run_rewriter_pipeline(mock_fixer, mock_resolver, mock_scanner, mock_pipeline_class, mock_ingest):
+def test_engine_run_rewriter_pipeline(
+  mock_fixer: MagicMock,
+  mock_resolver: MagicMock,
+  mock_scanner: MagicMock,
+  mock_pipeline_class: MagicMock,
+  mock_ingest: MagicMock,
+) -> None:
   """Test element."""
   mock_ingest.return_value = cst.parse_module("code")
 
@@ -127,7 +140,8 @@ def test_engine_run_rewriter_pipeline(mock_fixer, mock_resolver, mock_scanner, m
   class MockTree:
     code = "final_code"
 
-    def visit(self, visitor):
+    def visit(self, visitor: typing.Any) -> typing.Any:
+      """Visits."""
       if type(visitor).__name__ == "UsageScanner":
         return self
       return self
@@ -140,10 +154,11 @@ def test_engine_run_rewriter_pipeline(mock_fixer, mock_resolver, mock_scanner, m
     mock_linter = mock_linter_class.return_value
     mock_linter.check.return_value = ["linter_error"]
 
-    res = engine._run_rewriter_pipeline("code", MagicMock())
+    res: ConversionResult = engine._run_rewriter_pipeline("code", MagicMock())
 
     assert res.success is True
     assert res.code == "final_code"
+    assert res.errors is not None
     assert "linter_error" in res.errors
 
 
@@ -155,8 +170,14 @@ def test_engine_run_rewriter_pipeline(mock_fixer, mock_resolver, mock_scanner, m
 @patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher")
 @patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter")
 def test_engine_run_rewriter_pipeline_graph_opt(
-  mock_emitter, mock_patcher, mock_differ, mock_opt, mock_extractor, mock_pipeline, mock_ingest
-):
+  mock_emitter: MagicMock,
+  mock_patcher: MagicMock,
+  mock_differ: MagicMock,
+  mock_opt: MagicMock,
+  mock_extractor: MagicMock,
+  mock_pipeline: MagicMock,
+  mock_ingest: MagicMock,
+) -> None:
   """Test element."""
   mock_ingest.return_value = cst.parse_module("code")
 
@@ -177,7 +198,8 @@ def test_engine_run_rewriter_pipeline_graph_opt(
   class MockTree:
     code = "final"
 
-    def visit(self, visitor):
+    def visit(self, visitor: typing.Any) -> typing.Any:
+      """Visits."""
       return self
 
   mock_ingest.return_value = MockTree()
@@ -202,11 +224,11 @@ def test_engine_run_rewriter_pipeline_graph_opt(
     for mock_pass in [me, md1, md2, md3, mi, mf1, mf2, mf3]:
       mock_pass.return_value.apply.side_effect = lambda g: g
 
-    res = engine._run_rewriter_pipeline("code", MagicMock())
+    res: ConversionResult = engine._run_rewriter_pipeline("code", MagicMock())
     assert res.success is True
 
 
-def test_engine_run_compiler_pipeline_unknown_isa():
+def test_engine_run_compiler_pipeline_unknown_isa() -> None:
   """Test element."""
   # We can't use an unknown ISA in ASTEngine initialization because RuntimeConfig validates it.
   # So we bypass the validation by patching is_isa_source locally in the test instead
@@ -220,7 +242,7 @@ def test_engine_run_compiler_pipeline_unknown_isa():
 
 @patch("ml_switcheroo.core.engine.PythonFrontend")
 @patch("ml_switcheroo.core.engine.get_backend_class")
-def test_engine_run_compiler_pipeline_no_backend(mock_get_backend, mock_frontend_class):
+def test_engine_run_compiler_pipeline_no_backend(mock_get_backend: MagicMock, mock_frontend_class: MagicMock) -> None:
   """Test element."""
   mock_get_backend.return_value = None
   config = RuntimeConfig(source_framework="torch", target_framework="jax", enable_sharding=True)
@@ -234,7 +256,9 @@ def test_engine_run_compiler_pipeline_no_backend(mock_get_backend, mock_frontend
 @patch("ml_switcheroo.core.engine.PythonFrontend")
 @patch("ml_switcheroo.core.engine.get_backend_class")
 @patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer")
-def test_engine_run_compiler_pipeline_graph_opt(mock_opt, mock_get_backend, mock_frontend_class):
+def test_engine_run_compiler_pipeline_graph_opt(
+  mock_opt: MagicMock, mock_get_backend: MagicMock, mock_frontend_class: MagicMock
+) -> None:
   """Test element."""
   mock_opt_inst = mock_opt.return_value
   mock_opt_inst.optimize.return_value = LogicalGraph()
@@ -272,21 +296,22 @@ def test_engine_run_compiler_pipeline_graph_opt(mock_opt, mock_get_backend, mock
 @patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer")
 @patch("ml_switcheroo.core.compiler.differ.GraphDiffer")
 def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
-  mock_differ, mock_opt, mock_extractor, mock_pipeline, mock_ingest
-):
+  mock_differ: MagicMock, mock_opt: MagicMock, mock_extractor: MagicMock, mock_pipeline: MagicMock, mock_ingest: MagicMock
+) -> None:
   """Test element."""
   mock_differ.return_value.diff.return_value = []  # Empty plan
   mock_extractor_inst = mock_extractor.return_value
   mock_extractor_inst.graph = LogicalGraph()
   from ml_switcheroo.core.compiler.ir import LogicalNode
 
-  mock_extractor_inst.graph.nodes = {"n1": LogicalNode(id="n1", kind="dummy")}
+  mock_extractor_inst.graph.nodes = {"n1": LogicalNode(id="n1", kind="dummy")}  # type: ignore
   mock_extractor_inst.node_map = {}
 
   class MockTree:
     code = "final"
 
-    def visit(self, visitor):
+    def visit(self, visitor: typing.Any) -> typing.Any:
+      """Visits."""
       return self
 
   mock_ingest.return_value = MockTree()
@@ -294,21 +319,24 @@ def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
 
   config = RuntimeConfig(source_framework="torch", target_framework="jax", enable_graph_optimization=True)
   engine = ASTEngine(config=config)
-  res = engine._run_rewriter_pipeline("code", MagicMock())
+  res: ConversionResult = engine._run_rewriter_pipeline("code", MagicMock())
   assert res.success is True
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
 @patch("ml_switcheroo.core.engine.RewriterPipeline")
 @patch("ml_switcheroo.core.engine.GraphExtractor")
-def test_engine_run_rewriter_pipeline_graph_opt_fail(mock_extractor, mock_pipeline, mock_ingest):
+def test_engine_run_rewriter_pipeline_graph_opt_fail(
+  mock_extractor: MagicMock, mock_pipeline: MagicMock, mock_ingest: MagicMock
+) -> None:
   """Test element."""
   mock_extractor.side_effect = Exception("Graph Extraction Failed")
 
   class MockTree:
     code = "final"
 
-    def visit(self, visitor):
+    def visit(self, visitor: typing.Any) -> typing.Any:
+      """Visits."""
       return self
 
   mock_ingest.return_value = MockTree()
@@ -316,21 +344,23 @@ def test_engine_run_rewriter_pipeline_graph_opt_fail(mock_extractor, mock_pipeli
 
   config = RuntimeConfig(source_framework="torch", target_framework="jax", enable_graph_optimization=True)
   engine = ASTEngine(config=config)
-  res = engine._run_rewriter_pipeline("code", MagicMock())
+  res: ConversionResult = engine._run_rewriter_pipeline("code", MagicMock())
   assert res.success is True  # Should proceed with raw CST
+  assert res.errors is not None
   assert len(res.errors) == 0
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
 @patch("ml_switcheroo.core.engine.RewriterPipeline")
-def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline, mock_ingest):
+def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline: MagicMock, mock_ingest: MagicMock) -> None:
   """Test element."""
 
   class MockTree:
     # Needs to exactly match the start marker string
     code = "# <SWITCHEROO_FAIL_123"
 
-    def visit(self, visitor):
+    def visit(self, visitor: typing.Any) -> typing.Any:
+      """Visits."""
       return self
 
   mock_ingest.return_value = MockTree()
@@ -340,14 +370,17 @@ def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline, mock_ingest):
 
   # We must patch EscapeHatch.START_MARKER to match our code
   with patch("ml_switcheroo.core.engine.EscapeHatch.START_MARKER", "# <SWITCHEROO_FAIL_"):
-    res = engine._run_rewriter_pipeline("code", MagicMock())
+    res: ConversionResult = engine._run_rewriter_pipeline("code", MagicMock())
+    assert res.errors is not None
     assert len(res.errors) > 0
     assert "Escape Hatches Detected" in res.errors[0]
 
 
 @patch("ml_switcheroo.core.engine.PythonFrontend")
 @patch("ml_switcheroo.core.engine.get_backend_class")
-def test_engine_run_compiler_pipeline_ingest_fallback(mock_get_backend, mock_frontend_class):
+def test_engine_run_compiler_pipeline_ingest_fallback(
+  mock_get_backend: MagicMock, mock_frontend_class: MagicMock
+) -> None:
   """Test element."""
   mock_frontend = mock_frontend_class.return_value
   mock_graph = LogicalGraph()
@@ -364,6 +397,6 @@ def test_engine_run_compiler_pipeline_ingest_fallback(mock_get_backend, mock_fro
 
   # Force ingest_code to raise an exception, triggering the fallback
   with patch("ml_switcheroo.core.engine.ingest_code", side_effect=Exception("Ingest Failed")):
-    res = engine._run_compiler_pipeline("code", MagicMock())
+    res: ConversionResult = engine._run_compiler_pipeline("code", MagicMock())
     assert res.success is True
     assert res.code == "compiled_python"

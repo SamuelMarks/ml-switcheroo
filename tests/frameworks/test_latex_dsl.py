@@ -1,12 +1,13 @@
 """Test suite for the Latex Dsl module."""
 
-from unittest.mock import patch
+import typing
+from unittest.mock import patch, MagicMock
 from ml_switcheroo.frameworks.latex_dsl import LatexDSLAdapter
 from ml_switcheroo.frameworks.base import InitMode, StandardMap
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
-def test_latex_dsl_init():
+def test_latex_dsl_init() -> None:
   """Verifies the behavior of LaTeX DSL initialization."""
   adapter = LatexDSLAdapter()
   assert adapter.display_name == "LaTeX DSL (MIDL)"
@@ -15,43 +16,43 @@ def test_latex_dsl_init():
   assert adapter._mode == InitMode.GHOST
 
 
-def test_latex_dsl_create_parser():
+def test_latex_dsl_create_parser() -> None:
   """Verifies the behavior of LaTeX DSL create parser."""
   adapter = LatexDSLAdapter()
-  parser = adapter.create_parser("y = |x|")
+  parser: typing.Any = adapter.create_parser("y = |x|")
   assert parser is not None
   assert getattr(parser, "source", None) == "y = |x|"
 
 
-def test_latex_dsl_properties():
+def test_latex_dsl_properties() -> None:
   """Verifies the behavior of LaTeX DSL properties."""
   adapter = LatexDSLAdapter()
   assert adapter.import_alias == ("midl", "midl")
   assert "midl" in adapter.import_namespaces
   assert SemanticTier.NEURAL in adapter.supported_tiers
-  traits = adapter.structural_traits
+  traits: typing.Any = adapter.structural_traits
   assert traits.module_base == "midl.Module"
-  config = adapter.test_config
+  config: dict[str, typing.Any] = adapter.test_config
   assert "% latex package imports" in config["import"]
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
   assert adapter.get_to_numpy_code() == "return str(obj)"
   assert adapter.declared_magic_args == []
   assert adapter.rng_seed_methods == []
-  defs = adapter.definitions
+  defs: typing.Any = adapter.definitions
   assert "Module" in defs
-  specs = adapter.specifications
+  specs: typing.Any = adapter.specifications
   assert "Conv2d" in specs
-  snapshot = {}
+  snapshot: dict[str, typing.Any] = {}
   adapter.apply_wiring(snapshot)
   assert snapshot == {}
   assert adapter.get_doc_url("anything") is None
-  examples = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
 
 
 @patch("ml_switcheroo.frameworks.latex_dsl.load_definitions")
-def test_latex_dsl_definitions_already_present(mock_load):
+def test_latex_dsl_definitions_already_present(mock_load: MagicMock) -> None:
   """Verifies the behavior of LaTeX DSL definitions already present."""
   mock_load.return_value = {
     "Module": StandardMap(api="existing.Module"),
@@ -59,5 +60,5 @@ def test_latex_dsl_definitions_already_present(mock_load):
     "Linear": StandardMap(api="existing.Linear"),
   }
   adapter = LatexDSLAdapter()
-  defs = adapter.definitions
+  defs: typing.Any = adapter.definitions
   assert defs["Module"].api == "existing.Module"

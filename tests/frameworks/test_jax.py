@@ -1,10 +1,12 @@
 """Test suite for the Jax module."""
 
+import pytest
+import typing
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.base import InitMode
 
 
-def test_jax_adapter_init():
+def test_jax_adapter_init() -> None:
   """Verifies the behavior of JAX adapter initialization."""
   adapter = JaxCoreAdapter()
   assert adapter.display_name == "JAX (no framework)"
@@ -12,111 +14,111 @@ def test_jax_adapter_init():
   assert adapter.ui_priority == 10
 
 
-def test_jax_import_alias():
+def test_jax_import_alias() -> None:
   """Verifies the behavior of JAX import alias."""
   adapter = JaxCoreAdapter()
   assert adapter.import_alias == ("jax.numpy", "jnp")
 
 
-def test_jax_import_namespaces():
+def test_jax_import_namespaces() -> None:
   """Verifies the behavior of JAX import namespaces."""
   adapter = JaxCoreAdapter()
-  ns = adapter.import_namespaces
+  ns: typing.Any = adapter.import_namespaces
   assert "jax.numpy" in ns
   assert ns["jax.numpy"].recommended_alias == "jnp"
   assert "optax" in ns
 
 
-def test_jax_test_config():
+def test_jax_test_config() -> None:
   """Verifies the behavior of JAX test configuration."""
   adapter = JaxCoreAdapter()
-  config = adapter.test_config
+  config: dict[str, typing.Any] = adapter.test_config
   assert "import jax.numpy as jnp" in config["import"]
 
 
-def test_jax_harness_imports():
+def test_jax_harness_imports() -> None:
   """Verifies the behavior of JAX harness imports."""
   adapter = JaxCoreAdapter()
   assert "import jax" in adapter.harness_imports
   assert "import jax.random" in adapter.harness_imports
 
 
-def test_jax_harness_init_code():
+def test_jax_harness_init_code() -> None:
   """Verifies the behavior of JAX harness initialization code."""
   adapter = JaxCoreAdapter()
-  code = adapter.get_harness_init_code()
+  code: str = adapter.get_harness_init_code()
   assert "def _make_jax_key(seed):" in code
   assert "jax.random.PRNGKey(seed)" in code
 
 
-def test_jax_declared_magic_args():
+def test_jax_declared_magic_args() -> None:
   """Verifies the behavior of JAX declared magic arguments."""
   adapter = JaxCoreAdapter()
   assert adapter.declared_magic_args == ["key"]
 
 
-def test_jax_structural_traits():
+def test_jax_structural_traits() -> None:
   """Verifies the behavior of JAX structural traits."""
   adapter = JaxCoreAdapter()
-  traits = adapter.structural_traits
+  traits: typing.Any = adapter.structural_traits
   assert traits.module_base is None
   assert traits.forward_method == "__call__"
   assert not traits.requires_super_init
 
 
-def test_jax_rng_seed_methods():
+def test_jax_rng_seed_methods() -> None:
   """Verifies the behavior of JAX rng seed methods."""
   adapter = JaxCoreAdapter()
   assert adapter.rng_seed_methods == []
 
 
-def test_jax_definitions(monkeypatch):
+def test_jax_definitions(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of JAX definitions."""
   adapter = JaxCoreAdapter()
-  defs = adapter.definitions
+  defs: typing.Any = adapter.definitions
   assert isinstance(defs, dict)
 
 
-def test_jax_convert_no_array():
+def test_jax_convert_no_array() -> None:
   """Verifies the behavior of JAX convert no array."""
   adapter = JaxCoreAdapter()
   assert adapter.convert("test") == "test"
 
 
-def test_jax_convert_list():
+def test_jax_convert_list() -> None:
   """Verifies the behavior of JAX convert list."""
   adapter = JaxCoreAdapter()
-  res = adapter.convert([1, 2, 3])
+  res: typing.Any = adapter.convert([1, 2, 3])
   assert res is not None
 
 
-def test_jax_apply_wiring():
+def test_jax_apply_wiring() -> None:
   """Verifies the behavior of JAX apply wiring."""
   adapter = JaxCoreAdapter()
-  snapshot = {}
+  snapshot: dict[str, typing.Any] = {}
   adapter.apply_wiring(snapshot)
   assert "mappings" in snapshot
   assert "templates" in snapshot
 
 
-def test_jax_tiered_examples():
+def test_jax_tiered_examples() -> None:
   """Verifies the behavior of JAX tiered examples."""
   adapter = JaxCoreAdapter()
-  examples = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
   assert "tier2_neural" in examples
   assert "tier4_qwen3-vl" in examples
   assert "tier3_extras" in examples
 
 
-def test_jax_doc_url():
+def test_jax_doc_url() -> None:
   """Verifies the behavior of JAX documentation URL."""
   adapter = JaxCoreAdapter()
-  url = adapter.get_doc_url("jax.numpy.abs")
+  url: typing.Optional[str] = adapter.get_doc_url("jax.numpy.abs")
   assert url == "https://jax.readthedocs.io/en/latest/_autosummary/jax.numpy.abs.html"
 
 
-def test_jax_init_live_mode(monkeypatch):
+def test_jax_init_live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of JAX initialization live mode."""
   monkeypatch.setattr("ml_switcheroo.frameworks.jax.jax", True)
   adapter = JaxCoreAdapter()

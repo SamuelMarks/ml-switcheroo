@@ -1,45 +1,46 @@
 """Docstring."""
 
 import pytest
+import typing
 from ml_switcheroo.core.cst.base import CSTNode, Trivia
 
 
 class MockCST(CSTNode):
   """Docstring."""
 
-  def _get_name(self):
+  def _get_name(self) -> str:
     """Docstring."""
     return "Mock"
 
-  def _get_fields(self):
+  def _get_fields(self) -> dict[str, typing.Any]:
     """Docstring."""
     return {"a": 1}
 
 
-def test_cst_base_render():
+def test_cst_base_render() -> None:
   """Docstring."""
   t = Trivia(text=" ")
-  m = MockCST(leading_trivia=[t], trailing_trivia=[t])
+  m = MockCST(leading_trivia=[t], trailing_trivia=[t])  # type: ignore
   # The default to_text raises NotImplementedError
   with pytest.raises(NotImplementedError):
     m.to_text()
 
-  rep = repr(m)
+  rep: str = repr(m)
   assert "Mock" in rep
 
 
-def test_cst_base_trivia_convert():
+def test_cst_base_trivia_convert() -> None:
   """Docstring."""
-  m = MockCST(leading_trivia=" ")
+  m = MockCST(leading_trivia=" ")  # type: ignore
   assert len(m.leading_trivia) == 1
   assert m.leading_trivia[0].text == " "
 
-  m2 = MockCST(trailing_trivia=" ")
+  m2 = MockCST(trailing_trivia=" ")  # type: ignore
   assert len(m2.trailing_trivia) == 1
   assert m2.trailing_trivia[0].text == " "
 
 
-def test_trivia_eq():
+def test_trivia_eq() -> None:
   """Docstring."""
   t1 = Trivia(text="a")
   t2 = Trivia(text="a")
@@ -47,20 +48,20 @@ def test_trivia_eq():
   assert t1 != "a"
 
 
-def test_cst_base_trivia_convert_none():
+def test_cst_base_trivia_convert_none() -> None:
   """Docstring."""
-  m = MockCST(leading_trivia=None, trailing_trivia=None)
+  m = MockCST(leading_trivia=None, trailing_trivia=None)  # type: ignore
   assert m.leading_trivia == []
   assert m.trailing_trivia == []
 
 
-def test_cst_base_str():
+def test_cst_base_str() -> None:
   """Docstring."""
 
   class MockStr(MockCST):
     """Docstring."""
 
-    def to_text(self):
+    def to_text(self) -> str:
       """Docstring."""
       return "MockStr"
 
@@ -68,16 +69,16 @@ def test_cst_base_str():
   assert str(m) == "MockStr"
 
 
-def test_cst_visitor():
+def test_cst_visitor() -> None:
   """Docstring."""
   from ml_switcheroo.core.cst.base import CSTVisitor
 
   class MockVisitor(CSTVisitor):
     """Docstring."""
 
-    def visit_MockCST(self, node):
+    def visit_MockCST(self, node: CSTNode) -> None:
       """Docstring."""
-      self.visited = True
+      self.visited = True  # type: ignore
 
   v = MockVisitor()
   m = MockCST()
@@ -85,18 +86,18 @@ def test_cst_visitor():
   assert getattr(v, "visited", False)
 
 
-def test_cst_visitor_generic():
+def test_cst_visitor_generic() -> None:
   """Docstring."""
   from ml_switcheroo.core.cst.base import CSTVisitor
 
   class MockVisitor(CSTVisitor):
     """Docstring."""
 
-    def __init__(self):
+    def __init__(self) -> None:
       """Docstring."""
       self.generic_visited = False
 
-    def generic_visit(self, node):
+    def generic_visit(self, node: CSTNode) -> None:
       """Docstring."""
       self.generic_visited = True
 
@@ -106,28 +107,34 @@ def test_cst_visitor_generic():
   assert v.generic_visited
 
 
-def test_cst_visitor_generic_fields():
+def test_cst_visitor_generic_fields() -> None:
   """Docstring."""
   from ml_switcheroo.core.cst.base import CSTVisitor
   from dataclasses import dataclass, field
-  from typing import List
+  from typing import List, Optional
 
   @dataclass
   class NodeA(CSTNode):
     """Docstring."""
 
-    child: CSTNode = None
+    child: Optional[CSTNode] = None
     children: List[CSTNode] = field(default_factory=list)
     other: int = 1
+
+    def _get_name(self) -> str:
+      return "NodeA"
+
+    def _get_fields(self) -> dict[str, typing.Any]:
+      return {"child": self.child, "children": self.children, "other": self.other}
 
   class MockVisitor(CSTVisitor):
     """Docstring."""
 
-    def __init__(self):
+    def __init__(self) -> None:
       """Docstring."""
       self.visited_count = 0
 
-    def generic_visit(self, node):
+    def generic_visit(self, node: CSTNode) -> None:
       """Docstring."""
       self.visited_count += 1
       super().generic_visit(node)
@@ -140,24 +147,30 @@ def test_cst_visitor_generic_fields():
   assert v.visited_count == 4
 
 
-def test_cst_transformer_generic_fields():
+def test_cst_transformer_generic_fields() -> None:
   """Docstring."""
   from ml_switcheroo.core.cst.base import CSTTransformer
   from dataclasses import dataclass, field
-  from typing import List
+  from typing import List, Optional
 
   @dataclass
   class NodeA(CSTNode):
     """Docstring."""
 
-    child: CSTNode = None
-    children: List[CSTNode] = field(default_factory=list)
+    child: Optional[CSTNode] = None
+    children: List[typing.Any] = field(default_factory=list)
     other: int = 1
+
+    def _get_name(self) -> str:
+      return "NodeA"
+
+    def _get_fields(self) -> dict[str, typing.Any]:
+      return {"child": self.child, "children": self.children, "other": self.other}
 
   class MockTransformer(CSTTransformer):
     """Docstring."""
 
-    def transform_NodeA(self, node):
+    def transform_NodeA(self, node: NodeA) -> typing.Any:
       """Docstring."""
       if node.other == 1:
         return self.generic_transform(node)
@@ -169,7 +182,7 @@ def test_cst_transformer_generic_fields():
   child2 = NodeA(other=3)
   root.child = child1
   root.children = [child2, "not a node"]
-  res = t.transform(root)
+  res: typing.Any = t.transform(root)
   assert res.child is child1
   assert res.children[0] is child2
   assert res.children[1] == "not a node"

@@ -8,9 +8,10 @@ from ml_switcheroo.testing.fuzzer.type_parser import (
   DictType,
   CallableType,
 )
+from typing import Dict, Any
 
 
-def test_get_fallback_base_value():
+def test_get_fallback_base_value() -> None:
   """Gets fallback base value."""
   from ml_switcheroo.testing.fuzzer.parser import get_fallback_base_value
   import numpy as np
@@ -21,7 +22,7 @@ def test_get_fallback_base_value():
   assert get_fallback_base_value(PrimitiveType(name="float"), ()) == 0.0
   assert get_fallback_base_value(PrimitiveType(name="str"), ()) == ""
   assert get_fallback_base_value(PrimitiveType(name="dtype"), ()) == np.float32
-  assert get_fallback_base_value(parse_type_annotation("Array"), (2,)).shape == (2,)
+  assert getattr(get_fallback_base_value(parse_type_annotation("Array"), (2,)), "shape") == (2,)
   assert get_fallback_base_value(ListType(inner=PrimitiveType(name="int")), ()) == []
   assert get_fallback_base_value(TupleType(elements=[PrimitiveType(name="int")], variadic=False), ()) == ()
   assert (
@@ -31,15 +32,15 @@ def test_get_fallback_base_value():
   assert get_fallback_base_value(parse_type_annotation("unknown"), ()) is None
 
 
-def test_generate_from_hint():
+def test_generate_from_hint() -> None:
   """Generates from hint."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
   import numpy as np
 
-  symbol_map = {}
+  symbol_map: Dict[str, Any] = {}
   assert generate_from_hint("int", (), 10, 5, symbol_map) == 0
   assert generate_from_hint("int", (), 0, 5, symbol_map, {"options": [42]}) == 42
-  res = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42})
+  res: Any = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42})
   assert isinstance(res, int)
   res = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42.0})
   assert isinstance(res, float)
@@ -63,7 +64,7 @@ def test_generate_from_hint():
   assert isinstance(res, list)
   assert len(res) >= 2
   assert all((isinstance(x, np.ndarray) for x in res))
-  assert all((x.shape == res[0].shape for x in res))
+  assert all((getattr(x, "shape") == getattr(res[0], "shape") for x in res))
   res = generate_from_hint("List[int]", (), 0, 5, symbol_map)
   assert isinstance(res, list)
   res = generate_from_hint("Dict[str, int]", (), 0, 5, symbol_map)
@@ -73,7 +74,7 @@ def test_generate_from_hint():
   assert isinstance(res, np.ndarray)
   res = generate_from_hint("Array", (2,), 0, 5, symbol_map, {"rank": 3})
   assert isinstance(res, np.ndarray)
-  assert len(res.shape) == 3
+  assert len(getattr(res, "shape")) == 3
   res = generate_from_hint("Callable", (), 0, 5, symbol_map)
   assert callable(res)
   res = generate_from_hint("int", (), 0, 5, symbol_map)
@@ -89,11 +90,11 @@ def test_generate_from_hint():
   assert isinstance(res, np.ndarray)
 
 
-def test_fuzzer_parser_missed():
+def test_fuzzer_parser_missed() -> None:
   """Verifies the behavior of fuzzer parser missed."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
-  symbol_map = {}
+  symbol_map: Dict[str, Any] = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.1):
     assert generate_from_hint("Optional[int]", (), 0, 5, symbol_map) is None
   with __import__("unittest.mock").mock.patch("ml_switcheroo.testing.fuzzer.parser.generate_from_hint") as mock_gen:
@@ -101,42 +102,42 @@ def test_fuzzer_parser_missed():
 
     mock_gen.side_effect = [np.zeros((2,)), np.zeros((3,))]
     with __import__("unittest.mock").mock.patch("random.randint", return_value=2):
-      res = generate_from_hint("List[Array]", (2,), 0, 5, symbol_map)
+      res: Any = generate_from_hint("List[Array]", (2,), 0, 5, symbol_map)
   res = generate_from_hint("Dict[List[int], int]", (), 0, 5, symbol_map)
   res = generate_from_hint("Dict[int]", (), 0, 5, symbol_map)
   assert res == {}
 
 
-def test_fuzzer_parser_more():
+def test_fuzzer_parser_more() -> None:
   """Verifies the behavior of fuzzer parser more."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
-  symbol_map = {}
+  symbol_map: Dict[str, Any] = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
     generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1.0]})
     generate_from_hint("Any", (), 0, 5, symbol_map, {"default": []})
 
 
-def test_fuzzer_parser_bool_list():
+def test_fuzzer_parser_bool_list() -> None:
   """Verifies the behavior of fuzzer parser boolean list."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
-  symbol_map = {}
+  symbol_map: Dict[str, Any] = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
     generate_from_hint("Any", (), 0, 5, symbol_map, {"default": True})
     generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1, 2, 3]})
 
 
-def test_fuzzer_parser_int_inference():
+def test_fuzzer_parser_int_inference() -> None:
   """Verifies the behavior of fuzzer parser integer inference."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
-  symbol_map = {}
+  symbol_map: Dict[str, Any] = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
     generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42})
 
 
-def test_fuzzer_parser_float_inference():
+def test_fuzzer_parser_float_inference() -> None:
   """Test fuzzer parser infers float from default."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
   from ml_switcheroo.testing.fuzzer.type_parser import AnyType
@@ -144,5 +145,5 @@ def test_fuzzer_parser_float_inference():
 
   # Force the code to take the type inference branch instead of just returning default
   with mock.patch("random.random", return_value=0.5):
-    val = generate_from_hint(AnyType(), {}, 0, 3, {}, {"default": 3.14})
+    val: Any = generate_from_hint(AnyType(), {}, 0, 3, {}, {"default": 3.14})
     assert isinstance(val, float)

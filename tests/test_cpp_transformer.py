@@ -19,93 +19,99 @@ from ml_switcheroo.core.compiler.backends.cpp.cst import (
 )
 
 
-def test_transformer_generic_visit_cppmodule():
+def test_transformer_generic_visit_cppmodule() -> None:
   """Test element."""
-  transformer = CppCSTTransformer()
-  node = CppModule(includes=[IncludeDirective(path="iostream")], body=[ReturnStatement()])
-  result = transformer.visit(node)
+  transformer: CppCSTTransformer = CppCSTTransformer()
+  node: CppModule = CppModule(includes=[IncludeDirective(path="iostream")], body=[ReturnStatement()])
+  result: CppNode = transformer.visit(node)
   assert isinstance(result, CppModule)
 
 
-def test_transformer_function_definition():
+def test_transformer_function_definition() -> None:
   """Test element."""
-  transformer = CppCSTTransformer()
-  node = FunctionDefinition(
-    return_type=TypeIdentifier("int"),
+  transformer: CppCSTTransformer = CppCSTTransformer()
+  node: FunctionDefinition = FunctionDefinition(
+    return_type=TypeIdentifier(name="int"),
     name="foo",
-    arguments=[FunctionArgument(TypeIdentifier("int"), "x")],
-    body=[ReturnStatement(Identifier("x"))],
+    arguments=[FunctionArgument(type_id=TypeIdentifier(name="int"), name="x")],
+    body=[ReturnStatement(value=Identifier(name="x"))],
   )
-  result = transformer.visit(node)
+  result: CppNode = transformer.visit(node)
   assert isinstance(result, FunctionDefinition)
 
 
-def test_transformer_variable_declaration():
+def test_transformer_variable_declaration() -> None:
   """Test element."""
-  transformer = CppCSTTransformer()
-  node = VariableDeclaration(type_id=TypeIdentifier("int"), name="x", initializer=Identifier("y"))
-  result = transformer.visit(node)
+  transformer: CppCSTTransformer = CppCSTTransformer()
+  node: VariableDeclaration = VariableDeclaration(
+    type_id=TypeIdentifier(name="int"), name="x", initializer=Identifier(name="y")
+  )
+  result: CppNode = transformer.visit(node)
   assert isinstance(result, VariableDeclaration)
 
-  node_no_init = VariableDeclaration(type_id=TypeIdentifier("int"), name="x")
-  result_no_init = transformer.visit(node_no_init)
+  node_no_init: VariableDeclaration = VariableDeclaration(type_id=TypeIdentifier(name="int"), name="x")
+  result_no_init: CppNode = transformer.visit(node_no_init)
   assert isinstance(result_no_init, VariableDeclaration)
 
-  node_str_init = VariableDeclaration(type_id=TypeIdentifier("int"), name="x", initializer="1")
-  result_str_init = transformer.visit(node_str_init)
+  node_str_init: VariableDeclaration = VariableDeclaration(
+    type_id=TypeIdentifier(name="int"), name="x", initializer=Identifier(name="1")
+  )
+  result_str_init: CppNode = transformer.visit(node_str_init)
   assert isinstance(result_str_init, VariableDeclaration)
 
 
-def test_transformer_binary_expression():
+def test_transformer_binary_expression() -> None:
   """Test element."""
-  transformer = CppCSTTransformer()
-  node = BinaryExpression(left=Identifier("a"), operator="+", right=Identifier("b"))
-  result = transformer.visit(node)
+  transformer: CppCSTTransformer = CppCSTTransformer()
+  node: BinaryExpression = BinaryExpression(left=Identifier(name="a"), operator="+", right=Identifier(name="b"))
+  result: CppNode = transformer.visit(node)
   assert isinstance(result, BinaryExpression)
 
 
-def test_transformer_method_call():
+def test_transformer_method_call() -> None:
   """Test element."""
-  transformer = CppCSTTransformer()
-  node = MethodCall(name="foo", arguments=[Identifier("a")])
-  result = transformer.visit(node)
+  transformer: CppCSTTransformer = CppCSTTransformer()
+  node: MethodCall = MethodCall(name="foo", arguments=[Identifier(name="a")])
+  result: CppNode = transformer.visit(node)
   assert isinstance(result, MethodCall)
 
 
-def test_transformer_block_statement():
+def test_transformer_block_statement() -> None:
   """Test element."""
-  transformer = CppCSTTransformer()
-  node = BlockStatement(statements=[ReturnStatement()])
-  result = transformer.visit(node)
+  transformer: CppCSTTransformer = CppCSTTransformer()
+  node: BlockStatement = BlockStatement(statements=[ReturnStatement()])
+  result: CppNode = transformer.visit(node)
   assert isinstance(result, BlockStatement)
 
 
-def test_transformer_pybind_module():
+def test_transformer_pybind_module() -> None:
   """Test element."""
-  transformer = CppCSTTransformer()
-  node = PyBindModule(name="mod", module_var="m", defs=[PyBindDef(name="f", function_ref="f_impl", docstring="doc")])
-  result = transformer.visit(node)
+  transformer: CppCSTTransformer = CppCSTTransformer()
+  node: PyBindModule = PyBindModule(
+    name="mod", module_var="m", defs=[PyBindDef(name="f", function_ref="f_impl", docstring="doc")]
+  )
+  result: CppNode = transformer.visit(node)
   assert isinstance(result, PyBindModule)
 
 
-def test_transformer_identifiers():
+def test_transformer_identifiers() -> None:
   """Test element."""
-  transformer = CppCSTTransformer()
-  node_id = Identifier("x")
+  transformer: CppCSTTransformer = CppCSTTransformer()
+  node_id: Identifier = Identifier(name="x")
   assert transformer.visit(node_id) is node_id
 
-  node_type = TypeIdentifier("int")
+  node_type: TypeIdentifier = TypeIdentifier(name="int")
   assert transformer.visit(node_type) is node_type
 
 
-def test_transformer_custom_node():
+def test_transformer_custom_node() -> None:
   """Test element."""
 
   class DummyNode(CppNode):
-    def to_text(self):
+    def to_text(self) -> str:
       return ""
 
-  transformer = CppCSTTransformer()
-  node = DummyNode()
-  result = transformer.visit(node)
+  transformer: CppCSTTransformer = CppCSTTransformer()
+  node: DummyNode = DummyNode()
+  result: CppNode = transformer.visit(node)
   assert result is node

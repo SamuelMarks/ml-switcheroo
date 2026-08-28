@@ -7,6 +7,7 @@ This module validates the correctness of:
 """
 
 import pytest
+import typing
 import libcst as cst
 from unittest.mock import MagicMock
 
@@ -24,7 +25,7 @@ from ml_switcheroo.core.compiler.frontends.sass.cst import (
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_sass_register_allocator_temps():
+def test_sass_register_allocator_temps() -> None:
   """Verify that temporary register allocation and deallocation functions correctly.
 
   This test instantiates a RegisterAllocator, requests a temporary register,
@@ -38,14 +39,14 @@ def test_sass_register_allocator_temps():
       None
   """
   allocator = RegisterAllocator()
-  reg = allocator.allocate_temp()
+  reg: SassRegister = allocator.allocate_temp()
   assert reg.name.startswith("R")
 
   allocator.free_register(reg.name)
   assert len(allocator._free_pool) == 254
 
 
-def test_sass_register_allocator_overflow():
+def test_sass_register_allocator_overflow() -> None:
   """Assert that the allocator raises a ValueError when the free pool is exhausted.
 
   This test simulates a register pressure overflow by emptying the allocator's
@@ -64,7 +65,7 @@ def test_sass_register_allocator_overflow():
     allocator.get_register("overflow")
 
 
-def test_sass_register_allocator_record_usage():
+def test_sass_register_allocator_record_usage() -> None:
   """Verify liveness-tracking and automatic register freeing based on usage.
 
   This test builds a liveness map from a minimal data-flow graph (Input to Output),
@@ -94,7 +95,7 @@ def test_sass_register_allocator_record_usage():
   assert len(allocator._free_pool) == 255  # Freed
 
 
-def test_sass_synth_from_graph_inputs_outputs():
+def test_sass_synth_from_graph_inputs_outputs() -> None:
   """Test SASS synthesizer generation of graph inputs and outputs as SASS comments.
 
   This test sets up a LogicalGraph with one Input node and one Output node, then
@@ -115,7 +116,7 @@ def test_sass_synth_from_graph_inputs_outputs():
   graph.nodes.append(LogicalNode(id="out1", kind="Output"))
   graph.edges.append(LogicalEdge(source="in1", target="out1"))
 
-  nodes = synth.from_graph(graph)
+  nodes: list[typing.Any] = synth.from_graph(graph)
   assert len(nodes) == 2
   assert isinstance(nodes[0], SassComment)
   assert "Input x -> " in nodes[0].text
@@ -123,7 +124,7 @@ def test_sass_synth_from_graph_inputs_outputs():
   assert "Return:" in nodes[1].text
 
 
-def test_sass_synth_from_graph_unmapped():
+def test_sass_synth_from_graph_unmapped() -> None:
   """Ensure unmapped operations emit fallback comment nodes in synthesized SASS.
 
   This test feeds a LogicalGraph containing an unknown/unmapped operation to the
@@ -144,13 +145,13 @@ def test_sass_synth_from_graph_unmapped():
   graph = LogicalGraph()
   graph.nodes.append(LogicalNode(id="op1", kind="UnknownOp"))
 
-  nodes = synth.from_graph(graph)
+  nodes: list[typing.Any] = synth.from_graph(graph)
   assert len(nodes) == 1
   assert isinstance(nodes[0], SassComment)
   assert "Unmapped Op: UnknownOp" in nodes[0].text
 
 
-def test_sass_synth_to_python_label():
+def test_sass_synth_to_python_label() -> None:
   """Verify that SassLabel nodes are properly translated to Python comment CST.
 
   This test runs the `to_python` method with a list containing a SassLabel and
@@ -166,13 +167,13 @@ def test_sass_synth_to_python_label():
   mock_semantics = MagicMock(spec=SemanticsManager)
   synth = SassSynthesizer(mock_semantics)
 
-  nodes = [SassLabel(name="L_LOOP")]
-  module = synth.to_python(nodes)
-  code = module.code
+  nodes: list[typing.Any] = [SassLabel(name="L_LOOP")]
+  module: typing.Any = synth.to_python(nodes)
+  code: str = module.code
   assert "# SassLabel: L_LOOP" in code
 
 
-def test_sass_synth_to_python_comment():
+def test_sass_synth_to_python_comment() -> None:
   """Verify translation of SassComment nodes to Python comments.
 
   This test checks that when converting a sequence of SASS nodes containing
@@ -189,17 +190,17 @@ def test_sass_synth_to_python_comment():
   mock_semantics = MagicMock(spec=SemanticsManager)
   synth = SassSynthesizer(mock_semantics)
 
-  nodes = [SassComment(text="BEGIN block"), SassComment(text="just a comment"), SassLabel(name="L")]
-  module = synth.to_python(nodes)
-  code = module.code
+  nodes: list[typing.Any] = [SassComment(text="BEGIN block"), SassComment(text="just a comment"), SassLabel(name="L")]
+  module: typing.Any = synth.to_python(nodes)
+  code: str = module.code
   assert "# BEGIN block" in code
 
-  nodes2 = [SassComment(text="other comment")]
-  module2 = synth.to_python(nodes2)
+  nodes2: list[typing.Any] = [SassComment(text="other comment")]
+  module2: typing.Any = synth.to_python(nodes2)
   assert len(module2.body) == 0
 
 
-def test_sass_synth_to_python_instruction_empty_operands():
+def test_sass_synth_to_python_instruction_empty_operands() -> None:
   """Verify code generation for instructions with no operands.
 
   This test ensures that a basic SASS instruction with no operands, such as a NOP,
@@ -216,12 +217,12 @@ def test_sass_synth_to_python_instruction_empty_operands():
   synth = SassSynthesizer(mock_semantics)
 
   inst = SassInstruction(opcode="NOP", operands=[])
-  module = synth.to_python([inst])
-  code = module.code
+  module: typing.Any = synth.to_python([inst])
+  code: str = module.code
   assert "sass.NOP()" in code
 
 
-def test_sass_synth_to_python_instruction_store():
+def test_sass_synth_to_python_instruction_store() -> None:
   """Verify store instruction translation does not involve register assignments.
 
   This test ensures that store instructions (like ST_E) which write to memory
@@ -239,13 +240,13 @@ def test_sass_synth_to_python_instruction_store():
 
   # Store ops don't assign to a dest register
   inst = SassInstruction(opcode="ST_E", operands=[SassRegister(name="R0"), SassRegister(name="R1")])
-  module = synth.to_python([inst])
-  code = module.code
+  module: typing.Any = synth.to_python([inst])
+  code: str = module.code
   assert "sass.ST_E(R0, R1)" in code
   assert "=" not in code
 
 
-def test_sass_synth_to_python_instruction_branch():
+def test_sass_synth_to_python_instruction_branch() -> None:
   """Verify branch instruction translation compiles to a statement without assignment.
 
   This test checks that branch instructions (such as BRA), which only redirect
@@ -262,13 +263,13 @@ def test_sass_synth_to_python_instruction_branch():
   synth = SassSynthesizer(mock_semantics)
 
   inst = SassInstruction(opcode="BRA", operands=[])
-  module = synth.to_python([inst])
-  code = module.code
+  module: typing.Any = synth.to_python([inst])
+  code: str = module.code
   assert "sass.BRA()" in code
   assert "=" not in code
 
 
-def test_sass_synth_to_python_instruction_alu():
+def test_sass_synth_to_python_instruction_alu() -> None:
   """Verify ALU instruction translation generates proper destination assignments.
 
   This test confirms that instructions yielding a value back to a register,
@@ -287,12 +288,12 @@ def test_sass_synth_to_python_instruction_alu():
   inst = SassInstruction(
     opcode="FADD", operands=[SassRegister(name="R0"), SassRegister(name="R1"), SassRegister(name="R2")]
   )
-  module = synth.to_python([inst])
-  code = module.code
+  module: typing.Any = synth.to_python([inst])
+  code: str = module.code
   assert "R0 = sass.FADD(R1, R2)" in code
 
 
-def test_sass_synth_to_python_instruction_predicate():
+def test_sass_synth_to_python_instruction_predicate() -> None:
   """Verify SASS instruction predicates are correctly mapped to keyword arguments.
 
   This test verifies that if a SASS instruction is guarded by a predicate (such as P0),
@@ -311,12 +312,12 @@ def test_sass_synth_to_python_instruction_predicate():
   inst = SassInstruction(
     opcode="FADD", operands=[SassRegister(name="R0")], predicate=SassPredicate(name="P0", is_guard=True)
   )
-  module = synth.to_python([inst])
-  code = module.code
+  module: typing.Any = synth.to_python([inst])
+  code: str = module.code
   assert "R0 = sass.FADD(predicate = '@P0')" in code
 
 
-def test_sass_synth_convert_operand_to_py_immediates():
+def test_sass_synth_convert_operand_to_py_immediates() -> None:
   """Verify correct mapping of numeric SASS immediates to Python CST nodes.
 
   This test checks that different formats of SASS immediate values (integers,
@@ -332,22 +333,22 @@ def test_sass_synth_convert_operand_to_py_immediates():
   synth = SassSynthesizer(MagicMock())
 
   imm1 = SassImmediate(value=10, is_hex=False)
-  py1 = synth._convert_operand_to_py(imm1)
+  py1: typing.Any = synth._convert_operand_to_py(imm1)
   assert isinstance(py1, cst.Integer)
   assert py1.value == "10"
 
   imm2 = SassImmediate(value=255, is_hex=True)
-  py2 = synth._convert_operand_to_py(imm2)
+  py2: typing.Any = synth._convert_operand_to_py(imm2)
   assert isinstance(py2, cst.Integer)
   assert py2.value == "0xff"
 
   imm3 = SassImmediate(value=1.5, is_hex=False)
-  py3 = synth._convert_operand_to_py(imm3)
+  py3: typing.Any = synth._convert_operand_to_py(imm3)
   assert isinstance(py3, cst.Float)
   assert py3.value == "1.5"
 
 
-def test_sass_synth_convert_operand_to_py_string():
+def test_sass_synth_convert_operand_to_py_string() -> None:
   """Verify complex or custom operands default to bracketed string CST.
 
   This test checks that arbitrary operand types whose string representation contains
@@ -377,12 +378,20 @@ def test_sass_synth_convert_operand_to_py_string():
       """
       return "[R0]"
 
-  py1 = synth._convert_operand_to_py(DummyOp())
+    def to_text(self) -> str:
+      """Return the text representation of the dummy operand.
+
+      Returns:
+          str: The braced string "[v0]".
+      """
+      return "[R0]"
+
+  py1: typing.Any = synth._convert_operand_to_py(DummyOp())  # type: ignore
   assert isinstance(py1, cst.SimpleString)
   assert py1.value == "'[R0]'"
 
 
-def test_sass_backend_default_init():
+def test_sass_backend_default_init() -> None:
   """Verify default initialization of the SassBackend.
 
   This test instantiates SassBackend with default arguments and asserts that
@@ -398,7 +407,7 @@ def test_sass_backend_default_init():
   assert backend.synthesizer.semantics is not None
 
 
-def test_sass_synthesizer_empty_output():
+def test_sass_synthesizer_empty_output() -> None:
   """Test SASS synthesizer with an Output node with no inputs."""
   from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -410,5 +419,5 @@ def test_sass_synthesizer_empty_output():
   graph = LogicalGraph(name="test")
   graph.nodes.append(LogicalNode(id="out", kind="Output"))
 
-  res = synthesizer.from_graph(graph)
+  res: typing.Any = synthesizer.from_graph(graph)
   assert res is not None

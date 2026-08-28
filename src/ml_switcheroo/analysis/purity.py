@@ -15,9 +15,7 @@ Operations flagged:
 Violations are marked via the `EscapeHatch` mechanism.
 """
 
-from typing import Any
-
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Set, Any
 import libcst as cst
 
 from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -53,7 +51,7 @@ class PurityScanner(cst.CSTTransformer):
   # Fallback only if semantics not provided
   _DEFAULT_RNG_METHODS: Set[str] = {"seed"}
 
-  def __init__(self, semantics: Any = None, source_fw: Optional[str] = None):
+  def __init__(self, semantics: Optional[Any] = None, source_fw: Optional[str] = None) -> None:
     """Initialize the PurityScanner.
 
     Args:
@@ -99,7 +97,7 @@ class PurityScanner(cst.CSTTransformer):
     self,
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
-  ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel[Any]]:
+  ):
     """Exit a statement line.
 
     If violations were found within this statement, wraps it in the EscapeHatch.
@@ -118,7 +116,7 @@ class PurityScanner(cst.CSTTransformer):
       reason_msg = f"Side-effect unsafe for JAX: {', '.join(unique_reasons)}"
 
       # We wrap the *updated_node*.
-      return EscapeHatch.mark_failure(updated_node, reason_msg)  # type: ignore
+      return EscapeHatch.mark_failure(updated_node, reason_msg)
 
     return updated_node
 

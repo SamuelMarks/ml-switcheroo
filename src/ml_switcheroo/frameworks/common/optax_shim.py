@@ -10,12 +10,10 @@ Capabilities:
 3.  Filters internal utilities to provide clean Abstract Standard candidates.
 """
 
-from typing import Any
-
 try:
   import optax
 except Exception:
-  optax: Any = None  # type: ignore
+  optax = None
 
 
 class OptaxScanner:

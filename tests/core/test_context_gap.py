@@ -5,7 +5,7 @@ from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.types import SignatureContext
 
 
-def test_default_arg_injector():
+def test_default_arg_injector() -> None:
   """Verifies the behavior of default argument injector."""
   ctx = RewriterContext(MagicMock(), MagicMock())
   sig_ctx = SignatureContext()
@@ -16,7 +16,7 @@ def test_default_arg_injector():
   assert len(sig_ctx.injected_args) == 1
 
 
-def test_default_preamble_injector():
+def test_default_preamble_injector() -> None:
   """Verifies the behavior of default preamble injector."""
   ctx = RewriterContext(MagicMock(), MagicMock())
   ctx._default_preamble_injector("x = 1")
@@ -34,7 +34,7 @@ def test_default_preamble_injector():
   assert "import os" in ctx.module_preamble
 
 
-def test_hydrate_source_aliases_exception():
+def test_hydrate_source_aliases_exception() -> None:
   """Verifies the behavior of hydrate source aliases correctly handling an exception."""
   semantics = MagicMock()
   semantics.get_framework_config.side_effect = Exception("err")
@@ -43,7 +43,7 @@ def test_hydrate_source_aliases_exception():
   ctx._hydrate_source_aliases()
 
 
-def test_hydrate_source_aliases_pydantic():
+def test_hydrate_source_aliases_pydantic() -> None:
   """Verifies the behavior of hydrate source aliases pydantic."""
   semantics = MagicMock()
   alias_info = MagicMock()
@@ -54,7 +54,7 @@ def test_hydrate_source_aliases_pydantic():
   assert ctx.alias_map["jax"] == "jax"
 
 
-def test_hydrate_source_aliases_no_name():
+def test_hydrate_source_aliases_no_name() -> None:
   """Verifies the behavior of hydrate source aliases no name."""
   semantics = MagicMock()
   semantics.get_framework_config.return_value = {"alias": {}}
@@ -63,7 +63,7 @@ def test_hydrate_source_aliases_no_name():
   assert "jax" not in ctx.alias_map
 
 
-def test_hydrate_source_aliases_none():
+def test_hydrate_source_aliases_none() -> None:
   """Verifies the behavior of hydrate source aliases none."""
   semantics = MagicMock()
   semantics.get_framework_config.return_value = None

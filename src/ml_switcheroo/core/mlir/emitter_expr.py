@@ -6,8 +6,33 @@ into MLIR operations and values.
 """
 
 import libcst as cst
-from typing import Tuple, List, TYPE_CHECKING, Any
+from typing import Tuple, List, TYPE_CHECKING, Optional
 from ml_switcheroo.core.mlir.cst import ValueNode, OperationNode, AttributeNode
+
+if TYPE_CHECKING:
+  # To avoid circular imports, we just assert the structural existence of the context
+  class ContextDummy:
+    """Dummy context."""
+
+    def enter_scope(self) -> None:
+      """Enter a scope."""
+      ...
+
+    def exit_scope(self) -> None:
+      """Exit a scope."""
+      ...
+
+    def allocate_ssa(self, prefix: str = "%") -> ValueNode:
+      """Allocate an SSA."""
+      ...
+
+    def declare(self, name: str, val: ValueNode) -> None:
+      """Declare a value."""
+      ...
+
+    def lookup(self, name: str) -> Optional[ValueNode]:
+      """Lookup a value."""
+      ...
 
 
 class MlirEmitterExprMixin:
@@ -19,33 +44,33 @@ class MlirEmitterExprMixin:
   supporting MLIR operations and their final evaluated values.
   """
 
-  if TYPE_CHECKING:
-    ctx: Any
+  # This is provided by the mixed-in classes
+  ctx: "ContextDummy"
 
-    def _flatten_attr(self, attr: Any) -> Any:
+  if TYPE_CHECKING:
+
+    def _flatten_attr(self, attr: cst.BaseExpression) -> Optional[str]:
       """Flatten a Name or Attribute chain into a dotted string.
 
       Args:
-          self: The mixin instance.
           attr: The LibCST node representing the attribute or name to flatten.
 
       Returns:
           A dotted string representation of the attribute chain (e.g., "self.layer")
           or None if it cannot be flattened.
       """
-      return None
+      ...
 
-    def _get_binop_str(self, op: Any) -> str:
+    def _get_binop_str(self, op: cst.BaseBinaryOp) -> str:
       """Map a LibCST binary operator node to its corresponding string identifier.
 
       Args:
-          self: The mixin instance.
           op: The LibCST binary operator node (e.g., cst.Add, cst.Multiply).
 
       Returns:
           The string identifier (e.g., "add", "mul", "matmul") for the operator.
       """
-      return ""
+      ...
 
   def _emit_expression(self, expr: cst.BaseExpression) -> Tuple[ValueNode, List[OperationNode]]:
     """Recursively converts an expression into a value node and a list of supporting operations.
@@ -64,7 +89,7 @@ class MlirEmitterExprMixin:
             - The resulting ValueNode representing the evaluated expression.
             - A list of OperationNode objects generated to evaluate the expression.
     """
-    ops = []  # type: ignore
+    ops: List[OperationNode] = []
     if isinstance(expr, cst.Name):
       val = self.ctx.lookup(expr.value)
       if not val:
@@ -92,7 +117,7 @@ class MlirEmitterExprMixin:
       if flat_name and not self.ctx.lookup(root_var):
         is_static_op = True
 
-      common_attrs = []
+      common_attrs: List[AttributeNode] = []
       # Pack keywords into attribute if any are non-empty
       if any(arg_keywords):
         # AttributeNode needs a list of strings formatted for the printer
@@ -104,7 +129,7 @@ class MlirEmitterExprMixin:
 
       if is_static_op:
         result = self.ctx.allocate_ssa()
-        attrs = [AttributeNode(name="type", value=f'"{flat_name}"')] + common_attrs
+        attrs: List[AttributeNode] = [AttributeNode(name="type", value=f'"{flat_name}"')] + common_attrs
         op = OperationNode(
           name="sw.op",
           results=[result],

@@ -5,11 +5,12 @@ a custom mean squared error loss function using backend-agnostic Keras ops.
 It is designed to demonstrate and test Keras transpilation capabilities.
 """
 
+import typing
 import keras
 from keras import layers, ops
 
 
-def build_model(input_shape, num_classes):
+def build_model(input_shape: tuple[int, ...], num_classes: int) -> keras.Model:
   """Builds a Keras Functional API CNN model for classification.
 
   Source: Keras Examples.
@@ -22,16 +23,16 @@ def build_model(input_shape, num_classes):
   Returns:
     keras.Model: A Keras Functional Model representing the CNN classifier.
   """
-  inputs = keras.Input(shape=input_shape)
-  x = layers.Conv2D(32, kernel_size=(3, 3), activation="relu")(inputs)
+  inputs: typing.Any = keras.Input(shape=input_shape)
+  x: typing.Any = layers.Conv2D(32, kernel_size=(3, 3), activation="relu")(inputs)
   x = layers.MaxPooling2D(pool_size=(2, 2))(x)
   x = layers.Flatten()(x)
   x = layers.Dropout(0.5)(x)
-  outputs = layers.Dense(num_classes, activation="softmax")(x)
+  outputs: typing.Any = layers.Dense(num_classes, activation="softmax")(x)
   return keras.Model(inputs, outputs)
 
 
-def custom_loss(y_true, y_pred):
+def custom_loss(y_true: typing.Any, y_pred: typing.Any) -> typing.Any:
   """Computes the mean squared error loss using backend-agnostic Keras ops.
 
   Args:

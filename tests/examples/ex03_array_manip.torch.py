@@ -8,7 +8,7 @@ example for translating PyTorch tensor operations to JAX equivalent structures.
 import torch
 
 
-def transpose_matrices(batch):
+def transpose_matrices(batch: torch.Tensor) -> torch.Tensor:
   """Swaps the spatial/inner dimensions of a batch of 2D matrices.
 
   Semantic pivot: torch.permute -> jax.numpy.transpose.

@@ -2,15 +2,16 @@
 
 from ml_switcheroo.core.tikz.parser import TikzTransformer, _logical_from_tikz_graph
 from ml_switcheroo.core.tikz.nodes import TriviaNode, TikzNode, TikzTable, TikzGraph
+import typing
 from lark import Tree
 
 
-def test_tikz_parser_standalone():
+def test_tikz_parser_standalone() -> None:
   """Test function."""
   pass
 
 
-def test_tikz_transformer_direct():
+def test_tikz_transformer_direct() -> None:
   """Test function."""
   transformer = TikzTransformer()
 
@@ -46,7 +47,7 @@ def test_tikz_transformer_direct():
   # 326->317: c in ["{", "}"]
   transformer.tabular(["\\begin{tabular}", "{", "c", "}"])
   # 336-339: tabular_row items (id, kind)
-  transformer.tabular([Tree("tabular_row", [Tree("kind", ["Kind"]), Tree("id", ["Id"]), Tree("unknown", [])])])
+  transformer.tabular([Tree("tabular_row", [Tree("kind", ["Kind"]), Tree("id", ["Id"]), Tree("unknown", [])])])  # type: ignore
   # 340->317: empty current_row
   transformer.tabular([Tree("tabular_row", [])])
 
@@ -54,14 +55,14 @@ def test_tikz_transformer_direct():
   transformer.id(["A"])
 
 
-def test_logical_from_tikz_graph():
+def test_logical_from_tikz_graph() -> None:
   """Test function."""
   # 468, 480->483
 
   node1 = TikzNode(
-    "n1",
-    0,
-    0,
+    node_id="n1",
+    x=0,
+    y=0,
     content=TikzTable(
       rows=[
         [],  # 468
@@ -72,8 +73,8 @@ def test_logical_from_tikz_graph():
     ),
   )
 
-  node2 = TikzNode("n2", 0, 0, content=None)  # 480->483 false
-  node3 = TikzNode("n3", 0, 0, content="")  # 480->483 false
+  node2 = TikzNode(node_id="n2", x=0, y=0, content=None)  # 480->483 false # type: ignore
+  node3 = TikzNode(node_id="n3", x=0, y=0, content="")  # 480->483 false # type: ignore
 
   graph = TikzGraph(children=[node1, node2, node3])
-  lg = _logical_from_tikz_graph(graph)  # noqa: F841
+  lg: typing.Any = _logical_from_tikz_graph(graph)  # noqa: F841

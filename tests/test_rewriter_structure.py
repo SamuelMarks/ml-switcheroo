@@ -5,43 +5,44 @@ from ml_switcheroo.core.rewriter.passes.structure import StructuralPass, Structu
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.schema import StructuralTraits
+from typing import Dict, List, Any, Optional, Tuple
 
 
 class DummySemantics:
   """Test element."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Test element."""
-    self.framework_configs = {
+    self.framework_configs: Dict[str, Any] = {
       "jax": {
         "tiers": ["array", "neural"],
         "traits": {"module_base": "flax.nnx.Module", "forward_method": "__call__", "requires_super_init": False},
       },
       "torch": {"traits": {"module_base": "torch.nn.Module", "known_inference_methods": {"forward"}}},
     }
-    self.alias_map = {}
-    self.known_magic_args = ["rngs"]
+    self.alias_map: Dict[str, str] = {}
+    self.known_magic_args: List[str] = ["rngs"]
 
-  def get_framework_config(self, fw):
+  def get_framework_config(self, fw: str) -> Optional[Dict[str, Any]]:
     """Test element."""
     return self.framework_configs.get(fw)
 
-  def get_definition(self, name):
+  def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
     """Test element."""
     if name == "torch.Tensor":
       return ("tensor", {})
     return None
 
-  def resolve_variant(self, abstract_id, fw):
+  def resolve_variant(self, abstract_id: str, fw: str) -> Optional[Dict[str, Any]]:
     """Test element."""
     if abstract_id == "tensor" and fw == "jax":
       return {"api": "jax.Array"}
     return None
 
 
-def test_structure_pass():
+def test_structure_pass() -> None:
   """Test element."""
-  code = """
+  code: str = """
 import torch
 import torch.nn as nn
 
@@ -54,33 +55,33 @@ class MyModel(nn.Module):
         '''Docstring.'''
         return x
 """
-  config = RuntimeConfig(source_fw="torch", target_fw="jax")
-  semantics = DummySemantics()
+  config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
+  semantics: DummySemantics = DummySemantics()
   semantics.framework_configs["jax"]["traits"] = StructuralTraits(
     module_base="flax.nnx.Module", forward_method="__call__", requires_super_init=False, strip_magic_args=["rngs"]
   ).model_dump()
   semantics.framework_configs["torch"]["traits"] = StructuralTraits(
     module_base="torch.nn.Module", known_inference_methods={"forward"}
   ).model_dump()
-  context = RewriterContext(semantics=semantics, config=config)
+  context: RewriterContext = RewriterContext(semantics=semantics, config=config)
   context.alias_map = {"nn": "torch.nn", "torch": "torch"}
 
-  module = cst.parse_module(code)
-  pass_ = StructuralPass()
-  updated = pass_.transform(module, context)
+  module: cst.Module = cst.parse_module(code)
+  pass_: StructuralPass = StructuralPass()
+  updated: cst.Module = pass_.transform(module, context)
 
-  updated_code = updated.code
+  updated_code: str = updated.code
   assert "flax.nnx.Module" in updated_code
   assert "def __call__(self," in updated_code
   assert "jax.Array" in updated_code
 
 
-def test_structure_transformer_edge_cases():
+def test_structure_transformer_edge_cases() -> None:
   """Test element."""
-  config = RuntimeConfig(source_fw="torch", target_fw="jax")
-  semantics = DummySemantics()
-  context = RewriterContext(semantics=semantics, config=config)
-  transformer = StructuralTransformer(context)
+  config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
+  semantics: DummySemantics = DummySemantics()
+  context: RewriterContext = RewriterContext(semantics=semantics, config=config)
+  transformer: StructuralTransformer = StructuralTransformer(context)
 
   # Missing framework config
   semantics.framework_configs = {}
@@ -88,10 +89,10 @@ def test_structure_transformer_edge_cases():
   assert "array" in transformer._get_target_tiers()
 
   # Test qualified name fallback
-  name = cst.Name("foo")
+  name: cst.Name = cst.Name("foo")
   assert transformer._get_qualified_name(name) == "foo"
 
-  attr = cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
+  attr: cst.Attribute = cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
   assert transformer._get_qualified_name(attr) == "a.b"
 
   # Not flattened
@@ -118,42 +119,42 @@ def test_structure_transformer_edge_cases():
     "jax": {"tiers": ["math"], "traits": {}},
     "torch": {"traits": {"module_base": "torch.nn.Module"}},
   }
-  context = RewriterContext(semantics=semantics, config=config)
-  transformer = StructuralTransformer(context)
-  context.alias_map = {"nn": "torch.nn"}
+  context2: RewriterContext = RewriterContext(semantics=semantics, config=config)
+  transformer2: StructuralTransformer = StructuralTransformer(context2)
+  context2.alias_map = {"nn": "torch.nn"}
 
-  class_def = cst.parse_module("class A(torch.nn.Module): pass").body[0]
-  transformer.visit_ClassDef(class_def)
-  assert len(context.current_stmt_errors) > 0
+  class_def: cst.ClassDef = getattr(cst.parse_module("class A(torch.nn.Module): pass"), "body")[0]
+  transformer2.visit_ClassDef(class_def)
+  assert len(context2.current_stmt_errors) > 0
 
-  class_def2 = cst.parse_module("class B(Unknown): pass")
-  class_def2.visit(transformer)
-  assert not context.in_module_class
+  class_def2: cst.ClassDef = getattr(cst.parse_module("class B(Unknown): pass"), "body")[0]
+  class_def2.visit(transformer2)
+  assert not context2.in_module_class
 
   # Test docstring update edge cases
   # Test preamble injection
-  context.module_preamble.append("import foo")
-  mod = cst.parse_module("a = 1")
-  mod2 = transformer.leave_Module(mod, mod)
+  context2.module_preamble.append("import foo")
+  mod: cst.Module = cst.parse_module("a = 1")
+  mod2: cst.Module = transformer2.leave_Module(mod, mod)
   assert "import foo" in mod2.code
 
   # Test annotation rewrite
-  context.alias_map = {"torch": "torch"}
+  context2.alias_map = {"torch": "torch"}
   semantics.framework_configs["torch"] = {"traits": {"module_base": "torch.nn.Module"}}
   semantics.framework_configs["jax"] = {"tiers": ["array", "neural"], "traits": {}}
 
 
-def test_type_annotations_nested():
+def test_type_annotations_nested() -> None:
   """Test element."""
-  code = """
+  code: str = """
 def foo(x: List[torch.Tensor]):
     pass
 """
-  config = RuntimeConfig(source_fw="torch", target_fw="jax")
-  semantics = DummySemantics()
-  context = RewriterContext(semantics=semantics, config=config)
+  config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
+  semantics: DummySemantics = DummySemantics()
+  context: RewriterContext = RewriterContext(semantics=semantics, config=config)
   context.alias_map = {"torch": "torch"}
-  module = cst.parse_module(code)
-  pass_ = StructuralPass()
-  updated = pass_.transform(module, context)
+  module: cst.Module = cst.parse_module(code)
+  pass_: StructuralPass = StructuralPass()
+  updated: cst.Module = pass_.transform(module, context)
   assert "jax.Array" in updated.code

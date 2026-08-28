@@ -5,7 +5,7 @@ that converts a stream of characters into a Concrete Syntax Tree defined in `cst
 """
 
 import re
-from typing import List, Any, Union, cast
+from typing import List, Union, cast, Any
 
 from lark import Lark, Transformer, v_args
 from lark.lexer import Lexer, Token
@@ -54,7 +54,7 @@ class RdnaToken(Token):
 class RdnaLexer(Lexer):
   """Custom Lexer preserving trivia and matching RDNA tokens."""
 
-  def __init__(self, lexer_conf: Any) -> None:
+  def __init__(self, lexer_conf) -> None:
     """Initialize the custom RDNA lexer.
 
     Args:
@@ -62,7 +62,7 @@ class RdnaLexer(Lexer):
     """
     self.lexer_conf = lexer_conf
 
-  def lex(self, data: str) -> Any:  # type: ignore[override]
+  def lex(self, data: str) -> Any:
     """Tokenize the input string and attach trivia.
 
     Args:
@@ -118,7 +118,7 @@ class RdnaLexer(Lexer):
       yield t3
 
 
-def _get_trivia(node: Any) -> List[Trivia]:
+def _get_trivia(node) -> List[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -198,7 +198,7 @@ class RdnaTransformer(Transformer[Any, Any]):
   """
 
   @v_args(inline=False)
-  def module(self, children: List[Any]) -> RdnaModule:
+  def module(self, children) -> RdnaModule:
     """Transform the top-level module rule.
 
     Args:
@@ -221,7 +221,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return mod
 
   @v_args(inline=False)
-  def comment_stmt(self, children: List[Any]) -> RdnaComment:
+  def comment_stmt(self, children) -> RdnaComment:
     """Transform a comment.
 
     Args:
@@ -235,7 +235,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return c
 
   @v_args(inline=False)
-  def directive(self, children: List[Any]) -> RdnaDirective:
+  def directive(self, children) -> RdnaDirective:
     """Transform a directive.
 
     Args:
@@ -263,7 +263,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return d
 
   @v_args(inline=False)
-  def param_list(self, children: List[Any]) -> List[Any]:
+  def param_list(self, children: list[Any]) -> list[Any]:
     """Transform a parameter list.
 
     Args:
@@ -275,7 +275,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return children
 
   @v_args(inline=False)
-  def label(self, children: List[Any]) -> RdnaLabel:
+  def label(self, children) -> RdnaLabel:
     """Transform a label.
 
     Args:
@@ -289,7 +289,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return lbl
 
   @v_args(inline=False)
-  def instruction(self, children: List[Any]) -> RdnaInstruction:
+  def instruction(self, children) -> RdnaInstruction:
     """Transform an instruction.
 
     Args:
@@ -310,7 +310,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def operands(self, children: List[Any]) -> List[RdnaOperand]:
+  def operands(self, children) -> List[RdnaOperand]:
     """Transform an operands list.
 
     Args:
@@ -322,7 +322,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return [c for c in children if isinstance(c, RdnaOperand)]
 
   @v_args(inline=False)
-  def mem_reg(self, children: List[Any]) -> RdnaMemory:
+  def mem_reg(self, children) -> RdnaMemory:
     """Transform memory access.
 
     Args:
@@ -337,7 +337,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def mem_reg_pos(self, children: List[Any]) -> RdnaMemory:
+  def mem_reg_pos(self, children) -> RdnaMemory:
     """Transform memory access with positive offset.
 
     Args:
@@ -354,7 +354,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def mem_reg_neg(self, children: List[Any]) -> RdnaMemory:
+  def mem_reg_neg(self, children) -> RdnaMemory:
     """Transform memory access with negative offset.
 
     Args:
@@ -371,7 +371,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def register(self, children: List[Any]) -> Union[RdnaSGPR, RdnaVGPR]:
+  def register(self, children) -> Union[RdnaSGPR, RdnaVGPR]:
     """Transform a register.
 
     Args:
@@ -399,7 +399,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return reg
 
   @v_args(inline=False)
-  def imm_num(self, children: List[Any]) -> RdnaImmediate:
+  def imm_num(self, children) -> RdnaImmediate:
     """Transform number.
 
     Args:
@@ -416,7 +416,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def imm_hex(self, children: List[Any]) -> RdnaImmediate:
+  def imm_hex(self, children) -> RdnaImmediate:
     """Transform hex.
 
     Args:
@@ -432,7 +432,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def neg_num(self, children: List[Any]) -> RdnaImmediate:
+  def neg_num(self, children) -> RdnaImmediate:
     """Transform negative number.
 
     Args:
@@ -449,7 +449,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def neg_hex(self, children: List[Any]) -> RdnaImmediate:
+  def neg_hex(self, children) -> RdnaImmediate:
     """Transform negative hex.
 
     Args:
@@ -465,7 +465,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def pos_num(self, children: List[Any]) -> RdnaImmediate:
+  def pos_num(self, children) -> RdnaImmediate:
     """Transform positive number.
 
     Args:
@@ -482,7 +482,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def pos_hex(self, children: List[Any]) -> RdnaImmediate:
+  def pos_hex(self, children) -> RdnaImmediate:
     """Transform positive hex.
 
     Args:
@@ -498,7 +498,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def modifier(self, children: List[Any]) -> RdnaModifier:
+  def modifier(self, children) -> RdnaModifier:
     """Transform a modifier.
 
     Args:
@@ -513,7 +513,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def ident_or_modifier(self, children: List[Any]) -> Union[RdnaModifier, RdnaLabelRef]:
+  def ident_or_modifier(self, children) -> Union[RdnaModifier, RdnaLabelRef]:
     """Transform an identifier which could be a modifier.
 
     Args:

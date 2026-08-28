@@ -5,7 +5,10 @@ This adapter acts as a metadata container for the Compiler Registry,
 identifying StableHLO as a target language and providing static definitions.
 """
 
-from typing import Union, Any, Dict, List, Optional, Tuple
+import typing
+
+
+from typing import Union, Dict, List, Optional, Tuple
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import ImportConfig, InitMode, StandardMap, register_framework, FrameworkAdapter
 from ml_switcheroo.frameworks.loader import load_definitions
@@ -84,7 +87,7 @@ import numpy as np
 
 _client = xla_bridge.get_backend()
 
-def _execute_mlir(mlir_code: str, *args):
+def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dict]) -> typing.Union[int, float, str, list, dict, tuple]:
     # PJRT Compilation requires wrapping standard func in a main module if not already
     if "module {" not in mlir_code:
         mlir_code = f"module {{
@@ -267,7 +270,7 @@ def _execute_mlir(mlir_code: str, *args):
     """
     return "# Weights not supported in StableHLO mode"
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply wiring modifications or links using snapshot data.
 
     Args:
@@ -289,7 +292,9 @@ def _execute_mlir(mlir_code: str, *args):
       return f"https://github.com/openxla/stablehlo/blob/main/docs/spec.md#{op_code}"
     return None
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert the input data to a representation suitable for StableHLO (e.g., string representation).
 
     Args:

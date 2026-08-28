@@ -10,9 +10,12 @@ It includes logic to:
 4.  **Infer generation strategy from default values** when explicit hints are erased.
 """
 
+import typing
+
+
 import random
 import numpy as np
-from typing import Any, Dict, Tuple, Optional, Union
+from typing import Dict, Tuple, Union
 
 from ml_switcheroo.testing.fuzzer.type_parser import (
   parse_type_annotation,
@@ -42,7 +45,7 @@ from ml_switcheroo.testing.fuzzer.utils import (
 )
 
 
-def get_fallback_base_value(parsed: ParsedType, base_shape: Tuple[int, ...]) -> Any:
+def get_fallback_base_value(parsed: "ParsedType", base_shape: typing.Tuple[int, ...]) -> typing.Any:
   """Return a minimal valid value to terminate recursion when depth limit is reached.
 
   Args:
@@ -85,8 +88,8 @@ def generate_from_hint(
   depth: int,
   max_depth: int,
   symbol_map: Dict[str, int],
-  constraints: Optional[Dict[str, Any]] = None,
-) -> Any:
+  constraints=None,
+):
   """Recursively parses a type hint and generates conforming data.
 
   If type hints are generic ("Any"), it attempts to infer the type logic

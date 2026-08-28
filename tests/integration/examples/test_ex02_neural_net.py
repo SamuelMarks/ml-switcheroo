@@ -3,15 +3,16 @@
 import pytest
 import textwrap
 from ml_switcheroo import RuntimeConfig, ASTEngine, SemanticsManager
+from ml_switcheroo.core.engine import ConversionResult
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
-SOURCE_TORCH = textwrap.dedent(
+SOURCE_TORCH: str = textwrap.dedent(
   "\n    import torch.nn as nn\n\n    class SimplePerceptron(nn.Module):\n        def __init__(self, in_features, out_features):\n            super().__init__()\n            self.layer = nn.Linear(in_features, out_features)\n\n        def forward(self, x):\n            return self.layer(x)\n    "
 )
 
 
 @pytest.fixture(scope="module")
-def semantics():
+def semantics() -> SemanticsManager:
   """Helper to semantics."""
   mgr = SemanticsManager()
   mgr._providers = {}
@@ -45,12 +46,12 @@ def semantics():
     ("mlx", ["class SimplePerceptron(nn.Module):", "import mlx.nn as nn", "def __call__(self, x):"]),
   ],
 )
-def test_torch_to_target_neural(semantics, target_fw, check_strings):
+def test_torch_to_target_neural(semantics: SemanticsManager, target_fw: str, check_strings: list[str]) -> None:
   """Verifies the behavior of PyTorch to target neural."""
   config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
-  result = engine.run(SOURCE_TORCH)
+  result: ConversionResult = engine.run(SOURCE_TORCH)
   assert result.success, f"Conversion Errors: {result.errors}"
-  code = result.code
+  code: str = result.code
   for s in check_strings:
     assert s in code, f"Missing '{s}' in:\n{code}"

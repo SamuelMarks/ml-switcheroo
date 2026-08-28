@@ -4,8 +4,10 @@ This module provides fallback logic for generating inputs when explicit
 type hints are missing, generally based on argument naming conventions.
 """
 
+import typing
+
+
 import random
-from typing import Any, Dict, Tuple
 
 from ml_switcheroo.testing.fuzzer.generators import (
   generate_array,
@@ -32,7 +34,9 @@ def guess_dtype_by_name(name: str) -> str:
   return "float"
 
 
-def generate_by_heuristic(name: str, base_shape: Tuple[int, ...], constraints: Dict[str, Any] = None) -> Any:  # type: ignore
+def generate_by_heuristic(
+  name: str, base_shape: typing.Tuple[int, ...], constraints: typing.Optional[dict] = None
+) -> typing.Any:
   """Generate a value based on the argument name when no type hint is provided.
 
   Respects provided constraints if any.

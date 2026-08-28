@@ -1,5 +1,6 @@
 """Test suite for the Attention SASS Macros."""
 
+import typing
 from ml_switcheroo.core.compiler.backends.sass.macros import (
   expand_multiheadattention,
   expand_transformer,
@@ -8,19 +9,19 @@ from ml_switcheroo.core.compiler.backends.sass.macros import (
 )
 from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassNode, SassInstruction
 
 
 def test_sass_macro_multiheadattention() -> None:
   """Verifies that expand_multiheadattention generates correct SASS instructions."""
   allocator = RegisterAllocator()
   node_id = "mha1"
-  metadata = {}
+  metadata: dict[str, typing.Any] = {}
 
-  nodes = expand_multiheadattention(allocator, node_id, metadata)
+  nodes: list[SassNode] = expand_multiheadattention(allocator, node_id, metadata)
   assert len(nodes) > 5
 
-  comments = [n.text for n in nodes if isinstance(n, SassComment)]
+  comments: list[str] = [typing.cast(SassComment, n).text for n in nodes if isinstance(n, SassComment)]
   assert f"BEGIN MultiheadAttention ({node_id})" in comments
 
 
@@ -28,12 +29,12 @@ def test_sass_macro_transformer() -> None:
   """Verifies that expand_transformer generates correct SASS instructions."""
   allocator = RegisterAllocator()
   node_id = "tf1"
-  metadata = {}
+  metadata: dict[str, typing.Any] = {}
 
-  nodes = expand_transformer(allocator, node_id, metadata)
+  nodes: list[SassNode] = expand_transformer(allocator, node_id, metadata)
   assert len(nodes) > 3
 
-  comments = [n.text for n in nodes if isinstance(n, SassComment)]
+  comments: list[str] = [typing.cast(SassComment, n).text for n in nodes if isinstance(n, SassComment)]
   assert f"BEGIN Transformer ({node_id})" in comments
 
 
@@ -41,17 +42,17 @@ def test_sass_macro_transformer_enc_dec() -> None:
   """Verifies enc/dec macros."""
   allocator = RegisterAllocator()
   node_id = "enc1"
-  metadata = {}
+  metadata: dict[str, typing.Any] = {}
 
-  nodes = expand_transformerencoder(allocator, node_id, metadata)
+  nodes: list[SassNode] = expand_transformerencoder(allocator, node_id, metadata)
   assert len(nodes) >= 2
 
-  nodes2 = expand_transformerdecoder(allocator, node_id, metadata)
+  nodes2: list[SassNode] = expand_transformerdecoder(allocator, node_id, metadata)
   assert len(nodes2) >= 2
 
 
-def test_sass_analyzer_attention():
+def test_sass_analyzer_attention() -> None:
   """Verifies analyzer handles attention ops safely."""
-  instructions = []
+  instructions: list[SassInstruction] = []
   assert len(SassAnalyzer.analyze_block("MultiheadAttention", instructions)) == 0
   assert len(SassAnalyzer.analyze_block("Transformer", instructions)) == 0

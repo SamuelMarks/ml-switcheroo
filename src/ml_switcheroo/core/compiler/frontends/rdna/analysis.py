@@ -8,7 +8,10 @@ It enables the "Lifting" process to recover parameters like `kernel_size=3`
 from `s_cmp_lt_i32 sX, 3` instructions inside a loop structure.
 """
 
-from typing import Any, Dict, List
+from typing import Any
+
+
+from typing import List
 
 from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
@@ -17,7 +20,7 @@ class RdnaAnalyzer:
   """Analyze sequences of RDNA instructions to reverse-engineer high-level parameters."""
 
   @staticmethod
-  def analyze_block(kind: str, instructions: List["RdnaInstruction"]) -> Dict[str, Any]:
+  def analyze_block(kind: str, instructions: List["RdnaInstruction"]) -> Any:
     """Extract metadata from a block of instructions based on the operation kind.
 
     Args:
@@ -28,7 +31,7 @@ class RdnaAnalyzer:
         Dict[str, Any]: Extracted parameters (e.g., {"k": 3}).
 
     """
-    metadata = {}  # type: ignore
+    metadata: dict[Any, Any] = {}
     loop_limits = []
     for inst in instructions:
       if inst.opcode == "s_cmp_lt_i32":

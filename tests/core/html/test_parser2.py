@@ -8,10 +8,12 @@ This module verifies correct parsing behaviors for:
 - Creation of syntax tree call structures under empty conditions.
 """
 
+import typing
 from ml_switcheroo.core.html.parser import InternalHtmlParser, HtmlParser
+from ml_switcheroo.core.html.nodes import TagNode, CommentNode
 
 
-def test_internal_html_parser_void_elements():
+def test_internal_html_parser_void_elements() -> None:
   """Verifies that the internal HTML parser correctly identifies void elements.
 
   This test feeds a string of self-closing void elements (<br>, <img>, and
@@ -19,29 +21,29 @@ def test_internal_html_parser_void_elements():
   self-closing tag nodes and appended to the parsed root tree level.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   parser = InternalHtmlParser()
   parser.feed('<br><img src="test.png"><input>')
 
   assert len(parser.root_children) == 3
-  br = parser.root_children[0]
+  br = typing.cast(TagNode, parser.root_children[0])
   assert br.name == "br"
   assert br.self_closing is True
 
-  img = parser.root_children[1]
+  img = typing.cast(TagNode, parser.root_children[1])
   assert img.name == "img"
   assert img.self_closing is True
 
-  input_tag = parser.root_children[2]
+  input_tag = typing.cast(TagNode, parser.root_children[2])
   assert input_tag.name == "input"
   assert input_tag.self_closing is True
 
 
-def test_internal_html_parser_decl():
+def test_internal_html_parser_decl() -> None:
   """Verifies that the internal HTML parser parses markup declarations.
 
   This test feeds an HTML declaration tag (<!DOCTYPE html>) and validates that
@@ -49,20 +51,20 @@ def test_internal_html_parser_decl():
   and automatically marks the node as self-closing.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   parser = InternalHtmlParser()
   parser.feed("<!DOCTYPE html>")
   assert len(parser.root_children) == 1
-  decl = parser.root_children[0]
+  decl = typing.cast(TagNode, parser.root_children[0])
   assert decl.name == "!DOCTYPE html"
   assert decl.self_closing is True
 
 
-def test_internal_html_parser_comment():
+def test_internal_html_parser_comment() -> None:
   """Verifies that the internal HTML parser correctly processes comments.
 
   This test feeds an HTML comment and confirms that the parser creates a
@@ -70,18 +72,18 @@ def test_internal_html_parser_comment():
   delimiters while preserving leading/trailing whitespace inside.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   parser = InternalHtmlParser()
   parser.feed("<!-- This is a comment -->")
   assert len(parser.root_children) == 1
-  assert parser.root_children[0].content == " This is a comment "
+  assert typing.cast(CommentNode, parser.root_children[0]).content == " This is a comment "
 
 
-def test_htmlparser_parse_args_str_empty():
+def test_htmlparser_parse_args_str_empty() -> None:
   """Verifies that parsing an empty argument string results in an empty list.
 
   This test exercises the internal argument parsing logic of `HtmlParser` with
@@ -89,17 +91,17 @@ def test_htmlparser_parse_args_str_empty():
   without producing syntax or value errors.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   parser = HtmlParser("")
-  args = parser._parse_args_str("")
+  args: list[typing.Any] = parser._parse_args_str("")
   assert args == []
 
 
-def test_htmlparser_create_call_empty():
+def test_htmlparser_create_call_empty() -> None:
   """Verifies that creating a function call with empty arguments is successful.
 
   This test validates that `HtmlParser._create_call` correctly constructs a API
@@ -108,13 +110,13 @@ def test_htmlparser_create_call_empty():
   remains empty.
 
   Args:
-    None
+      None
 
   Returns:
-    None
+      None
   """
   parser = HtmlParser("")
-  call = parser._create_call("my.func")
+  call: typing.Any = parser._create_call("my.func")
   assert call.func.value.value == "my"
   assert call.func.attr.value == "func"
   assert call.args == []

@@ -1,5 +1,6 @@
 """Module docstring."""
 
+import typing
 from ml_switcheroo.core.compiler.backends.rdna.macros import (
   RegisterAllocatorProtocol,
   RdnaVGPR,
@@ -22,10 +23,10 @@ from ml_switcheroo.core.compiler.backends.rdna.macros import (
 class MockAllocator(RegisterAllocatorProtocol):
   """Mock allocator."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Init."""
-    self.vc = 0
-    self.sc = 0
+    self.vc: int = 0
+    self.sc: int = 0
 
   def get_vector_register(self, var_name: str) -> RdnaVGPR:
     """Get vector register."""
@@ -46,10 +47,10 @@ class MockAllocator(RegisterAllocatorProtocol):
     return RdnaSGPR(index=self.sc)
 
 
-def test_expand_all_macros():
+def test_expand_all_macros() -> None:
   """Test expand all macros."""
   alloc = MockAllocator()
-  funcs = [
+  funcs: list[typing.Callable[..., typing.Any]] = [
     expand_conv2d,
     expand_linear,
     expand_relu,
@@ -64,5 +65,5 @@ def test_expand_all_macros():
     expand_l,
   ]
   for func in funcs:
-    nodes = func(alloc, "node1", {})
+    nodes: list[typing.Any] = func(alloc, "node1", {})
     assert len(nodes) > 0

@@ -151,7 +151,7 @@ class CoverageScanner(cst.CSTVisitor):
 
     """
     # 1. Flatten CST to string
-    raw_name = get_full_name(node)  # type: ignore
+    raw_name = get_full_name(node)
     if not raw_name:
       return ""
 

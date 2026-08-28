@@ -13,8 +13,13 @@ Key Features:
 - **Sanitization**: Cleans HTML tags like ``<tt>``, ``<b>`` from names.
 """
 
+from typing import Any
+
+
+import typing
+
+
 from pathlib import Path
-from typing import Dict, Any, List
 from ml_switcheroo.utils.console import log_info, log_error
 
 
@@ -26,7 +31,7 @@ class OnnxSpecImporter:
   function signature including type hints.
   """
 
-  def parse_file(self, target_file: Path) -> Dict[str, Any]:
+  def parse_file(self, target_file: Path) -> typing.Dict[str, dict]:
     """Parse a specific ONNX Markdown file (e.g. Operators.md).
 
     Args:
@@ -44,7 +49,7 @@ class OnnxSpecImporter:
     log_info(f"Parsing ONNX Spec: {target_file.name}...")
     return self._parse_markdown(target_file)
 
-  def _parse_markdown(self, fpath: Path) -> Dict[str, Any]:
+  def _parse_markdown(self, fpath: Path) -> typing.Dict[str, dict]:
     """Parse markdown structurally.
 
     Args:
@@ -60,7 +65,7 @@ class OnnxSpecImporter:
     md = MarkdownIt()
     tokens = md.parse(content)
 
-    semantics: Dict[str, Any] = {}
+    semantics = {}
     current_op: str = ""
     current_section: str = ""
 
@@ -71,7 +76,7 @@ class OnnxSpecImporter:
           soup = BeautifulSoup(inline_content, "html.parser")
           a_tag = soup.find("a", attrs={"name": True})
           if isinstance(a_tag, Tag) and isinstance(a_tag.get("name"), str):  # pragma: no branch
-            current_op = a_tag["name"]  # type: ignore
+            current_op = a_tag["name"]
             if current_op not in semantics:
               semantics[current_op] = {"from": fpath.name, "description": "", "std_args": [], "_raw_summary": []}
             current_section = "Summary"
@@ -81,7 +86,7 @@ class OnnxSpecImporter:
       elif current_op:  # pragma: no branch
         if current_section == "Summary":
           if token.type == "inline":
-            cast_list: List[str] = semantics[current_op]["_raw_summary"]
+            cast_list: Any = semantics[current_op]["_raw_summary"]
             if not cast_list:
               cast_list.append(token.content)
         elif current_section in ("Inputs", "Attributes"):  # pragma: no branch
@@ -98,7 +103,7 @@ class OnnxSpecImporter:
               arg_name = raw_name.strip().split()[0] if raw_name.strip().split() else ""
               if arg_name:  # pragma: no branch
                 type_hint = self._map_onnx_type(raw_type)
-                std_args: List[Any] = semantics[current_op]["std_args"]
+                std_args: Any = semantics[current_op]["std_args"]
                 std_args.append((arg_name, type_hint))
 
     for op in semantics.values():

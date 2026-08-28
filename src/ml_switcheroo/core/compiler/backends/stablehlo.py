@@ -4,7 +4,7 @@ This module provides the StableHloBackend class, which compiles a logical graph 
 of computations into StableHLO-flavored MLIR code representation.
 """
 
-from typing import Any, Optional
+from typing import Any
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.mlir.cst import (
@@ -30,7 +30,7 @@ class StableHloBackend(CompilerBackend):
       semantics: Optional semantic definitions or configurations to assist in translation.
   """
 
-  def __init__(self, semantics: Optional[Any] = None) -> None:
+  def __init__(self, semantics: Any = None) -> None:
     """Initialize the StableHloBackend.
 
     Args:
@@ -89,10 +89,18 @@ class StableHloBackend(CompilerBackend):
           )
         else:
           operands = [ValueNode(name=f"%{src}") for src in in_edges[node.id]]
+          attrs = []
+          for k, v in node.metadata.items():
+            if isinstance(v, str) and not v.startswith('"'):
+              attrs.append(AttributeNode(name=k, value=f'"{v}"'))
+            else:
+              attrs.append(AttributeNode(name=k, value=str(v)))
+
           op = OperationNode(
             name=op_name,
             results=[ValueNode(name=f"%{node.id}")],
             operands=operands,
+            attributes=attrs,
           )
       block.operations.append(op)
 

@@ -12,7 +12,7 @@ import torch
 import torch.utils.checkpoint as checkpoint
 
 
-def explicit_graph_step(x):
+def explicit_graph_step(x: torch.Tensor) -> torch.Tensor:
   """Performs an explicit graph step using standard operations and checkpointing.
 
   This function computes the absolute value of the input tensor and then
@@ -27,10 +27,10 @@ def explicit_graph_step(x):
     torch.Tensor: The output tensor resulting from the checkpointed operation.
   """
   # This standard op SHOULD be converted to JAX
-  val = torch.abs(x)
+  val: torch.Tensor = torch.abs(x)
 
   # This framework-specific utility should trigger the Escape Hatch
   # because it is not mapped in the semantics and requires explicit handling.
-  out = checkpoint.checkpoint(lambda v: v * 2, val)
+  out: torch.Tensor = checkpoint.checkpoint(lambda v: v * 2, val, use_reentrant=False)
 
   return out

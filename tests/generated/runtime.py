@@ -5,6 +5,7 @@ import pytest
 import random
 import numpy as np
 import importlib.util
+import typing
 
 # --- flax_nnx ---
 FLAX_NNX_AVAILABLE = importlib.util.find_spec("jax") is not None
@@ -51,7 +52,7 @@ TORCH_AVAILABLE = importlib.util.find_spec("torch") is not None
 
 # --- Determinism ---
 @pytest.fixture(autouse=True)
-def ensure_determinism():
+def ensure_determinism() -> None:
   """Auto-injects fixed seeds for reproducibility at the start of every test.
   Covers Python random, NumPy, Torch, TensorFlow, and MLX.
   """
@@ -92,7 +93,7 @@ def ensure_determinism():
 
 
 # --- Verification Logic ---
-def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
+def verify_results(ref: typing.Union[int, float, str, bool, list, dict, tuple, np.ndarray], val: typing.Union[int, float, str, bool, list, dict, tuple, np.ndarray], rtol: float = 1e-3, atol: float = 1e-3, exact: bool = False) -> bool:
   """Cros-framework comparison helper.
 
   Recursively compares data structures (Lists, Dicts, Tuples).

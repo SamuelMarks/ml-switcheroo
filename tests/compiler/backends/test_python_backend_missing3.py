@@ -1,31 +1,33 @@
 """Tests."""
 
 import libcst as cst
+from typing import Any, Optional
+import typing
 from ml_switcheroo.core.compiler.backends.python import PythonBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_python_backend_is_stateful_layer_fallbacks():
+def test_python_backend_is_stateful_layer_fallbacks() -> None:
   """Test function."""
   b = PythonBackend()
   assert not b._is_stateful_layer(LogicalNode("n", "a.b.func_x"))
 
 
-def test_python_backend_frameworks_base_class():
+def test_python_backend_frameworks_base_class() -> None:
   """Test function."""
   backend = PythonBackend(framework="paxml")
 
   class DummyTraits:
     """Docstring."""
 
-    def __init__(self):
+    def __init__(self) -> None:
       """Test function."""
-      self.module_base = "praxis.base_layer.BaseLayer"
-      self.requires_super_init = True
-      self.forward_method = "forward"
+      self.module_base: str = "praxis.base_layer.BaseLayer"
+      self.requires_super_init: bool = True
+      self.forward_method: str = "forward"
 
-  backend.traits = DummyTraits()
+  backend.traits = DummyTraits()  # type: ignore
   assert backend.compile(LogicalGraph("T"))
 
   backend = PythonBackend(framework="keras")
@@ -33,21 +35,21 @@ def test_python_backend_frameworks_base_class():
   class DummyTraitsKeras:
     """Docstring."""
 
-    def __init__(self):
+    def __init__(self) -> None:
       """Test function."""
-      self.module_base = "keras.Layer"
-      self.requires_super_init = True
-      self.forward_method = "call"
+      self.module_base: str = "keras.Layer"
+      self.requires_super_init: bool = True
+      self.forward_method: str = "call"
 
-  backend.traits = DummyTraitsKeras()
+  backend.traits = DummyTraitsKeras()  # type: ignore
   assert backend.compile(LogicalGraph("T"))
 
 
-def test_python_backend_layer_init_resolution():
+def test_python_backend_layer_init_resolution() -> None:
   """Test function."""
   semantics = SemanticsManager()
 
-  def mock_resolve(api, fw):
+  def mock_resolve(api: str, fw: str) -> Optional[dict[str, Any]]:
     """Test function."""
     if api == "Relu":
       if fw == "torch":
@@ -74,38 +76,38 @@ def test_python_backend_layer_init_resolution():
 
   b = PythonBackend(framework="torch", semantics=semantics)
   n_relu = LogicalNode("n_relu", "Relu")
-  res = b._generate_layer_init(n_relu)
+  res: typing.Any = b._generate_layer_init(n_relu)
   assert "nn.Relu" in cst.Module(body=[res]).code
 
   n_linear = LogicalNode("n_linear", "Linear")
-  res = b._generate_layer_init(n_linear)
-  assert "nn.Linear" in cst.Module(body=[res]).code
+  res2: typing.Any = b._generate_layer_init(n_linear)
+  assert "nn.Linear" in cst.Module(body=[res2]).code
 
   b = PythonBackend(framework="mlx", semantics=semantics)
-  res = b._generate_layer_init(n_relu)
-  assert "nn.Relu" in cst.Module(body=[res]).code
+  res3: typing.Any = b._generate_layer_init(n_relu)
+  assert "nn.Relu" in cst.Module(body=[res3]).code
 
-  res = b._generate_layer_init(n_linear)
-  assert "nn.Linear" in cst.Module(body=[res]).code
+  res4: typing.Any = b._generate_layer_init(n_linear)
+  assert "nn.Linear" in cst.Module(body=[res4]).code
 
   b = PythonBackend(framework="keras", semantics=semantics)
-  res = b._generate_layer_init(LogicalNode("n1", "PMLX"))
-  assert "keras.layers.Linear" in cst.Module(body=[res]).code
+  res5: typing.Any = b._generate_layer_init(LogicalNode("n1", "PMLX"))
+  assert "keras.layers.Linear" in cst.Module(body=[res5]).code
 
   b = PythonBackend(framework="tensorflow", semantics=semantics)
-  res = b._generate_layer_init(LogicalNode("n1", "TFLayer"))
-  assert "tf.keras.layers.Dense" in cst.Module(body=[res]).code
+  res6: typing.Any = b._generate_layer_init(LogicalNode("n1", "TFLayer"))
+  assert "tf.keras.layers.Dense" in cst.Module(body=[res6]).code
 
   b = PythonBackend(framework="mlx", semantics=semantics)
-  res = b._generate_layer_init(LogicalNode("n1", "MLXSwiGLU"))
-  assert "nn.silu" in cst.Module(body=[res]).code
+  res7: typing.Any = b._generate_layer_init(LogicalNode("n1", "MLXSwiGLU"))
+  assert "nn.silu" in cst.Module(body=[res7]).code
 
 
-def test_python_backend_forward_args():
+def test_python_backend_forward_args() -> None:
   """Test function."""
   b = PythonBackend(framework="torch")
 
-  def mock_is_stateful_layer(node):
+  def mock_is_stateful_layer(node: LogicalNode) -> bool:
     """Test function."""
     return False
 
@@ -113,5 +115,5 @@ def test_python_backend_forward_args():
 
   n = LogicalNode("n", "func_x", metadata={"kwarg_a": "1"})
   g = LogicalGraph("T", nodes=[LogicalNode("i", "Input"), n], edges=[LogicalEdge("i", "n")])
-  c = b.compile(g)
+  c: str = b.compile(g)
   assert "kwarg_a=1" in c

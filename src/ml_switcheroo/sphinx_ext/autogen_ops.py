@@ -12,12 +12,12 @@ Features:
 2. Exports `docs/operations.yaml` ensuring appended updates rather than destructive overwrites.
 """
 
-from typing import Any
+import typing
+
 
 import yaml
 import shutil
 from pathlib import Path
-from typing import Dict, List
 
 from sphinx.application import Sphinx
 from sphinx.util import logging
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 class IndentedDumper(yaml.SafeDumper):
   """Custom Dumper to ensure lists are indented."""
 
-  def increase_indent(self, flow: Any = False, indentless: Any = False) -> Any:
+  def increase_indent(self, flow: bool = False, indentless: bool = False) -> typing.Any:
     """Increase the indentation level for YAML serialization, forcing list indentation.
 
     Args:
@@ -45,7 +45,7 @@ class IndentedDumper(yaml.SafeDumper):
     return super(IndentedDumper, self).increase_indent(flow, False)
 
 
-def _build_yaml_entry(op_name: str, definition: Dict[str, Any]) -> Dict[str, Any]:
+def _build_yaml_entry(op_name: str, definition: dict) -> dict:
   """Normalize internal semantics data into clean ODL YAML structure.
 
   Provides safe sanitization of description strings to prevent broken RST references.
@@ -108,7 +108,7 @@ def _build_yaml_entry(op_name: str, definition: Dict[str, Any]) -> Dict[str, Any
   }
 
 
-def _write_yaml_update(out_path: Path, new_entries: List[Dict[str, Any]]) -> None:
+def _write_yaml_update(out_path: Path, new_entries: typing.List[dict]) -> None:
   """Merge accumulated operations into the existing YAML file (Upsert logic).
 
   Reads the existing YAML file if it exists, updates it with the new entries,

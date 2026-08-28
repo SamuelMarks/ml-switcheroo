@@ -4,9 +4,7 @@ This module implements a Compiler Backend that synthesizes Python source code
 from the Logical Graph Internal Representation via LibCST.
 """
 
-from typing import Any
-
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 import libcst as cst
 from libcst import matchers as m
 
@@ -62,7 +60,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
             # SmallStatement -> SimpleStatementLine
             stmts_list.append(cst.SimpleStatementLine(body=[stmt]))
       else:
-        stmts_list = list(current_body.body)  # type: ignore
+        stmts_list = list(current_body.body)
 
       new_body_stmts = []
       replacements = {
@@ -74,7 +72,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
       injected = set()
 
       # Filter out old methods and replace
-      for stmt in stmts_list:  # type: ignore
+      for stmt in stmts_list:
         if isinstance(stmt, cst.FunctionDef):
           fname = stmt.name.value
           if fname in replacements:
@@ -86,7 +84,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
           else:
             new_body_stmts.append(stmt)
         else:
-          new_body_stmts.append(stmt)  # type: ignore
+          new_body_stmts.append(stmt)
 
       # Inject missing required methods
       if "__init__" not in injected:
@@ -106,7 +104,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
 class PythonBackend(CompilerBackend):
   """Synthesize a Python CST Module from a LogicalGraph."""
 
-  def __init__(self, framework: str = "torch", semantics: Any = None) -> None:
+  def __init__(self, framework: str = "torch", semantics=None) -> None:
     """Initialize the PythonBackend.
 
     Args:
@@ -200,7 +198,7 @@ class PythonBackend(CompilerBackend):
     body.append(class_def)
 
     # LibCST module expects sequence of statements
-    module = cst.Module(body=body)  # type: ignore
+    module = cst.Module(body=body)
     return module.code
 
   def _generate_imports(self) -> List[cst.SimpleStatementLine]:
@@ -211,29 +209,29 @@ class PythonBackend(CompilerBackend):
     """
     if self.framework == "torch":
       return [
-        cst.parse_statement("import torch"),  # type: ignore
-        cst.parse_statement("import torch.nn as nn"),  # type: ignore
+        cst.parse_statement("import torch"),
+        cst.parse_statement("import torch.nn as nn"),
       ]
     elif self.framework in ["jax", "flax", "flax_nnx"]:
       return [
-        cst.parse_statement("from flax import nnx"),  # type: ignore
-        cst.parse_statement("import jax.numpy as jnp"),  # type: ignore
+        cst.parse_statement("from flax import nnx"),
+        cst.parse_statement("import jax.numpy as jnp"),
       ]
     elif self.framework == "mlx":
       return [
-        cst.parse_statement("import mlx.core as mx"),  # type: ignore
-        cst.parse_statement("import mlx.nn as nn"),  # type: ignore
+        cst.parse_statement("import mlx.core as mx"),
+        cst.parse_statement("import mlx.nn as nn"),
       ]
     elif self.framework in ["keras", "tensorflow"]:
       return [
-        cst.parse_statement("import keras"),  # type: ignore
-        cst.parse_statement("import tensorflow as tf"),  # type: ignore
+        cst.parse_statement("import keras"),
+        cst.parse_statement("import tensorflow as tf"),
       ]
     elif self.framework == "paxml":
       return [
-        cst.parse_statement("import praxis.layers as pl"),  # type: ignore
-        cst.parse_statement("import praxis.layers.convolutions"),  # type: ignore
-        cst.parse_statement("from praxis.base_layer import BaseLayer"),  # type: ignore
+        cst.parse_statement("import praxis.layers as pl"),
+        cst.parse_statement("import praxis.layers.convolutions"),
+        cst.parse_statement("from praxis.base_layer import BaseLayer"),
       ]
     return []
 
@@ -443,9 +441,9 @@ class PythonBackend(CompilerBackend):
       code = f"self.create_child('{node.id}', {kind}({args_str}))"
     else:
       code = f"self.{node.id} = {kind}({args_str})"
-    return cst.parse_statement(code)  # type: ignore
+    return cst.parse_statement(code)
 
-  def _format_args_from_metadata(self, metadata: Dict[str, Any]) -> str:
+  def _format_args_from_metadata(self, metadata) -> str:
     """Format node metadata dictionary into a Python arguments string.
 
     Args:
@@ -465,7 +463,7 @@ class PythonBackend(CompilerBackend):
         args_list.append(f"{key}={val}")
     return ", ".join(args_list)
 
-  def _format_partition_spec(self, sharding: Any) -> str:
+  def _format_partition_spec(self, sharding) -> str:
     """Format JAX partition spec from abstract sharding.
 
     Args:
@@ -485,7 +483,7 @@ class PythonBackend(CompilerBackend):
         axes.append(f"({t_str})")
     return f"jax.sharding.PartitionSpec({', '.join(axes)})"
 
-  def _format_partition_spec_tf(self, sharding: Any) -> str:
+  def _format_partition_spec_tf(self, sharding) -> str:
     """Format TensorFlow layout specification.
 
     Args:
@@ -504,7 +502,7 @@ class PythonBackend(CompilerBackend):
         placements.append("'*'")
     return f"[{', '.join(placements)}]"
 
-  def _format_partition_spec_torch(self, sharding: Any) -> str:
+  def _format_partition_spec_torch(self, sharding) -> str:
     """Format PyTorch distribution specification.
 
     Args:

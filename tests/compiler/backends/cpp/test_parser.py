@@ -6,9 +6,10 @@ function definitions, and pybind11 module definitions from C++ source code.
 """
 
 from ml_switcheroo.core.compiler.backends.cpp.parser import CppParser
+from ml_switcheroo.core.compiler.backends.cpp.cst import CppModule, MacroDefinition, FunctionDefinition, PyBindModule
 
 
-def test_parser_basic():
+def test_parser_basic() -> None:
   """Tests basic parsing functionality of the CppParser.
 
   This test provides a block of C++ source code containing includes, a macro definition,
@@ -22,7 +23,7 @@ def test_parser_basic():
   Returns:
       None
   """
-  code = """
+  code: str = """
 #include <torch/extension.h>
 #include "my_header.h"
 
@@ -38,22 +39,28 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 """
   parser = CppParser(code)
-  mod = parser.parse()
+  mod: CppModule = parser.parse()
   assert len(mod.includes) == 2
   assert mod.includes[0].path == "torch/extension.h"
   assert mod.includes[0].system is True
   assert mod.includes[1].path == "my_header.h"
   assert mod.includes[1].system is False
 
-  assert mod.body[0].name == "MAX_VAL"
-  assert mod.body[0].value == "100"
+  macro_node = mod.body[0]
+  assert isinstance(macro_node, MacroDefinition)
+  assert macro_node.name == "MAX_VAL"
+  assert macro_node.value == "100"
 
-  assert mod.body[1].name == "forward"
-  assert mod.body[1].return_type.name == "torch::Tensor"
-  assert len(mod.body[1].arguments) == 2
-  assert mod.body[1].arguments[0].type_id.name == "torch::Tensor"
+  func_node = mod.body[1]
+  assert isinstance(func_node, FunctionDefinition)
+  assert func_node.name == "forward"
+  assert getattr(func_node.return_type, "name", None) == "torch::Tensor"
+  assert len(func_node.arguments) == 2
+  assert getattr(func_node.arguments[0].type_id, "name", None) == "torch::Tensor"
 
-  assert mod.body[2].name == "TORCH_EXTENSION_NAME"
-  assert mod.body[2].module_var == "m"
-  assert len(mod.body[2].defs) == 1
-  assert mod.body[2].defs[0].name == "forward"
+  pyb_node = mod.body[2]
+  assert isinstance(pyb_node, PyBindModule)
+  assert pyb_node.name == "TORCH_EXTENSION_NAME"
+  assert pyb_node.module_var == "m"
+  assert len(pyb_node.defs) == 1
+  assert pyb_node.defs[0].name == "forward"

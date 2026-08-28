@@ -3,15 +3,15 @@
 from ml_switcheroo.analysis.symbol_types import SymbolType, TensorType, ModuleType, UnionType, Scope
 
 
-def test_symbol_type():
+def test_symbol_type() -> None:
   """Test element."""
-  sym1 = SymbolType()
+  sym1: SymbolType = SymbolType()
   sym1.name = "Unknown"
 
-  sym2 = SymbolType()
+  sym2: SymbolType = SymbolType()
   sym2.name = "Unknown"
 
-  sym3 = SymbolType()
+  sym3: SymbolType = SymbolType()
   sym3.name = "Other"
 
   assert str(sym1) == "Unknown"
@@ -20,11 +20,11 @@ def test_symbol_type():
   assert sym1 != "Not a SymbolType"
 
 
-def test_tensor_type():
+def test_tensor_type() -> None:
   """Test element."""
-  t1 = TensorType(framework="torch")
-  t2 = TensorType(framework="torch")
-  t3 = TensorType(framework="jax")
+  t1: TensorType = TensorType(framework="torch")
+  t2: TensorType = TensorType(framework="torch")
+  t3: TensorType = TensorType(framework="jax")
 
   assert t1.name == "Tensor"
   assert t1 == t2
@@ -32,11 +32,11 @@ def test_tensor_type():
   assert t1 != "Not a TensorType"
 
 
-def test_module_type():
+def test_module_type() -> None:
   """Test element."""
-  m1 = ModuleType(path="torch.nn")
-  m2 = ModuleType(path="torch.nn")
-  m3 = ModuleType(path="jax.numpy")
+  m1: ModuleType = ModuleType(path="torch.nn")
+  m2: ModuleType = ModuleType(path="torch.nn")
+  m3: ModuleType = ModuleType(path="jax.numpy")
 
   assert m1.name == "Module"
   assert m1 == m2
@@ -44,14 +44,14 @@ def test_module_type():
   assert m1 != "Not a ModuleType"
 
 
-def test_union_type():
+def test_union_type() -> None:
   """Test element."""
-  t_torch = TensorType(framework="torch")
-  t_jax = TensorType(framework="jax")
+  t_torch: TensorType = TensorType(framework="torch")
+  t_jax: TensorType = TensorType(framework="jax")
 
-  u1 = UnionType(types=[t_torch, t_jax])
-  u2 = UnionType(types=[t_jax, t_torch])
-  u3 = UnionType(types=[t_torch])
+  u1: UnionType = UnionType(types=[t_torch, t_jax])
+  u2: UnionType = UnionType(types=[t_jax, t_torch])
+  u3: UnionType = UnionType(types=[t_torch])
 
   assert str(u1) == "Union[Tensor]"  # they both evaluate to "Tensor" string
   assert u1 == u2  # they contain same string representations
@@ -62,12 +62,12 @@ def test_union_type():
   assert u1 != "Not a UnionType"
 
 
-def test_scope():
+def test_scope() -> None:
   """Test element."""
-  root = Scope(name="root")
+  root: Scope = Scope(name="root")
   root.set("x", TensorType(framework="torch"))
 
-  child = Scope(parent=root, name="child")
+  child: Scope = Scope(parent=root, name="child")
   child.set("y", TensorType(framework="jax"))
 
   assert root.get("x") == TensorType(framework="torch")
@@ -77,6 +77,6 @@ def test_scope():
   assert child.get("y") == TensorType(framework="jax")
   assert child.get("z") is None
 
-  snap = child.snapshot()
+  snap: dict[str, SymbolType] = child.snapshot()
   assert snap["y"] == TensorType(framework="jax")
   assert "x" not in snap

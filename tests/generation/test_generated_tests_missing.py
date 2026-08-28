@@ -1,30 +1,32 @@
 """Test suite for the Generated Tests Missing module."""
 
+import typing
+from pathlib import Path
 
-def test_generator_empty_semantics():
+
+def test_generator_empty_semantics() -> None:
   """Verifies the behavior of generator empty semantics."""
   from ml_switcheroo.generated_tests.generator import TestCaseGenerator
-  from pathlib import Path
 
-  gen = TestCaseGenerator(None)
+  gen = TestCaseGenerator(None)  # type: ignore
   gen.generate({}, Path("foo.py"))
 
 
-def test_templates_exception():
+def test_templates_exception() -> None:
   """Verifies the behavior of templates correctly handling an exception."""
   from ml_switcheroo.generated_tests.templates import get_template
 
   class FaultyManager:
     """Test suite for the Faulty Manager component."""
 
-    def get_test_template(self, fw):
+    def get_test_template(self, fw: str) -> typing.Any:
       """Gets test template."""
       raise ValueError("fail")
 
   assert get_template(FaultyManager(), "torch") != {}
 
 
-def test_inputs_parse_arg_def():
+def test_inputs_parse_arg_def() -> None:
   """Verifies the behavior of inputs parse argument def."""
   from ml_switcheroo.generated_tests.inputs import parse_arg_def
 
@@ -35,7 +37,7 @@ def test_inputs_parse_arg_def():
   assert parse_arg_def("just_a_string") == {"name": "just_a_string", "type": "Array"}
 
 
-def test_infer_type_from_default():
+def test_infer_type_from_default() -> None:
   """Infers type from default."""
   from ml_switcheroo.generated_tests.inputs import _infer_type_from_default
 
@@ -46,7 +48,7 @@ def test_infer_type_from_default():
   assert _infer_type_from_default([1.0, 2.0]) == "List[Any]"
 
 
-def test_inputs_generate_input_value_code():
+def test_inputs_generate_input_value_code() -> None:
   """Verifies the behavior of inputs generate input value code."""
   from ml_switcheroo.generated_tests.inputs import generate_input_value_code
 
@@ -71,7 +73,7 @@ def test_inputs_generate_input_value_code():
   assert "(1, 2)" == generate_input_value_code("foo", {"type": "Tuple[int]"})
 
 
-def test_generate_dim_heuristic():
+def test_generate_dim_heuristic() -> None:
   """Generates dim heuristic."""
   from ml_switcheroo.generated_tests.inputs import _generate_dim_heuristic
 
@@ -80,7 +82,7 @@ def test_generate_dim_heuristic():
   assert _generate_dim_heuristic("foo") == "1"
 
 
-def test_inputs_parse_arg_def_more():
+def test_inputs_parse_arg_def_more() -> None:
   """Verifies the behavior of inputs parse argument def more."""
   from ml_switcheroo.generated_tests.inputs import parse_arg_def
 
@@ -90,14 +92,14 @@ def test_inputs_parse_arg_def_more():
   assert parse_arg_def(123) == {"name": "unknown", "type": "Array"}
 
 
-def test_infer_type_from_default_more():
+def test_infer_type_from_default_more() -> None:
   """Infers type from default more."""
   from ml_switcheroo.generated_tests.inputs import _infer_type_from_default
 
   assert _infer_type_from_default(["abc"]) == "List[Any]"
 
 
-def test_inputs_generate_input_value_code_more():
+def test_inputs_generate_input_value_code_more() -> None:
   """Verifies the behavior of inputs generate input value code more."""
   from ml_switcheroo.generated_tests.inputs import generate_input_value_code
 
@@ -107,28 +109,28 @@ def test_inputs_generate_input_value_code_more():
   assert "astype(np.float32)" in generate_input_value_code("foo", {"type": "Array"})
 
 
-def test_inputs_infer_type_from_default_any():
+def test_inputs_infer_type_from_default_any() -> None:
   """Verifies the behavior of inputs infer type from default any."""
   from ml_switcheroo.generated_tests.inputs import _infer_type_from_default
 
   assert _infer_type_from_default("abc") == "Any"
 
 
-def test_inputs_generate_dim_heuristic_fallback():
+def test_inputs_generate_dim_heuristic_fallback() -> None:
   """Verifies the behavior of inputs generate dim heuristic fallback."""
   from ml_switcheroo.generated_tests.inputs import generate_input_value_code
 
   assert "1" in generate_input_value_code("axis", {"type": "Any"})
 
 
-def test_inputs_generate_dim_heuristic_fallback_2():
+def test_inputs_generate_dim_heuristic_fallback_2() -> None:
   """Verifies the behavior of inputs generate dim heuristic fallback 2."""
   from ml_switcheroo.generated_tests.inputs import generate_input_value_code
 
   assert "np.random.randn" in generate_input_value_code("foo_bar", {"type": "Any"})
 
 
-def test_templates_is_static_arg():
+def test_templates_is_static_arg() -> None:
   """Verifies the behavior of templates is static argument."""
   from ml_switcheroo.generated_tests.templates import is_static_arg, get_template
 
@@ -145,7 +147,7 @@ def test_templates_is_static_arg():
   class GoodManager:
     """Test suite for the Good Manager component."""
 
-    def get_test_template(self, fw):
+    def get_test_template(self, fw: str) -> dict[str, str]:
       """Gets test template."""
       return {"import": "foo"}
 

@@ -3,16 +3,17 @@
 import pytest
 from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
+from typing import Dict, Any, List, Optional
 
 
 class MockSemantics(SemanticsManager):
   """Mock Semantics class for testing purposes."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data = {}
-    self._reverse_index = {}
-    self._key_origins = {}
+    self.data: Dict[str, Any] = {}
+    self._reverse_index: Dict[str, Any] = {}
+    self._key_origins: Dict[str, str] = {}
     self._inject(
       "abs", tier="array", variants={"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}, std_args=["x"]
     )
@@ -33,76 +34,76 @@ class MockSemantics(SemanticsManager):
       std_args=["x"],
     )
 
-  def _inject(self, name, tier, variants, std_args):
+  def _inject(self, name: str, tier: str, variants: Dict[str, Any], std_args: List[Any]) -> None:
     """Mock implementation of  inject."""
     self.data[name] = {"variants": variants, "std_args": std_args}
     self._key_origins[name] = tier
 
-  def get_known_apis(self):
+  def get_known_apis(self) -> Dict[str, Any]:
     """Mock implementation of get known apis."""
     return self.data
 
-  def get_definition_by_id(self, op_name):
+  def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
     """Mock implementation of get definition by id."""
     return self.data.get(op_name)
 
 
 @pytest.fixture
-def generator():
+def generator() -> MigrationGuideGenerator:
   """Provides a mock generator for testing."""
-  semantics = MockSemantics()
+  semantics: MockSemantics = MockSemantics()
   return MigrationGuideGenerator(semantics)
 
 
-def test_markdown_structure(generator):
+def test_markdown_structure(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of markdown structure."""
-  md = generator.generate("torch", "jax")
+  md: str = generator.generate("torch", "jax")
   assert "# Migration Guide: Torch to Jax" in md
   assert "## Array" in md
   assert "## Neural" in md
   assert "| Torch API | Jax API | Argument Changes |" in md
 
 
-def test_simple_match_row(generator):
+def test_simple_match_row(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of simple match row."""
-  md = generator.generate("torch", "jax")
+  md: str = generator.generate("torch", "jax")
   assert "| `torch.abs` | `jax.numpy.abs` | - |" in md
 
 
-def test_argument_diff_logic(generator):
+def test_argument_diff_logic(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of argument diff logic."""
-  md = generator.generate("torch", "jax")
+  md: str = generator.generate("torch", "jax")
   assert "`jnp.sum`" in md
   assert "`input`&#8594;`a`" in md
   assert "`dim`&#8594;`axis`" in md
 
 
-def test_missing_target(generator):
+def test_missing_target(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of missing target."""
-  md = generator.generate("torch", "jax")
+  md: str = generator.generate("torch", "jax")
   assert "`torch.unique`" in md
   assert "| `torch.unique` | `—` |" in md
 
 
-def test_plugin_annotation(generator):
+def test_plugin_annotation(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of plugin annotation."""
-  md = generator.generate("torch", "jax")
+  md: str = generator.generate("torch", "jax")
   assert "*(Plugin: magic_fix)*" in md
 
 
-def test_tier_ordering(generator):
+def test_tier_ordering(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of tier ordering."""
-  md = generator.generate("torch", "jax")
-  idx_array = md.find("## Array")
-  idx_neural = md.find("## Neural")
-  idx_extras = md.find("## Extras")
+  md: str = generator.generate("torch", "jax")
+  idx_array: int = md.find("## Array")
+  idx_neural: int = md.find("## Neural")
+  idx_extras: int = md.find("## Extras")
   assert idx_array < idx_neural
   assert idx_neural < idx_extras
 
 
-def test_filtering_missing_source(generator):
+def test_filtering_missing_source(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of filtering missing source."""
-  md = generator.generate("tensorflow", "jax")
+  md: str = generator.generate("tensorflow", "jax")
   assert "torch.abs" not in md
   assert "## Array" not in md
   assert "| `torch.abs`" not in md

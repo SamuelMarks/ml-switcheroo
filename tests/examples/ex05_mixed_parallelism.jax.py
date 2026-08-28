@@ -11,7 +11,7 @@ import jax
 import jax.numpy as jnp
 
 
-def parallel_step(x):
+def parallel_step(x: jax.Array) -> jax.Array:
   """Performs a parallel computation step using JAX.
 
   First computes the absolute value of the input array elements, then applies
@@ -25,10 +25,10 @@ def parallel_step(x):
       absolute values of the input array.
   """
   # This standard op SHOULD be converted to Torch
-  val = jnp.abs(x)
+  val: jax.Array = jnp.abs(x)
 
   # This parallelization primitive should trigger the Escape Hatch
   # as it cannot be trivially mapped to a torch function call.
-  out = jax.pmap(lambda v: v * 2)(val)
+  out: jax.Array = jax.pmap(lambda v: v * 2)(val)
 
   return out

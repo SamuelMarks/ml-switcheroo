@@ -5,7 +5,7 @@ from ml_switcheroo.core.mlir.cst import OperationNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_resolve_sw_op_no_type_attr():
+def test_resolve_sw_op_no_type_attr() -> None:
   """Test function."""
   semantics = SemanticsManager()
   emitter = StableHloEmitter(semantics)
@@ -14,9 +14,9 @@ def test_resolve_sw_op_no_type_attr():
   assert op.name == "sw.op"  # Should not be modified
 
 
-def test_map_py_type_to_mlir():
+def test_map_py_type_to_mlir() -> None:
   """Test function."""
   semantics = SemanticsManager()
   emitter = StableHloEmitter(semantics)
-  res = emitter._map_py_type_to_mlir("float")
+  res: str = emitter._map_py_type_to_mlir("float")
   assert res == "f32"

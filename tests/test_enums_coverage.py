@@ -3,7 +3,7 @@
 from ml_switcheroo.enums import SemanticTier, LogicOp
 
 
-def test_enums_member_access():
+def test_enums_member_access() -> None:
   """Verifies the behavior of enums member access."""
   assert SemanticTier.ARRAY_API == "array"
   assert SemanticTier.NEURAL == "neural"

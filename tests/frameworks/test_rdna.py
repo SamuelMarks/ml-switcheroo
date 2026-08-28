@@ -1,11 +1,12 @@
 """Test suite for the Rdna module."""
 
+import typing
 from ml_switcheroo.frameworks.rdna import RdnaAdapter
 from ml_switcheroo.frameworks.base import InitMode
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
-def test_rdna_adapter_init():
+def test_rdna_adapter_init() -> None:
   """Verifies the behavior of RDNA adapter initialization."""
   adapter = RdnaAdapter()
   assert adapter.display_name == "AMD RDNA"
@@ -15,34 +16,34 @@ def test_rdna_adapter_init():
   assert adapter.target_arch == "gfx1030"
 
 
-def test_rdna_properties():
+def test_rdna_properties() -> None:
   """Verifies the behavior of RDNA properties."""
   adapter = RdnaAdapter()
   assert adapter.import_alias == ("rdna", "asm")
   assert adapter.import_namespaces == {}
   assert SemanticTier.ARRAY_API in adapter.supported_tiers
-  traits = adapter.structural_traits
+  traits: typing.Any = adapter.structural_traits
   assert traits.module_base is None
-  config = adapter.test_config
+  config: dict[str, typing.Any] = adapter.test_config
   assert "; RDNA Header" in config["import"]
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
   assert adapter.get_to_numpy_code() == "return str(obj)"
   assert adapter.declared_magic_args == []
   assert adapter.rng_seed_methods == []
-  defs = adapter.definitions
+  defs: typing.Any = adapter.definitions
   assert isinstance(defs, dict)
-  specs = adapter.specifications
+  specs: typing.Any = adapter.specifications
   assert specs == {}
-  snapshot = {}
+  snapshot: dict[str, typing.Any] = {}
   adapter.apply_wiring(snapshot)
   assert snapshot == {}
-  examples = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
   assert "v_add_f32" in examples["tier1_math"]
 
 
-def test_rdna_missing_coverage():
+def test_rdna_missing_coverage() -> None:
   """Verifies the remaining untested methods of RDNA adapter."""
   adapter = RdnaAdapter()
 
@@ -69,7 +70,7 @@ def test_rdna_missing_coverage():
   assert adapter.convert(123) == "123"
 
   # Graph parsing
-  code = """
+  code: str = """
   ; comment
   BB0_1:
   v_add_f32 v0, v1, v2
@@ -77,14 +78,14 @@ def test_rdna_missing_coverage():
   s_cbranch_vccnz BB0_1
   BB0_2:
   """
-  graph_loop = adapter.parse_rdna_to_graph(code)
-  nodes_loop = list(graph_loop.nodes.values())
+  graph_loop: typing.Any = adapter.parse_rdna_to_graph(code)
+  nodes_loop: list[typing.Any] = list(graph_loop.nodes.values())
   assert any(n.op_type == "Conv2d" for n in nodes_loop)
 
-  code_no_loop = """
+  code_no_loop: str = """
   v_mac_f32 v3, v4, v5
   """
-  graph_no_loop = adapter.parse_rdna_to_graph(code_no_loop)
-  nodes_no_loop = list(graph_no_loop.nodes.values())
+  graph_no_loop: typing.Any = adapter.parse_rdna_to_graph(code_no_loop)
+  nodes_no_loop: list[typing.Any] = list(graph_no_loop.nodes.values())
   assert len(nodes_no_loop) == 1
   assert nodes_no_loop[0].op_type == "Linear"

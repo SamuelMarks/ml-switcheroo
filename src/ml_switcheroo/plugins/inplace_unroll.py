@@ -87,8 +87,8 @@ def unroll_inplace_ops(
       ctx: HookContext for target framework access.
   """
   # 1. Identify Method Call
-  method_name = _get_method_name(node)  # type: ignore
-  receiver = _get_receiver_name(node)  # type: ignore
+  method_name = _get_method_name(node)
+  receiver = _get_receiver_name(node)
 
   if not method_name or not receiver:
     return node
@@ -113,15 +113,15 @@ def unroll_inplace_ops(
     "pow": cst.Power(),
   }
 
-  if clean_name in infix_map and len(node.args) == 1:  # type: ignore
+  if clean_name in infix_map and len(node.args) == 1:
     # x.add_(y) -> x + y
     # Ensure arg is clean (remove comma if present)
-    right_operand = node.args[0].value  # type: ignore
+    right_operand = node.args[0].value
     return cst.BinaryOperation(left=receiver, operator=infix_map[clean_name], right=right_operand)
 
   # 5. Strategy B: Construct Functional Method Call (Fallback)
   # x.unknown_(y) -> x.unknown(y)
-  new_func = node.func.with_changes(attr=cst.Name(clean_name))  # type: ignore
+  new_func = node.func.with_changes(attr=cst.Name(clean_name))
   functional_call = node.with_changes(func=new_func)
 
   return functional_call

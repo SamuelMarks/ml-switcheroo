@@ -4,13 +4,10 @@ Generates standalone verification scripts.
 Bundles fuzzer logic (including Hypothesis strategies).
 """
 
-from typing import Any
-
 import json
 import inspect
 import textwrap
 from pathlib import Path
-from typing import Dict, Optional
 
 import libcst as cst
 from ml_switcheroo.testing.harness_generator_template import get_harness_skeleton
@@ -86,7 +83,7 @@ class HarnessInjector(cst.CSTTransformer):
         insert_idx = i
         break
 
-    nodes: list[Any] = []
+    nodes = []
     if self.imports_block.strip():
       nodes.extend(cst.parse_module(self.imports_block).body)
     if self.init_helpers_block.strip():
@@ -97,7 +94,7 @@ class HarnessInjector(cst.CSTTransformer):
     new_body = list(updated_node.body[:insert_idx]) + nodes + list(updated_node.body[insert_idx:])
     return updated_node.with_changes(body=new_body)
 
-  def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Any:
+  def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef):
     """Inject to_numpy logic into the to_numpy function definition.
 
     Args:
@@ -120,7 +117,7 @@ class HarnessInjector(cst.CSTTransformer):
       return updated_node.with_changes(body=updated_node.body.with_changes(body=new_body))
     return updated_node
 
-  def leave_If(self, original_node: cst.If, updated_node: cst.If) -> Any:
+  def leave_If(self, original_node: cst.If, updated_node: cst.If):
     """Inject the param injection logic replacing the target `if tp not in tgt_inputs: pass`.
 
     Args:
@@ -143,7 +140,7 @@ class HarnessInjector(cst.CSTTransformer):
           return updated_node.with_changes(body=updated_node.body.with_changes(body=parsed))
     return updated_node
 
-  def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> Any:
+  def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
     """Modify the run_verification arguments to use dynamic paths and frameworks.
 
     Args:
@@ -180,7 +177,7 @@ class HarnessGenerator:
     output_harness: Path,
     source_fw: str = "torch",
     target_fw: str = "jax",
-    semantics: Optional[Dict[str, Any]] = None,
+    semantics=None,
   ) -> None:
     """Create the verification harness file and writes it to disk.
 
@@ -258,7 +255,7 @@ class HarnessGenerator:
     deps.append("import hypothesis.extra.numpy as npst")
     deps.append("import re")
     deps.append("import numpy as np")
-    deps.append("from typing import Union, Any, Dict, List, Optional, Tuple, Callable")
+    deps.append("from typing import Any, Union, Any, Dict, List, Optional, Tuple, Callable")
     deps.append("from dataclasses import dataclass")
     deps.append("import typing")
     deps.append("""
@@ -309,7 +306,7 @@ class CallableType(ParsedType):
     pass
 """)
 
-    def extract_module_functions(module: Any) -> Any:
+    def extract_module_functions(module: __import__("types").ModuleType) -> None:  # type: ignore
       """Extract and de-indents all top-level functions from the given module.
 
       Args:
@@ -417,10 +414,10 @@ class CallableType(ParsedType):
         generic adapter compatible with registered frameworks.
     """
     shim_lines = [
-      "# Shim for missing get_adapter",
-      "def get_adapter(framework):",
+      "# Shim for missing get_adapter\nimport typing",
+      "def get_adapter(framework: str) -> typing.Any:",
       "    class GenericAdapter:",
-      "        def convert(self, data):",
+      "        def convert(self, data: typing.Any) -> typing.Any:",
       "            try:",
       "                import numpy as np",
       "                if not isinstance(data, (np.ndarray, np.generic)) and not isinstance(data, (list, tuple)):",
@@ -438,22 +435,18 @@ class CallableType(ParsedType):
 
       try:
         method_source = inspect.getsource(adapter_cls.convert)
-      except OSError:
+        import ast
+
+        tree = ast.parse(textwrap.dedent(method_source))
+        func_def = tree.body[0]
+        assert isinstance(func_def, ast.FunctionDef)
+        body_str = ast.unparse(func_def.body)  # type: ignore[arg-type]
+      except Exception:
         continue
 
-      clean_block = textwrap.dedent(method_source)
-      lines = clean_block.splitlines()
-      body_start = 0
-      for i, line in enumerate(lines):  # pragma: no branch
-        if line.strip().startswith("def convert"):  # pragma: no branch
-          body_start = i + 1
-          break
-
-      body_lines = lines[body_start:]
       condition_kw = "if" if first else "elif"
       shim_lines.append(f"            {condition_kw} framework == '{fw_name}':")
       base_indent = " " * 16
-      body_str = textwrap.dedent("\n".join(body_lines))
       indented_body = textwrap.indent(body_str, base_indent)
       shim_lines.append(indented_body)
       first = False

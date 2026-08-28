@@ -4,15 +4,15 @@ import ml_switcheroo.core.compiler.backends.visual_tikz as visual_tikz
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 
 
-def test_tikz_backend_empty():
+def test_tikz_backend_empty() -> None:
   """Verifies the behavior of TikZ backend empty."""
   backend = visual_tikz.TikzBackend()
   graph = LogicalGraph("Empty")
-  res = backend.compile(graph)
+  res: str = backend.compile(graph)
   assert "begin{tikzpicture}" in res
 
 
-def test_tikz_backend_pure_cycle():
+def test_tikz_backend_pure_cycle() -> None:
   """Test cycle with no input nodes to hit not queue and graph.nodes branch."""
   backend = visual_tikz.TikzBackend()
   graph = LogicalGraph("CycleOnly")
@@ -24,11 +24,11 @@ def test_tikz_backend_pure_cycle():
     LogicalEdge("n1", "n2"),
     LogicalEdge("n2", "n1"),  # Pure cycle
   ]
-  res = backend.compile(graph)
+  res: str = backend.compile(graph)
   assert "begin{tikzpicture}" in res
 
 
-def test_tikz_backend_unconnected_cycle():
+def test_tikz_backend_unconnected_cycle() -> None:
   """Test cycle in disconnected component to hit missing node from ranks."""
   backend = visual_tikz.TikzBackend()
   graph = LogicalGraph("IsolatedCycle")
@@ -43,11 +43,11 @@ def test_tikz_backend_unconnected_cycle():
     LogicalEdge("n1", "n2"),
     LogicalEdge("n2", "n1"),  # Isolated cycle
   ]
-  res = backend.compile(graph)
+  res: str = backend.compile(graph)
   assert "Isolated1" in res
 
 
-def test_visual_tikz_rank_existing_higher():
+def test_visual_tikz_rank_existing_higher() -> None:
   # Hit 116->115
   """Test visual tikz rank existing higher."""
   from ml_switcheroo.core.compiler.backends.visual_tikz import TikzBackend

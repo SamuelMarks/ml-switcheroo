@@ -11,74 +11,74 @@ def parse_expr(code: str) -> cst.BaseExpression:
   return cst.parse_expression(code)
 
 
-def test_create_dotted_name():
+def test_create_dotted_name() -> None:
   """Docstring."""
-  node = create_dotted_name("a.b.c")
-  code = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(node)])]).code
+  node: cst.BaseExpression = create_dotted_name("a.b.c")
+  code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=node)])]).code
   assert code.strip() == "a.b.c"
 
 
-def test_extract_root_name_attribute():
+def test_extract_root_name_attribute() -> None:
   """Docstring."""
-  node = parse_expr("a.b.c")
+  node: cst.BaseExpression = parse_expr("a.b.c")
   assert _extract_root_name(node) == "a"
   assert _extract_root_name(parse_expr("1 + 1")) is None
 
 
-def test_is_framework_module_node_no_name():
+def test_is_framework_module_node_no_name() -> None:
   """Docstring."""
-  ctx = MagicMock(spec=HookContext)
-  node = parse_expr("1 + 1")
+  ctx: MagicMock = MagicMock(spec=HookContext)
+  node: cst.BaseExpression = parse_expr("1 + 1")
   assert not is_framework_module_node(node, ctx)
 
 
-def test_is_framework_module_node_source_fw():
+def test_is_framework_module_node_source_fw() -> None:
   """Docstring."""
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "torch"
   ctx.target_fw = None
-  node = parse_expr("torch")
+  node: cst.BaseExpression = parse_expr("torch")
   assert is_framework_module_node(node, ctx)
 
 
-def test_is_framework_module_node_target_fw():
+def test_is_framework_module_node_target_fw() -> None:
   """Docstring."""
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "jax"
   ctx.target_fw = "torch"
-  node = parse_expr("torch")
+  node: cst.BaseExpression = parse_expr("torch")
   assert is_framework_module_node(node, ctx)
 
 
-def test_is_framework_module_node_configs_direct():
+def test_is_framework_module_node_configs_direct() -> None:
   """Docstring."""
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "a"
   ctx.target_fw = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {"torch": {}}
-  node = parse_expr("torch")
+  node: cst.BaseExpression = parse_expr("torch")
   assert is_framework_module_node(node, ctx)
 
 
-def test_is_framework_module_node_configs_alias_dict():
+def test_is_framework_module_node_configs_alias_dict() -> None:
   """Docstring."""
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "a"
   ctx.target_fw = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {"torch": {"alias": {"name": "jnp"}}}
-  node = parse_expr("jnp")
+  node: cst.BaseExpression = parse_expr("jnp")
   assert is_framework_module_node(node, ctx)
 
 
-def test_is_framework_module_node_configs_alias_object():
+def test_is_framework_module_node_configs_alias_object() -> None:
   """Docstring."""
 
   class AliasInfo:
     """Docstring."""
 
-    def model_dump(self):
+    def model_dump(self) -> dict:
       """Docstring."""
       return {"name": "jnp"}
 
@@ -87,16 +87,16 @@ def test_is_framework_module_node_configs_alias_object():
 
     alias = AliasInfo()
 
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "a"
   ctx.target_fw = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {"torch": Conf()}
-  node = parse_expr("jnp")
+  node: cst.BaseExpression = parse_expr("jnp")
   assert is_framework_module_node(node, ctx)
 
 
-def test_is_framework_module_node_configs_alias_object_no_dump():
+def test_is_framework_module_node_configs_alias_object_no_dump() -> None:
   """Docstring."""
 
   class Conf:
@@ -104,34 +104,34 @@ def test_is_framework_module_node_configs_alias_object_no_dump():
 
     alias = {"name": "jnp"}
 
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "a"
   ctx.target_fw = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {"torch": Conf()}
-  node = parse_expr("jnp")
+  node: cst.BaseExpression = parse_expr("jnp")
   assert is_framework_module_node(node, ctx)
 
 
-def test_is_framework_module_node_source_registry():
+def test_is_framework_module_node_source_registry() -> None:
   """Docstring."""
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "a"
   ctx.target_fw = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {}
   ctx.semantics._source_registry = {"np.random": None}
-  node = parse_expr("np")
+  node: cst.BaseExpression = parse_expr("np")
   assert is_framework_module_node(node, ctx)
 
 
-def test_is_framework_module_node_no_match():
+def test_is_framework_module_node_no_match() -> None:
   """Docstring."""
-  ctx = MagicMock(spec=HookContext)
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "a"
   ctx.target_fw = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {}
   ctx.semantics._source_registry = {}
-  node = parse_expr("unknown_framework")
+  node: cst.BaseExpression = parse_expr("unknown_framework")
   assert not is_framework_module_node(node, ctx)

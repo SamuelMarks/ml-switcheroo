@@ -8,7 +8,7 @@ automated refactoring of type hints.
 
 import libcst as cst
 from dataclasses import dataclass
-from typing import List, Optional, Any
+from typing import List, Optional
 
 
 class ParsedType:
@@ -280,10 +280,6 @@ class TypeAnnotationParser:
           elt: The CSTNode representing the subscript slice element to process.
       """
       nonlocal is_variadic
-
-      # In libcst, node.slice is a list of SubscriptElement
-      # elt is the slice object inside SubscriptElement
-      val: Any
       if isinstance(elt, cst.Index):
         val = elt.value
       else:

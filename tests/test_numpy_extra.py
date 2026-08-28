@@ -4,9 +4,9 @@ from unittest.mock import patch, MagicMock
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 
-def test_numpy_adapter_properties():
+def test_numpy_adapter_properties() -> None:
   """Test element."""
-  adapter = NumpyAdapter()
+  adapter: NumpyAdapter = NumpyAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -52,17 +52,17 @@ def test_numpy_adapter_properties():
   adapter.get_tiered_examples()
 
 
-def test_numpy_convert_branches():
+def test_numpy_convert_branches() -> None:
   """Test element."""
-  adapter = NumpyAdapter()
+  adapter: NumpyAdapter = NumpyAdapter()
   assert adapter.convert({"a": 1}) == {"a": 1}
 
   class DetachDummy:
-    def detach(self):
+    def detach(self) -> object:
       class CpuDummy:
-        def cpu(self):
+        def cpu(self) -> object:
           class NumpyDummy:
-            def numpy(self):
+            def numpy(self) -> str:
               return "detached"
 
           return NumpyDummy()
@@ -72,25 +72,27 @@ def test_numpy_convert_branches():
   assert adapter.convert(DetachDummy()) == "detached"
 
   class DetachFail:
-    def detach(self):
+    def detach(self) -> None:
       raise Exception("fail")
 
   adapter.convert(DetachFail())
 
-  class NumpyDummy:
-    def numpy(self):
+  class NumpyDummy2:
+    def numpy(self) -> str:
       return "numpy"
 
-  assert adapter.convert(NumpyDummy()) == "numpy"
+  assert adapter.convert(NumpyDummy2()) == "numpy"
 
   class NumpyFail:
-    def numpy(self):
+    def numpy(self) -> None:
       raise Exception("fail")
 
   adapter.convert(NumpyFail())
 
   class ArrayDummy:
-    def __array__(self, dtype=None):
+    def __array__(self, dtype: object = None) -> object:
+      import numpy as np
+
       return np.array([1], dtype=dtype)
 
   import numpy as np
@@ -98,7 +100,7 @@ def test_numpy_convert_branches():
   assert np.array_equal(adapter.convert(ArrayDummy()), np.array([1]))
 
   class ArrayFail:
-    def __array__(self):
+    def __array__(self) -> None:
       raise Exception("fail")
 
   adapter.convert(ArrayFail())

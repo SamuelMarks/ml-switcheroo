@@ -1,13 +1,35 @@
 """Logic for Conditional API Dispatch."""
 
-from typing import Any
-
-from typing import List, Optional, Dict
+from typing import List, Optional, TYPE_CHECKING, Union
 import libcst as cst
 from ml_switcheroo.enums import LogicOp
 
+if TYPE_CHECKING:
+  # Structural typing for dispatch rules
+  class DispatchRuleDummy:
+    """Dummy dispatch rule."""
 
-def evaluate_dispatch_rules(rewriter: Any, node: cst.Call, rules: List[Any], details: Dict[str, Any]) -> Optional[str]:
+    if_arg: str
+    op: LogicOp
+    is_val: Union[str, int, float, bool, None]
+    use_api: str
+
+  # structural typing for rewriter to avoid circular import
+  from typing import Protocol
+
+  class RewriterDummy(Protocol):
+    """Dummy rewriter."""
+
+    source_fw: str
+
+    def _is_module_alias(self, name: str) -> bool:
+      """Check if a name is a module alias."""
+      ...
+
+
+def evaluate_dispatch_rules(
+  rewriter: "RewriterDummy", node: cst.Call, rules: List["DispatchRuleDummy"], details: dict
+) -> Optional[str]:
   """Evaluate conditional dispatch rules against the current call arguments.
 
   Args:
@@ -20,7 +42,7 @@ def evaluate_dispatch_rules(rewriter: Any, node: cst.Call, rules: List[Any], det
       The string identifier of the API to dispatch to if a rule matches, otherwise None.
 
   """
-  source_variant = details["variants"].get(rewriter.source_fw, {})
+  source_variant = details.get("variants", {}).get(rewriter.source_fw, {})
   source_arg_map = source_variant.get("args", {})
 
   std_args_raw = details.get("std_args", [])
@@ -43,18 +65,18 @@ def evaluate_dispatch_rules(rewriter: Any, node: cst.Call, rules: List[Any], det
       continue
 
     if _check_rule_condition(arg_node, rule):
-      return rule.use_api  # type: ignore
+      return rule.use_api
 
   return None
 
 
 def _extract_argument_node(
-  rewriter: Any,
+  rewriter: "RewriterDummy",
   node: cst.Call,
   src_name: str,
   std_name: str,
   std_order: List[str],
-) -> Optional[cst.CSTNode]:
+) -> Optional[cst.BaseExpression]:
   """Extract the argument node for a given parameter name.
 
   Args:
@@ -93,7 +115,7 @@ def _extract_argument_node(
   return None
 
 
-def _node_to_literal(node: cst.CSTNode) -> Any:
+def _node_to_literal(node: cst.CSTNode) -> Union[str, int, float, bool, None]:
   """Convert a CST node into a basic Python literal type if possible.
 
   Args:
@@ -121,7 +143,7 @@ def _node_to_literal(node: cst.CSTNode) -> Any:
   return None
 
 
-def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
+def _check_rule_condition(node: cst.CSTNode, rule: "DispatchRuleDummy") -> bool:
   """Check if a given CSTNode meets the condition specified by a rule.
 
   Args:
@@ -159,15 +181,16 @@ def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
   op_map = {
     LogicOp.EQ: lambda v, t: bool(v == t),
     LogicOp.NEQ: lambda v, t: bool(v != t),
-    LogicOp.GT: lambda v, t: bool(v > t),
-    LogicOp.LT: lambda v, t: bool(v < t),
-    LogicOp.GTE: lambda v, t: bool(v >= t),
-    LogicOp.LTE: lambda v, t: bool(v <= t),
-    LogicOp.IN: lambda v, t: bool(v in t),
-    LogicOp.NOT_IN: lambda v, t: bool(v not in t),
+    LogicOp.GT: lambda v, t: bool(v > t) if t is not None and v is not None and type(v) == type(t) else False,
+    LogicOp.LT: lambda v, t: bool(v < t) if t is not None and v is not None and type(v) == type(t) else False,
+    LogicOp.GTE: lambda v, t: bool(v >= t) if t is not None and v is not None and type(v) == type(t) else False,
+    LogicOp.LTE: lambda v, t: bool(v <= t) if t is not None and v is not None and type(v) == type(t) else False,
+    LogicOp.IN: lambda v, t: bool(v in t) if t is not None else False,
+    LogicOp.NOT_IN: lambda v, t: bool(v not in t) if t is not None else False,
   }
 
   if op in op_map:
-    return op_map[op](val, target)
+    # We must disable type-checking on this lambda map lookup due to broad dynamic typing bounds
+    return op_map[op](val, target)  # type: ignore
 
   return False

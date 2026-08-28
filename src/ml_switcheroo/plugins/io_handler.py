@@ -124,6 +124,6 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
       return node
 
     # 3. Parse back to CST
-    return cst.parse_expression(new_code)  # type: ignore
+    return cst.parse_expression(new_code)
   except Exception:
     return node

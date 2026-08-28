@@ -4,9 +4,9 @@ from ml_switcheroo.core.latex.parser import LatexParser
 from unittest.mock import patch
 
 
-def test_latex_parser_missing_branches_clean():
+def test_latex_parser_missing_branches_clean() -> None:
   """Docstring."""
-  src1 = r"""
+  src1: str = r"""
 \begin{Unknown}
 \end{Unknown}
 \%escaped
@@ -16,7 +16,7 @@ def test_latex_parser_missing_branches_clean():
   parser = LatexParser(src1)
   parser.parse()
 
-  src2 = r"""
+  src2: str = r"""
 \UnknownMacroOutside{A}
 \begin{DefModel}{MyModel{WithBraces}}
 \Op{out}{valid_name}{{"nested": {1: 2}}}{config}

@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from ml_switcheroo.core.ingestion import ingest_code
 
 
-def test_ingestion_adapter_exception():
+def test_ingestion_adapter_exception() -> None:
   """Verifies the behavior of ingestion adapter correctly handling an exception."""
   adapter = MagicMock()
   adapter.create_parser.side_effect = Exception("Adapter Error")
@@ -15,7 +15,7 @@ def test_ingestion_adapter_exception():
   tracer.end_phase.assert_called()
 
 
-def test_ingestion_mlir_exception():
+def test_ingestion_mlir_exception() -> None:
   """Verifies the behavior of ingestion MLIR correctly handling an exception."""
   tracer = MagicMock()
   with patch("ml_switcheroo.core.ingestion.MlirParser") as MockMlir:
@@ -25,7 +25,7 @@ def test_ingestion_mlir_exception():
   tracer.end_phase.assert_called()
 
 
-def test_ingestion_tikz_exception():
+def test_ingestion_tikz_exception() -> None:
   """Verifies the behavior of ingestion TikZ correctly handling an exception."""
   tracer = MagicMock()
   with patch("ml_switcheroo.core.ingestion.TikzParser") as MockTikz:
@@ -35,7 +35,7 @@ def test_ingestion_tikz_exception():
   tracer.end_phase.assert_called()
 
 
-def test_ingestion_tikz_success():
+def test_ingestion_tikz_success() -> None:
   """Verifies the behavior of ingestion TikZ successfully."""
   tracer = MagicMock()
   with patch("ml_switcheroo.core.ingestion.TikzParser") as MockTikz:
@@ -53,7 +53,7 @@ def test_ingestion_tikz_success():
       ingest_code("dummy code", "tikz", "keras", None, tracer)
 
 
-def test_ingestion_python_exception():
+def test_ingestion_python_exception() -> None:
   """Verifies the behavior of ingestion python correctly handling an exception."""
   tracer = MagicMock()
   with pytest.raises(Exception):

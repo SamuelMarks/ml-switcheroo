@@ -9,53 +9,56 @@ from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassLabel,
   SassOperand,
   SassMemory,
+  SassNode,
 )
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from typing import Dict, Any, List, Optional, Tuple
 import pytest
+import libcst as cst
 
 
 class DummySassOperand(SassOperand):
   """Docstring."""
 
-  def __init__(self, raw):
+  def __init__(self, raw: str) -> None:
     """Docstring."""
     self.raw = raw
 
-  def __str__(self):
+  def __str__(self) -> str:
     """Docstring."""
     return self.raw
 
 
-def test_register_allocator():
+def test_register_allocator() -> None:
   """Docstring."""
-  allocator = RegisterAllocator()
-  reg = allocator.get_register("var1")
+  allocator: RegisterAllocator = RegisterAllocator()
+  reg: SassRegister = allocator.get_register("var1")
   assert reg.name == "R0"
-  reg2 = allocator.get_register("var1")
+  reg2: SassRegister = allocator.get_register("var1")
   assert reg2.name == "R0"
 
-  tmp_reg = allocator.allocate_temp()
+  tmp_reg: SassRegister = allocator.allocate_temp()
   assert tmp_reg.name == "R1"
 
   allocator.reset()
   assert allocator.get_register("var3").name == "R0"
 
 
-def test_register_allocator_overflow():
+def test_register_allocator_overflow() -> None:
   """Docstring."""
-  allocator = RegisterAllocator()
+  allocator: RegisterAllocator = RegisterAllocator()
   allocator._free_pool = []
   with pytest.raises(ValueError, match="SassRegister overflow"):
     allocator.allocate_temp()
 
 
-def test_synthesizer_from_graph():
+def test_synthesizer_from_graph() -> None:
   """Docstring."""
 
   class MockSemantics:
     """Docstring."""
 
-    def get_definition(self, kind):
+    def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
       """Docstring."""
       if kind == "UnknownNode":
         return None
@@ -65,21 +68,21 @@ def test_synthesizer_from_graph():
         return ("FallbackOp", {})
       return ("abstract.Linear", {})
 
-    def resolve_variant(self, abstract_id, target):
+    def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
       """Docstring."""
       if abstract_id == "FallbackOp":
         return {"api": "FADD", "args": []}
       return {"api": "NOP", "args": []}
 
-  synth = SassSynthesizer(semantics=MockSemantics())
+  synth: SassSynthesizer = SassSynthesizer(semantics=MockSemantics())
 
-  def dummy_expander(alloc, nid, meta):
+  def dummy_expander(alloc: RegisterAllocator, nid: str, meta: Dict[str, Any]) -> List[SassNode]:
     """Docstring."""
     return [SassInstruction("NOP", [])]
 
   synth.macro_registry = {"Linear": dummy_expander, "DirectMatch": dummy_expander}
 
-  graph = LogicalGraph(
+  graph: LogicalGraph = LogicalGraph(
     nodes=[
       LogicalNode(id="in1", kind="Input"),
       LogicalNode(id="conv1", kind="Conv2d", metadata={"k": 3}),
@@ -98,43 +101,43 @@ def test_synthesizer_from_graph():
     ],
   )
 
-  nodes = synth.from_graph(graph)
+  nodes: List[SassNode] = synth.from_graph(graph)
   assert len(nodes) > 0
 
 
-def test_synthesizer_from_graph_unmapped():
+def test_synthesizer_from_graph_unmapped() -> None:
   """Docstring."""
 
   class MockSemantics:
     """Docstring."""
 
-    def get_definition(self, kind):
+    def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
       """Docstring."""
       return ("abstract", {})
 
-    def resolve_variant(self, abstract_id, target):
+    def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
       """Docstring."""
       return None
 
-  synth = SassSynthesizer(semantics=MockSemantics())
+  synth: SassSynthesizer = SassSynthesizer(semantics=MockSemantics())
   synth.macro_registry = {}
 
-  graph = LogicalGraph(
+  graph: LogicalGraph = LogicalGraph(
     nodes=[
       LogicalNode(id="op1", kind="UnknownOp"),
     ],
     edges=[],
   )
-  nodes = synth.from_graph(graph)
+  nodes: List[SassNode] = synth.from_graph(graph)
   assert len(nodes) == 1
   assert "Unmapped Op" in str(nodes[0])
 
 
-def test_synthesizer_to_python():
+def test_synthesizer_to_python() -> None:
   """Docstring."""
-  synth = SassSynthesizer(semantics=None)
+  synth: SassSynthesizer = SassSynthesizer(semantics=None)
 
-  nodes = [
+  nodes: List[SassNode] = [
     SassInstruction(opcode="FADD", operands=[SassRegister(name="R0"), SassRegister(name="R1"), SassRegister(name="R2")]),
     SassLabel(name="label1"),
     SassInstruction(opcode="NOP", operands=[]),
@@ -142,8 +145,8 @@ def test_synthesizer_to_python():
     SassInstruction(opcode="MOV", operands=[SassRegister(name="R0"), DummySassOperand("#hashtag")]),
     SassInstruction(opcode="MOV", operands=[DummySassOperand("-R0"), SassImmediate(value=42)]),  # dest is not identifier
   ]
-  tree = synth.to_python(nodes)
-  code = tree.code
+  tree: cst.Module = synth.to_python(nodes)
+  code: str = getattr(tree, "code")
   assert "R0 =" in code
   assert "NOP" in code
   assert "'R[0:1]'" in code
@@ -152,26 +155,26 @@ def test_synthesizer_to_python():
   assert "predicate" in code
 
 
-def test_synthesizer_to_python_operands():
+def test_synthesizer_to_python_operands() -> None:
   """Docstring."""
-  synth = SassSynthesizer(semantics=None)
-  nodes = [
+  synth: SassSynthesizer = SassSynthesizer(semantics=None)
+  nodes: List[SassNode] = [
     SassInstruction(opcode="MOV", operands=[SassRegister(name="R0"), SassImmediate(value=42)]),
     SassInstruction(opcode="BRA", operands=[SassLabel(name="label1")]),
     SassInstruction(opcode="STG", operands=[SassMemory(base=SassRegister(name="R0"), offset=4)]),
     SassInstruction(opcode="MOV", operands=[SassRegister(name="R1"), SassImmediate(value=1.5, is_hex=False)]),
     SassInstruction(opcode="MOV", operands=[SassRegister(name="R2"), SassImmediate(value=1, is_hex=True)]),
   ]
-  tree = synth.to_python(nodes)
-  code = tree.code
+  tree: cst.Module = synth.to_python(nodes)
+  code: str = getattr(tree, "code")
   assert "42" in code
   assert "1.5" in code
   assert "STG" in code
 
 
-def test_backend_compile():
+def test_backend_compile() -> None:
   """Docstring."""
-  backend = SassBackend()
-  graph = LogicalGraph(nodes=[LogicalNode(id="in1", kind="Input")], edges=[])
-  code = backend.compile(graph)
+  backend: SassBackend = SassBackend()
+  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="in1", kind="Input")], edges=[])
+  code: str = backend.compile(graph)
   assert "Input in1" in code

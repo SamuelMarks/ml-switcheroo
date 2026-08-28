@@ -8,9 +8,9 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import InitMode
 
 
-def test_torch_adapter_properties():
+def test_torch_adapter_properties() -> None:
   """Test element."""
-  adapter = TorchAdapter()
+  adapter: TorchAdapter = TorchAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -57,17 +57,17 @@ def test_torch_adapter_properties():
   adapter.get_doc_url("unknown")
 
 
-def test_torch_ghost():
+def test_torch_ghost() -> None:
   """Test element."""
   with patch("ml_switcheroo.frameworks.torch.torch", None):
     with patch("ml_switcheroo.frameworks.torch.load_snapshot_for_adapter", return_value={}):
-      adapter = TorchAdapter()
+      adapter: TorchAdapter = TorchAdapter()
       assert adapter._mode == InitMode.GHOST
 
 
-def test_torch_collect():
+def test_torch_collect() -> None:
   """Test element."""
-  adapter = TorchAdapter()
+  adapter: TorchAdapter = TorchAdapter()
   adapter._snapshot_data = {}
   adapter._collect_ghost(SemanticTier.NEURAL)
 
@@ -78,14 +78,14 @@ def test_torch_collect():
     adapter._collect_live(SemanticTier.LAYER)
 
 
-def test_torch_examples():
+def test_torch_examples() -> None:
   """Test element."""
   get_torch_tiered_examples()
 
 
-def test_torch_io():
+def test_torch_io() -> None:
   """Test element."""
-  mixin = TorchIOMixin()
+  mixin: TorchIOMixin = TorchIOMixin()
   mixin.get_serialization_imports()
   mixin.get_serialization_syntax("load", "path")
   mixin.get_serialization_syntax("save", "path", "obj")
@@ -96,9 +96,9 @@ def test_torch_io():
   mixin.get_weight_save_code("s", "path")
 
 
-def test_torch_missed():
+def test_torch_missed() -> None:
   """Test element."""
-  adapter = TorchAdapter()
+  adapter: TorchAdapter = TorchAdapter()
   adapter.get_tiered_examples()
 
   import numpy as np

@@ -11,9 +11,12 @@ It supports:
 4.  **Weight Migration**: Loading checkpoints via ``tf.train.load_checkpoint``.
 """
 
+import typing
+
+
 import logging
 import textwrap
-from typing import Union, List, Tuple, Optional, Dict, Any
+from typing import Union, List, Tuple, Optional, Dict
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -56,7 +59,7 @@ class TensorFlowAdapter:
         to allow basic translation without dependencies.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data: Dict[str, Any] = {}
+    self._snapshot_data = {}
     if tf is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("tensorflow")
@@ -218,13 +221,13 @@ class TensorFlowAdapter:
     """
     return ["set_seed", "random.set_seed"]
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply manual wiring patches to the generated snapshot.
 
     Updates `tensorflow.` API prefixes to `tf.` to match standard aliases.
 
     Args:
-        snapshot (Dict[str, Any]): The snapshot dictionary to modify in-place.
+        snapshot (Dict[str, dict]): The snapshot dictionary to modify in-place.
 
     """
     if "mappings" not in snapshot:
@@ -388,16 +391,18 @@ class TensorFlowAdapter:
             """
     )
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert input data (NumPy/List) into TensorFlow Tensors.
 
     Used by the Fuzzer for validation.
 
     Args:
-        data (Any): Input data.
+        data (Union[int, float, str, list, dict]): Input data.
 
     Returns:
-        Any: ``tf.Tensor`` or original data if conversion fails.
+        Union[int, float, str, list, dict, "tf.Tensor"]: ``tf.Tensor`` or original data if conversion fails.
 
 
     """

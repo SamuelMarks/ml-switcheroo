@@ -6,7 +6,7 @@ bool, str) and recursive container types (list, tuple, dict).
 """
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional, Union, Callable
 
 import libcst as cst
 
@@ -33,7 +33,7 @@ def extract_primitive_key(node: cst.BaseExpression) -> Optional[str]:
   return None
 
 
-def convert_value_to_cst(val: Any) -> cst.BaseExpression:
+def convert_value_to_cst(val: Union[bool, int, float, str, list, tuple, dict, None]) -> cst.BaseExpression:
   """Recursively converts a python value (primitive/container) to a CST literal expression node.
 
   Supported types:
@@ -84,23 +84,23 @@ def convert_value_to_cst(val: Any) -> cst.BaseExpression:
 
   # 2. Key-Value Recursion (Dict)
   if isinstance(val, dict):
-    elements = []
+    dict_elements: List[cst.DictElement] = []
     for k, v in val.items():
       k_node = convert_value_to_cst(k)
       v_node = convert_value_to_cst(v)
-      elements.append(
-        cst.DictElement(  # type: ignore
+      dict_elements.append(
+        cst.DictElement(
           key=k_node,
           value=v_node,
           comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
         )
       )
 
-    if elements:
-      last = elements[-1]
-      elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+    if dict_elements:
+      last_el = dict_elements[-1]
+      dict_elements[-1] = last_el.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
-    return cst.Dict(elements=elements)  # type: ignore
+    return cst.Dict(elements=dict_elements)
 
   # 3. Primitives
   # Important: bool MUST be checked before int because bool is subclass of int in Python
@@ -127,10 +127,10 @@ def convert_value_to_cst(val: Any) -> cst.BaseExpression:
 def normalize_arguments(
   original_node: cst.Call,
   updated_node: cst.Call,
-  op_details: Dict[str, Any],
-  target_impl: Dict[str, Any],
+  op_details: dict,
+  target_impl: dict,
   source_fw: str,
-  is_module_alias_fn: Any,
+  is_module_alias_fn: Callable[[cst.BaseExpression], bool],
 ) -> List[cst.Arg]:
   """Pivot arguments from source implementation -> Standard -> Target implementation.
 
@@ -155,7 +155,7 @@ def normalize_arguments(
   # 1. Parse Standard Types
   std_args_raw = op_details.get("std_args", [])
   std_args_order = []
-  defaults_map: Dict[str, Any] = {}
+  defaults_map = {}
   variadic_arg_name = None
 
   for item in std_args_raw:
@@ -192,7 +192,7 @@ def normalize_arguments(
   is_method_call = isinstance(original_node.func, cst.Attribute)
   receiver_injected = False
 
-  if is_method_call and is_module_alias_fn(original_node.func.value):  # type: ignore
+  if isinstance(original_node.func, cst.Attribute) and is_module_alias_fn(original_node.func.value):
     is_method_call = False
 
   if is_method_call:
@@ -255,9 +255,9 @@ def normalize_arguments(
       )
 
     is_list = pack_as_type == "List"
-    trailing_comma = cst.MaybeSentinel.DEFAULT
+    trailing_comma: Union[cst.MaybeSentinel, cst.Comma] = cst.MaybeSentinel.DEFAULT
     if not is_list and len(elements) == 1:
-      trailing_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))  # type: ignore
+      trailing_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
     elements[-1] = elements[-1].with_changes(comma=trailing_comma)
 
     container_node = cst.List(elements=elements) if is_list else cst.Tuple(elements=elements)

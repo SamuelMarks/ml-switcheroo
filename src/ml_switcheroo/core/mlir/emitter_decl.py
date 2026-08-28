@@ -6,8 +6,33 @@ into MLIR operation nodes (such as sw.module and sw.func).
 """
 
 import libcst as cst
-from typing import TYPE_CHECKING, Any
-from ml_switcheroo.core.mlir.cst import OperationNode, RegionNode, AttributeNode, TypeNode
+from typing import TYPE_CHECKING, Optional, Union, Sequence
+from ml_switcheroo.core.mlir.cst import OperationNode, RegionNode, AttributeNode, TypeNode, BlockNode, ValueNode
+
+if TYPE_CHECKING:
+  # To avoid circular imports, we just assert the structural existence of the context
+  class ContextDummy:
+    """Dummy context class for type checking."""
+
+    def enter_scope(self) -> None:
+      """Enter a scope."""
+      ...
+
+    def exit_scope(self) -> None:
+      """Exit a scope."""
+      ...
+
+    def allocate_ssa(self, prefix: str) -> ValueNode:
+      """Allocate a new SSA value."""
+      ...
+
+    def declare(self, name: str, val: ValueNode) -> None:
+      """Declare a value."""
+      ...
+
+    def lookup(self, name: str) -> Optional[ValueNode]:
+      """Lookup a value."""
+      ...
 
 
 class MlirEmitterDeclMixin:
@@ -18,46 +43,45 @@ class MlirEmitterDeclMixin:
   structural constructs (operations, regions, and blocks).
   """
 
-  if TYPE_CHECKING:
-    ctx: Any
+  # This is provided by the mixed-in classes
+  ctx: "ContextDummy"
 
-    def _flatten_attr(self, attr: Any) -> Any:
+  if TYPE_CHECKING:
+
+    def _flatten_attr(self, attr: cst.BaseExpression) -> Optional[str]:
       """Flatten a Name or Attribute chain into a string.
 
       Args:
-          self: The mixin instance.
           attr: A LibCST Name or Attribute node representing an identifier chain.
 
       Returns:
           A dotted string representation of the chain (e.g. "self.layer"),
           or None if the attribute chain cannot be flattened.
       """
-      return None
+      ...
 
-    def _emit_block(self, block: Any, label: str = "^bb0") -> Any:
+    def _emit_block(self, block: Union[cst.BaseSuite, Sequence[cst.CSTNode]], label: str = "^bb0") -> BlockNode:
       """Convert a sequence of statements or a suite into an MLIR Block.
 
       Args:
-          self: The mixin instance.
           block: A CST Suite or list of statement nodes.
           label: Optional label for the generated block (defaults to "^bb0").
 
       Returns:
           A BlockNode representing the populated MLIR Block.
       """
-      return None
+      ...
 
-    def _annotation_to_string(self, ann: Any) -> str:
+    def _annotation_to_string(self, ann: cst.BaseExpression) -> str:
       """Convert a type annotation node to its string representation.
 
       Args:
-          self: The mixin instance.
           ann: The type annotation CST node (typically a Name or Attribute).
 
       Returns:
           The string representation of the type annotation, or "Any" if not flattenable.
       """
-      return "Any"
+      ...
 
   def _emit_class_def(self, node: cst.ClassDef) -> OperationNode:
     """Convert a Python class definition to `sw.module`.

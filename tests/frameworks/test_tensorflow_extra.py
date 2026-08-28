@@ -2,19 +2,21 @@
 
 from unittest.mock import MagicMock, patch
 import sys
+import pytest
+import typing
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
-def test_tensorflow_init_missing(monkeypatch):
+def test_tensorflow_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
-  monkeypatch.setitem(sys.modules, "tensorflow", None)
+  monkeypatch.setitem(sys.modules, "tensorflow", None)  # type: ignore
   import importlib
 
   real_import = __import__
 
-  def mock_import(name, *args, **kwargs):
+  def mock_import(name: str, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
     """Mocks __import__."""
     if name == "tensorflow":
       raise ImportError("Fail TF")
@@ -29,7 +31,7 @@ def test_tensorflow_init_missing(monkeypatch):
   importlib.reload(tf_fw)
 
 
-def test_tensorflow_collect_live(monkeypatch):
+def test_tensorflow_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
@@ -43,15 +45,15 @@ def test_tensorflow_collect_live(monkeypatch):
   mock_tf.keras.optimizers = MagicMock()
   monkeypatch.setattr(tf_fw, "tf", mock_tf)
 
-  adapter._mode = "LIVE"
+  adapter._mode = "LIVE"  # type: ignore
 
-  def mock_scan(module, prefix, kind, block_list=None):
+  def mock_scan(module: typing.Any, prefix: str, kind: str, block_list: typing.Any = None) -> typing.Any:
     """Mocks _scan_module."""
     from ml_switcheroo_ir.schema.ghost import GhostRef
 
-    return [GhostRef(api_path=prefix + ".X", name="X", kind=kind, group=kind, params=[])]
+    return [GhostRef(api_path=prefix + ".X", name="X", kind=kind, group=kind, params=[])]  # type: ignore
 
-  adapter._scan_module = mock_scan
+  adapter._scan_module = mock_scan  # type: ignore
 
   assert (
     getattr(adapter, "_collect_live", lambda x: [MagicMock(api_path="tensorflow.math.X")])(list(SemanticTier)[0])[
@@ -64,16 +66,16 @@ def test_tensorflow_collect_live(monkeypatch):
   pass
 
 
-def test_tensorflow_collect_ghost_no_snapshot():
+def test_tensorflow_collect_ghost_no_snapshot() -> None:
   """Test function."""
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
   adapter = tf_fw.TensorFlowAdapter()
-  adapter._snapshot_data = None
+  adapter._snapshot_data = None  # type: ignore
   assert getattr(adapter, "_collect_ghost", lambda x: [])(list(SemanticTier)[-1]) == []
 
 
-def test_tensorflow_convert_logic(monkeypatch):
+def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
@@ -90,7 +92,7 @@ def test_tensorflow_convert_logic(monkeypatch):
 
   mock_tf.Tensor = DummyTensor
 
-  def fake_convert(x):
+  def fake_convert(x: typing.Any) -> typing.Any:
     """Docstring."""
     if type(x).__name__ not in ("list", "ndarray"):
       raise ValueError("Unsupported type")
@@ -105,15 +107,15 @@ def test_tensorflow_convert_logic(monkeypatch):
   class MockTorch:
     """A mock Torch tensor."""
 
-    def detach(self):
+    def detach(self) -> "MockTorch":
       """Mocks detach."""
       return self
 
-    def cpu(self):
+    def cpu(self) -> "MockTorch":
       """Mocks cpu."""
       return self
 
-    def numpy(self):
+    def numpy(self) -> str:
       """Mocks numpy."""
       return "numpy_tensor"
 
@@ -122,7 +124,7 @@ def test_tensorflow_convert_logic(monkeypatch):
   class FailTorch:
     """A failing Torch tensor."""
 
-    def detach(self):
+    def detach(self) -> "FailTorch":
       """Mocks detach."""
       raise Exception("Fail")
 
@@ -132,14 +134,14 @@ def test_tensorflow_convert_logic(monkeypatch):
   class MockTF:
     """A mock TF tensor."""
 
-    def numpy(self):
+    def numpy(self) -> str:
       """Mocks numpy."""
       return "already_tf_tensor"
 
   class FailTF:
     """A failing TF tensor."""
 
-    def numpy(self):
+    def numpy(self) -> str:
       """Mocks numpy."""
       raise Exception("Fail")
 
@@ -149,7 +151,7 @@ def test_tensorflow_convert_logic(monkeypatch):
   class MockArray:
     """A mock array."""
 
-    def __array__(self):
+    def __array__(self) -> list[typing.Any]:
       """Gets array."""
       return []
 
@@ -158,7 +160,7 @@ def test_tensorflow_convert_logic(monkeypatch):
   class FailArray:
     """A failing array."""
 
-    def __array__(self):
+    def __array__(self) -> list[typing.Any]:
       """Gets array."""
       raise Exception("Fail")
 
@@ -166,7 +168,7 @@ def test_tensorflow_convert_logic(monkeypatch):
   assert adapter.convert(f3) is f3
 
 
-def test_tensorflow_properties():
+def test_tensorflow_properties() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
@@ -177,10 +179,12 @@ def test_tensorflow_properties():
   assert adapter.get_tensor_to_numpy_expr("t") == "t.numpy() if hasattr(t, 'numpy') else np.array(t)"
   assert "Checkpoint" not in adapter.get_weight_save_code("state", "path")
 
-  traits = adapter.plugin_traits
+  traits: typing.Any = adapter.plugin_traits
   assert traits.requires_explicit_rng is False
 
-  assert "not/tensorflow" in adapter.get_doc_url("not.tensorflow")
+  url: typing.Optional[str] = adapter.get_doc_url("not.tensorflow")
+  assert url is not None
+  assert "not/tensorflow" in url
 
   assert "tf.train.load_checkpoint" in adapter.get_weight_load_code("path")
 
@@ -188,20 +192,22 @@ def test_tensorflow_properties():
   assert adapter.get_serialization_syntax("save", "file", None) == ""
 
 
-def test_tensorflow_examples():
+def test_tensorflow_examples() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
   adapter = TensorFlowAdapter()
-  ex = adapter.get_tiered_examples()
+  ex: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in ex
   assert "tier2_neural" in ex
   assert "tier3_extras" in ex
 
 
-def test_tensorflow_doc_url():
+def test_tensorflow_doc_url() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
   adapter = TensorFlowAdapter()
-  assert "search.html" not in adapter.get_doc_url("tensorflow.keras.layers.Dense")
+  url: typing.Optional[str] = adapter.get_doc_url("tensorflow.keras.layers.Dense")
+  assert url is not None
+  assert "search.html" not in url

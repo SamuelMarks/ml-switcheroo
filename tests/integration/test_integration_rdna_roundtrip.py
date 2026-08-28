@@ -3,18 +3,18 @@
 import pytest
 import textwrap
 import ast
-from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
-CONVNET_SOURCE = textwrap.dedent(
+CONVNET_SOURCE: str = textwrap.dedent(
   "\n    import torch\n    import torch.nn as nn\n\n    class ConvNet(nn.Module):\n        def __init__(self):\n            super().__init__()\n            self.conv = nn.Conv2d(1, 32, 3)\n            self.fc = nn.Linear(32 * 26 * 26, 10)\n\n        def forward(self, x):\n            x = self.conv(x)\n            x = torch.flatten(x, 1)\n            return self.fc(x)\n    "
 ).strip()
 
 
 @pytest.fixture
-def semantics_mgr():
+def semantics_mgr() -> SemanticsManager:
   """Provides a mock semantics mgr for testing."""
   mgr = SemanticsManager()
   mgr.data["Conv2d"] = {"std_args": ["in", "out", "k"], "variants": {"torch": {"api": "torch.nn.Conv2d"}}}
@@ -30,14 +30,14 @@ def semantics_mgr():
   return mgr
 
 
-def test_rdna_roundtrip_logic(semantics_mgr):
+def test_rdna_roundtrip_logic(semantics_mgr: SemanticsManager) -> None:
   """Verifies the behavior of RDNA roundtrip logic."""
   print("\n--- [Phase 1] Compilation (Torch -> RDNA) ---")
   config_compile = RuntimeConfig(source_framework="torch", target_framework="rdna", strict_mode=False)
   engine_compile = ASTEngine(semantics=semantics_mgr, config=config_compile)
-  res_compile = engine_compile.run(CONVNET_SOURCE)
+  res_compile: ConversionResult = engine_compile.run(CONVNET_SOURCE)
   assert res_compile.success, f"Compilation failed: {res_compile.errors}"
-  rdna_code = res_compile.code
+  rdna_code: str = res_compile.code
   print(rdna_code)
   assert "; RDNA Code Generation Initialized" in rdna_code
   assert "L_KY_conv:" in rdna_code
@@ -46,9 +46,9 @@ def test_rdna_roundtrip_logic(semantics_mgr):
   print("\n--- [Phase 2] Decompilation (RDNA -> Torch) ---")
   config_decompile = RuntimeConfig(source_framework="rdna", target_framework="torch", strict_mode=False)
   engine_decompile = ASTEngine(semantics=semantics_mgr, config=config_decompile)
-  res_decompile = engine_decompile.run(rdna_code)
+  res_decompile: ConversionResult = engine_decompile.run(rdna_code)
   assert res_decompile.success, f"Decompilation failed: {res_decompile.errors}"
-  reconstructed_code = res_decompile.code
+  reconstructed_code: str = res_decompile.code
   print(reconstructed_code)
   assert "class DecompiledNet(nn.Module):" in reconstructed_code
   assert "def __init__(self):" in reconstructed_code

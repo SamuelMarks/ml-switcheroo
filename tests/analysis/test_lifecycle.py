@@ -4,11 +4,11 @@ import libcst as cst
 from ml_switcheroo.analysis.lifecycle import InitializationTracker
 
 
-def test_initialization_tracker_basic():
+def test_initialization_tracker_basic() -> None:
   """Test element."""
-  tracker = InitializationTracker()
+  tracker: InitializationTracker = InitializationTracker()
 
-  code = """
+  code: str = """
 class MyModule:
     def __init__(self):
         self.conv = nn.Conv2d()
@@ -19,17 +19,17 @@ class MyModule:
         x = self.conv(x)
         return x + self.bias
 """
-  tree = cst.parse_module(code)
+  tree: cst.Module = cst.parse_module(code)
   tree.visit(tracker)
 
   assert len(tracker.warnings) == 0
 
 
-def test_initialization_tracker_missing():
+def test_initialization_tracker_missing() -> None:
   """Test element."""
-  tracker = InitializationTracker()
+  tracker: InitializationTracker = InitializationTracker()
 
-  code = """
+  code: str = """
 class BadModule:
     def __init__(self):
         self.conv = nn.Conv2d()
@@ -38,7 +38,7 @@ class BadModule:
         x = self.conv(x)
         return x + self.missing_bias
 """
-  tree = cst.parse_module(code)
+  tree: cst.Module = cst.parse_module(code)
   tree.visit(tracker)
 
   assert len(tracker.warnings) == 1
@@ -46,11 +46,11 @@ class BadModule:
   assert "missing_bias" in tracker.warnings[0]
 
 
-def test_initialization_tracker_tuple_unpacking():
+def test_initialization_tracker_tuple_unpacking() -> None:
   """Test element."""
-  tracker = InitializationTracker()
+  tracker: InitializationTracker = InitializationTracker()
 
-  code = """
+  code: str = """
 class TupleMod:
     def __init__(self):
         (self.a, self.b) = (1, 2)
@@ -59,17 +59,17 @@ class TupleMod:
     def forward(self, x):
         return x + self.a + self.b + self.c + self.d
 """
-  tree = cst.parse_module(code)
+  tree: cst.Module = cst.parse_module(code)
   tree.visit(tracker)
 
   assert len(tracker.warnings) == 0
 
 
-def test_initialization_tracker_annassign():
+def test_initialization_tracker_annassign() -> None:
   """Test element."""
-  tracker = InitializationTracker()
+  tracker: InitializationTracker = InitializationTracker()
 
-  code = """
+  code: str = """
 class AnnMod:
     def __init__(self):
         self.a: int = 1
@@ -77,17 +77,17 @@ class AnnMod:
     def forward(self, x):
         return x + self.a
 """
-  tree = cst.parse_module(code)
+  tree: cst.Module = cst.parse_module(code)
   tree.visit(tracker)
 
   assert len(tracker.warnings) == 0
 
 
-def test_initialization_tracker_nested():
+def test_initialization_tracker_nested() -> None:
   """Test element."""
-  tracker = InitializationTracker()
+  tracker: InitializationTracker = InitializationTracker()
 
-  code = """
+  code: str = """
 class Outer:
     def __init__(self):
         self.outer_var = 1
@@ -101,7 +101,7 @@ class Outer:
     def forward(self, x):
         return x + self.outer_var + self.missing_outer
 """
-  tree = cst.parse_module(code)
+  tree: cst.Module = cst.parse_module(code)
   tree.visit(tracker)
 
   assert len(tracker.warnings) == 2
@@ -109,12 +109,12 @@ class Outer:
   assert any("Outer" in w and "missing_outer" in w for w in tracker.warnings)
 
 
-def test_initialization_tracker_no_scope():
+def test_initialization_tracker_no_scope() -> None:
   """Test element."""
   # Test methods returning early when scope stack is empty (e.g. methods outside classes)
-  tracker = InitializationTracker()
+  tracker: InitializationTracker = InitializationTracker()
 
-  code = """
+  code: str = """
 def __init__(self):
     self.x = 1
     self.y: int = 2
@@ -123,14 +123,14 @@ def __init__(self):
 def forward(self, x):
     return self.x + self.missing
 """
-  tree = cst.parse_module(code)
+  tree: cst.Module = cst.parse_module(code)
   tree.visit(tracker)
 
   assert len(tracker.warnings) == 0
 
 
-def test_initialization_tracker_leave_classdef_no_scope():
+def test_initialization_tracker_leave_classdef_no_scope() -> None:
   """Test element."""
-  tracker = InitializationTracker()
+  tracker: InitializationTracker = InitializationTracker()
   tracker.leave_ClassDef(cst.ClassDef(name=cst.Name("Dummy"), body=cst.IndentedBlock(body=[])))
   assert len(tracker.warnings) == 0

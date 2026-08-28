@@ -5,6 +5,7 @@ This module validates that attributes referenced in source code nodes (such as
 mappings and re-export simplification logic.
 """
 
+import typing
 import libcst as cst
 from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeMixin
 
@@ -16,7 +17,7 @@ class MockFixer(AttributeMixin):
   test attribute-matching and rewriting capabilities of the mixin.
   """
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the mock fixer with predefined namespace aliases and target frameworks.
 
     Sets up internal maps to simulate alias resolutions and define target frameworks
@@ -25,12 +26,12 @@ class MockFixer(AttributeMixin):
     Returns:
         None
     """
-    self._path_to_alias = {"jax.numpy": "jnp", "torch.nn.functional": "F"}
-    self._defined_names = {"jnp", "F"}
-    self.target_fw = "jax"
+    self._path_to_alias: dict[str, str] = {"jax.numpy": "jnp", "torch.nn.functional": "F"}
+    self._defined_names: set[str] = {"jnp", "F"}
+    self.target_fw: str = "jax"
 
 
-def test_attributemixin_leave_attribute():
+def test_attributemixin_leave_attribute() -> None:
   """Verifies that `leave_Attribute` simplifies attributes to their aliased names.
 
   This test parses an expression like `jax.numpy.abs` and checks that the fixer
@@ -42,16 +43,16 @@ def test_attributemixin_leave_attribute():
   fixer = MockFixer()
 
   # jax.numpy.abs -> jnp.abs
-  node = cst.parse_expression("jax.numpy.abs")
+  node = typing.cast(cst.Attribute, cst.parse_expression("jax.numpy.abs"))
   updated = node
 
-  result = fixer.leave_Attribute(node, updated)
+  result: typing.Any = fixer.leave_Attribute(node, updated)
   assert isinstance(result, cst.Attribute)
-  assert result.value.value == "jnp"
+  assert typing.cast(cst.Name, result.value).value == "jnp"
   assert result.attr.value == "abs"
 
 
-def test_attributemixin_simplify_reexports():
+def test_attributemixin_simplify_reexports() -> None:
   """Ensures that nested or deep attributes are simplified correctly.
 
   This test checks that when a nested package hierarchy (such as
@@ -66,16 +67,16 @@ def test_attributemixin_simplify_reexports():
   # flax.nnx.module.Module -> flax.nnx.Module (assuming nnx is defined)
   fixer._defined_names.add("flax")
   fixer.target_fw = "flax"
-  node = cst.parse_expression("flax.nnx.module.Module")
+  node = typing.cast(cst.Attribute, cst.parse_expression("flax.nnx.module.Module"))
   updated = node
 
-  result = fixer.leave_Attribute(node, updated)
+  result: typing.Any = fixer.leave_Attribute(node, updated)
   # Since flax.nnx is not in path_to_alias, it falls through to _simplify_reexports
   assert isinstance(result, cst.Attribute)
-  assert result.value.attr.value == "nnx"
+  assert typing.cast(cst.Attribute, result.value).attr.value == "nnx"
 
 
-def test_attributemixin_no_alias():
+def test_attributemixin_no_alias() -> None:
   """Validates that attributes without matching aliases are left unmodified.
 
   This test parses an attribute that has no predefined translation rule in the MockFixer
@@ -87,14 +88,14 @@ def test_attributemixin_no_alias():
   fixer = MockFixer()
 
   # Something.else -> Something.else
-  node = cst.parse_expression("Something.other")
+  node = typing.cast(cst.Attribute, cst.parse_expression("Something.other"))
   updated = node
 
-  result = fixer.leave_Attribute(node, updated)
+  result: typing.Any = fixer.leave_Attribute(node, updated)
   assert result is updated
 
 
-def test_attributemixin_no_path_to_alias():
+def test_attributemixin_no_path_to_alias() -> None:
   """Ensures the fixer fails gracefully when the path-to-alias dictionary is missing.
 
   This test deletes `_path_to_alias` from the fixer and verifies that `leave_Attribute`
@@ -104,14 +105,14 @@ def test_attributemixin_no_path_to_alias():
       None
   """
   fixer = MockFixer()
-  del fixer._path_to_alias
+  del fixer._path_to_alias  # type: ignore
 
-  node = cst.parse_expression("jax.numpy.abs")
-  result = fixer.leave_Attribute(node, node)
+  node = typing.cast(cst.Attribute, cst.parse_expression("jax.numpy.abs"))
+  result: typing.Any = fixer.leave_Attribute(node, node)
   assert result is node
 
 
-def test_attributemixin_simplify_no_attribute():
+def test_attributemixin_simplify_no_attribute() -> None:
   """Verifies that non-Attribute nodes are ignored by `_simplify_reexports`.
 
   This test checks that passing a simple name node instead of an attribute hierarchy

@@ -8,6 +8,9 @@ based on framework-specific structural traits, and mapping attributes, constants
 or macros from a source machine learning framework to a target framework.
 """
 
+from typing import Any
+
+
 import libcst as cst
 
 
@@ -35,6 +38,34 @@ class ApiTransformerAttrMixin:
      substitutions and framework-specific API mappings.
   """
 
+  # Added for type checking
+  context: Any
+  config: Any
+  semantics: Any
+  source_fw: Any
+  target_fw: Any
+  strict_mode: Any
+
+  def _get_qualified_name(self, *args: Any, **kwargs: Any) -> Any:
+    """Dummy method."""
+    ...
+
+  def _mark_stateful(self, *args: Any, **kwargs: Any) -> Any:
+    """Dummy method."""
+    ...
+
+  def _get_mapping(self, *args: Any, **kwargs: Any) -> Any:
+    """Dummy method."""
+    ...
+
+  def _handle_variant_imports(self, *args: Any, **kwargs: Any) -> Any:
+    """Dummy method."""
+    ...
+
+  def _create_dotted_name(self, *args: Any, **kwargs: Any) -> Any:
+    """Dummy method."""
+    ...
+
   def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
     """Intercept and post-processes CST assignment nodes during traversal.
 
@@ -57,22 +88,22 @@ class ApiTransformerAttrMixin:
     """
     # 1. Track Variable Initialization
     if isinstance(original_node.value, cst.Call):
-      func_name = self._get_qualified_name(original_node.value.func)  # type: ignore
+      func_name = self._get_qualified_name(original_node.value.func)
       if func_name:
-        definition = self.semantics.get_definition(func_name)  # type: ignore
+        definition = self.semantics.get_definition(func_name)
         if definition:
           abstract_id, _ = definition
-          origins = getattr(self.semantics, "_key_origins", {})  # type: ignore
+          origins = getattr(self.semantics, "_key_origins", {})
           tier = origins.get(abstract_id)
           if tier == SemanticTier.NEURAL.value:
             for target in original_node.targets:
-              target_name = self._get_qualified_name(target.target)  # type: ignore
+              target_name = self._get_qualified_name(target.target)
               if target_name:  # pragma: no branch
-                if target_name.startswith("self.") and len(self.context.scope_stack) > 1:  # type: ignore
+                if target_name.startswith("self.") and len(self.context.scope_stack) > 1:
                   # Track stateful variable in the class scope (parent of init scope)
-                  self.context.scope_stack[-2].add(target_name)  # type: ignore
+                  self.context.scope_stack[-2].add(target_name)
                 else:
-                  self._mark_stateful(target_name)  # type: ignore
+                  self._mark_stateful(target_name)
 
     # 2. Assignment Unwrapping (Functional -> OOP)
     if isinstance(original_node.value, cst.Call):
@@ -85,7 +116,7 @@ class ApiTransformerAttrMixin:
       unwrap_method = traits.functional_execution_method
       if is_functional_apply(original_node.value, unwrap_method):
         if len(updated_node.targets) == 1:  # pragma: no branch
-          target = updated_node.targets[0].target  # type: ignore
+          target = updated_node.targets[0].target
           if isinstance(target, (cst.Tuple, cst.List)):  # pragma: no branch
             elements = target.elements
             if len(elements) > 0:  # pragma: no branch
@@ -118,14 +149,14 @@ class ApiTransformerAttrMixin:
         corresponding to the target framework's equivalent, or the original updated node
         if no rewriting rule was matched.
     """
-    name = self._get_qualified_name(original_node)  # type: ignore
+    name = self._get_qualified_name(original_node)
     if not name:
       return updated_node
 
-    lookup = self.semantics.get_definition(name)  # type: ignore
+    lookup = self.semantics.get_definition(name)
     if lookup:
       _, details = lookup
-      target_var = details.get("variants", {}).get(self.target_fw)  # type: ignore
+      target_var = details.get("variants", {}).get(self.target_fw)
 
       # Plugin guard
       if target_var and "requires_plugin" in target_var:
@@ -141,13 +172,13 @@ class ApiTransformerAttrMixin:
           return updated_node
 
     # Perform mapping logic for constant/enum/attribute
-    target_impl = self._get_mapping(name, silent=True)  # type: ignore
+    target_impl = self._get_mapping(name, silent=True)
 
     if target_impl:
       # If semantic definition says it's an attribute/context, we rewrite aliases
       if "api" in target_impl:
-        self._handle_variant_imports(target_impl)  # type: ignore
-        return self._create_dotted_name(target_impl["api"])  # type: ignore
+        self._handle_variant_imports(target_impl)
+        return self._create_dotted_name(target_impl["api"])
 
       # Support macros for constants (e.g. inf -> float('inf'))
       if "macro_template" in target_impl:

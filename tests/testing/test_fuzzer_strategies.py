@@ -1,9 +1,10 @@
 """Test suite for the Fuzzer Strategies module."""
 
 from ml_switcheroo.testing.fuzzer.type_parser import parse_type_annotation
+from typing import Dict, Any
 
 
-def test_get_dtype_strategy():
+def test_get_dtype_strategy() -> None:
   """Gets dtype strategy."""
   from ml_switcheroo.testing.fuzzer.strategies import _get_dtype_strategy
   import numpy as np
@@ -21,7 +22,7 @@ def test_get_dtype_strategy():
   assert _get_dtype_strategy("invalid_dtype") == np.float32
 
 
-def test_strategies_from_spec():
+def test_strategies_from_spec() -> None:
   """Verifies the behavior of strategies from spec."""
   from ml_switcheroo.testing.fuzzer.strategies import strategies_from_spec
 
@@ -43,11 +44,11 @@ def test_strategies_from_spec():
   strategies_from_spec("unknown_type", {})
 
 
-def test_array_strategy():
+def test_array_strategy() -> None:
   """Verifies the behavior of array strategy."""
   from ml_switcheroo.testing.fuzzer.strategies import _array_strategy
 
-  shared_dims = {}
+  shared_dims: Dict[str, Any] = {}
   _array_strategy(parse_type_annotation("Array['N', 32, 'M']"), {}, shared_dims)
   _array_strategy(parse_type_annotation("Array['8']"), {}, shared_dims)
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
@@ -55,7 +56,7 @@ def test_array_strategy():
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
 
 
-def test_strategies_from_spec_more():
+def test_strategies_from_spec_more() -> None:
   """Verifies the behavior of strategies from spec more."""
   from ml_switcheroo.testing.fuzzer.strategies import strategies_from_spec, _array_strategy
 

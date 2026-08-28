@@ -45,7 +45,7 @@ class InjectionMixin(cst.CSTTransformer):
         continue
 
       check_name = req.alias if req.alias else (req.subcomponent if req.subcomponent else req.module.split(".")[0])
-      if check_name in self._defined_names:  # type: ignore
+      if check_name in self._defined_names:
         continue
 
       # Logic:
@@ -78,7 +78,7 @@ class InjectionMixin(cst.CSTTransformer):
       )
 
       self._append_injection(injections, node)
-      self._defined_names.add(check_name)  # type: ignore
+      self._defined_names.add(check_name)
       self._satisfied_injections.add(req.signature)
 
     # Insertion Logic
@@ -97,7 +97,7 @@ class InjectionMixin(cst.CSTTransformer):
     clean_body = []
     seen_imports: Set[str] = set()
 
-    for stmt in merged_body:  # type: ignore
+    for stmt in merged_body:
       is_import = False
       sig = ""
 

@@ -1,6 +1,6 @@
 """Core Transformation Strategies for Call Rewriting."""
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING
 import libcst as cst
 
 from ml_switcheroo.core.hooks import get_hook
@@ -17,27 +17,66 @@ from ml_switcheroo.core.rewriter.calls.utils import (
 from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards
 from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 
+if TYPE_CHECKING:
+  # Structural typing for rewriter to avoid circular import
+  class HookContextDummy:
+    """Dummy hook context."""
+
+    current_op_id: str
+
+  class Any:
+    """Dummy rewriter context."""
+
+    hook_context: HookContextDummy
+
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  class RewriterDummy:
+    """Dummy rewriter."""
+
+    context: Any
+    source_fw: str
+    target_fw: str
+    strict_mode: bool
+    semantics: SemanticsManager
+
+    def _handle_variant_imports(self, mapping: dict) -> None:
+      """Dummy."""
+      ...
+
+    def _is_module_alias(self, name: cst.BaseExpression) -> bool:
+      """Dummy."""
+      ...
+
+    def _report_failure(self, msg: str) -> None:
+      """Dummy."""
+      ...
+
+    def _create_name_node(self, name: str) -> cst.Name:
+      """Dummy."""
+      ...
+
 
 def execute_strategy(
-  rewriter: Any,
+  rewriter: "RewriterDummy",
   original: cst.Call,
   updated: cst.Call,
-  mapping: Dict[str, Any],
-  details: Dict[str, Any],
+  mapping: dict,
+  details: dict,
   abstract_id: str,
-) -> cst.CSTNode:
+) -> cst.BaseExpression:
   """Apply the appropriate transformation strategy.
 
   Args:
-      rewriter (Any): The rewriter context.
-      original (cst.Call): The original call node.
-      updated (cst.Call): The updated call node.
-      mapping (Dict[str, Any]): The transformation mapping.
-      details (Dict[str, Any]): Details of the API.
-      abstract_id (str): The abstract ID of the op.
+      rewriter: The rewriter context.
+      original: The original call node.
+      updated: The updated call node.
+      mapping: The transformation mapping.
+      details: Details of the API.
+      abstract_id: The abstract ID of the op.
 
   Returns:
-      cst.CSTNode: The transformed CST node.
+      cst.BaseExpression: The transformed CST node.
 
   """
   if hasattr(rewriter.context, "hook_context"):
@@ -128,7 +167,7 @@ def execute_strategy(
 
       # Apply Strict Guards (Rank Checking)
       if rewriter.strict_mode:
-        norm_args = apply_strict_guards(rewriter, norm_args, details, mapping)
+        norm_args = apply_strict_guards(rewriter, norm_args, details, mapping)  # type: ignore
 
       new_func = rewriter._create_name_node(target_api)
       result_node = updated.with_changes(func=new_func, args=norm_args)
@@ -146,17 +185,17 @@ def execute_strategy(
 
 def _apply_layout_permutation(
   node: cst.Call,
-  mapping: Dict[str, Any],
-  details: Dict[str, Any],
-  rewriter: Any,
+  mapping: dict,
+  details: dict,
+  rewriter: "RewriterDummy",
 ) -> cst.Call:
   """Apply layout permutation to the arguments of a call based on the provided mapping.
 
   Args:
-      node (cst.Call): The call node.
-      mapping (Dict[str, Any]): The transformation mapping.
-      details (Dict[str, Any]): Details of the API.
-      rewriter (Any): The rewriter context.
+      node: The call node.
+      mapping: The transformation mapping.
+      details: Details of the API.
+      rewriter: The rewriter context.
 
   Returns:
       cst.Call: The modified call node.
@@ -193,6 +232,6 @@ def _apply_layout_permutation(
       src_l, tgt_l = rule.split("->")
       perm_indices = compute_permutation(src_l.strip(), tgt_l.strip())
       if perm_indices:
-        node = inject_permute_call(node, perm_indices, rewriter.semantics, rewriter.target_fw)  # type: ignore
+        node = inject_permute_call(node, perm_indices, rewriter.semantics, rewriter.target_fw)
 
   return node

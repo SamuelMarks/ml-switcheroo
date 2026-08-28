@@ -3,6 +3,7 @@
 import pytest
 import ast
 import libcst as cst
+import typing
 from ml_switcheroo.core.compiler.backends.python import PythonBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 
@@ -24,7 +25,7 @@ def validate_python(code: str) -> None:
 def test_compile_interface_implementation(backend: PythonBackend) -> None:
   """Compiles interface implementation."""
   g = LogicalGraph()
-  res = backend.compile(g)
+  res: str = backend.compile(g)
   assert isinstance(res, str)
   assert "class Model" in res
 
@@ -35,7 +36,7 @@ def test_synthesize_torch_chain(backend: PythonBackend) -> None:
     nodes=[LogicalNode("x", "Input"), LogicalNode("conv1", "Conv2d"), LogicalNode("output", "Output")],
     edges=[LogicalEdge("x", "conv1"), LogicalEdge("conv1", "output")],
   )
-  code = backend.generate(g, "SimpleNet")
+  code: str = backend.generate(g, "SimpleNet")
   validate_python(code)
   assert "import torch" in code
   assert "class SimpleNet(nn.Module):" in code
@@ -47,7 +48,7 @@ def test_synthesize_flax_chain() -> None:
   """Verifies the behavior of synthesize Flax chain."""
   backend = PythonBackend(framework="flax_nnx")
   g = LogicalGraph(nodes=[LogicalNode("x", "Input"), LogicalNode("fc", "Linear", {"out": "10"})])
-  code = backend.generate(g, "FlaxNet")
+  code: str = backend.generate(g, "FlaxNet")
   validate_python(code)
   assert "class FlaxNet(nnx.Module):" in code
   assert "self.fc = nnx.Linear(out=10, rngs=rngs)" in code
@@ -55,15 +56,15 @@ def test_synthesize_flax_chain() -> None:
 
 def test_context_preservation(backend: PythonBackend) -> None:
   """Verifies the behavior of context preservation."""
-  orig = "class MyNet(nn.Module): pass"
-  tree = cst.parse_module(orig)
+  orig: str = "class MyNet(nn.Module): pass"
+  tree: cst.Module = cst.parse_module(orig)
   g = LogicalGraph(nodes=[LogicalNode("x", "Input")])
-  code = backend.generate(g, class_name="MyNet", original_tree=tree)
+  code: str = backend.generate(g, class_name="MyNet", original_tree=tree)
   validate_python(code)
   assert "class MyNet" in code
 
 
-def test_python_backend_sharding():
+def test_python_backend_sharding() -> None:
   """Verifies the behavior of python backend sharding."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
@@ -75,12 +76,12 @@ def test_python_backend_sharding():
   ]
   graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
   backend = PythonBackend(framework="flax_nnx")
-  code = backend.compile(graph)
+  code: str = backend.compile(graph)
   assert "jax.lax.with_sharding_constraint" in code
   assert "jax.sharding.PartitionSpec('data', ('model', 'tensor'))" in code
 
 
-def test_python_backend_sharding_none():
+def test_python_backend_sharding_none() -> None:
   """Verifies the behavior of python backend sharding none."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
@@ -92,12 +93,12 @@ def test_python_backend_sharding_none():
   ]
   graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
   backend = PythonBackend(framework="jax")
-  code = backend.compile(graph)
+  code: str = backend.compile(graph)
   assert "jax.lax.with_sharding_constraint" in code
   assert "jax.sharding.PartitionSpec(None, 'tensor')" in code
 
 
-def test_python_backend_sharding_torch():
+def test_python_backend_sharding_torch() -> None:
   """Verifies the behavior of python backend sharding PyTorch."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
@@ -109,13 +110,13 @@ def test_python_backend_sharding_torch():
   ]
   graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
   backend = PythonBackend(framework="torch")
-  code = backend.compile(graph)
+  code: str = backend.compile(graph)
   assert "distribute_tensor" in code
   assert "Shard(0)" in code
   assert "Replicate()" in code
 
 
-def test_python_backend_sharding_tf_mlx():
+def test_python_backend_sharding_tf_mlx() -> None:
   """Verifies the behavior of python backend sharding tf MLX."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
@@ -127,14 +128,14 @@ def test_python_backend_sharding_tf_mlx():
   ]
   graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
   backend = PythonBackend(framework="tensorflow")
-  code_tf = backend.compile(graph)
+  code_tf: str = backend.compile(graph)
   assert "keras.distribution.layout" in code_tf
-  backend = PythonBackend(framework="mlx")
-  code_mlx = backend.compile(graph)
+  backend_mlx = PythonBackend(framework="mlx")
+  code_mlx: str = backend_mlx.compile(graph)
   assert "mx.distributed.shard" in code_mlx
 
 
-def test_python_backend_primitive_mapping_mlx():
+def test_python_backend_primitive_mapping_mlx() -> None:
   """Verifies the behavior of python backend primitive mapping MLX."""
   from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.backends.python import PythonBackend
@@ -146,62 +147,70 @@ def test_python_backend_primitive_mapping_mlx():
     LogicalNode(id="swiglu", kind="SwiGLU"),
   ]
   backend = PythonBackend(framework="mlx")
-  code = backend.compile(graph)
+  code: str = backend.compile(graph)
   assert "self.rope = nn.RoPE()" in code
   assert "self.vision = nn.Conv2d()" in code
   assert "self.swiglu = nn.silu()" in code
 
 
-def test_python_backend_class_updater_inline_body():
+def test_python_backend_class_updater_inline_body() -> None:
   """Test function."""
   import libcst as cst
   from ml_switcheroo.core.compiler.backends.python import ClassBodyReplacer
 
   # A class with inline body methods
-  code = "class MyModel:\n  def __init__(self): pass\n  def forward(self, x): return x"
-  tree = cst.parse_module(code)
+  code: str = "class MyModel:\n  def __init__(self): pass\n  def forward(self, x): return x"
+  tree: cst.Module = cst.parse_module(code)
 
-  new_init = cst.parse_module("def __init__(self):\n  self.new_layer = 1").body[0]
-  new_forward = cst.parse_module("def forward(self, x):\n  return x + 1").body[0]
+  new_init: cst.FunctionDef = typing.cast(
+    cst.FunctionDef, cst.parse_module("def __init__(self):\n  self.new_layer = 1").body[0]
+  )
+  new_forward: cst.FunctionDef = typing.cast(
+    cst.FunctionDef, cst.parse_module("def forward(self, x):\n  return x + 1").body[0]
+  )
 
   updater = ClassBodyReplacer("MyModel", new_init, new_forward)
-  modified = tree.visit(updater)
+  modified: cst.Module = tree.visit(updater)
 
   assert "self.new_layer = 1" in modified.code
 
 
-def test_python_backend_class_updater_inline_body_missing_branch():
+def test_python_backend_class_updater_inline_body_missing_branch() -> None:
   """Test function."""
   import libcst as cst
   from ml_switcheroo.core.compiler.backends.python import ClassBodyReplacer
 
   # A class with inline body that contains a SmallStatement we don't care about or that wraps safely
-  code = "class MyModel: pass\n"
-  tree = cst.parse_module(code)
+  code: str = "class MyModel: pass\n"
+  tree: cst.Module = cst.parse_module(code)
 
-  new_init = cst.parse_module("def __init__(self):\n  pass").body[0]
-  new_forward = cst.parse_module("def forward(self, x):\n  return x").body[0]
+  new_init: cst.FunctionDef = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self):\n  pass").body[0])
+  new_forward: cst.FunctionDef = typing.cast(
+    cst.FunctionDef, cst.parse_module("def forward(self, x):\n  return x").body[0]
+  )
 
   updater = ClassBodyReplacer("MyModel", new_init, new_forward)
-  modified = tree.visit(updater)
+  modified: cst.Module = tree.visit(updater)
 
   assert "def __init__" in modified.code
 
 
-def test_python_backend_class_updater_inline_body_missing_branch2():
+def test_python_backend_class_updater_inline_body_missing_branch2() -> None:
   """Test function."""
   import libcst as cst
   from ml_switcheroo.core.compiler.backends.python import ClassBodyReplacer
 
   # A class with inline body that contains a SmallStatement we don't care about (e.g., break/continue which aren't in the tuple)
-  code = "class MyModel:\n  def __init__(self): break"
-  tree = cst.parse_module(code)
+  code: str = "class MyModel:\n  def __init__(self): break"
+  tree: cst.Module = cst.parse_module(code)
 
-  new_init = cst.parse_module("def __init__(self):\n  pass").body[0]
-  new_forward = cst.parse_module("def forward(self, x):\n  return x").body[0]
+  new_init: cst.FunctionDef = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self):\n  pass").body[0])
+  new_forward: cst.FunctionDef = typing.cast(
+    cst.FunctionDef, cst.parse_module("def forward(self, x):\n  return x").body[0]
+  )
 
   updater = ClassBodyReplacer("MyModel", new_init, new_forward)
-  modified = tree.visit(updater)
+  modified: cst.Module = tree.visit(updater)
 
   # Ensure it doesn't crash on the missing branch for 'break' stmt
   assert "class MyModel:" in modified.code

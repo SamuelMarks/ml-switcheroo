@@ -5,7 +5,7 @@ from unittest.mock import patch, mock_open
 from ml_switcheroo.cli.__main__ import main
 
 
-def test_main_dispatch():
+def test_main_dispatch() -> None:
   """Test main dispatch."""
   # Test all branches in main.py
 
@@ -15,14 +15,14 @@ def test_main_dispatch():
       main()
 
   # 2. Version
-  with pytest.raises(SystemExit) as e:
+  with pytest.raises(SystemExit) as e1:
     main(["--version"])
-  assert e.value.code == 0
+  assert e1.value.code == 0
 
   # 3. Help
-  with pytest.raises(SystemExit) as e:
+  with pytest.raises(SystemExit) as e2:
     main(["--help"])
-    assert e.value.code == 0
+  assert e2.value.code == 0
 
   # 4. Unknown command
   with pytest.raises(SystemExit):
@@ -83,7 +83,7 @@ def test_main_dispatch():
     assert main(["verified-pipeline", "in.py"]) == 1
 
 
-def test_main_dispatch_default_sys_argv():
+def test_main_dispatch_default_sys_argv() -> None:
   """Test main dispatch default sys argv."""
   with patch("sys.argv", ["ml-switcheroo", "matrix"]):
     with patch("ml_switcheroo.cli.__main__.commands.handle_matrix", return_value=0):

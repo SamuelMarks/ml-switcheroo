@@ -1,20 +1,21 @@
 """Test suite for the Latex Parser module."""
 
 import pytest
+import libcst as cst
 from ml_switcheroo.core.latex.parser import LatexParser
 
 
 @pytest.fixture
-def basic_latex():
+def basic_latex() -> str:
   """Provides a mock basic LaTeX for testing."""
   return "\n\\documentclass{standalone}\n\\begin{document}\n\\begin{DefModel}{SimpleNet}\n    \\Attribute{fc1}{Linear}{in=10, out=5}\n    \\Input{data}{[B, 10]}\n\n    \\StateOp{h1}{fc1}{data}{[B, 5]}\n    \\Op{act}{ReLU}{h1}{[B, 5]}\n    \\Return{act}\n\\end{DefModel}\n\\end{document}\n"
 
 
-def test_parser_end_to_end(basic_latex):
+def test_parser_end_to_end(basic_latex: str) -> None:
   """Verifies the behavior of parser end to end."""
   parser = LatexParser(basic_latex)
-  tree = parser.parse()
-  code = tree.code
+  tree: cst.Module = parser.parse()
+  code: str = tree.code
   assert "import midl" in code
   assert "class SimpleNet(midl.Module):" in code
   assert "self.fc1 = midl.Linear(in=10, out=5)" in code
@@ -25,41 +26,41 @@ def test_parser_end_to_end(basic_latex):
   assert "return act" in code
 
 
-def test_config_parsing():
+def test_config_parsing() -> None:
   """Verifies the behavior of configuration parsing."""
   parser = LatexParser("")
-  res1 = parser._parse_config_string("a=1, b=2")
+  res1: dict[str, str] = parser._parse_config_string("a=1, b=2")
   assert res1 == {"a": "1", "b": "2"}
-  res2 = parser._parse_config_string("1, 2, k=3")
+  res2: dict[str, str] = parser._parse_config_string("1, 2, k=3")
   assert res2 == {"arg_0": "1", "arg_1": "2", "k": "3"}
 
 
-def test_complex_args_parsing():
+def test_complex_args_parsing() -> None:
   """Verifies the behavior of complex arguments parsing."""
   parser = LatexParser("")
-  parsed = parser._parse_arg_list("x, dim=1, keepdim=True")
+  parsed: list[str] = parser._parse_arg_list("x, dim=1, keepdim=True")
   assert parsed == ["x", "dim=1", "keepdim=True"]
 
 
-def test_multiple_attributes(basic_latex):
+def test_multiple_attributes(basic_latex: str) -> None:
   """Verifies the behavior of multiple attributes."""
-  source = (
+  source: str = (
     "\n\\begin{DefModel}{Multi}\n    \\Attribute{c1}{Conv}{k=3}\n    \\Attribute{c2}{Conv}{k=5}\n\\end{DefModel}\n    "
   )
   parser = LatexParser(source)
-  code = parser.parse().code
-  lines = code.splitlines()
-  c1_idx = next((i for (i, line) in enumerate(lines) if "self.c1" in line))
-  c2_idx = next((i for (i, line) in enumerate(lines) if "self.c2" in line))
+  code: str = parser.parse().code
+  lines: list[str] = code.splitlines()
+  c1_idx: int = next((i for (i, line) in enumerate(lines) if "self.c1" in line))
+  c2_idx: int = next((i for (i, line) in enumerate(lines) if "self.c2" in line))
   assert c1_idx < c2_idx
   assert "midl.Conv" in code
 
 
-def test_implicit_flow_synthesis():
+def test_implicit_flow_synthesis() -> None:
   """Verifies the behavior of implicit flow synthesis."""
-  source = "\n\\begin{DefModel}{Flow}\n    \\Attribute{l1}{L}{}\n    \\Input{x}{_}\n    \\StateOp{a}{l1}{x}{_}\n    \\Op{b}{Func}{a}{_}\n    \\StateOp{c}{l1}{b}{_}\n\\end{DefModel}\n    "
+  source: str = "\n\\begin{DefModel}{Flow}\n    \\Attribute{l1}{L}{}\n    \\Input{x}{_}\n    \\StateOp{a}{l1}{x}{_}\n    \\Op{b}{Func}{a}{_}\n    \\StateOp{c}{l1}{b}{_}\n\\end{DefModel}\n    "
   parser = LatexParser(source)
-  code = parser.parse().code
+  code: str = parser.parse().code
   assert "a = self.l1(x)" in code
   assert "b = midl.Func(a)" in code
   assert "c = self.l1(b)" in code

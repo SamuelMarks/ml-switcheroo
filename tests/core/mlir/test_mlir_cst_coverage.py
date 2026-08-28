@@ -20,7 +20,7 @@ from ml_switcheroo.core.mlir.cst import (
 from ml_switcheroo.core.cst.base import Trivia
 
 
-def test_attribute_alias_def_node():
+def test_attribute_alias_def_node() -> None:
   """Verify the formatting of AttributeAliasDefNode."""
   # Test with value_str
   alias1 = AttributeAliasDefNode(name="#alias1", value_str="dense<1.0>")
@@ -31,14 +31,14 @@ def test_attribute_alias_def_node():
   assert alias2.to_text() == "#alias2 = f32"
 
 
-def test_module_node_aliases():
+def test_module_node_aliases() -> None:
   """Verify the formatting of ModuleNode with aliases."""
   alias1 = AttributeAliasDefNode(name="#alias", value_str="1", trailing_trivia=[Trivia("\n")])
-  mod = ModuleNode(aliases=[alias1], body=BlockNode())
+  mod = ModuleNode(aliases=[alias1], body=BlockNode(label=""))  # type: ignore
   assert mod.to_text() == "#alias = 1\n"
 
 
-def test_value_node_with_type():
+def test_value_node_with_type() -> None:
   """Verify that a ValueNode with an associated TypeNode and colon trivia is correctly formatted.
 
   This test constructs a ValueNode representing "%0", assigns a TypeNode of type "i32",
@@ -51,11 +51,11 @@ def test_value_node_with_type():
   Returns:
       None.
   """
-  v = ValueNode(name="%0", type_node=TypeNode(body="i32"), colon_trivia=[Trivia(" ")])
+  v = ValueNode(name="%0", type_node=TypeNode(body="i32"), colon_trivia=[Trivia(" ")])  # type: ignore
   assert v.to_text() == "%0 :i32"
 
 
-def test_operation_node_name_trivia_str():
+def test_operation_node_name_trivia_str() -> None:
   """Verify that providing a string for name_trivia in OperationNode is parsed into Trivia objects.
 
   This test instantiates an OperationNode passing a string with spaces for the name_trivia
@@ -74,7 +74,7 @@ def test_operation_node_name_trivia_str():
   assert op.name_trivia[0].text == " "
 
 
-def test_operation_node_name_trivia_none():
+def test_operation_node_name_trivia_none() -> None:
   """Verify that providing None for name_trivia in OperationNode defaults to an empty list.
 
   This test instantiates an OperationNode with name_trivia set to None and ensures
@@ -91,7 +91,7 @@ def test_operation_node_name_trivia_none():
   assert op.name_trivia == []
 
 
-def test_operation_node_no_parens():
+def test_operation_node_no_parens() -> None:
   """Verify that an OperationNode with has_parens set to False does not format its operands with parentheses.
 
   This test constructs an OperationNode with multiple ValueNode operands but has_parens set to
@@ -109,7 +109,7 @@ def test_operation_node_no_parens():
   assert op.to_text() == "foo %0, %1"
 
 
-def test_operation_node_op_tail():
+def test_operation_node_op_tail() -> None:
   """Verify that OperationNode correctly formats its tail string and tail trivia.
 
   This test constructs an OperationNode specifying result_types, a custom op_tail_str (" -> "),
@@ -123,11 +123,11 @@ def test_operation_node_op_tail():
       None.
   """
   # lines 197, 204
-  op = OperationNode(name="foo", result_types=[TypeNode(body="i32")], op_tail_str=" -> ", op_tail_trivia=[Trivia(" ")])
+  op = OperationNode(name="foo", result_types=[TypeNode(body="i32")], op_tail_str=" -> ", op_tail_trivia=[Trivia(" ")])  # type: ignore
   assert op.to_text() == "foo  -> i32"
 
 
-def test_operation_node_multiple_result_types():
+def test_operation_node_multiple_result_types() -> None:
   """Verify that OperationNode correctly formats multiple result types using the specified op_tail_str.
 
   This test constructs multiple OperationNode instances with multiple result types and different
@@ -148,7 +148,7 @@ def test_operation_node_multiple_result_types():
   assert op2.to_text() == "foo : i32, f32"
 
 
-def test_stablehlo_constant_op():
+def test_stablehlo_constant_op() -> None:
   """Verify the formatting of StableHloConstantOp across various configurations of attributes and types.
 
   This test constructs three different configurations of StableHloConstantOp:
@@ -172,7 +172,7 @@ def test_stablehlo_constant_op():
   op2 = StableHloConstantOp(
     name="stablehlo.constant",
     results=[ValueNode(name="%0")],
-    name_trivia=[Trivia("  ")],
+    name_trivia=[Trivia("  ")],  # type: ignore
     attributes=[AttributeNode(name="value", value="dense<1.0>")],
     result_types=[TypeNode(body="tensor<f32>"), TypeNode(body="tensor<i32>")],
   )

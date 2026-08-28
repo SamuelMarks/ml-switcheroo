@@ -9,7 +9,10 @@ Migration Note:
     Compilation logic is now handled by `ml_switcheroo.core.compiler.backends.sass.SassBackend`.
 """
 
-from typing import Union, Dict, List, Optional, Tuple, Any, TYPE_CHECKING
+import typing
+
+
+from typing import Union, Dict, List, Optional, Tuple, TYPE_CHECKING
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -247,7 +250,7 @@ class SassAdapter(FrameworkAdapter):
     """
     return "// Weights saving not supported in SASS adapter"
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply framework-specific wiring or context snapshot logic.
 
     Args:
@@ -266,7 +269,9 @@ class SassAdapter(FrameworkAdapter):
     """
     return None
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert input data into a format suitable for the SASS adapter.
 
     Args:

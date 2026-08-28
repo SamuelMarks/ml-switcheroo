@@ -9,7 +9,10 @@ Migration Note:
     have been removed. Routing now occurs via `compiler.registry`.
 """
 
-from typing import Union, Any, Dict, List, Optional, Tuple, TYPE_CHECKING
+import typing
+
+
+from typing import Union, Dict, List, Optional, Tuple, TYPE_CHECKING
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -262,7 +265,7 @@ class RdnaAdapter(FrameworkAdapter):
     """
     return "; Weights saving not supported in RDNA adapter"
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply framework-specific wiring or configuration from a snapshot.
 
     Args:
@@ -281,7 +284,9 @@ class RdnaAdapter(FrameworkAdapter):
     """
     return f"https://gpuopen.com/learn/rdna-performance-guide/?q={api_name}"
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert arbitrary data or objects into an RDNA-compatible representation.
 
     Args:

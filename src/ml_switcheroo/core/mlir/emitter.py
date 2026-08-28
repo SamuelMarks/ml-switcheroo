@@ -4,6 +4,9 @@ This module provides the `PythonToMlirEmitter`, a compiler front-end that
 transforms Python LibCST trees into the MLIR CST object model.
 """
 
+from typing import Any
+
+
 import libcst as cst
 from typing import Dict, List, Optional, Union, Sequence
 
@@ -86,7 +89,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
   def __init__(self) -> None:
     """Initialize the emitter with a fresh SSA context."""
-    self.ctx = SSAContext()
+    self.ctx: Any = SSAContext()
 
   def convert(self, node: cst.Module) -> ModuleNode:
     """Entry point: Converts a CST Module to an MLIR ModuleNode.
@@ -153,11 +156,11 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     """
     block = BlockNode(label=label)
-    stmts = []  # type: ignore
+    stmts: Any = []
     if isinstance(body_enc, (cst.IndentedBlock, cst.SimpleStatementSuite, cst.Module)):
-      stmts = body_enc.body  # type: ignore
+      stmts = body_enc.body
     elif isinstance(body_enc, (list, tuple)):
-      stmts = body_enc  # type: ignore
+      stmts = body_enc
 
     for stmt in stmts:
       ops = self._emit_statement(stmt)

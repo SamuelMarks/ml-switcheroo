@@ -1,7 +1,7 @@
 """Test suite for the Init Coverage 3 module."""
 
 
-def test_convert_error():
+def test_convert_error() -> None:
   """Converts correctly handling an error."""
   import ml_switcheroo
   from unittest.mock import patch

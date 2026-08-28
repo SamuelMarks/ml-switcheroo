@@ -2,21 +2,21 @@
 
 import argparse
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from ml_switcheroo.cli.__main__ import main
 
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_convert")
-def test_main_convert(mock_handle_convert):
+def test_main_convert(mock_handle_convert: MagicMock) -> None:
   """Test element."""
   mock_handle_convert.return_value = 0
-  argv = ["convert", "input.py", "--target", "jax", "--out", "out.py", "--config", "a=1"]
-  res = main(argv)
+  argv: list[str] = ["convert", "input.py", "--target", "jax", "--out", "out.py", "--config", "a=1"]
+  res: int = main(argv)
   assert res == 0
   mock_handle_convert.assert_called_once()
   # verify args
-  call_args = mock_handle_convert.call_args[0]
+  call_args: tuple = mock_handle_convert.call_args[0]
   assert call_args[0] == Path("input.py")
   assert call_args[1] == Path("out.py")
   assert call_args[3] == "jax"
@@ -24,120 +24,120 @@ def test_main_convert(mock_handle_convert):
 
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_define")
-def test_main_define(mock_handle_define):
+def test_main_define(mock_handle_define: MagicMock) -> None:
   """Test element."""
   mock_handle_define.return_value = 0
-  argv = ["define", "op.yaml"]
-  res = main(argv)
+  argv: list[str] = ["define", "op.yaml"]
+  res: int = main(argv)
   assert res == 0
   mock_handle_define.assert_called_once_with(Path("op.yaml"))
 
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_gen_weight_script")
-def test_main_gen_weight_script(mock_handle):
+def test_main_gen_weight_script(mock_handle: MagicMock) -> None:
   """Test element."""
   mock_handle.return_value = 0
-  argv = ["gen-weight-script", "model.py", "--out", "script.py", "--source", "torch", "--target", "jax"]
-  res = main(argv)
+  argv: list[str] = ["gen-weight-script", "model.py", "--out", "script.py", "--source", "torch", "--target", "jax"]
+  res: int = main(argv)
   assert res == 0
   mock_handle.assert_called_once_with(Path("model.py"), Path("script.py"), "torch", "jax")
 
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_matrix")
-def test_main_matrix(mock_handle):
+def test_main_matrix(mock_handle: MagicMock) -> None:
   """Test element."""
   mock_handle.return_value = 0
-  res = main(["matrix"])
+  res: int = main(["matrix"])
   assert res == 0
   mock_handle.assert_called_once()
 
 
 @patch("ml_switcheroo.cli.__main__.handle_schema")
-def test_main_schema(mock_handle):
+def test_main_schema(mock_handle: MagicMock) -> None:
   """Test element."""
   mock_handle.return_value = 0
-  res = main(["schema"])
+  res: int = main(["schema"])
   assert res == 0
   mock_handle.assert_called_once()
 
 
 @patch("ml_switcheroo.cli.__main__.handle_suggest")
-def test_main_suggest(mock_handle):
+def test_main_suggest(mock_handle: MagicMock) -> None:
   """Test element."""
   mock_handle.return_value = 0
-  res = main(["suggest", "torch.add", "--out-dir", "out"])
+  res: int = main(["suggest", "torch.add", "--out-dir", "out"])
   assert res == 0
   mock_handle.assert_called_once_with("torch.add", out_dir=Path("out"), batch_size=50)
 
 
 @patch("ml_switcheroo.cli.__main__.handle_scaffold")
-def test_main_scaffold(mock_handle):
+def test_main_scaffold(mock_handle: MagicMock) -> None:
   """Test element."""
-  res = main(["scaffold", "jax"])
+  res: int = main(["scaffold", "jax"])
   assert res == 0
   mock_handle.assert_called_once()
 
 
 @patch("ml_switcheroo.cli.__main__.handle_harvest")
-def test_main_harvest(mock_handle):
+def test_main_harvest(mock_handle: MagicMock) -> None:
   """Test element."""
-  res = main(["harvest", "tests/"])
+  res: int = main(["harvest", "tests/"])
   assert res == 0
   mock_handle.assert_called_once()
 
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_ci")
-def test_main_ci(mock_handle):
+def test_main_ci(mock_handle: MagicMock) -> None:
   """Test element."""
   mock_handle.return_value = 0
-  res = main(["ci", "--repair"])
+  res: int = main(["ci", "--repair"])
   assert res == 0
   mock_handle.assert_called_once_with(False, Path("README.md"), None, True)
 
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_docs")
-def test_main_gen_docs(mock_handle):
+def test_main_gen_docs(mock_handle: MagicMock) -> None:
   """Test element."""
   mock_handle.return_value = 0
-  res = main(["gen-docs"])
+  res: int = main(["gen-docs"])
   assert res == 0
   mock_handle.assert_called_once_with("torch", "jax", Path("MIGRATION_GUIDE.md"))
 
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_gen_tests")
-def test_main_gen_tests(mock_handle):
+def test_main_gen_tests(mock_handle: MagicMock) -> None:
   """Test element."""
   mock_handle.return_value = 0
-  res = main(["gen-tests"])
+  res: int = main(["gen-tests"])
   assert res == 0
   mock_handle.assert_called_once()
 
 
 @patch("builtins.open")
 @patch("ml_switcheroo.ingestion.verified_pipeline.run_verified_pipeline")
-def test_main_verified_pipeline(mock_run, mock_open):
+def test_main_verified_pipeline(mock_run: MagicMock, mock_open: MagicMock) -> None:
   """Test element."""
   mock_run.return_value = {"status": "success"}
   mock_open.return_value.__enter__.return_value.read.return_value = "code"
-  res = main(["verified-pipeline", "file.py"])
+  res: int = main(["verified-pipeline", "file.py"])
   assert res == 0
   mock_run.assert_called_once_with("code")
 
 
 @patch("builtins.open")
 @patch("ml_switcheroo.ingestion.verified_pipeline.run_verified_pipeline")
-def test_main_verified_pipeline_fail(mock_run, mock_open):
+def test_main_verified_pipeline_fail(mock_run: MagicMock, mock_open: MagicMock) -> None:
   """Test element."""
   mock_run.return_value = {"status": "error"}
   mock_open.return_value.__enter__.return_value.read.return_value = "code"
-  res = main(["verified-pipeline", "file.py"])
+  res: int = main(["verified-pipeline", "file.py"])
   assert res == 1
 
 
-def test_main_unknown():
+def test_main_unknown() -> None:
   """Test element."""
   # Simulate an unknown command (argparse would usually catch this, but just in case)
   with patch("argparse.ArgumentParser.parse_args") as mock_parse:
     mock_parse.return_value = argparse.Namespace(command="unknown")
-    res = main(["unknown"])
+    res: int = main(["unknown"])
     assert res == 0

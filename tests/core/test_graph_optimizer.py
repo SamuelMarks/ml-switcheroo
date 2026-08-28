@@ -1,11 +1,12 @@
 """Test module."""
 
+import typing
 from ml_switcheroo.core.graph import LogicalNode, LogicalEdge, LogicalGraph
 from ml_switcheroo.core.graph_optimizer import GraphOptimizer
 from ml_switcheroo.core.dsl import PatternDef
 
 
-def build_test_graph():
+def build_test_graph() -> LogicalGraph:
   """Test element."""
   # Input -> Conv2d -> BatchNorm -> ReLU -> Output
   g = LogicalGraph()
@@ -20,25 +21,25 @@ def build_test_graph():
   return g
 
 
-def test_graph_optimizer_no_patterns():
+def test_graph_optimizer_no_patterns() -> None:
   """Test element."""
-  g = build_test_graph()
+  g: LogicalGraph = build_test_graph()
   opt = GraphOptimizer([])
-  res = opt.optimize(g)
+  res: LogicalGraph = opt.optimize(g)
   # The original graph object is returned directly
   assert res is g
 
 
-def test_graph_optimizer_single_pattern():
+def test_graph_optimizer_single_pattern() -> None:
   """Test element."""
-  g = build_test_graph()
+  g: LogicalGraph = build_test_graph()
   patterns = [
     PatternDef(name="CBR", sequence=["Conv2d", "BatchNorm", "ReLU"], replace_with="Conv2dBNReLU", description="test")
   ]
   opt = GraphOptimizer(patterns)
-  res = opt.optimize(g)
+  res: LogicalGraph = opt.optimize(g)
 
-  node_ids = {n.id: n for n in res.nodes}
+  node_ids: dict[str, LogicalNode] = {n.id: n for n in res.nodes}
   assert "fused_conv" in node_ids
   assert node_ids["fused_conv"].kind == "Conv2dBNReLU"
   assert "conv" not in node_ids
@@ -47,29 +48,29 @@ def test_graph_optimizer_single_pattern():
   assert "in" in node_ids
   assert "out" in node_ids
 
-  edges = [(e.source, e.target) for e in res.edges]
+  edges: list[tuple[str, str]] = [(e.source, e.target) for e in res.edges]
   assert ("in", "fused_conv") in edges
   assert ("fused_conv", "out") in edges
   assert len(edges) == 2
 
   # Metadata merging
-  fused_meta = node_ids["fused_conv"].metadata
+  fused_meta: dict[str, typing.Any] = node_ids["fused_conv"].metadata
   assert fused_meta["arg_0"] == "3"
   assert fused_meta["eps"] == "1e-5"
 
 
-def test_graph_optimizer_no_match():
+def test_graph_optimizer_no_match() -> None:
   """Test element."""
-  g = build_test_graph()
+  g: LogicalGraph = build_test_graph()
   patterns = [PatternDef(name="LinearReLU", sequence=["Linear", "ReLU"], replace_with="LinearReLU", description="test")]
   opt = GraphOptimizer(patterns)
-  res = opt.optimize(g)
+  res: LogicalGraph = opt.optimize(g)
 
   assert len(res.nodes) == 5
   assert len(res.edges) == 4
 
 
-def test_graph_optimizer_multiple_patterns():
+def test_graph_optimizer_multiple_patterns() -> None:
   """Test element."""
   # Input -> Linear -> ReLU -> Linear -> Output
   g = LogicalGraph()
@@ -84,63 +85,63 @@ def test_graph_optimizer_multiple_patterns():
 
   patterns = [PatternDef(name="LinearReLU", sequence=["Linear", "ReLU"], replace_with="LinearReLU", description="test")]
   opt = GraphOptimizer(patterns)
-  res = opt.optimize(g)
+  res: LogicalGraph = opt.optimize(g)
 
-  node_ids = {n.id: n for n in res.nodes}
+  node_ids: dict[str, LogicalNode] = {n.id: n for n in res.nodes}
   assert "fused_l1" in node_ids
   assert "l2" in node_ids
 
-  edges = [(e.source, e.target) for e in res.edges]
+  edges: list[tuple[str, str]] = [(e.source, e.target) for e in res.edges]
   assert ("in", "fused_l1") in edges
   assert ("fused_l1", "l2") in edges
   assert ("l2", "out") in edges
 
 
-def test_match_sequence_fail_empty_seq():
+def test_match_sequence_fail_empty_seq() -> None:
   """Test element."""
   opt = GraphOptimizer([])
   n = LogicalNode("x", "X")
   assert opt._match_sequence(n, [], {}, {}, set()) is None
 
 
-def test_match_sequence_fail_first_node():
+def test_match_sequence_fail_first_node() -> None:
   """Test element."""
   opt = GraphOptimizer([])
   n = LogicalNode("x", "X")
   assert opt._match_sequence(n, ["Y", "Z"], {}, {}, set()) is None
 
 
-def test_match_sequence_fail_missing_target():
+def test_match_sequence_fail_missing_target() -> None:
   """Test element."""
   opt = GraphOptimizer([])
   n = LogicalNode("x", "X")
-  node_map = {"x": n, "y": LogicalNode("y", "Y")}
+  node_map: dict[str, LogicalNode] = {"x": n, "y": LogicalNode("y", "Y")}
   # No out edge from x to y
-  out_edges = {"x": []}
+  out_edges: dict[str, list[str]] = {"x": []}
   assert opt._match_sequence(n, ["X", "Y"], node_map, out_edges, set()) is None
 
 
-def test_match_sequence_fail_already_processed():
+def test_match_sequence_fail_already_processed() -> None:
   """Test element."""
   opt = GraphOptimizer([])
   n = LogicalNode("x", "X")
   y = LogicalNode("y", "Y")
-  node_map = {"x": n, "y": y}
-  out_edges = {"x": ["y"]}
+  node_map: dict[str, LogicalNode] = {"x": n, "y": y}
+  out_edges: dict[str, list[str]] = {"x": ["y"]}
   assert opt._match_sequence(n, ["X", "Y"], node_map, out_edges, {"y"}) is None
 
 
-def test_match_sequence_fail_wrong_kind():
+def test_match_sequence_fail_wrong_kind() -> None:
   """Test element."""
   opt = GraphOptimizer([])
   n = LogicalNode("x", "X")
   y = LogicalNode("y", "Z")  # Wrong kind
-  node_map = {"x": n, "y": y}
-  out_edges = {"x": ["y"]}
+  node_map: dict[str, LogicalNode] = {"x": n, "y": y}
+  out_edges: dict[str, list[str]] = {"x": ["y"]}
   assert opt._match_sequence(n, ["X", "Y"], node_map, out_edges, set()) is None
 
 
-def test_optimizer_branching_edge_drops():
+def test_optimizer_branching_edge_drops() -> None:
   """Test element."""
   # Check that edges internal to fusion block drop
   # And check cross-fusion links drop if internal
@@ -153,9 +154,9 @@ def test_optimizer_branching_edge_drops():
   p = PatternDef(name="AB", sequence=["OpA", "OpB"], replace_with="OpAB", description="")
   opt = GraphOptimizer([p])
 
-  res = opt.optimize(g)
+  res: LogicalGraph = opt.optimize(g)
 
-  edges = [(e.source, e.target) for e in res.edges]
+  edges: list[tuple[str, str]] = [(e.source, e.target) for e in res.edges]
   # fused_A represents A+B. A was head, B was tail.
   # The A->B edge is internal.
   # The B->C edge is (fused_A.tail) -> C, so it becomes fused_A -> C
@@ -167,7 +168,7 @@ def test_optimizer_branching_edge_drops():
   assert len(edges) == 1
 
 
-def test_optimizer_double_fusion_link():
+def test_optimizer_double_fusion_link() -> None:
   """Test element."""
   g = LogicalGraph()
   g.nodes = [LogicalNode("A1", "A"), LogicalNode("B1", "B"), LogicalNode("A2", "A"), LogicalNode("B2", "B")]
@@ -179,9 +180,9 @@ def test_optimizer_double_fusion_link():
   ]
   p = PatternDef(name="AB", sequence=["A", "B"], replace_with="AB", description="")
   opt = GraphOptimizer([p])
-  res = opt.optimize(g)
+  res: LogicalGraph = opt.optimize(g)
 
-  edges = [(e.source, e.target) for e in res.edges]
+  edges: list[tuple[str, str]] = [(e.source, e.target) for e in res.edges]
   # B1 (tail of fused_A1) -> A2 (head of fused_A2) -> fused_A1 -> fused_A2
   assert ("fused_A1", "fused_A2") in edges
   assert len(edges) == 1

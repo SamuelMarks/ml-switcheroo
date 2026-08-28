@@ -3,7 +3,7 @@
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, topological_sort
 
 
-def test_graph_structure():
+def test_graph_structure() -> None:
   """Verifies the behavior of graph structure."""
   node = LogicalNode(id="test", kind="Op", metadata={"k": "3"})
   assert node.id == "test"
@@ -17,7 +17,7 @@ def test_graph_structure():
   assert len(graph.edges) == 1
 
 
-def test_topological_sort_linear():
+def test_topological_sort_linear() -> None:
   """Verifies the behavior of topological sort linear."""
   g = LogicalGraph()
   n_a = LogicalNode(id="a", kind="op")
@@ -25,12 +25,12 @@ def test_topological_sort_linear():
   n_c = LogicalNode(id="c", kind="op")
   g.nodes = [n_c, n_a, n_b]
   g.edges = [LogicalEdge("a", "b"), LogicalEdge("b", "c")]
-  sorted_nodes = topological_sort(g)
-  ids = [n.id for n in sorted_nodes]
+  sorted_nodes: list[LogicalNode] = topological_sort(g)
+  ids: list[str] = [n.id for n in sorted_nodes]
   assert ids == ["a", "b", "c"]
 
 
-def test_topological_sort_branch():
+def test_topological_sort_branch() -> None:
   """Verifies the behavior of topological sort branch."""
   g = LogicalGraph()
   n_a = LogicalNode("a", "op")
@@ -38,25 +38,25 @@ def test_topological_sort_branch():
   n_c = LogicalNode("c", "op")
   g.nodes = [n_a, n_b, n_c]
   g.edges = [LogicalEdge("a", "b"), LogicalEdge("a", "c")]
-  sorted_nodes = topological_sort(g)
-  ids = [n.id for n in sorted_nodes]
+  sorted_nodes: list[LogicalNode] = topological_sort(g)
+  ids: list[str] = [n.id for n in sorted_nodes]
   assert ids[0] == "a"
   assert "b" in ids[1:]
   assert "c" in ids[1:]
 
 
-def test_topological_sort_cycle_resilience():
+def test_topological_sort_cycle_resilience() -> None:
   """Verifies the behavior of topological sort cycle resilience."""
   g = LogicalGraph()
   n_a = LogicalNode("a", "op")
   n_b = LogicalNode("b", "op")
   g.nodes = [n_a, n_b]
   g.edges = [LogicalEdge("a", "b"), LogicalEdge("b", "a")]
-  sorted_nodes = topological_sort(g)
+  sorted_nodes: list[LogicalNode] = topological_sort(g)
   assert len(sorted_nodes) == 2
 
 
-def test_logical_axis():
+def test_logical_axis() -> None:
   """Verifies the behavior of logical axis."""
   from ml_switcheroo.core.compiler.ir import LogicalAxis
 
@@ -65,7 +65,7 @@ def test_logical_axis():
   assert axis.size == 1024
 
 
-def test_partition_spec():
+def test_partition_spec() -> None:
   """Verifies the behavior of partition spec."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
@@ -76,7 +76,7 @@ def test_partition_spec():
   assert spec.axes[2] == ("model", "tensor")
 
 
-def test_logical_mesh():
+def test_logical_mesh() -> None:
   """Verifies the behavior of logical mesh."""
   from ml_switcheroo.core.compiler.ir import LogicalMesh
 
@@ -85,7 +85,7 @@ def test_logical_mesh():
   assert mesh.shape["model"] == 4
 
 
-def test_graph_sharding_attributes():
+def test_graph_sharding_attributes() -> None:
   """Verifies the behavior of graph sharding attributes."""
   from ml_switcheroo.core.compiler.ir import LogicalMesh, PartitionSpec, LogicalGraph, LogicalNode
 
@@ -93,23 +93,25 @@ def test_graph_sharding_attributes():
   spec = PartitionSpec(axes=("data", None))
   node = LogicalNode(id="sharded_node", kind="Op", sharding=spec)
   graph = LogicalGraph(nodes=[node], mesh=mesh)
+  assert graph.mesh is not None
   assert graph.mesh.shape["data"] == 8
+  assert graph.nodes[0].sharding is not None
   assert graph.nodes[0].sharding.axes == ("data", None)
 
 
-def test_topological_sort_missing_node():
+def test_topological_sort_missing_node() -> None:
   """Verifies the behavior when an edge points to a non-existent node."""
   g = LogicalGraph()
   n_a = LogicalNode(id="a", kind="op")
   g.nodes = [n_a]
   # edge points to "b" which is not in nodes
   g.edges = [LogicalEdge("a", "b")]
-  sorted_nodes = topological_sort(g)
+  sorted_nodes: list[LogicalNode] = topological_sort(g)
   assert len(sorted_nodes) == 1
   assert sorted_nodes[0].id == "a"
 
 
-def test_ir_topological_sort_cycle():
+def test_ir_topological_sort_cycle() -> None:
   # Hit 133->131 (in_degree != 0) and 141->140 (n.id in seen)
   """Test ir topological sort cycle."""
   from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, topological_sort
@@ -122,5 +124,5 @@ def test_ir_topological_sort_cycle():
   g.edges.append(LogicalEdge("A", "B"))
   g.edges.append(LogicalEdge("B", "C"))
   g.edges.append(LogicalEdge("C", "B"))
-  sorted_nodes = topological_sort(g)
+  sorted_nodes: list[LogicalNode] = topological_sort(g)
   assert len(sorted_nodes) == 3

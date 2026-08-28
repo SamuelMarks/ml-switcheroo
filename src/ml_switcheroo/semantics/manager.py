@@ -12,9 +12,13 @@ Core Responsibilities:
 
 from typing import Any
 
+import typing
+
+
 import os
 import json
 import yaml
+import copy
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Set, List
 from pydantic import ValidationError
@@ -30,6 +34,8 @@ from ml_switcheroo.frameworks.base import get_adapter
 from ml_switcheroo.semantics.file_loader import KnowledgeBaseLoader
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
+_MANAGER_CACHE = None
+
 
 class SemanticsManager:
   """Central database for semantic mappings and configuration.
@@ -41,16 +47,21 @@ class SemanticsManager:
 
   def __init__(self) -> None:
     """Initialize the manager and loads all knowledge sources."""
+    global _MANAGER_CACHE
+    if _MANAGER_CACHE is not None:
+      self.__dict__ = {k: copy.copy(v) for k, v in _MANAGER_CACHE.items()}
+      return
+
     # Core Data Stores
-    self.data: Dict[str, Dict[Any, Any]] = {}
-    self.framework_configs: Dict[str, Dict[Any, Any]] = {}
-    self.test_templates: Dict[str, Dict[Any, Any]] = {}
+    self.data: dict[Any, Any] = {}
+    self.framework_configs: dict[Any, Any] = {}
+    self.test_templates: dict[Any, Any] = {}
     self._known_rng_methods: Set[str] = set()
     self.known_magic_args: Set[str] = set()
     self.patterns: List[PatternDef] = []
 
     # Indexes
-    self._reverse_index: Dict[str, Tuple[str, Dict[Any, Any]]] = {}
+    self._reverse_index: dict[Any, Any] = {}
     self._key_origins: Dict[str, str] = {}
     self._validation_status: Dict[str, bool] = {}
 
@@ -70,6 +81,8 @@ class SemanticsManager:
 
     # --- Phase 3: Indexing ---
     self._build_index()
+
+    _MANAGER_CACHE = {k: copy.copy(v) for k, v in self.__dict__.items()}
 
   def _build_index(self) -> None:
     """Construct the reverse index mapping from concrete API endpoints back to their abstract definitions."""
@@ -94,7 +107,7 @@ class SemanticsManager:
       with open(priority_json_path, "r", encoding="utf-8") as f:
         priority_scores = json.load(f)
 
-    def get_priority(abs_id: Any, details: Any, tier: Any) -> Any:
+    def get_priority(abs_id: str, details: dict, tier: int) -> int:
       """Determine indexing priority when multiple abstract ops map to the same target API.
 
       This handles overlaps between generic ops like `cat` vs `concat`.
@@ -122,7 +135,7 @@ class SemanticsManager:
     for abstract_id, details in self.data.items():
       variants = details.get("variants", {})
       tier = self._key_origins.get(abstract_id)
-      score = get_priority(abstract_id, details, tier)
+      score = get_priority(abstract_id, details, tier)  # type: ignore
 
       for _engine, impl in variants.items():
         if not impl:
@@ -130,7 +143,7 @@ class SemanticsManager:
         api_name = impl.get("api")
         if api_name:
 
-          def register_api(name: Any) -> Any:
+          def register_api(name: str) -> None:
             """Register the target concrete API mapped back to its abstract concept.
 
             Uses tie-breaker scores when overlaps are found.
@@ -141,7 +154,7 @@ class SemanticsManager:
             if name in self._reverse_index:
               existing_id, existing_details = self._reverse_index[name]
               existing_tier = self._key_origins.get(existing_id)
-              existing_score = get_priority(existing_id, existing_details, existing_tier)
+              existing_score = get_priority(existing_id, existing_details, existing_tier)  # type: ignore
               if score > existing_score:
                 self._reverse_index[name] = (abstract_id, details)
             else:
@@ -210,7 +223,7 @@ class SemanticsManager:
       return adapter.inherits_from
     return None
 
-  def resolve_variant(self, abstract_id: str, target_fw: str) -> Optional[Dict[str, Any]]:
+  def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Optional[dict]:
     """Resolve the implementation of an abstract operation.
 
     Args:
@@ -226,7 +239,7 @@ class SemanticsManager:
       return None
     variants = defn.get("variants", {})
     if target_fw in variants:
-      return variants[target_fw]  # type: ignore
+      return variants[target_fw]
 
     curr = target_fw
     limit = 5
@@ -235,7 +248,7 @@ class SemanticsManager:
       if not parent:
         return None
       if parent in variants:
-        return variants[parent]  # type: ignore
+        return variants[parent]
       curr = parent
       limit -= 1
     return None
@@ -250,9 +263,9 @@ class SemanticsManager:
         True if the operation is verified or untracked, False otherwise.
     """
     status_map = getattr(self, "_validation_status", {})
-    return status_map.get(abstract_id, True)  # type: ignore
+    return status_map.get(abstract_id, True)
 
-  def get_definition_by_id(self, abstract_id: str) -> Optional[Dict[str, Any]]:
+  def get_definition_by_id(self, abstract_id: str) -> typing.Optional[dict]:
     """Direct dictionary access.
 
     Args:
@@ -264,7 +277,7 @@ class SemanticsManager:
     """
     return self.data.get(abstract_id)
 
-  def get_definition(self, api_name: str) -> Optional[Tuple[str, Dict[Any, Any]]]:
+  def get_definition(self, api_name: str) -> typing.Optional[typing.Tuple[str, dict]]:
     """Reverse lookup from concrete API string or Abstract ID fallback.
 
     Args:
@@ -283,7 +296,7 @@ class SemanticsManager:
 
     return None
 
-  def get_known_apis(self) -> Dict[str, Dict[Any, Any]]:
+  def get_known_apis(self) -> typing.Dict[str, dict]:
     """Return full knowledge graph.
 
     Returns:
@@ -291,7 +304,7 @@ class SemanticsManager:
     """
     return self.data
 
-  def get_framework_config(self, framework: str) -> Dict[str, Any]:
+  def get_framework_config(self, framework: str) -> dict:
     """Return definition of framework traits.
 
     Args:
@@ -365,7 +378,7 @@ class SemanticsManager:
     except Exception as e:
       print(f"❌ Error loading validation report: {e}")
 
-  def update_definition(self, abstract_id: str, new_data: Dict[str, Any]) -> None:
+  def update_definition(self, abstract_id: str, new_data: dict) -> None:
     """Update an operation definition in memory and persists to disk.
 
     Args:

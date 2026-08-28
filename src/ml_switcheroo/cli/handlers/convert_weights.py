@@ -19,7 +19,6 @@ Unsupported combinations degrade gracefully by returning False.
 import textwrap
 import pprint
 from pathlib import Path
-from typing import Dict, Any, List
 
 import libcst as cst
 from ml_switcheroo.core.graph import GraphExtractor
@@ -97,7 +96,7 @@ class WeightScriptGenerator:
       log_error(f"Failed to write output script: {e}")
       return False
 
-  def _flatten_mapping_rules(self, layer_registry: Dict[str, Any]) -> List[Dict[str, Any]]:
+  def _flatten_mapping_rules(self, layer_registry):
     """Construct mapping rules for each layer found in the AST.
 
     Args:
@@ -176,7 +175,7 @@ class WeightScriptGenerator:
 
     return rules
 
-  def _generate_script(self, rules: List[Dict[str, Any]]) -> str:
+  def _generate_script(self, rules) -> str:
     """Generate the migration script using Adapter primitives.
 
     Args:

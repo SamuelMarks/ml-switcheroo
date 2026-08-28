@@ -13,7 +13,7 @@ This is used by the ``GraphPatcher`` to surgically insert new code for
 nodes created during Graph Optimization (e.g. Fused Operations).
 """
 
-from typing import Any, Dict, List
+from typing import List
 import libcst as cst
 
 from ml_switcheroo.core.compiler.ir import LogicalNode
@@ -176,7 +176,7 @@ class PythonSnippetEmitter:
 
     return clean_kind
 
-  def _build_args_from_metadata(self, metadata: Dict[str, Any]) -> List[cst.Arg]:
+  def _build_args_from_metadata(self, metadata) -> List[cst.Arg]:
     """Build libcst arguments from node metadata.
 
     Args:

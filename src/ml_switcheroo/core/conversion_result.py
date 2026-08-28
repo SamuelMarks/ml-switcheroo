@@ -4,7 +4,7 @@ This module defines the `ConversionResult` Pydantic model, which encapsulates
 the generated code, any errors encountered, and the execution trace logs.
 """
 
-from typing import Any, Dict, List
+from typing import Dict, List, Any
 
 from pydantic import BaseModel, Field
 

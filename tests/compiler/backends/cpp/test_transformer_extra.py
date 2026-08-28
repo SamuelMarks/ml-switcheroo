@@ -20,11 +20,12 @@ from ml_switcheroo.core.compiler.backends.cpp.cst import (
   BlockStatement,
   PyBindModule,
   PyBindDef,
+  CppNode,
 )
 from ml_switcheroo.core.compiler.backends.cpp.transformer import CppCSTTransformer
 
 
-def test_full_transform():
+def test_full_transform() -> None:
   """Test the CppCSTTransformer with a complete C++ module CST.
 
   This test constructs a complex `CppModule` node featuring functions, variable
@@ -58,10 +59,10 @@ def test_full_transform():
     ],
   )
   # just traversing should not crash and should return the node itself
-  res = t.visit(mod)
+  res: CppNode = t.visit(mod)
   assert res is mod
-  assert t.visit(Identifier("foo")).name == "foo"
-  assert t.visit(TypeIdentifier("int")).name == "int"
+  assert getattr(t.visit(Identifier("foo")), "name", None) == "foo"
+  assert getattr(t.visit(TypeIdentifier("int")), "name", None) == "int"
 
   class Mover(CppCSTTransformer):
     """A specialized AST transformer for mutating identifier names during C++ CST traversal.
@@ -85,5 +86,7 @@ def test_full_transform():
       return node
 
   m = Mover()
-  res2 = m.visit(mod)
-  assert res2.body[0].arguments[0].name == "a"  # not changed because it's a FunctionArgument string not Identifier
+  res2: CppNode = m.visit(mod)
+  assert (
+    getattr(res2, "body")[0].arguments[0].name == "a"
+  )  # not changed because it's a FunctionArgument string not Identifier

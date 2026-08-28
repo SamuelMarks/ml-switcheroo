@@ -11,12 +11,12 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
-def backend():
+def backend() -> StableHloBackend:
   """Provides a StableHLO Backend with a loaded SemanticsManager."""
   return StableHloBackend(SemanticsManager())
 
 
-MATH_OPS = [
+MATH_OPS: list[tuple[str, str]] = [
   ("Abs", "stablehlo.abs"),
   ("Add", "stablehlo.add"),
   ("Atan2", "stablehlo.atan2"),
@@ -53,7 +53,7 @@ MATH_OPS = [
 
 
 @pytest.mark.parametrize("logical_op, expected_mlir_op", MATH_OPS)
-def test_math_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str):
+def test_math_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str) -> None:
   """Verifies that mathematical operations are correctly mapped to StableHLO syntax.
 
   This ensures both mapping resolution and operand generation are correct.
@@ -63,7 +63,7 @@ def test_math_operations(backend: StableHloBackend, logical_op: str, expected_ml
   g.nodes = [LogicalNode("in_node", "Input"), LogicalNode("op_node", logical_op), LogicalNode("out_node", "Output")]
   g.edges = [LogicalEdge("in_node", "op_node"), LogicalEdge("op_node", "out_node")]
 
-  mlir_code = backend.compile(g)
+  mlir_code: str = backend.compile(g)
 
   # 1. Operation exists in MLIR output
   assert expected_mlir_op in mlir_code
@@ -74,10 +74,10 @@ def test_math_operations(backend: StableHloBackend, logical_op: str, expected_ml
   assert "%op_node =" in mlir_code
 
 
-def test_stablehlo_custom_call_fallback(backend: StableHloBackend):
+def test_stablehlo_custom_call_fallback(backend: StableHloBackend) -> None:
   """Verifies that unknown operations fall back to a custom_call."""
   g = LogicalGraph()
   g.nodes = [LogicalNode("my_op", "UnknownMagicOp")]
-  mlir_code = backend.compile(g)
+  mlir_code: str = backend.compile(g)
   assert "stablehlo.custom_call" in mlir_code
   assert "@unknownmagicop" in mlir_code

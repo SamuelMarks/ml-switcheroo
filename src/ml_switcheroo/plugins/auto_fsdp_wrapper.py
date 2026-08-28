@@ -33,7 +33,7 @@ def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.
   # 1. Ensure the operation supports sharding conceptually
   op_def = None
   if ctx.current_op_id and ctx.semantics:
-    op_def = ctx.semantics.get_operation(ctx.current_op_id)
+    op_def = ctx.semantics.get_operation(ctx.current_op_id)  # type: ignore
 
   if not (op_def and getattr(op_def, "sharding_supported", False)):
     return node

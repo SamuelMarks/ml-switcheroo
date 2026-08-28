@@ -1,15 +1,23 @@
 """Test suite for the Analysis module."""
 
+import typing
 from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassRegister, SassImmediate, SassPredicate
+from ml_switcheroo.core.compiler.frontends.sass.cst import (
+  SassInstruction,
+  SassRegister,
+  SassImmediate,
+  SassPredicate,
+  SassLabel,
+  SassMemory,
+)
 
 
-def make_inst(opcode, *operands):
+def make_inst(opcode: str, *operands: typing.Any) -> SassInstruction:
   """Helper to make inst."""
   return SassInstruction(opcode=opcode, operands=list(operands))
 
 
-def test_analyze_conv2d_kernel_size():
+def test_analyze_conv2d_kernel_size() -> None:
   """Analyzes conv2d kernel size."""
   r3 = SassRegister(name="R3")
   pt = SassRegister(name="PT")
@@ -17,44 +25,44 @@ def test_analyze_conv2d_kernel_size():
   insts = [
     make_inst("MOV", SassRegister(name="R1"), SassRegister(name="RZ")),
     make_inst("ISETP.LT.AND", p0, pt, r3, SassImmediate(value=3), pt),
-    make_inst("BRA", SassRegister(name="L_LOOP")),
+    make_inst("BRA", SassLabel(name="L_LOOP")),  # type: ignore
   ]
-  meta = SassAnalyzer.analyze_block("Conv2d", insts)
+  meta: dict[str, typing.Any] = SassAnalyzer.analyze_block("Conv2d", insts)
   assert "kernel_size" in meta
   assert meta["kernel_size"] == 3
   assert meta["arg_2"] == 3
 
 
-def test_analyze_linear_in_features():
+def test_analyze_linear_in_features() -> None:
   """Analyzes linear in features."""
   r8 = SassRegister(name="R8")
   pt = SassRegister(name="PT")
   p0 = SassPredicate(name="P0")
   insts = [
-    make_inst("LDG.E.F32", SassRegister(name="R9"), SassRegister(name="addr")),
+    make_inst("LDG.E.F32", SassRegister(name="R9"), SassMemory(base="addr")),  # type: ignore
     make_inst("ISETP.LT.AND", p0, pt, r8, SassImmediate(value=128), pt),
   ]
-  meta = SassAnalyzer.analyze_block("Linear", insts)
+  meta: dict[str, typing.Any] = SassAnalyzer.analyze_block("Linear", insts)
   assert "in_features" in meta
   assert meta["in_features"] == 128
   assert meta["arg_0"] == 128
 
 
-def test_analyze_no_loop_found():
+def test_analyze_no_loop_found() -> None:
   """Analyzes no loop found."""
   insts = [make_inst("FADD", SassRegister(name="R0"), SassRegister(name="R1"), SassRegister(name="R2"))]
-  meta = SassAnalyzer.analyze_block("Linear", insts)
+  meta: dict[str, typing.Any] = SassAnalyzer.analyze_block("Linear", insts)
   assert meta == {}
 
 
-def test_sass_analysis_other_kinds():
+def test_sass_analysis_other_kinds() -> None:
   """Docstring."""
   from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate
 
   inst = SassInstruction(opcode="ISETP.LT.AND", operands=[SassImmediate(value=5)])
 
-  meta = SassAnalyzer.analyze_block("Conv3d", [inst])
+  meta: dict[str, typing.Any] = SassAnalyzer.analyze_block("Conv3d", [inst])
   assert meta["kernel_size"] == 5
 
   meta = SassAnalyzer.analyze_block("AvgPool2d", [inst])

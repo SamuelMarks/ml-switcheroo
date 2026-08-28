@@ -8,9 +8,10 @@ complete unit coverage of the C++ parsing capabilities.
 
 import pytest
 from ml_switcheroo.core.compiler.backends.cpp.parser import CppParser
+from ml_switcheroo.core.compiler.backends.cpp.cst import CppModule
 
 
-def test_parser_coverage():
+def test_parser_coverage() -> None:
   """Verifies C++ parser coverage across edge cases and error conditions.
 
   This test covers:
@@ -49,13 +50,13 @@ def test_parser_coverage():
 
   # Raw statement
   parser = CppParser("int foo() { some_code_here; }")
-  mod = parser.parse()
+  mod: CppModule = parser.parse()
   assert len(mod.body) == 1
 
   # Empty macro
   parser = CppParser("#define FOO")
   mod = parser.parse()
-  assert mod.body[0].value == ""
+  assert getattr(mod.body[0], "value") == ""
 
   # Include with angle brackets
   parser = CppParser("#include <vector>")
@@ -66,25 +67,25 @@ def test_parser_coverage():
   # Return statement empty
   parser = CppParser("int f() { return ; }")
   mod = parser.parse()
-  assert mod.body[0].body[0].value is None
+  assert getattr(mod.body[0], "body")[0].value is None
 
   # Return string and number expression
   parser = CppParser('int f() { return "hello"; return 42; }')
   mod = parser.parse()
-  assert mod.body[0].body[0].value.name == '"hello"'
-  assert mod.body[0].body[1].value.name == "42"
+  assert getattr(getattr(mod.body[0], "body")[0].value, "name", None) == '"hello"'
+  assert getattr(getattr(mod.body[0], "body")[1].value, "name", None) == "42"
 
   # Variable decl with expression
   parser = CppParser("int f() { int x = 5; }")
   mod = parser.parse()
-  assert mod.body[0].body[0].initializer.name == "5"
+  assert getattr(getattr(mod.body[0], "body")[0].initializer, "name", None) == "5"
 
   # Pybind missing ref error / fallback
   with pytest.raises(ValueError, match="Unexpected"):
     CppParser('PYBIND11_MODULE(m1, m2) { m.def("a", foo, "doc"); }').parse()
 
 
-def test_missing_coverage():
+def test_missing_coverage() -> None:
   """Tests parsing scenarios covering remaining gaps in AST node types.
 
   This includes validation of:
@@ -103,7 +104,7 @@ def test_missing_coverage():
       None.
   """
   # Test macro with no value
-  assert CppParser("#define FOO").parse().body[0].value == ""
+  assert getattr(CppParser("#define FOO").parse().body[0], "value", None) == ""
 
   # Test include missing system true/false fallback (invalid syntax technically)
   with pytest.raises(ValueError):
@@ -115,22 +116,22 @@ def test_missing_coverage():
     parser.parse()  # we expect &
 
   # Test variable decl with no initializer
-  mod = CppParser("int foo;").parse()
-  assert mod.body[0].name == "foo"
+  mod: CppModule = CppParser("int foo;").parse()
+  assert getattr(mod.body[0], "name", None) == "foo"
 
   # Test return empty
   mod = CppParser("return;").parse()
-  assert mod.body[0].value is None
+  assert getattr(mod.body[0], "value", None) is None
 
   # Test method call expression inside variable decl
   mod = CppParser("int foo = bar(1);").parse()
-  assert mod.body[0].initializer.name == "bar"
+  assert getattr(getattr(mod.body[0], "initializer", None), "name", None) == "bar"
 
   # test module empty
   assert len(CppParser("").parse().body) == 0
 
 
-def test_missing_coverage_3():
+def test_missing_coverage_3() -> None:
   """Verifies specific AST structure generation for functions and variables.
 
   Tests coverage for:
@@ -147,23 +148,23 @@ def test_missing_coverage_3():
   """
   # Include fallback (although parsing should catch it, transformer has a return path)
   # func_args, func_arg
-  mod = CppParser("int foo(int x, float y) {}").parse()
-  assert mod.body[0].arguments[1].name == "y"
+  mod: CppModule = CppParser("int foo(int x, float y) {}").parse()
+  assert getattr(mod.body[0], "arguments")[1].name == "y"
 
   # pybind module_var assignment
   mod = CppParser("PYBIND11_MODULE(m1, m2) {}").parse()
-  assert mod.body[0].module_var == "m2"
+  assert getattr(mod.body[0], "module_var", None) == "m2"
 
   # return empty
   mod = CppParser("int f() { return; }").parse()
-  assert mod.body[0].body[0].value is None
+  assert getattr(getattr(mod.body[0], "body")[0], "value", None) is None
 
   # binary expr and string lit
   mod = CppParser('int x = "a" + "b";').parse()
-  assert mod.body[0].initializer.operator == "+"
+  assert getattr(getattr(mod.body[0], "initializer", None), "operator", None) == "+"
 
 
-def test_missing_coverage_4():
+def test_missing_coverage_4() -> None:
   """Verifies parsing of macro literals and local header include paths.
 
   Validates:
@@ -177,19 +178,19 @@ def test_missing_coverage_4():
       None.
   """
   # macro define with value string
-  mod = CppParser('#define FOO "bar"').parse()
-  assert mod.body[0].name == "FOO"
+  mod: CppModule = CppParser('#define FOO "bar"').parse()
+  assert getattr(mod.body[0], "name", None) == "FOO"
 
   # macro define with number
   mod = CppParser("#define FOO 42").parse()
-  assert mod.body[0].name == "FOO"
+  assert getattr(mod.body[0], "name", None) == "FOO"
 
   # local include
   mod = CppParser('#include "local.h"').parse()
   assert mod.includes[0].system is False
 
 
-def test_missing_coverage_unreachable():
+def test_missing_coverage_unreachable() -> None:
   """Validates AssertionError triggers on unreachable transformer logic.
 
   Directly invokes internal transformer methods with invalid structures to
@@ -210,7 +211,7 @@ def test_missing_coverage_unreachable():
     t.include_local([])
 
 
-def test_cpp_parser_branch_coverage():
+def test_cpp_parser_branch_coverage() -> None:
   """Tests CppTransformer branch paths using raw token list structures.
 
   Directly exercises internal transformer class methods with edge-case
@@ -234,24 +235,24 @@ def test_cpp_parser_branch_coverage():
 
   # 131->136 function missing identifier
   f = transformer.function(["type_id", Token("PUNCT", "(")])
-  assert f.name == ""
+  assert getattr(f, "name", None) == ""
 
   # 154->158 func_arg missing identifier
   fa = transformer.func_arg(["type_id", Token("PUNCT", ",")])
-  assert fa.name == ""
+  assert getattr(fa, "name", None) == ""
 
   # 170->177 pybind missing second identifier
   pb = transformer.pybind([Token("IDENTIFIER", "module_name")])
-  assert pb.module_var == ""
+  assert getattr(pb, "module_var", None) == ""
 
   # 213->217 var_decl_init missing identifier
   # 218->222 var_decl_init missing expression
   vd = transformer.var_decl_init(["type_id", Token("PUNCT", "=")])
-  assert vd.name == ""
-  assert vd.initializer is None
+  assert getattr(vd, "name", None) == ""
+  assert getattr(vd, "initializer", None) is None
 
   # 255->259 binary_expr missing punct
   from ml_switcheroo.core.compiler.backends.cpp.cst import Identifier
 
   be = transformer.binary_expr([Identifier("a"), Identifier("b")])
-  assert be.operator == ""
+  assert getattr(be, "operator", None) == ""

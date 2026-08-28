@@ -9,47 +9,47 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 @pytest.fixture
-def mock_managers():
+def mock_managers() -> MagicMock:
   """Provides a mock managers for testing."""
   sem = MagicMock(spec=SemanticsManager)
   sem.get_framework_config.return_value = {}
   return sem
 
 
-def test_routing_to_compiler_pipeline_target_isa(mock_managers):
+def test_routing_to_compiler_pipeline_target_isa(mock_managers: MagicMock) -> None:
   """Verifies the behavior of routing to compiler pipeline target isa."""
   config = RuntimeConfig(source_framework="torch", target_framework="sass")
   engine = ASTEngine(mock_managers, config)
-  engine._run_compiler_pipeline = MagicMock()
-  engine._run_rewriter_pipeline = MagicMock()
+  engine._run_compiler_pipeline = MagicMock()  # type: ignore
+  engine._run_rewriter_pipeline = MagicMock()  # type: ignore
   engine.run("code")
   engine._run_compiler_pipeline.assert_called_once()
   engine._run_rewriter_pipeline.assert_not_called()
 
 
-def test_routing_to_compiler_pipeline_source_isa(mock_managers):
+def test_routing_to_compiler_pipeline_source_isa(mock_managers: MagicMock) -> None:
   """Verifies the behavior of routing to compiler pipeline source isa."""
   config = RuntimeConfig(source_framework="rdna", target_framework="torch")
   engine = ASTEngine(mock_managers, config)
-  engine._run_compiler_pipeline = MagicMock()
-  engine._run_rewriter_pipeline = MagicMock()
+  engine._run_compiler_pipeline = MagicMock()  # type: ignore
+  engine._run_rewriter_pipeline = MagicMock()  # type: ignore
   engine.run("code")
   engine._run_compiler_pipeline.assert_called_once()
   engine._run_rewriter_pipeline.assert_not_called()
 
 
-def test_routing_to_rewriter_pipeline_high_level(mock_managers):
+def test_routing_to_rewriter_pipeline_high_level(mock_managers: MagicMock) -> None:
   """Verifies the behavior of routing to rewriter pipeline high level."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(mock_managers, config)
-  engine._run_compiler_pipeline = MagicMock()
-  engine._run_rewriter_pipeline = MagicMock()
+  engine._run_compiler_pipeline = MagicMock()  # type: ignore
+  engine._run_rewriter_pipeline = MagicMock()  # type: ignore
   engine.run("code")
   engine._run_rewriter_pipeline.assert_called_once()
   engine._run_compiler_pipeline.assert_not_called()
 
 
-def test_python_frontend_invoked_in_compiler_pipeline(mock_managers):
+def test_python_frontend_invoked_in_compiler_pipeline(mock_managers: MagicMock) -> None:
   """Verifies the behavior of python frontend invoked in compiler pipeline."""
   config = RuntimeConfig(source_framework="torch", target_framework="sass")
   engine = ASTEngine(mock_managers, config)

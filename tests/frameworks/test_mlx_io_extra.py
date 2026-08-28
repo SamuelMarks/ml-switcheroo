@@ -3,7 +3,7 @@
 from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
 
-def test_mlx_io_mixin_serialization():
+def test_mlx_io_mixin_serialization() -> None:
   """Test function."""
   mixin = MlxIOMixin()
 
@@ -15,11 +15,11 @@ def test_mlx_io_mixin_serialization():
 
   assert mixin.get_weight_conversion_imports() == ["import mlx.core as mx"]
 
-  load_code = mixin.get_weight_load_code("path")
+  load_code: str = mixin.get_weight_load_code("path")
   assert "mx.load(path)" in load_code
 
-  expr = mixin.get_tensor_to_numpy_expr("t")
+  expr: str = mixin.get_tensor_to_numpy_expr("t")
   assert expr == "np.array(t)"
 
-  save_code = mixin.get_weight_save_code("state", "path")
+  save_code: str = mixin.get_weight_save_code("state", "path")
   assert "mlx_state =" in save_code

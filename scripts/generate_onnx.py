@@ -3,7 +3,7 @@
 
 import json
 from pathlib import Path
-import onnx.defs  # type: ignore
+import onnx.defs
 
 
 def run() -> None:

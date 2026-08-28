@@ -13,21 +13,21 @@ from ml_switcheroo.core.mlir.nodes import (
 )
 
 
-def test_nodes_branches():
+def test_nodes_branches() -> None:
   """Docstring."""
   # ValueNode
-  t = TypeNode(
+  t: TypeNode = TypeNode(
     body="i32", leading_trivia=[TriviaNode(content="L", kind="w")], trailing_trivia=[TriviaNode(content="T", kind="w")]
   )
   assert t.to_text() == "Li32T"
 
-  v = ValueNode(
+  v: ValueNode = ValueNode(
     name="%v", leading_trivia=[TriviaNode(content="L", kind="w")], trailing_trivia=[TriviaNode(content="T", kind="w")]
   )
   assert v.to_text() == "L%vT"
 
   # AttributeNode
-  a = AttributeNode(
+  a: AttributeNode = AttributeNode(
     name="a",
     value='"1"',
     leading_trivia=[TriviaNode(content="L", kind="w")],
@@ -35,21 +35,21 @@ def test_nodes_branches():
   )
   assert a.to_text() == 'La = "1"T'
 
-  a2 = AttributeNode(name="a", value='"1"', type_annotation="i32")
+  a2: AttributeNode = AttributeNode(name="a", value='"1"', type_annotation="i32")
   assert a2.to_text() == 'a = "1" : i32'
 
   # OperationNode
-  o1 = OperationNode(
+  o1: OperationNode = OperationNode(
     name='"sw.op"',
     leading_trivia=[TriviaNode(content="L", kind="w")],
     trailing_trivia=[TriviaNode(content="T\n", kind="w")],
   )
   assert o1.to_text() == 'L"sw.op"T\n'
 
-  o1b = OperationNode(name='"sw.op"', trailing_trivia=[TriviaNode(content="T", kind="w")])
+  o1b: OperationNode = OperationNode(name='"sw.op"', trailing_trivia=[TriviaNode(content="T", kind="w")])
   assert o1b.to_text() == '"sw.op"T\n'
 
-  o2 = OperationNode(
+  o2: OperationNode = OperationNode(
     name='"sw.op"',
     results=[v],
     operands=[v],
@@ -59,19 +59,19 @@ def test_nodes_branches():
   )
   o2.to_text()
 
-  o3 = OperationNode(name='"sw.op"', results=[v, v])
+  o3: OperationNode = OperationNode(name='"sw.op"', results=[v, v])
   o3.to_text()
 
-  o4 = OperationNode(
+  o4: OperationNode = OperationNode(
     name='"sw.op"', name_trivia=[TriviaNode(content="N", kind="w")], operands=[v], attributes=[a], result_types=[t, t]
   )
   assert 'op"N' in o4.to_text()
 
-  o5 = OperationNode(name='"sw.op"', result_types=[t])
+  o5: OperationNode = OperationNode(name='"sw.op"', result_types=[t])
   o5.to_text()
 
   # StableHloConstantOp
-  so1 = StableHloConstantOp(
+  so1: StableHloConstantOp = StableHloConstantOp(
     name='"stablehlo.constant"',
     results=[v],
     leading_trivia=[TriviaNode(content="L", kind="w")],
@@ -79,7 +79,7 @@ def test_nodes_branches():
   )
   so1.to_text()
 
-  so2 = StableHloConstantOp(
+  so2: StableHloConstantOp = StableHloConstantOp(
     name='"stablehlo.constant"',
     results=[v, v],
     attributes=[a, a],
@@ -89,7 +89,7 @@ def test_nodes_branches():
   so2.to_text()
 
   # BlockNode
-  b1 = BlockNode(
+  b1: BlockNode = BlockNode(
     label="bb0",
     arguments=[(v, t)],
     operations=[o1],
@@ -98,23 +98,23 @@ def test_nodes_branches():
   )
   b1.to_text()
 
-  b2 = BlockNode(label="bb1", arguments=[(v, t), (v, t)], operations=[o1])
+  b2: BlockNode = BlockNode(label="bb1", arguments=[(v, t), (v, t)], operations=[o1])
   b2.to_text()
 
   # RegionNode
-  re1 = RegionNode(
+  re1: RegionNode = RegionNode(
     blocks=[b1], leading_trivia=[TriviaNode(content="L", kind="w")], trailing_trivia=[TriviaNode(content="T", kind="w")]
   )
   re1.to_text()
 
-  re2 = RegionNode(blocks=[b1, b2])
+  re2: RegionNode = RegionNode(blocks=[b1, b2])
   re2.to_text()
 
   # ModuleNode
-  m1 = ModuleNode(
+  m1: ModuleNode = ModuleNode(
     body=b1, leading_trivia=[TriviaNode(content="L", kind="w")], trailing_trivia=[TriviaNode(content="T", kind="w")]
   )
   m1.to_text()
 
-  m2 = ModuleNode(body=b1)
+  m2: ModuleNode = ModuleNode(body=b1)
   m2.to_text()

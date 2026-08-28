@@ -5,8 +5,8 @@ from libcst.codemod import CodemodContext
 from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryTransformer
 
 
-def test_cst_to_string_none_base():
+def test_cst_to_string_none_base() -> None:
   """Test function."""
-  transformer = AuxiliaryTransformer(CodemodContext())
-  attr_node = cst.Attribute(value=cst.Pass(), attr=cst.Name("bar"))
+  transformer = AuxiliaryTransformer(CodemodContext())  # type: ignore
+  attr_node = cst.Attribute(value=cst.Pass(), attr=cst.Name("bar"))  # type: ignore
   assert transformer._cst_to_string(attr_node) is None

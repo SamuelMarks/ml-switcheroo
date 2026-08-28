@@ -4,11 +4,12 @@ from unittest.mock import patch, MagicMock
 from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 from ml_switcheroo.frameworks.tensorflow_examples import get_tf_tiered_examples
 from ml_switcheroo.frameworks.base import InitMode
+from typing import Dict, Any
 
 
-def test_tf_adapter_properties():
+def test_tf_adapter_properties() -> None:
   """Test element."""
-  adapter = TensorFlowAdapter()
+  adapter: TensorFlowAdapter = TensorFlowAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -57,17 +58,17 @@ def test_tf_adapter_properties():
   adapter.get_doc_url("unknown")
 
 
-def test_tf_examples():
+def test_tf_examples() -> None:
   """Test element."""
-  ex = get_tf_tiered_examples()
+  ex: Dict[str, Any] = get_tf_tiered_examples()
   assert isinstance(ex, dict)
 
 
-def test_tf_extra_misses():
+def test_tf_extra_misses() -> None:
   """Test element."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
-  adapter = TensorFlowAdapter()
+  adapter: TensorFlowAdapter = TensorFlowAdapter()
 
   # 231-237
   adapter.apply_wiring({"mappings": {"test": {"api": "tensorflow.test"}, "bad": {}, "none": None, "no_api": {"a": 1}}})
@@ -81,11 +82,11 @@ def test_tf_extra_misses():
   adapter.get_device_syntax("cpu", "var")
 
 
-def test_tf_ghost_init():
+def test_tf_ghost_init() -> None:
   """Test element."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
   with patch("ml_switcheroo.frameworks.tensorflow.tf", None):
     with patch("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", return_value={}):
-      adapter = TensorFlowAdapter()
+      adapter: TensorFlowAdapter = TensorFlowAdapter()
       assert adapter._mode == InitMode.GHOST

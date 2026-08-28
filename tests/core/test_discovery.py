@@ -7,12 +7,12 @@ similarity metrics, and error boundary handling when modules cannot be imported.
 """
 
 from unittest.mock import patch, Mock
-
+import typing
 
 from ml_switcheroo.core.discovery import SimulatedReflection
 
 
-def test_discovery_init():
+def test_discovery_init() -> None:
   """Tests the initialization of the SimulatedReflection class.
 
   Verifies that when SimulatedReflection is instantiated with a framework name,
@@ -30,7 +30,7 @@ def test_discovery_init():
   assert reflection.search_modules == ["torch"]
 
 
-def test_discovery_normalize():
+def test_discovery_normalize() -> None:
   """Tests the normalization method of the SimulatedReflection class.
 
   Verifies that `_normalize` correctly maps typical API names to their canonical,
@@ -48,17 +48,13 @@ def test_discovery_normalize():
   assert reflection._normalize("abs_") == "abs"
 
 
-def test_discovery_exact_match():
+def test_discovery_exact_match() -> None:
   """Tests exact-matching/normalization-matching in SimulatedReflection discovery.
 
   This test mocks the framework's internal structure to simulate the presence of public
   members and private members. It verifies that `discover` successfully locates and
   returns the exact (normalized) matching API path (e.g., matching 'LogSoftmax' to
   'log_softmax') from the search modules while correctly ignoring private members (starting with '_').
-
-  Args:
-      mocker: The pytest-mock fixture used to patch `inspect.getmembers`
-          and `importlib.import_module`.
 
   Returns:
       None
@@ -75,20 +71,16 @@ def test_discovery_exact_match():
   ):
     reflection = SimulatedReflection("torch")
     reflection.search_modules = ["torch.nn.functional"]
-    result = reflection.discover("LogSoftmax")
+    result: typing.Optional[str] = reflection.discover("LogSoftmax")
     assert result == "torch.nn.functional.log_softmax"
 
 
-def test_discovery_fuzzy_match():
+def test_discovery_fuzzy_match() -> None:
   """Tests fuzzy-matching fallbacks in SimulatedReflection discovery.
 
   This test mocks the framework's module contents and verifies that when an exact match is
   not found, the discovery engine falls back to a fuzzy search using close string matching
   (e.g., matching 'absolut' to 'numpy.absolute').
-
-  Args:
-      mocker: The pytest-mock fixture used to patch `inspect.getmembers`
-          and `importlib.import_module`.
 
   Returns:
       None
@@ -99,20 +91,16 @@ def test_discovery_fuzzy_match():
   with patch("inspect.getmembers", return_value=[("absolute", mock_mod.abs)]):
     with patch("importlib.import_module", return_value=mock_mod):
       reflection = SimulatedReflection("numpy")
-      result = reflection.discover("absolut")
+      result: typing.Optional[str] = reflection.discover("absolut")
       assert result == "numpy.absolute"
 
 
-def test_discovery_no_match():
+def test_discovery_no_match() -> None:
   """Tests discovery behavior when no matching API endpoint is found.
 
   This test simulates import failures when trying to load framework modules,
   verifying that `discover` handles these exceptions gracefully and returns `None`
   instead of propagating the error or returning an incorrect match.
-
-  Args:
-      mocker: The pytest-mock fixture used to mock `importlib.import_module` and
-          force it to raise an `ImportError`.
 
   Returns:
       None
@@ -120,5 +108,5 @@ def test_discovery_no_match():
   patch("importlib.import_module", side_effect=ImportError)
 
   reflection = SimulatedReflection("torch")
-  result = reflection.discover("NonExistent")
+  result: typing.Optional[str] = reflection.discover("NonExistent")
   assert result is None

@@ -5,7 +5,7 @@ into graphical representations using TikZ or document-based representations
 using a customized Machine Intelligence Definition Language (MIDL) LaTeX format.
 """
 
-from typing import Dict, Any, Optional, Tuple, List, Union
+from typing import Dict, Tuple, List, Union, Any
 from collections import defaultdict, deque
 
 
@@ -39,7 +39,7 @@ class TikzBackend(CompilerBackend):
   Verified to use Rank-Based Layout.
   """
 
-  def __init__(self, semantics: Optional[Any] = None, y_spacing: float = 2.5, x_spacing: float = 3.0) -> None:
+  def __init__(self, semantics=None, y_spacing: float = 2.5, x_spacing: float = 3.0) -> None:
     """Initialize the TikZ backend.
 
     Args:
@@ -238,7 +238,7 @@ class LatexBackend(CompilerBackend):
   from a logical graph.
   """
 
-  def __init__(self, semantics: Optional[Any] = None) -> None:
+  def __init__(self, semantics: Any = None) -> None:
     """Initialize the LaTeX backend.
 
     Args:

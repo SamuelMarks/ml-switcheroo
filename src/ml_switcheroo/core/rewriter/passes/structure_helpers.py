@@ -9,7 +9,7 @@ one-liners, managing `super().__init__()` calls, and updating docstrings.
 
 from typing import List, Tuple, Optional
 import libcst as cst
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 
 class StructuralTransformerHelpersMixin:
@@ -22,7 +22,7 @@ class StructuralTransformerHelpersMixin:
 
   if TYPE_CHECKING:
 
-    def _create_dotted_name(self, name: str) -> Any:
+    def _create_dotted_name(self, name: str):
       """Create a dotted name or attribute node from a dot-separated string representation.
 
       Args:
@@ -115,7 +115,7 @@ class StructuralTransformerHelpersMixin:
     Returns:
         A modified `cst.FunctionDef` node containing the injected preamble statements.
     """
-    new_stmts = []  # type: ignore
+    new_stmts = []
     for code in stmts_code:
       try:
         mod = cst.parse_module(code)

@@ -1,7 +1,31 @@
 """Strict Mode Guards Injection."""
 
-from typing import List, Dict, Any
+from typing import List, Dict, TYPE_CHECKING, Union
 import libcst as cst
+
+if TYPE_CHECKING:
+  # structural typing for rewriter to avoid circular import
+  class HookContextDummy:
+    """Dummy hook context."""
+
+    metadata: Dict[str, Union[str, int, float, bool, dict, list, None]]
+
+    def inject_preamble(self, code: str) -> None:
+      """Inject preamble."""
+      ...
+
+  class Any:
+    """Dummy rewriter context."""
+
+    hook_context: HookContextDummy
+
+  from typing import Protocol
+
+  class RewriterDummy(Protocol):
+    """Dummy rewriter."""
+
+    context: Any
+
 
 STRICT_RANK_HELPER = """
 def _check_rank(x, rank):
@@ -14,18 +38,18 @@ def _check_rank(x, rank):
 
 
 def apply_strict_guards(
-  rewriter: Any,
+  rewriter: "RewriterDummy",
   norm_args: List[cst.Arg],
-  details: Dict[str, Any],
-  target_impl: Dict[str, Any],
+  details: dict,
+  target_impl: dict,
 ) -> List[cst.Arg]:
   """Wrap arguments with rank assertion helper calls if required by strict mode.
 
   Args:
-      rewriter (Any): The CST rewriter instance containing context.
-      norm_args (List[cst.Arg]): The normalized list of arguments.
-      details (Dict[str, Any]): Details of the standard API.
-      target_impl (Dict[str, Any]): The target framework's implementation details.
+      rewriter: The CST rewriter instance containing context.
+      norm_args: The normalized list of arguments.
+      details: Details of the standard API.
+      target_impl: The target framework's implementation details.
 
   Returns:
       List[cst.Arg]: A new list of arguments, potentially wrapped in assertion logic.

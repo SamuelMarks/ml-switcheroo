@@ -10,7 +10,8 @@ It handles:
 - resolving documentation URLs via Framework Adapters.
 """
 
-from typing import Any, Dict, List
+import typing
+
 
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -24,7 +25,7 @@ class DocContextBuilder:
   view context dictionary that can be used directly by documentation generators.
   """
 
-  def __init__(self, semantics: SemanticsManager):
+  def __init__(self, semantics: "SemanticsManager") -> None:
     """Initialize the builder.
 
     Args:
@@ -33,7 +34,7 @@ class DocContextBuilder:
     """
     self.semantics = semantics
 
-  def build(self, op_name: str, definition: Dict[str, Any]) -> Dict[str, Any]:
+  def build(self, op_name: str, definition: dict) -> typing.Dict[str, typing.Any]:
     """Construct the documentation context for a single operation.
 
     Args:
@@ -58,7 +59,7 @@ class DocContextBuilder:
       "variants": variants,
     }
 
-  def _format_args(self, std_args: List[Any]) -> List[str]:
+  def _format_args(self, std_args: typing.List[typing.Any]) -> typing.List[str]:
     """Format the standard arguments list into human-readable signature strings.
 
     Handles various ODL formats:
@@ -101,7 +102,7 @@ class DocContextBuilder:
 
     return formatted
 
-  def _resolve_variants(self, variants_map: Dict[str, Any]) -> List[Dict[str, Any]]:
+  def _resolve_variants(self, variants_map: typing.Dict[str, typing.Any]) -> typing.List[typing.Dict[str, typing.Any]]:
     """Process the raw variants dictionary into display-ready objects.
 
     Sorts frameworks by UI priority, retrieves display names,
@@ -153,7 +154,7 @@ class DocContextBuilder:
 
     return results
 
-  def _determine_impl_type(self, variant: Dict[str, Any]) -> str:
+  def _determine_impl_type(self, variant: typing.Dict[str, typing.Any]) -> str:
     """Classify the implementation strategy.
 
     Args:

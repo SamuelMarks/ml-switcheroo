@@ -4,7 +4,7 @@ Parses the HTML DSL structure using a formal Lark grammar to construct an HTML C
 and extracts high-level model logic into a Python LibCST Module.
 """
 
-from typing import Any, List, Tuple, Optional
+from typing import List, Tuple, Optional, Union
 
 import libcst as cst
 from html.parser import HTMLParser as BaseHTMLParser
@@ -372,30 +372,30 @@ class HtmlParser:
 
     return cst.Module(body=[import_stmt, class_def])
 
-  def _create_dotted(self, name: Any) -> Any:
+  def _create_dotted(self, name: str) -> Union[cst.Name, cst.Attribute]:
     """Create a dotted LibCST Name or Attribute node from a dot-separated string.
 
     Args:
-        name (Any): The dotted name as a string or other representable type.
+        name (str): The dotted name as a string or other representable type.
 
     Returns:
-        Any: The constructed LibCST Attribute or Name node.
+        Union[cst.Name, cst.Attribute]: The constructed LibCST Attribute or Name node.
     """
     parts = name.split(".")
-    node = cst.Name(parts[0])
+    node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
     for p in parts[1:]:
-      node = cst.Attribute(node, cst.Name(p))  # type: ignore
+      node = cst.Attribute(node, cst.Name(p))
     return node
 
-  def _create_call(self, func_name: Any, config_str: Any = None) -> Any:
+  def _create_call(self, func_name: str, config_str: Optional[str] = None) -> cst.Call:
     """Create a LibCST Call node.
 
     Args:
-        func_name (Any): The name of the function to be called.
-        config_str (Any, optional): The string representing the function configuration arguments.
+        func_name (str): The name of the function to be called.
+        config_str (Optional[str], optional): The string representing the function configuration arguments.
 
     Returns:
-        Any: The constructed LibCST Call node.
+        cst.Call: The constructed LibCST Call node.
     """
     args = []
     if config_str:
@@ -430,14 +430,14 @@ class HtmlParser:
         args.append(cst.Arg(self._safe_val(p.strip())))
     return args
 
-  def _safe_val(self, v: Any) -> Any:
+  def _safe_val(self, v: str) -> cst.BaseExpression:
     """Safely parse a string value into a LibCST expression node.
 
     Args:
-        v (Any): The string or object representing the value to parse.
+        v (str): The string or object representing the value to parse.
 
     Returns:
-        Any: The parsed LibCST expression node, or SimpleString if parsing fails.
+        cst.BaseExpression: The parsed LibCST expression node, or SimpleString if parsing fails.
     """
     try:
       return cst.parse_expression(v)

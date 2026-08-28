@@ -4,7 +4,10 @@ Provides the metadata and configuration required to map intermediate representat
 operations and semantics to TikZ/LaTeX visualization output.
 """
 
-from typing import Union, Any, Dict, List, Optional, Tuple
+import typing
+
+
+from typing import Union, Dict, List, Optional, Tuple
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -258,7 +261,7 @@ class TikzAdapter(FrameworkAdapter):
     """
     return "# Weights not supported in TikZ mode"
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply visual connection wiring or post-processing logic to the representation.
 
     Args:
@@ -277,7 +280,9 @@ class TikzAdapter(FrameworkAdapter):
     """
     return None
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert input data to a format compatible with LaTeX/TikZ serialization.
 
     Args:

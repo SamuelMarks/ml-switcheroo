@@ -12,9 +12,12 @@ Capabilities:
     which can be used to patch the Knowledge Base.
 """
 
+import typing
+
+
 import copy
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, List
 
 from ml_switcheroo.testing.runner import EquivalenceRunner
 
@@ -36,7 +39,7 @@ class SemanticsBisector:
     self.runner = runner
     self.logger = logging.getLogger(__name__)
 
-  def propose_fix(self, op_name: str, op_def: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+  def propose_fix(self, op_name: str, op_def: dict) -> typing.Optional[dict]:
     """Attempt to satisfy verification by mutating verification parameters.
 
     Strategies:
@@ -68,7 +71,7 @@ class SemanticsBisector:
     # Unpack info using runner helpers logic (simplified manual unpack here)
     params: List[str] = []
     hints: Dict[str, str] = {}
-    constraints: Dict[str, Dict[str, Any]] = {}
+    constraints = {}
 
     for arg in std_args_raw:
       if isinstance(arg, dict):

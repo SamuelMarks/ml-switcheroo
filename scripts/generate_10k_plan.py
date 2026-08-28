@@ -4,13 +4,15 @@ This script clones repositories for popular ML frameworks, extracts their API su
 and generates a comprehensive Markdown plan and JSON mapping file.
 """
 
+from typing import Any
+
+
 import subprocess
 import ast
 import json
 import itertools
 from pathlib import Path
 import logging
-from typing import Any
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
@@ -123,7 +125,7 @@ def generate_mappings() -> None:
   zoos = ["transformers", "maxtext"]
 
   total_steps = 0
-  all_mappings: dict[str, Any] = {}
+  all_mappings: dict[Any, Any] = {}
 
   with plan_path.open("w", encoding="utf-8") as f:
     f.write("# The 10,000+ Step Universal Transmutation Plan\n\n")

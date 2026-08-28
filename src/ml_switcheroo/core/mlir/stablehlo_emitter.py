@@ -6,7 +6,7 @@ to map Python source APIs (like `torch.abs`) to StableHLO operations (like `stab
 """
 
 import libcst as cst
-from typing import List, Tuple, Optional, TYPE_CHECKING, Any, Union
+from typing import List, Tuple, Optional, TYPE_CHECKING, Union, cast
 
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 from ml_switcheroo.core.mlir.types import FunctionType
@@ -178,7 +178,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     Returns:
         List of operations.
     """
-    ops = []
+    ops: List[OperationNode] = []
     # 1. Evaluate condition
     cond_val, expr_ops = self._emit_expression(node.test)
     ops.extend(expr_ops)
@@ -206,9 +206,10 @@ class StableHloEmitter(PythonToMlirEmitter):
           false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))  # pragma: no cover
         false_region = RegionNode(blocks=[false_block])
         regions.append(false_region)
-      else:  # isinstance(node.orelse, cst.If)
+      elif isinstance(node.orelse, cst.If):
         # To be strictly compliant with stablehlo.if vs case, we handle elif as nested here
-        false_block = BlockNode(label="", operations=self._emit_if(node.orelse))  # type: ignore
+        # Safe cast as we checked isinstance
+        false_block = BlockNode(label="", operations=self._emit_if(cast(cst.If, node.orelse)))
         if not false_block.operations:  # pragma: no cover
           false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))  # pragma: no cover
         elif false_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):  # pragma: no branch
@@ -368,7 +369,7 @@ class StableHloEmitter(PythonToMlirEmitter):
 
     # 2. Check for 'stablehlo' variant
     if "stablehlo" in variants and variants["stablehlo"]:
-      return variants["stablehlo"].get("api")  # type: ignore
+      return variants["stablehlo"].get("api")
 
     return None
 
@@ -474,7 +475,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     ops.append(op)
     return result, ops
 
-  def _extract_literal(self, node: cst.CSTNode) -> Any:
+  def _extract_literal(self, node: cst.CSTNode):
     """Extract python literal from CST node.
 
     Args:

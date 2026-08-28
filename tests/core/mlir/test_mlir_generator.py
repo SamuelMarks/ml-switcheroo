@@ -1,5 +1,6 @@
 """Test suite for the Mlir Generator module."""
 
+import typing
 from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import (
   ModuleNode,
@@ -16,35 +17,35 @@ from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 def gen_code(node: ModuleNode) -> str:
   """Helper to generation code."""
   gen = MlirToPythonGenerator()
-  cst_mod = gen.generate(node)
+  cst_mod: typing.Any = gen.generate(node)
   return cst_mod.code
 
 
-def test_module_to_class():
+def test_module_to_class() -> None:
   """Verifies the behavior of module to class."""
   op = OperationNode(name="sw.module", attributes=[AttributeNode(name="sym_name", value='"MyClass"')])
-  mod = ModuleNode(body=BlockNode(label="", operations=[op]))
-  code = gen_code(mod)
+  mod = ModuleNode(body=BlockNode(label="", operations=[op]))  # type: ignore
+  code: str = gen_code(mod)
   assert "class MyClass:" in code
   assert "pass" in code
 
 
-def test_func_to_def_with_args():
+def test_func_to_def_with_args() -> None:
   """Verifies the behavior of function to def with arguments."""
   ret_op = OperationNode(name="sw.return", operands=[ValueNode(name="%x")])
-  body_blk = BlockNode(label="^entry", arguments=[(ValueNode(name="%x"), TypeNode(body="!sw.unk"))], operations=[ret_op])
+  body_blk = BlockNode(label="^entry", arguments=[(ValueNode(name="%x"), TypeNode(body="!sw.unk"))], operations=[ret_op])  # type: ignore
   func_op = OperationNode(
     name="sw.func",
     attributes=[AttributeNode(name="sym_name", value='"forward"')],
     regions=[RegionNode(blocks=[body_blk])],
   )
-  mod = ModuleNode(body=BlockNode(label="", operations=[func_op]))
-  code = gen_code(mod)
+  mod = ModuleNode(body=BlockNode(label="", operations=[func_op]))  # type: ignore
+  code: str = gen_code(mod)
   assert "def forward(x):" in code
   assert "return x" in code
 
 
-def test_ops_assignment_and_call():
+def test_ops_assignment_and_call() -> None:
   """Verifies the behavior of ops assignment and call."""
   op = OperationNode(
     name="sw.op",
@@ -53,32 +54,32 @@ def test_ops_assignment_and_call():
     attributes=[AttributeNode(name="type", value='"torch.add"')],
   )
   use_op = OperationNode(name="sw.return", operands=[ValueNode(name="%0")])
-  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
-  code = gen_code(mod)
+  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))  # type: ignore
+  code: str = gen_code(mod)
   assert "return torch.add(_a, _b)" in code
 
 
-def test_trivia_restoration():
+def test_trivia_restoration() -> None:
   """Verifies the behavior of trivia restoration."""
-  op = OperationNode(name="sw.return", leading_trivia=[Trivia("// My Comment")])
-  mod = ModuleNode(body=BlockNode("", operations=[op]))
-  code = gen_code(mod)
+  op = OperationNode(name="sw.return", leading_trivia=[Trivia("// My Comment")])  # type: ignore
+  mod = ModuleNode(body=BlockNode("", operations=[op]))  # type: ignore
+  code: str = gen_code(mod)
   assert "# My Comment" in code
   assert "return" in code
 
 
-def test_constant_generation():
+def test_constant_generation() -> None:
   """Verifies the behavior of constant generation."""
   op = OperationNode(
     name="sw.constant", results=[ValueNode(name="%c")], attributes=[AttributeNode(name="value", value="1")]
   )
   use_op = OperationNode(name="sw.return", operands=[ValueNode(name="%c")])
-  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
-  code = gen_code(mod)
+  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))  # type: ignore
+  code: str = gen_code(mod)
   assert "return 1" in code
 
 
-def test_getattr_generation():
+def test_getattr_generation() -> None:
   """Verifies the behavior of getattr generation."""
   op = OperationNode(
     name="sw.getattr",
@@ -87,41 +88,41 @@ def test_getattr_generation():
     attributes=[AttributeNode(name="name", value='"layer"')],
   )
   use_op = OperationNode(name="sw.return", operands=[ValueNode(name="%attr")])
-  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
-  code = gen_code(mod)
+  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))  # type: ignore
+  code: str = gen_code(mod)
   assert "return _self.layer" in code
 
 
-def test_sw_call_generation():
+def test_sw_call_generation() -> None:
   """Verifies the behavior of sw call generation."""
   op = OperationNode(
     name="sw.call", results=[ValueNode(name="%res")], operands=[ValueNode(name="%func"), ValueNode(name="%arg")]
   )
   use_op = OperationNode(name="sw.return", operands=[ValueNode(name="%res")])
-  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
-  code = gen_code(mod)
+  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))  # type: ignore
+  code: str = gen_code(mod)
   assert "return _func(_arg)" in code
 
 
-def test_trivia_restoration_percent():
+def test_trivia_restoration_percent() -> None:
   """Docstring."""
-  from ml_switcheroo.core.mlir.nodes import OperationNode, ModuleNode, BlockNode
+  from ml_switcheroo.core.mlir.cst import OperationNode, ModuleNode, BlockNode
   from ml_switcheroo.core.cst.base import Trivia
   from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
-  op = OperationNode(name="sw.return", leading_trivia=[Trivia(text="% comment")])
-  mod = ModuleNode(body=BlockNode("", operations=[op]))
-  code = MlirToPythonGenerator().generate(mod).code
+  op = OperationNode(name="sw.return", leading_trivia=[Trivia(text="% comment")])  # type: ignore
+  mod = ModuleNode(body=BlockNode("", operations=[op]))  # type: ignore
+  code: str = MlirToPythonGenerator().generate(mod).code  # type: ignore
   assert "#% comment" in code
 
 
-def test_trivia_restoration_no_content():
+def test_trivia_restoration_no_content() -> None:
   """Docstring."""
-  from ml_switcheroo.core.mlir.nodes import OperationNode, ModuleNode, BlockNode
+  from ml_switcheroo.core.mlir.cst import OperationNode, ModuleNode, BlockNode
   from ml_switcheroo.core.cst.base import Trivia
   from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
-  op = OperationNode(name="sw.return", leading_trivia=[Trivia(text="// no content comment")])
-  mod = ModuleNode(body=BlockNode("", operations=[op]))
-  code = MlirToPythonGenerator().generate(mod).code
+  op = OperationNode(name="sw.return", leading_trivia=[Trivia(text="// no content comment")])  # type: ignore
+  mod = ModuleNode(body=BlockNode("", operations=[op]))  # type: ignore
+  code: str = MlirToPythonGenerator().generate(mod).code  # type: ignore
   assert "# no content comment" in code

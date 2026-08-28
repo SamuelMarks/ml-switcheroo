@@ -1,8 +1,9 @@
 """Test suite for the Type Mapping module."""
 
 import pytest
+import typing
 import importlib
-from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import PluginTraits
@@ -10,7 +11,7 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 @pytest.fixture(autouse=True)
-def reload_plugins():
+def reload_plugins() -> None:
   """Helper to reload plugins."""
   from ml_switcheroo.core import hooks
   import ml_switcheroo.plugins.casting
@@ -52,15 +53,15 @@ def run_transpile(code: str, target: str) -> str:
   mgr.framework_configs[target]["plugin_traits"] = PluginTraits(has_numpy_compatible_arrays=True)
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)
   engine = ASTEngine(semantics=mgr, config=cfg)
-  res = engine.run(code)
+  res: ConversionResult = engine.run(code)
   if not res.success:
     pytest.fail(str(res.errors))
-  return res.code
+  return typing.cast(str, res.code)
 
 
-def test_type_constant_keras():
+def test_type_constant_keras() -> None:
   """Verifies the behavior of type constant Keras."""
-  code = "dtype = torch.float32"
-  res = run_transpile(code, "keras")
+  code: str = "dtype = torch.float32"
+  res: str = run_transpile(code, "keras")
   assert "import numpy as np" in res
   assert "np.float32" in res

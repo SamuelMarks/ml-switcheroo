@@ -8,16 +8,20 @@ from ml_switcheroo.cli.commands import handle_gen_weight_script
 @mock.patch("ml_switcheroo.cli.commands.RuntimeConfig")
 @mock.patch("ml_switcheroo.cli.commands.SemanticsManager")
 @mock.patch("ml_switcheroo.cli.commands.WeightScriptGenerator")
-def test_handle_gen_weight_script(mock_generator_cls, mock_sem_mgr, mock_rc):
+def test_handle_gen_weight_script(
+  mock_generator_cls: mock.MagicMock,
+  mock_sem_mgr: mock.MagicMock,
+  mock_rc: mock.MagicMock,
+) -> None:
   """Docstring."""
   # Setup mocks
-  mock_config = mock.Mock()
+  mock_config: mock.Mock = mock.Mock()
   mock_rc.load.return_value = mock_config
 
-  mock_sem = mock.Mock()
+  mock_sem: mock.Mock = mock.Mock()
   mock_sem_mgr.return_value = mock_sem
 
-  mock_generator = mock.Mock()
+  mock_generator: mock.Mock = mock.Mock()
   mock_generator_cls.return_value = mock_generator
 
   # Test success

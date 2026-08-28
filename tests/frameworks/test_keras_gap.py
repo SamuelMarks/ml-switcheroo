@@ -3,7 +3,7 @@
 from ml_switcheroo.frameworks.keras import KerasAdapter
 
 
-def test_keras_gap():
+def test_keras_gap() -> None:
   """Verifies the behavior of Keras gap."""
   adapter = KerasAdapter()
   try:

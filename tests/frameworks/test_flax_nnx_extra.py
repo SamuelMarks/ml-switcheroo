@@ -1,11 +1,13 @@
 """Test module."""
 
 import sys
+import typing
+import pytest
 from unittest.mock import MagicMock, patch
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
-def test_flax_nnx_reload_exceptions(monkeypatch):
+def test_flax_nnx_reload_exceptions(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import importlib
 
@@ -14,8 +16,8 @@ def test_flax_nnx_reload_exceptions(monkeypatch):
   old_flax = sys.modules.get("flax")
   old_flax_nnx = sys.modules.get("flax.nnx")
 
-  sys.modules["jax"] = None
-  sys.modules["flax.nnx"] = None
+  sys.modules["jax"] = None  # type: ignore
+  sys.modules["flax.nnx"] = None  # type: ignore
 
   try:
     import ml_switcheroo.frameworks.flax_nnx as fnx
@@ -43,7 +45,7 @@ def test_flax_nnx_reload_exceptions(monkeypatch):
       del sys.modules["flax.nnx"]
 
 
-def test_flax_nnx_array_exception():
+def test_flax_nnx_array_exception() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
@@ -52,7 +54,7 @@ def test_flax_nnx_array_exception():
   class FakeArray:
     """A fake array class."""
 
-    def __array__(self):
+    def __array__(self) -> list[int]:
       """Gets the array."""
       return [1, 2, 3]
 
@@ -62,11 +64,11 @@ def test_flax_nnx_array_exception():
 
   with patch.dict(sys.modules, {"jax.numpy": mock_jnp}):
     obj = FakeArray()
-    res = adapter.convert(obj)
+    res: typing.Any = adapter.convert(obj)
     assert res is obj
 
 
-def test_flax_nnx_ghost_mode(monkeypatch):
+def test_flax_nnx_ghost_mode(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import ml_switcheroo.frameworks.flax_nnx as fnx
 
@@ -82,16 +84,16 @@ def test_flax_nnx_ghost_mode(monkeypatch):
   ):
     adapter = fnx.FlaxNNXAdapter()
     assert adapter._mode.name == "GHOST"
-    ghosts = adapter._collect_ghost(SemanticTier.EXTRAS)
+    ghosts: list[typing.Any] = adapter._collect_ghost(SemanticTier.EXTRAS)
     assert len(ghosts) == 1
     assert ghosts[0].api_path == "nnx.fake"
 
     # Test empty snapshot handling
-    adapter._snapshot_data = {}
+    adapter._snapshot_data = {}  # type: ignore
     assert adapter._collect_ghost(SemanticTier.EXTRAS) == []
 
 
-def test_flax_nnx_properties():
+def test_flax_nnx_properties() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
@@ -109,36 +111,36 @@ def test_flax_nnx_properties():
   assert "from flax import nnx" in adapter.harness_imports
 
 
-def test_flax_nnx_definitions(monkeypatch):
+def test_flax_nnx_definitions(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import ml_switcheroo.frameworks.flax_nnx as fnx
 
   with patch("ml_switcheroo.frameworks.flax_nnx.load_definitions", return_value={}):
     adapter = fnx.FlaxNNXAdapter()
-    defs = adapter.definitions
+    defs: typing.Any = adapter.definitions
     assert "ReLU" in defs
     assert "Linear" in defs
     assert "Conv2d" in defs
     assert "Module" in defs
 
 
-def test_flax_nnx_apply_wiring():
+def test_flax_nnx_apply_wiring() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   adapter = FlaxNNXAdapter()
-  snapshot = {"mappings": {"test_api": {"api": "flax.nnx.SomeModule"}}}
+  snapshot: dict[str, typing.Any] = {"mappings": {"test_api": {"api": "flax.nnx.SomeModule"}}}
   adapter.apply_wiring(snapshot)
   assert snapshot["mappings"]["test_api"]["api"] == "nnx.SomeModule"
   assert snapshot["mappings"]["forward"]["requires_plugin"] == "inject_training_flag"
   assert snapshot["mappings"]["register_buffer"]["requires_plugin"] == "torch_register_buffer_to_nnx"
 
 
-def test_flax_nnx_collect_ghost_no_snapshot():
+def test_flax_nnx_collect_ghost_no_snapshot() -> None:
   """Test function."""
   # Hit line 82
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   adapter = FlaxNNXAdapter()
-  adapter._snapshot_data = None
+  adapter._snapshot_data = None  # type: ignore
   assert adapter._collect_ghost(SemanticTier.EXTRAS) == []

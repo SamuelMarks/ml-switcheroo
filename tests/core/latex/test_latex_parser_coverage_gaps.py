@@ -3,9 +3,9 @@
 from ml_switcheroo.core.latex.parser import LatexParser
 
 
-def test_latex_parser_coverage_gaps():
+def test_latex_parser_coverage_gaps() -> None:
   """Test latex parser coverage gaps."""
-  source = r"""
+  source: str = r"""
     \% Escaped comment
     % Regular comment
     \begin{DefModel}{MyModel{Nested}}

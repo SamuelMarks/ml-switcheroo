@@ -1,11 +1,12 @@
 """Module docstring."""
 
+import typing
 from unittest.mock import patch
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.enums import SemanticTier
 
 
-def test_jax_adapter_ghost_mode():
+def test_jax_adapter_ghost_mode() -> None:
   """Docstring."""
   with patch("ml_switcheroo.frameworks.jax.jax", None):
     with patch(
@@ -15,29 +16,29 @@ def test_jax_adapter_ghost_mode():
       adapter = JaxCoreAdapter()
       assert adapter._mode.value == "ghost"
 
-      ghosts = adapter._collect_ghost(SemanticTier.LOSS)
+      ghosts: list[typing.Any] = adapter._collect_ghost(SemanticTier.LOSS)
       assert len(ghosts) == 1
       assert ghosts[0].name == "foo"
 
 
-def test_jax_adapter_ghost_mode_no_snapshot():
+def test_jax_adapter_ghost_mode_no_snapshot() -> None:
   """Docstring."""
   with patch("ml_switcheroo.frameworks.jax.jax", None):
     with patch("ml_switcheroo.frameworks.jax.load_snapshot_for_adapter", return_value={}):
       adapter = JaxCoreAdapter()
       assert adapter._mode.value == "ghost"
-      ghosts = adapter._collect_ghost(SemanticTier.LOSS)
+      ghosts: list[typing.Any] = adapter._collect_ghost(SemanticTier.LOSS)
       assert len(ghosts) == 0
 
 
-def test_jax_adapter_plugin_traits():
+def test_jax_adapter_plugin_traits() -> None:
   """Docstring."""
   adapter = JaxCoreAdapter()
-  traits = adapter.plugin_traits
+  traits: typing.Any = adapter.plugin_traits
   assert traits.has_numpy_compatible_arrays
 
 
-def test_jax_adapter_collect_live():
+def test_jax_adapter_collect_live() -> None:
   """Docstring."""
   adapter = JaxCoreAdapter()
   with patch("ml_switcheroo.frameworks.jax.OptaxScanner.scan_losses", return_value=["loss1"], create=True):
@@ -46,7 +47,7 @@ def test_jax_adapter_collect_live():
     assert "opt1" in adapter._collect_live(SemanticTier.OPTIMIZER)
 
 
-def test_jax_adapter_convert_exception():
+def test_jax_adapter_convert_exception() -> None:
   """Docstring."""
   adapter = JaxCoreAdapter()
   with patch("builtins.__import__", side_effect=Exception):

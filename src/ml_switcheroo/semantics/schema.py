@@ -10,7 +10,7 @@ Updated to support:
 - **PatternDef**: Graph fusion patterns.
 """
 
-from typing import Dict, List, Optional, Tuple, Any, Set
+from typing import Dict, List, Optional, Tuple, Set, Any
 from pydantic import BaseModel, Field, ConfigDict
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier

@@ -3,7 +3,7 @@
 from ml_switcheroo.core.tikz.parser import TikzParser
 
 
-def test_parser_error():
+def test_parser_error() -> None:
   """Test parser error handling."""
   parser = TikzParser(r"\begin{tikzpicture} \invalid \end{tikzpicture}")
   try:

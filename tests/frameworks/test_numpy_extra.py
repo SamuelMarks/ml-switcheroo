@@ -1,14 +1,16 @@
 """Test module."""
 
 import sys
+import pytest
+import typing
 
 
-def test_numpy_init_missing(monkeypatch):
+def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import ml_switcheroo.frameworks.numpy as np_fw
 
   old_np = sys.modules.get("numpy")
-  sys.modules["numpy"] = None
+  sys.modules["numpy"] = None  # type: ignore
   import importlib
 
   try:
@@ -21,7 +23,7 @@ def test_numpy_init_missing(monkeypatch):
       del sys.modules["numpy"]
 
 
-def test_numpy_convert(monkeypatch):
+def test_numpy_convert(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import ml_switcheroo.frameworks.numpy as np_fw
   import importlib
@@ -39,15 +41,15 @@ def test_numpy_convert(monkeypatch):
   class MockTorch:
     """A mock Torch tensor."""
 
-    def detach(self):
+    def detach(self) -> "MockTorch":
       """Mocks detach."""
       return self
 
-    def cpu(self):
+    def cpu(self) -> "MockTorch":
       """Mocks cpu."""
       return self
 
-    def numpy(self):
+    def numpy(self) -> str:
       """Mocks numpy."""
       return "numpy_tensor"
 
@@ -56,7 +58,7 @@ def test_numpy_convert(monkeypatch):
   class FailTorch:
     """A fake failing torch tensor."""
 
-    def detach(self):
+    def detach(self) -> "FailTorch":
       """Mocks detach."""
       raise Exception("Fail")
 
@@ -66,7 +68,7 @@ def test_numpy_convert(monkeypatch):
   class MockTF:
     """A mock TF tensor."""
 
-    def numpy(self):
+    def numpy(self) -> str:
       """Mocks numpy."""
       return "tf_tensor"
 
@@ -75,7 +77,7 @@ def test_numpy_convert(monkeypatch):
   class FailTF:
     """A failing TF tensor."""
 
-    def numpy(self):
+    def numpy(self) -> str:
       """Mocks numpy."""
       raise Exception("Fail")
 
@@ -85,7 +87,7 @@ def test_numpy_convert(monkeypatch):
   class MockArray:
     """A mock numpy array interface."""
 
-    def __array__(self):
+    def __array__(self) -> list[typing.Any]:
       """Gets array."""
       return []
 
@@ -94,11 +96,11 @@ def test_numpy_convert(monkeypatch):
   class FailArray:
     """A failing array."""
 
-    def __array__(self):
+    def __array__(self) -> list[typing.Any]:
       """Gets array."""
       return []  # trigger the lambda then raise
 
-  def failing_array(x):
+  def failing_array(x: typing.Any) -> str:
     """Mocks numpy array creation."""
     if isinstance(x, FailArray):
       raise Exception("Fail")
@@ -112,7 +114,7 @@ def test_numpy_convert(monkeypatch):
   assert adapter.convert(f3) is f3
 
 
-def test_numpy_properties():
+def test_numpy_properties() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
@@ -131,11 +133,11 @@ def test_numpy_properties():
   assert adapter.get_tensor_to_numpy_expr("t") == "t"
   assert adapter.get_weight_save_code("state", "path") == "np.savez_compressed(path, **state)"
 
-  traits = adapter.plugin_traits
+  traits: typing.Any = adapter.plugin_traits
   assert traits.has_numpy_compatible_arrays is True
 
 
-def test_numpy_doc_url():
+def test_numpy_doc_url() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
@@ -143,7 +145,7 @@ def test_numpy_doc_url():
   assert adapter.get_doc_url("numpy.array") == "https://numpy.org/doc/stable/reference/generated/numpy.array.html"
 
 
-def test_numpy_test_config():
+def test_numpy_test_config() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
@@ -151,7 +153,7 @@ def test_numpy_test_config():
   assert "import numpy as np" in adapter.test_config["import"]
 
 
-def test_numpy_get_to_numpy_code():
+def test_numpy_get_to_numpy_code() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
@@ -159,7 +161,7 @@ def test_numpy_get_to_numpy_code():
   assert "if isinstance(obj, np.ndarray)" in adapter.get_to_numpy_code()
 
 
-def test_numpy_get_tiered_examples():
+def test_numpy_get_tiered_examples() -> None:
   """Test function."""
   from ml_switcheroo.frameworks.numpy import NumpyAdapter
 

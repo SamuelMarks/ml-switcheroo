@@ -5,7 +5,6 @@ and emit target specific code (e.g. RDNA Assembly, SASS, or High-Level Python).
 """
 
 from abc import ABC, abstractmethod
-from typing import Any
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
@@ -13,7 +12,7 @@ class CompilerBackend(ABC):
   """Abstract base class for compilation backends."""
 
   @abstractmethod
-  def compile(self, graph: LogicalGraph) -> Any:
+  def compile(self, graph: LogicalGraph) -> str:
     """Compile the Logical Intermediate Representation (IR) into a target artifact.
 
     Args:

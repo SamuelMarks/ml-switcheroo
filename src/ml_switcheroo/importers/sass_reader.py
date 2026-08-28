@@ -8,9 +8,14 @@ It normalizes assembly mnemonics into the ML-Switcheroo Abstract Standard option
 where possible (e.g., "FP32 Add" -> "Add").
 """
 
+from typing import Any
+
+import typing
+
+
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from ml_switcheroo.utils.console import log_info, log_error, log_success
 
@@ -31,7 +36,7 @@ class SassHtmlParser(HTMLParser):
     self.in_row = False
     self.in_cell = False
     self.current_row_cells: List[str] = []
-    self.extracted_ops: List[Tuple[str, str]] = []  # (Opcode, Description)  # type: ignore
+    self.extracted_ops: List[Tuple[str, str]] = []  # (Opcode, Description)
     self.cell_buffer = ""
 
   def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
@@ -121,7 +126,7 @@ class SassSpecImporter:
     ("Fused Multiply and Add", "FusedMultiplyAdd"),
   ]
 
-  def parse_file(self, html_path: Path) -> Dict[str, Any]:
+  def parse_file(self, html_path: Path) -> typing.Dict[str, dict]:
     """Parse an HTML file containing SASS documentation.
 
     Reads the specified HTML documentation file, parses the SASS instruction
@@ -150,7 +155,7 @@ class SassSpecImporter:
     parser = SassHtmlParser()
     parser.feed(content)
 
-    mappings = {}  # type: ignore
+    mappings: dict[Any, Any] = {}
 
     for opcode, desc in parser.extracted_ops:
       abstract_id = self._infer_abstract_op(opcode, desc)

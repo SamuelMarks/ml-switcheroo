@@ -5,16 +5,19 @@ import libcst as cst
 import importlib
 import pkgutil
 import inspect
+from typing import List, Set, Dict
 from unittest.mock import MagicMock
 import ml_switcheroo
 
 pytest.skip("Too slow for pre-commit", allow_module_level=True)
 
 
-def get_all_classes_and_funcs():
+def get_all_classes_and_funcs() -> Set[type]:
   """Gets all classes and funcs."""
-  callables = []
-  for loader, module_name, is_pkg in pkgutil.walk_packages(ml_switcheroo.__path__, ml_switcheroo.__name__ + "."):
+  callables: List[type] = []
+  # Note: ml_switcheroo.__path__ is a list of str, but it might complain about type
+  path: list[str] = getattr(ml_switcheroo, "__path__", [])
+  for loader, module_name, is_pkg in pkgutil.walk_packages(path, ml_switcheroo.__name__ + "."):
     try:
       module = importlib.import_module(module_name)
       for name, obj in inspect.getmembers(module):
@@ -30,10 +33,10 @@ def get_all_classes_and_funcs():
 
 
 @pytest.mark.skip(reason="Too slow for pre-commit")
-def test_improved_fuzz():
+def test_improved_fuzz() -> None:
   """Verifies the behavior of improved fuzz."""
   with open("massive_code.py", "r") as f:
-    code = f.read()
+    code: str = f.read()
   import os
 
   for root, dirs, files in os.walk("src/ml_switcheroo"):
@@ -41,13 +44,13 @@ def test_improved_fuzz():
       if file.endswith(".py"):
         with open(os.path.join(root, file), "r") as f:
           code += f.read() + "\n\n"
-  tree = cst.parse_module(code)
-  nodes = []
+  tree: cst.Module = cst.parse_module(code)
+  nodes: List[cst.CSTNode] = []
 
   class NodeCollector(cst.CSTVisitor):
     """Test suite for the Node Collector component."""
 
-    def on_visit(self, node):
+    def on_visit(self, node: cst.CSTNode) -> bool:
       """Helper to on visit."""
       nodes.append(node)
       return True
@@ -55,16 +58,16 @@ def test_improved_fuzz():
   tree.visit(NodeCollector())
   from collections import defaultdict
 
-  node_by_type = defaultdict(list)
+  node_by_type: Dict[type, List[cst.CSTNode]] = defaultdict(list)
   for n in nodes:
     if len(node_by_type[type(n)]) < 10:
       node_by_type[type(n)].append(n)
-  reduced_nodes = []
+  reduced_nodes: List[cst.CSTNode] = []
   for type_nodes in node_by_type.values():
     reduced_nodes.extend(type_nodes)
-  callables = get_all_classes_and_funcs()
-  mock_ctx = MagicMock()
-  mock_semantics = MagicMock()
+  callables: Set[type] = get_all_classes_and_funcs()
+  mock_ctx: MagicMock = MagicMock()
+  mock_semantics: MagicMock = MagicMock()
   for obj in callables:
     if inspect.isclass(obj) and issubclass(obj, (cst.CSTVisitor, cst.CSTTransformer)):
       try:

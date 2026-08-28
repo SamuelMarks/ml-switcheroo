@@ -1,6 +1,7 @@
 """Test suite for scanners.py."""
 
 import libcst as cst
+import typing
 
 from ml_switcheroo.core.scanners import (
   get_full_name,
@@ -12,17 +13,17 @@ from ml_switcheroo.core.scanners import (
 def parse_expr(code: str) -> cst.BaseExpression:
   """Docstring."""
   module = cst.parse_module(code)
-  return module.body[0].body[0].value
+  return typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
 
 
-def test_get_full_name():
+def test_get_full_name() -> None:
   """Docstring."""
   assert get_full_name(cst.Name("torch")) == "torch"
   assert get_full_name(parse_expr("torch.nn.functional")) == "torch.nn.functional"
   assert get_full_name(cst.Integer("42")) == ""
 
 
-def test_simple_name_scanner_found():
+def test_simple_name_scanner_found() -> None:
   """Docstring."""
   module = cst.parse_module("import jnp\njnp.add(1, 2)")
   scanner = SimpleNameScanner("jnp")
@@ -30,7 +31,7 @@ def test_simple_name_scanner_found():
   assert scanner.found
 
 
-def test_simple_name_scanner_not_found():
+def test_simple_name_scanner_not_found() -> None:
   """Docstring."""
   module = cst.parse_module("import jnp\nnp.add(1, 2)")
   scanner = SimpleNameScanner("jnp")
@@ -38,7 +39,7 @@ def test_simple_name_scanner_not_found():
   assert not scanner.found
 
 
-def test_simple_name_scanner_in_import():
+def test_simple_name_scanner_in_import() -> None:
   """Docstring."""
   module = cst.parse_module("import jnp\nfrom jnp import x")
   scanner = SimpleNameScanner("jnp")
@@ -46,7 +47,7 @@ def test_simple_name_scanner_in_import():
   assert not scanner.found
 
 
-def test_usage_scanner_import_basic():
+def test_usage_scanner_import_basic() -> None:
   """Docstring."""
   module = cst.parse_module("import torch\ntorch.add(1, 2)")
   scanner = UsageScanner("torch")
@@ -55,7 +56,7 @@ def test_usage_scanner_import_basic():
   assert "torch" in scanner.found_usages
 
 
-def test_usage_scanner_import_as():
+def test_usage_scanner_import_as() -> None:
   """Docstring."""
   module = cst.parse_module("import torch as t\nt.add(1, 2)")
   scanner = UsageScanner("torch")
@@ -64,7 +65,7 @@ def test_usage_scanner_import_as():
   assert "t" in scanner.found_usages
 
 
-def test_usage_scanner_import_submodule_as():
+def test_usage_scanner_import_submodule_as() -> None:
   """Docstring."""
   module = cst.parse_module("import torch.nn as nn\nnn.Linear()")
   scanner = UsageScanner("torch")
@@ -73,7 +74,7 @@ def test_usage_scanner_import_submodule_as():
   assert "nn" in scanner.found_usages
 
 
-def test_usage_scanner_import_from():
+def test_usage_scanner_import_from() -> None:
   """Docstring."""
   module = cst.parse_module("from torch import nn\nnn.Linear()")
   scanner = UsageScanner("torch")
@@ -82,7 +83,7 @@ def test_usage_scanner_import_from():
   assert "nn" in scanner.found_usages
 
 
-def test_usage_scanner_import_from_as():
+def test_usage_scanner_import_from_as() -> None:
   """Docstring."""
   module = cst.parse_module("from torch import nn as n\nn.Linear()")
   scanner = UsageScanner("torch")
@@ -91,7 +92,7 @@ def test_usage_scanner_import_from_as():
   assert "n" in scanner.found_usages
 
 
-def test_usage_scanner_not_used():
+def test_usage_scanner_not_used() -> None:
   """Docstring."""
   module = cst.parse_module("import torch as t\nimport numpy as np\nnp.add(1, 2)")
   scanner = UsageScanner("torch")
@@ -99,7 +100,7 @@ def test_usage_scanner_not_used():
   assert not scanner.get_result()
 
 
-def test_usage_scanner_import_from_not_torch():
+def test_usage_scanner_import_from_not_torch() -> None:
   """Docstring."""
   module = cst.parse_module("from numpy import add\nadd(1, 2)")
   scanner = UsageScanner("torch")
@@ -107,7 +108,7 @@ def test_usage_scanner_import_from_not_torch():
   assert not scanner.get_result()
 
 
-def test_usage_scanner_import_from_star():
+def test_usage_scanner_import_from_star() -> None:
   """Docstring."""
   module = cst.parse_module("from torch import *\n")
   scanner = UsageScanner("torch")

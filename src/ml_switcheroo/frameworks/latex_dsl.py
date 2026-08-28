@@ -4,7 +4,10 @@ Provides metadata and hooks for the Machine Intelligence Definition Language (MI
 LaTeX DSL.
 """
 
-from typing import Union, Any, Dict, List, Optional, Tuple
+import typing
+
+
+from typing import Union, Dict, List, Optional, Tuple
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StandardMap, ImportConfig, InitMode, OperationDef
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
@@ -277,7 +280,7 @@ class LatexDSLAdapter:
     """
     return "# Weights not supported in LaTeX mode"
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
     """Apply dynamic mappings or wiring configuration.
 
     Args:
@@ -296,7 +299,9 @@ class LatexDSLAdapter:
     """
     return None
 
-  def convert(self, data: Any) -> Any:
+  def convert(
+    self, data: typing.Union[int, float, str, list, dict]
+  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
     """Convert arbitrary data to its LaTeX DSL or string equivalent.
 
     Args:

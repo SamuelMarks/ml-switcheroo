@@ -1,17 +1,17 @@
 """Test suite for the Attention Layers module."""
 
 import pytest
-from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.hooks import _HOOKS
 from ml_switcheroo.plugins.attention_packing import repack_attn_keras, repack_attn_flax
 
-SOURCE_TORCH = "\nimport torch.nn as nn\n\nclass MyAttn(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.attn = nn.MultiheadAttention(embed_dim=256, num_heads=8)\n\n    def forward(self, q, k, v, mask):\n        out, _ = self.attn(q, k, v, key_padding_mask=mask)\n        return out\n"
+SOURCE_TORCH: str = "\nimport torch.nn as nn\n\nclass MyAttn(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.attn = nn.MultiheadAttention(embed_dim=256, num_heads=8)\n\n    def forward(self, q, k, v, mask):\n        out, _ = self.attn(q, k, v, key_padding_mask=mask)\n        return out\n"
 
 
 @pytest.fixture
-def attn_semantics():
+def attn_semantics() -> SemanticsManager:
   """Provides a mock attn semantics for testing."""
   _HOOKS["repack_attn_keras"] = repack_attn_keras
   _HOOKS["repack_attn_flax"] = repack_attn_flax
@@ -37,28 +37,28 @@ def attn_semantics():
   }
   mgr._providers = {"keras": {}}
   mgr._source_registry = {}
-  mgr.is_verified = lambda x: True
+  mgr.is_verified = lambda x: True  # type: ignore
   return mgr
 
 
-def test_torch_to_keras_attention(attn_semantics):
+def test_torch_to_keras_attention(attn_semantics: SemanticsManager) -> None:
   """Verifies the behavior of PyTorch to Keras attention."""
   config = RuntimeConfig(source_framework="torch", target_framework="keras", strict_mode=False)
   engine = ASTEngine(semantics=attn_semantics, config=config)
-  result = engine.run(SOURCE_TORCH)
-  code = result.code
+  result: ConversionResult = engine.run(SOURCE_TORCH)
+  code: str = result.code
   assert "class MyAttn(keras.Model):" in code
   assert ".MultiHeadAttention" in code
   assert "key_dim=256" in code
   assert "self.attn(q, v, key = k" in code.replace("key=", "key = ")
 
 
-def test_torch_to_flax_attention(attn_semantics):
+def test_torch_to_flax_attention(attn_semantics: SemanticsManager) -> None:
   """Verifies the behavior of PyTorch to Flax attention."""
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   engine = ASTEngine(semantics=attn_semantics, config=config)
-  result = engine.run(SOURCE_TORCH)
-  code = result.code
+  result: ConversionResult = engine.run(SOURCE_TORCH)
+  code: str = result.code
   assert "class MyAttn(nnx.Module):" in code or "class MyAttn(flax.nnx.Module):" in code
   assert "self.attn(q, k, v" in code
   assert "mask = mask" in code.replace("mask=", "mask = ")

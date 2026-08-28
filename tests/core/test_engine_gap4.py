@@ -6,7 +6,7 @@ from ml_switcheroo.config import RuntimeConfig
 import libcst as cst
 
 
-def test_rewriter_loopback_sharding_actual():
+def test_rewriter_loopback_sharding_actual() -> None:
   """Verifies the behavior of rewriter loopback sharding actual."""
   cfg = RuntimeConfig(strict_mode=False)
   cfg.enable_sharding = True

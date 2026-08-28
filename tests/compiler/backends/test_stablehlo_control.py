@@ -11,12 +11,12 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
-def backend():
+def backend() -> StableHloBackend:
   """Provides a StableHLO Backend with a loaded SemanticsManager."""
   return StableHloBackend(SemanticsManager())
 
 
-CONTROL_OPS = [
+CONTROL_OPS: list[tuple[str, str]] = [
   ("Case", "stablehlo.case"),
   ("CustomCall", "stablehlo.custom_call"),
   ("If", "stablehlo.if"),
@@ -28,14 +28,14 @@ CONTROL_OPS = [
 
 
 @pytest.mark.parametrize("logical_op, expected_mlir_op", CONTROL_OPS)
-def test_control_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str):
+def test_control_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str) -> None:
   """Verifies that control flow operations map to the correct MLIR syntax."""
   g = LogicalGraph()
   # Simple graph: Input -> Op -> Output
   g.nodes = [LogicalNode("in_node", "Input"), LogicalNode("op_node", logical_op), LogicalNode("out_node", "Output")]
   g.edges = [LogicalEdge("in_node", "op_node"), LogicalEdge("op_node", "out_node")]
 
-  mlir_code = backend.compile(g)
+  mlir_code: str = backend.compile(g)
 
   assert expected_mlir_op in mlir_code
   assert "%op_node =" in mlir_code

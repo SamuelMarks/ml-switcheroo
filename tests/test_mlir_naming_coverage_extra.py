@@ -3,13 +3,13 @@
 from ml_switcheroo.core.mlir.naming import NamingContext
 
 
-def test_more_branches():
+def test_more_branches() -> None:
   """Docstring."""
-  ctx = NamingContext()
+  ctx: NamingContext = NamingContext()
 
   ctx._used_names["_ssa2"] = "%ssa2"
   ctx._used_names["_ssa2_0"] = "%ssa2"
-  res9 = ctx.register("%ssa2")
+  res9: str = ctx.register("%ssa2")
   assert res9 == "_ssa2_1"
 
   ctx._used_names["nonssa"] = "nonssa"
@@ -31,5 +31,5 @@ def test_more_branches():
 
   ctx._used_names["_clean3"] = "%out6"
   ctx._used_names["_clean3_0"] = "%out6"
-  res11 = ctx.register("%out6", hint="_clean3")
+  res11: str = ctx.register("%out6", hint="_clean3")
   assert res11 == "_clean3_1"

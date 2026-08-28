@@ -25,7 +25,7 @@ class Net(nn.Module):
       fc2 (nn.Linear): Second fully connected layer.
   """
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the MNIST CNN architecture.
 
     Configures the layers including two convolutional layers, two dropout layers,
@@ -39,7 +39,7 @@ class Net(nn.Module):
     self.fc1 = nn.Linear(9216, 128)
     self.fc2 = nn.Linear(128, 10)
 
-  def forward(self, x):
+  def forward(self, x: torch.Tensor) -> torch.Tensor:
     """Performs a forward pass of the network on the input tensor.
 
     Args:
@@ -60,5 +60,5 @@ class Net(nn.Module):
     x = F.relu(x)
     x = self.dropout2(x)
     x = self.fc2(x)
-    output = F.log_softmax(x, dim=1)
+    output: torch.Tensor = F.log_softmax(x, dim=1)
     return output

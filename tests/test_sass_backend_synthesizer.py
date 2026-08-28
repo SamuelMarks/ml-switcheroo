@@ -13,22 +13,25 @@ from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassComment,
   SassLabel,
   SassMemory,
+  SassNode,
 )
 from ml_switcheroo.semantics.manager import SemanticsManager
+from pathlib import Path
+from typing import Dict, Any, List, Optional
 
 
-def test_register_allocator():
+def test_register_allocator() -> None:
   """Test element."""
-  alloc = RegisterAllocator()
+  alloc: RegisterAllocator = RegisterAllocator()
 
   # get_register
-  r1 = alloc.get_register("var1")
+  r1: SassRegister = alloc.get_register("var1")
   assert r1.name == "R0"
 
-  r1_again = alloc.get_register("var1")
+  r1_again: SassRegister = alloc.get_register("var1")
   assert r1_again.name == "R0"
 
-  r2 = alloc.get_register("var2")
+  r2: SassRegister = alloc.get_register("var2")
   assert r2.name == "R1"
 
   # free_register
@@ -36,18 +39,18 @@ def test_register_allocator():
   alloc.get_register("var3")
 
   # allocate_temp
-  rtemp = alloc.allocate_temp()
+  rtemp: SassRegister = alloc.allocate_temp()
   assert rtemp.name.startswith("R")
 
   # reset
   alloc.reset()
-  r4 = alloc.get_register("var4")
+  r4: SassRegister = alloc.get_register("var4")
   assert r4.name == "R0"
 
 
-def test_register_allocator_overflow():
+def test_register_allocator_overflow() -> None:
   """Test element."""
-  alloc = RegisterAllocator()
+  alloc: RegisterAllocator = RegisterAllocator()
   alloc.reset()
   for i in range(255):
     alloc.get_register(f"v{i}")
@@ -55,10 +58,10 @@ def test_register_allocator_overflow():
     alloc.get_register("v256")
 
 
-def test_register_allocator_liveness():
+def test_register_allocator_liveness() -> None:
   """Test element."""
-  alloc = RegisterAllocator()
-  graph = LogicalGraph()
+  alloc: RegisterAllocator = RegisterAllocator()
+  graph: LogicalGraph = LogicalGraph()
   graph.nodes.append(Node(id="n1", kind="test", metadata={}))
   graph.nodes.append(Node(id="n2", kind="test", metadata={}))
   graph.edges.append(Edge(source="n1", target="n2"))
@@ -77,30 +80,30 @@ def test_register_allocator_liveness():
   alloc.record_usage("nonexistent")
 
 
-def test_synthesizer_init(tmp_path):
+def test_synthesizer_init(tmp_path: Path) -> None:
   """Test element."""
   # test reading macros.json
-  macros_json = tmp_path / "macros.json"
+  macros_json: Path = tmp_path / "macros.json"
   macros_json.write_text('{"Conv2d": "expand_conv2d"}')
 
-  sem = SemanticsManager()
+  sem: SemanticsManager = SemanticsManager()
 
   with patch("ml_switcheroo.core.compiler.backends.sass.synthesizer.os.path.dirname", return_value=str(tmp_path)):
     with patch("ml_switcheroo.core.compiler.backends.sass.synthesizer.os.path.exists", return_value=True):
-      synth = SassSynthesizer(sem)
-      assert "Conv2d" in synth.macro_registry
+      synth: SassSynthesizer = SassSynthesizer(sem)
+      assert "Conv2d" in getattr(synth, "macro_registry")
 
 
-def test_synthesizer_from_graph():
+def test_synthesizer_from_graph() -> None:
   """Test element."""
-  sem = SemanticsManager()
-  synth = SassSynthesizer(sem)
+  sem: SemanticsManager = SemanticsManager()
+  synth: SassSynthesizer = SassSynthesizer(sem)
 
-  graph = LogicalGraph()
-  n_in = Node(id="in1", kind="Input", metadata={"name": "input_x"})
-  n_add = Node(id="add1", kind="Add", metadata={})
-  n_conv = Node(id="conv1", kind="Conv2d", metadata={"k": 3})
-  n_out = Node(id="out1", kind="Output", metadata={})
+  graph: LogicalGraph = LogicalGraph()
+  n_in: Node = Node(id="in1", kind="Input", metadata={"name": "input_x"})
+  n_add: Node = Node(id="add1", kind="Add", metadata={})
+  n_conv: Node = Node(id="conv1", kind="Conv2d", metadata={"k": 3})
+  n_out: Node = Node(id="out1", kind="Output", metadata={})
 
   graph.nodes.extend([n_in, n_add, n_conv, n_out])
 
@@ -108,10 +111,10 @@ def test_synthesizer_from_graph():
   graph.edges.append(Edge(source="add1", target="conv1"))
   graph.edges.append(Edge(source="conv1", target="out1"))
 
-  def mock_get_definition(kind):
+  def mock_get_definition(kind: str) -> List[str]:
     return [kind]
 
-  def mock_resolve_variant(abstract_id, target):
+  def mock_resolve_variant(abstract_id: str, target: str) -> Optional[Dict[str, str]]:
     if abstract_id == "Add":
       return {"api": "FADD"}
     return None
@@ -124,7 +127,7 @@ def test_synthesizer_from_graph():
 
       synth.macro_registry = {"Conv2d": expand_conv2d}
 
-      nodes = synth.from_graph(graph)
+      nodes: List[SassNode] = synth.from_graph(graph)
 
       assert len(nodes) > 0
       # Check input comment
@@ -137,45 +140,45 @@ def test_synthesizer_from_graph():
       assert any(isinstance(n, SassComment) and "Return" in n.text for n in nodes)
 
 
-def test_synthesizer_from_graph_unmapped_op():
+def test_synthesizer_from_graph_unmapped_op() -> None:
   """Test element."""
-  sem = SemanticsManager()
-  synth = SassSynthesizer(sem)
+  sem: SemanticsManager = SemanticsManager()
+  synth: SassSynthesizer = SassSynthesizer(sem)
 
-  graph = LogicalGraph()
+  graph: LogicalGraph = LogicalGraph()
   graph.nodes.append(Node(id="n1", kind="UnknownOp", metadata={}))
 
   with patch.object(sem, "get_definition", return_value=None):
     with patch.object(sem, "resolve_variant", return_value=None):
-      nodes = synth.from_graph(graph)
+      nodes: List[SassNode] = synth.from_graph(graph)
       assert any(isinstance(n, SassComment) and "Unmapped Op: UnknownOp" in n.text for n in nodes)
 
 
-def test_synthesizer_from_graph_method_suffix():
+def test_synthesizer_from_graph_method_suffix() -> None:
   """Test element."""
-  sem = SemanticsManager()
-  synth = SassSynthesizer(sem)
+  sem: SemanticsManager = SemanticsManager()
+  synth: SassSynthesizer = SassSynthesizer(sem)
 
-  graph = LogicalGraph()
+  graph: LogicalGraph = LogicalGraph()
   # test suffix macro match e.g. "reshape"
   graph.nodes.append(Node(id="n1", kind="tensor.reshape", metadata={}))
 
   with patch.object(sem, "get_definition", return_value=["tensor.reshape"]):
 
-    def fake_expand(alloc, node_id, meta):
+    def fake_expand(alloc: RegisterAllocator, node_id: str, meta: Dict[str, Any]) -> List[SassNode]:
       return [SassComment(text="fake_reshape")]
 
     synth.macro_registry = {"reshape": fake_expand}
-    nodes = synth.from_graph(graph)
+    nodes: List[SassNode] = synth.from_graph(graph)
     assert any(isinstance(n, SassComment) and "fake_reshape" in n.text for n in nodes)
 
 
-def test_synthesizer_to_python():
+def test_synthesizer_to_python() -> None:
   """Test element."""
-  sem = SemanticsManager()
-  synth = SassSynthesizer(sem)
+  sem: SemanticsManager = SemanticsManager()
+  synth: SassSynthesizer = SassSynthesizer(sem)
 
-  nodes = [
+  nodes: List[SassNode] = [
     # basic inst
     SassInstruction(opcode="FADD", operands=[SassRegister(name="R0"), SassRegister(name="R1"), SassRegister(name="R2")]),
     # branch (no dest)
@@ -194,8 +197,8 @@ def test_synthesizer_to_python():
     SassComment(text="END Loop"),
   ]
 
-  py_mod = synth.to_python(nodes)
-  code = cst.Module(body=py_mod.body).code
+  py_mod: cst.Module = synth.to_python(nodes)
+  code: str = cst.Module(body=py_mod.body).code
 
   assert "R0 = sass.FADD(R1, R2)" in code
   assert "sass.BRA('L1:', predicate = 'P0')" in code

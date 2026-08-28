@@ -13,9 +13,9 @@ def extract_graph(code: str) -> GraphExtractor:
   return extractor
 
 
-def test_graph_extractor_class_and_methods():
+def test_graph_extractor_class_and_methods() -> None:
   """Test extractor captures class name and method scopes correctly."""
-  code = """
+  code: str = """
 class MyModel:
     def __init__(self):
         self.conv1 = nn.Conv2d(3, 16)
@@ -34,7 +34,7 @@ class MyModel:
     def call(self, val):
         pass
 """
-  extractor = extract_graph(code)
+  extractor: GraphExtractor = extract_graph(code)
   assert extractor.model_name == "MyModel"
   assert "conv1" in extractor.layer_registry
   assert "conv2" in extractor.layer_registry
@@ -47,9 +47,9 @@ class MyModel:
   assert len(extractor.graph.nodes) > 0
 
 
-def test_graph_extractor_layer_def_edge_cases():
+def test_graph_extractor_layer_def_edge_cases() -> None:
   """Test _analyze_layer_def ignores invalid patterns."""
-  code = """
+  code: str = """
 class Net:
     def __init__(self):
         # Valid
@@ -61,7 +61,7 @@ class Net:
         # Complex target
         self.layer.sub = nn.Conv1d()
 """
-  extractor = extract_graph(code)
+  extractor: GraphExtractor = extract_graph(code)
   assert "conv1" in extractor.layer_registry
   assert "size" not in extractor.layer_registry
   assert "local_var" not in extractor.layer_registry
@@ -72,9 +72,9 @@ class Net:
   assert node.metadata.get("kernel_size") == "3"
 
 
-def test_graph_extractor_data_flow():
+def test_graph_extractor_data_flow() -> None:
   """Test data flow and edge creation."""
-  code = """
+  code: str = """
 class Net:
     def __init__(self):
         self.layer1 = Linear(10, 10)
@@ -90,16 +90,16 @@ class Net:
         # Return variable
         return z
 """
-  extractor = extract_graph(code)
+  extractor: GraphExtractor = extract_graph(code)
 
   # Check edges
-  edges = [(e.source, e.target) for e in extractor.graph.edges]
+  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
   assert ("input", "layer1") in edges
   assert ("layer1", "func_relu") in edges
   assert ("func_relu", "output") in edges
 
   # Check nodes
-  node_ids = {n.id for n in extractor.graph.nodes}
+  node_ids: set[str] = {n.id for n in extractor.graph.nodes}
   assert "layer1" in node_ids
   assert "layer2" in node_ids
   assert "input" in node_ids
@@ -107,9 +107,9 @@ class Net:
   assert "output" in node_ids
 
 
-def test_graph_extractor_return_call():
+def test_graph_extractor_return_call() -> None:
   """Test when return statement is a direct call."""
-  code = """
+  code: str = """
 class Net:
     def __init__(self):
         self.layer1 = Linear(10, 10)
@@ -117,15 +117,15 @@ class Net:
     def forward(self, x):
         return self.layer1(x)
 """
-  extractor = extract_graph(code)
-  edges = [(e.source, e.target) for e in extractor.graph.edges]
+  extractor: GraphExtractor = extract_graph(code)
+  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
   assert ("input", "layer1") in edges
   assert ("layer1", "output") in edges
 
 
-def test_graph_extractor_return_untracked_variable():
+def test_graph_extractor_return_untracked_variable() -> None:
   """Test when return statement returns an untracked variable."""
-  code = """
+  code: str = """
 class Net:
     def __init__(self):
         pass
@@ -134,30 +134,30 @@ class Net:
         untracked = 5
         return untracked
 """
-  extractor = extract_graph(code)
-  edges = [(e.source, e.target) for e in extractor.graph.edges]
+  extractor: GraphExtractor = extract_graph(code)
+  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
   # No edges should be created for untracked variable
   assert len(edges) == 0
 
 
-def test_graph_extractor_resolve_layer_func_name_fallback():
+def test_graph_extractor_resolve_layer_func_name_fallback() -> None:
   """Test _resolve_layer_or_func_name fallback for complex calls."""
-  code = """
+  code: str = """
 class Net:
     def forward(self, x):
         y = getattr(self, "layer")(x)
         return y
 """
-  extractor = extract_graph(code)
-  edges = [(e.source, e.target) for e in extractor.graph.edges]
+  extractor: GraphExtractor = extract_graph(code)
+  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
   # No edges because getattr is not recognized properly by get_full_name
   # without returning None
   assert len(edges) == 0
 
 
-def test_graph_extractor_complex_assignment_targets():
+def test_graph_extractor_complex_assignment_targets() -> None:
   """Test data flow handles complex assignment targets."""
-  code = """
+  code: str = """
 class Net:
     def __init__(self):
         self.layer = Linear()
@@ -169,26 +169,26 @@ class Net:
         self.output[0] = self.layer(a)
         return a
 """
-  extractor = extract_graph(code)
+  extractor: GraphExtractor = extract_graph(code)
   # Check edges to verify a and b were tracked
-  edges = [(e.source, e.target) for e in extractor.graph.edges]
+  edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
   assert ("input", "layer") in edges
 
 
-def test_get_var_name_fallback():
+def test_get_var_name_fallback() -> None:
   """Test _get_var_name fallback."""
   extractor = GraphExtractor()
   assert extractor._get_var_name(cst.Integer("1")) is None
 
 
-def test_node_to_string_fallback():
+def test_node_to_string_fallback() -> None:
   """Test _node_to_string uses capture_node_source."""
   extractor = GraphExtractor()
   node = cst.Name("var_name")
   assert extractor._node_to_string(node) == "var_name"
 
 
-def test_analyze_call_expression_missing_layer():
+def test_analyze_call_expression_missing_layer() -> None:
   """Test _analyze_call_expression when layer name is None."""
   extractor = GraphExtractor()
   # Mock a call with a complex func that doesn't resolve to a string

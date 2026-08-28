@@ -1,6 +1,6 @@
 """Docstring."""
 
-from typing import Any, Optional, List
+from typing import List, Any
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.latex.nodes import (
@@ -17,7 +17,7 @@ from ml_switcheroo.core.latex.nodes import (
 class LatexBackend(CompilerBackend):
   """Transform Logical Graphs into MIDL LaTeX format."""
 
-  def __init__(self, semantics: Optional[Any] = None) -> None:
+  def __init__(self, semantics: Any = None) -> None:
     """Execute implementation detail.
 
     Args:

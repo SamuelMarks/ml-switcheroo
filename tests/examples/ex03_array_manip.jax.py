@@ -6,10 +6,11 @@ batches of matrices. It serves as a benchmark and example of JAX-to-PyTorch
 semantic translation.
 """
 
+import jax
 import jax.numpy as jnp
 
 
-def transpose_matrices(batch):
+def transpose_matrices(batch: jax.Array) -> jax.Array:
   """Swaps the spatial dimensions of a batch of 2D matrices.
 
   This function takes a 3D JAX array representing a batch of matrices and

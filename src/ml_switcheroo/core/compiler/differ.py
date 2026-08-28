@@ -47,7 +47,7 @@ class ReplaceAction(PatchAction):
           (stateful setup) replacement. Defaults to False.
   """
 
-  new_node: Any  # LogicalNode
+  new_node: Any
   input_vars: List[str]
   output_var: str
   is_init: bool = False
@@ -171,7 +171,7 @@ class GraphDiffer:
     return actions
 
 
-def _is_likely_stateful(node: Any) -> bool:
+def _is_likely_stateful(node) -> bool:
   """Heuristic for statefulness based on kind (naming convention).
 
   Args:

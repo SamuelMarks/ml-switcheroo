@@ -1,13 +1,14 @@
 """Tests for MLIR generator coverage."""
 
 import libcst as cst
+import typing
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 from ml_switcheroo.core.mlir.naming import NamingContext
 from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode, BlockNode, ValueNode
 from ml_switcheroo.core.cst.base import Trivia
 
 
-def test_stmt_with_changes_leading_lines():
+def test_stmt_with_changes_leading_lines() -> None:
   """Test stmt with changes leading lines."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
@@ -24,12 +25,12 @@ def test_stmt_with_changes_leading_lines():
     leading_trivia=[Trivia("comment")],
   )
   block = BlockNode(label="^bb0", operations=[op])
-  stmts = gen._convert_block(block)
+  stmts: list[typing.Any] = gen._convert_block(block)
   # Should hit line 125
   assert len(stmts) == 1
 
 
-def test_convert_statement_import_and_none():
+def test_convert_statement_import_and_none() -> None:
   """Test convert statement import and none."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
@@ -52,20 +53,20 @@ def test_convert_statement_import_and_none():
   assert gen._convert_statement_op(op2) is None
 
 
-def test_wrap_as_statement_void_call():
+def test_wrap_as_statement_void_call() -> None:
   """Test wrap as statement void call."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
   gen.ctx = ctx
   op = OperationNode(name="sw.call", operands=[], results=[ValueNode(name="%0")], attributes=[], regions=[])
   gen.usage_counts["%0"] = 1  # Not 0
-  expr = cst.parse_expression("super().__init__()")
-  stmt = gen._wrap_as_statement(op, expr)
+  expr = typing.cast(cst.Expr, cst.parse_expression("super().__init__()"))
+  stmt: typing.Any = gen._wrap_as_statement(op, expr)
   # Should hit line 247: is_void_call is true for print
   assert isinstance(stmt.body[0], cst.Expr)
 
 
-def test_wrap_as_statement_getattr():
+def test_wrap_as_statement_getattr() -> None:
   """Test wrap as statement getattr."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
@@ -84,7 +85,7 @@ def test_wrap_as_statement_getattr():
   assert "myattr" in ctx._map["%0"]
 
 
-def test_wrap_as_statement_constant():
+def test_wrap_as_statement_constant() -> None:
   """Test wrap as statement constant."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()

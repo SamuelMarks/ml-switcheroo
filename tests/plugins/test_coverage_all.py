@@ -8,7 +8,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 _sem = SemanticsManager()
 
 
-def make_ctx(target="torch"):
+def make_ctx(target: str = "torch") -> HookContext:
   """Helper to make ctx."""
   config = RuntimeConfig(source_framework="jax", target_framework=target)
   hctx = HookContext(semantics=_sem, config=config)
@@ -16,7 +16,7 @@ def make_ctx(target="torch"):
   return hctx
 
 
-def get_ast_nodes():
+def get_ast_nodes() -> list[cst.CSTNode]:
   """Gets AST nodes."""
   return [
     cst.Call(func=cst.Name("func")),
@@ -58,11 +58,11 @@ def get_ast_nodes():
   ]
 
 
-def test_plugin_coverage_fuzz():
+def test_plugin_coverage_fuzz() -> None:
   """Verifies the behavior of plugin coverage fuzz."""
-  nodes = get_ast_nodes()
-  targets = ["torch", "jax", "mlx", "tensorflow", "keras", "source_placeholder"]
-  contexts = {tgt: make_ctx(target=tgt) for tgt in targets}
+  nodes: list[cst.CSTNode] = get_ast_nodes()
+  targets: list[str] = ["torch", "jax", "mlx", "tensorflow", "keras", "source_placeholder"]
+  contexts: dict[str, HookContext] = {tgt: make_ctx(target=tgt) for tgt in targets}
   for hook_name, hook_func in _HOOKS.items():
     for node in nodes:
       for tgt, ctx in contexts.items():

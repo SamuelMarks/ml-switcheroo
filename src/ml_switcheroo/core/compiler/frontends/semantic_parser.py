@@ -5,7 +5,7 @@ compilation, allowing lifters to reconstruct high-level graphs from assembly
 without relying on regex.
 """
 
-from typing import Any, Optional, List
+from typing import Optional, List, Any
 from dataclasses import dataclass
 from lark import Lark, Transformer, v_args, Token
 
@@ -389,7 +389,7 @@ class _SemanticTransformer(Transformer[Any, Any]):
     )
 
   @v_args(inline=False)
-  def marker_start(self, children: List[Any]) -> SemanticMarker:
+  def marker_start(self, children: list[Any]) -> SemanticMarker:
     """Transform a marker_start rule into a SemanticMarker with leading trivia.
 
     Args:
@@ -429,6 +429,6 @@ class SemanticCommentParser:
       tree = self.parser.parse(text)
       transformer = _SemanticTransformer()
       marker = transformer.transform(tree)
-      return marker  # type: ignore
+      return marker
     except Exception:
       return None

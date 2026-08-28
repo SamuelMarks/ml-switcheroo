@@ -3,11 +3,12 @@
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.frameworks.rdna import RdnaAdapter
 from ml_switcheroo.frameworks.sass import SassAdapter
+from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
-def test_rdna_adapter_properties():
+def test_rdna_adapter_properties() -> None:
   """Test element."""
-  adapter = RdnaAdapter()
+  adapter: RdnaAdapter = RdnaAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -42,9 +43,9 @@ def test_rdna_adapter_properties():
   adapter.get_tiered_examples()
 
 
-def test_sass_adapter_properties():
+def test_sass_adapter_properties() -> None:
   """Test element."""
-  adapter = SassAdapter()
+  adapter: SassAdapter = SassAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -79,10 +80,10 @@ def test_sass_adapter_properties():
   adapter.get_tiered_examples()
 
 
-def test_rdna_parse_to_graph():
+def test_rdna_parse_to_graph() -> None:
   """Test element."""
-  adapter = RdnaAdapter()
-  code = """
+  adapter: RdnaAdapter = RdnaAdapter()
+  code: str = """
     label_start:
     s_mov_b32 s0, 1
     v_add_f32 v0, v1, v2
@@ -97,14 +98,14 @@ def test_rdna_parse_to_graph():
     label_end:
     s_endpgm
     """
-  graph = adapter.parse_rdna_to_graph(code)
+  graph: LogicalGraph = adapter.parse_rdna_to_graph(code)
   assert graph is not None
 
 
-def test_sass_parse_to_graph():
+def test_sass_parse_to_graph() -> None:
   """Test element."""
-  adapter = SassAdapter()
-  code = """
+  adapter: SassAdapter = SassAdapter()
+  code: str = """
     L_1:
     MOV R0, R1
     FADD R2, R3, R4
@@ -118,39 +119,39 @@ def test_sass_parse_to_graph():
     L_3:
     EXIT
     """
-  graph = adapter.parse_sass_to_graph(code)
+  graph: LogicalGraph = adapter.parse_sass_to_graph(code)
   assert graph is not None
 
 
-def test_rdna_fmac_no_loop():
+def test_rdna_fmac_no_loop() -> None:
   """Test element."""
-  adapter = RdnaAdapter()
-  code = "v_fmac_f32 v0, v1, v2"
+  adapter: RdnaAdapter = RdnaAdapter()
+  code: str = "v_fmac_f32 v0, v1, v2"
   adapter.parse_rdna_to_graph(code)
 
 
-def test_sass_ffma_no_loop():
+def test_sass_ffma_no_loop() -> None:
   """Test element."""
-  adapter = SassAdapter()
-  code = "FFMA R0, R1, R2, R3"
+  adapter: SassAdapter = SassAdapter()
+  code: str = "FFMA R0, R1, R2, R3"
   adapter.parse_sass_to_graph(code)
 
 
-def test_asm_empty_parsing():
+def test_asm_empty_parsing() -> None:
   """Test element."""
-  adapter1 = RdnaAdapter()
+  adapter1: RdnaAdapter = RdnaAdapter()
   adapter1.parse_rdna_to_graph("")
   adapter1.parse_rdna_to_graph("// comment")
 
-  adapter2 = SassAdapter()
+  adapter2: SassAdapter = SassAdapter()
   adapter2.parse_sass_to_graph("")
   adapter2.parse_sass_to_graph("/* comment */")
 
 
-def test_rdna_loop_no_fmac():
+def test_rdna_loop_no_fmac() -> None:
   """Test element."""
-  adapter = RdnaAdapter()
-  code = """
+  adapter: RdnaAdapter = RdnaAdapter()
+  code: str = """
     label_loop:
     s_add_u32 s0, s0, 1
     s_branch label_loop
@@ -158,10 +159,10 @@ def test_rdna_loop_no_fmac():
   adapter.parse_rdna_to_graph(code)
 
 
-def test_sass_loop_no_fmac():
+def test_sass_loop_no_fmac() -> None:
   """Test element."""
-  adapter = SassAdapter()
-  code = """
+  adapter: SassAdapter = SassAdapter()
+  code: str = """
     L_2:
     IADD3 R0, R0, 1
     FFMA R0, R1, R2, R3
@@ -170,10 +171,10 @@ def test_sass_loop_no_fmac():
   adapter.parse_sass_to_graph(code)
 
 
-def test_sass_loop_print():
+def test_sass_loop_print() -> None:
   """Test element."""
-  adapter = SassAdapter()
-  code = """
+  adapter: SassAdapter = SassAdapter()
+  code: str = """
     // comment
     /* block comment */
     L_1:
@@ -182,5 +183,5 @@ def test_sass_loop_print():
     IADD3 R0, R0, 1
     BRA L_2
     """
-  g = adapter.parse_sass_to_graph(code)
+  g: LogicalGraph = adapter.parse_sass_to_graph(code)
   print(g.nodes)

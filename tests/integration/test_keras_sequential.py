@@ -1,22 +1,23 @@
 """Test suite for the Keras Sequential module."""
 
 import pytest
+import typing
 from unittest.mock import MagicMock
-from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.plugins.keras_sequential import transform_keras_sequential
 from ml_switcheroo.core.hooks import _HOOKS
 
-SOURCE_TORCH = "\nimport torch.nn as nn\ndef get_model():\n    model = nn.Sequential(\n        nn.Linear(10, 20),\n        nn.ReLU(),\n        nn.Linear(20, 1)\n    )\n    return model\n"
+SOURCE_TORCH: str = "\nimport torch.nn as nn\ndef get_model():\n    model = nn.Sequential(\n        nn.Linear(10, 20),\n        nn.ReLU(),\n        nn.Linear(20, 1)\n    )\n    return model\n"
 
 
 @pytest.fixture
-def keras_semantics():
+def keras_semantics() -> MagicMock:
   """Provides a mock Keras semantics for testing."""
   _HOOKS["keras_sequential_pack"] = transform_keras_sequential
   mgr = MagicMock(spec=SemanticsManager)
-  mappings = {
+  mappings: dict[str, typing.Any] = {
     "Sequential": {
       "std_args": ["layers"],
       "variants": {
@@ -31,7 +32,7 @@ def keras_semantics():
     "ReLU": {"std_args": [], "variants": {"torch": {"api": "torch.nn.ReLU"}, "keras": {"api": "keras.layers.ReLU"}}},
   }
 
-  def get_def(name):
+  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
     """Gets def."""
     if "Sequential" in name:
       return ("Sequential", mappings["Sequential"])
@@ -41,7 +42,7 @@ def keras_semantics():
       return ("ReLU", mappings["ReLU"])
     return ("Generic", {"variants": {}})
 
-  def resolve(aid, fw):
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
     """Resolves ."""
     if aid in mappings and fw == "keras":
       return mappings[aid]["variants"]["keras"]
@@ -55,13 +56,13 @@ def keras_semantics():
   return mgr
 
 
-def test_sequential_packing(keras_semantics):
+def test_sequential_packing(keras_semantics: MagicMock) -> None:
   """Verifies the behavior of sequential packing."""
   config = RuntimeConfig(source_framework="torch", target_framework="keras")
-  engine = ASTEngine(semantics=keras_semantics, config=config)
-  result = engine.run(SOURCE_TORCH)
+  engine = ASTEngine(semantics=keras_semantics, config=config)  # type: ignore
+  result: ConversionResult = engine.run(SOURCE_TORCH)
   assert result.success
-  code = result.code
+  code: str = result.code
   assert "keras.Sequential([" in code.replace("\n", "").replace(" ", "")
   assert "keras.layers.Dense" in code
   assert "keras.layers.ReLU" in code

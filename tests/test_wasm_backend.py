@@ -2,17 +2,18 @@
 
 from ml_switcheroo.core.compiler.backends.wasm_backend import WasmBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from typing import List
 
 
-def test_wasm_backend_init():
+def test_wasm_backend_init() -> None:
   """Test element."""
-  backend = WasmBackend(semantics="dummy")
-  assert backend.semantics == "dummy"
+  backend: WasmBackend = WasmBackend(semantics="dummy")
+  assert getattr(backend, "semantics") == "dummy"
 
 
-def test_wasm_backend_compile():
+def test_wasm_backend_compile() -> None:
   """Test element."""
-  nodes = [
+  nodes: List[LogicalNode] = [
     LogicalNode(id="in1", kind="Input"),
     LogicalNode(id="in2", kind="Input"),
     LogicalNode(id="add1", kind="Add"),
@@ -21,7 +22,7 @@ def test_wasm_backend_compile():
     LogicalNode(id="other1", kind="Other"),
     LogicalNode(id="out1", kind="Output"),
   ]
-  edges = [
+  edges: List[LogicalEdge] = [
     LogicalEdge(source="in1", target="add1"),
     LogicalEdge(source="in2", target="add1"),
     LogicalEdge(source="add1", target="mul1"),
@@ -31,9 +32,9 @@ def test_wasm_backend_compile():
     LogicalEdge(source="sub1", target="other1"),
     LogicalEdge(source="other1", target="out1"),
   ]
-  graph = LogicalGraph(name="test_graph", nodes=nodes, edges=edges)
-  backend = WasmBackend()
-  code = backend.compile(graph)
+  graph: LogicalGraph = LogicalGraph(name="test_graph", nodes=nodes, edges=edges)
+  backend: WasmBackend = WasmBackend()
+  code: str = backend.compile(graph)
 
   assert "(module" in code
   assert "(func $test_graph" in code
@@ -51,16 +52,16 @@ def test_wasm_backend_compile():
   assert "local.set $other1" in code
 
 
-def test_wasm_backend_compile_no_output():
+def test_wasm_backend_compile_no_output() -> None:
   """Test element."""
-  nodes = [
+  nodes: List[LogicalNode] = [
     LogicalNode(id="in1", kind="Input"),
     LogicalNode(id="add1", kind="Add"),
   ]
-  edges = [LogicalEdge(source="in1", target="add1")]
-  graph = LogicalGraph(name="main", nodes=nodes, edges=edges)
-  backend = WasmBackend()
-  code = backend.compile(graph)
+  edges: List[LogicalEdge] = [LogicalEdge(source="in1", target="add1")]
+  graph: LogicalGraph = LogicalGraph(name="main", nodes=nodes, edges=edges)
+  backend: WasmBackend = WasmBackend()
+  code: str = backend.compile(graph)
 
   assert "(func $main" in code
   assert "(result f32)" not in code

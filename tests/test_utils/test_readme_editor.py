@@ -3,6 +3,8 @@
 import pytest
 from ml_switcheroo.utils.readme_editor import ReadmeEditor
 from ml_switcheroo.semantics.manager import SemanticsManager
+from pathlib import Path
+from typing import Dict
 
 
 class MockSemantics(SemanticsManager):
@@ -18,39 +20,39 @@ class MockSemantics(SemanticsManager):
 
 
 @pytest.fixture
-def editor(tmp_path):
+def editor(tmp_path: Path) -> ReadmeEditor:
   """Provides a mock editor for testing."""
-  mgr = MockSemantics()
-  readme = tmp_path / "README.md"
+  mgr: MockSemantics = MockSemantics()
+  readme: Path = tmp_path / "README.md"
   readme.write_text("# Test Project\nStart.", encoding="utf-8")
   return ReadmeEditor(mgr, readme)
 
 
-def test_missing_file_returns_false(tmp_path):
+def test_missing_file_returns_false(tmp_path: Path) -> None:
   """Verifies the behavior of missing file returns false."""
-  mgr = MockSemantics()
-  missing_path = tmp_path / "NONEXISTENT.md"
-  editor = ReadmeEditor(mgr, missing_path)
-  success = editor.update_matrix({})
+  mgr: MockSemantics = MockSemantics()
+  missing_path: Path = tmp_path / "NONEXISTENT.md"
+  editor: ReadmeEditor = ReadmeEditor(mgr, missing_path)
+  success: bool = editor.update_matrix({})
   assert success is False
 
 
-def test_missing_section_header_returns_false(editor):
+def test_missing_section_header_returns_false(editor: ReadmeEditor) -> None:
   """Verifies the behavior of missing section header returns false."""
   editor.readme_path.write_text("# Title\n\nNo matrix here.", encoding="utf-8")
-  success = editor.update_matrix({})
+  success: bool = editor.update_matrix({})
   assert success is False
   assert editor.readme_path.read_text(encoding="utf-8") == "# Title\n\nNo matrix here."
 
 
-def test_injection_between_headers(editor):
+def test_injection_between_headers(editor: ReadmeEditor) -> None:
   """Verifies the behavior of injection between headers."""
-  original_content = "# Title\nIntro text.\n\n## ✅ Compatibility Matrix\n\n| Old | Table |\n| --- | --- |\n| row | 1 |\n\n## Contributing\nPlease help.\n"
+  original_content: str = "# Title\nIntro text.\n\n## ✅ Compatibility Matrix\n\n| Old | Table |\n| --- | --- |\n| row | 1 |\n\n## Contributing\nPlease help.\n"
   editor.readme_path.write_text(original_content, encoding="utf-8")
-  results = {"abs": True, "complex_layer": False}
-  success = editor.update_matrix(results)
+  results: Dict[str, bool] = {"abs": True, "complex_layer": False}
+  success: bool = editor.update_matrix(results)
   assert success is True
-  new_text = editor.readme_path.read_text(encoding="utf-8")
+  new_text: str = editor.readme_path.read_text(encoding="utf-8")
   assert "# Title\nIntro text." in new_text
   assert "## ✅ Compatibility Matrix" in new_text
   assert "## Contributing\nPlease help." in new_text
@@ -59,34 +61,34 @@ def test_injection_between_headers(editor):
   assert "| Old | Table |" not in new_text
 
 
-def test_injection_at_end_of_file(editor):
+def test_injection_at_end_of_file(editor: ReadmeEditor) -> None:
   """Verifies the behavior of injection at end of file."""
-  original_content = "# Title\n## ✅ Compatibility Matrix\nOld Data\n"
+  original_content: str = "# Title\n## ✅ Compatibility Matrix\nOld Data\n"
   editor.readme_path.write_text(original_content, encoding="utf-8")
-  success = editor.update_matrix({})
+  success: bool = editor.update_matrix({})
   assert success is True
-  new_text = editor.readme_path.read_text(encoding="utf-8")
+  new_text: str = editor.readme_path.read_text(encoding="utf-8")
   assert "## ✅ Compatibility Matrix" in new_text
   assert "| Category | PyTorch" in new_text
   assert "Old Data" not in new_text
 
 
-def test_category_heuristics(editor):
+def test_category_heuristics(editor: ReadmeEditor) -> None:
   """Verifies the behavior of category heuristics."""
   editor.readme_path.write_text("## ✅ Compatibility Matrix\n", encoding="utf-8")
-  results = {}
-  success = editor.update_matrix(results)
+  results: Dict[str, bool] = {}
+  success: bool = editor.update_matrix(results)
   assert success is True
-  content = editor.readme_path.read_text(encoding="utf-8")
+  content: str = editor.readme_path.read_text(encoding="utf-8")
   assert "| **Neural** | `t.nn.C`" in content
 
 
-def test_null_variant_handling(editor):
+def test_null_variant_handling(editor: ReadmeEditor) -> None:
   """Verifies the behavior of null variant handling."""
   editor.readme_path.write_text("## ✅ Compatibility Matrix\n", encoding="utf-8")
-  results = {"unsupported": False}
-  success = editor.update_matrix(results)
+  results: Dict[str, bool] = {"unsupported": False}
+  success: bool = editor.update_matrix(results)
   assert success is True
-  content = editor.readme_path.read_text(encoding="utf-8")
+  content: str = editor.readme_path.read_text(encoding="utf-8")
   assert "| `t.bad` | — |" in content
   assert "Untested/Fail" in content

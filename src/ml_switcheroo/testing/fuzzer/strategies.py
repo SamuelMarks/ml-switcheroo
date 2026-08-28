@@ -10,12 +10,13 @@ This module maps Operation Definition Language (ODL) type strings (e.g., ``Array
     across different arguments using a shared context.
 """
 
-from typing import Any
+import typing
+
 
 import numpy as np
 import hypothesis.strategies as st
 import hypothesis.extra.numpy as npst
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from ml_switcheroo.testing.fuzzer.type_parser import (
   parse_type_annotation,
@@ -33,7 +34,7 @@ from ml_switcheroo.testing.fuzzer.type_parser import (
 )
 
 
-def _get_dtype_strategy(dtype_str: Optional[str]) -> Any:
+def _get_dtype_strategy(dtype_str: typing.Optional[str]) -> typing.Any:
   """Resolve a string dtype representation to a NumPy dtype or type class.
 
   Args:
@@ -65,8 +66,8 @@ def _get_dtype_strategy(dtype_str: Optional[str]) -> Any:
 
 def strategies_from_spec(
   type_str: Union[str, ParsedType],
-  constraints: Dict[str, Any],
-  shared_dims: Optional[Dict[str, Any]] = None,
+  constraints,
+  shared_dims=None,
 ) -> st.SearchStrategy:
   """Construct a Hypothesis strategy from a type string and constraints.
 
@@ -166,9 +167,7 @@ def strategies_from_spec(
   return _array_strategy(TensorType(dims=None), constraints, shared_dims)
 
 
-def _array_strategy(
-  type_str: TensorType, constraints: Dict[Any, Any], shared_dims: Optional[Dict[Any, Any]]
-) -> st.SearchStrategy:
+def _array_strategy(type_str: "TensorType", constraints: dict, shared_dims: typing.Optional[dict]) -> "st.SearchStrategy":
   """Construct a NumPy array strategy based on rank, symbolic shape, and element constraints.
 
   Args:
@@ -216,18 +215,21 @@ def _array_strategy(
   mn = constraints.get("min")
   mx = constraints.get("max")
 
-  elements = None
+  from hypothesis.strategies import SearchStrategy
+  from typing import Any
+
+  elements: Optional[SearchStrategy[Any]] = None
   if np.issubdtype(dtype, np.integer):
-    min_v = int(mn) if mn is not None else -10
-    max_v = int(mx) if mx is not None else 10
-    elements = st.integers(min_value=min_v, max_value=max_v)
+    min_v_i = int(mn) if mn is not None else -10
+    max_v_i = int(mx) if mx is not None else 10
+    elements = st.integers(min_value=min_v_i, max_value=max_v_i)
 
   elif np.issubdtype(dtype, np.floating):  # pragma: no branch
-    min_v = float(mn) if mn is not None else -10.0  # type: ignore
-    max_v = float(mx) if mx is not None else 10.0  # type: ignore
-    elements = st.floats(  # type: ignore
-      min_value=min_v,
-      max_value=max_v,
+    min_v_f = float(mn) if mn is not None else -10.0
+    max_v_f = float(mx) if mx is not None else 10.0
+    elements = st.floats(
+      min_value=min_v_f,
+      max_value=max_v_f,
       allow_nan=False,
       allow_infinity=False,
     )

@@ -5,8 +5,6 @@ It scans API surfaces, normalizes names, and clusters them using Levenshtein dis
 to propose candidate standards for the ODL.
 """
 
-from typing import Any
-
 import importlib
 import inspect
 import difflib
@@ -50,7 +48,7 @@ class ConsensusEngine:
       except ImportError:
         logger.warning(f"Could not import framework '{fw}' for ingestion.")
 
-  def _scan_module(self, mod: Any, prefix: str, depth: int = 0) -> Any:
+  def _scan_module(self, mod, prefix: str, depth: int = 0):
     """Recursively scans a module's members to populate the vocabulary.
 
     Inspects all members of the given module. If a member is a function or a class,

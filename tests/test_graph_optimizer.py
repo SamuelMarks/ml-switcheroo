@@ -3,20 +3,21 @@
 from ml_switcheroo.core.graph_optimizer import GraphOptimizer
 from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.core.dsl import PatternDef
+from typing import Dict, List, Optional
 
 
-def test_graph_optimizer_no_patterns():
+def test_graph_optimizer_no_patterns() -> None:
   """Docstring."""
-  graph = LogicalGraph(nodes=[LogicalNode(id="1", kind="A")], edges=[])
-  opt = GraphOptimizer(patterns=[])
-  opt_graph = opt.optimize(graph)
+  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="1", kind="A")], edges=[])
+  opt: GraphOptimizer = GraphOptimizer(patterns=[])
+  opt_graph: LogicalGraph = opt.optimize(graph)
   assert len(opt_graph.nodes) == 1
   assert opt_graph.nodes[0].id == "1"
 
 
-def test_graph_optimizer_simple_fusion():
+def test_graph_optimizer_simple_fusion() -> None:
   """Docstring."""
-  graph = LogicalGraph(
+  graph: LogicalGraph = LogicalGraph(
     nodes=[
       LogicalNode(id="1", kind="Conv"),
       LogicalNode(id="2", kind="BatchNorm"),
@@ -27,9 +28,9 @@ def test_graph_optimizer_simple_fusion():
       LogicalEdge(source="2", target="3"),
     ],
   )
-  pattern = PatternDef(name="ConvBNReLU", sequence=["Conv", "BatchNorm", "ReLU"], replace_with="FusedConv")
-  opt = GraphOptimizer(patterns=[pattern])
-  opt_graph = opt.optimize(graph)
+  pattern: PatternDef = PatternDef(name="ConvBNReLU", sequence=["Conv", "BatchNorm", "ReLU"], replace_with="FusedConv")
+  opt: GraphOptimizer = GraphOptimizer(patterns=[pattern])
+  opt_graph: LogicalGraph = opt.optimize(graph)
 
   assert len(opt_graph.nodes) == 1
   assert opt_graph.nodes[0].kind == "FusedConv"
@@ -37,9 +38,9 @@ def test_graph_optimizer_simple_fusion():
   assert len(opt_graph.edges) == 0
 
 
-def test_graph_optimizer_fusion_with_surrounding_nodes():
+def test_graph_optimizer_fusion_with_surrounding_nodes() -> None:
   """Docstring."""
-  graph = LogicalGraph(
+  graph: LogicalGraph = LogicalGraph(
     nodes=[
       LogicalNode(id="0", kind="Input"),
       LogicalNode(id="1", kind="Conv"),
@@ -54,9 +55,9 @@ def test_graph_optimizer_fusion_with_surrounding_nodes():
       LogicalEdge(source="3", target="4"),
     ],
   )
-  pattern = PatternDef(name="ConvBNReLU", sequence=["Conv", "BatchNorm", "ReLU"], replace_with="FusedConv")
-  opt = GraphOptimizer(patterns=[pattern])
-  opt_graph = opt.optimize(graph)
+  pattern: PatternDef = PatternDef(name="ConvBNReLU", sequence=["Conv", "BatchNorm", "ReLU"], replace_with="FusedConv")
+  opt: GraphOptimizer = GraphOptimizer(patterns=[pattern])
+  opt_graph: LogicalGraph = opt.optimize(graph)
 
   assert len(opt_graph.nodes) == 3
   assert set(n.id for n in opt_graph.nodes) == {"0", "fused_1", "4"}
@@ -65,10 +66,10 @@ def test_graph_optimizer_fusion_with_surrounding_nodes():
   assert edge_pairs == {("0", "fused_1"), ("fused_1", "4")}
 
 
-def test_graph_optimizer_internal_edges_dropped():
+def test_graph_optimizer_internal_edges_dropped() -> None:
   """Docstring."""
   # If there is an edge from Conv to Output directly (branching)
-  graph = LogicalGraph(
+  graph: LogicalGraph = LogicalGraph(
     nodes=[
       LogicalNode(id="1", kind="Conv"),
       LogicalNode(id="2", kind="BatchNorm"),
@@ -85,48 +86,48 @@ def test_graph_optimizer_internal_edges_dropped():
   # also add node 0
   graph.nodes.insert(0, LogicalNode(id="0", kind="Input"))
 
-  pattern = PatternDef(name="ConvBNReLU", sequence=["Conv", "BatchNorm", "ReLU"], replace_with="FusedConv")
-  opt = GraphOptimizer(patterns=[pattern])
-  opt_graph = opt.optimize(graph)
+  pattern: PatternDef = PatternDef(name="ConvBNReLU", sequence=["Conv", "BatchNorm", "ReLU"], replace_with="FusedConv")
+  opt: GraphOptimizer = GraphOptimizer(patterns=[pattern])
+  opt_graph: LogicalGraph = opt.optimize(graph)
 
   # edge 1 -> 4 is dropped because 1 is internal non-tail
   # edge 0 -> 2 is dropped because 2 is internal non-head
   assert len(opt_graph.edges) == 0
 
 
-def test_match_sequence_returns_none_empty_sequence():
+def test_match_sequence_returns_none_empty_sequence() -> None:
   """Docstring."""
-  opt = GraphOptimizer(patterns=[])
-  res = opt._match_sequence(
+  opt: GraphOptimizer = GraphOptimizer(patterns=[])
+  res: Optional[List[LogicalNode]] = opt._match_sequence(
     start_node=LogicalNode(id="1", kind="A"), sequence=[], node_map={}, out_edges={}, processed_ids=set()
   )
   assert res is None
 
 
-def test_match_sequence_mismatch_first():
+def test_match_sequence_mismatch_first() -> None:
   """Docstring."""
-  opt = GraphOptimizer(patterns=[])
-  res = opt._match_sequence(
+  opt: GraphOptimizer = GraphOptimizer(patterns=[])
+  res: Optional[List[LogicalNode]] = opt._match_sequence(
     start_node=LogicalNode(id="1", kind="B"), sequence=["A", "C"], node_map={}, out_edges={}, processed_ids=set()
   )
   assert res is None
 
 
-def test_match_sequence_neighbor_not_found():
+def test_match_sequence_neighbor_not_found() -> None:
   """Docstring."""
-  opt = GraphOptimizer(patterns=[])
-  node_map = {"1": LogicalNode(id="1", kind="A"), "2": LogicalNode(id="2", kind="C")}
-  res = opt._match_sequence(
+  opt: GraphOptimizer = GraphOptimizer(patterns=[])
+  node_map: Dict[str, LogicalNode] = {"1": LogicalNode(id="1", kind="A"), "2": LogicalNode(id="2", kind="C")}
+  res: Optional[List[LogicalNode]] = opt._match_sequence(
     start_node=node_map["1"], sequence=["A", "B"], node_map=node_map, out_edges={"1": ["2"]}, processed_ids=set()
   )
   assert res is None
 
 
-def test_match_sequence_neighbor_already_processed():
+def test_match_sequence_neighbor_already_processed() -> None:
   """Docstring."""
-  opt = GraphOptimizer(patterns=[])
-  node_map = {"1": LogicalNode(id="1", kind="A"), "2": LogicalNode(id="2", kind="B")}
-  res = opt._match_sequence(
+  opt: GraphOptimizer = GraphOptimizer(patterns=[])
+  node_map: Dict[str, LogicalNode] = {"1": LogicalNode(id="1", kind="A"), "2": LogicalNode(id="2", kind="B")}
+  res: Optional[List[LogicalNode]] = opt._match_sequence(
     start_node=node_map["1"], sequence=["A", "B"], node_map=node_map, out_edges={"1": ["2"]}, processed_ids={"2"}
   )
   assert res is None

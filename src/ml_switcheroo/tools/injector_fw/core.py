@@ -7,8 +7,10 @@ or updating of Semantic Operations in the JSON definition files located in
 It replaces the legacy LibCST-based injector that modified Python source code.
 """
 
+import typing
+
+
 import json
-from typing import Dict, Any
 
 from ml_switcheroo.core.dsl import FrameworkVariant
 from ml_switcheroo.frameworks.loader import get_definitions_path
@@ -24,7 +26,7 @@ class FrameworkInjector:
   3. Writing the updated JSON back to disk.
   """
 
-  def __init__(self, target_fw: str, op_name: str, variant: FrameworkVariant):
+  def __init__(self, target_fw: str, op_name: str, variant: "FrameworkVariant") -> None:
     """Initialize the injector.
 
     Args:
@@ -83,7 +85,7 @@ class FrameworkInjector:
 
     return True
 
-  def _load_current(self) -> Dict[str, Any]:
+  def _load_current(self) -> typing.Dict[str, typing.Any]:
     """Safely loads existing JSON data.
 
     Returns:
@@ -95,7 +97,7 @@ class FrameworkInjector:
 
     try:
       with open(self.json_path, "r", encoding="utf-8") as f:
-        return json.load(f)  # type: ignore
+        return json.load(f)
     except json.JSONDecodeError:
       log_warning(f"Corrupt JSON at {self.json_path}. Overwriting with new data.")
       return {}

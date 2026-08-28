@@ -1,30 +1,32 @@
 """Test suite for the Visualizer Missing module."""
 
+from typing import Any
 
-def test_visualizer_exceptions():
+
+def test_visualizer_exceptions() -> None:
   """Verifies the behavior of visualizer exceptions."""
   import libcst as cst
   from ml_switcheroo.utils.visualizer import MermaidGenerator
 
-  gen = MermaidGenerator()
+  gen: MermaidGenerator = MermaidGenerator()
 
   class BadNode(cst.CSTNode):
     """Test suite for the Bad Node component."""
 
-    def _codegen_impl(self, state):
+    def _codegen_impl(self, state: Any) -> None:
       """Helper to  codegen impl."""
       raise Exception("fail")
 
-    def _visit_and_replace_children(self, v):
+    def _visit_and_replace_children(self, v: Any) -> "BadNode":
       """Helper to  visit and replace children."""
       return self
 
   assert "<BadNode>" in gen._node_to_str(BadNode())
   with __import__("unittest.mock").mock.patch.object(gen, "_node_to_str", side_effect=Exception("fail")):
-    call_node = cst.Call(func=cst.Name("foo"))
+    call_node: cst.Call = cst.Call(func=cst.Name("foo"))
     gen.visit_Call(call_node)
   with __import__("unittest.mock").mock.patch.object(gen, "_node_to_str", side_effect=Exception("fail")):
-    arg_node = cst.Arg(value=cst.Name("foo"))
+    arg_node: cst.Arg = cst.Arg(value=cst.Name("foo"))
     gen.visit_Arg(arg_node)
   gen.stack.clear()
   gen.leave_Assign(cst.Assign(targets=[cst.AssignTarget(cst.Name("a"))], value=cst.Pass()))
@@ -32,18 +34,18 @@ def test_visualizer_exceptions():
   gen.visit_SimpleString(cst.SimpleString('""'))
 
 
-def test_visualizer_more_nodes():
+def test_visualizer_more_nodes() -> None:
   """Verifies the behavior of visualizer more nodes."""
   import libcst as cst
   from ml_switcheroo.utils.visualizer import MermaidGenerator
 
-  gen = MermaidGenerator()
-  cls_node = cst.ClassDef(name=cst.Name("Foo"), body=cst.IndentedBlock([]))
+  gen: MermaidGenerator = MermaidGenerator()
+  cls_node: cst.ClassDef = cst.ClassDef(name=cst.Name("Foo"), body=cst.IndentedBlock([]))
   gen.visit_ClassDef(cls_node)
   gen.leave_ClassDef(cls_node)
-  imp_node = cst.Import(names=[cst.ImportAlias(name=cst.Name("foo")), cst.ImportAlias(name=cst.Name("bar"))])
+  imp_node: cst.Import = cst.Import(names=[cst.ImportAlias(name=cst.Name("foo")), cst.ImportAlias(name=cst.Name("bar"))])
   gen.visit_Import(imp_node)
-  imp_from_node = cst.ImportFrom(
+  imp_from_node: cst.ImportFrom = cst.ImportFrom(
     module=cst.Name("foo"),
     names=[
       cst.ImportAlias(name=cst.Name("a")),
@@ -53,17 +55,17 @@ def test_visualizer_more_nodes():
     ],
   )
   gen.visit_ImportFrom(imp_from_node)
-  imp_from_star = cst.ImportFrom(module=cst.Name("foo"), names=cst.ImportStar())
+  imp_from_star: cst.ImportFrom = cst.ImportFrom(module=cst.Name("foo"), names=cst.ImportStar())
   gen.visit_ImportFrom(imp_from_star)
 
 
-def test_visualizer_more_fallbacks():
+def test_visualizer_more_fallbacks() -> None:
   """Verifies the behavior of visualizer more fallbacks."""
   import libcst as cst
   from ml_switcheroo.utils.visualizer import MermaidGenerator
 
-  gen = MermaidGenerator()
-  call = cst.Call(func=cst.Call(func=cst.Name("a")))
+  gen: MermaidGenerator = MermaidGenerator()
+  call: cst.Call = cst.Call(func=cst.Call(func=cst.Name("a")))
   gen.visit_Call(call)
 
   class DummyImportAlias(cst.ImportAlias):
@@ -71,5 +73,5 @@ def test_visualizer_more_fallbacks():
 
     pass
 
-  imp = cst.Import(names=[DummyImportAlias(name=cst.Attribute(cst.Name("a"), cst.Name("b")))])
+  imp: cst.Import = cst.Import(names=[DummyImportAlias(name=cst.Attribute(cst.Name("a"), cst.Name("b")))])
   gen.visit_Import(imp)

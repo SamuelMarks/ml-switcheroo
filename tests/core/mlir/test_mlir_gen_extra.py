@@ -1,6 +1,7 @@
 """Test suite for the Mlir Gen Extra module."""
 
 import pytest
+import typing
 import libcst as cst
 from collections import defaultdict
 from ml_switcheroo.core.mlir.cst import OperationNode, BlockNode, AttributeNode, ValueNode
@@ -12,12 +13,12 @@ from ml_switcheroo.core.mlir.naming import NamingContext
 class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
   """Dummy Generator class for testing purposes."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the DummyGenerator instance."""
     self.ctx = NamingContext()
-    self.usage_counts = defaultdict(int)
-    self.usage_consumers = {}
-    self.resolved_values = {}
+    self.usage_counts: typing.DefaultDict[str, int] = defaultdict(int)
+    self.usage_consumers: dict[str, typing.Any] = {}
+    self.resolved_values: dict[str, cst.BaseExpression] = {}
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
     """Mock implementation of  resolve operand."""
@@ -25,7 +26,7 @@ class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
       return self.resolved_values[ssa_name]
     return cst.Name(f"res_{ssa_name.replace('%', '')}")
 
-  def _convert_block(self, block: BlockNode):
+  def _convert_block(self, block: BlockNode) -> list[cst.BaseStatement]:
     """Mock implementation of  convert block."""
     if not block.operations:
       return []
@@ -37,17 +38,17 @@ class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
 
   def _create_dotted_name(self, name: str) -> cst.BaseExpression:
     """Mock implementation of  create dotted name."""
-    parts = name.split(".")
+    parts: list[str] = name.split(".")
     if len(parts) == 1:
       return cst.Name(parts[0])
     else:
       attr = cst.Name(parts[-1])
-      val = cst.Name(parts[0])
+      val: typing.Any = cst.Name(parts[0])
       for p in parts[1:-1]:
         val = cst.Attribute(value=val, attr=cst.Name(p))
       return cst.Attribute(value=val, attr=attr)
 
-  def _get_attr(self, op: OperationNode, attr_name: str) -> str:
+  def _get_attr(self, op: OperationNode, attr_name: str) -> typing.Optional[str]:
     """Mock implementation of  get attribute."""
     for a in op.attributes:
       if a.name == attr_name:
@@ -55,7 +56,7 @@ class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
     return None
 
 
-def test_expression_generator_mixin_unimplemented():
+def test_expression_generator_mixin_unimplemented() -> None:
   """Verifies the behavior of expression generator mixin unimplemented."""
 
   class IncompleteGen(ExpressionGeneratorMixin):
@@ -68,7 +69,7 @@ def test_expression_generator_mixin_unimplemented():
     gen._resolve_operand("%val")
 
 
-def test_statement_generator_mixin_unimplemented():
+def test_statement_generator_mixin_unimplemented() -> None:
   """Verifies the behavior of statement generator mixin unimplemented."""
 
   class IncompleteGen(StatementGeneratorMixin):
@@ -85,12 +86,12 @@ def test_statement_generator_mixin_unimplemented():
     gen._scan_block_usage(BlockNode(label="^bb0", arguments=[], operations=[]))
 
 
-def test_parse_keywords():
+def test_parse_keywords() -> None:
   """Parses keywords."""
   gen = DummyGenerator()
   op1 = OperationNode(
     name="sw.call",
-    attributes=[AttributeNode(name="arg_keywords", value=['"arg1"', '"arg2"'])],
+    attributes=[AttributeNode(name="arg_keywords", value='["arg1", "arg2"]')],
     operands=[],
     results=[],
     regions=[],
@@ -118,7 +119,7 @@ def test_parse_keywords():
   assert gen._parse_keywords(op4) == []
 
 
-def test_expr_sw_constant_exception():
+def test_expr_sw_constant_exception() -> None:
   """Verifies the behavior of expr sw constant correctly handling an exception."""
   gen = DummyGenerator()
   op = OperationNode(
@@ -128,31 +129,31 @@ def test_expr_sw_constant_exception():
     results=[],
     regions=[],
   )
-  res = gen._expr_sw_constant(op)
+  res: typing.Any = gen._expr_sw_constant(op)
   assert isinstance(res, cst.Name)
   assert res.value == "invalid_syntax"
 
 
-def test_expr_sw_getattr_empty():
+def test_expr_sw_getattr_empty() -> None:
   """Verifies the behavior of expr sw getattr empty."""
   gen = DummyGenerator()
   op = OperationNode(name="sw.getattr", attributes=[], operands=[], results=[], regions=[])
-  res = gen._expr_sw_getattr(op)
+  res: typing.Any = gen._expr_sw_getattr(op)
   assert isinstance(res, cst.Name)
   assert res.value == "error"
 
 
-def test_expr_sw_call_empty():
+def test_expr_sw_call_empty() -> None:
   """Verifies the behavior of expr sw call empty."""
   gen = DummyGenerator()
   op = OperationNode(name="sw.call", attributes=[], operands=[], results=[], regions=[])
-  res = gen._expr_sw_call(op)
+  res: typing.Any = gen._expr_sw_call(op)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Name)
   assert res.func.value == "unknown"
 
 
-def test_expr_sw_call_with_keywords():
+def test_expr_sw_call_with_keywords() -> None:
   """Verifies the behavior of expr sw call with keywords."""
   gen = DummyGenerator()
   op = OperationNode(
@@ -162,13 +163,13 @@ def test_expr_sw_call_with_keywords():
     results=[],
     regions=[],
   )
-  res = gen._expr_sw_call(op)
+  res: typing.Any = gen._expr_sw_call(op)
   assert len(res.args) == 3
   assert res.args[0].keyword is None
   assert res.args[2].keyword.value == "kw1"
 
 
-def test_expr_sw_op():
+def test_expr_sw_op() -> None:
   """Verifies the behavior of expr sw op."""
   gen = DummyGenerator()
   op = OperationNode(
@@ -178,7 +179,7 @@ def test_expr_sw_op():
     results=[],
     regions=[],
   )
-  res = gen._expr_sw_op(op)
+  res: typing.Any = gen._expr_sw_op(op)
   assert isinstance(res, cst.Call)
   assert len(res.args) == 1
   assert res.args[0].keyword.value == "kw1"
@@ -189,12 +190,12 @@ def test_expr_sw_op():
     results=[],
     regions=[],
   )
-  res2 = gen._expr_sw_op(op2)
+  res2: typing.Any = gen._expr_sw_op(op2)
   assert isinstance(res2, cst.BinaryOperation)
   assert isinstance(res2.operator, cst.Add)
 
 
-def test_expr_binop_all_ops():
+def test_expr_binop_all_ops() -> None:
   """Verifies the behavior of expr binop all ops."""
   gen = DummyGenerator()
   op_err = OperationNode(
@@ -204,10 +205,10 @@ def test_expr_binop_all_ops():
     results=[],
     regions=[],
   )
-  res_err = gen._expr_binop(op_err, "binop.add")
+  res_err: typing.Any = gen._expr_binop(op_err, "binop.add")
   assert isinstance(res_err, cst.Name)
   assert res_err.value == "error_binop"
-  ops = {
+  ops: dict[str, typing.Any] = {
     "add": cst.Add,
     "sub": cst.Subtract,
     "mul": cst.Multiply,
@@ -231,13 +232,13 @@ def test_expr_binop_all_ops():
       results=[],
       regions=[],
     )
-    res = gen._expr_binop(op, f"binop.{op_name}")
+    res: typing.Any = gen._expr_binop(op, f"binop.{op_name}")
     assert isinstance(res.operator, expected_cst_op)
 
 
-def test_convert_setattr_empty():
+def test_convert_setattr_empty() -> None:
   """Converts setattr empty."""
   gen = DummyGenerator()
   op = OperationNode(name="sw.setattr", attributes=[], operands=[], results=[], regions=[])
-  res = gen._convert_setattr(op)
+  res: typing.Any = gen._convert_setattr(op)
   assert isinstance(res.body[0], cst.Pass)

@@ -14,7 +14,7 @@ It defines the structure for:
 - **Patterns**: Graph fusion rules.
 """
 
-from typing import Dict, List, Optional, Any, Union, Tuple, Literal
+from typing import Dict, List, Optional, Union, Literal, Any
 from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
 from ml_switcheroo.enums import LogicOp as LogicOp
@@ -51,7 +51,7 @@ class ParameterDef(BaseModel):
   doc: Optional[str] = Field(None, description="Argument docstring explanation.")
 
   # --- Feature: Rich Defaults ---
-  default: Optional[Any] = Field(
+  default: Any = Field(
     None,
     description="Default value. Supports primitives (int, float, bool, str) and containers (list, dict, None).",
   )
@@ -132,15 +132,16 @@ class FrameworkVariant(BaseModel):
     None,
     description="Mapping from Standard Argument Name to Framework Argument Name. If value is null, argument is dropped.",
   )
-  arg_values: Optional[Dict[str, Union[Dict[str, Any], Any]]] = Field(
-    None,
+  arg_values: Any = Field(
+    default_factory=lambda: {},
     description="Map of {StandardArg: {SourceValue: TargetCode}} for enums, OR {StandardArg: TargetCode} for constant injection.",
   )
-  kwargs_map: Optional[Dict[str, Optional[str]]] = Field(
-    None, description="Mapping for specific keys within a **kwargs expansion. Values can be null to drop the key."
+  kwargs_map: Any = Field(
+    default_factory=lambda: {},
+    description="Mapping for specific keys within a **kwargs expansion. Values can be null to drop the key.",
   )
-  inject_args: Optional[Dict[str, Any]] = Field(
-    None,
+  inject_args: Any = Field(
+    default_factory=lambda: {},
     description="Dictionary of new arguments to inject with fixed default values (supports primitives and complex types).",
   )
 
@@ -208,7 +209,7 @@ class FrameworkVariant(BaseModel):
   missing_message: Optional[str] = Field(
     None, description="Custom error message to display if this mapping fails or is missing."
   )
-  replace_with_graph: Optional[List[Dict[str, Any]]] = Field(
+  replace_with_graph: Any = Field(
     None, description="List of nodes defining a subgraph replacement for macro_graph operations."
   )
 
@@ -232,8 +233,8 @@ class PluginScaffoldDef(BaseModel):
   )
 
   # --- Feature: Auto-Wire ---
-  auto_wire: Optional[Dict[str, Any]] = Field(
-    None,
+  auto_wire: Any = Field(
+    default_factory=lambda: {},
     description="Dictionary defining Semantic Operations to be automatically injected via the plugin itself. Matches the structure of an ODL OperationDef JSON.",
   )
 
@@ -265,9 +266,7 @@ class OperationDef(BaseModel):
   # Classifies the op usage pattern (Function call, Context Manager, etc.)
   op_type: OpType = Field(OpType.FUNCTION, description="Syntactic type: function, context, decorator, attribute, class.")
 
-  std_args: List[Union[str, Tuple[str, str], ParameterDef, Dict[str, Any]]] = Field(
-    default_factory=list, description="List of standardized arguments."
-  )
+  std_args: List[Union[str, ParameterDef]] = Field(default_factory=list, description="List of standardized arguments.")
   variants: Dict[str, Optional[FrameworkVariant]] = Field(
     ...,
     description="Map of framework keys (e.g. 'torch') to their implementation details.",

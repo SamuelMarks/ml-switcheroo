@@ -10,9 +10,14 @@ It parses the specific structure of OpenXLA docs:
 - Syntax: `#### Syntax` blocks containing MLIR signatures.
 """
 
+from typing import Any
+
+import typing
+
+
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import List, Union
 
 from ml_switcheroo.utils.console import log_error, log_info
 
@@ -20,7 +25,7 @@ from ml_switcheroo.utils.console import log_error, log_info
 class StableHloSpecImporter:
   """Parse StableHLO Markdown specification files."""
 
-  def parse_file(self, target_file: Path) -> Dict[str, Any]:
+  def parse_file(self, target_file: Path) -> typing.Dict[str, dict]:
     """Parse `spec.md` from the StableHLO repository.
 
     Args:
@@ -36,7 +41,7 @@ class StableHloSpecImporter:
     log_info(f"Parsing StableHLO Spec: {target_file.name}...")
     return self._parse_markdown(target_file)
 
-  def _parse_markdown(self, fpath: Path) -> Dict[str, Any]:
+  def _parse_markdown(self, fpath: Path) -> typing.Dict[str, dict]:
     """Parse markdown structures directly into semantic definitions.
 
     Args:
@@ -51,9 +56,9 @@ class StableHloSpecImporter:
     md = MarkdownIt()
     tokens = md.parse(content)
 
-    semantics: Dict[str, Any] = {}
+    semantics: dict[Any, Any] = {}
     current_op: Union[str, None] = None
-    current_def: Dict[str, Any] = {}
+    current_def: dict[Any, Any] = {}
 
     for i, token in enumerate(tokens):
       if token.type == "heading_open" and token.tag == "h3":
@@ -95,7 +100,7 @@ class StableHloSpecImporter:
 
     return semantics
 
-  def _finalize_op(self, semantics: Dict[str, Any], name: str, details: Dict[str, Any]) -> None:
+  def _finalize_op(self, semantics: typing.Dict[str, dict], name: str, details: dict) -> None:
     """Clean up and register the operation.
 
     Args:

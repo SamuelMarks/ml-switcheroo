@@ -5,12 +5,12 @@ from ml_switcheroo.analysis.audit import CoverageScanner
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_coverage_scanner_import_resolution():
+def test_coverage_scanner_import_resolution() -> None:
   """Test element."""
-  semantics = SemanticsManager()
-  scanner = CoverageScanner(semantics, {"torch", "jax"})
+  semantics: SemanticsManager = SemanticsManager()
+  scanner: CoverageScanner = CoverageScanner(semantics, {"torch", "jax"})
 
-  code = """
+  code: str = """
 import torch
 import torch.nn as nn
 from jax import numpy as jnp
@@ -24,7 +24,7 @@ lax.add(1, 2)
 torch.float32
 unknown.call()
 """
-  tree = cst.parse_module(code)
+  tree: cst.Module = cst.parse_module(code)
   tree.visit(scanner)
 
   # Check alias map
@@ -42,12 +42,12 @@ unknown.call()
   assert "unknown.call" not in scanner.results
 
 
-def test_coverage_scanner_resolve_fqn():
+def test_coverage_scanner_resolve_fqn() -> None:
   """Test element."""
-  semantics = SemanticsManager()
-  scanner = CoverageScanner(semantics, {"torch"})
+  semantics: SemanticsManager = SemanticsManager()
+  scanner: CoverageScanner = CoverageScanner(semantics, {"torch"})
 
-  code = """
+  code: str = """
 import torch as t
 from torch import nn
 
@@ -55,22 +55,22 @@ t.sum()
 nn.Conv2d()
 non_name_call(1)
 """
-  tree = cst.parse_module(code)
+  tree: cst.Module = cst.parse_module(code)
   tree.visit(scanner)
 
   assert scanner.results["torch.sum"][1] == "torch"
   assert scanner.results["torch.nn.Conv2d"][1] == "torch"
 
 
-def test_coverage_scanner_edge_cases():
+def test_coverage_scanner_edge_cases() -> None:
   """Test element."""
-  semantics = SemanticsManager()
-  scanner = CoverageScanner(semantics, {"torch"})
+  semantics: SemanticsManager = SemanticsManager()
+  scanner: CoverageScanner = CoverageScanner(semantics, {"torch"})
 
   # Test line 69 (not node.module)
-  code_no_module = "from . import something"
-  tree = cst.parse_module(code_no_module)
-  tree.visit(scanner)
+  code_no_module: str = "from . import something"
+  tree_no_module: cst.Module = cst.parse_module(code_no_module)
+  tree_no_module.visit(scanner)
 
   # Test line 156 (no raw name)
   scanner._check_node(cst.Pass())
@@ -80,10 +80,10 @@ def test_coverage_scanner_edge_cases():
   # A standalone name 't' will be an Attribute or Name in Expr, but CoverageScanner
   # only visits Call and Attribute. Let's make an attribute call that evaluates to just the root.
   # Actually, a Call node like t() where t is an alias for torch.
-  code_alias_only = """
+  code_alias_only: str = """
 import torch as t
 t()
 """
-  tree = cst.parse_module(code_alias_only)
-  tree.visit(scanner)
+  tree_alias_only: cst.Module = cst.parse_module(code_alias_only)
+  tree_alias_only.visit(scanner)
   assert scanner.results["torch"][1] == "torch"

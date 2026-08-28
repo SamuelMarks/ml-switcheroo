@@ -1,6 +1,6 @@
 """MLIR Compiler Backend."""
 
-from typing import Any, Optional
+from typing import Any
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.mlir.cst import (
@@ -21,7 +21,7 @@ class MlirBackend(CompilerBackend):
   mapping each logical node to an `sw.op` operation, and then prints it.
   """
 
-  def __init__(self, semantics: Optional[Any] = None) -> None:
+  def __init__(self, semantics: Any = None) -> None:
     """Initialize the MLIR backend.
 
     Args:

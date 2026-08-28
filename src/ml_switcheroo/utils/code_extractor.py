@@ -10,16 +10,19 @@ It ensures that:
 3.  Dependencies (like helper methods or constants) are resolved.
 """
 
+import typing
+
+
 import inspect
 import textwrap
-from typing import Any, List, Type
+from typing import List
 
 
 class CodeExtractor:
   """Extract self-contained source code for Python classes or functions."""
 
   @staticmethod
-  def extract_class(cls_obj: Type[Any]) -> str:
+  def extract_class(cls_obj: typing.Type[typing.Any]) -> str:
     """Read the source code of a class and formats it for injection.
 
     Args:

@@ -3,32 +3,33 @@
 from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RdnaSynthesizer
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from unittest.mock import patch
+from typing import Optional
 
 
 class DummySemantics:
   """Test element."""
 
-  def resolve_variant(self, abstract_id, flavor):
+  def resolve_variant(self, abstract_id: str, flavor: str) -> Optional[dict]:
     """Test element."""
     return None
 
-  def get_definition(self, kind: str):
+  def get_definition(self, kind: str) -> Optional[dict]:
     """Test element."""
     return None
 
 
-def test_rdna_synthesizer_branches():
+def test_rdna_synthesizer_branches() -> None:
   """Test element."""
   # 1. Test when macros.json does not exist
   with patch("os.path.exists", return_value=False):
-    synth = RdnaSynthesizer(semantics=DummySemantics())
-    assert not synth.macro_registry
+    synth: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
+    assert not getattr(synth, "macro_registry")
 
   # 2. Test when macros.json exists but is empty
   with patch("os.path.exists", return_value=True):
     with patch("builtins.open", __import__("unittest").mock.mock_open(read_data="{}")):
-      synth = RdnaSynthesizer(semantics=DummySemantics())
-      assert not synth.macro_registry
+      synth2: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
+      assert not getattr(synth2, "macro_registry")
 
   # 3. Test multiple edges to same target (174->176)
   nodes = [
@@ -41,24 +42,24 @@ def test_rdna_synthesizer_branches():
     LogicalEdge(source="in1", target="add"),
     LogicalEdge(source="in2", target="add"),  # multiple edges
   ]
-  graph = LogicalGraph(nodes=nodes, edges=edges)
-  synth = RdnaSynthesizer(semantics=DummySemantics())
-  synth.from_graph(graph)
+  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
+  synth3: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
+  synth3.from_graph(graph)
 
   # 4. Test when output has no sources (188->178)
-  nodes = [LogicalNode(id="out2", kind="Output")]
-  edges = []
-  graph = LogicalGraph(nodes=nodes, edges=edges)
-  synth = RdnaSynthesizer(semantics=DummySemantics())
-  synth.from_graph(graph)
+  nodes2 = [LogicalNode(id="out2", kind="Output")]
+  edges2 = []
+  graph2: LogicalGraph = LogicalGraph(nodes=nodes2, edges=edges2)
+  synth4: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
+  synth4.from_graph(graph2)
 
 
-def test_unmapped_op_and_comment():
+def test_unmapped_op_and_comment() -> None:
   """Test element."""
   # Test Unmapped Op and RdnaComment branches
   nodes = [LogicalNode(id="unmapped1", kind="TotallyUnknownOp")]
-  graph = LogicalGraph(nodes=nodes, edges=[])
+  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
 
-  synth = RdnaSynthesizer(semantics=DummySemantics())
-  cst_mod = synth.from_graph(graph)
+  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
+  cst_mod: list = synth.from_graph(graph)
   assert cst_mod is not None

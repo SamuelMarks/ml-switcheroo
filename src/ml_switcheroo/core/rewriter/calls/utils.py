@@ -14,12 +14,40 @@ Decoupling Logic:
     Functional unwrapping detection is driven by `StructuralTraits`.
 """
 
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Optional, Tuple, TYPE_CHECKING
 import libcst as cst
 
 from ml_switcheroo.utils.node_diff import diff_nodes
 from ml_switcheroo.core.tracer import get_tracer
 from ml_switcheroo.semantics.manager import SemanticsManager
+
+if TYPE_CHECKING:
+  # structural typing for rewriter to avoid circular import
+  from typing import Protocol
+
+  class SignatureContextDummy(Protocol):
+    """Dummy signature context for type hinting."""
+
+    existing_args: set
+    injected_args: list
+
+  class Any(Protocol):
+    """Dummy rewriter context for type hinting."""
+
+    signature_stack: list[SignatureContextDummy]
+
+  class RewriterDummy(Protocol):
+    """Dummy rewriter for type hinting."""
+
+    context: Any
+
+    def _report_warning(self, msg: str) -> None:
+      """Dummy method."""
+      ...
+
+    def _create_dotted_name(self, name: str) -> cst.Attribute:
+      """Dummy method."""
+      ...
 
 
 def is_functional_apply(node: cst.Call, method_name: Optional[str] = "apply") -> bool:
@@ -47,7 +75,9 @@ def is_functional_apply(node: cst.Call, method_name: Optional[str] = "apply") ->
   return False
 
 
-def rewrite_stateful_call(rewriter: Any, node: cst.Call, instance_name: str, config: Dict[str, str]) -> cst.Call:
+def rewrite_stateful_call(
+  rewriter: "RewriterDummy", node: cst.Call, instance_name: str, config: Dict[str, str]
+) -> cst.Call:
   """Rewrite a call to a stateful object to match a functional pattern.
 
   Used when converting OOP frameworks to Functional ones where state must be passed explicitly.
@@ -105,7 +135,7 @@ def rewrite_stateful_call(rewriter: Any, node: cst.Call, instance_name: str, con
       attr=cst.Name(method_name),
     )
   else:
-    new_func = node.func  # type: ignore
+    new_func = node.func
 
   return node.with_changes(func=new_func, args=new_args)
 
@@ -315,12 +345,12 @@ def inject_permute_call(
   parts = api_str.split(".")
   func_node = cst.Name(parts[0])
   for part in parts[1:]:
-    func_node = cst.Attribute(value=func_node, attr=cst.Name(part))  # type: ignore
+    func_node = cst.Attribute(value=func_node, attr=cst.Name(part))
 
   # 3. Construct Args
   # Input argument
   input_arg = cst.Arg(
-    value=base_node,  # type: ignore
+    value=base_node,
     comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
   )
 
@@ -358,7 +388,7 @@ def inject_permute_call(
     for i, idx_val in enumerate(indices):
       comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
       if i == len(indices) - 1:
-        comma = cst.MaybeSentinel.DEFAULT  # type: ignore
+        comma = cst.MaybeSentinel.DEFAULT
 
       call_args.append(
         cst.Arg(

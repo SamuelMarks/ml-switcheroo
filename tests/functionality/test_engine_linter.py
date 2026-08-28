@@ -1,7 +1,8 @@
 """Test suite for the Engine Linter module."""
 
 import pytest
-from ml_switcheroo.core.engine import ASTEngine
+import typing
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 from unittest.mock import MagicMock, patch
@@ -11,19 +12,19 @@ import libcst as cst
 class MockUsageScanner(cst.CSTVisitor):
   """Mock Usage Scanner class for testing purposes."""
 
-  def __init__(self, *args, **kwargs):
+  def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
     """Initializes the MockUsageScanner instance."""
     pass
 
-  def get_result(self):
+  def get_result(self) -> bool:
     """Mock implementation of get result."""
     return True
 
-  def on_visit(self, node):
+  def on_visit(self, node: typing.Any) -> bool:
     """Mock implementation of on visit."""
     return False
 
-  def on_leave(self, node):
+  def on_leave(self, node: typing.Any) -> None:
     """Mock implementation of on leave."""
     pass
 
@@ -31,38 +32,38 @@ class MockUsageScanner(cst.CSTVisitor):
 class MockSemantics(SemanticsManager):
   """Mock Semantics class for testing purposes."""
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data = {}
-    self.framework_configs = {}
-    self.import_data = {}
-    self.test_templates = {}
-    self._known_rng_methods = set()
-    self._reverse_index = {}
-    self._key_origins = {}
-    self._validation_status = {}
-    self._providers = {}
-    self._source_registry = {}
+    self.data: dict[str, typing.Any] = {}
+    self.framework_configs: dict[str, typing.Any] = {}
+    self.import_data: dict[str, typing.Any] = {}
+    self.test_templates: dict[str, typing.Any] = {}
+    self._known_rng_methods: set[str] = set()
+    self._reverse_index: dict[str, typing.Any] = {}
+    self._key_origins: dict[str, str] = {}
+    self._validation_status: dict[str, typing.Any] = {}
+    self._providers: dict[str, typing.Any] = {}
+    self._source_registry: dict[str, typing.Any] = {}
 
-  def get_import_map(self, target_fw):
+  def get_import_map(self, target_fw: str) -> dict[str, typing.Any]:
     """Mock implementation of get import map."""
     return {}
 
-  def get_framework_aliases(self):
+  def get_framework_aliases(self) -> dict[str, typing.Any]:
     """Mock implementation of get framework aliases."""
     return {}
 
-  def get_all_rng_methods(self):
+  def get_all_rng_methods(self) -> set[str]:
     """Mock implementation of get all rng methods."""
     return set()
 
-  def get_framework_config(self, fw):
+  def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
     """Mock implementation of get framework configuration."""
     return {}
 
 
 @pytest.fixture
-def engine():
+def engine() -> typing.Generator[ASTEngine, None, None]:
   """Provides a mock engine for testing."""
   mgr = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
@@ -75,7 +76,7 @@ def engine():
   del mock_jax.create_emitter
   del mock_jax.create_parser
 
-  def get_adapter_side_effect(name):
+  def get_adapter_side_effect(name: str) -> typing.Optional[MagicMock]:
     """Gets adapter side effect."""
     if name == "torch":
       return mock_torch
@@ -87,30 +88,33 @@ def engine():
     yield ASTEngine(semantics=mgr, config=config)
 
 
-def test_engine_catches_leaked_import(engine):
+def test_engine_catches_leaked_import(engine: ASTEngine) -> None:
   """Verifies the behavior of engine catches leaked import."""
-  code = "\nimport torch\nx = 1\n"
+  code: str = "\nimport torch\nx = 1\n"
   with patch("ml_switcheroo.core.engine.UsageScanner", side_effect=MockUsageScanner):
-    result = engine.run(code)
+    result: ConversionResult = engine.run(code)
   assert result.success is True
+  assert result.errors is not None
   assert len(result.errors) > 0
   assert any(("Forbidden Import: 'torch'" in e for e in result.errors))
 
 
-def test_engine_catches_leaked_usage(engine):
+def test_engine_catches_leaked_usage(engine: ASTEngine) -> None:
   """Verifies the behavior of engine catches leaked usage."""
-  code = "\nimport torch\ny = torch.abs(x)\n"
-  result = engine.run(code)
+  code: str = "\nimport torch\ny = torch.abs(x)\n"
+  result: ConversionResult = engine.run(code)
   assert "torch.abs(x)" in result.code
   assert result.has_errors
-  errors_str = str(result.errors)
+  errors_str: str = str(result.errors)
   assert "Forbidden" in errors_str
 
 
-def test_linter_trace_event(engine):
+def test_linter_trace_event(engine: ASTEngine) -> None:
   """Verifies the behavior of linter trace event."""
-  code = "import torch"
+  code: str = "import torch"
   with patch("ml_switcheroo.core.engine.UsageScanner", side_effect=MockUsageScanner):
-    result = engine.run(code)
-  phase_descriptions = [e["description"] for e in result.trace_events if e["type"] == "phase_start"]
+    result: ConversionResult = engine.run(code)
+  phase_descriptions: list[str] = [
+    typing.cast(str, e["description"]) for e in result.trace_events if e["type"] == "phase_start"
+  ]
   assert "Structural Linter" in phase_descriptions

@@ -5,21 +5,22 @@ import json
 from pathlib import Path
 from unittest import mock
 import pytest
+from typing import List, Dict
 
 # Add scripts directory to sys.path to import it
-scripts_dir = Path(__file__).parent.parent / "scripts"
+scripts_dir: Path = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(scripts_dir.resolve()))
 
 import generate_10k_plan  # noqa: E402
 
 
 @pytest.fixture
-def mock_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+def mock_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
   """Sets up mock repositories and temporary directories."""
-  tmp_repos = tmp_path / "tmp_repos"
+  tmp_repos: Path = tmp_path / "tmp_repos"
   monkeypatch.setattr(generate_10k_plan, "TMP_DIR", tmp_repos)
 
-  mock_repos = {
+  mock_repos: Dict[str, str] = {
     "pytorch": "https://pytorch.com",
     "keras": "https://keras.com",
     "flax": "https://flax.com",
@@ -31,19 +32,19 @@ def mock_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
   }
   monkeypatch.setattr(generate_10k_plan, "REPOS", mock_repos)
 
-  mock_dirs = {k: ["core"] for k in mock_repos}
+  mock_dirs: Dict[str, List[str]] = {k: ["core"] for k in mock_repos}
   monkeypatch.setattr(generate_10k_plan, "FOCUS_DIRS", mock_dirs)
 
   return tmp_repos
 
 
-def test_clone_repos(mock_env: Path, monkeypatch: pytest.MonkeyPatch):
+def test_clone_repos(mock_env: Path, monkeypatch: pytest.MonkeyPatch) -> None:
   """Test repository cloning logic."""
   # Create one existing repo to test skip path
-  repo_a = mock_env / "pytorch"
+  repo_a: Path = mock_env / "pytorch"
   repo_a.mkdir(parents=True)
 
-  mock_run = mock.Mock()
+  mock_run: mock.Mock = mock.Mock()
   monkeypatch.setattr(generate_10k_plan.subprocess, "run", mock_run)
 
   generate_10k_plan.clone_repos()
@@ -52,46 +53,46 @@ def test_clone_repos(mock_env: Path, monkeypatch: pytest.MonkeyPatch):
   assert mock_run.call_count == 7
 
 
-def test_extract_api_surface_file_and_dir(mock_env: Path):
+def test_extract_api_surface_file_and_dir(mock_env: Path) -> None:
   """Test API extraction for both files and directories."""
-  repo_a = mock_env / "pytorch"
+  repo_a: Path = mock_env / "pytorch"
 
   # Set up a directory with a Python file and a test file
-  layers_dir = repo_a / "core"
+  layers_dir: Path = repo_a / "core"
   layers_dir.mkdir(parents=True)
   (layers_dir / "dense.py").write_text("class Dense:\n  pass\nclass _PrivateDense:\n  pass\n", encoding="utf-8")
   (layers_dir / "test_dense.py").write_text("class TestDense:\n  pass", encoding="utf-8")
 
-  functional_file = layers_dir / "functional.py"
+  functional_file: Path = layers_dir / "functional.py"
   functional_file.write_text(
     "def relu():\n  pass\ndef _private():\n  pass\nclass Outer:\n  def inner_method(self):\n    pass\n",
     encoding="utf-8",
   )
 
-  apis = generate_10k_plan.extract_api_surface("pytorch", ["core", "core/functional.py"])
+  apis: List[str] = generate_10k_plan.extract_api_surface("pytorch", ["core", "core/functional.py"])
 
   # Expected: dense.Dense, functional.Outer, functional.relu (inner_method skipped, private skipped, test skipped)
   assert apis == ["dense.Dense", "functional.Outer", "functional.relu"]
 
 
-def test_extract_api_surface_parse_error(mock_env: Path):
+def test_extract_api_surface_parse_error(mock_env: Path) -> None:
   """Test API extraction handles parse errors gracefully."""
-  repo_b = mock_env / "keras"
-  core_dir = repo_b / "core"
+  repo_b: Path = mock_env / "keras"
+  core_dir: Path = repo_b / "core"
   core_dir.mkdir(parents=True)
 
-  bad_file = core_dir / "bad.py"
+  bad_file: Path = core_dir / "bad.py"
   bad_file.write_text("class InvalidSyntax(", encoding="utf-8")
 
-  apis = generate_10k_plan.extract_api_surface("keras", ["core"])
+  apis: List[str] = generate_10k_plan.extract_api_surface("keras", ["core"])
   assert apis == []
 
 
-def test_generate_mappings(mock_env: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+def test_generate_mappings(mock_env: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
   """Test the mapping generation logic."""
 
   # Mock extract_api_surface to return predetermined APIs
-  def mock_extract(repo_name, focus_dirs):
+  def mock_extract(repo_name: str, focus_dirs: List[str]) -> List[str]:
     """Mock extract."""
     if repo_name == "pytorch":
       return ["module.Dense", "module.Relu"]
@@ -101,12 +102,14 @@ def test_generate_mappings(mock_env: Path, monkeypatch: pytest.MonkeyPatch, tmp_
 
   monkeypatch.setattr(generate_10k_plan, "extract_api_surface", mock_extract)
 
-  plan_path = tmp_path / "10000_STEP_PLAN.md"
-  json_path = tmp_path / "universal_mapping.json"
+  plan_path: Path = tmp_path / "10000_STEP_PLAN.md"
+  json_path: Path = tmp_path / "universal_mapping.json"
+
+  import io
 
   original_open = Path.open
 
-  def mock_open(self, *args, **kwargs):
+  def mock_open(self: Path, *args: tuple[str, ...], **kwargs: dict[str, str]) -> io.IOBase:
     """Mock open."""
     if self.name == "10000_STEP_PLAN.md":
       return original_open(plan_path, *args, **kwargs)
@@ -121,10 +124,10 @@ def test_generate_mappings(mock_env: Path, monkeypatch: pytest.MonkeyPatch, tmp_
   # Check json output
   assert json_path.exists()
   with open(json_path) as f:
-    mappings = json.load(f)
+    mappings: Dict[str, Dict[str, Dict[str, str]]] = json.load(f)
 
   assert "pytorch_to_keras" in mappings
-  pt_to_kr = mappings["pytorch_to_keras"]
+  pt_to_kr: Dict[str, Dict[str, str]] = mappings["pytorch_to_keras"]
 
   assert pt_to_kr["module.Dense"]["type"] == "direct"
   assert pt_to_kr["module.Dense"]["target"] == "other.dense"
@@ -133,7 +136,7 @@ def test_generate_mappings(mock_env: Path, monkeypatch: pytest.MonkeyPatch, tmp_
   assert pt_to_kr["module.Relu"]["intermediate"] == "jax"
 
 
-def test_main_block(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+def test_main_block(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
   """Test the main execution block."""
   import runpy
   import subprocess
@@ -141,7 +144,7 @@ def test_main_block(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
 
   monkeypatch.setattr(subprocess, "run", mock.Mock())
 
-  original_cwd = os.getcwd()
+  original_cwd: str = os.getcwd()
   os.chdir(tmp_path)
   try:
     runpy.run_path(str(scripts_dir / "generate_10k_plan.py"), run_name="__main__")

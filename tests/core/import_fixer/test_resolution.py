@@ -1,5 +1,6 @@
 """Test suite for the Import Resolver module."""
 
+import pytest
 import libcst as cst
 from unittest.mock import Mock
 
@@ -11,7 +12,7 @@ from ml_switcheroo.core.import_fixer.resolution import (
 )
 
 
-def test_importreq_signature():
+def test_importreq_signature() -> None:
   """Verifies the behavior of ImportReq.signature."""
   req1 = ImportReq(module="torch")
   assert req1.signature == "torch"
@@ -30,22 +31,22 @@ def test_importreq_signature():
   assert req5.signature == "jax"
 
 
-def test_deduplicate():
+def test_deduplicate() -> None:
   """Verifies the behavior of _deduplicate."""
-  reqs = [
+  reqs: list[ImportReq] = [
     ImportReq(module="torch"),
     ImportReq(module="torch", alias="torch"),
     ImportReq(module="jax", subcomponent="numpy", alias="jnp"),
     ImportReq(module="jax", subcomponent="numpy", alias="jnp"),
   ]
-  deduped = _deduplicate(reqs)
+  deduped: list[ImportReq] = _deduplicate(reqs)
   assert len(deduped) == 2
 
 
-def test_qualnamescanner(monkeypatch):
+def test_qualnamescanner(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of _QualNameScanner."""
-  code = "import torch; torch.nn.Linear(10, 10); x = 5"
-  tree = cst.parse_module(code)
+  code: str = "import torch; torch.nn.Linear(10, 10); x = 5"
+  tree: cst.Module = cst.parse_module(code)
 
   scanner = _QualNameScanner("torch.nn")
   tree.visit(scanner)
@@ -81,9 +82,9 @@ def test_qualnamescanner(monkeypatch):
   assert scanner3.found is False
 
 
-def test_importresolver():
+def test_importresolver() -> None:
   """Verifies the behavior of ImportResolver."""
-  mock_semantics = Mock()
+  mock_semantics: Mock = Mock()
   # Mock alias
   mock_semantics.get_framework_aliases.return_value = {"jax": ("jax.numpy", "jnp")}
   # Mock import map
@@ -92,11 +93,11 @@ def test_importresolver():
     "torch.nn.functional": ("jax.nn", None, None),
   }
 
-  resolver = ImportResolver(semantics=mock_semantics)
+  resolver = ImportResolver(semantics=mock_semantics)  # type: ignore
 
   # Test tree where things are used
-  code = "import jax; jnp.zeros(5); flax.nnx.Linear(); jax.nn.relu()"
-  tree = cst.parse_module(code)
+  code: str = "import jax; jnp.zeros(5); flax.nnx.Linear(); jax.nn.relu()"
+  tree: cst.Module = cst.parse_module(code)
 
   plan = resolver.resolve(tree, "jax")
 
@@ -117,24 +118,24 @@ def test_importresolver():
   assert plan.required_imports[3].subcomponent is None
 
   # test not used path
-  code_empty = "x = 1"
-  tree_empty = cst.parse_module(code_empty)
+  code_empty: str = "x = 1"
+  tree_empty: cst.Module = cst.parse_module(code_empty)
   plan_empty = resolver.resolve(tree_empty, "jax")
   assert len(plan_empty.required_imports) == 0
 
 
-def test_importresolver_full_path():
+def test_importresolver_full_path() -> None:
   """Verifies the behavior of ImportResolver using full paths."""
-  mock_semantics = Mock()
+  mock_semantics: Mock = Mock()
   mock_semantics.get_framework_aliases.return_value = {"jax": ("jax.numpy", "jnp")}
   mock_semantics.get_import_map.return_value = {
     "torch.nn": ("flax", "nnx", "nnx"),
   }
-  resolver = ImportResolver(semantics=mock_semantics)
+  resolver = ImportResolver(semantics=mock_semantics)  # type: ignore
 
   # Even if we use jax.numpy, it should detect it and inject alias
-  code = "jax.numpy.zeros(5)"
-  tree = cst.parse_module(code)
+  code: str = "jax.numpy.zeros(5)"
+  tree: cst.Module = cst.parse_module(code)
   plan = resolver.resolve(tree, "jax")
   assert len(plan.required_imports) == 2
   assert plan.required_imports[0].module == "jax"

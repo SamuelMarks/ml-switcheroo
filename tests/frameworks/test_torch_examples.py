@@ -6,14 +6,14 @@ from ml_switcheroo.frameworks.torch import TorchAdapter
 
 
 @pytest.fixture
-def adapter():
+def adapter() -> TorchAdapter:
   """Provides a mock adapter for testing."""
   return TorchAdapter()
 
 
-def test_tiered_examples_structure(adapter):
+def test_tiered_examples_structure(adapter: TorchAdapter) -> None:
   """Verifies the behavior of tiered examples structure."""
-  examples = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert isinstance(examples, dict)
   assert "tier1_math" in examples
   assert "tier2_neural_simple" in examples
@@ -21,36 +21,36 @@ def test_tiered_examples_structure(adapter):
   assert "tier3_extras_dataloader" in examples
 
 
-def test_tier1_math_validity(adapter):
+def test_tier1_math_validity(adapter: TorchAdapter) -> None:
   """Verifies the behavior of tier1 math validity."""
-  code = adapter.get_tiered_examples()["tier1_math"]
+  code: str = adapter.get_tiered_examples()["tier1_math"]
   ast.parse(code)
   assert "torch.abs" in code
   assert "torch.add" in code
   assert "torch.mean" in code
 
 
-def test_tier2_neural_simple_validity(adapter):
+def test_tier2_neural_simple_validity(adapter: TorchAdapter) -> None:
   """Verifies the behavior of tier2 neural simple validity."""
-  code = adapter.get_tiered_examples()["tier2_neural_simple"]
+  code: str = adapter.get_tiered_examples()["tier2_neural_simple"]
   ast.parse(code)
   assert "class Net(nn.Module):" in code
   assert "super().__init__()" in code
   assert "nn.functional.relu" in code
 
 
-def test_tier2_neural_cnn_validity(adapter):
+def test_tier2_neural_cnn_validity(adapter: TorchAdapter) -> None:
   """Verifies the behavior of tier2 neural cnn validity."""
-  code = adapter.get_tiered_examples()["tier2_neural_cnn"]
+  code: str = adapter.get_tiered_examples()["tier2_neural_cnn"]
   ast.parse(code)
   assert "class ConvNet(nn.Module):" in code
   assert "nn.Conv2d" in code
   assert "torch.flatten" in code
 
 
-def test_tier3_extras_dataloader_validity(adapter):
+def test_tier3_extras_dataloader_validity(adapter: TorchAdapter) -> None:
   """Verifies the behavior of tier3 extras dataloader validity."""
-  code = adapter.get_tiered_examples()["tier3_extras_dataloader"]
+  code: str = adapter.get_tiered_examples()["tier3_extras_dataloader"]
   ast.parse(code)
   assert "DataLoader" in code
   assert "TensorDataset" in code

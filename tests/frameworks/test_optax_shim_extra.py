@@ -5,11 +5,11 @@ import importlib
 from unittest.mock import patch
 
 
-def test_optax_shim_import_error():
+def test_optax_shim_import_error() -> None:
   """Verifies the behavior of optax shim import correctly handling an error."""
-  with patch.dict(sys.modules, {"optax": None}):
+  with patch.dict(sys.modules, {"optax": None}):  # type: ignore
     import ml_switcheroo.frameworks.common.optax_shim as optax_shim
 
     importlib.reload(optax_shim)
-    assert optax_shim.optax is None
+    assert getattr(optax_shim, "optax", None) is None
   importlib.reload(optax_shim)

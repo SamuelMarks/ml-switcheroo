@@ -1,12 +1,14 @@
 """Test module."""
 
 from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassRegister, SassLabel
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassRegister, SassLabel, SassNode
+from ml_switcheroo.core.graph import LogicalGraph
+from typing import List
 
 
-def test_sass_lifter_basic():
+def test_sass_lifter_basic() -> None:
   """Test element."""
-  stmts = [
+  stmts: List[SassNode] = [
     SassComment(text="; BEGIN Linear(add1)"),
     SassInstruction(opcode="VADD", operands=[SassRegister(name="R0"), SassRegister(name="R1"), SassRegister(name="R2")]),
     SassComment(text="; END Linear(add1)"),
@@ -16,38 +18,38 @@ def test_sass_lifter_basic():
     SassComment(text="; Unmapped Op: something(xyz)"),
     SassLabel(name="L1"),
   ]
-  lifter = SassLifter()
-  graph = lifter.lift(stmts)
+  lifter: SassLifter = SassLifter()
+  graph: LogicalGraph = lifter.lift(stmts)
   assert len(graph.nodes) >= 0
 
 
-def test_sass_lifter_mismatch_end():
+def test_sass_lifter_mismatch_end() -> None:
   """Test element."""
-  stmts = [
+  stmts: List[SassNode] = [
     SassComment(text="; BEGIN Linear(add1)"),
     SassComment(text="; END Linear(add2)"),
   ]
-  lifter = SassLifter()
-  graph = lifter.lift(stmts)
+  lifter: SassLifter = SassLifter()
+  graph: LogicalGraph = lifter.lift(stmts)
   assert len(graph.nodes) >= 0
 
 
-def test_sass_lifter_unmapped_flatten():
+def test_sass_lifter_unmapped_flatten() -> None:
   """Test element."""
-  stmts = [
+  stmts: List[SassNode] = [
     SassComment(text="; Unmapped Op: flatten(some_id)"),
   ]
-  lifter = SassLifter()
-  graph = lifter.lift(stmts)
+  lifter: SassLifter = SassLifter()
+  graph: LogicalGraph = lifter.lift(stmts)
   assert len(graph.nodes) >= 0
 
 
-def test_sass_lifter_instruction_unmapped():
+def test_sass_lifter_instruction_unmapped() -> None:
   """Test element."""
-  stmts = [
+  stmts: List[SassNode] = [
     SassInstruction(opcode="VADD", operands=[]),
   ]
-  lifter = SassLifter()
-  graph = lifter.lift(stmts)
+  lifter: SassLifter = SassLifter()
+  graph: LogicalGraph = lifter.lift(stmts)
   # The first instruction gets added as unmapped node
   assert len(graph.nodes) >= 0

@@ -4,9 +4,10 @@ import sys
 import importlib
 import inspect
 from unittest.mock import MagicMock
+from typing import Any, Callable, List
 
 
-def try_call(func):
+def try_call(func: Callable[..., Any]) -> None:
   """Docstring."""
   try:
     func()
@@ -22,25 +23,25 @@ def try_call(func):
     pass
 
 
-def brute_module(mod_name):
+def brute_module(mod_name: str) -> None:
   """Docstring."""
   try:
-    mod = importlib.import_module(mod_name)
+    mod: Any = importlib.import_module(mod_name)
   except Exception:
     return
   for name, obj in inspect.getmembers(mod):
     if inspect.isfunction(obj) or inspect.isclass(obj):
-      if obj.__module__ == mod_name:
+      if getattr(obj, "__module__", "") == mod_name:
         try_call(obj)
         if inspect.isclass(obj):
           for m_name, method in inspect.getmembers(obj, predicate=inspect.isroutine):
             try_call(method)
 
 
-def test_brute_force_all_testing():
+def test_brute_force_all_testing() -> None:
   """Docstring."""
   sys.argv = ["ml_switcheroo"]
-  mods = [
+  mods: List[str] = [
     "ml_switcheroo.__main__",
     "ml_switcheroo.testing.batch_runner",
     "ml_switcheroo.testing.bisector",

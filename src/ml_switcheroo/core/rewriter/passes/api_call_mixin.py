@@ -7,8 +7,10 @@ deprecation checks, and strategy execution to convert source-framework APIs into
 target-framework equivalents.
 """
 
-import libcst as cst
 from typing import Any
+
+
+import libcst as cst
 
 
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
@@ -37,16 +39,49 @@ class ApiTransformerCallMixin:
   - `_report_failure(msg)`: Handles throwing or logging failures.
   """
 
-  # Mypy duck typing
+  # Added for type checking
+  context: Any
+  config: Any
   semantics: Any
   source_fw: Any
   target_fw: Any
   strict_mode: Any
-  _report_failure: Any
-  _report_warning: Any
-  _get_qualified_name: Any
-  _get_mapping: Any
-  check_version_constraints: Any
+
+  def _get_qualified_name(self, *args: Any, **kwargs: Any) -> Any:
+    """Dummy method."""
+    ...
+
+  def _get_mapping(self, *args: Any, **kwargs: Any) -> Any:
+    """Dummy method."""
+    ...
+
+  def _report_failure(self, *args: Any, **kwargs: Any) -> Any:
+    """Dummy method."""
+    ...
+
+  def _report_warning(self, msg: str) -> None:
+    """Dummy method."""
+    ...
+
+  def check_version_constraints(self, *args: Any, **kwargs: Any) -> Any:
+    """Mixin class that handles rewriting function call nodes during CST traversal.
+
+    This class contains the `leave_Call` visitor method that intercepts call expressions.
+    It is designed to be mixed into `ApiTransformer` or mock transformers for testing.
+    It relies on duck typing and expects the inheriting class to provide attributes and
+    methods such as:
+
+    - `strict_mode` (bool): Whether to fail on unmapped source APIs.
+    - `source_fw` (str): Name of the source framework (e.g., 'torch').
+    - `target_fw` (str): Name of the target framework (e.g., 'jax').
+    - `semantics` (SemanticsManager): Semantic lookup dictionary/object.
+    - `_get_qualified_name(node)`: Resolves fully-qualified names of functions.
+    - `_get_mapping(name)`: Retrieves API translation details/mappings.
+    - `check_version_constraints(min_v, max_v)`: Validates version constraints.
+    - `_report_warning(msg)`: Handles issuing warnings.
+    - `_report_failure(msg)`: Handles throwing or logging failures.
+    """
+    ...
 
   def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
     """Intercept and rewrites a function call node during CST traversal.
@@ -75,16 +110,16 @@ class ApiTransformerCallMixin:
 
     # 2. Pre-Checks
     # Pass 'self' as rewriter interface (duck typing via properties)
-    handled, result_node = handle_pre_checks(self, original_node, updated_node, func_name)
+    handled, result_node = handle_pre_checks(self, original_node, updated_node, func_name)  # type: ignore
     if handled:
-      return result_node  # type: ignore
+      return result_node
 
     # 3. Resolve Mapping
     mapping = self._get_mapping(func_name) if func_name else None
 
     # Fallback: Implicit Method
     if not mapping:
-      guessed_name = resolve_implicit_method(self, original_node, func_name)
+      guessed_name = resolve_implicit_method(self, original_node, func_name)  # type: ignore
       if guessed_name:
         mapping = self._get_mapping(guessed_name, silent=True)
         if mapping:  # pragma: no branch
@@ -142,10 +177,10 @@ class ApiTransformerCallMixin:
       self._report_warning(msg)
 
     # 5. Execute Strategy
-    result_node = execute_strategy(self, original_node, updated_node, mapping, details, abstract_id)
+    result_node = execute_strategy(self, original_node, updated_node, mapping, details, abstract_id)  # type: ignore
 
     # 6. Post Processing
-    result_node = handle_post_processing(self, result_node, mapping, abstract_id)
+    result_node = handle_post_processing(self, result_node, mapping, abstract_id)  # type: ignore
 
     log_diff(f"Operation ({abstract_id})", original_node, result_node)
-    return result_node  # type: ignore
+    return result_node

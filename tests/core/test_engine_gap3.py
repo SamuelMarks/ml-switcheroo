@@ -7,14 +7,14 @@ import libcst as cst
 from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
 
-def get_tracer_mock():
+def get_tracer_mock() -> MagicMock:
   """Gets tracer mock."""
   m = MagicMock()
   m.export.return_value = []
   return m
 
 
-def test_rewriter_loopback_sharding_full():
+def test_rewriter_loopback_sharding_full() -> None:
   """Verifies the behavior of rewriter loopback sharding full."""
   cfg = RuntimeConfig(strict_mode=False)
   cfg.enable_sharding = True

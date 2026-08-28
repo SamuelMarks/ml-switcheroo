@@ -1,12 +1,13 @@
 """Docstring."""
 
 from ml_switcheroo.utils.doc_renderer import OpPageRenderer
+from typing import Dict, Any, List
 
 
-def test_render_rst_full():
+def test_render_rst_full() -> None:
   """Docstring."""
-  renderer = OpPageRenderer()
-  context = {
+  renderer: OpPageRenderer = OpPageRenderer()
+  context: Dict[str, Any] = {
     "name": "Abs",
     "description": "Computes absolute value.",
     "args": ["x: Array", "y"],
@@ -30,7 +31,7 @@ def test_render_rst_full():
     ],
   }
 
-  rst = renderer.render_rst(context)
+  rst: str = renderer.render_rst(context)
   assert "Abs" in rst
   assert "Computes absolute value." in rst
   assert "x: Array" in rst
@@ -40,54 +41,59 @@ def test_render_rst_full():
   assert "jnp.abs" in rst
 
 
-def test_render_rst_no_variants_no_args():
+def test_render_rst_no_variants_no_args() -> None:
   """Docstring."""
-  renderer = OpPageRenderer()
-  context = {"name": "Dummy", "description": "Dummy desc.", "args": [], "variants": []}
+  renderer: OpPageRenderer = OpPageRenderer()
+  context: Dict[str, Any] = {"name": "Dummy", "description": "Dummy desc.", "args": [], "variants": []}
 
-  rst = renderer.render_rst(context)
+  rst: str = renderer.render_rst(context)
   assert "Dummy" in rst
   assert "Dummy desc." in rst
 
 
-def test_rst_header_structure():
+def test_rst_header_structure() -> None:
   """Docstring."""
-  renderer = OpPageRenderer()
-  context = {
+  renderer: OpPageRenderer = OpPageRenderer()
+  context: Dict[str, Any] = {
     "name": "Linear",
     "description": "Linear transformation.",
     "args": ["in: int", "out: int"],
     "variants": [{"framework": "Torch", "api": "torch.nn.Linear"}],
   }
-  rst = renderer.render_rst(context)
+  rst: str = renderer.render_rst(context)
   assert "Linear" in rst
 
 
-def test_rst_args_block():
+def test_rst_args_block() -> None:
   """Docstring."""
-  renderer = OpPageRenderer()
-  context = {"name": "Linear", "description": "Linear transformation.", "args": ["in: int", "out: int"], "variants": []}
-  rst = renderer.render_rst(context)
+  renderer: OpPageRenderer = OpPageRenderer()
+  context: Dict[str, Any] = {
+    "name": "Linear",
+    "description": "Linear transformation.",
+    "args": ["in: int", "out: int"],
+    "variants": [],
+  }
+  rst: str = renderer.render_rst(context)
   assert "in: int, out: int" in rst
 
 
-def test_html_injection():
+def test_html_injection() -> None:
   """Docstring."""
-  renderer = OpPageRenderer()
-  context = {
+  renderer: OpPageRenderer = OpPageRenderer()
+  context: Dict[str, Any] = {
     "name": "Linear",
     "description": "Linear transformation.",
     "args": ["in: int", "out: int"],
     "variants": [{"framework": "Torch", "api": "torch.nn.Linear"}],
   }
-  rst = renderer.render_rst(context)
+  rst: str = renderer.render_rst(context)
   assert "raw:: html" in rst
 
 
-def test_html_tabs_content():
+def test_html_tabs_content() -> None:
   """Docstring."""
-  renderer = OpPageRenderer()
-  variants = [
+  renderer: OpPageRenderer = OpPageRenderer()
+  variants: List[Dict[str, Any]] = [
     {
       "framework": "PyTorch",
       "api": "torch.nn.Linear",
@@ -96,7 +102,7 @@ def test_html_tabs_content():
     },
     {"framework": "JAX", "api": "flax.nnx.Linear", "implementation_type": "Direct Mapping", "doc_url": None},
   ]
-  html = renderer._render_html_tabs(variants)
+  html: str = renderer._render_html_tabs(variants)
   assert '<button class="op-tab-btn active"' in html
   assert ">PyTorch</button>" in html
   assert ">JAX</button>" in html
@@ -106,6 +112,6 @@ def test_html_tabs_content():
   assert "Direct Mapping" in html
   assert '<a href="http://torch.docs/Linear"' in html
   assert "flax.nnx.Linear" in html
-  jax_block_start = html.find('id="JAX_1"')
-  jax_block = html[jax_block_start:]
+  jax_block_start: int = html.find('id="JAX_1"')
+  jax_block: str = html[jax_block_start:]
   assert "Official Docs" not in jax_block

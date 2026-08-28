@@ -1,19 +1,20 @@
 """Docstring."""
 
+from typing import Dict, Any, Tuple, Optional
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_manager_init():
+def test_manager_init() -> None:
   """Docstring."""
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
   assert sm is not None
 
 
-def test_manager_coverage():
+def test_manager_coverage() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
 
   assert sm.get_test_template("not_real") is None
 
@@ -24,13 +25,13 @@ def test_manager_coverage():
   assert sm.get_patterns() is not None
 
 
-def test_manager_load_validation():
+def test_manager_load_validation() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
   from pathlib import Path
   from unittest.mock import patch, mock_open
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
 
   # Path doesn't exist
   with patch("pathlib.Path.exists", return_value=False):
@@ -42,25 +43,25 @@ def test_manager_load_validation():
       sm.load_validation_report(Path("dummy.json"))
 
   # Success
-  m_open = mock_open(read_data='{"Abs": true}')
+  m_open: Any = mock_open(read_data='{"Abs": true}')
   with patch("pathlib.Path.exists", return_value=True):
     with patch("builtins.open", m_open):
       sm.load_validation_report(Path("dummy.json"))
       assert sm._validation_status.get("Abs") is True
 
 
-def test_manager_update_definition():
+def test_manager_update_definition() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
   from unittest.mock import patch, mock_open
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
 
   # Validation error
   sm.update_definition("Abs", {"operation": "Abs", "std_args": "NOT_A_LIST"})  # Will trigger Pydantic error
 
   # Valid
-  m_open = mock_open()
+  m_open: Any = mock_open()
   with patch("builtins.open", m_open):
     with patch("pathlib.Path.mkdir"):
       sm.update_definition("NewOp", {"variants": {"torch": {"api": "torch.new_op"}}})
@@ -74,11 +75,11 @@ def test_manager_update_definition():
       assert "WriteFail" in sm.data
 
 
-def test_manager_get_import_map():
+def test_manager_get_import_map() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
 
   # Mocking internal states to hit coverage
   sm._providers = {
@@ -92,7 +93,7 @@ def test_manager_get_import_map():
   }
 
   # Try direct mapping
-  res = sm.get_import_map("jax")
+  res: Dict[str, Tuple[str, Optional[str], Optional[str]]] = sm.get_import_map("jax")
   assert "torch" in res
   assert res["torch"][0] == "jax.numpy"
 
@@ -101,28 +102,28 @@ def test_manager_get_import_map():
   sm._framework_aliases = {"myfw": ("myfw.mod", "myfw")}  # Doesn't matter
 
   # Let's override resolve_inheritance
-  original_res = sm._resolve_inheritance
+  original_res: Any = sm._resolve_inheritance
   sm._resolve_inheritance = lambda x: "flax" if x == "custom" else None
 
-  res2 = sm.get_import_map("custom")
+  res2: Dict[str, Tuple[str, Optional[str], Optional[str]]] = sm.get_import_map("custom")
   assert "torch.nn" in res2
   assert res2["torch.nn"][0] == "flax.linen"
 
   sm._resolve_inheritance = original_res
 
 
-def test_manager_resolve_variant():
+def test_manager_resolve_variant() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
 
   # Mock data
   sm.data = {"Abs": {"variants": {"torch": {"api": "torch.abs"}, "numpy": {"api": "np.abs"}}}}
 
   # Direct match
   assert sm.resolve_variant("Abs", "torch") is not None
-  assert sm.resolve_variant("Abs", "torch")["api"] == "torch.abs"
+  assert sm.resolve_variant("Abs", "torch")["api"] == "torch.abs"  # type: ignore
 
   # Missing
   assert sm.resolve_variant("Unknown", "torch") is None
@@ -131,28 +132,28 @@ def test_manager_resolve_variant():
   sm._resolve_inheritance = lambda x: "numpy" if x == "custom_numpy" else None
 
   assert sm.resolve_variant("Abs", "custom_numpy") is not None
-  assert sm.resolve_variant("Abs", "custom_numpy")["api"] == "np.abs"
+  assert sm.resolve_variant("Abs", "custom_numpy")["api"] == "np.abs"  # type: ignore
 
   # Fallback missing
   assert sm.resolve_variant("Abs", "unknown_fw") is None
 
 
-def test_manager_get_definition_missing():
+def test_manager_get_definition_missing() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
   assert sm.get_definition("unknown.api") is None
 
 
-def test_manager_get_framework_config():
+def test_manager_get_framework_config() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
   sm._providers = {"jax": {"core": {"provider": "val"}}}
 
-  res = sm.get_framework_config("jax")
+  res: Dict[str, Any] = sm.get_framework_config("jax")
   assert res is not None
 
   sm._resolve_inheritance = lambda x: "jax" if x == "custom" else None
@@ -162,11 +163,11 @@ def test_manager_get_framework_config():
   assert sm.get_framework_config("unknown") == {}
 
 
-def test_manager_resolve_inheritance():
+def test_manager_resolve_inheritance() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
   sm.framework_configs = {"custom": {"extends": "base_custom"}}
   assert sm._resolve_inheritance("custom") == "base_custom"
 
@@ -174,59 +175,59 @@ def test_manager_resolve_inheritance():
   # We mock get_adapter to return a mock adapter with inherits_from
   from unittest.mock import patch, MagicMock
 
-  mock_ad = MagicMock()
+  mock_ad: MagicMock = MagicMock()
   mock_ad.inherits_from = "base_ad"
   with patch("ml_switcheroo.semantics.manager.get_adapter", return_value=mock_ad):
     assert sm._resolve_inheritance("custom2") == "base_ad"
 
 
-def test_manager_resolve_variant_limit():
+def test_manager_resolve_variant_limit() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
   sm.data = {"Abs": {"variants": {"root": {"api": "root.api"}}}}
   # Create an inheritance cycle
   sm._resolve_inheritance = lambda x: "b" if x == "a" else "a"
   assert sm.resolve_variant("Abs", "a") is None
 
 
-def test_manager_is_verified():
+def test_manager_is_verified() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
   sm._validation_status = {"Abs": False, "Relu": True}
   assert sm.is_verified("Abs") is False
   assert sm.is_verified("Relu") is True
   assert sm.is_verified("Unknown") is True
 
 
-def test_manager_get_definition_by_id():
+def test_manager_get_definition_by_id() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
   sm.data = {"Abs": {"foo": "bar"}}
   assert sm.get_definition_by_id("Abs") == {"foo": "bar"}
 
 
-def test_manager_get_definition():
+def test_manager_get_definition() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
   sm.data = {"torch.abs": {"api": "torch.abs"}}
-  res = sm.get_definition("torch.abs")
+  res: Optional[Tuple[str, Dict[str, Any]]] = sm.get_definition("torch.abs")
   assert res is not None
   assert res[0] == "Abs"
 
 
-def test_manager_get_definition_missing_real():
+def test_manager_get_definition_missing_real() -> None:
   """Docstring."""
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  sm = SemanticsManager()
+  sm: SemanticsManager = SemanticsManager()
   sm.data = {}
   sm._reverse_index = {}
   assert sm.get_definition("completely.unknown.api") is None

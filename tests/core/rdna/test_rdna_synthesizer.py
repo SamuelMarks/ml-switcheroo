@@ -1,6 +1,7 @@
 """Test suite for the Rdna Synthesizer module."""
 
 import pytest
+import typing
 from unittest.mock import MagicMock
 from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RegisterAllocator, RdnaSynthesizer, MAX_VGPR, MAX_SGPR
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
@@ -11,8 +12,8 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 def test_allocator_dual_pools() -> None:
   """Verifies the behavior of allocator dual pools."""
   alloc = RegisterAllocator()
-  v0 = alloc.get_vector_register("x")
-  s0 = alloc.get_scalar_register("cnt")
+  v0: RdnaVGPR = alloc.get_vector_register("x")
+  s0: RdnaSGPR = alloc.get_scalar_register("cnt")
   assert isinstance(v0, RdnaVGPR)
   assert v0.index == 0
   assert isinstance(s0, RdnaSGPR)
@@ -22,8 +23,8 @@ def test_allocator_dual_pools() -> None:
 def test_allocator_reuse() -> None:
   """Verifies the behavior of allocator reuse."""
   alloc = RegisterAllocator()
-  v_a = alloc.get_vector_register("a")
-  v_b = alloc.get_vector_register("a")
+  v_a: RdnaVGPR = alloc.get_vector_register("a")
+  v_b: RdnaVGPR = alloc.get_vector_register("a")
   assert v_a.index == v_b.index == 0
 
 
@@ -46,11 +47,11 @@ def test_allocator_overflow_sgpr() -> None:
 def test_allocator_temps() -> None:
   """Verifies the behavior of allocator temps."""
   alloc = RegisterAllocator()
-  t1 = alloc.allocate_vector_temp()
-  t2 = alloc.allocate_scalar_temp()
+  t1: RdnaVGPR = alloc.allocate_vector_temp()
+  t2: RdnaSGPR = alloc.allocate_scalar_temp()
   assert t1.index == 0
   assert t2.index == 0
-  t3 = alloc.allocate_vector_temp()
+  t3: RdnaVGPR = alloc.allocate_vector_temp()
   assert t3.index == 1
 
 
@@ -59,13 +60,13 @@ def mock_semantics() -> MagicMock:
   """Provides a mock semantics for testing."""
   mgr = MagicMock(spec=SemanticsManager)
 
-  def get_def(kind):
+  def get_def(kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
     """Gets def."""
     if kind == "Add":
       return ("Add", {})
     return None
 
-  def resolve(aid, fw):
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
     """Resolves ."""
     if fw == "rdna" and aid == "Add":
       return {"api": "v_add_f32"}
@@ -82,11 +83,11 @@ def test_graph_to_rdna_basic_math(mock_semantics: MagicMock) -> None:
   g = LogicalGraph()
   g.nodes = [LogicalNode("x", "Input", {}), LogicalNode("y", "Input", {}), LogicalNode("z", "Add", {})]
   g.edges = [LogicalEdge("x", "z"), LogicalEdge("y", "z")]
-  nodes = synth.from_graph(g)
+  nodes: list[typing.Any] = synth.from_graph(g)
   assert len(nodes) == 3
   assert isinstance(nodes[0], RdnaComment)
   assert "** Input x -> v0" in str(nodes[0]).replace(";", "**")
-  inst = nodes[2]
+  inst: typing.Any = nodes[2]
   assert isinstance(inst, RdnaInstruction)
   assert inst.opcode == "v_add_f32"
   assert str(inst.operands[0]) == "v2"
@@ -99,7 +100,7 @@ def test_graph_to_rdna_unmapped(mock_semantics: MagicMock) -> None:
   synth = RdnaSynthesizer(mock_semantics)
   g = LogicalGraph()
   g.nodes = [LogicalNode("n1", "MysteryOp", {})]
-  nodes = synth.from_graph(g)
+  nodes: list[typing.Any] = synth.from_graph(g)
   assert len(nodes) == 1
   assert "Unmapped Op: MysteryOp" in str(nodes[0])
 
@@ -108,8 +109,8 @@ def test_rdna_to_python_instruction() -> None:
   """Verifies the behavior of RDNA to python instruction."""
   synth = RdnaSynthesizer(MagicMock())
   inst = RdnaInstruction(opcode="v_add_f32", operands=[RdnaVGPR(index=0), RdnaVGPR(index=1), RdnaVGPR(index=2)])
-  mod = synth.to_python([inst])
-  code = mod.code
+  mod: typing.Any = synth.to_python([inst])
+  code: str = mod.code
   assert "v0 = rdna.v_add_f32(v1, v2)" in code
 
 
@@ -119,15 +120,15 @@ def test_rdna_to_python_ranges() -> None:
   inst = RdnaInstruction(
     opcode="image_load", operands=[RdnaVGPR(index=0, count=4), RdnaVGPR(index=4, count=4), RdnaSGPR(index=0, count=4)]
   )
-  mod = synth.to_python([inst])
-  code = mod.code
+  mod: typing.Any = synth.to_python([inst])
+  code: str = mod.code
   assert "v_0_3 = rdna.image_load(v_4_7, s_0_3)" in code
 
 
 def test_rdna_to_python_label() -> None:
   """Verifies the behavior of RDNA to python label."""
   synth = RdnaSynthesizer(MagicMock())
-  nodes = [RdnaLabel(name="L_LOOP")]
-  mod = synth.to_python(nodes)
-  code = mod.code
+  nodes: list[typing.Any] = [RdnaLabel(name="L_LOOP")]
+  mod: typing.Any = synth.to_python(nodes)
+  code: str = mod.code
   assert "# RdnaLabel: L_LOOP" in code

@@ -9,7 +9,6 @@ tuple-of-tuples format required by XLA compilers and NumPy-compatible libraries.
 """
 
 import libcst as cst
-from typing import Dict, Any
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
@@ -62,7 +61,7 @@ def _supports_numpy_padding(ctx: HookContext) -> bool:
   if not ctx.semantics:
     return False  # pragma: no cover  # pragma: no cover
 
-  conf: Dict[str, Any] = ctx.semantics.get_framework_config(ctx.target_fw)
+  conf = ctx.semantics.get_framework_config(ctx.target_fw)
   if not conf:
     return False  # pragma: no cover  # pragma: no cover
 
@@ -71,7 +70,7 @@ def _supports_numpy_padding(ctx: HookContext) -> bool:
     return False  # pragma: no cover  # pragma: no cover
 
   if isinstance(traits, dict):
-    return traits.get("has_numpy_compatible_arrays", False)  # type: ignore
+    return traits.get("has_numpy_compatible_arrays", False)
 
   if hasattr(traits, "has_numpy_compatible_arrays"):
     return getattr(traits, "has_numpy_compatible_arrays", False)
@@ -144,7 +143,7 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
     parts = target_api.split(".")
     new_func = cst.Name(parts[0])
     for part in parts[1:]:
-      new_func = cst.Attribute(value=new_func, attr=cst.Name(part))  # type: ignore
+      new_func = cst.Attribute(value=new_func, attr=cst.Name(part))
 
     return node.with_changes(func=new_func, args=args)
 

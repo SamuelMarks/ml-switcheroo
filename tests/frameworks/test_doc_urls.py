@@ -1,9 +1,10 @@
 """Test suite for the Doc Urls module."""
 
 import pytest
+import typing
 from ml_switcheroo.frameworks.base import get_adapter
 
-CASES = [
+CASES: list[tuple[str, str, str]] = [
   ("torch", "torch.nn.Linear", "https://pytorch.org/docs/stable/generated/torch.nn.Linear.html"),
   ("torch", "torch.nn.init.zeros_", "https://pytorch.org/docs/stable/nn.init.html#torch.nn.init.zeros_"),
   ("jax", "jax.numpy.abs", "https://jax.readthedocs.io/en/latest/_autosummary/jax.numpy.abs.html"),
@@ -17,26 +18,26 @@ CASES = [
 
 
 @pytest.mark.parametrize("fw_key, api, pattern", CASES)
-def test_doc_url_generation(fw_key, api, pattern):
+def test_doc_url_generation(fw_key: str, api: str, pattern: str) -> None:
   """Verifies the behavior of documentation URL generation."""
-  adapter = get_adapter(fw_key)
+  adapter: typing.Any = get_adapter(fw_key)
   assert adapter is not None, f"Adapter for {fw_key} missing"
-  url = adapter.get_doc_url(api)
+  url: typing.Optional[str] = adapter.get_doc_url(api)
   assert url is not None
   assert pattern in url
 
 
-def test_stub_adapters_return_docs():
+def test_stub_adapters_return_docs() -> None:
   """Verifies the behavior of stub adapters return documentation."""
-  mlir = get_adapter("mlir")
+  mlir: typing.Any = get_adapter("mlir")
   assert mlir is not None
   assert mlir.get_doc_url("tosa.add") is None
-  tikz = get_adapter("tikz")
+  tikz: typing.Any = get_adapter("tikz")
   assert tikz is not None
   assert tikz.get_doc_url("foo") is None
-  latex = get_adapter("latex_dsl")
+  latex: typing.Any = get_adapter("latex_dsl")
   assert latex is not None
   assert latex.get_doc_url("midl.Conv") is None
-  html = get_adapter("html")
+  html: typing.Any = get_adapter("html")
   assert html is not None
   assert html.get_doc_url("html_dsl.Conv") is None

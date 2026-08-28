@@ -4,14 +4,14 @@ import libcst as cst
 from ml_switcheroo.core.scanners import get_full_name, SimpleNameScanner, UsageScanner
 
 
-def test_get_full_name():
+def test_get_full_name() -> None:
   """Test get full name."""
   assert get_full_name(cst.Name("x")) == "x"
   assert get_full_name(cst.Attribute(value=cst.Name("x"), attr=cst.Name("y"))) == "x.y"
   assert get_full_name(cst.Call(func=cst.Name("x"))) == ""
 
 
-def test_simple_name_scanner():
+def test_simple_name_scanner() -> None:
   """Test simple name scanner."""
   scanner = SimpleNameScanner("target")
   mod = cst.parse_module("import target\ntarget = 1\nfrom target import x\nx = target\n")
@@ -24,7 +24,7 @@ def test_simple_name_scanner():
   assert not scanner2.found
 
 
-def test_usage_scanner():
+def test_usage_scanner() -> None:
   """Test usage scanner."""
   scanner = UsageScanner("torch")
   mod = cst.parse_module("import torch\ntorch.abs(x)")

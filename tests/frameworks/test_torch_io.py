@@ -3,7 +3,7 @@
 from ml_switcheroo.frameworks.torch_io import TorchIOMixin
 
 
-def test_torch_io_methods():
+def test_torch_io_methods() -> None:
   """Verifies the behavior of all PyTorch I/O mixin methods."""
   mixin = TorchIOMixin()
 
@@ -25,7 +25,7 @@ def test_torch_io_methods():
   ]
 
   # Test get_weight_load_code
-  load_code = mixin.get_weight_load_code("path_to_checkpoint")
+  load_code: str = mixin.get_weight_load_code("path_to_checkpoint")
   assert "torch.load(path_to_checkpoint, map_location='cpu', weights_only=True)" in load_code
   assert "loaded['state_dict']" in load_code
 
@@ -33,6 +33,6 @@ def test_torch_io_methods():
   assert mixin.get_tensor_to_numpy_expr("my_tensor") == "my_tensor.detach().cpu().numpy()"
 
   # Test get_weight_save_code
-  save_code = mixin.get_weight_save_code("my_state", "out_path")
+  save_code: str = mixin.get_weight_save_code("my_state", "out_path")
   assert "torch.from_numpy" in save_code
   assert "torch.save(converted_state, out_path)" in save_code

@@ -1,10 +1,11 @@
 """Test suite for extended SassAnalyzer edge cases and new macros."""
 
+import typing
 from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate, SassRegister
 
 
-def test_sass_analyzer_avgpool2d():
+def test_sass_analyzer_avgpool2d() -> None:
   """Verifies analyzer handles AvgPool2d limits."""
   instructions = [
     SassInstruction(
@@ -18,11 +19,11 @@ def test_sass_analyzer_avgpool2d():
       ],
     )
   ]
-  metadata = SassAnalyzer.analyze_block("AvgPool2d", instructions)
+  metadata: dict[str, typing.Any] = SassAnalyzer.analyze_block("AvgPool2d", instructions)
   assert metadata["kernel_size"] == 5
 
 
-def test_sass_analyzer_maxpool2d():
+def test_sass_analyzer_maxpool2d() -> None:
   """Verifies analyzer handles MaxPool2d limits."""
   instructions = [
     SassInstruction(
@@ -36,16 +37,16 @@ def test_sass_analyzer_maxpool2d():
       ],
     )
   ]
-  metadata = SassAnalyzer.analyze_block("MaxPool2d", instructions)
+  metadata: dict[str, typing.Any] = SassAnalyzer.analyze_block("MaxPool2d", instructions)
   assert metadata["kernel_size"] == 7
 
 
-def test_sass_analyzer_batchnorm2d():
+def test_sass_analyzer_batchnorm2d() -> None:
   """Verifies analyzer handles BatchNorm2d safely."""
   instructions = [
     SassInstruction(
       opcode="FADD", operands=[SassRegister(name="R1"), SassRegister(name="R2"), SassImmediate(value=0.001)]
     )
   ]
-  metadata = SassAnalyzer.analyze_block("BatchNorm2d", instructions)
+  metadata: dict[str, typing.Any] = SassAnalyzer.analyze_block("BatchNorm2d", instructions)
   assert len(metadata) == 0

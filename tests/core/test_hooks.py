@@ -5,12 +5,13 @@ AutoWireSpec, and related plugin registration mechanisms within the ml-switchero
 core framework.
 """
 
+import typing
 from ml_switcheroo.core.hooks import AutoWireSpec, HookContext
 from ml_switcheroo.config import RuntimeConfig
 from unittest.mock import MagicMock
 
 
-def test_autowirespec():
+def test_autowirespec() -> None:
   """Verifies that AutoWireSpec initializes and stores operation mappings correctly.
 
   This test instantiates AutoWireSpec with a mock operation mapping and asserts
@@ -27,7 +28,7 @@ def test_autowirespec():
   assert spec.ops["test_op"]["api"] == "test_api"
 
 
-def test_hookcontext_init():
+def test_hookcontext_init() -> None:
   """Verifies the proper initialization of the HookContext object.
 
   Ensures that HookContext correctly receives, stores, and exposes dependencies
@@ -46,7 +47,7 @@ def test_hookcontext_init():
   preamble_injector = MagicMock()
   symbol_table = MagicMock()
 
-  ctx = HookContext(semantics, config, arg_injector, preamble_injector, symbol_table)
+  ctx = HookContext(semantics, config, arg_injector, preamble_injector, symbol_table)  # type: ignore
   assert ctx.semantics == semantics
   assert ctx._runtime_config == config
   assert ctx._arg_injector == arg_injector
@@ -58,7 +59,7 @@ def test_hookcontext_init():
   assert ctx.current_op_id is None
 
 
-def test_hookcontext_resolve_type():
+def test_hookcontext_resolve_type() -> None:
   """Verifies that HookContext.resolve_type resolves node types correctly.
 
   Tests different return cases of the symbol table type-resolution, including
@@ -75,7 +76,7 @@ def test_hookcontext_resolve_type():
   mock_sym.name = "Tensor"
   symbol_table.get_type.return_value = mock_sym
 
-  ctx = HookContext(semantics=MagicMock(), config=RuntimeConfig(), symbol_table=symbol_table)
+  ctx = HookContext(semantics=MagicMock(), config=RuntimeConfig(), symbol_table=symbol_table)  # type: ignore
 
   # Tensor
   assert ctx.resolve_type("node") == "Tensor"
@@ -96,7 +97,7 @@ def test_hookcontext_resolve_type():
   assert ctx.resolve_type("node") is None
 
 
-def test_hookcontext_plugin_traits():
+def test_hookcontext_plugin_traits() -> None:
   """Verifies retrieval of custom plugin traits within the HookContext.
 
   Ensures that framework-specific plugin traits can be correctly read
@@ -113,8 +114,8 @@ def test_hookcontext_plugin_traits():
 
   # Dict traits
   semantics.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": True}}
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))
-  traits = ctx.plugin_traits
+  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))  # type: ignore
+  traits: typing.Any = ctx.plugin_traits
   assert traits.has_numpy_compatible_arrays is True
 
   # No traits in config
@@ -135,12 +136,12 @@ def test_hookcontext_plugin_traits():
   assert traits.has_numpy_compatible_arrays is False
 
   # None semantics
-  ctx = HookContext(semantics=None, config=RuntimeConfig(target_framework="jax"))
-  traits = ctx.plugin_traits
-  assert traits.has_numpy_compatible_arrays is False
+  ctx2 = HookContext(semantics=None, config=RuntimeConfig(target_framework="jax"))  # type: ignore
+  traits2: typing.Any = ctx2.plugin_traits
+  assert traits2.has_numpy_compatible_arrays is False
 
 
-def test_hookcontext_current_variant():
+def test_hookcontext_current_variant() -> None:
   """Verifies HookContext.current_variant correctly resolves the current framework variant.
 
   Tests the integration with the semantics manager's variant resolution
@@ -157,10 +158,10 @@ def test_hookcontext_current_variant():
   semantics = MagicMock()
   semantics.resolve_variant.return_value = {"api": "jax.numpy.add", "pack_to_tuple": "True"}
 
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))
+  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))  # type: ignore
   ctx.current_op_id = "Add"
 
-  variant = ctx.current_variant
+  variant: typing.Any = ctx.current_variant
   assert variant is not None
   assert variant.api == "jax.numpy.add"
   assert variant.pack_to_tuple == "True"
@@ -173,11 +174,11 @@ def test_hookcontext_current_variant():
   ctx.current_op_id = None
   assert ctx.current_variant is None
   ctx.current_op_id = "Add"
-  ctx.semantics = None
+  ctx.semantics = None  # type: ignore
   assert ctx.current_variant is None
 
 
-def test_hookcontext_injectors():
+def test_hookcontext_injectors() -> None:
   """Verifies the behavior of argument and preamble injectors in HookContext.
 
   Ensures that calling inject_signature_arg or inject_preamble properly
@@ -192,7 +193,7 @@ def test_hookcontext_injectors():
   """
   arg_inj = MagicMock()
   preamble_inj = MagicMock()
-  ctx = HookContext(semantics=MagicMock(), config=RuntimeConfig(), arg_injector=arg_inj, preamble_injector=preamble_inj)
+  ctx = HookContext(semantics=MagicMock(), config=RuntimeConfig(), arg_injector=arg_inj, preamble_injector=preamble_inj)  # type: ignore
 
   ctx.inject_signature_arg("x", "int")
   arg_inj.assert_called_with("x", "int")
@@ -201,12 +202,12 @@ def test_hookcontext_injectors():
   preamble_inj.assert_called_with("print('test')")
 
   # Should not crash if injectors are None
-  ctx = HookContext(semantics=MagicMock(), config=RuntimeConfig(), arg_injector=None, preamble_injector=None)
-  ctx.inject_signature_arg("x", "int")
-  ctx.inject_preamble("print('test')")
+  ctx2 = HookContext(semantics=MagicMock(), config=RuntimeConfig(), arg_injector=None, preamble_injector=None)  # type: ignore
+  ctx2.inject_signature_arg("x", "int")
+  ctx2.inject_preamble("print('test')")
 
 
-def test_hookcontext_config():
+def test_hookcontext_config() -> None:
   """Verifies that raw configuration values can be retrieved via HookContext.
 
   Validates that custom plugin configuration settings can be read by key
@@ -220,13 +221,13 @@ def test_hookcontext_config():
       None
   """
   config = RuntimeConfig(plugin_settings={"test_key": "test_val"})
-  ctx = HookContext(semantics=MagicMock(), config=config)
+  ctx = HookContext(semantics=MagicMock(), config=config)  # type: ignore
 
   assert ctx.raw_config("test_key") == "test_val"
   assert ctx.raw_config("missing_key", "default") == "default"
 
 
-def test_hookcontext_validate_settings():
+def test_hookcontext_validate_settings() -> None:
   """Verifies HookContext.validate_settings correctly parses and validates Pydantic schemas.
 
   Tests the parsing mechanism of custom configuration dictionaries using a Pydantic
@@ -252,7 +253,7 @@ def test_hookcontext_validate_settings():
     val2: int = 0
 
   config = RuntimeConfig(plugin_settings={"val1": "test", "val2": 1, "extra": True})
-  ctx = HookContext(semantics=MagicMock(), config=config)
+  ctx = HookContext(semantics=MagicMock(), config=config)  # type: ignore
 
   validated = ctx.validate_settings(TestSettings)
   assert validated.val1 == "test"
@@ -260,7 +261,7 @@ def test_hookcontext_validate_settings():
   assert not hasattr(validated, "extra")
 
 
-def test_hookcontext_lookup_api():
+def test_hookcontext_lookup_api() -> None:
   """Verifies HookContext.lookup_api retrieves the mapped target API name for an operation.
 
   Tests that the context queries the semantics manager for the correct variant API
@@ -275,18 +276,18 @@ def test_hookcontext_lookup_api():
   """
   semantics = MagicMock()
   semantics.resolve_variant.return_value = {"api": "jax.numpy.add"}
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))
+  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))  # type: ignore
 
   assert ctx.lookup_api("Add") == "jax.numpy.add"
 
   semantics.resolve_variant.return_value = None
   assert ctx.lookup_api("Add") is None
 
-  ctx.semantics = None
+  ctx.semantics = None  # type: ignore
   assert ctx.lookup_api("Add") is None
 
 
-def test_hookcontext_lookup_signature():
+def test_hookcontext_lookup_signature() -> None:
   """Verifies HookContext.lookup_signature parses and builds an operation's argument list.
 
   Tests that the signature parser correctly handles standard argument definitions
@@ -311,11 +312,11 @@ def test_hookcontext_lookup_signature():
     ]
   }
 
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig())
+  ctx = HookContext(semantics=semantics, config=RuntimeConfig())  # type: ignore
   assert ctx.lookup_signature("Add") == ["arg1", "arg2", "arg3"]
 
   semantics.get_definition_by_id.return_value = None
   assert ctx.lookup_signature("Add") == []
 
-  ctx.semantics = None
+  ctx.semantics = None  # type: ignore
   assert ctx.lookup_signature("Add") == []

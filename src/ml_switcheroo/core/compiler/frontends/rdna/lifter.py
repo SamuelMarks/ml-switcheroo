@@ -5,9 +5,7 @@ high-level `LogicalGraph`. It relies on semantic comment markers (e.g. `; BEGIN`
 emitted during compilation to reconstruct the control flow and layer definitions.
 """
 
-from typing import Any
-
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Any
 
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer

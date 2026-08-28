@@ -9,7 +9,7 @@ This module provides the ``ASTEngine``, generating code via:
 Supports optional **Graph-Guided Rewriting** (Loopback).
 """
 
-from typing import Any, Dict, Optional, cast
+from typing import Optional, cast, Any
 import libcst as cst
 
 from ml_switcheroo.config import RuntimeConfig
@@ -58,7 +58,7 @@ class ASTEngine:
     target: Optional[str] = None,
     strict_mode: bool = False,
     enable_graph_optimization: bool = False,
-    plugin_config: Optional[Dict[str, Any]] = None,
+    plugin_config=None,
     intermediate: Optional[str] = None,
   ) -> None:
     """Initialize the engine with semantics and configuration.
@@ -229,12 +229,12 @@ class ASTEngine:
       if self.source == "sass":
         parser = SassParser(code)
         nodes = parser.parse().statements
-        lifter: Any = SassLifter()
+        lifter = SassLifter()
         graph = lifter.lift(nodes)
       elif self.source == "rdna":
         parser = RdnaParser(code)  # type: ignore
         nodes = parser.parse().statements
-        lifter = RdnaLifter()
+        lifter = RdnaLifter()  # type: ignore
         graph = lifter.lift(nodes)
       elif self.source == "stablehlo":
         # StableHLO parses via ingest_code to Python CST, then frontend parses to graph

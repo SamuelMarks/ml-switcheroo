@@ -1,5 +1,6 @@
 """Test suite for the Cli Visuals module."""
 
+import typing
 from unittest.mock import patch
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -9,7 +10,7 @@ from rich.console import Console
 class StableMockSemantics(SemanticsManager):
   """Test suite for the Stable Mock Semantics component."""
 
-  def get_known_apis(self):
+  def get_known_apis(self) -> dict[str, typing.Any]:
     """Mock implementation of get known apis."""
     return {
       "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}},
@@ -20,7 +21,7 @@ class StableMockSemantics(SemanticsManager):
       "unsupported_op": {"std_args": ["x"], "variants": {"torch": {"api": "torch.oops"}}},
     }
 
-  def get_definition(self, api_name):
+  def get_definition(self, api_name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
     """Mock implementation of get definition."""
     if api_name == "torch.abs":
       return ("abs", {})
@@ -30,7 +31,7 @@ class StableMockSemantics(SemanticsManager):
 class MockInspector:
   """Mock Inspector class for testing purposes."""
 
-  def inspect(self, _pkg):
+  def inspect(self, _pkg: str) -> dict[str, typing.Any]:
     """Mock implementation of inspect."""
     return {
       "torch.abs": {"name": "abs", "params": ["x"], "docstring_summary": "Calculates abs."},
@@ -38,21 +39,21 @@ class MockInspector:
     }
 
 
-def test_matrix_visual_snapshot(snapshot, tmp_path):
+def test_matrix_visual_snapshot(snapshot: typing.Any, tmp_path: typing.Any) -> None:
   """Verifies the behavior of matrix visual snapshot."""
   semantics = StableMockSemantics()
   semantics._key_origins = {}
-  console = Console(file=None, force_terminal=True, width=100, record=True)
+  console = Console(file=None, force_terminal=True, width=100, record=True)  # type: ignore
   matrix = CompatibilityMatrix(semantics)
   matrix.console = console
-  expected_order = ["torch", "jax", "numpy", "tensorflow", "mlx", "paxml"]
+  expected_order: list[str] = ["torch", "jax", "numpy", "tensorflow", "mlx", "paxml"]
   with patch("ml_switcheroo.cli.matrix.get_framework_priority_order", return_value=expected_order):
     matrix.render()
-  output = console.export_text()
+  output: str = console.export_text()
 
   def header_insensitive(text: str) -> str:
     """Helper to header insensitive."""
-    lines = text.splitlines()
+    lines: list[str] = text.splitlines()
     if not lines:
       return text
     lines[0] = lines[0].strip()

@@ -5,7 +5,7 @@ that converts a stream of characters into a Concrete Syntax Tree defined in `cst
 """
 
 import re
-from typing import List, Any, cast
+from typing import List, cast, Any
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassComment,
   SassDirective,
@@ -48,7 +48,7 @@ class SassToken(Token):
 class SassLexer(Lexer):
   """Custom Lexer preserving trivia and matching SASS tokens."""
 
-  def __init__(self, lexer_conf: Any):
+  def __init__(self, lexer_conf: Any) -> None:
     """Initialize the SassLexer.
 
     Args:
@@ -56,7 +56,7 @@ class SassLexer(Lexer):
     """
     self.lexer_conf = lexer_conf
 
-  def lex(self, data: str) -> Any:  # type: ignore[override]
+  def lex(self, data: str) -> Any:
     """Tokenize the input string and attach trivia.
 
     Args:
@@ -190,7 +190,7 @@ class SassTransformer(Transformer[Any, Any]):
   """Transform parsed AST nodes into SassNode classes."""
 
   @v_args(inline=False)
-  def module(self, children: List[Any]) -> SassModule:
+  def module(self, children: list[Any]) -> SassModule:
     """Transform the top-level module rule.
 
     Args:
@@ -205,7 +205,7 @@ class SassTransformer(Transformer[Any, Any]):
     return mod
 
   @v_args(inline=False)
-  def empty_statement(self, children: List[Any]) -> None:
+  def empty_statement(self, children: list[Any]) -> None:
     """Transform an empty statement into None.
 
     Args:
@@ -217,7 +217,7 @@ class SassTransformer(Transformer[Any, Any]):
     return None
 
   @v_args(inline=False)
-  def comment_stmt(self, children: List[Any]) -> SassComment:
+  def comment_stmt(self, children: list[Any]) -> SassComment:
     """Transform a comment into a SassComment.
 
     Args:
@@ -231,7 +231,7 @@ class SassTransformer(Transformer[Any, Any]):
     return c
 
   @v_args(inline=False)
-  def directive(self, children: List[Any]) -> SassDirective:
+  def directive(self, children: list[Any]) -> SassDirective:
     """Transform a directive into a SassDirective.
 
     Args:
@@ -264,7 +264,7 @@ class SassTransformer(Transformer[Any, Any]):
     return d
 
   @v_args(inline=False)
-  def at_string(self, children: List[Any]) -> List[Any]:
+  def at_string(self, children: list[Any]) -> Any:
     """Transform an AT STRING into a list of Tokens.
 
     Args:
@@ -276,7 +276,7 @@ class SassTransformer(Transformer[Any, Any]):
     return children  # pragma: no cover
 
   @v_args(inline=False)
-  def param_list(self, children: List[Any]) -> List[Any]:  # pragma: no cover
+  def param_list(self, children: list[Any]) -> Any:  # pragma: no cover
     """Transform a parameter list.
 
     Args:
@@ -288,7 +288,7 @@ class SassTransformer(Transformer[Any, Any]):
     return children  # pragma: no cover
 
   @v_args(inline=False)
-  def label(self, children: List[Any]) -> SassLabel:
+  def label(self, children: list[Any]) -> SassLabel:
     """Transform a label into a SassLabel.
 
     Args:
@@ -302,7 +302,7 @@ class SassTransformer(Transformer[Any, Any]):
     return lbl
 
   @v_args(inline=False)
-  def instruction(self, children: List[Any]) -> SassInstruction:
+  def instruction(self, children: list[Any]) -> SassInstruction:
     """Transform an instruction.
 
     Args:
@@ -336,7 +336,7 @@ class SassTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def predicate(self, children: List[Any]) -> SassPredicate:
+  def predicate(self, children: list[Any]) -> SassPredicate:
     """Transform a predicate.
 
     Args:
@@ -358,7 +358,7 @@ class SassTransformer(Transformer[Any, Any]):
     return p
 
   @v_args(inline=False)
-  def operands(self, children: List[Any]) -> List[SassOperand]:
+  def operands(self, children: list[Any]) -> List[SassOperand]:
     """Transform an operands list.
 
     Args:
@@ -370,7 +370,7 @@ class SassTransformer(Transformer[Any, Any]):
     return [c for c in children if isinstance(c, SassOperand)]
 
   @v_args(inline=False)
-  def mem_bank(self, children: List[Any]) -> SassMemory:
+  def mem_bank(self, children: list[Any]) -> SassMemory:
     """Transform a memory bank access.
 
     Args:
@@ -387,7 +387,7 @@ class SassTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def mem_bank_single(self, children: List[Any]) -> SassMemory:
+  def mem_bank_single(self, children: list[Any]) -> SassMemory:
     """Transform a memory bank access without offset.
 
     Args:
@@ -403,7 +403,7 @@ class SassTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def mem_reg(self, children: List[Any]) -> SassMemory:
+  def mem_reg(self, children: list[Any]) -> SassMemory:
     """Transform a memory register access.
 
     Args:
@@ -418,7 +418,7 @@ class SassTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def mem_reg_offset(self, children: List[Any]) -> SassMemory:
+  def mem_reg_offset(self, children: list[Any]) -> SassMemory:
     """Transform a memory register access with offset.
 
     Args:
@@ -435,7 +435,7 @@ class SassTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def mem_reg_neg_offset(self, children: List[Any]) -> SassMemory:
+  def mem_reg_neg_offset(self, children: list[Any]) -> SassMemory:
     """Transform a memory register access with negative offset.
 
     Args:
@@ -452,7 +452,7 @@ class SassTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def register(self, children: List[Any]) -> SassRegister:
+  def register(self, children: list[Any]) -> SassRegister:
     """Transform a register.
 
     Args:
@@ -472,7 +472,7 @@ class SassTransformer(Transformer[Any, Any]):
     return r
 
   @v_args(inline=False)
-  def pred_at_bang_id(self, children: List[Any]) -> SassPredicate:  # pragma: no cover
+  def pred_at_bang_id(self, children: list[Any]) -> SassPredicate:  # pragma: no cover
     """Transform a @!identifier predicate.
 
     Args:
@@ -487,7 +487,7 @@ class SassTransformer(Transformer[Any, Any]):
     return p
 
   @v_args(inline=False)
-  def pred_at_bang_reg(self, children: List[Any]) -> SassPredicate:  # pragma: no cover
+  def pred_at_bang_reg(self, children: list[Any]) -> SassPredicate:  # pragma: no cover
     """Transform a @!register predicate.
 
     Args:
@@ -502,7 +502,7 @@ class SassTransformer(Transformer[Any, Any]):
     return p
 
   @v_args(inline=False)
-  def pred_at_id(self, children: List[Any]) -> SassPredicate:  # pragma: no cover
+  def pred_at_id(self, children: list[Any]) -> SassPredicate:  # pragma: no cover
     """Transform a @identifier predicate.
 
     Args:
@@ -517,7 +517,7 @@ class SassTransformer(Transformer[Any, Any]):
     return p
 
   @v_args(inline=False)
-  def pred_at_reg(self, children: List[Any]) -> SassPredicate:  # pragma: no cover
+  def pred_at_reg(self, children: list[Any]) -> SassPredicate:  # pragma: no cover
     """Transform a @register predicate.
 
     Args:
@@ -532,7 +532,7 @@ class SassTransformer(Transformer[Any, Any]):
     return p
 
   @v_args(inline=False)
-  def pred_bang_id(self, children: List[Any]) -> SassPredicate:  # pragma: no cover
+  def pred_bang_id(self, children: list[Any]) -> SassPredicate:  # pragma: no cover
     """Transform a !identifier predicate.
 
     Args:
@@ -547,7 +547,7 @@ class SassTransformer(Transformer[Any, Any]):
     return p
 
   @v_args(inline=False)
-  def pred_bang_reg(self, children: List[Any]) -> SassPredicate:  # pragma: no cover
+  def pred_bang_reg(self, children: list[Any]) -> SassPredicate:  # pragma: no cover
     """Transform a !register predicate.
 
     Args:
@@ -562,7 +562,7 @@ class SassTransformer(Transformer[Any, Any]):
     return p
 
   @v_args(inline=False)
-  def immediate(self, children: List[Any]) -> SassImmediate:
+  def immediate(self, children: list[Any]) -> SassImmediate:
     """Transform an immediate value.
 
     Args:
@@ -584,7 +584,7 @@ class SassTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def identifier(self, children: List[Any]) -> SassLabel:
+  def identifier(self, children: list[Any]) -> SassLabel:
     """Transform an identifier operand.
 
     Args:
@@ -623,6 +623,6 @@ class SassParser:
 
     try:
       tree = self.parser.parse(self.code)
-      return self.transformer.transform(tree)  # type: ignore
+      return self.transformer.transform(tree)
     except Exception as e:
       raise ValueError(f"Unexpected token: {e}")

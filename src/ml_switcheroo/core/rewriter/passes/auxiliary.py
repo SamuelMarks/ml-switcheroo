@@ -11,8 +11,6 @@ specifically:
 It merges logic previously found in `decorators.py` and `control_flow.py`.
 """
 
-from typing import Any
-
 from typing import Union, Optional
 import libcst as cst
 
@@ -130,7 +128,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     parts = name_str.split(".")
     node = cst.Name(parts[0])
     for part in parts[1:]:
-      node = cst.Attribute(value=node, attr=cst.Name(part))  # type: ignore
+      node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
 
   # --- Error Handling ---
@@ -168,7 +166,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     self,
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
-  ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel[Any]]:
+  ):
     """Proces statement errors.
 
     Args:
@@ -182,13 +180,13 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     if self.context.current_stmt_warnings:
       unique = list(dict.fromkeys(self.context.current_stmt_warnings))
       msg = "; ".join(unique)
-      return EscapeHatch.mark_failure(updated_node, msg)  # type: ignore
+      return EscapeHatch.mark_failure(updated_node, msg)
 
     # Check errors (Priority over warnings for reversion logic structure)
     if self.context.current_stmt_errors:
       unique = list(dict.fromkeys(self.context.current_stmt_errors))
       msg = "; ".join(unique)
-      return EscapeHatch.mark_failure(original_node, msg)  # type: ignore
+      return EscapeHatch.mark_failure(original_node, msg)
 
     return updated_node
 
@@ -239,7 +237,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
       if isinstance(current_expr, cst.Call):
         new_expr = current_expr.with_changes(func=new_name_node)
       else:
-        new_expr = new_name_node  # type: ignore
+        new_expr = new_name_node
 
       return updated_node.with_changes(decorator=new_expr)
 
@@ -247,7 +245,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
 
   # --- Control Flow Logic ---
 
-  def leave_For(self, original_node: cst.For, updated_node: cst.For) -> Union[cst.For, cst.CSTNode, cst.FlattenSentinel]:  # type: ignore
+  def leave_For(self, original_node: cst.For, updated_node: cst.For) -> Union[cst.For, cst.CSTNode, cst.FlattenSentinel]:
     """Process 'for' loops for safety checks and unrolling.
 
     Args:

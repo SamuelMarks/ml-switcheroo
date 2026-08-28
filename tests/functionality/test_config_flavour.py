@@ -7,7 +7,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def test_effective_framework_resolution():
+def test_effective_framework_resolution() -> None:
   """Verifies the behavior of effective framework resolution."""
   c1 = RuntimeConfig(source_framework="torch", target_framework="jax")
   assert c1.effective_source == "torch"
@@ -19,7 +19,7 @@ def test_effective_framework_resolution():
   assert c3.effective_source == "paxml"
 
 
-def test_engine_adopts_flavour():
+def test_engine_adopts_flavour() -> None:
   """Verifies the behavior of engine adopts flavour."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax", target_flavour="paxml")
   engine = ASTEngine(config=config)
@@ -27,7 +27,7 @@ def test_engine_adopts_flavour():
   assert engine.source == "torch"
 
 
-def test_rewriter_integration_mock():
+def test_rewriter_integration_mock() -> None:
   """Verifies the behavior of rewriter integration mock."""
   mgr = MagicMock(spec=SemanticsManager)
   mgr.get_known_apis.return_value = {}

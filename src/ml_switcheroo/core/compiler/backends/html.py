@@ -9,7 +9,7 @@ of the 'Time-Travel' WASM interactive demo, which is a separate Sphinx documenta
 extension (`ml_switcheroo.sphinx_ext`) and not an artifact produced by this backend.
 """
 
-from typing import Any, Dict, Optional, List
+from typing import Dict, List, Any
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, topological_sort
 from ml_switcheroo.core.html.nodes import SvgArrow, GridBox, HtmlDocument
@@ -22,7 +22,7 @@ class HtmlBackend(CompilerBackend):
   ROW_HEIGHT = 80
   GAP_HEIGHT = 0
 
-  def __init__(self, semantics: Optional[Any] = None) -> None:
+  def __init__(self, semantics: Any = None) -> None:
     """Initialize the HTML backend.
 
     Args:

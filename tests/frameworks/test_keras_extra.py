@@ -1,12 +1,14 @@
 """Test module."""
 
 from unittest.mock import MagicMock, patch
+import typing
 from ml_switcheroo.frameworks.keras import KerasAdapter
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 import sys
+import pytest
 
 
-def test_keras_collect_live(monkeypatch):
+def test_keras_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import ml_switcheroo.frameworks.keras as keras_fw
 
@@ -19,16 +21,16 @@ def test_keras_collect_live(monkeypatch):
   monkeypatch.setattr(keras_fw, "keras", mock_keras)
 
   adapter = keras_fw.KerasAdapter()
-  adapter._mode = "LIVE"
+  adapter._mode = "LIVE"  # type: ignore
 
   # Mock _scan_module on the adapter
-  def mock_scan_module(module, prefix, kind, block_list=None):
+  def mock_scan_module(module: typing.Any, prefix: str, kind: str, block_list: typing.Any = None) -> typing.Any:
     """Mocks _scan_module."""
     from ml_switcheroo_ir.schema.ghost import GhostRef
 
-    return [GhostRef(api_path=prefix + ".Test", name="Test", kind=kind, group=kind, params=[])]
+    return [GhostRef(api_path=prefix + ".Test", name="Test", kind=kind, group=kind, params=[])]  # type: ignore
 
-  adapter._scan_module = mock_scan_module
+  adapter._scan_module = mock_scan_module  # type: ignore
 
   assert adapter._collect_live(SemanticTier.LOSS)[0].api_path == "keras.losses.Test"
   assert adapter._collect_live(SemanticTier.OPTIMIZER)[0].api_path == "keras.optimizers.Test"
@@ -37,7 +39,7 @@ def test_keras_collect_live(monkeypatch):
   assert adapter._collect_live(SemanticTier.ARRAY_API) == []
 
 
-def test_keras_convert(monkeypatch):
+def test_keras_convert(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import ml_switcheroo.frameworks.keras as keras_fw
 
@@ -52,18 +54,18 @@ def test_keras_convert(monkeypatch):
     mock_keras.ops.convert_to_tensor.assert_called_once_with([1, 2, 3])
 
 
-def test_keras_convert_fail(monkeypatch):
+def test_keras_convert_fail(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import ml_switcheroo.frameworks.keras as keras_fw
 
   adapter = keras_fw.KerasAdapter()
 
   # Force ImportError
-  with patch.dict(sys.modules, {"keras": None}):
+  with patch.dict(sys.modules, {"keras": None}):  # type: ignore
     assert adapter.convert([1, 2, 3]) == [1, 2, 3]
 
 
-def test_keras_collect_ghost(monkeypatch):
+def test_keras_collect_ghost(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test function."""
   import ml_switcheroo.frameworks.keras as keras_fw
 
@@ -78,23 +80,23 @@ def test_keras_collect_ghost(monkeypatch):
     },
   ):
     adapter = keras_fw.KerasAdapter()
-    ghosts = adapter._collect_ghost(SemanticTier.EXTRAS)
+    ghosts: list[typing.Any] = adapter._collect_ghost(SemanticTier.EXTRAS)
     assert len(ghosts) == 1
     assert ghosts[0].api_path == "keras.fake"
 
-    adapter._snapshot_data = {}
+    adapter._snapshot_data = {}  # type: ignore
     assert adapter._collect_ghost(SemanticTier.EXTRAS) == []
 
 
-def test_keras_collect_ghost_no_snapshot():
+def test_keras_collect_ghost_no_snapshot() -> None:
   """Test function."""
   # Hit line 208
   adapter = KerasAdapter()
-  adapter._snapshot_data = None
+  adapter._snapshot_data = None  # type: ignore
   assert adapter._collect_ghost(SemanticTier.EXTRAS) == []
 
 
-def test_keras_rng_split():
+def test_keras_rng_split() -> None:
   """Test function."""
   import ml_switcheroo.frameworks.keras as keras_fw
 
@@ -102,14 +104,14 @@ def test_keras_rng_split():
   assert adapter.get_rng_split_syntax("rng", "key") == "pass"
 
 
-def test_keras_init_missing():
+def test_keras_init_missing() -> None:
   """Test function."""
   # Hit lines 25-26, 70
   import importlib
   import ml_switcheroo.frameworks.keras as keras_fw
 
   old_keras = sys.modules.get("keras")
-  sys.modules["keras"] = None
+  sys.modules["keras"] = None  # type: ignore
   try:
     importlib.reload(keras_fw)
     assert keras_fw.keras is None

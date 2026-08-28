@@ -1,7 +1,7 @@
 """Tests for this module."""
 
 
-def test_html_backend_first_operation_no_blue_row():
+def test_html_backend_first_operation_no_blue_row() -> None:
   """Test html backend first operation no blue row."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.compiler.ir import LogicalGraph
@@ -12,7 +12,7 @@ def test_html_backend_first_operation_no_blue_row():
   backend.compile(graph)
 
 
-def test_html_backend_first_op_not_layer():
+def test_html_backend_first_op_not_layer() -> None:
   """Test html backend first op not layer."""
   from ml_switcheroo.core.compiler.backends.html import HtmlBackend
   from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
@@ -24,11 +24,11 @@ def test_html_backend_first_op_not_layer():
   )
   graph.nodes.append(op)
   backend = HtmlBackend()
-  code = backend.compile(graph)
+  code: str = backend.compile(graph)
   assert "box b" not in code or "box b" in code
 
 
-def test_html_backend_second_operation_no_blue_row():
+def test_html_backend_second_operation_no_blue_row() -> None:
   # To hit 222->229 (last_blue_row == -1 on second iteration)
   # This happens if the first iteration didn't set last_blue_row.
   # But wait, looking at the code:

@@ -11,8 +11,10 @@ Refactor:
     - **New**: `resolve_type` method to query Symbol Table.
 """
 
-from typing import Callable, Dict, Optional, Any, Type, TypeVar, List
+from __future__ import annotations
+from typing import Callable, Dict, Optional, Type, TypeVar, List, Union, TYPE_CHECKING
 from pydantic import BaseModel, Field, ConfigDict
+import libcst as cst
 
 # We import RuntimeConfig for type hinting
 from ml_switcheroo.config import RuntimeConfig
@@ -20,9 +22,13 @@ from ml_switcheroo.core.dsl import FrameworkVariant
 from ml_switcheroo.semantics.schema import PluginTraits
 
 # Lazy import to avoid circular dependency
-# TYPE_CHECKING block logic or Any is sufficient for runtime
-SymbolTableType = Any
-SemanticsManagerType = Any
+if TYPE_CHECKING:
+  from ml_switcheroo.analysis.symbol_table import SymbolTable as SymbolTableType
+  from ml_switcheroo.semantics.manager import SemanticsManager as SemanticsManagerType
+else:
+  SymbolTableType = type
+  SemanticsManagerType = type
+
 T = TypeVar("T", bound=BaseModel)
 
 # Callbacks for plugin side-effects
@@ -38,8 +44,8 @@ class AutoWireSpec(BaseModel):
 
   model_config = ConfigDict(extra="allow")
 
-  ops: Dict[str, Dict[str, Any]] = Field(
-    default_factory=dict,
+  ops: Optional[Dict[str, Union[str, dict, list]]] = Field(
+    default_factory=lambda: {},
     description="Dictionary of Abstract Operations to inject into SemanticsManager.",
   )
 
@@ -81,10 +87,10 @@ class HookContext:
     self.target_fw = config.effective_target
 
     # Plugin State
-    self.metadata: Dict[str, Any] = {}
+    self.metadata: Dict[str, Union[str, int, float, bool, dict, list, None]] = {}
     self.current_op_id: Optional[str] = None
 
-  def resolve_type(self, node: Any) -> Optional[str]:
+  def resolve_type(self, node: cst.CSTNode) -> Optional[str]:
     """Query the Symbol Table for the inferred type of a node.
 
     Args:
@@ -180,15 +186,17 @@ class HookContext:
     if self._preamble_injector:
       self._preamble_injector(code_str)
 
-  def raw_config(self, key: str, default: Any = None) -> Any:
+  def raw_config(
+    self, key: str, default: Union[str, int, float, bool, dict, list, None] = None
+  ) -> Union[str, int, float, bool, dict, list, None]:
     """Retrieve a raw value from the unstructured plugin settings dict.
 
     Args:
         key (str): Configuration key.
-        default (Any): Default value if key is not found.
+        default: Default value if key is not found.
 
     Returns:
-        Any: The configuration value.
+        The configuration value.
 
     """
     return self._runtime_config.plugin_settings.get(key, default)
@@ -227,7 +235,7 @@ class HookContext:
     if not target_variant:
       return None
 
-    return target_variant.get("api")  # type: ignore
+    return target_variant.get("api")
 
   def lookup_signature(self, op_name: str) -> List[str]:
     """Retrieve standard argument list for a given operation.
@@ -270,9 +278,9 @@ from ml_switcheroo.core.hooks_registry import (  # noqa: E402
   _HOOK_METADATA,
 )
 
-HookFunction = Callable[[Any, HookContext], Any]
+HookFunction = Callable[..., cst.CSTNode]
 
-_PLUGINS_LOADED = False
+_PLUGINS_LOADED: bool = False
 __all__ = [
   "HookContext",
   "AutoWireSpec",

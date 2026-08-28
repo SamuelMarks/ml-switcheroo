@@ -4,6 +4,7 @@ This module defines a basic single-layer perceptron model which is utilized for
 demonstrating and testing translation capabilities from PyTorch to JAX/Flax structures.
 """
 
+import torch
 import torch.nn as nn
 
 
@@ -22,7 +23,7 @@ class SimplePerceptron(nn.Module):
     layer (nn.Linear): The linear transformation layer.
   """
 
-  def __init__(self, in_features, out_features):
+  def __init__(self, in_features: int, out_features: int) -> None:
     """Initializes the SimplePerceptron layer.
 
     Args:
@@ -33,7 +34,7 @@ class SimplePerceptron(nn.Module):
     # Standard Linear layer
     self.layer = nn.Linear(in_features, out_features)
 
-  def forward(self, x):
+  def forward(self, x: torch.Tensor) -> torch.Tensor:
     """Performs a forward pass of the neural network layer.
 
     Args:

@@ -1,11 +1,12 @@
 """Module docstring."""
 
 import pathlib
+import typing
 from unittest import mock
 from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module, get_required_packages
 
 
-def test_get_required_packages():
+def test_get_required_packages() -> None:
   """Test get required packages."""
   assert get_required_packages("import os") == ["os"]
   assert get_required_packages("import os.path") == ["os"]
@@ -14,11 +15,11 @@ def test_get_required_packages():
   assert get_required_packages("=invalid syntax=") == []
 
 
-def test_ensure_runtime_module_tensorflow_and_jax(tmp_path: pathlib.Path):
+def test_ensure_runtime_module_tensorflow_and_jax(tmp_path: pathlib.Path) -> None:
   """Test ensure runtime module tensorflow and jax."""
-  mgr = mock.MagicMock()
+  mgr: mock.MagicMock = mock.MagicMock()
 
-  def mock_get_template(m, fw):
+  def mock_get_template(m: typing.Any, fw: str) -> typing.Optional[dict[str, str]]:
     """Mock get template."""
     if fw == "tensorflow":
       return {"import": "import tensorflow as tf"}
@@ -31,7 +32,7 @@ def test_ensure_runtime_module_tensorflow_and_jax(tmp_path: pathlib.Path):
   with mock.patch("ml_switcheroo.generated_tests.runtime_builder.get_template", side_effect=mock_get_template):
     ensure_runtime_module(tmp_path, frameworks=["tensorflow", "jax", "unknown"], mgr=mgr)
 
-  content = (tmp_path / "runtime.py").read_text()
+  content: str = (tmp_path / "runtime.py").read_text()
   assert "TENSORFLOW_AVAILABLE" in content
   assert "JAX_AVAILABLE" in content
   assert "TORCH_AVAILABLE" in content

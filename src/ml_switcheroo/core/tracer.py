@@ -15,7 +15,7 @@ import time
 import uuid
 from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 
 class TraceEventType(str, Enum):
@@ -212,7 +212,7 @@ class TraceLogger:
     self,
     evt_type: TraceEventType,
     desc: str,
-    meta: Dict[str, Any],
+    meta,
     lineno: Optional[int] = None,
   ) -> None:
     """Support to create and append events.
@@ -236,7 +236,7 @@ class TraceLogger:
       )
     )
 
-  def export(self) -> List[Dict[str, Any]]:
+  def export(self):
     """Export the event log as a list of dictionaries.
 
     Returns:

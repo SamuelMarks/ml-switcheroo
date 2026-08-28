@@ -1,23 +1,24 @@
 """Docstring."""
 
 from unittest.mock import MagicMock, patch
+from pathlib import Path
 from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
 
 
-def test_handle_scaffold(tmp_path):
+def test_handle_scaffold(tmp_path: Path) -> None:
   """Docstring."""
-  args = MagicMock()
+  args: MagicMock = MagicMock()
   args.framework = "test_fw"
 
   with patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine") as MockEngine:
-    engine = MockEngine.return_value
+    engine: MagicMock = MockEngine.return_value
     engine.cluster.return_value = {"std_name": ["test_fw.path"]}
 
     # We need to mock open to not write to current dir
     import builtins
 
-    mock_open = MagicMock()
-    mock_file = MagicMock()
+    mock_open: MagicMock = MagicMock()
+    mock_file: MagicMock = MagicMock()
     mock_open.return_value.__enter__.return_value = mock_file
 
     with patch.object(builtins, "open", mock_open):

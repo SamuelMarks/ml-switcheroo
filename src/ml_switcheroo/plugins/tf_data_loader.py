@@ -10,10 +10,8 @@ Transformation Overview:
     Output: `tf.data.Dataset.from_tensor_slices((x, y)).shuffle(1024).batch(64).prefetch(AUTOTUNE)`
 """
 
-from typing import Any
-
 import libcst as cst
-from typing import List, Optional, Union
+from typing import List, Optional
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
@@ -63,7 +61,7 @@ def _extract_tensor_dataset_inputs(
 
 
 @register_hook("tf_data_loader")
-def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel[Any]]:
+def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """Plugin Transform Rewrites DataLoader construction into a tf.data pipeline.
 
   Logic:
@@ -87,8 +85,8 @@ def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> Union[cst.Call,
 
   # 1. Parse Arguments
   dataset_arg = node.args[0].value
-  batch_size_arg = _get_arg_by_name(node.args, "batch_size")  # type: ignore
-  shuffle_arg = _get_arg_by_name(node.args, "shuffle")  # type: ignore
+  batch_size_arg = _get_arg_by_name(node.args, "batch_size")
+  shuffle_arg = _get_arg_by_name(node.args, "shuffle")
 
   # 2. Unwrap Dataset
   tensors = _extract_tensor_dataset_inputs(dataset_arg)
@@ -99,7 +97,7 @@ def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> Union[cst.Call,
   if len(tensors) > 1:
     slice_input = cst.Tuple(elements=[cst.Element(t) for t in tensors])
   else:
-    slice_input = tensors[0]  # type: ignore
+    slice_input = tensors[0]
 
   # 4. Build Pipeline Chain
   # Root: tf.data.Dataset.from_tensor_slices

@@ -9,9 +9,9 @@ from ml_switcheroo.core.compiler.qwen_fusion import (
 )
 
 
-def test_swiglu_fusion_pass():
+def test_swiglu_fusion_pass() -> None:
   """Docstring."""
-  graph = LogicalGraph(
+  graph: LogicalGraph = LogicalGraph(
     nodes=[
       LogicalNode(id="input", kind="Input"),
       LogicalNode(id="layer_gate_proj", kind="Linear"),
@@ -28,23 +28,23 @@ def test_swiglu_fusion_pass():
       LogicalEdge(source="unrelated1", target="unrelated2"),
     ],
   )
-  pass_ = SwiGLUFusionPass()
-  new_graph = pass_.apply(graph)
+  pass_: SwiGLUFusionPass = SwiGLUFusionPass()
+  new_graph: LogicalGraph = pass_.apply(graph)
   assert any(n.id == "layer_swiglu" for n in new_graph.nodes)
   assert any(e.source == "unrelated1" for e in new_graph.edges)
 
 
-def test_swiglu_fusion_pass_no_match():
+def test_swiglu_fusion_pass_no_match() -> None:
   """Docstring."""
-  graph = LogicalGraph(nodes=[LogicalNode(id="input", kind="Input")], edges=[])
-  pass_ = SwiGLUFusionPass()
-  new_graph = pass_.apply(graph)
+  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="input", kind="Input")], edges=[])
+  pass_: SwiGLUFusionPass = SwiGLUFusionPass()
+  new_graph: LogicalGraph = pass_.apply(graph)
   assert len(new_graph.nodes) == 1
 
 
-def test_swiglu_defusion_pass():
+def test_swiglu_defusion_pass() -> None:
   """Docstring."""
-  graph = LogicalGraph(
+  graph: LogicalGraph = LogicalGraph(
     nodes=[
       LogicalNode(id="input", kind="Input"),
       LogicalNode(id="layer_swiglu", kind="SwiGLU"),
@@ -58,24 +58,24 @@ def test_swiglu_defusion_pass():
       LogicalEdge(source="unrelated1", target="unrelated2"),
     ],
   )
-  pass_ = SwiGLUDefusionPass()
-  new_graph = pass_.apply(graph)
+  pass_: SwiGLUDefusionPass = SwiGLUDefusionPass()
+  new_graph: LogicalGraph = pass_.apply(graph)
   assert any(n.id == "layer_gate_proj" for n in new_graph.nodes)
   assert any(n.id == "layer_up_proj" for n in new_graph.nodes)
   assert any(e.source == "unrelated1" for e in new_graph.edges)
 
 
-def test_swiglu_defusion_pass_no_match():
+def test_swiglu_defusion_pass_no_match() -> None:
   """Docstring."""
-  graph = LogicalGraph(nodes=[LogicalNode(id="input", kind="Input")], edges=[])
-  pass_ = SwiGLUDefusionPass()
-  new_graph = pass_.apply(graph)
+  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="input", kind="Input")], edges=[])
+  pass_: SwiGLUDefusionPass = SwiGLUDefusionPass()
+  new_graph: LogicalGraph = pass_.apply(graph)
   assert len(new_graph.nodes) == 1
 
 
-def test_vision_patch_fusion_pass():
+def test_vision_patch_fusion_pass() -> None:
   """Docstring."""
-  graph = LogicalGraph(
+  graph: LogicalGraph = LogicalGraph(
     nodes=[
       LogicalNode(id="input", kind="Input"),
       LogicalNode(id="patch_conv", kind="Conv2d"),
@@ -89,23 +89,23 @@ def test_vision_patch_fusion_pass():
       LogicalEdge(source="unrelated1", target="unrelated2"),
     ],
   )
-  pass_ = VisionPatchEmbeddingFusionPass()
-  new_graph = pass_.apply(graph)
+  pass_: VisionPatchEmbeddingFusionPass = VisionPatchEmbeddingFusionPass()
+  new_graph: LogicalGraph = pass_.apply(graph)
   assert any(n.kind == "VisionPatchEmbedding" for n in new_graph.nodes)
   assert any(e.source == "unrelated1" for e in new_graph.edges)
 
 
-def test_vision_patch_fusion_pass_no_match():
+def test_vision_patch_fusion_pass_no_match() -> None:
   """Docstring."""
-  graph = LogicalGraph(nodes=[LogicalNode(id="input", kind="Input")], edges=[])
-  pass_ = VisionPatchEmbeddingFusionPass()
-  new_graph = pass_.apply(graph)
+  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="input", kind="Input")], edges=[])
+  pass_: VisionPatchEmbeddingFusionPass = VisionPatchEmbeddingFusionPass()
+  new_graph: LogicalGraph = pass_.apply(graph)
   assert len(new_graph.nodes) == 1
 
 
-def test_vision_patch_defusion_pass():
+def test_vision_patch_defusion_pass() -> None:
   """Docstring."""
-  graph = LogicalGraph(
+  graph: LogicalGraph = LogicalGraph(
     nodes=[
       LogicalNode(id="input", kind="Input"),
       LogicalNode(id="patch_embed", kind="VisionPatchEmbedding"),
@@ -119,15 +119,15 @@ def test_vision_patch_defusion_pass():
       LogicalEdge(source="unrelated1", target="unrelated2"),
     ],
   )
-  pass_ = VisionPatchEmbeddingDefusionPass()
-  new_graph = pass_.apply(graph)
+  pass_: VisionPatchEmbeddingDefusionPass = VisionPatchEmbeddingDefusionPass()
+  new_graph: LogicalGraph = pass_.apply(graph)
   assert any(n.kind == "Conv2d" for n in new_graph.nodes)
   assert any(e.source == "unrelated1" for e in new_graph.edges)
 
 
-def test_vision_patch_defusion_pass_no_match():
+def test_vision_patch_defusion_pass_no_match() -> None:
   """Docstring."""
-  graph = LogicalGraph(nodes=[LogicalNode(id="input", kind="Input")], edges=[])
-  pass_ = VisionPatchEmbeddingDefusionPass()
-  new_graph = pass_.apply(graph)
+  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="input", kind="Input")], edges=[])
+  pass_: VisionPatchEmbeddingDefusionPass = VisionPatchEmbeddingDefusionPass()
+  new_graph: LogicalGraph = pass_.apply(graph)
   assert len(new_graph.nodes) == 1

@@ -1,18 +1,19 @@
 """Docstring."""
 
 from ml_switcheroo.generated_tests.templates import get_template
+import typing
 from unittest.mock import MagicMock
 
 
-def test_get_template_exception():
+def test_get_template_exception() -> None:
   """Docstring."""
-  manager = MagicMock()
+  manager: MagicMock = MagicMock()
   manager.get_test_template.side_effect = Exception("err")
-  tmpl = get_template("torch", manager)
+  tmpl: typing.Optional[dict[str, str]] = get_template("torch", manager)
   assert tmpl is not None
 
 
-def test_is_static_arg():
+def test_is_static_arg() -> None:
   """Docstring."""
   from ml_switcheroo.generated_tests.templates import is_static_arg
 
@@ -28,9 +29,9 @@ def test_is_static_arg():
   assert is_static_arg({"name": "x", "type": "Tensor"}) is False
 
 
-def test_get_template_no_manager():
+def test_get_template_no_manager() -> None:
   """Docstring."""
   from ml_switcheroo.generated_tests.templates import get_template
 
-  tmpl = get_template(None, "torch")
+  tmpl: typing.Optional[dict[str, str]] = get_template(None, "torch")
   assert tmpl is not None
