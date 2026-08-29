@@ -1,9 +1,11 @@
 """Test suite for the Ex01 Math Ops module."""
 
-import pytest
 import typing
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE_TORCH: str = "\nimport torch\n\ndef compute_loss(prediction, target):\n    diff = torch.abs(prediction - target)\n    loss = torch.mean(diff)\n    return loss\n"

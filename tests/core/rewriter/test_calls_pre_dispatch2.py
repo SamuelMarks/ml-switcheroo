@@ -1,19 +1,21 @@
 """Test suite for the Calls Pre Dispatch2 module."""
 
 import typing
-import libcst as cst
 from unittest.mock import MagicMock
+
+import libcst as cst
+
 from ml_switcheroo.core.rewriter.calls.dispatch import (
-  evaluate_dispatch_rules,
+  _check_rule_condition,
   _extract_argument_node,
   _node_to_literal,
-  _check_rule_condition,
+  evaluate_dispatch_rules,
 )
 from ml_switcheroo.enums import LogicOp
 
 
 class MockRule:
-  """Mock Rule class for testing purposes."""
+  """Docstring."""
 
   def __init__(
     self,
@@ -32,7 +34,7 @@ class MockRule:
 
 
 class MockRewriterDispatch:
-  """Mock Rewriter Dispatch class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockRewriterDispatch instance."""
@@ -42,7 +44,7 @@ class MockRewriterDispatch:
 
 
 class MockTraits:
-  """Mock Traits class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, method: str = "apply", implicit_roots: typing.Optional[list[str]] = None) -> None:
     """Initializes the MockTraits instance."""
@@ -68,7 +70,7 @@ def test_evaluate_dispatch_rules() -> None:
 
 
 def test_extract_argument_node_errors() -> None:
-  """Extracts argument node errors."""
+  """Docstring."""
   rewriter = MockRewriterDispatch()
   node = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[cst.Arg(value=cst.Name("a"))])
   res1: typing.Any = _extract_argument_node(rewriter, node, "not_found", "a", ["x", "a"])  # type: ignore

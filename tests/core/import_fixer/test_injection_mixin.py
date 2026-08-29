@@ -7,8 +7,9 @@ __future__ imports, duplicate imports, and already satisfied/defined names.
 """
 
 import libcst as cst
+
 from ml_switcheroo.core.import_fixer.injection_mixin import InjectionMixin
-from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan, ImportReq
+from ml_switcheroo.core.import_fixer.resolution import ImportReq, ResolutionPlan
 
 
 class MockFixer(InjectionMixin):

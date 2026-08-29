@@ -1,8 +1,9 @@
 """Test suite for the Mlir Generator Reroll module."""
 
 import typing
-from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
+
 from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode, ValueNode
+from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
 def gen_code_from_block(ops: list[OperationNode]) -> str:

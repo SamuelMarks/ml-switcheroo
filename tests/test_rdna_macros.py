@@ -1,22 +1,23 @@
 """Docstring."""
 
+from typing import List
+
 from ml_switcheroo.core.compiler.backends.rdna.macros import (
+  RegisterAllocatorProtocol,
+  expand_adam,
   expand_conv2d,
+  expand_conv3d,
+  expand_conv_general_dilated,
+  expand_dropout,
+  expand_flatten,
+  expand_l,
   expand_linear,
   expand_relu,
-  expand_flatten,
   expand_reshape,
-  expand_conv3d,
-  expand_dropout,
-  expand_variable,
   expand_transpose,
-  expand_conv_general_dilated,
-  expand_adam,
-  expand_l,
-  RegisterAllocatorProtocol,
+  expand_variable,
 )
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR, RdnaSGPR, RdnaNode
-from typing import List
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaNode, RdnaSGPR, RdnaVGPR
 
 
 class DummyAllocator(RegisterAllocatorProtocol):

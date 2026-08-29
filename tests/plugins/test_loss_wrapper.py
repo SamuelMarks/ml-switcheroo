@@ -1,13 +1,15 @@
 """Test suite for the Loss Wrapper module."""
 
-import pytest
-import libcst as cst
-from typing import Callable, Any, Dict, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -472,8 +474,9 @@ def test_loss_wrapper_direct_empty_context(rewriter_factory: Callable[[str], Piv
   """
   rewriter: PivotRewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
-  from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
   import libcst as cst
+
+  from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
   code: str = "torch.nn.functional.cross_entropy(a, b)"
   module: cst.Module = cst.parse_module(code)

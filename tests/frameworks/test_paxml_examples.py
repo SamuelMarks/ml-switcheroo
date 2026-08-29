@@ -1,13 +1,15 @@
 """Test suite for the Paxml Examples module."""
 
 import ast
+
 import pytest
+
 from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
 
 @pytest.fixture
 def adapter() -> PaxmlAdapter:
-  """Provides a mock adapter for testing."""
+  """Docstring."""
   return PaxmlAdapter()
 
 
@@ -37,7 +39,7 @@ def test_tier2_neural_validity(adapter: PaxmlAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: PaxmlAdapter) -> None:
-  """Verifies the behavior of tier3 extras validity."""
+  """Docstring."""
   code: str = adapter.get_tiered_examples()["tier3_extras"]
   ast.parse(code)
   assert "pax_fiddle.Config" in code

@@ -398,6 +398,9 @@ class TikzTransformer(Transformer[Token, Any]):
     return Tree("ignore", children)
 
 
+_CACHED_PARSER = None
+
+
 class TikzParser:
   """Parse TikZ code into a TikzGraph (CST) using a formal Lark grammar."""
 
@@ -409,11 +412,14 @@ class TikzParser:
     """
     self.text = text
 
-    grammar_path = os.path.join(os.path.dirname(__file__), "grammar.lark")
-    with open(grammar_path, "r", encoding="utf-8") as f:
-      self.grammar = f.read()
+    global _CACHED_PARSER
+    if _CACHED_PARSER is None:
+      grammar_path = os.path.join(os.path.dirname(__file__), "grammar.lark")
+      with open(grammar_path, "r", encoding="utf-8") as f:
+        self.grammar = f.read()
+      _CACHED_PARSER = Lark(self.grammar, start="start", parser="earley")
 
-    self.parser = Lark(self.grammar, start="start", parser="earley")
+    self.parser = _CACHED_PARSER
 
   def parse(self) -> TikzGraph:
     """Parse the input TikZ text and construct the graph.

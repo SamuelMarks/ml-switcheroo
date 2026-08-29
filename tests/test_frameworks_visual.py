@@ -1,16 +1,18 @@
 """Tests for visual DSL framework adapters."""
 
-from typing import Dict, Any
-from unittest.mock import patch, MagicMock
+from typing import Any, Dict
+from unittest.mock import MagicMock, patch
+
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.frameworks.base import InitMode
 from ml_switcheroo.frameworks.html_dsl import HtmlDSLAdapter
 from ml_switcheroo.frameworks.latex_dsl import LatexDSLAdapter
 from ml_switcheroo.frameworks.tikz import TikzAdapter
-from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.frameworks.base import InitMode
 
 
 def test_html_dsl_adapter() -> None:
-  """Test HtmlDSLAdapter."""
+  """Docstring."""
   adapter: HtmlDSLAdapter = HtmlDSLAdapter()
   assert adapter._mode == InitMode.GHOST
   assert adapter.import_alias == ("html_dsl", "dsl")
@@ -59,7 +61,7 @@ def test_html_dsl_adapter() -> None:
 
 
 def test_latex_dsl_adapter() -> None:
-  """Test LatexDSLAdapter."""
+  """Docstring."""
   adapter: LatexDSLAdapter = LatexDSLAdapter()
   assert adapter._mode == InitMode.GHOST
   assert adapter.import_alias == ("midl", "midl")
@@ -104,7 +106,7 @@ def test_latex_dsl_adapter() -> None:
 
 
 def test_tikz_adapter() -> None:
-  """Test TikzAdapter."""
+  """Docstring."""
   adapter: TikzAdapter = TikzAdapter()
   assert adapter._mode == InitMode.GHOST
   assert adapter.import_alias == ("tikz", "tikz")
@@ -148,20 +150,20 @@ def test_tikz_adapter() -> None:
 
 
 def test_latex_parser_create() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: LatexDSLAdapter = LatexDSLAdapter()
   assert adapter.create_parser("code") is not None
   adapter.plugin_traits
 
 
 def test_tikz_parser_create() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: TikzAdapter = TikzAdapter()
   adapter.plugin_traits
 
 
 def test_missing() -> None:
-  """Test element."""
+  """Docstring."""
   HtmlDSLAdapter().get_device_check_syntax()
   LatexDSLAdapter().get_device_check_syntax()
   TikzAdapter().get_device_check_syntax()

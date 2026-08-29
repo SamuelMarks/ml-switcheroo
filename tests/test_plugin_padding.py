@@ -1,7 +1,9 @@
 """Test suite for the Plugin Padding module."""
 
-import libcst as cst
 from unittest.mock import MagicMock
+
+import libcst as cst
+
 from ml_switcheroo.plugins.padding import _supports_numpy_padding, transform_padding
 
 

@@ -1,20 +1,22 @@
 """Test suite for the Fuzzer Parser module."""
 
+from typing import Any, Dict
+
 from ml_switcheroo.testing.fuzzer.type_parser import (
-  parse_type_annotation,
-  PrimitiveType,
-  ListType,
-  TupleType,
-  DictType,
   CallableType,
+  DictType,
+  ListType,
+  PrimitiveType,
+  TupleType,
+  parse_type_annotation,
 )
-from typing import Dict, Any
 
 
 def test_get_fallback_base_value() -> None:
   """Gets fallback base value."""
-  from ml_switcheroo.testing.fuzzer.parser import get_fallback_base_value
   import numpy as np
+
+  from ml_switcheroo.testing.fuzzer.parser import get_fallback_base_value
 
   assert get_fallback_base_value(PrimitiveType(name="bool"), ()) is False
   assert get_fallback_base_value(PrimitiveType(name="int"), ()) == 0
@@ -34,8 +36,9 @@ def test_get_fallback_base_value() -> None:
 
 def test_generate_from_hint() -> None:
   """Generates from hint."""
-  from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
   import numpy as np
+
+  from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
   symbol_map: Dict[str, Any] = {}
   assert generate_from_hint("int", (), 10, 5, symbol_map) == 0
@@ -138,10 +141,11 @@ def test_fuzzer_parser_int_inference() -> None:
 
 
 def test_fuzzer_parser_float_inference() -> None:
-  """Test fuzzer parser infers float from default."""
+  """Docstring."""
+  from unittest import mock
+
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
   from ml_switcheroo.testing.fuzzer.type_parser import AnyType
-  from unittest import mock
 
   # Force the code to take the type inference branch instead of just returning default
   with mock.patch("random.random", return_value=0.5):

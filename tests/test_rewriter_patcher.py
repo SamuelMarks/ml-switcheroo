@@ -1,15 +1,17 @@
 """Test module."""
 
-import libcst as cst
+from typing import Dict, Union
 from unittest.mock import MagicMock
-from ml_switcheroo.core.rewriter.patcher import GraphPatcher, DeleteAction, ReplaceAction
+
+import libcst as cst
+
 from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
 from ml_switcheroo.core.compiler.ir import LogicalNode
-from typing import Dict, Union
+from ml_switcheroo.core.rewriter.patcher import DeleteAction, GraphPatcher, ReplaceAction
 
 
 def test_graph_patcher_delete() -> None:
-  """Test element."""
+  """Docstring."""
   action: DeleteAction = DeleteAction(node_id="test_node")
   provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
   emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
@@ -23,7 +25,7 @@ def test_graph_patcher_delete() -> None:
 
 
 def test_graph_patcher_replace_init() -> None:
-  """Test element."""
+  """Docstring."""
   logical_node: MagicMock = MagicMock(spec=LogicalNode)
   action: ReplaceAction = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=True)
   provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
@@ -49,7 +51,7 @@ def test_graph_patcher_replace_init() -> None:
 
 
 def test_graph_patcher_replace_call() -> None:
-  """Test element."""
+  """Docstring."""
   logical_node: MagicMock = MagicMock(spec=LogicalNode)
   action: ReplaceAction = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"])
   provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Call(func=cst.Name("test"))}
@@ -66,7 +68,7 @@ def test_graph_patcher_replace_call() -> None:
 
 
 def test_graph_patcher_replace_call_stmt_like() -> None:
-  """Test element."""
+  """Docstring."""
   logical_node: MagicMock = MagicMock(spec=LogicalNode)
   action: ReplaceAction = ReplaceAction(
     node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"], output_var="y"
@@ -89,7 +91,7 @@ def test_graph_patcher_replace_call_stmt_like() -> None:
 
 
 def test_graph_patcher_leave_hooks() -> None:
-  """Test element."""
+  """Docstring."""
   patcher: GraphPatcher = GraphPatcher([], {}, MagicMock())
 
   # leave_Assign

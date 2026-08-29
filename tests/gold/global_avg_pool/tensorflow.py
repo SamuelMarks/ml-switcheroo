@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class GAPModel(tf.keras.Model):
-  """Test suite for the G A P Model component."""
+  """Docstring."""
 
   def call(self, x: tf.Tensor) -> tf.Tensor:
     """Helper to call."""

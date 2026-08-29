@@ -1,12 +1,14 @@
 """Test suite for the Type Inference module."""
 
-import pytest
 import importlib
+
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-import ml_switcheroo.plugins.rng_threading
 import ml_switcheroo.plugins.reshape
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+import ml_switcheroo.plugins.rng_threading
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE: str = "\nimport torch\n\ndef process():\n    x = torch.randn(10)\n    # Implicit method call on inferred Tensor\n    y = x.view(5, 2)\n    return y\n"
@@ -22,7 +24,7 @@ def reload_required_plugins() -> None:
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   mgr = SemanticsManager()
   return mgr
 

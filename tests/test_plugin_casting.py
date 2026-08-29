@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.plugins.casting import _create_dotted_name, _supports_numpy_casting, transform_casting
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.casting import _create_dotted_name, _supports_numpy_casting, transform_casting
 
 
 def test_create_dotted_name() -> None:
@@ -40,24 +42,18 @@ def test_supports_numpy_casting() -> None:
 
   # plugin_traits object
   class Traits:
-    """Docstring."""
-
     has_numpy_compatible_arrays: bool = True
 
   ctx.semantics.get_framework_config.return_value = {"plugin_traits": Traits()}
   assert _supports_numpy_casting(ctx)
 
   class TraitsFalse:
-    """Docstring."""
-
     has_numpy_compatible_arrays: bool = False
 
   ctx.semantics.get_framework_config.return_value = {"plugin_traits": TraitsFalse()}
   assert not _supports_numpy_casting(ctx)
 
   class TraitsMissing:
-    """Docstring."""
-
     pass
 
   ctx.semantics.get_framework_config.return_value = {"plugin_traits": TraitsMissing()}

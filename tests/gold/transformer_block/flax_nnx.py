@@ -1,12 +1,12 @@
 """Test suite for the Flax Nnx module."""
 
-from flax import nnx
-import jax.numpy as jnp
 import jax
+import jax.numpy as jnp
+from flax import nnx
 
 
 class TransformerBlock(nnx.Module):
-  """Test suite for the Transformer Block component."""
+  """Docstring."""
 
   def __init__(self, embed_dim: int, num_heads: int, ff_dim: int, dropout: float = 0.1, rngs: nnx.Rngs = None):
     """Initializes the TransformerBlock instance."""

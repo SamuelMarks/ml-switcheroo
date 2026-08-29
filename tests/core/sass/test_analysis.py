@@ -1,14 +1,15 @@
 """Test suite for the Analysis module."""
 
 import typing
+
 from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassInstruction,
-  SassRegister,
   SassImmediate,
-  SassPredicate,
+  SassInstruction,
   SassLabel,
   SassMemory,
+  SassPredicate,
+  SassRegister,
 )
 
 
@@ -58,7 +59,7 @@ def test_analyze_no_loop_found() -> None:
 def test_sass_analysis_other_kinds() -> None:
   """Docstring."""
   from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate, SassInstruction
 
   inst = SassInstruction(opcode="ISETP.LT.AND", operands=[SassImmediate(value=5)])
 

@@ -1,18 +1,15 @@
 """Test suite for the Analyzer Edge Cases module."""
 
 import typing
-from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
-from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassInstruction as SassInst,
-  SassImmediate as SassImm,
-  SassRegister as SassReg,
-)
+
 from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
-from ml_switcheroo.core.compiler.frontends.rdna.cst import (
-  RdnaInstruction as RdnaInst,
-  RdnaImmediate as RdnaImm,
-  RdnaVGPR as VGPR,
-)
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate as RdnaImm
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction as RdnaInst
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR as VGPR
+from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate as SassImm
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction as SassInst
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassRegister as SassReg
 
 
 def test_sass_analyzer_edge_cases() -> None:

@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class GNModel(nn.Module):
-  """Test suite for the G N Model component."""
+  """Docstring."""
 
   def __init__(self, num_groups: int, num_channels: int):
     """Initializes the GNModel instance."""

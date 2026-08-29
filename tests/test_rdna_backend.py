@@ -1,5 +1,7 @@
 """Docstring."""
 
+from typing import List
+
 from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
@@ -9,7 +11,6 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaNode,
   RdnaVGPR,
 )
-from typing import List
 
 
 class DummyRdnaNode(RdnaNode):

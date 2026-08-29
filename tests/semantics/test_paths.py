@@ -3,8 +3,9 @@
 import sys
 from pathlib import Path
 from unittest.mock import patch
-from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
+
 import ml_switcheroo.semantics.paths as paths
+from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 
 
 def test_resolve_semantics_dir_local(tmp_path: Path) -> None:

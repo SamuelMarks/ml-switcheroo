@@ -2,7 +2,7 @@
 
 from ml_switcheroo.core.compiler.backends.sass.macros import expand_avgpool2d
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassLabel, SassComment
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassLabel
 
 
 def test_sass_macro_avgpool2d() -> None:

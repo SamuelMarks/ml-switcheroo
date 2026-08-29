@@ -1,9 +1,11 @@
 """Test suite for the Generator Types module."""
 
-import pytest
 import typing
 from pathlib import Path
 from unittest.mock import MagicMock
+
+import pytest
+
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.generated_tests.inputs import generate_input_value_code
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -11,11 +13,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def gen(tmp_path: Path) -> TestCaseGenerator:
-  """Provides a mock generation for testing."""
+  """Docstring."""
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
   def mock_get_template(fw: str) -> typing.Optional[dict[str, str]]:
-    """Provides a mock get template for testing."""
     if fw == "torch":
       return {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"}
     if fw == "jax":

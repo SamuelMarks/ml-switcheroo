@@ -1,11 +1,12 @@
 """Test suite for the Keras3 module."""
 
 import typing
+
 import keras
 
 
 class GNModel(keras.Model):  # type: ignore
-  """Test suite for the G N Model component."""
+  """Docstring."""
 
   def __init__(self, num_groups: int, num_channels: int) -> None:
     """Initializes the GNModel instance."""

@@ -1,15 +1,17 @@
 """Test suite for the Generator Shape module."""
 
-import pytest
 import typing
+
 import libcst as cst
-from tests.conftest import TestRewriter as PivotRewriter
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 class MockShapeSemantics(SemanticsManager):
-  """Mock Shape Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockShapeSemantics instance."""
@@ -50,7 +52,7 @@ class MockShapeSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[bool], PivotRewriter]:
-  """Provides a mock rewriter factory for testing."""
+  """Docstring."""
   semantics = MockShapeSemantics()
 
   def create(strict: bool = False) -> PivotRewriter:

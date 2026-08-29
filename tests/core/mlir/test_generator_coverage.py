@@ -1,15 +1,17 @@
 """Tests for MLIR generator coverage."""
 
-import libcst as cst
 import typing
+
+import libcst as cst
+
+from ml_switcheroo.core.cst.base import Trivia
+from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, OperationNode, ValueNode
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 from ml_switcheroo.core.mlir.naming import NamingContext
-from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode, BlockNode, ValueNode
-from ml_switcheroo.core.cst.base import Trivia
 
 
 def test_stmt_with_changes_leading_lines() -> None:
-  """Test stmt with changes leading lines."""
+  """Docstring."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
   gen.ctx = ctx
@@ -31,7 +33,7 @@ def test_stmt_with_changes_leading_lines() -> None:
 
 
 def test_convert_statement_import_and_none() -> None:
-  """Test convert statement import and none."""
+  """Docstring."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
   gen.ctx = ctx
@@ -54,7 +56,7 @@ def test_convert_statement_import_and_none() -> None:
 
 
 def test_wrap_as_statement_void_call() -> None:
-  """Test wrap as statement void call."""
+  """Docstring."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
   gen.ctx = ctx
@@ -67,7 +69,7 @@ def test_wrap_as_statement_void_call() -> None:
 
 
 def test_wrap_as_statement_getattr() -> None:
-  """Test wrap as statement getattr."""
+  """Docstring."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
   gen.ctx = ctx
@@ -86,7 +88,7 @@ def test_wrap_as_statement_getattr() -> None:
 
 
 def test_wrap_as_statement_constant() -> None:
-  """Test wrap as statement constant."""
+  """Docstring."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
   gen.ctx = ctx

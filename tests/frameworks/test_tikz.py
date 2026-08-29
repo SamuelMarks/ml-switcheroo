@@ -1,9 +1,11 @@
 """Test suite for the Tikz module."""
 
 import typing
-from ml_switcheroo.frameworks.tikz import TikzAdapter
-from ml_switcheroo.frameworks.base import InitMode
+
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.frameworks.base import InitMode
+from ml_switcheroo.frameworks.tikz import TikzAdapter
 
 
 def test_tikz_adapter_init() -> None:
@@ -44,7 +46,7 @@ def test_tikz_properties() -> None:
 
 
 def test_tikz_missing_coverage() -> None:
-  """Verifies untested methods of TikzAdapter."""
+  """Docstring."""
   adapter = TikzAdapter()
 
   # Traits

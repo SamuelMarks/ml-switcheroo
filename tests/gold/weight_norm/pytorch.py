@@ -6,7 +6,7 @@ from torch.nn.utils import weight_norm
 
 
 class WNModel(nn.Module):
-  """Test suite for the W N Model component."""
+  """Docstring."""
 
   def __init__(self, in_features: int, out_features: int):
     """Initializes the WNModel instance."""

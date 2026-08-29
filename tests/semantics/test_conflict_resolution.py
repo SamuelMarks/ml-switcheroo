@@ -1,15 +1,17 @@
 """Test suite for the Conflict Resolution module."""
 
-import pytest
 import warnings
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
+import pytest
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.merging import merge_tier_data
-from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 class MockConflictSemantics(SemanticsManager):
-  """Mock Conflict Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockConflictSemantics instance."""
@@ -61,7 +63,7 @@ def test_array_vs_neural_silent_upgrade() -> None:
 
 
 def test_extras_override_silence() -> None:
-  """Verifies the behavior of extras override silence."""
+  """Docstring."""
   mgr: MockConflictSemantics = MockConflictSemantics()
   merge_tier_data(
     data=mgr.data,

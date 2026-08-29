@@ -1,48 +1,48 @@
 """Docstring."""
 
+from typing import Callable
+
 from ml_switcheroo.core.compiler.backends.sass.macros import (
-  expand_conv2d,
-  expand_linear,
-  expand_flatten,
-  expand_reshape,
-  expand_conv3d,
-  expand_dropout,
-  expand_relu,
-  expand_mean,
+  RegisterAllocatorProtocol,
   expand_avgpool2d,
-  expand_maxpool2d,
   expand_batchnorm2d,
+  expand_conv2d,
+  expand_conv3d,
+  expand_crossentropyloss,
+  expand_dropout,
+  expand_flatten,
+  expand_gelu,
+  expand_linear,
+  expand_maxpool2d,
+  expand_mean,
+  expand_mseloss,
+  expand_relu,
+  expand_reshape,
   expand_sigmoid,
   expand_tanh,
-  expand_gelu,
-  expand_mseloss,
-  expand_crossentropyloss,
 )
 from ml_switcheroo.core.compiler.backends.sass.macros_extra import (
-  expand_rnn,
-  expand_lstm,
-  expand_gru,
-  expand_multiheadattention,
-  expand_transformer,
-  expand_transformerencoder,
-  expand_transformerdecoder,
+  _make_generic_expand,
+  expand_adam,
+  expand_adaptivepool,
   expand_conv1d,
-  expand_depthwiseconv2d,
+  expand_conv_general_dilated,
   expand_convtranspose,
+  expand_depthwiseconv2d,
+  expand_gru,
+  expand_l,
+  expand_lstm,
+  expand_multiheadattention,
   expand_pool1d,
   expand_pool3d,
-  expand_adaptivepool,
-  expand_variable,
+  expand_rnn,
+  expand_transformer,
+  expand_transformerdecoder,
+  expand_transformerencoder,
   expand_transpose,
-  expand_conv_general_dilated,
-  expand_adam,
-  expand_l,
-  _make_generic_expand,
+  expand_variable,
 )
-
 from ml_switcheroo.core.compiler.frontends.sass.cst import SassRegister
-from ml_switcheroo.core.compiler.backends.sass.macros import RegisterAllocatorProtocol
-from typing import Callable
 
 
 class DummyAllocator(RegisterAllocatorProtocol):

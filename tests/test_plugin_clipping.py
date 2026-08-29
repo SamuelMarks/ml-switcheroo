@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.plugins.clipping import transform_grad_clipping
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.clipping import transform_grad_clipping
 
 
 def test_transform_grad_clipping_not_required() -> None:

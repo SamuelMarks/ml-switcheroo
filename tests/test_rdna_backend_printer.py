@@ -1,27 +1,28 @@
 """Test module."""
 
+from typing import List
+
+from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
   RdnaDirective,
+  RdnaImmediate,
   RdnaInstruction,
   RdnaLabel,
   RdnaNode,
-  RdnaImmediate,
 )
-from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
-from typing import List
 
 
 class CustomNode(RdnaNode):
-  """Test element."""
+  """Docstring."""
 
   def __str__(self) -> str:
-    """Test element."""
+    """Docstring."""
     return "custom_node"
 
 
 def test_rdna_printer() -> None:
-  """Test element."""
+  """Docstring."""
   printer: RdnaPrinter = RdnaPrinter()
   nodes: List[RdnaNode] = [
     RdnaLabel(name="L1"),

@@ -1,6 +1,6 @@
 """Test suite for the Fuzzer Utils module."""
 
-from typing import Tuple, Dict, Any
+from typing import Any, Dict, Tuple
 
 
 def test_is_pipe_top_level() -> None:

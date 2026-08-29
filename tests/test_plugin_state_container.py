@@ -1,18 +1,20 @@
 """Docstring."""
 
-import libcst as cst
+from typing import Optional
 from unittest.mock import MagicMock
+
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.state_container import (
   _create_node,
   _get_receiver,
+  convert_load_state_dict,
+  convert_parameters,
   convert_register_buffer,
   convert_register_parameter,
   convert_state_dict,
-  convert_load_state_dict,
-  convert_parameters,
 )
-from ml_switcheroo.core.hooks import HookContext
-from typing import Optional
 
 
 def test_create_node() -> None:

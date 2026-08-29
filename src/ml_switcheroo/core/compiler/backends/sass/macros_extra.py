@@ -486,13 +486,13 @@ def _make_generic_expand(name: str):
     Returns:
         List[SassNode]: The list of SASS nodes.
     """
-    nodes: List[SassNode] = []  # pragma: no cover
+    nodes: List[SassNode] = []
 
-    r_acc = allocator.get_register(node_id)  # pragma: no cover
-    nodes.append(SassComment(text=f"BEGIN {name} ({node_id})"))  # pragma: no cover
-    nodes.append(SassInstruction(opcode="MOV", operands=[r_acc, SassRegister(name="R3")]))  # pragma: no cover
-    nodes.append(SassComment(text=f"END {name} ({node_id})"))  # pragma: no cover
-    return nodes  # pragma: no cover
+    r_acc = allocator.get_register(node_id)
+    nodes.append(SassComment(text=f"BEGIN {name} ({node_id})"))
+    nodes.append(SassInstruction(opcode="MOV", operands=[r_acc, SassRegister(name="R3")]))
+    nodes.append(SassComment(text=f"END {name} ({node_id})"))
+    return nodes
 
   return expand
 

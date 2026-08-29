@@ -1,16 +1,18 @@
 """Test suite for the Dispatch Logic module."""
 
-import pytest
 import typing
+
 import libcst as cst
-from tests.conftest import TestRewriter
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.dsl import LogicOp, Rule
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.dsl import Rule, LogicOp
+from tests.conftest import TestRewriter
 
 
 class MockDispatchSemantics(SemanticsManager):
-  """Mock Dispatch Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockDispatchSemantics instance."""
@@ -80,7 +82,7 @@ class MockDispatchSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   semantics = MockDispatchSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(semantics, config)
@@ -115,7 +117,7 @@ def test_dispatch_in_list(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_positional_extraction(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch positional extraction."""
+  """Docstring."""
   code: str = "y = torch.resize(x, None, 'nearest')"
   res: str = rewrite(rewriter, code)
   assert "jax.image.resize_nearest" in res

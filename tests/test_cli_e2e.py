@@ -1,10 +1,11 @@
 """Test suite for the Cli E2E module."""
 
-from ml_switcheroo.cli.__main__ import main
-from unittest.mock import patch, MagicMock, mock_open
 import runpy
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock, mock_open, patch
+
+from ml_switcheroo.cli.__main__ import main
 
 
 def test_cli_e2e_suggest(tmp_path: Path) -> None:
@@ -191,7 +192,7 @@ def test_cli_e2e_unknown_command() -> None:
 
 
 def test_cli_e2e_module_execution() -> None:
-  """Tests running the module directly"""
+  """Docstring."""
   with patch("sys.exit") as mock_exit:
     with patch.object(sys, "argv", ["ml_switcheroo", "schema"]):
       with patch("ml_switcheroo.cli.__main__.handle_schema", return_value=0):

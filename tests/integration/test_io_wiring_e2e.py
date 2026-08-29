@@ -1,10 +1,12 @@
 """Test suite for the Io Wiring E2E module."""
 
-import pytest
-import typing
 import importlib
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+import typing
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE_CODE: str = "\nimport torch\n\ndef save_model(model):\n    torch.save(model, 'checkpoint.pth')\n    loaded = torch.load('checkpoint.pth')\n    return loaded\n"

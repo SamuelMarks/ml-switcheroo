@@ -1,11 +1,11 @@
 """Test suite for the Macros module."""
 
 from ml_switcheroo.core.compiler.backends.sass.macros import expand_conv2d, expand_linear
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassLabel, SassRegister, SassComment
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassLabel, SassRegister
 
 
 class MockAllocator:
-  """Mock Allocator class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockAllocator instance."""

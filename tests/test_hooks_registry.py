@@ -1,16 +1,17 @@
 """Test suite for the Hooks Registry module."""
 
-from unittest.mock import patch
 from pathlib import Path
+from unittest.mock import patch
+
 from ml_switcheroo.core.hooks_registry import (
-  register_hook,
-  get_hook,
-  get_all_hook_metadata,
-  clear_hooks,
-  load_plugins,
-  _import_from_dir,
-  _HOOKS,
   _HOOK_METADATA,
+  _HOOKS,
+  _import_from_dir,
+  clear_hooks,
+  get_all_hook_metadata,
+  get_hook,
+  load_plugins,
+  register_hook,
 )
 
 

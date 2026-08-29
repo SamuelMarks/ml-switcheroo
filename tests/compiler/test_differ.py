@@ -1,8 +1,9 @@
 """Test suite for the Differ module."""
 
 import typing
-from ml_switcheroo.core.compiler.differ import GraphDiffer, _is_likely_stateful, DeleteAction, ReplaceAction
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+
+from ml_switcheroo.core.compiler.differ import DeleteAction, GraphDiffer, ReplaceAction, _is_likely_stateful
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def test_differ_no_changes() -> None:
@@ -89,8 +90,8 @@ def test__is_likely_stateful() -> None:
 
 
 def test_differ_diff_no_anchor() -> None:
+  """Docstring."""
   # Hit 123->128
-  """Test differ diff no anchor."""
   from ml_switcheroo.core.compiler.differ import GraphDiffer
   from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 

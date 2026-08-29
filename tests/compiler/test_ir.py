@@ -1,6 +1,6 @@
 """Test suite for the Ir module."""
 
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, topological_sort
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, topological_sort
 
 
 def test_graph_structure() -> None:
@@ -87,7 +87,7 @@ def test_logical_mesh() -> None:
 
 def test_graph_sharding_attributes() -> None:
   """Verifies the behavior of graph sharding attributes."""
-  from ml_switcheroo.core.compiler.ir import LogicalMesh, PartitionSpec, LogicalGraph, LogicalNode
+  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalMesh, LogicalNode, PartitionSpec
 
   mesh = LogicalMesh(shape={"data": 8})
   spec = PartitionSpec(axes=("data", None))
@@ -112,9 +112,9 @@ def test_topological_sort_missing_node() -> None:
 
 
 def test_ir_topological_sort_cycle() -> None:
+  """Docstring."""
   # Hit 133->131 (in_degree != 0) and 141->140 (n.id in seen)
-  """Test ir topological sort cycle."""
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, topological_sort
+  from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, topological_sort
 
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("A", "Op"))

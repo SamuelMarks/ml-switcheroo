@@ -1,10 +1,12 @@
 """Docstring."""
 
-from unittest.mock import patch, MagicMock
-from ml_switcheroo.core.ingestion import ingest_code
-from ml_switcheroo.frameworks.base import FrameworkAdapter
+from unittest.mock import MagicMock, patch
+
 import libcst as cst
 import pytest
+
+from ml_switcheroo.core.ingestion import ingest_code
+from ml_switcheroo.frameworks.base import FrameworkAdapter
 
 
 class DummyAdapter(FrameworkAdapter):

@@ -1,11 +1,11 @@
 """Test module."""
 
-from ml_switcheroo.analysis.cfg import ControlFlowGraph, BasicBlock
-from ml_switcheroo.analysis.dominators import build_dominator_sets, find_immediate_dominators, find_back_edges
+from ml_switcheroo.analysis.cfg import BasicBlock, ControlFlowGraph
+from ml_switcheroo.analysis.dominators import build_dominator_sets, find_back_edges, find_immediate_dominators
 
 
 def build_test_cfg() -> ControlFlowGraph:
-  """Test element."""
+  """Docstring."""
   cfg: ControlFlowGraph = ControlFlowGraph()
   # 1 -> 2 -> 3 -> 4
   # |    ^    |
@@ -33,7 +33,7 @@ def build_test_cfg() -> ControlFlowGraph:
 
 
 def test_build_dominator_sets() -> None:
-  """Test element."""
+  """Docstring."""
   cfg: ControlFlowGraph = build_test_cfg()
   doms: dict[str, set[str]] = build_dominator_sets(cfg)
 
@@ -56,14 +56,14 @@ def test_build_dominator_sets() -> None:
 
 
 def test_build_dominator_sets_empty_cfg() -> None:
-  """Test element."""
+  """Docstring."""
   cfg: ControlFlowGraph = ControlFlowGraph()
   doms: dict[str, set[str]] = build_dominator_sets(cfg)
   assert doms == {}
 
 
 def test_build_dominator_sets_unreachable() -> None:
-  """Test element."""
+  """Docstring."""
   cfg: ControlFlowGraph = ControlFlowGraph()
   cfg.get_or_create_block("1")
   cfg.get_or_create_block("2")  # unreachable
@@ -74,7 +74,7 @@ def test_build_dominator_sets_unreachable() -> None:
 
 
 def test_find_immediate_dominators() -> None:
-  """Test element."""
+  """Docstring."""
   cfg: ControlFlowGraph = build_test_cfg()
   doms: dict[str, set[str]] = build_dominator_sets(cfg)
   idoms: dict[str, str | None] = find_immediate_dominators(cfg, doms)
@@ -88,7 +88,7 @@ def test_find_immediate_dominators() -> None:
 
 
 def test_find_back_edges() -> None:
-  """Test element."""
+  """Docstring."""
   cfg: ControlFlowGraph = build_test_cfg()
   # Add a loop 3 -> 2
   cfg.blocks["3"].add_successor(cfg.blocks["2"])

@@ -1,12 +1,13 @@
 """Test suite for the Sharding Extractor module."""
 
 import typing
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
 
 def test_sharding_extraction_pass() -> None:
-  """Verifies the behavior of sharding extraction pass."""
+  """Docstring."""
   graph = LogicalGraph(
     nodes=[
       LogicalNode(id="x", kind="Input"),
@@ -33,7 +34,7 @@ def test_sharding_extraction_pass() -> None:
 
 
 def test_sharding_extraction_pass_complex_spec() -> None:
-  """Verifies the behavior of sharding extraction pass complex spec."""
+  """Docstring."""
   graph = LogicalGraph(
     nodes=[
       LogicalNode(id="fc", kind="Linear"),
@@ -53,7 +54,7 @@ def test_sharding_extraction_pass_complex_spec() -> None:
 
 
 def test_sharding_extraction_pass_no_match() -> None:
-  """Verifies the behavior of sharding extraction pass no match."""
+  """Docstring."""
   graph = LogicalGraph(nodes=[LogicalNode(id="fc", kind="Linear")])
   pass_ = ShardingExtractionPass()
   extracted_graph: LogicalGraph = pass_.apply(graph)
@@ -61,7 +62,7 @@ def test_sharding_extraction_pass_no_match() -> None:
 
 
 def test_sharding_extraction_pass_invalid_ast() -> None:
-  """Verifies the behavior of sharding extraction pass invalid AST."""
+  """Docstring."""
   graph = LogicalGraph(
     nodes=[
       LogicalNode(id="fc", kind="Linear"),
@@ -76,7 +77,7 @@ def test_sharding_extraction_pass_invalid_ast() -> None:
 
 
 def test_sharding_extraction_pass_fallback_arg() -> None:
-  """Verifies the behavior of sharding extraction pass fallback argument."""
+  """Docstring."""
   graph = LogicalGraph(
     nodes=[
       LogicalNode(id="fc", kind="Linear"),
@@ -94,7 +95,7 @@ def test_sharding_extraction_pass_fallback_arg() -> None:
 
 
 def test_sharding_extraction_pass_no_partition_spec() -> None:
-  """Verifies the behavior of sharding extraction pass no partition spec."""
+  """Docstring."""
   graph = LogicalGraph(
     nodes=[
       LogicalNode(id="fc", kind="Linear"),
@@ -209,10 +210,10 @@ def test_sharding_extractor_source_node_not_found() -> None:
 
 
 def test_sharding_extractor_duplicate_edge() -> None:
+  """Docstring."""
   # Hit 85->77
-  """Test sharding extractor duplicate edge."""
+  from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("A", "Op"))
@@ -226,8 +227,8 @@ def test_sharding_extractor_duplicate_edge() -> None:
 
 
 def test_sharding_extractor_ast_not_call() -> None:
+  """Docstring."""
   # Hit 111->128
-  """Test sharding extractor ast not call."""
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
   # The string must contain PartitionSpec to pass the substring check
@@ -236,10 +237,10 @@ def test_sharding_extractor_ast_not_call() -> None:
 
 
 def test_sharding_extractor_duplicate_edge_not_in_new_edges() -> None:
+  """Docstring."""
   # Hit 85->77 (if new_edge in new_edges is True -> does not append)
-  """Test sharding extractor duplicate edge not in new edges."""
+  from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("A", "Op"))
@@ -252,10 +253,10 @@ def test_sharding_extractor_duplicate_edge_not_in_new_edges() -> None:
 
 
 def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact() -> None:
+  """Docstring."""
   # Hit 85->77 (if new_edge in new_edges is True -> does not append)
-  """Test sharding extractor duplicate edge not in new edges exact."""
+  from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("A", "Op"))
@@ -268,10 +269,10 @@ def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact() -> None:
 
 
 def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact_dataclass() -> None:
+  """Docstring."""
   # Hit 85->77 by making sure equality holds
-  """Test sharding extractor duplicate edge not in new edges exact dataclass."""
+  from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("A", "Op"))
@@ -285,7 +286,7 @@ def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact_dataclass() ->
 
 def test_sharding_extractor_duplicate_edge_2() -> None:
   """Docstring."""
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+  from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
   graph = LogicalGraph(name="test")

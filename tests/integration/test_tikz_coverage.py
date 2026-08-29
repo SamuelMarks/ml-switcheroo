@@ -1,18 +1,20 @@
 """Module docstring."""
 
 import typing
+
+from lark import Token
+
 from ml_switcheroo.core.tikz.nodes import (
   TikzBaseNode,
-  TriviaNode,
-  TikzOption,
-  TikzTextNode,
-  TikzTable,
-  TikzNode,
   TikzEdge,
   TikzGraph,
+  TikzNode,
+  TikzOption,
+  TikzTable,
+  TikzTextNode,
+  TriviaNode,
 )
 from ml_switcheroo.core.tikz.parser import TikzParser, TikzTransformer
-from lark import Token
 
 
 def test_tikz_nodes_missing() -> None:
@@ -37,10 +39,7 @@ def test_tikz_nodes_missing() -> None:
       n.emit()
 
   class DummyTikz(TikzBaseNode):  # type: ignore[misc]
-    """Docstring."""
-
     def emit(self, indent_level: int = 0) -> str:
-      """Docstring."""
       return "d"
 
   DummyTikz().emit()
@@ -130,10 +129,7 @@ def test_tikz_parser_missing() -> None:
     pass
 
   class DummyTree:
-    """Docstring."""
-
     def __init__(self, data: str, children: list[typing.Any]) -> None:
-      """Docstring."""
       self.data: str = data
       self.children: list[typing.Any] = children
 

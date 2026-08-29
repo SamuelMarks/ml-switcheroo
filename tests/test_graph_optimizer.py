@@ -1,9 +1,10 @@
 """Docstring."""
 
-from ml_switcheroo.core.graph_optimizer import GraphOptimizer
-from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.dsl import PatternDef
 from typing import Dict, List, Optional
+
+from ml_switcheroo.core.dsl import PatternDef
+from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.graph_optimizer import GraphOptimizer
 
 
 def test_graph_optimizer_no_patterns() -> None:

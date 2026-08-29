@@ -6,20 +6,21 @@ for translating logical graphs to low-level Pythonic representations of assembly
 and the RdnaBackend high-level configuration.
 """
 
-import pytest
-import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RegisterAllocator, RdnaSynthesizer, RdnaBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+import libcst as cst
+import pytest
+
+from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RdnaBackend, RdnaSynthesizer, RegisterAllocator
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
-  RdnaInstruction,
-  RdnaVGPR,
-  RdnaSGPR,
   RdnaComment,
-  RdnaLabel,
   RdnaImmediate,
+  RdnaInstruction,
+  RdnaLabel,
+  RdnaSGPR,
+  RdnaVGPR,
 )
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -450,10 +451,10 @@ def test_rdna_backend_default_init():
 
 
 def test_rdna_synthesizer_empty_output():
-  """Test RDNA synthesizer with an Output node with no inputs."""
+  """Docstring."""
   from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RdnaSynthesizer
-  from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
   semantics = SemanticsManager()
   synthesizer = RdnaSynthesizer(semantics)

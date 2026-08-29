@@ -1,8 +1,9 @@
 """Test suite for the Mlir Generator Hardening module."""
 
 import typing
-from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
+
 from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, ValueNode
+from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
 def gen_code(op: OperationNode) -> str:

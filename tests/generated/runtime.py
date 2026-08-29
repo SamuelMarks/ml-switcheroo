@@ -1,4 +1,6 @@
 """Shared runtime flags for generated tests (Auto-Generated)."""
+# ruff: noqa
+# fmt: off
 
 import sys
 import pytest

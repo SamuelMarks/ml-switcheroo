@@ -1,8 +1,9 @@
 """Test suite for the Lifter module."""
 
 from typing import List
+
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassNode, SassRegister
 from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassRegister, SassNode
 
 
 def test_lift_simple_chain() -> None:

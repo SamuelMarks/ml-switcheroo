@@ -1,12 +1,14 @@
 """Test suite for the Gradient Modes module."""
 
-import pytest
 import typing
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.dsl import OpType
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.dsl import OpType
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE_TORCH: str = "\nimport torch\n\ndef evaluate(model, x):\n    with torch.no_grad():\n        return model(x)\n"
 EXPECTED_JAX: str = "\nimport contextlib\nimport torch\n\ndef evaluate(model, x):\n    with contextlib.nullcontext():\n        return model(x)\n"
@@ -14,7 +16,7 @@ EXPECTED_JAX: str = "\nimport contextlib\nimport torch\n\ndef evaluate(model, x)
 
 @pytest.fixture
 def manager() -> SemanticsManager:
-  """Provides a mock manager for testing."""
+  """Docstring."""
   mgr = SemanticsManager()
   no_grad_def: dict[str, typing.Any] = {
     "op_type": OpType.CONTEXT,

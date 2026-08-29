@@ -1,12 +1,13 @@
 """Test module."""
 
 import libcst as cst
+
 from ml_switcheroo.analysis.purity import PurityScanner
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def get_hatch_message(tree: cst.Module) -> str:
-  """Test element."""
+  """Docstring."""
   # We look for the escape hatch comment
   lines: list[str] = tree.code.splitlines()
   line: str
@@ -17,7 +18,7 @@ def get_hatch_message(tree: cst.Module) -> str:
 
 
 def test_purity_io() -> None:
-  """Test element."""
+  """Docstring."""
   scanner: PurityScanner = PurityScanner()
   code: str = "print('hello')"
   tree: cst.Module = cst.parse_module(code)
@@ -28,7 +29,7 @@ def test_purity_io() -> None:
 
 
 def test_purity_mutation() -> None:
-  """Test element."""
+  """Docstring."""
   scanner: PurityScanner = PurityScanner()
   code: str = "x.append(1)"
   tree: cst.Module = cst.parse_module(code)
@@ -38,7 +39,7 @@ def test_purity_mutation() -> None:
 
 
 def test_purity_io_write() -> None:
-  """Test element."""
+  """Docstring."""
   scanner: PurityScanner = PurityScanner()
   code: str = "f.write('hello')"
   tree: cst.Module = cst.parse_module(code)
@@ -48,7 +49,7 @@ def test_purity_io_write() -> None:
 
 
 def test_purity_global() -> None:
-  """Test element."""
+  """Docstring."""
   scanner: PurityScanner = PurityScanner()
   code: str = "global x"
   tree: cst.Module = cst.parse_module(code)
@@ -58,7 +59,7 @@ def test_purity_global() -> None:
 
 
 def test_purity_nonlocal() -> None:
-  """Test element."""
+  """Docstring."""
   scanner: PurityScanner = PurityScanner()
   code: str = "nonlocal y, z"
   tree: cst.Module = cst.parse_module(code)
@@ -68,7 +69,7 @@ def test_purity_nonlocal() -> None:
 
 
 def test_purity_rng() -> None:
-  """Test element."""
+  """Docstring."""
   scanner: PurityScanner = PurityScanner()
   code: str = "random.seed(42)"
   tree: cst.Module = cst.parse_module(code)
@@ -78,7 +79,7 @@ def test_purity_rng() -> None:
 
 
 def test_purity_dynamic_config() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   # Mock framework config
   semantics.framework_configs["torch"] = {"traits": {"impurity_methods": ["add_", "copy_"]}}
@@ -92,7 +93,7 @@ def test_purity_dynamic_config() -> None:
 
 
 def test_purity_multiple_violations() -> None:
-  """Test element."""
+  """Docstring."""
   scanner: PurityScanner = PurityScanner()
   code: str = "print(x.append(1))"  # Contrived, but shows multiple
   tree: cst.Module = cst.parse_module(code)
@@ -103,7 +104,7 @@ def test_purity_multiple_violations() -> None:
 
 
 def test_purity_safe() -> None:
-  """Test element."""
+  """Docstring."""
   scanner: PurityScanner = PurityScanner()
   code: str = "x = y + z"
   tree: cst.Module = cst.parse_module(code)

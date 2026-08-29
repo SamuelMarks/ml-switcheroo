@@ -9,15 +9,17 @@ substitution via `MacroSubstitutionTransformer`, and transforming functional cal
 to unary and binary infix operations via `rewrite_as_infix`.
 """
 
-import pytest
 import typing
+
 import libcst as cst
+import pytest
+
 from ml_switcheroo.core.rewriter.calls.transformers import (
+  MacroSubstitutionTransformer,
   apply_index_select,
+  rewrite_as_infix,
   rewrite_as_inline_lambda,
   rewrite_as_macro,
-  rewrite_as_infix,
-  MacroSubstitutionTransformer,
 )
 
 

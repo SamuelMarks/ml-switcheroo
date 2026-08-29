@@ -1,18 +1,20 @@
 """Test suite for the Rdna Roundtrip module."""
 
-import pytest
 import typing
 from unittest.mock import MagicMock
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+
+import pytest
+
 from ml_switcheroo.core.compiler.backends.rdna import RdnaBackend
-from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
 def semantics_mgr() -> SemanticsManager:
-  """Provides a mock semantics mgr for testing."""
+  """Docstring."""
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
   def get_def(kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:

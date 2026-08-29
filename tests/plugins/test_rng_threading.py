@@ -1,14 +1,16 @@
 """Test suite for the Rng Threading module."""
 
-import pytest
-import libcst as cst
-from typing import Generator, Dict
+from typing import Dict, Generator
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.plugins.rng_threading import inject_prng_threading
 from ml_switcheroo.semantics.schema import PluginTraits
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:

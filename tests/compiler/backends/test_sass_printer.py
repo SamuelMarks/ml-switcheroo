@@ -1,17 +1,15 @@
 """Test suite for the SassPrinter module."""
 
-from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassComment as Comment,
-  SassDirective as Directive,
-  SassInstruction as Instruction,
-  SassLabel as Label,
-  SassNode,
-)
 from ml_switcheroo.core.compiler.backends.sass.printer import SassPrinter
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment as Comment
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassDirective as Directive
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction as Instruction
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassLabel as Label
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassNode
 
 
 class CustomSassNode(SassNode):
-  """Custom generic node for testing fallback behavior."""
+  """Docstring."""
 
   def __str__(self) -> str:
     """Return mock representation."""
@@ -71,10 +69,10 @@ def test_sass_printer_all_nodes() -> None:
   """Docstring."""
   from ml_switcheroo.core.compiler.backends.sass.printer import SassPrinter
   from ml_switcheroo.core.compiler.frontends.sass.cst import (
-    SassLabel,
-    SassInstruction,
-    SassDirective,
     SassComment,
+    SassDirective,
+    SassInstruction,
+    SassLabel,
     SassRegister,
   )
 

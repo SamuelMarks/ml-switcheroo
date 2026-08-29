@@ -89,17 +89,17 @@ class RdnaLifter:
         marker = self.comment_parser.parse(text)
 
         if not marker:
-          continue  # pragma: no cover
+          continue
 
         if isinstance(marker, SemanticInput):
           commit_node(marker.name, "Input", {"name": marker.name})
-          continue  # pragma: no cover
+          continue
 
         elif isinstance(marker, SemanticBegin):
           current_block_kind = marker.kind
           current_block_id = marker.id
           current_instructions = []
-          continue  # pragma: no cover
+          continue
 
         elif isinstance(marker, SemanticEnd):
           if marker.id == current_block_id:
@@ -116,7 +116,7 @@ class RdnaLifter:
           if "flatten" in marker.api:
             meta["arg_1"] = 1
           commit_node(marker.id, marker.api, meta)
-          continue  # pragma: no cover
+          continue
 
         elif isinstance(marker, SemanticReturn):
           if "output" not in seen_ids:

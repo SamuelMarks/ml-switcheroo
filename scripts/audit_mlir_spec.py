@@ -1,5 +1,6 @@
 """Script to audit MLIR spec."""
 
+import sys
 import urllib.request
 import json
 import re
@@ -63,6 +64,7 @@ for line in content.splitlines():
 
 with open("audit_mlir.json", "w") as f:
   json.dump(grammar_rules, f, indent=2)
+  f.write("\n")
 
 # Now read the implemented grammar in src/ml_switcheroo/core/mlir/grammar.lark
 lark_path = Path("src/ml_switcheroo/core/mlir/grammar.lark")
@@ -109,10 +111,16 @@ for rule in grammar_rules.keys():
     missing_rules.append(rule)
 
 with open("audit_mlir.md", "w") as f:
-  f.write("# MLIR LangRef Missing Grammar Rules\n\n")
+  f.write("# MLIR LangRef Missing Grammar Rules\n")
+  if missing_rules:
+    f.write("\n")
   for rule in sorted(missing_rules):
     f.write(f"- [ ] Implement `{rule}` (Spec: `{grammar_rules[rule]}`)\n")
+
 
 print(f"Found {len(grammar_rules)} total MLIR grammar rules.")
 print(f"Implemented (fuzzy match): {len(implemented_matches)}")
 print(f"Missing: {len(missing_rules)}")
+
+if missing_rules:
+  sys.exit(1)

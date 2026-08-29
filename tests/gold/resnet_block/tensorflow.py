@@ -1,11 +1,12 @@
 """Test suite for the Tensorflow module."""
 
 import typing
+
 import tensorflow as tf
 
 
 class ResidualBlock(tf.keras.Model):  # type: ignore
-  """Test suite for the Residual Block component."""
+  """Docstring."""
 
   def __init__(self, channels: int) -> None:
     """Initializes the ResidualBlock instance."""

@@ -1,14 +1,16 @@
 """Module docstring."""
 
-from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeMixin
-import pytest
-from unittest.mock import MagicMock, patch
-import libcst as cst
 from pathlib import Path
-from ml_switcheroo.core.engine import ASTEngine
+from unittest.mock import MagicMock, patch
+
+import libcst as cst
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.conversion_result import ConversionResult
+from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeMixin
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_ast_engine_init() -> None:
@@ -420,7 +422,6 @@ def test_run_rewriter_pipeline_opt_no_plan_1(mock_ingest: MagicMock) -> None:
   reset_tracer()
 
   def mock_diff(*args: list[str], **kwargs: dict[str, str]) -> list[str]:
-    """Docstring."""
     print("MOCK DIFF CALLED!")
     return []
 
@@ -510,7 +511,7 @@ class DummyMixin3(AttributeMixin):
 
 
 def test_attributes_mixin_branch_coverage3() -> None:
-  """Test attributes mixin branch coverage 3."""
+  """Docstring."""
   mixin: DummyMixin3 = DummyMixin3()
   # Let's hit the lines without `_path_to_alias` and without `_defined_names`
   node: cst.BaseExpression = cst.parse_expression("a.b")

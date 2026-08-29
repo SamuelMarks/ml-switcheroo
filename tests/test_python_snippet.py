@@ -1,8 +1,9 @@
 """Docstring."""
 
+import libcst as cst
+
 from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
 from ml_switcheroo.core.compiler.ir import LogicalNode
-import libcst as cst
 
 
 def test_emit_init() -> None:

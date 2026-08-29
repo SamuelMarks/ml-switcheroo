@@ -209,17 +209,17 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     func_node = expr.func if isinstance(expr, cst.Call) else expr
 
     name = self._get_qualified_name(func_node)
-    if not name:  # pragma: no cover
+    if not name:
       return updated_node
 
     lookup = self.context.semantics.get_definition(name)
-    if not lookup:  # pragma: no cover
+    if not lookup:
       return updated_node
 
     _, details = lookup
     variants = details.get("variants", {})
 
-    if self.context.target_fw not in variants:  # pragma: no cover
+    if self.context.target_fw not in variants:
       return updated_node
 
     target_variant = variants[self.context.target_fw]

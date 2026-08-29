@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class AttentionModel(tf.keras.Model):
-  """Test suite for the Attention Model component."""
+  """Docstring."""
 
   def __init__(self, embed_dim: int, num_heads: int):
     """Initializes the AttentionModel instance."""

@@ -1,15 +1,15 @@
 """Test suite for Conv and Pooling SASS Macros."""
 
 from ml_switcheroo.core.compiler.backends.sass.macros import (
+  expand_adaptivepool,
   expand_conv1d,
-  expand_depthwiseconv2d,
   expand_convtranspose,
+  expand_depthwiseconv2d,
   expand_pool1d,
   expand_pool3d,
-  expand_adaptivepool,
 )
-from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
+from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction
 
 

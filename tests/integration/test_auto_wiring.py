@@ -1,14 +1,16 @@
 """Test suite for the Auto Wiring module."""
 
-import pytest
 import typing
-import libcst as cst
 from pathlib import Path
 from unittest.mock import patch
-from ml_switcheroo.core.hooks import register_hook, HookContext
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
+import libcst as cst
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.core.hooks import HookContext, register_hook
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture(autouse=True)

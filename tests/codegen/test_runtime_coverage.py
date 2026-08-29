@@ -1,15 +1,16 @@
 """Test suite for the Runtime Comparator module coverage."""
 
-import numpy as np
-from unittest import mock
 import sys
-import pytest
 import typing
-from ml_switcheroo.generated_tests.runtime import verify_results
+from unittest import mock
+
+import numpy as np
+import pytest
 
 # We need to import the fixture but avoid pytest seeing it as a test fixture directly
 # if we just want to call its code. We can extract the original function.
 from ml_switcheroo.generated_tests import runtime
+from ml_switcheroo.generated_tests.runtime import verify_results
 
 
 def test_verify_results_shape_mismatch_size_1() -> None:
@@ -42,25 +43,17 @@ def test_verify_results_fallback() -> None:
   """Verifies the fallback exception block."""
 
   class BadThing:
-    """Docstring."""
-
     def __eq__(self, other: typing.Any) -> bool:
-      """Docstring."""
       raise ValueError("Bad")
 
   class VeryBadThing:
-    """Docstring."""
-
     def __init__(self, val: typing.Any) -> None:
-      """Docstring."""
       self.val = val
 
     def __array__(self) -> np.ndarray:
-      """Docstring."""
       raise RuntimeError("No array")
 
     def __eq__(self, other: typing.Any) -> bool:
-      """Docstring."""
       raise RuntimeError("No eq")
 
   assert not verify_results(VeryBadThing(1), VeryBadThing(2))

@@ -2,12 +2,13 @@
 
 import sys
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
+
+from scripts.audit_against_snapshots import audit_frameworks, load_snapshots, load_snapshots_multi
 
 # Provide access to the module
 sys.path.insert(0, str(Path("src").resolve()))
-from scripts.audit_against_snapshots import audit_frameworks, load_snapshots
 
 
 @patch("scripts.audit_against_snapshots.sys")
@@ -30,7 +31,7 @@ def test_load_snapshots(mock_sys: MagicMock) -> None:
 
 
 def test_load_snapshots_empty() -> None:
-  """Test loading snapshots empty."""
+  """Docstring."""
   from scripts.audit_against_snapshots import load_snapshots
 
   mock_path_obj: MagicMock = MagicMock()
@@ -39,7 +40,7 @@ def test_load_snapshots_empty() -> None:
 
 
 def test_audit_frameworks_coverage() -> None:
-  """Test auditing framework coverage."""
+  """Docstring."""
   manager: MagicMock = MagicMock()
   manager.data = {
     "flatten": {
@@ -102,14 +103,14 @@ def test_audit_frameworks_coverage() -> None:
 
 
 def test_main_block() -> None:
-  """Test that the main block is callable."""
+  """Docstring."""
   from scripts.audit_against_snapshots import main
 
   assert callable(main)
 
 
 def test_audit_frameworks_coverage2() -> None:
-  """Test another coverage case for audit frameworks."""
+  """Docstring."""
   manager: MagicMock = MagicMock()
   manager.data = {
     "flatten": {
@@ -126,7 +127,7 @@ def test_audit_frameworks_coverage2() -> None:
 
 
 def test_audit_frameworks() -> None:
-  """Test auditing framework definitions against snapshots."""
+  """Docstring."""
   manager: MagicMock = MagicMock()
   manager.data = {
     "flatten": {
@@ -236,8 +237,9 @@ def test_main_success(
       mock_load (MagicMock): Mock argument.
       mock_audit (MagicMock): Mock argument.
   """
-  from scripts.audit_against_snapshots import main
   import sys
+
+  from scripts.audit_against_snapshots import main
 
   mock_audit.return_value = []
 
@@ -262,8 +264,9 @@ def test_main_failure_strict(
       mock_load (MagicMock): Mock argument.
       mock_audit (MagicMock): Mock argument.
   """
-  from scripts.audit_against_snapshots import main
   import sys
+
+  from scripts.audit_against_snapshots import main
 
   mock_audit.return_value = ["error"]
 
@@ -288,10 +291,94 @@ def test_main_failure_not_strict(
       mock_load (MagicMock): Mock argument.
       mock_audit (MagicMock): Mock argument.
   """
-  from scripts.audit_against_snapshots import main
   import sys
+
+  from scripts.audit_against_snapshots import main
 
   mock_audit.return_value = ["error"]
 
   with patch.object(sys, "argv", ["audit_against_snapshots.py"]):
     assert main() == 0
+
+
+# --- Merged from test_audit_against_snapshots_extra.py ---
+
+
+sys.path.insert(0, str(Path("src").resolve()))
+
+
+def test_load_snapshots_branches() -> None:
+  """Docstring."""
+  mock_dir = MagicMock()
+  mock_file1 = MagicMock()
+  mock_file1.name = "torch_map.json"
+  mock_file2 = MagicMock()
+  mock_file2.name = "torch_vunknown.json"
+  mock_file3 = MagicMock()
+  mock_file3.name = "torch_v1.json"
+
+  mock_dir.glob.return_value = [mock_file1, mock_file2, mock_file3]
+
+  dummy_data = {
+    "categories": {
+      "list_cat": [{"api_path": "a"}, {"name": "b"}, {"aliases": ["c", "d"]}],
+      "dict_cat": {"e": {"api": "e"}},
+    },
+    "functions": {"f": {}},
+    "classes": {"g": {}},
+    "extra_item": {"args": []},
+    "extra_item2": {},
+  }
+
+  with patch("builtins.open", new_callable=MagicMock):
+    with patch("json.load", return_value=dummy_data):
+      snapshots = load_snapshots(mock_dir)
+      assert "torch" in snapshots
+      t = snapshots["torch"]
+      assert "a" in t and "b" in t and "c" in t and "d" in t
+      assert "e" in t
+      assert "f" in t
+      assert "g" in t
+      assert "extra_item" in t
+      assert "extra_item2" not in t
+
+
+def test_load_snapshots_multi_branches() -> None:
+  """Docstring."""
+  mock_dir1 = MagicMock()
+  mock_dir1.exists.return_value = False
+
+  mock_dir2 = MagicMock()
+  mock_dir2.exists.return_value = True
+
+  mock_file1 = MagicMock()
+  mock_file1.name = "torch_map.json"
+  mock_file2 = MagicMock()
+  mock_file2.name = "torch_vunknown.json"
+  mock_file3 = MagicMock()
+  mock_file3.name = "torch_v1.json"
+
+  mock_dir2.glob.return_value = [mock_file1, mock_file2, mock_file3]
+
+  dummy_data = {
+    "categories": {
+      "list_cat": [{"api_path": "a"}, {"name": "b"}, {"aliases": ["c", "d"]}],
+      "dict_cat": {"e": {"api": "e"}},
+    },
+    "functions": {"f": {}},
+    "classes": {"g": {}},
+    "extra_item": {"args": []},
+    "extra_item2": {},
+  }
+
+  with patch("builtins.open", new_callable=MagicMock):
+    with patch("json.load", return_value=dummy_data):
+      snapshots = load_snapshots_multi([mock_dir1, mock_dir2])
+      assert "torch" in snapshots
+      t = snapshots["torch"]
+      assert "a" in t and "b" in t and "c" in t and "d" in t
+      assert "e" in t
+      assert "f" in t
+      assert "g" in t
+      assert "extra_item" in t
+      assert "extra_item2" not in t

@@ -1,12 +1,14 @@
 """Test suite for the Stack Wiring module."""
 
-import pytest
 import typing
+
+import pytest
+
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 
 
 class MockAdapter(JAXStackMixin):
-  """Mock Adapter class for testing purposes."""
+  """Docstring."""
 
   def apply_wiring(self, snapshot: dict[str, typing.Any]) -> None:
     """Mock implementation of apply wiring."""
@@ -15,7 +17,7 @@ class MockAdapter(JAXStackMixin):
 
 @pytest.fixture
 def adapter() -> MockAdapter:
-  """Provides a mock adapter for testing."""
+  """Docstring."""
   return MockAdapter()
 
 

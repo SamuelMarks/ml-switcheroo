@@ -1,13 +1,15 @@
 """Test suite for the Api Attr Mixin module."""
 
-import pytest
 import typing
+
 import libcst as cst
+import pytest
+
 from ml_switcheroo.core.rewriter.passes.api_attr_mixin import ApiTransformerAttrMixin
 
 
 class MockSemantics:
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, defs: dict[str, tuple[str, dict[str, typing.Any]]], origins: dict[str, str]) -> None:
     """Initializes the MockSemantics instance."""
@@ -20,7 +22,7 @@ class MockSemantics:
 
 
 class MockContext:
-  """Mock Context class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockContext instance."""
@@ -28,7 +30,7 @@ class MockContext:
 
 
 class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
-  """Mock Transformer class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, semantics: MockSemantics, context: MockContext, traits: typing.Optional[typing.Any] = None) -> None:
     """Initializes the MockTransformer instance."""

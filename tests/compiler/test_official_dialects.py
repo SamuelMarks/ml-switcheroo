@@ -1,13 +1,13 @@
 """Tests for official MLIR dialects."""
 
-import json
 import importlib.resources as resources
+import json
 
 from ml_switcheroo.core.mlir.official_dialects import OFFICIAL_OPS
 
 
 def test_official_ops_exist() -> None:
-  """Test that official ops are loaded."""
+  """Docstring."""
   assert len(OFFICIAL_OPS) > 0
 
   data_path = resources.files("ml_switcheroo.core.mlir.data").joinpath("mlir_official_ops.json")

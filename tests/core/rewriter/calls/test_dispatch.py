@@ -1,15 +1,16 @@
 """Test suite for conditional dispatch logic."""
 
-import libcst as cst
 import typing
 
-from ml_switcheroo.enums import LogicOp
+import libcst as cst
+
 from ml_switcheroo.core.rewriter.calls.dispatch import (
-  evaluate_dispatch_rules,
+  _check_rule_condition,
   _extract_argument_node,
   _node_to_literal,
-  _check_rule_condition,
+  evaluate_dispatch_rules,
 )
+from ml_switcheroo.enums import LogicOp
 
 
 class DummyRule:
@@ -31,7 +32,6 @@ class DummyRewriter:
     self.source_fw = source_fw
 
   def _is_module_alias(self, name: typing.Any) -> bool:
-    """Docstring."""
     return False
 
 
@@ -43,7 +43,7 @@ def parse_call(code: str) -> cst.Call:
 
 
 def test_node_to_literal() -> None:
-  """Test converting CST nodes to literals."""
+  """Docstring."""
   assert _node_to_literal(cst.Integer("42")) == 42
   assert _node_to_literal(cst.Float("3.14")) == 3.14
   assert _node_to_literal(cst.SimpleString("'hello'")) == "hello"
@@ -56,7 +56,7 @@ def test_node_to_literal() -> None:
 
 
 def test_check_rule_condition_is_type() -> None:
-  """Test rule condition IS_TYPE."""
+  """Docstring."""
   rule_int: typing.Any = DummyRule("x", LogicOp.IS_TYPE, "int", "foo")
   assert _check_rule_condition(cst.Integer("5"), rule_int)
   assert not _check_rule_condition(cst.Float("5.0"), rule_int)
@@ -83,7 +83,7 @@ def test_check_rule_condition_is_type() -> None:
 
 
 def test_check_rule_condition_operators() -> None:
-  """Test rule conditions using various operators."""
+  """Docstring."""
   # EQ
   rule_eq: typing.Any = DummyRule("x", LogicOp.EQ, 5, "foo")
   assert _check_rule_condition(cst.Integer("5"), rule_eq)
@@ -124,7 +124,7 @@ def test_check_rule_condition_operators() -> None:
 
 
 def test_extract_argument_node_keyword() -> None:
-  """Test extracting arguments by keyword."""
+  """Docstring."""
   rewriter = DummyRewriter("torch")
   call: cst.Call = parse_call("func(a=1, b=2)")
 
@@ -134,7 +134,7 @@ def test_extract_argument_node_keyword() -> None:
 
 
 def test_extract_argument_node_positional() -> None:
-  """Test extracting arguments positionally."""
+  """Docstring."""
   rewriter = DummyRewriter("torch")
   call: cst.Call = parse_call("func(1, 2)")
 
@@ -144,13 +144,10 @@ def test_extract_argument_node_positional() -> None:
 
 
 def test_extract_argument_node_method() -> None:
-  """Test extracting arguments for methods where first arg 'x' is skipped."""
+  """Docstring."""
 
   class MethodRewriter(DummyRewriter):
-    """Docstring."""
-
     def _is_module_alias(self, name: typing.Any) -> bool:
-      """Docstring."""
       return False
 
   rewriter = MethodRewriter("torch")
@@ -162,7 +159,7 @@ def test_extract_argument_node_method() -> None:
 
 
 def test_extract_argument_node_not_found() -> None:
-  """Test when argument is not found."""
+  """Docstring."""
   rewriter = DummyRewriter("torch")
   call: cst.Call = parse_call("func(1)")
 
@@ -174,7 +171,7 @@ def test_extract_argument_node_not_found() -> None:
 
 
 def test_evaluate_dispatch_rules() -> None:
-  """Test evaluate_dispatch_rules."""
+  """Docstring."""
   rewriter = DummyRewriter("torch")
   call: cst.Call = parse_call("func(mode='fast')")
 
@@ -199,7 +196,7 @@ def test_evaluate_dispatch_rules() -> None:
 
 
 def test_evaluate_dispatch_rules_tuple_std_args() -> None:
-  """Test with tuple format in std_args."""
+  """Docstring."""
   rewriter = DummyRewriter("torch")
   call: cst.Call = parse_call("func(1, 2)")
 

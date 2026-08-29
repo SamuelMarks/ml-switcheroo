@@ -1,12 +1,13 @@
 """Test suite for the compiler sharding extractor pass."""
 
-from typing import List, Set, Tuple, Optional
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, PartitionSpec
+from typing import List, Optional, Set, Tuple
+
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, PartitionSpec
 from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
 
 def test_sharding_extraction_pass_no_nodes() -> None:
-  """Test with no sharding constraint nodes."""
+  """Docstring."""
   graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="n1", kind="Linear")], edges=[])
   pass_: ShardingExtractionPass = ShardingExtractionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -16,7 +17,7 @@ def test_sharding_extraction_pass_no_nodes() -> None:
 
 
 def test_sharding_extraction_pass_missing_source() -> None:
-  """Test with sharding constraint node that has no incoming edge."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="n1", kind="Linear"),
     LogicalNode(id="s1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data', None)"}),
@@ -28,7 +29,7 @@ def test_sharding_extraction_pass_missing_source() -> None:
 
 
 def test_sharding_extraction_pass_missing_source_node() -> None:
-  """Test with sharding constraint node but the source node does not exist in graph.nodes."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="s1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data', None)"})
   ]
@@ -42,7 +43,7 @@ def test_sharding_extraction_pass_missing_source_node() -> None:
 
 
 def test_sharding_extraction_pass_invalid_parse() -> None:
-  """Test with sharding constraint that fails to parse."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="n1", kind="Linear"),
     LogicalNode(id="s1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec(!"}),
@@ -55,7 +56,7 @@ def test_sharding_extraction_pass_invalid_parse() -> None:
 
 
 def test_sharding_extraction_pass_success() -> None:
-  """Test successfully extracting sharding constraints and rewiring edges."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="n1", kind="Linear"),
     LogicalNode(id="s1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data', None)"}),
@@ -84,7 +85,7 @@ def test_sharding_extraction_pass_success() -> None:
 
 
 def test_parse_partition_spec_various() -> None:
-  """Test _parse_partition_spec edge cases."""
+  """Docstring."""
   pass_: ShardingExtractionPass = ShardingExtractionPass()
 
   assert pass_._parse_partition_spec("foo()") is None
@@ -103,7 +104,7 @@ def test_parse_partition_spec_various() -> None:
 
 
 def test_sharding_extraction_pass_preserve_other_edges() -> None:
-  """Test that edges not related to removal are preserved."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="n1", kind="Linear"),
     LogicalNode(id="s1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data', None)"}),

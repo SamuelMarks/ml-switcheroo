@@ -1,8 +1,9 @@
 """Test suite for the Generator Paxml module."""
 
-from pathlib import Path
 import typing
+from pathlib import Path
 from unittest.mock import MagicMock
+
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 

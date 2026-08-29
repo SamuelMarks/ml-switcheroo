@@ -1,16 +1,18 @@
 """Test suite for the Mlir Convnet Clean module."""
 
 import typing
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 INPUT_CODE: str = "\nimport torch\nimport torch.nn as nn\n\nclass ConvNet(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.conv = nn.Conv2d(1, 32, 3)\n        self.fc = nn.Linear(32 * 26 * 26, 10)\n\n    def forward(self, x):\n        x = self.conv(x)\n        x = torch.flatten(x, 1)\n        return self.fc(x)\n"
 
 
 class MockConvNetSemantics(SemanticsManager):  # type: ignore[misc]
-  """Mock Conv Net Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockConvNetSemantics instance."""

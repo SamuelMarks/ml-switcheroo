@@ -1,9 +1,11 @@
 """Test suite for the Verified Pipeline module."""
 
-from ml_switcheroo.ingestion import verified_pipeline
-from unittest.mock import patch, MagicMock
+from typing import Any, Dict
+from unittest.mock import MagicMock, patch
+
 import pytest
-from typing import Dict, Any
+
+from ml_switcheroo.ingestion import verified_pipeline
 
 
 def test_verified_pipeline_dummy() -> None:
@@ -12,7 +14,7 @@ def test_verified_pipeline_dummy() -> None:
 
 
 def test_verified_pipeline_griffe_available() -> None:
-  """Test pipeline when Griffe is available and parses successfully."""
+  """Docstring."""
   source: str = "def foo(): pass"
   res: Dict[str, Any] = verified_pipeline.run_verified_pipeline(source)
   assert res["status"] == "success"
@@ -21,14 +23,14 @@ def test_verified_pipeline_griffe_available() -> None:
 
 @patch("ml_switcheroo.ingestion.verified_pipeline.ast.parse")
 def test_verified_pipeline_ast_error(mock_ast_parse: MagicMock) -> None:
-  """Test pipeline when AST parsing fails."""
+  """Docstring."""
   mock_ast_parse.side_effect = SyntaxError("test syntax error")
   with pytest.raises(SyntaxError):
     verified_pipeline.run_verified_pipeline("invalid code")
 
 
 def test_verified_pipeline_griffe_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test pipeline when Griffe throws an error during parsing."""
+  """Docstring."""
 
   def mock_parse_module(code: str) -> None:
     """Mocks parse_module to throw an error."""
@@ -49,7 +51,7 @@ def test_verified_pipeline_griffe_error(monkeypatch: pytest.MonkeyPatch) -> None
 
 
 def test_verified_pipeline_griffe_not_available(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test pipeline when Griffe is missing."""
+  """Docstring."""
   import sys
 
   monkeypatch.setitem(sys.modules, "griffe", None)
@@ -60,7 +62,7 @@ def test_verified_pipeline_griffe_not_available(monkeypatch: pytest.MonkeyPatch)
 
 
 def test_verified_pipeline_cdd_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test pipeline when cdd is not installed."""
+  """Docstring."""
   import builtins
 
   original_import: Any = builtins.__import__

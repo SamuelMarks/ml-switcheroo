@@ -1,15 +1,17 @@
 """Test suite for the Config Toml module."""
 
-import pytest
 import typing
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
 
 
 @pytest.fixture
 def toml_file(tmp_path: Path) -> Path:
-  """Provides a mock toml file for testing."""
+  """Docstring."""
   fpath: Path = tmp_path / "pyproject.toml"
   content: str = '\n[tool.ml_switcheroo]\nsource_framework = "tensorflow"\ntarget_framework = "mlx"\nstrict_mode = true\n\n[tool.ml_switcheroo.plugin_settings]\nepsilon = 0.005\nuse_gpu = false\ndebug_level = "info"\n'
   fpath.write_text(content, encoding="utf-8")

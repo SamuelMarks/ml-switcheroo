@@ -1,13 +1,15 @@
 """Test suite for the Tensorflow Examples module."""
 
 import ast
+
 import pytest
+
 from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
 
 @pytest.fixture
 def adapter() -> TensorFlowAdapter:
-  """Provides a mock adapter for testing."""
+  """Docstring."""
   return TensorFlowAdapter()
 
 
@@ -41,7 +43,7 @@ def test_tier2_neural_validity(adapter: TensorFlowAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: TensorFlowAdapter) -> None:
-  """Verifies the behavior of tier3 extras validity."""
+  """Docstring."""
   code: str = adapter.get_tiered_examples()["tier3_extras"]
   ast.parse(code)
   assert "tf.data.Dataset.from_tensor_slices" in code

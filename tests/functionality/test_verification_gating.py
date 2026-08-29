@@ -1,17 +1,19 @@
 """Test suite for the Verification Gating module."""
 
 import json
-import pytest
 import typing
 from pathlib import Path
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -59,7 +61,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def mock_report(tmp_path: Path) -> str:
-  """Provides a mock report for testing."""
+  """Docstring."""
   report: dict[str, bool] = {"good_op": True, "bad_op": False}
   path: Path = tmp_path / "verification.json"
   path.write_text(json.dumps(report))

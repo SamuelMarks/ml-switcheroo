@@ -5,15 +5,16 @@ elements, layout boxes, and structural documents used in the ml_switcheroo HTML-
 """
 
 import pytest
+
 from ml_switcheroo.core.html.nodes import (
-  HtmlNode,
-  TextNode,
-  CommentNode,
   AttributeNode,
-  TagNode,
-  SvgArrow,
+  CommentNode,
   GridBox,
   HtmlDocument,
+  HtmlNode,
+  SvgArrow,
+  TagNode,
+  TextNode,
 )
 
 
@@ -205,7 +206,7 @@ def test_htmldocument_pure_cst() -> None:
 
 def test_tagnode_set_attribute_multiple():
   """Verifies set_attribute behavior when other attributes exist."""
-  from ml_switcheroo.core.html.nodes import TagNode, AttributeNode
+  from ml_switcheroo.core.html.nodes import AttributeNode, TagNode
 
   tag = TagNode(name="div")
   tag.attributes.append(AttributeNode(name="id", value="test"))

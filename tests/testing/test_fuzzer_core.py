@@ -1,6 +1,6 @@
 """Test suite for the Fuzzer Core module."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def test_fuzzer_core_coverage() -> None:
@@ -11,8 +11,6 @@ def test_fuzzer_core_coverage() -> None:
   ig.build_strategies(["shape", "axis", "mask", "indices", "alpha", "inputs"])
 
   class FailingAdapter:
-    """Test suite for the Failing Adapter component."""
-
     def convert(self, x: Any) -> Any:
       """Converts ."""
       raise ValueError("fail")

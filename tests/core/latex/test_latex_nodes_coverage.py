@@ -1,10 +1,10 @@
 """Tests for Latex nodes coverage."""
 
-from ml_switcheroo.core.latex.nodes import LatexNode, TextNode, DocumentNode
+from ml_switcheroo.core.latex.nodes import DocumentNode, LatexNode, TextNode
 
 
 def test_latex_node_abstract() -> None:
-  """Test latex node abstract base class."""
+  """Docstring."""
 
   class DummyNode(LatexNode):
     """Dummy."""
@@ -21,14 +21,14 @@ def test_latex_node_abstract() -> None:
 
 
 def test_text_node_emit() -> None:
-  """Test TextNode emit."""
+  """Docstring."""
   node = TextNode(content="some text")
   assert node.emit(0) == "some text"
   assert node.emit(1) == "  some text"
 
 
 def test_document_node_emit() -> None:
-  """Test DocumentNode emit."""
+  """Docstring."""
   node = DocumentNode(children=[TextNode(content="inner")])
   # DocumentNode inherits LatexNode but its emit is custom to join children
   assert node.emit(1) == "  inner"

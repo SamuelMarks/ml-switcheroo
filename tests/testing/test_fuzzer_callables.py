@@ -1,16 +1,18 @@
 """Test suite for the Fuzzer Callables module."""
 
-import pytest
-import numpy as np
+from typing import Any, Callable, Dict, List
+
 import hypothesis.strategies as st
-from hypothesis import given, settings, HealthCheck
+import numpy as np
+import pytest
+from hypothesis import HealthCheck, given, settings
+
 from ml_switcheroo.testing.fuzzer.core import InputFuzzer
-from typing import Dict, Any, List, Callable
 
 
 @pytest.fixture
 def fuzzer() -> InputFuzzer:
-  """Provides a mock fuzzer for testing."""
+  """Docstring."""
   return InputFuzzer()
 
 

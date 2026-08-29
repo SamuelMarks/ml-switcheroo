@@ -5,8 +5,8 @@ ensuring it correctly parses and extracts include directives, preprocessor macro
 function definitions, and pybind11 module definitions from C++ source code.
 """
 
+from ml_switcheroo.core.compiler.backends.cpp.cst import CppModule, FunctionDefinition, MacroDefinition, PyBindModule
 from ml_switcheroo.core.compiler.backends.cpp.parser import CppParser
-from ml_switcheroo.core.compiler.backends.cpp.cst import CppModule, MacroDefinition, FunctionDefinition, PyBindModule
 
 
 def test_parser_basic() -> None:

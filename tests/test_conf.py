@@ -1,23 +1,23 @@
 """Tests for docs/conf.py."""
 
-import os
-import sys
-import types
 import inspect
-from pathlib import Path
-from typing import Dict, Optional, Callable
-
-import pytest
+import os
 
 # Avoid actual execution of the configuration logic on import
 # We will use runpy to test the module scope
 import runpy
+import sys
+import types
+from pathlib import Path
+from typing import Callable, Dict, Optional
+
+import pytest
 
 docs_dir: Path = Path(__file__).parent.parent / "docs"
 
 
 def test_conf_evaluation(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Tests that conf.py evaluates successfully in both full and partial modes."""
+  """Docstring."""
   # Test without BUILD_ALL_DOCS
   monkeypatch.delenv("BUILD_ALL_DOCS", raising=False)
   namespace: Dict[str, list[str]] = runpy.run_path(str(docs_dir / "conf.py"))
@@ -33,7 +33,7 @@ def test_conf_evaluation(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_linkcode_resolve_non_py_domain() -> None:
-  """Tests linkcode_resolve returns None for non-python domains."""
+  """Docstring."""
   namespace: Dict[str, Callable[[str, Dict[str, str]], Optional[str]]] = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve: Callable[[str, Dict[str, str]], Optional[str]] = namespace["linkcode_resolve"]
 
@@ -41,7 +41,7 @@ def test_linkcode_resolve_non_py_domain() -> None:
 
 
 def test_linkcode_resolve_no_module() -> None:
-  """Tests linkcode_resolve returns None when module is empty."""
+  """Docstring."""
   namespace: Dict[str, Callable[[str, Dict[str, str]], Optional[str]]] = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve: Callable[[str, Dict[str, str]], Optional[str]] = namespace["linkcode_resolve"]
 
@@ -49,7 +49,7 @@ def test_linkcode_resolve_no_module() -> None:
 
 
 def test_linkcode_resolve_module_not_found(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Tests linkcode_resolve returns None when module is not in sys.modules."""
+  """Docstring."""
   namespace: Dict[str, Callable[[str, Dict[str, str]], Optional[str]]] = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve: Callable[[str, Dict[str, str]], Optional[str]] = namespace["linkcode_resolve"]
 
@@ -58,7 +58,7 @@ def test_linkcode_resolve_module_not_found(monkeypatch: pytest.MonkeyPatch) -> N
 
 
 def test_linkcode_resolve_attribute_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Tests linkcode_resolve returns None when attribute is missing."""
+  """Docstring."""
   namespace: Dict[str, Callable[[str, Dict[str, str]], Optional[str]]] = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve: Callable[[str, Dict[str, str]], Optional[str]] = namespace["linkcode_resolve"]
 
@@ -69,7 +69,7 @@ def test_linkcode_resolve_attribute_error(monkeypatch: pytest.MonkeyPatch) -> No
 
 
 def test_linkcode_resolve_unwrap_and_inspect_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Tests linkcode_resolve unwrap logic and handling of inspect errors."""
+  """Docstring."""
   namespace: Dict[str, Callable[[str, Dict[str, str]], Optional[str]]] = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve: Callable[[str, Dict[str, str]], Optional[str]] = namespace["linkcode_resolve"]
 
@@ -98,7 +98,7 @@ def test_linkcode_resolve_unwrap_and_inspect_error(monkeypatch: pytest.MonkeyPat
 
 
 def test_linkcode_resolve_no_source_file(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Tests linkcode_resolve returns None when source file is missing."""
+  """Docstring."""
   namespace: Dict[str, Callable[[str, Dict[str, str]], Optional[str]]] = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve: Callable[[str, Dict[str, str]], Optional[str]] = namespace["linkcode_resolve"]
 
@@ -113,7 +113,7 @@ def test_linkcode_resolve_no_source_file(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_linkcode_resolve_outside_repo(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Tests linkcode_resolve returns None for files outside repo."""
+  """Docstring."""
   namespace: Dict[str, Callable[[str, Dict[str, str]], Optional[str]]] = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve: Callable[[str, Dict[str, str]], Optional[str]] = namespace["linkcode_resolve"]
 
@@ -129,7 +129,7 @@ def test_linkcode_resolve_outside_repo(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_linkcode_resolve_success(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Tests successful GitHub URL resolution."""
+  """Docstring."""
   namespace: Dict[str, Callable[[str, Dict[str, str]], Optional[str]]] = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve: Callable[[str, Dict[str, str]], Optional[str]] = namespace["linkcode_resolve"]
 
@@ -150,7 +150,7 @@ def test_linkcode_resolve_success(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_linkcode_resolve_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test linkcode_resolve handles ValueError during relpath calculation."""
+  """Docstring."""
   namespace: Dict[str, Callable[[str, Dict[str, str]], Optional[str]]] = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve: Callable[[str, Dict[str, str]], Optional[str]] = namespace["linkcode_resolve"]
 

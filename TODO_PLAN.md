@@ -1,3 +1,33 @@
+# Snapshot Grounding Implementation Plan
+
+## Phase 1: Extend Snapshot Auditing to Python AST
+
+- [x] Extend `scripts/audit_against_snapshots.py` to recursively scan `src/ml_switcheroo/frameworks/` and `src/ml_switcheroo/plugins/` for `.py` files.
+- [x] Implement an AST parser within `audit_against_snapshots.py` that builds an alias map of all `import` and `import from` statements (e.g. tracking `import mlx.core as mx` to `mlx.core`).
+- [x] Implement an AST walker that searches for `ast.Attribute` and `ast.Call` nodes to reconstruct full API call chains (e.g. `jnp.sum` -> `jax.numpy.sum`).
+- [x] Resolve reconstructed API call chains against the alias map to get fully qualified API names.
+- [x] Ensure the loaded JSON snapshots from `../ml-framework-snapshots` are queried with these fully qualified Python APIs.
+- [x] Integrate the AST check alongside the existing ODL/JSON declarative checks, reporting any missing/hallucinated APIs.
+- [x] Verify the existing `.pre-commit-config.yaml` correctly invokes the updated script during `pre-commit run --all-files`.
+
+## Phase 2: Add IR/Compiler Spec Auditors to Pre-commit
+
+- [x] Modify `.pre-commit-config.yaml` to add a local hook for `scripts/audit_mlir_spec.py`.
+- [x] Modify `.pre-commit-config.yaml` to add a local hook for `scripts/audit_stablehlo_spec.py`.
+- [x] Test the new pre-commit hooks to ensure they properly execute against the current codebase and fail if specs are violated.
+
+## Phase 3: Audit Inline Snippets in ODL/Definitions
+
+- [x] Expand `scripts/audit_against_snapshots.py` to extract string literals from `code: "..."` and similar snippet blocks within `.yaml` and `.json` definitions.
+- [x] Parse these extracted snippets using `ast.parse()` to safely extract programmatic API calls inside the declarative files.
+- [x] Route these snippet-extracted APIs through the same snapshot validation logic as the Python source files.
+
+## Griffe Synergy
+
+- [x] Note: Our `../griffe` repo is heavily focused on parsing Docstrings to AST via `cdd-python`.
+- [x] The current AST static analysis in Phase 1 provides complementary protection specifically for programmatic framework API calls inside our implementation code, independent of the docstring limitations listed in `LIMITATIONS_OF_CDD_PYTHON.md`.
+- [x] Evaluate if Griffe's broader codebase structural scanning can be integrated in the future to map docstring signatures directly against the loaded JSON snapshots, providing a two-way validation of docs vs reality.
+
 # TODO: Missing Type Annotations
 
 The following files contain variables, parameters, or return types that lack explicit type annotations.

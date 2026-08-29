@@ -1,14 +1,15 @@
 """Test suite for the Bonsai E2E module."""
 
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
-import pytest
 
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   return SemanticsManager()
 
 

@@ -1,16 +1,18 @@
 """Test suite for the Flax Torch Bidirectional module."""
 
 import ast
-import pytest
 import typing
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
+import pytest
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.merging import merge_overlay_data
-from ml_switcheroo.core.escape_hatch import EscapeHatch
-from ml_switcheroo_ir.schema.ghost import SemanticTier
 from tests.utils.ast_utils import cmp_ast
-from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
 flax_nnx_tier2_ex0: str = "\nfrom flax import nnx\n\nclass Net(nnx.Module):\n    def __init__(self, rngs: nnx.Rngs):\n        # State injection pattern\n        self.linear = nnx.Linear(10, 10, rngs=rngs)\n\n    def __call__(self, x):\n        x = self.linear(x)\n        # Functional activation\n        return nnx.relu(x)\n"
 torch_tier2_ex0: str = "\nimport torch.nn.functional as F\nfrom torch import nn\n\nclass Net(nn.Module):\n    def __init__(self):\n        super().__init__()\n        # State injection pattern\n        self.linear = nn.Linear(10, 10)\n\n    def forward(self, x):\n        x = self.linear(x)\n        # Functional activation\n        return F.relu(x)\n"
@@ -57,7 +59,7 @@ def test_flax_nnx_to_torch_neural_ex0(semantics: SemanticsManager) -> None:
 
 
 class FixedSemantics(SemanticsManager):
-  """Test suite for the Fixed Semantics component."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the FixedSemantics instance."""

@@ -1,8 +1,9 @@
 """Test suite for guards.py"""
 
-import libcst as cst
 import typing
 from unittest.mock import MagicMock
+
+import libcst as cst
 
 from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards
 

@@ -3,12 +3,13 @@
 import os
 from pathlib import Path
 from unittest import mock
-from ml_switcheroo.sphinx_ext.hooks import add_static_path, copy_wheel_and_reqs
+
 import ml_switcheroo.sphinx_ext.hooks
+from ml_switcheroo.sphinx_ext.hooks import add_static_path, copy_wheel_and_reqs
 
 
 class MockApp:
-  """Mock App class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, has_config: bool = True, has_builder: bool = True) -> None:
     """Initializes the MockApp instance."""

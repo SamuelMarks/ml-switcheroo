@@ -1,16 +1,18 @@
 """Test suite for the Attention Packing module."""
 
-import pytest
-import libcst as cst
 import typing
 from unittest.mock import MagicMock
+
+import libcst as cst
+import pytest
+
 from ml_switcheroo.core.hooks import HookContext
-from ml_switcheroo.plugins.attention_packing import repack_attn_keras, repack_attn_flax, repack_attn_torch
+from ml_switcheroo.plugins.attention_packing import repack_attn_flax, repack_attn_keras, repack_attn_torch
 
 
 @pytest.fixture
 def mock_ctx() -> MagicMock:
-  """Provides a mock ctx for testing."""
+  """Docstring."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "target.Attention"
   return ctx

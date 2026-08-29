@@ -4,7 +4,7 @@ import numpy as np
 
 
 class BNModel:
-  """Test suite for the B N Model component."""
+  """Docstring."""
 
   def __init__(self, num_features: int, momentum: float = 0.1):
     """Initializes the BNModel instance."""

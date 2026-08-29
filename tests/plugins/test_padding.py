@@ -1,14 +1,17 @@
 """Test suite for the Padding module."""
 
-import pytest
-import libcst as cst
-from typing import Generator, Dict, Any, Union
+from typing import Any, Dict, Generator, Union
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.padding import transform_padding
 from ml_switcheroo.semantics.schema import PluginTraits
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -248,3 +251,16 @@ def test_pad_wrong_length(rewriter: PivotRewriter) -> None:
   call_node: Union[cst.CSTNode, cst.BaseExpression] = cst.parse_module(code).body[0].body[0].value
   res: Union[cst.CSTNode, cst.Call] = transform_padding(call_node, rewriter.ctx)
   assert res is call_node
+
+
+# --- Merged from test_padding_extra.py ---
+
+
+def test_padding_no_conf() -> None:
+  """Verifies the behavior of padding no conf."""
+  node: cst.Call = cst.Call(func=cst.Name("pad"))
+  semantics: MagicMock = MagicMock()
+  ctx: HookContext = HookContext(semantics=semantics, config=MagicMock(effective_target="jax"))
+  semantics.get_framework_config.return_value = {}
+  res: Union[cst.CSTNode, cst.Call] = transform_padding(node, ctx)
+  assert res is node

@@ -1,7 +1,8 @@
 """Test suite for the Flax Nnx module."""
 
-import jax
 import typing
+
+import jax
 
 
 def conditional_op(pred: typing.Any, x: typing.Any) -> typing.Any:

@@ -1,13 +1,14 @@
 """Test suite for the Init module."""
 
-from unittest.mock import patch
 import typing
+from unittest.mock import patch
 
 
 def test_plugins_init_discovery() -> None:
   """Verifies the behavior of plugins initialization discovery."""
-  import ml_switcheroo.plugins as plugins_pkg
   import importlib
+
+  import ml_switcheroo.plugins as plugins_pkg
 
   mock_modules: list[tuple[typing.Optional[str], str, bool]] = [
     (None, "_protected", False),

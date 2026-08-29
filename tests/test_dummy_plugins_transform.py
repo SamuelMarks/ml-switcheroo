@@ -1,13 +1,16 @@
 """Test suite for the Dummy Plugins Transform module."""
 
-import libcst as cst
 import inspect
 from typing import List
 from unittest.mock import MagicMock
 
+import libcst as cst
+
 
 def test_all_plugin_fallbacks() -> None:
   """Verifies the behavior of all plugin fallbacks."""
+  import types
+
   import ml_switcheroo.plugins.auto_fsdp_wrapper as p1
   import ml_switcheroo.plugins.casting as p2
   import ml_switcheroo.plugins.clipping as p3
@@ -24,8 +27,6 @@ def test_all_plugin_fallbacks() -> None:
   import ml_switcheroo.plugins.state_flag_injection as p14
   import ml_switcheroo.plugins.static_unroll as p15
   import ml_switcheroo.plugins.tf_data_loader as p16
-
-  import types
 
   modules: List[types.ModuleType] = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]
   plugins: List[cst.CSTTransformer] = []

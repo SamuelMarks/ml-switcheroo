@@ -239,7 +239,7 @@ class ApiHelpersMixin:
         origins = getattr(self.semantics, "_key_origins", {})
         tier = origins.get(abstract_id)
         if tier in ("neural", "neural_ops") and self.target_fw in ("NumPy", "jax"):
-          self._report_failure(  # pragma: no cover
+          self._report_failure(
             f"Cannot map neural network abstraction '{name}' directly to pure math backend '{self.target_fw}'. Use a framework like Flax or Keras."
           )
         else:

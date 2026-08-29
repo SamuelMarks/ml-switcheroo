@@ -1,13 +1,15 @@
 """Test suite for the Shared Base Inheritance module."""
 
+from typing import Any, Dict, Generator, Optional
 from unittest.mock import patch
+
 import pytest
-from typing import Generator, Dict, Any, Optional
+
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockAdapterWithParent:
-  """Mock Adapter With Parent class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, parent: str) -> None:
     """Initializes the MockAdapterWithParent instance."""
@@ -135,8 +137,6 @@ def test_json_overrides_adapter_inheritance(manager: SemanticsManager) -> None:
   manager.data["op"] = {"variants": {"parent_B": {"api": "found_In_B"}}}
 
   class MockAdapterA:
-    """Mock Adapter A class for testing purposes."""
-
     inherits_from: str = "parent_A"
 
   manager.framework_configs["child"] = {"extends": "parent_B"}

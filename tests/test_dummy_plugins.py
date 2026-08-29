@@ -1,7 +1,8 @@
 """Test suite for the Dummy Plugins module."""
 
-from unittest.mock import patch
 import importlib
+from unittest.mock import patch
+
 import ml_switcheroo.plugins
 
 

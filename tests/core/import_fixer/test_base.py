@@ -7,6 +7,7 @@ using LibCST node representations.
 """
 
 import libcst as cst
+
 from ml_switcheroo.core.import_fixer.base import BaseImportFixer
 from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 

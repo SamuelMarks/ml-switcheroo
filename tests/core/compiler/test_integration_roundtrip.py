@@ -1,14 +1,15 @@
 """Integration tests for the compiler roundtrip."""
 
 import typing
+
+from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticCommentParser
+from ml_switcheroo.core.html.parser import HtmlParser
 from ml_switcheroo.core.mlir.parser import MlirParser
 from ml_switcheroo.core.tikz.parser import TikzParser
-from ml_switcheroo.core.html.parser import HtmlParser
-from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticCommentParser
 
 
 def test_mlir_roundtrip() -> None:
-  """Test MLIR roundtrip."""
+  """Docstring."""
   code: str = "sw.func { sw.return %1 }\\n"
   parser = MlirParser(code)
   try:
@@ -22,7 +23,7 @@ def test_mlir_roundtrip() -> None:
 
 
 def test_tikz_roundtrip() -> None:
-  """Test TikZ roundtrip."""
+  """Docstring."""
   code: str = r"""\begin{tikzpicture}
     \node (node1) at (0.0, 0.0) {Text 1};
 \end{tikzpicture}
@@ -39,7 +40,7 @@ def test_tikz_roundtrip() -> None:
 
 
 def test_html_roundtrip() -> None:
-  """Test HTML roundtrip."""
+  """Docstring."""
   code: str = """
 <html>
   <body>
@@ -57,7 +58,7 @@ def test_html_roundtrip() -> None:
 
 
 def test_semantic_roundtrip() -> None:
-  """Test Semantic Comments roundtrip."""
+  """Docstring."""
   code: str = "  BEGIN   Add ( node_1 ) // ok  "
   parser = SemanticCommentParser()
   marker: typing.Any = parser.parse(code)

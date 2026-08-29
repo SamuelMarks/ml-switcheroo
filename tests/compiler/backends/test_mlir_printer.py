@@ -1,7 +1,7 @@
 """Test suite for the MlirPrinter module."""
 
-from ml_switcheroo.core.mlir.cst import ModuleNode, BlockNode, OperationNode, ValueNode, AttributeNode, TypeNode
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
+from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, TypeNode, ValueNode
 
 
 def test_mlir_printer_emit_module_wrapper() -> None:

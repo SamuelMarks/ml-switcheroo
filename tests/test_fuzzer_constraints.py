@@ -1,16 +1,18 @@
 """Test suite for the Fuzzer Constraints module."""
 
-import pytest
-import numpy as np
-import hypothesis.strategies as st
-from hypothesis import given, settings, HealthCheck
-from ml_switcheroo.testing.fuzzer import InputFuzzer
 from typing import Dict, List
+
+import hypothesis.strategies as st
+import numpy as np
+import pytest
+from hypothesis import HealthCheck, given, settings
+
+from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 
 @pytest.fixture
 def fuzzer() -> InputFuzzer:
-  """Provides a mock fuzzer for testing."""
+  """Docstring."""
   return InputFuzzer()
 
 
@@ -101,12 +103,12 @@ def test_tensor_alias_support(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 
 
 def test_fuzzer_parser_extra_coverage() -> None:
-  """Test fuzzer parser missing branches."""
-  from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
-  from ml_switcheroo.testing.fuzzer.type_parser import OptionalType, PrimitiveType, AnyType
-
+  """Docstring."""
   # Optional return None
   import random
+
+  from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
+  from ml_switcheroo.testing.fuzzer.type_parser import AnyType, OptionalType, PrimitiveType
 
   random.seed(42)  # Try to hit < 0.2
   for _ in range(20):

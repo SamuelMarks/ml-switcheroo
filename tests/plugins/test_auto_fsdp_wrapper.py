@@ -1,11 +1,13 @@
 """Test suite for the Auto Fsdp Wrapper module."""
 
-import libcst as cst
 import typing
 from unittest.mock import MagicMock
-from ml_switcheroo.core.hooks import HookContext
-from ml_switcheroo.core.dsl import OperationDef, OpType
+
+import libcst as cst
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.dsl import OperationDef, OpType
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.auto_fsdp_wrapper import wrap_with_sharding
 
 
@@ -94,3 +96,17 @@ def test_auto_fsdp_wrapper_no_op_id() -> None:
   result: typing.Any = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
   assert typing.cast(cst.Name, result.func).value == "Unknown"
+
+
+# --- Merged from test_auto_fsdp_wrapper_missing_api.py ---
+
+
+def test_auto_fsdp_wrapper_no_api() -> None:
+  """Verifies the behavior of auto FSDP wrapper no API."""
+  node = cst.Call(func=cst.Name("Linear"))
+  ctx = HookContext(semantics=MagicMock(), config=MagicMock(effective_target="torch"))
+  ctx.current_op_id = "Conv2d"
+  ctx.semantics.get_operation.return_value = MagicMock(sharding_supported=True)
+  ctx.semantics.get_framework_config.return_value = {"plugin_traits": {"sharding_wrapper_api": None}}
+  result: typing.Any = wrap_with_sharding(node, ctx)
+  assert result is node

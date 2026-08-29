@@ -6,8 +6,8 @@ normalization, exact matching against exported public members, fuzzy matching us
 similarity metrics, and error boundary handling when modules cannot be imported.
 """
 
-from unittest.mock import patch, Mock
 import typing
+from unittest.mock import Mock, patch
 
 from ml_switcheroo.core.discovery import SimulatedReflection
 

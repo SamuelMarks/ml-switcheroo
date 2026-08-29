@@ -1,8 +1,9 @@
 """Module docstring."""
 
+from typing import Optional
+
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
 from ml_switcheroo.frameworks.base import FrameworkAdapter, StructuralTraits
-from typing import Optional
 
 
 def analyze_frameworks() -> None:

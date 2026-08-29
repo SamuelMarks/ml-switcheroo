@@ -15,11 +15,10 @@ _pkg_dir = Path(__file__).parent
 for importer, module_name, ispkg in pkgutil.iter_modules([str(_pkg_dir)]):
   # Skip potential future protected modules if necessary
   if module_name.startswith("_") or "utils" in module_name or "helpers" in module_name:
-    # pragma: no cover
-    continue  # pragma: no cover
+    continue
 
   try:
     importlib.import_module(f".{module_name}", package=__name__)
   except Exception as e:
-    # We log but continue  # pragma: no cover, ensuring one bad plugin doesn't break the engine
+    # We log but continue, ensuring one bad plugin doesn't break the engine
     print(f"⚠️  Failed to auto-load plugin '{module_name}': {e}")

@@ -1,18 +1,19 @@
 """Test suite for the Parser module."""
 
 import typing
-from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
+
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassComment,
-  SassLabel,
   SassDirective,
-  SassInstruction,
-  SassRegister,
   SassImmediate,
+  SassInstruction,
+  SassLabel,
   SassMemory,
-  SassPredicate,
   SassNode,
+  SassPredicate,
+  SassRegister,
 )
+from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
 
 
 def test_parse_empty() -> None:

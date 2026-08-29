@@ -3,41 +3,41 @@
 import pathlib
 from unittest import mock
 
-from ml_switcheroo.generated_tests.runtime_builder import get_required_packages, ensure_runtime_module
+from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module, get_required_packages
 
 
 def test_get_required_packages_simple():
-  """Test getting required packages for simple imports."""
+  """Docstring."""
   packages = get_required_packages("import torch\nimport jax")
   assert packages == ["torch", "jax"]
 
 
 def test_get_required_packages_from():
-  """Test getting required packages for from imports."""
+  """Docstring."""
   packages = get_required_packages("from torch import nn\nfrom jax.numpy import abs")
   assert packages == ["torch", "jax"]
 
 
 def test_get_required_packages_aliases():
-  """Test getting required packages with aliases."""
+  """Docstring."""
   packages = get_required_packages("import torch as t\nimport jax.numpy as jnp")
   assert packages == ["torch", "jax"]
 
 
 def test_get_required_packages_deduplication():
-  """Test deduplication of required packages."""
+  """Docstring."""
   packages = get_required_packages("import torch\nfrom torch import nn")
   assert packages == ["torch"]
 
 
 def test_get_required_packages_syntax_error():
-  """Test handling of invalid import syntax."""
+  """Docstring."""
   packages = get_required_packages("import class")
   assert packages == []
 
 
 def test_ensure_runtime_module(tmp_path: pathlib.Path):
-  """Test generating the runtime module."""
+  """Docstring."""
   out_dir = tmp_path / "tests"
 
   # We mock get_template to supply predictable test data
@@ -82,7 +82,7 @@ def test_ensure_runtime_module(tmp_path: pathlib.Path):
 
 
 def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path):
-  """Test generating with no explicit frameworks requested."""
+  """Docstring."""
   out_dir = tmp_path / "tests"
 
   def mock_get_template(mgr, fw):
@@ -105,7 +105,7 @@ def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path):
 
 
 def test_ensure_runtime_module_empty_template_import(tmp_path: pathlib.Path):
-  """Test generating when a template has no specific import logic (uses default) or evaluates to empty packages."""
+  """Docstring."""
   out_dir = tmp_path / "tests"
 
   def mock_get_template(mgr, fw):

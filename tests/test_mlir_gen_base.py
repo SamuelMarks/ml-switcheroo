@@ -1,18 +1,19 @@
 """Test module."""
 
 import libcst as cst
-from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode
+
+from ml_switcheroo.core.mlir.cst import AttributeNode, OperationNode
 from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
 
 
 class TestGenerator(BaseGeneratorMixin):
-  """Test element."""
+  """Docstring."""
 
   pass
 
 
 def test_get_attr() -> None:
-  """Test element."""
+  """Docstring."""
   gen: TestGenerator = TestGenerator()
   op: OperationNode = OperationNode(name="test.op")
   assert gen._get_attr(op, "missing") is None
@@ -25,7 +26,7 @@ def test_get_attr() -> None:
 
 
 def test_create_dotted_name() -> None:
-  """Test element."""
+  """Docstring."""
   gen: TestGenerator = TestGenerator()
 
   node: cst.BaseExpression = gen._create_dotted_name("")
@@ -43,3 +44,21 @@ def test_create_dotted_name() -> None:
   assert node3.value.attr.value == "nn"
   assert isinstance(node3.value.value, cst.Name)
   assert node3.value.value.value == "torch"
+
+
+# --- Merged from test_mlir_gen_base_extra.py ---
+
+
+class TestGeneratorExtra(BaseGeneratorMixin):
+  """Docstring."""
+
+  pass
+
+
+def test_get_attr_continue() -> None:
+  """Docstring."""
+  gen: TestGenerator = TestGenerator()
+  op: OperationNode = OperationNode(
+    name="test.op", attributes=[AttributeNode(name="other", value="val"), AttributeNode(name="foo", value="bar")]
+  )
+  assert gen._get_attr(op, "foo") == "bar"

@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class SameConvModel(nn.Module):
-  """Test suite for the Same Conv Model component."""
+  """Docstring."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3):
     """Initializes the SameConvModel instance."""

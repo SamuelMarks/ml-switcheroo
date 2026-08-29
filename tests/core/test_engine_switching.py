@@ -1,20 +1,22 @@
 """Test suite for the Engine Switching module."""
 
-import pytest
 import typing
 from unittest.mock import MagicMock
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.frameworks.mlir import MlirAdapter
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.frameworks import register_framework
+from ml_switcheroo.frameworks.mlir import MlirAdapter
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 register_framework("mlir")(MlirAdapter)
 
 
 @pytest.fixture
 def base_engine() -> typing.Callable[[str, str], ASTEngine]:
-  """Provides a mock base engine for testing."""
+  """Docstring."""
   semantics = MagicMock(spec=SemanticsManager)
   semantics.get_framework_config.return_value = {}
   semantics.get_import_map.return_value = {}

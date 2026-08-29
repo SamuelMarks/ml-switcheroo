@@ -1,12 +1,13 @@
 """Test module."""
 
-import libcst as cst
 from unittest.mock import MagicMock, patch
+
+import libcst as cst
 
 
 def test_attention_packing_pos_args() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.attention_packing import repack_attn_torch, repack_attn_keras
+  """Docstring."""
+  from ml_switcheroo.plugins.attention_packing import repack_attn_keras, repack_attn_torch
 
   node: cst.BaseExpression = cst.parse_expression("MultiheadAttention(a, b, c)")
   ctx: MagicMock = MagicMock()
@@ -18,14 +19,14 @@ def test_attention_packing_pos_args() -> None:
 
 
 def test_casting_no_traits() -> None:
-  """Test element."""
+  """Docstring."""
   ctx: MagicMock = MagicMock()
   ctx.get_framework_config.return_value = {}
   pass
 
 
 def test_device_allocator_value_error() -> None:
-  """Test element."""
+  """Docstring."""
   from ml_switcheroo.plugins.device_allocator import _parse_device_args
 
   _parse_device_args(cst.parse_expression("torch.device('cuda:foo')"))
@@ -33,7 +34,7 @@ def test_device_allocator_value_error() -> None:
 
 
 def test_device_checks_exception() -> None:
-  """Test element."""
+  """Docstring."""
   from ml_switcheroo.plugins.device_checks import transform_cuda_check
 
   ctx: MagicMock = MagicMock()
@@ -43,7 +44,7 @@ def test_device_checks_exception() -> None:
 
 
 def test_flatten_branches() -> None:
-  """Test element."""
+  """Docstring."""
   from ml_switcheroo.plugins.flatten import transform_flatten
 
   ctx: MagicMock = MagicMock()
@@ -73,7 +74,7 @@ def test_flatten_branches() -> None:
 
 
 def test_loss_wrapper_branches() -> None:
-  """Test element."""
+  """Docstring."""
   from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
   ctx: MagicMock = MagicMock()
@@ -93,7 +94,7 @@ def test_loss_wrapper_branches() -> None:
 
 
 def test_optimizer_step_branches() -> None:
-  """Test element."""
+  """Docstring."""
   from ml_switcheroo.plugins.optimizer_step import transform_optimizer_init
 
   ctx: MagicMock = MagicMock()
@@ -104,7 +105,7 @@ def test_optimizer_step_branches() -> None:
 
 
 def test_padding_branches() -> None:
-  """Test element."""
+  """Docstring."""
   from ml_switcheroo.plugins.padding import transform_padding
 
   ctx: MagicMock = MagicMock()
@@ -114,7 +115,7 @@ def test_padding_branches() -> None:
 
 
 def test_state_flag_injection_branches() -> None:
-  """Test element."""
+  """Docstring."""
   from ml_switcheroo.plugins.state_flag_injection import capture_eval_state
 
   ctx: MagicMock = MagicMock()
@@ -125,7 +126,7 @@ def test_state_flag_injection_branches() -> None:
 
 
 def test_static_unroll_branches() -> None:
-  """Test element."""
+  """Docstring."""
   from ml_switcheroo.plugins.static_unroll import unroll_static_loops
 
   ctx: MagicMock = MagicMock()
@@ -135,9 +136,9 @@ def test_static_unroll_branches() -> None:
 
 
 def test_plugin_init() -> None:
-  """Test element."""
-  from unittest.mock import patch
+  """Docstring."""
   import importlib
+  from unittest.mock import patch
 
   with patch("pkgutil.iter_modules") as mock_iter:
     mock_iter.return_value = [(None, "_hidden", False), (None, "my_utils", False), (None, "bad_plugin", False)]
@@ -149,10 +150,12 @@ def test_plugin_init() -> None:
 
 
 def test_loss_wrapper_missing_lines() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
+  """Docstring."""
   from unittest.mock import MagicMock
+
   import libcst as cst
+
+  from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
   ctx: MagicMock = MagicMock()
   ctx.framework = "keras"
@@ -167,19 +170,22 @@ def test_loss_wrapper_missing_lines() -> None:
 
 
 def test_nnx_to_torch_params_unsupported() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.nnx_to_torch_params import _extract_leaf_name
+  """Docstring."""
   import libcst as cst
+
+  from ml_switcheroo.plugins.nnx_to_torch_params import _extract_leaf_name
 
   node: cst.BaseExpression = cst.parse_expression("foo()")
   _extract_leaf_name(node)
 
 
 def test_optimizer_step_missing() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.optimizer_step import transform_optimizer_init
+  """Docstring."""
   from unittest.mock import MagicMock
+
   import libcst as cst
+
+  from ml_switcheroo.plugins.optimizer_step import transform_optimizer_init
 
   ctx: MagicMock = MagicMock()
   ctx.framework = "torch"
@@ -189,10 +195,12 @@ def test_optimizer_step_missing() -> None:
 
 
 def test_padding_missing() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.padding import transform_padding, _supports_numpy_padding
+  """Docstring."""
   from unittest.mock import MagicMock
+
   import libcst as cst
+
+  from ml_switcheroo.plugins.padding import _supports_numpy_padding, transform_padding
 
   ctx: MagicMock = MagicMock()
   ctx.get_framework_config.return_value = None
@@ -210,19 +218,22 @@ def test_padding_missing() -> None:
 
 
 def test_state_flag_injection_missing() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.state_flag_injection import _get_func_name
+  """Docstring."""
   import libcst as cst
+
+  from ml_switcheroo.plugins.state_flag_injection import _get_func_name
 
   node: cst.BaseExpression = cst.parse_expression("foo()")
   _get_func_name(node)
 
 
 def test_static_unroll_missing() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.static_unroll import unroll_static_loops
+  """Docstring."""
   from unittest.mock import MagicMock
+
   import libcst as cst
+
+  from ml_switcheroo.plugins.static_unroll import unroll_static_loops
 
   ctx: MagicMock = MagicMock()
   node: cst.BaseStatement = cst.parse_statement("for i in range(1): pass")
@@ -232,10 +243,12 @@ def test_static_unroll_missing() -> None:
 
 
 def test_loss_wrapper_branches_real() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
+  """Docstring."""
   from unittest.mock import MagicMock
+
   import libcst as cst
+
+  from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
   ctx: MagicMock = MagicMock()
   ctx.framework = "keras"
@@ -250,19 +263,22 @@ def test_loss_wrapper_branches_real() -> None:
 
 
 def test_nnx_to_torch_params_real() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.nnx_to_torch_params import _extract_leaf_name
+  """Docstring."""
   import libcst as cst
+
+  from ml_switcheroo.plugins.nnx_to_torch_params import _extract_leaf_name
 
   node: cst.BaseExpression = cst.parse_expression("1")
   _extract_leaf_name(node)
 
 
 def test_optimizer_step_init_real() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.optimizer_step import transform_optimizer_init
+  """Docstring."""
   from unittest.mock import MagicMock
+
   import libcst as cst
+
+  from ml_switcheroo.plugins.optimizer_step import transform_optimizer_init
 
   ctx: MagicMock = MagicMock()
   ctx.framework = "torch"
@@ -272,10 +288,12 @@ def test_optimizer_step_init_real() -> None:
 
 
 def test_padding_real() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.padding import transform_padding, _supports_numpy_padding
+  """Docstring."""
   from unittest.mock import MagicMock
+
   import libcst as cst
+
+  from ml_switcheroo.plugins.padding import _supports_numpy_padding, transform_padding
 
   ctx: MagicMock = MagicMock()
   ctx.get_framework_config.return_value = None
@@ -295,10 +313,12 @@ def test_padding_real() -> None:
 
 
 def test_state_flag_eval_real() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.state_flag_injection import capture_eval_state
+  """Docstring."""
   from unittest.mock import MagicMock
+
   import libcst as cst
+
+  from ml_switcheroo.plugins.state_flag_injection import capture_eval_state
 
   ctx: MagicMock = MagicMock()
   ctx.framework = "torch"
@@ -307,10 +327,12 @@ def test_state_flag_eval_real() -> None:
 
 
 def test_static_unroll_real() -> None:
-  """Test element."""
-  from ml_switcheroo.plugins.static_unroll import unroll_static_loops
+  """Docstring."""
   from unittest.mock import MagicMock
+
   import libcst as cst
+
+  from ml_switcheroo.plugins.static_unroll import unroll_static_loops
 
   ctx: MagicMock = MagicMock()
   node: cst.BaseStatement = cst.parse_statement("for i in range(1):\n  pass")

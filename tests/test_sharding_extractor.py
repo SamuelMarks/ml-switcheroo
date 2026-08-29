@@ -1,8 +1,9 @@
 """Docstring."""
 
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, PartitionSpec
-from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 from typing import Optional
+
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, PartitionSpec
+from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
 
 def test_sharding_extraction_pass() -> None:

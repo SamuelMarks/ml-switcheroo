@@ -1,10 +1,11 @@
 """Test suite for the Patcher module."""
 
-from ml_switcheroo.testing.patcher import patch_json_spec
 import json
 import tempfile
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
+
+from ml_switcheroo.testing.patcher import patch_json_spec
 
 
 def test_patch_json_spec() -> None:

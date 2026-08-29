@@ -1,13 +1,14 @@
 """Test suite for the Generator Jit module."""
 
-from pathlib import Path
 import typing
+from pathlib import Path
+
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockTraitSemantics(SemanticsManager):
-  """Mock Trait Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, templates: typing.Optional[dict[str, dict[str, str]]] = None) -> None:
     """Initializes the MockTraitSemantics instance."""
@@ -23,7 +24,7 @@ class MockTraitSemantics(SemanticsManager):
     return {}
 
   def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
-    """Mock implementation of get test template."""
+    """Docstring."""
     if fw in self.custom_templates:
       return self.custom_templates[fw]
     if fw == "jax":

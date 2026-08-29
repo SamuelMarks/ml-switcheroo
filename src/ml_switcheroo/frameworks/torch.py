@@ -21,12 +21,12 @@ from typing import List, Tuple, Dict, Optional
 
 try:
   import torch
-  import torch.nn as nn  # pragma: no cover
-  import torch.optim as optim  # pragma: no cover
-except Exception:  # pragma: no cover
-  torch = None  # pragma: no cover
-  nn = None  # pragma: no cover
-  optim = None  # pragma: no cover
+  import torch.nn as nn
+  import torch.optim as optim
+except Exception:
+  torch = None
+  nn = None
+  optim = None
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -65,10 +65,10 @@ class TorchAdapter(TorchIOMixin):
     self._mode = InitMode.LIVE
     self._snapshot_data = {}
     if torch is None:
-      self._mode = InitMode.GHOST  # pragma: no cover
-      self._snapshot_data = load_snapshot_for_adapter("torch")  # pragma: no cover
-      if not self._snapshot_data:  # pragma: no cover
-        logging.debug("PyTorch not installed and no snapshot found. Scanning unavailable.")  # pragma: no cover
+      self._mode = InitMode.GHOST
+      self._snapshot_data = load_snapshot_for_adapter("torch")
+      if not self._snapshot_data:
+        logging.debug("PyTorch not installed and no snapshot found. Scanning unavailable.")
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -218,11 +218,11 @@ class TorchAdapter(TorchIOMixin):
     """
     defs = load_definitions("torch")
     if "ReLU" not in defs:
-      defs["ReLU"] = StandardMap(api="torch.nn.ReLU")  # pragma: no cover
+      defs["ReLU"] = StandardMap(api="torch.nn.ReLU")
     # if "relu" not in defs:
     #   defs["relu"] = StandardMap(api="torch.relu")
     if "Linear" not in defs:
-      defs["Linear"] = StandardMap(  # pragma: no cover
+      defs["Linear"] = StandardMap(
         api="torch.nn.Linear", args={"in_features": "in_features", "out_features": "out_features"}
       )
     if "Conv2d" not in defs:
@@ -284,7 +284,7 @@ class TorchAdapter(TorchIOMixin):
 
     """
     if "nn.init" in api_name:
-      return f"https://pytorch.org/docs/stable/nn.init.html#{api_name}"  # pragma: no cover
+      return f"https://pytorch.org/docs/stable/nn.init.html#{api_name}"
     return f"https://pytorch.org/docs/stable/generated/{api_name}.html"
 
   def get_tiered_examples(self) -> Dict[str, str]:
@@ -308,18 +308,18 @@ class TorchAdapter(TorchIOMixin):
     try:
       import torch
       import numpy as np
-    except Exception:  # pragma: no cover
-      return data  # pragma: no cover
+    except Exception:
+      return data
     if isinstance(data, (np.ndarray, np.generic)):
       try:
         return torch.from_numpy(data)
-      except Exception:  # pragma: no cover
-        return torch.tensor(data)  # pragma: no cover
+      except Exception:
+        return torch.tensor(data)
     if isinstance(data, (list, tuple)):
       try:
         return torch.tensor(data)
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
+      except Exception:
+        pass
     return data
 
   def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:
@@ -334,8 +334,8 @@ class TorchAdapter(TorchIOMixin):
     """
     if not self._snapshot_data:
       return []
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
-    return [GhostRef.model_validate(item) for item in raw_list]  # pragma: no cover
+    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    return [GhostRef.model_validate(item) for item in raw_list]
 
   def _collect_live(self, category: SemanticTier) -> List[GhostRef]:
     """Introspect live torch modules.
@@ -355,7 +355,7 @@ class TorchAdapter(TorchIOMixin):
     elif category == SemanticTier.ACTIVATION:
       results.extend(getattr(self, "_scan_activations", lambda: [])())
     elif category == SemanticTier.LAYER:
-      results.extend(getattr(self, "_scan_layers", lambda: [])())  # pragma: no cover
+      results.extend(getattr(self, "_scan_layers", lambda: [])())
     return results
 
   def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:

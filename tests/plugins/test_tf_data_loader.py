@@ -1,10 +1,12 @@
 """Test suite for the Tf Data Loader module."""
 
-import libcst as cst
 from typing import List, Optional, Union
 from unittest.mock import MagicMock
-from ml_switcheroo.plugins.tf_data_loader import transform_tf_dataloader, _get_arg_by_name, _extract_tensor_dataset_inputs
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.tf_data_loader import _extract_tensor_dataset_inputs, _get_arg_by_name, transform_tf_dataloader
 
 
 def test_get_arg_by_name() -> None:
@@ -15,7 +17,7 @@ def test_get_arg_by_name() -> None:
 
 
 def test_extract_tensor_dataset_inputs() -> None:
-  """Extracts tensor dataset inputs."""
+  """Docstring."""
   node: cst.Call = cst.Call(func=cst.Name("TensorDataset"), args=[cst.Arg(cst.Name("x")), cst.Arg(cst.Name("y"))])
   res: Optional[List[cst.Arg]] = _extract_tensor_dataset_inputs(node)
   assert res is not None
@@ -23,7 +25,7 @@ def test_extract_tensor_dataset_inputs() -> None:
 
 
 def test_extract_tensor_dataset_inputs_attribute() -> None:
-  """Extracts tensor dataset inputs when func is an attribute."""
+  """Docstring."""
   node: cst.Call = cst.Call(
     func=cst.Attribute(value=cst.Name("data"), attr=cst.Name("TensorDataset")), args=[cst.Arg(cst.Name("x"))]
   )
@@ -33,14 +35,14 @@ def test_extract_tensor_dataset_inputs_attribute() -> None:
 
 
 def test_extract_tensor_dataset_inputs_other() -> None:
-  """Extracts tensor dataset inputs other."""
+  """Docstring."""
   node: cst.Call = cst.Call(func=cst.Name("OtherDataset"), args=[cst.Arg(cst.Name("x"))])
   res: Optional[List[cst.Arg]] = _extract_tensor_dataset_inputs(node)
   assert res is None
 
 
 def test_extract_tensor_dataset_inputs_not_call() -> None:
-  """Extracts tensor dataset inputs not call."""
+  """Docstring."""
   node: cst.Name = cst.Name("x")
   res: Optional[List[cst.Arg]] = _extract_tensor_dataset_inputs(node)  # type: ignore
   assert res is None

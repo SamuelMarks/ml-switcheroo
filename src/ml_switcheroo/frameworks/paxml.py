@@ -17,10 +17,10 @@ from typing import Union, List, Tuple, Dict, Optional
 
 try:
   import praxis
-  import praxis.layers  # pragma: no cover
-  import praxis.base_layer  # pragma: no cover
-  import praxis.layers.activations  # pragma: no cover
-  import praxis.layers.normalizations  # pragma: no cover
+  import praxis.layers
+  import praxis.base_layer
+  import praxis.layers.activations
+  import praxis.layers.normalizations
 except Exception:
   praxis = None
 from ml_switcheroo.frameworks.base import (

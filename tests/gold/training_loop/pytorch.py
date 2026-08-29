@@ -1,6 +1,7 @@
 """Test suite for the Pytorch module."""
 
 import typing
+
 import torch
 import torch.nn as nn
 import torch.optim as optim

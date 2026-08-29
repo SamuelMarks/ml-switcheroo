@@ -1,53 +1,54 @@
 """Test module."""
 
 import pytest
+
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
-  CppNode,
-  TypeIdentifier,
-  Identifier,
   BinaryExpression,
-  MethodCall,
-  ReturnStatement,
-  VariableDeclaration,
+  BlockStatement,
+  CppModule,
+  CppNode,
   FunctionArgument,
   FunctionDefinition,
-  RawStatement,
+  Identifier,
+  IncludeDirective,
   MacroDefinition,
-  BlockStatement,
+  MethodCall,
   PyBindDef,
   PyBindModule,
-  IncludeDirective,
-  CppModule,
+  RawStatement,
+  ReturnStatement,
+  TypeIdentifier,
+  VariableDeclaration,
 )
 
 
 def test_cpp_node_base() -> None:
-  """Test element."""
+  """Docstring."""
   node: CppNode = CppNode()
   with pytest.raises(NotImplementedError):
     node.to_text()
 
 
 def test_type_identifier() -> None:
-  """Test element."""
+  """Docstring."""
   node: TypeIdentifier = TypeIdentifier(name="int")
   assert node.to_text() == "int"
 
 
 def test_identifier() -> None:
-  """Test element."""
+  """Docstring."""
   node: Identifier = Identifier(name="a")
   assert node.to_text() == "a"
 
 
 def test_binary_expression() -> None:
-  """Test element."""
+  """Docstring."""
   node: BinaryExpression = BinaryExpression(left=Identifier(name="a"), operator="+", right=Identifier(name="b"))
   assert node.to_text() == "a + b"
 
 
 def test_method_call() -> None:
-  """Test element."""
+  """Docstring."""
   node: MethodCall = MethodCall(name="foo")
   assert node.to_text() == "foo()"
   node_args: MethodCall = MethodCall(name="foo", arguments=[Identifier(name="a"), Identifier(name="b")])
@@ -55,7 +56,7 @@ def test_method_call() -> None:
 
 
 def test_return_statement() -> None:
-  """Test element."""
+  """Docstring."""
   node: ReturnStatement = ReturnStatement()
   assert node.to_text() == "return;"
   node_val: ReturnStatement = ReturnStatement(value=Identifier(name="a"))
@@ -63,7 +64,7 @@ def test_return_statement() -> None:
 
 
 def test_variable_declaration() -> None:
-  """Test element."""
+  """Docstring."""
   node: VariableDeclaration = VariableDeclaration(type_id=TypeIdentifier(name="int"), name="a")
   assert node.to_text() == "int a;"
   node_init: VariableDeclaration = VariableDeclaration(
@@ -77,13 +78,13 @@ def test_variable_declaration() -> None:
 
 
 def test_function_argument() -> None:
-  """Test element."""
+  """Docstring."""
   node: FunctionArgument = FunctionArgument(type_id=TypeIdentifier(name="int"), name="a")
   assert node.to_text() == "int a"
 
 
 def test_function_definition() -> None:
-  """Test element."""
+  """Docstring."""
   node: FunctionDefinition = FunctionDefinition(
     return_type=TypeIdentifier(name="int"),
     name="foo",
@@ -94,31 +95,31 @@ def test_function_definition() -> None:
 
 
 def test_raw_statement() -> None:
-  """Test element."""
+  """Docstring."""
   node: RawStatement = RawStatement(code="int a = 1;")
   assert node.to_text() == "int a = 1;"
 
 
 def test_macro_definition() -> None:
-  """Test element."""
+  """Docstring."""
   node: MacroDefinition = MacroDefinition(name="FOO", value="1")
   assert node.to_text() == "#define FOO 1"
 
 
 def test_block_statement() -> None:
-  """Test element."""
+  """Docstring."""
   node: BlockStatement = BlockStatement(statements=[ReturnStatement()])
   assert node.to_text() == "{\n    return;\n}"
 
 
 def test_pybind_def() -> None:
-  """Test element."""
+  """Docstring."""
   node: PyBindDef = PyBindDef(name="foo", function_ref="foo_impl", docstring="foo doc")
   assert node.to_text() == 'm.def("foo", &foo_impl, "foo doc");'
 
 
 def test_pybind_module() -> None:
-  """Test element."""
+  """Docstring."""
   node: PyBindModule = PyBindModule(
     name="foo", module_var="m", defs=[PyBindDef(name="foo", function_ref="foo_impl", docstring="foo doc")]
   )
@@ -126,7 +127,7 @@ def test_pybind_module() -> None:
 
 
 def test_include_directive() -> None:
-  """Test element."""
+  """Docstring."""
   node: IncludeDirective = IncludeDirective(path="iostream", system=True)
   assert node.to_text() == "#include <iostream>"
   node_local: IncludeDirective = IncludeDirective(path="foo.h", system=False)
@@ -149,7 +150,7 @@ def test_include_directive() -> None:
 
 
 def test_cpp_module() -> None:
-  """Test element."""
+  """Docstring."""
   node: CppModule = CppModule(includes=[IncludeDirective(path="iostream", system=True)], body=[ReturnStatement()])
   assert node.to_text() == "#include <iostream>\n\nreturn;\n"
 
@@ -158,7 +159,7 @@ def test_cpp_module() -> None:
 
 
 def test_cpp_node_parse() -> None:
-  """Test element."""
+  """Docstring."""
   # Will use the parser
   node: CppModule = CppNode.parse("int a = 1;")
   assert isinstance(node, CppModule)

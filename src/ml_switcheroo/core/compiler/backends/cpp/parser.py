@@ -419,6 +419,9 @@ class CppTransformer(Transformer[Any, Any]):
     return BinaryExpression(left=exprs[0], operator=op, right=exprs[1])
 
 
+_CACHED_PARSER = None
+
+
 class CppParser:
   """A parser for C++ source code using Lark."""
 
@@ -429,7 +432,10 @@ class CppParser:
         text: The raw C++ source code string to be parsed.
     """
     self.text = text
-    self.parser = Lark(GRAMMAR, parser="earley")
+    global _CACHED_PARSER
+    if _CACHED_PARSER is None:
+      _CACHED_PARSER = Lark(GRAMMAR, parser="earley")
+    self.parser = _CACHED_PARSER
     self.transformer = CppTransformer()
 
   def parse(self) -> CppModule:

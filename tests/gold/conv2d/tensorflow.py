@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class ConvModel(tf.keras.Model):
-  """Test suite for the Conv Model component."""
+  """Docstring."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3):
     """Initializes the ConvModel instance."""

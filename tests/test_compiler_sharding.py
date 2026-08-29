@@ -1,25 +1,26 @@
 """Test suite for the compiler sharding pass."""
 
-from typing import List, Dict
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalMesh, PartitionSpec
+from typing import Dict, List
+
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalMesh, LogicalNode, PartitionSpec
 from ml_switcheroo.core.compiler.sharding import ShardingInferencePass
 
 
 def test_sharding_inference_pass_default_mesh() -> None:
-  """Test ShardingInferencePass with default mesh."""
+  """Docstring."""
   pass_: ShardingInferencePass = ShardingInferencePass()
   assert pass_.mesh.shape == {"data": 1, "tensor": 1}
 
 
 def test_sharding_inference_pass_custom_mesh() -> None:
-  """Test ShardingInferencePass with custom mesh."""
+  """Docstring."""
   mesh: LogicalMesh = LogicalMesh(shape={"data": 2, "tensor": 4})
   pass_: ShardingInferencePass = ShardingInferencePass(mesh=mesh)
   assert pass_.mesh.shape == {"data": 2, "tensor": 4}
 
 
 def test_sharding_inference_pass_apply() -> None:
-  """Test ShardingInferencePass apply method on various nodes."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     # Column Parallel matches
     LogicalNode(id="q_proj", kind="Linear"),

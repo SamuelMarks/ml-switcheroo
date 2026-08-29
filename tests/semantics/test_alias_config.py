@@ -1,13 +1,15 @@
 """Test suite for the Alias Config module."""
 
-import libcst as cst
-from typing import Dict, Any, Tuple
+from typing import Any, Dict, Tuple
 from unittest.mock import MagicMock
+
+import libcst as cst
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
+from ml_switcheroo.frameworks import register_framework
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.merging import merge_tier_data
-from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
-from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.frameworks import register_framework
 
 
 def test_manager_uses_registry_defaults() -> None:
@@ -23,8 +25,6 @@ def test_manager_picks_up_new_framework() -> None:
   """Verifies the behavior of manager picks up new framework."""
 
   class FastAIAdapter:
-    """Test suite for the Fast A I Adapter component."""
-
     import_alias: Tuple[str, str] = ("fastai.vision", "fv")
 
     def convert(self, x: Any) -> Any:

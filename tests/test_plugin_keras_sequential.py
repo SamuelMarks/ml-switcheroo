@@ -1,10 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
 
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
-from ml_switcheroo.plugins.keras_sequential import transform_keras_sequential, _create_dotted_name
+from ml_switcheroo.plugins.keras_sequential import _create_dotted_name, transform_keras_sequential
 
 
 def test_create_dotted_name() -> None:

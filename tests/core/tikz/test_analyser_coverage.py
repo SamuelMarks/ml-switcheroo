@@ -1,12 +1,14 @@
 """Tests for TikZ analyser coverage."""
 
-import libcst as cst
 import typing
+
+import libcst as cst
+
 from ml_switcheroo.core.tikz.analyser import GraphExtractor
 
 
 def test_analyse_layer_def_not_self() -> None:
-  """Test analyse layer def not self."""
+  """Docstring."""
   analyser = GraphExtractor()
   assign = typing.cast(
     cst.Assign, typing.cast(cst.SimpleStatementLine, cst.parse_statement("other.conv = nn.Conv2d()")).body[0]
@@ -16,7 +18,7 @@ def test_analyse_layer_def_not_self() -> None:
 
 
 def test_analyse_layer_def_not_call() -> None:
-  """Test analyse layer def not call."""
+  """Docstring."""
   analyser = GraphExtractor()
   assign = typing.cast(cst.Assign, typing.cast(cst.SimpleStatementLine, cst.parse_statement("self.conv = 42")).body[0])
   analyser._analyze_layer_def(assign)
@@ -24,7 +26,7 @@ def test_analyse_layer_def_not_call() -> None:
 
 
 def test_analyze_data_flow_not_call() -> None:
-  """Test analyze data flow not call."""
+  """Docstring."""
   analyser = GraphExtractor()
   assign = typing.cast(cst.Assign, typing.cast(cst.SimpleStatementLine, cst.parse_statement("x = 42")).body[0])
   analyser._analyze_data_flow(assign)
@@ -32,7 +34,7 @@ def test_analyze_data_flow_not_call() -> None:
 
 
 def test_resolve_layer_or_func_name_none() -> None:
-  """Test resolve layer or func name none."""
+  """Docstring."""
   analyser = GraphExtractor()
   # A lambda call or complex expression where get_full_name returns None
   expr = typing.cast(cst.BaseExpression, cst.parse_expression("(lambda x: x)"))
@@ -40,7 +42,7 @@ def test_resolve_layer_or_func_name_none() -> None:
 
 
 def test_analyze_call_expression_none() -> None:
-  """Test analyze call expression none."""
+  """Docstring."""
   analyser = GraphExtractor()
   call = typing.cast(cst.Call, cst.parse_expression("(lambda x: x)()"))
   analyser._analyze_call_expression(call, ["out"])

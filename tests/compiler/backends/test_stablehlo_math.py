@@ -5,8 +5,9 @@ and generation correctness for math operations defined in the plan.
 """
 
 import pytest
+
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 

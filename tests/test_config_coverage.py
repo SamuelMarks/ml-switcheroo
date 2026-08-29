@@ -1,19 +1,21 @@
 """Test suite for the Config Coverage module."""
 
-import pytest
 import types
 from pathlib import Path
-from typing import Dict, Union, Optional
+from typing import Dict, Optional, Union
+from unittest.mock import patch
+
+import pytest
 from pydantic import BaseModel, Field
+
 from ml_switcheroo.config import (
   RuntimeConfig,
+  _import_tomllib,
+  _load_toml_settings,
   _resolve_default_source,
   _resolve_default_target,
   parse_cli_key_values,
-  _load_toml_settings,
-  _import_tomllib,
 )
-from unittest.mock import patch
 
 
 def test_resolve_default_placeholders() -> None:
@@ -39,7 +41,7 @@ def test_effective_frameworks() -> None:
 
 
 class DummySchema(BaseModel):
-  """Dummy Schema class for testing purposes."""
+  """Docstring."""
 
   my_int: int = Field(...)
 
@@ -89,7 +91,7 @@ def test_load_toml_settings_error(tmp_path: Path) -> None:
 
 
 def test_import_tomllib() -> None:
-  """Tests _import_tomllib behavior under different environments."""
+  """Docstring."""
   # Python 3.11+ mock
   with patch("sys.version_info", (3, 11)):
     with patch("builtins.__import__") as mock_import:
@@ -113,7 +115,7 @@ def test_import_tomllib() -> None:
 
 
 def test_runtime_config_load_overrides(tmp_path: Path) -> None:
-  """Tests the overrides passed to load()."""
+  """Docstring."""
   toml_file: Path = tmp_path / "pyproject.toml"
   toml_file.write_text("""
 [tool.ml_switcheroo]

@@ -1,15 +1,17 @@
 """Test suite for the Protocol Numpy Code module."""
 
-import pytest
 import typing
-from ml_switcheroo.frameworks.base import get_adapter
-from ml_switcheroo.frameworks import available_frameworks
-import ml_switcheroo.frameworks.torch
+
+import pytest
+
 import ml_switcheroo.frameworks.jax
-import ml_switcheroo.frameworks.tensorflow
 import ml_switcheroo.frameworks.keras
-import ml_switcheroo.frameworks.numpy
 import ml_switcheroo.frameworks.mlx
+import ml_switcheroo.frameworks.numpy
+import ml_switcheroo.frameworks.tensorflow
+import ml_switcheroo.frameworks.torch
+from ml_switcheroo.frameworks import available_frameworks
+from ml_switcheroo.frameworks.base import get_adapter
 
 
 def test_torch_implementation() -> None:

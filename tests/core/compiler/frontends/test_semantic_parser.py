@@ -1,33 +1,34 @@
 """Test suite for semantic comment parser."""
 
+import pytest
+
 from ml_switcheroo.core.compiler.frontends.semantic_parser import (
-  SemanticCommentParser,
-  SemanticInput,
   SemanticBegin,
+  SemanticCommentParser,
   SemanticEnd,
-  SemanticUnmapped,
-  SemanticReturn,
+  SemanticInput,
   SemanticMarker,
+  SemanticReturn,
+  SemanticUnmapped,
   Trivia,
 )
-import pytest
 
 
 def test_trivia_to_text() -> None:
-  """Test Trivia to_text method."""
+  """Docstring."""
   t = Trivia("foo")
   assert t.text == "foo"
 
 
 def test_semantic_marker_abstract() -> None:
-  """Test abstract method."""
+  """Docstring."""
   m = SemanticMarker()
   with pytest.raises(NotImplementedError):
     m.to_text()
 
 
 def test_semantic_parser_input() -> None:
-  """Test parsing of an input semantic comment."""
+  """Docstring."""
   parser = SemanticCommentParser()
   res = parser.parse("Input my_var -> R0")
   assert isinstance(res, SemanticInput)
@@ -35,7 +36,7 @@ def test_semantic_parser_input() -> None:
 
 
 def test_semantic_parser_begin() -> None:
-  """Test parsing of a begin semantic comment."""
+  """Docstring."""
   parser = SemanticCommentParser()
   res = parser.parse("BEGIN Add (node_1)")
   assert isinstance(res, SemanticBegin)
@@ -44,7 +45,7 @@ def test_semantic_parser_begin() -> None:
 
 
 def test_semantic_parser_end() -> None:
-  """Test parsing of an end semantic comment."""
+  """Docstring."""
   parser = SemanticCommentParser()
   res = parser.parse("END Add (node_1) // comment")
   assert isinstance(res, SemanticEnd)
@@ -53,7 +54,7 @@ def test_semantic_parser_end() -> None:
 
 
 def test_semantic_parser_unmapped() -> None:
-  """Test parsing of an unmapped semantic comment."""
+  """Docstring."""
   parser = SemanticCommentParser()
   res = parser.parse("Unmapped Op: torch.add (node_2)")
   assert isinstance(res, SemanticUnmapped)
@@ -62,21 +63,21 @@ def test_semantic_parser_unmapped() -> None:
 
 
 def test_semantic_parser_return() -> None:
-  """Test parsing of a return semantic comment."""
+  """Docstring."""
   parser = SemanticCommentParser()
   res = parser.parse("Return: R0")
   assert isinstance(res, SemanticReturn)
 
 
 def test_semantic_parser_invalid() -> None:
-  """Test parsing of an invalid semantic comment."""
+  """Docstring."""
   parser = SemanticCommentParser()
   res = parser.parse("Just a regular comment")
   assert res is None
 
 
 def test_semantic_parser_to_text_roundtrip() -> None:
-  """Test roundtrip of to_text."""
+  """Docstring."""
   parser = SemanticCommentParser()
   cases = [
     "Input my_var -> R0",

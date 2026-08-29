@@ -1,13 +1,15 @@
 """Test suite for the Examples Suite module."""
 
-import pytest
 import ast
 from pathlib import Path
 from typing import Set
-from ml_switcheroo.core.engine import ASTEngine
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
 
@@ -20,7 +22,7 @@ def _load_files():
 
 
 class MockBidirectionalSemantics(SemanticsManager):
-  """Mock Bidirectional Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self):
     """Initializes the MockBidirectionalSemantics instance."""

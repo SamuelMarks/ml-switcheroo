@@ -1,7 +1,8 @@
 """Test suite for the Dsl module."""
 
-from ml_switcheroo.core.dsl import OperationDef, ParameterDef, FrameworkVariant
-from typing import Dict, Any
+from typing import Any, Dict
+
+from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef, ParameterDef
 
 
 def test_parameter_def_rich_defaults() -> None:

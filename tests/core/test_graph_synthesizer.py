@@ -1,15 +1,17 @@
 """Test suite for the Graph Synthesizer module."""
 
 import ast
-import pytest
+
 import libcst as cst
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+import pytest
+
 from ml_switcheroo.core.compiler.backends.python import PythonBackend
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 
 @pytest.fixture
 def synthesizer() -> PythonBackend:
-  """Provides a mock synthesizer for testing."""
+  """Docstring."""
   return PythonBackend()
 
 

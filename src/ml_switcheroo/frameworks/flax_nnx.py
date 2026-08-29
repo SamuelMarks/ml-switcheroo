@@ -30,14 +30,14 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 try:
   import jax
-except Exception:  # pragma: no cover
-  jax = None  # pragma: no cover
+except Exception:
+  jax = None
 try:
   import flax.nnx
 
-  flax_nnx = flax.nnx  # pragma: no cover
-except Exception:  # pragma: no cover
-  flax_nnx = None  # pragma: no cover
+  flax_nnx = flax.nnx
+except Exception:
+  flax_nnx = None
 
 
 @register_framework("flax_nnx")

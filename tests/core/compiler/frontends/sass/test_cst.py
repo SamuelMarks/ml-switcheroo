@@ -1,22 +1,23 @@
 """Tests for the SASS Concrete Syntax Tree nodes."""
 
 import pytest
+
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassModule,
-  SassInstruction,
-  SassRegister,
-  SassImmediate,
-  SassMemory,
-  SassPredicate,
-  SassLabel,
-  SassDirective,
   SassComment,
+  SassDirective,
+  SassImmediate,
+  SassInstruction,
+  SassLabel,
+  SassMemory,
+  SassModule,
+  SassPredicate,
+  SassRegister,
 )
 from ml_switcheroo.core.cst.base import Trivia
 
 
 def test_register_to_text() -> None:
-  """Test register serialization."""
+  """Docstring."""
   reg = SassRegister(name="R0", leading_trivia=[Trivia(" ")], trailing_trivia=[Trivia(",")])
   assert reg.to_text() == " R0,"
 
@@ -31,7 +32,7 @@ def test_register_to_text() -> None:
 
 
 def test_predicate_to_text() -> None:
-  """Test predicate serialization."""
+  """Docstring."""
   pred = SassPredicate(name="P0", is_guard=True)
   assert pred.to_text() == "@P0"
 
@@ -43,7 +44,7 @@ def test_predicate_to_text() -> None:
 
 
 def test_immediate_to_text() -> None:
-  """Test immediate serialization."""
+  """Docstring."""
   imm_int = SassImmediate(value=42)
   assert imm_int.to_text() == "42"
 
@@ -55,7 +56,7 @@ def test_immediate_to_text() -> None:
 
 
 def test_memory_to_text() -> None:
-  """Test memory operand serialization."""
+  """Docstring."""
   mem_reg = SassMemory(base=SassRegister(name="R1"))
   assert mem_reg.to_text() == "[R1]"
 
@@ -70,7 +71,7 @@ def test_memory_to_text() -> None:
 
 
 def test_instruction_to_text() -> None:
-  """Test instruction serialization."""
+  """Docstring."""
   inst = SassInstruction(
     leading_trivia=[Trivia("  ")],
     predicate=SassPredicate(name="P0", is_guard=True, trailing_trivia=[Trivia(" ")]),
@@ -85,7 +86,7 @@ def test_instruction_to_text() -> None:
 
 
 def test_instruction_to_text_no_trivia() -> None:
-  """Test instruction serialization with missing trivia to trigger default spacing."""
+  """Docstring."""
   inst = SassInstruction(
     predicate=SassPredicate(name="P0", is_guard=True),
     opcode="FADD",
@@ -101,19 +102,19 @@ def test_instruction_to_text_no_trivia() -> None:
 
 
 def test_instruction_invalid_opcode() -> None:
-  """Test validation of opcode string."""
+  """Docstring."""
   with pytest.raises(ValueError, match="Invalid SASS opcode"):
     SassInstruction(opcode="FADD R0")
 
 
 def test_label_to_text() -> None:
-  """Test label serialization."""
+  """Docstring."""
   lbl = SassLabel(name="L_0", trailing_trivia=[Trivia("\n")])
   assert lbl.to_text() == "L_0:\n"
 
 
 def test_directive_to_text() -> None:
-  """Test directive serialization."""
+  """Docstring."""
   dir1 = SassDirective(name="text")
   assert dir1.to_text() == ".text"
 
@@ -122,13 +123,13 @@ def test_directive_to_text() -> None:
 
 
 def test_comment_to_text() -> None:
-  """Test comment serialization."""
+  """Docstring."""
   com = SassComment(text="this is a comment", trailing_trivia=[Trivia("\n")])
   assert com.to_text() == "// this is a comment\n"
 
 
 def test_module_to_text() -> None:
-  """Test module serialization."""
+  """Docstring."""
   mod = SassModule(
     statements=[
       SassDirective(name="text", trailing_trivia=[Trivia("\n")]),

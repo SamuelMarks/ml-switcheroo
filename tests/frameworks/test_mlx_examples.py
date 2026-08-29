@@ -1,13 +1,15 @@
 """Test suite for the Mlx Examples module."""
 
 import ast
+
 import pytest
+
 from ml_switcheroo.frameworks.mlx import MLXAdapter
 
 
 @pytest.fixture
 def adapter() -> MLXAdapter:
-  """Provides a mock adapter for testing."""
+  """Docstring."""
   return MLXAdapter()
 
 
@@ -42,7 +44,7 @@ def test_tier2_neural_validity(adapter: MLXAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: MLXAdapter) -> None:
-  """Verifies the behavior of tier3 extras validity."""
+  """Docstring."""
   code: str = adapter.get_tiered_examples()["tier3_extras"]
   ast.parse(code)
   assert "with mx.stream(mx.gpu):" in code

@@ -1,6 +1,6 @@
 """Test suite for the Dsl Complexity module."""
 
-from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
+from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef
 
 
 def test_complexity_field_storage() -> None:

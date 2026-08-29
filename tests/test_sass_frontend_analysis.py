@@ -1,11 +1,11 @@
 """Test module."""
 
 from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate, SassRegister
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate, SassInstruction, SassRegister
 
 
 def test_sass_analyzer() -> None:
-  """Test element."""
+  """Docstring."""
   inst1: SassInstruction = SassInstruction(
     opcode="ISETP.LT.AND",
     operands=[

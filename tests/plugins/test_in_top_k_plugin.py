@@ -1,10 +1,11 @@
 """Tests for the in_top_k plugin."""
 
-import libcst as cst
 import typing
 
-from ml_switcheroo.plugins.in_top_k_plugin import in_top_k_plugin
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.in_top_k_plugin import in_top_k_plugin
 
 
 def test_in_top_k_plugin_basic() -> None:

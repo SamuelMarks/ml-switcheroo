@@ -1,9 +1,11 @@
 """Test suite for NN and Shape operations in the StableHLO backend."""
 
+from typing import Any, Dict, List, Optional, Tuple
+
 import pytest
-from typing import List, Tuple, Dict, Any, Optional
+
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 OPS: List[Tuple[str, str]] = [
   # NN

@@ -1,13 +1,15 @@
 """Test suite for the Api Helpers module."""
 
-import pytest
 import typing
+
 import libcst as cst
+import pytest
+
 from ml_switcheroo.core.rewriter.passes.api_helpers import ApiHelpersMixin
 
 
 class MockTracer:
-  """Mock Tracer class for testing purposes."""
+  """Docstring."""
 
   def log_match(self, *args: typing.Any, **kwargs: typing.Any) -> None:
     """Mock implementation of log match."""
@@ -15,7 +17,7 @@ class MockTracer:
 
 
 class MockSemantics:
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, defs: dict[str, tuple[str, dict[str, typing.Any]]], configs: dict[str, typing.Any]) -> None:
     """Initializes the MockSemantics instance."""
@@ -40,7 +42,7 @@ class MockSemantics:
 
 
 class MockHookContext:
-  """Mock Hook Context class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockHookContext instance."""
@@ -52,7 +54,7 @@ class MockHookContext:
 
 
 class MockContext:
-  """Mock Context class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockContext instance."""
@@ -61,7 +63,7 @@ class MockContext:
 
 
 class MockConfig:
-  """Mock Config class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockConfig instance."""
@@ -71,7 +73,7 @@ class MockConfig:
 
 
 class MockHelper(ApiHelpersMixin):
-  """Mock Helper class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockHelper instance."""
@@ -224,7 +226,7 @@ def test_inject_argument_exists() -> None:
 
 
 def test_apply_preamble_exception() -> None:
-  """Tests fallback when cst.parse_module throws an error inside _apply_preamble."""
+  """Docstring."""
   helper = MockHelper()
   func = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
   # Using invalid syntax to trigger parse error
@@ -233,7 +235,7 @@ def test_apply_preamble_exception() -> None:
 
 
 def test_convert_to_indented_block_fallback() -> None:
-  """Tests _convert_to_indented_block when body is already IndentedBlock."""
+  """Docstring."""
   helper = MockHelper()
   func = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
   # Function body is an IndentedBlock
@@ -242,7 +244,7 @@ def test_convert_to_indented_block_fallback() -> None:
 
 
 def test_get_mapping_not_dict() -> None:
-  """Tests _get_mapping when target_impl is present but not a dict."""
+  """Docstring."""
   helper = MockHelper()
 
   class FakeImpl:
@@ -257,14 +259,14 @@ def test_get_mapping_not_dict() -> None:
 
 
 def test_cst_to_string_fallback() -> None:
-  """Tests _cst_to_string with unsupported node type."""
+  """Docstring."""
   helper = MockHelper()
   # Pass() is not supported, should return None
   assert helper._cst_to_string(cst.Pass()) is None
 
 
 def test_version_parse_empty() -> None:
-  """Tests check_version_constraints with an empty version string which raises error during parse."""
+  """Docstring."""
   helper = MockHelper()
   helper.semantics.framework_configs["jax"]["version"] = ""
   assert helper.check_version_constraints("1.0", None) is None

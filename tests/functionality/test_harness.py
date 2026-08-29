@@ -1,10 +1,11 @@
 """Test suite for the Harness module."""
 
+import os
+import subprocess
 import sys
 import typing
-import subprocess
-import os
 from pathlib import Path
+
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 

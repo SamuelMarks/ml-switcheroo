@@ -1,11 +1,11 @@
 """Test suite for the Flax Nnx module."""
 
-from flax import nnx
 import jax.numpy as jnp
+from flax import nnx
 
 
 class EmbeddingModel(nnx.Module):
-  """Test suite for the Embedding Model component."""
+  """Docstring."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int, rngs: nnx.Rngs):
     """Initializes the EmbeddingModel instance."""

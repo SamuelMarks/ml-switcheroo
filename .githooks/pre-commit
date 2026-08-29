@@ -26,17 +26,21 @@ uv build
 echo "=> [6/6] Running tests and updating coverage shields..."
 
 # We capture the status of the tests so we can fail the hook if they fail
-uv run pytest --cov=src/ml_switcheroo --cov-report=term > coverage_output.tmp || {
-    echo "Tests failed! See pytest output below:"
-    cat coverage_output.tmp
-    rm coverage_output.tmp
-    exit 1
-}
+TESTS_FAILED=0
+uv run pytest -n auto --cov=src/ml_switcheroo --cov-report=term > coverage_output.tmp || TESTS_FAILED=1
 
-TEST_COV=$(grep TOTAL coverage_output.tmp | awk '{print $NF}' | tr -d '%')
+if [ $TESTS_FAILED -eq 1 ]; then
+    echo "Tests failed! See pytest output below:"
+    # We don't cat the whole thing to avoid spamming the terminal, just let them know
+    # cat coverage_output.tmp
+fi
+
+TEST_COV=$(grep TOTAL coverage_output.tmp | awk '{print $NF}' | tr -d '%' || echo "0")
+if [ -z "$TEST_COV" ]; then TEST_COV="0"; fi
 rm coverage_output.tmp
 
-DOC_COV=$(uv run interrogate src/ml_switcheroo | grep "actual:" | sed -n 's/.*actual: \([0-9.]*%\).*/\1/p' | tr -d '%')
+DOC_COV=$(uv run interrogate src/ml_switcheroo | grep "actual:" | sed -n 's/.*actual: \([0-9.]*%\).*/\1/p' | tr -d '%' || echo "0")
+if [ -z "$DOC_COV" ]; then DOC_COV="0"; fi
 
 get_color() {
     local cov=$(echo "$1" | awk '{print int($1)}')
@@ -65,6 +69,13 @@ echo "=> Coverage Shields: Test ${TEST_COV_ROUNDED}%, Doc ${DOC_COV_ROUNDED}%"
 
 # Add the modified files to staging automatically if they were modified
 git add README.md
+
+if [ $TESTS_FAILED -eq 1 ]; then
+    echo "================================================================"
+    echo "Tests failed! Aborting commit."
+    echo "================================================================"
+    exit 1
+fi
 
 # To avoid auto-adding unstaged user modifications to tracked files,
 # we only update the index for files that are already partially staged

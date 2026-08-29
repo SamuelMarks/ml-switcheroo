@@ -1,20 +1,22 @@
 """Test suite for the Type Mapping module."""
 
-import pytest
-import typing
 import importlib
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+import typing
+
+import pytest
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import PluginTraits
-from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 @pytest.fixture(autouse=True)
 def reload_plugins() -> None:
   """Helper to reload plugins."""
-  from ml_switcheroo.core import hooks
   import ml_switcheroo.plugins.casting
+  from ml_switcheroo.core import hooks
 
   hooks._PLUGINS_LOADED = False
   importlib.reload(ml_switcheroo.plugins.casting)

@@ -1,16 +1,18 @@
 """Test suite for the Escape Hatch Reliability module."""
 
-import pytest
 import typing
+
 import libcst as cst
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.escape_hatch import EscapeHatch
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.semantics.manager import SemanticsManager
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -38,7 +40,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   return PivotRewriter(semantics, config)

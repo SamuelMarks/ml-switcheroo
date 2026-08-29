@@ -1,33 +1,27 @@
 """Tests for the MLIR strict type system."""
 
-from ml_switcheroo.core.mlir.types import (
-  IntegerType,
-  FloatType,
-  ComplexType,
-  TensorType,
-  FunctionType,
-)
+from ml_switcheroo.core.mlir.types import ComplexType, FloatType, FunctionType, IntegerType, TensorType
 
 
 def test_integer_type() -> None:
-  """Test IntegerType string formatting."""
+  """Docstring."""
   assert IntegerType(32).to_string() == "i32"
   assert IntegerType(1).to_string() == "i1"
 
 
 def test_float_type() -> None:
-  """Test FloatType string formatting."""
+  """Docstring."""
   assert FloatType("f32").to_string() == "f32"
   assert FloatType("bf16").to_string() == "bf16"
 
 
 def test_complex_type() -> None:
-  """Test ComplexType string formatting."""
+  """Docstring."""
   assert ComplexType(FloatType("f64")).to_string() == "complex<f64>"
 
 
 def test_tensor_type() -> None:
-  """Test TensorType string formatting for various shapes."""
+  """Docstring."""
   f32 = FloatType("f32")
   # Unranked
   assert TensorType(f32, None).to_string() == "tensor<*xf32>"
@@ -40,7 +34,7 @@ def test_tensor_type() -> None:
 
 
 def test_function_type() -> None:
-  """Test FunctionType string formatting."""
+  """Docstring."""
   f32 = FloatType("f32")
   t_f32 = TensorType(f32, None)
   t_i32 = TensorType(IntegerType(32), [10])

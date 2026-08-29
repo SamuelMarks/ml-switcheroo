@@ -1,15 +1,17 @@
 """Test suite for the Loop Unroll module."""
 
-import pytest
-import libcst as cst
-from typing import Callable, Dict, Any
+from typing import Any, Callable, Dict
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
+
+import libcst as cst
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.plugins.loop_unroll import transform_loops
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.semantics.schema import PluginTraits
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -34,7 +36,7 @@ def rewriter_factory() -> Callable[[str], PivotRewriter]:
   Returns:
       Callable[[str], PivotRewriter]: The factory function.
   """
-  from ml_switcheroo.core.hooks_registry import clear_hooks, _HOOKS
+  from ml_switcheroo.core.hooks_registry import _HOOKS, clear_hooks
 
   clear_hooks()
   _HOOKS["transform_for_loop"] = transform_loops

@@ -1,9 +1,11 @@
 """Test suite for the Init Coverage module."""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
+
 import ml_switcheroo
 from ml_switcheroo.semantics.manager import SemanticsManager
-from unittest.mock import patch, MagicMock
 
 
 def test_convert_success() -> None:

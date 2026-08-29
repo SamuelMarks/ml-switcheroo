@@ -1,24 +1,28 @@
 """Test module."""
 
+from typing import List
+
 import pytest
-from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
+from lark import Token
+
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
   RdnaDirective,
-  RdnaLabel,
   RdnaInstruction,
-  RdnaSGPR,
-  RdnaVGPR,
-  RdnaModifier,
+  RdnaLabel,
   RdnaLabelRef,
   RdnaMemory,
+  RdnaModifier,
   RdnaModule,
   RdnaNode,
+  RdnaSGPR,
+  RdnaVGPR,
 )
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser, RdnaTransformer
 
 
 def test_parser_empty() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser("")
   mod: RdnaModule = parser.parse()
   assert len(mod.statements) == 0
@@ -29,7 +33,7 @@ def test_parser_empty() -> None:
 
 
 def test_parser_comments() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser("; just a comment\n  ; another comment")
   mod: RdnaModule = parser.parse()
   assert len(mod.statements) == 2
@@ -39,7 +43,7 @@ def test_parser_comments() -> None:
 
 
 def test_parser_directive() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser(".text\n.globl main\n.type main, function")
   mod: RdnaModule = parser.parse()
   assert len(mod.statements) == 3
@@ -52,7 +56,7 @@ def test_parser_directive() -> None:
 
 
 def test_parser_label() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser("main:\nL1:")
   mod: RdnaModule = parser.parse()
   assert len(mod.statements) == 2
@@ -62,7 +66,7 @@ def test_parser_label() -> None:
 
 
 def test_parser_instruction_no_args() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser("s_endpgm")
   mod: RdnaModule = parser.parse()
   assert len(mod.statements) == 1
@@ -72,7 +76,7 @@ def test_parser_instruction_no_args() -> None:
 
 
 def test_parser_instruction_registers() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser("v_add_f32 v0, s[1:2], v3")
   mod: RdnaModule = parser.parse()
   inst: RdnaInstruction = getattr(mod, "statements")[0]
@@ -95,7 +99,7 @@ def test_parser_instruction_registers() -> None:
 
 
 def test_parser_immediates() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser("v_mov_b32 v0, 42\nv_mov_b32 v1, -42\nv_mov_b32 v2, +42")
   mod: RdnaModule = parser.parse()
   assert getattr(getattr(mod.statements[0], "operands", [])[1], "value", None) == 42
@@ -110,7 +114,7 @@ def test_parser_immediates() -> None:
 
 
 def test_parser_immediates_float() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser("v_mov_b32 v0, 3.14\nv_mov_b32 v1, -3.14\nv_mov_b32 v2, +3.14")
   mod: RdnaModule = parser.parse()
   assert getattr(getattr(mod.statements[0], "operands", [])[1], "value", None) == 3.14
@@ -119,7 +123,7 @@ def test_parser_immediates_float() -> None:
 
 
 def test_parser_memory() -> None:
-  """Test element."""
+  """Docstring."""
   # Correct memory syntax: `[s[2:3]]`, `[s[2:3] + 4]`, `[s[2:3] - 4]`
   parser: RdnaParser = RdnaParser(
     "s_load_dword s0, [s[2:3]]\ns_load_dword s0, [s[2:3] + 4]\ns_load_dword s0, [s[2:3] - 8]"
@@ -140,7 +144,7 @@ def test_parser_memory() -> None:
 
 
 def test_parser_modifier() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser("v_add_f32 v0, v1, v2, glc\n s_branch L1")
   mod: RdnaModule = parser.parse()
   inst: RdnaInstruction = getattr(mod, "statements")[0]
@@ -153,21 +157,61 @@ def test_parser_modifier() -> None:
 
 
 def test_parser_invalid() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser("v_add_f32 @@@")
   with pytest.raises(ValueError):
     parser.parse()
 
 
 def test_parser_lexer_mismatch() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser("!")
   with pytest.raises(ValueError, match="Unexpected '!'"):
     parser.parse()
 
 
 def test_parser_eof_trivia() -> None:
-  """Test element."""
+  """Docstring."""
   parser: RdnaParser = RdnaParser("v_add_f32 v0, v1 ")
   mod: RdnaModule = parser.parse()
   assert getattr(mod.statements[-1], "trailing_trivia")[-1].text == " "
+
+
+# --- Merged from test_rdna_frontend_parser_extra.py ---
+
+
+def test_parser_empty_line() -> None:
+  """Docstring."""
+  parser: RdnaParser = RdnaParser("  \n  v_add_f32 v0, v1, v2")
+  parser.parse()
+
+
+def test_parser_modifier_extra() -> None:
+  """Docstring."""
+  transformer: RdnaTransformer = RdnaTransformer()
+  res: RdnaModifier = transformer.modifier([Token("MODIFIER", "row_mask:0xf")])
+  assert res.name == "row_mask:0xf"
+
+
+def test_parser_eof_trivia_extra() -> None:
+  """Docstring."""
+  parser: RdnaParser = RdnaParser("v_add_f32 v0, v1, v2 ; eof comment")
+  parser.parse()
+
+
+def test_param_children() -> None:
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaTransformer
+
+  transformer: RdnaTransformer = RdnaTransformer()
+
+  class DummyToken:
+    def __init__(self) -> None:
+      self.children: List[Token] = [Token("A", "b"), Token("B", "c")]
+
+  # We call directive directly
+  # children = [ DOT, Token("IDENTIFIER", "name"), param_list ]
+  # param_list is a list of parameters
+  res: RdnaDirective = transformer.directive([Token("DOT", "."), Token("IDENTIFIER", "my_dir"), [DummyToken()]])
+  assert res.name == "my_dir"
+  assert "bc" in getattr(res, "params")[0]

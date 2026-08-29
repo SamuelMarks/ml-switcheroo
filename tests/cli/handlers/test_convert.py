@@ -1,7 +1,8 @@
 """Docstring."""
 
-from unittest.mock import MagicMock, patch
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
 from ml_switcheroo.cli.handlers.convert import ConversionResult, _convert_single_file, _print_batch_summary
 
 
@@ -103,8 +104,8 @@ def test_handle_convert_plugins(tmp_path: Path) -> None:
     semantics: MagicMock = MockSemantics()
     semantics.is_verified.return_value = True
     engine: MagicMock = MockEngine.return_value
-    from ml_switcheroo.core.engine import ConversionResult
     from ml_switcheroo.config import RuntimeConfig
+    from ml_switcheroo.core.engine import ConversionResult
 
     # We need config.plugin_paths to be set
     mock_config: RuntimeConfig = RuntimeConfig()

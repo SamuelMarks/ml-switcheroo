@@ -1,11 +1,12 @@
 """Test suite for the Keras3 module."""
 
 import typing
+
 import keras
 
 
 class MLP(keras.Model):  # type: ignore
-  """Test suite for the M L P component."""
+  """Docstring."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int) -> None:
     """Initializes the MLP instance."""

@@ -1,5 +1,7 @@
 """Test module."""
 
+from typing import Any, List
+
 from ml_switcheroo.core.compiler.backends.sass.printer import SassPrinter
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassComment,
@@ -9,23 +11,22 @@ from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassNode,
   SassRegister,
 )
-from typing import List, Any
 
 
 class MockSassNode(SassNode):
-  """Test element."""
+  """Docstring."""
 
   def __str__(self) -> str:
-    """Test element."""
+    """Docstring."""
     return "mock_node"
 
   def __eq__(self, other: Any) -> bool:
-    """Test element."""
+    """Docstring."""
     return isinstance(other, MockSassNode)
 
 
 def test_sass_printer_emit() -> None:
-  """Test element."""
+  """Docstring."""
   printer: SassPrinter = SassPrinter()
   nodes: List[SassNode] = [
     SassLabel(name="L1"),

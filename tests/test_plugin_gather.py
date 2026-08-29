@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock, patch
-from ml_switcheroo.plugins.gather import transform_gather
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.gather import transform_gather
 
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")

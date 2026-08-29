@@ -1,13 +1,16 @@
 """Test suite for the Method Property module."""
 
-import pytest
-import libcst as cst
-from typing import Generator, Dict, Any, Optional, Tuple, Union
+from typing import Any, Dict, Generator, Optional, Tuple, Union
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.method_property import transform_method_to_property
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -173,4 +176,23 @@ def test_unknown_method(rewriter: PivotRewriter) -> None:
   """
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("unknown_method")))
   res: Union[cst.CSTNode, cst.Subscript, cst.Attribute] = transform_method_to_property(node, rewriter.ctx)
+  assert res is node
+
+
+# --- Merged from test_method_property_extra.py ---
+
+
+def test_method_property_not_attribute() -> None:
+  """Verifies the behavior of method property not attribute."""
+  node: cst.Call = cst.Call(func=cst.Name("size"))
+  ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
+  res: Union[cst.CSTNode, cst.Subscript, cst.Attribute] = transform_method_to_property(node, ctx)
+  assert res is node
+
+
+def test_method_property_unknown_method() -> None:
+  """Verifies the behavior of method property unknown method."""
+  node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("unknown")))
+  ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
+  res: Union[cst.CSTNode, cst.Subscript, cst.Attribute] = transform_method_to_property(node, ctx)
   assert res is node

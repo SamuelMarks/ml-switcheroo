@@ -4,7 +4,7 @@ import numpy as np
 
 
 class LSTMModel:
-  """Test suite for the L S T M Model component."""
+  """Docstring."""
 
   def __init__(self, input_size: int, hidden_size: int):
     """Initializes the LSTMModel instance."""

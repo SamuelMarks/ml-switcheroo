@@ -1,11 +1,12 @@
 """Test suite for the Jax Stack module."""
 
 import typing
+
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 
 
 class MockHighLevelAdapter(JAXStackMixin):
-  """Mock High Level Adapter class for testing purposes."""
+  """Docstring."""
 
   pass
 
@@ -58,7 +59,7 @@ def test_serialization_syntax_orbax() -> None:
 
 
 def test_weight_load_code() -> None:
-  """Test get weight load code."""
+  """Docstring."""
   adapter = MockHighLevelAdapter()
   code: str = adapter.get_weight_load_code("path")
   assert "orbax.checkpoint.PyTreeCheckpointer" in code
@@ -67,14 +68,14 @@ def test_weight_load_code() -> None:
 
 
 def test_tensor_conversion_syntax() -> None:
-  """Test tensor conversion syntax."""
+  """Docstring."""
   adapter = MockHighLevelAdapter()
   code: str = adapter.get_tensor_to_numpy_expr("x")
   assert code == "np.array(x)"
 
 
 def test_weight_save_code() -> None:
-  """Test weight save code."""
+  """Docstring."""
   adapter = MockHighLevelAdapter()
   code: str = adapter.get_weight_save_code("state", "path")
   assert "tuple_params =" in code

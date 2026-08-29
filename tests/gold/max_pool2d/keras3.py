@@ -1,11 +1,12 @@
 """Test suite for the Keras3 module."""
 
 import typing
+
 import keras
 
 
 class MaxPoolModel(keras.Model):  # type: ignore
-  """Test suite for the Max Pool Model component."""
+  """Docstring."""
 
   def __init__(self, pool_size: int = 2, strides: int = 2) -> None:
     """Initializes the MaxPoolModel instance."""

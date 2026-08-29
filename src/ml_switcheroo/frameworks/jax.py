@@ -21,9 +21,9 @@ from typing import List, Tuple, Dict, Optional
 try:
   import jax
   import jax.numpy as jnp
-except Exception:  # pragma: no cover
-  jax = None  # pragma: no cover
-  jnp = None  # pragma: no cover
+except Exception:
+  jax = None
+  jnp = None
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,

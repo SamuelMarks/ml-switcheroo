@@ -1,16 +1,18 @@
 """Test suite for the Device Allocator Multi module."""
 
-import pytest
-import libcst as cst
 import typing
 from unittest.mock import MagicMock, patch
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.device_allocator import transform_device_allocator
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.mlx import MLXAdapter
 from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
+from ml_switcheroo.plugins.device_allocator import transform_device_allocator
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -20,7 +22,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def base_semantics() -> MagicMock:
-  """Provides a mock base semantics for testing."""
+  """Docstring."""
   mgr = MagicMock()
   variants: dict[str, typing.Any] = {
     "jax": {"requires_plugin": "device_allocator"},

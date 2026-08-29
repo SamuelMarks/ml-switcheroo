@@ -1,13 +1,14 @@
 """Test suite for the Latex Parser module."""
 
-import pytest
 import libcst as cst
+import pytest
+
 from ml_switcheroo.core.latex.parser import LatexParser
 
 
 @pytest.fixture
 def basic_latex() -> str:
-  """Provides a mock basic LaTeX for testing."""
+  """Docstring."""
   return "\n\\documentclass{standalone}\n\\begin{document}\n\\begin{DefModel}{SimpleNet}\n    \\Attribute{fc1}{Linear}{in=10, out=5}\n    \\Input{data}{[B, 10]}\n\n    \\StateOp{h1}{fc1}{data}{[B, 5]}\n    \\Op{act}{ReLU}{h1}{[B, 5]}\n    \\Return{act}\n\\end{DefModel}\n\\end{document}\n"
 
 

@@ -1,10 +1,11 @@
 """Docstring."""
 
-import sys
 import importlib
 import inspect
-from unittest.mock import MagicMock
+import sys
+import pytest
 from typing import Any, Callable, List
+from unittest.mock import MagicMock
 
 
 def try_call(func: Callable[..., Any]) -> None:
@@ -38,6 +39,7 @@ def brute_module(mod_name: str) -> None:
             try_call(method)
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_brute_force_all_testing() -> None:
   """Docstring."""
   sys.argv = ["ml_switcheroo"]

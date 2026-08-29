@@ -1,20 +1,18 @@
 """Docstring."""
 
-from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
+from typing import Any, Dict, Optional, Tuple
+
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.mlir.cst import ModuleNode, BlockNode, OperationNode
-from typing import Dict, Any, Optional, Tuple
+from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
 
 
 def test_stablehlo_backend() -> None:
   """Docstring."""
 
   class MockSemantics:
-    """Docstring."""
-
     def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
       if kind == "KnownOp":
         return ("abstract.KnownOp", {"variants": {"stablehlo": {"api": "stablehlo.add"}}})
       return None
@@ -59,10 +57,7 @@ def test_mlir_printer() -> None:
 
   # testing _visit coverage for fallback
   class DummyNode:
-    """Docstring."""
-
     def to_text(self) -> str:
-      """Docstring."""
       return "dummy_text"
 
   code2: str = printer.emit(DummyNode())

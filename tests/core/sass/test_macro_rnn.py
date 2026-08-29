@@ -1,10 +1,11 @@
 """Test suite for the RNN SASS Macros."""
 
 import typing
-from ml_switcheroo.core.compiler.backends.sass.macros import expand_rnn, expand_lstm, expand_gru
-from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+
+from ml_switcheroo.core.compiler.backends.sass.macros import expand_gru, expand_lstm, expand_rnn
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassComment, SassNode
+from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassNode
 
 
 def test_sass_macro_rnn() -> None:

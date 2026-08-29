@@ -1,9 +1,10 @@
 """Test suite for the Engine module."""
 
 from unittest.mock import MagicMock, patch
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.core.rewriter.patcher import PatchAction
 
 

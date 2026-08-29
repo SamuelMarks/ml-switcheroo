@@ -1,9 +1,13 @@
 """Module docstring."""
 
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple
+from unittest.mock import MagicMock
+
 import libcst as cst
+import pytest
+
+from ml_switcheroo.core.hooks_registry import clear_hooks, register_hook
 from ml_switcheroo.core.rewriter.calls.pre import handle_pre_checks, resolve_implicit_method
-from ml_switcheroo.core.hooks_registry import register_hook, clear_hooks
-from typing import Dict, Any, List, Optional, Tuple, Set
 
 
 class DummyTraits:
@@ -405,8 +409,10 @@ def test_resolve_implicit_method_branches() -> None:
 
 def test_handle_pre_checks_no_hook() -> None:
   """Function doc."""
-  from unittest.mock import patch, MagicMock
+  from unittest.mock import MagicMock, patch
+
   import libcst as cst
+
   from ml_switcheroo.core.rewriter.calls.pre import handle_pre_checks
 
   class DummyRewriter:
@@ -429,9 +435,11 @@ def test_handle_pre_checks_no_hook() -> None:
 
 def test_resolve_implicit_method_missing_attributes() -> None:
   """Function doc."""
-  import libcst as cst
-  from ml_switcheroo.core.rewriter.calls.pre import resolve_implicit_method
   from unittest.mock import MagicMock
+
+  import libcst as cst
+
+  from ml_switcheroo.core.rewriter.calls.pre import resolve_implicit_method
 
   # Branch [154, 157]: Missing _is_module_alias
   class RewriterNoIsModule:
@@ -483,3 +491,58 @@ def test_resolve_implicit_method_missing_attributes() -> None:
 
   r3: RewriterLegacyNoMap = RewriterLegacyNoMap()
   resolve_implicit_method(r3, node_attr, "obj.f")
+
+
+# --- Merged from test_rewriter_calls_pre_extra.py ---
+
+
+class DummyRewriterExtra:
+  """Docstring."""
+
+  def __init__(self) -> None:
+    """Docstring."""
+    self.context: MagicMock = MagicMock()
+    self.context.hook_context = MagicMock()
+    self.semantics: MagicMock = MagicMock()
+    self.semantics.get_definition.return_value = None
+
+  def _report_warning(self, w: str) -> None:
+    pass
+
+
+@pytest.fixture(autouse=True)
+def _cleanup() -> Generator[None, None, None]:
+  import ml_switcheroo.core.hooks_registry as hr
+
+  hr.clear_hooks()
+  hr._PLUGINS_LOADED = True
+  yield
+  hr.clear_hooks()
+
+
+def test_handle_pre_checks_inplace_no_change() -> None:
+  """Docstring."""
+  rewriter: DummyRewriter = DummyRewriter()
+
+  # 97-98: in-place unroll hook doesn't change node
+  @register_hook("unroll_inplace_ops")
+  def mock_hook(node: cst.CSTNode, ctx: MagicMock) -> cst.CSTNode:
+    return node
+
+  original: cst.Call = getattr(getattr(cst.parse_statement("foo_()"), "body")[0], "value")
+  res: Tuple[bool, cst.CSTNode] = handle_pre_checks(rewriter, original, original, "foo_")
+  assert res[0] is False
+
+
+def test_handle_pre_checks_inplace_change() -> None:
+  """Docstring."""
+  rewriter: DummyRewriter = DummyRewriter()
+
+  # 97-98: in-place unroll hook changes node
+  @register_hook("unroll_inplace_ops")
+  def mock_hook(node: cst.CSTNode, ctx: MagicMock) -> cst.CSTNode:
+    return getattr(cst.parse_statement("b = 1"), "body")[0]
+
+  original: cst.Call = getattr(getattr(cst.parse_statement("foo_()"), "body")[0], "value")
+  res: Tuple[bool, cst.CSTNode] = handle_pre_checks(rewriter, original, original, "foo_")
+  assert res[0] is True

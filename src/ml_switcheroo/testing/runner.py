@@ -225,12 +225,12 @@ class EquivalenceRunner:
       try:
         a_arr = np.asanyarray(a)
         b_arr = np.asanyarray(b)
-        if a_arr.shape != b_arr.shape:  # pragma: no cover
-          return False  # pragma: no cover
+        if a_arr.shape != b_arr.shape:
+          return False
         # Handle string/object types safely
         if a_arr.dtype.kind in ["U", "S", "O"]:
           return np.array_equal(a_arr, b_arr)
         return np.allclose(a_arr, b_arr, rtol=rtol, atol=atol, equal_nan=True)
-      except Exception:  # pragma: no cover
-        return False  # pragma: no cover
+      except Exception:
+        return False
     return a == b

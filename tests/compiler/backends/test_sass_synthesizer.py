@@ -6,22 +6,23 @@ This module validates the correctness of:
 3. `SassBackend`: Instantiation with default configuration.
 """
 
-import pytest
 import typing
-import libcst as cst
 from unittest.mock import MagicMock
+
+import libcst as cst
+import pytest
 
 from ml_switcheroo.core.compiler.backends.sass import SassBackend
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator, SassSynthesizer
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassInstruction,
-  SassRegister,
   SassComment,
-  SassLabel,
   SassImmediate,
+  SassInstruction,
+  SassLabel,
   SassPredicate,
+  SassRegister,
 )
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -408,10 +409,10 @@ def test_sass_backend_default_init() -> None:
 
 
 def test_sass_synthesizer_empty_output() -> None:
-  """Test SASS synthesizer with an Output node with no inputs."""
+  """Docstring."""
   from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
-  from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
   semantics = SemanticsManager()
   synthesizer = SassSynthesizer(semantics)

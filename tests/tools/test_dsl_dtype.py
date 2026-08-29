@@ -1,12 +1,14 @@
 """Test suite for the Dsl Dtype module."""
 
-import pytest
-import numpy as np
+from typing import Any, Dict
+
 import hypothesis.strategies as st
-from hypothesis import given, settings, HealthCheck
+import numpy as np
+import pytest
+from hypothesis import HealthCheck, given, settings
+
 from ml_switcheroo.core.dsl import ParameterDef
 from ml_switcheroo.testing.fuzzer import InputFuzzer
-from typing import Dict, Any
 
 
 def test_param_dtype_field_initialization() -> None:
@@ -39,7 +41,7 @@ def test_param_dtype_and_rank() -> None:
 
 @pytest.fixture
 def fuzzer() -> InputFuzzer:
-  """Provides a mock fuzzer for testing."""
+  """Docstring."""
   return InputFuzzer()
 
 
@@ -74,7 +76,7 @@ def test_fuzzer_respects_dtype_bool(fuzzer: InputFuzzer, data: st.DataObject) ->
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["mask"], constraints=constraints)
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
   arr: np.ndarray = inputs["mask"]
-  assert getattr(arr, "dtype") == bool
+  assert getattr(arr, "dtype") == np.bool_
 
 
 @given(data=st.data())

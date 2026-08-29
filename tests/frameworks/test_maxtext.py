@@ -1,12 +1,14 @@
 """Test suite for the MaxText Framework Adapter."""
 
 import typing
-from ml_switcheroo.frameworks.maxtext import MaxTextAdapter
+
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.frameworks.maxtext import MaxTextAdapter
 
 
 def test_maxtext_adapter() -> None:
-  """Test basic properties of MaxTextAdapter."""
+  """Docstring."""
   adapter = MaxTextAdapter()
 
   assert adapter.display_name == "MaxText"

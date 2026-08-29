@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.plugins.context_to_function_wrap import transform_context_manager, _create_dotted_name
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.context_to_function_wrap import _create_dotted_name, transform_context_manager
 
 
 def test_create_dotted_name() -> None:

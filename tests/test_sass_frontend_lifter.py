@@ -1,13 +1,14 @@
 """Test module."""
 
-from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassRegister, SassLabel, SassNode
-from ml_switcheroo.core.graph import LogicalGraph
 from typing import List
+
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassLabel, SassNode, SassRegister
+from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+from ml_switcheroo.core.graph import LogicalGraph
 
 
 def test_sass_lifter_basic() -> None:
-  """Test element."""
+  """Docstring."""
   stmts: List[SassNode] = [
     SassComment(text="; BEGIN Linear(add1)"),
     SassInstruction(opcode="VADD", operands=[SassRegister(name="R0"), SassRegister(name="R1"), SassRegister(name="R2")]),
@@ -24,7 +25,7 @@ def test_sass_lifter_basic() -> None:
 
 
 def test_sass_lifter_mismatch_end() -> None:
-  """Test element."""
+  """Docstring."""
   stmts: List[SassNode] = [
     SassComment(text="; BEGIN Linear(add1)"),
     SassComment(text="; END Linear(add2)"),
@@ -35,7 +36,7 @@ def test_sass_lifter_mismatch_end() -> None:
 
 
 def test_sass_lifter_unmapped_flatten() -> None:
-  """Test element."""
+  """Docstring."""
   stmts: List[SassNode] = [
     SassComment(text="; Unmapped Op: flatten(some_id)"),
   ]
@@ -45,7 +46,7 @@ def test_sass_lifter_unmapped_flatten() -> None:
 
 
 def test_sass_lifter_instruction_unmapped() -> None:
-  """Test element."""
+  """Docstring."""
   stmts: List[SassNode] = [
     SassInstruction(opcode="VADD", operands=[]),
   ]

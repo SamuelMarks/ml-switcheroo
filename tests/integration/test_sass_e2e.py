@@ -1,18 +1,20 @@
 """Test suite for the Sass E2E module."""
 
-import pytest
 import typing
 from unittest.mock import MagicMock
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.frameworks.sass import SassAdapter
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.frameworks import register_framework
+from ml_switcheroo.frameworks.sass import SassAdapter
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
 def semantics() -> MagicMock:
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   mgr = MagicMock(spec=SemanticsManager)
   add_def: dict[str, typing.Any] = {"variants": {"torch": {"api": "torch.add"}, "sass": {"api": "FADD"}}}
   mul_def: dict[str, typing.Any] = {"variants": {"torch": {"api": "torch.mul"}, "sass": {"api": "FMUL"}}}
@@ -45,7 +47,7 @@ def semantics() -> MagicMock:
 
 @pytest.fixture
 def sass_engine(semantics: MagicMock) -> ASTEngine:
-  """Provides a mock SASS engine for testing."""
+  """Docstring."""
   register_framework("sass")(SassAdapter)
   config = RuntimeConfig(source_framework="torch", target_framework="sass", strict_mode=False)
   return ASTEngine(semantics=semantics, config=config)
@@ -53,7 +55,7 @@ def sass_engine(semantics: MagicMock) -> ASTEngine:
 
 @pytest.fixture
 def python_engine(semantics: MagicMock) -> ASTEngine:
-  """Provides a mock python engine for testing."""
+  """Docstring."""
   register_framework("sass")(SassAdapter)
   config = RuntimeConfig(source_framework="sass", target_framework="jax")
   config.strict_mode = False

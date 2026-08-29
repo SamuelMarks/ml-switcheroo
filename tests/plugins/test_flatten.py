@@ -1,14 +1,17 @@
 """Test suite for the Flatten module."""
 
-import pytest
 import typing
-import libcst as cst
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.flatten import transform_flatten
 from ml_switcheroo.semantics.schema import PluginTraits
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -18,7 +21,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   hooks._HOOKS["flatten_range"] = transform_flatten
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -147,7 +150,6 @@ def test_flatten_fallback_lookups() -> None:
   ctx.current_op_id = None
 
   def mock_lookup(aid: str) -> typing.Optional[str]:
-    """Provides a mock lookup for testing."""
     if aid == "flatten_full":
       return "jnp.ravel"
     return None
@@ -167,7 +169,6 @@ def test_flatten_fallback_lookups_range() -> None:
   ctx.current_op_id = None
 
   def mock_lookup(aid: str) -> typing.Optional[str]:
-    """Provides a mock lookup for testing."""
     if aid == "flatten_range":
       return "jnp.reshape"
     return None
@@ -286,7 +287,6 @@ def test_flatten_callable_class(rewriter: PivotRewriter) -> None:
   rewriter.context.hook_context._current_variant = MagicMock(op_type=MagicMock(value="class"))
 
   def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
-    """Docstring."""
     if aid == "Flatten":
       return {"api": "tf.keras.layers.Flatten"}
     return None
@@ -305,3 +305,16 @@ def test_flatten_callable_class(rewriter: PivotRewriter) -> None:
     "tf.keras.layers.Flatten()(x)"
     in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=typing.cast(cst.BaseExpression, res))])]).code
   )
+
+
+# --- Merged from test_flatten_missing.py ---
+
+
+def test_flatten_unhandled_fw():
+  """Verifies the behavior of flatten unhandled framework."""
+  ctx = MagicMock(spec=HookContext)
+  ctx.target_fw = "unknown"
+  ctx.current_op_id = "Flatten"
+  node = cst.Call(func=cst.Name("flatten"))
+  res = transform_flatten(node, ctx)
+  assert res == node

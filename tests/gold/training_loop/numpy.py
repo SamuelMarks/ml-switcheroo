@@ -1,6 +1,7 @@
 """Test suite for the Numpy module."""
 
 import typing
+
 import numpy as np
 
 

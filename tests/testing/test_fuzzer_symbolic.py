@@ -1,18 +1,20 @@
 """Test suite for the Fuzzer Symbolic module."""
 
-import pytest
-import numpy as np
 import random
+from typing import Any, Dict
+
 import hypothesis.strategies as st
-from hypothesis import given, settings, HealthCheck
-from ml_switcheroo.testing.fuzzer import InputFuzzer
+import numpy as np
+import pytest
+from hypothesis import HealthCheck, given, settings
+
 from ml_switcheroo.frameworks import register_framework
-from typing import Dict, Any
+from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 
 @pytest.fixture
 def fuzzer() -> InputFuzzer:
-  """Provides a mock fuzzer for testing."""
+  """Docstring."""
   random.seed(42)
   np.random.seed(42)
   return InputFuzzer()
@@ -25,8 +27,8 @@ def test_heuristic_booleans(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of heuristic booleans."""
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["mask", "condition"])
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  assert getattr(inputs["mask"], "dtype") == bool
-  assert getattr(inputs["condition"], "dtype") == bool
+  assert getattr(inputs["mask"], "dtype") == np.bool_
+  assert getattr(inputs["condition"], "dtype") == np.bool_
 
 
 @given(data=st.data())
@@ -261,8 +263,6 @@ def test_adapt_to_framework_delegation(fuzzer: InputFuzzer) -> None:
 
   @register_framework("mock_fw")
   class MockAdapter:
-    """Mock Adapter class for testing purposes."""
-
     def convert(self, x: Any) -> str:
       """Mock implementation of convert."""
       return "converted"

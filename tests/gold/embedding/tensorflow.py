@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class EmbeddingModel(tf.keras.Model):
-  """Test suite for the Embedding Model component."""
+  """Docstring."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int):
     """Initializes the EmbeddingModel instance."""

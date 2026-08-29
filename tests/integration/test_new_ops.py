@@ -1,11 +1,13 @@
 """Test suite for the New Ops module."""
 
-import pytest
 import typing
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE_TORCH_NN: str = "\nimport torch\nimport torch.nn as nn\nimport torch.nn.functional as F\n\nclass TransformerBlock(nn.Module):\n    def __init__(self, vocab_size, d_model):\n        super().__init__()\n        # Embedding\n        self.embed = nn.Embedding(vocab_size, d_model)\n        # LayerNorm\n        self.ln = nn.LayerNorm(d_model, eps=1e-6)\n        # GELU activation\n        self.act = nn.GELU()\n\n    def forward(self, x):\n        x = self.embed(x)\n        x = self.ln(x)\n        x = self.act(x)\n        # ArgMax\n        return torch.argmax(x, dim=-1)\n"
 EXPECTED_FLAX_NNX: str = "\nimport flax.nnx as nnx\nimport jax.numpy as jnp\n\nclass TransformerBlock(nnx.Module):\n    def __init__(self, vocab_size, d_model, rngs: nnx.Rngs):\n        # Flax Embed(num_embeddings, features, ...)\n        self.embed = nnx.Embed(vocab_size, d_model, rngs=rngs)\n        self.ln = nnx.LayerNorm(d_model, epsilon=1e-6, rngs=rngs)\n        self.act = nnx.gelu\n\n    def __call__(self, x):\n        x = self.embed(x)\n        x = self.ln(x)\n        x = self.act(x)\n        return jnp.argmax(x, axis=-1)\n"

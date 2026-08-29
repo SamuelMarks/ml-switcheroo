@@ -1,14 +1,14 @@
 """Test suite for the Html Nodes module."""
 
 from ml_switcheroo.core.html.nodes import (
-  SvgArrow,
+  AttributeNode,
+  CommentNode,
   GridBox,
   HtmlDocument,
   HtmlNode,
-  TextNode,
-  CommentNode,
-  AttributeNode,
+  SvgArrow,
   TagNode,
+  TextNode,
 )
 
 
@@ -61,7 +61,7 @@ def test_document_render_structure() -> None:
 
 
 def test_html_node_base() -> None:
-  """Test HtmlNode base methods raise NotImplementedError."""
+  """Docstring."""
   node = HtmlNode()
   try:
     node.emit()
@@ -75,19 +75,19 @@ def test_html_node_base() -> None:
 
 
 def test_text_node() -> None:
-  """Test TextNode emit."""
+  """Docstring."""
   node = TextNode(content="hello")
   assert node.emit() == "hello"
 
 
 def test_comment_node() -> None:
-  """Test CommentNode emit."""
+  """Docstring."""
   node = CommentNode(content=" test ")
   assert node.emit() == "<!-- test -->"
 
 
 def test_attribute_node() -> None:
-  """Test AttributeNode emit."""
+  """Docstring."""
   attr = AttributeNode(name="class", value="test", quote_style="'")
   assert attr.emit() == "class='test'"
   attr2 = AttributeNode(name="disabled")
@@ -95,7 +95,7 @@ def test_attribute_node() -> None:
 
 
 def test_tag_node() -> None:
-  """Test TagNode emit."""
+  """Docstring."""
   tag = TagNode(name="br", self_closing=True)
   assert tag.emit() == "<br/>"
   tag2 = TagNode(name="div", children=[TextNode(content="hello")])
@@ -103,7 +103,7 @@ def test_tag_node() -> None:
 
 
 def test_tag_node_with_children() -> None:
-  """Test TagNode emit with children."""
+  """Docstring."""
   child = TagNode(name="span", children=[TextNode(content="A")])
   tag = TagNode(name="div", attributes=[AttributeNode(name="id", value="main")], children=[child])
   html: str = tag.emit()
@@ -112,7 +112,7 @@ def test_tag_node_with_children() -> None:
 
 
 def test_tag_node_manipulation() -> None:
-  """Test TagNode manipulation methods (append, remove, modify attributes)."""
+  """Docstring."""
   tag = TagNode(name="div")
 
   # Attribute manipulation

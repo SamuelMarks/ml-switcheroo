@@ -6,8 +6,9 @@ higher-level logical node parameters (e.g., kernel size, in_features, elements).
 """
 
 import typing
+
 from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate, SassRegister
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate, SassInstruction, SassRegister
 
 
 def test_sass_analyzer_empty() -> None:
@@ -123,9 +124,9 @@ def test_sass_analyzer_unknown_kind() -> None:
 
 
 def test_sass_analysis_all_pass_blocks() -> None:
-  """Test sass analysis all pass blocks."""
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassImmediate
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate, SassInstruction
 
   _analyzer = SassAnalyzer()
 
@@ -157,8 +158,8 @@ def test_sass_analysis_all_pass_blocks() -> None:
 
 
 def test_sass_analysis_linear_no_loop_limits() -> None:
+  """Docstring."""
   # Hit 52->116 (Linear with no limits)
-  """Test sass analysis linear no loop limits."""
   from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 
   res: dict[str, typing.Any] = SassAnalyzer.analyze_block("Linear", [])
@@ -166,7 +167,7 @@ def test_sass_analysis_linear_no_loop_limits() -> None:
 
 
 def test_sass_analyzer_linear_no_loop_limits() -> None:
-  """Test SassAnalyzer for Linear kind with empty loop limits."""
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 
   analyzer = SassAnalyzer()

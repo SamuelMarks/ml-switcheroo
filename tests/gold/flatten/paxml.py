@@ -1,11 +1,11 @@
 """Test suite for the Paxml module."""
 
-from praxis import base_layer
 import jax.numpy as jnp
+from praxis import base_layer
 
 
 class FlattenModel(base_layer.BaseLayer):
-  """Test suite for the Flatten Model component."""
+  """Docstring."""
 
   start_dim: int = 1
 

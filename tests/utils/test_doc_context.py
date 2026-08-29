@@ -1,21 +1,23 @@
 """Test suite for the Doc Context module."""
 
-import pytest
+from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
-from ml_switcheroo.utils.doc_context import DocContextBuilder
+
+import pytest
+
 from ml_switcheroo.semantics.manager import SemanticsManager
-from typing import Dict, Any, List
+from ml_switcheroo.utils.doc_context import DocContextBuilder
 
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   return MagicMock(spec=SemanticsManager)
 
 
 @pytest.fixture
 def builder(mock_semantics: MagicMock) -> DocContextBuilder:
-  """Provides a mock builder for testing."""
+  """Docstring."""
   return DocContextBuilder(mock_semantics)
 
 

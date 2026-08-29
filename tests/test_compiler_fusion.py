@@ -1,12 +1,13 @@
 """Test suite for the compiler fusion passes."""
 
 from typing import List, Set, Tuple
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.compiler.fusion import QKVFusionPass, QKVDefusionPass
+
+from ml_switcheroo.core.compiler.fusion import QKVDefusionPass, QKVFusionPass
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def test_qkv_fusion_pass_no_nodes() -> None:
-  """Test QKVFusionPass with no nodes."""
+  """Docstring."""
   graph: LogicalGraph = LogicalGraph(nodes=[], edges=[])
   pass_: QKVFusionPass = QKVFusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -14,7 +15,7 @@ def test_qkv_fusion_pass_no_nodes() -> None:
 
 
 def test_qkv_fusion_pass_missing_k_v() -> None:
-  """Test QKVFusionPass with missing K and V nodes."""
+  """Docstring."""
   graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="q_proj", kind="Linear")], edges=[])
   pass_: QKVFusionPass = QKVFusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -23,7 +24,7 @@ def test_qkv_fusion_pass_missing_k_v() -> None:
 
 
 def test_qkv_fusion_pass_success() -> None:
-  """Test QKVFusionPass successfully fusing nodes."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="input", kind="Input"),
     LogicalNode(id="q_proj", kind="Linear"),
@@ -60,7 +61,7 @@ def test_qkv_fusion_pass_success() -> None:
 
 
 def test_qkv_defusion_pass_no_nodes() -> None:
-  """Test QKVDefusionPass with no nodes."""
+  """Docstring."""
   graph: LogicalGraph = LogicalGraph(nodes=[], edges=[])
   pass_: QKVDefusionPass = QKVDefusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -68,7 +69,7 @@ def test_qkv_defusion_pass_no_nodes() -> None:
 
 
 def test_qkv_defusion_pass_success() -> None:
-  """Test QKVDefusionPass successfully de-fusing nodes."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="input", kind="Input"),
     LogicalNode(id="qkv_proj", kind="Linear"),
@@ -99,7 +100,7 @@ def test_qkv_defusion_pass_success() -> None:
 
 
 def test_qkv_fusion_pass_unrelated_edge() -> None:
-  """Test QKVFusionPass with unrelated edge."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="input", kind="Input"),
     LogicalNode(id="q_proj", kind="Linear"),
@@ -124,7 +125,7 @@ def test_qkv_fusion_pass_unrelated_edge() -> None:
 
 
 def test_qkv_defusion_pass_unrelated_edge() -> None:
-  """Test QKVDefusionPass with unrelated edge."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="input", kind="Input"),
     LogicalNode(id="qkv_proj", kind="Linear"),

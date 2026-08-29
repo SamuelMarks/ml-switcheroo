@@ -7,17 +7,17 @@ parentheses omission for operations, custom op tail string rendering, and specia
 stablehlo constant operations.
 """
 
+from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import (
-  TypeNode,
-  ValueNode,
+  AttributeAliasDefNode,
   AttributeNode,
+  BlockNode,
+  ModuleNode,
   OperationNode,
   StableHloConstantOp,
-  AttributeAliasDefNode,
-  ModuleNode,
-  BlockNode,
+  TypeNode,
+  ValueNode,
 )
-from ml_switcheroo.core.cst.base import Trivia
 
 
 def test_attribute_alias_def_node() -> None:

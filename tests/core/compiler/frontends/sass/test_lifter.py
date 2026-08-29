@@ -5,15 +5,15 @@ nodes (comments, instructions, registers, and immediates) into a unified `Logica
 with correct nodes, kind prefixes, metadata, and connectivity.
 """
 
-from ml_switcheroo.core.compiler.ir import LogicalGraph
-from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassComment,
-  SassInstruction,
-  SassRegister,
   SassImmediate,
+  SassInstruction,
   SassNode,
+  SassRegister,
 )
+from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 def test_sass_lifter_unmapped() -> None:

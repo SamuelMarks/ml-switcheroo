@@ -3,11 +3,12 @@
 import types
 import typing
 from unittest.mock import MagicMock, patch
+
 from ml_switcheroo.core.discovery import SimulatedReflection
 
 
 def mock_module_with_members(name: str, members: list[str]) -> types.ModuleType:
-  """Provides a mock module with members for testing."""
+  """Docstring."""
   mod = types.ModuleType(name)
   for m in members:
     setattr(mod, m, MagicMock())

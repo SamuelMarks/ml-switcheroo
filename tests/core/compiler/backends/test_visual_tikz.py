@@ -1,7 +1,7 @@
 """Tests for visual_tikz.py."""
 
 import ml_switcheroo.core.compiler.backends.visual_tikz as visual_tikz
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def test_tikz_backend_empty() -> None:
@@ -13,7 +13,7 @@ def test_tikz_backend_empty() -> None:
 
 
 def test_tikz_backend_pure_cycle() -> None:
-  """Test cycle with no input nodes to hit not queue and graph.nodes branch."""
+  """Docstring."""
   backend = visual_tikz.TikzBackend()
   graph = LogicalGraph("CycleOnly")
   graph.nodes = [
@@ -29,7 +29,7 @@ def test_tikz_backend_pure_cycle() -> None:
 
 
 def test_tikz_backend_unconnected_cycle() -> None:
-  """Test cycle in disconnected component to hit missing node from ranks."""
+  """Docstring."""
   backend = visual_tikz.TikzBackend()
   graph = LogicalGraph("IsolatedCycle")
   graph.nodes = [
@@ -48,10 +48,10 @@ def test_tikz_backend_unconnected_cycle() -> None:
 
 
 def test_visual_tikz_rank_existing_higher() -> None:
+  """Docstring."""
   # Hit 116->115
-  """Test visual tikz rank existing higher."""
   from ml_switcheroo.core.compiler.backends.visual_tikz import TikzBackend
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+  from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("A", "Input"))

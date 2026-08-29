@@ -1,19 +1,21 @@
 """Test suite for the Schedulers module."""
 
+from typing import Any, Dict, Optional, Union, cast
+
 import libcst as cst
-from typing import Optional, Dict, Any, Union, cast
+
 from ml_switcheroo.plugins.schedulers import (
   _create_dotted_name,
   _get_target_arg_name,
-  transform_scheduler_init,
-  _transform_step_lr,
   _transform_cosine_lr,
+  _transform_step_lr,
+  transform_scheduler_init,
   transform_scheduler_step,
 )
 
 
 class DummyVariant:
-  """Dummy Variant class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, args: Optional[Dict[str, Any]] = None) -> None:
     """Initializes the DummyVariant instance."""
@@ -21,7 +23,7 @@ class DummyVariant:
 
 
 class DummyContext:
-  """Dummy Context class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, op_id: Optional[str], api: Optional[str], variant_args: Optional[Dict[str, Any]] = None) -> None:
     """Initializes the DummyContext instance."""

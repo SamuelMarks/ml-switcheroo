@@ -1,15 +1,15 @@
 """Module docstring."""
 
 from ml_switcheroo.core.mlir.nodes import (
-  TriviaNode,
-  ValueNode,
-  TypeNode,
   AttributeNode,
   BlockNode,
-  RegionNode,
-  OperationNode,
-  StableHloConstantOp,
   ModuleNode,
+  OperationNode,
+  RegionNode,
+  StableHloConstantOp,
+  TriviaNode,
+  TypeNode,
+  ValueNode,
 )
 
 

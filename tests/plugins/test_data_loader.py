@@ -1,14 +1,16 @@
 """Test suite for the Data Loader module."""
 
-import pytest
-import libcst as cst
 import typing
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.data_loader import transform_dataloader
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.frameworks.base import register_framework
+from ml_switcheroo.plugins.data_loader import transform_dataloader
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -20,7 +22,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
-  """Provides a mock rewriter factory for testing."""
+  """Docstring."""
   hooks._HOOKS["convert_dataloader"] = transform_dataloader
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -40,8 +42,6 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
 
   @register_framework("custom")
   class CustomAdapter:
-    """Test suite for the Custom Adapter component."""
-
     pass
 
   def create(target: str) -> PivotRewriter:
@@ -74,7 +74,7 @@ def test_jax_shim_injection(rewriter_factory: typing.Callable[[str], PivotRewrit
 
 
 def test_dataloader_arg_extraction(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of dataloader argument extraction."""
+  """Docstring."""
   rw: PivotRewriter = rewriter_factory("jax")
   code: str = "\ndef train():\n    dl = DataLoader(my_ds, batch_size=64, shuffle=True)\n"
   res: str = rewrite_code(rw, code)

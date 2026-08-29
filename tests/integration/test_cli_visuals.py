@@ -2,13 +2,15 @@
 
 import typing
 from unittest.mock import patch
+
+from rich.console import Console
+
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 from ml_switcheroo.semantics.manager import SemanticsManager
-from rich.console import Console
 
 
 class StableMockSemantics(SemanticsManager):
-  """Test suite for the Stable Mock Semantics component."""
+  """Docstring."""
 
   def get_known_apis(self) -> dict[str, typing.Any]:
     """Mock implementation of get known apis."""
@@ -29,7 +31,7 @@ class StableMockSemantics(SemanticsManager):
 
 
 class MockInspector:
-  """Mock Inspector class for testing purposes."""
+  """Docstring."""
 
   def inspect(self, _pkg: str) -> dict[str, typing.Any]:
     """Mock implementation of inspect."""

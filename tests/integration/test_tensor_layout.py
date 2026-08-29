@@ -1,8 +1,9 @@
 """Test suite for the Tensor Layout module."""
 
 import typing
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE_LAYOUT: str = (
@@ -12,7 +13,7 @@ EXPECTED_OUTPUT: str = "\nimport jax.numpy as jnp\n\ndef process_image(x):\n    
 
 
 class LayoutSemantics(SemanticsManager):  # type: ignore[misc]
-  """Test suite for the Layout Semantics component."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the LayoutSemantics instance."""

@@ -1,18 +1,19 @@
 """Test module."""
 
-import pytest
-import libcst as cst
+from typing import Any, Generator, Union
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass, AuxiliaryTransformer
-from ml_switcheroo.core.rewriter.context import RewriterContext
+import libcst as cst
+import pytest
+
 from ml_switcheroo.core.hooks_registry import register_hook
-from typing import Generator, Any, Union
+from ml_switcheroo.core.rewriter.context import RewriterContext
+from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass, AuxiliaryTransformer
 
 
 @pytest.fixture(autouse=True)
 def clean_hooks() -> Generator[None, None, None]:
-  """Test element."""
+  """Docstring."""
   import ml_switcheroo.core.hooks_registry as hr
 
   hr.clear_hooks()
@@ -23,7 +24,7 @@ def clean_hooks() -> Generator[None, None, None]:
 
 @pytest.fixture
 def context() -> RewriterContext:
-  """Test element."""
+  """Docstring."""
   semantics: MagicMock = MagicMock()
   conf: dict = {"traits": {"functional_execution_method": "apply"}}
   semantics.get_framework_config.return_value = conf
@@ -38,7 +39,7 @@ def context() -> RewriterContext:
 
 
 def test_auxiliary_pass(context: RewriterContext) -> None:
-  """Test element."""
+  """Docstring."""
   module: cst.Module = cst.parse_module("def foo():\n  pass\n")
   p: AuxiliaryPass = AuxiliaryPass()
   res: cst.Module = p.transform(module, context)
@@ -46,7 +47,7 @@ def test_auxiliary_pass(context: RewriterContext) -> None:
 
 
 def test_aux_get_traits_cached(context: RewriterContext) -> None:
-  """Test element."""
+  """Docstring."""
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   traits: Any = transformer._get_traits()
   assert getattr(traits, "functional_execution_method", None) == "apply"
@@ -57,7 +58,7 @@ def test_aux_get_traits_cached(context: RewriterContext) -> None:
 
 
 def test_aux_get_traits_no_conf(context: RewriterContext) -> None:
-  """Test element."""
+  """Docstring."""
   context.semantics.get_framework_config.return_value = None
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   traits: Any = transformer._get_traits()
@@ -65,7 +66,7 @@ def test_aux_get_traits_no_conf(context: RewriterContext) -> None:
 
 
 def test_aux_get_qualified_name(context: RewriterContext) -> None:
-  """Test element."""
+  """Docstring."""
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
 
   node: cst.BaseExpression = cst.parse_expression("t.Tensor")
@@ -82,7 +83,7 @@ def test_aux_get_qualified_name(context: RewriterContext) -> None:
 
 
 def test_aux_create_dotted_name(context: RewriterContext) -> None:
-  """Test element."""
+  """Docstring."""
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   node: cst.BaseExpression = transformer._create_dotted_name("a.b.c")
   assert isinstance(node, cst.Attribute)
@@ -98,7 +99,7 @@ def test_aux_create_dotted_name(context: RewriterContext) -> None:
 
 
 def test_aux_report(context: RewriterContext) -> None:
-  """Test element."""
+  """Docstring."""
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   transformer._report_failure("error1")
   transformer._report_warning("warn1")
@@ -113,7 +114,7 @@ def test_aux_report(context: RewriterContext) -> None:
 
 
 def test_aux_report_warning_only(context: RewriterContext) -> None:
-  """Test element."""
+  """Docstring."""
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   transformer._report_warning("warn1")
   transformer._report_warning("warn1")  # duplicate
@@ -123,7 +124,7 @@ def test_aux_report_warning_only(context: RewriterContext) -> None:
 
 
 def test_aux_decorator(context: RewriterContext) -> None:
-  """Test element."""
+  """Docstring."""
   context.semantics.get_definition.return_value = ("abs_id", {"variants": {"jax": {"api": "jax.jit"}}})
 
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
@@ -153,7 +154,7 @@ def test_aux_decorator(context: RewriterContext) -> None:
 
 
 def test_aux_for_loop(context: RewriterContext) -> None:
-  """Test element."""
+  """Docstring."""
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("for i in range(10): pass")
   for_node: cst.For = getattr(mod, "body")[0]

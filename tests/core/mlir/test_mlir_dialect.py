@@ -1,6 +1,6 @@
 """Test suite for the Mlir Dialect module."""
 
-from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode, RegionNode, ValueNode
+from ml_switcheroo.core.mlir.cst import AttributeNode, OperationNode, RegionNode, ValueNode
 from ml_switcheroo.core.mlir.dialect import DialectRegistry
 
 

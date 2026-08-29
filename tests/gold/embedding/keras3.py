@@ -1,11 +1,12 @@
 """Test suite for the Keras3 module."""
 
 import typing
+
 import keras
 
 
 class EmbeddingModel(keras.Model):  # type: ignore
-  """Test suite for the Embedding Model component."""
+  """Docstring."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int) -> None:
     """Initializes the EmbeddingModel instance."""

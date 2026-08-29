@@ -1,28 +1,29 @@
 """Test module."""
 
+from typing import Any, List
+
 from ml_switcheroo.core.compiler.backends.sass.backend import SassBackend
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassNode
 from ml_switcheroo.core.graph import LogicalGraph
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassNode
-from typing import Any, List
 
 
 def test_sass_backend_init() -> None:
-  """Test element."""
+  """Docstring."""
   backend: SassBackend = SassBackend()
   assert getattr(backend, "synthesizer") is not None
   assert getattr(backend, "emitter") is not None
 
 
 def test_sass_backend_init_with_semantics() -> None:
-  """Test element."""
+  """Docstring."""
   sem: SemanticsManager = SemanticsManager()
   backend: SassBackend = SassBackend(semantics=sem)
   assert backend.synthesizer.semantics == sem
 
 
 def test_sass_backend_compile(mocker: Any) -> None:
-  """Test element."""
+  """Docstring."""
   backend: SassBackend = SassBackend()
   graph: LogicalGraph = LogicalGraph()
   # mock synthesizer and emitter

@@ -1,14 +1,16 @@
 """Module docstring."""
 
+from typing import Any, Dict
+
 import libcst as cst
+
 from ml_switcheroo.core.rewriter.calls.dispatch import (
-  evaluate_dispatch_rules,
-  _extract_argument_node,
   _check_rule_condition,
+  _extract_argument_node,
   _node_to_literal,
+  evaluate_dispatch_rules,
 )
 from ml_switcheroo.enums import LogicOp
-from typing import Any, Dict
 
 
 class DummyRule:
@@ -74,10 +76,7 @@ def test_extract_argument_node_branches() -> None:
   assert _extract_argument_node(rewriter, node2, "a", "a", ["a", "b"]) is not None
 
   class RewriterWithModuleAlias:
-    """Docstring."""
-
     def _is_module_alias(self, val: Any) -> bool:
-      """Docstring."""
       return True
 
   rewriter2: RewriterWithModuleAlias = RewriterWithModuleAlias()
@@ -86,10 +85,7 @@ def test_extract_argument_node_branches() -> None:
   node3: cst.Call = getattr(getattr(cst.parse_statement("obj.f(2)"), "body")[0], "value")
 
   class RewriterNotModule:
-    """Docstring."""
-
     def _is_module_alias(self, val: Any) -> bool:
-      """Docstring."""
       return False
 
   rewriter3: RewriterNotModule = RewriterNotModule()
@@ -114,23 +110,17 @@ def test_node_to_literal() -> None:
   assert _node_to_literal(cst.Pass()) is None
 
   class BadInt(cst.Integer):
-    """Docstring."""
-
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-      """Docstring."""
       super().__init__(*args, **kwargs)
 
     @property
     def value(self) -> str:
-      """Docstring."""
       return "bad"
 
     def _visit_and_replace_children(self, visitor: Any) -> "BadInt":
-      """Docstring."""
       return self
 
     def _codegen_impl(self, state: Any, default_semi: Any) -> None:
-      """Docstring."""
       pass
 
   try:
@@ -139,23 +129,17 @@ def test_node_to_literal() -> None:
     pass
 
   class BadFloat(cst.Float):
-    """Docstring."""
-
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-      """Docstring."""
       super().__init__(*args, **kwargs)
 
     @property
     def value(self) -> str:
-      """Docstring."""
       return "bad"
 
     def _visit_and_replace_children(self, visitor: Any) -> "BadFloat":
-      """Docstring."""
       return self
 
     def _codegen_impl(self, state: Any, default_semi: Any) -> None:
-      """Docstring."""
       pass
 
   try:
@@ -211,9 +195,10 @@ def test_check_rule_condition_branches() -> None:
 
 
 def test_node_to_literal_valueerror() -> None:
-  """Test element."""
-  from ml_switcheroo.core.rewriter.calls.dispatch import _node_to_literal
+  """Docstring."""
   import libcst as cst
+
+  from ml_switcheroo.core.rewriter.calls.dispatch import _node_to_literal
 
   class HackyInt(cst.Integer):
     def _validate(self) -> None:

@@ -1,14 +1,16 @@
 """Test suite for the Nnx Variable Reverse module."""
 
-import pytest
-import libcst as cst
-from typing import Generator, Dict, Union
+from typing import Dict, Generator, Union
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.nnx_to_torch_params import transform_nnx_param
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.frameworks.base import register_framework
+from ml_switcheroo.plugins.nnx_to_torch_params import transform_nnx_param
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -46,8 +48,6 @@ def rewriter() -> Generator[PivotRewriter, None, None]:
 
   @register_framework("custom_fw")
   class CustomFW:
-    """Test suite for the Custom F W component."""
-
     pass
 
   cfg: RuntimeConfig = RuntimeConfig(source_framework="jax", target_framework="custom_fw")

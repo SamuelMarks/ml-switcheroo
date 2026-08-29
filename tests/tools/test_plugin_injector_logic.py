@@ -1,15 +1,17 @@
 """Test suite for the Plugin Injector Logic module."""
 
-import pytest
-from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule, LogicOp
-from ml_switcheroo.tools.injector_plugin import PluginGenerator
 from pathlib import Path
 from typing import List
+
+import pytest
+
+from ml_switcheroo.core.dsl import LogicOp, PluginScaffoldDef, PluginType, Rule
+from ml_switcheroo.tools.injector_plugin import PluginGenerator
 
 
 @pytest.fixture
 def plugin_dir(tmp_path: Path) -> Path:
-  """Provides a mock plugin directory for testing."""
+  """Docstring."""
   d: Path = tmp_path / "plugins"
   d.mkdir()
   return d

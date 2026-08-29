@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.plugins.static_unroll import LoopVarReplacer, unroll_static_loops
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.static_unroll import LoopVarReplacer, unroll_static_loops
 
 
 def test_loop_var_replacer() -> None:

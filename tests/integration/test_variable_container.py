@@ -1,14 +1,16 @@
 """Test suite for the Variable Container module."""
 
-import pytest
-import typing
 import textwrap
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+import typing
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.core.hooks import _HOOKS
 from ml_switcheroo.plugins.nnx_to_torch_params import transform_nnx_param
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE_FLAX_VARIABLE: str = textwrap.dedent(
   "\n  import flax.nnx as nnx\n\n  class MyLayer(nnx.Module):\n    def __init__(self, rngs: nnx.Rngs):\n        self.param = nnx.Param(1.0)\n        self.var = nnx.Variable(2.0)\n        self.cache = nnx.Cache(3.0)\n"
@@ -23,7 +25,7 @@ def register_hooks() -> None:
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   mgr = SemanticsManager()
   mgr._key_origins["Variable"] = SemanticTier.NEURAL.value
   mgr._key_origins["Param"] = SemanticTier.NEURAL.value

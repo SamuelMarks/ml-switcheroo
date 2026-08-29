@@ -1,15 +1,17 @@
 """Test suite for the Rewriter Alias Resolution module."""
 
-import pytest
+from typing import Any, Dict, Tuple
+
 import libcst as cst
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.semantics.manager import SemanticsManager
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
-from typing import Dict, Any, Tuple
+from ml_switcheroo.semantics.manager import SemanticsManager
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 class MockAliasSemantics(SemanticsManager):
-  """Mock Alias Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockAliasSemantics instance."""
@@ -34,7 +36,7 @@ class MockAliasSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   semantics: MockAliasSemantics = MockAliasSemantics()
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(semantics, config)

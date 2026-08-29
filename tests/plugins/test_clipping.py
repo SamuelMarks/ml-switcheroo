@@ -1,14 +1,16 @@
 """Test suite for the Clipping module."""
 
-import pytest
-import libcst as cst
 import typing
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.plugins.clipping import transform_grad_clipping
 from ml_switcheroo.semantics.schema import PluginTraits
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -18,7 +20,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   hooks._HOOKS["grad_clipper"] = transform_grad_clipping
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()

@@ -1,6 +1,7 @@
 """Test suite for the Mlx module."""
 
 import typing
+
 import mlx.core as mx  # type: ignore
 import mlx.nn as nn  # type: ignore
 import mlx.optimizers as optim  # type: ignore

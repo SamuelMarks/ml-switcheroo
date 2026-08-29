@@ -1,7 +1,9 @@
 """Test suite for the Import Fixer Coverage module."""
 
 import typing
+
 import libcst as cst
+
 from ml_switcheroo.core.import_fixer import ImportFixer
 from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 

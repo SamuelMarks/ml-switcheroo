@@ -1,12 +1,14 @@
 """Test suite for the Integration Rdna Roundtrip module."""
 
-import pytest
-import textwrap
 import ast
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+import textwrap
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 CONVNET_SOURCE: str = textwrap.dedent(
   "\n    import torch\n    import torch.nn as nn\n\n    class ConvNet(nn.Module):\n        def __init__(self):\n            super().__init__()\n            self.conv = nn.Conv2d(1, 32, 3)\n            self.fc = nn.Linear(32 * 26 * 26, 10)\n\n        def forward(self, x):\n            x = self.conv(x)\n            x = torch.flatten(x, 1)\n            return self.fc(x)\n    "
@@ -15,7 +17,7 @@ CONVNET_SOURCE: str = textwrap.dedent(
 
 @pytest.fixture
 def semantics_mgr() -> SemanticsManager:
-  """Provides a mock semantics mgr for testing."""
+  """Docstring."""
   mgr = SemanticsManager()
   mgr.data["Conv2d"] = {"std_args": ["in", "out", "k"], "variants": {"torch": {"api": "torch.nn.Conv2d"}}}
   mgr._reverse_index["torch.nn.Conv2d"] = ("Conv2d", mgr.data["Conv2d"])

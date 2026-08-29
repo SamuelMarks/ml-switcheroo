@@ -1,20 +1,21 @@
 """Test suite for the Parser module."""
 
 import typing
-from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
+
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
-  RdnaLabel,
   RdnaDirective,
+  RdnaImmediate,
   RdnaInstruction,
+  RdnaLabel,
+  RdnaLabelRef,
+  RdnaMemory,
+  RdnaModifier,
+  RdnaNode,
   RdnaSGPR,
   RdnaVGPR,
-  RdnaImmediate,
-  RdnaLabelRef,
-  RdnaModifier,
-  RdnaMemory,
-  RdnaNode,
 )
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 
 
 def test_parse_comment() -> None:

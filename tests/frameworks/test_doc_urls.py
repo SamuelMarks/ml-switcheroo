@@ -1,7 +1,9 @@
 """Test suite for the Doc Urls module."""
 
-import pytest
 import typing
+
+import pytest
+
 from ml_switcheroo.frameworks.base import get_adapter
 
 CASES: list[tuple[str, str, str]] = [

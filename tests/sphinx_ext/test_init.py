@@ -1,13 +1,14 @@
 """Test suite for the Init module."""
 
 import os
-from typing import Dict, List, Tuple, Any, Callable, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from unittest import mock
+
 from ml_switcheroo.sphinx_ext import setup
 
 
 class MockApp:
-  """Mock App class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockApp instance."""

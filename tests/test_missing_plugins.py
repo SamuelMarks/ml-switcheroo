@@ -1,6 +1,7 @@
 """Test suite for the Missing Plugins module."""
 
 from unittest.mock import MagicMock
+
 from ml_switcheroo.plugins import (
   auto_fsdp_wrapper,
   batch_norm,

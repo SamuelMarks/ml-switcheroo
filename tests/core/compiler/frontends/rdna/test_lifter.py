@@ -1,9 +1,10 @@
 """Test suite for the Lifter module."""
 
+from unittest.mock import patch
+
 from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaLabelRef, RdnaNode
 from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 from ml_switcheroo.core.compiler.ir import LogicalGraph
-from unittest.mock import patch
 
 
 def test_lifter_empty() -> None:

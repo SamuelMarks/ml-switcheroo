@@ -238,7 +238,7 @@ class RdnaInstruction(RdnaNode):
         if i > 0:
           res += ", " + op_text
         else:
-          res += " " + op_text  # pragma: no cover
+          res += " " + op_text
       else:
         res += op_text
 

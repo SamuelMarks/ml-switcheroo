@@ -1,8 +1,9 @@
 """Docstring."""
 
-import libcst as cst
 from typing import Union, cast
 from unittest.mock import MagicMock
+
+import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.mlx_optimizers import (

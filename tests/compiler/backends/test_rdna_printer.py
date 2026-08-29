@@ -1,17 +1,15 @@
 """Test suite for the RdnaPrinter module."""
 
-from ml_switcheroo.core.compiler.frontends.rdna.cst import (
-  RdnaComment as Comment,
-  RdnaDirective as Directive,
-  RdnaInstruction as Instruction,
-  RdnaLabel as Label,
-  RdnaNode,
-)
 from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment as Comment
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaDirective as Directive
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction as Instruction
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaLabel as Label
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaNode
 
 
 class CustomRdnaNode(RdnaNode):
-  """Custom generic node for testing fallback behavior."""
+  """Docstring."""
 
   def __str__(self) -> str:
     """Return mock representation."""
@@ -71,10 +69,10 @@ def test_rdna_printer_all_nodes() -> None:
   """Docstring."""
   from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
   from ml_switcheroo.core.compiler.frontends.rdna.cst import (
-    RdnaLabel,
-    RdnaInstruction,
-    RdnaDirective,
     RdnaComment,
+    RdnaDirective,
+    RdnaInstruction,
+    RdnaLabel,
     c_SGPR,
   )
 

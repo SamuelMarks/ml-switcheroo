@@ -3,17 +3,17 @@
 from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
-from ml_switcheroo.core.mlir.cst import ModuleNode, BlockNode, OperationNode
+from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
 
 
 def test_mlir_backend_init() -> None:
-  """Test initialization."""
+  """Docstring."""
   backend = MlirBackend(semantics="mock_semantics")  # type: ignore
   assert backend.semantics == "mock_semantics"
 
 
 def test_mlir_backend_compile_input_numeric() -> None:
-  """Test compile with numeric Input node."""
+  """Docstring."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", kind="Input", metadata={"value": "42"})
@@ -27,7 +27,7 @@ def test_mlir_backend_compile_input_numeric() -> None:
 
 
 def test_mlir_backend_compile_input_non_numeric() -> None:
-  """Test compile with non-numeric Input node."""
+  """Docstring."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", kind="Input", metadata={"value": "not_a_number"})
@@ -40,7 +40,7 @@ def test_mlir_backend_compile_input_non_numeric() -> None:
 
 
 def test_mlir_backend_compile_input_default_numeric() -> None:
-  """Test compile with Input node with no value in metadata (defaults to 1)."""
+  """Docstring."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", kind="Input")  # metadata missing "value", should default to "1"
@@ -52,7 +52,7 @@ def test_mlir_backend_compile_input_default_numeric() -> None:
 
 
 def test_mlir_backend_compile_output() -> None:
-  """Test compile with Output node."""
+  """Docstring."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", kind="Output")
@@ -64,7 +64,7 @@ def test_mlir_backend_compile_output() -> None:
 
 
 def test_mlir_backend_compile_generic_op() -> None:
-  """Test compile with a generic operation node."""
+  """Docstring."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", kind="MyOp", metadata={"attr1": "val1", "attr2": "val2"})
@@ -79,7 +79,7 @@ def test_mlir_backend_compile_generic_op() -> None:
 
 
 def test_mlir_printer_emit_non_module() -> None:
-  """Test MlirPrinter with non-module node."""
+  """Docstring."""
   printer = MlirPrinter()
   # OperationNode.to_text() should be called
   op = OperationNode(name='"mock.op"')
@@ -88,7 +88,7 @@ def test_mlir_printer_emit_non_module() -> None:
 
 
 def test_mlir_printer_emit_module_with_module_op() -> None:
-  """Test MlirPrinter with a module node that already has a module operation."""
+  """Docstring."""
   printer = MlirPrinter()
   op = OperationNode(name="module")
   block = BlockNode(label="")
@@ -102,7 +102,7 @@ def test_mlir_printer_emit_module_with_module_op() -> None:
 
 
 def test_mlir_printer_emit_module_without_module_op() -> None:
-  """Test MlirPrinter with a module node that has normal ops."""
+  """Docstring."""
   printer = MlirPrinter()
   op = OperationNode(name='"some.op"')
   block = BlockNode(label="")

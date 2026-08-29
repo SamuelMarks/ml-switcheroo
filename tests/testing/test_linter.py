@@ -1,15 +1,17 @@
 """Test suite for the Linter module."""
 
-import pytest
-from ml_switcheroo.testing.linter import StructuralLinter, validate_transpilation
-from unittest.mock import patch, MagicMock
 import pathlib
 from typing import List
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from ml_switcheroo.testing.linter import StructuralLinter, validate_transpilation
 
 
 @pytest.fixture
 def linter() -> StructuralLinter:
-  """Provides a mock linter for testing."""
+  """Docstring."""
   return StructuralLinter(forbidden_roots={"torch", "flax"})
 
 
@@ -205,3 +207,53 @@ def test_linter_empty_names(linter: StructuralLinter) -> None:
   # Temporarily add context to bypass definition skip if any
   linter._context_stack.append("import")
   linter.visit_ImportFrom(node)
+
+
+# --- Merged from test_linter_missing.py ---
+
+
+def test_linter_missing_coverage() -> None:
+  """Verifies the behavior of linter missing coverage."""
+  from ml_switcheroo.testing.linter import StructuralLinter
+
+  linter: StructuralLinter = StructuralLinter({"torch"})
+  res: List[str] = linter.check("from torch import *")
+  assert any(("Wildcard" in msg for msg in res))
+  import libcst as cst
+
+  assert linter._get_root_name(cst.Integer("1")) == ""
+  assert linter._get_full_name_from_node(cst.Integer("1")) == ""
+
+
+def test_linter_get_full_name_attribute() -> None:
+  """Verifies the behavior of linter get full name attribute."""
+  import libcst as cst
+
+  from ml_switcheroo.testing.linter import StructuralLinter
+
+  linter: StructuralLinter = StructuralLinter({"torch"})
+  node: cst.Attribute = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn"))
+  assert linter._get_full_name_from_node(node) == "torch.nn"
+
+
+def test_linter_parse_error_extra() -> None:
+  """Verifies the behavior of linter parse correctly handling an error."""
+  from ml_switcheroo.testing.linter import validate_transpilation
+
+  ok: bool
+  msgs: List[str]
+  ok, msgs = validate_transpilation("def foo(", "torch")
+  assert not ok
+  assert any(("Parse Error" in m for m in msgs))
+
+
+def test_linter_direct_access() -> None:
+  """Verifies the behavior of linter direct access."""
+  from ml_switcheroo.testing.linter import validate_transpilation
+
+  code: str = "import something_else\ntorch.add(x, y)"
+  ok: bool
+  msgs: List[str]
+  ok, msgs = validate_transpilation(code, "torch")
+  assert not ok
+  assert any(("Direct access 'torch'" in m for m in msgs))

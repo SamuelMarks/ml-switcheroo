@@ -1,12 +1,14 @@
 """Test suite for the Provenance module."""
 
-import libcst as cst
 import typing
+
+import libcst as cst
+
 from ml_switcheroo.core.graph import GraphExtractor
 
 
 def extract(code: str) -> GraphExtractor:
-  """Extracts ."""
+  """Docstring."""
   tree = cst.parse_module(code)
   extractor = GraphExtractor()
   tree.visit(extractor)

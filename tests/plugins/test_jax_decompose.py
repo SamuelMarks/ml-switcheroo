@@ -1,10 +1,12 @@
 """Test suite for the Jax Decompose module."""
 
-import libcst as cst
 from typing import Union
 from unittest.mock import MagicMock
-from ml_switcheroo.core.hooks import HookContext
+
+import libcst as cst
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.jax_decompose import decompose_via_jax
 
 

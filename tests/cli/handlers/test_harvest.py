@@ -1,6 +1,7 @@
 """Docstring."""
 
 from unittest.mock import MagicMock
+
 from ml_switcheroo.cli.handlers.harvest import handle_harvest
 
 

@@ -1,13 +1,16 @@
 """Test suite for the State Flag module."""
 
-import pytest
-import libcst as cst
-from typing import Callable, Dict, Any, Union
+from typing import Any, Callable, Dict, Union
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.state_flag_injection import inject_training_flag_call, capture_eval_state
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.state_flag_injection import _get_func_name, capture_eval_state, inject_training_flag_call
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite(rewriter: PivotRewriter, code: str) -> str:
@@ -177,7 +180,7 @@ def test_unsupported_node_type_in_capture() -> None:
 
 
 def test_unsupported_receiver_name() -> None:
-  """Verifies behavior when receiver name cannot be extracted."""
+  """Docstring."""
   # e.g., func_list[0].eval()
   node: cst.Call = cst.Call(
     func=cst.Attribute(
@@ -202,3 +205,39 @@ def test_train_with_args(rewriter_factory: Callable[[], PivotRewriter]) -> None:
   r: PivotRewriter = rewriter_factory()
   res: str = rewrite(r, "m.train(mode_var); m(x)")
   assert "training=mode_var" in res
+
+
+# --- Merged from test_state_flag_missing.py ---
+
+
+def test_get_func_name() -> None:
+  """Gets function name."""
+  assert _get_func_name(cst.Call(func=cst.SimpleString("'a'"))) is None
+
+
+def test_inject_training_flag_call() -> None:
+  """Injects training flag call."""
+  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx.metadata = {}
+  ctx.lookup_api.return_value = None
+  node1: cst.Call = cst.Call(func=cst.Name("dropout"))
+  assert inject_training_flag_call(node1, ctx) == node1
+  ctx.lookup_api.return_value = "Dropout"
+  node_pos: cst.Call = cst.Call(
+    func=cst.Name("dropout"), args=[cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("training"))]
+  )
+  inject_training_flag_call(node_pos, ctx)
+
+
+def test_capture_eval_state() -> None:
+  """Verifies the behavior of capture eval state."""
+  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx.metadata = {}
+  node1: cst.Call = cst.Call(func=cst.Name("foo"))
+  assert capture_eval_state(node1, ctx) == node1
+  node_not_method: cst.Call = cst.Call(func=cst.Name("eval"))
+  assert capture_eval_state(node_not_method, ctx) == node_not_method
+  node_train_pos: cst.Call = cst.Call(
+    func=cst.Attribute(value=cst.Name("model"), attr=cst.Name("train")), args=[cst.Arg(value=cst.Name("False"))]
+  )
+  capture_eval_state(node_train_pos, ctx)

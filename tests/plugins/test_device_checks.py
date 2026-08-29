@@ -1,13 +1,15 @@
 """Test suite for the Device Checks module."""
 
-import pytest
-import libcst as cst
 import typing
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.plugins.device_checks import transform_cuda_check
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -17,7 +19,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   hooks._HOOKS["cuda_is_available"] = transform_cuda_check
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -60,7 +62,6 @@ def test_device_checks_adapter_error(rewriter: PivotRewriter) -> None:
   orig = dc.get_adapter
 
   def raiser(fw: str) -> typing.Any:
-    """Docstring."""
     raise Exception("Adapter crashed")
 
   dc.get_adapter = raiser

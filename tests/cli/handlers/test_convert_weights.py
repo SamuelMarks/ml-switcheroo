@@ -1,9 +1,10 @@
 """Docstring."""
 
-from unittest.mock import MagicMock, patch
 from pathlib import Path
+from typing import Dict, Optional, Tuple
+from unittest.mock import MagicMock, patch
+
 from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
-from typing import Optional, Dict, Tuple
 
 
 def test_weight_script_generator_init() -> None:
@@ -81,7 +82,6 @@ def test_weight_script_generator_success(tmp_path: Path) -> None:
 
   # Mock lookup so rules are generated
   def mock_lookup(aid: str) -> Optional[Dict[str, str]]:
-    """Docstring."""
     return {"api": "jax.numpy.conv"} if aid == "Conv2D" else None
 
   semantics.get_definition.return_value = ("Conv2D", {"variants": {"jax": {"api": "jax.numpy.conv"}}})
@@ -99,7 +99,6 @@ def test_weight_script_generator_success(tmp_path: Path) -> None:
     target_adapter.get_weight_save_code.return_value = "save"
 
     def adapter_side_effect(fw: str) -> MagicMock:
-      """Docstring."""
       if fw == "torch":
         return source_adapter
       return target_adapter
@@ -137,7 +136,6 @@ def test_weight_script_generator_rules(tmp_path: Path) -> None:
 
   # Mock lookup so rules are generated
   def mock_lookup(aid: str) -> Optional[Tuple[str, dict]]:
-    """Docstring."""
     if aid == "Conv2d":
       return (
         "Conv2D",
@@ -161,7 +159,6 @@ def test_weight_script_generator_rules(tmp_path: Path) -> None:
     target_adapter: MagicMock = MagicMock()
 
     def adapter_side_effect(fw: str) -> MagicMock:
-      """Docstring."""
       if fw == "torch":
         return source_adapter
       return target_adapter
@@ -179,7 +176,6 @@ def test_weight_script_generator_rules_inverse(tmp_path: Path) -> None:
 
   # Mock lookup so rules are generated
   def mock_lookup(aid: str) -> Optional[Tuple[str, dict]]:
-    """Docstring."""
     if aid == "Conv2d":
       return (
         "Conv2D",
@@ -203,7 +199,6 @@ def test_weight_script_generator_rules_inverse(tmp_path: Path) -> None:
     target_adapter: MagicMock = MagicMock()
 
     def adapter_side_effect(fw: str) -> MagicMock:
-      """Docstring."""
       if fw == "jax":
         return source_adapter
       return target_adapter
@@ -221,7 +216,6 @@ def test_weight_script_generator_rules_missing(tmp_path: Path) -> None:
 
   # Mock lookup so rules are generated
   def mock_lookup(aid: str) -> Optional[Tuple[str, dict]]:
-    """Docstring."""
     if aid == "MissingOp":
       return None
     return None

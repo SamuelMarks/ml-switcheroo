@@ -1,14 +1,16 @@
 """Test suite for the Physical Gen module."""
 
-import pytest
 import typing
 from pathlib import Path
+
+import pytest
+
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -25,7 +27,7 @@ class MockSemantics(SemanticsManager):
     self.framework_configs: dict[str, typing.Any] = {"jax": {"traits": {"jit_static_args": ["axis", "keepdims"]}}}
 
   def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
-    """Mock implementation of get test template."""
+    """Docstring."""
     return self.test_templates.get(fw)
 
   def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
@@ -35,14 +37,14 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def generator() -> TestCaseGenerator:
-  """Provides a mock generator for testing."""
+  """Docstring."""
   mgr = MockSemantics()
   return TestCaseGenerator(semantics_mgr=mgr)
 
 
 @pytest.fixture
 def sample_spec() -> dict[str, typing.Any]:
-  """Provides a mock sample spec for testing."""
+  """Docstring."""
   return {
     "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}},
     "mean": {
@@ -108,7 +110,7 @@ def test_overwrite_behavior(generator: TestCaseGenerator, sample_spec: dict[str,
 def test_skip_existing_manual_test(
   generator: TestCaseGenerator, sample_spec: dict[str, typing.Any], tmp_path: Path
 ) -> None:
-  """Verifies the behavior of skip existing manual test."""
+  """Docstring."""
   out_file: Path = tmp_path / "test_manual.py"
   out_file.write_text("def test_gen_abs(): pass")
   generator.generate(sample_spec, out_file)

@@ -150,7 +150,7 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
       arg2_val = cst.Attribute(value=input_val, attr=cst.Name("ndim"))
     else:
       # Generate: end_dim + 1
-      arg2_val = _create_integer(end_dim + 1)  # pragma: no cover
+      arg2_val = _create_integer(end_dim + 1)
 
     arg2 = cst.Arg(value=arg2_val)
 
@@ -204,7 +204,7 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
     )
 
     if input_arg.comma == cst.MaybeSentinel.DEFAULT:
-      input_arg = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))  # pragma: no cover
+      input_arg = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
     new_args = [input_arg, cst.Arg(value=shape_tuple)]
     return node.with_changes(func=new_func, args=new_args)

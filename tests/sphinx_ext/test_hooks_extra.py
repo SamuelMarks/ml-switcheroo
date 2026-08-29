@@ -2,8 +2,10 @@
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
 import pytest
-from ml_switcheroo.sphinx_ext.hooks import copy_wheel_and_reqs, add_static_path
+
+from ml_switcheroo.sphinx_ext.hooks import add_static_path, copy_wheel_and_reqs
 
 
 def test_add_static_path_missing(tmp_path: Path) -> None:
@@ -23,12 +25,12 @@ def test_add_static_path_missing(tmp_path: Path) -> None:
 
 
 def test_copy_wheel_exception() -> None:
-  """Test function."""
+  """Docstring."""
   copy_wheel_and_reqs(MagicMock(), Exception())
 
 
 def test_copy_wheel_no_builder() -> None:
-  """Test function."""
+  """Docstring."""
   app: MagicMock = MagicMock()
   del app.builder
   copy_wheel_and_reqs(app, None)

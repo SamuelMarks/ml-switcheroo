@@ -1,7 +1,9 @@
 """Test suite for the Standards Content module."""
 
+from typing import Any, Dict, List
+
 import pytest
-from typing import Dict, Any, List
+
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 

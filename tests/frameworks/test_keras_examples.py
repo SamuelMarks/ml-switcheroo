@@ -1,13 +1,15 @@
 """Test suite for the Keras Examples module."""
 
 import ast
+
 import pytest
+
 from ml_switcheroo.frameworks.keras import KerasAdapter
 
 
 @pytest.fixture
 def adapter() -> KerasAdapter:
-  """Provides a mock adapter for testing."""
+  """Docstring."""
   return KerasAdapter()
 
 
@@ -36,7 +38,7 @@ def test_tier2_neural_validity(adapter: KerasAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: KerasAdapter) -> None:
-  """Verifies the behavior of tier3 extras validity."""
+  """Docstring."""
   code: str = adapter.get_tiered_examples()["tier3_extras_rng"]
   ast.parse(code)
   assert "random.SeedGenerator" in code

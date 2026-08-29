@@ -1,9 +1,11 @@
 """Tests for MLIR gen base coverage."""
 
 import typing
+
 import libcst as cst
+
+from ml_switcheroo.core.mlir.cst import AttributeNode, OperationNode
 from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
-from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode
 
 
 class DummyGen(BaseGeneratorMixin):
@@ -15,7 +17,7 @@ class DummyGen(BaseGeneratorMixin):
 
 
 def test_get_attr_list() -> None:
-  """Test get attr list."""
+  """Docstring."""
   gen = DummyGen()
   op = OperationNode(
     name="test",
@@ -28,7 +30,7 @@ def test_get_attr_list() -> None:
 
 
 def test_create_dotted_name_empty() -> None:
-  """Test create dotted name empty."""
+  """Docstring."""
   gen = DummyGen()
   node: typing.Any = gen._create_dotted_name("")
   assert isinstance(node, cst.Name)

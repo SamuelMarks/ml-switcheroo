@@ -1,27 +1,31 @@
 """Test module."""
 
-import pytest
-import libcst as cst
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 from unittest.mock import patch
+
+import libcst as cst
+import pytest
+
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator, SassSynthesizer
-from ml_switcheroo.core.graph import LogicalGraph, LogicalNode as Node, LogicalEdge as Edge
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassInstruction,
-  SassRegister,
-  SassImmediate,
-  SassPredicate,
   SassComment,
+  SassImmediate,
+  SassInstruction,
   SassLabel,
   SassMemory,
   SassNode,
+  SassPredicate,
+  SassRegister,
 )
+from ml_switcheroo.core.graph import LogicalEdge as Edge
+from ml_switcheroo.core.graph import LogicalGraph
+from ml_switcheroo.core.graph import LogicalNode as Node
 from ml_switcheroo.semantics.manager import SemanticsManager
-from pathlib import Path
-from typing import Dict, Any, List, Optional
 
 
 def test_register_allocator() -> None:
-  """Test element."""
+  """Docstring."""
   alloc: RegisterAllocator = RegisterAllocator()
 
   # get_register
@@ -49,7 +53,7 @@ def test_register_allocator() -> None:
 
 
 def test_register_allocator_overflow() -> None:
-  """Test element."""
+  """Docstring."""
   alloc: RegisterAllocator = RegisterAllocator()
   alloc.reset()
   for i in range(255):
@@ -59,7 +63,7 @@ def test_register_allocator_overflow() -> None:
 
 
 def test_register_allocator_liveness() -> None:
-  """Test element."""
+  """Docstring."""
   alloc: RegisterAllocator = RegisterAllocator()
   graph: LogicalGraph = LogicalGraph()
   graph.nodes.append(Node(id="n1", kind="test", metadata={}))
@@ -81,7 +85,7 @@ def test_register_allocator_liveness() -> None:
 
 
 def test_synthesizer_init(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   # test reading macros.json
   macros_json: Path = tmp_path / "macros.json"
   macros_json.write_text('{"Conv2d": "expand_conv2d"}')
@@ -95,7 +99,7 @@ def test_synthesizer_init(tmp_path: Path) -> None:
 
 
 def test_synthesizer_from_graph() -> None:
-  """Test element."""
+  """Docstring."""
   sem: SemanticsManager = SemanticsManager()
   synth: SassSynthesizer = SassSynthesizer(sem)
 
@@ -141,7 +145,7 @@ def test_synthesizer_from_graph() -> None:
 
 
 def test_synthesizer_from_graph_unmapped_op() -> None:
-  """Test element."""
+  """Docstring."""
   sem: SemanticsManager = SemanticsManager()
   synth: SassSynthesizer = SassSynthesizer(sem)
 
@@ -155,7 +159,7 @@ def test_synthesizer_from_graph_unmapped_op() -> None:
 
 
 def test_synthesizer_from_graph_method_suffix() -> None:
-  """Test element."""
+  """Docstring."""
   sem: SemanticsManager = SemanticsManager()
   synth: SassSynthesizer = SassSynthesizer(sem)
 
@@ -174,7 +178,7 @@ def test_synthesizer_from_graph_method_suffix() -> None:
 
 
 def test_synthesizer_to_python() -> None:
-  """Test element."""
+  """Docstring."""
   sem: SemanticsManager = SemanticsManager()
   synth: SassSynthesizer = SassSynthesizer(sem)
 

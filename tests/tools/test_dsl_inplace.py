@@ -1,6 +1,6 @@
 """Test suite for the Dsl Inplace module."""
 
-from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
+from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef
 
 
 def test_inplace_flag_defaults_false() -> None:

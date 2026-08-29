@@ -1,9 +1,11 @@
 """Docstring."""
 
 import typing
-from ml_switcheroo.frameworks.mlx import MLXAdapter
+
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.frameworks.mlx import MLXAdapter
 
 
 def test_mlx_adapter_basic() -> None:
@@ -96,6 +98,7 @@ def test_convert() -> None:
   """Docstring."""
   import sys
   from unittest.mock import MagicMock
+
   from ml_switcheroo.frameworks.mlx import MLXAdapter
 
   sys.modules["mlx.core"] = MagicMock()
@@ -107,3 +110,21 @@ def test_convert() -> None:
   adapter.convert(1)
   del sys.modules["mlx.core"]
   del sys.modules["mlx"]
+
+
+# --- Merged from test_mlx_extra2_loop.py ---
+
+
+def test_mlx_no_numpy(monkeypatch):
+  """Docstring."""
+  import sys
+
+  monkeypatch.setitem(sys.modules, "numpy", None)
+  import importlib
+
+  import ml_switcheroo.frameworks.mlx as mlx_mod
+
+  try:
+    importlib.reload(mlx_mod)
+  except Exception:
+    pass

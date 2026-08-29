@@ -1,7 +1,8 @@
 """Docstring."""
 
-from unittest.mock import patch
 from pathlib import Path
+from unittest.mock import patch
+
 from ml_switcheroo.cli.handlers.define import handle_define
 
 

@@ -1,11 +1,12 @@
 """Test suite for the Tensorflow module."""
 
 import typing
+
 import tensorflow as tf
 
 
 class BNModel(tf.keras.Model):  # type: ignore
-  """Test suite for the B N Model component."""
+  """Docstring."""
 
   def __init__(self, num_features: int) -> None:
     """Initializes the BNModel instance."""

@@ -1,13 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
-from ml_switcheroo.plugins.tf_data_loader import (
-  _get_arg_by_name,
-  _extract_tensor_dataset_inputs,
-  transform_tf_dataloader,
-)
+from ml_switcheroo.plugins.tf_data_loader import _extract_tensor_dataset_inputs, _get_arg_by_name, transform_tf_dataloader
 
 
 def parse_expr(code: str) -> cst.BaseExpression:

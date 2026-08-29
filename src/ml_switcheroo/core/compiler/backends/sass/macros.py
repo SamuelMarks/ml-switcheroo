@@ -229,13 +229,11 @@ def expand_linear(
 
   # 4. Optional Bias
   if "bias" in metadata and metadata["bias"]:
-    nodes.append(SassComment(text="Add Bias"))  # pragma: no cover
-    r_bias_val = allocator.allocate_temp()  # pragma: no cover
-    r_bias_ptr = SassRegister(name="R5")  # Assumed # pragma: no cover
-    nodes.append(
-      SassInstruction(opcode="LDG.E.F32", operands=[r_bias_val, SassMemory(base=r_bias_ptr)])
-    )  # pragma: no cover
-    nodes.append(SassInstruction(opcode="FADD", operands=[r_acc, r_acc, r_bias_val]))  # pragma: no cover
+    nodes.append(SassComment(text="Add Bias"))
+    r_bias_val = allocator.allocate_temp()
+    r_bias_ptr = SassRegister(name="R5")  # Assumed
+    nodes.append(SassInstruction(opcode="LDG.E.F32", operands=[r_bias_val, SassMemory(base=r_bias_ptr)]))
+    nodes.append(SassInstruction(opcode="FADD", operands=[r_acc, r_acc, r_bias_val]))
 
   nodes.append(SassComment(text=f"END Linear ({node_id})"))
   return nodes

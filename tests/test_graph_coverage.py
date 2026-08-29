@@ -1,6 +1,7 @@
 """Module docstring."""
 
 import libcst as cst
+
 from ml_switcheroo.core.graph import GraphExtractor
 
 

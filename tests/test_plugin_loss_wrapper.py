@@ -1,7 +1,9 @@
 """Test suite for the Plugin Loss Wrapper module."""
 
-import libcst as cst
 from unittest.mock import MagicMock
+
+import libcst as cst
+
 from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
 

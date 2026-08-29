@@ -2,9 +2,10 @@
 
 import typing
 from unittest.mock import MagicMock
+
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.rewriter.context import RewriterContext, SignatureContext
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.config import RuntimeConfig
 
 
 def test_rewriter_context_inject_argument() -> None:

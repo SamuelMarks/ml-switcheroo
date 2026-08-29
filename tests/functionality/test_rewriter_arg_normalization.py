@@ -1,15 +1,17 @@
 """Test suite for the Rewriter Arg Normalization module."""
 
-import pytest
-import libcst as cst
 import typing
-from tests.conftest import TestRewriter
-from ml_switcheroo.semantics.manager import SemanticsManager
+
+import libcst as cst
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.semantics.manager import SemanticsManager
+from tests.conftest import TestRewriter
 
 
 class MockArgSemantics(SemanticsManager):
-  """Mock Arg Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockArgSemantics instance."""
@@ -84,7 +86,7 @@ class MockArgSemantics(SemanticsManager):
 
 @pytest.fixture
 def engine() -> TestRewriter:
-  """Provides a mock engine for testing."""
+  """Docstring."""
   semantics = MockArgSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(semantics, config)

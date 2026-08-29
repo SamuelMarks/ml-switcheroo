@@ -5,8 +5,9 @@ and generation correctness for shape/tensor manipulation operations.
 """
 
 import pytest
+
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 

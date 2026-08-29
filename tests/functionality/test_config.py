@@ -1,6 +1,7 @@
 """Test suite for the Config module."""
 
 import pytest
+
 from ml_switcheroo.config import RuntimeConfig
 
 
@@ -29,8 +30,6 @@ def test_config_ui_priority_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
-    """Docstring."""
-
     inherits_from = None
     ui_priority = "not_an_int"
 
@@ -43,7 +42,7 @@ def test_config_ui_priority_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_config_ui_priority_no_adapter(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test function."""
+  """Docstring."""
   from ml_switcheroo.config import get_framework_priority_order
 
   with monkeypatch.context() as m:
@@ -54,12 +53,10 @@ def test_config_ui_priority_no_adapter(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_config_ui_priority_has_adapter_but_no_ui_priority(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test function."""
+  """Docstring."""
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
-    """Docstring."""
-
     inherits_from = None
     # no ui_priority
 
@@ -71,12 +68,10 @@ def test_config_ui_priority_has_adapter_but_no_ui_priority(monkeypatch: pytest.M
 
 
 def test_config_ui_priority_has_adapter_with_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test function."""
+  """Docstring."""
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
-    """Docstring."""
-
     inherits_from = None
     ui_priority = "not_an_int"
 
@@ -88,12 +83,10 @@ def test_config_ui_priority_has_adapter_with_value_error(monkeypatch: pytest.Mon
 
 
 def test_config_ui_priority_has_adapter_with_type_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test function."""
+  """Docstring."""
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
-    """Docstring."""
-
     inherits_from = None
     ui_priority = [1]  # list cannot be passed to int() natively, raises TypeError
 
@@ -105,9 +98,10 @@ def test_config_ui_priority_has_adapter_with_type_error(monkeypatch: pytest.Monk
 
 
 def test_config_load_enable_sharding_none() -> None:
-  """Test function."""
-  from ml_switcheroo.config import RuntimeConfig
+  """Docstring."""
   from unittest.mock import patch
+
+  from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"enable_sharding": True}, None)):
     # Testing when enable_sharding is explicitly None
@@ -116,9 +110,10 @@ def test_config_load_enable_sharding_none() -> None:
 
 
 def test_config_load_enable_sharding_not_none() -> None:
-  """Test function."""
-  from ml_switcheroo.config import RuntimeConfig
+  """Docstring."""
   from unittest.mock import patch
+
+  from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"enable_sharding": False}, None)):
     # Testing when enable_sharding is explicitly True

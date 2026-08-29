@@ -73,14 +73,14 @@ class MlirLexer(Lexer):
     if isinstance(lexer_state, str):
       data = lexer_state
     else:
-      data = str(lexer_state.text)  # pragma: no cover
+      data = str(lexer_state.text)
 
     leading: List[Trivia] = []
     for mo in re.finditer(tok_regex, data):
       kind = mo.lastgroup
       val = mo.group()
       if kind == "MISMATCH":
-        raise ValueError(f"Unexpected '{val}'")  # pragma: no cover
+        raise ValueError(f"Unexpected '{val}'")
       if kind in ("WS", "COMMENT"):
         assert val is not None
         leading.append(Trivia(val))
@@ -468,6 +468,9 @@ class MlirTransformer(Transformer):
     return BlockNode(label=label, arguments=args, operations=ops, leading_trivia=leading)
 
 
+_CACHED_PARSER = None
+
+
 class MlirParser:
   """Parse a stream of MLIR tokens into a Concrete Syntax Tree."""
 
@@ -478,7 +481,10 @@ class MlirParser:
         text (str): The MLIR source code to parse.
     """
     self.text = text
-    self.parser = Lark(GRAMMAR, parser="earley", lexer=MlirLexer)
+    global _CACHED_PARSER
+    if _CACHED_PARSER is None:
+      _CACHED_PARSER = Lark(GRAMMAR, parser="earley", lexer=MlirLexer)
+    self.parser = _CACHED_PARSER
     self.transformer = MlirTransformer()
 
   def parse(self) -> ModuleNode:

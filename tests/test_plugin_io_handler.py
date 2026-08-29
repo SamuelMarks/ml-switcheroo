@@ -1,10 +1,12 @@
 """Docstring."""
 
-import libcst as cst
-from unittest.mock import MagicMock, patch
-from ml_switcheroo.plugins.io_handler import _get_func_name, _get_arg, transform_io_calls
-from ml_switcheroo.core.hooks import HookContext
 from typing import List
+from unittest.mock import MagicMock, patch
+
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.io_handler import _get_arg, _get_func_name, transform_io_calls
 
 
 def test_get_func_name() -> None:

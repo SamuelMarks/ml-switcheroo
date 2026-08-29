@@ -1,12 +1,13 @@
 """Module docstring."""
 
-import pytest
-import libcst as cst
-from unittest import mock
 from typing import Dict, List
+from unittest import mock
 
+import libcst as cst
+import pytest
+
+from ml_switcheroo.core.mlir.cst import AttributeNode, OperationNode, ValueNode
 from ml_switcheroo.core.mlir.gen_expressions import ExpressionGeneratorMixin
-from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode, ValueNode
 
 
 class DummyGenerator(ExpressionGeneratorMixin):
@@ -237,8 +238,8 @@ def test_expr_sw_op_keyword() -> None:
 
 def test_parse_keywords_branches_invalid_type() -> None:
   """Function doc."""
+  from ml_switcheroo.core.mlir.cst import AttributeNode, OperationNode
   from ml_switcheroo.core.mlir.gen_expressions import ExpressionGeneratorMixin
-  from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode
 
   class DummyGen(ExpressionGeneratorMixin):
     """Class doc."""

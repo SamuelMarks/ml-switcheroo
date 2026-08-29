@@ -1,15 +1,16 @@
 """Test module."""
 
 import typing
-import yaml
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import yaml
 
 from ml_switcheroo.cli.handlers.define import handle_define
 
 
 def test_handle_define_not_found(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   res: int = handle_define(tmp_path / "missing.yaml")
   assert res == 1
 
@@ -17,7 +18,7 @@ def test_handle_define_not_found(tmp_path: Path) -> None:
 @patch("ml_switcheroo.cli.handlers.define.resolve_semantics_dir")
 @patch("ml_switcheroo.cli.handlers.define.shutil.copy2")
 def test_handle_define_success(mock_copy: MagicMock, mock_resolve: MagicMock, tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   # Setup mock semantics dir
   sem_dir: Path = tmp_path / "semantics"
   sem_dir.mkdir()
@@ -41,7 +42,7 @@ def test_handle_define_success(mock_copy: MagicMock, mock_resolve: MagicMock, tm
 
 
 def test_handle_define_invalid_schema(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   in_file: Path = tmp_path / "op.yaml"
   data: dict[str, str] = {"invalid": "data"}  # missing 'operation'
   with open(in_file, "w") as f:

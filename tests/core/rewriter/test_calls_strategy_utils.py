@@ -1,14 +1,16 @@
 """Test suite for the Calls Strategy Utils module."""
 
-import libcst as cst
 import typing
 from unittest.mock import MagicMock, patch
+
+import libcst as cst
+
 from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy
 from ml_switcheroo.core.rewriter.calls.utils import rewrite_stateful_call
 
 
 class MockSigCtx:
-  """Mock Sig Ctx class for testing purposes."""
+  """Docstring."""
 
   def __init__(
     self,
@@ -21,7 +23,7 @@ class MockSigCtx:
 
 
 class MockContext:
-  """Mock Context class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, has_hook: bool = True, has_sig: bool = True) -> None:
     """Initializes the MockContext instance."""
@@ -32,7 +34,7 @@ class MockContext:
 
 
 class MockRewriter:
-  """Mock Rewriter class for testing purposes."""
+  """Docstring."""
 
   def __init__(
     self, fail_norm: bool = False, no_imports: bool = False, legacy_sig: bool = False, strict_mode: bool = False

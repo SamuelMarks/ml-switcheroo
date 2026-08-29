@@ -1,12 +1,14 @@
 """Test suite for the Manager Overlay Loading module."""
 
 import json
-import pytest
 from pathlib import Path
-from typing import Dict, Any, Generator, Optional, Tuple
+from typing import Any, Dict, Generator, Optional, Tuple
 from unittest.mock import patch
-from ml_switcheroo.semantics.manager import SemanticsManager
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture

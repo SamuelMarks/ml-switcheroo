@@ -1,11 +1,11 @@
 """Test suite for the Flax Nnx module."""
 
-from flax import nnx
 import jax.numpy as jnp
+from flax import nnx
 
 
 class MaxPoolModel(nnx.Module):
-  """Test suite for the Max Pool Model component."""
+  """Docstring."""
 
   def __init__(self, kernel_size: int = 2, stride: int = 2, rngs: nnx.Rngs = None):
     """Initializes the MaxPoolModel instance."""

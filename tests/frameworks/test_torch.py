@@ -1,9 +1,11 @@
 """Docstring."""
 
 import typing
-from ml_switcheroo.frameworks.torch import TorchAdapter
+
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.frameworks.torch import TorchAdapter
 
 
 def test_torch_adapter_basic() -> None:
@@ -73,8 +75,8 @@ def test_torch_adapter_convert() -> None:
   """Docstring."""
   pytest.importorskip("torch")
   adapter = TorchAdapter()
-  import torch  # type: ignore
   import numpy as np
+  import torch  # type: ignore
 
   # test list
   t: typing.Any = adapter.convert([1, 2, 3])
@@ -124,6 +126,7 @@ def test_convert() -> None:
   """Docstring."""
   import sys
   from unittest.mock import MagicMock
+
   from ml_switcheroo.frameworks.torch import TorchAdapter
 
   sys.modules["torch"] = MagicMock()  # type: ignore

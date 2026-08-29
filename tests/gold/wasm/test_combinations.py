@@ -1,10 +1,12 @@
 """Test suite for the Combinations module."""
 
-import pytest
-import typing
 import json
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+import typing
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.sphinx_ext.registry import scan_registry
 

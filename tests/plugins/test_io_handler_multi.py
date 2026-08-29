@@ -1,14 +1,16 @@
 """Test suite for the Io Handler Multi module."""
 
-import pytest
-import libcst as cst
 from unittest.mock import MagicMock, patch
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.io_handler import transform_io_calls
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
 from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
+from ml_switcheroo.plugins.io_handler import transform_io_calls
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:

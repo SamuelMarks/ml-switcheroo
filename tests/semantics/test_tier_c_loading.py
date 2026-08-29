@@ -1,16 +1,18 @@
 """Test suite for the Tier C Loading module."""
 
 import json
-import pytest
 from pathlib import Path
-from typing import Dict, Any, Generator, Optional, Tuple
+from typing import Any, Dict, Generator, Optional, Tuple
 from unittest.mock import patch
+
 import libcst as cst
+import pytest
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import _HOOKS
+from ml_switcheroo.plugins.data_loader import transform_dataloader
 from ml_switcheroo.semantics.manager import SemanticsManager
 from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.plugins.data_loader import transform_dataloader
-from ml_switcheroo.core.hooks import _HOOKS
 
 
 @pytest.fixture

@@ -1,15 +1,16 @@
 """Test suite for the Loss SASS Macros."""
 
 import typing
-from ml_switcheroo.core.compiler.backends.sass.macros import expand_mseloss, expand_crossentropyloss
-from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+
+from ml_switcheroo.core.compiler.backends.sass.macros import expand_crossentropyloss, expand_mseloss
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
+from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassInstruction,
   SassComment,
-  SassRegister,
   SassImmediate,
+  SassInstruction,
   SassNode,
+  SassRegister,
 )
 
 

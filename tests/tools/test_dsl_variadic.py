@@ -1,7 +1,8 @@
 """Test suite for the Dsl Variadic module."""
 
-from ml_switcheroo.core.dsl import ParameterDef, OperationDef, FrameworkVariant
 from typing import Any
+
+from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef, ParameterDef
 
 
 def test_parameter_variadic_defaults() -> None:

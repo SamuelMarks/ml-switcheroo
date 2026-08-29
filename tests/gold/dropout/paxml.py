@@ -1,12 +1,13 @@
 """Test suite for the Paxml module."""
 
 import typing
+
 from praxis import base_layer  # type: ignore
 from praxis.layers import stochastic  # type: ignore
 
 
 class DropoutModel(base_layer.BaseLayer):  # type: ignore
-  """Test suite for the Dropout Model component."""
+  """Docstring."""
 
   p: float = 0.5
 

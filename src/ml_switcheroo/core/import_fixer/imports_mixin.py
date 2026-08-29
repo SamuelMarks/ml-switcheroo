@@ -97,7 +97,7 @@ class ImportMixin(cst.CSTTransformer):
         new_alias = self._make_alias_node(req)
 
         # Preserve alias if not specified in requirement but present in source
-        if not req.alias and alias.asname and not new_alias.asname:  # pragma: no cover
+        if not req.alias and alias.asname and not new_alias.asname:
           new_alias = new_alias.with_changes(asname=alias.asname)
 
         new_aliases.append(new_alias)
@@ -111,18 +111,18 @@ class ImportMixin(cst.CSTTransformer):
 
       # 2. Existence Check
       for req in self.plan.required_imports:
-        if req.module == full_name and not req.subcomponent:  # pragma: no cover
+        if req.module == full_name and not req.subcomponent:
           self._satisfied_injections.add(req.signature)
 
       # 3. Prune
       if root_pkg in self.source_fws:
-        if self.preserve_source and not replacement_occurred:  # pragma: no cover
-          new_aliases.append(alias)  # pragma: no cover
+        if self.preserve_source and not replacement_occurred:
+          new_aliases.append(alias)
       else:
-        new_aliases.append(alias)  # pragma: no cover
+        new_aliases.append(alias)
 
     if not new_aliases:
-      return cst.RemoveFromParent()  # pragma: no cover
+      return cst.RemoveFromParent()
 
     return updated_node.with_changes(names=new_aliases)
 
@@ -150,7 +150,7 @@ class ImportMixin(cst.CSTTransformer):
 
     if isinstance(updated_node.names, cst.ImportStar):
       if root_pkg in self.source_fws and not getattr(self, "preserve_source", False):
-        return cst.RemoveFromParent()  # pragma: no cover
+        return cst.RemoveFromParent()
       return updated_node
 
     # Check if this statement matches a mapping key (e.g. "torch.nn")
@@ -179,8 +179,8 @@ class ImportMixin(cst.CSTTransformer):
       self._track_definition(alias)  # type: ignore
 
     if root_pkg in self.source_fws:
-      if self.preserve_source:  # pragma: no cover
+      if self.preserve_source:
         return updated_node
-      return cst.RemoveFromParent()  # pragma: no cover
+      return cst.RemoveFromParent()
 
     return updated_node

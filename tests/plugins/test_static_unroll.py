@@ -1,13 +1,16 @@
 """Test suite for the Static Unroll module."""
 
-import pytest
-import libcst as cst
 from typing import Generator, Union
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.static_unroll import unroll_static_loops
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -102,7 +105,7 @@ def test_unroll_value_error(rewriter: PivotRewriter) -> None:
     iter=cst.Call(func=cst.Name("range"), args=[cst.Arg(cst.Integer("0"))]),
     body=cst.IndentedBlock(body=[cst.SimpleStatementLine([cst.Pass()])]),
   )
-  from unittest.mock import patch, PropertyMock
+  from unittest.mock import PropertyMock, patch
 
   with patch.object(cst.Integer, "value", new_callable=PropertyMock) as mock_val:
     mock_val.return_value = "not an integer"
@@ -133,4 +136,29 @@ def test_unroll_body_not_indented(rewriter: PivotRewriter) -> None:
     body=cst.SimpleStatementSuite(body=[cst.Pass()]),
   )
   res: Union[cst.CSTNode, cst.For] = unroll_static_loops(node, rewriter.ctx)
+  assert res is node
+
+
+# --- Merged from test_static_unroll_extra.py ---
+
+
+def test_static_unroll_iter_not_call() -> None:
+  """Verifies the behavior of static unroll iter not call."""
+  node: cst.For = cst.For(
+    target=cst.Name("i"), iter=cst.List([]), body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])])
+  )
+  ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
+  res: Union[cst.CSTNode, cst.For] = unroll_static_loops(node, ctx)
+  assert res is node
+
+
+def test_static_unroll_iter_call_not_range() -> None:
+  """Verifies the behavior of static unroll iter call not range."""
+  node: cst.For = cst.For(
+    target=cst.Name("i"),
+    iter=cst.Call(func=cst.Name("enumerate"), args=[]),
+    body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])]),
+  )
+  ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
+  res: Union[cst.CSTNode, cst.For] = unroll_static_loops(node, ctx)
   assert res is node

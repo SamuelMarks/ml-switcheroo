@@ -1,17 +1,18 @@
 """Test suite for the Emitter module."""
 
 from unittest.mock import MagicMock
+
 from ml_switcheroo.core.compiler.backends.sass.emitter import SassEmitter
+from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassInstruction,
-  SassRegister,
   SassComment,
-  SassLabel,
   SassDirective,
   SassImmediate,
+  SassInstruction,
+  SassLabel,
   SassNode,
+  SassRegister,
 )
-from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 

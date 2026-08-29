@@ -1,12 +1,13 @@
 """Test suite for the Paxml module."""
 
 import typing
+
 from praxis import base_layer  # type: ignore
 from praxis.layers import poolings  # type: ignore
 
 
 class MaxPoolModel(base_layer.BaseLayer):  # type: ignore
-  """Test suite for the Max Pool Model component."""
+  """Docstring."""
 
   kernel_size: int = 2
   stride: int = 2

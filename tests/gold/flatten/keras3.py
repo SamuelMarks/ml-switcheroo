@@ -1,11 +1,12 @@
 """Test suite for the Keras3 module."""
 
 import typing
+
 import keras
 
 
 class FlattenModel(keras.Model):  # type: ignore
-  """Test suite for the Flatten Model component."""
+  """Docstring."""
 
   def __init__(self, start_dim: int = 1) -> None:
     """Initializes the FlattenModel instance."""

@@ -1,19 +1,21 @@
 """Test suite for the Harness Protocol module."""
 
-import pytest
 import sys
 import typing
 from unittest.mock import MagicMock, patch
-from ml_switcheroo.frameworks.base import get_adapter
-from ml_switcheroo.frameworks import available_frameworks
-import ml_switcheroo.frameworks.jax
+
+import pytest
+
 import ml_switcheroo.frameworks.flax_nnx
+import ml_switcheroo.frameworks.jax
 import ml_switcheroo.frameworks.torch
+from ml_switcheroo.frameworks import available_frameworks
+from ml_switcheroo.frameworks.base import get_adapter
 
 
 @pytest.fixture
 def mock_all_imports() -> typing.Generator[None, None, None]:
-  """Provides a mock all imports for testing."""
+  """Docstring."""
   with patch.dict(
     sys.modules,
     {

@@ -1,8 +1,9 @@
 """Test suite for post.py"""
 
-import libcst as cst
 import typing
 from unittest.mock import MagicMock
+
+import libcst as cst
 
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
 
@@ -44,11 +45,9 @@ class MockRewriter:
     self._report_failure = MagicMock()
 
   def _create_dotted_name(self, name: str) -> cst.Name:
-    """Docstring."""
     return cst.Name(name)
 
   def _get_target_traits(self) -> MockTraits:
-    """Docstring."""
     return MockTraits()
 
 

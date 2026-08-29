@@ -1,27 +1,28 @@
 """Test module."""
 
 import inspect
+from typing import Any, Dict, List
+
 import ml_switcheroo.core.compiler.backends.sass.macros as macros
 import ml_switcheroo.core.compiler.backends.sass.macros_extra as macros_extra
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassRegister, SassNode
 from ml_switcheroo.core.compiler.backends.sass.macros import RegisterAllocatorProtocol
-from typing import Dict, Any, List
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassNode, SassRegister
 
 
 class DummyAllocator(RegisterAllocatorProtocol):
-  """Test element."""
+  """Docstring."""
 
   def get_register(self, var_name: str) -> SassRegister:
-    """Test element."""
+    """Docstring."""
     return SassRegister(name=f"REG_{var_name}")
 
   def allocate_temp(self) -> SassRegister:
-    """Test element."""
+    """Docstring."""
     return SassRegister(name="TEMP")
 
 
 def test_all_macros() -> None:
-  """Test element."""
+  """Docstring."""
   allocator: DummyAllocator = DummyAllocator()
   metadata: Dict[str, Any] = {"k": 3, "seq_len": 5}
   node_id: str = "test_node"

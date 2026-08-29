@@ -19,14 +19,14 @@ from typing import Dict, Any, List, Optional, Tuple
 
 try:
   import keras
-  import keras.activations  # pragma: no cover
-  import keras.layers  # pragma: no cover
-  import keras.losses  # pragma: no cover
-  import keras.ops  # pragma: no cover
-  import keras.optimizers  # pragma: no cover
-  import keras.random  # pragma: no cover
-except Exception:  # pragma: no cover
-  keras = None  # pragma: no cover
+  import keras.activations
+  import keras.layers
+  import keras.losses
+  import keras.ops
+  import keras.optimizers
+  import keras.random
+except Exception:
+  keras = None
 from ml_switcheroo_ir.schema.ghost import GhostRef
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
@@ -285,7 +285,7 @@ class KerasAdapter(KerasIOMixin):
     try:
       import keras
 
-      return keras.ops.convert_to_tensor(data)  # pragma: no cover
+      return keras.ops.convert_to_tensor(data)
     except (ImportError, AttributeError):
       return data
 

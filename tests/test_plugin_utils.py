@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
-from ml_switcheroo.plugins.utils import create_dotted_name, is_framework_module_node, _extract_root_name
+from ml_switcheroo.plugins.utils import _extract_root_name, create_dotted_name, is_framework_module_node
 
 
 def parse_expr(code: str) -> cst.BaseExpression:
@@ -76,15 +78,10 @@ def test_is_framework_module_node_configs_alias_object() -> None:
   """Docstring."""
 
   class AliasInfo:
-    """Docstring."""
-
     def model_dump(self) -> dict:
-      """Docstring."""
       return {"name": "jnp"}
 
   class Conf:
-    """Docstring."""
-
     alias = AliasInfo()
 
   ctx: MagicMock = MagicMock(spec=HookContext)
@@ -100,8 +97,6 @@ def test_is_framework_module_node_configs_alias_object_no_dump() -> None:
   """Docstring."""
 
   class Conf:
-    """Docstring."""
-
     alias = {"name": "jnp"}
 
   ctx: MagicMock = MagicMock(spec=HookContext)

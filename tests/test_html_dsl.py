@@ -1,18 +1,19 @@
 """Module docstring."""
 
+import libcst as cst
 import pytest
+
 from ml_switcheroo.core.html.nodes import (
-  HtmlNode,
-  TextNode,
-  CommentNode,
   AttributeNode,
-  TagNode,
-  SvgArrow,
+  CommentNode,
   GridBox,
   HtmlDocument,
+  HtmlNode,
+  SvgArrow,
+  TagNode,
+  TextNode,
 )
-from ml_switcheroo.core.html.parser import InternalHtmlParser, GridExtractor, HtmlParser
-import libcst as cst
+from ml_switcheroo.core.html.parser import GridExtractor, HtmlParser, InternalHtmlParser
 
 
 def test_nodes_base_html_node() -> None:

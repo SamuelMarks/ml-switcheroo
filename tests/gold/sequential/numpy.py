@@ -1,6 +1,7 @@
 """Test suite for the Numpy module."""
 
 import typing
+
 import numpy as np
 
 
@@ -8,8 +9,6 @@ def create_sequential(in_features: int, hidden: int, out_features: int) -> typin
   """Creates sequential."""
 
   class SequentialImpl:
-    """Test suite for the Sequential Impl component."""
-
     def __init__(self, in_feat: int, hid: int, out_feat: int) -> None:
       """Initializes the SequentialImpl instance."""
       self.w1 = np.random.randn(in_feat, hid)

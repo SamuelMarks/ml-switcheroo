@@ -1,6 +1,7 @@
 """Test suite for the Flax Nnx module."""
 
 import typing
+
 import optax  # type: ignore
 
 

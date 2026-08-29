@@ -1,13 +1,14 @@
 """Tests for pure math framework decomposition handling."""
 
+from typing import Any
+
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
-from typing import Any
 
 
 def test_pure_math_rejection_numpy() -> None:
-  """Test rejection of NN nodes to numpy in strict mode."""
+  """Docstring."""
   code: str = "import torch.nn as nn\nself.conv = nn.Conv2d(1, 32, 3)"
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="numpy", strict_mode=True)
   semantics: SemanticsManager = SemanticsManager()
@@ -19,7 +20,7 @@ def test_pure_math_rejection_numpy() -> None:
 
 
 def test_pure_math_rejection_jax() -> None:
-  """Test rejection of NN nodes to jax in strict mode."""
+  """Docstring."""
   code: str = "import torch.nn as nn\nself.conv = nn.Conv2d(1, 32, 3)"
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   semantics: SemanticsManager = SemanticsManager()

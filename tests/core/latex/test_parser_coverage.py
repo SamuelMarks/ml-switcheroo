@@ -1,27 +1,29 @@
 """Tests for Latex parser coverage."""
 
-import libcst as cst
 import typing
 from unittest.mock import patch
-from ml_switcheroo.core.latex.parser import LatexParser
+
+import libcst as cst
+
 from ml_switcheroo.core.latex.nodes import LatexNode
+from ml_switcheroo.core.latex.parser import LatexParser
 
 
 def test_parse_arg_list_empty() -> None:
-  """Test parsing empty arg list."""
+  """Docstring."""
   parser = LatexParser("")
   assert parser._parse_arg_list("   ") == []
 
 
 def test_safe_value_node_ellipsis() -> None:
-  """Test safe value node ellipsis."""
+  """Docstring."""
   parser = LatexParser("")
   node: typing.Any = parser._safe_value_node("...")
   assert isinstance(node, cst.Ellipsis)
 
 
 def test_safe_value_node_fallback_name() -> None:
-  """Test safe value node fallback name."""
+  """Docstring."""
   parser = LatexParser("")
   with patch("libcst.parse_expression", side_effect=cst.ParserSyntaxError("err", lines=[""], raw_line=0, raw_column=0)):
     node: typing.Any = parser._safe_value_node("valid_name")
@@ -30,7 +32,7 @@ def test_safe_value_node_fallback_name() -> None:
 
 
 def test_create_call_simple_name() -> None:
-  """Test create call simple name."""
+  """Docstring."""
   parser = LatexParser("")
   call: typing.Any = parser._create_call("SimpleFunc")
   assert isinstance(call.func, cst.Name)
@@ -38,7 +40,7 @@ def test_create_call_simple_name() -> None:
 
 
 def test_create_call_config_arg() -> None:
-  """Test create call config arg."""
+  """Docstring."""
   parser = LatexParser("")
   call: typing.Any = parser._create_call("Func", config={"arg_0": "val"})
   assert isinstance(call.args[0].value, cst.Name)
@@ -46,7 +48,7 @@ def test_create_call_config_arg() -> None:
 
 
 def test_create_call_args_list_kwarg() -> None:
-  """Test create call args list kwarg."""
+  """Docstring."""
   parser = LatexParser("")
   call: typing.Any = parser._create_call("Func", args_list=["k=v"])
   assert typing.cast(cst.Name, call.args[0].keyword).value == "k"  # type: ignore
@@ -54,7 +56,7 @@ def test_create_call_args_list_kwarg() -> None:
 
 
 def test_synthesize_class_fallback_op() -> None:
-  """Test synthesize class fallback op."""
+  """Docstring."""
   parser = LatexParser("")
 
   class DummyNode(LatexNode):

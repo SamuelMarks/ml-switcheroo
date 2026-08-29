@@ -1,15 +1,17 @@
 """Test suite for the Generator Determinism module."""
 
-import pytest
 from pathlib import Path
 from unittest.mock import MagicMock
+
+import pytest
+
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
 def generator() -> TestCaseGenerator:
-  """Provides a mock generator for testing."""
+  """Docstring."""
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {"torch": {"import": "import torch"}}
   mgr.get_test_template = MagicMock(side_effect=lambda fw: templates.get(fw))

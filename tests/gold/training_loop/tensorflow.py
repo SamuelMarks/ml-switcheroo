@@ -1,6 +1,7 @@
 """Test suite for the Tensorflow module."""
 
 import typing
+
 import tensorflow as tf
 
 

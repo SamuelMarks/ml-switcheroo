@@ -1,12 +1,13 @@
 """Test suite for the Paxml module."""
 
 import typing
+
 from praxis import base_layer  # type: ignore
 from praxis.layers import embedding_softmax  # type: ignore
 
 
 class EmbeddingModel(base_layer.BaseLayer):  # type: ignore
-  """Test suite for the Embedding Model component."""
+  """Docstring."""
 
   num_embeddings: int = 0
   embedding_dim: int = 0

@@ -1,18 +1,20 @@
 """Test suite for the Symbol Table2 module."""
 
+from unittest.mock import MagicMock
+
 import libcst as cst
 import pytest
-from unittest.mock import MagicMock
-from ml_switcheroo.analysis.symbol_types import TensorType, ModuleType, UnionType, SymbolType
-from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer, SymbolTable
+
+from ml_switcheroo.analysis.symbol_table import SymbolTable, SymbolTableAnalyzer
+from ml_switcheroo.analysis.symbol_types import ModuleType, SymbolType, TensorType, UnionType
 
 
 @pytest.fixture
 def analyzer() -> SymbolTableAnalyzer:
-  """Provides a mock analyzer for testing."""
+  """Docstring."""
   sem: MagicMock = MagicMock()
 
-  from typing import Optional, Tuple, Dict
+  from typing import Dict, Optional, Tuple
 
   def get_def(name: str) -> Optional[Tuple[str, Dict]]:
     """Gets def.
@@ -165,8 +167,6 @@ def test_assign_attribute(analyzer: SymbolTableAnalyzer) -> None:
   tree: cst.Module = analyze(code, analyzer)
 
   class AttrVisitor(cst.CSTVisitor):
-    """Test suite for the Attr Visitor component."""
-
     def __init__(self) -> None:
       """Initializes the AttrVisitor instance."""
       self.nodes: list[cst.Attribute] = []

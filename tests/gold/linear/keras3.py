@@ -1,11 +1,12 @@
 """Test suite for the Keras3 module."""
 
 import typing
+
 import keras
 
 
 class Model(keras.Model):  # type: ignore
-  """Test suite for the Model component."""
+  """Docstring."""
 
   def __init__(self, in_features: int, out_features: int) -> None:
     """Initializes the Model instance."""

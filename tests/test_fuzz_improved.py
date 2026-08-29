@@ -1,12 +1,14 @@
 """Test suite for the Fuzz Improved module."""
 
-import pytest
-import libcst as cst
 import importlib
-import pkgutil
 import inspect
-from typing import List, Set, Dict
+import pkgutil
+from typing import Dict, List, Set
 from unittest.mock import MagicMock
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo
 
 pytest.skip("Too slow for pre-commit", allow_module_level=True)
@@ -48,8 +50,6 @@ def test_improved_fuzz() -> None:
   nodes: List[cst.CSTNode] = []
 
   class NodeCollector(cst.CSTVisitor):
-    """Test suite for the Node Collector component."""
-
     def on_visit(self, node: cst.CSTNode) -> bool:
       """Helper to on visit."""
       nodes.append(node)

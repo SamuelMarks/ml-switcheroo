@@ -1,13 +1,13 @@
 """Tests for leftover import removal after transformation."""
 
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.conversion_result import ConversionResult
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.conversion_result import ConversionResult
 
 
 def test_leftover_import_tensorflow() -> None:
-  """Test that old framework imports are removed for TF."""
+  """Docstring."""
   code: str = "import torch\nimport torch.nn as nn\nself.conv = nn.Conv2d(1, 32, 3)"
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="tensorflow")
   semantics: SemanticsManager = SemanticsManager()
@@ -20,7 +20,7 @@ def test_leftover_import_tensorflow() -> None:
 
 
 def test_leftover_import_keras() -> None:
-  """Test that old framework imports are removed for Keras."""
+  """Docstring."""
   code: str = "import torch\nimport torch.nn as nn\nself.conv = nn.Conv2d(1, 32, 3)"
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="keras")
   semantics: SemanticsManager = SemanticsManager()

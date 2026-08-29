@@ -1,11 +1,11 @@
 """Test suite for the Flax Nnx module."""
 
-from flax import nnx
 import jax.numpy as jnp
+from flax import nnx
 
 
 class FlattenModel(nnx.Module):
-  """Test suite for the Flatten Model component."""
+  """Docstring."""
 
   def __init__(self, start_dim: int = 1):
     """Initializes the FlattenModel instance."""

@@ -1,10 +1,10 @@
 """Test module."""
 
-from ml_switcheroo.analysis.symbol_types import SymbolType, TensorType, ModuleType, UnionType, Scope
+from ml_switcheroo.analysis.symbol_types import ModuleType, Scope, SymbolType, TensorType, UnionType
 
 
 def test_symbol_type() -> None:
-  """Test element."""
+  """Docstring."""
   sym1: SymbolType = SymbolType()
   sym1.name = "Unknown"
 
@@ -21,7 +21,7 @@ def test_symbol_type() -> None:
 
 
 def test_tensor_type() -> None:
-  """Test element."""
+  """Docstring."""
   t1: TensorType = TensorType(framework="torch")
   t2: TensorType = TensorType(framework="torch")
   t3: TensorType = TensorType(framework="jax")
@@ -33,7 +33,7 @@ def test_tensor_type() -> None:
 
 
 def test_module_type() -> None:
-  """Test element."""
+  """Docstring."""
   m1: ModuleType = ModuleType(path="torch.nn")
   m2: ModuleType = ModuleType(path="torch.nn")
   m3: ModuleType = ModuleType(path="jax.numpy")
@@ -45,7 +45,7 @@ def test_module_type() -> None:
 
 
 def test_union_type() -> None:
-  """Test element."""
+  """Docstring."""
   t_torch: TensorType = TensorType(framework="torch")
   t_jax: TensorType = TensorType(framework="jax")
 
@@ -63,7 +63,7 @@ def test_union_type() -> None:
 
 
 def test_scope() -> None:
-  """Test element."""
+  """Docstring."""
   root: Scope = Scope(name="root")
   root.set("x", TensorType(framework="torch"))
 

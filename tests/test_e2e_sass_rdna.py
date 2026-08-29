@@ -1,8 +1,9 @@
 """Test suite for the e2e Sass and Rdna ODL targets."""
 
-from typing import Dict, Union, Optional
-from ml_switcheroo.semantics.manager import SemanticsManager
+from typing import Dict, Optional, Union
+
 from ml_switcheroo.core.compiler.ir import LogicalGraph
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_odl_sass_rdna() -> None:
@@ -29,14 +30,12 @@ def test_odl_sass_rdna() -> None:
 def test_sass_roundtrip_new_macros() -> None:
   """Verifies the roundtrip compilation of the new SASS macros."""
   from ml_switcheroo.core.compiler.backends.sass import SassBackend
-  from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
   from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+  from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
   from ml_switcheroo.core.compiler.ir import LogicalNode
 
   # A dummy semantics manager that maps directly
   class DummySemantics:
-    """A dummy semantics manager for testing."""
-
     def get_definition(self, kind: str) -> tuple[str, dict[str, str]]:
       """Gets a mock definition."""
       return (kind, {})

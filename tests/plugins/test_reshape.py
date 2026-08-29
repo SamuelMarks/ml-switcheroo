@@ -1,8 +1,10 @@
 """Test suite for the Reshape module."""
 
-import libcst as cst
 from typing import Union
 from unittest.mock import MagicMock
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.reshape import _create_dotted_name, transform_view_semantics
 

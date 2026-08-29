@@ -1,13 +1,13 @@
 """Tests for PaxML layer mappings."""
 
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.conversion_result import ConversionResult
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.conversion_result import ConversionResult
 
 
 def test_conv2d_paxml_positional() -> None:
-  """Test positional mapping for Conv2d to PaxML."""
+  """Docstring."""
   code: str = "import torch.nn as nn\nself.conv = nn.Conv2d(1, 32, 3)"
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="paxml")
   semantics: SemanticsManager = SemanticsManager()
@@ -18,7 +18,7 @@ def test_conv2d_paxml_positional() -> None:
 
 
 def test_linear_paxml_positional() -> None:
-  """Test positional mapping for Linear to PaxML."""
+  """Docstring."""
   code: str = "import torch.nn as nn\nself.fc = nn.Linear(32 * 26 * 26, 10)"
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="paxml")
   semantics: SemanticsManager = SemanticsManager()

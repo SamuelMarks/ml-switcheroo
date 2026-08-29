@@ -1,10 +1,12 @@
 """Test suite for the Console module."""
 
+from typing import Any, Generator, List, Tuple
+
 import pytest
 from rich.console import Console
 from rich.style import Style
-from ml_switcheroo.utils.console import console, set_console, reset_console, log_info, log_error, get_console
-from typing import Any, Generator, List, Tuple
+
+from ml_switcheroo.utils.console import console, get_console, log_error, log_info, reset_console, set_console
 
 
 @pytest.fixture(autouse=True)
@@ -43,7 +45,7 @@ def test_logging_wrappers_format(capsys: pytest.CaptureFixture[str]) -> None:
   """Verifies the behavior of logging wrappers format."""
   reset_console()
   log_info("InfoText")
-  from ml_switcheroo.utils.console import log_warning, log_success
+  from ml_switcheroo.utils.console import log_success, log_warning
 
   log_warning("WarningText")
   log_success("SuccessText")

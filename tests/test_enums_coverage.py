@@ -1,6 +1,6 @@
 """Test suite for the Enums Coverage module."""
 
-from ml_switcheroo.enums import SemanticTier, LogicOp
+from ml_switcheroo.enums import LogicOp, SemanticTier
 
 
 def test_enums_member_access() -> None:

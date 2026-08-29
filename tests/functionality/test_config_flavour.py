@@ -1,6 +1,7 @@
 """Test suite for the Config Flavour module."""
 
 from unittest.mock import MagicMock
+
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager

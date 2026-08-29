@@ -1,8 +1,9 @@
 """Test suite for the Paths Coverage module."""
 
-from unittest.mock import patch, MagicMock
-from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 
 
 def test_resolve_semantics_dir_local(tmp_path: Path) -> None:

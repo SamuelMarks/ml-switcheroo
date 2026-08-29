@@ -1,7 +1,8 @@
 """Module docstring."""
 
 import libcst as cst
-from ml_switcheroo.core.mlir.type_inference import parse_py_type_to_mlir, TypeInferencePass
+
+from ml_switcheroo.core.mlir.type_inference import TypeInferencePass, parse_py_type_to_mlir
 from ml_switcheroo.core.mlir.types import FloatType
 
 

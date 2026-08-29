@@ -152,10 +152,10 @@ class StableHloEmitter(PythonToMlirEmitter):
 
     # 2. Body Region
     body_block = self._emit_block(node.body)
-    if not body_block.operations:  # pragma: no cover
-      body_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))  # pragma: no cover
+    if not body_block.operations:
+      body_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
     elif body_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):
-      body_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))  # pragma: no cover
+      body_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
     body_region = RegionNode(blocks=[body_block])
 
     while_op = OperationNode(
@@ -200,20 +200,20 @@ class StableHloEmitter(PythonToMlirEmitter):
     if getattr(node, "orelse", None):
       if isinstance(node.orelse, cst.Else):
         false_block = self._emit_block(node.orelse.body)
-        if not false_block.operations:  # pragma: no cover
-          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))  # pragma: no cover
+        if not false_block.operations:
+          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
         elif false_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):
-          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))  # pragma: no cover
+          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
         false_region = RegionNode(blocks=[false_block])
         regions.append(false_region)
       elif isinstance(node.orelse, cst.If):
         # To be strictly compliant with stablehlo.if vs case, we handle elif as nested here
         # Safe cast as we checked isinstance
         false_block = BlockNode(label="", operations=self._emit_if(cast(cst.If, node.orelse)))
-        if not false_block.operations:  # pragma: no cover
-          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))  # pragma: no cover
+        if not false_block.operations:
+          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
         elif false_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):  # pragma: no branch
-          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))  # pragma: no cover
+          false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
         false_region = RegionNode(blocks=[false_block])
         regions.append(false_region)
     else:

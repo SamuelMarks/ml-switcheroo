@@ -1,11 +1,12 @@
 """Test module."""
 
 import libcst as cst
+
 from ml_switcheroo.analysis.lifecycle import InitializationTracker
 
 
 def test_initialization_tracker_basic() -> None:
-  """Test element."""
+  """Docstring."""
   tracker: InitializationTracker = InitializationTracker()
 
   code: str = """
@@ -26,7 +27,7 @@ class MyModule:
 
 
 def test_initialization_tracker_missing() -> None:
-  """Test element."""
+  """Docstring."""
   tracker: InitializationTracker = InitializationTracker()
 
   code: str = """
@@ -47,7 +48,7 @@ class BadModule:
 
 
 def test_initialization_tracker_tuple_unpacking() -> None:
-  """Test element."""
+  """Docstring."""
   tracker: InitializationTracker = InitializationTracker()
 
   code: str = """
@@ -66,7 +67,7 @@ class TupleMod:
 
 
 def test_initialization_tracker_annassign() -> None:
-  """Test element."""
+  """Docstring."""
   tracker: InitializationTracker = InitializationTracker()
 
   code: str = """
@@ -84,7 +85,7 @@ class AnnMod:
 
 
 def test_initialization_tracker_nested() -> None:
-  """Test element."""
+  """Docstring."""
   tracker: InitializationTracker = InitializationTracker()
 
   code: str = """
@@ -110,7 +111,7 @@ class Outer:
 
 
 def test_initialization_tracker_no_scope() -> None:
-  """Test element."""
+  """Docstring."""
   # Test methods returning early when scope stack is empty (e.g. methods outside classes)
   tracker: InitializationTracker = InitializationTracker()
 
@@ -130,7 +131,66 @@ def forward(self, x):
 
 
 def test_initialization_tracker_leave_classdef_no_scope() -> None:
-  """Test element."""
+  """Docstring."""
   tracker: InitializationTracker = InitializationTracker()
   tracker.leave_ClassDef(cst.ClassDef(name=cst.Name("Dummy"), body=cst.IndentedBlock(body=[])))
   assert len(tracker.warnings) == 0
+
+
+# --- Merged from test_lifecycle_extra.py ---
+
+
+def analyze(code: str) -> InitializationTracker:
+  """Analyze code for initialization tracker."""
+  tree: cst.Module = cst.parse_module(code)
+  tracker: InitializationTracker = InitializationTracker()
+  tree.visit(tracker)
+  return tracker
+
+
+def test_initialization_tracker_basic_extra() -> None:
+  """Docstring."""
+  code: str = """
+class MyModule:
+    def __init__(self):
+        self.w = 1.0
+
+    def forward(self, x):
+        return self.w * x
+    """
+  tracker: InitializationTracker = analyze(code)
+  assert len(tracker.warnings) == 0
+
+
+def test_initialization_tracker_uninitialized() -> None:
+  """Docstring."""
+  code: str = """
+class MyModule:
+    def __init__(self):
+        pass
+
+    def forward(self, x):
+        return self.w * x
+    """
+  tracker: InitializationTracker = analyze(code)
+  assert len(tracker.warnings) == 1
+
+
+def test_initialization_tracker_complex() -> None:
+  """Docstring."""
+  code: str = """
+class SubModule:
+    def __init__(self):
+        self.a = 2
+
+class MyModule:
+    def __init__(self):
+        self.sub = SubModule()
+        self.b = self.c # c uninitialized
+
+    def forward(self, x):
+        self.d = 4 # late init
+        return self.sub.a * self.w * x + self.d
+    """
+  tracker: InitializationTracker = analyze(code)
+  assert len(tracker.warnings) > 0

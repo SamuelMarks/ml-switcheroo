@@ -1,7 +1,9 @@
 """Tests for ml_switcheroo.plugins.mlx_optimizers."""
 
-import libcst as cst
 from unittest.mock import MagicMock
+
+import libcst as cst
+
 from ml_switcheroo.plugins.mlx_optimizers import (
   transform_mlx_optimizer_init,
   transform_mlx_optimizer_step,
@@ -10,7 +12,7 @@ from ml_switcheroo.plugins.mlx_optimizers import (
 
 
 def test_mlx_optimizer_step_plugin_branches() -> None:
-  """Test element."""
+  """Docstring."""
   ctx: MagicMock = MagicMock()
   ctx.framework = "mlx"
   node: cst.BaseExpression = cst.parse_expression("opt.step()")
@@ -40,7 +42,7 @@ def test_mlx_optimizer_step_plugin_branches() -> None:
 
 
 def test_mlx_optimizer_step_plugin_kwargs() -> None:
-  """Test element."""
+  """Docstring."""
   ctx: MagicMock = MagicMock()
   ctx.framework = "mlx"
 
@@ -52,7 +54,7 @@ def test_mlx_optimizer_step_plugin_kwargs() -> None:
 
 
 def test_mlx_optimizer_step_plugin_model_attr() -> None:
-  """Test element."""
+  """Docstring."""
   ctx: MagicMock = MagicMock()
   ctx.framework = "mlx"
 
@@ -64,7 +66,7 @@ def test_mlx_optimizer_step_plugin_model_attr() -> None:
 
 
 def test_mlx_optimizer_init() -> None:
-  """Test element."""
+  """Docstring."""
   ctx: MagicMock = MagicMock()
   # Mock lookup
   ctx.lookup_api.return_value = "mlx.optimizers.AdamW"
@@ -76,7 +78,7 @@ def test_mlx_optimizer_init() -> None:
 
 
 def test_mlx_zero_grad() -> None:
-  """Test element."""
+  """Docstring."""
   ctx: MagicMock = MagicMock()
   node: cst.BaseExpression = cst.parse_expression("opt.zero_grad()")
   res: cst.CSTNode = transform_mlx_zero_grad(node, ctx)
@@ -84,7 +86,7 @@ def test_mlx_zero_grad() -> None:
 
 
 def test_mlx_optimizer_step_standalone() -> None:
-  """Test element."""
+  """Docstring."""
   ctx: MagicMock = MagicMock()
   # just an identifier
   node: cst.BaseExpression = cst.parse_expression("step()")
@@ -94,7 +96,7 @@ def test_mlx_optimizer_step_standalone() -> None:
 
 
 def test_mlx_optimizer_step_coverage() -> None:
-  """Test element."""
+  """Docstring."""
   ctx: MagicMock = MagicMock()
   ctx.framework = "mlx"
   node: cst.BaseExpression = cst.parse_expression("step(a, b)")
@@ -102,7 +104,7 @@ def test_mlx_optimizer_step_coverage() -> None:
 
 
 def test_mlx_optimizer_init_no_mapping() -> None:
-  """Test element."""
+  """Docstring."""
   ctx: MagicMock = MagicMock()
   ctx.lookup_api.return_value = None
   node: cst.BaseExpression = cst.parse_expression("AdamW(params, lr=0.01)")

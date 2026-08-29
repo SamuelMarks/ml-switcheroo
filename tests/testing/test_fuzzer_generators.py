@@ -1,6 +1,6 @@
 """Test suite for the Fuzzer Generators module."""
 
-from typing import Tuple, Callable
+from typing import Callable, Tuple
 
 
 def test_generate_scalar_int() -> None:
@@ -27,8 +27,9 @@ def test_generate_scalar_float() -> None:
 
 def test_generate_array() -> None:
   """Generates array."""
-  from ml_switcheroo.testing.fuzzer.generators import generate_array
   import numpy as np
+
+  from ml_switcheroo.testing.fuzzer.generators import generate_array
 
   arr: np.ndarray = generate_array("float", (2, 2), {})
   assert arr.shape == (2, 2)

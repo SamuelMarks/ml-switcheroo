@@ -1,7 +1,7 @@
 """Test suite for the Bug Rng Literal module."""
 
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 

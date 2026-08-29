@@ -1,11 +1,11 @@
 """Test suite for the Flax Nnx module."""
 
-from flax import nnx
 import jax.numpy as jnp
+from flax import nnx
 
 
 class DropoutModel(nnx.Module):
-  """Test suite for the Dropout Model component."""
+  """Docstring."""
 
   def __init__(self, p: float = 0.5, rngs: nnx.Rngs = None):
     """Initializes the DropoutModel instance."""

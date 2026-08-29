@@ -1,13 +1,15 @@
 """Test suite for the Tikz Analyser module."""
 
-import libcst as cst
 import typing
+
+import libcst as cst
+
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph
 from ml_switcheroo.core.tikz.analyser import GraphExtractor
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalEdge
 
 
 def parse_and_extract(code: str) -> LogicalGraph:
-  """Parses and extract."""
+  """Docstring."""
   module = cst.parse_module(code)
   extractor = GraphExtractor()
   module.visit(extractor)
@@ -15,7 +17,7 @@ def parse_and_extract(code: str) -> LogicalGraph:
 
 
 def test_extract_nodes_from_init() -> None:
-  """Extracts nodes from initialization."""
+  """Docstring."""
   code: str = "\nclass Net:\n    def __init__(self):\n        self.conv1 = nn.Conv2d(1, 32, 3)\n        self.fc = nn.Linear(128, 10)\n"
   graph: LogicalGraph = parse_and_extract(code)
   assert len(graph.nodes) == 2
@@ -30,7 +32,7 @@ def test_extract_nodes_from_init() -> None:
 
 
 def test_extract_edges_sequential_flow() -> None:
-  """Extracts edges sequential flow."""
+  """Docstring."""
   code: str = "\nclass Net:\n    def __init__(self):\n        self.conv = nn.Conv(1, 1)\n        self.fc = nn.Linear(1, 1)\n\n    def forward(self, x):\n        x = self.conv(x)\n        x = self.fc(x)\n        return x\n"
   graph: LogicalGraph = parse_and_extract(code)
   assert len(graph.edges) == 3
@@ -61,7 +63,7 @@ def test_functional_call_tracing() -> None:
 
 
 def test_keyword_argument_extraction() -> None:
-  """Verifies the behavior of keyword argument extraction."""
+  """Docstring."""
   code: str = "\nclass Layer:\n    def __init__(self):\n        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)\n"
   graph: LogicalGraph = parse_and_extract(code)
   pool: typing.Any = next((n for n in graph.nodes if n.id == "pool"))

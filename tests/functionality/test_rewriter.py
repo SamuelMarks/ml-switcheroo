@@ -1,15 +1,17 @@
 """Test suite for the Rewriter module."""
 
-import pytest
-import libcst as cst
 import typing
-from tests.conftest import TestRewriter
-from ml_switcheroo.semantics.manager import SemanticsManager
+
+import libcst as cst
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.semantics.manager import SemanticsManager
+from tests.conftest import TestRewriter
 
 
 class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -57,7 +59,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
   return TestRewriter(semantics, config)

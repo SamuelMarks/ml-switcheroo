@@ -4,7 +4,7 @@ from ml_switcheroo.core.latex.parser import LatexParser
 
 
 def test_latex_parser_coverage_gaps() -> None:
-  """Test latex parser coverage gaps."""
+  """Docstring."""
   source: str = r"""
     \% Escaped comment
     % Regular comment

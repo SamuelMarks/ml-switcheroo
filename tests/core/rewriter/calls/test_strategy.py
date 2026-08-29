@@ -1,10 +1,11 @@
 """Test suite for strategy.py"""
 
-import libcst as cst
 import typing
 from unittest.mock import MagicMock, patch
 
-from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy, _apply_layout_permutation
+import libcst as cst
+
+from ml_switcheroo.core.rewriter.calls.strategy import _apply_layout_permutation, execute_strategy
 
 
 def parse_call(code: str) -> cst.Call:
@@ -37,11 +38,9 @@ class MockRewriter:
     self._handle_variant_imports = MagicMock()
 
   def _create_name_node(self, api_str: str) -> cst.Name:
-    """Docstring."""
     return cst.Name(api_str)
 
   def _is_module_alias(self, node: typing.Any) -> bool:
-    """Docstring."""
     return False
 
 

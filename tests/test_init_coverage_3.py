@@ -3,8 +3,9 @@
 
 def test_convert_error() -> None:
   """Converts correctly handling an error."""
-  import ml_switcheroo
   from unittest.mock import patch
+
+  import ml_switcheroo
   from ml_switcheroo.core.conversion_result import ConversionResult
 
   with patch("ml_switcheroo.ASTEngine") as MockEngine:

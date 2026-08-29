@@ -1,13 +1,15 @@
 """Test suite for the Doc Gen module."""
 
+from typing import Any, Dict, List, Optional
+
 import pytest
-from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
+
 from ml_switcheroo.semantics.manager import SemanticsManager
-from typing import Dict, Any, List, Optional
+from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
 
 class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -50,7 +52,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def generator() -> MigrationGuideGenerator:
-  """Provides a mock generator for testing."""
+  """Docstring."""
   semantics: MockSemantics = MockSemantics()
   return MigrationGuideGenerator(semantics)
 
@@ -107,3 +109,52 @@ def test_filtering_missing_source(generator: MigrationGuideGenerator) -> None:
   assert "torch.abs" not in md
   assert "## Array" not in md
   assert "| `torch.abs`" not in md
+
+
+# --- Merged from test_doc_gen_missing.py ---
+
+
+def test_doc_gen_missing() -> None:
+  """Verifies the behavior of documentation generation missing."""
+  from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
+
+  class DummySM:
+    def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
+      """Mock implementation of get definition by id."""
+      if op_name == "missing":
+        return None
+      return {"std_args": ["a"]}
+
+  m: MigrationGuideGenerator = MigrationGuideGenerator(DummySM())
+  assert m._has_variants("missing", "jax") is False
+  assert m._generate_op_row("foo", "jax", "torch") != ""
+
+
+def test_doc_gen_missing_tuple_arg() -> None:
+  """Verifies the behavior of documentation generation missing tuple argument."""
+  from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
+
+  class DummySM:
+    def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
+      """Mock implementation of get definition by id."""
+      return {"std_args": [("a", "int")]}
+
+  m: MigrationGuideGenerator = MigrationGuideGenerator(DummySM())
+  res: str = m._generate_op_row("foo", "jax", "torch")
+  assert res is not None
+
+
+def test_doc_gen_missing_dict_arg() -> None:
+  """Verifies the behavior of documentation generation missing dictionary argument."""
+  from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
+
+  class DummySM:
+    """Dummy sm."""
+
+    def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
+      """Get definition by id."""
+      return {"std_args": [{"name": "a", "type": "int"}]}
+
+  m: MigrationGuideGenerator = MigrationGuideGenerator(DummySM())
+  res: str = m._generate_op_row("foo", "jax", "torch")
+  assert res is not None

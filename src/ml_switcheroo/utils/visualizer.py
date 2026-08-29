@@ -137,7 +137,7 @@ class MermaidGenerator(cst.CSTVisitor):
     # Fallback to code generator for complex expressions (e.g. calls, tuples)
     try:
       return self._renderer.code_for_node(node).strip()
-    except Exception:  # pragma: no cover
+    except Exception:
       return f"<{type(node).__name__}>"
 
   def visit_Module(self, node: cst.Module) -> Optional[bool]:
@@ -224,7 +224,7 @@ class MermaidGenerator(cst.CSTVisitor):
       else:
         # Standardize prefix "Call" to satisfy test expectations and clarity
         name = f"Call: {name}()"
-    except Exception:  # pragma: no cover
+    except Exception:
       name = "Call"
 
     uid = self._add_node(name, "callNode")
@@ -268,7 +268,7 @@ class MermaidGenerator(cst.CSTVisitor):
         else:
           label += val_code
         is_simple = True
-      except Exception:  # pragma: no cover
+      except Exception:
         pass
 
     # Always add node and push to stack to maintain symmetry for leave_Arg

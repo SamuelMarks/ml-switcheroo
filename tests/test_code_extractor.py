@@ -1,9 +1,11 @@
 """Docstring."""
 
-import pytest
-from ml_switcheroo.utils.code_extractor import CodeExtractor
-from unittest.mock import patch
 from typing import List
+from unittest.mock import patch
+
+import pytest
+
+from ml_switcheroo.utils.code_extractor import CodeExtractor
 
 
 class DummyFuzzer:

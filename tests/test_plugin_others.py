@@ -1,7 +1,8 @@
 """Test suite for the Plugin Others module."""
 
-import libcst as cst
 from unittest.mock import MagicMock
+
+import libcst as cst
 
 
 def test_plugin_others() -> None:
@@ -24,8 +25,9 @@ def test_plugin_others() -> None:
   transform_device_allocator(node, ctx)
   ctx.semantics.get_operation.return_value = MagicMock(device_allocation_supported=True)
   transform_device_allocator(node, ctx)
-  from ml_switcheroo.plugins.device_checks import transform_cuda_check
   from unittest.mock import patch
+
+  from ml_switcheroo.plugins.device_checks import transform_cuda_check
 
   with patch("ml_switcheroo.plugins.device_checks.get_adapter") as mock_get:
     mock_adapter: MagicMock = MagicMock()

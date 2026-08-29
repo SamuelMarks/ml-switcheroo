@@ -2,7 +2,8 @@
 
 import pytest
 from pydantic import ValidationError
-from ml_switcheroo.core.dsl import ParameterDef, OperationDef, FrameworkVariant
+
+from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef, ParameterDef
 
 
 def test_param_rank_field_initialization() -> None:

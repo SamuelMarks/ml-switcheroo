@@ -1,15 +1,17 @@
 """Test suite for the Matrix module."""
 
-import pytest
 import typing
 from unittest.mock import MagicMock, patch
+
+import pytest
 from rich.console import Console
+
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockMatrixSemantics(SemanticsManager):
-  """Mock Matrix Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockMatrixSemantics instance."""
@@ -27,13 +29,13 @@ class MockMatrixSemantics(SemanticsManager):
 
 @pytest.fixture
 def semantics() -> MockMatrixSemantics:
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   return MockMatrixSemantics()
 
 
 @pytest.fixture
 def matrix(semantics: MockMatrixSemantics) -> CompatibilityMatrix:
-  """Provides a mock matrix for testing."""
+  """Docstring."""
   mat = CompatibilityMatrix(semantics)
   mat.console = Console(file=None, force_terminal=True, width=200, record=True)  # type: ignore
   return mat

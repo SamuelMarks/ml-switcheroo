@@ -1,17 +1,19 @@
 """Test suite for the Base Registry module."""
 
-import pytest
 import json
 import logging
 import typing
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
+
 from ml_switcheroo.frameworks.base import (
-  register_framework,
-  get_adapter,
-  load_snapshot_for_adapter,
   _ADAPTER_REGISTRY,
   available_frameworks,
+  get_adapter,
+  load_snapshot_for_adapter,
+  register_framework,
 )
 
 
@@ -21,8 +23,6 @@ def test_available_frameworks() -> None:
 
   @register_framework(key)
   class TestAdapterAvail:
-    """Test Adapter."""
-
     pass
 
   available: list[str] = available_frameworks()
@@ -36,10 +36,7 @@ def test_registry_mechanics() -> None:
 
   @register_framework(key)
   class TestAdapter:
-    """Test suite for the Adapter component."""
-
     def __init__(self) -> None:
-      """Initializes the TestAdapter instance."""
       self.initialized = True
 
   assert key in _ADAPTER_REGISTRY
@@ -56,7 +53,7 @@ def test_get_adapter_missing() -> None:
 
 @pytest.fixture
 def mock_snapshot_dir(tmp_path: Path) -> Path:
-  """Provides a mock snapshot directory for testing."""
+  """Docstring."""
   d: Path = tmp_path / "snapshots"
   d.mkdir()
   return d

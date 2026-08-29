@@ -1,10 +1,12 @@
 """Docstring."""
 
-from unittest.mock import patch
-from ml_switcheroo.core.compiler.backends.python import PythonBackend, ClassBodyReplacer
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, PartitionSpec
-import libcst as cst
 from typing import List, Optional
+from unittest.mock import patch
+
+import libcst as cst
+
+from ml_switcheroo.core.compiler.backends.python import ClassBodyReplacer, PythonBackend
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, PartitionSpec
 
 
 def test_class_body_replacer() -> None:
@@ -128,15 +130,11 @@ def test_build_forward_complex() -> None:
   ]
 
   class MockSemantics:
-    """Docstring."""
-
     def resolve_variant(self, kind: str, framework: str) -> Optional[dict]:
-      """Docstring."""
       # reverse lookup fallback branch
       return None
 
     def get_definition(self, kind: str) -> tuple:
-      """Docstring."""
       return "Abs", {"api": "torch.add"}
 
   backend.semantics = MockSemantics()
@@ -153,16 +151,12 @@ def test_build_forward_with_semantics_reverse_lookup() -> None:
   backend: PythonBackend = PythonBackend("torch")
 
   class MockSemantics:
-    """Docstring."""
-
     def resolve_variant(self, kind: str, framework: str) -> Optional[dict]:
-      """Docstring."""
       if kind == "abstract_id":
         return {"api": "resolved_target"}
       return None
 
     def get_definition(self, kind: str) -> Optional[tuple]:
-      """Docstring."""
       if kind == "torch.concrete_api":
         return "abstract_id", {"some": "data"}
       return None
@@ -204,10 +198,7 @@ def test_generate_layer_init() -> None:
   backend: PythonBackend = PythonBackend("torch")
 
   class MockSemantics:
-    """Docstring."""
-
     def resolve_variant(self, kind: str, framework: str) -> Optional[dict]:
-      """Docstring."""
       if kind == "Linear":
         return {"api": "torch.nn.Linear"}
       elif kind == "Other":
@@ -233,10 +224,7 @@ def test_generate_layer_init_flax() -> None:
   backend: PythonBackend = PythonBackend("flax")
 
   class MockSemantics:
-    """Docstring."""
-
     def resolve_variant(self, kind: str, framework: str) -> Optional[dict]:
-      """Docstring."""
       if kind == "Linear":
         return {"api": "nn.Dense"}
       return None
@@ -278,10 +266,7 @@ def test_generate_layer_init_mlx() -> None:
   backend: PythonBackend = PythonBackend("mlx")
 
   class MockSemantics:
-    """Docstring."""
-
     def resolve_variant(self, kind: str, framework: str) -> Optional[dict]:
-      """Docstring."""
       if kind == "SwiGLU":
         return {"api": "mlx.core.silu"}
       return None
@@ -323,17 +308,13 @@ def test_generate_base_class_formatting() -> None:
   graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="in1", kind="Input")], edges=[])
 
   class MockAdapter:
-    """Docstring."""
-
     def __init__(self, requires_super_init: bool = True, base_class: str = "torch.nn.Module") -> None:
-      """Docstring."""
       self.requires_super_init = requires_super_init
       self.module_base = base_class
       self.forward_method = "forward"
 
     @property
     def structural_traits(self) -> "MockAdapter":
-      """Docstring."""
       return self
 
   with patch("ml_switcheroo.core.compiler.backends.python.get_adapter") as mock_adapter:

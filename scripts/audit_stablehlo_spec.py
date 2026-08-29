@@ -5,6 +5,7 @@ implemented operations to identify and output missing ones.
 """
 
 import urllib.request
+import sys
 import json
 import re
 from pathlib import Path
@@ -40,12 +41,19 @@ out = {"official_ops": sorted(ops), "implemented": sorted(list(implemented)), "m
 
 with open("audit_stablehlo.json", "w") as f:
   json.dump(out, f, indent=2)
+  f.write("\n")
 
 with open("audit_stablehlo.md", "w") as f:
-  f.write("# StableHLO Missing Operations\n\n")
+  f.write("# StableHLO Missing Operations\n")
+  if missing:
+    f.write("\n")
   for op in missing:
     f.write("- [ ] Implement " + bt + op + bt + "\n")
+
 
 print(f"Found {len(ops)} total ops.")
 print(f"Implemented: {len(implemented)}")
 print(f"Missing: {len(missing)}")
+
+if missing:
+  sys.exit(1)

@@ -1,14 +1,16 @@
 """Test suite for the Hooks Loader module."""
 
-import pytest
-from unittest.mock import patch
 from pathlib import Path
-from ml_switcheroo.core.hooks import load_plugins, get_hook, _HOOKS
+from unittest.mock import patch
+
+import pytest
+
+from ml_switcheroo.core.hooks import _HOOKS, get_hook, load_plugins
 
 
 @pytest.fixture
 def mock_plugin_dir(tmp_path: Path) -> Path:
-  """Provides a mock plugin directory for testing."""
+  """Docstring."""
   plugin_dir: Path = tmp_path / "custom_plugins"
   plugin_dir.mkdir()
   plugin_file: Path = plugin_dir / "my_plugin.py"

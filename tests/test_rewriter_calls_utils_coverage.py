@@ -1,6 +1,7 @@
 """Module docstring."""
 
 import libcst as cst
+
 from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply
 
 
@@ -22,6 +23,7 @@ def test_is_functional_apply_branches() -> None:
 def test_is_super_call_other_call() -> None:
   """Function doc."""
   import libcst as cst
+
   from ml_switcheroo.core.rewriter.calls.utils import is_super_call
 
   node: cst.BaseExpression = getattr(getattr(cst.parse_statement("foo().method()"), "body")[0], "value")
@@ -30,9 +32,11 @@ def test_is_super_call_other_call() -> None:
 
 def test_inject_permute_call_empty_indices() -> None:
   """Function doc."""
-  import libcst as cst
-  from ml_switcheroo.core.rewriter.calls.utils import inject_permute_call
   from unittest.mock import MagicMock
+
+  import libcst as cst
+
+  from ml_switcheroo.core.rewriter.calls.utils import inject_permute_call
 
   node: cst.BaseExpression = cst.parse_expression("x")
   semantics: MagicMock = MagicMock()

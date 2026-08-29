@@ -1,14 +1,17 @@
 """Test suite for the Gather module."""
 
-import pytest
 import typing
-import libcst as cst
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.gather import transform_gather
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.frameworks.base import register_framework
+from ml_switcheroo.plugins.gather import transform_gather
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -18,7 +21,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @register_framework("custom_fw")
 class CustomAdapter:
-  """Test suite for the Custom Adapter component."""
+  """Docstring."""
 
   @property
   def harness_imports(self) -> list[str]:
@@ -41,7 +44,7 @@ class CustomAdapter:
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
-  """Provides a mock rewriter factory for testing."""
+  """Docstring."""
   hooks._HOOKS["gather_adapter"] = transform_gather
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -107,3 +110,41 @@ def test_gather_custom_fw_transpilation(rewriter_factory: typing.Callable[[str],
   code: str = "y = torch.gather(x, 1, idx)"
   res: str = rewrite_code(rw, code)
   assert "custom.gather_nd" in res
+
+
+# --- Merged from test_gather_missing.py ---
+
+
+def test_gather_no_target_api() -> None:
+  """Verifies the behavior of gather no target API."""
+  ctx = MagicMock(spec=HookContext)
+  ctx.lookup_api.return_value = None
+  node = cst.Call(func=cst.Name("gather"))
+  res: typing.Any = transform_gather(node, ctx)
+  assert res == node
+
+
+def test_gather_kwargs() -> None:
+  """Verifies the behavior of gather keyword arguments."""
+  ctx = MagicMock(spec=HookContext)
+  ctx.lookup_api.return_value = "jax.numpy.take_along_axis"
+  ctx.target_fw = "jax"
+  node = cst.Call(
+    func=cst.Name("gather"),
+    args=[
+      cst.Arg(value=cst.Name("x")),
+      cst.Arg(value=cst.Integer("1"), keyword=cst.Name("dim")),
+      cst.Arg(value=cst.Name("idx"), keyword=cst.Name("index")),
+    ],
+  )
+  transform_gather(node, ctx)
+
+
+def test_gather_missing_args() -> None:
+  """Verifies the behavior of gather missing arguments."""
+  ctx = MagicMock(spec=HookContext)
+  ctx.lookup_api.return_value = "jax.numpy.take_along_axis"
+  ctx.target_fw = "jax"
+  node = cst.Call(func=cst.Name("gather"), args=[cst.Arg(value=cst.Name("x"))])
+  res: typing.Any = transform_gather(node, ctx)
+  assert res == node

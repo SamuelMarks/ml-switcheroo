@@ -6,9 +6,11 @@ source frameworks, and other configuration settings in the `ResolutionPlan`.
 """
 
 import typing
+
 import libcst as cst
+
 from ml_switcheroo.core.import_fixer.imports_mixin import ImportMixin
-from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan, ImportReq
+from ml_switcheroo.core.import_fixer.resolution import ImportReq, ResolutionPlan
 
 
 class MockFixer(ImportMixin):
@@ -194,7 +196,7 @@ def test_importmixin_leave_importfrom_empty_module() -> None:
 
 
 def test_importmixin_preserve_source() -> None:
-  """Test that preserve_source configuration works."""
+  """Docstring."""
   fixer = MockFixer()
   fixer.preserve_source = True
 
@@ -215,7 +217,7 @@ def test_importmixin_preserve_source() -> None:
 
 
 def test_importmixin_leave_ImportFrom_preserve_alias() -> None:
-  """Test preserving an existing alias during replacement."""
+  """Docstring."""
   fixer = MockFixer()
   fixer.plan.mappings["torch.sub"] = ImportReq(module="jax", subcomponent="sub")
 
@@ -228,7 +230,6 @@ def test_importmixin_leave_ImportFrom_preserve_alias() -> None:
   assert res.names[0].asname is not None
   assert typing.cast(cst.Name, res.names[0].asname.name).value == "my_sub"
 
-  """Test preserving source in leave_ImportFrom."""
   fixer = MockFixer()
   fixer.preserve_source = True
 
@@ -238,7 +239,7 @@ def test_importmixin_leave_ImportFrom_preserve_alias() -> None:
 
 
 def test_importmixin_remove_from_parent() -> None:
-  """Test when no aliases remain, RemoveFromParent is returned."""
+  """Docstring."""
   fixer = MockFixer()
   # It removes source_fws aliases if not preserve_source
   import_node = typing.cast(cst.Import, cst.parse_statement("import torch.unknown").body[0])  # type: ignore
@@ -251,7 +252,7 @@ def test_importmixin_remove_from_parent() -> None:
 
 
 def test_importmixin_leave_Import_preserve_source() -> None:
-  """Test preserve source on leave_Import."""
+  """Docstring."""
   fixer = MockFixer()
   fixer.preserve_source = True
   # We need it to NOT hit the root_pkg not in source_fws so it hits line 186
@@ -263,7 +264,7 @@ def test_importmixin_leave_Import_preserve_source() -> None:
 
 
 def test_importmixin_leave_ImportFrom_preserve_source_else() -> None:
-  """Test preserving source in leave_ImportFrom when root_pkg not in source_fws."""
+  """Docstring."""
   fixer = MockFixer()
 
   from_node = typing.cast(cst.ImportFrom, cst.parse_statement("from unknown import sub").body[0])  # type: ignore
@@ -272,7 +273,7 @@ def test_importmixin_leave_ImportFrom_preserve_source_else() -> None:
 
 
 def test_importmixin_leave_ImportFrom_remove() -> None:
-  """Test removing an ImportFrom when it's a source framework and not preserved."""
+  """Docstring."""
   fixer = MockFixer()
   # It removes source_fws aliases if not preserve_source
   from_node = typing.cast(cst.ImportFrom, cst.parse_statement("from torch import unknown").body[0])  # type: ignore
@@ -282,7 +283,7 @@ def test_importmixin_leave_ImportFrom_remove() -> None:
 
 
 def test_importmixin_leave_Import_remove() -> None:
-  """Test removing an Import when it's a source framework and not preserved."""
+  """Docstring."""
   fixer = MockFixer()
   # It removes source_fws aliases if not preserve_source
   import_node = typing.cast(cst.Import, cst.parse_statement("import torch.unknown").body[0])  # type: ignore

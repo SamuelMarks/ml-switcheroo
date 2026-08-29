@@ -1,20 +1,22 @@
 """Test suite for the Autogen Ops module."""
 
-import yaml
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 from unittest import mock
+
+import yaml
+
 from ml_switcheroo.sphinx_ext.autogen_ops import (
   IndentedDumper,
   _build_yaml_entry,
+  _write_index_file,
   _write_yaml_update,
   generate_op_docs,
-  _write_index_file,
 )
 
 
 class MockEnum:
-  """Mock Enum class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, value: str) -> None:
     """Initializes the MockEnum instance."""
@@ -154,7 +156,7 @@ def test_write_index_file(tmp_path: Path) -> None:
 
 
 class MockApp:
-  """Mock App class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, srcdir: str) -> None:
     """Initializes the MockApp instance."""
@@ -281,3 +283,20 @@ def test_generate_op_docs_empty(
   generate_op_docs(app)  # type: ignore
   out_dir: Path = srcdir / "ops"
   assert (out_dir / "index.rst").exists()
+
+
+# --- Merged from test_autogen_ops_extra_loop.py ---
+
+
+def test_autogen_ops_variant_with_enum():
+  """Docstring."""
+
+  class DummyEnum:
+    @property
+    def value(self):
+      return "enum_val"
+
+  definition = {"variants": {"jax": {"some_field": DummyEnum()}}}
+
+  res = _build_yaml_entry("TestOp", definition)
+  assert res["variants"]["jax"]["some_field"] == "enum_val"

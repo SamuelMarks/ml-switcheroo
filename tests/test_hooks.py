@@ -1,18 +1,20 @@
 """Test suite for the Hooks module."""
 
-import pytest
-import libcst as cst
+from typing import Callable, Generator, Optional
 from unittest.mock import MagicMock
+
+import libcst as cst
+import pytest
 from pydantic import BaseModel, ValidationError
-from ml_switcheroo.core.hooks import register_hook, get_hook, HookContext, _HOOKS
+
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.schema import PluginTraits
+from ml_switcheroo.core.hooks import _HOOKS, HookContext, get_hook, register_hook
 from ml_switcheroo.semantics.manager import SemanticsManager
-from typing import Generator, Optional, Callable
+from ml_switcheroo.semantics.schema import PluginTraits
 
 
 class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   pass
 
@@ -152,8 +154,6 @@ def test_config_validation_failure() -> None:
   bad_config: RuntimeConfig = RuntimeConfig(plugin_settings={"epsilon": "im_not_a_float"}, strict_mode=False)
 
   class PluginSchema(BaseModel):
-    """Test suite for the Plugin Schema component."""
-
     epsilon: float
 
   ctx: HookContext = HookContext(MockSemantics(), bad_config)
@@ -166,8 +166,6 @@ def test_config_validation_success() -> None:
   good_config: RuntimeConfig = RuntimeConfig(plugin_settings={"epsilon": 0.001, "ignored": "val"}, strict_mode=False)
 
   class PluginSchema(BaseModel):
-    """Test suite for the Plugin Schema component."""
-
     epsilon: float = 1e-05
 
   ctx: HookContext = HookContext(MockSemantics(), good_config)

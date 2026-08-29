@@ -4,10 +4,12 @@ This module verifies the behavior of foundational CST structures, including triv
 nodes, post-initialization logic, visitation, and transformation mechanisms.
 """
 
-import pytest
-from ml_switcheroo.core.cst.base import Trivia, CSTNode, CSTVisitor, CSTTransformer
 from dataclasses import dataclass, field
 from typing import List
+
+import pytest
+
+from ml_switcheroo.core.cst.base import CSTNode, CSTTransformer, CSTVisitor, Trivia
 
 
 @dataclass

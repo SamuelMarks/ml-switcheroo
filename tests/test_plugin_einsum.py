@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.plugins.einsum import normalize_einsum, _create_dotted_name, _is_string
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.einsum import _create_dotted_name, _is_string, normalize_einsum
 
 
 def test_is_string() -> None:

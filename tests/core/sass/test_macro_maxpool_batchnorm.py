@@ -1,8 +1,8 @@
 """Test suite for the MaxPool2d and BatchNorm2d SASS Macros."""
 
-from ml_switcheroo.core.compiler.backends.sass.macros import expand_maxpool2d, expand_batchnorm2d
+from ml_switcheroo.core.compiler.backends.sass.macros import expand_batchnorm2d, expand_maxpool2d
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassComment
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction
 
 
 def test_sass_macro_maxpool2d() -> None:

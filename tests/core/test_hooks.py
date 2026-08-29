@@ -6,9 +6,10 @@ core framework.
 """
 
 import typing
-from ml_switcheroo.core.hooks import AutoWireSpec, HookContext
-from ml_switcheroo.config import RuntimeConfig
 from unittest.mock import MagicMock
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import AutoWireSpec, HookContext
 
 
 def test_autowirespec() -> None:

@@ -1,12 +1,13 @@
 """Test module."""
 
+from typing import Any, List
+
 from ml_switcheroo.core.compiler.backends.sass.emitter import SassEmitter
 from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassNode
-from typing import Any, List
 
 
 def test_sass_emitter_emit(mocker: Any) -> None:
-  """Test element."""
+  """Docstring."""
   emitter: SassEmitter = SassEmitter()
   nodes: List[SassNode] = [SassComment(text="test")]
   mock_printer: Any = mocker.patch("ml_switcheroo.core.compiler.backends.sass.emitter.SassPrinter")
@@ -19,7 +20,7 @@ def test_sass_emitter_emit(mocker: Any) -> None:
 
 
 def test_sass_emitter_integration() -> None:
-  """Test element."""
+  """Docstring."""
   emitter: SassEmitter = SassEmitter()
   nodes: List[SassNode] = [SassComment(text="integration")]
   result: str = emitter.emit(nodes)

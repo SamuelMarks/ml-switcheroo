@@ -4,7 +4,7 @@ import numpy as np
 
 
 class FlattenModel:
-  """Test suite for the Flatten Model component."""
+  """Docstring."""
 
   def __init__(self, start_dim: int = 1):
     """Initializes the FlattenModel instance."""

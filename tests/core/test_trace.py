@@ -1,7 +1,8 @@
 """Test suite for the Trace module."""
 
 import typing
-from ml_switcheroo.core.tracer import TraceLogger, TraceEventType
+
+from ml_switcheroo.core.tracer import TraceEventType, TraceLogger
 
 
 def test_phase_nesting() -> None:

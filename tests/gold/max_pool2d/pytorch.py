@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class MaxPoolModel(nn.Module):
-  """Test suite for the Max Pool Model component."""
+  """Docstring."""
 
   def __init__(self, kernel_size: int = 2, stride: int = 2):
     """Initializes the MaxPoolModel instance."""

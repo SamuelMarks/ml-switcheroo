@@ -1,47 +1,47 @@
 """Test suite for SASS macros integration."""
 
 from ml_switcheroo.core.compiler.backends.sass.macros import (
-  expand_conv2d,
-  expand_linear,
-  expand_mean,
-  expand_relu,
-  expand_flatten,
-  expand_reshape,
-  expand_conv3d,
+  expand_adaptivepool,
   expand_avgpool2d,
-  expand_maxpool2d,
   expand_batchnorm2d,
-  expand_dropout,
-  expand_sigmoid,
-  expand_tanh,
-  expand_gelu,
-  expand_mseloss,
-  expand_crossentropyloss,
-  expand_rnn,
-  expand_lstm,
-  expand_gru,
-  expand_multiheadattention,
-  expand_transformer,
-  expand_transformerencoder,
-  expand_transformerdecoder,
   expand_conv1d,
-  expand_depthwiseconv2d,
+  expand_conv2d,
+  expand_conv3d,
   expand_convtranspose,
+  expand_crossentropyloss,
+  expand_depthwiseconv2d,
+  expand_dropout,
+  expand_flatten,
+  expand_gelu,
+  expand_generic_activation,
+  expand_generic_dropout,
+  expand_generic_linalg,
+  expand_generic_loss,
+  expand_generic_norm,
+  expand_generic_reduction,
+  expand_gru,
+  expand_linear,
+  expand_lstm,
+  expand_maxpool2d,
+  expand_mean,
+  expand_mseloss,
+  expand_multiheadattention,
   expand_pool1d,
   expand_pool3d,
-  expand_adaptivepool,
-  expand_generic_norm,
-  expand_generic_activation,
-  expand_generic_linalg,
-  expand_generic_reduction,
-  expand_generic_loss,
-  expand_generic_dropout,
+  expand_relu,
+  expand_reshape,
+  expand_rnn,
+  expand_sigmoid,
+  expand_tanh,
+  expand_transformer,
+  expand_transformerdecoder,
+  expand_transformerencoder,
 )
 from ml_switcheroo.core.compiler.frontends.sass.cst import SassRegister
 
 
 class DummyAllocator:
-  """Dummy allocator for testing."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initialize the dummy allocator."""
@@ -58,7 +58,7 @@ class DummyAllocator:
 
 
 def test_macros_basic() -> None:
-  """Test basic SASS macros expansion."""
+  """Docstring."""
   alloc = DummyAllocator()
 
   # Test all with basic metadata
@@ -100,7 +100,7 @@ def test_macros_basic() -> None:
 
 
 def test_macros_branches() -> None:
-  """Test branch coverage of SASS macros."""
+  """Docstring."""
   alloc = DummyAllocator()
 
   # Linear with bias

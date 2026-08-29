@@ -1,14 +1,16 @@
 """Test suite for the Flax To Mlx To Flax module."""
 
-import pytest
-import textwrap
 import re
-from ml_switcheroo.core.engine import ASTEngine
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+import textwrap
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.frameworks.mlx import MLXAdapter
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
+from ml_switcheroo.frameworks.mlx import MLXAdapter
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 FLAX_SOURCE = textwrap.dedent(
   "\nfrom flax import nnx\n\nclass Net(nnx.Module):\n    def __init__(self, rngs: nnx.Rngs):\n        self.linear = nnx.Linear(10, 10, rngs=rngs)\n\n    def __call__(self, x):\n        x = self.linear(x)\n        return nnx.relu(x)\n"
@@ -17,7 +19,7 @@ FLAX_SOURCE = textwrap.dedent(
 
 @pytest.fixture
 def semantics():
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   mgr = SemanticsManager()
   mgr.data["Linear"] = {
     "std_args": ["in_features", "out_features"],

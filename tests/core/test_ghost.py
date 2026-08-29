@@ -7,11 +7,12 @@ Verifies that:
 4. Edge cases (defaults, annotations, missing signatures) are handled.
 """
 
-from typing import Optional
-import pytest
 import typing
-from ml_switcheroo.core.ghost import GhostInspector, GhostRef
+from typing import Optional
 
+import pytest
+
+from ml_switcheroo.core.ghost import GhostInspector, GhostRef
 
 # --- Mock Objects for Inspection ---
 

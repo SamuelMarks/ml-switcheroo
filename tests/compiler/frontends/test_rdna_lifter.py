@@ -5,17 +5,13 @@ from AMD RDNA assembly instructions and comments, including unmapped operators,
 input/return markers, block captures, and unrecognized assembly/comments.
 """
 
+import typing
+
+import pytest
+
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaImmediate, RdnaInstruction, RdnaNode, RdnaVGPR
 from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 from ml_switcheroo.core.compiler.ir import LogicalGraph
-import pytest
-import typing
-from ml_switcheroo.core.compiler.frontends.rdna.cst import (
-  RdnaComment,
-  RdnaInstruction,
-  RdnaImmediate,
-  RdnaVGPR,
-  RdnaNode,
-)
 
 
 def test_rdna_lifter_basic() -> None:
@@ -157,8 +153,8 @@ def test_rdna_lifter_end_without_begin() -> None:
 
 
 def test_rdna_analysis_no_loop_limits() -> None:
+  """Docstring."""
   # Hit analysis 40
-  """Test rdna analysis no loop limits."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction
 
@@ -168,10 +164,10 @@ def test_rdna_analysis_no_loop_limits() -> None:
 
 
 def test_rdna_analysis_other_kind() -> None:
+  """Docstring."""
   # Hit 47->53
-  """Test rdna analysis other kind."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaImmediate
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
   inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate("10")])  # type: ignore
   res: dict[str, typing.Any] = RdnaAnalyzer.analyze_block("OtherKind", [inst])
@@ -179,9 +175,9 @@ def test_rdna_analysis_other_kind() -> None:
 
 
 def test_rdna_lifter_return_already_seen() -> None:
-  """Test rdna lifter return already seen."""
-  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [
@@ -193,9 +189,9 @@ def test_rdna_lifter_return_already_seen() -> None:
 
 
 def test_rdna_lifter_return_no_previous() -> None:
-  """Test rdna lifter return no previous."""
-  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [
@@ -206,9 +202,9 @@ def test_rdna_lifter_return_no_previous() -> None:
 
 
 def test_rdna_lifter_instruction_no_block_or_marker() -> None:
-  """Test rdna lifter instruction no block or marker."""
-  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaInstruction(opcode="v_add_f32", operands=[])]
@@ -218,9 +214,9 @@ def test_rdna_lifter_instruction_no_block_or_marker() -> None:
 
 
 def test_rdna_lifter_instruction_in_block() -> None:
-  """Test rdna lifter instruction in block."""
-  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaLabel
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaLabel("lbl")]
@@ -229,10 +225,10 @@ def test_rdna_lifter_instruction_in_block() -> None:
 
 
 def test_rdna_lifter_comment_no_marker() -> None:
-  """Test rdna lifter comment no marker."""
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
   from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
 
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="hi")]
@@ -242,10 +238,10 @@ def test_rdna_lifter_comment_no_marker() -> None:
 
 
 def test_rdna_lifter_comment_unknown_marker(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test rdna lifter comment unknown marker."""
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
   from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
 
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="hi")]
@@ -255,7 +251,7 @@ def test_rdna_lifter_comment_unknown_marker(monkeypatch: pytest.MonkeyPatch) -> 
 
 
 def test_rdna_analyzer_linear_no_loop_limits() -> None:
-  """Test RdnaAnalyzer for Linear kind with empty loop limits."""
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
 
   analyzer = RdnaAnalyzer()
@@ -264,9 +260,9 @@ def test_rdna_analyzer_linear_no_loop_limits() -> None:
 
 
 def test_rdna_lifter_mismatched_end() -> None:
-  """Test RdnaLifter with a mismatched SemanticEnd."""
-  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 
   cst_nodes: list[RdnaNode] = [
     RdnaComment(text="; BEGIN Relu (relu1)"),
@@ -280,9 +276,9 @@ def test_rdna_lifter_mismatched_end() -> None:
 
 
 def test_rdna_lifter_multiple_returns() -> None:
-  """Test RdnaLifter with multiple SemanticReturns."""
-  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 
   cst_nodes: list[RdnaNode] = [
     RdnaComment(text="; Return:"),

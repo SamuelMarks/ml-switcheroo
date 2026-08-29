@@ -1,11 +1,11 @@
 """Test suite for the Flax Nnx module."""
 
-from flax import nnx
 import jax.numpy as jnp
+from flax import nnx
 
 
 class GNModel(nnx.Module):
-  """Test suite for the G N Model component."""
+  """Docstring."""
 
   def __init__(self, num_groups: int, num_channels: int, rngs: nnx.Rngs):
     """Initializes the GNModel instance."""

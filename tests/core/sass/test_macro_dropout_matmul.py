@@ -1,10 +1,11 @@
 """Test suite for the Dropout and MatMul SASS Macros."""
 
 import typing
+
 from ml_switcheroo.core.compiler.backends.sass.macros import expand_dropout, expand_linear
-from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassComment, SassNode
+from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassNode
 
 
 def test_sass_macro_dropout() -> None:

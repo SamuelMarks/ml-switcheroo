@@ -1,13 +1,14 @@
 """Tests for assembly-level framework adapters."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.frameworks.rdna import RdnaAdapter
 from ml_switcheroo.frameworks.sass import SassAdapter
-from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 def test_rdna_adapter_properties() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: RdnaAdapter = RdnaAdapter()
 
   adapter.import_alias
@@ -44,7 +45,7 @@ def test_rdna_adapter_properties() -> None:
 
 
 def test_sass_adapter_properties() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: SassAdapter = SassAdapter()
 
   adapter.import_alias
@@ -81,7 +82,7 @@ def test_sass_adapter_properties() -> None:
 
 
 def test_rdna_parse_to_graph() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: RdnaAdapter = RdnaAdapter()
   code: str = """
     label_start:
@@ -103,7 +104,7 @@ def test_rdna_parse_to_graph() -> None:
 
 
 def test_sass_parse_to_graph() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: SassAdapter = SassAdapter()
   code: str = """
     L_1:
@@ -124,21 +125,21 @@ def test_sass_parse_to_graph() -> None:
 
 
 def test_rdna_fmac_no_loop() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: RdnaAdapter = RdnaAdapter()
   code: str = "v_fmac_f32 v0, v1, v2"
   adapter.parse_rdna_to_graph(code)
 
 
 def test_sass_ffma_no_loop() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: SassAdapter = SassAdapter()
   code: str = "FFMA R0, R1, R2, R3"
   adapter.parse_sass_to_graph(code)
 
 
 def test_asm_empty_parsing() -> None:
-  """Test element."""
+  """Docstring."""
   adapter1: RdnaAdapter = RdnaAdapter()
   adapter1.parse_rdna_to_graph("")
   adapter1.parse_rdna_to_graph("// comment")
@@ -149,7 +150,7 @@ def test_asm_empty_parsing() -> None:
 
 
 def test_rdna_loop_no_fmac() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: RdnaAdapter = RdnaAdapter()
   code: str = """
     label_loop:
@@ -160,7 +161,7 @@ def test_rdna_loop_no_fmac() -> None:
 
 
 def test_sass_loop_no_fmac() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: SassAdapter = SassAdapter()
   code: str = """
     L_2:
@@ -172,7 +173,7 @@ def test_sass_loop_no_fmac() -> None:
 
 
 def test_sass_loop_print() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: SassAdapter = SassAdapter()
   code: str = """
     // comment

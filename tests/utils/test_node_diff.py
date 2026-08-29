@@ -1,6 +1,7 @@
 """Test suite for the Node Diff module."""
 
 import libcst as cst
+
 from ml_switcheroo.utils.node_diff import capture_node_source, diff_nodes
 
 

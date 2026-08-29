@@ -53,7 +53,7 @@ def convert_value_to_cst(val: Union[bool, int, float, str, list, tuple, dict, No
     try:
       parsed = ast.literal_eval(val)
       # Avoid infinite recursion if ast.literal_eval returns the exact same string
-      if not isinstance(parsed, str) or parsed != val:  # pragma: no cover
+      if not isinstance(parsed, str) or parsed != val:
         return convert_value_to_cst(parsed)
     except (ValueError, SyntaxError):
       pass

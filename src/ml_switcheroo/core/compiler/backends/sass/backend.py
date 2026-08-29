@@ -41,9 +41,9 @@ class SassBackend(CompilerBackend):
     """
     # Lazy load if not provided, but typically passed from Registry/Engine
     if semantics is None:
-      from ml_switcheroo.semantics.manager import SemanticsManager  # pragma: no cover
+      from ml_switcheroo.semantics.manager import SemanticsManager
 
-      semantics = SemanticsManager()  # pragma: no cover
+      semantics = SemanticsManager()
 
     self.synthesizer = SassSynthesizer(semantics)
     self.emitter = SassEmitter()
@@ -58,5 +58,5 @@ class SassBackend(CompilerBackend):
     Returns:
         str: The fully generated SASS assembly code representing the input logical graph.
     """
-    sass_nodes = self.synthesizer.from_graph(graph)  # pragma: no cover
-    return self.emitter.emit(sass_nodes)  # pragma: no cover
+    sass_nodes = self.synthesizer.from_graph(graph)
+    return self.emitter.emit(sass_nodes)

@@ -78,8 +78,8 @@ class BatchValidator:
       # 1. Manual Test Priority
       if op_name in manual_tests:
         # Presence of a manual test implies Human Verification.
-        results[op_name] = True  # pragma: no cover
-        continue  # pragma: no cover
+        results[op_name] = True
+        continue
 
       # 2. Automated Fuzzing
       details = known_apis[op_name]
@@ -167,7 +167,7 @@ class BatchValidator:
 
     """
     found: set[Any] = set()
-    if not root.exists():  # pragma: no cover
+    if not root.exists():
       return found
 
     for py_file in root.rglob("*.py"):

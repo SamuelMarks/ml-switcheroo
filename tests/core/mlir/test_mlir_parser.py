@@ -1,6 +1,7 @@
 """Test suite for the Mlir Parser module."""
 
 import typing
+
 from ml_switcheroo.core.mlir.parser import MlirParser
 
 
@@ -74,7 +75,7 @@ def test_explicit_type_parsing() -> None:
 
 
 def test_parse_roundtrip_with_trivia() -> None:
-  """Tests lossless roundtripping of MLIR code with complex trivia."""
+  """Docstring."""
   code: str = """
 // Module comment
 %0 = stablehlo.constant { value = 1 } : tensor<i32> // inline trailing
@@ -179,10 +180,11 @@ def test_parse_bare_id_list_attr() -> None:
 
 
 def test_mlir_transformer_edge_cases() -> None:
-  """Test method."""
+  """Docstring."""
   from lark import Tree
-  from ml_switcheroo.core.mlir.parser import MlirTransformer
+
   from ml_switcheroo.core.cst.base import Trivia
+  from ml_switcheroo.core.mlir.parser import MlirTransformer
 
   transformer = MlirTransformer()
 

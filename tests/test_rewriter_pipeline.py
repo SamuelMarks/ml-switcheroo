@@ -1,14 +1,16 @@
 """Test module."""
 
-import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
-from ml_switcheroo.core.rewriter.interface import RewriterPass
+
+import libcst as cst
+
 from ml_switcheroo.core.rewriter.context import RewriterContext
+from ml_switcheroo.core.rewriter.interface import RewriterPass
+from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
 
 
 def test_rewriter_pipeline() -> None:
-  """Test element."""
+  """Docstring."""
   # Setup
   pass1: MagicMock = MagicMock(spec=RewriterPass)
   pass2: MagicMock = MagicMock(spec=RewriterPass)

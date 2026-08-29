@@ -28,9 +28,9 @@ try:
 
   _np_mod = _np
   np = _np
-except Exception:  # pragma: no cover
-  _np_mod = None  # pragma: no cover
-  np = None  # pragma: no cover
+except Exception:
+  _np_mod = None
+  np = None
 
 
 @register_framework("mlx")
@@ -196,8 +196,8 @@ class MLXAdapter(MlxIOMixin):
 
       if isinstance(data, (np.ndarray, list, tuple, np.generic)):
         return mx.array(data)
-    except Exception:  # pragma: no cover
-      pass  # pragma: no cover
+    except Exception:
+      pass
     return data
 
   def get_tiered_examples(self) -> Dict[str, str]:
@@ -348,7 +348,7 @@ class Qwen3VLPatchEmbed(nn.Module):
         List[str]: Imports.
 
     """
-    return ["import mlx.core as mx"]  # pragma: no cover
+    return ["import mlx.core as mx"]
 
   def apply_wiring(self, snapshot):
     """Override/Patches snapshot items that cannot be statically defined.

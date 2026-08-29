@@ -2,9 +2,9 @@
 
 import json
 import sys
+import pytest
 from pathlib import Path
 from unittest import mock
-import pytest
 
 # Add scripts directory to sys.path to import it
 scripts_dir: Path = Path(__file__).parent.parent / "scripts"
@@ -14,7 +14,7 @@ import validate_odl_json  # noqa: E402
 
 
 def test_validate_file_success(tmp_path: Path) -> None:
-  """Tests validate_file returns True for a valid file."""
+  """Docstring."""
   valid_file: Path = tmp_path / "valid.json"
   valid_data: dict = {"version": 1, "ops": [{"name": "test_op", "args": [{"name": "x", "type": "tensor"}]}]}
   valid_file.write_text(json.dumps(valid_data), encoding="utf-8")
@@ -26,7 +26,7 @@ def test_validate_file_success(tmp_path: Path) -> None:
 
 
 def test_validate_file_failure(tmp_path: Path) -> None:
-  """Tests validate_file returns False when validation fails."""
+  """Docstring."""
   invalid_file: Path = tmp_path / "invalid.json"
   invalid_file.write_text("invalid json", encoding="utf-8")
 
@@ -34,7 +34,7 @@ def test_validate_file_failure(tmp_path: Path) -> None:
 
 
 def test_main_success(tmp_path: Path) -> None:
-  """Tests main execution with successful validation."""
+  """Docstring."""
   valid_file: Path = tmp_path / "semantics" / "valid.json"
   valid_file.parent.mkdir(parents=True)
   valid_file.write_text("{}", encoding="utf-8")
@@ -47,7 +47,7 @@ def test_main_success(tmp_path: Path) -> None:
 
 
 def test_main_failure(tmp_path: Path) -> None:
-  """Tests main execution with failed validation."""
+  """Docstring."""
   invalid_file: Path = tmp_path / "semantics" / "invalid.json"
   invalid_file.parent.mkdir(parents=True)
   invalid_file.write_text("{}", encoding="utf-8")
@@ -61,7 +61,7 @@ def test_main_failure(tmp_path: Path) -> None:
 
 
 def test_main_ignore_non_semantics(tmp_path: Path) -> None:
-  """Tests main ignores files not in semantics directory or not JSON."""
+  """Docstring."""
   other_file: Path = tmp_path / "other" / "file.json"
   other_file.parent.mkdir(parents=True)
   txt_file: Path = tmp_path / "semantics" / "file.txt"
@@ -75,9 +75,9 @@ def test_main_ignore_non_semantics(tmp_path: Path) -> None:
 
 
 def test_import_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Tests behavior when import fails."""
-  import sys
+  """Docstring."""
   import importlib
+  import sys
 
   monkeypatch.setitem(sys.modules, "ml_switcheroo.semantics.schema", None)
   with pytest.raises(SystemExit) as exc_info:
@@ -86,7 +86,7 @@ def test_import_error(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_main_block(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Tests main block execution."""
+  """Docstring."""
   import runpy
 
   monkeypatch.setattr(sys, "argv", ["validate_odl_json.py"])

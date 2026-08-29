@@ -1,16 +1,18 @@
 """Test suite for the Generator Verification Mode module."""
 
-import pytest
 import typing
 from pathlib import Path
 from unittest.mock import MagicMock
+
+import pytest
+
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
 def generator(tmp_path: Path) -> TestCaseGenerator:
-  """Provides a mock generator for testing."""
+  """Docstring."""
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   mgr.get_test_template = MagicMock(
     return_value={"torch": {"import": "import torch", "convert_input": "{np_var}", "to_numpy": "{res_var}"}}

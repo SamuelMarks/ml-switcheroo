@@ -1,9 +1,10 @@
 """Test module."""
 
 import libcst as cst
+
 from ml_switcheroo.core.import_fixer.utils import (
-  get_root_name,
   create_dotted_name,
+  get_root_name,
   get_signature,
   is_docstring,
   is_future_import,
@@ -11,7 +12,7 @@ from ml_switcheroo.core.import_fixer.utils import (
 
 
 def test_get_root_name() -> None:
-  """Test element."""
+  """Docstring."""
   node: cst.Name = cst.Name("torch")
   assert get_root_name(node) == "torch"
 
@@ -28,7 +29,7 @@ def test_get_root_name() -> None:
 
 
 def test_create_dotted_name() -> None:
-  """Test element."""
+  """Docstring."""
   node: cst.BaseExpression = create_dotted_name("torch")
   assert isinstance(node, cst.Name)
   assert node.value == "torch"
@@ -43,7 +44,7 @@ def test_create_dotted_name() -> None:
 
 
 def test_get_signature() -> None:
-  """Test element."""
+  """Docstring."""
   # Test simple statement unwrapping
   import_stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(
     body=[cst.Import(names=[cst.ImportAlias(name=cst.Name("torch"))])]
@@ -59,7 +60,7 @@ def test_get_signature() -> None:
 
 
 def test_is_docstring() -> None:
-  """Test element."""
+  """Docstring."""
   # A standard docstring expression
   doc_node: cst.SimpleStatementLine = cst.SimpleStatementLine(body=[cst.Expr(value=cst.SimpleString('"""Doc"""'))])
   assert is_docstring(doc_node, 0) is True
@@ -81,7 +82,7 @@ def test_is_docstring() -> None:
 
 
 def test_is_future_import() -> None:
-  """Test element."""
+  """Docstring."""
   future_node: cst.SimpleStatementLine = cst.SimpleStatementLine(
     body=[cst.ImportFrom(module=cst.Name("__future__"), names=[cst.ImportAlias(name=cst.Name("annotations"))])]
   )

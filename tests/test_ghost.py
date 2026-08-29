@@ -1,8 +1,9 @@
 """Docstring."""
 
-from ml_switcheroo.core.ghost import GhostParam, GhostRef, GhostInspector
-from unittest.mock import patch, MagicMock
-from typing import Dict, Optional, Union, Callable
+from typing import Callable, Dict, Optional, Union
+from unittest.mock import MagicMock, patch
+
+from ml_switcheroo.core.ghost import GhostInspector, GhostParam, GhostRef
 
 
 def test_ghost_ref_has_arg() -> None:
@@ -19,12 +20,12 @@ def test_ghost_ref_has_arg() -> None:
 
 
 def dummy_func(a: int, b: int = 1, *args: tuple[int, ...], c: int = 2, d: Optional[str] = None) -> None:
-  """Dummy docstring."""
+  """Docstring."""
   pass
 
 
 class DummyClass:
-  """dummy class docstring."""
+  """Docstring."""
 
   def __init__(self, x: int, y: str = "test") -> None:
     """Docstring."""
@@ -37,7 +38,7 @@ def test_ghost_inspector_func() -> None:
   assert ref.name == "dummy_func"
   assert ref.api_path == "dummy_func"
   assert ref.kind == "function"
-  assert ref.docstring == "Dummy docstring."
+  assert ref.docstring == "Docstring."
   assert ref.has_varargs is True
 
   assert ref.has_arg("a")
@@ -58,7 +59,7 @@ def test_ghost_inspector_class() -> None:
   ref: GhostRef = GhostInspector.inspect(DummyClass, "DummyClass")
   assert ref.name == "DummyClass"
   assert ref.kind == "class"
-  assert ref.docstring == "dummy class docstring."
+  assert ref.docstring == "Docstring."
   assert ref.has_arg("x")
   assert ref.has_arg("y")
   assert not ref.has_arg("self")
@@ -80,7 +81,6 @@ def test_ghost_inspector_sanitize_callable() -> None:
   """Docstring."""
 
   def func_with_callable_default(f: Callable[..., None] = dummy_func) -> None:
-    """Docstring."""
     pass
 
   ref: GhostRef = GhostInspector.inspect(func_with_callable_default, "func")
@@ -104,7 +104,6 @@ def test_ghost_inspector_unrepresentable_str_only() -> None:
   """Docstring."""
 
   def func_with_bad_str_default(x: UnrepresentableStrOnly = UnrepresentableStrOnly()) -> None:
-    """Docstring."""
     pass
 
   ref: GhostRef = GhostInspector.inspect(func_with_bad_str_default, "func")
@@ -128,7 +127,6 @@ def test_ghost_inspector_unrepresentable_str_address() -> None:
   """Docstring."""
 
   def func_with_bad_str_default(x: UnrepresentableStrAddress = UnrepresentableStrAddress()) -> None:
-    """Docstring."""
     pass
 
   ref: GhostRef = GhostInspector.inspect(func_with_bad_str_default, "func")
@@ -141,7 +139,6 @@ def test_ghost_inspector_annotation_string() -> None:
   MyType = int
 
   def func(x: "MyType") -> None:
-    """Docstring."""
     pass
 
   ref: GhostRef = GhostInspector.inspect(func, "func")
@@ -168,8 +165,6 @@ def test_ghost_inspector_class_without_init() -> None:
   """Docstring."""
 
   class EmptyClass:
-    """Docstring."""
-
     pass
 
   ref: GhostRef = GhostInspector.inspect(EmptyClass, "EmptyClass")

@@ -1,7 +1,7 @@
 """Test suite for the Flax Nnx module."""
 
-from flax import nnx
 import jax
+from flax import nnx
 
 
 def create_sequential(in_features: int, hidden: int, out_features: int, rngs: nnx.Rngs) -> nnx.Sequential:

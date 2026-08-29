@@ -1,7 +1,8 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
+
+import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.nnx_to_torch_params import _extract_leaf_name, transform_nnx_param

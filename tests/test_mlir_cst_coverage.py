@@ -1,17 +1,17 @@
 """Module docstring."""
 
+from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import (
-  TypeNode,
-  ValueNode,
+  AttributeAliasDefNode,
   AttributeNode,
   BlockNode,
-  RegionNode,
-  OperationNode,
-  StableHloConstantOp,
-  AttributeAliasDefNode,
   ModuleNode,
+  OperationNode,
+  RegionNode,
+  StableHloConstantOp,
+  TypeNode,
+  ValueNode,
 )
-from ml_switcheroo.core.cst.base import Trivia
 
 
 def test_mlir_cst_coverage() -> None:

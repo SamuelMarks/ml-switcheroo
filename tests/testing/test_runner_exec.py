@@ -1,17 +1,19 @@
 """Test suite for the Runner Exec module."""
 
 import sys
+from typing import Any, Dict, Generator, Tuple
 from unittest.mock import MagicMock, patch
-import pytest
+
 import numpy as np
-from ml_switcheroo.testing.runner import EquivalenceRunner
+import pytest
+
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
-from typing import Dict, Any, Generator, Tuple
+from ml_switcheroo.testing.runner import EquivalenceRunner
 
 
 @pytest.fixture
 def mock_frameworks() -> Generator[Dict[str, MagicMock], None, None]:
-  """Provides a mock frameworks for testing."""
+  """Docstring."""
 
   def create_safe_mock(name: str, ret_val: float = 5.0) -> MagicMock:
     """Creates safe mock."""

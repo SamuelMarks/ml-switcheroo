@@ -1,15 +1,18 @@
 """Test suite for the Device Allocator module."""
 
-import pytest
 import typing
-import libcst as cst
 from unittest.mock import MagicMock, patch
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.device_allocator import transform_device_allocator
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
+from ml_switcheroo.plugins.device_allocator import _parse_device_args, transform_device_allocator
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -25,7 +28,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> typing.Generator[PivotRewriter, None, None]:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   hooks._HOOKS["device_allocator"] = transform_device_allocator
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -146,3 +149,40 @@ def test_device_allocator_invalid_colon_index(rewriter: PivotRewriter) -> None:
   code: str = "d = torch.device('cuda:foo')"
   result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu:foo')[0]" in result or "jax.devices('cuda:foo')[0]" in result
+
+
+# --- Merged from test_device_allocator_extra.py ---
+
+
+def test_device_allocator_no_adapter() -> None:
+  """Docstring."""
+  node = cst.parse_expression("torch.device('cuda', 0)")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  semantics_mock = MagicMock()
+  ctx = HookContext(semantics=semantics_mock, config=config)
+
+  with patch("ml_switcheroo.plugins.device_allocator.get_adapter", return_value=None):
+    res: typing.Any = transform_device_allocator(typing.cast(cst.Call, node), ctx)
+    assert res is node
+
+
+def test_parse_device_args_no_args() -> None:
+  """Docstring."""
+  node = cst.parse_expression("torch.device()")
+  t, idx = _parse_device_args(typing.cast(cst.Call, node))
+  assert t is None
+  assert idx is None
+
+
+def test_device_allocator_adapter_exception_extra() -> None:
+  """Docstring."""
+  node = cst.parse_expression("torch.device('cuda')")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  semantics_mock = MagicMock()
+  ctx = HookContext(semantics=semantics_mock, config=config)
+
+  mock_adapter = MagicMock()
+  mock_adapter.get_device_syntax.side_effect = Exception("Adapter failure")
+  with patch("ml_switcheroo.plugins.device_allocator.get_adapter", return_value=mock_adapter):
+    res: typing.Any = transform_device_allocator(typing.cast(cst.Call, node), ctx)
+    assert res is node

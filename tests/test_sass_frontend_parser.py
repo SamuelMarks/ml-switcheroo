@@ -1,21 +1,22 @@
 """Test module."""
 
 import pytest
-from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
+
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassModule,
-  SassLabel,
-  SassInstruction,
-  SassDirective,
   SassComment,
-  SassRegister,
+  SassDirective,
   SassImmediate,
+  SassInstruction,
+  SassLabel,
   SassMemory,
+  SassModule,
+  SassRegister,
 )
+from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
 
 
 def test_empty() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser("")
   mod: SassModule = parser.parse()
   assert isinstance(mod, SassModule)
@@ -27,7 +28,7 @@ def test_empty() -> None:
 
 
 def test_comment() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser("// hello\n")
   mod: SassModule = parser.parse()
   assert len(mod.statements) == 1
@@ -36,7 +37,7 @@ def test_comment() -> None:
 
 
 def test_directive() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser(".headerflags\n.reqntid 128, 1, 1\n")
   mod: SassModule = parser.parse()
   assert len(mod.statements) == 2
@@ -50,7 +51,7 @@ def test_directive() -> None:
 
 
 def test_label() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser("L0:\n")
   mod: SassModule = parser.parse()
   assert len(mod.statements) == 1
@@ -59,7 +60,7 @@ def test_label() -> None:
 
 
 def test_instruction_basic() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser("MOV R0, 1;\n")
   mod: SassModule = parser.parse()
   assert len(mod.statements) == 1
@@ -74,7 +75,7 @@ def test_instruction_basic() -> None:
 
 
 def test_instruction_memory() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser("LDG.E R0, [R2];\nLDG.E R0, [R2 + 0x10];\nLDG.E R0, [R2 - 16];\n")
   mod: SassModule = parser.parse()
   assert len(mod.statements) == 3
@@ -94,7 +95,7 @@ def test_instruction_memory() -> None:
 
 
 def test_instruction_memory_bank() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser("MOV R0, c[0x0][0x4];\nMOV R0, c[0x0];\n")
   mod: SassModule = parser.parse()
 
@@ -109,7 +110,7 @@ def test_instruction_memory_bank() -> None:
 
 
 def test_predicate() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser("@P0 MOV R0, 1;\n@!P1 MOV R1, 2;\n")
   mod: SassModule = parser.parse()
 
@@ -125,7 +126,7 @@ def test_predicate() -> None:
 
 
 def test_predicate_operands() -> None:
-  """Test element."""
+  """Docstring."""
   # predicate_operand: @!id | @!reg | @id | @reg | !id | !reg
   parser: SassParser = SassParser("ISETP.LT.AND P0, PT, R1, 3, PT;\n")
   mod: SassModule = parser.parse()
@@ -133,7 +134,7 @@ def test_predicate_operands() -> None:
 
 
 def test_registers() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser("MOV -R1, |-R2|;\n")
   mod: SassModule = parser.parse()
   op1 = getattr(mod.statements[0], "operands")[0]
@@ -146,21 +147,21 @@ def test_registers() -> None:
 
 
 def test_empty_statement() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser(";\n")
   mod: SassModule = parser.parse()
   assert len(mod.statements) == 0
 
 
 def test_mismatch() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser("~")
   with pytest.raises(ValueError, match="Unexpected"):
     parser.parse()
 
 
 def test_predicate_operands_all() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
     MOV R0, @!P0;
     MOV R0, @!R1;
@@ -183,7 +184,7 @@ def test_predicate_operands_all() -> None:
 
 
 def test_immediate_hex_and_float() -> None:
-  """Test element."""
+  """Docstring."""
   parser: SassParser = SassParser("MOV R0, 0x10;\nMOV R0, 1.5;\n")
   mod: SassModule = parser.parse()
   assert getattr(mod.statements[0], "operands")[1].value == 16

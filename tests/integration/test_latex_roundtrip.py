@@ -1,8 +1,9 @@
 """Test suite for the Latex Roundtrip module."""
 
 import pytest
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 

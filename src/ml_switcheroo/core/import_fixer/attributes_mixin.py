@@ -70,11 +70,11 @@ class AttributeMixin(cst.CSTTransformer):
 
     """
     if not isinstance(node.value, cst.Attribute):
-      return node  # pragma: no cover
+      return node
 
     middle_attr = node.value.attr.value
     if middle_attr not in REDUNDANT_SEGMENTS:
-      return node  # pragma: no cover
+      return node
 
     # Safety Check: The root of this chain must be a known framework alias or import
     root_name = get_root_name(node)
@@ -89,7 +89,7 @@ class AttributeMixin(cst.CSTTransformer):
       safe_roots.add(self.target_fw)
 
     if root_name not in safe_roots:
-      return node  # pragma: no cover
+      return node
 
     # Collapse: Remove the middle attribute
     new_base = node.value.value

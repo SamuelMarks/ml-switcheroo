@@ -1,8 +1,9 @@
 """Docstring."""
 
-from unittest.mock import patch
 from pathlib import Path
-from ml_switcheroo.cli.handlers.dev import handle_matrix, handle_docs, handle_gen_tests
+from unittest.mock import patch
+
+from ml_switcheroo.cli.handlers.dev import handle_docs, handle_gen_tests, handle_matrix
 
 
 def test_handle_matrix() -> None:

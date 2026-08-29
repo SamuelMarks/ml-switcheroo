@@ -1,12 +1,14 @@
 """Test suite for the Import Map Loading module."""
 
-from typing import Dict, Any, Tuple, Optional
-from ml_switcheroo.semantics.manager import SemanticsManager
+from typing import Any, Dict, Optional, Tuple
+
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""

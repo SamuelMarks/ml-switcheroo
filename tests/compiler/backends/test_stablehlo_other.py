@@ -4,10 +4,12 @@ Provides comprehensive coverage of exact semantics, type enforcement,
 and generation correctness for remaining operations defined in the plan.
 """
 
-import pytest
 import typing
+
+import pytest
+
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -69,8 +71,8 @@ def test_other_operations(backend: StableHloBackend, logical_op: str, expected_m
 
 
 def test_stablehlo_semantics_not_found() -> None:
+  """Docstring."""
   # Hit 75->83
-  """Test stablehlo semantics not found."""
 
   class SemanticsNoDef:
     """Semantics no def."""
@@ -87,8 +89,8 @@ def test_stablehlo_semantics_not_found() -> None:
 
 
 def test_stablehlo_semantics_no_api() -> None:
+  """Docstring."""
   # Hit 80->83
-  """Test stablehlo semantics no api."""
 
   class SemanticsNoApi:
     """Semantics no api."""
@@ -105,8 +107,8 @@ def test_stablehlo_semantics_no_api() -> None:
 
 
 def test_stablehlo_semantics_none() -> None:
+  """Docstring."""
   # Hit 75->83 (self.semantics is None)
-  """Test stablehlo semantics none."""
   backend = StableHloBackend()
   backend.semantics = None
   g = LogicalGraph("Test")

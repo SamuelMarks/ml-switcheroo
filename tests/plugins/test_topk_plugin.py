@@ -1,13 +1,15 @@
 """Test suite for the Topk Plugin module."""
 
-import pytest
-import libcst as cst
-from typing import Callable, Dict, Any, Union
+from typing import Any, Callable, Dict, Union
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.plugins.topk import transform_topk
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:

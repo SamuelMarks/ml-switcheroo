@@ -1,18 +1,20 @@
 """Test suite for the Merging module."""
 
-import pytest
 import warnings
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.semantics.schema import PatternDef
+
 from ml_switcheroo.semantics.merging import (
+  _normalize_args,
   infer_tier_from_priority,
   merge_frameworks,
-  merge_patterns,
-  _normalize_args,
-  merge_tier_data,
   merge_overlay_data,
+  merge_patterns,
+  merge_tier_data,
 )
+from ml_switcheroo.semantics.schema import PatternDef
 
 
 def test_infer_tier_from_priority() -> None:

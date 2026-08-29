@@ -1,13 +1,13 @@
 """Test suite for the Import Errors module."""
 
-from unittest.mock import patch
 import importlib
+from unittest.mock import patch
 
 try:
-  import torch  # noqa: F401
+  import flax  # noqa: F401
   import jax  # noqa: F401
   import tensorflow  # noqa: F401
-  import flax  # noqa: F401
+  import torch  # noqa: F401
 except ImportError:
   pass
 
@@ -52,6 +52,7 @@ def test_import_errors_frameworks() -> None:
 
     importlib.reload(ml_switcheroo.frameworks.torch)
     from ml_switcheroo_ir.schema.ghost import SemanticTier
+
     import ml_switcheroo.frameworks.jax
 
     a1: ml_switcheroo.frameworks.jax.JaxCoreAdapter = ml_switcheroo.frameworks.jax.JaxCoreAdapter()

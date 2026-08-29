@@ -1,17 +1,18 @@
 """Test suite for the Hooks Context module."""
 
-import pytest
-from unittest.mock import MagicMock
 from typing import Dict, List, Optional, Union
-from ml_switcheroo.core.hooks import HookContext
+from unittest.mock import MagicMock
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext, PluginTraits
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.hooks import PluginTraits
 
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   mgr: MagicMock = MagicMock(spec=SemanticsManager)
   data: Dict[str, Dict[str, Union[List[Union[str, tuple[str, str]]], Dict[str, Dict[str, str]]]]] = {
     "add": {"std_args": ["x1", "x2"], "variants": {"jax": {"api": "jax.numpy.add"}, "numpy": {"api": "numpy.add"}}},
@@ -96,7 +97,7 @@ def test_lookup_signature_unknown_returns_empty(mock_semantics: MagicMock) -> No
 
 
 def test_hooks_resolve_type_no_symbol_table() -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -105,22 +106,18 @@ def test_hooks_resolve_type_no_symbol_table() -> None:
 
 
 def test_hooks_resolve_type_with_symbol_table() -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
   ctx: HookContext = HookContext(mock_manager, config)
 
   class DummySym:
-    """Test class."""
-
     def __init__(self, name: str) -> None:
       """Init."""
       self.name: str = name
 
   class MockSymbolTable:
-    """Test class."""
-
     def get_type(self, node: str) -> Optional[DummySym]:
       """Get type."""
       if node == "tensor":
@@ -140,7 +137,7 @@ def test_hooks_resolve_type_with_symbol_table() -> None:
 
 
 def test_hooks_plugin_traits_no_semantics() -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -152,7 +149,7 @@ def test_hooks_plugin_traits_no_semantics() -> None:
 
 
 def test_hooks_plugin_traits_with_dict(mock_semantics: MagicMock) -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   mock_semantics.get_framework_config.return_value = {"plugin_traits": {"some_trait": True}}
@@ -164,7 +161,7 @@ def test_hooks_plugin_traits_with_dict(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_plugin_traits_with_object(mock_semantics: MagicMock) -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   from ml_switcheroo.core.hooks import PluginTraits
 
@@ -176,7 +173,7 @@ def test_hooks_plugin_traits_with_object(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_plugin_traits_with_other(mock_semantics: MagicMock) -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   mock_semantics.get_framework_config.return_value = {"plugin_traits": "unsupported"}
@@ -185,7 +182,7 @@ def test_hooks_plugin_traits_with_other(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_plugin_traits_falsy(mock_semantics: MagicMock) -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   # The 'plugin_traits' key exists but value is falsy, e.g., empty dict or None
@@ -195,7 +192,7 @@ def test_hooks_plugin_traits_falsy(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_current_variant_no_semantics() -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -204,14 +201,14 @@ def test_hooks_current_variant_no_semantics() -> None:
 
 
 def test_hooks_current_variant_no_op_id(mock_semantics: MagicMock) -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   assert ctx.current_variant is None
 
 
 def test_hooks_current_variant_not_resolved(mock_semantics: MagicMock) -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   ctx.current_op_id = "missing"
@@ -220,7 +217,7 @@ def test_hooks_current_variant_not_resolved(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_current_variant_resolved(mock_semantics: MagicMock) -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   ctx.current_op_id = "add"
@@ -234,7 +231,7 @@ def test_hooks_current_variant_resolved(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_inject_signature_arg() -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -254,7 +251,7 @@ def test_hooks_inject_signature_arg() -> None:
 
 
 def test_hooks_lookup_api_no_semantics() -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -263,7 +260,7 @@ def test_hooks_lookup_api_no_semantics() -> None:
 
 
 def test_hooks_lookup_signature_no_semantics() -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -272,7 +269,7 @@ def test_hooks_lookup_signature_no_semantics() -> None:
 
 
 def test_hooks_lookup_signature_with_dict(mock_semantics: MagicMock) -> None:
-  """Test method."""
+  """Docstring."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   mock_semantics.get_definition_by_id.side_effect = lambda aid: {

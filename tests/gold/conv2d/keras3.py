@@ -1,11 +1,12 @@
 """Test suite for the Keras3 module."""
 
 import typing
+
 import keras
 
 
 class ConvModel(keras.Model):  # type: ignore
-  """Test suite for the Conv Model component."""
+  """Docstring."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3) -> None:
     """Initializes the ConvModel instance."""

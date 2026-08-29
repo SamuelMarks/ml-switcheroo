@@ -1,11 +1,11 @@
 """Test suite for the Massive Cst Fuzz module."""
 
-import types
-
-import pytest
 import os
+import types
+from typing import List, Set
+
 import libcst as cst
-from typing import Set, List
+import pytest
 
 pytest.skip("Too slow for pre-commit", allow_module_level=True)
 
@@ -13,8 +13,9 @@ pytest.skip("Too slow for pre-commit", allow_module_level=True)
 def get_all_visitors() -> Set[type]:
   """Gets all visitors."""
   import importlib
-  import pkgutil
   import inspect
+  import pkgutil
+
   import ml_switcheroo
 
   visitors: List[type] = []

@@ -149,7 +149,7 @@ class ApiTransformerCallMixin:
         tier = origins.get(lookup_id)
 
         if tier in ("neural", "neural_ops") and self.target_fw in ("NumPy", "jax"):
-          self._report_failure(  # pragma: no cover
+          self._report_failure(
             f"Cannot map neural network abstraction '{func_name}' directly to pure math backend '{self.target_fw}'. Use a framework like Flax or Keras."
           )
         else:

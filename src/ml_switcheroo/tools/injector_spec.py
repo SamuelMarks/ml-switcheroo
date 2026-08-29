@@ -57,7 +57,7 @@ class StandardsInjector:
 
     if op_name[0].isupper() and self.tier == SemanticTier.EXTRAS:
       # Simple heuristic: "Conv2d" -> Neural, "abs" -> Math
-      self.tier = SemanticTier.NEURAL  # pragma: no cover
+      self.tier = SemanticTier.NEURAL
 
     # NOTE: Removed islower() heuristic that forced EXTRAS->ARRAY_API.
     # Explicit EXTRAS assignment should be respected for utilities like 'save' or 'load'.
@@ -105,13 +105,13 @@ class StandardsInjector:
 
     # Optional fields (only add if not default)
     if op.op_type != "function":
-      out["op_type"] = op.op_type  # pragma: no cover
+      out["op_type"] = op.op_type
     if op.return_type != "Any":
-      out["return_type"] = op.return_type  # pragma: no cover
+      out["return_type"] = op.return_type
     if op.is_inplace:
-      out["is_inplace"] = True  # pragma: no cover
+      out["is_inplace"] = True
     if op.output_shape_calc:
-      out["output_shape_calc"] = op.output_shape_calc  # pragma: no cover
+      out["output_shape_calc"] = op.output_shape_calc
 
     return out
 
@@ -130,7 +130,7 @@ class StandardsInjector:
     """
     result = []
     for arg in args:
-      if isinstance(arg, (ParameterDef, dict)):  # pragma: no cover
+      if isinstance(arg, (ParameterDef, dict)):
         # Convert object/dict to clean dict
         if isinstance(arg, ParameterDef):
           d = arg.model_dump(exclude_none=True)
@@ -143,7 +143,7 @@ class StandardsInjector:
         # No, stick to dicts for consistency if provided as such.
         result.append(d)
 
-      elif isinstance(arg, (list, tuple)):  # pragma: no cover
+      elif isinstance(arg, (list, tuple)):
         # Legacy tuple ["x", "type"]
         entry = {"name": arg[0]}
         if len(arg) > 1:

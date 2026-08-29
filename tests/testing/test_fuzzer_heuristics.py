@@ -14,8 +14,9 @@ def test_guess_dtype_by_name() -> None:
 
 def test_generate_by_heuristic() -> None:
   """Generates by heuristic."""
-  from ml_switcheroo.testing.fuzzer.heuristics import generate_by_heuristic
   import numpy as np
+
+  from ml_switcheroo.testing.fuzzer.heuristics import generate_by_heuristic
 
   assert generate_by_heuristic("foo", (2, 2), {"options": [42]}) == 42
   assert generate_by_heuristic("axis", (2, 2, 2)) in (0, 1, 2)

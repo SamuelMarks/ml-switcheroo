@@ -1,19 +1,20 @@
 """Test suite for utils.py"""
 
-import libcst as cst
 import typing
 from unittest.mock import MagicMock, patch
 
+import libcst as cst
+
 from ml_switcheroo.core.rewriter.calls.utils import (
-  is_functional_apply,
-  rewrite_stateful_call,
-  inject_kwarg,
-  strip_kwarg,
-  is_super_call,
-  is_builtin,
-  log_diff,
   compute_permutation,
+  inject_kwarg,
   inject_permute_call,
+  is_builtin,
+  is_functional_apply,
+  is_super_call,
+  log_diff,
+  rewrite_stateful_call,
+  strip_kwarg,
 )
 
 
@@ -59,7 +60,6 @@ class MockRewriter:
     self._report_warning = MagicMock()
 
   def _create_dotted_name(self, name: str) -> cst.Name:
-    """Docstring."""
     return cst.Name(name)
 
 
@@ -209,10 +209,7 @@ def test_rewrite_stateful_call_legacy() -> None:
   """Docstring."""
 
   class LegacyRewriter:
-    """Docstring."""
-
     def __init__(self) -> None:
-      """Docstring."""
       self._signature_stack = [MockSigCtx(["x"])]
       self._report_warning = MagicMock()
 

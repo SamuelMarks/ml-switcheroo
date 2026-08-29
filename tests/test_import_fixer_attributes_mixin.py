@@ -1,12 +1,14 @@
 """Test module."""
 
+from typing import Dict, Optional, Set
+
 import libcst as cst
+
 from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeMixin
-from typing import Dict, Set, Optional
 
 
 class MockFixer(AttributeMixin):
-  """Test element."""
+  """Docstring."""
 
   def __init__(
     self,
@@ -14,7 +16,7 @@ class MockFixer(AttributeMixin):
     defined_names: Optional[Set[str]] = None,
     target_fw: Optional[str] = None,
   ) -> None:
-    """Test element."""
+    """Docstring."""
     if path_to_alias is not None:
       self._path_to_alias: Dict[str, str] = path_to_alias
     if defined_names is not None:
@@ -24,7 +26,7 @@ class MockFixer(AttributeMixin):
 
 
 def test_simplify_reexports_not_attribute() -> None:
-  """Test element."""
+  """Docstring."""
   fixer: MockFixer = MockFixer()
   # Not an attribute value
   node: cst.Attribute = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn"))
@@ -32,7 +34,7 @@ def test_simplify_reexports_not_attribute() -> None:
 
 
 def test_simplify_reexports_not_redundant() -> None:
-  """Test element."""
+  """Docstring."""
   fixer: MockFixer = MockFixer()
   # jax.numpy.sum
   node: cst.Attribute = cst.Attribute(
@@ -42,7 +44,7 @@ def test_simplify_reexports_not_redundant() -> None:
 
 
 def test_simplify_reexports_not_safe_root() -> None:
-  """Test element."""
+  """Docstring."""
   fixer: MockFixer = MockFixer(defined_names={"my_module"})
   # unknown.module.X
   node: cst.Attribute = cst.Attribute(
@@ -52,7 +54,7 @@ def test_simplify_reexports_not_safe_root() -> None:
 
 
 def test_simplify_reexports_success() -> None:
-  """Test element."""
+  """Docstring."""
   fixer: MockFixer = MockFixer(defined_names={"nnx"})
   # nnx.module.Module -> nnx.Module
   node: cst.Attribute = cst.Attribute(
@@ -66,14 +68,14 @@ def test_simplify_reexports_success() -> None:
 
 
 def test_leave_attribute_missing_path_to_alias() -> None:
-  """Test element."""
+  """Docstring."""
   fixer: AttributeMixin = AttributeMixin()  # No _path_to_alias set
   node: cst.Attribute = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn"))
   assert fixer.leave_Attribute(node, node) is node
 
 
 def test_leave_attribute_collapsing() -> None:
-  """Test element."""
+  """Docstring."""
   fixer: MockFixer = MockFixer(path_to_alias={"jax.numpy": "jnp"}, defined_names={"jnp"})
   # original_node = jax.numpy.sum
   original_node: cst.Attribute = cst.Attribute(
@@ -88,7 +90,7 @@ def test_leave_attribute_collapsing() -> None:
 
 
 def test_leave_attribute_no_collapsing() -> None:
-  """Test element."""
+  """Docstring."""
   fixer: MockFixer = MockFixer(path_to_alias={"jax.numpy": "jnp"}, defined_names={"jnp"})
   original_node: cst.Attribute = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn"))
   updated: cst.BaseExpression = fixer.leave_Attribute(original_node, original_node)
@@ -96,7 +98,7 @@ def test_leave_attribute_no_collapsing() -> None:
 
 
 def test_leave_attribute_with_simplify_after_collapse() -> None:
-  """Test element."""
+  """Docstring."""
   fixer: MockFixer = MockFixer(path_to_alias={"flax.nnx": "nnx"}, defined_names={"nnx"})
   # flax.nnx.module.Module -> nnx.module.Module -> nnx.Module
   original_node: cst.Attribute = cst.Attribute(

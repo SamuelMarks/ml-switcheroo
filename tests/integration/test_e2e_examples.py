@@ -1,15 +1,15 @@
 """Test suite for the E2E Examples module."""
 
 import typing
-
+from pathlib import Path
+from typing import Any, Dict, Optional, Set, Tuple
 
 import pytest
-from pathlib import Path
-from typing import Set, Dict, Tuple, Optional, Any
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 EXAMPLES_DIR: Path = Path(__file__).parent.parent.parent / "tests" / "examples"
 
@@ -23,7 +23,7 @@ def _read_code(filename: str) -> str:
 
 
 class E2ESemantics(SemanticsManager):
-  """Test suite for the E2 E Semantics component."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the E2ESemantics instance."""
@@ -160,7 +160,7 @@ class E2ESemantics(SemanticsManager):
 
 @pytest.fixture
 def engine_factory() -> typing.Callable[[str, str, bool], ASTEngine]:
-  """Provides a mock engine factory for testing."""
+  """Docstring."""
   semantics = E2ESemantics()
 
   def _create(source: str, target: str, strict: bool = False) -> ASTEngine:

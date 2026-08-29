@@ -1,14 +1,16 @@
 """Test suite for the Readme Editor module."""
 
-import pytest
-from ml_switcheroo.utils.readme_editor import ReadmeEditor
-from ml_switcheroo.semantics.manager import SemanticsManager
 from pathlib import Path
 from typing import Dict
 
+import pytest
+
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.utils.readme_editor import ReadmeEditor
+
 
 class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def get_known_apis(self) -> dict:
     """Mock implementation of get known apis."""
@@ -21,7 +23,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def editor(tmp_path: Path) -> ReadmeEditor:
-  """Provides a mock editor for testing."""
+  """Docstring."""
   mgr: MockSemantics = MockSemantics()
   readme: Path = tmp_path / "README.md"
   readme.write_text("# Test Project\nStart.", encoding="utf-8")

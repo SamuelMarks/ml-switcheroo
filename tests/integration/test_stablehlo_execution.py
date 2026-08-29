@@ -1,9 +1,10 @@
 """Tests for StableHLO execution and parity."""
 
-import pytest
 import numpy as np
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 jax = pytest.importorskip("jax")
@@ -24,7 +25,7 @@ def requires_pjrt() -> bool:
 
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
-  """Provide a SemanticsManager instance for the tests."""
+  """Docstring."""
   mgr = SemanticsManager()
   return mgr
 
@@ -57,7 +58,7 @@ module {
 
 @pytest.mark.skipif(not requires_pjrt(), reason="JAX PJRT cpu backend not available.")
 def test_stablehlo_math_parity(semantics: SemanticsManager) -> None:
-  """Test StableHLO execution parity for basic math operations."""
+  """Docstring."""
   mlir_code: str = """
 module {
   func.func @main(%x: tensor<3xf32>, %y: tensor<3xf32>) -> tensor<3xf32> {
@@ -85,7 +86,7 @@ module {
 
 @pytest.mark.skipif(not requires_pjrt(), reason="JAX PJRT cpu backend not available.")
 def test_stablehlo_while_parity(semantics: SemanticsManager) -> None:
-  """Test the structural generation of stablehlo.while loop."""
+  """Docstring."""
   # This is a basic structural test for while compilation parity
   code: str = "import torch\ndef forward(x: torch.Tensor, count: torch.Tensor):\n    while count:\n        x = torch.abs(x)\n    return x\n"
   config = RuntimeConfig(source_framework="torch", target_framework="stablehlo", strict_mode=True)

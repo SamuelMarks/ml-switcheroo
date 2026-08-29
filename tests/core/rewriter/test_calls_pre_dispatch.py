@@ -1,13 +1,15 @@
 """Test suite for the Calls Pre Dispatch module."""
 
 import typing
-import libcst as cst
 from unittest.mock import MagicMock, patch
+
+import libcst as cst
+
 from ml_switcheroo.core.rewriter.calls.pre import handle_pre_checks, resolve_implicit_method
 
 
 class MockTraits:
-  """Mock Traits class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, method: str = "apply", implicit_roots: typing.Optional[list[str]] = None) -> None:
     """Initializes the MockTraits instance."""
@@ -16,7 +18,7 @@ class MockTraits:
 
 
 class MockType:
-  """Mock Type class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, name: str, framework: typing.Optional[str] = None) -> None:
     """Initializes the MockType instance."""
@@ -26,7 +28,7 @@ class MockType:
 
 
 class MockSymbolTable:
-  """Mock Symbol Table class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, sym_type: typing.Any = None) -> None:
     """Initializes the MockSymbolTable instance."""
@@ -38,7 +40,7 @@ class MockSymbolTable:
 
 
 class MockContext:
-  """Mock Context class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, symbol_table: typing.Any = None) -> None:
     """Initializes the MockContext instance."""
@@ -47,7 +49,7 @@ class MockContext:
 
 
 class MockRewriterPre:
-  """Mock Rewriter Pre class for testing purposes."""
+  """Docstring."""
 
   def __init__(
     self,
@@ -259,7 +261,7 @@ def test_resolve_implicit_method_legacy_fallback() -> None:
 
 
 class MockRule:
-  """Mock Rule class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, if_arg: typing.Any, op: typing.Any, is_val: typing.Any = None, use_api: typing.Any = None) -> None:
     """Initializes the MockRule instance."""
@@ -270,7 +272,7 @@ class MockRule:
 
 
 class MockRewriterDispatch:
-  """Mock Rewriter Dispatch class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, source_fw: str = "src", is_module_val: bool = False) -> None:
     """Initializes the MockRewriterDispatch instance."""

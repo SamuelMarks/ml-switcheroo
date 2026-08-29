@@ -1,9 +1,11 @@
 """Test suite for the Sass Parser Coverage module."""
 
-import pytest
 import typing
+
+import pytest
+
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassMemory, SassModule, SassRegister
 from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassMemory, SassRegister, SassModule
 
 
 def test_sass_parser_missing() -> None:
@@ -15,7 +17,7 @@ def test_sass_parser_missing() -> None:
 
 
 def test_sass_parser_error() -> None:
-  """Test for test_sass_parser_error."""
+  """Docstring."""
   with pytest.raises(ValueError, match="Unexpected"):
     SassParser("~").parse()
 
@@ -24,19 +26,19 @@ def test_sass_parser_error() -> None:
 
 
 def test_sass_parser_empty() -> None:
-  """Test for test_sass_parser_empty."""
+  """Docstring."""
   mod: SassModule = SassParser("   ").parse()
   assert len(mod.statements) == 0
 
 
 def test_sass_parser_directive_no_params() -> None:
-  """Test for test_sass_parser_directive_no_params."""
+  """Docstring."""
   mod: SassModule = SassParser(".text").parse()
   assert mod.statements[0].name == "text"
 
 
 def test_sass_parser_directive_string() -> None:
-  """Test for test_sass_parser_directive_string."""
+  """Docstring."""
   mod: SassModule = SassParser('.headerflags @"NV_PROFILE"').parse()
   assert mod.statements[0].params[0] == '@"NV_PROFILE"'
 
@@ -45,37 +47,37 @@ def test_sass_parser_directive_string() -> None:
 
 
 def test_sass_parser_comments() -> None:
-  """Test for test_sass_parser_comments."""
+  """Docstring."""
   mod: SassModule = SassParser("// foo").parse()
   assert mod.statements[0].text == "foo"
 
 
 def test_sass_parser_empty_stmt() -> None:
-  """Test for test_sass_parser_empty_stmt."""
+  """Docstring."""
   mod: SassModule = SassParser(";").parse()
   assert len(mod.statements) == 0
 
 
 def test_sass_parser_mem_reg() -> None:
-  """Test for test_sass_parser_mem_reg."""
+  """Docstring."""
   mod: SassModule = SassParser("LDG R0, [R1]").parse()
   assert getattr(mod.statements[0].operands[1], "offset", "fake") is None
 
 
 def test_sass_parser_predicate_operand() -> None:
-  """Test for test_sass_parser_predicate_operand."""
+  """Docstring."""
   mod: SassModule = SassParser("ISETP.NE.AND P0, PT, R1, 0x0, PT").parse()
   assert mod.statements[0].operands[-1].name == "PT"
 
 
 def test_sass_parser_at_string() -> None:
-  """Test for test_sass_parser_at_string."""
+  """Docstring."""
   mod: SassModule = SassParser('.headerflags @"foo"').parse()
   assert mod.statements[0].params[0] == '@"foo"'
 
 
 def test_sass_parser_immediate() -> None:
-  """Test for test_sass_parser_immediate."""
+  """Docstring."""
   mod: SassModule = SassParser("MOV R0, 5").parse()
   assert mod.statements[0].operands[1].value == 5
   assert mod.statements[0].operands[1].is_hex is False
@@ -86,7 +88,7 @@ def test_sass_parser_immediate() -> None:
 
 
 def test_sass_parser_register() -> None:
-  """Test for test_sass_parser_register."""
+  """Docstring."""
   mod: SassModule = SassParser("MOV R0, -R1").parse()
   assert mod.statements[0].operands[1].negated is True
 
@@ -96,13 +98,13 @@ def test_sass_parser_register() -> None:
 
 
 def test_sass_parser_mem_bank() -> None:
-  """Test for test_sass_parser_mem_bank."""
+  """Docstring."""
   mod: SassModule = SassParser("FADD R0, R1, c[0x0][0x4]").parse()
   assert mod.statements[0].operands[2].offset == 4
 
 
 def test_sass_parser_mem_offset() -> None:
-  """Test for test_sass_parser_mem_offset."""
+  """Docstring."""
   mod: SassModule = SassParser("LDG.E R0, [R1 + 0x8]").parse()
   assert mod.statements[0].operands[1].offset == 8
 
@@ -111,14 +113,14 @@ def test_sass_parser_mem_offset() -> None:
 
 
 def test_sass_parser_predicate_guard() -> None:
-  """Test for test_sass_parser_predicate_guard."""
+  """Docstring."""
   mod: SassModule = SassParser("@!P0 MOV R0, R1").parse()
   assert mod.statements[0].predicate.negated is True
   assert mod.statements[0].predicate.name == "P0"
 
 
 def test_missing_coverage_sass() -> None:
-  """Test for test_missing_coverage_sass."""
+  """Docstring."""
   # label
   mod: SassModule = SassParser("main:").parse()
   assert mod.statements[0].name == "main"
@@ -141,7 +143,7 @@ def test_missing_coverage_sass() -> None:
 
 
 def test_missing_coverage_sass_2() -> None:
-  """Test for test_missing_coverage_sass_2."""
+  """Docstring."""
   # directive list param
   mod: SassModule = SassParser('.headerflags @"NV_PROFILE", "OTHER"').parse()
   assert len(mod.statements[0].params) == 2
@@ -151,7 +153,7 @@ def test_missing_coverage_sass_2() -> None:
 
 
 def test_missing_coverage_sass_3() -> None:
-  """Test for test_missing_coverage_sass_3."""
+  """Docstring."""
   # directive param fallback list and Token fallback
   mod: SassModule = SassParser(".req 5").parse()  # number identifier?
   assert mod.statements[0].params[0] == "5"
@@ -161,7 +163,7 @@ def test_missing_coverage_sass_3() -> None:
 
 
 def test_missing_coverage_sass_4() -> None:
-  """Test for test_missing_coverage_sass_4."""
+  """Docstring."""
   # label trivia
   mod: SassModule = SassParser("main:\n  MOV R0, R1").parse()
   assert mod.statements[0].name == "main"
@@ -176,21 +178,21 @@ def test_missing_coverage_sass_4() -> None:
 
 
 def test_missing_coverage_sass_5() -> None:
-  """Test for test_missing_coverage_sass_5."""
+  """Docstring."""
   # label operand
   mod: SassModule = SassParser("BRA main").parse()
   assert mod.statements[0].operands[0].name == "main"
 
 
 def test_missing_coverage_sass_6() -> None:
-  """Test for test_missing_coverage_sass_6."""
+  """Docstring."""
   # at_string parsing direct string value fallback
   mod: SassModule = SassParser('.headerflags "NV_PROFILE"').parse()
   assert mod.statements[0].params[0] == '"NV_PROFILE"'
 
 
 def test_missing_coverage_sass_7() -> None:
-  """Test for test_missing_coverage_sass_7."""
+  """Docstring."""
   mod: SassModule = SassParser(".headerflags 5").parse()
   assert mod.statements[0].params[0] == "5"
 
@@ -202,45 +204,45 @@ def test_missing_coverage_sass_7() -> None:
 
 
 def test_sass_parser_pred_at_bang_id() -> None:
-  """Test for test_sass_parser_pred_at_bang_id."""
+  """Docstring."""
   mod: SassModule = SassParser("FADD R0, @!P0").parse()
   assert mod.statements[0].operands[1].negated is True
   assert mod.statements[0].operands[1].name == "P0"
 
 
 def test_sass_parser_pred_at_id() -> None:
-  """Test for test_sass_parser_pred_at_id."""
+  """Docstring."""
   mod: SassModule = SassParser("FADD R0, @P0").parse()
   assert mod.statements[0].operands[1].negated is False
 
 
 def test_sass_parser_pred_bang_reg() -> None:
-  """Test for test_sass_parser_pred_bang_reg."""
+  """Docstring."""
   mod: SassModule = SassParser("FADD R0, !PT").parse()
   assert mod.statements[0].operands[1].negated is True
 
 
 def test_sass_parser_pred_reg() -> None:
-  """Test for test_sass_parser_pred_reg."""
+  """Docstring."""
   mod: SassModule = SassParser("FADD R0, PT").parse()
   assert isinstance(mod.statements[0].operands[1], SassRegister)
 
 
 def test_sass_parser_mem_bank_2() -> None:
-  """Test for test_sass_parser_mem_bank_2."""
+  """Docstring."""
   mod: SassModule = SassParser("FADD R0, c[0x0][0x4]").parse()
   assert isinstance(mod.statements[0].operands[1], SassMemory)
   assert mod.statements[0].operands[1].offset == 4
 
 
 def test_sass_parser_mem_reg_neg_offset() -> None:
-  """Test for test_sass_parser_mem_reg_neg_offset."""
+  """Docstring."""
   mod: SassModule = SassParser("FADD R0, [R1 - 0x4]").parse()
   assert mod.statements[0].operands[1].offset == -4
 
 
 def test_sass_parser_missing_coverage_8() -> None:
-  """Test for test_sass_parser_missing_coverage_8."""
+  """Docstring."""
   mod: SassModule = SassParser("FADD R0, @!R1").parse()
   assert mod.statements[0].operands[1].negated is True
 
@@ -252,7 +254,7 @@ def test_sass_parser_missing_coverage_8() -> None:
 
 
 def test_sass_parser_missing_coverage_9() -> None:
-  """Test for test_sass_parser_missing_coverage_9."""
+  """Docstring."""
   # hit line 104 (node missing leading_trivia but has children)
   from ml_switcheroo.core.compiler.frontends.sass.parser import _get_trivia
 
@@ -275,7 +277,8 @@ def test_sass_parser_missing_coverage_9() -> None:
 
   # test directive param list fallback (line 240, 242)
   # Not sure exactly how to hit it from parser, so we'll mock or force it via parser
-  from lark import Tree, Token
+  from lark import Token, Tree
+
   from ml_switcheroo.core.compiler.frontends.sass.parser import SassTransformer
 
   transformer = SassTransformer()
@@ -295,7 +298,7 @@ def test_sass_parser_missing_coverage_9() -> None:
 
 
 def test_sass_parser_branch_coverage() -> None:
-  """Test for test_sass_parser_branch_coverage."""
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.sass.parser import SassTransformer
 
   transformer = SassTransformer()
@@ -311,7 +314,7 @@ def test_sass_cst_print() -> None:
   assert "main:" in str(mod)
   assert ".text" in str(mod)
 
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate, SassPredicate, SassRegister, SassMemory
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate, SassMemory, SassPredicate, SassRegister
 
   imm = SassImmediate(value=42, is_hex=False)
   assert str(imm) == "42"
@@ -364,9 +367,10 @@ def test_sass_parser_semi_instruction() -> None:
 
 def test_sass_cst_extra_coverage() -> None:
   """Docstring."""
-  from ml_switcheroo.core.cst.base import Trivia
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction, SassPredicate, SassImmediate, SassDirective
   import pytest
+
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassDirective, SassImmediate, SassInstruction, SassPredicate
+  from ml_switcheroo.core.cst.base import Trivia
 
   with pytest.raises(ValueError, match="Invalid SASS opcode"):
     SassInstruction(opcode="BAD OPCODE", operands=[])

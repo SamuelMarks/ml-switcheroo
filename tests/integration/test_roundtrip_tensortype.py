@@ -1,15 +1,16 @@
 """Test suite for the Roundtrip Tensortype module."""
 
 import pytest
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 
 @pytest.fixture
 def semantics_env() -> SemanticsManager:
-  """Provides a mock semantics environment for testing."""
+  """Docstring."""
   mgr = SemanticsManager()
   RegistryLoader(mgr).hydrate()
   return mgr

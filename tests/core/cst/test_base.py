@@ -1,15 +1,16 @@
 """Tests for the base CST implementation."""
 
-import pytest
 from dataclasses import dataclass, field
 from typing import List
 
-from ml_switcheroo.core.cst.base import CSTNode, CSTVisitor, CSTTransformer, Trivia
+import pytest
+
+from ml_switcheroo.core.cst.base import CSTNode, CSTTransformer, CSTVisitor, Trivia
 
 
 @dataclass
 class DummyNode(CSTNode):
-  """A simple node for testing."""
+  """Docstring."""
 
   name: str = ""
   child: "CSTNode" = None
@@ -25,7 +26,7 @@ class DummyNode(CSTNode):
 
 
 class MockVisitor(CSTVisitor):
-  """A test visitor to track visited nodes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initialize the visitor."""
@@ -38,7 +39,7 @@ class MockVisitor(CSTVisitor):
 
 
 class MockTransformer(CSTTransformer):
-  """A test transformer that renames DummyNodes."""
+  """Docstring."""
 
   def transform_DummyNode(self, node: DummyNode) -> DummyNode:
     """Transforms a DummyNode."""
@@ -48,13 +49,13 @@ class MockTransformer(CSTTransformer):
 
 
 def test_trivia() -> None:
-  """Test trivia creation and access."""
+  """Docstring."""
   t = Trivia("  ")
   assert t.text == "  "
 
 
 def test_cstnode_base() -> None:
-  """Test that CSTNode base class raises NotImplementedError."""
+  """Docstring."""
   node = CSTNode()
   with pytest.raises(NotImplementedError):
     node.to_text()
@@ -64,7 +65,7 @@ def test_cstnode_base() -> None:
 
 
 def test_trivia_coercion() -> None:
-  """Test that __post_init__ properly coerces str and None trivia inputs."""
+  """Docstring."""
   node_str = DummyNode(name="test", leading_trivia="  ", trailing_trivia="\n")
   assert len(node_str.leading_trivia) == 1
   assert node_str.leading_trivia[0].text == "  "
@@ -77,7 +78,7 @@ def test_trivia_coercion() -> None:
 
 
 def test_visitor() -> None:
-  """Test the CSTVisitor traversal logic."""
+  """Docstring."""
   root = DummyNode(name="root")
   child1 = DummyNode(name="child1")
   child2 = DummyNode(name="child2")
@@ -94,7 +95,7 @@ def test_visitor() -> None:
 
 
 def test_transformer() -> None:
-  """Test the CSTTransformer transformation logic."""
+  """Docstring."""
   root = DummyNode(name="root")
   child1 = DummyNode(name="child1")
   child2 = DummyNode(name="child2")

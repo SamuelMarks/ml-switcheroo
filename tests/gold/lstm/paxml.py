@@ -1,12 +1,13 @@
 """Test suite for the Paxml module."""
 
 import typing
+
 from praxis import base_layer  # type: ignore
 from praxis.layers import rnn_cell  # type: ignore
 
 
 class LSTMModel(base_layer.BaseLayer):  # type: ignore
-  """Test suite for the L S T M Model component."""
+  """Docstring."""
 
   input_size: int = 0
   hidden_size: int = 0

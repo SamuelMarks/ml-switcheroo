@@ -1,16 +1,18 @@
 """Test suite for the Engine Linter module."""
 
-import pytest
 import typing
+from unittest.mock import MagicMock, patch
+
+import libcst as cst
+import pytest
+
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.config import RuntimeConfig
-from unittest.mock import MagicMock, patch
-import libcst as cst
 
 
 class MockUsageScanner(cst.CSTVisitor):
-  """Mock Usage Scanner class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
     """Initializes the MockUsageScanner instance."""
@@ -30,7 +32,7 @@ class MockUsageScanner(cst.CSTVisitor):
 
 
 class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -64,7 +66,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def engine() -> typing.Generator[ASTEngine, None, None]:
-  """Provides a mock engine for testing."""
+  """Docstring."""
   mgr = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   mock_torch = MagicMock()

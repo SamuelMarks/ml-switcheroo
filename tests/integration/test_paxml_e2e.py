@@ -1,12 +1,14 @@
 """Test suite for the Paxml E2E module."""
 
-import pytest
 import typing
 from pathlib import Path
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 EXAMPLES_DIR: Path = Path(__file__).parent.parent / "examples"
 
@@ -18,7 +20,7 @@ def _read_code(filename: str) -> str:
 
 
 class PaxE2ESemantics(SemanticsManager):  # type: ignore[misc]
-  """Test suite for the Pax E2 E Semantics component."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the PaxE2ESemantics instance."""
@@ -92,7 +94,7 @@ class PaxE2ESemantics(SemanticsManager):  # type: ignore[misc]
 
 @pytest.fixture
 def pax_engine() -> ASTEngine:
-  """Provides a mock pax engine for testing."""
+  """Docstring."""
   semantics = PaxE2ESemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="paxml", strict_mode=False)
   return ASTEngine(semantics=semantics, config=config)

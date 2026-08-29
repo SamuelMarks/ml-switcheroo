@@ -3,8 +3,8 @@
 from pathlib import Path
 from unittest.mock import patch
 
-import yaml
 import pytest
+import yaml
 
 from ml_switcheroo.cli.handlers.define import handle_define
 

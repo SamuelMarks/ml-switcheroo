@@ -1,15 +1,17 @@
 """Test suite for the Rewriter Functional Unwrap module."""
 
-import pytest
 import typing
+
 import libcst as cst
-from tests.conftest import TestRewriter
-from ml_switcheroo.semantics.manager import SemanticsManager
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.semantics.manager import SemanticsManager
+from tests.conftest import TestRewriter
 
 
 class MockUnwrapSemantics(SemanticsManager):
-  """Mock Unwrap Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockUnwrapSemantics instance."""
@@ -34,7 +36,7 @@ class MockUnwrapSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   semantics = MockUnwrapSemantics()
   config = RuntimeConfig(source_framework="jax", target_framework="jax", strict_mode=False)
   return TestRewriter(semantics, config)

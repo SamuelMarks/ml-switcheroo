@@ -1,8 +1,9 @@
 """Test suite for the Macro Ops module."""
 
 import typing
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE_CODE: str = (
@@ -12,7 +13,7 @@ EXPECTED_JAX: str = "\nimport jax.numpy as jnp\nimport jax.nn as nn\n\ndef activ
 
 
 class MacroSemantics(SemanticsManager):  # type: ignore[misc]
-  """Test suite for the Macro Semantics component."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MacroSemantics instance."""

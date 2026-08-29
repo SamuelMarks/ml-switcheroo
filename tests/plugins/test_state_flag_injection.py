@@ -1,10 +1,12 @@
 """Test suite for the State Flag Injection module."""
 
-import libcst as cst
 from typing import Union
-from ml_switcheroo.plugins.state_flag_injection import inject_training_flag_call, capture_eval_state, _get_func_name
-from ml_switcheroo.core.hooks import HookContext
 from unittest.mock import MagicMock
+
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.state_flag_injection import _get_func_name, capture_eval_state, inject_training_flag_call
 
 
 def test_get_func_name() -> None:

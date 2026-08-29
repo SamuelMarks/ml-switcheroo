@@ -1,12 +1,12 @@
 """Test suite for the Paxml module."""
 
+import jax.numpy as jnp
 from praxis import base_layer
 from praxis.layers import attentions
-import jax.numpy as jnp
 
 
 class AttentionModel(base_layer.BaseLayer):
-  """Test suite for the Attention Model component."""
+  """Docstring."""
 
   embed_dim: int = 0
   num_heads: int = 0

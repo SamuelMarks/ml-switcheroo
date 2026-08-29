@@ -1,18 +1,19 @@
 """Test module."""
 
-import pytest
-import libcst as cst
+from typing import Any, Dict, List
 from unittest.mock import Mock, patch
 
-from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy, _apply_layout_permutation
-from typing import Dict, Any, List
+import libcst as cst
+import pytest
+
+from ml_switcheroo.core.rewriter.calls.strategy import _apply_layout_permutation, execute_strategy
 
 
 class MockRewriter:
-  """Test element."""
+  """Docstring."""
 
   def __init__(self) -> None:
-    """Test element."""
+    """Docstring."""
     self.context: Mock = Mock()
     self.source_fw: str = "source_fw"
     self.target_fw: str = "target_fw"
@@ -31,18 +32,18 @@ class MockRewriter:
 
 @pytest.fixture
 def original_call() -> cst.Call:
-  """Test element."""
+  """Docstring."""
   return cst.Call(func=cst.Name("foo"), args=[])
 
 
 @pytest.fixture
 def updated_call() -> cst.Call:
-  """Test element."""
+  """Docstring."""
   return cst.Call(func=cst.Name("bar"), args=[])
 
 
 def test_execute_strategy_dispatch_rules(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"dispatch_rules": ["rule1"]}
   details: Dict[str, Any] = {}
@@ -58,7 +59,7 @@ def test_execute_strategy_dispatch_rules(original_call: cst.Call, updated_call: 
 
 
 def test_execute_strategy_variant_imports(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   rewriter._handle_variant_imports = Mock()
   mapping: Dict[str, Any] = {"api": "foo"}
@@ -67,7 +68,7 @@ def test_execute_strategy_variant_imports(original_call: cst.Call, updated_call:
 
 
 def test_execute_strategy_infix_success(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"transformation_type": "infix", "operator": "+"}
   details: Dict[str, Any] = {"std_args": ["a", "b"]}
@@ -79,7 +80,7 @@ def test_execute_strategy_infix_success(original_call: cst.Call, updated_call: c
 
 
 def test_execute_strategy_infix_failure(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"transformation_type": "infix", "operator": "+"}
   details: Dict[str, Any] = {}
@@ -92,7 +93,7 @@ def test_execute_strategy_infix_failure(original_call: cst.Call, updated_call: c
 
 
 def test_execute_strategy_inline_lambda_success(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
   details: Dict[str, Any] = {}
@@ -104,7 +105,7 @@ def test_execute_strategy_inline_lambda_success(original_call: cst.Call, updated
 
 
 def test_execute_strategy_inline_lambda_failure(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
   details: Dict[str, Any] = {}
@@ -117,7 +118,7 @@ def test_execute_strategy_inline_lambda_failure(original_call: cst.Call, updated
 
 
 def test_execute_strategy_plugin_success(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"requires_plugin": "my_plugin"}
   details: Dict[str, Any] = {}
@@ -131,7 +132,7 @@ def test_execute_strategy_plugin_success(original_call: cst.Call, updated_call: 
 
 
 def test_execute_strategy_plugin_failure(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"requires_plugin": "my_plugin"}
   details: Dict[str, Any] = {}
@@ -144,7 +145,7 @@ def test_execute_strategy_plugin_failure(original_call: cst.Call, updated_call: 
 
 
 def test_execute_strategy_macro_success(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"macro_template": "{x} + 1"}
   details: Dict[str, Any] = {"std_args": ["x", ["y", "def"], {"name": "z"}]}
@@ -159,7 +160,7 @@ def test_execute_strategy_macro_success(original_call: cst.Call, updated_call: c
 
 
 def test_execute_strategy_macro_failure(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"macro_template": "{x} + 1"}
   details: Dict[str, Any] = {}
@@ -172,7 +173,7 @@ def test_execute_strategy_macro_failure(original_call: cst.Call, updated_call: c
 
 
 def test_execute_strategy_standard_missing_api(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {}
   details: Dict[str, Any] = {}
@@ -183,7 +184,7 @@ def test_execute_strategy_standard_missing_api(original_call: cst.Call, updated_
 
 
 def test_execute_strategy_standard_missing_api_neural(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   rewriter.target_fw = "jax"
   mapping: Dict[str, Any] = {}
@@ -195,7 +196,7 @@ def test_execute_strategy_standard_missing_api_neural(original_call: cst.Call, u
 
 
 def test_execute_strategy_standard_success(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   rewriter.strict_mode = True
   mapping: Dict[str, Any] = {"api": "new_api"}
@@ -211,7 +212,7 @@ def test_execute_strategy_standard_success(original_call: cst.Call, updated_call
 
 
 def test_execute_strategy_standard_layout_map(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"api": "new_api", "layout_map": {"a": "NCHW->NHWC"}}
   details: Dict[str, Any] = {}
@@ -225,7 +226,7 @@ def test_execute_strategy_standard_layout_map(original_call: cst.Call, updated_c
 
 
 def test_execute_strategy_standard_normalization_failure(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"api": "new_api"}
   details: Dict[str, Any] = {}
@@ -238,7 +239,7 @@ def test_execute_strategy_standard_normalization_failure(original_call: cst.Call
 
 
 def test_apply_layout_permutation() -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   node: cst.Call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("x"))])
   mapping: Dict[str, Any] = {
@@ -262,7 +263,7 @@ def test_apply_layout_permutation() -> None:
 
 
 def test_execute_strategy_no_hook_context(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   del rewriter.context.hook_context
   mapping: Dict[str, Any] = {"api": "foo"}
@@ -270,7 +271,7 @@ def test_execute_strategy_no_hook_context(original_call: cst.Call, updated_call:
 
 
 def test_execute_strategy_dispatch_rules_falsy(original_call: cst.Call, updated_call: cst.Call) -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   mapping: Dict[str, Any] = {"dispatch_rules": ["rule1"]}
 
@@ -280,7 +281,7 @@ def test_execute_strategy_dispatch_rules_falsy(original_call: cst.Call, updated_
 
 
 def test_apply_layout_permutation_no_arrow() -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   node: cst.Call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("x"))])
   mapping: Dict[str, Any] = {
@@ -295,7 +296,7 @@ def test_apply_layout_permutation_no_arrow() -> None:
 
 
 def test_apply_layout_permutation_falsy_indices() -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   node: cst.Call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("x"))])
   mapping: Dict[str, Any] = {
@@ -312,7 +313,7 @@ def test_apply_layout_permutation_falsy_indices() -> None:
 
 
 def test_apply_layout_permutation_out_of_bounds_idx() -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   mapping: Dict[str, Any] = {

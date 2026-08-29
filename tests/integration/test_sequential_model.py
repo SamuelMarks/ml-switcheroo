@@ -1,15 +1,17 @@
 """Test suite for the Sequential Model module."""
 
-import pytest
 import typing
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSequentialSemantics(SemanticsManager):  # type: ignore[misc]
-  """Mock Sequential Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockSequentialSemantics instance."""
@@ -57,7 +59,7 @@ class MockSequentialSemantics(SemanticsManager):  # type: ignore[misc]
 
 @pytest.fixture
 def semantics_manager() -> MockSequentialSemantics:
-  """Provides a mock semantics manager for testing."""
+  """Docstring."""
   return MockSequentialSemantics()
 
 

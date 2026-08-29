@@ -1,34 +1,35 @@
 """Test module."""
 
 import pytest
+
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
+  RdnaComment,
+  RdnaDirective,
+  RdnaImmediate,
+  RdnaInstruction,
+  RdnaLabel,
   RdnaLabelRef,
+  RdnaMemory,
+  RdnaModifier,
+  RdnaModule,
+  RdnaNode,
   RdnaSGPR,
   RdnaVGPR,
   c_SGPR,
   c_VGPR,
-  RdnaImmediate,
-  RdnaModifier,
-  RdnaMemory,
-  RdnaInstruction,
-  RdnaLabel,
-  RdnaDirective,
-  RdnaComment,
-  RdnaModule,
-  RdnaNode,
 )
 from ml_switcheroo.core.cst.base import Trivia
 
 
 def with_trivia(node: RdnaNode) -> RdnaNode:
-  """Test element."""
+  """Docstring."""
   node.leading_trivia = [Trivia(" ")]
   node.trailing_trivia = [Trivia("\n")]
   return node
 
 
 def test_cst_label_ref() -> None:
-  """Test element."""
+  """Docstring."""
   node: RdnaNode = RdnaLabelRef(name="label1")
   assert node.to_text() == "label1"
   node = with_trivia(node)
@@ -36,7 +37,7 @@ def test_cst_label_ref() -> None:
 
 
 def test_cst_sgpr() -> None:
-  """Test element."""
+  """Docstring."""
   node: RdnaNode = RdnaSGPR(index=0)
   assert node.to_text() == "s0"
   node2: RdnaNode = RdnaSGPR(index=1, count=4)
@@ -47,7 +48,7 @@ def test_cst_sgpr() -> None:
 
 
 def test_cst_vgpr() -> None:
-  """Test element."""
+  """Docstring."""
   node: RdnaNode = RdnaVGPR(index=2)
   assert node.to_text() == "v2"
   node2: RdnaNode = RdnaVGPR(index=2, count=3)
@@ -58,7 +59,7 @@ def test_cst_vgpr() -> None:
 
 
 def test_cst_immediate() -> None:
-  """Test element."""
+  """Docstring."""
   node: RdnaNode = RdnaImmediate(value=42)
   assert node.to_text() == "42"
   node2: RdnaNode = RdnaImmediate(value=255, is_hex=True)
@@ -68,7 +69,7 @@ def test_cst_immediate() -> None:
 
 
 def test_cst_modifier() -> None:
-  """Test element."""
+  """Docstring."""
   node: RdnaNode = RdnaModifier(name="off")
   assert node.to_text() == "off"
   node2: RdnaNode = with_trivia(node)
@@ -76,7 +77,7 @@ def test_cst_modifier() -> None:
 
 
 def test_cst_memory() -> None:
-  """Test element."""
+  """Docstring."""
   node: RdnaNode = RdnaMemory(base=c_VGPR(1))
   assert node.to_text() == "v1"
   node2: RdnaNode = RdnaMemory(base=c_VGPR(1), offset=12)
@@ -91,7 +92,7 @@ def test_cst_memory() -> None:
 
 
 def test_cst_instruction() -> None:
-  """Test element."""
+  """Docstring."""
   node: RdnaNode = RdnaInstruction(opcode="v_add_f32", operands=[c_VGPR(0), c_VGPR(1), c_VGPR(2)])
   assert node.to_text() == "v_add_f32 v0, v1, v2"
 
@@ -110,7 +111,7 @@ def test_cst_instruction() -> None:
 
 
 def test_cst_label() -> None:
-  """Test element."""
+  """Docstring."""
   node: RdnaNode = RdnaLabel(name="loop_start")
   assert node.to_text() == "loop_start:"
   node2: RdnaNode = with_trivia(node)
@@ -118,7 +119,7 @@ def test_cst_label() -> None:
 
 
 def test_cst_directive() -> None:
-  """Test element."""
+  """Docstring."""
   node: RdnaNode = RdnaDirective(name="text")
   assert node.to_text() == ".text"
   node2: RdnaNode = RdnaDirective(name="globl", params=["main"])
@@ -128,7 +129,7 @@ def test_cst_directive() -> None:
 
 
 def test_cst_comment() -> None:
-  """Test element."""
+  """Docstring."""
   node: RdnaNode = RdnaComment(text="this is a comment")
   assert node.to_text() == "; this is a comment"
   node2: RdnaNode = with_trivia(node)
@@ -136,7 +137,7 @@ def test_cst_comment() -> None:
 
 
 def test_cst_module() -> None:
-  """Test element."""
+  """Docstring."""
   node: RdnaNode = RdnaModule(statements=[RdnaComment(text="1"), RdnaComment(text="2")])
   assert node.to_text() == "; 1; 2"
   node2: RdnaNode = with_trivia(node)

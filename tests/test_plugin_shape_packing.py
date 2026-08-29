@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock, patch
-from ml_switcheroo.plugins.shape_packing import transform_shape_packing
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.shape_packing import transform_shape_packing
 
 
 def test_transform_shape_packing_no_target_api() -> None:

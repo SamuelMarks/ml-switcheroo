@@ -6,6 +6,7 @@ It is designed to demonstrate and test Keras transpilation capabilities.
 """
 
 import typing
+
 import keras
 from keras import layers, ops
 

@@ -5,16 +5,17 @@ SASS compiler comments (like unmapped nodes, block beginning/end markers, inputs
 and raw instructions into an intermediate representation logical graph.
 """
 
-from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
-from ml_switcheroo.core.compiler.ir import LogicalGraph
 import pytest
+
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassComment,
-  SassInstruction,
   SassImmediate,
-  SassRegister,
+  SassInstruction,
   SassNode,
+  SassRegister,
 )
+from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 def test_sass_lifter_basic() -> None:
@@ -109,8 +110,6 @@ def test_sass_lifter_unrecognized_comment() -> None:
   lifter = SassLifter()
 
   class MockSassOperand:
-    """Mock implementation of a SASS instruction operand for testing fallback paths."""
-
     def __str__(self) -> str:
       """Returns a string representation of the mock operand.
 
@@ -159,10 +158,10 @@ def test_sass_lifter_end_without_begin() -> None:
 
 
 def test_sass_lifter_return_already_seen() -> None:
+  """Docstring."""
   # Hit 134->144 (actually 135->141)
-  """Test sass lifter return already seen."""
-  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
 
   lifter = SassLifter()
   nodes: list[SassNode] = [SassComment(text="; Return: ")]
@@ -174,10 +173,10 @@ def test_sass_lifter_return_already_seen() -> None:
 
 
 def test_sass_lifter_return_no_previous() -> None:
+  """Docstring."""
   # Hit 138->140 (no previous node)
-  """Test sass lifter return no previous."""
-  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
 
   lifter = SassLifter()
   nodes: list[SassNode] = [SassComment(text="hi")]
@@ -187,11 +186,11 @@ def test_sass_lifter_return_no_previous() -> None:
 
 
 def test_sass_lifter_instruction_in_block() -> None:
+  """Docstring."""
   # Hit 148->94 (node is label so it's not an instruction, skips 148 and loops to 94)
   # Wait, the node loop starts around 89
-  """Test sass lifter instruction in block."""
-  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassLabel
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
 
   lifter = SassLifter()
   nodes: list[SassNode] = [SassLabel("lbl")]
@@ -200,10 +199,10 @@ def test_sass_lifter_instruction_in_block() -> None:
 
 
 def test_sass_lifter_comment_no_marker() -> None:
-  """Test sass lifter comment no marker."""
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
   from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
 
   lifter = SassLifter()
   nodes: list[SassNode] = [SassComment(text="hi")]
@@ -213,10 +212,10 @@ def test_sass_lifter_comment_no_marker() -> None:
 
 
 def test_sass_lifter_comment_unknown_marker(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test sass lifter comment unknown marker."""
+  """Docstring."""
+  from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
   from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
 
   lifter = SassLifter()
   nodes: list[SassNode] = [SassComment(text="hi")]
@@ -226,9 +225,9 @@ def test_sass_lifter_comment_unknown_marker(monkeypatch: pytest.MonkeyPatch) -> 
 
 
 def test_sass_lifter_mismatched_end() -> None:
-  """Test SassLifter with a mismatched SemanticEnd."""
-  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
 
   cst_nodes: list[SassNode] = [
     SassComment(text="; BEGIN Relu (relu1)"),
@@ -242,9 +241,9 @@ def test_sass_lifter_mismatched_end() -> None:
 
 
 def test_sass_lifter_multiple_returns() -> None:
-  """Test SassLifter with multiple SemanticReturns."""
-  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+  """Docstring."""
   from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment
+  from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
 
   cst_nodes: list[SassNode] = [
     SassComment(text="; Return:"),

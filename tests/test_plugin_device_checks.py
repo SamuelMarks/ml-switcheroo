@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock, patch
-from ml_switcheroo.plugins.device_checks import transform_cuda_check
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.device_checks import transform_cuda_check
 
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")

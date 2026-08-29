@@ -1,6 +1,7 @@
 """Test suite for the Paxml module."""
 
 import typing
+
 from praxis import optimizers  # type: ignore
 
 

@@ -1,13 +1,15 @@
 """Test suite for the Loader module."""
 
-import pytest
 import typing
+
+import pytest
+
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
 def manager() -> SemanticsManager:
-  """Provides a mock manager for testing."""
+  """Docstring."""
   return SemanticsManager()
 
 

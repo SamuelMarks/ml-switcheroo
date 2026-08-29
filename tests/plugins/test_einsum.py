@@ -1,13 +1,15 @@
 """Test suite for the Einsum module."""
 
-import pytest
 import typing
-import libcst as cst
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.plugins.einsum import normalize_einsum
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -17,7 +19,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   hooks._HOOKS["einsum_normalizer"] = normalize_einsum
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()

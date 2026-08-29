@@ -1,6 +1,7 @@
 """Test suite for the Qwen Roundtrip module."""
 
 import pytest
+
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -8,7 +9,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   return SemanticsManager()
 
 

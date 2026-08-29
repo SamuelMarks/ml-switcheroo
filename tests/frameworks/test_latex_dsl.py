@@ -1,10 +1,13 @@
 """Test suite for the Latex Dsl module."""
 
 import typing
-from unittest.mock import patch, MagicMock
-from ml_switcheroo.frameworks.latex_dsl import LatexDSLAdapter
-from ml_switcheroo.frameworks.base import InitMode, StandardMap
+from unittest.mock import MagicMock, patch
+
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.frameworks.base import InitMode, StandardMap
+from ml_switcheroo.frameworks.latex_dsl import LatexDSLAdapter
+from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def test_latex_dsl_init() -> None:
@@ -62,3 +65,66 @@ def test_latex_dsl_definitions_already_present(mock_load: MagicMock) -> None:
   adapter = LatexDSLAdapter()
   defs: typing.Any = adapter.definitions
   assert defs["Module"].api == "existing.Module"
+
+
+# --- Merged from test_latex_dsl_extra2.py ---
+
+
+def test_latex_dsl_adapter_get_device_check_syntax() -> None:
+  """Docstring."""
+  adapter = LatexDSLAdapter()
+  assert adapter.get_device_check_syntax() == "True"
+
+
+def test_latex_dsl_adapter_definitions() -> None:
+  """Docstring."""
+  from unittest.mock import patch
+
+  import ml_switcheroo.frameworks.latex_dsl as ldsl
+
+  with patch("ml_switcheroo.frameworks.latex_dsl.load_definitions", return_value={}):
+    adapter = ldsl.LatexDSLAdapter()
+    defs: typing.Any = adapter.definitions
+    assert "Module" in defs
+    assert "Conv2d" in defs
+    assert "Linear" in defs
+
+
+def test_latex_dsl_adapter_properties() -> None:
+  """Docstring."""
+  adapter = LatexDSLAdapter()
+  assert adapter.get_device_syntax("cpu") == ""
+  assert adapter.get_rng_split_syntax("rng", "key") == ""
+  assert adapter.get_serialization_imports() == []
+  assert adapter.get_serialization_syntax("save", "file") == ""
+  assert adapter.get_weight_conversion_imports() == []
+  assert adapter.get_weight_load_code("path") == "# Weights not supported in LaTeX mode"
+  assert adapter.get_tensor_to_numpy_expr("t") == "t"
+  assert adapter.get_weight_save_code("state", "path") == "# Weights not supported in LaTeX mode"
+  assert adapter.convert("data") == "data"
+  assert isinstance(adapter.plugin_traits, PluginTraits)
+
+  examples: dict[str, str] = adapter.get_tiered_examples()
+  assert "tier1_math" in examples
+  assert "tier2_neural" in examples
+  assert "tier3_extras" in examples
+
+
+# --- Merged from test_latex_dsl_extra.py ---
+
+
+def test_latex_dsl_adapter_missing_methods() -> None:
+  """Docstring."""
+  adapter = LatexDSLAdapter()
+  assert adapter.get_device_syntax("cpu") == ""
+  assert adapter.get_device_check_syntax() == "True"
+  assert adapter.get_rng_split_syntax("rng", "key") == ""
+  assert adapter.get_serialization_imports() == []
+  assert adapter.get_serialization_syntax("save", "file") == ""
+  assert adapter.get_weight_conversion_imports() == []
+  assert adapter.get_weight_load_code("path") == "# Weights not supported in LaTeX mode"
+  assert adapter.get_tensor_to_numpy_expr("t") == "t"
+  assert adapter.get_weight_save_code("state", "path") == "# Weights not supported in LaTeX mode"
+  assert adapter.convert("data") == "data"
+
+  assert isinstance(adapter.plugin_traits, PluginTraits)

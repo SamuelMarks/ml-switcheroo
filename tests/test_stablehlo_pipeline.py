@@ -6,14 +6,14 @@ fulfilling the pipeline advertised in the README.
 """
 
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.engine import ASTEngine
-from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
 from ml_switcheroo.core.mlir.cst import ModuleNode
+from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_stablehlo_parser_basic() -> None:
-  """Unit test for the StableHloParser class."""
+  """Docstring."""
   code = "module {}"
   parser = StableHloParser(code)
   result = parser.parse()

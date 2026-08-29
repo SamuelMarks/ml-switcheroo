@@ -1,9 +1,9 @@
 """Test suite for the Rdna Lifting module."""
 
-from typing import List, Any
 import typing
+from typing import Any, List
+
 from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
-from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
   RdnaImmediate,
@@ -12,6 +12,7 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaSGPR,
   RdnaVGPR,
 )
+from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
@@ -86,7 +87,7 @@ def test_lift_no_markers() -> None:
 def test_rdna_analysis_conv2d_fallback() -> None:
   """Docstring."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaImmediate
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
   # We need loop_limits to be populated. The code checks for s_cmp_lt_i32
   inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=3)])  # type: ignore
@@ -98,7 +99,7 @@ def test_rdna_analysis_conv2d_fallback() -> None:
 def test_rdna_analysis_linear_fallback() -> None:
   """Docstring."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaImmediate
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
   inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=10)])  # type: ignore
 
@@ -109,7 +110,7 @@ def test_rdna_analysis_linear_fallback() -> None:
 def test_rdna_analysis_unknown_kind() -> None:
   """Docstring."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaImmediate
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
   inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=10)])  # type: ignore
 
@@ -130,8 +131,8 @@ def test_rdna_analysis_no_loop_limits() -> None:
 
 def test_rdna_lifter_seen_ids() -> None:
   """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [
@@ -147,8 +148,8 @@ def test_rdna_lifter_seen_ids() -> None:
 
 def test_rdna_lifter_unmapped() -> None:
   """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="; Unmapped Op: flatten (flatten_0)")]
@@ -160,8 +161,8 @@ def test_rdna_lifter_unmapped() -> None:
 
 def test_rdna_lifter_input() -> None:
   """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+  from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [RdnaComment(text="; Input arg_0 ->")]

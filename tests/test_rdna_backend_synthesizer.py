@@ -1,32 +1,34 @@
 """Test module."""
 
-import pytest
+from typing import Dict, List, Optional
+from unittest.mock import patch
+
 import libcst as cst
+import pytest
 
 from ml_switcheroo.core.compiler.backends.rdna.synthesizer import (
-  RegisterAllocator,
-  RdnaSynthesizer,
-  RdnaBackend,
-  MAX_VGPR,
   MAX_SGPR,
+  MAX_VGPR,
+  RdnaBackend,
+  RdnaSynthesizer,
+  RegisterAllocator,
 )
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
-  RdnaVGPR,
-  RdnaSGPR,
+  RdnaImmediate,
   RdnaInstruction,
   RdnaLabel,
-  RdnaImmediate,
   RdnaNode,
+  RdnaSGPR,
+  RdnaVGPR,
 )
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from typing import Optional, List, Dict
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 class MockSemanticsManager:
-  """Test element."""
+  """Docstring."""
 
   def get_definition(self, kind: str) -> Optional[List[str]]:
-    """Test element."""
+    """Docstring."""
     if kind == "known_op":
       return ["add"]
     elif kind == "macro_op":
@@ -36,14 +38,14 @@ class MockSemanticsManager:
     return None
 
   def resolve_variant(self, abstract_id: str, backend: str) -> Optional[Dict[str, str]]:
-    """Test element."""
+    """Docstring."""
     if abstract_id == "add":
       return {"api": "v_add_f32"}
     return None
 
 
 def test_register_allocator() -> None:
-  """Test element."""
+  """Docstring."""
   allocator: RegisterAllocator = RegisterAllocator()
 
   v1: RdnaVGPR = allocator.get_vector_register("x")
@@ -68,7 +70,7 @@ def test_register_allocator() -> None:
 
 
 def test_register_allocator_overflow() -> None:
-  """Test element."""
+  """Docstring."""
   allocator: RegisterAllocator = RegisterAllocator()
   allocator._next_vgpr = MAX_VGPR
   with pytest.raises(ValueError, match="RdnaVGPR overflow"):
@@ -80,7 +82,7 @@ def test_register_allocator_overflow() -> None:
 
 
 def test_synthesizer_from_graph() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: MockSemanticsManager = MockSemanticsManager()
   synthesizer: RdnaSynthesizer = RdnaSynthesizer(semantics)
 
@@ -105,7 +107,7 @@ def test_synthesizer_from_graph() -> None:
 
 
 def test_synthesizer_to_python() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: MockSemanticsManager = MockSemanticsManager()
   synthesizer: RdnaSynthesizer = RdnaSynthesizer(semantics)
 
@@ -130,7 +132,7 @@ def test_synthesizer_to_python() -> None:
 
 
 def test_rdna_backend() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: MockSemanticsManager = MockSemanticsManager()
   backend: RdnaBackend = RdnaBackend(semantics)
 
@@ -143,6 +145,68 @@ def test_rdna_backend() -> None:
 
 
 def test_rdna_backend_default_semantics() -> None:
-  """Test element."""
+  """Docstring."""
   backend: RdnaBackend = RdnaBackend()
   assert backend.synthesizer.semantics is not None
+
+
+# --- Merged from test_rdna_backend_synthesizer_extra.py ---
+
+
+class DummySemantics:
+  """Docstring."""
+
+  def resolve_variant(self, abstract_id: str, flavor: str) -> Optional[dict]:
+    """Docstring."""
+    return None
+
+  def get_definition(self, kind: str) -> Optional[dict]:
+    """Docstring."""
+    return None
+
+
+def test_rdna_synthesizer_branches() -> None:
+  """Docstring."""
+  # 1. Test when macros.json does not exist
+  with patch("os.path.exists", return_value=False):
+    synth: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
+    assert not getattr(synth, "macro_registry")
+
+  # 2. Test when macros.json exists but is empty
+  with patch("os.path.exists", return_value=True):
+    with patch("builtins.open", __import__("unittest").mock.mock_open(read_data="{}")):
+      synth2: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
+      assert not getattr(synth2, "macro_registry")
+
+  # 3. Test multiple edges to same target (174->176)
+  nodes = [
+    LogicalNode(id="in1", kind="Input"),
+    LogicalNode(id="in2", kind="Input"),
+    LogicalNode(id="add", kind="Add"),
+    LogicalNode(id="out", kind="Output"),  # Empty output sources?
+  ]
+  edges = [
+    LogicalEdge(source="in1", target="add"),
+    LogicalEdge(source="in2", target="add"),  # multiple edges
+  ]
+  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
+  synth3: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
+  synth3.from_graph(graph)
+
+  # 4. Test when output has no sources (188->178)
+  nodes2 = [LogicalNode(id="out2", kind="Output")]
+  edges2 = []
+  graph2: LogicalGraph = LogicalGraph(nodes=nodes2, edges=edges2)
+  synth4: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
+  synth4.from_graph(graph2)
+
+
+def test_unmapped_op_and_comment() -> None:
+  """Docstring."""
+  # Test Unmapped Op and RdnaComment branches
+  nodes = [LogicalNode(id="unmapped1", kind="TotallyUnknownOp")]
+  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
+
+  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
+  cst_mod: list = synth.from_graph(graph)
+  assert cst_mod is not None

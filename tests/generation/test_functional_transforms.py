@@ -1,14 +1,16 @@
 """Test suite for the Functional Transforms module."""
 
-import pytest
 import typing
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class FunctionalSemantics(SemanticsManager):
-  """Test suite for the Functional Semantics component."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the FunctionalSemantics instance."""
@@ -64,7 +66,7 @@ class FunctionalSemantics(SemanticsManager):
 
 @pytest.fixture
 def engine_factory() -> typing.Callable[[str, str], ASTEngine]:
-  """Provides a mock engine factory for testing."""
+  """Docstring."""
   semantics = FunctionalSemantics()
 
   def create(source: str, target: str) -> ASTEngine:

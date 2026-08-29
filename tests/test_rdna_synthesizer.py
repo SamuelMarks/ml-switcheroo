@@ -1,27 +1,29 @@
 """Docstring."""
 
+from typing import Any, Dict, List, Optional, Tuple
+
+import libcst as cst
+import pytest
+
 from ml_switcheroo.core.compiler.backends.rdna.synthesizer import (
-  RegisterAllocator,
-  RdnaSynthesizer,
-  RdnaBackend,
-  MAX_VGPR,
   MAX_SGPR,
+  MAX_VGPR,
+  RdnaBackend,
+  RdnaSynthesizer,
+  RegisterAllocator,
 )
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
-  RdnaVGPR,
-  RdnaSGPR,
-  RdnaInstruction,
   RdnaImmediate,
+  RdnaInstruction,
+  RdnaLabel,
   RdnaLabelRef,
   RdnaMemory,
-  RdnaLabel,
-  RdnaOperand,
   RdnaNode,
+  RdnaOperand,
+  RdnaSGPR,
+  RdnaVGPR,
 )
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-import pytest
-import libcst as cst
-from typing import Optional, List, Dict, Any, Tuple
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 class DummyOperand(RdnaOperand):
@@ -73,22 +75,17 @@ def test_synthesizer_from_graph() -> None:
   """Docstring."""
 
   class MockSemantics:
-    """Docstring."""
-
     def get_definition(self, kind: str) -> Optional[Tuple[str, dict]]:
-      """Docstring."""
       if kind == "UnknownNode":
         return None
       return ("abstract.Linear", {})
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Docstring."""
       return {"api": "v_nop", "args": []}
 
   synth: RdnaSynthesizer = RdnaSynthesizer(semantics=MockSemantics())
 
   def dummy_expander(alloc: RegisterAllocator, nid: str, meta: dict) -> List[RdnaNode]:
-    """Docstring."""
     return [RdnaInstruction("s_nop", [])]
 
   synth.macro_registry = {"Linear": dummy_expander}
@@ -112,20 +109,15 @@ def test_synthesizer_from_graph_exact_macro() -> None:
   """Docstring."""
 
   class MockSemantics:
-    """Docstring."""
-
     def get_definition(self, kind: str) -> Optional[Tuple[str, dict]]:
-      """Docstring."""
       return ("ExactMacro", {})
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Docstring."""
       return {"api": "v_add", "args": ["a", "b", "c"]}
 
   synth: RdnaSynthesizer = RdnaSynthesizer(semantics=MockSemantics())
 
   def dummy_expander(alloc: RegisterAllocator, nid: str, meta: dict) -> List[RdnaNode]:
-    """Docstring."""
     return [RdnaInstruction("s_nop", [])]
 
   synth.macro_registry = {"ExactMacro": dummy_expander}
@@ -185,14 +177,10 @@ def test_synthesizer_from_graph_unmapped() -> None:
   """Docstring."""
 
   class MockSemantics:
-    """Docstring."""
-
     def get_definition(self, kind: str) -> Optional[Tuple[str, dict]]:
-      """Docstring."""
       return ("abstract", {})
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Docstring."""
       return None
 
   synth: RdnaSynthesizer = RdnaSynthesizer(semantics=MockSemantics())
@@ -213,14 +201,10 @@ def test_synthesizer_from_graph_with_sources() -> None:
   """Docstring."""
 
   class MockSemantics:
-    """Docstring."""
-
     def get_definition(self, kind: str) -> Optional[Tuple[str, dict]]:
-      """Docstring."""
       return ("abstract", {})
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Docstring."""
       return {"api": "v_add", "args": ["a"]}
 
   synth: RdnaSynthesizer = RdnaSynthesizer(semantics=MockSemantics())

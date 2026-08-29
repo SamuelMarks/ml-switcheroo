@@ -89,7 +89,7 @@ class RdnaLexer(Lexer):
         t.leading_trivia = list(leading)
         leading.clear()
         yield t
-      else:  # pragma: no cover
+      else:
         if kind == "PUNCTUATION":
           punct_map = {
             ";": "SEMI",
@@ -131,7 +131,7 @@ def _get_trivia(node) -> List[Trivia]:
     res = node.leading_trivia
     node.leading_trivia = []
     return cast(List[Trivia], res)
-  return []  # pragma: no cover
+  return []
 
 
 GRAMMAR = r"""
@@ -254,9 +254,9 @@ class RdnaTransformer(Transformer[Any, Any]):
             continue
           if hasattr(p, "children"):
             params.append("".join(getattr(c, "value", str(c)) for c in p.children))
-          else:  # pragma: no cover
+          else:
             params.append(str(p))
-      else:  # pragma: no cover
+      else:
         params.append(str(param_list))
     d = RdnaDirective(name=name, params=params)
     d.leading_trivia = _get_trivia(children[0])
@@ -390,7 +390,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     if match.group(2) and match.group(3):
       start = int(match.group(2))
       count = int(match.group(3)) - start + 1
-    else:  # pragma: no cover
+    else:
       start = int(match.group(4))
       count = 1
 
@@ -526,10 +526,13 @@ class RdnaTransformer(Transformer[Any, Any]):
     val = children[0].value
     if val in ("off", "glc", "slc"):
       res: Union[RdnaModifier, RdnaLabelRef] = RdnaModifier(name=val)
-    else:  # pragma: no cover
+    else:
       res = RdnaLabelRef(name=val)
     res.leading_trivia = leading
     return res
+
+
+_CACHED_PARSER = None
 
 
 class RdnaParser:
@@ -546,7 +549,10 @@ class RdnaParser:
         code: The raw RDNA string.
     """
     self.code = code
-    self.parser = Lark(GRAMMAR, parser="earley", lexer=RdnaLexer)
+    global _CACHED_PARSER
+    if _CACHED_PARSER is None:
+      _CACHED_PARSER = Lark(GRAMMAR, parser="earley", lexer=RdnaLexer)
+    self.parser = _CACHED_PARSER
     self.transformer = RdnaTransformer()
 
   def parse(self) -> RdnaModule:
@@ -572,6 +578,6 @@ class RdnaParser:
         mod = cast(RdnaModule, self.transformer.transform(tree))
         statements.extend(mod.statements)
       except Exception as e:
-        raise ValueError(f"Unexpected token: {e}")  # pragma: no cover
+        raise ValueError(f"Unexpected token: {e}")
 
     return RdnaModule(statements=statements)

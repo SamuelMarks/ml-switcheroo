@@ -1,12 +1,12 @@
 """Test suite for the Flax Nnx module."""
 
-from flax import nnx
-import jax.numpy as jnp
 import jax
+import jax.numpy as jnp
+from flax import nnx
 
 
 class ResidualBlock(nnx.Module):
-  """Test suite for the Residual Block component."""
+  """Docstring."""
 
   def __init__(self, channels: int, rngs: nnx.Rngs):
     """Initializes the ResidualBlock instance."""

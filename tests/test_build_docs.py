@@ -1,11 +1,11 @@
 """Tests for scripts/build_docs.py."""
 
-import sys
 import subprocess
-from pathlib import Path
-from unittest import mock
+import sys
 import pytest
-from typing import Tuple, Any
+from pathlib import Path
+from typing import Any, Tuple
+from unittest import mock
 
 # Add scripts directory to sys.path to import it
 scripts_dir: Path = Path(__file__).parent.parent / "scripts"

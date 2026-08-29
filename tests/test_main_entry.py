@@ -1,8 +1,9 @@
 """Test suite for the Main Entry module."""
 
-import pytest
-from unittest.mock import patch
 import sys
+from unittest.mock import patch
+
+import pytest
 
 
 def test_main_entry():

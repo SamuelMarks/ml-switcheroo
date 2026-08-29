@@ -1,12 +1,13 @@
 """Test module."""
 
 import libcst as cst
-from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
+
 from ml_switcheroo.core.import_fixer.base import BaseImportFixer
+from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 
 
 def test_base_import_fixer_init() -> None:
-  """Test element."""
+  """Docstring."""
   plan: ResolutionPlan = ResolutionPlan()
 
   # default init
@@ -27,7 +28,7 @@ def test_base_import_fixer_init() -> None:
 
 
 def test_track_definition() -> None:
-  """Test element."""
+  """Docstring."""
   plan: ResolutionPlan = ResolutionPlan()
   fixer: BaseImportFixer = BaseImportFixer(plan)
 

@@ -1,12 +1,10 @@
 """Docstring."""
 
-from ml_switcheroo.core.compiler.backends.visual_backends import (
-  TikzBackend as VB_TikzBackend,
-  LatexBackend as VB_LatexBackend,
-)
-from ml_switcheroo.core.compiler.backends.visual_tikz import TikzBackend as VT_TikzBackend
+from ml_switcheroo.core.compiler.backends.visual_backends import LatexBackend as VB_LatexBackend
+from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend as VB_TikzBackend
 from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend as VL_LatexBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.backends.visual_tikz import TikzBackend as VT_TikzBackend
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def get_dummy_graph() -> LogicalGraph:

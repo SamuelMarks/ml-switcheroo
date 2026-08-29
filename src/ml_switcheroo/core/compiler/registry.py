@@ -53,7 +53,7 @@ class GraphFrontend(BaseFrontend):
     Returns:
         The generated logical graph or equivalent representation.
     """
-    raise NotImplementedError  # pragma: no cover
+    raise NotImplementedError
 
 
 # Backend mappings for the Compiler (Graph -> Text) pipeline
@@ -126,7 +126,7 @@ def is_isa_target(target: str) -> bool:
       True if the target is an ISA or Graph-based format.
 
   """
-  return target in ["sass", "rdna", "html", "tikz", "latex_dsl", "mlir"]  # pragma: no cover
+  return target in ["sass", "rdna", "html", "tikz", "latex_dsl", "mlir"]
 
 
 def is_isa_source(source: str) -> bool:
@@ -141,4 +141,4 @@ def is_isa_source(source: str) -> bool:
       True if the source is an ISA requiring lifting.
 
   """
-  return source in ["sass", "rdna", "stablehlo"]  # pragma: no cover
+  return source in ["sass", "rdna", "stablehlo"]

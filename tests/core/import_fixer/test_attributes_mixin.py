@@ -6,7 +6,9 @@ mappings and re-export simplification logic.
 """
 
 import typing
+
 import libcst as cst
+
 from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeMixin
 
 

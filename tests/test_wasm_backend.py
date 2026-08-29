@@ -1,18 +1,19 @@
 """Test suite for the wasm backend."""
 
-from ml_switcheroo.core.compiler.backends.wasm_backend import WasmBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from typing import List
+
+from ml_switcheroo.core.compiler.backends.wasm_backend import WasmBackend
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def test_wasm_backend_init() -> None:
-  """Test element."""
+  """Docstring."""
   backend: WasmBackend = WasmBackend(semantics="dummy")
   assert getattr(backend, "semantics") == "dummy"
 
 
 def test_wasm_backend_compile() -> None:
-  """Test element."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="in1", kind="Input"),
     LogicalNode(id="in2", kind="Input"),
@@ -53,7 +54,7 @@ def test_wasm_backend_compile() -> None:
 
 
 def test_wasm_backend_compile_no_output() -> None:
-  """Test element."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="in1", kind="Input"),
     LogicalNode(id="add1", kind="Add"),

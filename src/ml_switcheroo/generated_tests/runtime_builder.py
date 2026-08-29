@@ -212,7 +212,7 @@ def ensure_runtime_module(
   imports_str = "\n".join(imports_block)
 
   # Combine parts
-  code = '"""Shared runtime flags for generated tests (Auto-Generated)."""\n\n'
+  code = '"""Shared runtime flags for generated tests (Auto-Generated)."""\n# ruff: noqa\n# fmt: off\n\n'
   code += "import sys\nimport pytest\nimport random\nimport numpy as np\nimport importlib.util\nimport typing\n\n"
   code += imports_str + "\n"
   code += _SHARED_RUNTIME_LOGIC

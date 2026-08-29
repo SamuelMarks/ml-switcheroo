@@ -1,11 +1,13 @@
 """Test suite for the Import Fixer Smart module."""
 
-import libcst as cst
 import typing
 from unittest.mock import MagicMock
+
+import libcst as cst
+
 from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def solve_and_fix(

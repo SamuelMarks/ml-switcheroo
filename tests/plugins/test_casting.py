@@ -1,13 +1,16 @@
 """Test suite for the Casting module."""
 
-import pytest
-import libcst as cst
 import typing
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.casting import transform_casting
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.casting import _supports_numpy_casting, transform_casting
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_call(rewriter: PivotRewriter, code: str) -> str:
@@ -17,7 +20,7 @@ def rewrite_call(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   hooks._HOOKS["type_methods"] = transform_casting
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -135,7 +138,7 @@ def test_missing_traits(rewriter: PivotRewriter) -> None:
 
 
 class MockTraits:
-  """Mock Traits class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, val: bool) -> None:
     """Initializes the MockTraits instance."""
@@ -242,3 +245,26 @@ def test_fallback_infer_type_unmapped(rewriter: PivotRewriter) -> None:
   node: cst.BaseExpression = cst.parse_expression("x.unknown()")
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
+
+
+# --- Merged from test_casting_extra.py ---
+
+
+def test_casting_missing_traits_in_conf() -> None:
+  """Verifies the behavior of casting missing traits in conf."""
+  semantics = MagicMock()
+  ctx = HookContext(semantics=semantics, config=MagicMock(effective_target="jax"))
+  semantics.get_framework_config.return_value = {"plugin_traits": None}
+  assert _supports_numpy_casting(ctx) is False
+
+
+def test_casting_op_id_not_cast() -> None:
+  """Verifies the behavior of casting op id not cast."""
+  node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("float")))
+  semantics = MagicMock()
+  ctx = HookContext(semantics=semantics, config=MagicMock(effective_target="jax"))
+  semantics.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": True}}
+  ctx.current_op_id = "SomethingElse"
+  semantics.get_definition_by_id.return_value = {"metadata": {}}
+  result: typing.Any = transform_casting(node, ctx)
+  assert result is node

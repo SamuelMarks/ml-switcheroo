@@ -8,14 +8,196 @@ from typing import Any
 
 import sys
 import argparse
+import ast
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Set
 
 # Load local components
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.file_loader import KnowledgeBaseLoader
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
+
+
+def extract_api_calls(file_path: Path) -> Set[str]:
+  """Extracts fully qualified API calls from a Python file."""
+  with open(file_path, "r", encoding="utf-8") as f:
+    try:
+      tree = ast.parse(f.read())
+    except SyntaxError:
+      return set()
+
+  aliases: Dict[str, str] = {}
+  for node in ast.walk(tree):
+    if isinstance(node, ast.Import):
+      for name in node.names:
+        aliases[name.asname or name.name] = name.name
+    elif isinstance(node, ast.ImportFrom):
+      if node.module:
+        for name in node.names:
+          aliases[name.asname or name.name] = f"{node.module}.{name.name}"
+
+  apis: Set[str] = set()
+  for node in ast.walk(tree):
+    if isinstance(node, ast.Call):
+      if isinstance(node.func, ast.Attribute):
+        chain: List[str] = []
+        curr: ast.expr = node.func
+        while isinstance(curr, ast.Attribute):
+          chain.append(curr.attr)
+          curr = curr.value
+        if isinstance(curr, ast.Name):
+          chain.append(curr.id)
+          chain.reverse()
+          root = chain[0]
+          if root in aliases:
+            full_api = aliases[root] + "." + ".".join(chain[1:])
+            apis.add(full_api)
+  return apis
+
+
+def audit_inline_snippets(manager: SemanticsManager, snapshots: Dict[str, Dict[str, Any]]) -> List[str]:
+  """Audits programmatic API calls inside declarative inline snippets (e.g. macro_template)."""
+  errors: List[str] = []
+
+  framework_prefixes = {
+    "mlx": "mlx",
+    "torch": "torch",
+    "jax": "jax",
+    "tensorflow": "tensorflow",
+    "tf": "tensorflow",
+    "stablehlo": "stablehlo",
+    "rdna": "rdna",
+    "numpy": "numpy",
+    "flax": "flax",
+    "keras": "keras",
+    "praxis": "paxml",
+  }
+
+  ignore_list = {
+    "jax.image.resize",
+    "numpy.add",
+    "tf.math.add",
+    "jax.numpy.add",
+    "keras.ops.add",
+    "jax.numpy.sum",
+    "jax.numpy.matmul",
+    "jax.numpy.linalg.norm",
+    "jax.numpy.issubdtype",
+    "jax.scipy.special.gammaln",
+    "jax.numpy.log",
+    "jax.numpy.cumsum",
+    "jax.numpy.exp",
+    "jax.numpy.log1p",
+    "jax.numpy.square",
+    "jax.numpy.maximum",
+    "jax.numpy.var",
+    "jax.lax.complex",
+    "jax.numpy.stack",
+    "jax.numpy.real",
+    "jax.numpy.imag",
+    "keras.ops.where",
+    "jax.numpy.linalg.slogdet",
+    "numpy.generic",
+    "numpy.ndarray",
+    "torch.tensor",
+    "torch.from_numpy",
+    "jax.numpy.array",
+    "mlx.core.array",
+    "tensorflow.convert_to_tensor",
+    "keras.ops.convert_to_tensor",
+    "jax.default_backend",
+    "jax.vjp",
+    "jax.random.permutation",
+    "jax.random.randint",
+    "jax.random.uniform",
+    "math.sqrt",
+  }
+
+  for op_name, op_details in manager.data.items():
+    variants = op_details.get("variants", {})
+    for fw_name, fw_mapping in variants.items():
+      if "macro_template" in fw_mapping:
+        snippet = fw_mapping["macro_template"]
+        try:
+          tree = ast.parse(snippet)
+        except Exception:
+          continue
+
+        for node in ast.walk(tree):
+          if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute):
+              chain: List[str] = []
+              curr: ast.expr = node.func
+              while isinstance(curr, ast.Attribute):
+                chain.append(curr.attr)
+                curr = curr.value
+              if isinstance(curr, ast.Name):
+                chain.append(curr.id)
+                chain.reverse()
+                root = chain[0]
+                full_api = root + "." + ".".join(chain[1:])
+
+                if full_api in ignore_list:
+                  continue
+
+                if root in framework_prefixes:
+                  fw_key = framework_prefixes[root]
+                  if fw_key in snapshots:
+                    snapshot = snapshots[fw_key]
+                    if full_api not in snapshot:
+                      errors.append(f"[{fw_key}] Inline snippet hallucinated API in {op_name}: '{full_api}'")
+
+  return errors
+
+
+def audit_python_ast(src_dirs: List[Path], snapshots: Dict[str, Dict[str, Any]]) -> List[str]:
+  """Audits programmatic API calls in Python files against snapshots."""
+  errors: List[str] = []
+
+  framework_prefixes = {
+    "mlx": "mlx",
+    "torch": "torch",
+    "jax": "jax",
+    "tensorflow": "tensorflow",
+    "tf": "tensorflow",
+    "stablehlo": "stablehlo",
+    "rdna": "rdna",
+    "numpy": "numpy",
+    "flax": "flax",
+    "keras": "keras",
+    "praxis": "paxml",
+  }
+
+  ignore_list = {
+    "numpy.generic",
+    "numpy.ndarray",
+    "torch.tensor",
+    "torch.from_numpy",
+    "jax.numpy.array",
+    "mlx.core.array",
+    "tensorflow.convert_to_tensor",
+    "keras.ops.convert_to_tensor",
+  }
+
+  for src_dir in src_dirs:
+    if not src_dir.exists():
+      continue
+    for file_path in src_dir.rglob("*.py"):
+      calls = extract_api_calls(file_path)
+      for call in calls:
+        if call in ignore_list:
+          continue
+
+        root_module = call.split(".")[0]
+        if root_module in framework_prefixes:
+          fw_key = framework_prefixes[root_module]
+          if fw_key in snapshots:
+            snapshot = snapshots[fw_key]
+            if call not in snapshot:
+              errors.append(f"[{fw_key}] Programmatic API call hallucinated in {file_path}: '{call}'")
+
+  return errors
 
 
 def load_snapshots(snapshot_dir: Path) -> Dict[str, Dict[str, Any]]:
@@ -218,6 +400,13 @@ def main() -> int:
   print(f"Loaded {len(snapshots)} snapshots.")
   errors = audit_frameworks(mgr, snapshots)
 
+  src_dirs = [Path("src/ml_switcheroo/frameworks"), Path("src/ml_switcheroo/plugins")]
+  ast_errors = audit_python_ast(src_dirs, snapshots)
+  errors.extend(ast_errors)
+
+  snippet_errors = audit_inline_snippets(mgr, snapshots)
+  errors.extend(snippet_errors)
+
   if errors:
     print(f"\n❌ Found {len(errors)} mismatches:\n")
     for error in errors:
@@ -230,5 +419,5 @@ def main() -> int:
   return 0
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
   sys.exit(main())

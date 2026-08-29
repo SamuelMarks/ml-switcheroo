@@ -1,15 +1,17 @@
 """Test suite for the Verify module."""
 
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 from typing import Generator
+from unittest.mock import MagicMock, patch
+
+import pytest
+
 from ml_switcheroo.cli.handlers.verify import handle_ci
 
 
 @pytest.fixture
 def mock_config() -> Generator[MagicMock, None, None]:
-  """Provides a mock configuration for testing."""
+  """Docstring."""
   with patch("ml_switcheroo.config.RuntimeConfig.load") as mock_load:
     mock_conf: MagicMock = MagicMock()
     mock_conf.plugin_paths = ["some/plugin"]
@@ -19,21 +21,21 @@ def mock_config() -> Generator[MagicMock, None, None]:
 
 @pytest.fixture
 def mock_semantics() -> Generator[MagicMock, None, None]:
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   with patch("ml_switcheroo.cli.handlers.verify.SemanticsManager") as mock:
     yield mock
 
 
 @pytest.fixture
 def mock_validator() -> Generator[MagicMock, None, None]:
-  """Provides a mock validator for testing."""
+  """Docstring."""
   with patch("ml_switcheroo.cli.handlers.verify.BatchValidator") as mock:
     yield mock
 
 
 @pytest.fixture
 def mock_load_plugins() -> Generator[MagicMock, None, None]:
-  """Provides a mock load plugins for testing."""
+  """Docstring."""
   with patch("ml_switcheroo.cli.handlers.verify.load_plugins") as mock:
     yield mock
 

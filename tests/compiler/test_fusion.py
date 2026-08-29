@@ -1,7 +1,7 @@
 """Test suite for the Fusion module."""
 
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.compiler.fusion import QKVFusionPass, QKVDefusionPass
+from ml_switcheroo.core.compiler.fusion import QKVDefusionPass, QKVFusionPass
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def test_qkv_fusion_pass() -> None:

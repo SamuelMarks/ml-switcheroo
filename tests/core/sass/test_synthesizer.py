@@ -1,18 +1,20 @@
 """Test suite for the Synthesizer module."""
 
-import pytest
 import typing
 from unittest.mock import MagicMock
-from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator, SassSynthesizer, MAX_REGISTERS
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+
+import pytest
+
+from ml_switcheroo.core.compiler.backends.sass.synthesizer import MAX_REGISTERS, RegisterAllocator, SassSynthesizer
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassInstruction,
-  SassRegister,
-  SassImmediate,
   SassComment,
+  SassImmediate,
+  SassInstruction,
   SassLabel,
   SassNode,
+  SassRegister,
 )
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -64,7 +66,7 @@ def test_allocator_reset() -> None:
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   mgr = MagicMock(spec=SemanticsManager)
 
   def resolve(kind: str, target: str) -> typing.Optional[dict[str, typing.Any]]:
@@ -174,8 +176,6 @@ def test_sass_to_python_no_dest() -> None:
   synth = SassSynthesizer(MagicMock())
 
   class RdnaLabelRef:
-    """Test suite for the SassLabel Ref component."""
-
     def __str__(self) -> str:
       """Helper to   string  ."""
       return "L_TARGET"
@@ -196,8 +196,6 @@ def test_sass_to_python_complex_operand() -> None:
   synth = SassSynthesizer(MagicMock())
 
   class ComplexMem:
-    """Test suite for the Complex Mem component."""
-
     def __str__(self) -> str:
       """Helper to   string  ."""
       return "[R1 + 0x4]"

@@ -1,14 +1,15 @@
 """Test suite for the Harness Rng module."""
 
+import os
+import subprocess
 import sys
 import typing
-import subprocess
-import os
 from pathlib import Path
 from unittest.mock import patch
-from ml_switcheroo.testing.harness_generator import HarnessGenerator
-from ml_switcheroo.frameworks.jax import JaxCoreAdapter
+
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
+from ml_switcheroo.frameworks.jax import JaxCoreAdapter
+from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
@@ -20,7 +21,7 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
 
 
 class SafeJaxCoreAdapter(JaxCoreAdapter):
-  """Test suite for the Safe Jax Core Adapter component."""
+  """Docstring."""
 
   @property
   def harness_imports(self) -> list[str]:
@@ -33,7 +34,7 @@ class SafeJaxCoreAdapter(JaxCoreAdapter):
 
 
 class SafeFlaxAdapter(FlaxNNXAdapter):
-  """Test suite for the Safe Flax Adapter component."""
+  """Docstring."""
 
   @property
   def harness_imports(self) -> list[str]:

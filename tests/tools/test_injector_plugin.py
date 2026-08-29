@@ -1,15 +1,17 @@
 """Test suite for the Injector Plugin module."""
 
+from pathlib import Path
+from typing import Any, Dict, List
+
 import pytest
+
 from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule
 from ml_switcheroo.tools.injector_plugin import PluginGenerator
-from pathlib import Path
-from typing import Dict, Any, List
 
 
 @pytest.fixture
 def plugin_dir(tmp_path: Path) -> Path:
-  """Provides a mock plugin directory for testing."""
+  """Docstring."""
   d: Path = tmp_path / "plugins"
   d.mkdir()
   return d
@@ -36,6 +38,7 @@ def test_filename_normalization(plugin_dir: Path) -> None:
 def test_func_finder_other_func() -> None:
   """Verifies the behavior when node.name.value != self.func_name."""
   import libcst as cst
+
   from ml_switcheroo.tools.injector_plugin import BodyExtractor
 
   code: str = "def other_func(): pass\ndef target_func(): pass"
@@ -145,7 +148,7 @@ def test_preserves_logic_with_complex_indentation(plugin_dir: Path) -> None:
 
 
 def test_preserves_logic_with_simple_statement_suite(plugin_dir: Path) -> None:
-  """Test preserving logic from a single-line function body (SimpleStatementSuite)."""
+  """Docstring."""
   gen: PluginGenerator = PluginGenerator(plugin_dir)
   scaffold: PluginScaffoldDef = PluginScaffoldDef(name="simple_stmt", type=PluginType.CALL, doc="Doc")
   file_path: Path = plugin_dir / "simple_stmt.py"
@@ -160,7 +163,7 @@ def test_preserves_logic_with_simple_statement_suite(plugin_dir: Path) -> None:
 
 
 def test_preserves_logic_empty_body(plugin_dir: Path) -> None:
-  """Test preserving logic when body becomes empty after docstring strip."""
+  """Docstring."""
   gen: PluginGenerator = PluginGenerator(plugin_dir)
   scaffold: PluginScaffoldDef = PluginScaffoldDef(name="empty_body", type=PluginType.CALL, doc="New Doc")
   file_path: Path = plugin_dir / "empty_body.py"
@@ -172,7 +175,7 @@ def test_preserves_logic_empty_body(plugin_dir: Path) -> None:
 
 
 def test_injector_plugin_edge_cases(plugin_dir: Path) -> None:
-  """Test injector plugin edge cases for body extraction."""
+  """Docstring."""
   from ml_switcheroo.tools.injector_plugin import PluginGenerator
 
   gen: PluginGenerator = PluginGenerator(plugin_dir)
@@ -244,3 +247,36 @@ def test_auto_wire_generation(plugin_dir: Path) -> None:
   assert '@register_hook(trigger="rewired", auto_wire={' in content
   assert '"TestOp":' in content
   assert '"api": "foo"' in content
+
+
+# --- Merged from test_injector_plugin_missing.py ---
+
+
+def test_injector_plugin_missing() -> None:
+  """Verifies the behavior of injector plugin missing."""
+  from pathlib import Path
+
+  import libcst as cst
+
+  from ml_switcheroo.tools.injector_plugin import BodyExtractor, PluginGenerator
+
+  extractor: BodyExtractor = BodyExtractor("foo")
+  extractor.visit_FunctionDef(cst.FunctionDef(name=cst.Name("bar"), params=cst.Parameters(), body=cst.IndentedBlock([])))
+  assert getattr(extractor, "found") is False
+  _: PluginGenerator = PluginGenerator(Path("."))
+
+
+def test_injector_plugin_generate_body_logic() -> None:
+  """Verifies the behavior of injector plugin generate body logic."""
+  from pathlib import Path
+
+  import libcst as cst
+
+  from ml_switcheroo.core.dsl import LogicOp, Rule
+  from ml_switcheroo.tools.injector_plugin import PluginGenerator
+
+  gen: PluginGenerator = PluginGenerator(Path("."))
+  stmts: List[cst.BaseStatement] = gen._generate_cst_body_logic([Rule(if_arg="foo", op=LogicOp.GT, val=5, use_api="bar")])
+  mod: cst.Module = cst.Module(body=stmts)
+  res: str = mod.code
+  assert "val_0 > 5" in res

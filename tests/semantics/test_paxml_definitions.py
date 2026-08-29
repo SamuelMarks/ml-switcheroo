@@ -1,7 +1,9 @@
 """Test suite for the Paxml Definitions module."""
 
+from typing import Any, Dict, Generator, Optional, Tuple
+
 import pytest
-from typing import Generator, Dict, Any, Optional, Tuple
+
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 

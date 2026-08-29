@@ -1,7 +1,7 @@
 """Tests for visual_latex.py."""
 
 import ml_switcheroo.core.compiler.backends.visual_latex as visual_latex
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def create_sample_graph() -> LogicalGraph:
@@ -78,7 +78,7 @@ def test_latex_backend_no_out_edges() -> None:
 
 
 def test_latex_backend_output_node_bypass() -> None:
-  """Test output node logic and func_ ignoring in state_registry."""
+  """Docstring."""
   backend = visual_latex.LatexBackend()
   graph = LogicalGraph("Custom")
   graph.nodes = [
@@ -97,10 +97,10 @@ def test_latex_backend_output_node_bypass() -> None:
 
 
 def test_visual_latex_no_node_data() -> None:
+  """Docstring."""
   # Hit 125->131
-  """Test visual latex no node data."""
   from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalEdge
+  from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph
 
   g = LogicalGraph("Test")
   # A graph with an edge but no nodes in graph.nodes.
@@ -112,10 +112,10 @@ def test_visual_latex_no_node_data() -> None:
 
 
 def test_visual_latex_clean_type_no_dot_no_func() -> None:
+  """Docstring."""
   # Hit 135->137
-  """Test visual latex clean type no dot no func."""
   from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+  from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
   g = LogicalGraph("Test")
   g.nodes.append(LogicalNode("in", "Input"))

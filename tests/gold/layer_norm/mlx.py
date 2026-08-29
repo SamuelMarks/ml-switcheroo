@@ -5,7 +5,7 @@ import mlx.nn as nn
 
 
 class LayerNormModel(nn.Module):
-  """Test suite for the Layer Norm Model component."""
+  """Docstring."""
 
   def __init__(self, normalized_shape: int):
     """Initializes the LayerNormModel instance."""

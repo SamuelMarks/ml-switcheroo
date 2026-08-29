@@ -7,6 +7,7 @@ assignments, while loops, and if-conditional expressions.
 """
 
 import libcst as cst
+
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 
 

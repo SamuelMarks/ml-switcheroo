@@ -1,5 +1,7 @@
 """Docstring."""
 
+from typing import List
+
 from ml_switcheroo.core.compiler.backends.sass.printer import SassPrinter
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassComment,
@@ -9,7 +11,6 @@ from ml_switcheroo.core.compiler.frontends.sass.cst import (
   SassNode,
   SassRegister,
 )
-from typing import List
 
 
 class DummySassNode(SassNode):

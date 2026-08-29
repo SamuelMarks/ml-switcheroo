@@ -1,8 +1,10 @@
 """Module docstring."""
 
+from typing import Any, Dict
+
 import libcst as cst
+
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
-from typing import Dict, Any
 
 
 class DummyRewriter:
@@ -21,8 +23,6 @@ def test_missing_post_branch() -> None:
   handle_post_processing(rewriter, node, mapping, "id")
 
   class RewriterNoReport:
-    """Docstring."""
-
     pass
 
   rewriter_no_report: RewriterNoReport = RewriterNoReport()

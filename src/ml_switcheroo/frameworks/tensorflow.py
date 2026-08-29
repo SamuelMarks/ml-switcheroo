@@ -31,8 +31,8 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 try:
   import tensorflow as tf
-except Exception:  # pragma: no cover
-  tf = None  # pragma: no cover
+except Exception:
+  tf = None
 
 
 @register_framework("tensorflow")
@@ -50,7 +50,6 @@ class TensorFlowAdapter:
   ui_priority: int = 30
 
   def __init__(self) -> None:
-    # pragma: no cover
     """Initialize the adapter.
 
     Detects if TensorFlow is installed to determine the initialization mode:

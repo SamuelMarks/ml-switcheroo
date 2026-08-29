@@ -1,7 +1,8 @@
 """Docstring."""
 
+from typing import Any, Dict, List
+
 from ml_switcheroo.utils.doc_renderer import OpPageRenderer
-from typing import Dict, Any, List
 
 
 def test_render_rst_full() -> None:

@@ -1,9 +1,10 @@
 """Test suite for the Sass Wiring module."""
 
 from unittest.mock import MagicMock
-from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
+
 from ml_switcheroo.core.compiler.backends.sass import SassBackend
 from ml_switcheroo.core.compiler.backends.sass.macros import expand_conv2d, expand_linear
+from ml_switcheroo.core.compiler.backends.sass.synthesizer import SassSynthesizer
 
 
 def test_synthesizer_wires_macros() -> None:

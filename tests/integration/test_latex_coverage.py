@@ -1,19 +1,22 @@
 """Module docstring."""
 
-import libcst as cst
 import typing
+from unittest.mock import patch
+
+import libcst as cst
+
 from ml_switcheroo.core.latex.nodes import (
-  MacroNode,
-  EnvironmentNode,
-  TextNode,
-  DocumentNode,
-  MemoryNode,
-  InputNode,
   ComputeNode,
-  StateOpNode,
-  ReturnNode,
-  ModelContainer,
+  DocumentNode,
+  EnvironmentNode,
+  InputNode,
   LatexNode,
+  MacroNode,
+  MemoryNode,
+  ModelContainer,
+  ReturnNode,
+  StateOpNode,
+  TextNode,
 )
 from ml_switcheroo.core.latex.parser import LatexParser
 
@@ -38,10 +41,7 @@ def test_latex_nodes_missing() -> None:
     n.__str__()
 
   class DummyNode(LatexNode):  # type: ignore[misc]
-    """Docstring."""
-
     def emit(self, indent_level: int = 0) -> str:
-      """Docstring."""
       return "dummy"
 
   DummyNode().__str__()
@@ -157,8 +157,33 @@ def test_latex_parser_missing() -> None:
 
   # Hit line 327 missing fallback in synthesize class
   class DummyOp:
-    """Docstring."""
-
     node_id = "d"
 
   LatexParser("")._synthesize_class("N", [], None, [DummyOp()], None)
+
+
+# --- Merged from test_latex_coverage_extra.py ---
+
+
+def test_latex_parser_missing_branches_clean() -> None:
+  """Docstring."""
+  src1: str = r"""
+\begin{Unknown}
+\end{Unknown}
+\%escaped
+\begin{DefModel}
+\end{DefModel}
+"""
+  parser = LatexParser(src1)
+  parser.parse()
+
+  src2: str = r"""
+\UnknownMacroOutside{A}
+\begin{DefModel}{MyModel{WithBraces}}
+\Op{out}{valid_name}{{"nested": {1: 2}}}{config}
+\UnknownMacro[opt[nested]]{{Nested{Inside}Name}}
+\end{DefModel}
+"""
+  parser2 = LatexParser(src2)
+  with patch.object(parser2, "_synthesize_class", return_value=None):
+    parser2.parse()

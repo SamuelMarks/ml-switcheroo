@@ -233,10 +233,10 @@ class GraphPatcher(cst.CSTTransformer):
 
         if is_expr_context:
           return self.emitter.emit_expression(action.new_node, action.input_vars)
-        else:  # pragma: no cover
+        else:
           # Statement-like replacement
-          new_stmt = self.emitter.emit_call(action.new_node, action.input_vars, action.output_var)  # pragma: no cover
-          return self._unwrap_stmt_if_nested(original, new_stmt)  # pragma: no cover
+          new_stmt = self.emitter.emit_call(action.new_node, action.input_vars, action.output_var)
+          return self._unwrap_stmt_if_nested(original, new_stmt)
 
     return updated  # pragma: no cover
 
@@ -262,4 +262,4 @@ class GraphPatcher(cst.CSTTransformer):
         # Yes, return FlattenSentinel([node]) splits it.
         return cst.FlattenSentinel(new_stmt.body)
 
-    return new_stmt  # pragma: no cover
+    return new_stmt

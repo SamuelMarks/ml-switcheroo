@@ -1,12 +1,13 @@
 """Module docstring."""
 
-import pytest
-import libcst as cst
-from typing import List, Dict, Any
 from collections import defaultdict
+from typing import Any, Dict, List
 
+import libcst as cst
+import pytest
+
+from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, OperationNode, RegionNode, TypeNode, ValueNode
 from ml_switcheroo.core.mlir.gen_statements import StatementGeneratorMixin
-from ml_switcheroo.core.mlir.cst import OperationNode, AttributeNode, ValueNode, BlockNode, RegionNode, TypeNode
 from ml_switcheroo.core.mlir.naming import NamingContext
 
 

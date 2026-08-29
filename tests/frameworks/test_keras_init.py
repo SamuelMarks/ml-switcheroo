@@ -1,6 +1,7 @@
 """Test suite for the Keras Init module."""
 
 import typing
+
 import ml_switcheroo.frameworks.keras as keras_fw
 
 

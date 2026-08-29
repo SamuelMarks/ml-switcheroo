@@ -1,15 +1,16 @@
 """Test module."""
 
+from typing import Dict
 from unittest.mock import MagicMock
+
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.types import SignatureContext
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.config import RuntimeConfig
-from typing import Dict
 
 
 def test_rewriter_context_default_injectors() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: MagicMock = MagicMock(spec=SemanticsManager)
   config: MagicMock = MagicMock(spec=RuntimeConfig)
   config.effective_source = "pytorch"
@@ -55,7 +56,7 @@ def test_rewriter_context_default_injectors() -> None:
 
 
 def test_rewriter_context_hydrate_pydantic() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: MagicMock = MagicMock(spec=SemanticsManager)
   config: MagicMock = MagicMock(spec=RuntimeConfig)
   config.effective_source = "pytorch"
@@ -70,7 +71,7 @@ def test_rewriter_context_hydrate_pydantic() -> None:
 
 
 def test_rewriter_context_hydrate_exception() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: MagicMock = MagicMock(spec=SemanticsManager)
   config: MagicMock = MagicMock(spec=RuntimeConfig)
   config.effective_source = "pytorch"
@@ -81,7 +82,7 @@ def test_rewriter_context_hydrate_exception() -> None:
 
 
 def test_rewriter_context_hydrate_none() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: MagicMock = MagicMock(spec=SemanticsManager)
   config: MagicMock = MagicMock(spec=RuntimeConfig)
   config.effective_source = "pytorch"
@@ -89,3 +90,58 @@ def test_rewriter_context_hydrate_none() -> None:
   semantics.get_framework_config.return_value = None
   ctx: RewriterContext = RewriterContext(semantics=semantics, config=config)
   assert ctx.alias_map == {}
+
+
+# --- Merged from test_rewriter_context_extra.py ---
+
+
+def test_hydrate_alias_map_with_dict() -> None:
+  """Docstring."""
+  # Hit the line 160->exit path
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  sm: MagicMock = MagicMock()
+  sm.get_framework_config.return_value = {"alias": {"name": "th"}}
+  ctx: RewriterContext = RewriterContext(semantics=sm, config=config)
+
+  assert ctx.alias_map.get("th") == "th"
+
+
+def test_hydrate_alias_map_no_name() -> None:
+  """Docstring."""
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  sm: MagicMock = MagicMock()
+  sm.get_framework_config.return_value = {"alias": {}}
+  ctx: RewriterContext = RewriterContext(semantics=sm, config=config)
+  assert "th" not in ctx.alias_map
+
+
+def test_hydrate_alias_map_model_dump() -> None:
+  """Docstring."""
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  sm: MagicMock = MagicMock()
+
+  class DummyAlias:
+    def model_dump(self) -> Dict[str, str]:
+      return {"name": "th_dummy"}
+
+  sm.get_framework_config.return_value = {"alias": DummyAlias()}
+  ctx: RewriterContext = RewriterContext(semantics=sm, config=config)
+  assert ctx.alias_map.get("th_dummy") == "th_dummy"
+
+
+def test_hydrate_alias_map_dict_no_name_key() -> None:
+  """Docstring."""
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  sm: MagicMock = MagicMock()
+  sm.get_framework_config.return_value = {"alias": {"something_else": "value"}}
+  ctx: RewriterContext = RewriterContext(semantics=sm, config=config)
+  assert not ctx.alias_map
+
+
+def test_hydrate_alias_map_not_dict() -> None:
+  """Docstring."""
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  sm: MagicMock = MagicMock()
+  sm.get_framework_config.return_value = {"alias": "just_a_string"}
+  ctx: RewriterContext = RewriterContext(semantics=sm, config=config)
+  assert not ctx.alias_map

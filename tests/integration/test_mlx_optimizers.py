@@ -1,12 +1,13 @@
 """Test suite for the Mlx Optimizers module."""
 
-import pytest
 import typing
-import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
+import libcst as cst
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.core.hooks import _HOOKS
 from ml_switcheroo.frameworks.base import register_framework
 from ml_switcheroo.plugins.mlx_optimizers import (
@@ -14,6 +15,7 @@ from ml_switcheroo.plugins.mlx_optimizers import (
   transform_mlx_optimizer_step,
   transform_mlx_zero_grad,
 )
+from ml_switcheroo.semantics.manager import SemanticsManager
 from tests.conftest import TestRewriter as PivotRewriter
 
 SOURCE_CODE: str = "\nimport torch.optim as optim\n\ndef setup_training(model):\n    optimizer = optim.Adam(model.parameters(), lr=0.001)\n    optimizer.step()\n    optimizer.zero_grad()\n    return optimizer\n"
@@ -21,12 +23,10 @@ SOURCE_CODE: str = "\nimport torch.optim as optim\n\ndef setup_training(model):\
 
 @pytest.fixture
 def functional_framework_setup() -> str:
-  """Provides a mock functional framework setup for testing."""
+  """Docstring."""
 
   @register_framework("functional_fw")
   class FunctionalAdapter:
-    """Test suite for the Functional Adapter component."""
-
     pass
 
   return "functional_fw"
@@ -34,7 +34,7 @@ def functional_framework_setup() -> str:
 
 @pytest.fixture
 def mlx_semantics(functional_framework_setup: str) -> MagicMock:
-  """Provides a mock MLX semantics for testing."""
+  """Docstring."""
   fw_key = functional_framework_setup
   _HOOKS["mlx_optimizer_init"] = transform_mlx_optimizer_init
   _HOOKS["mlx_optimizer_step"] = transform_mlx_optimizer_step

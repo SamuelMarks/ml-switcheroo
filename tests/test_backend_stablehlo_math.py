@@ -1,10 +1,12 @@
 """Test suite for Math & Arithmetic operations in the StableHLO backend."""
 
-import pytest
+from typing import Any, Dict, List, Optional, Tuple
+
 import libcst as cst
-from typing import List, Tuple, Dict, Any, Optional
+import pytest
+
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
 from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -84,7 +86,7 @@ def test_math_operations_backend(abstract_name: str, expected_api: str) -> None:
 
 
 def test_stablehlo_emitter_math_ops() -> None:
-  """Test the PythonToMlir emitter mapping math operations properly."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   # Assuming the semantics manager is loaded, but we can mock or inject
   # Actually, we can inject a mock directly.

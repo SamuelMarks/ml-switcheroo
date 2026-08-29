@@ -1,8 +1,10 @@
 """Test suite for the Init Discovery module."""
 
-import pytest
 import typing
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 import ml_switcheroo.frameworks as frameworks_pkg
 
 

@@ -1,15 +1,11 @@
 """Test suite for the Import Resolver module."""
 
-import pytest
-import libcst as cst
 from unittest.mock import Mock
 
-from ml_switcheroo.core.import_fixer.resolution import (
-  ImportReq,
-  _QualNameScanner,
-  ImportResolver,
-  _deduplicate,
-)
+import libcst as cst
+import pytest
+
+from ml_switcheroo.core.import_fixer.resolution import ImportReq, ImportResolver, _deduplicate, _QualNameScanner
 
 
 def test_importreq_signature() -> None:

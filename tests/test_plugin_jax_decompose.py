@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.plugins.jax_decompose import decompose_via_jax
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.jax_decompose import decompose_via_jax
 
 
 def test_decompose_via_jax() -> None:

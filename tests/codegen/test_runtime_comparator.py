@@ -1,7 +1,9 @@
 """Test suite for the Runtime Comparator module."""
 
 import typing
+
 import numpy as np
+
 from ml_switcheroo.generated_tests.runtime import verify_results
 
 

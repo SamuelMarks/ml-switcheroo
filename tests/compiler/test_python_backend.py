@@ -16,13 +16,13 @@ class MockSharding:
 
 
 def test_python_snippet_emitter_init():
-  """Test snippet emitter init."""
+  """Docstring."""
   emitter = PythonSnippetEmitter(framework="jax")
   assert emitter.framework == "jax"
 
 
 def test_python_snippet_emit_init_stateless():
-  """Test emit_init with stateless node."""
+  """Docstring."""
   emitter = PythonSnippetEmitter()
   node = LogicalNode(id="n1", kind="func_add")
   stmt = emitter.emit_init(node)
@@ -31,7 +31,7 @@ def test_python_snippet_emit_init_stateless():
 
 
 def test_python_snippet_emit_init_stateful():
-  """Test emit_init with stateful node."""
+  """Docstring."""
   emitter = PythonSnippetEmitter(framework="torch")
   node = LogicalNode(id="l1", kind="Linear", metadata={"arg_1": "10", "arg_2": "20"})
   stmt = emitter.emit_init(node)
@@ -41,7 +41,7 @@ def test_python_snippet_emit_init_stateful():
 
 
 def test_python_snippet_emit_init_flax():
-  """Test emit_init with stateful node for flax (rngs inject)."""
+  """Docstring."""
   emitter = PythonSnippetEmitter(framework="flax_nnx")
   node = LogicalNode(id="l1", kind="Linear")
   stmt = emitter.emit_init(node)
@@ -51,7 +51,7 @@ def test_python_snippet_emit_init_flax():
 
 
 def test_python_snippet_emit_call_input():
-  """Test emit_call with input node."""
+  """Docstring."""
   emitter = PythonSnippetEmitter()
   node = LogicalNode(id="in", kind="Input")
   stmt = emitter.emit_call(node, ["x_in"], "x_out")
@@ -64,7 +64,7 @@ def test_python_snippet_emit_call_input():
 
 
 def test_python_snippet_emit_call_expr():
-  """Test emit_call with expression."""
+  """Docstring."""
   emitter = PythonSnippetEmitter()
   node = LogicalNode(id="add", kind="add", metadata={"alpha": "1.0"})
   stmt = emitter.emit_call(node, ["x", "y"], "out")
@@ -73,7 +73,7 @@ def test_python_snippet_emit_call_expr():
 
 
 def test_python_snippet_emit_expression_error():
-  """Test emit_expression on parse error."""
+  """Docstring."""
   emitter = PythonSnippetEmitter()
   # Invalid python expression string in metadata to cause parser error
   node = LogicalNode(id="bad", kind="bad", metadata={"key": "def class *"})
@@ -83,7 +83,7 @@ def test_python_snippet_emit_expression_error():
 
 
 def test_python_snippet_resolve_api_name():
-  """Test framework specific resolving."""
+  """Docstring."""
   _ = LogicalNode(id="1", kind="Linear")
   emitter_torch = PythonSnippetEmitter("torch")
   assert emitter_torch._resolve_api_name("Linear") == "nn.Linear"
@@ -100,13 +100,13 @@ def test_python_snippet_resolve_api_name():
 
 
 def test_python_backend_init():
-  """Test init."""
+  """Docstring."""
   backend = PythonBackend(framework="torch")
   assert backend.framework == "torch"
 
 
 def test_python_backend_compile():
-  """Test compilation for torch."""
+  """Docstring."""
   backend = PythonBackend(framework="torch")
   graph = LogicalGraph(name="MyModel")
   graph.nodes.append(LogicalNode(id="in", kind="Input", metadata={"name": "x"}))
@@ -123,7 +123,7 @@ def test_python_backend_compile():
 
 
 def test_python_backend_compile_no_name():
-  """Test default name."""
+  """Docstring."""
   backend = PythonBackend(framework="torch")
   graph = LogicalGraph()
   graph.nodes.append(LogicalNode(id="out", kind="Output"))
@@ -132,7 +132,7 @@ def test_python_backend_compile_no_name():
 
 
 def test_python_backend_generate_replacing():
-  """Test generate with class body replacer."""
+  """Docstring."""
   backend = PythonBackend(framework="torch")
   graph = LogicalGraph(name="MyModel")
   graph.nodes.append(LogicalNode(id="l1", kind="Linear"))
@@ -157,7 +157,7 @@ def test_python_backend_generate_replacing():
 
 
 def test_python_backend_framework_imports():
-  """Test imports generation."""
+  """Docstring."""
   assert "import torch" in cst.Module(body=PythonBackend("torch")._generate_imports()).code
   assert "jax.numpy" in cst.Module(body=PythonBackend("jax")._generate_imports()).code
   assert "mlx.core" in cst.Module(body=PythonBackend("mlx")._generate_imports()).code
@@ -167,7 +167,7 @@ def test_python_backend_framework_imports():
 
 
 def test_python_backend_build_init_paxml():
-  """Test init for paxml."""
+  """Docstring."""
   backend = PythonBackend("paxml")
   node = LogicalNode(id="l1", kind="Linear", metadata={"arg_0": "10"})
   init_def = backend._build_init([node])
@@ -177,7 +177,7 @@ def test_python_backend_build_init_paxml():
 
 
 def test_python_backend_build_init_flax():
-  """Test init for flax."""
+  """Docstring."""
   backend = PythonBackend("flax_nnx")
   node = LogicalNode(id="l1", kind="Linear")
   init_def = backend._build_init([node])
@@ -187,7 +187,7 @@ def test_python_backend_build_init_flax():
 
 
 def test_python_backend_build_forward_sharding():
-  """Test forward with sharding constraints."""
+  """Docstring."""
   node = LogicalNode(id="l1", kind="Linear", metadata={"arg_0": "10"})
   node.sharding = MockSharding(["batch", None])
 
@@ -224,7 +224,7 @@ def test_python_backend_build_forward_sharding():
 
 
 def test_python_backend_build_layer_init_mlx_specials():
-  """Test layer init mapping in mlx."""
+  """Docstring."""
   backend = PythonBackend("mlx")
   node = LogicalNode(id="s", kind="SwiGLU")
   stmt = backend._generate_layer_init(node)
@@ -240,7 +240,7 @@ def test_python_backend_build_layer_init_mlx_specials():
 
 
 def test_python_backend_generate_replacing_pass_stmt():
-  """Test replacing simple statement with multiple passes to hit missing coverage in _ClassBodyReplacer."""
+  """Docstring."""
   backend = PythonBackend(framework="torch")
   graph = LogicalGraph(name="MyModel")
 
@@ -251,7 +251,7 @@ def test_python_backend_generate_replacing_pass_stmt():
 
 
 def test_python_backend_generate_replacing_no_match():
-  """Test replacing class body with no functions matching and some other nodes."""
+  """Docstring."""
   backend = PythonBackend(framework="torch")
   graph = LogicalGraph(name="MyModel")
 
@@ -263,7 +263,7 @@ def test_python_backend_generate_replacing_no_match():
 
 
 def test_python_backend_build_forward_tuple_outputs():
-  """Test build forward with multiple outputs."""
+  """Docstring."""
   backend = PythonBackend("torch")
   node = LogicalNode(id="l1", kind="Linear")
   fwd = backend._build_forward([node])
@@ -272,7 +272,7 @@ def test_python_backend_build_forward_tuple_outputs():
 
 
 def test_python_backend_build_forward_no_outputs():
-  """Test build forward with zero outputs."""
+  """Docstring."""
   backend = PythonBackend("torch")
   node = LogicalNode(id="l1", kind="Linear")
   fwd = backend._build_forward([node])
@@ -281,7 +281,7 @@ def test_python_backend_build_forward_no_outputs():
 
 
 def test_python_backend_build_layer_init_torch_specials():
-  """Test torch special layer initializers."""
+  """Docstring."""
   backend = PythonBackend("torch")
   node_swi = LogicalNode(id="s", kind="SwiGLU")
   code = cst.Module(body=[backend._generate_layer_init(node_swi)]).code
@@ -297,7 +297,7 @@ def test_python_backend_build_layer_init_torch_specials():
 
 
 def test_python_backend_build_layer_init_jax_specials():
-  """Test jax special layer initializers."""
+  """Docstring."""
   backend = PythonBackend("jax")
   node = LogicalNode(id="l", kind="Conv2d")
   code = cst.Module(body=[backend._generate_layer_init(node)]).code
@@ -317,7 +317,7 @@ def test_python_backend_build_layer_init_jax_specials():
 
 
 def test_python_backend_build_layer_init_paxml_specials():
-  """Test paxml special layer initializers."""
+  """Docstring."""
   backend = PythonBackend("paxml")
   node = LogicalNode(id="l", kind="Conv2d")
   code = cst.Module(body=[backend._generate_layer_init(node)]).code
@@ -325,7 +325,7 @@ def test_python_backend_build_layer_init_paxml_specials():
 
 
 def test_python_snippet_emit_expression_bool():
-  """Test boolean value evaluation in metadata."""
+  """Docstring."""
   emitter = PythonSnippetEmitter("torch")
   node = LogicalNode(id="l", kind="Linear", metadata={"bias": "True", "other": "False"})
   stmt = emitter.emit_init(node)
@@ -355,7 +355,7 @@ class FakeSemantics:
 
 
 def test_python_backend_semantics_resolution():
-  """Test python backend semantics resolution."""
+  """Docstring."""
   backend = PythonBackend("torch")
   backend.semantics = FakeSemantics()
 
@@ -393,8 +393,8 @@ def test_python_backend_semantics_resolution():
 
 
 def test_python_backend_prefix_stripping():
+  """Docstring."""
   # torch prefix
-  """Test python backend prefix stripping."""
   backend_t = PythonBackend("torch")
   node_t = LogicalNode(id="n", kind="torch.nn.Linear")
   c_t = cst.Module(body=[backend_t._generate_layer_init(node_t)]).code
@@ -408,7 +408,7 @@ def test_python_backend_prefix_stripping():
 
 
 def test_python_backend_implicit_prefixes():
-  """Test python backend implicit prefixes."""
+  """Docstring."""
   backends = ["torch", "jax", "flax", "flax_nnx", "keras", "tensorflow", "mlx", "paxml"]
   prefixes = ["nn.", "nnx.", "nnx.", "nnx.", "keras.layers.", "tf.keras.layers.", "nn.", "pl."]
 
@@ -420,7 +420,7 @@ def test_python_backend_implicit_prefixes():
 
 
 def test_python_backend_mlx_swiglu():
-  """Test python backend mlx swiglu."""
+  """Docstring."""
   backend_m = PythonBackend("mlx")
   node = LogicalNode(id="s", kind="SwiGLU")
   code = cst.Module(body=[backend_m._generate_layer_init(node)]).code
@@ -428,7 +428,7 @@ def test_python_backend_mlx_swiglu():
 
 
 def test_python_backend_build_forward_resolve():
-  """Test python backend build forward resolve."""
+  """Docstring."""
   backend = PythonBackend("torch")
   backend.semantics = FakeSemantics()
   # To hit 311->319: get_definition returns something, and definition has 'api'
@@ -439,7 +439,7 @@ def test_python_backend_build_forward_resolve():
 
 
 def test_python_backend_layer_init_paxml():
-  """Test python backend layer init paxml."""
+  """Docstring."""
   backend = PythonBackend("paxml")
   node = LogicalNode(id="l1", kind="Linear")
   init = backend._generate_layer_init(node)
@@ -448,7 +448,7 @@ def test_python_backend_layer_init_paxml():
 
 
 def test_python_backend_format_partition_spec():
-  """Test python backend format partition spec."""
+  """Docstring."""
   backend = PythonBackend("torch")
 
   # Test _format_partition_spec_tf (tuple -> '*')
@@ -460,7 +460,7 @@ def test_python_backend_format_partition_spec():
 
 
 def test_python_backend_build_layer_init_mlx_special():
-  """Test python backend build layer init mlx special."""
+  """Docstring."""
   backend = PythonBackend("mlx")
   node = LogicalNode(id="s", kind="SwiGLU")
   code = cst.Module(body=[backend._generate_layer_init(node)]).code
@@ -468,7 +468,7 @@ def test_python_backend_build_layer_init_mlx_special():
 
 
 def test_python_backend_build_layer_init_args():
-  """Test python backend build layer init args."""
+  """Docstring."""
   backend = PythonBackend("flax_nnx")
   node = LogicalNode(id="s", kind="Linear", metadata={"arg": "1"})
   code = cst.Module(body=[backend._generate_layer_init(node)]).code
@@ -480,7 +480,7 @@ def test_python_backend_build_layer_init_args():
 
 
 def test_python_backend_base_class_resolution():
-  """Test python backend base class resolution."""
+  """Docstring."""
   backend_flax = PythonBackend("flax_nnx")
   backend_flax.traits.module_base = "flax.nnx.Module"
   code = backend_flax.compile(LogicalGraph(name="M"))
@@ -503,7 +503,7 @@ def test_python_backend_base_class_resolution():
 
 
 def test_python_backend_sharding_tf_no_tuple():
-  """Test python backend sharding tf no tuple."""
+  """Docstring."""
   backend = PythonBackend("tensorflow")
   from collections import namedtuple
 
@@ -513,8 +513,8 @@ def test_python_backend_sharding_tf_no_tuple():
 
 
 def test_python_backend_generate_replacer_not_module():
+  """Docstring."""
   # If original_tree.visit(replacer) is not a cst.Module (which is weird, but we hit 163->166)
-  """Test python backend generate replacer not module."""
   backend = PythonBackend("torch")
   node = cst.parse_statement("pass")
   code = backend.generate(LogicalGraph(), original_tree=node)
@@ -522,7 +522,7 @@ def test_python_backend_generate_replacer_not_module():
 
 
 def test_python_backend_sharding_others():
-  """Test python backend sharding others."""
+  """Docstring."""
   backend = PythonBackend("paxml")
   from collections import namedtuple
 
@@ -534,7 +534,7 @@ def test_python_backend_sharding_others():
 
 
 def test_python_backend_semantics_reverse_lookup_none():
-  """Test python backend semantics reverse lookup none."""
+  """Docstring."""
   backend = PythonBackend("torch")
   backend.semantics = FakeSemantics()
   # Test _build_forward with reverse lookup returning None
@@ -545,7 +545,7 @@ def test_python_backend_semantics_reverse_lookup_none():
 
 
 def test_python_backend_semantics_forward_lookup_none():
-  """Test python backend semantics forward lookup none."""
+  """Docstring."""
   backend = PythonBackend("torch")
 
   class FakeSemanticsNone(FakeSemantics):
@@ -563,7 +563,7 @@ def test_python_backend_semantics_forward_lookup_none():
 
 
 def test_python_backend_prefix_others():
-  """Test python backend prefix others."""
+  """Docstring."""
   backend_k = PythonBackend("keras")
   node_k = LogicalNode(id="k", kind="Linear")
   c_k = cst.Module(body=[backend_k._generate_layer_init(node_k)]).code
@@ -576,7 +576,7 @@ def test_python_backend_prefix_others():
 
 
 def test_python_backend_sharding_torch_tuple():
-  """Test python backend sharding torch tuple."""
+  """Docstring."""
   backend = PythonBackend("torch")
   from collections import namedtuple
 
@@ -586,8 +586,8 @@ def test_python_backend_sharding_torch_tuple():
 
 
 def test_python_backend_generate_replacing_simple_assign():
+  """Docstring."""
   # Hit line 60-63
-  """Test python backend generate replacing simple assign."""
   backend = PythonBackend(framework="torch")
   source = "class M: x = 1"
   tree = cst.parse_module(source)
@@ -596,8 +596,8 @@ def test_python_backend_generate_replacing_simple_assign():
 
 
 def test_python_backend_generate_replacing_simple_unsupported():
+  """Docstring."""
   # Hit line 61->60 (an unsupported statement type in SimpleStatementSuite)
-  """Test python backend generate replacing simple unsupported."""
   backend = PythonBackend(framework="torch")
   source = "class M: global x"
   tree = cst.parse_module(source)
@@ -607,19 +607,17 @@ def test_python_backend_generate_replacing_simple_unsupported():
 
 
 def test_python_backend_generate_replacing_not_simple_or_indented():
+  """Docstring."""
   # Hit 64->67
-  """Test python backend generate replacing not simple or indented."""
   _backend = PythonBackend(framework="torch")
 
   class FakeBody(cst.CSTNode):
     """Fake body."""
 
     def _codegen_impl(self, state):
-      """Docstring."""
       pass
 
     def _visit_and_replace_children(self, visitor):
-      """Docstring."""
       return self
 
   # Actually, cst.ClassDef.body can only be SimpleStatementSuite or IndentedBlock.
@@ -629,8 +627,8 @@ def test_python_backend_generate_replacing_not_simple_or_indented():
 
 
 def test_python_backend_replacing_multiple_same_func():
+  """Docstring."""
   # Hit 82->77
-  """Test python backend replacing multiple same func."""
   backend = PythonBackend("torch")
   source = "class M:\n  def forward(self): pass\n  def forward(self): pass"
   tree = cst.parse_module(source)
@@ -638,8 +636,8 @@ def test_python_backend_replacing_multiple_same_func():
 
 
 def test_python_backend_replacing_init_only():
+  """Docstring."""
   # Hit 92->95
-  """Test python backend replacing init only."""
   backend = PythonBackend("torch")
   source = "class M:\n  def __init__(self): pass"
   tree = cst.parse_module(source)
@@ -647,7 +645,7 @@ def test_python_backend_replacing_init_only():
 
 
 def test_python_backend_sharding_jax_tuple():
-  """Test python backend sharding jax tuple."""
+  """Docstring."""
   backend = PythonBackend("jax")
   from collections import namedtuple
 
@@ -657,8 +655,8 @@ def test_python_backend_sharding_jax_tuple():
 
 
 def test_python_backend_prefix_paxml_and_other():
+  """Docstring."""
   # Hit 425->429 (not paxml but hits the else branch)
-  """Test python backend prefix paxml and other."""
   backend = PythonBackend("numpy")
   node = LogicalNode(id="n", kind="Linear")
   c = cst.Module(body=[backend._generate_layer_init(node)]).code
@@ -666,8 +664,8 @@ def test_python_backend_prefix_paxml_and_other():
 
 
 def test_python_backend_flax_rngs_existing():
+  """Docstring."""
   # Hit 438->442
-  """Test python backend flax rngs existing."""
   backend = PythonBackend("flax_nnx")
   node = LogicalNode(id="n", kind="Linear", metadata={"rngs": "rngs"})
   c = cst.Module(body=[backend._generate_layer_init(node)]).code
@@ -675,8 +673,8 @@ def test_python_backend_flax_rngs_existing():
 
 
 def test_python_backend_semantics_concrete_hit():
+  """Docstring."""
   # Hit 399->409
-  """Test python backend semantics concrete hit."""
   backend = PythonBackend("torch")
 
   class Semantics:
@@ -694,8 +692,8 @@ def test_python_backend_semantics_concrete_hit():
 
 
 def test_python_backend_semantics_rev_lookup_no_api():
+  """Docstring."""
   # Hit 311->319
-  """Test python backend semantics rev lookup no api."""
   backend = PythonBackend("torch")
 
   class Semantics2:
@@ -721,8 +719,8 @@ def test_python_backend_semantics_rev_lookup_no_api():
 
 
 def test_python_backend_build_forward_metadata_no_extra_args():
+  """Docstring."""
   # Hit 325->327
-  """Test python backend build forward metadata no extra args."""
   backend = PythonBackend("torch")
 
   class Semantics3:
@@ -746,8 +744,8 @@ def test_python_backend_build_forward_metadata_no_extra_args():
 
 
 def test_python_backend_semantics_no_api_dict():
+  """Docstring."""
   # Hit 308->322 and 399->409
-  """Test python backend semantics no api dict."""
   backend = PythonBackend("torch")
 
   class Semantics4:
@@ -775,8 +773,8 @@ def test_python_backend_semantics_no_api_dict():
 
 
 def test_python_backend_tf_sharding_not_none_or_str():
+  """Docstring."""
   # Hit 483->478
-  """Test python backend tf sharding not none or str."""
   backend = PythonBackend("torch")
   from collections import namedtuple
 
@@ -795,8 +793,8 @@ def test_python_backend_tf_sharding_not_none_or_str():
 
 
 def test_python_backend_generate_updated_node_return():
+  """Docstring."""
   # Hit line 103 (which is returned when original_node.name.value != target_class)
-  """Test python backend generate updated node return."""
   backend = PythonBackend("torch")
   source = "class Other:\n  pass"
   tree = cst.parse_module(source)
@@ -809,8 +807,8 @@ def test_python_backend_generate_updated_node_return():
 
 
 def test_python_backend_semantics_no_resolve_variant():
+  """Docstring."""
   # Hit 308->322 (no resolve_variant attr)
-  """Test python backend semantics no resolve variant."""
   backend = PythonBackend("torch")
 
   class Semantics5:

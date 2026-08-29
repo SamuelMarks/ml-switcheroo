@@ -1,11 +1,12 @@
 """Test suite for the Keras3 module."""
 
 import typing
+
 import keras
 
 
 class ResidualBlock(keras.Model):  # type: ignore
-  """Test suite for the Residual Block component."""
+  """Docstring."""
 
   def __init__(self, channels: int) -> None:
     """Initializes the ResidualBlock instance."""

@@ -1,14 +1,15 @@
 """Test suite for the Paxml module."""
 
 import typing
+
 from praxis import base_layer  # type: ignore
+from praxis.layers import activations  # type: ignore
 from praxis.layers import convolutions  # type: ignore
 from praxis.layers import normalizations  # type: ignore
-from praxis.layers import activations  # type: ignore
 
 
 class ResidualBlock(base_layer.BaseLayer):  # type: ignore
-  """Test suite for the Residual Block component."""
+  """Docstring."""
 
   channels: int = 0
 

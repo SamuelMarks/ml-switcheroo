@@ -1,18 +1,20 @@
 """Test module."""
 
 from typing import Dict, List, Optional
+
 import libcst as cst
+
 from ml_switcheroo.core.import_fixer.resolution import (
   ImportReq,
-  _QualNameScanner,
   ImportResolver,
-  _deduplicate,
   ResolutionPlan,
+  _deduplicate,
+  _QualNameScanner,
 )
 
 
 def test_importreq_signature() -> None:
-  """Test element."""
+  """Docstring."""
   req1: ImportReq = ImportReq(module="torch")
   assert req1.signature == "torch"
 
@@ -33,7 +35,7 @@ def test_importreq_signature() -> None:
 
 
 def test_qual_name_scanner() -> None:
-  """Test element."""
+  """Docstring."""
   tree: cst.Module = cst.parse_module("import jax.numpy\nx = jax.numpy.sum()")
   scanner: _QualNameScanner = _QualNameScanner("jax.numpy")
   tree.visit(scanner)
@@ -75,14 +77,14 @@ def test_qual_name_scanner() -> None:
 
 
 class MockSemantics:
-  """Test element."""
+  """Docstring."""
 
   def get_framework_aliases(self) -> Dict[str, tuple[str, str]]:
-    """Test element."""
+    """Docstring."""
     return {"jax": ("jax.numpy", "jnp")}
 
   def get_import_map(self, target_fw: str) -> Dict[str, tuple[str, str, str]]:
-    """Test element."""
+    """Docstring."""
     if target_fw == "jax":
       return {
         "torch.nn": ("flax", "nnx", "nnx"),
@@ -91,7 +93,7 @@ class MockSemantics:
 
 
 def test_import_resolver() -> None:
-  """Test element."""
+  """Docstring."""
   sm: MockSemantics = MockSemantics()
   resolver: ImportResolver = ImportResolver(sm)
 

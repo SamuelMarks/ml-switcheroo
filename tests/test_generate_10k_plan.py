@@ -1,11 +1,11 @@
 """Tests for scripts/generate_10k_plan.py."""
 
-import sys
 import json
-from pathlib import Path
-from unittest import mock
+import sys
 import pytest
-from typing import List, Dict
+from pathlib import Path
+from typing import Dict, List
+from unittest import mock
 
 # Add scripts directory to sys.path to import it
 scripts_dir: Path = Path(__file__).parent.parent / "scripts"
@@ -39,7 +39,7 @@ def mock_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 def test_clone_repos(mock_env: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test repository cloning logic."""
+  """Docstring."""
   # Create one existing repo to test skip path
   repo_a: Path = mock_env / "pytorch"
   repo_a.mkdir(parents=True)
@@ -54,7 +54,7 @@ def test_clone_repos(mock_env: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_extract_api_surface_file_and_dir(mock_env: Path) -> None:
-  """Test API extraction for both files and directories."""
+  """Docstring."""
   repo_a: Path = mock_env / "pytorch"
 
   # Set up a directory with a Python file and a test file
@@ -76,7 +76,7 @@ def test_extract_api_surface_file_and_dir(mock_env: Path) -> None:
 
 
 def test_extract_api_surface_parse_error(mock_env: Path) -> None:
-  """Test API extraction handles parse errors gracefully."""
+  """Docstring."""
   repo_b: Path = mock_env / "keras"
   core_dir: Path = repo_b / "core"
   core_dir.mkdir(parents=True)
@@ -89,11 +89,10 @@ def test_extract_api_surface_parse_error(mock_env: Path) -> None:
 
 
 def test_generate_mappings(mock_env: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-  """Test the mapping generation logic."""
+  """Docstring."""
 
   # Mock extract_api_surface to return predetermined APIs
   def mock_extract(repo_name: str, focus_dirs: List[str]) -> List[str]:
-    """Mock extract."""
     if repo_name == "pytorch":
       return ["module.Dense", "module.Relu"]
     elif repo_name == "keras":
@@ -137,10 +136,10 @@ def test_generate_mappings(mock_env: Path, monkeypatch: pytest.MonkeyPatch, tmp_
 
 
 def test_main_block(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-  """Test the main execution block."""
+  """Docstring."""
+  import os
   import runpy
   import subprocess
-  import os
 
   monkeypatch.setattr(subprocess, "run", mock.Mock())
 

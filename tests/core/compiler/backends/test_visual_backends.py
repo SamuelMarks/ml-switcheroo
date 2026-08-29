@@ -1,7 +1,7 @@
 """Test suite for the Visual Backends module."""
 
-from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend, LatexBackend
+from ml_switcheroo.core.compiler.backends.visual_backends import LatexBackend, TikzBackend
+from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def create_sample_graph() -> LogicalGraph:

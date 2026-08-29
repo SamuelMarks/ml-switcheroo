@@ -1,20 +1,22 @@
 """Test suite for the Mlir Roundtrip module."""
 
-import pytest
 import typing
 from unittest.mock import patch
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.tracer import TraceEventType
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.core.tracer import TraceEventType
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE_CODE: str = "\nclass MyModel:\n    def forward(self, x):\n        return x\n"
 CONVNET_SOURCE: str = "\nimport torch\nimport torch.nn as nn\n\nclass ConvNet(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.conv = nn.Conv2d(1, 32, 3)\n        self.fc = nn.Linear(32 * 26 * 26, 10)\n\n    def forward(self, x):\n        x = self.conv(x)\n        x = torch.flatten(x, 1)\n        return self.fc(x)\n"
 
 
 class MockFlaxSemantics(SemanticsManager):  # type: ignore[misc]
-  """Mock Flax Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockFlaxSemantics instance."""
@@ -83,7 +85,7 @@ class MockFlaxSemantics(SemanticsManager):  # type: ignore[misc]
 
 @pytest.fixture
 def engine_mlir() -> typing.Generator[ASTEngine, None, None]:
-  """Provides a mock engine MLIR for testing."""
+  """Docstring."""
   config = RuntimeConfig(source_framework="mlir", target_framework="jax", strict_mode=False)
   with patch("ml_switcheroo.semantics.manager.SemanticsManager") as mock_mgr:
     mgr = mock_mgr.return_value

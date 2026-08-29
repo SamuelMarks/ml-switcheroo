@@ -1,8 +1,9 @@
 """Docstring."""
 
-import pytest
 import typing
-from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
+
+import pytest
+
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
   RdnaDirective,
@@ -10,13 +11,14 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaInstruction,
   RdnaLabel,
   RdnaLabelRef,
+  RdnaMemory,
   RdnaModifier,
+  RdnaModule,
+  RdnaNode,
   RdnaSGPR,
   RdnaVGPR,
-  RdnaMemory,
-  RdnaNode,
-  RdnaModule,
 )
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 
 
 def test_rdna_parser_empty() -> None:
@@ -220,17 +222,11 @@ def test_cst_extra_coverage() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.parser import _get_trivia
 
   class DummyChild:
-    """Docstring."""
-
     def __init__(self) -> None:
-      """Docstring."""
       self.leading_trivia: list[typing.Any] = ["trivia"]
 
   class DummyNode:
-    """Docstring."""
-
     def __init__(self) -> None:
-      """Docstring."""
       self.children: list[typing.Any] = [DummyChild()]
       self.leading_trivia: list[typing.Any] = ["mytrivia"]
 
@@ -239,17 +235,18 @@ def test_cst_extra_coverage() -> None:
 
 def test_rdna_extra_cst_coverage() -> None:
   """Docstring."""
-  from ml_switcheroo.core.cst.base import Trivia
+  import pytest
+
   from ml_switcheroo.core.compiler.frontends.rdna.cst import (
-    RdnaInstruction,
-    RdnaModifier,
     RdnaImmediate,
+    RdnaInstruction,
+    RdnaMemory,
+    RdnaModifier,
+    RdnaVGPR,
     c_SGPR,
     c_VGPR,
-    RdnaMemory,
-    RdnaVGPR,
   )
-  import pytest
+  from ml_switcheroo.core.cst.base import Trivia
 
   assert isinstance(c_SGPR(0), RdnaNode)
   assert isinstance(c_VGPR(0), RdnaNode)

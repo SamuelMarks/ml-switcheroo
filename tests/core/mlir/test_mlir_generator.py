@@ -1,15 +1,16 @@
 """Test suite for the Mlir Generator module."""
 
 import typing
+
 from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import (
+  AttributeNode,
+  BlockNode,
   ModuleNode,
   OperationNode,
-  BlockNode,
   RegionNode,
-  ValueNode,
-  AttributeNode,
   TypeNode,
+  ValueNode,
 )
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
@@ -106,8 +107,8 @@ def test_sw_call_generation() -> None:
 
 def test_trivia_restoration_percent() -> None:
   """Docstring."""
-  from ml_switcheroo.core.mlir.cst import OperationNode, ModuleNode, BlockNode
   from ml_switcheroo.core.cst.base import Trivia
+  from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
   from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
   op = OperationNode(name="sw.return", leading_trivia=[Trivia(text="% comment")])  # type: ignore
@@ -118,8 +119,8 @@ def test_trivia_restoration_percent() -> None:
 
 def test_trivia_restoration_no_content() -> None:
   """Docstring."""
-  from ml_switcheroo.core.mlir.cst import OperationNode, ModuleNode, BlockNode
   from ml_switcheroo.core.cst.base import Trivia
+  from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
   from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
   op = OperationNode(name="sw.return", leading_trivia=[Trivia(text="// no content comment")])  # type: ignore

@@ -1,12 +1,13 @@
 """Test suite for the Backend module."""
 
 import pytest
+
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 
 class NoOpBackend(CompilerBackend):
-  """Test suite for the No Op Backend component."""
+  """Docstring."""
 
   def compile(self, graph: LogicalGraph) -> str:
     """Compiles ."""

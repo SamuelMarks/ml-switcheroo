@@ -1,18 +1,18 @@
 """Tests for HTML parser."""
 
-from ml_switcheroo.core.html.parser import HtmlParser, InternalHtmlParser, GridExtractor
 from ml_switcheroo.core.html.nodes import HtmlDocument
+from ml_switcheroo.core.html.parser import GridExtractor, HtmlParser, InternalHtmlParser
 
 
 def test_html_parser_unmatched_endtag() -> None:
-  """Test unmatched end tag parsing."""
+  """Docstring."""
   parser = InternalHtmlParser()
   parser.feed("</div>")
   assert len(parser.root_children) == 0
 
 
 def test_html_parser_h3_non_text_child() -> None:
-  """Test h3 non-text child."""
+  """Docstring."""
   html: str = "<h3><span>Not a text node directly</span>Not Model</h3>"
   parser = HtmlParser(source=html)
   doc: HtmlDocument = parser.parse_cst()  # type: ignore
@@ -23,7 +23,7 @@ def test_html_parser_h3_non_text_child() -> None:
 
 
 def test_html_parser_div_non_class_attr() -> None:
-  """Test div with non-class attribute."""
+  """Docstring."""
   html: str = "<div id='test' class=''>Content</div>"
   parser = HtmlParser(source=html)
   doc: HtmlDocument = parser.parse_cst()  # type: ignore
@@ -33,7 +33,7 @@ def test_html_parser_div_non_class_attr() -> None:
 
 
 def test_html_parser_process_box_non_text_child() -> None:
-  """Test processing box with non-text child."""
+  """Docstring."""
   html: str = "<div class='box'><span><b>Bold</b></span><code><i>Italic</i></code><p>Ignored</p></div>"
   parser = HtmlParser(source=html)
   doc: HtmlDocument = parser.parse_cst()  # type: ignore

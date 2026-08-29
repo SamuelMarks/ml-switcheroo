@@ -1,15 +1,17 @@
 """Test suite for the Pipeline module."""
 
-import pytest
-import libcst as cst
 from unittest.mock import MagicMock
+
+import libcst as cst
+import pytest
+
+from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
-from ml_switcheroo.core.rewriter.context import RewriterContext
 
 
 class MockPass(RewriterPass):
-  """Mock Pass class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, label: str) -> None:
     """Initializes the MockPass instance."""
@@ -52,8 +54,6 @@ def test_interface_enforcement() -> None:
   with pytest.raises(TypeError):
 
     class InvalidPass(RewriterPass):
-      """Test suite for the Invalid Pass component."""
-
       pass
 
     InvalidPass()

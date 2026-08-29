@@ -1,13 +1,15 @@
 """Test suite for the Numpy Examples module."""
 
 import ast
+
 import pytest
+
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 
 @pytest.fixture
 def adapter() -> NumpyAdapter:
-  """Provides a mock adapter for testing."""
+  """Docstring."""
   return NumpyAdapter()
 
 
@@ -39,7 +41,7 @@ def test_tier2_neural_validity(adapter: NumpyAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: NumpyAdapter) -> None:
-  """Verifies the behavior of tier3 extras validity."""
+  """Docstring."""
   code: str = adapter.get_tiered_examples()["tier3_extras"]
   ast.parse(code)
   assert "np.save" in code

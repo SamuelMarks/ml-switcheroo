@@ -1,23 +1,25 @@
 """Test module."""
 
+from typing import List, Set
+
 import libcst as cst
+
 from ml_switcheroo.core.import_fixer.injection_mixin import InjectionMixin
-from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan, ImportReq
-from typing import Set, List
+from ml_switcheroo.core.import_fixer.resolution import ImportReq, ResolutionPlan
 
 
 class MockFixer(InjectionMixin):
-  """Test element."""
+  """Docstring."""
 
   def __init__(self, plan: ResolutionPlan) -> None:
-    """Test element."""
+    """Docstring."""
     self.plan: ResolutionPlan = plan
     self._satisfied_injections: Set[str] = set()
     self._defined_names: Set[str] = set()
 
 
 def test_leave_module_no_injections() -> None:
-  """Test element."""
+  """Docstring."""
   plan: ResolutionPlan = ResolutionPlan()
   fixer: MockFixer = MockFixer(plan)
   orig_module: cst.Module = cst.parse_module("x = 1")
@@ -26,7 +28,7 @@ def test_leave_module_no_injections() -> None:
 
 
 def test_leave_module_with_injection() -> None:
-  """Test element."""
+  """Docstring."""
   plan: ResolutionPlan = ResolutionPlan(
     required_imports=[ImportReq("torch"), ImportReq("jax", "numpy", "jnp"), ImportReq("torch", "nn", "nn")]
   )
@@ -48,7 +50,7 @@ def test_leave_module_with_injection() -> None:
 
 
 def test_leave_module_deduplication() -> None:
-  """Test element."""
+  """Docstring."""
   # Test deduplication step at the end of leave_Module
   plan: ResolutionPlan = ResolutionPlan(required_imports=[ImportReq("sys")])
   fixer: MockFixer = MockFixer(plan)
@@ -64,7 +66,7 @@ def test_leave_module_deduplication() -> None:
 
 
 def test_leave_module_already_satisfied() -> None:
-  """Test element."""
+  """Docstring."""
   plan: ResolutionPlan = ResolutionPlan(required_imports=[ImportReq("sys")])
   fixer: MockFixer = MockFixer(plan)
   fixer._satisfied_injections.add("sys")
@@ -75,7 +77,7 @@ def test_leave_module_already_satisfied() -> None:
 
 
 def test_leave_module_already_defined() -> None:
-  """Test element."""
+  """Docstring."""
   plan: ResolutionPlan = ResolutionPlan(required_imports=[ImportReq("sys")])
   fixer: MockFixer = MockFixer(plan)
   fixer._defined_names.add("sys")
@@ -86,7 +88,7 @@ def test_leave_module_already_defined() -> None:
 
 
 def test_append_injection() -> None:
-  """Test element."""
+  """Docstring."""
   fixer: MockFixer = MockFixer(ResolutionPlan())
   injections: List[cst.BaseStatement] = []
   fixer._append_injection(injections, cst.Pass())

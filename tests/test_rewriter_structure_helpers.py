@@ -1,12 +1,14 @@
 """Test module."""
 
-import libcst as cst
-from ml_switcheroo.core.rewriter.passes.structure_helpers import StructuralTransformerHelpersMixin
 from typing import List
+
+import libcst as cst
+
+from ml_switcheroo.core.rewriter.passes.structure_helpers import StructuralTransformerHelpersMixin
 
 
 class DummyTransformer(StructuralTransformerHelpersMixin):
-  """Test element."""
+  """Docstring."""
 
   def _create_dotted_name(self, name: str) -> cst.BaseExpression:
     parts: List[str] = name.split(".")
@@ -17,7 +19,7 @@ class DummyTransformer(StructuralTransformerHelpersMixin):
 
 
 def test_structure_helpers() -> None:
-  """Test element."""
+  """Docstring."""
   helper: DummyTransformer = DummyTransformer()
   func_def: cst.FunctionDef = getattr(cst.parse_module("def foo(self, a, b): pass"), "body")[0]
 

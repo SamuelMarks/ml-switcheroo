@@ -1,14 +1,16 @@
 """Test suite for the Mlx Extras module."""
 
-import pytest
-import libcst as cst
-from typing import Generator, Dict, Any, Optional, Tuple, Union
+from typing import Any, Dict, Generator, Optional, Tuple, Union
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.mlx_extras import transform_compiler, transform_synchronize
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.frameworks.base import register_framework
+from ml_switcheroo.plugins.mlx_extras import transform_compiler, transform_synchronize
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 @pytest.fixture
@@ -63,8 +65,6 @@ def rewriter() -> Generator[PivotRewriter, None, None]:
 
   @register_framework("custom_fw")
   class CustomFW:
-    """Test suite for the Custom F W component."""
-
     pass
 
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="custom_fw")

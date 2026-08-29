@@ -4,7 +4,7 @@ import keras
 
 
 class BNModel(keras.Model):
-  """Test suite for the B N Model component."""
+  """Docstring."""
 
   def __init__(self, num_features: int):
     """Initializes the BNModel instance."""

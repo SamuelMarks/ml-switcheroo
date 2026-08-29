@@ -1,13 +1,16 @@
 """Test module."""
 
+from unittest.mock import MagicMock
+
 import libcst as cst
-from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer, SymbolTable
-from ml_switcheroo.analysis.symbol_types import TensorType, ModuleType, UnionType, SymbolType, Scope
+
+from ml_switcheroo.analysis.symbol_table import SymbolTable, SymbolTableAnalyzer
+from ml_switcheroo.analysis.symbol_types import ModuleType, Scope, SymbolType, TensorType, UnionType
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_symbol_table_basic() -> None:
-  """Test element."""
+  """Docstring."""
   table: SymbolTable = SymbolTable()
   node: cst.Name = cst.Name("test")
   sym: TensorType = TensorType(framework="torch")
@@ -17,7 +20,7 @@ def test_symbol_table_basic() -> None:
 
 
 def test_symbol_table_analyzer_imports() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -42,7 +45,7 @@ nn.Conv2d(1, 1, 1)
 
 
 def test_symbol_table_analyzer_assignments() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   # Fake semantics to return Tensor for torch.randn
   semantics._key_origins = {"torch.randn": "neural"}
@@ -74,7 +77,7 @@ self.y = x
 
 
 def test_symbol_table_analyzer_scopes() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -92,7 +95,7 @@ class MyClass:
 
 
 def test_symbol_table_analyzer_control_flow_if() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -124,7 +127,7 @@ else:
 
 
 def test_symbol_table_analyzer_control_flow_loops() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -151,7 +154,7 @@ while True:
 
 
 def test_symbol_table_analyzer_ifexp() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -178,7 +181,7 @@ x = torch.randn() if True else jax.numpy.zeros()
 
 
 def test_symbol_table_analyzer_call_methods() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -201,7 +204,7 @@ y = x.view()
 
 
 def test_make_union() -> None:
-  """Test element."""
+  """Docstring."""
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
   t1: TensorType = TensorType(framework="torch")
   t2: TensorType = TensorType(framework="torch")
@@ -223,7 +226,7 @@ def test_make_union() -> None:
 
 
 def test_symbol_table_analyzer_missing_branches() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -246,7 +249,7 @@ else:
 
 
 def test_symbol_table_analyzer_ifexp_partials() -> None:
-  """Test element."""
+  """Docstring."""
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
 
   ifexp: cst.IfExp = cst.IfExp(body=cst.Name("a"), test=cst.Name("b"), orelse=cst.Name("c"))
@@ -267,7 +270,7 @@ def test_symbol_table_analyzer_ifexp_partials() -> None:
 
 
 def test_symbol_table_analyzer_merge_states_missing_b() -> None:
-  """Test element."""
+  """Docstring."""
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
   state_a: dict[str, SymbolType] = {"x": TensorType(framework="torch")}
   state_b: dict[str, SymbolType] = {}
@@ -276,7 +279,7 @@ def test_symbol_table_analyzer_merge_states_missing_b() -> None:
 
 
 def test_symbol_table_analyzer_importfrom_edge() -> None:
-  """Test element."""
+  """Docstring."""
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
   code: str = "from . import something"
   tree: cst.Module = cst.parse_module(code)
@@ -285,7 +288,7 @@ def test_symbol_table_analyzer_importfrom_edge() -> None:
 
 
 def test_symbol_table_analyzer_union_call() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   semantics.data = {"torch.Tensor.view": {"return_type": "Tensor"}}
   semantics._reverse_index = {"torch.Tensor.view": ("torch.Tensor.view", semantics.data["torch.Tensor.view"])}
@@ -319,7 +322,7 @@ def test_symbol_table_analyzer_union_call() -> None:
 
 
 def test_symbol_table_analyzer_loose_lookup() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   # Provide a definition for 'view' but not 'torch.Tensor.view'
   semantics.data = {"view": {"return_type": "Tensor"}}
@@ -353,10 +356,93 @@ def test_symbol_table_analyzer_loose_lookup() -> None:
 
 
 def test_make_union_len_one() -> None:
-  """Test element."""
+  """Docstring."""
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
   t1: TensorType = TensorType(framework="torch")
   u2: UnionType = UnionType([t1])
   # The union of t1 and u2 should return t1
   res: SymbolType = analyzer._make_union(t1, u2)
   assert isinstance(res, TensorType)
+
+
+# --- Merged from test_symbol_table_extra.py ---
+
+
+def analyze(code: str) -> SymbolTableAnalyzer:
+  """Analyze code for symbol table."""
+  tree: cst.Module = cst.parse_module(code)
+  sm: MagicMock = MagicMock()
+  analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(sm)
+  tree.visit(analyzer)
+  return analyzer
+
+
+def test_missing_symbol_table_coverage() -> None:
+  """Docstring."""
+  # Test try/except blocks
+  code: str = """
+try:
+    x = 1
+except Exception as e:
+    x = 2
+finally:
+    y = 3
+    """
+  analyze(code)
+
+  # Test boolean ops
+  code_bool: str = """
+x = True and False or True
+    """
+  analyze(code_bool)
+
+  # Test unary ops
+  code_unary: str = """
+x = not True
+y = -1
+    """
+  analyze(code_unary)
+
+  # Test with/async with
+  code_with: str = """
+with open('file.txt') as f:
+    x = 1
+    """
+  analyze(code_with)
+
+
+def test_global_scope_access() -> None:
+  """Docstring."""
+  code: str = """
+global_var = 1
+def func():
+    return global_var
+    """
+  analyze(code)
+
+
+def test_class_def_nested() -> None:
+  """Docstring."""
+  code: str = """
+class Outer:
+    class Inner:
+        def __init__(self):
+            self.x = 1
+    """
+  analyze(code)
+
+
+def test_lambda() -> None:
+  """Docstring."""
+  code: str = """
+f = lambda x: x + 1
+    """
+  analyze(code)
+
+
+def test_list_comp() -> None:
+  """Docstring."""
+  code: str = """
+l = [x for x in range(10)]
+    """
+  analyze(code)

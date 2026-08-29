@@ -1,9 +1,11 @@
 """Test suite for the Manager Paxml Defaults module."""
 
+from typing import Any, Dict, Tuple
+
 import libcst as cst
-from typing import Dict, Tuple, Any
-from ml_switcheroo.semantics.manager import SemanticsManager
+
 from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_paxml_alias_loaded_from_adapter() -> None:

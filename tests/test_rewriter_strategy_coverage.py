@@ -1,8 +1,9 @@
 """Module docstring."""
 
 import libcst as cst
-from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy, _apply_layout_permutation
+
 from ml_switcheroo.core.hooks_registry import clear_hooks
+from ml_switcheroo.core.rewriter.calls.strategy import _apply_layout_permutation, execute_strategy
 
 
 class DummyContext:
@@ -99,9 +100,11 @@ def test_apply_layout_permutation_branches():
 
 def test_apply_layout_transformations_no_arrow():
   """Function doc."""
-  import libcst as cst
-  from ml_switcheroo.core.rewriter.calls.strategy import _apply_layout_permutation
   from unittest.mock import MagicMock
+
+  import libcst as cst
+
+  from ml_switcheroo.core.rewriter.calls.strategy import _apply_layout_permutation
 
   class DummyRewriter:
     """Class doc."""
@@ -130,7 +133,6 @@ def test_strategy_missing_api_custom_message():
   rewriter.last_failure = None
 
   def mock_report_failure(msg):
-    """Docstring."""
     rewriter.last_failure = msg
 
   rewriter._report_failure = mock_report_failure
@@ -146,7 +148,6 @@ def test_strategy_missing_api_default_message():
   rewriter.last_failure = None
 
   def mock_report_failure(msg):
-    """Docstring."""
     rewriter.last_failure = msg
 
   rewriter._report_failure = mock_report_failure
@@ -164,7 +165,6 @@ def test_strategy_neural_rejection():
   rewriter.last_failure = None
 
   def mock_report_failure(msg):
-    """Docstring."""
     rewriter.last_failure = msg
 
   rewriter._report_failure = mock_report_failure

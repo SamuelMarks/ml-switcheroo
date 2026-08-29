@@ -7,8 +7,9 @@ complete unit coverage of the C++ parsing capabilities.
 """
 
 import pytest
-from ml_switcheroo.core.compiler.backends.cpp.parser import CppParser
+
 from ml_switcheroo.core.compiler.backends.cpp.cst import CppModule
+from ml_switcheroo.core.compiler.backends.cpp.parser import CppParser
 
 
 def test_parser_coverage() -> None:
@@ -228,8 +229,9 @@ def test_cpp_parser_branch_coverage() -> None:
   Returns:
       None.
   """
-  from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
   from lark import Token
+
+  from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
 
   transformer = CppTransformer()
 

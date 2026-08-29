@@ -1,14 +1,16 @@
 """Test suite for the Shape Packing module."""
 
-import pytest
-import libcst as cst
-from typing import Callable, Dict, Any, Union
+from typing import Any, Callable, Dict, Union
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.shape_packing import transform_shape_packing
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.frameworks.base import register_framework
+from ml_switcheroo.plugins.shape_packing import transform_shape_packing
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -27,7 +29,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @register_framework("custom_fw")
 class CustomAdapter:
-  """Test suite for the Custom Adapter component."""
+  """Docstring."""
 
   @property
   def harness_imports(self) -> list:

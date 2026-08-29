@@ -54,6 +54,20 @@ repos:
         files: ^(src/ml_switcheroo/semantics/odl/.*\.yaml|src/ml_switcheroo/frameworks/definitions/.*\.json|src/ml_switcheroo/frameworks/.*\.py)$
         pass_filenames: false
 
+      - id: audit-mlir-spec
+        name: audit-mlir-spec
+        entry: uv run python scripts/audit_mlir_spec.py
+        language: system
+        files: ^src/ml_switcheroo/core/mlir/
+        pass_filenames: false
+
+      - id: audit-stablehlo-spec
+        name: audit-stablehlo-spec
+        entry: uv run python scripts/audit_stablehlo_spec.py
+        language: system
+        files: ^src/ml_switcheroo/core/mlir/
+        pass_filenames: false
+
       - id: pytest-coverage
         name: pytest-coverage
         entry: uv run pytest -n auto --cov=src --cov-fail-under=100 tests

@@ -1,12 +1,13 @@
 """Tests for the MLIR static type inference engine."""
 
 import libcst as cst
-from ml_switcheroo.core.mlir.types import IntegerType, FloatType, TensorType
-from ml_switcheroo.core.mlir.type_inference import parse_py_type_to_mlir, TypeInferencePass
+
+from ml_switcheroo.core.mlir.type_inference import TypeInferencePass, parse_py_type_to_mlir
+from ml_switcheroo.core.mlir.types import FloatType, IntegerType, TensorType
 
 
 def test_parse_py_type_to_mlir() -> None:
-  """Test parsing basic Python types."""
+  """Docstring."""
   assert parse_py_type_to_mlir("int") == IntegerType(32)
   assert parse_py_type_to_mlir("float") == FloatType("f32")
   assert parse_py_type_to_mlir("bool") == IntegerType(1)
@@ -15,7 +16,7 @@ def test_parse_py_type_to_mlir() -> None:
 
 
 def test_type_inference_pass() -> None:
-  """Test basic type inference pass over CST."""
+  """Docstring."""
   code = """
 def my_func(a):
     b = 5.0
@@ -40,7 +41,7 @@ def my_func(a):
 
 
 def test_type_inference_pass_empty_return() -> None:
-  """Test return type capture with empty return."""
+  """Docstring."""
   code = """
 def my_func():
     return
@@ -52,7 +53,7 @@ def my_func():
 
 
 def test_type_inference_pass_unknown_expression() -> None:
-  """Test fallback to unranked f32 tensor for unknown expressions."""
+  """Docstring."""
   code = """
 def my_func():
     b = unknown_func()

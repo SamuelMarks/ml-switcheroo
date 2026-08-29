@@ -1,14 +1,16 @@
 """Test suite for the Escape Hatch Wiring module."""
 
-import pytest
 import typing
+
+import pytest
+
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -51,7 +53,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def semantics_mgr() -> MockSemantics:
-  """Provides a mock semantics mgr for testing."""
+  """Docstring."""
   return MockSemantics()
 
 

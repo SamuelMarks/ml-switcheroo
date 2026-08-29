@@ -1,11 +1,11 @@
 """Test suite for the WASM Compiler Backend."""
 
 from ml_switcheroo.core.compiler.backends.wasm_backend import WasmBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def test_wasm_backend_compile() -> None:
-  """Tests WASM compilation."""
+  """Docstring."""
   graph = LogicalGraph(name="test_graph")
   graph.nodes.append(LogicalNode(id="in1", kind="Input"))
   graph.nodes.append(LogicalNode(id="in2", kind="Input"))
@@ -40,7 +40,7 @@ def test_wasm_backend_compile() -> None:
 
 
 def test_wasm_backend_sub_and_custom() -> None:
-  """Tests WASM compilation with Sub and custom nodes."""
+  """Docstring."""
   graph = LogicalGraph()
   graph.nodes.append(LogicalNode(id="n1", kind="Sub"))
   graph.nodes.append(LogicalNode(id="n2", kind="MyCustomOp"))
@@ -55,7 +55,7 @@ def test_wasm_backend_sub_and_custom() -> None:
 
 
 def test_wasm_backend_output_no_incoming() -> None:
-  """Tests output node with no incoming edges."""
+  """Docstring."""
   graph = LogicalGraph(name="")
   graph.nodes.append(LogicalNode(id="out1", kind="Output"))
   backend = WasmBackend()
@@ -65,7 +65,7 @@ def test_wasm_backend_output_no_incoming() -> None:
 
 
 def test_wasm_backend_incoming_not_found() -> None:
-  """Tests incoming node that is not in the graph."""
+  """Docstring."""
   graph = LogicalGraph()
   graph.nodes.append(LogicalNode(id="n1", kind="Add"))
   graph.edges.append(LogicalEdge(source="missing", target="n1"))

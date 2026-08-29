@@ -1,13 +1,14 @@
 """Test suite for the Paxml module."""
 
 import typing
+
 from praxis import base_layer  # type: ignore
-from praxis.layers import linears  # type: ignore
 from praxis.layers import activations  # type: ignore
+from praxis.layers import linears  # type: ignore
 
 
 class MLP(base_layer.BaseLayer):  # type: ignore
-  """Test suite for the M L P component."""
+  """Docstring."""
 
   in_features: int = 0
   hidden_features: int = 0

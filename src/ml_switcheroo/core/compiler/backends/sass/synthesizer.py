@@ -241,9 +241,9 @@ class SassSynthesizer:
         abstract_id = None
         if defn:
           abstract_id = defn[0]
-        else:  # pragma: no cover
+        else:
           # 2. Try treating node.kind as Abstract ID directly
-          abstract_id = node.kind  # pragma: no cover
+          abstract_id = node.kind
 
         # --- Macro Expansion Path ---
         if abstract_id in self.macro_registry:
@@ -321,19 +321,19 @@ class SassSynthesizer:
 
     for node in sass_nodes:
       stmt = None
-      if isinstance(node, SassInstruction):  # pragma: no cover
+      if isinstance(node, SassInstruction):
         stmt = self._convert_instruction_to_py(node)
-      elif isinstance(node, SassComment):  # pragma: no cover
-        if "BEGIN" in node.text or "END" in node.text:  # pragma: no cover
-          stmt = cst.SimpleStatementLine(  # pragma: no cover
+      elif isinstance(node, SassComment):
+        if "BEGIN" in node.text or "END" in node.text:
+          stmt = cst.SimpleStatementLine(
             body=[cst.Pass()],
-            trailing_whitespace=cst.TrailingWhitespace(comment=cst.Comment(value=f"# {node.text}")),  # pragma: no cover
-          )  # pragma: no cover
-      elif isinstance(node, SassLabel):  # pragma: no cover
-        # Labels usually denote blocks. Python doesn't have labels. # pragma: no cover
+            trailing_whitespace=cst.TrailingWhitespace(comment=cst.Comment(value=f"# {node.text}")),
+          )
+      elif isinstance(node, SassLabel):
+        # Labels usually denote blocks. Python doesn't have labels.
         # We emit a comment marker for clarity in decompilation.
         # To attach comment, we need a node.
-        stmt = cst.SimpleStatementLine(  # pragma: no cover
+        stmt = cst.SimpleStatementLine(
           body=[cst.Pass()],
           trailing_whitespace=cst.TrailingWhitespace(comment=cst.Comment(value=f"# SassLabel: {node.name}")),
         )
@@ -441,8 +441,8 @@ class SassSynthesizer:
     # Registers (R0) are valid IDs. SassMemory ([R0]) is not.
 
     raw = str(op)
-    if raw.isalnum() and not raw.isdigit():  # pragma: no cover
-      return cst.Name(raw)  # pragma: no cover
+    if raw.isalnum() and not raw.isdigit():
+      return cst.Name(raw)
 
     # Fallback for complex operands (SassMemory, Negated Regs): return as String Literal
     return cst.SimpleString(f"'{raw}'")

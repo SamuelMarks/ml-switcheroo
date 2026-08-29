@@ -1,14 +1,14 @@
 """Test suite for the Mlir Nodes module."""
 
 from ml_switcheroo.core.mlir.nodes import (
-  ValueNode,
-  TypeNode,
   AttributeNode,
-  OperationNode,
   BlockNode,
-  RegionNode,
   ModuleNode,
+  OperationNode,
+  RegionNode,
   TriviaNode,
+  TypeNode,
+  ValueNode,
 )
 
 
@@ -144,7 +144,7 @@ def test_trailing_trivia() -> None:
 
 
 def test_stablehloconstantop() -> None:
-  """Test method."""
+  """Docstring."""
   from ml_switcheroo.core.mlir.nodes import StableHloConstantOp
 
   op = StableHloConstantOp(

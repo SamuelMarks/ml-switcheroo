@@ -3,13 +3,15 @@
 import json
 from pathlib import Path
 from unittest.mock import patch
+
+from ml_switcheroo_ir.schema.ghost import StandardMap
+
 from ml_switcheroo.frameworks.loader import (
-  load_definitions,
+  DEFINITIONS_DIR,
   clear_definition_cache,
   get_definitions_path,
-  DEFINITIONS_DIR,
+  load_definitions,
 )
-from ml_switcheroo_ir.schema.ghost import StandardMap
 
 
 def test_load_definitions_file_not_found() -> None:

@@ -1,7 +1,8 @@
 """Docstring."""
 
-from ml_switcheroo.core.tracer import TraceLogger, TraceEventType, get_tracer, reset_tracer
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
+from ml_switcheroo.core.tracer import TraceEventType, TraceLogger, get_tracer, reset_tracer
 
 
 def test_trace_logger_lifecycle() -> None:

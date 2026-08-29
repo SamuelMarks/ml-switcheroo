@@ -1,14 +1,17 @@
 """Test suite for the Io Handler module."""
 
-import pytest
-import libcst as cst
-from typing import Generator
+from typing import Generator, List
 from unittest.mock import MagicMock, patch
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.io_handler import transform_io_calls
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
+from ml_switcheroo.plugins.io_handler import _get_arg, _get_func_name, transform_io_calls
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -130,3 +133,122 @@ def test_missing_serialization_syntax(rewriter: PivotRewriter) -> None:
     mock_get.return_value = mock_adapter
     res: cst.CSTNode = transform_io_calls(node, ctx)
     assert res is node
+
+
+# --- Merged from test_io_handler_extra.py ---
+
+
+def test_get_arg_wrong_keyword() -> None:
+  """Gets argument wrong keyword."""
+  arg: cst.Arg = cst.Arg(value=cst.Name("val"), keyword=cst.Name("wrong_name"))
+  assert _get_arg([arg], 0, "obj") is None
+
+
+# --- Merged from test_io_handler_missing.py ---
+
+
+def test_get_func_name() -> None:
+  """Gets function name."""
+  assert _get_func_name(cst.Call(func=cst.Name("foo"))) == "foo"
+  assert _get_func_name(cst.Call(func=cst.SimpleString("'bar'"))) is None
+
+
+def test_get_arg() -> None:
+  """Gets argument."""
+  args: List[cst.Arg] = [cst.Arg(value=cst.Name("a"), keyword=cst.Name("a_kw"))]
+  assert _get_arg(args, 1, "missing") is None
+
+
+def test_transform_io_calls_misses() -> None:
+  """Transforms I/O calls misses."""
+  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx.target_fw = "jax"
+  node1: cst.Call = cst.Call(func=cst.Name("foo"))
+  assert transform_io_calls(node1, ctx) == node1
+  node_save: cst.Call = cst.Call(func=cst.Name("save"))
+  with patch("ml_switcheroo.plugins.io_handler.get_adapter", return_value=None):
+    assert transform_io_calls(node_save, ctx) == node_save
+
+  class BadAdapter:
+    def get_serialization_imports(self) -> List[str]:
+      """Gets serialization imports.
+
+      Returns:
+          List[str]: List of serialization imports.
+      """
+      return []
+
+    pass
+
+  with patch("ml_switcheroo.plugins.io_handler.get_adapter", return_value=BadAdapter()):
+    assert transform_io_calls(node_save, ctx) == node_save
+
+  class GoodAdapter:
+    def get_serialization_imports(self) -> List[str]:
+      """Gets serialization imports.
+
+      Returns:
+          List[str]: List of serialization imports.
+      """
+      return []
+
+    def format_save(self, obj: cst.BaseExpression, path: cst.BaseExpression) -> cst.Call:
+      """Formats save.
+
+      Args:
+          obj (cst.BaseExpression): Object to save.
+          path (cst.BaseExpression): Path to save to.
+
+      Returns:
+          cst.Call: The CST node for save call.
+      """
+      return cst.Call(func=cst.Name("good_save"))
+
+    def format_load(self, path: cst.BaseExpression) -> cst.Call:
+      """Formats load.
+
+      Args:
+          path (cst.BaseExpression): Path to load from.
+
+      Returns:
+          cst.Call: The CST node for load call.
+      """
+      return cst.Call(func=cst.Name("good_load"))
+
+  with patch("ml_switcheroo.plugins.io_handler.get_adapter", return_value=GoodAdapter()):
+    node_bad_save_1: cst.Call = cst.Call(func=cst.Name("save"), args=[cst.Arg(value=cst.Name("a"))])
+    assert transform_io_calls(node_bad_save_1, ctx) == node_bad_save_1
+    node_bad_save_2: cst.Call = cst.Call(func=cst.Name("save"), args=[])
+    assert transform_io_calls(node_bad_save_2, ctx) == node_bad_save_2
+    node_bad_load: cst.Call = cst.Call(func=cst.Name("load"), args=[])
+    assert transform_io_calls(node_bad_load, ctx) == node_bad_load
+
+    class RaiseAdapter:
+      def get_serialization_imports(self) -> List[str]:
+        """Gets serialization imports.
+
+        Returns:
+            List[str]: List of serialization imports.
+        """
+        return []
+
+      def format_save(self, obj: cst.BaseExpression, path: cst.BaseExpression) -> cst.Call:
+        """Formats save.
+
+        Args:
+            obj (cst.BaseExpression): Object to save.
+            path (cst.BaseExpression): Path to save to.
+
+        Raises:
+            ValueError: Boom error.
+
+        Returns:
+            cst.Call: Function call.
+        """
+        raise ValueError("boom")
+
+    with patch("ml_switcheroo.plugins.io_handler.get_adapter", return_value=RaiseAdapter()):
+      node_good_save: cst.Call = cst.Call(
+        func=cst.Name("save"), args=[cst.Arg(value=cst.Name("obj")), cst.Arg(value=cst.Name("path"))]
+      )
+      assert transform_io_calls(node_good_save, ctx) == node_good_save

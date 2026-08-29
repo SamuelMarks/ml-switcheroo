@@ -1,11 +1,12 @@
 """Test suite for the Tensorflow module."""
 
 import typing
+
 import tensorflow as tf
 
 
 class DropoutModel(tf.keras.Model):  # type: ignore
-  """Test suite for the Dropout Model component."""
+  """Docstring."""
 
   def __init__(self, p: float = 0.5) -> None:
     """Initializes the DropoutModel instance."""

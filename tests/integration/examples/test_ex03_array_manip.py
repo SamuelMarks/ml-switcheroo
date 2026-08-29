@@ -1,11 +1,13 @@
 """Test suite for the Ex03 Array Manip module."""
 
-import pytest
 import typing
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE_TORCH: str = "\nimport torch\n\ndef transpose_matrices(batch):\n    return torch.permute(batch, 0, 2, 1)\n"
 
@@ -13,7 +15,7 @@ SOURCE_TORCH: str = "\nimport torch\n\ndef transpose_matrices(batch):\n    retur
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
   """Helper to semantics."""
-  from unittest.mock import patch, mock_open
+  from unittest.mock import mock_open, patch
 
   mgr = SemanticsManager()
   mgr._providers["numpy"] = {SemanticTier.ARRAY_API: {"root": "numpy", "sub": None, "alias": "np"}}

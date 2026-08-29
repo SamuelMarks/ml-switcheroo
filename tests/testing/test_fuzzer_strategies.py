@@ -1,13 +1,15 @@
 """Test suite for the Fuzzer Strategies module."""
 
+from typing import Any, Dict
+
 from ml_switcheroo.testing.fuzzer.type_parser import parse_type_annotation
-from typing import Dict, Any
 
 
 def test_get_dtype_strategy() -> None:
   """Gets dtype strategy."""
-  from ml_switcheroo.testing.fuzzer.strategies import _get_dtype_strategy
   import numpy as np
+
+  from ml_switcheroo.testing.fuzzer.strategies import _get_dtype_strategy
 
   assert _get_dtype_strategy(None) == np.float32
   assert _get_dtype_strategy("int") == np.int32
@@ -58,7 +60,7 @@ def test_array_strategy() -> None:
 
 def test_strategies_from_spec_more() -> None:
   """Verifies the behavior of strategies from spec more."""
-  from ml_switcheroo.testing.fuzzer.strategies import strategies_from_spec, _array_strategy
+  from ml_switcheroo.testing.fuzzer.strategies import _array_strategy, strategies_from_spec
 
   strategies_from_spec("List[int] | float", {})
   strategies_from_spec("Array['N']", {})

@@ -1,13 +1,13 @@
 """Test module."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_compatibility_matrix_get_json() -> None:
-  """Test element."""
+  """Docstring."""
   semantics = SemanticsManager()
 
   # Mock data
@@ -41,7 +41,7 @@ def test_compatibility_matrix_get_json() -> None:
 
 
 def test_compatibility_matrix_render() -> None:
-  """Test element."""
+  """Docstring."""
   semantics = SemanticsManager()
   matrix = CompatibilityMatrix(semantics)
 
@@ -61,7 +61,7 @@ def test_compatibility_matrix_render() -> None:
 
 
 def test_compatibility_matrix_get_status_icon() -> None:
-  """Test element."""
+  """Docstring."""
   matrix = CompatibilityMatrix(SemanticsManager())
 
   assert matrix._get_status_icon(None) == "❌"
@@ -71,7 +71,7 @@ def test_compatibility_matrix_get_status_icon() -> None:
 
 
 def test_compatibility_matrix_get_sorted_engines() -> None:
-  """Test element."""
+  """Docstring."""
   matrix = CompatibilityMatrix(SemanticsManager())
   with patch("ml_switcheroo.cli.matrix.get_framework_priority_order", return_value=["a", "b"]):
     assert matrix._get_sorted_engines() == ["a", "b"]

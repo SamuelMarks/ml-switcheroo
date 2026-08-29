@@ -1,11 +1,12 @@
 """Test suite for the Keras3 module."""
 
 import typing
+
 import keras
 
 
 class LayerNormModel(keras.Model):  # type: ignore
-  """Test suite for the Layer Norm Model component."""
+  """Docstring."""
 
   def __init__(self, normalized_shape: int) -> None:
     """Initializes the LayerNormModel instance."""

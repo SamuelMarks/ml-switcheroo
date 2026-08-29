@@ -1,24 +1,25 @@
 """Test module."""
 
 import pytest
+
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassNode,
-  SassOperand,
-  SassRegister,
-  SassPredicate,
+  SassComment,
+  SassDirective,
   SassImmediate,
-  SassMemory,
   SassInstruction,
   SassLabel,
-  SassDirective,
-  SassComment,
+  SassMemory,
   SassModule,
+  SassNode,
+  SassOperand,
+  SassPredicate,
+  SassRegister,
 )
 from ml_switcheroo.core.cst.base import Trivia
 
 
 def test_sass_register() -> None:
-  """Test element."""
+  """Docstring."""
   reg: SassRegister = SassRegister(name="R0")
   assert reg.to_text() == "R0"
 
@@ -38,7 +39,7 @@ def test_sass_register() -> None:
 
 
 def test_sass_predicate() -> None:
-  """Test element."""
+  """Docstring."""
   pred: SassPredicate = SassPredicate(name="P0")
   assert pred.to_text() == "P0"
 
@@ -58,7 +59,7 @@ def test_sass_predicate() -> None:
 
 
 def test_sass_immediate() -> None:
-  """Test element."""
+  """Docstring."""
   imm_int: SassImmediate = SassImmediate(value=42)
   assert imm_int.to_text() == "42"
 
@@ -72,7 +73,7 @@ def test_sass_immediate() -> None:
 
 
 def test_sass_memory() -> None:
-  """Test element."""
+  """Docstring."""
   # Constant bank
   mem_c_bank_offset: SassMemory = SassMemory(base="c[0x0]", offset=4)
   assert mem_c_bank_offset.to_text() == "c[0x0][0x4]"
@@ -95,7 +96,7 @@ def test_sass_memory() -> None:
 
 
 def test_sass_instruction() -> None:
-  """Test element."""
+  """Docstring."""
   # Valid inst
   inst: SassInstruction = SassInstruction(opcode="MOV", operands=[SassRegister(name="R0"), SassImmediate(value=1)])
   assert inst.to_text() == "MOV R0, 1;"
@@ -126,7 +127,7 @@ def test_sass_instruction() -> None:
 
 
 def test_sass_label() -> None:
-  """Test element."""
+  """Docstring."""
   lbl: SassLabel = SassLabel(name="L0")
   assert lbl.to_text() == "L0:"
 
@@ -136,7 +137,7 @@ def test_sass_label() -> None:
 
 
 def test_sass_directive() -> None:
-  """Test element."""
+  """Docstring."""
   dir1: SassDirective = SassDirective(name="headerflags")
   assert dir1.to_text() == ".headerflags"
 
@@ -149,7 +150,7 @@ def test_sass_directive() -> None:
 
 
 def test_sass_comment() -> None:
-  """Test element."""
+  """Docstring."""
   comm: SassComment = SassComment(text="test")
   assert comm.to_text() == "// test"
 
@@ -159,7 +160,7 @@ def test_sass_comment() -> None:
 
 
 def test_sass_module() -> None:
-  """Test element."""
+  """Docstring."""
   mod: SassModule = SassModule(statements=[SassLabel(name="L0")])
   assert mod.to_text() == "L0:"
 
@@ -169,7 +170,7 @@ def test_sass_module() -> None:
 
 
 def test_base_nodes() -> None:
-  """Test element."""
+  """Docstring."""
   node: SassNode = SassNode()
   op: SassOperand = SassOperand()
   assert isinstance(node, SassNode)

@@ -1,12 +1,12 @@
 """Test suite for the Paxml module."""
 
+import jax.numpy as jnp
 from praxis import base_layer
 from praxis.layers import normalizations
-import jax.numpy as jnp
 
 
 class BNModel(base_layer.BaseLayer):
-  """Test suite for the B N Model component."""
+  """Docstring."""
 
   num_features: int = 0
 

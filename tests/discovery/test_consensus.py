@@ -1,7 +1,8 @@
 """Test suite for the Consensus module."""
 
-from unittest.mock import patch, MagicMock
 import typing
+from unittest.mock import MagicMock, patch
+
 from ml_switcheroo.discovery.consensus import ConsensusEngine
 
 

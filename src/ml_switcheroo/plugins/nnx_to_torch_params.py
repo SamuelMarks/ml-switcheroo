@@ -37,7 +37,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   node = cst.Name(parts[0])
   for part in parts[1:]:
     node = cst.Attribute(value=node, attr=cst.Name(part))
-  return node  # pragma: no cover
+  return node
 
 
 def _extract_leaf_name(node: cst.BaseExpression) -> Optional[str]:
@@ -55,7 +55,7 @@ def _extract_leaf_name(node: cst.BaseExpression) -> Optional[str]:
   elif isinstance(node, cst.Attribute):
     return node.attr.value
   else:
-    return None  # pragma: no cover  # pragma: no cover
+    return None
 
 
 @register_hook("nnx_param_to_torch")
@@ -92,7 +92,7 @@ def transform_nnx_param(node: cst.Call, ctx: HookContext) -> cst.Call:
   # If lookup fails, we return the original node to avoid hallucinating APIs.
   target_api = ctx.lookup_api(ctx.current_op_id or "Param")
   if not target_api:
-    return node  # pragma: no cover
+    return node
 
   new_func = _create_dotted_name(target_api)
 

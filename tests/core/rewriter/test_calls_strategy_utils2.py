@@ -1,25 +1,27 @@
 """Test suite for the Calls Strategy Utils2 module."""
 
-import libcst as cst
 import typing
 from unittest.mock import MagicMock, patch
+
+import libcst as cst
+
 from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy
 from ml_switcheroo.core.rewriter.calls.utils import (
-  rewrite_stateful_call,
-  inject_kwarg,
-  strip_kwarg,
-  is_super_call,
-  is_builtin,
-  log_diff,
   compute_permutation,
+  inject_kwarg,
   inject_permute_call,
+  is_builtin,
   is_functional_apply,
+  is_super_call,
+  log_diff,
+  rewrite_stateful_call,
+  strip_kwarg,
 )
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockRewriter:
-  """Mock Rewriter class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, strict_mode: bool = False) -> None:
     """Initializes the MockRewriter instance."""
@@ -51,7 +53,7 @@ class MockRewriter:
 
 
 class MockSigCtx:
-  """Mock Sig Ctx class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, node: typing.Any = None) -> None:
     """Initializes the MockSigCtx instance."""
@@ -207,15 +209,11 @@ def test_rewrite_stateful_call_no_create_dotted_fixed() -> None:
   """Rewrites stateful call no create dotted fixed."""
 
   class DummyContext:
-    """Dummy Context class for testing purposes."""
-
     def __init__(self) -> None:
       """Initializes the DummyContext instance."""
       self.signature_stack = [MockSigCtx()]
 
   class BasicRewriter:
-    """Test suite for the Basic Rewriter component."""
-
     def __init__(self) -> None:
       """Initializes the BasicRewriter instance."""
       self.context = DummyContext()

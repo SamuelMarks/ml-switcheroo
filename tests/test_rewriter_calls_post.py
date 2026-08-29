@@ -1,9 +1,11 @@
 """Module docstring."""
 
+from typing import Any, Dict, List, Optional, Tuple
+
 import libcst as cst
-from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from typing import List, Dict, Any, Tuple, Optional
+
+from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
 
 
 class DummyTraits:
@@ -23,10 +25,7 @@ class DummyContext:
     """Docstring."""
 
     class Sig:
-      """Docstring."""
-
       def __init__(self, i: bool, m: bool) -> None:
-        """Docstring."""
         self.is_init = i
         self.is_module_method = m
 
@@ -60,17 +59,14 @@ class DummyRewriter:
     self.report: bool = report
 
   def _create_dotted_name(self, name: str) -> cst.Name:
-    """Docstring."""
     if name == "error":
       raise ValueError("bad type")
     return cst.Name(name)
 
   def _report_failure(self, msg: str) -> None:
-    """Docstring."""
     pass
 
   def _get_target_traits(self) -> DummyTraits:
-    """Docstring."""
     return self.traits
 
 
@@ -94,10 +90,7 @@ def test_handle_post_processing_branches() -> None:
 
   # 42 -> 44 (output_select_index failure, no _report_failure)
   class DummyRewriterNoReport(DummyRewriter):
-    """Docstring."""
-
     def _report_failure(self, msg: str) -> None:
-      """Docstring."""
       raise NotImplementedError()
 
   rewriter_no_report: DummyRewriterNoReport = DummyRewriterNoReport()

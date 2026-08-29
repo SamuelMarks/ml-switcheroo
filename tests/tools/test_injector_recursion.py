@@ -1,8 +1,10 @@
 """Test suite for the Injector Recursion module."""
 
+from typing import Any, Dict, List, Tuple
+
 import libcst as cst
+
 from ml_switcheroo.tools.injector_fw import convert_to_cst_literal
-from typing import Any, List, Dict, Tuple
 
 
 def render_node(node: cst.CSTNode) -> str:
@@ -32,9 +34,10 @@ def test_primitive_recursion() -> None:
 
 
 def test_get_import_root() -> None:
-  """Tests get_import_root."""
-  from ml_switcheroo.tools.injector_fw.utils import get_import_root
+  """Docstring."""
   import libcst as cst
+
+  from ml_switcheroo.tools.injector_fw.utils import get_import_root
 
   assert get_import_root(cst.Name("torch")) == "torch"
   attr: cst.Attribute = cst.Attribute(value=cst.Name("scipy"), attr=cst.Name("special"))
@@ -43,9 +46,10 @@ def test_get_import_root() -> None:
 
 
 def test_is_docstring() -> None:
-  """Tests is_docstring."""
-  from ml_switcheroo.tools.injector_fw.utils import is_docstring
+  """Docstring."""
   import libcst as cst
+
+  from ml_switcheroo.tools.injector_fw.utils import is_docstring
 
   # Not index 0
   assert is_docstring(cst.Name("test"), 1) is False
@@ -60,9 +64,10 @@ def test_is_docstring() -> None:
 
 
 def test_is_future_import() -> None:
-  """Tests is_future_import."""
-  from ml_switcheroo.tools.injector_fw.utils import is_future_import
+  """Docstring."""
   import libcst as cst
+
+  from ml_switcheroo.tools.injector_fw.utils import is_future_import
 
   # Future import
   tree: cst.Module = cst.parse_module("from __future__ import annotations")

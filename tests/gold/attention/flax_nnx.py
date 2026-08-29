@@ -1,11 +1,11 @@
 """Test suite for the Flax Nnx module."""
 
-from flax import nnx
 import jax.numpy as jnp
+from flax import nnx
 
 
 class AttentionModel(nnx.Module):
-  """Test suite for the Attention Model component."""
+  """Docstring."""
 
   def __init__(self, embed_dim: int, num_heads: int, rngs: nnx.Rngs):
     """Initializes the AttentionModel instance."""

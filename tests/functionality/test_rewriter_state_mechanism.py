@@ -1,16 +1,18 @@
 """Test suite for the Rewriter State Mechanism module."""
 
-import pytest
 import typing
+
 import libcst as cst
-from tests.conftest import TestRewriter
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.config import RuntimeConfig
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.semantics.manager import SemanticsManager
+from tests.conftest import TestRewriter
 
 
 class MockStateSemantics(SemanticsManager):
-  """Mock State Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockStateSemantics instance."""
@@ -59,7 +61,7 @@ class MockStateSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   semantics = MockStateSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow", strict_mode=False)
   return TestRewriter(semantics, config)

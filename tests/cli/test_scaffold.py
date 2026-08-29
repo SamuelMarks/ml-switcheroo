@@ -4,14 +4,16 @@ import json
 import typing
 from argparse import Namespace
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 import pytest
+
 from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
 
 
 @patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine")
 def test_handle_scaffold(mock_engine_class: MagicMock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test element."""
+  """Docstring."""
   monkeypatch.chdir(tmp_path)
 
   mock_engine: MagicMock = mock_engine_class.return_value

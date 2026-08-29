@@ -1,15 +1,9 @@
 """Module docstring."""
 
 import libcst as cst
+
+from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, RegionNode, ValueNode
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
-from ml_switcheroo.core.mlir.cst import (
-  ModuleNode,
-  BlockNode,
-  OperationNode,
-  ValueNode,
-  AttributeNode,
-  RegionNode,
-)
 
 
 def build_mock_op(

@@ -1,7 +1,7 @@
 """Test suite for the Paxml Backend module."""
 
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.core.compiler.backends.python import PythonBackend
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def test_synthesize_paxml_chain() -> None:

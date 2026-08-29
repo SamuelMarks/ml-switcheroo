@@ -1,17 +1,19 @@
 """Test suite for the Injector Fw module."""
 
 import json
-import pytest
+from pathlib import Path
+from typing import Any, Dict
 from unittest.mock import patch
+
+import pytest
+
 from ml_switcheroo.core.dsl import FrameworkVariant
 from ml_switcheroo.tools.injector_fw import FrameworkInjector
-from pathlib import Path
-from typing import Dict, Any
 
 
 @pytest.fixture
 def target_json(tmp_path: Path) -> Path:
-  """Provides a mock target JSON for testing."""
+  """Docstring."""
   defs_dir: Path = tmp_path / "definitions"
   defs_dir.mkdir()
   initial_data: Dict[str, Dict[str, str]] = {"OldOp": {"api": "torch.old"}}
@@ -22,7 +24,7 @@ def target_json(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def sample_variant() -> FrameworkVariant:
-  """Provides a mock sample variant for testing."""
+  """Docstring."""
   return FrameworkVariant(api="torch.nn.functional.log_softmax", args={"dim": "dim"}, requires_plugin="custom_plugin")
 
 
@@ -124,3 +126,38 @@ def test_injector_load_corrupt_json(target_json: Path, sample_variant: Framework
     content: Dict[str, Any] = json.loads(target_json.read_text())
     assert "LogSoftmax" in content
     assert "OldOp" not in content
+
+
+# --- Merged from test_injector_fw_missing.py ---
+
+
+def test_injector_fw_missing() -> None:
+  """Verifies the behavior of injector framework missing."""
+  from ml_switcheroo.core.dsl import FrameworkVariant
+  from ml_switcheroo.tools.injector_fw.core import FrameworkInjector
+
+  variant: FrameworkVariant = FrameworkVariant(api="foo")
+  injector: FrameworkInjector = FrameworkInjector("jax", "bar", variant)
+  with __import__("unittest.mock").mock.patch.object(
+    injector, "_load_current", return_value={"bar": variant.model_dump(exclude_none=True)}
+  ):
+    assert injector.inject(dry_run=False) is True
+  with __import__("unittest.mock").mock.patch.object(injector, "_load_current", return_value={"other": {}}):
+    with __import__("unittest.mock").mock.patch("builtins.open", side_effect=OSError("fail")):
+      assert injector.inject(dry_run=False) is False
+  with __import__("unittest.mock").mock.patch(
+    "builtins.open", __import__("unittest.mock").mock.mock_open(read_data="invalid json")
+  ):
+    assert injector._load_current() == {}
+
+
+def test_injector_fw_updating() -> None:
+  """Verifies the behavior of injector framework updating."""
+  from ml_switcheroo.core.dsl import FrameworkVariant
+  from ml_switcheroo.tools.injector_fw.core import FrameworkInjector
+
+  variant: FrameworkVariant = FrameworkVariant(api="foo")
+  injector: FrameworkInjector = FrameworkInjector("jax", "bar", variant)
+  with __import__("unittest.mock").mock.patch.object(injector, "_load_current", return_value={"bar": {"api": "old_foo"}}):
+    with __import__("unittest.mock").mock.patch("builtins.open", __import__("unittest.mock").mock.mock_open()):
+      assert injector.inject(dry_run=False) is True

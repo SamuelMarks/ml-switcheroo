@@ -405,6 +405,9 @@ class _SemanticTransformer(Transformer[Any, Any]):
     return m
 
 
+_CACHED_PARSER = None
+
+
 class SemanticCommentParser:
   """Parse semantic comments.
 
@@ -414,7 +417,10 @@ class SemanticCommentParser:
 
   def __init__(self) -> None:
     """Initialize the SemanticCommentParser and its underlying LALR parser."""
-    self.parser = Lark(SEMANTIC_GRAMMAR, parser="lalr")
+    global _CACHED_PARSER
+    if _CACHED_PARSER is None:
+      _CACHED_PARSER = Lark(SEMANTIC_GRAMMAR, parser="lalr")
+    self.parser = _CACHED_PARSER
 
   def parse(self, text: str) -> Optional[SemanticMarker]:
     """Parse a semantic comment string into a strongly typed marker.

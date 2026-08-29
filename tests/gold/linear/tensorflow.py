@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class Model(tf.keras.Model):
-  """Test suite for the Model component."""
+  """Docstring."""
 
   def __init__(self, in_features: int, out_features: int):
     """Initializes the Model instance."""

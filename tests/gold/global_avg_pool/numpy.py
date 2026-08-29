@@ -4,7 +4,7 @@ import numpy as np
 
 
 class GAPModel:
-  """Test suite for the G A P Model component."""
+  """Docstring."""
 
   def __call__(self, x: np.ndarray) -> np.ndarray:
     """Executes the callable instance."""

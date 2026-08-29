@@ -105,8 +105,8 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     """
     lines = []
     for t in trivia:
-      if hasattr(t, "content"):  # pragma: no cover
-        content = t.content.strip()  # pragma: no cover
+      if hasattr(t, "content"):
+        content = t.content.strip()
       else:
         content = t.text.strip()
       # Only process comments, not just newlines
@@ -143,9 +143,9 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
           # Defer emission
           res_ssa = op.results[0].name
           self.deferred_exprs[res_ssa] = expr_node
-        else:  # pragma: no cover
+        else:
           # Wrap as statement (Assignment or Expression Stmt)
-          stmt_node = self._wrap_as_statement(op, expr_node)  # pragma: no cover
+          stmt_node = self._wrap_as_statement(op, expr_node)
           if hasattr(stmt_node, "with_changes") and leading:
             stmt_node = stmt_node.with_changes(leading_lines=leading)
           stmts.append(stmt_node)

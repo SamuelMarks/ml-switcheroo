@@ -22,5 +22,5 @@ class SassEmitter:
         str: The formatted SASS source code string.
 
     """
-    printer = SassPrinter()  # pragma: no cover
-    return printer.emit(nodes)  # pragma: no cover
+    printer = SassPrinter()
+    return printer.emit(nodes)

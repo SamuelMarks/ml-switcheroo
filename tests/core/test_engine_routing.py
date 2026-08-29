@@ -1,16 +1,18 @@
 """Test suite for the Engine Routing module."""
 
-import pytest
 from unittest.mock import MagicMock, patch
-from ml_switcheroo.core.engine import ASTEngine
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.compiler.ir import LogicalGraph
+from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
 def mock_managers() -> MagicMock:
-  """Provides a mock managers for testing."""
+  """Docstring."""
   sem = MagicMock(spec=SemanticsManager)
   sem.get_framework_config.return_value = {}
   return sem

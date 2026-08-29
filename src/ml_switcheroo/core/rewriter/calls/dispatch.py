@@ -181,10 +181,10 @@ def _check_rule_condition(node: cst.CSTNode, rule: "DispatchRuleDummy") -> bool:
   op_map = {
     LogicOp.EQ: lambda v, t: bool(v == t),
     LogicOp.NEQ: lambda v, t: bool(v != t),
-    LogicOp.GT: lambda v, t: bool(v > t) if t is not None and v is not None and type(v) == type(t) else False,
-    LogicOp.LT: lambda v, t: bool(v < t) if t is not None and v is not None and type(v) == type(t) else False,
-    LogicOp.GTE: lambda v, t: bool(v >= t) if t is not None and v is not None and type(v) == type(t) else False,
-    LogicOp.LTE: lambda v, t: bool(v <= t) if t is not None and v is not None and type(v) == type(t) else False,
+    LogicOp.GT: lambda v, t: bool(v > t) if t is not None and v is not None and type(v) is type(t) else False,
+    LogicOp.LT: lambda v, t: bool(v < t) if t is not None and v is not None and type(v) is type(t) else False,
+    LogicOp.GTE: lambda v, t: bool(v >= t) if t is not None and v is not None and type(v) is type(t) else False,
+    LogicOp.LTE: lambda v, t: bool(v <= t) if t is not None and v is not None and type(v) is type(t) else False,
     LogicOp.IN: lambda v, t: bool(v in t) if t is not None else False,
     LogicOp.NOT_IN: lambda v, t: bool(v not in t) if t is not None else False,
   }

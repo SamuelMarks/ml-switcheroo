@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.plugins.auto_fsdp_wrapper import wrap_with_sharding
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.auto_fsdp_wrapper import wrap_with_sharding
 
 
 def test_wrap_with_sharding_no_op_def() -> None:

@@ -1,18 +1,19 @@
 """Test suite for the Tf Data Pipeline module."""
 
 import pytest
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.core.hooks import _HOOKS
 from ml_switcheroo.plugins.tf_data_loader import transform_tf_dataloader
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE: str = "\nimport torch\nfrom torch.utils.data import DataLoader, TensorDataset\n\ndef create_pipeline(x, y):\n    ds = TensorDataset(x, y)\n    loader = DataLoader(ds, batch_size=64, shuffle=True)\n    return loader\n"
 
 
 @pytest.fixture
 def tf_semantics() -> SemanticsManager:
-  """Provides a mock tf semantics for testing."""
+  """Docstring."""
   _HOOKS["tf_data_loader"] = transform_tf_dataloader
   mgr = SemanticsManager()
   mapping: dict[str, str] = {"api": "tf.data.Dataset", "requires_plugin": "tf_data_loader"}

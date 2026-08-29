@@ -1,18 +1,19 @@
 """Test module."""
 
 from pathlib import Path
+
 from ml_switcheroo.importers.stablehlo_reader import StableHloSpecImporter
 
 
 def test_stablehlo_reader_missing_file(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   importer = StableHloSpecImporter()
   res = importer.parse_file(tmp_path / "missing.md")
   assert res == {}
 
 
 def test_stablehlo_reader_parse_markdown(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   importer = StableHloSpecImporter()
 
   md_content = """
@@ -109,7 +110,7 @@ stablehlo.broken_syntax ( ) [ ]
 
 
 def test_stablehlo_long_summary(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   importer = StableHloSpecImporter()
   long_desc = "A" * 310
 

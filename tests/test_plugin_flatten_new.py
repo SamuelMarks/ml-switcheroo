@@ -1,25 +1,22 @@
 """Tests for the new flatten plugin transformations."""
 
+from typing import Dict
+
 import libcst as cst
+
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.flatten import transform_flatten
-from ml_switcheroo.config import RuntimeConfig
-from typing import Dict
 
 
 def get_context(api_name: str, op_type: str = "function") -> HookContext:
-  """Get a mock hook context for testing."""
+  """Docstring."""
 
   class MockSemantics:
-    """Docstring."""
-
     def resolve_variant(self, op_name: str, target_fw: str) -> Dict[str, str]:
-      """Docstring."""
       return {"api": api_name, "op_type": op_type}
 
   class MockConfig(RuntimeConfig):
-    """Docstring."""
-
     source_framework: str = "torch"
     target_framework: str = "numpy"
 
@@ -30,7 +27,7 @@ def get_context(api_name: str, op_type: str = "function") -> HookContext:
 
 
 def test_flatten_jax_collapse() -> None:
-  """Test flatten to jax collapse transformation."""
+  """Docstring."""
   # torch.flatten(x, 1) -> jax.lax.collapse(x, 1, x.ndim)
   code: str = "flatten(x, 1)"
   module: cst.Module = cst.parse_module(code)
@@ -43,7 +40,7 @@ def test_flatten_jax_collapse() -> None:
 
 
 def test_flatten_numpy_ravel() -> None:
-  """Test flatten to numpy ravel transformation."""
+  """Docstring."""
   # torch.flatten(x) -> numpy.ravel(x)
   code: str = "flatten(x)"
   module: cst.Module = cst.parse_module(code)
@@ -56,7 +53,7 @@ def test_flatten_numpy_ravel() -> None:
 
 
 def test_flatten_numpy_reshape_batch() -> None:
-  """Test flatten to numpy reshape transformation."""
+  """Docstring."""
   # torch.flatten(x, 1) -> numpy.reshape(x, (x.shape[0], -1))
   code: str = "flatten(x, 1)"
   module: cst.Module = cst.parse_module(code)
@@ -69,7 +66,7 @@ def test_flatten_numpy_reshape_batch() -> None:
 
 
 def test_flatten_mlx() -> None:
-  """Test flatten to mlx transformation."""
+  """Docstring."""
   # torch.flatten(x, 1) -> mlx.core.flatten(x, 1, -1)
   code: str = "flatten(x, 1)"
   module: cst.Module = cst.parse_module(code)
@@ -82,7 +79,7 @@ def test_flatten_mlx() -> None:
 
 
 def test_flatten_keras_layer() -> None:
-  """Test flatten to keras layer transformation."""
+  """Docstring."""
   # torch.flatten(x) -> keras.layers.Flatten()(x)
   code: str = "flatten(x)"
   module: cst.Module = cst.parse_module(code)
@@ -95,7 +92,7 @@ def test_flatten_keras_layer() -> None:
 
 
 def test_flatten_value_error_positional() -> None:
-  """Test value error in positional argument processing."""
+  """Docstring."""
   code: str = "flatten(x, 'a', 'b')"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -105,7 +102,7 @@ def test_flatten_value_error_positional() -> None:
 
 
 def test_flatten_negative_end_dim_kwargs() -> None:
-  """Test negative end_dim in kwargs."""
+  """Docstring."""
   code: str = "flatten(x, start_dim=-1, end_dim=-2)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -115,7 +112,7 @@ def test_flatten_negative_end_dim_kwargs() -> None:
 
 
 def test_flatten_keyword_args_positive() -> None:
-  """Test positive keyword args."""
+  """Docstring."""
   code: str = "flatten(x, start_dim=1, end_dim=2)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -125,7 +122,7 @@ def test_flatten_keyword_args_positive() -> None:
 
 
 def test_flatten_value_error_hex() -> None:
-  """Test value error with hex."""
+  """Docstring."""
   code: str = "flatten(x, 0x1, 0x2)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value

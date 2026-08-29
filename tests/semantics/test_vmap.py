@@ -1,14 +1,16 @@
 """Test suite for the Vmap module."""
 
+from typing import Any, Dict, Optional, Set, Tuple
+
 import pytest
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
-from typing import Dict, Tuple, Optional, Set, Any
 
 
 class MockVmapSemantics(SemanticsManager):
-  """Mock Vmap Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockVmapSemantics instance."""

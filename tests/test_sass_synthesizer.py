@@ -1,20 +1,22 @@
 """Docstring."""
 
-from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator, SassSynthesizer
+from typing import Any, Dict, List, Optional, Tuple
+
+import libcst as cst
+import pytest
+
 from ml_switcheroo.core.compiler.backends.sass.backend import SassBackend
+from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator, SassSynthesizer
 from ml_switcheroo.core.compiler.frontends.sass.cst import (
-  SassRegister,
-  SassInstruction,
   SassImmediate,
+  SassInstruction,
   SassLabel,
-  SassOperand,
   SassMemory,
   SassNode,
+  SassOperand,
+  SassRegister,
 )
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from typing import Dict, Any, List, Optional, Tuple
-import pytest
-import libcst as cst
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 class DummySassOperand(SassOperand):
@@ -56,10 +58,7 @@ def test_synthesizer_from_graph() -> None:
   """Docstring."""
 
   class MockSemantics:
-    """Docstring."""
-
     def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
       if kind == "UnknownNode":
         return None
       if kind == "DirectMatch":
@@ -69,7 +68,6 @@ def test_synthesizer_from_graph() -> None:
       return ("abstract.Linear", {})
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Docstring."""
       if abstract_id == "FallbackOp":
         return {"api": "FADD", "args": []}
       return {"api": "NOP", "args": []}
@@ -77,7 +75,6 @@ def test_synthesizer_from_graph() -> None:
   synth: SassSynthesizer = SassSynthesizer(semantics=MockSemantics())
 
   def dummy_expander(alloc: RegisterAllocator, nid: str, meta: Dict[str, Any]) -> List[SassNode]:
-    """Docstring."""
     return [SassInstruction("NOP", [])]
 
   synth.macro_registry = {"Linear": dummy_expander, "DirectMatch": dummy_expander}
@@ -109,14 +106,10 @@ def test_synthesizer_from_graph_unmapped() -> None:
   """Docstring."""
 
   class MockSemantics:
-    """Docstring."""
-
     def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
       return ("abstract", {})
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Docstring."""
       return None
 
   synth: SassSynthesizer = SassSynthesizer(semantics=MockSemantics())

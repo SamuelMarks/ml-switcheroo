@@ -1,6 +1,7 @@
 """Test suite for the Matrix Cmd module."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 
 

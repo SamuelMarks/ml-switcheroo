@@ -1,6 +1,6 @@
 """Test suite for the Dsl Return Type module."""
 
-from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
+from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef
 
 
 def test_op_return_type_default() -> None:

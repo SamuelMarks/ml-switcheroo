@@ -20,5 +20,5 @@ class RdnaEmitter:
     Returns:
         str: The generated RDNA assembly text.
     """
-    printer = RdnaPrinter()  # pragma: no cover
-    return printer.emit(nodes)  # pragma: no cover
+    printer = RdnaPrinter()
+    return printer.emit(nodes)

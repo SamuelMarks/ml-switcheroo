@@ -403,7 +403,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
     """
     for alias in node.names:
       if not isinstance(alias, cst.ImportAlias) or not isinstance(alias.name, (cst.Name, cst.Attribute)):
-        continue  # pragma: no cover
+        continue
       full_name = self._cst_to_string(alias.name)
       if not full_name:
         continue
@@ -437,7 +437,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
 
     for alias in node.names:
       if not isinstance(alias, cst.ImportAlias) or not isinstance(alias.name, (cst.Name, cst.Attribute)):
-        continue  # pragma: no cover
+        continue
       imported_name = alias.name.value if isinstance(alias.name, cst.Name) else alias.name.attr.value
       canonical_source = f"{module_name}.{imported_name}"
       local_name = alias.asname.name.value if alias.asname and isinstance(alias.asname.name, cst.Name) else imported_name

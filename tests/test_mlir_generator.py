@@ -1,14 +1,16 @@
 """Test module."""
 
-import libcst as cst
-from unittest import mock
 from typing import List, Optional
+from unittest import mock
+
+import libcst as cst
+
+from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, RegionNode, Trivia, ValueNode
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
-from ml_switcheroo.core.mlir.cst import ModuleNode, BlockNode, OperationNode, ValueNode, AttributeNode, Trivia, RegionNode
 
 
 def test_generator_init() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   assert gen.ctx is not None
   assert gen.usage_counts is not None
@@ -17,7 +19,7 @@ def test_generator_init() -> None:
 
 
 def test_generate_module() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   # Empty module
@@ -28,7 +30,7 @@ def test_generate_module() -> None:
 
 
 def test_convert_trivia() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   # Test trivia conversion
@@ -42,7 +44,7 @@ def test_convert_trivia() -> None:
 
 
 def test_scan_block_usage() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   # Op with operands
@@ -59,7 +61,7 @@ def test_scan_block_usage() -> None:
 
 
 def test_should_inline_expression() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   # no result op
@@ -91,7 +93,7 @@ def test_should_inline_expression() -> None:
 
 
 def test_resolve_operand() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   # Deferred
@@ -113,7 +115,7 @@ def test_resolve_operand() -> None:
 
 
 def test_create_expression_from_op() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   op_unknown: OperationNode = OperationNode(name='"unknown"')
@@ -127,7 +129,7 @@ def test_create_expression_from_op() -> None:
 
 
 def test_convert_statement_op() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   op_unknown: OperationNode = OperationNode(name='"unknown"')
@@ -140,7 +142,7 @@ def test_convert_statement_op() -> None:
 
 
 def test_wrap_as_statement() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   expr: cst.Name = cst.Name("val")
@@ -202,7 +204,7 @@ def test_wrap_as_statement() -> None:
 
 
 def test_convert_block() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   op_const: OperationNode = OperationNode(
     name='"sw.constant"', results=[ValueNode(name="%0")], attributes=[AttributeNode(name="value", value="42")]
@@ -221,7 +223,7 @@ def test_convert_block() -> None:
 
 
 def test_convert_block_deferred() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   # If inlined but not consumed in a statement immediately
   op_const: OperationNode = OperationNode(
@@ -235,7 +237,7 @@ def test_convert_block_deferred() -> None:
 
 
 def test_scan_block_usage_regions() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   b: BlockNode = BlockNode(label="", operations=[OperationNode(name='"sw.op"', operands=[ValueNode(name="%0")])])
   op: OperationNode = OperationNode(name='"sw.parent"', regions=[RegionNode(blocks=[b])])
@@ -244,7 +246,7 @@ def test_scan_block_usage_regions() -> None:
 
 
 def test_convert_trivia_other() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   lines: List[cst.EmptyLine] = gen._convert_trivia([Trivia(text="other"), Trivia(text="// comment")])
   assert len(lines) == 1
@@ -252,7 +254,7 @@ def test_convert_trivia_other() -> None:
 
 
 def test_convert_block_stmt_leading() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   # To test stmt_node with leading trivia and no expression
   # We mock _convert_statement_op
@@ -272,7 +274,7 @@ def test_convert_block_stmt_leading() -> None:
 
 
 def test_should_inline_expression_not_statement() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   op_normal: OperationNode = OperationNode(name='"sw.op"', results=[ValueNode(name="%3")])
   gen.usage_counts["%3"] = 1
@@ -282,7 +284,7 @@ def test_should_inline_expression_not_statement() -> None:
 
 
 def test_create_expression_from_op_branches() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   with mock.patch.object(gen, "_expr_sw_op", return_value="sw.op"):
     assert gen._create_expression_from_op(OperationNode(name='"sw.op"')) == "sw.op"
@@ -293,7 +295,7 @@ def test_create_expression_from_op_branches() -> None:
 
 
 def test_convert_statement_op_branches() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   with mock.patch.object(gen, "_convert_class_def", return_value="sw.module"):
     assert gen._convert_statement_op(OperationNode(name='"sw.module"')) == "sw.module"
@@ -306,7 +308,7 @@ def test_convert_statement_op_branches() -> None:
 
 
 def test_wrap_as_statement_branches() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   # sw.getattr without raw_n
   op_getattr_no_n: OperationNode = OperationNode(name='"sw.getattr"', results=[ValueNode(name="%2")])
@@ -318,7 +320,7 @@ def test_wrap_as_statement_branches() -> None:
 
 
 def test_is_void_call_super() -> None:
-  """Test element."""
+  """Docstring."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   void_call: cst.Call = cst.Call(
     func=cst.Attribute(value=cst.Call(func=cst.Name("super"), args=[]), attr=cst.Name("__init__")), args=[]

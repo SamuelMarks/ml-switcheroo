@@ -1,11 +1,11 @@
 """Docstring."""
 
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.compiler.qwen_fusion import (
-  SwiGLUFusionPass,
   SwiGLUDefusionPass,
-  VisionPatchEmbeddingFusionPass,
+  SwiGLUFusionPass,
   VisionPatchEmbeddingDefusionPass,
+  VisionPatchEmbeddingFusionPass,
 )
 
 

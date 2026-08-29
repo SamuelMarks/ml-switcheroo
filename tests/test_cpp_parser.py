@@ -1,23 +1,24 @@
 """Test module."""
 
 import pytest
-from ml_switcheroo.core.compiler.backends.cpp.parser import CppParser
+
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
-  CppModule,
-  MacroDefinition,
-  FunctionDefinition,
-  VariableDeclaration,
-  ReturnStatement,
-  Identifier,
   BinaryExpression,
-  RawStatement,
-  PyBindModule,
+  CppModule,
+  FunctionDefinition,
+  Identifier,
+  MacroDefinition,
   MethodCall,
+  PyBindModule,
+  RawStatement,
+  ReturnStatement,
+  VariableDeclaration,
 )
+from ml_switcheroo.core.compiler.backends.cpp.parser import CppParser
 
 
 def test_parser_empty() -> None:
-  """Test element."""
+  """Docstring."""
   parser: CppParser = CppParser("   \n ")
   node: CppModule = parser.parse()
   assert isinstance(node, CppModule)
@@ -26,7 +27,7 @@ def test_parser_empty() -> None:
 
 
 def test_parser_include_system() -> None:
-  """Test element."""
+  """Docstring."""
   parser: CppParser = CppParser("#include <iostream>")
   node: CppModule = parser.parse()
   assert isinstance(node, CppModule)
@@ -36,7 +37,7 @@ def test_parser_include_system() -> None:
 
 
 def test_parser_include_local() -> None:
-  """Test element."""
+  """Docstring."""
   parser: CppParser = CppParser('#include "my_header.h"')
   node: CppModule = parser.parse()
   assert isinstance(node, CppModule)
@@ -46,7 +47,7 @@ def test_parser_include_local() -> None:
 
 
 def test_parser_macro_define() -> None:
-  """Test element."""
+  """Docstring."""
   parser: CppParser = CppParser("#define FOO 1")
   node: CppModule = parser.parse()
   assert len(node.body) == 1
@@ -63,7 +64,7 @@ def test_parser_macro_define() -> None:
 
 
 def test_parser_macro_empty() -> None:
-  """Test element."""
+  """Docstring."""
   parser: CppParser = CppParser("#define BAZ")
   node: CppModule = parser.parse()
   assert len(node.body) == 1
@@ -73,7 +74,7 @@ def test_parser_macro_empty() -> None:
 
 
 def test_parser_function() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
     int main() {
         return 0;
@@ -96,7 +97,7 @@ def test_parser_function() -> None:
 
 
 def test_parser_function_args() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
     void foo(int a, float b) {
     }
@@ -113,7 +114,7 @@ def test_parser_function_args() -> None:
 
 
 def test_parser_return_empty() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
     void foo() {
         return;
@@ -129,7 +130,7 @@ def test_parser_return_empty() -> None:
 
 
 def test_parser_var_decl() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
     int a;
     float b = 1.0;
@@ -148,7 +149,7 @@ def test_parser_var_decl() -> None:
 
 
 def test_parser_raw_statement() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
     std::cout << "hello";
     """
@@ -160,7 +161,7 @@ def test_parser_raw_statement() -> None:
 
 
 def test_parser_expressions() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
     int main() {
         foo(1, a);
@@ -181,7 +182,7 @@ def test_parser_expressions() -> None:
 
 
 def test_parser_pybind() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
     PYBIND11_MODULE(my_mod, m) {
         m.def("foo", &foo_impl, "doc");
@@ -201,16 +202,17 @@ def test_parser_pybind() -> None:
 
 
 def test_parser_invalid() -> None:
-  """Test element."""
+  """Docstring."""
   parser: CppParser = CppParser("invalid syntax")
   with pytest.raises(ValueError):
     parser.parse()
 
 
 def test_system_include_no_path() -> None:
-  """Test element."""
-  from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
+  """Docstring."""
   from lark import Token
+
+  from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
 
   transformer: CppTransformer = CppTransformer()
   import pytest
@@ -220,9 +222,10 @@ def test_system_include_no_path() -> None:
 
 
 def test_local_include_no_path() -> None:
-  """Test element."""
-  from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
+  """Docstring."""
   from lark import Token
+
+  from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
 
   transformer: CppTransformer = CppTransformer()
   import pytest
@@ -232,7 +235,7 @@ def test_local_include_no_path() -> None:
 
 
 def test_method_call() -> None:
-  """Test element."""
+  """Docstring."""
   from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
 
   transformer: CppTransformer = CppTransformer()
@@ -243,9 +246,10 @@ def test_method_call() -> None:
 
 
 def test_identifier_string_literal() -> None:
-  """Test element."""
-  from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
+  """Docstring."""
   from lark import Token
+
+  from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
 
   transformer: CppTransformer = CppTransformer()
   res: Identifier = transformer.string_lit([Token("STRING", '"hello"')])

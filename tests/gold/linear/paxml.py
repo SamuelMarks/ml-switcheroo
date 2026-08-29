@@ -1,12 +1,13 @@
 """Test suite for the Paxml module."""
 
 import typing
+
 from praxis import base_layer  # type: ignore
 from praxis.layers import linears  # type: ignore
 
 
 class Model(base_layer.BaseLayer):  # type: ignore
-  """Test suite for the Model component."""
+  """Docstring."""
 
   in_features: int = 0
   out_features: int = 0

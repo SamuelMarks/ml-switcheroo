@@ -59,15 +59,15 @@ def _supports_numpy_padding(ctx: HookContext) -> bool:
       bool: True if the target framework configuration supports NumPy-style padding, False otherwise.
   """
   if not ctx.semantics:
-    return False  # pragma: no cover  # pragma: no cover
+    return False
 
   conf = ctx.semantics.get_framework_config(ctx.target_fw)
   if not conf:
-    return False  # pragma: no cover  # pragma: no cover
+    return False
 
   traits = conf.get("plugin_traits")
   if not traits:
-    return False  # pragma: no cover  # pragma: no cover
+    return False
 
   if isinstance(traits, dict):
     return traits.get("has_numpy_compatible_arrays", False)
@@ -75,7 +75,7 @@ def _supports_numpy_padding(ctx: HookContext) -> bool:
   if hasattr(traits, "has_numpy_compatible_arrays"):
     return getattr(traits, "has_numpy_compatible_arrays", False)
 
-  return False  # pragma: no cover  # pragma: no cover
+  return False
 
 
 @register_hook("padding_converter")
@@ -97,22 +97,22 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   # 0. Capability and API Check
   if not _supports_numpy_padding(ctx):
-    return node  # pragma: no cover  # pragma: no cover
+    return node
 
   target_api = ctx.lookup_api("Pad")
   if not target_api:
-    return node  # pragma: no cover  # pragma: no cover
+    return node
 
   args = list(node.args)
   if len(args) < 2:
-    return node  # pragma: no cover  # pragma: no cover
+    return node
 
   input_arg = args[0]
   pad_arg = args[1]
 
   # We can only perform structural rewrites if the padding is a Tuple literal.
   if not isinstance(pad_arg.value, cst.Tuple):
-    return node  # pragma: no cover  # pragma: no cover
+    return node
 
   elements = pad_arg.value.elements
 

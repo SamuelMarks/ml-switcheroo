@@ -1,12 +1,14 @@
 """Test module."""
 
-import libcst as cst
 import typing
+
+import libcst as cst
+
 from ml_switcheroo.core.graph import GraphExtractor
 
 
 def test_graph_extractor_init_pass() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
 class MyModel:
     def __init__(self):
@@ -33,7 +35,7 @@ class MyModel:
 
 
 def test_graph_extractor_forward_pass() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
 class MyModel:
     def __init__(self):
@@ -60,7 +62,7 @@ class MyModel:
 
 
 def test_graph_extractor_direct_call_return() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
 class MyModel:
     def __init__(self):
@@ -79,7 +81,7 @@ class MyModel:
 
 
 def test_graph_extractor_top_level_data_flow() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
 x = 1
 y = 2
@@ -99,7 +101,7 @@ z = add(x, y)
 
 
 def test_graph_extractor_top_level_expr() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
 func(x)
 """
@@ -115,7 +117,7 @@ func(x)
 
 
 def test_graph_extractor_missing_nodes() -> None:
-  """Test element."""
+  """Docstring."""
   # Various branches that return None or False
   extractor = GraphExtractor()
 
@@ -140,7 +142,7 @@ def test_graph_extractor_missing_nodes() -> None:
 
 
 def test_graph_extractor_return_complex() -> None:
-  """Test element."""
+  """Docstring."""
   code: str = """
 class MyModel:
     def forward(self, x):
@@ -153,7 +155,7 @@ class MyModel:
 
 
 def test_graph_extractor_missing_paths() -> None:
-  """Test element."""
+  """Docstring."""
   extractor = GraphExtractor()
   extractor._in_forward = True
 
@@ -183,7 +185,7 @@ def test_graph_extractor_missing_paths() -> None:
 
 
 def test_graph_extractor_context_node_call() -> None:
-  """Test element."""
+  """Docstring."""
   extractor = GraphExtractor()
   call_node = typing.cast(
     cst.Call,

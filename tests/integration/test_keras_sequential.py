@@ -1,20 +1,22 @@
 """Test suite for the Keras Sequential module."""
 
-import pytest
 import typing
 from unittest.mock import MagicMock
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.plugins.keras_sequential import transform_keras_sequential
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.core.hooks import _HOOKS
+from ml_switcheroo.plugins.keras_sequential import transform_keras_sequential
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE_TORCH: str = "\nimport torch.nn as nn\ndef get_model():\n    model = nn.Sequential(\n        nn.Linear(10, 20),\n        nn.ReLU(),\n        nn.Linear(20, 1)\n    )\n    return model\n"
 
 
 @pytest.fixture
 def keras_semantics() -> MagicMock:
-  """Provides a mock Keras semantics for testing."""
+  """Docstring."""
   _HOOKS["keras_sequential_pack"] = transform_keras_sequential
   mgr = MagicMock(spec=SemanticsManager)
   mappings: dict[str, typing.Any] = {

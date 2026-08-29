@@ -8,8 +8,6 @@ def test_readme_editor_duck() -> None:
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   class DuckPath:
-    """Test suite for the Duck Path component."""
-
     def exists(self) -> bool:
       """Helper to exists."""
       return True
@@ -31,8 +29,6 @@ def test_readme_editor_read_error() -> None:
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   class DuckPath:
-    """Mock Path for testing read error."""
-
     def exists(self) -> bool:
       """Check if exists."""
       return True
@@ -47,12 +43,11 @@ def test_readme_editor_read_error() -> None:
 
 def test_readme_editor_no_map() -> None:
   """Verifies the behavior of readme editor duck."""
-  from ml_switcheroo.utils.readme_editor import ReadmeEditor
   import markdown_it
 
-  class DuckPath:
-    """Mock Path for testing no map."""
+  from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
+  class DuckPath:
     def exists(self) -> bool:
       """Check if exists."""
       return True

@@ -1,18 +1,19 @@
 """Test suite for the Attention Layers module."""
 
 import pytest
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.core.hooks import _HOOKS
-from ml_switcheroo.plugins.attention_packing import repack_attn_keras, repack_attn_flax
+from ml_switcheroo.plugins.attention_packing import repack_attn_flax, repack_attn_keras
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 SOURCE_TORCH: str = "\nimport torch.nn as nn\n\nclass MyAttn(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.attn = nn.MultiheadAttention(embed_dim=256, num_heads=8)\n\n    def forward(self, q, k, v, mask):\n        out, _ = self.attn(q, k, v, key_padding_mask=mask)\n        return out\n"
 
 
 @pytest.fixture
 def attn_semantics() -> SemanticsManager:
-  """Provides a mock attn semantics for testing."""
+  """Docstring."""
   _HOOKS["repack_attn_keras"] = repack_attn_keras
   _HOOKS["repack_attn_flax"] = repack_attn_flax
   mgr = SemanticsManager()

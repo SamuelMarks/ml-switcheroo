@@ -1,7 +1,7 @@
 """Test suite for the Engine Visuals module."""
 
-from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.core.tracer import TraceEventType
 
 

@@ -5,7 +5,7 @@ import mlx.nn as nn
 
 
 class GAPModel(nn.Module):
-  """Test suite for the G A P Model component."""
+  """Docstring."""
 
   def __call__(self, x: mx.array) -> mx.array:
     """Executes the callable instance."""

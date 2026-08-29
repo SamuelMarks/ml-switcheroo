@@ -5,7 +5,7 @@ import mlx.nn as nn
 
 
 class BNModel(nn.Module):
-  """Test suite for the B N Model component."""
+  """Docstring."""
 
   def __init__(self, num_features: int):
     """Initializes the BNModel instance."""

@@ -1,18 +1,20 @@
 """Test module."""
 
+from typing import List, Set, Union
+
 import libcst as cst
+
 from ml_switcheroo.core.import_fixer.imports_mixin import ImportMixin
-from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan, ImportReq
-from typing import Set, Union, List
+from ml_switcheroo.core.import_fixer.resolution import ImportReq, ResolutionPlan
 
 
 class MockFixer(ImportMixin):
-  """Test element."""
+  """Docstring."""
 
   def __init__(
     self, plan: ResolutionPlan, source_fws: Union[str, List[str], Set[str]], preserve_source: bool = False
   ) -> None:
-    """Test element."""
+    """Docstring."""
     self.plan: ResolutionPlan = plan
     self.source_fws: Union[str, List[str], Set[str]] = source_fws
     self.preserve_source: bool = preserve_source
@@ -24,7 +26,7 @@ class MockFixer(ImportMixin):
 
 
 def test_make_alias_node() -> None:
-  """Test element."""
+  """Docstring."""
   fixer: MockFixer = MockFixer(ResolutionPlan(), set())
 
   # Simple req without subcomponent or alias
@@ -64,7 +66,7 @@ def test_make_alias_node() -> None:
 
 
 def test_leave_import() -> None:
-  """Test element."""
+  """Docstring."""
   plan: ResolutionPlan = ResolutionPlan(mappings={"torch.nn": ImportReq("flax", "nnx", "nnx")})
   fixer: MockFixer = MockFixer(plan, ["torch"], False)
 
@@ -126,7 +128,7 @@ def test_leave_import() -> None:
 
 
 def test_leave_import_from() -> None:
-  """Test element."""
+  """Docstring."""
   plan: ResolutionPlan = ResolutionPlan(
     mappings={"torch.nn": ImportReq("flax", "nnx", "nnx"), "torch.Tensor": ImportReq("jax", "Array")}
   )

@@ -1,9 +1,14 @@
 """Test suite for the Jax module."""
 
-import pytest
 import typing
-from ml_switcheroo.frameworks.jax import JaxCoreAdapter
+from unittest.mock import patch
+
+import pytest
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.enums import SemanticTier  # noqa: F811
 from ml_switcheroo.frameworks.base import InitMode
+from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 
 
 def test_jax_adapter_init() -> None:
@@ -30,7 +35,7 @@ def test_jax_import_namespaces() -> None:
 
 
 def test_jax_test_config() -> None:
-  """Verifies the behavior of JAX test configuration."""
+  """Docstring."""
   adapter = JaxCoreAdapter()
   config: dict[str, typing.Any] = adapter.test_config
   assert "import jax.numpy as jnp" in config["import"]
@@ -123,3 +128,71 @@ def test_jax_init_live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
   monkeypatch.setattr("ml_switcheroo.frameworks.jax.jax", True)
   adapter = JaxCoreAdapter()
   assert adapter._mode == InitMode.LIVE
+
+
+# --- Merged from test_jax_extra2.py ---
+
+
+def test_jax_activations_coverage() -> None:
+  """Docstring."""
+  adapter = JaxCoreAdapter()
+  res: list[typing.Any] = adapter._collect_live(SemanticTier.ACTIVATION)
+  assert isinstance(res, list)
+
+
+def test_jax_import_exception() -> None:
+  """Docstring."""
+  # To test the import exception block we would have needed to mock import before the module was loaded.
+  # Since it's already loaded, we can just manually trigger the logic or ignore it.
+  pass
+
+
+# --- Merged from test_jax_extra.py ---
+
+
+def test_jax_adapter_ghost_mode() -> None:
+  """Docstring."""
+  with patch("ml_switcheroo.frameworks.jax.jax", None):
+    with patch(
+      "ml_switcheroo.frameworks.jax.load_snapshot_for_adapter",
+      return_value={"categories": {"loss": [{"name": "foo", "kind": "function", "api_path": "foo"}]}},
+    ):
+      adapter = JaxCoreAdapter()
+      assert adapter._mode.value == "ghost"
+
+      ghosts: list[typing.Any] = adapter._collect_ghost(SemanticTier.LOSS)
+      assert len(ghosts) == 1
+      assert ghosts[0].name == "foo"
+
+
+def test_jax_adapter_ghost_mode_no_snapshot() -> None:
+  """Docstring."""
+  with patch("ml_switcheroo.frameworks.jax.jax", None):
+    with patch("ml_switcheroo.frameworks.jax.load_snapshot_for_adapter", return_value={}):
+      adapter = JaxCoreAdapter()
+      assert adapter._mode.value == "ghost"
+      ghosts: list[typing.Any] = adapter._collect_ghost(SemanticTier.LOSS)
+      assert len(ghosts) == 0
+
+
+def test_jax_adapter_plugin_traits() -> None:
+  """Docstring."""
+  adapter = JaxCoreAdapter()
+  traits: typing.Any = adapter.plugin_traits
+  assert traits.has_numpy_compatible_arrays
+
+
+def test_jax_adapter_collect_live() -> None:
+  """Docstring."""
+  adapter = JaxCoreAdapter()
+  with patch("ml_switcheroo.frameworks.jax.OptaxScanner.scan_losses", return_value=["loss1"], create=True):
+    assert "loss1" in adapter._collect_live(SemanticTier.LOSS)
+  with patch("ml_switcheroo.frameworks.jax.OptaxScanner.scan_optimizers", return_value=["opt1"], create=True):
+    assert "opt1" in adapter._collect_live(SemanticTier.OPTIMIZER)
+
+
+def test_jax_adapter_convert_exception() -> None:
+  """Docstring."""
+  adapter = JaxCoreAdapter()
+  with patch("builtins.__import__", side_effect=Exception):
+    assert adapter.convert([1, 2]) == [1, 2]

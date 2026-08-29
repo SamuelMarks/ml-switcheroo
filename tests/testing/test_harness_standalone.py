@@ -1,16 +1,17 @@
 """Test suite for the Harness Standalone module."""
 
-import sys
-import subprocess
 import os
+import subprocess
+import sys
 from pathlib import Path
-from ml_switcheroo.testing.harness_generator import HarnessGenerator
+from typing import Any, Dict, List
+
 from ml_switcheroo.frameworks import register_framework
-from typing import Dict, List, Any
+from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 class DynKerasAdapter:
-  """Test suite for the Dyn Keras Adapter component."""
+  """Docstring."""
 
   declared_magic_args: List[str] = []
   harness_imports: List[str] = []

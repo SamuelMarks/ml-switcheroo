@@ -1,10 +1,12 @@
 """Docstring."""
 
-import libcst as cst
-from unittest.mock import MagicMock
-from ml_switcheroo.plugins.batch_norm import transform_batch_norm
-from ml_switcheroo.core.hooks import HookContext
 from typing import List
+from unittest.mock import MagicMock
+
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.batch_norm import transform_batch_norm
 
 
 def test_transform_batch_norm_not_required() -> None:

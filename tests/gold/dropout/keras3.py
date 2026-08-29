@@ -1,11 +1,12 @@
 """Test suite for the Keras3 module."""
 
 import typing
+
 import keras
 
 
 class DropoutModel(keras.Model):  # type: ignore
-  """Test suite for the Dropout Model component."""
+  """Docstring."""
 
   def __init__(self, p: float = 0.5) -> None:
     """Initializes the DropoutModel instance."""

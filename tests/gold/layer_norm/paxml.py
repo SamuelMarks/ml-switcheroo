@@ -1,12 +1,13 @@
 """Test suite for the Paxml module."""
 
 import typing
+
 from praxis import base_layer  # type: ignore
 from praxis.layers import normalizations  # type: ignore
 
 
 class LayerNormModel(base_layer.BaseLayer):  # type: ignore
-  """Test suite for the Layer Norm Model component."""
+  """Docstring."""
 
   normalized_shape: int = 0
 

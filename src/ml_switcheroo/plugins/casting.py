@@ -57,8 +57,8 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
   # Navigate: config -> plugin_traits -> has_numpy_compatible_arrays
   # We handle both dict access (from JSON) and object access (if hydrated objects are used)
   traits = conf.get("plugin_traits")
-  if not traits:  # pragma: no cover
-    return False  # pragma: no cover
+  if not traits:
+    return False
 
   if isinstance(traits, dict):
     return traits.get("has_numpy_compatible_arrays", False)

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from unittest.mock import patch
+
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 

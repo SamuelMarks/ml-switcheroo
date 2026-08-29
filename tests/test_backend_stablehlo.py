@@ -1,12 +1,15 @@
 """Test suite for the StableHLO backend."""
 
-from typing import Dict, Any, Tuple, Optional, List
+from typing import Any, Dict, List, Optional, Tuple
+
+import pytest
+
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 class DummySemantics:
-  """Test element."""
+  """Docstring."""
 
   def get_definition(self, kind: str) -> Optional[Tuple[Optional[str], Dict[str, Any]]]:
     """Test element.
@@ -23,13 +26,13 @@ class DummySemantics:
 
 
 def test_stablehlo_backend_init() -> None:
-  """Test element."""
+  """Docstring."""
   backend: StableHloBackend = StableHloBackend(semantics="dummy")  # type: ignore
   assert backend.semantics == "dummy"
 
 
 def test_stablehlo_backend_compile() -> None:
-  """Test element."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="in1", kind="Input"),
     LogicalNode(id="in2", kind="Input"),
@@ -57,7 +60,7 @@ def test_stablehlo_backend_compile() -> None:
 
 
 def test_stablehlo_backend_compile_no_semantics() -> None:
-  """Test element."""
+  """Docstring."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="add1", kind="Add"),
   ]
@@ -68,3 +71,120 @@ def test_stablehlo_backend_compile_no_semantics() -> None:
 
   assert "stablehlo.custom_call" in code
   assert '"@add"' in code
+
+
+# --- Merged from test_backend_stablehlo_rest.py ---
+
+
+OPS: List[Tuple[str, str]] = [
+  # CF
+  ("Case", "stablehlo.case"),
+  ("If", "stablehlo.if"),
+  ("Map", "stablehlo.map"),
+  ("While", "stablehlo.while"),
+  # Comm
+  ("AfterAll", "stablehlo.after_all"),
+  ("AllGather", "stablehlo.all_gather"),
+  ("AllReduce", "stablehlo.all_reduce"),
+  ("AllToAll", "stablehlo.all_to_all"),
+  ("AsyncDone", "stablehlo.async_done"),
+  ("AsyncStart", "stablehlo.async_start"),
+  ("CollectiveBroadcast", "stablehlo.collective_broadcast"),
+  ("CollectivePermute", "stablehlo.collective_permute"),
+  ("Infeed", "stablehlo.infeed"),
+  ("Outfeed", "stablehlo.outfeed"),
+  ("PartitionId", "stablehlo.partition_id"),
+  ("Recv", "stablehlo.recv"),
+  ("Reduce", "stablehlo.reduce"),
+  ("ReducePrecision", "stablehlo.reduce_precision"),
+  ("ReduceScatter", "stablehlo.reduce_scatter"),
+  ("ReduceWindow", "stablehlo.reduce_window"),
+  ("ReplicaId", "stablehlo.replica_id"),
+  ("Send", "stablehlo.send"),
+  # RNG
+  ("Rng", "stablehlo.rng"),
+  ("RngBitGenerator", "stablehlo.rng_bit_generator"),
+  # Misc
+  ("Clamp", "stablehlo.clamp"),
+  ("Compare", "stablehlo.compare"),
+  ("Composite", "stablehlo.composite"),
+  ("Constant", "stablehlo.constant"),
+  ("CustomCall", "stablehlo.custom_call"),
+  ("IsFinite", "stablehlo.is_finite"),
+  ("OptimizationBarrier", "stablehlo.optimization_barrier"),
+  ("Select", "stablehlo.select"),
+  ("SelectAndScatter", "stablehlo.select_and_scatter"),
+  ("UniformDequantize", "stablehlo.uniform_dequantize"),
+  ("UniformQuantize", "stablehlo.uniform_quantize"),
+]
+
+
+class RestSemanticsMock:
+  """Mock semantics."""
+
+  def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+    """Get mock definition for kind.
+
+    Args:
+        kind (str): Kind string.
+
+    Returns:
+        Optional[Tuple[str, Dict[str, Any]]]: Definition tuple.
+    """
+    for abstract, stablehlo_api in OPS:
+      if kind == abstract:
+        return abstract, {"variants": {"stablehlo": {"api": stablehlo_api}}}
+    return None
+
+
+@pytest.mark.parametrize("abstract_name, expected_api", OPS)
+def test_rest_operations_backend(abstract_name: str, expected_api: str) -> None:
+  """Test generating StableHLO via backend.
+
+  Args:
+      abstract_name (str): Abstract name.
+      expected_api (str): Expected API string.
+  """
+  nodes: List[LogicalNode] = [
+    LogicalNode(id="in1", kind="Input"),
+    LogicalNode(id="op1", kind=abstract_name),
+    LogicalNode(id="out1", kind="Output"),
+  ]
+  edges: List[LogicalEdge] = [
+    LogicalEdge(source="in1", target="op1"),
+    LogicalEdge(source="op1", target="out1"),
+  ]
+  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
+  backend: StableHloBackend = StableHloBackend(semantics=RestSemanticsMock())  # type: ignore
+  code: str = backend.compile(graph)
+  assert expected_api in code
+
+
+# --- Merged from test_backend_stablehlo_extra.py ---
+
+
+class DummyStrSemantics:
+  """Dummy semantics."""
+
+  def get_definition(self, kind: str) -> Tuple[str, Dict[str, Any]]:
+    """Get mock definition.
+
+    Args:
+        kind (str): Kind string.
+
+    Returns:
+        Tuple[str, Dict[str, Any]]: Definition tuple.
+    """
+    return kind, {"variants": {"stablehlo": {"api": "stablehlo.dummy"}}}
+
+
+def test_stablehlo_backend_str_attribute() -> None:
+  """Docstring."""
+  nodes: List[LogicalNode] = [
+    LogicalNode(id="op1", kind="Dummy", metadata={"str_attr": "hello_world", "quoted_attr": '"quoted"'})
+  ]
+  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
+  backend: StableHloBackend = StableHloBackend(semantics=DummyStrSemantics())  # type: ignore
+  code: str = backend.compile(graph)
+  assert 'str_attr = "hello_world"' in code
+  assert 'quoted_attr = "quoted"' in code

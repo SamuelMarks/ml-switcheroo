@@ -1,10 +1,12 @@
 """Test suite for the Nnx To Torch Params module."""
 
-import libcst as cst
 from typing import Union
 from unittest.mock import MagicMock
-from ml_switcheroo.plugins.nnx_to_torch_params import transform_nnx_param
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.nnx_to_torch_params import transform_nnx_param
 
 
 def test_nnx_param_trainable() -> None:

@@ -1,33 +1,34 @@
 """Tests for RDNA parser coverage."""
 
 import pytest
+
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaDirective, RdnaImmediate, RdnaMemory
 from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaMemory, RdnaDirective
 
 
 def test_rdna_parser_empty_lines():
-  """Test RDNA parser with empty lines."""
+  """Docstring."""
   parser = RdnaParser("v_mov_b32 v0, v1\n\n  \n")
   nodes = parser.parse().statements
   assert len(nodes) == 1
 
 
 def test_rdna_parser_trivia():
-  """Test trivia in parsing."""
+  """Docstring."""
   parser = RdnaParser("  ; comment\n  v_nop\n")
   mod = parser.parse()
   assert mod.statements[0].leading_trivia[0].text == "  "
 
 
 def test_rdna_parser_errors():
-  """Test parser error handling."""
+  """Docstring."""
   parser = RdnaParser("!")
   with pytest.raises(ValueError):
     parser.parse()
 
 
 def test_rdna_parser_immediate_variants():
-  """Test different numeric immediate variants."""
+  """Docstring."""
   # imm_num float
   parser = RdnaParser("v_add v0, 1.5")
   inst = parser.parse().statements[0]
@@ -61,7 +62,7 @@ def test_rdna_parser_immediate_variants():
 
 
 def test_rdna_parser_directive_variants():
-  """Test directives with different parameters."""
+  """Docstring."""
   parser = RdnaParser('.foo -1, -0x2, +3, +0x4, "string", bar:baz')
   d = parser.parse().statements[0]
   assert isinstance(d, RdnaDirective)
@@ -69,7 +70,7 @@ def test_rdna_parser_directive_variants():
 
 
 def test_rdna_parser_memory_variants():
-  """Test memory operand variants."""
+  """Docstring."""
   parser = RdnaParser("v_add [v0 + 0x10]")
   inst = parser.parse().statements[0]
   assert isinstance(inst.operands[0], RdnaMemory)
@@ -82,13 +83,13 @@ def test_rdna_parser_memory_variants():
 
 
 def test_rdna_parser_empty():
-  """Test empty file."""
+  """Docstring."""
   parser = RdnaParser("")
   assert len(parser.parse().statements) == 0
 
 
 def test_rdna_parser_only_trivia():
-  """Test trivia with no statements."""
+  """Docstring."""
   parser = RdnaParser("  \n")
   mod = parser.parse()
   assert len(mod.statements) == 0
@@ -96,22 +97,23 @@ def test_rdna_parser_only_trivia():
 
 
 def test_rdna_parser_modifier():
-  """Test instruction modifier."""
+  """Docstring."""
   parser = RdnaParser("v_add_f32 v0, row_mask:0xf")
   inst = parser.parse().statements[0]
   assert inst.operands[1].name == "row_mask:0xf"
 
 
 def test_rdna_parser_misc():
-  """Test misc parsing logic."""
+  """Docstring."""
   # directive with single param list that is not a list? (not really possible but test coverage)
   pass
 
 
 def test_rdna_parser_missing_coverage_extra():
-  """Test for test_rdna_parser_missing_coverage_extra."""
-  from ml_switcheroo.core.compiler.frontends.rdna.parser import _get_trivia, RdnaTransformer
+  """Docstring."""
   from lark import Token
+
+  from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaTransformer, _get_trivia
 
   # line 113
   class DummyNode:
@@ -128,9 +130,10 @@ def test_rdna_parser_missing_coverage_extra():
 
 
 def test_rdna_parser_branch_coverage():
-  """Test for test_rdna_parser_branch_coverage."""
-  from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaTransformer
+  """Docstring."""
   from lark import Token
+
+  from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaTransformer
 
   transformer = RdnaTransformer()
 

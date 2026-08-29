@@ -4,7 +4,7 @@ from ml_switcheroo.core.mlir.naming import NamingContext
 
 
 def test_naming_collision() -> None:
-  """Test naming collision."""
+  """Docstring."""
   ctx = NamingContext()
   # To hit 100 and 123: py_name="coll", collision so attempt="_coll"
   ctx._used_names["coll"] = True

@@ -1,11 +1,11 @@
 """Module docstring."""
 
-import libcst as cst
 import typing
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-from ml_switcheroo.core.rewriter.calls.dispatch import _node_to_literal
-from ml_switcheroo.core.rewriter.calls.dispatch import _check_rule_condition, evaluate_dispatch_rules
+import libcst as cst
+
+from ml_switcheroo.core.rewriter.calls.dispatch import _check_rule_condition, _node_to_literal, evaluate_dispatch_rules
 from ml_switcheroo.enums import LogicOp
 
 
@@ -43,7 +43,6 @@ class DummyRewriter:
     self.source_fw = source_fw
 
   def _is_module_alias(self, name: typing.Any) -> bool:
-    """Docstring."""
     return False
 
 

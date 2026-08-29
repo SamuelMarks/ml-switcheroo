@@ -1,13 +1,21 @@
 """Test module."""
 
-from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaImmediate, c_SGPR, RdnaNode
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from typing import List
+
+from ml_switcheroo.core.compiler.frontends.rdna.cst import (
+  RdnaComment,
+  RdnaImmediate,
+  RdnaInstruction,
+  RdnaModule,
+  RdnaNode,
+  c_SGPR,
+)
+from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 
 def test_rdna_lifter_basic() -> None:
-  """Test element."""
+  """Docstring."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [
     RdnaComment(text="; Input x ->"),
@@ -38,7 +46,7 @@ def test_rdna_lifter_basic() -> None:
 
 
 def test_rdna_lifter_seen_ids() -> None:
-  """Test element."""
+  """Docstring."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [
     RdnaComment(text="; Input x ->"),
@@ -49,7 +57,7 @@ def test_rdna_lifter_seen_ids() -> None:
 
 
 def test_rdna_lifter_instruction() -> None:
-  """Test element."""
+  """Docstring."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [RdnaInstruction(opcode="v_add_f32", operands=[])]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -58,7 +66,7 @@ def test_rdna_lifter_instruction() -> None:
 
 
 def test_rdna_lifter_multiple_return() -> None:
-  """Test element."""
+  """Docstring."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [
     RdnaComment(text="; Input x ->"),
@@ -73,7 +81,7 @@ def test_rdna_lifter_multiple_return() -> None:
 
 
 def test_rdna_lifter_unmapped_other() -> None:
-  """Test element."""
+  """Docstring."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [
     RdnaComment(text="; Unmapped Op: other_op(other_op)"),
@@ -86,7 +94,7 @@ def test_rdna_lifter_unmapped_other() -> None:
 
 
 def test_rdna_lifter_return_no_previous() -> None:
-  """Test element."""
+  """Docstring."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [
     RdnaComment(text="; Return:"),
@@ -98,10 +106,38 @@ def test_rdna_lifter_return_no_previous() -> None:
 
 
 def test_rdna_lifter_comment_unparsed() -> None:
-  """Test element."""
+  """Docstring."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [
     RdnaComment(text="; JUST A NORMAL COMMENT"),
   ]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
+
+
+# --- Merged from test_rdna_frontend_lifter_extra.py ---
+
+
+def test_lifter_end_mismatch() -> None:
+  """Docstring."""
+  mod: RdnaModule = RdnaModule(
+    statements=[
+      RdnaComment(text="; BEGIN: Linear(some_id)"),
+      RdnaComment(text="; END: some_other_id"),  # mismatch
+    ]
+  )
+  lifter: RdnaLifter = RdnaLifter()
+  graph: LogicalGraph = lifter.lift(mod.statements)
+  assert graph is not None
+
+
+def test_lifter_return_seen() -> None:
+  """Docstring."""
+  mod: RdnaModule = RdnaModule(
+    statements=[
+      RdnaComment(text="; RETURN"),
+      RdnaComment(text="; RETURN"),
+    ]
+  )
+  lifter: RdnaLifter = RdnaLifter()
+  lifter.lift(mod.statements)

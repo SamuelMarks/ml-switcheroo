@@ -1,11 +1,27 @@
 """Test suite for the Rdna Synthesizer module."""
 
-import pytest
 import typing
 from unittest.mock import MagicMock
-from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RegisterAllocator, RdnaSynthesizer, MAX_VGPR, MAX_SGPR
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaVGPR, RdnaSGPR, RdnaComment, RdnaLabel
+
+import pytest
+
+from ml_switcheroo.core.compiler.backends.rdna.synthesizer import (
+  MAX_SGPR,
+  MAX_VGPR,
+  RdnaBackend,
+  RdnaSynthesizer,
+  RegisterAllocator,
+)
+from ml_switcheroo.core.compiler.frontends.rdna.cst import (
+  RdnaComment,
+  RdnaImmediate,
+  RdnaInstruction,
+  RdnaLabel,
+  RdnaOperand,
+  RdnaSGPR,
+  RdnaVGPR,
+)
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -57,7 +73,7 @@ def test_allocator_temps() -> None:
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Provides a mock semantics for testing."""
+  """Docstring."""
   mgr = MagicMock(spec=SemanticsManager)
 
   def get_def(kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
@@ -132,3 +148,118 @@ def test_rdna_to_python_label() -> None:
   mod: typing.Any = synth.to_python(nodes)
   code: str = mod.code
   assert "# RdnaLabel: L_LOOP" in code
+
+
+# --- Merged from test_rdna_synthesizer_missing.py ---
+
+
+def test_register_allocator_overflow_vgpr() -> None:
+  """Docstring."""
+  allocator = RegisterAllocator()
+  allocator._next_vgpr = 256
+  with pytest.raises(ValueError, match="RdnaVGPR overflow"):
+    allocator.get_vector_register("test")
+
+
+def test_register_allocator_overflow_sgpr() -> None:
+  """Docstring."""
+  allocator = RegisterAllocator()
+  allocator._next_sgpr = 106
+  with pytest.raises(ValueError, match="RdnaSGPR overflow"):
+    allocator.get_scalar_register("test")
+
+
+def test_convert_operand_to_py_immediate_float() -> None:
+  """Docstring."""
+  synth = RdnaSynthesizer(None)  # type: ignore
+  imm = RdnaImmediate(value=3.14)  # type: ignore
+  res: typing.Any = synth._convert_operand_to_py(imm)
+  assert getattr(res, "value", None) == "3.14"
+
+
+def test_convert_operand_to_py_brackets() -> None:
+  """Docstring."""
+  synth = RdnaSynthesizer(None)  # type: ignore
+
+  class DummyOp(RdnaOperand):
+    def __str__(self) -> str:
+      return "v[1:2]"
+
+    def to_text(self) -> str:
+      """To text."""
+      return "v[1:2]"
+
+  res: typing.Any = synth._convert_operand_to_py(DummyOp())
+  assert getattr(res, "value", None) == "v_1_2"
+
+
+def test_convert_operand_to_py_fallback() -> None:
+  """Docstring."""
+  synth = RdnaSynthesizer(None)  # type: ignore
+
+  class DummyOp(RdnaOperand):
+    def __str__(self) -> str:
+      return "some-weird-str!"
+
+    def to_text(self) -> str:
+      """To text."""
+      return "some-weird-str!"
+
+  res: typing.Any = synth._convert_operand_to_py(DummyOp())
+  assert res.value == "'some-weird-str!'"
+
+
+def test_rdna_synthesizer_label_conversion() -> None:
+  """Docstring."""
+  synth = RdnaSynthesizer(None)  # type: ignore
+  label = RdnaLabel(name="my_label")
+  mod: typing.Any = synth.to_python([label])
+  assert mod is not None
+
+
+def test_convert_instruction_to_py_no_operands() -> None:
+  """Docstring."""
+  synth = RdnaSynthesizer(None)  # type: ignore
+  inst = RdnaInstruction(opcode="s_endpgm", operands=[])
+  res: typing.Any = synth._convert_instruction_to_py(inst)
+  assert res is not None
+
+
+# --- Merged from test_rdna_synthesizer_missing_more.py ---
+
+
+def test_rdna_synthesizer_macro_exact_match() -> None:
+  """Docstring."""
+  semantics = SemanticsManager()
+  synth = RdnaSynthesizer(semantics)
+  # mock a macro
+  synth.macro_registry["my_abstract_id"] = lambda alloc, nid, meta: [RdnaComment(text="mock")]
+
+  graph = LogicalGraph("test")
+  n = LogicalNode("n1", "my_abstract_id")
+  graph.nodes.append(n)
+
+  # We also mock get_definition
+  original = semantics.get_definition
+
+  def mock_get_def(kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+    if kind == "my_abstract_id":
+      return ("my_abstract_id", {})
+    return original(kind)
+
+  semantics.get_definition = mock_get_def  # type: ignore
+
+  nodes: list[typing.Any] = synth.from_graph(graph)
+  assert len(nodes) == 1
+  assert isinstance(nodes[0], RdnaComment)
+  assert nodes[0].text == "mock"
+
+
+def test_rdna_backend_compile() -> None:
+  """Docstring."""
+  backend = RdnaBackend()
+  graph = LogicalGraph("test")
+  n = LogicalNode("n1", "Input")
+  graph.nodes.append(n)
+  code: str = backend.compile(graph)
+  assert "; RDNA Code Generation Initialized" in code

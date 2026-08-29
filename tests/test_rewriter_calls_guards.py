@@ -1,41 +1,43 @@
 """Test module."""
 
+from typing import Any, Dict, List
+
 import libcst as cst
-from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards, STRICT_RANK_HELPER
-from typing import List, Dict, Any
+
+from ml_switcheroo.core.rewriter.calls.guards import STRICT_RANK_HELPER, apply_strict_guards
 
 
 class MockHookContext:
-  """Test element."""
+  """Docstring."""
 
   def __init__(self) -> None:
-    """Test element."""
+    """Docstring."""
     self.metadata: Dict[str, Any] = {}
     self.preamble_injected: List[str] = []
 
   def inject_preamble(self, text: str) -> None:
-    """Test element."""
+    """Docstring."""
     self.preamble_injected.append(text)
 
 
 class MockContext:
-  """Test element."""
+  """Docstring."""
 
   def __init__(self) -> None:
-    """Test element."""
+    """Docstring."""
     self.hook_context: MockHookContext = MockHookContext()
 
 
 class MockRewriter:
-  """Test element."""
+  """Docstring."""
 
   def __init__(self) -> None:
-    """Test element."""
+    """Docstring."""
     self.context: MockContext = MockContext()
 
 
 def test_apply_strict_guards_no_guards() -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [cst.Arg(value=cst.Name("x"))]
   details: Dict[str, Any] = {"std_args": ["a"]}
@@ -46,7 +48,7 @@ def test_apply_strict_guards_no_guards() -> None:
 
 
 def test_apply_strict_guards_with_guards() -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [
     cst.Arg(keyword=cst.Name("inputs"), value=cst.Name("x"), equal=cst.AssignEqual()),
@@ -76,7 +78,7 @@ def test_apply_strict_guards_with_guards() -> None:
 
 
 def test_apply_strict_guards_multiple_calls_preamble() -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   rewriter.context.hook_context.metadata["strict_helper_injected"] = True
 
@@ -91,7 +93,7 @@ def test_apply_strict_guards_multiple_calls_preamble() -> None:
 
 
 def test_apply_strict_guards_target_impl_mapping() -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [cst.Arg(keyword=cst.Name("target_arg_name"), value=cst.Name("x"), equal=cst.AssignEqual())]
   details: Dict[str, Any] = {"std_args": [{"name": "std_input", "rank": 4}]}
@@ -104,7 +106,7 @@ def test_apply_strict_guards_target_impl_mapping() -> None:
 
 
 def test_apply_strict_guards_no_context() -> None:
-  """Test element."""
+  """Docstring."""
 
   class RewriterNoContext:
     pass
@@ -120,7 +122,7 @@ def test_apply_strict_guards_no_context() -> None:
 
 
 def test_apply_strict_guards_guards_applied_false() -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [cst.Arg(value=cst.Name("x"))]
   details: Dict[str, Any] = {"std_args": [{"name": "inputs", "rank": 2}]}
@@ -132,7 +134,7 @@ def test_apply_strict_guards_guards_applied_false() -> None:
 
 
 def test_apply_strict_guards_arg_key_in_guards_map() -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [cst.Arg(keyword=cst.Name("inputs"), value=cst.Name("x"), equal=cst.AssignEqual())]
   details: Dict[str, Any] = {"std_args": [{"name": "inputs", "rank": 2}]}
@@ -144,7 +146,7 @@ def test_apply_strict_guards_arg_key_in_guards_map() -> None:
 
 
 def test_apply_strict_guards_arg_key_not_in_guards_map() -> None:
-  """Test element."""
+  """Docstring."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [cst.Arg(keyword=cst.Name("other"), value=cst.Name("x"), equal=cst.AssignEqual())]
   details: Dict[str, Any] = {"std_args": [{"name": "inputs", "rank": 2}]}

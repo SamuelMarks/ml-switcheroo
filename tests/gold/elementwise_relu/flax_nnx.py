@@ -1,7 +1,7 @@
 """Test suite for the Flax Nnx module."""
 
-import jax.numpy as jnp
 import jax
+import jax.numpy as jnp
 
 
 def relu_activation(x: jnp.ndarray) -> jnp.ndarray:

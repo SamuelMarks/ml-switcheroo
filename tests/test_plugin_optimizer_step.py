@@ -1,14 +1,15 @@
 """Docstring."""
 
-import libcst as cst
 from unittest.mock import MagicMock
+
+import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.optimizer_step import (
+  _get_func_name,
+  strip_zero_grad,
   transform_optimizer_init,
   transform_optimizer_step,
-  strip_zero_grad,
-  _get_func_name,
 )
 
 

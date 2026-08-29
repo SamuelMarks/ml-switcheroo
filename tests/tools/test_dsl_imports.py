@@ -1,7 +1,8 @@
 """Test suite for the Dsl Imports module."""
 
+from typing import Any, Dict
+
 from ml_switcheroo.core.dsl import FrameworkVariant, ImportReq
-from typing import Dict, Any
 
 
 def test_variant_imports_strings() -> None:

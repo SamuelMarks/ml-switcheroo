@@ -1,18 +1,19 @@
 """Test suite for the Latex Source To Torch module."""
 
 import pytest
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
-from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 LATEX_SOURCE_CONVNET: str = "\n\\documentclass[tikz]{standalone}\n\\begin{DefModel}{ConvNet}\n    % arg_0=in_channels, arg_1=out_channels, arg_2=kernel_size\n    \\Attribute{conv}{Conv2d}{arg_0=1, arg_1=32, arg_2=3}\n\n    % arg_0=in_features, arg_1=out_features\n    \\Attribute{fc}{Linear}{arg_0=128, arg_1=10}\n\n    % Input tensor\n    \\Input{x}{[B, 1, 28, 28]}\n\n    % Forward Pass\n    \\StateOp{h1}{conv}{x}{[_]}\n    \\Op{h2}{relu}{h1}{[_]}\n\n    % Flatten: arg_0=start_dim\n    \\Op{flat}{Flatten}{h2, arg_0=1}{[_]}\n\n    \\StateOp{out}{fc}{flat}{[_]}\n    \\Return{out}\n\\end{DefModel}\n"
 
 
 @pytest.fixture
 def hydrated_semantics() -> SemanticsManager:
-  """Provides a mock hydrated semantics for testing."""
+  """Docstring."""
   mgr = SemanticsManager()
   loader = RegistryLoader(mgr)
   loader.hydrate()

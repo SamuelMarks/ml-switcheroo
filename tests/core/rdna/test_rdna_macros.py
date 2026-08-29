@@ -1,11 +1,29 @@
 """Test suite for the Rdna Macros module."""
 
-from ml_switcheroo.core.compiler.backends.rdna.macros import expand_conv2d, expand_linear
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaLabel, RdnaSGPR, RdnaVGPR, RdnaComment
+import typing
+
+from ml_switcheroo.core.compiler.backends.rdna.macros import (
+  RdnaSGPR,
+  RdnaVGPR,
+  RegisterAllocatorProtocol,
+  expand_adam,
+  expand_conv2d,
+  expand_conv3d,
+  expand_conv_general_dilated,
+  expand_dropout,
+  expand_flatten,
+  expand_l,
+  expand_linear,
+  expand_relu,
+  expand_reshape,
+  expand_transpose,
+  expand_variable,
+)
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaLabel, RdnaSGPR, RdnaVGPR  # noqa: F811
 
 
 class MockAllocator:
-  """Mock Allocator class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockAllocator instance."""
@@ -95,3 +113,55 @@ def test_macros_generate_comments() -> None:
   comments = [n.text for n in nodes if isinstance(n, RdnaComment)]
   assert "BEGIN Conv2d (L1)" in comments
   assert "END Conv2d (L1)" in comments
+
+
+# --- Merged from test_rdna_macros_extra.py ---
+
+
+class MockAllocatorExtra(RegisterAllocatorProtocol):
+  """Mock allocator."""
+
+  def __init__(self) -> None:
+    """Init."""
+    self.vc: int = 0
+    self.sc: int = 0
+
+  def get_vector_register(self, var_name: str) -> RdnaVGPR:
+    """Get vector register."""
+    return RdnaVGPR(index=0)
+
+  def get_scalar_register(self, var_name: str) -> RdnaSGPR:
+    """Get scalar register."""
+    return RdnaSGPR(index=0)
+
+  def allocate_vector_temp(self) -> RdnaVGPR:
+    """Allocate vector temp."""
+    self.vc += 1
+    return RdnaVGPR(index=self.vc)
+
+  def allocate_scalar_temp(self) -> RdnaSGPR:
+    """Allocate scalar temp."""
+    self.sc += 1
+    return RdnaSGPR(index=self.sc)
+
+
+def test_expand_all_macros() -> None:
+  """Docstring."""
+  alloc = MockAllocator()
+  funcs: list[typing.Callable[..., typing.Any]] = [
+    expand_conv2d,
+    expand_linear,
+    expand_relu,
+    expand_flatten,
+    expand_reshape,
+    expand_conv3d,
+    expand_dropout,
+    expand_variable,
+    expand_transpose,
+    expand_conv_general_dilated,
+    expand_adam,
+    expand_l,
+  ]
+  for func in funcs:
+    nodes: list[typing.Any] = func(alloc, "node1", {})
+    assert len(nodes) > 0

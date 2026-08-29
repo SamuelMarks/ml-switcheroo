@@ -1,10 +1,12 @@
 """Docstring."""
 
-import libcst as cst
-from unittest.mock import MagicMock, patch
-from ml_switcheroo.plugins.device_allocator import transform_device_allocator, _parse_device_args
-from ml_switcheroo.core.hooks import HookContext
 from typing import Optional
+from unittest.mock import MagicMock, patch
+
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.device_allocator import _parse_device_args, transform_device_allocator
 
 
 def test_parse_device_args() -> None:

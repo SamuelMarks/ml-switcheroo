@@ -24,9 +24,9 @@ try:
 
   _np_mod = _np
   np = _np
-except Exception:  # pragma: no cover
-  _np_mod = None  # pragma: no cover
-  np = None  # pragma: no cover
+except Exception:
+  _np_mod = None
+  np = None
 
 
 @register_framework("numpy")

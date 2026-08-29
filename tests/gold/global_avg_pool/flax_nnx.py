@@ -1,11 +1,11 @@
 """Test suite for the Flax Nnx module."""
 
-from flax import nnx
 import jax.numpy as jnp
+from flax import nnx
 
 
 class GAPModel(nnx.Module):
-  """Test suite for the G A P Model component."""
+  """Docstring."""
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance."""

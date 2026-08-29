@@ -1,8 +1,9 @@
 """Docstring."""
 
-from ml_switcheroo.utils.readme_editor import ReadmeEditor
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
 
 def test_readme_editor_init() -> None:

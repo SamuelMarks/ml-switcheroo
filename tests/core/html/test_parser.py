@@ -9,8 +9,9 @@ extraction of DSL module layers and execution graphs. Specifically, it tests:
 """
 
 import typing
-from ml_switcheroo.core.html.parser import HtmlParser, InternalHtmlParser, GridExtractor
-from ml_switcheroo.core.html.nodes import HtmlDocument, TagNode, TextNode, AttributeNode
+
+from ml_switcheroo.core.html.nodes import AttributeNode, HtmlDocument, TagNode, TextNode
+from ml_switcheroo.core.html.parser import GridExtractor, HtmlParser, InternalHtmlParser
 
 
 def test_internal_html_parser_basic() -> None:
@@ -304,7 +305,7 @@ def test_htmlparser_empty() -> None:
 
 
 def test_internal_parser_missing_attribute_value() -> None:
-  """Tests parsing HTML with attributes that have no value."""
+  """Docstring."""
   parser = InternalHtmlParser()
   # Use a self-closing tag with a valueless attribute and a normal tag with a valueless attribute
   parser.feed('<div disabled><img src="test.png" defer/></div>')
@@ -320,7 +321,7 @@ def test_internal_parser_missing_attribute_value() -> None:
 
 
 def test_htmlparser_safe_val_eval_exception() -> None:
-  """Tests fallback when eval throws an error but parse_expression succeeds."""
+  """Docstring."""
   html: str = """
     <div class="box b"><span>Op</span><code>some_unknown_var</code></div>
   """
@@ -333,7 +334,7 @@ def test_htmlparser_safe_val_eval_exception() -> None:
 
 
 def test_htmlparser_unclosed_tags() -> None:
-  """Tests that HtmlParser.parse() correctly handles unclosed tags in the internal stack."""
+  """Docstring."""
   html: str = "<div><span>unclosed"
   parser = HtmlParser(html)
   cst_mod: typing.Any = parser.parse()

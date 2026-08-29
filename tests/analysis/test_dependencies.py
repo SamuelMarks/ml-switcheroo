@@ -1,14 +1,17 @@
 """Test module."""
 
+import sys
+from unittest.mock import MagicMock, patch
+
 import libcst as cst
-from unittest.mock import patch
+import pytest
 
 from ml_switcheroo.analysis.dependencies import DependencyScanner
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_dependency_scanner() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   semantics.import_data = {"numpy.core": {}, "pandas": {}}
 
@@ -47,7 +50,7 @@ import pandas as pd
 
 
 def test_get_root_package_fallback() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   scanner: DependencyScanner = DependencyScanner(semantics, source_fw="torch")
 
@@ -62,7 +65,7 @@ def test_get_root_package_fallback() -> None:
   # Should not crash, just returns early on node.relative
 
   # Simulate from ... import without relative, but module is None (invalid CST normally, but test logic)
-  from typing import Optional, Union, Tuple
+  from typing import Optional, Tuple, Union
 
   class MockImportFrom(cst.ImportFrom):
     """Mock element."""
@@ -82,7 +85,7 @@ def test_get_root_package_fallback() -> None:
 
 
 def test_validate_package_empty() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   scanner: DependencyScanner = DependencyScanner(semantics, source_fw="torch")
   scanner._validate_package("")
@@ -92,7 +95,7 @@ def test_validate_package_empty() -> None:
 @patch("sys.version_info", (3, 9))
 @patch("sys.builtin_module_names", ("sys",))
 def test_is_stdlib_py39_fallback() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   scanner: DependencyScanner = DependencyScanner(semantics, source_fw="torch")
 
@@ -100,3 +103,17 @@ def test_is_stdlib_py39_fallback() -> None:
   assert scanner._is_stdlib("os") is True  # in common_stdlib
   assert scanner._is_stdlib("sys") is True  # in builtin_module_names
   assert scanner._is_stdlib("cv2") is False
+
+
+# --- Merged from test_dependencies_extra.py ---
+
+
+def test_is_stdlib_py310(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Docstring."""
+  monkeypatch.setattr(sys, "version_info", (3, 10))
+  # We must patch sys.stdlib_module_names
+  monkeypatch.setattr(sys, "stdlib_module_names", {"os", "sys"}, raising=False)
+
+  scanner: DependencyScanner = DependencyScanner(MagicMock(), "torch")
+  assert scanner._is_stdlib("os") is True
+  assert scanner._is_stdlib("torch") is False

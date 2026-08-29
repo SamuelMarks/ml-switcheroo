@@ -1,9 +1,11 @@
 """Test suite for the Import Fixer module."""
 
-from ml_switcheroo.core.import_fixer import ImportFixer
-from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan, ImportReq
-import libcst as cst
 import typing
+
+import libcst as cst
+
+from ml_switcheroo.core.import_fixer import ImportFixer
+from ml_switcheroo.core.import_fixer.resolution import ImportReq, ResolutionPlan
 
 
 def apply_fixer(code: str, plan: typing.Any = None, preserve: bool = False, source_fws: typing.Any = None) -> str:

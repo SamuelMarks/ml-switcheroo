@@ -1,10 +1,12 @@
 """Test suite for the Ex02 Neural Net module."""
 
-import pytest
 import textwrap
-from ml_switcheroo import RuntimeConfig, ASTEngine, SemanticsManager
-from ml_switcheroo.core.engine import ConversionResult
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo import ASTEngine, RuntimeConfig, SemanticsManager
+from ml_switcheroo.core.engine import ConversionResult
 
 SOURCE_TORCH: str = textwrap.dedent(
   "\n    import torch.nn as nn\n\n    class SimplePerceptron(nn.Module):\n        def __init__(self, in_features, out_features):\n            super().__init__()\n            self.layer = nn.Linear(in_features, out_features)\n\n        def forward(self, x):\n            return self.layer(x)\n    "

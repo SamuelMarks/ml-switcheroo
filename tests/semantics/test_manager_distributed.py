@@ -1,10 +1,12 @@
 """Test suite for the Manager Distributed module."""
 
 import json
-import pytest
 from pathlib import Path
-from typing import Dict, Any, Generator
+from typing import Any, Dict, Generator
 from unittest.mock import patch
+
+import pytest
+
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 

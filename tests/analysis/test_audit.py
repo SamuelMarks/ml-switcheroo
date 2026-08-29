@@ -1,12 +1,13 @@
 """Test module."""
 
 import libcst as cst
+
 from ml_switcheroo.analysis.audit import CoverageScanner
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_coverage_scanner_import_resolution() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   scanner: CoverageScanner = CoverageScanner(semantics, {"torch", "jax"})
 
@@ -43,7 +44,7 @@ unknown.call()
 
 
 def test_coverage_scanner_resolve_fqn() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   scanner: CoverageScanner = CoverageScanner(semantics, {"torch"})
 
@@ -63,7 +64,7 @@ non_name_call(1)
 
 
 def test_coverage_scanner_edge_cases() -> None:
-  """Test element."""
+  """Docstring."""
   semantics: SemanticsManager = SemanticsManager()
   scanner: CoverageScanner = CoverageScanner(semantics, {"torch"})
 

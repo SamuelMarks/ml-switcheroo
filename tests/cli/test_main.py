@@ -2,14 +2,14 @@
 
 import argparse
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.cli.__main__ import main
 
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_convert")
 def test_main_convert(mock_handle_convert: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   mock_handle_convert.return_value = 0
   argv: list[str] = ["convert", "input.py", "--target", "jax", "--out", "out.py", "--config", "a=1"]
   res: int = main(argv)
@@ -25,7 +25,7 @@ def test_main_convert(mock_handle_convert: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_define")
 def test_main_define(mock_handle_define: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   mock_handle_define.return_value = 0
   argv: list[str] = ["define", "op.yaml"]
   res: int = main(argv)
@@ -35,7 +35,7 @@ def test_main_define(mock_handle_define: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_gen_weight_script")
 def test_main_gen_weight_script(mock_handle: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   mock_handle.return_value = 0
   argv: list[str] = ["gen-weight-script", "model.py", "--out", "script.py", "--source", "torch", "--target", "jax"]
   res: int = main(argv)
@@ -45,7 +45,7 @@ def test_main_gen_weight_script(mock_handle: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_matrix")
 def test_main_matrix(mock_handle: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   mock_handle.return_value = 0
   res: int = main(["matrix"])
   assert res == 0
@@ -54,7 +54,7 @@ def test_main_matrix(mock_handle: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.__main__.handle_schema")
 def test_main_schema(mock_handle: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   mock_handle.return_value = 0
   res: int = main(["schema"])
   assert res == 0
@@ -63,7 +63,7 @@ def test_main_schema(mock_handle: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.__main__.handle_suggest")
 def test_main_suggest(mock_handle: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   mock_handle.return_value = 0
   res: int = main(["suggest", "torch.add", "--out-dir", "out"])
   assert res == 0
@@ -72,7 +72,7 @@ def test_main_suggest(mock_handle: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.__main__.handle_scaffold")
 def test_main_scaffold(mock_handle: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   res: int = main(["scaffold", "jax"])
   assert res == 0
   mock_handle.assert_called_once()
@@ -80,7 +80,7 @@ def test_main_scaffold(mock_handle: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.__main__.handle_harvest")
 def test_main_harvest(mock_handle: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   res: int = main(["harvest", "tests/"])
   assert res == 0
   mock_handle.assert_called_once()
@@ -88,7 +88,7 @@ def test_main_harvest(mock_handle: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_ci")
 def test_main_ci(mock_handle: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   mock_handle.return_value = 0
   res: int = main(["ci", "--repair"])
   assert res == 0
@@ -97,7 +97,7 @@ def test_main_ci(mock_handle: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_docs")
 def test_main_gen_docs(mock_handle: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   mock_handle.return_value = 0
   res: int = main(["gen-docs"])
   assert res == 0
@@ -106,7 +106,7 @@ def test_main_gen_docs(mock_handle: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.__main__.commands.handle_gen_tests")
 def test_main_gen_tests(mock_handle: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   mock_handle.return_value = 0
   res: int = main(["gen-tests"])
   assert res == 0
@@ -116,7 +116,7 @@ def test_main_gen_tests(mock_handle: MagicMock) -> None:
 @patch("builtins.open")
 @patch("ml_switcheroo.ingestion.verified_pipeline.run_verified_pipeline")
 def test_main_verified_pipeline(mock_run: MagicMock, mock_open: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   mock_run.return_value = {"status": "success"}
   mock_open.return_value.__enter__.return_value.read.return_value = "code"
   res: int = main(["verified-pipeline", "file.py"])
@@ -127,7 +127,7 @@ def test_main_verified_pipeline(mock_run: MagicMock, mock_open: MagicMock) -> No
 @patch("builtins.open")
 @patch("ml_switcheroo.ingestion.verified_pipeline.run_verified_pipeline")
 def test_main_verified_pipeline_fail(mock_run: MagicMock, mock_open: MagicMock) -> None:
-  """Test element."""
+  """Docstring."""
   mock_run.return_value = {"status": "error"}
   mock_open.return_value.__enter__.return_value.read.return_value = "code"
   res: int = main(["verified-pipeline", "file.py"])
@@ -135,7 +135,7 @@ def test_main_verified_pipeline_fail(mock_run: MagicMock, mock_open: MagicMock) 
 
 
 def test_main_unknown() -> None:
-  """Test element."""
+  """Docstring."""
   # Simulate an unknown command (argparse would usually catch this, but just in case)
   with patch("argparse.ArgumentParser.parse_args") as mock_parse:
     mock_parse.return_value = argparse.Namespace(command="unknown")

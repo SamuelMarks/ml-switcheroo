@@ -1,8 +1,9 @@
 """Test suite for the Flax Nnx module."""
 
 import typing
-from flax import nnx  # type: ignore
+
 import jax.numpy as jnp
+from flax import nnx  # type: ignore
 
 
 def train_step(

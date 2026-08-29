@@ -86,7 +86,7 @@ def _build_yaml_entry(op_name: str, definition: dict) -> dict:
       clean_details = {}
       for k, v in details.items():
         if hasattr(v, "value"):
-          clean_details[k] = v.value  # pragma: no cover
+          clean_details[k] = v.value
         else:
           clean_details[k] = v
       clean_variants[fw] = dict(sorted(clean_details.items()))

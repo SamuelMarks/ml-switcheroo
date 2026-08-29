@@ -1,15 +1,16 @@
 """Test suite for the Attention SASS Macros."""
 
 import typing
+
 from ml_switcheroo.core.compiler.backends.sass.macros import (
   expand_multiheadattention,
   expand_transformer,
-  expand_transformerencoder,
   expand_transformerdecoder,
+  expand_transformerencoder,
 )
-from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
 from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
-from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassNode, SassInstruction
+from ml_switcheroo.core.compiler.frontends.sass.analysis import SassAnalyzer
+from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment, SassInstruction, SassNode
 
 
 def test_sass_macro_multiheadattention() -> None:

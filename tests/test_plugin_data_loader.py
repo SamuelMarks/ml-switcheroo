@@ -1,10 +1,12 @@
 """Docstring."""
 
-import libcst as cst
+from typing import Dict, List
 from unittest.mock import MagicMock
-from ml_switcheroo.plugins.data_loader import transform_dataloader, get_shim_code
+
+import libcst as cst
+
 from ml_switcheroo.core.hooks import HookContext
-from typing import List, Dict
+from ml_switcheroo.plugins.data_loader import get_shim_code, transform_dataloader
 
 
 def test_get_shim_code() -> None:

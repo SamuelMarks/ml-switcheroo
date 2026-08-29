@@ -1,13 +1,15 @@
 """Test suite for the Infix Transform module."""
 
-import pytest
 import typing
+
+import pytest
+
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInfixSemantics(SemanticsManager):
-  """Mock Infix Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockInfixSemantics instance."""
@@ -42,7 +44,7 @@ class MockInfixSemantics(SemanticsManager):
 
 @pytest.fixture
 def engine() -> ASTEngine:
-  """Provides a mock engine for testing."""
+  """Docstring."""
   return ASTEngine(semantics=MockInfixSemantics(), source="torch", target="jax", strict_mode=True)
 
 

@@ -9,8 +9,9 @@ This module verifies correct parsing behaviors for:
 """
 
 import typing
-from ml_switcheroo.core.html.parser import InternalHtmlParser, HtmlParser
-from ml_switcheroo.core.html.nodes import TagNode, CommentNode
+
+from ml_switcheroo.core.html.nodes import CommentNode, TagNode
+from ml_switcheroo.core.html.parser import HtmlParser, InternalHtmlParser
 
 
 def test_internal_html_parser_void_elements() -> None:

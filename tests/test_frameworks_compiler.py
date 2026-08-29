@@ -1,12 +1,13 @@
 """Tests for MLIR and StableHLO framework adapters."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from ml_switcheroo.frameworks.mlir import MlirAdapter
 from ml_switcheroo.frameworks.stablehlo import StableHloAdapter
 
 
 def test_mlir_adapter_properties() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: MlirAdapter = MlirAdapter()
   pass
   adapter.import_alias
@@ -46,7 +47,7 @@ def test_mlir_adapter_properties() -> None:
 
 
 def test_stablehlo_adapter_properties() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: StableHloAdapter = StableHloAdapter()
   pass
   adapter.import_alias
@@ -86,7 +87,7 @@ def test_stablehlo_adapter_properties() -> None:
 
 
 def test_mlir_stablehlo_missing_methods() -> None:
-  """Test element."""
+  """Docstring."""
   adapter: MlirAdapter = MlirAdapter()
   adapter.get_serialization_syntax("save", "path", "obj")
   adapter.get_example_code()

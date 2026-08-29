@@ -1,16 +1,18 @@
 """Test suite for the Roundtrip Silu module."""
 
-import pytest
 import typing
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
+
+import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
 def semantics_env() -> SemanticsManager:
-  """Provides a mock semantics environment for testing."""
+  """Docstring."""
   mgr = SemanticsManager()
   silu_def: dict[str, typing.Any] = {
     "std_args": [{"name": "x", "type": "Tensor"}],

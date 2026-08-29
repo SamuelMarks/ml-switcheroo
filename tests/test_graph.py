@@ -1,8 +1,10 @@
 """Module docstring."""
 
-import libcst as cst
-from ml_switcheroo.core.graph import GraphExtractor
 from typing import List
+
+import libcst as cst
+
+from ml_switcheroo.core.graph import GraphExtractor
 
 
 def test_graph_extractor_init_pass() -> None:

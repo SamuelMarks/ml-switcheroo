@@ -1,12 +1,14 @@
 """Test suite for the Plugins module."""
 
+import typing
+
 import libcst as cst
 import pytest
-import typing
+
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.core.hooks import _HOOKS, register_hook
+from ml_switcheroo.frameworks.base import get_adapter, register_framework
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.hooks import register_hook, _HOOKS
-from ml_switcheroo.frameworks.base import register_framework, get_adapter
 
 
 def cleanup_args(args_list: list[cst.Arg]) -> list[cst.Arg]:
@@ -17,7 +19,7 @@ def cleanup_args(args_list: list[cst.Arg]) -> list[cst.Arg]:
 
 
 class MockSemantics(SemanticsManager):
-  """Mock Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -68,7 +70,7 @@ class MockSemantics(SemanticsManager):
 
 @register_hook("mock_alpha_rewrite")
 def mock_plugin_logic(node: cst.Call, _ctx: typing.Any) -> cst.Call:
-  """Provides a mock plugin logic for testing."""
+  """Docstring."""
   new_func = cst.Name("plugin_success")
   filtered: list[cst.Arg] = [
     a for a in node.args if not (a.keyword and typing.cast(cst.Name, a.keyword).value == "alpha")
@@ -101,8 +103,6 @@ def test_custom_framework_plugin_registration() -> None:
 
   @register_framework("plugin_test_fw")
   class PluginTestAdapter:
-    """Test suite for the Plugin Test Adapter component."""
-
     pass
 
   adapter: typing.Any = get_adapter("plugin_test_fw")

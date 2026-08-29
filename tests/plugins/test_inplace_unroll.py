@@ -1,13 +1,16 @@
 """Test suite for the Inplace Unroll module."""
 
-import pytest
-import libcst as cst
 import typing
 from unittest.mock import MagicMock
-from tests.conftest import TestRewriter as PivotRewriter
-from ml_switcheroo.config import RuntimeConfig
+
+import libcst as cst
+import pytest
+
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.inplace_unroll import unroll_inplace_ops
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.inplace_unroll import _get_method_name, _get_receiver_name, unroll_inplace_ops
+from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
@@ -19,7 +22,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   hooks._HOOKS["unroll_inplace_ops"] = unroll_inplace_ops
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -84,3 +87,51 @@ def test_ignore_single_underscore(rewriter: PivotRewriter) -> None:
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("_")))
   res: typing.Any = hook(node, None)
   assert typing.cast(cst.Name, res.func.attr).value == "_"
+
+
+# --- Merged from test_inplace_unroll_extra.py ---
+
+
+def test_inplace_unroll_not_attribute() -> None:
+  """Docstring."""
+  node = cst.parse_expression("add_(x)")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  semantics_mock = MagicMock()
+  ctx = HookContext(semantics=semantics_mock, config=config)
+
+  res: typing.Any = unroll_inplace_ops(typing.cast(cst.Call, node), ctx)
+  assert res is node
+
+
+def test_get_receiver_name_not_attribute() -> None:
+  """Docstring."""
+  node = cst.parse_expression("add_(x)")
+  assert _get_receiver_name(typing.cast(cst.Call, node)) is None
+
+
+def test_get_method_name_not_attribute() -> None:
+  """Docstring."""
+  node = cst.parse_expression("add_(x)")
+  assert _get_method_name(typing.cast(cst.Call, node)) is None
+
+
+def test_inplace_unroll_just_underscore() -> None:
+  """Docstring."""
+  node = cst.parse_expression("x._(y)")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  semantics_mock = MagicMock()
+  ctx = HookContext(semantics=semantics_mock, config=config)
+
+  res: typing.Any = unroll_inplace_ops(typing.cast(cst.Call, node), ctx)
+  assert res is node
+
+
+def test_inplace_unroll_no_underscore() -> None:
+  """Docstring."""
+  node = cst.parse_expression("x.add(y)")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  semantics_mock = MagicMock()
+  ctx = HookContext(semantics=semantics_mock, config=config)
+
+  res: typing.Any = unroll_inplace_ops(typing.cast(cst.Call, node), ctx)
+  assert res is node

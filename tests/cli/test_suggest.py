@@ -1,19 +1,20 @@
 """Test module."""
 
-import pytest
 import sys
 import types
-from pathlib import Path
 import typing
+from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from ml_switcheroo.cli.handlers.suggest import (
-  handle_suggest,
-  _extract_metadata,
-  _inspect_live_object,
+  _build_footer,
   _build_header,
   _build_target_block,
-  _build_footer,
+  _extract_metadata,
+  _inspect_live_object,
+  handle_suggest,
 )
 
 
@@ -27,7 +28,7 @@ class DummyClass:
   """Class doc."""
 
   def __init__(self, x: typing.Any) -> None:
-    """Test element."""
+    """Docstring."""
     pass
 
 
@@ -40,7 +41,7 @@ sys.modules["dummy_mod"] = dummy_mod
 
 
 def test_extract_metadata() -> None:
-  """Test element."""
+  """Docstring."""
   info: dict[str, str] = _extract_metadata(dummy_func)
   assert info["kind"] == "function"
   assert "Dummy doc." in info["docstring"]
@@ -52,7 +53,7 @@ def test_extract_metadata() -> None:
 
 
 def test_extract_metadata_no_sig() -> None:
-  """Test element."""
+  """Docstring."""
   # Builtins often don't have standard signatures inspectable via inspect.signature
   info: dict[str, str] = _extract_metadata(print)
   assert info["kind"] == "function"
@@ -60,7 +61,7 @@ def test_extract_metadata_no_sig() -> None:
 
 
 def test_inspect_live_object() -> None:
-  """Test element."""
+  """Docstring."""
   info: dict[str, str] = _inspect_live_object("dummy_mod.dummy_func")
   assert info["kind"] == "function"
 
@@ -72,7 +73,7 @@ def test_inspect_live_object() -> None:
 
 
 def test_build_blocks() -> None:
-  """Test element."""
+  """Docstring."""
   header: str = _build_header("{}")
   assert "You are an expert AI assistant" in header
 
@@ -86,7 +87,7 @@ def test_build_blocks() -> None:
 
 
 def test_handle_suggest_single(capsys: pytest.CaptureFixture[str]) -> None:
-  """Test element."""
+  """Docstring."""
   res: int = handle_suggest("dummy_mod.dummy_func")
   assert res == 0
   captured = capsys.readouterr()
@@ -96,13 +97,13 @@ def test_handle_suggest_single(capsys: pytest.CaptureFixture[str]) -> None:
 
 
 def test_handle_suggest_single_fail() -> None:
-  """Test element."""
+  """Docstring."""
   res: int = handle_suggest("dummy_mod.missing_func")
   assert res == 1
 
 
 def test_handle_suggest_wildcard(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   out_dir: Path = tmp_path / "out"
   res: int = handle_suggest("dummy_mod.*", out_dir=out_dir, batch_size=1)
   assert res == 0
@@ -117,13 +118,13 @@ def test_handle_suggest_wildcard(tmp_path: Path) -> None:
 
 
 def test_handle_suggest_wildcard_fail() -> None:
-  """Test element."""
+  """Docstring."""
   res: int = handle_suggest("missing_module.*")
   assert res == 1
 
 
 def test_handle_suggest_wildcard_empty() -> None:
-  """Test element."""
+  """Docstring."""
   empty_mod = types.ModuleType("empty_mod")
   setattr(empty_mod, "_hidden", 1)
   sys.modules["empty_mod"] = empty_mod
@@ -132,7 +133,7 @@ def test_handle_suggest_wildcard_empty() -> None:
 
 
 def test_handle_suggest_wildcard_skip_module() -> None:
-  """Test element."""
+  """Docstring."""
   import os
 
   mod = types.ModuleType("skip_mod")
@@ -144,7 +145,7 @@ def test_handle_suggest_wildcard_skip_module() -> None:
 
 
 def test_handle_suggest_wildcard_extract_exception() -> None:
-  """Test element."""
+  """Docstring."""
   mod = types.ModuleType("fail_mod")
 
   # Create an object that raises an exception when passed to inspect.getdoc

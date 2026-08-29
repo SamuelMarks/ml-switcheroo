@@ -1,14 +1,16 @@
 """Test suite for the External Plugins module."""
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.hooks import load_plugins, get_hook
+from ml_switcheroo.core.hooks import get_hook, load_plugins
 
 
 @pytest.fixture
 def workspace(tmp_path):
-  """Provides a mock workspace for testing."""
+  """Docstring."""
   ws = tmp_path / "workspace"
   ws.mkdir()
   ext_dir = ws / "extensions"

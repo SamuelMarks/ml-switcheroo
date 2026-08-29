@@ -4,7 +4,7 @@ import numpy as np
 
 
 class AttentionModel:
-  """Test suite for the Attention Model component."""
+  """Docstring."""
 
   def __init__(self, embed_dim: int, num_heads: int):
     """Initializes the AttentionModel instance."""

@@ -1,11 +1,12 @@
 """Test suite for the Harness Generator Live module."""
 
-import sys
-import subprocess
 import os
+import subprocess
+import sys
 from pathlib import Path
-from ml_switcheroo.testing.harness_generator import HarnessGenerator
 from typing import Dict
+
+from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 def test_generated_fuzzer_runs_standalone(tmp_path: Path) -> None:

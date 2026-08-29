@@ -1,13 +1,13 @@
 """Test suite for the C++ Generator module."""
 
-from ml_switcheroo.core.compiler.backends.cpp.generator import TorchCppExtensionGenerator
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
+  BinaryExpression,
+  Identifier,
+  ReturnStatement,
   TypeIdentifier,
   VariableDeclaration,
-  Identifier,
-  BinaryExpression,
-  ReturnStatement,
 )
+from ml_switcheroo.core.compiler.backends.cpp.generator import TorchCppExtensionGenerator
 
 
 def test_torch_extension_generator() -> None:

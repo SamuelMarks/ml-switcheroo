@@ -1,13 +1,15 @@
 """Test suite for the Conftest module."""
 
+import importlib
 import sys
-import pytest
+import typing
 import warnings
 from pathlib import Path
-from typing import Callable, Optional, Generator
-import typing
-import importlib
-from ml_switcheroo.core.rewriter import RewriterContext, RewriterPipeline, StructuralPass, ApiPass, AuxiliaryPass
+from typing import Callable, Generator, Optional
+
+import pytest
+
+from ml_switcheroo.core.rewriter import ApiPass, AuxiliaryPass, RewriterContext, RewriterPipeline, StructuralPass
 
 warnings.filterwarnings("ignore", message=".*np\\.object.*")
 warnings.filterwarnings("ignore", category=FutureWarning, module="keras.*")
@@ -22,12 +24,12 @@ except ImportError:
 
 
 class TestRewriter:
-  """Test suite for the Rewriter component."""
+  """Docstring."""
 
   __test__ = False
 
   def __init__(self, semantics: typing.Any, config: typing.Any, symbol_table: typing.Optional[typing.Any] = None) -> None:
-    """Initializes the TestRewriter instance."""
+    """Docstring."""
     self.context = RewriterContext(semantics, config, symbol_table)
     self.pipeline = RewriterPipeline([StructuralPass(), ApiPass(), AuxiliaryPass()])
 
@@ -47,7 +49,7 @@ class TestRewriter:
 
 
 class SnapshotAssert:
-  """Test suite for the Snapshot Assert component."""
+  """Docstring."""
 
   def __init__(self, request: pytest.FixtureRequest) -> None:
     """Initializes the SnapshotAssert instance."""
@@ -79,7 +81,7 @@ class SnapshotAssert:
 
 @pytest.fixture
 def snapshot(request: pytest.FixtureRequest) -> SnapshotAssert:
-  """Provides a mock snapshot for testing."""
+  """Docstring."""
   return SnapshotAssert(request)
 
 
@@ -97,8 +99,8 @@ def isolate_semantics_manager() -> Generator[None, None, None]:
 @pytest.fixture(autouse=True)
 def isolate_hook_registry() -> Generator[None, None, None]:
   """Helper to isolate hook registry."""
-  from ml_switcheroo.core.hooks import _HOOKS, _HOOK_METADATA
   import ml_switcheroo.core.hooks as hooks_module
+  from ml_switcheroo.core.hooks import _HOOK_METADATA, _HOOKS
 
   original_hooks = _HOOKS.copy()
   original_metadata = _HOOK_METADATA.copy()
@@ -121,5 +123,5 @@ def isolate_framework_registry() -> Generator[None, None, None]:
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
-  """Helper to pytest addoption."""
+  """Docstring."""
   parser.addoption("--update-snapshots", action="store_true", default=False, help="Update snapshots for visual tests")

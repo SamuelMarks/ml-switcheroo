@@ -1,7 +1,9 @@
 """Docstring."""
 
-import pytest
 import typing
+
+import pytest
+
 from ml_switcheroo.core.cst.base import CSTNode, Trivia
 
 
@@ -9,11 +11,9 @@ class MockCST(CSTNode):
   """Docstring."""
 
   def _get_name(self) -> str:
-    """Docstring."""
     return "Mock"
 
   def _get_fields(self) -> dict[str, typing.Any]:
-    """Docstring."""
     return {"a": 1}
 
 
@@ -59,10 +59,7 @@ def test_cst_base_str() -> None:
   """Docstring."""
 
   class MockStr(MockCST):
-    """Docstring."""
-
     def to_text(self) -> str:
-      """Docstring."""
       return "MockStr"
 
   m = MockStr()
@@ -74,10 +71,7 @@ def test_cst_visitor() -> None:
   from ml_switcheroo.core.cst.base import CSTVisitor
 
   class MockVisitor(CSTVisitor):
-    """Docstring."""
-
     def visit_MockCST(self, node: CSTNode) -> None:
-      """Docstring."""
       self.visited = True  # type: ignore
 
   v = MockVisitor()
@@ -91,14 +85,10 @@ def test_cst_visitor_generic() -> None:
   from ml_switcheroo.core.cst.base import CSTVisitor
 
   class MockVisitor(CSTVisitor):
-    """Docstring."""
-
     def __init__(self) -> None:
-      """Docstring."""
       self.generic_visited = False
 
     def generic_visit(self, node: CSTNode) -> None:
-      """Docstring."""
       self.generic_visited = True
 
   v = MockVisitor()
@@ -109,14 +99,13 @@ def test_cst_visitor_generic() -> None:
 
 def test_cst_visitor_generic_fields() -> None:
   """Docstring."""
-  from ml_switcheroo.core.cst.base import CSTVisitor
   from dataclasses import dataclass, field
   from typing import List, Optional
 
+  from ml_switcheroo.core.cst.base import CSTVisitor
+
   @dataclass
   class NodeA(CSTNode):
-    """Docstring."""
-
     child: Optional[CSTNode] = None
     children: List[CSTNode] = field(default_factory=list)
     other: int = 1
@@ -128,14 +117,10 @@ def test_cst_visitor_generic_fields() -> None:
       return {"child": self.child, "children": self.children, "other": self.other}
 
   class MockVisitor(CSTVisitor):
-    """Docstring."""
-
     def __init__(self) -> None:
-      """Docstring."""
       self.visited_count = 0
 
     def generic_visit(self, node: CSTNode) -> None:
-      """Docstring."""
       self.visited_count += 1
       super().generic_visit(node)
 
@@ -149,14 +134,13 @@ def test_cst_visitor_generic_fields() -> None:
 
 def test_cst_transformer_generic_fields() -> None:
   """Docstring."""
-  from ml_switcheroo.core.cst.base import CSTTransformer
   from dataclasses import dataclass, field
   from typing import List, Optional
 
+  from ml_switcheroo.core.cst.base import CSTTransformer
+
   @dataclass
   class NodeA(CSTNode):
-    """Docstring."""
-
     child: Optional[CSTNode] = None
     children: List[typing.Any] = field(default_factory=list)
     other: int = 1
@@ -168,10 +152,7 @@ def test_cst_transformer_generic_fields() -> None:
       return {"child": self.child, "children": self.children, "other": self.other}
 
   class MockTransformer(CSTTransformer):
-    """Docstring."""
-
     def transform_NodeA(self, node: NodeA) -> typing.Any:
-      """Docstring."""
       if node.other == 1:
         return self.generic_transform(node)
       return node

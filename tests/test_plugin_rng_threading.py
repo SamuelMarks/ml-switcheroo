@@ -1,9 +1,11 @@
 """Docstring."""
 
-import libcst as cst
-from unittest.mock import MagicMock, patch
-from ml_switcheroo.plugins.rng_threading import _remove_generator_arg, inject_prng_threading
 from typing import List
+from unittest.mock import MagicMock, patch
+
+import libcst as cst
+
+from ml_switcheroo.plugins.rng_threading import _remove_generator_arg, inject_prng_threading
 
 
 def test_remove_generator_arg() -> None:

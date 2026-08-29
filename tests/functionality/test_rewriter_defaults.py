@@ -1,16 +1,18 @@
 """Test suite for the Rewriter Defaults module."""
 
-import pytest
 import typing
+
 import libcst as cst
-from tests.conftest import TestRewriter
-from ml_switcheroo.semantics.manager import SemanticsManager
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.semantics.manager import SemanticsManager
+from tests.conftest import TestRewriter
 
 
 @pytest.fixture
 def manager() -> SemanticsManager:
-  """Provides a mock manager for testing."""
+  """Docstring."""
   mgr = SemanticsManager()
   mgr.data = {}
   mgr._reverse_index = {}
@@ -54,7 +56,7 @@ def manager() -> SemanticsManager:
 
 @pytest.fixture
 def rewriter(manager: SemanticsManager) -> TestRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(manager, config)
 

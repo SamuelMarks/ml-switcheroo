@@ -1,15 +1,17 @@
 """Test suite for the Runner Shape module."""
 
-import pytest
-import numpy as np
-from unittest.mock import MagicMock, patch
-from ml_switcheroo.testing.runner import EquivalenceRunner
 from typing import Dict
+from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pytest
+
+from ml_switcheroo.testing.runner import EquivalenceRunner
 
 
 @pytest.fixture
 def runner() -> EquivalenceRunner:
-  """Provides a mock runner for testing."""
+  """Docstring."""
   r: EquivalenceRunner = EquivalenceRunner()
   r.fuzzer = MagicMock()
   return r

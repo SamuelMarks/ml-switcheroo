@@ -1,10 +1,12 @@
 """Test suite for the Device Wiring E2E module."""
 
-import pytest
-import typing
 import importlib
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+import typing
+
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 

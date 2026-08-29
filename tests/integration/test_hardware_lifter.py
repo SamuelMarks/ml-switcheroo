@@ -1,16 +1,17 @@
 """Test suite for the Hardware Lifter module."""
 
-import unittest
 import typing
-from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
-from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
-from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
+import unittest
+
 from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
+from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
+from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 class TestHardwareLifters(unittest.TestCase):
-  """Test suite for the Hardware Lifters component."""
+  """Docstring."""
 
   def test_sass_lifter_conv2d(self) -> None:
     """Verifies the behavior of SASS lifter conv2d."""

@@ -241,7 +241,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         The finalized CST Module node with prepended preamble statements.
     """
     if not self.context.module_preamble:
-      return updated_node  # pragma: no cover # pragma: no cover # pragma: no cover
+      return updated_node
 
     new_stmts = []
     # Deduplication now handled at insertion time in Context, so order is preserved.
@@ -249,14 +249,14 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       try:
         mod = cst.parse_module(code)
         new_stmts.extend(mod.body)
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
+      except Exception:
+        pass
 
     # Clear buffer to prevent re-injection
     self.context.module_preamble.clear()
 
     if not new_stmts:
-      return updated_node  # pragma: no cover # pragma: no cover # pragma: no cover
+      return updated_node
 
     # Prepends to body (naive injection).
     # ImportFixer will tidy up imports later in the pipeline.
@@ -287,7 +287,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         The updated CST Annotation node.
     """
     self._in_annotation = False
-    return updated_node  # pragma: no cover
+    return updated_node
 
   def leave_Name(self, original_node: cst.Name, updated_node: cst.Name) -> cst.BaseExpression:
     """Rewrite type names if inside a type annotation.
@@ -309,7 +309,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         mapping = self._get_type_mapping(full_name)
         if mapping and "api" in mapping:
           return self._create_dotted_name(mapping["api"])
-    return updated_node  # pragma: no cover
+    return updated_node
 
   def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
     """Rewrite dotted type attributes (e.g. torch.Tensor) if inside an annotation.
@@ -336,11 +336,11 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     # the next class in MRO gets called if no change is made, or if we want chain logic.
     # But LibCST Transformers don't support super() chaining well on return values.
     # PivotRewriter wraps this. For standalone pass, this is final.
-    if hasattr(super(), "leave_Attribute"):  # pragma: no cover
+    if hasattr(super(), "leave_Attribute"):
       # If using multiple inheritance shim (PivotRewriter)
-      return super().leave_Attribute(original_node, updated_node)  # pragma: no cover
+      return super().leave_Attribute(original_node, updated_node)
 
-    return updated_node  # pragma: no cover
+    return updated_node
 
   # --- Visitor Logic: Classes ---
 
@@ -371,7 +371,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if not is_module:
       for base in node.bases:
         raw_name = self._cst_to_string(base.value)
-        if raw_name and self._is_framework_base(raw_name):  # pragma: no cover
+        if raw_name and self._is_framework_base(raw_name):
           is_module = True
           break
 
@@ -424,7 +424,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
           new_bases.append(base)
       updated_node = updated_node.with_changes(bases=new_bases)
 
-    return updated_node  # pragma: no cover
+    return updated_node
 
   # --- Visitor Logic: Functions ---
 
@@ -473,7 +473,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     """
     self.context.scope_stack.pop()
     if not self.context.signature_stack:
-      return updated_node  # pragma: no cover # pragma: no cover # pragma: no cover
+      return updated_node
 
     sig_ctx = self.context.signature_stack.pop()
     traits = self.target_traits
@@ -528,6 +528,6 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if sig_ctx.injected_args:
       updated_node = self._update_docstring(updated_node, sig_ctx.injected_args)
 
-    return updated_node  # pragma: no cover
+    return updated_node
 
   # --- Helpers: AST Mutation ---

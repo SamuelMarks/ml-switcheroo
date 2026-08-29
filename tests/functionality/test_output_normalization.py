@@ -1,15 +1,17 @@
 """Test suite for the Output Normalization module."""
 
-import pytest
 import typing
+
 import libcst as cst
-from tests.conftest import TestRewriter
-from ml_switcheroo.semantics.manager import SemanticsManager
+import pytest
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.semantics.manager import SemanticsManager
+from tests.conftest import TestRewriter
 
 
 class MockOutputSemantics(SemanticsManager):
-  """Mock Output Semantics class for testing purposes."""
+  """Docstring."""
 
   def __init__(self) -> None:
     """Initializes the MockOutputSemantics instance."""
@@ -48,7 +50,7 @@ class MockOutputSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Provides a mock rewriter for testing."""
+  """Docstring."""
   semantics = MockOutputSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   return TestRewriter(semantics, config)

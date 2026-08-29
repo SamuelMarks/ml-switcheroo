@@ -1,21 +1,23 @@
 """Test suite for the State Container module."""
 
-import libcst as cst
-from typing import Union, Dict, Optional
+from typing import Dict, Optional, Union
 from unittest.mock import patch
+
+import libcst as cst
+
 from ml_switcheroo.plugins.state_container import (
   _create_node,
   _get_receiver,
+  convert_load_state_dict,
+  convert_parameters,
   convert_register_buffer,
   convert_register_parameter,
   convert_state_dict,
-  convert_load_state_dict,
-  convert_parameters,
 )
 
 
 class DummyContext:
-  """Dummy Context class for testing purposes."""
+  """Docstring."""
 
   def __init__(self, api_map: Optional[Dict[str, str]] = None) -> None:
     """Initializes the DummyContext instance."""

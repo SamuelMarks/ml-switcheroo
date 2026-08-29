@@ -1,10 +1,12 @@
 """Docstring."""
 
-import libcst as cst
-from unittest.mock import MagicMock
-from ml_switcheroo.plugins.inplace_unroll import unroll_inplace_ops, _get_receiver_name, _get_method_name
-from ml_switcheroo.core.hooks import HookContext
 from typing import Optional
+from unittest.mock import MagicMock
+
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.inplace_unroll import _get_method_name, _get_receiver_name, unroll_inplace_ops
 
 
 def test_get_receiver_name() -> None:

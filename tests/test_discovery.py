@@ -1,8 +1,9 @@
 """Docstring."""
 
-from unittest.mock import patch, MagicMock
-from ml_switcheroo.core.discovery import SimulatedReflection
 from typing import List, Optional
+from unittest.mock import MagicMock, patch
+
+from ml_switcheroo.core.discovery import SimulatedReflection
 
 
 class MockAdapter:
@@ -94,7 +95,6 @@ def test_discovery_fuzzy_import_error(
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA", "modB"])
 
   def side_effect(name: str) -> MagicMock:
-    """Docstring."""
     if name == "modA":
       raise ImportError()
     return MagicMock()

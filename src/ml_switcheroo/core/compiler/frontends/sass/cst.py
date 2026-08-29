@@ -93,10 +93,10 @@ class SassImmediate(SassOperand):
     """Render the immediate to its literal text."""
     res = "".join(t.text for t in self.leading_trivia)
     if self.is_hex:
-      if isinstance(self.value, float):  # pragma: no cover
-        res += hex(int(self.value))  # pragma: no cover
+      if isinstance(self.value, float):
+        res += hex(int(self.value))
       else:
-        res += hex(int(self.value))  # pragma: no cover
+        res += hex(int(self.value))
     else:
       res += str(self.value)
     res += "".join(t.text for t in self.trailing_trivia)

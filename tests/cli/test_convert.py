@@ -2,18 +2,18 @@
 
 import json
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ml_switcheroo.cli.handlers.convert import handle_convert, _convert_single_file, _print_batch_summary
+from ml_switcheroo.cli.handlers.convert import _convert_single_file, _print_batch_summary, handle_convert
 from ml_switcheroo.core.engine import ConversionResult
 
 
 @patch("ml_switcheroo.cli.handlers.convert._convert_single_file")
 @patch("ml_switcheroo.cli.handlers.convert.load_plugins")
 def test_handle_convert_single_file(mock_load_plugins: MagicMock, mock_convert_single: MagicMock, tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   mock_convert_single.return_value = ConversionResult(success=True, code="out", errors=[])
 
   in_file: Path = tmp_path / "in.py"
@@ -39,7 +39,7 @@ def test_handle_convert_single_file(mock_load_plugins: MagicMock, mock_convert_s
 
 @patch("ml_switcheroo.cli.handlers.convert._convert_single_file")
 def test_handle_convert_dir(mock_convert_single: MagicMock, tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   mock_convert_single.return_value = ConversionResult(success=True, code="out", errors=[])
 
   in_dir: Path = tmp_path / "src"
@@ -67,13 +67,13 @@ def test_handle_convert_dir(mock_convert_single: MagicMock, tmp_path: Path) -> N
 
 
 def test_handle_convert_not_found() -> None:
-  """Test element."""
+  """Docstring."""
   res: int = handle_convert(Path("nonexistent.py"), None, None, None, False, False, None, {})
   assert res == 1
 
 
 def test_handle_convert_dir_no_out(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   in_dir: Path = tmp_path / "src"
   in_dir.mkdir()
   res: int = handle_convert(in_dir, None, None, None, False, False, None, {})
@@ -81,7 +81,7 @@ def test_handle_convert_dir_no_out(tmp_path: Path) -> None:
 
 
 def test_handle_convert_infer_source(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   in_file: Path = tmp_path / "in.sass"
   in_file.write_text("code")
   m: MagicMock
@@ -94,7 +94,7 @@ def test_handle_convert_infer_source(tmp_path: Path) -> None:
 
 @patch("ml_switcheroo.cli.handlers.convert.ASTEngine")
 def test_convert_single_file_success(mock_engine_class: MagicMock, tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   mock_engine: MagicMock = mock_engine_class.return_value
   mock_engine.run.return_value = ConversionResult(success=True, code="out code", trace_events=[{"event": "start"}])
 
@@ -114,7 +114,7 @@ def test_convert_single_file_success(mock_engine_class: MagicMock, tmp_path: Pat
 def test_convert_single_file_stdout(
   mock_engine_class: MagicMock, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-  """Test element."""
+  """Docstring."""
   mock_engine: MagicMock = mock_engine_class.return_value
   mock_engine.run.return_value = ConversionResult(success=True, code="out code stdout")
 
@@ -129,7 +129,7 @@ def test_convert_single_file_stdout(
 
 @patch("ml_switcheroo.cli.handlers.convert.ASTEngine")
 def test_convert_single_file_exception(mock_engine_class: MagicMock, tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   mock_engine: MagicMock = mock_engine_class.return_value
   mock_engine.run.side_effect = ValueError("Boom")
 
@@ -148,7 +148,7 @@ def test_convert_single_file_exception(mock_engine_class: MagicMock, tmp_path: P
 def test_convert_single_file_verify(
   mock_engine: MagicMock, mock_harness: MagicMock, mock_run: MagicMock, tmp_path: Path
 ) -> None:
-  """Test element."""
+  """Docstring."""
   mock_engine.return_value.run.return_value = ConversionResult(success=True, code="out")
   mock_run.return_value.returncode = 0
 
@@ -167,7 +167,7 @@ def test_convert_single_file_verify(
 
 
 def test_print_batch_summary(capsys: pytest.CaptureFixture[str]) -> None:
-  """Test element."""
+  """Docstring."""
   results: dict[str, ConversionResult] = {
     "ok.py": ConversionResult(success=True, code=""),
     "fail.py": ConversionResult(success=False, code="", errors=["Bad"]),
@@ -182,7 +182,7 @@ def test_print_batch_summary(capsys: pytest.CaptureFixture[str]) -> None:
 
 
 def test_print_batch_summary_perfect(capsys: pytest.CaptureFixture[str]) -> None:
-  """Test element."""
+  """Docstring."""
   results: dict[str, ConversionResult] = {"ok.py": ConversionResult(success=True, code="")}
   _print_batch_summary(results)
   captured = capsys.readouterr()
@@ -192,7 +192,7 @@ def test_print_batch_summary_perfect(capsys: pytest.CaptureFixture[str]) -> None
 @patch("ml_switcheroo.cli.handlers.convert._convert_single_file")
 @patch("ml_switcheroo.cli.handlers.convert.load_plugins")
 def test_handle_convert_plugins(mock_load: MagicMock, mock_conv: MagicMock, tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   mock_conv.return_value = ConversionResult(success=True, code="")
   mock_load.return_value = 1
 
@@ -211,7 +211,7 @@ def test_handle_convert_plugins(mock_load: MagicMock, mock_conv: MagicMock, tmp_
 
 @patch("ml_switcheroo.cli.handlers.convert._convert_single_file")
 def test_handle_convert_single_fail_fast(mock_conv: MagicMock, tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   mock_conv.return_value = ConversionResult(success=False, code="", errors=["err"])
   in_file: Path = tmp_path / "in.py"
   in_file.write_text("code")
@@ -221,7 +221,7 @@ def test_handle_convert_single_fail_fast(mock_conv: MagicMock, tmp_path: Path) -
 
 
 def test_handle_convert_dir_empty(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   in_dir: Path = tmp_path / "src"
   in_dir.mkdir()
 
@@ -231,7 +231,7 @@ def test_handle_convert_dir_empty(tmp_path: Path) -> None:
 
 @patch("ml_switcheroo.cli.handlers.convert.ASTEngine")
 def test_convert_single_file_trace_exception(mock_engine: MagicMock, tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   mock_engine.return_value.run.return_value = ConversionResult(
     success=True, code="out", trace_events=[{"event": "start"}]
   )
@@ -249,7 +249,7 @@ def test_convert_single_file_trace_exception(mock_engine: MagicMock, tmp_path: P
 
 @patch("ml_switcheroo.cli.handlers.convert.ASTEngine")
 def test_convert_single_file_fail(mock_engine: MagicMock, tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   mock_engine.return_value.run.return_value = ConversionResult(success=False, code="out")
   in_file: Path = tmp_path / "in.py"
   in_file.write_text("code")
@@ -264,7 +264,7 @@ def test_convert_single_file_fail(mock_engine: MagicMock, tmp_path: Path) -> Non
 def test_convert_single_file_verify_fail(
   mock_engine: MagicMock, mock_harness: MagicMock, mock_run: MagicMock, tmp_path: Path
 ) -> None:
-  """Test element."""
+  """Docstring."""
   mock_engine.return_value.run.return_value = ConversionResult(success=True, code="out")
   mock_run.return_value.returncode = 1
 

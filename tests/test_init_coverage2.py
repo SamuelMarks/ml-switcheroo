@@ -1,8 +1,10 @@
 """Test suite for the Init Coverage2 module."""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
+
 import ml_switcheroo
-from unittest.mock import patch, MagicMock
 
 
 def test_convert_success() -> None:

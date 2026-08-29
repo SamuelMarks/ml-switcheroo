@@ -132,14 +132,14 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
         return cst.SimpleStatementLine(
           body=[cst.ImportFrom(module=self._create_dotted_name(module_val or ""), names=import_aliases)]
         )
-      else:  # pragma: no cover
+      else:
         return cst.SimpleStatementLine(
           body=[cst.Import(names=[cst.ImportAlias(name=self._create_dotted_name(module_val))])]
         )
     else:
       if import_aliases:
         return cst.SimpleStatementLine(body=[cst.Import(names=import_aliases)])
-      else:  # pragma: no cover
+      else:
         return cst.SimpleStatementLine(body=[cst.Pass()])
 
   def _convert_return(self, op: OperationNode) -> cst.SimpleStatementLine:

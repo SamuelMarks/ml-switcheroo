@@ -1,18 +1,19 @@
 """Test module."""
 
 from pathlib import Path
+
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
 
 
 def test_onnx_reader_missing_file(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   importer = OnnxSpecImporter()
   res = importer.parse_file(tmp_path / "missing.md")
   assert res == {}
 
 
 def test_onnx_reader_parse_markdown(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   importer = OnnxSpecImporter()
 
   md_content = """
@@ -64,7 +65,7 @@ Adds two tensors.
 
 
 def test_map_onnx_type() -> None:
-  """Test element."""
+  """Docstring."""
   importer = OnnxSpecImporter()
 
   # Lists
@@ -90,7 +91,7 @@ def test_map_onnx_type() -> None:
 
 
 def test_long_summary(tmp_path: Path) -> None:
-  """Test element."""
+  """Docstring."""
   importer = OnnxSpecImporter()
   long_desc = "A" * 310
 

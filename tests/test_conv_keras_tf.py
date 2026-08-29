@@ -6,7 +6,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_conv2d_keras_positional():
-  """Test positional mapping for Conv2d to Keras."""
+  """Docstring."""
   code = "import torch.nn as nn\nself.conv = nn.Conv2d(1, 32, 3)"
   config = RuntimeConfig(source_framework="torch", target_framework="keras")
   semantics = SemanticsManager()
@@ -17,7 +17,7 @@ def test_conv2d_keras_positional():
 
 
 def test_conv2d_tensorflow_positional():
-  """Test positional mapping for Conv2d to TensorFlow."""
+  """Docstring."""
   code = "import torch.nn as nn\nself.conv = nn.Conv2d(1, 32, 3)"
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow")
   semantics = SemanticsManager()
@@ -28,7 +28,7 @@ def test_conv2d_tensorflow_positional():
 
 
 def test_conv_transpose2d_keras_positional():
-  """Test positional mapping for ConvTranspose2d to Keras."""
+  """Docstring."""
   code = "import torch.nn as nn\nself.conv = nn.ConvTranspose2d(1, 32, 3)"
   config = RuntimeConfig(source_framework="torch", target_framework="keras")
   semantics = SemanticsManager()
@@ -39,7 +39,7 @@ def test_conv_transpose2d_keras_positional():
 
 
 def test_conv1d_keras_positional():
-  """Test positional mapping for Conv1d to Keras."""
+  """Docstring."""
   code = "import torch.nn as nn\nself.conv = nn.Conv1d(1, 32, 3)"
   config = RuntimeConfig(source_framework="torch", target_framework="keras")
   semantics = SemanticsManager()
@@ -50,7 +50,7 @@ def test_conv1d_keras_positional():
 
 
 def test_conv3d_tensorflow_positional():
-  """Test positional mapping for Conv3d to TensorFlow."""
+  """Docstring."""
   code = "import torch.nn as nn\nself.conv = nn.Conv3d(1, 32, 3)"
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow")
   semantics = SemanticsManager()

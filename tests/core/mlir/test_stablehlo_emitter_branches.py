@@ -1,14 +1,16 @@
 """Test module."""
 
-import libcst as cst
 import typing
-from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
+
+import libcst as cst
+
 from ml_switcheroo.core.mlir.cst import OperationNode
+from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_stablehlo_branches() -> None:
-  """Test function."""
+  """Docstring."""
   semantics = SemanticsManager()
 
   # Mock some behavior

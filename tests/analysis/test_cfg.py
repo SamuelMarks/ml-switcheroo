@@ -1,11 +1,12 @@
 """Test module."""
 
 import pytest
+
 from ml_switcheroo.analysis.cfg import BasicBlock, ControlFlowGraph
 
 
 def test_basic_block() -> None:
-  """Test element."""
+  """Docstring."""
   bb1: BasicBlock = BasicBlock("block1")
   bb2: BasicBlock = BasicBlock("block2")
 
@@ -28,7 +29,7 @@ def test_basic_block() -> None:
 
 
 def test_control_flow_graph() -> None:
-  """Test element."""
+  """Docstring."""
   cfg: ControlFlowGraph = ControlFlowGraph()
   assert cfg.entry_block is None
 
@@ -47,7 +48,7 @@ def test_control_flow_graph() -> None:
 
 
 def test_cfg_set_entry_block() -> None:
-  """Test element."""
+  """Docstring."""
   cfg: ControlFlowGraph = ControlFlowGraph()
   cfg.get_or_create_block("block1")
   bb2: BasicBlock = cfg.get_or_create_block("block2")
@@ -60,7 +61,7 @@ def test_cfg_set_entry_block() -> None:
 
 
 def test_cfg_traverse_dfs() -> None:
-  """Test element."""
+  """Docstring."""
   cfg: ControlFlowGraph = ControlFlowGraph()
   bb1: BasicBlock = cfg.get_or_create_block("A")
   bb2: BasicBlock = cfg.get_or_create_block("B")
@@ -90,7 +91,7 @@ def test_cfg_traverse_dfs() -> None:
 
 
 def test_cfg_traverse_dfs_no_entry() -> None:
-  """Test element."""
+  """Docstring."""
   cfg: ControlFlowGraph = ControlFlowGraph()
   with pytest.raises(ValueError, match="Cannot traverse CFG: No entry block defined."):
     cfg.traverse_dfs()

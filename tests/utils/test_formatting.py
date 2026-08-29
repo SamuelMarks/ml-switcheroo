@@ -4,7 +4,7 @@ from ml_switcheroo.utils.formatting import StructuredFormatter, escape_html, esc
 
 
 def test_structured_formatter_basic() -> None:
-  """Test standard adding lines."""
+  """Docstring."""
   fmt: StructuredFormatter = StructuredFormatter(indent_size=4)
   fmt.add_line("def foo():", 0)
   fmt.add_line("return True", 1)
@@ -15,7 +15,7 @@ def test_structured_formatter_basic() -> None:
 
 
 def test_structured_formatter_add_block() -> None:
-  """Test adding multiline blocks."""
+  """Docstring."""
   fmt: StructuredFormatter = StructuredFormatter(indent_size=2)
   block: str = "line1\nline2\nline3"
   fmt.add_block(block, indent_level=2)
@@ -25,7 +25,7 @@ def test_structured_formatter_add_block() -> None:
 
 
 def test_escape_html() -> None:
-  """Test HTML escaping."""
+  """Docstring."""
   raw: str = "<div>&'\"</div>"
   escaped: str = escape_html(raw)
   assert escaped == "&lt;div&gt;&amp;&#x27;&quot;&lt;/div&gt;"
@@ -35,7 +35,7 @@ def test_escape_html() -> None:
 
 
 def test_escape_latex() -> None:
-  """Test LaTeX escaping."""
+  """Docstring."""
   raw: str = "50% accuracy"
   assert escape_latex(raw) == "50\\% accuracy"
 

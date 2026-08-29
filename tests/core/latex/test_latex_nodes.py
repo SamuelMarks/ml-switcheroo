@@ -1,6 +1,6 @@
 """Test suite for the Latex Nodes module."""
 
-from ml_switcheroo.core.latex.nodes import ModelContainer, MemoryNode, InputNode, ComputeNode, StateOpNode, ReturnNode
+from ml_switcheroo.core.latex.nodes import ComputeNode, InputNode, MemoryNode, ModelContainer, ReturnNode, StateOpNode
 
 
 def test_memory_node_serialization() -> None:
