@@ -1,5 +1,0 @@
-description: Returns a predicate that selects a single thread.
-std_args:
-- scope
-type: function
-operation: single_thread_predicate

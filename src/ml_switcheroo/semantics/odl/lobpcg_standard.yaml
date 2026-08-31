@@ -1,8 +1,0 @@
-description: Compute the top-k standard eigenvalues using the LOBPCG routine.
-std_args:
-- A
-- X
-- m
-- tol
-type: function
-operation: lobpcg_standard

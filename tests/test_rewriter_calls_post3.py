@@ -23,6 +23,8 @@ def test_missing_post_branch() -> None:
   handle_post_processing(rewriter, node, mapping, "id")
 
   class RewriterNoReport:
+    """Docstring."""
+
     pass
 
   rewriter_no_report: RewriterNoReport = RewriterNoReport()

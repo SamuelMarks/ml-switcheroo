@@ -36,6 +36,8 @@ def test_sass_roundtrip_new_macros() -> None:
 
   # A dummy semantics manager that maps directly
   class DummySemantics:
+    """Docstring."""
+
     def get_definition(self, kind: str) -> tuple[str, dict[str, str]]:
       """Gets a mock definition."""
       return (kind, {})

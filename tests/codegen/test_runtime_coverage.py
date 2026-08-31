@@ -43,17 +43,25 @@ def test_verify_results_fallback() -> None:
   """Verifies the fallback exception block."""
 
   class BadThing:
+    """Docstring."""
+
     def __eq__(self, other: typing.Any) -> bool:
+      """Docstring."""
       raise ValueError("Bad")
 
   class VeryBadThing:
+    """Docstring."""
+
     def __init__(self, val: typing.Any) -> None:
+      """Docstring."""
       self.val = val
 
     def __array__(self) -> np.ndarray:
+      """Docstring."""
       raise RuntimeError("No array")
 
     def __eq__(self, other: typing.Any) -> bool:
+      """Docstring."""
       raise RuntimeError("No eq")
 
   assert not verify_results(VeryBadThing(1), VeryBadThing(2))
@@ -86,3 +94,28 @@ def test_ensure_determinism() -> None:
     func()
     sys.modules["mlx"].core.random.seed.side_effect = Exception("err")  # type: ignore
     func()
+
+
+def test_verify_results_more_cases() -> None:
+  """Docstring."""
+  # None checks
+  assert verify_results(None, None)
+  assert not verify_results(None, 1)
+  assert not verify_results(1, None)
+
+  # Dicts
+  assert verify_results({"a": 1}, {"a": 1})
+  assert not verify_results({"a": 1}, {"b": 1})
+  assert not verify_results({"a": 1}, {"a": 2})
+
+  # Lists
+  assert verify_results([1, 2], [1, 2])
+  assert not verify_results([1, 2], [1, 3])
+  assert not verify_results([1, 2], [1])
+
+  # Shape mismatch size != 1
+  assert not verify_results(np.array([1, 2]), np.array([1, 2, 3]))
+
+  # Primitives
+  assert verify_results("hello", "hello")
+  assert not verify_results("hello", "world")

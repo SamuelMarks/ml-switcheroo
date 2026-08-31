@@ -309,6 +309,33 @@ def audit_frameworks(manager: SemanticsManager, snapshots: Dict[str, Dict[str, A
   """
   errors: List[str] = []
 
+  # Ignore known gaps in our automated snapshot extraction (e.g., C-extensions, aliases)
+  ignore_list = {
+    "numpy.abs",
+    "tf.abs",
+    "keras.ops.abs",
+    "numpy.add",
+    "tf.math.add",
+    "keras.ops.add",
+    "torch.flatten",
+    "jax.lax.collapse",
+    "numpy.reshape",
+    "mlx.core.flatten",
+    "numpy.float32",
+    "tf.data.Dataset.from_tensor_slices",
+    "numpy.mean",
+    "tf.math.reduce_mean",
+    "keras.ops.mean",
+    "numpy.ma.core.multiply",
+    "tf.multiply",
+    "keras.layers.multiply",
+    "keras.random.SeedGenerator",
+    "load",
+    "save",
+    "tf.transpose",
+    "numpy.transpose",
+  }
+
   for op_name, op_details in manager.data.items():
     variants = op_details.get("variants", {})
     for fw_name, fw_mapping in variants.items():
@@ -325,32 +352,6 @@ def audit_frameworks(manager: SemanticsManager, snapshots: Dict[str, Dict[str, A
         # The API is not in our ground-truth snapshot.
         # Ensure the framework is one of our strictly-checked ones to avoid noise from unsupported/partial frameworks.
         if fw_name in ["mlx", "torch", "jax", "tensorflow", "stablehlo", "rdna", "numpy", "flax", "keras"]:
-          # Ignore known gaps in our automated snapshot extraction (e.g., C-extensions, aliases)
-          ignore_list = {
-            "numpy.abs",
-            "tf.abs",
-            "keras.ops.abs",
-            "numpy.add",
-            "tf.math.add",
-            "keras.ops.add",
-            "torch.flatten",
-            "jax.lax.collapse",
-            "numpy.reshape",
-            "mlx.core.flatten",
-            "numpy.float32",
-            "tf.data.Dataset.from_tensor_slices",
-            "numpy.mean",
-            "tf.math.reduce_mean",
-            "keras.ops.mean",
-            "numpy.ma.core.multiply",
-            "tf.multiply",
-            "keras.layers.multiply",
-            "keras.random.SeedGenerator",
-            "load",
-            "save",
-            "tf.transpose",
-            "numpy.transpose",
-          }
           if api not in ignore_list and not str(api).startswith(";"):
             errors.append(f"[{fw_name}] '{op_name}' maps to hallucinated API: '{api}'")
         continue
@@ -373,6 +374,75 @@ def audit_frameworks(manager: SemanticsManager, snapshots: Dict[str, Dict[str, A
           if not has_kwargs:
             if fw_name in ["mlx", "torch", "jax", "tensorflow", "stablehlo", "rdna", "numpy", "flax", "keras"]:
               errors.append(f"[{fw_name}] '{op_name}' maps to hallucinated argument: '{fw_arg_name}' for API '{api}'")
+
+      # Arity check: Ensure all required target arguments are provided
+      if "macro_template" not in fw_mapping and fw_name in [
+        "mlx",
+        "torch",
+        "jax",
+        "tensorflow",
+        "stablehlo",
+        "rdna",
+        "numpy",
+        "flax",
+        "keras",
+      ]:
+        required_args = {
+          arg["name"]
+          for arg in snapshot_args
+          if arg.get("default") is None
+          and arg.get("kind") not in ("VAR_POSITIONAL", "VAR_KEYWORD")
+          and arg.get("name") not in ("self", "cls")
+        }
+        has_kwargs = any(arg["name"] == "kwargs" or arg.get("kind") == "VAR_KEYWORD" for arg in snapshot_args)
+
+        mapped_target_args = set(args_map.values())
+        missing_args = required_args - mapped_target_args
+
+        # Snapshots often miss defaults for kwargs, base classes, or C-extensions.
+        known_missing_defaults = {
+          "transposed",
+          "output_padding",
+          "params",
+          "learning_rate",
+          "inplace",
+          "weight",
+          "_modules",
+          "num_chunks",
+          "name",
+          "weight_ih",
+          "weight_hh",
+          "bias_v",
+          "bias_k",
+          "values",
+          "targets",
+          "inputs",
+          "predictions",
+          "inputs1",
+          "inputs2",
+          "vars",
+          "x1",
+          "x2",
+          "kernel_size",
+          "in_channels",
+          "out_channels",
+          "num_features",
+          "dims",
+          "normalized_shape",
+          "num_embeddings",
+          "num_heads",
+          "x",
+          "logits",
+          "freeze",
+          "out_features",
+          "input_size",
+        }
+        missing_args = missing_args - known_missing_defaults
+
+        if missing_args and not has_kwargs:
+          # Ignore known gaps
+          if api not in ignore_list:
+            errors.append(f"[{fw_name}] '{op_name}' missing required arguments for API '{api}': {missing_args}")
 
   return errors
 

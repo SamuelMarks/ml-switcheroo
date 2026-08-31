@@ -2,7 +2,7 @@
 
 This module implements a compiler pass that analyzes an unannotated `LogicalGraph`
 (e.g., ingested from Hugging Face PyTorch models) and infers distributed sharding constraints
-(e.g., for MaxText/NNX targets) based on standard tensor-parallel and FSDP heuristics.
+(e.g., for JAX/NNX targets) based on standard tensor-parallel and FSDP heuristics.
 """
 
 from typing import Optional

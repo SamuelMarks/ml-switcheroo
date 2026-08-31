@@ -17,6 +17,7 @@ def gen(tmp_path: Path) -> TestCaseGenerator:
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
   def mock_get_template(fw: str) -> typing.Optional[dict[str, str]]:
+    """Docstring."""
     if fw == "torch":
       return {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"}
     if fw == "jax":

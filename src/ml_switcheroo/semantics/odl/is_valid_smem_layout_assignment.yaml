@@ -1,6 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- shape
-- tiling
-type: function
-operation: is_valid_smem_layout_assignment

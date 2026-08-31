@@ -15,7 +15,10 @@ def test_ensure_runtime_module_no_req_pkgs(tmp_path: Path) -> None:
   """Verifies the behavior of ensure runtime module no request pkgs."""
 
   class MockSemantics:
+    """Docstring."""
+
     def get_test_template(self, fw: str) -> dict[str, str]:
+      """Docstring."""
       return {"import": "import"}
 
     def get_framework_config(self, fw: str) -> dict[str, typing.Any]:

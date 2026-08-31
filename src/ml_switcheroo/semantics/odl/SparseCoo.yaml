@@ -1,5 +1,0 @@
-description: Layout constant for COO.
-op_type: attribute
-std_args: []
-variants: {}
-operation: SparseCoo

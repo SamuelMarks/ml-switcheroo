@@ -1,4 +1,0 @@
-description: Get autocast IPU dtype.
-std_args: []
-variants: {}
-operation: GetAutocastIpuDtype

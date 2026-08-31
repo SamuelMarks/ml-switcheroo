@@ -507,11 +507,13 @@ class DummyRewriterExtra:
     self.semantics.get_definition.return_value = None
 
   def _report_warning(self, w: str) -> None:
+    """Docstring."""
     pass
 
 
 @pytest.fixture(autouse=True)
 def _cleanup() -> Generator[None, None, None]:
+  """Docstring."""
   import ml_switcheroo.core.hooks_registry as hr
 
   hr.clear_hooks()
@@ -527,6 +529,7 @@ def test_handle_pre_checks_inplace_no_change() -> None:
   # 97-98: in-place unroll hook doesn't change node
   @register_hook("unroll_inplace_ops")
   def mock_hook(node: cst.CSTNode, ctx: MagicMock) -> cst.CSTNode:
+    """Docstring."""
     return node
 
   original: cst.Call = getattr(getattr(cst.parse_statement("foo_()"), "body")[0], "value")
@@ -541,6 +544,7 @@ def test_handle_pre_checks_inplace_change() -> None:
   # 97-98: in-place unroll hook changes node
   @register_hook("unroll_inplace_ops")
   def mock_hook(node: cst.CSTNode, ctx: MagicMock) -> cst.CSTNode:
+    """Docstring."""
     return getattr(cst.parse_statement("b = 1"), "body")[0]
 
   original: cst.Call = getattr(getattr(cst.parse_statement("foo_()"), "body")[0], "value")

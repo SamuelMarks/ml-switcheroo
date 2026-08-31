@@ -1,5 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- platform
-type: function
-operation: get_attached_topology

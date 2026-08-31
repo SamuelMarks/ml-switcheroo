@@ -1,6 +1,0 @@
-description: The class representing a Python class.
-std_args:
-- self
-- mask
-type: class
-operation: CustomFromMask

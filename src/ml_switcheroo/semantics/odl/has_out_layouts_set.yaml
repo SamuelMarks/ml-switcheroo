@@ -1,5 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- op
-type: function
-operation: has_out_layouts_set

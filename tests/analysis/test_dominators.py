@@ -1,11 +1,28 @@
-"""Test module."""
+"""Test module for CFG Dominator analysis tools.
+
+This module validates the correctness of graph theory algorithms implemented in the
+`ml_switcheroo.analysis.dominators` package. It verifies the calculation of dominator
+sets, immediate dominators (idoms), and the detection of back edges (loops) within
+Control Flow Graphs.
+"""
 
 from ml_switcheroo.analysis.cfg import BasicBlock, ControlFlowGraph
 from ml_switcheroo.analysis.dominators import build_dominator_sets, find_back_edges, find_immediate_dominators
 
 
 def build_test_cfg() -> ControlFlowGraph:
-  """Docstring."""
+  """Construct a standard non-trivial test CFG for dominator analysis.
+
+  Constructs a CFG with the following structure:
+  Entry: 1
+  1 -> 2, 1 -> 5
+  5 -> 2
+  2 -> 3
+  3 -> 4, 3 -> 6
+
+  Returns:
+      ControlFlowGraph: The populated Control Flow Graph.
+  """
   cfg: ControlFlowGraph = ControlFlowGraph()
   # 1 -> 2 -> 3 -> 4
   # |    ^    |
@@ -33,7 +50,12 @@ def build_test_cfg() -> ControlFlowGraph:
 
 
 def test_build_dominator_sets() -> None:
-  """Docstring."""
+  """Test the calculation of complete dominator sets for all nodes in the CFG.
+
+  Verifies that `build_dominator_sets` correctly implements the iterative data-flow
+  equation for dominators. Asserts that the entry node dominates all reachable nodes,
+  and that intermediate nodes have the correct strict dominators (e.g. {1, 2, 3} for node 3).
+  """
   cfg: ControlFlowGraph = build_test_cfg()
   doms: dict[str, set[str]] = build_dominator_sets(cfg)
 
@@ -56,14 +78,22 @@ def test_build_dominator_sets() -> None:
 
 
 def test_build_dominator_sets_empty_cfg() -> None:
-  """Docstring."""
+  """Test dominator set calculation on an empty CFG.
+
+  Verifies that calling the function on a CFG with no blocks safely returns
+  an empty dictionary without error.
+  """
   cfg: ControlFlowGraph = ControlFlowGraph()
   doms: dict[str, set[str]] = build_dominator_sets(cfg)
   assert doms == {}
 
 
 def test_build_dominator_sets_unreachable() -> None:
-  """Docstring."""
+  """Test dominator set behavior for unreachable CFG blocks.
+
+  Verifies that blocks disconnected from the entry node fall back to safely
+  dominating only themselves, preventing infinite loops or crashes during analysis.
+  """
   cfg: ControlFlowGraph = ControlFlowGraph()
   cfg.get_or_create_block("1")
   cfg.get_or_create_block("2")  # unreachable
@@ -74,7 +104,12 @@ def test_build_dominator_sets_unreachable() -> None:
 
 
 def test_find_immediate_dominators() -> None:
-  """Docstring."""
+  """Test the identification of Immediate Dominators (idoms).
+
+  Verifies that `find_immediate_dominators` correctly extracts the unique immediate
+  dominator for each node from the full dominator sets. This is crucial for constructing
+  the dominator tree.
+  """
   cfg: ControlFlowGraph = build_test_cfg()
   doms: dict[str, set[str]] = build_dominator_sets(cfg)
   idoms: dict[str, str | None] = find_immediate_dominators(cfg, doms)
@@ -88,7 +123,12 @@ def test_find_immediate_dominators() -> None:
 
 
 def test_find_back_edges() -> None:
-  """Docstring."""
+  """Test the detection of back edges (loops) using dominator information.
+
+  A back edge exists if a node has a successor that also dominates it.
+  This test artificially adds a loop (`3 -> 2`) to the test CFG and verifies
+  that `find_back_edges` accurately detects it.
+  """
   cfg: ControlFlowGraph = build_test_cfg()
   # Add a loop 3 -> 2
   cfg.blocks["3"].add_successor(cfg.blocks["2"])
@@ -98,3 +138,18 @@ def test_find_back_edges() -> None:
 
   assert len(back_edges) == 1
   assert back_edges[0] == ("3", "2")
+
+
+def test_find_immediate_dominators_unreachable() -> None:
+  """Test immediate dominator resolution for unreachable blocks.
+
+  Verifies that an unreachable node correctly receives `None` as its immediate
+  dominator, mirroring the behavior of the entry node.
+  """
+  cfg = ControlFlowGraph()
+  cfg.get_or_create_block("1")
+  cfg.get_or_create_block("2")
+  cfg.set_entry_block("1")
+  doms = build_dominator_sets(cfg)
+  idoms = find_immediate_dominators(cfg, doms)
+  assert idoms["2"] is None

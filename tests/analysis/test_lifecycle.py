@@ -1,4 +1,10 @@
-"""Test module."""
+"""Test module for the InitializationTracker in lifecycle analysis.
+
+This module verifies that the `InitializationTracker` correctly monitors variable
+lifecycle within Neural Network module classes. It ensures that stateful attributes
+accessed in `forward` passes or other methods are properly initialized in the `__init__`
+constructor, issuing warnings for potential uninitialized variable access.
+"""
 
 import libcst as cst
 
@@ -6,7 +12,12 @@ from ml_switcheroo.analysis.lifecycle import InitializationTracker
 
 
 def test_initialization_tracker_basic() -> None:
-  """Docstring."""
+  """Test the correct tracking of basic attribute initializations.
+
+  Verifies that when a class defines attributes in `__init__` (like `self.conv`)
+  and uses them in `forward`, the tracker considers them safely initialized and
+  emits no warnings.
+  """
   tracker: InitializationTracker = InitializationTracker()
 
   code: str = """
@@ -27,7 +38,12 @@ class MyModule:
 
 
 def test_initialization_tracker_missing() -> None:
-  """Docstring."""
+  """Test detection of uninitialized class attributes.
+
+  Verifies that if a variable (like `self.missing_bias`) is accessed in `forward`
+  but was never assigned in `__init__`, the tracker successfully flags it and
+  generates a warning.
+  """
   tracker: InitializationTracker = InitializationTracker()
 
   code: str = """
@@ -48,7 +64,11 @@ class BadModule:
 
 
 def test_initialization_tracker_tuple_unpacking() -> None:
-  """Docstring."""
+  """Test initialization tracking through tuple and list unpacking.
+
+  Ensures that the tracker can correctly parse multiple assignments like
+  `(self.a, self.b) = (1, 2)` or `[self.c, self.d] = [3, 4]` within `__init__`.
+  """
   tracker: InitializationTracker = InitializationTracker()
 
   code: str = """
@@ -67,7 +87,11 @@ class TupleMod:
 
 
 def test_initialization_tracker_annassign() -> None:
-  """Docstring."""
+  """Test initialization tracking for annotated assignments.
+
+  Verifies that type-annotated assignments in `__init__` (e.g. `self.a: int = 1`)
+  are successfully tracked as valid initializations.
+  """
   tracker: InitializationTracker = InitializationTracker()
 
   code: str = """
@@ -85,7 +109,12 @@ class AnnMod:
 
 
 def test_initialization_tracker_nested() -> None:
-  """Docstring."""
+  """Test tracking within nested class definitions.
+
+  Verifies that the tracker manages scope stacks correctly for nested classes,
+  ensuring that missing initializations are flagged for the correct inner
+  or outer class scope.
+  """
   tracker: InitializationTracker = InitializationTracker()
 
   code: str = """
@@ -111,7 +140,12 @@ class Outer:
 
 
 def test_initialization_tracker_no_scope() -> None:
-  """Docstring."""
+  """Test tracker resilience outside of class contexts.
+
+  Verifies that if `__init__` or `forward` style functions are defined globally
+  (outside a class scope), the tracker safely ignores them without crashing
+  or emitting false warnings.
+  """
   # Test methods returning early when scope stack is empty (e.g. methods outside classes)
   tracker: InitializationTracker = InitializationTracker()
 
@@ -131,7 +165,11 @@ def forward(self, x):
 
 
 def test_initialization_tracker_leave_classdef_no_scope() -> None:
-  """Docstring."""
+  """Test defensive programming in `leave_ClassDef` when state is missing.
+
+  Ensures the tracker handles scenarios where `leave_ClassDef` is called
+  but the internal scope stack has somehow been emptied prematurely.
+  """
   tracker: InitializationTracker = InitializationTracker()
   tracker.leave_ClassDef(cst.ClassDef(name=cst.Name("Dummy"), body=cst.IndentedBlock(body=[])))
   assert len(tracker.warnings) == 0
@@ -141,7 +179,14 @@ def test_initialization_tracker_leave_classdef_no_scope() -> None:
 
 
 def analyze(code: str) -> InitializationTracker:
-  """Analyze code for initialization tracker."""
+  """Helper to run the InitializationTracker on a snippet of code.
+
+  Args:
+      code (str): Source code to parse and analyze.
+
+  Returns:
+      InitializationTracker: The populated tracker instance after traversal.
+  """
   tree: cst.Module = cst.parse_module(code)
   tracker: InitializationTracker = InitializationTracker()
   tree.visit(tracker)
@@ -149,7 +194,7 @@ def analyze(code: str) -> InitializationTracker:
 
 
 def test_initialization_tracker_basic_extra() -> None:
-  """Docstring."""
+  """Test basic attribute initialization using the analyzer helper."""
   code: str = """
 class MyModule:
     def __init__(self):
@@ -163,7 +208,7 @@ class MyModule:
 
 
 def test_initialization_tracker_uninitialized() -> None:
-  """Docstring."""
+  """Test detection of variables accessed but completely uninitialized in `__init__`."""
   code: str = """
 class MyModule:
     def __init__(self):
@@ -177,7 +222,12 @@ class MyModule:
 
 
 def test_initialization_tracker_complex() -> None:
-  """Docstring."""
+  """Test complex assignment issues, including intra-initialization and late initialization.
+
+  Verifies that assigning an uninitialized variable to another variable *inside*
+  `__init__` (e.g. `self.b = self.c`), or late-initializing variables inside
+  `forward` (e.g. `self.d = 4`) correctly trigger warnings.
+  """
   code: str = """
 class SubModule:
     def __init__(self):
@@ -194,3 +244,29 @@ class MyModule:
     """
   tracker: InitializationTracker = analyze(code)
   assert len(tracker.warnings) > 0
+
+
+def test_initialization_tracker_missing_branches() -> None:
+  """Test branch coverage gaps for ignored statement types.
+
+  Ensures that local variable assignments and non-init method definitions
+  are safely bypassed by the tracker without causing analysis faults.
+  """
+  tracker = InitializationTracker()
+
+  code = """
+class MiscMod:
+    def __init__(self):
+        # 196->exit: Target is not Attribute on self or tuple/list
+        local_var = 1
+
+    def helper(self):
+        # 103->exit and 123->exit: func_name not in init or forward
+        # 153->exit: AnnAssign but not in init
+        self.other: int = 1
+        pass
+"""
+  tree = cst.parse_module(code)
+  tree.visit(tracker)
+
+  assert len(tracker.warnings) == 0

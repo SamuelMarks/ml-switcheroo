@@ -1,4 +1,9 @@
-"""Docstring."""
+"""LaTeX visualizer backend for LogicalGraphs.
+
+This module provides the LatexBackend, which compiles a LogicalGraph into
+standalone LaTeX documents using the Machine Intelligence Definition Language (MIDL)
+package format, suitable for high-quality PDF rendering of neural architectures.
+"""
 
 from typing import List, Any
 from ml_switcheroo.core.compiler.backend import CompilerBackend

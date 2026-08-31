@@ -37,6 +37,7 @@ class ValueNode(MlirNode):
   """Represent an SSA Value identifier (e.g. %0)."""
 
   name: str = ""
+  use_index: Optional[int] = None
   type_node: Optional[TypeNode] = None
   colon_trivia: List[Trivia] = field(default_factory=list)
 
@@ -44,6 +45,8 @@ class ValueNode(MlirNode):
     """Return textual representation of the node."""
     out = "".join(t.text for t in self.leading_trivia)
     out += self.name
+    if self.use_index is not None:
+      out += f"#{self.use_index}"
     if self.type_node:
       out += "".join(t.text for t in self.colon_trivia)
       out += ":"
@@ -57,6 +60,7 @@ class AttributeNode(MlirNode):
   """Represent a named attribute."""
 
   name: str = ""
+  use_index: Optional[int] = None
   value: Union[str, List[str]] = ""
   type_annotation: Optional[str] = None
 
@@ -129,6 +133,11 @@ class OperationNode(MlirNode):
   """Represent a specific MLIR Operation."""
 
   name: str = ""
+  use_index: Optional[int] = None
+  is_generic: bool = False
+  location: Optional[str] = None
+  properties: List["AttributeNode"] = field(default_factory=list)
+  successors: List[str] = field(default_factory=list)
   results: List[ValueNode] = field(default_factory=list)
   operands: List[ValueNode] = field(default_factory=list)
   attributes: List[AttributeNode] = field(default_factory=list)
@@ -158,7 +167,10 @@ class OperationNode(MlirNode):
       parts.append(", ".join(r_names))
       parts.append(" = ")
 
-    parts.append(self.name)
+    if getattr(self, "is_generic", False):
+      parts.append(f'"{self.name}"')
+    else:
+      parts.append(self.name)
 
     if self.name_trivia:
       for t in self.name_trivia:
@@ -183,6 +195,19 @@ class OperationNode(MlirNode):
         parts.append(f"({','.join(op_names)})")
       else:
         parts.append(",".join(op_names))
+
+    if self.successors:
+      parts.append(" [")
+      parts.append(", ".join(self.successors))
+      parts.append("]")
+
+    if self.properties:
+      parts.append(" <{")
+      parts.append(", ".join([a.to_text() for a in self.properties]))
+      parts.append("}>")
+
+    if self.location:
+      parts.append(f" loc({self.location})")
 
     if self.attributes:
       if not self.name_trivia:
@@ -248,6 +273,19 @@ class StableHloConstantOp(OperationNode):
       for t in self.name_trivia:
         parts.append(t.text)
 
+    if self.successors:
+      parts.append(" [")
+      parts.append(", ".join(self.successors))
+      parts.append("]")
+
+    if self.properties:
+      parts.append(" <{")
+      parts.append(", ".join([a.to_text() for a in self.properties]))
+      parts.append("}>")
+
+    if self.location:
+      parts.append(f" loc({self.location})")
+
     if self.attributes:
       if not self.name_trivia:
         parts.append(" ")
@@ -274,6 +312,7 @@ class AttributeAliasDefNode(MlirNode):
   """Represent a top-level attribute alias definition."""
 
   name: str = ""
+  use_index: Optional[int] = None
   value_node: Optional[MlirNode] = None
   value_str: str = ""
 
@@ -285,6 +324,24 @@ class AttributeAliasDefNode(MlirNode):
       out += self.value_node.to_text()
     else:
       out += self.value_str
+    out += "".join(t.text for t in self.trailing_trivia)
+    return out
+
+
+@dataclass
+class TypeAliasDefNode(MlirNode):
+  """Represent a type alias definition."""
+
+  name: str = ""
+  use_index: Optional[int] = None
+  type_node: Optional[TypeNode] = None
+  leading_trivia: List[Trivia] = field(default_factory=list)
+  trailing_trivia: List[Trivia] = field(default_factory=list)
+
+  def to_text(self) -> str:
+    """Return textual representation of the node."""
+    out = "".join(t.text for t in self.leading_trivia)
+    out += f"!{self.name} ={self.type_node.to_text() if self.type_node else ''}"
     out += "".join(t.text for t in self.trailing_trivia)
     return out
 

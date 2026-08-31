@@ -206,7 +206,10 @@ def test_param_children() -> None:
   transformer: RdnaTransformer = RdnaTransformer()
 
   class DummyToken:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.children: List[Token] = [Token("A", "b"), Token("B", "c")]
 
   # We call directive directly

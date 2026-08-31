@@ -1,5 +1,0 @@
-description: Constructs a layout from an MLIR attribute.
-std_args:
-- attr
-type: function
-operation: from_layout_attr

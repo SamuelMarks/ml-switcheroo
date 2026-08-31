@@ -9,6 +9,8 @@ def create_sequential(in_features: int, hidden: int, out_features: int) -> typin
   """Creates sequential."""
 
   class SequentialImpl:
+    """Docstring."""
+
     def __init__(self, in_feat: int, hid: int, out_feat: int) -> None:
       """Initializes the SequentialImpl instance."""
       self.w1 = np.random.randn(in_feat, hid)

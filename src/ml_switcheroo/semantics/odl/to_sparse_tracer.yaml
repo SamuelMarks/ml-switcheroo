@@ -1,6 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- self
-- val
-type: function
-operation: to_sparse_tracer

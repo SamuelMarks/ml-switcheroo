@@ -156,7 +156,10 @@ def test_flax_nnx_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
   assert adapter.convert({"a": 1}) == {"a": 1}
 
   class FakeJNP:
+    """Docstring."""
+
     def array(self, x: typing.Any) -> typing.Any:
+      """Docstring."""
       if x == [1, 2]:
         return "jnp_array"
       raise Exception("fail")

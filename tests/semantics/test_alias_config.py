@@ -25,6 +25,8 @@ def test_manager_picks_up_new_framework() -> None:
   """Verifies the behavior of manager picks up new framework."""
 
   class FastAIAdapter:
+    """Docstring."""
+
     import_alias: Tuple[str, str] = ("fastai.vision", "fv")
 
     def convert(self, x: Any) -> Any:

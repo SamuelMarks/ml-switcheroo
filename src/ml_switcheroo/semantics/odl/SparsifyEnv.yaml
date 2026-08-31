@@ -1,6 +1,0 @@
-description: Environment for sparse jaxpr evaluation.
-std_args:
-- self
-- bufs
-type: class
-operation: SparsifyEnv

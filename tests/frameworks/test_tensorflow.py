@@ -139,6 +139,8 @@ def test_tensorflow_convert(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_tf = MagicMock()
 
     class DummyTensor:
+      """Docstring."""
+
       pass
 
     mock_tf.Tensor = DummyTensor
@@ -149,6 +151,8 @@ def test_tensorflow_convert(monkeypatch: pytest.MonkeyPatch) -> None:
     if not hasattr(mock_tf, "Tensor"):
 
       class DummyTensor2:
+        """Docstring."""
+
         pass
 
       mock_tf.Tensor = DummyTensor2  # type: ignore
@@ -287,11 +291,14 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
   mock_tf = MagicMock()
 
   class DummyTensor:
+    """Docstring."""
+
     pass
 
   mock_tf.Tensor = DummyTensor
 
   def fake_convert(x: typing.Any) -> typing.Any:
+    """Docstring."""
     if type(x).__name__ not in ("list", "ndarray"):
       raise ValueError("Unsupported type")
     return DummyTensor()
@@ -409,3 +416,14 @@ def test_tensorflow_doc_url_extra() -> None:
   url: typing.Optional[str] = adapter.get_doc_url("tensorflow.keras.layers.Dense")
   assert url is not None
   assert "search.html" not in url
+
+
+def test_tensorflow_ghost_mode_with_snapshot() -> None:
+  """Docstring."""
+  from unittest.mock import patch
+  from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
+
+  with patch("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", return_value={"test": 1}):
+    with patch("ml_switcheroo.frameworks.tensorflow.tf", None):
+      adapter = TensorFlowAdapter()
+      assert adapter._snapshot_data == {"test": 1}

@@ -116,9 +116,11 @@ def test_synthesizer_from_graph() -> None:
   graph.edges.append(Edge(source="conv1", target="out1"))
 
   def mock_get_definition(kind: str) -> List[str]:
+    """Docstring."""
     return [kind]
 
   def mock_resolve_variant(abstract_id: str, target: str) -> Optional[Dict[str, str]]:
+    """Docstring."""
     if abstract_id == "Add":
       return {"api": "FADD"}
     return None
@@ -170,6 +172,7 @@ def test_synthesizer_from_graph_method_suffix() -> None:
   with patch.object(sem, "get_definition", return_value=["tensor.reshape"]):
 
     def fake_expand(alloc: RegisterAllocator, node_id: str, meta: Dict[str, Any]) -> List[SassNode]:
+      """Docstring."""
       return [SassComment(text="fake_reshape")]
 
     synth.macro_registry = {"reshape": fake_expand}

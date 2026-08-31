@@ -1,8 +1,0 @@
-description: Returns a noop mask_mod
-std_args:
-- batch
-- head
-- token_q
-- token_kv
-type: function
-operation: noop_mask

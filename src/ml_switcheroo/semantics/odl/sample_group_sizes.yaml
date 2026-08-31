@@ -1,8 +1,0 @@
-description: Sample group sizes.
-std_args:
-- key
-- num_groups
-- num_elements
-- alpha
-type: function
-operation: sample_group_sizes

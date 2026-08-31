@@ -166,6 +166,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
   # Test static unroll success
   @register_hook("transform_for_loop_static")
   def mock_static(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
+    """Docstring."""
     return cst.parse_statement("i = 0")
 
   res2: Union[cst.BaseStatement, cst.FlattenSentinel, cst.RemovalSentinel] = transformer.leave_For(for_node, for_node)
@@ -178,6 +179,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
 
   @register_hook("transform_for_loop_static")
   def mock_static_fail(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
+    """Docstring."""
     raise ValueError("static fail")
 
   res3: Union[cst.BaseStatement, cst.FlattenSentinel, cst.RemovalSentinel] = transformer.leave_For(for_node, for_node)
@@ -189,6 +191,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
 
   @register_hook("transform_for_loop")
   def mock_loop(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
+    """Docstring."""
     return cst.parse_statement("pass")
 
   res4: Union[cst.BaseStatement, cst.FlattenSentinel, cst.RemovalSentinel] = transformer.leave_For(for_node, for_node)
@@ -199,6 +202,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
 
   @register_hook("transform_for_loop")
   def mock_loop_fail(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
+    """Docstring."""
     raise ValueError("loop fail")
 
   res5: Union[cst.BaseStatement, cst.FlattenSentinel, cst.RemovalSentinel] = transformer.leave_For(for_node, for_node)

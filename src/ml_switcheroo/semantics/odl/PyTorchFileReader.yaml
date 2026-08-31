@@ -1,5 +1,0 @@
-description: Internal file reader.
-op_type: class
-std_args: []
-variants: {}
-operation: PyTorchFileReader

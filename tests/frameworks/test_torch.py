@@ -124,16 +124,36 @@ def test_torch_adapter_wiring() -> None:
 
 def test_convert() -> None:
   """Docstring."""
-  import sys
-  from unittest.mock import MagicMock
+  from unittest.mock import MagicMock, patch
 
   from ml_switcheroo.frameworks.torch import TorchAdapter
 
-  sys.modules["torch"] = MagicMock()  # type: ignore
-  import numpy as np
+  with patch.dict("sys.modules", {"torch": MagicMock()}):
+    import numpy as np
 
-  adapter = TorchAdapter()
-  adapter.convert(np.array([1, 2, 3]))
-  adapter.convert([1, 2, 3])
-  adapter.convert(1)
-  del sys.modules["torch"]
+    adapter = TorchAdapter()
+    adapter.convert(np.array([1, 2, 3]))
+    adapter.convert([1, 2, 3])
+    adapter.convert(1)
+
+
+def test_torch_ghost_mode_with_snapshot() -> None:
+  """Docstring."""
+  from unittest.mock import patch
+  from ml_switcheroo.frameworks.torch import TorchAdapter
+
+  with patch("ml_switcheroo.frameworks.torch.load_snapshot_for_adapter", return_value={"test": 1}):
+    with patch("ml_switcheroo.frameworks.torch.torch", None):
+      adapter = TorchAdapter()
+      assert adapter._snapshot_data == {"test": 1}
+
+
+def test_torch_definitions_skip() -> None:
+  """Docstring."""
+  from unittest.mock import patch
+  from ml_switcheroo.frameworks.torch import TorchAdapter
+
+  with patch("ml_switcheroo.frameworks.torch.load_definitions", return_value={"Conv2d": "already_exists"}):
+    adapter = TorchAdapter()
+    defs = adapter.definitions
+    assert defs["Conv2d"] == "already_exists"

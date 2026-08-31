@@ -6,3 +6,4 @@ variants:
   latex_dsl:
     api: midl.DefModel
     required_imports: []
+    args: {}

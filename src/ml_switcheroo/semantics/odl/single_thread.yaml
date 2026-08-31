@@ -1,5 +1,0 @@
-description: Runs the context only from a single thread.
-std_args:
-- scope
-type: function
-operation: single_thread

@@ -106,6 +106,7 @@ def test_resolve_operand() -> None:
 
   # Dotted lookup
   def mock_lookup(x: str) -> Optional[str]:
+    """Docstring."""
     return "self.layer" if x == "%2" else "_foo"
 
   with mock.patch.object(gen.ctx, "lookup", side_effect=mock_lookup):

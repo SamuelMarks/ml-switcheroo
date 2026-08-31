@@ -150,6 +150,7 @@ def test_flatten_fallback_lookups() -> None:
   ctx.current_op_id = None
 
   def mock_lookup(aid: str) -> typing.Optional[str]:
+    """Docstring."""
     if aid == "flatten_full":
       return "jnp.ravel"
     return None
@@ -169,6 +170,7 @@ def test_flatten_fallback_lookups_range() -> None:
   ctx.current_op_id = None
 
   def mock_lookup(aid: str) -> typing.Optional[str]:
+    """Docstring."""
     if aid == "flatten_range":
       return "jnp.reshape"
     return None
@@ -287,6 +289,7 @@ def test_flatten_callable_class(rewriter: PivotRewriter) -> None:
   rewriter.context.hook_context._current_variant = MagicMock(op_type=MagicMock(value="class"))
 
   def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+    """Docstring."""
     if aid == "Flatten":
       return {"api": "tf.keras.layers.Flatten"}
     return None

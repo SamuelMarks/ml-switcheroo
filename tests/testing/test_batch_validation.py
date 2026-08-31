@@ -40,6 +40,7 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
     constraints: Optional[Dict[str, Any]] = None,
     shape_calc: Optional[str] = None,
   ) -> Tuple[bool, str]:
+    """Docstring."""
     if not variants:
       return (True, "Skipped")
     api: str = list(variants.values())[0]["api"]
@@ -87,6 +88,7 @@ def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.P
   (test_dir / "test_manual.py").write_text("def test_manual_op(): pass")
 
   def mock_verify(*args: Any, **kwargs: Any) -> Tuple[bool, str]:
+    """Docstring."""
     return (True, "OK")
 
   with patch.object(validator.runner, "verify", side_effect=mock_verify) as mock_run:

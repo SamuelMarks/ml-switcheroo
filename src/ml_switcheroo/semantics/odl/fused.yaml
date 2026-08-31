@@ -1,5 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- out_spaces
-type: function
-operation: fused

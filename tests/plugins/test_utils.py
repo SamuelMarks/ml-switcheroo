@@ -110,6 +110,8 @@ def test_utils_missing() -> None:
   from ml_switcheroo.plugins.utils import _extract_root_name, is_framework_module_node
 
   class DummyAlias:
+    """Docstring."""
+
     def model_dump(self) -> dict:
       """Mock implementation of model dump.
 
@@ -119,6 +121,8 @@ def test_utils_missing() -> None:
       return {"name": "pd"}
 
   class DummyConf:
+    """Docstring."""
+
     alias: DummyAlias = DummyAlias()
 
   class DummyConfNoDump:
@@ -127,6 +131,8 @@ def test_utils_missing() -> None:
     alias: object = object()
 
   class DummySM:
+    """Docstring."""
+
     _source_registry: dict = {"torch.nn": {}}
     framework_configs: dict = {
       "pandas": DummyConf(),
@@ -139,6 +145,8 @@ def test_utils_missing() -> None:
     }
 
   class DummyConfigObj:
+    """Docstring."""
+
     source_framework: str = "s"
     target_framework: str = "target_fw"
     effective_source: str = "s"

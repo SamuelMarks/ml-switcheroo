@@ -1,4 +1,0 @@
-description: Globally disable compilation.
-std_args: []
-variants: {}
-operation: DisableCompile

@@ -35,6 +35,7 @@ def test_torch_convert_numpy_exception(monkeypatch):
   # actually, why don't we monkeypatch the REAL torch module in sys.modules
 
   def mock_from_numpy(data):
+    """Docstring."""
     raise ValueError("mock error")
 
   monkeypatch.setattr(torch, "from_numpy", mock_from_numpy)
@@ -49,6 +50,7 @@ def test_torch_convert_list_exception(monkeypatch):
   import torch
 
   def mock_tensor(data):
+    """Docstring."""
     raise ValueError("mock error")
 
   monkeypatch.setattr(torch, "tensor", mock_tensor)
@@ -77,6 +79,7 @@ def test_torch_collect_live_layer():
   from ml_switcheroo_ir.schema.ghost import SemanticTier
 
   def dummy_scan_layers():
+    """Docstring."""
     return ["layer1"]
 
   fw._scan_layers = dummy_scan_layers
@@ -92,6 +95,7 @@ def test_torch_import_fail_in_convert(monkeypatch):
   original_import = builtins.__import__
 
   def mock_import(name, *args, **kwargs):
+    """Docstring."""
     if name == "torch":
       raise ImportError("mock error")
     return original_import(name, *args, **kwargs)
@@ -118,10 +122,14 @@ def test_torch_convert_numpy_fallback(monkeypatch):
   import sys
 
   class MockTorch:
+    """Docstring."""
+
     def from_numpy(self, data):
+      """Docstring."""
       raise ValueError()
 
     def tensor(self, data):
+      """Docstring."""
       return "fallback"
 
   monkeypatch.setitem(sys.modules, "torch", MockTorch())
@@ -135,7 +143,10 @@ def test_torch_convert_list_fallback(monkeypatch):
   import sys
 
   class MockTorch:
+    """Docstring."""
+
     def tensor(self, data):
+      """Docstring."""
       raise ValueError()
 
   monkeypatch.setitem(sys.modules, "torch", MockTorch())

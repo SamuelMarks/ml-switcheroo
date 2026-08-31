@@ -1,4 +1,9 @@
-"""Docstring."""
+"""TikZ visualizer backend for LogicalGraphs.
+
+This module provides the TikzBackend, which converts LogicalGraphs into
+TikZ LaTeX diagrams, calculating a rank-based layout for node positioning
+and generating a compileable TikZ abstract syntax tree.
+"""
 
 from typing import Any
 

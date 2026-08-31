@@ -110,6 +110,8 @@ def test_sass_lifter_unrecognized_comment() -> None:
   lifter = SassLifter()
 
   class MockSassOperand:
+    """Docstring."""
+
     def __str__(self) -> str:
       """Returns a string representation of the mock operand.
 

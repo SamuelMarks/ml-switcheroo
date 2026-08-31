@@ -48,6 +48,8 @@ def rewriter() -> Generator[PivotRewriter, None, None]:
 
   @register_framework("custom_fw")
   class CustomFW:
+    """Docstring."""
+
     pass
 
   cfg: RuntimeConfig = RuntimeConfig(source_framework="jax", target_framework="custom_fw")

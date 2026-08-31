@@ -9,6 +9,8 @@ def test_compiler_backend_base() -> None:
   from ml_switcheroo.core.compiler.ir import LogicalGraph
 
   class DummyBackend(CompilerBackend):
+    """Docstring."""
+
     def compile(self, graph: LogicalGraph) -> str:
       """Mock implementation of compile."""
       return super().compile(graph)  # type: ignore

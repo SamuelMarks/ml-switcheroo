@@ -1,4 +1,10 @@
-"""Test module."""
+"""Test module for the Control Flow Graph (CFG) analysis components.
+
+This module contains unit tests verifying the correctness of the `BasicBlock` and
+`ControlFlowGraph` structures used for static analysis of code paths. It ensures
+that blocks can be created, linked correctly, and that algorithms like DFS
+traversal execute as expected.
+"""
 
 import pytest
 
@@ -6,7 +12,11 @@ from ml_switcheroo.analysis.cfg import BasicBlock, ControlFlowGraph
 
 
 def test_basic_block() -> None:
-  """Docstring."""
+  """Test the creation and mutation of a BasicBlock structure.
+
+  Verifies that instructions can be appended to a basic block, and that predecessor
+  and successor relationships are established and remain idempotent upon duplication.
+  """
   bb1: BasicBlock = BasicBlock("block1")
   bb2: BasicBlock = BasicBlock("block2")
 
@@ -29,7 +39,12 @@ def test_basic_block() -> None:
 
 
 def test_control_flow_graph() -> None:
-  """Docstring."""
+  """Test the core management logic of the ControlFlowGraph.
+
+  Verifies that a CFG automatically designates the first created block as the
+  entry block and ensures that subsequent requests for the same block ID
+  return the existing block instance (singleton per ID).
+  """
   cfg: ControlFlowGraph = ControlFlowGraph()
   assert cfg.entry_block is None
 
@@ -48,7 +63,11 @@ def test_control_flow_graph() -> None:
 
 
 def test_cfg_set_entry_block() -> None:
-  """Docstring."""
+  """Test the explicit re-assignment of the CFG entry block.
+
+  Verifies that the entry block can be changed dynamically to an existing block,
+  and that attempting to set an unknown block as the entry raises an appropriate ValueError.
+  """
   cfg: ControlFlowGraph = ControlFlowGraph()
   cfg.get_or_create_block("block1")
   bb2: BasicBlock = cfg.get_or_create_block("block2")
@@ -61,7 +80,12 @@ def test_cfg_set_entry_block() -> None:
 
 
 def test_cfg_traverse_dfs() -> None:
-  """Docstring."""
+  """Test the Depth-First Search (DFS) traversal algorithm on the CFG.
+
+  Verifies that a standard diamond CFG structure (A -> B, A -> C, B -> D, C -> D)
+  traverses correctly. Also tests that starting the traversal from an intermediate
+  block yields only the reachable subset.
+  """
   cfg: ControlFlowGraph = ControlFlowGraph()
   bb1: BasicBlock = cfg.get_or_create_block("A")
   bb2: BasicBlock = cfg.get_or_create_block("B")
@@ -91,7 +115,10 @@ def test_cfg_traverse_dfs() -> None:
 
 
 def test_cfg_traverse_dfs_no_entry() -> None:
-  """Docstring."""
+  """Test DFS traversal failure when no entry block is defined.
+
+  Verifies that calling DFS on an empty ControlFlowGraph safely raises a ValueError.
+  """
   cfg: ControlFlowGraph = ControlFlowGraph()
   with pytest.raises(ValueError, match="Cannot traverse CFG: No entry block defined."):
     cfg.traverse_dfs()

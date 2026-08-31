@@ -68,6 +68,8 @@ def test_get_plugin_config_validation() -> None:
   config: RuntimeConfig = RuntimeConfig(source_framework="jax", target_framework="torch", plugin_settings={"x": "bad"})
 
   class DummySchema(BaseModel):
+    """Docstring."""
+
     x: int
 
   with pytest.raises(ValueError):
@@ -91,6 +93,8 @@ def test_runtime_config_default_fallback(monkeypatch: pytest.MonkeyPatch) -> Non
   assert conf._resolve_default_target() == "target_placeholder"
 
   class BadAdapter:
+    """Docstring."""
+
     @property
     def ui_priority(self) -> str:
       """Helper to UI priority."""

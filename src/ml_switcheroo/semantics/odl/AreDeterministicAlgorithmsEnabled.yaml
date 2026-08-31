@@ -1,4 +1,0 @@
-description: Returns True if global deterministic flag is turned on.
-std_args: []
-variants: {}
-operation: AreDeterministicAlgorithmsEnabled

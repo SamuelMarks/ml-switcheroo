@@ -325,7 +325,7 @@ class SassAdapter(FrameworkAdapter):
         if "BRA " in line:
           # Extract target label
           parts = line.split("BRA ")
-          if len(parts) > 1:
+          if len(parts) > 1:  # pragma: no branch
             target = parts[1].strip().strip(";")
             target_block = cfg.get_or_create_block(target)
             current_block.add_successor(target_block)

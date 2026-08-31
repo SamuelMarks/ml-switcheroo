@@ -46,6 +46,8 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   """Docstring."""
 
   class CustomNNAdapter:
+    """Docstring."""
+
     def convert(self, x: typing.Any) -> typing.Any:
       """Converts ."""
       return x

@@ -1,4 +1,0 @@
-description: Gets the default device.
-std_args: []
-variants: {}
-operation: GetDefaultDevice

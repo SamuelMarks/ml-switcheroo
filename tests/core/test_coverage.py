@@ -34,6 +34,8 @@ def test_latex_parser_edges() -> None:
   from ml_switcheroo.core.latex.nodes import LatexNode
 
   class DummyOp(LatexNode):
+    """Docstring."""
+
     def __init__(self) -> None:
       """Initializes the DummyOp instance."""
       super().__init__()
@@ -141,6 +143,7 @@ def test_mlir_generator_gaps() -> None:
   gen.usage_counts["%2"] = 1
 
   def mock_get_attr(o: typing.Any, attr: str) -> typing.Optional[str]:
+    """Docstring."""
     if attr == "type":
       return None
     return '"foo_attr"'
@@ -171,6 +174,8 @@ def test_stablehlo_emitter_gaps() -> None:
   from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
 
   class MockSemantics:
+    """Docstring."""
+
     def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
       """Mock implementation of get definition."""
       if name == "missing_variant":
@@ -193,9 +198,13 @@ def test_structure_pass_coverage_245() -> None:
   from ml_switcheroo.core.rewriter.passes.structure import StructuralTransformer
 
   class MockSuper:
+    """Docstring."""
+
     pass
 
   class FakePass(MockSuper, StructuralTransformer):  # type: ignore
+    """Docstring."""
+
     def __init__(self) -> None:
       """Initializes the FakePass instance."""
       self.context = type("MockContext", (), {"source_fw": "src", "target_fw": "tgt", "semantics": None})()
@@ -208,6 +217,7 @@ def test_structure_pass_coverage_245() -> None:
   original_hasattr = builtins.hasattr
 
   def mock_hasattr(obj: typing.Any, name: str) -> bool:
+    """Docstring."""
     if name == "leave_Attribute" and isinstance(obj, super):
       return False
     return original_hasattr(obj, name)
@@ -293,6 +303,8 @@ def test_html_node_not_implemented() -> None:
   from ml_switcheroo.core.html.nodes import HtmlNode
 
   class DummyNode(HtmlNode):
+    """Docstring."""
+
     pass
 
   with pytest.raises(NotImplementedError):
@@ -304,6 +316,8 @@ def test_latex_node_to_text() -> None:
   from ml_switcheroo.core.latex.nodes import LatexNode
 
   class DummyNode(LatexNode):
+    """Docstring."""
+
     def to_latex(self) -> str:
       """Mock implementation of to LaTeX."""
       return super().to_latex()
@@ -327,7 +341,10 @@ def test_mlir_gen_base_coverage() -> None:
   from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
 
   class MockGen(BaseGeneratorMixin):
+    """Docstring."""
+
     def map_op(self, op: OperationNode) -> typing.Any:
+      """Docstring."""
       pass
 
   mixin = MockGen()
@@ -341,6 +358,8 @@ def test_mlir_node_to_text() -> None:
   from ml_switcheroo.core.mlir.cst import MlirNode
 
   class DummyNode(MlirNode):
+    """Docstring."""
+
     def to_text(self) -> typing.Any:
       """Mock implementation of to text."""
       try:
@@ -356,6 +375,8 @@ def test_rewriter_interface() -> None:
   from ml_switcheroo.core.rewriter.interface import RewriterPass
 
   class DummyPass(RewriterPass):
+    """Docstring."""
+
     def transform(self, module: cst.Module, context: typing.Any) -> cst.Module:
       """Mock implementation of transform."""
       try:
@@ -392,6 +413,8 @@ def test_tikz_nodes_coverage() -> None:
   from ml_switcheroo.core.tikz.nodes import TikzBaseNode, TikzGraph, TikzNode, TriviaNode
 
   class DummyNode(TikzBaseNode):
+    """Docstring."""
+
     def to_text(self) -> str:
       """Mock implementation of to text."""
       try:

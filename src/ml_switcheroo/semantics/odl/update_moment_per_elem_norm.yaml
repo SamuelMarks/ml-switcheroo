@@ -1,4 +1,0 @@
-description: Auto-generated from jax_code_defs
-std_args: []
-type: attribute
-operation: update_moment_per_elem_norm

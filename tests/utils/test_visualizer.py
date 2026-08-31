@@ -88,6 +88,8 @@ def test_visualizer_exceptions() -> None:
   gen: MermaidGenerator = MermaidGenerator()
 
   class BadNode(cst.CSTNode):
+    """Docstring."""
+
     def _codegen_impl(self, state: Any) -> None:
       """Helper to  codegen impl."""
       raise Exception("fail")
@@ -146,6 +148,8 @@ def test_visualizer_more_fallbacks() -> None:
   gen.visit_Call(call)
 
   class DummyImportAlias(cst.ImportAlias):
+    """Docstring."""
+
     pass
 
   imp: cst.Import = cst.Import(names=[DummyImportAlias(name=cst.Attribute(cst.Name("a"), cst.Name("b")))])

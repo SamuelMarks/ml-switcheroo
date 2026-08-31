@@ -1,4 +1,0 @@
-description: FBGEMM linear with FP16 weights.
-std_args: []
-variants: {}
-operation: FbgemmLinearFp16Weight

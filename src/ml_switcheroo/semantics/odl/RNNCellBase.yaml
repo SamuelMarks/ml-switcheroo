@@ -1,4 +1,0 @@
-description: Base class for RNN Cells.
-std_args: []
-type: class
-operation: RNNCellBase

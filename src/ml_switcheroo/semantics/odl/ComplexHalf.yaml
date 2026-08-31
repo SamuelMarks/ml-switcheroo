@@ -1,5 +1,0 @@
-description: Half-precision complex data type.
-op_type: attribute
-std_args: []
-variants: {}
-operation: ComplexHalf

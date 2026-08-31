@@ -260,3 +260,13 @@ def test_paxml_init_logging(monkeypatch: pytest.MonkeyPatch) -> None:
   with patch("ml_switcheroo.frameworks.paxml.load_snapshot_for_adapter", return_value=None):
     adapter = pax_fw.PaxmlAdapter()
     assert adapter._mode.name == "GHOST"
+
+
+def test_paxml_ghost_mode_with_snapshot() -> None:
+  """Docstring."""
+  from unittest.mock import patch
+  from ml_switcheroo.frameworks.paxml import PaxmlAdapter
+
+  with patch("ml_switcheroo.frameworks.paxml.load_snapshot_for_adapter", return_value={"test": 1}):
+    adapter = PaxmlAdapter()
+    assert adapter._snapshot_data == {"test": 1}

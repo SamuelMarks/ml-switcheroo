@@ -1,7 +1,9 @@
 operation: TensorDataset
 description: Definition for TensorDataset
 std_args:
-- tensors
+- name: tensors
+  type: Any
 variants:
   torch:
     api: torch.utils.data.TensorDataset
+    args: {}

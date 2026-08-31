@@ -1,4 +1,9 @@
-"""Test module."""
+"""Test module for the semantic API CoverageScanner.
+
+This module contains unit tests verifying the correctness of `CoverageScanner` in tracking
+and identifying API usage within CST trees. It tests alias resolution (e.g. `import torch as t`),
+FQNs extraction, and interaction with the `SemanticsManager`.
+"""
 
 import libcst as cst
 
@@ -7,7 +12,12 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_coverage_scanner_import_resolution() -> None:
-  """Docstring."""
+  """Test that CoverageScanner correctly resolves standard and aliased imports.
+
+  This test verifies that standard modules (`torch`), aliased modules (`import torch.nn as nn`),
+  and `from` imports (`from jax import numpy as jnp`) correctly populate the scanner's internal
+  alias map and are recognized when they are later invoked in the code.
+  """
   semantics: SemanticsManager = SemanticsManager()
   scanner: CoverageScanner = CoverageScanner(semantics, {"torch", "jax"})
 
@@ -44,7 +54,11 @@ unknown.call()
 
 
 def test_coverage_scanner_resolve_fqn() -> None:
-  """Docstring."""
+  """Test the correct generation of Fully Qualified Names (FQNs) based on aliases.
+
+  This verifies that the scanner can map method calls back to their canonical FQNs.
+  For example, if `torch` is imported as `t`, `t.sum()` should resolve to `torch.sum`.
+  """
   semantics: SemanticsManager = SemanticsManager()
   scanner: CoverageScanner = CoverageScanner(semantics, {"torch"})
 
@@ -64,7 +78,13 @@ non_name_call(1)
 
 
 def test_coverage_scanner_edge_cases() -> None:
-  """Docstring."""
+  """Test edge cases such as relative imports, unrecognized node types, and single root calls.
+
+  This test ensures the scanner degrades gracefully when handling:
+  - Relative `from . import` statements where `node.module` may be empty.
+  - Invalid nodes passed to `_check_node`.
+  - Calling a root module alias directly (e.g., `t()` when `import torch as t`).
+  """
   semantics: SemanticsManager = SemanticsManager()
   scanner: CoverageScanner = CoverageScanner(semantics, {"torch"})
 
@@ -88,3 +108,24 @@ t()
   tree_alias_only: cst.Module = cst.parse_module(code_alias_only)
   tree_alias_only.visit(scanner)
   assert scanner.results["torch"][1] == "torch"
+
+
+def test_coverage_scanner_variants_no_match() -> None:
+  """Test that scanner identifies the root module even when semantics mapping returns a variant.
+
+  This verifies that if we have a mocked `SemanticsManager` returning definitions, the
+  scanner correctly attributes the API call to the framework tracked by the scanner.
+  """
+  from unittest.mock import MagicMock
+
+  semantics = MagicMock()
+  semantics.get_definition.return_value = ("abstract_id", {"variants": {"jax": {"api": "jax.other"}}})
+  scanner = CoverageScanner(semantics, {"jax"})
+
+  code = """
+import jax
+jax.something()
+"""
+  tree = cst.parse_module(code)
+  tree.visit(scanner)
+  assert scanner.results["jax.something"] == (True, "jax")

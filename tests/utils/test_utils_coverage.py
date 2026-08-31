@@ -29,6 +29,8 @@ def test_doc_context_branches() -> None:
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
+    """Docstring."""
+
     def get_all_operations(self) -> Dict[str, Any]:
       """Mock implementation of get all operations."""
       return {}
@@ -61,6 +63,8 @@ def test_doc_context_more() -> None:
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
+    """Docstring."""
+
     pass
 
   b: DocContextBuilder = DocContextBuilder(DummySM())
@@ -85,6 +89,8 @@ def test_doc_context_more_variants() -> None:
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
+    """Docstring."""
+
     pass
 
   b: DocContextBuilder = DocContextBuilder(DummySM())

@@ -108,6 +108,7 @@ def test_jax_convert_exception() -> None:
     fromlist: tuple[str, ...] = (),
     level: int = 0,
   ) -> types.ModuleType:
+    """Docstring."""
     if name == "jax.numpy":
       raise ImportError("mock")
     return real_import(name, globals, locals, fromlist, level)

@@ -1,4 +1,0 @@
-description: Globally enable compilation.
-std_args: []
-variants: {}
-operation: EnableCompile

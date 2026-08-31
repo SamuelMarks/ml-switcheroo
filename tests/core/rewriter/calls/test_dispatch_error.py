@@ -43,6 +43,7 @@ class DummyRewriter:
     self.source_fw = source_fw
 
   def _is_module_alias(self, name: typing.Any) -> bool:
+    """Docstring."""
     return False
 
 

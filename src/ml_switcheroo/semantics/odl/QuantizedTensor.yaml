@@ -1,4 +1,0 @@
-description: A tensor which has been quantized to int8 and its scales.
-std_args: []
-type: class
-operation: QuantizedTensor

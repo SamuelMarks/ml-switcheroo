@@ -1,6 +1,0 @@
-description: Gather data from across processes.
-std_args:
-- in_tree
-- tiled
-type: function
-operation: process_allgather

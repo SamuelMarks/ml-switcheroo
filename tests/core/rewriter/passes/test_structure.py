@@ -191,6 +191,8 @@ def test_is_framework_base_traits_object() -> None:
   (transformer, sem, ctx) = get_transformer()
 
   class DummyTraits:
+    """Docstring."""
+
     module_base = "my.Framework"
 
   sem.configs["torch"] = {"traits": DummyTraits()}
@@ -335,10 +337,15 @@ def test_leave_attribute_super_shim() -> None:
   ctx = RewriterContext(semantics=SemanticsManager(), config=RuntimeConfig())
 
   class SuperShim(cst.CSTTransformer):
+    """Docstring."""
+
     def leave_Attribute(self, original: typing.Any, updated: typing.Any) -> typing.Any:
+      """Docstring."""
       return updated.with_changes(value=cst.Name("shimmed"))
 
   class ShimmedStructuralPass(StructuralTransformer, SuperShim):  # type: ignore
+    """Docstring."""
+
     pass
 
   transformer = ShimmedStructuralPass(ctx)  # type: ignore

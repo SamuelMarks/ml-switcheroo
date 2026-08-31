@@ -1,1035 +1,659 @@
-# Snapshot Grounding Implementation Plan
+# Semantic Docstring Overhaul Plan
 
-## Phase 1: Extend Snapshot Auditing to Python AST
-
-- [x] Extend `scripts/audit_against_snapshots.py` to recursively scan `src/ml_switcheroo/frameworks/` and `src/ml_switcheroo/plugins/` for `.py` files.
-- [x] Implement an AST parser within `audit_against_snapshots.py` that builds an alias map of all `import` and `import from` statements (e.g. tracking `import mlx.core as mx` to `mlx.core`).
-- [x] Implement an AST walker that searches for `ast.Attribute` and `ast.Call` nodes to reconstruct full API call chains (e.g. `jnp.sum` -> `jax.numpy.sum`).
-- [x] Resolve reconstructed API call chains against the alias map to get fully qualified API names.
-- [x] Ensure the loaded JSON snapshots from `../ml-framework-snapshots` are queried with these fully qualified Python APIs.
-- [x] Integrate the AST check alongside the existing ODL/JSON declarative checks, reporting any missing/hallucinated APIs.
-- [x] Verify the existing `.pre-commit-config.yaml` correctly invokes the updated script during `pre-commit run --all-files`.
-
-## Phase 2: Add IR/Compiler Spec Auditors to Pre-commit
-
-- [x] Modify `.pre-commit-config.yaml` to add a local hook for `scripts/audit_mlir_spec.py`.
-- [x] Modify `.pre-commit-config.yaml` to add a local hook for `scripts/audit_stablehlo_spec.py`.
-- [x] Test the new pre-commit hooks to ensure they properly execute against the current codebase and fail if specs are violated.
-
-## Phase 3: Audit Inline Snippets in ODL/Definitions
-
-- [x] Expand `scripts/audit_against_snapshots.py` to extract string literals from `code: "..."` and similar snippet blocks within `.yaml` and `.json` definitions.
-- [x] Parse these extracted snippets using `ast.parse()` to safely extract programmatic API calls inside the declarative files.
-- [x] Route these snippet-extracted APIs through the same snapshot validation logic as the Python source files.
-
-## Griffe Synergy
-
-- [x] Note: Our `../griffe` repo is heavily focused on parsing Docstrings to AST via `cdd-python`.
-- [x] The current AST static analysis in Phase 1 provides complementary protection specifically for programmatic framework API calls inside our implementation code, independent of the docstring limitations listed in `LIMITATIONS_OF_CDD_PYTHON.md`.
-- [x] Evaluate if Griffe's broader codebase structural scanning can be integrated in the future to map docstring signatures directly against the loaded JSON snapshots, providing a two-way validation of docs vs reality.
-
-# TODO: Missing Type Annotations
-
-The following files contain variables, parameters, or return types that lack explicit type annotations.
-
-- [x] src/ml_switcheroo/__init__.py
-- [x] src/ml_switcheroo/analysis/cfg.py
-- [x] src/ml_switcheroo/analysis/purity.py
-- [x] src/ml_switcheroo/analysis/symbol_table.py
-- [x] src/ml_switcheroo/analysis/symbol_types.py
-- [x] src/ml_switcheroo/cli/handlers/convert.py
-- [x] src/ml_switcheroo/cli/handlers/convert_weights.py
-- [x] src/ml_switcheroo/cli/handlers/suggest.py
-- [x] src/ml_switcheroo/cli/matrix.py
-- [x] src/ml_switcheroo/config.py
-- [x] src/ml_switcheroo/core/compiler/backend.py
-- [x] src/ml_switcheroo/core/compiler/backends/cpp/parser.py
-- [x] src/ml_switcheroo/core/compiler/backends/html.py
-- [x] src/ml_switcheroo/core/compiler/backends/mlir_backend.py
-- [x] src/ml_switcheroo/core/compiler/backends/python.py
-- [x] src/ml_switcheroo/core/compiler/backends/python_snippet.py
-- [x] src/ml_switcheroo/core/compiler/backends/rdna/macros.py
-- [x] src/ml_switcheroo/core/compiler/backends/sass/macros.py
-- [x] src/ml_switcheroo/core/compiler/backends/sass/macros_extra.py
-- [x] src/ml_switcheroo/core/compiler/backends/stablehlo.py
-- [x] src/ml_switcheroo/core/compiler/backends/visual_backends.py
 - [x] src/ml_switcheroo/core/compiler/backends/visual_latex.py
 - [x] src/ml_switcheroo/core/compiler/backends/visual_tikz.py
-- [x] src/ml_switcheroo/core/compiler/backends/wasm_backend.py
-- [x] src/ml_switcheroo/core/compiler/differ.py
-- [x] src/ml_switcheroo/core/compiler/frontends/rdna/analysis.py
-- [x] src/ml_switcheroo/core/compiler/frontends/rdna/lifter.py
-- [x] src/ml_switcheroo/core/compiler/frontends/rdna/parser.py
-- [x] src/ml_switcheroo/core/compiler/frontends/sass/analysis.py
-- [x] src/ml_switcheroo/core/compiler/frontends/sass/lifter.py
-- [x] src/ml_switcheroo/core/compiler/frontends/sass/parser.py
-- [x] src/ml_switcheroo/core/compiler/frontends/semantic_parser.py
-- [x] src/ml_switcheroo/core/compiler/registry.py
-- [x] src/ml_switcheroo/core/engine.py
-- [x] src/ml_switcheroo/core/escape_hatch.py
-- [x] src/ml_switcheroo/core/ghost.py
-- [x] src/ml_switcheroo/core/hooks.py
-- [x] src/ml_switcheroo/core/hooks_registry.py
-- [x] src/ml_switcheroo/core/html/parser.py
-- [x] src/ml_switcheroo/core/ingestion.py
 - [x] src/ml_switcheroo/core/mlir/emitter_decl.py
 - [x] src/ml_switcheroo/core/mlir/emitter_expr.py
-- [x] src/ml_switcheroo/core/mlir/generator.py
-- [x] src/ml_switcheroo/core/mlir/parser.py
-- [x] src/ml_switcheroo/core/mlir/stablehlo_emitter.py
 - [x] src/ml_switcheroo/core/rewriter/calls/dispatch.py
 - [x] src/ml_switcheroo/core/rewriter/calls/guards.py
 - [x] src/ml_switcheroo/core/rewriter/calls/post.py
 - [x] src/ml_switcheroo/core/rewriter/calls/pre.py
 - [x] src/ml_switcheroo/core/rewriter/calls/strategy.py
 - [x] src/ml_switcheroo/core/rewriter/calls/utils.py
-- [x] src/ml_switcheroo/core/rewriter/normalization_utils.py
-- [x] src/ml_switcheroo/core/rewriter/passes/api.py
+- [x] src/ml_switcheroo/core/rewriter/passes/api_attr_mixin.py
+- [x] src/ml_switcheroo/core/rewriter/passes/api_call_mixin.py
 - [x] src/ml_switcheroo/core/rewriter/passes/api_helpers.py
-- [x] src/ml_switcheroo/core/rewriter/passes/auxiliary.py
-- [x] src/ml_switcheroo/core/rewriter/passes/structure.py
-- [x] src/ml_switcheroo/core/rewriter/passes/structure_helpers.py
-- [x] src/ml_switcheroo/core/rewriter/patcher.py
-- [x] src/ml_switcheroo/core/tikz/parser.py
-- [x] src/ml_switcheroo/core/tracer.py
-- [x] src/ml_switcheroo/discovery/consensus.py
-- [x] src/ml_switcheroo/frameworks/base.py
-- [x] src/ml_switcheroo/frameworks/common/jax_stack.py
-- [x] src/ml_switcheroo/frameworks/flax_nnx.py
-- [x] src/ml_switcheroo/frameworks/html_dsl.py
-- [x] src/ml_switcheroo/frameworks/jax.py
-- [x] src/ml_switcheroo/frameworks/keras.py
-- [x] src/ml_switcheroo/frameworks/latex_dsl.py
-- [x] src/ml_switcheroo/frameworks/maxtext.py
-- [x] src/ml_switcheroo/frameworks/mlir.py
-- [x] src/ml_switcheroo/frameworks/mlx.py
-- [x] src/ml_switcheroo/frameworks/numpy.py
-- [x] src/ml_switcheroo/frameworks/paxml.py
-- [x] src/ml_switcheroo/frameworks/rdna.py
-- [x] src/ml_switcheroo/frameworks/sass.py
-- [x] src/ml_switcheroo/frameworks/stablehlo.py
-- [x] src/ml_switcheroo/frameworks/tensorflow.py
-- [x] src/ml_switcheroo/frameworks/tikz.py
-- [x] src/ml_switcheroo/frameworks/torch.py
-- [x] src/ml_switcheroo/generated_tests/generator.py
-- [x] src/ml_switcheroo/generated_tests/inputs.py
-- [x] src/ml_switcheroo/generated_tests/runtime.py
-- [x] src/ml_switcheroo/generated_tests/runtime_builder.py
-- [x] src/ml_switcheroo/generated_tests/templates.py
-- [x] src/ml_switcheroo/importers/array_api_reader.py
-- [x] src/ml_switcheroo/importers/future_onnx_reader.py
-- [x] src/ml_switcheroo/importers/onnx_reader.py
-- [x] src/ml_switcheroo/importers/sass_reader.py
-- [x] src/ml_switcheroo/importers/stablehlo_reader.py
-- [x] src/ml_switcheroo/ingestion/verified_pipeline.py
-- [x] src/ml_switcheroo/plugins/attention_packing.py
-- [x] src/ml_switcheroo/plugins/loop_unroll.py
-- [x] src/ml_switcheroo/plugins/mlx_optimizers.py
-- [x] src/ml_switcheroo/plugins/optimizer_step.py
-- [x] src/ml_switcheroo/plugins/static_unroll.py
-- [x] src/ml_switcheroo/plugins/tf_data_loader.py
-- [x] src/ml_switcheroo/semantics/file_loader.py
-- [x] src/ml_switcheroo/semantics/manager.py
-- [x] src/ml_switcheroo/semantics/merging.py
-- [x] src/ml_switcheroo/semantics/registry_loader.py
-- [x] src/ml_switcheroo/sphinx_ext/__init__.py
-- [x] src/ml_switcheroo/sphinx_ext/autogen_ops.py
-- [x] src/ml_switcheroo/sphinx_ext/hooks.py
-- [x] src/ml_switcheroo/sphinx_ext/registry.py
-- [x] src/ml_switcheroo/sphinx_ext/rendering.py
-- [x] src/ml_switcheroo/testing/batch_runner.py
-- [x] src/ml_switcheroo/testing/bisector.py
-- [x] src/ml_switcheroo/testing/fuzzer/core.py
-- [x] src/ml_switcheroo/testing/fuzzer/generators.py
-- [x] src/ml_switcheroo/testing/fuzzer/heuristics.py
-- [x] src/ml_switcheroo/testing/fuzzer/parser.py
-- [x] src/ml_switcheroo/testing/fuzzer/strategies.py
-- [x] src/ml_switcheroo/testing/harness_generator.py
-- [x] src/ml_switcheroo/testing/runner.py
-- [x] src/ml_switcheroo/tools/injector_fw/core.py
-- [x] src/ml_switcheroo/tools/injector_fw/utils.py
-- [x] src/ml_switcheroo/tools/injector_spec.py
-- [x] src/ml_switcheroo/utils/code_extractor.py
-- [x] src/ml_switcheroo/utils/console.py
-- [x] src/ml_switcheroo/utils/doc_context.py
-- [x] src/ml_switcheroo/utils/doc_gen.py
-- [x] src/ml_switcheroo/utils/doc_renderer.py
-- [x] src/ml_switcheroo/utils/readme_editor.py
 - [x] tests/analysis/test_audit.py
 - [x] tests/analysis/test_cfg.py
 - [x] tests/analysis/test_dependencies.py
-- [x] tests/analysis/test_dependencies_extra.py
 - [x] tests/analysis/test_dominators.py
 - [x] tests/analysis/test_lifecycle.py
-- [x] tests/analysis/test_lifecycle_extra.py
 - [x] tests/analysis/test_purity.py
 - [x] tests/analysis/test_symbol_table.py
 - [x] tests/analysis/test_symbol_table2.py
-- [x] tests/analysis/test_symbol_table_extra.py
 - [x] tests/analysis/test_symbol_types.py
-- [x] tests/audit_traits.py
 - [x] tests/cli/handlers/test_convert.py
-- [x] tests/cli/handlers/test_convert_weights.py
-- [x] tests/cli/handlers/test_define.py
-- [x] tests/cli/handlers/test_dev.py
-- [x] tests/cli/handlers/test_harvest.py
-- [x] tests/cli/handlers/test_meta.py
-- [x] tests/cli/handlers/test_scaffold.py
-- [x] tests/cli/handlers/test_suggest.py
-- [x] tests/cli/handlers/test_verify.py
-- [x] tests/cli/test_cli_extra.py
-- [x] tests/cli/test_cli_extra2.py
-- [x] tests/cli/test_commands.py
-- [x] tests/cli/test_commands_extra.py
-- [x] tests/cli/test_convert.py
-- [x] tests/cli/test_convert_weights.py
-- [x] tests/cli/test_define.py
-- [x] tests/cli/test_dev.py
-- [x] tests/cli/test_harvest.py
-- [x] tests/cli/test_main.py
-- [x] tests/cli/test_matrix.py
-- [x] tests/cli/test_matrix_cmd.py
-- [x] tests/cli/test_meta.py
-- [x] tests/cli/test_scaffold.py
-- [x] tests/cli/test_suggest.py
-- [x] tests/cli/test_verify.py
-- [x] tests/codegen/test_generator_constraints.py
-- [x] tests/codegen/test_generator_determinism.py
-- [x] tests/codegen/test_generator_flow.py
-- [x] tests/codegen/test_generator_grad.py
-- [x] tests/codegen/test_generator_jit.py
-- [x] tests/codegen/test_generator_paxml.py
-- [x] tests/codegen/test_generator_runtime.py
-- [x] tests/codegen/test_generator_shape.py
-- [x] tests/codegen/test_generator_template.py
-- [x] tests/codegen/test_generator_tolerances.py
-- [x] tests/codegen/test_generator_types.py
-- [x] tests/codegen/test_generator_verification_mode.py
-- [x] tests/codegen/test_generator_void_return.py
-- [x] tests/codegen/test_inputs_extra.py
-- [x] tests/codegen/test_physical_gen.py
-- [x] tests/codegen/test_runtime_builder_missing.py
-- [x] tests/codegen/test_runtime_comparator.py
-- [x] tests/codegen/test_runtime_comparator_exact.py
-- [x] tests/codegen/test_runtime_coverage.py
-- [x] tests/codegen/test_runtime_extra.py
-- [x] tests/codegen/test_templates_extra.py
-- [x] tests/compiler/backends/cpp/test_cst_extra.py
-- [x] tests/compiler/backends/cpp/test_mapper.py
-- [x] tests/compiler/backends/cpp/test_mapper_extra.py
-- [x] tests/compiler/backends/cpp/test_parser.py
-- [x] tests/compiler/backends/cpp/test_parser_coverage.py
-- [x] tests/compiler/backends/cpp/test_transformer_extra.py
-- [x] tests/compiler/backends/test_backends_gap.py
-- [x] tests/compiler/backends/test_backends_gap2.py
-- [x] tests/compiler/backends/test_extras_gap.py
-- [x] tests/compiler/backends/test_mlir_printer.py
-- [x] tests/compiler/backends/test_python_backend.py
-- [x] tests/compiler/backends/test_python_backend_missing.py
-- [x] tests/compiler/backends/test_python_backend_missing2.py
-- [x] tests/compiler/backends/test_python_backend_missing3.py
-- [x] tests/compiler/backends/test_python_backend_missing4.py
-- [x] tests/compiler/backends/test_python_snippet.py
-- [x] tests/compiler/backends/test_rdna_printer.py
-- [x] tests/compiler/backends/test_rdna_roundtrip.py
-- [x] tests/compiler/backends/test_rdna_synth_extra.py
-- [x] tests/compiler/backends/test_rdna_synthesizer.py
-- [x] tests/compiler/backends/test_sass_printer.py
-- [x] tests/compiler/backends/test_sass_roundtrip.py
-- [x] tests/compiler/backends/test_sass_synth_extra.py
-- [x] tests/compiler/backends/test_sass_synth_macros_all.py
-- [x] tests/compiler/backends/test_sass_synth_missing.py
-- [x] tests/compiler/backends/test_sass_synthesizer.py
-- [x] tests/compiler/backends/test_stablehlo_control.py
-- [x] tests/compiler/backends/test_stablehlo_data.py
-- [x] tests/compiler/backends/test_stablehlo_dist.py
-- [x] tests/compiler/backends/test_stablehlo_math.py
-- [x] tests/compiler/backends/test_stablehlo_nn.py
-- [x] tests/compiler/backends/test_stablehlo_other.py
-- [x] tests/compiler/backends/test_visual_backends_missing.py
-- [x] tests/compiler/frontends/test_analyzer_edge_cases.py
-- [x] tests/compiler/frontends/test_python_frontend.py
-- [x] tests/compiler/frontends/test_rdna_lifter.py
-- [x] tests/compiler/frontends/test_rdna_parser_coverage.py
-- [x] tests/compiler/frontends/test_sass_analysis.py
-- [x] tests/compiler/frontends/test_sass_lifter.py
-- [x] tests/compiler/frontends/test_sass_parser_coverage.py
-- [x] tests/compiler/frontends/test_semantic_parser.py
-- [x] tests/compiler/test_backend.py
-- [x] tests/compiler/test_compiler_gap.py
-- [x] tests/compiler/test_differ.py
-- [x] tests/compiler/test_fusion.py
-- [x] tests/compiler/test_html_backend.py
-- [x] tests/compiler/test_html_backend_missing.py
-- [x] tests/compiler/test_ir.py
-- [x] tests/compiler/test_mlir_backend.py
-- [x] tests/compiler/test_mlir_parser.py
-- [x] tests/compiler/test_python_backend.py
-- [x] tests/compiler/test_qwen_fusion.py
-- [x] tests/compiler/test_registry.py
-- [x] tests/compiler/test_sharding.py
-- [x] tests/compiler/test_sharding_extractor.py
-- [x] tests/conftest.py
-- [x] tests/core/compiler/backends/test_visual_backends.py
-- [x] tests/core/compiler/backends/test_visual_latex.py
-- [x] tests/core/compiler/backends/test_visual_tikz.py
-- [x] tests/core/compiler/frontends/rdna/test_analysis_coverage.py
-- [x] tests/core/compiler/frontends/rdna/test_lifter.py
-- [x] tests/core/compiler/frontends/rdna/test_parser.py
-- [x] tests/core/compiler/frontends/rdna/test_parser_coverage.py
-- [x] tests/core/compiler/frontends/sass/test_analysis.py
-- [x] tests/core/compiler/frontends/sass/test_analysis_more.py
-- [x] tests/core/compiler/frontends/sass/test_lifter.py
-- [x] tests/core/compiler/frontends/sass/test_parser.py
-- [x] tests/core/compiler/test_integration_roundtrip.py
-- [x] tests/core/html/test_html_nodes.py
-- [x] tests/core/html/test_html_roundtrip.py
-- [x] tests/core/html/test_nodes.py
-- [x] tests/core/html/test_parser.py
-- [x] tests/core/html/test_parser2.py
-- [x] tests/core/html/test_parser3.py
-- [x] tests/core/import_fixer/test_attributes_mixin.py
-- [x] tests/core/import_fixer/test_base.py
-- [x] tests/core/import_fixer/test_imports_mixin.py
-- [x] tests/core/import_fixer/test_injection_gap.py
-- [x] tests/core/import_fixer/test_resolution.py
-- [x] tests/core/import_fixer/test_utils_gap.py
-- [x] tests/core/latex/test_latex_nodes.py
-- [x] tests/core/latex/test_latex_nodes_coverage.py
-- [x] tests/core/latex/test_latex_parser.py
-- [x] tests/core/latex/test_latex_parser_coverage_gaps.py
-- [x] tests/core/latex/test_parser_coverage.py
-- [x] tests/core/mlir/test_dialect_coverage.py
-- [x] tests/core/mlir/test_gen_base_coverage.py
-- [x] tests/core/mlir/test_generator_coverage.py
-- [x] tests/core/mlir/test_mlir_cst_coverage.py
-- [x] tests/core/mlir/test_mlir_dialect.py
-- [x] tests/core/mlir/test_mlir_emitter.py
-- [x] tests/core/mlir/test_mlir_emitter_extra.py
-- [x] tests/core/mlir/test_mlir_gen_extra.py
-- [x] tests/core/mlir/test_mlir_gen_extra2.py
-- [x] tests/core/mlir/test_mlir_generator.py
-- [x] tests/core/mlir/test_mlir_generator_fusion.py
-- [x] tests/core/mlir/test_mlir_generator_hardening.py
-- [x] tests/core/mlir/test_mlir_generator_naming.py
-- [x] tests/core/mlir/test_mlir_generator_reroll.py
-- [x] tests/core/mlir/test_mlir_generator_void_suppression.py
-- [x] tests/core/mlir/test_mlir_nodes.py
-- [x] tests/core/mlir/test_mlir_parser.py
-- [x] tests/core/mlir/test_mlir_parser_coverage.py
-- [x] tests/core/mlir/test_naming_coverage.py
-- [x] tests/core/mlir/test_nodes_gap.py
-- [x] tests/core/mlir/test_stablehlo_emitter.py
-- [x] tests/core/mlir/test_stablehlo_emitter_branches.py
-- [x] tests/core/mlir/test_stablehlo_emitter_extra.py
-- [x] tests/core/mlir/test_stablehlo_emitter_extra2.py
-- [x] tests/core/mlir/test_stablehlo_emitter_extra3.py
-- [x] tests/core/rdna/test_rdna_cst_extra.py
-- [x] tests/core/rdna/test_rdna_lifting.py
-- [x] tests/core/rdna/test_rdna_macros_extra.py
-- [x] tests/core/rdna/test_rdna_parser_extra.py
-- [x] tests/core/rdna/test_rdna_synthesizer.py
-- [x] tests/core/rdna/test_rdna_synthesizer_missing.py
-- [x] tests/core/rdna/test_rdna_synthesizer_missing_more.py
-- [x] tests/core/rewriter/calls/test_dispatch.py
-- [x] tests/core/rewriter/calls/test_dispatch_error.py
-- [x] tests/core/rewriter/calls/test_guards.py
-- [x] tests/core/rewriter/calls/test_post.py
-- [x] tests/core/rewriter/calls/test_pre.py
-- [x] tests/core/rewriter/calls/test_strategy.py
-- [x] tests/core/rewriter/calls/test_transformers.py
-- [x] tests/core/rewriter/calls/test_utils.py
-- [x] tests/core/rewriter/passes/test_api.py
-- [x] tests/core/rewriter/passes/test_api_attr_mixin.py
-- [x] tests/core/rewriter/passes/test_api_call_mixin.py
-- [x] tests/core/rewriter/passes/test_api_extra2.py
-- [x] tests/core/rewriter/passes/test_api_extra3.py
-- [x] tests/core/rewriter/passes/test_api_helpers.py
-- [x] tests/core/rewriter/passes/test_auxiliary.py
-- [x] tests/core/rewriter/passes/test_auxiliary_extra.py
-- [x] tests/core/rewriter/passes/test_auxiliary_extra_hooks.py
-- [x] tests/core/rewriter/passes/test_auxiliary_extra_hooks2.py
-- [x] tests/core/rewriter/passes/test_auxiliary_extra_hooks3.py
-- [x] tests/core/rewriter/passes/test_structure.py
-- [x] tests/core/rewriter/passes/test_structure_extra.py
-- [x] tests/core/rewriter/passes/test_structure_extra2.py
-- [x] tests/core/rewriter/test_calls_extra.py
-- [x] tests/core/rewriter/test_calls_pre_dispatch.py
-- [x] tests/core/rewriter/test_calls_pre_dispatch2.py
-- [x] tests/core/rewriter/test_calls_strategy_utils.py
-- [x] tests/core/rewriter/test_calls_strategy_utils2.py
-- [x] tests/core/rewriter/test_context.py
-- [x] tests/core/rewriter/test_dispatch_logic.py
-- [x] tests/core/rewriter/test_normalization_utils.py
-- [x] tests/core/rewriter/test_patcher.py
-- [x] tests/core/rewriter/test_trait_rewriting.py
-- [x] tests/core/sass/test_analysis.py
-- [x] tests/core/sass/test_emitter.py
-- [x] tests/core/sass/test_macro_activations.py
-- [x] tests/core/sass/test_macro_attention.py
-- [x] tests/core/sass/test_macro_conv_pool.py
-- [x] tests/core/sass/test_macro_dropout_matmul.py
-- [x] tests/core/sass/test_macro_final.py
-- [x] tests/core/sass/test_macro_loss.py
-- [x] tests/core/sass/test_macro_rnn.py
-- [x] tests/core/sass/test_sass_cst_extra.py
-- [x] tests/core/sass/test_sass_macros_extra.py
-- [x] tests/core/sass/test_sass_parser_extra.py
-- [x] tests/core/sass/test_synthesizer.py
-- [x] tests/core/test_context_gap.py
-- [x] tests/core/test_coverage_gap.py
-- [x] tests/core/test_coverage_gap_more2.py
-- [x] tests/core/test_cst_base.py
-- [x] tests/core/test_discovery.py
-- [x] tests/core/test_discovery_inference.py
-- [x] tests/core/test_engine.py
-- [x] tests/core/test_engine_extra.py
-- [x] tests/core/test_engine_gap.py
-- [x] tests/core/test_engine_gap10.py
-- [x] tests/core/test_engine_gap19.py
-- [x] tests/core/test_engine_gap2.py
-- [x] tests/core/test_engine_gap20.py
-- [x] tests/core/test_engine_gap3.py
-- [x] tests/core/test_engine_gap4.py
-- [x] tests/core/test_engine_gap5.py
-- [x] tests/core/test_engine_gap6.py
-- [x] tests/core/test_engine_gap7.py
-- [x] tests/core/test_engine_gap8.py
-- [x] tests/core/test_engine_gap9.py
-- [x] tests/core/test_engine_missing.py
-- [x] tests/core/test_engine_pipeline.py
-- [x] tests/core/test_engine_routing.py
-- [x] tests/core/test_engine_switching.py
-- [x] tests/core/test_ghost.py
-- [x] tests/core/test_graph.py
-- [x] tests/core/test_graph_optimizer.py
-- [x] tests/core/test_hooks.py
-- [x] tests/core/test_import_fixer_coverage.py
-- [x] tests/core/test_ingestion_gap.py
-- [x] tests/core/test_provenance.py
-- [x] tests/core/test_scanners.py
-- [x] tests/core/test_scanners_extra.py
-- [x] tests/core/test_scanners_gap.py
-- [x] tests/core/test_trace.py
-- [x] tests/core/tikz/test_analyser.py
-- [x] tests/core/tikz/test_analyser_coverage.py
-- [x] tests/core/tikz/test_nodes_coverage.py
-- [x] tests/core/tikz/test_nodes_coverage_extra.py
-- [x] tests/core/tikz/test_parser_coverage.py
-- [x] tests/core/tikz/test_parser_coverage_full.py
-- [x] tests/core/tikz/test_parser_coverage_full_2.py
-- [x] tests/core/tikz/test_tikz_analyser.py
-- [x] tests/core/tikz/test_tikz_nodes.py
-- [x] tests/core/tikz/test_tikz_nodes_extra.py
-- [x] tests/core/tikz/test_tikz_parser.py
-- [x] tests/core/wasm/test_wasm_cst_extra.py
-- [x] tests/discovery/test_consensus.py
-- [x] tests/examples/ex01_math_ops.jax.py
-- [x] tests/examples/ex01_math_ops.torch.py
-- [x] tests/examples/ex02_neural_net.flax_nnx.py
-- [x] tests/examples/ex02_neural_net.torch.py
-- [x] tests/examples/ex03_array_manip.jax.py
-- [x] tests/examples/ex03_array_manip.torch.py
-- [x] tests/examples/ex04_mixed_checkpointing.torch.py
-- [x] tests/examples/ex05_mixed_parallelism.jax.py
-- [x] tests/examples/ex06_paxml.torch.py
-- [x] tests/examples/ex07_mnist_cnn.torch.py
-- [x] tests/examples/ex08_vae.jax.py
-- [x] tests/examples/ex09_simple_keras.keras.py
-- [x] tests/frameworks/test_base_registry.py
-- [x] tests/frameworks/test_doc_urls.py
-- [x] tests/frameworks/test_flax_nnx.py
-- [x] tests/frameworks/test_flax_nnx_extra.py
-- [x] tests/frameworks/test_flax_nnx_extra2.py
-- [x] tests/frameworks/test_harness_protocol.py
-- [x] tests/frameworks/test_html_dsl.py
-- [x] tests/frameworks/test_html_dsl_extra.py
-- [x] tests/frameworks/test_html_dsl_extra2.py
-- [x] tests/frameworks/test_init_discovery.py
-- [x] tests/frameworks/test_jax.py
-- [x] tests/frameworks/test_jax_extra.py
-- [x] tests/frameworks/test_jax_extra2.py
-- [x] tests/frameworks/test_jax_stack.py
-- [x] tests/frameworks/test_keras.py
-- [x] tests/frameworks/test_keras_examples.py
-- [x] tests/frameworks/test_keras_extra.py
-- [x] tests/frameworks/test_keras_extra2.py
-- [x] tests/frameworks/test_keras_extra3.py
-- [x] tests/frameworks/test_keras_extra4.py
-- [x] tests/frameworks/test_keras_gap.py
-- [x] tests/frameworks/test_keras_init.py
-- [x] tests/frameworks/test_keras_io.py
-- [x] tests/frameworks/test_keras_io_extra.py
-- [x] tests/frameworks/test_latex_dsl.py
-- [x] tests/frameworks/test_latex_dsl_extra.py
-- [x] tests/frameworks/test_latex_dsl_extra2.py
-- [x] tests/frameworks/test_loader.py
-- [x] tests/frameworks/test_maxtext.py
-- [x] tests/frameworks/test_mlir.py
-- [x] tests/frameworks/test_mlir_extra.py
-- [x] tests/frameworks/test_mlx.py
-- [x] tests/frameworks/test_mlx_examples.py
-- [x] tests/frameworks/test_mlx_io.py
-- [x] tests/frameworks/test_mlx_io_extra.py
-- [x] tests/frameworks/test_numpy.py
-- [x] tests/frameworks/test_numpy_examples.py
-- [x] tests/frameworks/test_numpy_extra.py
-- [x] tests/frameworks/test_optax_shim.py
-- [x] tests/frameworks/test_optax_shim_extra.py
-- [x] tests/frameworks/test_paxml.py
-- [x] tests/frameworks/test_paxml_examples.py
-- [x] tests/frameworks/test_paxml_extra.py
-- [x] tests/frameworks/test_protocol_numpy_code.py
-- [x] tests/frameworks/test_rdna.py
-- [x] tests/frameworks/test_rdna_extra.py
-- [x] tests/frameworks/test_sass.py
-- [x] tests/frameworks/test_sass_extra.py
-- [x] tests/frameworks/test_stablehlo.py
-- [x] tests/frameworks/test_stablehlo_extra.py
-- [x] tests/frameworks/test_stack_wiring.py
-- [x] tests/frameworks/test_tensorflow.py
-- [x] tests/frameworks/test_tensorflow_examples.py
-- [x] tests/frameworks/test_tensorflow_extra.py
-- [x] tests/frameworks/test_tikz.py
-- [x] tests/frameworks/test_torch.py
-- [x] tests/frameworks/test_torch_examples.py
-- [x] tests/frameworks/test_torch_io.py
-- [x] tests/functionality/test_config.py
-- [x] tests/functionality/test_config_flavour.py
-- [x] tests/functionality/test_config_toml.py
-- [x] tests/functionality/test_engine.py
-- [x] tests/functionality/test_engine_linter.py
-- [x] tests/functionality/test_escape_hatch_reliability.py
-- [x] tests/functionality/test_escape_hatch_wiring.py
-- [x] tests/functionality/test_harness.py
-- [x] tests/functionality/test_harness_rng.py
-- [x] tests/functionality/test_import_fixer.py
-- [x] tests/functionality/test_import_fixer_coverage.py
-- [x] tests/functionality/test_import_fixer_coverage_extra.py
-- [x] tests/functionality/test_import_fixer_coverage_extra_injection.py
-- [x] tests/functionality/test_import_fixer_smart.py
-- [x] tests/functionality/test_infix_transform.py
-- [x] tests/functionality/test_loader.py
-- [x] tests/functionality/test_matrix.py
-- [x] tests/functionality/test_output_casting.py
-- [x] tests/functionality/test_output_normalization.py
-- [x] tests/functionality/test_pkg_structure.py
-- [x] tests/functionality/test_plugins.py
-- [x] tests/functionality/test_rewriter.py
-- [x] tests/functionality/test_rewriter_arg_normalization.py
-- [x] tests/functionality/test_rewriter_bubbling.py
-- [x] tests/functionality/test_rewriter_constants.py
-- [x] tests/functionality/test_rewriter_decorators.py
-- [x] tests/functionality/test_rewriter_defaults.py
-- [x] tests/functionality/test_rewriter_functional_unwrap.py
-- [x] tests/functionality/test_rewriter_lifecycle.py
-- [x] tests/functionality/test_rewriter_state_mechanism.py
-- [x] tests/functionality/test_trace_diff.py
-- [x] tests/functionality/test_verification_gating.py
-- [x] tests/generated/runtime.py
-- [x] tests/generated_tests/test_runtime_builder.py
-- [x] tests/generation/test_functional_transforms.py
-- [x] tests/generation/test_generated_tests_missing.py
-- [x] tests/gold/attention/keras3.py
-- [x] tests/gold/attention/paxml.py
-- [x] tests/gold/batch_norm/keras3.py
-- [x] tests/gold/batch_norm/paxml.py
-- [x] tests/gold/batch_norm/tensorflow.py
-- [x] tests/gold/concat/keras3.py
-- [x] tests/gold/cond_control_flow/flax_nnx.py
-- [x] tests/gold/conv2d/keras3.py
-- [x] tests/gold/conv2d/paxml.py
-- [x] tests/gold/conv2d_same_padding/keras3.py
-- [x] tests/gold/conv2d_same_padding/paxml.py
-- [x] tests/gold/cross_entropy_loss/keras3.py
-- [x] tests/gold/dropout/keras3.py
-- [x] tests/gold/dropout/paxml.py
-- [x] tests/gold/dropout/tensorflow.py
-- [x] tests/gold/einsum/keras3.py
-- [x] tests/gold/elementwise_relu/keras3.py
-- [x] tests/gold/embedding/keras3.py
-- [x] tests/gold/embedding/paxml.py
-- [x] tests/gold/flatten/keras3.py
-- [x] tests/gold/gelu/keras3.py
-- [x] tests/gold/global_avg_pool/keras3.py
-- [x] tests/gold/gradient_clipping/flax_nnx.py
-- [x] tests/gold/gradient_clipping/pytorch.py
-- [x] tests/gold/gradient_clipping/tensorflow.py
-- [x] tests/gold/group_norm/keras3.py
-- [x] tests/gold/layer_norm/keras3.py
-- [x] tests/gold/layer_norm/paxml.py
-- [x] tests/gold/linear/keras3.py
-- [x] tests/gold/linear/paxml.py
-- [x] tests/gold/lstm/keras3.py
-- [x] tests/gold/lstm/paxml.py
-- [x] tests/gold/masked_fill/keras3.py
-- [x] tests/gold/max_pool2d/keras3.py
-- [x] tests/gold/max_pool2d/paxml.py
-- [x] tests/gold/mlp/keras3.py
-- [x] tests/gold/mlp/paxml.py
-- [x] tests/gold/optim_adam/flax_nnx.py
-- [x] tests/gold/optim_adam/keras3.py
-- [x] tests/gold/optim_adam/mlx.py
-- [x] tests/gold/optim_adam/numpy.py
-- [x] tests/gold/optim_adam/paxml.py
-- [x] tests/gold/optim_adam/pytorch.py
-- [x] tests/gold/optim_adam/tensorflow.py
-- [x] tests/gold/resnet_block/keras3.py
-- [x] tests/gold/resnet_block/paxml.py
-- [x] tests/gold/resnet_block/tensorflow.py
-- [x] tests/gold/scan_loop/flax_nnx.py
-- [x] tests/gold/scan_loop/pytorch.py
-- [x] tests/gold/scan_loop/tensorflow.py
-- [x] tests/gold/sequential/numpy.py
-- [x] tests/gold/sequential/paxml.py
-- [x] tests/gold/split/flax_nnx.py
-- [x] tests/gold/split/keras3.py
-- [x] tests/gold/split/pytorch.py
-- [x] tests/gold/split/tensorflow.py
-- [x] tests/gold/training_loop/flax_nnx.py
-- [x] tests/gold/training_loop/keras3.py
-- [x] tests/gold/training_loop/mlx.py
-- [x] tests/gold/training_loop/numpy.py
-- [x] tests/gold/training_loop/paxml.py
-- [x] tests/gold/training_loop/pytorch.py
-- [x] tests/gold/training_loop/tensorflow.py
-- [x] tests/gold/transformer_block/keras3.py
-- [x] tests/gold/wasm/test_combinations.py
-- [x] tests/importers/test_array_api_reader_extra.py
-- [x] tests/importers/test_sass_reader_extra.py
-- [x] tests/integration/examples/test_ex01_math_ops.py
-- [x] tests/integration/examples/test_ex02_neural_net.py
-- [x] tests/integration/examples/test_ex03_array_manip.py
-- [x] tests/integration/test_attention_layers.py
-- [x] tests/integration/test_auto_wiring.py
-- [x] tests/integration/test_bonsai_e2e.py
-- [x] tests/integration/test_bug_rng_literal.py
-- [x] tests/integration/test_clamp.py
-- [x] tests/integration/test_cli_visuals.py
-- [x] tests/integration/test_dataloader_wiring.py
-- [x] tests/integration/test_device_checks_wired.py
-- [x] tests/integration/test_device_wiring_e2e.py
-- [x] tests/integration/test_e2e_examples.py
-- [x] tests/integration/test_engine_visuals.py
-- [x] tests/integration/test_examples_suite.py
-- [x] tests/integration/test_external_plugins.py
-- [x] tests/integration/test_flax_to_mlx_to_flax.py
-- [x] tests/integration/test_flax_torch_bidirectional.py
-- [x] tests/integration/test_ghost_hydrating.py
-- [x] tests/integration/test_gradient_modes.py
-- [x] tests/integration/test_hardware_lifter.py
-- [x] tests/integration/test_integration_rdna_roundtrip.py
-- [x] tests/integration/test_io_wiring_e2e.py
-- [x] tests/integration/test_keras_math_to_jax.py
-- [x] tests/integration/test_keras_sequential.py
-- [x] tests/integration/test_latex_coverage.py
-- [x] tests/integration/test_latex_coverage_extra.py
-- [x] tests/integration/test_latex_roundtrip.py
-- [x] tests/integration/test_latex_source_to_torch.py
-- [x] tests/integration/test_macro_ops.py
-- [x] tests/integration/test_mlir_convnet_clean.py
-- [x] tests/integration/test_mlir_roundtrip.py
-- [x] tests/integration/test_mlx_optimizers.py
-- [x] tests/integration/test_new_ops.py
-- [x] tests/integration/test_onehot.py
-- [x] tests/integration/test_paxml_e2e.py
-- [x] tests/integration/test_qwen_roundtrip.py
-- [x] tests/integration/test_rdna_compiler.py
-- [x] tests/integration/test_roundtrip_modulelist.py
-- [x] tests/integration/test_roundtrip_silu.py
-- [x] tests/integration/test_roundtrip_tensortype.py
-- [x] tests/integration/test_sass_e2e.py
-- [x] tests/integration/test_sass_macros.py
-- [x] tests/integration/test_sequential_model.py
-- [x] tests/integration/test_split_e2e.py
-- [x] tests/integration/test_squeeze.py
-- [x] tests/integration/test_stablehlo_codegen.py
-- [x] tests/integration/test_stablehlo_execution.py
-- [x] tests/integration/test_tensor_layout.py
-- [x] tests/integration/test_tf_data_pipeline.py
-- [x] tests/integration/test_tikz_coverage.py
-- [x] tests/integration/test_topk.py
-- [x] tests/integration/test_torch_to_jax_flax_abs_case.py
-- [x] tests/integration/test_type_inference.py
-- [x] tests/integration/test_type_mapping.py
-- [x] tests/integration/test_variable_container.py
-- [x] tests/plugins/test_arg_packing.py
-- [x] tests/plugins/test_attention_packing.py
-- [x] tests/plugins/test_auto_fsdp_wrapper.py
-- [x] tests/plugins/test_auto_fsdp_wrapper_missing_api.py
-- [x] tests/plugins/test_batch_norm.py
-- [x] tests/plugins/test_casting.py
-- [x] tests/plugins/test_casting_extra.py
-- [x] tests/plugins/test_ckpt_keys.py
-- [x] tests/plugins/test_clipping.py
-- [x] tests/plugins/test_context_wrap.py
-- [x] tests/plugins/test_coverage_all.py
-- [x] tests/plugins/test_data_loader.py
-- [x] tests/plugins/test_data_loader_extended.py
-- [x] tests/plugins/test_device_allocator.py
-- [x] tests/plugins/test_device_allocator_extra.py
-- [x] tests/plugins/test_device_allocator_multi.py
-- [x] tests/plugins/test_device_checks.py
-- [x] tests/plugins/test_einsum.py
-- [x] tests/plugins/test_flatten.py
-- [x] tests/plugins/test_gather.py
-- [x] tests/plugins/test_gather_missing.py
-- [x] tests/plugins/test_in_top_k_plugin.py
-- [x] tests/plugins/test_init.py
-- [x] tests/plugins/test_inplace_unroll.py
-- [x] tests/plugins/test_inplace_unroll_extra.py
-- [x] tests/plugins/test_io_handler.py
-- [x] tests/plugins/test_io_handler_extra.py
-- [x] tests/plugins/test_io_handler_missing.py
-- [x] tests/plugins/test_io_handler_multi.py
-- [x] tests/plugins/test_jax_decompose.py
-- [x] tests/plugins/test_keras_sequential_extra.py
-- [x] tests/plugins/test_loop_unroll.py
-- [x] tests/plugins/test_loss_wrapper.py
-- [x] tests/plugins/test_method_property.py
-- [x] tests/plugins/test_method_property_extra.py
-- [x] tests/plugins/test_mlx_extras.py
-- [x] tests/plugins/test_mlx_optimizers.py
-- [x] tests/plugins/test_nnx_to_torch_params.py
-- [x] tests/plugins/test_nnx_variable_reverse.py
-- [x] tests/plugins/test_optimizer_step.py
-- [x] tests/plugins/test_padding.py
-- [x] tests/plugins/test_padding_extra.py
-- [x] tests/plugins/test_reshape.py
-- [x] tests/plugins/test_rng_threading.py
-- [x] tests/plugins/test_scatter.py
-- [x] tests/plugins/test_scatter_extra.py
-- [x] tests/plugins/test_schedulers.py
-- [x] tests/plugins/test_shape_packing.py
-- [x] tests/plugins/test_state_container.py
-- [x] tests/plugins/test_state_flag.py
-- [x] tests/plugins/test_state_flag_injection.py
-- [x] tests/plugins/test_state_flag_missing.py
-- [x] tests/plugins/test_static_unroll.py
-- [x] tests/plugins/test_static_unroll_extra.py
-- [x] tests/plugins/test_tf_data_loader.py
-- [x] tests/plugins/test_topk_plugin.py
-- [x] tests/plugins/test_utils.py
-- [x] tests/plugins/test_utils_missing.py
-- [x] tests/scripts/test_audit_against_snapshots.py
-- [x] tests/semantics/test_alias_config.py
-- [x] tests/semantics/test_conflict_resolution.py
-- [x] tests/semantics/test_file_loader.py
-- [x] tests/semantics/test_file_loader_missing.py
-- [x] tests/semantics/test_import_map_loading.py
-- [x] tests/semantics/test_manager_architecture.py
-- [x] tests/semantics/test_manager_array_api.py
-- [x] tests/semantics/test_manager_distributed.py
-- [x] tests/semantics/test_manager_extra.py
-- [x] tests/semantics/test_manager_overlay_loading.py
-- [x] tests/semantics/test_manager_paxml_defaults.py
-- [x] tests/semantics/test_merging.py
-- [x] tests/semantics/test_paths.py
-- [x] tests/semantics/test_paxml_definitions.py
-- [x] tests/semantics/test_registry_loader_extra.py
-- [x] tests/semantics/test_shared_base_inheritance.py
-- [x] tests/semantics/test_standards_content.py
-- [x] tests/semantics/test_tier_c_loading.py
-- [x] tests/semantics/test_vmap.py
-- [x] tests/sphinx_ext/test_autogen_ops.py
-- [x] tests/sphinx_ext/test_hooks.py
-- [x] tests/sphinx_ext/test_hooks_extra.py
-- [x] tests/sphinx_ext/test_init.py
-- [x] tests/sphinx_ext/test_registry.py
-- [x] tests/sphinx_ext/test_registry_extra.py
-- [x] tests/sphinx_ext/test_registry_extra_2.py
-- [x] tests/sphinx_ext/test_rendering.py
-- [x] tests/sphinx_ext/test_sphinx_ext_missing.py
-- [x] tests/test_api_extra.py
-- [x] tests/test_api_helpers_extra.py
-- [x] tests/test_auxiliary_extra.py
-- [x] tests/test_backend_stablehlo.py
-- [x] tests/test_backend_stablehlo_bitwise.py
-- [x] tests/test_backend_stablehlo_complex_linalg.py
-- [x] tests/test_backend_stablehlo_extra.py
-- [x] tests/test_backend_stablehlo_math.py
-- [x] tests/test_backend_stablehlo_nn_shape.py
-- [x] tests/test_backend_stablehlo_rest.py
-- [x] tests/test_batch_runner.py
-- [x] tests/test_batch_runner_extra.py
-- [x] tests/test_build_docs.py
-- [x] tests/test_cli_e2e.py
-- [x] tests/test_code_extractor.py
-- [x] tests/test_compiler_fusion.py
-- [x] tests/test_compiler_sharding.py
-- [x] tests/test_compiler_sharding_extractor.py
-- [x] tests/test_conf.py
-- [x] tests/test_config_coverage.py
-- [x] tests/test_config_extra.py
-- [x] tests/test_config_extra2.py
-- [x] tests/test_config_extra_py310.py
-- [x] tests/test_conv_keras_tf.py
-- [x] tests/test_cpp_cst.py
-- [x] tests/test_cpp_generator.py
-- [x] tests/test_cpp_mapper.py
-- [x] tests/test_cpp_parser.py
-- [x] tests/test_cpp_transformer.py
-- [x] tests/test_discovery.py
-- [x] tests/test_dummy_plugins.py
-- [x] tests/test_dummy_plugins_transform.py
-- [x] tests/test_e2e_sass_rdna.py
-- [x] tests/test_engine.py
-- [x] tests/test_engine_fusion.py
-- [x] tests/test_engine_fusion_gap.py
-- [x] tests/test_enums_coverage.py
-- [x] tests/test_frameworks_asm.py
-- [x] tests/test_frameworks_compiler.py
-- [x] tests/test_frameworks_flax_nnx.py
-- [x] tests/test_frameworks_jax_gap.py
-- [x] tests/test_frameworks_mlx_gap.py
-- [x] tests/test_frameworks_visual.py
-- [x] tests/test_frontend_python.py
-- [x] tests/test_frontend_semantic_parser.py
-- [x] tests/test_fuzz_improved.py
-- [x] tests/test_fuzzer_constraints.py
-- [x] tests/test_gen_expressions.py
-- [x] tests/test_gen_statements.py
-- [x] tests/test_generate_10k_plan.py
-- [x] tests/test_generator.py
-- [x] tests/test_ghost.py
-- [x] tests/test_graph.py
-- [x] tests/test_graph_coverage.py
-- [x] tests/test_graph_optimizer.py
-- [x] tests/test_harness_complex_types.py
-- [x] tests/test_harness_generator_live.py
-- [x] tests/test_hooks.py
-- [x] tests/test_hooks_context.py
-- [x] tests/test_hooks_loader.py
-- [x] tests/test_hooks_registry.py
-- [x] tests/test_html_backend.py
-- [x] tests/test_html_dsl.py
-- [x] tests/test_import_errors.py
-- [x] tests/test_import_fixer_attributes_mixin.py
-- [x] tests/test_import_fixer_base.py
-- [x] tests/test_import_fixer_imports_mixin.py
-- [x] tests/test_import_fixer_injection_mixin.py
-- [x] tests/test_import_fixer_resolution.py
-- [x] tests/test_import_fixer_utils.py
-- [x] tests/test_ingestion.py
-- [x] tests/test_init_coverage.py
-- [x] tests/test_init_coverage2.py
-- [x] tests/test_init_coverage_3.py
-- [x] tests/test_init_gap.py
-- [x] tests/test_jax_extra.py
-- [x] tests/test_keras_extra.py
-- [x] tests/test_leftover_imports.py
-- [x] tests/test_main_entry.py
-- [x] tests/test_massive_cst_fuzz.py
-- [x] tests/test_missing_plugins.py
-- [x] tests/test_mlir_cst_coverage.py
-- [x] tests/test_mlir_cst_extra.py
-- [x] tests/test_mlir_emitter_coverage_final.py
-- [x] tests/test_mlir_emitter_expr.py
-- [x] tests/test_mlir_gen_base.py
-- [x] tests/test_mlir_gen_base_extra.py
-- [x] tests/test_mlir_generator.py
-- [x] tests/test_mlir_naming_coverage.py
-- [x] tests/test_mlir_naming_coverage_extra.py
-- [x] tests/test_mlir_naming_coverage_extra2.py
-- [x] tests/test_mlir_naming_coverage_extra3.py
-- [x] tests/test_mlir_naming_coverage_final.py
-- [x] tests/test_mlir_nodes_coverage.py
-- [x] tests/test_mlir_nodes_coverage_more.py
-- [x] tests/test_mlir_parser.py
-- [x] tests/test_mlir_parser_extra.py
-- [x] tests/test_mlir_stablehlo_parser.py
-- [x] tests/test_mlir_type_inference_coverage.py
-- [x] tests/test_mlir_types.py
-- [x] tests/test_mlx_extra.py
-- [x] tests/test_naming.py
-- [x] tests/test_new_engine_branches.py
-- [x] tests/test_nodes.py
-- [x] tests/test_numpy_extra.py
-- [x] tests/test_paths_coverage.py
-- [x] tests/test_paxml_extra.py
-- [x] tests/test_paxml_layer_mappings.py
-- [x] tests/test_plugin_attention_packing.py
-- [x] tests/test_plugin_auto_fsdp.py
-- [x] tests/test_plugin_batch_norm.py
-- [x] tests/test_plugin_casting.py
-- [x] tests/test_plugin_checkpoint_keys.py
-- [x] tests/test_plugin_clipping.py
-- [x] tests/test_plugin_context_wrap.py
-- [x] tests/test_plugin_coverage_extra.py
-- [x] tests/test_plugin_coverage_gaps.py
-- [x] tests/test_plugin_data_loader.py
-- [x] tests/test_plugin_device_allocator.py
-- [x] tests/test_plugin_device_checks.py
-- [x] tests/test_plugin_einsum.py
-- [x] tests/test_plugin_flatten_new.py
-- [x] tests/test_plugin_gather.py
-- [x] tests/test_plugin_inplace_unroll.py
-- [x] tests/test_plugin_io_handler.py
-- [x] tests/test_plugin_jax_decompose.py
-- [x] tests/test_plugin_keras_sequential.py
-- [x] tests/test_plugin_loop_unroll.py
-- [x] tests/test_plugin_loss_wrapper.py
-- [x] tests/test_plugin_method_property.py
-- [x] tests/test_plugin_mlx_extras.py
-- [x] tests/test_plugin_mlx_optimizers.py
-- [x] tests/test_plugin_nnx_to_torch_params.py
-- [x] tests/test_plugin_optimizer_step.py
-- [x] tests/test_plugin_others.py
-- [x] tests/test_plugin_padding.py
-- [x] tests/test_plugin_reshape.py
-- [x] tests/test_plugin_rng_threading.py
-- [x] tests/test_plugin_scatter.py
-- [x] tests/test_plugin_schedulers.py
-- [x] tests/test_plugin_shape_packing.py
-- [x] tests/test_plugin_state_container.py
-- [x] tests/test_plugin_state_flag_injection.py
-- [x] tests/test_plugin_static_unroll.py
-- [x] tests/test_plugin_tf_data_loader.py
-- [x] tests/test_plugin_topk.py
-- [x] tests/test_plugin_utils.py
-- [x] tests/test_pure_math_decomposition.py
-- [x] tests/test_python_backend.py
-- [x] tests/test_python_snippet.py
-- [x] tests/test_qwen_fusion.py
-- [x] tests/test_rdna_backend.py
-- [x] tests/test_rdna_backend_emitter.py
-- [x] tests/test_rdna_backend_macros.py
-- [x] tests/test_rdna_backend_printer.py
-- [x] tests/test_rdna_backend_synthesizer.py
-- [x] tests/test_rdna_backend_synthesizer_extra.py
-- [x] tests/test_rdna_extra.py
-- [x] tests/test_rdna_frontend_analysis.py
-- [x] tests/test_rdna_frontend_cst.py
-- [x] tests/test_rdna_frontend_lifter.py
-- [x] tests/test_rdna_frontend_lifter_extra.py
-- [x] tests/test_rdna_frontend_parser.py
-- [x] tests/test_rdna_frontend_parser_extra.py
-- [x] tests/test_rdna_macros.py
-- [x] tests/test_rdna_synthesizer.py
-- [x] tests/test_rewriter_alias_resolution.py
-- [x] tests/test_rewriter_api_attr.py
-- [x] tests/test_rewriter_api_attr_extra.py
-- [x] tests/test_rewriter_api_call_extra.py
-- [x] tests/test_rewriter_api_call_extra2.py
-- [x] tests/test_rewriter_api_helpers_extra.py
-- [x] tests/test_rewriter_api_pass_coverage.py
-- [x] tests/test_rewriter_api_pass_coverage_extra.py
-- [x] tests/test_rewriter_auxiliary.py
-- [x] tests/test_rewriter_bubbling.py
-- [x] tests/test_rewriter_calls_dispatch.py
-- [x] tests/test_rewriter_calls_guards.py
-- [x] tests/test_rewriter_calls_post.py
-- [x] tests/test_rewriter_calls_post2.py
-- [x] tests/test_rewriter_calls_post3.py
-- [x] tests/test_rewriter_calls_pre.py
-- [x] tests/test_rewriter_calls_pre_extra.py
-- [x] tests/test_rewriter_calls_strategy.py
-- [x] tests/test_rewriter_calls_transformers.py
-- [x] tests/test_rewriter_calls_utils_coverage.py
-- [x] tests/test_rewriter_calls_utils_extra.py
-- [x] tests/test_rewriter_constants.py
-- [x] tests/test_rewriter_context.py
-- [x] tests/test_rewriter_context_extra.py
-- [x] tests/test_rewriter_normalization_utils.py
-- [x] tests/test_rewriter_normalization_utils_extra.py
-- [x] tests/test_rewriter_normalization_utils_extra2.py
-- [x] tests/test_rewriter_normalization_utils_extra3.py
-- [x] tests/test_rewriter_normalization_utils_extra4.py
-- [x] tests/test_rewriter_normalization_utils_extra5.py
-- [x] tests/test_rewriter_patcher.py
-- [x] tests/test_rewriter_pipeline.py
-- [x] tests/test_rewriter_strategy_coverage.py
-- [x] tests/test_rewriter_structure.py
-- [x] tests/test_rewriter_structure_extra.py
-- [x] tests/test_rewriter_structure_helpers.py
-- [x] tests/test_runner.py
-- [x] tests/test_runner_extra.py
-- [x] tests/test_sass_backend_backend.py
-- [x] tests/test_sass_backend_emitter.py
-- [x] tests/test_sass_backend_macros.py
-- [x] tests/test_sass_backend_printer.py
-- [x] tests/test_sass_backend_synthesizer.py
-- [x] tests/test_sass_frontend_analysis.py
-- [x] tests/test_sass_frontend_cst.py
-- [x] tests/test_sass_frontend_lifter.py
-- [x] tests/test_sass_frontend_parser.py
-- [x] tests/test_sass_macros.py
-- [x] tests/test_sass_printer.py
-- [x] tests/test_sass_synthesizer.py
-- [x] tests/test_scanners.py
-- [x] tests/test_sharding.py
-- [x] tests/test_sharding_extractor.py
-- [x] tests/test_signature_extractor.py
-- [x] tests/test_stablehlo_backend.py
-- [x] tests/test_stablehlo_emitter_extra.py
-- [x] tests/test_stablehlo_emitter_extra4.py
-- [x] tests/test_tensorflow_extra.py
-- [x] tests/test_torch_extra.py
-- [x] tests/test_tracer.py
-- [x] tests/test_utils/test_console.py
-- [x] tests/test_utils/test_readme_editor.py
-- [x] tests/test_validate_odl_json.py
-- [x] tests/test_verified_pipeline.py
-- [x] tests/test_visual_backends.py
-- [x] tests/test_wasm_backend.py
-- [x] tests/testing/test_batch_runner.py
-- [x] tests/testing/test_batch_runner_missing.py
-- [x] tests/testing/test_batch_validation.py
-- [x] tests/testing/test_bisector.py
-- [x] tests/testing/test_bisector_missing.py
-- [x] tests/testing/test_brute_force_testing.py
-- [x] tests/testing/test_fuzzer_callables.py
-- [x] tests/testing/test_fuzzer_core.py
-- [x] tests/testing/test_fuzzer_generators.py
-- [x] tests/testing/test_fuzzer_heuristics.py
-- [x] tests/testing/test_fuzzer_parser.py
-- [x] tests/testing/test_fuzzer_strategies.py
-- [x] tests/testing/test_fuzzer_symbolic.py
-- [x] tests/testing/test_fuzzer_type_parser.py
-- [x] tests/testing/test_fuzzer_utils.py
-- [x] tests/testing/test_harness_dynamic_flow.py
-- [x] tests/testing/test_harness_generator_missing.py
-- [x] tests/testing/test_harness_standalone.py
-- [x] tests/testing/test_linter.py
-- [x] tests/testing/test_linter_missing.py
-- [x] tests/testing/test_patcher.py
-- [x] tests/testing/test_runner_exec.py
-- [x] tests/testing/test_runner_missing.py
-- [x] tests/testing/test_runner_shape.py
-- [x] tests/testing/test_signature_extractor.py
-- [x] tests/tools/test_dsl.py
-- [x] tests/tools/test_dsl_complexity.py
-- [x] tests/tools/test_dsl_dtype.py
-- [x] tests/tools/test_dsl_imports.py
-- [x] tests/tools/test_dsl_inplace.py
-- [x] tests/tools/test_dsl_output_cast.py
-- [x] tests/tools/test_dsl_rank.py
-- [x] tests/tools/test_dsl_return_type.py
-- [x] tests/tools/test_dsl_shape.py
-- [x] tests/tools/test_dsl_variadic.py
-- [x] tests/tools/test_dsl_verification.py
-- [x] tests/tools/test_injector_fw.py
-- [x] tests/tools/test_injector_fw_missing.py
-- [x] tests/tools/test_injector_fw_utils_missing.py
-- [x] tests/tools/test_injector_plugin.py
-- [x] tests/tools/test_injector_plugin_missing.py
-- [x] tests/tools/test_injector_recursion.py
-- [x] tests/tools/test_injector_spec.py
-- [x] tests/tools/test_injector_spec_missing.py
-- [x] tests/tools/test_injector_spec_missing2.py
-- [x] tests/tools/test_plugin_injector_logic.py
-- [x] tests/utils/ast_utils.py
-- [x] tests/utils/test_code_extractor_dedent.py
-- [x] tests/utils/test_doc_context.py
-- [x] tests/utils/test_doc_gen.py
-- [x] tests/utils/test_doc_gen_missing.py
-- [x] tests/utils/test_doc_renderer.py
-- [x] tests/utils/test_formatting.py
-- [x] tests/utils/test_node_diff.py
-- [x] tests/utils/test_readme_editor.py
-- [x] tests/utils/test_readme_editor_write_error.py
-- [x] tests/utils/test_utils_coverage.py
-- [x] tests/utils/test_utils_missing.py
-- [x] tests/utils/test_utils_missing_final.py
-- [x] tests/utils/test_visualizer.py
-- [x] tests/utils/test_visualizer_missing.py
+- [ ] tests/cli/handlers/test_convert_weights.py
+- [ ] tests/cli/handlers/test_convert_weights_patch.py
+- [ ] tests/cli/handlers/test_define.py
+- [ ] tests/cli/handlers/test_dev.py
+- [ ] tests/cli/handlers/test_harvest.py
+- [ ] tests/cli/handlers/test_meta.py
+- [ ] tests/cli/handlers/test_scaffold.py
+- [ ] tests/cli/handlers/test_suggest.py
+- [ ] tests/cli/handlers/test_suggest_patch.py
+- [ ] tests/cli/handlers/test_verify.py
+- [ ] tests/cli/test_cli.py
+- [ ] tests/cli/test_commands.py
+- [ ] tests/cli/test_convert.py
+- [ ] tests/cli/test_convert_weights.py
+- [ ] tests/cli/test_define.py
+- [ ] tests/cli/test_dev.py
+- [ ] tests/cli/test_harvest.py
+- [ ] tests/cli/test_main.py
+- [ ] tests/cli/test_matrix.py
+- [ ] tests/cli/test_meta.py
+- [ ] tests/cli/test_scaffold.py
+- [ ] tests/cli/test_suggest.py
+- [ ] tests/cli/test_verify.py
+- [ ] tests/codegen/test_generator_constraints.py
+- [ ] tests/codegen/test_generator_determinism.py
+- [ ] tests/codegen/test_generator_flow.py
+- [ ] tests/codegen/test_generator_grad.py
+- [ ] tests/codegen/test_generator_jit.py
+- [ ] tests/codegen/test_generator_runtime.py
+- [ ] tests/codegen/test_generator_shape.py
+- [ ] tests/codegen/test_generator_template.py
+- [ ] tests/codegen/test_generator_tolerances.py
+- [ ] tests/codegen/test_generator_types.py
+- [ ] tests/codegen/test_generator_verification_mode.py
+- [ ] tests/codegen/test_generator_void_return.py
+- [ ] tests/codegen/test_inputs.py
+- [ ] tests/codegen/test_physical_gen.py
+- [ ] tests/codegen/test_runtime.py
+- [ ] tests/codegen/test_runtime_builder.py
+- [ ] tests/codegen/test_runtime_coverage.py
+- [ ] tests/codegen/test_templates.py
+- [ ] tests/compiler/backends/cpp/test_cst.py
+- [ ] tests/compiler/backends/cpp/test_mapper.py
+- [ ] tests/compiler/backends/test_backends.py
+- [ ] tests/compiler/backends/test_python_backend.py
+- [ ] tests/compiler/backends/test_python_snippet.py
+- [ ] tests/compiler/backends/test_rdna_printer.py
+- [ ] tests/compiler/backends/test_rdna_roundtrip.py
+- [ ] tests/compiler/backends/test_rdna_synth.py
+- [ ] tests/compiler/backends/test_rdna_synthesizer.py
+- [ ] tests/compiler/backends/test_sass_printer.py
+- [ ] tests/compiler/backends/test_sass_roundtrip.py
+- [ ] tests/compiler/backends/test_sass_synth.py
+- [ ] tests/compiler/backends/test_sass_synth_macros.py
+- [ ] tests/compiler/backends/test_sass_synthesizer.py
+- [ ] tests/compiler/backends/test_stablehlo_other.py
+- [ ] tests/compiler/backends/test_visual_backends.py
+- [ ] tests/compiler/backends/test_wasm_backend.py
+- [ ] tests/compiler/frontends/test_python_frontend.py
+- [ ] tests/compiler/frontends/test_rdna_lifter.py
+- [ ] tests/compiler/frontends/test_rdna_parser_coverage.py
+- [ ] tests/compiler/frontends/test_sass_analysis.py
+- [ ] tests/compiler/frontends/test_sass_lifter.py
+- [ ] tests/compiler/frontends/test_sass_parser_coverage.py
+- [ ] tests/compiler/frontends/test_semantic_parser.py
+- [ ] tests/compiler/test_backend.py
+- [ ] tests/compiler/test_compiler.py
+- [ ] tests/compiler/test_differ.py
+- [ ] tests/compiler/test_html_backend.py
+- [ ] tests/compiler/test_ir.py
+- [ ] tests/compiler/test_mlir_backend.py
+- [ ] tests/compiler/test_mlir_parser.py
+- [ ] tests/compiler/test_official_dialects.py
+- [ ] tests/compiler/test_python_backend.py
+- [ ] tests/compiler/test_sharding_extractor.py
+- [ ] tests/conftest.py
+- [ ] tests/core/compiler/backends/test_visual_latex.py
+- [ ] tests/core/compiler/backends/test_visual_tikz.py
+- [ ] tests/core/compiler/frontends/rdna/test_analysis_coverage.py
+- [ ] tests/core/compiler/frontends/rdna/test_cst.py
+- [ ] tests/core/compiler/frontends/rdna/test_parser_coverage.py
+- [ ] tests/core/compiler/frontends/sass/test_cst.py
+- [ ] tests/core/compiler/frontends/test_sass_parser_coverage.py
+- [ ] tests/core/compiler/frontends/test_semantic_parser.py
+- [ ] tests/core/compiler/test_integration_roundtrip.py
+- [ ] tests/core/compiler/test_registry.py
+- [ ] tests/core/cst/test_base.py
+- [ ] tests/core/html/test_html_nodes.py
+- [ ] tests/core/html/test_html_roundtrip.py
+- [ ] tests/core/html/test_parser.py
+- [ ] tests/core/html/test_parser3.py
+- [ ] tests/core/import_fixer/test_imports_mixin.py
+- [ ] tests/core/import_fixer/test_injection.py
+- [ ] tests/core/import_fixer/test_utils.py
+- [ ] tests/core/latex/test_latex_nodes_coverage.py
+- [ ] tests/core/latex/test_latex_parser.py
+- [ ] tests/core/latex/test_latex_parser_coverage_gaps.py
+- [ ] tests/core/latex/test_parser_coverage.py
+- [ ] tests/core/mlir/test_dialect_coverage.py
+- [ ] tests/core/mlir/test_gen_base_coverage.py
+- [ ] tests/core/mlir/test_generator_coverage.py
+- [ ] tests/core/mlir/test_mlir_emitter.py
+- [ ] tests/core/mlir/test_mlir_gen.py
+- [ ] tests/core/mlir/test_mlir_generator.py
+- [ ] tests/core/mlir/test_mlir_nodes.py
+- [ ] tests/core/mlir/test_mlir_parser.py
+- [ ] tests/core/mlir/test_mlir_parser_coverage.py
+- [ ] tests/core/mlir/test_naming_coverage.py
+- [ ] tests/core/mlir/test_nodes.py
+- [ ] tests/core/mlir/test_stablehlo_emitter.py
+- [ ] tests/core/mlir/test_stablehlo_emitter_branches.py
+- [ ] tests/core/mlir/test_type_inference.py
+- [ ] tests/core/mlir/test_types.py
+- [ ] tests/core/rdna/test_rdna_cst.py
+- [ ] tests/core/rdna/test_rdna_lifting.py
+- [ ] tests/core/rdna/test_rdna_macros.py
+- [ ] tests/core/rdna/test_rdna_parser.py
+- [ ] tests/core/rdna/test_rdna_synthesizer.py
+- [ ] tests/core/rewriter/calls/test_dispatch.py
+- [ ] tests/core/rewriter/calls/test_dispatch_error.py
+- [ ] tests/core/rewriter/calls/test_guards.py
+- [ ] tests/core/rewriter/calls/test_post.py
+- [ ] tests/core/rewriter/calls/test_pre.py
+- [ ] tests/core/rewriter/calls/test_strategy.py
+- [ ] tests/core/rewriter/calls/test_utils.py
+- [ ] tests/core/rewriter/passes/test_api.py
+- [ ] tests/core/rewriter/passes/test_api_attr_mixin.py
+- [ ] tests/core/rewriter/passes/test_api_call_mixin.py
+- [ ] tests/core/rewriter/passes/test_api_coverage.py
+- [ ] tests/core/rewriter/passes/test_api_helpers.py
+- [ ] tests/core/rewriter/passes/test_auxiliary.py
+- [ ] tests/core/rewriter/passes/test_structure.py
+- [ ] tests/core/rewriter/test_calls.py
+- [ ] tests/core/rewriter/test_calls_pre_dispatch.py
+- [ ] tests/core/rewriter/test_calls_pre_dispatch2.py
+- [ ] tests/core/rewriter/test_calls_strategy_utils.py
+- [ ] tests/core/rewriter/test_calls_strategy_utils2.py
+- [ ] tests/core/rewriter/test_dispatch_logic.py
+- [ ] tests/core/rewriter/test_normalization_utils.py
+- [ ] tests/core/rewriter/test_patcher.py
+- [ ] tests/core/rewriter/test_pipeline.py
+- [ ] tests/core/rewriter/test_trait_rewriting.py
+- [ ] tests/core/sass/test_analysis.py
+- [ ] tests/core/sass/test_macros.py
+- [ ] tests/core/sass/test_sass_cst.py
+- [ ] tests/core/sass/test_sass_macros.py
+- [ ] tests/core/sass/test_sass_parser.py
+- [ ] tests/core/sass/test_synthesizer.py
+- [ ] tests/core/test_coverage.py
+- [ ] tests/core/test_cst_base.py
+- [ ] tests/core/test_discovery_inference.py
+- [ ] tests/core/test_engine.py
+- [ ] tests/core/test_engine_pipeline.py
+- [ ] tests/core/test_engine_routing.py
+- [ ] tests/core/test_engine_switching.py
+- [ ] tests/core/test_ghost.py
+- [ ] tests/core/test_graph.py
+- [ ] tests/core/test_graph_optimizer.py
+- [ ] tests/core/test_graph_synthesizer.py
+- [ ] tests/core/test_provenance.py
+- [ ] tests/core/tikz/test_analyser.py
+- [ ] tests/core/tikz/test_analyser_coverage.py
+- [ ] tests/core/tikz/test_nodes_coverage.py
+- [ ] tests/core/tikz/test_parser_coverage.py
+- [ ] tests/core/tikz/test_tikz_analyser.py
+- [ ] tests/core/tikz/test_tikz_nodes.py
+- [ ] tests/core/tikz/test_tikz_parser.py
+- [ ] tests/core/wasm/test_wasm_cst.py
+- [ ] tests/discovery/test_consensus.py
+- [ ] tests/frameworks/test_base_registry.py
+- [ ] tests/frameworks/test_flax_nnx.py
+- [ ] tests/frameworks/test_harness_protocol.py
+- [ ] tests/frameworks/test_html_dsl.py
+- [ ] tests/frameworks/test_jax.py
+- [ ] tests/frameworks/test_jax_stack.py
+- [ ] tests/frameworks/test_keras.py
+- [ ] tests/frameworks/test_keras_examples.py
+- [ ] tests/frameworks/test_keras_io.py
+- [ ] tests/frameworks/test_latex_dsl.py
+- [ ] tests/frameworks/test_mlir.py
+- [ ] tests/frameworks/test_mlx.py
+- [ ] tests/frameworks/test_mlx_examples.py
+- [ ] tests/frameworks/test_mlx_io.py
+- [ ] tests/frameworks/test_numpy.py
+- [ ] tests/frameworks/test_numpy_examples.py
+- [ ] tests/frameworks/test_paxml.py
+- [ ] tests/frameworks/test_paxml_examples.py
+- [ ] tests/frameworks/test_rdna.py
+- [ ] tests/frameworks/test_sass.py
+- [ ] tests/frameworks/test_stablehlo.py
+- [ ] tests/frameworks/test_stack_wiring.py
+- [ ] tests/frameworks/test_tensorflow.py
+- [ ] tests/frameworks/test_tensorflow_examples.py
+- [ ] tests/frameworks/test_tikz.py
+- [ ] tests/frameworks/test_torch.py
+- [ ] tests/frameworks/test_torch_examples.py
+- [ ] tests/functionality/__pycache__/test_import_fixer_coverage.cpython-39-pytest-8.4.2.pyc
+- [ ] tests/functionality/test_config.py
+- [ ] tests/functionality/test_config_toml.py
+- [ ] tests/functionality/test_engine_linter.py
+- [ ] tests/functionality/test_escape_hatch_reliability.py
+- [ ] tests/functionality/test_escape_hatch_wiring.py
+- [ ] tests/functionality/test_harness_rng.py
+- [ ] tests/functionality/test_import_fixer_coverage.py
+- [ ] tests/functionality/test_infix_transform.py
+- [ ] tests/functionality/test_loader.py
+- [ ] tests/functionality/test_matrix.py
+- [ ] tests/functionality/test_output_casting.py
+- [ ] tests/functionality/test_output_normalization.py
+- [ ] tests/functionality/test_plugins.py
+- [ ] tests/functionality/test_rewriter.py
+- [ ] tests/functionality/test_rewriter_arg_normalization.py
+- [ ] tests/functionality/test_rewriter_bubbling.py
+- [ ] tests/functionality/test_rewriter_constants.py
+- [ ] tests/functionality/test_rewriter_decorators.py
+- [ ] tests/functionality/test_rewriter_defaults.py
+- [ ] tests/functionality/test_rewriter_functional_unwrap.py
+- [ ] tests/functionality/test_rewriter_lifecycle.py
+- [ ] tests/functionality/test_rewriter_state_mechanism.py
+- [ ] tests/functionality/test_trace_diff.py
+- [ ] tests/functionality/test_verification_gating.py
+- [ ] tests/generated_tests/test_runtime_builder.py
+- [ ] tests/generation/test_functional_transforms.py
+- [ ] tests/generation/test_generated_tests.py
+- [ ] tests/gold/attention/flax_nnx.py
+- [ ] tests/gold/attention/keras3.py
+- [ ] tests/gold/attention/mlx.py
+- [ ] tests/gold/attention/numpy.py
+- [ ] tests/gold/attention/paxml.py
+- [ ] tests/gold/attention/pytorch.py
+- [ ] tests/gold/attention/tensorflow.py
+- [ ] tests/gold/batch_norm/flax_nnx.py
+- [ ] tests/gold/batch_norm/keras3.py
+- [ ] tests/gold/batch_norm/mlx.py
+- [ ] tests/gold/batch_norm/numpy.py
+- [ ] tests/gold/batch_norm/paxml.py
+- [ ] tests/gold/batch_norm/pytorch.py
+- [ ] tests/gold/batch_norm/tensorflow.py
+- [ ] tests/gold/conv2d/flax_nnx.py
+- [ ] tests/gold/conv2d/keras3.py
+- [ ] tests/gold/conv2d/mlx.py
+- [ ] tests/gold/conv2d/numpy.py
+- [ ] tests/gold/conv2d/paxml.py
+- [ ] tests/gold/conv2d/pytorch.py
+- [ ] tests/gold/conv2d/tensorflow.py
+- [ ] tests/gold/conv2d_same_padding/flax_nnx.py
+- [ ] tests/gold/conv2d_same_padding/keras3.py
+- [ ] tests/gold/conv2d_same_padding/mlx.py
+- [ ] tests/gold/conv2d_same_padding/numpy.py
+- [ ] tests/gold/conv2d_same_padding/paxml.py
+- [ ] tests/gold/conv2d_same_padding/pytorch.py
+- [ ] tests/gold/conv2d_same_padding/tensorflow.py
+- [ ] tests/gold/dropout/flax_nnx.py
+- [ ] tests/gold/dropout/keras3.py
+- [ ] tests/gold/dropout/mlx.py
+- [ ] tests/gold/dropout/numpy.py
+- [ ] tests/gold/dropout/paxml.py
+- [ ] tests/gold/dropout/pytorch.py
+- [ ] tests/gold/dropout/tensorflow.py
+- [ ] tests/gold/embedding/flax_nnx.py
+- [ ] tests/gold/embedding/keras3.py
+- [ ] tests/gold/embedding/mlx.py
+- [ ] tests/gold/embedding/numpy.py
+- [ ] tests/gold/embedding/paxml.py
+- [ ] tests/gold/embedding/pytorch.py
+- [ ] tests/gold/embedding/tensorflow.py
+- [ ] tests/gold/flatten/flax_nnx.py
+- [ ] tests/gold/flatten/keras3.py
+- [ ] tests/gold/flatten/mlx.py
+- [ ] tests/gold/flatten/numpy.py
+- [ ] tests/gold/flatten/paxml.py
+- [ ] tests/gold/flatten/pytorch.py
+- [ ] tests/gold/flatten/tensorflow.py
+- [ ] tests/gold/global_avg_pool/flax_nnx.py
+- [ ] tests/gold/global_avg_pool/keras3.py
+- [ ] tests/gold/global_avg_pool/mlx.py
+- [ ] tests/gold/global_avg_pool/numpy.py
+- [ ] tests/gold/global_avg_pool/paxml.py
+- [ ] tests/gold/global_avg_pool/pytorch.py
+- [ ] tests/gold/global_avg_pool/tensorflow.py
+- [ ] tests/gold/group_norm/flax_nnx.py
+- [ ] tests/gold/group_norm/keras3.py
+- [ ] tests/gold/group_norm/pytorch.py
+- [ ] tests/gold/layer_norm/flax_nnx.py
+- [ ] tests/gold/layer_norm/keras3.py
+- [ ] tests/gold/layer_norm/mlx.py
+- [ ] tests/gold/layer_norm/numpy.py
+- [ ] tests/gold/layer_norm/paxml.py
+- [ ] tests/gold/layer_norm/pytorch.py
+- [ ] tests/gold/layer_norm/tensorflow.py
+- [ ] tests/gold/linear/flax_nnx.py
+- [ ] tests/gold/linear/keras3.py
+- [ ] tests/gold/linear/mlx.py
+- [ ] tests/gold/linear/numpy.py
+- [ ] tests/gold/linear/paxml.py
+- [ ] tests/gold/linear/pytorch.py
+- [ ] tests/gold/linear/tensorflow.py
+- [ ] tests/gold/lstm/flax_nnx.py
+- [ ] tests/gold/lstm/keras3.py
+- [ ] tests/gold/lstm/mlx.py
+- [ ] tests/gold/lstm/numpy.py
+- [ ] tests/gold/lstm/paxml.py
+- [ ] tests/gold/lstm/pytorch.py
+- [ ] tests/gold/lstm/tensorflow.py
+- [ ] tests/gold/max_pool2d/flax_nnx.py
+- [ ] tests/gold/max_pool2d/keras3.py
+- [ ] tests/gold/max_pool2d/mlx.py
+- [ ] tests/gold/max_pool2d/numpy.py
+- [ ] tests/gold/max_pool2d/paxml.py
+- [ ] tests/gold/max_pool2d/pytorch.py
+- [ ] tests/gold/max_pool2d/tensorflow.py
+- [ ] tests/gold/mlp/flax_nnx.py
+- [ ] tests/gold/mlp/keras3.py
+- [ ] tests/gold/mlp/mlx.py
+- [ ] tests/gold/mlp/numpy.py
+- [ ] tests/gold/mlp/paxml.py
+- [ ] tests/gold/mlp/pytorch.py
+- [ ] tests/gold/mlp/tensorflow.py
+- [ ] tests/gold/optim_adam/numpy.py
+- [ ] tests/gold/resnet_block/flax_nnx.py
+- [ ] tests/gold/resnet_block/keras3.py
+- [ ] tests/gold/resnet_block/mlx.py
+- [ ] tests/gold/resnet_block/numpy.py
+- [ ] tests/gold/resnet_block/paxml.py
+- [ ] tests/gold/resnet_block/pytorch.py
+- [ ] tests/gold/resnet_block/tensorflow.py
+- [ ] tests/gold/sequential/numpy.py
+- [ ] tests/gold/transformer_block/flax_nnx.py
+- [ ] tests/gold/transformer_block/keras3.py
+- [ ] tests/gold/transformer_block/pytorch.py
+- [ ] tests/gold/weight_norm/pytorch.py
+- [ ] tests/gold/weight_norm/tensorflow.py
+- [ ] tests/importers/test_array_api_reader.py
+- [ ] tests/importers/test_future_onnx_reader.py
+- [ ] tests/importers/test_onnx_reader.py
+- [ ] tests/importers/test_sass_reader.py
+- [ ] tests/importers/test_stablehlo_reader.py
+- [ ] tests/integration/test_attention_layers.py
+- [ ] tests/integration/test_bonsai_e2e.py
+- [ ] tests/integration/test_clamp.py
+- [ ] tests/integration/test_cli_visuals.py
+- [ ] tests/integration/test_device_checks_wired.py
+- [ ] tests/integration/test_e2e_examples.py
+- [ ] tests/integration/test_examples_suite.py
+- [ ] tests/integration/test_external_plugins.py
+- [ ] tests/integration/test_flax_to_mlx_to_flax.py
+- [ ] tests/integration/test_flax_torch_bidirectional.py
+- [ ] tests/integration/test_ghost_hydrating.py
+- [ ] tests/integration/test_gradient_modes.py
+- [ ] tests/integration/test_hardware_lifter.py
+- [ ] tests/integration/test_integration_rdna_roundtrip.py
+- [ ] tests/integration/test_keras_sequential.py
+- [ ] tests/integration/test_latex_coverage.py
+- [ ] tests/integration/test_latex_source_to_torch.py
+- [ ] tests/integration/test_macro_ops.py
+- [ ] tests/integration/test_mlir_convnet_clean.py
+- [ ] tests/integration/test_mlir_roundtrip.py
+- [ ] tests/integration/test_mlx_optimizers.py
+- [ ] tests/integration/test_onehot.py
+- [ ] tests/integration/test_paxml_e2e.py
+- [ ] tests/integration/test_qwen_roundtrip.py
+- [ ] tests/integration/test_rdna_compiler.py
+- [ ] tests/integration/test_roundtrip_modulelist.py
+- [ ] tests/integration/test_roundtrip_silu.py
+- [ ] tests/integration/test_roundtrip_tensortype.py
+- [ ] tests/integration/test_sass_e2e.py
+- [ ] tests/integration/test_sass_e2e_complex.py
+- [ ] tests/integration/test_sass_lifting.py
+- [ ] tests/integration/test_sass_macros.py
+- [ ] tests/integration/test_sequential_model.py
+- [ ] tests/integration/test_squeeze.py
+- [ ] tests/integration/test_stablehlo_execution.py
+- [ ] tests/integration/test_tensor_layout.py
+- [ ] tests/integration/test_tf_data_pipeline.py
+- [ ] tests/integration/test_tikz_coverage.py
+- [ ] tests/integration/test_topk.py
+- [ ] tests/integration/test_torch_to_jax_flax_abs_case.py
+- [ ] tests/integration/test_type_inference.py
+- [ ] tests/integration/test_variable_container.py
+- [ ] tests/plugins/test_attention_packing.py
+- [ ] tests/plugins/test_batch_norm.py
+- [ ] tests/plugins/test_casting.py
+- [ ] tests/plugins/test_ckpt_keys.py
+- [ ] tests/plugins/test_clipping.py
+- [ ] tests/plugins/test_context_wrap.py
+- [ ] tests/plugins/test_data_loader.py
+- [ ] tests/plugins/test_data_loader_extended.py
+- [ ] tests/plugins/test_device_allocator.py
+- [ ] tests/plugins/test_device_allocator_multi.py
+- [ ] tests/plugins/test_device_checks.py
+- [ ] tests/plugins/test_einsum.py
+- [ ] tests/plugins/test_flatten.py
+- [ ] tests/plugins/test_gather.py
+- [ ] tests/plugins/test_inplace_unroll.py
+- [ ] tests/plugins/test_io_handler.py
+- [ ] tests/plugins/test_mlx_extras.py
+- [ ] tests/plugins/test_mlx_optimizers.py
+- [ ] tests/plugins/test_nnx_variable_reverse.py
+- [ ] tests/plugins/test_schedulers.py
+- [ ] tests/plugins/test_shape_packing.py
+- [ ] tests/plugins/test_state_container.py
+- [ ] tests/plugins/test_state_flag.py
+- [ ] tests/plugins/test_tf_data_loader.py
+- [ ] tests/plugins/test_utils.py
+- [ ] tests/scripts/test_audit_against_snapshots.py
+- [ ] tests/semantics/test_alias_config.py
+- [ ] tests/semantics/test_conflict_resolution.py
+- [ ] tests/semantics/test_file_loader.py
+- [ ] tests/semantics/test_import_map_loading.py
+- [ ] tests/semantics/test_manager.py
+- [ ] tests/semantics/test_registry_loader.py
+- [ ] tests/semantics/test_shared_base_inheritance.py
+- [ ] tests/semantics/test_vmap.py
+- [ ] tests/sphinx_ext/test_autogen_ops.py
+- [ ] tests/sphinx_ext/test_hooks.py
+- [ ] tests/sphinx_ext/test_hooks_extra.py
+- [ ] tests/sphinx_ext/test_init.py
+- [ ] tests/sphinx_ext/test_rendering.py
+- [ ] tests/test_api.py
+- [ ] tests/test_api_helpers.py
+- [ ] tests/test_auxiliary.py
+- [ ] tests/test_backend_stablehlo.py
+- [ ] tests/test_backend_stablehlo_math.py
+- [ ] tests/test_batch_runner.py
+- [ ] tests/test_cli_e2e.py
+- [ ] tests/test_code_extractor.py
+- [ ] tests/test_compiler_fusion.py
+- [ ] tests/test_compiler_sharding.py
+- [ ] tests/test_compiler_sharding_extractor.py
+- [ ] tests/test_conf.py
+- [ ] tests/test_config.py
+- [ ] tests/test_config_coverage.py
+- [ ] tests/test_conv_keras_tf.py
+- [ ] tests/test_cpp_cst.py
+- [ ] tests/test_cpp_generator.py
+- [ ] tests/test_cpp_mapper.py
+- [ ] tests/test_cpp_parser.py
+- [ ] tests/test_cpp_transformer.py
+- [ ] tests/test_discovery.py
+- [ ] tests/test_e2e_sass_rdna.py
+- [ ] tests/test_engine.py
+- [ ] tests/test_frameworks_asm.py
+- [ ] tests/test_frameworks_compiler.py
+- [ ] tests/test_frameworks_flax_nnx.py
+- [ ] tests/test_frameworks_visual.py
+- [ ] tests/test_frontend_python.py
+- [ ] tests/test_frontend_semantic_parser.py
+- [ ] tests/test_fuzz_improved.py
+- [ ] tests/test_fuzzer_constraints.py
+- [ ] tests/test_gen_expressions.py
+- [ ] tests/test_gen_statements.py
+- [ ] tests/test_generate_10k_plan.py
+- [ ] tests/test_generator.py
+- [ ] tests/test_ghost.py
+- [ ] tests/test_graph.py
+- [ ] tests/test_graph_coverage.py
+- [ ] tests/test_graph_optimizer.py
+- [ ] tests/test_hooks.py
+- [ ] tests/test_hooks_context.py
+- [ ] tests/test_hooks_loader.py
+- [ ] tests/test_hooks_registry.py
+- [ ] tests/test_html_backend.py
+- [ ] tests/test_html_dsl.py
+- [ ] tests/test_import_fixer_attributes_mixin.py
+- [ ] tests/test_import_fixer_base.py
+- [ ] tests/test_import_fixer_imports_mixin.py
+- [ ] tests/test_import_fixer_injection_mixin.py
+- [ ] tests/test_import_fixer_resolution.py
+- [ ] tests/test_import_fixer_utils.py
+- [ ] tests/test_ingestion.py
+- [ ] tests/test_jax.py
+- [ ] tests/test_keras.py
+- [ ] tests/test_leftover_imports.py
+- [ ] tests/test_mlir_cst.py
+- [ ] tests/test_mlir_cst_coverage.py
+- [ ] tests/test_mlir_emitter_coverage.py
+- [ ] tests/test_mlir_emitter_expr.py
+- [ ] tests/test_mlir_gen_base.py
+- [ ] tests/test_mlir_generator.py
+- [ ] tests/test_mlir_naming_coverage.py
+- [ ] tests/test_mlir_nodes_coverage.py
+- [ ] tests/test_mlir_parser.py
+- [ ] tests/test_mlir_stablehlo_parser.py
+- [ ] tests/test_mlir_type_inference_coverage.py
+- [ ] tests/test_mlir_types.py
+- [ ] tests/test_mlx.py
+- [ ] tests/test_naming.py
+- [ ] tests/test_new_engine_branches.py
+- [ ] tests/test_nodes.py
+- [ ] tests/test_numpy.py
+- [ ] tests/test_paxml.py
+- [ ] tests/test_paxml_layer_mappings.py
+- [ ] tests/test_plugin.py
+- [ ] tests/test_plugin_attention_packing.py
+- [ ] tests/test_plugin_auto_fsdp.py
+- [ ] tests/test_plugin_batch_norm.py
+- [ ] tests/test_plugin_casting.py
+- [ ] tests/test_plugin_checkpoint_keys.py
+- [ ] tests/test_plugin_clipping.py
+- [ ] tests/test_plugin_context_wrap.py
+- [ ] tests/test_plugin_coverage.py
+- [ ] tests/test_plugin_coverage_gaps.py
+- [ ] tests/test_plugin_data_loader.py
+- [ ] tests/test_plugin_device_allocator.py
+- [ ] tests/test_plugin_device_checks.py
+- [ ] tests/test_plugin_einsum.py
+- [ ] tests/test_plugin_flatten_new.py
+- [ ] tests/test_plugin_gather.py
+- [ ] tests/test_plugin_inplace_unroll.py
+- [ ] tests/test_plugin_io_handler.py
+- [ ] tests/test_plugin_jax_decompose.py
+- [ ] tests/test_plugin_keras_sequential.py
+- [ ] tests/test_plugin_loss_wrapper.py
+- [ ] tests/test_plugin_method_property.py
+- [ ] tests/test_plugin_mlx_extras.py
+- [ ] tests/test_plugin_mlx_optimizers.py
+- [ ] tests/test_plugin_nnx_to_torch_params.py
+- [ ] tests/test_plugin_optimizer_step.py
+- [ ] tests/test_plugin_reshape.py
+- [ ] tests/test_plugin_rng_threading.py
+- [ ] tests/test_plugin_scatter.py
+- [ ] tests/test_plugin_schedulers.py
+- [ ] tests/test_plugin_shape_packing.py
+- [ ] tests/test_plugin_state_container.py
+- [ ] tests/test_plugin_state_flag_injection.py
+- [ ] tests/test_plugin_static_unroll.py
+- [ ] tests/test_plugin_tf_data_loader.py
+- [ ] tests/test_plugin_topk.py
+- [ ] tests/test_plugin_utils.py
+- [ ] tests/test_pure_math_decomposition.py
+- [ ] tests/test_python_backend.py
+- [ ] tests/test_python_snippet.py
+- [ ] tests/test_qwen_fusion.py
+- [ ] tests/test_rdna.py
+- [ ] tests/test_rdna_backend.py
+- [ ] tests/test_rdna_backend_emitter.py
+- [ ] tests/test_rdna_backend_macros.py
+- [ ] tests/test_rdna_backend_printer.py
+- [ ] tests/test_rdna_backend_synthesizer.py
+- [ ] tests/test_rdna_frontend_analysis.py
+- [ ] tests/test_rdna_frontend_cst.py
+- [ ] tests/test_rdna_frontend_lifter.py
+- [ ] tests/test_rdna_frontend_parser.py
+- [ ] tests/test_rdna_macros.py
+- [ ] tests/test_rdna_synthesizer.py
+- [ ] tests/test_rewriter_alias_resolution.py
+- [ ] tests/test_rewriter_api_attr.py
+- [ ] tests/test_rewriter_api_call.py
+- [ ] tests/test_rewriter_api_helpers.py
+- [ ] tests/test_rewriter_api_pass_coverage.py
+- [ ] tests/test_rewriter_auxiliary.py
+- [ ] tests/test_rewriter_bubbling.py
+- [ ] tests/test_rewriter_calls_dispatch.py
+- [ ] tests/test_rewriter_calls_guards.py
+- [ ] tests/test_rewriter_calls_post.py
+- [ ] tests/test_rewriter_calls_post2.py
+- [ ] tests/test_rewriter_calls_post3.py
+- [ ] tests/test_rewriter_calls_pre.py
+- [ ] tests/test_rewriter_calls_strategy.py
+- [ ] tests/test_rewriter_calls_transformers.py
+- [ ] tests/test_rewriter_calls_utils.py
+- [ ] tests/test_rewriter_calls_utils_coverage.py
+- [ ] tests/test_rewriter_constants.py
+- [ ] tests/test_rewriter_context.py
+- [ ] tests/test_rewriter_normalization_utils.py
+- [ ] tests/test_rewriter_patcher.py
+- [ ] tests/test_rewriter_pipeline.py
+- [ ] tests/test_rewriter_strategy_coverage.py
+- [ ] tests/test_rewriter_structure.py
+- [ ] tests/test_rewriter_structure_helpers.py
+- [ ] tests/test_runner.py
+- [ ] tests/test_sass_backend_backend.py
+- [ ] tests/test_sass_backend_emitter.py
+- [ ] tests/test_sass_backend_macros.py
+- [ ] tests/test_sass_backend_printer.py
+- [ ] tests/test_sass_backend_synthesizer.py
+- [ ] tests/test_sass_frontend_analysis.py
+- [ ] tests/test_sass_frontend_cst.py
+- [ ] tests/test_sass_frontend_lifter.py
+- [ ] tests/test_sass_frontend_parser.py
+- [ ] tests/test_sass_macros.py
+- [ ] tests/test_sass_printer.py
+- [ ] tests/test_sass_synthesizer.py
+- [ ] tests/test_scanners.py
+- [ ] tests/test_scanners_coverage.py
+- [ ] tests/test_sharding.py
+- [ ] tests/test_sharding_extractor.py
+- [ ] tests/test_signature_extractor.py
+- [ ] tests/test_stablehlo_backend.py
+- [ ] tests/test_stablehlo_emitter.py
+- [ ] tests/test_stablehlo_pipeline.py
+- [ ] tests/test_tensorflow.py
+- [ ] tests/test_torch.py
+- [ ] tests/test_tracer.py
+- [ ] tests/test_utils/test_readme_editor.py
+- [ ] tests/test_validate_odl_json.py
+- [ ] tests/test_verified_pipeline.py
+- [ ] tests/test_visual_backends.py
+- [ ] tests/test_wasm_backend.py
+- [ ] tests/testing/__init__.py
+- [ ] tests/testing/test_batch_runner.py
+- [ ] tests/testing/test_batch_validation.py
+- [ ] tests/testing/test_bisector.py
+- [ ] tests/testing/test_brute_force_testing.py
+- [ ] tests/testing/test_fuzzer_callables.py
+- [ ] tests/testing/test_fuzzer_core.py
+- [ ] tests/testing/test_fuzzer_parser.py
+- [ ] tests/testing/test_fuzzer_symbolic.py
+- [ ] tests/testing/test_fuzzer_type_parser.py
+- [ ] tests/testing/test_harness_dynamic_flow.py
+- [ ] tests/testing/test_harness_generator.py
+- [ ] tests/testing/test_harness_standalone.py
+- [ ] tests/testing/test_linter.py
+- [ ] tests/testing/test_runner.py
+- [ ] tests/testing/test_runner_exec.py
+- [ ] tests/testing/test_runner_shape.py
+- [ ] tests/testing/test_signature_extractor.py
+- [ ] tests/tools/test_dsl_dtype.py
+- [ ] tests/tools/test_injector_fw.py
+- [ ] tests/tools/test_injector_fw_utils.py
+- [ ] tests/tools/test_injector_plugin.py
+- [ ] tests/tools/test_injector_recursion.py
+- [ ] tests/tools/test_injector_spec.py
+- [ ] tests/tools/test_plugin_injector_logic.py
+- [ ] tests/utils/test_code_extractor_dedent.py
+- [ ] tests/utils/test_doc_context.py
+- [ ] tests/utils/test_doc_gen.py
+- [ ] tests/utils/test_doc_renderer.py
+- [ ] tests/utils/test_formatting.py
+- [ ] tests/utils/test_readme_editor.py
+- [ ] tests/utils/test_readme_editor_write_error.py
+- [ ] tests/utils/test_utils.py
+- [ ] tests/utils/test_utils_coverage.py
+- [ ] tests/utils/test_visualizer.py

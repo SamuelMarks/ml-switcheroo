@@ -170,3 +170,13 @@ def test_rdna_parse_rdna_to_graph() -> None:
   nodes2: list[typing.Any] = list(graph2.nodes.values())
   assert len(nodes2) == 1
   assert nodes2[0].op_type == "Linear"
+
+
+def test_rdna_cfg_builder_missing_branches() -> None:
+  """Docstring."""
+  from ml_switcheroo.frameworks.rdna import RdnaAdapter
+
+  adapter = RdnaAdapter()
+  code = "   \n// comment\ns_branch"
+  cfg = adapter.parse_rdna_to_graph(code)
+  assert cfg is not None

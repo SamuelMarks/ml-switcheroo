@@ -22,18 +22,18 @@ class BaseImportFixer(cst.CSTTransformer):
     self,
     plan: ResolutionPlan,
     source_fws: Optional[Union[str, Set[str]]] = None,
-    preserve_source: bool = False,
+    used_names: Optional[Set[str]] = None,
   ):
     """Initialize the fixer state.
 
     Args:
         plan: The pre-calculated ResolutionPlan describing required imports and mappings.
-        source_fws: Framework(s) to strip imports for (e.g. 'torch').
-        preserve_source: If True, do not delete imports even if matched.
+        source_fws: Framework(s) to explicitly strip imports for (e.g. 'torch').
+        used_names: Set of names actually used in the code body (for dead-code elimination).
 
     """
     self.plan = plan
-    self.preserve_source = preserve_source
+    self.used_names = used_names if used_names is not None else set()
 
     # Normalize source frameworks set
     if source_fws is None:

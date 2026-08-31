@@ -1,5 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- pass_
-type: function
-operation: register_pass

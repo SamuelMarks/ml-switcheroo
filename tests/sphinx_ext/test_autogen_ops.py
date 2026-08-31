@@ -292,8 +292,11 @@ def test_autogen_ops_variant_with_enum():
   """Docstring."""
 
   class DummyEnum:
+    """Docstring."""
+
     @property
     def value(self):
+      """Docstring."""
       return "enum_val"
 
   definition = {"variants": {"jax": {"some_field": DummyEnum()}}}

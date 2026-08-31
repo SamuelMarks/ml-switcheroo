@@ -60,3 +60,22 @@ def test_stablehlo_branches() -> None:
   code = "import x\nfrom y import z"
   tree = cst.parse_module(code)
   emitter.convert(tree)
+
+
+def test_stablehlo_if_orelse_invalid() -> None:
+  """Hit the 209->225 branch by providing an invalid orelse."""
+  semantics = SemanticsManager()
+  emitter = StableHloEmitter(semantics)
+
+  # Parse a normal if, then mutate its orelse to a bad type.
+  tree = cst.parse_module("if True: pass\n")
+
+  # We need to extract the If node.
+  if_node = tree.body[0]
+  if isinstance(if_node, cst.If):
+    # We create a new If with bad orelse
+    bad_if = if_node.with_changes(orelse=cst.Pass())
+    # Hack around the AST validation by just passing it to _emit_if
+    ops = emitter._emit_if(bad_if)
+    # Assert ops generated
+    assert len(ops) > 0

@@ -64,23 +64,7 @@ class ApiTransformerCallMixin:
     ...
 
   def check_version_constraints(self, *args: Any, **kwargs: Any) -> Any:
-    """Mixin class that handles rewriting function call nodes during CST traversal.
-
-    This class contains the `leave_Call` visitor method that intercepts call expressions.
-    It is designed to be mixed into `ApiTransformer` or mock transformers for testing.
-    It relies on duck typing and expects the inheriting class to provide attributes and
-    methods such as:
-
-    - `strict_mode` (bool): Whether to fail on unmapped source APIs.
-    - `source_fw` (str): Name of the source framework (e.g., 'torch').
-    - `target_fw` (str): Name of the target framework (e.g., 'jax').
-    - `semantics` (SemanticsManager): Semantic lookup dictionary/object.
-    - `_get_qualified_name(node)`: Resolves fully-qualified names of functions.
-    - `_get_mapping(name)`: Retrieves API translation details/mappings.
-    - `check_version_constraints(min_v, max_v)`: Validates version constraints.
-    - `_report_warning(msg)`: Handles issuing warnings.
-    - `_report_failure(msg)`: Handles throwing or logging failures.
-    """
+    """Dummy method."""
     ...
 
   def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
@@ -97,11 +81,11 @@ class ApiTransformerCallMixin:
     6. Run post-processing hooks to finalized the rewritten node structure.
 
     Args:
-        original_node: The original LibCST Call node before traversal.
-        updated_node: The updated LibCST Call node with children visited.
+        original_node (cst.Call): The original LibCST Call node before traversal.
+        updated_node (cst.Call): The updated LibCST Call node with children visited.
 
     Returns:
-        The fully rewritten AST node (e.g., cst.Call, cst.BinaryOperation,
+        cst.BaseExpression: The fully rewritten AST node (e.g., cst.Call, cst.BinaryOperation,
         cst.UnaryOperation) representing the target-framework equivalent,
         or the original/updated node if no rewrite is performed.
     """

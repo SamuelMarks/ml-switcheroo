@@ -13,7 +13,7 @@ def test_base_import_fixer_init() -> None:
   # default init
   fixer: BaseImportFixer = BaseImportFixer(plan)
   assert fixer.source_fws == set()
-  assert fixer.preserve_source is False
+  assert fixer.used_names == set()
   assert fixer._defined_names == set()
   assert fixer._satisfied_injections == set()
   assert fixer._path_to_alias == {}

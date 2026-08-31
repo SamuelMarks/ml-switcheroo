@@ -9,7 +9,10 @@ def test_get_trivia_empty_children():
   """Docstring."""
 
   class DummyNode:
+    """Docstring."""
+
     def __init__(self):
+      """Docstring."""
       self.children = []
 
   assert _get_trivia(DummyNode()) == []
@@ -19,6 +22,8 @@ def test_get_trivia_no_children():
   """Docstring."""
 
   class DummyNode:
+    """Docstring."""
+
     pass
 
   assert _get_trivia(DummyNode()) == []
@@ -28,7 +33,10 @@ def test_get_trivia_from_children():
   """Docstring."""
 
   class DummyNodeWithTrivia:
+    """Docstring."""
+
     def __init__(self):
+      """Docstring."""
       self.leading_trivia = ["some_trivia"]
 
   node = Tree("dummy", [DummyNodeWithTrivia()])

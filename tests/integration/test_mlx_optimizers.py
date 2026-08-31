@@ -27,6 +27,8 @@ def functional_framework_setup() -> str:
 
   @register_framework("functional_fw")
   class FunctionalAdapter:
+    """Docstring."""
+
     pass
 
   return "functional_fw"

@@ -9,10 +9,14 @@ def test_rdna_cst_repr() -> None:
   from ml_switcheroo.core.cst.base import Trivia
 
   class DummyRdna(RdnaNode):
+    """Docstring."""
+
     def _get_name(self) -> str:
+      """Docstring."""
       return "Dummy"
 
     def _get_fields(self) -> dict[str, typing.Any]:
+      """Docstring."""
       return {"a": 1}
 
   d = DummyRdna()

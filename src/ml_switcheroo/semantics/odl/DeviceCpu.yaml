@@ -1,4 +1,0 @@
-description: Returns the CPU device object.
-std_args: []
-variants: {}
-operation: DeviceCpu

@@ -1,4 +1,0 @@
-description: Return a bool indicating if XPU is currently available.
-std_args: []
-variants: {}
-operation: is_available

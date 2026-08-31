@@ -1,4 +1,0 @@
-description: Returns True if Hijax mode is currently enabled.
-std_args: []
-variants: {}
-operation: UsingHijax

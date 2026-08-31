@@ -1,9 +1,0 @@
-description: Generates a random BCSR array.
-std_args:
-- rng
-- rand_method
-- nse
-- n_batch
-- n_dense
-type: function
-operation: rand_bcsr

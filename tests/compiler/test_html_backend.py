@@ -179,6 +179,7 @@ def test_html_backend_layout_graph_break_loop() -> None:
   orig_gridbox = GridBox
 
   def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    """Docstring."""
     css: str = kwargs.get("css_class", "")
     if "box b" in css:
       kwargs["css_class"] = "box mutated"
@@ -205,6 +206,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row2() -> None:
   orig_gridbox = __import__("ml_switcheroo.core.compiler.backends.html", fromlist=["GridBox"]).GridBox
 
   def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    """Docstring."""
     css: str = kwargs.get("css_class", "")
     if "box b" in css:
       kwargs["css_class"] = "box mutated"
@@ -234,6 +236,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row3() -> None:
   orig_gridbox = html_mod.GridBox
 
   def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    """Docstring."""
     box = orig_gridbox(*args, **kwargs)
     if "box b" in box.css_class:
       box.css_class = "box g"
@@ -263,6 +266,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row4() -> None:
   orig_gridbox = html_mod.GridBox
 
   def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    """Docstring."""
     box = orig_gridbox(*args, **kwargs)
     if "box b" in box.css_class:
       box.css_class = "box g"
@@ -292,6 +296,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row5() -> None:
   orig_gridbox = html_mod.GridBox
 
   def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    """Docstring."""
     box = orig_gridbox(*args, **kwargs)
     if "box b" in box.css_class:
       box.css_class = "box g"
@@ -321,6 +326,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row6() -> None:
   orig_gridbox = html_mod.GridBox
 
   def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    """Docstring."""
     box = orig_gridbox(*args, **kwargs)
     if "box b" in box.css_class:
       box.row = 999
@@ -350,6 +356,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row7() -> None:
   orig_gridbox = html_mod.GridBox
 
   def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    """Docstring."""
     box = orig_gridbox(*args, **kwargs)
     if "box b" in box.css_class:
       box.row = 999
@@ -379,6 +386,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row8() -> None:
   orig_gridbox = html_mod.GridBox
 
   def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    """Docstring."""
     box = orig_gridbox(*args, **kwargs)
     if kwargs.get("css_class") == "box b" and kwargs.get("row") == 2:
       box.css_class = "box g"
@@ -407,6 +415,7 @@ def test_html_backend_layout_graph_no_match_last_blue_row9() -> None:
   orig_gridbox = html_mod.GridBox
 
   def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    """Docstring."""
     box = orig_gridbox(*args, **kwargs)
     # when creating the green box for row 2, it is added to the list.
     # when iterating over the boxes looking for row 2 and "box b",

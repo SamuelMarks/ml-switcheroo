@@ -1,8 +1,0 @@
-description: Creates causal mask for self-attention.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: Tensor
-variants: {}
-operation: MakeCausalMask

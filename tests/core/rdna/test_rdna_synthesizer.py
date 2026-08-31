@@ -182,7 +182,10 @@ def test_convert_operand_to_py_brackets() -> None:
   synth = RdnaSynthesizer(None)  # type: ignore
 
   class DummyOp(RdnaOperand):
+    """Docstring."""
+
     def __str__(self) -> str:
+      """Docstring."""
       return "v[1:2]"
 
     def to_text(self) -> str:
@@ -198,7 +201,10 @@ def test_convert_operand_to_py_fallback() -> None:
   synth = RdnaSynthesizer(None)  # type: ignore
 
   class DummyOp(RdnaOperand):
+    """Docstring."""
+
     def __str__(self) -> str:
+      """Docstring."""
       return "some-weird-str!"
 
     def to_text(self) -> str:
@@ -243,6 +249,7 @@ def test_rdna_synthesizer_macro_exact_match() -> None:
   original = semantics.get_definition
 
   def mock_get_def(kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+    """Docstring."""
     if kind == "my_abstract_id":
       return ("my_abstract_id", {})
     return original(kind)

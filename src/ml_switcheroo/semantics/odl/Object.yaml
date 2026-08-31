@@ -1,5 +1,0 @@
-description: Base class for NNX objects that are not Pytrees.
-op_type: class
-std_args: []
-variants: {}
-operation: Object

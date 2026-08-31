@@ -1,9 +1,0 @@
-description: The class representing a Python class.
-std_args:
-- self
-- spec
-- smem_buffer
-- gmem_buffer
-- wrap_in_custom_primitive
-type: class
-operation: OnDeviceProfiler

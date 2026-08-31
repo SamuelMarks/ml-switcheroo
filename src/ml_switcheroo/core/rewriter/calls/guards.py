@@ -6,7 +6,7 @@ import libcst as cst
 if TYPE_CHECKING:
   # structural typing for rewriter to avoid circular import
   class HookContextDummy:
-    """Dummy hook context."""
+    """Structural type representation of a hook context."""
 
     metadata: Dict[str, Union[str, int, float, bool, dict, list, None]]
 
@@ -15,14 +15,14 @@ if TYPE_CHECKING:
       ...
 
   class Any:
-    """Dummy rewriter context."""
+    """Structural type representation of a rewriter context."""
 
     hook_context: HookContextDummy
 
   from typing import Protocol
 
   class RewriterDummy(Protocol):
-    """Dummy rewriter."""
+    """Structural type representation of a rewriter protocol."""
 
     context: Any
 

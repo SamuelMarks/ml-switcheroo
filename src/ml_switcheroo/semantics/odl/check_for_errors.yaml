@@ -1,5 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- self
-type: function
-operation: check_for_errors

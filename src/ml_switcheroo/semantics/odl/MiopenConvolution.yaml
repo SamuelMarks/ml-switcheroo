@@ -1,4 +1,0 @@
-description: Backend specific convolution.
-std_args: []
-variants: {}
-operation: MiopenConvolution

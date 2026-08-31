@@ -62,7 +62,10 @@ def test_rewriter_context_hydrate_pydantic() -> None:
   config.effective_source = "pytorch"
 
   class FakeModel:
+    """Docstring."""
+
     def model_dump(self) -> Dict[str, str]:
+      """Docstring."""
       return {"name": "test_alias"}
 
   semantics.get_framework_config.return_value = {"alias": FakeModel()}
@@ -121,7 +124,10 @@ def test_hydrate_alias_map_model_dump() -> None:
   sm: MagicMock = MagicMock()
 
   class DummyAlias:
+    """Docstring."""
+
     def model_dump(self) -> Dict[str, str]:
+      """Docstring."""
       return {"name": "th_dummy"}
 
   sm.get_framework_config.return_value = {"alias": DummyAlias()}

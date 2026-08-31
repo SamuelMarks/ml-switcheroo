@@ -120,7 +120,7 @@ Generate standalone scripts to convert model weights between formats.
 Automatically infer distributed sharding constraints for large models.
 *   Uses `ShardingInferencePass` to analyze unannotated graphs (e.g., standard PyTorch models).
 *   Injects `LogicalMesh` and `PartitionSpec` annotations using tensor-parallel and FSDP heuristics.
-*   Enables zero-effort distributed training when targeting frameworks like PaxML or MaxText.
+*   Enables zero-effort distributed training when targeting frameworks like PaxML or JAX.
 
 ---
 

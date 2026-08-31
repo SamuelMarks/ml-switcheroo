@@ -78,10 +78,15 @@ def test_is_framework_module_node_configs_alias_object() -> None:
   """Docstring."""
 
   class AliasInfo:
+    """Docstring."""
+
     def model_dump(self) -> dict:
+      """Docstring."""
       return {"name": "jnp"}
 
   class Conf:
+    """Docstring."""
+
     alias = AliasInfo()
 
   ctx: MagicMock = MagicMock(spec=HookContext)
@@ -97,6 +102,8 @@ def test_is_framework_module_node_configs_alias_object_no_dump() -> None:
   """Docstring."""
 
   class Conf:
+    """Docstring."""
+
     alias = {"name": "jnp"}
 
   ctx: MagicMock = MagicMock(spec=HookContext)

@@ -34,6 +34,7 @@ class DummyEmitter(MlirEmitterExprMixin):
     self.ctx: DummyCtx = DummyCtx()
 
   def _flatten_attr(self, attr: cst.BaseExpression) -> Optional[str]:
+    """Docstring."""
     if isinstance(attr, cst.Name):
       return attr.value
     elif isinstance(attr, cst.Attribute):
@@ -43,6 +44,7 @@ class DummyEmitter(MlirEmitterExprMixin):
     return None
 
   def _get_binop_str(self, op: cst.BaseBinaryOp) -> str:
+    """Docstring."""
     if isinstance(op, cst.Add):
       return "add"
     if isinstance(op, cst.Multiply):
@@ -143,10 +145,14 @@ def test_emit_error() -> None:
   emitter: DummyEmitter = DummyEmitter()
 
   class DummyNode(cst.BaseExpression):
+    """Docstring."""
+
     def _visit_and_replace_children(self, visitor: object) -> cst.CSTNode:
+      """Docstring."""
       return self
 
     def _codegen_impl(self, state: object, default_semi: bool = False) -> None:
+      """Docstring."""
       pass
 
   val: ValueNode
@@ -165,10 +171,14 @@ def test_annotation_to_string() -> None:
   assert emitter._annotation_to_string(attr) == "typing.Any"
 
   class DummyNode(cst.CSTNode):
+    """Docstring."""
+
     def _visit_and_replace_children(self, visitor: object) -> cst.CSTNode:
+      """Docstring."""
       return self
 
     def _codegen_impl(self, state: object, default_semi: bool = False) -> None:
+      """Docstring."""
       pass
 
   assert emitter._annotation_to_string(DummyNode()) == "Any"

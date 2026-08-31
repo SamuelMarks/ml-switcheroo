@@ -1,10 +1,19 @@
-"""Test module."""
+"""Test module for SymbolType data structures.
+
+This module validates the correctness of the symbol type classes (`SymbolType`, `TensorType`,
+`ModuleType`, `UnionType`, and `Scope`) used by the SymbolTableAnalyzer to track and compare
+type states during AST traversal.
+"""
 
 from ml_switcheroo.analysis.symbol_types import ModuleType, Scope, SymbolType, TensorType, UnionType
 
 
 def test_symbol_type() -> None:
-  """Docstring."""
+  """Test basic generic SymbolType behavior.
+
+  Verifies that base `SymbolType` instances with identical names compare as equal,
+  and differ from instances with other names or entirely different object types.
+  """
   sym1: SymbolType = SymbolType()
   sym1.name = "Unknown"
 
@@ -21,7 +30,12 @@ def test_symbol_type() -> None:
 
 
 def test_tensor_type() -> None:
-  """Docstring."""
+  """Test framework-specific TensorType behavior.
+
+  Verifies that `TensorType` correctly stores the framework name, automatically sets
+  its base name to "Tensor", and implements equality such that tensors from the
+  same framework are equal, but tensors from different frameworks are not.
+  """
   t1: TensorType = TensorType(framework="torch")
   t2: TensorType = TensorType(framework="torch")
   t3: TensorType = TensorType(framework="jax")
@@ -33,7 +47,11 @@ def test_tensor_type() -> None:
 
 
 def test_module_type() -> None:
-  """Docstring."""
+  """Test ModuleType behavior for imported libraries.
+
+  Verifies that `ModuleType` correctly tracks the import path (e.g. `torch.nn`),
+  automatically sets its base name to "Module", and checks equality based on the path.
+  """
   m1: ModuleType = ModuleType(path="torch.nn")
   m2: ModuleType = ModuleType(path="torch.nn")
   m3: ModuleType = ModuleType(path="jax.numpy")
@@ -45,7 +63,13 @@ def test_module_type() -> None:
 
 
 def test_union_type() -> None:
-  """Docstring."""
+  """Test UnionType behavior for merged branch states.
+
+  Verifies the string representation and equality logic of `UnionType`. Because
+  equality is currently based on the set of the string representations of its
+  member types, a Union of a PyTorch Tensor and a JAX Tensor (both stringifying
+  to "Tensor") evaluates as equal to a Union containing only one of them.
+  """
   t_torch: TensorType = TensorType(framework="torch")
   t_jax: TensorType = TensorType(framework="jax")
 
@@ -63,7 +87,13 @@ def test_union_type() -> None:
 
 
 def test_scope() -> None:
-  """Docstring."""
+  """Test hierarchical Scope resolution.
+
+  Verifies that a child `Scope` can correctly set and get its own local symbols,
+  and transparently fall back to its parent `Scope` when looking up symbols
+  that exist only in higher scopes. Also verifies that `snapshot()` only returns
+  the local symbols.
+  """
   root: Scope = Scope(name="root")
   root.set("x", TensorType(framework="torch"))
 

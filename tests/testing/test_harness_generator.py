@@ -29,6 +29,8 @@ def test_harness_adapter_shim_exceptions() -> None:
     assert res == ("", "", "pass")
 
   class MockAdapter:
+    """Docstring."""
+
     def get_to_numpy_code(self) -> str:
       """Mock implementation of get to NumPy code."""
       raise Exception("Fail")
@@ -64,6 +66,7 @@ def test_harness_extract_module_functions_oserror() -> None:
   original_getsource: Any = inspect.getsource
 
   def mock_getsource(obj: Any) -> str:
+    """Docstring."""
     if inspect.isfunction(obj):
       raise OSError("fail")
     return original_getsource(obj)
@@ -91,6 +94,7 @@ def test_harness_generate_adapter_shim_oserror() -> None:
   original_getsource: Any = inspect.getsource
 
   def mock_getsource(obj: Any) -> str:
+    """Docstring."""
     if hasattr(obj, "__name__") and getattr(obj, "__name__") == "convert":
       raise OSError("fail")
     return original_getsource(obj)
@@ -105,6 +109,8 @@ def test_harness_generate_adapter_shim_no_convert() -> None:
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   class NoConvertAdapter:
+    """Docstring."""
+
     pass
 
   _ADAPTER_REGISTRY["fake_fw"] = NoConvertAdapter
@@ -122,6 +128,8 @@ def test_harness_build_dynamic_init_with_magic_args() -> None:
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   class MockAdapter:
+    """Docstring."""
+
     harness_imports: list[str] = ["import something"]
     declared_magic_args: list[str] = ["my_magic_arg"]
 

@@ -56,6 +56,8 @@ def test_bisector_extract_params() -> None:
   ):
 
     class MockRunner:
+      """Docstring."""
+
       def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
         """Mock implementation of verify."""
         assert kwargs.get("hints") == {"a": "int", "b": "float"}
@@ -74,6 +76,8 @@ def test_bisector_runner_exception() -> None:
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunnerEx:
+    """Docstring."""
+
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
       """Mock implementation of verify."""
       raise ValueError("Runner died")
@@ -91,6 +95,8 @@ def test_bisector_no_fix_needed() -> None:
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunnerOk:
+    """Docstring."""
+
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
       """Mock implementation of verify."""
       return (True, "OK")
@@ -108,6 +114,8 @@ def test_bisector_fix_found() -> None:
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunner:
+    """Docstring."""
+
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
       """Mock implementation of verify."""
       return (True, "OK")
@@ -127,6 +135,8 @@ def test_bisector_exception() -> None:
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunner:
+    """Docstring."""
+
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
       """Mock implementation of verify."""
       raise Exception("fail")

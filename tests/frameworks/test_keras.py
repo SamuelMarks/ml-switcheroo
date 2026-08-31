@@ -163,6 +163,7 @@ def test_keras_import_exception() -> None:
   def mock_import(
     name: str, globals: typing.Any = None, locals: typing.Any = None, fromlist: typing.Any = (), level: int = 0
   ) -> typing.Any:
+    """Docstring."""
     if name == "keras" or name.startswith("keras."):
       raise Exception("import fail")
     return real_import(name, globals, locals, fromlist, level)
@@ -186,16 +187,12 @@ def test_keras_definitions_hit_true() -> None:
   # If @property is not evaluating we will override the property on the class just to trigger coverage
   adapter = keras_fw.KerasAdapter()
 
+  from unittest.mock import patch
   # We call the underlying function code manually to cover the branch if it's cached somewhere outside our control
-  import ml_switcheroo.frameworks.loader as base
 
-  orig = base.load_definitions
-  try:
-    base.load_definitions = lambda x: {}  # type: ignore
+  with patch("ml_switcheroo.frameworks.loader.load_definitions", return_value={}):
     defs: typing.Any = type(adapter).definitions.fget(adapter)  # type: ignore
     assert "ReLU" in defs
-  finally:
-    base.load_definitions = orig  # type: ignore
 
 
 # --- Merged from test_keras_extra.py ---

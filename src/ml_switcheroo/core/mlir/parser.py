@@ -20,6 +20,7 @@ from ml_switcheroo.core.mlir.cst import (
   TypeNode,
   AttributeNode,
   AttributeAliasDefNode,
+  TypeAliasDefNode,
 )
 
 TOKEN_REGEX = [
@@ -32,7 +33,7 @@ TOKEN_REGEX = [
   ("TYPE", r"!sw\.type<[^>]+>|tensor<[^>]+>|![a-zA-Z_0-9\.<>]+|[iuf]\d+|index|none"),
   ("NUMBER", r"-?\d+(?:\.\d+)?"),
   ("STRING", r'"(?:[^"\\]|\\.)*"'),
-  ("OPAQUE_DIALECT_CONTENTS", r"<[^>]+>"),
+  ("OPAQUE_DIALECT_CONTENTS", r"<(?![{])[^>]+>"),
   ("IDENTIFIER", r"[a-zA-Z_][a-zA-Z0-9_$.]*"),
   ("ARROW", r"->"),
   ("PUNCTUATION", r"[=,(){}\[\]:<>.]"),
@@ -112,9 +113,9 @@ class MlirLexer(Lexer):
 
 GRAMMAR = r"""
     ?start: module
-    module: (operation | attribute_alias_def)*
+    module: (operation | attribute_alias_def | type_alias_def)*
 
-    operation: [results EQ] custom_operation
+    operation: [results EQ] custom_operation [trailing_location] | [op_result_list] generic_operation [trailing_location]
 
     custom_operation: op_name [SYM_ID] [operands] [dictionary_attribute] op_tail*
 
@@ -132,7 +133,7 @@ GRAMMAR = r"""
             | operand_list
     operand_list: operand (COMMA operand)*
 
-    operand: (VAL_ID | SYM_ID) [COLON TYPE]
+    operand: (value_use | SYM_ID) [COLON TYPE]
 
     dictionary_attribute: LBRACE [attribute_entry (COMMA attribute_entry)*] RBRACE
     attribute_entry: attr_name EQ attribute_value
@@ -163,7 +164,7 @@ GRAMMAR = r"""
     dictionary_properties: LANGLE dictionary_attribute RANGLE
     entry_block: operation+
     function_type: (TYPE | type_list_parens) ARROW (TYPE | type_list_parens)
-    generic_operation: STRING [LPAREN value_use_list RPAREN] [successor_list]
+    generic_operation: STRING [LPAREN [value_use_list] RPAREN] [successor_list] [region_list] [dictionary_properties] [dictionary_attribute] [COLON function_type]
     op_result: VAL_ID [COLON NUMBER]
     op_result_list: op_result (COMMA op_result)* EQ
     opaque_dialect_attribute: dialect_namespace dialect_attribute_body
@@ -178,15 +179,15 @@ GRAMMAR = r"""
     ssa_use_and_type_list: ssa_use_and_type (COMMA ssa_use_and_type)*
     successor: CARET_ID [COLON block_arg_list]
     successor_list: LBRACK successor (COMMA successor)* RBRACK
-    trailing_location: "loc" LPAREN STRING RPAREN
-    type_alias: "!" IDENTIFIER
+    trailing_location: IDENTIFIER LPAREN STRING RPAREN
+    type_alias: TYPE
     type_alias_def: type_alias EQ TYPE
     type_list_no_parens: TYPE (COMMA TYPE)*
     type_list_parens: LPAREN [TYPE (COMMA TYPE)*] RPAREN
     value_id_and_type: VAL_ID COLON TYPE
     value_id_and_type_list: value_id_and_type (COMMA value_id_and_type)*
     value_id_list: VAL_ID (COMMA VAL_ID)*
-    value_use: VAL_ID [ATTR_ALIAS_ID NUMBER]
+    value_use: VAL_ID [ATTR_ALIAS_ID]
     value_use_list: value_use (COMMA value_use)*
     dialect_namespace: IDENTIFIER
     dialect_attribute_body: LANGLE dialect_attribute_contents+ RANGLE
@@ -260,9 +261,28 @@ class MlirTransformer(Transformer):
         The ModuleNode.
     """
     ops = [c for c in children if isinstance(c, OperationNode)]
-    aliases = [c for c in children if isinstance(c, AttributeAliasDefNode)]
+    aliases = [c for c in children if type(c).__name__ in ("AttributeAliasDefNode", "TypeAliasDefNode")]
     leading = _get_trivia(children[0]) if children else []
     return ModuleNode(body=BlockNode(label="", operations=ops), aliases=aliases, leading_trivia=leading)
+
+  @v_args(inline=False)
+  def type_alias_def(self, children) -> "TypeAliasDefNode":
+    """Transform type_alias_def.
+
+    Args:
+        children: Parsed children.
+
+    Returns:
+        The TypeAliasDefNode.
+    """
+    name_token = children[0].children[0]
+    name = name_token.value.lstrip("!")
+    type_node = TypeNode(body=children[2].value, leading_trivia=_get_trivia(children[2]))
+    leading = _get_trivia(children[0])
+    trailing = []
+    if len(children) > 1 and getattr(children[-1], "data", None) == "trivia":
+      trailing = _get_trivia(children[-1])
+    return TypeAliasDefNode(name=name, type_node=type_node, leading_trivia=leading, trailing_trivia=trailing)
 
   @v_args(inline=False)
   def attribute_alias_def(self, children) -> "AttributeAliasDefNode":
@@ -276,7 +296,7 @@ class MlirTransformer(Transformer):
     """
     # ATTR_ALIAS_ID trivia? "=" trivia? attribute_value trivia?
     name_token = children[0].children[0]
-    name = name_token.value
+    name = name_token.value.lstrip("!")
 
     # Find attribute_value
     val_node = next(c for c in children if getattr(c, "data", None) == "attribute_value")
@@ -321,15 +341,27 @@ class MlirTransformer(Transformer):
     i = 0
     while i < len(children):
       c = children[i]
-      if getattr(c, "data", None) == "custom_operation":
+      if getattr(c, "data", None) in ("custom_operation", "generic_operation"):
         children = children[:i] + c.children + children[i + 1 :]
         continue
-      if isinstance(c, Token) and c.type == "EQ":
+      if getattr(c, "data", None) == "op_result_list":
+        for child in c.children:
+          if getattr(child, "data", None) == "op_result":
+            # Extract VAL_ID
+            v_tok = child.children[0]
+            op.results.append(ValueNode(name=v_tok.value, leading_trivia=_get_trivia(v_tok)))
+      elif isinstance(c, Token) and c.type == "EQ":
         pass
       elif getattr(c, "data", None) == "results":
         op.results = [ValueNode(name=v.value, leading_trivia=_get_trivia(v)) for v in c.children if v.type == "VAL_ID"]
       elif getattr(c, "data", None) == "op_name":
         op.name = c.children[0].value
+      elif isinstance(c, Token) and c.type == "STRING" and not op.name:
+        # String as op name means generic operation!
+        # Drop surrounding quotes for the AST string.
+        op.name = c.value.strip('"')
+        op.is_generic = True
+        op.name_trivia = _get_trivia(c)
       elif isinstance(c, Token) and c.type == "SYM_ID":
         # Usually `@main` after op_name, we can just append it to name or name_trivia
         triv = _get_trivia(c)
@@ -341,7 +373,6 @@ class MlirTransformer(Transformer):
         else:
           op.has_parens = False
 
-        # Determine the operand_list node
         operand_list_node = None
         for val in c.children:
           if getattr(val, "data", None) == "operand_list":
@@ -351,7 +382,14 @@ class MlirTransformer(Transformer):
         if operand_list_node is not None:
           for op_val in operand_list_node.children:
             if getattr(op_val, "data", None) == "operand":
-              v_tok = op_val.children[0]
+              v_node = op_val.children[0]
+              idx = None
+              if isinstance(v_node, Token):
+                v_tok = v_node
+              else:
+                v_tok = v_node.children[0]
+                if len(v_node.children) > 1 and v_node.children[1] is not None:
+                  idx = int(v_node.children[1].value.lstrip("#"))
               type_node = None
               colon_triv = []
               if len(op_val.children) > 2 and getattr(op_val.children[2], "type", None) == "TYPE":
@@ -359,22 +397,86 @@ class MlirTransformer(Transformer):
                 type_node = TypeNode(body=op_val.children[2].value, leading_trivia=_get_trivia(op_val.children[2]))
               op.operands.append(
                 ValueNode(
-                  name=v_tok.value, leading_trivia=_get_trivia(v_tok), type_node=type_node, colon_trivia=colon_triv
+                  name=v_tok.value,
+                  use_index=idx,
+                  leading_trivia=_get_trivia(v_tok),
+                  type_node=type_node,
+                  colon_trivia=colon_triv,
                 )
               )
+      elif getattr(c, "data", None) == "value_use_list":
+        for op_val in c.children:
+          if getattr(op_val, "data", None) == "value_use":
+            v_tok = op_val.children[0]
+            op.operands.append(ValueNode(name=v_tok.value, leading_trivia=_get_trivia(v_tok)))
+      elif getattr(c, "data", None) == "successor_list":
+        for succ in c.children:
+          if getattr(succ, "data", None) == "successor":
+            caret = succ.children[0]  # CARET_ID wrapper (caret-id -> ^ suffix-id)
+            if getattr(caret, "data", None) == "caret_id":
+              caret_tok = caret.children[1]  # the suffix ID
+              op.successors.append("^" + caret_tok.value)
+            elif isinstance(caret, Token) and caret.type == "CARET_ID":
+              op.successors.append(caret.value)
+      elif getattr(c, "data", None) == "region_list":
+        for reg in c.children:
+          if getattr(reg, "data", None) == "region":
+            op.regions.append(self.region([reg]))  # Assuming recursive parsing handles it
       elif isinstance(c, list):
         if len(c) > 0 and isinstance(c[0], AttributeNode):
           op.attributes = c
         elif len(c) > 0 and isinstance(c[0], RegionNode):
           op.regions.extend(c)
+      elif getattr(c, "data", None) == "dictionary_properties":
+        for prop_child in c.children:
+          if isinstance(prop_child, list):
+            op.properties = prop_child
+      elif getattr(c, "data", None) == "function_type":
+        # function_type parses into arg types and result types.
+        # For generic operations, it's (arg1, arg2) -> (res1, res2).
+        # We just extract the result types to op.result_types for now,
+        # and operands type to operands.
+        parts = c.children
+        arrow_idx = -1
+        for idx, pt in enumerate(parts):
+          if isinstance(pt, Token) and pt.type == "ARROW":  # pragma: no branch
+            arrow_idx = idx
+            break
+
+        if arrow_idx != -1:
+          # Everything after arrow is result type
+          for pt in parts[arrow_idx + 1 :]:
+            if getattr(pt, "type", None) == "TYPE":
+              op.result_types.append(TypeNode(body=pt.value, leading_trivia=_get_trivia(pt)))
+            elif getattr(pt, "data", None) == "type_list_parens":
+              for inner_pt in pt.children:
+                if getattr(inner_pt, "type", None) == "TYPE":
+                  op.result_types.append(TypeNode(body=inner_pt.value, leading_trivia=_get_trivia(inner_pt)))
+
+          # Everything before arrow is arg type
+          arg_idx = 0
+          for pt in parts[:arrow_idx]:
+            if getattr(pt, "type", None) == "TYPE":
+              if arg_idx < len(op.operands):
+                op.operands[arg_idx].type_node = TypeNode(body=pt.value, leading_trivia=_get_trivia(pt))
+              arg_idx += 1
+            elif getattr(pt, "data", None) == "type_list_parens":
+              for inner_pt in pt.children:
+                if getattr(inner_pt, "type", None) == "TYPE":
+                  if arg_idx < len(op.operands):
+                    op.operands[arg_idx].type_node = TypeNode(body=inner_pt.value, leading_trivia=_get_trivia(inner_pt))
+                  arg_idx += 1
+      elif getattr(c, "data", None) == "trailing_location":
+        op.location = c.children[2].value
       elif getattr(c, "data", None) == "op_tail":
-        op.op_tail_str = c.children[0].value
-        op.op_tail_trivia = _get_trivia(c.children[0])
-        for tail_child in c.children:
-          if getattr(tail_child, "data", None) == "result_types":
-            for t in tail_child.children:
-              if getattr(t, "type", None) == "TYPE":
-                op.result_types.append(TypeNode(body=t.value, leading_trivia=_get_trivia(t)))
+        if c.children:
+          op.op_tail_str = c.children[0].value
+          op.op_tail_trivia = _get_trivia(c.children[0])
+          for tail_child in c.children:
+            if getattr(tail_child, "data", None) == "result_types":
+              for t in tail_child.children:
+                if getattr(t, "type", None) == "TYPE":
+                  op.result_types.append(TypeNode(body=t.value, leading_trivia=_get_trivia(t)))
       i += 1
     return op
 

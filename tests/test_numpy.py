@@ -59,11 +59,22 @@ def test_numpy_convert_branches() -> None:
   assert adapter.convert({"a": 1}) == {"a": 1}
 
   class DetachDummy:
+    """Docstring."""
+
     def detach(self) -> object:
+      """Docstring."""
+
       class CpuDummy:
+        """Docstring."""
+
         def cpu(self) -> object:
+          """Docstring."""
+
           class NumpyDummy:
+            """Docstring."""
+
             def numpy(self) -> str:
+              """Docstring."""
               return "detached"
 
           return NumpyDummy()
@@ -73,25 +84,37 @@ def test_numpy_convert_branches() -> None:
   assert adapter.convert(DetachDummy()) == "detached"
 
   class DetachFail:
+    """Docstring."""
+
     def detach(self) -> None:
+      """Docstring."""
       raise Exception("fail")
 
   adapter.convert(DetachFail())
 
   class NumpyDummy2:
+    """Docstring."""
+
     def numpy(self) -> str:
+      """Docstring."""
       return "numpy"
 
   assert adapter.convert(NumpyDummy2()) == "numpy"
 
   class NumpyFail:
+    """Docstring."""
+
     def numpy(self) -> None:
+      """Docstring."""
       raise Exception("fail")
 
   adapter.convert(NumpyFail())
 
   class ArrayDummy:
+    """Docstring."""
+
     def __array__(self, dtype: object = None) -> object:
+      """Docstring."""
       import numpy as np
 
       return np.array([1], dtype=dtype)
@@ -101,7 +124,10 @@ def test_numpy_convert_branches() -> None:
   assert np.array_equal(adapter.convert(ArrayDummy()), np.array([1]))
 
   class ArrayFail:
+    """Docstring."""
+
     def __array__(self) -> None:
+      """Docstring."""
       raise Exception("fail")
 
   adapter.convert(ArrayFail())

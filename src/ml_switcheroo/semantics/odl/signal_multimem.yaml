@@ -1,7 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- ptr
-- value
-- predicate
-type: function
-operation: signal_multimem

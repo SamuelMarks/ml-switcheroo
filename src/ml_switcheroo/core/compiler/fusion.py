@@ -1,4 +1,4 @@
-"""Graph Optimization Passes for specific architectures (e.g. MaxText vs HF).
+"""Graph Optimization Passes for specific architectures (e.g., Transformer topologies).
 
 Provides passes to:
 1. Fuse Q, K, V projections into a single QKV projection.

@@ -1,7 +1,7 @@
 """Test suite for the Device Checks module."""
 
 import typing
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import libcst as cst
 import pytest
@@ -55,97 +55,68 @@ def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
   assert "torch.cuda" in rewrite_code(rewriter, code)
 
 
-def test_device_checks_adapter_error(rewriter: PivotRewriter) -> None:
+@patch("ml_switcheroo.plugins.device_checks.get_adapter")
+def test_device_checks_adapter_error(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
   """Verifies adapter errors are caught."""
-  import ml_switcheroo.plugins.device_checks as dc
-
-  orig = dc.get_adapter
 
   def raiser(fw: str) -> typing.Any:
+    """Docstring."""
     raise Exception("Adapter crashed")
 
-  dc.get_adapter = raiser
-  try:
-    code: str = "torch.cuda.is_available()"
-    res: str = rewrite_code(rewriter, code)
-    assert "torch.cuda.is_available()" in res
-  finally:
-    dc.get_adapter = orig
+  mock_get_adapter.side_effect = raiser
+  code: str = "torch.cuda.is_available()"
+  res: str = rewrite_code(rewriter, code)
+  assert "torch.cuda.is_available()" in res
 
 
-def test_device_checks_syntax_error(rewriter: PivotRewriter) -> None:
+@patch("ml_switcheroo.plugins.device_checks.get_adapter")
+def test_device_checks_syntax_error(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
   """Verifies syntax errors are caught."""
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.return_value = "invalid syntax {{{"
-  import ml_switcheroo.plugins.device_checks as dc
-
-  orig = dc.get_adapter
-  dc.get_adapter = lambda fw: mock_adapter
-  try:
-    code: str = "torch.cuda.is_available()"
-    res: str = rewrite_code(rewriter, code)
-    assert "torch.cuda.is_available()" in res
-  finally:
-    dc.get_adapter = orig
+  mock_get_adapter.return_value = mock_adapter
+  code: str = "torch.cuda.is_available()"
+  res: str = rewrite_code(rewriter, code)
+  assert "torch.cuda.is_available()" in res
 
 
-def test_device_checks_not_implemented(rewriter: PivotRewriter) -> None:
+@patch("ml_switcheroo.plugins.device_checks.get_adapter")
+def test_device_checks_not_implemented(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
   """Verifies NotImplementedError is caught."""
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.side_effect = NotImplementedError()
-  import ml_switcheroo.plugins.device_checks as dc
-
-  orig = dc.get_adapter
-  dc.get_adapter = lambda fw: mock_adapter
-  try:
-    code: str = "torch.cuda.is_available()"
-    res: str = rewrite_code(rewriter, code)
-    assert "torch.cuda.is_available()" in res
-  finally:
-    dc.get_adapter = orig
+  mock_get_adapter.return_value = mock_adapter
+  code: str = "torch.cuda.is_available()"
+  res: str = rewrite_code(rewriter, code)
+  assert "torch.cuda.is_available()" in res
 
 
-def test_device_checks_get_adapter_none(rewriter: PivotRewriter) -> None:
+@patch("ml_switcheroo.plugins.device_checks.get_adapter")
+def test_device_checks_get_adapter_none(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
   """Verifies None adapter returns original node."""
-  import ml_switcheroo.plugins.device_checks as dc
-
-  orig = dc.get_adapter
-  dc.get_adapter = lambda fw: None
-  try:
-    code: str = "torch.cuda.is_available()"
-    res: str = rewrite_code(rewriter, code)
-    assert "torch.cuda.is_available()" in res
-  finally:
-    dc.get_adapter = orig
+  mock_get_adapter.return_value = None
+  code: str = "torch.cuda.is_available()"
+  res: str = rewrite_code(rewriter, code)
+  assert "torch.cuda.is_available()" in res
 
 
-def test_device_checks_empty_code(rewriter: PivotRewriter) -> None:
+@patch("ml_switcheroo.plugins.device_checks.get_adapter")
+def test_device_checks_empty_code(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
   """Verifies empty syntax returns original node."""
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.return_value = ""
-  import ml_switcheroo.plugins.device_checks as dc
-
-  orig = dc.get_adapter
-  dc.get_adapter = lambda fw: mock_adapter
-  try:
-    code: str = "torch.cuda.is_available()"
-    res: str = rewrite_code(rewriter, code)
-    assert "torch.cuda.is_available()" in res
-  finally:
-    dc.get_adapter = orig
+  mock_get_adapter.return_value = mock_adapter
+  code: str = "torch.cuda.is_available()"
+  res: str = rewrite_code(rewriter, code)
+  assert "torch.cuda.is_available()" in res
 
 
-def test_device_checks_adapter_exception(rewriter: PivotRewriter) -> None:
+@patch("ml_switcheroo.plugins.device_checks.get_adapter")
+def test_device_checks_adapter_exception(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
   """Verifies Exception is caught."""
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.side_effect = Exception()
-  import ml_switcheroo.plugins.device_checks as dc
-
-  orig = dc.get_adapter
-  dc.get_adapter = lambda fw: mock_adapter
-  try:
-    code: str = "torch.cuda.is_available()"
-    res: str = rewrite_code(rewriter, code)
-    assert "torch.cuda.is_available()" in res
-  finally:
-    dc.get_adapter = orig
+  mock_get_adapter.return_value = mock_adapter
+  code: str = "torch.cuda.is_available()"
+  res: str = rewrite_code(rewriter, code)
+  assert "torch.cuda.is_available()" in res

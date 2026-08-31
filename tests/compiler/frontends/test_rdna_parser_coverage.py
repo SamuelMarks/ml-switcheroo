@@ -222,11 +222,17 @@ def test_cst_extra_coverage() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.parser import _get_trivia
 
   class DummyChild:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.leading_trivia: list[typing.Any] = ["trivia"]
 
   class DummyNode:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.children: list[typing.Any] = [DummyChild()]
       self.leading_trivia: list[typing.Any] = ["mytrivia"]
 

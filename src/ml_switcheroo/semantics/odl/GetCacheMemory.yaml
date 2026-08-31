@@ -1,4 +1,0 @@
-description: Get the cache size in bytes.
-std_args: []
-variants: {}
-operation: GetCacheMemory

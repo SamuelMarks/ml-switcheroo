@@ -6,3 +6,4 @@ variants:
   tikz:
     api: tikz.tikzpicture
     required_imports: []
+    args: {}

@@ -206,6 +206,8 @@ def test_structure_transformer_edge_cases2():
 
   # 181, 183->174: self._known_module_bases
   class DummyTraits:
+    """Docstring."""
+
     module_base = "dummy.Module"
 
   semantics.framework_configs = {"other": {"traits": DummyTraits()}}

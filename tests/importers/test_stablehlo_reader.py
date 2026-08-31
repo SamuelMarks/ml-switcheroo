@@ -126,3 +126,34 @@ def test_stablehlo_long_summary(tmp_path: Path) -> None:
   res = importer.parse_file(md_file)
   assert "LongOp" in res
   assert len(res["LongOp"]["description"]) == 300  # 297 + "..."
+
+
+def test_stablehlo_extra_coverage(tmp_path: Path) -> None:
+  """Docstring."""
+  importer = StableHloSpecImporter()
+  md_content = """
+Intro text before any h3 to hit elif current_op false branch.
+
+###
+
+### *not code*
+
+### `valid_op`
+
+First paragraph.
+
+Second paragraph to hit false branch of not current_def["description"].
+
+```python
+# just some other framework
+```
+
+```mlir
+%result = "stablehlo.valid_op"(%x) : (tensor<f32>) -> tensor<f32>
+// just a regular comment
+```
+"""
+  md_file = tmp_path / "spec_extra.md"
+  md_file.write_text(md_content)
+  res = importer.parse_file(md_file)
+  assert "ValidOp" in res

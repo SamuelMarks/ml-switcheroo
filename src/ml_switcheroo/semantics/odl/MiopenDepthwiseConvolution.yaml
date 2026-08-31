@@ -1,4 +1,0 @@
-description: Backend specific depthwise convolution.
-std_args: []
-variants: {}
-operation: MiopenDepthwiseConvolution

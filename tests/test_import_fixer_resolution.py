@@ -65,8 +65,11 @@ def test_qual_name_scanner() -> None:
   # cst.Attribute needs correct types but we can pass something to trigger exception inside get_full_name if we wanted,
   # but `get_full_name` is robust. Let's just create an invalid node dynamically.
   class BadNode(cst.Attribute):
+    """Docstring."""
+
     @property
     def value(self) -> cst.BaseExpression:
+      """Docstring."""
       raise ValueError("bad")
 
   try:
@@ -127,10 +130,14 @@ def test_import_resolver() -> None:
 
   # Test 3: Check_name fallback
   class MockSemantics2:
+    """Docstring."""
+
     def get_framework_aliases(self) -> Dict[str, tuple[str, str]]:
+      """Docstring."""
       return {}
 
     def get_import_map(self, target_fw: str) -> Dict[str, tuple[str, Optional[str], Optional[str]]]:
+      """Docstring."""
       return {"torch.optim": ("optax", None, None)}
 
   sm2: MockSemantics2 = MockSemantics2()

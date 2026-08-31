@@ -209,11 +209,15 @@ def test_rewrite_stateful_call_no_create_dotted_fixed() -> None:
   """Rewrites stateful call no create dotted fixed."""
 
   class DummyContext:
+    """Docstring."""
+
     def __init__(self) -> None:
       """Initializes the DummyContext instance."""
       self.signature_stack = [MockSigCtx()]
 
   class BasicRewriter:
+    """Docstring."""
+
     def __init__(self) -> None:
       """Initializes the BasicRewriter instance."""
       self.context = DummyContext()

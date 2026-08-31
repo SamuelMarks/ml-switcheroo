@@ -7,7 +7,7 @@ from ml_switcheroo.enums import LogicOp
 if TYPE_CHECKING:
   # Structural typing for dispatch rules
   class DispatchRuleDummy:
-    """Dummy dispatch rule."""
+    """Structural type representation of a dispatch rule."""
 
     if_arg: str
     op: LogicOp
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
   from typing import Protocol
 
   class RewriterDummy(Protocol):
-    """Dummy rewriter."""
+    """Structural type representation of a rewriter context."""
 
     source_fw: str
 

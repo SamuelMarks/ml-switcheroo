@@ -1,8 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- fmt
-- args
-- uniform
-- scope
-type: function
-operation: debug_print

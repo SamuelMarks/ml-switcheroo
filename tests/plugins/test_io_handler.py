@@ -170,6 +170,8 @@ def test_transform_io_calls_misses() -> None:
     assert transform_io_calls(node_save, ctx) == node_save
 
   class BadAdapter:
+    """Docstring."""
+
     def get_serialization_imports(self) -> List[str]:
       """Gets serialization imports.
 
@@ -184,6 +186,8 @@ def test_transform_io_calls_misses() -> None:
     assert transform_io_calls(node_save, ctx) == node_save
 
   class GoodAdapter:
+    """Docstring."""
+
     def get_serialization_imports(self) -> List[str]:
       """Gets serialization imports.
 
@@ -224,6 +228,8 @@ def test_transform_io_calls_misses() -> None:
     assert transform_io_calls(node_bad_load, ctx) == node_bad_load
 
     class RaiseAdapter:
+      """Docstring."""
+
       def get_serialization_imports(self) -> List[str]:
         """Gets serialization imports.
 

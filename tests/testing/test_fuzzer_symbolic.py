@@ -263,6 +263,8 @@ def test_adapt_to_framework_delegation(fuzzer: InputFuzzer) -> None:
 
   @register_framework("mock_fw")
   class MockAdapter:
+    """Docstring."""
+
     def convert(self, x: Any) -> str:
       """Mock implementation of convert."""
       return "converted"

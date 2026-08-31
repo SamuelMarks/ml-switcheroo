@@ -1,7 +1,0 @@
-description: Experimental CSR matrix implemented in JAX.
-std_args:
-- self
-- args
-- shape
-type: class
-operation: CSR

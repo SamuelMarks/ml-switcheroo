@@ -99,3 +99,32 @@ def test_transform_gather_missing_args(mock_is_framework: MagicMock) -> None:
 
   result: cst.CSTNode = transform_gather(node, ctx)
   assert result is node
+
+
+@patch("ml_switcheroo.plugins.gather.is_framework_module_node")
+def test_transform_gather_module_node(mock_is_framework: MagicMock) -> None:
+  """Docstring."""
+  mock_is_framework.return_value = True
+  node = cst.Call(func=cst.Attribute(value=cst.Name("torch"), attr=cst.Name("gather")), args=[])
+  ctx = MagicMock(spec=HookContext)
+  ctx.lookup_api.return_value = "take_along_axis"
+  transform_gather(node, ctx)
+
+
+@patch("ml_switcheroo.plugins.gather.is_framework_module_node")
+def test_transform_gather_other_keyword(mock_is_framework: MagicMock) -> None:
+  """Docstring."""
+  mock_is_framework.return_value = False
+  node = cst.Call(
+    func=cst.Name("gather"),
+    args=[
+      cst.Arg(value=cst.Name("x")),
+      cst.Arg(value=cst.Name("idx"), keyword=cst.Name("index")),
+      cst.Arg(value=cst.Name("foo"), keyword=cst.Name("other")),
+    ],
+  )
+  ctx = MagicMock(spec=HookContext)
+  ctx.lookup_api.return_value = "take_along_axis"
+  res = transform_gather(node, ctx)
+  assert isinstance(res, cst.Call)
+  assert len(res.args) == 2

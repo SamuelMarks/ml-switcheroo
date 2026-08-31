@@ -6,3 +6,4 @@ variants:
   tensorflow:
     api: tf.data.Dataset.from_tensor_slices
     required_imports: []
+    args: {}

@@ -14,44 +14,44 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 if TYPE_CHECKING:
   # Structural typing for rewriter to avoid circular import
   class SemanticManagerDummy:
-    """Dummy class."""
+    """Structural type representation of a semantic manager."""
 
     known_magic_args: List[str]
 
   class TargetTraitsDummy:
-    """Dummy class."""
+    """Structural type representation of a semantic manager."""
 
     strip_magic_args: List[str]
     auto_strip_magic_args: bool
     inject_magic_args: List[Tuple[str, str]]
 
   class SignatureStackDummy:
-    """Dummy class."""
+    """Structural type representation of a semantic manager."""
 
     is_init: bool
     is_module_method: bool
 
   class RewriterContextDummy:
-    """Dummy class."""
+    """Structural type representation of a semantic manager."""
 
     signature_stack: List[SignatureStackDummy]
 
   class RewriterDummy:
-    """Dummy class."""
+    """Structural type representation of a semantic manager."""
 
     semantics: SemanticManagerDummy
     context: RewriterContextDummy
 
     def _report_failure(self, msg: str) -> None:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
     def _create_dotted_name(self, name: str) -> cst.Attribute:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
     def _get_target_traits(self) -> TargetTraitsDummy:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
 

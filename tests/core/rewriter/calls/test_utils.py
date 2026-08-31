@@ -60,6 +60,7 @@ class MockRewriter:
     self._report_warning = MagicMock()
 
   def _create_dotted_name(self, name: str) -> cst.Name:
+    """Docstring."""
     return cst.Name(name)
 
 
@@ -209,7 +210,10 @@ def test_rewrite_stateful_call_legacy() -> None:
   """Docstring."""
 
   class LegacyRewriter:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self._signature_stack = [MockSigCtx(["x"])]
       self._report_warning = MagicMock()
 

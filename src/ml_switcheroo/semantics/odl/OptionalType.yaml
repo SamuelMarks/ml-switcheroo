@@ -1,5 +1,0 @@
-description: JIT type representing Optional[T].
-op_type: class
-std_args: []
-variants: {}
-operation: OptionalType

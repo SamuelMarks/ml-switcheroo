@@ -12,16 +12,17 @@ class MockFixer(ImportMixin):
   """Docstring."""
 
   def __init__(
-    self, plan: ResolutionPlan, source_fws: Union[str, List[str], Set[str]], preserve_source: bool = False
+    self, plan: ResolutionPlan, source_fws: Union[str, List[str], Set[str]], used_names: Set[str] = None
   ) -> None:
     """Docstring."""
     self.plan: ResolutionPlan = plan
     self.source_fws: Union[str, List[str], Set[str]] = source_fws
-    self.preserve_source: bool = preserve_source
+    self.used_names: Set[str] = used_names if used_names is not None else set()
     self._satisfied_injections: Set[str] = set()
     self.defined: Set[cst.CSTNode] = set()
 
   def _track_definition(self, node: cst.CSTNode) -> None:
+    """Docstring."""
     self.defined.add(node)
 
 
@@ -68,7 +69,7 @@ def test_make_alias_node() -> None:
 def test_leave_import() -> None:
   """Docstring."""
   plan: ResolutionPlan = ResolutionPlan(mappings={"torch.nn": ImportReq("flax", "nnx", "nnx")})
-  fixer: MockFixer = MockFixer(plan, ["torch"], False)
+  fixer: MockFixer = MockFixer(plan, ["torch"], set())
 
   # Case: matched mapping
   original: cst.Import = cst.Import(
@@ -88,7 +89,7 @@ def test_leave_import() -> None:
   # Case: matched mapping but with preserve_alias logic
   req: ImportReq = ImportReq("flax")
   plan2: ResolutionPlan = ResolutionPlan(mappings={"torch": req})
-  fixer2: MockFixer = MockFixer(plan2, ["torch"], False)
+  fixer2: MockFixer = MockFixer(plan2, ["torch"], set())
 
   original_with_alias: cst.Import = cst.Import(
     names=[cst.ImportAlias(name=cst.Name("torch"), asname=cst.AsName(name=cst.Name("th")))]
@@ -103,26 +104,27 @@ def test_leave_import() -> None:
 
   # Case: Existence check cover
   plan3: ResolutionPlan = ResolutionPlan(required_imports=[ImportReq("sys")])
-  fixer3: MockFixer = MockFixer(plan3, [], False)
+  fixer3: MockFixer = MockFixer(plan3, [], set())
   orig_sys: cst.Import = cst.Import(names=[cst.ImportAlias(name=cst.Name("sys"))])
   fixer3.leave_Import(orig_sys, orig_sys)
   assert "sys" in fixer3._satisfied_injections
 
   # Case: Prune (RemoveFromParent)
   plan4: ResolutionPlan = ResolutionPlan()
-  fixer4: MockFixer = MockFixer(plan4, ["torch"], False)
+  fixer4: MockFixer = MockFixer(plan4, ["torch"], set())
   orig_prune: cst.Import = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch"))])
   res: Union[cst.Import, cst.RemovalSentinel] = fixer4.leave_Import(orig_prune, orig_prune)
   assert isinstance(res, cst.RemovalSentinel)
 
-  # Case: Preserve source
-  fixer5: MockFixer = MockFixer(plan4, ["torch"], True)
+  # Case: Used source (DCE avoids it)
+  fixer5: MockFixer = MockFixer(plan4, ["torch"], {"torch"})
   res2: Union[cst.Import, cst.RemovalSentinel] = fixer5.leave_Import(orig_prune, orig_prune)
   assert isinstance(res2, cst.Import)
 
-  # Case: Not in source_fws (pass through)
+  # Case: Not in source_fws (pass through if used)
+  fixer6: MockFixer = MockFixer(plan4, [], {"sys"})
   orig_sys2: cst.Import = cst.Import(names=[cst.ImportAlias(name=cst.Name("sys"))])
-  res3: Union[cst.Import, cst.RemovalSentinel] = fixer5.leave_Import(orig_sys2, orig_sys2)
+  res3: Union[cst.Import, cst.RemovalSentinel] = fixer6.leave_Import(orig_sys2, orig_sys2)
   assert isinstance(res3, cst.Import)
   assert len(res3.names) == 1
 
@@ -132,7 +134,7 @@ def test_leave_import_from() -> None:
   plan: ResolutionPlan = ResolutionPlan(
     mappings={"torch.nn": ImportReq("flax", "nnx", "nnx"), "torch.Tensor": ImportReq("jax", "Array")}
   )
-  fixer: MockFixer = MockFixer(plan, ["torch"], False)
+  fixer: MockFixer = MockFixer(plan, ["torch"], set())
 
   # Case: no module
   orig_no_mod: cst.ImportFrom = cst.ImportFrom(
@@ -173,13 +175,13 @@ def test_leave_import_from() -> None:
   assert isinstance(res_other, cst.RemovalSentinel)
 
   # Case: preserve
-  fixer_preserve: MockFixer = MockFixer(plan, ["torch"], True)
+  fixer_preserve: MockFixer = MockFixer(plan, ["torch"], {"optim"})
   res_preserve: Union[cst.ImportFrom, cst.Import, cst.RemovalSentinel] = fixer_preserve.leave_ImportFrom(
     orig_other, orig_other
   )
   assert isinstance(res_preserve, cst.ImportFrom)
 
-  # Case: non-source prune
+  # Case: non-source prune (DCE removes it if unused)
   orig_sys: cst.ImportFrom = cst.ImportFrom(module=cst.Name("sys"), names=[cst.ImportAlias(name=cst.Name("path"))])
   res_sys: Union[cst.ImportFrom, cst.Import, cst.RemovalSentinel] = fixer.leave_ImportFrom(orig_sys, orig_sys)
-  assert isinstance(res_sys, cst.ImportFrom)
+  assert isinstance(res_sys, cst.RemovalSentinel)

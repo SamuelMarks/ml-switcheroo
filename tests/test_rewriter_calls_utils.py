@@ -38,6 +38,7 @@ class RewriterShim:
     self.warned: bool = False
 
   def _report_warning(self, msg: str) -> None:
+    """Docstring."""
     self.warned = True
 
 

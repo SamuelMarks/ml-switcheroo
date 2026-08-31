@@ -1,4 +1,11 @@
-"""Test module."""
+"""Test module for the SymbolTable and SymbolTableAnalyzer components.
+
+This module validates the correctness of the symbol table logic, ensuring that
+variables, imports, assignments, and control flow blocks (like if/else and loops)
+are accurately tracked and typed within a Control Flow Graph context. It also verifies
+the resolution of types for neural network and tensor operations using the
+`SemanticsManager`.
+"""
 
 from unittest.mock import MagicMock
 
@@ -10,7 +17,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_symbol_table_basic() -> None:
-  """Docstring."""
+  """Test basic reading and writing to the SymbolTable structure.
+
+  Verifies that we can assign a specific `TensorType` to a CST Node and
+  retrieve it successfully, and that querying an unrecorded node returns None.
+  """
   table: SymbolTable = SymbolTable()
   node: cst.Name = cst.Name("test")
   sym: TensorType = TensorType(framework="torch")
@@ -20,7 +31,12 @@ def test_symbol_table_basic() -> None:
 
 
 def test_symbol_table_analyzer_imports() -> None:
-  """Docstring."""
+  """Test that import statements are correctly recorded as ModuleTypes in the scope.
+
+  Verifies that standard imports (e.g. `import torch`) and aliased imports
+  (e.g. `import torch.nn as nn` or `from jax import numpy as jnp`) correctly populate
+  the symbol table's current scope with fully-qualified module paths.
+  """
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -45,7 +61,12 @@ nn.Conv2d(1, 1, 1)
 
 
 def test_symbol_table_analyzer_assignments() -> None:
-  """Docstring."""
+  """Test that standard assignments are typed correctly.
+
+  Verifies that the analyzer resolves function calls like `torch.randn` via the
+  SemanticsManager, and records the resulting `TensorType` against the assigned
+  variables (e.g., `x` and `self.y`).
+  """
   semantics: SemanticsManager = SemanticsManager()
   # Fake semantics to return Tensor for torch.randn
   semantics._key_origins = {"torch.randn": "neural"}
@@ -77,7 +98,11 @@ self.y = x
 
 
 def test_symbol_table_analyzer_scopes() -> None:
-  """Docstring."""
+  """Test that the analyzer correctly manages block scopes (e.g. classes and functions).
+
+  Verifies that entering a class or function definition pushes a new scope,
+  and that the analyzer restores the original `global` scope upon leaving the block.
+  """
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -95,7 +120,12 @@ class MyClass:
 
 
 def test_symbol_table_analyzer_control_flow_if() -> None:
-  """Docstring."""
+  """Test variable type merging at the end of an if/else block.
+
+  Verifies that if a variable is assigned a PyTorch tensor in the `if` branch
+  and a JAX array in the `else` branch, the resulting scope type is correctly
+  recorded as a `UnionType` representing both frameworks.
+  """
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -127,7 +157,11 @@ else:
 
 
 def test_symbol_table_analyzer_control_flow_loops() -> None:
-  """Docstring."""
+  """Test variable type tracking across `for` and `while` loop iterations.
+
+  Verifies that the analyzer properly tracks types generated inside loops
+  and bubbles them up to the surrounding scope safely.
+  """
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -154,7 +188,11 @@ while True:
 
 
 def test_symbol_table_analyzer_ifexp() -> None:
-  """Docstring."""
+  """Test type unioning in inline if-expressions (ternary operators).
+
+  Verifies that the type of `a if cond else b` correctly yields a `UnionType`
+  if the branches resolve to different tensor types.
+  """
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -181,7 +219,11 @@ x = torch.randn() if True else jax.numpy.zeros()
 
 
 def test_symbol_table_analyzer_call_methods() -> None:
-  """Docstring."""
+  """Test method type resolution on identified variables.
+
+  Verifies that if `x` is recognized as a PyTorch Tensor, a method call like `x.view()`
+  is correctly resolved to `torch.Tensor.view` and properly typed in the resulting assignment.
+  """
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -204,7 +246,12 @@ y = x.view()
 
 
 def test_make_union() -> None:
-  """Docstring."""
+  """Test the `_make_union` utility function behavior.
+
+  Verifies that unioning identical types collapses to a single type,
+  unioning different types creates a proper `UnionType`, and unioning
+  existing `UnionType`s flattens and deduplicates the resulting types.
+  """
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
   t1: TensorType = TensorType(framework="torch")
   t2: TensorType = TensorType(framework="torch")
@@ -226,7 +273,11 @@ def test_make_union() -> None:
 
 
 def test_symbol_table_analyzer_missing_branches() -> None:
-  """Docstring."""
+  """Test symbol analysis over various complex control flows.
+
+  Ensures the analyzer safely traverses `for...else` and `while...else`
+  blocks without halting or raising AST evaluation errors.
+  """
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
@@ -249,7 +300,12 @@ else:
 
 
 def test_symbol_table_analyzer_ifexp_partials() -> None:
-  """Docstring."""
+  """Test edge-cases for IfExp type recording.
+
+  Verifies that if only the body or only the `orelse` branch of a ternary
+  operator has a recordable type, the analyzer safely defaults the entire
+  expression to that single resolved type instead of crashing.
+  """
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
 
   ifexp: cst.IfExp = cst.IfExp(body=cst.Name("a"), test=cst.Name("b"), orelse=cst.Name("c"))
@@ -270,7 +326,11 @@ def test_symbol_table_analyzer_ifexp_partials() -> None:
 
 
 def test_symbol_table_analyzer_merge_states_missing_b() -> None:
-  """Docstring."""
+  """Test scope state merging when a variable only exists in one branch.
+
+  Verifies that if variable `x` exists in state `a` but not state `b` (e.g. defined in
+  an `if` block but not in `else`), the resulting merged scope optimistically retains `x`.
+  """
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
   state_a: dict[str, SymbolType] = {"x": TensorType(framework="torch")}
   state_b: dict[str, SymbolType] = {}
@@ -279,7 +339,11 @@ def test_symbol_table_analyzer_merge_states_missing_b() -> None:
 
 
 def test_symbol_table_analyzer_importfrom_edge() -> None:
-  """Docstring."""
+  """Test analyzer safety when handling blank relative imports.
+
+  Verifies that statements like `from . import something` do not cause
+  module resolution errors or crashes within the analyzer.
+  """
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
   code: str = "from . import something"
   tree: cst.Module = cst.parse_module(code)
@@ -288,7 +352,12 @@ def test_symbol_table_analyzer_importfrom_edge() -> None:
 
 
 def test_symbol_table_analyzer_union_call() -> None:
-  """Docstring."""
+  """Test method resolution when the caller variable is a UnionType.
+
+  Verifies that if a variable `x` is determined to be a Union containing a PyTorch
+  Tensor, calling `x.view()` successfully resolves the PyTorch branch of the union
+  and types the return value appropriately.
+  """
   semantics: SemanticsManager = SemanticsManager()
   semantics.data = {"torch.Tensor.view": {"return_type": "Tensor"}}
   semantics._reverse_index = {"torch.Tensor.view": ("torch.Tensor.view", semantics.data["torch.Tensor.view"])}
@@ -322,7 +391,11 @@ def test_symbol_table_analyzer_union_call() -> None:
 
 
 def test_symbol_table_analyzer_loose_lookup() -> None:
-  """Docstring."""
+  """Test loose fallback resolution for methods in the SemanticManager.
+
+  Verifies that if a fully qualified method name like `torch.Tensor.view` is not found,
+  the analyzer can successfully fall back to looking up the base operation name `view`.
+  """
   semantics: SemanticsManager = SemanticsManager()
   # Provide a definition for 'view' but not 'torch.Tensor.view'
   semantics.data = {"view": {"return_type": "Tensor"}}
@@ -356,7 +429,12 @@ def test_symbol_table_analyzer_loose_lookup() -> None:
 
 
 def test_make_union_len_one() -> None:
-  """Docstring."""
+  """Test _make_union deduplication edge cases.
+
+  Verifies that attempting to union a base `TensorType` with a `UnionType`
+  that only contains that same `TensorType` correctly collapses down to
+  just the base `TensorType`.
+  """
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
   t1: TensorType = TensorType(framework="torch")
   u2: UnionType = UnionType([t1])
@@ -369,7 +447,14 @@ def test_make_union_len_one() -> None:
 
 
 def analyze(code: str) -> SymbolTableAnalyzer:
-  """Analyze code for symbol table."""
+  """Helper to run the SymbolTableAnalyzer on a snippet of code.
+
+  Args:
+      code (str): Source code to parse and analyze.
+
+  Returns:
+      SymbolTableAnalyzer: The populated analyzer instance.
+  """
   tree: cst.Module = cst.parse_module(code)
   sm: MagicMock = MagicMock()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(sm)
@@ -378,7 +463,11 @@ def analyze(code: str) -> SymbolTableAnalyzer:
 
 
 def test_missing_symbol_table_coverage() -> None:
-  """Docstring."""
+  """Test parsing of additional control flow blocks.
+
+  Ensures the analyzer safely traverses `try/except/finally`, complex boolean logic,
+  unary operators, and `with` blocks without raising errors.
+  """
   # Test try/except blocks
   code: str = """
 try:
@@ -412,7 +501,11 @@ with open('file.txt') as f:
 
 
 def test_global_scope_access() -> None:
-  """Docstring."""
+  """Test scope fallthrough for undefined local variables.
+
+  Verifies that if a function scope does not contain a variable (`global_var`),
+  the analyzer accurately traverses up the scope stack to find it in the parent scopes.
+  """
   code: str = """
 global_var = 1
 def func():
@@ -422,7 +515,11 @@ def func():
 
 
 def test_class_def_nested() -> None:
-  """Docstring."""
+  """Test scope management for nested classes.
+
+  Verifies that the analyzer can accurately push and pop nested class definition
+  scopes without mixing attribute states.
+  """
   code: str = """
 class Outer:
     class Inner:
@@ -433,7 +530,10 @@ class Outer:
 
 
 def test_lambda() -> None:
-  """Docstring."""
+  """Test traversal safety for lambda functions.
+
+  Verifies that lambda nodes are safely visited by the AST analyzer.
+  """
   code: str = """
 f = lambda x: x + 1
     """
@@ -441,8 +541,47 @@ f = lambda x: x + 1
 
 
 def test_list_comp() -> None:
-  """Docstring."""
+  """Test traversal safety for list comprehensions.
+
+  Verifies that list comprehensions are safely visited by the AST analyzer.
+  """
   code: str = """
 l = [x for x in range(10)]
     """
   analyze(code)
+
+
+def test_symbol_table_missing_branches() -> None:
+  """Test specific missing edge-case branch coverages in SymbolTableAnalyzer.
+
+  Verifies the handling of `If` blocks lacking `Else` branches and function calls
+  on variables that do not carry Tensor or Union type data (e.g. built-in floats).
+  """
+  # 144->147: if without else
+  code = """
+import torch
+if True:
+    x = torch.randn(1)
+"""
+  tree = cst.parse_module(code)
+  semantics = SemanticsManager()
+  builder = SymbolTableAnalyzer(semantics)
+  tree.visit(builder)
+
+  # 412->421: Call on attribute of a non-Tensor/non-Union type.
+  code2 = """
+import math
+y = math.pi
+y.conjugate()
+"""
+  tree2 = cst.parse_module(code2)
+  builder2 = SymbolTableAnalyzer(SemanticsManager())
+  tree2.visit(builder2)
+
+
+def test_symbol_table_412() -> None:
+  """Test the non-Tensor call branch in detail.
+
+  Manually injects an empty base `SymbolType` and verifies the analyzer handles
+  calling a method (`x.conjugate()`) on it without throwing an attribute error.
+  """

@@ -1,5 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- dtype
-type: function
-operation: assert_is_supported_dtype

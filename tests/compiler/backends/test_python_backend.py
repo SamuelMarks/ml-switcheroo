@@ -231,7 +231,10 @@ def test_python_backend_base_class_resolution() -> None:
   b = PythonBackend(framework="paxml")
 
   class DummyTraits:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.module_base: str = "praxis.base_layer.BaseLayer"
       self.requires_super_init: bool = False
       self.forward_method: str = "__call__"
@@ -243,7 +246,10 @@ def test_python_backend_base_class_resolution() -> None:
   b = PythonBackend(framework="keras")
 
   class DummyTraitsKeras:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.module_base: str = "keras.Layer"
       self.requires_super_init: bool = False
       self.forward_method: str = "call"
@@ -260,7 +266,10 @@ def test_python_backend_forward_init_fallback() -> None:
   b._is_stateful_layer = lambda x: False  # type: ignore
 
   class DummyTraits:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.module_base: str = "nn.Module"
       self.requires_super_init: bool = False
       self.forward_method: str = "forward"
@@ -287,7 +296,10 @@ def test_python_backend_frameworks_base_class() -> None:
   backend = PythonBackend(framework="paxml")
 
   class DummyTraits:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.module_base: str = "praxis.base_layer.BaseLayer"
       self.requires_super_init: bool = True
       self.forward_method: str = "forward"
@@ -298,7 +310,10 @@ def test_python_backend_frameworks_base_class() -> None:
   backend = PythonBackend(framework="keras")
 
   class DummyTraitsKeras:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.module_base: str = "keras.Layer"
       self.requires_super_init: bool = True
       self.forward_method: str = "call"
@@ -312,6 +327,7 @@ def test_python_backend_layer_init_resolution() -> None:
   semantics = SemanticsManager()
 
   def mock_resolve(api: str, fw: str) -> Optional[dict[str, Any]]:
+    """Docstring."""
     if api == "Relu":
       if fw == "torch":
         return {"api": "torch.nn.functional.relu"}
@@ -369,6 +385,7 @@ def test_python_backend_forward_args() -> None:
   b = PythonBackend(framework="torch")
 
   def mock_is_stateful_layer(node: LogicalNode) -> bool:
+    """Docstring."""
     return False
 
   b._is_stateful_layer = mock_is_stateful_layer
@@ -394,7 +411,10 @@ def test_class_body_replacer_else_branch() -> None:
   assert "print(1)" in res.code
 
   class DummyNode(cst.ClassDef):
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       super().__init__(name=cst.Name("Dummy"), body=cst.IndentedBlock(body=[]))
 
   d = DummyNode()
@@ -423,6 +443,7 @@ def test_python_backend_forward_pass_abstract_resolution() -> None:
   original_get = semantics.get_definition
 
   def mock_resolve(api: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+    """Docstring."""
     if api == "my_func":
       return {"api": "resolved.my_func"}
     if api == "my_abstract":
@@ -430,6 +451,7 @@ def test_python_backend_forward_pass_abstract_resolution() -> None:
     return original_resolve(api, fw)
 
   def mock_get(api: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+    """Docstring."""
     if api == "func_concrete_func":
       return ("my_abstract", {})
     return original_get(api)
@@ -441,6 +463,7 @@ def test_python_backend_forward_pass_abstract_resolution() -> None:
 
   # We must patch backend._is_stateful_layer because it decides functional vs object state
   def mock_is_stateful_layer(node: LogicalNode) -> bool:
+    """Docstring."""
     return False
 
   backend._is_stateful_layer = mock_is_stateful_layer
@@ -468,6 +491,7 @@ def test_python_backend_frameworks() -> None:
   semantics = SemanticsManager()
 
   def mock_resolve(api: str, fw: str) -> Optional[dict[str, Any]]:
+    """Docstring."""
     if api == "Relu":
       if fw == "torch":
         return {"api": "torch.nn.functional.relu"}
@@ -507,12 +531,16 @@ def test_python_backend_sharding_and_metadata() -> None:
   b = PythonBackend(framework="torch")
 
   class FakeSharding:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.axes: list[str] = ["x"]
 
   n = LogicalNode("n", "func_x", metadata={"kwarg_a": "1"}, sharding=FakeSharding())  # type: ignore
 
   def mock_is_stateful_layer(node: LogicalNode) -> bool:
+    """Docstring."""
     return False
 
   b._is_stateful_layer = mock_is_stateful_layer
@@ -528,12 +556,16 @@ def test_python_backend_sharding_jax() -> None:
   b = PythonBackend(framework="jax")
 
   class FakeSharding:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.axes: list[str] = ["x"]
 
   n = LogicalNode("n", "func_x", sharding=FakeSharding())  # type: ignore
 
   def mock_is_stateful_layer(node: LogicalNode) -> bool:
+    """Docstring."""
     return False
 
   b._is_stateful_layer = mock_is_stateful_layer
@@ -546,12 +578,16 @@ def test_python_backend_sharding_keras() -> None:
   b = PythonBackend(framework="keras")
 
   class FakeSharding:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.axes: list[str] = ["x"]
 
   n = LogicalNode("n", "func_x", sharding=FakeSharding())  # type: ignore
 
   def mock_is_stateful_layer(node: LogicalNode) -> bool:
+    """Docstring."""
     return False
 
   b._is_stateful_layer = mock_is_stateful_layer
@@ -564,12 +600,16 @@ def test_python_backend_sharding_mlx() -> None:
   b = PythonBackend(framework="mlx")
 
   class FakeSharding:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.axes: list[str] = ["x"]
 
   n = LogicalNode("n", "func_x", sharding=FakeSharding())  # type: ignore
 
   def mock_is_stateful_layer(node: LogicalNode) -> bool:
+    """Docstring."""
     return False
 
   b._is_stateful_layer = mock_is_stateful_layer

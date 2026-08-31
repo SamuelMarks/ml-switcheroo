@@ -1,5 +1,0 @@
-description: Returns the in_layouts attribute of the given operation.
-std_args:
-- op
-type: function
-operation: in_layouts

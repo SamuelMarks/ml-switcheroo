@@ -1,6 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- f
-- meta
-type: function
-operation: xla_metadata_call

@@ -25,9 +25,15 @@ def solve_and_fix(
   resolver = ImportResolver(mgr)  # type: ignore
   tree = cst.parse_module(code)
   plan: ResolutionPlan = resolver.resolve(tree, target_fw)
-  fixer = ImportFixer(plan=plan, source_fws={"torch"})
-  res: typing.Any = tree.visit(fixer)
-  return typing.cast(str, res.code)
+
+  from ml_switcheroo.core.scanners import GlobalUsageScanner
+
+  scanner = GlobalUsageScanner()
+  tree.visit(scanner)
+
+  fixer = ImportFixer(plan=plan, source_fws={"torch"}, used_names=scanner.used_names)
+  new_tree: typing.Any = tree.visit(fixer)
+  return typing.cast(str, new_tree.code)
 
 
 def test_smart_injection_jnp_usage() -> None:

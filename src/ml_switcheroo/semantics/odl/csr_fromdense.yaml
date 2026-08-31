@@ -1,7 +1,0 @@
-description: Create a CSR-format sparse matrix from a dense matrix.
-std_args:
-- mat
-- nse
-- index_dtype
-type: function
-operation: csr_fromdense

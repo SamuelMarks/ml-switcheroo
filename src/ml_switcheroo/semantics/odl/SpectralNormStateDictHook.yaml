@@ -1,6 +1,0 @@
-description: The class representing a Python class.
-std_args:
-- self
-- fn
-type: class
-operation: SpectralNormStateDictHook

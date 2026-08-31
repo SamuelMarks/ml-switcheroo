@@ -1,5 +1,0 @@
-description: 5-bit integer data type (Quantization).
-op_type: attribute
-std_args: []
-variants: {}
-operation: Int5

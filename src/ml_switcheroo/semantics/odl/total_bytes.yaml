@@ -1,6 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- cls
-- avals
-type: function
-operation: total_bytes

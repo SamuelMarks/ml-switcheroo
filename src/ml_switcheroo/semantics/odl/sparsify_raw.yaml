@@ -1,5 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- f
-type: function
-operation: sparsify_raw

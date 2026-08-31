@@ -210,7 +210,7 @@ class GraphPatcher(cst.CSTTransformer):
     """
     oid = id(original)
     if oid not in self._action_map:
-      return updated  # pragma: no cover
+      return updated
 
     action = self._action_map[oid]
 
@@ -238,7 +238,7 @@ class GraphPatcher(cst.CSTTransformer):
           new_stmt = self.emitter.emit_call(action.new_node, action.input_vars, action.output_var)
           return self._unwrap_stmt_if_nested(original, new_stmt)
 
-    return updated  # pragma: no cover
+    return updated
 
   def _unwrap_stmt_if_nested(self, context_node: cst.CSTNode, new_stmt: cst.SimpleStatementLine):
     """Support: If we are replacing a node that is already inside a SimpleStatementLine body list.

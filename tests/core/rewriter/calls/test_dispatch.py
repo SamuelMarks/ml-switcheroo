@@ -32,6 +32,7 @@ class DummyRewriter:
     self.source_fw = source_fw
 
   def _is_module_alias(self, name: typing.Any) -> bool:
+    """Docstring."""
     return False
 
 
@@ -147,7 +148,10 @@ def test_extract_argument_node_method() -> None:
   """Docstring."""
 
   class MethodRewriter(DummyRewriter):
+    """Docstring."""
+
     def _is_module_alias(self, name: typing.Any) -> bool:
+      """Docstring."""
       return False
 
   rewriter = MethodRewriter("torch")

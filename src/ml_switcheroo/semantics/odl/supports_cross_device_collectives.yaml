@@ -1,4 +1,0 @@
-description: The class representing a Python function.
-std_args: []
-type: function
-operation: supports_cross_device_collectives

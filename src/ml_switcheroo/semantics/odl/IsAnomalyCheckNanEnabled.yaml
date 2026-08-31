@@ -1,4 +1,0 @@
-description: Returns True if anomaly check for NaNs is enabled.
-std_args: []
-variants: {}
-operation: IsAnomalyCheckNanEnabled

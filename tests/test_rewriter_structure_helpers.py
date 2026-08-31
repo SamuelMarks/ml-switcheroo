@@ -11,6 +11,7 @@ class DummyTransformer(StructuralTransformerHelpersMixin):
   """Docstring."""
 
   def _create_dotted_name(self, name: str) -> cst.BaseExpression:
+    """Docstring."""
     parts: List[str] = name.split(".")
     node: cst.BaseExpression = cst.Name(parts[0])
     for p in parts[1:]:
@@ -24,6 +25,7 @@ def test_structure_helpers() -> None:
   func_def: cst.FunctionDef = getattr(cst.parse_module("def foo(self, a, b): pass"), "body")[0]
 
   def get_code(node: cst.CSTNode) -> str:
+    """Docstring."""
     return cst.Module(body=[node]).code
 
   # test _strip_argument_from_signature
@@ -77,6 +79,8 @@ def test_structure_helpers() -> None:
   func_no_body: cst.ClassDef = getattr(cst.parse_module("class A: pass"), "body")[0]
 
   class A:
+    """Docstring."""
+
     pass
 
   A()

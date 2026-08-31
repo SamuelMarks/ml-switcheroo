@@ -1,4 +1,0 @@
-description: Returns True if autocast cache is enabled.
-std_args: []
-variants: {}
-operation: IsAutocastCacheEnabled

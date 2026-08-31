@@ -1,5 +1,0 @@
-description: Storage class for float32 data.
-op_type: class
-std_args: []
-variants: {}
-operation: FloatStorage

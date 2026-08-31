@@ -615,9 +615,11 @@ def test_python_backend_generate_replacing_not_simple_or_indented():
     """Fake body."""
 
     def _codegen_impl(self, state):
+      """Docstring."""
       pass
 
     def _visit_and_replace_children(self, visitor):
+      """Docstring."""
       return self
 
   # Actually, cst.ClassDef.body can only be SimpleStatementSuite or IndentedBlock.

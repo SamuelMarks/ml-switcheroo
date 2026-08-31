@@ -1,4 +1,0 @@
-description: Generation number of the currently attached TPU.
-std_args: []
-type: function
-operation: tpu_generation

@@ -1,5 +1,0 @@
-description: JIT type representing Number.
-op_type: class
-std_args: []
-variants: {}
-operation: NumberType

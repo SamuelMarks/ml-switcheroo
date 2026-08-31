@@ -1,6 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- self
-- ref
-type: function
-operation: to_remote_multicast

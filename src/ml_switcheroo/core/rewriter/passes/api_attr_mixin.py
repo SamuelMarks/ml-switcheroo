@@ -80,11 +80,11 @@ class ApiTransformerAttrMixin:
        to assign only to the first element (the primary output).
 
     Args:
-        original_node: The original LibCST assignment node before children traversal.
-        updated_node: The updated LibCST assignment node with child-level updates.
+        original_node (cst.Assign): The original LibCST assignment node before children traversal.
+        updated_node (cst.Assign): The updated LibCST assignment node with child-level updates.
 
     Returns:
-        The mutated or original updated LibCST assignment node.
+        cst.Assign: The mutated or original updated LibCST assignment node.
     """
     # 1. Track Variable Initialization
     if isinstance(original_node.value, cst.Call):
@@ -141,11 +141,11 @@ class ApiTransformerAttrMixin:
     and constant macro templates (e.g., rewriting infinite values using custom macro patterns).
 
     Args:
-        original_node: The original LibCST attribute node before children traversal.
-        updated_node: The updated LibCST attribute node with child-level updates.
+        original_node (cst.Attribute): The original LibCST attribute node before children traversal.
+        updated_node (cst.Attribute): The updated LibCST attribute node with child-level updates.
 
     Returns:
-        The rewritten CST node (which could be an Attribute, a Name, or a general CSTNode)
+        cst.BaseExpression: The rewritten CST node (which could be an Attribute, a Name, or a general CSTNode)
         corresponding to the target framework's equivalent, or the original updated node
         if no rewriting rule was matched.
     """

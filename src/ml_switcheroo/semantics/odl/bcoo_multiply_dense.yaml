@@ -1,6 +1,0 @@
-description: An element-wise multiplication between a sparse and a dense array.
-std_args:
-- sp_mat
-- v
-type: function
-operation: bcoo_multiply_dense

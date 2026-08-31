@@ -1,4 +1,0 @@
-description: Return dense multi-dimensional 'meshgrid'.
-std_args: []
-variants: {}
-operation: Mgrid

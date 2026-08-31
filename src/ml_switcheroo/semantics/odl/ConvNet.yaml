@@ -4,3 +4,4 @@ std_args: []
 variants:
   latex_dsl:
     api: midl.ConvNet
+    args: {}

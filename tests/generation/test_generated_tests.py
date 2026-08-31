@@ -17,7 +17,10 @@ def test_templates_exception() -> None:
   from ml_switcheroo.generated_tests.templates import get_template
 
   class FaultyManager:
+    """Docstring."""
+
     def get_test_template(self, fw: str) -> typing.Any:
+      """Docstring."""
       raise ValueError("fail")
 
   assert get_template(FaultyManager(), "torch") != {}
@@ -142,7 +145,10 @@ def test_templates_is_static_arg() -> None:
   assert is_static_arg({"type": "Array", "name": "foo"}) is False
 
   class GoodManager:
+    """Docstring."""
+
     def get_test_template(self, fw: str) -> dict[str, str]:
+      """Docstring."""
       return {"import": "foo"}
 
   assert get_template(GoodManager(), "jax") == {"import": "foo"}

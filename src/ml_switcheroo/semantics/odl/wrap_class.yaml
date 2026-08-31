@@ -1,6 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- cls
-- cls_sourceinfo
-type: function
-operation: wrap_class

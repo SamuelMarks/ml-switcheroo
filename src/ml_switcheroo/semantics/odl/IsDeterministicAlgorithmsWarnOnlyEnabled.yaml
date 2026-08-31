@@ -1,4 +1,0 @@
-description: Returns True if the global deterministic flag is set to warn only.
-std_args: []
-variants: {}
-operation: IsDeterministicAlgorithmsWarnOnlyEnabled

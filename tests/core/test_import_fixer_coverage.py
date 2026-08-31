@@ -70,10 +70,27 @@ def test_imports_mixin_107() -> None:
   plan = ResolutionPlan()
   fixer = ImportFixer(plan)
   fixer.source_fws = {"foo"}
-  fixer.preserve_source = True
+  fixer.used_names = {
+    "torch",
+    "optim",
+    "nn",
+    "sys",
+    "re",
+    "math",
+    "test_pkg",
+    "other",
+    "some_alias",
+    "a",
+    "b",
+    "c",
+    "my_pkg",
+    "math_alias",
+    "x",
+    "y",
+  }
   node_star = cst.ImportFrom(module=cst.Name("foo"), names=cst.ImportStar())
   res_star: typing.Any = fixer.leave_ImportFrom(node_star, node_star)
-  assert res_star == node_star
+  assert isinstance(res_star, cst.RemovalSentinel)
 
 
 def test_base_import_fixer() -> None:

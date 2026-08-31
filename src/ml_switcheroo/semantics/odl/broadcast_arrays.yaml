@@ -1,4 +1,0 @@
-description: Broadcasts one or more arrays against one another.
-std_args: []
-variants: {}
-operation: broadcast_arrays

@@ -1,6 +1,0 @@
-description: Returns the producer reference variable for the given operand.
-std_args:
-- self
-- operand
-type: function
-operation: producer_ref

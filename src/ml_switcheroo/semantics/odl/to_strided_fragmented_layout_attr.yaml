@@ -1,5 +1,0 @@
-description: 'Constructs a #mosaic_gpu.WGStridedFragLayout attribute from a WGStridedFragLayout.'
-std_args:
-- layout
-type: function
-operation: to_strided_fragmented_layout_attr

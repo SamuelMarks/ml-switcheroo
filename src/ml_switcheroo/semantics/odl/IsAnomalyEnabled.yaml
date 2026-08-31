@@ -1,4 +1,0 @@
-description: Returns True if anomaly detection is enabled.
-std_args: []
-variants: {}
-operation: IsAnomalyEnabled

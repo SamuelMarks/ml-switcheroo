@@ -1,4 +1,0 @@
-description: Returns True if autocast is enabled on XLA.
-std_args: []
-variants: {}
-operation: IsAutocastXlaEnabled

@@ -327,7 +327,10 @@ def test_rdna_synthesizer_misc() -> None:
   assert s.index == 0
 
   class MockSemantics(SemanticsManager):
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       pass
 
     def resolve_variant(self, node_id: str, tgt: str) -> dict[str, typing.Any]:
@@ -374,7 +377,10 @@ def test_sass_synthesizer_gaps() -> None:
     alloc.allocate_temp()
 
   class MockSemantics(SemanticsManager):
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       pass
 
     def get_definition(self, kind: str) -> typing.Optional[typing.Any]:

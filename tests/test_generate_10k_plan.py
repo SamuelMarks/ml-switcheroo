@@ -93,6 +93,7 @@ def test_generate_mappings(mock_env: Path, monkeypatch: pytest.MonkeyPatch, tmp_
 
   # Mock extract_api_surface to return predetermined APIs
   def mock_extract(repo_name: str, focus_dirs: List[str]) -> List[str]:
+    """Docstring."""
     if repo_name == "pytorch":
       return ["module.Dense", "module.Relu"]
     elif repo_name == "keras":

@@ -137,6 +137,8 @@ def test_json_overrides_adapter_inheritance(manager: SemanticsManager) -> None:
   manager.data["op"] = {"variants": {"parent_B": {"api": "found_In_B"}}}
 
   class MockAdapterA:
+    """Docstring."""
+
     inherits_from: str = "parent_A"
 
   manager.framework_configs["child"] = {"extends": "parent_B"}

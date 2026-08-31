@@ -1,4 +1,0 @@
-description: Internal TorchScript class representation.
-std_args: []
-variants: {}
-operation: ScriptClass

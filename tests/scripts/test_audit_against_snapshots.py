@@ -53,12 +53,12 @@ def test_audit_frameworks_coverage() -> None:
   }
   snapshots: Dict[str, Dict[str, Any]] = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}, "torch": {}, "jax": {}}
   errors: List[str] = audit_frameworks(manager, snapshots)
-  assert len(errors) == 2
+  assert len(errors) == 3
 
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}}
   errors = audit_frameworks(manager, snapshots)
-  assert len(errors) == 1
+  assert len(errors) == 2
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "kwargs", "kind": "VAR_KEYWORD"}]}}}
   errors = audit_frameworks(manager, snapshots)
@@ -79,7 +79,7 @@ def test_audit_frameworks_coverage() -> None:
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}, {"name": "start_axis"}]}}}
   errors = audit_frameworks(manager, snapshots)
-  assert len(errors) == 1
+  assert len(errors) == 2
   manager = MagicMock()
   manager.data = {
     "flatten": {
@@ -92,12 +92,12 @@ def test_audit_frameworks_coverage() -> None:
   }
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}, "torch": {}, "jax": {}}
   errors = audit_frameworks(manager, snapshots)
-  assert len(errors) == 2
+  assert len(errors) == 3
 
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}}
   errors = audit_frameworks(manager, snapshots)
-  assert len(errors) == 1
+  assert len(errors) == 2
   manager.data = {"flatten": {"variants": {"missing": {}}}}
   assert audit_frameworks(manager, {}) == []
 
@@ -140,12 +140,12 @@ def test_audit_frameworks() -> None:
   }
   snapshots: Dict[str, Dict[str, Any]] = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}, "torch": {}, "jax": {}}
   errors: List[str] = audit_frameworks(manager, snapshots)
-  assert len(errors) == 2
+  assert len(errors) == 3
 
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}}
   errors = audit_frameworks(manager, snapshots)
-  assert len(errors) == 1
+  assert len(errors) == 2
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "kwargs", "kind": "VAR_KEYWORD"}]}}}
   errors = audit_frameworks(manager, snapshots)
@@ -166,7 +166,7 @@ def test_audit_frameworks() -> None:
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}, {"name": "start_axis"}]}}}
   errors = audit_frameworks(manager, snapshots)
-  assert len(errors) == 1
+  assert len(errors) == 2
   manager = MagicMock()
   manager.data = {
     "flatten": {
@@ -179,12 +179,12 @@ def test_audit_frameworks() -> None:
   }
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}, "torch": {}, "jax": {}}
   errors = audit_frameworks(manager, snapshots)
-  assert len(errors) == 2
+  assert len(errors) == 3
 
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}}
   errors = audit_frameworks(manager, snapshots)
-  assert len(errors) == 1
+  assert len(errors) == 2
   manager.data = {
     "flatten": {
       "variants": {
@@ -208,12 +208,12 @@ def test_audit_frameworks() -> None:
   # "missing" framework is skipped because we don't have a snapshot for it in this test setup
 
   assert "[mlx] 'flatten' maps to hallucinated argument: 'missing_axis' for API 'mlx.flatten'" in errors
-  assert len(errors) == 2
+  assert len(errors) == 3
 
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "input"}]}}}
   errors = audit_frameworks(manager, snapshots)
-  assert len(errors) == 1
+  assert len(errors) == 2
   manager.data = {"flatten": {"variants": {"mlx": {"api": "mlx.flatten", "args": {"start_dim": "missing_axis"}}}}}
   snapshots = {"mlx": {"mlx.flatten": {"args": [{"name": "kwargs", "kind": "VAR_KEYWORD"}]}}}
   errors = audit_frameworks(manager, snapshots)

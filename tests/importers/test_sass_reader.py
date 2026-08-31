@@ -195,3 +195,21 @@ def test_sass_reader_regex_substrings() -> None:
   assert reader._infer_abstract_op("dummy", "convert an integer into a fp32") == "CastFloat"
   # "fp32" before "integer"
   assert reader._infer_abstract_op("dummy", "convert a fp32 into an integer") == "CastInt"
+
+
+def test_sass_reader_extra_branches(tmp_path: Path) -> None:
+  """Docstring."""
+  importer = SassSpecImporter()
+  html_content = """
+<table>
+<tbody>
+<tr>
+<td>OpcodeOnly</td>
+</tr>
+</tbody>
+</table>
+    """
+  html_file = tmp_path / "Extra.html"
+  html_file.write_text(html_content)
+  res = importer.parse_file(html_file)
+  assert res == {}

@@ -16,8 +16,8 @@ def test_baseimportfixer_init() -> None:
   """Verifies the standard initialization of `BaseImportFixer`.
 
   Ensures that when the fixer is initialized with a ResolutionPlan, a single framework
-  string, and the preserve_source flag, the internal attributes (plan, normalized
-  source_fws set, preserve_source flag, empty defined_names set, and empty
+  string, and the used_names flag, the internal attributes (plan, normalized
+  source_fws set, used_names flag, empty defined_names set, and empty
   satisfied_injections set) are correctly set.
 
   Args:
@@ -27,10 +27,10 @@ def test_baseimportfixer_init() -> None:
       None
   """
   plan = ResolutionPlan()
-  fixer = BaseImportFixer(plan=plan, source_fws="torch", preserve_source=True)
+  fixer = BaseImportFixer(plan=plan, source_fws="torch", used_names=set())
   assert fixer.plan == plan
   assert fixer.source_fws == {"torch"}
-  assert fixer.preserve_source is True
+  assert fixer.used_names == set()
   assert fixer._defined_names == set()
   assert fixer._satisfied_injections == set()
   assert fixer._path_to_alias == plan.path_to_alias

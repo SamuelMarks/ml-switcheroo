@@ -4,5 +4,8 @@ std_args: []
 variants:
   keras:
     requires_plugin: jax_decompose
+    api: ''
+    args: {}
   sass:
     api: FMUL
+    args: {}

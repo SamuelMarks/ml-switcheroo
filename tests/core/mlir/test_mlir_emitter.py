@@ -231,6 +231,8 @@ def test_unknown_binop() -> None:
   """Verifies the behavior of unknown binop."""
 
   class DummyBinOp(cst.BaseBinaryOp):
+    """Docstring."""
+
     def _visit_and_replace_children(self, visitor: typing.Any) -> typing.Any:
       """Mock implementation of  visit and replace children."""
       return self

@@ -45,9 +45,11 @@ class MockRewriter:
     self._report_failure = MagicMock()
 
   def _create_dotted_name(self, name: str) -> cst.Name:
+    """Docstring."""
     return cst.Name(name)
 
   def _get_target_traits(self) -> MockTraits:
+    """Docstring."""
     return MockTraits()
 
 

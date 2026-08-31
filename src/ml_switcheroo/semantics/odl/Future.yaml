@@ -1,5 +1,0 @@
-description: Wrapper for future results (JIT/Async).
-op_type: class
-std_args: []
-variants: {}
-operation: Future

@@ -223,6 +223,32 @@ class SemanticsManager:
       return adapter.inherits_from
     return None
 
+  def get_framework_ecosystem(self, fw: str) -> typing.Set[str]:
+    """Recursively collect the framework and all its ancestors' root module aliases.
+
+    Args:
+        fw: The framework name (e.g. 'flax_nnx').
+
+    Returns:
+        A set of root module names (e.g. {'flax_nnx', 'flax', 'jax'}).
+    """
+    ecosystem = {fw}
+    current: typing.Optional[str] = fw
+
+    while current:
+      # Add the alias module root if defined
+      conf = self.get_framework_config(current)
+      alias_module = conf.get("alias", {}).get("module", "")
+      if alias_module:
+        ecosystem.add(alias_module.split(".")[0])
+
+      # Traverse up the inheritance tree
+      current = self._resolve_inheritance(current)
+      if current:
+        ecosystem.add(current)
+
+    return ecosystem - {""}
+
   def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Optional[dict]:
     """Resolve the implementation of an abstract operation.
 

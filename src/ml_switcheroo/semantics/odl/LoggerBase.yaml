@@ -1,5 +1,0 @@
-description: Base class for loggers.
-op_type: class
-std_args: []
-variants: {}
-operation: LoggerBase

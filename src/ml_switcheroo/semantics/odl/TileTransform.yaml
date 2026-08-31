@@ -1,7 +1,0 @@
-description: Tiles a suffix of memref dimensions.
-std_args:
-- self
-- tiling
-- rounding
-type: class
-operation: TileTransform

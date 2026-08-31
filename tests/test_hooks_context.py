@@ -113,11 +113,15 @@ def test_hooks_resolve_type_with_symbol_table() -> None:
   ctx: HookContext = HookContext(mock_manager, config)
 
   class DummySym:
+    """Docstring."""
+
     def __init__(self, name: str) -> None:
       """Init."""
       self.name: str = name
 
   class MockSymbolTable:
+    """Docstring."""
+
     def get_type(self, node: str) -> Optional[DummySym]:
       """Get type."""
       if node == "tensor":

@@ -1,5 +1,0 @@
-description: Translates slice objects to concatenation along the first axis.
-op_type: attribute
-std_args: []
-variants: {}
-operation: R_

@@ -1,6 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- self
-- allow_groups
-type: function
-operation: await_cp_async_copy

@@ -62,6 +62,8 @@ def test_expression_generator_mixin_unimplemented() -> None:
   """Verifies the behavior of expression generator mixin unimplemented."""
 
   class IncompleteGen(ExpressionGeneratorMixin):
+    """Docstring."""
+
     pass
 
   gen = IncompleteGen()
@@ -73,6 +75,8 @@ def test_statement_generator_mixin_unimplemented() -> None:
   """Verifies the behavior of statement generator mixin unimplemented."""
 
   class IncompleteGen(StatementGeneratorMixin):
+    """Docstring."""
+
     pass
 
   gen = IncompleteGen()

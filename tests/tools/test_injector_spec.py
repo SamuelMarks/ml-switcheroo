@@ -170,6 +170,8 @@ def test_injector_spec_missing_more() -> None:
   from ml_switcheroo.tools.injector_spec import StandardsInjector
 
   class DummyOpDef:
+    """Docstring."""
+
     op_type: str = "function"
 
   injector: StandardsInjector = StandardsInjector(DummyOpDef())
@@ -191,6 +193,8 @@ def test_injector_spec_write_parent_not_exist_extra() -> None:
   injector: StandardsInjector = StandardsInjector(op_def)
 
   class MockPath:
+    """Docstring."""
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
       """Initializes the MockPath instance."""
       self.parent: Any = type(
@@ -202,6 +206,7 @@ def test_injector_spec_write_parent_not_exist_extra() -> None:
       return False
 
     def __truediv__(self, other: Any) -> Any:
+      """Docstring."""
       return self
 
   with __import__("unittest.mock").mock.patch(

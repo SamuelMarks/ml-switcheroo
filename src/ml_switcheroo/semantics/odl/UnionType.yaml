@@ -1,5 +1,0 @@
-description: Type representation for unions.
-op_type: class
-std_args: []
-variants: {}
-operation: UnionType

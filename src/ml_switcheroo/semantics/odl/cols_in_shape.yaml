@@ -1,7 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- self
-- shape
-- bitwidth
-type: function
-operation: cols_in_shape

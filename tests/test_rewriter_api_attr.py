@@ -15,10 +15,13 @@ def test_api_attr_mixin_branches() -> None:
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
+    """Docstring."""
+
     framework_configs: Dict[str, Any] = {}
     _key_origins: Dict[str, str] = {"dummy_call": SemanticTier.NEURAL.value}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+      """Docstring."""
       if name == "dummy.call":
         return ("dummy_call", {"op_type": "function", "std_args": []})
       if name == "dummy.call2":
@@ -26,12 +29,15 @@ def test_api_attr_mixin_branches() -> None:
       return None
 
     def get_framework_config(self, fw: str) -> Dict[str, Any]:
+      """Docstring."""
       return {}
 
     def resolve_variant(self, *args: Any, **kwargs: Any) -> Dict[str, str]:
+      """Docstring."""
       return {"target": "jax.numpy.float32", "api": "jax.numpy.float32"}
 
     def is_verified(self, name: str) -> bool:
+      """Docstring."""
       return True
 
   context: RewriterContext = RewriterContext(semantics=DummySemantics(), config=config)

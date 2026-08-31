@@ -1,5 +1,0 @@
-description: An instance which returns an open multi-dimensional meshgrid.
-op_type: attribute
-std_args: []
-variants: {}
-operation: OGrid

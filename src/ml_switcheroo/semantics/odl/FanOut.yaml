@@ -1,5 +1,0 @@
-description: Layer construction function for a fan-out layer.
-std_args:
-- num
-type: function
-operation: FanOut

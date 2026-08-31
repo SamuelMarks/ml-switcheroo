@@ -1,4 +1,0 @@
-description: Backend specific RNN.
-std_args: []
-variants: {}
-operation: MiopenRnn

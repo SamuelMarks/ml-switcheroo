@@ -18,55 +18,55 @@ from ml_switcheroo.core.hooks import get_hook
 if TYPE_CHECKING:
   # Structural typing for rewriter to avoid circular import
   class SourceTraitsDummy:
-    """Dummy class."""
+    """Structural type representation of a hook context."""
 
     functional_execution_method: str
     implicit_method_roots: list
 
   class SemanticManagerDummy:
-    """Dummy class."""
+    """Structural type representation of a hook context."""
 
     def get_definition(self, func_name: str) -> Optional[Tuple[str, dict]]:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
     def get_framework_config(self, target_fw: str) -> dict:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
   class HookContextDummy:
-    """Dummy class."""
+    """Structural type representation of a hook context."""
 
     pass
 
   class SignatureContextDummy:
-    """Dummy class."""
+    """Structural type representation of a hook context."""
 
     existing_args: set
     injected_args: list
 
   class RewriterContextDummy:
-    """Dummy class."""
+    """Structural type representation of a hook context."""
 
     hook_context: HookContextDummy
     symbol_table: "SymbolTableDummy"
     signature_stack: list[SignatureContextDummy]
 
   class SymbolTypeDummy:
-    """Dummy class."""
+    """Structural type representation of a hook context."""
 
     name: str
     framework: str
 
   class SymbolTableDummy:
-    """Dummy class."""
+    """Structural type representation of a hook context."""
 
     def get_type(self, node: cst.CSTNode) -> Optional[SymbolTypeDummy]:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
   class RewriterDummy:
-    """Dummy class."""
+    """Structural type representation of a hook context."""
 
     source_traits: SourceTraitsDummy
     semantics: SemanticManagerDummy
@@ -75,35 +75,35 @@ if TYPE_CHECKING:
     context: RewriterContextDummy
 
     def _get_source_traits(self) -> SourceTraitsDummy:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
     def _get_mapping(self, func_name: str, silent: bool = False) -> Optional[dict]:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
     def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
     def _report_warning(self, msg: str) -> None:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
     def _is_stateful(self, func_name: str) -> bool:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
     def _is_module_alias(self, name: cst.BaseExpression) -> bool:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
     def _get_target_traits(self) -> "SourceTraitsDummy":
-      """Dummy."""
+      """Structural method signature."""
       ...
 
     def _create_dotted_name(self, name: str) -> cst.Attribute:
-      """Dummy."""
+      """Structural method signature."""
       ...
 
 

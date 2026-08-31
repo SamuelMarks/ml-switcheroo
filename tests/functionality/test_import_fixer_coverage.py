@@ -19,7 +19,7 @@ class DummyFixer(AttributeMixin, ImportMixin, InjectionMixin, BaseImportFixer):
     self.plan = plan
     self.source_fws: set[str] = {"torch"}
     self.target_fw = "jax"
-    self.preserve_source = False
+    self.used_names = set()
     self._defined_names: set[str] = set()
     self._path_to_alias: dict[str, str] = {}
     self._satisfied_injections: set[str] = set()
@@ -47,7 +47,7 @@ def test_imports_mixin_not_in_source_fws() -> None:
   fixer = DummyFixer(ResolutionPlan([], {}, {}))
   import_node = cst.Import(names=[cst.ImportAlias(name=cst.Name("os"))])
   res: typing.Any = fixer.leave_Import(import_node, import_node)
-  assert getattr(res, "names")[0].name.value == "os"
+  assert isinstance(res, cst.RemovalSentinel)
 
 
 def test_injection_mixin_no_alias() -> None:
@@ -114,21 +114,38 @@ def test_leave_import_branches() -> None:
   res: typing.Any = fixer.leave_Import(import_node, import_node)
   assert isinstance(res, cst.RemovalSentinel)
 
-  fixer.preserve_source = True
+  fixer.used_names = {
+    "torch",
+    "optim",
+    "nn",
+    "sys",
+    "re",
+    "math",
+    "test_pkg",
+    "other",
+    "some_alias",
+    "a",
+    "b",
+    "c",
+    "my_pkg",
+    "math_alias",
+    "x",
+    "y",
+  }
   res2: typing.Any = fixer.leave_Import(import_node, import_node)
   assert not isinstance(res2, cst.RemovalSentinel)
 
   req = ImportReq(module="jax")
   fixer_rep = DummyFixer(ResolutionPlan([], {"torch": req}, {}))
-  fixer_rep.preserve_source = True
+  fixer_rep.used_names = {"math_alias"}
   import_node_rep = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch"))])
   res_rep: typing.Any = fixer_rep.leave_Import(import_node_rep, import_node_rep)
   assert len(res_rep.names) == 1
 
-  fixer.preserve_source = False
+  fixer.used_names = set()
   import_node2 = cst.Import(names=[cst.ImportAlias(name=cst.Name("os"))])
   res3: typing.Any = fixer.leave_Import(import_node2, import_node2)
-  assert not isinstance(res3, cst.RemovalSentinel)
+  assert isinstance(res3, cst.RemovalSentinel)
 
   req_j = ImportReq(module="jax")
   fixer4 = DummyFixer(ResolutionPlan([], {"torch": req_j}, {}))
@@ -170,10 +187,27 @@ def test_leave_import_from_branches() -> None:
   res3: typing.Any = fixer.leave_ImportFrom(import_from_star2, import_from_star2)
   assert not isinstance(res3, cst.RemovalSentinel)
 
-  fixer.preserve_source = True
+  fixer.used_names = {
+    "torch",
+    "optim",
+    "nn",
+    "sys",
+    "re",
+    "math",
+    "test_pkg",
+    "other",
+    "some_alias",
+    "a",
+    "b",
+    "c",
+    "my_pkg",
+    "math_alias",
+    "x",
+    "y",
+  }
   res_ps: typing.Any = fixer.leave_ImportFrom(import_from_star, import_from_star)
-  assert not isinstance(res_ps, cst.RemovalSentinel)
-  fixer.preserve_source = False
+  assert isinstance(res_ps, cst.RemovalSentinel)
+  fixer.used_names = set()
 
   req = ImportReq(module="jax.numpy", subcomponent="sin")
   fixer2 = DummyFixer(ResolutionPlan([], {"torch.sin": req}, {}))
@@ -201,9 +235,27 @@ def test_leave_import_from_branches() -> None:
 
   import_from_os = cst.ImportFrom(module=cst.Name("os"), names=[cst.ImportAlias(name=cst.Name("path"))])
   res8: typing.Any = fixer.leave_ImportFrom(import_from_os, import_from_os)
-  assert not isinstance(res8, cst.RemovalSentinel)
+  assert isinstance(res8, cst.RemovalSentinel)
 
-  fixer.preserve_source = True
+  fixer.used_names = {
+    "torch",
+    "optim",
+    "nn",
+    "sys",
+    "re",
+    "math",
+    "test_pkg",
+    "other",
+    "some_alias",
+    "a",
+    "b",
+    "c",
+    "my_pkg",
+    "math_alias",
+    "x",
+    "y",
+    "unknown",
+  }
   res9: typing.Any = fixer.leave_ImportFrom(import_from_unmapped, import_from_unmapped)
   assert not isinstance(res9, cst.RemovalSentinel)
 
@@ -212,7 +264,24 @@ def test_imports_mixin_119_121() -> None:
   """Docstring."""
   req = ImportReq(module="jax")
   fixer = DummyFixer(ResolutionPlan([], {"torch": req}, {}))
-  fixer.preserve_source = True
+  fixer.used_names = {
+    "torch",
+    "optim",
+    "nn",
+    "sys",
+    "re",
+    "math",
+    "test_pkg",
+    "other",
+    "some_alias",
+    "a",
+    "b",
+    "c",
+    "my_pkg",
+    "math_alias",
+    "x",
+    "y",
+  }
   import_node = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch")), cst.ImportAlias(name=cst.Name("torch2"))])
   fixer.source_fws = {"torch", "torch2"}
   fixer.leave_Import(import_node, import_node)
@@ -222,28 +291,28 @@ def test_imports_mixin_119_exhaustive() -> None:
   """Docstring."""
   # 1. preserve=False
   fixer1 = DummyFixer(ResolutionPlan([], {}, {}))
-  fixer1.preserve_source = False
+  fixer1.used_names = set()
   fixer1.source_fws = {"torch"}
   node = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch"))])
   fixer1.leave_Import(node, node)
 
   # 2. preserve=True, repl=False
   fixer2 = DummyFixer(ResolutionPlan([], {}, {}))
-  fixer2.preserve_source = True
+  fixer2.used_names = {"my_pkg", "other", "a", "b", "c", "x", "y"}
   fixer2.source_fws = {"torch"}
   fixer2.leave_Import(node, node)
 
   # 3. preserve=True, repl=True (from earlier in loop)
   req = ImportReq(module="jax")
   fixer3 = DummyFixer(ResolutionPlan([], {"torch": req}, {}))
-  fixer3.preserve_source = True
+  fixer3.used_names = {"my_pkg", "other", "a", "b", "c", "x", "y"}
   fixer3.source_fws = {"torch", "torch2"}
   node2 = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch")), cst.ImportAlias(name=cst.Name("torch2"))])
   fixer3.leave_Import(node2, node2)
 
   # 4. preserve=False, repl=True
   fixer4 = DummyFixer(ResolutionPlan([], {"torch": req}, {}))
-  fixer4.preserve_source = False
+  fixer4.used_names = set()
   fixer4.source_fws = {"torch", "torch2"}
   fixer4.leave_Import(node2, node2)
 

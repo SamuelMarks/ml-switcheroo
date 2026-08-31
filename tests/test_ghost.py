@@ -81,6 +81,7 @@ def test_ghost_inspector_sanitize_callable() -> None:
   """Docstring."""
 
   def func_with_callable_default(f: Callable[..., None] = dummy_func) -> None:
+    """Docstring."""
     pass
 
   ref: GhostRef = GhostInspector.inspect(func_with_callable_default, "func")
@@ -104,6 +105,7 @@ def test_ghost_inspector_unrepresentable_str_only() -> None:
   """Docstring."""
 
   def func_with_bad_str_default(x: UnrepresentableStrOnly = UnrepresentableStrOnly()) -> None:
+    """Docstring."""
     pass
 
   ref: GhostRef = GhostInspector.inspect(func_with_bad_str_default, "func")
@@ -127,6 +129,7 @@ def test_ghost_inspector_unrepresentable_str_address() -> None:
   """Docstring."""
 
   def func_with_bad_str_default(x: UnrepresentableStrAddress = UnrepresentableStrAddress()) -> None:
+    """Docstring."""
     pass
 
   ref: GhostRef = GhostInspector.inspect(func_with_bad_str_default, "func")
@@ -139,6 +142,7 @@ def test_ghost_inspector_annotation_string() -> None:
   MyType = int
 
   def func(x: "MyType") -> None:
+    """Docstring."""
     pass
 
   ref: GhostRef = GhostInspector.inspect(func, "func")
@@ -165,6 +169,8 @@ def test_ghost_inspector_class_without_init() -> None:
   """Docstring."""
 
   class EmptyClass:
+    """Docstring."""
+
     pass
 
   ref: GhostRef = GhostInspector.inspect(EmptyClass, "EmptyClass")

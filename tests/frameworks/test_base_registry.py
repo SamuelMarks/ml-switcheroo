@@ -23,6 +23,8 @@ def test_available_frameworks() -> None:
 
   @register_framework(key)
   class TestAdapterAvail:
+    """Docstring."""
+
     pass
 
   available: list[str] = available_frameworks()
@@ -36,7 +38,10 @@ def test_registry_mechanics() -> None:
 
   @register_framework(key)
   class TestAdapter:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.initialized = True
 
   assert key in _ADAPTER_REGISTRY

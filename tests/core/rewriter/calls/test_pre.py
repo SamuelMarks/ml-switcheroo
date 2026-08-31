@@ -56,12 +56,15 @@ class MockRewriter:
     self._report_warning = MagicMock()
 
   def _get_source_traits(self) -> MockTraits:
+    """Docstring."""
     return MockTraits()
 
   def _get_target_traits(self) -> MockTraits:
+    """Docstring."""
     return MockTraits()
 
   def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[dict[str, typing.Any]]:
+    """Docstring."""
     if name == "needs_plugin":
       return {"requires_plugin": True}
     if name == "Tensor.foo":
@@ -73,12 +76,15 @@ class MockRewriter:
     return None
 
   def _get_source_lifecycle_lists(self) -> tuple[set[str], set[str]]:
+    """Docstring."""
     return ({"strip_me"}, {"warn_me"})
 
   def _is_stateful(self, name: str) -> bool:
+    """Docstring."""
     return name == "stateful_op"
 
   def _is_module_alias(self, node: typing.Any) -> bool:
+    """Docstring."""
     return False
 
 
@@ -209,13 +215,17 @@ def test_handle_pre_checks_no_traits() -> None:
   """Docstring."""
 
   class BlankRewriter:
+    """Docstring."""
+
     def __init__(self) -> None:
+      """Docstring."""
       self.context = MockContext()
       self.semantics = MockSemantics()
       self.target_fw = "jax"
       self.source_fw = "torch"
 
       def _is_module_alias(self, n: typing.Any) -> bool:
+        """Docstring."""
         return False
 
       def _get_source_traits(self) -> typing.Any:
@@ -249,8 +259,14 @@ def test_resolve_implicit_method_symbol_table() -> None:
   rewriter = MockRewriter()
 
   class MockSymbolTable:
+    """Docstring."""
+
     def get_type(self, node: typing.Any) -> typing.Any:
+      """Docstring."""
+
       class MockType:
+        """Docstring."""
+
         name = "Tensor"
         framework = "torch"
 

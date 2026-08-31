@@ -103,6 +103,8 @@ def test_custom_framework_plugin_registration() -> None:
 
   @register_framework("plugin_test_fw")
   class PluginTestAdapter:
+    """Docstring."""
+
     pass
 
   adapter: typing.Any = get_adapter("plugin_test_fw")

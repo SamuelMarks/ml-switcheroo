@@ -220,3 +220,49 @@ def test_mlir_cst_coverage() -> None:
 
   m: ModuleNode = ModuleNode(leading_trivia=[Trivia(" ")], body=b2, aliases=[alias])
   assert " #map = affine_map<(d0) -> (d0)>" in m.to_text()
+
+
+def test_cst_missing_branches() -> None:
+  """Cover missing branches in cst.py."""
+  from ml_switcheroo.core.mlir.cst import (
+    ValueNode,
+    OperationNode,
+    StableHloConstantOp,
+    TypeAliasDefNode,
+    TypeNode,
+    AttributeNode,
+  )
+
+  # 49
+  val = ValueNode(name="%0", use_index=1)
+  assert "#1" in val.to_text()
+
+  # 171, 200-202, 205-207, 210
+  op = OperationNode(
+    name="my.op", operands=[], successors=["^bb1"], properties=[AttributeNode("p", "1")], location="foo.py:1:1"
+  )
+  op.is_generic = True
+  text = op.to_text()
+  assert '"my.op"' in text
+  assert "[^bb1]" in text
+  assert "<{p = 1}>" in text
+  assert "loc(foo.py:1:1)" in text
+
+  # 277-279, 282-284, 287
+  gop = StableHloConstantOp(
+    name='"my.op"', operands=[], successors=["^bb1"], properties=[AttributeNode("p", "1")], location="foo.py:1:1"
+  )
+  text = gop.to_text()
+  assert "[^bb1]" in text
+  assert "<{p = 1}>" in text
+  assert "loc(foo.py:1:1)" in text
+
+  # 343-346
+  alias = TypeAliasDefNode()
+  alias.name = "my_alias"
+  t = TypeNode()
+  t.body = " i32 "
+  alias.type_node = t
+  text = alias.to_text()
+  assert "!my_alias =" in text
+  assert "i32" in text

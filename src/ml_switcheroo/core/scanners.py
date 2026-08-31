@@ -121,129 +121,55 @@ class SimpleNameScanner(cst.CSTVisitor):
     return not self.found
 
 
-class UsageScanner(cst.CSTVisitor):
-  """Scan the AST for usages of a specific framework root or its local aliases.
+class GlobalUsageScanner(cst.CSTVisitor):
+  """Scan the AST for all names used outside of import declarations.
 
-  This class implements a multi-pass logic during a single traversal:
-
-  1.  **Cataloging**: It identifies all aliases bound to the ``source_fw``
-      (e.g., ``import torch as t`` -> ``t`` is an alias).
-  2.  **Detection**: It checks if any of these cataloged aliases are used
-      in the code body (e.g., ``t.abs(x)``).
-
-  This is primarily used by the ``ImportFixer`` to decide whether to prune the
-  original import statement. If usages persist (e.g., via the Escape Hatch),
-  the import MUST be preserved to keep the code valid.
+  This is primarily used by the `ImportFixer` for Generalized Dead-Code
+  Elimination (DCE) of unused imports.
   """
 
-  def __init__(self, source_fw: str) -> None:
-    """Initialize the UsageScanner.
-
-    Args:
-        source_fw: The framework string (e.g., 'torch').
-
-    """
-    self.source_fw = source_fw
-    # A set of specific aliases that were visibly used.
-    self.found_usages: Set[str] = set()
-
-    # We track the root name itself, plus any aliases found during visit_Import
-    self._tracked_aliases: Set[str] = {source_fw}
+  def __init__(self) -> None:
+    """Initialize the GlobalUsageScanner."""
+    self.used_names: Set[str] = set()
     self._in_import = False
 
-  def get_result(self) -> bool:
-    """Return the scan result.
-
-    Returns:
-        bool: True if any tracked alias was found used in the body.
-
-    """
-    return len(self.found_usages) > 0
-
   def visit_Import(self, node: cst.Import) -> None:
-    """Catalog names bound by ``import ...``.
-
-    Logic:
-      - ``import torch`` -> tracks 'torch'.
-      - ``import torch as t`` -> tracks 't'.
-      - ``import torch.nn as nn`` -> tracks 'nn' (because it stems from torch).
+    """Flag entry into an ``import ...`` statement.
 
     Args:
         node: The import node.
-
     """
     self._in_import = True
-    for alias in node.names:
-      base_name = get_full_name(alias.name)
-
-      # Check if this import is relevant (matches source_fw or source_fw.*)
-      if base_name == self.source_fw or base_name.startswith(f"{self.source_fw}."):
-        # Determine the bound name in local scope
-        if alias.asname:
-          bound_name = alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else ""
-        else:
-          # For `import torch.nn`, the bound name is the top-level 'torch'
-          # For `import torch`, the bound name is 'torch'
-          bound_name = base_name.split(".")[0]
-
-        self._tracked_aliases.add(bound_name)
 
   def leave_Import(self, node: cst.Import) -> None:
     """Exit import scope.
 
     Args:
         node: The import node being left.
-
     """
     self._in_import = False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """Catalog names bound by ``from ... import ...``.
-
-    Logic:
-      - ``from torch import nn`` -> tracks 'nn'.
-      - ``from torch.nn import Linear`` -> tracks 'Linear'.
+    """Flag entry into a ``from ... import ...`` statement.
 
     Args:
         node: The import-from node.
-
     """
     self._in_import = True
-    if not node.module:
-      return
-
-    module_name = get_full_name(node.module)
-
-    # Check relevancy
-    if module_name == self.source_fw or module_name.startswith(f"{self.source_fw}."):
-      if isinstance(node.names, cst.ImportStar):
-        return
-      for alias in node.names:
-        if isinstance(alias, cst.ImportAlias):  # pragma: no branch
-          if alias.asname:
-            bound_name = alias.asname.name.value if isinstance(alias.asname.name, cst.Name) else ""
-          else:
-            bound_name = alias.name.value if isinstance(alias.name, cst.Name) else ""
-          self._tracked_aliases.add(bound_name)
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
     """Exit import-from scope.
 
     Args:
         node: The import-from node being left.
-
     """
     self._in_import = False
 
   def visit_Name(self, node: cst.Name) -> None:
-    """Check if a name in the body matches one of our tracked aliases.
-
-    If found, it is recorded in ``found_usages``.
+    """Record any name used outside of an import block.
 
     Args:
         node: The name node.
-
     """
     if not self._in_import:
-      if node.value in self._tracked_aliases:
-        self.found_usages.add(node.value)
+      self.used_names.add(node.value)

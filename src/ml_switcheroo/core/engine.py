@@ -16,7 +16,7 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.conversion_result import ConversionResult as ConversionResult
 from ml_switcheroo.core.hooks import load_plugins
 from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
-from ml_switcheroo.core.scanners import UsageScanner
+from ml_switcheroo.core.scanners import GlobalUsageScanner
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.testing.linter import StructuralLinter
 from ml_switcheroo.core.tracer import get_tracer, reset_tracer
@@ -426,27 +426,20 @@ class ASTEngine:
 
     # 4. Import Fixing
     if self.config.enable_import_fixer:
-      usage_scanner = UsageScanner(self.source)
+      usage_scanner = GlobalUsageScanner()
       tree.visit(usage_scanner)
-      should_preserve = usage_scanner.get_result()
+      used_names = usage_scanner.used_names
+
       resolver = ImportResolver(self.semantics)
       plan = resolver.resolve(tree, self.target)  # type: ignore
+
+      source_fws = self.semantics.get_framework_ecosystem(self.config.source_framework)
+      source_fws.update(self.semantics.get_framework_ecosystem(self.config.effective_source))
+
       fixer = ImportFixer(
         plan=plan,  # type: ignore
-        source_fws={
-          self.config.source_framework,
-          self.config.effective_source,
-          self.semantics.get_framework_config(self.config.source_framework)
-          .get("alias", {})
-          .get("module", "")
-          .split(".")[0],
-          self.semantics.get_framework_config(self.config.effective_source)
-          .get("alias", {})
-          .get("module", "")
-          .split(".")[0],
-        }
-        - {""},
-        preserve_source=should_preserve,
+        source_fws=source_fws,
+        used_names=used_names,
       )
       tree = tree.visit(fixer)
       tracer.log_snapshot("After Import Fixing", self._graph_to_mermaid(tree), self.to_source(tree))

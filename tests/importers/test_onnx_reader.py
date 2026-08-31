@@ -107,3 +107,21 @@ def test_long_summary(tmp_path: Path) -> None:
   assert "Long" in res
   # The description is `<a name="Long"></a><a name="long">**Long**</a>` which is length 46.
   assert len(res["Long"]["description"]) == 46
+
+
+def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
+  """Docstring."""
+  importer = OnnxSpecImporter()
+  md_content = """
+### <a name="Dup"></a>
+#### Summary
+First paragraph.
+
+### <a name="Dup"></a>
+#### Summary
+Another summary.
+    """
+  md_file = tmp_path / "Extra.md"
+  md_file.write_text(md_content)
+  res = importer.parse_file(md_file)
+  assert "Dup" in res

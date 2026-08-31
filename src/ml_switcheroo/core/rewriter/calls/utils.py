@@ -80,17 +80,18 @@ def rewrite_stateful_call(
 ) -> cst.Call:
   """Rewrite a call to a stateful object to match a functional pattern.
 
-  Used when converting OOP frameworks to Functional ones where state must be passed explicitly.
-  Can inject arguments (e.g. `variables`) and change method names (e.g. `__call__` -> `apply`).
+  Used when converting OOP frameworks (where state is implicit in `self`) to Functional ones
+  where state must be passed explicitly. This function can inject arguments (e.g. `variables`)
+  into the call signature and change method names (e.g. `__call__` -> `apply`).
 
   Args:
-      rewriter: The Transformer instance (must expose context).
-      node (cst.Call): The original call node.
+      rewriter: The active Transformer instance executing the rewrite (must expose context).
+      node (cst.Call): The original call node to be rewritten.
       instance_name (str): The name of the object instance being called.
-      config (Dict[str, str]): Configuration dict containing 'prepend_arg' and 'method'.
+      config (Dict[str, str]): Configuration dict containing 'prepend_arg' and 'method' keys for the rewriting logic.
 
   Returns:
-      cst.Call: The transformed call node.
+      cst.Call: The transformed call node conforming to the functional pattern.
 
   """
   new_args = list(node.args)
@@ -321,13 +322,13 @@ def inject_permute_call(
       of JAX-style syntax.
 
   Args:
-      base_node (cst.CSTNode): The expression to wrap (the input tensor).
-      indices (Tuple[int, ...]): Tuple of dimensions to permute (e.g., (0, 2, 3, 1)).
-      semantics (SemanticsManager): Manager to look up syntax.
-      target_fw (str): Target framework key.
+      base_node (cst.CSTNode): The expression to wrap (usually the input tensor).
+      indices (Tuple[int, ...]): Tuple of integers representing dimensions to permute (e.g., (0, 2, 3, 1)).
+      semantics (SemanticsManager): Semantics manager used to look up the correct permutation syntax for the framework.
+      target_fw (str): Target framework string key (e.g., 'torch', 'jax').
 
   Returns:
-      cst.CSTNode: Node representing `permute(base_node, indices)` or original if unsupported.
+      cst.CSTNode: The constructed node representing `permute(base_node, indices)` or the original node if unsupported.
 
   """
   # 1. Lookup 'permute_dims' definition logic

@@ -1,8 +1,0 @@
-description: Configuration flag for RTLD_GLOBAL usage.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: Any
-variants: {}
-operation: UseRtldGlobal

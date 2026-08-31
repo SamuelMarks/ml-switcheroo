@@ -265,7 +265,10 @@ def test_normalization_utils_extra() -> None:
 
   # 276:
   class BadCST:
+    """Docstring."""
+
     def __repr__(self) -> str:
+      """Docstring."""
       raise Exception("fail")
 
   details = {"std_args": [{"name": "a", "default": BadCST()}]}
@@ -347,3 +350,16 @@ def test_convert_value_to_cst_negative_int() -> None:
   node: typing.Any = convert_value_to_cst(-5)
   assert isinstance(node, cst.UnaryOperation)
   assert isinstance(node.expression, cst.Integer)
+
+
+def test_convert_value_to_cst_branch() -> None:
+  """Docstring."""
+  from ml_switcheroo.core.rewriter.normalization_utils import convert_value_to_cst
+  from unittest.mock import patch
+
+  with patch("ast.literal_eval", return_value="foo"):
+    node = convert_value_to_cst("foo")
+    # Should fall through to the scalar string generation
+    import libcst as cst
+
+    assert isinstance(node, cst.SimpleString)

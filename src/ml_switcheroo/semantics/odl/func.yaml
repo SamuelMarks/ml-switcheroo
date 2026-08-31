@@ -6,3 +6,4 @@ variants:
   mlir:
     api: sw.func
     required_imports: []
+    args: {}

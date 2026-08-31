@@ -119,6 +119,8 @@ def test_patcher_action_not_found_on_leave():
   # What if it's a ReplaceAction, but it IS an init? Wait we just tested that and it returned!
   # Ah! what if `self.emitter.emit_init` DOES NOT EXIST?!
   class DummyEmitterNoEmitInit:
+    """Docstring."""
+
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitterNoEmitInit())
@@ -144,9 +146,13 @@ def test_patcher_replace_action_on_leave_return_updated_unknown():
   # We already tested UnknownAction to hit line 241
   # What if it's NOT ReplaceAction and NOT DeleteAction?
   class MyAction(PatchAction):
+    """Docstring."""
+
     pass
 
   class DummyEmitter:
+    """Docstring."""
+
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -169,13 +175,18 @@ def test_patcher_hit_241_explicitly():
   """Docstring."""
 
   class DummyEmitter:
+    """Docstring."""
+
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitter())
 
   # Needs to be a subclass of PatchAction, but NOT DeleteAction or ReplaceAction
   class UnknownAction(PatchAction):
+    """Docstring."""
+
     def __init__(self):
+      """Docstring."""
       # Bypass __init__
       pass
 
@@ -197,6 +208,8 @@ def test_patcher_replace_action_no_branch_missing():
   import builtins
 
   class MockEmitter:
+    """Docstring."""
+
     pass
 
   patcher = GraphPatcher([], {}, MockEmitter())
@@ -213,6 +226,7 @@ def test_patcher_replace_action_no_branch_missing():
   orig_isinstance = builtins.isinstance
 
   def mock_isinstance(obj, class_or_tuple):
+    """Docstring."""
     if type(obj) is ReplaceAction and class_or_tuple == ReplaceAction:
       return False
     return orig_isinstance(obj, class_or_tuple)
@@ -228,6 +242,8 @@ def test_patcher_base_action_fallback():
   """Docstring."""
 
   class DummyEmitter:
+    """Docstring."""
+
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -235,7 +251,10 @@ def test_patcher_base_action_fallback():
   updated = cst.Name("updated")
 
   class CustomPatch(PatchAction):
+    """Docstring."""
+
     def __init__(self, node_id):
+      """Docstring."""
       self.node_id = node_id
 
   action = CustomPatch(node_id="n1")
@@ -248,12 +267,17 @@ def test_patcher_hit_241_explicitly2():
   """Docstring."""
 
   class DummyEmitter:
+    """Docstring."""
+
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitter())
 
   class MyPatchAction(PatchAction):
+    """Docstring."""
+
     def __init__(self):
+      """Docstring."""
       self.node_id = "test"
 
   action = MyPatchAction()
@@ -268,12 +292,17 @@ def test_patcher_hit_241_direct_test():
   """Docstring."""
 
   class DummyEmitter:
+    """Docstring."""
+
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitter())
 
   class MyPatchAction:
+    """Docstring."""
+
     def __init__(self):
+      """Docstring."""
       self.node_id = "test"
 
   action = MyPatchAction()
@@ -291,6 +320,8 @@ def test_patcher_base_action_fallback_extra():
   """Docstring."""
 
   class DummyEmitter:
+    """Docstring."""
+
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -299,6 +330,8 @@ def test_patcher_base_action_fallback_extra():
 
   # Create an anonymous class that inherits from PatchAction
   class CustomPatch(PatchAction):
+    """Docstring."""
+
     pass
 
   action = CustomPatch(node_id="n1")
@@ -314,6 +347,8 @@ def test_patcher_base_action():
   """Docstring."""
 
   class DummyEmitter:
+    """Docstring."""
+
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -332,7 +367,10 @@ def test_patcher_replace_action_on_leave_return_updated_not_is_init():
   """Docstring."""
 
   class DummyEmitter:
+    """Docstring."""
+
     def emit_call(self, node, inputs, out):
+      """Docstring."""
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -340,6 +378,8 @@ def test_patcher_replace_action_on_leave_return_updated_not_is_init():
   # We want to hit line 241
   # Line 241 is reached if the action is NOT DeleteAction and NOT ReplaceAction
   class UnknownAction(PatchAction):
+    """Docstring."""
+
     pass
 
   action = UnknownAction(node_id="n1")
@@ -360,7 +400,10 @@ def test_patcher_replace_action_on_leave_return_updated():
   """Docstring."""
 
   class DummyEmitter:
+    """Docstring."""
+
     def emit_call(self, node, inputs, out):
+      """Docstring."""
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -383,7 +426,10 @@ def test_patcher_replace_action_on_leave_return_updated_extra():
   """Docstring."""
 
   class DummyEmitter:
+    """Docstring."""
+
     def emit_call(self, node, inputs, out):
+      """Docstring."""
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -406,9 +452,13 @@ def test_patcher_unhandled_action_type():
   """Docstring."""
 
   class DummyAction(PatchAction):
+    """Docstring."""
+
     pass
 
   class DummyEmitter:
+    """Docstring."""
+
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -424,6 +474,8 @@ def test_patcher_return_updated():
   """Docstring."""
 
   class DummyEmitter:
+    """Docstring."""
+
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -438,7 +490,10 @@ def test_patcher_replace_action_not_expr_not_init():
   """Docstring."""
 
   class DummyEmitter:
+    """Docstring."""
+
     def emit_call(self, node, inputs, out):
+      """Docstring."""
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -452,3 +507,31 @@ def test_patcher_replace_action_not_expr_not_init():
 
   res = patcher.on_leave(original, updated)
   assert isinstance(res, cst.FlattenSentinel)
+
+
+def test_patcher_missing_branches() -> None:
+  """Docstring."""
+  from ml_switcheroo.core.rewriter.patcher import GraphPatcher, PatchAction
+  import libcst as cst
+  from unittest.mock import MagicMock
+
+  # Dummy unhandled action
+  class DummyAction(PatchAction):
+    """Docstring."""
+
+    pass
+
+  dummy_original = cst.Pass()
+  action = DummyAction(node_id=id(dummy_original))
+
+  patcher = GraphPatcher([], MagicMock(), MagicMock())
+  patcher._action_map[id(dummy_original)] = action
+
+  # 241
+  res = patcher._handle_node(dummy_original, dummy_original)
+  assert res == dummy_original
+
+  # 257->265: new_stmt.body is empty
+  empty_stmt = cst.SimpleStatementLine(body=[])
+  res2 = patcher._unwrap_stmt_if_nested(cst.Expr(cst.Pass()), empty_stmt)
+  assert res2 == empty_stmt

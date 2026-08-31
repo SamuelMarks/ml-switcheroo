@@ -1,4 +1,0 @@
-description: A TMEM layout for A sparsity metadata.
-std_args: []
-type: function
-operation: sparse_meta_layout

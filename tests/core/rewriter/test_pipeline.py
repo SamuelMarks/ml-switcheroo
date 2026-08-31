@@ -54,6 +54,8 @@ def test_interface_enforcement() -> None:
   with pytest.raises(TypeError):
 
     class InvalidPass(RewriterPass):
+      """Docstring."""
+
       pass
 
     InvalidPass()

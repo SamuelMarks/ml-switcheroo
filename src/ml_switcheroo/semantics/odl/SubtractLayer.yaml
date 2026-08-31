@@ -1,5 +1,0 @@
-description: Layer that performs elementwise subtraction on a list of two inputs.
-op_type: class
-std_args: []
-variants: {}
-operation: SubtractLayer

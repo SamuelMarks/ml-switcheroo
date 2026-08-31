@@ -12,7 +12,7 @@ from ml_switcheroo.core.mlir.cst import OperationNode, RegionNode, AttributeNode
 if TYPE_CHECKING:
   # To avoid circular imports, we just assert the structural existence of the context
   class ContextDummy:
-    """Dummy context class for type checking."""
+    """Context structural type for type checking."""
 
     def enter_scope(self) -> None:
       """Enter a scope."""

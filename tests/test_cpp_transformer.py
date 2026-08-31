@@ -108,7 +108,10 @@ def test_transformer_custom_node() -> None:
   """Docstring."""
 
   class DummyNode(CppNode):
+    """Docstring."""
+
     def to_text(self) -> str:
+      """Docstring."""
       return ""
 
   transformer: CppCSTTransformer = CppCSTTransformer()

@@ -90,6 +90,7 @@ def test_loop_static_unroll_hook(run_pass: typing.Callable[[str], str]) -> None:
 
   @register_hook("transform_for_loop_static")
   def mock_hook(node: typing.Any, ctx: typing.Any) -> typing.Any:
+    """Docstring."""
     return cst.FlattenSentinel([cst.SimpleStatementLine([cst.Expr(cst.Name("unrolled"))])])
 
   with patch(
@@ -109,6 +110,7 @@ def test_loop_safety_hook(run_pass: typing.Callable[[str], str]) -> None:
 
   @register_hook("transform_for_loop")
   def mock_safety(node: typing.Any, ctx: typing.Any) -> typing.Any:
+    """Docstring."""
     return EscapeHatch.mark_failure(node, "Unsafe Loop")
 
   with patch(

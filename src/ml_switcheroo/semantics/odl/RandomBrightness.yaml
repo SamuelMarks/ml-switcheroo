@@ -1,9 +1,0 @@
-description: A preprocessing layer which randomly adjusts brightness during training.
-op_type: class
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: factor
-  type: float
-variants: {}
-operation: RandomBrightness

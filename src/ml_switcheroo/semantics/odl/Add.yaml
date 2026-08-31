@@ -14,18 +14,23 @@ variants:
   rdna:
     api: v_add_f32
     required_imports: []
+    args: {}
   sass:
     api: FADD
+    args: {}
   numpy:
     api: numpy.add
     macro_template: numpy.add({input}, {other} * {alpha})
+    args: {}
   tensorflow:
     api: tf.math.add
     macro_template: tf.math.add({input}, {other} * {alpha})
+    args: {}
   paxml:
     api: jax.numpy.add
     macro_template: jax.numpy.add({input}, {other} * {alpha})
     required_imports: []
+    args: {}
   flax_nnx:
     api: jax.numpy.add
     args: {}

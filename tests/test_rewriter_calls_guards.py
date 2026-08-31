@@ -109,6 +109,8 @@ def test_apply_strict_guards_no_context() -> None:
   """Docstring."""
 
   class RewriterNoContext:
+    """Docstring."""
+
     pass
 
   rewriter: RewriterNoContext = RewriterNoContext()

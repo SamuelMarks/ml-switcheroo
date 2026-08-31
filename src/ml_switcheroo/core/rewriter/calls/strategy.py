@@ -65,18 +65,23 @@ def execute_strategy(
   details: dict,
   abstract_id: str,
 ) -> cst.BaseExpression:
-  """Apply the appropriate transformation strategy.
+  """Apply the appropriate transformation strategy for rewriting a function call.
+
+  This function determines and executes the correct transformation mechanism
+  (e.g., infix operators, inline lambdas, macro expansions, plugins, or standard
+  API calls) based on the provided mapping rules and API details. It also handles
+  dispatch rules, argument normalization, strict mode guards, and layout permutations.
 
   Args:
-      rewriter: The rewriter context.
-      original: The original call node.
-      updated: The updated call node.
-      mapping: The transformation mapping.
-      details: Details of the API.
-      abstract_id: The abstract ID of the op.
+      rewriter: The active rewriter instance providing context, semantics, and target framework details.
+      original: The original `cst.Call` node from the source tree before any modifications.
+      updated: The currently updated `cst.Call` node, which may have already undergone pre-processing.
+      mapping: The target framework-specific mapping dictionary detailing how to transform the call.
+      details: The general API details dictionary for the abstract operation being mapped.
+      abstract_id: The unique identifier for the abstract operation (e.g., 'math.add').
 
   Returns:
-      cst.BaseExpression: The transformed CST node.
+      cst.BaseExpression: The transformed CST node representing the rewritten call or expression.
 
   """
   if hasattr(rewriter.context, "hook_context"):
@@ -189,16 +194,21 @@ def _apply_layout_permutation(
   details: dict,
   rewriter: "RewriterDummy",
 ) -> cst.Call:
-  """Apply layout permutation to the arguments of a call based on the provided mapping.
+  """Apply layout permutation to the arguments or return value of a call.
+
+  This function modifies the arguments of a function call, or wraps the entire call,
+  with permutation logic (e.g., transposing dimensions) based on the `layout_map`
+  provided in the transformation mapping. This is commonly used when transforming
+  between frameworks with different data layout conventions (like NCHW vs. NHWC).
 
   Args:
-      node: The call node.
-      mapping: The transformation mapping.
-      details: Details of the API.
-      rewriter: The rewriter context.
+      node: The call node whose arguments or return value need layout permutation.
+      mapping: The transformation mapping dictionary containing the 'layout_map' rules.
+      details: The general API details dictionary specifying standard argument names.
+      rewriter: The active rewriter instance providing semantics and target framework details.
 
   Returns:
-      cst.Call: The modified call node.
+      cst.Call: The modified call node with permuted arguments or a permutation wrapped around the return value.
 
   """
   layout_map = mapping["layout_map"]

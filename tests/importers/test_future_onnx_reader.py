@@ -116,3 +116,23 @@ def test_long_summary(tmp_path: Path) -> None:
   res = importer.parse_file(md_file)
   assert "Long" in res
   assert len(res["Long"]["description"]) == 303  # 300 + "..."
+
+
+def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
+  """Docstring."""
+  importer = OnnxSpecImporter()
+  md_content = """
+### <a name="Dup"></a>
+#### Summary
+First paragraph.
+
+Second paragraph.
+
+### <a name="Dup"></a>
+#### Summary
+Another summary.
+    """
+  md_file = tmp_path / "Extra.md"
+  md_file.write_text(md_content)
+  res = importer.parse_file(md_file)
+  assert "Dup" in res

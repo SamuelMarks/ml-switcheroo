@@ -50,6 +50,8 @@ def test_improved_fuzz() -> None:
   nodes: List[cst.CSTNode] = []
 
   class NodeCollector(cst.CSTVisitor):
+    """Docstring."""
+
     def on_visit(self, node: cst.CSTNode) -> bool:
       """Helper to on visit."""
       nodes.append(node)

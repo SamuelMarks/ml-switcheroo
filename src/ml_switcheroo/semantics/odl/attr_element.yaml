@@ -1,7 +1,0 @@
-description: Returns `op.attributes[attr_name][index]` if it exists, otherwise None.
-std_args:
-- attr_name
-- op
-- index
-type: function
-operation: attr_element

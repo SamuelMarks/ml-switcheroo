@@ -1,5 +1,0 @@
-description: Base class for Neural Network Models.
-op_type: class
-std_args: []
-variants: {}
-operation: Model

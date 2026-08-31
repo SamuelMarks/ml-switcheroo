@@ -1,5 +1,0 @@
-description: Aggregation constant for Average.
-op_type: attribute
-std_args: []
-variants: {}
-operation: Avg

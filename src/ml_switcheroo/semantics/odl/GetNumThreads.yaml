@@ -1,4 +1,0 @@
-description: Returns the number of threads used for parallelizing CPU operations.
-std_args: []
-variants: {}
-operation: GetNumThreads

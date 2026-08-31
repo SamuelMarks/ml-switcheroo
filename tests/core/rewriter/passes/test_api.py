@@ -184,6 +184,8 @@ def test_module_bases_object() -> None:
   (t, s, _) = get_transformer()
 
   class DummyTraits:
+    """Docstring."""
+
     module_base = "MyModule"
 
   s.configs["torch"] = {"traits": DummyTraits()}
@@ -205,9 +207,11 @@ def test_classdef_raw_fallback() -> None:
   t._known_module_bases = {"MyModule"}
 
   def mock_get_qualified_name(node: typing.Any) -> typing.Optional[str]:
+    """Docstring."""
     return None
 
   def mock_cst_to_string(node: typing.Any) -> typing.Optional[str]:
+    """Docstring."""
     if isinstance(node, cst.Name) and node.value == "MyModule":
       return "MyModule"
     return "Other"

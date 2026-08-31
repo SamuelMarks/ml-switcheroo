@@ -1,8 +1,0 @@
-description: Construct optimizer triple for RMSProp with momentum.
-std_args:
-- step_size
-- gamma
-- eps
-- momentum
-type: function
-operation: rmsprop_momentum

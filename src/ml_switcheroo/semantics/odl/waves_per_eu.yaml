@@ -1,4 +1,0 @@
-description: ROCm-specific waves per execution unit.
-std_args: []
-type: attribute
-operation: waves_per_eu

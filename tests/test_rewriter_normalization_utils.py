@@ -41,6 +41,8 @@ def test_convert_value_to_cst_branches() -> None:
 
   # Unknown
   class Unknown:
+    """Docstring."""
+
     pass
 
   assert isinstance(convert_value_to_cst(Unknown()), cst.SimpleString)
@@ -268,6 +270,7 @@ def test_normalize_arguments_various() -> None:
   }
 
   def is_module_alias_fn(node: Any) -> bool:
+    """Docstring."""
     return True  # Covers 196
 
   # Covers 196 (is_module_alias_fn returns True, so is_method_call = False)

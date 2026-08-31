@@ -125,6 +125,7 @@ def test_flax_nnx_convert_without_jax() -> None:
     fromlist: tuple[str, ...] = (),
     level: int = 0,
   ) -> types.ModuleType:
+    """Docstring."""
     if name == "jax.numpy":
       raise ImportError()
     return real_import(name, globals, locals, fromlist, level)

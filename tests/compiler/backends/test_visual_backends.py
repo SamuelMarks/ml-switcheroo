@@ -259,6 +259,7 @@ def test_visual_backends_rank_existing_higher() -> None:
     """Dummy visual."""
 
     def _get_shape(self, n: LogicalNode) -> str:
+      """Docstring."""
       return "box"
 
   backend = DummyVisual()

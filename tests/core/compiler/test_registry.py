@@ -9,6 +9,8 @@ def test_graph_frontend_parse_not_implemented():
   """Docstring."""
 
   class DummyFrontend(GraphFrontend):
+    """Docstring."""
+
     pass
 
   frontend = DummyFrontend()

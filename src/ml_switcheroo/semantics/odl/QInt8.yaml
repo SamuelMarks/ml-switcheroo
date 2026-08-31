@@ -1,5 +1,0 @@
-description: Quantized Int8 Dtype.
-op_type: attribute
-std_args: []
-variants: {}
-operation: QInt8

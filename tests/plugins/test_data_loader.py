@@ -42,6 +42,8 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
 
   @register_framework("custom")
   class CustomAdapter:
+    """Docstring."""
+
     pass
 
   def create(target: str) -> PivotRewriter:

@@ -174,6 +174,8 @@ def test_render_demo_html_empty_wheels_and_fallback(tmp_path: Path) -> None:
   dist_dir.mkdir()
 
   class MockAdapter:
+    """Docstring."""
+
     def __init__(self, name: str) -> None:
       """Docstring.
 
@@ -206,6 +208,8 @@ def test_render_demo_html_no_priority_order(tmp_path: Path) -> None:
   hierarchy: Dict[str, List[Dict[str, str]]] = {"numpy": []}
 
   class MockAdapter:
+    """Docstring."""
+
     def __init__(self, name: str) -> None:
       """Docstring.
 

@@ -1,5 +1,0 @@
-description: Layer that adds a list of inputs.
-op_type: class
-std_args: []
-variants: {}
-operation: AddLayer

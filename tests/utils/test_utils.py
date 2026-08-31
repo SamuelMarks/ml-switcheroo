@@ -15,6 +15,8 @@ def test_code_extractor_oserror_1() -> None:
   """Docstring."""
 
   class DummyClass:
+    """Docstring."""
+
     pass
 
   with patch("ml_switcheroo.utils.code_extractor.inspect.getsource", side_effect=OSError("Test error")):

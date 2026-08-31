@@ -6,3 +6,4 @@ variants:
   keras:
     api: keras.random.SeedGenerator
     required_imports: []
+    args: {}

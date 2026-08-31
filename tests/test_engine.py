@@ -422,6 +422,7 @@ def test_run_rewriter_pipeline_opt_no_plan_1(mock_ingest: MagicMock) -> None:
   reset_tracer()
 
   def mock_diff(*args: list[str], **kwargs: dict[str, str]) -> list[str]:
+    """Docstring."""
     print("MOCK DIFF CALLED!")
     return []
 

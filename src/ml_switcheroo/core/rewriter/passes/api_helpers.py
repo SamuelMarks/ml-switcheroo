@@ -12,7 +12,13 @@ from ml_switcheroo.core.tracer import get_tracer
 
 
 class ApiHelpersMixin:
-  """Docstring."""
+  """Mixin providing CST string/node conversions and alias resolutions.
+
+  This class contains utility methods for traversing, querying, and transforming
+  CST nodes representing API calls, variables, modules, and signatures. It serves
+  as a support mixin for the `ApiTransformer`, exposing methods for fully qualified
+  name resolution, alias checking, target framework mappings, and version checks.
+  """
 
   # Added for type checking
   context: Any
@@ -26,20 +32,14 @@ class ApiHelpersMixin:
     """Dummy method."""
     ...
 
-  """Mixin providing CST string/node conversions and alias resolutions.
-
-  This class contains utility methods for traversing, querying, and transforming
-  CST nodes representing API calls, variables, modules, and signatures.
-  """
-
   def _cst_to_string(self, node: cst.BaseExpression) -> Optional[str]:
     """Flatten CST nodes (Name/Attribute) to string.
 
     Args:
-        node: The CST expression node to convert.
+        node (cst.BaseExpression): The CST expression node to convert.
 
     Returns:
-        The flattened dotted string representation of the expression (e.g., 'foo.bar'),
+        Optional[str]: The flattened dotted string representation of the expression (e.g., 'foo.bar'),
         or None if the node type is not supported.
     """
     if isinstance(node, cst.Name):
@@ -57,10 +57,10 @@ class ApiHelpersMixin:
     """Resolve aliases to get the Fully Qualified Name (FQN).
 
     Args:
-        node: The CST expression node representing the name or attribute.
+        node (cst.BaseExpression): The CST expression node representing the name or attribute.
 
     Returns:
-        The resolved Fully Qualified Name (FQN) as a string, or None if resolving fails.
+        Optional[str]: The resolved Fully Qualified Name (FQN) as a string, or None if resolving fails.
     """
     full_str = self._cst_to_string(node)
     if not full_str:
@@ -81,10 +81,10 @@ class ApiHelpersMixin:
     """Construct a CST node structure for a dotted API path.
 
     Args:
-        api_path: The dotted API path string (e.g., 'foo.bar.baz').
+        api_path (str): The dotted API path string (e.g., 'foo.bar.baz').
 
     Returns:
-        The constructed CST expression node representing the path.
+        cst.BaseExpression: The constructed CST expression node representing the path.
     """
     parts = api_path.split(".")
     node = cst.Name(parts[0])
@@ -93,27 +93,27 @@ class ApiHelpersMixin:
     return node
 
   def _create_dotted_name(self, name_str: str) -> Union[cst.Name, cst.Attribute]:
-    """Alia for create_name_node used by plugins.
+    """Alias for create_name_node used by plugins.
 
     Args:
-        name_str: The dotted name string to convert to a CST node structure.
+        name_str (str): The dotted name string to convert to a CST node structure.
 
     Returns:
-        A Union of cst.Name or cst.Attribute representing the dotted name.
+        Union[cst.Name, cst.Attribute]: A CST Name or Attribute representing the dotted name.
     """
     # Type ignored because _create_name_node returns BaseExpression but plugins expect union subset
-    return self._create_name_node(name_str)
+    return self._create_name_node(name_str)  # type: ignore
 
   def _is_module_alias(self, node: cst.CSTNode) -> bool:
     """Determine if a node is a module reference (not a variable).
 
     Args:
-        node: The CST node to inspect.
+        node (cst.CSTNode): The CST node to inspect.
 
     Returns:
-        True if the node is identified as a module alias, False otherwise.
+        bool: True if the node is identified as a module alias, False otherwise.
     """
-    name = self._cst_to_string(node)
+    name = self._cst_to_string(node)  # type: ignore
     if not name:
       return False
 
@@ -144,11 +144,11 @@ class ApiHelpersMixin:
     """Inject source code statements at the start of the function body.
 
     Args:
-        node: The target function definition node.
-        stmts_code: A list of source code strings representing statements to inject.
+        node (cst.FunctionDef): The target function definition node.
+        stmts_code (List[str]): A list of source code strings representing statements to inject.
 
     Returns:
-        A new function definition node with the preamble statements injected.
+        cst.FunctionDef: A new function definition node with the preamble statements injected.
     """
     new_stmts = []
     for code in stmts_code:
@@ -164,11 +164,11 @@ class ApiHelpersMixin:
     """Support to insert statements respecting docstrings.
 
     Args:
-        node: The function definition node where statements are injected.
-        new_stmts: The list of CST statements to insert into the function body.
+        node (cst.FunctionDef): The function definition node where statements are injected.
+        new_stmts (List[cst.BaseStatement]): The list of CST statements to insert into the function body.
 
     Returns:
-        The updated function definition node with the statements inserted.
+        cst.FunctionDef: The updated function definition node with the statements inserted.
     """
     if isinstance(node.body, cst.SimpleStatementSuite):
       node = self._convert_to_indented_block(node)
@@ -188,25 +188,25 @@ class ApiHelpersMixin:
     """Unwrap simple one-liners to indented blocks for injection.
 
     Args:
-        node: The function definition node to convert.
+        node (cst.FunctionDef): The function definition node to convert.
 
     Returns:
-        The updated function definition node with an IndentedBlock body.
+        cst.FunctionDef: The updated function definition node with an IndentedBlock body.
     """
     if isinstance(node.body, cst.SimpleStatementSuite):
       new_stmts = [cst.SimpleStatementLine(body=[s]) for s in node.body.body]
       return node.with_changes(body=cst.IndentedBlock(body=new_stmts))
     return node
 
-  def _get_mapping(self, name: str, silent: bool = False):
+  def _get_mapping(self, name: str, silent: bool = False) -> Optional[dict]:
     """Query the Semantics Manager for the target implementation of the API.
 
     Args:
-        name: The fully qualified name of the API to map.
-        silent: If True, suppresses error/failure reports during lookup.
+        name (str): The fully qualified name of the API to map.
+        silent (bool, optional): If True, suppresses error/failure reports during lookup. Defaults to False.
 
     Returns:
-        The target implementation mapping dictionary if found and verified, otherwise None.
+        Optional[dict]: The target implementation mapping dictionary if found and verified, otherwise None.
     """
     lookup = self.semantics.get_definition(name)
     if not lookup:
@@ -250,11 +250,11 @@ class ApiHelpersMixin:
       return target_impl
     return None
 
-  def _handle_variant_imports(self, variant) -> None:
-    """Inject required imports defined in the variant.
+  def _handle_variant_imports(self, variant: dict) -> None:
+    """Inject required imports defined in the variant mapping into the module context.
 
     Args:
-        variant: The target variant dictionary containing import requirements.
+        variant (dict): The target variant dictionary mapping containing required imports.
     """
     reqs = variant.get("required_imports", [])
     for r in reqs:
@@ -278,13 +278,13 @@ class ApiHelpersMixin:
         self.context.hook_context.inject_preamble(stmt)
 
   def _is_framework_base(self, name: str) -> bool:
-    """Check if a class name corresponds to any known framework Module base.
+    """Check if a class name corresponds to any known neural network framework Module base.
 
     Args:
-        name: The name of the class to check.
+        name (str): The name of the class to check.
 
     Returns:
-        True if the name matches a known framework module base, False otherwise.
+        bool: True if the name matches a known framework module base (e.g., `nn.Module`), False otherwise.
     """
     if not name:
       return False
@@ -306,14 +306,14 @@ class ApiHelpersMixin:
     return False
 
   def check_version_constraints(self, min_v: Optional[str], max_v: Optional[str]) -> Optional[str]:
-    """Check if target version requirements are met.
+    """Check if target framework version requirements are met based on the mapping constraints.
 
     Args:
-        min_v: The minimum required version string, if any.
-        max_v: The maximum supported version string (exclusive), if any.
+        min_v (Optional[str]): The minimum required version string, if any.
+        max_v (Optional[str]): The maximum supported version string (exclusive), if any.
 
     Returns:
-        An error message string if version constraints are violated, or None if constraints are met.
+        Optional[str]: An error message string if version constraints are violated, or None if constraints are met.
     """
     if not min_v and not max_v:
       return None
@@ -337,14 +337,14 @@ class ApiHelpersMixin:
     if not current:
       return None
 
-    def parse_v(v_str):
-      """Parse a version string into a tuple of integers.
+    def parse_v(v_str: str) -> tuple:
+      """Parse a version string into a tuple of integers for comparison.
 
       Args:
-          v_str: The version string (e.g., '1.2.3') or version-like object to parse.
+          v_str (str): The version string (e.g., '1.2.3') or version-like object to parse.
 
       Returns:
-          A tuple of integers representing the version segments.
+          tuple: A tuple of integers representing the version segments.
       """
       parts = []
       # Fix: Use re module safely imported at global scope
@@ -372,15 +372,15 @@ class ApiHelpersMixin:
     arg_name: str,
     annotation: Optional[str],
   ) -> cst.FunctionDef:
-    """Inject a new argument after 'self' (or at start).
+    """Inject a new argument after 'self' (or at the start if 'self' is not present).
 
     Args:
-        node: The function definition node to modify.
-        arg_name: The name of the argument to inject.
-        annotation: The optional type annotation string for the argument.
+        node (cst.FunctionDef): The function definition node to modify.
+        arg_name (str): The name of the argument to inject.
+        annotation (Optional[str]): The optional type annotation string for the argument.
 
     Returns:
-        The modified function definition node with the new argument injected.
+        cst.FunctionDef: The modified function definition node with the new argument injected.
     """
     params = list(node.params.params)
     insert_idx = 0

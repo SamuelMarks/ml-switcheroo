@@ -112,7 +112,7 @@ def test_engine_run_compiler_pipeline_stablehlo(
 
 @patch("ml_switcheroo.core.engine.ingest_code")
 @patch("ml_switcheroo.core.engine.RewriterPipeline")
-@patch("ml_switcheroo.core.engine.UsageScanner")
+@patch("ml_switcheroo.core.engine.GlobalUsageScanner")
 @patch("ml_switcheroo.core.engine.ImportResolver")
 @patch("ml_switcheroo.core.engine.ImportFixer")
 def test_engine_run_rewriter_pipeline(
@@ -139,11 +139,13 @@ def test_engine_run_rewriter_pipeline(
 
   # Needs to ensure visit returns something
   class MockTree:
+    """Docstring."""
+
     code = "final_code"
 
     def visit(self, visitor: typing.Any) -> typing.Any:
       """Visits."""
-      if type(visitor).__name__ == "UsageScanner":
+      if type(visitor).__name__ == "GlobalUsageScanner":
         return self
       return self
 
@@ -197,6 +199,8 @@ def test_engine_run_rewriter_pipeline_graph_opt(
   mock_differ_inst.diff.return_value = ["plan"]  # Some dummy plan
 
   class MockTree:
+    """Docstring."""
+
     code = "final"
 
     def visit(self, visitor: typing.Any) -> typing.Any:
@@ -309,6 +313,8 @@ def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
   mock_extractor_inst.node_map = {}
 
   class MockTree:
+    """Docstring."""
+
     code = "final"
 
     def visit(self, visitor: typing.Any) -> typing.Any:
@@ -334,6 +340,8 @@ def test_engine_run_rewriter_pipeline_graph_opt_fail(
   mock_extractor.side_effect = Exception("Graph Extraction Failed")
 
   class MockTree:
+    """Docstring."""
+
     code = "final"
 
     def visit(self, visitor: typing.Any) -> typing.Any:
@@ -357,6 +365,8 @@ def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline: MagicMock, moc
   """Docstring."""
 
   class MockTree:
+    """Docstring."""
+
     # Needs to exactly match the start marker string
     code = "# <SWITCHEROO_FAIL_123"
 

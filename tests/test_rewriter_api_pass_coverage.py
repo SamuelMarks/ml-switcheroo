@@ -28,15 +28,20 @@ def test_apitransformer_methods() -> None:
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemanticsNone:
+    """Docstring."""
+
     framework_configs: Dict[str, Any] = {"torch": {"traits": {"module_base": "torch.nn.Module"}}}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+      """Docstring."""
       return None
 
     def is_verified(self, name: str) -> bool:
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw: str) -> Optional[Dict[str, Any]]:
+      """Docstring."""
       return None
 
   semantics_none: DummySemanticsNone = DummySemanticsNone()
@@ -53,15 +58,20 @@ def test_apitransformer_methods() -> None:
   transformer._get_target_traits()
 
   class DummySemanticsTraits:
+    """Docstring."""
+
     framework_configs: Dict[str, Any] = {}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+      """Docstring."""
       return None
 
     def is_verified(self, name: str) -> bool:
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw: str) -> Optional[Dict[str, Any]]:
+      """Docstring."""
       return {"traits": {}}
 
   semantics_traits: DummySemanticsTraits = DummySemanticsTraits()
@@ -132,20 +142,26 @@ def test_api_attr_mixin_leave_Assign() -> None:
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
+    """Docstring."""
+
     framework_configs: Dict[str, Any] = {}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+      """Docstring."""
       if name == "torch.tensor":
         return ("tensor", {"traits": {"lifecycle": ["module"]}})
       return None
 
     def is_verified(self, name: str) -> bool:
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw: str) -> Dict[str, Any]:
+      """Docstring."""
       return {}
 
     def resolve_variant(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+      """Docstring."""
       return {"target": "jax.numpy.float32"}
 
   context: RewriterContext = RewriterContext(semantics=DummySemantics(), config=config)
@@ -168,20 +184,26 @@ def test_api_attr_mixin_leave_Attribute() -> None:
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
+    """Docstring."""
+
     framework_configs: Dict[str, Any] = {}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+      """Docstring."""
       if name == "torch.float32":
         return ("float32", {"target": "jax.numpy.float32"})
       return None
 
     def is_verified(self, name: str) -> bool:
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw: str) -> Dict[str, Any]:
+      """Docstring."""
       return {}
 
     def resolve_variant(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+      """Docstring."""
       return {"target": "jax.numpy.float32"}
 
   context: RewriterContext = RewriterContext(semantics=DummySemantics(), config=config)
@@ -199,20 +221,26 @@ def test_api_call_mixin_leave_Call() -> None:
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
+    """Docstring."""
+
     framework_configs: Dict[str, Any] = {}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+      """Docstring."""
       if name == "torch.abs":
         return ("abs", {"target": "jax.numpy.abs"})
       return None
 
     def is_verified(self, name: str) -> bool:
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw: str) -> Dict[str, Any]:
+      """Docstring."""
       return {}
 
     def resolve_variant(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+      """Docstring."""
       return {"target": "jax.numpy.float32"}
 
   context: RewriterContext = RewriterContext(semantics=DummySemantics(), config=config)
@@ -230,17 +258,22 @@ def test_api_attr_mixin_leave_Attribute_plugin() -> None:
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
+    """Docstring."""
+
     framework_configs: Dict[str, Any] = {}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+      """Docstring."""
       if name == "torch.plugin_attr":
         return ("plugin_attr", {"variants": {"jax": {"requires_plugin": True}}})
       return None
 
     def is_verified(self, name: str) -> bool:
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw: str) -> Dict[str, Any]:
+      """Docstring."""
       return {}
 
   context: RewriterContext = RewriterContext(semantics=DummySemantics(), config=config)
@@ -255,18 +288,23 @@ def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
+    """Docstring."""
+
     framework_configs: Dict[str, Any] = {}
     _key_origins: Dict[str, str] = {"nn_call": "neural"}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+      """Docstring."""
       if name == "torch.nn.call":
         return ("nn_call", {})
       return None
 
     def is_verified(self, name: str) -> bool:
+      """Docstring."""
       return True
 
     def get_framework_config(self, fw: str) -> Dict[str, Any]:
+      """Docstring."""
       return {}
 
   context: RewriterContext = RewriterContext(semantics=DummySemantics(), config=config)

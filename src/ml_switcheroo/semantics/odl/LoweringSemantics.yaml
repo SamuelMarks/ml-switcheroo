@@ -1,4 +1,0 @@
-description: Semantics for the kernel's instruction stream.
-std_args: []
-type: class
-operation: LoweringSemantics

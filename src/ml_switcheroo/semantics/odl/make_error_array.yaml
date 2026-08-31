@@ -1,6 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- aval
-- message
-type: function
-operation: make_error_array

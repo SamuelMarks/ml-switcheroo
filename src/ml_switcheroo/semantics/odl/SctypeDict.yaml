@@ -1,5 +1,0 @@
-description: Dictionary of scalar types.
-op_type: attribute
-std_args: []
-variants: {}
-operation: SctypeDict

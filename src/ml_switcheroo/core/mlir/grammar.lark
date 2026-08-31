@@ -1,8 +1,7 @@
-
 ?start: module
-module: (operation | attribute_alias_def)*
+module: (operation | attribute_alias_def | type_alias_def)*
 
-operation: [results EQ] custom_operation
+operation: [results EQ] custom_operation [trailing_location] | [op_result_list] generic_operation [trailing_location]
 
 custom_operation: op_name [SYM_ID] [operands] [dictionary_attribute] op_tail*
 
@@ -20,7 +19,7 @@ operands: LPAREN [operand_list] RPAREN
 | operand_list
 operand_list: operand (COMMA operand)*
 
-operand: (VAL_ID | SYM_ID) [COLON TYPE]
+operand: (value_use | SYM_ID) [COLON TYPE]
 
 dictionary_attribute: LBRACE [attribute_entry (COMMA attribute_entry)*] RBRACE
 attribute_entry: attr_name EQ attribute_value
@@ -51,7 +50,7 @@ dialect_type_contents: dialect_type_body | IDENTIFIER
 dictionary_properties: LANGLE dictionary_attribute RANGLE
 entry_block: operation+
 function_type: (TYPE | type_list_parens) ARROW (TYPE | type_list_parens)
-generic_operation: STRING [LPAREN value_use_list RPAREN] [successor_list]
+generic_operation: STRING [LPAREN [value_use_list] RPAREN] [successor_list] [region_list] [dictionary_properties] [dictionary_attribute] [COLON function_type]
 op_result: VAL_ID [COLON NUMBER]
 op_result_list: op_result (COMMA op_result)* EQ
 opaque_dialect_attribute: dialect_namespace dialect_attribute_body
@@ -66,15 +65,15 @@ ssa_use_and_type: ssa_use COLON TYPE
 ssa_use_and_type_list: ssa_use_and_type (COMMA ssa_use_and_type)*
 successor: CARET_ID [COLON block_arg_list]
 successor_list: LBRACK successor (COMMA successor)* RBRACK
-trailing_location: "loc" LPAREN STRING RPAREN
-type_alias: "!" IDENTIFIER
+trailing_location: IDENTIFIER LPAREN STRING RPAREN
+type_alias: TYPE
 type_alias_def: type_alias EQ TYPE
 type_list_no_parens: TYPE (COMMA TYPE)*
 type_list_parens: LPAREN [TYPE (COMMA TYPE)*] RPAREN
 value_id_and_type: VAL_ID COLON TYPE
 value_id_and_type_list: value_id_and_type (COMMA value_id_and_type)*
 value_id_list: VAL_ID (COMMA VAL_ID)*
-value_use: VAL_ID [ATTR_ALIAS_ID NUMBER]
+value_use: VAL_ID [ATTR_ALIAS_ID]
 value_use_list: value_use (COMMA value_use)*
 dialect_namespace: IDENTIFIER
 dialect_attribute_body: LANGLE dialect_attribute_contents+ RANGLE

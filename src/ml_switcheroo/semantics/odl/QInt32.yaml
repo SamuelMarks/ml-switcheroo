@@ -1,5 +1,0 @@
-description: Quantized Int32 Dtype.
-op_type: attribute
-std_args: []
-variants: {}
-operation: QInt32

@@ -1,4 +1,0 @@
-description: PyTorch internal tags for compiler/dispatcher.
-std_args: []
-type: attribute
-operation: Tag

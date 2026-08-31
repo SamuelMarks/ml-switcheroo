@@ -1,4 +1,0 @@
-description: IEEE 754 floating-point representation of (positive) infinity.
-std_args: []
-variants: {}
-operation: inf

@@ -4,3 +4,4 @@ std_args: []
 variants:
   paxml:
     api: praxis.pax_fiddle.Config
+    args: {}

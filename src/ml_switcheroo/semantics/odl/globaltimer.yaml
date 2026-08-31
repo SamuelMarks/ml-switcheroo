@@ -1,5 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- kind
-type: function
-operation: globaltimer

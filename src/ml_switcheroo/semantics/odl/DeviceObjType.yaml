@@ -1,5 +1,0 @@
-description: Internal type definition for Device objects.
-op_type: class
-std_args: []
-variants: {}
-operation: DeviceObjType

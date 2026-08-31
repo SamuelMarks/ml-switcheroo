@@ -1,8 +1,0 @@
-description: Introspects mode information for a module.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: node
-  type: Any
-variants: {}
-operation: SetModeInfo

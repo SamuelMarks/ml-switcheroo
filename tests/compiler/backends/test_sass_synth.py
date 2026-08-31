@@ -379,6 +379,7 @@ def test_sass_synthesizer_macro_exact_match() -> None:
   original = semantics.get_definition
 
   def mock_get_def(kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+    """Docstring."""
     if kind == "my_macro":
       return ("my_macro", {})
     return original(kind)

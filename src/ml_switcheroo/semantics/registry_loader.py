@@ -92,6 +92,9 @@ class RegistryLoader:
         "name": alias_name,
       }
 
+    if hasattr(adapter, "inherits_from") and adapter.inherits_from:
+      config["extends"] = adapter.inherits_from
+
     if hasattr(adapter, "structural_traits"):
       try:
         traits = adapter.structural_traits

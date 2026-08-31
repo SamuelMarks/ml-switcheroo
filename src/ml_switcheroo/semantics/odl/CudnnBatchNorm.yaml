@@ -1,9 +1,0 @@
-description: CuDNN Batch Normalization.
-std_args:
-- input
-- weight
-- bias
-- running_mean
-- running_var
-variants: {}
-operation: CudnnBatchNorm

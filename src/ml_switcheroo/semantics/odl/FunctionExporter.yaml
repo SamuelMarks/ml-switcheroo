@@ -1,4 +1,0 @@
-description: Context for exporting function traces.
-std_args: []
-variants: {}
-operation: FunctionExporter

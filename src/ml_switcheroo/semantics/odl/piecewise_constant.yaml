@@ -1,6 +1,0 @@
-description: The class representing a Python function.
-std_args:
-- boundaries
-- values
-type: function
-operation: piecewise_constant

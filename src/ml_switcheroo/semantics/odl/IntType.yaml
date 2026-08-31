@@ -1,5 +1,0 @@
-description: JIT type representing Int.
-op_type: class
-std_args: []
-variants: {}
-operation: IntType

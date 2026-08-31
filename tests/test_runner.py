@@ -144,10 +144,14 @@ def test_runner_error_branches() -> None:
   assert runner._deep_compare(np.array([1.0]), np.array([2.0])) is False
 
   class BadIter:
+    """Docstring."""
+
     def __len__(self) -> int:
+      """Docstring."""
       return 1
 
     def __iter__(self) -> Any:
+      """Docstring."""
       raise Exception("bad")
 
   assert runner._deep_compare(BadIter(), [1]) is False
@@ -173,6 +177,7 @@ def test_runner_hypothesis_exception() -> None:
 
   # We want execute_api to return different things for different fws
   def mock_exec(api: str, args: Dict[str, Any]) -> int:
+    """Docstring."""
     if "tf" in api:
       return 1
     return 2
@@ -199,7 +204,10 @@ def test_runner_misc_misses() -> None:
 
   # 228 exception in .numpy()
   class BadNumpy:
+    """Docstring."""
+
     def numpy(self) -> Any:
+      """Docstring."""
       raise Exception("bad numpy")
 
   assert runner._deep_compare(BadNumpy(), 1) is False

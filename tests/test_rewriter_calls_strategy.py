@@ -24,9 +24,11 @@ class MockRewriter:
     self.semantics._key_origins = {"some_id": "neural"}
 
   def _report_failure(self, msg: str) -> None:
+    """Docstring."""
     self.failures.append(msg)
 
   def _create_name_node(self, name: str) -> cst.Name:
+    """Docstring."""
     return cst.Name(name)
 
 

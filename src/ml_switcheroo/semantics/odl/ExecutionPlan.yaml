@@ -1,5 +1,0 @@
-description: Internal representation of an execution plan.
-op_type: class
-std_args: []
-variants: {}
-operation: ExecutionPlan

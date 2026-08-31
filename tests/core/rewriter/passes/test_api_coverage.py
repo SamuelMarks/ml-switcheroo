@@ -11,6 +11,8 @@ def test_api_resolution_pass_import_invalid_alias():
   """Docstring."""
 
   class DummyImportNode:
+    """Docstring."""
+
     names = ["not_an_alias"]
     module = None
 
@@ -19,6 +21,8 @@ def test_api_resolution_pass_import_invalid_alias():
   p.visit_Import(DummyImportNode())
 
   class DummyImportFromNode:
+    """Docstring."""
+
     names = ["not_an_alias"]
     module = cst.Name("dummy")
     relative = []
@@ -30,9 +34,13 @@ def test_api_resolution_pass_import_invalid_alias_name():
   """Docstring."""
 
   class MockAlias:
+    """Docstring."""
+
     name = "not_name_or_attr"
 
   class DummyImportNode:
+    """Docstring."""
+
     names = [MockAlias()]
     module = None
 
@@ -43,6 +51,7 @@ def test_api_resolution_pass_import_invalid_alias_name():
   original_isinstance = builtins.isinstance
 
   def patched_isinstance(obj, class_or_tuple):
+    """Docstring."""
     if obj.__class__.__name__ == "MockAlias" and class_or_tuple == cst.ImportAlias:
       return True
     return original_isinstance(obj, class_or_tuple)
@@ -52,6 +61,8 @@ def test_api_resolution_pass_import_invalid_alias_name():
     p.visit_Import(DummyImportNode())
 
     class DummyImportFromNode:
+      """Docstring."""
+
       module = cst.Name("dummy")
       relative = []
       names = [MockAlias()]

@@ -1,5 +1,0 @@
-description: Create a dense version of the array.
-std_args:
-- self
-type: function
-operation: todense

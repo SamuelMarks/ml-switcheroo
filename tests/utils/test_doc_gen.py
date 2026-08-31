@@ -119,6 +119,8 @@ def test_doc_gen_missing() -> None:
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
   class DummySM:
+    """Docstring."""
+
     def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
       """Mock implementation of get definition by id."""
       if op_name == "missing":
@@ -135,6 +137,8 @@ def test_doc_gen_missing_tuple_arg() -> None:
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
   class DummySM:
+    """Docstring."""
+
     def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
       """Mock implementation of get definition by id."""
       return {"std_args": [("a", "int")]}

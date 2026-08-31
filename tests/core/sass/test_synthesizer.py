@@ -176,6 +176,8 @@ def test_sass_to_python_no_dest() -> None:
   synth = SassSynthesizer(MagicMock())
 
   class RdnaLabelRef:
+    """Docstring."""
+
     def __str__(self) -> str:
       """Helper to   string  ."""
       return "L_TARGET"
@@ -196,6 +198,8 @@ def test_sass_to_python_complex_operand() -> None:
   synth = SassSynthesizer(MagicMock())
 
   class ComplexMem:
+    """Docstring."""
+
     def __str__(self) -> str:
       """Helper to   string  ."""
       return "[R1 + 0x4]"

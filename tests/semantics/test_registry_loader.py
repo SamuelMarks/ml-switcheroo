@@ -31,7 +31,11 @@ def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, capsys: pyt
     elif fw == "dummy_traits":
 
       class BadTraitsAdapter:
+        """Docstring."""
+
         class FakeTraits:
+          """Docstring."""
+
           def model_dump(self, **kwargs: Any) -> Any:
             """Mock implementation of model dump.
 
@@ -49,6 +53,8 @@ def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, capsys: pyt
     elif fw == "dummy_wiring":
 
       class BadWiringAdapter:
+        """Docstring."""
+
         def apply_wiring(self, snap: Any) -> None:
           """Applies wiring.
 

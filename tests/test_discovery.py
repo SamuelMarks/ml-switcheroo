@@ -95,6 +95,7 @@ def test_discovery_fuzzy_import_error(
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA", "modB"])
 
   def side_effect(name: str) -> MagicMock:
+    """Docstring."""
     if name == "modA":
       raise ImportError()
     return MagicMock()

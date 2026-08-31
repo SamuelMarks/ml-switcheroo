@@ -167,6 +167,9 @@ class OperationNode(MlirNode):
   """Represent a specific MLIR Operation."""
 
   name: str
+  is_generic: bool = False
+  properties: List[AttributeNode] = field(default_factory=list)
+  successors: List[str] = field(default_factory=list)
   results: List[ValueNode] = field(default_factory=list)
   operands: List[ValueNode] = field(default_factory=list)
   attributes: List[AttributeNode] = field(default_factory=list)
@@ -191,7 +194,10 @@ class OperationNode(MlirNode):
       parts.append(" = ")
 
     # 3. Op Name
-    parts.append(self.name)
+    if self.is_generic:
+      parts.append(f'"{self.name}"')
+    else:
+      parts.append(self.name)
 
     # 3b. Name Trivia
     if self.name_trivia:
@@ -205,6 +211,20 @@ class OperationNode(MlirNode):
         parts.append(" ")
       op_names = [o.to_text() for o in self.operands]
       parts.append(f"({', '.join(op_names)})")
+
+    # 4b. Successors
+    if self.successors:
+      if not parts[-1].endswith(" "):
+        parts.append(" ")
+      parts.append(f"[{', '.join(self.successors)}]")
+
+    # 4c. Properties
+    if self.properties:
+      if not parts[-1].endswith(" "):
+        parts.append(" ")
+      parts.append("<{")
+      parts.append(", ".join([a.to_text() for a in self.properties]))
+      parts.append("}>")
 
     # 5. Attributes
     if self.attributes:

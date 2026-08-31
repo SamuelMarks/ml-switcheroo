@@ -6,3 +6,4 @@ variants:
   latex_dsl:
     api: midl.Attribute
     required_imports: []
+    args: {}

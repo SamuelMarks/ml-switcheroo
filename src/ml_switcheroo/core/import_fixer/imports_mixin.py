@@ -4,6 +4,7 @@ Handles visiting, cleaning, and rewriting `Import` and `ImportFrom` nodes based
 on the centralized `ResolutionPlan`.
 """
 
+import typing
 from typing import Union
 
 import libcst as cst
@@ -23,15 +24,15 @@ class ImportMixin(cst.CSTTransformer):
   Attributes:
       plan: The resolution plan containing mappings and required imports.
       source_fws: List of target source frameworks.
-      preserve_source: Whether to preserve source imports if not matched.
+      used_names: Set of names actually used in the code body (for dead-code elimination).
       _track_definition: A set or callback to track imported definition names.
       _satisfied_injections: A set of signatures of satisfied injected imports.
   """
 
   plan: ResolutionPlan
-  source_fws: "list[str]"
-  preserve_source: bool
-  _track_definition: "set[str]"
+  source_fws: "set[str]"
+  used_names: "set[str]"
+  _track_definition: typing.Any
   _satisfied_injections: "set[str]"
 
   def _make_alias_node(self, req: ImportReq) -> cst.ImportAlias:
@@ -114,12 +115,12 @@ class ImportMixin(cst.CSTTransformer):
         if req.module == full_name and not req.subcomponent:
           self._satisfied_injections.add(req.signature)
 
-      # 3. Prune
-      if root_pkg in self.source_fws:
-        if self.preserve_source and not replacement_occurred:
+      # 3. Prune using DCE (Dead Code Elimination)
+      bound_name = alias.asname.name.value if alias.asname else root_pkg
+
+      if not replacement_occurred:
+        if bound_name in self.used_names:
           new_aliases.append(alias)
-      else:
-        new_aliases.append(alias)
 
     if not new_aliases:
       return cst.RemoveFromParent()
@@ -149,7 +150,9 @@ class ImportMixin(cst.CSTTransformer):
     root_pkg = module_name.split(".")[0]
 
     if isinstance(updated_node.names, cst.ImportStar):
-      if root_pkg in self.source_fws and not getattr(self, "preserve_source", False):
+      if root_pkg in self.source_fws:
+        # We cannot safely DCE an ImportStar without knowing exported symbols,
+        # so we rely on source_fws to prune it if it belongs to the source framework.
         return cst.RemoveFromParent()
       return updated_node
 
@@ -175,12 +178,15 @@ class ImportMixin(cst.CSTTransformer):
           self._track_definition(new_node.names[0])  # type: ignore
           return new_node
 
+    new_aliases = []
     for alias in updated_node.names:
       self._track_definition(alias)  # type: ignore
 
-    if root_pkg in self.source_fws:
-      if self.preserve_source:
-        return updated_node
+      bound_name = alias.asname.name.value if alias.asname else alias.name.value
+      if bound_name in self.used_names:
+        new_aliases.append(alias)
+
+    if not new_aliases:
       return cst.RemoveFromParent()
 
-    return updated_node
+    return updated_node.with_changes(names=new_aliases)

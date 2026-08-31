@@ -1,5 +1,0 @@
-description: Attention with Linear Biases (ALiBi) layer.
-op_type: class
-std_args: []
-variants: {}
-operation: ALiBi

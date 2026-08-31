@@ -65,6 +65,8 @@ def rewriter() -> Generator[PivotRewriter, None, None]:
 
   @register_framework("custom_fw")
   class CustomFW:
+    """Docstring."""
+
     pass
 
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="custom_fw")

@@ -1,4 +1,0 @@
-description: The shape of the first tile in the tiling expression.
-std_args: []
-type: attribute
-operation: base_tile_shape

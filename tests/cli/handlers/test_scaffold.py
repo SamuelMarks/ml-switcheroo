@@ -26,3 +26,20 @@ def test_handle_scaffold(tmp_path: Path) -> None:
       with patch("ml_switcheroo.cli.handlers.scaffold.json.dump") as mock_dump:
         handle_scaffold(args)
         mock_dump.assert_called_once()
+
+
+def test_handle_scaffold_empty_paths() -> None:
+  """Docstring."""
+  args = MagicMock()
+  args.framework = "test_fw_empty"
+
+  with patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine") as MockEngine:
+    engine = MockEngine.return_value
+    engine.cluster.return_value = {"std_name": []}
+
+    import builtins
+
+    mock_open = MagicMock()
+    with patch.object(builtins, "open", mock_open):
+      with patch("ml_switcheroo.cli.handlers.scaffold.json.dump"):
+        handle_scaffold(args)

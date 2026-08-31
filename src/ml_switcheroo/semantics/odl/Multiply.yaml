@@ -13,13 +13,16 @@ std_args:
 variants:
   stablehlo:
     api: stablehlo.multiply
+    args: {}
   numpy:
     api: numpy.ma.core.multiply
     args: {}
   tensorflow:
     api: tf.multiply
+    args: {}
   flax_nnx:
     api: jax.numpy.multiply
+    args: {}
   keras:
     api: keras.layers.multiply
     args:
@@ -27,3 +30,4 @@ variants:
       kwargs: kwargs
   sass:
     api: FMUL
+    args: {}

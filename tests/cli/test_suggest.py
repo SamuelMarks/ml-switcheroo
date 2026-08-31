@@ -150,6 +150,8 @@ def test_handle_suggest_wildcard_extract_exception() -> None:
 
   # Create an object that raises an exception when passed to inspect.getdoc
   class BadObj:
+    """Docstring."""
+
     pass
 
   bad = BadObj()

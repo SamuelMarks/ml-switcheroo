@@ -1,4 +1,0 @@
-description: Returns True if autocast is enabled on IPU.
-std_args: []
-variants: {}
-operation: IsAutocastIpuEnabled

@@ -1,9 +1,0 @@
-description: The class representing a Python class.
-std_args:
-- self
-- fwd_mask_info
-- dq_mask_info
-- dkv_mask_info
-- kwargs
-type: class
-operation: SplashAttentionKernel

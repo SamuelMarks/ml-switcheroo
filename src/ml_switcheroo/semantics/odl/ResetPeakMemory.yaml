@@ -1,4 +1,0 @@
-description: Reset the peak memory tracker.
-std_args: []
-variants: {}
-operation: ResetPeakMemory

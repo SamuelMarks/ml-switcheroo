@@ -1,8 +1,0 @@
-description: Sets autocast dtype for GPU.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: dtype
-  type: DType
-variants: {}
-operation: SetAutocastGpuDtype

@@ -133,6 +133,7 @@ def test_strategy_missing_api_custom_message():
   rewriter.last_failure = None
 
   def mock_report_failure(msg):
+    """Docstring."""
     rewriter.last_failure = msg
 
   rewriter._report_failure = mock_report_failure
@@ -148,6 +149,7 @@ def test_strategy_missing_api_default_message():
   rewriter.last_failure = None
 
   def mock_report_failure(msg):
+    """Docstring."""
     rewriter.last_failure = msg
 
   rewriter._report_failure = mock_report_failure
@@ -165,6 +167,7 @@ def test_strategy_neural_rejection():
   rewriter.last_failure = None
 
   def mock_report_failure(msg):
+    """Docstring."""
     rewriter.last_failure = msg
 
   rewriter._report_failure = mock_report_failure

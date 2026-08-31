@@ -1,8 +1,0 @@
-description: User function wrapped by colocated_python.
-std_args:
-- self
-- fun
-- fun_sourceinfo
-- fun_signature
-type: class
-operation: FunctionInfo

@@ -11,16 +11,12 @@ from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-class MockUsageScanner(cst.CSTVisitor):
+class MockGlobalUsageScanner(cst.CSTVisitor):
   """Docstring."""
 
   def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
-    """Initializes the MockUsageScanner instance."""
-    pass
-
-  def get_result(self) -> bool:
-    """Mock implementation of get result."""
-    return True
+    """Initializes the MockGlobalUsageScanner instance."""
+    self.used_names = {"torch"}
 
   def on_visit(self, node: typing.Any) -> bool:
     """Mock implementation of on visit."""
@@ -92,8 +88,8 @@ def engine() -> typing.Generator[ASTEngine, None, None]:
 
 def test_engine_catches_leaked_import(engine: ASTEngine) -> None:
   """Verifies the behavior of engine catches leaked import."""
-  code: str = "\nimport torch\nx = 1\n"
-  with patch("ml_switcheroo.core.engine.UsageScanner", side_effect=MockUsageScanner):
+  code: str = "\nimport torch\nx = torch.add(1, 2)\n"
+  with patch("ml_switcheroo.core.engine.GlobalUsageScanner", side_effect=MockGlobalUsageScanner):
     result: ConversionResult = engine.run(code)
   assert result.success is True
   assert result.errors is not None
@@ -114,7 +110,7 @@ def test_engine_catches_leaked_usage(engine: ASTEngine) -> None:
 def test_linter_trace_event(engine: ASTEngine) -> None:
   """Verifies the behavior of linter trace event."""
   code: str = "import torch"
-  with patch("ml_switcheroo.core.engine.UsageScanner", side_effect=MockUsageScanner):
+  with patch("ml_switcheroo.core.engine.GlobalUsageScanner", side_effect=MockGlobalUsageScanner):
     result: ConversionResult = engine.run(code)
   phase_descriptions: list[str] = [
     typing.cast(str, e["description"]) for e in result.trace_events if e["type"] == "phase_start"
