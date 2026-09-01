@@ -1,0 +1,11 @@
+description: Computes the base-10 logarithm element-wise in-place.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  dask:
+    api: dask.array.log10
+operation: Log10_
+type: function

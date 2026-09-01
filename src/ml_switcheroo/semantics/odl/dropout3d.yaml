@@ -1,0 +1,10 @@
+description: Apply 3D channel-wise dropout during training.
+std_args:
+- p
+type: function
+operation: dropout3d
+variants:
+  mlx:
+    api: mlx.nn.Dropout3d
+  torch:
+    api: torch.nn.Dropout3d

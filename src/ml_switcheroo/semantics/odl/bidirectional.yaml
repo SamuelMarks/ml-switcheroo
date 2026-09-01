@@ -1,0 +1,19 @@
+description: The class representing a Python module/class/instance attribute.
+std_args:
+- layer
+- merge_mode
+- backward_layer
+- weights
+- kwargs
+- activity_regularizer
+- trainable
+- dtype
+- autocast
+- name
+type: attribute
+operation: bidirectional
+variants:
+  keras:
+    api: keras.layers.Bidirectional
+  tensorflow:
+    api: tf.keras.layers.Bidirectional

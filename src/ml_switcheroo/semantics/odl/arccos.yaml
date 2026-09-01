@@ -1,0 +1,10 @@
+description: LaTeX \arccos macro.
+std_args:
+- kwargs
+variants:
+  latex_dsl:
+    api: latex.arccos
+  dask:
+    api: dask.array.arccos
+operation: arccos
+type: function

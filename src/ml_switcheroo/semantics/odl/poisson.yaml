@@ -1,0 +1,12 @@
+description: Computes the Poisson loss between `y_true` & `y_pred`.
+std_args:
+- reduction
+- name
+- dtype
+variants:
+  keras:
+    api: keras.losses.Poisson
+  tensorflow:
+    api: tf.keras.losses.Poisson
+operation: poisson
+type: function

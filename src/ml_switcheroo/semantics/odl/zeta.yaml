@@ -1,0 +1,7 @@
+description: LaTeX \zeta macro.
+std_args: []
+type: attribute
+operation: zeta
+variants:
+  latex_dsl:
+    api: latex.zeta

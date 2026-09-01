@@ -1,0 +1,13 @@
+description: Builds a Glorot normal initializer (aka Xavier normal initializer).
+std_args:
+- in_axis
+- out_axis
+- batch_axis
+- dtype
+variants:
+  flax_nnx:
+    api: jax.nn.initializers.glorot_normal
+  jax:
+    api: jax.nn.initializers.glorot_normal
+operation: glorot_normal
+type: function

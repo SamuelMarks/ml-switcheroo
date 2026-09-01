@@ -1,0 +1,12 @@
+description: HTML <head> element.
+std_args:
+- children
+- id
+- class_name
+- style
+- kwargs
+type: attribute
+operation: head
+variants:
+  html_dsl:
+    api: html.head

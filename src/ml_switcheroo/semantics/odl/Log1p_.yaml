@@ -1,0 +1,11 @@
+description: Computes log1p in-place.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  dask:
+    api: dask.array.log1p
+operation: Log1p_
+type: function

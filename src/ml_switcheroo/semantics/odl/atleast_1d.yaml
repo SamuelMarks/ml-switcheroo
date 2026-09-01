@@ -1,0 +1,7 @@
+description: Convert inputs to arrays with at least one dimension.
+std_args: []
+variants:
+  dask:
+    api: dask.array.atleast_1d
+operation: atleast_1d
+type: function

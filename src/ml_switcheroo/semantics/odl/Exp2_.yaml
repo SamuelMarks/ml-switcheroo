@@ -1,0 +1,11 @@
+description: In-place Exp2.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  dask:
+    api: dask.array.exp2
+operation: Exp2_
+type: function

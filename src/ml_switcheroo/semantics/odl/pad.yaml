@@ -1,0 +1,11 @@
+description: Pad an array.
+std_args:
+- array
+- pad_width
+- mode
+- kwargs
+type: function
+operation: pad
+variants:
+  dask:
+    api: dask.array.pad

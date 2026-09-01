@@ -1,0 +1,11 @@
+description: The class representing a Python module/class/instance attribute.
+std_args:
+- x
+- negative_slope
+type: attribute
+operation: leaky_relu_
+variants:
+  keras:
+    api: keras.activations.leaky_relu
+  tensorflow:
+    api: tf.nn.leaky_relu

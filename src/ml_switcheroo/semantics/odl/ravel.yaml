@@ -1,0 +1,8 @@
+description: Return a contiguous flattened array.
+std_args:
+- array_like
+variants:
+  dask:
+    api: dask.array.ravel
+operation: ravel
+type: function

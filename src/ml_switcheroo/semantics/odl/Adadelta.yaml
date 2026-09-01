@@ -1,0 +1,65 @@
+description: 'Auto-discovered via Consensus (Score: 2.0)'
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: lr
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: rho
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight_decay
+  type: Any
+variants:
+  keras:
+    api: keras.optimizers.Adadelta
+    args:
+      learning_rate: learning_rate
+      rho: rho
+      epsilon: epsilon
+      ema_momentum: ema_momentum
+      name: name
+      gradient_accumulation_steps: gradient_accumulation_steps
+      weight_decay: weight_decay
+      loss_scale_factor: loss_scale_factor
+      ema_overwrite_frequency: ema_overwrite_frequency
+      clipvalue: clipvalue
+      use_ema: use_ema
+      clipnorm: clipnorm
+      global_clipnorm: global_clipnorm
+      kwargs: kwargs
+  mlx:
+    api: mlx.optimizers.AdaDelta
+    args:
+      learning_rate: learning_rate
+      rho: rho
+  torch:
+    api: torch.optim.Adadelta
+    args:
+      rho: rho
+      weight_decay: weight_decay
+  tensorflow:
+    api: tf.keras.optimizers.Adadelta
+    args:
+      learning_rate: learning_rate
+      rho: rho
+      epsilon: epsilon
+      ema_momentum: ema_momentum
+      name: name
+      gradient_accumulation_steps: gradient_accumulation_steps
+      weight_decay: weight_decay
+      loss_scale_factor: loss_scale_factor
+      ema_overwrite_frequency: ema_overwrite_frequency
+      clipvalue: clipvalue
+      use_ema: use_ema
+      clipnorm: clipnorm
+      global_clipnorm: global_clipnorm
+      kwargs: kwargs
+operation: Adadelta
+type: function

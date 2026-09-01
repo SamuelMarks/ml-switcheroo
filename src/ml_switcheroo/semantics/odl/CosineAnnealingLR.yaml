@@ -1,0 +1,12 @@
+description: Set the learning rate of each parameter group using a cosine annealing
+  schedule.
+std_args:
+- optimizer
+- T_max
+- eta_min
+- last_epoch
+variants:
+  torch:
+    api: torch.optim.lr_scheduler.CosineAnnealingLR
+operation: CosineAnnealingLR
+type: function

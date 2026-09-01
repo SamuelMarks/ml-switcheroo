@@ -1,0 +1,8 @@
+description: Return the number of dimensions of an array.
+std_args:
+- a
+variants:
+  dask:
+    api: dask.array.ndim
+operation: ndim
+type: function

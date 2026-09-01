@@ -1,0 +1,11 @@
+description: Attention with Linear Biases (ALiBi) layer.
+op_type: class
+std_args: []
+variants:
+  mlx:
+    api: mlx.nn.ALiBi
+    args:
+      _alibi_mask_key: _alibi_mask_key
+      _alibi_mask: _alibi_mask
+operation: ALiBi
+type: function

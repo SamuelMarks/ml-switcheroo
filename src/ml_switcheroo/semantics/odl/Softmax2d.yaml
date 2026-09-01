@@ -1,0 +1,8 @@
+description: Applies SoftMax over features to each spatial location.
+std_args:
+- kwargs
+type: class
+operation: Softmax2d
+variants:
+  torch:
+    api: torch.nn.Softmax2d

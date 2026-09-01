@@ -1,0 +1,10 @@
+description: Auto-generated mapping for rollaxis.
+std_args:
+- a
+- axis
+- start
+variants:
+  dask:
+    api: dask.array.rollaxis
+operation: rollaxis
+type: function

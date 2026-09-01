@@ -1,0 +1,8 @@
+description: Sparse sigmoid activation function.
+std_args:
+- x
+variants:
+  keras:
+    api: keras.activations.sparse_sigmoid
+operation: sparse_sigmoid
+type: function

@@ -1,0 +1,24 @@
+description: Computes the Circle loss.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_true
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_pred
+  type: Any
+- default: 80.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: gamma
+  type: float
+variants:
+  keras:
+    api: keras.losses.Circle
+  tikz:
+    api: tikz.shape.circle
+  tensorflow:
+    api: tf.keras.losses.Circle
+operation: circle
+type: function

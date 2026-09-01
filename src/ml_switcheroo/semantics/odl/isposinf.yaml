@@ -1,0 +1,8 @@
+description: partial(func, *args, **keywords) - new function with partial application
+std_args:
+- kwargs
+variants:
+  dask:
+    api: dask.array.isposinf
+operation: isposinf
+type: function

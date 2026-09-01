@@ -1,0 +1,23 @@
+description: Abstract base class for generic types.
+std_args:
+- module_constructor
+- in_shardings
+- out_shardings
+- static_argnums
+- static_argnames
+- donate_argnums
+- donate_argnames
+- keep_unused
+- device
+- backend
+- inline
+- abstracted_axes
+- donate_state
+- constrain_state
+- module_init_args
+- module_init_kwargs
+variants:
+  flax_nnx:
+    api: flax.nnx.Jit
+operation: jit
+type: function

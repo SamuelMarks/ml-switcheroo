@@ -1,0 +1,66 @@
+description: 'Auto-discovered via Consensus (Score: 4.0)'
+std_args:
+- eps
+- lr
+type: function
+operation: Adam
+variants:
+  keras:
+    api: keras.optimizers.Adam
+    args:
+      learning_rate: learning_rate
+      beta_1: beta_1
+      beta_2: beta_2
+      epsilon: epsilon
+      amsgrad: amsgrad
+      ema_momentum: ema_momentum
+      name: name
+      gradient_accumulation_steps: gradient_accumulation_steps
+      weight_decay: weight_decay
+      loss_scale_factor: loss_scale_factor
+      ema_overwrite_frequency: ema_overwrite_frequency
+      clipvalue: clipvalue
+      use_ema: use_ema
+      clipnorm: clipnorm
+      global_clipnorm: global_clipnorm
+      kwargs: kwargs
+  mlx:
+    api: mlx.optimizers.Adam
+    args:
+      learning_rate: learning_rate
+  optax_shim:
+    api: optax.adam
+    args:
+      learning_rate: learning_rate
+  flax_nnx:
+    api: optax.adam
+    args:
+      learning_rate: learning_rate
+  torch:
+    api: torch.optim.Adam
+    args:
+      amsgrad: amsgrad
+      weight_decay: weight_decay
+  jax:
+    api: optax.adam
+    args:
+      learning_rate: learning_rate
+  tensorflow:
+    api: tf.keras.optimizers.Adam
+    args:
+      learning_rate: learning_rate
+      beta_1: beta_1
+      beta_2: beta_2
+      epsilon: epsilon
+      amsgrad: amsgrad
+      ema_momentum: ema_momentum
+      name: name
+      gradient_accumulation_steps: gradient_accumulation_steps
+      weight_decay: weight_decay
+      loss_scale_factor: loss_scale_factor
+      ema_overwrite_frequency: ema_overwrite_frequency
+      clipvalue: clipvalue
+      use_ema: use_ema
+      clipnorm: clipnorm
+      global_clipnorm: global_clipnorm
+      kwargs: kwargs

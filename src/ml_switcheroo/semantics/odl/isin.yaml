@@ -1,0 +1,13 @@
+description: Calculates ``element in test_elements``, broadcasting over `element`
+  only.
+std_args:
+- element
+- test_elements
+- assume_unique
+- invert
+- kind
+variants:
+  dask:
+    api: dask.array.isin
+operation: isin
+type: function

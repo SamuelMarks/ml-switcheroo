@@ -1,0 +1,10 @@
+description: frompyfunc(func, /, nin, nout, *[, identity])
+std_args:
+- func
+- nin
+- nout
+variants:
+  dask:
+    api: dask.array.frompyfunc
+operation: frompyfunc
+type: function

@@ -1,0 +1,13 @@
+description: One-hot encodes the given indices.
+std_args:
+- x
+- num_classes
+- dtype
+- axis
+type: attribute
+operation: one_hot
+variants:
+  flax_nnx:
+    api: jax.nn.one_hot
+  jax:
+    api: jax.nn.one_hot

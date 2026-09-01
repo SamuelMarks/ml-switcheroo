@@ -1,0 +1,9 @@
+description: conjugate(x, /, out=None, *, where=True, casting='same_kind', order='K',
+  dtype=None, subok=True[, signature, extobj])
+std_args:
+- kwargs
+variants:
+  dask:
+    api: dask.array.conj
+operation: conjugate
+type: function

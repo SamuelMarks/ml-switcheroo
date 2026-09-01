@@ -1,0 +1,8 @@
+description: Round to nearest integer towards zero.
+std_args:
+- kwargs
+variants:
+  dask:
+    api: dask.array.fix
+operation: fix
+type: function

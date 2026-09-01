@@ -1,0 +1,11 @@
+description: Creates a criterion that optimizes a multi-class multi-classification
+std_args:
+- size_average
+- reduce
+- reduction
+- __constants__
+type: class
+operation: MultiLabelMarginLoss
+variants:
+  torch:
+    api: torch.nn.MultiLabelMarginLoss

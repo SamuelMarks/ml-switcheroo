@@ -1,0 +1,8 @@
+description: Find the indices of array elements that are non-zero, grouped by element.
+std_args:
+- a
+variants:
+  dask:
+    api: dask.array.argwhere
+operation: argwhere
+type: function

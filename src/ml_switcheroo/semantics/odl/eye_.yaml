@@ -1,0 +1,8 @@
+description: Fill the 2-dimensional input `Tensor` with the identity matrix.
+std_args:
+- tensor
+type: function
+operation: eye_
+variants:
+  torch:
+    api: torch.nn.init.eye_

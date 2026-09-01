@@ -1,0 +1,15 @@
+description: Base class for building neural networks with MLX.
+std_args:
+- dims
+- num_heads
+- mlp_dims
+- dropout
+- activation
+- norm_first
+type: class
+operation: TransformerEncoderLayer
+variants:
+  mlx:
+    api: mlx.nn.TransformerEncoderLayer
+  torch:
+    api: torch.nn.TransformerEncoderLayer

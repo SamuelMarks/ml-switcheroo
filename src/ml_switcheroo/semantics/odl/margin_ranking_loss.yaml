@@ -1,0 +1,13 @@
+description: Calculate the margin ranking loss that loss given inputs :math:`x_1`,
+  :math:`x_2` and a label
+std_args:
+- inputs1
+- inputs2
+- targets
+- margin
+- reduction
+type: function
+operation: margin_ranking_loss
+variants:
+  mlx:
+    api: mlx.nn.losses.margin_ranking_loss

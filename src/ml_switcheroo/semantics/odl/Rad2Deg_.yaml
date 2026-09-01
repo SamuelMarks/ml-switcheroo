@@ -1,0 +1,11 @@
+description: In-place version of rad2deg.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  dask:
+    api: dask.array.rad2deg
+operation: Rad2Deg_
+type: function

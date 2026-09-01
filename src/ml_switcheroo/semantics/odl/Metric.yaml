@@ -1,0 +1,10 @@
+description: Base class for metrics.
+op_type: class
+std_args:
+- name
+- dtype
+variants:
+  tensorflow:
+    api: tf.keras.metrics.Metric
+operation: Metric
+type: function

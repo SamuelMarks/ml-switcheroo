@@ -1,0 +1,26 @@
+description: Optimizer that implements the Adamax algorithm.
+std_args:
+- eps
+- lr
+- weight_decay
+type: function
+operation: Adamax
+variants:
+  keras:
+    api: keras.optimizers.Adamax
+    args:
+      weight_decay: weight_decay
+  mlx:
+    api: mlx.optimizers.Adamax
+    args:
+      eps: eps
+  torch:
+    api: torch.optim.Adamax
+    args:
+      eps: eps
+      lr: lr
+      weight_decay: weight_decay
+  tensorflow:
+    api: tf.keras.optimizers.Adamax
+    args:
+      weight_decay: weight_decay

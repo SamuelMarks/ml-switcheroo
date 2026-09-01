@@ -1,0 +1,13 @@
+description: Builds an initializer that returns truncated-normal random arrays.
+std_args:
+- stddev
+- dtype
+- lower
+- upper
+variants:
+  flax_nnx:
+    api: jax.nn.initializers.truncated_normal
+  jax:
+    api: jax.nn.initializers.truncated_normal
+operation: truncated_normal
+type: function

@@ -1,0 +1,11 @@
+description: Compute the median along the specified axis, while ignoring NaNs.
+std_args:
+- a
+- axis
+- keepdims
+- out
+variants:
+  dask:
+    api: dask.array.nanmedian
+operation: nanmedian
+type: function

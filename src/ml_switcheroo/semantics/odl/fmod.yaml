@@ -1,0 +1,11 @@
+description: fmod(x1, x2, /, out=None, *, where=True, casting='same_kind', order='K',
+  dtype=None, subok=True[, signature, extobj])
+std_args:
+- kwargs
+variants:
+  dask:
+    api: dask.array.fmod
+  torch:
+    api: torch.fmod
+operation: fmod
+type: function

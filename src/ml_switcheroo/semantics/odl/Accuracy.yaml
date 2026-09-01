@@ -1,0 +1,15 @@
+description: Auto-generated mapping for Accuracy.
+std_args: []
+variants:
+  keras:
+    api: keras.metrics.Accuracy
+    args:
+      name: name
+      dtype: dtype
+  tensorflow:
+    api: tf.keras.metrics.Accuracy
+    args:
+      name: name
+      dtype: dtype
+operation: Accuracy
+type: function

@@ -1,0 +1,11 @@
+description: Returns an array with axes transposed.
+std_args:
+- a
+- axes
+variants:
+  dask:
+    api: dask.array.transpose
+  jax:
+    api: jnp.transpose
+operation: transpose
+type: function

@@ -1,0 +1,10 @@
+description: LaTeX \arcsin macro.
+std_args:
+- kwargs
+variants:
+  latex_dsl:
+    api: latex.arcsin
+  dask:
+    api: dask.array.arcsin
+operation: arcsin
+type: function

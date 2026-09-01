@@ -1,0 +1,9 @@
+description: erfinv(input, *, out=None) -> Tensor
+std_args:
+- input
+- out
+type: attribute
+operation: erfinv
+variants:
+  torch:
+    api: torch.erfinv

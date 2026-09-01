@@ -1,0 +1,12 @@
+description: Mish activation function.
+std_args:
+- x
+type: function
+operation: mish
+variants:
+  keras:
+    api: keras.activations.mish
+  mlx:
+    api: mlx.nn.Mish
+  torch:
+    api: torch.nn.Mish

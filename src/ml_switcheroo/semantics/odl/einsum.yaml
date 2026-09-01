@@ -1,0 +1,13 @@
+description: einsum(subscripts, *operands, out=None, dtype=None, order='K',
+std_args:
+- dtype
+- optimize
+- split_every
+- kwargs
+variants:
+  dask:
+    api: dask.array.einsum
+  flax_nnx:
+    api: flax.nnx.Einsum
+operation: einsum
+type: function

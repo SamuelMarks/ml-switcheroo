@@ -1,5 +1,5 @@
 operation: TensorDataset
-description: Definition for TensorDataset
+description: Dataset wrapping tensors.
 std_args:
 - name: tensors
   type: Any
@@ -7,3 +7,4 @@ variants:
   torch:
     api: torch.utils.data.TensorDataset
     args: {}
+type: function

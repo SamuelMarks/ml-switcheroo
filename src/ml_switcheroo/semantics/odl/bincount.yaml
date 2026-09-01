@@ -1,0 +1,11 @@
+description: bincount(x, /, weights=None, minlength=0)
+std_args:
+- x
+- weights
+- minlength
+- split_every
+variants:
+  dask:
+    api: dask.array.bincount
+operation: bincount
+type: function

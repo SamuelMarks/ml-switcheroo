@@ -1,0 +1,9 @@
+description: Log-Softmax activation function.
+std_args:
+- x
+- axis
+type: attribute
+operation: log_softmax
+variants:
+  keras:
+    api: keras.activations.log_softmax

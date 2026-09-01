@@ -1,0 +1,9 @@
+description: Range of values (maximum - minimum) along an axis.
+std_args:
+- a
+- axis
+variants:
+  dask:
+    api: dask.array.ptp
+operation: ptp
+type: function

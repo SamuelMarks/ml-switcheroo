@@ -1,0 +1,23 @@
+description: Abstract base class for generic types.
+std_args:
+- module_constructor
+- axis_name
+- in_axes
+- out_axes
+- static_broadcasted_argnums
+- devices
+- backend
+- axis_size
+- donate_argnums
+- global_arg_shapes
+- in_axes_kwargs
+- state_axes
+- split_rngs
+- transform_metadata
+- module_init_args
+- module_init_kwargs
+variants:
+  flax_nnx:
+    api: flax.nnx.Pmap
+operation: pmap
+type: function

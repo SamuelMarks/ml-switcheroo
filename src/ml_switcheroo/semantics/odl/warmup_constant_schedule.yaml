@@ -1,0 +1,14 @@
+description: Linear warmup followed by constant schedule i.e no decay.
+std_args:
+- init_value
+- peak_value
+- warmup_steps
+type: attribute
+operation: warmup_constant_schedule
+variants:
+  optax_shim:
+    api: optax.schedules.warmup_constant_schedule
+  flax_nnx:
+    api: optax.schedules.warmup_constant_schedule
+  jax:
+    api: optax.schedules.warmup_constant_schedule

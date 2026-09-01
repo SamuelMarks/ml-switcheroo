@@ -1,0 +1,18 @@
+description: 'istft(input, n_fft, hop_length=None, win_length=None, window=None, center=True,
+  normalized=False, onesided=None, length=None, return_complex=False) -> Tensor:'
+std_args:
+- input
+- n_fft
+- hop_length
+- win_length
+- window
+- center
+- normalized
+- onesided
+- length
+- return_complex
+variants:
+  torch:
+    api: torch.istft
+operation: istft
+type: function

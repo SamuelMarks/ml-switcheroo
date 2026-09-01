@@ -1,0 +1,9 @@
+description: Holds parameters in a list.
+std_args:
+- parameters
+- values
+type: class
+operation: ParameterList
+variants:
+  torch:
+    api: torch.nn.ParameterList

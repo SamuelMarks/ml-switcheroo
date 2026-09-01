@@ -1,0 +1,7 @@
+description: LaTeX \Psi macro.
+std_args: []
+type: attribute
+operation: psi
+variants:
+  latex_dsl:
+    api: latex.Psi

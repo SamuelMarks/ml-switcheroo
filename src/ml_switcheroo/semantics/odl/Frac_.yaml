@@ -1,0 +1,11 @@
+description: In-place version of Frac.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  latex_dsl:
+    api: latex.frac
+operation: Frac_
+type: function

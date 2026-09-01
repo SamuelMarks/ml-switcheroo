@@ -1,0 +1,9 @@
+description: degrees(x, /, out=None, *, where=True, casting='same_kind', order='K',
+  dtype=None, subok=True[, signature, extobj])
+std_args:
+- kwargs
+variants:
+  dask:
+    api: dask.array.degrees
+operation: degrees
+type: function

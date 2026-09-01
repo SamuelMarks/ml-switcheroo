@@ -1,0 +1,8 @@
+description: Returns a bool array, where True if input element is real.
+std_args:
+- kwargs
+variants:
+  dask:
+    api: dask.array.isreal
+operation: isreal
+type: function

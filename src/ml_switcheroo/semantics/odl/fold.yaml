@@ -1,0 +1,13 @@
+description: Combines an array of sliding local blocks into a large containing tensor.
+std_args:
+- output_size
+- kernel_size
+- dilation
+- padding
+- stride
+- __constants__
+type: function
+operation: fold
+variants:
+  torch:
+    api: torch.nn.Fold

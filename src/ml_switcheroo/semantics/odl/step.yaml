@@ -1,0 +1,8 @@
+description: Applies the Step Activation Function.
+std_args:
+- threshold
+variants:
+  mlx:
+    api: mlx.nn.Step
+operation: step
+type: function

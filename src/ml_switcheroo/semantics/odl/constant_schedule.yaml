@@ -1,0 +1,12 @@
+description: Constructs a constant schedule.
+std_args:
+- value
+type: attribute
+operation: constant_schedule
+variants:
+  optax_shim:
+    api: optax.schedules.constant_schedule
+  flax_nnx:
+    api: optax.schedules.constant_schedule
+  jax:
+    api: optax.schedules.constant_schedule

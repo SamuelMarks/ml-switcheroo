@@ -1,0 +1,11 @@
+description: Insert values along the given axis before the given indices.
+std_args:
+- arr
+- obj
+- values
+- axis
+type: function
+operation: insert
+variants:
+  dask:
+    api: dask.array.insert

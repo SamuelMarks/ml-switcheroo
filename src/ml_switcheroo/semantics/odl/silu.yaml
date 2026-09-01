@@ -1,0 +1,12 @@
+description: Swish (or Silu) activation function.
+std_args:
+- x
+type: function
+operation: silu
+variants:
+  keras:
+    api: keras.activations.silu
+  mlx:
+    api: mlx.nn.SiLU
+  torch:
+    api: torch.nn.SiLU

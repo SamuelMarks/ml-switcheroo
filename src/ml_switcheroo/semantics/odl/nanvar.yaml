@@ -1,0 +1,14 @@
+description: Compute the variance along the specified axis, while ignoring NaNs.
+std_args:
+- a
+- axis
+- dtype
+- keepdims
+- ddof
+- split_every
+- out
+variants:
+  dask:
+    api: dask.array.nanvar
+operation: nanvar
+type: function

@@ -39,3 +39,8 @@ std_args:
   type: int
 type: class
 operation: ConvTranspose2d
+variants:
+  mlx:
+    api: mlx.nn.ConvTranspose2d
+  torch:
+    api: torch.nn.ConvTranspose2d

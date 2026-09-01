@@ -1,0 +1,11 @@
+description: Compute the median along the specified axis.
+std_args:
+- a
+- axis
+- keepdims
+- out
+variants:
+  dask:
+    api: dask.array.median
+operation: median
+type: function

@@ -1,0 +1,14 @@
+description: Functional einsum operation wrapper.
+op_type: class
+std_args:
+- result
+- lhs
+- rhs
+- einsum_config
+- loc
+- ip
+variants:
+  mlir:
+    api: mhlo.einsum
+operation: EinsumOp
+type: function

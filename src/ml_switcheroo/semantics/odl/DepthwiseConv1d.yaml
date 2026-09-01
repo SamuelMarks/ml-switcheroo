@@ -1,0 +1,14 @@
+description: 1D Depthwise Convolution.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: int
+variants:
+  keras:
+    api: keras.layers.DepthwiseConv1D
+  tensorflow:
+    api: tf.keras.layers.DepthwiseConv1D
+operation: DepthwiseConv1d
+type: function

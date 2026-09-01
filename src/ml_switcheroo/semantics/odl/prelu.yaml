@@ -1,0 +1,23 @@
+description: Parametric Rectified Linear Unit activation layer.
+std_args:
+- alpha_initializer
+- alpha_regularizer
+- alpha_constraint
+- shared_axes
+- kwargs
+- activity_regularizer
+- trainable
+- dtype
+- autocast
+- name
+type: attribute
+operation: prelu
+variants:
+  keras:
+    api: keras.layers.PReLU
+  mlx:
+    api: mlx.nn.PReLU
+  torch:
+    api: torch.nn.PReLU
+  tensorflow:
+    api: tf.keras.layers.PReLU

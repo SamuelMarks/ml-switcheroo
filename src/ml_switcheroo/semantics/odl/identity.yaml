@@ -1,0 +1,14 @@
+description: Initializer that generates the identity matrix.
+std_args:
+- gain
+type: function
+operation: identity
+variants:
+  keras:
+    api: keras.initializers.Identity
+  mlx:
+    api: mlx.nn.Identity
+  torch:
+    api: torch.nn.Identity
+  tensorflow:
+    api: tf.keras.initializers.Identity

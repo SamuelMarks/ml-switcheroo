@@ -1,0 +1,17 @@
+description: Applies the rectified linear unit activation function.
+std_args:
+- x
+- negative_slope
+- max_value
+- threshold
+type: function
+operation: relu
+variants:
+  keras:
+    api: keras.activations.relu
+  mlx:
+    api: mlx.nn.ReLU
+  torch:
+    api: torch.nn.functional.relu
+  tensorflow:
+    api: tf.nn.relu

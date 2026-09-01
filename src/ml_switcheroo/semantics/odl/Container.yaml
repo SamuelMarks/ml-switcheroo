@@ -1,0 +1,8 @@
+description: Base class for all neural network modules.
+std_args:
+- kwargs
+type: class
+operation: Container
+variants:
+  torch:
+    api: torch.nn.Container

@@ -41,3 +41,8 @@ std_args:
   type: Union[int, Tuple[int, int, int]]
 type: class
 operation: ConvTranspose3d
+variants:
+  mlx:
+    api: mlx.nn.ConvTranspose3d
+  torch:
+    api: torch.nn.ConvTranspose3d

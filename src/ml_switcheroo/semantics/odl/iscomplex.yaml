@@ -1,0 +1,8 @@
+description: Returns a bool array, where True if input element is complex.
+std_args:
+- kwargs
+variants:
+  dask:
+    api: dask.array.iscomplex
+operation: iscomplex
+type: function

@@ -1,0 +1,8 @@
+description: Pads the input tensor using circular padding of the input boundary.
+std_args:
+- padding
+type: class
+operation: CircularPad3d
+variants:
+  torch:
+    api: torch.nn.CircularPad3d

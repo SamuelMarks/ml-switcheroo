@@ -1,0 +1,27 @@
+description: 1D Convolutional LSTM.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_size
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hidden_size
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kernel_size
+  type: int | Tuple[int]
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: bool
+variants:
+  keras:
+    api: keras.layers.ConvLSTM1D
+  tensorflow:
+    api: tf.keras.layers.ConvLSTM1D
+operation: ConvLSTM1d
+type: function

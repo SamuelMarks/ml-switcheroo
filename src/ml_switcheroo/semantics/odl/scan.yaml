@@ -1,0 +1,22 @@
+description: Abstract base class for generic types.
+std_args:
+- module_constructor
+- length
+- reverse
+- unroll
+- _split_transpose
+- in_axes
+- in_axes_kwargs
+- out_axes
+- carry_argnum
+- state_axes
+- split_rngs
+- transform_metadata
+- scan_output
+- module_init_args
+- module_init_kwargs
+variants:
+  flax_nnx:
+    api: flax.nnx.Scan
+operation: scan
+type: function

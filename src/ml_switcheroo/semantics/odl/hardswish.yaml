@@ -1,0 +1,11 @@
+description: Applies the hardswish function, element-wise.
+std_args:
+- inplace
+- __constants__
+type: function
+operation: hardswish
+variants:
+  mlx:
+    api: mlx.nn.Hardswish
+  torch:
+    api: torch.nn.Hardswish

@@ -1,0 +1,13 @@
+description: Blocked variant of :func:`numpy.histogramdd`.
+std_args:
+- sample
+- bins
+- range
+- normed
+- weights
+- density
+variants:
+  dask:
+    api: dask.array.histogramdd
+operation: histogramdd
+type: function

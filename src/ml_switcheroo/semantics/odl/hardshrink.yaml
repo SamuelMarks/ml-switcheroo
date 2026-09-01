@@ -1,0 +1,10 @@
+description: The class representing a Python module/class/instance attribute.
+std_args:
+- lambd
+type: attribute
+operation: hardshrink
+variants:
+  mlx:
+    api: mlx.nn.HardShrink
+  torch:
+    api: torch.nn.Hardshrink

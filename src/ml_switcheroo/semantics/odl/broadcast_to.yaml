@@ -1,0 +1,15 @@
+description: Broadcasts an array to a specified shape.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: shape
+  type: Tuple[int, Ellipsis]
+variants:
+  dask:
+    api: dask.array.broadcast_to
+operation: broadcast_to
+type: function

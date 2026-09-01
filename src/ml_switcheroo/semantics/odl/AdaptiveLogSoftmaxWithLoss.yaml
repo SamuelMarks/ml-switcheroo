@@ -1,0 +1,16 @@
+description: Efficient softmax approximation.
+std_args:
+- in_features
+- n_classes
+- cutoffs
+- div_value
+- head_bias
+- head
+- tail
+- dtype
+- device
+type: class
+operation: AdaptiveLogSoftmaxWithLoss
+variants:
+  torch:
+    api: torch.nn.AdaptiveLogSoftmaxWithLoss

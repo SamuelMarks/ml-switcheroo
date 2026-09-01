@@ -1,0 +1,10 @@
+description: The class representing a Python module/class/instance attribute.
+std_args:
+- __call__
+type: attribute
+operation: module
+variants:
+  mlx:
+    api: mlx.nn.Module
+  torch:
+    api: torch.nn.Module

@@ -1,0 +1,13 @@
+description: Compute the arithmetic mean along the specified axis, ignoring NaNs.
+std_args:
+- a
+- axis
+- dtype
+- keepdims
+- split_every
+- out
+variants:
+  dask:
+    api: dask.array.nanmean
+operation: nanmean
+type: function

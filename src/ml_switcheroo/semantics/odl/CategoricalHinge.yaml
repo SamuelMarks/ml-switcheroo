@@ -1,0 +1,15 @@
+description: Computes the categorical hinge loss.
+op_type: class
+std_args:
+- default: sum_over_batch_size
+  is_variadic: false
+  kind: positional_or_keyword
+  name: reduction
+  type: str
+variants:
+  keras:
+    api: keras.losses.CategoricalHinge
+  tensorflow:
+    api: tf.keras.losses.CategoricalHinge
+operation: CategoricalHinge
+type: function

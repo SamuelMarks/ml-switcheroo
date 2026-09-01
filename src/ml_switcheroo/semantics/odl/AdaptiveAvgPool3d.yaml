@@ -1,0 +1,9 @@
+description: Applies a 3D adaptive average pooling over an input signal composed of
+  several input planes.
+std_args:
+- output_size
+type: class
+operation: AdaptiveAvgPool3d
+variants:
+  torch:
+    api: torch.nn.AdaptiveAvgPool3d

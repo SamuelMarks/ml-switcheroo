@@ -1,0 +1,11 @@
+description: Computes the fractional portion of each element.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  latex_dsl:
+    api: latex.frac
+operation: Frac
+type: function

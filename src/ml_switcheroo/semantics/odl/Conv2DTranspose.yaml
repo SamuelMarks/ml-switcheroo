@@ -67,3 +67,4 @@ variants:
       output_padding: output_padding
       use_bias: use_bias
       dilation_rate: dilation_rate
+type: function

@@ -1,0 +1,13 @@
+description: Auto-generated from flax_nnx_code_defs
+std_args: []
+variants:
+  html_dsl:
+    api: html.a
+    args:
+      children: children
+      id: id
+      class_name: class_name
+      style: style
+      kwargs: kwargs
+operation: A
+type: function

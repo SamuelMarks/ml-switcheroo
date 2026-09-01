@@ -1,0 +1,11 @@
+description: The class representing a Python module/class/instance attribute.
+std_args:
+- lower
+- upper
+- inplace
+- __constants__
+type: attribute
+operation: rrelu_
+variants:
+  torch:
+    api: torch.nn.RReLU

@@ -1,0 +1,13 @@
+description: Calculates the squared error for a set of predictions.
+std_args:
+- predictions
+- targets
+type: attribute
+operation: squared_error
+variants:
+  optax_shim:
+    api: optax.losses.squared_error
+  flax_nnx:
+    api: optax.losses.squared_error
+  jax:
+    api: optax.losses.squared_error

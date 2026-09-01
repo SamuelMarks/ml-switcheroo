@@ -1,6 +1,9 @@
 operation: mul
-description: Auto-generated mapping for mul.
-std_args: []
+description: mul(input, other, *, out=None) -> Tensor
+std_args:
+- input
+- other
+- out
 variants:
   keras:
     requires_plugin: jax_decompose
@@ -9,3 +12,6 @@ variants:
   sass:
     api: FMUL
     args: {}
+  torch:
+    api: torch.mul
+type: function

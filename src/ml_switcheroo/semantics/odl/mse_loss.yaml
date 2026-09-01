@@ -1,0 +1,10 @@
+description: Computes the mean squared error loss.
+std_args:
+- predictions
+- targets
+- reduction
+type: function
+operation: mse_loss
+variants:
+  mlx:
+    api: mlx.nn.losses.mse_loss

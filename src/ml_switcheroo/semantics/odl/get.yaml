@@ -1,0 +1,8 @@
+description: Retrieve a Keras activation function via an identifier.
+std_args:
+- identifier
+type: attribute
+operation: get
+variants:
+  keras:
+    api: keras.activations.get

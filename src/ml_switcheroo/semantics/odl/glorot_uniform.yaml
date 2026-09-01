@@ -1,0 +1,13 @@
+description: Builds a Glorot uniform initializer (aka Xavier uniform initializer).
+std_args:
+- in_axis
+- out_axis
+- batch_axis
+- dtype
+variants:
+  flax_nnx:
+    api: jax.nn.initializers.glorot_uniform
+  jax:
+    api: jax.nn.initializers.glorot_uniform
+operation: glorot_uniform
+type: function

@@ -1,0 +1,14 @@
+description: Returns a function which implements a piecewise interpolated schedule.
+std_args:
+- interpolate_type
+- init_value
+- boundaries_and_scales
+type: attribute
+operation: piecewise_interpolate_schedule
+variants:
+  optax_shim:
+    api: optax.schedules.piecewise_interpolate_schedule
+  flax_nnx:
+    api: optax.schedules.piecewise_interpolate_schedule
+  jax:
+    api: optax.schedules.piecewise_interpolate_schedule

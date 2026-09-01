@@ -1,0 +1,11 @@
+description: 'StableHLO official operation: stablehlo.broadcast_in_dim'
+std_args:
+- self
+- expression
+- axes
+- shape
+type: class
+operation: BroadcastInDim
+variants:
+  stablehlo:
+    api: stablehlo.broadcast_in_dim

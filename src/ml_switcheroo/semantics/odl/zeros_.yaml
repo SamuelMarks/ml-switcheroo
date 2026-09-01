@@ -1,0 +1,8 @@
+description: Fill the input Tensor with the scalar value `0`.
+std_args:
+- tensor
+type: function
+operation: zeros_
+variants:
+  torch:
+    api: torch.nn.init.zeros_

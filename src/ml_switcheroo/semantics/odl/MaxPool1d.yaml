@@ -15,3 +15,8 @@ std_args:
   type: int
 type: class
 operation: MaxPool1d
+variants:
+  mlx:
+    api: mlx.nn.MaxPool1d
+  torch:
+    api: torch.nn.MaxPool1d

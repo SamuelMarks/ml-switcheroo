@@ -1,0 +1,12 @@
+description: Creates a criterion that uses a squared term if the absolute
+std_args:
+- size_average
+- reduce
+- reduction
+- beta
+- __constants__
+type: class
+operation: SmoothL1Loss
+variants:
+  torch:
+    api: torch.nn.SmoothL1Loss

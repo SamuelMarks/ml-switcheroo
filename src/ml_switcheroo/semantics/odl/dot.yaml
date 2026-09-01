@@ -1,0 +1,19 @@
+description: Computes element-wise dot product of two tensors.
+std_args:
+- axes
+- normalize
+- kwargs
+- activity_regularizer
+- trainable
+- dtype
+- autocast
+- name
+variants:
+  keras:
+    api: keras.layers.Dot
+  dask:
+    api: dask.array.dot
+  tensorflow:
+    api: tf.keras.layers.Dot
+operation: dot
+type: function

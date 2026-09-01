@@ -1,0 +1,14 @@
+description: Computes the precision of the predictions with respect to the labels.
+std_args:
+- thresholds
+- top_k
+- class_id
+- name
+- dtype
+variants:
+  keras:
+    api: keras.metrics.Precision
+  tensorflow:
+    api: tf.keras.metrics.Precision
+operation: Precision
+type: function

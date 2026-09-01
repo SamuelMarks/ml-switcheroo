@@ -1,0 +1,15 @@
+description: Sigmoid focal loss.
+std_args:
+- logits
+- labels
+- alpha
+- gamma
+type: attribute
+operation: sigmoid_focal_loss
+variants:
+  optax_shim:
+    api: optax.losses.sigmoid_focal_loss
+  flax_nnx:
+    api: optax.losses.sigmoid_focal_loss
+  jax:
+    api: optax.losses.sigmoid_focal_loss

@@ -1,0 +1,26 @@
+description: Applies a multi-layer long short-term memory (LSTM) RNN.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input_size
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: hidden_size
+  type: int
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: num_layers
+  type: int
+type: class
+operation: LSTM
+variants:
+  keras:
+    api: keras.layers.LSTM
+  mlx:
+    api: mlx.nn.LSTM
+  torch:
+    api: torch.nn.LSTM
+  tensorflow:
+    api: tf.keras.layers.LSTM

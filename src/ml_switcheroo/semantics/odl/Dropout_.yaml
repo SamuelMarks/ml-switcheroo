@@ -1,0 +1,29 @@
+description: In-place dropout.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+- default: 0.5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: p
+  type: float
+- default: true
+  is_variadic: false
+  kind: positional_or_keyword
+  name: training
+  type: bool
+variants:
+  keras:
+    api: keras.layers.Dropout
+  mlx:
+    api: mlx.nn.Dropout
+  flax_nnx:
+    api: flax.nnx.Dropout
+  torch:
+    api: torch.nn.Dropout
+  tensorflow:
+    api: tf.keras.layers.Dropout
+operation: Dropout_
+type: function

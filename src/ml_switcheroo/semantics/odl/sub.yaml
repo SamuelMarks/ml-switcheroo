@@ -1,0 +1,11 @@
+description: sub(input, other, *, alpha=1, out=None) -> Tensor
+std_args:
+- input
+- other
+- alpha
+- out
+variants:
+  torch:
+    api: torch.sub
+operation: sub
+type: function

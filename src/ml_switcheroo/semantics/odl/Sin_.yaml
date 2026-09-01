@@ -1,0 +1,13 @@
+description: In-place sine.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  latex_dsl:
+    api: latex.sin
+  dask:
+    api: dask.array.sin
+operation: Sin_
+type: function

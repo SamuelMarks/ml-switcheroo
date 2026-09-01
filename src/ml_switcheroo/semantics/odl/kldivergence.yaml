@@ -1,0 +1,17 @@
+description: Computes Kullback-Leibler divergence loss between y_true & y_pred.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_true
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_pred
+  type: Tensor
+variants:
+  keras:
+    api: keras.losses.KLDivergence
+  tensorflow:
+    api: tf.keras.losses.KLDivergence
+operation: kldivergence
+type: function

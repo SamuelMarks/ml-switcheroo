@@ -1,0 +1,16 @@
+description: Applies Alpha Dropout to the input.
+std_args:
+- default: 0.5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: p
+  type: float
+type: class
+operation: AlphaDropout
+variants:
+  keras:
+    api: keras.layers.AlphaDropout
+  torch:
+    api: torch.nn.AlphaDropout
+  tensorflow:
+    api: tf.keras.layers.AlphaDropout

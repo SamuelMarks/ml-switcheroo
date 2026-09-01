@@ -1,0 +1,7 @@
+description: LaTeX \Gamma macro.
+std_args: []
+variants:
+  latex_dsl:
+    api: latex.Gamma
+operation: gamma
+type: function

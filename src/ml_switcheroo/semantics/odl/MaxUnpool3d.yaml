@@ -1,0 +1,10 @@
+description: Computes a partial inverse of :class:`MaxPool3d`.
+std_args:
+- kernel_size
+- stride
+- padding
+type: class
+operation: MaxUnpool3d
+variants:
+  torch:
+    api: torch.nn.MaxUnpool3d

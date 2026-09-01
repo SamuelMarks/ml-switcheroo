@@ -1,0 +1,13 @@
+description: Sequentially apply multiple schedules.
+std_args:
+- schedules
+- boundaries
+type: attribute
+operation: join_schedules
+variants:
+  optax_shim:
+    api: optax.schedules.join_schedules
+  flax_nnx:
+    api: optax.schedules.join_schedules
+  jax:
+    api: optax.schedules.join_schedules

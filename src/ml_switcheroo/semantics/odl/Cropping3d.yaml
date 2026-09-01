@@ -1,0 +1,15 @@
+description: Cropping layer for 3D data.
+op_type: class
+std_args:
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: cropping
+  type: int | Tuple[int, int, int] | Tuple[Tuple[int, int], ...]
+variants:
+  keras:
+    api: keras.layers.Cropping3D
+  tensorflow:
+    api: tf.keras.layers.Cropping3D
+operation: Cropping3d
+type: function

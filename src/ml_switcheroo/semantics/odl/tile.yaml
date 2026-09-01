@@ -1,0 +1,15 @@
+description: Constructs an array by tiling an input array.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: repetitions
+  type: Tuple[int, Ellipsis]
+variants:
+  dask:
+    api: dask.array.tile
+operation: tile
+type: function

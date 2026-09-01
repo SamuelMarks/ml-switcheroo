@@ -1,0 +1,18 @@
+description: Alias for GlobalMaxPool1D.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data_format
+  type: str
+- is_variadic: false
+  kind: positional_or_keyword
+  name: keepdims
+  type: bool
+variants:
+  keras:
+    api: keras.layers.GlobalMaxPool1D
+  tensorflow:
+    api: tf.keras.layers.GlobalMaxPool1D
+operation: GlobalMaxPooling1D
+type: function

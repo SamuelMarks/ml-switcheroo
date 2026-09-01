@@ -1,0 +1,8 @@
+description: Variable initializer type.
+std_args:
+- kwargs
+variants:
+  tensorflow:
+    api: tf.keras.initializers.Initializer
+operation: Initializer
+type: function

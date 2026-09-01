@@ -1,0 +1,14 @@
+description: Builds an initializer that returns real uniformly-distributed random
+  arrays.
+std_args:
+- scale
+- dtype
+type: attribute
+operation: uniform
+variants:
+  flax_nnx:
+    api: jax.nn.initializers.uniform
+  torch:
+    api: torch.nn.init.uniform
+  jax:
+    api: jax.nn.initializers.uniform

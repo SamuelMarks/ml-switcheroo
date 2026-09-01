@@ -1,0 +1,9 @@
+description: Extract a diagonal or construct a diagonal array.
+std_args:
+- v
+- k
+variants:
+  dask:
+    api: dask.array.diag
+operation: diag
+type: function

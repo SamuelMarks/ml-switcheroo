@@ -1,0 +1,16 @@
+description: Constructs a schedule with polynomial transition from init to end value.
+std_args:
+- init_value
+- end_value
+- power
+- transition_steps
+- transition_begin
+type: attribute
+operation: polynomial_schedule
+variants:
+  optax_shim:
+    api: optax.schedules.polynomial_schedule
+  flax_nnx:
+    api: optax.schedules.polynomial_schedule
+  jax:
+    api: optax.schedules.polynomial_schedule

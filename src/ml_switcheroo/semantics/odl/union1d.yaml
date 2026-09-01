@@ -1,0 +1,9 @@
+description: Find the union of two arrays.
+std_args:
+- ar1
+- ar2
+variants:
+  dask:
+    api: dask.array.union1d
+operation: union1d
+type: function

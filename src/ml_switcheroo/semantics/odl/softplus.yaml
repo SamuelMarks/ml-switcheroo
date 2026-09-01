@@ -1,0 +1,12 @@
+description: Softplus activation function.
+std_args:
+- x
+type: attribute
+operation: softplus
+variants:
+  keras:
+    api: keras.activations.softplus
+  mlx:
+    api: mlx.nn.Softplus
+  torch:
+    api: torch.nn.Softplus

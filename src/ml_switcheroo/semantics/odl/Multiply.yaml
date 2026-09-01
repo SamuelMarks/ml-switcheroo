@@ -18,16 +18,19 @@ variants:
     api: numpy.ma.core.multiply
     args: {}
   tensorflow:
-    api: tf.multiply
+    api: tf.keras.layers.Multiply
     args: {}
   flax_nnx:
     api: jax.numpy.multiply
     args: {}
   keras:
-    api: keras.layers.multiply
+    api: keras.layers.Multiply
     args:
       inputs: inputs
       kwargs: kwargs
   sass:
     api: FMUL
     args: {}
+  dask:
+    api: dask.array.multiply
+type: function

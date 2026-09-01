@@ -1,0 +1,8 @@
+description: Return indices that are non-zero in the flattened version of a.
+std_args:
+- a
+variants:
+  dask:
+    api: dask.array.flatnonzero
+operation: flatnonzero
+type: function

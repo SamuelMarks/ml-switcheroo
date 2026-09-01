@@ -1,0 +1,12 @@
+description: The class representing a Python module/class/instance attribute.
+std_args:
+- x
+- threshold
+- default_value
+type: attribute
+operation: threshold
+variants:
+  keras:
+    api: keras.activations.threshold
+  torch:
+    api: torch.nn.Threshold

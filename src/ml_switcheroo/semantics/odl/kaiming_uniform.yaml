@@ -1,0 +1,8 @@
+description: kaiming_uniform(...)
+std_args:
+- kwargs
+type: attribute
+operation: kaiming_uniform
+variants:
+  torch:
+    api: torch.nn.init.kaiming_uniform

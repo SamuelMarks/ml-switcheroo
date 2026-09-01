@@ -1,0 +1,13 @@
+description: In-place version of Tan.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  latex_dsl:
+    api: latex.tan
+  dask:
+    api: dask.array.tan
+operation: Tan_
+type: function

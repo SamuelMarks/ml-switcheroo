@@ -1,0 +1,14 @@
+description: Returns a matrix from an array-like object. (Deprecated in NumPy, maps
+  to Array creation).
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: data
+  type: Any
+variants:
+  latex_dsl:
+    api: latex.env.matrix
+  tikz:
+    api: tikz.matrix
+operation: Matrix
+type: function

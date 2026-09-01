@@ -1,0 +1,12 @@
+description: SGD with warm restarts.
+std_args:
+- cosine_kwargs
+type: attribute
+operation: sgdr_schedule
+variants:
+  optax_shim:
+    api: optax.schedules.sgdr_schedule
+  flax_nnx:
+    api: optax.schedules.sgdr_schedule
+  jax:
+    api: optax.schedules.sgdr_schedule

@@ -1,0 +1,12 @@
+description: Abstract optimizer base class.
+std_args:
+- schedulers
+type: function
+operation: Optimizer
+variants:
+  mlx:
+    api: mlx.optimizers.Optimizer
+  torch:
+    api: torch.optim.lr_scheduler.Optimizer
+  tensorflow:
+    api: tf.keras.optimizers.Optimizer

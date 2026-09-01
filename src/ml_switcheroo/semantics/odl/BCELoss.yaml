@@ -1,0 +1,13 @@
+description: Creates a criterion that measures the Binary Cross Entropy between the
+  target and
+std_args:
+- weight
+- size_average
+- reduce
+- reduction
+- __constants__
+type: class
+operation: BCELoss
+variants:
+  torch:
+    api: torch.nn.BCELoss

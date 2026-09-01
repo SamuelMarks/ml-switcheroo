@@ -1,0 +1,9 @@
+description: Divides and rearranges the channels in a tensor.
+std_args:
+- groups
+- __constants__
+type: class
+operation: ChannelShuffle
+variants:
+  torch:
+    api: torch.nn.ChannelShuffle

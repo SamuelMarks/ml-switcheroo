@@ -1,0 +1,12 @@
+description: Creates a criterion that measures the mean absolute error (MAE) between
+  each element in
+std_args:
+- size_average
+- reduce
+- reduction
+- __constants__
+type: class
+operation: L1Loss
+variants:
+  torch:
+    api: torch.nn.L1Loss

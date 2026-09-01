@@ -1,0 +1,7 @@
+description: LaTeX \alpha macro.
+std_args: []
+type: attribute
+operation: alpha
+variants:
+  latex_dsl:
+    api: latex.alpha

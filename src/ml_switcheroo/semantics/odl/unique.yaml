@@ -1,0 +1,11 @@
+description: Find the unique elements of an array.
+std_args:
+- ar
+- return_index
+- return_inverse
+- return_counts
+variants:
+  dask:
+    api: dask.array.unique
+operation: unique
+type: function

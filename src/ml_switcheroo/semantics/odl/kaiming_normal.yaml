@@ -1,0 +1,8 @@
+description: kaiming_normal(...)
+std_args:
+- kwargs
+type: attribute
+operation: kaiming_normal
+variants:
+  torch:
+    api: torch.nn.init.kaiming_normal

@@ -1,0 +1,8 @@
+description: Broadcasts one or more arrays against one another.
+std_args:
+- subok
+variants:
+  dask:
+    api: dask.array.broadcast_arrays
+operation: broadcast_arrays
+type: function

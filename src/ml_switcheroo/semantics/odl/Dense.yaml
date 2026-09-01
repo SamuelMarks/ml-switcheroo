@@ -1,4 +1,26 @@
-description: Auto-generated from keras_code_defs
-std_args: []
+description: Just your regular densely-connected NN layer.
+std_args:
+- units
+- activation
+- use_bias
+- kernel_initializer
+- bias_initializer
+- kernel_regularizer
+- bias_regularizer
+- activity_regularizer
+- kernel_constraint
+- bias_constraint
+- lora_rank
+- lora_alpha
+- kwargs
+- trainable
+- dtype
+- autocast
+- name
 type: function
 operation: Dense
+variants:
+  keras:
+    api: keras.layers.Dense
+  tensorflow:
+    api: tf.keras.layers.Dense

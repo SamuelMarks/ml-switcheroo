@@ -1,0 +1,11 @@
+description: Return the indices for the lower-triangle of an (n, m) array.
+std_args:
+- n
+- k
+- m
+- chunks
+variants:
+  dask:
+    api: dask.array.tril_indices
+operation: tril_indices
+type: function

@@ -1,0 +1,11 @@
+description: Applies the Softmin function.
+std_args:
+- dim
+- __constants__
+type: function
+operation: softmin
+variants:
+  mlx:
+    api: mlx.nn.Softmin
+  torch:
+    api: torch.nn.Softmin

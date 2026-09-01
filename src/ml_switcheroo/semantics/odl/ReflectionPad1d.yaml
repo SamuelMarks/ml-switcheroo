@@ -1,0 +1,8 @@
+description: Pads the input tensor using the reflection of the input boundary.
+std_args:
+- padding
+type: class
+operation: ReflectionPad1d
+variants:
+  torch:
+    api: torch.nn.ReflectionPad1d

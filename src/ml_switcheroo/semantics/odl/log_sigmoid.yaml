@@ -1,0 +1,8 @@
+description: Logarithm of the sigmoid activation function.
+std_args:
+- x
+variants:
+  keras:
+    api: keras.activations.log_sigmoid
+operation: log_sigmoid
+type: function

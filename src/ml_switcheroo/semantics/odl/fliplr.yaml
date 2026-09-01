@@ -1,0 +1,8 @@
+description: Reverse the order of elements along axis 1 (left/right).
+std_args:
+- m
+variants:
+  dask:
+    api: dask.array.fliplr
+operation: fliplr
+type: function

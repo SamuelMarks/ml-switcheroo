@@ -1,0 +1,66 @@
+description: 'Auto-discovered via Consensus (Score: 4.0)'
+std_args:
+- eps
+- initial_accumulator_value
+- lr
+type: function
+operation: Adagrad
+variants:
+  keras:
+    api: keras.optimizers.Adagrad
+    args:
+      learning_rate: learning_rate
+      initial_accumulator_value: initial_accumulator_value
+      epsilon: epsilon
+      ema_momentum: ema_momentum
+      name: name
+      gradient_accumulation_steps: gradient_accumulation_steps
+      weight_decay: weight_decay
+      loss_scale_factor: loss_scale_factor
+      ema_overwrite_frequency: ema_overwrite_frequency
+      clipvalue: clipvalue
+      use_ema: use_ema
+      clipnorm: clipnorm
+      global_clipnorm: global_clipnorm
+      kwargs: kwargs
+  mlx:
+    api: mlx.optimizers.Adagrad
+    args:
+      learning_rate: learning_rate
+  optax_shim:
+    api: optax.adagrad
+    args:
+      learning_rate: learning_rate
+      initial_accumulator_value: initial_accumulator_value
+  flax_nnx:
+    api: optax.adagrad
+    args:
+      learning_rate: learning_rate
+      initial_accumulator_value: initial_accumulator_value
+  torch:
+    api: torch.optim.Adagrad
+    args:
+      initial_accumulator_value: initial_accumulator_value
+      weight_decay: weight_decay
+  jax:
+    api: optax.adagrad
+    args:
+      learning_rate: learning_rate
+      initial_accumulator_value: initial_accumulator_value
+  tensorflow:
+    api: tf.keras.optimizers.Adagrad
+    args:
+      learning_rate: learning_rate
+      initial_accumulator_value: initial_accumulator_value
+      epsilon: epsilon
+      ema_momentum: ema_momentum
+      name: name
+      gradient_accumulation_steps: gradient_accumulation_steps
+      weight_decay: weight_decay
+      loss_scale_factor: loss_scale_factor
+      ema_overwrite_frequency: ema_overwrite_frequency
+      clipvalue: clipvalue
+      use_ema: use_ema
+      clipnorm: clipnorm
+      global_clipnorm: global_clipnorm
+      kwargs: kwargs

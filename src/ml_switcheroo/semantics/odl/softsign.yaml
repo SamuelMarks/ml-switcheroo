@@ -1,0 +1,12 @@
+description: Softsign activation function.
+std_args:
+- x
+type: function
+operation: softsign
+variants:
+  keras:
+    api: keras.activations.softsign
+  mlx:
+    api: mlx.nn.Softsign
+  torch:
+    api: torch.nn.Softsign

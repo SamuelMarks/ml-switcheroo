@@ -1,0 +1,10 @@
+description: divmod(x1, x2[, out1, out2], / [, out=(None, None)], *, where=True, casting='same_kind',
+  order='K', dtype=None, subok=True[, signature, extobj])
+std_args:
+- x
+- y
+variants:
+  dask:
+    api: dask.array.divmod
+operation: divmod
+type: function

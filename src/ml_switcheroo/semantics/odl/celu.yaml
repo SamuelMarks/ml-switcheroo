@@ -1,0 +1,13 @@
+description: Continuously Differentiable Exponential Linear Unit.
+std_args:
+- x
+- alpha
+type: function
+operation: celu
+variants:
+  keras:
+    api: keras.activations.celu
+  mlx:
+    api: mlx.nn.CELU
+  torch:
+    api: torch.nn.CELU

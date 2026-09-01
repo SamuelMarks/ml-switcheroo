@@ -1,63 +1,48 @@
-operation: Conv2D
-description: 2D convolution layer.
-op_type: class
+description: Applies a 2D convolution.
 std_args:
-- name: in_channels
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  rank: 4
+  shape_spec: '[B, C_in, H, W]'
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight
+  rank: 4
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: bias
+  type: Tensor
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: stride
   type: int
-- name: filters
+- default: 0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: padding
   type: int
-- name: kernel_size
-  type: Union[int, Tuple[int, int]]
-- name: strides
-  type: Union[int, Tuple[int, int]]
-  default:
-  - 1
-  - 1
-- name: padding
-  type: str
-  default: valid
-- name: dilation_rate
-  type: Union[int, Tuple[int, int]]
-  default:
-  - 1
-  - 1
-- name: groups
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: dilation
   type: int
-  default: 1
-- name: use_bias
-  type: bool
-  default: true
+- default: 1
+  is_variadic: false
+  kind: positional_or_keyword
+  name: groups
+  type: int
+type: attribute
+operation: conv2d
 variants:
-  torch:
-    api: torch.nn.Conv2d
-    args:
-      in_channels: in_channels
-      filters: out_channels
-      kernel_size: kernel_size
-      strides: stride
-      padding: padding
-      dilation_rate: dilation
-      groups: groups
-      use_bias: bias
   keras:
     api: keras.layers.Conv2D
-    args:
-      in_channels: null
-      filters: filters
-      kernel_size: kernel_size
-      strides: strides
-      padding: padding
-      dilation_rate: dilation_rate
-      groups: groups
-      use_bias: use_bias
+  mlx:
+    api: mlx.nn.Conv2d
+  torch:
+    api: torch.nn.Conv2d
   tensorflow:
     api: tf.keras.layers.Conv2D
-    args:
-      in_channels: null
-      filters: filters
-      kernel_size: kernel_size
-      strides: strides
-      padding: padding
-      dilation_rate: dilation_rate
-      groups: groups
-      use_bias: use_bias

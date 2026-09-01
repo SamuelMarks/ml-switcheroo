@@ -1,0 +1,23 @@
+description: Preprocessing layer which resizes images.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: height
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: width
+  type: int
+- default: bilinear
+  is_variadic: false
+  kind: positional_or_keyword
+  name: interpolation
+  type: str
+variants:
+  keras:
+    api: keras.layers.Resizing
+  tensorflow:
+    api: tf.keras.layers.Resizing
+operation: Resizing
+type: function

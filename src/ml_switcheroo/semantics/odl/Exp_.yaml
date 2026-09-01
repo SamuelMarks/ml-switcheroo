@@ -1,0 +1,15 @@
+description: In-place Exp.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  numpy:
+    api: numpy.exp
+  latex_dsl:
+    api: latex.exp
+  dask:
+    api: dask.array.exp
+operation: Exp_
+type: function

@@ -29,3 +29,8 @@ std_args:
   type: bool
 type: class
 operation: AvgPool1d
+variants:
+  mlx:
+    api: mlx.nn.AvgPool1d
+  torch:
+    api: torch.nn.AvgPool1d

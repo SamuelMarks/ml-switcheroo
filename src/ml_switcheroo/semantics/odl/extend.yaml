@@ -1,0 +1,8 @@
+description: SASS @extend directive.
+std_args:
+- kwargs
+type: function
+operation: extend
+variants:
+  sass:
+    api: sass.at_extend

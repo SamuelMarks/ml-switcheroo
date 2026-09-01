@@ -1,0 +1,15 @@
+description: Applies Batch Normalization over a N-Dimensional input.
+std_args:
+- num_features
+- eps
+- momentum
+- affine
+- track_running_stats
+- process_group
+- dtype
+- device
+type: class
+operation: SyncBatchNorm
+variants:
+  torch:
+    api: torch.nn.SyncBatchNorm

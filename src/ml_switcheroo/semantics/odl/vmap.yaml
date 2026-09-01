@@ -1,0 +1,19 @@
+description: Abstract base class for generic types.
+std_args:
+- module_constructor
+- in_axes
+- out_axes
+- axis_name
+- axis_size
+- spmd_axis_name
+- in_axes_kwargs
+- state_axes
+- split_rngs
+- transform_metadata
+- module_init_args
+- module_init_kwargs
+variants:
+  flax_nnx:
+    api: flax.nnx.Vmap
+operation: vmap
+type: function

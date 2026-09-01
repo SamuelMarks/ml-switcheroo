@@ -1,0 +1,17 @@
+description: Computes CTC loss.
+std_args:
+- logits
+- logit_paddings
+- labels
+- label_paddings
+- blank_id
+- log_epsilon
+type: attribute
+operation: ctc_loss
+variants:
+  optax_shim:
+    api: optax.losses.ctc_loss
+  flax_nnx:
+    api: optax.losses.ctc_loss
+  jax:
+    api: optax.losses.ctc_loss

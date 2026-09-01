@@ -1,4 +1,14 @@
-description: Auto-generated mapping for BatchNorm1d.
-std_args: []
+description: Applies Batch Normalization over a 2D or 3D input.
+std_args:
+- num_features
+- eps
+- momentum
+- affine
+- track_running_stats
+- device
+- dtype
 type: class
 operation: BatchNorm1d
+variants:
+  torch:
+    api: torch.nn.BatchNorm1d

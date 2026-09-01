@@ -1,0 +1,12 @@
+description: Extracts sliding local blocks from a batched input tensor.
+std_args:
+- kernel_size
+- dilation
+- padding
+- stride
+- __constants__
+type: function
+operation: unfold
+variants:
+  torch:
+    api: torch.nn.Unfold

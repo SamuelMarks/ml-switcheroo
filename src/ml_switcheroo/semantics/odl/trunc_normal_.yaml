@@ -1,0 +1,13 @@
+description: Fill the input Tensor with values drawn from a truncated normal distribution.
+std_args:
+- tensor
+- mean
+- std
+- a
+- b
+- generator
+type: function
+operation: trunc_normal_
+variants:
+  torch:
+    api: torch.nn.init.trunc_normal_

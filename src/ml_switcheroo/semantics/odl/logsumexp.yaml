@@ -1,0 +1,15 @@
+description: The class representing a Python module/class/instance attribute.
+std_args:
+- a
+- axis
+- b
+- keepdims
+- return_sign
+- where
+type: attribute
+operation: logsumexp
+variants:
+  flax_nnx:
+    api: jax.nn.logsumexp
+  jax:
+    api: jax.nn.logsumexp

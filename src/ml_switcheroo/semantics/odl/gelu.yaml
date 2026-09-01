@@ -1,0 +1,17 @@
+description: Gaussian error linear unit (GELU) activation function.
+std_args:
+- x
+- approximate
+type: attribute
+operation: gelu
+variants:
+  keras:
+    api: keras.activations.gelu
+  mlx:
+    api: mlx.nn.GELU
+  flax_nnx:
+    api: jax.nn.gelu
+  torch:
+    api: torch.nn.GELU
+  jax:
+    api: jax.nn.gelu

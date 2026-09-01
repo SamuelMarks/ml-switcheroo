@@ -1,0 +1,8 @@
+description: CSS property padding.
+std_args:
+- value
+type: attribute
+operation: padding
+variants:
+  sass:
+    api: sass.prop.padding

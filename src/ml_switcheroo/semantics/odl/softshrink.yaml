@@ -1,0 +1,10 @@
+description: Applies the Softshrink function.
+std_args:
+- lambd
+type: attribute
+operation: softshrink
+variants:
+  mlx:
+    api: mlx.nn.Softshrink
+  torch:
+    api: torch.nn.Softshrink

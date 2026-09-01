@@ -1,0 +1,13 @@
+description: An array with ones at and below the given diagonal and zeros elsewhere.
+std_args:
+- N
+- M
+- k
+- dtype
+- chunks
+- like
+variants:
+  dask:
+    api: dask.array.tri
+operation: tri
+type: function

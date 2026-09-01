@@ -1,0 +1,8 @@
+description: Exponential activation function.
+std_args:
+- x
+variants:
+  keras:
+    api: keras.activations.exponential
+operation: exponential
+type: function

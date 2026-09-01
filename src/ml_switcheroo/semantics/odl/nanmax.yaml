@@ -1,0 +1,12 @@
+description: Return the maximum of an array or maximum along an axis, ignoring any
+std_args:
+- a
+- axis
+- keepdims
+- split_every
+- out
+variants:
+  dask:
+    api: dask.array.nanmax
+operation: nanmax
+type: function

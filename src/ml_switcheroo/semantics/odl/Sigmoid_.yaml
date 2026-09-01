@@ -1,0 +1,17 @@
+description: In-place sigmoid.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  keras:
+    api: keras.activations.sigmoid
+  mlx:
+    api: mlx.nn.Sigmoid
+  torch:
+    api: torch.nn.Sigmoid
+  tensorflow:
+    api: tf.nn.sigmoid
+operation: Sigmoid_
+type: function

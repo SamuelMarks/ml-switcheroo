@@ -1,0 +1,9 @@
+description: vdot(a, b, /)
+std_args:
+- a
+- b
+variants:
+  dask:
+    api: dask.array.vdot
+operation: vdot
+type: function

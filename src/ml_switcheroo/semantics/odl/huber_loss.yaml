@@ -1,0 +1,17 @@
+description: Computes the Huber loss between inputs and targets.
+std_args:
+- inputs
+- targets
+- delta
+- reduction
+type: attribute
+operation: huber_loss
+variants:
+  mlx:
+    api: mlx.nn.losses.huber_loss
+  optax_shim:
+    api: optax.losses.huber_loss
+  flax_nnx:
+    api: optax.losses.huber_loss
+  jax:
+    api: optax.losses.huber_loss

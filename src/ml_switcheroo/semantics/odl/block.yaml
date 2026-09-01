@@ -1,0 +1,9 @@
+description: Assemble an nd-array from nested lists of blocks.
+std_args:
+- arrays
+- allow_unknown_chunksizes
+variants:
+  dask:
+    api: dask.array.block
+operation: block
+type: function

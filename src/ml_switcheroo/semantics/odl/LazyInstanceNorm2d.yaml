@@ -1,0 +1,16 @@
+description: A :class:`torch.nn.InstanceNorm2d` module with lazy initialization of
+  the ``num_features`` argument.
+std_args:
+- num_features
+- eps
+- momentum
+- affine
+- track_running_stats
+- cls_to_become
+- device
+- dtype
+type: class
+operation: LazyInstanceNorm2d
+variants:
+  torch:
+    api: torch.nn.LazyInstanceNorm2d

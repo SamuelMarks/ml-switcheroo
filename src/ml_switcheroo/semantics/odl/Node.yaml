@@ -1,0 +1,10 @@
+description: JIT Graph Node.
+op_type: class
+std_args:
+- options
+- path
+variants:
+  tikz:
+    api: tikz.node
+operation: Node
+type: function

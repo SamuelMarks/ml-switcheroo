@@ -1,0 +1,13 @@
+description: Embedding Module.
+std_args:
+- num_embeddings
+- features
+- dtype
+- param_dtype
+- embedding_init
+- rngs
+variants:
+  flax_nnx:
+    api: flax.nnx.Embed
+operation: Embed
+type: function

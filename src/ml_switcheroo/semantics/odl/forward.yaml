@@ -1,0 +1,8 @@
+description: SASS @forward directive.
+std_args:
+- kwargs
+type: function
+operation: forward
+variants:
+  sass:
+    api: sass.at_forward

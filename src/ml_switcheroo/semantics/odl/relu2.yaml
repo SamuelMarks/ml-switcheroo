@@ -1,0 +1,7 @@
+description: "Applies the ReLU\xB2 activation function."
+std_args: []
+variants:
+  mlx:
+    api: mlx.nn.ReLU2
+operation: relu2
+type: function

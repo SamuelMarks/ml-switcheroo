@@ -1,0 +1,27 @@
+description: Returns a new array having a specified ``shape`` and filled with zeros.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: shape
+  type: Union[int, Tuple[int, Ellipsis]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Optional[dtype]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: device
+  type: Optional[device]
+variants:
+  keras:
+    api: keras.initializers.Zeros
+  flax_nnx:
+    api: jax.nn.initializers.zeros
+  torch:
+    api: torch.zeros
+  jax:
+    api: jax.nn.initializers.zeros
+  tensorflow:
+    api: tf.keras.initializers.Zeros
+operation: zeros
+type: function

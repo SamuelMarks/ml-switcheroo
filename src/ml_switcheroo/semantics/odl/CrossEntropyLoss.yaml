@@ -1,0 +1,14 @@
+description: This criterion computes the cross entropy loss between input logits
+std_args:
+- weight
+- size_average
+- ignore_index
+- reduce
+- reduction
+- label_smoothing
+- __constants__
+type: class
+operation: CrossEntropyLoss
+variants:
+  torch:
+    api: torch.nn.CrossEntropyLoss

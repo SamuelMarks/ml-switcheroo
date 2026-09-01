@@ -1,0 +1,14 @@
+description: Scaled Exponential Linear Unit (SELU).
+std_args:
+- x
+type: function
+operation: selu
+variants:
+  keras:
+    api: keras.activations.selu
+  mlx:
+    api: mlx.nn.SELU
+  torch:
+    api: torch.nn.SELU
+  tensorflow:
+    api: tf.nn.selu

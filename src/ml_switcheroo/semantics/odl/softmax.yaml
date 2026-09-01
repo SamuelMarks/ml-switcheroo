@@ -1,0 +1,19 @@
+description: Softmax converts a vector of values to a probability distribution.
+std_args:
+- x
+- axis
+type: attribute
+operation: softmax
+variants:
+  keras:
+    api: keras.activations.softmax
+  mlx:
+    api: mlx.nn.Softmax
+  flax_nnx:
+    api: jax.nn.softmax
+  torch:
+    api: torch.nn.Softmax
+  jax:
+    api: jax.nn.softmax
+  tensorflow:
+    api: tf.keras.layers.Softmax

@@ -1,0 +1,13 @@
+description: Returns a boolean array where two arrays are element-wise equal within
+  a
+std_args:
+- arr1
+- arr2
+- rtol
+- atol
+- equal_nan
+variants:
+  dask:
+    api: dask.array.isclose
+operation: isclose
+type: function

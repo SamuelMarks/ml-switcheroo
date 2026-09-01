@@ -1,0 +1,12 @@
+description: Creates a criterion that optimizes a multi-label one-versus-all
+std_args:
+- weight
+- size_average
+- reduce
+- reduction
+- __constants__
+type: class
+operation: MultiLabelSoftMarginLoss
+variants:
+  torch:
+    api: torch.nn.MultiLabelSoftMarginLoss

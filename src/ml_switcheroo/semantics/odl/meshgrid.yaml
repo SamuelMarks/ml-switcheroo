@@ -1,0 +1,11 @@
+description: Returns coordinate matrices from coordinate vectors.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: indexing
+  type: str
+variants:
+  dask:
+    api: dask.array.meshgrid
+operation: meshgrid
+type: function

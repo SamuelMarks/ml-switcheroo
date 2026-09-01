@@ -1,0 +1,9 @@
+description: Return a Keras activation function via its config.
+std_args:
+- config
+- custom_objects
+type: function
+operation: deserialize
+variants:
+  keras:
+    api: keras.activations.deserialize

@@ -1,0 +1,8 @@
+description: Pads the input tensor using replication of the input boundary.
+std_args:
+- padding
+type: class
+operation: ReplicationPad2d
+variants:
+  torch:
+    api: torch.nn.ReplicationPad2d

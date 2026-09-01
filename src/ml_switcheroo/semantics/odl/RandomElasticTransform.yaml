@@ -1,0 +1,29 @@
+description: A preprocessing layer that applies random elastic transformations.
+op_type: class
+std_args:
+- factor
+- scale
+- interpolation
+- fill_mode
+- fill_value
+- value_range
+- seed
+- _USE_BASE_FACTOR
+- _FACTOR_BOUNDS
+- _SUPPORTED_INTERPOLATION
+- _SUPPORTED_FILL_MODES
+- data_format
+- kwargs
+- bounding_box_format
+- activity_regularizer
+- trainable
+- dtype
+- autocast
+- name
+variants:
+  keras:
+    api: keras.layers.RandomElasticTransform
+  tensorflow:
+    api: tf.keras.layers.RandomElasticTransform
+operation: RandomElasticTransform
+type: function

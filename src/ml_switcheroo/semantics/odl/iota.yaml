@@ -1,0 +1,7 @@
+description: LaTeX \iota macro.
+std_args: []
+variants:
+  latex_dsl:
+    api: latex.iota
+operation: iota
+type: function

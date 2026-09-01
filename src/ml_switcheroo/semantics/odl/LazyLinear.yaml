@@ -1,0 +1,13 @@
+description: A :class:`torch.nn.Linear` module where `in_features` is inferred.
+std_args:
+- out_features
+- bias
+- cls_to_become
+- weight
+- dtype
+- device
+type: class
+operation: LazyLinear
+variants:
+  torch:
+    api: torch.nn.LazyLinear

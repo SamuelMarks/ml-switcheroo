@@ -1,0 +1,12 @@
+description: HTML <title> element.
+std_args:
+- children
+- id
+- class_name
+- style
+- kwargs
+variants:
+  html_dsl:
+    api: html.title
+operation: title
+type: function

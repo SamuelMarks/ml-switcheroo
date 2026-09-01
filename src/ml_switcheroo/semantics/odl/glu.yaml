@@ -1,0 +1,13 @@
+description: Gated Linear Unit (GLU) activation function.
+std_args:
+- x
+- axis
+type: function
+operation: glu
+variants:
+  keras:
+    api: keras.activations.glu
+  mlx:
+    api: mlx.nn.GLU
+  torch:
+    api: torch.nn.GLU

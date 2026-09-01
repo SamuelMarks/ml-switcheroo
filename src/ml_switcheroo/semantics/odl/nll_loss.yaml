@@ -1,0 +1,11 @@
+description: Computes the negative log likelihood loss.
+std_args:
+- inputs
+- targets
+- axis
+- reduction
+type: function
+operation: nll_loss
+variants:
+  mlx:
+    api: mlx.nn.losses.nll_loss

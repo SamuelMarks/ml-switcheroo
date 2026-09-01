@@ -1,0 +1,12 @@
+description: The Kullback-Leibler divergence loss.
+std_args:
+- size_average
+- reduce
+- reduction
+- log_target
+- __constants__
+type: class
+operation: KLDivLoss
+variants:
+  torch:
+    api: torch.nn.KLDivLoss

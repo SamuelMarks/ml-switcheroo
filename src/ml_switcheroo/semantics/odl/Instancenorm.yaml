@@ -1,0 +1,19 @@
+description: Applies instance normalization [1] on the inputs.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_features
+  type: Any
+variants:
+  mlx:
+    api: mlx.nn.InstanceNorm
+operation: Instancenorm
+type: function

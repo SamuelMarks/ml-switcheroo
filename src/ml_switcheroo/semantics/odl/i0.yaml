@@ -1,0 +1,8 @@
+description: Modified Bessel function of the first kind, order 0.
+std_args:
+- kwargs
+type: attribute
+operation: i0
+variants:
+  dask:
+    api: dask.array.i0

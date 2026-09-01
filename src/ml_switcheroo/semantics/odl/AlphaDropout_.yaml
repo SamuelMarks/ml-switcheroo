@@ -1,0 +1,17 @@
+description: In-place version of AlphaDropout.
+op_type: class
+std_args:
+- default: 0.5
+  is_variadic: false
+  kind: positional_or_keyword
+  name: p
+  type: float
+variants:
+  keras:
+    api: keras.layers.AlphaDropout
+  torch:
+    api: torch.nn.AlphaDropout
+  tensorflow:
+    api: tf.keras.layers.AlphaDropout
+operation: AlphaDropout_
+type: function

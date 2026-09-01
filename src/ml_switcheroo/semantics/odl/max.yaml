@@ -1,0 +1,23 @@
+description: Calculates the maximum value of the input array ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: Optional[Union[int, Tuple[int, Ellipsis]]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: keepdims
+  type: bool
+variants:
+  latex_dsl:
+    api: latex.max
+  dask:
+    api: dask.array.max
+  torch:
+    api: torch.max
+operation: max
+type: function

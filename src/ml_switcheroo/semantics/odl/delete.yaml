@@ -1,0 +1,10 @@
+description: Return a new array with sub-arrays along an axis deleted. For a one
+std_args:
+- arr
+- obj
+- axis
+variants:
+  dask:
+    api: dask.array.delete
+operation: delete
+type: function

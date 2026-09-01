@@ -1,0 +1,8 @@
+description: dirac(...)
+std_args:
+- kwargs
+type: attribute
+operation: dirac
+variants:
+  torch:
+    api: torch.nn.init.dirac

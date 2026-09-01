@@ -1,0 +1,14 @@
+description: Sigmoid activation function.
+std_args:
+- x
+type: function
+operation: sigmoid
+variants:
+  keras:
+    api: keras.activations.sigmoid
+  mlx:
+    api: mlx.nn.Sigmoid
+  torch:
+    api: torch.nn.Sigmoid
+  tensorflow:
+    api: tf.nn.sigmoid

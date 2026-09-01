@@ -1,0 +1,8 @@
+description: Convert a string or number to a floating point number, if possible.
+std_args:
+- kwargs
+variants:
+  torch:
+    api: float
+operation: float_
+type: function

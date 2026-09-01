@@ -1,0 +1,7 @@
+description: IEEE 754 floating-point representation of (positive) infinity.
+std_args: []
+variants:
+  latex_dsl:
+    api: latex.inf
+operation: inf
+type: function

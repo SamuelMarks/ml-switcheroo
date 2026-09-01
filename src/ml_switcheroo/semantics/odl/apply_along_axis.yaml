@@ -1,0 +1,13 @@
+description: Apply a function to 1-D slices along the given axis.
+std_args:
+- func1d
+- axis
+- arr
+- dtype
+- shape
+- kwargs
+variants:
+  dask:
+    api: dask.array.apply_along_axis
+operation: apply_along_axis
+type: function

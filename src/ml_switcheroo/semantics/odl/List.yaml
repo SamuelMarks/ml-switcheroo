@@ -1,0 +1,7 @@
+description: Base class for all neural network modules.
+std_args: []
+variants:
+  flax_nnx:
+    api: flax.nnx.List
+operation: List
+type: function

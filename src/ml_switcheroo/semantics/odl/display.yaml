@@ -1,0 +1,8 @@
+description: CSS property display.
+std_args:
+- value
+variants:
+  sass:
+    api: sass.prop.display
+operation: display
+type: function

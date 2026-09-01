@@ -1,0 +1,10 @@
+description: Apply 2D channel-wise dropout during training.
+std_args:
+- p
+type: function
+operation: dropout2d
+variants:
+  mlx:
+    api: mlx.nn.Dropout2d
+  torch:
+    api: torch.nn.Dropout2d

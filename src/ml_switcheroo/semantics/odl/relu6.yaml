@@ -1,0 +1,12 @@
+description: Relu6 activation function.
+std_args:
+- x
+type: function
+operation: relu6
+variants:
+  keras:
+    api: keras.activations.relu6
+  mlx:
+    api: mlx.nn.ReLU6
+  torch:
+    api: torch.nn.ReLU6

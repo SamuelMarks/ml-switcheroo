@@ -1,0 +1,9 @@
+description: Return the indices for the upper-triangle of arr.
+std_args:
+- arr
+- k
+variants:
+  dask:
+    api: dask.array.triu_indices_from
+operation: triu_indices_from
+type: function

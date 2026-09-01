@@ -1,0 +1,11 @@
+description: Implements data parallelism at the module level.
+std_args:
+- module
+- device_ids
+- output_device
+- dim
+type: class
+operation: DataParallel
+variants:
+  torch:
+    api: torch.nn.DataParallel

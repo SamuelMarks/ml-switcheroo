@@ -1,0 +1,7 @@
+description: LaTeX \beta macro.
+std_args: []
+type: attribute
+operation: beta
+variants:
+  latex_dsl:
+    api: latex.beta

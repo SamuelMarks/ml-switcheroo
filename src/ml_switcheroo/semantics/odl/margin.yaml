@@ -1,0 +1,8 @@
+description: CSS property margin.
+std_args:
+- value
+type: attribute
+operation: margin
+variants:
+  sass:
+    api: sass.prop.margin

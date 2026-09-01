@@ -1,0 +1,14 @@
+description: Compute the standard deviation along the specified axis, while
+std_args:
+- a
+- axis
+- dtype
+- keepdims
+- ddof
+- split_every
+- out
+variants:
+  dask:
+    api: dask.array.nanstd
+operation: nanstd
+type: function

@@ -1,0 +1,13 @@
+description: Computes the negative log likelihood loss for a Gaussian distribution.
+std_args:
+- inputs
+- targets
+- vars
+- full
+- eps
+- reduction
+type: function
+operation: gaussian_nll_loss
+variants:
+  mlx:
+    api: mlx.nn.losses.gaussian_nll_loss

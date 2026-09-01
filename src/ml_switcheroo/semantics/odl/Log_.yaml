@@ -1,0 +1,13 @@
+description: Computes natural logarithm in-place.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  latex_dsl:
+    api: latex.log
+  dask:
+    api: dask.array.log
+operation: Log_
+type: function

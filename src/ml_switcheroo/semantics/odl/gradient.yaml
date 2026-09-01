@@ -1,0 +1,10 @@
+description: Return the gradient of an N-dimensional array.
+std_args:
+- f
+- axis
+- kwargs
+variants:
+  dask:
+    api: dask.array.gradient
+operation: gradient
+type: function

@@ -1,0 +1,14 @@
+description: Fill the input `Tensor` with values using a Xavier normal distribution.
+std_args:
+- tensor
+- gain
+- generator
+type: function
+operation: xavier_normal_
+variants:
+  torch:
+    api: torch.nn.init.xavier_normal_
+    args:
+      tensor: tensor
+      gain: gain
+      generator: generator

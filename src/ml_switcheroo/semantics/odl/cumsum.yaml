@@ -1,0 +1,12 @@
+description: Return the cumulative sum of the elements along a given axis.
+std_args:
+- x
+- axis
+- dtype
+- out
+- method
+variants:
+  dask:
+    api: dask.array.cumsum
+operation: cumsum
+type: function

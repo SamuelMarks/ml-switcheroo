@@ -1,0 +1,10 @@
+description: true_divide(dividend, divisor, *, out) -> Tensor
+std_args:
+- input
+- other
+- out
+variants:
+  torch:
+    api: torch.true_divide
+operation: true_divide
+type: function

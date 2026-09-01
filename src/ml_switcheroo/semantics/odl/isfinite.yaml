@@ -1,0 +1,11 @@
+description: Tests each element ``x_i`` of the input array ``x`` to determine if finite.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+variants:
+  dask:
+    api: dask.array.isfinite
+operation: isfinite
+type: function

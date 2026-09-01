@@ -18,3 +18,8 @@ std_args:
   type: int
 type: class
 operation: Transformer
+variants:
+  mlx:
+    api: mlx.nn.Transformer
+  torch:
+    api: torch.nn.Transformer

@@ -1,0 +1,11 @@
+description: Computes base-2 logarithm in-place.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  dask:
+    api: dask.array.log2
+operation: Log2_
+type: function

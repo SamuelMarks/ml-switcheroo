@@ -1,9 +1,12 @@
-description: Auto-generated mapping for draw.
+description: TikZ \draw command.
 op_type: function
 operation: draw
-std_args: []
+std_args:
+- options
+- path
 variants:
   tikz:
     api: tikz.draw
     required_imports: []
     args: {}
+type: function

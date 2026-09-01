@@ -1,0 +1,14 @@
+description: Base class for all layers.
+op_type: class
+std_args:
+- trainable
+- name
+- dtype
+- activity_regularizer
+- autocast
+- kwargs
+variants:
+  tensorflow:
+    api: tf.keras.layers.Layer
+operation: Layer
+type: function

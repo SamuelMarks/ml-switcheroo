@@ -1,0 +1,8 @@
+description: Base class for all neural network modules.
+std_args:
+- kwargs
+variants:
+  flax_nnx:
+    api: flax.nnx.Dict
+operation: Dict
+type: function

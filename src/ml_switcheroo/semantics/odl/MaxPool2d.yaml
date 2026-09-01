@@ -10,3 +10,8 @@ std_args:
   type: Union[int, Tuple[int, int]]
 type: class
 operation: MaxPool2d
+variants:
+  mlx:
+    api: mlx.nn.MaxPool2d
+  torch:
+    api: torch.nn.MaxPool2d

@@ -1,0 +1,8 @@
+description: Tanh shrink activation function.
+std_args:
+- x
+variants:
+  keras:
+    api: keras.activations.tanh_shrink
+operation: tanh_shrink
+type: function

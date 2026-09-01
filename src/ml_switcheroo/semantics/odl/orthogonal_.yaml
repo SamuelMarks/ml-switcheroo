@@ -1,0 +1,10 @@
+description: Fill the input `Tensor` with a (semi) orthogonal matrix.
+std_args:
+- tensor
+- gain
+- generator
+type: function
+operation: orthogonal_
+variants:
+  torch:
+    api: torch.nn.init.orthogonal_

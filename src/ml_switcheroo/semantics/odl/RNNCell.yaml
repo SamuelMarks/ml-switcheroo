@@ -1,0 +1,15 @@
+description: An Elman RNN cell with tanh or ReLU non-linearity.
+std_args:
+- input_size
+- hidden_size
+- bias
+- nonlinearity
+- __constants__
+- dtype
+- device
+- num_chunks
+type: class
+operation: RNNCell
+variants:
+  torch:
+    api: torch.nn.RNNCell

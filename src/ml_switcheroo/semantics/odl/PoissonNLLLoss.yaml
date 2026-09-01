@@ -1,0 +1,14 @@
+description: Negative log likelihood loss with Poisson distribution of target.
+std_args:
+- log_input
+- full
+- __constants__
+- eps
+- reduce
+- size_average
+- reduction
+type: class
+operation: PoissonNLLLoss
+variants:
+  torch:
+    api: torch.nn.PoissonNLLLoss

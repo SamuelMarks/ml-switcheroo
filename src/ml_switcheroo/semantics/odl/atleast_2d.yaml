@@ -1,0 +1,7 @@
+description: View inputs as arrays with at least two dimensions.
+std_args: []
+variants:
+  dask:
+    api: dask.array.atleast_2d
+operation: atleast_2d
+type: function

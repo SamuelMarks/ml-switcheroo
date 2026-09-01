@@ -1,0 +1,18 @@
+description: Concatenates a list of inputs.
+std_args:
+- axis
+- kwargs
+- activity_regularizer
+- trainable
+- dtype
+- autocast
+- name
+variants:
+  keras:
+    api: keras.layers.Concatenate
+  dask:
+    api: dask.array.concatenate
+  tensorflow:
+    api: tf.keras.layers.Concatenate
+operation: concatenate
+type: function

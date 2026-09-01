@@ -1,0 +1,10 @@
+description: Return selected slices of an array along given axis.
+std_args:
+- condition
+- a
+- axis
+variants:
+  dask:
+    api: dask.array.compress
+operation: compress
+type: function

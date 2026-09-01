@@ -1,0 +1,12 @@
+description: Return the cumulative product of elements along a given axis.
+std_args:
+- x
+- axis
+- dtype
+- out
+- method
+variants:
+  dask:
+    api: dask.array.cumprod
+operation: cumprod
+type: function

@@ -1,0 +1,10 @@
+description: Interchange two axes of an array.
+std_args:
+- a
+- axis1
+- axis2
+variants:
+  dask:
+    api: dask.array.swapaxes
+operation: swapaxes
+type: function

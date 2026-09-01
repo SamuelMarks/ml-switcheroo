@@ -1,0 +1,13 @@
+description: Calculates the L2 loss for a set of predictions.
+std_args:
+- predictions
+- targets
+type: attribute
+operation: l2_loss
+variants:
+  optax_shim:
+    api: optax.losses.l2_loss
+  flax_nnx:
+    api: optax.losses.l2_loss
+  jax:
+    api: optax.losses.l2_loss

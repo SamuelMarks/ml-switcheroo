@@ -1,0 +1,8 @@
+description: SparsePlus activation function.
+std_args:
+- x
+variants:
+  keras:
+    api: keras.activations.sparse_plus
+operation: sparse_plus
+type: function

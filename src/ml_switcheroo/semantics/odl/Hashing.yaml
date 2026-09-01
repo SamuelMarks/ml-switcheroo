@@ -1,0 +1,18 @@
+description: A preprocessing layer which hashes and bins categorical features.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: num_bins
+  type: int
+- is_variadic: false
+  kind: positional_or_keyword
+  name: mask_value
+  type: Any
+variants:
+  keras:
+    api: keras.layers.Hashing
+  tensorflow:
+    api: tf.keras.layers.Hashing
+operation: Hashing
+type: function

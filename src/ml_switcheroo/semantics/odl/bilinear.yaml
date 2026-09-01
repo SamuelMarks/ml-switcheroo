@@ -1,0 +1,13 @@
+description: The class representing a Python module/class/instance attribute.
+std_args:
+- input1_dims
+- input2_dims
+- output_dims
+- bias
+type: attribute
+operation: bilinear
+variants:
+  mlx:
+    api: mlx.nn.Bilinear
+  torch:
+    api: torch.nn.Bilinear

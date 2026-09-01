@@ -1,0 +1,8 @@
+description: HardTanh activation function.
+std_args:
+- x
+variants:
+  keras:
+    api: keras.activations.hard_tanh
+operation: hard_tanh
+type: function

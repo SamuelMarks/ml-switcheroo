@@ -1,0 +1,13 @@
+description: Returns a function which implements a piecewise constant schedule.
+std_args:
+- init_value
+- boundaries_and_scales
+type: attribute
+operation: piecewise_constant_schedule
+variants:
+  optax_shim:
+    api: optax.schedules.piecewise_constant_schedule
+  flax_nnx:
+    api: optax.schedules.piecewise_constant_schedule
+  jax:
+    api: optax.schedules.piecewise_constant_schedule

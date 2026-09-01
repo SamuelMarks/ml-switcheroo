@@ -15,3 +15,14 @@ std_args:
   type: float
 type: class
 operation: MultiheadAttention
+variants:
+  keras:
+    api: keras.layers.MultiHeadAttention
+  mlx:
+    api: mlx.nn.MultiHeadAttention
+  flax_nnx:
+    api: flax.nnx.MultiHeadAttention
+  torch:
+    api: torch.nn.MultiheadAttention
+  tensorflow:
+    api: tf.keras.layers.MultiHeadAttention

@@ -1,0 +1,9 @@
+description: Return the elements of an array that satisfy some condition.
+std_args:
+- condition
+- arr
+variants:
+  dask:
+    api: dask.array.extract
+operation: extract
+type: function

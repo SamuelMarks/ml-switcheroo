@@ -1,0 +1,10 @@
+description: Construct an array from an index array and a list of arrays to choose
+  from.
+std_args:
+- a
+- choices
+variants:
+  dask:
+    api: dask.array.choose
+operation: choose
+type: function

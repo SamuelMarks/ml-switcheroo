@@ -1,0 +1,47 @@
+description: HTML <input> element.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: batch_shape
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: batch_size
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: kwargs
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: name
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: optional
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ragged
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: shape
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: sparse
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Any
+variants:
+  html_dsl:
+    api: html.input
+operation: Input
+type: function

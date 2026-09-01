@@ -1,0 +1,14 @@
+description: This wrapper allows to apply a layer to every temporal slice of an input.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: layer
+  type: Any
+variants:
+  keras:
+    api: keras.layers.TimeDistributed
+  tensorflow:
+    api: tf.keras.layers.TimeDistributed
+operation: TimeDistributed
+type: function

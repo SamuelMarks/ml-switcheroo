@@ -1,0 +1,10 @@
+description: The class representing a Python module/class/instance attribute.
+std_args:
+- kwargs
+type: attribute
+operation: logsigmoid
+variants:
+  mlx:
+    api: mlx.nn.LogSigmoid
+  torch:
+    api: torch.nn.LogSigmoid

@@ -1,0 +1,10 @@
+description: Rotate an array by 90 degrees in the plane specified by axes.
+std_args:
+- m
+- k
+- axes
+variants:
+  dask:
+    api: dask.array.rot90
+operation: rot90
+type: function

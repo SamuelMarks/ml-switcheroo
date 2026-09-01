@@ -23,3 +23,10 @@ std_args:
   type: float
 type: class
 operation: LayerNorm
+variants:
+  mlx:
+    api: mlx.nn.LayerNorm
+  flax_nnx:
+    api: flax.nnx.LayerNorm
+  torch:
+    api: torch.nn.LayerNorm

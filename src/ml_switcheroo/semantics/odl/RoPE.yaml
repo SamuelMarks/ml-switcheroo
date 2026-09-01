@@ -1,0 +1,12 @@
+description: Rotary Positional Embeddings.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dims
+  type: int
+variants:
+  mlx:
+    api: mlx.nn.RoPE
+operation: RoPE
+type: function

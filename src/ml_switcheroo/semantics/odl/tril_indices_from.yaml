@@ -1,0 +1,9 @@
+description: Return the indices for the lower-triangle of arr.
+std_args:
+- arr
+- k
+variants:
+  dask:
+    api: dask.array.tril_indices_from
+operation: tril_indices_from
+type: function

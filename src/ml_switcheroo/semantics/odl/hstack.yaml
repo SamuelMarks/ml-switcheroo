@@ -1,0 +1,9 @@
+description: Stack arrays in sequence horizontally (column wise).
+std_args:
+- tup
+- allow_unknown_chunksizes
+variants:
+  dask:
+    api: dask.array.hstack
+operation: hstack
+type: function

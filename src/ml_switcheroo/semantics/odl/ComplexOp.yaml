@@ -1,0 +1,11 @@
+description: Desc
+std_args:
+- lhs
+- rhs
+- loc
+- ip
+variants:
+  mlir:
+    api: mhlo.complex
+operation: ComplexOp
+type: function

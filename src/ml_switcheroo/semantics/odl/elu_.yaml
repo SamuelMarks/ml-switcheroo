@@ -1,0 +1,15 @@
+description: Exponential Linear Unit.
+std_args:
+- x
+- alpha
+type: attribute
+operation: elu_
+variants:
+  keras:
+    api: keras.activations.elu
+  mlx:
+    api: mlx.nn.ELU
+  torch:
+    api: torch.nn.ELU
+  tensorflow:
+    api: tf.nn.elu

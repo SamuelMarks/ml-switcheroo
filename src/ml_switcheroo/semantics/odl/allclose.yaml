@@ -1,0 +1,14 @@
+description: Returns True if two arrays are element-wise equal within a tolerance.
+std_args:
+- arr1
+- arr2
+- rtol
+- atol
+- equal_nan
+variants:
+  dask:
+    api: dask.array.allclose
+  torch:
+    api: torch.allclose
+operation: allclose
+type: function

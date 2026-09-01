@@ -1,0 +1,8 @@
+description: LaTeX \begin{gather} environment.
+std_args:
+- content
+type: function
+operation: gather
+variants:
+  latex_dsl:
+    api: latex.env.gather

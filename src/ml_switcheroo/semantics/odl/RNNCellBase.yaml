@@ -1,0 +1,16 @@
+description: Base class for RNN Cells.
+std_args:
+- __constants__
+- input_size
+- hidden_size
+- bias
+- weight_ih
+- weight_hh
+- num_chunks
+- dtype
+- device
+type: class
+operation: RNNCellBase
+variants:
+  torch:
+    api: torch.nn.RNNCellBase

@@ -59,5 +59,18 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Conv3d": {
+    "api": "midl.Conv3d",
+    "args": {
+      "in_channels": "arg_0",
+      "kernel_size": "arg_2",
+      "out_channels": "arg_1",
+      "padding": "arg_4",
+      "stride": "arg_3"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   }
 }

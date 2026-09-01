@@ -1,0 +1,8 @@
+description: Reverse the order of elements along axis 0 (up/down).
+std_args:
+- m
+variants:
+  dask:
+    api: dask.array.flipud
+operation: flipud
+type: function

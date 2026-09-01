@@ -1,0 +1,25 @@
+description: Data loader combines a dataset and a sampler, and provides an iterable
+  over the given dataset.
+std_args:
+- dataset
+- batch_size
+- shuffle
+- sampler
+- batch_sampler
+- num_workers
+- collate_fn
+- pin_memory
+- drop_last
+- timeout
+- worker_init_fn
+- multiprocessing_context
+- generator
+- prefetch_factor
+- persistent_workers
+- pin_memory_device
+- in_order
+variants:
+  torch:
+    api: torch.utils.data.DataLoader
+operation: DataLoader
+type: function

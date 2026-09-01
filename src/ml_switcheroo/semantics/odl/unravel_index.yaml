@@ -1,0 +1,10 @@
+description: unravel_index(indices, shape, order='C')
+std_args:
+- indices
+- shape
+- order
+variants:
+  dask:
+    api: dask.array.unravel_index
+operation: unravel_index
+type: function

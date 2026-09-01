@@ -1,0 +1,12 @@
+description: Return an array drawn from elements in choicelist, depending on conditions.
+std_args:
+- condlist
+- choicelist
+- default
+variants:
+  dask:
+    api: dask.array.select
+  html_dsl:
+    api: html.select
+operation: select
+type: function

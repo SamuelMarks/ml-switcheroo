@@ -1,0 +1,11 @@
+description: A new operation
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: Tensor
+variants:
+  mlir:
+    api: sparse_tensor.new
+operation: NewOp
+type: function

@@ -1,0 +1,14 @@
+description: Applies Instance Normalization.
+std_args:
+- num_features
+- eps
+- momentum
+- affine
+- track_running_stats
+- device
+- dtype
+type: class
+operation: InstanceNorm2d
+variants:
+  torch:
+    api: torch.nn.InstanceNorm2d

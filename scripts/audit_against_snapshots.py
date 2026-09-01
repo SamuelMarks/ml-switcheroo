@@ -334,6 +334,8 @@ def audit_frameworks(manager: SemanticsManager, snapshots: Dict[str, Dict[str, A
     "save",
     "tf.transpose",
     "numpy.transpose",
+    "torch.relu",
+    "torch.nn.functional.relu",
   }
 
   for op_name, op_details in manager.data.items():

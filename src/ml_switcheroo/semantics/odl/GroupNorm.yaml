@@ -23,3 +23,8 @@ std_args:
   type: float
 type: class
 operation: GroupNorm
+variants:
+  mlx:
+    api: mlx.nn.GroupNorm
+  torch:
+    api: torch.nn.GroupNorm

@@ -1,0 +1,9 @@
+description: Return the angle of the complex argument.
+std_args:
+- x
+- deg
+variants:
+  dask:
+    api: dask.array.angle
+operation: angle
+type: function

@@ -1,0 +1,13 @@
+description: Computes element-wise sigmoid cross entropy given logits and labels.
+std_args:
+- logits
+- labels
+type: attribute
+operation: sigmoid_binary_cross_entropy
+variants:
+  optax_shim:
+    api: optax.losses.sigmoid_binary_cross_entropy
+  flax_nnx:
+    api: optax.losses.sigmoid_binary_cross_entropy
+  jax:
+    api: optax.losses.sigmoid_binary_cross_entropy

@@ -1,0 +1,9 @@
+description: absolute(x, /, out=None, *, where=True, casting='same_kind', order='K',
+  dtype=None, subok=True[, signature, extobj])
+std_args:
+- kwargs
+variants:
+  dask:
+    api: dask.array.abs
+operation: absolute
+type: function

@@ -1,0 +1,12 @@
+description: A layer that calls the passed callables in order.
+std_args:
+- _modules
+type: class
+operation: Sequential
+variants:
+  mlx:
+    api: mlx.nn.Sequential
+  flax_nnx:
+    api: flax.nnx.Sequential
+  torch:
+    api: torch.nn.Sequential

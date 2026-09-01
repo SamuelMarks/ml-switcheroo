@@ -1,0 +1,14 @@
+description: Keras Layer wrapping Flax.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: module
+  type: Any
+variants:
+  keras:
+    api: keras.layers.FlaxLayer
+  tensorflow:
+    api: tf.keras.layers.FlaxLayer
+operation: FlaxLayer
+type: function

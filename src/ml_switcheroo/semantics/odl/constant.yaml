@@ -1,0 +1,16 @@
+description: The class representing a Python module/class/instance attribute.
+std_args:
+- value
+type: attribute
+operation: constant
+variants:
+  keras:
+    api: keras.initializers.Constant
+  flax_nnx:
+    api: jax.nn.initializers.constant
+  torch:
+    api: torch.nn.init.constant
+  jax:
+    api: jax.nn.initializers.constant
+  tensorflow:
+    api: tf.keras.initializers.Constant

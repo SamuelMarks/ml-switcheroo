@@ -1,0 +1,10 @@
+description: Applies a 2D nearest neighbor upsampling to an input signal composed
+  of several input channels.
+std_args:
+- size
+- scale_factor
+type: class
+operation: UpsamplingNearest2d
+variants:
+  torch:
+    api: torch.nn.UpsamplingNearest2d

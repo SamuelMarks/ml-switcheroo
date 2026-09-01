@@ -23,7 +23,7 @@ variants:
     macro_template: numpy.add({input}, {other} * {alpha})
     args: {}
   tensorflow:
-    api: tf.math.add
+    api: tf.keras.layers.Add
     macro_template: tf.math.add({input}, {other} * {alpha})
     args: {}
   paxml:
@@ -36,8 +36,13 @@ variants:
     args: {}
     macro_template: jax.numpy.add({input}, {other} * {alpha})
   keras:
-    api: keras.ops.add
+    api: keras.layers.Add
     args:
       inputs: inputs
       kwargs: kwargs
     macro_template: keras.ops.add({input}, {other} * {alpha})
+  dask:
+    api: dask.array.add
+  torch:
+    api: torch.add
+type: function

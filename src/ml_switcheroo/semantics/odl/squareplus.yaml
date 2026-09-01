@@ -1,0 +1,9 @@
+description: Squareplus activation function.
+std_args:
+- x
+- b
+variants:
+  keras:
+    api: keras.activations.squareplus
+operation: squareplus
+type: function

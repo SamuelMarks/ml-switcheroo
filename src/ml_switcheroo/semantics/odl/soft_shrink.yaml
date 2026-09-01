@@ -1,0 +1,9 @@
+description: Soft Shrink activation function.
+std_args:
+- x
+- threshold
+variants:
+  keras:
+    api: keras.activations.soft_shrink
+operation: soft_shrink
+type: function

@@ -1,0 +1,14 @@
+description: A :class:`torch.nn.BatchNorm2d` module with lazy initialization.
+std_args:
+- eps
+- momentum
+- affine
+- track_running_stats
+- cls_to_become
+- device
+- dtype
+type: class
+operation: LazyBatchNorm2d
+variants:
+  torch:
+    api: torch.nn.LazyBatchNorm2d

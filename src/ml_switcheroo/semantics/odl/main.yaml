@@ -1,0 +1,12 @@
+description: HTML <main> element.
+std_args:
+- children
+- id
+- class_name
+- style
+- kwargs
+type: function
+operation: main
+variants:
+  html_dsl:
+    api: html.main

@@ -1,0 +1,12 @@
+description: Unflattens a tensor dim expanding it to a desired shape. For use with
+  :class:`~nn.Sequential`.
+std_args:
+- dim
+- unflattened_size
+- NamedShape
+- __constants__
+variants:
+  torch:
+    api: torch.nn.Unflatten
+operation: unflatten
+type: function

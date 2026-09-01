@@ -1,0 +1,11 @@
+description: Applies the randomized leaky rectified linear unit function, element-wise.
+std_args:
+- lower
+- upper
+- inplace
+- __constants__
+type: function
+operation: rrelu
+variants:
+  torch:
+    api: torch.nn.RReLU

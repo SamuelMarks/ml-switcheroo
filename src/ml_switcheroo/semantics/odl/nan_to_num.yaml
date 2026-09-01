@@ -1,0 +1,10 @@
+description: Replace NaN with zero and infinity with large finite numbers (default
+std_args:
+- kwargs
+variants:
+  dask:
+    api: dask.array.nan_to_num
+  torch:
+    api: torch.nan_to_num
+operation: nan_to_num
+type: function

@@ -1,0 +1,12 @@
+description: Upsample the input signal spatially.
+std_args:
+- scale_factor
+- mode
+- align_corners
+type: function
+operation: upsample
+variants:
+  mlx:
+    api: mlx.nn.Upsample
+  torch:
+    api: torch.nn.Upsample

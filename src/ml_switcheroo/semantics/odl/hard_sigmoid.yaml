@@ -1,0 +1,8 @@
+description: Hard sigmoid activation function.
+std_args:
+- x
+variants:
+  keras:
+    api: keras.activations.hard_sigmoid
+operation: hard_sigmoid
+type: function

@@ -1,0 +1,12 @@
+description: Construct an array by executing a function over each coordinate.
+std_args:
+- func
+- chunks
+- shape
+- dtype
+- kwargs
+variants:
+  dask:
+    api: dask.array.fromfunction
+operation: fromfunction
+type: function

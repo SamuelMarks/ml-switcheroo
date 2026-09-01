@@ -57,4 +57,4 @@ def test_conv3d_tensorflow_positional():
   engine = ASTEngine(semantics, config)
   result = engine.run(code)
 
-  assert "tf.keras.layers.Convolution3D(32, 3" in result.code
+  assert "tf.keras.layers.Conv3D(1, 32, 3" in result.code

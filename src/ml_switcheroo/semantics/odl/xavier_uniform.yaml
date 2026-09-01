@@ -1,0 +1,8 @@
+description: xavier_uniform(...)
+std_args:
+- kwargs
+type: attribute
+operation: xavier_uniform
+variants:
+  torch:
+    api: torch.nn.init.xavier_uniform

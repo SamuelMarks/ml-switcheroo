@@ -1,0 +1,12 @@
+description: HTML <p> element.
+std_args:
+- children
+- id
+- class_name
+- style
+- kwargs
+type: attribute
+operation: p
+variants:
+  html_dsl:
+    api: html.p

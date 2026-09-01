@@ -1,0 +1,17 @@
+description: Computes the mean absolute percentage error between y_true & y_pred.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_true
+  type: Tensor
+- is_variadic: false
+  kind: positional_or_keyword
+  name: y_pred
+  type: Tensor
+variants:
+  keras:
+    api: keras.losses.MeanAbsolutePercentageError
+  tensorflow:
+    api: tf.keras.losses.MeanAbsolutePercentageError
+operation: meanabsolutepercentageerror
+type: function

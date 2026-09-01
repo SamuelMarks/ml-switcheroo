@@ -1,0 +1,23 @@
+description: Optimizer that implements the Nadam algorithm.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: lr
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight_decay
+  type: Any
+variants:
+  keras:
+    api: keras.optimizers.Nadam
+  torch:
+    api: torch.optim.NAdam
+  tensorflow:
+    api: tf.keras.optimizers.Nadam
+operation: Nadam
+type: function

@@ -1,0 +1,18 @@
+description: Torch module wrapper layer for Keras.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: module
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: name
+  type: str
+variants:
+  keras:
+    api: keras.layers.TorchModuleWrapper
+  tensorflow:
+    api: tf.keras.layers.TorchModuleWrapper
+operation: TorchModuleWrapper
+type: function

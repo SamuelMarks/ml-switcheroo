@@ -1,0 +1,9 @@
+description: Fill the input Tensor with the value :math:`\text{val}`.
+std_args:
+- tensor
+- val
+type: function
+operation: constant_
+variants:
+  torch:
+    api: torch.nn.init.constant_

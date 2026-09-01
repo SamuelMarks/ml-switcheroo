@@ -1,0 +1,31 @@
+description: Calculates the sum of the input array ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: axis
+  type: Optional[Union[int, Tuple[int, Ellipsis]]]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: dtype
+  type: Optional[dtype]
+- is_variadic: false
+  kind: positional_or_keyword
+  name: keepdims
+  type: bool
+variants:
+  keras:
+    api: keras.metrics.Sum
+  latex_dsl:
+    api: latex.sum
+  dask:
+    api: dask.array.sum
+  torch:
+    api: torch.sum
+  tensorflow:
+    api: tf.keras.metrics.Sum
+operation: sum
+type: function

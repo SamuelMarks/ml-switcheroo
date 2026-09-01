@@ -1,0 +1,16 @@
+description: Returns the specified diagonals of a matrix (or a stack of matrices)
+  ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+- is_variadic: false
+  kind: positional_or_keyword
+  name: offset
+  type: int
+type: attribute
+operation: diagonal
+variants:
+  dask:
+    api: dask.array.diagonal

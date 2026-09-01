@@ -1,0 +1,9 @@
+description: Applies the Hardsigmoid function element-wise.
+std_args:
+- inplace
+- __constants__
+type: function
+operation: hardsigmoid
+variants:
+  torch:
+    api: torch.nn.Hardsigmoid

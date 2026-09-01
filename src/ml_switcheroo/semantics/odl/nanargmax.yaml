@@ -1,0 +1,12 @@
+description: Return the indices of the maximum values in the specified axis ignoring
+std_args:
+- a
+- axis
+- keepdims
+- split_every
+- out
+variants:
+  dask:
+    api: dask.array.nanargmax
+operation: nanargmax
+type: function

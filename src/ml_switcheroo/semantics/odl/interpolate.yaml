@@ -1,0 +1,14 @@
+description: Down/up samples the input.
+std_args:
+- input
+- recompute_scale_factor
+- scale_factor
+- antialias
+- mode
+- align_corners
+- size
+type: function
+operation: interpolate
+variants:
+  torch:
+    api: torch.nn.functional.interpolate

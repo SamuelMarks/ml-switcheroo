@@ -1,0 +1,11 @@
+description: In-place version of I0.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  dask:
+    api: dask.array.i0
+operation: I0_
+type: function

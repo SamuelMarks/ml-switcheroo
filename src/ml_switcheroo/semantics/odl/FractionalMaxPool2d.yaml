@@ -1,0 +1,14 @@
+description: Applies a 2D fractional max pooling over an input signal composed of
+  several input planes.
+std_args:
+- kernel_size
+- output_size
+- output_ratio
+- return_indices
+- __constants__
+- _random_samples
+type: class
+operation: FractionalMaxPool2d
+variants:
+  torch:
+    api: torch.nn.FractionalMaxPool2d

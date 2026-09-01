@@ -1,0 +1,10 @@
+description: Implements NumPy's ``indices`` for Dask Arrays.
+std_args:
+- dimensions
+- dtype
+- chunks
+variants:
+  dask:
+    api: dask.array.indices
+operation: indices
+type: function

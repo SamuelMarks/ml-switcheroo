@@ -1,0 +1,28 @@
+description: Turns nonnegative integers (indexes) into dense vectors of fixed size.
+std_args:
+- input_dim
+- output_dim
+- embeddings_initializer
+- embeddings_regularizer
+- embeddings_constraint
+- mask_zero
+- weights
+- lora_rank
+- lora_alpha
+- kwargs
+- activity_regularizer
+- trainable
+- dtype
+- autocast
+- name
+type: function
+operation: embedding
+variants:
+  keras:
+    api: keras.layers.Embedding
+  mlx:
+    api: mlx.nn.Embedding
+  torch:
+    api: torch.nn.Embedding
+  tensorflow:
+    api: tf.keras.layers.Embedding

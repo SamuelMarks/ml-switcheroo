@@ -1,0 +1,13 @@
+description: Abstract base class for generic types.
+std_args:
+- module_constructor
+- prevent_cse
+- static_argnums
+- policy
+- module_init_args
+- module_init_kwargs
+variants:
+  flax_nnx:
+    api: flax.nnx.Remat
+operation: remat
+type: function

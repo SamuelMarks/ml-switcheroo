@@ -1,0 +1,35 @@
+description: Optimizer that implements the Muon algorithm.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: eps
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: lr
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: momentum
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: nesterov
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: ns_steps
+  type: Any
+- is_variadic: false
+  kind: positional_or_keyword
+  name: weight_decay
+  type: Any
+variants:
+  keras:
+    api: keras.optimizers.Muon
+  mlx:
+    api: mlx.optimizers.Muon
+  tensorflow:
+    api: tf.keras.optimizers.Muon
+operation: Muon
+type: function

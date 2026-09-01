@@ -1,0 +1,12 @@
+description: Estimate a covariance matrix, given data and weights.
+std_args:
+- m
+- y
+- rowvar
+- bias
+- ddof
+variants:
+  dask:
+    api: dask.array.cov
+operation: cov
+type: function

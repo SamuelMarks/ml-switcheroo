@@ -1,0 +1,7 @@
+description: LaTeX \int macro.
+std_args: []
+variants:
+  latex_dsl:
+    api: latex.int
+operation: int_
+type: function

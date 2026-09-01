@@ -1,0 +1,12 @@
+description: Applies a 1D power-average pooling over an input signal composed of several
+  input planes.
+std_args:
+- kernel_size
+- stride
+- ceil_mode
+- norm_type
+type: class
+operation: LPPool1d
+variants:
+  torch:
+    api: torch.nn.LPPool1d

@@ -1,0 +1,16 @@
+description: Abstract wrapper base class.
+std_args:
+- layer
+- kwargs
+- activity_regularizer
+- trainable
+- dtype
+- autocast
+- name
+variants:
+  keras:
+    api: keras.layers.Wrapper
+  tensorflow:
+    api: tf.keras.layers.Wrapper
+operation: Wrapper
+type: function

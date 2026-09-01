@@ -1,0 +1,10 @@
+description: Append values to the end of an array.
+std_args:
+- arr
+- values
+- axis
+type: function
+operation: append
+variants:
+  dask:
+    api: dask.array.append

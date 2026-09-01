@@ -1,0 +1,12 @@
+description: Approximate percentile of 1-D array
+std_args:
+- a
+- q
+- method
+- internal_method
+- kwargs
+variants:
+  dask:
+    api: dask.array.percentile
+operation: percentile
+type: function

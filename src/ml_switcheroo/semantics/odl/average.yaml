@@ -1,0 +1,12 @@
+description: Averages a list of inputs element-wise..
+std_args:
+- kwargs
+variants:
+  keras:
+    api: keras.layers.Average
+  dask:
+    api: dask.array.average
+  tensorflow:
+    api: tf.keras.layers.Average
+operation: average
+type: function

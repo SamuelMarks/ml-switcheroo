@@ -1,0 +1,10 @@
+description: The differences between consecutive elements of an array.
+std_args:
+- ary
+- to_end
+- to_begin
+variants:
+  dask:
+    api: dask.array.ediff1d
+operation: ediff1d
+type: function

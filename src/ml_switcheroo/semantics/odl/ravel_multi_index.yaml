@@ -1,0 +1,11 @@
+description: ravel_multi_index(multi_index, dims, mode='raise', order='C')
+std_args:
+- multi_index
+- dims
+- mode
+- order
+variants:
+  dask:
+    api: dask.array.ravel_multi_index
+operation: ravel_multi_index
+type: function

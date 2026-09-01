@@ -1,0 +1,13 @@
+description: Builds an initializer that returns real normally-distributed random arrays.
+std_args:
+- stddev
+- dtype
+type: attribute
+operation: normal
+variants:
+  flax_nnx:
+    api: jax.nn.initializers.normal
+  torch:
+    api: torch.nn.init.normal
+  jax:
+    api: jax.nn.initializers.normal

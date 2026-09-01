@@ -1,0 +1,9 @@
+description: Wrapper for future results (JIT/Async).
+op_type: class
+std_args:
+- kwargs
+variants:
+  orbax_checkpoint:
+    api: orbax.checkpoint.Future
+operation: Future
+type: function

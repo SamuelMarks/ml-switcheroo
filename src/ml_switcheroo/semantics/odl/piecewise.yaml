@@ -1,0 +1,11 @@
+description: Evaluate a piecewise-defined function.
+std_args:
+- x
+- condlist
+- funclist
+- kw
+variants:
+  dask:
+    api: dask.array.piecewise
+operation: piecewise
+type: function

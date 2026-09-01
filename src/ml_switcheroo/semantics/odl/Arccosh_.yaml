@@ -1,0 +1,11 @@
+description: In-place version of Arccosh.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  dask:
+    api: dask.array.arccosh
+operation: Arccosh_
+type: function

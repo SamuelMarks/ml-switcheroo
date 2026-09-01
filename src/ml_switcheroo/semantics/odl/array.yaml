@@ -1,0 +1,10 @@
+description: 'Constant: array'
+std_args:
+- content
+variants:
+  latex_dsl:
+    api: latex.env.array
+  dask:
+    api: dask.array.Array
+operation: array
+type: function

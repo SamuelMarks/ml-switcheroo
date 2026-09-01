@@ -1,0 +1,13 @@
+description: Builds a He normal initializer (aka Kaiming normal initializer).
+std_args:
+- in_axis
+- out_axis
+- batch_axis
+- dtype
+variants:
+  flax_nnx:
+    api: jax.nn.initializers.he_normal
+  jax:
+    api: jax.nn.initializers.he_normal
+operation: he_normal
+type: function

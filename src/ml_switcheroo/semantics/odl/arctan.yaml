@@ -1,0 +1,10 @@
+description: LaTeX \arctan macro.
+std_args:
+- kwargs
+variants:
+  latex_dsl:
+    api: latex.arctan
+  dask:
+    api: dask.array.arctan
+operation: arctan
+type: function

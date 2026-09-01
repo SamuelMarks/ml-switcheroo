@@ -1,0 +1,22 @@
+description: Random Erasing data augmentation technique.
+op_type: class
+std_args:
+- default: 1.0
+  is_variadic: false
+  kind: positional_or_keyword
+  name: factor
+  type: float
+- default:
+  - 0.02
+  - 0.33
+  is_variadic: false
+  kind: positional_or_keyword
+  name: scale
+  type: Tuple[float, float]
+variants:
+  keras:
+    api: keras.layers.RandomErasing
+  tensorflow:
+    api: tf.keras.layers.RandomErasing
+operation: RandomErasing
+type: function

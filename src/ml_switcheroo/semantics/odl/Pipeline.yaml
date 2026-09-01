@@ -1,0 +1,18 @@
+description: Applies a series of layers to an input.
+op_type: class
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: layers
+  type: List
+variants:
+  keras:
+    api: keras.layers.Pipeline
+  sklearn:
+    api: sklearn.pipeline.Pipeline
+  huggingface:
+    api: transformers.Pipeline
+  tensorflow:
+    api: tf.keras.layers.Pipeline
+operation: Pipeline
+type: function

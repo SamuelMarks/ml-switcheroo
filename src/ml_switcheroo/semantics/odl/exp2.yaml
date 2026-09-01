@@ -1,0 +1,9 @@
+description: exp2(x, /, out=None, *, where=True, casting='same_kind', order='K', dtype=None,
+  subok=True[, signature, extobj])
+std_args:
+- kwargs
+type: attribute
+operation: exp2
+variants:
+  dask:
+    api: dask.array.exp2

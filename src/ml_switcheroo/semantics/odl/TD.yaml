@@ -1,0 +1,12 @@
+description: HTML <td> element.
+std_args:
+- children
+- id
+- class_name
+- style
+- kwargs
+variants:
+  html_dsl:
+    api: html.td
+operation: TD
+type: function

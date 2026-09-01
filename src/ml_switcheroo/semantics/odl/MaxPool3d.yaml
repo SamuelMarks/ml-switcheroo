@@ -10,3 +10,8 @@ std_args:
   type: Any
 type: class
 operation: MaxPool3d
+variants:
+  mlx:
+    api: mlx.nn.MaxPool3d
+  torch:
+    api: torch.nn.MaxPool3d

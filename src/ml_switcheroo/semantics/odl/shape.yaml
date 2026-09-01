@@ -1,0 +1,8 @@
+description: Return the shape of an array.
+std_args:
+- array
+type: attribute
+operation: shape
+variants:
+  dask:
+    api: dask.array.shape

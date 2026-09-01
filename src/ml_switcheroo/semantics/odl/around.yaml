@@ -1,0 +1,9 @@
+description: Round an array to the given number of decimals.
+std_args:
+- x
+- decimals
+variants:
+  dask:
+    api: dask.array.around
+operation: around
+type: function

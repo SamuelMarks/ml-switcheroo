@@ -1,0 +1,8 @@
+description: Pads the input tensor boundaries with zero.
+std_args:
+- padding
+type: class
+operation: ZeroPad3d
+variants:
+  torch:
+    api: torch.nn.ZeroPad3d

@@ -1,0 +1,16 @@
+description: load(f, map_location=None, pickle_module=pickle, *, weights_only=True,
+  mmap=None, **pickle_load_args)
+std_args:
+- f
+- map_location
+- pickle_module
+- weights_only
+- mmap
+- pickle_load_args
+variants:
+  torch:
+    api: torch.load
+  jax:
+    api: load
+operation: load
+type: function

@@ -15,3 +15,8 @@ std_args:
   type: Union[int, Tuple[int, int, int]]
 type: class
 operation: AvgPool3d
+variants:
+  mlx:
+    api: mlx.nn.AvgPool3d
+  torch:
+    api: torch.nn.AvgPool3d

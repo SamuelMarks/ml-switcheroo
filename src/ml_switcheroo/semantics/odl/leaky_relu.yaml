@@ -1,0 +1,11 @@
+description: Leaky relu activation function.
+std_args:
+- x
+- negative_slope
+type: function
+operation: leaky_relu
+variants:
+  keras:
+    api: keras.activations.leaky_relu
+  tensorflow:
+    api: tf.nn.leaky_relu

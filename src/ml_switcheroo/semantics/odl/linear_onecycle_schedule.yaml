@@ -1,0 +1,17 @@
+description: Returns a learning rate with three linear phases.
+std_args:
+- transition_steps
+- peak_value
+- pct_start
+- pct_final
+- div_factor
+- final_div_factor
+type: attribute
+operation: linear_onecycle_schedule
+variants:
+  optax_shim:
+    api: optax.schedules.linear_onecycle_schedule
+  flax_nnx:
+    api: optax.schedules.linear_onecycle_schedule
+  jax:
+    api: optax.schedules.linear_onecycle_schedule

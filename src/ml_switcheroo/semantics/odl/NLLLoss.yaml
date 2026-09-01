@@ -1,0 +1,13 @@
+description: The negative log likelihood loss. It is useful to train a classification
+std_args:
+- weight
+- size_average
+- ignore_index
+- reduce
+- reduction
+- __constants__
+type: class
+operation: NLLLoss
+variants:
+  torch:
+    api: torch.nn.NLLLoss

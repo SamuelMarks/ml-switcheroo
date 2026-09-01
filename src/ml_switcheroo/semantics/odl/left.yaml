@@ -1,0 +1,10 @@
+description: The class representing a Python module/class/instance attribute.
+std_args:
+- value
+type: attribute
+operation: left
+variants:
+  sass:
+    api: sass.prop.left
+  latex_dsl:
+    api: latex.left

@@ -1,0 +1,13 @@
+description: In-place square root.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: input
+  type: Tensor
+variants:
+  latex_dsl:
+    api: latex.sqrt
+  dask:
+    api: dask.array.sqrt
+operation: Sqrt_
+type: function

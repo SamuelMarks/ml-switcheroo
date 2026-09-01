@@ -1,0 +1,11 @@
+description: Loss base class.
+op_type: class
+std_args:
+- reduction
+- name
+- dtype
+variants:
+  tensorflow:
+    api: tf.keras.losses.Loss
+operation: Loss
+type: function

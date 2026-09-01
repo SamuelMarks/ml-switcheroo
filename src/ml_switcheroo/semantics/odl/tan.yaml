@@ -1,0 +1,14 @@
+description: Calculates an implementation-dependent approximation to the tangent for
+  each element ``x_i`` of the input array ``x``.
+std_args:
+- is_variadic: false
+  kind: positional_or_keyword
+  name: x
+  type: array
+variants:
+  latex_dsl:
+    api: latex.tan
+  dask:
+    api: dask.array.tan
+operation: tan
+type: function
