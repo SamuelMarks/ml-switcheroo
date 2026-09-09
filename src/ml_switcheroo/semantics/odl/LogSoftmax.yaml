@@ -14,5 +14,23 @@ operation: LogSoftmax
 variants:
   mlx:
     api: mlx.nn.LogSoftmax
+    args: {}
   torch:
     api: torch.nn.LogSoftmax
+    args: {}
+  paxml:
+    api: jax.nn.log_softmax
+    args:
+      dim: axis
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.nn.log_softmax
+    args:
+      dim: axis
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,7 @@
+operation: AsMutableVars
+variants:
+  flax_nnx:
+    api: flax.nnx.as_mutable_vars
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -8,7 +8,23 @@ std_args:
 variants:
   keras:
     api: keras.layers.TimeDistributed
+    args:
+      kwargs: kwargs
+      layer: layer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.TimeDistributed
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.Scan
+    args:
+      layer: target
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: TimeDistributed
 type: function

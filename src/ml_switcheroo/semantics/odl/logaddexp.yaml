@@ -1,17 +1,36 @@
-description: Calculates the logarithm of the sum of exponentiations ``log(exp(x1)
-  + exp(x2))`` for each element ``x1_i`` of the input array ``x1`` with the respective
-  element ``x2_i`` of the input array ``x2``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x1
-  type: Union[array, int, float]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x2
-  type: Union[array, int, float]
-variants:
-  dask:
-    api: dask.array.logaddexp
 operation: logaddexp
-type: function
+description: logaddexp(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.logaddexp
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.logaddexp
+    args:
+      x1: x1
+      x2: x2
+  mlx:
+    api: mlx.core.logaddexp
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.logaddexp
+    args:
+      x1: x1
+      x2: x2

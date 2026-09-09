@@ -1,0 +1,4 @@
+operation: Ubmsk
+variants:
+  nvidia_sass:
+    api: UBMSK

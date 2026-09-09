@@ -1,0 +1,7 @@
+operation: CachedPartial
+variants:
+  flax_nnx:
+    api: flax.nnx.cached_partial
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

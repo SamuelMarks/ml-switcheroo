@@ -1,0 +1,12 @@
+operation: ControlDependency
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: jax_control_dependencies
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: jax_control_dependencies

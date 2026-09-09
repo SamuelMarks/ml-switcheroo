@@ -1,0 +1,12 @@
+operation: AsContiguousArray
+variants:
+  paxml:
+    api: jax.numpy.ascontiguousarray
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.ascontiguousarray
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

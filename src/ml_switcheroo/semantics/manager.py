@@ -62,6 +62,7 @@ class SemanticsManager:
 
     # Indexes
     self._reverse_index: dict[Any, Any] = {}
+    self._variant_cache: Dict[Tuple[str, str], Optional[dict]] = {}
     self._key_origins: Dict[str, str] = {}
     self._validation_status: Dict[str, bool] = {}
 
@@ -86,12 +87,22 @@ class SemanticsManager:
 
   def _build_index(self) -> None:
     """Construct the reverse index mapping from concrete API endpoints back to their abstract definitions."""
-    self._reverse_index.clear()
+    if not hasattr(self, "_reverse_index"):
+      self._reverse_index = {}
+    else:
+      self._reverse_index.clear()
+
+    if not hasattr(self, "_variant_cache"):
+      self._variant_cache = {}
+    else:
+      self._variant_cache.clear()
     alias_map = {}
 
-    aliases_json_path = os.path.join(os.path.dirname(__file__), "aliases.json")
-    if os.path.exists(aliases_json_path):  # pragma: no branch
-      with open(aliases_json_path, "r", encoding="utf-8") as f:
+    import importlib.resources
+
+    aliases_json_path = importlib.resources.files("ml_framework_snapshots.snapshots").joinpath("aliases.json")
+    if aliases_json_path.is_file():  # pragma: no branch
+      with aliases_json_path.open("r", encoding="utf-8") as f:
         alias_map.update(json.load(f))
 
     for fw, config in self.framework_configs.items():
@@ -260,23 +271,49 @@ class SemanticsManager:
         A dictionary containing the implementation variant details, or None if
         the variant cannot be resolved.
     """
+    cache_key = (abstract_id, target_fw)
+    if not hasattr(self, "_variant_cache"):
+      self._variant_cache = {}
+    if cache_key in self._variant_cache:
+      return self._variant_cache[cache_key]
+
     defn = self.data.get(abstract_id)
+    if not defn and isinstance(abstract_id, str):
+      defn = self.data.get(abstract_id.lower()) or self.data.get(abstract_id.capitalize())
     if not defn:
+      self._variant_cache[cache_key] = None
       return None
     variants = defn.get("variants", {})
     if target_fw in variants:
-      return variants[target_fw]
+      result = variants[target_fw]
+      self._variant_cache[cache_key] = result
+      return result
 
     curr = target_fw
     limit = 5
     while limit > 0:
       parent = self._resolve_inheritance(curr)
       if not parent:
-        return None
+        break
       if parent in variants:
-        return variants[parent]
+        result = variants[parent]
+        self._variant_cache[cache_key] = result
+        return result
       curr = parent
       limit -= 1
+
+    if isinstance(abstract_id, str):
+      for candidate_id in [abstract_id.lower(), abstract_id.capitalize()]:
+        if candidate_id != abstract_id:
+          alt_defn = self.data.get(candidate_id)
+          if alt_defn:
+            alt_vars = alt_defn.get("variants", {})
+            if target_fw in alt_vars:
+              result = alt_vars[target_fw]
+              self._variant_cache[cache_key] = result
+              return result
+
+    self._variant_cache[cache_key] = None
     return None
 
   def is_verified(self, abstract_id: str) -> bool:
@@ -313,12 +350,21 @@ class SemanticsManager:
         A tuple of (abstract_id, definition_dict) if resolved, or None if not
         found.
     """
+    if not hasattr(self, "_reverse_index"):
+      self._reverse_index = {}
     res = self._reverse_index.get(api_name)
     if res:
       return res
 
-    if api_name in self.data:
-      return (api_name, self.data[api_name])
+    lower_name = api_name.lower()
+    cap_name = api_name.capitalize()
+    for candidate in [api_name, lower_name, cap_name]:
+      if candidate in self.data and self.data[candidate].get("variants"):
+        return (candidate, self.data[candidate])
+
+    for candidate in [api_name, lower_name, cap_name]:
+      if candidate in self.data:
+        return (candidate, self.data[candidate])
 
     return None
 

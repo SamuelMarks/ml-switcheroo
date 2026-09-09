@@ -1,0 +1,22 @@
+operation: batch_matmul
+description: Batch matrix multiplication.
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: precision
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.batch_matmul
+    args:
+      lhs: lhs
+      rhs: rhs

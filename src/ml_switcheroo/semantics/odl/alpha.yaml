@@ -5,3 +5,4 @@ operation: alpha
 variants:
   latex_dsl:
     api: latex.alpha
+    args: {}

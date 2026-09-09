@@ -1,0 +1,11 @@
+operation: apply_mask
+variants:
+  flax_nnx:
+    api: nnx.graph.GraphDef.apply
+    args:
+      self: self
+      state: state
+      states: states
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -12,7 +12,25 @@ std_args:
 variants:
   keras:
     api: keras.layers.SpatialDropout1D
+    args:
+      dtype: dtype
+      name: name
+      rate: rate
+      seed: seed
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.SpatialDropout1D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Dropout1d
+    args:
+      rate: p
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: SpatialDropout1D
 type: function

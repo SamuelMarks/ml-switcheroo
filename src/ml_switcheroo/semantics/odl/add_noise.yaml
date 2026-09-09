@@ -1,0 +1,8 @@
+operation: add_noise
+variants:
+  flax_nnx:
+    api: optax.add_noise
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

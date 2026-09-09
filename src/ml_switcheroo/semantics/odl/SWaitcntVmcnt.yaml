@@ -1,0 +1,5 @@
+operation: SWaitcntVmcnt
+variants:
+  rdna:
+    api: s_waitcnt_vmcnt
+    description: Auto-mapped instruction S_WAITCNT_VMCNT

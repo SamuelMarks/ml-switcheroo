@@ -1,0 +1,16 @@
+operation: logdet
+description: logdet(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.logdet
+    args:
+      input: input
+  keras:
+    api: keras.ops.logdet
+    args:
+      x: x

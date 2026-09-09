@@ -1,0 +1,10 @@
+__frameworks__:
+  torch:
+    alias:
+      module: "torch"
+      name: "torch"
+  torch_nn:
+    extends: "torch"
+    alias:
+      module: "torch.nn"
+      name: "nn"

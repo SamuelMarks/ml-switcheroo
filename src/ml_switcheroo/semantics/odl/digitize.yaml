@@ -1,10 +1,27 @@
-description: Return the indices of the bins to which each value in input array belongs.
-std_args:
-- a
-- bins
-- right
-variants:
-  dask:
-    api: dask.array.digitize
 operation: digitize
-type: function
+description: Auto-generated from jax_code_defs
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: bins
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: right
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  jax:
+    api: jax.numpy.digitize
+    args:
+      x: x
+      bins: bins
+  keras:
+    api: keras.ops.digitize
+    args:
+      x: x
+      bins: bins

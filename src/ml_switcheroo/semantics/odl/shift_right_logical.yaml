@@ -1,0 +1,22 @@
+operation: shift_right_logical
+description: 'Elementwise logical right shift: :math:`x \gg y`.'
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: y
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.shift_right_logical
+    args:
+      x: x
+      y: y
+  stablehlo:
+    api: stablehlo.shift_right_logical
+    args:
+      lhs: lhs
+      rhs: rhs

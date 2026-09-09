@@ -1,0 +1,13 @@
+operation: ExponentialMinusOne
+variants:
+  stablehlo:
+    api: stablehlo.exponential_minus_one
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: result_accuracy
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

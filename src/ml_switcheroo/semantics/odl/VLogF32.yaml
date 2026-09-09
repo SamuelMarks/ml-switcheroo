@@ -1,0 +1,5 @@
+operation: VLogF32
+variants:
+  rdna:
+    api: v_log_f32
+    description: Auto-mapped instruction V_LOG_F32

@@ -1,0 +1,4 @@
+operation: Ufsetp
+variants:
+  nvidia_sass:
+    api: UFSETP

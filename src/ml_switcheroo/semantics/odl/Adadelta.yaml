@@ -19,21 +19,9 @@ std_args:
 variants:
   keras:
     api: keras.optimizers.Adadelta
-    args:
-      learning_rate: learning_rate
-      rho: rho
-      epsilon: epsilon
-      ema_momentum: ema_momentum
-      name: name
-      gradient_accumulation_steps: gradient_accumulation_steps
-      weight_decay: weight_decay
-      loss_scale_factor: loss_scale_factor
-      ema_overwrite_frequency: ema_overwrite_frequency
-      clipvalue: clipvalue
-      use_ema: use_ema
-      clipnorm: clipnorm
-      global_clipnorm: global_clipnorm
-      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   mlx:
     api: mlx.optimizers.AdaDelta
     args:
@@ -42,24 +30,22 @@ variants:
   torch:
     api: torch.optim.Adadelta
     args:
-      rho: rho
-      weight_decay: weight_decay
+      epsilon: eps
+      learning_rate: lr
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.optimizers.Adadelta
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.adadelta
     args:
-      learning_rate: learning_rate
-      rho: rho
-      epsilon: epsilon
-      ema_momentum: ema_momentum
-      name: name
-      gradient_accumulation_steps: gradient_accumulation_steps
-      weight_decay: weight_decay
-      loss_scale_factor: loss_scale_factor
-      ema_overwrite_frequency: ema_overwrite_frequency
-      clipvalue: clipvalue
-      use_ema: use_ema
-      clipnorm: clipnorm
-      global_clipnorm: global_clipnorm
-      kwargs: kwargs
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Adadelta
 type: function

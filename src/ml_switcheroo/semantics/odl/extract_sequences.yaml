@@ -1,0 +1,22 @@
+operation: extract_sequences
+description: Expands the dimension of last axis into sequences of `sequence_length`.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: sequence_length
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: sequence_stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  keras:
+    api: keras.ops.extract_sequences
+    args:
+      x: x
+      sequence_length: sequence_length
+      sequence_stride: sequence_stride

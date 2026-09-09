@@ -54,7 +54,7 @@ class RdnaToken(Token):
 class RdnaLexer(Lexer):
   """Custom Lexer preserving trivia and matching RDNA tokens."""
 
-  def __init__(self, lexer_conf) -> None:
+  def __init__(self, lexer_conf: Any) -> None:
     """Initialize the custom RDNA lexer.
 
     Args:
@@ -62,11 +62,12 @@ class RdnaLexer(Lexer):
     """
     self.lexer_conf = lexer_conf
 
-  def lex(self, data: str) -> Any:
+  def lex(self, lexer_state: Any, parser_state: Any = None) -> Any:
     """Tokenize the input string and attach trivia.
 
     Args:
-        data: The source string to tokenize.
+        lexer_state: The source string or lexer state to tokenize.
+        parser_state: Optional parser state.
 
     Yields:
         RdnaToken: Tokens.
@@ -74,6 +75,12 @@ class RdnaLexer(Lexer):
     Raises:
         ValueError: Value error.
     """
+    if isinstance(lexer_state, str):
+      data = lexer_state
+    elif hasattr(lexer_state, "text"):
+      data = str(lexer_state.text)
+    else:
+      data = str(lexer_state)
     leading: List[Trivia] = []
     for mo in re.finditer(tok_regex, data):
       kind = mo.lastgroup

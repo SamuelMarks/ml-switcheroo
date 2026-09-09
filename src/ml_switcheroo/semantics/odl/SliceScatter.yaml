@@ -1,0 +1,14 @@
+operation: SliceScatter
+variants:
+  paxml:
+    api: jax.lax.dynamic_update_slice
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: slice_scatter_plugin
+  flax_nnx:
+    api: jax.lax.dynamic_update_slice
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: slice_scatter_plugin

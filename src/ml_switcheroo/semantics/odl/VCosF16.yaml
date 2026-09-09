@@ -1,0 +1,5 @@
+operation: VCosF16
+variants:
+  rdna:
+    api: v_cos_f16
+    description: Auto-mapped instruction V_COS_F16

@@ -1,0 +1,8 @@
+operation: cosine_similarity
+variants:
+  flax_nnx:
+    api: optax.cosine_similarity
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

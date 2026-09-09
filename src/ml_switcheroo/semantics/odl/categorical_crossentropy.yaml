@@ -1,0 +1,27 @@
+operation: categorical_crossentropy
+description: Computes categorical cross-entropy loss between target and output tensor.
+std_args:
+- name: target
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: output
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: from_logits
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '-1'
+variants:
+  keras:
+    api: keras.ops.categorical_crossentropy
+    args:
+      target: target
+      output: output

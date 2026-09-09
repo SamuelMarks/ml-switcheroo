@@ -1,0 +1,29 @@
+operation: cummax
+description: cummax(input, dim, *, out=None) -> (Tensor, LongTensor)
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.cummax
+    args:
+      input: input
+      dim: dim
+  jax:
+    api: jax.lax.cummax
+    args:
+      operand: operand
+  mlx:
+    api: mlx.core.cummax
+    args:
+      a: a

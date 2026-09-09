@@ -1,0 +1,7 @@
+operation: TrainState
+variants:
+  flax_nnx:
+    api: flax.nnx.TrainState
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

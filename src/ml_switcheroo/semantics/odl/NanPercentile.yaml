@@ -1,0 +1,47 @@
+operation: nanpercentile
+description: Auto-generated mapping for nanpercentile.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: q
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: out
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: overwrite_input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: method
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''linear'''
+- name: keepdims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: interpolation
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: DeprecatedArg()
+variants:
+  jax:
+    api: jax.numpy.nanpercentile
+    args:
+      a: a
+      q: q

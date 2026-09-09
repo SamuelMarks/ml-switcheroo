@@ -1,0 +1,10 @@
+operation: QUInt4x2Storage
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

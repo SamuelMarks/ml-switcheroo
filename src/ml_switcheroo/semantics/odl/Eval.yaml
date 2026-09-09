@@ -1,0 +1,11 @@
+operation: eval
+description: eval(*args) -> None
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+variants:
+  mlx:
+    api: mlx.core.eval
+    args: {}

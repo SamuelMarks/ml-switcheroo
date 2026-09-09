@@ -1,0 +1,8 @@
+operation: V
+variants:
+  flax_nnx:
+    api: nnx.module.V
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

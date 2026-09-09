@@ -1,28 +1,68 @@
-description: Dot-product attention with multiple heads.
+operation: MultiHeadAttention
+description: Implements the scaled dot product attention with multiple heads.
 std_args:
-- is_variadic: false
+- name: dims
   kind: positional_or_keyword
-  name: embed_dim
-  type: int
-- is_variadic: false
-  kind: positional_or_keyword
-  name: num_heads
-  type: int
-- default: 0.0
   is_variadic: false
+  type: int
+- name: num_heads
   kind: positional_or_keyword
-  name: dropout
-  type: float
-type: class
-operation: MultiheadAttention
+  is_variadic: false
+  type: int
+- name: query_input_dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''dims'''
+- name: key_input_dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''dims'''
+- name: value_input_dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''key_input_dims'''
+- name: value_dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''dims'''
+- name: value_output_dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''dims'''
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
 variants:
-  keras:
-    api: keras.layers.MultiHeadAttention
   mlx:
     api: mlx.nn.MultiHeadAttention
-  flax_nnx:
-    api: flax.nnx.MultiHeadAttention
+    args:
+      dims: dims
+      num_heads: num_heads
+  keras:
+    api: keras.layers.MultiHeadAttention
+    args:
+      num_heads: num_heads
+      key_dim: key_dim
   torch:
     api: torch.nn.MultiheadAttention
-  tensorflow:
-    api: tf.keras.layers.MultiHeadAttention
+    args:
+      dims: embed_dim
+      num_heads: num_heads
+  flax_nnx:
+    api: flax.nnx.MultiHeadAttention
+    args:
+      num_heads: num_heads
+      dims: in_features
+  nvidia_sass:
+    api: Macro.MultiheadAttention
+    args: {}
+  rdna:
+    api: ; Macro.MultiheadAttention
+    args: {}

@@ -1,0 +1,5 @@
+operation: VDivFmasF64
+variants:
+  rdna:
+    api: v_div_fmas_f64
+    description: Auto-mapped instruction V_DIV_FMAS_F64

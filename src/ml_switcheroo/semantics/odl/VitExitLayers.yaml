@@ -1,0 +1,7 @@
+operation: VitExitLayers
+variants:
+  paxml:
+    api: praxis.layers.VitExitLayers
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

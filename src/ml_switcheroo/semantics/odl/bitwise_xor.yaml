@@ -13,5 +13,26 @@ std_args:
 variants:
   dask:
     api: dask.array.bitwise_xor
+    args: {}
+  flax_nnx:
+    api: jax.numpy.bitwise_xor
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.lax.bitwise_xor
+    args:
+      x: x
+      y: y
+  mlx:
+    api: mlx.core.bitwise_xor
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.bitwise_xor
+    args:
+      x: x
+      y: y
 operation: bitwise_xor
 type: function

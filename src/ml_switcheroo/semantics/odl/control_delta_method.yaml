@@ -1,0 +1,9 @@
+operation: control_delta_method
+variants:
+  flax_nnx:
+    api: optax.monte_carlo.control_variates.control_delta_method
+    args:
+      function: function
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,11 +1,16 @@
 description: Fill the input Tensor with values drawn from the normal distribution.
 std_args:
-- tensor
-- mean
-- std
-- generator
+- name: tensor
+  type: Any
+- name: mean
+  type: Any
+- name: std
+  type: Any
+- name: generator
+  type: Any
 type: function
 operation: normal_
 variants:
   torch:
     api: torch.nn.init.normal_
+    args: {}

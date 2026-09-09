@@ -34,15 +34,46 @@ operation: RMSprop
 variants:
   keras:
     api: keras.optimizers.RMSprop
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   mlx:
     api: mlx.optimizers.RMSprop
+    args:
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   optax_shim:
     api: optax.rmsprop
+    args: {}
   flax_nnx:
     api: optax.rmsprop
+    args:
+      epsilon: eps
+      rho: decay
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.optim.RMSprop
+    args:
+      epsilon: eps
+      learning_rate: lr
+      rho: alpha
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.rmsprop
+    args:
+      epsilon: eps
+      rho: decay
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.optimizers.RMSprop
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

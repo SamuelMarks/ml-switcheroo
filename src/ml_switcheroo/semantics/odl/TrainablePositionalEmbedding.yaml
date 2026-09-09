@@ -1,0 +1,101 @@
+operation: TrainablePositionalEmbedding
+variants:
+  paxml:
+    api: praxis.layers.TrainablePositionalEmbedding
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Embedding
+    args:
+      embedding_dims: embedding_dim
+      max_seq_length: num_embeddings
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Embed
+    args:
+      embedding_dims: features
+      max_seq_length: num_embeddings
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.Embedding
+    args:
+      num_embeddings: num_embeddings
+      dims: dims
+  keras:
+    api: keras.layers.Embedding
+    args:
+      input_dim: input_dim
+      output_dim: output_dim
+std_args:
+- name: max_seq_length
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: embedding_dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: padding_idx
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: max_norm
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: norm_type
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '2.0'
+- name: scale_grad_by_freq
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: 'False'
+- name: sparse
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: __constants__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+  default: '[''num_embeddings'', ''embedding_dim'', ''padding_idx'', ''max_norm'',
+    ''norm_type'', ''scale_grad_by_freq'', ''sparse'']'
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: freeze
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: _freeze
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: _weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''

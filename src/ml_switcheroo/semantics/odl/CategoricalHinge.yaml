@@ -9,7 +9,13 @@ std_args:
 variants:
   keras:
     api: keras.losses.CategoricalHinge
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.losses.CategoricalHinge
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: CategoricalHinge
 type: function

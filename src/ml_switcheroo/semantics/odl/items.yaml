@@ -1,0 +1,9 @@
+operation: items
+variants:
+  flax_nnx:
+    api: nnx.transforms.iteration.StateAxes.items
+    args:
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

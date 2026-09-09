@@ -1,0 +1,36 @@
+operation: split
+description: Splits the tensor into chunks. Each chunk is a view of the original tensor.
+std_args:
+- name: tensor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: split_size_or_sections
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+variants:
+  torch:
+    api: torch.split
+    args:
+      tensor: tensor
+      split_size_or_sections: split_size_or_sections
+  jax:
+    api: jax.random.split
+    args:
+      key: key
+  mlx:
+    api: mlx.core.split
+    args:
+      a: a
+      indices_or_sections: indices_or_sections
+  keras:
+    api: keras.ops.split
+    args:
+      x: x
+      indices_or_sections: indices_or_sections

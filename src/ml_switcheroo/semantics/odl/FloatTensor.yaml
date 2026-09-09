@@ -1,0 +1,20 @@
+operation: FloatTensor
+variants:
+  paxml:
+    api: jnp.array
+    arg_values:
+      dtype: jnp.float32
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.array
+    arg_values:
+      dtype: jnp.float32
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.array
+    args:
+      object: object

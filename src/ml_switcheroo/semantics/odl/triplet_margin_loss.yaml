@@ -1,0 +1,58 @@
+operation: triplet_margin_loss
+description: Compute the triplet loss between given input tensors and a margin greater
+  than 0.
+std_args:
+- name: anchor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: positive
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: negative
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: margin
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '1.0'
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '2'
+- name: eps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: 1e-06
+- name: swap
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: size_average
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reduce
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''mean'''
+variants:
+  torch:
+    api: torch.nn.functional.triplet_margin_loss
+    args:
+      anchor: anchor
+      positive: positive
+      negative: negative

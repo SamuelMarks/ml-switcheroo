@@ -1,0 +1,12 @@
+operation: BusDayCount
+variants:
+  paxml:
+    api: jax.numpy.busday_count
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.busday_count
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

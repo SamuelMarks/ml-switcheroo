@@ -1,0 +1,93 @@
+operation: TransformerEncoderDecoder
+variants:
+  paxml:
+    api: praxis.layers.TransformerEncoderDecoder
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Transformer
+    args:
+      model_dims: d_model
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.Transformer
+    args: {}
+std_args:
+- name: model_dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '512'
+- name: nhead
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '8'
+- name: num_encoder_layers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '6'
+- name: num_decoder_layers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '6'
+- name: dim_feedforward
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '2048'
+- name: dropout
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.1'
+- name: activation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''relu'''
+- name: custom_encoder
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: custom_decoder
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: layer_norm_eps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: 1e-05
+- name: batch_first
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''False`` (seq, batch, feature).'''
+- name: norm_first
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''False`` (after).'''
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''

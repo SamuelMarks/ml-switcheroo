@@ -1,12 +1,25 @@
-description: Mish activation function.
-std_args:
-- x
-type: function
 operation: mish
+description: Apply the Mish function, element-wise.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
+  torch:
+    api: torch.nn.functional.mish
+    args:
+      input: input
+  mlx:
+    api: mlx.nn.mish
+    args:
+      x: x
   keras:
     api: keras.activations.mish
-  mlx:
-    api: mlx.nn.Mish
-  torch:
-    api: torch.nn.Mish
+    args:
+      x: x

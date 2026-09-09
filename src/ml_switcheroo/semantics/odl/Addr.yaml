@@ -1,0 +1,12 @@
+operation: Addr
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: jnp.add({beta} * {input}, {alpha} * jnp.outer({vec1}, {vec2}))
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: jnp.add({beta} * {input}, {alpha} * jnp.outer({vec1}, {vec2}))
+    pack_as: Tuple
+    required_imports: []

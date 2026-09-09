@@ -33,3 +33,25 @@ def test_backend_type_hints() -> None:
   """Verifies the behavior of backend type hints."""
   assert hasattr(CompilerBackend, "compile")
   assert CompilerBackend.compile.__isabstractmethod__  # type: ignore
+
+
+def test_compiler_backend_super_call() -> None:
+  """Verifies calling super().compile raises NotImplementedError."""
+
+  class ConcreteBackend(CompilerBackend):
+    """Concrete backend for testing base method."""
+
+    def compile(self, graph: LogicalGraph) -> str:
+      """Compile method.
+
+      Args:
+          graph: Input logical graph.
+
+      Returns:
+          Compiled string.
+      """
+      return ""
+
+  backend = ConcreteBackend()
+  with pytest.raises(NotImplementedError):
+    CompilerBackend.compile(backend, LogicalGraph())

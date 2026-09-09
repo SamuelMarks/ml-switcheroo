@@ -1,0 +1,8 @@
+operation: bias_correction
+variants:
+  flax_nnx:
+    api: optax.tree.bias_correction
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

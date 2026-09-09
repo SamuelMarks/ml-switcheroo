@@ -1,0 +1,8 @@
+operation: strides
+variants:
+  flax_nnx:
+    api: nnx.nn.linear.ConvTranspose.strides
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

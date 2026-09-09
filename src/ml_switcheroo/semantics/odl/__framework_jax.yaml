@@ -1,0 +1,10 @@
+__frameworks__:
+  jax:
+    alias:
+      module: "jax.numpy"
+      name: "jnp"
+  flax:
+    extends: "jax"
+    alias:
+      module: "flax.nnx"
+      name: "nnx"

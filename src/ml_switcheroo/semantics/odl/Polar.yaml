@@ -1,0 +1,26 @@
+operation: polar
+description: polar(abs, angle, *, out=None) -> Tensor
+std_args:
+- name: abs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: angle
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.polar
+    args:
+      abs: abs
+      angle: angle
+  keras:
+    api: keras.ops.polar
+    args:
+      abs_: abs_
+      angle: angle

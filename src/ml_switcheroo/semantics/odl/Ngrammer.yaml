@@ -1,0 +1,7 @@
+operation: Ngrammer
+variants:
+  paxml:
+    api: paxml.layers.Ngrammer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,8 @@
+operation: axis
+variants:
+  flax_nnx:
+    api: nnx.nn.normalization.BatchNorm.axis
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,29 @@
+operation: AllToAll
+variants:
+  stablehlo:
+    api: stablehlo.all_to_all
+std_args:
+- name: operands
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: split_dimension
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: concat_dimension
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: split_count
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: replica_groups
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: channel_handle
+  kind: keyword_only
+  is_variadic: false
+  type: Any

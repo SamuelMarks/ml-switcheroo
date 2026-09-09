@@ -12,7 +12,25 @@ std_args:
 variants:
   keras:
     api: keras.layers.GaussianDropout
+    args:
+      kwargs: kwargs
+      rate: rate
+      seed: seed
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.GaussianDropout
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Dropout
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.Dropout
+    args: {}
 operation: GaussianDropout
 type: function

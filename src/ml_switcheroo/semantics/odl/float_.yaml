@@ -1,8 +1,17 @@
 description: Convert a string or number to a floating point number, if possible.
 std_args:
-- kwargs
+- name: kwargs
+  type: Any
 variants:
   torch:
     api: float
-operation: float_
+    args: {}
+  flax_nnx:
+    api: jax.numpy.float_
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+operation: Float_
 type: function

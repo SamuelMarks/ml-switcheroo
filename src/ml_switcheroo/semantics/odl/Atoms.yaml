@@ -1,0 +1,4 @@
+operation: Atoms
+variants:
+  nvidia_sass:
+    api: ATOMS

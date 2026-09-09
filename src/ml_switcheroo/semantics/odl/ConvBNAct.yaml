@@ -1,0 +1,7 @@
+operation: ConvBNAct
+variants:
+  paxml:
+    api: praxis.layers.ConvBNAct
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

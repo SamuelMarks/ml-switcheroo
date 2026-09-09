@@ -24,7 +24,55 @@ std_args:
 variants:
   keras:
     api: keras.layers.LayerNormalization
+    args:
+      axis: axis
+      beta_constraint: beta_constraint
+      beta_initializer: beta_initializer
+      beta_regularizer: beta_regularizer
+      center: center
+      epsilon: epsilon
+      gamma_constraint: gamma_constraint
+      gamma_initializer: gamma_initializer
+      gamma_regularizer: gamma_regularizer
+      kwargs: kwargs
+      scale: scale
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.LayerNormalization
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.LayerNorm
+    args:
+      axis: dims
+      center: affine
+      epsilon: eps
+      scale: affine
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.LayerNorm
+    args:
+      axis: normalized_shape
+      center: elementwise_affine
+      epsilon: eps
+      scale: elementwise_affine
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.LayerNorm
+    args:
+      axis: reduction_axes
+      center: use_bias
+      epsilon: epsilon
+      scale: use_scale
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: LayerNormalization
 type: function

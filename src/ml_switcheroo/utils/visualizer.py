@@ -320,7 +320,7 @@ class MermaidGenerator(cst.CSTVisitor):
     else:
       for n in node.names:
         if hasattr(n, "name") and hasattr(n.name, "value"):  # pragma: no branch
-          names.append(n.name.value)
+          names.append(str(n.name.value))
 
     display_names = ", ".join(names[:3])
     if len(names) > 3:

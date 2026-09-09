@@ -1,0 +1,23 @@
+operation: lu_factor
+description: linalg.lu_factor(A, *, bool pivot=True, out=None) -> (Tensor, Tensor)
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.linalg.lu_factor
+    args: {}
+  mlx:
+    api: mlx.core.linalg.lu_factor
+    args:
+      a: a
+  keras:
+    api: keras.ops.lu_factor
+    args:
+      x: x

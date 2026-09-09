@@ -1,0 +1,15 @@
+operation: unique_all
+variants:
+  flax_nnx:
+    api: jax.numpy.unique_all
+    args:
+      fill_value: fill_value
+      size: size
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.unique_all
+    args:
+      x: x

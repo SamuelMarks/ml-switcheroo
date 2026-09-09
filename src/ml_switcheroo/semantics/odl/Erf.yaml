@@ -1,0 +1,28 @@
+operation: erf
+description: erf(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.erf
+    args:
+      input: input
+  jax:
+    api: jax.lax.erf
+    args:
+      x: x
+  mlx:
+    api: mlx.core.erf
+    args:
+      a: a
+  keras:
+    api: keras.ops.erf
+    args:
+      x: x

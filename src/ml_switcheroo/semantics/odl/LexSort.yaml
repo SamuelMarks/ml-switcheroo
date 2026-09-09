@@ -1,0 +1,17 @@
+operation: lexsort
+description: Auto-generated mapping for lexsort.
+std_args:
+- name: keys
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '-1'
+variants:
+  jax:
+    api: jax.numpy.lexsort
+    args:
+      keys: keys

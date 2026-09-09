@@ -1,0 +1,26 @@
+operation: Bool
+description: Definition for Bool
+op_type: attribute
+std_args: []
+variants:
+  torch:
+    api: torch.bool
+  jax:
+    api: jax.numpy.bool_
+  mlx:
+    api: mlx.core.bool_
+  numpy:
+    api: numpy.bool_
+  keras:
+    api: numpy.bool_
+  paxml:
+    api: jax.numpy.bool_
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.bool_
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

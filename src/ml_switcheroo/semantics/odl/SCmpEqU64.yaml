@@ -1,0 +1,5 @@
+operation: SCmpEqU64
+variants:
+  rdna:
+    api: s_cmp_eq_u64
+    description: Auto-mapped instruction S_CMP_EQ_U64

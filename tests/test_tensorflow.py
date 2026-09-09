@@ -72,7 +72,17 @@ def test_tf_extra_misses() -> None:
   adapter: TensorFlowAdapter = TensorFlowAdapter()
 
   # 231-237
-  adapter.apply_wiring({"mappings": {"test": {"api": "tensorflow.test"}, "bad": {}, "none": None, "no_api": {"a": 1}}})
+  adapter.apply_wiring(
+    {
+      "mappings": {
+        "test": {"api": "tensorflow.test"},
+        "non_tf": {"api": "tf.keras.layers.Dense"},
+        "bad": {},
+        "none": None,
+        "no_api": {"a": 1},
+      }
+    }
+  )
 
   # 241-243
   adapter.get_tiered_examples()
@@ -91,3 +101,53 @@ def test_tf_ghost_init() -> None:
     with patch("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", return_value={}):
       adapter: TensorFlowAdapter = TensorFlowAdapter()
       assert adapter._mode == InitMode.GHOST
+
+
+def test_tf_ghost_init_with_snapshot() -> None:
+  """Docstring."""
+  from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
+
+  with patch("ml_switcheroo.frameworks.tensorflow.tf", None):
+    with patch("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", return_value={"categories": {}}):
+      adapter: TensorFlowAdapter = TensorFlowAdapter()
+      assert adapter._mode == InitMode.GHOST
+
+
+def test_tf_definitions_all_exist() -> None:
+  """Test definitions when all standard keys are present."""
+  from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
+
+  adapter: TensorFlowAdapter = TensorFlowAdapter()
+  existing: Dict[str, Any] = {
+    "Linear": MagicMock(),
+    "Conv2d": MagicMock(),
+    "Conv1d": MagicMock(),
+    "Conv3d": MagicMock(),
+    "ConvTranspose2d": MagicMock(),
+  }
+  with patch("ml_switcheroo.frameworks.tensorflow.load_definitions", return_value=existing):
+    defs = adapter.definitions
+    assert "Linear" in defs
+
+
+def test_tf_import_exception(monkeypatch: Any) -> None:
+  """Test module behavior when importing tensorflow fails."""
+  import builtins
+  import importlib
+
+  real_import = builtins.__import__
+
+  def mock_import(name: str, *args: Any, **kwargs: Any) -> Any:
+    if name == "tensorflow":
+      raise ImportError("No TF")
+    return real_import(name, *args, **kwargs)
+
+  monkeypatch.setattr(builtins, "__import__", mock_import)
+  import ml_switcheroo.frameworks.tensorflow as tf_mod
+
+  try:
+    importlib.reload(tf_mod)
+    assert tf_mod.tf is None
+  finally:
+    monkeypatch.undo()
+    importlib.reload(tf_mod)

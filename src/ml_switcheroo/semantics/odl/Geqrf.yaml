@@ -1,0 +1,16 @@
+operation: geqrf
+description: geqrf(input, *, out=None) -> (Tensor, Tensor)
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.geqrf
+    args:
+      input: input

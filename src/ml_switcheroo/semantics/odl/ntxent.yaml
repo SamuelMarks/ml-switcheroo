@@ -1,0 +1,8 @@
+operation: ntxent
+variants:
+  flax_nnx:
+    api: optax.ntxent
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,12 +1,36 @@
 description: Abstract optimizer base class.
 std_args:
-- schedulers
+- name: schedulers
+  type: Any
 type: function
 operation: Optimizer
 variants:
   mlx:
     api: mlx.optimizers.Optimizer
+    args:
+      schedulers: schedulers
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.optim.lr_scheduler.Optimizer
+    args: {}
   tensorflow:
     api: tf.keras.optimizers.Optimizer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Optimizer
+    args:
+      model: model
+      self: self
+      tx: tx
+      wrt: wrt
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

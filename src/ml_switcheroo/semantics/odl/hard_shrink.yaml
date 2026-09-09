@@ -1,9 +1,17 @@
 description: Hard Shrink activation function.
 std_args:
-- x
-- threshold
+- name: x
+  type: Any
+- name: threshold
+  type: Any
 variants:
   keras:
     api: keras.activations.hard_shrink
+    args:
+      threshold: threshold
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: hard_shrink
 type: function

@@ -1,9 +1,17 @@
 description: Return a Keras activation function via its config.
 std_args:
-- config
-- custom_objects
+- name: config
+  type: Any
+- name: custom_objects
+  type: Any
 type: function
 operation: deserialize
 variants:
   keras:
     api: keras.activations.deserialize
+    args:
+      config: config
+      custom_objects: custom_objects
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

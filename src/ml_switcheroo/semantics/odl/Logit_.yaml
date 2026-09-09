@@ -1,0 +1,10 @@
+operation: Logit_
+variants:
+  flax_nnx:
+    api: jax.scipy.special.logit
+    args:
+      eps: null
+      input: p
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

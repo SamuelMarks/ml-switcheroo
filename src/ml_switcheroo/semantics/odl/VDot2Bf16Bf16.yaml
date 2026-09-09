@@ -1,0 +1,5 @@
+operation: VDot2Bf16Bf16
+variants:
+  rdna:
+    api: v_dot2_bf16_bf16
+    description: Auto-mapped instruction V_DOT2_BF16_BF16

@@ -1,13 +1,18 @@
 description: Continuously Differentiable Exponential Linear Unit.
 std_args:
-- x
-- alpha
+- name: x
+  type: Any
+- name: alpha
+  type: Any
 type: attribute
 operation: celu_
 variants:
   keras:
     api: keras.activations.celu
+    args: {}
   mlx:
     api: mlx.nn.CELU
+    args: {}
   torch:
     api: torch.nn.CELU
+    args: {}

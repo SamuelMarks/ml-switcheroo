@@ -1,9 +1,12 @@
-description: rint(x, /, out=None, *, where=True, casting='same_kind', order='K', dtype=None,
-  subok=True[, signature, extobj])
-std_args:
-- kwargs
-variants:
-  dask:
-    api: dask.array.rint
 operation: rint
-type: function
+description: Auto-generated mapping for rint.
+std_args:
+- name: x
+  kind: positional_only
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.rint
+    args:
+      x: x

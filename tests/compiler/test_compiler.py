@@ -28,7 +28,7 @@ def test_registry_gaps() -> None:
 
   cls: typing.Any = get_backend_class("unknown_target")
   assert cls.__name__ == "PythonBackend"
-  assert is_isa_target("sass") is True
+  assert is_isa_target("nvidia_sass") is True
   assert is_isa_target("unknown") is False
   assert is_isa_source("rdna") is True
   assert is_isa_source("jax") is False

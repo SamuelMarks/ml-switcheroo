@@ -1,0 +1,8 @@
+operation: EmaState
+variants:
+  flax_nnx:
+    api: optax.EmaState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

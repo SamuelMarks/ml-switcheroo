@@ -1,0 +1,36 @@
+operation: Checkpoint
+description: Make ``fun`` recompute internal linearization points when differentiated.
+std_args:
+- name: fun
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: prevent_cse
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: static_argnums
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: ()
+- name: policy
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: concrete
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  jax:
+    api: jax.checkpoint
+    args:
+      fun: fun
+  mlx:
+    api: mlx.core.checkpoint
+    args:
+      fun: fun

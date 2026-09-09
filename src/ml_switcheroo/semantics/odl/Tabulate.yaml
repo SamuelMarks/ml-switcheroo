@@ -1,0 +1,19 @@
+operation: Tabulate
+variants:
+  flax_nnx:
+    api: flax.nnx.tabulate
+    args:
+      column_kwargs: column_kwargs
+      compute_flops: compute_flops
+      compute_vjp_flops: compute_vjp_flops
+      console_kwargs: console_kwargs
+      depth: depth
+      input_args: input_args
+      input_kwargs: input_kwargs
+      method: method
+      obj: obj
+      row_filter: row_filter
+      table_kwargs: table_kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,5 @@
+operation: SSetkill
+variants:
+  rdna:
+    api: s_setkill
+    description: Auto-mapped instruction S_SETKILL

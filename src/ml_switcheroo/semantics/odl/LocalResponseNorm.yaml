@@ -1,12 +1,18 @@
 description: Applies local response normalization over an input signal.
 std_args:
-- size
-- alpha
-- beta
-- k
-- __constants__
+- name: size
+  type: Any
+- name: alpha
+  type: Any
+- name: beta
+  type: Any
+- name: k
+  type: Any
+- name: __constants__
+  type: Any
 type: class
 operation: LocalResponseNorm
 variants:
   torch:
     api: torch.nn.LocalResponseNorm
+    args: {}

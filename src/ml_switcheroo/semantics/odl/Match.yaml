@@ -1,0 +1,4 @@
+operation: Match
+variants:
+  nvidia_sass:
+    api: MATCH

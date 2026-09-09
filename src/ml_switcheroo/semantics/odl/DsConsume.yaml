@@ -1,0 +1,5 @@
+operation: DsConsume
+variants:
+  rdna:
+    api: ds_consume
+    description: Auto-mapped instruction DS_CONSUME

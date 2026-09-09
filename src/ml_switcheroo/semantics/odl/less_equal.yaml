@@ -13,5 +13,26 @@ std_args:
 variants:
   dask:
     api: dask.array.less_equal
+    args: {}
+  flax_nnx:
+    api: jax.numpy.less_equal
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.less_equal
+    args:
+      x1: x1
+      x2: x2
+  mlx:
+    api: mlx.core.less_equal
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.less_equal
+    args:
+      x1: x1
+      x2: x2
 operation: less_equal
 type: function

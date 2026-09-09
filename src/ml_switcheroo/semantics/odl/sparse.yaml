@@ -1,8 +1,10 @@
 description: sparse(...)
 std_args:
-- kwargs
+- name: kwargs
+  type: Any
 type: function
 operation: sparse
 variants:
   torch:
     api: torch.nn.init.sparse
+    args: {}

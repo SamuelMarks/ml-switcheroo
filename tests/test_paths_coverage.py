@@ -32,8 +32,62 @@ def test_resolve_snapshots_dir() -> None:
   with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir") as mock_resolve:
     mock_instance: MagicMock = MagicMock()
     mock_resolve.return_value = mock_instance
-    resolve_snapshots_dir()
-    mock_instance.parent.parent.parent.parent.__truediv__.assert_called_once_with("ml-compiler-snapshots")
+    mock_candidate = MagicMock()
+    mock_candidate.exists.return_value = False
+    mock_fw_candidate = MagicMock()
+    mock_fw_candidate.exists.return_value = False
+
+    def truediv_side_effect(arg: str) -> MagicMock:
+      """Side effect function simulating path division."""
+      if arg == "ml-compiler-snapshots":
+        return mock_candidate
+      if arg == "ml-framework-snapshots":
+        sub = MagicMock()
+        sub.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = mock_fw_candidate
+        return sub
+      return MagicMock()
+
+    mock_instance.parent.parent.parent.parent.__truediv__.side_effect = truediv_side_effect
+    res = resolve_snapshots_dir()
+    assert res == mock_candidate
+
+
+def test_resolve_snapshots_dir_candidate_exists() -> None:
+  """Resolves snapshots directory when ml-compiler-snapshots exists."""
+  with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir") as mock_resolve:
+    mock_instance: MagicMock = MagicMock()
+    mock_resolve.return_value = mock_instance
+    mock_candidate = MagicMock()
+    mock_candidate.exists.return_value = True
+    mock_instance.parent.parent.parent.parent.__truediv__.return_value = mock_candidate
+
+    res = resolve_snapshots_dir()
+    assert res == mock_candidate
+
+
+def test_resolve_snapshots_dir_framework_candidate_exists() -> None:
+  """Resolves snapshots directory when ml-framework-snapshots exists."""
+  with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir") as mock_resolve:
+    mock_instance: MagicMock = MagicMock()
+    mock_resolve.return_value = mock_instance
+    mock_candidate = MagicMock()
+    mock_candidate.exists.return_value = False
+    mock_fw_candidate = MagicMock()
+    mock_fw_candidate.exists.return_value = True
+
+    def truediv_side_effect(arg: str) -> MagicMock:
+      """Side effect function simulating framework path division."""
+      if arg == "ml-compiler-snapshots":
+        return mock_candidate
+      if arg == "ml-framework-snapshots":
+        sub = MagicMock()
+        sub.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = mock_fw_candidate
+        return sub
+      return MagicMock()
+
+    mock_instance.parent.parent.parent.parent.__truediv__.side_effect = truediv_side_effect
+    res = resolve_snapshots_dir()
+    assert res == mock_fw_candidate
 
 
 def test_resolve_semantics_dir_fallback() -> None:

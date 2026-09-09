@@ -1,0 +1,25 @@
+operation: DynamicGather
+variants:
+  stablehlo:
+    api: stablehlo.dynamic_gather
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: start_indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: slice_sizes
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dimension_numbers
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: indices_are_sorted
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

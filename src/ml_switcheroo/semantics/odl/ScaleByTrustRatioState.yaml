@@ -1,0 +1,8 @@
+operation: ScaleByTrustRatioState
+variants:
+  flax_nnx:
+    api: optax.ScaleByTrustRatioState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,4 @@
+operation: Jmxu
+variants:
+  nvidia_sass:
+    api: JMXU

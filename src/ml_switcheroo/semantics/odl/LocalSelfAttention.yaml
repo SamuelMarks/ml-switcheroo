@@ -1,0 +1,11 @@
+operation: LocalSelfAttention
+variants:
+  paxml:
+    api: paxml.layers.LocalSelfAttention
+    args:
+      dim: input_dim
+      num_heads: num_heads
+      window_size: block_size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

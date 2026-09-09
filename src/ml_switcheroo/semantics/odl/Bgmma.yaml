@@ -1,0 +1,4 @@
+operation: Bgmma
+variants:
+  nvidia_sass:
+    api: BGMMA

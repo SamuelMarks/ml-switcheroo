@@ -1,0 +1,45 @@
+operation: MkldnnConvolution
+variants:
+  mlx:
+    api: mlx.nn.Conv2d
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: in_channels
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: out_channels
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: kernel_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: groups
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'

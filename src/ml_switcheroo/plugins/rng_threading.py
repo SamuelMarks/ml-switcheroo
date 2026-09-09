@@ -72,8 +72,8 @@ def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
     return node
 
   # 1. Configuration
-  rng_arg = ctx.raw_config("rng_arg_name", default="rng")
-  key_var = ctx.raw_config("key_var_name", default="key")
+  rng_arg = str(ctx.raw_config("rng_arg_name", default="rng"))
+  key_var = str(ctx.raw_config("key_var_name", default="key"))
 
   # 2. Request Signature Injection
   ctx.inject_signature_arg(rng_arg)  # type: ignore

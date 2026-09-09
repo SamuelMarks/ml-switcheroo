@@ -1,0 +1,4 @@
+operation: Bpt
+variants:
+  nvidia_sass:
+    api: BPT

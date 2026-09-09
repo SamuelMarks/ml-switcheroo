@@ -1,0 +1,9 @@
+operation: Negate
+variants:
+  stablehlo:
+    api: stablehlo.negate
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

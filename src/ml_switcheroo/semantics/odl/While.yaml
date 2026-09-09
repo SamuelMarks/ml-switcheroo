@@ -1,0 +1,17 @@
+operation: While
+variants:
+  stablehlo:
+    api: stablehlo.while
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: cond
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: body
+  kind: keyword_only
+  is_variadic: false
+  type: Any

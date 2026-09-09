@@ -12,7 +12,26 @@ std_args:
 variants:
   keras:
     api: keras.layers.CenterCrop
+    args:
+      data_format: data_format
+      height: height
+      kwargs: kwargs
+      width: width
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.CenterCrop
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: CenterCrop
 type: function

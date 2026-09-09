@@ -4,7 +4,7 @@ This module implements a Compiler Backend that synthesizes Python source code
 from the Logical Graph Internal Representation via LibCST.
 """
 
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 import libcst as cst
 from libcst import matchers as m
 
@@ -55,14 +55,12 @@ class ClassBodyReplacer(cst.CSTTransformer):
         # Convert inline body to block statements
         # Inline bodies contain SmallStatements (e.g. Pass, Expr).
         # We wrap them in SimpleStatementLine logic.
-        for stmt in current_body.body:
-          if isinstance(stmt, (cst.Pass, cst.Expr, cst.Assign, cst.AnnAssign, cst.Return)):
-            # SmallStatement -> SimpleStatementLine
-            stmts_list.append(cst.SimpleStatementLine(body=[stmt]))
+        for small_stmt in current_body.body:
+          stmts_list.append(cst.SimpleStatementLine(body=[small_stmt]))
       else:
-        stmts_list = list(current_body.body)
+        stmts_list = [s for s in current_body.body if isinstance(s, (cst.SimpleStatementLine, cst.BaseCompoundStatement))]
 
-      new_body_stmts = []
+      new_body_stmts: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
       replacements = {
         "__init__": self.new_init,
         "forward": self.new_forward,
@@ -161,7 +159,7 @@ class PythonBackend(CompilerBackend):
       if isinstance(new_tree, cst.Module) and replacer.found:
         return new_tree.code
 
-    body: List[cst.CSTNode] = []
+    body: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
     body.extend(self._generate_imports())
 
     base_class = self.traits.module_base if self.traits.module_base else "nn.Module"
@@ -209,29 +207,29 @@ class PythonBackend(CompilerBackend):
     """
     if self.framework == "torch":
       return [
-        cst.parse_statement("import torch"),
-        cst.parse_statement("import torch.nn as nn"),
+        cast(cst.SimpleStatementLine, cst.parse_statement("import torch")),
+        cast(cst.SimpleStatementLine, cst.parse_statement("import torch.nn as nn")),
       ]
     elif self.framework in ["jax", "flax", "flax_nnx"]:
       return [
-        cst.parse_statement("from flax import nnx"),
-        cst.parse_statement("import jax.numpy as jnp"),
+        cast(cst.SimpleStatementLine, cst.parse_statement("from flax import nnx")),
+        cast(cst.SimpleStatementLine, cst.parse_statement("import jax.numpy as jnp")),
       ]
     elif self.framework == "mlx":
       return [
-        cst.parse_statement("import mlx.core as mx"),
-        cst.parse_statement("import mlx.nn as nn"),
+        cast(cst.SimpleStatementLine, cst.parse_statement("import mlx.core as mx")),
+        cast(cst.SimpleStatementLine, cst.parse_statement("import mlx.nn as nn")),
       ]
     elif self.framework in ["keras", "tensorflow"]:
       return [
-        cst.parse_statement("import keras"),
-        cst.parse_statement("import tensorflow as tf"),
+        cast(cst.SimpleStatementLine, cst.parse_statement("import keras")),
+        cast(cst.SimpleStatementLine, cst.parse_statement("import tensorflow as tf")),
       ]
     elif self.framework == "paxml":
       return [
-        cst.parse_statement("import praxis.layers as pl"),
-        cst.parse_statement("import praxis.layers.convolutions"),
-        cst.parse_statement("from praxis.base_layer import BaseLayer"),
+        cast(cst.SimpleStatementLine, cst.parse_statement("import praxis.layers as pl")),
+        cast(cst.SimpleStatementLine, cst.parse_statement("import praxis.layers.convolutions")),
+        cast(cst.SimpleStatementLine, cst.parse_statement("from praxis.base_layer import BaseLayer")),
       ]
     return []
 
@@ -441,7 +439,7 @@ class PythonBackend(CompilerBackend):
       code = f"self.create_child('{node.id}', {kind}({args_str}))"
     else:
       code = f"self.{node.id} = {kind}({args_str})"
-    return cst.parse_statement(code)
+    return cast(cst.SimpleStatementLine, cst.parse_statement(code))
 
   def _format_args_from_metadata(self, metadata) -> str:
     """Format node metadata dictionary into a Python arguments string.

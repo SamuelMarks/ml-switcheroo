@@ -280,10 +280,13 @@ class TypeAnnotationParser:
           elt: The CSTNode representing the subscript slice element to process.
       """
       nonlocal is_variadic
+      val: cst.BaseExpression
       if isinstance(elt, cst.Index):
         val = elt.value
-      else:
+      elif isinstance(elt, cst.BaseExpression):
         val = elt
+      else:
+        return
 
       if isinstance(val, cst.Ellipsis):
         is_variadic = True

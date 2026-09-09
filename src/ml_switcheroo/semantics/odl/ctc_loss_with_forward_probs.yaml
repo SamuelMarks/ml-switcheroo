@@ -1,17 +1,29 @@
 description: Computes CTC loss and CTC forward-probabilities.
 std_args:
-- logits
-- logit_paddings
-- labels
-- label_paddings
-- blank_id
-- log_epsilon
+- name: logits
+  type: Any
+- name: logit_paddings
+  type: Any
+- name: labels
+  type: Any
+- name: label_paddings
+  type: Any
+- name: blank_id
+  type: Any
+- name: log_epsilon
+  type: Any
 type: attribute
 operation: ctc_loss_with_forward_probs
 variants:
   optax_shim:
     api: optax.losses.ctc_loss_with_forward_probs
+    args: {}
   flax_nnx:
-    api: optax.losses.ctc_loss_with_forward_probs
+    api: optax.ctc_loss_with_forward_probs
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.losses.ctc_loss_with_forward_probs
+    args: {}

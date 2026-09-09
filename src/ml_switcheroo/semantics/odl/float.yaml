@@ -1,8 +1,12 @@
-description: Convert a string or number to a floating point number, if possible.
-std_args:
-- kwargs
-type: function
 operation: float
+description: float(memory_format=torch.preserve_format) -> Tensor
+std_args:
+- name: memory_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: torch.preserve_format
 variants:
   torch:
-    api: float
+    api: torch.Tensor.float
+    args: {}

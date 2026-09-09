@@ -1,0 +1,26 @@
+operation: segment_sum
+description: Computes the sum of segments in a tensor.
+std_args:
+- name: data
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: segment_ids
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: num_segments
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: sorted
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  keras:
+    api: keras.ops.segment_sum
+    args:
+      data: data
+      segment_ids: segment_ids

@@ -1,0 +1,28 @@
+operation: dot_product_attention
+variants:
+  flax_nnx:
+    api: nnx.nn.attention.dot_product_attention
+    args:
+      bias: bias
+      broadcast_dropout: broadcast_dropout
+      deterministic: deterministic
+      dropout_rate: dropout_rate
+      dropout_rng: dropout_rng
+      dtype: dtype
+      is_causal: is_causal
+      key: key
+      mask: mask
+      module: module
+      precision: precision
+      promote_dtype: promote_dtype
+      query: query
+      value: value
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  keras:
+    api: keras.ops.dot_product_attention
+    args:
+      query: query
+      key: key
+      value: value

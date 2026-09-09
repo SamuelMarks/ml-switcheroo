@@ -1,18 +1,30 @@
 description: Constructs a schedule with either continuous or discrete exponential
   decay.
 std_args:
-- init_value
-- transition_steps
-- decay_rate
-- transition_begin
-- staircase
-- end_value
+- name: init_value
+  type: Any
+- name: transition_steps
+  type: Any
+- name: decay_rate
+  type: Any
+- name: transition_begin
+  type: Any
+- name: staircase
+  type: Any
+- name: end_value
+  type: Any
 type: attribute
 operation: exponential_decay
 variants:
   optax_shim:
     api: optax.schedules.exponential_decay
+    args: {}
   flax_nnx:
-    api: optax.schedules.exponential_decay
+    api: optax.exponential_decay
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.schedules.exponential_decay
+    args: {}

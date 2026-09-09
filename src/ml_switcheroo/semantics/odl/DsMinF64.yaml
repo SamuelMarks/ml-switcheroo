@@ -1,0 +1,5 @@
+operation: DsMinF64
+variants:
+  rdna:
+    api: ds_min_f64
+    description: Auto-mapped instruction DS_MIN_F64

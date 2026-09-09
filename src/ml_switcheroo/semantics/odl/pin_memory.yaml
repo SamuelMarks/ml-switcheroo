@@ -1,0 +1,7 @@
+operation: pin_memory
+description: pin_memory() -> Tensor
+std_args: []
+variants:
+  torch:
+    api: torch.Tensor.pin_memory
+    args: {}

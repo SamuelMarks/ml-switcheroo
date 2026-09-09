@@ -1,0 +1,5 @@
+operation: SCvtF32F16
+variants:
+  rdna:
+    api: s_cvt_f32_f16
+    description: Auto-mapped instruction S_CVT_F32_F16

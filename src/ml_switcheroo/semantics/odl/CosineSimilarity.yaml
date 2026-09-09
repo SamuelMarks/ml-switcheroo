@@ -23,7 +23,23 @@ operation: CosineSimilarity
 variants:
   keras:
     api: keras.losses.CosineSimilarity
+    args:
+      dim: axis
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.nn.CosineSimilarity
+    args: {}
   tensorflow:
     api: tf.keras.losses.CosineSimilarity
+    args: {}
+  mlx:
+    api: mlx.nn.losses.cosine_similarity_loss
+    args:
+      dim: axis
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

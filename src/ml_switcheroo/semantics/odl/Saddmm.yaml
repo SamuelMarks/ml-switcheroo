@@ -1,0 +1,37 @@
+operation: Saddmm
+description: Performs the S-ADDMM operation (Sparse Add Matrix-Matrix). Generally
+  deprecated in favor of explicit sparse operations.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: mat1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: mat2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: beta
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: alpha
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.saddmm
+    args:
+      input: input
+      mat1: mat1
+      mat2: mat2

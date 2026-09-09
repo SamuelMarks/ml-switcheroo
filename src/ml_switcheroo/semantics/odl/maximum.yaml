@@ -1,22 +1,41 @@
-description: Computes the maximum value for each element ``x1_i`` of the input array
-  ``x1`` relative to the respective element ``x2_i`` of the input array ``x2``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x1
-  type: Union[array, int, float]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x2
-  type: Union[array, int, float]
-variants:
-  keras:
-    api: keras.layers.Maximum
-  numpy:
-    api: numpy.maximum
-  dask:
-    api: dask.array.maximum
-  tensorflow:
-    api: tf.keras.layers.Maximum
 operation: maximum
-type: function
+description: maximum(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.maximum
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.maximum
+    args:
+      x1: x1
+      x2: x2
+  mlx:
+    api: mlx.core.maximum
+    args:
+      a: a
+      b: b
+  stablehlo:
+    api: stablehlo.maximum
+    args:
+      lhs: lhs
+      rhs: rhs
+  keras:
+    api: keras.ops.maximum
+    args:
+      x1: x1
+      x2: x2

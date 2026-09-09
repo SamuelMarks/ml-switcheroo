@@ -1,0 +1,10 @@
+operation: BitCast
+variants:
+  flax_nnx:
+    api: jax.lax.bitcast_convert_type
+    args:
+      dtype: new_dtype
+      x: operand
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

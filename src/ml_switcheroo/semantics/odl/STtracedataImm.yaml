@@ -1,0 +1,5 @@
+operation: STtracedataImm
+variants:
+  rdna:
+    api: s_ttracedata_imm
+    description: Auto-mapped instruction S_TTRACEDATA_IMM

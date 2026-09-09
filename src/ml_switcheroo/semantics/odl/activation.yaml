@@ -1,16 +1,30 @@
 description: Applies an activation function to an output.
 std_args:
-- activation
-- kwargs
-- activity_regularizer
-- trainable
-- dtype
-- autocast
-- name
+- name: activation
+  type: Any
+- name: kwargs
+  type: Any
+- name: activity_regularizer
+  type: Any
+- name: trainable
+  type: Any
+- name: dtype
+  type: Any
+- name: autocast
+  type: Any
+- name: name
+  type: Any
 type: attribute
 operation: activation
 variants:
   keras:
     api: keras.layers.Activation
+    args:
+      activation: activation
+      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.Activation
+    args: {}

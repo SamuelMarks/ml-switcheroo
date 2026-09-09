@@ -1,0 +1,5 @@
+operation: VCmpxLtI16
+variants:
+  rdna:
+    api: v_cmpx_lt_i16
+    description: Auto-mapped instruction V_CMPX_LT_I16

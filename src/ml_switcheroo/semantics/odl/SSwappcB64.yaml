@@ -1,0 +1,5 @@
+operation: SSwappcB64
+variants:
+  rdna:
+    api: s_swappc_b64
+    description: Auto-mapped instruction S_SWAPPC_B64

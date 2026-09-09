@@ -1,0 +1,12 @@
+operation: Zero_
+variants:
+  paxml:
+    api: jax.numpy.zeros_like
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.zeros_like
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,21 @@
+operation: laguerre_polynomial_l
+description: laguerre_polynomial_l(input, n, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: n
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.special.laguerre_polynomial_l
+    args:
+      input: input
+      n: n

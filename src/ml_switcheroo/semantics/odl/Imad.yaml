@@ -1,0 +1,4 @@
+operation: Imad
+variants:
+  nvidia_sass:
+    api: IMAD

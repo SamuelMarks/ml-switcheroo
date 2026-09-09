@@ -1,0 +1,8 @@
+operation: clip_by_block_rms
+variants:
+  flax_nnx:
+    api: optax.clip_by_block_rms
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -8,7 +8,16 @@ std_args:
 variants:
   keras:
     api: keras.layers.RepeatVector
+    args:
+      kwargs: kwargs
+      n: n
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.RepeatVector
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: RepeatVector
 type: function

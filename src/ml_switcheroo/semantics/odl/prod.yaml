@@ -1,27 +1,29 @@
-description: Calculates the product of input array ``x`` elements.
+operation: prod
+description: 'prod(input: Tensor, *, dtype: Optional[_dtype]) -> Tensor'
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: axis
-  type: Optional[Union[int, Tuple[int, Ellipsis]]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: dtype
-  type: Optional[dtype]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: keepdims
-  type: bool
+  is_variadic: false
+  type: Tensor
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
-  latex_dsl:
-    api: latex.prod
-  dask:
-    api: dask.array.prod
   torch:
     api: torch.prod
-operation: prod
-type: function
+    args:
+      input: input
+      dtype: dtype
+  jax:
+    api: jax.numpy.prod
+    args:
+      a: a
+  mlx:
+    api: mlx.core.prod
+    args:
+      a: a
+  keras:
+    api: keras.ops.prod
+    args:
+      x: x

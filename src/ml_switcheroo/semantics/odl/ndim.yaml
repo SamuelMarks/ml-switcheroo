@@ -1,8 +1,16 @@
+operation: ndim
 description: Return the number of dimensions of an array.
 std_args:
-- a
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
-  dask:
-    api: dask.array.ndim
-operation: ndim
-type: function
+  jax:
+    api: jax.numpy.ndim
+    args:
+      a: a
+  keras:
+    api: keras.ops.ndim
+    args:
+      x: x

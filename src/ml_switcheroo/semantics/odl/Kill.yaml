@@ -1,0 +1,4 @@
+operation: Kill
+variants:
+  nvidia_sass:
+    api: KILL

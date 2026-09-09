@@ -1,0 +1,7 @@
+operation: SelfAttentionWithNormAndResidual
+variants:
+  paxml:
+    api: praxis.layers.SelfAttentionWithNormAndResidual
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

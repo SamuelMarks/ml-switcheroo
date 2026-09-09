@@ -1,0 +1,8 @@
+operation: masked
+variants:
+  flax_nnx:
+    api: optax.masked
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

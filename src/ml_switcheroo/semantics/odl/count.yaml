@@ -1,0 +1,8 @@
+operation: count
+variants:
+  flax_nnx:
+    api: nnx.training.metrics.Welford.count
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

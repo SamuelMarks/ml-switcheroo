@@ -257,9 +257,9 @@ def test_rdna_synthesizer_gaps() -> None:
   nodes: list[typing.Any] = synth.from_graph(g)
   assert len(nodes) > 0
   mod: typing.Any = synth.to_python(nodes)
-  from ml_switcheroo.core.compiler.backends.sass.backend import SassBackend
+  from ml_switcheroo.core.compiler.backends.nvidia_sass.backend import NvidiaSassBackend
 
-  SassBackend()
+  NvidiaSassBackend()
   assert "v0 =" in mod.code
 
 
@@ -285,9 +285,9 @@ def test_rdna_synthesizer_py_translation() -> None:
     Label(name="L1"),
   ]
   mod: typing.Any = synth.to_python(nodes)
-  from ml_switcheroo.core.compiler.backends.sass.backend import SassBackend
+  from ml_switcheroo.core.compiler.backends.nvidia_sass.backend import NvidiaSassBackend
 
-  SassBackend()
+  NvidiaSassBackend()
   code: str = mod.code
   assert "rdna.v_add_f32" in code
   assert "rdna.store_dword" in code
@@ -346,25 +346,25 @@ def test_rdna_synthesizer_misc() -> None:
   synth.from_graph(g)
 
 
-def test_sass_macros_linear() -> None:
-  """Verifies the behavior of SASS macros linear."""
-  from ml_switcheroo.core.compiler.backends.sass.macros import expand_linear
-  from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator
+def test_nvidia_sass_macros_linear() -> None:
+  """Verifies the behavior of NVIDIA_SASS macros linear."""
+  from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_linear
+  from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import RegisterAllocator
 
   alloc = RegisterAllocator()
   nodes: list[typing.Any] = expand_linear(alloc, "test_lin", {"in_features": 64, "bias": True})
   assert len(nodes) > 10
 
 
-def test_sass_synthesizer_gaps() -> None:
-  """Verifies the behavior of SASS synthesizer gaps."""
-  from ml_switcheroo.core.compiler.backends.sass.synthesizer import RegisterAllocator, SassSynthesizer
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassComment as Comment
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassImmediate as Immediate
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassInstruction as Instruction
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassLabel as Label
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassMemory as Memory
-  from ml_switcheroo.core.compiler.frontends.sass.cst import SassRegister as Register
+def test_nvidia_sass_synthesizer_gaps() -> None:
+  """Verifies the behavior of NVIDIA_SASS synthesizer gaps."""
+  from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import RegisterAllocator, NvidiaSassSynthesizer
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment as Comment
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate as Immediate
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassInstruction as Instruction
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassLabel as Label
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassMemory as Memory
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassRegister as Register
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
   from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -393,7 +393,7 @@ def test_sass_synthesizer_gaps() -> None:
         return {}
       return {"api": "FADD"}
 
-  synth = SassSynthesizer(MockSemantics())
+  synth = NvidiaSassSynthesizer(MockSemantics())
   g = LogicalGraph(nodes=[], edges=[])
   g.nodes.append(LogicalNode("n1", "Missing"))
   nodes: list[typing.Any] = synth.from_graph(g)
@@ -411,11 +411,11 @@ def test_sass_synthesizer_gaps() -> None:
     Instruction(opcode="MOV", operands=[Register(name="R4"), Register(name="R1")]),
   ]
   mod: typing.Any = synth.to_python(nodes)
-  from ml_switcheroo.core.compiler.backends.sass.backend import SassBackend
+  from ml_switcheroo.core.compiler.backends.nvidia_sass.backend import NvidiaSassBackend
 
-  SassBackend()
+  NvidiaSassBackend()
   code: str = mod.code
-  assert "sass.FADD" in code
+  assert "nvidia_sass.FADD" in code
   assert "Label: L1" in code
   assert "0x1" in code
   assert "3.14" in code

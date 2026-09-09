@@ -1,9 +1,12 @@
 description: Return the recommended gain value for the given nonlinearity function.
 std_args:
-- nonlinearity
-- param
+- name: nonlinearity
+  type: Any
+- name: param
+  type: Any
 type: function
 operation: calculate_gain
 variants:
   torch:
     api: torch.nn.init.calculate_gain
+    args: {}

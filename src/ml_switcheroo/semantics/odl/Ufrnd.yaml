@@ -1,0 +1,4 @@
+operation: Ufrnd
+variants:
+  nvidia_sass:
+    api: UFRND

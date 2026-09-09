@@ -1,0 +1,60 @@
+operation: scatter
+description: Scatters a list of tensors to all processes in a group.
+std_args:
+- name: tensor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: scatter_list
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: src
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: group
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: async_op
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: group_src
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.distributed.scatter
+    args:
+      tensor: tensor
+  jax:
+    api: jax.lax.scatter
+    args:
+      operand: operand
+      scatter_indices: scatter_indices
+      updates: updates
+      dimension_numbers: dimension_numbers
+  stablehlo:
+    api: stablehlo.scatter
+    args:
+      inputs: inputs
+      scatter_indices: scatter_indices
+      updates: updates
+      scatter_dimension_numbers: scatter_dimension_numbers
+      indices_are_sorted: indices_are_sorted
+      unique_indices: unique_indices
+      update_computation: update_computation
+  keras:
+    api: keras.ops.scatter
+    args:
+      indices: indices
+      values: values
+      shape: shape

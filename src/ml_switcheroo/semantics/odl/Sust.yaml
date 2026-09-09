@@ -1,0 +1,4 @@
+operation: Sust
+variants:
+  nvidia_sass:
+    api: SUST

@@ -151,3 +151,20 @@ def test_hydrate_alias_map_not_dict() -> None:
   sm.get_framework_config.return_value = {"alias": "just_a_string"}
   ctx: RewriterContext = RewriterContext(semantics=sm, config=config)
   assert not ctx.alias_map
+
+
+def test_hydrate_alias_map_exception() -> None:
+  """Test that exception during _hydrate_source_aliases is handled."""
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  sm: MagicMock = MagicMock()
+  sm.get_framework_config.side_effect = RuntimeError("failed to load config")
+  ctx: RewriterContext = RewriterContext(semantics=sm, config=config)
+  assert not ctx.alias_map
+
+
+def test_plugin_traits_property() -> None:
+  """Test plugin_traits property accesses hook_context."""
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  sm: MagicMock = MagicMock()
+  ctx: RewriterContext = RewriterContext(semantics=sm, config=config)
+  assert ctx.plugin_traits == ctx.hook_context.plugin_traits

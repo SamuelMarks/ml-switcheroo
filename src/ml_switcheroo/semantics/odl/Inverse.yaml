@@ -1,0 +1,16 @@
+operation: Inverse
+variants:
+  paxml:
+    api: jax.numpy.linalg.inv
+    args:
+      input: a
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.linalg.inv
+    args:
+      input: a
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

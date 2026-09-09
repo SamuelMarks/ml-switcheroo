@@ -1,0 +1,17 @@
+operation: resize
+description: Auto-generated mapping for resize.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: new_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.numpy.resize
+    args:
+      a: a
+      new_shape: new_shape

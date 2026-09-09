@@ -1,0 +1,24 @@
+operation: UFunc
+variants:
+  paxml:
+    api: jax.numpy.ufunc
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.ufunc
+    args:
+      accumulate: accumulate
+      at: at
+      call: call
+      func: func
+      identity: identity
+      name: name
+      nargs: nargs
+      nin: nin
+      nout: nout
+      reduce: reduce
+      reduceat: reduceat
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

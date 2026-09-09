@@ -1,23 +1,34 @@
-description: Convert the input to an array.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: obj
-  type: Union[array, bool, int, float, complex, NestedSequence, SupportsBufferProtocol]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: dtype
-  type: Optional[dtype]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: device
-  type: Optional[device]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: copy
-  type: Optional[bool]
-variants:
-  dask:
-    api: dask.array.asarray
 operation: asarray
-type: function
+description: 'asarray(obj: Any, *, dtype: Optional[dtype], device: Optional[DeviceLikeType],
+  copy: Optional[bool] = None, requires_grad: bool = False) -> Tensor # noqa: B950'
+std_args:
+- name: obj
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: device
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: copy
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: requires_grad
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.asarray
+    args:
+      obj: obj
+  jax:
+    api: jax.numpy.asarray
+    args:
+      a: a

@@ -1,10 +1,37 @@
-description: Return selected slices of an array along given axis.
-std_args:
-- condition
-- a
-- axis
-variants:
-  dask:
-    api: dask.array.compress
 operation: compress
-type: function
+description: Compress an array along a given axis using a boolean condition.
+std_args:
+- name: condition
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: size
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: fill_value
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+  default: '0'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.compress
+    args:
+      condition: condition
+      a: a

@@ -1,0 +1,7 @@
+operation: __array_namespace_info__
+variants:
+  flax_nnx:
+    api: jax.numpy.__array_namespace_info__
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

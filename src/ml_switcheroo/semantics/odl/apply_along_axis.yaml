@@ -1,13 +1,37 @@
 description: Apply a function to 1-D slices along the given axis.
 std_args:
-- func1d
-- axis
-- arr
-- dtype
-- shape
-- kwargs
+- name: func1d
+  type: Any
+- name: axis
+  type: Any
+- name: arr
+  type: Any
+- name: dtype
+  type: Any
+- name: shape
+  type: Any
+- name: kwargs
+  type: Any
 variants:
   dask:
     api: dask.array.apply_along_axis
+    args: {}
+  flax_nnx:
+    api: jax.numpy.apply_along_axis
+    args:
+      args: args
+      arr: arr
+      axis: axis
+      func1d: func1d
+      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.apply_along_axis
+    args:
+      func1d: func1d
+      axis: axis
+      arr: arr
 operation: apply_along_axis
 type: function

@@ -8,5 +8,22 @@ std_args:
 variants:
   dask:
     api: dask.array.logical_not
+    args: {}
+  flax_nnx:
+    api: jax.numpy.logical_not
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.logical_or
+    args: {}
+  mlx:
+    api: mlx.core.logical_not
+    args:
+      a: a
+  keras:
+    api: keras.ops.logical_not
+    args:
+      x: x
 operation: logical_not
 type: function

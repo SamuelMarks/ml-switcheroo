@@ -1,0 +1,5 @@
+operation: SCbranchExecz
+variants:
+  rdna:
+    api: s_cbranch_execz
+    description: Auto-mapped instruction S_CBRANCH_EXECZ

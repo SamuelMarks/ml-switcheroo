@@ -1,8 +1,14 @@
 description: Sparse sigmoid activation function.
 std_args:
-- x
+- name: x
+  type: Any
 variants:
   keras:
     api: keras.activations.sparse_sigmoid
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: sparse_sigmoid
 type: function

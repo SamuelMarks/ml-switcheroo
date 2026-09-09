@@ -134,6 +134,36 @@ def test_flax_nnx_convert_without_jax() -> None:
     res = adapter.convert([1, 2, 3])
     assert res == [1, 2, 3]
 
+  # When jax is present: test non-array (243->248), success array, and exception in jnp.array
+  mock_jax = MagicMock()
+  mock_jnp = MagicMock()
+  mock_jax.numpy = mock_jnp
+  with patch.dict("sys.modules", {"jax": mock_jax, "jax.numpy": mock_jnp}):
+    # Non-array data jumps to line 248
+    assert adapter.convert(123) == 123
+    # Valid array data
+    mock_jnp.array.return_value = "jax_array"
+    assert adapter.convert([1, 2]) == "jax_array"
+    # Exception in jnp.array
+    mock_jnp.array.side_effect = Exception("err")
+    assert adapter.convert([1, 2]) == [1, 2]
+
+
+def test_flax_nnx_import_success() -> None:
+  """Test module-level import when flax.nnx is available."""
+  import importlib
+  import sys
+
+  mock_flax = MagicMock()
+  mock_nnx = MagicMock()
+  mock_flax.nnx = mock_nnx
+  mock_jax = MagicMock()
+  with patch.dict(sys.modules, {"flax": mock_flax, "flax.nnx": mock_nnx, "jax": mock_jax}):
+    import ml_switcheroo.frameworks.flax_nnx as mod
+
+    importlib.reload(mod)
+  importlib.reload(mod)
+
 
 def test_flax_nnx_apply_wiring() -> None:
   """Docstring."""

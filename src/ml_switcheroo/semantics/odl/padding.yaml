@@ -1,8 +1,8 @@
-description: CSS property padding.
-std_args:
-- value
-type: attribute
 operation: padding
 variants:
-  sass:
-    api: sass.prop.padding
+  flax_nnx:
+    api: nnx.nn.linear.ConvTranspose.padding
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

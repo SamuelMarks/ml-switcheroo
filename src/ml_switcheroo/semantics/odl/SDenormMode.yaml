@@ -1,0 +1,5 @@
+operation: SDenormMode
+variants:
+  rdna:
+    api: s_denorm_mode
+    description: Auto-mapped instruction S_DENORM_MODE

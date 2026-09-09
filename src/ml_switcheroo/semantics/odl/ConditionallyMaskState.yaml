@@ -1,0 +1,8 @@
+operation: ConditionallyMaskState
+variants:
+  flax_nnx:
+    api: optax.ConditionallyMaskState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

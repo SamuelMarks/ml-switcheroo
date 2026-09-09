@@ -1,0 +1,52 @@
+operation: conv_general_dilated_patches
+description: Extract patches subject to the receptive field of `conv_general_dilated`.
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: filter_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: window_strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: lhs_dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: rhs_dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: dimension_numbers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''("NCHWD..., OIHWD..., NCHWD...")`.'''
+- name: precision
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: preferred_element_type
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.conv_general_dilated_patches
+    args:
+      lhs: lhs
+      filter_shape: filter_shape
+      window_strides: window_strides
+      padding: padding

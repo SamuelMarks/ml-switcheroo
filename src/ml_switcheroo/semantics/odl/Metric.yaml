@@ -1,10 +1,27 @@
 description: Base class for metrics.
 op_type: class
 std_args:
-- name
-- dtype
+- name: name
+  type: Any
+- name: dtype
+  type: Any
 variants:
   tensorflow:
     api: tf.keras.metrics.Metric
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.metric_utils.Metric
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Metric
+    args:
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Metric
 type: function

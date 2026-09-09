@@ -1,0 +1,25 @@
+operation: Float64
+description: Definition for Float64
+op_type: attribute
+std_args: []
+variants:
+  torch:
+    api: torch.float64
+  jax:
+    api: jax.numpy.float64
+  mlx:
+    api: mlx.core.float64
+  numpy:
+    api: numpy.float64
+  keras:
+    api: numpy.float64
+  paxml:
+    api: jnp.float64
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.float64
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

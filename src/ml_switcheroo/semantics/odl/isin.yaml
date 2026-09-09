@@ -1,13 +1,33 @@
-description: Calculates ``element in test_elements``, broadcasting over `element`
-  only.
-std_args:
-- element
-- test_elements
-- assume_unique
-- invert
-- kind
-variants:
-  dask:
-    api: dask.array.isin
 operation: isin
-type: function
+description: isin(elements, test_elements, *, assume_unique=False, invert=False) ->
+  Tensor
+std_args:
+- name: elements
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: test_elements
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: assume_unique
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: invert
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  torch:
+    api: torch.isin
+    args:
+      elements: elements
+      test_elements: test_elements
+  jax:
+    api: jax.numpy.isin
+    args:
+      element: element
+      test_elements: test_elements

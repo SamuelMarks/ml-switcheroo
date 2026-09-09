@@ -1,0 +1,22 @@
+operation: Contiguous
+description: 'contiguous(a: array, /, allow_col_major: bool = False, *, stream: Union[None,
+  Stream, Device] = None) -> array'
+std_args:
+- name: a
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: allow_col_major
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  mlx:
+    api: mlx.core.contiguous
+    args:
+      a: a

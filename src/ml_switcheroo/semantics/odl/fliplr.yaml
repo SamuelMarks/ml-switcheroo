@@ -1,8 +1,16 @@
-description: Reverse the order of elements along axis 1 (left/right).
-std_args:
-- m
-variants:
-  dask:
-    api: dask.array.fliplr
 operation: fliplr
-type: function
+description: fliplr(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.fliplr
+    args:
+      input: input
+  jax:
+    api: jax.numpy.fliplr
+    args:
+      m: m

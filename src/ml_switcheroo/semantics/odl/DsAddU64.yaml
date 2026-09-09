@@ -1,0 +1,5 @@
+operation: DsAddU64
+variants:
+  rdna:
+    api: ds_add_u64
+    description: Auto-mapped instruction DS_ADD_U64

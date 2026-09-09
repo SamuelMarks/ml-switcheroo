@@ -1,0 +1,8 @@
+operation: TraceState
+variants:
+  flax_nnx:
+    api: optax.TraceState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

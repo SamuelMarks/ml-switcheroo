@@ -1,0 +1,10 @@
+operation: Fork
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.fork
+    args:
+      self: self
+      split: split
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

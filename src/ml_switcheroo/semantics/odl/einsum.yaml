@@ -1,13 +1,40 @@
-description: einsum(subscripts, *operands, out=None, dtype=None, order='K',
-std_args:
-- dtype
-- optimize
-- split_every
-- kwargs
-variants:
-  dask:
-    api: dask.array.einsum
-  flax_nnx:
-    api: flax.nnx.Einsum
 operation: einsum
-type: function
+description: einsum(equation, *operands) -> Tensor
+std_args:
+- name: equation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: operands
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+  default: ()
+variants:
+  torch:
+    api: torch.einsum
+    args:
+      equation: equation
+      operands: operands
+  jax:
+    api: jax.numpy.einsum
+    args:
+      subscripts: subscripts
+  mlx:
+    api: mlx.core.einsum
+    args:
+      subscripts: subscripts
+  stablehlo:
+    api: stablehlo.einsum
+    args:
+      lhs: lhs
+      rhs: rhs
+      einsum_config: einsum_config
+  keras:
+    api: keras.ops.einsum
+    args:
+      subscripts: subscripts

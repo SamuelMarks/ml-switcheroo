@@ -12,5 +12,19 @@ std_args:
 variants:
   dask:
     api: dask.array.round
+    args: {}
+  jax:
+    api: jax.numpy.round
+    args:
+      a: a
+  torch:
+    api: torch.round
+    args: {}
+  mlx:
+    api: mlx.core.round
+    args: {}
+  keras:
+    api: keras.ops.round
+    args: {}
 operation: Round_
 type: function

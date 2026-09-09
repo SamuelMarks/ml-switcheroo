@@ -1,11 +1,20 @@
-description: Find the unique elements of an array.
-std_args:
-- ar
-- return_index
-- return_inverse
-- return_counts
-variants:
-  dask:
-    api: dask.array.unique
 operation: unique
-type: function
+description: unique(input, sorted=True, return_inverse=False, return_counts=False,
+  dim=None) -> tuple[Tensor, Tensor, Tensor]
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.unique
+    args: {}
+  jax:
+    api: jax.numpy.unique
+    args:
+      ar: ar

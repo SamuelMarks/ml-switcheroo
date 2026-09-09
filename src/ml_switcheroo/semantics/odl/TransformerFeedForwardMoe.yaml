@@ -1,0 +1,7 @@
+operation: TransformerFeedForwardMoe
+variants:
+  paxml:
+    api: praxis.layers.TransformerFeedForwardMoe
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

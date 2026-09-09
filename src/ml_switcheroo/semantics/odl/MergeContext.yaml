@@ -1,0 +1,16 @@
+operation: MergeContext
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.merge_context
+    args:
+      ctxtag: ctxtag
+      index_ref: index_ref
+      is_inner: is_inner
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

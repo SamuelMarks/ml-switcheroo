@@ -1,0 +1,5 @@
+operation: SBitcmp0B64
+variants:
+  rdna:
+    api: s_bitcmp0_b64
+    description: Auto-mapped instruction S_BITCMP0_B64

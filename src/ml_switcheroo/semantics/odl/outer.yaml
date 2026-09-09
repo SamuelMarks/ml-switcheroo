@@ -1,15 +1,36 @@
-description: Returns the outer product of two vectors ``x1`` and ``x2``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x1
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x2
-  type: array
-variants:
-  dask:
-    api: dask.array.outer
 operation: outer
-type: function
+description: outer(input, vec2, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: vec2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.outer
+    args:
+      input: input
+      vec2: vec2
+  jax:
+    api: jax.numpy.outer
+    args:
+      a: a
+      b: b
+  mlx:
+    api: mlx.core.outer
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.outer
+    args:
+      x1: x1
+      x2: x2

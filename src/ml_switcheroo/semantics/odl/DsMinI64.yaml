@@ -1,0 +1,5 @@
+operation: DsMinI64
+variants:
+  rdna:
+    api: ds_min_i64
+    description: Auto-mapped instruction DS_MIN_I64

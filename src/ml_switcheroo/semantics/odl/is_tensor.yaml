@@ -1,0 +1,16 @@
+operation: is_tensor
+description: Returns True if `obj` is a PyTorch tensor.
+std_args:
+- name: obj
+  kind: positional_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.is_tensor
+    args:
+      obj: obj
+  keras:
+    api: keras.ops.is_tensor
+    args:
+      x: x

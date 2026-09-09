@@ -1,0 +1,16 @@
+operation: RepeatInterleave
+variants:
+  paxml:
+    api: jax.numpy.repeat
+    args:
+      dim: axis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.repeat
+    args:
+      dim: axis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

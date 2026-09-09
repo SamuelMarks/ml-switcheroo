@@ -1,0 +1,5 @@
+operation: VRcpF16
+variants:
+  rdna:
+    api: v_rcp_f16
+    description: Auto-mapped instruction V_RCP_F16

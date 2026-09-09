@@ -1,11 +1,27 @@
-description: The class representing a Python module/class/instance attribute.
+operation: Rrelu_
+description: rrelu_(input, lower=1./8, upper=1./3, training=False) -> Tensor
 std_args:
-- lower
-- upper
-- inplace
-- __constants__
-type: attribute
-operation: rrelu_
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: lower
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 1.0 / 8
+- name: upper
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 1.0 / 3
+- name: training
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
 variants:
   torch:
-    api: torch.nn.RReLU
+    api: torch.nn.functional.rrelu_
+    args:
+      input: input

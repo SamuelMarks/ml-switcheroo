@@ -1,0 +1,4 @@
+operation: Frnd
+variants:
+  nvidia_sass:
+    api: FRND

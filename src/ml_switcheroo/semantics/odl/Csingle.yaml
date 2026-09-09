@@ -1,0 +1,9 @@
+operation: Csingle
+variants:
+  flax_nnx:
+    api: jax.numpy.csingle
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

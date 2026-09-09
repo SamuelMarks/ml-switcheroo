@@ -1,0 +1,32 @@
+operation: Bucketize
+description: bucketize(input, boundaries, *, out_int32=False, right=False, out=None)
+  -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: boundaries
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out_int32
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: right
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.bucketize
+    args:
+      input: input
+      boundaries: boundaries

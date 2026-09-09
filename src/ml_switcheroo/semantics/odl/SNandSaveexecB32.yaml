@@ -1,0 +1,5 @@
+operation: SNandSaveexecB32
+variants:
+  rdna:
+    api: s_nand_saveexec_b32
+    description: Auto-mapped instruction S_NAND_SAVEEXEC_B32

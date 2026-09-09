@@ -1,8 +1,19 @@
 description: Logarithm of the sigmoid activation function.
 std_args:
-- x
+- name: x
+  type: Any
 variants:
   keras:
     api: keras.activations.log_sigmoid
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.log_sigmoid
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: log_sigmoid
 type: function

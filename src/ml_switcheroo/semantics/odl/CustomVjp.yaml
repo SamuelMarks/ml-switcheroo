@@ -1,0 +1,16 @@
+operation: CustomVjp
+variants:
+  paxml:
+    api: jax.custom_vjp
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.custom_vjp
+    args:
+      fun: fun
+      nondiff_argnums: nondiff_argnums
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

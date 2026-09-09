@@ -1,0 +1,31 @@
+operation: complex
+description: complex(real, imag, *, out=None) -> Tensor
+std_args:
+- name: real
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: imag
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.complex
+    args:
+      real: real
+      imag: imag
+  jax:
+    api: jax.lax.complex
+    args:
+      x: x
+      y: y
+  stablehlo:
+    api: stablehlo.complex
+    args:
+      lhs: lhs
+      rhs: rhs

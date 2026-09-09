@@ -1,8 +1,24 @@
-description: partial(func, *args, **keywords) - new function with partial application
-std_args:
-- kwargs
-variants:
-  dask:
-    api: dask.array.isposinf
 operation: isposinf
-type: function
+description: isposinf(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.isposinf
+    args:
+      input: input
+  jax:
+    api: jax.numpy.isposinf
+    args:
+      x: x
+  mlx:
+    api: mlx.core.isposinf
+    args:
+      a: a

@@ -1,14 +1,29 @@
-description: Sigmoid activation function.
-std_args:
-- x
-type: function
 operation: sigmoid
+description: sigmoid(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
+  torch:
+    api: torch.nn.functional.sigmoid
+    args:
+      input: input
+  mlx:
+    api: mlx.core.sigmoid
+    args:
+      a: a
   keras:
     api: keras.activations.sigmoid
-  mlx:
-    api: mlx.nn.Sigmoid
-  torch:
-    api: torch.nn.Sigmoid
-  tensorflow:
-    api: tf.nn.sigmoid
+    args:
+      x: x
+  jax:
+    api: jax.nn.sigmoid
+    args: {}
+  nvidia_sass:
+    api: Macro.Sigmoid
+    args: {}
+  rdna:
+    api: ; Macro.Sigmoid
+    args: {}

@@ -1,0 +1,26 @@
+operation: lu_solve
+description: lu_solve(b, LU_data, LU_pivots, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: LU_data
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: LU_pivots
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.lu_solve
+    args:
+      input: input
+      LU_data: LU_data
+      LU_pivots: LU_pivots

@@ -28,7 +28,7 @@ flowchart TD
 %% Level 3: Yellow (Intermediate)
     classDef l3Node fill: #f9ab00, stroke: #ffd427, stroke-width: 2px, color: white, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
 
-%% Hardware: Navy (SASS) - Roboto Mono
+%% Hardware: Navy (NVIDIA_SASS) - Roboto Mono
     classDef asmNode fill: #20344b, stroke: #57caff, stroke-width: 2px, color: white, font-family: 'Roboto Mono Normal', font-size: 14px, rx: 2px, ry: 2px;
 
 %% --- 2. Subgraph Styling ---
@@ -72,7 +72,7 @@ flowchart TD
 
     subgraph LBottom [Level 4: ASM]
         direction LR
-        SASS[NVIDIA SASS]
+        NVIDIA_SASS[NVIDIA SASS]
         RDNA[AMD RDNA]
     end
 
@@ -80,13 +80,13 @@ flowchart TD
     TikZ ~~~ TensorFlow
     TensorFlow ~~~ JAX
     JAX ~~~ StableHLO
-    StableHLO ~~~ SASS
+    StableHLO ~~~ NVIDIA_SASS
 %% --- 5. Apply Styles ---
     class HTML,TikZ,LaTeX l0Node;
     class PyTorch,MLX,TensorFlow,Keras,FlaxNNX,Pax l1Node;
     class JAX,NumPy l2Node;
     class StableHLO,MLIR l3Node;
-    class SASS asmNode;
+    class NVIDIA_SASS asmNode;
     class RDNA asmNode;
     class L0 containerL0;
     class L1 containerL1;

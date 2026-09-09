@@ -1,0 +1,25 @@
+operation: vander
+description: vander(x, N=None, increasing=False) -> Tensor
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: N
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: increasing
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.vander
+    args:
+      x: x
+  jax:
+    api: jax.numpy.vander
+    args:
+      x: x

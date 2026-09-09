@@ -14,7 +14,7 @@ Decoupling Logic:
     Functional unwrapping detection is driven by `StructuralTraits`.
 """
 
-from typing import Dict, Optional, Tuple, TYPE_CHECKING
+from typing import Dict, Optional, Tuple, Union, TYPE_CHECKING
 import libcst as cst
 
 from ml_switcheroo.utils.node_diff import diff_nodes
@@ -126,12 +126,13 @@ def rewrite_stateful_call(
   method_name = config.get("method")
   if method_name:
     # Must use rewriter helper if available to handle alias logic, or fall back
+    base: cst.BaseExpression
     if hasattr(rewriter, "_create_dotted_name"):
       base = rewriter._create_dotted_name(instance_name)
     else:
       base = cst.Name(instance_name)
 
-    new_func = cst.Attribute(
+    new_func: cst.BaseExpression = cst.Attribute(
       value=base,
       attr=cst.Name(method_name),
     )
@@ -308,11 +309,11 @@ def compute_permutation(source_layout: str, target_layout: str) -> Optional[Tupl
 
 
 def inject_permute_call(
-  base_node: cst.CSTNode,
+  base_node: cst.BaseExpression,
   indices: Tuple[int, ...],
   semantics: SemanticsManager,
   target_fw: str,
-) -> cst.CSTNode:
+) -> cst.BaseExpression:
   """Wrap a CST node with a permutation call valid for the target framework.
 
   Decoupling Logic:
@@ -322,13 +323,13 @@ def inject_permute_call(
       of JAX-style syntax.
 
   Args:
-      base_node (cst.CSTNode): The expression to wrap (usually the input tensor).
+      base_node (cst.BaseExpression): The expression to wrap (usually the input tensor).
       indices (Tuple[int, ...]): Tuple of integers representing dimensions to permute (e.g., (0, 2, 3, 1)).
       semantics (SemanticsManager): Semantics manager used to look up the correct permutation syntax for the framework.
       target_fw (str): Target framework string key (e.g., 'torch', 'jax').
 
   Returns:
-      cst.CSTNode: The constructed node representing `permute(base_node, indices)` or the original node if unsupported.
+      cst.BaseExpression: The constructed node representing `permute(base_node, indices)` or the original node if unsupported.
 
   """
   # 1. Lookup 'permute_dims' definition logic
@@ -344,7 +345,7 @@ def inject_permute_call(
 
   # 2. Build API Name Node
   parts = api_str.split(".")
-  func_node = cst.Name(parts[0])
+  func_node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
   for part in parts[1:]:
     func_node = cst.Attribute(value=func_node, attr=cst.Name(part))
 
@@ -387,7 +388,7 @@ def inject_permute_call(
   else:
     # Positional Varargs: .permute(x, 0, 2, 1)
     for i, idx_val in enumerate(indices):
-      comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
+      comma: Union[cst.Comma, cst.MaybeSentinel] = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
       if i == len(indices) - 1:
         comma = cst.MaybeSentinel.DEFAULT
 

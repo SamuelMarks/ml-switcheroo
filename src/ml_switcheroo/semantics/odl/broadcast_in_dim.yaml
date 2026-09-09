@@ -1,0 +1,27 @@
+operation: broadcast_in_dim
+description: Wraps XLA's `BroadcastInDim
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: broadcast_dimensions
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.broadcast_in_dim
+    args:
+      operand: operand
+      shape: shape
+      broadcast_dimensions: broadcast_dimensions
+  stablehlo:
+    api: stablehlo.broadcast_in_dim
+    args:
+      operand: operand
+      broadcast_dimensions: broadcast_dimensions

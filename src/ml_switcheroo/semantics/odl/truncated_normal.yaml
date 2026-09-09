@@ -1,13 +1,25 @@
 description: Builds an initializer that returns truncated-normal random arrays.
 std_args:
-- stddev
-- dtype
-- lower
-- upper
+- name: stddev
+  type: Any
+- name: dtype
+  type: Any
+- name: lower
+  type: Any
+- name: upper
+  type: Any
 variants:
   flax_nnx:
-    api: jax.nn.initializers.truncated_normal
+    api: nnx.rnglib.Rngs.truncated_normal
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: jax.nn.initializers.truncated_normal
+    args: {}
+  keras:
+    api: keras.initializers.truncated_normal
+    args: {}
 operation: truncated_normal
 type: function

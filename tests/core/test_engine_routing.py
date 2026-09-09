@@ -20,7 +20,7 @@ def mock_managers() -> MagicMock:
 
 def test_routing_to_compiler_pipeline_target_isa(mock_managers: MagicMock) -> None:
   """Verifies the behavior of routing to compiler pipeline target isa."""
-  config = RuntimeConfig(source_framework="torch", target_framework="sass")
+  config = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass")
   engine = ASTEngine(mock_managers, config)
   engine._run_compiler_pipeline = MagicMock()  # type: ignore
   engine._run_rewriter_pipeline = MagicMock()  # type: ignore
@@ -53,7 +53,7 @@ def test_routing_to_rewriter_pipeline_high_level(mock_managers: MagicMock) -> No
 
 def test_python_frontend_invoked_in_compiler_pipeline(mock_managers: MagicMock) -> None:
   """Verifies the behavior of python frontend invoked in compiler pipeline."""
-  config = RuntimeConfig(source_framework="torch", target_framework="sass")
+  config = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass")
   engine = ASTEngine(mock_managers, config)
   with patch("ml_switcheroo.core.engine.PythonFrontend") as MockFront:
     MockFront.return_value.parse_to_graph.return_value = LogicalGraph()

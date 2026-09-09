@@ -1,0 +1,28 @@
+operation: TransformerFeedForward
+variants:
+  paxml:
+    api: praxis.layers.TransformerFeedForward
+    args:
+      dropout_prob: relu_dropout_prob
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Sequential
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: transformer_ff_block
+  mlx:
+    api: mlx.nn.Sequential
+    args: {}
+std_args:
+- name: _modules
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+  default: ()

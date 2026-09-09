@@ -1,0 +1,31 @@
+operation: GlobalPooling
+variants:
+  keras:
+    api: keras.layers.GlobalAveragePooling2D
+    args:
+      keepdims: keepdims
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: paxml.layers.GlobalPooling
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.AdaptiveAvgPool2d
+    dispatch_rules: []
+    inject_args:
+      output_size: 1
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.GlobalAveragePooling2D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: output_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

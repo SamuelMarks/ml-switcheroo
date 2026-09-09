@@ -1,0 +1,8 @@
+operation: start
+variants:
+  flax_nnx:
+    api: nnx.reprlib.Attr.start
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

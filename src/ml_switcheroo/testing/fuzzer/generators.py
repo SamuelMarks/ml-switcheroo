@@ -99,10 +99,10 @@ def generate_array(type_lbl: str, shape: typing.Tuple[int, ...], constraints: di
     high_bound = int(max_val) if max_val is not None else 10
     high = high_bound + 1
 
-    arr = np.random.randint(low, high, size=shape)
+    int_arr = np.random.randint(low, high, size=shape)
     if explicit_dtype:
-      return arr.astype(explicit_dtype)
-    return arr.astype(np.int32)
+      return int_arr.astype(explicit_dtype)
+    return int_arr.astype(np.int32)
 
   # Float default
   arr = np.random.randn(*shape)

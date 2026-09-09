@@ -1,0 +1,7 @@
+operation: Number
+variants:
+  flax_nnx:
+    api: jax.numpy.number
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

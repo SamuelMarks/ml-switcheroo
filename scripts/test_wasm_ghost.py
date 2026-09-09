@@ -36,10 +36,10 @@ class TestWasmGhostMode(unittest.TestCase):
     assert torch_variant is not None
     self.assertEqual(torch_variant.get("api"), "torch.nn.Conv2d")
 
-    jax_variant = manager.resolve_variant("Conv2d", "jax")
-    self.assertIsNotNone(jax_variant, "Failed to load JAX Conv2d variant.")
-    assert jax_variant is not None
-    self.assertEqual(jax_variant.get("api"), "jax.lax.conv")
+    flax_variant = manager.resolve_variant("Conv2d", "flax_nnx")
+    self.assertIsNotNone(flax_variant, "Failed to load Flax NNX Conv2d variant.")
+    assert flax_variant is not None
+    self.assertEqual(flax_variant.get("api"), "flax.nnx.Conv")
 
 
 if __name__ == "__main__":

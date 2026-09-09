@@ -1,12 +1,18 @@
 description: Compute grid sample.
 std_args:
-- input
-- grid
-- mode
-- padding_mode
-- align_corners
+- name: input
+  type: Any
+- name: grid
+  type: Any
+- name: mode
+  type: Any
+- name: padding_mode
+  type: Any
+- name: align_corners
+  type: Any
 type: function
 operation: grid_sample
 variants:
   torch:
     api: torch.nn.functional.grid_sample
+    args: {}

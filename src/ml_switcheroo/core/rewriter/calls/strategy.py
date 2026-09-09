@@ -1,5 +1,6 @@
 """Core Transformation Strategies for Call Rewriting."""
 
+import typing
 from typing import TYPE_CHECKING
 import libcst as cst
 
@@ -128,7 +129,10 @@ def execute_strategy(
     plugin_name = mapping["requires_plugin"]
     hook = get_hook(plugin_name)
     if hook:
-      return hook(updated, rewriter.context.hook_context)
+      res = hook(updated, rewriter.context.hook_context)
+      if res is not None:
+        return typing.cast(cst.BaseExpression, res)
+      return updated
     else:
       rewriter._report_failure(f"Missing required plugin: '{plugin_name}'")
       return updated
@@ -175,13 +179,15 @@ def execute_strategy(
         norm_args = apply_strict_guards(rewriter, norm_args, details, mapping)  # type: ignore
 
       new_func = rewriter._create_name_node(target_api)
-      result_node = updated.with_changes(func=new_func, args=norm_args)
+      res_node: cst.BaseExpression = updated.with_changes(func=new_func, args=norm_args)
 
       # Layout Permutation Logic
       if "layout_map" in mapping and mapping["layout_map"]:
-        result_node = _apply_layout_permutation(result_node, mapping, details, rewriter)
+        res_node = _apply_layout_permutation(
+          updated.with_changes(func=new_func, args=norm_args), mapping, details, rewriter
+        )
 
-      return result_node
+      return res_node
 
     except ValueError:
       rewriter._report_failure("Argument normalization failed")
@@ -193,7 +199,7 @@ def _apply_layout_permutation(
   mapping: dict,
   details: dict,
   rewriter: "RewriterDummy",
-) -> cst.Call:
+) -> cst.BaseExpression:
   """Apply layout permutation to the arguments or return value of a call.
 
   This function modifies the arguments of a function call, or wraps the entire call,
@@ -208,7 +214,7 @@ def _apply_layout_permutation(
       rewriter: The active rewriter instance providing semantics and target framework details.
 
   Returns:
-      cst.Call: The modified call node with permuted arguments or a permutation wrapped around the return value.
+      cst.BaseExpression: The modified call node with permuted arguments or a permutation wrapped around the return value.
 
   """
   layout_map = mapping["layout_map"]
@@ -234,7 +240,7 @@ def _apply_layout_permutation(
           modified_args[idx] = original_arg.with_changes(value=wrapped_val)
     idx += 1
 
-  node = node.with_changes(args=modified_args)
+  res_node: cst.BaseExpression = node.with_changes(args=modified_args)
 
   if "return" in layout_map:
     rule = layout_map["return"]
@@ -242,6 +248,6 @@ def _apply_layout_permutation(
       src_l, tgt_l = rule.split("->")
       perm_indices = compute_permutation(src_l.strip(), tgt_l.strip())
       if perm_indices:
-        node = inject_permute_call(node, perm_indices, rewriter.semantics, rewriter.target_fw)
+        res_node = inject_permute_call(res_node, perm_indices, rewriter.semantics, rewriter.target_fw)
 
-  return node
+  return res_node

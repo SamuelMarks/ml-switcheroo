@@ -1,0 +1,14 @@
+operation: item
+variants:
+  flax_nnx:
+    api: jax.numpy.ndarray.item
+    args:
+      args: args
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.Array.item
+    args:
+      a: a

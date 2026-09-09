@@ -17,13 +17,35 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 def test_rdna_lifter_basic() -> None:
   """Docstring."""
   lifter: RdnaLifter = RdnaLifter()
+
+  # Manually inject a fake marker that isn't handled explicitly to hit the 'else' branch
+  from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
+
+  class FakeMarker(SemanticMarker):
+    """Fake marker for testing fallback logic."""
+
+    pass
+
+  original_parse = lifter.comment_parser.parse
+
+  def mock_parse(text):
+    if "FAKE_MARKER" in text:
+      return FakeMarker()
+    return original_parse(text)
+
+  lifter.comment_parser.parse = mock_parse
+
   nodes: List[RdnaNode] = [
+    RdnaComment(text="; FAKE_MARKER"),
     RdnaComment(text="; Input x ->"),
     RdnaComment(text="; BEGIN Conv2d(block_1)"),
     RdnaInstruction(opcode="s_cmp_lt_i32", operands=[c_SGPR(0), RdnaImmediate(value=3)]),
     RdnaComment(text="; END Conv2d(block_1)"),
     RdnaComment(text="; Unmapped Op: flatten(flatten)"),
     RdnaComment(text="; Return:"),
+    RdnaComment(text="; Return:"),  # Duplicate for seen_ids branch
+    RdnaComment(text="; Unmapped Op: unknown(other)"),  # Unmapped branch without flatten
+    RdnaInstruction(opcode="v_add_f32", operands=[]),  # implicit block hit
   ]
   graph: LogicalGraph = lifter.lift(nodes)
 
@@ -122,8 +144,8 @@ def test_lifter_end_mismatch() -> None:
   """Docstring."""
   mod: RdnaModule = RdnaModule(
     statements=[
-      RdnaComment(text="; BEGIN: Linear(some_id)"),
-      RdnaComment(text="; END: some_other_id"),  # mismatch
+      RdnaComment(text="; BEGIN Linear(some_id)"),
+      RdnaComment(text="; END Linear(some_other_id)"),  # mismatch
     ]
   )
   lifter: RdnaLifter = RdnaLifter()

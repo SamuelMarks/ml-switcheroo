@@ -1,0 +1,22 @@
+operation: packbits
+description: Auto-generated mapping for packbits.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: bitorder
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''big'''
+variants:
+  jax:
+    api: jax.numpy.packbits
+    args:
+      a: a

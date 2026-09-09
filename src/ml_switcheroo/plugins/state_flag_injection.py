@@ -13,9 +13,8 @@ The plugin consists of two cooperating hooks:
 State is tracked via a metadata dictionary in `HookContext` keyed by the object name.
 """
 
-from typing import Optional
+from typing import Optional, Dict, cast
 import libcst as cst
-from typing import cast
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
@@ -150,14 +149,14 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     return node
 
   # 2. Determine State Value
-  state_updates = {}
+  state_updates: Dict[str, cst.BaseExpression] = {}
 
   if method_name == "eval":
     state_updates["training"] = cst.Name("False")
 
   elif method_name == "train":
     # Check args for train(mode=bool). Default is True.
-    val = cst.Name("True")
+    val: cst.BaseExpression = cst.Name("True")
     if node.args:
       # Simple heuristic: grab first arg.
       # If it's a literal 'False' or 'True', we use it.

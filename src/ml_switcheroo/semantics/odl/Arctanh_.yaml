@@ -8,5 +8,6 @@ std_args:
 variants:
   dask:
     api: dask.array.arctanh
+    args: {}
 operation: Arctanh_
 type: function

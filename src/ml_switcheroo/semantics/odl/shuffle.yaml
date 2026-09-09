@@ -1,10 +1,14 @@
 description: Reorders one dimensions of a Dask Array based on an indexer.
 std_args:
-- x
-- indexer
-- axis
+- name: x
+  type: Any
+- name: indexer
+  type: Any
+- name: axis
+  type: Any
 variants:
   dask:
     api: dask.array.shuffle
+    args: {}
 operation: shuffle
 type: function

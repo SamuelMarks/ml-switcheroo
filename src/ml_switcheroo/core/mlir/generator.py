@@ -7,7 +7,7 @@ MLIR CST object model and reconstructs valid Python code via LibCST.
 from typing import Any
 
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union, cast
 from collections import defaultdict
 import libcst as cst
 
@@ -118,7 +118,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         lines.append(cst.EmptyLine(comment=cst.Comment(content), newline=cst.Newline()))
     return lines
 
-  def _convert_block(self, block: BlockNode) -> List[cst.BaseStatement]:
+  def _convert_block(self, block: BlockNode) -> List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]]:
     """Convert operations in a block to a list of Python statements.
 
     Applies expression folding where possible.
@@ -129,7 +129,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     Returns:
         A list of LibCST BaseStatement objects representing Python statements.
     """
-    stmts: List[cst.BaseStatement] = []
+    stmts: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
 
     for op in block.operations:
       leading = self._convert_trivia(op.leading_trivia)
@@ -148,15 +148,15 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
           stmt_node = self._wrap_as_statement(op, expr_node)
           if hasattr(stmt_node, "with_changes") and leading:
             stmt_node = stmt_node.with_changes(leading_lines=leading)
-          stmts.append(stmt_node)
+          stmts.append(cast(Union[cst.SimpleStatementLine, cst.BaseCompoundStatement], stmt_node))
       else:
         # Handle statements that are never expressions (Control Flow, Class Defs, Defs, Imports)
         # These are handled by StatementGeneratorMixin
-        stmt_node = self._convert_statement_op(op)
-        if stmt_node:
-          if hasattr(stmt_node, "with_changes") and leading:
-            stmt_node = stmt_node.with_changes(leading_lines=leading)
-          stmts.append(stmt_node)
+        stmt_op = self._convert_statement_op(op)
+        if stmt_op:
+          if hasattr(stmt_op, "with_changes") and leading:
+            stmt_op = stmt_op.with_changes(leading_lines=leading)
+          stmts.append(cast(Union[cst.SimpleStatementLine, cst.BaseCompoundStatement], stmt_op))
 
     return stmts
 

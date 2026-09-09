@@ -1,0 +1,22 @@
+operation: Swapdims
+description: swapdims(input, dim0, dim1) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim0
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dim1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.swapdims
+    args:
+      input: input
+      dim0: dim0
+      dim1: dim1

@@ -1,0 +1,91 @@
+operation: FRnn
+variants:
+  paxml:
+    api: praxis.layers.FRnn
+    args:
+      cell: cell_tpl
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.RNN
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.RNN
+    args:
+      input_size: input_size
+      hidden_size: hidden_size
+  keras:
+    api: keras.layers.RNN
+    args:
+      cell: cell
+std_args:
+- name: input_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: hidden_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: num_layers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: nonlinearity
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''tanh'''
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: batch_first
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: dropout
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+- name: bidirectional
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+  default: ()
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
+- name: mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: proj_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'

@@ -1,0 +1,38 @@
+operation: approx_min_k
+description: Returns min ``k`` values and their indices of the ``operand`` in an approximate
+  manner.
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: k
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: reduction_dimension
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '-1.0'
+- name: recall_target
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.95'
+- name: reduction_input_size_override
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '-1'
+- name: aggregate_to_topk
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+variants:
+  jax:
+    api: jax.lax.approx_min_k
+    args:
+      operand: operand
+      k: k

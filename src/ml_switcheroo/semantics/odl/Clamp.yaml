@@ -1,0 +1,36 @@
+operation: clamp
+description: clamp(input, min=None, max=None, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: min
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: max
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.clamp
+    args:
+      input: input
+  jax:
+    api: jax.lax.clamp
+    args:
+      min: min
+      x: x
+      max: max
+  stablehlo:
+    api: stablehlo.clamp
+    args:
+      min: min
+      operand: operand
+      max: max

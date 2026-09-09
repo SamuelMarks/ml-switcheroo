@@ -1,0 +1,16 @@
+operation: rfftn
+variants:
+  flax_nnx:
+    api: jax.numpy.fft.rfftn
+    args:
+      a: a
+      axes: axes
+      norm: norm
+      s: s
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.core.fft.rfftn
+    args:
+      a: a

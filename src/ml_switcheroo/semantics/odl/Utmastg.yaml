@@ -1,0 +1,4 @@
+operation: Utmastg
+variants:
+  nvidia_sass:
+    api: UTMASTG

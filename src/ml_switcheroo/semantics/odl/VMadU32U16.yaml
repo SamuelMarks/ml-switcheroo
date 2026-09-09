@@ -1,0 +1,5 @@
+operation: VMadU32U16
+variants:
+  rdna:
+    api: v_mad_u32_u16
+    description: Auto-mapped instruction V_MAD_U32_U16

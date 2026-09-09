@@ -1,0 +1,5 @@
+operation: DsSubRtnU64
+variants:
+  rdna:
+    api: ds_sub_rtn_u64
+    description: Auto-mapped instruction DS_SUB_RTN_U64

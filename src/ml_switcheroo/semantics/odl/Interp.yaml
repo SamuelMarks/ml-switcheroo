@@ -1,0 +1,38 @@
+operation: interp
+description: One-dimensional linear interpolation for monotonically increasing sample
+  points.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: xp
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: fp
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: left
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: right
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: period
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.interp
+    args:
+      x: x
+      xp: xp
+      fp: fp

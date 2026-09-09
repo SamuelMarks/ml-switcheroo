@@ -1,0 +1,32 @@
+operation: argpartition
+description: Returns indices that partially sort an array.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: kth
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '-1'
+variants:
+  jax:
+    api: jax.numpy.argpartition
+    args:
+      a: a
+      kth: kth
+  mlx:
+    api: mlx.core.argpartition
+    args:
+      a: a
+      kth: kth
+  keras:
+    api: keras.ops.argpartition
+    args:
+      x: x
+      kth: kth

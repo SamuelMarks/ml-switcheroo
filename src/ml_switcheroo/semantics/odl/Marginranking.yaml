@@ -1,0 +1,44 @@
+operation: Marginranking
+variants:
+  mlx:
+    api: mlx.nn.losses.margin_ranking_loss
+    args:
+      margin: margin
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.MarginRankingLoss
+    args:
+      margin: margin
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: margin
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.0'
+- name: size_average
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: reduce
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '''mean'''
+- name: __constants__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+  default: '[''margin'', ''reduction'']'

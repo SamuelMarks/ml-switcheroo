@@ -1,0 +1,5 @@
+operation: DsMskorRtnB32
+variants:
+  rdna:
+    api: ds_mskor_rtn_b32
+    description: Auto-mapped instruction DS_MSKOR_RTN_B32

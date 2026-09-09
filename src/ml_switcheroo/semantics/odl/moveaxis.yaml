@@ -1,20 +1,40 @@
-description: Moves array axes (dimensions) to new positions, while leaving other axes
-  in their original positions.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: source
-  type: Union[int, Tuple[int, Ellipsis]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: destination
-  type: Union[int, Tuple[int, Ellipsis]]
-variants:
-  dask:
-    api: dask.array.moveaxis
 operation: moveaxis
-type: function
+description: moveaxis(input, source, destination) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: source
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: destination
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.moveaxis
+    args:
+      input: input
+      source: source
+      destination: destination
+  jax:
+    api: jax.numpy.moveaxis
+    args:
+      a: a
+      source: source
+      destination: destination
+  mlx:
+    api: mlx.core.moveaxis
+    args:
+      a: a
+      source: source
+      destination: destination
+  keras:
+    api: keras.ops.moveaxis
+    args:
+      x: x
+      source: source
+      destination: destination

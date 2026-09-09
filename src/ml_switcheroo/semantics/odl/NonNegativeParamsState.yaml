@@ -1,0 +1,8 @@
+operation: NonNegativeParamsState
+variants:
+  flax_nnx:
+    api: optax.NonNegativeParamsState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

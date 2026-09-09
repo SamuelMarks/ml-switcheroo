@@ -1,0 +1,7 @@
+operation: numel
+description: 'numel(input: Tensor) -> int'
+std_args: []
+variants:
+  torch:
+    api: torch.numel
+    args: {}

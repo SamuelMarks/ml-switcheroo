@@ -1,0 +1,4 @@
+operation: R2P
+variants:
+  nvidia_sass:
+    api: R2P

@@ -1,8 +1,20 @@
-description: Return a contiguous flattened array.
-std_args:
-- array_like
-variants:
-  dask:
-    api: dask.array.ravel
 operation: ravel
-type: function
+description: ravel(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.ravel
+    args:
+      input: input
+  jax:
+    api: jax.numpy.ravel
+    args:
+      a: a
+  keras:
+    api: keras.ops.ravel
+    args:
+      x: x

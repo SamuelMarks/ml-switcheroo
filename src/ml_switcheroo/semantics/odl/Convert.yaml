@@ -1,0 +1,12 @@
+operation: convert
+description: Convert operation
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  stablehlo:
+    api: stablehlo.convert
+    args:
+      operand: operand

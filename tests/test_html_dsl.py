@@ -256,3 +256,123 @@ def test_parser_facade_ops_missing_args() -> None:
   parser: HtmlParser = HtmlParser(html)
   tree: cst.Module = parser.parse()
   assert "relu_out = dsl.relu(x)" in tree.code
+
+
+def test_internal_parser_attribute_none_and_startendtag() -> None:
+  """Test valueless attributes and handle_startendtag branches."""
+  parser: InternalHtmlParser = InternalHtmlParser()
+  parser.feed('<input disabled class="input-class">')
+  assert len(parser.root_children) == 1
+  input_tag: HtmlNode = parser.root_children[0]
+  assert isinstance(input_tag, TagNode)
+  assert any(attr.name == "disabled" and attr.value is None for attr in input_tag.attributes)
+  assert any(attr.name == "class" and attr.value == "input-class" for attr in input_tag.attributes)
+
+  # Explicit startendtag invocation with both None and non-None attribute values
+  parser.handle_startendtag("custom-tag", [("valueless", None), ("valued", "123")])
+  custom_tag: HtmlNode = parser.root_children[1]
+  assert isinstance(custom_tag, TagNode)
+  assert custom_tag.self_closing
+  assert custom_tag.attributes[0].value is None
+  assert custom_tag.attributes[1].value == "123"
+
+
+def test_internal_parser_endtag_edge_cases() -> None:
+  """Test endtag when tag is not found in stack and when closing outer tag closes inner tags."""
+  parser: InternalHtmlParser = InternalHtmlParser()
+  # Tag not in stack should be safely ignored
+  parser.handle_endtag("nonexistent")
+  assert len(parser.root_children) == 0
+
+  # Closing outer tag while inner tags remain open
+  parser.feed("<section><p><span>text</section>")
+  assert len(parser.root_children) == 1
+  section_node: HtmlNode = parser.root_children[0]
+  assert isinstance(section_node, TagNode)
+  assert section_node.name == "section"
+  # Unclosed p should be appended into section_node children
+  assert len(section_node.children) >= 1
+
+
+def test_grid_extractor_edge_cases() -> None:
+  """Test GridExtractor with various DOM shapes, non-text children, and box classes."""
+  extractor: GridExtractor = GridExtractor()
+  empty_doc: HtmlDocument = HtmlDocument(model_name="", children=[])
+  extractor.extract(empty_doc)
+  assert extractor.model_name == "Model"
+
+  doc: HtmlDocument = HtmlDocument(
+    model_name="CustomModel",
+    children=[
+      TextNode(content="trivia"),
+      CommentNode(content="comment"),
+      # h3 with non-text child and without Model:
+      TagNode(name="h3", children=[TagNode(name="b"), TextNode(content="NonModel Title")]),
+      # div without class attribute or with empty/non-box class
+      TagNode(name="div", attributes=[AttributeNode(name="id", value="ignored")]),
+      TagNode(name="div", attributes=[AttributeNode(name="class", value=None)]),
+      TagNode(name="div", attributes=[AttributeNode(name="class", value="container")]),
+      # box div with non-TagNode, TagNode that is not span/code, and span/code with non-TextNode
+      TagNode(
+        name="div",
+        attributes=[AttributeNode(name="class", value="box ignored_color")],
+        children=[
+          TextNode(content="whitespace"),
+          TagNode(name="i", children=[TextNode(content="icon")]),
+          TagNode(name="span", children=[TagNode(name="strong")]),
+          TagNode(name="code", children=[TagNode(name="em")]),
+        ],
+      ),
+      # box with Call header (starts with Call but not Call () -> ignored)
+      TagNode(
+        name="div",
+        attributes=[AttributeNode(name="class", value="box b")],
+        children=[
+          TagNode(name="span", children=[TextNode(content="Call")]),
+          TagNode(name="code", children=[TextNode(content="")]),
+        ],
+      ),
+      # tag that is neither h3 nor div
+      TagNode(name="article", children=[TextNode(content="article text")]),
+    ],
+  )
+  extractor.extract(doc)
+  assert extractor.model_name == "CustomModel"
+  assert len(extractor.ops) == 0
+
+
+def test_html_parser_args_and_safe_val() -> None:
+  """Test positional argument parsing and fallback on invalid syntax."""
+  parser: HtmlParser = HtmlParser("")
+  # Empty argument string
+  assert parser._parse_args_str("") == []
+
+  # Create call without config_str
+  empty_call = parser._create_call("dsl.Linear", config_str=None)
+  assert len(empty_call.args) == 0
+
+  # Positional and keyword arguments
+  args = parser._parse_args_str("123, axis=1, True")
+  assert len(args) == 3
+  assert args[0].keyword is None
+  assert args[1].keyword is not None and args[1].keyword.value == "axis"
+  assert args[2].keyword is None
+
+  # Fallback for invalid Python syntax expression
+  safe_val = parser._safe_val("def invalid_syntax(): pass")
+  assert isinstance(safe_val, cst.SimpleString)
+
+  # Full roundtrip with positional args and comments for _find_model branch coverage
+  html: str = """
+    <!-- header comment -->
+    <h3>Section Header</h3>
+    <h3>Model: AdvancedNet</h3>
+    <div class="box r"><span>conv: Conv2d</span><code>16, 32, kernel_size=3</code></div>
+    <div class="box b"><span>Call (conv)</span><code>args: x</code></div>
+    <div class="box b"><span>pool</span><code>x, 2, stride=2</code></div>
+    """
+  p: HtmlParser = HtmlParser(html)
+  mod: cst.Module = p.parse()
+  assert "class AdvancedNet" in mod.code
+  assert "self.conv = dsl.Conv2d(16, 32, kernel_size=3)" in mod.code
+  assert "pool_out = dsl.pool(conv_out, x, 2, stride=2)" in mod.code

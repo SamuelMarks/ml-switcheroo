@@ -1,9 +1,20 @@
-description: Stack arrays in sequence depth wise (along third axis).
-std_args:
-- tup
-- allow_unknown_chunksizes
-variants:
-  dask:
-    api: dask.array.dstack
 operation: dstack
-type: function
+description: dstack(tensors, *, out=None) -> Tensor
+std_args:
+- name: tensors
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.dstack
+    args:
+      tensors: tensors
+  jax:
+    api: jax.numpy.dstack
+    args:
+      tup: tup

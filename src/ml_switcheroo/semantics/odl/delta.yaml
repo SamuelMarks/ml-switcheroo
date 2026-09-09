@@ -5,3 +5,4 @@ operation: delta
 variants:
   latex_dsl:
     api: latex.Delta
+    args: {}

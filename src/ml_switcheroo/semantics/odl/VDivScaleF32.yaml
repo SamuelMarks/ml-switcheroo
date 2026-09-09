@@ -1,0 +1,5 @@
+operation: VDivScaleF32
+variants:
+  rdna:
+    api: v_div_scale_f32
+    description: Auto-mapped instruction V_DIV_SCALE_F32

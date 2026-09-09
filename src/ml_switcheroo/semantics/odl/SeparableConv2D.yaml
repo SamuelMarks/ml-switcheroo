@@ -29,7 +29,34 @@ std_args:
 variants:
   keras:
     api: keras.layers.SeparableConv2D
+    args:
+      activation: activation
+      activity_regularizer: activity_regularizer
+      bias_constraint: bias_constraint
+      bias_initializer: bias_initializer
+      bias_regularizer: bias_regularizer
+      data_format: data_format
+      depth_multiplier: depth_multiplier
+      depthwise_constraint: depthwise_constraint
+      depthwise_initializer: depthwise_initializer
+      depthwise_regularizer: depthwise_regularizer
+      dilation_rate: dilation_rate
+      filters: filters
+      kernel_size: kernel_size
+      kwargs: kwargs
+      padding: padding
+      pointwise_constraint: pointwise_constraint
+      pointwise_initializer: pointwise_initializer
+      pointwise_regularizer: pointwise_regularizer
+      strides: strides
+      use_bias: use_bias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.SeparableConv2D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: SeparableConv2D
 type: function

@@ -13,7 +13,7 @@ import typing
 
 import logging
 import textwrap
-from typing import Union, List, Tuple, Dict, Optional
+from typing import Union, List, Tuple, Dict, Optional, Any
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
@@ -28,10 +28,14 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 
+jax: Optional[Any] = None
 try:
-  import jax
+  import jax as _jax
+
+  jax = _jax
 except Exception:
   jax = None
+flax_nnx: Optional[Any] = None
 try:
   import flax.nnx
 
@@ -61,7 +65,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     - Otherwise, falls back to GHOST mode and loads an API snapshot.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data = {}
+    self._snapshot_data: Dict[str, Any] = {}
     if flax_nnx is not None:
       self._flax_available = True
     else:

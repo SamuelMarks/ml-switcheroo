@@ -1,13 +1,21 @@
 description: Calculates the L2 loss for a set of predictions.
 std_args:
-- predictions
-- targets
+- name: predictions
+  type: Any
+- name: targets
+  type: Any
 type: attribute
 operation: l2_loss
 variants:
   optax_shim:
     api: optax.losses.l2_loss
+    args: {}
   flax_nnx:
-    api: optax.losses.l2_loss
+    api: optax.l2_loss
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.losses.l2_loss
+    args: {}

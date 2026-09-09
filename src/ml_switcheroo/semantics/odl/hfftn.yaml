@@ -1,0 +1,28 @@
+operation: hfftn
+description: hfftn(input, s=None, dim=None, norm=None, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: s
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: norm
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.fft.hfftn
+    args:
+      input: input

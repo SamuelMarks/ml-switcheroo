@@ -1,0 +1,5 @@
+operation: VCeilF32
+variants:
+  rdna:
+    api: v_ceil_f32
+    description: Auto-mapped instruction V_CEIL_F32

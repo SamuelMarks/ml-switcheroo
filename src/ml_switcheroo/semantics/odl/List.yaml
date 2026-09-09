@@ -2,6 +2,12 @@ description: Base class for all neural network modules.
 std_args: []
 variants:
   flax_nnx:
-    api: flax.nnx.List
+    api: nnx.helpers.List
+    args:
+      it: it
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: List
 type: function

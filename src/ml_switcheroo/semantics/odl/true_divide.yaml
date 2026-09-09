@@ -1,10 +1,24 @@
 description: true_divide(dividend, divisor, *, out) -> Tensor
 std_args:
-- input
-- other
-- out
+- name: input
+  type: Any
+- name: other
+  type: Any
+- name: out
+  type: Any
 variants:
   torch:
     api: torch.true_divide
+    args: {}
+  jax:
+    api: jax.numpy.divide
+    args:
+      x1: x1
+      x2: x2
+  keras:
+    api: keras.ops.true_divide
+    args:
+      x1: x1
+      x2: x2
 operation: true_divide
 type: function

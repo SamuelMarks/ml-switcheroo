@@ -1,0 +1,11 @@
+operation: tensorsolve
+variants:
+  flax_nnx:
+    api: jax.numpy.linalg.tensorsolve
+    args:
+      a: a
+      axes: axes
+      b: b
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

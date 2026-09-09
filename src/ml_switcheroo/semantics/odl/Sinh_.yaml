@@ -7,7 +7,23 @@ std_args:
 variants:
   latex_dsl:
     api: latex.sinh
+    args: {}
   dask:
     api: dask.array.sinh
+    args: {}
+  paxml:
+    api: jax.numpy.sinh
+    dispatch_rules: []
+    macro_template: '{input} = jnp.sinh({input})'
+    pack_as: Tuple
+    required_imports: []
+    transformation_type: macro
+  flax_nnx:
+    api: jax.numpy.sinh
+    dispatch_rules: []
+    macro_template: '{input} = jnp.sinh({input})'
+    pack_as: Tuple
+    required_imports: []
+    transformation_type: macro
 operation: Sinh_
 type: function

@@ -1,0 +1,4 @@
+operation: Nanosleep
+variants:
+  nvidia_sass:
+    api: NANOSLEEP

@@ -1,8 +1,34 @@
 operation: TorchSave
 description: Definition for TorchSave
 std_args:
-- obj
-- f
+- name: obj
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: f
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: pickle_module
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(pickle)```'''
+- name: pickle_protocol
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '''```(DEFAULT_PROTOCOL)```'''
+- name: _use_new_zipfile_serialization
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: _disable_byteorder_record
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
   torch:
     api: torch.save
@@ -12,3 +38,8 @@ variants:
   numpy:
     api: save
     requires_plugin: io_handler
+  mlx:
+    api: mlx.core.save
+    args:
+      file: file
+      arr: arr

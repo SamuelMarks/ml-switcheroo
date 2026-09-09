@@ -94,6 +94,10 @@ def test_structure_transformer_edge_cases() -> None:
   name: cst.Name = cst.Name("foo")
   assert transformer._get_qualified_name(name) == "foo"
 
+  # Single-part alias in alias_map (lines 118-120)
+  context.alias_map = {"th": "torch"}
+  assert transformer._get_qualified_name(cst.Name("th")) == "torch"
+
   attr: cst.Attribute = cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
   assert transformer._get_qualified_name(attr) == "a.b"
 
@@ -109,12 +113,39 @@ def test_structure_transformer_edge_cases() -> None:
   assert transformer._is_framework_base("torch.nn.Module")
   assert not transformer._is_framework_base("SomethingElse")
 
+  # Suffix match in _is_framework_base (lines 204-205)
+  transformer._known_module_bases = {"flax.linen.Module"}
+  assert transformer._is_framework_base("linen.Module")
+
+  # visit_Import and visit_ImportFrom (lines 400-440)
+  import_node: cst.Module = cst.parse_module("import torch as th, os")
+  import_node.visit(transformer)
+  assert context.alias_map["th"] == "torch"
+  assert context.alias_map["os"] == "os"
+
+  from_node: cst.Module = cst.parse_module("from torch.nn import Linear as Lin, Conv2d")
+  from_node.visit(transformer)
+  assert context.alias_map["Lin"] == "torch.nn.Linear"
+  assert context.alias_map["Conv2d"] == "torch.nn.Conv2d"
+
+  # Relative import and ImportStar
+  rel_node: cst.Module = cst.parse_module("from . import foo\nfrom bar import *")
+  rel_node.visit(transformer)
+
   # get_source_inference_methods
   semantics.framework_configs = {"torch": {"traits": {"known_inference_methods": ["call"]}}}
   assert "call" in transformer._get_source_inference_methods()
 
   # type_mapping missing
   assert transformer._get_type_mapping("missing") is None
+  assert transformer._get_type_mapping("int") is None
+
+  # leave_Attribute in annotation where mapping has no api or mapping is None
+  transformer._in_annotation = True
+  attr_node = cst.parse_expression("foo.bar")
+  assert isinstance(attr_node, cst.Attribute)
+  assert transformer.leave_Attribute(attr_node, attr_node) == attr_node
+  transformer._in_annotation = False
 
   # Error case in class def (unsupported tier)
   semantics.framework_configs = {

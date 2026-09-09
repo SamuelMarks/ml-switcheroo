@@ -1,0 +1,5 @@
+operation: VTrigPreopF64
+variants:
+  rdna:
+    api: v_trig_preop_f64
+    description: Auto-mapped instruction V_TRIG_PREOP_F64

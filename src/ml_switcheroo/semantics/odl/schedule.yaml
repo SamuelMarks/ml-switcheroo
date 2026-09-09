@@ -1,0 +1,7 @@
+operation: schedule
+variants:
+  flax_nnx:
+    api: optax.Schedule
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

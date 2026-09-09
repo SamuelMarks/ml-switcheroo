@@ -1,0 +1,22 @@
+operation: issubdtype
+description: Returns True if first argument is a typecode lower/equal in type hierarchy.
+std_args:
+- name: arg1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: arg2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.numpy.issubdtype
+    args:
+      arg1: arg1
+      arg2: arg2
+  mlx:
+    api: mlx.core.issubdtype
+    args:
+      arg1: arg1
+      arg2: arg2

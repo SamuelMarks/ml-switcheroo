@@ -16,7 +16,29 @@ std_args:
 variants:
   keras:
     api: keras.layers.SpatialDropout2D
+    args:
+      data_format: data_format
+      dtype: dtype
+      name: name
+      rate: rate
+      seed: seed
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.SpatialDropout2D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Dropout2d
+    args:
+      rate: p
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.Dropout2d
+    args: {}
 operation: SpatialDropout2D
 type: function

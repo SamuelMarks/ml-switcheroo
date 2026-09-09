@@ -1,0 +1,46 @@
+operation: triangular_solve
+description: triangular_solve(b, A, upper=True, transpose=False, unitriangular=False,
+  *, out=None) -> (Tensor, Tensor)
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: A
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: upper
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: transpose
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: unitriangular
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.triangular_solve
+    args:
+      input: input
+      A: A
+  stablehlo:
+    api: stablehlo.triangular_solve
+    args:
+      a: a
+      b: b
+      left_side: left_side
+      lower: lower
+      unit_diagonal: unit_diagonal
+      transpose_a: transpose_a

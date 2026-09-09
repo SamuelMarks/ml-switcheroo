@@ -1,0 +1,8 @@
+operation: KeyEntry
+variants:
+  flax_nnx:
+    api: nnx.extract.KeyEntry
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

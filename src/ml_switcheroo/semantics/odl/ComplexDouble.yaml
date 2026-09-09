@@ -1,0 +1,12 @@
+operation: ComplexDouble
+variants:
+  paxml:
+    api: jax.numpy.complex128
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.complex128
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,8 @@
+operation: ConditionallyTransformState
+variants:
+  flax_nnx:
+    api: optax.ConditionallyTransformState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

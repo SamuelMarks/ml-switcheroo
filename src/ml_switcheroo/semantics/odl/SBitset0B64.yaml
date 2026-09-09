@@ -1,0 +1,5 @@
+operation: SBitset0B64
+variants:
+  rdna:
+    api: s_bitset0_b64
+    description: Auto-mapped instruction S_BITSET0_B64

@@ -1,31 +1,60 @@
-description: Returns evenly spaced numbers over a specified interval.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: start
-  type: Union[int, float, complex]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: stop
-  type: Union[int, float, complex]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: num
-  type: int
-- is_variadic: false
-  kind: positional_or_keyword
-  name: dtype
-  type: Optional[dtype]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: device
-  type: Optional[device]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: endpoint
-  type: bool
-variants:
-  dask:
-    api: dask.array.linspace
 operation: linspace
-type: function
+description: linspace(start, end, steps, *, out=None, dtype=None, layout=torch.strided,
+  device=None, requires_grad=False) -> Tensor
+std_args:
+- name: start
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: end
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: steps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: layout
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: torch.strided
+- name: device
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: requires_grad
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.linspace
+    args:
+      start: start
+      end: end
+      steps: steps
+  jax:
+    api: jax.numpy.linspace
+    args:
+      start: start
+      stop: stop
+  mlx:
+    api: mlx.core.linspace
+    args:
+      start: start
+      stop: stop
+  keras:
+    api: keras.ops.linspace
+    args:
+      start: start
+      stop: stop

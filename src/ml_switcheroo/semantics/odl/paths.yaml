@@ -1,0 +1,8 @@
+operation: paths
+variants:
+  flax_nnx:
+    api: nnx.filterlib.PathIn.paths
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,7 @@
+operation: MakeCausalMask
+variants:
+  flax_nnx:
+    api: flax.nnx.make_causal_mask
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,12 @@
+operation: sort_complex
+description: Auto-generated mapping for sort_complex.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.sort_complex
+    args:
+      a: a

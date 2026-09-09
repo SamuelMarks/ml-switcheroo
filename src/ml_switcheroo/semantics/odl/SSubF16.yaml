@@ -1,0 +1,5 @@
+operation: SSubF16
+variants:
+  rdna:
+    api: s_sub_f16
+    description: Auto-mapped instruction S_SUB_F16

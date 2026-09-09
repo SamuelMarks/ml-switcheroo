@@ -1,0 +1,17 @@
+operation: fill_diagonal
+variants:
+  flax_nnx:
+    api: jax.numpy.fill_diagonal
+    args:
+      a: a
+      inplace: inplace
+      val: val
+      wrap: wrap
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.fill_diagonal
+    args:
+      a: a
+      val: val

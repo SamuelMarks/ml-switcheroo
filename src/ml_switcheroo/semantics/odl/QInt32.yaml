@@ -1,0 +1,12 @@
+operation: QInt32
+variants:
+  paxml:
+    api: jax.numpy.int32
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.int32
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

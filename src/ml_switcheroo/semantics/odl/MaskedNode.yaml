@@ -1,0 +1,8 @@
+operation: MaskedNode
+variants:
+  flax_nnx:
+    api: optax.MaskedNode
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

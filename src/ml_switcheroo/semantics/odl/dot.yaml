@@ -1,19 +1,37 @@
-description: Computes element-wise dot product of two tensors.
-std_args:
-- axes
-- normalize
-- kwargs
-- activity_regularizer
-- trainable
-- dtype
-- autocast
-- name
-variants:
-  keras:
-    api: keras.layers.Dot
-  dask:
-    api: dask.array.dot
-  tensorflow:
-    api: tf.keras.layers.Dot
 operation: dot
-type: function
+description: dot(input, tensor, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: tensor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.dot
+    args:
+      input: input
+      tensor: tensor
+  jax:
+    api: jax.lax.dot
+    args:
+      lhs: lhs
+      rhs: rhs
+  stablehlo:
+    api: stablehlo.dot
+    args:
+      lhs: lhs
+      rhs: rhs
+      precision_config: precision_config
+  keras:
+    api: keras.ops.dot
+    args:
+      x1: x1
+      x2: x2

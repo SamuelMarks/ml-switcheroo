@@ -1,0 +1,22 @@
+operation: polyint
+description: Auto-generated mapping for polyint.
+std_args:
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: m
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: k
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.polyint
+    args:
+      p: p

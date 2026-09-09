@@ -1,17 +1,27 @@
 description: Initializer that generates an orthogonal matrix.
 std_args:
-- gain
-- seed
+- name: gain
+  type: Any
+- name: seed
+  type: Any
 type: function
 operation: orthogonal
 variants:
   keras:
     api: keras.initializers.Orthogonal
+    args: {}
   flax_nnx:
-    api: jax.nn.initializers.orthogonal
+    api: nnx.rnglib.Rngs.orthogonal
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.nn.init.orthogonal
+    args: {}
   jax:
     api: jax.nn.initializers.orthogonal
+    args: {}
   tensorflow:
     api: tf.keras.initializers.Orthogonal
+    args: {}

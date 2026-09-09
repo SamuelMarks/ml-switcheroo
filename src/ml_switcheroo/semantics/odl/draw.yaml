@@ -2,8 +2,10 @@ description: TikZ \draw command.
 op_type: function
 operation: draw
 std_args:
-- options
-- path
+- name: options
+  type: Any
+- name: path
+  type: Any
 variants:
   tikz:
     api: tikz.draw

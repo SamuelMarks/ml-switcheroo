@@ -1,0 +1,37 @@
+operation: OrmQr
+description: ormqr(input, tau, other, left=True, transpose=False, *, out=None) ->
+  Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: input2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: input3
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: left
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: transpose
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.ormqr
+    args:
+      input: input
+      input2: input2
+      input3: input3

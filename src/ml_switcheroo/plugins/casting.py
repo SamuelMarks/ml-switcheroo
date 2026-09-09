@@ -13,8 +13,8 @@ Transformation:
 """
 
 import libcst as cst
-
 from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.plugins.utils import create_dotted_name
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
@@ -27,11 +27,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
       cst.BaseExpression: The constructed LibCST expression node representable
           as an Attribute or Name chain.
   """
-  parts = name_str.split(".")
-  node = cst.Name(parts[0])
-  for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))
-  return node
+  return create_dotted_name(name_str)
 
 
 def _supports_numpy_casting(ctx: HookContext) -> bool:

@@ -1,0 +1,5 @@
+operation: VCmpxNgtF16
+variants:
+  rdna:
+    api: v_cmpx_ngt_f16
+    description: Auto-mapped instruction V_CMPX_NGT_F16

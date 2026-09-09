@@ -1,0 +1,5 @@
+operation: VMinmaxF32
+variants:
+  rdna:
+    api: v_minmax_f32
+    description: Auto-mapped instruction V_MINMAX_F32

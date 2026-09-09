@@ -1,0 +1,22 @@
+operation: Chunk
+description: 'chunk(input: Tensor, chunks: int, dim: int = 0) -> Tuple[Tensor, ...]'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: chunks
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+variants:
+  torch:
+    api: torch.chunk
+    args:
+      input: input
+      chunks: chunks

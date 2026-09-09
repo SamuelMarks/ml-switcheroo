@@ -1,18 +1,39 @@
-description: Concatenates a list of inputs.
-std_args:
-- axis
-- kwargs
-- activity_regularizer
-- trainable
-- dtype
-- autocast
-- name
-variants:
-  keras:
-    api: keras.layers.Concatenate
-  dask:
-    api: dask.array.concatenate
-  tensorflow:
-    api: tf.keras.layers.Concatenate
 operation: concatenate
-type: function
+description: concatenate(tensors, axis=0, out=None) -> Tensor
+std_args:
+- name: tensors
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: out
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.concatenate
+    args:
+      tensors: tensors
+  jax:
+    api: jax.lax.concatenate
+    args:
+      operands: operands
+      dimension: dimension
+  mlx:
+    api: mlx.core.concatenate
+    args:
+      arrays: arrays
+  stablehlo:
+    api: stablehlo.concatenate
+    args:
+      inputs: inputs
+      dimension: dimension
+  keras:
+    api: keras.ops.concatenate
+    args:
+      xs: xs

@@ -1,0 +1,13 @@
+operation: DynamicReshape
+variants:
+  stablehlo:
+    api: stablehlo.dynamic_reshape
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: output_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor

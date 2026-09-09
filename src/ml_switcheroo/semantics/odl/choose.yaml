@@ -1,10 +1,28 @@
+operation: choose
 description: Construct an array from an index array and a list of arrays to choose
   from.
 std_args:
-- a
-- choices
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: choices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''raise'''
 variants:
-  dask:
-    api: dask.array.choose
-operation: choose
-type: function
+  jax:
+    api: jax.numpy.choose
+    args:
+      a: a
+      choices: choices

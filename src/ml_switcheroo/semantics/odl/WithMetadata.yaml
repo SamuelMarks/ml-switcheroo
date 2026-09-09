@@ -1,0 +1,7 @@
+operation: WithMetadata
+variants:
+  flax_nnx:
+    api: flax.nnx.with_metadata
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

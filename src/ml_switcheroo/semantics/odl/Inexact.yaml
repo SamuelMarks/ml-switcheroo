@@ -1,0 +1,7 @@
+operation: Inexact
+variants:
+  flax_nnx:
+    api: jax.numpy.inexact
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

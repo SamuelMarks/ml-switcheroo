@@ -1,0 +1,7 @@
+operation: BregmanPCA
+variants:
+  paxml:
+    api: praxis.layers.BregmanPCA
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

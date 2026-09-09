@@ -1,0 +1,9 @@
+operation: Uint2
+variants:
+  flax_nnx:
+    api: jax.numpy.uint2
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

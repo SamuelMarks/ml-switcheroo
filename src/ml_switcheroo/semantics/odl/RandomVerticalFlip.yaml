@@ -1,0 +1,26 @@
+operation: RandomVerticalFlip
+variants:
+  keras:
+    api: keras.layers.RandomFlip
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: HORIZONTAL_AND_VERTICAL
+- name: seed
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: data_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'

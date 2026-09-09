@@ -1,0 +1,35 @@
+operation: svd
+description: svd(input, some=True, compute_uv=True, *, out=None) -> (Tensor, Tensor,
+  Tensor)
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: some
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: compute_uv
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.svd
+    args:
+      input: input
+  mlx:
+    api: mlx.core.linalg.svd
+    args:
+      a: a
+  keras:
+    api: keras.ops.svd
+    args:
+      x: x

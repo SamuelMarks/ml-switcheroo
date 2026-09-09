@@ -1,0 +1,8 @@
+operation: split_key_like
+variants:
+  flax_nnx:
+    api: optax.tree.split_key_like
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

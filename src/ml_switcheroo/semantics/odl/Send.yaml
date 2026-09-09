@@ -1,0 +1,25 @@
+operation: Send
+variants:
+  stablehlo:
+    api: stablehlo.send
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: token
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: channel_handle
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: is_host_transfer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: source_target_pairs
+  kind: keyword_only
+  is_variadic: false
+  type: Any

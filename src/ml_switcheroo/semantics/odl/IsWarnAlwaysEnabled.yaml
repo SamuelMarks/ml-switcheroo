@@ -1,0 +1,12 @@
+operation: IsWarnAlwaysEnabled
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: 'True'
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: 'True'
+    pack_as: Tuple
+    required_imports: []

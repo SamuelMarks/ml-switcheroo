@@ -1,9 +1,13 @@
 description: 'StableHLO official operation: stablehlo.broadcast_in_dim'
 std_args:
-- self
-- expression
-- axes
-- shape
+- name: self
+  type: Any
+- name: expression
+  type: Any
+- name: axes
+  type: Any
+- name: shape
+  type: Any
 type: class
 operation: BroadcastInDim
 variants:

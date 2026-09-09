@@ -1,29 +1,80 @@
+operation: DepthwiseConv2D
 description: 2D depthwise convolution layer.
-op_type: class
 std_args:
-- is_variadic: false
+- name: kernel_size
   kind: positional_or_keyword
-  name: kernel_size
-  type: int | Tuple[int, int]
-- default: 1
   is_variadic: false
-  kind: positional_or_keyword
-  name: stride
-  type: int | Tuple[int, int]
-- default: 1
-  is_variadic: false
-  kind: positional_or_keyword
-  name: depth_multiplier
   type: int
-- default: true
-  is_variadic: false
+- name: strides
   kind: positional_or_keyword
-  name: bias
-  type: bool
+  is_variadic: false
+  type: int
+  default: (1, 1)
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''valid'''
+- name: depth_multiplier
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: data_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dilation_rate
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: (1, 1)
+- name: activation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: use_bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: depthwise_initializer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''glorot_uniform'''
+- name: bias_initializer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''zeros'''
+- name: depthwise_regularizer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias_regularizer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: activity_regularizer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: depthwise_constraint
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias_constraint
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   keras:
     api: keras.layers.DepthwiseConv2D
-  tensorflow:
-    api: tf.keras.layers.DepthwiseConv2D
-operation: DepthwiseConv2d
-type: function
+    args:
+      kernel_size: kernel_size

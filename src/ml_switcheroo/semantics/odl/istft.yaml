@@ -1,18 +1,36 @@
 description: 'istft(input, n_fft, hop_length=None, win_length=None, window=None, center=True,
   normalized=False, onesided=None, length=None, return_complex=False) -> Tensor:'
 std_args:
-- input
-- n_fft
-- hop_length
-- win_length
-- window
-- center
-- normalized
-- onesided
-- length
-- return_complex
+- name: input
+  type: Any
+- name: n_fft
+  type: Any
+- name: hop_length
+  type: Any
+- name: win_length
+  type: Any
+- name: window
+  type: Any
+- name: center
+  type: Any
+- name: normalized
+  type: Any
+- name: onesided
+  type: Any
+- name: length
+  type: Any
+- name: return_complex
+  type: Any
 variants:
   torch:
     api: torch.istft
+    args: {}
+  keras:
+    api: keras.ops.istft
+    args:
+      x: x
+      sequence_length: sequence_length
+      sequence_stride: sequence_stride
+      fft_length: fft_length
 operation: istft
 type: function

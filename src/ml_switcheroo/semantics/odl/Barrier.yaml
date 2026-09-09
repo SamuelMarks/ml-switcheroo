@@ -1,0 +1,22 @@
+operation: barrier
+description: Synchronize all processes.
+std_args:
+- name: group
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(GroupMember.WORLD)```'''
+- name: async_op
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: device_ids
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.distributed.barrier
+    args: {}

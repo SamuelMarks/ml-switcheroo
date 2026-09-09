@@ -1,0 +1,14 @@
+operation: VarMean
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: (jax.numpy.var({x}, axis={axis}, ddof={correction}, keepdims={keepdims}),
+      jax.numpy.mean({x}, axis={axis}, keepdims={keepdims}))
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: (jax.numpy.var({x}, axis={axis}, ddof={correction}, keepdims={keepdims}),
+      jax.numpy.mean({x}, axis={axis}, keepdims={keepdims}))
+    pack_as: Tuple
+    required_imports: []

@@ -1,15 +1,27 @@
-description: Applies the HardTanh function.
-std_args:
-- min_val
-- max_val
-- inplace
-- __constants__
-- min_value
-- max_value
-type: function
 operation: hardtanh
+description: hardtanh(input, min_val=-1., max_val=1., inplace=False) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: min_val
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '-1.0'
+- name: max_val
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '1.0'
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
-  mlx:
-    api: mlx.nn.HardTanh
   torch:
-    api: torch.nn.Hardtanh
+    api: torch.nn.functional.hardtanh
+    args:
+      input: input

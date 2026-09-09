@@ -82,14 +82,14 @@ def test_handle_convert_dir_no_out(tmp_path: Path) -> None:
 
 def test_handle_convert_infer_source(tmp_path: Path) -> None:
   """Docstring."""
-  in_file: Path = tmp_path / "in.sass"
+  in_file: Path = tmp_path / "in.nvidia_sass"
   in_file.write_text("code")
   m: MagicMock
   with patch("ml_switcheroo.cli.handlers.convert._convert_single_file") as m:
     m.return_value = ConversionResult(success=True, code="")
     handle_convert(in_file, None, None, None, False, False, None, {})
     config: MagicMock = m.call_args[0][4]
-    assert config.source_framework == "sass"
+    assert config.source_framework == "nvidia_sass"
 
 
 @patch("ml_switcheroo.cli.handlers.convert.ASTEngine")

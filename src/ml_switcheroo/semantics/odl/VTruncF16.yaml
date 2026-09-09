@@ -1,0 +1,5 @@
+operation: VTruncF16
+variants:
+  rdna:
+    api: v_trunc_f16
+    description: Auto-mapped instruction V_TRUNC_F16

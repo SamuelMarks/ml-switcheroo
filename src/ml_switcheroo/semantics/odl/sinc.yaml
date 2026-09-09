@@ -1,8 +1,20 @@
-description: Return the normalized sinc function.
-std_args:
-- kwargs
-type: attribute
 operation: sinc
+description: sinc(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
-  dask:
-    api: dask.array.sinc
+  torch:
+    api: torch.sinc
+    args:
+      input: input
+  jax:
+    api: jax.numpy.sinc
+    args:
+      x: x

@@ -1,0 +1,4 @@
+operation: Bssy
+variants:
+  nvidia_sass:
+    api: BSSY

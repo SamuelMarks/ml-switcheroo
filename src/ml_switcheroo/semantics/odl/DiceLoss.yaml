@@ -1,0 +1,43 @@
+operation: DiceLoss
+variants:
+  keras:
+    api: keras.losses.Dice
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    macro_template: 1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis})
+      + {y_pred}.sum(axis={axis}))
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.losses.Dice
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: 1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis})
+      + {y_pred}.sum(axis={axis}))
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''sum_over_batch_size'''
+- name: name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''dice'''
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str

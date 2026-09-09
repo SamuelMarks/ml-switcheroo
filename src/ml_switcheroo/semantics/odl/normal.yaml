@@ -1,13 +1,18 @@
-description: Builds an initializer that returns real normally-distributed random arrays.
-std_args:
-- stddev
-- dtype
-type: attribute
 operation: normal
+description: normal(...)
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
 variants:
-  flax_nnx:
-    api: jax.nn.initializers.normal
   torch:
     api: torch.nn.init.normal
+    args: {}
   jax:
     api: jax.nn.initializers.normal
+    args: {}

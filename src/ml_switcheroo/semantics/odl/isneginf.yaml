@@ -1,8 +1,24 @@
-description: partial(func, *args, **keywords) - new function with partial application
-std_args:
-- kwargs
-variants:
-  dask:
-    api: dask.array.isneginf
 operation: isneginf
-type: function
+description: isneginf(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.isneginf
+    args:
+      input: input
+  jax:
+    api: jax.numpy.isneginf
+    args:
+      x: x
+  mlx:
+    api: mlx.core.isneginf
+    args:
+      a: a

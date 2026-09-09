@@ -1,10 +1,19 @@
 description: JIT Graph Node.
 op_type: class
 std_args:
-- options
-- path
+- name: options
+  type: Any
+- name: path
+  type: Any
 variants:
   tikz:
     api: tikz.node
+    args: {}
+  flax_nnx:
+    api: nnx.graph.Node
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Node
 type: function

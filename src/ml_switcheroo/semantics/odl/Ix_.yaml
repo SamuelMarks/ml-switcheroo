@@ -1,0 +1,12 @@
+operation: ix_
+description: Return a multi-dimensional grid (open mesh) from N one-dimensional sequences.
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: tuple
+  default: ()
+variants:
+  jax:
+    api: jax.numpy.ix_
+    args: {}

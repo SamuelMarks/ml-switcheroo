@@ -1,11 +1,27 @@
+operation: insert
 description: Insert values along the given axis before the given indices.
 std_args:
-- arr
-- obj
-- values
-- axis
-type: function
-operation: insert
+- name: arr
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: obj
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: values
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
 variants:
-  dask:
-    api: dask.array.insert
+  jax:
+    api: jax.numpy.insert
+    args:
+      arr: arr
+      obj: obj
+      values: values

@@ -1,0 +1,8 @@
+operation: chain
+variants:
+  flax_nnx:
+    api: optax.chain
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

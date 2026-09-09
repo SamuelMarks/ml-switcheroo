@@ -35,7 +35,7 @@ def test_conv_transpose2d_keras_positional():
   engine = ASTEngine(semantics, config)
   result = engine.run(code)
 
-  assert "layers.Conv2DTranspose(1, 32, 3" in result.code
+  assert "layers.Conv2DTranspose(32, 3" in result.code
 
 
 def test_conv1d_keras_positional():

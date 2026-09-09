@@ -1,10 +1,20 @@
 description: Computes the mean squared error loss.
 std_args:
-- predictions
-- targets
-- reduction
+- name: predictions
+  type: Any
+- name: targets
+  type: Any
+- name: reduction
+  type: Any
 type: function
 operation: mse_loss
 variants:
   mlx:
     api: mlx.nn.losses.mse_loss
+    args:
+      predictions: predictions
+      reduction: reduction
+      targets: targets
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

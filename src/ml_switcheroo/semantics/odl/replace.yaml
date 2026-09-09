@@ -1,0 +1,8 @@
+operation: replace
+variants:
+  flax_nnx:
+    api: nnx.variablelib.Variable.replace
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

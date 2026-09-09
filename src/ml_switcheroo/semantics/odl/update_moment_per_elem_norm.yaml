@@ -1,0 +1,8 @@
+operation: update_moment_per_elem_norm
+variants:
+  flax_nnx:
+    api: optax.tree.update_moment_per_elem_norm
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

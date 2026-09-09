@@ -1,0 +1,22 @@
+operation: pshuffle
+description: Convenience wrapper of jax.lax.ppermute with alternate permutation encoding
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis_name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: perm
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.pshuffle
+    args:
+      x: x
+      axis_name: axis_name
+      perm: perm

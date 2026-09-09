@@ -1,0 +1,4 @@
+operation: Fset
+variants:
+  nvidia_sass:
+    api: FSET

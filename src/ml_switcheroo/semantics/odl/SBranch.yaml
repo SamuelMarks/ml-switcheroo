@@ -1,0 +1,5 @@
+operation: SBranch
+variants:
+  rdna:
+    api: s_branch
+    description: Auto-mapped instruction S_BRANCH

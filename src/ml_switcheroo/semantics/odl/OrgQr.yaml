@@ -1,0 +1,7 @@
+operation: OrgQr
+variants:
+  flax_nnx:
+    api: jax.scipy.linalg.qr
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

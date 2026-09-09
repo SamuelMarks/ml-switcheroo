@@ -1,0 +1,14 @@
+operation: Addcmul
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: jnp.add({input}, {value} * jnp.multiply({tensor1}, {tensor2}))
+    pack_as: Tuple
+    required_imports:
+    - import jax.numpy as jnp
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: jnp.add({input}, {value} * jnp.multiply({tensor1}, {tensor2}))
+    pack_as: Tuple
+    required_imports:
+    - import jax.numpy as jnp

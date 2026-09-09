@@ -1,8 +1,20 @@
 description: Variable initializer type.
 std_args:
-- kwargs
+- name: kwargs
+  type: Any
 variants:
   tensorflow:
     api: tf.keras.initializers.Initializer
+    args: {}
+  paxml:
+    api: praxis.base_layer.Initializer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Initializer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Initializer
 type: function

@@ -138,7 +138,7 @@ class GraphPatcher(cst.CSTTransformer):
 
   def leave_Assign(
     self, original_node: cst.Assign, updated_node: cst.Assign
-  ) -> Union[cst.Assign, cst.SimpleStatementLine, cst.RemovalSentinel]:
+  ) -> Union[cst.BaseSmallStatement, cst.FlattenSentinel[cst.BaseSmallStatement], cst.RemovalSentinel]:
     """Intercept Assignment statements (e.g. `self.conv = ...`, `y = func(x)`).
 
     Args:
@@ -148,11 +148,16 @@ class GraphPatcher(cst.CSTTransformer):
     Returns:
         The replaced Assign node, SimpleStatementLine, or RemovalSentinel if deleted.
     """
-    return self._handle_node(original_node, updated_node)
+    res = self._handle_node(original_node, updated_node)
+    if isinstance(res, (cst.BaseSmallStatement, cst.FlattenSentinel, cst.RemovalSentinel)):
+      return res
+    if isinstance(res, cst.SimpleStatementLine) and res.body:
+      return cst.FlattenSentinel(list(res.body))
+    return updated_node
 
   def leave_Expr(
     self, original_node: cst.Expr, updated_node: cst.Expr
-  ) -> Union[cst.Expr, cst.SimpleStatementLine, cst.RemovalSentinel]:
+  ) -> Union[cst.BaseSmallStatement, cst.FlattenSentinel[cst.BaseSmallStatement], cst.RemovalSentinel]:
     """Intercept Expression statements (e.g. `func(x)` without assignment).
 
     Args:
@@ -162,11 +167,14 @@ class GraphPatcher(cst.CSTTransformer):
     Returns:
         The replaced Expr node, SimpleStatementLine, or RemovalSentinel if deleted.
     """
-    return self._handle_node(original_node, updated_node)
+    res = self._handle_node(original_node, updated_node)
+    if isinstance(res, (cst.BaseSmallStatement, cst.FlattenSentinel, cst.RemovalSentinel)):
+      return res
+    if isinstance(res, cst.SimpleStatementLine) and res.body:
+      return cst.FlattenSentinel(list(res.body))
+    return updated_node
 
-  def leave_Call(
-    self, original_node: cst.Call, updated_node: cst.Call
-  ) -> Union[cst.Call, cst.BaseExpression, cst.RemovalSentinel]:
+  def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
     """Execute implementation detail for call expression patching.
 
     Args:
@@ -176,7 +184,10 @@ class GraphPatcher(cst.CSTTransformer):
     Returns:
         The replaced Call expression, BaseExpression, or RemovalSentinel if deleted.
     """
-    return self._handle_node(original_node, updated_node)
+    res = self._handle_node(original_node, updated_node)
+    if isinstance(res, cst.BaseExpression):
+      return res
+    return updated_node
 
   def leave_SimpleStatementLine(
     self, original_node: cst.SimpleStatementLine, updated_node: cst.SimpleStatementLine
@@ -254,12 +265,8 @@ class GraphPatcher(cst.CSTTransformer):
         or the original new_stmt object.
     """
     if isinstance(context_node, (cst.Assign, cst.Expr)):
-      if new_stmt.body and len(new_stmt.body) > 0:
+      if new_stmt.body:
         # Return FlattenSentinel of the inner nodes
-        # This injects the new assignment/expr into the parent statement line
-        # Wait, if we return FlattenSentinel here, does LibCST support splicing into a body list?
-        # Assign/Expr are in SimpleStatementLine.body.
-        # Yes, return FlattenSentinel([node]) splits it.
         return cst.FlattenSentinel(new_stmt.body)
 
     return new_stmt

@@ -1,0 +1,10 @@
+operation: merge_masks
+variants:
+  flax_nnx:
+    api: nnx.statelib.FlatState.merge
+    args:
+      flat_state: flat_state
+      flat_states: flat_states
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

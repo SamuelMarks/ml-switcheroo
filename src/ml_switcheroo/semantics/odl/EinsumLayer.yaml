@@ -1,0 +1,77 @@
+operation: EinsumLayer
+variants:
+  keras:
+    api: keras.layers.EinsumDense
+    args:
+      equation: equation
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.Einsum
+    args:
+      equation: eqn
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Einsum
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: equation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: output_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: activation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias_axes
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: kernel_initializer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''glorot_uniform'''
+- name: bias_initializer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''zeros'''
+- name: kernel_regularizer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias_regularizer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kernel_constraint
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias_constraint
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: lora_rank
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: lora_alpha
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'

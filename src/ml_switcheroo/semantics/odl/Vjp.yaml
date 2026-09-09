@@ -1,0 +1,23 @@
+operation: vjp
+description: 'vjp(fun: Callable, primals: list[array], cotangents: list[array]) ->
+  tuple[list[array], list[array]]'
+std_args:
+- name: fun
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: primals
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: cotangents
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  mlx:
+    api: mlx.core.vjp
+    args:
+      fun: fun
+      primals: primals
+      cotangents: cotangents

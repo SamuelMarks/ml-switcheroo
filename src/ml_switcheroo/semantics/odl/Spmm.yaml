@@ -1,0 +1,17 @@
+operation: Spmm
+description: Sparse matrix multiplication.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: mat2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.spmm
+    args:
+      input: input
+      mat2: mat2

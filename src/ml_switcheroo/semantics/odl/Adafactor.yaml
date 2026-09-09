@@ -11,54 +11,37 @@ std_args:
 variants:
   keras:
     api: keras.optimizers.Adafactor
-    args:
-      learning_rate: learning_rate
-      beta_2_decay: beta_2_decay
-      epsilon_1: epsilon_1
-      epsilon_2: epsilon_2
-      clip_threshold: clip_threshold
-      relative_step: relative_step
-      ema_momentum: ema_momentum
-      name: name
-      gradient_accumulation_steps: gradient_accumulation_steps
-      weight_decay: weight_decay
-      loss_scale_factor: loss_scale_factor
-      global_clipnorm: global_clipnorm
-      ema_overwrite_frequency: ema_overwrite_frequency
-      clipvalue: clipvalue
-      use_ema: use_ema
-      clipnorm: clipnorm
-      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   mlx:
     api: mlx.optimizers.Adafactor
     args:
-      learning_rate: learning_rate
+      beta_1: beta_1
       clip_threshold: clip_threshold
+      decay_rate: decay_rate
+      eps: eps
+      learning_rate: learning_rate
       relative_step: relative_step
+      scale_parameter: scale_parameter
+      warmup_init: warmup_init
       weight_decay: weight_decay
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.optim.Adafactor
     args:
       weight_decay: weight_decay
   tensorflow:
     api: tf.keras.optimizers.Adafactor
-    args:
-      learning_rate: learning_rate
-      beta_2_decay: beta_2_decay
-      epsilon_1: epsilon_1
-      epsilon_2: epsilon_2
-      clip_threshold: clip_threshold
-      relative_step: relative_step
-      ema_momentum: ema_momentum
-      name: name
-      gradient_accumulation_steps: gradient_accumulation_steps
-      weight_decay: weight_decay
-      loss_scale_factor: loss_scale_factor
-      global_clipnorm: global_clipnorm
-      ema_overwrite_frequency: ema_overwrite_frequency
-      clipvalue: clipvalue
-      use_ema: use_ema
-      clipnorm: clipnorm
-      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.adafactor
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Adafactor
 type: function

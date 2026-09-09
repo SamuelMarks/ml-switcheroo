@@ -1,0 +1,9 @@
+operation: Addbmm
+variants:
+  flax_nnx:
+    api: jax.numpy.sum
+    dispatch_rules: []
+    macro_template: '{beta} * {input} + {alpha} * jax.numpy.sum(jax.numpy.matmul({batch1},
+      {batch2}), axis=0)'
+    pack_as: Tuple
+    required_imports: []

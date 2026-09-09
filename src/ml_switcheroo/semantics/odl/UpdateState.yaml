@@ -1,0 +1,7 @@
+operation: UpdateState
+variants:
+  flax_nnx:
+    api: flax.nnx.update
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

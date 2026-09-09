@@ -17,7 +17,24 @@ std_args:
 variants:
   keras:
     api: keras.layers.Resizing
+    args:
+      antialias: antialias
+      crop_to_aspect_ratio: crop_to_aspect_ratio
+      data_format: data_format
+      fill_mode: fill_mode
+      fill_value: fill_value
+      height: height
+      interpolation: interpolation
+      kwargs: kwargs
+      pad_to_aspect_ratio: pad_to_aspect_ratio
+      width: width
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.Resizing
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Resizing
 type: function

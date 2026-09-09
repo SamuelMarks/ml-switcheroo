@@ -1,11 +1,16 @@
 description: Gaussian negative log likelihood loss.
 std_args:
-- full
-- eps
-- reduction
-- __constants__
+- name: full
+  type: Any
+- name: eps
+  type: Any
+- name: reduction
+  type: Any
+- name: __constants__
+  type: Any
 type: class
 operation: GaussianNLLLoss
 variants:
   torch:
     api: torch.nn.GaussianNLLLoss
+    args: {}

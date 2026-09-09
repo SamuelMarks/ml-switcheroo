@@ -1,0 +1,7 @@
+operation: EvalShape
+variants:
+  flax_nnx:
+    api: flax.nnx.eval_shape
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

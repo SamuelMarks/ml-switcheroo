@@ -1,0 +1,7 @@
+operation: IsData
+variants:
+  flax_nnx:
+    api: flax.nnx.is_data
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

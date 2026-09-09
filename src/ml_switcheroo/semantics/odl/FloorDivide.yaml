@@ -1,0 +1,12 @@
+operation: FloorDivide
+variants:
+  paxml:
+    api: jax.numpy.floor_divide
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.floor_divide
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

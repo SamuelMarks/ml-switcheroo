@@ -1,0 +1,4 @@
+operation: Lea
+variants:
+  nvidia_sass:
+    api: LEA

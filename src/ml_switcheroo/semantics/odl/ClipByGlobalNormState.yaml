@@ -1,0 +1,8 @@
+operation: ClipByGlobalNormState
+variants:
+  flax_nnx:
+    api: optax.ClipByGlobalNormState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

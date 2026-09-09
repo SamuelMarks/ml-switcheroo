@@ -1,0 +1,16 @@
+operation: to_dense
+description: to_dense(dtype=None, *, masked_grad=True) -> Tensor
+std_args:
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: masked_grad
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'True'
+variants:
+  torch:
+    api: torch.Tensor.to_dense
+    args: {}

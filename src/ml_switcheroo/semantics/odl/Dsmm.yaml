@@ -1,0 +1,12 @@
+operation: Dsmm
+variants:
+  paxml:
+    api: jax.experimental.sparse.bcoo_spdot_general
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.experimental.sparse.bcoo_spdot_general
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

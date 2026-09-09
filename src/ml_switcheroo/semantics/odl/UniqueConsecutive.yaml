@@ -1,0 +1,12 @@
+operation: UniqueConsecutive
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: unique_consecutive_plugin
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: unique_consecutive_plugin

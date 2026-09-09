@@ -13,7 +13,17 @@ std_args:
 variants:
   keras:
     api: keras.layers.Rescaling
+    args:
+      kwargs: kwargs
+      offset: offset
+      scale: scale
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.Rescaling
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Rescaling
 type: function

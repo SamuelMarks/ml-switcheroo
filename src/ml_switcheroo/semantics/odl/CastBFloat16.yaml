@@ -1,0 +1,12 @@
+operation: CastBFloat16
+variants:
+  paxml:
+    api: jnp.bfloat16
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.bfloat16
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

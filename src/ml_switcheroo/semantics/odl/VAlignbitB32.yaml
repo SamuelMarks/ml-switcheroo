@@ -1,0 +1,5 @@
+operation: VAlignbitB32
+variants:
+  rdna:
+    api: v_alignbit_b32
+    description: Auto-mapped instruction V_ALIGNBIT_B32

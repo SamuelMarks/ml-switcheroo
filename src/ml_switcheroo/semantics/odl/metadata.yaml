@@ -1,0 +1,8 @@
+operation: metadata
+variants:
+  flax_nnx:
+    api: nnx.transforms.transforms.ValueMetadata.metadata
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

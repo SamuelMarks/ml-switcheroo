@@ -1,0 +1,4 @@
+operation: Sel
+variants:
+  nvidia_sass:
+    api: SEL

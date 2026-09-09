@@ -1,0 +1,27 @@
+operation: moments
+description: Calculates the mean and variance of `x`.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axes
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+- name: keepdims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: synchronized
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  keras:
+    api: keras.ops.moments
+    args:
+      x: x
+      axes: axes

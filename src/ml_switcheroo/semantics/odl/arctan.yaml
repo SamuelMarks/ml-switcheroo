@@ -1,10 +1,28 @@
-description: LaTeX \arctan macro.
-std_args:
-- kwargs
-variants:
-  latex_dsl:
-    api: latex.arctan
-  dask:
-    api: dask.array.arctan
 operation: arctan
-type: function
+description: 'arctan(input: Tensor, *, out: Optional[Tensor]) -> Tensor'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.arctan
+    args:
+      input: input
+  jax:
+    api: jax.numpy.atan
+    args:
+      x: x
+  mlx:
+    api: mlx.core.arctan
+    args:
+      a: a
+  keras:
+    api: keras.ops.arctan
+    args:
+      x: x

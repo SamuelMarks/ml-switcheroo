@@ -1,0 +1,5 @@
+operation: SNorB32
+variants:
+  rdna:
+    api: s_nor_b32
+    description: Auto-mapped instruction S_NOR_B32

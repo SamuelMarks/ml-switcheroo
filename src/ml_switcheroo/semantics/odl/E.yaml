@@ -1,0 +1,13 @@
+operation: E
+variants:
+  paxml:
+    api: jax.numpy.e
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.e
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

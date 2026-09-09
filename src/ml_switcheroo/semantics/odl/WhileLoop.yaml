@@ -1,0 +1,12 @@
+operation: WhileLoop
+variants:
+  paxml:
+    api: jax.lax.while_loop
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.lax.while_loop
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

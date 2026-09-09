@@ -1,0 +1,7 @@
+operation: ReplaceByPureDict
+variants:
+  flax_nnx:
+    api: flax.nnx.replace_by_pure_dict
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

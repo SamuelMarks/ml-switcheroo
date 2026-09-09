@@ -1,0 +1,17 @@
+operation: DynamicUpdateSlice
+variants:
+  stablehlo:
+    api: stablehlo.dynamic_update_slice
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: update
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: start_indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor

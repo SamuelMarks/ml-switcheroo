@@ -11,7 +11,24 @@ std_args:
 variants:
   keras:
     api: keras.losses.KLDivergence
+    args: {}
   tensorflow:
     api: tf.keras.losses.KLDivergence
-operation: kldivergence
+    args: {}
+  paxml:
+    api: optax.kl_divergence
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.losses.kl_div_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.kl_divergence
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+operation: KLDivergence
 type: function

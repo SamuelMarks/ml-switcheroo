@@ -1,0 +1,16 @@
+operation: ByteTensor
+variants:
+  paxml:
+    api: jax.numpy.array
+    dispatch_rules: []
+    inject_args:
+      dtype: jax.numpy.uint8
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.array
+    dispatch_rules: []
+    inject_args:
+      dtype: jax.numpy.uint8
+    pack_as: Tuple
+    required_imports: []

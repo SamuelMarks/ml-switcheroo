@@ -1,0 +1,17 @@
+operation: BitwiseRightShift
+variants:
+  paxml:
+    api: jnp.right_shift
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.right_shift
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.right_shift
+    args:
+      x1: x1
+      x2: x2

@@ -1,0 +1,8 @@
+operation: max_norm
+variants:
+  paxml:
+    api: optax.tree.max
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

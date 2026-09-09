@@ -1,0 +1,7 @@
+operation: CausalMask
+variants:
+  paxml:
+    api: praxis.layers.causal_mask
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

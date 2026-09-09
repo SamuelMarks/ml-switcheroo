@@ -1,0 +1,5 @@
+operation: VBfmB32
+variants:
+  rdna:
+    api: v_bfm_b32
+    description: Auto-mapped instruction V_BFM_B32

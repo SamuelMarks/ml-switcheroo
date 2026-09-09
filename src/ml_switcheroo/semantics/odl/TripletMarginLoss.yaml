@@ -37,3 +37,4 @@ operation: TripletMarginLoss
 variants:
   torch:
     api: torch.nn.TripletMarginLoss
+    args: {}

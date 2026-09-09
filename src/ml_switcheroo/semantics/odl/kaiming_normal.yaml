@@ -1,8 +1,22 @@
 description: kaiming_normal(...)
 std_args:
-- kwargs
+- name: kwargs
+  type: Any
 type: attribute
 operation: kaiming_normal
 variants:
   torch:
     api: torch.nn.init.kaiming_normal
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.rnglib.Rngs.kaiming_normal
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.nn.initializers.he_normal
+    args: {}

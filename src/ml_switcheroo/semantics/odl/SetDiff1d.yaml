@@ -1,0 +1,32 @@
+operation: setdiff1d
+description: Compute the set difference of two 1D arrays.
+std_args:
+- name: ar1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: ar2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: assume_unique
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: size
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: fill_value
+  kind: keyword_only
+  is_variadic: false
+  type: int
+  default: '''the minimum value'''
+variants:
+  jax:
+    api: jax.numpy.setdiff1d
+    args:
+      ar1: ar1
+      ar2: ar2

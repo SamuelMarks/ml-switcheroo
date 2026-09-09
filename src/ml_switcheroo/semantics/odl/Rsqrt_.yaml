@@ -1,0 +1,27 @@
+operation: Rsqrt_
+description: In-place version of Rsqrt.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.rsqrt_
+    args:
+      input: input
+  rdna:
+    api: v_rsq_f32
+    args: {}
+  nvidia_sass:
+    api: MUFU.RSQ
+    args: {}
+  jax:
+    api: jax.lax.rsqrt
+    args: {}
+  mlx:
+    api: mlx.core.rsqrt
+    args: {}
+  keras:
+    api: keras.ops.rsqrt
+    args: {}

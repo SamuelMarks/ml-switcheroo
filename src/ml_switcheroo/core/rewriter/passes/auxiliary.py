@@ -11,7 +11,7 @@ specifically:
 It merges logic previously found in `decorators.py` and `control_flow.py`.
 """
 
-from typing import Union, Optional
+from typing import Union, Optional, cast
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.interface import RewriterPass
@@ -126,7 +126,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
         The constructed CST expression node representing the dotted name.
     """
     parts = name_str.split(".")
-    node = cst.Name(parts[0])
+    node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
     for part in parts[1:]:
       node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
@@ -234,6 +234,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
       new_name_node = self._create_dotted_name(target_api)
       current_expr = updated_node.decorator
 
+      new_expr: cst.BaseExpression
       if isinstance(current_expr, cst.Call):
         new_expr = current_expr.with_changes(func=new_name_node)
       else:
@@ -245,7 +246,9 @@ class AuxiliaryTransformer(cst.CSTTransformer):
 
   # --- Control Flow Logic ---
 
-  def leave_For(self, original_node: cst.For, updated_node: cst.For) -> Union[cst.For, cst.CSTNode, cst.FlattenSentinel]:
+  def leave_For(
+    self, original_node: cst.For, updated_node: cst.For
+  ) -> Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
     """Process 'for' loops for safety checks and unrolling.
 
     Args:
@@ -260,8 +263,10 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     if static_hook:
       try:
         new_node = static_hook(updated_node, self.context.hook_context)
-        if new_node is not updated_node:
-          return new_node
+        if new_node is not updated_node and isinstance(
+          new_node, (cst.BaseStatement, cst.BaseSmallStatement, cst.FlattenSentinel)
+        ):
+          return cast(Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel], new_node)
       except Exception as e:
         import traceback
 
@@ -273,12 +278,16 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     if hook:
       try:
         new_node = hook(updated_node, self.context.hook_context)
-        if new_node is not updated_node:
-          return new_node
+        if new_node is not updated_node and isinstance(
+          new_node, (cst.BaseStatement, cst.BaseSmallStatement, cst.FlattenSentinel)
+        ):
+          return cast(Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel], new_node)
       except Exception as e:
         self._report_failure(f"Loop transformation failed: {str(e)}")
         # Since Compound statements aren't handled by leave_SimpleStatementLine error logic,
         # we must wrap manually here.
-        return EscapeHatch.mark_failure(original_node, f"Loop transformation failed: {str(e)}")
+        failed = EscapeHatch.mark_failure(original_node, f"Loop transformation failed: {str(e)}")
+        if isinstance(failed, (cst.BaseStatement, cst.FlattenSentinel)):  # pragma: no branch
+          return failed
 
     return updated_node

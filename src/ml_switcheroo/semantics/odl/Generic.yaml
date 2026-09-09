@@ -1,0 +1,7 @@
+operation: Generic
+variants:
+  flax_nnx:
+    api: jax.numpy.generic
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

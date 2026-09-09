@@ -1,0 +1,5 @@
+operation: SFloorF16
+variants:
+  rdna:
+    api: s_floor_f16
+    description: Auto-mapped instruction S_FLOOR_F16

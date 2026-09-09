@@ -1,0 +1,18 @@
+operation: SubtractLayer
+variants:
+  keras:
+    api: keras.layers.Subtract
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.Subtract
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'

@@ -1,15 +1,32 @@
-description: Constructs an array by tiling an input array.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: repetitions
-  type: Tuple[int, Ellipsis]
-variants:
-  dask:
-    api: dask.array.tile
 operation: tile
-type: function
+description: tile(input, dims) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.tile
+    args:
+      input: input
+      dims: dims
+  jax:
+    api: jax.numpy.tile
+    args:
+      A: A
+      reps: reps
+  mlx:
+    api: mlx.core.tile
+    args:
+      a: a
+      reps: reps
+  keras:
+    api: keras.ops.tile
+    args:
+      x: x
+      repeats: repeats

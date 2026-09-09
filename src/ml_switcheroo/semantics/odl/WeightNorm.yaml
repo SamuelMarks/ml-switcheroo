@@ -1,0 +1,9 @@
+operation: WeightNorm
+variants:
+  flax_nnx:
+    api: flax.nnx.WeightNorm
+    args:
+      layer: layer_instance
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

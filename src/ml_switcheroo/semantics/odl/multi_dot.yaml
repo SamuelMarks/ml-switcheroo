@@ -1,0 +1,10 @@
+operation: multi_dot
+variants:
+  flax_nnx:
+    api: jax.numpy.linalg.multi_dot
+    args:
+      arrays: arrays
+      precision: precision
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

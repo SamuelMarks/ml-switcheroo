@@ -1,0 +1,5 @@
+operation: SBfeU32
+variants:
+  rdna:
+    api: s_bfe_u32
+    description: Auto-mapped instruction S_BFE_U32

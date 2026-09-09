@@ -1,0 +1,7 @@
+operation: TemporalShifting
+variants:
+  paxml:
+    api: praxis.layers.TemporalShifting
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

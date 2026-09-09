@@ -1,0 +1,31 @@
+operation: Histc
+description: histc(input, bins=100, min=0, max=0, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: bins
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '100'
+- name: min
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: max
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.histc
+    args:
+      input: input

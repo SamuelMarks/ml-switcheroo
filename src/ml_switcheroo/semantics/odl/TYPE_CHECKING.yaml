@@ -1,0 +1,12 @@
+operation: TYPE_CHECKING
+variants:
+  paxml:
+    api: typing.TYPE_CHECKING
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: typing.TYPE_CHECKING
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

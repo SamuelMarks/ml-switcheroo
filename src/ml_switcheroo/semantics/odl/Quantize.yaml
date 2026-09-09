@@ -1,0 +1,33 @@
+operation: quantize
+description: 'quantize(w: array, /, group_size: int = 64, bits: int = 4, mode: str
+  = ''affine'', *, stream: Union[None, Stream, Device] = None) -> tuple[array, array,
+  array]'
+std_args:
+- name: w
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: group_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '64'
+- name: bits
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '4'
+- name: mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''affine'''
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  mlx:
+    api: mlx.core.quantize
+    args:
+      w: w

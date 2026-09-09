@@ -1,0 +1,21 @@
+operation: householder_product
+description: householder_product(A, tau, *, out=None) -> Tensor
+std_args:
+- name: A
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: tau
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.linalg.householder_product
+    args:
+      A: A
+      tau: tau

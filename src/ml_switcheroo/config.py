@@ -52,7 +52,7 @@ def get_framework_priority_order() -> List[str]:
 
   """
   # Defer import to prevent circular dependency during initialization
-  # config -> frameworks/__init__ -> sass -> hooks -> config
+  # config -> frameworks/__init__ -> nvidia_sass -> hooks -> config
   from ml_switcheroo.frameworks.base import available_frameworks, get_adapter
 
   frameworks = available_frameworks()

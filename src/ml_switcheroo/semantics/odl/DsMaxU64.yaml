@@ -1,0 +1,5 @@
+operation: DsMaxU64
+variants:
+  rdna:
+    api: ds_max_u64
+    description: Auto-mapped instruction DS_MAX_U64

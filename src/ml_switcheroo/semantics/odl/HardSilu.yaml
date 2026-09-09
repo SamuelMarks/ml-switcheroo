@@ -1,0 +1,12 @@
+operation: HardSilu
+variants:
+  paxml:
+    api: jax.nn.hard_swish
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.hard_silu
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

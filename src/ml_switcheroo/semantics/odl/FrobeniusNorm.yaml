@@ -1,0 +1,22 @@
+operation: FrobeniusNorm
+variants:
+  paxml:
+    api: jnp.linalg.norm
+    args:
+      dim: axis
+      keepdim: keepdims
+    dispatch_rules: []
+    inject_args:
+      ord: '''fro'''
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.linalg.norm
+    args:
+      dim: axis
+      keepdim: keepdims
+    dispatch_rules: []
+    inject_args:
+      ord: '''fro'''
+    pack_as: Tuple
+    required_imports: []

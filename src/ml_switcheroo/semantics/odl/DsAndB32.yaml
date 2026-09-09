@@ -1,0 +1,5 @@
+operation: DsAndB32
+variants:
+  rdna:
+    api: ds_and_b32
+    description: Auto-mapped instruction DS_AND_B32

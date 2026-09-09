@@ -1,0 +1,12 @@
+operation: Matvec
+variants:
+  paxml:
+    api: jax.numpy.matvec
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.matvec
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

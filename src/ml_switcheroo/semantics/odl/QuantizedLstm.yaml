@@ -1,0 +1,6 @@
+operation: QuantizedLstm
+variants:
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

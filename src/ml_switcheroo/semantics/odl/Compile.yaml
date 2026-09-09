@@ -1,0 +1,46 @@
+operation: compile
+description: Optimizes given model/function using TorchDynamo and specified backend.
+std_args:
+- name: model
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: fullgraph
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: dynamic
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: backend
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''inductor'''
+- name: options
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: mode
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: disable
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.compile
+    args: {}
+  mlx:
+    api: mlx.core.compile
+    args:
+      fun: fun

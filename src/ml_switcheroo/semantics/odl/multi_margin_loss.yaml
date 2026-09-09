@@ -1,0 +1,47 @@
+operation: multi_margin_loss
+description: Compute the multi margin loss, with optional weighting.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: target
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: margin
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1.0'
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: size_average
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reduce
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''mean'''
+variants:
+  torch:
+    api: torch.nn.functional.multi_margin_loss
+    args:
+      input: input
+      target: target

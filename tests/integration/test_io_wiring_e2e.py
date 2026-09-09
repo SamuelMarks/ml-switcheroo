@@ -26,31 +26,35 @@ def ensure_io_plugin() -> typing.Generator[None, None, None]:
 @pytest.fixture(scope="module")
 def hydrated_semantics() -> SemanticsManager:
   """Helper to hydrated semantics."""
+  from unittest.mock import mock_open, patch
+
   mgr = SemanticsManager()
-  mgr.update_definition(
-    "TorchSave",
-    {
-      "operation": "TorchSave",
-      "std_args": ["obj", "f"],
-      "variants": {
-        "torch": {"api": "torch.save"},
-        "jax": {"api": "save", "requires_plugin": "io_handler"},
-        "numpy": {"api": "save", "requires_plugin": "io_handler"},
+  m_open = mock_open()
+  with patch("builtins.open", m_open):
+    mgr.update_definition(
+      "TorchSave",
+      {
+        "operation": "TorchSave",
+        "std_args": ["obj", "f"],
+        "variants": {
+          "torch": {"api": "torch.save"},
+          "jax": {"api": "save", "requires_plugin": "io_handler"},
+          "numpy": {"api": "save", "requires_plugin": "io_handler"},
+        },
       },
-    },
-  )
-  mgr.update_definition(
-    "TorchLoad",
-    {
-      "operation": "TorchLoad",
-      "std_args": ["f"],
-      "variants": {
-        "torch": {"api": "torch.load"},
-        "jax": {"api": "load", "requires_plugin": "io_handler"},
-        "numpy": {"api": "load", "requires_plugin": "io_handler"},
+    )
+    mgr.update_definition(
+      "TorchLoad",
+      {
+        "operation": "TorchLoad",
+        "std_args": ["f"],
+        "variants": {
+          "torch": {"api": "torch.load"},
+          "jax": {"api": "load", "requires_plugin": "io_handler"},
+          "numpy": {"api": "load", "requires_plugin": "io_handler"},
+        },
       },
-    },
-  )
+    )
   return mgr
 
 

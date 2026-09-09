@@ -1,17 +1,35 @@
-description: Gaussian error linear unit (GELU) activation function.
-std_args:
-- x
-- approximate
-type: attribute
 operation: gelu
+description: gelu(input, approximate = 'none') -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: approximate
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''none'''
 variants:
-  keras:
-    api: keras.activations.gelu
-  mlx:
-    api: mlx.nn.GELU
-  flax_nnx:
-    api: jax.nn.gelu
   torch:
-    api: torch.nn.GELU
+    api: torch.nn.functional.gelu
+    args:
+      input: input
   jax:
     api: jax.nn.gelu
+    args:
+      x: x
+  mlx:
+    api: mlx.nn.gelu
+    args:
+      x: x
+  keras:
+    api: keras.activations.gelu
+    args:
+      x: x
+  rdna:
+    api: ; Macro.GELU
+    args: {}
+  nvidia_sass:
+    api: Macro.GELU
+    args: {}

@@ -1,0 +1,5 @@
+operation: VCvtPkU8F32
+variants:
+  rdna:
+    api: v_cvt_pk_u8_f32
+    description: Auto-mapped instruction V_CVT_PK_U8_F32

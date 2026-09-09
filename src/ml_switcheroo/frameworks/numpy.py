@@ -14,11 +14,13 @@ import typing
 
 
 import textwrap
-from typing import Union, List, Tuple, Optional, Dict
+from typing import Union, List, Tuple, Optional, Dict, Any
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
 from ml_switcheroo.frameworks.loader import load_definitions
 
+_np_mod: Optional[Any] = None
+np: Optional[Any] = None
 try:
   import numpy as _np
 
@@ -290,7 +292,7 @@ class NumpyAdapter:
     """
     return f"np.savez_compressed({path_var}, **{state_var})"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, Dict[str, Any]]) -> None:
     """No dynamic wiring needed for NumPy.
 
     Args:
@@ -312,8 +314,8 @@ class NumpyAdapter:
     return f"https://numpy.org/doc/stable/reference/generated/{api_name}.html"
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, List[Any], Dict[Any, Any]]
+  ) -> typing.Union[int, float, str, List[Any], Dict[Any, Any], typing.Any]:
     """Attempt to convert input data to a NumPy array.
 
     Args:
@@ -337,7 +339,7 @@ class NumpyAdapter:
         return data.numpy()
       except Exception:
         pass
-    if hasattr(data, "__array__"):
+    if hasattr(data, "__array__") and np is not None:
       try:
         return np.array(data)
       except Exception:

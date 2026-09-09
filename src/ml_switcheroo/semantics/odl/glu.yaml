@@ -1,13 +1,21 @@
-description: Gated Linear Unit (GLU) activation function.
-std_args:
-- x
-- axis
-type: function
 operation: glu
+description: glu(input, dim=-1) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '-1'
 variants:
+  torch:
+    api: torch.nn.functional.glu
+    args:
+      input: input
   keras:
     api: keras.activations.glu
-  mlx:
-    api: mlx.nn.GLU
-  torch:
-    api: torch.nn.GLU
+    args:
+      x: x

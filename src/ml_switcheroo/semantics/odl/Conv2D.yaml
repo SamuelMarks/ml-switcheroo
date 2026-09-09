@@ -1,48 +1,59 @@
-description: Applies a 2D convolution.
+description: conv2d(input, weight, bias=None, stride=1, padding=0, dilation=1, groups=1)
+  -> Tensor
+operation: conv2d
 std_args:
 - is_variadic: false
   kind: positional_or_keyword
   name: input
-  rank: 4
-  shape_spec: '[B, C_in, H, W]'
-  type: Tensor
+  type: Any
 - is_variadic: false
   kind: positional_or_keyword
   name: weight
-  rank: 4
-  type: Tensor
+  type: Any
 - is_variadic: false
   kind: positional_or_keyword
   name: bias
-  type: Tensor
-- default: 1
+  type: Any
+- default: '1'
   is_variadic: false
   kind: positional_or_keyword
   name: stride
   type: int
-- default: 0
+- default: '0'
   is_variadic: false
   kind: positional_or_keyword
   name: padding
-  type: int
-- default: 1
+  type: str
+- default: '1'
   is_variadic: false
   kind: positional_or_keyword
   name: dilation
-  type: int
-- default: 1
+  type: Any
+- default: '1'
   is_variadic: false
   kind: positional_or_keyword
   name: groups
-  type: int
-type: attribute
-operation: conv2d
+  type: Any
 variants:
+  flax_nnx:
+    api: flax.nnx.Conv
+    args: {}
   keras:
     api: keras.layers.Conv2D
+    args: {}
   mlx:
-    api: mlx.nn.Conv2d
+    api: mlx.core.conv2d
+    args:
+      input: input
+      weight: weight
+  nvidia_sass:
+    api: Macro.Conv2d
+    args: {}
+  rdna:
+    api: ; Macro.Conv2d
+    args: {}
   torch:
-    api: torch.nn.Conv2d
-  tensorflow:
-    api: tf.keras.layers.Conv2D
+    api: torch.conv2d
+    args:
+      input: input
+      weight: weight

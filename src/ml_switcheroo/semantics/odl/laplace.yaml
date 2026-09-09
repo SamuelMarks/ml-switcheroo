@@ -1,0 +1,12 @@
+operation: laplace
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.laplace
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.laplace
+    args:
+      key: key

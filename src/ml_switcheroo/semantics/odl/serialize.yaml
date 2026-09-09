@@ -1,8 +1,14 @@
 description: Auto-generated from keras_code_defs
 std_args:
-- activation
+- name: activation
+  type: Any
 type: function
 operation: serialize
 variants:
   keras:
     api: keras.activations.serialize
+    args:
+      activation: activation
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

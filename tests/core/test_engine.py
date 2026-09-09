@@ -66,7 +66,7 @@ def test_engine_graph_to_mermaid(mock_gen: MagicMock) -> None:
 def test_engine_run_isa(mock_run_compiler: MagicMock) -> None:
   """Docstring."""
   mock_run_compiler.return_value = ConversionResult(success=True)
-  engine = ASTEngine(source="sass", target="html")
+  engine = ASTEngine(source="nvidia_sass", target="html")
   res: ConversionResult = engine.run("code")
   mock_run_compiler.assert_called_once()
   assert res.success is True
@@ -174,7 +174,7 @@ def test_astengine_sass_unsupported_missing_branches(monkeypatch: pytest.MonkeyP
   import ml_switcheroo.core.engine
 
   # To bypass pydantic validation, we just create the engine normally and override self.target
-  engine = ASTEngine(source="sass", target="jax")
+  engine = ASTEngine(source="nvidia_sass", target="jax")
   engine.target = "unsupported"
 
   # We must mock get_backend_class so it hits the check and raises ValueError? Wait, if we mock it to return None
@@ -182,12 +182,12 @@ def test_astengine_sass_unsupported_missing_branches(monkeypatch: pytest.MonkeyP
   monkeypatch.setattr(ml_switcheroo.core.engine, "get_backend_class", lambda x: None)
 
   with (
-    mock.patch("ml_switcheroo.core.compiler.frontends.sass.SassParser") as mock_parser,
-    mock.patch("ml_switcheroo.core.compiler.frontends.sass.SassLifter") as mock_lifter,
+    mock.patch("ml_switcheroo.core.compiler.frontends.nvidia_sass.NvidiaSassParser") as mock_parser,
+    mock.patch("ml_switcheroo.core.compiler.frontends.nvidia_sass.NvidiaSassLifter") as mock_lifter,
   ):
     mock_parser.return_value.parse.return_value.statements = []
     mock_lifter.return_value.lift.return_value = mock.MagicMock()
-    result: ConversionResult = engine.run("sass code")
+    result: ConversionResult = engine.run("nvidia_sass code")
     assert not result.success
     assert result.errors is not None
     assert any("No backend found" in e for e in result.errors)
@@ -366,10 +366,10 @@ def test_compiler_pipeline_coverage() -> None:
     mock_get_backend.return_value = MockBackend
     res: ConversionResult = engine._run_compiler_pipeline("code", get_tracer_mock())
     assert res.code == "compiled code"
-  engine_sass = ASTEngine(source="sass", target="rdna")
+  engine_sass = ASTEngine(source="nvidia_sass", target="rdna")
   with (
-    patch("ml_switcheroo.core.engine.SassParser"),
-    patch("ml_switcheroo.core.engine.SassLifter"),
+    patch("ml_switcheroo.core.engine.NvidiaSassParser"),
+    patch("ml_switcheroo.core.engine.NvidiaSassLifter"),
     patch("ml_switcheroo.core.engine.get_backend_class", return_value=MockBackend),
   ):
     engine_sass._run_compiler_pipeline("code", get_tracer_mock())
@@ -737,7 +737,7 @@ def test_astengine_fusion_target_branches_mocked(monkeypatch: pytest.MonkeyPatch
 
   monkeypatch.setattr(ml_switcheroo.core.engine, "get_backend_class", lambda x: FakeBackend)
 
-  cfg = RuntimeConfig(source_framework="sass", target_framework="jax", enable_graph_optimization=True)
+  cfg = RuntimeConfig(source_framework="nvidia_sass", target_framework="jax", enable_graph_optimization=True)
   engine = ASTEngine(config=cfg)
 
   engine.target = "flax"
@@ -756,7 +756,7 @@ def test_astengine_fusion_target_branches_mocked(monkeypatch: pytest.MonkeyPatch
 def test_astengine_sass_unsupported_target(monkeypatch: pytest.MonkeyPatch) -> None:
   """Docstring."""
   monkeypatch.setattr(ml_switcheroo.core.engine, "get_backend_class", lambda x: None)
-  engine = ASTEngine(source="sass", target="jax")
+  engine = ASTEngine(source="nvidia_sass", target="jax")
   result: ConversionResult = engine.run("v_add_f32 v0, v1, v2")
   assert not result.success
 
@@ -880,11 +880,11 @@ def get_tracer_mock_extra() -> MagicMock:
 
 def test_engine_target_torch_keras_sharding() -> None:
   """Verifies the behavior of engine target PyTorch Keras sharding."""
-  engine = ASTEngine(source="sass", target="keras")
+  engine = ASTEngine(source="nvidia_sass", target="keras")
   engine.config.enable_sharding = True
   with (
-    patch("ml_switcheroo.core.engine.SassParser"),
-    patch("ml_switcheroo.core.engine.SassLifter"),
+    patch("ml_switcheroo.core.engine.NvidiaSassParser"),
+    patch("ml_switcheroo.core.engine.NvidiaSassLifter"),
     patch("ml_switcheroo.core.engine.get_backend_class") as mock_get_backend,
   ):
     mock_cls = MagicMock()

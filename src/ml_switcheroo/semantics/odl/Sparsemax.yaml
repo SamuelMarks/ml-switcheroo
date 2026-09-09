@@ -11,5 +11,11 @@ std_args:
 variants:
   keras:
     api: keras.activations.sparsemax
+    args:
+      axis: axis
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Sparsemax
 type: function

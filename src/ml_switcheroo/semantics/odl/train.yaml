@@ -1,0 +1,10 @@
+operation: train
+variants:
+  flax_nnx:
+    api: nnx.module.Module.train
+    args:
+      attributes: attributes
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

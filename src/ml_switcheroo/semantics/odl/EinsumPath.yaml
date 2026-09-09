@@ -1,0 +1,12 @@
+operation: EinsumPath
+variants:
+  paxml:
+    api: jax.numpy.einsum_path
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.einsum_path
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

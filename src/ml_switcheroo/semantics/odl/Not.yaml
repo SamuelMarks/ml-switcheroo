@@ -1,0 +1,21 @@
+operation: Not
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  stablehlo:
+    api: stablehlo.not
+  flax_nnx:
+    api: flax.nnx.Not
+    args:
+      collection_filter: collection_filter
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

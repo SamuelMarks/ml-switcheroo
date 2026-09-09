@@ -1,0 +1,4 @@
+operation: Txq
+variants:
+  nvidia_sass:
+    api: TXQ

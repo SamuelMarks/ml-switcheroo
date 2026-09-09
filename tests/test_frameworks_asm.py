@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.frameworks.rdna import RdnaAdapter
-from ml_switcheroo.frameworks.sass import SassAdapter
+from ml_switcheroo.frameworks.nvidia_sass import NvidiaSassAdapter
 
 
 def test_rdna_adapter_properties() -> None:
@@ -44,9 +44,9 @@ def test_rdna_adapter_properties() -> None:
   adapter.get_tiered_examples()
 
 
-def test_sass_adapter_properties() -> None:
+def test_nvidia_sass_adapter_properties() -> None:
   """Docstring."""
-  adapter: SassAdapter = SassAdapter()
+  adapter: NvidiaSassAdapter = NvidiaSassAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -60,7 +60,7 @@ def test_sass_adapter_properties() -> None:
   adapter.declared_magic_args
   adapter.rng_seed_methods
 
-  with patch("ml_switcheroo.frameworks.sass.load_definitions", return_value={"test": MagicMock()}):
+  with patch("ml_switcheroo.frameworks.nvidia_sass.load_definitions", return_value={"test": MagicMock()}):
     adapter.definitions
 
   adapter.specifications
@@ -103,9 +103,9 @@ def test_rdna_parse_to_graph() -> None:
   assert graph is not None
 
 
-def test_sass_parse_to_graph() -> None:
+def test_nvidia_sass_parse_to_graph() -> None:
   """Docstring."""
-  adapter: SassAdapter = SassAdapter()
+  adapter: NvidiaSassAdapter = NvidiaSassAdapter()
   code: str = """
     L_1:
     MOV R0, R1
@@ -120,7 +120,7 @@ def test_sass_parse_to_graph() -> None:
     L_3:
     EXIT
     """
-  graph: LogicalGraph = adapter.parse_sass_to_graph(code)
+  graph: LogicalGraph = adapter.parse_nvidia_sass_to_graph(code)
   assert graph is not None
 
 
@@ -131,11 +131,11 @@ def test_rdna_fmac_no_loop() -> None:
   adapter.parse_rdna_to_graph(code)
 
 
-def test_sass_ffma_no_loop() -> None:
+def test_nvidia_sass_ffma_no_loop() -> None:
   """Docstring."""
-  adapter: SassAdapter = SassAdapter()
+  adapter: NvidiaSassAdapter = NvidiaSassAdapter()
   code: str = "FFMA R0, R1, R2, R3"
-  adapter.parse_sass_to_graph(code)
+  adapter.parse_nvidia_sass_to_graph(code)
 
 
 def test_asm_empty_parsing() -> None:
@@ -143,10 +143,11 @@ def test_asm_empty_parsing() -> None:
   adapter1: RdnaAdapter = RdnaAdapter()
   adapter1.parse_rdna_to_graph("")
   adapter1.parse_rdna_to_graph("// comment")
+  adapter1.parse_rdna_to_graph("s_branch")
 
-  adapter2: SassAdapter = SassAdapter()
-  adapter2.parse_sass_to_graph("")
-  adapter2.parse_sass_to_graph("/* comment */")
+  adapter2: NvidiaSassAdapter = NvidiaSassAdapter()
+  adapter2.parse_nvidia_sass_to_graph("")
+  adapter2.parse_nvidia_sass_to_graph("/* comment */")
 
 
 def test_rdna_loop_no_fmac() -> None:
@@ -160,21 +161,21 @@ def test_rdna_loop_no_fmac() -> None:
   adapter.parse_rdna_to_graph(code)
 
 
-def test_sass_loop_no_fmac() -> None:
+def test_nvidia_sass_loop_no_fmac() -> None:
   """Docstring."""
-  adapter: SassAdapter = SassAdapter()
+  adapter: NvidiaSassAdapter = NvidiaSassAdapter()
   code: str = """
     L_2:
     IADD3 R0, R0, 1
     FFMA R0, R1, R2, R3
     BRA L_2
     """
-  adapter.parse_sass_to_graph(code)
+  adapter.parse_nvidia_sass_to_graph(code)
 
 
-def test_sass_loop_print() -> None:
+def test_nvidia_sass_loop_print() -> None:
   """Docstring."""
-  adapter: SassAdapter = SassAdapter()
+  adapter: NvidiaSassAdapter = NvidiaSassAdapter()
   code: str = """
     // comment
     /* block comment */
@@ -184,5 +185,5 @@ def test_sass_loop_print() -> None:
     IADD3 R0, R0, 1
     BRA L_2
     """
-  g: LogicalGraph = adapter.parse_sass_to_graph(code)
+  g: LogicalGraph = adapter.parse_nvidia_sass_to_graph(code)
   print(g.nodes)

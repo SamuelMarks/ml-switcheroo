@@ -1,15 +1,30 @@
-description: Removes singleton dimensions (axes) from ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: axis
-  type: Union[int, Tuple[int, Ellipsis]]
-variants:
-  dask:
-    api: dask.array.squeeze
 operation: squeeze
-type: function
+description: 'squeeze(input: Tensor, dim: Optional[Union[int, List[int]]]) -> Tensor'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.squeeze
+    args:
+      input: input
+      dim: dim
+  jax:
+    api: jax.lax.squeeze
+    args:
+      array: array
+      dimensions: dimensions
+  mlx:
+    api: mlx.core.squeeze
+    args:
+      a: a
+  keras:
+    api: keras.ops.squeeze
+    args:
+      x: x

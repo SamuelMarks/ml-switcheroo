@@ -1,0 +1,15 @@
+operation: printoptions
+description: Context manager for setting print options.
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  jax:
+    api: jax.numpy.printoptions
+    args: {}

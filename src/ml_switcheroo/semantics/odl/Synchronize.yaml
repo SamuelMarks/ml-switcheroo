@@ -1,0 +1,11 @@
+operation: Synchronize
+description: 'synchronize(stream: typing.Optional[mlx.core.Stream] = None) -> None'
+std_args:
+- name: stream
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  mlx:
+    api: mlx.core.synchronize
+    args: {}

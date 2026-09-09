@@ -1,0 +1,7 @@
+operation: RestoreIntPaths
+variants:
+  flax_nnx:
+    api: flax.nnx.restore_int_paths
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

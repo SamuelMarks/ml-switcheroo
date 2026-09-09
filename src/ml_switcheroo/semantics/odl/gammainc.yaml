@@ -1,0 +1,8 @@
+operation: gammainc
+variants:
+  flax_nnx:
+    api: nnx.rnglib.RngStream.gamma
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

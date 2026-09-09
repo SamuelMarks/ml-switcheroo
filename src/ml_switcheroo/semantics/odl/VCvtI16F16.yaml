@@ -1,0 +1,5 @@
+operation: VCvtI16F16
+variants:
+  rdna:
+    api: v_cvt_i16_f16
+    description: Auto-mapped instruction V_CVT_I16_F16

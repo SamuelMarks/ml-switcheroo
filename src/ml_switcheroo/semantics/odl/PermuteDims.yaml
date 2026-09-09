@@ -1,0 +1,24 @@
+operation: PermuteDims
+variants:
+  numpy:
+    api: numpy.transpose
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: jax.numpy.transpose
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.transpose
+    args:
+      axes: perm
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.transpose
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

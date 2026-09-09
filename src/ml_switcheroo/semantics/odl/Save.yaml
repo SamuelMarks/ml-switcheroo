@@ -22,5 +22,22 @@ operation: Save
 variants:
   torch:
     api: torch.save
+    args: {}
   jax:
     api: save
+    args: {}
+  paxml:
+    api: jax.numpy.save
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.save
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.core.save
+    args:
+      file: file
+      arr: arr

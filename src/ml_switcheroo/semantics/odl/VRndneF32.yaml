@@ -1,0 +1,5 @@
+operation: VRndneF32
+variants:
+  rdna:
+    api: v_rndne_f32
+    description: Auto-mapped instruction V_RNDNE_F32

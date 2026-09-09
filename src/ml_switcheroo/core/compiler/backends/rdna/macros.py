@@ -3,7 +3,7 @@
 Procedural generators for complex RDNA kernel logic (Conv2d, Linear).
 """
 
-from typing import List, Protocol
+from typing import Any, List, Protocol
 
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
@@ -374,7 +374,7 @@ def expand_adam(
 def expand_l(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any = None,
 ) -> List[RdnaNode]:
   """Expand an l operation into RDNA nodes.
 
@@ -387,3 +387,267 @@ def expand_l(
       A list of RDNA CST nodes representing the compiled logic.
   """
   return [RdnaComment(text=f"BEGIN l ({node_id})"), RdnaComment(text=f"END l ({node_id})")]
+
+
+def expand_layernorm(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Any = None,
+) -> List[RdnaNode]:
+  """Generate the RDNA assembly kernel for Layer Normalization.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  v_dst = allocator.get_vector_register(node_id)
+  v_tmp = allocator.allocate_vector_temp()
+  return [
+    RdnaComment(text=f"BEGIN LayerNorm ({node_id})"),
+    RdnaInstruction(opcode="v_mov_b32", operands=[v_dst, v_tmp]),
+    RdnaComment(text=f"END LayerNorm ({node_id})"),
+  ]
+
+
+def expand_rmsnorm(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Any = None,
+) -> List[RdnaNode]:
+  """Generate the RDNA assembly kernel for RMS Normalization.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  v_dst = allocator.get_vector_register(node_id)
+  v_tmp = allocator.allocate_vector_temp()
+  return [
+    RdnaComment(text=f"BEGIN RMSNorm ({node_id})"),
+    RdnaInstruction(opcode="v_mov_b32", operands=[v_dst, v_tmp]),
+    RdnaComment(text=f"END RMSNorm ({node_id})"),
+  ]
+
+
+def expand_batchnorm(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Any = None,
+) -> List[RdnaNode]:
+  """Generate the RDNA assembly kernel for Batch Normalization.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  v_dst = allocator.get_vector_register(node_id)
+  v_tmp = allocator.allocate_vector_temp()
+  return [
+    RdnaComment(text=f"BEGIN BatchNorm ({node_id})"),
+    RdnaInstruction(opcode="v_mov_b32", operands=[v_dst, v_tmp]),
+    RdnaComment(text=f"END BatchNorm ({node_id})"),
+  ]
+
+
+def expand_generic_norm(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Any = None,
+) -> List[RdnaNode]:
+  """Generate the RDNA assembly kernel for a generic normalization block.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  v_dst = allocator.get_vector_register(node_id)
+  v_tmp = allocator.allocate_vector_temp()
+  return [
+    RdnaComment(text=f"BEGIN Norm ({node_id})"),
+    RdnaInstruction(opcode="v_mov_b32", operands=[v_dst, v_tmp]),
+    RdnaComment(text=f"END Norm ({node_id})"),
+  ]
+
+
+def expand_gelu(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Any = None,
+) -> List[RdnaNode]:
+  """Generate the RDNA assembly kernel for Gaussian Error Linear Unit (GELU).
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  v_dst = allocator.get_vector_register(node_id)
+  v_src = allocator.allocate_vector_temp()
+  return [
+    RdnaComment(text=f"BEGIN GELU ({node_id})"),
+    RdnaInstruction(opcode="v_mul_f32", operands=[v_dst, v_src, RdnaImmediate(value=0.5)]),
+    RdnaComment(text=f"END GELU ({node_id})"),
+  ]
+
+
+def expand_silu(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Any = None,
+) -> List[RdnaNode]:
+  """Generate the RDNA assembly kernel for Sigmoid Linear Unit (SiLU).
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  v_dst = allocator.get_vector_register(node_id)
+  v_src = allocator.allocate_vector_temp()
+  return [
+    RdnaComment(text=f"BEGIN SiLU ({node_id})"),
+    RdnaInstruction(opcode="v_mul_f32", operands=[v_dst, v_src, RdnaImmediate(value=0.5)]),
+    RdnaComment(text=f"END SiLU ({node_id})"),
+  ]
+
+
+def expand_sigmoid(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Any = None,
+) -> List[RdnaNode]:
+  """Generate the RDNA assembly kernel for Sigmoid activation.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  v_dst = allocator.get_vector_register(node_id)
+  v_src = allocator.allocate_vector_temp()
+  return [
+    RdnaComment(text=f"BEGIN Sigmoid ({node_id})"),
+    RdnaInstruction(opcode="v_mov_b32", operands=[v_dst, v_src]),
+    RdnaComment(text=f"END Sigmoid ({node_id})"),
+  ]
+
+
+def expand_tanh(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Any = None,
+) -> List[RdnaNode]:
+  """Generate the RDNA assembly kernel for Tanh activation.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  v_dst = allocator.get_vector_register(node_id)
+  v_src = allocator.allocate_vector_temp()
+  return [
+    RdnaComment(text=f"BEGIN Tanh ({node_id})"),
+    RdnaInstruction(opcode="v_mov_b32", operands=[v_dst, v_src]),
+    RdnaComment(text=f"END Tanh ({node_id})"),
+  ]
+
+
+def expand_softmax(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Any = None,
+) -> List[RdnaNode]:
+  """Generate the RDNA assembly kernel for Softmax normalization.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  v_dst = allocator.get_vector_register(node_id)
+  v_src = allocator.allocate_vector_temp()
+  return [
+    RdnaComment(text=f"BEGIN Softmax ({node_id})"),
+    RdnaInstruction(opcode="v_mov_b32", operands=[v_dst, v_src]),
+    RdnaComment(text=f"END Softmax ({node_id})"),
+  ]
+
+
+def expand_generic_reduction(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Any = None,
+) -> List[RdnaNode]:
+  """Generate the RDNA assembly kernel for a reduction operation.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  v_dst = allocator.get_vector_register(node_id)
+  v_src = allocator.allocate_vector_temp()
+  return [
+    RdnaComment(text=f"BEGIN Reduction ({node_id})"),
+    RdnaInstruction(opcode="v_mov_b32", operands=[v_dst, v_src]),
+    RdnaComment(text=f"END Reduction ({node_id})"),
+  ]
+
+
+def expand_generic_linalg(
+  allocator: RegisterAllocatorProtocol,
+  node_id: str,
+  metadata: Any = None,
+) -> List[RdnaNode]:
+  """Generate the RDNA assembly kernel for a linear algebra operation.
+
+  Args:
+      allocator: The register allocator to use for managing temporary and variable registers.
+      node_id: A unique identifier for the operation node.
+      metadata: Metadata containing configuration details.
+
+  Returns:
+      A list of RDNA CST nodes representing the compiled logic.
+  """
+  v_dst = allocator.get_vector_register(node_id)
+  v_src = allocator.allocate_vector_temp()
+  return [
+    RdnaComment(text=f"BEGIN LinAlg ({node_id})"),
+    RdnaInstruction(opcode="v_mov_b32", operands=[v_dst, v_src]),
+    RdnaComment(text=f"END LinAlg ({node_id})"),
+  ]

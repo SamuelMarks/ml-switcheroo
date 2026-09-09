@@ -1,0 +1,15 @@
+operation: ref
+description: Auto-generated from flax_nnx_v0.12.5_map.json
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.optim.lr_scheduler.ref
+    args: {}

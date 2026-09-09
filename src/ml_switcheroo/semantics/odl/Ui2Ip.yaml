@@ -1,0 +1,4 @@
+operation: Ui2Ip
+variants:
+  nvidia_sass:
+    api: UI2IP

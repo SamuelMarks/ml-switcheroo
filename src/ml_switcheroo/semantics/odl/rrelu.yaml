@@ -1,11 +1,33 @@
-description: Applies the randomized leaky rectified linear unit function, element-wise.
+operation: Rrelu
+description: rrelu(input, lower=1./8, upper=1./3, training=False, inplace=False) ->
+  Tensor
 std_args:
-- lower
-- upper
-- inplace
-- __constants__
-type: function
-operation: rrelu
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: lower
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '''```(1.0 / 8)```'''
+- name: upper
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '''```(1.0 / 3)```'''
+- name: training
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
   torch:
-    api: torch.nn.RReLU
+    api: torch.nn.functional.rrelu
+    args:
+      input: input

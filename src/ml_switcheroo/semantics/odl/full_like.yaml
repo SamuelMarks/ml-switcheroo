@@ -22,3 +22,20 @@ operation: full_like
 variants:
   dask:
     api: dask.array.full_like
+    args: {}
+  flax_nnx:
+    api: optax.tree.full_like
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.lax.full_like
+    args:
+      x: x
+      fill_value: fill_value
+  keras:
+    api: keras.ops.full_like
+    args:
+      x: x
+      fill_value: fill_value

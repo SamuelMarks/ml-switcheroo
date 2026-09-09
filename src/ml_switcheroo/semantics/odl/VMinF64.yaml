@@ -1,0 +1,5 @@
+operation: VMinF64
+variants:
+  rdna:
+    api: v_min_f64
+    description: Auto-mapped instruction V_MIN_F64

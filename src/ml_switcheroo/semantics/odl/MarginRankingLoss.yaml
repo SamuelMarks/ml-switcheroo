@@ -20,3 +20,15 @@ operation: MarginRankingLoss
 variants:
   torch:
     api: torch.nn.MarginRankingLoss
+    args: {}
+  mlx:
+    api: mlx.nn.losses.margin_ranking_loss
+    args:
+      inputs1: inputs1
+      inputs2: inputs2
+      margin: margin
+      reduction: reduction
+      targets: targets
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

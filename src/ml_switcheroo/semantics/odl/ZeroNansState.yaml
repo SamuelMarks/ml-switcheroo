@@ -1,0 +1,8 @@
+operation: ZeroNansState
+variants:
+  flax_nnx:
+    api: optax.ZeroNansState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

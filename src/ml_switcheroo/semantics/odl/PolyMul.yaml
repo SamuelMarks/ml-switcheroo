@@ -1,0 +1,22 @@
+operation: polymul
+description: Find the product of two polynomials.
+std_args:
+- name: a1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: a2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: trim_leading_zeros
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  jax:
+    api: jax.numpy.polymul
+    args:
+      a1: a1
+      a2: a2

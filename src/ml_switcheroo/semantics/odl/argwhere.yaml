@@ -1,8 +1,16 @@
-description: Find the indices of array elements that are non-zero, grouped by element.
-std_args:
-- a
-variants:
-  dask:
-    api: dask.array.argwhere
 operation: argwhere
-type: function
+description: argwhere(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.argwhere
+    args:
+      input: input
+  jax:
+    api: jax.numpy.argwhere
+    args:
+      a: a

@@ -1,0 +1,26 @@
+operation: Addcdiv
+variants:
+  numpy:
+    api: numpy.add
+    dispatch_rules: []
+    macro_template: '{input} + {value} * ({tensor1} / {tensor2})'
+    pack_as: Tuple
+    required_imports: []
+  keras:
+    api: keras.ops.add
+    dispatch_rules: []
+    macro_template: '{input} + {value} * ({tensor1} / {tensor2})'
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.math.add
+    dispatch_rules: []
+    macro_template: '{input} + {value} * ({tensor1} / {tensor2})'
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.add
+    dispatch_rules: []
+    macro_template: '{input} + {value} * ({tensor1} / {tensor2})'
+    pack_as: Tuple
+    required_imports: []

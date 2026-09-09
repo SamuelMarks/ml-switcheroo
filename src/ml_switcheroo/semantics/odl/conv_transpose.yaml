@@ -1,0 +1,58 @@
+operation: conv_transpose
+description: Convenience wrapper for calculating the N-d convolution "transpose".
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: rhs_dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: dimension_numbers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: tuple
+  default: '''tensorflow convention'''
+- name: transpose_kernel
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: precision
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: preferred_element_type
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.conv_transpose
+    args:
+      lhs: lhs
+      rhs: rhs
+      strides: strides
+      padding: padding
+  keras:
+    api: keras.ops.conv_transpose
+    args:
+      inputs: inputs
+      kernel: kernel
+      strides: strides

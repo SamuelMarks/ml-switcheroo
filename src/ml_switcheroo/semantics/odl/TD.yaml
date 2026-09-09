@@ -1,12 +1,18 @@
 description: HTML <td> element.
 std_args:
-- children
-- id
-- class_name
-- style
-- kwargs
+- name: children
+  type: Any
+- name: id
+  type: Any
+- name: class_name
+  type: Any
+- name: style
+  type: Any
+- name: kwargs
+  type: Any
 variants:
   html_dsl:
     api: html.td
+    args: {}
 operation: TD
 type: function

@@ -1,0 +1,4 @@
+operation: Bmov
+variants:
+  nvidia_sass:
+    api: BMOV

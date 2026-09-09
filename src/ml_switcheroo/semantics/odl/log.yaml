@@ -1,14 +1,38 @@
-description: Calculates an implementation-dependent approximation to the natural (base
-  ``e``) logarithm for each element ``x_i`` of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-type: attribute
 operation: log
+description: log(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
-  latex_dsl:
-    api: latex.log
-  dask:
-    api: dask.array.log
+  torch:
+    api: torch.log
+    args:
+      input: input
+  jax:
+    api: jax.lax.log
+    args:
+      x: x
+  mlx:
+    api: mlx.core.log
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.log
+    args:
+      operand: operand
+      result_accuracy: result_accuracy
+  rdna:
+    api: v_log_f32
+    args: {}
+  nvidia_sass:
+    api: MUFU.LOG2
+    args: {}
+  keras:
+    api: keras.ops.log
+    args: {}

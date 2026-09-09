@@ -1,0 +1,5 @@
+operation: SBitreplicateB64B32
+variants:
+  rdna:
+    api: s_bitreplicate_b64_b32
+    description: Auto-mapped instruction S_BITREPLICATE_B64_B32

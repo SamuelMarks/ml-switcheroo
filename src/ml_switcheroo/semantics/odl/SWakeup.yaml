@@ -1,0 +1,5 @@
+operation: SWakeup
+variants:
+  rdna:
+    api: s_wakeup
+    description: Auto-mapped instruction S_WAKEUP

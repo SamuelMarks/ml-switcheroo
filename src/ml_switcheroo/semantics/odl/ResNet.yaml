@@ -1,0 +1,7 @@
+operation: ResNet
+variants:
+  paxml:
+    api: praxis.layers.ResNet
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

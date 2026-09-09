@@ -1,0 +1,7 @@
+operation: Floating
+variants:
+  flax_nnx:
+    api: jax.numpy.floating
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

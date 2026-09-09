@@ -58,4 +58,12 @@ def test_interface_enforcement() -> None:
 
       pass
 
-    InvalidPass()
+    InvalidPass()  # type: ignore[abstract]
+
+
+def test_interface_base_call() -> None:
+  """Verifies calling RewriterPass.transform directly executes base method."""
+  ctx = MagicMock(spec=RewriterContext)
+  pass_inst = MockPass("Base")
+  res = RewriterPass.transform(pass_inst, cst.parse_module("x = 1"), ctx)
+  assert res is None

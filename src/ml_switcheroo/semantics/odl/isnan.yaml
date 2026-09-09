@@ -1,12 +1,24 @@
-description: Tests each element ``x_i`` of the input array ``x`` to determine whether
-  the element is ``NaN``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  dask:
-    api: dask.array.isnan
 operation: isnan
-type: function
+description: isnan(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.isnan
+    args:
+      input: input
+  jax:
+    api: jax.numpy.isnan
+    args:
+      x: x
+  mlx:
+    api: mlx.core.isnan
+    args:
+      a: a
+  keras:
+    api: keras.ops.isnan
+    args:
+      x: x

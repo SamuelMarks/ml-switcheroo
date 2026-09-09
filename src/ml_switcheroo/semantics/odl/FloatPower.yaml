@@ -1,0 +1,17 @@
+operation: FloatPower
+variants:
+  paxml:
+    api: jnp.float_power
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.float_power
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.float_power
+    args:
+      x1: x1
+      x2: x2

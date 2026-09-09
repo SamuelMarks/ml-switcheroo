@@ -1,0 +1,7 @@
+operation: RegisterVariableName
+variants:
+  flax_nnx:
+    api: flax.nnx.register_variable_name
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

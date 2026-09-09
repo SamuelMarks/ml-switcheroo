@@ -1,0 +1,19 @@
+operation: hard_swish
+variants:
+  keras:
+    api: keras.activations.hard_swish
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.hard_swish
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

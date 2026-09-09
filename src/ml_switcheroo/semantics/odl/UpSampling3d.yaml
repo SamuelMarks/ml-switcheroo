@@ -1,22 +1,21 @@
+operation: UpSampling3D
 description: Upsampling layer for 3D inputs.
-op_type: class
 std_args:
-- default:
-  - 2
-  - 2
-  - 2
+- name: size
+  kind: positional_or_keyword
   is_variadic: false
+  type: tuple
+  default: (2, 2, 2)
+- name: data_format
   kind: positional_or_keyword
-  name: size
-  type: Tuple[int, int, int]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: data_format
+  is_variadic: false
   type: str
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   keras:
     api: keras.layers.UpSampling3D
-  tensorflow:
-    api: tf.keras.layers.UpSampling3D
-operation: UpSampling3d
-type: function
+    args: {}

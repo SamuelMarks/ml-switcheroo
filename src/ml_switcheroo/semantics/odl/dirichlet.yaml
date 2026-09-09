@@ -1,0 +1,13 @@
+operation: dirichlet
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.dirichlet
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.dirichlet
+    args:
+      key: key
+      alpha: alpha

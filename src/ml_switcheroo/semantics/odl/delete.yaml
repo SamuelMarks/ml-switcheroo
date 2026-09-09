@@ -1,10 +1,27 @@
-description: Return a new array with sub-arrays along an axis deleted. For a one
-std_args:
-- arr
-- obj
-- axis
-variants:
-  dask:
-    api: dask.array.delete
 operation: delete
-type: function
+description: Delete entry or entries from an array.
+std_args:
+- name: arr
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: obj
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: assume_unique_indices
+  kind: keyword_only
+  is_variadic: false
+  type: int
+  default: 'False'
+variants:
+  jax:
+    api: jax.numpy.delete
+    args:
+      arr: arr
+      obj: obj

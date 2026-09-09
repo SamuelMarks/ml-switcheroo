@@ -1,0 +1,10 @@
+operation: LightConv1D
+variants:
+  paxml:
+    api: paxml.layers.LightConv1D
+    args:
+      in_channels: input_dims
+      kernel_size: kernel_size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,8 @@
+operation: WrappedSchedule
+variants:
+  flax_nnx:
+    api: optax.WrappedSchedule
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,27 @@
+operation: index_in_dim
+description: Convenience wrapper around :func:`lax.slice` to perform int indexing.
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: index
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+- name: keepdims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+variants:
+  jax:
+    api: jax.lax.index_in_dim
+    args:
+      operand: operand
+      index: index

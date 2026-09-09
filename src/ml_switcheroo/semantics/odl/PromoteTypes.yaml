@@ -1,0 +1,12 @@
+operation: PromoteTypes
+variants:
+  paxml:
+    api: jax.numpy.promote_types
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.promote_types
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

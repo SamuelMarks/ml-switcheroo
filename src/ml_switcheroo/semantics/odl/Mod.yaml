@@ -1,0 +1,22 @@
+operation: mod
+description: Auto-generated mapping for mod.
+std_args:
+- name: x1
+  kind: positional_only
+  is_variadic: false
+  type: Tensor
+- name: x2
+  kind: positional_only
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.mod
+    args:
+      x1: x1
+      x2: x2
+  keras:
+    api: keras.ops.mod
+    args:
+      x1: x1
+      x2: x2

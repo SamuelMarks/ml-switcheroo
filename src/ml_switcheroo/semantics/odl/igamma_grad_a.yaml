@@ -1,0 +1,17 @@
+operation: igamma_grad_a
+description: Elementwise derivative of the regularized incomplete gamma function.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.igamma_grad_a
+    args:
+      a: a
+      x: x

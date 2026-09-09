@@ -24,7 +24,7 @@ def test_svg_arrow_render() -> None:
 
 def test_grid_box_render_standard() -> None:
   """Verifies the behavior of grid box render standard."""
-  arrow = SvgArrow(0, 0, 10, 10, "s-blue", "", "")
+  arrow = SvgArrow(x1=0, y1=0, x2=10, y2=10, style_class="s-blue", marker_end="", parent_style="")
   box = GridBox(row=2, col=1, css_class="box r", header_text="Header", code_text="x=1", body_text="Body", arrows=[arrow])
   html: str = box.to_html()
   assert 'class="box r"' in html
@@ -151,3 +151,37 @@ def test_tag_node_manipulation() -> None:
     assert False, "Should raise ValueError"
   except ValueError:
     pass
+
+
+def test_html_nodes_remaining_branches() -> None:
+  """Test remaining branches in html nodes for 100% branch and line coverage."""
+  # 1. get_attribute non-existent and set_attribute non-first match
+  tag = TagNode(name="div", attributes=[AttributeNode(name="class", value="foo"), AttributeNode(name="id", value="bar")])
+  assert tag.get_attribute("non_existent") is None
+  tag.set_attribute("id", "baz")
+  assert tag.get_attribute("id") == "baz"
+
+  # 2. attr with leading_trivia
+  attr_trivia = AttributeNode(name="id", value="bar", leading_trivia=" ")
+  tag_trivia = TagNode(name="span", attributes=[attr_trivia])
+  assert tag_trivia.emit() == '<span id="bar"></span>'
+
+  # 3. GridBox with z_index
+  box = GridBox(row=1, col=1, z_index=10, header_text="ZBox")
+  html_box = box.to_html()
+  assert "z-index:10;" in html_box
+
+  # 4. Pure CST HtmlDocument
+  pure_doc = HtmlDocument(
+    leading_trivia="<!-- header -->",
+    trailing_trivia="<!-- footer -->",
+    children=[TagNode(name="div", children=[TextNode(content="CST Content")])],
+  )
+  pure_html = pure_doc.emit()
+  assert "<!-- header --><div>CST Content</div><!-- footer -->" == pure_html
+
+  # 5. Empty HtmlDocument
+  empty_doc = HtmlDocument(model_name="EmptyModel", children=[])
+  empty_html = empty_doc.emit()
+  assert "Model: EmptyModel" in empty_html
+  assert "repeat(0, 80px)" in empty_html

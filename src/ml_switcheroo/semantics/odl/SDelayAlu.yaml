@@ -1,0 +1,5 @@
+operation: SDelayAlu
+variants:
+  rdna:
+    api: s_delay_alu
+    description: Auto-mapped instruction S_DELAY_ALU

@@ -1,0 +1,17 @@
+operation: fromiter
+description: Unimplemented JAX wrapper for jnp.fromiter.
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+  default: ()
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
+variants:
+  jax:
+    api: jax.numpy.fromiter
+    args: {}

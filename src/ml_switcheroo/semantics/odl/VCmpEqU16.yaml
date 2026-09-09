@@ -1,0 +1,5 @@
+operation: VCmpEqU16
+variants:
+  rdna:
+    api: v_cmp_eq_u16
+    description: Auto-mapped instruction V_CMP_EQ_U16

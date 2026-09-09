@@ -1,0 +1,30 @@
+operation: as_strided
+description: as_strided(input, size, stride, storage_offset=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: storage_offset
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.as_strided
+    args:
+      input: input
+      size: size
+      stride: stride
+  mlx:
+    api: mlx.core.as_strided
+    args:
+      a: a

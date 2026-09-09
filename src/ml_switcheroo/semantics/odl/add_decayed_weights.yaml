@@ -1,0 +1,8 @@
+operation: add_decayed_weights
+variants:
+  flax_nnx:
+    api: optax.add_decayed_weights
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

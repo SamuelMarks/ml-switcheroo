@@ -1,0 +1,16 @@
+operation: ReduceSum
+variants:
+  paxml:
+    api: jnp.sum
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.sum
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.sum
+    args:
+      a: a

@@ -1,0 +1,15 @@
+operation: Union
+description: Union type; Union[X, Y] means either X or Y.
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwds
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.autograd.Union
+    args: {}

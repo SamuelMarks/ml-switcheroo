@@ -8,8 +8,9 @@ import pytest
 def test_paxml_import_success(monkeypatch: pytest.MonkeyPatch) -> None:
   """Docstring."""
   import types
+  from typing import Any
 
-  mock_praxis: types.ModuleType = types.ModuleType("praxis")
+  mock_praxis: Any = types.ModuleType("praxis")
   mock_praxis.layers = types.ModuleType("praxis.layers")
   mock_praxis.base_layer = types.ModuleType("praxis.base_layer")
   mock_praxis.layers.activations = types.ModuleType("praxis.layers.activations")
@@ -55,12 +56,13 @@ def test_paxml_methods_coverage() -> None:
   import sys
   from unittest.mock import MagicMock, patch
 
-  with patch.dict(sys.modules, {"jax.numpy": MagicMock()}):
-    import jax.numpy as jnp
-
-    jnp.array.return_value = "tensor"
+  mock_jax = MagicMock()
+  mock_jnp = MagicMock()
+  mock_jax.numpy = mock_jnp
+  with patch.dict(sys.modules, {"jax": mock_jax, "jax.numpy": mock_jnp}):
+    mock_jnp.array.return_value = "tensor"
     adapter.convert([1, 2])
-    jnp.array.side_effect = Exception("err")
+    mock_jnp.array.side_effect = Exception("err")
     adapter.convert([1, 2])
 
   with patch.dict(sys.modules, {"jax.numpy": None}):
@@ -108,3 +110,31 @@ def test_paxml_definitions_args_none() -> None:
   mock_map.args = None
   with patch("ml_switcheroo.frameworks.paxml.load_definitions", return_value={"Linear": mock_map}):
     adapter.definitions
+
+
+def test_paxml_init_no_snapshot() -> None:
+  """Docstring."""
+  from unittest.mock import patch
+
+  from ml_switcheroo.frameworks.paxml import PaxmlAdapter
+
+  with (
+    patch("ml_switcheroo.frameworks.paxml.praxis", None),
+    patch("ml_switcheroo.frameworks.paxml.load_snapshot_for_adapter", return_value={}),
+  ):
+    adapter: PaxmlAdapter = PaxmlAdapter()
+    assert adapter._snapshot_data == {}
+
+
+def test_paxml_init_with_snapshot() -> None:
+  """Docstring."""
+  from unittest.mock import patch
+
+  from ml_switcheroo.frameworks.paxml import PaxmlAdapter
+
+  with (
+    patch("ml_switcheroo.frameworks.paxml.praxis", None),
+    patch("ml_switcheroo.frameworks.paxml.load_snapshot_for_adapter", return_value={"categories": {}}),
+  ):
+    adapter: PaxmlAdapter = PaxmlAdapter()
+    assert adapter._mode.name == "GHOST"

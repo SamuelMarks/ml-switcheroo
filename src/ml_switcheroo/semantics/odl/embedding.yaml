@@ -1,28 +1,58 @@
-description: Turns nonnegative integers (indexes) into dense vectors of fixed size.
-std_args:
-- input_dim
-- output_dim
-- embeddings_initializer
-- embeddings_regularizer
-- embeddings_constraint
-- mask_zero
-- weights
-- lora_rank
-- lora_alpha
-- kwargs
-- activity_regularizer
-- trainable
-- dtype
-- autocast
-- name
-type: function
 operation: embedding
+description: Generate a simple lookup table that looks up embeddings in a fixed dictionary
+  and size.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: padding_idx
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: max_norm
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: norm_type
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '2.0'
+- name: scale_grad_by_freq
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: 'False'
+- name: sparse
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
 variants:
-  keras:
-    api: keras.layers.Embedding
+  torch:
+    api: torch.nn.functional.embedding
+    args:
+      input: input
+      weight: weight
   mlx:
     api: mlx.nn.Embedding
-  torch:
-    api: torch.nn.Embedding
-  tensorflow:
-    api: tf.keras.layers.Embedding
+    args: {}
+  keras:
+    api: keras.layers.Embedding
+    args: {}
+  flax_nnx:
+    api: flax.nnx.Embed
+    args: {}
+  nvidia_sass:
+    api: Macro.Embedding
+    args: {}
+  rdna:
+    api: ; Macro.Embedding
+    args: {}

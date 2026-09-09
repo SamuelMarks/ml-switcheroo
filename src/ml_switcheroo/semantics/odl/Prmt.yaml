@@ -1,0 +1,4 @@
+operation: Prmt
+variants:
+  nvidia_sass:
+    api: PRMT

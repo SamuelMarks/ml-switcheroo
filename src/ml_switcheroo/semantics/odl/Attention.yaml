@@ -64,5 +64,15 @@ operation: Attention
 variants:
   keras:
     api: keras.layers.Attention
+    args:
+      dropout: dropout
+      kwargs: kwargs
+      score_mode: score_mode
+      seed: seed
+      use_scale: use_scale
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.Attention
+    args: {}

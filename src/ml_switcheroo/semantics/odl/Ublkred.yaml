@@ -1,0 +1,4 @@
+operation: Ublkred
+variants:
+  nvidia_sass:
+    api: UBLKRED

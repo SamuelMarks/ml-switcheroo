@@ -1,0 +1,21 @@
+operation: copy
+description: Return an array copy of the given object.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: order
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.copy
+    args:
+      a: a
+  keras:
+    api: keras.ops.copy
+    args:
+      x: x

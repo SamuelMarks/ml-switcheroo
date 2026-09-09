@@ -1,0 +1,7 @@
+operation: IterChildren
+variants:
+  flax_nnx:
+    api: flax.nnx.iter_children
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

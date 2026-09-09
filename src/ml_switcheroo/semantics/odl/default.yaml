@@ -1,0 +1,8 @@
+operation: default
+variants:
+  flax_nnx:
+    api: nnx.bridge.module.AttrPriority.DEFAULT
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

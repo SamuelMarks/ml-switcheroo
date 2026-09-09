@@ -1,9 +1,24 @@
-description: Return the angle of the complex argument.
-std_args:
-- x
-- deg
-variants:
-  dask:
-    api: dask.array.angle
 operation: angle
-type: function
+description: 'angle(input: Tensor, *, out: Optional[Tensor]) -> Tensor'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.angle
+    args:
+      input: input
+  jax:
+    api: jax.numpy.angle
+    args:
+      z: z
+  keras:
+    api: keras.ops.angle
+    args:
+      x: x

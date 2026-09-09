@@ -1,0 +1,22 @@
+operation: pbroadcast
+description: Perform a collective broadcast and replicate from ``source``.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis_name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: source
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.pbroadcast
+    args:
+      x: x
+      axis_name: axis_name
+      source: source

@@ -1,0 +1,5 @@
+operation: SLshlB32
+variants:
+  rdna:
+    api: s_lshl_b32
+    description: Auto-mapped instruction S_LSHL_B32

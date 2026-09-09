@@ -1,0 +1,4 @@
+operation: test.op
+description: Provided description
+std_args: []
+variants: {}

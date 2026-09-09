@@ -1,0 +1,5 @@
+operation: VCmpNeqF64
+variants:
+  rdna:
+    api: v_cmp_neq_f64
+    description: Auto-mapped instruction V_CMP_NEQ_F64

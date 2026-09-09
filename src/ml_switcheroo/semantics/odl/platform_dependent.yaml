@@ -1,0 +1,22 @@
+operation: platform_dependent
+description: Stages out platform-specific code.
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: tuple
+  default: ()
+- name: default
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: per_platform
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.platform_dependent
+    args: {}

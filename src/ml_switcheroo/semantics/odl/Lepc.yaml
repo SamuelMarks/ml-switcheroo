@@ -1,0 +1,4 @@
+operation: Lepc
+variants:
+  nvidia_sass:
+    api: LEPC

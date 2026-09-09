@@ -24,7 +24,26 @@ std_args:
 variants:
   keras:
     api: keras.losses.CategoricalCrossentropy
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.losses.CategoricalCrossentropy
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.CrossEntropyLoss
+    arg_values:
+      reduction:
+        none: '''none'''
+        sum: '''sum'''
+        sum_over_batch_size: '''mean'''
+    args:
+      label_smoothing: label_smoothing
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: CategoricalCrossentropy
 type: function

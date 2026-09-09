@@ -1,0 +1,4 @@
+operation: R2Ur
+variants:
+  nvidia_sass:
+    api: R2UR

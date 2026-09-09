@@ -1,0 +1,7 @@
+operation: CausalSegmentMask
+variants:
+  paxml:
+    api: praxis.layers.causal_segment_mask
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

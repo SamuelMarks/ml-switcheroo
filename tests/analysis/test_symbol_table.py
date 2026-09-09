@@ -7,6 +7,8 @@ the resolution of types for neural network and tensor operations using the
 `SemanticsManager`.
 """
 
+from __future__ import annotations
+
 from unittest.mock import MagicMock
 
 import libcst as cst

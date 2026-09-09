@@ -1,0 +1,14 @@
+operation: Int16Tensor
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: jnp.array({data}, dtype=jnp.int16)
+    pack_as: Tuple
+    required_imports:
+    - import jax.numpy as jnp
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: jnp.array({data}, dtype=jnp.int16)
+    pack_as: Tuple
+    required_imports:
+    - import jax.numpy as jnp

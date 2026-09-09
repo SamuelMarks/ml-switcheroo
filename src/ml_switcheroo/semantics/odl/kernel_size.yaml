@@ -1,0 +1,8 @@
+operation: kernel_size
+variants:
+  flax_nnx:
+    api: nnx.nn.linear.ConvTranspose.kernel_size
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

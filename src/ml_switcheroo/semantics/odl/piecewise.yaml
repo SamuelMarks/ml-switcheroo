@@ -1,11 +1,32 @@
+operation: piecewise
 description: Evaluate a piecewise-defined function.
 std_args:
-- x
-- condlist
-- funclist
-- kw
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: condlist
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: funclist
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+  default: ()
+- name: kw
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
-  dask:
-    api: dask.array.piecewise
-operation: piecewise
-type: function
+  jax:
+    api: jax.numpy.piecewise
+    args:
+      x: x
+      condlist: condlist
+      funclist: funclist

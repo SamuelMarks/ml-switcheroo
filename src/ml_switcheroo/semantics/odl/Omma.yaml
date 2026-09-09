@@ -1,0 +1,4 @@
+operation: Omma
+variants:
+  nvidia_sass:
+    api: OMMA

@@ -60,7 +60,7 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
     else:
       is_method = True
 
-  if is_method:
+  if is_method and isinstance(node.func, cst.Attribute):
     input_tensor = node.func.value
     shape_args = list(node.args)
   else:

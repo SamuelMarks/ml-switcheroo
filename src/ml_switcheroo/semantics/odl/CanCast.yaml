@@ -1,0 +1,12 @@
+operation: CanCast
+variants:
+  paxml:
+    api: jax.numpy.can_cast
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.can_cast
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

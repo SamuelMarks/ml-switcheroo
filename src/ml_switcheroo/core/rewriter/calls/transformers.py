@@ -8,7 +8,7 @@ import libcst as cst
 from typing import List, Union
 
 
-def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
+def apply_index_select(inner_node: cst.BaseExpression, index: int) -> cst.Subscript:
   """Wrap an expression node with a subscript access for a specific integer index.
 
   Safe, structured alternative to string output adapters for tuple destructuring.
@@ -18,7 +18,7 @@ def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
       Output: `func(...)[index]`
 
   Args:
-      inner_node (cst.CSTNode): The expression node (usually a Call) to slice.
+      inner_node (cst.BaseExpression): The expression node (usually a Call) to slice.
       index (int): The integer index to access.
 
   Returns:
@@ -195,11 +195,11 @@ def rewrite_as_infix(
       "<<": cst.LeftShift(),
       ">>": cst.RightShift(),
     }
-    cst_op = op_map.get(op_symbol)
-    if not cst_op:
+    cst_bin_op = op_map.get(op_symbol)
+    if not cst_bin_op:
       raise ValueError(f"Unsupported binary operator: {op_symbol}")
 
-    return cst.BinaryOperation(left=args[0].value, operator=cst_op, right=args[1].value)
+    return cst.BinaryOperation(left=args[0].value, operator=cst_bin_op, right=args[1].value)
 
   else:
     raise ValueError(f"Infix operator requires 1 or 2 args, got {len(args)}")

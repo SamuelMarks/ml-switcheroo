@@ -1,14 +1,25 @@
 description: Builds an initializer that returns real uniformly-distributed random
   arrays.
 std_args:
-- scale
-- dtype
+- name: scale
+  type: Any
+- name: dtype
+  type: Any
 type: attribute
 operation: uniform
 variants:
   flax_nnx:
-    api: jax.nn.initializers.uniform
+    api: nnx.rnglib.Rngs.uniform
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.nn.init.uniform
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: jax.nn.initializers.uniform
+    args: {}

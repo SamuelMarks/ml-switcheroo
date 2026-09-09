@@ -1,13 +1,37 @@
+operation: tri
 description: An array with ones at and below the given diagonal and zeros elsewhere.
 std_args:
-- N
-- M
-- k
-- dtype
-- chunks
-- like
+- name: N
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: M
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: k
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
 variants:
-  dask:
-    api: dask.array.tri
-operation: tri
-type: function
+  jax:
+    api: jax.numpy.tri
+    args:
+      N: N
+  mlx:
+    api: mlx.core.tri
+    args:
+      n: n
+      m: m
+      k: k
+  keras:
+    api: keras.ops.tri
+    args:
+      N: N

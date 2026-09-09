@@ -1,12 +1,28 @@
-description: Calculates an implementation-dependent approximation to the base ``10``
-  logarithm for each element ``x_i`` of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  dask:
-    api: dask.array.log10
 operation: log10
-type: function
+description: 'log10(input: Tensor, *, out: Optional[Tensor]) -> Tensor'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.log10
+    args:
+      input: input
+  jax:
+    api: jax.numpy.log10
+    args:
+      x: x
+  mlx:
+    api: mlx.core.log10
+    args:
+      a: a
+  keras:
+    api: keras.ops.log10
+    args:
+      x: x

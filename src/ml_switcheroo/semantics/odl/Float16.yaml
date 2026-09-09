@@ -1,0 +1,25 @@
+operation: Float16
+description: Definition for Float16
+op_type: attribute
+std_args: []
+variants:
+  torch:
+    api: torch.float16
+  jax:
+    api: jax.numpy.float16
+  mlx:
+    api: mlx.core.float16
+  numpy:
+    api: numpy.float16
+  keras:
+    api: numpy.float16
+  paxml:
+    api: jnp.float16
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.float16
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

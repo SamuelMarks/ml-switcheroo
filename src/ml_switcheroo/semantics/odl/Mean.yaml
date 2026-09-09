@@ -1,17 +1,34 @@
-operation: Mean
-description: Definition for Mean
+operation: mean
+description: mean(input, *, dtype=None) -> Tensor
 std_args:
-- x
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
   torch:
     api: torch.mean
+    args:
+      input: input
   jax:
     api: jax.numpy.mean
-  numpy:
-    api: numpy.mean
-  tensorflow:
-    api: tf.math.reduce_mean
+    args:
+      a: a
   mlx:
     api: mlx.core.mean
+    args:
+      a: a
   keras:
     api: keras.ops.mean
+    args:
+      x: x
+  nvidia_sass:
+    api: Macro.Mean
+    args: {}
+  rdna:
+    api: ; Macro.Mean
+    args: {}

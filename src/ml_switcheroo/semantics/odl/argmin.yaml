@@ -1,21 +1,39 @@
-description: Returns the indices of the minimum values along a specified axis.
+operation: argmin
+description: argmin(input, dim=None, keepdim=False) -> LongTensor
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
+  is_variadic: false
+  type: Tensor
+- name: dim
   kind: positional_or_keyword
-  name: axis
-  type: Optional[int]
-- is_variadic: false
+  is_variadic: false
+  type: Any
+- name: keepdim
   kind: positional_or_keyword
-  name: keepdims
-  type: bool
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
-  dask:
-    api: dask.array.argmin
   torch:
     api: torch.argmin
-operation: argmin
-type: function
+    args:
+      input: input
+  jax:
+    api: jax.lax.argmin
+    args:
+      operand: operand
+      axis: axis
+      index_dtype: index_dtype
+  mlx:
+    api: mlx.core.argmin
+    args:
+      a: a
+  keras:
+    api: keras.ops.argmin
+    args:
+      x: x

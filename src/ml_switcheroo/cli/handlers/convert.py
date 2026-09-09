@@ -70,7 +70,7 @@ def handle_convert(
   # 1. Infer source from extension if omitted
   if not source and input_path.is_file():
     ext = input_path.suffix.lower()
-    ext_map = {".html": "html", ".tex": "latex_dsl", ".mlir": "mlir", ".sass": "sass", ".s": "rdna"}
+    ext_map = {".html": "html", ".tex": "latex_dsl", ".mlir": "mlir", ".nvidia_sass": "nvidia_sass", ".s": "rdna"}
     if ext in ext_map:
       source = ext_map[ext]
       log_info(f"Inferred source framework '{source}' from file extension.")

@@ -1,0 +1,15 @@
+operation: FeedForward
+variants:
+  paxml:
+    api: paxml.layers.FeedForward
+    args:
+      activation: null
+      in_features: input_dims
+      out_features: output_dims
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

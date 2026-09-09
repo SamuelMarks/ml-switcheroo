@@ -1,0 +1,5 @@
+operation: VMaxF16
+variants:
+  rdna:
+    api: v_max_f16
+    description: Auto-mapped instruction V_MAX_F16

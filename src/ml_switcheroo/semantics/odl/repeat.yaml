@@ -1,20 +1,37 @@
-description: Repeats each element of an array a specified number of times on a per-element
-  basis.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: repeats
-  type: Union[int, array]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: axis
-  type: Optional[int]
-variants:
-  dask:
-    api: dask.array.repeat
 operation: repeat
-type: function
+description: Repeat each element of an array after themselves
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: repeats
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: total_repeat_length
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.repeat
+    args:
+      a: a
+      repeats: repeats
+  mlx:
+    api: mlx.core.repeat
+    args:
+      array: array
+      repeats: repeats
+  keras:
+    api: keras.ops.repeat
+    args:
+      x: x
+      repeats: repeats

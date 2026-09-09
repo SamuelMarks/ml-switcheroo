@@ -1,10 +1,40 @@
-description: Interchange two axes of an array.
-std_args:
-- a
-- axis1
-- axis2
-variants:
-  dask:
-    api: dask.array.swapaxes
 operation: swapaxes
-type: function
+description: swapaxes(input, axis0, axis1) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis0
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.swapaxes
+    args:
+      input: input
+      axis0: axis0
+      axis1: axis1
+  jax:
+    api: jax.numpy.swapaxes
+    args:
+      a: a
+      axis1: axis1
+      axis2: axis2
+  mlx:
+    api: mlx.core.swapaxes
+    args:
+      a: a
+      axis1: axis1
+      axis2: axis2
+  keras:
+    api: keras.ops.swapaxes
+    args:
+      x: x
+      axis1: axis1
+      axis2: axis2

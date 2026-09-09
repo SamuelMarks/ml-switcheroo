@@ -1,50 +1,65 @@
-description: Short-time Fourier transform.
+operation: STFT
+description: Short-time Fourier transform (STFT).
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: input
+  is_variadic: false
   type: Tensor
-- is_variadic: false
+- name: n_fft
   kind: positional_or_keyword
-  name: n_fft
+  is_variadic: false
   type: int
-- is_variadic: false
+- name: hop_length
   kind: positional_or_keyword
-  name: hop_length
-  type: Optional[int]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: win_length
-  type: Optional[int]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: window
-  type: Optional[Tensor]
-- default: true
   is_variadic: false
+  type: Any
+  default: '''None`` (treated as equal to ``floor(n_fft / 4)``)'''
+- name: win_length
   kind: positional_or_keyword
-  name: center
-  type: bool
-- default: false
   is_variadic: false
+  type: Any
+  default: '''None``  (treated as equal to :attr:`n_fft`)'''
+- name: window
   kind: positional_or_keyword
-  name: normalized
-  type: bool
-- default: true
   is_variadic: false
+  type: Tensor
+  default: '''None`` (treated as window of all :math:`1` s)'''
+- name: center
   kind: positional_or_keyword
-  name: onesided
+  is_variadic: false
   type: bool
-- is_variadic: false
+  default: 'True'
+- name: pad_mode
   kind: positional_or_keyword
-  name: return_complex
+  is_variadic: false
+  type: Any
+  default: '''reflect'''
+- name: normalized
+  kind: positional_or_keyword
+  is_variadic: false
   type: bool
+  default: 'False'
+- name: onesided
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: '''True`` for real :attr:`input` and :attr:`window`, ``False`` otherwise'''
+- name: return_complex
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: '''```(None)```'''
+- name: align_to_window
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
 variants:
-  keras:
-    api: keras.initializers.STFT
   torch:
     api: torch.stft
-  tensorflow:
-    api: tf.keras.initializers.STFT
-operation: Stft
-type: function
+    args:
+      input: input
+      n_fft: n_fft
+  keras:
+    api: keras.initializers.STFT
+    args: {}

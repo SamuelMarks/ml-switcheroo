@@ -9,7 +9,23 @@ std_args:
 variants:
   keras:
     api: keras.losses.SquaredHinge
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.losses.SquaredHinge
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.SoftMarginLoss
+    arg_values:
+      reduction:
+        sum_over_batch_size: '''mean'''
+    args:
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: SquaredHinge
 type: function

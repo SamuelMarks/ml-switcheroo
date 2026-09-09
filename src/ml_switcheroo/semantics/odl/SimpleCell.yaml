@@ -1,0 +1,87 @@
+operation: SimpleCell
+variants:
+  keras:
+    api: keras.layers.SimpleRNNCell
+    args:
+      hidden_features: units
+      in_features: null
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.RNNCell
+    args:
+      hidden_features: hidden_size
+      in_features: input_size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.SimpleRNNCell
+    args:
+      hidden_features: units
+      in_features: null
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.SimpleCell
+    args:
+      activation_fn: activation_fn
+      bias_init: bias_init
+      bias_metadata: bias_metadata
+      carry_init: carry_init
+      dtype: dtype
+      hidden_features: hidden_features
+      in_features: in_features
+      keep_rngs: keep_rngs
+      kernel_init: kernel_init
+      kernel_metadata: kernel_metadata
+      param_dtype: param_dtype
+      promote_dtype: promote_dtype
+      recurrent_kernel_init: recurrent_kernel_init
+      recurrent_kernel_metadata: recurrent_kernel_metadata
+      residual: residual
+      rngs: rngs
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: in_features
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: hidden_features
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: nonlinearity
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''tanh'''
+- name: __constants__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+  default: '[''input_size'', ''hidden_size'', ''bias'', ''nonlinearity'']'
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: num_chunks
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int

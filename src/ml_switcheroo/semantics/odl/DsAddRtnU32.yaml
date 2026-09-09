@@ -1,0 +1,5 @@
+operation: DsAddRtnU32
+variants:
+  rdna:
+    api: ds_add_rtn_u32
+    description: Auto-mapped instruction DS_ADD_RTN_U32

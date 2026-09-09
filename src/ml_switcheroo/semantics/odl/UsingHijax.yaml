@@ -1,0 +1,7 @@
+operation: UsingHijax
+variants:
+  flax_nnx:
+    api: flax.nnx.using_hijax
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

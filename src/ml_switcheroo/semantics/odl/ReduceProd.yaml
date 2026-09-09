@@ -1,0 +1,16 @@
+operation: ReduceProd
+variants:
+  paxml:
+    api: jnp.prod
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.prod
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.prod
+    args:
+      a: a

@@ -1,0 +1,4 @@
+operation: BitwiseOp
+variants:
+  nvidia_sass:
+    api: LOP

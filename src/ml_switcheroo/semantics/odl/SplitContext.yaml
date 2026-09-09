@@ -1,0 +1,7 @@
+operation: SplitContext
+variants:
+  flax_nnx:
+    api: flax.nnx.split_context
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

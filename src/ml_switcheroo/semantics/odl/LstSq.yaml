@@ -1,0 +1,27 @@
+operation: lstsq
+description: Auto-generated from jax_code_defs
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: A
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.lstsq
+    args:
+      input: input
+      A: A
+  keras:
+    api: keras.ops.lstsq
+    args:
+      a: a
+      b: b

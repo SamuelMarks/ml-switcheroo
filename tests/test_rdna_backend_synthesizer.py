@@ -1,6 +1,7 @@
 """Test module."""
 
 from typing import Dict, List, Optional
+from pathlib import Path
 from unittest.mock import patch
 
 import libcst as cst
@@ -14,12 +15,13 @@ from ml_switcheroo.core.compiler.backends.rdna.synthesizer import (
   RegisterAllocator,
 )
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
+  RdnaComment,
+  RdnaLabel,
   RdnaImmediate,
   RdnaInstruction,
-  RdnaLabel,
   RdnaNode,
-  RdnaSGPR,
   RdnaVGPR,
+  RdnaSGPR,
 )
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
@@ -125,9 +127,13 @@ def test_synthesizer_to_python() -> None:
   )
   inst7: RdnaInstruction = RdnaInstruction(opcode="v_add_f32", operands=[RdnaVGPR(index=0), "some_string"])
   inst8: RdnaInstruction = RdnaInstruction(opcode="v_add_f32", operands=[RdnaVGPR(index=0), "array[0]"])
+  inst9: RdnaInstruction = RdnaInstruction(opcode="v_add_f32", operands=["bad_dest", "array[0]"])  # Hit 295->301
   label1: RdnaLabel = RdnaLabel(name="L1")
+  comment: RdnaComment = RdnaComment(text="; Comment")
 
-  cst_module: cst.Module = synthesizer.to_python([inst1, inst2, inst3, inst4, inst5, inst6, inst7, inst8, label1])
+  cst_module: cst.Module = synthesizer.to_python(
+    [inst1, inst2, inst3, inst4, inst5, inst6, inst7, inst8, inst9, label1, comment]
+  )
   assert isinstance(cst_module, cst.Module)
 
 
@@ -201,10 +207,50 @@ def test_rdna_synthesizer_branches() -> None:
   synth4.from_graph(graph2)
 
 
+def test_synthesizer_init(tmp_path: Path) -> None:
+  """Docstring."""
+  macros_json: Path = tmp_path / "macros.json"
+  macros_json.write_text('{"Conv2d": "expand_conv2d", "UnknownOp": "expand_unknown"}')
+
+  semantics: MockSemanticsManager = MockSemanticsManager()
+
+  with patch("ml_switcheroo.core.compiler.backends.rdna.synthesizer.os.path.dirname", return_value=str(tmp_path)):
+    with patch("ml_switcheroo.core.compiler.backends.rdna.synthesizer.os.path.exists", return_value=True):
+      synthesizer: RdnaSynthesizer = RdnaSynthesizer(semantics)
+      assert "Conv2d" in synthesizer.macro_registry
+      assert "UnknownOp" not in synthesizer.macro_registry
+
+  with patch("ml_switcheroo.core.compiler.backends.rdna.synthesizer.os.path.exists", return_value=False):
+    synth2: RdnaSynthesizer = RdnaSynthesizer(semantics)
+    assert "Conv2d" not in synth2.macro_registry
+
+
+def test_synthesizer_init_yaml(tmp_path: Path) -> None:
+  """Tests RDNA synthesizer initialization when macros.yaml is present."""
+  macros_yaml: Path = tmp_path / "macros.yaml"
+  macros_yaml.write_text("Conv2d: expand_conv2d\nUnknownOp: expand_unknown\n")
+
+  semantics: MockSemanticsManager = MockSemanticsManager()
+  with patch("ml_switcheroo.core.compiler.backends.rdna.synthesizer.os.path.dirname", return_value=str(tmp_path)):
+    synth: RdnaSynthesizer = RdnaSynthesizer(semantics)
+    assert "Conv2d" in synth.macro_registry
+    assert "UnknownOp" not in synth.macro_registry
+
+
+def test_synthesizer_init_filenotfound(tmp_path: Path) -> None:
+  """Tests RDNA synthesizer initialization when files exist in os.path.exists check but fail on open."""
+  semantics: MockSemanticsManager = MockSemanticsManager()
+  with patch("ml_switcheroo.core.compiler.backends.rdna.synthesizer.os.path.dirname", return_value=str(tmp_path)):
+    with patch("ml_switcheroo.core.compiler.backends.rdna.synthesizer.os.path.exists", return_value=True):
+      synth: RdnaSynthesizer = RdnaSynthesizer(semantics)
+      assert synth.macro_registry == {}
+
+
 def test_unmapped_op_and_comment() -> None:
   """Docstring."""
   # Test Unmapped Op and RdnaComment branches
   nodes = [LogicalNode(id="unmapped1", kind="TotallyUnknownOp")]
+  nodes.append(LogicalNode(id="n2", kind="", metadata={}))  # Hit 211->214
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
 
   synth: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())

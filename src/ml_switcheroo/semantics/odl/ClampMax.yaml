@@ -1,0 +1,10 @@
+operation: ClampMax
+variants:
+  numpy:
+    api: numpy.minimum
+    args:
+      input: x1
+      max: x2
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

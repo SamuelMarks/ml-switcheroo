@@ -1,0 +1,7 @@
+operation: ComplexFloating
+variants:
+  flax_nnx:
+    api: jax.numpy.complexfloating
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

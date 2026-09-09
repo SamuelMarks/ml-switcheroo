@@ -1,0 +1,12 @@
+operation: custom_gradient
+description: Decorator to define a function with a custom gradient.
+std_args:
+- name: f
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  keras:
+    api: keras.ops.custom_gradient
+    args:
+      f: f

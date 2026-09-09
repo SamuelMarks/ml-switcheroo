@@ -1,0 +1,10 @@
+operation: popitem
+variants:
+  flax_nnx:
+    api: nnx.graph.pop
+    args:
+      filters: filters
+      node: node
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

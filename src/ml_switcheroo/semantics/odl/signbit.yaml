@@ -1,12 +1,24 @@
-description: Determines whether the sign bit is set for each element ``x_i`` of the
-  input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  dask:
-    api: dask.array.signbit
 operation: signbit
-type: function
+description: signbit(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.signbit
+    args:
+      input: input
+  jax:
+    api: jax.numpy.signbit
+    args:
+      x: x
+  keras:
+    api: keras.ops.signbit
+    args:
+      x: x

@@ -1,0 +1,4 @@
+operation: Isetp
+variants:
+  nvidia_sass:
+    api: ISETP

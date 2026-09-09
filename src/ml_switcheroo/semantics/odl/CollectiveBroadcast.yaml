@@ -1,0 +1,21 @@
+operation: CollectiveBroadcast
+variants:
+  stablehlo:
+    api: stablehlo.collective_broadcast
+std_args:
+- name: operands
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: replica_groups
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: channel_handle
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: has_dynamic_root
+  kind: keyword_only
+  is_variadic: false
+  type: Any

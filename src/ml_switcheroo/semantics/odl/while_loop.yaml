@@ -1,0 +1,23 @@
+operation: while_loop
+variants:
+  flax_nnx:
+    api: nnx.transforms.iteration.while_loop
+    args:
+      body_fun: body_fun
+      cond_fun: cond_fun
+      init_val: init_val
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.lax.while_loop
+    args:
+      cond_fun: cond_fun
+      body_fun: body_fun
+      init_val: init_val
+  keras:
+    api: keras.ops.while_loop
+    args:
+      cond: cond
+      body: body
+      loop_vars: loop_vars

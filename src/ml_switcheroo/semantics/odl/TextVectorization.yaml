@@ -40,7 +40,28 @@ std_args:
 variants:
   keras:
     api: keras.layers.TextVectorization
+    args:
+      encoding: encoding
+      idf_weights: idf_weights
+      kwargs: kwargs
+      max_tokens: max_tokens
+      name: name
+      ngrams: ngrams
+      output_mode: output_mode
+      output_sequence_length: output_sequence_length
+      pad_to_max_tokens: pad_to_max_tokens
+      ragged: ragged
+      sparse: sparse
+      split: split
+      standardize: standardize
+      vocabulary: vocabulary
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.TextVectorization
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: TextVectorization
 type: function

@@ -8,7 +8,18 @@ std_args:
 variants:
   keras:
     api: keras.layers.JaxLayer
+    args:
+      call_fn: call_fn
+      init_fn: init_fn
+      kwargs: kwargs
+      params: params
+      seed: seed
+      state: state
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.JaxLayer
+    args: {}
 operation: JaxLayer
 type: function

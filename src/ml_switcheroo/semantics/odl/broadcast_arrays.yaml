@@ -1,8 +1,23 @@
 description: Broadcasts one or more arrays against one another.
 std_args:
-- subok
+- name: subok
+  type: Any
 variants:
   dask:
     api: dask.array.broadcast_arrays
+    args: {}
+  flax_nnx:
+    api: jax.numpy.broadcast_arrays
+    args:
+      args: args
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.broadcast_arrays
+    args: {}
+  mlx:
+    api: mlx.core.broadcast_arrays
+    args: {}
 operation: broadcast_arrays
 type: function

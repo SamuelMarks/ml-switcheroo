@@ -1,11 +1,29 @@
 description: Return the indices for the upper-triangle of an (n, m) array.
 std_args:
-- n
-- k
-- m
-- chunks
+- name: n
+  type: Any
+- name: k
+  type: Any
+- name: m
+  type: Any
+- name: chunks
+  type: Any
 variants:
   dask:
     api: dask.array.triu_indices
+    args: {}
+  flax_nnx:
+    api: jax.numpy.triu_indices
+    args:
+      k: k
+      m: m
+      n: n
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.triu_indices
+    args:
+      n: n
 operation: triu_indices
 type: function

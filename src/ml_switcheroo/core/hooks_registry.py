@@ -8,21 +8,20 @@ lazy-loading of plugins, and retrieval of hooks for AST transformations.
 import importlib
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Callable, List
+from typing import Dict, Optional, Callable, List, Any
 import libcst as cst
 from ml_switcheroo.core.hooks import AutoWireSpec
 
 # Global registry
-_HOOKS: Dict[str, Callable[..., cst.CSTNode]] = {}
+HookCallable = Callable[..., Any]
+_HOOKS: Dict[str, HookCallable] = {}
 _HOOK_METADATA: Dict[str, AutoWireSpec] = {}
 
 
 _PLUGINS_LOADED: bool = False
 
 
-def register_hook(
-  trigger: str, auto_wire: Optional[dict] = None
-) -> Callable[[Callable[..., cst.CSTNode]], Callable[..., cst.CSTNode]]:
+def register_hook(trigger: str, auto_wire: Optional[dict] = None) -> Callable[[HookCallable], HookCallable]:
   """Register a custom translation hook for a specific trigger.
 
   Args:

@@ -1,24 +1,27 @@
-description: Copies an array to a specified data type irrespective of type-promotion
-  rules.
+operation: astype
+description: This is implemented via :func:`jax.lax.convert_element_type`, which may
 std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: dtype
-  type: dtype
-- is_variadic: false
-  kind: positional_or_keyword
-  name: copy
+- name: copy
+  kind: keyword_only
+  is_variadic: false
   type: bool
-- is_variadic: false
-  kind: positional_or_keyword
-  name: device
-  type: Optional[device]
+  default: 'False'
+- name: device
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: x
+  kind: positional_only
+  is_variadic: false
+  type: Tensor
+- name: dtype
+  kind: positional_only
+  is_variadic: false
+  type: Any
 variants:
   jax:
-    api: astype
-operation: astype
-type: function
+    api: jax.numpy.astype
+    args:
+      x: x
+      dtype: dtype

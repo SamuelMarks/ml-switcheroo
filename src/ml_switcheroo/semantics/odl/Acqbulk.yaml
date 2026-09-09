@@ -1,0 +1,4 @@
+operation: Acqbulk
+variants:
+  nvidia_sass:
+    api: ACQBULK

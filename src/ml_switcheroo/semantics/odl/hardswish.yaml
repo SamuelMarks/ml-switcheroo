@@ -1,11 +1,21 @@
-description: Applies the hardswish function, element-wise.
-std_args:
-- inplace
-- __constants__
-type: function
 operation: hardswish
+description: Apply hardswish function, element-wise.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
-  mlx:
-    api: mlx.nn.Hardswish
   torch:
-    api: torch.nn.Hardswish
+    api: torch.nn.functional.hardswish
+    args:
+      input: input
+  mlx:
+    api: mlx.nn.hardswish
+    args:
+      x: x

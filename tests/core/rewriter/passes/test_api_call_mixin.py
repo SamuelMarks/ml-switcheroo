@@ -138,6 +138,22 @@ def test_leave_Call_no_mapping_strict() -> None:
     assert "not found in semantics" in transformer.failures[0]
 
 
+def test_leave_Call_no_mapping_strict_neural() -> None:
+  """Verifies the neural error when mapping neural tier to numpy/jax."""
+  transformer = MockTransformer()
+  transformer.target_fw = "NumPy"
+  transformer.semantics._key_origins = {"Linear": "neural"}
+  with pytest.MonkeyPatch().context() as m:
+    import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
+
+    m.setattr(mixin, "get_tracer", lambda: MockTracer())
+    m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
+    tree = cst.parse_module("torch.Linear(10, 20)")
+    tree.visit(transformer)
+    assert len(transformer.failures) == 1
+    assert "Cannot map neural network abstraction" in transformer.failures[0]
+
+
 def test_leave_Call_with_mapping_deprecated() -> None:
   """Verifies the behavior of leave Call with mapping deprecated."""
   transformer = MockTransformer()

@@ -1,0 +1,4 @@
+operation: Setlmembase
+variants:
+  nvidia_sass:
+    api: SETLMEMBASE

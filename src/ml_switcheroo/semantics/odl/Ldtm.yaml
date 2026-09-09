@@ -1,0 +1,4 @@
+operation: Ldtm
+variants:
+  nvidia_sass:
+    api: LDTM

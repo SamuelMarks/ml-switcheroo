@@ -1,0 +1,7 @@
+operation: MergeState
+variants:
+  flax_nnx:
+    api: flax.nnx.merge_state
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

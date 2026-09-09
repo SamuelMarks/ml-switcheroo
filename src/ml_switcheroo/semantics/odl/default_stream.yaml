@@ -1,0 +1,12 @@
+operation: default_stream
+description: 'default_stream(device: mlx.core.Device) -> mlx.core.Stream'
+std_args:
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  mlx:
+    api: mlx.core.default_stream
+    args:
+      device: device

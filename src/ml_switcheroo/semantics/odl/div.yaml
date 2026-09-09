@@ -1,12 +1,36 @@
-description: HTML <div> element.
-std_args:
-- children
-- id
-- class_name
-- style
-- kwargs
-variants:
-  html_dsl:
-    api: html.div
 operation: div
-type: function
+description: div(input, other, *, rounding_mode=None, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rounding_mode
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.div
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.lax.div
+    args:
+      x: x
+      y: y
+  mlx:
+    api: mlx.core.divide
+    args: {}
+  keras:
+    api: keras.ops.divide
+    args: {}

@@ -1,0 +1,12 @@
+operation: NotEqual
+variants:
+  paxml:
+    api: jax.numpy.not_equal
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.not_equal
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

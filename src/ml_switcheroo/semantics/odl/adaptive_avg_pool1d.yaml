@@ -1,0 +1,17 @@
+operation: adaptive_avg_pool1d
+description: adaptive_avg_pool1d(input, output_size) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: output_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  torch:
+    api: torch.nn.functional.adaptive_avg_pool1d
+    args:
+      input: input
+      output_size: output_size

@@ -54,8 +54,8 @@ def test_extract_metadata() -> None:
 
 def test_extract_metadata_no_sig() -> None:
   """Docstring."""
-  # Builtins often don't have standard signatures inspectable via inspect.signature
-  info: dict[str, str] = _extract_metadata(print)
+  # Builtins without Python-level signatures trigger ValueError/TypeError in inspect.signature
+  info: dict[str, str] = _extract_metadata(iter)
   assert info["kind"] == "function"
   assert "Unknown Signature" in info["signature"]  # Because ValueError/TypeError is caught
 

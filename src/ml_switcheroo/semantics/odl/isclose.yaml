@@ -1,13 +1,47 @@
-description: Returns a boolean array where two arrays are element-wise equal within
-  a
-std_args:
-- arr1
-- arr2
-- rtol
-- atol
-- equal_nan
-variants:
-  dask:
-    api: dask.array.isclose
 operation: isclose
-type: function
+description: isclose(input, other, rtol=1e-05, atol=1e-08, equal_nan=False) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rtol
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 1e-05
+- name: atol
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 1e-08
+- name: equal_nan
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.isclose
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.isclose
+    args:
+      a: a
+      b: b
+  mlx:
+    api: mlx.core.isclose
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.isclose
+    args:
+      x1: x1
+      x2: x2

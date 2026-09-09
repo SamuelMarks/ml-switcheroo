@@ -1,27 +1,34 @@
-description: Max pooling operation for 3D data (Alias).
-op_type: class
+operation: MaxPooling3D
+description: Max pooling operation for 3D data (spatial or spatio-temporal).
 std_args:
-- default:
-  - 2
-  - 2
-  - 2
+- name: pool_size
+  kind: positional_or_keyword
   is_variadic: false
+  type: tuple
+  default: (2, 2, 2)
+- name: strides
   kind: positional_or_keyword
-  name: pool_size
-  type: Union[int, Tuple[int, int, int]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: strides
-  type: Union[int, Tuple[int, int, int]]
-- default: valid
   is_variadic: false
+  type: tuple
+- name: padding
   kind: positional_or_keyword
-  name: padding
-  type: str
+  is_variadic: false
+  type: Any
+  default: '''valid'''
+- name: data_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   keras:
-    api: keras.layers.MaxPool3D
-  tensorflow:
-    api: tf.keras.layers.MaxPool3D
-operation: MaxPooling3d
-type: function
+    api: keras.layers.MaxPooling3D
+    args: {}

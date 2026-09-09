@@ -1,0 +1,14 @@
+operation: f
+variants:
+  flax_nnx:
+    api: nnx.transforms.autodiff.CustomVjpFnWrapper.f
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.f
+    args:
+      key: key
+      dfnum: dfnum
+      dfden: dfden

@@ -1,0 +1,5 @@
+operation: VCmpxNeqF16
+variants:
+  rdna:
+    api: v_cmpx_neq_f16
+    description: Auto-mapped instruction V_CMPX_NEQ_F16

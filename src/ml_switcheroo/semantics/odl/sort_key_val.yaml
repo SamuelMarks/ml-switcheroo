@@ -1,0 +1,28 @@
+operation: sort_key_val
+description: Sorts ``keys`` along ``dimension`` and applies the same permutation to
+  ``values``.
+std_args:
+- name: keys
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: values
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dimension
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '-1'
+- name: is_stable
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+variants:
+  jax:
+    api: jax.lax.sort_key_val
+    args:
+      keys: keys
+      values: values

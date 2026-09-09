@@ -1,0 +1,8 @@
+operation: tree_l2_norm
+variants:
+  flax_nnx:
+    api: optax.tree_utils.tree_l2_norm
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

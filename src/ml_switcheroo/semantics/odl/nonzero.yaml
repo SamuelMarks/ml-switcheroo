@@ -1,11 +1,30 @@
-description: Returns the indices of the array elements which are non-zero.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  dask:
-    api: dask.array.nonzero
 operation: nonzero
-type: function
+description: nonzero(input, *, out=None, as_tuple=False) -> LongTensor or tuple of
+  LongTensors
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: as_tuple
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.nonzero
+    args:
+      input: input
+  jax:
+    api: jax.numpy.nonzero
+    args:
+      a: a
+  keras:
+    api: keras.ops.nonzero
+    args:
+      x: x

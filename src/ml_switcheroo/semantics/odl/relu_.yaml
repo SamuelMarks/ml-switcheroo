@@ -1,17 +1,27 @@
-description: The class representing a Python module/class/instance attribute.
+operation: Relu_
+description: relu_(input) -> Tensor
 std_args:
-- x
-- negative_slope
-- max_value
-- threshold
-type: attribute
-operation: relu_
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
+  torch:
+    api: torch.nn.functional.relu_
+    args:
+      input: input
+  rdna:
+    api: ; Macro.ReLU
+    args: {}
+  nvidia_sass:
+    api: Macro.ReLU
+    args: {}
+  jax:
+    api: jax.nn.relu
+    args: {}
+  mlx:
+    api: mlx.nn.relu
+    args: {}
   keras:
     api: keras.activations.relu
-  mlx:
-    api: mlx.nn.ReLU
-  torch:
-    api: torch.nn.ReLU
-  tensorflow:
-    api: tf.nn.relu
+    args: {}

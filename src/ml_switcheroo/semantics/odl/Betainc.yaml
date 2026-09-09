@@ -1,0 +1,22 @@
+operation: betainc
+description: Elementwise regularized incomplete beta integral.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: b
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.betainc
+    args:
+      a: a
+      b: b
+      x: x

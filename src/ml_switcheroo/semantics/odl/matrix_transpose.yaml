@@ -1,0 +1,13 @@
+operation: matrix_transpose
+variants:
+  flax_nnx:
+    api: jax.numpy.matrix_transpose
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.matrix_transpose
+    args:
+      x: x

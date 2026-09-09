@@ -1,0 +1,5 @@
+operation: VCmpLgF32
+variants:
+  rdna:
+    api: v_cmp_lg_f32
+    description: Auto-mapped instruction V_CMP_LG_F32

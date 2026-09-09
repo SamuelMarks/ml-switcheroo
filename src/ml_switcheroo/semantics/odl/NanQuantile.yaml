@@ -1,0 +1,41 @@
+operation: nanquantile
+description: nanquantile(input, q, dim=None, keepdim=False, *, interpolation='linear',
+  out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: q
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: keepdim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: interpolation
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''linear'''
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.nanquantile
+    args:
+      input: input
+      q: q
+  jax:
+    api: jax.numpy.nanquantile
+    args:
+      a: a
+      q: q

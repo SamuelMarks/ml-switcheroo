@@ -1,0 +1,11 @@
+operation: LanguageModel
+variants:
+  paxml:
+    api: paxml.layers.LanguageModel
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,17 +1,35 @@
 description: Computes the Huber loss between inputs and targets.
 std_args:
-- inputs
-- targets
-- delta
-- reduction
+- name: inputs
+  type: Any
+- name: targets
+  type: Any
+- name: delta
+  type: Any
+- name: reduction
+  type: Any
 type: attribute
 operation: huber_loss
 variants:
   mlx:
     api: mlx.nn.losses.huber_loss
+    args:
+      delta: delta
+      inputs: inputs
+      reduction: reduction
+      targets: targets
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   optax_shim:
     api: optax.losses.huber_loss
+    args: {}
   flax_nnx:
-    api: optax.losses.huber_loss
+    api: optax.huber_loss
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.losses.huber_loss
+    args: {}

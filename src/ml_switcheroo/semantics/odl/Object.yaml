@@ -1,0 +1,22 @@
+operation: Object
+variants:
+  paxml:
+    api: object
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Object
+    args:
+      comment: comment
+      empty_repr: empty_repr
+      end: end
+      indent: indent
+      kv_sep: kv_sep
+      same_line: same_line
+      self: self
+      start: start
+      type: type
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

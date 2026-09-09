@@ -1,0 +1,29 @@
+operation: trapezoid
+description: trapezoid(y, x=None, *, dx=None, dim=-1) -> Tensor
+std_args:
+- name: y
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dx
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: dim
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '-1'
+variants:
+  torch:
+    api: torch.trapezoid
+    args:
+      y: y
+  jax:
+    api: jax.numpy.trapezoid
+    args:
+      y: y

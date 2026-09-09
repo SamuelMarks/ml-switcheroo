@@ -1,0 +1,12 @@
+operation: UnsortedSegmentMin
+variants:
+  paxml:
+    api: jax.ops.segment_min
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.ops.segment_min
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

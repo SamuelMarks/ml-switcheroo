@@ -1,0 +1,5 @@
+operation: VAshrrevI64
+variants:
+  rdna:
+    api: v_ashrrev_i64
+    description: Auto-mapped instruction V_ASHRREV_I64

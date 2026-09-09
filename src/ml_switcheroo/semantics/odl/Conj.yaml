@@ -1,0 +1,24 @@
+operation: conj
+description: conj(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.conj
+    args:
+      input: input
+  jax:
+    api: jax.lax.conj
+    args:
+      x: x
+  mlx:
+    api: mlx.core.conj
+    args:
+      a: a
+  keras:
+    api: keras.ops.conj
+    args:
+      x: x

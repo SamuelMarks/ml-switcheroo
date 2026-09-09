@@ -1,0 +1,12 @@
+operation: stride
+description: stride(dim) -> tuple or int
+std_args:
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.Tensor.stride
+    args:
+      dim: dim

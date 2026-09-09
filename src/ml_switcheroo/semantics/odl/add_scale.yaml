@@ -1,0 +1,8 @@
+operation: add_scale
+variants:
+  flax_nnx:
+    api: optax.tree.add_scale
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,12 +1,19 @@
 description: SGD with warm restarts.
 std_args:
-- cosine_kwargs
+- name: cosine_kwargs
+  type: Any
 type: attribute
 operation: sgdr_schedule
 variants:
   optax_shim:
     api: optax.schedules.sgdr_schedule
+    args: {}
   flax_nnx:
-    api: optax.schedules.sgdr_schedule
+    api: optax.sgdr_schedule
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.schedules.sgdr_schedule
+    args: {}

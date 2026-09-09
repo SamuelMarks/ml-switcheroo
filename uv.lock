@@ -933,6 +933,11 @@ wheels = [
 ]
 
 [[package]]
+name = "ml-framework-snapshots"
+version = "0.1.0"
+source = { git = "https://github.com/SamuelMarks/ml-framework-snapshots.git#450921f61b9aa79f395a461c86167663f0f042ab" }
+
+[[package]]
 name = "ml-switcheroo"
 version = "0.0.2"
 source = { editable = "." }
@@ -947,6 +952,7 @@ dependencies = [
     { name = "libcst" },
     { name = "markdown-it-py", version = "3.0.0", source = { registry = "https://pypi.org/simple" }, extra = ["linkify"], marker = "python_full_version < '3.11'" },
     { name = "markdown-it-py", version = "4.2.0", source = { registry = "https://pypi.org/simple" }, extra = ["linkify"], marker = "python_full_version >= '3.11'" },
+    { name = "ml-framework-snapshots" },
     { name = "ml-switcheroo-ir" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11' and sys_platform != 'emscripten'" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*' and sys_platform != 'emscripten'" },
@@ -999,6 +1005,7 @@ requires-dist = [
     { name = "libcst", marker = "sys_platform == 'emscripten'", specifier = "==1.8.6" },
     { name = "linkify-it-py", marker = "extra == 'docs'", specifier = ">=2" },
     { name = "markdown-it-py", extras = ["linkify"] },
+    { name = "ml-framework-snapshots", git = "https://github.com/SamuelMarks/ml-framework-snapshots.git" },
     { name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.1/ml_switcheroo_ir-0.1.0-py3-none-any.whl" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=4" },
     { name = "numpy", marker = "sys_platform != 'emscripten'" },

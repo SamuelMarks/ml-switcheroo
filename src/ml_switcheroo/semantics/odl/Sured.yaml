@@ -1,0 +1,4 @@
+operation: Sured
+variants:
+  nvidia_sass:
+    api: SURED

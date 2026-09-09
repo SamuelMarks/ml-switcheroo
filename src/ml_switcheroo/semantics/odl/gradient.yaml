@@ -1,10 +1,30 @@
-description: Return the gradient of an N-dimensional array.
-std_args:
-- f
-- axis
-- kwargs
-variants:
-  dask:
-    api: dask.array.gradient
 operation: gradient
-type: function
+description: gradient(input, *, spacing=1, dim=None, edge_order=1) -> List of Tensors
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: spacing
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: dim
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: edge_order
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '1'
+variants:
+  torch:
+    api: torch.gradient
+    args:
+      input: input
+  jax:
+    api: jax.numpy.gradient
+    args:
+      f: f

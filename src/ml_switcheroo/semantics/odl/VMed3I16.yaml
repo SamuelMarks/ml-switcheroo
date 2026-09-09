@@ -1,0 +1,5 @@
+operation: VMed3I16
+variants:
+  rdna:
+    api: v_med3_i16
+    description: Auto-mapped instruction V_MED3_I16

@@ -1,12 +1,32 @@
-description: Returns an indication of the sign of a number for each element ``x_i``
-  of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  dask:
-    api: dask.array.sign
 operation: sign
-type: function
+description: sign(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.sign
+    args:
+      input: input
+  jax:
+    api: jax.lax.sign
+    args:
+      x: x
+  mlx:
+    api: mlx.core.sign
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.sign
+    args:
+      operand: operand
+  keras:
+    api: keras.ops.sign
+    args:
+      x: x

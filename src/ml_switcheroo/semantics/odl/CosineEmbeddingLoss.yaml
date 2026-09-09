@@ -28,3 +28,4 @@ operation: CosineEmbeddingLoss
 variants:
   torch:
     api: torch.nn.CosineEmbeddingLoss
+    args: {}

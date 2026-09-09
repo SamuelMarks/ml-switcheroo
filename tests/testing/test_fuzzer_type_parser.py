@@ -43,6 +43,7 @@ def test_tensors() -> None:
   """Docstring."""
   assert parse_type_annotation("Array") == TensorType(dims=None)
   assert parse_type_annotation("Tensor") == TensorType(dims=None)
+  assert parse_type_annotation("Array[1:2]") == TensorType(dims=None)
   assert parse_type_annotation("ndarray") == TensorType(dims=None)
   assert parse_type_annotation("np.ndarray") == TensorType(dims=None)
 
@@ -200,3 +201,35 @@ def test_cst_fallback_formatting() -> None:
   # the cst_node is set!
   module: cst.Module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=getattr(parsed, "cst_node"))])])
   assert getattr(module, "code").strip() == type_str
+
+
+def test_subscript_slice_non_expression() -> None:
+  """Test _process_slice_elt with non-Index, non-BaseExpression element."""
+  parser: TypeAnnotationParser = TypeAnnotationParser()
+  dummy_subscript: cst.Subscript = cst.Subscript(
+    value=cst.Name("Array"),
+    slice=[cst.SubscriptElement(slice=cst.Pass())],
+  )
+  res: ParsedType = parser.visit_Subscript(dummy_subscript)
+  assert isinstance(res, TensorType)
+
+
+def test_subscript_slice_direct_expression_and_custom() -> None:
+  """Test _process_slice_elt with direct BaseExpression element and custom generic subscript."""
+  parser: TypeAnnotationParser = TypeAnnotationParser()
+  node = cst.Subscript(
+    value=cst.Name("Array"),
+    slice=[cst.SubscriptElement(slice=cst.Name("N"))],
+  )
+  res = parser.visit_Subscript(node)
+  assert res == TensorType(dims=["N"])
+
+  # Custom generic subscript (line 321: else: res = base)
+  custom_res = parse_type_annotation("CustomType[int]")
+  assert isinstance(custom_res, PrimitiveType)
+  assert custom_res.name == "CustomType"
+
+  # Integer constant (lines 221-222)
+  int_const = parser.visit(cst.Integer("42"))
+  assert isinstance(int_const, PrimitiveType)
+  assert int_const.name == "42"

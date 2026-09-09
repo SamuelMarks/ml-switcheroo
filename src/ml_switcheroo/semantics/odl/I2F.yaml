@@ -1,0 +1,4 @@
+operation: I2F
+variants:
+  nvidia_sass:
+    api: I2F

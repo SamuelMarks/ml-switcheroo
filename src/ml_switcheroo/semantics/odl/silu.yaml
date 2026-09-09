@@ -1,12 +1,34 @@
-description: Swish (or Silu) activation function.
-std_args:
-- x
-type: function
 operation: silu
+description: Apply the Sigmoid Linear Unit (SiLU) function, element-wise.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
+  torch:
+    api: torch.nn.functional.silu
+    args:
+      input: input
+  mlx:
+    api: mlx.nn.silu
+    args:
+      x: x
   keras:
     api: keras.activations.silu
-  mlx:
-    api: mlx.nn.SiLU
-  torch:
-    api: torch.nn.SiLU
+    args:
+      x: x
+  rdna:
+    api: ; Macro.SiLU
+    args: {}
+  nvidia_sass:
+    api: Macro.SiLU
+    args: {}
+  jax:
+    api: jax.nn.silu
+    args: {}

@@ -1,0 +1,5 @@
+operation: SWqmB64
+variants:
+  rdna:
+    api: s_wqm_b64
+    description: Auto-mapped instruction S_WQM_B64

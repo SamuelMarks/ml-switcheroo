@@ -1,0 +1,22 @@
+operation: scatter_update
+description: Update inputs via updates at scattered (sparse) indices.
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: updates
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  keras:
+    api: keras.ops.scatter_update
+    args:
+      inputs: inputs
+      indices: indices
+      updates: updates

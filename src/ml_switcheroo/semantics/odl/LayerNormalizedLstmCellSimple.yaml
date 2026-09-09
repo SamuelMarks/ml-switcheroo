@@ -1,0 +1,10 @@
+operation: LayerNormalizedLstmCellSimple
+variants:
+  paxml:
+    api: paxml.layers.LayerNormalizedLstmCellSimple
+    args:
+      hidden_size: num_hidden_nodes
+      input_size: num_input_nodes
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

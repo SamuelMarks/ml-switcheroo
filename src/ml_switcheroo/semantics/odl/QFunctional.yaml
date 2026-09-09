@@ -1,0 +1,13 @@
+operation: QFunctional
+variants:
+  flax_nnx:
+    api: nnx.bridge.wrappers.Functional
+    args:
+      args: args
+      graphdef: graphdef
+      kwargs: kwargs
+      module_type: module_type
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

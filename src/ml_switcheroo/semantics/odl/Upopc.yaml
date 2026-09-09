@@ -1,0 +1,4 @@
+operation: Upopc
+variants:
+  nvidia_sass:
+    api: UPOPC

@@ -1,0 +1,4 @@
+operation: Uvirtcount
+variants:
+  nvidia_sass:
+    api: UVIRTCOUNT

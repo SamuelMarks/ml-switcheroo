@@ -1,0 +1,30 @@
+operation: max_pool
+description: Max pooling operation.
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: pool_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''valid'''
+- name: data_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  keras:
+    api: keras.ops.max_pool
+    args:
+      inputs: inputs
+      pool_size: pool_size

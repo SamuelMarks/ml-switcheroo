@@ -1,0 +1,5 @@
+operation: VReadfirstlaneB32
+variants:
+  rdna:
+    api: v_readfirstlane_b32
+    description: Auto-mapped instruction V_READFIRSTLANE_B32

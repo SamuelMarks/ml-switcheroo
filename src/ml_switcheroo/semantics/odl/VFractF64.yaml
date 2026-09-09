@@ -1,0 +1,5 @@
+operation: VFractF64
+variants:
+  rdna:
+    api: v_fract_f64
+    description: Auto-mapped instruction V_FRACT_F64

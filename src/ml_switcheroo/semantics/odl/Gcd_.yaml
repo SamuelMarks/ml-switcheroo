@@ -1,0 +1,17 @@
+operation: Gcd_
+variants:
+  paxml:
+    api: jnp.gcd
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.gcd
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.gcd
+    args:
+      x1: x1
+      x2: x2

@@ -54,7 +54,7 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
       # This is a child node (e.g. flax_nnx -> jax)
       hierarchy[parent].append({"key": key, "label": label})
     else:
-      # This is a root node (e.g. torch, jax, sass, rdna)
+      # This is a root node (e.g. torch, jax, nvidia_sass, rdna)
       roots.add(key)
 
   # 2. Convert to Render-Ready structures & Gather Examples

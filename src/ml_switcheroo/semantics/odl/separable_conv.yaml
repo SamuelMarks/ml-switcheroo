@@ -1,0 +1,41 @@
+operation: separable_conv
+description: General N-D separable convolution.
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: depthwise_kernel
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: pointwise_kernel
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''valid'''
+- name: data_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dilation_rate
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+variants:
+  keras:
+    api: keras.ops.separable_conv
+    args:
+      inputs: inputs
+      depthwise_kernel: depthwise_kernel
+      pointwise_kernel: pointwise_kernel

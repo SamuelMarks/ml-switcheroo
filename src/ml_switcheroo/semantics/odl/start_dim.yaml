@@ -1,0 +1,8 @@
+operation: start_dim
+variants:
+  flax_nnx:
+    api: nnx.reprlib.Object.start
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

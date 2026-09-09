@@ -1,0 +1,32 @@
+operation: layer_norm
+description: Apply Layer Normalization for last certain number of dimensions.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: normalized_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: eps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: 1e-05
+variants:
+  torch:
+    api: torch.nn.functional.layer_norm
+    args:
+      input: input
+      normalized_shape: normalized_shape

@@ -1,25 +1,55 @@
-description: Returns a new array having a specified ``shape`` and filled with ``fill_value``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: shape
-  type: Union[int, Tuple[int, Ellipsis]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: fill_value
-  type: Union[bool, int, float, complex]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: dtype
-  type: Optional[dtype]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: device
-  type: Optional[device]
-type: attribute
 operation: full
+description: full(size, fill_value, *, out=None, dtype=None, layout=torch.strided,
+  device=None, requires_grad=False) -> Tensor
+std_args:
+- name: size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: fill_value
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: layout
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: torch.strided
+- name: device
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: requires_grad
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
 variants:
-  dask:
-    api: dask.array.full
   torch:
     api: torch.full
+    args:
+      size: size
+      fill_value: fill_value
+  jax:
+    api: jax.lax.full
+    args:
+      shape: shape
+      fill_value: fill_value
+  mlx:
+    api: mlx.core.full
+    args:
+      shape: shape
+      vals: vals
+  keras:
+    api: keras.ops.full
+    args:
+      shape: shape
+      fill_value: fill_value

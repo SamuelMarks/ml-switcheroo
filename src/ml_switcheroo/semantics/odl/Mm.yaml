@@ -1,0 +1,25 @@
+operation: Mm
+description: mm(input, mat2, out_dtype=None, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: mat2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out_dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.mm
+    args:
+      input: input
+      mat2: mat2

@@ -1,0 +1,9 @@
+operation: Float8_e5m2fnuz
+variants:
+  flax_nnx:
+    api: jax.numpy.float8_e5m2fnuz
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

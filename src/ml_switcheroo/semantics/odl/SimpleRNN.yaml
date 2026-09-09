@@ -23,7 +23,55 @@ std_args:
 variants:
   keras:
     api: keras.layers.SimpleRNN
+    args:
+      activation: activation
+      activity_regularizer: activity_regularizer
+      bias_constraint: bias_constraint
+      bias_initializer: bias_initializer
+      bias_regularizer: bias_regularizer
+      dropout: dropout
+      go_backwards: go_backwards
+      kernel_constraint: kernel_constraint
+      kernel_initializer: kernel_initializer
+      kernel_regularizer: kernel_regularizer
+      kwargs: kwargs
+      recurrent_constraint: recurrent_constraint
+      recurrent_dropout: recurrent_dropout
+      recurrent_initializer: recurrent_initializer
+      recurrent_regularizer: recurrent_regularizer
+      return_sequences: return_sequences
+      return_state: return_state
+      seed: seed
+      stateful: stateful
+      units: units
+      unroll: unroll
+      use_bias: use_bias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.SimpleRNN
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.RNN
+    args:
+      return_sequences: null
+      return_state: null
+      units: hidden_size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.RNN
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.RNN
+    args:
+      input_size: input_size
+      hidden_size: hidden_size
 operation: SimpleRNN
 type: function

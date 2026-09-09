@@ -1,0 +1,12 @@
+operation: clz
+description: Elementwise count-leading-zeros.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.clz
+    args:
+      x: x

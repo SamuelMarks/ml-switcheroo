@@ -7,17 +7,30 @@ std_args:
 variants:
   keras:
     api: keras.activations.tanh
+    args: {}
   numpy:
     api: numpy.tanh
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   mlx:
     api: mlx.nn.Tanh
+    args: {}
   latex_dsl:
     api: latex.tanh
+    args: {}
   dask:
     api: dask.array.tanh
+    args: {}
   torch:
     api: torch.nn.Tanh
+    args: {}
   tensorflow:
     api: tf.nn.tanh
+    args: {}
+  jax:
+    api: jax.lax.tanh
+    args:
+      x: x
 operation: Tanh_
 type: function

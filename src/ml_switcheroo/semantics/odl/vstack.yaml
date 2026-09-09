@@ -1,9 +1,24 @@
-description: Stack arrays in sequence vertically (row wise).
-std_args:
-- tup
-- allow_unknown_chunksizes
-variants:
-  dask:
-    api: dask.array.vstack
 operation: vstack
-type: function
+description: vstack(tensors, *, out=None) -> Tensor
+std_args:
+- name: tensors
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.vstack
+    args:
+      tensors: tensors
+  jax:
+    api: jax.numpy.vstack
+    args:
+      tup: tup
+  keras:
+    api: keras.ops.vstack
+    args:
+      xs: xs

@@ -1,0 +1,27 @@
+operation: binomial
+description: Auto-generated from flax_nnx_code_defs
+std_args:
+- name: count
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: prob
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: generator
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.binomial
+    args:
+      count: count
+      prob: prob
+  jax:
+    api: jax.random.binomial
+    args:
+      key: key
+      n: n
+      p: p

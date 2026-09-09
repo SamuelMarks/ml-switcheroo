@@ -1,0 +1,7 @@
+operation: VitEntryLayers
+variants:
+  paxml:
+    api: praxis.layers.VitEntryLayers
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

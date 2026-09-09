@@ -1,0 +1,5 @@
+operation: SCmpNgtF16
+variants:
+  rdna:
+    api: s_cmp_ngt_f16
+    description: Auto-mapped instruction S_CMP_NGT_F16

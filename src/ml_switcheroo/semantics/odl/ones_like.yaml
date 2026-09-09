@@ -18,3 +18,22 @@ operation: ones_like
 variants:
   dask:
     api: dask.array.ones_like
+    args: {}
+  flax_nnx:
+    api: optax.tree.ones_like
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.ones_like
+    args:
+      a: a
+  mlx:
+    api: mlx.core.ones_like
+    args:
+      a: a
+  keras:
+    api: keras.ops.ones_like
+    args:
+      x: x

@@ -1,0 +1,27 @@
+operation: sparse_categorical_crossentropy
+description: Computes sparse categorical cross-entropy loss.
+std_args:
+- name: target
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: output
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: from_logits
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '-1'
+variants:
+  keras:
+    api: keras.ops.sparse_categorical_crossentropy
+    args:
+      target: target
+      output: output

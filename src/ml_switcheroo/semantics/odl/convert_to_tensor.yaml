@@ -1,0 +1,24 @@
+operation: convert_to_tensor
+description: Convert a NumPy array or Python array to a tensor.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: sparse
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: ragged
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  keras:
+    api: keras.ops.convert_to_tensor
+    args:
+      x: x

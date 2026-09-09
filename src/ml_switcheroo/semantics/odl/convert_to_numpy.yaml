@@ -1,0 +1,12 @@
+operation: convert_to_numpy
+description: Convert a tensor to a NumPy array.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  keras:
+    api: keras.ops.convert_to_numpy
+    args:
+      x: x

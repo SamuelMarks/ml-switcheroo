@@ -1,0 +1,5 @@
+operation: VCmpTF64
+variants:
+  rdna:
+    api: v_cmp_t_f64
+    description: Auto-mapped instruction V_CMP_T_F64

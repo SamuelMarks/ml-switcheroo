@@ -1,0 +1,25 @@
+operation: DotGeneral
+variants:
+  stablehlo:
+    api: stablehlo.dot_general
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dot_dimension_numbers
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: precision_config
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: algorithm
+  kind: keyword_only
+  is_variadic: false
+  type: Any

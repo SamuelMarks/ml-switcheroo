@@ -4,7 +4,7 @@ This module provides the StableHloBackend class, which compiles a logical graph 
 of computations into StableHLO-flavored MLIR code representation.
 """
 
-from typing import Any
+from typing import Any, Dict
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.mlir.cst import (
@@ -18,12 +18,22 @@ from ml_switcheroo.core.mlir.cst import (
 )
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
 
+_LOGICAL_OP_ALIASES: Dict[str, str] = {
+  "Div": "divide",
+  "Mul": "multiply",
+  "Neg": "Negate",
+  "Pow": "power",
+  "Sub": "subtract",
+  "IsFinite": "is_finite",
+  "Tuple": "TUPLE",
+}
+
 
 class StableHloBackend(CompilerBackend):
   """Back-end for generating StableHLO text from a LogicalGraph.
 
   This implementation provides a direct Graph-to-StableHLO conversion path
-  used when an ISA is the source format (e.g. SASS -> StableHLO).
+  used when an ISA is the source format (e.g. NVIDIA_SASS -> StableHLO).
   It constructs an MLIR CST using StableHLO dialect nodes.
 
   Attributes:
@@ -74,6 +84,10 @@ class StableHloBackend(CompilerBackend):
         op_name = node.kind
         if self.semantics:
           defn = self.semantics.get_definition(node.kind)
+          if not defn or "stablehlo" not in defn[1].get("variants", {}):
+            alias = _LOGICAL_OP_ALIASES.get(node.kind)
+            if alias:
+              defn = self.semantics.get_definition(alias)
           if defn:
             _, details = defn
             variants = details.get("variants", {})

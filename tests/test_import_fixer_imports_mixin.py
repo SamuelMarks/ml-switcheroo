@@ -1,6 +1,6 @@
 """Test module."""
 
-from typing import List, Set, Union
+from typing import List, Optional, Set, Union
 
 import libcst as cst
 
@@ -12,11 +12,16 @@ class MockFixer(ImportMixin):
   """Docstring."""
 
   def __init__(
-    self, plan: ResolutionPlan, source_fws: Union[str, List[str], Set[str]], used_names: Set[str] = None
+    self, plan: ResolutionPlan, source_fws: Union[str, List[str], Set[str]], used_names: Optional[Set[str]] = None
   ) -> None:
     """Docstring."""
     self.plan: ResolutionPlan = plan
-    self.source_fws: Union[str, List[str], Set[str]] = source_fws
+    if isinstance(source_fws, str):
+      self.source_fws = {source_fws}
+    elif isinstance(source_fws, list):
+      self.source_fws = set(source_fws)
+    else:
+      self.source_fws = source_fws
     self.used_names: Set[str] = used_names if used_names is not None else set()
     self._satisfied_injections: Set[str] = set()
     self.defined: Set[cst.CSTNode] = set()
@@ -98,6 +103,20 @@ def test_leave_import() -> None:
     original_with_alias, original_with_alias
   )
   assert isinstance(updated_with_alias, cst.Import)
+
+  # Case: unmapped import preserved if used
+  fixer_used: MockFixer = MockFixer(ResolutionPlan(), ["torch"], {"os"})
+  orig_os: cst.Import = cst.Import(names=[cst.ImportAlias(name=cst.Name("os"))])
+  res_os: Union[cst.Import, cst.RemovalSentinel] = fixer_used.leave_Import(orig_os, orig_os)
+  assert isinstance(res_os, cst.Import)
+  assert len(res_os.names) == 1
+  assert getattr(res_os.names[0].name, "value", None) == "os"
+
+  # Case: req with subcomponent in required_imports to hit branch 113->112
+  plan_sub: ResolutionPlan = ResolutionPlan(required_imports=[ImportReq("os", "path", "path")])
+  fixer_sub: MockFixer = MockFixer(plan_sub, ["torch"], {"os"})
+  res_sub: Union[cst.Import, cst.RemovalSentinel] = fixer_sub.leave_Import(orig_os, orig_os)
+  assert isinstance(res_sub, cst.Import)
   assert updated_with_alias.names[0].asname is not None
   assert isinstance(updated_with_alias.names[0].asname.name, cst.Name)
   assert updated_with_alias.names[0].asname.name.value == "th"
@@ -127,6 +146,78 @@ def test_leave_import() -> None:
   res3: Union[cst.Import, cst.RemovalSentinel] = fixer6.leave_Import(orig_sys2, orig_sys2)
   assert isinstance(res3, cst.Import)
   assert len(res3.names) == 1
+
+
+def test_leave_import_dce() -> None:
+  """Docstring."""
+  fixer: MockFixer = MockFixer(
+    plan=ResolutionPlan(
+      mappings={},
+      required_imports=[],
+    ),
+    source_fws={"torch"},
+    used_names={"used_pkg"},
+  )
+
+  node: cst.Import = cst.Import(
+    names=[cst.ImportAlias(name=cst.Name("used_pkg")), cst.ImportAlias(name=cst.Name("unused_pkg"))]
+  )
+
+  result: Union[cst.Import, cst.RemovalSentinel] = fixer.leave_Import(node, node)
+  assert isinstance(result, cst.Import)
+  assert len(result.names) == 1
+  assert result.names[0].name.value == "used_pkg"
+
+  # Hit 121 -> 90 by having replacement occur for the FIRST alias, but NOT the second,
+  # and the second is in used_names
+  fixer2: MockFixer = MockFixer(
+    plan=ResolutionPlan(
+      mappings={"torch": ImportReq("jax", "numpy", "jnp")},
+      required_imports=[],
+    ),
+    source_fws={"torch"},
+    used_names={"sys"},
+  )
+  node2: cst.Import = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch")), cst.ImportAlias(name=cst.Name("sys"))])
+  result2 = fixer2.leave_Import(node2, node2)
+  assert isinstance(result2, cst.Import)
+  assert len(result2.names) == 2
+  assert isinstance(result2.names[0].name, cst.Attribute)
+  assert result2.names[0].name.attr.value == "numpy"
+  assert result2.names[1].name.value == "sys"
+
+  # Hit the unused branch
+  fixer3: MockFixer = MockFixer(
+    plan=ResolutionPlan(
+      mappings={"torch": ImportReq("jax", "numpy", "jnp")},
+      required_imports=[],
+    ),
+    source_fws={"torch"},
+    used_names=set(),
+  )
+  node3: cst.Import = cst.Import(
+    names=[
+      cst.ImportAlias(name=cst.Name("torch")),
+      cst.ImportAlias(name=cst.Name("sys")),
+      cst.ImportAlias(name=cst.Name("os")),
+    ]
+  )
+  result3 = fixer3.leave_Import(node3, node3)
+  assert isinstance(result3, cst.Import)
+  assert len(result3.names) == 1
+
+  # Hit replacement_occurred=True jumping back to loop start (line 121->89)
+  fixer4: MockFixer = MockFixer(
+    plan=ResolutionPlan(
+      mappings={"torch": ImportReq("jax", "numpy", "jnp")},
+      required_imports=[],
+    ),
+    source_fws={"torch"},
+    used_names=set(),
+  )
+  node4: cst.Import = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch"))])
+  result4 = fixer4.leave_Import(node4, node4)
+  assert isinstance(result4, cst.Import)
 
 
 def test_leave_import_from() -> None:
@@ -169,6 +260,21 @@ def test_leave_import_from() -> None:
   assert res_tensor.names[0].name.attr.value == "Array"
   assert "jax.Array" in fixer._satisfied_injections
 
+  # Multiple aliases (bypasses 160)
+  node_multiple = cst.ImportFrom(
+    module=cst.Name("torch"), names=[cst.ImportAlias(name=cst.Name("a")), cst.ImportAlias(name=cst.Name("b"))]
+  )
+  res4 = fixer.leave_ImportFrom(node_multiple, node_multiple)
+  assert isinstance(res4, cst.RemovalSentinel)
+
+  # Hit 175-179 branch: matching mapping with NO subcomponent
+  plan2: ResolutionPlan = ResolutionPlan(mappings={"torch.nn": ImportReq("flax", None, "flax")}, required_imports=[])
+  fixer2: MockFixer = MockFixer(plan2, ["torch"], set())
+  node_nosub = cst.ImportFrom(module=cst.Name("torch"), names=[cst.ImportAlias(name=cst.Name("nn"))])
+  res5 = fixer2.leave_ImportFrom(node_nosub, node_nosub)
+  assert isinstance(res5, cst.Import)
+  assert res5.names[0].name.value == "flax"
+
   # Case: prune
   orig_other: cst.ImportFrom = cst.ImportFrom(module=cst.Name("torch"), names=[cst.ImportAlias(name=cst.Name("optim"))])
   res_other: Union[cst.ImportFrom, cst.Import, cst.RemovalSentinel] = fixer.leave_ImportFrom(orig_other, orig_other)
@@ -185,3 +291,21 @@ def test_leave_import_from() -> None:
   orig_sys: cst.ImportFrom = cst.ImportFrom(module=cst.Name("sys"), names=[cst.ImportAlias(name=cst.Name("path"))])
   res_sys: Union[cst.ImportFrom, cst.Import, cst.RemovalSentinel] = fixer.leave_ImportFrom(orig_sys, orig_sys)
   assert isinstance(res_sys, cst.RemovalSentinel)
+
+  # Case: from-import with asname preserved (line 183)
+  orig_asname: cst.ImportFrom = cst.ImportFrom(
+    module=cst.Name("my_mod"),
+    names=[cst.ImportAlias(name=cst.Name("helper"), asname=cst.AsName(name=cst.Name("h")))],
+  )
+  fixer_asname: MockFixer = MockFixer(plan, ["torch"], {"h"})
+  res_asname = fixer_asname.leave_ImportFrom(orig_asname, orig_asname)
+  assert isinstance(res_asname, cst.ImportFrom)
+
+  # Case: from-import with non-Name alias (line 187 fallback)
+  orig_non_name: cst.ImportFrom = cst.ImportFrom(
+    module=cst.Name("my_mod"),
+    names=[cst.ImportAlias(name=cst.Attribute(value=cst.Name("a"), attr=cst.Name("b")))],
+  )
+  fixer_non_name: MockFixer = MockFixer(plan, ["torch"], set())
+  res_non_name = fixer_non_name.leave_ImportFrom(orig_non_name, orig_non_name)
+  assert isinstance(res_non_name, cst.RemovalSentinel)

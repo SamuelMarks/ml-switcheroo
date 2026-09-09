@@ -1,0 +1,10 @@
+operation: find_duplicates
+variants:
+  flax_nnx:
+    api: nnx.graph.find_duplicates
+    args:
+      node: node
+      only: only
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

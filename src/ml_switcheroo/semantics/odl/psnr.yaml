@@ -1,0 +1,22 @@
+operation: psnr
+description: Peak Signal-to-Noise Ratio (PSNR) function.
+std_args:
+- name: x1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: x2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: max_val
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  keras:
+    api: keras.ops.psnr
+    args:
+      x1: x1
+      x2: x2
+      max_val: max_val

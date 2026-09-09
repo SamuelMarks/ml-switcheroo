@@ -1,0 +1,37 @@
+operation: frombuffer
+description: frombuffer(buffer, *, dtype, count=-1, offset=0, requires_grad=False)
+  -> Tensor
+std_args:
+- name: buffer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: count
+  kind: keyword_only
+  is_variadic: false
+  type: int
+  default: '-1'
+- name: offset
+  kind: keyword_only
+  is_variadic: false
+  type: int
+  default: '0'
+- name: requires_grad
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.frombuffer
+    args:
+      buffer: buffer
+      dtype: dtype
+  jax:
+    api: jax.numpy.frombuffer
+    args:
+      buffer: buffer

@@ -1,0 +1,4 @@
+operation: Utcatomsws
+variants:
+  nvidia_sass:
+    api: UTCATOMSWS

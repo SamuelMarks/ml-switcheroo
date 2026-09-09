@@ -1,10 +1,13 @@
 description: Applies a 2D adaptive max pooling over an input signal composed of several
   input planes.
 std_args:
-- output_size
-- return_indices
+- name: output_size
+  type: Any
+- name: return_indices
+  type: Any
 type: class
 operation: AdaptiveMaxPool2d
 variants:
   torch:
     api: torch.nn.AdaptiveMaxPool2d
+    args: {}

@@ -1,0 +1,8 @@
+operation: UpdateCvState
+variants:
+  flax_nnx:
+    api: optax.monte_carlo.control_variates.UpdateCvState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

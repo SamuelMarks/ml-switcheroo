@@ -1,0 +1,8 @@
+operation: OptaxTest
+variants:
+  flax_nnx:
+    api: optax.optax_test.OptaxTest
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

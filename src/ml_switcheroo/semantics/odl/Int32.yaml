@@ -1,0 +1,25 @@
+operation: Int32
+description: Definition for Int32
+op_type: attribute
+std_args: []
+variants:
+  torch:
+    api: torch.int32
+  jax:
+    api: jax.numpy.int32
+  mlx:
+    api: mlx.core.int32
+  numpy:
+    api: numpy.int32
+  keras:
+    api: numpy.int32
+  paxml:
+    api: jax.numpy.int32
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.int32
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

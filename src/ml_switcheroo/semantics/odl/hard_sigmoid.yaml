@@ -1,8 +1,19 @@
 description: Hard sigmoid activation function.
 std_args:
-- x
+- name: x
+  type: Any
 variants:
   keras:
     api: keras.activations.hard_sigmoid
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.hard_sigmoid
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: hard_sigmoid
 type: function

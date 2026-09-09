@@ -1,0 +1,12 @@
+operation: HannWindow
+variants:
+  paxml:
+    api: jax.numpy.hanning
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.hanning
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

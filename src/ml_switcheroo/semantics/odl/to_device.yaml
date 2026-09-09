@@ -1,0 +1,11 @@
+operation: to_device
+variants:
+  flax_nnx:
+    api: jax.numpy.ndarray.to_device
+    args:
+      device: device
+      self: self
+      stream: stream
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

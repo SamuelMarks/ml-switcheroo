@@ -1,0 +1,4 @@
+operation: Bar
+variants:
+  nvidia_sass:
+    api: BAR

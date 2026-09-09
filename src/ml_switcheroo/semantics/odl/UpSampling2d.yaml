@@ -1,26 +1,26 @@
+operation: UpSampling2D
 description: Upsampling layer for 2D inputs.
-op_type: class
 std_args:
-- default:
-  - 2
-  - 2
+- name: size
+  kind: positional_or_keyword
   is_variadic: false
+  type: tuple
+  default: (2, 2)
+- name: data_format
   kind: positional_or_keyword
-  name: size
-  type: Tuple[int, int]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: data_format
-  type: str
-- default: nearest
   is_variadic: false
-  kind: positional_or_keyword
-  name: interpolation
   type: str
+- name: interpolation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''nearest'''
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   keras:
     api: keras.layers.UpSampling2D
-  tensorflow:
-    api: tf.keras.layers.UpSampling2D
-operation: UpSampling2d
-type: function
+    args: {}

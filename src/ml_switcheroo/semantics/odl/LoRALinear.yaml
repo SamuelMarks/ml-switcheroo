@@ -21,5 +21,27 @@ std_args:
 variants:
   flax_nnx:
     api: flax.nnx.LoRALinear
+    args:
+      a_initializer: a_initializer
+      a_metadata: a_metadata
+      b_initializer: b_initializer
+      b_metadata: b_metadata
+      in_features: in_features
+      kwargs: kwargs
+      lora_dtype: lora_dtype
+      lora_param_dtype: lora_param_dtype
+      lora_param_type: lora_param_type
+      lora_promote_dtype: lora_promote_dtype
+      lora_rank: lora_rank
+      out_features: out_features
+      rngs: rngs
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: LoRALinear
 type: function

@@ -51,4 +51,16 @@ def resolve_snapshots_dir() -> Path:
       Path: The absolute path to the 'snapshots' directory.
 
   """
-  return resolve_semantics_dir().parent.parent.parent.parent / "ml-compiler-snapshots"
+  candidate = resolve_semantics_dir().parent.parent.parent.parent / "ml-compiler-snapshots"
+  if candidate.exists():
+    return candidate
+  framework_candidate = (
+    resolve_semantics_dir().parent.parent.parent.parent
+    / "ml-framework-snapshots"
+    / "src"
+    / "ml_framework_snapshots"
+    / "snapshots"
+  )
+  if framework_candidate.exists():
+    return framework_candidate
+  return candidate

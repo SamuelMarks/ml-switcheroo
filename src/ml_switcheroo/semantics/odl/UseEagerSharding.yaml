@@ -1,0 +1,7 @@
+operation: UseEagerSharding
+variants:
+  flax_nnx:
+    api: flax.nnx.use_eager_sharding
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

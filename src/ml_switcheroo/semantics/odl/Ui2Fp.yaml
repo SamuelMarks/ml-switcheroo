@@ -1,0 +1,4 @@
+operation: Ui2Fp
+variants:
+  nvidia_sass:
+    api: UI2FP

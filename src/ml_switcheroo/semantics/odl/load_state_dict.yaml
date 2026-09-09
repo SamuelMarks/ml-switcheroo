@@ -1,0 +1,8 @@
+operation: load_state_dict
+variants:
+  flax_nnx:
+    api: torch_load_state_dict_to_nnx
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: torch_load_state_dict_to_nnx

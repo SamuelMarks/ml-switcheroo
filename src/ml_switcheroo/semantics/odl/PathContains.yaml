@@ -1,0 +1,15 @@
+operation: PathContains
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.PathContains
+    args:
+      exact: exact
+      key: key
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

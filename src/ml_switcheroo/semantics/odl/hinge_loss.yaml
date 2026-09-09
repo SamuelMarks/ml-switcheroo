@@ -1,19 +1,37 @@
 description: Average hinge loss (non-regularized).
 std_args:
-- y_true
-- pred_decision
-- labels
-- sample_weight
+- name: y_true
+  type: Any
+- name: pred_decision
+  type: Any
+- name: labels
+  type: Any
+- name: sample_weight
+  type: Any
 type: attribute
 operation: hinge_loss
 variants:
   sklearn:
     api: sklearn.metrics.hinge_loss
+    args: {}
   mlx:
     api: mlx.nn.losses.hinge_loss
+    args:
+      inputs: inputs
+      reduction: reduction
+      targets: targets
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   optax_shim:
     api: optax.losses.hinge_loss
+    args: {}
   flax_nnx:
-    api: optax.losses.hinge_loss
+    api: optax.hinge_loss
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.losses.hinge_loss
+    args: {}

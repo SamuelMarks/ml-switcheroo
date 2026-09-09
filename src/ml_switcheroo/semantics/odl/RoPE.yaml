@@ -8,5 +8,13 @@ std_args:
 variants:
   mlx:
     api: mlx.nn.RoPE
+    args:
+      base: base
+      dims: dims
+      scale: scale
+      traditional: traditional
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: RoPE
 type: function

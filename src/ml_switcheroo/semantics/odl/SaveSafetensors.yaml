@@ -1,0 +1,14 @@
+operation: SaveSafetensors
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: save_file({arrays}, {file}, metadata={metadata})
+    pack_as: Tuple
+    required_imports:
+    - from safetensors.flax import save_file
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: save_file({arrays}, {file}, metadata={metadata})
+    pack_as: Tuple
+    required_imports:
+    - from safetensors.flax import save_file

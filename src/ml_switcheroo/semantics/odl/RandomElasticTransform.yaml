@@ -1,29 +1,72 @@
 description: A preprocessing layer that applies random elastic transformations.
 op_type: class
 std_args:
-- factor
-- scale
-- interpolation
-- fill_mode
-- fill_value
-- value_range
-- seed
-- _USE_BASE_FACTOR
-- _FACTOR_BOUNDS
-- _SUPPORTED_INTERPOLATION
-- _SUPPORTED_FILL_MODES
-- data_format
-- kwargs
-- bounding_box_format
-- activity_regularizer
-- trainable
-- dtype
-- autocast
-- name
+- name: factor
+  type: Any
+- name: scale
+  type: Any
+- name: interpolation
+  type: Any
+- name: fill_mode
+  type: Any
+- name: fill_value
+  type: Any
+- name: value_range
+  type: Any
+- name: seed
+  type: Any
+- name: _USE_BASE_FACTOR
+  type: Any
+- name: _FACTOR_BOUNDS
+  type: Any
+- name: _SUPPORTED_INTERPOLATION
+  type: Any
+- name: _SUPPORTED_FILL_MODES
+  type: Any
+- name: data_format
+  type: Any
+- name: kwargs
+  type: Any
+- name: bounding_box_format
+  type: Any
+- name: activity_regularizer
+  type: Any
+- name: trainable
+  type: Any
+- name: dtype
+  type: Any
+- name: autocast
+  type: Any
+- name: name
+  type: Any
 variants:
   keras:
     api: keras.layers.RandomElasticTransform
+    args:
+      data_format: data_format
+      factor: factor
+      fill_mode: fill_mode
+      fill_value: fill_value
+      interpolation: interpolation
+      kwargs: kwargs
+      scale: scale
+      seed: seed
+      value_range: value_range
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.RandomElasticTransform
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: RandomElasticTransform
 type: function

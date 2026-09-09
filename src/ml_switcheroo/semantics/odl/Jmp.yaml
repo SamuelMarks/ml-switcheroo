@@ -1,0 +1,4 @@
+operation: Jmp
+variants:
+  nvidia_sass:
+    api: JMP

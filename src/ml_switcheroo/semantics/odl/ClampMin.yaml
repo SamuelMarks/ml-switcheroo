@@ -1,0 +1,17 @@
+operation: ClampMin
+variants:
+  paxml:
+    api: jnp.maximum
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.maximum
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.maximum
+    args:
+      x1: x1
+      x2: x2

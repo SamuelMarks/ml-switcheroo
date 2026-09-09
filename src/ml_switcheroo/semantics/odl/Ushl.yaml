@@ -1,0 +1,4 @@
+operation: Ushl
+variants:
+  nvidia_sass:
+    api: USHL

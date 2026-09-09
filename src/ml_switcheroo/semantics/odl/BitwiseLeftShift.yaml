@@ -1,0 +1,17 @@
+operation: BitwiseLeftShift
+variants:
+  paxml:
+    api: jnp.left_shift
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.left_shift
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.left_shift
+    args:
+      x1: x1
+      x2: x2

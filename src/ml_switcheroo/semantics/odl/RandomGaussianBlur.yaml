@@ -14,7 +14,29 @@ std_args:
 variants:
   keras:
     api: keras.layers.RandomGaussianBlur
+    args:
+      data_format: data_format
+      factor: factor
+      kernel_size: kernel_size
+      kwargs: kwargs
+      seed: seed
+      sigma: sigma
+      value_range: value_range
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.RandomGaussianBlur
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: RandomGaussianBlur
 type: function

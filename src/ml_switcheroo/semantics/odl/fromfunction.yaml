@@ -1,12 +1,27 @@
+operation: fromfunction
 description: Construct an array by executing a function over each coordinate.
 std_args:
-- func
-- chunks
-- shape
-- dtype
-- kwargs
+- name: function
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(float)```'''
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
-  dask:
-    api: dask.array.fromfunction
-operation: fromfunction
-type: function
+  jax:
+    api: jax.numpy.fromfunction
+    args:
+      function: function
+      shape: shape

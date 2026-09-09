@@ -1,9 +1,12 @@
-description: invert(x, /, out=None, *, where=True, casting='same_kind', order='K',
-  dtype=None, subok=True[, signature, extobj])
+operation: Invert
+description: Compute bit-wise inversion, or bit-wise NOT, element-wise.
 std_args:
-- kwargs
+- name: x
+  kind: positional_only
+  is_variadic: false
+  type: Any
 variants:
-  dask:
-    api: dask.array.invert
-operation: invert
-type: function
+  jax:
+    api: jax.numpy.invert
+    args:
+      x: x

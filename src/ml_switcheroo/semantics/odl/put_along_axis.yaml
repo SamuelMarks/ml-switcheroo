@@ -1,0 +1,31 @@
+operation: put_along_axis
+description: 'put_along_axis(a: array, /, indices: array, values: array, axis: Optional[int]
+  = None, *, stream: Union[None, Stream, Device] = None) -> array'
+std_args:
+- name: a
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: values
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  mlx:
+    api: mlx.core.put_along_axis
+    args:
+      a: a
+      indices: indices
+      values: values

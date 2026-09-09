@@ -1,0 +1,12 @@
+operation: binary_crossentropy
+variants:
+  flax_nnx:
+    api: optax.sigmoid_binary_cross_entropy
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  keras:
+    api: keras.ops.binary_crossentropy
+    args:
+      target: target
+      output: output

@@ -7,5 +7,18 @@ std_args:
 variants:
   dask:
     api: dask.array.square
+    args: {}
+  torch:
+    api: torch.square
+    args: {}
+  jax:
+    api: jax.numpy.square
+    args: {}
+  mlx:
+    api: mlx.core.square
+    args: {}
+  keras:
+    api: keras.ops.square
+    args: {}
 operation: Square_
 type: function

@@ -1,0 +1,15 @@
+operation: array_equiv
+variants:
+  flax_nnx:
+    api: jax.numpy.array_equiv
+    args:
+      a1: a1
+      a2: a2
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.array_equiv
+    args:
+      a1: a1
+      a2: a2

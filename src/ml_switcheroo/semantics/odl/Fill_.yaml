@@ -11,5 +11,6 @@ std_args:
 variants:
   tikz:
     api: tikz.fill
+    args: {}
 operation: Fill_
 type: function

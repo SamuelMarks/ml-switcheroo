@@ -1,0 +1,8 @@
+operation: ScaleState
+variants:
+  flax_nnx:
+    api: optax.ScaleState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

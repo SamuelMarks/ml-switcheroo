@@ -1,0 +1,4 @@
+operation: Atomg
+variants:
+  nvidia_sass:
+    api: ATOMG

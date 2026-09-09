@@ -1,0 +1,4 @@
+operation: Mov32I
+variants:
+  nvidia_sass:
+    api: MOV32I

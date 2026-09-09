@@ -1,0 +1,16 @@
+operation: pinv
+variants:
+  flax_nnx:
+    api: jax.numpy.linalg.pinv
+    args:
+      a: a
+      hermitian: hermitian
+      rcond: rcond
+      rtol: rtol
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.core.linalg.pinv
+    args:
+      a: a

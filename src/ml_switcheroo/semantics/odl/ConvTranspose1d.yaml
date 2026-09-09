@@ -42,5 +42,54 @@ operation: ConvTranspose1d
 variants:
   mlx:
     api: mlx.nn.ConvTranspose1d
+    args:
+      bias: bias
+      dilation: dilation
+      in_channels: in_channels
+      kernel_size: kernel_size
+      out_channels: out_channels
+      output_padding: output_padding
+      padding: padding
+      stride: stride
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.nn.ConvTranspose1d
+    args: {}
+  keras:
+    api: keras.layers.Conv1DTranspose
+    args:
+      bias: use_bias
+      in_channels: null
+      out_channels: filters
+      output_padding: null
+      stride: strides
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.Conv1DTranspose
+    args:
+      bias: use_bias
+      in_channels: input_dims
+      out_channels: output_dims
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.Convolution1DTranspose
+    args:
+      bias: use_bias
+      dilation: dilation_rate
+      in_channels: null
+      out_channels: filters
+      stride: strides
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.ConvTranspose
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

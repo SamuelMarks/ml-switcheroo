@@ -1,10 +1,22 @@
-description: The differences between consecutive elements of an array.
-std_args:
-- ary
-- to_end
-- to_begin
-variants:
-  dask:
-    api: dask.array.ediff1d
 operation: ediff1d
-type: function
+description: Auto-generated from jax_code_defs
+std_args:
+- name: ary
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: to_end
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: to_begin
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.ediff1d
+    args:
+      ary: ary

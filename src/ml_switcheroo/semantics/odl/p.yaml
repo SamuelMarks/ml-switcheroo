@@ -1,12 +1,24 @@
 description: HTML <p> element.
 std_args:
-- children
-- id
-- class_name
-- style
-- kwargs
+- name: children
+  type: Any
+- name: id
+  type: Any
+- name: class_name
+  type: Any
+- name: style
+  type: Any
+- name: kwargs
+  type: Any
 type: attribute
 operation: p
 variants:
   html_dsl:
     api: html.p
+    args: {}
+  flax_nnx:
+    api: nnx.transforms.compilation.P
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,12 @@
+operation: PartitionName
+variants:
+  paxml:
+    api: str
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.PARTITION_NAME
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

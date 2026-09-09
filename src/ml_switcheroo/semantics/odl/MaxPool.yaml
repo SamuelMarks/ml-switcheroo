@@ -1,0 +1,65 @@
+operation: MaxPool
+variants:
+  onnx:
+    macro_template: helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size},
+      strides={stride})
+    required_imports:
+    - from onnx import helper
+  future_onnx:
+    macro_template: helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size},
+      strides={stride})
+    required_imports:
+    - from onnx import helper
+  mlx:
+    api: mlx.nn.MaxPool3d
+    args:
+      kernel_size: kernel_size
+      padding: padding
+      stride: stride
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.MaxPool3d
+    args:
+      kernel_size: kernel_size
+      padding: padding
+      stride: stride
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.max_pool
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: kernel_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: ''':attr:`kernel_size'''
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: return_indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: '''```(None)```'''
+- name: ceil_mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: '''```(None)```'''

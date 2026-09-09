@@ -1,0 +1,10 @@
+operation: AssertClose
+variants:
+  flax_nnx:
+    api: numpy.testing.assert_allclose
+    args:
+      expected: desired
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports:
+    - import numpy

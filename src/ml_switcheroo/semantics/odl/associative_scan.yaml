@@ -1,0 +1,32 @@
+operation: associative_scan
+description: Performs a scan with an associative binary operation, in parallel.
+std_args:
+- name: fn
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: reverse
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: elems
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+variants:
+  jax:
+    api: jax.lax.associative_scan
+    args:
+      fn: fn
+      elems: elems
+  keras:
+    api: keras.ops.associative_scan
+    args:
+      f: f
+      elems: elems

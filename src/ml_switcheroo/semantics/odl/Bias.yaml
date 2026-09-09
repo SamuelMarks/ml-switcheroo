@@ -1,0 +1,15 @@
+operation: Bias
+variants:
+  paxml:
+    api: praxis.layers.Bias
+    args:
+      dims: dims
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.nn.normalization.InstanceNorm.bias
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -19,7 +19,13 @@ std_args:
 variants:
   keras:
     api: keras.losses.CategoricalFocalCrossentropy
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.losses.CategoricalFocalCrossentropy
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: CategoricalFocalCrossentropy
 type: function

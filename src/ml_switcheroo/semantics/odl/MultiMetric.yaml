@@ -1,0 +1,29 @@
+operation: MultiMetric
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.ModuleDict
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.MultiMetric
+    args:
+      metrics: metrics
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: modules
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: _modules
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

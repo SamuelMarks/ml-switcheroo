@@ -1,0 +1,8 @@
+operation: div_value
+variants:
+  paxml:
+    api: optax.tree.div
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

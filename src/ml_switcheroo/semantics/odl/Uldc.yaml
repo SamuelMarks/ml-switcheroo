@@ -1,0 +1,4 @@
+operation: Uldc
+variants:
+  nvidia_sass:
+    api: ULDC

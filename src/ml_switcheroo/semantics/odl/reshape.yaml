@@ -1,25 +1,42 @@
-description: Reshapes an array without changing its data.
+operation: reshape
+description: reshape(input, shape) -> Tensor
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
+  is_variadic: false
+  type: Tensor
+- name: shape
   kind: positional_or_keyword
-  name: shape
-  type: Tuple[int, Ellipsis]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: copy
-  type: Optional[bool]
+  is_variadic: false
+  type: Any
 variants:
-  keras:
-    api: keras.layers.Reshape
-  dask:
-    api: dask.array.reshape
   torch:
     api: torch.reshape
-  tensorflow:
-    api: tf.keras.layers.Reshape
-operation: reshape
-type: function
+    args:
+      input: input
+      shape: shape
+  jax:
+    api: jax.lax.reshape
+    args:
+      operand: operand
+      new_sizes: new_sizes
+  mlx:
+    api: mlx.core.reshape
+    args:
+      a: a
+      shape: shape
+  stablehlo:
+    api: stablehlo.reshape
+    args:
+      operand: operand
+  rdna:
+    api: ; Macro.Reshape
+    args: {}
+  nvidia_sass:
+    api: Macro.Reshape
+    args: {}
+  keras:
+    api: keras.ops.reshape
+    args:
+      x: x
+      newshape: newshape

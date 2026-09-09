@@ -1,0 +1,8 @@
+operation: conditionally_transform
+variants:
+  flax_nnx:
+    api: optax.conditionally_transform
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,8 @@
+operation: MultiStepsState
+variants:
+  flax_nnx:
+    api: optax.MultiStepsState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

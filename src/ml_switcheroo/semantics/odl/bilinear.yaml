@@ -1,13 +1,26 @@
-description: The class representing a Python module/class/instance attribute.
-std_args:
-- input1_dims
-- input2_dims
-- output_dims
-- bias
-type: attribute
 operation: bilinear
+description: bilinear(input1, input2, weight, bias=None) -> Tensor
+std_args:
+- name: input1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: input2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
-  mlx:
-    api: mlx.nn.Bilinear
   torch:
-    api: torch.nn.Bilinear
+    api: torch.nn.functional.bilinear
+    args:
+      input1: input1
+      input2: input2
+      weight: weight

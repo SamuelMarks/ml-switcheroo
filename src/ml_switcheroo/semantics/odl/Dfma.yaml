@@ -1,0 +1,4 @@
+operation: Dfma
+variants:
+  nvidia_sass:
+    api: DFMA

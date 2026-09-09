@@ -1,0 +1,22 @@
+operation: conv_dimension_numbers
+description: Converts convolution `dimension_numbers` to a `ConvDimensionNumbers`.
+std_args:
+- name: lhs_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: rhs_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dimension_numbers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.lax.conv_dimension_numbers
+    args:
+      lhs_shape: lhs_shape
+      rhs_shape: rhs_shape
+      dimension_numbers: dimension_numbers

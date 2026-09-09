@@ -7,5 +7,6 @@ std_args:
 variants:
   dask:
     api: dask.array.i0
+    args: {}
 operation: I0_
 type: function

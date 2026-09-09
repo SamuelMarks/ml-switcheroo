@@ -1,0 +1,7 @@
+operation: tolist
+description: tolist() -> list or number
+std_args: []
+variants:
+  torch:
+    api: torch.Tensor.tolist
+    args: {}

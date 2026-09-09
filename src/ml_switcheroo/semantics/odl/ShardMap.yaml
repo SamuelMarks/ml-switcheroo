@@ -1,0 +1,7 @@
+operation: ShardMap
+variants:
+  flax_nnx:
+    api: flax.nnx.shard_map
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

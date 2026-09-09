@@ -1,13 +1,28 @@
 description: Abstract base class for generic types.
 std_args:
-- module_constructor
-- prevent_cse
-- static_argnums
-- policy
-- module_init_args
-- module_init_kwargs
+- name: module_constructor
+  type: Any
+- name: prevent_cse
+  type: Any
+- name: static_argnums
+  type: Any
+- name: policy
+  type: Any
+- name: module_init_args
+  type: Any
+- name: module_init_kwargs
+  type: Any
 variants:
   flax_nnx:
-    api: flax.nnx.Remat
-operation: remat
+    api: flax.nnx.remat
+    args:
+      f: f
+      graph: graph
+      policy: policy
+      prevent_cse: prevent_cse
+      static_argnums: static_argnums
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+operation: Remat
 type: function

@@ -7,5 +7,32 @@ std_args:
 variants:
   dask:
     api: dask.array.log10
+    args: {}
+  paxml:
+    api: jax.numpy.log10
+    args:
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.log10
+    args:
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.log10
+    args: {}
+  jax:
+    api: jax.numpy.log10
+    args: {}
+  mlx:
+    api: mlx.core.log10
+    args: {}
+  keras:
+    api: keras.ops.log10
+    args: {}
 operation: Log10_
 type: function

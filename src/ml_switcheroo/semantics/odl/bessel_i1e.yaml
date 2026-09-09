@@ -1,0 +1,12 @@
+operation: bessel_i1e
+description: 'Exponentially scaled modified Bessel function of order 1:'
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.bessel_i1e
+    args:
+      x: x

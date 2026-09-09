@@ -24,7 +24,7 @@ def test_dependency_scanner() -> None:
   (`torch`), relative imports, and known semantic targets (`numpy`, `pandas`) are safely ignored.
   """
   semantics: SemanticsManager = SemanticsManager()
-  semantics.import_data = {"numpy.core": {}, "pandas": {}}
+  setattr(semantics, "import_data", {"numpy.core": {}, "pandas": {}})
 
   scanner: DependencyScanner = DependencyScanner(semantics, source_fw="torch")
 

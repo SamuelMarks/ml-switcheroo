@@ -1,11 +1,16 @@
-description: Compute the median along the specified axis, while ignoring NaNs.
-std_args:
-- a
-- axis
-- keepdims
-- out
-variants:
-  dask:
-    api: dask.array.nanmedian
 operation: nanmedian
-type: function
+description: nanmedian(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.nanmedian
+    args:
+      input: input
+  jax:
+    api: jax.numpy.nanmedian
+    args:
+      a: a

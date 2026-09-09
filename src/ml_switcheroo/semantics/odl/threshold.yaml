@@ -1,12 +1,32 @@
+operation: threshold
 description: The class representing a Python module/class/instance attribute.
 std_args:
-- x
-- threshold
-- default_value
-type: attribute
-operation: threshold
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: threshold
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: value
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
+  torch:
+    api: torch.threshold
+    args:
+      input: input
+      threshold: threshold
+      value: value
   keras:
     api: keras.activations.threshold
-  torch:
-    api: torch.nn.Threshold
+    args:
+      x: x
+      threshold: threshold
+      default_value: default_value

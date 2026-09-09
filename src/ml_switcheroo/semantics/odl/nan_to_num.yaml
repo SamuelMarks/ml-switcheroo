@@ -1,10 +1,30 @@
 description: Replace NaN with zero and infinity with large finite numbers (default
 std_args:
-- kwargs
+- name: kwargs
+  type: Any
 variants:
   dask:
     api: dask.array.nan_to_num
+    args: {}
   torch:
     api: torch.nan_to_num
+    args: {}
+  flax_nnx:
+    api: jax.numpy.nan_to_num
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.nan_to_num
+    args:
+      x: x
+  mlx:
+    api: mlx.core.nan_to_num
+    args:
+      a: a
+  keras:
+    api: keras.ops.nan_to_num
+    args:
+      x: x
 operation: nan_to_num
 type: function

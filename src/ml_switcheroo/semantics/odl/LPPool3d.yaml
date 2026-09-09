@@ -1,12 +1,17 @@
 description: Applies a 3D power-average pooling over an input signal composed of several
   input planes.
 std_args:
-- kernel_size
-- stride
-- ceil_mode
-- norm_type
+- name: kernel_size
+  type: Any
+- name: stride
+  type: Any
+- name: ceil_mode
+  type: Any
+- name: norm_type
+  type: Any
 type: class
 operation: LPPool3d
 variants:
   torch:
     api: torch.nn.LPPool3d
+    args: {}

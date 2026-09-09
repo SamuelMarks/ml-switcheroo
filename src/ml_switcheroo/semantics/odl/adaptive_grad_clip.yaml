@@ -1,0 +1,8 @@
+operation: adaptive_grad_clip
+variants:
+  flax_nnx:
+    api: optax.adaptive_grad_clip
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

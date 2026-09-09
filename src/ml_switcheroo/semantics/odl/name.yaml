@@ -1,0 +1,8 @@
+operation: name
+variants:
+  flax_nnx:
+    api: nnx.proxy_caller.GetAttr.name
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

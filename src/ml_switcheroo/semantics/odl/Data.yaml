@@ -1,0 +1,8 @@
+operation: Data
+variants:
+  flax_nnx:
+    api: nnx.transforms.iteration.Broadcasted.data
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

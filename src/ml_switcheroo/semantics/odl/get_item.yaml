@@ -1,0 +1,17 @@
+operation: get_item
+description: Return `x[key]`.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: key
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  keras:
+    api: keras.ops.get_item
+    args:
+      x: x
+      key: key

@@ -3,5 +3,18 @@ std_args: []
 variants:
   latex_dsl:
     api: latex.int
-operation: int_
+    args: {}
+  paxml:
+    api: jax.numpy.int64
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.int_
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+operation: Int_
 type: function

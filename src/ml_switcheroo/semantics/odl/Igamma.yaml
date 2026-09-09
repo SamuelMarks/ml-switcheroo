@@ -1,0 +1,26 @@
+operation: igamma
+description: igamma(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.igamma
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.lax.igamma
+    args:
+      a: a
+      x: x

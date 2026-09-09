@@ -1,0 +1,5 @@
+operation: SSetpcB64
+variants:
+  rdna:
+    api: s_setpc_b64
+    description: Auto-mapped instruction S_SETPC_B64

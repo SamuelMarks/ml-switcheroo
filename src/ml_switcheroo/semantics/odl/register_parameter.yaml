@@ -1,0 +1,8 @@
+operation: register_parameter
+variants:
+  flax_nnx:
+    api: torch_register_parameter_to_nnx
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: torch_register_parameter_to_nnx

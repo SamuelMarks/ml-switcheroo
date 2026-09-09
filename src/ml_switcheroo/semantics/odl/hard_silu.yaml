@@ -1,8 +1,19 @@
 description: Hard SiLU activation function, also known as Hard Swish.
 std_args:
-- x
+- name: x
+  type: Any
 variants:
   keras:
     api: keras.activations.hard_silu
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.hard_silu
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: hard_silu
 type: function

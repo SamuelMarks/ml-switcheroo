@@ -1,0 +1,14 @@
+operation: Dist
+variants:
+  paxml:
+    api: jax.numpy.linalg.norm
+    dispatch_rules: []
+    macro_template: jax.numpy.linalg.norm({input} - {other}, ord={p})
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.linalg.norm
+    dispatch_rules: []
+    macro_template: jax.numpy.linalg.norm({input} - {other}, ord={p})
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,4 @@
+operation: F2F
+variants:
+  nvidia_sass:
+    api: F2F

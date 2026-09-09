@@ -1,0 +1,17 @@
+operation: convert_element_type
+description: Elementwise cast.
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: new_dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.convert_element_type
+    args:
+      operand: operand
+      new_dtype: new_dtype

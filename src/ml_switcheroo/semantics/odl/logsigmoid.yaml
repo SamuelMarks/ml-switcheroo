@@ -1,10 +1,12 @@
-description: The class representing a Python module/class/instance attribute.
-std_args:
-- kwargs
-type: attribute
 operation: logsigmoid
+description: logsigmoid(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
-  mlx:
-    api: mlx.nn.LogSigmoid
   torch:
-    api: torch.nn.LogSigmoid
+    api: torch.nn.functional.logsigmoid
+    args:
+      input: input

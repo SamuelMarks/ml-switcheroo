@@ -1,0 +1,5 @@
+operation: SWaitcntDepctr
+variants:
+  rdna:
+    api: s_waitcnt_depctr
+    description: Auto-mapped instruction S_WAITCNT_DEPCTR

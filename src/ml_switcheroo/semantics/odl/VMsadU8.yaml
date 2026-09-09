@@ -1,0 +1,5 @@
+operation: VMsadU8
+variants:
+  rdna:
+    api: v_msad_u8
+    description: Auto-mapped instruction V_MSAD_U8

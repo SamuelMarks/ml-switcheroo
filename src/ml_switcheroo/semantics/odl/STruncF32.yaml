@@ -1,0 +1,5 @@
+operation: STruncF32
+variants:
+  rdna:
+    api: s_trunc_f32
+    description: Auto-mapped instruction S_TRUNC_F32

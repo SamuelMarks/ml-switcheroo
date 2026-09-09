@@ -8,7 +8,19 @@ std_args:
 variants:
   latex_dsl:
     api: latex.env.matrix
+    args: {}
   tikz:
     api: tikz.matrix
+    args: {}
+  paxml:
+    api: jax.numpy.array
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.array
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Matrix
 type: function

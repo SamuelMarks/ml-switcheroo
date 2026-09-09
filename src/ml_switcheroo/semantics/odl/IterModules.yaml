@@ -1,0 +1,7 @@
+operation: IterModules
+variants:
+  flax_nnx:
+    api: flax.nnx.iter_modules
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

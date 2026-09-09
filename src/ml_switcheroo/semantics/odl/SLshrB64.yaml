@@ -1,0 +1,5 @@
+operation: SLshrB64
+variants:
+  rdna:
+    api: s_lshr_b64
+    description: Auto-mapped instruction S_LSHR_B64

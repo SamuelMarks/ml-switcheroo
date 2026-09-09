@@ -1,0 +1,12 @@
+operation: TriuIndices
+variants:
+  paxml:
+    api: jax.numpy.triu_indices
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.triu_indices
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

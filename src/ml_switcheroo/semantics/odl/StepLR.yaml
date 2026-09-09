@@ -1,12 +1,24 @@
 description: Decays the learning rate of each parameter group by gamma every step_size
   epochs.
 std_args:
-- optimizer
-- step_size
-- gamma
-- last_epoch
+- name: optimizer
+  type: Any
+- name: step_size
+  type: Any
+- name: gamma
+  type: Any
+- name: last_epoch
+  type: Any
 variants:
   torch:
     api: torch.optim.lr_scheduler.StepLR
+    args:
+      gamma: gamma
+      last_epoch: last_epoch
+      optimizer: optimizer
+      step_size: step_size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: StepLR
 type: function

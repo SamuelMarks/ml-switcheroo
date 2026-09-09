@@ -20,6 +20,7 @@ import libcst as cst
 from typing import Optional, List
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.plugins.utils import create_dotted_name
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
@@ -33,11 +34,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
       cst.BaseExpression: The constructed CST BaseExpression, which will be a
           nested cst.Attribute structure (or cst.Name if there are no dots).
   """
-  parts = name_str.split(".")
-  node = cst.Name(parts[0])
-  for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))
-  return node
+  return create_dotted_name(name_str)
 
 
 def _extract_leaf_name(node: cst.BaseExpression) -> Optional[str]:

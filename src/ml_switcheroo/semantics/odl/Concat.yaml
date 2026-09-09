@@ -1,0 +1,29 @@
+operation: concat
+description: concat(tensors, dim=0, *, out=None) -> Tensor
+std_args:
+- name: tensors
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.concat
+    args:
+      tensors: tensors
+  jax:
+    api: jax.numpy.concat
+    args:
+      arrays: arrays
+  mlx:
+    api: mlx.core.concat
+    args:
+      arrays: arrays

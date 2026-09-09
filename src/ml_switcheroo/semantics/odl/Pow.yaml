@@ -1,0 +1,26 @@
+operation: pow
+description: pow(input, exponent, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: exponent
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.pow
+    args:
+      input: input
+      exponent: exponent
+  jax:
+    api: jax.lax.pow
+    args:
+      x: x
+      y: y

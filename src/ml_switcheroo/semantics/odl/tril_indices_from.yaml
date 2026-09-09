@@ -1,9 +1,24 @@
 description: Return the indices for the lower-triangle of arr.
 std_args:
-- arr
-- k
+- name: arr
+  type: Any
+- name: k
+  type: Any
 variants:
   dask:
     api: dask.array.tril_indices_from
+    args: {}
+  flax_nnx:
+    api: jax.numpy.tril_indices_from
+    args:
+      arr: arr
+      k: k
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.tril_indices_from
+    args:
+      arr: arr
 operation: tril_indices_from
 type: function

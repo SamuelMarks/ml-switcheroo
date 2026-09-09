@@ -1,0 +1,4 @@
+operation: Yield
+variants:
+  nvidia_sass:
+    api: YIELD

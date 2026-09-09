@@ -139,6 +139,15 @@ class RewriterContext:
     """
     return str(self.config.effective_target)
 
+  @property
+  def plugin_traits(self):
+    """Return plugin traits for target framework.
+
+    Returns:
+        PluginTraits for the target framework.
+    """
+    return self.hook_context.plugin_traits
+
   def _hydrate_source_aliases(self) -> None:
     """Load default aliases for the source framework from semantics config.
 

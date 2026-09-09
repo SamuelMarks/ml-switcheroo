@@ -70,7 +70,7 @@ class BatchValidator:
     if manual_test_dir:
       manual_tests = self._scan_manual_tests(manual_test_dir)
 
-    iterator = op_names
+    iterator: typing.Iterable[str] = op_names
     if verbose:
       iterator = track(op_names, description="🧪 Verifying Semantics...")
 

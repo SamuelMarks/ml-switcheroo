@@ -1,0 +1,12 @@
+operation: zero_grad
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: optimizer_zero_grad
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: optimizer_zero_grad

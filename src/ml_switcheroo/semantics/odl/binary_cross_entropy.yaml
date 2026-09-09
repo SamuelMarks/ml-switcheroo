@@ -1,0 +1,37 @@
+operation: binary_cross_entropy
+description: Compute Binary Cross Entropy between the target and input probabilities.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: target
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: size_average
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reduce
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '''mean'''
+variants:
+  torch:
+    api: torch.nn.functional.binary_cross_entropy
+    args:
+      input: input
+      target: target

@@ -1,0 +1,16 @@
+operation: apply
+variants:
+  flax_nnx:
+    api: nnx.bridge.module.Module.apply
+    args:
+      _initialize: _initialize
+      args: args
+      kwargs: kwargs
+      method: method
+      mutable: mutable
+      rngs: rngs
+      self: self
+      variables: variables
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

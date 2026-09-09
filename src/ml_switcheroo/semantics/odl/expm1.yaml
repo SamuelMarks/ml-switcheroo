@@ -1,12 +1,28 @@
-description: Calculates an implementation-dependent approximation to ``exp(x)-1``
-  for each element ``x_i`` of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-type: attribute
 operation: expm1
+description: expm1(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
-  dask:
-    api: dask.array.expm1
+  torch:
+    api: torch.expm1
+    args:
+      input: input
+  jax:
+    api: jax.lax.expm1
+    args:
+      x: x
+  mlx:
+    api: mlx.core.expm1
+    args:
+      a: a
+  keras:
+    api: keras.ops.expm1
+    args:
+      x: x

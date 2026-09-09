@@ -1,0 +1,5 @@
+operation: VBfeU32
+variants:
+  rdna:
+    api: v_bfe_u32
+    description: Auto-mapped instruction V_BFE_U32

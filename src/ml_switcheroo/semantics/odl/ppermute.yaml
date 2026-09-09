@@ -1,0 +1,22 @@
+operation: ppermute
+description: Perform a collective permutation according to the permutation ``perm``.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis_name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: perm
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.ppermute
+    args:
+      x: x
+      axis_name: axis_name
+      perm: perm

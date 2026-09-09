@@ -1,0 +1,32 @@
+operation: pairwise_distance
+description: pairwise_distance(x1, x2, p=2.0, eps=1e-6, keepdim=False) -> Tensor
+std_args:
+- name: x1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: x2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '2.0'
+- name: eps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 1e-06
+- name: keepdim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.nn.functional.pairwise_distance
+    args:
+      x1: x1
+      x2: x2

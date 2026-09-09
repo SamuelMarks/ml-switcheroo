@@ -1,0 +1,11 @@
+operation: update
+variants:
+  flax_nnx:
+    api: nnx.training.optimizer.ModelAndOptimizer.update
+    args:
+      grads: grads
+      kwargs: kwargs
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,17 @@
+operation: random_gamma_grad
+description: Elementwise derivative of samples from `Gamma(a, 1)`.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.random_gamma_grad
+    args:
+      a: a
+      x: x

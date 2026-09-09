@@ -1,14 +1,28 @@
-description: Calculates an implementation-dependent approximation to the hyperbolic
-  cosine for each element ``x_i`` in the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  latex_dsl:
-    api: latex.cosh
-  dask:
-    api: dask.array.cosh
 operation: cosh
-type: function
+description: cosh(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.cosh
+    args:
+      input: input
+  jax:
+    api: jax.lax.cosh
+    args:
+      x: x
+  mlx:
+    api: mlx.core.cosh
+    args:
+      a: a
+  keras:
+    api: keras.ops.cosh
+    args:
+      x: x

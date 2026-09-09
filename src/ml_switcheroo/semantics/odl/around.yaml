@@ -1,9 +1,16 @@
 description: Round an array to the given number of decimals.
 std_args:
-- x
-- decimals
+- name: x
+  type: Any
+- name: decimals
+  type: Any
 variants:
   dask:
     api: dask.array.around
+    args: {}
+  jax:
+    api: jax.numpy.round
+    args:
+      a: a
 operation: around
 type: function

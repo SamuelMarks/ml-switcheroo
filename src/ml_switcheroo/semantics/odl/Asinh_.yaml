@@ -1,0 +1,12 @@
+operation: Asinh_
+description: In-place version of Asinh.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.asinh_
+    args:
+      input: input

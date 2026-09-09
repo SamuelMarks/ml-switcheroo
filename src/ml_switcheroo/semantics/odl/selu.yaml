@@ -1,14 +1,25 @@
-description: Scaled Exponential Linear Unit (SELU).
-std_args:
-- x
-type: function
 operation: selu
+description: selu(input, inplace=False) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
+  torch:
+    api: torch.nn.functional.selu
+    args:
+      input: input
+  mlx:
+    api: mlx.nn.selu
+    args:
+      x: x
   keras:
     api: keras.activations.selu
-  mlx:
-    api: mlx.nn.SELU
-  torch:
-    api: torch.nn.SELU
-  tensorflow:
-    api: tf.nn.selu
+    args:
+      x: x

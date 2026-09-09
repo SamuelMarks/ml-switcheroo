@@ -1,10 +1,32 @@
 description: unravel_index(indices, shape, order='C')
 std_args:
-- indices
-- shape
-- order
+- name: indices
+  type: Any
+- name: shape
+  type: Any
+- name: order
+  type: Any
 variants:
   dask:
     api: dask.array.unravel_index
+    args: {}
+  flax_nnx:
+    api: jax.numpy.unravel_index
+    args:
+      indices: indices
+      shape: shape
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.unravel_index
+    args:
+      indices: indices
+      shape: shape
+  keras:
+    api: keras.ops.unravel_index
+    args:
+      indices: indices
+      shape: shape
 operation: unravel_index
 type: function

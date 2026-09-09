@@ -1,0 +1,33 @@
+operation: put
+description: Auto-generated from jax_code_defs
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: index
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: source
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: accumulate
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.put
+    args:
+      input: input
+      index: index
+      source: source
+  jax:
+    api: jax.numpy.put
+    args:
+      a: a
+      ind: ind
+      v: v

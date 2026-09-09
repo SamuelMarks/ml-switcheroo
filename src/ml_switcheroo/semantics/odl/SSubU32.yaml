@@ -1,0 +1,5 @@
+operation: SSubU32
+variants:
+  rdna:
+    api: s_sub_u32
+    description: Auto-mapped instruction S_SUB_U32

@@ -1,0 +1,5 @@
+operation: DsSwizzleB32
+variants:
+  rdna:
+    api: ds_swizzle_b32
+    description: Auto-mapped instruction DS_SWIZZLE_B32

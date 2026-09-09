@@ -1,0 +1,5 @@
+operation: SCmpOF32
+variants:
+  rdna:
+    api: s_cmp_o_f32
+    description: Auto-mapped instruction S_CMP_O_F32

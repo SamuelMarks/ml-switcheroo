@@ -1,0 +1,12 @@
+operation: UByte
+variants:
+  paxml:
+    api: jax.numpy.uint8
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.uint8
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

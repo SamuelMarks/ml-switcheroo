@@ -1,11 +1,43 @@
+operation: sub
 description: sub(input, other, *, alpha=1, out=None) -> Tensor
 std_args:
-- input
-- other
-- alpha
-- out
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: alpha
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
   torch:
     api: torch.sub
-operation: sub
-type: function
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.lax.sub
+    args:
+      x: x
+      y: y
+  rdna:
+    api: v_sub_f32
+    args: {}
+  nvidia_sass:
+    api: FSUB
+    args: {}
+  mlx:
+    api: mlx.core.subtract
+    args: {}
+  keras:
+    api: keras.ops.subtract
+    args: {}

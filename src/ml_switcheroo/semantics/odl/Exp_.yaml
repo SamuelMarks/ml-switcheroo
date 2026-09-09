@@ -7,9 +7,30 @@ std_args:
 variants:
   numpy:
     api: numpy.exp
+    args: {}
   latex_dsl:
     api: latex.exp
+    args: {}
   dask:
     api: dask.array.exp
+    args: {}
+  rdna:
+    api: v_exp_f32
+    args: {}
+  nvidia_sass:
+    api: MUFU.EXP
+    args: {}
+  torch:
+    api: torch.exp
+    args: {}
+  jax:
+    api: jax.numpy.exp
+    args: {}
+  mlx:
+    api: mlx.core.exp
+    args: {}
+  keras:
+    api: keras.ops.exp
+    args: {}
 operation: Exp_
 type: function

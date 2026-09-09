@@ -1,10 +1,13 @@
 description: Applies a 2D bilinear upsampling to an input signal composed of several
   input channels.
 std_args:
-- size
-- scale_factor
+- name: size
+  type: Any
+- name: scale_factor
+  type: Any
 type: class
 operation: UpsamplingBilinear2d
 variants:
   torch:
     api: torch.nn.UpsamplingBilinear2d
+    args: {}

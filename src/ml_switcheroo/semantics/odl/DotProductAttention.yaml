@@ -1,0 +1,40 @@
+operation: DotProductAttention
+variants:
+  keras:
+    api: keras.layers.Attention
+    dispatch_rules: []
+    macro_template: keras.layers.Attention(dropout={dropout_rate})({query}, {value},
+      key={key}, attention_mask={mask})
+    pack_as: Tuple
+    required_imports: []
+    transformation_type: macro
+  flax_nnx:
+    api: flax.nnx.dot_product_attention
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: use_scale
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: score_mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''dot'''
+- name: dropout
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.0'
+- name: seed
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'

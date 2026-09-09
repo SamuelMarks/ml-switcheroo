@@ -1,8 +1,20 @@
-description: Round to nearest integer towards zero.
-std_args:
-- kwargs
-variants:
-  dask:
-    api: dask.array.fix
 operation: fix
-type: function
+description: fix(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.fix
+    args:
+      input: input
+  jax:
+    api: jax.numpy.fix
+    args:
+      x: x

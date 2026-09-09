@@ -1,11 +1,31 @@
 description: ravel_multi_index(multi_index, dims, mode='raise', order='C')
 std_args:
-- multi_index
-- dims
-- mode
-- order
+- name: multi_index
+  type: Any
+- name: dims
+  type: Any
+- name: mode
+  type: Any
+- name: order
+  type: Any
 variants:
   dask:
     api: dask.array.ravel_multi_index
+    args: {}
+  flax_nnx:
+    api: jax.numpy.ravel_multi_index
+    args:
+      dims: dims
+      mode: mode
+      multi_index: multi_index
+      order: order
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.ravel_multi_index
+    args:
+      multi_index: multi_index
+      dims: dims
 operation: ravel_multi_index
 type: function

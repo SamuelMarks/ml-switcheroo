@@ -1,0 +1,11 @@
+operation: ExpandCopy
+variants:
+  flax_nnx:
+    api: jax.numpy.broadcast_to
+    args:
+      input: array
+      size: shape
+    dispatch_rules: []
+    pack_as: Tuple
+    pack_to_tuple: shape
+    required_imports: []

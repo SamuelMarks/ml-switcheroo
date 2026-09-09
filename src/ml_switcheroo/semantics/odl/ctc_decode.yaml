@@ -1,0 +1,42 @@
+operation: ctc_decode
+description: Decodes the output of a CTC model.
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: sequence_lengths
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: strategy
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''greedy'''
+- name: beam_width
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '100'
+- name: top_paths
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: merge_repeated
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: mask_index
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+variants:
+  keras:
+    api: keras.ops.ctc_decode
+    args:
+      inputs: inputs
+      sequence_lengths: sequence_lengths

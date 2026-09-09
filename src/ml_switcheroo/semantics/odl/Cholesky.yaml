@@ -1,0 +1,34 @@
+operation: cholesky
+description: cholesky(input, upper=False, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: upper
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.cholesky
+    args:
+      input: input
+  mlx:
+    api: mlx.core.linalg.cholesky
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.cholesky
+    args:
+      a: a
+      lower: lower
+  keras:
+    api: keras.ops.cholesky
+    args:
+      x: x

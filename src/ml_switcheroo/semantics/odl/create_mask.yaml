@@ -1,0 +1,14 @@
+operation: create_mask
+variants:
+  flax_nnx:
+    api: nnx.helpers.TrainState.create
+    args:
+      cls: cls
+      graphdef: graphdef
+      kwargs: kwargs
+      params: params
+      step: step
+      tx: tx
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

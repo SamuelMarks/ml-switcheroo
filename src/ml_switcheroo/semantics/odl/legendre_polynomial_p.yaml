@@ -1,0 +1,21 @@
+operation: legendre_polynomial_p
+description: legendre_polynomial_p(input, n, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: n
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.special.legendre_polynomial_p
+    args:
+      input: input
+      n: n

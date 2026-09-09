@@ -8,9 +8,22 @@ std_args:
 variants:
   keras:
     api: keras.layers.Lambda
+    args:
+      arguments: arguments
+      function: function
+      kwargs: kwargs
+      mask: mask
+      output_shape: output_shape
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   latex_dsl:
     api: latex.Lambda
+    args: {}
   tensorflow:
     api: tf.keras.layers.Lambda
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Lambda
 type: function

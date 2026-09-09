@@ -1,0 +1,7 @@
+operation: seed
+description: Sets the seed for generating random numbers to a non-deterministic
+std_args: []
+variants:
+  torch:
+    api: torch.seed
+    args: {}

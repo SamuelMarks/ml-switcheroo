@@ -1,0 +1,12 @@
+operation: ApplyOverAxes
+variants:
+  paxml:
+    api: jax.numpy.apply_over_axes
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.apply_over_axes
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

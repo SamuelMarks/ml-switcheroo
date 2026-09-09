@@ -1,0 +1,5 @@
+operation: VMaxI32
+variants:
+  rdna:
+    api: v_max_i32
+    description: Auto-mapped instruction V_MAX_I32

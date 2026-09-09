@@ -31,13 +31,34 @@ std_args:
 variants:
   keras:
     api: keras.optimizers.Lamb
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   optax_shim:
     api: optax.lamb
+    args: {}
   flax_nnx:
     api: optax.lamb
+    args:
+      beta_1: b1
+      beta_2: b2
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.lamb
+    args:
+      beta_1: b1
+      beta_2: b2
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.optimizers.Lamb
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Lamb
 type: function

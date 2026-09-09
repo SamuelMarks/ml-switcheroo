@@ -1,0 +1,27 @@
+operation: partition
+description: Returns a partially-sorted copy of an array.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: kth
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '-1'
+variants:
+  jax:
+    api: jax.numpy.partition
+    args:
+      a: a
+      kth: kth
+  mlx:
+    api: mlx.core.partition
+    args:
+      a: a
+      kth: kth

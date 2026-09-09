@@ -1,0 +1,12 @@
+operation: TakeAlongAxis
+variants:
+  paxml:
+    api: jax.numpy.take_along_axis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.take_along_axis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

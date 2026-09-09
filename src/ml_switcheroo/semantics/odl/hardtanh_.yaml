@@ -1,15 +1,23 @@
 description: Applies the HardTanh function.
 std_args:
-- min_val
-- max_val
-- inplace
-- __constants__
-- min_value
-- max_value
+- name: min_val
+  type: Any
+- name: max_val
+  type: Any
+- name: inplace
+  type: Any
+- name: __constants__
+  type: Any
+- name: min_value
+  type: Any
+- name: max_value
+  type: Any
 type: attribute
 operation: hardtanh_
 variants:
   mlx:
     api: mlx.nn.HardTanh
+    args: {}
   torch:
     api: torch.nn.Hardtanh
+    args: {}

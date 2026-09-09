@@ -7,7 +7,18 @@ std_args:
 variants:
   latex_dsl:
     api: latex.arccos
+    args: {}
   dask:
     api: dask.array.arccos
+    args: {}
+  flax_nnx:
+    api: jnp.arccos
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.acos
+    args:
+      x: x
 operation: Arccos_
 type: function

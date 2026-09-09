@@ -1,0 +1,8 @@
+operation: num_groups
+variants:
+  flax_nnx:
+    api: nnx.nn.normalization.GroupNorm.num_groups
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

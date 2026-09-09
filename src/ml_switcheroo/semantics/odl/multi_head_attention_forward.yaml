@@ -1,0 +1,163 @@
+operation: multi_head_attention_forward
+description: Forward method for MultiHeadAttention.
+std_args:
+- name: query, key, value
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: embed_dim_to_check
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: num_heads
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: in_proj_weight, in_proj_bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias_k, bias_v
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: add_zero_attn
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+- name: dropout_p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+- name: out_proj_weight, out_proj_bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: training
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: key_padding_mask
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: need_weights
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''True`, but should be set to `False`\n            For best performance
+    when attention weights are not needed'''
+- name: attn_mask
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: is_causal
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: use_separate_proj_weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: q_proj_weight, k_proj_weight, v_proj_weight, in_proj_bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: static_k, static_v
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: average_attn_weights
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: out_proj_weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: k_proj_weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: query
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: in_proj_weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: in_proj_bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out_proj_bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: q_proj_weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: v_proj_weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: key
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: bias_v
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: static_v
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: bias_k
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: static_k
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: value
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.nn.functional.multi_head_attention_forward
+    args:
+      query, key, value: query, key, value
+      embed_dim_to_check: embed_dim_to_check
+      num_heads: num_heads
+      in_proj_weight, in_proj_bias: in_proj_weight, in_proj_bias
+      bias_k, bias_v: bias_k, bias_v
+      add_zero_attn: add_zero_attn
+      dropout_p: dropout_p
+      out_proj_weight, out_proj_bias: out_proj_weight, out_proj_bias
+      out_proj_weight: out_proj_weight
+      query: query
+      in_proj_weight: in_proj_weight
+      in_proj_bias: in_proj_bias
+      out_proj_bias: out_proj_bias
+      key: key
+      bias_v: bias_v
+      bias_k: bias_k
+      value: value

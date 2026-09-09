@@ -1,0 +1,8 @@
+operation: output_ratio
+variants:
+  flax_nnx:
+    api: nnx.nn.recurrent.Output
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

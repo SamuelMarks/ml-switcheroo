@@ -1,0 +1,4 @@
+operation: Ldt
+variants:
+  nvidia_sass:
+    api: LDT

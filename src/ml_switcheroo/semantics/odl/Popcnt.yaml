@@ -1,0 +1,9 @@
+operation: Popcnt
+variants:
+  stablehlo:
+    api: stablehlo.popcnt
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

@@ -1,0 +1,20 @@
+operation: Addmm
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat1}, {mat2}))
+    pack_as: Tuple
+    required_imports:
+    - import jax.numpy as jnp
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat1}, {mat2}))
+    pack_as: Tuple
+    required_imports:
+    - import jax.numpy as jnp
+  mlx:
+    api: mlx.core.addmm
+    args:
+      c: c
+      a: a
+      b: b

@@ -1,0 +1,4 @@
+operation: Pmtrig
+variants:
+  nvidia_sass:
+    api: PMTRIG

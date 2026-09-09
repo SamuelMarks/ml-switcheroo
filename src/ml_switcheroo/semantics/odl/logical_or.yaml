@@ -12,5 +12,24 @@ std_args:
 variants:
   dask:
     api: dask.array.logical_or
+    args: {}
+  flax_nnx:
+    api: jax.numpy.logical_or
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.logical_or
+    args: {}
+  mlx:
+    api: mlx.core.logical_or
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.logical_or
+    args:
+      x1: x1
+      x2: x2
 operation: logical_or
 type: function

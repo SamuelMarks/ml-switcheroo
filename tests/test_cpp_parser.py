@@ -242,7 +242,9 @@ def test_method_call() -> None:
   res: MethodCall = transformer.method_call([Identifier(name="func_name"), Identifier(name="a")])
   assert res.name == "func_name"
   assert len(res.arguments) == 1
-  assert res.arguments[0].name == "a"
+  arg0 = res.arguments[0]
+  assert isinstance(arg0, Identifier)
+  assert arg0.name == "a"
 
 
 def test_identifier_string_literal() -> None:
@@ -254,3 +256,38 @@ def test_identifier_string_literal() -> None:
   transformer: CppTransformer = CppTransformer()
   res: Identifier = transformer.string_lit([Token("STRING", '"hello"')])
   assert res.name == '"hello"'
+
+
+def test_cpp_parser_missing_branches() -> None:
+  """Test edge cases for function_def, func_arg, pybind_module, var_decl, and binary_expr loops."""
+  from lark import Token
+
+  from ml_switcheroo.core.compiler.backends.cpp.cst import (
+    BinaryExpression,
+    FunctionArgument,
+    FunctionDefinition,
+    Identifier,
+    PyBindModule,
+    TypeIdentifier,
+    VariableDeclaration,
+  )
+  from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
+
+  transformer: CppTransformer = CppTransformer()
+
+  f_def: FunctionDefinition = transformer.function([TypeIdentifier(name="void")])
+  assert f_def.name == ""
+
+  f_arg: FunctionArgument = transformer.func_arg([TypeIdentifier(name="int")])
+  assert f_arg.name == ""
+
+  pb_mod: PyBindModule = transformer.pybind([Token("IDENTIFIER", "mod")])
+  assert pb_mod.name == "mod"
+  assert pb_mod.module_var == ""
+
+  v_decl: VariableDeclaration = transformer.var_decl_init([TypeIdentifier(name="int")])
+  assert v_decl.name == ""
+  assert v_decl.initializer is None
+
+  b_expr: BinaryExpression = transformer.binary_expr([Identifier(name="a"), Identifier(name="b")])
+  assert b_expr.operator == ""

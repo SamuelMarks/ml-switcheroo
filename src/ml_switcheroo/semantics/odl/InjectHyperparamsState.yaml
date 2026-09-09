@@ -1,0 +1,8 @@
+operation: InjectHyperparamsState
+variants:
+  flax_nnx:
+    api: optax.schedules.inject.InjectHyperparamsState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

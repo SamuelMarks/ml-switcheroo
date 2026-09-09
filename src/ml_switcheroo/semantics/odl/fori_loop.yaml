@@ -1,0 +1,27 @@
+operation: fori_loop
+variants:
+  flax_nnx:
+    api: nnx.transforms.iteration.fori_loop
+    args:
+      body_fun: body_fun
+      init_val: init_val
+      lower: lower
+      unroll: unroll
+      upper: upper
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.lax.fori_loop
+    args:
+      lower: lower
+      upper: upper
+      body_fun: body_fun
+      init_val: init_val
+  keras:
+    api: keras.ops.fori_loop
+    args:
+      lower: lower
+      upper: upper
+      body_fun: body_fun
+      init_val: init_val

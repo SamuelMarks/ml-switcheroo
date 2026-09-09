@@ -1,0 +1,4 @@
+operation: Uf2Ip
+variants:
+  nvidia_sass:
+    api: UF2IP

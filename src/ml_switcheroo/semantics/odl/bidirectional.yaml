@@ -1,19 +1,58 @@
 description: The class representing a Python module/class/instance attribute.
 std_args:
-- layer
-- merge_mode
-- backward_layer
-- weights
-- kwargs
-- activity_regularizer
-- trainable
-- dtype
-- autocast
-- name
+- name: layer
+  type: Any
+- name: merge_mode
+  type: Any
+- name: backward_layer
+  type: Any
+- name: weights
+  type: Any
+- name: kwargs
+  type: Any
+- name: activity_regularizer
+  type: Any
+- name: trainable
+  type: Any
+- name: dtype
+  type: Any
+- name: autocast
+  type: Any
+- name: name
+  type: Any
 type: attribute
-operation: bidirectional
+operation: Bidirectional
 variants:
   keras:
     api: keras.layers.Bidirectional
+    args:
+      backward_layer: backward_layer
+      kwargs: kwargs
+      layer: layer
+      merge_mode: merge_mode
+      weights: weights
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.Bidirectional
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Bidirectional
+    args:
+      backward_rnn: backward_rnn
+      forward_rnn: forward_rnn
+      merge_fn: merge_fn
+      return_carry: return_carry
+      rngs: rngs
+      self: self
+      time_major: time_major
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

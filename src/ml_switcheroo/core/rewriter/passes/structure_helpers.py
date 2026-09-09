@@ -115,7 +115,7 @@ class StructuralTransformerHelpersMixin:
     Returns:
         A modified `cst.FunctionDef` node containing the injected preamble statements.
     """
-    new_stmts = []
+    new_stmts: List[cst.BaseStatement] = []
     for code in stmts_code:
       try:
         mod = cst.parse_module(code)

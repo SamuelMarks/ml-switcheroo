@@ -9,13 +9,10 @@ from ml_switcheroo.frameworks.stablehlo import StableHloAdapter
 def test_mlir_adapter_properties() -> None:
   """Docstring."""
   adapter: MlirAdapter = MlirAdapter()
-  pass
   adapter.import_alias
   adapter.import_namespaces
   adapter.supported_tiers
-
-  pass
-  pass
+  adapter.structural_traits
   adapter.plugin_traits
 
   adapter.test_config
@@ -26,9 +23,9 @@ def test_mlir_adapter_properties() -> None:
   adapter.rng_seed_methods
 
   with patch("ml_switcheroo.frameworks.mlir.load_definitions", return_value={"test": MagicMock()}):
-    pass
+    adapter.definitions
 
-  pass
+  adapter.specifications
   adapter.convert([1, 2])
   adapter.get_device_syntax("cpu")
   adapter.get_device_check_syntax()
@@ -43,19 +40,14 @@ def test_mlir_adapter_properties() -> None:
   adapter.apply_wiring({})
   adapter.get_doc_url("mlir.Module")
 
-  pass
-
 
 def test_stablehlo_adapter_properties() -> None:
   """Docstring."""
   adapter: StableHloAdapter = StableHloAdapter()
-  pass
   adapter.import_alias
   adapter.import_namespaces
   adapter.supported_tiers
-
-  pass
-  pass
+  adapter.structural_traits
   adapter.plugin_traits
 
   adapter.test_config
@@ -66,9 +58,9 @@ def test_stablehlo_adapter_properties() -> None:
   adapter.rng_seed_methods
 
   with patch("ml_switcheroo.frameworks.stablehlo.load_definitions", return_value={"test": MagicMock()}):
-    pass
+    adapter.definitions
 
-  pass
+  adapter.specifications
   adapter.convert([1, 2])
   adapter.get_device_syntax("cpu")
   adapter.get_device_check_syntax()

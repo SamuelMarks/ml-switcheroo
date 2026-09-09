@@ -1,0 +1,17 @@
+operation: roots
+description: Return the roots of a polynomial with coefficients given in p.
+std_args:
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: strip_zeros
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'True'
+variants:
+  jax:
+    api: jax.numpy.roots
+    args:
+      p: p

@@ -143,3 +143,25 @@ def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: pytest.Monkey
   # verify merge_tier_data was called by inspecting the mocked merge or side effect
   # since we use MagicMock, we just check that manager._key_origins got the new origin
   assert manager._key_origins.get("plugin_op") == "extras"
+
+
+def test_index_variants_edge_cases() -> None:
+  """Test index_variants when _variant_cache is missing, variants is not dict, or variant is None."""
+  # Case 1: no _variant_cache
+  mgr = MagicMock()
+  del mgr._variant_cache
+  loader = RegistryLoader(mgr)
+  loader.index_variants()
+
+  # Case 2: variants is not dict, variant is None
+  mgr2 = MagicMock()
+  mgr2._variant_cache = {}
+  mgr2.data = {
+    "op1": {"variants": "not_a_dict"},
+    "op2": {"variants": {"jax": None, "torch": {"api": "torch.op2"}}},
+    "op3": "not_a_dict_details",
+  }
+  loader2 = RegistryLoader(mgr2)
+  loader2.index_variants()
+  assert ("op2", "torch") in mgr2._variant_cache
+  assert ("op2", "jax") not in mgr2._variant_cache

@@ -1,0 +1,8 @@
+operation: conditionally_mask
+variants:
+  flax_nnx:
+    api: optax.conditionally_mask
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,10 +1,14 @@
 description: The class representing a Python function.
 std_args:
-- self
-- value
-- indices
+- name: self
+  type: Any
+- name: value
+  type: Any
+- name: indices
+  type: Any
 type: function
 operation: store
 variants:
   dask:
     api: dask.array.store
+    args: {}

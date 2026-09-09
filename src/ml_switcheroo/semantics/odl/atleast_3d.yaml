@@ -3,5 +3,17 @@ std_args: []
 variants:
   dask:
     api: dask.array.atleast_3d
+    args: {}
+  flax_nnx:
+    api: jax.numpy.atleast_3d
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.atleast_3d
+    args: {}
+  mlx:
+    api: mlx.core.atleast_3d
+    args: {}
 operation: atleast_3d
 type: function

@@ -30,8 +30,8 @@ FRAMEWORK_GROUPS = {
   # Level 3
   "mlir": "Level 3: Standard IR",
   "stablehlo": "Level 3: Standard IR",
-  # Level 4 - Updated to include SASS/RDNA
-  "sass": "Level 4: ASM",
+  # Level 4 - Updated to include NVIDIA_SASS/RDNA
+  "nvidia_sass": "Level 4: ASM",
   "rdna": "Level 4: ASM",
 }
 

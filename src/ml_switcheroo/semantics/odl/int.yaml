@@ -1,7 +1,12 @@
-description: LaTeX \int macro.
-std_args: []
-type: function
 operation: int
+description: int(memory_format=torch.preserve_format) -> Tensor
+std_args:
+- name: memory_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: torch.preserve_format
 variants:
-  latex_dsl:
-    api: latex.int
+  torch:
+    api: torch.Tensor.int
+    args: {}

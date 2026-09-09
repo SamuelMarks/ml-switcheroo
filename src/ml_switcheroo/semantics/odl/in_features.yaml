@@ -1,0 +1,8 @@
+operation: in_features
+variants:
+  flax_nnx:
+    api: nnx.nn.lora.LoRA.in_features
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,5 @@
+operation: VSubCoU32
+variants:
+  rdna:
+    api: v_sub_co_u32
+    description: Auto-mapped instruction V_SUB_CO_U32

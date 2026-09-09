@@ -1,0 +1,14 @@
+operation: min_val
+variants:
+  paxml:
+    api: optax.tree.min
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.tree.min
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

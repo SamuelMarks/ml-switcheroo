@@ -1,0 +1,20 @@
+operation: neg
+description: neg(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.neg
+    args:
+      input: input
+  jax:
+    api: jax.lax.neg
+    args:
+      x: x

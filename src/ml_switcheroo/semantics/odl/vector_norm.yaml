@@ -1,0 +1,12 @@
+operation: vector_norm
+variants:
+  flax_nnx:
+    api: jax.numpy.linalg.vector_norm
+    args:
+      axis: axis
+      keepdims: keepdims
+      ord: ord
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

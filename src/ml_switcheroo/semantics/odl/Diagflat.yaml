@@ -1,0 +1,25 @@
+operation: diagflat
+description: diagflat(input, offset=0) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: offset
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+variants:
+  torch:
+    api: torch.diagflat
+    args:
+      input: input
+  jax:
+    api: jax.numpy.diagflat
+    args:
+      v: v
+  keras:
+    api: keras.ops.diagflat
+    args:
+      x: x

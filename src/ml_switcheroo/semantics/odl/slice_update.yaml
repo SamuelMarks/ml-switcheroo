@@ -1,0 +1,38 @@
+operation: slice_update
+description: 'slice_update(a: array, update: array, start_indices: array, axes: Sequence[int],
+  *, stream: Union[None, Stream, Device] = None) -> array'
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: update
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: start_indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axes
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  mlx:
+    api: mlx.core.slice_update
+    args:
+      a: a
+      update: update
+      start_indices: start_indices
+      axes: axes
+  keras:
+    api: keras.ops.slice_update
+    args:
+      inputs: inputs
+      start_indices: start_indices
+      updates: updates

@@ -1,0 +1,149 @@
+operation: CausalDepthwiseConv1D
+variants:
+  paxml:
+    api: praxis.layers.CausalDepthwiseConv1D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Conv1d
+    args:
+      hidden_dims: in_channels
+    dispatch_rules: []
+    inject_args:
+      groups: '{hidden_dims}'
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.Conv1d
+    args:
+      in_channels: in_channels
+      out_channels: out_channels
+      kernel_size: kernel_size
+std_args:
+- name: __doc__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: "'```(\\'Applies a 1D convolution over an input signal composed of several\
+    \ input\\\\n    planes.\\\\n\\\\n    In the simplest case, the output value of\
+    \ the layer with input size\\\\n    :math:`(N, C_{\\\\\\\\text{in}}, L)` and output\
+    \ :math:`(N, C_{\\\\\\\\text{out}}, L_{\\\\\\\\text{out}})` can be\\\\n    precisely\
+    \ described as:\\\\n\\\\n    .. math::\\\\n        \\\\\\\\text{out}(N_i, C_{\\\
+    \\\\\\text{out}_j}) = \\\\\\\\text{bias}(C_{\\\\\\\\text{out}_j}) +\\\\n     \
+    \   \\\\\\\\sum_{k = 0}^{C_{in} - 1} \\\\\\\\text{weight}(C_{\\\\\\\\text{out}_j},\
+    \ k)\\\\n        \\\\\\\\star \\\\\\\\text{input}(N_i, k)\\\\n\\\\n    where :math:`\\\
+    \\\\\\star` is the valid `cross-correlation`_ operator,\\\\n    :math:`N` is a\
+    \ batch size, :math:`C` denotes a number of channels,\\\\n    :math:`L` is a length\
+    \ of signal sequence.\\\\n    \\' + \"\\\\n\\\\n    This module supports :ref:`TensorFloat32<tf32_on_ampere>`.\\\
+    \\n\\\\n    On certain ROCm devices, when using float16 inputs this module will\
+    \ use :ref:`different precision<fp16_on_mi200>` for backward.\\\\n\\\\n    * :attr:`stride`\
+    \ controls the stride for the cross-correlation, a single\\\\n      number or\
+    \ a one-element tuple.\\\\n\\\\n    * :attr:`padding` controls the amount of padding\
+    \ applied to the input. It\\\\n      can be either a string {{\\'valid\\', \\\
+    'same\\'}} or a tuple of ints giving the\\\\n      amount of implicit padding\
+    \ applied on both sides.\\\\n\\\\n    * :attr:`dilation` controls the spacing\
+    \ between the kernel points; also\\\\n      known as the \xE0 trous algorithm.\
+    \ It is harder to describe, but this `link`_\\\\n      has a nice visualization\
+    \ of what :attr:`dilation` does.\\\\n\\\\n    {groups_note}\\\\n\\\\n    Note:\\\
+    \\n        {depthwise_separable_note}\\\\n    Note:\\\\n        {cudnn_reproducibility_note}\\\
+    \\n\\\\n    Note:\\\\n        ``padding=\\'valid\\'`` is the same as no padding.\
+    \ ``padding=\\'same\\'`` pads\\\\n        the input so the output has the shape\
+    \ as the input. However, this mode\\\\n        doesn\\'t support any stride values\
+    \ other than 1.\\\\n\\\\n    Note:\\\\n        This module supports complex data\
+    \ types i.e. ``complex32, complex64, complex128``.\\\\n\\\\n    Args:\\\\n   \
+    \     in_channels (int): Number of channels in the input image\\\\n        out_channels\
+    \ (int): Number of channels produced by the convolution\\\\n        kernel_size\
+    \ (int or tuple): Size of the convolving kernel\\\\n        stride (int or tuple,\
+    \ optional): Stride of the convolution. Default: 1\\\\n        padding (int, tuple\
+    \ or str, optional): Padding added to both sides of\\\\n            the input.\
+    \ Default: 0\\\\n        dilation (int or tuple, optional): Spacing between kernel\\\
+    \\n            elements. Default: 1\\\\n        groups (int, optional): Number\
+    \ of blocked connections from input\\\\n            channels to output channels.\
+    \ Default: 1\\\\n        bias (bool, optional): If ``True``, adds a learnable\
+    \ bias to the\\\\n            output. Default: ``True``\\\\n        padding_mode\
+    \ (str, optional): ``\\'zeros\\'``, ``\\'reflect\\'``,\\\\n            ``\\'replicate\\\
+    '`` or ``\\'circular\\'``. Default: ``\\'zeros\\'``\\\\n\\\\n    \".format(**reproducibility_notes,\
+    \ **convolution_notes) + \\'\\\\n\\\\n    Shape:\\\\n        - Input: :math:`(N,\
+    \ C_{in}, L_{in})` or :math:`(C_{in}, L_{in})`\\\\n        - Output: :math:`(N,\
+    \ C_{out}, L_{out})` or :math:`(C_{out}, L_{out})`, where\\\\n\\\\n          ..\
+    \ math::\\\\n              L_{out} = \\\\\\\\left\\\\\\\\lfloor\\\\\\\\frac{L_{in}\
+    \ + 2 \\\\\\\\times \\\\\\\\text{padding} - \\\\\\\\text{dilation}\\\\n      \
+    \                  \\\\\\\\times (\\\\\\\\text{kernel\\\\\\\\_size} - 1) - 1}{\\\
+    \\\\\\text{stride}} + 1\\\\\\\\right\\\\\\\\rfloor\\\\n\\\\n    Attributes:\\\\\
+    n        weight (Tensor): the learnable weights of the module of shape\\\\n  \
+    \          :math:`(\\\\\\\\text{out\\\\\\\\_channels},\\\\n            \\\\\\\\\
+    frac{\\\\\\\\text{in\\\\\\\\_channels}}{\\\\\\\\text{groups}}, \\\\\\\\text{kernel\\\
+    \\\\\\_size})`.\\\\n            The values of these weights are sampled from\\\
+    \\n            :math:`\\\\\\\\mathcal{U}(-\\\\\\\\sqrt{k}, \\\\\\\\sqrt{k})` where\\\
+    \\n            :math:`k = \\\\\\\\frac{groups}{C_\\\\\\\\text{in} * \\\\\\\\text{kernel\\\
+    \\\\\\_size}}`\\\\n        bias (Tensor):   the learnable bias of the module of\
+    \ shape\\\\n            (out_channels). If :attr:`bias` is ``True``, then the\
+    \ values of these weights are\\\\n            sampled from :math:`\\\\\\\\mathcal{U}(-\\\
+    \\\\\\sqrt{k}, \\\\\\\\sqrt{k})` where\\\\n            :math:`k = \\\\\\\\frac{groups}{C_\\\
+    \\\\\\text{in} * \\\\\\\\text{kernel\\\\\\\\_size}}`\\\\n\\\\n    Examples::\\\
+    \\n\\\\n        >>> m = nn.Conv1d(16, 33, 3, stride=2)\\\\n        >>> input =\
+    \ torch.randn(20, 16, 50)\\\\n        >>> output = m(input)\\\\n\\\\n    .. _cross-correlation:\\\
+    \\n        https://en.wikipedia.org/wiki/Cross-correlation\\\\n\\\\n    .. _link:\\\
+    \\n        https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md\\\
+    \\n    \\')```'"
+- name: out_channels
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: hidden_dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: groups
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: kernel_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: padding_mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''zeros'''
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: transposed
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+- name: output_padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: tuple

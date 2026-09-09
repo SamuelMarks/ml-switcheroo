@@ -1,0 +1,5 @@
+operation: SCeilF16
+variants:
+  rdna:
+    api: s_ceil_f16
+    description: Auto-mapped instruction S_CEIL_F16

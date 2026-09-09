@@ -1,14 +1,23 @@
 description: Wrapper to injects stateful hyperparameters into GradientTransformations.
 std_args:
-- inner_factory
-- static_args
-- hyperparam_dtype
+- name: inner_factory
+  type: Any
+- name: static_args
+  type: Any
+- name: hyperparam_dtype
+  type: Any
 type: attribute
 operation: inject_hyperparams
 variants:
   optax_shim:
     api: optax.schedules.inject_hyperparams
+    args: {}
   flax_nnx:
-    api: optax.schedules.inject_hyperparams
+    api: optax.schedules.inject.inject_hyperparams
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.schedules.inject_hyperparams
+    args: {}

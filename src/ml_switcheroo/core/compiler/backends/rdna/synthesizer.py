@@ -17,7 +17,7 @@ It contains:
 3.  **RdnaBackend**: The CompilerBackend adapter for the Registry, including header generation.
 """
 
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING, Any
 import libcst as cst
 
 # Direct Import from Frontend to avoid circular dependency via core shims
@@ -37,6 +37,7 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, topological_sort
 import ml_switcheroo.core.compiler.backends.rdna.macros as rdna_macros
 import json
 import os
+import yaml
 
 if TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -143,14 +144,25 @@ class RdnaSynthesizer:
     self.semantics = semantics
     self.allocator = RegisterAllocator()
     self.macro_registry = {}
+    macros_yaml_path = os.path.join(os.path.dirname(__file__), "macros.yaml")
     macros_json_path = os.path.join(os.path.dirname(__file__), "macros.json")
-    if os.path.exists(macros_json_path):
-      with open(macros_json_path, "r", encoding="utf-8") as f:
-        mapping = json.load(f)
+    mapping: Dict[str, Any] = {}
+    if os.path.exists(macros_yaml_path):
+      try:
+        with open(macros_yaml_path, "r", encoding="utf-8") as f:
+          mapping = yaml.safe_load(f) or {}
+      except FileNotFoundError:
+        mapping = {}
+    if not mapping and os.path.exists(macros_json_path):
+      try:
+        with open(macros_json_path, "r", encoding="utf-8") as f:
+          mapping = json.load(f)
+      except FileNotFoundError:
+        mapping = {}
 
-      for key, func_name in mapping.items():
-        if hasattr(rdna_macros, func_name):
-          self.macro_registry[key] = getattr(rdna_macros, func_name)
+    for key, func_name in mapping.items():
+      if hasattr(rdna_macros, func_name):
+        self.macro_registry[key] = getattr(rdna_macros, func_name)
 
   def from_graph(self, graph: LogicalGraph) -> List[RdnaNode]:
     """Convert a LogicalGraph into a list of RDNA AST nodes.
@@ -190,6 +202,9 @@ class RdnaSynthesizer:
       else:
         # Resolve Abstract ID
         defn = self.semantics.get_definition(node.kind)
+        if not defn and ("." in node.kind):
+          suffix = node.kind.split(".", 1)[-1]
+          defn = self.semantics.get_definition(suffix)
         abstract_id = defn[0] if defn else node.kind
 
         # --- Macro Expansion ---
@@ -216,6 +231,27 @@ class RdnaSynthesizer:
           continue
 
         opcode = variant["api"]
+
+        # Check if opcode represents a Macro directive
+        clean_macro: Optional[str] = None
+        if opcode.startswith("; Macro."):
+          clean_macro = opcode[len("; Macro.") :].strip()
+        elif opcode.startswith("Macro."):
+          clean_macro = opcode[len("Macro.") :].strip()
+
+        if clean_macro:
+          if clean_macro in self.macro_registry:
+            kernel_nodes = self.macro_registry[clean_macro](self.allocator, node.id, node.metadata)
+            output_nodes.extend(kernel_nodes)
+            continue
+          else:
+            output_nodes.append(RdnaComment(text=f"BEGIN {clean_macro} ({node.id})"))
+            output_nodes.append(RdnaComment(text=f"END {clean_macro} ({node.id})"))
+            continue
+
+        if opcode.startswith(";"):
+          output_nodes.append(RdnaComment(text=f"Unmapped Op: {opcode} ({node.id})"))
+          continue
 
         # RDNA Vector ALU Format: OPCODE DST, SRC0, SRC1
         dst_reg = self.allocator.get_vector_register(node.id)

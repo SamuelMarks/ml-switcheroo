@@ -1,0 +1,15 @@
+operation: from_dlpack
+variants:
+  flax_nnx:
+    api: jax.numpy.from_dlpack
+    args:
+      copy: copy
+      device: device
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.from_dlpack
+    args:
+      x: x

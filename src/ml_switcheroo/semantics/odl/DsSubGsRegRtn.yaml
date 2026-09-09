@@ -1,0 +1,5 @@
+operation: DsSubGsRegRtn
+variants:
+  rdna:
+    api: ds_sub_gs_reg_rtn
+    description: Auto-mapped instruction DS_SUB_GS_REG_RTN

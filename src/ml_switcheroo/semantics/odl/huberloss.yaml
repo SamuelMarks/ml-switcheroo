@@ -16,5 +16,41 @@ std_args:
 variants:
   torch:
     api: torch.nn.HuberLoss
-operation: huberloss
+    arg_values:
+      reduction:
+        none: '''none'''
+        sum: '''sum'''
+        sum_over_batch_size: '''mean'''
+    args:
+      delta: delta
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  keras:
+    api: keras.losses.Huber
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: optax.huber_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.losses.huber_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.losses.Huber
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.huber_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+operation: HuberLoss
 type: function

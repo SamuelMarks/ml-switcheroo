@@ -1,9 +1,11 @@
 """Tests for HTML DSL framework adapter."""
 
 import typing
+from unittest.mock import patch
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
+from ml_switcheroo.frameworks.base import StandardMap
 from ml_switcheroo.frameworks.html_dsl import HtmlDSLAdapter
 from ml_switcheroo.semantics.schema import PluginTraits
 
@@ -127,3 +129,16 @@ def test_html_dsl_missing_methods() -> None:
   assert adapter.get_weight_load_code("path") == "# Weights not supported in HTML mode"
   assert adapter.get_tensor_to_numpy_expr("t") == "t"
   assert adapter.get_weight_save_code("state", "path") == "# Weights not supported in HTML mode"
+
+
+def test_html_dsl_definitions_prepopulated() -> None:
+  """Verifies definitions when Module and Conv2d are already defined."""
+  custom_defs: dict[str, StandardMap] = {
+    "Module": StandardMap(api="custom.Module"),
+    "Conv2d": StandardMap(api="custom.Conv2d"),
+  }
+  with patch("ml_switcheroo.frameworks.html_dsl.load_definitions", return_value=custom_defs):
+    adapter = HtmlDSLAdapter()
+    defs = adapter.definitions
+    assert defs["Module"].api == "custom.Module"
+    assert defs["Conv2d"].api == "custom.Conv2d"

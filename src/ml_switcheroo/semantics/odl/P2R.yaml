@@ -1,0 +1,4 @@
+operation: P2R
+variants:
+  nvidia_sass:
+    api: P2R

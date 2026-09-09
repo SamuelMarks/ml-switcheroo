@@ -1,0 +1,12 @@
+operation: conv_general_permutations
+description: Utility for convolution dimension permutations relative to Conv HLO.
+std_args:
+- name: dimension_numbers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.conv_general_permutations
+    args:
+      dimension_numbers: dimension_numbers

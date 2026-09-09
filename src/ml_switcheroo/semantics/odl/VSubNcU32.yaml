@@ -1,0 +1,5 @@
+operation: VSubNcU32
+variants:
+  rdna:
+    api: v_sub_nc_u32
+    description: Auto-mapped instruction V_SUB_NC_U32

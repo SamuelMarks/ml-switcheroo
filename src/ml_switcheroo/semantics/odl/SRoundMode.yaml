@@ -1,0 +1,5 @@
+operation: SRoundMode
+variants:
+  rdna:
+    api: s_round_mode
+    description: Auto-mapped instruction S_ROUND_MODE

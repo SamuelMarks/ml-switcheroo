@@ -1,0 +1,33 @@
+operation: BatchNormInference
+variants:
+  stablehlo:
+    api: stablehlo.batch_norm_inference
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: scale
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: offset
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: mean
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: variance
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: epsilon
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: feature_index
+  kind: keyword_only
+  is_variadic: false
+  type: Any

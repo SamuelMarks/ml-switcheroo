@@ -1,0 +1,12 @@
+operation: flatten_parameters
+variants:
+  flax_nnx:
+    api: nnx.graph.SplitContext.flatten
+    args:
+      filters: filters
+      node: node
+      self: self
+      with_paths: with_paths
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

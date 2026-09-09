@@ -1,0 +1,8 @@
+operation: clip_by_global_norm
+variants:
+  flax_nnx:
+    api: optax.clip_by_global_norm
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

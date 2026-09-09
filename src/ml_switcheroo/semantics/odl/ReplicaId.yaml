@@ -1,0 +1,4 @@
+operation: ReplicaId
+variants:
+  stablehlo:
+    api: stablehlo.replica_id

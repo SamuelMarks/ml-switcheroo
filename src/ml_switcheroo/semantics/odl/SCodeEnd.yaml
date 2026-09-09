@@ -1,0 +1,5 @@
+operation: SCodeEnd
+variants:
+  rdna:
+    api: s_code_end
+    description: Auto-mapped instruction S_CODE_END

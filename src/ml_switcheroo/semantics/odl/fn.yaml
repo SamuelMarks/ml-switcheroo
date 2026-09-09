@@ -1,0 +1,8 @@
+operation: fn
+variants:
+  flax_nnx:
+    api: nnx.transforms.compilation.JitWrapped.fun
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

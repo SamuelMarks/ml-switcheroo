@@ -13,7 +13,20 @@ std_args:
 variants:
   keras:
     api: keras.layers.HashedCrossing
+    args:
+      dtype: dtype
+      kwargs: kwargs
+      name: name
+      num_bins: num_bins
+      output_mode: output_mode
+      sparse: sparse
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.HashedCrossing
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: HashedCrossing
 type: function

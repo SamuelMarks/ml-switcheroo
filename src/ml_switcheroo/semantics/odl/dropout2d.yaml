@@ -1,10 +1,27 @@
-description: Apply 2D channel-wise dropout during training.
-std_args:
-- p
-type: function
 operation: dropout2d
+description: Randomly zero out entire channels (a channel is a 2D feature map).
+std_args:
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.5'
+- name: training
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
 variants:
-  mlx:
-    api: mlx.nn.Dropout2d
   torch:
-    api: torch.nn.Dropout2d
+    api: torch.nn.functional.dropout2d
+    args:
+      input: input

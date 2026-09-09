@@ -1,0 +1,12 @@
+operation: rfftfreq
+variants:
+  flax_nnx:
+    api: jax.numpy.fft.rfftfreq
+    args:
+      d: d
+      device: device
+      dtype: dtype
+      n: n
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

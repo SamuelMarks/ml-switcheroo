@@ -1,23 +1,42 @@
-description: Calculates the standard deviation of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: axis
-  type: Optional[Union[int, Tuple[int, Ellipsis]]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: correction
-  type: Union[int, float]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: keepdims
-  type: bool
-variants:
-  dask:
-    api: dask.array.std
 operation: std
-type: function
+description: std(input, dim=None, *, correction=1, keepdim=False, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: correction
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: keepdim
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.std
+    args:
+      input: input
+  jax:
+    api: jax.numpy.std
+    args:
+      a: a
+  mlx:
+    api: mlx.core.std
+    args:
+      a: a
+  keras:
+    api: keras.ops.std
+    args:
+      x: x

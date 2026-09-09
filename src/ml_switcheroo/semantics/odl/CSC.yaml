@@ -1,10 +1,14 @@
 description: Experimental CSC matrix implemented in JAX; API subject to change.
 std_args:
-- self
-- args
-- shape
+- name: self
+  type: Any
+- name: args
+  type: Any
+- name: shape
+  type: Any
 type: class
 operation: CSC
 variants:
   latex_dsl:
     api: latex.csc
+    args: {}

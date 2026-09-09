@@ -1,0 +1,13 @@
+operation: Cosine
+variants:
+  stablehlo:
+    api: stablehlo.cosine
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: result_accuracy
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

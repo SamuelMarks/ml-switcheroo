@@ -1,21 +1,39 @@
-description: Returns the indices of the maximum values along a specified axis.
+operation: argmax
+description: argmax(input) -> LongTensor
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
+  is_variadic: false
+  type: Tensor
+- name: dim
   kind: positional_or_keyword
-  name: axis
-  type: Optional[int]
-- is_variadic: false
+  is_variadic: false
+  type: Any
+- name: keepdim
   kind: positional_or_keyword
-  name: keepdims
-  type: bool
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
-  dask:
-    api: dask.array.argmax
   torch:
     api: torch.argmax
-operation: argmax
-type: function
+    args:
+      input: input
+  jax:
+    api: jax.lax.argmax
+    args:
+      operand: operand
+      axis: axis
+      index_dtype: index_dtype
+  mlx:
+    api: mlx.core.argmax
+    args:
+      a: a
+  keras:
+    api: keras.ops.argmax
+    args:
+      x: x

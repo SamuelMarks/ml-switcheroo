@@ -1,9 +1,31 @@
 description: left_shift(x1, x2, /, out=None, *, where=True, casting='same_kind', order='K',
   dtype=None, subok=True[, signature, extobj])
 std_args:
-- kwargs
+- name: kwargs
+  type: Any
 variants:
   dask:
     api: dask.array.left_shift
+    args: {}
+  flax_nnx:
+    api: jax.numpy.left_shift
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.left_shift
+    args:
+      x1: x1
+      x2: x2
+  mlx:
+    api: mlx.core.left_shift
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.left_shift
+    args:
+      x: x
+      y: y
 operation: left_shift
 type: function

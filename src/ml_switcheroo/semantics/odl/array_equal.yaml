@@ -1,0 +1,21 @@
+operation: array_equal
+variants:
+  flax_nnx:
+    api: jax.numpy.array_equal
+    args:
+      a1: a1
+      a2: a2
+      equal_nan: equal_nan
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.array_equal
+    args:
+      a1: a1
+      a2: a2
+  mlx:
+    api: mlx.core.array_equal
+    args:
+      a: a
+      b: b

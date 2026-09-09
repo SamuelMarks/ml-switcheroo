@@ -1,10 +1,15 @@
 description: Fill the input `Tensor` with values using a Kaiming normal distribution.
 std_args:
-- tensor
-- a
-- mode
-- nonlinearity
-- generator
+- name: tensor
+  type: Any
+- name: a
+  type: Any
+- name: mode
+  type: Any
+- name: nonlinearity
+  type: Any
+- name: generator
+  type: Any
 type: function
 operation: kaiming_normal_
 variants:

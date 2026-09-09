@@ -1,0 +1,27 @@
+operation: Symeig
+description: Computes eigenvalues and eigenvectors of a real symmetric matrix (Deprecated).
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: eigenvectors
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: upper
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.symeig
+    args:
+      input: input

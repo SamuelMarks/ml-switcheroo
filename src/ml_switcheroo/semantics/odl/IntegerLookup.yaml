@@ -12,7 +12,38 @@ std_args:
 variants:
   keras:
     api: keras.layers.IntegerLookup
+    args:
+      idf_weights: idf_weights
+      invert: invert
+      kwargs: kwargs
+      mask_token: mask_token
+      max_tokens: max_tokens
+      name: name
+      num_oov_indices: num_oov_indices
+      oov_token: oov_token
+      output_mode: output_mode
+      pad_to_max_tokens: pad_to_max_tokens
+      sparse: sparse
+      vocabulary: vocabulary
+      vocabulary_dtype: vocabulary_dtype
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.IntegerLookup
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Embedding
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: vocab_lookup
+  mlx:
+    api: mlx.nn.Embedding
+    args:
+      num_embeddings: num_embeddings
+      dims: dims
 operation: IntegerLookup
 type: function

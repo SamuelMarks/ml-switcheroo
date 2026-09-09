@@ -1,10 +1,28 @@
-description: LaTeX \arccos macro.
-std_args:
-- kwargs
-variants:
-  latex_dsl:
-    api: latex.arccos
-  dask:
-    api: dask.array.arccos
 operation: arccos
-type: function
+description: 'arccos(input: Tensor, *, out: Optional[Tensor]) -> Tensor'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.arccos
+    args:
+      input: input
+  jax:
+    api: jax.numpy.acos
+    args:
+      x: x
+  mlx:
+    api: mlx.core.arccos
+    args:
+      a: a
+  keras:
+    api: keras.ops.arccos
+    args:
+      x: x

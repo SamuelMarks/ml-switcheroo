@@ -1,0 +1,22 @@
+operation: Outfeed
+variants:
+  stablehlo:
+    api: stablehlo.outfeed
+  jax:
+    api: jax.lax.outfeed
+    args:
+      token: token
+      xs: xs
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: token
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: outfeed_config
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

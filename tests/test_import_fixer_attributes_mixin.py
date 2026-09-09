@@ -25,7 +25,49 @@ class MockFixer(AttributeMixin):
       self.target_fw: str = target_fw
 
 
+def test_simplify_reexports_missing_attrs() -> None:
+  """Test docstring."""
+  """Test branch where Mixin is used without attributes from other mixins."""
+  fixer: MockFixer = MockFixer()  # none of the attrs set
+
+  # node: nnx.module.Module
+  node: cst.Attribute = cst.Attribute(
+    value=cst.Attribute(value=cst.Name("nnx"), attr=cst.Name("module")),
+    attr=cst.Name("Module"),
+  )
+  assert fixer._simplify_reexports(node) is node
+
+
+def test_simplify_reexports_target_fw_set() -> None:
+  """Test docstring."""
+  fixer: MockFixer = MockFixer(target_fw="nnx")
+  node: cst.Attribute = cst.Attribute(
+    value=cst.Attribute(value=cst.Name("nnx"), attr=cst.Name("module")),
+    attr=cst.Name("Module"),
+  )
+  result = fixer._simplify_reexports(node)
+  assert isinstance(result, cst.Attribute)
+  assert isinstance(result.value, cst.Name)
+  assert result.value.value == "nnx"
+
+
+def test_leave_Attribute_simplify() -> None:
+  """Test docstring."""
+  """Docstring."""
+  fixer: MockFixer = MockFixer(target_fw="nnx")
+  node: cst.Attribute = cst.Attribute(
+    value=cst.Attribute(value=cst.Name("nnx"), attr=cst.Name("module")),
+    attr=cst.Name("Module"),
+  )
+  result = fixer.leave_Attribute(node, node)
+  assert result is not node
+  assert isinstance(result, cst.Attribute)
+  assert isinstance(result.value, cst.Name)
+  assert result.value.value == "nnx"
+
+
 def test_simplify_reexports_not_attribute() -> None:
+  """Test docstring."""
   """Docstring."""
   fixer: MockFixer = MockFixer()
   # Not an attribute value
@@ -34,6 +76,7 @@ def test_simplify_reexports_not_attribute() -> None:
 
 
 def test_simplify_reexports_not_redundant() -> None:
+  """Test docstring."""
   """Docstring."""
   fixer: MockFixer = MockFixer()
   # jax.numpy.sum
@@ -44,6 +87,7 @@ def test_simplify_reexports_not_redundant() -> None:
 
 
 def test_simplify_reexports_not_safe_root() -> None:
+  """Test docstring."""
   """Docstring."""
   fixer: MockFixer = MockFixer(defined_names={"my_module"})
   # unknown.module.X
@@ -54,6 +98,7 @@ def test_simplify_reexports_not_safe_root() -> None:
 
 
 def test_simplify_reexports_success() -> None:
+  """Test docstring."""
   """Docstring."""
   fixer: MockFixer = MockFixer(defined_names={"nnx"})
   # nnx.module.Module -> nnx.Module
@@ -68,6 +113,7 @@ def test_simplify_reexports_success() -> None:
 
 
 def test_leave_attribute_missing_path_to_alias() -> None:
+  """Test docstring."""
   """Docstring."""
   fixer: AttributeMixin = AttributeMixin()  # No _path_to_alias set
   node: cst.Attribute = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn"))
@@ -75,6 +121,7 @@ def test_leave_attribute_missing_path_to_alias() -> None:
 
 
 def test_leave_attribute_collapsing() -> None:
+  """Test docstring."""
   """Docstring."""
   fixer: MockFixer = MockFixer(path_to_alias={"jax.numpy": "jnp"}, defined_names={"jnp"})
   # original_node = jax.numpy.sum
@@ -90,6 +137,7 @@ def test_leave_attribute_collapsing() -> None:
 
 
 def test_leave_attribute_no_collapsing() -> None:
+  """Test docstring."""
   """Docstring."""
   fixer: MockFixer = MockFixer(path_to_alias={"jax.numpy": "jnp"}, defined_names={"jnp"})
   original_node: cst.Attribute = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn"))
@@ -98,6 +146,7 @@ def test_leave_attribute_no_collapsing() -> None:
 
 
 def test_leave_attribute_with_simplify_after_collapse() -> None:
+  """Test docstring."""
   """Docstring."""
   fixer: MockFixer = MockFixer(path_to_alias={"flax.nnx": "nnx"}, defined_names={"nnx"})
   # flax.nnx.module.Module -> nnx.module.Module -> nnx.Module

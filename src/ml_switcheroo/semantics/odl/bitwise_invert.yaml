@@ -1,0 +1,19 @@
+operation: bitwise_invert
+variants:
+  flax_nnx:
+    api: jax.numpy.bitwise_invert
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.invert
+    args:
+      x: x
+  mlx:
+    api: mlx.core.bitwise_invert
+    args:
+      a: a
+  keras:
+    api: keras.ops.bitwise_invert
+    args:
+      x: x

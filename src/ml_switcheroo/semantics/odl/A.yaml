@@ -9,5 +9,11 @@ variants:
       class_name: class_name
       style: style
       kwargs: kwargs
+  flax_nnx:
+    api: nnx.transforms.autodiff.A
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: A
 type: function

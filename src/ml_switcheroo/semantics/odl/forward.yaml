@@ -1,8 +1,7 @@
-description: SASS @forward directive.
-std_args:
-- kwargs
-type: function
 operation: forward
 variants:
-  sass:
-    api: sass.at_forward
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: inject_training_flag

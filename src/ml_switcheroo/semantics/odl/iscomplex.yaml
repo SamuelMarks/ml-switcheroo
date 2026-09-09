@@ -1,8 +1,12 @@
-description: Returns a bool array, where True if input element is complex.
-std_args:
-- kwargs
-variants:
-  dask:
-    api: dask.array.iscomplex
 operation: iscomplex
-type: function
+description: Auto-generated from jax_code_defs
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.iscomplex
+    args:
+      x: x

@@ -12,7 +12,22 @@ std_args:
 variants:
   keras:
     api: keras.layers.GaussianNoise
+    args:
+      kwargs: kwargs
+      seed: seed
+      stddev: stddev
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.GaussianNoise
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Dropout
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: GaussianNoise
 type: function

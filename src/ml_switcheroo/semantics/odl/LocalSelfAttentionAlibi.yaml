@@ -1,0 +1,7 @@
+operation: LocalSelfAttentionAlibi
+variants:
+  paxml:
+    api: paxml.layers.LocalSelfAttentionAlibi
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

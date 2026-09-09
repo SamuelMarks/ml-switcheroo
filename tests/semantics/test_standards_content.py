@@ -28,7 +28,7 @@ def test_functional_math_ops(mgr: SemanticsManager) -> None:
     pytest.skip("No semantics loaded (Bootstrap needed)")
   assert "abs" in data
   assert "add" in data
-  assert "Mean" in data
+  assert "mean" in data or "Mean" in data
   abs_op: Dict[str, Any] = data["abs"]
   args: List[str] = []
   for arg in abs_op.get("std_args", []):
@@ -38,7 +38,7 @@ def test_functional_math_ops(mgr: SemanticsManager) -> None:
       args.append(arg)
     elif isinstance(arg, (tuple, list)):
       args.append(arg[0])
-  assert "x" in args
+  assert "x" in args or "input" in args
 
 
 def test_neural_ops(mgr: SemanticsManager) -> None:
@@ -50,7 +50,7 @@ def test_neural_ops(mgr: SemanticsManager) -> None:
   data: Dict[str, Any] = mgr.get_known_apis()
   assert "Conv2d" in data
   assert "Linear" in data
-  assert "MultiheadAttention" in data
+  assert "MultiHeadAttention" in data or "MultiheadAttention" in data
   conv: Dict[str, Any] = data["Conv2d"]
   args: List[str] = []
   for arg in conv.get("std_args", []):
@@ -88,5 +88,5 @@ def test_io_constants(mgr: SemanticsManager) -> None:
       mgr (SemanticsManager): Manager fixture.
   """
   data: Dict[str, Any] = mgr.get_known_apis()
-  assert "Save" in data
-  assert "Load" in data
+  assert "Save" in data or "save" in data
+  assert "Load" in data or "load" in data

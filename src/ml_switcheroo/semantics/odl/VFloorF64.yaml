@@ -1,0 +1,5 @@
+operation: VFloorF64
+variants:
+  rdna:
+    api: v_floor_f64
+    description: Auto-mapped instruction V_FLOOR_F64

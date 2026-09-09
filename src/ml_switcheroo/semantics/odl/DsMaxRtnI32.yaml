@@ -1,0 +1,5 @@
+operation: DsMaxRtnI32
+variants:
+  rdna:
+    api: ds_max_rtn_i32
+    description: Auto-mapped instruction DS_MAX_RTN_I32

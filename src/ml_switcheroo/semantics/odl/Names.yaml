@@ -1,0 +1,8 @@
+operation: Names
+variants:
+  flax_nnx:
+    api: nnx.graph.Names
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

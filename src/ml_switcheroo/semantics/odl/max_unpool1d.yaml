@@ -1,0 +1,37 @@
+operation: max_unpool1d
+description: Compute a partial inverse of :class:`MaxPool1d`.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: kernel_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: output_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.nn.functional.max_unpool1d
+    args:
+      input: input
+      indices: indices
+      kernel_size: kernel_size

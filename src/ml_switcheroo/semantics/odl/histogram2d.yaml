@@ -1,14 +1,37 @@
-description: Blocked variant of :func:`numpy.histogram2d`.
-std_args:
-- x
-- y
-- bins
-- range
-- normed
-- weights
-- density
-variants:
-  dask:
-    api: dask.array.histogram2d
 operation: histogram2d
-type: function
+description: Compute the bi-dimensional histogram of two data samples.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: y
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: bins
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '10'
+- name: range
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: weights
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: density
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.histogram2d
+    args:
+      x: x
+      y: y

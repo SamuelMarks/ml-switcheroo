@@ -1,8 +1,52 @@
-description: LaTeX \begin{gather} environment.
-std_args:
-- content
-type: function
 operation: gather
+description: Gathers a list of tensors in a single process.
+std_args:
+- name: tensor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: gather_list
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: dst
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: group
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: async_op
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: group_dst
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
 variants:
-  latex_dsl:
-    api: latex.env.gather
+  torch:
+    api: torch.distributed.gather
+    args:
+      tensor: tensor
+  jax:
+    api: jax.lax.gather
+    args:
+      operand: operand
+      start_indices: start_indices
+      dimension_numbers: dimension_numbers
+      slice_sizes: slice_sizes
+  stablehlo:
+    api: stablehlo.gather
+    args:
+      operand: operand
+      start_indices: start_indices
+      dimension_numbers: dimension_numbers
+      slice_sizes: slice_sizes
+      indices_are_sorted: indices_are_sorted

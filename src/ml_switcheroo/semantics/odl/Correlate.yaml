@@ -1,0 +1,37 @@
+operation: correlate
+description: Correlation of two one dimensional arrays.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: v
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''valid'''
+- name: preferred_element_type
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: precision
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.correlate
+    args:
+      a: a
+      v: v
+  keras:
+    api: keras.ops.correlate
+    args:
+      x1: x1
+      x2: x2

@@ -1,0 +1,4 @@
+operation: Hmul2
+variants:
+  nvidia_sass:
+    api: HMUL2

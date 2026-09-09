@@ -1,0 +1,5 @@
+operation: VCvtOffF32I4
+variants:
+  rdna:
+    api: v_cvt_off_f32_i4
+    description: Auto-mapped instruction V_CVT_OFF_F32_I4

@@ -1,0 +1,16 @@
+operation: BlackmanWindow
+variants:
+  paxml:
+    api: jnp.blackman
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.blackman
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.blackman
+    args:
+      M: M

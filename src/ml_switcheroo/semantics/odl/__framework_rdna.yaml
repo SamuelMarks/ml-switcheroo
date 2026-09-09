@@ -1,0 +1,9 @@
+__frameworks__:
+  rdna:
+    alias:
+      module: "rdna"
+      name: "rdna"
+    comment_syntax: ";"
+    register_conventions:
+      vector: "v"
+      scalar: "s"

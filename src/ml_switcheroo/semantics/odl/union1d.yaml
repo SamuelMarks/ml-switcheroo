@@ -1,9 +1,27 @@
-description: Find the union of two arrays.
-std_args:
-- ar1
-- ar2
-variants:
-  dask:
-    api: dask.array.union1d
 operation: union1d
-type: function
+description: Compute the set union of two 1D arrays.
+std_args:
+- name: ar1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: ar2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: size
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: fill_value
+  kind: keyword_only
+  is_variadic: false
+  type: int
+  default: '''the minimum value'''
+variants:
+  jax:
+    api: jax.numpy.union1d
+    args:
+      ar1: ar1
+      ar2: ar2

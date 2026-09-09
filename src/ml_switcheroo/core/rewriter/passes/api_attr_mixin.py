@@ -116,19 +116,20 @@ class ApiTransformerAttrMixin:
       unwrap_method = traits.functional_execution_method
       if is_functional_apply(original_node.value, unwrap_method):
         if len(updated_node.targets) == 1:  # pragma: no branch
-          target = updated_node.targets[0].target
-          if isinstance(target, (cst.Tuple, cst.List)):  # pragma: no branch
-            elements = target.elements
+          assign_target = updated_node.targets[0].target
+          if isinstance(assign_target, (cst.Tuple, cst.List)):  # pragma: no branch
+            elements = assign_target.elements
             if len(elements) > 0:  # pragma: no branch
               primary_target = elements[0].value
-              new_target = cst.AssignTarget(target=primary_target)
-              new_node = updated_node.with_changes(targets=[new_target])
-              get_tracer().log_mutation(
-                "Assignment Unwrapping",
-                capture_node_source(original_node),
-                capture_node_source(new_node),
-              )
-              return new_node
+              if isinstance(primary_target, cst.BaseAssignTargetExpression):  # pragma: no branch
+                new_target = cst.AssignTarget(target=primary_target)
+                new_node = updated_node.with_changes(targets=[new_target])
+                get_tracer().log_mutation(
+                  "Assignment Unwrapping",
+                  capture_node_source(original_node),
+                  capture_node_source(new_node),
+                )
+                return new_node
 
     return updated_node
 

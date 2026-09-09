@@ -1,13 +1,42 @@
-description: Return the product of array elements over a given axis treating Not a
-std_args:
-- a
-- axis
-- dtype
-- keepdims
-- split_every
-- out
-variants:
-  dask:
-    api: dask.array.nanprod
 operation: nanprod
-type: function
+description: Auto-generated mapping for nanprod.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: out
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: keepdims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: initial
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: where
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.nanprod
+    args:
+      a: a

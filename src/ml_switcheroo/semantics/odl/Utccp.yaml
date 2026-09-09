@@ -1,0 +1,4 @@
+operation: Utccp
+variants:
+  nvidia_sass:
+    api: UTCCP

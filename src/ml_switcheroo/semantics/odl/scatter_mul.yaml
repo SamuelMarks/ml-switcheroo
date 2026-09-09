@@ -1,0 +1,42 @@
+operation: scatter_mul
+description: Scatter-multiply operator.
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: scatter_indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: updates
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dimension_numbers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: indices_are_sorted
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: unique_indices
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: mode
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.scatter_mul
+    args:
+      operand: operand
+      scatter_indices: scatter_indices
+      updates: updates
+      dimension_numbers: dimension_numbers

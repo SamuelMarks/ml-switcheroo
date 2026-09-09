@@ -1,17 +1,26 @@
-description: Returns the next representable floating-point value for each element
-  ``x1_i`` of the input array ``x1`` in the direction of the respective element ``x2_i``
-  of the input array ``x2``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x1
-  type: Union[array, int, float]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x2
-  type: Union[array, int, float]
-variants:
-  dask:
-    api: dask.array.nextafter
 operation: nextafter
-type: function
+description: nextafter(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.nextafter
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.lax.nextafter
+    args:
+      x1: x1
+      x2: x2

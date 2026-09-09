@@ -1,0 +1,24 @@
+operation: Compare
+variants:
+  rdna:
+    api: v_cmp_lt_f32
+    description: Vector float comparison.
+  stablehlo:
+    api: stablehlo.compare
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: comparison_direction
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: compare_type
+  kind: keyword_only
+  is_variadic: false
+  type: Any

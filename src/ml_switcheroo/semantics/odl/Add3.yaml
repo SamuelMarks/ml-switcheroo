@@ -1,0 +1,4 @@
+operation: Add3
+variants:
+  nvidia_sass:
+    api: IADD3

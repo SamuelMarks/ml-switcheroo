@@ -1,0 +1,24 @@
+operation: ZerosLike
+variants:
+  paxml:
+    api: jax.numpy.zeros_like
+    args:
+      device: null
+      input: a
+      layout: null
+      memory_format: null
+      requires_grad: null
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.zeros_like
+    args:
+      device: null
+      input: a
+      layout: null
+      memory_format: null
+      requires_grad: null
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

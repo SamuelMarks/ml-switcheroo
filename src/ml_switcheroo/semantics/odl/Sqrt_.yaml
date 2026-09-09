@@ -7,7 +7,27 @@ std_args:
 variants:
   latex_dsl:
     api: latex.sqrt
+    args: {}
   dask:
     api: dask.array.sqrt
+    args: {}
+  rdna:
+    api: v_sqrt_f32
+    args: {}
+  nvidia_sass:
+    api: MUFU.SQRT
+    args: {}
+  torch:
+    api: torch.sqrt
+    args: {}
+  jax:
+    api: jax.numpy.sqrt
+    args: {}
+  mlx:
+    api: mlx.core.sqrt
+    args: {}
+  keras:
+    api: keras.ops.sqrt
+    args: {}
 operation: Sqrt_
 type: function

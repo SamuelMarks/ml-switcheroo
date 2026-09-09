@@ -1,12 +1,17 @@
 description: Creates a criterion that measures the mean squared error (squared L2
   norm) between
 std_args:
-- size_average
-- reduce
-- reduction
-- __constants__
+- name: size_average
+  type: Any
+- name: reduce
+  type: Any
+- name: reduction
+  type: Any
+- name: __constants__
+  type: Any
 type: class
 operation: MSELoss
 variants:
   torch:
     api: torch.nn.MSELoss
+    args: {}

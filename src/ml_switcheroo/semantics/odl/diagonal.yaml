@@ -1,16 +1,39 @@
-description: Returns the specified diagonals of a matrix (or a stack of matrices)
-  ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: offset
-  type: int
-type: attribute
 operation: diagonal
+description: diagonal(input, offset=0, dim1=0, dim2=1) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: offset
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: dim1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: dim2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
 variants:
-  dask:
-    api: dask.array.diagonal
+  torch:
+    api: torch.diagonal
+    args:
+      input: input
+  jax:
+    api: jax.numpy.diagonal
+    args:
+      a: a
+  mlx:
+    api: mlx.core.diagonal
+    args:
+      a: a
+  keras:
+    api: keras.ops.diagonal
+    args:
+      x: x

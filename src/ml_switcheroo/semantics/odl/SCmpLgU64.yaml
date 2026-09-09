@@ -1,0 +1,5 @@
+operation: SCmpLgU64
+variants:
+  rdna:
+    api: s_cmp_lg_u64
+    description: Auto-mapped instruction S_CMP_LG_U64

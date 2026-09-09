@@ -1,11 +1,40 @@
-description: Returns an array with axes transposed.
-std_args:
-- a
-- axes
-variants:
-  dask:
-    api: dask.array.transpose
-  jax:
-    api: jnp.transpose
 operation: transpose
-type: function
+description: transpose(input, dim0, dim1) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim0
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: dim1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  torch:
+    api: torch.transpose
+    args:
+      input: input
+      dim0: dim0
+      dim1: dim1
+  jax:
+    api: jax.lax.transpose
+    args:
+      operand: operand
+      permutation: permutation
+  mlx:
+    api: mlx.core.transpose
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.transpose
+    args:
+      operand: operand
+      permutation: permutation
+  keras:
+    api: keras.ops.transpose
+    args:
+      x: x

@@ -1,0 +1,25 @@
+operation: DynamicBroadcastInDim
+variants:
+  stablehlo:
+    api: stablehlo.dynamic_broadcast_in_dim
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: output_dimensions
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: broadcast_dimensions
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: known_expanding_dimensions
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: known_nonexpanding_dimensions
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor

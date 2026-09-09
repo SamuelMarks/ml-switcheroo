@@ -1,0 +1,21 @@
+operation: Rng
+variants:
+  stablehlo:
+    api: stablehlo.rng
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: b
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rng_distribution
+  kind: keyword_only
+  is_variadic: false
+  type: Any

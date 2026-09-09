@@ -1,0 +1,37 @@
+operation: hinge_embedding_loss
+description: Compute the hinge embedding loss.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: target
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: margin
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1.0'
+- name: size_average
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reduce
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''mean'''
+variants:
+  torch:
+    api: torch.nn.functional.hinge_embedding_loss
+    args:
+      input: input
+      target: target

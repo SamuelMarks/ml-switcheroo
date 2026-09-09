@@ -1,0 +1,45 @@
+operation: CustomCall
+variants:
+  stablehlo:
+    api: stablehlo.custom_call
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: call_target_name
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: has_side_effect
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: backend_config
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: ''
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: called_computations
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: operand_layouts
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: result_layouts
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: output_operand_aliases
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: result_tilings
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor

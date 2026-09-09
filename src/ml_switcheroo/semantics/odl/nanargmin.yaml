@@ -1,12 +1,27 @@
+operation: nanargmin
 description: Return the indices of the minimum values in the specified axis ignoring
 std_args:
-- a
-- axis
-- keepdims
-- split_every
-- out
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: out
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: keepdims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
 variants:
-  dask:
-    api: dask.array.nanargmin
-operation: nanargmin
-type: function
+  jax:
+    api: jax.numpy.nanargmin
+    args:
+      a: a

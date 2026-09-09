@@ -1,0 +1,17 @@
+operation: select_n
+description: Selects array values from multiple cases.
+std_args:
+- name: which
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: cases
+  kind: positional_or_keyword
+  is_variadic: true
+  type: tuple
+  default: ()
+variants:
+  jax:
+    api: jax.lax.select_n
+    args:
+      which: which

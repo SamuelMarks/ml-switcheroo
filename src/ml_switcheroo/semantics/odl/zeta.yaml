@@ -1,7 +1,26 @@
-description: LaTeX \zeta macro.
-std_args: []
-type: attribute
 operation: zeta
+description: zeta(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
-  latex_dsl:
-    api: latex.zeta
+  torch:
+    api: torch.special.zeta
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.lax.zeta
+    args:
+      x: x
+      q: q

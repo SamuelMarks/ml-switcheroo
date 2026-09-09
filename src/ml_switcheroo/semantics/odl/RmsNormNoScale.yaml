@@ -1,0 +1,7 @@
+operation: RmsNormNoScale
+variants:
+  paxml:
+    api: praxis.layers.RmsNormNoScale
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

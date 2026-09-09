@@ -1,23 +1,51 @@
-description: Returns a sorted copy of an input array ``x``.
+operation: sort
+description: sort(input, dim=-1, descending=False, stable=False, *, out=None) -> (Tensor,
+  LongTensor)
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
+  is_variadic: false
+  type: Tensor
+- name: dim
   kind: positional_or_keyword
-  name: axis
-  type: int
-- is_variadic: false
+  is_variadic: false
+  type: Any
+  default: '-1'
+- name: descending
   kind: positional_or_keyword
-  name: descending
-  type: bool
-- is_variadic: false
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: stable
   kind: positional_or_keyword
-  name: stable
-  type: bool
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
   torch:
     api: torch.sort
-operation: sort
-type: function
+    args:
+      input: input
+  jax:
+    api: jax.lax.sort
+    args:
+      operand: operand
+  mlx:
+    api: mlx.core.sort
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.sort
+    args:
+      inputs: inputs
+      dimension: dimension
+      is_stable: is_stable
+      comparator: comparator
+  keras:
+    api: keras.ops.sort
+    args:
+      x: x

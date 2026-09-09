@@ -1,0 +1,7 @@
+operation: IterGraph
+variants:
+  flax_nnx:
+    api: flax.nnx.iter_graph
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

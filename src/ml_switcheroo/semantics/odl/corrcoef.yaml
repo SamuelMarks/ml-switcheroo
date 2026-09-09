@@ -1,10 +1,16 @@
-description: Return Pearson product-moment correlation coefficients.
-std_args:
-- x
-- y
-- rowvar
-variants:
-  dask:
-    api: dask.array.corrcoef
 operation: corrcoef
-type: function
+description: corrcoef(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.corrcoef
+    args:
+      input: input
+  jax:
+    api: jax.numpy.corrcoef
+    args:
+      x: x

@@ -1,10 +1,27 @@
-description: frompyfunc(func, /, nin, nout, *[, identity])
-std_args:
-- func
-- nin
-- nout
-variants:
-  dask:
-    api: dask.array.frompyfunc
 operation: frompyfunc
-type: function
+description: Create a JAX ufunc from an arbitrary JAX-compatible scalar function.
+std_args:
+- name: func
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: nin
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: nout
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: identity
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.frompyfunc
+    args:
+      func: func
+      nin: nin
+      nout: nout

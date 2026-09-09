@@ -1,0 +1,7 @@
+operation: GetBigramIds
+variants:
+  paxml:
+    api: praxis.layers.get_bigram_ids
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

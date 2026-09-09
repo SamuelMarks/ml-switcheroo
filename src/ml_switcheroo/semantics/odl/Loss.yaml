@@ -1,11 +1,26 @@
 description: Loss base class.
 op_type: class
 std_args:
-- reduction
-- name
-- dtype
+- name: reduction
+  type: Any
+- name: name
+  type: Any
+- name: dtype
+  type: Any
 variants:
   tensorflow:
     api: tf.keras.losses.Loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Module
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.optimizers.Module
+    args:
+      __call__: __call__
 operation: Loss
 type: function

@@ -1,0 +1,12 @@
+operation: EuclideanNorm
+variants:
+  paxml:
+    api: jnp.linalg.norm
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.linalg.norm
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

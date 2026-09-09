@@ -19,14 +19,6 @@ import typing
 import logging
 from typing import List, Tuple, Dict, Optional
 
-try:
-  import torch
-  import torch.nn as nn
-  import torch.optim as optim
-except Exception:
-  torch = None
-  nn = None
-  optim = None
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -39,9 +31,23 @@ from ml_switcheroo.frameworks.base import (
   load_snapshot_for_adapter,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
-
-
 from ml_switcheroo.frameworks.torch_io import TorchIOMixin
+
+torch: Optional[Any] = None
+nn: Optional[Any] = None
+optim: Optional[Any] = None
+try:
+  import torch as _torch
+  import torch.nn as _nn
+  import torch.optim as _optim
+
+  torch = _torch
+  nn = _nn
+  optim = _optim
+except Exception:
+  torch = None
+  nn = None
+  optim = None
 
 
 @register_framework("torch")
@@ -63,7 +69,7 @@ class TorchAdapter(TorchIOMixin):
     and GHOST snapshot loading.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data = {}
+    self._snapshot_data: Dict[str, Any] = {}
     if torch is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("torch")
@@ -228,6 +234,21 @@ class TorchAdapter(TorchIOMixin):
     if "Conv2d" not in defs:
       defs["Conv2d"] = StandardMap(
         api="torch.nn.Conv2d",
+        args={"in_channels": "in_channels", "out_channels": "out_channels", "kernel_size": "kernel_size"},
+      )
+    if "Conv1d" not in defs:
+      defs["Conv1d"] = StandardMap(
+        api="torch.nn.Conv1d",
+        args={"in_channels": "in_channels", "out_channels": "out_channels", "kernel_size": "kernel_size"},
+      )
+    if "Conv3d" not in defs:
+      defs["Conv3d"] = StandardMap(
+        api="torch.nn.Conv3d",
+        args={"in_channels": "in_channels", "out_channels": "out_channels", "kernel_size": "kernel_size"},
+      )
+    if "ConvTranspose2d" not in defs:
+      defs["ConvTranspose2d"] = StandardMap(
+        api="torch.nn.ConvTranspose2d",
         args={"in_channels": "in_channels", "out_channels": "out_channels", "kernel_size": "kernel_size"},
       )
     return defs

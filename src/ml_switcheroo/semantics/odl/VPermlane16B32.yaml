@@ -1,0 +1,5 @@
+operation: VPermlane16B32
+variants:
+  rdna:
+    api: v_permlane16_b32
+    description: Auto-mapped instruction V_PERMLANE16_B32

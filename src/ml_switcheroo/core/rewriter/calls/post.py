@@ -57,10 +57,10 @@ if TYPE_CHECKING:
 
 def handle_post_processing(
   rewriter: "RewriterDummy",
-  node: cst.CSTNode,
+  node: cst.BaseExpression,
   mapping: dict,
   abstract_id: str,
-) -> cst.CSTNode:
+) -> cst.BaseExpression:
   """Apply post-rewrite modifications to the result node, such as type casting or state threading.
 
   Args:
@@ -70,7 +70,7 @@ def handle_post_processing(
       abstract_id: The abstract ID of the operation.
 
   Returns:
-      cst.CSTNode: The modified result node.
+      cst.BaseExpression: The modified result node.
 
   """
   result_node = node

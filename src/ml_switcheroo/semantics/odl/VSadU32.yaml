@@ -1,0 +1,5 @@
+operation: VSadU32
+variants:
+  rdna:
+    api: v_sad_u32
+    description: Auto-mapped instruction V_SAD_U32

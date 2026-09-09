@@ -1,7 +1,31 @@
 operation: TorchLoad
 description: Definition for TorchLoad
 std_args:
-- f
+- name: f
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: map_location
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: pickle_module
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: weights_only
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: mmap
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: pickle_load_args
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   torch:
     api: torch.load
@@ -11,3 +35,7 @@ variants:
   numpy:
     api: load
     requires_plugin: io_handler
+  mlx:
+    api: mlx.core.load
+    args:
+      file: file

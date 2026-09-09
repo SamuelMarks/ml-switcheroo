@@ -1,12 +1,29 @@
-description: Estimate a covariance matrix, given data and weights.
-std_args:
-- m
-- y
-- rowvar
-- bias
-- ddof
-variants:
-  dask:
-    api: dask.array.cov
 operation: cov
-type: function
+description: cov(input, *, correction=1, fweights=None, aweights=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: correction
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: fweights
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: aweights
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.cov
+    args:
+      input: input
+  jax:
+    api: jax.numpy.cov
+    args:
+      m: m

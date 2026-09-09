@@ -1,0 +1,18 @@
+operation: RandInt
+variants:
+  flax_nnx:
+    api: jax.random.randint
+    args: {}
+    dispatch_rules: []
+    macro_template: jax.random.randint({key}, shape={size}, minval={low}, maxval={high})
+    pack_as: Tuple
+    pack_to_tuple: size
+    required_imports: []
+    requires_plugin: inject_prng
+  jax:
+    api: jax.random.randint
+    args:
+      key: key
+      shape: shape
+      minval: minval
+      maxval: maxval

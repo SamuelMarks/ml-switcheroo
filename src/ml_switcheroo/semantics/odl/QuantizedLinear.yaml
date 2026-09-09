@@ -16,5 +16,11 @@ std_args:
 variants:
   mlx:
     api: mlx.nn.QuantizedLinear
+    args:
+      in_features: input_dims
+      out_features: output_dims
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: QuantizedLinear
 type: function

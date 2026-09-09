@@ -1,0 +1,29 @@
+operation: ReduceScatter
+variants:
+  stablehlo:
+    api: stablehlo.reduce_scatter
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: scatter_dimension
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: replica_groups
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: channel_handle
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: use_global_device_ids
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: computation
+  kind: keyword_only
+  is_variadic: false
+  type: Any

@@ -22,7 +22,8 @@ std_args:
   name: kwargs
   type: Any
 variants:
-  sass:
-    api: sass.at_function
+  nvidia_sass:
+    api: nvidia_sass.at_function
+    args: {}
 operation: Function
 type: function

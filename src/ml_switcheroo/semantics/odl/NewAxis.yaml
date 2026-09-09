@@ -1,0 +1,12 @@
+operation: NewAxis
+variants:
+  paxml:
+    api: jax.numpy.newaxis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.newaxis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

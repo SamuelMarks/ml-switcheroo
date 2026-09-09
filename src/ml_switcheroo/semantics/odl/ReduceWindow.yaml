@@ -1,0 +1,37 @@
+operation: ReduceWindow
+variants:
+  stablehlo:
+    api: stablehlo.reduce_window
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: init_values
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: window_dimensions
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: window_strides
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: base_dilations
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: window_dilations
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: padding
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: body
+  kind: keyword_only
+  is_variadic: false
+  type: Any

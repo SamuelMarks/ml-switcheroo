@@ -1,0 +1,8 @@
+operation: AdaptiveGradClipState
+variants:
+  flax_nnx:
+    api: optax.AdaptiveGradClipState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

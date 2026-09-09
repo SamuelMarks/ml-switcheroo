@@ -1,0 +1,8 @@
+operation: zero_nans
+variants:
+  flax_nnx:
+    api: optax.zero_nans
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

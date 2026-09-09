@@ -1,0 +1,4 @@
+operation: Credux
+variants:
+  nvidia_sass:
+    api: CREDUX

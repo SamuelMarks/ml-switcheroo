@@ -1,27 +1,138 @@
+operation: ConvLSTM2D
 description: 2D Convolutional LSTM.
-op_type: class
 std_args:
-- is_variadic: false
+- name: filters
   kind: positional_or_keyword
-  name: input_size
-  type: int
-- is_variadic: false
-  kind: positional_or_keyword
-  name: hidden_size
-  type: int
-- is_variadic: false
-  kind: positional_or_keyword
-  name: kernel_size
-  type: int | Tuple[int, int]
-- default: true
   is_variadic: false
+  type: int
+- name: kernel_size
   kind: positional_or_keyword
-  name: bias
+  is_variadic: false
+  type: Any
+- name: strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''valid'''
+- name: data_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dilation_rate
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: activation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''tanh'''
+- name: recurrent_activation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''sigmoid'''
+- name: use_bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: kernel_initializer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''glorot_uniform'''
+- name: recurrent_initializer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''orthogonal'''
+- name: bias_initializer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''zeros'''
+- name: unit_forget_bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: kernel_regularizer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: recurrent_regularizer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias_regularizer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: activity_regularizer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kernel_constraint
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: recurrent_constraint
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias_constraint
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dropout
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0.0'
+- name: recurrent_dropout
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0.0'
+- name: seed
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: return_sequences
+  kind: positional_or_keyword
+  is_variadic: false
   type: bool
+  default: 'False'
+- name: return_state
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: go_backwards
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: 'False'
+- name: stateful
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   keras:
     api: keras.layers.ConvLSTM2D
-  tensorflow:
-    api: tf.keras.layers.ConvLSTM2D
-operation: ConvLSTM2d
-type: function
+    args:
+      filters: filters
+      kernel_size: kernel_size

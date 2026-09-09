@@ -1,0 +1,5 @@
+operation: VCmpNeU64
+variants:
+  rdna:
+    api: v_cmp_ne_u64
+    description: Auto-mapped instruction V_CMP_NE_U64

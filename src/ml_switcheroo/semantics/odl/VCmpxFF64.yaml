@@ -1,0 +1,5 @@
+operation: VCmpxFF64
+variants:
+  rdna:
+    api: v_cmpx_f_f64
+    description: Auto-mapped instruction V_CMPX_F_F64

@@ -1,0 +1,5 @@
+operation: SCbranchVccz
+variants:
+  rdna:
+    api: s_cbranch_vccz
+    description: Auto-mapped instruction S_CBRANCH_VCCZ

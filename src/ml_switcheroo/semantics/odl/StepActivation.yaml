@@ -1,0 +1,12 @@
+operation: StepActivation
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: jnp.where({x} >= {threshold}, 1.0, 0.0)
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: jnp.where({x} >= {threshold}, 1.0, 0.0)
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,16 @@
+operation: after_all
+description: Merges one or more XLA token values. Experimental.
+std_args:
+- name: operands
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+  default: ()
+variants:
+  jax:
+    api: jax.lax.after_all
+    args: {}
+  stablehlo:
+    api: stablehlo.after_all
+    args:
+      inputs: inputs

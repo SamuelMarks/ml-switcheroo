@@ -1,0 +1,16 @@
+operation: ReduceStd
+variants:
+  paxml:
+    api: jnp.std
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.std
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.std
+    args:
+      a: a

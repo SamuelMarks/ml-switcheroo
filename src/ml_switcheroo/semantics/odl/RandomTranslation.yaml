@@ -21,7 +21,20 @@ std_args:
 variants:
   keras:
     api: keras.layers.RandomTranslation
+    args:
+      data_format: data_format
+      fill_mode: fill_mode
+      fill_value: fill_value
+      height_factor: height_factor
+      interpolation: interpolation
+      kwargs: kwargs
+      seed: seed
+      width_factor: width_factor
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.RandomTranslation
+    args: {}
 operation: RandomTranslation
 type: function

@@ -1,0 +1,4 @@
+operation: Fsetp
+variants:
+  nvidia_sass:
+    api: FSETP

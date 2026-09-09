@@ -13,7 +13,18 @@ std_args:
 variants:
   keras:
     api: keras.layers.CutMix
+    args:
+      data_format: data_format
+      factor: factor
+      kwargs: kwargs
+      seed: seed
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.CutMix
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: CutMix
 type: function

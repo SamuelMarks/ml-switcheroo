@@ -14,6 +14,8 @@ from ml_switcheroo.core.scanners import get_full_name
 class AttributeMixin(cst.CSTTransformer):
   """Mixin for processing Attribute nodes."""
 
+  _path_to_alias: dict[str, str]
+
   def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
     """Handle path simplification and alias collapsing.
 
@@ -48,11 +50,11 @@ class AttributeMixin(cst.CSTTransformer):
         suffix_parts = parts[i:]
 
         # Construct collapsed node: alias.Remainder
-        new_node = cst.Name(alias)
-        for part in suffix_parts:
+        new_node: cst.Attribute = cst.Attribute(value=cst.Name(alias), attr=cst.Name(suffix_parts[0]))
+        for part in suffix_parts[1:]:
           new_node = cst.Attribute(value=new_node, attr=cst.Name(part))
 
-        # Apply deep simplification again on the collapsed result just in case
+        # Apply deep simplification again on the collapsed result
         return self._simplify_reexports(new_node)
 
     return updated_node

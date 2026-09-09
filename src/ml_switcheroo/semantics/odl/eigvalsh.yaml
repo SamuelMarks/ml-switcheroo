@@ -1,0 +1,19 @@
+operation: eigvalsh
+description: linalg.eigvalsh(A, UPLO='L', *, out=None) -> Tensor
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.linalg.eigvalsh
+    args: {}
+  mlx:
+    api: mlx.core.linalg.eigvalsh
+    args:
+      a: a

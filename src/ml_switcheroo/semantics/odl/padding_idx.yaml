@@ -1,0 +1,8 @@
+operation: padding_idx
+variants:
+  flax_nnx:
+    api: nnx.nn.linear.Conv.padding
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

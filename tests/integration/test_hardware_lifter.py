@@ -5,20 +5,20 @@ import unittest
 
 from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
-from ml_switcheroo.core.compiler.frontends.sass.lifter import SassLifter
-from ml_switcheroo.core.compiler.frontends.sass.parser import SassParser
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassParser
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 class TestHardwareLifters(unittest.TestCase):
   """Docstring."""
 
-  def test_sass_lifter_conv2d(self) -> None:
-    """Verifies the behavior of SASS lifter conv2d."""
+  def test_nvidia_sass_lifter_conv2d(self) -> None:
+    """Verifies the behavior of NVIDIA_SASS lifter conv2d."""
     sass_code: str = "\nL_KY_conv:\n  MOV R2, RZ;\nL_KX_conv:\n  FFMA R0, R5, R6, R0;\n  ISETP.LT.AND P0, PT, R2, 3, PT;\n  BRA L_KX_conv;\n        "
-    parser = SassParser(sass_code)
+    parser = NvidiaSassParser(sass_code)
     ast_nodes: list[typing.Any] = parser.parse().statements
-    lifter = SassLifter()
+    lifter = NvidiaSassLifter()
     graph: LogicalGraph = lifter.lift(ast_nodes)
     self.assertIsNotNone(graph)
     kinds: list[str] = [n.kind for n in graph.nodes]

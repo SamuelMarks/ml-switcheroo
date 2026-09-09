@@ -1,0 +1,7 @@
+operation: GetAbstractModel
+variants:
+  flax_nnx:
+    api: flax.nnx.get_abstract_model
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

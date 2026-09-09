@@ -1,14 +1,26 @@
 description: Functional einsum operation wrapper.
 op_type: class
 std_args:
-- result
-- lhs
-- rhs
-- einsum_config
-- loc
-- ip
+- name: result
+  type: Any
+- name: lhs
+  type: Any
+- name: rhs
+  type: Any
+- name: einsum_config
+  type: Any
+- name: loc
+  type: Any
+- name: ip
+  type: Any
 variants:
   mlir:
     api: mhlo.einsum
+    args: {}
+  paxml:
+    api: praxis.layers.EinsumOp
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: EinsumOp
 type: function

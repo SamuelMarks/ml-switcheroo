@@ -1,0 +1,22 @@
+operation: rng_uniform
+description: Stateful PRNG generator. Experimental and its use is discouraged.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: b
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.rng_uniform
+    args:
+      a: a
+      b: b
+      shape: shape

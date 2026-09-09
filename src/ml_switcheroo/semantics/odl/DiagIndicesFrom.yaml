@@ -1,0 +1,12 @@
+operation: DiagIndicesFrom
+variants:
+  paxml:
+    api: jax.numpy.diag_indices_from
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.diag_indices_from
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

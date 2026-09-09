@@ -1,0 +1,8 @@
+operation: MultiTransformState
+variants:
+  flax_nnx:
+    api: optax.MultiTransformState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

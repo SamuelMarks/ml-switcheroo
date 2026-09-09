@@ -1,0 +1,49 @@
+operation: DynamicConv
+variants:
+  stablehlo:
+    api: stablehlo.dynamic_conv
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: window_strides
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: lhs_dilation
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: rhs_dilation
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: window_reversal
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: dimension_numbers
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: feature_group_count
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: batch_group_count
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: precision_config
+  kind: keyword_only
+  is_variadic: false
+  type: Any

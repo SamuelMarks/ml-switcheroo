@@ -1,15 +1,33 @@
-description: Joins a sequence of arrays along a new axis.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: arrays
-  type: Union[Tuple[array, Ellipsis], List[array]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: axis
-  type: int
-variants:
-  dask:
-    api: dask.array.stack
 operation: stack
-type: function
+description: stack(tensors, dim=0, *, out=None) -> Tensor
+std_args:
+- name: tensors
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.stack
+    args:
+      tensors: tensors
+  jax:
+    api: jax.numpy.stack
+    args:
+      arrays: arrays
+  mlx:
+    api: mlx.core.stack
+    args:
+      arrays: arrays
+  keras:
+    api: keras.ops.stack
+    args:
+      x: x

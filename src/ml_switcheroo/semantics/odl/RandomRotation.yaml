@@ -22,7 +22,19 @@ std_args:
 variants:
   keras:
     api: keras.layers.RandomRotation
+    args:
+      data_format: data_format
+      factor: factor
+      fill_mode: fill_mode
+      fill_value: fill_value
+      interpolation: interpolation
+      kwargs: kwargs
+      seed: seed
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.RandomRotation
+    args: {}
 operation: RandomRotation
 type: function

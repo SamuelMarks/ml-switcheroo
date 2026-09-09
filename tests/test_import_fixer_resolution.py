@@ -1,6 +1,7 @@
 """Test module."""
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
+from unittest.mock import patch
 
 import libcst as cst
 
@@ -32,6 +33,20 @@ def test_importreq_signature() -> None:
 
   req6: ImportReq = ImportReq(module="jax.numpy", alias="numpy")
   assert req6.signature == "jax.numpy"
+
+
+def test_import_resolver_usage_visitor_exception() -> None:
+  """Docstring."""
+  from ml_switcheroo.core.import_fixer.resolution import _QualNameScanner
+
+  visitor = _QualNameScanner("some.path")
+
+  node = cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
+
+  with patch("ml_switcheroo.core.import_fixer.resolution.get_full_name", side_effect=Exception("Simulated Error")):
+    visitor.visit_Attribute(node)
+
+  assert not visitor.found
 
 
 def test_qual_name_scanner() -> None:
@@ -98,7 +113,7 @@ class MockSemantics:
 def test_import_resolver() -> None:
   """Docstring."""
   sm: MockSemantics = MockSemantics()
-  resolver: ImportResolver = ImportResolver(sm)
+  resolver: ImportResolver = ImportResolver(cast(Any, sm))
 
   # Test 1: Framework Base Check
   tree1: cst.Module = cst.parse_module("import jax\njax.sum()")
@@ -141,7 +156,7 @@ def test_import_resolver() -> None:
       return {"torch.optim": ("optax", None, None)}
 
   sm2: MockSemantics2 = MockSemantics2()
-  resolver2: ImportResolver = ImportResolver(sm2)
+  resolver2: ImportResolver = ImportResolver(cast(Any, sm2))
   tree6: cst.Module = cst.parse_module("optax.adam()")
   plan6: ResolutionPlan = resolver2.resolve(tree6, "jax")
   assert any(r.signature == "optax" for r in plan6.required_imports)

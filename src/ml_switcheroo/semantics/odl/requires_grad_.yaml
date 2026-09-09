@@ -1,0 +1,12 @@
+operation: requires_grad_
+description: requires_grad_(requires_grad=True) -> Tensor
+std_args:
+- name: requires_grad
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+variants:
+  torch:
+    api: torch.Tensor.requires_grad_
+    args: {}

@@ -1,0 +1,9 @@
+operation: copy_to_host_async
+variants:
+  flax_nnx:
+    api: jax.numpy.ndarray.copy_to_host_async
+    args:
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

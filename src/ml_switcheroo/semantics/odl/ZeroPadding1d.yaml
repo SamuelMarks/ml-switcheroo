@@ -1,15 +1,21 @@
-description: Zero-padding layer for 1D input.
-op_type: class
+operation: ZeroPadding1D
+description: Zero-padding layer for 1D input (e.g. temporal sequence).
 std_args:
-- default: 1
-  is_variadic: false
+- name: padding
   kind: positional_or_keyword
-  name: padding
-  type: int
+  is_variadic: false
+  type: tuple
+  default: '1'
+- name: data_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   keras:
     api: keras.layers.ZeroPadding1D
-  tensorflow:
-    api: tf.keras.layers.ZeroPadding1D
-operation: ZeroPadding1d
-type: function
+    args: {}

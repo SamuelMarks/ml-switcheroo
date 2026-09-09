@@ -1,0 +1,17 @@
+operation: LogicalNot
+variants:
+  paxml:
+    api: jnp.logical_not
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.logical_not
+    args:
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.logical_or
+    args: {}

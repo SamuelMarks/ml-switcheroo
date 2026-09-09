@@ -1,0 +1,13 @@
+operation: And
+variants:
+  stablehlo:
+    api: stablehlo.and
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor

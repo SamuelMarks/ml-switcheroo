@@ -1,0 +1,4 @@
+operation: Fswzadd
+variants:
+  nvidia_sass:
+    api: FSWZADD

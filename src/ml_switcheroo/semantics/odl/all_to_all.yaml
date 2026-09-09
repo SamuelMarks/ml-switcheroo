@@ -1,0 +1,44 @@
+operation: all_to_all
+description: Scatters list of input tensors to all processes in a group and return
+  gathered list of tensors in output list.
+std_args:
+- name: output_tensor_list
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: input_tensor_list
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: group
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: async_op
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.distributed.all_to_all
+    args:
+      output_tensor_list: output_tensor_list
+      input_tensor_list: input_tensor_list
+  jax:
+    api: jax.lax.all_to_all
+    args:
+      x: x
+      axis_name: axis_name
+      split_axis: split_axis
+      concat_axis: concat_axis
+  stablehlo:
+    api: stablehlo.all_to_all
+    args:
+      operands: operands
+      split_dimension: split_dimension
+      concat_dimension: concat_dimension
+      split_count: split_count
+      replica_groups: replica_groups
+      channel_handle: channel_handle

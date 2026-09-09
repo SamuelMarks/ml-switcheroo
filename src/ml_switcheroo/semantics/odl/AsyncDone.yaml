@@ -1,0 +1,9 @@
+operation: AsyncDone
+variants:
+  stablehlo:
+    api: stablehlo.async_done
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

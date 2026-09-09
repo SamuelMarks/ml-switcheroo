@@ -1,6 +1,6 @@
 """Docstring."""
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import libcst as cst
 import pytest
@@ -87,18 +87,18 @@ def test_synthesizer_from_graph() -> None:
       """Docstring."""
       return {"api": "v_nop", "args": []}
 
-  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=MockSemantics())
+  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=cast(Any, MockSemantics()))
 
   def dummy_expander(alloc: RegisterAllocator, nid: str, meta: dict) -> List[RdnaNode]:
     """Docstring."""
-    return [RdnaInstruction("s_nop", [])]
+    return [RdnaInstruction(opcode="s_nop", operands=[])]
 
   synth.macro_registry = {"Linear": dummy_expander}
 
   graph: LogicalGraph = LogicalGraph(
     nodes=[
       LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="conv1", kind="Conv2d", metadata={"k": 3}),
+      LogicalNode(id="conv1", kind="Conv2d", metadata={"k": "3"}),
       LogicalNode(id="lin1", kind="Linear"),
       LogicalNode(id="out1", kind="Output"),
       LogicalNode(id="unkn1", kind="UnknownNode"),
@@ -124,11 +124,11 @@ def test_synthesizer_from_graph_exact_macro() -> None:
       """Docstring."""
       return {"api": "v_add", "args": ["a", "b", "c"]}
 
-  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=MockSemantics())
+  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=cast(Any, MockSemantics()))
 
   def dummy_expander(alloc: RegisterAllocator, nid: str, meta: dict) -> List[RdnaNode]:
     """Docstring."""
-    return [RdnaInstruction("s_nop", [])]
+    return [RdnaInstruction(opcode="s_nop", operands=[])]
 
   synth.macro_registry = {"ExactMacro": dummy_expander}
   graph: LogicalGraph = LogicalGraph(
@@ -140,7 +140,7 @@ def test_synthesizer_from_graph_exact_macro() -> None:
 
 def test_synthesizer_to_python() -> None:
   """Docstring."""
-  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=None)
+  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=cast(Any, None))
 
   nodes: List[RdnaNode] = [
     RdnaInstruction(opcode="v_add_f32", operands=[RdnaVGPR(index=0), RdnaVGPR(index=1), RdnaVGPR(index=2)]),
@@ -160,7 +160,7 @@ def test_synthesizer_to_python() -> None:
 
 def test_synthesizer_to_python_operands() -> None:
   """Docstring."""
-  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=None)
+  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=cast(Any, None))
   nodes: List[RdnaNode] = [
     RdnaInstruction(opcode="v_mov_b32", operands=[RdnaVGPR(index=0), RdnaImmediate(value=42)]),
     RdnaInstruction(opcode="s_branch", operands=[RdnaLabelRef(name="label1")]),
@@ -197,7 +197,7 @@ def test_synthesizer_from_graph_unmapped() -> None:
       """Docstring."""
       return None
 
-  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=MockSemantics())
+  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=cast(Any, MockSemantics()))
   synth.macro_registry = {}
 
   graph: LogicalGraph = LogicalGraph(
@@ -225,7 +225,7 @@ def test_synthesizer_from_graph_with_sources() -> None:
       """Docstring."""
       return {"api": "v_add", "args": ["a"]}
 
-  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=MockSemantics())
+  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=cast(Any, MockSemantics()))
   synth.macro_registry = {}
 
   graph: LogicalGraph = LogicalGraph(
@@ -244,3 +244,122 @@ def test_register_allocator_hit_sgpr_cache() -> None:
   allocator: RegisterAllocator = RegisterAllocator()
   allocator.get_scalar_register("var1")
   allocator.get_scalar_register("var1")
+
+
+def test_synthesizer_macro_directives_and_fallbacks() -> None:
+  """Test macro directives with semicolons, without semicolons, and invalid opcodes."""
+
+  class MockSemantics:
+    """Mock semantics resolving macro directives."""
+
+    def get_definition(self, kind: str) -> Optional[Tuple[str, dict]]:
+      """Lookup definition."""
+      return (kind, {})
+
+    def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
+      """Resolve variant."""
+      if abstract_id == "op_macro_semicolon":
+        return {"api": "; Macro.LayerNorm"}
+      if abstract_id == "op_macro_unknown":
+        return {"api": "Macro.CustomUnknown"}
+      if abstract_id == "op_semicolon_comment":
+        return {"api": "; unmapped custom comment"}
+      return None
+
+  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=cast(Any, MockSemantics()))
+  graph = LogicalGraph(
+    nodes=[
+      LogicalNode(id="n1", kind="op_macro_semicolon"),
+      LogicalNode(id="n2", kind="op_macro_unknown"),
+      LogicalNode(id="n3", kind="op_semicolon_comment"),
+    ]
+  )
+
+  nodes = synth.from_graph(graph)
+  assert len(nodes) > 0
+  texts = [str(n) for n in nodes]
+  assert any("LayerNorm" in t for t in texts)
+  assert any("CustomUnknown" in t for t in texts)
+  assert any("Unmapped Op: ; unmapped custom comment" in t for t in texts)
+
+
+def test_synthesizer_init_macros_missing_and_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Test synthesizer initialization when macros.json is missing or contains missing functions."""
+  import json
+  import os
+  import unittest.mock as mock
+  import ml_switcheroo.core.compiler.backends.rdna.synthesizer as synth_mod
+
+  # Test when macros.json does not exist
+  monkeypatch.setattr(os.path, "exists", lambda p: False)
+  synth: synth_mod.RdnaSynthesizer = synth_mod.RdnaSynthesizer(semantics=cast(Any, None))
+  assert synth.macro_registry == {}
+
+  # Test when macros.json has a function not in rdna_macros
+  monkeypatch.setattr(os.path, "exists", lambda p: True)
+  m_open = mock.mock_open(read_data=json.dumps({"dummy_op": "non_existent_func"}))
+  monkeypatch.setattr("builtins.open", m_open)
+  synth2: synth_mod.RdnaSynthesizer = synth_mod.RdnaSynthesizer(semantics=cast(Any, None))
+  assert "dummy_op" not in synth2.macro_registry
+
+
+def test_synthesizer_from_graph_edge_cases() -> None:
+  """Test edge cases in RdnaSynthesizer.from_graph."""
+
+  class MockSemantics:
+    """Mock semantics."""
+
+    def get_definition(self, kind: str) -> Optional[Tuple[str, dict]]:
+      """Lookup definition."""
+      if kind == "nn.Dotted":
+        return ("DottedOp", {})
+      return None
+
+    def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
+      """Resolve variant."""
+      if abstract_id == "DottedOp":
+        return {"api": "v_nop"}
+      return None
+
+  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=cast(Any, MockSemantics()))
+  graph: LogicalGraph = LogicalGraph(
+    nodes=[
+      LogicalNode(id="empty", kind=""),
+      LogicalNode(id="dot_node", kind="torch.nn.Dotted"),
+      LogicalNode(id="out_empty", kind="Output"),
+    ]
+  )
+  nodes: List[RdnaNode] = synth.from_graph(graph)
+  assert len(nodes) >= 2
+
+
+def test_synthesizer_to_python_comment() -> None:
+  """Test to_python with RdnaComment node."""
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
+
+  synth: RdnaSynthesizer = RdnaSynthesizer(semantics=cast(Any, None))
+  nodes: List[RdnaNode] = [
+    RdnaComment(text="a comment"),
+  ]
+  tree: cst.Module = synth.to_python(nodes)
+  assert tree.body == []
+
+
+def test_backend_compile_with_semantics() -> None:
+  """Test RdnaBackend initialization with explicit semantics."""
+
+  class MockSemantics:
+    """Mock semantics."""
+
+    def get_definition(self, kind: str) -> Optional[Tuple[str, dict]]:
+      """Return None."""
+      return None
+
+    def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
+      """Return None."""
+      return None
+
+  backend: RdnaBackend = RdnaBackend(semantics=cast(Any, MockSemantics()))
+  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="in1", kind="Input")], edges=[])
+  code: str = backend.compile(graph)
+  assert "RDNA Code Generation Initialized" in code

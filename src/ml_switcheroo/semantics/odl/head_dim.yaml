@@ -1,0 +1,8 @@
+operation: head_dim
+variants:
+  flax_nnx:
+    api: nnx.nn.attention.MultiHeadAttention.head_dim
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

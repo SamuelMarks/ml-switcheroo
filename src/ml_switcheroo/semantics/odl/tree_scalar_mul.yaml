@@ -1,0 +1,8 @@
+operation: tree_scalar_mul
+variants:
+  flax_nnx:
+    api: optax.tree_utils.tree_scalar_mul
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

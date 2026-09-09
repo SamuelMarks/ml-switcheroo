@@ -1,0 +1,7 @@
+operation: RecursiveMap
+variants:
+  flax_nnx:
+    api: flax.nnx.recursive_map
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

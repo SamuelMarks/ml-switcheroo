@@ -1,0 +1,7 @@
+operation: FindDuplicates
+variants:
+  flax_nnx:
+    api: flax.nnx.find_duplicates
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

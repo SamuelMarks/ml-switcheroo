@@ -1,0 +1,5 @@
+operation: DsCondxchg32RtnB64
+variants:
+  rdna:
+    api: ds_condxchg32_rtn_b64
+    description: Auto-mapped instruction DS_CONDXCHG32_RTN_B64

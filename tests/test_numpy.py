@@ -24,16 +24,23 @@ def test_numpy_adapter_properties() -> None:
   with patch("ml_switcheroo.frameworks.numpy.load_definitions", return_value={"test": MagicMock()}):
     pass
 
-  with patch.dict("sys.modules", {"numpy": None}):
+  orig_import = __import__
+
+  def mock_import_no_np(name, *args, **kwargs):
+    """Docstring."""
+    if name == "numpy":
+      raise ImportError("mock no numpy")
+    return orig_import(name, *args, **kwargs)
+
+  with patch("builtins.__import__", side_effect=mock_import_no_np):
     adapter.convert([1, 2])
 
-  with patch.dict("sys.modules", {"numpy": MagicMock()}):
-    import numpy as np
-
-    np.array.return_value = "tensor"
+  # Test numpy array conversion with exception fallback
+  mock_np = MagicMock()
+  mock_np.array.return_value = "tensor"
+  with patch("ml_switcheroo.frameworks.numpy.np", mock_np):
     adapter.convert([1, 2])
-
-    np.array.side_effect = Exception("err")
+    mock_np.array.side_effect = Exception("err")
     adapter.convert([1, 2])
 
   adapter.get_device_syntax("cpu")

@@ -1,15 +1,21 @@
-description: Cropping layer for 2D input.
-op_type: class
+operation: Cropping2D
+description: Cropping layer for 2D input (e.g. picture).
 std_args:
-- default: 0
-  is_variadic: false
+- name: cropping
   kind: positional_or_keyword
-  name: cropping
-  type: int | Tuple[int, int] | Tuple[Tuple[int, int], Tuple[int, int]]
+  is_variadic: false
+  type: tuple
+  default: ((0, 0), (0, 0))
+- name: data_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   keras:
     api: keras.layers.Cropping2D
-  tensorflow:
-    api: tf.keras.layers.Cropping2D
-operation: Cropping2d
-type: function
+    args: {}

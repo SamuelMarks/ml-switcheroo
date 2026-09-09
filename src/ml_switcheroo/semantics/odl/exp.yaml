@@ -1,17 +1,33 @@
-description: Calculates an implementation-dependent approximation to the exponential
-  function for each element ``x_i`` of the input array ``x`` (``e`` raised to the
-  power of ``x_i``, where ``e`` is the base of the natural logarithm).
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  numpy:
-    api: numpy.exp
-  latex_dsl:
-    api: latex.exp
-  dask:
-    api: dask.array.exp
 operation: exp
-type: function
+description: exp(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.exp
+    args:
+      input: input
+  jax:
+    api: jax.lax.exp
+    args:
+      x: x
+  mlx:
+    api: mlx.core.exp
+    args:
+      a: a
+  rdna:
+    api: v_exp_f32
+    args: {}
+  nvidia_sass:
+    api: MUFU.EXP
+    args: {}
+  keras:
+    api: keras.ops.exp
+    args: {}

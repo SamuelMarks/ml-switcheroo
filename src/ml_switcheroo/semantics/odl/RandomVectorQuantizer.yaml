@@ -1,0 +1,7 @@
+operation: RandomVectorQuantizer
+variants:
+  paxml:
+    api: praxis.layers.RandomVectorQuantizer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

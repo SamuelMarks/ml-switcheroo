@@ -1,0 +1,22 @@
+operation: broadcasted_iota
+description: Convenience wrapper around ``iota``.
+std_args:
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dimension
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.lax.broadcasted_iota
+    args:
+      dtype: dtype
+      shape: shape
+      dimension: dimension

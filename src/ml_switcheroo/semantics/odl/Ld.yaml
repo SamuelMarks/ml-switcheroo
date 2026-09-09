@@ -1,0 +1,4 @@
+operation: Ld
+variants:
+  nvidia_sass:
+    api: LD

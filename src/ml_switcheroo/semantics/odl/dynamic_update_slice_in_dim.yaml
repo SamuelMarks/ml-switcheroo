@@ -1,0 +1,27 @@
+operation: dynamic_update_slice_in_dim
+description: Convenience wrapper around :func:`dynamic_update_slice` to update
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: update
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: start_index
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.lax.dynamic_update_slice_in_dim
+    args:
+      operand: operand
+      update: update
+      start_index: start_index
+      axis: axis

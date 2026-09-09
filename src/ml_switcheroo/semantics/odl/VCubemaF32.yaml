@@ -1,0 +1,5 @@
+operation: VCubemaF32
+variants:
+  rdna:
+    api: v_cubema_f32
+    description: Auto-mapped instruction V_CUBEMA_F32

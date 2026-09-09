@@ -1,0 +1,37 @@
+operation: ragged_dot
+description: Ragged matrix multiplication.
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: group_sizes
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: precision
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: preferred_element_type
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: group_offset
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''[0].'''
+variants:
+  jax:
+    api: jax.lax.ragged_dot
+    args:
+      lhs: lhs
+      rhs: rhs
+      group_sizes: group_sizes

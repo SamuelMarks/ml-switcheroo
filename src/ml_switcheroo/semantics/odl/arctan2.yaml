@@ -1,9 +1,36 @@
-description: arctan2(x1, x2, /, out=None, *, where=True, casting='same_kind', order='K',
-  dtype=None, subok=True[, signature, extobj])
-std_args:
-- kwargs
-variants:
-  dask:
-    api: dask.array.arctan2
 operation: arctan2
-type: function
+description: 'arctan2(input: Tensor, other: Tensor, *, out: Optional[Tensor]) -> Tensor'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.arctan2
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.atan2
+    args:
+      x1: x1
+      x2: x2
+  mlx:
+    api: mlx.core.arctan2
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.arctan2
+    args:
+      x1: x1
+      x2: x2

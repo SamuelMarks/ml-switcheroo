@@ -1,0 +1,4 @@
+operation: S2Ur
+variants:
+  nvidia_sass:
+    api: S2UR

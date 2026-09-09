@@ -1,0 +1,12 @@
+operation: ValueAndGrad
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: pax_grad_wrapper
+  flax_nnx:
+    api: nnx.value_and_grad
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

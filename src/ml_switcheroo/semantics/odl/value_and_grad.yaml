@@ -1,0 +1,18 @@
+operation: value_and_grad
+variants:
+  flax_nnx:
+    api: nnx.transforms.autodiff.value_and_grad
+    args:
+      allow_int: allow_int
+      argnums: argnums
+      f: f
+      has_aux: has_aux
+      holomorphic: holomorphic
+      reduce_axes: reduce_axes
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.core.value_and_grad
+    args:
+      fun: fun

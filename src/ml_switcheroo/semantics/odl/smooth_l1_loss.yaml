@@ -1,11 +1,23 @@
 description: Computes the smooth L1 loss.
 std_args:
-- predictions
-- targets
-- beta
-- reduction
+- name: predictions
+  type: Any
+- name: targets
+  type: Any
+- name: beta
+  type: Any
+- name: reduction
+  type: Any
 type: function
 operation: smooth_l1_loss
 variants:
   mlx:
     api: mlx.nn.losses.smooth_l1_loss
+    args:
+      beta: beta
+      predictions: predictions
+      reduction: reduction
+      targets: targets
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

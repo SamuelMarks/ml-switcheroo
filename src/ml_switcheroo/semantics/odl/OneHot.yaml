@@ -1,0 +1,31 @@
+operation: OneHot
+variants:
+  jax:
+    api: jax.nn.one_hot
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.one_hot
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: num_classes
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: float
+  default: '''```(jnp.float_)```'''
+- name: axis
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '-1'

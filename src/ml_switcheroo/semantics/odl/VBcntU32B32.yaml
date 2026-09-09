@@ -1,0 +1,5 @@
+operation: VBcntU32B32
+variants:
+  rdna:
+    api: v_bcnt_u32_b32
+    description: Auto-mapped instruction V_BCNT_U32_B32

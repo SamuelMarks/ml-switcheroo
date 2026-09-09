@@ -1,0 +1,14 @@
+operation: GShardSharedEmbeddingSoftmax
+variants:
+  paxml:
+    api: paxml.layers.GShardSharedEmbeddingSoftmax
+    args:
+      in_features: input_dims
+      num_classes: num_classes
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

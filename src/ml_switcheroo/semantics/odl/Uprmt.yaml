@@ -1,0 +1,4 @@
+operation: Uprmt
+variants:
+  nvidia_sass:
+    api: UPRMT

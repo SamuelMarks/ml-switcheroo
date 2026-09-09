@@ -52,7 +52,36 @@ def test_manager_load_validation() -> None:
       assert sm._validation_status.get("Abs") is True
 
 
-def test_manager_update_definition() -> None:
+def test_manager_build_index_aliases_json() -> None:
+  """Test that _build_index loads aliases.json if it exists."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from unittest.mock import MagicMock, mock_open, patch
+
+  mock_path = MagicMock()
+  mock_path.is_file.return_value = True
+  mock_path.open = mock_open(read_data='{"my_alias": "my_module"}')
+
+  class MockFiles:
+    """Mock importlib resources files."""
+
+    def joinpath(self, path: str) -> Any:
+      """Mock joinpath for file resolution."""
+      if path == "aliases.json":
+        return mock_path
+      return MagicMock()
+
+  with patch("importlib.resources.files", return_value=MockFiles()):
+    sm = SemanticsManager()
+
+    # Give it data so it triggers the alias registration
+    sm.data = {"Op": {"variants": {"fw": {"api": "my_alias.sub"}}}}
+    sm._key_origins = {"Op": 1}
+    sm._build_index()
+
+    # "my_alias" in alias map resolves to "my_module"
+    # parts[0] == "my_alias"
+    # So "my_alias.sub" -> "my_module.sub"
+    assert "my_module.sub" in sm._reverse_index
   """Docstring."""
   from unittest.mock import mock_open, patch
 
@@ -224,6 +253,7 @@ def test_manager_get_definition() -> None:
 
   sm: SemanticsManager = SemanticsManager()
   sm.data = {"torch.abs": {"api": "torch.abs"}}
+  sm._reverse_index = {"torch.abs": ("Abs", {"api": "torch.abs"})}
   res: Optional[Tuple[str, Dict[str, Any]]] = sm.get_definition("torch.abs")
   assert res is not None
   assert res[0] == "Abs"
@@ -319,3 +349,58 @@ def test_get_known_apis():
   sm = SemanticsManager()
   sm.data = {"test": 123}
   assert sm.get_known_apis() == {"test": 123}
+
+
+def test_manager_get_definition_branches() -> None:
+  """Test reverse index lookup and candidate fallback without variants in get_definition."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm: SemanticsManager = SemanticsManager()
+  # Found in reverse index (line 357)
+  defn = sm.get_definition("torch.abs")
+  assert defn is not None
+
+  # Missing _reverse_index attribute initializes it (line 354)
+  del sm._reverse_index
+  assert sm.get_definition("torch.abs") is None
+
+  # Candidate in data without variants (line 367)
+  sm.data["dummy_no_var"] = {"operation": "dummy_no_var"}
+  defn_no_var = sm.get_definition("dummy_no_var")
+  assert defn_no_var is not None
+  assert defn_no_var[0] == "dummy_no_var"
+
+  # Candidate in data with variants (line 363)
+  sm.data["dummy_with_var"] = {"variants": {"jax": {"api": "jax.dummy"}}}
+  defn_with_var = sm.get_definition("dummy_with_var")
+  assert defn_with_var is not None
+  assert defn_with_var[0] == "dummy_with_var"
+
+  # Case-insensitive resolution when defn is found but lacks variant (lines 305-314)
+  sm.data["MyOp"] = {"variants": {"torch": {"api": "torch.my_op"}}}
+  sm.data["myop"] = {"variants": {"jax": {"api": "jax.my_op"}}}
+  res_var = sm.resolve_variant("MyOp", "jax")
+  assert res_var is not None
+  assert res_var["api"] == "jax.my_op"
+
+  # Non-string abstract_id fallback (line 305->316)
+  sm.data[123] = {"variants": {}}
+  assert sm.resolve_variant(123, "jax") is None
+
+
+def test_manager_build_index_no_attrs() -> None:
+  """Test _build_index when _reverse_index and _variant_cache are missing."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  class DummySubclass(SemanticsManager):
+    """Docstring."""
+
+    def __init__(self) -> None:
+      """Docstring."""
+      self.data = {}
+      self.framework_configs = {}
+
+  dummy = DummySubclass()
+  dummy._build_index()
+  assert hasattr(dummy, "_reverse_index")
+  assert hasattr(dummy, "_variant_cache")

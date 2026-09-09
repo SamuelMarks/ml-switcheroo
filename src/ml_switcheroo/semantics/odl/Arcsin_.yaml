@@ -7,7 +7,18 @@ std_args:
 variants:
   latex_dsl:
     api: latex.arcsin
+    args: {}
   dask:
     api: dask.array.arcsin
+    args: {}
+  flax_nnx:
+    api: jnp.arcsin
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.asin
+    args:
+      x: x
 operation: Arcsin_
 type: function

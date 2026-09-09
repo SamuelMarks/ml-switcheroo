@@ -1,0 +1,8 @@
+operation: CvExpectedValue
+variants:
+  flax_nnx:
+    api: optax.monte_carlo.control_variates.CvExpectedValue
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

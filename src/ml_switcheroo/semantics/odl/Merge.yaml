@@ -1,0 +1,12 @@
+operation: Merge
+variants:
+  flax_nnx:
+    api: flax.nnx.merge
+    args:
+      copy: copy
+      graphdef: graphdef
+      state: state
+      states: states
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

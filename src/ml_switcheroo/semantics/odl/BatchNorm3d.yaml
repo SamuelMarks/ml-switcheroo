@@ -1,14 +1,22 @@
 description: Applies Batch Normalization over a 5D input.
 std_args:
-- num_features
-- eps
-- momentum
-- affine
-- track_running_stats
-- device
-- dtype
+- name: num_features
+  type: Any
+- name: eps
+  type: Any
+- name: momentum
+  type: Any
+- name: affine
+  type: Any
+- name: track_running_stats
+  type: Any
+- name: device
+  type: Any
+- name: dtype
+  type: Any
 type: class
 operation: BatchNorm3d
 variants:
   torch:
     api: torch.nn.BatchNorm3d
+    args: {}

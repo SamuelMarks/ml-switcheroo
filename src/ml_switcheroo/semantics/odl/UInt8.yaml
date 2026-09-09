@@ -1,0 +1,14 @@
+operation: UInt8
+variants:
+  paxml:
+    api: jax.numpy.uint8
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.uint8
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

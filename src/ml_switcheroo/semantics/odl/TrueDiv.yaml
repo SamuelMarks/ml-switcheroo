@@ -1,0 +1,17 @@
+operation: TrueDiv
+variants:
+  paxml:
+    api: jnp.divide
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.divide
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.divide
+    args:
+      x1: x1
+      x2: x2

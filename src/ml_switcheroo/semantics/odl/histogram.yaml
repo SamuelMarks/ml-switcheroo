@@ -1,13 +1,43 @@
-description: Blocked variant of :func:`numpy.histogram`.
-std_args:
-- a
-- bins
-- range
-- normed
-- weights
-- density
-variants:
-  dask:
-    api: dask.array.histogram
 operation: histogram
-type: function
+description: histogram(input, bins, *, range=None, weight=None, density=False, out=None)
+  -> (Tensor, Tensor)
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: bins
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: range
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: weight
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: density
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.histogram
+    args:
+      input: input
+      bins: bins
+  jax:
+    api: jax.numpy.histogram
+    args:
+      a: a
+  keras:
+    api: keras.ops.histogram
+    args:
+      x: x

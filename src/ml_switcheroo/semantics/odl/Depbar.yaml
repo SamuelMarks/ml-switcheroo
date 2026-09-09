@@ -1,0 +1,4 @@
+operation: Depbar
+variants:
+  nvidia_sass:
+    api: DEPBAR

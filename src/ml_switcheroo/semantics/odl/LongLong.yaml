@@ -1,0 +1,12 @@
+operation: LongLong
+variants:
+  paxml:
+    api: jax.numpy.longlong
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.longlong
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

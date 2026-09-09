@@ -1,0 +1,4 @@
+operation: Voteu
+variants:
+  nvidia_sass:
+    api: VOTEU

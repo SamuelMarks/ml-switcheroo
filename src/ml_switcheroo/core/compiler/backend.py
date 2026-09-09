@@ -1,7 +1,7 @@
 """Compiler Backend Protocol.
 
 Defines the abstract interface for backends that consume the Logical Graph IR
-and emit target specific code (e.g. RDNA Assembly, SASS, or High-Level Python).
+and emit target specific code (e.g. RDNA Assembly, NVIDIA_SASS, or High-Level Python).
 """
 
 from abc import ABC, abstractmethod

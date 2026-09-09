@@ -1,0 +1,5 @@
+operation: VCvtF64F32
+variants:
+  rdna:
+    api: v_cvt_f64_f32
+    description: Auto-mapped instruction V_CVT_F64_F32

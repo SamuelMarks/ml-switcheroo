@@ -1,0 +1,5 @@
+operation: SNandB64
+variants:
+  rdna:
+    api: s_nand_b64
+    description: Auto-mapped instruction S_NAND_B64

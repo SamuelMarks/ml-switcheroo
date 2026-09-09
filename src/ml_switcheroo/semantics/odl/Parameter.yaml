@@ -1,0 +1,14 @@
+operation: Parameter
+variants:
+  flax_nnx:
+    api: nnx.bridge.module.Module.param
+    args:
+      init_args: init_args
+      init_fn: init_fn
+      init_kwargs: init_kwargs
+      name: name
+      self: self
+      unbox: unbox
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

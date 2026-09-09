@@ -1,0 +1,9 @@
+operation: Float4_e2m1fn
+variants:
+  flax_nnx:
+    api: jax.numpy.float4_e2m1fn
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

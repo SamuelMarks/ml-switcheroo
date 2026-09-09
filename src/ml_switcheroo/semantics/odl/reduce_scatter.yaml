@@ -1,0 +1,41 @@
+operation: reduce_scatter
+description: Reduces, then scatters a list of tensors to all processes in a group.
+std_args:
+- name: output
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: input_list
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: op
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(ReduceOp.SUM)```'''
+- name: group
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: async_op
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.distributed.reduce_scatter
+    args:
+      output: output
+      input_list: input_list
+  stablehlo:
+    api: stablehlo.reduce_scatter
+    args:
+      operand: operand
+      scatter_dimension: scatter_dimension
+      replica_groups: replica_groups
+      channel_handle: channel_handle
+      use_global_device_ids: use_global_device_ids
+      computation: computation

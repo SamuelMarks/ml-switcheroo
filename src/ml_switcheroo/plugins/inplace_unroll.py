@@ -87,8 +87,18 @@ def unroll_inplace_ops(
       ctx: HookContext for target framework access.
   """
   # 1. Identify Method Call
-  method_name = _get_method_name(node)
-  receiver = _get_receiver_name(node)
+  target_call: cst.Call
+  if isinstance(node, cst.Expr):
+    if not isinstance(node.value, cst.Call):
+      return node
+    target_call = node.value
+  elif isinstance(node, cst.Call):
+    target_call = node
+  else:
+    return node
+
+  method_name = _get_method_name(target_call)
+  receiver = _get_receiver_name(target_call)
 
   if not method_name or not receiver:
     return node
@@ -113,15 +123,18 @@ def unroll_inplace_ops(
     "pow": cst.Power(),
   }
 
-  if clean_name in infix_map and len(node.args) == 1:
+  res: Union[cst.Call, cst.BinaryOperation]
+  if clean_name in infix_map and len(target_call.args) == 1:
     # x.add_(y) -> x + y
     # Ensure arg is clean (remove comma if present)
-    right_operand = node.args[0].value
-    return cst.BinaryOperation(left=receiver, operator=infix_map[clean_name], right=right_operand)
+    right_operand = target_call.args[0].value
+    res = cst.BinaryOperation(left=receiver, operator=infix_map[clean_name], right=right_operand)
+  else:
+    # 5. Strategy B: Construct Functional Method Call (Fallback)
+    # x.unknown_(y) -> x.unknown(y)
+    new_func = target_call.func.with_changes(attr=cst.Name(clean_name))
+    res = target_call.with_changes(func=new_func)
 
-  # 5. Strategy B: Construct Functional Method Call (Fallback)
-  # x.unknown_(y) -> x.unknown(y)
-  new_func = node.func.with_changes(attr=cst.Name(clean_name))
-  functional_call = node.with_changes(func=new_func)
-
-  return functional_call
+  if isinstance(node, cst.Expr):
+    return node.with_changes(value=res)
+  return res

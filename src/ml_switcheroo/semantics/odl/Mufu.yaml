@@ -1,0 +1,4 @@
+operation: Mufu
+variants:
+  nvidia_sass:
+    api: MUFU

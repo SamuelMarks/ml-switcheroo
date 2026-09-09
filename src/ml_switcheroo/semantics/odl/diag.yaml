@@ -1,9 +1,33 @@
-description: Extract a diagonal or construct a diagonal array.
-std_args:
-- v
-- k
-variants:
-  dask:
-    api: dask.array.diag
 operation: diag
-type: function
+description: diag(input, diagonal=0, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: diagonal
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.diag
+    args:
+      input: input
+  jax:
+    api: jax.numpy.diag
+    args:
+      v: v
+  mlx:
+    api: mlx.core.diag
+    args:
+      a: a
+  keras:
+    api: keras.ops.diag
+    args:
+      x: x

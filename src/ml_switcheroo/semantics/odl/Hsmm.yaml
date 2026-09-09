@@ -1,0 +1,17 @@
+operation: Hsmm
+description: Hidden Semi-Markov Model (likely specialized/internal).
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: mat2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.hsmm
+    args:
+      input: input
+      mat2: mat2

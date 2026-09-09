@@ -1,0 +1,7 @@
+operation: GraphState
+variants:
+  flax_nnx:
+    api: flax.nnx.GraphState
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

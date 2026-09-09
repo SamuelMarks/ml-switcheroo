@@ -1,0 +1,17 @@
+operation: pixel_unshuffle
+description: pixel_unshuffle(input, downscale_factor) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: downscale_factor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  torch:
+    api: torch.nn.functional.pixel_unshuffle
+    args:
+      input: input
+      downscale_factor: downscale_factor

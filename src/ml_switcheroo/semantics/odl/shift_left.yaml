@@ -1,0 +1,22 @@
+operation: shift_left
+description: 'Elementwise left shift: :math:`x \ll y`.'
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: y
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.shift_left
+    args:
+      x: x
+      y: y
+  stablehlo:
+    api: stablehlo.shift_left
+    args:
+      lhs: lhs
+      rhs: rhs

@@ -1,0 +1,5 @@
+operation: DsCmpstoreB64
+variants:
+  rdna:
+    api: ds_cmpstore_b64
+    description: Auto-mapped instruction DS_CMPSTORE_B64

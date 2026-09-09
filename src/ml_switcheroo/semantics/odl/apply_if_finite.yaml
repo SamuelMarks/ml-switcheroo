@@ -1,0 +1,8 @@
+operation: apply_if_finite
+variants:
+  flax_nnx:
+    api: optax.apply_if_finite
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

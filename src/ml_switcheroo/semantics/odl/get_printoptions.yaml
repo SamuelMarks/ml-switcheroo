@@ -1,0 +1,11 @@
+operation: get_printoptions
+variants:
+  flax_nnx:
+    api: jax.numpy.get_printoptions
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.get_printoptions
+    args: {}

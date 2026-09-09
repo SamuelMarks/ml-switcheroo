@@ -1,0 +1,22 @@
+operation: index_take
+description: Auto-generated mapping for index_take.
+std_args:
+- name: src
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: idxs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axes
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.index_take
+    args:
+      src: src
+      idxs: idxs
+      axes: axes

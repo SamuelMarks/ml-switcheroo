@@ -1,0 +1,22 @@
+operation: InverseShortTimeFourierTransform
+variants:
+  paxml:
+    api: jax.scipy.signal.istft
+    args:
+      hop_length: noverlap
+      input: Zxx
+      n_fft: nperseg
+      window: window
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.scipy.signal.istft
+    args:
+      hop_length: noverlap
+      input: Zxx
+      n_fft: nperseg
+      window: window
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

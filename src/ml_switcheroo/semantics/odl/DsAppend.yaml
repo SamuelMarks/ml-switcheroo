@@ -1,0 +1,5 @@
+operation: DsAppend
+variants:
+  rdna:
+    api: ds_append
+    description: Auto-mapped instruction DS_APPEND

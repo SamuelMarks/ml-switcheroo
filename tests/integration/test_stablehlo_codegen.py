@@ -1,7 +1,5 @@
 """Test suite for the Stablehlo Codegen module."""
 
-import typing
-
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -15,22 +13,10 @@ SOURCE_TORCH: str = "\nimport torch\n\ndef transpose_matrices(batch):\n    retur
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
   """Helper to semantics."""
-  from unittest.mock import mock_open, patch
-
   mgr = SemanticsManager()
   mgr._key_origins["permute_dims"] = SemanticTier.ARRAY_API.value
   mgr._providers["numpy"] = {SemanticTier.ARRAY_API: {"root": "numpy", "sub": None, "alias": "np"}}
-  op_data: dict[str, typing.Any] = {
-    "operation": "permute_dims",
-    "std_args": ["x", {"name": "axes", "is_variadic": True}],
-    "variants": {
-      "jax": {"api": "jnp.transpose", "pack_to_tuple": "axes"},
-      "numpy": {"api": "numpy.transpose", "pack_to_tuple": "axes"},
-    },
-  }
-  m_open = mock_open()
-  with patch("builtins.open", m_open):
-    mgr.update_definition("permute_dims", op_data)
+
   mgr._reverse_index["torch.permute"] = ("permute_dims", mgr.data["permute_dims"])
   mgr.framework_configs["numpy"] = {"alias": {"module": "numpy", "name": "np"}}
   mgr.framework_configs["jax"] = {"alias": {"module": "jax.numpy", "name": "jnp"}}

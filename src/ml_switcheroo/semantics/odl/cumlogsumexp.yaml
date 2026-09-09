@@ -1,0 +1,22 @@
+operation: cumlogsumexp
+description: Computes a cumulative logsumexp along `axis`.
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+- name: reverse
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  jax:
+    api: jax.lax.cumlogsumexp
+    args:
+      operand: operand

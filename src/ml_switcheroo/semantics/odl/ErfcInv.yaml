@@ -1,0 +1,12 @@
+operation: ErfcInv
+variants:
+  paxml:
+    api: jax.scipy.special.erfc_inv
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.scipy.special.erfc_inv
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

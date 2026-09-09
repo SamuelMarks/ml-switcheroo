@@ -1,9 +1,17 @@
-description: modf(x[, out1, out2], / [, out=(None, None)], *, where=True, casting='same_kind',
-  order='K', dtype=None, subok=True[, signature, extobj])
-std_args:
-- x
-variants:
-  dask:
-    api: dask.array.modf
 operation: modf
-type: function
+description: Auto-generated mapping for modf.
+std_args:
+- name: out
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: x
+  kind: positional_only
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.modf
+    args:
+      x: x

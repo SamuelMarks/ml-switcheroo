@@ -5,3 +5,16 @@ operation: beta
 variants:
   latex_dsl:
     api: latex.beta
+    args: {}
+  flax_nnx:
+    api: nnx.rnglib.Rngs.beta
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.beta
+    args:
+      key: key
+      a: a
+      b: b

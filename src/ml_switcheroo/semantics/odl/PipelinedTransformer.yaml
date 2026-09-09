@@ -1,0 +1,11 @@
+operation: PipelinedTransformer
+variants:
+  paxml:
+    api: praxis.layers.PipelinedTransformer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

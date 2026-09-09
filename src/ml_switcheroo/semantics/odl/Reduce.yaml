@@ -1,0 +1,51 @@
+operation: reduce
+description: Reduces the tensor data across all machines.
+std_args:
+- name: tensor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dst
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: op
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(ReduceOp.SUM)```'''
+- name: group
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: async_op
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: group_dst
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.distributed.reduce
+    args:
+      tensor: tensor
+  jax:
+    api: jax.lax.reduce
+    args:
+      operands: operands
+      init_values: init_values
+      computation: computation
+      dimensions: dimensions
+  stablehlo:
+    api: stablehlo.reduce
+    args:
+      inputs: inputs
+      init_values: init_values
+      dimensions: dimensions
+      body: body

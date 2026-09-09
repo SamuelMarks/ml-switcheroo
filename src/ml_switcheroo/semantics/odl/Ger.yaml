@@ -1,0 +1,23 @@
+operation: Ger
+variants:
+  paxml:
+    api: jnp.outer
+    args:
+      input: a
+      vec2: b
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.outer
+    args:
+      input: a
+      vec2: b
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.outer
+    args:
+      a: a
+      b: b

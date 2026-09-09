@@ -1,0 +1,7 @@
+operation: GetNamedSharding
+variants:
+  flax_nnx:
+    api: flax.nnx.get_named_sharding
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

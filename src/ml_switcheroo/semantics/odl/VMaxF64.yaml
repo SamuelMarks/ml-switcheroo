@@ -1,0 +1,5 @@
+operation: VMaxF64
+variants:
+  rdna:
+    api: v_max_f64
+    description: Auto-mapped instruction V_MAX_F64

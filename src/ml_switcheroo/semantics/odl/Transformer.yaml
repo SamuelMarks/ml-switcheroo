@@ -21,5 +21,28 @@ operation: Transformer
 variants:
   mlx:
     api: mlx.nn.Transformer
+    args:
+      d_model: dims
+      dim_feedforward: mlp_dims
+      dropout: dropout
+      nhead: num_heads
+      norm_first: norm_first
+      num_decoder_layers: num_decoder_layers
+      num_encoder_layers: num_encoder_layers
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
-    api: torch.nn.Transformer
+    api: torch.nn.TransformerEncoderLayer
+    args:
+      hidden_dims: dim_feedforward
+      input_dims: d_model
+      num_heads: nhead
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.Transformer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

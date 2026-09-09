@@ -1,0 +1,8 @@
+operation: set
+variants:
+  flax_nnx:
+    api: optax.tree.set
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,5 @@
+operation: SOrB64
+variants:
+  rdna:
+    api: s_or_b64
+    description: Auto-mapped instruction S_OR_B64

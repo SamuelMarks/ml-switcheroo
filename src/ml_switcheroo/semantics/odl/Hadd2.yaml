@@ -1,0 +1,4 @@
+operation: Hadd2
+variants:
+  nvidia_sass:
+    api: HADD2

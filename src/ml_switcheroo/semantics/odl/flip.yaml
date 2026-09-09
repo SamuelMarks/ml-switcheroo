@@ -1,16 +1,25 @@
-description: Reverses the order of elements in an array along the given axis. The
-  shape of the array must be preserved.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: axis
-  type: Optional[Union[int, Tuple[int, Ellipsis]]]
-variants:
-  dask:
-    api: dask.array.flip
 operation: flip
-type: function
+description: flip(input, dims) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.flip
+    args:
+      input: input
+      dims: dims
+  jax:
+    api: jax.numpy.flip
+    args:
+      m: m
+  keras:
+    api: keras.ops.flip
+    args:
+      x: x

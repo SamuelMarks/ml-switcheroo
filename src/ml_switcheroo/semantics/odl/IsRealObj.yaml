@@ -1,0 +1,12 @@
+operation: isrealobj
+description: Return True if x is a not complex type or an array of complex numbers.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.numpy.isrealobj
+    args:
+      x: x

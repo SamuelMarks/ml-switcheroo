@@ -1,13 +1,24 @@
 description: One-hot encodes the given indices.
 std_args:
-- x
-- num_classes
-- dtype
-- axis
+- name: x
+  type: Any
+- name: num_classes
+  type: Any
+- name: dtype
+  type: Any
+- name: axis
+  type: Any
 type: attribute
 operation: one_hot
 variants:
   flax_nnx:
     api: jax.nn.one_hot
+    args: {}
   jax:
     api: jax.nn.one_hot
+    args: {}
+  keras:
+    api: keras.ops.one_hot
+    args:
+      x: x
+      num_classes: num_classes

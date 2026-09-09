@@ -1,0 +1,12 @@
+operation: is_signed
+description: Auto-generated from torch_v2.10.0_map.json
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.is_signed
+    args:
+      input: input

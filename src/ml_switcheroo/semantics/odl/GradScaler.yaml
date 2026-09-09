@@ -1,0 +1,12 @@
+operation: GradScaler
+variants:
+  paxml:
+    api: praxis.optimizers.ShardedAdafactor
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.amp.GradScaler
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

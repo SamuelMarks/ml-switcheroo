@@ -1,16 +1,51 @@
 description: Base class for RNN Cells.
 std_args:
-- __constants__
-- input_size
-- hidden_size
-- bias
-- weight_ih
-- weight_hh
-- num_chunks
-- dtype
-- device
+- name: __constants__
+  type: Any
+- name: input_size
+  type: Any
+- name: hidden_size
+  type: Any
+- name: bias
+  type: Any
+- name: weight_ih
+  type: Any
+- name: weight_hh
+  type: Any
+- name: num_chunks
+  type: Any
+- name: dtype
+  type: Any
+- name: device
+  type: Any
 type: class
 operation: RNNCellBase
 variants:
   torch:
     api: torch.nn.RNNCellBase
+    args:
+      bias: bias
+      device: device
+      dtype: dtype
+      hidden_size: hidden_size
+      input_size: input_size
+      num_chunks: num_chunks
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.RNNCell
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.Layer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.nn.recurrent.RNNCellBase
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

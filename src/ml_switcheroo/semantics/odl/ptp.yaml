@@ -1,9 +1,27 @@
+operation: ptp
 description: Range of values (maximum - minimum) along an axis.
 std_args:
-- a
-- axis
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: out
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: keepdims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
-  dask:
-    api: dask.array.ptp
-operation: ptp
-type: function
+  jax:
+    api: jax.numpy.ptp
+    args:
+      a: a

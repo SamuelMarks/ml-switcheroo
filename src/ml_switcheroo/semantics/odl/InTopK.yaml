@@ -1,0 +1,12 @@
+operation: InTopK
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: in_top_k_plugin
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: in_top_k_plugin

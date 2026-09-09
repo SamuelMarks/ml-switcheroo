@@ -1,0 +1,7 @@
+operation: MultitaskResidualAdapter
+variants:
+  paxml:
+    api: paxml.layers.MultitaskResidualAdapter
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

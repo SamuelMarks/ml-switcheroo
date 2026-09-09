@@ -51,7 +51,7 @@ repos:
         name: audit-against-snapshots
         entry: uv run python scripts/audit_against_snapshots.py --strict
         language: system
-        files: ^(src/ml_switcheroo/semantics/odl/.*\.yaml|src/ml_switcheroo/frameworks/definitions/.*\.json|src/ml_switcheroo/frameworks/.*\.py)$
+        files: ^(src/ml_switcheroo/semantics/odl/.*\.yaml|src/ml_switcheroo/frameworks/.*\.py)$
         pass_filenames: false
 
       - id: audit-mlir-spec

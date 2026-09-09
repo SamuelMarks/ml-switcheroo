@@ -73,7 +73,7 @@ def test_ast_engine_run_exception() -> None:
 def test_ast_engine_run_compiler(mock_compiler: MagicMock) -> None:
   """Docstring."""
   mock_compiler.return_value = ConversionResult(code="comp_code", success=True, trace_events=[])
-  engine: ASTEngine = ASTEngine(source="sass", target="rdna")
+  engine: ASTEngine = ASTEngine(source="nvidia_sass", target="rdna")
   result: ConversionResult = engine.run("some code")
   assert result.success is True
   assert result.code == "comp_code"
@@ -102,7 +102,7 @@ def test_run_compiler_pipeline_basic(mock_parse: MagicMock, mock_get_backend: Ma
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: ASTEngine = ASTEngine(source="torch", target="sass")
+  engine: ASTEngine = ASTEngine(source="torch", target="nvidia_sass")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
@@ -110,8 +110,8 @@ def test_run_compiler_pipeline_basic(mock_parse: MagicMock, mock_get_backend: Ma
   assert result.code == "compiled_output"
 
 
-@patch("ml_switcheroo.core.engine.SassParser")
-@patch("ml_switcheroo.core.engine.SassLifter")
+@patch("ml_switcheroo.core.engine.NvidiaSassParser")
+@patch("ml_switcheroo.core.engine.NvidiaSassLifter")
 @patch("ml_switcheroo.core.engine.get_backend_class")
 def test_run_compiler_pipeline_sass(mock_get_backend: MagicMock, mock_lifter: MagicMock, mock_parser: MagicMock) -> None:
   """Docstring."""
@@ -122,7 +122,7 @@ def test_run_compiler_pipeline_sass(mock_get_backend: MagicMock, mock_lifter: Ma
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: ASTEngine = ASTEngine(source="sass", target="rdna")
+  engine: ASTEngine = ASTEngine(source="nvidia_sass", target="rdna")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
@@ -142,7 +142,7 @@ def test_run_compiler_pipeline_rdna(mock_get_backend: MagicMock, mock_lifter: Ma
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: ASTEngine = ASTEngine(source="rdna", target="sass")
+  engine: ASTEngine = ASTEngine(source="rdna", target="nvidia_sass")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
@@ -153,7 +153,7 @@ def test_run_compiler_pipeline_rdna(mock_get_backend: MagicMock, mock_lifter: Ma
 @patch("ml_switcheroo.core.engine.get_backend_class", return_value=None)
 def test_run_compiler_pipeline_no_backend(mock_get: MagicMock) -> None:
   """Docstring."""
-  engine: ASTEngine = ASTEngine(source="sass", target="jax")
+  engine: ASTEngine = ASTEngine(source="nvidia_sass", target="jax")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
@@ -164,7 +164,7 @@ def test_run_compiler_pipeline_no_backend(mock_get: MagicMock) -> None:
 @patch("ml_switcheroo.core.engine.is_isa_source", return_value=True)
 def test_run_compiler_pipeline_no_frontend(mock_isa: MagicMock) -> None:
   """Docstring."""
-  engine: ASTEngine = ASTEngine(source="html", target="sass")
+  engine: ASTEngine = ASTEngine(source="html", target="nvidia_sass")
   with patch("ml_switcheroo.core.tracer.get_tracer") as mock_tracer:
     with pytest.raises(NotImplementedError):
       engine._run_compiler_pipeline("code", mock_tracer())
@@ -182,7 +182,7 @@ def test_run_compiler_pipeline_mlir_ingest(mock_ingest: MagicMock, mock_get_back
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: ASTEngine = ASTEngine(source="mlir", target="sass")
+  engine: ASTEngine = ASTEngine(source="mlir", target="nvidia_sass")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
@@ -203,7 +203,7 @@ def test_run_compiler_pipeline_mlir_ingest_fallback(mock_ingest: MagicMock, mock
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: ASTEngine = ASTEngine(source="mlir", target="sass")
+  engine: ASTEngine = ASTEngine(source="mlir", target="nvidia_sass")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()

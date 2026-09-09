@@ -1,13 +1,28 @@
-description: Calculates an implementation-dependent approximation to ``log(1+x)``,
-  where ``log`` refers to the natural (base ``e``) logarithm, for each element ``x_i``
-  of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-type: attribute
 operation: log1p
+description: log1p(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
-  dask:
-    api: dask.array.log1p
+  torch:
+    api: torch.log1p
+    args:
+      input: input
+  jax:
+    api: jax.lax.log1p
+    args:
+      x: x
+  mlx:
+    api: mlx.core.log1p
+    args:
+      a: a
+  keras:
+    api: keras.ops.log1p
+    args:
+      x: x

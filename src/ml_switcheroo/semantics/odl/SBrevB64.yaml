@@ -1,0 +1,5 @@
+operation: SBrevB64
+variants:
+  rdna:
+    api: s_brev_b64
+    description: Auto-mapped instruction S_BREV_B64

@@ -1,0 +1,8 @@
+operation: skip_large_updates
+variants:
+  flax_nnx:
+    api: optax.skip_large_updates
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

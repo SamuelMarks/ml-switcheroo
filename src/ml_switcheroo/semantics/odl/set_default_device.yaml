@@ -1,0 +1,16 @@
+operation: set_default_device
+description: Sets the default ``torch.Tensor`` to be allocated on ``device``.  This
+std_args:
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.set_default_device
+    args:
+      device: device
+  mlx:
+    api: mlx.core.set_default_device
+    args:
+      device: device

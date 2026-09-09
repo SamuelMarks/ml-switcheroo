@@ -1,9 +1,0 @@
-description: Internal Use class.
-op_type: class
-std_args:
-- kwargs
-variants:
-  sass:
-    api: sass.at_use
-operation: Use
-type: function

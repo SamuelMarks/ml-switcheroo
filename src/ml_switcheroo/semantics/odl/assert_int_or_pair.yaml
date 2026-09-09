@@ -1,0 +1,22 @@
+operation: assert_int_or_pair
+description: Auto-generated mapping for assert_int_or_pair.
+std_args:
+- name: arg
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: arg_name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: message
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+variants:
+  torch:
+    api: torch.nn.functional.assert_int_or_pair
+    args:
+      arg: arg
+      arg_name: arg_name
+      message: message

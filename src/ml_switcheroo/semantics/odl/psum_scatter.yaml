@@ -1,0 +1,33 @@
+operation: psum_scatter
+description: Like ``psum(x, axis_name)`` but each device retains only part of the
+  result.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis_name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: scatter_dimension
+  kind: keyword_only
+  is_variadic: false
+  type: int
+  default: '0'
+- name: axis_index_groups
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: tiled
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  jax:
+    api: jax.lax.psum_scatter
+    args:
+      x: x
+      axis_name: axis_name

@@ -1,0 +1,12 @@
+operation: MinScalarType
+variants:
+  paxml:
+    api: jax.numpy.min_scalar_type
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.min_scalar_type
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

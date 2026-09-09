@@ -1,0 +1,5 @@
+operation: VCmpEqI64
+variants:
+  rdna:
+    api: v_cmp_eq_i64
+    description: Auto-mapped instruction V_CMP_EQ_I64

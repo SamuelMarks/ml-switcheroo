@@ -1,0 +1,16 @@
+operation: LogCumSumExp
+variants:
+  paxml:
+    api: jax.numpy.logaddexp.accumulate
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: jax.numpy.log(jax.numpy.cumsum(jax.numpy.exp({input}), axis={dim}))
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.core.logcumsumexp
+    args:
+      a: a

@@ -1,0 +1,7 @@
+operation: RestoreRngs
+variants:
+  flax_nnx:
+    api: flax.nnx.restore_rngs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

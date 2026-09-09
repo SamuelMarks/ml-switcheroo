@@ -1,0 +1,13 @@
+operation: GetTupleElement
+variants:
+  stablehlo:
+    api: stablehlo.get_tuple_element
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: index
+  kind: keyword_only
+  is_variadic: false
+  type: Any

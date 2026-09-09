@@ -1,22 +1,37 @@
 description: A :class:`torch.nn.ConvTranspose1d` module with lazy initialization of
   the ``in_channels`` argument.
 std_args:
-- out_channels
-- kernel_size
-- stride
-- padding
-- output_padding
-- groups
-- bias
-- dilation
-- cls_to_become
-- dtype
-- padding_mode
-- device
-- in_channels
-- transposed
+- name: out_channels
+  type: Any
+- name: kernel_size
+  type: Any
+- name: stride
+  type: Any
+- name: padding
+  type: Any
+- name: output_padding
+  type: Any
+- name: groups
+  type: Any
+- name: bias
+  type: Any
+- name: dilation
+  type: Any
+- name: cls_to_become
+  type: Any
+- name: dtype
+  type: Any
+- name: padding_mode
+  type: Any
+- name: device
+  type: Any
+- name: in_channels
+  type: Any
+- name: transposed
+  type: Any
 type: class
 operation: LazyConvTranspose1d
 variants:
   torch:
     api: torch.nn.LazyConvTranspose1d
+    args: {}

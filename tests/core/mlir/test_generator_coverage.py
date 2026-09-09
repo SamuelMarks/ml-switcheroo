@@ -24,7 +24,7 @@ def test_stmt_with_changes_leading_lines() -> None:
       AttributeNode(name="doc", value='"docstring"', type_annotation="str"),
     ],
     regions=[],
-    leading_trivia=[Trivia("comment")],
+    leading_trivia=[Trivia("// comment")],
   )
   block = BlockNode(label="^bb0", operations=[op])
   stmts: list[typing.Any] = gen._convert_block(block)
@@ -62,7 +62,7 @@ def test_wrap_as_statement_void_call() -> None:
   gen.ctx = ctx
   op = OperationNode(name="sw.call", operands=[], results=[ValueNode(name="%0")], attributes=[], regions=[])
   gen.usage_counts["%0"] = 1  # Not 0
-  expr = typing.cast(cst.Expr, cst.parse_expression("super().__init__()"))
+  expr = cst.parse_expression("super().__init__()")
   stmt: typing.Any = gen._wrap_as_statement(op, expr)
   # Should hit line 247: is_void_call is true for print
   assert isinstance(stmt.body[0], cst.Expr)
@@ -98,3 +98,68 @@ def test_wrap_as_statement_constant() -> None:
   _ = gen._wrap_as_statement(op, expr)
   # Should hit line 266
   assert "cst" in ctx._map["%0"]
+
+
+class TriviaWithContent:
+  """Trivia object with content attribute."""
+
+  def __init__(self, content: str) -> None:
+    """Initialize TriviaWithContent with content.
+
+    Args:
+        content: Raw comment content.
+    """
+    self.content: str = content
+
+
+class TriviaTextOnly:
+  """Trivia object with text attribute instead of content."""
+
+  def __init__(self, text: str) -> None:
+    """Initialize TriviaTextOnly with text.
+
+    Args:
+        text: Raw comment text.
+    """
+    self.text: str = text
+
+
+def test_convert_trivia_text_attribute_and_stmt_leading_lines() -> None:
+  """Test trivia conversion using text attribute and statement ops with leading trivia."""
+  gen = MlirToPythonGenerator()
+
+  # 1. line 109: Trivia with content attribute and text attribute
+  lines1 = gen._convert_trivia([TriviaWithContent("// comment from content")])
+  assert len(lines1) == 1
+  lines2 = gen._convert_trivia([TriviaTextOnly("// comment from text")])
+  assert len(lines2) == 1
+
+  # 2. line 150: Statement op with leading trivia
+  op_import = OperationNode(
+    name="sw.import",
+    results=[ValueNode(name="%mod")],
+    operands=[],
+    attributes=[
+      AttributeNode(name="module", value="math", type_annotation="str"),
+      AttributeNode(name="names", value="['sin']", type_annotation="array"),
+      AttributeNode(name="aliases", value="['']", type_annotation="array"),
+    ],
+    regions=[],
+    leading_trivia=[Trivia("// leading comment")],
+  )
+  block = BlockNode(label="^bb0", operations=[op_import])
+  stmts = gen._convert_block(block)
+  assert len(stmts) == 1
+
+
+def test_is_void_call_non_super() -> None:
+  """Test _is_void_call branches for non-super init calls."""
+  gen = MlirToPythonGenerator()
+
+  # 348->351: receiver is Name, not Call
+  expr_obj = typing.cast(cst.Call, cst.parse_expression("self.__init__()"))
+  assert gen._is_void_call(expr_obj) is False
+
+  # 349->351: receiver is Call, but func is not 'super'
+  expr_other = typing.cast(cst.Call, cst.parse_expression("other().__init__()"))
+  assert gen._is_void_call(expr_other) is False

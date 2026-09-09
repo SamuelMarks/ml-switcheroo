@@ -1,0 +1,9 @@
+operation: bool_
+variants:
+  flax_nnx:
+    api: jax.numpy.bool_
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

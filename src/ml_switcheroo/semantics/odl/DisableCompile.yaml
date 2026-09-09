@@ -1,0 +1,12 @@
+operation: DisableCompile
+variants:
+  paxml:
+    api: jax.disable_jit
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.disable_jit
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

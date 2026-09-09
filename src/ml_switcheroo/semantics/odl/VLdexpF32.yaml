@@ -1,0 +1,5 @@
+operation: VLdexpF32
+variants:
+  rdna:
+    api: v_ldexp_f32
+    description: Auto-mapped instruction V_LDEXP_F32

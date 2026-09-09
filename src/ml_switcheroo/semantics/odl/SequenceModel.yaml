@@ -1,0 +1,7 @@
+operation: SequenceModel
+variants:
+  paxml:
+    api: praxis.layers.SequenceModel
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

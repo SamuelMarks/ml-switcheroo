@@ -1,0 +1,13 @@
+operation: choice
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.choice
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.choice
+    args:
+      key: key
+      a: a

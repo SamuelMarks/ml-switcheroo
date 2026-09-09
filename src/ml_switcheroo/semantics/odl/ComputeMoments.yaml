@@ -1,0 +1,7 @@
+operation: ComputeMoments
+variants:
+  paxml:
+    api: praxis.layers.compute_moments
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

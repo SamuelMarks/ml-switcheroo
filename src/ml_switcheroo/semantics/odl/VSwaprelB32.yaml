@@ -1,0 +1,5 @@
+operation: VSwaprelB32
+variants:
+  rdna:
+    api: v_swaprel_b32
+    description: Auto-mapped instruction V_SWAPREL_B32

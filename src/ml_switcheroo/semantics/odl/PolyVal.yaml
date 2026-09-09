@@ -1,0 +1,22 @@
+operation: polyval
+description: Auto-generated mapping for polyval.
+std_args:
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: unroll
+  kind: keyword_only
+  is_variadic: false
+  type: int
+  default: '16'
+variants:
+  jax:
+    api: jax.numpy.polyval
+    args:
+      p: p
+      x: x

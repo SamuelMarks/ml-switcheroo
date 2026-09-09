@@ -1,0 +1,12 @@
+operation: matrix_exp
+description: matrix_exp(A) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.matrix_exp
+    args:
+      input: input

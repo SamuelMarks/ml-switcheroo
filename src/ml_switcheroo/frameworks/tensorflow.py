@@ -205,7 +205,33 @@ class TensorFlowAdapter:
         Dict[str, StandardMap]: The mapping dictionary.
 
     """
-    return load_definitions("tensorflow")
+    defs = load_definitions("tensorflow")
+    if "Linear" not in defs:
+      defs["Linear"] = StandardMap(
+        api="tf.keras.layers.Dense",
+        args={"out_features": "units", "in_features": "input_dim"},
+      )
+    if "Conv2d" not in defs:
+      defs["Conv2d"] = StandardMap(
+        api="tf.keras.layers.Conv2D",
+        args={"out_channels": "filters", "kernel_size": "kernel_size", "in_channels": None},
+      )
+    if "Conv1d" not in defs:
+      defs["Conv1d"] = StandardMap(
+        api="tf.keras.layers.Conv1D",
+        args={"out_channels": "filters", "kernel_size": "kernel_size", "in_channels": None},
+      )
+    if "Conv3d" not in defs:
+      defs["Conv3d"] = StandardMap(
+        api="tf.keras.layers.Conv3D",
+        args={"out_channels": "filters", "kernel_size": "kernel_size", "in_channels": None},
+      )
+    if "ConvTranspose2d" not in defs:
+      defs["ConvTranspose2d"] = StandardMap(
+        api="tf.keras.layers.Conv2DTranspose",
+        args={"out_channels": "filters", "kernel_size": "kernel_size", "in_channels": None},
+      )
+    return defs
 
   @property
   def rng_seed_methods(self) -> List[str]:

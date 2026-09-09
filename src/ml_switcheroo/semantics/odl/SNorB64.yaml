@@ -1,0 +1,5 @@
+operation: SNorB64
+variants:
+  rdna:
+    api: s_nor_b64
+    description: Auto-mapped instruction S_NOR_B64

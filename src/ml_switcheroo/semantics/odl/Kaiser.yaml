@@ -1,0 +1,17 @@
+operation: kaiser
+description: Return the Kaiser window.
+std_args:
+- name: M
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: beta
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.kaiser
+    args:
+      M: M
+      beta: beta

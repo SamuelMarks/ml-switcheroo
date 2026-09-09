@@ -1,0 +1,5 @@
+operation: DsIncRtnU64
+variants:
+  rdna:
+    api: ds_inc_rtn_u64
+    description: Auto-mapped instruction DS_INC_RTN_U64

@@ -1,22 +1,28 @@
-description: Tests whether all input array elements evaluate to ``True`` along a specified
-  axis.
+operation: all
+description: 'all(input: Tensor, *, out=None) -> Tensor'
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: axis
-  type: Optional[Union[int, Tuple[int, Ellipsis]]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: keepdims
-  type: bool
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
-  dask:
-    api: dask.array.all
   torch:
     api: torch.all
-operation: all
-type: function
+    args:
+      input: input
+  jax:
+    api: jax.numpy.all
+    args:
+      a: a
+  mlx:
+    api: mlx.core.all
+    args:
+      a: a
+  keras:
+    api: keras.ops.all
+    args:
+      x: x

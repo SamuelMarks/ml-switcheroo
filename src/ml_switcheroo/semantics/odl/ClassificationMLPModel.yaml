@@ -1,0 +1,7 @@
+operation: ClassificationMLPModel
+variants:
+  paxml:
+    api: praxis.layers.ClassificationMLPModel
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

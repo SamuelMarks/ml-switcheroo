@@ -1,0 +1,28 @@
+operation: matrix_rank
+description: Returns the rank (i.e., number of non-zero singular values) of a matrix
+  (or a stack of matrices).
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: tol
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: symmetric
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.matrix_rank
+    args:
+      input: input

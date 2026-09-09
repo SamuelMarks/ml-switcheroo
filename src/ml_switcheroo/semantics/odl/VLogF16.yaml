@@ -1,0 +1,5 @@
+operation: VLogF16
+variants:
+  rdna:
+    api: v_log_f16
+    description: Auto-mapped instruction V_LOG_F16

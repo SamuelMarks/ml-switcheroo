@@ -1,0 +1,8 @@
+operation: args
+variants:
+  flax_nnx:
+    api: nnx.bridge.wrappers.ToLinen.args
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

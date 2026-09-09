@@ -1,24 +1,42 @@
-description: Convolution Module wrapping ``lax.conv_general_dilated``.
-std_args:
-- in_features
-- out_features
-- kernel_size
-- strides
-- padding
-- input_dilation
-- kernel_dilation
-- feature_group_count
-- use_bias
-- mask
-- dtype
-- param_dtype
-- precision
-- kernel_init
-- bias_init
-- conv_general_dilated
-- rngs
-variants:
-  flax_nnx:
-    api: flax.nnx.Conv
 operation: conv
-type: function
+description: Convenience wrapper around `conv_general_dilated`.
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: window_strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: precision
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: preferred_element_type
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.conv
+    args:
+      lhs: lhs
+      rhs: rhs
+      window_strides: window_strides
+      padding: padding
+  keras:
+    api: keras.ops.conv
+    args:
+      inputs: inputs
+      kernel: kernel

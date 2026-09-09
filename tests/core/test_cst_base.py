@@ -121,7 +121,7 @@ def test_cst_visitor_generic_fields() -> None:
     """Docstring."""
 
     child: Optional[CSTNode] = None
-    children: List[CSTNode] = field(default_factory=list)
+    children: List[typing.Any] = field(default_factory=list)
     other: int = 1
 
     def _get_name(self) -> str:
@@ -147,9 +147,9 @@ def test_cst_visitor_generic_fields() -> None:
   v = MockVisitor()
   root = NodeA()
   root.child = NodeA()
-  root.children = [NodeA(), NodeA()]
+  root.children = [NodeA(), "not a node"]
   v.visit(root)
-  assert v.visited_count == 4
+  assert v.visited_count == 3
 
 
 def test_cst_transformer_generic_fields() -> None:

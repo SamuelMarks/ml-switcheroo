@@ -1,0 +1,37 @@
+operation: L1
+variants:
+  mlx:
+    api: mlx.nn.losses.l1_loss
+    args:
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.L1Loss
+    args:
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: size_average
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: reduce
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '''mean'''
+- name: __constants__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+  default: '[''reduction'']'

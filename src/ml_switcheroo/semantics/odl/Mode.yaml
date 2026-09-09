@@ -1,0 +1,26 @@
+operation: mode
+description: mode(input, dim=-1, keepdim=False, *, out=None) -> (Tensor, LongTensor)
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '-1'
+- name: keepdim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.mode
+    args:
+      input: input

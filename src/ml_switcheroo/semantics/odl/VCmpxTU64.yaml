@@ -1,0 +1,5 @@
+operation: VCmpxTU64
+variants:
+  rdna:
+    api: v_cmpx_t_u64
+    description: Auto-mapped instruction V_CMPX_T_U64

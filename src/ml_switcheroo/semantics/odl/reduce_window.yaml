@@ -1,0 +1,58 @@
+operation: reduce_window
+description: Auto-generated mapping for reduce_window.
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: init_value
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: computation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: window_dimensions
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: window_strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: base_dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: window_dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.reduce_window
+    args:
+      operand: operand
+      init_value: init_value
+      computation: computation
+      window_dimensions: window_dimensions
+      window_strides: window_strides
+      padding: padding
+  stablehlo:
+    api: stablehlo.reduce_window
+    args:
+      inputs: inputs
+      init_values: init_values
+      window_dimensions: window_dimensions
+      window_strides: window_strides
+      base_dilations: base_dilations
+      window_dilations: window_dilations
+      padding: padding
+      body: body

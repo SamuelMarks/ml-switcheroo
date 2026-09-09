@@ -1,0 +1,13 @@
+operation: rayleigh
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.rayleigh
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.rayleigh
+    args:
+      key: key
+      scale: scale

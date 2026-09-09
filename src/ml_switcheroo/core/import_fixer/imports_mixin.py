@@ -85,7 +85,6 @@ class ImportMixin(cst.CSTTransformer):
         The modified Import node, or RemoveFromParent() if all names are pruned.
     """
     new_aliases = []
-    replacement_occurred = False
 
     for alias in updated_node.names:
       full_name = get_full_name(alias.name)
@@ -105,7 +104,6 @@ class ImportMixin(cst.CSTTransformer):
         self._track_definition(new_alias)  # type: ignore
 
         self._satisfied_injections.add(req.signature)
-        replacement_occurred = True
         continue
 
       self._track_definition(alias)  # type: ignore
@@ -116,11 +114,10 @@ class ImportMixin(cst.CSTTransformer):
           self._satisfied_injections.add(req.signature)
 
       # 3. Prune using DCE (Dead Code Elimination)
-      bound_name = alias.asname.name.value if alias.asname else root_pkg
+      bound_name = alias.asname.name.value if (alias.asname and isinstance(alias.asname.name, cst.Name)) else root_pkg
 
-      if not replacement_occurred:
-        if bound_name in self.used_names:
-          new_aliases.append(alias)
+      if bound_name in self.used_names:
+        new_aliases.append(alias)
 
     if not new_aliases:
       return cst.RemoveFromParent()
@@ -182,7 +179,12 @@ class ImportMixin(cst.CSTTransformer):
     for alias in updated_node.names:
       self._track_definition(alias)  # type: ignore
 
-      bound_name = alias.asname.name.value if alias.asname else alias.name.value
+      if alias.asname and isinstance(alias.asname.name, cst.Name):
+        bound_name = alias.asname.name.value
+      elif isinstance(alias.name, cst.Name):
+        bound_name = alias.name.value
+      else:
+        bound_name = ""
       if bound_name in self.used_names:
         new_aliases.append(alias)
 

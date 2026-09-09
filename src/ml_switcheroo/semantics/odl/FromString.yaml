@@ -1,0 +1,27 @@
+operation: fromstring
+description: A new 1-D array initialized from text data in a string.
+std_args:
+- name: string
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(float)```'''
+- name: count
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '-1'
+- name: sep
+  kind: keyword_only
+  is_variadic: false
+  type: str
+variants:
+  jax:
+    api: jax.numpy.fromstring
+    args:
+      string: string
+      sep: sep

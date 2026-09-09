@@ -1,0 +1,4 @@
+operation: Stas
+variants:
+  nvidia_sass:
+    api: STAS

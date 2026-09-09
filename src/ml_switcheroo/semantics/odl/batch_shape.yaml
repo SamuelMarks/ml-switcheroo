@@ -1,0 +1,8 @@
+operation: batch_shape
+variants:
+  flax_nnx:
+    api: optax.tree.batch_shape
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

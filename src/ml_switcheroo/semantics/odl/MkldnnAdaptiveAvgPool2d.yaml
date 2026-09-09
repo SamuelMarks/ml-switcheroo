@@ -1,0 +1,27 @@
+operation: MkldnnAdaptiveAvgPool2d
+variants:
+  keras:
+    api: keras.layers.GlobalAveragePooling2D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.AvgPool2d
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: kernel_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''kernel_size'''
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'

@@ -1,0 +1,7 @@
+operation: FilterEverything
+variants:
+  flax_nnx:
+    api: flax.nnx.Everything
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,18 @@
+operation: depends
+description: 'depends(inputs: Union[array, Sequence[array]], dependencies: Union[array,
+  Sequence[array]])'
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dependencies
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  mlx:
+    api: mlx.core.depends
+    args:
+      inputs: inputs
+      dependencies: dependencies

@@ -1,0 +1,17 @@
+operation: rem
+description: 'Elementwise remainder: :math:`x \bmod y`.'
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: y
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.rem
+    args:
+      x: x
+      y: y

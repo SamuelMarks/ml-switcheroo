@@ -1,12 +1,24 @@
-description: Tests each element ``x_i`` of the input array ``x`` to determine if equal
-  to positive or negative infinity.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  dask:
-    api: dask.array.isinf
 operation: isinf
-type: function
+description: isinf(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.isinf
+    args:
+      input: input
+  jax:
+    api: jax.numpy.isinf
+    args:
+      x: x
+  mlx:
+    api: mlx.core.isinf
+    args:
+      a: a
+  keras:
+    api: keras.ops.isinf
+    args:
+      x: x

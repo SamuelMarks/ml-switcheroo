@@ -1,0 +1,7 @@
+operation: FromTree
+variants:
+  flax_nnx:
+    api: flax.nnx.from_tree
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

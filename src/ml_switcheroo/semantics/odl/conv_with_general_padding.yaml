@@ -1,0 +1,47 @@
+operation: conv_with_general_padding
+description: Convenience wrapper around `conv_general_dilated`.
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: window_strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: lhs_dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: rhs_dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: precision
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: preferred_element_type
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.conv_with_general_padding
+    args:
+      lhs: lhs
+      rhs: rhs
+      window_strides: window_strides
+      padding: padding
+      lhs_dilation: lhs_dilation
+      rhs_dilation: rhs_dilation

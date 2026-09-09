@@ -1,0 +1,5 @@
+operation: SClause
+variants:
+  rdna:
+    api: s_clause
+    description: Auto-mapped instruction S_CLAUSE

@@ -1,17 +1,37 @@
-operation: Abs
-description: Definition for Abs
+operation: abs
+description: 'abs(input: Tensor, *, out: Optional[Tensor]) -> Tensor'
 std_args:
-- x
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
   torch:
     api: torch.abs
+    args:
+      input: input
   jax:
-    api: jax.numpy.abs
-  numpy:
-    api: numpy.abs
-  tensorflow:
-    api: tf.abs
+    api: jax.lax.abs
+    args:
+      x: x
   mlx:
     api: mlx.core.abs
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.abs
+    args:
+      operand: operand
+  rdna:
+    api: v_abs_f32
+    args: {}
+  nvidia_sass:
+    api: FABS
+    args: {}
   keras:
     api: keras.ops.abs
+    args: {}

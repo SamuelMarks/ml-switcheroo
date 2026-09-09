@@ -1,0 +1,58 @@
+operation: grad
+description: Compute and return the sum of gradients of outputs with respect to the
+  inputs.
+std_args:
+- name: outputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: grad_outputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: retain_graph
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: create_graph
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: only_inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: allow_unused
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: is_grads_batched
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: materialize_grads
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  torch:
+    api: torch.autograd.grad
+    args:
+      outputs: outputs
+      inputs: inputs
+  jax:
+    api: jax.grad
+    args:
+      fun: fun
+  mlx:
+    api: mlx.core.grad
+    args:
+      fun: fun

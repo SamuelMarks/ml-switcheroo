@@ -1,0 +1,17 @@
+operation: FullLike
+variants:
+  paxml:
+    api: jnp.full_like
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.full_like
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.lax.full_like
+    args:
+      x: x
+      fill_value: fill_value

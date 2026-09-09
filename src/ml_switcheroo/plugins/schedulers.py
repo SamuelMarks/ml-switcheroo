@@ -25,6 +25,7 @@ Addresses the architectural difference between:
 import libcst as cst
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.plugins.utils import create_dotted_name
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
@@ -37,11 +38,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   Returns:
       A LibCST expression node corresponding to the dotted name structure.
   """
-  parts = name_str.split(".")
-  node = cst.Name(parts[0])
-  for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))
-  return node
+  return create_dotted_name(name_str)
 
 
 def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:

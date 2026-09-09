@@ -1,0 +1,4 @@
+operation: Hsetp2
+variants:
+  nvidia_sass:
+    api: HSETP2

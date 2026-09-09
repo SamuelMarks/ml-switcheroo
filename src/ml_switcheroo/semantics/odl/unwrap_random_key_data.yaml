@@ -1,0 +1,8 @@
+operation: unwrap_random_key_data
+variants:
+  flax_nnx:
+    api: optax.tree.unwrap_random_key_data
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

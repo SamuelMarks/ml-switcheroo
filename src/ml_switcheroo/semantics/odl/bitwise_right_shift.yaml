@@ -1,0 +1,17 @@
+operation: bitwise_right_shift
+variants:
+  flax_nnx:
+    api: jax.numpy.bitwise_right_shift
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.bitwise_right_shift
+    args:
+      x1: x1
+      x2: x2
+  keras:
+    api: keras.ops.bitwise_right_shift
+    args:
+      x: x
+      y: y

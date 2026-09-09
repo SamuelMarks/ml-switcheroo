@@ -1,0 +1,30 @@
+operation: qr
+description: 'qr(input: Tensor, some: bool = True, *, out: Union[Tensor, Tuple[Tensor,
+  ...], List[Tensor], None]) -> (Tensor, Tensor)'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: some
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.qr
+    args:
+      input: input
+  mlx:
+    api: mlx.core.linalg.qr
+    args:
+      a: a
+  keras:
+    api: keras.ops.qr
+    args:
+      x: x

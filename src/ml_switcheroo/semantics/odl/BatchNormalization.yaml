@@ -29,7 +29,65 @@ std_args:
 variants:
   keras:
     api: keras.layers.BatchNormalization
+    args:
+      axis: axis
+      beta_constraint: beta_constraint
+      beta_initializer: beta_initializer
+      beta_regularizer: beta_regularizer
+      center: center
+      epsilon: epsilon
+      gamma_constraint: gamma_constraint
+      gamma_initializer: gamma_initializer
+      gamma_regularizer: gamma_regularizer
+      kwargs: kwargs
+      momentum: momentum
+      moving_mean_initializer: moving_mean_initializer
+      moving_variance_initializer: moving_variance_initializer
+      scale: scale
+      synchronized: synchronized
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.BatchNormalization
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.BatchNorm
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.BatchNorm
+    args:
+      center: affine
+      epsilon: eps
+      momentum: momentum
+      scale: affine
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.BatchNorm2d
+    args:
+      center: affine
+      epsilon: eps
+      momentum: momentum
+      scale: affine
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.BatchNorm
+    args:
+      axis: param_dtype
+      center: use_bias
+      epsilon: epsilon
+      momentum: momentum
+      scale: use_scale
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: BatchNormalization
 type: function

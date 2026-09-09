@@ -149,6 +149,15 @@ def test_get_mapping() -> None:
     assert helper._get_mapping("numpy.nomap") is None
     assert "No mapping" in helper.failures[2]
 
+    # Test unverified silent mode (line 225->227 branch)
+    assert helper._get_mapping("numpy.unverified", silent=True) is None
+
+    # Test neural abstraction failure to pure math backend (line 242)
+    helper.target_fw = "NumPy"
+    helper.semantics._key_origins = {"numpy.nomap": "neural"}
+    assert helper._get_mapping("numpy.nomap") is None
+    assert "Cannot map neural network abstraction" in helper.failures[-1]
+
 
 def test_handle_variant_imports() -> None:
   """Handles variant imports."""
@@ -167,6 +176,9 @@ def test_handle_variant_imports() -> None:
 def test_is_framework_base() -> None:
   """Checks if is framework base."""
   helper = MockHelper()
+  # Add a framework config with traits that have no module_base
+  helper.semantics.framework_configs["fw_no_base"] = {"traits": {"other": "val"}}
+  setattr(helper, "_known_module_bases", None)
   assert helper._is_framework_base("nn.Module") is True
   assert helper._is_framework_base("Module") is True
   assert helper._is_framework_base("foo") is False

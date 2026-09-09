@@ -1,0 +1,27 @@
+operation: alpha_dropout
+description: Apply alpha dropout to the input.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.5'
+- name: training
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  torch:
+    api: torch.nn.functional.alpha_dropout
+    args:
+      input: input

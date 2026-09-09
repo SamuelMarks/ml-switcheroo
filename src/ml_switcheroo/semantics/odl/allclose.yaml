@@ -1,14 +1,43 @@
-description: Returns True if two arrays are element-wise equal within a tolerance.
+operation: allclose
+description: 'allclose(input: Tensor, other: Tensor, rtol: float = 1e-05, atol: float
+  = 1e-08, equal_nan: bool = False) -> bool'
 std_args:
-- arr1
-- arr2
-- rtol
-- atol
-- equal_nan
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rtol
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 1e-05
+- name: atol
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 1e-08
+- name: equal_nan
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
 variants:
-  dask:
-    api: dask.array.allclose
   torch:
     api: torch.allclose
-operation: allclose
-type: function
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.allclose
+    args:
+      a: a
+      b: b
+  mlx:
+    api: mlx.core.allclose
+    args:
+      a: a
+      b: b

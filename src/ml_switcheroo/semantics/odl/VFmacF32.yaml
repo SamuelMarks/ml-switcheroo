@@ -1,0 +1,5 @@
+operation: VFmacF32
+variants:
+  rdna:
+    api: v_fmac_f32
+    description: Auto-mapped instruction V_FMAC_F32

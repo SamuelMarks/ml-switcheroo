@@ -27,9 +27,14 @@ std_args:
 variants:
   keras:
     api: keras.optimizers.Muon
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   mlx:
     api: mlx.optimizers.Muon
+    args: {}
   tensorflow:
     api: tf.keras.optimizers.Muon
+    args: {}
 operation: Muon
 type: function

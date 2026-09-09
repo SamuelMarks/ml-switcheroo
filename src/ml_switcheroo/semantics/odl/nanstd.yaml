@@ -1,14 +1,42 @@
-description: Compute the standard deviation along the specified axis, while
-std_args:
-- a
-- axis
-- dtype
-- keepdims
-- ddof
-- split_every
-- out
-variants:
-  dask:
-    api: dask.array.nanstd
 operation: nanstd
-type: function
+description: Auto-generated mapping for nanstd.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: out
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: ddof
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+- name: keepdims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: where
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.nanstd
+    args:
+      a: a

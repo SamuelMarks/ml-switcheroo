@@ -1,0 +1,5 @@
+operation: VPackB32F16
+variants:
+  rdna:
+    api: v_pack_b32_f16
+    description: Auto-mapped instruction V_PACK_B32_F16

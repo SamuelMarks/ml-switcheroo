@@ -1,11 +1,24 @@
-description: Tests each element ``x_i`` of the input array ``x`` to determine if finite.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  dask:
-    api: dask.array.isfinite
 operation: isfinite
-type: function
+description: isfinite(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.isfinite
+    args:
+      input: input
+  jax:
+    api: jax.numpy.isfinite
+    args:
+      x: x
+  mlx:
+    api: mlx.core.isfinite
+    args:
+      a: a
+  keras:
+    api: keras.ops.isfinite
+    args:
+      x: x

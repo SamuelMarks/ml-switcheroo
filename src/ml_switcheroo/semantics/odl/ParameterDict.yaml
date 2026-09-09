@@ -9,3 +9,13 @@ operation: ParameterDict
 variants:
   torch:
     api: torch.nn.ParameterDict
+    args:
+      parameters: parameters
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    missing_message: Use native Python dict for parameter storage.
+    pack_as: Tuple
+    required_imports: []

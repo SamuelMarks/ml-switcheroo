@@ -1,5 +1,6 @@
 """Tests for audit_against_snapshots.py."""
 
+import json
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -382,3 +383,60 @@ def test_load_snapshots_multi_branches() -> None:
       assert "g" in t
       assert "extra_item" in t
       assert "extra_item2" not in t
+
+
+def test_flatten_single_framework_edge_cases() -> None:
+  """Test edge cases for _flatten_single_framework with non-dict/non-mnemonic items."""
+  from scripts.audit_against_snapshots import _flatten_single_framework
+
+  flat: Dict[str, Dict[str, Any]] = {}
+  _flatten_single_framework("hw", ["string_item", {"no_mnemonic": 1}, {"mnemonic": "v_add"}], flat)
+  assert "v_add" in flat["hw"]
+
+  _flatten_single_framework("invalid", 12345, flat)
+  assert flat["invalid"] == {}
+
+
+def test_load_snapshots_filename_branches(tmp_path: Path) -> None:
+  """Test filename parsing branches in load_snapshots.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  snap_dir = tmp_path / "snaps"
+  snap_dir.mkdir()
+
+  (snap_dir / "test_sass_exhaustive.json").write_text(json.dumps([{"mnemonic": "FADD"}]))
+  (snap_dir / "test_rdna_exhaustive.json").write_text(json.dumps([{"mnemonic": "v_add"}]))
+  (snap_dir / "other_exhaustive.json").write_text(json.dumps([{"mnemonic": "CUSTOM"}]))
+
+  result = load_snapshots(snap_dir)
+  assert "nvidia_sass" in result
+  assert "rdna" in result
+  assert "other_exhaustive" in result
+
+
+def test_load_snapshots_parent_frameworks_exist() -> None:
+  """Test load_snapshots_multi when parent snapshots and frameworks directories exist."""
+  with patch("pathlib.Path.exists", return_value=True):
+    with patch("pathlib.Path.glob", return_value=[]):
+      result = load_snapshots_multi(None)
+      assert isinstance(result, dict)
+
+
+def test_audit_frameworks_macro_and_unknown_framework() -> None:
+  """Test audit_frameworks filtering for macros, semicolons, ignore_list, and unknown frameworks."""
+  manager = MagicMock()
+  manager.data = {
+    "op1": {
+      "variants": {
+        "unknown_fw": {"api": "unknown.api"},
+        "torch": {"api": "Macro.conv2d"},
+        "jax": {"api": "; inline sass"},
+        "mlx": {"api": "torch.int64"},
+      }
+    }
+  }
+  snapshots: Dict[str, Dict[str, Any]] = {"unknown_fw": {}, "torch": {}, "jax": {}, "mlx": {}}
+  errors = audit_frameworks(manager, snapshots)
+  assert errors == []

@@ -11,7 +11,7 @@ ml-switcheroo 🔄🦘
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Interactive docs](https://img.shields.io/badge/interactive-docs-orange)](https://samuelmarks.github.io/ml-switcheroo/)
 
-**ml-switcheroo** has evolved from a simple AST transpiler into a deterministic **Universal Compiler** for Machine Learning. It enables conversion between distinct levels of the ML stack: from high-level frameworks (PyTorch, JAX), down to hardware assembly (SASS, RDNA), and even into visual documentation formats (TikZ, HTML). **Note: Conversion to intermediate representations like StableHLO is currently in alpha/experimental state and is not yet loss-less.**
+**ml-switcheroo** has evolved from a simple AST transpiler into a deterministic **Universal Compiler** for Machine Learning. It enables conversion between distinct levels of the ML stack: from high-level frameworks (PyTorch, JAX), down to hardware assembly (NVIDIA_SASS, RDNA), and even into visual documentation formats (TikZ, HTML). **Note: Conversion to intermediate representations like StableHLO is currently in alpha/experimental state and is not yet loss-less.**
 
 It solves the $O(N^2)$ interoperability problem using a **Hub-and-Spoke** architecture. Instead of writing translators for every pair of languages, we map every dialect to a central **Abstract Standard** (Hub).
 
@@ -33,7 +33,7 @@ flowchart TD
 %% Level 3: Yellow (Intermediate)
     classDef l3Node fill: #f9ab00, stroke: #ffd427, stroke-width: 2px, color: white, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
 
-%% Hardware: Navy (SASS) - Roboto Mono
+%% Hardware: Navy (NVIDIA_SASS) - Roboto Mono
     classDef asmNode fill: #20344b, stroke: #57caff, stroke-width: 2px, color: white, font-family: 'Roboto Mono Normal', font-size: 14px, rx: 2px, ry: 2px;
 
 %% --- 2. Subgraph Styling ---
@@ -68,20 +68,20 @@ flowchart TD
 
     subgraph LBottom [Level 4: ASM]
         direction LR
-        SASS[NVIDIA SASS] ~~~ RDNA[AMD RDNA]
+        NVIDIA_SASS[NVIDIA SASS] ~~~ RDNA[AMD RDNA]
     end
 
 %% --- 4. Connections ---
     TikZ ~~~ TensorFlow
     TensorFlow ~~~ JAX
     JAX ~~~ StableHLO
-    StableHLO ~~~ SASS
+    StableHLO ~~~ NVIDIA_SASS
 %% --- 5. Apply Styles ---
     class HTML,TikZ,LaTeX l0Node;
     class PyTorch,MLX,TensorFlow,Keras,FlaxNNX,Pax l1Node;
     class JAX,NumPy l2Node;
     class StableHLO,MLIR l3Node;
-    class SASS asmNode;
+    class NVIDIA_SASS asmNode;
     class RDNA asmNode;
     class L0 containerL0;
     class L1 containerL1;
@@ -229,8 +229,8 @@ ml_switcheroo convert ./models/resnet.py --target jax --out ./resnet_jax.py
 # Visualization: Python -> LaTeX (TikZ)
 ml_switcheroo convert ./models/transformer.py --target tikz --out ./diagram.tex
 
-# Decompilation: SASS -> Python
-ml_switcheroo convert ./kernels/gemm.sass --source sass --target python
+# Decompilation: NVIDIA_SASS -> Python
+ml_switcheroo convert ./kernels/gemm.nvidia_sass --source nvidia_sass --target python
 
 # Sharding Inference: PyTorch -> PaxML (distributed)
 ml_switcheroo convert ./models/llama.py --target paxml --sharding --out ./llama_pax.py

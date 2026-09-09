@@ -1,0 +1,31 @@
+operation: atan2
+description: 'atan2(input: Tensor, other: Tensor, *, out: Optional[Tensor]) -> Tensor'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.atan2
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.lax.atan2
+    args:
+      x: x
+      y: y
+  stablehlo:
+    api: stablehlo.atan2
+    args:
+      lhs: lhs
+      rhs: rhs

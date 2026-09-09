@@ -1,36 +1,45 @@
 operation: multiply
-description: Calculates the product for each element ``x1_i`` of the input array ``x1``
-  with the respective element ``x2_i`` of the input array ``x2``.
+description: multiply(input, other, *, out=None)
 std_args:
-- name: x1
-  type: Union[array, int, float, complex]
-  is_variadic: false
+- name: input
   kind: positional_or_keyword
-- name: x2
-  type: Union[array, int, float, complex]
   is_variadic: false
+  type: Any
+- name: other
   kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
+  torch:
+    api: torch.multiply
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.multiply
+    args:
+      x1: x1
+      x2: x2
+  mlx:
+    api: mlx.core.multiply
+    args:
+      a: a
+      b: b
   stablehlo:
     api: stablehlo.multiply
-    args: {}
-  numpy:
-    api: numpy.ma.core.multiply
-    args: {}
-  tensorflow:
-    api: tf.keras.layers.Multiply
-    args: {}
-  flax_nnx:
-    api: jax.numpy.multiply
-    args: {}
-  keras:
-    api: keras.layers.Multiply
     args:
-      inputs: inputs
-      kwargs: kwargs
-  sass:
+      lhs: lhs
+      rhs: rhs
+  rdna:
+    api: v_mul_f32
+    args: {}
+  nvidia_sass:
     api: FMUL
     args: {}
-  dask:
-    api: dask.array.multiply
-type: function
+  keras:
+    api: keras.ops.multiply
+    args: {}

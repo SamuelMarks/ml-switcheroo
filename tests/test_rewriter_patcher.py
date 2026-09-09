@@ -112,3 +112,54 @@ def test_graph_patcher_leave_hooks() -> None:
 
   empty_stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(body=[])
   assert isinstance(patcher.leave_SimpleStatementLine(stmt, empty_stmt), cst.RemovalSentinel)
+
+  # leave_Assign returning SimpleStatementLine
+  patcher._handle_node = MagicMock(return_value=stmt)
+  res_assign = patcher.leave_Assign(assign, assign)
+  assert isinstance(res_assign, cst.FlattenSentinel)
+
+  # leave_Expr returning SimpleStatementLine
+  res_expr = patcher.leave_Expr(expr, expr)
+  assert isinstance(res_expr, cst.FlattenSentinel)
+
+  # leave_Call returning BaseExpression
+  patcher._handle_node = MagicMock(return_value=cst.Name("new_call"))
+  res_call = patcher.leave_Call(call, call)
+  assert getattr(res_call, "value", None) == "new_call"
+
+  # Fallback branches when _handle_node returns an empty statement (lines 156, 175, 192)
+  patcher._handle_node = MagicMock(return_value=empty_stmt)
+  assert patcher.leave_Assign(assign, assign) == assign
+  assert patcher.leave_Expr(expr, expr) == expr
+  assert patcher.leave_Call(call, call) == call
+
+
+def test_graph_patcher_is_expr_context_and_unwrap() -> None:
+  """Test is_expr_context replacement and _unwrap_stmt_if_nested branches."""
+  from ml_switcheroo.core.graph import LogicalNode
+  from ml_switcheroo.core.rewriter.patcher import ReplaceAction
+
+  orig_call = cst.Call(func=cst.Name("f"))
+  action = ReplaceAction(
+    node_id="node1",
+    new_node=LogicalNode(id="node1", kind="Add"),
+    input_vars=[],
+    output_var="x",
+    is_init=False,
+  )
+  emitter = MagicMock()
+  emitter.emit_expression.return_value = cst.Name("emitted_expr")
+  patcher = GraphPatcher([action], {"node1": orig_call}, emitter)
+
+  # Line 254: is_expr_context when original is a Call
+  res_expr = patcher._handle_node(orig_call, orig_call)
+  assert getattr(res_expr, "value", None) == "emitted_expr"
+
+  # _unwrap_stmt_if_nested when context_node is not Assign/Expr
+  non_assign_context = cst.Pass()
+  stmt = cst.SimpleStatementLine(body=[cst.Expr(value=cst.Name("x"))])
+  assert patcher._unwrap_stmt_if_nested(non_assign_context, stmt) == stmt
+
+  # _unwrap_stmt_if_nested when new_stmt.body is empty
+  empty_stmt = cst.SimpleStatementLine(body=[])
+  assert patcher._unwrap_stmt_if_nested(cst.Expr(value=cst.Name("x")), empty_stmt) == empty_stmt

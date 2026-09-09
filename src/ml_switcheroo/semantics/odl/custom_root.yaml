@@ -1,0 +1,32 @@
+operation: custom_root
+description: Differentiably solve for the roots of a function.
+std_args:
+- name: f
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: initial_guess
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: solve
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+- name: has_aux
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: tangent_solve
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.custom_root
+    args:
+      f: f
+      initial_guess: initial_guess
+      solve: solve
+      tangent_solve: tangent_solve

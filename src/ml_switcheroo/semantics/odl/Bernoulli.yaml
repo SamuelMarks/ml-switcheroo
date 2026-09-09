@@ -1,0 +1,19 @@
+operation: Bernoulli
+variants:
+  paxml:
+    api: jax.random.bernoulli
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: inject_prng
+  flax_nnx:
+    api: jax.random.bernoulli
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: inject_prng
+  jax:
+    api: jax.random.bernoulli
+    args:
+      key: key

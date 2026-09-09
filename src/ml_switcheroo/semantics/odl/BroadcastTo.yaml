@@ -1,0 +1,12 @@
+operation: BroadcastTo
+variants:
+  paxml:
+    api: jax.numpy.broadcast_to
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.broadcast_to
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

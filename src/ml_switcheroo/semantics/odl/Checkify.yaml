@@ -1,0 +1,16 @@
+operation: Checkify
+variants:
+  paxml:
+    api: jax.experimental.checkify.checkify
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.checkify
+    args:
+      errors: errors
+      f: f
+      graph: graph
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

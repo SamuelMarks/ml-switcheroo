@@ -1,14 +1,27 @@
-description: Calculates an implementation-dependent approximation to the cosine for
-  each element ``x_i`` of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  latex_dsl:
-    api: latex.cos
-  dask:
-    api: dask.array.cos
 operation: cos
-type: function
+description: cos(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.cos
+    args:
+      input: input
+  jax:
+    api: jax.lax.cos
+    args:
+      x: x
+  mlx:
+    api: mlx.core.cos
+    args:
+      a: a
+  keras:
+    api: keras.ops.cos
+    args: {}

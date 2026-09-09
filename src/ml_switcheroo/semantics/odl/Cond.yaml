@@ -1,0 +1,40 @@
+operation: cond
+description: Conditionally applies `true_fn` or `false_fn`.
+std_args:
+- name: pred
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+- name: false_fn
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: operands
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: ()
+- name: true_fn
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.cond
+    args:
+      pred: pred
+      false_fn: false_fn
+      true_fn: true_fn
+  jax:
+    api: jax.lax.cond
+    args:
+      pred: pred
+      true_fun: true_fun
+      false_fun: false_fun
+      operands: operands
+  keras:
+    api: keras.ops.cond
+    args:
+      pred: pred
+      true_fn: true_fn
+      false_fn: false_fn

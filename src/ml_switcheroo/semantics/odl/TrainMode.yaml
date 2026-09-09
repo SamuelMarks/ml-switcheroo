@@ -1,0 +1,7 @@
+operation: TrainMode
+variants:
+  flax_nnx:
+    api: flax.nnx.train_mode
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

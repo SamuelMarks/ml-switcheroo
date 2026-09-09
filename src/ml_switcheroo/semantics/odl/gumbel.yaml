@@ -1,0 +1,12 @@
+operation: gumbel
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.gumbel
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.gumbel
+    args:
+      key: key

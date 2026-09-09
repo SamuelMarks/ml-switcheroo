@@ -1,0 +1,8 @@
+operation: group_size
+variants:
+  flax_nnx:
+    api: nnx.nn.normalization.GroupNorm.group_size
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

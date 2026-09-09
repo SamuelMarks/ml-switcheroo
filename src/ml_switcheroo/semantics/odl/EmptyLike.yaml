@@ -1,0 +1,15 @@
+operation: EmptyLike
+variants:
+  paxml:
+    api: jax.numpy.empty_like
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.empty_like
+    args:
+      input: a
+      requires_grad: null
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

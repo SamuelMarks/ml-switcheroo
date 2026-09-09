@@ -1,19 +1,39 @@
-description: Abstract base class for generic types.
-std_args:
-- module_constructor
-- in_axes
-- out_axes
-- axis_name
-- axis_size
-- spmd_axis_name
-- in_axes_kwargs
-- state_axes
-- split_rngs
-- transform_metadata
-- module_init_args
-- module_init_kwargs
-variants:
-  flax_nnx:
-    api: flax.nnx.Vmap
 operation: vmap
-type: function
+description: vmap is the vectorizing map; ``vmap(func)`` returns a new function that
+std_args:
+- name: func
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: in_dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: out_dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: randomness
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''error'''
+- name: chunk_size
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.vmap
+    args:
+      func: func
+  jax:
+    api: jax.vmap
+    args:
+      fun: fun
+  mlx:
+    api: mlx.core.vmap
+    args:
+      fun: fun

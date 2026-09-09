@@ -111,6 +111,7 @@ def run() -> None:
       existing_file.unlink()
 
   for k, v in new_k_nn.items():
+    v["operation"] = k
     out_yaml_file: Path = odl_dir / f"{k.replace('/', '_')}.yaml"
     with open(out_yaml_file, "w") as out_f:
       yaml.dump(v, out_f, sort_keys=False, indent=2)

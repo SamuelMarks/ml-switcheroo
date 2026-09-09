@@ -1,11 +1,20 @@
-description: Compute the median along the specified axis.
-std_args:
-- a
-- axis
-- keepdims
-- out
-variants:
-  dask:
-    api: dask.array.median
 operation: median
-type: function
+description: median(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.median
+    args:
+      input: input
+  jax:
+    api: jax.numpy.median
+    args:
+      a: a
+  keras:
+    api: keras.ops.median
+    args:
+      x: x

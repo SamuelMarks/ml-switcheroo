@@ -1,0 +1,7 @@
+operation: Float8E5m2
+variants:
+  flax_nnx:
+    api: jnp.float8_e5m2
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

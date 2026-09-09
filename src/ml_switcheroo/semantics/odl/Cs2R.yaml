@@ -1,0 +1,4 @@
+operation: Cs2R
+variants:
+  nvidia_sass:
+    api: CS2R

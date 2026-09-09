@@ -232,6 +232,20 @@ def test_auxiliary_leave_decorator_rename_noncall() -> None:
   assert res.decorator.value == "new_dec"
 
 
+def test_auxiliary_leave_decorator_name_none_or_not_found() -> None:
+  """Test leave_Decorator returns updated_node if name is None or not found."""
+  ctx = setup_ctx()
+  p = AuxiliaryTransformer(ctx)
+  # name is None (e.g. integer or unsupported expression as decorator)
+  dec_unnamed = cst.Decorator(decorator=cst.Integer("1"))
+  assert p.leave_Decorator(dec_unnamed, dec_unnamed) is dec_unnamed
+
+  # lookup is None
+  ctx.semantics.get_definition = MagicMock(return_value=None)  # type: ignore
+  dec = cst.Decorator(decorator=cst.Name("unknown_dec"))
+  assert p.leave_Decorator(dec, dec) is dec
+
+
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_static_hook(mock_get_hook: MagicMock) -> None:
   """Docstring."""

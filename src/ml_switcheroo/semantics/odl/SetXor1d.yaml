@@ -1,0 +1,22 @@
+operation: setxor1d
+description: Compute the set-wise xor of elements in two arrays.
+std_args:
+- name: ar1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: ar2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: assume_unique
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  jax:
+    api: jax.numpy.setxor1d
+    args:
+      ar1: ar1
+      ar2: ar2

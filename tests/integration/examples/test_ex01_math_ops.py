@@ -1,7 +1,5 @@
 """Test suite for the Ex01 Math Ops module."""
 
-import typing
-
 import pytest
 
 from ml_switcheroo.config import RuntimeConfig
@@ -19,32 +17,7 @@ EXPECTED_KERAS: str = "\nimport keras\nimport numpy as np\n\ndef compute_loss(pr
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
   """Helper to semantics."""
-  mgr = SemanticsManager()
-  abs_def: dict[str, typing.Any] = {
-    "std_args": ["x"],
-    "variants": {
-      "torch": {"api": "torch.abs"},
-      "jax": {"api": "jax.numpy.abs"},
-      "numpy": {"api": "numpy.abs"},
-      "tensorflow": {"api": "tf.abs"},
-      "mlx": {"api": "mlx.core.abs"},
-      "keras": {"api": "keras.ops.abs"},
-    },
-  }
-  mean_def: dict[str, typing.Any] = {
-    "std_args": ["x"],
-    "variants": {
-      "torch": {"api": "torch.mean"},
-      "jax": {"api": "jax.numpy.mean"},
-      "numpy": {"api": "numpy.mean"},
-      "tensorflow": {"api": "tf.math.reduce_mean"},
-      "mlx": {"api": "mlx.core.mean"},
-      "keras": {"api": "keras.ops.mean"},
-    },
-  }
-  mgr.update_definition("Abs", abs_def)
-  mgr.update_definition("Mean", mean_def)
-  return mgr
+  return SemanticsManager()
 
 
 @pytest.mark.parametrize(

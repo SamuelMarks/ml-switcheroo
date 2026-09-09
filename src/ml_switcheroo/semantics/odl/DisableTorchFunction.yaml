@@ -1,0 +1,12 @@
+operation: DisableTorchFunction
+variants:
+  paxml:
+    api: contextlib.nullcontext
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: contextlib.nullcontext
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

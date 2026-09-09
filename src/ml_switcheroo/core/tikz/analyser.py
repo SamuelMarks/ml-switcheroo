@@ -11,7 +11,6 @@ emitter to generate visual diagrams.
 
 from typing import Dict, List, Optional
 import libcst as cst
-from libcst import matchers as m
 
 from ml_switcheroo.core.scanners import get_full_name
 from ml_switcheroo.utils.node_diff import capture_node_source
@@ -178,7 +177,7 @@ class GraphExtractor(cst.CSTVisitor):
     """
     # 1. Identify Target (must be self.something)
     target = node.targets[0].target
-    if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):
+    if not (isinstance(target, cst.Attribute) and isinstance(target.value, cst.Name) and target.value.value == "self"):
       return
 
     attr_name = target.attr.value
@@ -234,7 +233,7 @@ class GraphExtractor(cst.CSTVisitor):
         The resolved layer name or functional node identifier if found, otherwise None.
     """
     # 1. Method call on self (Registered Layer)
-    if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):
+    if isinstance(func_node, cst.Attribute) and isinstance(func_node.value, cst.Name) and func_node.value.value == "self":
       return func_node.attr.value
 
     # 2. Functional Call (Ephemeral Node)

@@ -25,3 +25,19 @@ operation: FeatureAlphaDropout
 variants:
   torch:
     api: torch.nn.FeatureAlphaDropout
+    args: {}
+  keras:
+    api: keras.layers.AlphaDropout
+    args:
+      p: rate
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

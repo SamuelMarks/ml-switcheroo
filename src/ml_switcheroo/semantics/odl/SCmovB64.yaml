@@ -1,0 +1,5 @@
+operation: SCmovB64
+variants:
+  rdna:
+    api: s_cmov_b64
+    description: Auto-mapped instruction S_CMOV_B64

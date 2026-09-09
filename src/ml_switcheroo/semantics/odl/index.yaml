@@ -1,0 +1,8 @@
+operation: index
+variants:
+  flax_nnx:
+    api: nnx.graph.NodeDef.index
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

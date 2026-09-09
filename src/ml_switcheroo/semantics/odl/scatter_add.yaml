@@ -1,0 +1,34 @@
+operation: scatter_add
+description: scatter_add(input, dim, index, src) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: index
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: src
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.scatter_add
+    args:
+      input: input
+      dim: dim
+      index: index
+      src: src
+  jax:
+    api: jax.lax.scatter_add
+    args:
+      operand: operand
+      scatter_indices: scatter_indices
+      updates: updates
+      dimension_numbers: dimension_numbers

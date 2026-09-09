@@ -1,0 +1,4 @@
+operation: Brev
+variants:
+  nvidia_sass:
+    api: BREV

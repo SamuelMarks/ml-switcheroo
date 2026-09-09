@@ -1,9 +1,32 @@
-description: power(x1, x2, /, out=None, *, where=True, casting='same_kind', order='K',
-  dtype=None, subok=True[, signature, extobj])
-std_args:
-- kwargs
-variants:
-  dask:
-    api: dask.array.power
 operation: power
-type: function
+description: First array elements raised to powers from second array, element-wise.
+std_args:
+- name: x1
+  kind: positional_only
+  is_variadic: false
+  type: Tensor
+- name: x2
+  kind: positional_only
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.pow
+    args:
+      x1: x1
+      x2: x2
+  mlx:
+    api: mlx.core.power
+    args:
+      a: a
+      b: b
+  stablehlo:
+    api: stablehlo.power
+    args:
+      lhs: lhs
+      rhs: rhs
+  keras:
+    api: keras.ops.power
+    args:
+      x1: x1
+      x2: x2

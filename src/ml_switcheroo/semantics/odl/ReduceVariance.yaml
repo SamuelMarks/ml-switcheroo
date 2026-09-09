@@ -1,0 +1,16 @@
+operation: ReduceVariance
+variants:
+  paxml:
+    api: jnp.var
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.var
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.var
+    args:
+      a: a

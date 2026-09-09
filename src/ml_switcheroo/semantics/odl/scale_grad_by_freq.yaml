@@ -1,0 +1,8 @@
+operation: scale_grad_by_freq
+variants:
+  paxml:
+    api: optax.tree.scale
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

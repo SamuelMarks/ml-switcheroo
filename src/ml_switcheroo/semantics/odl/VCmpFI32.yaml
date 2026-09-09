@@ -1,0 +1,5 @@
+operation: VCmpFI32
+variants:
+  rdna:
+    api: v_cmp_f_i32
+    description: Auto-mapped instruction V_CMP_F_I32

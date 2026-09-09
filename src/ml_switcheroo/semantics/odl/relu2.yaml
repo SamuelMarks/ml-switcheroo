@@ -3,5 +3,9 @@ std_args: []
 variants:
   mlx:
     api: mlx.nn.ReLU2
-operation: relu2
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+operation: ReLU2
 type: function

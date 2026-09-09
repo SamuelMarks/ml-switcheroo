@@ -14,5 +14,26 @@ std_args:
 variants:
   dask:
     api: dask.array.floor_divide
+    args: {}
+  flax_nnx:
+    api: jax.numpy.floor_divide
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.floor_divide
+    args:
+      x1: x1
+      x2: x2
+  mlx:
+    api: mlx.core.floor_divide
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.floor_divide
+    args:
+      x1: x1
+      x2: x2
 operation: floor_divide
 type: function

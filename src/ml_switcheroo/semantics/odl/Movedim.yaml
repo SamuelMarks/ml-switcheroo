@@ -1,0 +1,22 @@
+operation: Movedim
+description: movedim(input, source, destination) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: source
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: destination
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.movedim
+    args:
+      input: input
+      source: source
+      destination: destination

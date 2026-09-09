@@ -1,11 +1,29 @@
-description: bincount(x, /, weights=None, minlength=0)
-std_args:
-- x
-- weights
-- minlength
-- split_every
-variants:
-  dask:
-    api: dask.array.bincount
 operation: bincount
-type: function
+description: bincount(input, weights=None, minlength=0) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: weights
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: minlength
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+variants:
+  torch:
+    api: torch.bincount
+    args:
+      input: input
+  jax:
+    api: jax.numpy.bincount
+    args:
+      x: x
+  keras:
+    api: keras.ops.bincount
+    args:
+      x: x

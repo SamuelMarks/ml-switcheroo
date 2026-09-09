@@ -1,0 +1,5 @@
+operation: VXorB32
+variants:
+  rdna:
+    api: v_xor_b32
+    description: Auto-mapped instruction V_XOR_B32

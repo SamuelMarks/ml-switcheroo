@@ -1,0 +1,9 @@
+operation: Display
+variants:
+  flax_nnx:
+    api: flax.nnx.display
+    args:
+      args: args
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

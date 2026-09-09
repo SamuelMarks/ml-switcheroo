@@ -1,36 +1,34 @@
-description: Applies a 1D average pooling.
+operation: AvgPool1D
+description: Average pooling for temporal data.
 std_args:
-- is_variadic: false
+- name: pool_size
   kind: positional_or_keyword
-  name: input
-  type: Tensor
-- is_variadic: false
-  kind: positional_or_keyword
-  name: kernel_size
-  type: int
-- is_variadic: false
-  kind: positional_or_keyword
-  name: stride
-  type: int
-- default: 0
   is_variadic: false
+  type: Any
+- name: strides
   kind: positional_or_keyword
-  name: padding
-  type: int
-- default: false
   is_variadic: false
+  type: Any
+- name: padding
   kind: positional_or_keyword
-  name: ceil_mode
-  type: bool
-- default: true
   is_variadic: false
+  type: Any
+  default: '''valid'''
+- name: data_format
   kind: positional_or_keyword
-  name: count_include_pad
-  type: bool
-type: class
-operation: AvgPool1d
+  is_variadic: false
+  type: Any
+- name: name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
-  mlx:
-    api: mlx.nn.AvgPool1d
-  torch:
-    api: torch.nn.AvgPool1d
+  keras:
+    api: keras.layers.AvgPool1D
+    args:
+      pool_size: pool_size

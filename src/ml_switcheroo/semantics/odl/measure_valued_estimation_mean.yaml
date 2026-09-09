@@ -1,0 +1,13 @@
+operation: measure_valued_estimation_mean
+variants:
+  flax_nnx:
+    api: optax.monte_carlo.stochastic_gradient_estimators.measure_valued_estimation_mean
+    args:
+      coupling: coupling
+      dist: dist
+      function: function
+      num_samples: num_samples
+      rng: rng
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -11,11 +11,11 @@ Transformation Overview:
 """
 
 import libcst as cst
-from typing import List, Optional
+from typing import List, Optional, Sequence
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
-def _get_arg_by_name(args: List[cst.Arg], name: str) -> Optional[cst.Arg]:
+def _get_arg_by_name(args: Sequence[cst.Arg], name: str) -> Optional[cst.Arg]:
   """Retrieve an argument node by its keyword name.
 
   Args:
@@ -94,6 +94,7 @@ def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     tensors = [dataset_arg]
 
   # 3. Construct Input Tuple
+  slice_input: cst.BaseExpression
   if len(tensors) > 1:
     slice_input = cst.Tuple(elements=[cst.Element(t) for t in tensors])
   else:

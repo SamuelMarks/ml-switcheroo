@@ -1,13 +1,25 @@
 description: Builds a Glorot normal initializer (aka Xavier normal initializer).
 std_args:
-- in_axis
-- out_axis
-- batch_axis
-- dtype
+- name: in_axis
+  type: Any
+- name: out_axis
+  type: Any
+- name: batch_axis
+  type: Any
+- name: dtype
+  type: Any
 variants:
   flax_nnx:
-    api: jax.nn.initializers.glorot_normal
+    api: nnx.rnglib.Rngs.glorot_normal
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: jax.nn.initializers.glorot_normal
+    args: {}
+  keras:
+    api: keras.initializers.glorot_normal
+    args: {}
 operation: glorot_normal
 type: function

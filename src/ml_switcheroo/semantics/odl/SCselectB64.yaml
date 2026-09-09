@@ -1,0 +1,5 @@
+operation: SCselectB64
+variants:
+  rdna:
+    api: s_cselect_b64
+    description: Auto-mapped instruction S_CSELECT_B64

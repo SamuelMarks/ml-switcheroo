@@ -1,0 +1,15 @@
+operation: AdaptedTransformerFeedForward
+variants:
+  paxml:
+    api: praxis.layers.AdaptedTransformerFeedForward
+    args:
+      dropout_prob: residual_dropout_prob
+      hidden_dims: hidden_dims
+      input_dims: input_dims
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

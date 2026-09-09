@@ -1,8 +1,17 @@
+operation: Tanhshrink
 description: Applies the element-wise Tanhshrink function.
 std_args:
-- kwargs
-type: function
-operation: tanhshrink
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+  default: ()
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   torch:
     api: torch.nn.Tanhshrink
+    args: {}

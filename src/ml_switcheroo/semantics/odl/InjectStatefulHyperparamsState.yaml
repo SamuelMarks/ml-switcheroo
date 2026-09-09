@@ -1,0 +1,8 @@
+operation: InjectStatefulHyperparamsState
+variants:
+  flax_nnx:
+    api: optax.InjectStatefulHyperparamsState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

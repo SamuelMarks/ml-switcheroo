@@ -1,0 +1,42 @@
+operation: binary_cross_entropy_with_logits
+description: Compute Binary Cross Entropy between target and input logits.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: target
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: size_average
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reduce
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '''mean'''
+- name: pos_weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.nn.functional.binary_cross_entropy_with_logits
+    args:
+      input: input
+      target: target

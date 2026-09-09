@@ -1,0 +1,5 @@
+operation: VFmacF16
+variants:
+  rdna:
+    api: v_fmac_f16
+    description: Auto-mapped instruction V_FMAC_F16

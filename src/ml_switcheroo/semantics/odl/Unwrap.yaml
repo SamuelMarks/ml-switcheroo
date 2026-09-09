@@ -1,0 +1,27 @@
+operation: unwrap
+description: Auto-generated mapping for unwrap.
+std_args:
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: discont
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '-1'
+- name: period
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(2 * pi)```'''
+variants:
+  jax:
+    api: jax.numpy.unwrap
+    args:
+      p: p

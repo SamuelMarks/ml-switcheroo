@@ -1,0 +1,14 @@
+operation: StochasticResidual
+variants:
+  paxml:
+    api: praxis.layers.StochasticResidual
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.linen.StochasticDepth
+    args:
+      survival_prob: probability
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

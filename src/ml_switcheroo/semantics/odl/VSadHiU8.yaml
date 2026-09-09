@@ -1,0 +1,5 @@
+operation: VSadHiU8
+variants:
+  rdna:
+    api: v_sad_hi_u8
+    description: Auto-mapped instruction V_SAD_HI_U8

@@ -1,11 +1,51 @@
-description: Pad an array.
-std_args:
-- array
-- pad_width
-- mode
-- kwargs
-type: function
 operation: pad
+description: pad(input, pad, mode="constant", value=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: pad
+  kind: positional_or_keyword
+  is_variadic: false
+  type: tuple
+- name: mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''constant'''
+- name: value
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
 variants:
-  dask:
-    api: dask.array.pad
+  torch:
+    api: torch.nn.functional.pad
+    args:
+      input: input
+      pad: pad
+  jax:
+    api: jax.lax.pad
+    args:
+      operand: operand
+      padding_value: padding_value
+      padding_config: padding_config
+  mlx:
+    api: mlx.core.pad
+    args:
+      a: a
+      pad_width: pad_width
+  stablehlo:
+    api: stablehlo.pad
+    args:
+      operand: operand
+      padding_value: padding_value
+      edge_padding_low: edge_padding_low
+      edge_padding_high: edge_padding_high
+      interior_padding: interior_padding
+  keras:
+    api: keras.ops.pad
+    args:
+      x: x
+      pad_width: pad_width

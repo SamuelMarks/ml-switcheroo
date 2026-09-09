@@ -1,0 +1,95 @@
+operation: AttentionLayer
+variants:
+  keras:
+    api: keras.layers.Attention
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.MultiheadAttention
+    dispatch_rules: []
+    missing_message: 'Structure Mismatch: PyTorch MultiheadAttention includes projection
+      weights; Keras Attention is raw dot-product.'
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.Attention
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.linen.attention.dot_product_attention
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: embed_dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: num_heads
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dropout
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''0.0`` (no dropout).'''
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: add_bias_kv
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: add_zero_attn
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: kdim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '''None`` (uses ``kdim=embed_dim``).'''
+- name: vdim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '''None`` (uses ``vdim=embed_dim``).'''
+- name: batch_first
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''False`` (seq, batch, feature).'''
+- name: __constants__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+  default: '[''batch_first'']'
+- name: bias_k
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: bias_v
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''

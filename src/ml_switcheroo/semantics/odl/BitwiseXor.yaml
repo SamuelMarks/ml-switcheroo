@@ -1,0 +1,23 @@
+operation: BitwiseXor
+variants:
+  paxml:
+    api: jnp.bitwise_xor
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.bitwise_xor
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.lax.bitwise_xor
+    args:
+      x: x
+      y: y
+  rdna:
+    api: v_xor_b32
+    args: {}
+  nvidia_sass:
+    api: LOP3_LUT
+    args: {}

@@ -1,0 +1,5 @@
+operation: SFmacF32
+variants:
+  rdna:
+    api: s_fmac_f32
+    description: Auto-mapped instruction S_FMAC_F32

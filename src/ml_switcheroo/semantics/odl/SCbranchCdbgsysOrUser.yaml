@@ -1,0 +1,5 @@
+operation: SCbranchCdbgsysOrUser
+variants:
+  rdna:
+    api: s_cbranch_cdbgsys_or_user
+    description: Auto-mapped instruction S_CBRANCH_CDBGSYS_OR_USER

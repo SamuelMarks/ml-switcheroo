@@ -1,0 +1,4 @@
+operation: Hmul2_32I
+variants:
+  nvidia_sass:
+    api: HMUL2_32I

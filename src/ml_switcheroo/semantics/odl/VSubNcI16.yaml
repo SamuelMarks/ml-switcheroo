@@ -1,0 +1,5 @@
+operation: VSubNcI16
+variants:
+  rdna:
+    api: v_sub_nc_i16
+    description: Auto-mapped instruction V_SUB_NC_I16

@@ -1,0 +1,20 @@
+operation: stop_gradient
+description: Stops gradient computation.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.stop_gradient
+    args:
+      x: x
+  mlx:
+    api: mlx.core.stop_gradient
+    args:
+      a: a
+  keras:
+    api: keras.ops.stop_gradient
+    args:
+      variable: variable

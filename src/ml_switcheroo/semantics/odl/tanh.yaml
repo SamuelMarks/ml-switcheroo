@@ -1,24 +1,35 @@
-description: Calculates an implementation-dependent approximation to the hyperbolic
-  tangent for each element ``x_i`` of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-type: function
 operation: tanh
+description: tanh(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
+  torch:
+    api: torch.nn.functional.tanh
+    args:
+      input: input
+  jax:
+    api: jax.lax.tanh
+    args:
+      x: x
+  mlx:
+    api: mlx.core.tanh
+    args:
+      a: a
   keras:
     api: keras.activations.tanh
-  numpy:
-    api: numpy.tanh
-  mlx:
-    api: mlx.nn.Tanh
-  latex_dsl:
-    api: latex.tanh
-  dask:
-    api: dask.array.tanh
-  torch:
-    api: torch.nn.Tanh
-  tensorflow:
-    api: tf.nn.tanh
+    args:
+      x: x
+  stablehlo:
+    api: stablehlo.tanh
+    args:
+      operand: operand
+      result_accuracy: result_accuracy
+  nvidia_sass:
+    api: Macro.Tanh
+    args: {}
+  rdna:
+    api: ; Macro.Tanh
+    args: {}

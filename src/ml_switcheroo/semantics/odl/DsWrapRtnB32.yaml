@@ -1,0 +1,5 @@
+operation: DsWrapRtnB32
+variants:
+  rdna:
+    api: ds_wrap_rtn_b32
+    description: Auto-mapped instruction DS_WRAP_RTN_B32

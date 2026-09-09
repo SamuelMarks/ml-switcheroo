@@ -1,0 +1,12 @@
+operation: ForiLoop
+variants:
+  paxml:
+    api: jax.lax.fori_loop
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.fori_loop
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

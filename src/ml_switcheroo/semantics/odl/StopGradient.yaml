@@ -1,0 +1,12 @@
+operation: StopGradient
+variants:
+  paxml:
+    api: jax.lax.stop_gradient
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.lax.stop_gradient
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

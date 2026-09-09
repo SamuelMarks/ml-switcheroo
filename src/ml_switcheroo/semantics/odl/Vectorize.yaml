@@ -1,0 +1,26 @@
+operation: vectorize
+description: Define a vectorized function with broadcasting.
+std_args:
+- name: pyfunc
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: excluded
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(frozenset())```'''
+- name: signature
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.vectorize
+    args:
+      pyfunc: pyfunc
+  keras:
+    api: keras.ops.vectorize
+    args:
+      pyfunc: pyfunc

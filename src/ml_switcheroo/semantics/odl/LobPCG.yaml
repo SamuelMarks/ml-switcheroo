@@ -1,0 +1,12 @@
+operation: LobPCG
+variants:
+  paxml:
+    api: jax.scipy.sparse.linalg.lobpcg
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.scipy.sparse.linalg.lobpcg
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -27,5 +27,25 @@ std_args:
 variants:
   dask:
     api: dask.array.topk
+    args: {}
+  paxml:
+    api: jax.lax.top_k
+    args:
+      input: operand
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.lax.top_k
+    args:
+      input: operand
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.core.topk
+    args:
+      a: a
+      k: k
 operation: TopK
 type: function

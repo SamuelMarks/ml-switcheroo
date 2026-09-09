@@ -1,9 +1,12 @@
-description: fabs(x, /, out=None, *, where=True, casting='same_kind', order='K', dtype=None,
-  subok=True[, signature, extobj])
-std_args:
-- kwargs
-variants:
-  dask:
-    api: dask.array.fabs
 operation: fabs
-type: function
+description: Auto-generated mapping for fabs.
+std_args:
+- name: x
+  kind: positional_only
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.numpy.fabs
+    args:
+      x: x

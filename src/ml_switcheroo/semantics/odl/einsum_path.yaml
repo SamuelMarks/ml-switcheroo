@@ -1,0 +1,19 @@
+operation: einsum_path
+variants:
+  flax_nnx:
+    api: jax.numpy.einsum_path
+    args:
+      operands: operands
+      optimize: optimize
+      subscripts: subscripts
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.einsum_path
+    args:
+      subscripts: subscripts
+  mlx:
+    api: mlx.core.einsum_path
+    args:
+      subscripts: subscripts

@@ -1,0 +1,4 @@
+operation: MinMax
+variants:
+  nvidia_sass:
+    api: FMNMX

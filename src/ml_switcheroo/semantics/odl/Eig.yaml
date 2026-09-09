@@ -1,0 +1,30 @@
+operation: eig
+description: Auto-generated from jax_code_defs
+std_args:
+- name: eigenvectors
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: e
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: v
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.eig
+    args: {}
+  mlx:
+    api: mlx.core.linalg.eig
+    args:
+      a: a
+  keras:
+    api: keras.ops.eig
+    args:
+      x: x

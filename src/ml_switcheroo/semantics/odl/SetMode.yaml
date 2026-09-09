@@ -1,0 +1,7 @@
+operation: SetMode
+variants:
+  flax_nnx:
+    api: flax.nnx.set_mode
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

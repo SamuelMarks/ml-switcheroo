@@ -1,0 +1,42 @@
+operation: CircleLoss
+variants:
+  keras:
+    api: keras.losses.Circle
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.losses.Circle
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: gamma
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '80.0'
+- name: margin
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0.4'
+- name: remove_diagonal
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''sum_over_batch_size'''
+- name: name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''circle'''
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

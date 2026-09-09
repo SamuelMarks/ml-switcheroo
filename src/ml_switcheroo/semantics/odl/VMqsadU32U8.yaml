@@ -1,0 +1,5 @@
+operation: VMqsadU32U8
+variants:
+  rdna:
+    api: v_mqsad_u32_u8
+    description: Auto-mapped instruction V_MQSAD_U32_U8

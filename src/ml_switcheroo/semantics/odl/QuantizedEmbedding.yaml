@@ -12,5 +12,10 @@ std_args:
 variants:
   mlx:
     api: mlx.nn.QuantizedEmbedding
+    args:
+      embedding_dim: dims
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: QuantizedEmbedding
 type: function

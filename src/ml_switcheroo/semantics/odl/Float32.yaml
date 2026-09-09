@@ -1,9 +1,14 @@
 operation: Float32
 description: Definition for Float32
+op_type: attribute
 std_args: []
 variants:
+  torch:
+    api: torch.float32
   jax:
     api: jax.numpy.float32
+  mlx:
+    api: mlx.core.float32
   numpy:
     api: numpy.float32
   keras:

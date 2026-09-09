@@ -1,0 +1,5 @@
+operation: VMed3U32
+variants:
+  rdna:
+    api: v_med3_u32
+    description: Auto-mapped instruction V_MED3_U32

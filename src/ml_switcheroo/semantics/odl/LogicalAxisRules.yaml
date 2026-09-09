@@ -1,0 +1,7 @@
+operation: LogicalAxisRules
+variants:
+  flax_nnx:
+    api: flax.nnx.logical_axis_rules
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

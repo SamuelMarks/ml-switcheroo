@@ -1,0 +1,14 @@
+operation: addressable_data
+variants:
+  flax_nnx:
+    api: jax.numpy.ndarray.addressable_data
+    args:
+      index: index
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.Array.addressable_data
+    args:
+      index: index

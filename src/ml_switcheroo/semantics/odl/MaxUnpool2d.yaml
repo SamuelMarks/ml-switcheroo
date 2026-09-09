@@ -1,10 +1,14 @@
 description: Computes a partial inverse of :class:`MaxPool2d`.
 std_args:
-- kernel_size
-- stride
-- padding
+- name: kernel_size
+  type: Any
+- name: stride
+  type: Any
+- name: padding
+  type: Any
 type: class
 operation: MaxUnpool2d
 variants:
   torch:
     api: torch.nn.MaxUnpool2d
+    args: {}

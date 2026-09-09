@@ -1,0 +1,9 @@
+operation: Erf_
+variants:
+  flax_nnx:
+    api: jax.scipy.special.erf
+    args:
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

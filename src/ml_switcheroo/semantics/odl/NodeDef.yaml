@@ -1,0 +1,14 @@
+operation: NodeDef
+variants:
+  flax_nnx:
+    api: nnx.graphlib.NodeDef
+    args:
+      index: index
+      metadata: metadata
+      num_attributes: num_attributes
+      outer_index: outer_index
+      self: self
+      type: type
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

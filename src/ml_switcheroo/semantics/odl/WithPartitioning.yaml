@@ -1,0 +1,7 @@
+operation: WithPartitioning
+variants:
+  flax_nnx:
+    api: flax.nnx.with_partitioning
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

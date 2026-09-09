@@ -1,0 +1,22 @@
+operation: in_top_k
+description: Checks if the targets are in the top-k predictions.
+std_args:
+- name: targets
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: predictions
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: k
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  keras:
+    api: keras.ops.in_top_k
+    args:
+      targets: targets
+      predictions: predictions
+      k: k

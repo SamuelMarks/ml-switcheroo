@@ -1,9 +1,27 @@
-description: Return the elements of an array that satisfy some condition.
-std_args:
-- condition
-- arr
-variants:
-  dask:
-    api: dask.array.extract
 operation: extract
-type: function
+description: Return the elements of an array that satisfy a condition.
+std_args:
+- name: condition
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: arr
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: size
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: fill_value
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+  default: '0'
+variants:
+  jax:
+    api: jax.numpy.extract
+    args:
+      condition: condition
+      arr: arr

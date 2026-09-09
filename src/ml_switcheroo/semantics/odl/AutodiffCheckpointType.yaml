@@ -1,0 +1,7 @@
+operation: AutodiffCheckpointType
+variants:
+  paxml:
+    api: praxis.layers.AutodiffCheckpointType
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

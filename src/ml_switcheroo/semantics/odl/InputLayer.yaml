@@ -8,7 +8,24 @@ std_args:
 variants:
   keras:
     api: keras.layers.InputLayer
+    args:
+      batch_shape: batch_shape
+      batch_size: batch_size
+      dtype: dtype
+      input_tensor: input_tensor
+      kwargs: kwargs
+      name: name
+      optional: optional
+      ragged: ragged
+      shape: shape
+      sparse: sparse
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.InputLayer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: InputLayer
 type: function

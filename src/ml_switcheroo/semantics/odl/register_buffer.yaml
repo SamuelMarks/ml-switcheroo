@@ -1,0 +1,8 @@
+operation: register_buffer
+variants:
+  flax_nnx:
+    api: torch_register_buffer_to_nnx
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: torch_register_buffer_to_nnx

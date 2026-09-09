@@ -1,0 +1,22 @@
+operation: adaptive_max_pool2d_with_indices
+description: adaptive_max_pool2d(input, output_size, return_indices=False)
+std_args:
+- name: output_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: return_indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.nn.functional.adaptive_max_pool2d_with_indices
+    args:
+      output_size: output_size
+      input: input

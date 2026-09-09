@@ -1,0 +1,7 @@
+operation: RegisterDataType
+variants:
+  flax_nnx:
+    api: flax.nnx.register_data_type
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,5 @@
+operation: VCmpxLeI64
+variants:
+  rdna:
+    api: v_cmpx_le_i64
+    description: Auto-mapped instruction V_CMPX_LE_I64

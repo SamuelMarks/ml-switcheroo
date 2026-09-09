@@ -1,0 +1,4 @@
+operation: Redux
+variants:
+  nvidia_sass:
+    api: REDUX

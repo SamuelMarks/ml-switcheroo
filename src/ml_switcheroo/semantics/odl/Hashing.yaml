@@ -12,7 +12,20 @@ std_args:
 variants:
   keras:
     api: keras.layers.Hashing
+    args:
+      kwargs: kwargs
+      mask_value: mask_value
+      num_bins: num_bins
+      output_mode: output_mode
+      salt: salt
+      sparse: sparse
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.Hashing
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Hashing
 type: function

@@ -1,0 +1,37 @@
+operation: avg_pool1d
+description: avg_pool1d(input, kernel_size, stride=None, padding=0, ceil_mode=False,
+  count_include_pad=True) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kernel_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+- name: ceil_mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: count_include_pad
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+variants:
+  torch:
+    api: torch.nn.functional.avg_pool1d
+    args:
+      input: input
+      kernel_size: kernel_size

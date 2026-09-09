@@ -1,0 +1,15 @@
+operation: UpdateContext
+variants:
+  flax_nnx:
+    api: flax.nnx.update_context
+    args:
+      inner_ref_outer_index: inner_ref_outer_index
+      outer_index_inner_ref: outer_index_inner_ref
+      outer_index_outer_ref: outer_index_outer_ref
+      outer_ref_outer_index: outer_ref_outer_index
+      self: self
+      static_cache: static_cache
+      tag: tag
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

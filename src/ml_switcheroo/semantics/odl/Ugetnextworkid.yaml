@@ -1,0 +1,4 @@
+operation: Ugetnextworkid
+variants:
+  nvidia_sass:
+    api: UGETNEXTWORKID

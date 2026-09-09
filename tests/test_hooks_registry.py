@@ -80,9 +80,9 @@ def test_get_all_metadata():
   assert "my_hook" in meta
 
 
-def test_load_plugins_default(tmp_path):
-  """Loads plugins default."""
-  count = load_plugins(plugins_dir=Path("does_not_exist"))
+def test_load_plugins_default(tmp_path: Path) -> None:
+  """Loads plugins default including non-existent extra directory."""
+  count: int = load_plugins(plugins_dir=Path("does_not_exist"), extra_dirs=[tmp_path, Path("does_not_exist_extra")])
   assert count == 0
 
 

@@ -1,25 +1,51 @@
 description: Data loader combines a dataset and a sampler, and provides an iterable
   over the given dataset.
 std_args:
-- dataset
-- batch_size
-- shuffle
-- sampler
-- batch_sampler
-- num_workers
-- collate_fn
-- pin_memory
-- drop_last
-- timeout
-- worker_init_fn
-- multiprocessing_context
-- generator
-- prefetch_factor
-- persistent_workers
-- pin_memory_device
-- in_order
+- name: dataset
+  type: Any
+- name: batch_size
+  type: Any
+- name: shuffle
+  type: Any
+- name: sampler
+  type: Any
+- name: batch_sampler
+  type: Any
+- name: num_workers
+  type: Any
+- name: collate_fn
+  type: Any
+- name: pin_memory
+  type: Any
+- name: drop_last
+  type: Any
+- name: timeout
+  type: Any
+- name: worker_init_fn
+  type: Any
+- name: multiprocessing_context
+  type: Any
+- name: generator
+  type: Any
+- name: prefetch_factor
+  type: Any
+- name: persistent_workers
+  type: Any
+- name: pin_memory_device
+  type: Any
+- name: in_order
+  type: Any
 variants:
   torch:
     api: torch.utils.data.DataLoader
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.data.Dataset
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: tf_data_loader
 operation: DataLoader
 type: function

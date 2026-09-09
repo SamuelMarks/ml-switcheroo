@@ -1,0 +1,4 @@
+operation: Fsel
+variants:
+  nvidia_sass:
+    api: FSEL

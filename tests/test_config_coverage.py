@@ -2,7 +2,7 @@
 
 import types
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Any, Dict, Optional, Union
 from unittest.mock import patch
 
 import pytest
@@ -104,7 +104,7 @@ def test_import_tomllib() -> None:
 
     original_import = builtins.__import__
 
-    def fake_import(name: str, *args: tuple[str, ...], **kwargs: dict[str, str]) -> types.ModuleType:
+    def fake_import(name: str, *args: Any, **kwargs: Any) -> types.ModuleType:
       """Fake import."""
       if name == "tomli":
         raise ImportError("No module named tomli")
@@ -121,8 +121,57 @@ def test_runtime_config_load_overrides(tmp_path: Path) -> None:
 [tool.ml_switcheroo]
 plugin_paths = ["custom_plugins"]
   """)
-  config: RuntimeConfig = RuntimeConfig.load(strict_mode=True, enable_graph_optimization=True, search_path=tmp_path)
+  config: RuntimeConfig = RuntimeConfig.load(
+    strict_mode=True, enable_graph_optimization=True, enable_sharding=True, search_path=tmp_path
+  )
   assert config.strict_mode is True
   assert config.enable_graph_optimization is True
+  assert config.enable_sharding is True
   assert len(config.plugin_paths) == 1
   assert config.plugin_paths[0].name == "custom_plugins"
+
+
+def test_framework_priority_hierarchy_and_missing_priority() -> None:
+  """Test framework priority ordering for child flavours and missing ui_priority."""
+  from ml_switcheroo.config import get_framework_priority_order
+
+  class ChildAdapter:
+    """Mock child adapter."""
+
+    inherits_from = "parent"
+
+  class ParentAdapter:
+    """Mock parent adapter with empty inherits_from."""
+
+    inherits_from = None
+
+  class NoPriorityAdapter:
+    """Mock adapter without ui_priority."""
+
+    pass
+
+  with patch(
+    "ml_switcheroo.frameworks.base.available_frameworks", return_value=["child", "parent", "noprio", "no_adapter"]
+  ):
+    with patch("ml_switcheroo.frameworks.base.get_adapter") as mock_get:
+
+      def get_adapter_mock(name: str) -> Any:
+        """Mock adapter resolver.
+
+        Args:
+            name: Framework name.
+
+        Returns:
+            Adapter instance or None.
+        """
+        if name == "child":
+          return ChildAdapter()
+        elif name == "parent":
+          return ParentAdapter()
+        elif name == "noprio":
+          return NoPriorityAdapter()
+        return None
+
+      mock_get.side_effect = get_adapter_mock
+      order = get_framework_priority_order()
+      assert order == ["no_adapter", "noprio", "parent", "child"]

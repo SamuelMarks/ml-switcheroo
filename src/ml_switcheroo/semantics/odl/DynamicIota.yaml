@@ -1,0 +1,13 @@
+operation: DynamicIota
+variants:
+  stablehlo:
+    api: stablehlo.dynamic_iota
+std_args:
+- name: output_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: iota_dimension
+  kind: keyword_only
+  is_variadic: false
+  type: Any

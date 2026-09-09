@@ -1,0 +1,12 @@
+operation: RealIfClose
+variants:
+  paxml:
+    api: jax.numpy.real_if_close
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.real_if_close
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

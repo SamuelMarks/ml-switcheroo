@@ -1,22 +1,40 @@
-description: Clamps each element ``x_i`` of the input array ``x`` to the range ``[min,
-  max]``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: min
-  type: Optional[Union[int, float, array]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: max
-  type: Optional[Union[int, float, array]]
-variants:
-  dask:
-    api: dask.array.clip
-  tikz:
-    api: tikz.clip
 operation: clip
-type: function
+description: clip(input, min=None, max=None, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: min
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: max
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.clip
+    args:
+      input: input
+  jax:
+    api: jax.numpy.clip
+    args:
+      min: min
+  mlx:
+    api: mlx.core.clip
+    args:
+      a: a
+      a_min: a_min
+      a_max: a_max
+  keras:
+    api: keras.ops.clip
+    args:
+      x: x
+      x_min: x_min
+      x_max: x_max

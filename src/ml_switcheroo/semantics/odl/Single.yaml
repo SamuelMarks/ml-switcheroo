@@ -1,0 +1,21 @@
+operation: Single
+variants:
+  numpy:
+    api: numpy.float32
+    args:
+      value: value
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: jax.numpy.float32
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.single
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

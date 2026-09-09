@@ -1,17 +1,36 @@
 description: Computes CTC loss.
 std_args:
-- logits
-- logit_paddings
-- labels
-- label_paddings
-- blank_id
-- log_epsilon
+- name: logits
+  type: Any
+- name: logit_paddings
+  type: Any
+- name: labels
+  type: Any
+- name: label_paddings
+  type: Any
+- name: blank_id
+  type: Any
+- name: log_epsilon
+  type: Any
 type: attribute
 operation: ctc_loss
 variants:
   optax_shim:
     api: optax.losses.ctc_loss
+    args: {}
   flax_nnx:
-    api: optax.losses.ctc_loss
+    api: optax.ctc_loss
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.losses.ctc_loss
+    args: {}
+  keras:
+    api: keras.ops.ctc_loss
+    args:
+      target: target
+      output: output
+      target_length: target_length
+      output_length: output_length

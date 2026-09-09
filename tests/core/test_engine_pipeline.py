@@ -37,8 +37,8 @@ def test_engine_run_compiler_pipeline_python(mock_get_backend: MagicMock, mock_f
     assert res.code == "compiled_python"
 
 
-@patch("ml_switcheroo.core.engine.SassParser")
-@patch("ml_switcheroo.core.engine.SassLifter")
+@patch("ml_switcheroo.core.engine.NvidiaSassParser")
+@patch("ml_switcheroo.core.engine.NvidiaSassLifter")
 @patch("ml_switcheroo.core.engine.get_backend_class")
 def test_engine_run_compiler_pipeline_sass(
   mock_get_backend: MagicMock, mock_lifter_class: MagicMock, mock_parser_class: MagicMock
@@ -55,7 +55,7 @@ def test_engine_run_compiler_pipeline_sass(
   mock_get_backend.return_value = mock_backend_class
   mock_backend_class.return_value.compile.return_value = "compiled_sass"
 
-  engine = ASTEngine(source="sass", target="html")
+  engine = ASTEngine(source="nvidia_sass", target="html")
   res: ConversionResult = engine._run_compiler_pipeline("code", MagicMock())
 
   assert res.success is True
@@ -237,7 +237,7 @@ def test_engine_run_compiler_pipeline_unknown_isa() -> None:
   """Docstring."""
   # We can't use an unknown ISA in ASTEngine initialization because RuntimeConfig validates it.
   # So we bypass the validation by patching is_isa_source locally in the test instead
-  engine = ASTEngine(source="sass", target="html")  # use valid frameworks
+  engine = ASTEngine(source="nvidia_sass", target="html")  # use valid frameworks
   engine.source = "unknown_isa"  # Override after init
 
   with patch("ml_switcheroo.core.engine.is_isa_source", return_value=True):

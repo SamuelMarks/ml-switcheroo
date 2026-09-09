@@ -1,0 +1,12 @@
+operation: Asin_
+description: In-place version of Asin.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.asin_
+    args:
+      input: input

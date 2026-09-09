@@ -1,0 +1,9 @@
+operation: MLPBlock
+variants:
+  paxml:
+    api: paxml.layers.MLPBlock
+    args:
+      hidden_features: hidden_dims
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

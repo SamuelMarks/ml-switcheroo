@@ -1,0 +1,5 @@
+operation: VCvtFloorI32F32
+variants:
+  rdna:
+    api: v_cvt_floor_i32_f32
+    description: Auto-mapped instruction V_CVT_FLOOR_I32_F32

@@ -1,8 +1,17 @@
+operation: step
 description: Applies the Step Activation Function.
 std_args:
-- threshold
+- name: threshold
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.0'
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
   mlx:
-    api: mlx.nn.Step
-operation: step
-type: function
+    api: mlx.nn.step
+    args:
+      x: x

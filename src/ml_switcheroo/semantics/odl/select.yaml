@@ -1,12 +1,39 @@
-description: Return an array drawn from elements in choicelist, depending on conditions.
-std_args:
-- condlist
-- choicelist
-- default
-variants:
-  dask:
-    api: dask.array.select
-  html_dsl:
-    api: html.select
 operation: select
-type: function
+description: select(input, dim, index) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: index
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  torch:
+    api: torch.select
+    args:
+      input: input
+      dim: dim
+      index: index
+  jax:
+    api: jax.lax.select
+    args:
+      pred: pred
+      on_true: on_true
+      on_false: on_false
+  stablehlo:
+    api: stablehlo.select
+    args:
+      pred: pred
+      on_true: on_true
+      on_false: on_false
+  keras:
+    api: keras.ops.select
+    args:
+      condlist: condlist
+      choicelist: choicelist

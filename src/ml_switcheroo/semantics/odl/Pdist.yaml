@@ -1,0 +1,17 @@
+operation: pdist
+description: pdist(input, p=2) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '2'
+variants:
+  torch:
+    api: torch.nn.functional.pdist
+    args:
+      input: input

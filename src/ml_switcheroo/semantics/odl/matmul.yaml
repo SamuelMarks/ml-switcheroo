@@ -1,15 +1,40 @@
-description: Computes the matrix product.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x1
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x2
-  type: array
-type: attribute
 operation: matmul
+description: matmul(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
-  dask:
-    api: dask.array.matmul
+  torch:
+    api: torch.matmul
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.matmul
+    args:
+      a: a
+      b: b
+  mlx:
+    api: mlx.core.matmul
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.matmul
+    args: {}
+  nvidia_sass:
+    api: Macro.Linear
+    args: {}
+  rdna:
+    api: ; Macro.Linear
+    args: {}

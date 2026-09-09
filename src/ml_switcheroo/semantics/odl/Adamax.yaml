@@ -1,26 +1,45 @@
 description: Optimizer that implements the Adamax algorithm.
 std_args:
-- eps
-- lr
-- weight_decay
+- name: eps
+  type: Any
+- name: lr
+  type: Any
+- name: weight_decay
+  type: Any
 type: function
 operation: Adamax
 variants:
   keras:
     api: keras.optimizers.Adamax
-    args:
-      weight_decay: weight_decay
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   mlx:
     api: mlx.optimizers.Adamax
     args:
-      eps: eps
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.optim.Adamax
     args:
-      eps: eps
-      lr: lr
-      weight_decay: weight_decay
+      epsilon: eps
+      learning_rate: lr
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.optimizers.Adamax
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.adamax
     args:
-      weight_decay: weight_decay
+      beta_1: b1
+      beta_2: b2
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

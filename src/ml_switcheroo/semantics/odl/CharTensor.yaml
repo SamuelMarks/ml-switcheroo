@@ -1,0 +1,16 @@
+operation: CharTensor
+variants:
+  paxml:
+    api: jax.numpy.array
+    dispatch_rules: []
+    inject_args:
+      dtype: jax.numpy.int8
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.array
+    dispatch_rules: []
+    inject_args:
+      dtype: jax.numpy.int8
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,14 @@
+operation: fftshift
+variants:
+  flax_nnx:
+    api: jax.numpy.fft.fftshift
+    args:
+      axes: axes
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.core.fft.fftshift
+    args:
+      a: a

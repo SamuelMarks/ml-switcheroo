@@ -1,37 +1,59 @@
-description: 3D convolution layer.
-std_args:
-- filters
-- kernel_size
-- strides
-- padding
-- data_format
-- dilation_rate
-- groups
-- activation
-- use_bias
-- kernel_initializer
-- bias_initializer
-- kernel_regularizer
-- bias_regularizer
-- activity_regularizer
-- kernel_constraint
-- bias_constraint
-- kwargs
-- rank
-- lora_rank
-- lora_alpha
-- trainable
-- dtype
-- autocast
-- name
-type: attribute
 operation: conv3d
+description: conv3d(input, weight, bias=None, stride=1, padding=0, dilation=1, groups=1)
+  -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '0'
+- name: dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: groups
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
 variants:
+  torch:
+    api: torch.conv3d
+    args:
+      input: input
+      weight: weight
+  mlx:
+    api: mlx.core.conv3d
+    args:
+      input: input
+      weight: weight
+  rdna:
+    api: ; Macro.Conv3d
+    args: {}
+  nvidia_sass:
+    api: Macro.Conv3d
+    args: {}
+  flax_nnx:
+    api: flax.nnx.Conv
+    args: {}
   keras:
     api: keras.layers.Conv3D
-  mlx:
-    api: mlx.nn.Conv3d
-  torch:
-    api: torch.nn.Conv3d
-  tensorflow:
-    api: tf.keras.layers.Conv3D
+    args: {}

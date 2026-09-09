@@ -1,0 +1,4 @@
+operation: Brx
+variants:
+  nvidia_sass:
+    api: BRX

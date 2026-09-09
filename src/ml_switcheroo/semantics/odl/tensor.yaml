@@ -1,24 +1,31 @@
-description: Constructs a tensor from data.
+operation: tensor
+description: tensor(data, *, dtype=None, device=None, requires_grad=False, pin_memory=False)
+  -> Tensor
 std_args:
-- is_variadic: false
+- name: data
   kind: positional_or_keyword
-  name: data
-  type: Any
-- is_variadic: false
-  kind: positional_or_keyword
-  name: dtype
-  type: Any
-- is_variadic: false
-  kind: positional_or_keyword
-  name: device
-  type: Any
-- default: false
   is_variadic: false
+  type: list
+- name: dtype
   kind: positional_or_keyword
-  name: requires_grad
-  type: bool
+  is_variadic: false
+  type: Any
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: requires_grad
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: pin_memory
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
 variants:
   torch:
-    api: torch.fft.Tensor
-operation: tensor
-type: function
+    api: torch.tensor
+    args:
+      data: data

@@ -12,7 +12,7 @@ transpilers that map syntax 1:1, it employs a **Hub-and-Spoke** semantic model t
 problem.
 
 The system treats every deep learning representation—whether high-level Python (PyTorch, JAX), intermediate
-representation (StableHLO, MLIR), or hardware assembly (SASS, RDNA)—as a dialect of a central mathematical logic.
+representation (StableHLO, MLIR), or hardware assembly (NVIDIA_SASS, RDNA)—as a dialect of a central mathematical logic.
 
 The runtime engine uses a **Dual-Pipeline Strategy** to handle the distinct topological requirements of structured
 code (ASTs) versus linear instruction streams (Graphs/ASM).
@@ -27,7 +27,7 @@ classifies the Input/Output languages to route execution through one of two isom
 ### 2.0. Route Selection Logic
 
 The Engine dynamically decides between the **Rewriter Pipeline** (Path A) and the **Compiler Pipeline** (Path B) based on:
-1. **Source Nature**: Code that is primarily linear instructions (e.g. SASS) gets parsed directly into the graph. Structured code (Python AST) defaults to the Rewriter Pipeline.
+1. **Source Nature**: Code that is primarily linear instructions (e.g. NVIDIA_SASS) gets parsed directly into the graph. Structured code (Python AST) defaults to the Rewriter Pipeline.
 2. **Target Nature**: If the target requires holistic layout logic (e.g. HTML, TikZ, Assembly), the code is explicitly diverted into Path B.
 3. **Graph-Guided Rewriting (The Loopback Bridge)**: For high-level architectural optimizations across Python dialects (e.g. fusing a Conv2d and a BatchNorm2d natively in JAX), the Rewriter Pipeline can perform a loopback. It lifts a snippet of the AST into a `LogicalGraph`, runs optimizer passes (fusion, parameter folding), and synthesizes it back into AST nodes. This loopback acts as a bridge, bringing Compiler-tier reasoning into the preservation-focused Rewriter Path.
 
@@ -88,7 +88,7 @@ variable naming conventions are retained where possible.
 
 ### 2.2. Path B: The Graph Compiler
 
-**Used for:** Assembly (SASS, RDNA), Visuals (TikZ, HTML), and IR roundtrips.
+**Used for:** Assembly (NVIDIA_SASS, RDNA), Visuals (TikZ, HTML), and IR roundtrips.
 
 This path treats code as a reconstructible logic flow. It "lifts" linear instruction streams into a topological graph,
 optimizing and fusing nodes before synthesizing completely fresh output code.
@@ -173,7 +173,7 @@ The `LogicalGraph` is the lingua franca.
 
 ### 5.2. Frontends (Lifters)
 
-* **ASM Lifters (`sass`, `rdna`)**: Parse assembly text. They use `Analyzer` heuristics to reverse-engineer high-level
+* **ASM Lifters (`nvidia_sass`, `rdna`)**: Parse assembly text. They use `Analyzer` heuristics to reverse-engineer high-level
   semantics (e.g., detecting loop bounds to infer kernel size 3x3).
 * **Python Frontend**: Extracts a graph from Python ASTs using provenance tracking to link Logic back to Source Lines.
 

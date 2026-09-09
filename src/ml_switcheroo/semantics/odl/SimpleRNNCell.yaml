@@ -18,7 +18,42 @@ std_args:
 variants:
   keras:
     api: keras.layers.SimpleRNNCell
+    args:
+      activation: activation
+      bias_constraint: bias_constraint
+      bias_initializer: bias_initializer
+      bias_regularizer: bias_regularizer
+      dropout: dropout
+      kernel_constraint: kernel_constraint
+      kernel_initializer: kernel_initializer
+      kernel_regularizer: kernel_regularizer
+      kwargs: kwargs
+      recurrent_constraint: recurrent_constraint
+      recurrent_dropout: recurrent_dropout
+      recurrent_initializer: recurrent_initializer
+      recurrent_regularizer: recurrent_regularizer
+      seed: seed
+      units: units
+      use_bias: use_bias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.SimpleRNNCell
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.RNNCell
+    args:
+      units: hidden_size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.RNNCell
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: SimpleRNNCell
 type: function

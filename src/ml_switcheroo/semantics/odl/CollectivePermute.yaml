@@ -1,0 +1,17 @@
+operation: CollectivePermute
+variants:
+  stablehlo:
+    api: stablehlo.collective_permute
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: source_target_pairs
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: channel_handle
+  kind: keyword_only
+  is_variadic: false
+  type: Any

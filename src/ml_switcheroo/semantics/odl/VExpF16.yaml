@@ -1,0 +1,5 @@
+operation: VExpF16
+variants:
+  rdna:
+    api: v_exp_f16
+    description: Auto-mapped instruction V_EXP_F16

@@ -1,0 +1,21 @@
+operation: dtype
+description: partial(func, *args, **keywords) - new function with partial application
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: canonicalize
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'True'
+variants:
+  jax:
+    api: jax.lax.dtype
+    args:
+      x: x
+  keras:
+    api: keras.ops.dtype
+    args:
+      x: x

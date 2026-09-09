@@ -1,27 +1,30 @@
-description: Returns a new array having a specified ``shape`` and filled with ones.
+operation: ones
+description: ones(*size, *, out=None, dtype=None, layout=torch.strided, device=None,
+  requires_grad=False) -> Tensor
 std_args:
-- is_variadic: false
+- name: args
   kind: positional_or_keyword
-  name: shape
-  type: Union[int, Tuple[int, Ellipsis]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: dtype
-  type: Optional[dtype]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: device
-  type: Optional[device]
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
 variants:
-  keras:
-    api: keras.initializers.Ones
-  flax_nnx:
-    api: jax.nn.initializers.ones
   torch:
     api: torch.ones
+    args: {}
   jax:
     api: jax.nn.initializers.ones
-  tensorflow:
-    api: tf.keras.initializers.Ones
-operation: ones
-type: function
+    args:
+      key: key
+      shape: shape
+  mlx:
+    api: mlx.core.ones
+    args:
+      shape: shape
+  keras:
+    api: keras.initializers.ones
+    args:
+      name: name
+      target: target

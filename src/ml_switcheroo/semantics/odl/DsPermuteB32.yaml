@@ -1,0 +1,5 @@
+operation: DsPermuteB32
+variants:
+  rdna:
+    api: ds_permute_b32
+    description: Auto-mapped instruction DS_PERMUTE_B32

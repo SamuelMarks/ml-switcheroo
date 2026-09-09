@@ -1,0 +1,5 @@
+operation: SBfeI64
+variants:
+  rdna:
+    api: s_bfe_i64
+    description: Auto-mapped instruction S_BFE_I64

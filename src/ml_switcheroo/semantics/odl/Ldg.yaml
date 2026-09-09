@@ -1,0 +1,4 @@
+operation: Ldg
+variants:
+  nvidia_sass:
+    api: LDG

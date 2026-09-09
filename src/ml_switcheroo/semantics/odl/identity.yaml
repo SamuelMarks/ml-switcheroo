@@ -1,14 +1,24 @@
-description: Initializer that generates the identity matrix.
-std_args:
-- gain
-type: function
 operation: identity
+description: Return the identity array.
+std_args:
+- name: n
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
 variants:
-  keras:
-    api: keras.initializers.Identity
+  jax:
+    api: jax.numpy.identity
+    args:
+      n: n
   mlx:
-    api: mlx.nn.Identity
-  torch:
-    api: torch.nn.Identity
-  tensorflow:
-    api: tf.keras.initializers.Identity
+    api: mlx.core.identity
+    args:
+      n: n
+  keras:
+    api: keras.initializers.identity
+    args: {}

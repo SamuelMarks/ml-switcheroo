@@ -1,0 +1,26 @@
+operation: heaviside
+description: heaviside(input, values, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: values
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.heaviside
+    args:
+      input: input
+      values: values
+  jax:
+    api: jax.numpy.heaviside
+    args:
+      x1: x1
+      x2: x2

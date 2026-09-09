@@ -1,12 +1,28 @@
-description: Calculates an implementation-dependent approximation to the base ``2``
-  logarithm for each element ``x_i`` of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  dask:
-    api: dask.array.log2
 operation: log2
-type: function
+description: 'log2(input: Tensor, *, out: Optional[Tensor]) -> Tensor'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.log2
+    args:
+      input: input
+  jax:
+    api: jax.numpy.log2
+    args:
+      x: x
+  mlx:
+    api: mlx.core.log2
+    args:
+      a: a
+  keras:
+    api: keras.ops.log2
+    args:
+      x: x

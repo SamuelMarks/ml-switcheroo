@@ -1,10 +1,17 @@
-description: The class representing a Python module/class/instance attribute.
-std_args:
-- lambd
-type: attribute
 operation: hardshrink
+description: hardshrink(input, lambd=0.5) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: lambd
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0.5'
 variants:
-  mlx:
-    api: mlx.nn.HardShrink
   torch:
-    api: torch.nn.Hardshrink
+    api: torch.nn.functional.hardshrink
+    args:
+      input: input

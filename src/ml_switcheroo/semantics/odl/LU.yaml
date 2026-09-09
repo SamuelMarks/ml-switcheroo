@@ -1,0 +1,19 @@
+operation: lu
+description: Computes the LU factorization of a matrix or batches of matrices
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.lu
+    args: {}
+  mlx:
+    api: mlx.core.linalg.lu
+    args:
+      a: a

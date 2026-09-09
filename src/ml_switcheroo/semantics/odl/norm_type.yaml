@@ -1,0 +1,8 @@
+operation: norm_type
+variants:
+  paxml:
+    api: optax.tree.norm
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

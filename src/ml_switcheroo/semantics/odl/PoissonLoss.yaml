@@ -1,0 +1,12 @@
+operation: PoissonLoss
+variants:
+  paxml:
+    api: optax.poisson_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.poisson_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

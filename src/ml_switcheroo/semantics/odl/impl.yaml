@@ -1,0 +1,14 @@
+operation: impl
+variants:
+  flax_nnx:
+    api: nnx.variablelib.GetVariable.impl
+    args:
+      avals: avals
+      has_qdd: has_qdd
+      hijax_var: hijax_var
+      self: self
+      treedef: treedef
+      var_type: var_type
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,33 @@
+operation: lp_pool2d
+description: Apply a 2D power-average pooling over an input signal composed of several
+  input planes.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: norm_type
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kernel_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: ceil_mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  torch:
+    api: torch.nn.functional.lp_pool2d
+    args:
+      input: input
+      norm_type: norm_type
+      kernel_size: kernel_size

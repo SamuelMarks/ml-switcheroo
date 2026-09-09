@@ -1,0 +1,4 @@
+operation: Ulepc
+variants:
+  nvidia_sass:
+    api: ULEPC

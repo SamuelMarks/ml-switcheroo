@@ -1,0 +1,5 @@
+operation: SCmpOF16
+variants:
+  rdna:
+    api: s_cmp_o_f16
+    description: Auto-mapped instruction S_CMP_O_F16

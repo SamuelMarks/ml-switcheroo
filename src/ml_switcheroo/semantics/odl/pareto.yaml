@@ -1,0 +1,13 @@
+operation: pareto
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.pareto
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.pareto
+    args:
+      key: key
+      b: b

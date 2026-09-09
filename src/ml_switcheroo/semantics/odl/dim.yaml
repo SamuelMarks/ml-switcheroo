@@ -1,0 +1,7 @@
+operation: Dim
+description: dim() -> int
+std_args: []
+variants:
+  torch:
+    api: torch.Tensor.dim
+    args: {}

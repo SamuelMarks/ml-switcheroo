@@ -1,0 +1,5 @@
+operation: VCmpxUF16
+variants:
+  rdna:
+    api: v_cmpx_u_f16
+    description: Auto-mapped instruction V_CMPX_U_F16

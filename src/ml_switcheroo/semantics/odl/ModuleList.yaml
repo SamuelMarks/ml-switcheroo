@@ -9,3 +9,13 @@ operation: ModuleList
 variants:
   torch:
     api: torch.nn.ModuleList
+    args:
+      modules: modules
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.List
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

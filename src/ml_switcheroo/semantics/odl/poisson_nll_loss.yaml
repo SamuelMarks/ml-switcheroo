@@ -1,0 +1,48 @@
+operation: poisson_nll_loss
+description: Compute the Poisson negative log likelihood loss.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: target
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: log_input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: full
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''False``\n            :math:`\\text{target} * \\log(\\text{target}) -
+    \\text{target} + 0.5 * \\log(2 * \\pi * \\text{target})`.'''
+- name: size_average
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: eps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 1e-08
+- name: reduce
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '''mean'''
+variants:
+  torch:
+    api: torch.nn.functional.poisson_nll_loss
+    args:
+      input: input
+      target: target

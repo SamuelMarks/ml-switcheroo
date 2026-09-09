@@ -4,7 +4,19 @@ import typing
 
 import pytest
 
-from ml_switcheroo.core.wasm.cst import WatFunc, WatInstr, WatLocal, WatModule, WatNode, WatParam, WatParser, WatResult
+from ml_switcheroo.core.wasm.cst import (
+  WasmArgument,
+  WasmOpcode,
+  WasmRegister,
+  WatFunc,
+  WatInstr,
+  WatLocal,
+  WatModule,
+  WatNode,
+  WatParam,
+  WatParser,
+  WatResult,
+)
 
 
 def test_wat_node_base() -> None:
@@ -16,7 +28,7 @@ def test_wat_node_base() -> None:
 
 def test_wat_param() -> None:
   """Docstring."""
-  param = WatParam("x", "f32")
+  param = WatParam(WasmRegister("x"), "f32")
   assert param.to_text() == "(param $x f32)"
 
 
@@ -28,16 +40,16 @@ def test_wat_result() -> None:
 
 def test_wat_local() -> None:
   """Docstring."""
-  local = WatLocal("temp", "f32")
+  local = WatLocal(WasmRegister("temp"), "f32")
   assert local.to_text() == "(local $temp f32)"
 
 
 def test_wat_instr() -> None:
   """Docstring."""
-  instr1 = WatInstr("f32.add")
+  instr1 = WatInstr(WasmOpcode("f32.add"))
   assert instr1.to_text() == "f32.add"
 
-  instr2 = WatInstr("local.get", ["$x"])
+  instr2 = WatInstr(WasmOpcode("local.get"), [WasmArgument("$x")])
   assert instr2.to_text(indent=1) == "  local.get $x"
 
 
@@ -46,15 +58,15 @@ def test_wat_func() -> None:
   func = WatFunc(
     name="add_two",
     export=True,
-    params=[WatParam("a", "f32"), WatParam("b", "f32")],
+    params=[WatParam(WasmRegister("a"), "f32"), WatParam(WasmRegister("b"), "f32")],
     results=[WatResult("f32")],
-    locals=[WatLocal("c", "f32")],
+    locals=[WatLocal(WasmRegister("c"), "f32")],
     body=[
-      WatInstr("local.get", ["$a"]),
-      WatInstr("local.get", ["$b"]),
-      WatInstr("f32.add"),
-      WatInstr("local.set", ["$c"]),
-      WatInstr("local.get", ["$c"]),
+      WatInstr(WasmOpcode("local.get"), [WasmArgument("$a")]),
+      WatInstr(WasmOpcode("local.get"), [WasmArgument("$b")]),
+      WatInstr(WasmOpcode("f32.add")),
+      WatInstr(WasmOpcode("local.set"), [WasmArgument("$c")]),
+      WatInstr(WasmOpcode("local.get"), [WasmArgument("$c")]),
     ],
   )
   text = func.to_text()
@@ -66,7 +78,7 @@ def test_wat_func() -> None:
 
 def test_wat_module() -> None:
   """Docstring."""
-  mod = WatModule(functions=[WatFunc(name="main", body=[WatInstr("nop")])])
+  mod = WatModule(functions=[WatFunc(name="main", body=[WatInstr(WasmOpcode("nop"))])])
   text = mod.to_text()
   assert "(module\n" in text
   assert "  (func $main\n" in text

@@ -1,0 +1,5 @@
+operation: SCmpGtI32
+variants:
+  rdna:
+    api: s_cmp_gt_i32
+    description: Auto-mapped instruction S_CMP_GT_I32

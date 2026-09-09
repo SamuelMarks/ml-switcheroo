@@ -1,17 +1,29 @@
 description: Linear warmup followed by cosine decay.
 std_args:
-- init_value
-- peak_value
-- warmup_steps
-- decay_steps
-- end_value
-- exponent
+- name: init_value
+  type: Any
+- name: peak_value
+  type: Any
+- name: warmup_steps
+  type: Any
+- name: decay_steps
+  type: Any
+- name: end_value
+  type: Any
+- name: exponent
+  type: Any
 type: attribute
 operation: warmup_cosine_decay_schedule
 variants:
   optax_shim:
     api: optax.schedules.warmup_cosine_decay_schedule
+    args: {}
   flax_nnx:
-    api: optax.schedules.warmup_cosine_decay_schedule
+    api: optax.warmup_cosine_decay_schedule
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.schedules.warmup_cosine_decay_schedule
+    args: {}

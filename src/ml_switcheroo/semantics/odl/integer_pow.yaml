@@ -1,0 +1,17 @@
+operation: integer_pow
+description: 'Elementwise power: :math:`x^y`, where :math:`y` is a fixed integer.'
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: y
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.lax.integer_pow
+    args:
+      x: x
+      y: y

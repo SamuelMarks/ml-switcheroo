@@ -1,0 +1,22 @@
+operation: collapse
+description: Collapses dimensions of an array into a single dimension.
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: start_dimension
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: stop_dimension
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.collapse
+    args:
+      operand: operand
+      start_dimension: start_dimension

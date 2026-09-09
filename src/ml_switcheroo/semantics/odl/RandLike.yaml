@@ -1,0 +1,9 @@
+operation: RandLike
+variants:
+  flax_nnx:
+    api: jax.random.uniform
+    dispatch_rules: []
+    macro_template: jax.random.uniform({key}, {input}.shape, dtype={dtype})
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: inject_prng

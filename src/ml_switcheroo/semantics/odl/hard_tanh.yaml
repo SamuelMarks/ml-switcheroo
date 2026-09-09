@@ -1,8 +1,19 @@
 description: HardTanh activation function.
 std_args:
-- x
+- name: x
+  type: Any
 variants:
   keras:
     api: keras.activations.hard_tanh
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.hard_tanh
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: hard_tanh
 type: function

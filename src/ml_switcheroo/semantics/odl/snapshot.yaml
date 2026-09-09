@@ -1,0 +1,8 @@
+operation: snapshot
+variants:
+  flax_nnx:
+    api: optax.snapshot
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

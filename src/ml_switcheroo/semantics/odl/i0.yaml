@@ -1,8 +1,20 @@
-description: Modified Bessel function of the first kind, order 0.
-std_args:
-- kwargs
-type: attribute
 operation: i0
+description: i0(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
-  dask:
-    api: dask.array.i0
+  torch:
+    api: torch.i0
+    args:
+      input: input
+  jax:
+    api: jax.numpy.i0
+    args:
+      x: x

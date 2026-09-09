@@ -7,5 +7,16 @@ std_args:
 variants:
   dask:
     api: dask.array.deg2rad
+    args: {}
+  paxml:
+    api: jax.numpy.deg2rad
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.deg2rad
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Deg2Rad_
 type: function

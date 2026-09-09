@@ -1,9 +1,17 @@
-description: Applies the Hardsigmoid function element-wise.
-std_args:
-- inplace
-- __constants__
-type: function
 operation: hardsigmoid
+description: Apply the Hardsigmoid function element-wise.
+std_args:
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
 variants:
   torch:
-    api: torch.nn.Hardsigmoid
+    api: torch.nn.functional.hardsigmoid
+    args:
+      input: input

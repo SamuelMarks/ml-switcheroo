@@ -1,0 +1,4 @@
+operation: Sts
+variants:
+  nvidia_sass:
+    api: STS

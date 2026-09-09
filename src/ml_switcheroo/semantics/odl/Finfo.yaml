@@ -1,0 +1,12 @@
+operation: Finfo
+variants:
+  paxml:
+    api: jax.numpy.finfo
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.finfo
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

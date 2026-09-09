@@ -1,0 +1,16 @@
+operation: histogram_bin_edges
+variants:
+  flax_nnx:
+    api: jax.numpy.histogram_bin_edges
+    args:
+      a: a
+      bins: bins
+      range: range
+      weights: weights
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.histogram_bin_edges
+    args:
+      a: a

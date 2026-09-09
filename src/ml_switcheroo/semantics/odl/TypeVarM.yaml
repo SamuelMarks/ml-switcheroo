@@ -1,0 +1,12 @@
+operation: TypeVarM
+variants:
+  paxml:
+    api: typing.TypeVar
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.M
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

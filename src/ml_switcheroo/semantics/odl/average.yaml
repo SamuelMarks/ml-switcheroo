@@ -1,12 +1,36 @@
-description: Averages a list of inputs element-wise..
-std_args:
-- kwargs
-variants:
-  keras:
-    api: keras.layers.Average
-  dask:
-    api: dask.array.average
-  tensorflow:
-    api: tf.keras.layers.Average
 operation: average
-type: function
+description: Compute the weighted average along the specified axis.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: weights
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: returned
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: keepdims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  jax:
+    api: jax.numpy.average
+    args:
+      a: a
+  keras:
+    api: keras.ops.average
+    args:
+      x: x

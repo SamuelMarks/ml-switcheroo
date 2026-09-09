@@ -1,0 +1,12 @@
+operation: NanToNum
+variants:
+  paxml:
+    api: jax.numpy.nan_to_num
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.nan_to_num
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

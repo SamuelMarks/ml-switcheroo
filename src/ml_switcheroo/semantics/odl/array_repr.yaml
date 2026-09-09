@@ -1,0 +1,27 @@
+operation: array_repr
+description: Return the string representation of an array.
+std_args:
+- name: arr
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: max_line_width
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: precision
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: suppress_small
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.array_repr
+    args:
+      arr: arr

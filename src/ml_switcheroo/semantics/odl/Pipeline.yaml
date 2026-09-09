@@ -8,11 +8,43 @@ std_args:
 variants:
   keras:
     api: keras.layers.Pipeline
+    args:
+      layers: layers
+      name: name
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   sklearn:
     api: sklearn.pipeline.Pipeline
+    args: {}
   huggingface:
     api: transformers.Pipeline
+    args: {}
   tensorflow:
     api: tf.keras.layers.Pipeline
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.Sequential
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.Sequential
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Sequential
+    dispatch_rules: []
+    pack_as: Tuple
+    pack_to_tuple: args
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Sequential
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Pipeline
 type: function

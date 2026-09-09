@@ -1,0 +1,15 @@
+operation: create_token
+description: Creates an XLA token value with no preconditions for sequencing effects.
+std_args:
+- name: _
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.create_token
+    args: {}
+  stablehlo:
+    api: stablehlo.create_token
+    args: {}

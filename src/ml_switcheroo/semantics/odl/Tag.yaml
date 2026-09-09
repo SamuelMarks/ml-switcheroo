@@ -1,0 +1,8 @@
+operation: Tag
+variants:
+  flax_nnx:
+    api: nnx.filterlib.WithTag.tag
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

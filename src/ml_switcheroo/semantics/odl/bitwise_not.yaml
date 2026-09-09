@@ -1,0 +1,15 @@
+operation: bitwise_not
+variants:
+  flax_nnx:
+    api: jax.numpy.bitwise_not
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.lax.bitwise_not
+    args:
+      x: x
+  keras:
+    api: keras.ops.bitwise_not
+    args:
+      x: x

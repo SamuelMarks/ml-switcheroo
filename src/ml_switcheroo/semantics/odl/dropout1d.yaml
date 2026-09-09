@@ -1,9 +1,17 @@
+operation: Dropout1d
 description: Randomly zero out entire channels.
 std_args:
-- p
-- inplace
-type: function
-operation: dropout1d
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
   torch:
     api: torch.nn.Dropout1d
+    args:
+      p: p
+      inplace: inplace

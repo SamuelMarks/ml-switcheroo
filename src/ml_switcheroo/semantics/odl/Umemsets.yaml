@@ -1,0 +1,4 @@
+operation: Umemsets
+variants:
+  nvidia_sass:
+    api: UMEMSETS

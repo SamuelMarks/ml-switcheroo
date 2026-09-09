@@ -1,0 +1,4 @@
+operation: Ufsel
+variants:
+  nvidia_sass:
+    api: UFSEL

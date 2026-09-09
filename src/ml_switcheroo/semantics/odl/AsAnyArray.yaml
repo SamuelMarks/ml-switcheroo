@@ -11,5 +11,16 @@ std_args:
 variants:
   dask:
     api: dask.array.asanyarray
+    args: {}
+  paxml:
+    api: jax.numpy.asanyarray
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.asanyarray
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: AsAnyArray
 type: function

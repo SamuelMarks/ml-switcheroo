@@ -15,24 +15,24 @@ variants:
   keras:
     api: keras.layers.ActivityRegularization
     args:
+      kwargs: kwargs
       l1: l1
       l2: l2
-      kwargs: kwargs
-      activity_regularizer: activity_regularizer
-      trainable: trainable
-      dtype: dtype
-      autocast: autocast
-      name: name
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.ActivityRegularization
-    args:
-      l1: l1
-      l2: l2
-      kwargs: kwargs
-      activity_regularizer: activity_regularizer
-      trainable: trainable
-      dtype: dtype
-      autocast: autocast
-      name: name
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: ActivityRegularization
 type: function

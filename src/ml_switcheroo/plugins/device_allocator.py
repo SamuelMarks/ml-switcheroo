@@ -82,7 +82,7 @@ def _parse_device_args(node: cst.Call) -> Tuple[Optional[cst.BaseExpression], Op
   arg0 = node.args[0].value
 
   dev_type_node = arg0
-  dev_index_node = None
+  dev_index_node: Optional[cst.BaseExpression] = None
 
   # Handle "cuda:0" string literal case decomposition
   if isinstance(arg0, cst.SimpleString):

@@ -1,0 +1,7 @@
+operation: CurrentUpdateContext
+variants:
+  flax_nnx:
+    api: flax.nnx.current_update_context
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

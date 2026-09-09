@@ -1,0 +1,12 @@
+operation: SetErrCall
+variants:
+  paxml:
+    api: jax.numpy.seterrcall
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.seterrcall
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

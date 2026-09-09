@@ -12,8 +12,37 @@ std_args:
   type: bool
 variants:
   keras:
-    api: keras.layers.GlobalAvgPool2D
+    api: keras.layers.GlobalAveragePooling2D
+    args:
+      data_format: data_format
+      keepdims: keepdims
+      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
-    api: tf.keras.layers.GlobalAvgPool2D
+    api: tf.keras.layers.GlobalAveragePooling2D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.AvgPool2d
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.AdaptiveAvgPool2d
+    dispatch_rules: []
+    inject_args:
+      output_size:
+      - 1
+      - 1
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.AvgPool
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: GlobalAveragePooling2D
 type: function

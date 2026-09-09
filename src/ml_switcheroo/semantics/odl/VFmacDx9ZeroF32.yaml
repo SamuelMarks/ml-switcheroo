@@ -1,0 +1,5 @@
+operation: VFmacDx9ZeroF32
+variants:
+  rdna:
+    api: v_fmac_dx9_zero_f32
+    description: Auto-mapped instruction V_FMAC_DX9_ZERO_F32

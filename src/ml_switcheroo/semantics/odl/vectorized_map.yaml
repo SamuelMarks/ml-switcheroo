@@ -1,0 +1,17 @@
+operation: vectorized_map
+description: Parallel map of `function` on axis 0 of tensor(s) `elements`.
+std_args:
+- name: function
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: elements
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  keras:
+    api: keras.ops.vectorized_map
+    args:
+      function: function
+      elements: elements

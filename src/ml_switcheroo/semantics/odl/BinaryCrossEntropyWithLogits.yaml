@@ -1,0 +1,14 @@
+operation: BinaryCrossEntropyWithLogits
+variants:
+  paxml:
+    api: optax.sigmoid_binary_cross_entropy
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: loss_reduction
+  flax_nnx:
+    api: optax.sigmoid_binary_cross_entropy
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: loss_reduction

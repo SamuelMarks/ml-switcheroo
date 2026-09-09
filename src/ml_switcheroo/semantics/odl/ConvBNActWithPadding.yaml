@@ -1,0 +1,7 @@
+operation: ConvBNActWithPadding
+variants:
+  paxml:
+    api: praxis.layers.ConvBNActWithPadding
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

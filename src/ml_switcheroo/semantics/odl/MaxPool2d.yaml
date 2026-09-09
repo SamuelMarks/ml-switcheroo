@@ -13,5 +13,58 @@ operation: MaxPool2d
 variants:
   mlx:
     api: mlx.nn.MaxPool2d
+    args:
+      kernel_size: kernel_size
+      padding: padding
+      stride: stride
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.nn.MaxPool2d
+    args:
+      ceil_mode: ceil_mode
+      dilation: dilation
+      kernel_size: kernel_size
+      padding: padding
+      return_indices: return_indices
+      stride: stride
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  onnx:
+    macro_template: helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size},
+      strides={stride})
+    required_imports:
+    - from onnx import helper
+  future_onnx:
+    macro_template: helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size},
+      strides={stride})
+    required_imports:
+    - from onnx import helper
+  keras:
+    api: keras.layers.MaxPooling2D
+    args:
+      kernel_size: pool_size
+      stride: strides
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.MaxPool2d
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.MaxPooling2D
+    args:
+      kernel_size: pool_size
+      stride: strides
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.max_pool
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

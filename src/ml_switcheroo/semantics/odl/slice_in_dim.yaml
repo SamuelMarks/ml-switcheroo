@@ -1,0 +1,32 @@
+operation: slice_in_dim
+description: Convenience wrapper around :func:`lax.slice` applying to only one dimension.
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: start_index
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''zero'''
+- name: limit_index
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''operand'''
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+variants:
+  jax:
+    api: jax.lax.slice_in_dim
+    args:
+      operand: operand

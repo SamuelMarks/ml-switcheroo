@@ -1,0 +1,4 @@
+operation: Warpgroupset
+variants:
+  nvidia_sass:
+    api: WARPGROUPSET

@@ -1,0 +1,5 @@
+operation: DsAndRtnB64
+variants:
+  rdna:
+    api: ds_and_rtn_b64
+    description: Auto-mapped instruction DS_AND_RTN_B64

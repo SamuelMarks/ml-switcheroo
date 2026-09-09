@@ -1,0 +1,5 @@
+operation: VMbcntLoU32B32
+variants:
+  rdna:
+    api: v_mbcnt_lo_u32_b32
+    description: Auto-mapped instruction V_MBCNT_LO_U32_B32

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
     source_fw: str
 
-    def _is_module_alias(self, name: str) -> bool:
+    def _is_module_alias(self, name: cst.BaseExpression) -> bool:
       """Check if a name is a module alias."""
       ...
 

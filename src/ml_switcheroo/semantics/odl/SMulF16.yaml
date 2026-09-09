@@ -1,0 +1,5 @@
+operation: SMulF16
+variants:
+  rdna:
+    api: s_mul_f16
+    description: Auto-mapped instruction S_MUL_F16

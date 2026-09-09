@@ -1,0 +1,7 @@
+operation: CubedReLU
+variants:
+  paxml:
+    api: praxis.layers.CubedReLU
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,14 @@
+operation: L2Normalize
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: '{x} / jnp.sqrt(jnp.maximum(jnp.sum({x}**2, axis={axis}, keepdims=True),
+      {epsilon}))'
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: '{x} / jnp.sqrt(jnp.maximum(jnp.sum({x}**2, axis={axis}, keepdims=True),
+      {epsilon}))'
+    pack_as: Tuple
+    required_imports: []

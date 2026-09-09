@@ -1,0 +1,4 @@
+operation: Rpcmov
+variants:
+  nvidia_sass:
+    api: RPCMOV

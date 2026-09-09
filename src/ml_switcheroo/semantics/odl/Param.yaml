@@ -1,0 +1,19 @@
+operation: Param
+variants:
+  paxml:
+    api: praxis.base_layer.WeightInit
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Param
+    args:
+      init_args: init_args
+      init_fn: init_fn
+      init_kwargs: init_kwargs
+      name: name
+      self: self
+      unbox: unbox
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

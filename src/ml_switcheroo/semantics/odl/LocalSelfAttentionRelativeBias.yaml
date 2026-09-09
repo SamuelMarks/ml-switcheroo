@@ -1,0 +1,7 @@
+operation: LocalSelfAttentionRelativeBias
+variants:
+  paxml:
+    api: paxml.layers.LocalSelfAttentionRelativeBias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,12 @@
+operation: isscalar
+description: Returns True if the type of `element` is a scalar type.
+std_args:
+- name: element
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.numpy.isscalar
+    args:
+      element: element

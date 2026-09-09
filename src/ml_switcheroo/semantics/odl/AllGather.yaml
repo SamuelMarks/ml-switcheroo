@@ -1,0 +1,25 @@
+operation: AllGather
+variants:
+  stablehlo:
+    api: stablehlo.all_gather
+std_args:
+- name: operands
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: all_gather_dim
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: replica_groups
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: channel_handle
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: use_global_device_ids
+  kind: keyword_only
+  is_variadic: false
+  type: Any

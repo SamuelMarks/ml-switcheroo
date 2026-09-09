@@ -1,0 +1,16 @@
+operation: array_split
+variants:
+  flax_nnx:
+    api: jax.numpy.array_split
+    args:
+      ary: ary
+      axis: axis
+      indices_or_sections: indices_or_sections
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.array_split
+    args:
+      ary: ary
+      indices_or_sections: indices_or_sections

@@ -1,0 +1,7 @@
+operation: TensorType
+variants:
+  flax_nnx:
+    api: jax.Array
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

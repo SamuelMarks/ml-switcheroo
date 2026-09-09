@@ -1,10 +1,30 @@
-description: Rotate an array by 90 degrees in the plane specified by axes.
-std_args:
-- m
-- k
-- axes
-variants:
-  dask:
-    api: dask.array.rot90
 operation: rot90
-type: function
+description: rot90(input, k=1, dims=(0, 1)) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: k
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: (0, 1)
+variants:
+  torch:
+    api: torch.rot90
+    args:
+      input: input
+  jax:
+    api: jax.numpy.rot90
+    args:
+      m: m
+  keras:
+    api: keras.ops.rot90
+    args:
+      array: array

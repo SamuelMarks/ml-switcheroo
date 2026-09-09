@@ -1,0 +1,28 @@
+operation: map
+description: Map a function over leading array axes.
+std_args:
+- name: f
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: xs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.map
+    args:
+      f: f
+      xs: xs
+  stablehlo:
+    api: stablehlo.map
+    args:
+      inputs: inputs
+      dimensions: dimensions
+      computation: computation
+  keras:
+    api: keras.ops.map
+    args:
+      f: f
+      xs: xs

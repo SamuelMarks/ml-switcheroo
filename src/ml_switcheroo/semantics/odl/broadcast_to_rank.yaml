@@ -1,0 +1,17 @@
+operation: broadcast_to_rank
+description: Adds leading dimensions of ``1`` to give ``x`` rank ``rank``.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rank
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.lax.broadcast_to_rank
+    args:
+      x: x
+      rank: rank

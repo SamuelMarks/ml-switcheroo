@@ -1,0 +1,47 @@
+operation: batch_norm
+description: Apply Batch Normalization for each channel across a batch of data.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: running_mean
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: running_var
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: training
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: momentum
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.1'
+- name: eps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: 1e-05
+variants:
+  torch:
+    api: torch.nn.functional.batch_norm
+    args:
+      input: input
+      running_mean: running_mean
+      running_var: running_var

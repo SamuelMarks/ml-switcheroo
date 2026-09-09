@@ -1,22 +1,41 @@
-description: Computes the minimum value for each element ``x1_i`` of the input array
-  ``x1`` relative to the respective element ``x2_i`` of the input array ``x2``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x1
-  type: Union[array, int, float]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x2
-  type: Union[array, int, float]
-variants:
-  keras:
-    api: keras.layers.Minimum
-  numpy:
-    api: numpy.minimum
-  dask:
-    api: dask.array.minimum
-  tensorflow:
-    api: tf.keras.layers.Minimum
 operation: minimum
-type: function
+description: minimum(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.minimum
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.minimum
+    args:
+      x1: x1
+      x2: x2
+  mlx:
+    api: mlx.core.minimum
+    args:
+      a: a
+      b: b
+  stablehlo:
+    api: stablehlo.minimum
+    args:
+      lhs: lhs
+      rhs: rhs
+  keras:
+    api: keras.ops.minimum
+    args:
+      x1: x1
+      x2: x2

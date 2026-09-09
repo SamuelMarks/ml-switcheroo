@@ -1,0 +1,4 @@
+operation: Dsetp
+variants:
+  nvidia_sass:
+    api: DSETP

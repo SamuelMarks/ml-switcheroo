@@ -17,7 +17,23 @@ std_args:
 variants:
   keras:
     api: keras.layers.STFTSpectrogram
+    args:
+      data_format: data_format
+      expand_dims: expand_dims
+      fft_length: fft_length
+      frame_length: frame_length
+      frame_step: frame_step
+      kwargs: kwargs
+      mode: mode
+      padding: padding
+      periodic: periodic
+      scaling: scaling
+      window: window
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.STFTSpectrogram
+    args: {}
 operation: STFTSpectrogram
 type: function

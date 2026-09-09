@@ -1,0 +1,9 @@
+operation: svdvals
+variants:
+  flax_nnx:
+    api: jax.numpy.linalg.svdvals
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

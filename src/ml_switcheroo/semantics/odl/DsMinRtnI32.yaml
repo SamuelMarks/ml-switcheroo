@@ -1,0 +1,5 @@
+operation: DsMinRtnI32
+variants:
+  rdna:
+    api: ds_min_rtn_i32
+    description: Auto-mapped instruction DS_MIN_RTN_I32

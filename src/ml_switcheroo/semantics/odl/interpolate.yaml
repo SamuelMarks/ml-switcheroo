@@ -1,14 +1,22 @@
 description: Down/up samples the input.
 std_args:
-- input
-- recompute_scale_factor
-- scale_factor
-- antialias
-- mode
-- align_corners
-- size
+- name: input
+  type: Any
+- name: recompute_scale_factor
+  type: Any
+- name: scale_factor
+  type: Any
+- name: antialias
+  type: Any
+- name: mode
+  type: Any
+- name: align_corners
+  type: Any
+- name: size
+  type: Any
 type: function
 operation: interpolate
 variants:
   torch:
     api: torch.nn.functional.interpolate
+    args: {}

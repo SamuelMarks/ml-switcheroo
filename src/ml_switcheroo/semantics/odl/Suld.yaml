@@ -1,0 +1,4 @@
+operation: Suld
+variants:
+  nvidia_sass:
+    api: SULD

@@ -1,0 +1,16 @@
+operation: bartlett
+description: Return the Bartlett window.
+std_args:
+- name: M
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.numpy.bartlett
+    args:
+      M: M
+  keras:
+    api: keras.ops.bartlett
+    args:
+      x: x

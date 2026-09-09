@@ -1,0 +1,5 @@
+operation: SSethalt
+variants:
+  rdna:
+    api: s_sethalt
+    description: Auto-mapped instruction S_SETHALT

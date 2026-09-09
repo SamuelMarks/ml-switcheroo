@@ -1,0 +1,52 @@
+operation: conv_transpose3d
+description: conv_transpose3d(input, weight, bias=None, stride=1, padding=0, output_padding=0,
+  groups=1, dilation=1) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+- name: output_padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+- name: groups
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+variants:
+  torch:
+    api: torch.nn.functional.conv_transpose3d
+    args:
+      input: input
+      weight: weight
+  mlx:
+    api: mlx.core.conv_transpose3d
+    args:
+      input: input
+      weight: weight

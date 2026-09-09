@@ -1,31 +1,53 @@
-description: Calculates the sum of the input array ``x``.
+operation: sum
+description: sum(input, dim=None, keepdim=False, *, dtype=None) -> Tensor
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
+  is_variadic: false
+  type: Tensor
+- name: dim
   kind: positional_or_keyword
-  name: axis
-  type: Optional[Union[int, Tuple[int, Ellipsis]]]
-- is_variadic: false
+  is_variadic: false
+  type: Any
+- name: keepdim
   kind: positional_or_keyword
-  name: dtype
-  type: Optional[dtype]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: keepdims
-  type: bool
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
-  keras:
-    api: keras.metrics.Sum
-  latex_dsl:
-    api: latex.sum
-  dask:
-    api: dask.array.sum
   torch:
     api: torch.sum
-  tensorflow:
-    api: tf.keras.metrics.Sum
-operation: sum
-type: function
+    args:
+      input: input
+      dim: dim
+      keepdim: keepdim
+      dtype: dtype
+  jax:
+    api: jax.numpy.sum
+    args:
+      input: a
+      dim: axis
+      keepdim: keepdims
+      dtype: dtype
+  mlx:
+    api: mlx.core.sum
+    args:
+      input: a
+      dim: axis
+      keepdim: keepdims
+  keras:
+    api: keras.ops.sum
+    args:
+      input: x
+      dim: axis
+      keepdim: keepdims
+  nvidia_sass:
+    api: Macro.Sum
+    args: {}
+  rdna:
+    api: ; Macro.Sum
+    args: {}

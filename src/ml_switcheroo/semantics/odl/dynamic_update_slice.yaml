@@ -1,0 +1,28 @@
+operation: dynamic_update_slice
+description: Wraps XLA's `DynamicUpdateSlice
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: update
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: start_indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.dynamic_update_slice
+    args:
+      operand: operand
+      update: update
+      start_indices: start_indices
+  stablehlo:
+    api: stablehlo.dynamic_update_slice
+    args:
+      operand: operand
+      update: update
+      start_indices: start_indices

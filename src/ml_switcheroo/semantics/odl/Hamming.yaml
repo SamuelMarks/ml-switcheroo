@@ -1,0 +1,16 @@
+operation: hamming
+description: Return the Hamming window.
+std_args:
+- name: M
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.numpy.hamming
+    args:
+      M: M
+  keras:
+    api: keras.ops.hamming
+    args:
+      x: x

@@ -1,0 +1,16 @@
+operation: CumulativeTrapezoid
+variants:
+  paxml:
+    api: jax.scipy.integrate.cumulative_trapezoid
+    args:
+      dim: axis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.scipy.integrate.cumulative_trapezoid
+    args:
+      dim: axis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

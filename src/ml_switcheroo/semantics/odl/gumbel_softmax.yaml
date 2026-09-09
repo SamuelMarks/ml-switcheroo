@@ -1,0 +1,33 @@
+operation: gumbel_softmax
+description: Sample from the Gumbel-Softmax distribution (`Link 1`_  `Link 2`_) and
+  optionally discretize.
+std_args:
+- name: logits
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: tau
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '1'
+- name: hard
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '-1'
+- name: eps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: 1e-10
+variants:
+  torch:
+    api: torch.nn.functional.gumbel_softmax
+    args:
+      logits: logits

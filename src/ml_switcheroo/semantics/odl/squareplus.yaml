@@ -1,9 +1,17 @@
 description: Squareplus activation function.
 std_args:
-- x
-- b
+- name: x
+  type: Any
+- name: b
+  type: Any
 variants:
   keras:
     api: keras.activations.squareplus
+    args:
+      b: b
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: squareplus
 type: function

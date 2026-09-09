@@ -1,0 +1,34 @@
+operation: amin
+description: amin(input, dim, keepdim=False, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: ()
+- name: keepdim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.amin
+    args:
+      input: input
+  jax:
+    api: jax.numpy.min
+    args:
+      a: a
+  keras:
+    api: keras.ops.amin
+    args:
+      x: x

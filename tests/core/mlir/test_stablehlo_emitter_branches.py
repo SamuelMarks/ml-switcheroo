@@ -79,3 +79,84 @@ def test_stablehlo_if_orelse_invalid() -> None:
     ops = emitter._emit_if(bad_if)
     # Assert ops generated
     assert len(ops) > 0
+
+
+def test_stablehlo_additional_branches() -> None:
+  """Test remaining branches in StableHloEmitter."""
+  from unittest.mock import patch
+  from ml_switcheroo.core.mlir.cst import AttributeNode, TypeNode
+
+  semantics = SemanticsManager()
+  emitter = StableHloEmitter(semantics)
+
+  # 80->79: param with non-Name name
+  fn = cst.parse_module("def foo(): pass").body[0]
+  assert isinstance(fn, cst.FunctionDef)
+  bad_param = typing.cast(cst.Param, cst.Param(name=typing.cast(cst.Name, cst.Integer("1"))))
+  fn_bad_param = fn.with_deep_changes(fn.params, params=[bad_param])
+  emitter._emit_func_def(fn_bad_param)
+
+  # 156: while loop with empty body (pass emits no ops)
+  code = "while True:\n    pass"
+  tree = cst.parse_module(code)
+  while_node = tree.body[0]
+  assert isinstance(while_node, cst.While)
+  ops = emitter._emit_while(while_node)
+  assert len(ops) > 0
+
+  # 204: if with else pass (false_block has no operations)
+  code = "if True:\n    x = 1\nelse:\n    pass"
+  tree = cst.parse_module(code)
+  if_node = tree.body[0]
+  assert isinstance(if_node, cst.If)
+  ops = emitter._emit_if(if_node)
+  assert len(ops) > 0
+
+  # 206: if with else assignment (false_block has ops but not return)
+  code = "if True:\n    x = 1\nelse:\n    x = 2"
+  tree = cst.parse_module(code)
+  if_node = tree.body[0]
+  assert isinstance(if_node, cst.If)
+  ops = emitter._emit_if(if_node)
+  assert len(ops) > 0
+
+  # 214: if with elif where nested _emit_if returns []
+  elif_tree = cst.parse_module("if True: pass\nelif False: pass")
+  elif_node = elif_tree.body[0]
+  assert isinstance(elif_node, cst.If)
+  calls = 0
+  orig_emit_if = emitter._emit_if
+
+  def fake_emit_if(node: typing.Any) -> typing.List[OperationNode]:
+    """Mock recursive _emit_if call."""
+    nonlocal calls
+    calls += 1
+    if calls > 1:
+      return []
+    return orig_emit_if(node)
+
+  with patch.object(emitter, "_emit_if", side_effect=fake_emit_if):
+    ops = emitter._emit_if(elif_node)
+    assert len(ops) > 0
+
+  # 324->exit: _resolve_sw_constant with result_types already set
+  op_const = OperationNode(
+    name="sw.constant",
+    operands=[],
+    attributes=[AttributeNode(name="value", value="1.0")],
+    result_types=[TypeNode(body="tensor<f32>")],
+  )
+  emitter._resolve_sw_constant(op_const)
+  assert len(op_const.result_types) == 1
+
+  # 349->exit: _resolve_sw_op with result_types already set
+  with patch.object(emitter, "_lookup_stablehlo_op", return_value="stablehlo.add"):
+    op_sw = OperationNode(
+      name="sw.op",
+      operands=[],
+      attributes=[AttributeNode(name="type", value='"add"')],
+      result_types=[TypeNode(body="tensor<f32>")],
+    )
+    emitter._resolve_sw_op(op_sw)
+    assert op_sw.name == "stablehlo.add"
+    assert len(op_sw.result_types) == 1

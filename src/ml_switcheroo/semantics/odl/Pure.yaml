@@ -1,0 +1,7 @@
+operation: Pure
+variants:
+  flax_nnx:
+    api: flax.nnx.pure
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

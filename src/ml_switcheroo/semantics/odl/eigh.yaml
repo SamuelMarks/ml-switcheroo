@@ -1,0 +1,23 @@
+operation: eigh
+description: linalg.eigh(A, UPLO='L', *, out=None) -> (Tensor, Tensor)
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.linalg.eigh
+    args: {}
+  mlx:
+    api: mlx.core.linalg.eigh
+    args:
+      a: a
+  keras:
+    api: keras.ops.eigh
+    args:
+      x: x

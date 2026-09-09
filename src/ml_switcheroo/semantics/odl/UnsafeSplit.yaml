@@ -1,0 +1,12 @@
+operation: UnsafeSplit
+variants:
+  paxml:
+    api: jax.numpy.split
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.split
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

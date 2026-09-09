@@ -1,0 +1,12 @@
+operation: Cauchy
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.cauchy
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.cauchy
+    args:
+      key: key

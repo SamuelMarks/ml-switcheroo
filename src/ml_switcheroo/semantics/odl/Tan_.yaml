@@ -7,7 +7,21 @@ std_args:
 variants:
   latex_dsl:
     api: latex.tan
+    args: {}
   dask:
     api: dask.array.tan
+    args: {}
+  torch:
+    api: torch.tan
+    args: {}
+  jax:
+    api: jax.numpy.tan
+    args: {}
+  mlx:
+    api: mlx.core.tan
+    args: {}
+  keras:
+    api: keras.ops.tan
+    args: {}
 operation: Tan_
 type: function

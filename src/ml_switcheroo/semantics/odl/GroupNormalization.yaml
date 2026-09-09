@@ -29,7 +29,57 @@ std_args:
 variants:
   keras:
     api: keras.layers.GroupNormalization
+    args:
+      axis: axis
+      beta_constraint: beta_constraint
+      beta_initializer: beta_initializer
+      beta_regularizer: beta_regularizer
+      center: center
+      epsilon: epsilon
+      gamma_constraint: gamma_constraint
+      gamma_initializer: gamma_initializer
+      gamma_regularizer: gamma_regularizer
+      groups: groups
+      kwargs: kwargs
+      scale: scale
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.GroupNormalization
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.GroupNorm
+    args:
+      center: affine
+      epsilon: eps
+      groups: num_groups
+      scale: affine
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.GroupNorm
+    args:
+      axis: num_channels
+      center: affine
+      epsilon: eps
+      groups: num_groups
+      scale: affine
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.GroupNorm
+    args:
+      center: use_bias
+      epsilon: epsilon
+      groups: num_groups
+      scale: use_scale
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: GroupNormalization
 type: function

@@ -9,7 +9,16 @@ std_args:
 variants:
   keras:
     api: keras.layers.Masking
+    args:
+      kwargs: kwargs
+      mask_value: mask_value
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.Masking
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Masking
 type: function

@@ -1,0 +1,31 @@
+operation: ConcatenateLayer
+variants:
+  keras:
+    api: keras.layers.Concatenate
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.Concatenate
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '-1'
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'

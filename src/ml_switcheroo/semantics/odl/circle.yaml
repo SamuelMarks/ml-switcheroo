@@ -16,9 +16,12 @@ std_args:
 variants:
   keras:
     api: keras.losses.Circle
+    args: {}
   tikz:
     api: tikz.shape.circle
+    args: {}
   tensorflow:
     api: tf.keras.losses.Circle
+    args: {}
 operation: circle
 type: function

@@ -1,11 +1,16 @@
 description: Creates a criterion that optimizes a two-class classification
 std_args:
-- size_average
-- reduce
-- reduction
-- __constants__
+- name: size_average
+  type: Any
+- name: reduce
+  type: Any
+- name: reduction
+  type: Any
+- name: __constants__
+  type: Any
 type: class
 operation: SoftMarginLoss
 variants:
   torch:
     api: torch.nn.SoftMarginLoss
+    args: {}

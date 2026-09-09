@@ -1,13 +1,29 @@
 description: Fill the input Tensor with values drawn from a truncated normal distribution.
 std_args:
-- tensor
-- mean
-- std
-- a
-- b
-- generator
+- name: tensor
+  type: Any
+- name: mean
+  type: Any
+- name: std
+  type: Any
+- name: a
+  type: Any
+- name: b
+  type: Any
+- name: generator
+  type: Any
 type: function
 operation: trunc_normal_
 variants:
   torch:
     api: torch.nn.init.trunc_normal_
+    args:
+      a: a
+      b: b
+      generator: generator
+      mean: mean
+      std: std
+      tensor: tensor
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

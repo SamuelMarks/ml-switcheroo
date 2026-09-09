@@ -1,0 +1,12 @@
+operation: hanning
+description: Return the Hanning window.
+std_args:
+- name: M
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.numpy.hanning
+    args:
+      M: M

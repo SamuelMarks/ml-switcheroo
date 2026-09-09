@@ -1,0 +1,13 @@
+operation: PureState
+variants:
+  paxml:
+    api: tuple
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.PureState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

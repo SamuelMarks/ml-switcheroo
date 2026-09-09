@@ -1,23 +1,57 @@
-description: Abstract base class for generic types.
-std_args:
-- module_constructor
-- axis_name
-- in_axes
-- out_axes
-- static_broadcasted_argnums
-- devices
-- backend
-- axis_size
-- donate_argnums
-- global_arg_shapes
-- in_axes_kwargs
-- state_axes
-- split_rngs
-- transform_metadata
-- module_init_args
-- module_init_kwargs
-variants:
-  flax_nnx:
-    api: flax.nnx.Pmap
 operation: pmap
-type: function
+description: Parallel map with support for collective operations.
+std_args:
+- name: fun
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis_name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: in_axes
+  kind: keyword_only
+  is_variadic: false
+  type: int
+  default: '0'
+- name: out_axes
+  kind: keyword_only
+  is_variadic: false
+  type: int
+  default: '0'
+- name: static_broadcasted_argnums
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''().'''
+- name: donate_argnums
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: ()
+- name: devices
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: axis_size
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: backend
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: global_arg_shapes
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.pmap
+    args:
+      fun: fun

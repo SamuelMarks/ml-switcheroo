@@ -1,0 +1,41 @@
+operation: Gaussiannll
+variants:
+  mlx:
+    api: mlx.nn.losses.gaussian_nll_loss
+    args:
+      eps: eps
+      full: full
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.GaussianNLLLoss
+    args:
+      eps: eps
+      full: full
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: full
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: eps
+  kind: keyword_only
+  is_variadic: false
+  type: float
+  default: 1e-06
+- name: reduction
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''mean'''
+- name: __constants__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+  default: '[''full'', ''eps'', ''reduction'']'

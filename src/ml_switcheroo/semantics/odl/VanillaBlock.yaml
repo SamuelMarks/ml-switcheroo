@@ -1,0 +1,166 @@
+operation: VanillaBlock
+variants:
+  paxml:
+    api: praxis.layers.VanillaBlock
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Conv2d
+    args:
+      input_dim: in_channels
+      kernel_size: kernel_size
+      output_dim: out_channels
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.Conv2d
+    args:
+      in_channels: in_channels
+      out_channels: out_channels
+      kernel_size: kernel_size
+std_args:
+- name: __doc__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: "'```(\\'Applies a 2D convolution over an input signal composed of several\
+    \ input\\\\n    planes.\\\\n\\\\n    In the simplest case, the output value of\
+    \ the layer with input size\\\\n    :math:`(N, C_{\\\\\\\\text{in}}, H, W)` and\
+    \ output :math:`(N, C_{\\\\\\\\text{out}}, H_{\\\\\\\\text{out}}, W_{\\\\\\\\\
+    text{out}})`\\\\n    can be precisely described as:\\\\n\\\\n    .. math::\\\\\
+    n        \\\\\\\\text{out}(N_i, C_{\\\\\\\\text{out}_j}) = \\\\\\\\text{bias}(C_{\\\
+    \\\\\\text{out}_j}) +\\\\n        \\\\\\\\sum_{k = 0}^{C_{\\\\\\\\text{in}} -\
+    \ 1} \\\\\\\\text{weight}(C_{\\\\\\\\text{out}_j}, k) \\\\\\\\star \\\\\\\\text{input}(N_i,\
+    \ k)\\\\n\\\\n\\\\n    where :math:`\\\\\\\\star` is the valid 2D `cross-correlation`_\
+    \ operator,\\\\n    :math:`N` is a batch size, :math:`C` denotes a number of channels,\\\
+    \\n    :math:`H` is a height of input planes in pixels, and :math:`W` is\\\\n\
+    \    width in pixels.\\\\n    \\' + \"\\\\n\\\\n    This module supports :ref:`TensorFloat32<tf32_on_ampere>`.\\\
+    \\n\\\\n    On certain ROCm devices, when using float16 inputs this module will\
+    \ use :ref:`different precision<fp16_on_mi200>` for backward.\\\\n\\\\n    * :attr:`stride`\
+    \ controls the stride for the cross-correlation, a single\\\\n      number or\
+    \ a tuple.\\\\n\\\\n    * :attr:`padding` controls the amount of padding applied\
+    \ to the input. It\\\\n      can be either a string {{\\'valid\\', \\'same\\'}}\
+    \ or an int / a tuple of ints giving the\\\\n      amount of implicit padding\
+    \ applied on both sides.\\\\n\\\\n    * :attr:`dilation` controls the spacing\
+    \ between the kernel points; also\\\\n      known as the \xE0 trous algorithm.\
+    \ It is harder to describe, but this `link`_\\\\n      has a nice visualization\
+    \ of what :attr:`dilation` does.\\\\n\\\\n\\\\n    {groups_note}\\\\n\\\\n   \
+    \ The parameters :attr:`kernel_size`, :attr:`stride`, :attr:`padding`, :attr:`dilation`\
+    \ can either be:\\\\n\\\\n        - a single ``int`` -- in which case the same\
+    \ value is used for the height and width dimension\\\\n        - a ``tuple`` of\
+    \ two ints -- in which case, the first `int` is used for the height dimension,\\\
+    \\n          and the second `int` for the width dimension\\\\n\\\\n    Note:\\\
+    \\n        {depthwise_separable_note}\\\\n\\\\n    Note:\\\\n        {cudnn_reproducibility_note}\\\
+    \\n\\\\n    Note:\\\\n        ``padding=\\'valid\\'`` is the same as no padding.\
+    \ ``padding=\\'same\\'`` pads\\\\n        the input so the output has the shape\
+    \ as the input. However, this mode\\\\n        doesn\\'t support any stride values\
+    \ other than 1.\\\\n\\\\n    Note:\\\\n        This module supports complex data\
+    \ types i.e. ``complex32, complex64, complex128``.\\\\n\\\\n    Args:\\\\n   \
+    \     in_channels (int): Number of channels in the input image\\\\n        out_channels\
+    \ (int): Number of channels produced by the convolution\\\\n        kernel_size\
+    \ (int or tuple): Size of the convolving kernel\\\\n        stride (int or tuple,\
+    \ optional): Stride of the convolution. Default: 1\\\\n        padding (int, tuple\
+    \ or str, optional): Padding added to all four sides of\\\\n            the input.\
+    \ Default: 0\\\\n        dilation (int or tuple, optional): Spacing between kernel\
+    \ elements. Default: 1\\\\n        groups (int, optional): Number of blocked connections\
+    \ from input\\\\n            channels to output channels. Default: 1\\\\n    \
+    \    bias (bool, optional): If ``True``, adds a learnable bias to the\\\\n   \
+    \         output. Default: ``True``\\\\n        padding_mode (str, optional):\
+    \ ``\\'zeros\\'``, ``\\'reflect\\'``,\\\\n            ``\\'replicate\\'`` or ``\\\
+    'circular\\'``. Default: ``\\'zeros\\'``\\\\n    \".format(**reproducibility_notes,\
+    \ **convolution_notes) + \\'\\\\n\\\\n    Shape:\\\\n        - Input: :math:`(N,\
+    \ C_{in}, H_{in}, W_{in})` or :math:`(C_{in}, H_{in}, W_{in})`\\\\n        - Output:\
+    \ :math:`(N, C_{out}, H_{out}, W_{out})` or :math:`(C_{out}, H_{out}, W_{out})`,\
+    \ where\\\\n\\\\n          .. math::\\\\n              H_{out} = \\\\\\\\left\\\
+    \\\\\\lfloor\\\\\\\\frac{H_{in}  + 2 \\\\\\\\times \\\\\\\\text{padding}[0] -\
+    \ \\\\\\\\text{dilation}[0]\\\\n                        \\\\\\\\times (\\\\\\\\\
+    text{kernel\\\\\\\\_size}[0] - 1) - 1}{\\\\\\\\text{stride}[0]} + 1\\\\\\\\right\\\
+    \\\\\\rfloor\\\\n\\\\n          .. math::\\\\n              W_{out} = \\\\\\\\\
+    left\\\\\\\\lfloor\\\\\\\\frac{W_{in}  + 2 \\\\\\\\times \\\\\\\\text{padding}[1]\
+    \ - \\\\\\\\text{dilation}[1]\\\\n                        \\\\\\\\times (\\\\\\\
+    \\text{kernel\\\\\\\\_size}[1] - 1) - 1}{\\\\\\\\text{stride}[1]} + 1\\\\\\\\\
+    right\\\\\\\\rfloor\\\\n\\\\n    Attributes:\\\\n        weight (Tensor): the\
+    \ learnable weights of the module of shape\\\\n            :math:`(\\\\\\\\text{out\\\
+    \\\\\\_channels}, \\\\\\\\frac{\\\\\\\\text{in\\\\\\\\_channels}}{\\\\\\\\text{groups}},`\\\
+    \\n            :math:`\\\\\\\\text{kernel\\\\\\\\_size[0]}, \\\\\\\\text{kernel\\\
+    \\\\\\_size[1]})`.\\\\n            The values of these weights are sampled from\\\
+    \\n            :math:`\\\\\\\\mathcal{U}(-\\\\\\\\sqrt{k}, \\\\\\\\sqrt{k})` where\\\
+    \\n            :math:`k = \\\\\\\\frac{groups}{C_\\\\\\\\text{in} * \\\\\\\\prod_{i=0}^{1}\\\
+    \\\\\\text{kernel\\\\\\\\_size}[i]}`\\\\n        bias (Tensor):   the learnable\
+    \ bias of the module of shape\\\\n            (out_channels). If :attr:`bias`\
+    \ is ``True``,\\\\n            then the values of these weights are\\\\n     \
+    \       sampled from :math:`\\\\\\\\mathcal{U}(-\\\\\\\\sqrt{k}, \\\\\\\\sqrt{k})`\
+    \ where\\\\n            :math:`k = \\\\\\\\frac{groups}{C_\\\\\\\\text{in} * \\\
+    \\\\\\prod_{i=0}^{1}\\\\\\\\text{kernel\\\\\\\\_size}[i]}`\\\\n\\\\n    Examples:\\\
+    \\n\\\\n        >>> # With square kernels and equal stride\\\\n        >>> m =\
+    \ nn.Conv2d(16, 33, 3, stride=2)\\\\n        >>> # non-square kernels and unequal\
+    \ stride and with padding\\\\n        >>> m = nn.Conv2d(16, 33, (3, 5), stride=(2,\
+    \ 1), padding=(4, 2))\\\\n        >>> # non-square kernels and unequal stride\
+    \ and with padding and dilation\\\\n        >>> m = nn.Conv2d(16, 33, (3, 5),\
+    \ stride=(2, 1), padding=(4, 2), dilation=(3, 1))\\\\n        >>> input = torch.randn(20,\
+    \ 16, 50, 100)\\\\n        >>> output = m(input)\\\\n\\\\n    .. _cross-correlation:\\\
+    \\n        https://en.wikipedia.org/wiki/Cross-correlation\\\\n\\\\n    .. _link:\\\
+    \\n        https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md\\\
+    \\n    \\')```'"
+- name: output_dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: input_dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: groups
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: kernel_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: padding_mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''zeros'''
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: transposed
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+- name: output_padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: tuple

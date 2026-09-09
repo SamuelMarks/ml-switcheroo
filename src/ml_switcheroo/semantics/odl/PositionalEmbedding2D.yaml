@@ -1,0 +1,7 @@
+operation: PositionalEmbedding2D
+variants:
+  paxml:
+    api: praxis.layers.PositionalEmbedding2D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

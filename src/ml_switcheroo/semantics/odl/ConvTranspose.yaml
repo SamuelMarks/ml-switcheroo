@@ -32,3 +32,54 @@ operation: ConvTranspose
 variants:
   flax_nnx:
     api: flax.nnx.ConvTranspose
+    args:
+      bias_init: bias_init
+      bias_metadata: bias_metadata
+      dtype: dtype
+      in_features: in_features
+      kernel_dilation: kernel_dilation
+      kernel_init: kernel_init
+      kernel_metadata: kernel_metadata
+      kernel_size: kernel_size
+      mask: mask
+      out_features: out_features
+      padding: padding
+      param_dtype: param_dtype
+      precision: precision
+      preferred_element_type: preferred_element_type
+      promote_dtype: promote_dtype
+      rngs: rngs
+      self: self
+      strides: strides
+      transpose_kernel: transpose_kernel
+      use_bias: use_bias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  keras:
+    api: keras.layers.Conv2DTranspose
+    args:
+      in_features: null
+      out_features: filters
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.ConvTranspose2d
+    args:
+      in_features: in_channels
+      out_features: out_channels
+      use_bias: bias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.ConvTranspose2d
+    args:
+      in_features: in_channels
+      out_features: out_channels
+      strides: stride
+      use_bias: bias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,14 @@
+operation: BatchStat
+variants:
+  flax_nnx:
+    api: flax.nnx.BatchStat
+    args:
+      eager_sharding: eager_sharding
+      hijax: hijax
+      metadata: metadata
+      ref: ref
+      self: self
+      value: value
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

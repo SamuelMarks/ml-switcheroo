@@ -1,0 +1,37 @@
+operation: composite
+description: Composite operation
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: name
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: composite_attributes
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: decomposition
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: version
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: composite_regions
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  stablehlo:
+    api: stablehlo.composite
+    args:
+      inputs: inputs
+      name: name
+      composite_attributes: composite_attributes
+      decomposition: decomposition
+      version: version
+      composite_regions: composite_regions

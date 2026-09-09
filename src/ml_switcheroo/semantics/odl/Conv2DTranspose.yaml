@@ -36,35 +36,75 @@ variants:
   torch:
     api: torch.nn.ConvTranspose2d
     args:
-      in_channels: in_channels
+      dilation_rate: dilation
       filters: out_channels
       kernel_size: kernel_size
-      strides: stride
       padding: padding
-      output_padding: output_padding
-      groups: groups
+      strides: stride
       use_bias: bias
-      dilation_rate: dilation
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   keras:
     api: keras.layers.Conv2DTranspose
     args:
-      in_channels: null
-      filters: filters
-      kernel_size: kernel_size
-      strides: strides
-      padding: padding
-      output_padding: output_padding
-      use_bias: use_bias
+      activation: activation
+      activity_regularizer: activity_regularizer
+      bias_constraint: bias_constraint
+      bias_initializer: bias_initializer
+      bias_regularizer: bias_regularizer
+      data_format: data_format
       dilation_rate: dilation_rate
+      filters: filters
+      kernel_constraint: kernel_constraint
+      kernel_initializer: kernel_initializer
+      kernel_regularizer: kernel_regularizer
+      kernel_size: kernel_size
+      kwargs: kwargs
+      output_padding: output_padding
+      padding: padding
+      strides: strides
+      use_bias: use_bias
+      in_channels: null
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.Conv2DTranspose
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
     args:
       in_channels: null
-      filters: filters
+  paxml:
+    api: praxis.layers.Conv2DTranspose
+    args:
+      filters: filter_dims
+      kernel_size: filter_shape
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.ConvTranspose2d
+    args:
+      filters: out_channels
       kernel_size: kernel_size
-      strides: strides
       padding: padding
-      output_padding: output_padding
+      strides: stride
+      use_bias: bias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.ConvTranspose
+    args:
+      dilation_rate: kernel_dilation
+      filters: features
+      kernel_size: kernel_size
+      padding: padding
+      strides: strides
       use_bias: use_bias
-      dilation_rate: dilation_rate
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 type: function

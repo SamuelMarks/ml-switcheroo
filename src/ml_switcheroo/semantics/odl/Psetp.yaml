@@ -1,0 +1,4 @@
+operation: Psetp
+variants:
+  nvidia_sass:
+    api: PSETP

@@ -1,0 +1,7 @@
+operation: StateSharding
+variants:
+  flax_nnx:
+    api: flax.nnx.StateSharding
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

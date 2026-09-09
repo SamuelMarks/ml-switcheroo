@@ -1,26 +1,83 @@
 description: Just your regular densely-connected NN layer.
 std_args:
-- units
-- activation
-- use_bias
-- kernel_initializer
-- bias_initializer
-- kernel_regularizer
-- bias_regularizer
-- activity_regularizer
-- kernel_constraint
-- bias_constraint
-- lora_rank
-- lora_alpha
-- kwargs
-- trainable
-- dtype
-- autocast
-- name
+- name: units
+  type: Any
+- name: activation
+  type: Any
+- name: use_bias
+  type: Any
+- name: kernel_initializer
+  type: Any
+- name: bias_initializer
+  type: Any
+- name: kernel_regularizer
+  type: Any
+- name: bias_regularizer
+  type: Any
+- name: activity_regularizer
+  type: Any
+- name: kernel_constraint
+  type: Any
+- name: bias_constraint
+  type: Any
+- name: lora_rank
+  type: Any
+- name: lora_alpha
+  type: Any
+- name: kwargs
+  type: Any
+- name: trainable
+  type: Any
+- name: dtype
+  type: Any
+- name: autocast
+  type: Any
+- name: name
+  type: Any
 type: function
 operation: Dense
 variants:
   keras:
     api: keras.layers.Dense
+    args:
+      activation: activation
+      activity_regularizer: activity_regularizer
+      bias_constraint: bias_constraint
+      bias_initializer: bias_initializer
+      bias_regularizer: bias_regularizer
+      kernel_constraint: kernel_constraint
+      kernel_initializer: kernel_initializer
+      kernel_regularizer: kernel_regularizer
+      kwargs: kwargs
+      lora_alpha: lora_alpha
+      lora_rank: lora_rank
+      quantization_config: quantization_config
+      units: units
+      use_bias: use_bias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Linear
+    args:
+      in_features: in_features
+      out_features: out_features
+  flax_nnx:
+    api: flax.nnx.Linear
+    args:
+      in_features: in_features
+      out_features: out_features
+  mlx:
+    api: mlx.nn.Linear
+    args:
+      in_features: input_dims
+      out_features: output_dims
   tensorflow:
     api: tf.keras.layers.Dense
+    args: {}
+  rdna:
+    api: ; Macro.Linear
+    args: {}
+  nvidia_sass:
+    api: Macro.Linear
+    args: {}

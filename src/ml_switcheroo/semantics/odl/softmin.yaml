@@ -1,11 +1,25 @@
-description: Applies the Softmin function.
-std_args:
-- dim
-- __constants__
-type: function
 operation: softmin
+description: Apply a softmin function.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: _stacklevel
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '3'
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
-  mlx:
-    api: mlx.nn.Softmin
   torch:
-    api: torch.nn.Softmin
+    api: torch.nn.functional.softmin
+    args:
+      input: input

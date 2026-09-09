@@ -1,0 +1,27 @@
+operation: feature_alpha_dropout
+description: Randomly masks out entire channels (a channel is a feature map).
+std_args:
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.5'
+- name: training
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.nn.functional.feature_alpha_dropout
+    args:
+      input: input

@@ -20,8 +20,46 @@ std_args:
   type: str
 variants:
   keras:
-    api: keras.layers.AvgPool3D
+    api: keras.layers.AveragePooling3D
+    args:
+      data_format: data_format
+      kwargs: kwargs
+      name: name
+      padding: padding
+      pool_size: pool_size
+      strides: strides
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
-    api: tf.keras.layers.AvgPool3D
+    api: tf.keras.layers.AveragePooling3D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.AvgPool3d
+    arg_values:
+      padding:
+        valid: 0
+    args:
+      padding: padding
+      pool_size: kernel_size
+      strides: stride
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.AvgPool
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.AvgPool3d
+    args:
+      kernel_size: kernel_size
 operation: AveragePooling3D
 type: function

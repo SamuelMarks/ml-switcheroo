@@ -1,0 +1,5 @@
+operation: VAndB16
+variants:
+  rdna:
+    api: v_and_b16
+    description: Auto-mapped instruction V_AND_B16

@@ -1,16 +1,41 @@
+operation: load
 description: load(f, map_location=None, pickle_module=pickle, *, weights_only=True,
   mmap=None, **pickle_load_args)
 std_args:
-- f
-- map_location
-- pickle_module
-- weights_only
-- mmap
-- pickle_load_args
+- name: f
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: map_location
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: pickle_module
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: weights_only
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: mmap
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: pickle_load_args
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   torch:
     api: torch.load
+    args:
+      f: f
   jax:
-    api: load
-operation: load
-type: function
+    api: jax.numpy.load
+    args: {}
+  mlx:
+    api: mlx.core.load
+    args:
+      file: file

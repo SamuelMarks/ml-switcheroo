@@ -1,0 +1,17 @@
+operation: estimate_control_variate_coefficients
+variants:
+  flax_nnx:
+    api: optax.monte_carlo.control_variates.estimate_control_variate_coefficients
+    args:
+      control_variate_from_function: control_variate_from_function
+      control_variate_state: control_variate_state
+      dist_builder: dist_builder
+      eps: eps
+      function: function
+      grad_estimator: grad_estimator
+      num_samples: num_samples
+      params: params
+      rng: rng
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

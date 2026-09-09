@@ -1,11 +1,16 @@
 description: Base class for all neural network modules.
 std_args:
-- size
-- alpha
-- beta
-- k
+- name: size
+  type: Any
+- name: alpha
+  type: Any
+- name: beta
+  type: Any
+- name: k
+  type: Any
 type: class
 operation: CrossMapLRN2d
 variants:
   torch:
     api: torch.nn.CrossMapLRN2d
+    args: {}

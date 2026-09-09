@@ -1,17 +1,36 @@
-description: Computes the truth value of ``x1_i > x2_i`` for each element ``x1_i``
-  of the input array ``x1`` with the respective element ``x2_i`` of the input array
-  ``x2``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x1
-  type: Union[array, int, float]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x2
-  type: Union[array, int, float]
-variants:
-  dask:
-    api: dask.array.greater
 operation: greater
-type: function
+description: greater(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.greater
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.greater
+    args:
+      x1: x1
+      x2: x2
+  mlx:
+    api: mlx.core.greater
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.greater
+    args:
+      x1: x1
+      x2: x2

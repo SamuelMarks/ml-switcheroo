@@ -1,10 +1,17 @@
-description: Applies the Softshrink function.
-std_args:
-- lambd
-type: attribute
 operation: softshrink
+description: softshrink(input, lambd=0.5) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: lambd
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0.5'
 variants:
-  mlx:
-    api: mlx.nn.Softshrink
   torch:
-    api: torch.nn.Softshrink
+    api: torch.nn.functional.softshrink
+    args:
+      input: input

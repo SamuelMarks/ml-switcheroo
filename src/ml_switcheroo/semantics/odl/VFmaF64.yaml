@@ -1,0 +1,5 @@
+operation: VFmaF64
+variants:
+  rdna:
+    api: v_fma_f64
+    description: Auto-mapped instruction V_FMA_F64

@@ -1,0 +1,44 @@
+operation: Pooling1D
+variants:
+  paxml:
+    api: praxis.layers.Pooling1D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.AvgPool1d
+    args:
+      stride: stride
+      window: kernel_size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.AvgPool1d
+    args:
+      kernel_size: kernel_size
+std_args:
+- name: window
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: ''':attr:`kernel_size'''
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: ceil_mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: count_include_pad
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'

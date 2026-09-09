@@ -1,0 +1,13 @@
+operation: column_stack
+variants:
+  flax_nnx:
+    api: jax.numpy.column_stack
+    args:
+      tup: tup
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.column_stack
+    args:
+      tup: tup

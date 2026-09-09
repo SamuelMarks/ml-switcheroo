@@ -1,0 +1,5 @@
+operation: SCmpLtU32
+variants:
+  rdna:
+    api: s_cmp_lt_u32
+    description: Auto-mapped instruction S_CMP_LT_U32

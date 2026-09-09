@@ -1,0 +1,5 @@
+operation: VMulF32
+variants:
+  rdna:
+    api: v_mul_f32
+    description: Auto-mapped instruction V_MUL_F32

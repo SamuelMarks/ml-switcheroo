@@ -1,0 +1,5 @@
+operation: VMulI32I24
+variants:
+  rdna:
+    api: v_mul_i32_i24
+    description: Auto-mapped instruction V_MUL_I32_I24

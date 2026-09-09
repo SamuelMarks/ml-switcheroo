@@ -1,10 +1,20 @@
 description: Computes the L1 loss.
 std_args:
-- predictions
-- targets
-- reduction
+- name: predictions
+  type: Any
+- name: targets
+  type: Any
+- name: reduction
+  type: Any
 type: function
 operation: l1_loss
 variants:
   mlx:
     api: mlx.nn.losses.l1_loss
+    args:
+      predictions: predictions
+      reduction: reduction
+      targets: targets
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,16 @@
+operation: view_as_real
+description: view_as_real(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.view_as_real
+    args:
+      input: input
+  keras:
+    api: keras.ops.view_as_real
+    args:
+      x: x

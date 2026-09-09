@@ -1,12 +1,26 @@
-description: Softplus activation function.
-std_args:
-- x
-type: attribute
 operation: softplus
+description: softplus(input, beta=1, threshold=20) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: beta
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: threshold
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '20'
 variants:
+  torch:
+    api: torch.nn.functional.softplus
+    args:
+      input: input
   keras:
     api: keras.activations.softplus
-  mlx:
-    api: mlx.nn.Softplus
-  torch:
-    api: torch.nn.Softplus
+    args:
+      x: x

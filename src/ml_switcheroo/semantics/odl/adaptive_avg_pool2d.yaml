@@ -1,0 +1,18 @@
+operation: adaptive_avg_pool2d
+description: Apply a 2D adaptive average pooling over an input signal composed of
+  several input planes.
+std_args:
+- name: output_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.nn.functional.adaptive_avg_pool2d
+    args:
+      output_size: output_size
+      input: input

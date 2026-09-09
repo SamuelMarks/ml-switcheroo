@@ -1,0 +1,5 @@
+operation: VAndB32
+variants:
+  rdna:
+    api: v_and_b32
+    description: Auto-mapped instruction V_AND_B32

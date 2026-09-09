@@ -1,0 +1,11 @@
+operation: is_available
+description: Return ``True`` if the distributed package is available.
+std_args: []
+variants:
+  torch:
+    api: torch.distributed.is_available
+    args: {}
+  mlx:
+    api: mlx.core.is_available
+    args:
+      device: device

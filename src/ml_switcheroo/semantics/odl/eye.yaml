@@ -1,30 +1,27 @@
-description: Returns a two-dimensional array with ones on the ``k``\th diagonal and
-  zeros elsewhere.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: n_rows
-  type: int
-- is_variadic: false
-  kind: positional_or_keyword
-  name: n_cols
-  type: Optional[int]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: k
-  type: int
-- is_variadic: false
-  kind: positional_or_keyword
-  name: dtype
-  type: Optional[dtype]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: device
-  type: Optional[device]
-type: attribute
 operation: eye
+description: eye(...)
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
 variants:
-  dask:
-    api: dask.array.eye
   torch:
     api: torch.nn.init.eye
+    args: {}
+  jax:
+    api: jax.numpy.eye
+    args:
+      N: N
+  mlx:
+    api: mlx.core.eye
+    args:
+      n: n
+  keras:
+    api: keras.ops.eye
+    args:
+      N: N

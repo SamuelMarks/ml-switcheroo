@@ -1,12 +1,37 @@
-description: Return the cumulative product of elements along a given axis.
-std_args:
-- x
-- axis
-- dtype
-- out
-- method
-variants:
-  dask:
-    api: dask.array.cumprod
 operation: cumprod
-type: function
+description: cumprod(input, dim, *, dtype=None, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.cumprod
+    args:
+      input: input
+      dim: dim
+  jax:
+    api: jax.lax.cumprod
+    args:
+      operand: operand
+  mlx:
+    api: mlx.core.cumprod
+    args:
+      a: a
+  keras:
+    api: keras.ops.cumprod
+    args:
+      x: x

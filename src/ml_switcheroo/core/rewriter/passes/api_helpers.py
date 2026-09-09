@@ -87,7 +87,7 @@ class ApiHelpersMixin:
         cst.BaseExpression: The constructed CST expression node representing the path.
     """
     parts = api_path.split(".")
-    node = cst.Name(parts[0])
+    node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
     for part in parts[1:]:
       node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
@@ -150,7 +150,7 @@ class ApiHelpersMixin:
     Returns:
         cst.FunctionDef: A new function definition node with the preamble statements injected.
     """
-    new_stmts = []
+    new_stmts: List[cst.BaseStatement] = []
     for code in stmts_code:
       try:
         mod = cst.parse_module(code)

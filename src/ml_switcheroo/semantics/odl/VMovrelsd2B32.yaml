@@ -1,0 +1,5 @@
+operation: VMovrelsd2B32
+variants:
+  rdna:
+    api: v_movrelsd_2_b32
+    description: Auto-mapped instruction V_MOVRELSD_2_B32

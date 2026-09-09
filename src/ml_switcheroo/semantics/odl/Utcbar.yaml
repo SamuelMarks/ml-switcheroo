@@ -1,0 +1,4 @@
+operation: Utcbar
+variants:
+  nvidia_sass:
+    api: UTCBAR

@@ -1,0 +1,41 @@
+operation: LogCoshLoss
+variants:
+  keras:
+    api: keras.losses.LogCosh
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: optax.log_cosh
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.losses.log_cosh_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.losses.LogCosh
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.log_cosh
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: targets
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''none'''

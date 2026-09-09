@@ -1,0 +1,37 @@
+operation: custom_linear_solve
+description: Perform a matrix-free linear solve with implicitly defined gradients.
+std_args:
+- name: matvec
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: b
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: solve
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: transpose_solve
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: symmetric
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: has_aux
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  jax:
+    api: jax.lax.custom_linear_solve
+    args:
+      matvec: matvec
+      b: b
+      solve: solve

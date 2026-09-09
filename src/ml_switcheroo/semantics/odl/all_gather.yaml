@@ -1,0 +1,40 @@
+operation: all_gather
+description: Gathers tensors from the whole group in a list.
+std_args:
+- name: tensor_list
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+- name: tensor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: group
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: async_op
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.distributed.all_gather
+    args:
+      tensor_list: tensor_list
+      tensor: tensor
+  jax:
+    api: jax.lax.all_gather
+    args:
+      x: x
+      axis_name: axis_name
+  stablehlo:
+    api: stablehlo.all_gather
+    args:
+      operands: operands
+      all_gather_dim: all_gather_dim
+      replica_groups: replica_groups
+      channel_handle: channel_handle
+      use_global_device_ids: use_global_device_ids

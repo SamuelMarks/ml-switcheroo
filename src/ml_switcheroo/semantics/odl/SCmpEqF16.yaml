@@ -1,0 +1,5 @@
+operation: SCmpEqF16
+variants:
+  rdna:
+    api: s_cmp_eq_f16
+    description: Auto-mapped instruction S_CMP_EQ_F16

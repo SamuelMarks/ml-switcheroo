@@ -106,7 +106,7 @@ def test_visualizer_exceptions() -> None:
     arg_node: cst.Arg = cst.Arg(value=cst.Name("foo"))
     gen.visit_Arg(arg_node)
   gen.stack.clear()
-  gen.leave_Assign(cst.Assign(targets=[cst.AssignTarget(cst.Name("a"))], value=cst.Pass()))
+  gen.leave_Assign(cst.Assign(targets=[cst.AssignTarget(cst.Name("a"))], value=cst.Name("b")))
   gen.stack.clear()
   gen.visit_SimpleString(cst.SimpleString('""'))
 
@@ -154,3 +154,12 @@ def test_visualizer_more_fallbacks() -> None:
 
   imp: cst.Import = cst.Import(names=[DummyImportAlias(name=cst.Attribute(cst.Name("a"), cst.Name("b")))])
   gen.visit_Import(imp)
+
+
+def test_visualizer_complex_arg() -> None:
+  """Verifies the behavior of visualizer with complex argument expression."""
+  code: str = "fn(k=sub_call(1))"
+  tree: cst.Module = cst.parse_module(code)
+  gen: MermaidGenerator = MermaidGenerator()
+  mermaid: str = gen.generate(tree)
+  assert "sub_call()" in mermaid

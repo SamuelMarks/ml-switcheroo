@@ -1,12 +1,18 @@
 description: Creates a criterion that measures the triplet loss given input
 std_args:
-- distance_function
-- margin
-- swap
-- reduction
-- __constants__
+- name: distance_function
+  type: Any
+- name: margin
+  type: Any
+- name: swap
+  type: Any
+- name: reduction
+  type: Any
+- name: __constants__
+  type: Any
 type: class
 operation: TripletMarginWithDistanceLoss
 variants:
   torch:
     api: torch.nn.TripletMarginWithDistanceLoss
+    args: {}

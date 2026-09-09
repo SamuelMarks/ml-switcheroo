@@ -1,0 +1,5 @@
+operation: VAddNcI32
+variants:
+  rdna:
+    api: v_add_nc_i32
+    description: Auto-mapped instruction V_ADD_NC_I32

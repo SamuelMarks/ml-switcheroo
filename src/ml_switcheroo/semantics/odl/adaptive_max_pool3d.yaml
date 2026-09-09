@@ -1,0 +1,15 @@
+operation: adaptive_max_pool3d
+description: adaptive_max_pool3d(input, output_size, return_indices=False)
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.nn.functional.adaptive_max_pool3d
+    args: {}

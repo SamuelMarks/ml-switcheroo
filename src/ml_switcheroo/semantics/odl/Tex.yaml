@@ -1,0 +1,4 @@
+operation: Tex
+variants:
+  nvidia_sass:
+    api: TEX

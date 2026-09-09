@@ -1,0 +1,7 @@
+operation: QuantizeVector
+variants:
+  paxml:
+    api: praxis.layers.quantize_vector
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

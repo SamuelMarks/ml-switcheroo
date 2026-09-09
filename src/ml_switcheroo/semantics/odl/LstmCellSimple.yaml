@@ -1,0 +1,73 @@
+operation: LstmCellSimple
+variants:
+  keras:
+    api: keras.layers.LSTMCell
+    args:
+      hidden_size: units
+      input_size: null
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: paxml.layers.LstmCellSimple
+    args:
+      hidden_size: num_hidden_nodes
+      input_size: num_input_nodes
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.LSTM
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.LSTMCell
+    args:
+      bias: bias
+      hidden_size: hidden_size
+      input_size: input_size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.LSTMCell
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.LSTMCell
+    args:
+      hidden_size: features
+      input_size: features
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: input_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: hidden_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: num_chunks
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int

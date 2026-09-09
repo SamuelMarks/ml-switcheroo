@@ -1,0 +1,4 @@
+operation: Utmapf
+variants:
+  nvidia_sass:
+    api: UTMAPF

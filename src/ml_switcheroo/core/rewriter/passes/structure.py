@@ -58,6 +58,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     """
     self.context = context
     self._in_annotation = False
+    self._attribute_depth = 0
     self._cached_target_traits: Optional[StructuralTraits] = None
     self._known_module_bases: Optional[Set[str]] = None
 
@@ -148,7 +149,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         A LibCST expression node corresponding to the given dotted path structure.
     """
     parts = name_str.split(".")
-    node = cst.Name(parts[0])
+    node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
     for part in parts[1:]:
       node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
@@ -169,7 +170,19 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       return False
 
     if self._known_module_bases is None:
-      self._known_module_bases = set()
+      self._known_module_bases = {
+        "torch.nn.Module",
+        "nn.Module",
+        "flax.linen.Module",
+        "flax.nnx.Module",
+        "nnx.Module",
+        "mlx.nn.Module",
+        "keras.Model",
+        "keras.layers.Layer",
+        "keras.Layer",
+        "html_dsl.Module",
+        "dsl.Module",
+      }
       # Scan all registered configs for module_base traits
       for _, config in self.context.semantics.framework_configs.items():
         traits = config.get("traits")
@@ -218,6 +231,27 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         A dictionary containing the resolved type target variant details, or None
         if no mapping was found.
     """
+    if name in {
+      "int",
+      "float",
+      "str",
+      "bool",
+      "bytes",
+      "list",
+      "dict",
+      "tuple",
+      "set",
+      "frozenset",
+      "complex",
+      "None",
+      "Any",
+      "Optional",
+      "Union",
+      "Callable",
+      "Iterable",
+      "Sequence",
+    }:
+      return None
     lookup = self.context.semantics.get_definition(name)
     if not lookup:
       return None
@@ -243,7 +277,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if not self.context.module_preamble:
       return updated_node
 
-    new_stmts = []
+    new_stmts: List[cst.BaseStatement] = []
     # Deduplication now handled at insertion time in Context, so order is preserved.
     for code in self.context.module_preamble:
       try:
@@ -289,6 +323,18 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     self._in_annotation = False
     return updated_node
 
+  def visit_Attribute(self, node: cst.Attribute) -> Optional[bool]:
+    """Track entry into an Attribute chain.
+
+    Args:
+        node: The CST Attribute node being entered.
+
+    Returns:
+        True to continue visiting children.
+    """
+    self._attribute_depth += 1
+    return True
+
   def leave_Name(self, original_node: cst.Name, updated_node: cst.Name) -> cst.BaseExpression:
     """Rewrite type names if inside a type annotation.
 
@@ -303,7 +349,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         The mapped CST expression representing the target type, or the updated node
         if no mapping was applicable.
     """
-    if self._in_annotation:
+    if self._in_annotation and getattr(self, "_attribute_depth", 0) == 0:
       full_name = self._get_qualified_name(original_node)
       if full_name:  # pragma: no branch
         mapping = self._get_type_mapping(full_name)
@@ -325,7 +371,8 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         The mapped CST expression representing the target type, or the updated node
         if no mapping was found.
     """
-    if self._in_annotation:
+    self._attribute_depth = max(0, getattr(self, "_attribute_depth", 1) - 1)
+    if self._in_annotation and getattr(self, "_attribute_depth", 0) == 0:
       full_name = self._get_qualified_name(original_node)
       if full_name:  # pragma: no branch
         mapping = self._get_type_mapping(full_name)
@@ -334,13 +381,47 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
     # NOTE: When used in mixed inheritance (PivotRewriter), we must ensure
     # the next class in MRO gets called if no change is made, or if we want chain logic.
-    # But LibCST Transformers don't support super() chaining well on return values.
-    # PivotRewriter wraps this. For standalone pass, this is final.
-    if hasattr(super(), "leave_Attribute"):
-      # If using multiple inheritance shim (PivotRewriter)
-      return super().leave_Attribute(original_node, updated_node)
+    return super().leave_Attribute(original_node, updated_node)
 
-    return updated_node
+  # --- Visitor Logic: Imports ---
+
+  def visit_Import(self, node: cst.Import) -> Optional[bool]:
+    """Capture module imports and aliases into context alias map.
+
+    Args:
+        node: The CST Import node being visited.
+
+    Returns:
+        False to avoid descending into import aliases.
+    """
+    for alias in node.names:
+      full_name = self._cst_to_string(alias.name) or ""
+      if alias.asname and isinstance(alias.asname.name, cst.Name):
+        local_name = alias.asname.name.value
+        self.context.alias_map[local_name] = full_name
+      else:
+        root = full_name.split(".")[0]
+        self.context.alias_map[root] = root
+    return False
+
+  def visit_ImportFrom(self, node: cst.ImportFrom) -> Optional[bool]:
+    """Capture from-import aliases into context alias map.
+
+    Args:
+        node: The CST ImportFrom node being visited.
+
+    Returns:
+        False to avoid descending into imported names.
+    """
+    if node.relative or isinstance(node.names, cst.ImportStar) or not node.module:
+      return False
+    module_name = self._cst_to_string(node.module)
+    for alias in node.names:
+      imported_name = alias.name.value if isinstance(alias.name, cst.Name) else alias.name.attr.value
+      canonical_source = f"{module_name}.{imported_name}"
+      local_name = alias.asname.name.value if alias.asname and isinstance(alias.asname.name, cst.Name) else imported_name
+      self.context.alias_map[local_name] = canonical_source
+    return False
 
   # --- Visitor Logic: Classes ---
 
@@ -386,7 +467,9 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
     return True
 
-  def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> Union[cst.ClassDef, cst.CSTNode]:
+  def leave_ClassDef(
+    self, original_node: cst.ClassDef, updated_node: cst.ClassDef
+  ) -> Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
     """Rewrite class inheritance bases when leaving a class definition.
 
     Updates base classes to inherit from the target framework's base module, or registers
@@ -407,7 +490,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
       # Check for errors bubbled up
       if self.context.current_stmt_errors:
-        msg = "; ".join(self.context.current_stmt_errors)
+        msg = "\n".join(self.context.current_stmt_errors)
         self.context.current_stmt_errors.clear()
         return EscapeHatch.mark_failure(original_node, msg)
 

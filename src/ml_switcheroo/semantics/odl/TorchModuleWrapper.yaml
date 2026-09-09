@@ -12,7 +12,16 @@ std_args:
 variants:
   keras:
     api: keras.layers.TorchModuleWrapper
+    args:
+      kwargs: kwargs
+      module: module
+      name: name
+      output_shape: output_shape
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.TorchModuleWrapper
+    args: {}
 operation: TorchModuleWrapper
 type: function

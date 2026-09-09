@@ -21,13 +21,19 @@ def test_mlx_adapter_properties() -> None:
   adapter.declared_magic_args
   adapter.rng_seed_methods
 
-  with patch("ml_switcheroo.frameworks.mlx.load_definitions", return_value={"test": MagicMock()}):
-    pass
+  with patch(
+    "ml_switcheroo.frameworks.mlx.load_definitions",
+    return_value={"Linear": MagicMock(), "Conv2d": MagicMock()},
+  ):
+    assert "Linear" in adapter.definitions
 
   with patch.dict("sys.modules", {"mlx": None, "mlx.core": None}):
     adapter.convert([1, 2])
 
-  with patch.dict("sys.modules", {"mlx.core": MagicMock()}):
+  mock_mlx = MagicMock()
+  mock_core = MagicMock()
+  mock_mlx.core = mock_core
+  with patch.dict("sys.modules", {"mlx": mock_mlx, "mlx.core": mock_core}):
     import mlx.core as mx
 
     mx.array.return_value = "tensor"

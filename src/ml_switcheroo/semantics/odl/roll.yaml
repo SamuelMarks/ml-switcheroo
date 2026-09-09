@@ -1,21 +1,37 @@
-description: Rolls array elements along a specified axis. Array elements that roll
-  beyond the last position are re-introduced at the first position. Array elements
-  that roll beyond the first position are re-introduced at the last position.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: shift
-  type: Union[int, Tuple[int, Ellipsis]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: axis
-  type: Optional[Union[int, Tuple[int, Ellipsis]]]
-variants:
-  dask:
-    api: dask.array.roll
 operation: roll
-type: function
+description: roll(input, shifts, dims=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: shifts
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dims
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: ()
+variants:
+  torch:
+    api: torch.roll
+    args:
+      input: input
+      shifts: shifts
+  jax:
+    api: jax.numpy.roll
+    args:
+      a: a
+      shift: shift
+  mlx:
+    api: mlx.core.roll
+    args:
+      a: a
+      shift: shift
+  keras:
+    api: keras.ops.roll
+    args:
+      x: x
+      shift: shift

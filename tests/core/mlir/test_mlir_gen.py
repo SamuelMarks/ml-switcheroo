@@ -487,3 +487,114 @@ def test_convert_return_with_operands() -> None:
   res: typing.Any = gen._convert_return(op)
   assert isinstance(res.body[0], cst.Return)
   assert res.body[0].value is not None
+
+
+def test_gen_expressions_and_statements_missing_branches() -> None:
+  """Test edge cases and branches in expression and statement generation."""
+  from ml_switcheroo.core.mlir.cst import TypeNode
+
+  gen = DummyGenerator()
+
+  # 1. _parse_keywords with list value (line 50)
+  op_list = OperationNode(
+    name="sw.op",
+    operands=[],
+    attributes=[AttributeNode(name="arg_keywords", value=['"k1"', '"k2"'])],
+    results=[],
+    regions=[],
+  )
+  assert gen._parse_keywords(op_list) == ["k1", "k2"]
+
+  # 2. _parse_keywords with non-string/non-list value and subsequent attribute (54->46)
+  op_non_list = OperationNode(
+    name="sw.op",
+    operands=[],
+    attributes=[
+      AttributeNode(name="arg_keywords", value=typing.cast(typing.Any, 123)),
+      AttributeNode(name="other", value="ignored"),
+    ],
+    results=[],
+    regions=[],
+  )
+  assert gen._parse_keywords(op_non_list) == []
+
+  # 3. _expr_sw_op with empty keyword string (166->169)
+  op_call = OperationNode(
+    name="sw.op",
+    operands=[ValueNode(name="%x"), ValueNode(name="%y")],
+    attributes=[
+      AttributeNode(name="type", value='"torch.add"'),
+      AttributeNode(name="arg_keywords", value='["", "other"]'),
+    ],
+    results=[],
+    regions=[],
+  )
+  call_node = gen._expr_sw_op(op_call)
+  assert isinstance(call_node, cst.Call)
+  assert call_node.args[0].keyword is None
+  assert call_node.args[1].keyword is not None
+
+  # 4. _convert_import with missing names/aliases and empty fallback (103->105, 105->110)
+  op_empty_import = OperationNode(
+    name="sw.import",
+    operands=[],
+    attributes=[],
+    results=[],
+    regions=[],
+  )
+  pass_stmt = gen._convert_import(op_empty_import)
+  assert isinstance(pass_stmt.body[0], cst.Pass)
+
+  # 4b. _convert_import with module_val set but empty import_aliases (136)
+  op_mod_import = OperationNode(
+    name="sw.import",
+    operands=[],
+    attributes=[AttributeNode(name="module", value='"os"')],
+    results=[],
+    regions=[],
+  )
+  import_stmt = gen._convert_import(op_mod_import)
+  assert isinstance(import_stmt.body[0], cst.Import)
+
+  # 5. _convert_class_def with empty elements in bases_attr (179->177)
+  op_class = OperationNode(
+    name="sw.class",
+    operands=[],
+    attributes=[
+      AttributeNode(name="sym_name", value='"MyClass"'),
+      AttributeNode(name="bases", value="[, ,]"),
+    ],
+    results=[],
+    regions=[],
+  )
+  class_node = gen._convert_class_def(op_class)
+  assert isinstance(class_node, cst.ClassDef)
+  assert len(class_node.bases) == 0
+
+  # 6. _convert_func_def with argument type not starting with !sw.type<
+  arg_block = BlockNode(
+    label="^bb0",
+    arguments=[(ValueNode(name="%x"), TypeNode(body="tensor<f32>"))],
+    operations=[],
+  )
+  op_func = OperationNode(
+    name="sw.func",
+    operands=[],
+    attributes=[AttributeNode(name="sym_name", value='"my_func"')],
+    results=[],
+    regions=[RegionNode(blocks=[arg_block])],
+  )
+  func_node = gen._convert_func_def(op_func)
+  assert isinstance(func_node, cst.FunctionDef)
+  assert func_node.params.params[0].annotation is None
+
+  # 6b. _convert_func_def with empty regions (219->237)
+  op_empty_func = OperationNode(
+    name="sw.func",
+    operands=[],
+    attributes=[AttributeNode(name="sym_name", value='"empty_func"')],
+    results=[],
+    regions=[],
+  )
+  func_empty_node = gen._convert_func_def(op_empty_func)
+  assert isinstance(func_empty_node, cst.FunctionDef)

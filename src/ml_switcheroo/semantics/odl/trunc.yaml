@@ -1,14 +1,24 @@
-description: Rounds each element ``x_i`` of the input array ``x`` to the nearest integer-valued
-  number that is closer to zero than ``x_i``.
+operation: trunc
+description: trunc(input, *, out=None) -> Tensor
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x
-  type: array
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
-  dask:
-    api: dask.array.trunc
   torch:
     api: torch.trunc
-operation: trunc
-type: function
+    args:
+      input: input
+  jax:
+    api: jax.numpy.trunc
+    args:
+      x: x
+  keras:
+    api: keras.ops.trunc
+    args:
+      x: x

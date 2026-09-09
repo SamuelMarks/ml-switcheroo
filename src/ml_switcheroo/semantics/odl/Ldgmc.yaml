@@ -1,0 +1,4 @@
+operation: Ldgmc
+variants:
+  nvidia_sass:
+    api: LDGMC

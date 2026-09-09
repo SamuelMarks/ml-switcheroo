@@ -1,14 +1,22 @@
 description: Creates a criterion that optimizes a multi-class classification hinge
 std_args:
-- p
-- margin
-- weight
-- size_average
-- reduce
-- reduction
-- __constants__
+- name: p
+  type: Any
+- name: margin
+  type: Any
+- name: weight
+  type: Any
+- name: size_average
+  type: Any
+- name: reduce
+  type: Any
+- name: reduction
+  type: Any
+- name: __constants__
+  type: Any
 type: class
 operation: MultiMarginLoss
 variants:
   torch:
     api: torch.nn.MultiMarginLoss
+    args: {}

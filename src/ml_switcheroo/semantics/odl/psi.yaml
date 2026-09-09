@@ -5,3 +5,10 @@ operation: psi
 variants:
   latex_dsl:
     api: latex.Psi
+    args: {}
+  flax_nnx:
+    api: jax.numpy.pi
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,15 @@
+operation: scaled_dot_product_attention
+description: scaled_dot_product_attention(query, key, value, attn_mask=None, dropout_p=0.0,
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.nn.functional.scaled_dot_product_attention
+    args: {}

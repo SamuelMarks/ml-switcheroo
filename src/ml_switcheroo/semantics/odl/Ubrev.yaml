@@ -1,0 +1,4 @@
+operation: Ubrev
+variants:
+  nvidia_sass:
+    api: UBREV

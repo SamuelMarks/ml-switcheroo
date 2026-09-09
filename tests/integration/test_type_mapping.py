@@ -26,33 +26,19 @@ def reload_plugins() -> None:
 def run_transpile(code: str, target: str) -> str:
   """Runs transpile."""
   mgr = SemanticsManager()
-  mgr.update_definition(
-    "CastFloat",
-    {
-      "variants": {"torch": {"api": "float"}, "jax": {"api": "astype", "requires_plugin": "type_methods"}},
-      "metadata": {"target_type": "Float32"},
-      "std_args": ["x"],
-    },
-  )
+
   mgr._reverse_index["torch.Tensor.float"] = ("CastFloat", mgr.data["CastFloat"])
-  mgr.update_definition(
-    "Float32",
-    {
-      "variants": {
-        "jax": {"api": "jax.numpy.float32"},
-        "numpy": {"api": "numpy.float32"},
-        "keras": {"api": "numpy.float32"},
-      }
-    },
-  )
   mgr._reverse_index["torch.float32"] = ("Float32", mgr.data["Float32"])
+
   mgr._providers = {}
   mgr._providers["keras"] = {SemanticTier.ARRAY_API: {"root": "numpy", "sub": None, "alias": "np"}}
   mgr._source_registry["torch.float32"] = ("torch", SemanticTier.ARRAY_API)
   mgr._key_origins["Float32"] = SemanticTier.ARRAY_API.value
+
   if target not in mgr.framework_configs:
     mgr.framework_configs[target] = {}
   mgr.framework_configs[target]["plugin_traits"] = PluginTraits(has_numpy_compatible_arrays=True)
+
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)
   engine = ASTEngine(semantics=mgr, config=cfg)
   res: ConversionResult = engine.run(code)

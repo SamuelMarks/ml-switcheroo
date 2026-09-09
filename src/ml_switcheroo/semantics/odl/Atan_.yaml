@@ -1,0 +1,12 @@
+operation: Atan_
+description: In-place version of Atan.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.atan_
+    args:
+      input: input

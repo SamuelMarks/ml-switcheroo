@@ -1,0 +1,4 @@
+operation: Ublkpf
+variants:
+  nvidia_sass:
+    api: UBLKPF

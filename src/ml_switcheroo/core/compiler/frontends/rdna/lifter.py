@@ -124,6 +124,8 @@ class RdnaLifter:
             if previous_node_id:
               graph.edges.append(LogicalEdge(source=previous_node_id, target="output"))
             seen_ids.add("output")
+        else:
+          pass
 
       if current_block_id is not None and isinstance(node, RdnaInstruction):
         current_instructions.append(node)

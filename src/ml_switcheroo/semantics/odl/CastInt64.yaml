@@ -1,0 +1,12 @@
+operation: CastInt64
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: '{input}.astype(jax.numpy.int64)'
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: '{input}.astype(jax.numpy.int64)'
+    pack_as: Tuple
+    required_imports: []

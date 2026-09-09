@@ -1,0 +1,13 @@
+operation: T
+variants:
+  flax_nnx:
+    api: nnx.transforms.iteration.T
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.t
+    args:
+      key: key
+      df: df

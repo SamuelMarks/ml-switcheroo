@@ -1,0 +1,8 @@
+operation: Multinomial
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.multinomial
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

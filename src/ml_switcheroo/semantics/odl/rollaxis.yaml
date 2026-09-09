@@ -1,10 +1,22 @@
-description: Auto-generated mapping for rollaxis.
-std_args:
-- a
-- axis
-- start
-variants:
-  dask:
-    api: dask.array.rollaxis
 operation: rollaxis
-type: function
+description: Roll the specified axis to a given position.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: start
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+variants:
+  jax:
+    api: jax.numpy.rollaxis
+    args:
+      a: a
+      axis: axis

@@ -8,6 +8,9 @@ definitions alongside "Config-First" JSONs.
 import ml_switcheroo
 import typing
 
+if typing.TYPE_CHECKING:
+  import ml_switcheroo.semantics.manager
+
 
 from ml_switcheroo.frameworks.base import (
   available_frameworks,
@@ -38,6 +41,23 @@ class RegistryLoader:
     """
     self._hydrate_adapters()
     self._hydrate_plugins()
+    self.index_variants()
+
+  def index_variants(self) -> None:
+    """Index operation variants into hash maps for O(1) lookups.
+
+    Returns:
+        None
+    """
+    if hasattr(self.mgr, "_variant_cache"):
+      self.mgr._variant_cache.clear()
+      for abstract_id, details in self.mgr.data.items():
+        if isinstance(details, dict):
+          variants = details.get("variants", {})
+          if isinstance(variants, dict):
+            for fw_name, variant in variants.items():
+              if variant is not None:
+                self.mgr._variant_cache[(abstract_id, fw_name)] = variant
 
   def _hydrate_adapters(self) -> None:
     """Iterate over registered FrameworkAdapters to extract Traits and Mappings.

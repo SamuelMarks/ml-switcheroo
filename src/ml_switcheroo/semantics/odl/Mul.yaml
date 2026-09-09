@@ -1,17 +1,38 @@
 operation: mul
 description: mul(input, other, *, out=None) -> Tensor
 std_args:
-- input
-- other
-- out
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
-  keras:
-    requires_plugin: jax_decompose
-    api: ''
-    args: {}
-  sass:
-    api: FMUL
-    args: {}
   torch:
     api: torch.mul
-type: function
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.lax.mul
+    args:
+      x: x
+      y: y
+  rdna:
+    api: v_mul_f32
+    args: {}
+  nvidia_sass:
+    api: FMUL
+    args: {}
+  mlx:
+    api: mlx.core.multiply
+    args: {}
+  keras:
+    api: keras.ops.multiply
+    args: {}

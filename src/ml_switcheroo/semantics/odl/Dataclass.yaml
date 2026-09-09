@@ -1,0 +1,25 @@
+operation: Dataclass
+variants:
+  paxml:
+    api: dataclasses.dataclass
+    dispatch_rules: []
+    missing_message: PaxML uses standard dataclasses or specific base layers; direct
+      mapping to Pytree registry varies.
+    pack_as: Tuple
+    required_imports:
+    - import dataclasses
+  flax_nnx:
+    api: flax.nnx.dataclass
+    args:
+      cls: cls
+      eq: eq
+      init: init
+      kw_only: kw_only
+      match_args: match_args
+      order: order
+      slots: slots
+      unsafe_hash: unsafe_hash
+      weakref_slot: weakref_slot
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

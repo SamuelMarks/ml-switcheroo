@@ -1,0 +1,12 @@
+operation: ColumnStack
+variants:
+  paxml:
+    api: jax.numpy.column_stack
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.column_stack
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

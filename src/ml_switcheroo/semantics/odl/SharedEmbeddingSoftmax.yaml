@@ -1,0 +1,7 @@
+operation: SharedEmbeddingSoftmax
+variants:
+  paxml:
+    api: praxis.layers.SharedEmbeddingSoftmax
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

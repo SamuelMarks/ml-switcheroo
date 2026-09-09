@@ -1,0 +1,5 @@
+operation: SEndpgmSaved
+variants:
+  rdna:
+    api: s_endpgm_saved
+    description: Auto-mapped instruction S_ENDPGM_SAVED

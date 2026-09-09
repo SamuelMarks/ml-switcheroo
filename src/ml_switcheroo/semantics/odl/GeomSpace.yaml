@@ -1,0 +1,37 @@
+operation: geomspace
+description: Return numbers spaced evenly on a log scale (a geometric progression).
+std_args:
+- name: start
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: stop
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: num
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '50'
+- name: endpoint
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+variants:
+  jax:
+    api: jax.numpy.geomspace
+    args:
+      start: start
+      stop: stop

@@ -1,0 +1,7 @@
+operation: CastInt
+variants:
+  nvidia_sass:
+    api: F2I
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

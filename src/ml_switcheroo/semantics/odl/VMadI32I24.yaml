@@ -1,0 +1,5 @@
+operation: VMadI32I24
+variants:
+  rdna:
+    api: v_mad_i32_i24
+    description: Auto-mapped instruction V_MAD_I32_I24

@@ -1,0 +1,25 @@
+operation: KaiserWindow
+variants:
+  paxml:
+    api: jnp.kaiser
+    args:
+      beta: beta
+      periodic: null
+      window_length: M
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.kaiser
+    args:
+      beta: beta
+      periodic: null
+      window_length: M
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.kaiser
+    args:
+      M: M
+      beta: beta

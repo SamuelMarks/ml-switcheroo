@@ -1,0 +1,24 @@
+operation: take_along_axis
+variants:
+  flax_nnx:
+    api: jax.numpy.take_along_axis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.take_along_axis
+    args:
+      a: a
+      indices: indices
+      axis: axis
+      arr: arr
+  mlx:
+    api: mlx.core.take_along_axis
+    args:
+      a: a
+      indices: indices
+  keras:
+    api: keras.ops.take_along_axis
+    args:
+      x: x
+      indices: indices

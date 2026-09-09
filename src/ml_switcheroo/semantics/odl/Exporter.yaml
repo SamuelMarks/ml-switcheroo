@@ -1,0 +1,23 @@
+operation: Exporter
+description: 'exporter(file: str, fun: collections.abc.Callable, *, shapeless: bool
+  = False) -> mlx.core.FunctionExporter'
+std_args:
+- name: file
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: fun
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: shapeless
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  mlx:
+    api: mlx.core.exporter
+    args:
+      file: file
+      fun: fun

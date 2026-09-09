@@ -1,0 +1,20 @@
+operation: irfft
+variants:
+  flax_nnx:
+    api: jax.numpy.fft.irfft
+    args:
+      a: a
+      axis: axis
+      n: n
+      norm: norm
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.core.fft.irfft
+    args:
+      a: a
+  keras:
+    api: keras.ops.irfft
+    args:
+      x: x

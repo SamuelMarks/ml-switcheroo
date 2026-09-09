@@ -1,0 +1,30 @@
+operation: PermuteCopy
+variants:
+  numpy:
+    api: numpy.transpose
+    args:
+      dims: axes
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: jax.numpy.transpose
+    args:
+      dims: axes
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.transpose
+    args:
+      dims: perm
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.transpose
+    args:
+      dims: axes
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

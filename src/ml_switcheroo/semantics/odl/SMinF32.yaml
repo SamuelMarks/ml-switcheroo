@@ -1,0 +1,5 @@
+operation: SMinF32
+variants:
+  rdna:
+    api: s_min_f32
+    description: Auto-mapped instruction S_MIN_F32

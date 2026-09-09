@@ -1,0 +1,37 @@
+operation: reduce_window_shape_tuple
+description: Auto-generated mapping for reduce_window_shape_tuple.
+std_args:
+- name: operand_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: window_dimensions
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: window_strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: base_dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: window_dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.reduce_window_shape_tuple
+    args:
+      operand_shape: operand_shape
+      window_dimensions: window_dimensions
+      window_strides: window_strides
+      padding: padding

@@ -1,17 +1,21 @@
-description: Zero-padding layer for 2D input.
-op_type: class
+operation: ZeroPadding2D
+description: Zero-padding layer for 2D input (e.g. picture).
 std_args:
-- default:
-  - 1
-  - 1
-  is_variadic: false
+- name: padding
   kind: positional_or_keyword
-  name: padding
-  type: Tuple[int, int]
+  is_variadic: false
+  type: tuple
+  default: (1, 1)
+- name: data_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   keras:
     api: keras.layers.ZeroPadding2D
-  tensorflow:
-    api: tf.keras.layers.ZeroPadding2D
-operation: ZeroPadding2d
-type: function
+    args: {}

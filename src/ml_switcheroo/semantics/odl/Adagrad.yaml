@@ -1,32 +1,26 @@
 description: 'Auto-discovered via Consensus (Score: 4.0)'
 std_args:
-- eps
-- initial_accumulator_value
-- lr
+- name: eps
+  type: Any
+- name: initial_accumulator_value
+  type: Any
+- name: lr
+  type: Any
 type: function
 operation: Adagrad
 variants:
   keras:
     api: keras.optimizers.Adagrad
-    args:
-      learning_rate: learning_rate
-      initial_accumulator_value: initial_accumulator_value
-      epsilon: epsilon
-      ema_momentum: ema_momentum
-      name: name
-      gradient_accumulation_steps: gradient_accumulation_steps
-      weight_decay: weight_decay
-      loss_scale_factor: loss_scale_factor
-      ema_overwrite_frequency: ema_overwrite_frequency
-      clipvalue: clipvalue
-      use_ema: use_ema
-      clipnorm: clipnorm
-      global_clipnorm: global_clipnorm
-      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   mlx:
     api: mlx.optimizers.Adagrad
     args:
-      learning_rate: learning_rate
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   optax_shim:
     api: optax.adagrad
     args:
@@ -35,32 +29,27 @@ variants:
   flax_nnx:
     api: optax.adagrad
     args:
-      learning_rate: learning_rate
-      initial_accumulator_value: initial_accumulator_value
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.optim.Adagrad
     args:
-      initial_accumulator_value: initial_accumulator_value
-      weight_decay: weight_decay
+      epsilon: eps
+      learning_rate: lr
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.adagrad
     args:
-      learning_rate: learning_rate
-      initial_accumulator_value: initial_accumulator_value
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.optimizers.Adagrad
-    args:
-      learning_rate: learning_rate
-      initial_accumulator_value: initial_accumulator_value
-      epsilon: epsilon
-      ema_momentum: ema_momentum
-      name: name
-      gradient_accumulation_steps: gradient_accumulation_steps
-      weight_decay: weight_decay
-      loss_scale_factor: loss_scale_factor
-      ema_overwrite_frequency: ema_overwrite_frequency
-      clipvalue: clipvalue
-      use_ema: use_ema
-      clipnorm: clipnorm
-      global_clipnorm: global_clipnorm
-      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

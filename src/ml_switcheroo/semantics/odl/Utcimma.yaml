@@ -1,0 +1,4 @@
+operation: Utcimma
+variants:
+  nvidia_sass:
+    api: UTCIMMA

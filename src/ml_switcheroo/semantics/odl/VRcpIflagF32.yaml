@@ -1,0 +1,5 @@
+operation: VRcpIflagF32
+variants:
+  rdna:
+    api: v_rcp_iflag_f32
+    description: Auto-mapped instruction V_RCP_IFLAG_F32

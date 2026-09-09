@@ -1,0 +1,5 @@
+operation: DsXorRtnB64
+variants:
+  rdna:
+    api: ds_xor_rtn_b64
+    description: Auto-mapped instruction DS_XOR_RTN_B64

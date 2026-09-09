@@ -1,0 +1,38 @@
+operation: fractional_max_pool2d_with_indices
+description: fractional_max_pool2d(input, kernel_size, output_size=None, output_ratio=None,
+  return_indices=False, _random_samples=None)
+std_args:
+- name: kernel_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: output_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: output_ratio
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '''```(None)```'''
+- name: return_indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: _random_samples
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.nn.functional.fractional_max_pool2d_with_indices
+    args:
+      kernel_size: kernel_size
+      input: input

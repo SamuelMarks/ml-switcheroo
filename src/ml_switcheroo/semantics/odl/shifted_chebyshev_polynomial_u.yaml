@@ -1,0 +1,21 @@
+operation: shifted_chebyshev_polynomial_u
+description: shifted_chebyshev_polynomial_u(input, n, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: n
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.special.shifted_chebyshev_polynomial_u
+    args:
+      input: input
+      n: n

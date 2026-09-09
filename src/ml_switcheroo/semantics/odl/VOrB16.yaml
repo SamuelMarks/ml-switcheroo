@@ -1,0 +1,5 @@
+operation: VOrB16
+variants:
+  rdna:
+    api: v_or_b16
+    description: Auto-mapped instruction V_OR_B16

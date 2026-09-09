@@ -1,0 +1,4 @@
+operation: Bra
+variants:
+  nvidia_sass:
+    api: BRA

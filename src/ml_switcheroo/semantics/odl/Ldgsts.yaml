@@ -1,0 +1,4 @@
+operation: Ldgsts
+variants:
+  nvidia_sass:
+    api: LDGSTS

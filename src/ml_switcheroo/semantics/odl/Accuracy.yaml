@@ -1,5 +1,14 @@
 description: Auto-generated mapping for Accuracy.
-std_args: []
+std_args:
+- name: name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''accuracy'''
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
   keras:
     api: keras.metrics.Accuracy

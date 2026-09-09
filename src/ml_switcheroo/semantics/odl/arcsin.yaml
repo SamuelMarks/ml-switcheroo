@@ -1,10 +1,28 @@
-description: LaTeX \arcsin macro.
-std_args:
-- kwargs
-variants:
-  latex_dsl:
-    api: latex.arcsin
-  dask:
-    api: dask.array.arcsin
 operation: arcsin
-type: function
+description: 'arcsin(input: Tensor, *, out: Optional[Tensor]) -> Tensor'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.arcsin
+    args:
+      input: input
+  jax:
+    api: jax.numpy.asin
+    args:
+      x: x
+  mlx:
+    api: mlx.core.arcsin
+    args:
+      a: a
+  keras:
+    api: keras.ops.arcsin
+    args:
+      x: x

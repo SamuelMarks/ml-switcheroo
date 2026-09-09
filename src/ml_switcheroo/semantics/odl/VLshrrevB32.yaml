@@ -1,0 +1,5 @@
+operation: VLshrrevB32
+variants:
+  rdna:
+    api: v_lshrrev_b32
+    description: Auto-mapped instruction V_LSHRREV_B32

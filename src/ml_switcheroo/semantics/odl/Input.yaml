@@ -43,5 +43,6 @@ std_args:
 variants:
   html_dsl:
     api: html.input
+    args: {}
 operation: Input
 type: function

@@ -1,23 +1,35 @@
-description: Calculates the maximum value of the input array ``x``.
+operation: max
+description: max(input, *, out=None) -> Tensor
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: axis
-  type: Optional[Union[int, Tuple[int, Ellipsis]]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: keepdims
-  type: bool
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
-  latex_dsl:
-    api: latex.max
-  dask:
-    api: dask.array.max
   torch:
     api: torch.max
-operation: max
-type: function
+    args:
+      input: input
+  jax:
+    api: jax.lax.max
+    args:
+      x: x
+      y: y
+  mlx:
+    api: mlx.core.max
+    args:
+      a: a
+  rdna:
+    api: v_max_f32
+    args: {}
+  nvidia_sass:
+    api: FMNMX
+    args: {}
+  keras:
+    api: keras.ops.max
+    args:
+      x: x

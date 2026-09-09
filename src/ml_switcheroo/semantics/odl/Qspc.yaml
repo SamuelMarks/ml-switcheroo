@@ -1,0 +1,4 @@
+operation: Qspc
+variants:
+  nvidia_sass:
+    api: QSPC

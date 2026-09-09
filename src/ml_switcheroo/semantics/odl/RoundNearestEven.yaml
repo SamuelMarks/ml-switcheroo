@@ -1,0 +1,9 @@
+operation: RoundNearestEven
+variants:
+  stablehlo:
+    api: stablehlo.round_nearest_even
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

@@ -1,0 +1,8 @@
+operation: R
+variants:
+  flax_nnx:
+    api: nnx.transforms.compilation.R
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

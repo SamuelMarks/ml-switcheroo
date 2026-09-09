@@ -1,0 +1,20 @@
+operation: clone
+description: clone(input, *, memory_format=torch.preserve_format) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: memory_format
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.clone
+    args:
+      input: input
+  jax:
+    api: jax.random.clone
+    args:
+      key: key

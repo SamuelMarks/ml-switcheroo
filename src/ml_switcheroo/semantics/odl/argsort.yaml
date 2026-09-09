@@ -1,23 +1,39 @@
-description: Returns the indices that sort an array ``x`` along a specified axis.
+operation: argsort
+description: argsort(input, dim=-1, descending=False, stable=False) -> Tensor
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
+  is_variadic: false
+  type: Tensor
+- name: dim
   kind: positional_or_keyword
-  name: axis
-  type: int
-- is_variadic: false
+  is_variadic: false
+  type: Any
+  default: '-1'
+- name: descending
   kind: positional_or_keyword
-  name: descending
-  type: bool
-- is_variadic: false
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: stable
   kind: positional_or_keyword
-  name: stable
-  type: bool
+  is_variadic: false
+  type: Any
+  default: 'False'
 variants:
   torch:
     api: torch.argsort
-operation: argsort
-type: function
+    args:
+      input: input
+  jax:
+    api: jax.numpy.argsort
+    args:
+      a: a
+  mlx:
+    api: mlx.core.argsort
+    args:
+      a: a
+  keras:
+    api: keras.ops.argsort
+    args:
+      x: x

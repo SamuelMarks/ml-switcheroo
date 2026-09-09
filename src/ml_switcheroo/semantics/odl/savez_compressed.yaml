@@ -1,0 +1,20 @@
+operation: savez_compressed
+description: 'savez_compressed(file: Union[file, str, pathlib.Path], *args, **kwargs)'
+std_args:
+- name: file
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  mlx:
+    api: mlx.core.savez_compressed
+    args:
+      file: file

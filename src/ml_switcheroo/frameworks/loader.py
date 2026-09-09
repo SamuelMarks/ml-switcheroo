@@ -1,7 +1,7 @@
 """Framework Definition Loader.
 
 This module provides utilities to load static operation definitions from JSON files
-located in `src/ml_switcheroo/frameworks/definitions/`. It utilizes caching to
+located in `ml_framework_snapshots.snapshots`. It utilizes caching to
 ensure efficient access during runtime and discovery.
 """
 
@@ -10,8 +10,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Dict
 from ml_switcheroo_ir.schema.ghost import StandardMap
-
-DEFINITIONS_DIR = Path(__file__).parent / "definitions"
+import importlib.resources
 
 
 @lru_cache(maxsize=None)
@@ -29,11 +28,11 @@ def load_definitions(framework: str) -> Dict[str, StandardMap]:
       Returns an empty dict if the definition file does not exist.
 
   """
-  file_path = DEFINITIONS_DIR / f"{framework}.json"
-  if not file_path.exists():
+  file_path = importlib.resources.files("ml_framework_snapshots.snapshots").joinpath(f"{framework}.json")
+  if not file_path.is_file():
     return {}
   try:
-    with open(file_path, "r", encoding="utf-8") as f:
+    with file_path.open("r", encoding="utf-8") as f:
       raw_data = json.load(f)
     return {op_name: StandardMap.model_validate(op_def) for op_name, op_def in raw_data.items()}
   except (json.JSONDecodeError, OSError) as e:
@@ -59,4 +58,8 @@ def get_definitions_path(framework: str) -> Path:
       Path: The absolute path to the intended JSON file.
 
   """
-  return DEFINITIONS_DIR / f"{framework}.json"
+  # Fallback to local path representation for testing/compatibility
+  try:
+    return Path(str(importlib.resources.files("ml_framework_snapshots.snapshots").joinpath(f"{framework}.json")))
+  except Exception:
+    return Path(f"{framework}.json")

@@ -1,0 +1,5 @@
+operation: VCmpxNeI16
+variants:
+  rdna:
+    api: v_cmpx_ne_i16
+    description: Auto-mapped instruction V_CMPX_NE_I16

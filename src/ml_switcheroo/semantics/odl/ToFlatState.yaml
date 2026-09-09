@@ -1,0 +1,7 @@
+operation: ToFlatState
+variants:
+  flax_nnx:
+    api: flax.nnx.to_flat_state
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

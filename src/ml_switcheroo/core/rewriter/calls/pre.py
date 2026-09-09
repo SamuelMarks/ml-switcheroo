@@ -4,7 +4,7 @@ Handles functional unwrapping, plugin claims, and lifecycle method stripping.
 Updated to remove dependencies on deleted legacy modules.
 """
 
-from typing import Tuple, Optional, TYPE_CHECKING, Set
+from typing import Tuple, Optional, TYPE_CHECKING, Set, cast
 
 import libcst as cst
 
@@ -146,7 +146,7 @@ def handle_pre_checks(
         else:
           new_args = []
 
-        result_node = updated.with_changes(func=receiver, args=new_args)
+        result_node: cst.BaseExpression = updated.with_changes(func=receiver, args=new_args)
         log_diff("Functional Unwrap", original, result_node)
         return True, result_node
   else:
@@ -184,9 +184,9 @@ def handle_pre_checks(
     hook = get_hook("unroll_inplace_ops")
     if hook:
       new_node = hook(updated, rewriter.context.hook_context)
-      if new_node != updated:
+      if new_node is not None and new_node != updated:
         log_diff("In-place Unroll", updated, new_node)
-        return True, new_node
+        return True, cast(cst.BaseExpression, new_node)
 
   # 3. Lifecycle Method Handling (Strip/Warn)
   if hasattr(rewriter, "_get_source_lifecycle_lists"):

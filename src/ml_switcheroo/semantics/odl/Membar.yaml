@@ -1,0 +1,4 @@
+operation: Membar
+variants:
+  nvidia_sass:
+    api: MEMBAR

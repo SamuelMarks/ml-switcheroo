@@ -1,0 +1,5 @@
+operation: SWaitcntLgkmcnt
+variants:
+  rdna:
+    api: s_waitcnt_lgkmcnt
+    description: Auto-mapped instruction S_WAITCNT_LGKMCNT

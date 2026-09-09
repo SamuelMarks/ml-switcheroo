@@ -1,0 +1,12 @@
+operation: PutAlongAxis
+variants:
+  paxml:
+    api: jax.numpy.put_along_axis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.put_along_axis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

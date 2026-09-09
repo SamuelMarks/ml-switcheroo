@@ -1,0 +1,5 @@
+operation: SRndneF16
+variants:
+  rdna:
+    api: s_rndne_f16
+    description: Auto-mapped instruction S_RNDNE_F16

@@ -1,0 +1,31 @@
+operation: kron
+description: kron(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.kron
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.kron
+    args:
+      a: a
+      b: b
+  mlx:
+    api: mlx.core.kron
+    args:
+      a: a
+      b: b

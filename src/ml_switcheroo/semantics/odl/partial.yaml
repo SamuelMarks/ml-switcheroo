@@ -1,9 +1,12 @@
 description: The class representing a Python module/class/instance attribute.
 std_args:
-- __slots__
-- kwargs
+- name: __slots__
+  type: Any
+- name: kwargs
+  type: Any
 type: attribute
 operation: partial
 variants:
   torch:
     api: torch.optim.lr_scheduler.partial
+    args: {}

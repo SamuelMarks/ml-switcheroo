@@ -1,0 +1,27 @@
+operation: unpackbits
+description: Auto-generated mapping for unpackbits.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: count
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: bitorder
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''big'''
+variants:
+  jax:
+    api: jax.numpy.unpackbits
+    args:
+      a: a

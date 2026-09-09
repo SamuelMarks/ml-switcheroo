@@ -1,0 +1,5 @@
+operation: SLshl3AddU32
+variants:
+  rdna:
+    api: s_lshl3_add_u32
+    description: Auto-mapped instruction S_LSHL3_ADD_U32

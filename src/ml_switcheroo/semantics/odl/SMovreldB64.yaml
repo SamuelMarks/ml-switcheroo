@@ -1,0 +1,5 @@
+operation: SMovreldB64
+variants:
+  rdna:
+    api: s_movreld_b64
+    description: Auto-mapped instruction S_MOVRELD_B64

@@ -1,0 +1,33 @@
+operation: solve
+description: Returns the solution of a square system of linear equations with a unique
+  solution.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: A
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.solve
+    args:
+      input: input
+      A: A
+  mlx:
+    api: mlx.core.linalg.solve
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.solve
+    args:
+      a: a
+      b: b

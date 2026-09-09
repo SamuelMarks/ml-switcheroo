@@ -1,0 +1,5 @@
+operation: VFractF16
+variants:
+  rdna:
+    api: v_fract_f16
+    description: Auto-mapped instruction V_FRACT_F16

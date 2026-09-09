@@ -1,8 +1,11 @@
 description: Fill the input `Tensor` with values using a Xavier uniform distribution.
 std_args:
-- tensor
-- gain
-- generator
+- name: tensor
+  type: Any
+- name: gain
+  type: Any
+- name: generator
+  type: Any
 type: function
 operation: xavier_uniform_
 variants:

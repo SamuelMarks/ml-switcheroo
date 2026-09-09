@@ -13,9 +13,35 @@ variants:
     args: {}
   tensorflow:
     api: tf.transpose
+    dispatch_rules: []
+    pack_as: Tuple
     pack_to_tuple: perm
-    args: {}
+    required_imports: []
   numpy:
     api: numpy.transpose
+    dispatch_rules: []
+    pack_as: Tuple
     pack_to_tuple: axes
+    required_imports: []
+  rdna:
+    api: global_load_dword
     args: {}
+  nvidia_sass:
+    api: LDG
+    args: {}
+  paxml:
+    api: jnp.transpose
+    dispatch_rules: []
+    pack_as: Tuple
+    pack_to_tuple: axes
+    required_imports: []
+  flax_nnx:
+    api: jnp.transpose
+    dispatch_rules: []
+    pack_as: Tuple
+    pack_to_tuple: axes
+    required_imports: []
+  mlx:
+    api: mlx.core.permute_dims
+    args:
+      a: a

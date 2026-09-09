@@ -13,5 +13,15 @@ std_args:
 variants:
   mlx:
     api: mlx.nn.SinusoidalPositionalEncoding
+    args:
+      cos_first: cos_first
+      dims: dims
+      full_turns: full_turns
+      max_freq: max_freq
+      min_freq: min_freq
+      scale: scale
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: SinusoidalPositionalEncoding
 type: function

@@ -1,0 +1,16 @@
+operation: Rand
+variants:
+  paxml:
+    api: jax.random.uniform
+    dispatch_rules: []
+    pack_as: Tuple
+    pack_to_tuple: shape
+    required_imports: []
+    requires_plugin: inject_prng
+  flax_nnx:
+    api: jax.random.uniform
+    dispatch_rules: []
+    pack_as: Tuple
+    pack_to_tuple: shape
+    required_imports: []
+    requires_plugin: inject_prng

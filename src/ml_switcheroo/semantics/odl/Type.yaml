@@ -1,0 +1,25 @@
+operation: type
+description: type(dtype=None, non_blocking=False, **kwargs) -> str or Tensor
+std_args:
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: non_blocking
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: '**kwargs'
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.Tensor.type
+    args:
+      '**kwargs': '**kwargs'

@@ -1,0 +1,5 @@
+operation: VWritelaneB32
+variants:
+  rdna:
+    api: v_writelane_b32
+    description: Auto-mapped instruction V_WRITELANE_B32

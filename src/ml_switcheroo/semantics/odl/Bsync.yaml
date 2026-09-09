@@ -1,0 +1,4 @@
+operation: Bsync
+variants:
+  nvidia_sass:
+    api: BSYNC

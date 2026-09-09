@@ -1,0 +1,4 @@
+operation: Idp4A
+variants:
+  nvidia_sass:
+    api: IDP4A

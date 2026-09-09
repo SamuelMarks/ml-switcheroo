@@ -1,17 +1,34 @@
-description: Applies the rectified linear unit activation function.
-std_args:
-- x
-- negative_slope
-- max_value
-- threshold
-type: function
 operation: relu
+description: relu(input, inplace=False) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
-  keras:
-    api: keras.activations.relu
-  mlx:
-    api: mlx.nn.ReLU
   torch:
     api: torch.nn.functional.relu
-  tensorflow:
-    api: tf.nn.relu
+    args:
+      input: input
+  mlx:
+    api: mlx.nn.relu
+    args:
+      x: x
+  keras:
+    api: keras.activations.relu
+    args:
+      x: x
+  rdna:
+    api: ; Macro.ReLU
+    args: {}
+  nvidia_sass:
+    api: Macro.ReLU
+    args: {}
+  jax:
+    api: jax.nn.relu
+    args: {}

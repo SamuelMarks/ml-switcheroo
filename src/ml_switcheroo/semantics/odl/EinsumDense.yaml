@@ -16,7 +16,29 @@ std_args:
 variants:
   keras:
     api: keras.layers.EinsumDense
+    args:
+      activation: activation
+      bias_axes: bias_axes
+      bias_constraint: bias_constraint
+      bias_initializer: bias_initializer
+      bias_regularizer: bias_regularizer
+      equation: equation
+      gptq_unpacked_column_size: gptq_unpacked_column_size
+      kernel_constraint: kernel_constraint
+      kernel_initializer: kernel_initializer
+      kernel_regularizer: kernel_regularizer
+      kwargs: kwargs
+      lora_alpha: lora_alpha
+      lora_rank: lora_rank
+      output_shape: output_shape
+      quantization_config: quantization_config
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.EinsumDense
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: EinsumDense
 type: function

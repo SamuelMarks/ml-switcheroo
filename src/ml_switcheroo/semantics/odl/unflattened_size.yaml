@@ -1,0 +1,8 @@
+operation: unflattened_size
+variants:
+  flax_nnx:
+    api: nnx.graph.PytreeNodeImpl.unflatten
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

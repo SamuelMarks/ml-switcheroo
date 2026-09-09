@@ -18,7 +18,7 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaSGPR,
   RdnaVGPR,
 )
-from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser, RdnaTransformer
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaLexer, RdnaParser, RdnaTransformer
 
 
 def test_parser_empty() -> None:
@@ -218,3 +218,40 @@ def test_param_children() -> None:
   res: RdnaDirective = transformer.directive([Token("DOT", "."), Token("IDENTIFIER", "my_dir"), [DummyToken()]])
   assert res.name == "my_dir"
   assert "bc" in getattr(res, "params")[0]
+
+
+def test_rdna_tokenize_lexer_state_variants() -> None:
+  """Test RdnaLexer with object having text attribute and arbitrary object."""
+
+  class ObjWithText:
+    """Docstring."""
+
+    text = "v_add_f32 v0, v1, v2;\n"
+
+  lexer = RdnaLexer(None)
+  tokens1 = list(lexer.lex(ObjWithText()))
+  assert len(tokens1) > 0
+
+  class ObjWithoutText:
+    """Docstring."""
+
+    def __str__(self) -> str:
+      """Return string representation."""
+      return "v_add_f32 v0, v1, v2;\n"
+
+  tokens2 = list(lexer.lex(ObjWithoutText()))
+  assert len(tokens2) > 0
+
+
+def test_directive_single_non_list_param() -> None:
+  """Test directive transformation with a single non-list parameter."""
+  transformer: RdnaTransformer = RdnaTransformer()
+  directive: RdnaDirective = transformer.directive([Token("DOT", "."), Token("IDENTIFIER", "my_dir"), "single_param"])
+  assert directive.params == ["single_param"]
+
+
+def test_module_eof_trivia_empty_stmts_branch() -> None:
+  """Test module transformation with EOF_TRIVIA and subsequent None element."""
+  transformer: RdnaTransformer = RdnaTransformer()
+  mod: RdnaModule = transformer.module([Token("EOF_TRIVIA", ""), None])
+  assert len(mod.statements) == 0

@@ -1,0 +1,36 @@
+operation: GlobalMaxPool3D
+variants:
+  keras:
+    api: keras.layers.GlobalMaxPool3D
+    args:
+      data_format: data_format
+      keepdims: keepdims
+      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.AdaptiveMaxPool3d
+    dispatch_rules: []
+    inject_args:
+      output_size:
+      - 1
+      - 1
+      - 1
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.GlobalMaxPool3D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: output_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: return_indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'

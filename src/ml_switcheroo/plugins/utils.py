@@ -6,7 +6,7 @@ It relies on the `HookContext` to dynamically resolve framework identities.
 """
 
 import libcst as cst
-from typing import Optional
+from typing import Optional, Union
 
 from ml_switcheroo.core.hooks import HookContext
 
@@ -24,7 +24,7 @@ def create_dotted_name(name_str: str) -> cst.BaseExpression:
 
   """
   parts = name_str.split(".")
-  node = cst.Name(parts[0])
+  node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
   for part in parts[1:]:
     node = cst.Attribute(value=node, attr=cst.Name(part))
   return node

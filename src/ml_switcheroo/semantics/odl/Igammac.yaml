@@ -1,0 +1,26 @@
+operation: igammac
+description: igammac(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.igammac
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.lax.igammac
+    args:
+      a: a
+      x: x

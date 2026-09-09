@@ -1,0 +1,5 @@
+operation: STruncF16
+variants:
+  rdna:
+    api: s_trunc_f16
+    description: Auto-mapped instruction S_TRUNC_F16

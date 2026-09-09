@@ -18,7 +18,72 @@ operation: GRUCell
 variants:
   keras:
     api: keras.layers.GRUCell
+    args:
+      activation: activation
+      bias_constraint: bias_constraint
+      bias_initializer: bias_initializer
+      bias_regularizer: bias_regularizer
+      dropout: dropout
+      kernel_constraint: kernel_constraint
+      kernel_initializer: kernel_initializer
+      kernel_regularizer: kernel_regularizer
+      kwargs: kwargs
+      recurrent_activation: recurrent_activation
+      recurrent_constraint: recurrent_constraint
+      recurrent_dropout: recurrent_dropout
+      recurrent_initializer: recurrent_initializer
+      recurrent_regularizer: recurrent_regularizer
+      reset_after: reset_after
+      seed: seed
+      units: units
+      use_bias: use_bias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.nn.GRUCell
+    args:
+      bias: bias
+      dtype: dtype
+      hidden_size: hidden_size
+      input_size: input_size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.GRUCell
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.GRUCell
+    args:
+      bias: null
+      hidden_size: hidden_dims
+      input_size: input_dims
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.nn.recurrent.GRUCell
+    args:
+      activation_fn: activation_fn
+      bias_init: bias_init
+      bias_metadata: bias_metadata
+      carry_init: carry_init
+      dtype: dtype
+      gate_fn: gate_fn
+      hidden_features: hidden_features
+      in_features: in_features
+      keep_rngs: keep_rngs
+      kernel_init: kernel_init
+      kernel_metadata: kernel_metadata
+      param_dtype: param_dtype
+      promote_dtype: promote_dtype
+      recurrent_kernel_init: recurrent_kernel_init
+      recurrent_kernel_metadata: recurrent_kernel_metadata
+      rngs: rngs
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

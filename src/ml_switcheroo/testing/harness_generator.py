@@ -8,6 +8,7 @@ import json
 import inspect
 import textwrap
 from pathlib import Path
+from typing import Union
 
 import libcst as cst
 from ml_switcheroo.testing.harness_generator_template import get_harness_skeleton
@@ -83,7 +84,7 @@ class HarnessInjector(cst.CSTTransformer):
         insert_idx = i
         break
 
-    nodes = []
+    nodes: list[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
     if self.imports_block.strip():
       nodes.extend(cst.parse_module(self.imports_block).body)
     if self.init_helpers_block.strip():

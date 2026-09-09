@@ -1,0 +1,7 @@
+operation: share_memory_
+description: Moves the underlying storage to shared memory.
+std_args: []
+variants:
+  torch:
+    api: torch.Tensor.share_memory_
+    args: {}

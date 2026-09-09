@@ -1,0 +1,12 @@
+operation: Atanh_
+description: In-place version of Atanh.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.atanh_
+    args:
+      input: input

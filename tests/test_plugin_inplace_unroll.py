@@ -77,3 +77,27 @@ def test_unroll_inplace_ops_functional_fallback() -> None:
   assert isinstance(result, cst.Call)
   assert getattr(result.func, "attr", None) is not None
   assert getattr(result.func.attr, "value", None) == "relu"
+
+
+def test_unroll_inplace_ops_expr_node() -> None:
+  """Test unroll_inplace_ops with Expr nodes."""
+  ctx: MagicMock = MagicMock(spec=HookContext)
+
+  # Expr without a call
+  non_call_expr: cst.Expr = cst.Expr(value=cst.Name("x"))
+  assert unroll_inplace_ops(non_call_expr, ctx) is non_call_expr
+
+  # Non-Expr and Non-Call node
+  pass_node = cst.Pass()
+  assert unroll_inplace_ops(pass_node, ctx) is pass_node
+
+  # Expr with a method call
+  call_node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("relu_")), args=[])
+  expr_node = cst.Expr(value=call_node)
+  result = unroll_inplace_ops(expr_node, ctx)
+  assert isinstance(result, cst.Expr)
+  assert getattr(result.value.func.attr, "value", None) == "relu"
+
+  # Non-Attribute func fallback
+  non_attr_call = cst.Call(func=cst.Name("relu_"), args=[cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y"))])
+  assert unroll_inplace_ops(non_attr_call, ctx) is non_attr_call

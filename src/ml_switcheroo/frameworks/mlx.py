@@ -15,7 +15,7 @@ Definitions are loaded from `frameworks/definitions/mlx.json`.
 import typing
 
 
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Optional, Dict, Any
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
 from ml_switcheroo.frameworks.loader import load_definitions
@@ -23,6 +23,8 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
+_np_mod: Optional[Any] = None
+np: Optional[Any] = None
 try:
   import numpy as _np
 
@@ -167,7 +169,18 @@ class MLXAdapter(MlxIOMixin):
         Dict[str, StandardMap]: Definitions map.
 
     """
-    return load_definitions("mlx")
+    defs = load_definitions("mlx")
+    if "Linear" not in defs:
+      defs["Linear"] = StandardMap(
+        api="mlx.nn.Linear",
+        args={"in_features": "input_dims", "out_features": "output_dims"},
+      )
+    if "Conv2d" not in defs:
+      defs["Conv2d"] = StandardMap(
+        api="mlx.nn.Conv2d",
+        args={"in_channels": "in_channels", "out_channels": "out_channels", "kernel_size": "kernel_size"},
+      )
+    return defs
 
   @property
   def rng_seed_methods(self) -> List[str]:
@@ -180,8 +193,8 @@ class MLXAdapter(MlxIOMixin):
     return ["seed", "random.seed"]
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, List[Any], Dict[Any, Any]]
+  ) -> typing.Union[int, float, str, List[Any], Dict[Any, Any], typing.Any]:
     """Convert input data (NumPy/List) to MLX Tensor for verification.
 
     Args:
@@ -194,7 +207,9 @@ class MLXAdapter(MlxIOMixin):
     try:
       import mlx.core as mx
 
-      if isinstance(data, (np.ndarray, list, tuple, np.generic)):
+      if np is not None and isinstance(data, (np.ndarray, np.generic)):
+        return mx.array(data)
+      elif isinstance(data, (list, tuple)):
         return mx.array(data)
     except Exception:
       pass
@@ -350,7 +365,7 @@ class Qwen3VLPatchEmbed(nn.Module):
     """
     return ["import mlx.core as mx"]
 
-  def apply_wiring(self, snapshot):
+  def apply_wiring(self, snapshot: typing.Dict[str, Dict[str, Any]]) -> None:
     """Override/Patches snapshot items that cannot be statically defined.
 
     Args:

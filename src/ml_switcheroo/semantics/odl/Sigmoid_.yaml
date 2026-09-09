@@ -7,11 +7,32 @@ std_args:
 variants:
   keras:
     api: keras.activations.sigmoid
+    args: {}
   mlx:
     api: mlx.nn.Sigmoid
+    args: {}
   torch:
     api: torch.nn.Sigmoid
+    args: {}
   tensorflow:
     api: tf.nn.sigmoid
+    args: {}
+  paxml:
+    api: jax.nn.sigmoid
+    dispatch_rules: []
+    macro_template: '{input} = jax.nn.sigmoid({input})'
+    pack_as: Tuple
+    required_imports: []
+    transformation_type: macro
+  flax_nnx:
+    api: jax.nn.sigmoid
+    dispatch_rules: []
+    macro_template: '{input} = jax.nn.sigmoid({input})'
+    pack_as: Tuple
+    required_imports: []
+    transformation_type: macro
+  jax:
+    api: jax.nn.sigmoid
+    args: {}
 operation: Sigmoid_
 type: function

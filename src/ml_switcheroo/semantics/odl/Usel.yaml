@@ -1,0 +1,4 @@
+operation: Usel
+variants:
+  nvidia_sass:
+    api: USEL

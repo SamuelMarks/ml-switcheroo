@@ -1,0 +1,7 @@
+operation: SSMGated
+variants:
+  paxml:
+    api: praxis.layers.SSMGated
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

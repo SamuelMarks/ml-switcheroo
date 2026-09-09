@@ -1,0 +1,12 @@
+operation: NegativeAlias
+variants:
+  paxml:
+    api: jax.numpy.negative
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.negative
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

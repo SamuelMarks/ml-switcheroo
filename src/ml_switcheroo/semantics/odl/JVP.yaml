@@ -1,0 +1,23 @@
+operation: jvp
+description: 'jvp(fun: Callable, primals: list[array], tangents: list[array]) -> tuple[list[array],
+  list[array]]'
+std_args:
+- name: fun
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: primals
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: tangents
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  mlx:
+    api: mlx.core.jvp
+    args:
+      fun: fun
+      primals: primals
+      tangents: tangents

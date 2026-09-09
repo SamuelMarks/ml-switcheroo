@@ -1,11 +1,16 @@
 description: Desc
 std_args:
-- lhs
-- rhs
-- loc
-- ip
+- name: lhs
+  type: Any
+- name: rhs
+  type: Any
+- name: loc
+  type: Any
+- name: ip
+  type: Any
 variants:
   mlir:
     api: mhlo.complex
+    args: {}
 operation: ComplexOp
 type: function

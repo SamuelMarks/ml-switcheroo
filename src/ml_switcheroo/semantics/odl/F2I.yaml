@@ -1,0 +1,4 @@
+operation: F2I
+variants:
+  nvidia_sass:
+    api: F2I

@@ -1,0 +1,29 @@
+operation: TriangularSolve
+variants:
+  stablehlo:
+    api: stablehlo.triangular_solve
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: b
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: left_side
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: lower
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: unit_diagonal
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: transpose_a
+  kind: keyword_only
+  is_variadic: false
+  type: Any

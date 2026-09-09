@@ -1,0 +1,4 @@
+operation: Mov
+variants:
+  nvidia_sass:
+    api: MOV

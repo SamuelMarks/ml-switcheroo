@@ -1,0 +1,8 @@
+operation: EnableGrad
+variants:
+  flax_nnx:
+    api: contextlib.nullcontext
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports:
+    - import contextlib

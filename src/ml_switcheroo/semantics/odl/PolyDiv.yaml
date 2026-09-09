@@ -1,0 +1,22 @@
+operation: polydiv
+description: Returns the quotient and remainder of polynomial division.
+std_args:
+- name: u
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: v
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: trim_leading_zeros
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  jax:
+    api: jax.numpy.polydiv
+    args:
+      u: u
+      v: v

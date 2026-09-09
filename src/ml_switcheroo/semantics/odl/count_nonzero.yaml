@@ -15,5 +15,19 @@ std_args:
 variants:
   dask:
     api: dask.array.count_nonzero
+    args: {}
+  flax_nnx:
+    api: jax.numpy.count_nonzero
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.count_nonzero
+    args:
+      a: a
+  keras:
+    api: keras.ops.count_nonzero
+    args:
+      x: x
 operation: count_nonzero
 type: function

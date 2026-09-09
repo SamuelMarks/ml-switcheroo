@@ -1,0 +1,8 @@
+operation: log_cosh
+variants:
+  flax_nnx:
+    api: optax.log_cosh
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

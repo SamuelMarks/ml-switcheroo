@@ -1,10 +1,22 @@
-description: Implements NumPy's ``indices`` for Dask Arrays.
-std_args:
-- dimensions
-- dtype
-- chunks
-variants:
-  dask:
-    api: dask.array.indices
 operation: indices
-type: function
+description: Return an array representing the indices of a grid.
+std_args:
+- name: dimensions
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(int32)```'''
+- name: sparse
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  jax:
+    api: jax.numpy.indices
+    args:
+      dimensions: dimensions

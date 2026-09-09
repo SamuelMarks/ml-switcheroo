@@ -1,0 +1,12 @@
+operation: char
+description: char(memory_format=torch.preserve_format) -> Tensor
+std_args:
+- name: memory_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: torch.preserve_format
+variants:
+  torch:
+    api: torch.Tensor.char
+    args: {}

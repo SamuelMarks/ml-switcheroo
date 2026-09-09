@@ -1,12 +1,28 @@
 description: Computes the logarithm of the hyperbolic cosine of the prediction error.
 std_args:
-- reduction
-- name
-- dtype
+- name: reduction
+  type: Any
+- name: name
+  type: Any
+- name: dtype
+  type: Any
 variants:
   keras:
     api: keras.losses.LogCosh
+    args:
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.losses.LogCosh
+    args: {}
+  mlx:
+    api: mlx.nn.losses.log_cosh_loss
+    args:
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Logcosh
 type: function

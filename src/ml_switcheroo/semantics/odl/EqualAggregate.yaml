@@ -1,0 +1,10 @@
+operation: EqualAggregate
+variants:
+  flax_nnx:
+    api: jax.numpy.array_equal
+    args:
+      input: a1
+      other: a2
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

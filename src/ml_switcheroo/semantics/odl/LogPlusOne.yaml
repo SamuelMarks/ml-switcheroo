@@ -1,0 +1,13 @@
+operation: LogPlusOne
+variants:
+  stablehlo:
+    api: stablehlo.log_plus_one
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: result_accuracy
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

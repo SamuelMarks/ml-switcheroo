@@ -38,15 +38,26 @@ def validate_file(filepath: Path) -> bool:
 def main() -> None:
   """Execute validation for ODL JSON semantics files.
 
-  Expects a list of file paths as command line arguments.
+  Expects a list of file paths as command line arguments or defaults
+  to scanning src/ml_switcheroo/semantics/*.json.
   Exits with code 1 if any semantics JSON file fails validation.
   """
+  files_to_check: list[Path] = []
+  if len(sys.argv) > 1:
+    for arg in sys.argv[1:]:
+      filepath = Path(arg)
+      if filepath.suffix == ".json" and "semantics" in filepath.parts:
+        files_to_check.append(filepath)
+  else:
+    sem_dir = src_path / "ml_switcheroo" / "semantics"
+    for jf in sem_dir.glob("*.json"):
+      if jf.name not in ("priority_scores.json", "nvidia_sass_isa.json", "rdna_isa.json"):
+        files_to_check.append(jf)
+
   failed = False
-  for arg in sys.argv[1:]:
-    filepath = Path(arg)
-    if filepath.suffix == ".json" and "semantics" in filepath.parts:
-      if not validate_file(filepath):
-        failed = True
+  for filepath in files_to_check:
+    if not validate_file(filepath):
+      failed = True
 
   if failed:
     sys.exit(1)

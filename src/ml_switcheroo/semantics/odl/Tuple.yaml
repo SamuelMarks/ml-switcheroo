@@ -1,0 +1,12 @@
+operation: TUPLE
+description: Tuple operation
+std_args:
+- name: val
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  stablehlo:
+    api: stablehlo.tuple
+    args:
+      val: val

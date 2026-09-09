@@ -1,0 +1,8 @@
+operation: embedding_dim
+variants:
+  flax_nnx:
+    api: nnx.nn.linear.Embed.embedding
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

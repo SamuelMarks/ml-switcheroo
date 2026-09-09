@@ -1,0 +1,8 @@
+operation: Value
+variants:
+  flax_nnx:
+    api: nnx.transforms.transforms.ValueMetadata.value
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

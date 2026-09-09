@@ -1,0 +1,7 @@
+operation: Pool
+variants:
+  flax_nnx:
+    api: flax.nnx.pool
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

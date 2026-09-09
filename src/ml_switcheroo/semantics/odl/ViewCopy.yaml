@@ -1,0 +1,20 @@
+operation: ViewCopy
+variants:
+  numpy:
+    api: numpy.reshape
+    dispatch_rules: []
+    pack_as: Tuple
+    pack_to_tuple: newshape
+    required_imports: []
+  paxml:
+    api: jax.numpy.reshape
+    dispatch_rules: []
+    pack_as: Tuple
+    pack_to_tuple: shape
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.reshape
+    dispatch_rules: []
+    pack_as: Tuple
+    pack_to_tuple: shape
+    required_imports: []

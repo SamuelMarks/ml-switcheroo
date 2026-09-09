@@ -1,0 +1,12 @@
+operation: IsTensor
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: isinstance({obj}, (jax.Array, jax.numpy.ndarray))
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: isinstance({obj}, (jax.Array, jax.numpy.ndarray))
+    pack_as: Tuple
+    required_imports: []

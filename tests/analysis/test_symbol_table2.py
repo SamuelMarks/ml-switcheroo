@@ -6,6 +6,9 @@ nested unions, and complex module import scenarios. It complements `test_symbol_
 by targeting specific, deeply nested branch logic.
 """
 
+from __future__ import annotations
+
+from typing import Any, cast
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -29,7 +32,7 @@ def analyzer() -> SymbolTableAnalyzer:
 
   from typing import Dict, Optional, Tuple
 
-  def get_def(name: str) -> Optional[Tuple[str, Dict]]:
+  def get_def(name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
     """Mock side effect to resolve specific API signatures.
 
     Args:
@@ -45,7 +48,6 @@ def analyzer() -> SymbolTableAnalyzer:
   sem.get_definition.side_effect = get_def
   res_analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(sem)
   res_analyzer.table = SymbolTable()
-  res_analyzer.source_fw = "torch"
   return res_analyzer
 
 
@@ -244,7 +246,7 @@ def test_call_on_tensor(analyzer: SymbolTableAnalyzer) -> None:
       analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
   """
   code: str = "\nimport torch\nx = torch.randn(1)\ny = x.view()\n"
-  analyzer.semantics.get_definition.side_effect = lambda n: (
+  cast(Any, analyzer.semantics).get_definition.side_effect = lambda n: (
     ("op", {"return_type": "Tensor"}) if "view" in n or "randn" in n else None
   )
   analyze(code, analyzer)
@@ -288,9 +290,11 @@ def test_call_non_tensor_return(analyzer: SymbolTableAnalyzer) -> None:
   Args:
       analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
   """
-  analyzer.semantics.get_key_origins.return_value = {}
+  cast(Any, analyzer.semantics).get_key_origins.return_value = {}
   code: str = "import torch\nx = torch.get_int()"
-  analyzer.semantics.get_definition.side_effect = lambda n: ("op", {"return_type": "int"}) if "get_int" in n else None
+  cast(Any, analyzer.semantics).get_definition.side_effect = lambda n: (
+    ("op", {"return_type": "int"}) if "get_int" in n else None
+  )
   analyze(code, analyzer)
   assert analyzer.current_scope.get("x") is None
 
@@ -337,3 +341,20 @@ def analyze(code: str, analyzer: SymbolTableAnalyzer) -> cst.Module:
   tree: cst.Module = cst.parse_module(code)
   tree.visit(analyzer)
   return tree
+
+
+def test_call_on_non_tensor_non_union(analyzer: SymbolTableAnalyzer) -> None:
+  """Test method calls on types that are neither TensorType nor UnionType.
+
+  Verifies that if a method is invoked on an object typed as something else
+  (like a ModuleType), the analyzer safely skips Tensor/Union specific logic.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  x_node: cst.BaseExpression = cst.parse_expression("x")
+  m_type: ModuleType = ModuleType(path="sys")
+  analyzer.table.record_type(x_node, m_type)
+  call_node: cst.Call = cst.Call(func=cst.Attribute(value=x_node, attr=cst.Name("some_method")))
+  analyzer.leave_Call(call_node)
+  assert analyzer.table.get_type(call_node) is None

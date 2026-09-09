@@ -1,0 +1,40 @@
+operation: cross
+description: cross(input, other, dim=None, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.cross
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.cross
+    args:
+      a: a
+      b: b
+  mlx:
+    api: mlx.core.linalg.cross
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.cross
+    args:
+      x1: x1
+      x2: x2

@@ -1,0 +1,7 @@
+operation: EvalMode
+variants:
+  flax_nnx:
+    api: flax.nnx.eval_mode
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

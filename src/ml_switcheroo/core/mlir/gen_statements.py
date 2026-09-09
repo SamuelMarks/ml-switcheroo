@@ -10,7 +10,7 @@ import typing
 
 import libcst as cst
 from collections import defaultdict
-from typing import List
+from typing import List, Union
 import ast
 
 from ml_switcheroo.core.mlir.cst import OperationNode, BlockNode
@@ -41,7 +41,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     """
     raise NotImplementedError
 
-  def _convert_block(self, block: BlockNode) -> List[cst.BaseStatement]:
+  def _convert_block(self, block: BlockNode) -> List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]]:
     """Convert a block of MLIR operations into a list of Python statements.
 
     Args:

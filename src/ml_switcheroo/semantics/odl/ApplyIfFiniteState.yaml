@@ -1,0 +1,8 @@
+operation: ApplyIfFiniteState
+variants:
+  flax_nnx:
+    api: optax.ApplyIfFiniteState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

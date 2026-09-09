@@ -1,9 +1,12 @@
 description: Fill the {3, 4, 5}-dimensional input `Tensor` with the Dirac delta function.
 std_args:
-- tensor
-- groups
+- name: tensor
+  type: Any
+- name: groups
+  type: Any
 type: function
 operation: dirac_
 variants:
   torch:
     api: torch.nn.init.dirac_
+    args: {}

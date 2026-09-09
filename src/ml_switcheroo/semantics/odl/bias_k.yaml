@@ -1,0 +1,8 @@
+operation: bias_k
+variants:
+  flax_nnx:
+    api: nnx.nn.linear.LinearGeneral.bias
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

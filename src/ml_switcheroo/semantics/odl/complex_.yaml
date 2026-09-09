@@ -1,0 +1,9 @@
+operation: complex_
+variants:
+  flax_nnx:
+    api: jax.numpy.complex_
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

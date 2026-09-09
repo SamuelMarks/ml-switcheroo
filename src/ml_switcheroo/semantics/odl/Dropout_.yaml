@@ -17,13 +17,20 @@ std_args:
 variants:
   keras:
     api: keras.layers.Dropout
+    args: {}
   mlx:
     api: mlx.nn.Dropout
+    args: {}
   flax_nnx:
-    api: flax.nnx.Dropout
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: inject_prng
   torch:
     api: torch.nn.Dropout
+    args: {}
   tensorflow:
     api: tf.keras.layers.Dropout
+    args: {}
 operation: Dropout_
 type: function

@@ -1,0 +1,27 @@
+operation: place
+description: Change elements of an array based on conditional and input values.
+std_args:
+- name: arr
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: mask
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: vals
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: inplace
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'True'
+variants:
+  jax:
+    api: jax.numpy.place
+    args:
+      arr: arr
+      mask: mask
+      vals: vals

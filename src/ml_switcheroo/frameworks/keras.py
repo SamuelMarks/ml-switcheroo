@@ -38,6 +38,7 @@ from ml_switcheroo.frameworks.base import (
   register_framework,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
+from ml_switcheroo.semantics.schema import PluginTraits
 
 
 from ml_switcheroo.frameworks.keras_io import KerasIOMixin
@@ -179,15 +180,13 @@ class KerasAdapter(KerasIOMixin):
     )
 
   @property
-  def plugin_traits(self):
+  def plugin_traits(self) -> PluginTraits:
     """Plugin behavior flags.
 
     Returns:
         PluginTraits: Object defining capabilities.
 
     """
-    from ml_switcheroo.semantics.schema import PluginTraits
-
     return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=False,
@@ -208,6 +207,31 @@ class KerasAdapter(KerasIOMixin):
     defs = load_definitions("keras")
     if "ReLU" not in defs:
       defs["ReLU"] = StandardMap(api="keras.layers.ReLU")
+    if "Linear" not in defs:
+      defs["Linear"] = StandardMap(
+        api="keras.layers.Dense",
+        args={"out_features": "units", "in_features": "input_dim"},
+      )
+    if "Conv2d" not in defs:
+      defs["Conv2d"] = StandardMap(
+        api="keras.layers.Conv2D",
+        args={"out_channels": "filters", "kernel_size": "kernel_size", "in_channels": None},
+      )
+    if "Conv1d" not in defs:
+      defs["Conv1d"] = StandardMap(
+        api="keras.layers.Conv1D",
+        args={"out_channels": "filters", "kernel_size": "kernel_size", "in_channels": None},
+      )
+    if "Conv3d" not in defs:
+      defs["Conv3d"] = StandardMap(
+        api="keras.layers.Conv3D",
+        args={"out_channels": "filters", "kernel_size": "kernel_size", "in_channels": None},
+      )
+    if "ConvTranspose2d" not in defs:
+      defs["ConvTranspose2d"] = StandardMap(
+        api="keras.layers.Conv2DTranspose",
+        args={"out_channels": "filters", "kernel_size": "kernel_size", "in_channels": None},
+      )
     return defs
 
   @property
@@ -271,8 +295,8 @@ class KerasAdapter(KerasIOMixin):
     return results
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, List[Any], Dict[Any, Any]]
+  ) -> typing.Union[int, float, str, List[Any], Dict[Any, Any], typing.Any]:
     """Convert input data to Keras Tensor.
 
     Args:
@@ -325,7 +349,7 @@ class KerasAdapter(KerasIOMixin):
     """
     return "pass"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, Dict[str, Any]]) -> None:
     """Apply configuration wiring.
 
     Args:

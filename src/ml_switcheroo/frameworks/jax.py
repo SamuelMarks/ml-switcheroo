@@ -18,12 +18,6 @@ import logging
 import textwrap
 from typing import List, Tuple, Dict, Optional
 
-try:
-  import jax
-  import jax.numpy as jnp
-except Exception:
-  jax = None
-  jnp = None
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
@@ -38,6 +32,18 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.common.optax_shim import OptaxScanner
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.loader import load_definitions
+
+jax: Optional[Any] = None
+jnp: Optional[Any] = None
+try:
+  import jax as _jax
+  import jax.numpy as _jnp
+
+  jax = _jax
+  jnp = _jnp
+except Exception:
+  jax = None
+  jnp = None
 
 
 @register_framework("jax")
@@ -61,7 +67,7 @@ class JaxCoreAdapter(JAXStackMixin):
     Detects installation status to toggle between LIVE and GHOST modes.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data = {}
+    self._snapshot_data: Dict[str, Any] = {}
     if jax is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("jax")
@@ -228,8 +234,8 @@ class JaxCoreAdapter(JAXStackMixin):
     return results
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, List[Any], Dict[Any, Any]]
+  ) -> typing.Union[int, float, str, List[Any], Dict[Any, Any], typing.Any]:
     """Convert input data to a JAX array for verification.
 
     Args:
@@ -243,11 +249,14 @@ class JaxCoreAdapter(JAXStackMixin):
     except Exception:
       return data
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
-      return jnp.array(data)
+      try:
+        return jnp.array(data)
+      except Exception:
+        return data
 
     return data
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, Dict[str, Any]]) -> None:
     """Apply Level 0/1 Stack wiring.
 
     Populates the JSON snapshot with manually wired logic.

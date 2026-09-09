@@ -26,8 +26,15 @@ def test_is_super_call_other_call() -> None:
 
   from ml_switcheroo.core.rewriter.calls.utils import is_super_call
 
-  node: cst.BaseExpression = getattr(getattr(cst.parse_statement("foo().method()"), "body")[0], "value")
+  node = cst.parse_expression("foo().method()")
+  assert isinstance(node, cst.Call)
   assert not is_super_call(node)
+  node_name = cst.parse_expression("other()")
+  assert isinstance(node_name, cst.Call)
+  assert not is_super_call(node_name)
+  node_subscript = cst.parse_expression("funcs[0]()")
+  assert isinstance(node_subscript, cst.Call)
+  assert not is_super_call(node_subscript)
 
 
 def test_inject_permute_call_empty_indices() -> None:
@@ -44,7 +51,9 @@ def test_inject_permute_call_empty_indices() -> None:
   semantics.get_framework_config.return_value = fw_config
   semantics.resolve_variant.return_value = {"api": "torch.transpose", "pack_to_tuple": "dim"}
 
-  res: cst.Call = inject_permute_call(node, [], semantics, "torch")
+  indices: tuple[int, ...] = ()
+  res = inject_permute_call(node, indices, semantics, "torch")
+  assert isinstance(res, cst.Call)
   # should have an empty tuple
   assert isinstance(res.args[1].value, cst.Tuple)
   assert len(res.args[1].value.elements) == 0

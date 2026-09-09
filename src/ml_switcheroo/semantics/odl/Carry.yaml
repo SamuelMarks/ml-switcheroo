@@ -1,0 +1,8 @@
+operation: Carry
+variants:
+  flax_nnx:
+    api: flax.nnx.Carry
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

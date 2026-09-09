@@ -76,7 +76,8 @@ class OnnxSpecImporter:
           soup = BeautifulSoup(inline_content, "html.parser")
           a_tag = soup.find("a", attrs={"name": True})
           if isinstance(a_tag, Tag) and isinstance(a_tag.get("name"), str):  # pragma: no branch
-            current_op = a_tag["name"]
+            name_val = a_tag["name"]
+            current_op = str(name_val)
             if current_op not in semantics:
               semantics[current_op] = {"from": fpath.name, "description": "", "std_args": [], "_raw_summary": []}
             current_section = "Summary"

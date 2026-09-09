@@ -1,0 +1,25 @@
+operation: DynamicPad
+variants:
+  stablehlo:
+    api: stablehlo.dynamic_pad
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: padding_value
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: edge_padding_low
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: edge_padding_high
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: interior_padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor

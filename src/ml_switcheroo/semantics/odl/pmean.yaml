@@ -1,0 +1,22 @@
+operation: pmean
+description: Compute an all-reduce mean on ``x`` over the pmapped axis ``axis_name``.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis_name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis_index_groups
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.pmean
+    args:
+      x: x
+      axis_name: axis_name

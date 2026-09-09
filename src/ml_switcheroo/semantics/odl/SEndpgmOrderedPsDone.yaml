@@ -1,0 +1,5 @@
+operation: SEndpgmOrderedPsDone
+variants:
+  rdna:
+    api: s_endpgm_ordered_ps_done
+    description: Auto-mapped instruction S_ENDPGM_ORDERED_PS_DONE

@@ -1,0 +1,5 @@
+operation: SXorSaveexecB64
+variants:
+  rdna:
+    api: s_xor_saveexec_b64
+    description: Auto-mapped instruction S_XOR_SAVEEXEC_B64

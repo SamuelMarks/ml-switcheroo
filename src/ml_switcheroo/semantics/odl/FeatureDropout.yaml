@@ -1,0 +1,29 @@
+operation: FeatureDropout
+variants:
+  keras:
+    api: keras.layers.SpatialDropout2D
+    args:
+      p: rate
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.Dropout2d
+    args:
+      p: p
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.linen.Dropout
+    args:
+      p: rate
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.5'

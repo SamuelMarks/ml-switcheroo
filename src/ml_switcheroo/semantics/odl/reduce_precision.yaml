@@ -1,0 +1,28 @@
+operation: reduce_precision
+description: Wraps XLA's `ReducePrecision
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: exponent_bits
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: mantissa_bits
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.lax.reduce_precision
+    args:
+      operand: operand
+      exponent_bits: exponent_bits
+      mantissa_bits: mantissa_bits
+  stablehlo:
+    api: stablehlo.reduce_precision
+    args:
+      operand: operand
+      exponent_bits: exponent_bits
+      mantissa_bits: mantissa_bits

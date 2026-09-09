@@ -1,0 +1,31 @@
+operation: IdentityNorm
+variants:
+  paxml:
+    api: paxml.layers.IdentityNorm
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Identity
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.identity
+    args:
+      n: n
+  mlx:
+    api: mlx.nn.Identity
+    args: {}
+  keras:
+    api: keras.layers.Identity
+    args: {}
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any

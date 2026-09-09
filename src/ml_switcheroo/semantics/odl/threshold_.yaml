@@ -1,12 +1,22 @@
-description: Threshold activation function.
+operation: Threshold_
+description: threshold_(input, threshold, value) -> Tensor
 std_args:
-- x
-- threshold
-- default_value
-type: attribute
-operation: threshold_
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: threshold
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: value
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
-  keras:
-    api: keras.activations.threshold
   torch:
-    api: torch.nn.Threshold
+    api: torch.nn.functional.threshold_
+    args:
+      input: input
+      threshold: threshold
+      value: value

@@ -1,0 +1,5 @@
+operation: VFrexpMantF16
+variants:
+  rdna:
+    api: v_frexp_mant_f16
+    description: Auto-mapped instruction V_FREXP_MANT_F16

@@ -1,0 +1,26 @@
+operation: ne
+description: ne(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.ne
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.lax.ne
+    args:
+      x: x
+      y: y

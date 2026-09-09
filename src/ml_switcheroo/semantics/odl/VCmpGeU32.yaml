@@ -1,0 +1,5 @@
+operation: VCmpGeU32
+variants:
+  rdna:
+    api: v_cmp_ge_u32
+    description: Auto-mapped instruction V_CMP_GE_U32

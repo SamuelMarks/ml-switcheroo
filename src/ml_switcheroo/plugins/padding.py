@@ -11,6 +11,7 @@ tuple-of-tuples format required by XLA compilers and NumPy-compatible libraries.
 import libcst as cst
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.plugins.utils import create_dotted_name
 
 
 def _create_zero_pad() -> cst.Element:
@@ -140,10 +141,7 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
     args[1] = pad_arg.with_changes(value=new_pad_tuple)
 
     # Build Dotted Name for function
-    parts = target_api.split(".")
-    new_func = cst.Name(parts[0])
-    for part in parts[1:]:
-      new_func = cst.Attribute(value=new_func, attr=cst.Name(part))
+    new_func = create_dotted_name(target_api)
 
     return node.with_changes(func=new_func, args=args)
 

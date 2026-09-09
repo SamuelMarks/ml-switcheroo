@@ -1,5 +1,7 @@
 """Test module."""
 
+from typing import Any, cast
+
 import libcst as cst
 
 from ml_switcheroo.core.import_fixer.utils import (
@@ -25,7 +27,7 @@ def test_get_root_name() -> None:
   assert get_root_name(node3) == "torch"
 
   # test fallback
-  assert get_root_name(cst.Pass()) == ""
+  assert get_root_name(cast(Any, cst.Pass())) == ""
 
 
 def test_create_dotted_name() -> None:
@@ -97,6 +99,24 @@ def test_is_future_import() -> None:
     body=[cst.Import(names=[cst.ImportAlias(name=cst.Name("torch"))])]
   )
   assert is_future_import(regular_import_node) is False
+
+  multi_node: cst.SimpleStatementLine = cst.SimpleStatementLine(
+    body=[
+      cst.Import(names=[cst.ImportAlias(name=cst.Name("torch"))]),
+      cst.ImportFrom(module=cst.Name("__future__"), names=[cst.ImportAlias(name=cst.Name("annotations"))]),
+    ]
+  )
+  assert is_future_import(multi_node) is True
+
+  # Hit 108->106
+  multi_node2: cst.SimpleStatementLine = cst.SimpleStatementLine(
+    body=[
+      cst.ImportFrom(module=cst.Name("sys"), names=[cst.ImportAlias(name=cst.Name("path"))]),
+      cst.ImportFrom(module=None, relative=[cst.Dot()], names=[cst.ImportAlias(name=cst.Name("path"))]),  # Hit 108->106
+      cst.Import(names=[cst.ImportAlias(name=cst.Name("torch"))]),
+    ]
+  )
+  assert is_future_import(multi_node2) is False
 
   non_stmt: cst.Pass = cst.Pass()
   assert is_future_import(non_stmt) is False

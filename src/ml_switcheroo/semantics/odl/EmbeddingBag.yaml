@@ -55,3 +55,9 @@ operation: EmbeddingBag
 variants:
   torch:
     api: torch.nn.EmbeddingBag
+    args: {}
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: embedding_bag

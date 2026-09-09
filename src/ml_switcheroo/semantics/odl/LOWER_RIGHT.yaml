@@ -1,0 +1,11 @@
+operation: LOWER_RIGHT
+variants:
+  flax_nnx:
+    api: nnx.transforms.compilation.JitWrapped.lower
+    args:
+      args: args
+      kwargs: kwargs
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

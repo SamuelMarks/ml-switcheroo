@@ -1,0 +1,4 @@
+operation: Fence
+variants:
+  nvidia_sass:
+    api: FENCE

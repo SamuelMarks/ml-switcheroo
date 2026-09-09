@@ -1,0 +1,9 @@
+__frameworks__:
+  nvidia_sass:
+    alias:
+      module: "nvidia_sass"
+      name: "sass"
+    comment_syntax: "//"
+    register_conventions:
+      general: "R"
+      predicate: "P"

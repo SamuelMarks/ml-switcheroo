@@ -1,0 +1,5 @@
+operation: VFrexpExpI32F32
+variants:
+  rdna:
+    api: v_frexp_exp_i32_f32
+    description: Auto-mapped instruction V_FREXP_EXP_I32_F32

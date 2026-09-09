@@ -1,0 +1,7 @@
+operation: BiTemperedLoss
+variants:
+  paxml:
+    api: praxis.layers.BiTemperedLoss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

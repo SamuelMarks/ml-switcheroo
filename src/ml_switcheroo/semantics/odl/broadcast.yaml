@@ -1,0 +1,42 @@
+operation: broadcast
+description: Broadcasts the tensor to the whole group.
+std_args:
+- name: tensor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: src
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: group
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: async_op
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: group_src
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.distributed.broadcast
+    args:
+      tensor: tensor
+  jax:
+    api: jax.lax.broadcast
+    args:
+      operand: operand
+      sizes: sizes
+  stablehlo:
+    api: stablehlo.broadcast
+    args:
+      operand: operand
+      broadcast_sizes: broadcast_sizes

@@ -1,0 +1,5 @@
+operation: VDivFixupF16
+variants:
+  rdna:
+    api: v_div_fixup_f16
+    description: Auto-mapped instruction V_DIV_FIXUP_F16

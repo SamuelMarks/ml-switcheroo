@@ -1,0 +1,12 @@
+operation: SortComplex
+variants:
+  paxml:
+    api: jax.numpy.sort_complex
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.sort_complex
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

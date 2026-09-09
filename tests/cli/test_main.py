@@ -3,6 +3,7 @@
 import argparse
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+import pytest
 
 from ml_switcheroo.cli.__main__ import main
 
@@ -141,3 +142,14 @@ def test_main_unknown() -> None:
     mock_parse.return_value = argparse.Namespace(command="unknown")
     res: int = main(["unknown"])
     assert res == 0
+
+
+def test_main_dunder_main() -> None:
+  """Test execution of __main__ module block."""
+  import runpy
+
+  with patch("sys.argv", ["ml-switcheroo", "schema"]):
+    with patch("ml_switcheroo.cli.__main__.handle_schema", return_value=0):
+      with pytest.raises(SystemExit) as exc:
+        runpy.run_module("ml_switcheroo.cli.__main__", run_name="__main__")
+      assert exc.value.code == 0

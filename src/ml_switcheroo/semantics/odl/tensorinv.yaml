@@ -1,0 +1,10 @@
+operation: tensorinv
+variants:
+  flax_nnx:
+    api: jax.numpy.linalg.tensorinv
+    args:
+      a: a
+      ind: ind
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

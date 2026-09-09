@@ -1,0 +1,12 @@
+operation: ihfft
+variants:
+  flax_nnx:
+    api: jax.numpy.fft.ihfft
+    args:
+      a: a
+      axis: axis
+      n: n
+      norm: norm
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

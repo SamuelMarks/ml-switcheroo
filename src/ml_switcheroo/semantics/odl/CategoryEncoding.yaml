@@ -18,7 +18,31 @@ std_args:
 variants:
   keras:
     api: keras.layers.CategoryEncoding
+    args:
+      kwargs: kwargs
+      num_tokens: num_tokens
+      output_mode: output_mode
+      sparse: sparse
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.CategoryEncoding
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.nn.one_hot
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: CategoryEncoding
 type: function

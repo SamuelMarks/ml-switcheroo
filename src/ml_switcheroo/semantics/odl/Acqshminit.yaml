@@ -1,0 +1,4 @@
+operation: Acqshminit
+variants:
+  nvidia_sass:
+    api: ACQSHMINIT

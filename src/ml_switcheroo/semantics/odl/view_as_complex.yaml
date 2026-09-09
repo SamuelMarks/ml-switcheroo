@@ -1,0 +1,16 @@
+operation: view_as_complex
+description: view_as_complex(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.view_as_complex
+    args:
+      input: input
+  keras:
+    api: keras.ops.view_as_complex
+    args:
+      x: x

@@ -1,11 +1,24 @@
-description: Returns coordinate matrices from coordinate vectors.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: indexing
-  type: str
-variants:
-  dask:
-    api: dask.array.meshgrid
 operation: meshgrid
-type: function
+description: Creates grids of coordinates specified by the 1D inputs in `attr`:tensors.
+std_args:
+- name: tensors
+  kind: positional_or_keyword
+  is_variadic: true
+  type: list
+- name: indexing
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.meshgrid
+    args: {}
+  jax:
+    api: jax.numpy.meshgrid
+    args: {}
+  mlx:
+    api: mlx.core.meshgrid
+    args: {}
+  keras:
+    api: keras.ops.meshgrid
+    args: {}

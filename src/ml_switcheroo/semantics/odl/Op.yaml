@@ -1,0 +1,11 @@
+operation: Op
+description: Auto-generated from numpy_v2.4.2_map.json
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+variants:
+  jax:
+    api: jax.numpy.logical_or
+    args: {}

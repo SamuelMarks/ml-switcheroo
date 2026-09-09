@@ -1,0 +1,16 @@
+operation: BitwiseNot
+variants:
+  paxml:
+    api: jnp.invert
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.invert
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.invert
+    args:
+      x: x

@@ -1,0 +1,7 @@
+operation: LanguageModelType
+variants:
+  paxml:
+    api: paxml.layers.LanguageModelType
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

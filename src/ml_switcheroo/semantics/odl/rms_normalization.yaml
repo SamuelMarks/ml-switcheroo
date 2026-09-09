@@ -1,0 +1,26 @@
+operation: rms_normalization
+description: Performs Root Mean Square (RMS) normalization on `x`.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: scale
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '-1'
+- name: epsilon
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+variants:
+  keras:
+    api: keras.ops.rms_normalization
+    args:
+      x: x

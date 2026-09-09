@@ -1,0 +1,7 @@
+operation: AsPytreeVars
+variants:
+  flax_nnx:
+    api: flax.nnx.as_pytree_vars
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

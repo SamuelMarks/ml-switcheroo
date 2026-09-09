@@ -1,15 +1,30 @@
-description: Exponential Linear Unit.
-std_args:
-- x
-- alpha
-type: function
 operation: elu
+description: Apply the Exponential Linear Unit (ELU) function element-wise.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: alpha
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '1.0'
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
+  torch:
+    api: torch.nn.functional.elu
+    args:
+      input: input
+  mlx:
+    api: mlx.nn.elu
+    args:
+      x: x
   keras:
     api: keras.activations.elu
-  mlx:
-    api: mlx.nn.ELU
-  torch:
-    api: torch.nn.ELU
-  tensorflow:
-    api: tf.nn.elu
+    args:
+      x: x

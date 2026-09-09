@@ -1,0 +1,15 @@
+operation: triangular
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.triangular
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.triangular
+    args:
+      key: key
+      left: left
+      mode: mode
+      right: right

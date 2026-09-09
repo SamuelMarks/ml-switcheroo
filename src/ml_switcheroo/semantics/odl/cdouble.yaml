@@ -1,0 +1,9 @@
+operation: cdouble
+variants:
+  flax_nnx:
+    api: jax.numpy.cdouble
+    args:
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

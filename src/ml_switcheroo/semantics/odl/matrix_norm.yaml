@@ -1,0 +1,11 @@
+operation: matrix_norm
+variants:
+  flax_nnx:
+    api: jax.numpy.linalg.matrix_norm
+    args:
+      keepdims: keepdims
+      ord: ord
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

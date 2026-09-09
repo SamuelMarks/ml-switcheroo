@@ -1,0 +1,16 @@
+operation: blackman
+description: Return the Blackman window.
+std_args:
+- name: M
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.numpy.blackman
+    args:
+      M: M
+  keras:
+    api: keras.ops.blackman
+    args:
+      x: x

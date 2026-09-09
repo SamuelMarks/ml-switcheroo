@@ -1,0 +1,21 @@
+operation: multigammaln
+description: multigammaln(input, p, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.special.multigammaln
+    args:
+      input: input
+      p: p

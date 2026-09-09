@@ -1,0 +1,8 @@
+operation: negative_slope
+variants:
+  flax_nnx:
+    api: nnx.nn.activations.PReLU.negative_slope
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

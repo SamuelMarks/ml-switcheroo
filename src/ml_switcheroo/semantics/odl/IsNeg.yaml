@@ -1,0 +1,12 @@
+operation: IsNeg
+variants:
+  paxml:
+    api: jax.numpy.signbit
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.signbit
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

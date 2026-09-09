@@ -1,30 +1,30 @@
-description: Returns evenly spaced values within the half-open interval ``[start,
-  stop)`` as a one-dimensional array.
+operation: arange
+description: arange(start=0, end, step=1, *, out=None, dtype=None, layout=torch.strided,
+  device=None, requires_grad=False) -> Tensor
 std_args:
-- is_variadic: false
+- name: args
   kind: positional_or_keyword
-  name: start
-  type: Union[int, float]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: stop
-  type: Optional[Union[int, float]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: step
-  type: Union[int, float]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: dtype
-  type: Optional[dtype]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: device
-  type: Optional[device]
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
 variants:
-  dask:
-    api: dask.array.arange
   torch:
     api: torch.arange
-operation: arange
-type: function
+    args: {}
+  jax:
+    api: jax.numpy.arange
+    args:
+      start: start
+  mlx:
+    api: mlx.core.arange
+    args:
+      start: start
+      stop: stop
+      step: step
+  keras:
+    api: keras.ops.arange
+    args:
+      start: start

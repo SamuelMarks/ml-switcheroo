@@ -115,16 +115,25 @@ def test_convert() -> None:
 # --- Merged from test_mlx_extra2_loop.py ---
 
 
-def test_mlx_no_numpy(monkeypatch):
+def test_mlx_no_numpy() -> None:
   """Docstring."""
-  import sys
-
-  monkeypatch.setitem(sys.modules, "numpy", None)
+  import builtins
   import importlib
+  from unittest.mock import patch
 
   import ml_switcheroo.frameworks.mlx as mlx_mod
 
-  try:
-    importlib.reload(mlx_mod)
-  except Exception:
-    pass
+  orig_import = builtins.__import__
+
+  def mock_import(name, *args, **kwargs):
+    """Docstring."""
+    if name == "numpy":
+      raise ImportError("no numpy")
+    return orig_import(name, *args, **kwargs)
+
+  with patch("builtins.__import__", side_effect=mock_import):
+    try:
+      importlib.reload(mlx_mod)
+    except Exception:
+      pass
+  importlib.reload(mlx_mod)

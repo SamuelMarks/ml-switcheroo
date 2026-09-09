@@ -1,0 +1,8 @@
+operation: ShouldSkipUpdateFunction
+variants:
+  flax_nnx:
+    api: optax.ShouldSkipUpdateFunction
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

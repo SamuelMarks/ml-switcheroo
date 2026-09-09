@@ -1,0 +1,21 @@
+operation: cholesky_inverse
+description: cholesky_inverse(L, upper=False, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: upper
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.cholesky_inverse
+    args:
+      input: input

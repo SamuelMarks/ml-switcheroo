@@ -1,0 +1,5 @@
+operation: SSextI32I8
+variants:
+  rdna:
+    api: s_sext_i32_i8
+    description: Auto-mapped instruction S_SEXT_I32_I8

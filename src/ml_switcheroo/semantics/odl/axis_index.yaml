@@ -1,0 +1,12 @@
+operation: axis_index
+description: Return the index along the mapped axis ``axis_name``.
+std_args:
+- name: axis_name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.axis_index
+    args:
+      axis_name: axis_name

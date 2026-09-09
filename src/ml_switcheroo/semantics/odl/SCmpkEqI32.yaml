@@ -1,0 +1,5 @@
+operation: SCmpkEqI32
+variants:
+  rdna:
+    api: s_cmpk_eq_i32
+    description: Auto-mapped instruction S_CMPK_EQ_I32

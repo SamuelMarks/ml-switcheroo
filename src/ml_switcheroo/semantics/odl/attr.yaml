@@ -1,0 +1,15 @@
+operation: attr
+variants:
+  flax_nnx:
+    api: nnx.reprlib.Attr
+    args:
+      end: end
+      key: key
+      self: self
+      start: start
+      use_raw_key: use_raw_key
+      use_raw_value: use_raw_value
+      value: value
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,8 +1,14 @@
 description: Fill the input Tensor with the scalar value `1`.
 std_args:
-- tensor
+- name: tensor
+  type: Any
 type: function
 operation: ones_
 variants:
   torch:
     api: torch.nn.init.ones_
+    args:
+      tensor: tensor
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

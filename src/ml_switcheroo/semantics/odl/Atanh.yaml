@@ -1,0 +1,20 @@
+operation: atanh
+description: 'atanh(input: Tensor, *, out: Optional[Tensor]) -> Tensor'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.atanh
+    args:
+      input: input
+  jax:
+    api: jax.lax.atanh
+    args:
+      x: x

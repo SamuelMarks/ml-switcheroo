@@ -1,0 +1,4 @@
+operation: Uffma
+variants:
+  nvidia_sass:
+    api: UFFMA

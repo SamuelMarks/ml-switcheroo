@@ -1,11 +1,23 @@
 description: Fill the 2D input `Tensor` as a sparse matrix.
 std_args:
-- tensor
-- sparsity
-- std
-- generator
+- name: tensor
+  type: Any
+- name: sparsity
+  type: Any
+- name: std
+  type: Any
+- name: generator
+  type: Any
 type: function
 operation: sparse_
 variants:
   torch:
     api: torch.nn.init.sparse_
+    args:
+      generator: generator
+      sparsity: sparsity
+      std: std
+      tensor: tensor
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

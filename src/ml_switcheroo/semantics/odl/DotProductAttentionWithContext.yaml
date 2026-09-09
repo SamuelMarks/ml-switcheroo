@@ -1,0 +1,7 @@
+operation: DotProductAttentionWithContext
+variants:
+  paxml:
+    api: praxis.layers.DotProductAttentionWithContext
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

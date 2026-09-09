@@ -1,0 +1,4 @@
+operation: Ucgabar_Wait
+variants:
+  nvidia_sass:
+    api: UCGABAR_WAIT

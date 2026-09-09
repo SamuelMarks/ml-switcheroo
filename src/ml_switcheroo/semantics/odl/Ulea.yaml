@@ -1,0 +1,4 @@
+operation: Ulea
+variants:
+  nvidia_sass:
+    api: ULEA

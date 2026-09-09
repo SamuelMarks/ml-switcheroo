@@ -1,0 +1,5 @@
+operation: SGetregB32
+variants:
+  rdna:
+    api: s_getreg_b32
+    description: Auto-mapped instruction S_GETREG_B32

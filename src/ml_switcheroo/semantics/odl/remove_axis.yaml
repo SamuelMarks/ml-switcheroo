@@ -1,0 +1,11 @@
+operation: remove_axis
+variants:
+  flax_nnx:
+    api: nnx.bridge.variables.NNXMeta.remove_axis
+    args:
+      index: index
+      params: params
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

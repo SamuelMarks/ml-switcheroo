@@ -1,23 +1,35 @@
-description: Calculates the minimum value of the input array ``x``.
+operation: min
+description: min(input, *, out=None) -> Tensor
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: axis
-  type: Optional[Union[int, Tuple[int, Ellipsis]]]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: keepdims
-  type: bool
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
-  latex_dsl:
-    api: latex.min
-  dask:
-    api: dask.array.min
   torch:
     api: torch.min
-operation: min
-type: function
+    args:
+      input: input
+  jax:
+    api: jax.lax.min
+    args:
+      x: x
+      y: y
+  mlx:
+    api: mlx.core.min
+    args:
+      a: a
+  rdna:
+    api: v_min_f32
+    args: {}
+  nvidia_sass:
+    api: FMNMX
+    args: {}
+  keras:
+    api: keras.ops.min
+    args:
+      x: x

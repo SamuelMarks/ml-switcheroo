@@ -1,0 +1,13 @@
+operation: wald
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.wald
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.wald
+    args:
+      key: key
+      mean: mean

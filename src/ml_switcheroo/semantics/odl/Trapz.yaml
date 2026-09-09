@@ -1,0 +1,22 @@
+operation: Trapz
+description: trapz(y, x, *, dim=-1) -> Tensor
+std_args:
+- name: y
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dim
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '-1'
+variants:
+  torch:
+    api: torch.trapz
+    args:
+      y: y
+      x: x

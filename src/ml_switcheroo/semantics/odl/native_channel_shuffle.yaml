@@ -1,0 +1,17 @@
+operation: native_channel_shuffle
+description: native_channel_shuffle(input, groups) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: groups
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  torch:
+    api: torch.nn.functional.native_channel_shuffle
+    args:
+      input: input
+      groups: groups

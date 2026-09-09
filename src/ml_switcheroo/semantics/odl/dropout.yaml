@@ -1,34 +1,37 @@
-description: Applies random dropout.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: input
-  type: Tensor
-- default: 0.5
-  is_variadic: false
-  kind: positional_or_keyword
-  name: p
-  type: float
-- default: true
-  is_variadic: false
-  kind: positional_or_keyword
-  name: training
-  type: bool
-- default: false
-  is_variadic: false
-  kind: positional_or_keyword
-  name: inplace
-  type: bool
-type: attribute
 operation: dropout
+description: During training, randomly zeroes some elements of the input tensor with
+  probability :attr:`p`.
+std_args:
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.5'
+- name: training
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
 variants:
-  keras:
-    api: keras.layers.Dropout
-  mlx:
-    api: mlx.nn.Dropout
+  torch:
+    api: torch.nn.functional.dropout
+    args:
+      input: input
   flax_nnx:
     api: flax.nnx.Dropout
-  torch:
-    api: torch.nn.Dropout
-  tensorflow:
-    api: tf.keras.layers.Dropout
+    args: {}
+  mlx:
+    api: mlx.nn.Dropout
+    args: {}
+  keras:
+    api: keras.layers.Dropout
+    args: {}

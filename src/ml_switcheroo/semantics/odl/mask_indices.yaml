@@ -1,0 +1,15 @@
+operation: mask_indices
+variants:
+  flax_nnx:
+    api: jax.numpy.mask_indices
+    args:
+      k: k
+      mask_func: mask_func
+      n: n
+      size: size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.mask_indices
+    args: {}

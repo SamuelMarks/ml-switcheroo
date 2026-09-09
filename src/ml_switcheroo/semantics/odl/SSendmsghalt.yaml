@@ -1,0 +1,5 @@
+operation: SSendmsghalt
+variants:
+  rdna:
+    api: s_sendmsghalt
+    description: Auto-mapped instruction S_SENDMSGHALT

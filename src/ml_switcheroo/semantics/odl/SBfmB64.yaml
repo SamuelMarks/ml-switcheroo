@@ -1,0 +1,5 @@
+operation: SBfmB64
+variants:
+  rdna:
+    api: s_bfm_b64
+    description: Auto-mapped instruction S_BFM_B64

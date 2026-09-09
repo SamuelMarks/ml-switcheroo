@@ -16,7 +16,23 @@ std_args:
 variants:
   keras:
     api: keras.layers.InputSpec
+    args:
+      allow_last_axis_squeeze: allow_last_axis_squeeze
+      axes: axes
+      dtype: dtype
+      max_ndim: max_ndim
+      min_ndim: min_ndim
+      name: name
+      ndim: ndim
+      optional: optional
+      shape: shape
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.InputSpec
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: InputSpec
 type: function

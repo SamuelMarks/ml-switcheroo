@@ -1,15 +1,38 @@
-description: The class representing a Python module/class/instance attribute.
-std_args:
-- a
-- axis
-- b
-- keepdims
-- return_sign
-- where
-type: attribute
 operation: logsumexp
+description: logsumexp(input, dim, keepdim=False, *, out=None)
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: keepdim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
-  flax_nnx:
-    api: jax.nn.logsumexp
+  torch:
+    api: torch.logsumexp
+    args:
+      input: input
+      dim: dim
   jax:
     api: jax.nn.logsumexp
+    args:
+      a: a
+  mlx:
+    api: mlx.core.logsumexp
+    args:
+      a: a
+  keras:
+    api: keras.ops.logsumexp
+    args:
+      x: x

@@ -1,19 +1,42 @@
-description: Returns elements chosen from ``x1`` or ``x2`` depending on ``condition``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: condition
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x1
-  type: Union[array, int, float, complex, bool]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x2
-  type: Union[array, int, float, complex, bool]
-variants:
-  dask:
-    api: dask.array.where
 operation: where
-type: function
+description: where(condition, input, other, *, out=None) -> Tensor
+std_args:
+- name: condition
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.where
+    args:
+      condition: condition
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.where
+    args:
+      condition: condition
+      x: x
+      y: y
+  mlx:
+    api: mlx.core.where
+    args:
+      condition: condition
+      x: x
+      y: y
+  keras:
+    api: keras.ops.where
+    args:
+      condition: condition

@@ -1,0 +1,11 @@
+operation: ArrayRepr
+variants:
+  flax_nnx:
+    api: nnx.summary.ArrayRepr
+    args:
+      dtype: dtype
+      self: self
+      shape: shape
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

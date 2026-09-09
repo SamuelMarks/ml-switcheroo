@@ -11,5 +11,30 @@ std_args:
 variants:
   dask:
     api: dask.array.broadcast_to
+    args: {}
+  flax_nnx:
+    api: jax.numpy.broadcast_to
+    args:
+      array: array
+      out_sharding: out_sharding
+      shape: shape
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.broadcast_to
+    args:
+      array: array
+      shape: shape
+  mlx:
+    api: mlx.core.broadcast_to
+    args:
+      a: a
+      shape: shape
+  keras:
+    api: keras.ops.broadcast_to
+    args:
+      x: x
+      shape: shape
 operation: broadcast_to
 type: function

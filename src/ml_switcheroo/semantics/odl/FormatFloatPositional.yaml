@@ -1,0 +1,12 @@
+operation: FormatFloatPositional
+variants:
+  paxml:
+    api: jax.numpy.format_float_positional
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.format_float_positional
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

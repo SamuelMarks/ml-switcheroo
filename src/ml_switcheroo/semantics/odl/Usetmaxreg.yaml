@@ -1,0 +1,4 @@
+operation: Usetmaxreg
+variants:
+  nvidia_sass:
+    api: USETMAXREG

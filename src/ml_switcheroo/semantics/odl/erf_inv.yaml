@@ -1,0 +1,12 @@
+operation: erf_inv
+description: 'Elementwise inverse error function: :math:`\mathrm{erf}^{-1}(x)`.'
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.erf_inv
+    args:
+      x: x

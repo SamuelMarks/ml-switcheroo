@@ -1,0 +1,17 @@
+operation: DynamicSlice
+variants:
+  stablehlo:
+    api: stablehlo.dynamic_slice
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: start_indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: slice_sizes
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor

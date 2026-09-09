@@ -1,0 +1,8 @@
+operation: max_pool2d
+variants:
+  paxml:
+    api: optax.tree.max
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

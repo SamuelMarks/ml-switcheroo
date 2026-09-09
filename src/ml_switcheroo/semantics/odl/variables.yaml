@@ -1,0 +1,8 @@
+operation: variables
+variants:
+  flax_nnx:
+    api: nnx.bridge.module.Module.variables
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

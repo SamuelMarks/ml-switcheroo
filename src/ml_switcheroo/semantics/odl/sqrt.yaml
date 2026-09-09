@@ -1,14 +1,38 @@
-description: Calculates the principal square root for each element ``x_i`` of the
-  input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  latex_dsl:
-    api: latex.sqrt
-  dask:
-    api: dask.array.sqrt
 operation: sqrt
-type: function
+description: sqrt(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.sqrt
+    args:
+      input: input
+  jax:
+    api: jax.lax.sqrt
+    args:
+      x: x
+  mlx:
+    api: mlx.core.sqrt
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.sqrt
+    args:
+      operand: operand
+      result_accuracy: result_accuracy
+  rdna:
+    api: v_sqrt_f32
+    args: {}
+  nvidia_sass:
+    api: MUFU.SQRT
+    args: {}
+  keras:
+    api: keras.ops.sqrt
+    args: {}

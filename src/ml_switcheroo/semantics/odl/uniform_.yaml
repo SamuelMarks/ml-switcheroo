@@ -1,11 +1,16 @@
 description: Fill the input Tensor with values drawn from the uniform distribution.
 std_args:
-- tensor
-- a
-- b
-- generator
+- name: tensor
+  type: Any
+- name: a
+  type: Any
+- name: b
+  type: Any
+- name: generator
+  type: Any
 type: function
 operation: uniform_
 variants:
   torch:
     api: torch.nn.init.uniform_
+    args: {}

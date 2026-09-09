@@ -1,19 +1,33 @@
 description: Linear warmup followed by exponential decay.
 std_args:
-- init_value
-- peak_value
-- warmup_steps
-- transition_steps
-- decay_rate
-- transition_begin
-- staircase
-- end_value
+- name: init_value
+  type: Any
+- name: peak_value
+  type: Any
+- name: warmup_steps
+  type: Any
+- name: transition_steps
+  type: Any
+- name: decay_rate
+  type: Any
+- name: transition_begin
+  type: Any
+- name: staircase
+  type: Any
+- name: end_value
+  type: Any
 type: attribute
 operation: warmup_exponential_decay_schedule
 variants:
   optax_shim:
     api: optax.schedules.warmup_exponential_decay_schedule
+    args: {}
   flax_nnx:
-    api: optax.schedules.warmup_exponential_decay_schedule
+    api: optax.warmup_exponential_decay_schedule
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.schedules.warmup_exponential_decay_schedule
+    args: {}

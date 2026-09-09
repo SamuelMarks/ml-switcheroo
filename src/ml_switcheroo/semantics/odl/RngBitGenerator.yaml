@@ -1,0 +1,13 @@
+operation: RngBitGenerator
+variants:
+  stablehlo:
+    api: stablehlo.rng_bit_generator
+std_args:
+- name: rng_algorithm
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: initial_state
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor

@@ -1,0 +1,14 @@
+operation: measure_valued_jacobians
+variants:
+  flax_nnx:
+    api: optax.monte_carlo.stochastic_gradient_estimators.measure_valued_jacobians
+    args:
+      coupling: coupling
+      dist_builder: dist_builder
+      function: function
+      num_samples: num_samples
+      params: params
+      rng: rng
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -26,7 +26,51 @@ operation: LayerNorm
 variants:
   mlx:
     api: mlx.nn.LayerNorm
+    args: {}
   flax_nnx:
-    api: flax.nnx.LayerNorm
+    api: nnx.nn.normalization.LayerNorm
+    args:
+      axis_index_groups: axis_index_groups
+      axis_name: axis_name
+      bias_init: bias_init
+      bias_metadata: bias_metadata
+      dtype: dtype
+      epsilon: epsilon
+      feature_axes: feature_axes
+      num_features: num_features
+      param_dtype: param_dtype
+      promote_dtype: promote_dtype
+      reduction_axes: reduction_axes
+      rngs: rngs
+      scale_init: scale_init
+      scale_metadata: scale_metadata
+      self: self
+      use_bias: use_bias
+      use_fast_variance: use_fast_variance
+      use_scale: use_scale
+    dispatch_rules: []
+    macro_template: nnx.LayerNorm(num_features={normalized_shape}, epsilon={eps}).call({input})
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.nn.LayerNorm
+    args: {}
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.LayerNormalization
+    dispatch_rules: []
+    macro_template: tf.keras.layers.LayerNormalization(epsilon={eps})({input})
+    pack_as: Tuple
+    required_imports: []
+  rdna:
+    api: ; Macro.LayerNorm
+    args: {}
+  nvidia_sass:
+    api: Macro.LayerNorm
+    args: {}
+  keras:
+    api: keras.layers.LayerNormalization
+    args: {}

@@ -1,0 +1,17 @@
+operation: ReduceMin
+variants:
+  paxml:
+    api: jnp.min
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.min
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.lax.min
+    args:
+      x: x
+      y: y

@@ -1,0 +1,5 @@
+operation: DsNop
+variants:
+  rdna:
+    api: ds_nop
+    description: Auto-mapped instruction DS_NOP

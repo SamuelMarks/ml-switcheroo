@@ -1,0 +1,5 @@
+operation: SPackHlB32B16
+variants:
+  rdna:
+    api: s_pack_hl_b32_b16
+    description: Auto-mapped instruction S_PACK_HL_B32_B16

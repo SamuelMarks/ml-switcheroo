@@ -1,12 +1,28 @@
-description: Returns the imaginary component of a complex number for each element
-  ``x_i`` of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  dask:
-    api: dask.array.imag
 operation: imag
-type: function
+description: imag(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.imag
+    args:
+      input: input
+  jax:
+    api: jax.lax.imag
+    args:
+      x: x
+  mlx:
+    api: mlx.core.imag
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.imag
+    args:
+      operand: operand
+  keras:
+    api: keras.ops.imag
+    args:
+      x: x

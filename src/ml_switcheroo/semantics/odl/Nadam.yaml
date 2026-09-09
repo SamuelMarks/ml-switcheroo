@@ -15,9 +15,25 @@ std_args:
 variants:
   keras:
     api: keras.optimizers.Nadam
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.optim.NAdam
+    args: {}
   tensorflow:
     api: tf.keras.optimizers.Nadam
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.nadam
+    args:
+      beta_1: b1
+      beta_2: b2
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Nadam
 type: function

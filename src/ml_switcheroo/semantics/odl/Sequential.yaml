@@ -1,12 +1,36 @@
 description: A layer that calls the passed callables in order.
 std_args:
-- _modules
+- name: _modules
+  type: Any
 type: class
 operation: Sequential
 variants:
   mlx:
     api: mlx.nn.Sequential
+    args:
+      modules: modules
+    dispatch_rules: []
+    pack_as: Tuple
+    pack_to_tuple: layers
+    required_imports: []
   flax_nnx:
-    api: flax.nnx.Sequential
+    api: nnx.Sequential
+    args:
+      fns: fns
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    pack_to_tuple: layers
+    required_imports: []
   torch:
     api: torch.nn.Sequential
+    args:
+      args: args
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.Sequential
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

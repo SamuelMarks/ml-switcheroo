@@ -1,0 +1,36 @@
+operation: inner
+description: inner(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.inner
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.inner
+    args:
+      a: a
+      b: b
+  mlx:
+    api: mlx.core.inner
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.inner
+    args:
+      x1: x1
+      x2: x2

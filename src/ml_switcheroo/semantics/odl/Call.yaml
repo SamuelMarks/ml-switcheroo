@@ -1,0 +1,15 @@
+operation: Call
+variants:
+  nvidia_sass:
+    api: CALL
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.call
+    args:
+      args: args
+      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,32 @@
+operation: rng_bit_generator
+description: Stateless PRNG bit generator. Experimental and its use is discouraged.
+std_args:
+- name: key
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(np.uint32)```'''
+- name: algorithm
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(RandomAlgorithm.RNG_DEFAULT)```'''
+variants:
+  jax:
+    api: jax.lax.rng_bit_generator
+    args:
+      key: key
+      shape: shape
+  stablehlo:
+    api: stablehlo.rng_bit_generator
+    args:
+      rng_algorithm: rng_algorithm
+      initial_state: initial_state

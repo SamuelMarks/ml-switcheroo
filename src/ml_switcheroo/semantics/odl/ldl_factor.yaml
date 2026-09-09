@@ -1,0 +1,15 @@
+operation: ldl_factor
+description: linalg.ldl_factor(A, *, hermitian=False, out=None) -> (Tensor, Tensor)
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.linalg.ldl_factor
+    args: {}

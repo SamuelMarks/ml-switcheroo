@@ -1,0 +1,10 @@
+__frameworks__:
+  keras:
+    alias:
+      module: "keras.ops"
+      name: "ops"
+  keras_layers:
+    extends: "keras"
+    alias:
+      module: "keras.layers"
+      name: "layers"

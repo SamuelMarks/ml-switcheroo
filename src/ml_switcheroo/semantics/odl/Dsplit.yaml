@@ -1,0 +1,22 @@
+operation: dsplit
+description: dsplit(input, indices_or_sections) -> List of Tensors
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: indices_or_sections
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.dsplit
+    args:
+      input: input
+      indices_or_sections: indices_or_sections
+  jax:
+    api: jax.numpy.dsplit
+    args:
+      ary: ary
+      indices_or_sections: indices_or_sections

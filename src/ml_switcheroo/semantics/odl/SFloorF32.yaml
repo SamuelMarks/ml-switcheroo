@@ -1,0 +1,5 @@
+operation: SFloorF32
+variants:
+  rdna:
+    api: s_floor_f32
+    description: Auto-mapped instruction S_FLOOR_F32

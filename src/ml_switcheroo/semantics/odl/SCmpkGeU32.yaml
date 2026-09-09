@@ -1,0 +1,5 @@
+operation: SCmpkGeU32
+variants:
+  rdna:
+    api: s_cmpk_ge_u32
+    description: Auto-mapped instruction S_CMPK_GE_U32

@@ -1,0 +1,10 @@
+operation: lower
+variants:
+  flax_nnx:
+    api: nnx.transforms.compilation.Traced.lower
+    args:
+      lowering_platforms: lowering_platforms
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

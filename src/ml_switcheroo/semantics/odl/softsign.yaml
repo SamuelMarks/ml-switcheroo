@@ -1,12 +1,16 @@
-description: Softsign activation function.
-std_args:
-- x
-type: function
 operation: softsign
+description: softsign(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
+  torch:
+    api: torch.nn.functional.softsign
+    args:
+      input: input
   keras:
     api: keras.activations.softsign
-  mlx:
-    api: mlx.nn.Softsign
-  torch:
-    api: torch.nn.Softsign
+    args:
+      x: x

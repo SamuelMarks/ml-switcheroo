@@ -1,0 +1,16 @@
+operation: Detach
+variants:
+  paxml:
+    api: jax.lax.stop_gradient
+    args:
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.lax.stop_gradient
+    args:
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

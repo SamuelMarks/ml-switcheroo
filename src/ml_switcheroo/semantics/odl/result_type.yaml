@@ -4,5 +4,16 @@ std_args: []
 variants:
   dask:
     api: dask.array.result_type
+    args: {}
+  flax_nnx:
+    api: jax.numpy.result_type
+    args:
+      args: args
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.result_type
+    args: {}
 operation: result_type
 type: function

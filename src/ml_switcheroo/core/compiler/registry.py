@@ -4,7 +4,7 @@ Centralizes registration of Frontends (Source -> IR) and Backends (IR -> Target)
 for the compiler pipeline.
 
 This registry maps framework keys to their respective compiler components.
-It cleanly separates Low-Level ISAs (SASS, RDNA) which use the explicit
+It cleanly separates Low-Level ISAs (NVIDIA_SASS, RDNA) which use the explicit
 Graph/Compiler pipeline, from High-Level frameworks (Torch, JAX, MLIR, TikZ)
 which flow through the CST Rewriter pipeline.
 """
@@ -15,8 +15,8 @@ if TYPE_CHECKING:
   from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
-from ml_switcheroo.core.compiler.frontends.sass import SassParser, SassLifter
-from ml_switcheroo.core.compiler.backends.sass import SassBackend
+from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassParser, NvidiaSassLifter
+from ml_switcheroo.core.compiler.backends.nvidia_sass import NvidiaSassBackend
 from ml_switcheroo.core.compiler.frontends.rdna import RdnaParser, RdnaLifter
 from ml_switcheroo.core.compiler.backends.rdna import RdnaBackend
 from ml_switcheroo.core.compiler.backends.python import PythonBackend
@@ -58,7 +58,7 @@ class GraphFrontend(BaseFrontend):
 
 # Backend mappings for the Compiler (Graph -> Text) pipeline
 _BACKENDS: Dict[str, Type[CompilerBackend]] = {
-  "sass": SassBackend,
+  "nvidia_sass": NvidiaSassBackend,
   "rdna": RdnaBackend,
   "python": PythonBackend,
   # High-Level Fallbacks (if routed to compiler)
@@ -90,14 +90,14 @@ _FRONTENDS = {
   "mlx": PythonFrontend,
   "paxml": PythonFrontend,
   # ISAs use Parser+Lifter tuple strategy handled by engine
-  "sass": (SassParser, SassLifter),
+  "nvidia_sass": (NvidiaSassParser, NvidiaSassLifter),
   "rdna": (RdnaParser, RdnaLifter),
   "stablehlo": StableHloParser,
 }
 
 
 def get_backend_class(target: str) -> Optional[Type[CompilerBackend]]:
-  """Return the backend class for the target (e.g. 'sass').
+  """Return the backend class for the target (e.g. 'nvidia_sass').
 
   Args:
       target: The target framework identifier.
@@ -116,7 +116,7 @@ def is_isa_target(target: str) -> bool:
   backends that strictly consume Graphs are routed here.
 
 
-  Note: MLIR/StableHLO/TikZ/Latex/HTML/RDNA/SASS use this path for graph-based generation
+  Note: MLIR/StableHLO/TikZ/Latex/HTML/RDNA/NVIDIA_SASS use this path for graph-based generation
   if selected as target in CLI, bypassing the CST rewriter.
 
   Args:
@@ -126,13 +126,13 @@ def is_isa_target(target: str) -> bool:
       True if the target is an ISA or Graph-based format.
 
   """
-  return target in ["sass", "rdna", "html", "tikz", "latex_dsl", "mlir"]
+  return target in ["nvidia_sass", "rdna", "html", "tikz", "latex_dsl", "mlir"]
 
 
 def is_isa_source(source: str) -> bool:
   """Determine if the source requires Lifting (ASM -> Graph -> AST).
 
-  Only SASS, RDNA, and StableHLO are treated as low-level source inputs.
+  Only NVIDIA_SASS, RDNA, and StableHLO are treated as low-level source inputs.
 
   Args:
       source: The source framework identifier.
@@ -141,4 +141,4 @@ def is_isa_source(source: str) -> bool:
       True if the source is an ISA requiring lifting.
 
   """
-  return source in ["sass", "rdna", "stablehlo"]
+  return source in ["nvidia_sass", "rdna", "stablehlo"]

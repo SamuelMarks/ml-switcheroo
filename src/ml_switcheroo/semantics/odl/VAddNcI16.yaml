@@ -1,0 +1,5 @@
+operation: VAddNcI16
+variants:
+  rdna:
+    api: v_add_nc_i16
+    description: Auto-mapped instruction V_ADD_NC_I16

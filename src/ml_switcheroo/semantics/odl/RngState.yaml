@@ -1,0 +1,7 @@
+operation: RngState
+variants:
+  flax_nnx:
+    api: flax.nnx.RngState
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,12 +1,37 @@
-description: Return the cumulative sum of the elements along a given axis.
-std_args:
-- x
-- axis
-- dtype
-- out
-- method
-variants:
-  dask:
-    api: dask.array.cumsum
 operation: cumsum
-type: function
+description: cumsum(input, dim, *, dtype=None, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.cumsum
+    args:
+      input: input
+      dim: dim
+  jax:
+    api: jax.lax.cumsum
+    args:
+      operand: operand
+  mlx:
+    api: mlx.core.cumsum
+    args:
+      a: a
+  keras:
+    api: keras.ops.cumsum
+    args:
+      x: x

@@ -1,0 +1,29 @@
+operation: cummin
+description: cummin(input, dim, *, out=None) -> (Tensor, LongTensor)
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.cummin
+    args:
+      input: input
+      dim: dim
+  jax:
+    api: jax.lax.cummin
+    args:
+      operand: operand
+  mlx:
+    api: mlx.core.cummin
+    args:
+      a: a

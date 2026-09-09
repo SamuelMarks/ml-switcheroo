@@ -1,0 +1,4 @@
+operation: Ldgdepbar
+variants:
+  nvidia_sass:
+    api: LDGDEPBAR

@@ -12,5 +12,29 @@ std_args:
 variants:
   dask:
     api: dask.array.expand_dims
+    args: {}
+  flax_nnx:
+    api: jax.numpy.expand_dims
+    args:
+      a: a
+      axis: axis
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.lax.expand_dims
+    args:
+      array: array
+      dimensions: dimensions
+  mlx:
+    api: mlx.core.expand_dims
+    args:
+      a: a
+      axis: axis
+  keras:
+    api: keras.ops.expand_dims
+    args:
+      x: x
+      axis: axis
 operation: expand_dims
 type: function

@@ -141,10 +141,40 @@ def test_jax_activations_coverage() -> None:
 
 
 def test_jax_import_exception() -> None:
-  """Docstring."""
-  # To test the import exception block we would have needed to mock import before the module was loaded.
-  # Since it's already loaded, we can just manually trigger the logic or ignore it.
-  pass
+  """Test jax module level import failure fallback."""
+  import importlib
+  import sys
+  from unittest.mock import MagicMock
+
+  with patch.dict(sys.modules, {"jax": None, "jax.numpy": None}):
+    import ml_switcheroo.frameworks.jax as mod
+
+    importlib.reload(mod)
+    assert mod.jax is None
+    assert mod.jnp is None
+
+  mock_jax = MagicMock()
+  mock_jnp = MagicMock()
+  with patch.dict(sys.modules, {"jax": mock_jax, "jax.numpy": mock_jnp}):
+    importlib.reload(mod)
+    assert mod.jax is not None
+    assert mod.jnp is not None
+
+  importlib.reload(mod)
+
+
+def test_jax_convert_array_exception() -> None:
+  """Test jnp.array exception handling during convert."""
+  adapter = JaxCoreAdapter()
+  import sys
+  from unittest.mock import MagicMock
+
+  mock_jax = MagicMock()
+  mock_jnp = MagicMock()
+  mock_jax.numpy = mock_jnp
+  mock_jnp.array.side_effect = ValueError("bad array")
+  with patch.dict(sys.modules, {"jax": mock_jax, "jax.numpy": mock_jnp}):
+    assert adapter.convert([1, 2, 3]) == [1, 2, 3]
 
 
 # --- Merged from test_jax_extra.py ---

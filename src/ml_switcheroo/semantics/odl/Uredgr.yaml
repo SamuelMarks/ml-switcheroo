@@ -1,0 +1,4 @@
+operation: Uredgr
+variants:
+  nvidia_sass:
+    api: UREDGR

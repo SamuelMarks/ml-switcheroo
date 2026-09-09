@@ -1,0 +1,7 @@
+operation: MakeAttentionMask
+variants:
+  flax_nnx:
+    api: flax.nnx.make_attention_mask
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

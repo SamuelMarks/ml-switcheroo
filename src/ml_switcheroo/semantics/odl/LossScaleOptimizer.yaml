@@ -18,7 +18,11 @@ std_args:
 variants:
   keras:
     api: keras.optimizers.LossScaleOptimizer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.optimizers.LossScaleOptimizer
+    args: {}
 operation: LossScaleOptimizer
 type: function

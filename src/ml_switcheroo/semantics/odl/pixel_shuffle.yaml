@@ -1,0 +1,17 @@
+operation: pixel_shuffle
+description: pixel_shuffle(input, upscale_factor) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: upscale_factor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  torch:
+    api: torch.nn.functional.pixel_shuffle
+    args:
+      input: input
+      upscale_factor: upscale_factor

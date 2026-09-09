@@ -1,0 +1,4 @@
+operation: Sttm
+variants:
+  nvidia_sass:
+    api: STTM

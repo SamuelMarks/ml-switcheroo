@@ -1,0 +1,21 @@
+operation: size
+description: Return the number of elements along a given axis.
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.numpy.size
+    args:
+      a: a
+  keras:
+    api: keras.ops.size
+    args:
+      x: x

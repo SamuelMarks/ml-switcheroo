@@ -58,6 +58,13 @@ jobs:
           mypy --strict src
           interrogate -c pyproject.toml --fail-under 100
 
+      - name: Run Snapshot Audit & Anti-Hallucination Check
+        if: matrix.python-version == '3.12'
+        run: |
+          source .venv/bin/activate
+          python scripts/audit_against_snapshots.py --strict
+          python scripts/validate_odl_json.py
+
 # This code works but is disabled as I'm doing manual doc releases:
 #
 #      - name: Doc build

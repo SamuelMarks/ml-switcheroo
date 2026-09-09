@@ -1,0 +1,8 @@
+operation: filters
+variants:
+  flax_nnx:
+    api: nnx.transforms.compilation.StateSharding.filters
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

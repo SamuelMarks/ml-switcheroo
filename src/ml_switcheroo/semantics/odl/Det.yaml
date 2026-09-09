@@ -1,0 +1,16 @@
+operation: det
+description: det(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.det
+    args:
+      input: input
+  keras:
+    api: keras.ops.det
+    args:
+      x: x

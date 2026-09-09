@@ -1,0 +1,49 @@
+operation: fft
+description: fft(input, n=None, dim=-1, norm=None, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: n
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '-1'
+- name: norm
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.fft.fft
+    args:
+      input: input
+  jax:
+    api: jax.lax.fft
+    args:
+      x: x
+      fft_type: fft_type
+      fft_lengths: fft_lengths
+  mlx:
+    api: mlx.core.fft.fft
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.fft
+    args:
+      operand: operand
+      fft_type: fft_type
+      fft_length: fft_length
+  keras:
+    api: keras.ops.fft
+    args:
+      x: x

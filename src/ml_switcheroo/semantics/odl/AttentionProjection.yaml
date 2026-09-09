@@ -1,0 +1,68 @@
+operation: AttentionProjection
+variants:
+  paxml:
+    api: praxis.layers.AttentionProjection
+    args:
+      dim_per_head: dim_per_head
+      input_dim: input_dim
+      is_output: is_output_projection
+      num_heads: num_heads
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Linear
+    args:
+      input_dim: in_features
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Linear
+    args:
+      input_dim: in_features
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.Linear
+    args:
+      input_dims: input_dims
+      output_dims: output_dims
+  keras:
+    api: keras.activations.linear
+    args:
+      x: x
+std_args:
+- name: input_dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: out_features
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: __constants__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+  default: '[''in_features'', ''out_features'']'
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''

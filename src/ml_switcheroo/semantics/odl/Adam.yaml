@@ -1,33 +1,24 @@
 description: 'Auto-discovered via Consensus (Score: 4.0)'
 std_args:
-- eps
-- lr
+- name: eps
+  type: Any
+- name: lr
+  type: Any
 type: function
 operation: Adam
 variants:
   keras:
     api: keras.optimizers.Adam
-    args:
-      learning_rate: learning_rate
-      beta_1: beta_1
-      beta_2: beta_2
-      epsilon: epsilon
-      amsgrad: amsgrad
-      ema_momentum: ema_momentum
-      name: name
-      gradient_accumulation_steps: gradient_accumulation_steps
-      weight_decay: weight_decay
-      loss_scale_factor: loss_scale_factor
-      ema_overwrite_frequency: ema_overwrite_frequency
-      clipvalue: clipvalue
-      use_ema: use_ema
-      clipnorm: clipnorm
-      global_clipnorm: global_clipnorm
-      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   mlx:
     api: mlx.optimizers.Adam
     args:
-      learning_rate: learning_rate
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   optax_shim:
     api: optax.adam
     args:
@@ -35,32 +26,39 @@ variants:
   flax_nnx:
     api: optax.adam
     args:
-      learning_rate: learning_rate
+      beta_1: b1
+      beta_2: b2
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: optimizer_constructor
   torch:
     api: torch.optim.Adam
     args:
-      amsgrad: amsgrad
-      weight_decay: weight_decay
+      epsilon: eps
+      learning_rate: lr
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.adam
     args:
-      learning_rate: learning_rate
+      beta_1: b1
+      beta_2: b2
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: optimizer_constructor
   tensorflow:
     api: tf.keras.optimizers.Adam
-    args:
-      learning_rate: learning_rate
-      beta_1: beta_1
-      beta_2: beta_2
-      epsilon: epsilon
-      amsgrad: amsgrad
-      ema_momentum: ema_momentum
-      name: name
-      gradient_accumulation_steps: gradient_accumulation_steps
-      weight_decay: weight_decay
-      loss_scale_factor: loss_scale_factor
-      ema_overwrite_frequency: ema_overwrite_frequency
-      clipvalue: clipvalue
-      use_ema: use_ema
-      clipnorm: clipnorm
-      global_clipnorm: global_clipnorm
-      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: optax.adam
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: optimizer_constructor

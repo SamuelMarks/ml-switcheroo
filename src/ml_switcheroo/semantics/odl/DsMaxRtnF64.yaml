@@ -1,0 +1,5 @@
+operation: DsMaxRtnF64
+variants:
+  rdna:
+    api: ds_max_rtn_f64
+    description: Auto-mapped instruction DS_MAX_RTN_F64

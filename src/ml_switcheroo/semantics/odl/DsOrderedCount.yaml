@@ -1,0 +1,5 @@
+operation: DsOrderedCount
+variants:
+  rdna:
+    api: ds_ordered_count
+    description: Auto-mapped instruction DS_ORDERED_COUNT

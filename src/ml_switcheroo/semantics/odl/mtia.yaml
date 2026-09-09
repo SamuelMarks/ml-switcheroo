@@ -1,0 +1,22 @@
+operation: mtia
+description: mtia(device=None, non_blocking=False, memory_format=torch.preserve_format)
+  -> Tensor
+std_args:
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: non_blocking
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: memory_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: torch.preserve_format
+variants:
+  torch:
+    api: torch.Tensor.mtia
+    args: {}

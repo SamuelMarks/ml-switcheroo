@@ -1,0 +1,43 @@
+operation: max_pool3d_with_indices
+description: max_pool3d(input, kernel_size, stride=None, padding=0, dilation=1, ceil_mode=False,
+  return_indices=False)
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: kernel_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: ''':attr:`kernel_size'''
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: ceil_mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: return_indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  torch:
+    api: torch.nn.functional.max_pool3d_with_indices
+    args:
+      input: input
+      kernel_size: kernel_size

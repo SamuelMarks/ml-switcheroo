@@ -1,0 +1,5 @@
+operation: VMulLoU16
+variants:
+  rdna:
+    api: v_mul_lo_u16
+    description: Auto-mapped instruction V_MUL_LO_U16

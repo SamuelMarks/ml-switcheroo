@@ -1,0 +1,12 @@
+operation: Reseed
+variants:
+  flax_nnx:
+    api: flax.nnx.reseed
+    args:
+      graph: graph
+      node: node
+      policy: policy
+      stream_keys: stream_keys
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,26 @@
+operation: solve_triangular
+description: linalg.solve_triangular(A, B, *, upper, left=True, unitriangular=False,
+  out=None) -> Tensor
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.linalg.solve_triangular
+    args: {}
+  mlx:
+    api: mlx.core.linalg.solve_triangular
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.solve_triangular
+    args:
+      a: a
+      b: b

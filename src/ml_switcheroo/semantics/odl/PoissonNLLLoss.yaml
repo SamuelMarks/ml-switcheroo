@@ -1,14 +1,34 @@
 description: Negative log likelihood loss with Poisson distribution of target.
 std_args:
-- log_input
-- full
-- __constants__
-- eps
-- reduce
-- size_average
-- reduction
+- name: log_input
+  type: Any
+- name: full
+  type: Any
+- name: __constants__
+  type: Any
+- name: eps
+  type: Any
+- name: reduce
+  type: Any
+- name: size_average
+  type: Any
+- name: reduction
+  type: Any
 type: class
 operation: PoissonNLLLoss
 variants:
   torch:
     api: torch.nn.PoissonNLLLoss
+    args: {}
+  paxml:
+    api: optax.poisson_nll_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: loss_reduction
+  flax_nnx:
+    api: optax.poisson_nll_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: loss_reduction

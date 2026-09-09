@@ -1,0 +1,5 @@
+operation: VSubrevCoCiU32
+variants:
+  rdna:
+    api: v_subrev_co_ci_u32
+    description: Auto-mapped instruction V_SUBREV_CO_CI_U32

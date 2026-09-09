@@ -1,18 +1,43 @@
-description: Calculates the division of each element ``x1_i`` of the input array ``x1``
-  with the respective element ``x2_i`` of the input array ``x2``.
+operation: divide
+description: divide(input, other, *, rounding_mode=None, out=None) -> Tensor
 std_args:
-- is_variadic: false
+- name: input
   kind: positional_or_keyword
-  name: x1
-  type: Union[array, int, float, complex]
-- is_variadic: false
+  is_variadic: false
+  type: Any
+- name: other
   kind: positional_or_keyword
-  name: x2
-  type: Union[array, int, float, complex]
+  is_variadic: false
+  type: Any
+- name: rounding_mode
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
-  dask:
-    api: dask.array.divide
   torch:
     api: torch.divide
-operation: divide
-type: function
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.divide
+    args:
+      x1: x1
+      x2: x2
+  mlx:
+    api: mlx.core.divide
+    args:
+      a: a
+      b: b
+  stablehlo:
+    api: stablehlo.divide
+    args:
+      lhs: lhs
+      rhs: rhs
+  keras:
+    api: keras.ops.divide
+    args: {}

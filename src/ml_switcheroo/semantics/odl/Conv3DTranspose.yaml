@@ -1,31 +1,76 @@
 description: 3D transposed convolution layer.
 std_args:
-- filters
-- kernel_size
-- strides
-- padding
-- data_format
-- dilation_rate
-- activation
-- use_bias
-- kernel_initializer
-- bias_initializer
-- kernel_regularizer
-- bias_regularizer
-- activity_regularizer
-- kernel_constraint
-- bias_constraint
-- kwargs
-- rank
-- output_padding
-- trainable
-- name
-- dtype
-- autocast
+- name: filters
+  type: Any
+- name: kernel_size
+  type: Any
+- name: strides
+  type: Any
+- name: padding
+  type: Any
+- name: data_format
+  type: Any
+- name: dilation_rate
+  type: Any
+- name: activation
+  type: Any
+- name: use_bias
+  type: Any
+- name: kernel_initializer
+  type: Any
+- name: bias_initializer
+  type: Any
+- name: kernel_regularizer
+  type: Any
+- name: bias_regularizer
+  type: Any
+- name: activity_regularizer
+  type: Any
+- name: kernel_constraint
+  type: Any
+- name: bias_constraint
+  type: Any
+- name: kwargs
+  type: Any
+- name: rank
+  type: Any
+- name: output_padding
+  type: Any
+- name: trainable
+  type: Any
+- name: name
+  type: Any
+- name: dtype
+  type: Any
+- name: autocast
+  type: Any
 variants:
   keras:
     api: keras.layers.Conv3DTranspose
+    args:
+      activation: activation
+      activity_regularizer: activity_regularizer
+      bias_constraint: bias_constraint
+      bias_initializer: bias_initializer
+      bias_regularizer: bias_regularizer
+      data_format: data_format
+      dilation_rate: dilation_rate
+      filters: filters
+      kernel_constraint: kernel_constraint
+      kernel_initializer: kernel_initializer
+      kernel_regularizer: kernel_regularizer
+      kernel_size: kernel_size
+      kwargs: kwargs
+      output_padding: output_padding
+      padding: padding
+      strides: strides
+      use_bias: use_bias
+      in_channels: null
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.Conv3DTranspose
+    args: {}
 operation: Conv3DTranspose
 type: function

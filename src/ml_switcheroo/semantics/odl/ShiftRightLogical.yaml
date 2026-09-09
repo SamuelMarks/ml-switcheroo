@@ -1,0 +1,13 @@
+operation: ShiftRightLogical
+variants:
+  stablehlo:
+    api: stablehlo.shift_right_logical
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

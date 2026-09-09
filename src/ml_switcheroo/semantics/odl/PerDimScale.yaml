@@ -1,0 +1,9 @@
+operation: PerDimScale
+variants:
+  paxml:
+    api: paxml.layers.PerDimScale
+    args:
+      dim: dim
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

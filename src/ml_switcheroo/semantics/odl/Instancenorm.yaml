@@ -1,19 +1,22 @@
+operation: InstanceNorm
 description: Applies instance normalization [1] on the inputs.
 std_args:
-- is_variadic: false
+- name: dims
   kind: positional_or_keyword
-  name: dtype
-  type: Any
-- is_variadic: false
+  is_variadic: false
+  type: int
+- name: eps
   kind: positional_or_keyword
-  name: eps
-  type: Any
-- is_variadic: false
+  is_variadic: false
+  type: float
+  default: 1e-05
+- name: affine
   kind: positional_or_keyword
-  name: num_features
-  type: Any
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
   mlx:
     api: mlx.nn.InstanceNorm
-operation: Instancenorm
-type: function
+    args:
+      dims: dims

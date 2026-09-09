@@ -1,0 +1,43 @@
+operation: triplet_margin_with_distance_loss
+description: Compute the triplet margin loss for input tensors using a custom distance
+  function.
+std_args:
+- name: anchor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: positive
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: negative
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: distance_function
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: margin
+  kind: keyword_only
+  is_variadic: false
+  type: float
+  default: '1.0'
+- name: swap
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: reduction
+  kind: keyword_only
+  is_variadic: false
+  type: str
+  default: '''mean'''
+variants:
+  torch:
+    api: torch.nn.functional.triplet_margin_with_distance_loss
+    args:
+      anchor: anchor
+      positive: positive
+      negative: negative

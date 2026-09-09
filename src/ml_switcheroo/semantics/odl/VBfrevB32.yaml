@@ -1,0 +1,5 @@
+operation: VBfrevB32
+variants:
+  rdna:
+    api: v_bfrev_b32
+    description: Auto-mapped instruction V_BFREV_B32

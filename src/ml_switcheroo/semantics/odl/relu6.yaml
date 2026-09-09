@@ -1,12 +1,21 @@
-description: Relu6 activation function.
-std_args:
-- x
-type: function
 operation: relu6
+description: relu6(input, inplace=False) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: inplace
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
 variants:
+  torch:
+    api: torch.nn.functional.relu6
+    args:
+      input: input
   keras:
     api: keras.activations.relu6
-  mlx:
-    api: mlx.nn.ReLU6
-  torch:
-    api: torch.nn.ReLU6
+    args:
+      x: x

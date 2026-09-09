@@ -1,0 +1,8 @@
+operation: selective_transform
+variants:
+  flax_nnx:
+    api: optax.selective_transform
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

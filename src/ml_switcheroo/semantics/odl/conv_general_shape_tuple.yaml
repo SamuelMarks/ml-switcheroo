@@ -1,0 +1,32 @@
+operation: conv_general_shape_tuple
+description: Auto-generated mapping for conv_general_shape_tuple.
+std_args:
+- name: lhs_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: rhs_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: window_strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dimension_numbers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.conv_general_shape_tuple
+    args:
+      lhs_shape: lhs_shape
+      rhs_shape: rhs_shape
+      window_strides: window_strides
+      padding: padding
+      dimension_numbers: dimension_numbers

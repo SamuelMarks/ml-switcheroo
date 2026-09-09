@@ -7,7 +7,41 @@ std_args:
 variants:
   latex_dsl:
     api: latex.log
+    args: {}
   dask:
     api: dask.array.log
+    args: {}
+  paxml:
+    api: jax.numpy.log
+    args:
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.log
+    args:
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  rdna:
+    api: v_log_f32
+    args: {}
+  nvidia_sass:
+    api: MUFU.LOG2
+    args: {}
+  torch:
+    api: torch.log
+    args: {}
+  jax:
+    api: jax.numpy.log
+    args: {}
+  mlx:
+    api: mlx.core.log
+    args: {}
+  keras:
+    api: keras.ops.log
+    args: {}
 operation: Log_
 type: function

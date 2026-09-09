@@ -1,0 +1,5 @@
+operation: SCmpNleF32
+variants:
+  rdna:
+    api: s_cmp_nle_f32
+    description: Auto-mapped instruction S_CMP_NLE_F32

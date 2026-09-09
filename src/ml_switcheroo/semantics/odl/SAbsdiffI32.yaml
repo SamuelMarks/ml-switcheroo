@@ -1,0 +1,5 @@
+operation: SAbsdiffI32
+variants:
+  rdna:
+    api: s_absdiff_i32
+    description: Auto-mapped instruction S_ABSDIFF_I32

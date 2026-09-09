@@ -1,0 +1,48 @@
+operation: StackedTransformer
+variants:
+  paxml:
+    api: praxis.layers.StackedTransformer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.TransformerEncoder
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.TransformerEncoder
+    args:
+      num_layers: num_layers
+      dims: dims
+      num_heads: num_heads
+std_args:
+- name: encoder_layer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: num_layers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: norm
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: enable_nested_tensor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''True`` (enabled).'''
+- name: __constants__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+  default: '[''norm'']'
+- name: mask_check
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'

@@ -1,0 +1,7 @@
+operation: FromFlatState
+variants:
+  flax_nnx:
+    api: flax.nnx.from_flat_state
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

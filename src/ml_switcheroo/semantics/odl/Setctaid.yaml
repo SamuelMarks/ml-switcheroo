@@ -1,0 +1,4 @@
+operation: Setctaid
+variants:
+  nvidia_sass:
+    api: SETCTAID

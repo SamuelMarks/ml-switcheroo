@@ -1,0 +1,7 @@
+operation: ToPureDict
+variants:
+  flax_nnx:
+    api: flax.nnx.to_pure_dict
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

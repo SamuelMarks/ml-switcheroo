@@ -1,41 +1,15 @@
-description: Applies a multi-layer gated recurrent unit (GRU) RNN to an input sequence.
+operation: Gru
+description: 'Auto-discovered via Consensus (Score: 2.0)'
 std_args:
-- is_variadic: false
+- name: args
   kind: positional_or_keyword
-  name: input_size
-  type: int
-- is_variadic: false
-  kind: positional_or_keyword
-  name: hidden_size
-  type: int
-- default: 1
-  is_variadic: false
-  kind: positional_or_keyword
-  name: num_layers
-  type: int
-- default: true
-  is_variadic: false
-  kind: positional_or_keyword
-  name: bias
-  type: bool
-- default: 0.0
-  is_variadic: false
-  kind: positional_or_keyword
-  name: dropout
-  type: float
-- default: false
-  is_variadic: false
-  kind: positional_or_keyword
-  name: bidirectional
-  type: bool
-type: class
-operation: GRU
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
 variants:
-  keras:
-    api: keras.layers.GRU
-  mlx:
-    api: mlx.nn.GRU
   torch:
-    api: torch.nn.GRU
-  tensorflow:
-    api: tf.keras.layers.GRU
+    api: torch.gru
+    args: {}

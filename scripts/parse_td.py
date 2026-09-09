@@ -1,16 +1,11 @@
 """Parse tablegen definitions."""
 
+import json
 import os
 import re
-import json
+from typing import Dict, List, Set
 
-ops_by_dialect: dict[str, set[str]] = {}
-
-re1 = re.compile(r'def\s+[A-Za-z0-9_]+Op\s*:\s*[A-Za-z0-9_]+<\s*"([a-zA-Z0-9_.-]+)"')
-re2 = re.compile(r'def\s+[A-Za-z0-9_]+Op\s*:\s*Op<\s*[A-Za-z0-9_]+,\s*"([a-zA-Z0-9_.-]+)"')
-
-# Some known directories to real dialect names mapping
-dir_to_dialect = {
+DIR_TO_DIALECT: Dict[str, str] = {
   "arith": "arith",
   "builtin": "builtin",
   "func": "func",
@@ -42,39 +37,74 @@ dir_to_dialect = {
   "transform": "transform",
 }
 
-for root, _, files in os.walk("/tmp/llvm-project/mlir/include/mlir"):
-  for f in files:
-    if f.endswith(".td"):
-      path = os.path.join(root, f)
+RE1 = re.compile(r'def\s+[A-Za-z0-9_]+Op\s*:\s*[A-Za-z0-9_]+<\s*"([a-zA-Z0-9_.-]+)"')
+RE2 = re.compile(r'def\s+[A-Za-z0-9_]+Op\s*:\s*Op<\s*[A-Za-z0-9_]+,\s*"([a-zA-Z0-9_.-]+)"')
 
-      # Identify dialect from path
-      dialect = "unknown"
-      if "/Dialect/" in path:
-        parts = path.split("/Dialect/")
-        if len(parts) > 1:
-          dir_name = parts[1].split("/")[0].lower()
-          dialect = dir_to_dialect.get(dir_name, dir_name)
-      elif "/IR/" in path:
-        dialect = "builtin"
 
-      with open(path, "r", encoding="utf-8") as file:
-        content = file.read()
+def parse_td_files(root_dir: str) -> Dict[str, List[str]]:
+  """Parse TableGen definitions from directory.
 
-        ops_found = set()
-        for m in re1.finditer(content):
+  Args:
+      root_dir: Directory containing .td TableGen files.
+
+  Returns:
+      Dictionary mapping dialect names to sorted lists of operation names.
+  """
+  ops_by_dialect: Dict[str, Set[str]] = {}
+
+  for root, _, files in os.walk(root_dir):
+    for f in files:
+      if f.endswith(".td"):
+        path = os.path.join(root, f)
+
+        if "/Dialect/" in path:
+          dir_name = path.split("/Dialect/")[1].split("/")[0].lower()
+          dialect = DIR_TO_DIALECT.get(dir_name, dir_name) if dir_name else "unknown"
+        elif "/IR/" in path:
+          dialect = "builtin"
+        else:
+          dialect = "unknown"
+
+        with open(path, "r", encoding="utf-8") as file:
+          content = file.read()
+
+        ops_found: Set[str] = set()
+        for m in RE1.finditer(content):
           ops_found.add(m.group(1))
-        for m in re2.finditer(content):
+        for m in RE2.finditer(content):
           ops_found.add(m.group(1))
 
         for op in ops_found:
           ops_by_dialect.setdefault(dialect, set()).add(op)
 
-final_ops = {}
-for d, ops in ops_by_dialect.items():
-  if len(ops) > 0:
-    final_ops[d] = sorted(list(ops))
+  final_ops: Dict[str, List[str]] = {d: sorted(list(ops)) for d, ops in ops_by_dialect.items()}
 
-with open("mlir_official_ops.json", "w") as file:
-  json.dump(final_ops, file, indent=2)
+  return final_ops
 
-print(f"Found {sum(len(v) for v in final_ops.values())} operations across {len(final_ops)} dialects.")
+
+def main(
+  llvm_include_dir: str = "/tmp/llvm-project/mlir/include/mlir",
+  output_path: str = "mlir_official_ops.json",
+) -> int:
+  """Main execution function for parsing TableGen files.
+
+  Args:
+      llvm_include_dir: Path to MLIR include directory.
+      output_path: Path to output JSON file.
+
+  Returns:
+      Exit code (0 for success).
+  """
+  final_ops = parse_td_files(llvm_include_dir)
+  with open(output_path, "w", encoding="utf-8") as file:
+    json.dump(final_ops, file, indent=2)
+
+  total_ops = sum(len(v) for v in final_ops.values())
+  print(f"Found {total_ops} operations across {len(final_ops)} dialects.")
+  return 0
+
+
+if __name__ == "__main__":
+  import sys
+
+  sys.exit(main())

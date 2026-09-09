@@ -1,0 +1,5 @@
+operation: SAndSaveexecB32
+variants:
+  rdna:
+    api: s_and_saveexec_b32
+    description: Auto-mapped instruction S_AND_SAVEEXEC_B32

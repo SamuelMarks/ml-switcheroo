@@ -133,6 +133,20 @@ def test_execute_strategy_plugin_success(original_call: cst.Call, updated_call: 
     mock_hook.assert_called_once_with(updated_call, rewriter.context.hook_context)
 
 
+def test_execute_strategy_plugin_returns_none(original_call: cst.Call, updated_call: cst.Call) -> None:
+  """Docstring."""
+  rewriter: MockRewriter = MockRewriter()
+  mapping: Dict[str, Any] = {"requires_plugin": "my_plugin"}
+  details: Dict[str, Any] = {}
+
+  with patch("ml_switcheroo.core.rewriter.calls.strategy.get_hook") as mock_get_hook:
+    mock_hook: Mock = Mock(return_value=None)
+    mock_get_hook.return_value = mock_hook
+    result: cst.CSTNode = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
+    assert result == updated_call
+    mock_hook.assert_called_once_with(updated_call, rewriter.context.hook_context)
+
+
 def test_execute_strategy_plugin_failure(original_call: cst.Call, updated_call: cst.Call) -> None:
   """Docstring."""
   rewriter: MockRewriter = MockRewriter()

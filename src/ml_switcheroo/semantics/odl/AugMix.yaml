@@ -45,7 +45,32 @@ std_args:
 variants:
   keras:
     api: keras.layers.AugMix
+    args:
+      all_ops: all_ops
+      alpha: alpha
+      chain_depth: chain_depth
+      data_format: data_format
+      factor: factor
+      interpolation: interpolation
+      kwargs: kwargs
+      num_chains: num_chains
+      seed: seed
+      value_range: value_range
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.AugMix
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: AugMix
 type: function

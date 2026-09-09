@@ -1,0 +1,12 @@
+operation: GetDefaultDevice
+variants:
+  paxml:
+    dispatch_rules: []
+    macro_template: jax.default_backend()
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: jax.default_backend()
+    pack_as: Tuple
+    required_imports: []

@@ -1,11 +1,28 @@
 description: Attention with Linear Biases (ALiBi) layer.
 op_type: class
-std_args: []
+std_args:
+- name: _alibi_mask_key
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: _alibi_mask
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
 variants:
   mlx:
     api: mlx.nn.ALiBi
-    args:
-      _alibi_mask_key: _alibi_mask_key
-      _alibi_mask: _alibi_mask
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.ALiBi
+    dispatch_rules: []
+    missing_message: Flax NNX ALiBi support requires explicit extension.
+    pack_as: Tuple
+    required_imports: []
 operation: ALiBi
 type: function

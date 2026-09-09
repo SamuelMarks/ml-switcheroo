@@ -1,0 +1,16 @@
+operation: cholesky_ex
+description: linalg.cholesky_ex(A, *, upper=False, check_errors=False, out=None) ->
+  (Tensor, Tensor)
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.linalg.cholesky_ex
+    args: {}

@@ -1,0 +1,8 @@
+operation: ClipState
+variants:
+  flax_nnx:
+    api: optax.ClipState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

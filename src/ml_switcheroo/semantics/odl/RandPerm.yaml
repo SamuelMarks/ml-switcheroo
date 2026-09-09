@@ -1,0 +1,9 @@
+operation: RandPerm
+variants:
+  flax_nnx:
+    api: jax.random.permutation
+    dispatch_rules: []
+    macro_template: jax.random.permutation({key}, {n})
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: inject_prng

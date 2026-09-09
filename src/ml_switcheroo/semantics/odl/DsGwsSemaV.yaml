@@ -1,0 +1,5 @@
+operation: DsGwsSemaV
+variants:
+  rdna:
+    api: ds_gws_sema_v
+    description: Auto-mapped instruction DS_GWS_SEMA_V

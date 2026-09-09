@@ -1,0 +1,10 @@
+operation: MaskedLmDataAugmenter
+variants:
+  paxml:
+    api: paxml.layers.MaskedLmDataAugmenter
+    args:
+      mask_prob: mask_prob
+      vocab_size: vocab_size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

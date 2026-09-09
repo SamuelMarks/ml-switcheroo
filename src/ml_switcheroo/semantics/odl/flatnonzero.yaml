@@ -1,8 +1,22 @@
-description: Return indices that are non-zero in the flattened version of a.
-std_args:
-- a
-variants:
-  dask:
-    api: dask.array.flatnonzero
 operation: flatnonzero
-type: function
+description: Return indices of nonzero elements in a flattened array
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: size
+  kind: keyword_only
+  is_variadic: false
+  type: int
+  default: '''```(None)```'''
+- name: fill_value
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+  default: '0'
+variants:
+  jax:
+    api: jax.numpy.flatnonzero
+    args:
+      a: a

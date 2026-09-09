@@ -1,23 +1,67 @@
-description: Abstract base class for generic types.
-std_args:
-- module_constructor
-- in_shardings
-- out_shardings
-- static_argnums
-- static_argnames
-- donate_argnums
-- donate_argnames
-- keep_unused
-- device
-- backend
-- inline
-- abstracted_axes
-- donate_state
-- constrain_state
-- module_init_args
-- module_init_kwargs
-variants:
-  flax_nnx:
-    api: flax.nnx.Jit
 operation: jit
-type: function
+description: Sets up ``fun`` for just-in-time compilation with XLA.
+std_args:
+- name: fun
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: donate_argnames
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: out_shardings
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(sharding_impls.UNSPECIFIED)```'''
+- name: donate_argnums
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: in_shardings
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(sharding_impls.UNSPECIFIED)```'''
+- name: keep_unused
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: static_argnames
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: static_argnums
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: inline
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: abstracted_axes
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: backend
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.jit
+    args:
+      fun: fun

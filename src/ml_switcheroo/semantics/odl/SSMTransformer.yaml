@@ -1,0 +1,7 @@
+operation: SSMTransformer
+variants:
+  paxml:
+    api: praxis.layers.SSMTransformer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

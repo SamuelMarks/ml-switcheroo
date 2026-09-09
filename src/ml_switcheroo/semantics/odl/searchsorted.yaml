@@ -1,25 +1,50 @@
-description: Finds the indices into ``x1`` such that, if the corresponding elements
-  in ``x2`` were inserted before the indices, the order of ``x1``, when sorted in
-  ascending order, would be preserved.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x1
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x2
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: side
-  type: Literal[left, right]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: sorter
-  type: Optional[array]
-variants:
-  dask:
-    api: dask.array.searchsorted
 operation: searchsorted
-type: function
+description: searchsorted(sorted_sequence, values, *, out_int32=False, right=False,
+  side=None, out=None, sorter=None) -> Tensor
+std_args:
+- name: sorted_sequence
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: values
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out_int32
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: right
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: side
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: sorter
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.searchsorted
+    args:
+      sorted_sequence: sorted_sequence
+      values: values
+  jax:
+    api: jax.numpy.searchsorted
+    args:
+      a: a
+      v: v
+  keras:
+    api: keras.ops.searchsorted
+    args:
+      sorted_sequence: sorted_sequence
+      values: values

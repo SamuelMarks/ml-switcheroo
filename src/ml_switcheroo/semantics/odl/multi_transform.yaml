@@ -1,0 +1,8 @@
+operation: multi_transform
+variants:
+  flax_nnx:
+    api: optax.multi_transform
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

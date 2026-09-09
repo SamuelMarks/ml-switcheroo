@@ -1,0 +1,7 @@
+operation: BaseActivation
+variants:
+  paxml:
+    api: praxis.layers.BaseActivation
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

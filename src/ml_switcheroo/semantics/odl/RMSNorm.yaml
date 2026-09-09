@@ -14,7 +14,62 @@ operation: RMSNorm
 variants:
   mlx:
     api: mlx.nn.RMSNorm
+    args:
+      dim: dims
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   flax_nnx:
-    api: flax.nnx.RMSNorm
+    api: nnx.nn.normalization.RMSNorm
+    args:
+      axis_index_groups: axis_index_groups
+      axis_name: axis_name
+      dtype: dtype
+      epsilon: epsilon
+      feature_axes: feature_axes
+      num_features: num_features
+      param_dtype: param_dtype
+      promote_dtype: promote_dtype
+      reduction_axes: reduction_axes
+      rngs: rngs
+      scale_init: scale_init
+      scale_metadata: scale_metadata
+      self: self
+      use_fast_variance: use_fast_variance
+      use_scale: use_scale
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.nn.RMSNorm
+    args:
+      dim: normalized_shape
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  keras:
+    api: keras.layers.RMSNormalization
+    args:
+      epsilon: epsilon
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.RmsNorm
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.RMSNormalization
+    args:
+      dim: null
+      eps: epsilon
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  rdna:
+    api: ; Macro.RMSNorm
+    args: {}
+  nvidia_sass:
+    api: Macro.RMSNorm
+    args: {}

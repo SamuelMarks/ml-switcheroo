@@ -1,20 +1,40 @@
 description: Base class for RNN modules (RNN, LSTM, GRU).
 std_args:
-- __constants__
-- __jit_unused_properties__
-- mode
-- input_size
-- hidden_size
-- num_layers
-- bias
-- batch_first
-- dropout
-- bidirectional
-- proj_size
-- dtype
-- device
+- name: __constants__
+  type: Any
+- name: __jit_unused_properties__
+  type: Any
+- name: mode
+  type: Any
+- name: input_size
+  type: Any
+- name: hidden_size
+  type: Any
+- name: num_layers
+  type: Any
+- name: bias
+  type: Any
+- name: batch_first
+  type: Any
+- name: dropout
+  type: Any
+- name: bidirectional
+  type: Any
+- name: proj_size
+  type: Any
+- name: dtype
+  type: Any
+- name: device
+  type: Any
 type: class
 operation: RNNBase
 variants:
   torch:
     api: torch.nn.RNNBase
+    args: {}
+  flax_nnx:
+    api: nnx.nn.recurrent.RNNBase
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,4 @@
+operation: Hfma2
+variants:
+  nvidia_sass:
+    api: HFMA2

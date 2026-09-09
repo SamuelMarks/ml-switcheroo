@@ -229,6 +229,11 @@ class PaxmlAdapter(JAXStackMixin):
       defs["Sequential"] = StandardMap(api="praxis.layers.Sequential")
     if "ReLU" not in defs:
       defs["ReLU"] = StandardMap(api="praxis.layers.ReLU")
+    if "Conv2d" not in defs:
+      defs["Conv2d"] = StandardMap(
+        api="praxis.layers.Conv2D",
+        args={"out_channels": "filters", "kernel_size": "filter_dims", "in_channels": None},
+      )
     return defs
 
   @property

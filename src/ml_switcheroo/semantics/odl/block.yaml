@@ -1,9 +1,12 @@
-description: Assemble an nd-array from nested lists of blocks.
-std_args:
-- arrays
-- allow_unknown_chunksizes
-variants:
-  dask:
-    api: dask.array.block
 operation: block
-type: function
+description: Auto-generated mapping for block.
+std_args:
+- name: arrays
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.block
+    args:
+      arrays: arrays

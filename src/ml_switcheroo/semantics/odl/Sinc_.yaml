@@ -7,5 +7,20 @@ std_args:
 variants:
   dask:
     api: dask.array.sinc
+    args: {}
+  paxml:
+    api: jax.numpy.sinc
+    dispatch_rules: []
+    macro_template: '{input} = jnp.sinc({input})'
+    pack_as: Tuple
+    required_imports: []
+    transformation_type: macro
+  flax_nnx:
+    api: jax.numpy.sinc
+    dispatch_rules: []
+    macro_template: '{input} = jnp.sinc({input})'
+    pack_as: Tuple
+    required_imports: []
+    transformation_type: macro
 operation: Sinc_
 type: function

@@ -1,0 +1,4 @@
+operation: Uimad
+variants:
+  nvidia_sass:
+    api: UIMAD

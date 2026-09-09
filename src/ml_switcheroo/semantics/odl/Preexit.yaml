@@ -1,0 +1,4 @@
+operation: Preexit
+variants:
+  nvidia_sass:
+    api: PREEXIT

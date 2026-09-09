@@ -1,0 +1,17 @@
+operation: Dequantize
+description: dequantize(tensor) -> Tensor
+std_args:
+- name: tensor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.dequantize
+    args:
+      tensor: tensor
+  mlx:
+    api: mlx.core.dequantize
+    args:
+      w: w
+      scales: scales

@@ -1,0 +1,17 @@
+operation: Unbind
+description: unbind(input, dim=0) -> seq
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+variants:
+  torch:
+    api: torch.unbind
+    args:
+      input: input

@@ -1,0 +1,16 @@
+operation: bessel_j0
+description: bessel_j0(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.special.bessel_j0
+    args:
+      input: input

@@ -1,0 +1,26 @@
+operation: GeluApprox
+variants:
+  keras:
+    api: keras.activations.gelu
+    dispatch_rules: []
+    inject_args:
+      approximate: true
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.nn.gelu
+    dispatch_rules: []
+    inject_args:
+      approximate: true
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: approximate
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'

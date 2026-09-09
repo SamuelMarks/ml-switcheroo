@@ -1,0 +1,15 @@
+operation: promote_types
+variants:
+  flax_nnx:
+    api: jax.numpy.promote_types
+    args:
+      a: a
+      b: b
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.promote_types
+    args:
+      a: a
+      b: b

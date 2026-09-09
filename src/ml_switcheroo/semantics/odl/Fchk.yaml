@@ -1,0 +1,4 @@
+operation: Fchk
+variants:
+  nvidia_sass:
+    api: FCHK

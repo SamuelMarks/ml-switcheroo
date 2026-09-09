@@ -7,7 +7,18 @@ std_args:
 variants:
   latex_dsl:
     api: latex.arctan
+    args: {}
   dask:
     api: dask.array.arctan
+    args: {}
+  flax_nnx:
+    api: jnp.arctan
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.atan
+    args:
+      x: x
 operation: Arctan_
 type: function

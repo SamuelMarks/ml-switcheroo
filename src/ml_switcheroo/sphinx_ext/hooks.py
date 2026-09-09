@@ -7,6 +7,8 @@ Provides lifecycle hooks to:
 
 import typing
 
+if typing.TYPE_CHECKING:
+  import sphinx.application
 
 import os
 import sphinx

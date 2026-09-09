@@ -29,7 +29,13 @@ std_args:
 variants:
   keras:
     api: keras.optimizers.Ftrl
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.optimizers.Ftrl
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Ftrl
 type: function

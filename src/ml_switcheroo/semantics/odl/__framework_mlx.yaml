@@ -1,0 +1,10 @@
+__frameworks__:
+  mlx:
+    alias:
+      module: "mlx.core"
+      name: "mx"
+  mlx_nn:
+    extends: "mlx"
+    alias:
+      module: "mlx.nn"
+      name: "nn"

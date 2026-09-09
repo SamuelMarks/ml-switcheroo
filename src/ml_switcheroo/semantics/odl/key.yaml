@@ -1,0 +1,12 @@
+operation: key
+variants:
+  flax_nnx:
+    api: nnx.nn.attention.MultiHeadAttention.key
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.key
+    args:
+      seed: seed

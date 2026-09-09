@@ -1,0 +1,4 @@
+operation: Ldl
+variants:
+  nvidia_sass:
+    api: LDL

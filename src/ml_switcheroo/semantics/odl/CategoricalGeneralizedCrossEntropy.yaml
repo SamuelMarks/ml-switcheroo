@@ -9,7 +9,11 @@ std_args:
 variants:
   keras:
     api: keras.losses.CategoricalGeneralizedCrossEntropy
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.losses.CategoricalGeneralizedCrossEntropy
+    args: {}
 operation: CategoricalGeneralizedCrossEntropy
 type: function

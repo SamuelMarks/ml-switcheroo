@@ -1,0 +1,5 @@
+operation: SMulHiI32
+variants:
+  rdna:
+    api: s_mul_hi_i32
+    description: Auto-mapped instruction S_MUL_HI_I32

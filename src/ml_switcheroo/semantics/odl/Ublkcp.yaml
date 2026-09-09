@@ -1,0 +1,4 @@
+operation: Ublkcp
+variants:
+  nvidia_sass:
+    api: UBLKCP

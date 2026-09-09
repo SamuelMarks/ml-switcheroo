@@ -1,9 +1,17 @@
 description: Fill the input Tensor with the value :math:`\text{val}`.
 std_args:
-- tensor
-- val
+- name: tensor
+  type: Any
+- name: val
+  type: Any
 type: function
 operation: constant_
 variants:
   torch:
     api: torch.nn.init.constant_
+    args:
+      tensor: tensor
+      val: val
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

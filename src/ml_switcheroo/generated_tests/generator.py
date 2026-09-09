@@ -7,6 +7,9 @@ operations across multiple frameworks by using the semantic definitions.
 import ml_switcheroo
 import typing
 
+if typing.TYPE_CHECKING:
+  import ml_switcheroo.semantics.manager
+
 
 import ast
 import pathlib

@@ -1,0 +1,7 @@
+operation: ForkRngs
+variants:
+  flax_nnx:
+    api: flax.nnx.fork_rngs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

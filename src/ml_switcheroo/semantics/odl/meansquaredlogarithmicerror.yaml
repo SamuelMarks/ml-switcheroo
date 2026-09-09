@@ -11,7 +11,23 @@ std_args:
 variants:
   keras:
     api: keras.losses.MeanSquaredLogarithmicError
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.losses.MeanSquaredLogarithmicError
-operation: meansquaredlogarithmicerror
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    macro_template: optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))
+    pack_as: Tuple
+    required_imports: []
+operation: MeanSquaredLogarithmicError
 type: function

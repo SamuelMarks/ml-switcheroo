@@ -1,0 +1,5 @@
+operation: SBarrier
+variants:
+  rdna:
+    api: s_barrier
+    description: Auto-mapped instruction S_BARRIER

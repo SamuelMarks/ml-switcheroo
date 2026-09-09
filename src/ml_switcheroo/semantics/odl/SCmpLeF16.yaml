@@ -1,0 +1,5 @@
+operation: SCmpLeF16
+variants:
+  rdna:
+    api: s_cmp_le_f16
+    description: Auto-mapped instruction S_CMP_LE_F16

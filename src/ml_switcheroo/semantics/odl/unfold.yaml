@@ -1,12 +1,32 @@
+operation: Unfold
 description: Extracts sliding local blocks from a batched input tensor.
 std_args:
-- kernel_size
-- dilation
-- padding
-- stride
-- __constants__
-type: function
-operation: unfold
+- name: kernel_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '0'
+- name: stride
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: __constants__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+  default: '[''kernel_size'', ''dilation'', ''padding'', ''stride'']'
 variants:
   torch:
     api: torch.nn.Unfold
+    args:
+      kernel_size: kernel_size

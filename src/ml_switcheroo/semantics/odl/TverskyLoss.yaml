@@ -1,0 +1,36 @@
+operation: TverskyLoss
+variants:
+  keras:
+    api: keras.losses.Tversky
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: alpha
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.5'
+- name: beta
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.5'
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''sum_over_batch_size'''
+- name: name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''tversky'''
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str

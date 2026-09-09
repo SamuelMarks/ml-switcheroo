@@ -1,0 +1,5 @@
+operation: SIcacheInv
+variants:
+  rdna:
+    api: s_icache_inv
+    description: Auto-mapped instruction S_ICACHE_INV

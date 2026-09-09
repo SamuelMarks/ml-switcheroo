@@ -1,0 +1,7 @@
+operation: character
+variants:
+  flax_nnx:
+    api: jax.numpy.character
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

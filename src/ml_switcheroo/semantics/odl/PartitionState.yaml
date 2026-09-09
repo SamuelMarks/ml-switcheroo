@@ -1,0 +1,8 @@
+operation: PartitionState
+variants:
+  flax_nnx:
+    api: optax.PartitionState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

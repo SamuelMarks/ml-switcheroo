@@ -1,0 +1,36 @@
+operation: depthwise_conv
+description: General N-D depthwise convolution.
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kernel
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''valid'''
+- name: data_format
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dilation_rate
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+variants:
+  keras:
+    api: keras.ops.depthwise_conv
+    args:
+      inputs: inputs
+      kernel: kernel

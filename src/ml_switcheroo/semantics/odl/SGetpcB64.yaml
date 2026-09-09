@@ -1,0 +1,5 @@
+operation: SGetpcB64
+variants:
+  rdna:
+    api: s_getpc_b64
+    description: Auto-mapped instruction S_GETPC_B64

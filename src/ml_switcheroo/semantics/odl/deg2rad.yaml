@@ -1,9 +1,20 @@
-description: deg2rad(x, /, out=None, *, where=True, casting='same_kind', order='K',
-  dtype=None, subok=True[, signature, extobj])
-std_args:
-- kwargs
-variants:
-  dask:
-    api: dask.array.deg2rad
 operation: deg2rad
-type: function
+description: deg2rad(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.deg2rad
+    args:
+      input: input
+  jax:
+    api: jax.numpy.deg2rad
+    args:
+      x: x

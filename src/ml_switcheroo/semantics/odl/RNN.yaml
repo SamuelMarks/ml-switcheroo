@@ -17,10 +17,58 @@ type: class
 operation: RNN
 variants:
   keras:
-    api: keras.layers.RNN
+    api: keras.layers.SimpleRNN
+    args:
+      bias: use_bias
+      hidden_size: units
+      input_size: null
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   mlx:
     api: mlx.nn.RNN
+    args:
+      bias: bias
+      hidden_size: hidden_size
+      input_size: input_size
+      nonlinearity: nonlinearity
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.nn.RNN
+    args:
+      bias: bias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
-    api: tf.keras.layers.RNN
+    api: tf.keras.layers.SimpleRNN
+    args:
+      bias: use_bias
+      hidden_size: units
+      input_size: null
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.RNN
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.RNN
+    args:
+      broadcast_rngs: broadcast_rngs
+      cell: cell
+      keep_order: keep_order
+      return_carry: return_carry
+      reverse: reverse
+      rngs: rngs
+      self: self
+      state_axes: state_axes
+      time_major: time_major
+      unroll: unroll
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

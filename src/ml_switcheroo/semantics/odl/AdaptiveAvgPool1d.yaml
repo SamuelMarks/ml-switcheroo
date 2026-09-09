@@ -14,3 +14,21 @@ operation: AdaptiveAvgPool1d
 variants:
   torch:
     api: torch.nn.AdaptiveAvgPool1d
+    args: {}
+  keras:
+    api: keras.layers.GlobalAveragePooling1D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.GlobalAveragePooling1D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.avg_pool
+    dispatch_rules: []
+    macro_template: jax.image.resize({input}, shape=(*{input}.shape[:-1], {output_size}),
+      method='linear')
+    pack_as: Tuple
+    required_imports: []

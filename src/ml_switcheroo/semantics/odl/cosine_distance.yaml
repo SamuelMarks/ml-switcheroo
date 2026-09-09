@@ -1,0 +1,8 @@
+operation: cosine_distance
+variants:
+  flax_nnx:
+    api: optax.cosine_distance
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

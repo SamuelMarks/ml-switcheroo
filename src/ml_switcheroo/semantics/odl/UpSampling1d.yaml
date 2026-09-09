@@ -1,15 +1,17 @@
+operation: UpSampling1D
 description: Upsampling layer for 1D inputs.
-op_type: class
 std_args:
-- default: 2
-  is_variadic: false
+- name: size
   kind: positional_or_keyword
-  name: size
-  type: int
+  is_variadic: false
+  type: Any
+  default: '2'
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'
 variants:
   keras:
     api: keras.layers.UpSampling1D
-  tensorflow:
-    api: tf.keras.layers.UpSampling1D
-operation: UpSampling1d
-type: function
+    args: {}

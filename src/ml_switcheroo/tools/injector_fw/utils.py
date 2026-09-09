@@ -7,7 +7,7 @@ lists, primitives) into LibCST nodes, as well as utilities for inspecting import
 import typing
 
 
-from typing import Union
+from typing import Union, List
 import json
 import libcst as cst
 
@@ -24,7 +24,7 @@ def get_import_root(node: Union[cst.Name, cst.Attribute]) -> str:
   """
   if isinstance(node, cst.Name):
     return node.value
-  if isinstance(node, cst.Attribute):
+  if isinstance(node, cst.Attribute) and isinstance(node.value, (cst.Name, cst.Attribute)):
     return get_import_root(node.value)
   return ""
 
@@ -99,11 +99,11 @@ def convert_to_cst_literal(val: typing.Any) -> cst.BaseExpression:
 
   # 2. Key-Value Recursion (Dict)
   if isinstance(val, dict):
-    elements = []
+    dict_elements: List[cst.BaseDictElement] = []
     for k, v in val.items():
       k_node = convert_to_cst_literal(k)
       v_node = convert_to_cst_literal(v)
-      elements.append(
+      dict_elements.append(
         cst.DictElement(
           key=k_node,
           value=v_node,
@@ -111,11 +111,11 @@ def convert_to_cst_literal(val: typing.Any) -> cst.BaseExpression:
         )
       )
 
-    if elements:  # pragma: no branch
-      last = elements[-1]
-      elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+    if dict_elements:  # pragma: no branch
+      last_dict_el = dict_elements[-1]
+      dict_elements[-1] = last_dict_el.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
-    return cst.Dict(elements=elements)
+    return cst.Dict(elements=dict_elements)
 
   # 3. Primitives
   if isinstance(val, bool):

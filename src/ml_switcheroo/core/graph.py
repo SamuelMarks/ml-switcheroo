@@ -9,7 +9,6 @@ enabling surgical patching later in the pipeline.
 
 from typing import Dict, List, Optional
 import libcst as cst
-from libcst import matchers as m
 
 # Re-export Core IR definitions for backward compatibility
 from ml_switcheroo.core.compiler.ir import LogicalNode, LogicalEdge, LogicalGraph, topological_sort
@@ -101,7 +100,7 @@ class GraphExtractor(cst.CSTVisitor):
     self._scope_depth += 1
     if name in ["__init__", "setup"]:
       self._in_init = True
-    elif name in ["forward", "__call__", "call", "kernel", "f"]:
+    elif name in ["forward", "__call__", "call", "kernel", "f", "model"] or self._scope_depth == 1:
       self._in_init = False  # Safety reset
       self._in_forward = True
       # Reset provenance for new forward pass analysis
@@ -136,9 +135,7 @@ class GraphExtractor(cst.CSTVisitor):
     """
     if self._in_init:
       self._analyze_layer_def(node)
-    elif self._in_forward:
-      self._analyze_data_flow(node)
-    elif self._scope_depth == 0:
+    elif self._in_forward or self._scope_depth == 0:
       self._analyze_data_flow(node)
     return True
 
@@ -229,7 +226,7 @@ class GraphExtractor(cst.CSTVisitor):
         node: The assignment node defining the layer.
     """
     target = node.targets[0].target
-    if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):
+    if not (isinstance(target, cst.Attribute) and isinstance(target.value, cst.Name) and target.value.value == "self"):
       return
 
     attr_name = target.attr.value
@@ -304,7 +301,7 @@ class GraphExtractor(cst.CSTVisitor):
     Returns:
         The registered string identifier of the layer/function node, or None if unresolved.
     """
-    if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):
+    if isinstance(func_node, cst.Attribute) and isinstance(func_node.value, cst.Name) and func_node.value.value == "self":
       return func_node.attr.value
 
     func_name = get_full_name(func_node)

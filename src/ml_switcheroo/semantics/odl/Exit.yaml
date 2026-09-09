@@ -1,0 +1,4 @@
+operation: Exit
+variants:
+  nvidia_sass:
+    api: EXIT

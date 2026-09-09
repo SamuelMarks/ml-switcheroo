@@ -18,3 +18,4 @@ lark>=1.1.9
 texsoup
 markdown-it-py[linkify]
 beautifulsoup4
+ml_framework_snapshots @ git+https://github.com/SamuelMarks/ml-framework-snapshots.git

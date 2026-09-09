@@ -7,5 +7,16 @@ std_args:
 variants:
   latex_dsl:
     api: latex.frac
+    args: {}
+  paxml:
+    dispatch_rules: []
+    macro_template: '{input} - jnp.trunc({input})'
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    macro_template: '{input} - jnp.trunc({input})'
+    pack_as: Tuple
+    required_imports: []
 operation: Frac_
 type: function

@@ -7,5 +7,28 @@ std_args:
 variants:
   dask:
     api: dask.array.negative
+    args: {}
+  paxml:
+    api: jax.numpy.negative
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.negative
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.negative
+    args: {}
+  jax:
+    api: jax.numpy.negative
+    args: {}
+  mlx:
+    api: mlx.core.negative
+    args: {}
+  keras:
+    api: keras.ops.negative
+    args: {}
 operation: Negative_
 type: function

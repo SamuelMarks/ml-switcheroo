@@ -1,0 +1,7 @@
+operation: VQNgrammer
+variants:
+  paxml:
+    api: praxis.layers.VQNgrammer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

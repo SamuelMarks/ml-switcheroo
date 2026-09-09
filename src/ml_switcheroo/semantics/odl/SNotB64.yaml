@@ -1,0 +1,5 @@
+operation: SNotB64
+variants:
+  rdna:
+    api: s_not_b64
+    description: Auto-mapped instruction S_NOT_B64

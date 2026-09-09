@@ -1,0 +1,4 @@
+operation: Red
+variants:
+  nvidia_sass:
+    api: RED

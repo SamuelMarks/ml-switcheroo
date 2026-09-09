@@ -1,0 +1,22 @@
+operation: AdaptiveAveragePooling1D
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.AdaptiveAvgPool1d
+    args:
+      output_size: output_size
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: output_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

@@ -1,0 +1,12 @@
+operation: ClassProperty
+description: Decorator that converts a method into a read-only class property.
+std_args:
+- name: func
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.classproperty
+    args:
+      func: func

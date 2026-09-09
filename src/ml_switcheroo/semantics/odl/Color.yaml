@@ -1,8 +1,0 @@
-description: CSS property color.
-std_args:
-- value
-variants:
-  sass:
-    api: sass.prop.color
-operation: Color
-type: function

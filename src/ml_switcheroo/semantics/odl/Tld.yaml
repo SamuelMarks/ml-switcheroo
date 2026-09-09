@@ -1,0 +1,4 @@
+operation: Tld
+variants:
+  nvidia_sass:
+    api: TLD

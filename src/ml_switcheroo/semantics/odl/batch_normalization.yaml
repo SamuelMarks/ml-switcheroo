@@ -1,0 +1,40 @@
+operation: batch_normalization
+description: Normalizes `x` by `mean` and `variance`.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: mean
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: variance
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: offset
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: scale
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: epsilon
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.001'
+variants:
+  keras:
+    api: keras.ops.batch_normalization
+    args:
+      x: x
+      mean: mean
+      variance: variance
+      axis: axis

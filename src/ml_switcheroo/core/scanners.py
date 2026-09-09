@@ -17,7 +17,7 @@ from typing import Set, Union
 import libcst as cst
 
 
-def get_full_name(node: Union[cst.Name, cst.Attribute]) -> str:
+def get_full_name(node: Union[cst.Name, cst.Attribute, cst.BaseExpression]) -> str:
   """Recursively resolves a CST Name or Attribute chain to a dot-separated string.
 
   This helper flattens the AST representation of dotted names into strings
@@ -32,7 +32,8 @@ def get_full_name(node: Union[cst.Name, cst.Attribute]) -> str:
   if isinstance(node, cst.Name):
     return node.value
   elif isinstance(node, cst.Attribute):
-    return f"{get_full_name(node.value)}.{node.attr.value}"
+    prefix = get_full_name(node.value)
+    return f"{prefix}.{node.attr.value}" if prefix else node.attr.value
   return ""
 
 

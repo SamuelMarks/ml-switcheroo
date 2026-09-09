@@ -1,0 +1,12 @@
+operation: reshape_weight_to_matrix
+variants:
+  flax_nnx:
+    api: jax.numpy.ndarray.reshape
+    args:
+      args: args
+      order: order
+      out_sharding: out_sharding
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

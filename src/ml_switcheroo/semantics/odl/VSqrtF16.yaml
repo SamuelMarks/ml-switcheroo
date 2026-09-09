@@ -1,0 +1,5 @@
+operation: VSqrtF16
+variants:
+  rdna:
+    api: v_sqrt_f16
+    description: Auto-mapped instruction V_SQRT_F16

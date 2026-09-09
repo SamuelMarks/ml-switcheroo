@@ -1,0 +1,9 @@
+operation: Erfc_
+variants:
+  flax_nnx:
+    api: jax.scipy.special.erfc
+    args:
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

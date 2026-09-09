@@ -1,0 +1,5 @@
+operation: VCmpxGtF16
+variants:
+  rdna:
+    api: v_cmpx_gt_f16
+    description: Auto-mapped instruction V_CMPX_GT_F16

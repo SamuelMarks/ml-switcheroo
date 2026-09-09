@@ -1,0 +1,8 @@
+operation: AddDecayedWeightsState
+variants:
+  flax_nnx:
+    api: optax.AddDecayedWeightsState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

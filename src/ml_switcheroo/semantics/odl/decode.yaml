@@ -1,0 +1,8 @@
+operation: decode
+variants:
+  flax_nnx:
+    api: nnx.nn.attention.MultiHeadAttention.decode
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

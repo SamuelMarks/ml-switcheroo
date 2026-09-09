@@ -1,0 +1,8 @@
+operation: ConvT
+variants:
+  flax_nnx:
+    api: nnx.rnglib.RngStream.count
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

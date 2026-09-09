@@ -1,0 +1,22 @@
+operation: LayerWrapper
+variants:
+  keras:
+    api: keras.layers.Wrapper
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.Wrapper
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: layer
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+  default: '{}'

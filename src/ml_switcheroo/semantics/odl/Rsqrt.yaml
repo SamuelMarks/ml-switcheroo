@@ -1,0 +1,38 @@
+operation: rsqrt
+description: rsqrt(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.rsqrt
+    args:
+      input: input
+  jax:
+    api: jax.lax.rsqrt
+    args:
+      x: x
+  mlx:
+    api: mlx.core.rsqrt
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.rsqrt
+    args:
+      operand: operand
+      result_accuracy: result_accuracy
+  rdna:
+    api: v_rsq_f32
+    args: {}
+  nvidia_sass:
+    api: MUFU.RSQ
+    args: {}
+  keras:
+    api: keras.ops.rsqrt
+    args: {}

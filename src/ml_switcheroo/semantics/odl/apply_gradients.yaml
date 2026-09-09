@@ -1,0 +1,11 @@
+operation: apply_gradients
+variants:
+  flax_nnx:
+    api: nnx.helpers.TrainState.apply_gradients
+    args:
+      grads: grads
+      kwargs: kwargs
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -1,0 +1,32 @@
+operation: group_norm
+description: Apply Group Normalization for last certain number of dimensions.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: num_groups
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: eps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: 1e-05
+variants:
+  torch:
+    api: torch.nn.functional.group_norm
+    args:
+      input: input
+      num_groups: num_groups

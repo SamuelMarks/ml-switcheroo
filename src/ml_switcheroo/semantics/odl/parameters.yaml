@@ -1,0 +1,8 @@
+operation: parameters
+variants:
+  flax_nnx:
+    api: torch_parameters_to_nnx
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: torch_parameters_to_nnx

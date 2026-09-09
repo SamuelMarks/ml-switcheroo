@@ -13,7 +13,10 @@ import ml_switcheroo
 
 import json
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+  import ml_switcheroo.semantics.manager
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.semantics.merging import (
   merge_tier_data,

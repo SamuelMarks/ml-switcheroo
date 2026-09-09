@@ -1,0 +1,4 @@
+operation: Movm
+variants:
+  nvidia_sass:
+    api: MOVM

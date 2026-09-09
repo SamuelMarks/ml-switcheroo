@@ -1,0 +1,12 @@
+operation: moving_avg_baseline
+variants:
+  flax_nnx:
+    api: optax.monte_carlo.control_variates.moving_avg_baseline
+    args:
+      decay: decay
+      function: function
+      use_decay_early_training_heuristic: use_decay_early_training_heuristic
+      zero_debias: zero_debias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

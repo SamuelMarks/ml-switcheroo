@@ -1,6 +1,5 @@
 """Test suite for the Numpy module."""
 
-import sys
 import typing
 
 import pytest
@@ -166,20 +165,25 @@ def test_numpy_tiered_examples() -> None:
 
 def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
   """Docstring."""
+  import builtins
+  import importlib
+  from unittest.mock import patch
+
   import ml_switcheroo.frameworks.numpy as np_fw
 
-  old_np = sys.modules.get("numpy")
-  sys.modules["numpy"] = None  # type: ignore
-  import importlib
+  orig_import = builtins.__import__
 
-  try:
+  def mock_import(name: str, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    """Docstring."""
+    if name == "numpy":
+      raise ImportError("no numpy")
+    return orig_import(name, *args, **kwargs)
+
+  with patch("builtins.__import__", side_effect=mock_import):
     importlib.reload(np_fw)
     assert getattr(np_fw, "np", None) is None
-  finally:
-    if old_np:
-      sys.modules["numpy"] = old_np
-    else:
-      del sys.modules["numpy"]
+
+  importlib.reload(np_fw)
 
 
 def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:

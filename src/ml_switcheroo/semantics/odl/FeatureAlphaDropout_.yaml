@@ -17,5 +17,6 @@ std_args:
 variants:
   torch:
     api: torch.nn.FeatureAlphaDropout
+    args: {}
 operation: FeatureAlphaDropout_
 type: function

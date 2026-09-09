@@ -1,0 +1,5 @@
+operation: VCvtF32Ubyte3
+variants:
+  rdna:
+    api: v_cvt_f32_ubyte3
+    description: Auto-mapped instruction V_CVT_F32_UBYTE3

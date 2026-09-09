@@ -1,0 +1,17 @@
+operation: Bmm
+variants:
+  paxml:
+    api: jnp.matmul
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.matmul
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.matmul
+    args:
+      a: a
+      b: b

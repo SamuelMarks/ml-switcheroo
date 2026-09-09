@@ -1,0 +1,23 @@
+operation: Combinations
+description: 'combinations(input: Tensor, r: int = 2, with_replacement: bool = False)
+  -> seq'
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: r
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '2'
+- name: with_replacement
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+variants:
+  torch:
+    api: torch.combinations
+    args:
+      input: input

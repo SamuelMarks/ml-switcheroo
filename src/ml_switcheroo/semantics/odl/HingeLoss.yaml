@@ -1,0 +1,65 @@
+operation: HingeLoss
+variants:
+  keras:
+    api: keras.losses.Hinge
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: optax.hinge_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.losses.hinge_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.HingeEmbeddingLoss
+    arg_values:
+      reduction:
+        none: '''none'''
+        sum: '''sum'''
+        sum_over_batch_size: '''mean'''
+    args:
+      reduction: reduction
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.losses.Hinge
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.hinge_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+std_args:
+- name: margin
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '1.0'
+- name: size_average
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: reduce
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'True'
+- name: reduction
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '''mean'''
+- name: __constants__
+  kind: positional_or_keyword
+  is_variadic: false
+  type: list
+  default: '[''margin'', ''reduction'']'

@@ -1,0 +1,40 @@
+operation: dot_general
+description: General dot product/contraction operator.
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dimension_numbers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: tuple
+- name: precision
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: preferred_element_type
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.dot_general
+    args:
+      lhs: lhs
+      rhs: rhs
+      dimension_numbers: dimension_numbers
+  stablehlo:
+    api: stablehlo.dot_general
+    args:
+      lhs: lhs
+      rhs: rhs
+      dot_dimension_numbers: dot_dimension_numbers
+      precision_config: precision_config
+      algorithm: algorithm

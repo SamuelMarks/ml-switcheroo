@@ -1,11 +1,24 @@
 description: Leaky relu activation function.
 std_args:
-- x
-- negative_slope
+- name: x
+  type: Any
+- name: negative_slope
+  type: Any
 type: function
 operation: leaky_relu
 variants:
   keras:
     api: keras.activations.leaky_relu
+    args:
+      negative_slope: negative_slope
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.nn.leaky_relu
+    args: {}
+  mlx:
+    api: mlx.nn.leaky_relu
+    args:
+      x: x

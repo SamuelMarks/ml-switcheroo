@@ -1,0 +1,8 @@
+operation: clear
+variants:
+  flax_nnx:
+    api: nnx.graph.GraphNodeImpl.clear
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

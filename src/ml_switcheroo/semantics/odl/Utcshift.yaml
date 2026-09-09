@@ -1,0 +1,4 @@
+operation: Utcshift
+variants:
+  nvidia_sass:
+    api: UTCSHIFT

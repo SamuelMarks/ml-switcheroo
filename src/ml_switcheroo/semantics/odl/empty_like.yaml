@@ -16,5 +16,20 @@ std_args:
 variants:
   dask:
     api: dask.array.empty_like
+    args: {}
+  flax_nnx:
+    api: jax.numpy.empty_like
+    args:
+      device: device
+      dtype: dtype
+      prototype: prototype
+      shape: shape
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.empty_like
+    args:
+      prototype: prototype
 operation: empty_like
 type: function

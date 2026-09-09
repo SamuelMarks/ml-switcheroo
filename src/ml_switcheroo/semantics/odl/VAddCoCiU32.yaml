@@ -1,0 +1,5 @@
+operation: VAddCoCiU32
+variants:
+  rdna:
+    api: v_add_co_ci_u32
+    description: Auto-mapped instruction V_ADD_CO_CI_U32

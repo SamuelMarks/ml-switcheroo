@@ -1,12 +1,28 @@
-description: Returns the real component of a complex number for each element ``x_i``
-  of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  dask:
-    api: dask.array.real
 operation: real
-type: function
+description: real(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.real
+    args:
+      input: input
+  jax:
+    api: jax.lax.real
+    args:
+      x: x
+  mlx:
+    api: mlx.core.real
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.real
+    args:
+      operand: operand
+  keras:
+    api: keras.ops.real
+    args:
+      x: x

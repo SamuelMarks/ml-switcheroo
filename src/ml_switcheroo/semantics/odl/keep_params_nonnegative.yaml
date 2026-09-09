@@ -1,0 +1,8 @@
+operation: keep_params_nonnegative
+variants:
+  flax_nnx:
+    api: optax.keep_params_nonnegative
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

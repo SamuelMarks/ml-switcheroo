@@ -1,0 +1,5 @@
+operation: VRndneF64
+variants:
+  rdna:
+    api: v_rndne_f64
+    description: Auto-mapped instruction V_RNDNE_F64

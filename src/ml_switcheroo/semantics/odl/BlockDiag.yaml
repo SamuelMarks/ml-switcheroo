@@ -1,0 +1,12 @@
+operation: BlockDiag
+variants:
+  paxml:
+    api: jax.scipy.linalg.block_diag
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.scipy.linalg.block_diag
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

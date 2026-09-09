@@ -1,0 +1,12 @@
+operation: ListConcatenate
+variants:
+  flax_nnx:
+    api: jnp.concatenate
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.lax.concatenate
+    args:
+      operands: operands
+      dimension: dimension

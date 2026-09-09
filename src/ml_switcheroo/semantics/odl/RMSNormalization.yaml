@@ -14,7 +14,45 @@ std_args:
 variants:
   keras:
     api: keras.layers.RMSNormalization
+    args:
+      axis: axis
+      epsilon: epsilon
+      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.RMSNormalization
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.layers.RMSNorm
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.RMSNorm
+    args:
+      axis: dims
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.RMSNorm
+    args:
+      epsilon: eps
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.RMSNorm
+    args:
+      axis: axis
+      epsilon: epsilon
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: RMSNormalization
 type: function

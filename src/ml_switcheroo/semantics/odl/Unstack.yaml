@@ -1,0 +1,21 @@
+operation: unstack
+description: Splits an array into a sequence of arrays along the given axis.
+std_args:
+- name: axis
+  kind: keyword_only
+  is_variadic: false
+  type: int
+  default: '0'
+- name: x
+  kind: positional_only
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.unstack
+    args:
+      x: x
+  keras:
+    api: keras.ops.unstack
+    args:
+      x: x

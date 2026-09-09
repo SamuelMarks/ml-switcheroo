@@ -1,0 +1,8 @@
+operation: per_example_layer_norm_clip
+variants:
+  flax_nnx:
+    api: optax.per_example_layer_norm_clip
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

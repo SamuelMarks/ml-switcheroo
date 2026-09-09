@@ -1,0 +1,12 @@
+operation: poly
+description: Auto-generated mapping for poly.
+std_args:
+- name: seq_of_zeros
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.poly
+    args:
+      seq_of_zeros: seq_of_zeros

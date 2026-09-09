@@ -1,0 +1,5 @@
+operation: VSubrevF16
+variants:
+  rdna:
+    api: v_subrev_f16
+    description: Auto-mapped instruction V_SUBREV_F16

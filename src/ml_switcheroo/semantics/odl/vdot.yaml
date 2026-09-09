@@ -1,9 +1,31 @@
-description: vdot(a, b, /)
-std_args:
-- a
-- b
-variants:
-  dask:
-    api: dask.array.vdot
 operation: vdot
-type: function
+description: vdot(input, other, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: other
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.vdot
+    args:
+      input: input
+      other: other
+  jax:
+    api: jax.numpy.vdot
+    args:
+      a: a
+      b: b
+  keras:
+    api: keras.ops.vdot
+    args:
+      x1: x1
+      x2: x2

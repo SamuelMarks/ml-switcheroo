@@ -7,5 +7,6 @@ std_args:
 variants:
   dask:
     api: dask.array.expm1
+    args: {}
 operation: Expm1_
 type: function

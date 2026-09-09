@@ -1,0 +1,5 @@
+operation: VNotB16
+variants:
+  rdna:
+    api: v_not_b16
+    description: Auto-mapped instruction V_NOT_B16

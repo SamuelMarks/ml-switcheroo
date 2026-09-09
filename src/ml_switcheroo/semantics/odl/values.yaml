@@ -1,0 +1,7 @@
+operation: values
+description: values() -> Tensor
+std_args: []
+variants:
+  torch:
+    api: torch.Tensor.values
+    args: {}

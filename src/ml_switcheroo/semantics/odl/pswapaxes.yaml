@@ -1,0 +1,27 @@
+operation: pswapaxes
+description: Swap the pmapped axis ``axis_name`` with the unmapped axis ``axis``.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis_name
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis_index_groups
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.pswapaxes
+    args:
+      x: x
+      axis_name: axis_name
+      axis: axis

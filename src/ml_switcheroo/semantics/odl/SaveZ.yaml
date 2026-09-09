@@ -1,0 +1,24 @@
+operation: savez
+description: Save several arrays into a single file in uncompressed ``.npz`` format.
+std_args:
+- name: file
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwds
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  jax:
+    api: jax.numpy.savez
+    args:
+      file: file
+  mlx:
+    api: mlx.core.savez
+    args:
+      file: file

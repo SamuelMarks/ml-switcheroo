@@ -1,7 +1,24 @@
 operation: CastFloat
 description: Definition for CastFloat
 std_args:
-- x
+- name: copy
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: device
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: x
+  kind: positional_only
+  is_variadic: false
+  type: Tensor
+- name: dtype
+  kind: positional_only
+  is_variadic: false
+  type: Any
 variants:
   torch:
     api: float

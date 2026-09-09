@@ -1,0 +1,12 @@
+operation: AcceleratorError
+variants:
+  paxml:
+    api: RuntimeError
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: RuntimeError
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

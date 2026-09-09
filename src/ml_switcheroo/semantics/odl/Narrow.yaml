@@ -1,0 +1,27 @@
+operation: Narrow
+description: narrow(input, dim, start, length) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: start
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: length
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  torch:
+    api: torch.narrow
+    args:
+      input: input
+      dim: dim
+      start: start
+      length: length

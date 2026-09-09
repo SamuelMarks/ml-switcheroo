@@ -1,0 +1,4 @@
+operation: Rtt
+variants:
+  nvidia_sass:
+    api: RTT

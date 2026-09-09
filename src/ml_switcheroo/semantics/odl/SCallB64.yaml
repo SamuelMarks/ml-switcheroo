@@ -1,0 +1,5 @@
+operation: SCallB64
+variants:
+  rdna:
+    api: s_call_b64
+    description: Auto-mapped instruction S_CALL_B64

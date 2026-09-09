@@ -16,7 +16,18 @@ std_args:
 variants:
   keras:
     api: keras.layers.Equalization
+    args:
+      bins: bins
+      data_format: data_format
+      kwargs: kwargs
+      value_range: value_range
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.Equalization
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Equalization
 type: function

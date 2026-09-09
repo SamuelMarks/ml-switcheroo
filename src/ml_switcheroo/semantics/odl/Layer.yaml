@@ -1,14 +1,43 @@
 description: Base class for all layers.
 op_type: class
 std_args:
-- trainable
-- name
-- dtype
-- activity_regularizer
-- autocast
-- kwargs
+- name: trainable
+  type: Any
+- name: name
+  type: Any
+- name: dtype
+  type: Any
+- name: activity_regularizer
+  type: Any
+- name: autocast
+  type: Any
+- name: kwargs
+  type: Any
 variants:
   tensorflow:
     api: tf.keras.layers.Layer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: praxis.base_layer.BaseLayer
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.Module
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.Module
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.Module
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: Layer
 type: function

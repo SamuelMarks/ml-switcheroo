@@ -1,0 +1,8 @@
+operation: NdArray
+variants:
+  flax_nnx:
+    api: jax.numpy.ndarray
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

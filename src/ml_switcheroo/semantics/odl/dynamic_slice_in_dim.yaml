@@ -1,0 +1,27 @@
+operation: dynamic_slice_in_dim
+description: Convenience wrapper around :func:`lax.dynamic_slice` applied to one dimension.
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: start_index
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: slice_size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+variants:
+  jax:
+    api: jax.lax.dynamic_slice_in_dim
+    args:
+      operand: operand
+      start_index: start_index
+      slice_size: slice_size

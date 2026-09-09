@@ -119,8 +119,10 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
       arg_expr = self._resolve_operand(op_val.name)
 
       kw_node = None
-      if i < len(keywords) and keywords[i]:
-        kw_node = cst.Name(keywords[i])
+      if i < len(keywords):
+        kw_val = keywords[i]
+        if kw_val:
+          kw_node = cst.Name(kw_val)
 
       args.append(
         cst.Arg(
@@ -159,8 +161,10 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     for i, op_val in enumerate(op.operands):
       arg_expr = self._resolve_operand(op_val.name)
       kw_node = None
-      if i < len(keywords) and keywords[i]:
-        kw_node = cst.Name(keywords[i])
+      if i < len(keywords):
+        kw_val = keywords[i]
+        if kw_val:
+          kw_node = cst.Name(kw_val)
 
       args.append(
         cst.Arg(

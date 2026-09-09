@@ -1,0 +1,8 @@
+operation: cast_like
+variants:
+  flax_nnx:
+    api: optax.tree.cast_like
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

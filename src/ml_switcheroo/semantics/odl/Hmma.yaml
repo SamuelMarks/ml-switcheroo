@@ -1,0 +1,4 @@
+operation: Hmma
+variants:
+  nvidia_sass:
+    api: HMMA

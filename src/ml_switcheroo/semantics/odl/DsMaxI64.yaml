@@ -1,0 +1,5 @@
+operation: DsMaxI64
+variants:
+  rdna:
+    api: ds_max_i64
+    description: Auto-mapped instruction DS_MAX_I64

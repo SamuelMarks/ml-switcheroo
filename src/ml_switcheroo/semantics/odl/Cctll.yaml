@@ -1,0 +1,4 @@
+operation: Cctll
+variants:
+  nvidia_sass:
+    api: CCTLL

@@ -90,6 +90,8 @@ def test_ensure_determinism() -> None:
     func()
 
   with mock.patch.dict("sys.modules", {"mlx": mock.MagicMock()}):
+    if "mlx.core" in sys.modules:
+      del sys.modules["mlx.core"]
     sys.modules["mlx"].core = mock.MagicMock()  # type: ignore
     func()
     sys.modules["mlx"].core.random.seed.side_effect = Exception("err")  # type: ignore

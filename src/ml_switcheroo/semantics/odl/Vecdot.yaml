@@ -1,0 +1,22 @@
+operation: vecdot
+description: linalg.vecdot(x, y, *, dim=-1, out=None) -> Tensor
+std_args:
+- name: args
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: kwargs
+  kind: keyword_only
+  is_variadic: true
+  type: Any
+variants:
+  torch:
+    api: torch.linalg.vecdot
+    args: {}
+  jax:
+    api: jax.numpy.vecdot
+    args:
+      a: a
+      b: b
+      x1: x1
+      x2: x2

@@ -1,0 +1,12 @@
+operation: cumulative_prod
+variants:
+  flax_nnx:
+    api: jax.numpy.cumulative_prod
+    args:
+      axis: axis
+      dtype: dtype
+      include_initial: include_initial
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

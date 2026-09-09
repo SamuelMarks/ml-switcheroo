@@ -1,0 +1,7 @@
+operation: RelativeBias
+variants:
+  paxml:
+    api: praxis.layers.RelativeBias
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

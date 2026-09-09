@@ -1,0 +1,5 @@
+operation: SMinI32
+variants:
+  rdna:
+    api: s_min_i32
+    description: Auto-mapped instruction S_MIN_I32

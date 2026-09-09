@@ -1,0 +1,8 @@
+operation: skip_not_finite
+variants:
+  flax_nnx:
+    api: optax.skip_not_finite
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

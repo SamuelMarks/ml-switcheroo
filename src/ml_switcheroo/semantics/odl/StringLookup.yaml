@@ -57,7 +57,32 @@ std_args:
 variants:
   keras:
     api: keras.layers.StringLookup
+    args:
+      encoding: encoding
+      idf_weights: idf_weights
+      invert: invert
+      kwargs: kwargs
+      mask_token: mask_token
+      max_tokens: max_tokens
+      name: name
+      num_oov_indices: num_oov_indices
+      oov_token: oov_token
+      output_mode: output_mode
+      pad_to_max_tokens: pad_to_max_tokens
+      sparse: sparse
+      vocabulary: vocabulary
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.StringLookup
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: string_lookup_shim
 operation: StringLookup
 type: function

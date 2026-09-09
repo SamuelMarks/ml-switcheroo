@@ -1,0 +1,14 @@
+operation: OfType
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.OfType
+    args:
+      self: self
+      type: type
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

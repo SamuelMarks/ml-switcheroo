@@ -1,8 +1,16 @@
+operation: shape
 description: Return the shape of an array.
 std_args:
-- array
-type: attribute
-operation: shape
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
-  dask:
-    api: dask.array.shape
+  jax:
+    api: jax.numpy.shape
+    args:
+      a: a
+  keras:
+    api: keras.ops.shape
+    args:
+      x: x

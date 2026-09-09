@@ -1,0 +1,5 @@
+operation: VSqrtF64
+variants:
+  rdna:
+    api: v_sqrt_f64
+    description: Auto-mapped instruction V_SQRT_F64

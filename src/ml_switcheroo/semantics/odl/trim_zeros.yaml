@@ -1,0 +1,15 @@
+operation: trim_zeros
+variants:
+  flax_nnx:
+    api: jax.numpy.trim_zeros
+    args:
+      axis: axis
+      filt: filt
+      trim: trim
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.trim_zeros
+    args:
+      filt: filt

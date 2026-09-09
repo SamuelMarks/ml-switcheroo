@@ -1,8 +1,20 @@
 description: Retrieve a Keras activation function via an identifier.
 std_args:
-- identifier
+- name: identifier
+  type: Any
 type: attribute
 operation: get
 variants:
   keras:
     api: keras.activations.get
+    args:
+      identifier: identifier
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.tree.get
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

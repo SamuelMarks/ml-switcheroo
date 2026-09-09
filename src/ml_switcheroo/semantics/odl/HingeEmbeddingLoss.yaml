@@ -23,3 +23,15 @@ operation: HingeEmbeddingLoss
 variants:
   torch:
     api: torch.nn.HingeEmbeddingLoss
+    args: {}
+  keras:
+    api: keras.losses.Hinge
+    dispatch_rules: []
+    missing_message: Keras Hinge expects 0/1 labels or -1/1 depending on config.
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.losses.Hinge
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

@@ -11,7 +11,23 @@ std_args:
 variants:
   keras:
     api: keras.losses.MeanAbsolutePercentageError
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.losses.MeanAbsolutePercentageError
-operation: meanabsolutepercentageerror
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    api: optax.mape_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: optax.mape_loss
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+operation: MeanAbsolutePercentageError
 type: function

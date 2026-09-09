@@ -11,5 +11,19 @@ std_args:
 variants:
   tikz:
     api: tikz.fill
+    args: {}
+  flax_nnx:
+    api: jnp.full_like
+    args:
+      input: a
+      value: fill_value
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.lax.full_like
+    args:
+      x: x
+      fill_value: fill_value
 operation: Fill
 type: function

@@ -1,9 +1,16 @@
-description: degrees(x, /, out=None, *, where=True, casting='same_kind', order='K',
-  dtype=None, subok=True[, signature, extobj])
-std_args:
-- kwargs
-variants:
-  dask:
-    api: dask.array.degrees
 operation: degrees
-type: function
+description: Auto-generated from jax_code_defs
+std_args:
+- name: x
+  kind: positional_only
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.degrees
+    args:
+      x: x
+  mlx:
+    api: mlx.core.degrees
+    args:
+      a: a

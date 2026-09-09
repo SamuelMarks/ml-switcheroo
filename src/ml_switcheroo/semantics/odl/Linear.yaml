@@ -1,14 +1,37 @@
-description: The class representing a Python module/class/instance attribute.
-std_args:
-- x
-type: attribute
 operation: linear
+description: linear(input, weight, bias=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
+  torch:
+    api: torch.nn.functional.linear
+    args:
+      input: input
+      weight: weight
   keras:
     api: keras.activations.linear
-  mlx:
-    api: mlx.nn.Linear
+    args:
+      x: x
+  rdna:
+    api: ; Macro.Linear
+    args: {}
+  nvidia_sass:
+    api: Macro.Linear
+    args: {}
   flax_nnx:
     api: flax.nnx.Linear
-  torch:
-    api: torch.nn.Linear
+    args: {}
+  mlx:
+    api: mlx.nn.Linear
+    args: {}

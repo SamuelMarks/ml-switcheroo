@@ -1,20 +1,24 @@
-description: Returns the sum along the specified diagonals of a matrix (or a stack
-  of matrices) ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: offset
-  type: int
-- is_variadic: false
-  kind: positional_or_keyword
-  name: dtype
-  type: Optional[dtype]
-variants:
-  dask:
-    api: dask.array.trace
 operation: trace
-type: function
+description: trace(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.trace
+    args:
+      input: input
+  jax:
+    api: jax.numpy.trace
+    args:
+      a: a
+  mlx:
+    api: mlx.core.trace
+    args:
+      a: a
+  keras:
+    api: keras.ops.trace
+    args:
+      x: x

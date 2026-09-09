@@ -13,3 +13,14 @@ operation: PixelUnshuffle
 variants:
   torch:
     api: torch.nn.PixelUnshuffle
+    args: {}
+  paxml:
+    api: jax.nn.pixel_unshuffle
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.nn.pixel_unshuffle
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

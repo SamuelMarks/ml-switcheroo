@@ -1,9 +1,26 @@
 description: Log-Softmax activation function.
 std_args:
-- x
-- axis
+- name: x
+  type: Any
+- name: axis
+  type: Any
 type: attribute
 operation: log_softmax
 variants:
   keras:
     api: keras.activations.log_softmax
+    args:
+      axis: axis
+      x: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.log_softmax
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  mlx:
+    api: mlx.nn.log_softmax
+    args:
+      x: x

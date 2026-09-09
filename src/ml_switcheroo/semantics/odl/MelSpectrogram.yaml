@@ -24,7 +24,36 @@ std_args:
 variants:
   keras:
     api: keras.layers.MelSpectrogram
+    args:
+      fft_length: fft_length
+      kwargs: kwargs
+      mag_exp: mag_exp
+      max_freq: max_freq
+      min_freq: min_freq
+      min_power: min_power
+      num_mel_bins: num_mel_bins
+      power_to_db: power_to_db
+      ref_power: ref_power
+      sampling_rate: sampling_rate
+      sequence_length: sequence_length
+      sequence_stride: sequence_stride
+      top_db: top_db
+      window: window
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.MelSpectrogram
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: MelSpectrogram
 type: function

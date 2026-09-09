@@ -1,0 +1,8 @@
+operation: kl_divergence
+variants:
+  flax_nnx:
+    api: optax.kl_divergence
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

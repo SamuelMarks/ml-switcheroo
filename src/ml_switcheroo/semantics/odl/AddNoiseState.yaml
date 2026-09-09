@@ -1,0 +1,8 @@
+operation: AddNoiseState
+variants:
+  flax_nnx:
+    api: optax.AddNoiseState
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

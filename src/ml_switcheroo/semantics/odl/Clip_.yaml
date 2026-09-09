@@ -15,7 +15,9 @@ std_args:
 variants:
   dask:
     api: dask.array.clip
+    args: {}
   tikz:
     api: tikz.clip
+    args: {}
 operation: Clip_
 type: function

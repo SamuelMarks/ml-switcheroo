@@ -10,7 +10,37 @@ operation: AlphaDropout
 variants:
   keras:
     api: keras.layers.AlphaDropout
+    args:
+      kwargs: kwargs
+      noise_shape: noise_shape
+      rate: rate
+      seed: seed
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   torch:
     api: torch.nn.AlphaDropout
+    args:
+      inplace: inplace
+      p: p
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.AlphaDropout
+    args: {}
+  paxml:
+    api: praxis.layers.AlphaDropout
+    args:
+      p: keep_prob
+    dispatch_rules: []
+    macro_template: praxis.layers.AlphaDropout(keep_prob=1.0-{p})
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.linen.AlphaDropout
+    args:
+      p: rate
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

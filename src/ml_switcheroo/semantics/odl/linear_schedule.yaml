@@ -1,15 +1,25 @@
 description: Schedule with linear transition from ``init_value`` to ``end_value``.
 std_args:
-- init_value
-- end_value
-- transition_steps
-- transition_begin
+- name: init_value
+  type: Any
+- name: end_value
+  type: Any
+- name: transition_steps
+  type: Any
+- name: transition_begin
+  type: Any
 type: attribute
 operation: linear_schedule
 variants:
   optax_shim:
     api: optax.schedules.linear_schedule
+    args: {}
   flax_nnx:
-    api: optax.schedules.linear_schedule
+    api: optax.linear_schedule
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.schedules.linear_schedule
+    args: {}

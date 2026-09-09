@@ -1,0 +1,12 @@
+operation: lognormal
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.lognormal
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.lognormal
+    args:
+      key: key

@@ -1,0 +1,4 @@
+operation: Sgxt
+variants:
+  nvidia_sass:
+    api: SGXT

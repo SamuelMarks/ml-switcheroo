@@ -1,0 +1,5 @@
+operation: SIncperflevel
+variants:
+  rdna:
+    api: s_incperflevel
+    description: Auto-mapped instruction S_INCPERFLEVEL

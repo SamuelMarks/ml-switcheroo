@@ -1,0 +1,7 @@
+operation: LocalSelfAttentionXL
+variants:
+  paxml:
+    api: paxml.layers.LocalSelfAttentionXL
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

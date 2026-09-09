@@ -1,0 +1,17 @@
+operation: rev
+description: Wraps XLA's `Rev
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dimensions
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.rev
+    args:
+      operand: operand
+      dimensions: dimensions

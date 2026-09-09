@@ -1,0 +1,48 @@
+operation: instance_norm
+description: Apply Instance Normalization independently for each channel in every
+  data sample within a batch.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: running_mean
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: running_var
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: weight
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+  default: '''```(None)```'''
+- name: use_input_stats
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: momentum
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.1'
+- name: eps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: 1e-05
+variants:
+  torch:
+    api: torch.nn.functional.instance_norm
+    args:
+      input: input

@@ -1,0 +1,16 @@
+operation: ModelAndOptimizer
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.ModelAndOptimizer
+    args:
+      model: model
+      self: self
+      tx: tx
+      wrt: wrt
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

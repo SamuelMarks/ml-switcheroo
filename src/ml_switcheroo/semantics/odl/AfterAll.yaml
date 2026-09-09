@@ -1,0 +1,9 @@
+operation: AfterAll
+variants:
+  stablehlo:
+    api: stablehlo.after_all
+std_args:
+- name: inputs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

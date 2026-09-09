@@ -1,13 +1,21 @@
 description: Computes the softmax cross entropy between sets of logits and labels.
 std_args:
-- logits
-- labels
+- name: logits
+  type: Any
+- name: labels
+  type: Any
 type: attribute
 operation: safe_softmax_cross_entropy
 variants:
   optax_shim:
     api: optax.losses.safe_softmax_cross_entropy
+    args: {}
   flax_nnx:
-    api: optax.losses.safe_softmax_cross_entropy
+    api: optax.safe_softmax_cross_entropy
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   jax:
     api: optax.losses.safe_softmax_cross_entropy
+    args: {}

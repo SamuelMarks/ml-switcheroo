@@ -1,0 +1,5 @@
+operation: SSleep
+variants:
+  rdna:
+    api: s_sleep
+    description: Auto-mapped instruction S_SLEEP

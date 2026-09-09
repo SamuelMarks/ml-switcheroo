@@ -1,0 +1,18 @@
+operation: isdtype
+description: Returns a boolean indicating whether a provided dtype is of a specified
+  kind.
+std_args:
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: kind
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+variants:
+  jax:
+    api: jax.numpy.isdtype
+    args:
+      dtype: dtype
+      kind: kind

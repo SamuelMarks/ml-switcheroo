@@ -1,10 +1,20 @@
 description: Fill the input `Tensor` with a (semi) orthogonal matrix.
 std_args:
-- tensor
-- gain
-- generator
+- name: tensor
+  type: Any
+- name: gain
+  type: Any
+- name: generator
+  type: Any
 type: function
 operation: orthogonal_
 variants:
   torch:
     api: torch.nn.init.orthogonal_
+    args:
+      gain: gain
+      generator: generator
+      tensor: tensor
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

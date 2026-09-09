@@ -1,0 +1,14 @@
+operation: diag_indices
+variants:
+  flax_nnx:
+    api: jax.numpy.diag_indices
+    args:
+      n: n
+      ndim: ndim
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.diag_indices
+    args:
+      n: n

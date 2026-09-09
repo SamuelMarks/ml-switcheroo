@@ -14,3 +14,14 @@ operation: AdaptiveMaxPool1d
 variants:
   torch:
     api: torch.nn.AdaptiveMaxPool1d
+    args: {}
+  keras:
+    api: keras.layers.GlobalMaxPooling1D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.keras.layers.GlobalMaxPooling1D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

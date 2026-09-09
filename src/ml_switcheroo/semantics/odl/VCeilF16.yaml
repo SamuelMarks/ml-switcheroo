@@ -1,0 +1,5 @@
+operation: VCeilF16
+variants:
+  rdna:
+    api: v_ceil_f16
+    description: Auto-mapped instruction V_CEIL_F16

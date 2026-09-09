@@ -1,0 +1,17 @@
+operation: ReducePrecision
+variants:
+  stablehlo:
+    api: stablehlo.reduce_precision
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: exponent_bits
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: mantissa_bits
+  kind: keyword_only
+  is_variadic: false
+  type: Any

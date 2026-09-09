@@ -1,14 +1,33 @@
-description: Calculates an implementation-dependent approximation to the tangent for
-  each element ``x_i`` of the input array ``x``.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-variants:
-  latex_dsl:
-    api: latex.tan
-  dask:
-    api: dask.array.tan
 operation: tan
-type: function
+description: tan(input, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.tan
+    args:
+      input: input
+  jax:
+    api: jax.lax.tan
+    args:
+      x: x
+  mlx:
+    api: mlx.core.tan
+    args:
+      a: a
+  stablehlo:
+    api: stablehlo.tan
+    args:
+      operand: operand
+      result_accuracy: result_accuracy
+  keras:
+    api: keras.ops.tan
+    args:
+      x: x

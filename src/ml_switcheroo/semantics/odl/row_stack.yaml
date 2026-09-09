@@ -1,0 +1,16 @@
+operation: row_stack
+description: row_stack(tensors, *, out=None) -> Tensor
+std_args:
+- name: tensors
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.row_stack
+    args:
+      tensors: tensors

@@ -28,6 +28,7 @@ from ml_switcheroo.core.graph import GraphExtractor
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
 from ml_switcheroo.core.rewriter.passes.structure import StructuralPass
+from ml_switcheroo.core.rewriter.passes.mutation import FunctionalMutationPass
 from ml_switcheroo.core.rewriter.passes.api import ApiPass
 from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass
 
@@ -38,7 +39,7 @@ from ml_switcheroo.core.compiler.registry import (
   get_backend_class,
 )
 from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
-from ml_switcheroo.core.compiler.frontends.sass import SassParser, SassLifter
+from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassParser, NvidiaSassLifter
 from ml_switcheroo.core.compiler.frontends.rdna import RdnaParser, RdnaLifter
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.frameworks.base import get_adapter
@@ -180,7 +181,7 @@ class ASTEngine:
   def _run_compiler_pipeline(self, code: str, tracer: Any) -> ConversionResult:
     """Run the Graph-based compiler pipeline for Instruction Set Architectures (ISAs).
 
-    This pipeline handles conversion for targets like SASS, RDNA, or graph-level
+    This pipeline handles conversion for targets like NVIDIA_SASS, RDNA, or graph-level
     optimizations such as sharding. It parses the source into a graph, optimizes it
     (if enabled), applies sharding inference, and then runs a compiler backend
     to emit target code.
@@ -225,11 +226,11 @@ class ASTEngine:
         graph = frontend.parse_to_graph()
 
     else:
-      # ISA Source (SASS/RDNA) logic
-      if self.source == "sass":
-        parser = SassParser(code)
+      # ISA Source (NVIDIA_SASS/RDNA) logic
+      if self.source == "nvidia_sass":
+        parser = NvidiaSassParser(code)
         nodes = parser.parse().statements
-        lifter = SassLifter()
+        lifter = NvidiaSassLifter()
         graph = lifter.lift(nodes)
       elif self.source == "rdna":
         parser = RdnaParser(code)  # type: ignore
@@ -416,6 +417,7 @@ class ASTEngine:
     pipeline = RewriterPipeline(
       [
         StructuralPass(),  # Class and signature changes
+        FunctionalMutationPass(),  # In-place mutations, indexing, PRNG state
         ApiPass(),  # Core logic, calls, attributes
         AuxiliaryPass(),  # Decorators and safety mechanisms
       ]

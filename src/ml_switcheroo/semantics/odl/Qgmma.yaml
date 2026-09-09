@@ -1,0 +1,4 @@
+operation: Qgmma
+variants:
+  nvidia_sass:
+    api: QGMMA

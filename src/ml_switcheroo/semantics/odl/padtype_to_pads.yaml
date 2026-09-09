@@ -1,0 +1,27 @@
+operation: padtype_to_pads
+description: Convert padding string to list of pairs of pad values.
+std_args:
+- name: in_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: window_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: window_strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  jax:
+    api: jax.lax.padtype_to_pads
+    args:
+      in_shape: in_shape
+      window_shape: window_shape
+      window_strides: window_strides
+      padding: padding

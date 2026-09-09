@@ -1,0 +1,31 @@
+operation: Renorm
+description: renorm(input, p, dim, maxnorm, *, out=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: maxnorm
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.renorm
+    args:
+      input: input
+      p: p
+      dim: dim
+      maxnorm: maxnorm

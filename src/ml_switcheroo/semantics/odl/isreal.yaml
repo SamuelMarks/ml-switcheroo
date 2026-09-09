@@ -1,8 +1,16 @@
-description: Returns a bool array, where True if input element is real.
-std_args:
-- kwargs
-variants:
-  dask:
-    api: dask.array.isreal
 operation: isreal
-type: function
+description: isreal(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.isreal
+    args:
+      input: input
+  jax:
+    api: jax.numpy.isreal
+    args:
+      x: x

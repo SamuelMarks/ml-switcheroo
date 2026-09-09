@@ -1,7 +1,21 @@
-description: LaTeX \iota macro.
-std_args: []
-variants:
-  latex_dsl:
-    api: latex.iota
 operation: iota
-type: function
+description: Wraps XLA's `Iota
+std_args:
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.lax.iota
+    args:
+      dtype: dtype
+      size: size
+  stablehlo:
+    api: stablehlo.iota
+    args:
+      iota_dimension: iota_dimension

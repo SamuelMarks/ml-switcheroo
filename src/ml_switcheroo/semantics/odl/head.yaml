@@ -1,12 +1,24 @@
 description: HTML <head> element.
 std_args:
-- children
-- id
-- class_name
-- style
-- kwargs
+- name: children
+  type: Any
+- name: id
+  type: Any
+- name: class_name
+  type: Any
+- name: style
+  type: Any
+- name: kwargs
+  type: Any
 type: attribute
 operation: head
 variants:
   html_dsl:
     api: html.head
+    args: {}
+  flax_nnx:
+    api: nnx.nn.attention.MultiHeadAttention.head_dim
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

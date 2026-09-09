@@ -1,0 +1,16 @@
+operation: FromNumpy
+variants:
+  paxml:
+    api: jnp.array
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jnp.array
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.numpy.array
+    args:
+      object: object

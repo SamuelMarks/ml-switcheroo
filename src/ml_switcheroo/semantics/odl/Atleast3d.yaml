@@ -1,0 +1,12 @@
+operation: Atleast3d
+variants:
+  paxml:
+    api: jax.numpy.atleast_3d
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: jax.numpy.atleast_3d
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

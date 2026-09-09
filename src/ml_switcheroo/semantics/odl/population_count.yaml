@@ -1,0 +1,12 @@
+operation: population_count
+description: Elementwise popcount, count the number of set bits in each element.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.population_count
+    args:
+      x: x

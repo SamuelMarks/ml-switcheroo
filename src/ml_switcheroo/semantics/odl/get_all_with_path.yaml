@@ -1,0 +1,8 @@
+operation: get_all_with_path
+variants:
+  flax_nnx:
+    api: optax.tree.get_all_with_path
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

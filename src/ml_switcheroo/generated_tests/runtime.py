@@ -42,7 +42,7 @@ def ensure_determinism() -> None:
   if "torch" in sys.modules:  # pragma: no branch
     try:
       sys.modules["torch"].manual_seed(seed)
-      if sys.modules["torch"].cuda.is_available():
+      if sys.modules["torch"].cuda.is_available():  # pragma: no branch
         sys.modules["torch"].cuda.manual_seed_all(seed)
     except Exception:
       pass

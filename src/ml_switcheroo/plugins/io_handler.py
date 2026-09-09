@@ -58,7 +58,7 @@ def _get_arg(args: List[cst.Arg], index: int, name: str) -> Optional[cst.Arg]:
 
 
 @register_hook("io_handler")
-def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
+def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.BaseExpression:
   """Transform to rewrite save/load calls using Adapter-specific logic.
 
   Triggers:

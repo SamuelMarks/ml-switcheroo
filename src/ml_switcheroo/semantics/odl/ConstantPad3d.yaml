@@ -1,9 +1,12 @@
 description: Pads the input tensor boundaries with a constant value.
 std_args:
-- padding
-- value
+- name: padding
+  type: Any
+- name: value
+  type: Any
 type: class
 operation: ConstantPad3d
 variants:
   torch:
     api: torch.nn.ConstantPad3d
+    args: {}

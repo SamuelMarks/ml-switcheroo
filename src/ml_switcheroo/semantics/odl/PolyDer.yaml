@@ -1,0 +1,17 @@
+operation: polyder
+description: Auto-generated mapping for polyder.
+std_args:
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: m
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+variants:
+  jax:
+    api: jax.numpy.polyder
+    args:
+      p: p

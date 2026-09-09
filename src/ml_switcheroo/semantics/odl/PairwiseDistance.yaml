@@ -18,3 +18,4 @@ operation: PairwiseDistance
 variants:
   torch:
     api: torch.nn.PairwiseDistance
+    args: {}

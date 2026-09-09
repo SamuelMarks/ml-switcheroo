@@ -1,0 +1,37 @@
+operation: SelectAndScatter
+variants:
+  stablehlo:
+    api: stablehlo.select_and_scatter
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: source
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: init_value
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: window_dimensions
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: window_strides
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+- name: padding
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: select
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: scatter
+  kind: keyword_only
+  is_variadic: false
+  type: Any

@@ -1,0 +1,8 @@
+operation: d_model
+variants:
+  flax_nnx:
+    api: nnx.training.optimizer.ModelAndOptimizer.model
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

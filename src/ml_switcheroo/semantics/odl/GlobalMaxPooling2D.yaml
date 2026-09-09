@@ -11,8 +11,27 @@ std_args:
   type: bool
 variants:
   keras:
-    api: keras.layers.GlobalMaxPool2D
+    api: keras.layers.GlobalMaxPooling2D
+    args:
+      data_format: data_format
+      keepdims: keepdims
+      kwargs: kwargs
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
-    api: tf.keras.layers.GlobalMaxPool2D
+    api: tf.keras.layers.GlobalMaxPooling2D
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  torch:
+    api: torch.nn.AdaptiveMaxPool2d
+    dispatch_rules: []
+    inject_args:
+      output_size:
+      - 1
+      - 1
+    pack_as: Tuple
+    required_imports: []
 operation: GlobalMaxPooling2D
 type: function

@@ -1,12 +1,32 @@
-description: Upsample the input signal spatially.
-std_args:
-- scale_factor
-- mode
-- align_corners
-type: function
 operation: upsample
+description: Upsample input.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: align_corners
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: '''```(None)```'''
+- name: size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: mode
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''nearest'''
+- name: scale_factor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
 variants:
-  mlx:
-    api: mlx.nn.Upsample
   torch:
-    api: torch.nn.Upsample
+    api: torch.nn.functional.upsample
+    args:
+      input: input

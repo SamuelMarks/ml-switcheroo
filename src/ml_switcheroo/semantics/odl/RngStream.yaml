@@ -1,0 +1,7 @@
+operation: RngStream
+variants:
+  flax_nnx:
+    api: flax.nnx.RngStream
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

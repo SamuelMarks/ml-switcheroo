@@ -1,0 +1,17 @@
+operation: If
+variants:
+  stablehlo:
+    api: stablehlo.if
+std_args:
+- name: pred
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: true_branch
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: false_branch
+  kind: keyword_only
+  is_variadic: false
+  type: Any

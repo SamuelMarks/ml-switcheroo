@@ -1,31 +1,74 @@
-description: Optimizer that implements the AdamW algorithm.
+operation: AdamW
+description: Implements AdamW algorithm, where weight decay does not accumulate in
+  the momentum nor variance.
 std_args:
-- is_variadic: false
+- name: params
   kind: positional_or_keyword
-  name: eps
+  is_variadic: false
   type: Any
-- is_variadic: false
+- name: lr
   kind: positional_or_keyword
-  name: lr
-  type: Any
-- is_variadic: false
+  is_variadic: false
+  type: Tensor
+  default: '0.001'
+- name: betas
   kind: positional_or_keyword
-  name: weight_decay
+  is_variadic: false
+  type: Tensor
+  default: (0.9, 0.999)
+- name: eps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: 1e-08
+- name: weight_decay
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '0.01'
+- name: amsgrad
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: maximize
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: foreach
+  kind: keyword_only
+  is_variadic: false
   type: Any
+  default: '''```(None)```'''
+- name: capturable
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: differentiable
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: fused
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
 variants:
-  keras:
-    api: keras.optimizers.AdamW
-  mlx:
-    api: mlx.optimizers.AdamW
-  optax_shim:
-    api: optax.adamw
-  flax_nnx:
-    api: optax.adamw
   torch:
     api: torch.optim.AdamW
+    args:
+      params: params
   jax:
     api: optax.adamw
-  tensorflow:
-    api: tf.keras.optimizers.AdamW
-operation: Adamw
-type: function
+    args:
+      learning_rate: learning_rate
+  mlx:
+    api: mlx.optimizers.AdamW
+    args:
+      learning_rate: learning_rate
+  keras:
+    api: keras.optimizers.AdamW
+    args: {}

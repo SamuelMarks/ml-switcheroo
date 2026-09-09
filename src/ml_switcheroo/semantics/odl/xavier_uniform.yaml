@@ -1,8 +1,22 @@
 description: xavier_uniform(...)
 std_args:
-- kwargs
+- name: kwargs
+  type: Any
 type: attribute
 operation: xavier_uniform
 variants:
   torch:
     api: torch.nn.init.xavier_uniform
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: nnx.rnglib.Rngs.xavier_uniform
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.nn.initializers.glorot_uniform
+    args: {}

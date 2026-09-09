@@ -1,0 +1,4 @@
+operation: S2R
+variants:
+  nvidia_sass:
+    api: S2R

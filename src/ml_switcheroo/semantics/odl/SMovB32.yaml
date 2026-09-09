@@ -1,0 +1,5 @@
+operation: SMovB32
+variants:
+  rdna:
+    api: s_mov_b32
+    description: Auto-mapped instruction S_MOV_B32

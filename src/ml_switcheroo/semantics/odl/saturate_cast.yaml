@@ -1,0 +1,17 @@
+operation: saturate_cast
+description: Performs a safe saturating cast to the desired dtype.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  keras:
+    api: keras.ops.saturate_cast
+    args:
+      x: x
+      dtype: dtype

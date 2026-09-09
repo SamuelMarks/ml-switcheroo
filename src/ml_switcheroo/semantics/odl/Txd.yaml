@@ -1,0 +1,4 @@
+operation: Txd
+variants:
+  nvidia_sass:
+    api: TXD

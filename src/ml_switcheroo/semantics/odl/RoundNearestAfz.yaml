@@ -1,0 +1,9 @@
+operation: RoundNearestAfz
+variants:
+  stablehlo:
+    api: stablehlo.round_nearest_afz
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

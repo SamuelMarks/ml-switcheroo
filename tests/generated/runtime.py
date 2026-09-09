@@ -30,14 +30,14 @@ MLX_AVAILABLE = importlib.util.find_spec("mlx") is not None and importlib.util.f
 # --- numpy ---
 NUMPY_AVAILABLE = importlib.util.find_spec("numpy") is not None
 
+# --- nvidia_sass ---
+NVIDIA_SASS_AVAILABLE = True
+
 # --- paxml ---
 PAXML_AVAILABLE = importlib.util.find_spec("jax") is not None
 
 # --- rdna ---
 RDNA_AVAILABLE = True
-
-# --- sass ---
-SASS_AVAILABLE = True
 
 # --- stablehlo ---
 STABLEHLO_AVAILABLE = True

@@ -1,0 +1,5 @@
+operation: VCmpFF16
+variants:
+  rdna:
+    api: v_cmp_f_f16
+    description: Auto-mapped instruction V_CMP_F_F16

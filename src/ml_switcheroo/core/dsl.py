@@ -256,7 +256,7 @@ class OperationDef(BaseModel):
   """
 
   operation: str = Field(..., description="The PascalCase abstract name (e.g. 'LogSoftmax').")
-  description: str = Field(..., description="Docstring summary of what the operation does.")
+  description: str = Field(default="", description="Docstring summary of what the operation does.")
 
   state_semantics: Optional[str] = Field(
     None, description="State semantics (e.g. 'pure' or 'stateful') as per the ODL specification."

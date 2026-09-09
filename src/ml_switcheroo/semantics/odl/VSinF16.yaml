@@ -1,0 +1,5 @@
+operation: VSinF16
+variants:
+  rdna:
+    api: v_sin_f16
+    description: Auto-mapped instruction V_SIN_F16

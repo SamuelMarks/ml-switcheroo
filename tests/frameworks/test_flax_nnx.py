@@ -57,7 +57,7 @@ def test_flax_nnx_harness_init_code() -> None:
 def test_flax_nnx_supported_tiers() -> None:
   """Verifies the behavior of Flax NNX supported tiers."""
   adapter = FlaxNNXAdapter()
-  tiers: set[SemanticTier] = adapter.supported_tiers
+  tiers: list[SemanticTier] = adapter.supported_tiers
   assert SemanticTier.ARRAY_API in tiers
 
 
@@ -204,7 +204,7 @@ def test_flax_nnx_convert_branch() -> None:
   mock_jnp = MagicMock()
   mock_jnp.array.side_effect = Exception("Fail")
   with patch.dict(sys.modules, {"jax.numpy": mock_jnp}):
-    obj = ObjWithArray()
+    obj: typing.Any = ObjWithArray()
     assert adapter.convert(obj) is obj
 
 
@@ -316,7 +316,7 @@ def test_flax_nnx_array_exception() -> None:
   mock_jnp.array.side_effect = Exception("Fail")
 
   with patch.dict(sys.modules, {"jax.numpy": mock_jnp}):
-    obj = FakeArray()
+    obj: typing.Any = FakeArray()
     res: typing.Any = adapter.convert(obj)
     assert res is obj
 
@@ -397,3 +397,20 @@ def test_flax_nnx_collect_ghost_no_snapshot() -> None:
   adapter = FlaxNNXAdapter()
   adapter._snapshot_data = None  # type: ignore
   assert adapter._collect_ghost(SemanticTier.EXTRAS) == []
+
+
+def test_flax_nnx_definitions_prepopulated() -> None:
+  """Verifies definitions when ReLU, Linear, Conv2d are already present."""
+  from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter, StandardMap
+
+  custom_defs: dict[str, StandardMap] = {
+    "ReLU": StandardMap(api="custom.relu"),
+    "Linear": StandardMap(api="custom.linear"),
+    "Conv2d": StandardMap(api="custom.conv2d"),
+  }
+  with patch("ml_switcheroo.frameworks.flax_nnx.load_definitions", return_value=custom_defs):
+    adapter = FlaxNNXAdapter()
+    defs = adapter.definitions
+    assert defs["ReLU"].api == "custom.relu"
+    assert defs["Linear"].api == "custom.linear"
+    assert defs["Conv2d"].api == "custom.conv2d"

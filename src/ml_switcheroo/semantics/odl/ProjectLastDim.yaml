@@ -1,0 +1,7 @@
+operation: ProjectLastDim
+variants:
+  paxml:
+    api: praxis.layers.project_last_dim
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

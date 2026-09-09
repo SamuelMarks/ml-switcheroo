@@ -1,0 +1,5 @@
+operation: SCeilF32
+variants:
+  rdna:
+    api: s_ceil_f32
+    description: Auto-mapped instruction S_CEIL_F32

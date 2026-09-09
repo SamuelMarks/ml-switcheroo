@@ -1,0 +1,5 @@
+operation: VMin3U16
+variants:
+  rdna:
+    api: v_min3_u16
+    description: Auto-mapped instruction V_MIN3_U16

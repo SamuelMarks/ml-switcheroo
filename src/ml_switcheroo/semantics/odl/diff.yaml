@@ -1,27 +1,42 @@
-description: Calculates the n-th discrete forward difference along a specified axis.
-std_args:
-- is_variadic: false
-  kind: positional_or_keyword
-  name: x
-  type: array
-- is_variadic: false
-  kind: positional_or_keyword
-  name: axis
-  type: int
-- is_variadic: false
-  kind: positional_or_keyword
-  name: n
-  type: int
-- is_variadic: false
-  kind: positional_or_keyword
-  name: prepend
-  type: Optional[array]
-- is_variadic: false
-  kind: positional_or_keyword
-  name: append
-  type: Optional[array]
-variants:
-  dask:
-    api: dask.array.diff
 operation: diff
-type: function
+description: diff(input, n=1, dim=-1, prepend=None, append=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: n
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '1'
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '-1'
+- name: prepend
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: append
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.diff
+    args:
+      input: input
+  jax:
+    api: jax.numpy.diff
+    args:
+      a: a
+  keras:
+    api: keras.ops.diff
+    args:
+      a: a

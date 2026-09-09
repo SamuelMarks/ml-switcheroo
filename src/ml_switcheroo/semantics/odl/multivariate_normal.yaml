@@ -1,0 +1,14 @@
+operation: multivariate_normal
+variants:
+  flax_nnx:
+    api: nnx.rnglib.Rngs.multivariate_normal
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  jax:
+    api: jax.random.multivariate_normal
+    args:
+      key: key
+      mean: mean
+      cov: cov

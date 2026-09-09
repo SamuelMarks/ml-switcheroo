@@ -1,0 +1,21 @@
+operation: Infeed
+variants:
+  stablehlo:
+    api: stablehlo.infeed
+  jax:
+    api: jax.lax.infeed
+    args:
+      token: token
+std_args:
+- name: token
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: infeed_config
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: layout
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor

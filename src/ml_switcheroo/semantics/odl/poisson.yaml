@@ -1,12 +1,21 @@
-description: Computes the Poisson loss between `y_true` & `y_pred`.
-std_args:
-- reduction
-- name
-- dtype
-variants:
-  keras:
-    api: keras.losses.Poisson
-  tensorflow:
-    api: tf.keras.losses.Poisson
 operation: poisson
-type: function
+description: poisson(input, generator=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: generator
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.poisson
+    args:
+      input: input
+  jax:
+    api: jax.random.poisson
+    args:
+      key: key
+      lam: lam

@@ -1,0 +1,4 @@
+operation: Ret
+variants:
+  nvidia_sass:
+    api: RET

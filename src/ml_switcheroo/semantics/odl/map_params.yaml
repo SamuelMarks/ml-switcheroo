@@ -1,0 +1,8 @@
+operation: map_params
+variants:
+  flax_nnx:
+    api: optax.tree.map_params
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

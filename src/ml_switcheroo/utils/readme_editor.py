@@ -87,17 +87,20 @@ class ReadmeEditor:
 
     # We need to map tokens back to lines.
     # tokens[target_idx].map contains the line numbers [start, end]
-    start_line = tokens[target_idx].map[1] if tokens[target_idx].map else -1
+    start_line = -1
+    target_map = tokens[target_idx].map
+    if target_map is not None:
+      start_line = target_map[1]
 
     if start_line == -1:
       log_error("Could not determine line mapping for header.")
       return False
 
-    end_line = (
-      tokens[next_heading_idx].map[0]
-      if next_heading_idx != -1 and tokens[next_heading_idx].map
-      else len(content.splitlines())
-    )
+    end_line = len(content.splitlines())
+    if next_heading_idx != -1:
+      next_map = tokens[next_heading_idx].map
+      if next_map is not None:  # pragma: no branch
+        end_line = next_map[0]
 
     lines = content.splitlines()
     pre_lines = lines[:start_line]

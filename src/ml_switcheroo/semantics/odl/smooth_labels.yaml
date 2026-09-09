@@ -1,0 +1,8 @@
+operation: smooth_labels
+variants:
+  flax_nnx:
+    api: optax.smooth_labels
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

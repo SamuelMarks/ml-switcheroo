@@ -1,0 +1,27 @@
+operation: logistic
+description: Sample logistic random values with given shape and float dtype.
+std_args:
+- name: key
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: ()
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '''```(float)```'''
+variants:
+  jax:
+    api: jax.random.logistic
+    args:
+      key: key
+  stablehlo:
+    api: stablehlo.logistic
+    args:
+      operand: operand
+      result_accuracy: result_accuracy

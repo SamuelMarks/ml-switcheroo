@@ -102,7 +102,7 @@ locally.
 
 The `ASTEngine` orchestrates the conversion pipeline. It handles parsing, deep analysis, optimization, and transformation by performing **Route Selection**:
 * **Rewriter Pipeline:** Used when both source and target are high-level frameworks (e.g., PyTorch to JAX).
-* **Compiler Pipeline:** Used when the source or target involves an ISA (e.g., SASS/RDNA) or visual documentation targets.
+* **Compiler Pipeline:** Used when the source or target involves an ISA (e.g., NVIDIA_SASS/RDNA) or visual documentation targets.
 
 ```mermaid
 graph TD

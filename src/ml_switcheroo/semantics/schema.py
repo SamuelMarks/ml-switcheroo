@@ -132,3 +132,32 @@ class SemanticsFile(BaseModel):
   frameworks: Optional[Dict[str, FrameworkTraits]] = Field(None, alias="__frameworks__")
   imports: Optional[Dict[str, Any]] = Field(None, alias="__imports__")
   patterns: Optional[List[PatternDef]] = Field(default_factory=lambda: [], alias="__patterns__")
+
+
+def validate_yaml_schema(yaml_content: str) -> SemanticsFile:
+  """Validates a YAML string against the SemanticsFile schema.
+
+  Args:
+      yaml_content: The YAML string to validate.
+
+  Returns:
+      A validated SemanticsFile instance.
+
+  Raises:
+      ValueError: If the YAML content is invalid or fails schema validation.
+  """
+  import yaml
+  from pydantic import ValidationError
+
+  try:
+    data = yaml.safe_load(yaml_content)
+  except yaml.YAMLError as e:
+    raise ValueError(f"Invalid YAML content: {e}")
+
+  if data is None:
+    data = {}
+
+  try:
+    return SemanticsFile.model_validate(data)
+  except ValidationError as e:
+    raise ValueError(f"Schema validation failed: {e}")

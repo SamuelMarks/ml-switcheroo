@@ -1,13 +1,33 @@
-description: Return the sum of array elements over a given axis treating Not a
-std_args:
-- a
-- axis
-- dtype
-- keepdims
-- split_every
-- out
-variants:
-  dask:
-    api: dask.array.nansum
 operation: nansum
-type: function
+description: nansum(input, *, dtype=None) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: keepdim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: dtype
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.nansum
+    args:
+      input: input
+  jax:
+    api: jax.numpy.nansum
+    args:
+      a: a

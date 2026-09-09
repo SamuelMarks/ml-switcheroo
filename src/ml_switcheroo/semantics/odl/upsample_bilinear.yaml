@@ -1,0 +1,22 @@
+operation: upsample_bilinear
+description: Upsamples the input, using bilinear upsampling.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: size
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: scale_factor
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  torch:
+    api: torch.nn.functional.upsample_bilinear
+    args:
+      input: input

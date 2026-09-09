@@ -1,0 +1,15 @@
+operation: NodeStates
+variants:
+  paxml:
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.NodeStates
+    args:
+      args: args
+      kwargs: kwargs
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

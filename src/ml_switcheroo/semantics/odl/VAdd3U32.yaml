@@ -1,0 +1,5 @@
+operation: VAdd3U32
+variants:
+  rdna:
+    api: v_add3_u32
+    description: Auto-mapped instruction V_ADD3_U32

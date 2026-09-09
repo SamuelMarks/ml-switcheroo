@@ -1,0 +1,11 @@
+operation: is_pinned
+description: Returns true if this tensor resides in pinned memory.
+std_args:
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+variants:
+  torch:
+    api: torch.Tensor.is_pinned
+    args: {}

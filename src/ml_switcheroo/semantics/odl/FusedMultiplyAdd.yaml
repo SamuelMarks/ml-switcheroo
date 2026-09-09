@@ -1,0 +1,12 @@
+operation: FusedMultiplyAdd
+variants:
+  rdna:
+    api: v_fmac_f32
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  nvidia_sass:
+    api: FFMA32I
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

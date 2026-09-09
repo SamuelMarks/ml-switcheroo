@@ -1,0 +1,13 @@
+operation: Case
+variants:
+  stablehlo:
+    api: stablehlo.case
+std_args:
+- name: index
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: branches
+  kind: keyword_only
+  is_variadic: false
+  type: Any

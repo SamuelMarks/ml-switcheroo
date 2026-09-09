@@ -1,9 +1,24 @@
+operation: erfinv
 description: erfinv(input, *, out=None) -> Tensor
 std_args:
-- input
-- out
-type: attribute
-operation: erfinv
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
 variants:
   torch:
     api: torch.erfinv
+    args:
+      input: input
+  mlx:
+    api: mlx.core.erfinv
+    args:
+      a: a
+  keras:
+    api: keras.ops.erfinv
+    args:
+      x: x

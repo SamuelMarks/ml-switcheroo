@@ -45,9 +45,6 @@ def test_keras_adapter_properties() -> None:
   adapter.get_rng_split_syntax("rng", "key")
 
   adapter.get_tensor_to_numpy_expr("t")
-  pass
-  pass
-
   assert isinstance(adapter.get_tiered_examples(), dict)
 
   snapshot: Dict[str, Dict[str, Dict[str, str]]] = {}
@@ -101,3 +98,27 @@ def test_keras_collect_live() -> None:
     adapter._collect_live(SemanticTier.OPTIMIZER)
     adapter._collect_live(SemanticTier.ACTIVATION)
     adapter._collect_live(SemanticTier.LAYER)
+
+
+def test_keras_import_success() -> None:
+  """Test module-level import when keras is available."""
+  import importlib
+  import sys
+
+  mock_keras = MagicMock()
+  with patch.dict(
+    sys.modules,
+    {
+      "keras": mock_keras,
+      "keras.activations": MagicMock(),
+      "keras.layers": MagicMock(),
+      "keras.losses": MagicMock(),
+      "keras.ops": MagicMock(),
+      "keras.optimizers": MagicMock(),
+      "keras.random": MagicMock(),
+    },
+  ):
+    import ml_switcheroo.frameworks.keras as mod
+
+    importlib.reload(mod)
+  importlib.reload(mod)

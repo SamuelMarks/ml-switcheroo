@@ -1,0 +1,13 @@
+operation: AsyncStart
+variants:
+  stablehlo:
+    api: stablehlo.async_start
+std_args:
+- name: operands
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: body
+  kind: keyword_only
+  is_variadic: false
+  type: Any

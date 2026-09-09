@@ -1,0 +1,22 @@
+operation: top_k
+description: Returns top ``k`` values and their indices along the last axis of ``operand``.
+std_args:
+- name: operand
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: k
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+variants:
+  jax:
+    api: jax.lax.top_k
+    args:
+      operand: operand
+      k: k
+  keras:
+    api: keras.ops.top_k
+    args:
+      x: x
+      k: k

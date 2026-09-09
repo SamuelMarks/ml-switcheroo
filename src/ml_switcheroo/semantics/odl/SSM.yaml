@@ -1,0 +1,7 @@
+operation: SSM
+variants:
+  paxml:
+    api: praxis.layers.SSM
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

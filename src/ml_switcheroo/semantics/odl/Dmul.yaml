@@ -1,0 +1,4 @@
+operation: Dmul
+variants:
+  nvidia_sass:
+    api: DMUL

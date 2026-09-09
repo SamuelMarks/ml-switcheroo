@@ -1,0 +1,17 @@
+operation: polyadd
+description: Auto-generated mapping for polyadd.
+std_args:
+- name: a1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: a2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.numpy.polyadd
+    args:
+      a1: a1
+      a2: a2

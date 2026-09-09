@@ -1,0 +1,32 @@
+operation: conv_shape_tuple
+description: Compute the shape tuple of a conv given input shapes in canonical order.
+std_args:
+- name: lhs_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: rhs_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: pads
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: batch_group_count
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+variants:
+  jax:
+    api: jax.lax.conv_shape_tuple
+    args:
+      lhs_shape: lhs_shape
+      rhs_shape: rhs_shape
+      strides: strides
+      pads: pads

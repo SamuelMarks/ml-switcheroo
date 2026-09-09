@@ -95,7 +95,7 @@
       api: jnp.abs
     rdna:
       api: v_and_b32
-    sass:
+    nvidia_sass:
       api: IABS
     stablehlo:
       api: stablehlo.abs
@@ -679,7 +679,7 @@
       api: v_add_f32
       args: {}
       required_imports: []
-    sass:
+    nvidia_sass:
       api: FADD
       args: {}
     numpy:
@@ -2259,7 +2259,7 @@
     numpy:
       api: numpy.f2py.symbolic.Precedence.ATOM
       args: {}
-    sass:
+    nvidia_sass:
       api: ATOM
 - operation: Attention
   description: Computes scaled dot product attention on query, key and value tensors, using an optional attention mask if passed. This operator covers self and cross variants of the attention operation
@@ -4432,7 +4432,7 @@
       args:
         args: args
         kwargs: kwargs
-    sass:
+    nvidia_sass:
       api: CALL
 - operation: CanCast
   description: Determines if a type conversion is allowed under casting rules.
@@ -4570,7 +4570,7 @@
     jax:
       api: astype
       requires_plugin: type_methods
-    sass:
+    nvidia_sass:
       api: I2F
 - operation: CastHalf
   description: Auto-generated from jax_code_defs
@@ -4600,7 +4600,7 @@
     numpy:
       api: astype
       requires_plugin: type_methods
-    sass:
+    nvidia_sass:
       api: F2I
     tensorflow:
       api: tf.cast
@@ -5043,7 +5043,7 @@
   variants:
     rdna:
       api: v_med3_f32
-    sass:
+    nvidia_sass:
       api: MNMX
     stablehlo:
       api: stablehlo.clamp
@@ -6173,7 +6173,7 @@
         stride: filter_stride
     rdna:
       api: ; Macro.Conv2d
-    sass:
+    nvidia_sass:
       api: Macro.Conv2d
     tensorflow:
       api: tf.keras.layers.Conv2D
@@ -11128,7 +11128,7 @@
   variants:
     rdna:
       api: v_fmac_f32
-    sass:
+    nvidia_sass:
       api: FFMA32I
 - operation: Future
   description: Wrapper for future results (JIT/Async).
@@ -16189,7 +16189,7 @@
         bias: bias
         in_features: input_dims
         out_features: output_dims
-    sass:
+    nvidia_sass:
       api: Macro.Linear
     tensorflow:
       api: tf.keras.layers.Dense
@@ -18846,7 +18846,7 @@
       args: {}
     rdna:
       api: v_mul_f32
-    sass:
+    nvidia_sass:
       api: FMUL
     stablehlo:
       api: stablehlo.multiply
@@ -19796,7 +19796,7 @@
     numpy:
       api: numpy.nditer.nop
       args: {}
-    sass:
+    nvidia_sass:
       api: NOP
 - operation: Norm
   description: Returns the matrix norm or vector norm of a given tensor.
@@ -27474,7 +27474,7 @@
       args: {}
     rdna:
       api: v_sub_f32
-    sass:
+    nvidia_sass:
       api: FADD
     stablehlo:
       api: stablehlo.subtract
@@ -37947,7 +37947,7 @@
       api: ''
       args: {}
       requires_plugin: jax_decompose
-    sass:
+    nvidia_sass:
       api: FMUL
       args: {}
 - operation: multi_dot
@@ -37992,7 +37992,7 @@
       args:
         inputs: inputs
         kwargs: kwargs
-    sass:
+    nvidia_sass:
       api: FMUL
       args: {}
 - operation: multivariate_normal

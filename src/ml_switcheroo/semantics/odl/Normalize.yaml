@@ -1,0 +1,35 @@
+operation: normalize
+description: Perform :math:`L_p` normalization of inputs over specified dimension.
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: p
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '2.0'
+- name: dim
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '1'
+- name: eps
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: 1e-12
+- name: out
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.nn.functional.normalize
+    args:
+      input: input
+  keras:
+    api: keras.ops.normalize
+    args:
+      x: x

@@ -1,0 +1,14 @@
+operation: data_ptr
+variants:
+  paxml:
+    api: data
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: method_to_property
+  flax_nnx:
+    api: data
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: method_to_property

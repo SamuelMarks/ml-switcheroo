@@ -1,14 +1,12 @@
-description: The class representing a Python module/class/instance attribute.
-std_args:
-- x
-type: attribute
 operation: selu_
+description: selu_(input) -> Tensor
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
-  keras:
-    api: keras.activations.selu
-  mlx:
-    api: mlx.nn.SELU
   torch:
-    api: torch.nn.SELU
-  tensorflow:
-    api: tf.nn.selu
+    api: torch.nn.functional.selu_
+    args:
+      input: input

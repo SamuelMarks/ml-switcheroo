@@ -7,7 +7,37 @@ std_args:
 variants:
   latex_dsl:
     api: latex.cos
+    args: {}
   dask:
     api: dask.array.cos
+    args: {}
+  paxml:
+    api: jax.numpy.cos
+    args:
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: unroll_inplace_ops
+  flax_nnx:
+    api: jax.numpy.cos
+    args:
+      input: x
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+    requires_plugin: unroll_inplace_ops
+  torch:
+    api: torch.cos
+    args: {}
+  jax:
+    api: jax.numpy.cos
+    args: {}
+  mlx:
+    api: mlx.core.cos
+    args: {}
+  keras:
+    api: keras.ops.cos
+    args: {}
 operation: Cos_
 type: function

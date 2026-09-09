@@ -1,10 +1,36 @@
-description: 'Constant: array'
-std_args:
-- content
-variants:
-  latex_dsl:
-    api: latex.env.array
-  dask:
-    api: dask.array.Array
 operation: array
-type: function
+description: Create an array.
+std_args:
+- name: object
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: copy
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: order
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''K'''
+- name: ndmin
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '0'
+variants:
+  jax:
+    api: jax.numpy.array
+    args:
+      object: object
+  keras:
+    api: keras.ops.array
+    args:
+      x: x

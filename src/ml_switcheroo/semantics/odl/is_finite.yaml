@@ -1,0 +1,16 @@
+operation: is_finite
+description: Elementwise :math:`\mathrm{isfinite}`.
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+variants:
+  jax:
+    api: jax.lax.is_finite
+    args:
+      x: x
+  stablehlo:
+    api: stablehlo.is_finite
+    args:
+      x: x

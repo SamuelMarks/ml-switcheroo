@@ -1,12 +1,18 @@
 description: This loss combines a `Sigmoid` layer and the `BCELoss` in one single
 std_args:
-- weight
-- size_average
-- reduce
-- reduction
-- pos_weight
+- name: weight
+  type: Any
+- name: size_average
+  type: Any
+- name: reduce
+  type: Any
+- name: reduction
+  type: Any
+- name: pos_weight
+  type: Any
 type: class
 operation: BCEWithLogitsLoss
 variants:
   torch:
     api: torch.nn.BCEWithLogitsLoss
+    args: {}

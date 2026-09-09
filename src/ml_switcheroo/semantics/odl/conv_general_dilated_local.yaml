@@ -1,0 +1,52 @@
+operation: conv_general_dilated_local
+description: General n-dimensional unshared convolution operator with optional dilation.
+std_args:
+- name: lhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: rhs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: window_strides
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: padding
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: filter_shape
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: lhs_dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: rhs_dilation
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: dimension_numbers
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+  default: '''```(None)```'''
+- name: precision
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+variants:
+  jax:
+    api: jax.lax.conv_general_dilated_local
+    args:
+      lhs: lhs
+      rhs: rhs
+      window_strides: window_strides
+      padding: padding
+      filter_shape: filter_shape

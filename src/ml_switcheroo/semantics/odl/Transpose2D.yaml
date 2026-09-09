@@ -1,0 +1,12 @@
+operation: Transpose2D
+variants:
+  numpy:
+    api: numpy.transpose
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  tensorflow:
+    api: tf.transpose
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

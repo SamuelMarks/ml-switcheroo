@@ -1,0 +1,8 @@
+operation: num_heads
+variants:
+  flax_nnx:
+    api: nnx.nn.attention.MultiHeadAttention.num_heads
+    args: {}
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

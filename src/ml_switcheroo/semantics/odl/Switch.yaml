@@ -1,0 +1,31 @@
+operation: switch
+description: Apply exactly one of the ``branches`` given by ``index``.
+std_args:
+- name: index
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: branches
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: operands
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: operand
+  kind: keyword_only
+  is_variadic: false
+  type: Any
+  default: '''```(_no_operand_sentinel)```'''
+variants:
+  jax:
+    api: jax.lax.switch
+    args:
+      index: index
+      branches: branches
+  keras:
+    api: keras.ops.switch
+    args:
+      index: index
+      branches: branches

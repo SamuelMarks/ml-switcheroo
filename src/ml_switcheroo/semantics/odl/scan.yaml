@@ -1,22 +1,47 @@
-description: Abstract base class for generic types.
-std_args:
-- module_constructor
-- length
-- reverse
-- unroll
-- _split_transpose
-- in_axes
-- in_axes_kwargs
-- out_axes
-- carry_argnum
-- state_axes
-- split_rngs
-- transform_metadata
-- scan_output
-- module_init_args
-- module_init_kwargs
-variants:
-  flax_nnx:
-    api: flax.nnx.Scan
 operation: scan
-type: function
+description: Scan a function over leading array axes while carrying along state.
+std_args:
+- name: f
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: init
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: xs
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: length
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '''```(None)```'''
+- name: reverse
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: unroll
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: '1'
+- name: _split_transpose
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+variants:
+  jax:
+    api: jax.lax.scan
+    args:
+      f: f
+      init: init
+  keras:
+    api: keras.ops.scan
+    args:
+      f: f
+      init: init

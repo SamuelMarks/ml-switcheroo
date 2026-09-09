@@ -1,0 +1,20 @@
+operation: slogdet
+description: slogdet(input) -> (Tensor, Tensor)
+std_args:
+- name: input
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Tensor
+- name: out
+  kind: keyword_only
+  is_variadic: false
+  type: Tensor
+variants:
+  torch:
+    api: torch.slogdet
+    args:
+      input: input
+  keras:
+    api: keras.ops.slogdet
+    args:
+      x: x

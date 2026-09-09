@@ -1,0 +1,9 @@
+operation: reset
+variants:
+  flax_nnx:
+    api: nnx.training.metrics.MultiMetric.reset
+    args:
+      self: self
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []

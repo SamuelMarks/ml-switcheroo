@@ -1,0 +1,5 @@
+operation: VSinF32
+variants:
+  rdna:
+    api: v_sin_f32
+    description: Auto-mapped instruction V_SIN_F32

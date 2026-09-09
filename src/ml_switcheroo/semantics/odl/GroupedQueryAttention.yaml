@@ -15,8 +15,29 @@ std_args:
   type: int
 variants:
   keras:
-    api: keras.layers.GroupQueryAttention
+    api: keras.layers.MultiHeadAttention
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
   tensorflow:
     api: tf.keras.layers.GroupQueryAttention
+    args: {}
+  paxml:
+    api: paxml.layers.GroupedQueryAttention
+    args:
+      embed_dim: input_dim
+      num_heads: num_heads
+      num_kv_heads: num_kv_heads
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
+  flax_nnx:
+    api: flax.nnx.MultiHeadAttention
+    args:
+      embed_dim: null
+      num_heads: num_heads
+    dispatch_rules: []
+    pack_as: Tuple
+    required_imports: []
 operation: GroupedQueryAttention
 type: function

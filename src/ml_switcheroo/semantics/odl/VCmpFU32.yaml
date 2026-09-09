@@ -1,0 +1,5 @@
+operation: VCmpFU32
+variants:
+  rdna:
+    api: v_cmp_f_u32
+    description: Auto-mapped instruction V_CMP_F_U32
