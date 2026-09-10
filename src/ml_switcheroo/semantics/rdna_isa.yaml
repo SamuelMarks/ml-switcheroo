@@ -190,6 +190,182 @@ cluster_load_b32:
   memory: load
 cluster_load_b64:
   memory: load
+ds_add_f32:
+  memory: atomic
+ds_add_gs_reg_rtn:
+  memory: atomic
+ds_add_rtn_f32:
+  memory: atomic
+ds_add_rtn_u32:
+  memory: atomic
+ds_add_rtn_u64:
+  memory: atomic
+ds_add_u32:
+  memory: atomic
+ds_add_u64:
+  memory: atomic
+ds_and_b32:
+  memory: atomic
+ds_and_b64:
+  memory: atomic
+ds_and_rtn_b32:
+  memory: atomic
+ds_and_rtn_b64:
+  memory: atomic
+ds_append:
+  memory: memory_op
+ds_bpermute_b32:
+  memory: memory_op
+ds_bvh_stack_rtn_b32:
+  memory: memory_op
+ds_cmpstore_b32:
+  memory: atomic
+ds_cmpstore_b64:
+  memory: atomic
+ds_cmpstore_f32:
+  memory: atomic
+ds_cmpstore_f64:
+  memory: atomic
+ds_cmpstore_rtn_b32:
+  memory: atomic
+ds_cmpstore_rtn_b64:
+  memory: atomic
+ds_cmpstore_rtn_f32:
+  memory: atomic
+ds_cmpstore_rtn_f64:
+  memory: atomic
+ds_condxchg32_rtn_b64:
+  memory: atomic
+ds_consume:
+  memory: memory_op
+ds_dec_rtn_u32:
+  memory: atomic
+ds_dec_rtn_u64:
+  memory: atomic
+ds_dec_u32:
+  memory: atomic
+ds_dec_u64:
+  memory: atomic
+ds_gws_barrier:
+  memory: memory_op
+ds_gws_init:
+  memory: memory_op
+ds_gws_sema_br:
+  memory: memory_op
+ds_gws_sema_p:
+  memory: memory_op
+ds_gws_sema_release_all:
+  memory: memory_op
+ds_gws_sema_v:
+  memory: memory_op
+ds_inc_rtn_u32:
+  memory: atomic
+ds_inc_rtn_u64:
+  memory: atomic
+ds_inc_u32:
+  memory: atomic
+ds_inc_u64:
+  memory: atomic
+ds_max_f32:
+  memory: atomic
+ds_max_f64:
+  memory: atomic
+ds_max_i32:
+  memory: atomic
+ds_max_i64:
+  memory: atomic
+ds_max_rtn_f32:
+  memory: atomic
+ds_max_rtn_f64:
+  memory: atomic
+ds_max_rtn_i32:
+  memory: atomic
+ds_max_rtn_i64:
+  memory: atomic
+ds_max_rtn_u32:
+  memory: atomic
+ds_max_rtn_u64:
+  memory: atomic
+ds_max_u32:
+  memory: atomic
+ds_max_u64:
+  memory: atomic
+ds_min_f32:
+  memory: atomic
+ds_min_f64:
+  memory: atomic
+ds_min_i32:
+  memory: atomic
+ds_min_i64:
+  memory: atomic
+ds_min_rtn_f32:
+  memory: atomic
+ds_min_rtn_f64:
+  memory: atomic
+ds_min_rtn_i32:
+  memory: atomic
+ds_min_rtn_i64:
+  memory: atomic
+ds_min_rtn_u32:
+  memory: atomic
+ds_min_rtn_u64:
+  memory: atomic
+ds_min_u32:
+  memory: atomic
+ds_min_u64:
+  memory: atomic
+ds_mskor_b32:
+  memory: atomic
+ds_mskor_b64:
+  memory: atomic
+ds_mskor_rtn_b32:
+  memory: atomic
+ds_mskor_rtn_b64:
+  memory: atomic
+ds_nop:
+  memory: memory_op
+ds_or_b32:
+  memory: atomic
+ds_or_b64:
+  memory: atomic
+ds_or_rtn_b32:
+  memory: atomic
+ds_or_rtn_b64:
+  memory: atomic
+ds_ordered_count:
+  memory: atomic
+ds_permute_b32:
+  memory: memory_op
+ds_rsub_rtn_u32:
+  memory: atomic
+ds_rsub_rtn_u64:
+  memory: atomic
+ds_rsub_u32:
+  memory: atomic
+ds_rsub_u64:
+  memory: atomic
+ds_sub_gs_reg_rtn:
+  memory: atomic
+ds_sub_rtn_u32:
+  memory: atomic
+ds_sub_rtn_u64:
+  memory: atomic
+ds_sub_u32:
+  memory: atomic
+ds_sub_u64:
+  memory: atomic
+ds_swizzle_b32:
+  memory: memory_op
+ds_wrap_rtn_b32:
+  memory: memory_op
+ds_xor_b32:
+  memory: atomic
+ds_xor_b64:
+  memory: atomic
+ds_xor_rtn_b32:
+  memory: atomic
+ds_xor_rtn_b64:
+  memory: atomic
 flat_atomic_add:
   memory: atomic
 flat_atomic_add_f32:

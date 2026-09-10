@@ -18,3 +18,15 @@ variants:
     api: jax.lax.neg
     args:
       x: x
+  rdna:
+    api: v_sub_f32
+    args: {}
+  nvidia_sass:
+    api: FNEG
+    args: {}
+  mlx:
+    api: mlx.core.negative
+    args: {}
+  keras:
+    api: keras.ops.negative
+    args: {}

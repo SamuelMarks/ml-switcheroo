@@ -14,6 +14,10 @@ class ConversionResult(BaseModel):
 
   code: str = Field(default="", description="The generated source code.")
   errors: List[str] = Field(default_factory=list, description="List of error messages encountered.")
+  warnings: List[str] = Field(
+    default_factory=list,
+    description="Diagnostic warnings and static safety recommendations.",
+  )
   success: bool = Field(
     default=True,
     description="True if the pipeline completed without fatal crashes.",
@@ -29,3 +33,13 @@ class ConversionResult(BaseModel):
 
     """
     return len(self.errors) > 0
+
+  @property
+  def has_warnings(self) -> bool:
+    """Check if the result contains any diagnostic warnings.
+
+    Returns:
+        True if one or more warnings are present.
+
+    """
+    return len(self.warnings) > 0

@@ -72,5 +72,11 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  rdna:
+    api: ; Macro.AvgPool2d
+    args: {}
+  nvidia_sass:
+    api: Macro.AvgPool2d
+    args: {}
 operation: AveragePooling2D
 type: function

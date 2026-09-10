@@ -32,3 +32,18 @@ variants:
     api: keras.layers.AvgPool3D
     args:
       pool_size: pool_size
+  rdna:
+    api: ; Macro.AvgPool3d
+    args: {}
+  nvidia_sass:
+    api: Macro.AvgPool3d
+    args: {}
+  torch:
+    api: torch.nn.AvgPool3d
+    args: {}
+  flax_nnx:
+    api: flax.nnx.AvgPool
+    args: {}
+  mlx:
+    api: mlx.nn.AvgPool3d
+    args: {}

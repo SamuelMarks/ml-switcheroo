@@ -20,3 +20,12 @@ variants:
   torch:
     api: torch.nn.CrossEntropyLoss
     args: {}
+  flax_nnx:
+    api: flax.nnx.losses.cross_entropy
+    args: {}
+  mlx:
+    api: mlx.nn.losses.cross_entropy
+    args: {}
+  keras:
+    api: keras.losses.CategoricalCrossentropy
+    args: {}

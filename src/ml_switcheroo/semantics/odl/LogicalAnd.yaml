@@ -16,3 +16,15 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  torch:
+    api: torch.logical_and
+    args: {}
+  jax:
+    api: jax.numpy.logical_and
+    args: {}
+  mlx:
+    api: mlx.core.logical_and
+    args: {}
+  keras:
+    api: keras.ops.logical_and
+    args: {}

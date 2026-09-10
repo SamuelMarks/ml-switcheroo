@@ -16,3 +16,12 @@ variants:
   jax:
     api: jax.numpy.logical_or
     args: {}
+  torch:
+    api: torch.logical_xor
+    args: {}
+  mlx:
+    api: mlx.core.logical_xor
+    args: {}
+  keras:
+    api: keras.ops.logical_xor
+    args: {}

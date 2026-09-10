@@ -520,3 +520,45 @@ def test_attributes_mixin_branch_coverage3() -> None:
 
   node2: cst.BaseExpression = cst.parse_expression("a.module.c")
   assert mixin._simplify_reexports(node2) == node2
+
+
+def test_engine_compiler_safety_warning_logging() -> None:
+  """Verify that compiler pipeline logs warnings for detected static safety diagnostics."""
+  from ml_switcheroo.config import RuntimeConfig
+
+  cfg = RuntimeConfig.load(source="torch", target="rdna")
+  engine = ASTEngine(config=cfg)
+  code = "import torch\ndef f(x):\n    if x.item() > 0:\n        return x\n"
+  result = engine.run(code)
+  assert any("VALUE_DEPENDENT_CONTROL_FLOW" in w for w in result.warnings)
+
+
+def test_engine_rewriter_safety_warning_logging() -> None:
+  """Verify that rewriter pipeline logs warnings for detected static safety diagnostics."""
+  from ml_switcheroo.config import RuntimeConfig
+
+  cfg = RuntimeConfig.load(source="torch", target="jax")
+  engine = ASTEngine(config=cfg)
+  code = "import torch\ndef f(x):\n    if x.item() > 0:\n        return x\n"
+  result = engine.run(code)
+  assert any("VALUE_DEPENDENT_CONTROL_FLOW" in w for w in result.warnings)
+
+
+def test_engine_safety_scanner_exception_handling() -> None:
+  """Verify graceful exception handling when StaticSafetyScanner encounters an unexpected error."""
+  from ml_switcheroo.config import RuntimeConfig
+  from ml_switcheroo.analysis.static_safety import StaticSafetyScanner
+
+  # Compiler pipeline exception handling
+  cfg_comp = RuntimeConfig.load(source="torch", target="rdna")
+  engine_comp = ASTEngine(config=cfg_comp)
+  with patch.object(StaticSafetyScanner, "scan", side_effect=RuntimeError("Scanner error")):
+    res_comp = engine_comp.run("import torch\nx = 1\n")
+    assert res_comp.success is True
+
+  # Rewriter pipeline exception handling
+  cfg_rew = RuntimeConfig.load(source="torch", target="jax")
+  engine_rew = ASTEngine(config=cfg_rew)
+  with patch.object(StaticSafetyScanner, "scan", side_effect=RuntimeError("Scanner error")):
+    res_rew = engine_rew.run("import torch\nx = 1\n")
+    assert res_rew.success is True

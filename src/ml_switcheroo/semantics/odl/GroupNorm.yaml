@@ -78,3 +78,9 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  rdna:
+    api: ; Macro.GroupNorm
+    args: {}
+  nvidia_sass:
+    api: Macro.GroupNorm
+    args: {}

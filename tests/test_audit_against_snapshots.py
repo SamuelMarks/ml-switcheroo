@@ -539,6 +539,77 @@ def test_generate_audit_report_and_cli(tmp_path: Path) -> None:
       assert saved["status"] == "pass"
 
 
+def test_audit_frameworks_ungrounded_sass_instruction() -> None:
+  """Test that audit_frameworks flags an ungrounded SASS instruction."""
+  mock_mgr = MagicMock()
+  mock_mgr.data = {
+    "fake_op": {"variants": {"nvidia_sass": {"api": "HALLUCINATED_SASS_OP"}}},
+  }
+  snapshots: Dict[str, Dict[str, Any]] = {
+    "nvidia_sass": {"FFMA": {}, "FADD": {}},
+  }
+  errors = scripts.audit_against_snapshots.audit_frameworks(mock_mgr, snapshots)
+  assert any("HALLUCINATED_SASS_OP" in err and "[nvidia_sass]" in err for err in errors)
+
+
+def test_audit_frameworks_ungrounded_rdna_instruction() -> None:
+  """Test that audit_frameworks flags an ungrounded RDNA instruction."""
+  mock_mgr = MagicMock()
+  mock_mgr.data = {
+    "fake_op": {"variants": {"rdna": {"api": "v_fake_hallucinated_inst"}}},
+  }
+  snapshots: Dict[str, Dict[str, Any]] = {
+    "rdna": {"v_fmac_f32": {}, "v_add_f32": {}},
+  }
+  errors = scripts.audit_against_snapshots.audit_frameworks(mock_mgr, snapshots)
+  assert any("v_fake_hallucinated_inst" in err and "[rdna]" in err for err in errors)
+
+
+def test_audit_frameworks_with_framework_filter() -> None:
+  """Test that audit_frameworks respects the framework parameter filter."""
+  mock_mgr = MagicMock()
+  mock_mgr.data = {
+    "op1": {
+      "variants": {
+        "rdna": {"api": "v_fake_rdna"},
+        "nvidia_sass": {"api": "HALLUCINATED_SASS"},
+      }
+    }
+  }
+  snapshots: Dict[str, Dict[str, Any]] = {
+    "rdna": {"v_add_f32": {}},
+    "nvidia_sass": {"FADD": {}},
+  }
+  # Only audit rdna
+  rdna_errors = scripts.audit_against_snapshots.audit_frameworks(mock_mgr, snapshots, framework="rdna")
+  assert len(rdna_errors) == 1
+  assert "[rdna]" in rdna_errors[0]
+  assert "[nvidia_sass]" not in rdna_errors[0]
+
+  # Only audit nvidia_sass
+  sass_errors = scripts.audit_against_snapshots.audit_frameworks(mock_mgr, snapshots, framework="nvidia_sass")
+  assert len(sass_errors) == 1
+  assert "[nvidia_sass]" in sass_errors[0]
+  assert "[rdna]" not in sass_errors[0]
+
+
+def test_main_cli_framework_filter() -> None:
+  """Test CLI argument parsing for --framework option."""
+  with patch("sys.argv", ["audit_against_snapshots.py", "--framework", "rdna"]):
+    with (
+      patch("scripts.audit_against_snapshots.SemanticsManager"),
+      patch("scripts.audit_against_snapshots.KnowledgeBaseLoader"),
+      patch("scripts.audit_against_snapshots.RegistryLoader"),
+      patch("scripts.audit_against_snapshots.load_snapshots_multi", return_value={"rdna": {}}),
+      patch("scripts.audit_against_snapshots.audit_frameworks", return_value=[]) as mock_audit,
+      patch("scripts.audit_against_snapshots.audit_python_ast", return_value=[]),
+      patch("scripts.audit_against_snapshots.audit_inline_snippets", return_value=[]),
+    ):
+      assert scripts.audit_against_snapshots.main() == 0
+      mock_audit.assert_called_once()
+      assert mock_audit.call_args[1].get("framework") == "rdna"
+
+
 def test_main_entrypoint(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test __main__ execution block for audit_against_snapshots."""
   import runpy

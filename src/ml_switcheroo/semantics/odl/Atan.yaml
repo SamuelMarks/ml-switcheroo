@@ -18,3 +18,9 @@ variants:
     api: jax.lax.atan
     args:
       x: x
+  mlx:
+    api: mlx.core.arctan
+    args: {}
+  keras:
+    api: keras.ops.arctan
+    args: {}

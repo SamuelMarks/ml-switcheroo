@@ -49,6 +49,9 @@ def test_expand_op_variants_isa_alu_macro() -> None:
     "operation": "BitwiseAnd",
     "variants": {
       "torch": {"api": "torch.bitwise_and"},
+      "jax": {"api": "jax.numpy.bitwise_and"},
+      "mlx": {"api": "mlx.core.bitwise_and"},
+      "keras": {"api": "keras.ops.bitwise_and"},
       "rdna": {"api": "existing_rdna"},
       "nvidia_sass": {"api": "existing_sass"},
     },
@@ -62,7 +65,12 @@ def test_expand_op_variants_isa_alu_macro() -> None:
   # Missing rdna and sass
   odl_data_missing: Dict[str, Any] = {
     "operation": "BitwiseAnd",
-    "variants": {"torch": {"api": "torch.bitwise_and"}},
+    "variants": {
+      "torch": {"api": "torch.bitwise_and"},
+      "jax": {"api": "jax.numpy.bitwise_and"},
+      "mlx": {"api": "mlx.core.bitwise_and"},
+      "keras": {"api": "keras.ops.bitwise_and"},
+    },
   }
   added = expander.expand_op_variants(odl_data_missing, snapshots)
   assert added == 2

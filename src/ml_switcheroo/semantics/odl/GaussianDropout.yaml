@@ -32,5 +32,8 @@ variants:
   mlx:
     api: mlx.nn.Dropout
     args: {}
+  flax_nnx:
+    api: flax.nnx.Dropout
+    args: {}
 operation: GaussianDropout
 type: function

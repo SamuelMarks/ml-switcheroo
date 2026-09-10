@@ -8,5 +8,17 @@ variants:
   dask:
     api: dask.array.expm1
     args: {}
+  torch:
+    api: torch.expm1
+    args: {}
+  jax:
+    api: jax.numpy.expm1
+    args: {}
+  mlx:
+    api: mlx.core.expm1
+    args: {}
+  keras:
+    api: keras.ops.expm1
+    args: {}
 operation: Expm1_
 type: function

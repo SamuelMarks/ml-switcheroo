@@ -23,3 +23,6 @@ variants:
     api: keras.activations.selu
     args:
       x: x
+  jax:
+    api: jax.nn.selu
+    args: {}

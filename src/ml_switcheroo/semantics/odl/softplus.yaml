@@ -24,3 +24,9 @@ variants:
     api: keras.activations.softplus
     args:
       x: x
+  jax:
+    api: jax.nn.softplus
+    args: {}
+  mlx:
+    api: mlx.nn.softplus
+    args: {}

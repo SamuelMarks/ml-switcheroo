@@ -50,5 +50,8 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  mlx:
+    api: mlx.nn.losses.cross_entropy
+    args: {}
 operation: SparseCategoricalCrossentropy
 type: function

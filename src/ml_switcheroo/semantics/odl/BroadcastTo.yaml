@@ -10,3 +10,15 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  torch:
+    api: torch.broadcast_to
+    args: {}
+  jax:
+    api: jax.numpy.broadcast_to
+    args: {}
+  mlx:
+    api: mlx.core.broadcast_to
+    args: {}
+  keras:
+    api: keras.ops.broadcast_to
+    args: {}

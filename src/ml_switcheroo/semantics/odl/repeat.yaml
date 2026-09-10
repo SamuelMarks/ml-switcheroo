@@ -35,3 +35,6 @@ variants:
     args:
       x: x
       repeats: repeats
+  torch:
+    api: torch.repeat_interleave
+    args: {}

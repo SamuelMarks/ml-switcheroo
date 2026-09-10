@@ -25,6 +25,15 @@ variants:
       in_channels: in_channels
       out_channels: out_channels
       kernel_size: kernel_size
+  rdna:
+    api: ; Macro.ConvTranspose3d
+    args: {}
+  nvidia_sass:
+    api: Macro.ConvTranspose3d
+    args: {}
+  flax_nnx:
+    api: flax.nnx.ConvTranspose
+    args: {}
 std_args:
 - name: __doc__
   kind: positional_or_keyword

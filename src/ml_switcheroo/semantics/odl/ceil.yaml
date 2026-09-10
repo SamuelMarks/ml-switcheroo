@@ -30,3 +30,9 @@ variants:
     api: keras.ops.ceil
     args:
       x: x
+  rdna:
+    api: v_ceil_f32
+    args: {}
+  nvidia_sass:
+    api: F2F
+    args: {}

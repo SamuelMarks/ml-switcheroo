@@ -18,3 +18,9 @@ variants:
     api: jax.lax.acos
     args:
       x: x
+  mlx:
+    api: mlx.core.arccos
+    args: {}
+  keras:
+    api: keras.ops.arccos
+    args: {}

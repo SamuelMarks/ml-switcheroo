@@ -20,3 +20,9 @@ variants:
     args:
       x: x
       alpha: alpha
+  jax:
+    api: jax.nn.relu
+    args: {}
+  keras:
+    api: keras.layers.PReLU
+    args: {}

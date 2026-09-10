@@ -10,3 +10,15 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  torch:
+    api: torch.floor_divide
+    args: {}
+  jax:
+    api: jax.numpy.floor_divide
+    args: {}
+  mlx:
+    api: mlx.core.floor_divide
+    args: {}
+  keras:
+    api: keras.ops.floor_divide
+    args: {}

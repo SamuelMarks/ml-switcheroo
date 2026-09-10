@@ -17,6 +17,18 @@ variants:
     api: mlx.nn.AvgPool1d
     args:
       kernel_size: kernel_size
+  rdna:
+    api: ; Macro.AvgPool1d
+    args: {}
+  nvidia_sass:
+    api: Macro.AvgPool1d
+    args: {}
+  flax_nnx:
+    api: flax.nnx.AvgPool
+    args: {}
+  keras:
+    api: keras.layers.AveragePooling1D
+    args: {}
 std_args:
 - name: window
   kind: positional_or_keyword

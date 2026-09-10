@@ -40,5 +40,14 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  torch:
+    api: torch.permute
+    args: {}
+  jax:
+    api: jax.numpy.transpose
+    args: {}
+  mlx:
+    api: mlx.core.transpose
+    args: {}
 operation: Permute
 type: function

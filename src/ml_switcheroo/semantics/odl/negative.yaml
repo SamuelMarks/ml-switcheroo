@@ -26,3 +26,9 @@ variants:
     api: keras.ops.negative
     args:
       x: x
+  rdna:
+    api: v_sub_f32
+    args: {}
+  nvidia_sass:
+    api: FNEG
+    args: {}

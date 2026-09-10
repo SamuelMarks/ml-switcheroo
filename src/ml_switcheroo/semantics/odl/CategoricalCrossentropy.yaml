@@ -45,5 +45,11 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  flax_nnx:
+    api: flax.nnx.losses.cross_entropy
+    args: {}
+  mlx:
+    api: mlx.nn.losses.cross_entropy
+    args: {}
 operation: CategoricalCrossentropy
 type: function

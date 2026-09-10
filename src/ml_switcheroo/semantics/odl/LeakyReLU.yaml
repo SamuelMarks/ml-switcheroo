@@ -47,3 +47,6 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  jax:
+    api: jax.nn.leaky_relu
+    args: {}

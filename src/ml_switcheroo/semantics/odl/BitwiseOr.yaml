@@ -21,3 +21,12 @@ variants:
   nvidia_sass:
     api: LOP3_LUT
     args: {}
+  torch:
+    api: torch.bitwise_or
+    args: {}
+  mlx:
+    api: mlx.core.bitwise_or
+    args: {}
+  keras:
+    api: keras.ops.bitwise_or
+    args: {}

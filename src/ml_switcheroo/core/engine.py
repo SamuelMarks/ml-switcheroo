@@ -9,7 +9,7 @@ This module provides the ``ASTEngine``, generating code via:
 Supports optional **Graph-Guided Rewriting** (Loopback).
 """
 
-from typing import Optional, cast, Any
+from typing import Optional, cast, Any, List
 import libcst as cst
 
 from ml_switcheroo.config import RuntimeConfig
@@ -297,10 +297,27 @@ class ASTEngine:
     else:
       backend = cast(CompilerBackend, backend_cls(self.semantics))  # type: ignore
 
+    warnings: List[str] = []
+    try:
+      from ml_switcheroo.analysis.static_safety import StaticSafetyScanner
+
+      safety_diags = StaticSafetyScanner.scan(code)
+      for diag in safety_diags:
+        warning_msg = f"[{diag.category.value}] {diag.message} Recommendation: {diag.recommendation}"
+        warnings.append(warning_msg)
+        tracer.log_warning(warning_msg)
+    except Exception:
+      pass
+
     output_code = backend.compile(graph)
     tracer.log_mutation("Codegen", "(Graph)", output_code)
     tracer.end_phase()
-    return ConversionResult(code=output_code, success=True, trace_events=tracer.export())
+    return ConversionResult(
+      code=output_code,
+      success=True,
+      warnings=warnings,
+      trace_events=tracer.export(),
+    )
 
   def _run_rewriter_pipeline(self, code: str, tracer: Any) -> ConversionResult:
     """Run the structural rewriter pipeline with optional graph loopback optimization.
@@ -467,11 +484,24 @@ class ASTEngine:
         errors.extend(list_errors)
       tracer.end_phase()
 
+    warnings: List[str] = []
+    try:
+      from ml_switcheroo.analysis.static_safety import StaticSafetyScanner
+
+      safety_diags = StaticSafetyScanner.scan(tree)
+      for diag in safety_diags:
+        warning_msg = f"[{diag.category.value}] {diag.message} Recommendation: {diag.recommendation}"
+        warnings.append(warning_msg)
+        tracer.log_warning(warning_msg)
+    except Exception:
+      pass
+
     tracer.end_phase()
     return ConversionResult(
       code=final_code,
       success=True,
       errors=errors,
+      warnings=warnings,
       trace_events=tracer.export(),
     )
 

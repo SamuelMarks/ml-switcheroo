@@ -15,3 +15,12 @@ variants:
   jax:
     api: jax.numpy.logical_or
     args: {}
+  torch:
+    api: torch.logical_not
+    args: {}
+  mlx:
+    api: mlx.core.logical_not
+    args: {}
+  keras:
+    api: keras.ops.logical_not
+    args: {}

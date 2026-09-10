@@ -96,3 +96,9 @@ variants:
       in_channels: in_channels
       out_channels: out_channels
       kernel_size: kernel_size
+  rdna:
+    api: ; Macro.ConvTranspose1d
+    args: {}
+  nvidia_sass:
+    api: Macro.ConvTranspose1d
+    args: {}

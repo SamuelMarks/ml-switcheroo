@@ -16,3 +16,12 @@ variants:
   torch:
     api: torch.nn.BCEWithLogitsLoss
     args: {}
+  flax_nnx:
+    api: flax.nnx.losses.binary_cross_entropy
+    args: {}
+  mlx:
+    api: mlx.nn.losses.binary_cross_entropy
+    args: {}
+  keras:
+    api: keras.losses.BinaryCrossentropy
+    args: {}

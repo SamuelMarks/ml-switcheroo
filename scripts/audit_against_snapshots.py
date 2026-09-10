@@ -368,12 +368,83 @@ def load_snapshots_multi(snapshot_dirs: Optional[List[Path]] = None) -> Dict[str
   return flat_snapshots
 
 
-def audit_frameworks(manager: SemanticsManager, snapshots: Dict[str, Dict[str, Any]]) -> List[str]:
+# Strict supplementary lookup tables for validated hardware ISA instructions.
+RDNA_KNOWN_INSTRUCTIONS: Set[str] = {
+  "v_abs_f32",
+  "s_getreg_b32",
+  "s_setreg_b32",
+  "s_setreg_imm32_b32",
+  "v_add_co_ci_u32",
+  "v_add_nc_i16",
+  "v_add_nc_i32",
+  "v_add_nc_u32",
+  "v_and_b16",
+  "v_and_b32",
+  "v_cls_i32",
+  "v_clz_i32_u32",
+  "v_cmp_t_f16",
+  "v_cmp_t_f32",
+  "v_cmp_t_f64",
+  "v_cmpx_t_f16",
+  "v_cmpx_t_f32",
+  "v_cmpx_t_f64",
+  "v_cndmask_b16",
+  "v_ctz_i32_b32",
+  "v_cvt_floor_i32_f32",
+  "v_cvt_nearest_i32_f32",
+  "v_cvt_pk_norm_i16_f16",
+  "v_cvt_pk_norm_i16_f32",
+  "v_cvt_pk_norm_u16_f16",
+  "v_cvt_pk_norm_u16_f32",
+  "v_cvt_pk_rtz_f16_f32",
+  "v_dot2acc_f32_f16",
+  "v_fma_dx9_zero_f32",
+  "v_fmac_dx9_zero_f32",
+  "v_mul_dx9_zero_f32",
+  "v_or_b16",
+  "v_sub_co_ci_u32",
+  "v_sub_nc_i16",
+  "v_sub_nc_i32",
+  "v_sub_nc_u32",
+  "v_subrev_co_ci_u32",
+  "v_subrev_nc_u32",
+  "v_xor_b16",
+}
+
+NVIDIA_SASS_KNOWN_INSTRUCTIONS: Set[str] = {
+  "FABS",
+  "FSUB",
+  "LOP",
+  "IABS",
+  "FMNMX",
+  "MUFU",
+  "FFMA",
+  "FADD",
+  "FMUL",
+  "LDG",
+  "STG",
+  "ISETP",
+  "FSETP",
+  "BRA",
+  "EXIT",
+  "MOV",
+  "FNEG",
+  "LOP3_LUT",
+  "nvidia_sass.at_function",
+}
+
+
+def audit_frameworks(
+  manager: SemanticsManager,
+  snapshots: Dict[str, Dict[str, Any]],
+  framework: Optional[str] = None,
+) -> List[str]:
   """Audits the known manager data against the snapshots.
 
   Args:
       manager: The hydrated SemanticsManager.
       snapshots: The loaded snapshots.
+      framework: Optional framework identifier to filter auditing.
 
   Returns:
       A list of error strings.
@@ -441,6 +512,8 @@ def audit_frameworks(manager: SemanticsManager, snapshots: Dict[str, Dict[str, A
   for op_name, op_details in manager.data.items():
     variants = op_details.get("variants", {})
     for fw_name, fw_mapping in variants.items():
+      if framework is not None and fw_name != framework:
+        continue
       if fw_name not in snapshots:
         # We might not have a snapshot for every framework in the matrix
         continue
@@ -454,11 +527,31 @@ def audit_frameworks(manager: SemanticsManager, snapshots: Dict[str, Dict[str, A
       if api in snapshot:
         is_valid_api = True
       elif fw_name == "nvidia_sass":
-        base = str(api).split(".")[0].split("_")[0]
-        if base in snapshot or base.lstrip("U") in snapshot or api in ("FABS", "FSUB", "LOP", "nvidia_sass.at_function"):
+        api_str = str(api).upper()
+        base = api_str.split(".")[0].split("_")[0]
+        if (
+          api_str in snapshot
+          or base in snapshot
+          or base.lstrip("U") in snapshot
+          or f"nvidia_sass.inst.{api_str}" in snapshot
+          or f"nvidia_sass.inst.{base}" in snapshot
+          or api in NVIDIA_SASS_KNOWN_INSTRUCTIONS
+          or api_str in NVIDIA_SASS_KNOWN_INSTRUCTIONS
+          or base in NVIDIA_SASS_KNOWN_INSTRUCTIONS
+        ):
           is_valid_api = True
       elif fw_name == "rdna":
-        if api == "v_abs_f32" or str(api).startswith("v_") or str(api).startswith("s_"):
+        api_str = str(api).lower()
+        base = api_str.split(".")[0]
+        if (
+          api_str in snapshot
+          or base in snapshot
+          or f"amd_rdna.inst.{api_str}" in snapshot
+          or f"amd_rdna.inst.{base}" in snapshot
+          or api in RDNA_KNOWN_INSTRUCTIONS
+          or api_str in RDNA_KNOWN_INSTRUCTIONS
+          or base in RDNA_KNOWN_INSTRUCTIONS
+        ):
           is_valid_api = True
 
       if not is_valid_api:
@@ -643,6 +736,9 @@ def main() -> int:
   parser = argparse.ArgumentParser(description="Audit against snapshots")
   parser.add_argument("--strict", action="store_true", help="Fail if any mismatches found")
   parser.add_argument(
+    "--framework", type=str, default=None, help="Audit only a specific framework (e.g. rdna, nvidia_sass)"
+  )
+  parser.add_argument(
     "--report", "--output", dest="report_path", type=str, default=None, help="Save structured audit report to JSON"
   )
   args = parser.parse_args()
@@ -665,7 +761,7 @@ def main() -> int:
   snapshots = load_snapshots_multi(snapshot_dirs)
 
   print(f"Loaded {len(snapshots)} snapshots.")
-  errors = audit_frameworks(mgr, snapshots)
+  errors = audit_frameworks(mgr, snapshots, framework=args.framework)
 
   src_dirs = [Path("src/ml_switcheroo/frameworks"), Path("src/ml_switcheroo/plugins")]
   ast_errors = audit_python_ast(src_dirs, snapshots)

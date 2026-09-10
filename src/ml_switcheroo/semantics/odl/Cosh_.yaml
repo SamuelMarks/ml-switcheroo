@@ -27,5 +27,17 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: unroll_inplace_ops
+  torch:
+    api: torch.cosh
+    args: {}
+  jax:
+    api: jax.numpy.cosh
+    args: {}
+  mlx:
+    api: mlx.core.cosh
+    args: {}
+  keras:
+    api: keras.ops.cosh
+    args: {}
 operation: Cosh_
 type: function

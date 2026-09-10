@@ -20,3 +20,12 @@ variants:
     api: mlx.nn.InstanceNorm
     args:
       dims: dims
+  torch:
+    api: torch.nn.InstanceNorm2d
+    args: {}
+  flax_nnx:
+    api: flax.nnx.LayerNorm
+    args: {}
+  keras:
+    api: keras.layers.UnitNormalization
+    args: {}

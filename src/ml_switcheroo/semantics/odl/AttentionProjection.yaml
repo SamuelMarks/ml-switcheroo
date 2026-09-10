@@ -33,6 +33,12 @@ variants:
     api: keras.activations.linear
     args:
       x: x
+  rdna:
+    api: ; Macro.Linear
+    args: {}
+  nvidia_sass:
+    api: Macro.Linear
+    args: {}
 std_args:
 - name: input_dim
   kind: positional_or_keyword

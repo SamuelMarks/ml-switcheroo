@@ -22,6 +22,12 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  flax_nnx:
+    api: flax.nnx.losses.kl_div
+    args: {}
+  mlx:
+    api: mlx.nn.losses.kl_div_loss
+    args: {}
 std_args:
 - name: size_average
   kind: positional_or_keyword

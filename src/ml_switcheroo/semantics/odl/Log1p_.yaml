@@ -15,5 +15,17 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  torch:
+    api: torch.log1p
+    args: {}
+  jax:
+    api: jax.numpy.log1p
+    args: {}
+  mlx:
+    api: mlx.core.log1p
+    args: {}
+  keras:
+    api: keras.ops.log1p
+    args: {}
 operation: Log1p_
 type: function

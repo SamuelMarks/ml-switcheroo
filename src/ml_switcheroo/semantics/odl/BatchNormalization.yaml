@@ -89,5 +89,11 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  rdna:
+    api: ; Macro.BatchNorm
+    args: {}
+  nvidia_sass:
+    api: Macro.BatchNorm
+    args: {}
 operation: BatchNormalization
 type: function

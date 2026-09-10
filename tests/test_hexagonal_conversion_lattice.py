@@ -174,3 +174,73 @@ def test_high_level_roundtrips() -> None:
   torch_output = engine_mlx_to_torch.run(mlx_output.code)
   assert "class Model(nn.Module):" in torch_output.code
   assert "def forward(self, x):" in torch_output.code
+
+
+@pytest.mark.parametrize("target", ["torch", "jax", "flax_nnx", "mlx", "keras", "nvidia_sass", "rdna"])
+def test_directed_conversion_multilayer_architecture(target: str) -> None:
+  """Tests static conversion of a multi-layer feed-forward model to target framework.
+
+  Args:
+      target: Target framework name.
+  """
+  source_code = """import torch
+import torch.nn as nn
+
+class MLP(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.fc1 = nn.Linear(64, 32)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(32, 10)
+
+    def forward(self, x):
+        h = self.relu(self.fc1(x))
+        return self.fc2(h)
+"""
+  engine = ASTEngine(source="torch", target=target)
+  res = engine.run(source_code)
+  assert res.code is not None
+  assert len(res.code.strip()) > 0
+
+
+@pytest.mark.parametrize("target", ["torch", "flax_nnx", "mlx", "keras", "nvidia_sass", "rdna"])
+def test_directed_conversion_conv_block(target: str) -> None:
+  """Tests static conversion of a convolutional block to target framework.
+
+  Args:
+      target: Target framework name.
+  """
+  source_code = """import torch
+import torch.nn as nn
+
+class ConvNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv = nn.Conv2d(3, 16, 3)
+
+    def forward(self, x):
+        return self.conv(x)
+"""
+  engine = ASTEngine(source="torch", target=target)
+  res = engine.run(source_code)
+  assert res.code is not None
+  assert len(res.code.strip()) > 0
+
+
+@pytest.mark.parametrize("target", ["torch", "jax", "flax_nnx", "mlx", "keras"])
+def test_directed_conversion_activation_chain(target: str) -> None:
+  """Tests static conversion of functional activation and math chains.
+
+  Args:
+      target: Target framework name.
+  """
+  source_code = """import torch
+
+def compute_chain(x):
+    y = torch.abs(x)
+    return torch.exp(y)
+"""
+  engine = ASTEngine(source="torch", target=target)
+  res = engine.run(source_code)
+  assert res.code is not None
+  assert len(res.code.strip()) > 0

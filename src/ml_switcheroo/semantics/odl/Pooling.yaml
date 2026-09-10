@@ -30,6 +30,12 @@ variants:
     api: mlx.nn.MaxPool2d
     args:
       kernel_size: kernel_size
+  rdna:
+    api: ; Macro.MaxPool2d
+    args: {}
+  nvidia_sass:
+    api: Macro.MaxPool2d
+    args: {}
 std_args:
 - name: window_shape
   kind: positional_or_keyword

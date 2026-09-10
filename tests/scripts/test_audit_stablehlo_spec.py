@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+from typing import Any
 from unittest.mock import MagicMock, patch
 import pytest
 
@@ -45,7 +46,8 @@ def test_get_pip_cache_dir_platforms(monkeypatch: pytest.MonkeyPatch, tmp_path: 
   assert auditor.get_pip_cache_dir() == tmp_path / "home" / ".cache" / "pip"
 
   # Fallback on Path.home() exception
-  def _raising_home():
+  def _raising_home() -> Path:
+    """Mock Path.home raising RuntimeError."""
     raise RuntimeError("No home dir")
 
   monkeypatch.setattr(Path, "home", _raising_home)
@@ -115,7 +117,8 @@ def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
   cache_file.unlink()
   primary_url = "https://raw.githubusercontent.com/openxla/stablehlo/main/docs/spec.md"
 
-  def _side_effect(req, **kwargs):
+  def _side_effect(req: Any, **kwargs: Any) -> MagicMock:
+    """Mock urlopen side effect simulating CDN fallback."""
     if "cdn.jsdelivr.net" in req.full_url:
       resp = MagicMock()
       resp.read.return_value = b"# CDN StableHLO Spec"
@@ -163,6 +166,12 @@ def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     with patch("urllib.request.urlopen", side_effect=Exception("Network down")):
       with pytest.raises(RuntimeError, match="Failed to download spec"):
         auditor.download_spec("https://fake.url/spec.md", force_download=True)
+
+  # 11. Fallback cache exists but is empty/whitespace when network fails: raises RuntimeError
+  cache_file.write_text("   \n", encoding="utf-8")
+  with patch("urllib.request.urlopen", side_effect=Exception("Network down")):
+    with pytest.raises(RuntimeError, match="Failed to download spec"):
+      auditor.download_spec("https://fake.url/spec.md", force_download=True)
 
 
 def test_parse_stablehlo_ops() -> None:

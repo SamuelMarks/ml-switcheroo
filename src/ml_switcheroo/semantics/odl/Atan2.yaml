@@ -29,3 +29,9 @@ variants:
     args:
       lhs: lhs
       rhs: rhs
+  mlx:
+    api: mlx.core.arctan2
+    args: {}
+  keras:
+    api: keras.ops.arctan2
+    args: {}

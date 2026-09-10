@@ -13,3 +13,12 @@ variants:
   torch:
     api: torch.gru
     args: {}
+  flax_nnx:
+    api: flax.nnx.GRU
+    args: {}
+  mlx:
+    api: mlx.nn.GRU
+    args: {}
+  keras:
+    api: keras.layers.GRU
+    args: {}

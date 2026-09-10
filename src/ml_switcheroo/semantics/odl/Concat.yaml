@@ -27,3 +27,6 @@ variants:
     api: mlx.core.concat
     args:
       arrays: arrays
+  keras:
+    api: keras.ops.concatenate
+    args: {}

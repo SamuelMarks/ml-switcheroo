@@ -31,3 +31,9 @@ variants:
     api: keras.ops.round
     args:
       x: x
+  rdna:
+    api: v_rndne_f32
+    args: {}
+  nvidia_sass:
+    api: F2F
+    args: {}

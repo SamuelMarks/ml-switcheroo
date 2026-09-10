@@ -14,3 +14,18 @@ variants:
     api: jax.numpy.invert
     args:
       x: x
+  rdna:
+    api: v_not_b32
+    args: {}
+  nvidia_sass:
+    api: LOP3_LUT
+    args: {}
+  torch:
+    api: torch.bitwise_not
+    args: {}
+  mlx:
+    api: mlx.core.bitwise_not
+    args: {}
+  keras:
+    api: keras.ops.bitwise_invert
+    args: {}

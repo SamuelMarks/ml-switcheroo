@@ -39,5 +39,11 @@ variants:
   keras:
     api: keras.ops.cos
     args: {}
+  rdna:
+    api: v_cos_f32
+    args: {}
+  nvidia_sass:
+    api: MUFU.COS
+    args: {}
 operation: Cos_
 type: function

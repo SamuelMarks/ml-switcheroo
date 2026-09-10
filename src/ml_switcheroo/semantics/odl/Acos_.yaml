@@ -10,3 +10,15 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  torch:
+    api: torch.acos
+    args: {}
+  jax:
+    api: jax.numpy.arccos
+    args: {}
+  mlx:
+    api: mlx.core.arccos
+    args: {}
+  keras:
+    api: keras.ops.arccos
+    args: {}

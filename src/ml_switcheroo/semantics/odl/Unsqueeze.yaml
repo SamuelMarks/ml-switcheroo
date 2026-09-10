@@ -10,3 +10,15 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  torch:
+    api: torch.unsqueeze
+    args: {}
+  jax:
+    api: jax.numpy.expand_dims
+    args: {}
+  mlx:
+    api: mlx.core.expand_dims
+    args: {}
+  keras:
+    api: keras.ops.expand_dims
+    args: {}

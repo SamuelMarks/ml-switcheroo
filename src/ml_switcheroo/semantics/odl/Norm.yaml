@@ -43,3 +43,6 @@ variants:
     api: keras.ops.norm
     args:
       x: x
+  jax:
+    api: jax.numpy.linalg.norm
+    args: {}

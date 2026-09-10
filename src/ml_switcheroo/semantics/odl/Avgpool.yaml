@@ -23,6 +23,15 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  rdna:
+    api: ; Macro.AvgPool3d
+    args: {}
+  nvidia_sass:
+    api: Macro.AvgPool3d
+    args: {}
+  keras:
+    api: keras.layers.AveragePooling3D
+    args: {}
 std_args:
 - name: kernel_size
   kind: positional_or_keyword

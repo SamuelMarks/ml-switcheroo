@@ -40,6 +40,12 @@ variants:
     api: jax.nn.softmax
     args:
       x: x
+  rdna:
+    api: ; Macro.Softmax
+    args: {}
+  nvidia_sass:
+    api: Macro.Softmax
+    args: {}
 std_args:
 - name: dim
   kind: positional_or_keyword

@@ -18,3 +18,9 @@ variants:
     api: jax.lax.asin
     args:
       x: x
+  mlx:
+    api: mlx.core.arcsin
+    args: {}
+  keras:
+    api: keras.ops.arcsin
+    args: {}

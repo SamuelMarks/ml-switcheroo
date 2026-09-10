@@ -93,3 +93,9 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  rdna:
+    api: ; Macro.ConvTranspose1d
+    args: {}
+  nvidia_sass:
+    api: Macro.ConvTranspose1d
+    args: {}

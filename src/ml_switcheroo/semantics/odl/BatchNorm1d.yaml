@@ -20,3 +20,18 @@ variants:
   torch:
     api: torch.nn.BatchNorm1d
     args: {}
+  rdna:
+    api: ; Macro.BatchNorm
+    args: {}
+  nvidia_sass:
+    api: Macro.BatchNorm
+    args: {}
+  flax_nnx:
+    api: flax.nnx.BatchNorm
+    args: {}
+  mlx:
+    api: mlx.nn.BatchNorm
+    args: {}
+  keras:
+    api: keras.layers.BatchNormalization
+    args: {}

@@ -25,5 +25,17 @@ variants:
     pack_as: Tuple
     required_imports: []
     transformation_type: macro
+  torch:
+    api: torch.sinh
+    args: {}
+  jax:
+    api: jax.numpy.sinh
+    args: {}
+  mlx:
+    api: mlx.core.sinh
+    args: {}
+  keras:
+    api: keras.ops.sinh
+    args: {}
 operation: Sinh_
 type: function

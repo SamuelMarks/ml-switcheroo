@@ -12,12 +12,17 @@ def test_conversion_result_defaults_and_has_errors() -> None:
   res_success = ConversionResult(code="y = 1")
   assert res_success.code == "y = 1"
   assert res_success.errors == []
+  assert res_success.warnings == []
   assert res_success.success is True
   assert res_success.trace_events == []
   assert res_success.has_errors is False
+  assert res_success.has_warnings is False
 
   res_failure = ConversionResult(code="", errors=["Failed to transpile node"], success=False)
   assert res_failure.has_errors is True
+
+  res_warning = ConversionResult(code="y = 1", warnings=["Dynamic construct detected"])
+  assert res_warning.has_warnings is True
 
 
 def test_escape_hatch_mark_failure_standard_statement() -> None:
@@ -45,3 +50,15 @@ def test_escape_hatch_mark_failure_fallback_on_exception() -> None:
 
   res = EscapeHatch.mark_failure(mock_node, "Some failure reason")
   assert res is mock_node
+
+
+def test_conversion_result_collects_static_safety_warnings() -> None:
+  """Test that ASTEngine records static safety warnings in ConversionResult."""
+  from ml_switcheroo.core.engine import ASTEngine
+
+  engine = ASTEngine(source="torch", target="jax")
+  code_with_dynamic = "import torch\ndef func(x):\n    if x.item() > 0:\n        return x[x > 0]\n    return x\n"
+  res = engine.run(code_with_dynamic)
+  assert res.has_warnings is True
+  assert any("DYNAMIC_SHAPE" in w for w in res.warnings)
+  assert any("VALUE_DEPENDENT_CONTROL_FLOW" in w for w in res.warnings)

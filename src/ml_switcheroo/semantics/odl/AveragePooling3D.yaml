@@ -61,5 +61,11 @@ variants:
     api: mlx.nn.AvgPool3d
     args:
       kernel_size: kernel_size
+  rdna:
+    api: ; Macro.AvgPool3d
+    args: {}
+  nvidia_sass:
+    api: Macro.AvgPool3d
+    args: {}
 operation: AveragePooling3D
 type: function

@@ -15,3 +15,12 @@ variants:
   torch:
     api: torch.nn.MSELoss
     args: {}
+  flax_nnx:
+    api: flax.nnx.losses.mse
+    args: {}
+  mlx:
+    api: mlx.nn.losses.mse_loss
+    args: {}
+  keras:
+    api: keras.losses.MeanSquaredError
+    args: {}

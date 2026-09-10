@@ -24,3 +24,9 @@ variants:
     args:
       x: x
       y: y
+  mlx:
+    api: mlx.core.power
+    args: {}
+  keras:
+    api: keras.ops.power
+    args: {}

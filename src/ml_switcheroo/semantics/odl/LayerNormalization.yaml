@@ -74,5 +74,11 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  rdna:
+    api: ; Macro.LayerNorm
+    args: {}
+  nvidia_sass:
+    api: Macro.LayerNorm
+    args: {}
 operation: LayerNormalization
 type: function

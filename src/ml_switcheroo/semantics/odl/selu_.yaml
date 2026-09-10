@@ -10,3 +10,12 @@ variants:
     api: torch.nn.functional.selu_
     args:
       input: input
+  jax:
+    api: jax.nn.selu
+    args: {}
+  mlx:
+    api: mlx.nn.selu
+    args: {}
+  keras:
+    api: keras.activations.selu
+    args: {}

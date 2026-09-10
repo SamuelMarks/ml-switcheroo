@@ -19,3 +19,6 @@ variants:
   tensorflow:
     api: tf.nn.elu
     args: {}
+  jax:
+    api: jax.nn.elu
+    args: {}

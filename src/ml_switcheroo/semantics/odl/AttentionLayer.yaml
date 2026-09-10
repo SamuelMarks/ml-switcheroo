@@ -26,6 +26,15 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  rdna:
+    api: ; Macro.MultiheadAttention
+    args: {}
+  nvidia_sass:
+    api: Macro.MultiheadAttention
+    args: {}
+  mlx:
+    api: mlx.nn.MultiHeadAttention
+    args: {}
 std_args:
 - name: embed_dim
   kind: positional_or_keyword

@@ -30,5 +30,11 @@ variants:
   keras:
     api: keras.ops.negative
     args: {}
+  rdna:
+    api: v_sub_f32
+    args: {}
+  nvidia_sass:
+    api: FNEG
+    args: {}
 operation: Negative_
 type: function

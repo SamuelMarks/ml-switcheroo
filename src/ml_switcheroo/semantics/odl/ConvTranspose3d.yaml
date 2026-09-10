@@ -84,3 +84,12 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  rdna:
+    api: ; Macro.ConvTranspose3d
+    args: {}
+  nvidia_sass:
+    api: Macro.ConvTranspose3d
+    args: {}
+  keras:
+    api: keras.layers.Conv3DTranspose
+    args: {}

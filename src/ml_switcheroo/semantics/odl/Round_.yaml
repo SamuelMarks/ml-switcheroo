@@ -26,5 +26,11 @@ variants:
   keras:
     api: keras.ops.round
     args: {}
+  rdna:
+    api: v_rndne_f32
+    args: {}
+  nvidia_sass:
+    api: F2F
+    args: {}
 operation: Round_
 type: function

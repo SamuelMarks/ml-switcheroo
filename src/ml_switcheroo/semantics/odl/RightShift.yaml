@@ -10,3 +10,21 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  rdna:
+    api: v_lshrrev_b32
+    args: {}
+  nvidia_sass:
+    api: SHF
+    args: {}
+  torch:
+    api: torch.bitwise_right_shift
+    args: {}
+  jax:
+    api: jax.numpy.right_shift
+    args: {}
+  mlx:
+    api: mlx.core.right_shift
+    args: {}
+  keras:
+    api: keras.ops.right_shift
+    args: {}

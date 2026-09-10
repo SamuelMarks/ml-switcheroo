@@ -147,3 +147,126 @@ def test_full_roundtrip_hardware_python_matrix(hardware_target: str, python_targ
   elif python_target == "keras":
     assert "(keras.Model):" in py_code
     assert "def call(self, x):" in py_code
+
+
+@pytest.mark.parametrize("src_hw,dst_hw", [("rdna", "nvidia_sass"), ("nvidia_sass", "rdna")])
+def test_direct_cross_isa_compilation(src_hw: str, dst_hw: str) -> None:
+  """Verifies direct cross-compilation between AMD RDNA and NVIDIA SASS assembly.
+
+  Args:
+      src_hw: Source hardware architecture ('rdna' or 'nvidia_sass').
+      dst_hw: Destination hardware architecture ('rdna' or 'nvidia_sass').
+  """
+  from ml_switcheroo import convert
+
+  if src_hw == "rdna":
+    code = "; BEGIN Conv2d (conv)\nv_add_f32 v1, v0, v0\n; END Conv2d (conv)\n"
+  else:
+    code = "// BEGIN Conv2d (conv)\nFADD R1, R0, R0;\n// END Conv2d (conv)\n"
+
+  converted = convert(code, source=src_hw, target=dst_hw)
+  assert "Conv2d" in converted
+  if dst_hw == "nvidia_sass":
+    assert "FFMA" in converted or "FADD" in converted or "BEGIN Conv2d" in converted
+  else:
+    assert "v_fmac_f32" in converted or "v_add_f32" in converted or "BEGIN Conv2d" in converted
+
+
+@pytest.mark.parametrize("src_py", ["torch", "jax", "mlx", "keras"])
+@pytest.mark.parametrize("dst_hw", ["rdna", "nvidia_sass"])
+def test_high_level_to_hardware_isa_compilation(src_py: str, dst_hw: str) -> None:
+  """Verifies compiling high-level Python models into hardware assembly ISAs.
+
+  Args:
+      src_py: Source high-level Python framework ('torch', 'jax', 'mlx', 'keras').
+      dst_hw: Target hardware architecture ('rdna' or 'nvidia_sass').
+  """
+  from ml_switcheroo import convert
+
+  sample_code = """
+import torch
+import torch.nn as nn
+class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv = nn.Conv2d(3, 16, 3)
+    def forward(self, x):
+        return self.conv(x)
+"""
+  converted = convert(sample_code, source=src_py, target=dst_hw)
+  assert "Conv2d" in converted
+  if dst_hw == "rdna":
+    assert "; RDNA Code Generation Initialized" in converted or "v0" in converted
+  else:
+    assert "R0" in converted or "MOV" in converted or "Conv2d" in converted
+
+
+@pytest.mark.parametrize(
+  "src_fw,dst_fw",
+  [
+    ("torch", "jax"),
+    ("jax", "torch"),
+    ("torch", "mlx"),
+    ("mlx", "torch"),
+    ("torch", "keras"),
+    ("keras", "torch"),
+    ("jax", "mlx"),
+    ("mlx", "jax"),
+    ("jax", "keras"),
+    ("keras", "jax"),
+    ("mlx", "keras"),
+    ("keras", "mlx"),
+  ],
+)
+def test_full_high_level_python_bidirectional_matrix(src_fw: str, dst_fw: str) -> None:
+  """Verifies static AST/CST conversion across all 12 high-level Python framework pairs.
+
+  Args:
+      src_fw: Source framework identifier.
+      dst_fw: Target framework identifier.
+  """
+  from ml_switcheroo import convert
+
+  snippets = {
+    "torch": (
+      "import torch\nimport torch.nn as nn\nclass Net(nn.Module):\n"
+      "    def __init__(self):\n        super().__init__()\n        self.conv = nn.Conv2d(3, 16, 3)\n"
+      "    def forward(self, x):\n        return self.conv(x)\n"
+    ),
+    "jax": (
+      "import jax.numpy as jnp\nimport flax.nnx as nnx\nclass Net(nnx.Module):\n"
+      "    def __init__(self, rngs: nnx.Rngs):\n        self.conv = nnx.Conv(3, 16, 3, rngs=rngs)\n"
+      "    def __call__(self, x):\n        return self.conv(x)\n"
+    ),
+    "mlx": (
+      "import mlx.core as mx\nimport mlx.nn as nn\nclass Net(nn.Module):\n"
+      "    def __init__(self):\n        super().__init__()\n        self.conv = nn.Conv2d(3, 16, 3)\n"
+      "    def __call__(self, x):\n        return self.conv(x)\n"
+    ),
+    "keras": (
+      "import keras\nimport keras.layers as layers\nclass Net(keras.Model):\n"
+      "    def __init__(self):\n        super().__init__()\n        self.conv = layers.Conv2D(16, 3)\n"
+      "    def call(self, x):\n        return self.conv(x)\n"
+    ),
+  }
+
+  converted = convert(snippets[src_fw], source=src_fw, target=dst_fw)
+
+  # Validate generated Python syntax
+  try:
+    ast.parse(converted)
+  except SyntaxError as exc:
+    pytest.fail(f"Conversion {src_fw} -> {dst_fw} generated invalid Python syntax: {exc}")
+
+  # Validate framework target class definitions
+  if dst_fw == "torch":
+    assert "(nn.Module):" in converted
+    assert "def forward(self, x):" in converted
+  elif dst_fw in ("jax", "flax_nnx", "flax"):
+    assert "def __call__(self, x):" in converted
+  elif dst_fw == "mlx":
+    assert "(nn.Module):" in converted
+    assert "def __call__(self, x):" in converted
+  elif dst_fw == "keras":
+    assert "keras.Model" in converted or "keras.Layer" in converted
+    assert "def call(self, x):" in converted

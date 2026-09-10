@@ -195,11 +195,27 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.numpy.arccos",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.arccos",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.arccos",
+        "args": {}
+      },
       "paxml": {
         "api": "jax.numpy.arccos",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "torch": {
+        "api": "torch.acos",
+        "args": {}
       }
     }
   },
@@ -2306,6 +2322,18 @@
       }
     ],
     "variants": {
+      "jax": {
+        "api": "jax.numpy.arcsin",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.arcsin",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.arcsin",
+        "args": {}
+      },
       "torch": {
         "api": "torch.asin_",
         "args": {
@@ -2400,6 +2428,18 @@
       }
     ],
     "variants": {
+      "jax": {
+        "api": "jax.numpy.arctan",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.arctan",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.arctan",
+        "args": {}
+      },
       "torch": {
         "api": "torch.atan_",
         "args": {
@@ -2727,10 +2767,22 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "mlx": {
+        "api": "mlx.nn.MultiHeadAttention",
+        "args": {}
+      },
+      "nvidia_sass": {
+        "api": "Macro.MultiheadAttention",
+        "args": {}
+      },
       "paxml": {
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.MultiheadAttention",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.Attention",
@@ -2820,6 +2872,10 @@
           "output_dims": "output_dims"
         }
       },
+      "nvidia_sass": {
+        "api": "Macro.Linear",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.AttentionProjection",
         "args": {
@@ -2831,6 +2887,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.Linear",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.Linear",
@@ -3115,10 +3175,18 @@
           "kernel_size": "kernel_size"
         }
       },
+      "nvidia_sass": {
+        "api": "Macro.AvgPool1d",
+        "args": {}
+      },
       "paxml": {
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.AvgPool1d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.AveragePooling1D",
@@ -3214,11 +3282,19 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.AvgPool2d",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.AvgPooling",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.AvgPool2d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.AveragePooling2D",
@@ -3303,10 +3379,18 @@
           "kernel_size": "kernel_size"
         }
       },
+      "nvidia_sass": {
+        "api": "Macro.AvgPool3d",
+        "args": {}
+      },
       "paxml": {
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.AvgPool3d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.AveragePooling3D",
@@ -3391,11 +3475,31 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.AvgPool",
+        "args": {}
+      },
       "keras": {
         "api": "keras.layers.AvgPool1D",
         "args": {
           "pool_size": "pool_size"
         }
+      },
+      "mlx": {
+        "api": "mlx.nn.AvgPool1d",
+        "args": {}
+      },
+      "nvidia_sass": {
+        "api": "Macro.AvgPool1d",
+        "args": {}
+      },
+      "rdna": {
+        "api": "; Macro.AvgPool1d",
+        "args": {}
+      },
+      "torch": {
+        "api": "torch.nn.AvgPool1d",
+        "args": {}
       }
     }
   },
@@ -3443,11 +3547,31 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.AvgPool",
+        "args": {}
+      },
       "keras": {
         "api": "keras.layers.AvgPool2D",
         "args": {
           "pool_size": "pool_size"
         }
+      },
+      "mlx": {
+        "api": "mlx.nn.AvgPool2d",
+        "args": {}
+      },
+      "nvidia_sass": {
+        "api": "Macro.AvgPool2d",
+        "args": {}
+      },
+      "rdna": {
+        "api": "; Macro.AvgPool2d",
+        "args": {}
+      },
+      "torch": {
+        "api": "torch.nn.AvgPool2d",
+        "args": {}
       }
     }
   },
@@ -3495,11 +3619,31 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.AvgPool",
+        "args": {}
+      },
       "keras": {
         "api": "keras.layers.AvgPool3D",
         "args": {
           "pool_size": "pool_size"
         }
+      },
+      "mlx": {
+        "api": "mlx.nn.AvgPool3d",
+        "args": {}
+      },
+      "nvidia_sass": {
+        "api": "Macro.AvgPool3d",
+        "args": {}
+      },
+      "rdna": {
+        "api": "; Macro.AvgPool3d",
+        "args": {}
+      },
+      "torch": {
+        "api": "torch.nn.AvgPool3d",
+        "args": {}
       }
     }
   },
@@ -3562,6 +3706,10 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "keras": {
+        "api": "keras.layers.AveragePooling3D",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.AvgPool3d",
         "args": {
@@ -3572,6 +3720,14 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "nvidia_sass": {
+        "api": "Macro.AvgPool3d",
+        "args": {}
+      },
+      "rdna": {
+        "api": "; Macro.AvgPool3d",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.AvgPool3d",
@@ -3666,6 +3822,18 @@
     ],
     "type": "class",
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.losses.binary_cross_entropy",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.losses.BinaryCrossentropy",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.nn.losses.binary_cross_entropy",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.BCEWithLogitsLoss",
         "args": {}
@@ -4088,6 +4256,26 @@
     ],
     "type": "class",
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.BatchNorm",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.layers.BatchNormalization",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.nn.BatchNorm",
+        "args": {}
+      },
+      "nvidia_sass": {
+        "api": "Macro.BatchNorm",
+        "args": {}
+      },
+      "rdna": {
+        "api": "; Macro.BatchNorm",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.BatchNorm1d",
         "args": {}
@@ -4536,11 +4724,19 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.BatchNorm",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.BatchNorm",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.BatchNorm",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.BatchNormalization",
@@ -5051,6 +5247,14 @@
           "y": "y"
         }
       },
+      "keras": {
+        "api": "keras.ops.bitwise_and",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.bitwise_and",
+        "args": {}
+      },
       "nvidia_sass": {
         "api": "LOP3_LUT",
         "args": {}
@@ -5063,6 +5267,10 @@
       },
       "rdna": {
         "api": "v_and_b32",
+        "args": {}
+      },
+      "torch": {
+        "api": "torch.bitwise_and",
         "args": {}
       }
     }
@@ -5123,11 +5331,31 @@
           "x": "x"
         }
       },
+      "keras": {
+        "api": "keras.ops.bitwise_invert",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.bitwise_not",
+        "args": {}
+      },
+      "nvidia_sass": {
+        "api": "LOP3_LUT",
+        "args": {}
+      },
       "paxml": {
         "api": "jnp.invert",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "v_not_b32",
+        "args": {}
+      },
+      "torch": {
+        "api": "torch.bitwise_not",
+        "args": {}
       }
     }
   },
@@ -5155,6 +5383,14 @@
           "y": "y"
         }
       },
+      "keras": {
+        "api": "keras.ops.bitwise_or",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.bitwise_or",
+        "args": {}
+      },
       "nvidia_sass": {
         "api": "LOP3_LUT",
         "args": {}
@@ -5167,6 +5403,10 @@
       },
       "rdna": {
         "api": "v_or_b32",
+        "args": {}
+      },
+      "torch": {
+        "api": "torch.bitwise_or",
         "args": {}
       }
     }
@@ -5211,6 +5451,14 @@
           "y": "y"
         }
       },
+      "keras": {
+        "api": "keras.ops.bitwise_xor",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.bitwise_xor",
+        "args": {}
+      },
       "nvidia_sass": {
         "api": "LOP3_LUT",
         "args": {}
@@ -5223,6 +5471,10 @@
       },
       "rdna": {
         "api": "v_xor_b32",
+        "args": {}
+      },
+      "torch": {
+        "api": "torch.bitwise_xor",
         "args": {}
       }
     }
@@ -5548,11 +5800,27 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.numpy.broadcast_to",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.broadcast_to",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.broadcast_to",
+        "args": {}
+      },
       "paxml": {
         "api": "jax.numpy.broadcast_to",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "torch": {
+        "api": "torch.broadcast_to",
+        "args": {}
       }
     }
   },
@@ -6099,11 +6367,19 @@
     ],
     "type": "function",
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.losses.cross_entropy",
+        "args": {}
+      },
       "keras": {
         "api": "keras.losses.CategoricalCrossentropy",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "mlx": {
+        "api": "mlx.nn.losses.cross_entropy",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.losses.CategoricalCrossentropy",
@@ -6409,6 +6685,14 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.Conv",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.layers.Conv1D",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.Conv1d",
         "args": {
@@ -6417,11 +6701,19 @@
           "out_channels": "out_channels"
         }
       },
+      "nvidia_sass": {
+        "api": "Macro.Conv1d",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.CausalDepthwiseConv1D",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.Conv1d",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.Conv1d",
@@ -7888,10 +8180,18 @@
           "out_channels": "out_channels"
         }
       },
+      "nvidia_sass": {
+        "api": "Macro.ConvTranspose1d",
+        "args": {}
+      },
       "paxml": {
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.ConvTranspose1d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.Conv1DTranspose",
@@ -8030,6 +8330,10 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.ConvTranspose2d",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.Conv2DTranspose",
         "args": {
@@ -8039,6 +8343,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.ConvTranspose2d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.Conv2DTranspose",
@@ -8932,6 +9240,14 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.ConvTranspose2d",
+        "args": {}
+      },
+      "rdna": {
+        "api": "; Macro.ConvTranspose2d",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.ConvTranspose2d",
         "args": {
@@ -9041,6 +9357,10 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.ConvTranspose1d",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.Conv1DTranspose",
         "args": {
@@ -9051,6 +9371,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.ConvTranspose1d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.Convolution1DTranspose",
@@ -9153,6 +9477,10 @@
         "api": "mlx.nn.ConvTranspose2d",
         "args": {}
       },
+      "nvidia_sass": {
+        "api": "Macro.ConvTranspose2d",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.Conv2DTranspose",
         "args": {
@@ -9163,6 +9491,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.ConvTranspose2d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.Convolution2DTranspose",
@@ -9251,6 +9583,10 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "keras": {
+        "api": "keras.layers.Conv3DTranspose",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.ConvTranspose3d",
         "args": {
@@ -9267,6 +9603,10 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.ConvTranspose3d",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.Conv3DTranspose",
         "args": {
@@ -9277,6 +9617,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.ConvTranspose3d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.Conv3DTranspose",
@@ -10038,6 +10382,10 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.Conv",
+        "args": {}
+      },
       "keras": {
         "api": "keras.layers.Convolution3D",
         "args": {
@@ -10057,6 +10405,14 @@
           "kernel_size": "kernel_size",
           "out_channels": "out_channels"
         }
+      },
+      "nvidia_sass": {
+        "api": "Macro.Conv3d",
+        "args": {}
+      },
+      "rdna": {
+        "api": "; Macro.Conv3d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.Convolution3D",
@@ -10174,6 +10530,10 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.ConvTranspose",
+        "args": {}
+      },
       "keras": {
         "api": "keras.layers.Convolution3DTranspose",
         "args": {
@@ -10192,6 +10552,14 @@
           "kernel_size": "kernel_size",
           "out_channels": "out_channels"
         }
+      },
+      "nvidia_sass": {
+        "api": "Macro.ConvTranspose3d",
+        "args": {}
+      },
+      "rdna": {
+        "api": "; Macro.ConvTranspose3d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.Convolution3DTranspose",
@@ -10250,6 +10618,10 @@
         "api": "mlx.core.cos",
         "args": {}
       },
+      "nvidia_sass": {
+        "api": "MUFU.COS",
+        "args": {}
+      },
       "paxml": {
         "api": "jax.numpy.cos",
         "args": {
@@ -10259,6 +10631,10 @@
         "pack_as": "Tuple",
         "required_imports": [],
         "requires_plugin": "unroll_inplace_ops"
+      },
+      "rdna": {
+        "api": "v_cos_f32",
+        "args": {}
       },
       "torch": {
         "api": "torch.cos",
@@ -10293,8 +10669,20 @@
         "required_imports": [],
         "requires_plugin": "unroll_inplace_ops"
       },
+      "jax": {
+        "api": "jax.numpy.cosh",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.cosh",
+        "args": {}
+      },
       "latex_dsl": {
         "api": "latex.cosh",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.cosh",
         "args": {}
       },
       "paxml": {
@@ -10306,6 +10694,10 @@
         "pack_as": "Tuple",
         "required_imports": [],
         "requires_plugin": "unroll_inplace_ops"
+      },
+      "torch": {
+        "api": "torch.cosh",
+        "args": {}
       }
     }
   },
@@ -10742,6 +11134,18 @@
     ],
     "type": "class",
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.losses.cross_entropy",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.losses.CategoricalCrossentropy",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.nn.losses.cross_entropy",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.CrossEntropyLoss",
         "args": {}
@@ -14372,11 +14776,27 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.numpy.expand_dims",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.expand_dims",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.expand_dims",
+        "args": {}
+      },
       "paxml": {
         "api": "jax.numpy.expand_dims",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "torch": {
+        "api": "torch.unsqueeze",
+        "args": {}
       }
     }
   },
@@ -14395,6 +14815,22 @@
     "variants": {
       "dask": {
         "api": "dask.array.expm1",
+        "args": {}
+      },
+      "jax": {
+        "api": "jax.numpy.expm1",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.expm1",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.expm1",
+        "args": {}
+      },
+      "torch": {
+        "api": "torch.expm1",
         "args": {}
       }
     }
@@ -15462,11 +15898,27 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.numpy.floor_divide",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.floor_divide",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.floor_divide",
+        "args": {}
+      },
       "paxml": {
         "api": "jax.numpy.floor_divide",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "torch": {
+        "api": "torch.floor_divide",
+        "args": {}
       }
     }
   },
@@ -15514,6 +15966,14 @@
       },
       "mlx": {
         "api": "mlx.core.floor",
+        "args": {}
+      },
+      "nvidia_sass": {
+        "api": "F2F",
+        "args": {}
+      },
+      "rdna": {
+        "api": "v_floor_f32",
         "args": {}
       },
       "torch": {
@@ -16074,6 +16534,10 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.Softmax",
+        "args": {}
+      },
       "paxml": {
         "api": "paxml.layers.FullSoftmax",
         "args": {
@@ -16082,6 +16546,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.Softmax",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.Softmax",
@@ -16348,6 +16816,10 @@
     ],
     "type": "function",
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.Dropout",
+        "args": {}
+      },
       "keras": {
         "api": "keras.layers.GaussianDropout",
         "args": {
@@ -17651,6 +18123,10 @@
         "required_imports": [],
         "requires_plugin": "mlx_layer_wrapper"
       },
+      "nvidia_sass": {
+        "api": "Macro.GroupNorm",
+        "args": {}
+      },
       "paxml": {
         "api": "paxml.layers.GroupNorm",
         "args": {
@@ -17661,6 +18137,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.GroupNorm",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.GroupNorm",
@@ -17754,6 +18234,14 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "nvidia_sass": {
+        "api": "Macro.GroupNorm",
+        "args": {}
+      },
+      "rdna": {
+        "api": "; Macro.GroupNorm",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.GroupNormalization",
@@ -17993,6 +18481,18 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.GRU",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.layers.GRU",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.nn.GRU",
+        "args": {}
+      },
       "torch": {
         "api": "torch.gru",
         "args": {}
@@ -19120,11 +19620,23 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.LayerNorm",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.layers.UnitNormalization",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.InstanceNorm",
         "args": {
           "dims": "dims"
         }
+      },
+      "torch": {
+        "api": "torch.nn.InstanceNorm2d",
+        "args": {}
       }
     }
   },
@@ -20264,11 +20776,19 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.losses.kl_div",
+        "args": {}
+      },
       "keras": {
         "api": "keras.losses.KLDivergence",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "mlx": {
+        "api": "mlx.nn.losses.kl_div_loss",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.losses.KLDivergence",
@@ -20472,6 +20992,14 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.losses.l1",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.losses.MeanAbsoluteError",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.losses.l1_loss",
         "args": {
@@ -20515,6 +21043,18 @@
     ],
     "type": "class",
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.losses.l1",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.losses.MeanAbsoluteError",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.nn.losses.l1_loss",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.L1Loss",
         "args": {}
@@ -21254,6 +21794,14 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "nvidia_sass": {
+        "api": "Macro.LayerNorm",
+        "args": {}
+      },
+      "rdna": {
+        "api": "; Macro.LayerNorm",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.LayerNormalization",
@@ -22254,6 +22802,10 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.nn.leaky_relu",
+        "args": {}
+      },
       "keras": {
         "api": "keras.activations.leaky_relu",
         "args": {},
@@ -22305,11 +22857,35 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.numpy.left_shift",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.left_shift",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.left_shift",
+        "args": {}
+      },
+      "nvidia_sass": {
+        "api": "SHF",
+        "args": {}
+      },
       "paxml": {
         "api": "jax.numpy.left_shift",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "v_lshlrev_b32",
+        "args": {}
+      },
+      "torch": {
+        "api": "torch.bitwise_left_shift",
+        "args": {}
       }
     }
   },
@@ -22915,6 +23491,22 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "jax": {
+        "api": "jax.numpy.log1p",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.log1p",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.log1p",
+        "args": {}
+      },
+      "torch": {
+        "api": "torch.log1p",
+        "args": {}
       }
     }
   },
@@ -23093,6 +23685,14 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.nn.log_softmax",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.activations.log_softmax",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.LogSoftmax",
         "args": {}
@@ -23234,6 +23834,18 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.numpy.logical_and",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.logical_and",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.logical_and",
+        "args": {}
+      },
       "paxml": {
         "api": "jax.numpy.logical_and",
         "args": {
@@ -23243,6 +23855,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "torch": {
+        "api": "torch.logical_and",
+        "args": {}
       }
     }
   },
@@ -23273,11 +23889,23 @@
         "api": "jax.numpy.logical_or",
         "args": {}
       },
+      "keras": {
+        "api": "keras.ops.logical_not",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.logical_not",
+        "args": {}
+      },
       "paxml": {
         "api": "jnp.logical_not",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "torch": {
+        "api": "torch.logical_not",
+        "args": {}
       }
     }
   },
@@ -23298,11 +23926,23 @@
         "api": "jax.numpy.logical_or",
         "args": {}
       },
+      "keras": {
+        "api": "keras.ops.logical_or",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.logical_or",
+        "args": {}
+      },
       "paxml": {
         "api": "jnp.logical_or",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "torch": {
+        "api": "torch.logical_or",
+        "args": {}
       }
     }
   },
@@ -23323,11 +23963,23 @@
         "api": "jax.numpy.logical_or",
         "args": {}
       },
+      "keras": {
+        "api": "keras.ops.logical_xor",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.logical_xor",
+        "args": {}
+      },
       "paxml": {
         "api": "jnp.logical_xor",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "torch": {
+        "api": "torch.logical_xor",
+        "args": {}
       }
     }
   },
@@ -23631,6 +24283,18 @@
     ],
     "type": "class",
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.losses.mse",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.losses.MeanSquaredError",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.nn.losses.mse_loss",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.MSELoss",
         "args": {}
@@ -24049,6 +24713,10 @@
           "from onnx import helper"
         ]
       },
+      "keras": {
+        "api": "keras.layers.MaxPooling3D",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.MaxPool3d",
         "args": {
@@ -24060,11 +24728,19 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.MaxPool3d",
+        "args": {}
+      },
       "onnx": {
         "macro_template": "helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size}, strides={stride})",
         "required_imports": [
           "from onnx import helper"
         ]
+      },
+      "rdna": {
+        "api": "; Macro.MaxPool3d",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.MaxPool3d",
@@ -24139,6 +24815,10 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.MaxPool1d",
+        "args": {}
+      },
       "onnx": {
         "macro_template": "helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size}, strides={stride})",
         "required_imports": [
@@ -24150,6 +24830,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.MaxPool1d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.MaxPooling1D",
@@ -24229,6 +24913,10 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.MaxPool2d",
+        "args": {}
+      },
       "onnx": {
         "macro_template": "helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size}, strides={stride})",
         "required_imports": [
@@ -24240,6 +24928,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.MaxPool2d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.MaxPooling2D",
@@ -24323,6 +25015,10 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.MaxPool3d",
+        "args": {}
+      },
       "onnx": {
         "macro_template": "helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size}, strides={stride})",
         "required_imports": [
@@ -24334,6 +25030,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.MaxPool3d",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.MaxPooling3D",
@@ -25854,6 +26554,14 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.losses.mse",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.losses.MeanSquaredError",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.losses.mse_loss",
         "args": {
@@ -26697,11 +27405,19 @@
         "api": "mlx.core.negative",
         "args": {}
       },
+      "nvidia_sass": {
+        "api": "FNEG",
+        "args": {}
+      },
       "paxml": {
         "api": "jax.numpy.negative",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "v_sub_f32",
+        "args": {}
       },
       "torch": {
         "api": "torch.negative",
@@ -27928,8 +28644,16 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.numpy.transpose",
+        "args": {}
+      },
       "keras": {
         "api": "keras.layers.Permute",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.transpose",
         "args": {}
       },
       "numpy": {
@@ -27958,6 +28682,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "torch": {
+        "api": "torch.permute",
+        "args": {}
       }
     }
   },
@@ -28437,11 +29165,19 @@
           "kernel_size": "kernel_size"
         }
       },
+      "nvidia_sass": {
+        "api": "Macro.MaxPool2d",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.Pooling",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.MaxPool2d",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.MaxPool2d",
@@ -28494,17 +29230,33 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.AvgPool",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.layers.AveragePooling1D",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.AvgPool1d",
         "args": {
           "kernel_size": "kernel_size"
         }
       },
+      "nvidia_sass": {
+        "api": "Macro.AvgPool1d",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.Pooling1D",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.AvgPool1d",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.AvgPool1d",
@@ -29542,11 +30294,19 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.RMSNorm",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.RMSNorm",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.RMSNorm",
+        "args": {}
       },
       "tensorflow": {
         "api": "tf.keras.layers.RMSNormalization",
@@ -32408,11 +33168,35 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.numpy.right_shift",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.right_shift",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.right_shift",
+        "args": {}
+      },
+      "nvidia_sass": {
+        "api": "SHF",
+        "args": {}
+      },
       "paxml": {
         "api": "jax.numpy.right_shift",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "v_lshrrev_b32",
+        "args": {}
+      },
+      "torch": {
+        "api": "torch.bitwise_right_shift",
+        "args": {}
       }
     }
   },
@@ -32635,6 +33419,14 @@
       },
       "mlx": {
         "api": "mlx.core.round",
+        "args": {}
+      },
+      "nvidia_sass": {
+        "api": "F2F",
+        "args": {}
+      },
+      "rdna": {
+        "api": "v_rndne_f32",
         "args": {}
       },
       "torch": {
@@ -36994,6 +37786,18 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.losses.binary_cross_entropy",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.losses.BinaryCrossentropy",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.nn.losses.binary_cross_entropy",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.SigmoidCrossEntropy",
         "dispatch_rules": [],
@@ -37404,6 +38208,10 @@
         "api": "mlx.core.sin",
         "args": {}
       },
+      "nvidia_sass": {
+        "api": "MUFU.SIN",
+        "args": {}
+      },
       "paxml": {
         "api": "jax.numpy.sin",
         "dispatch_rules": [],
@@ -37411,6 +38219,10 @@
         "pack_as": "Tuple",
         "required_imports": [],
         "transformation_type": "macro"
+      },
+      "rdna": {
+        "api": "v_sin_f32",
+        "args": {}
       },
       "torch": {
         "api": "torch.sin",
@@ -37529,8 +38341,20 @@
         "required_imports": [],
         "transformation_type": "macro"
       },
+      "jax": {
+        "api": "jax.numpy.sinh",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.sinh",
+        "args": {}
+      },
       "latex_dsl": {
         "api": "latex.sinh",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.sinh",
         "args": {}
       },
       "paxml": {
@@ -37540,6 +38364,10 @@
         "pack_as": "Tuple",
         "required_imports": [],
         "transformation_type": "macro"
+      },
+      "torch": {
+        "api": "torch.sinh",
+        "args": {}
       }
     }
   },
@@ -37957,6 +38785,10 @@
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "mlx": {
+        "api": "mlx.nn.losses.cross_entropy",
+        "args": {}
       },
       "paxml": {
         "api": "optax.softmax_cross_entropy_with_integer_labels",
@@ -39265,6 +40097,10 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.nn.silu",
+        "args": {}
+      },
       "keras": {
         "api": "keras.layers.Activation",
         "arg_values": {
@@ -39283,11 +40119,19 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "nvidia_sass": {
+        "api": "Macro.SiLU",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.Swish",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.SiLU",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.SiLU",
@@ -42200,11 +43044,27 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "jax": {
+        "api": "jax.numpy.expand_dims",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.ops.expand_dims",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.expand_dims",
+        "args": {}
+      },
       "paxml": {
         "api": "jax.numpy.expand_dims",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "torch": {
+        "api": "torch.unsqueeze",
+        "args": {}
       }
     }
   },
@@ -46921,6 +47781,14 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.Conv",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.layers.Conv2D",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.Conv2d",
         "args": {
@@ -46929,11 +47797,19 @@
           "out_channels": "out_channels"
         }
       },
+      "nvidia_sass": {
+        "api": "Macro.Conv2d",
+        "args": {}
+      },
       "paxml": {
         "api": "praxis.layers.VanillaBlock",
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "rdna": {
+        "api": "; Macro.Conv2d",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.Conv2d",
@@ -47962,6 +48838,14 @@
         "args": {
           "x": "x"
         }
+      },
+      "keras": {
+        "api": "keras.ops.arccos",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.arccos",
+        "args": {}
       },
       "torch": {
         "api": "torch.acos",
@@ -50294,6 +51178,14 @@
           "x": "x"
         }
       },
+      "keras": {
+        "api": "keras.ops.arcsin",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.arcsin",
+        "args": {}
+      },
       "torch": {
         "api": "torch.asin",
         "args": {
@@ -50481,6 +51373,14 @@
           "x": "x"
         }
       },
+      "keras": {
+        "api": "keras.ops.arctan",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.arctan",
+        "args": {}
+      },
       "torch": {
         "api": "torch.atan",
         "args": {
@@ -50519,6 +51419,14 @@
           "x": "x",
           "y": "y"
         }
+      },
+      "keras": {
+        "api": "keras.ops.arctan2",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.arctan2",
+        "args": {}
       },
       "stablehlo": {
         "api": "stablehlo.atan2",
@@ -51520,6 +52428,18 @@
       }
     ],
     "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.Linear",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.layers.Dense",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.nn.Linear",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.functional.bilinear",
         "args": {
@@ -52630,6 +53550,14 @@
           "a": "a"
         }
       },
+      "nvidia_sass": {
+        "api": "F2F",
+        "args": {}
+      },
+      "rdna": {
+        "api": "v_ceil_f32",
+        "args": {}
+      },
       "stablehlo": {
         "api": "stablehlo.ceil",
         "args": {
@@ -53666,6 +54594,10 @@
         "args": {
           "arrays": "arrays"
         }
+      },
+      "keras": {
+        "api": "keras.ops.concatenate",
+        "args": {}
       },
       "mlx": {
         "api": "mlx.core.concat",
@@ -55553,6 +56485,14 @@
         "args": {
           "a": "a"
         }
+      },
+      "nvidia_sass": {
+        "api": "MUFU.COS",
+        "args": {}
+      },
+      "rdna": {
+        "api": "v_cos_f32",
+        "args": {}
       },
       "torch": {
         "api": "torch.cos",
@@ -57605,6 +58545,10 @@
           "x2": "x2"
         }
       },
+      "mlx": {
+        "api": "mlx.core.inner",
+        "args": {}
+      },
       "stablehlo": {
         "api": "stablehlo.dot",
         "args": {
@@ -58528,6 +59472,10 @@
       }
     ],
     "variants": {
+      "jax": {
+        "api": "jax.nn.elu",
+        "args": {}
+      },
       "keras": {
         "api": "keras.activations.elu",
         "args": {
@@ -58563,6 +59511,10 @@
     ],
     "type": "attribute",
     "variants": {
+      "jax": {
+        "api": "jax.nn.elu",
+        "args": {}
+      },
       "keras": {
         "api": "keras.activations.elu",
         "args": {}
@@ -60261,6 +61213,14 @@
         "args": {
           "a": "a"
         }
+      },
+      "nvidia_sass": {
+        "api": "F2F",
+        "args": {}
+      },
+      "rdna": {
+        "api": "v_floor_f32",
+        "args": {}
       },
       "stablehlo": {
         "api": "stablehlo.floor",
@@ -62423,6 +63383,18 @@
       }
     ],
     "variants": {
+      "jax": {
+        "api": "jax.nn.hard_sigmoid",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.activations.hard_sigmoid",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.nn.hardsigmoid",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.functional.hardsigmoid",
         "args": {
@@ -62450,6 +63422,14 @@
       }
     ],
     "variants": {
+      "jax": {
+        "api": "jax.nn.hard_swish",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.activations.hard_swish",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.hardswish",
         "args": {
@@ -71500,6 +72480,22 @@
           "x": "x"
         }
       },
+      "keras": {
+        "api": "keras.ops.negative",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.negative",
+        "args": {}
+      },
+      "nvidia_sass": {
+        "api": "FNEG",
+        "args": {}
+      },
+      "rdna": {
+        "api": "v_sub_f32",
+        "args": {}
+      },
       "torch": {
         "api": "torch.neg",
         "args": {
@@ -71543,6 +72539,14 @@
         "args": {
           "a": "a"
         }
+      },
+      "nvidia_sass": {
+        "api": "FNEG",
+        "args": {}
+      },
+      "rdna": {
+        "api": "v_sub_f32",
+        "args": {}
       },
       "torch": {
         "api": "torch.negative",
@@ -71733,6 +72737,10 @@
       }
     ],
     "variants": {
+      "jax": {
+        "api": "jax.numpy.linalg.norm",
+        "args": {}
+      },
       "keras": {
         "api": "keras.ops.norm",
         "args": {
@@ -74135,6 +75143,14 @@
           "y": "y"
         }
       },
+      "keras": {
+        "api": "keras.ops.power",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.core.power",
+        "args": {}
+      },
       "torch": {
         "api": "torch.pow",
         "args": {
@@ -74189,6 +75205,10 @@
           "lhs": "lhs",
           "rhs": "rhs"
         }
+      },
+      "torch": {
+        "api": "torch.pow",
+        "args": {}
       }
     }
   },
@@ -74244,6 +75264,14 @@
       }
     ],
     "variants": {
+      "jax": {
+        "api": "jax.nn.relu",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.layers.PReLU",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.prelu",
         "args": {
@@ -75732,6 +76760,10 @@
           "x2": "x2"
         }
       },
+      "keras": {
+        "api": "keras.ops.mod",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.core.remainder",
         "args": {
@@ -75823,6 +76855,10 @@
           "array": "array",
           "repeats": "repeats"
         }
+      },
+      "torch": {
+        "api": "torch.repeat_interleave",
+        "args": {}
       }
     }
   },
@@ -76579,6 +77615,14 @@
         "args": {
           "a": "a"
         }
+      },
+      "nvidia_sass": {
+        "api": "F2F",
+        "args": {}
+      },
+      "rdna": {
+        "api": "v_rndne_f32",
+        "args": {}
       },
       "torch": {
         "api": "torch.round",
@@ -77700,6 +78744,10 @@
       }
     ],
     "variants": {
+      "jax": {
+        "api": "jax.nn.selu",
+        "args": {}
+      },
       "keras": {
         "api": "keras.activations.selu",
         "args": {
@@ -77732,6 +78780,18 @@
       }
     ],
     "variants": {
+      "jax": {
+        "api": "jax.nn.selu",
+        "args": {}
+      },
+      "keras": {
+        "api": "keras.activations.selu",
+        "args": {}
+      },
+      "mlx": {
+        "api": "mlx.nn.selu",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.functional.selu_",
         "args": {
@@ -78594,6 +79654,14 @@
           "a": "a"
         }
       },
+      "nvidia_sass": {
+        "api": "MUFU.SIN",
+        "args": {}
+      },
+      "rdna": {
+        "api": "v_sin_f32",
+        "args": {}
+      },
       "torch": {
         "api": "torch.sin",
         "args": {
@@ -79283,11 +80351,19 @@
       }
     ],
     "variants": {
+      "jax": {
+        "api": "jax.nn.softplus",
+        "args": {}
+      },
       "keras": {
         "api": "keras.activations.softplus",
         "args": {
           "x": "x"
         }
+      },
+      "mlx": {
+        "api": "mlx.nn.softplus",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.functional.softplus",

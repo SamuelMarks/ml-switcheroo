@@ -41,3 +41,12 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  rdna:
+    api: ; Macro.SiLU
+    args: {}
+  nvidia_sass:
+    api: Macro.SiLU
+    args: {}
+  jax:
+    api: jax.nn.silu
+    args: {}

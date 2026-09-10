@@ -24,3 +24,12 @@ variants:
       input1: input1
       input2: input2
       weight: weight
+  flax_nnx:
+    api: flax.nnx.Linear
+    args: {}
+  mlx:
+    api: mlx.nn.Linear
+    args: {}
+  keras:
+    api: keras.layers.Dense
+    args: {}

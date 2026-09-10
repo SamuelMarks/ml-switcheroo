@@ -15,3 +15,12 @@ variants:
     api: torch.nn.functional.hardsigmoid
     args:
       input: input
+  jax:
+    api: jax.nn.hard_sigmoid
+    args: {}
+  mlx:
+    api: mlx.nn.hardsigmoid
+    args: {}
+  keras:
+    api: keras.activations.hard_sigmoid
+    args: {}

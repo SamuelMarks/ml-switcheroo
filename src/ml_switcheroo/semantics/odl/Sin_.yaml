@@ -37,5 +37,11 @@ variants:
   keras:
     api: keras.ops.sin
     args: {}
+  rdna:
+    api: v_sin_f32
+    args: {}
+  nvidia_sass:
+    api: MUFU.SIN
+    args: {}
 operation: Sin_
 type: function

@@ -30,3 +30,6 @@ variants:
     args:
       x1: x1
       x2: x2
+  torch:
+    api: torch.pow
+    args: {}

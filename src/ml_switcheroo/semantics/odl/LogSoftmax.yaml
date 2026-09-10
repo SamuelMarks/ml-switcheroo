@@ -34,3 +34,9 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  jax:
+    api: jax.nn.log_softmax
+    args: {}
+  keras:
+    api: keras.activations.log_softmax
+    args: {}

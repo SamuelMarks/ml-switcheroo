@@ -10,3 +10,12 @@ variants:
     api: torch.atan_
     args:
       input: input
+  jax:
+    api: jax.numpy.arctan
+    args: {}
+  mlx:
+    api: mlx.core.arctan
+    args: {}
+  keras:
+    api: keras.ops.arctan
+    args: {}

@@ -51,7 +51,49 @@ repos:
         name: audit-against-snapshots
         entry: uv run python scripts/audit_against_snapshots.py --strict
         language: system
-        files: ^(src/ml_switcheroo/semantics/odl/.*\.yaml|src/ml_switcheroo/frameworks/.*\.py)$
+        files: ^(src/ml_switcheroo/semantics/.*|src/ml_switcheroo/frameworks/.*\.py|src/ml_switcheroo/core/compiler/backends/.*|docs/.*operations.*\.yaml)$
+        pass_filenames: false
+
+      - id: audit-rdna-grounding
+        name: audit-rdna-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework rdna
+        language: system
+        files: ^(src/ml_switcheroo/semantics/rdna.*|src/ml_switcheroo/frameworks/rdna\.py|src/ml_switcheroo/core/compiler/backends/rdna/.*)$
+        pass_filenames: false
+
+      - id: audit-sass-grounding
+        name: audit-sass-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework nvidia_sass
+        language: system
+        files: ^(src/ml_switcheroo/semantics/nvidia_sass.*|src/ml_switcheroo/frameworks/nvidia_sass\.py|src/ml_switcheroo/core/compiler/backends/nvidia_sass/.*)$
+        pass_filenames: false
+
+      - id: audit-torch-grounding
+        name: audit-torch-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework torch
+        language: system
+        files: ^(src/ml_switcheroo/semantics/.*torch.*|src/ml_switcheroo/frameworks/torch.*\.py)$
+        pass_filenames: false
+
+      - id: audit-jax-grounding
+        name: audit-jax-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework jax
+        language: system
+        files: ^(src/ml_switcheroo/semantics/.*jax.*|src/ml_switcheroo/frameworks/jax.*\.py|src/ml_switcheroo/frameworks/flax.*\.py)$
+        pass_filenames: false
+
+      - id: audit-mlx-grounding
+        name: audit-mlx-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework mlx
+        language: system
+        files: ^(src/ml_switcheroo/semantics/.*mlx.*|src/ml_switcheroo/frameworks/mlx.*\.py)$
+        pass_filenames: false
+
+      - id: audit-keras-grounding
+        name: audit-keras-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework keras
+        language: system
+        files: ^(src/ml_switcheroo/semantics/.*keras.*|src/ml_switcheroo/frameworks/keras.*\.py)$
         pass_filenames: false
 
       - id: audit-mlir-spec
@@ -70,7 +112,7 @@ repos:
 
       - id: pytest-coverage
         name: pytest-coverage
-        entry: uv run pytest -n auto --cov=src --cov-fail-under=100 tests
+        entry: uv run pytest -n auto --cov=src --cov-fail-under=100 --cov-branch tests
         language: system
         pass_filenames: false
         always_run: true

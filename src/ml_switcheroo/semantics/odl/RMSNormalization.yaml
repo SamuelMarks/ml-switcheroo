@@ -54,5 +54,11 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  rdna:
+    api: ; Macro.RMSNorm
+    args: {}
+  nvidia_sass:
+    api: Macro.RMSNorm
+    args: {}
 operation: RMSNormalization
 type: function

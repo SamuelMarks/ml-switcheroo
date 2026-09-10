@@ -10,6 +10,15 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  flax_nnx:
+    api: flax.nnx.losses.binary_cross_entropy
+    args: {}
+  mlx:
+    api: mlx.nn.losses.binary_cross_entropy
+    args: {}
+  keras:
+    api: keras.losses.BinaryCrossentropy
+    args: {}
 std_args:
 - name: weight
   kind: positional_or_keyword

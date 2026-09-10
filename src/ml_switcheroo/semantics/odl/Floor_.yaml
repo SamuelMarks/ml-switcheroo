@@ -20,5 +20,11 @@ variants:
   keras:
     api: keras.ops.floor
     args: {}
+  rdna:
+    api: v_floor_f32
+    args: {}
+  nvidia_sass:
+    api: F2F
+    args: {}
 operation: Floor_
 type: function

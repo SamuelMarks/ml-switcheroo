@@ -19,3 +19,9 @@ variants:
     api: mlx.nn.hardswish
     args:
       x: x
+  jax:
+    api: jax.nn.hard_swish
+    args: {}
+  keras:
+    api: keras.activations.hard_swish
+    args: {}

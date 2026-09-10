@@ -34,3 +34,6 @@ variants:
     args:
       lhs: lhs
       rhs: rhs
+  keras:
+    api: keras.ops.mod
+    args: {}
