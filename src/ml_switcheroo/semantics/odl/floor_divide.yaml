@@ -23,8 +23,8 @@ variants:
   jax:
     api: jax.numpy.floor_divide
     args:
-      x1: x1
-      x2: x2
+      x1: x
+      x2: y
   mlx:
     api: mlx.core.floor_divide
     args:

@@ -127,7 +127,7 @@ class RuntimeConfig(BaseModel):
       source_flavour (Optional[str]): Detailed source sub-framework.
       target_flavour (Optional[str]): Detailed target sub-framework.
       strict_mode (bool): If True, fail on unknown APIs.
-      intermediate (Optional[str]): Intermediate representation layer for round-trip verification.
+      intermediate (Optional[str]): Intermediate representation layer (e.g. 'ir', 'mlir', 'tikz') for round-trip verification.
       enable_graph_optimization (bool): If True, performs graph-level optimization and fusion.
       enable_import_fixer (bool): If True, performs import resolution, pruning, and injection.
       enable_sharding (bool): If True, enables distributed sharding logic and related fusions.
@@ -154,7 +154,7 @@ class RuntimeConfig(BaseModel):
   # Structural Verification
   intermediate: Optional[str] = Field(
     None,
-    description="Intermediate representation layer (e.g. 'mlir', 'tikz') for round-trip verification.",
+    description="Intermediate representation layer (e.g. 'ir', 'mlir', 'tikz') for round-trip verification.",
   )
 
   # Pipeline Control Flags

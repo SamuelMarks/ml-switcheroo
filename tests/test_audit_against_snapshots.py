@@ -74,6 +74,7 @@ def test_load_snapshots_formats(temp_workspace: Path) -> None:
       "cat1": [
         {"api_path": "torch.nn.Linear", "aliases": ["torch.nn.modules.linear.Linear"]},
         {"name": "torch.nn.Conv2d"},
+        {"mnemonic": "MNEMO_OP"},
       ],
       "cat2": {"torch.nn.ReLU": {}},
       "cat3": "ignore this",
@@ -105,6 +106,7 @@ def test_load_snapshots_multi_formats(temp_workspace: Path) -> None:
       "cat1": [
         {"api_path": "torch.nn.Linear", "aliases": ["torch.nn.modules.linear.Linear"]},
         {"name": "torch.nn.Conv2d"},
+        {"mnemonic": "MNEMO_OP"},
       ],
       "cat2": {"torch.nn.ReLU": {}},
       "cat3": "ignore this",
@@ -146,9 +148,17 @@ def test_load_snapshots_multi(temp_workspace: Path) -> None:
   # Test larger snapshot replacement
   (dir2 / "torch_v2.0.0.json").write_text(json.dumps({"functions": {"torch.nn.Conv2d": {}, "torch.larger": {}}}))
 
+  # Test ISA and exhaustive filenames
+  (dir1 / "rdna_isa.json").write_text(json.dumps({"functions": {"v_add_f32": {}}}))
+  (dir1 / "nvidia_sass_isa.json").write_text(json.dumps({"functions": {"FADD": {}}}))
+  (dir1 / "custom_exhaustive.json").write_text(json.dumps({"functions": {"custom_op": {}}}))
+
   snapshots = scripts.audit_against_snapshots.load_snapshots_multi([dir1, dir2, dir3])
   assert "torch" in snapshots
   assert "mlx" in snapshots
+  assert "rdna" in snapshots
+  assert "nvidia_sass" in snapshots
+  assert "custom_exhaustive" in snapshots
 
 
 def test_audit_frameworks() -> None:
@@ -270,7 +280,7 @@ def test_audit_inline_snippets() -> None:
     }
   }
 
-  snapshots = {"torch": {"torch.nn.functional.relu": {}}, "mlx": {"mlx.core.relu": {}}}
+  snapshots: dict[str, dict[str, Any]] = {"torch": {"torch.nn.functional.relu": {}}, "mlx": {"mlx.core.relu": {}}}
 
   errors = scripts.audit_against_snapshots.audit_inline_snippets(mock_manager, snapshots)
   assert any("mlx.core.not_exist" in err for err in errors)
@@ -287,7 +297,7 @@ def test_audit_python_ast(temp_workspace: Path) -> None:
   # Dir doesn't exist
   bad_dir = temp_workspace / "bad"
 
-  snapshots = {"torch": {"torch.nn.Linear": {}}, "mlx": {"mlx.core.valid": {}}}
+  snapshots: dict[str, dict[str, Any]] = {"torch": {"torch.nn.Linear": {}}, "mlx": {"mlx.core.valid": {}}}
 
   errors = scripts.audit_against_snapshots.audit_python_ast([src_dir, bad_dir], snapshots)
   assert any("mlx.core.broken" in err for err in errors)
@@ -411,7 +421,7 @@ def test_audit_against_snapshots_extra_branches(temp_workspace: Path) -> None:
   # Test load_snapshots filenames: sass, rdna, and other
   snap_fn_dir = temp_workspace / "fn_snaps"
   snap_fn_dir.mkdir()
-  (snap_fn_dir / "sass_exhaustive.json").write_text(json.dumps([{"mnemonic": "FADD"}]))
+  (snap_fn_dir / "sass_exhaustive.json").write_text(json.dumps([{"mnemonic": "FADD"}, "not_dict", {"no_mnemo": 1}]))
   (snap_fn_dir / "rdna_exhaustive.json").write_text(json.dumps([{"mnemonic": "v_add"}]))
   (snap_fn_dir / "other_exhaustive.json").write_text(json.dumps([{"mnemonic": "custom"}]))
   fn_res = scripts.audit_against_snapshots.load_snapshots(snap_fn_dir)
@@ -512,15 +522,35 @@ def test_generate_audit_report_and_cli(tmp_path: Path) -> None:
     "rdna": {"v_add_f32": {}},
   }
   errors = ["[torch] Some test error"]
-  report = scripts.audit_against_snapshots.generate_audit_report(mock_mgr, snapshots, errors)
+  report = scripts.audit_against_snapshots.generate_audit_report(mock_mgr, snapshots, errors, checksums={"f.json": "abc"})
   assert report["total_operations"] == 2
   assert report["total_errors"] == 1
   assert report["status"] == "fail"
+  assert report["snapshot_checksums"] == {"f.json": "abc"}
   assert report["targets"]["torch"]["mapped_operations"] == 1
   assert report["targets"]["torch"]["errors"] == 1
   assert report["targets"]["torch"]["status"] == "mismatched"
   assert report["targets"]["keras"]["mapped_operations"] == 1
   assert report["targets"]["keras"]["status"] == "valid"
+
+  # Test compute_snapshot_checksums directly
+  snap_dir = tmp_path / "chk_snaps"
+  snap_dir.mkdir()
+  (snap_dir / "torch_v1.0.0.json").write_text('{"foo": "bar"}')
+  (snap_dir / "empty_v1.0.0.json").write_text("")
+  (snap_dir / "torch_map.json").write_text("{}")
+  (snap_dir / "unknown_vunknown.json").write_text("{}")
+  (snap_dir / "error_v1.0.0.json").write_text('{"err": 1}')
+  (snap_dir / "non_dir").touch()
+  with patch.object(Path, "read_bytes", side_effect=[b"valid", b"", Exception("read fail")]):
+    checksums = scripts.audit_against_snapshots.compute_snapshot_checksums([snap_dir, tmp_path / "nonexistent"])
+  assert "torch_v1.0.0.json" in checksums
+  assert len(checksums["torch_v1.0.0.json"]) == 64
+  assert "empty_v1.0.0.json" not in checksums
+
+  # Test compute_snapshot_checksums default dirs
+  default_checksums = scripts.audit_against_snapshots.compute_snapshot_checksums(None)
+  assert isinstance(default_checksums, dict)
 
   report_file = tmp_path / "out_report.json"
   with patch("sys.argv", ["audit_against_snapshots.py", "--report", str(report_file)]):
@@ -619,3 +649,177 @@ def test_main_entrypoint(monkeypatch: pytest.MonkeyPatch) -> None:
     with pytest.raises(SystemExit) as excinfo:
       runpy.run_module("scripts.audit_against_snapshots", run_name="__main__")
     assert excinfo.value.code == 0
+
+
+def test_zero_hallucinated_parameters_live() -> None:
+  """Verifies zero hallucinated parameters or APIs exist across live catalog against snapshots."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  snapshots = scripts.audit_against_snapshots.load_snapshots_multi()
+  manager = SemanticsManager()
+  errors = scripts.audit_against_snapshots.audit_frameworks(manager, snapshots)
+  assert len(errors) == 0, f"Found snapshot audit errors: {errors}"
+
+
+def test_grounding_engine_fallback_import() -> None:
+  """Test import fallback logic for GroundingEngine."""
+  import runpy
+  import sys
+
+  with patch.dict(sys.modules, {"ml_framework_snapshots.grounding.engine": None}):
+    with patch.object(Path, "exists", return_value=False):
+      runpy.run_module("scripts.audit_against_snapshots", run_name="test_fallback_1")
+    with patch.object(Path, "exists", return_value=True):
+      runpy.run_module("scripts.audit_against_snapshots", run_name="test_fallback_2")
+
+
+def test_audit_frameworks_grounding_engine_init_exception() -> None:
+  """Test audit_frameworks when GroundingEngine() constructor raises an exception."""
+  mock_mgr = MagicMock()
+  mock_mgr.data = {}
+  with patch("scripts.audit_against_snapshots.GroundingEngine", side_effect=RuntimeError("boom")):
+    errors = scripts.audit_against_snapshots.audit_frameworks(mock_mgr, {})
+    assert errors == []
+
+
+def test_audit_frameworks_ir_and_grounding_exceptions() -> None:
+  """Test IR validation branch, grounding engine exceptions, and parameter tokenization."""
+
+  class MockOpMgr:
+    """Mock operations manager with IR, invalid API, and tokenized arguments."""
+
+    data: dict[str, dict[str, Any]] = {
+      "op_ir": {
+        "variants": {
+          "ir": {"api": "sw_ir.Relu", "args": {}},
+        }
+      },
+      "op_ir_invalid": {
+        "variants": {
+          "ir": {"api": "unknown_ir_op", "args": {}},
+        }
+      },
+      "op_flax_jax": {
+        "variants": {
+          "flax_nnx": {"api": "jnp.abs", "args": {}},
+        }
+      },
+      "op_ge_err": {
+        "variants": {
+          "torch": {"api": "torch.non_existent", "args": {}},
+        }
+      },
+      "op_ge_suggest_err": {
+        "variants": {
+          "torch": {"api": "torch.non_existent_2", "args": {}},
+        }
+      },
+      "op_ignored_api": {
+        "variants": {
+          "torch": {"api": "torch.flatten", "args": {}},
+        }
+      },
+      "op_ignored_arg": {
+        "variants": {
+          "torch": {
+            "api": "torch.sum",
+            "args": {"dim": "dim"},
+          }
+        }
+      },
+      "op_has_kwargs": {
+        "variants": {
+          "torch": {
+            "api": "torch.with_kw",
+            "args": {"extra": "extra"},
+          }
+        }
+      },
+      "op_bad_arg_token": {
+        "variants": {
+          "torch": {
+            "api": "torch.foo",
+            "args": {"invalid_arg": "invalid_arg"},
+          }
+        }
+      },
+      "op_ge_has_symbol": {
+        "variants": {
+          "torch": {"api": "torch.found_in_ge", "args": {}},
+        }
+      },
+      "op_ge_suggested": {
+        "variants": {
+          "torch": {"api": "torch.needs_suggestion", "args": {}},
+        }
+      },
+    }
+
+  mock_ge_1 = MagicMock()
+  mock_ge_1._discover_target_files.side_effect = RuntimeError("GE discover error")
+  mock_ge_1.suggest_closest_symbol.side_effect = RuntimeError("Suggest error")
+
+  mock_ge_2 = MagicMock()
+  mock_ge_2._discover_target_files.return_value = False
+
+  mock_ge_3 = MagicMock()
+  mock_ge_3._discover_target_files.return_value = True
+  mock_ge_3.has_symbol.side_effect = lambda tgt, sym: sym == "torch.found_in_ge"
+  mock_ge_3.suggest_closest_symbol.side_effect = (
+    lambda tgt, sym: "torch.suggested_api" if sym == "torch.needs_suggestion" else None
+  )
+
+  snapshots: dict[str, dict[str, Any]] = {
+    "torch": {
+      "torch.sum": {"params": [{"name": "input"}]},
+      "torch.with_kw": {"params": [{"name": "kwargs", "kind": "VAR_KEYWORD"}]},
+      "torch.foo": {
+        "params": ["not-a-dict", {"name": "valid, 123invalid"}],
+      },
+    },
+    "jax": {
+      "jnp.abs": {"params": []},
+    },
+    "flax_nnx": {},
+    "ir": {},
+  }
+
+  errors_1 = scripts.audit_against_snapshots.audit_frameworks(MockOpMgr(), snapshots, grounding_engine=mock_ge_1)  # type: ignore
+  assert any("maps to hallucinated argument" in e for e in errors_1)
+  assert any("maps to hallucinated API" in e for e in errors_1)
+
+  errors_2 = scripts.audit_against_snapshots.audit_frameworks(MockOpMgr(), snapshots, grounding_engine=mock_ge_2)  # type: ignore
+  assert len(errors_2) > 0
+
+  errors_3 = scripts.audit_against_snapshots.audit_frameworks(MockOpMgr(), snapshots, grounding_engine=mock_ge_3)  # type: ignore
+  assert any("did you mean: 'torch.suggested_api'" in e for e in errors_3)
+
+  with patch("scripts.audit_against_snapshots.GroundingEngine", None):
+    errors_4 = scripts.audit_against_snapshots.audit_frameworks(MockOpMgr(), snapshots, grounding_engine=None)  # type: ignore
+  assert len(errors_4) > 0
+
+
+def test_main_grounding_engine_exceptions_and_none(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Test main CLI when GroundingEngine raises or is None.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  monkeypatch.setattr("sys.argv", ["audit_against_snapshots.py", "--framework", "torch"])
+  with (
+    patch("scripts.audit_against_snapshots.load_snapshots_multi", return_value={}),
+    patch("scripts.audit_against_snapshots.audit_frameworks", return_value=[]),
+    patch("scripts.audit_against_snapshots.audit_python_ast", return_value=[]),
+    patch("scripts.audit_against_snapshots.audit_inline_snippets", return_value=[]),
+    patch("scripts.audit_against_snapshots.GroundingEngine", side_effect=RuntimeError("fail")),
+  ):
+    assert scripts.audit_against_snapshots.main() == 0
+
+  with (
+    patch("scripts.audit_against_snapshots.load_snapshots_multi", return_value={}),
+    patch("scripts.audit_against_snapshots.audit_frameworks", return_value=[]),
+    patch("scripts.audit_against_snapshots.audit_python_ast", return_value=[]),
+    patch("scripts.audit_against_snapshots.audit_inline_snippets", return_value=[]),
+    patch("scripts.audit_against_snapshots.GroundingEngine", None),
+  ):
+    assert scripts.audit_against_snapshots.main() == 0

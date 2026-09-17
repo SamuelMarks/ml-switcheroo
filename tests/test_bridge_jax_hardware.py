@@ -63,11 +63,14 @@ def test_hardware_to_jax_lifting(hw_source: str) -> None:
   semantics = MockBridgeSemantics()
   graph = LogicalGraph(
     name="TestNet",
-    nodes=[
-      LogicalNode("x", "Input"),
-      LogicalNode("c1", "Conv2d", {"in_channels": 3, "out_channels": 16, "kernel_size": 3}),
-      LogicalNode("out", "Output"),
-    ],
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode("x", "Input"),
+        LogicalNode("c1", "Conv2d", {"in_channels": 3, "out_channels": 16, "kernel_size": 3}),
+        LogicalNode("out", "Output"),
+      ]
+    },
     edges=[
       LogicalEdge("x", "c1"),
       LogicalEdge("c1", "out"),

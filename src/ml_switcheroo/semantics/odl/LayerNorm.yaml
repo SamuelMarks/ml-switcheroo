@@ -48,6 +48,12 @@ variants:
       use_bias: use_bias
       use_fast_variance: use_fast_variance
       use_scale: use_scale
+  ir:
+    api: LayerNormalization
+    args:
+      input: X
+      weight: scale
+      bias: B
     dispatch_rules: []
     macro_template: nnx.LayerNorm(num_features={normalized_shape}, epsilon={eps}).call({input})
     pack_as: Tuple

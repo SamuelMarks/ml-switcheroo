@@ -16,3 +16,17 @@ variants:
     api: mlx.core.value_and_grad
     args:
       fun: fun
+std_args:
+- name: fun
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: argnums
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: argnames
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: '[]'

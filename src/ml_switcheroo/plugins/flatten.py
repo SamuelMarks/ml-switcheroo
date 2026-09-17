@@ -61,7 +61,7 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   end_dim = -1
 
   # Extract positional args
-  if len(args) > 1:  # pragma: no branch
+  if len(args) > 1:
     try:
       if isinstance(args[1].value, cst.Integer):
         start_dim = int(args[1].value.value)

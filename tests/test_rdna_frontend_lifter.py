@@ -52,19 +52,19 @@ def test_rdna_lifter_basic() -> None:
   assert isinstance(graph, LogicalGraph)
   assert len(graph.nodes) > 0
 
-  node_ids: List[str] = [n.id for n in graph.nodes]
+  node_ids: List[str] = [n.id for n in graph.nodes.values()]
   assert "x" in node_ids
   assert "block_1" in node_ids
   assert "flatten" in node_ids
   assert "output" in node_ids
 
   # check if flatten has arg_1=1
-  flatten_node: LogicalNode = next(n for n in graph.nodes if n.id == "flatten")
-  assert flatten_node.metadata.get("arg_1") == 1
+  flatten_node: LogicalNode = graph.nodes["flatten"]
+  assert flatten_node.attributes.get("arg_1") == 1
 
   # check if Conv2d has k=3
-  conv_node: LogicalNode = next(n for n in graph.nodes if n.id == "block_1")
-  assert conv_node.metadata.get("k") == 3
+  conv_node: LogicalNode = graph.nodes["block_1"]
+  assert conv_node.attributes.get("k") == 3
 
 
 def test_rdna_lifter_seen_ids() -> None:
@@ -84,7 +84,7 @@ def test_rdna_lifter_instruction() -> None:
   nodes: List[RdnaNode] = [RdnaInstruction(opcode="v_add_f32", operands=[])]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].id == "inst_0"
+  assert "inst_0" in graph.nodes
 
 
 def test_rdna_lifter_multiple_return() -> None:
@@ -96,7 +96,7 @@ def test_rdna_lifter_multiple_return() -> None:
     RdnaComment(text="; Return:"),  # Output already in seen_ids
   ]
   graph: LogicalGraph = lifter.lift(nodes)
-  node_ids: List[str] = [n.id for n in graph.nodes]
+  node_ids: List[str] = list(graph.nodes.keys())
   assert "x" in node_ids
   assert "output" in node_ids
   assert len(graph.nodes) == 2
@@ -109,10 +109,10 @@ def test_rdna_lifter_unmapped_other() -> None:
     RdnaComment(text="; Unmapped Op: other_op(other_op)"),
   ]
   graph: LogicalGraph = lifter.lift(nodes)
-  node_ids: List[str] = [n.id for n in graph.nodes]
+  node_ids: List[str] = list(graph.nodes.keys())
   assert "other_op" in node_ids
-  other_node: LogicalNode = next(n for n in graph.nodes if n.id == "other_op")
-  assert "arg_1" not in other_node.metadata
+  other_node: LogicalNode = graph.nodes["other_op"]
+  assert "arg_1" not in other_node.attributes
 
 
 def test_rdna_lifter_return_no_previous() -> None:
@@ -123,7 +123,7 @@ def test_rdna_lifter_return_no_previous() -> None:
   ]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].id == "output"
+  assert "output" in graph.nodes
   assert len(graph.edges) == 0
 
 

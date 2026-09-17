@@ -36,3 +36,5 @@ def test_generate_by_heuristic() -> None:
   assert isinstance(generate_by_heuristic("alpha", ()), float)
   arr5: np.ndarray = generate_by_heuristic("inputs", (2, 2))
   assert getattr(arr5, "dtype") == np.float32
+  arr6: np.ndarray = generate_by_heuristic("foo", (2, 2), {"dtype": "float32"})
+  assert getattr(arr6, "dtype") == np.float32

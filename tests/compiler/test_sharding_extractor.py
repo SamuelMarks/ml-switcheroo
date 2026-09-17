@@ -8,54 +8,56 @@ from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPas
 
 def test_sharding_extraction_pass() -> None:
   """Docstring."""
+  nodes = {
+    "x": LogicalNode(id="x", op_type="Input"),
+    "fc": LogicalNode(id="fc", op_type="Linear"),
+    "func_sharding": LogicalNode(
+      id="func_sharding",
+      op_type="jax.lax.with_sharding_constraint",
+      attributes={"arg_0": "x", "arg_1": "jax.sharding.PartitionSpec('data', None)"},
+    ),
+    "out": LogicalNode(id="out", op_type="Output"),
+  }
   graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="x", kind="Input"),
-      LogicalNode(id="fc", kind="Linear"),
-      LogicalNode(
-        id="func_sharding",
-        kind="jax.lax.with_sharding_constraint",
-        metadata={"arg_0": "x", "arg_1": "jax.sharding.PartitionSpec('data', None)"},
-      ),
-      LogicalNode(id="out", kind="Output"),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("x", "fc"), LogicalEdge("fc", "func_sharding"), LogicalEdge("func_sharding", "out")],
   )
   pass_ = ShardingExtractionPass()
   extracted_graph: LogicalGraph = pass_.apply(graph)
-  node_ids: set[str] = {n.id for n in extracted_graph.nodes}
+  node_ids: set[str] = set(extracted_graph.nodes.keys())
   assert "func_sharding" not in node_ids
   assert "fc" in node_ids
   edges: list[tuple[str, str]] = [(e.source, e.target) for e in extracted_graph.edges]
   assert ("fc", "out") in edges
-  fc_node: LogicalNode = next((n for n in extracted_graph.nodes if n.id == "fc"))
+  fc_node: LogicalNode = extracted_graph.nodes["fc"]
   assert fc_node.sharding is not None
   assert fc_node.sharding.axes == ("data", None)
 
 
 def test_sharding_extraction_pass_complex_spec() -> None:
   """Docstring."""
+  nodes = {
+    "fc": LogicalNode(id="fc", op_type="Linear"),
+    "func_sharding": LogicalNode(
+      id="func_sharding",
+      op_type="with_sharding_constraint",
+      attributes={"arg_1": "PartitionSpec('data', ('model', 'tensor'))"},
+    ),
+  }
   graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="fc", kind="Linear"),
-      LogicalNode(
-        id="func_sharding",
-        kind="with_sharding_constraint",
-        metadata={"arg_1": "PartitionSpec('data', ('model', 'tensor'))"},
-      ),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("fc", "func_sharding")],
   )
   pass_ = ShardingExtractionPass()
   extracted_graph: LogicalGraph = pass_.apply(graph)
-  fc_node: LogicalNode = next((n for n in extracted_graph.nodes if n.id == "fc"))
+  fc_node: LogicalNode = extracted_graph.nodes["fc"]
   assert fc_node.sharding is not None
   assert fc_node.sharding.axes == ("data", ("model", "tensor"))
 
 
 def test_sharding_extraction_pass_no_match() -> None:
   """Docstring."""
-  graph = LogicalGraph(nodes=[LogicalNode(id="fc", kind="Linear")])
+  graph = LogicalGraph(nodes={"fc": LogicalNode(id="fc", op_type="Linear")})
   pass_ = ShardingExtractionPass()
   extracted_graph: LogicalGraph = pass_.apply(graph)
   assert len(extracted_graph.nodes) == 1
@@ -63,55 +65,66 @@ def test_sharding_extraction_pass_no_match() -> None:
 
 def test_sharding_extraction_pass_invalid_ast() -> None:
   """Docstring."""
+  nodes = {
+    "fc": LogicalNode(id="fc", op_type="Linear"),
+    "func_sharding": LogicalNode(
+      id="func_sharding", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data', "}
+    ),
+  }
   graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="fc", kind="Linear"),
-      LogicalNode(id="func_sharding", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data', "}),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("fc", "func_sharding")],
   )
   pass_ = ShardingExtractionPass()
   extracted_graph: LogicalGraph = pass_.apply(graph)
-  fc_node: LogicalNode = next((n for n in extracted_graph.nodes if n.id == "fc"))
+  fc_node: LogicalNode = extracted_graph.nodes["fc"]
   assert fc_node.sharding is None
 
 
 def test_sharding_extraction_pass_fallback_arg() -> None:
   """Docstring."""
+  nodes = {
+    "fc": LogicalNode(id="fc", op_type="Linear"),
+    "func_sharding": LogicalNode(
+      id="func_sharding", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data', [1, 2])"}
+    ),
+  }
   graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="fc", kind="Linear"),
-      LogicalNode(
-        id="func_sharding", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data', [1, 2])"}
-      ),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("fc", "func_sharding")],
   )
   pass_ = ShardingExtractionPass()
   extracted_graph: LogicalGraph = pass_.apply(graph)
-  fc_node: LogicalNode = next((n for n in extracted_graph.nodes if n.id == "fc"))
+  fc_node: LogicalNode = extracted_graph.nodes["fc"]
   assert fc_node.sharding is not None
   assert fc_node.sharding.axes == ("data", None)
 
 
 def test_sharding_extraction_pass_no_partition_spec() -> None:
   """Docstring."""
+  nodes = {
+    "fc": LogicalNode(id="fc", op_type="Linear"),
+    "func_sharding": LogicalNode(
+      id="func_sharding", op_type="with_sharding_constraint", attributes={"arg_1": "SomeOtherConstraint()"}
+    ),
+  }
   graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="fc", kind="Linear"),
-      LogicalNode(id="func_sharding", kind="with_sharding_constraint", metadata={"arg_1": "SomeOtherConstraint()"}),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("fc", "func_sharding")],
   )
   pass_ = ShardingExtractionPass()
   extracted_graph: LogicalGraph = pass_.apply(graph)
-  assert "func_sharding" in {n.id for n in extracted_graph.nodes}
+  assert "func_sharding" in set(extracted_graph.nodes.keys())
 
 
 def test_sharding_extractor_no_source() -> None:
   """Verifies the behavior when source node is not found."""
   graph = LogicalGraph(
-    nodes=[LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data')"})],
+    nodes={
+      "sharding1": LogicalNode(
+        id="sharding1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data')"}
+      )
+    },
     edges=[],
   )
   pass_ = ShardingExtractionPass()
@@ -122,11 +135,12 @@ def test_sharding_extractor_no_source() -> None:
 
 def test_sharding_extractor_invalid_ast() -> None:
   """Verifies the behavior when AST parsing fails."""
+  nodes = {
+    "source": LogicalNode(id="source", op_type="Linear"),
+    "sharding1": LogicalNode(id="sharding1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec("}),
+  }
   graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="source", kind="Linear"),
-      LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec("}),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("source", "sharding1")],
   )
   pass_ = ShardingExtractionPass()
@@ -136,11 +150,14 @@ def test_sharding_extractor_invalid_ast() -> None:
 
 def test_sharding_extractor_no_partition_spec() -> None:
   """Verifies the behavior when PartitionSpec is not in code."""
+  nodes = {
+    "source": LogicalNode(id="source", op_type="Linear"),
+    "sharding1": LogicalNode(
+      id="sharding1", op_type="with_sharding_constraint", attributes={"arg_1": "something_else()"}
+    ),
+  }
   graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="source", kind="Linear"),
-      LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "something_else()"}),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("source", "sharding1")],
   )
   pass_ = ShardingExtractionPass()
@@ -150,58 +167,71 @@ def test_sharding_extractor_no_partition_spec() -> None:
 
 def test_sharding_extractor_tuple_arg() -> None:
   """Verifies the behavior when PartitionSpec has tuple."""
+  nodes = {
+    "source": LogicalNode(id="source", op_type="Linear"),
+    "sharding1": LogicalNode(
+      id="sharding1",
+      op_type="with_sharding_constraint",
+      attributes={"arg_1": "PartitionSpec('data', ('model', 'tensor'))"},
+    ),
+  }
   graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="source", kind="Linear"),
-      LogicalNode(
-        id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data', ('model', 'tensor'))"}
-      ),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("source", "sharding1")],
   )
   pass_ = ShardingExtractionPass()
   extracted: LogicalGraph = pass_.apply(graph)
   assert len(extracted.nodes) == 1
-  assert extracted.nodes[0].sharding is not None
-  assert extracted.nodes[0].sharding.axes == ("data", ("model", "tensor"))
+  assert extracted.nodes["source"].sharding is not None
+  assert extracted.nodes["source"].sharding.axes == ("data", ("model", "tensor"))
 
 
 def test_sharding_extractor_none_arg() -> None:
   """Verifies the behavior when PartitionSpec has None."""
+  nodes = {
+    "source": LogicalNode(id="source", op_type="Linear"),
+    "sharding1": LogicalNode(
+      id="sharding1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec(None)"}
+    ),
+  }
   graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="source", kind="Linear"),
-      LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec(None)"}),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("source", "sharding1")],
   )
   pass_ = ShardingExtractionPass()
   extracted: LogicalGraph = pass_.apply(graph)
   assert len(extracted.nodes) == 1
-  assert extracted.nodes[0].sharding is not None
-  assert extracted.nodes[0].sharding.axes == (None,)
+  assert extracted.nodes["source"].sharding is not None
+  assert extracted.nodes["source"].sharding.axes == (None,)
 
 
 def test_sharding_extractor_unsupported_arg() -> None:
   """Verifies the behavior when PartitionSpec has unsupported arg type."""
+  nodes = {
+    "source": LogicalNode(id="source", op_type="Linear"),
+    "sharding1": LogicalNode(
+      id="sharding1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec(unsupported_var)"}
+    ),
+  }
   graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="source", kind="Linear"),
-      LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec(unsupported_var)"}),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("source", "sharding1")],
   )
   pass_ = ShardingExtractionPass()
   extracted: LogicalGraph = pass_.apply(graph)
   assert len(extracted.nodes) == 1
-  assert extracted.nodes[0].sharding is not None
-  assert extracted.nodes[0].sharding.axes == (None,)
+  assert extracted.nodes["source"].sharding is not None
+  assert extracted.nodes["source"].sharding.axes == (None,)
 
 
 def test_sharding_extractor_source_node_not_found() -> None:
   """Verifies the behavior when source node id is found but node object not in graph."""
   graph = LogicalGraph(
-    nodes=[LogicalNode(id="sharding1", kind="with_sharding_constraint", metadata={"arg_1": "PartitionSpec('data')"})],
+    nodes={
+      "sharding1": LogicalNode(
+        id="sharding1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data')"}
+      )
+    },
     edges=[LogicalEdge("missing_source", "sharding1")],
   )
   pass_ = ShardingExtractionPass()
@@ -211,24 +241,25 @@ def test_sharding_extractor_source_node_not_found() -> None:
 
 def test_sharding_extractor_duplicate_edge() -> None:
   """Docstring."""
-  # Hit 85->77
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
-  g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode("A", "Op"))
-  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"arg_1": "PartitionSpec()"}))
-  g.nodes.append(LogicalNode("B", "Op"))
-  g.edges.append(LogicalEdge("A", "Shard"))
-  g.edges.append(LogicalEdge("Shard", "B"))
-  # duplicate edge from A to B directly
-  g.edges.append(LogicalEdge("A", "B"))
+  nodes = {
+    "A": LogicalNode("A", op_type="Op"),
+    "Shard": LogicalNode("Shard", op_type="jax.lax.with_sharding_constraint", attributes={"arg_1": "PartitionSpec()"}),
+    "B": LogicalNode("B", op_type="Op"),
+  }
+  edges = [
+    LogicalEdge("A", "Shard"),
+    LogicalEdge("Shard", "B"),
+    LogicalEdge("A", "B"),
+  ]
+  g = LogicalGraph("Test", nodes=nodes, edges=edges)
   ShardingExtractionPass().apply(g)
 
 
 def test_sharding_extractor_ast_not_call() -> None:
   """Docstring."""
-  # Hit 111->128
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
   # The string must contain PartitionSpec to pass the substring check
@@ -238,49 +269,58 @@ def test_sharding_extractor_ast_not_call() -> None:
 
 def test_sharding_extractor_duplicate_edge_not_in_new_edges() -> None:
   """Docstring."""
-  # Hit 85->77 (if new_edge in new_edges is True -> does not append)
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
-  g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode("A", "Op"))
-  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"arg_1": "PartitionSpec()"}))
-  g.nodes.append(LogicalNode("B", "Op"))
-  g.edges.append(LogicalEdge("A", "Shard"))
-  g.edges.append(LogicalEdge("A", "B"))  # Add the new_edge to new_edges first
-  g.edges.append(LogicalEdge("Shard", "B"))  # Then when this is processed, new_edge is already in new_edges
+  nodes = {
+    "A": LogicalNode("A", op_type="Op"),
+    "Shard": LogicalNode("Shard", op_type="jax.lax.with_sharding_constraint", attributes={"arg_1": "PartitionSpec()"}),
+    "B": LogicalNode("B", op_type="Op"),
+  }
+  edges = [
+    LogicalEdge("A", "Shard"),
+    LogicalEdge("A", "B"),
+    LogicalEdge("Shard", "B"),
+  ]
+  g = LogicalGraph("Test", nodes=nodes, edges=edges)
   ShardingExtractionPass().apply(g)
 
 
 def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact() -> None:
   """Docstring."""
-  # Hit 85->77 (if new_edge in new_edges is True -> does not append)
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
-  g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode("A", "Op"))
-  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"arg_1": "PartitionSpec()"}))
-  g.nodes.append(LogicalNode("B", "Op"))
-  g.edges.append(LogicalEdge("A", "Shard"))
-  g.edges.append(LogicalEdge("A", "B"))  # Will be in new_edges
-  g.edges.append(LogicalEdge("Shard", "B"))  # Will create new_edge A->B and check if in new_edges
+  nodes = {
+    "A": LogicalNode("A", op_type="Op"),
+    "Shard": LogicalNode("Shard", op_type="jax.lax.with_sharding_constraint", attributes={"arg_1": "PartitionSpec()"}),
+    "B": LogicalNode("B", op_type="Op"),
+  }
+  edges = [
+    LogicalEdge("A", "Shard"),
+    LogicalEdge("A", "B"),
+    LogicalEdge("Shard", "B"),
+  ]
+  g = LogicalGraph("Test", nodes=nodes, edges=edges)
   ShardingExtractionPass().apply(g)
 
 
 def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact_dataclass() -> None:
   """Docstring."""
-  # Hit 85->77 by making sure equality holds
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
-  g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode("A", "Op"))
-  g.nodes.append(LogicalNode("Shard", "jax.lax.with_sharding_constraint", metadata={"arg_1": "PartitionSpec()"}))
-  g.nodes.append(LogicalNode("B", "Op"))
-  g.edges.append(LogicalEdge(source="A", target="Shard"))
-  g.edges.append(LogicalEdge(source="A", target="B"))  # Will be in new_edges
-  g.edges.append(LogicalEdge(source="Shard", target="B"))  # Will create new_edge A->B and check if in new_edges
+  nodes = {
+    "A": LogicalNode("A", op_type="Op"),
+    "Shard": LogicalNode("Shard", op_type="jax.lax.with_sharding_constraint", attributes={"arg_1": "PartitionSpec()"}),
+    "B": LogicalNode("B", op_type="Op"),
+  }
+  edges = [
+    LogicalEdge(source="A", target="Shard"),
+    LogicalEdge(source="A", target="B"),
+    LogicalEdge(source="Shard", target="B"),
+  ]
+  g = LogicalGraph("Test", nodes=nodes, edges=edges)
   ShardingExtractionPass().apply(g)
 
 
@@ -289,24 +329,21 @@ def test_sharding_extractor_duplicate_edge_2() -> None:
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
-  graph = LogicalGraph(name="test")
-  # source -> sharding -> target
-  # AND another path to same target?
-  # If the sharding node has two identical outgoing edges to the same target:
-  graph.nodes.append(LogicalNode("source", "Linear"))
-  graph.nodes.append(LogicalNode("shard", "with_sharding_constraint", {"mesh": "a"}))
-  graph.nodes.append(LogicalNode("target", "relu"))
-
-  graph.edges.append(LogicalEdge("source", "shard"))
-  graph.edges.append(LogicalEdge("shard", "target"))
-  graph.edges.append(LogicalEdge("shard", "target"))  # Duplicate edge
-
-  # Or an edge directly from source to target
-  graph.edges.append(LogicalEdge("source", "target"))
+  nodes = {
+    "source": LogicalNode("source", op_type="Linear"),
+    "shard": LogicalNode("shard", op_type="with_sharding_constraint", attributes={"mesh": "a"}),
+    "target": LogicalNode("target", op_type="relu"),
+  }
+  edges = [
+    LogicalEdge("source", "shard"),
+    LogicalEdge("shard", "target"),
+    LogicalEdge("shard", "target"),
+    LogicalEdge("source", "target"),
+  ]
+  graph = LogicalGraph(name="test", nodes=nodes, edges=edges)
 
   pass_ = ShardingExtractionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
 
-  # Verify that edges are deduplicated
-  edges: list[tuple[str, str]] = [(e.source, e.target) for e in new_graph.edges]
-  assert edges.count(("source", "target")) == 1
+  edges_res: list[tuple[str, str]] = [(e.source, e.target) for e in new_graph.edges]
+  assert edges_res.count(("source", "target")) == 1

@@ -38,8 +38,8 @@ variants:
   flax_nnx:
     api: flax.nnx.LSTMCell
     args:
-      hidden_size: features
-      input_size: features
+      input_size: in_features
+      hidden_size: hidden_features
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []

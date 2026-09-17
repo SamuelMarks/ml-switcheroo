@@ -19,3 +19,6 @@ variants:
     api: keras.activations.glu
     args:
       x: x
+  mlx:
+    api: mlx.nn.GLU
+    args: {}

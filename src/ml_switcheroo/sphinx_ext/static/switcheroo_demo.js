@@ -213,7 +213,7 @@ importlib.util.find_spec("ml_switcheroo") is not None
                     const reqText = await reqRes.text();
                     const reqs = reqText.split('\n')
                         .map(l => l.trim())
-                        .filter(l => l && !l.startsWith('#'))
+                        .filter(l => l && !l.startsWith('#') && !l.includes('git+'))
                         .map(l => {
                             if (l.includes(' @ ') && !l.split(' @ ')[1].startsWith('http')) {
                                 const parts = l.split(' @ ');
@@ -223,7 +223,13 @@ importlib.util.find_spec("ml_switcheroo") is not None
                             return l;
                         });
                     await micropip.install("numpy");
-                    if (reqs.length > 0) await micropip.install(reqs);
+                    for (const req of reqs) {
+                        try {
+                            await micropip.install(req);
+                        } catch (reqErr) {
+                            console.warn("Failed to install requirement:", req, reqErr);
+                        }
+                    }
                 } else {
                     await micropip.install(["numpy", "pydantic", "rich", "libcst"]);
                 }
@@ -233,7 +239,11 @@ importlib.util.find_spec("ml_switcheroo") is not None
 
             statusEl.innerText = "Installing Engine...";
             const wheelUrl = new URL(getStaticPath(wheelName), window.location.href).href;
-            await micropip.install(wheelUrl);
+            try {
+                await micropip.install(wheelUrl, false, false);
+            } catch (instErr) {
+                await micropip.install(wheelUrl);
+            }
         }
 
         // 4. UI Transition

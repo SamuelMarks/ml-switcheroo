@@ -41,3 +41,8 @@ variants:
   nvidia_sass:
     api: Macro.Softmax
     args: {}
+  ir:
+    api: Softmax
+    args:
+      input: input
+      dim: axis

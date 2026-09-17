@@ -20,7 +20,7 @@ class MockEmitter(PythonSnippetEmitter):
 
   def emit_init(self, node: LogicalNode) -> cst.BaseStatement:
     """Mock implementation of emit initialization."""
-    return typing.cast(cst.SimpleStatementLine, cst.parse_statement(f"self.{node.id} = {node.kind}()"))
+    return typing.cast(cst.SimpleStatementLine, cst.parse_statement(f"self.{node.id} = {node.op_type}()"))
 
   def emit_call(self, node: LogicalNode, inputs: list[str], output: str) -> cst.BaseStatement:
     """Mock implementation of emit call."""
@@ -48,7 +48,7 @@ def test_delete_node(emitter: MockEmitter) -> None:
     typing.cast(cst.FunctionDef, typing.cast(cst.ClassDef, module.body[0]).body.body[0]).body.body[1],
   )
   assign = typing.cast(cst.Assign, stmt.body[0])
-  provenance: dict[str, typing.Any] = {"bn1": assign}
+  provenance: dict[str, typing.Any] = {"bn1": assign, "unmapped_node": cst.Name("unmapped")}
   plan = [DeleteAction(node_id="bn1")]
   patcher = GraphPatcher(plan, provenance, emitter)  # type: ignore
   modified: cst.Module = module.visit(patcher)
@@ -63,7 +63,7 @@ def test_replace_init_node(emitter: MockEmitter) -> None:
   module = cst.parse_module(code)
   assign_node = typing.cast(cst.Assign, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0])
   provenance: dict[str, typing.Any] = {"c1": assign_node}
-  new_node = LogicalNode(id="fused", kind="FusedBlock")
+  new_node = LogicalNode(id="fused", op_type="FusedBlock")
   plan = [ReplaceAction(node_id="c1", new_node=new_node, is_init=True)]
   patcher = GraphPatcher(plan, provenance, emitter)  # type: ignore
   modified: cst.Module = module.visit(patcher)
@@ -76,7 +76,7 @@ def test_replace_call_statement(emitter: MockEmitter) -> None:
   module = cst.parse_module(code)
   assign_node = typing.cast(cst.Assign, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0])
   provenance: dict[str, typing.Any] = {"op_conv": assign_node}
-  new_node = LogicalNode(id="fused_op", kind="FusedOp")
+  new_node = LogicalNode(id="fused_op", op_type="FusedOp")
   plan = [ReplaceAction(node_id="op_conv", new_node=new_node, input_vars=["x", "z"], output_var="y", is_init=False)]
   patcher = GraphPatcher(plan, provenance, emitter)  # type: ignore
   modified: cst.Module = module.visit(patcher)
@@ -89,7 +89,7 @@ def test_replace_call_expression_nested(emitter: MockEmitter) -> None:
   module = cst.parse_module(code)
   call_node = typing.cast(cst.Return, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
   provenance: dict[str, typing.Any] = {"relu": call_node}
-  new_node = LogicalNode(id="fused_relu", kind="FusedOp")
+  new_node = LogicalNode(id="fused_relu", op_type="FusedOp")
   plan = [ReplaceAction(node_id="relu", new_node=new_node, input_vars=["x"], is_init=False)]
   patcher = GraphPatcher(plan, provenance, emitter)  # type: ignore
   modified: cst.Module = module.visit(patcher)

@@ -82,7 +82,9 @@ def test_context_preservation(synthesizer: PythonBackend) -> None:
   """Verifies the behavior of context preservation."""
   original_source = '\nimport torch\nimport torch.nn as nn\n\nclass MyNet(nn.Module):\n    """My Docstring."""\n    def __init__(self):\n        super().__init__()\n        self.old_layer = nn.Linear(1, 1)\n\n    def forward(self, x):\n        return self.old_layer(x)\n\n    def validation_step(self, batch):\n        print("I should survive")\n'
   original_tree = cst.parse_module(original_source)
-  g = LogicalGraph(nodes=[LogicalNode("x", "Input"), LogicalNode("new_conv", "Conv2d"), LogicalNode("out", "Output")])
+  g = LogicalGraph(
+    nodes={n.id: n for n in [LogicalNode("x", "Input"), LogicalNode("new_conv", "Conv2d"), LogicalNode("out", "Output")]}
+  )
   new_code = synthesizer.generate(g, class_name="MyNet", original_tree=original_tree)
   validate_python(new_code)
   assert '"""My Docstring."""' in new_code
@@ -95,7 +97,9 @@ def test_context_preservation(synthesizer: PythonBackend) -> None:
 def test_missing_class_fallback(synthesizer: PythonBackend) -> None:
   """Verifies the behavior of missing class fallback."""
   original_tree = cst.parse_module("class OtherClass: pass")
-  g = LogicalGraph(nodes=[LogicalNode("x", "Input"), LogicalNode("l1", "Linear"), LogicalNode("out", "Output")])
+  g = LogicalGraph(
+    nodes={n.id: n for n in [LogicalNode("x", "Input"), LogicalNode("l1", "Linear"), LogicalNode("out", "Output")]}
+  )
   new_code = synthesizer.generate(g, class_name="MissingClass", original_tree=original_tree)
   validate_python(new_code)
   assert "class MissingClass(nn.Module):" in new_code
@@ -123,6 +127,8 @@ def test_is_stateful_layer_helper(synthesizer: PythonBackend) -> None:
 
 def test_return_insertion(synthesizer: PythonBackend) -> None:
   """Verifies the behavior of return insertion."""
-  g = LogicalGraph(nodes=[LogicalNode("x", "Input", {"name": "y"}), LogicalNode("l1", "Linear")], edges=[])
+  g = LogicalGraph(
+    nodes={n.id: n for n in [LogicalNode("x", "Input", {"name": "y"}), LogicalNode("l1", "Linear")]}, edges=[]
+  )
   code = synthesizer.generate(g)
   assert "return y" in code

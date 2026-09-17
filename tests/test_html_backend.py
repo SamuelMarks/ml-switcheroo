@@ -8,10 +8,13 @@ from ml_switcheroo.core.html.nodes import SvgArrow
 def test_html_backend_compile() -> None:
   """Docstring."""
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="conv1", kind="Conv2d", metadata={"arg_1": "3", "arg_2": "16", "kernel_size": "3"}),
-      LogicalNode(id="func_relu", kind="func_relu", metadata={}),
-    ],
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="conv1", op_type="Conv2d", attributes={"arg_1": "3", "arg_2": "16", "kernel_size": "3"}),
+        LogicalNode(id="func_relu", op_type="func_relu", attributes={}),
+      ]
+    },
     edges=[],
     name="TestModel",
   )
@@ -25,7 +28,7 @@ def test_html_backend_compile() -> None:
 def test_html_backend_empty_graph() -> None:
   """Docstring."""
   graph: LogicalGraph = LogicalGraph(
-    nodes=[],
+    nodes={n.id: n for n in []},
     edges=[],
   )
   backend: HtmlBackend = HtmlBackend()
@@ -36,10 +39,13 @@ def test_html_backend_empty_graph() -> None:
 def test_html_backend_input_output_only() -> None:
   """Docstring."""
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="out1", kind="Output"),
-    ],
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="in1", op_type="Input"),
+        LogicalNode(id="out1", op_type="Output"),
+      ]
+    },
     edges=[],
   )
   backend: HtmlBackend = HtmlBackend()
@@ -58,12 +64,12 @@ def test_clean_kind() -> None:
 def test_is_stateful() -> None:
   """Docstring."""
   backend: HtmlBackend = HtmlBackend()
-  assert backend._is_stateful(LogicalNode(id="in1", kind="Input")) is False
-  assert backend._is_stateful(LogicalNode(id="out1", kind="Output")) is False
-  assert backend._is_stateful(LogicalNode(id="func_1", kind="Add")) is False
-  assert backend._is_stateful(LogicalNode(id="1", kind="func_add")) is False
-  assert backend._is_stateful(LogicalNode(id="2", kind="Conv2d")) is True
-  assert backend._is_stateful(LogicalNode(id="3", kind="add")) is False
+  assert backend._is_stateful(LogicalNode(id="in1", op_type="Input")) is False
+  assert backend._is_stateful(LogicalNode(id="out1", op_type="Output")) is False
+  assert backend._is_stateful(LogicalNode(id="func_1", op_type="Add")) is False
+  assert backend._is_stateful(LogicalNode(id="1", op_type="func_add")) is False
+  assert backend._is_stateful(LogicalNode(id="2", op_type="Conv2d")) is True
+  assert backend._is_stateful(LogicalNode(id="3", op_type="add")) is False
 
 
 def test_create_arrow() -> None:

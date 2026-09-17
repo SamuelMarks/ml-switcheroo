@@ -15,6 +15,6 @@ variants:
     args:
       input: input
   jax:
-    api: jax.numpy.fix
+    api: jax.numpy.trunc
     args:
-      x: x
+      input: x

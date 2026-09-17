@@ -35,16 +35,16 @@ def run_verified_pipeline(source_code: str) -> typing.Dict[str, typing.Union[str
 
   # 2. Griffe Analysis (Semantic Analysis)
   try:
-    from griffe import parse_module
+    import griffe
 
-    griffe_available = True
+    parse_func = getattr(griffe, "parse_module", None)
   except ImportError:
-    griffe_available = False
+    parse_func = None
 
   griffe_data = None
-  if griffe_available:
+  if callable(parse_func):
     try:
-      griffe_data = parse_module(source_code)
+      griffe_data = parse_func(source_code)
     except Exception as e:
       griffe_data = f"Griffe parsing error: {e}"
   else:

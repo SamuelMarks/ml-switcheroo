@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 """Validates all semantics/*.json files against SemanticsFile schema."""
 
-import sys
 import json
 from pathlib import Path
+import sys
+from typing import List, Optional, Sequence
 
 # Add src to sys.path to import ml_switcheroo
 src_path = Path(__file__).parent.parent / "src"
-sys.path.insert(0, str(src_path.resolve()))
+if str(src_path.resolve()) not in sys.path:
+  sys.path.insert(0, str(src_path.resolve()))
 
-try:
-  from ml_switcheroo.semantics.schema import SemanticsFile
-except ImportError as e:
-  print(f"Error importing SemanticsFile: {e}")
-  sys.exit(1)
+from ml_switcheroo.semantics.schema import SemanticsFile  # noqa: E402
 
 
 def validate_file(filepath: Path) -> bool:
@@ -35,16 +33,24 @@ def validate_file(filepath: Path) -> bool:
     return False
 
 
-def main() -> None:
+def main(argv: Optional[Sequence[str]] = None) -> int:
   """Execute validation for ODL JSON semantics files.
 
   Expects a list of file paths as command line arguments or defaults
   to scanning src/ml_switcheroo/semantics/*.json.
   Exits with code 1 if any semantics JSON file fails validation.
+
+  Args:
+      argv: Optional command-line arguments list.
+
+  Returns:
+      Exit code (0 for success, 1 for failure).
   """
-  files_to_check: list[Path] = []
-  if len(sys.argv) > 1:
-    for arg in sys.argv[1:]:
+  cli_args = list(sys.argv[1:] if argv is None else argv)
+  files_to_check: List[Path] = []
+
+  if len(cli_args) > 0:
+    for arg in cli_args:
       filepath = Path(arg)
       if filepath.suffix == ".json" and "semantics" in filepath.parts:
         files_to_check.append(filepath)
@@ -59,9 +65,8 @@ def main() -> None:
     if not validate_file(filepath):
       failed = True
 
-  if failed:
-    sys.exit(1)
+  return 1 if failed else 0
 
 
 if __name__ == "__main__":
-  main()
+  sys.exit(main())

@@ -95,9 +95,14 @@ def test_batch_runner_scan_manual_tests() -> None:
   """Docstring."""
   runner: BatchValidator = BatchValidator(MagicMock())
   runner.semantics.get_all_operations.return_value = ["foo"]  # type: ignore
+
+  # Line 171: root does not exist
+  with patch("pathlib.Path.exists", return_value=False):
+    assert runner._scan_manual_tests(Path("/nonexistent")) == set()
+
   mock_file: MagicMock = MagicMock()
   mock_file.parts = ["test_foo.py"]
-  mock_file.read_text.return_value = "def test_foo(): pass"
+  mock_file.read_text.return_value = "x = 1\ndef helper(): pass\ndef test_gen_bar(): pass\ndef test_foo(): pass"
   with patch("pathlib.Path.exists", return_value=True), patch("pathlib.Path.rglob", return_value=[mock_file]):
     res: set = runner._scan_manual_tests(Path("/root"))
     assert "foo" in res
@@ -112,14 +117,27 @@ def test_batch_runner_scan_manual_tests() -> None:
 
 def test_batch_runner_run() -> None:
   """Docstring."""
-  runner: BatchValidator = BatchValidator(MagicMock())
-  runner.semantics.get_all_operations.return_value = ["foo"]  # type: ignore
+  mgr = MagicMock()
+  mgr.get_known_apis.return_value = {"foo": {"variants": {}}}
+  runner: BatchValidator = BatchValidator(mgr)
 
   runner._run_manual_tests = MagicMock(return_value=(0, 0, []))  # type: ignore
   runner._scan_manual_tests = MagicMock(return_value={"foo"})  # type: ignore
 
-  runner.run_all(manual_test_dir=Path("mock_dir"))
+  # Lines 81-82: manual test priority matches op_name
+  res = runner.run_all(manual_test_dir=Path("mock_dir"))
+  assert res["foo"] is True
 
   with patch("ml_switcheroo.testing.batch_runner.track", return_value=["bar"]):
-    runner._verify_operation = MagicMock()  # type: ignore
+    mgr.get_known_apis.return_value = {"bar": {"variants": {}, "std_args": ["x"]}}
+    runner.runner.verify = MagicMock(return_value=(True, "OK"))  # type: ignore
     runner.run_all(manual_test_dir=None, verbose=True)
+
+
+def test_batch_runner_unpack_extra_branches() -> None:
+  """Test unpack_args missing branches: 131->135, 141->123, 151->123."""
+  runner: BatchValidator = BatchValidator(MagicMock())
+  params, hints, constrs = runner._unpack_args([{"name": "x"}, 12345])
+  assert params == ["x"]
+  assert hints == {}
+  assert constrs == {}

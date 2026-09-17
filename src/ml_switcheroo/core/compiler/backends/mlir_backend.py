@@ -45,9 +45,12 @@ class MlirBackend(CompilerBackend):
     """
     block = BlockNode(label="")
 
-    for node in graph.nodes:
-      if node.kind == "Input":
-        val = node.metadata.get("value", "1")
+    for node in graph.nodes.values():
+      op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
+      node_attrs = getattr(node, "attributes", {})
+
+      if op_type == "Input":
+        val = node_attrs.get("value", "1")
         # Try to determine type
         if str(val).isdigit():
           op = OperationNode(
@@ -63,12 +66,12 @@ class MlirBackend(CompilerBackend):
             attributes=[AttributeNode(name="type", value='"Input"')],
             result_types=[TypeNode(body="!sw.unknown")],
           )
-      elif node.kind == "Output":
+      elif op_type == "Output":
         op = OperationNode(name='"sw.return"', result_types=[TypeNode(body="()")])
       else:
         # Generic Op
-        attrs = [AttributeNode(name="type", value=f'"{node.kind}"')]
-        for k, v in node.metadata.items():
+        attrs = [AttributeNode(name="type", value=f'"{op_type}"')]
+        for k, v in node_attrs.items():
           attrs.append(AttributeNode(name=k, value=f'"{v}"'))
 
         op = OperationNode(

@@ -114,3 +114,44 @@ def test_structure_helpers() -> None:
   # Not simple statement line
   stmt_complex: cst.If = getattr(cst.parse_module("if True: pass"), "body")[0]
   assert not helper._is_super_init_call(stmt_complex)
+
+  # _strip_argument_from_signature stripping the sole param (params becomes empty, len(params) > 0 is False)
+  func_single_arg: cst.FunctionDef = getattr(cst.parse_module("def single(a): pass"), "body")[0]
+  f_stripped_all: cst.FunctionDef = helper._strip_argument_from_signature(func_single_arg, "a")
+  assert len(f_stripped_all.params.params) == 0
+
+  # _fix_comma with trailing comma on last param
+  func_trailing: cst.FunctionDef = getattr(cst.parse_module("def trailing(a, b,): pass"), "body")[0]
+  f_fixed_trailing: cst.FunctionDef = helper._fix_comma(func_trailing, list(func_trailing.params.params))
+  assert f_fixed_trailing.params.params[-1].comma == cst.MaybeSentinel.DEFAULT
+
+  # _inject_stmts_to_body with empty existing body
+  func_empty_body: cst.FunctionDef = getattr(cst.parse_module("def no_stmts():\n  pass"), "body")[0].with_changes(
+    body=cst.IndentedBlock(body=[])
+  )
+  f_prepended: cst.FunctionDef = helper._inject_stmts_to_body(func_empty_body, [cst.parse_statement("x = 1")])
+  assert len(f_prepended.body.body) == 1
+
+  # Mock body without body attribute for _strip_super_init and _has_super_init
+  class _MockBody:
+    """Mock body without body attribute."""
+
+  class _MockFunc:
+    """Mock function with MockBody."""
+
+    def __init__(self) -> None:
+      """Initialize mock function."""
+      self.body = _MockBody()
+
+  mock_f = _MockFunc()
+  assert helper._strip_super_init(mock_f) is mock_f  # type: ignore[arg-type]
+  assert helper._has_super_init(mock_f) is False  # type: ignore[arg-type]
+
+  # _update_docstring with empty body
+  assert helper._update_docstring(func_empty_body, [("arg", "int")]) is func_empty_body
+
+  # _update_docstring without triple double quotes (e.g. triple single quotes)
+  func_single_quote_doc: cst.FunctionDef = getattr(cst.parse_module("def foo():\n    '''SingleDoc'''\n    pass"), "body")[
+    0
+  ]
+  assert helper._update_docstring(func_single_quote_doc, [("arg", "int")]) is func_single_quote_doc

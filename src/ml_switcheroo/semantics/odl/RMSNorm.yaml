@@ -49,7 +49,11 @@ variants:
     required_imports: []
   keras:
     api: keras.layers.RMSNormalization
+    args: {}
+  ir:
+    api: RMSNorm
     args:
+      eps: eps
       epsilon: epsilon
     dispatch_rules: []
     pack_as: Tuple

@@ -144,3 +144,13 @@ def test_bisector_exception() -> None:
   bisector.runner = MockRunner()
   res: Optional[Dict[str, Any]] = bisector.propose_fix("foo", op_def)
   assert res is None
+
+
+def test_bisector_unsupported_arg_type() -> None:
+  """Test propose_fix with unsupported argument type in std_args to cover branch 96->76."""
+  runner: MagicMock = MagicMock(spec=EquivalenceRunner)
+  runner.verify.return_value = (True, "Pass")
+  bisector: SemanticsBisector = SemanticsBisector(runner)
+  op_def: Dict[str, Any] = {"std_args": [12345], "variants": {"a": {}}, "test_rtol": 0.001, "test_atol": 0.0001}
+  patch: Optional[Dict[str, Any]] = bisector.propose_fix("MyOp", op_def)
+  assert patch is None

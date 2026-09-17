@@ -8,7 +8,7 @@ based on framework-specific structural traits, and mapping attributes, constants
 or macros from a source machine learning framework to a target framework.
 """
 
-from typing import Any
+from typing import Any, cast
 
 
 import libcst as cst
@@ -98,7 +98,7 @@ class ApiTransformerAttrMixin:
           if tier == SemanticTier.NEURAL.value:
             for target in original_node.targets:
               target_name = self._get_qualified_name(target.target)
-              if target_name:  # pragma: no branch
+              if target_name:
                 if target_name.startswith("self.") and len(self.context.scope_stack) > 1:
                   # Track stateful variable in the class scope (parent of init scope)
                   self.context.scope_stack[-2].add(target_name)
@@ -115,13 +115,13 @@ class ApiTransformerAttrMixin:
 
       unwrap_method = traits.functional_execution_method
       if is_functional_apply(original_node.value, unwrap_method):
-        if len(updated_node.targets) == 1:  # pragma: no branch
+        if len(updated_node.targets) == 1:
           assign_target = updated_node.targets[0].target
-          if isinstance(assign_target, (cst.Tuple, cst.List)):  # pragma: no branch
+          if isinstance(assign_target, (cst.Tuple, cst.List)):
             elements = assign_target.elements
-            if len(elements) > 0:  # pragma: no branch
+            if len(elements) > 0:
               primary_target = elements[0].value
-              if isinstance(primary_target, cst.BaseAssignTargetExpression):  # pragma: no branch
+              if isinstance(primary_target, cst.BaseAssignTargetExpression):
                 new_target = cst.AssignTarget(target=primary_target)
                 new_node = updated_node.with_changes(targets=[new_target])
                 get_tracer().log_mutation(
@@ -179,7 +179,7 @@ class ApiTransformerAttrMixin:
       # If semantic definition says it's an attribute/context, we rewrite aliases
       if "api" in target_impl:
         self._handle_variant_imports(target_impl)
-        return self._create_dotted_name(target_impl["api"])
+        return cast(cst.BaseExpression, self._create_dotted_name(target_impl["api"]))
 
       # Support macros for constants (e.g. inf -> float('inf'))
       if "macro_template" in target_impl:

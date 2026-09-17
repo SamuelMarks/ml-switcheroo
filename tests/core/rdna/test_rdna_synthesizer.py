@@ -21,7 +21,7 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaSGPR,
   RdnaVGPR,
 )
-from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -96,9 +96,10 @@ def mock_semantics() -> MagicMock:
 def test_graph_to_rdna_basic_math(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to RDNA basic math."""
   synth = RdnaSynthesizer(mock_semantics)
-  g = LogicalGraph()
-  g.nodes = [LogicalNode("x", "Input", {}), LogicalNode("y", "Input", {}), LogicalNode("z", "Add", {})]
-  g.edges = [LogicalEdge("x", "z"), LogicalEdge("y", "z")]
+  x = LogicalNode(id="x", op_type="Input")
+  y = LogicalNode(id="y", op_type="Input")
+  z = LogicalNode(id="z", op_type="Add", inputs=["x", "y"])
+  g = LogicalGraph(nodes={"x": x, "y": y, "z": z})
   nodes: list[typing.Any] = synth.from_graph(g)
   assert len(nodes) == 3
   assert isinstance(nodes[0], RdnaComment)
@@ -243,7 +244,7 @@ def test_rdna_synthesizer_macro_exact_match() -> None:
 
   graph = LogicalGraph("test")
   n = LogicalNode("n1", "my_abstract_id")
-  graph.nodes.append(n)
+  graph.add_node(n)
 
   # We also mock get_definition
   original = semantics.get_definition
@@ -267,6 +268,6 @@ def test_rdna_backend_compile() -> None:
   backend = RdnaBackend()
   graph = LogicalGraph("test")
   n = LogicalNode("n1", "Input")
-  graph.nodes.append(n)
+  graph.add_node(n)
   code: str = backend.compile(graph)
   assert "; RDNA Code Generation Initialized" in code

@@ -118,7 +118,7 @@ class WeightScriptGenerator:
     abstract_params = ["weight", "bias", "running_mean", "running_var", "scale"]
 
     for layer_name, node in layer_registry.items():
-      op_kind = node.kind  # e.g. "Conv2d"
+      op_kind = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")  # e.g. "Conv2d"
 
       # Lookup Semantics
       definition = self.semantics.get_definition(op_kind)

@@ -20,7 +20,7 @@ def test_lifter_input() -> None:
   nodes: list[RdnaNode] = [RdnaComment(text="; Input x ->")]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].kind == "Input"
+  assert graph.nodes[0].op_type == "Input"
   assert graph.nodes[0].id == "x"
 
 
@@ -37,8 +37,8 @@ def test_lifter_block() -> None:
     graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "l1"
-  assert graph.nodes[0].kind == "Linear"
-  assert graph.nodes[0].metadata == {"features": 10}
+  assert graph.nodes[0].op_type == "Linear"
+  assert graph.nodes[0].attributes == {"features": 10}
 
 
 def test_lifter_block_mismatch() -> None:
@@ -55,8 +55,8 @@ def test_lifter_unmapped() -> None:
   nodes: list[RdnaNode] = [RdnaComment(text="; Unmapped Op: torch.flatten (f1)")]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].kind == "torch.flatten"
-  assert graph.nodes[0].metadata == {"arg_1": 1}
+  assert graph.nodes[0].op_type == "torch.flatten"
+  assert graph.nodes[0].attributes == {"arg_1": 1}
 
 
 def test_lifter_unmapped_no_flatten() -> None:
@@ -65,8 +65,8 @@ def test_lifter_unmapped_no_flatten() -> None:
   nodes: list[RdnaNode] = [RdnaComment(text="; Unmapped Op: other.op (f2)")]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].kind == "other.op"
-  assert graph.nodes[0].metadata == {}
+  assert graph.nodes[0].op_type == "other.op"
+  assert graph.nodes[0].attributes == {}
 
 
 def test_lifter_return() -> None:
@@ -75,7 +75,7 @@ def test_lifter_return() -> None:
   nodes: list[RdnaNode] = [RdnaComment(text="; Input x ->"), RdnaComment(text="; Return:")]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 2
-  assert graph.nodes[1].kind == "Output"
+  assert graph.nodes[1].op_type == "Output"
   assert len(graph.edges) == 1
   assert graph.edges[0].source == "x"
   assert graph.edges[0].target == "output"
@@ -87,7 +87,7 @@ def test_lifter_raw_instruction() -> None:
   nodes: list[RdnaNode] = [RdnaInstruction(opcode="v_add", operands=[RdnaLabelRef(name="v1"), RdnaLabelRef(name="v2")])]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].kind == "rdna.v_add"
+  assert graph.nodes[0].op_type == "rdna.v_add"
 
 
 def test_lifter_duplicate_node() -> None:
@@ -104,7 +104,7 @@ def test_lifter_return_no_previous() -> None:
   nodes: list[RdnaNode] = [RdnaComment(text="; Return:")]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].kind == "Output"
+  assert graph.nodes[0].op_type == "Output"
   assert len(graph.edges) == 0
 
 

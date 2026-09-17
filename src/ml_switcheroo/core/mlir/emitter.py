@@ -131,7 +131,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     """
     trivia = []
-    if hasattr(node, "leading_lines"):  # pragma: no branch
+    if hasattr(node, "leading_lines"):
       for line in node.leading_lines:
         if line.comment:
           text = line.comment.value.replace("#", "//", 1)

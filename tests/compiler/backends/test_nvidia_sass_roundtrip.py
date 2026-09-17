@@ -38,9 +38,13 @@ def semantics_mgr() -> SemanticsManager:
 
 def test_round_trip_math_op(semantics_mgr: SemanticsManager) -> None:
   """Verifies the behavior of round trip math op."""
-  g_in = LogicalGraph()
-  g_in.nodes = [LogicalNode("x", "Input"), LogicalNode("y", "Input"), LogicalNode("z", "Add")]
-  g_in.edges = [LogicalEdge("x", "z"), LogicalEdge("y", "z")]
+  nodes = {
+    "x": LogicalNode("x", op_type="Input"),
+    "y": LogicalNode("y", op_type="Input"),
+    "z": LogicalNode("z", op_type="Add"),
+  }
+  edges = [LogicalEdge("x", "z"), LogicalEdge("y", "z")]
+  g_in = LogicalGraph(nodes=nodes, edges=edges)
   backend = NvidiaSassBackend(semantics_mgr)
   sass_text: str = backend.compile(g_in)
   assert "FADD" in sass_text
@@ -53,9 +57,13 @@ def test_round_trip_math_op(semantics_mgr: SemanticsManager) -> None:
 
 def test_round_trip_macro_block(semantics_mgr: SemanticsManager) -> None:
   """Verifies the behavior of round trip macro block."""
-  g_in = LogicalGraph()
-  g_in.nodes = [LogicalNode("img", "Input"), LogicalNode("conv", "Conv2d", {"k": 3}), LogicalNode("out", "Output")]
-  g_in.edges = [LogicalEdge("img", "conv"), LogicalEdge("conv", "out")]
+  nodes = {
+    "img": LogicalNode("img", op_type="Input"),
+    "conv": LogicalNode("conv", op_type="Conv2d", attributes={"k": 3}),
+    "out": LogicalNode("out", op_type="Output"),
+  }
+  edges = [LogicalEdge("img", "conv"), LogicalEdge("conv", "out")]
+  g_in = LogicalGraph(nodes=nodes, edges=edges)
   backend = NvidiaSassBackend(semantics_mgr)
   sass_text: str = backend.compile(g_in)
   assert "BEGIN Conv2d" in sass_text
@@ -65,9 +73,9 @@ def test_round_trip_macro_block(semantics_mgr: SemanticsManager) -> None:
   lifter = NvidiaSassLifter()
   g_out: LogicalGraph = lifter.lift(ast_nodes)
   assert len(g_out.nodes) == 3
-  node_ids: list[str] = [n.id for n in g_out.nodes]
+  node_ids: list[str] = list(g_out.nodes.keys())
   assert "img" in node_ids
   assert "conv" in node_ids
   assert "output" in node_ids
-  conv_node: LogicalNode = next((n for n in g_out.nodes if n.id == "conv"))
-  assert conv_node.metadata["kernel_size"] == 3
+  conv_node: LogicalNode = g_out.nodes["conv"]
+  assert conv_node.attributes["kernel_size"] == 3

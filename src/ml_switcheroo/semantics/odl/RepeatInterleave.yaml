@@ -10,6 +10,8 @@ variants:
   flax_nnx:
     api: jax.numpy.repeat
     args:
+      input: a
+      repeats: repeats
       dim: axis
     dispatch_rules: []
     pack_as: Tuple

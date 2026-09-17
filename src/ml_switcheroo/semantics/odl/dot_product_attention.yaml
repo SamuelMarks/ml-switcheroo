@@ -26,3 +26,41 @@ variants:
       query: query
       key: key
       value: value
+std_args:
+- name: query
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: key
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: value
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: bias
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: mask
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: scale
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: is_causal
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+  default: 'False'
+- name: flash_attention
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: attn_logits_soft_cap
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

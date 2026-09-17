@@ -8,7 +8,7 @@ import pytest
 
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.plugins.device_checks import transform_cuda_check
+import ml_switcheroo.plugins.device_checks as dc
 from tests.conftest import TestRewriter as PivotRewriter
 
 
@@ -20,7 +20,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 @pytest.fixture
 def rewriter() -> PivotRewriter:
   """Docstring."""
-  hooks._HOOKS["cuda_is_available"] = transform_cuda_check
+  hooks._HOOKS["cuda_is_available"] = dc.transform_cuda_check
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   op_def: dict[str, typing.Any] = {"variants": {"jax": {"api": "jax.devices", "requires_plugin": "cuda_is_available"}}}

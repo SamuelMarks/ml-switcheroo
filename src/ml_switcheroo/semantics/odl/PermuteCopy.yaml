@@ -24,6 +24,7 @@ variants:
   flax_nnx:
     api: jax.numpy.transpose
     args:
+      input: a
       dims: axes
     dispatch_rules: []
     pack_as: Tuple

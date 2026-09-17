@@ -75,8 +75,8 @@ class RdnaLifter:
       if node_id in seen_ids:
         return
 
-      node = LogicalNode(id=node_id, kind=kind, metadata=meta or {})
-      graph.nodes.append(node)
+      node = LogicalNode(id=node_id, op_type=kind, attributes=meta or {})
+      graph.nodes[node_id] = node
       seen_ids.add(node_id)
 
       if previous_node_id:
@@ -120,7 +120,7 @@ class RdnaLifter:
 
         elif isinstance(marker, SemanticReturn):
           if "output" not in seen_ids:
-            graph.nodes.append(LogicalNode(id="output", kind="Output"))
+            graph.nodes["output"] = LogicalNode(id="output", op_type="Output")
             if previous_node_id:
               graph.edges.append(LogicalEdge(source=previous_node_id, target="output"))
             seen_ids.add("output")

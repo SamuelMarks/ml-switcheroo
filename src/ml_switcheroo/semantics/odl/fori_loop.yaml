@@ -25,3 +25,20 @@ variants:
       upper: upper
       body_fun: body_fun
       init_val: init_val
+std_args:
+- name: lower
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: upper
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: body_fun
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: init_val
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

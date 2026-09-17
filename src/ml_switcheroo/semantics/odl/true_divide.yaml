@@ -13,8 +13,8 @@ variants:
   jax:
     api: jax.numpy.divide
     args:
-      x1: x1
-      x2: x2
+      input: x
+      other: y
   keras:
     api: keras.ops.true_divide
     args:

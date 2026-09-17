@@ -282,3 +282,65 @@ def test_version_parse_empty() -> None:
   helper = MockHelper()
   helper.semantics.framework_configs["jax"]["version"] = ""
   assert helper.check_version_constraints("1.0", None) is None
+
+
+def test_api_helpers_branch_coverage_extensions(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Test branch gaps in ApiHelpersMixin."""
+  helper = MockHelper()
+
+  # 1. 49->54: _cst_to_string on attribute with non-flattenable base
+  attr_call = cst.Attribute(value=cst.Call(func=cst.Name("foo")), attr=cst.Name("bar"))
+  assert helper._cst_to_string(attr_call) is None
+
+  # 2. 124->130, 130->140, 137->132: _is_module_alias branches
+  node_mod = cst.Name("other_mod")
+  # 124->130: self.config is None
+  helper.config = None  # type: ignore[assignment]
+  assert not helper._is_module_alias(node_mod)
+
+  # 137->132: alias_conf is dict but module is None
+  helper.config = MockConfig()
+  helper.semantics.framework_configs = {"torch": {"alias": {"module": None}}}
+  assert not helper._is_module_alias(node_mod)
+
+  # 130->140: self.semantics is None
+  helper.semantics = None  # type: ignore[assignment]
+  assert not helper._is_module_alias(node_mod)
+
+  # 3. 179->184: _inject_stmts_to_body with empty body
+  helper = MockHelper()
+  func_empty = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0]).with_changes(
+    body=cst.IndentedBlock(body=[])
+  )
+  res_injected = helper._inject_stmts_to_body(func_empty, [cst.parse_statement("a = 1")])
+  assert len(res_injected.body.body) == 1
+
+  # 4. 215->218, 218->220: _get_mapping unknown root with empty alias map
+  helper.context.alias_map = {}
+  assert helper._get_mapping("unknown_lib.op") is None
+
+  # 5. 268->277, 271->277, 277->260: _handle_variant_imports dict/non-dict variants
+  helper._handle_variant_imports({"required_imports": [{"module": None}, {"module": "os"}, 12345]})
+  assert "import os" in helper.context.hook_context.stmts
+
+  # 6. 353->352: check_version_constraints with leading delimiter causing empty token
+  helper.semantics.framework_configs["jax"]["version"] = ".1.0"
+  assert helper.check_version_constraints("2.0", None) is not None
+
+  # 7. 387->391: _inject_argument_to_signature when first param is not self
+  func_noself = typing.cast(cst.FunctionDef, cst.parse_module("def foo(x):\n  pass").body[0])
+  res_noself = helper._inject_argument_to_signature(func_noself, "y", "int")
+  assert res_noself.params.params[0].name.value == "y"
+
+  # 8. 410->413: _inject_argument_to_signature when params evaluates to false
+  class _AlwaysFalseList(list):
+    """List subclass that evaluates to false for boolean checks."""
+
+    def __bool__(self) -> bool:
+      """Evaluate to false."""
+      return False
+
+  monkeypatch.setattr("ml_switcheroo.core.rewriter.passes.api_helpers.list", _AlwaysFalseList, raising=False)
+  func_base = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
+  res_falsy = helper._inject_argument_to_signature(func_base, "z", None)
+  assert len(res_falsy.params.params) >= 1

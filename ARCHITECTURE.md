@@ -210,6 +210,14 @@ Adapters define `PluginTraits` to toggle logic blocks used by generic plugins:
 * `requires_explicit_rng`: Enables PRNG key threading logic (JAX/Flax).
 * `requires_functional_state`: Enables BatchNorm state unwrapping logic (JAX).
 
+### Intermediate Representation Adapter (`ir` / `ml_switcheroo_ir`)
+
+The `IrAdapter` integrates the language-agnostic Intermediate Representation as a symmetrical framework citizen:
+
+* **Source IR (`--source ir`):** Ingests serialized JSON graphs or Python scripts calling `ml_switcheroo_ir`, lifting them into `LogicalGraph` for compilation to any target.
+* **Target IR (`--target ir`):** Compiles computational graphs from any source framework into canonical, deterministic JSON conforming to `ml_switcheroo_ir` schema.
+* **Intermediate Layer (`--intermediate ir`):** Orchestrates double-hop verification (`Source -> IR -> Target`) with strict topology and attribute validation.
+
 ---
 
 ## 🧠 4. DSL & Plugin System

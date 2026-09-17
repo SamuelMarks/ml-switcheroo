@@ -34,11 +34,11 @@ def test_stablehlo_backend_init() -> None:
 def test_stablehlo_backend_compile() -> None:
   """Docstring."""
   nodes: List[LogicalNode] = [
-    LogicalNode(id="in1", kind="Input"),
-    LogicalNode(id="in2", kind="Input"),
-    LogicalNode(id="add1", kind="Add"),
-    LogicalNode(id="mul1", kind="Mul"),  # fallback to custom_call
-    LogicalNode(id="out1", kind="Output"),
+    LogicalNode(id="in1", op_type="Input"),
+    LogicalNode(id="in2", op_type="Input"),
+    LogicalNode(id="add1", op_type="Add"),
+    LogicalNode(id="mul1", op_type="Mul"),  # fallback to custom_call
+    LogicalNode(id="out1", op_type="Output"),
   ]
   edges: List[LogicalEdge] = [
     LogicalEdge(source="in1", target="add1"),
@@ -47,7 +47,7 @@ def test_stablehlo_backend_compile() -> None:
     LogicalEdge(source="in2", target="mul1"),
     LogicalEdge(source="mul1", target="out1"),
   ]
-  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
   backend: StableHloBackend = StableHloBackend(semantics=DummySemantics())  # type: ignore
   code: str = backend.compile(graph)
 
@@ -62,10 +62,10 @@ def test_stablehlo_backend_compile() -> None:
 def test_stablehlo_backend_compile_no_semantics() -> None:
   """Docstring."""
   nodes: List[LogicalNode] = [
-    LogicalNode(id="add1", kind="Add"),
+    LogicalNode(id="add1", op_type="Add"),
   ]
   edges: List[LogicalEdge] = []
-  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
   backend: StableHloBackend = StableHloBackend(semantics=None)  # type: ignore
   code: str = backend.compile(graph)
 
@@ -146,15 +146,15 @@ def test_rest_operations_backend(abstract_name: str, expected_api: str) -> None:
       expected_api (str): Expected API string.
   """
   nodes: List[LogicalNode] = [
-    LogicalNode(id="in1", kind="Input"),
-    LogicalNode(id="op1", kind=abstract_name),
-    LogicalNode(id="out1", kind="Output"),
+    LogicalNode(id="in1", op_type="Input"),
+    LogicalNode(id="op1", op_type=abstract_name),
+    LogicalNode(id="out1", op_type="Output"),
   ]
   edges: List[LogicalEdge] = [
     LogicalEdge(source="in1", target="op1"),
     LogicalEdge(source="op1", target="out1"),
   ]
-  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
   backend: StableHloBackend = StableHloBackend(semantics=RestSemanticsMock())  # type: ignore
   code: str = backend.compile(graph)
   assert expected_api in code
@@ -181,9 +181,9 @@ class DummyStrSemantics:
 def test_stablehlo_backend_str_attribute() -> None:
   """Docstring."""
   nodes: List[LogicalNode] = [
-    LogicalNode(id="op1", kind="Dummy", metadata={"str_attr": "hello_world", "quoted_attr": '"quoted"'})
+    LogicalNode(id="op1", op_type="Dummy", attributes={"str_attr": "hello_world", "quoted_attr": '"quoted"'})
   ]
-  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=[])
   backend: StableHloBackend = StableHloBackend(semantics=DummyStrSemantics())  # type: ignore
   code: str = backend.compile(graph)
   assert 'str_attr = "hello_world"' in code

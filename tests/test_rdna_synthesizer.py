@@ -96,13 +96,16 @@ def test_synthesizer_from_graph() -> None:
   synth.macro_registry = {"Linear": dummy_expander}
 
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="conv1", kind="Conv2d", metadata={"k": "3"}),
-      LogicalNode(id="lin1", kind="Linear"),
-      LogicalNode(id="out1", kind="Output"),
-      LogicalNode(id="unkn1", kind="UnknownNode"),
-    ],
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="in1", op_type="Input"),
+        LogicalNode(id="conv1", op_type="Conv2d", attributes={"k": "3"}),
+        LogicalNode(id="lin1", op_type="Linear"),
+        LogicalNode(id="out1", op_type="Output"),
+        LogicalNode(id="unkn1", op_type="UnknownNode"),
+      ]
+    },
     edges=[LogicalEdge("in1", "conv1"), LogicalEdge("conv1", "out1"), LogicalEdge("in1", "out1")],
   )
 
@@ -132,7 +135,8 @@ def test_synthesizer_from_graph_exact_macro() -> None:
 
   synth.macro_registry = {"ExactMacro": dummy_expander}
   graph: LogicalGraph = LogicalGraph(
-    nodes=[LogicalNode(id="node", kind="MyOp"), LogicalNode(id="unmatched", kind="UnmatchedOp")], edges=[]
+    nodes={n.id: n for n in [LogicalNode(id="node", op_type="MyOp"), LogicalNode(id="unmatched", op_type="UnmatchedOp")]},
+    edges=[],
   )
   nodes: List[RdnaNode] = synth.from_graph(graph)
   assert len(nodes) > 0
@@ -178,7 +182,7 @@ def test_synthesizer_to_python_operands() -> None:
 def test_backend_compile() -> None:
   """Docstring."""
   backend: RdnaBackend = RdnaBackend()
-  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="in1", kind="Input")], edges=[])
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="in1", op_type="Input")]}, edges=[])
   code: str = backend.compile(graph)
   assert "RDNA Code Generation Initialized" in code
 
@@ -201,9 +205,12 @@ def test_synthesizer_from_graph_unmapped() -> None:
   synth.macro_registry = {}
 
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="op1", kind="UnknownOp"),
-    ],
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="op1", op_type="UnknownOp"),
+      ]
+    },
     edges=[],
   )
   nodes: List[RdnaNode] = synth.from_graph(graph)
@@ -229,10 +236,13 @@ def test_synthesizer_from_graph_with_sources() -> None:
   synth.macro_registry = {}
 
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="op1", kind="MyOp"),
-    ],
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="in1", op_type="Input"),
+        LogicalNode(id="op1", op_type="MyOp"),
+      ]
+    },
     edges=[LogicalEdge("in1", "op1")],
   )
   nodes: List[RdnaNode] = synth.from_graph(graph)
@@ -268,11 +278,14 @@ def test_synthesizer_macro_directives_and_fallbacks() -> None:
 
   synth: RdnaSynthesizer = RdnaSynthesizer(semantics=cast(Any, MockSemantics()))
   graph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="n1", kind="op_macro_semicolon"),
-      LogicalNode(id="n2", kind="op_macro_unknown"),
-      LogicalNode(id="n3", kind="op_semicolon_comment"),
-    ]
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="n1", op_type="op_macro_semicolon"),
+        LogicalNode(id="n2", op_type="op_macro_unknown"),
+        LogicalNode(id="n3", op_type="op_semicolon_comment"),
+      ]
+    }
   )
 
   nodes = synth.from_graph(graph)
@@ -323,11 +336,14 @@ def test_synthesizer_from_graph_edge_cases() -> None:
 
   synth: RdnaSynthesizer = RdnaSynthesizer(semantics=cast(Any, MockSemantics()))
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="empty", kind=""),
-      LogicalNode(id="dot_node", kind="torch.nn.Dotted"),
-      LogicalNode(id="out_empty", kind="Output"),
-    ]
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="empty", op_type=""),
+        LogicalNode(id="dot_node", op_type="torch.nn.Dotted"),
+        LogicalNode(id="out_empty", op_type="Output"),
+      ]
+    }
   )
   nodes: List[RdnaNode] = synth.from_graph(graph)
   assert len(nodes) >= 2
@@ -360,6 +376,6 @@ def test_backend_compile_with_semantics() -> None:
       return None
 
   backend: RdnaBackend = RdnaBackend(semantics=cast(Any, MockSemantics()))
-  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="in1", kind="Input")], edges=[])
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="in1", op_type="Input")]}, edges=[])
   code: str = backend.compile(graph)
   assert "RDNA Code Generation Initialized" in code

@@ -34,11 +34,11 @@ def test_graph_optimization_rewriter_path() -> None:
     fake_tree.visit.return_value = fake_tree
     MockIngest.return_value = fake_tree
     extractor_instance = MockExtractor.return_value
-    g_orig = LogicalGraph(nodes=[LogicalNode("n1", "MockOp")])
+    g_orig = LogicalGraph(nodes={n.id: n for n in [LogicalNode("n1", "MockOp")]})
     extractor_instance.graph = g_orig
     extractor_instance.node_map = {"n1": MagicMock()}
     optimizer_instance = MockOptimizer.return_value
-    g_opt = LogicalGraph(nodes=[])
+    g_opt = LogicalGraph(nodes={n.id: n for n in []})
     optimizer_instance.optimize.return_value = g_opt
     differ_instance = MockDiffer.return_value
     differ_instance.diff.return_value = [MagicMock(spec=PatchAction)]

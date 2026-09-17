@@ -7,7 +7,7 @@ and generation correctness for control flow operations.
 import pytest
 
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -31,10 +31,10 @@ CONTROL_OPS: list[tuple[str, str]] = [
 @pytest.mark.parametrize("logical_op, expected_mlir_op", CONTROL_OPS)
 def test_control_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str) -> None:
   """Verifies that control flow operations map to the correct MLIR syntax."""
-  g = LogicalGraph()
-  # Simple graph: Input -> Op -> Output
-  g.nodes = [LogicalNode("in_node", "Input"), LogicalNode("op_node", logical_op), LogicalNode("out_node", "Output")]
-  g.edges = [LogicalEdge("in_node", "op_node"), LogicalEdge("op_node", "out_node")]
+  in_n = LogicalNode(id="in_node", op_type="Input")
+  op_n = LogicalNode(id="op_node", op_type=logical_op, inputs=["in_node"])
+  out_n = LogicalNode(id="out_node", op_type="Output", inputs=["op_node"])
+  g = LogicalGraph(nodes={"in_node": in_n, "op_node": op_n, "out_node": out_n})
 
   mlir_code: str = backend.compile(g)
 

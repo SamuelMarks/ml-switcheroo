@@ -73,11 +73,16 @@ def test_register_allocator_overflow() -> None:
 def test_register_allocator_liveness() -> None:
   """Docstring."""
   alloc: RegisterAllocator = RegisterAllocator()
-  graph: LogicalGraph = LogicalGraph()
-  graph.nodes.append(Node(id="n1", kind="test", metadata={}))
-  graph.nodes.append(Node(id="n2", kind="test", metadata={}))
-  graph.edges.append(Edge(source="n1", target="n2"))
-  graph.edges.append(Edge(source="n1", target="n2"))
+  nodes = {
+    "n1": Node(id="n1", op_type="test"),
+    "n2": Node(id="n2", op_type="test"),
+    "n3": Node(id="n3", op_type="test"),
+  }
+  edges = [
+    Edge(source="n1", target="n2"),
+    Edge(source="n1", target="n3"),
+  ]
+  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
 
   alloc.build_liveness(graph)
   assert alloc._liveness_map["n1"] == 2
@@ -137,17 +142,11 @@ def test_synthesizer_from_graph() -> None:
   sem: SemanticsManager = SemanticsManager()
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(sem)
 
-  graph: LogicalGraph = LogicalGraph()
-  n_in: Node = Node(id="in1", kind="Input", metadata={"name": "input_x"})
-  n_add: Node = Node(id="add1", kind="Add", metadata={})
-  n_conv: Node = Node(id="conv1", kind="Conv2d", metadata={"k": "3"})
-  n_out: Node = Node(id="out1", kind="Output", metadata={})
-
-  graph.nodes.extend([n_in, n_add, n_conv, n_out])
-
-  graph.edges.append(Edge(source="in1", target="add1"))
-  graph.edges.append(Edge(source="add1", target="conv1"))
-  graph.edges.append(Edge(source="conv1", target="out1"))
+  n_in: Node = Node(id="in1", op_type="Input", attributes={"name": "input_x"})
+  n_add: Node = Node(id="add1", op_type="Add", attributes={}, inputs=["in1"])
+  n_conv: Node = Node(id="conv1", op_type="Conv2d", attributes={"k": "3"}, inputs=["add1"])
+  n_out: Node = Node(id="out1", op_type="Output", attributes={}, inputs=["conv1"])
+  graph: LogicalGraph = LogicalGraph(nodes={"in1": n_in, "add1": n_add, "conv1": n_conv, "out1": n_out})
 
   def mock_get_definition(kind: str) -> List[str]:
     """Docstring."""
@@ -187,16 +186,14 @@ def test_synthesizer_from_graph_unmapped_op() -> None:
 
   graph: LogicalGraph = LogicalGraph()
   # Hit 216->218: edge source to a target already seen
-  graph.nodes.append(Node(id="n1", kind="UnknownOp", metadata={}))
-  graph.nodes.append(Node(id="n2", kind="UnknownOp2", metadata={}))
-  graph.edges.append(Edge(source="n1", target="n2"))
-  graph.edges.append(Edge(source="n1", target="n2"))  # Duplicate edge
-
-  # Hit 231->220: Output with no sources
-  graph.nodes.append(Node(id="n3", kind="Output", metadata={}))
-
-  # Hit 275->278: Node without abstract_id
-  graph.nodes.append(Node(id="n4", kind="", metadata={}))
+  n1 = Node(id="n1", op_type="UnknownOp", attributes={})
+  n2 = Node(id="n2", op_type="UnknownOp2", attributes={}, inputs=["n1", "n1"])
+  n3 = Node(id="n3", op_type="Output", attributes={})
+  n4 = Node(id="n4", op_type="", attributes={})
+  graph.add_node(n1)
+  graph.add_node(n2)
+  graph.add_node(n3)
+  graph.add_node(n4)
 
   with patch.object(sem, "get_definition", return_value=None):
     with patch.object(sem, "resolve_variant", return_value=None):
@@ -209,11 +206,10 @@ def test_synthesizer_from_graph_method_suffix() -> None:
   sem: SemanticsManager = SemanticsManager()
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(sem)
 
-  graph: LogicalGraph = LogicalGraph()
   # test suffix macro match e.g. "reshape"
-  graph.nodes.append(Node(id="n0", kind="input", metadata={}))
-  graph.nodes.append(Node(id="n1", kind="tensor.reshape", metadata={}))
-  graph.edges.append(Edge(source="n0", target="n1"))
+  n0 = Node(id="n0", op_type="input", attributes={})
+  n1 = Node(id="n1", op_type="tensor.reshape", attributes={}, inputs=["n0"])
+  graph: LogicalGraph = LogicalGraph(nodes={"n0": n0, "n1": n1})
 
   with patch.object(sem, "get_definition", return_value=["tensor.reshape"]):
 

@@ -64,7 +64,7 @@ class HtmlBackend(CompilerBackend):
     return ", ".join(parts)
 
   def _is_stateful(self, node: LogicalNode) -> bool:
-    """Determine if a node represents state (Red box) vs Op (Blue box).
+    """Check if a node is stateful/parametric.
 
     Args:
         node: The node to check.
@@ -72,14 +72,15 @@ class HtmlBackend(CompilerBackend):
     Returns:
         True if the node is stateful, False otherwise.
     """
-    if node.kind in ["Input", "Output"]:
+    node_op_type: str = str(node.op_type if hasattr(node, "op_type") else getattr(node, "kind", ""))
+    if node_op_type in ["Input", "Output"]:
       return False
     if node.id.startswith("func_"):
       return False
-    if node.kind.startswith("func_"):
+    if node_op_type.startswith("func_"):
       return False
     # Heuristic: Upper case kinds are layers/stateful
-    if node.kind and node.kind[0].isupper():
+    if node_op_type and node_op_type[0].isupper():
       return True
     return False
 
@@ -167,7 +168,9 @@ class HtmlBackend(CompilerBackend):
     current_row = 2  # Row 1 is Headers
     last_blue_row = -1  # Track last operation box
 
-    flow_nodes = [n for n in ordered if n.kind != "Input" and n.kind != "Output"]
+    flow_nodes = [
+      n for n in ordered if (n.op_type if hasattr(n, "op_type") else getattr(n, "kind", "")) not in ("Input", "Output")
+    ]
 
     if not flow_nodes:
       # Render empty? Or input only?
@@ -178,16 +181,18 @@ class HtmlBackend(CompilerBackend):
     for i, node in enumerate(flow_nodes):
       is_stateful = self._is_stateful(node)
       op_row = current_row
+      node_op_type: str = str(node.op_type if hasattr(node, "op_type") else getattr(node, "kind", ""))
+      node_attrs = getattr(node, "attributes", {})
 
       if is_stateful:
         # 1. Attribute Box (Red)
-        disp_kind = self._clean_kind(node.kind)
+        disp_kind = self._clean_kind(node_op_type)
         mem_box = GridBox(
           row=current_row,
           col=1,
           css_class="box r",
           header_text=f"{node.id}: {disp_kind}",
-          code_text=self._format_args(node.metadata),
+          code_text=self._format_args(node_attrs),
           z_index=current_z,
         )
         current_z -= 1
@@ -200,8 +205,8 @@ class HtmlBackend(CompilerBackend):
         op_label = f"Call ({node.id})"
         op_args = "args: x"
       else:
-        op_label = self._clean_kind(node.kind)
-        fmt_args = self._format_args(node.metadata)
+        op_label = self._clean_kind(node_op_type)
+        fmt_args = self._format_args(node_attrs)
         op_args = f"args: {fmt_args}" if fmt_args else "args: x"
 
       op_box = GridBox(

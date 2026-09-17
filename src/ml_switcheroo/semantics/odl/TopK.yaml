@@ -39,6 +39,7 @@ variants:
     api: jax.lax.top_k
     args:
       input: operand
+      k: k
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []

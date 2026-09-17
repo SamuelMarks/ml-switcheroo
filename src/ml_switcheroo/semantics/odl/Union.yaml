@@ -11,5 +11,5 @@ std_args:
   type: Any
 variants:
   torch:
-    api: torch.autograd.Union
+    api: Macro.Union
     args: {}

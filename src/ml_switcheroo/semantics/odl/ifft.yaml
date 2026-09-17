@@ -14,3 +14,21 @@ variants:
     api: mlx.core.fft.ifft
     args:
       a: a
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: n
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+  default: '-1'
+- name: stream
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

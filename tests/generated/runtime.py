@@ -12,6 +12,9 @@ import typing
 # --- flax_nnx ---
 FLAX_NNX_AVAILABLE = importlib.util.find_spec("jax") is not None
 
+# --- ir ---
+IR_AVAILABLE = True
+
 # --- jax ---
 JAX_AVAILABLE = importlib.util.find_spec("jax") is not None
 

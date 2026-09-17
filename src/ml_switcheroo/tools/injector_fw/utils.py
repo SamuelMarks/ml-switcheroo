@@ -7,12 +7,12 @@ lists, primitives) into LibCST nodes, as well as utilities for inspecting import
 import typing
 
 
-from typing import Union, List
+from typing import List
 import json
 import libcst as cst
 
 
-def get_import_root(node: Union[cst.Name, cst.Attribute]) -> str:
+def get_import_root(node: cst.CSTNode) -> str:
   """Recursively extracts the root package name from a CST node.
 
   Args:
@@ -87,7 +87,7 @@ def convert_to_cst_literal(val: typing.Any) -> cst.BaseExpression:
       node = convert_to_cst_literal(item)
       elements.append(cst.Element(value=node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
 
-    if elements:  # pragma: no branch
+    if elements:
       # Strip trailing comma from last element for cleaner syntax
       last = elements[-1]
       elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
@@ -111,7 +111,7 @@ def convert_to_cst_literal(val: typing.Any) -> cst.BaseExpression:
         )
       )
 
-    if dict_elements:  # pragma: no branch
+    if dict_elements:
       last_dict_el = dict_elements[-1]
       dict_elements[-1] = last_dict_el.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 

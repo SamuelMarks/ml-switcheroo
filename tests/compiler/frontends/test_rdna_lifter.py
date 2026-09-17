@@ -15,18 +15,7 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 def test_rdna_lifter_basic() -> None:
-  """Tests the basic lifting capability of RdnaLifter for unmapped operations.
-
-  Verifies that basic unmapped operator comments (e.g., "; Unmapped Op: ...")
-  are correctly parsed, duplicate nodes are properly skipped, metadata is
-  properly extracted, and edges are correctly formed between the sequential nodes.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Tests the basic lifting capability of RdnaLifter for unmapped operations."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [
     # Unmapped marker
@@ -38,28 +27,18 @@ def test_rdna_lifter_basic() -> None:
   ]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 2
-  assert graph.nodes[0].id == "node1"
-  assert graph.nodes[0].kind == "Linear"
-  assert graph.nodes[1].id == "node2"
-  assert graph.nodes[1].kind == "flatten"
-  assert graph.nodes[1].metadata == {"arg_1": 1}
+  node_list = list(graph.nodes.values())
+  assert node_list[0].id == "node1"
+  assert node_list[0].op_type == "Linear"
+  assert node_list[1].id == "node2"
+  assert node_list[1].op_type == "flatten"
+  assert node_list[1].attributes == {"arg_1": 1}
   assert graph.edges[0].source == "node1"
   assert graph.edges[0].target == "node2"
 
 
 def test_rdna_lifter_input_return() -> None:
-  """Tests parsing of input and return marker comments in assembly.
-
-  Verifies that input comments ("; Input x ->") and return comments ("; Return:")
-  are lifted into corresponding input and output graph nodes with directed edges
-  connecting inputs to the return output, while handling redundant return comments.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Tests parsing of input and return marker comments in assembly."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [
     RdnaComment(text="; Input x ->"),
@@ -69,26 +48,15 @@ def test_rdna_lifter_input_return() -> None:
   ]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 2
-  assert graph.nodes[0].id == "x"
-  assert graph.nodes[1].id == "output"
+  node_list = list(graph.nodes.values())
+  assert node_list[0].id == "x"
+  assert node_list[1].id == "output"
   assert graph.edges[0].source == "x"
   assert graph.edges[0].target == "output"
 
 
 def test_rdna_lifter_block_capture() -> None:
-  """Tests capturing of operations within a block begin/end comment pair.
-
-  Verifies that RdnaLifter handles structured blocks marked by "; BEGIN ..."
-  and "; END ..." comments, parsing metadata (like immediate operand constants)
-  from inner instructions within the block, and generating a single composite
-  high-level graph node.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Tests capturing of operations within a block begin/end comment pair."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [
     RdnaComment(text="; BEGIN Conv2d(block1)"),
@@ -97,24 +65,14 @@ def test_rdna_lifter_block_capture() -> None:
   ]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].id == "block1"
-  assert graph.nodes[0].kind == "Conv2d"
-  assert graph.nodes[0].metadata == {"k": 3, "arg_2": 3}
+  node_list = list(graph.nodes.values())
+  assert node_list[0].id == "block1"
+  assert node_list[0].op_type == "Conv2d"
+  assert node_list[0].attributes == {"k": 3, "arg_2": 3}
 
 
 def test_rdna_lifter_unrecognized_comment() -> None:
-  """Tests lifting of instructions in the presence of unrecognized/generic comments.
-
-  Verifies that generic comments are ignored during lifting, and that actual
-  unstructured assembly instructions (e.g., "v_add_f32", "v_mul_f32") are successfully
-  lifted into corresponding instruction nodes with appropriate sequencing edges.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Tests lifting of instructions in the presence of unrecognized/generic comments."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [
     RdnaComment(text="; Just a regular comment"),
@@ -123,27 +81,17 @@ def test_rdna_lifter_unrecognized_comment() -> None:
   ]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 2
-  assert graph.nodes[0].id == "inst_0"
-  assert graph.nodes[0].kind == "rdna.v_add_f32"
-  assert graph.nodes[1].id == "inst_1"
-  assert graph.nodes[1].kind == "rdna.v_mul_f32"
+  node_list = list(graph.nodes.values())
+  assert node_list[0].id == "inst_0"
+  assert node_list[0].op_type == "rdna.v_add_f32"
+  assert node_list[1].id == "inst_1"
+  assert node_list[1].op_type == "rdna.v_mul_f32"
   assert graph.edges[0].source == "inst_0"
   assert graph.edges[0].target == "inst_1"
 
 
 def test_rdna_lifter_end_without_begin() -> None:
-  """Tests that a block END comment without a preceding BEGIN comment is ignored.
-
-  Verifies the robustness of the lifter's state machine when encountering mismatched
-  block markers, ensuring no erroneous nodes are created when an END block is found
-  without an active BEGIN block.
-
-  Args:
-      None
-
-  Returns:
-      None
-  """
+  """Tests that a block END comment without a preceding BEGIN comment is ignored."""
   lifter = RdnaLifter()
   nodes: list[RdnaNode] = [
     RdnaComment(text="; END Conv2d(block1)"),
@@ -154,7 +102,6 @@ def test_rdna_lifter_end_without_begin() -> None:
 
 def test_rdna_analysis_no_loop_limits() -> None:
   """Docstring."""
-  # Hit analysis 40
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction
 
@@ -165,7 +112,6 @@ def test_rdna_analysis_no_loop_limits() -> None:
 
 def test_rdna_analysis_other_kind() -> None:
   """Docstring."""
-  # Hit 47->53
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
@@ -185,7 +131,7 @@ def test_rdna_lifter_return_already_seen() -> None:
     RdnaComment(text="; Return:"),
   ]
   graph: LogicalGraph = lifter.lift(nodes)
-  assert len([n for n in graph.nodes if n.kind == "Output"]) == 1
+  assert len([n for n in graph.nodes.values() if n.op_type == "Output"]) == 1
 
 
 def test_rdna_lifter_return_no_previous() -> None:
@@ -210,7 +156,8 @@ def test_rdna_lifter_instruction_no_block_or_marker() -> None:
   nodes: list[RdnaNode] = [RdnaInstruction(opcode="v_add_f32", operands=[])]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].kind == "rdna.v_add_f32"
+  node_list = list(graph.nodes.values())
+  assert node_list[0].op_type == "rdna.v_add_f32"
 
 
 def test_rdna_lifter_instruction_in_block() -> None:
@@ -271,7 +218,6 @@ def test_rdna_lifter_mismatched_end() -> None:
   ]
   lifter = RdnaLifter()
   graph: LogicalGraph = lifter.lift(cst_nodes)
-  # It shouldn't commit the block since it was mismatched
   assert len(graph.nodes) == 0
 
 
@@ -286,6 +232,6 @@ def test_rdna_lifter_multiple_returns() -> None:
   ]
   lifter = RdnaLifter()
   graph: LogicalGraph = lifter.lift(cst_nodes)
-  # Only one output node should be created
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].kind == "Output"
+  node_list = list(graph.nodes.values())
+  assert node_list[0].op_type == "Output"

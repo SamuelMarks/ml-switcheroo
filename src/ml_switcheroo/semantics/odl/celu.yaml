@@ -24,3 +24,6 @@ variants:
     api: keras.activations.celu
     args:
       x: x
+  mlx:
+    api: mlx.nn.CELU
+    args: {}

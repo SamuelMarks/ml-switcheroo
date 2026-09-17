@@ -7,7 +7,7 @@ import pytest
 
 from ml_switcheroo.core.compiler.backends.python import ClassBodyReplacer, PythonBackend
 from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
-from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, PartitionSpec
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, PartitionSpec
 
 
 def test_python_backend_class_body_replacer() -> None:
@@ -38,7 +38,7 @@ def test_python_backend_imports() -> None:
   assert "keras.Model" in backend_keras.compile(LogicalGraph())
   backend_mlx = PythonBackend(framework="mlx")
   graph = LogicalGraph()
-  graph.nodes = [LogicalNode(id="x", kind="Input"), LogicalNode(id="out", kind="Output")]
+  graph.nodes = [LogicalNode(id="x", op_type="Input"), LogicalNode(id="out", op_type="Output")]
   code: str = backend_mlx.compile(graph)
   assert "import mlx.core as mx" in code
   backend_tf = PythonBackend(framework="tensorflow")
@@ -49,7 +49,7 @@ def test_python_backend_build_init() -> None:
   """Verifies the behavior of python backend build initialization."""
   backend = PythonBackend(framework="mlx")
   graph = LogicalGraph()
-  graph.nodes = [LogicalNode(id="x", kind="Input")]
+  graph.nodes = [LogicalNode(id="x", op_type="Input")]
   code: str = backend.compile(graph)
   assert "def __init__(self):" in code
 
@@ -59,9 +59,9 @@ def test_python_backend_build_forward() -> None:
   backend = PythonBackend(framework="jax")
   graph = LogicalGraph()
   graph.nodes = [
-    LogicalNode(id="x", kind="Input"),
-    LogicalNode(id="conv", kind="Conv2d", sharding=PartitionSpec(axes=(("a", "b"), "c"))),
-    LogicalNode(id="out", kind="Output"),
+    LogicalNode(id="x", op_type="Input"),
+    LogicalNode(id="conv", op_type="Conv2d", sharding=PartitionSpec(axes=(("a", "b"), "c"))),
+    LogicalNode(id="out", op_type="Output"),
   ]
   code: str = backend.compile(graph)
   assert "jax.sharding.PartitionSpec(('a', 'b'), 'c')" in code
@@ -132,13 +132,13 @@ def test_python_backend_class_body_replacer_methods() -> None:
 def test_python_backend_functional_nodes() -> None:
   """Verifies the behavior of python backend functional nodes."""
   backend = PythonBackend(framework="torch")
-  graph = LogicalGraph()
-  graph.nodes = [
-    LogicalNode(id="x", kind="Input"),
-    LogicalNode(id="relu", kind="torch.relu", metadata={"arg_0": "True", "inplace": "True"}),
-    LogicalNode(id="out", kind="Output"),
-  ]
-  graph.edges = [LogicalEdge("x", "relu"), LogicalEdge("relu", "out")]
+  graph = LogicalGraph(
+    nodes={
+      "x": LogicalNode(id="x", op_type="Input"),
+      "relu": LogicalNode(id="relu", op_type="torch.relu", attributes={"arg_0": "True", "inplace": "True"}, inputs=["x"]),
+      "out": LogicalNode(id="out", op_type="Output", inputs=["relu"]),
+    }
+  )
   code: str = backend.compile(graph)
   assert "relu(x, True, inplace=True)" in code
 
@@ -152,13 +152,13 @@ def test_python_backend_is_stateful_layer() -> None:
 def test_python_backend_generate_layer_init_mlx() -> None:
   """Verifies the behavior of python backend generate layer initialization MLX."""
   backend = PythonBackend(framework="mlx")
-  graph = LogicalGraph()
-  graph.nodes = [
-    LogicalNode(id="x", kind="Input"),
-    LogicalNode(id="fc", kind="Linear"),
-    LogicalNode(id="out", kind="Output"),
-  ]
-  graph.edges = [LogicalEdge("x", "fc"), LogicalEdge("fc", "out")]
+  graph = LogicalGraph(
+    nodes={
+      "x": LogicalNode(id="x", op_type="Input"),
+      "fc": LogicalNode(id="fc", op_type="Linear", inputs=["x"]),
+      "out": LogicalNode(id="out", op_type="Output", inputs=["fc"]),
+    }
+  )
   code: str = backend.compile(graph)
   assert "self.fc = nn.Linear()" in code
 
@@ -223,7 +223,7 @@ def test_rdna_macros_linear() -> None:
   pass
   node_unmap = LogicalNode("unmap", "this_op_does_not_exist_in_the_universe", {"arg_1": "v1", "arg_2": "v2"})
   node_layer = LogicalNode("lin", "Linear", {"in_features": 64})
-  graph = LogicalGraph(nodes=[node_unmap, node_layer], edges=[])
+  graph = LogicalGraph(nodes={n.id: n for n in [node_unmap, node_layer]}, edges=[])
   code: str = backend.compile(graph)
   assert "Linear" in code
   assert "Unmapped Op:" in code
@@ -252,8 +252,8 @@ def test_rdna_synthesizer_gaps() -> None:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   synth = RdnaSynthesizer(SemanticsManager())
-  g = LogicalGraph(nodes=[], edges=[])
-  g.nodes.append(LogicalNode("n1", "torch.add", {"arg_1": "a", "arg_2": "b"}))
+  g = LogicalGraph()
+  g.add_node(LogicalNode("n1", "torch.add", {"arg_1": "a", "arg_2": "b"}))
   nodes: list[typing.Any] = synth.from_graph(g)
   assert len(nodes) > 0
   mod: typing.Any = synth.to_python(nodes)
@@ -305,7 +305,8 @@ def test_rdna_synthesizer_io() -> None:
 
   synth = RdnaSynthesizer(SemanticsManager())
   g = LogicalGraph(
-    nodes=[LogicalNode("in", "Input", {"name": "x"}), LogicalNode("out", "Output")], edges=[LogicalEdge("in", "out")]
+    nodes={n.id: n for n in [LogicalNode("in", "Input", {"name": "x"}), LogicalNode("out", "Output")]},
+    edges=[LogicalEdge("in", "out")],
   )
   nodes: list[typing.Any] = synth.from_graph(g)
   assert len(nodes) > 0
@@ -342,7 +343,10 @@ def test_rdna_synthesizer_misc() -> None:
       return None
 
   synth = RdnaSynthesizer(MockSemantics())
-  g = LogicalGraph(nodes=[LogicalNode("src", "src_op"), LogicalNode("dst", "dst_op")], edges=[LogicalEdge("src", "dst")])
+  g = LogicalGraph(
+    nodes={n.id: n for n in [LogicalNode("src", "src_op"), LogicalNode("dst", "dst_op")]},
+    edges=[LogicalEdge("src", "dst")],
+  )
   synth.from_graph(g)
 
 
@@ -394,8 +398,8 @@ def test_nvidia_sass_synthesizer_gaps() -> None:
       return {"api": "FADD"}
 
   synth = NvidiaSassSynthesizer(MockSemantics())
-  g = LogicalGraph(nodes=[], edges=[])
-  g.nodes.append(LogicalNode("n1", "Missing"))
+  g = LogicalGraph()
+  g.add_node(LogicalNode(id="n1", op_type="Missing"))
   nodes: list[typing.Any] = synth.from_graph(g)
   assert len(nodes) > 0
   assert "Unmapped Op:" in str(nodes[0])

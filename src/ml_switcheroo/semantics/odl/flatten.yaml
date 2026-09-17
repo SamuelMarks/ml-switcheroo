@@ -31,6 +31,9 @@ variants:
     api: Macro.Flatten
     args: {}
   jax:
-    api: jax.Array.ravel
+    api: jax.numpy.ravel
     args:
-      a: a
+      input: a
+  keras:
+    api: keras.layers.Flatten
+    args: {}

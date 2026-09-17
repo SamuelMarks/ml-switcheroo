@@ -24,6 +24,8 @@ class DummySemantics:
     }
     self.alias_map: Dict[str, str] = {}
     self.known_magic_args: List[str] = ["rngs"]
+    self.defs: Dict[str, Tuple[str, Dict[str, Any]]] = {}
+    self.variants: Dict[Tuple[str, str], Optional[Dict[str, Any]]] = {}
 
   def get_framework_config(self, fw: str) -> Optional[Dict[str, Any]]:
     """Docstring."""
@@ -31,12 +33,16 @@ class DummySemantics:
 
   def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
     """Docstring."""
+    if name in self.defs:
+      return self.defs[name]
     if name == "torch.Tensor":
       return ("tensor", {})
     return None
 
   def resolve_variant(self, abstract_id: str, fw: str) -> Optional[Dict[str, Any]]:
     """Docstring."""
+    if (abstract_id, fw) in self.variants:
+      return self.variants[(abstract_id, fw)]
     if abstract_id == "tensor" and fw == "jax":
       return {"api": "jax.Array"}
     return None
@@ -399,3 +405,140 @@ def test_structure_transformer_edge_cases2():
   transformer = StructuralTransformer(context)
   # how to trigger 529
   # def leave_FunctionDef -> 530 is return updated_node. 529 is in leave_FunctionDef? Wait 529 is docstring logic or return.
+
+
+def test_structure_missing_branches() -> None:
+  """Test remaining missing branches and statements in StructuralTransformer."""
+  config = RuntimeConfig(source_fw="torch", target_fw="jax")
+  semantics = DummySemantics()
+  context = RewriterContext(semantics=semantics, config=config)
+  transformer = StructuralTransformer(context)
+
+  # 1. 138->140: _cst_to_string on Attribute with non-flattenable base
+  attr_call = cst.Attribute(value=cst.Call(func=cst.Name("fn")), attr=cst.Name("attr"))
+  assert transformer._cst_to_string(attr_call) is None
+
+  # 2. 220->222: _get_source_inference_methods with empty known_inference_methods
+  semantics.framework_configs["torch"]["traits"] = {"known_inference_methods": set()}
+  assert "forward" in transformer._get_source_inference_methods()
+
+  # 3. 286-287, 293: leave_Module with invalid preamble syntax and empty new_stmts
+  mod = cst.parse_module("x = 1")
+  context.module_preamble = ["invalid syntax !@@#"]
+  res_mod = transformer.leave_Module(mod, mod)
+  assert res_mod is mod
+
+  # 4. 354: leave_Name in annotation with full_name present and full_name None
+  transformer._in_annotation = True
+  transformer._attribute_depth = 0
+  semantics.defs = {
+    "TensorWithApi": ("tensor_api", {}),
+    "TensorNoApi": ("tensor_no_api", {}),
+    "torch.TensorNoApi": ("tensor_no_api", {}),
+  }
+  semantics.variants = {
+    ("tensor_api", "jax"): {"api": "jax.Array"},
+    ("tensor_no_api", "jax"): {"dummy": "value"},
+  }
+  # 354 -> 355: has full_name and has api
+  name_with_api = cst.Name("TensorWithApi")
+  res_name1 = transformer.leave_Name(name_with_api, name_with_api)
+  assert isinstance(res_name1, cst.Attribute)
+
+  # 354 -> 358: full_name is None
+  transformer._cst_to_string = lambda node: None  # type: ignore[assignment]
+  name_no_str = cst.Name("x")
+  res_name_no_str = transformer.leave_Name(name_no_str, name_no_str)
+  assert res_name_no_str is name_no_str
+
+  # Restore _cst_to_string
+  del transformer._cst_to_string
+
+  # 5. 377: leave_Attribute in annotation with full_name present and full_name None
+  transformer._in_annotation = True
+  transformer._attribute_depth = 0
+  context.alias_map = {"torch": "torch"}
+  # 377 -> 378: has full_name
+  semantics.defs["torch.TensorWithApi"] = ("tensor_api", {})
+  attr_with_api = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("TensorWithApi"))
+  res_attr_api = transformer.leave_Attribute(attr_with_api, attr_with_api)
+  assert isinstance(res_attr_api, cst.Attribute)
+
+  # 377 -> 384: full_name is None
+  attr_call_none = cst.Attribute(value=cst.Call(func=cst.Name("fn")), attr=cst.Name("attr"))
+  res_attr_none = transformer.leave_Attribute(attr_call_none, attr_call_none)
+  assert res_attr_none == attr_call_none
+  transformer._in_annotation = False
+
+  # 6. 456-457: Fallback in visit_ClassDef when _get_qualified_name misses but _cst_to_string matches
+  context_fallback = RewriterContext(semantics=DummySemantics(), config=config)
+  context_fallback.alias_map = {"torch": "unmapped_pkg"}
+  transformer_fallback = StructuralTransformer(context_fallback)
+  class_mod_fallback = cst.parse_module("class Mod(torch.nn.Module): pass")
+  class_fallback = class_mod_fallback.body[0]  # type: ignore[assignment]
+  transformer_fallback.context.scope_stack.append(set())
+  transformer_fallback.visit_ClassDef(class_fallback)
+  assert transformer_fallback.context.in_module_class is True
+
+  # 7. Target tier does not support neural
+  semantics_non_neural = DummySemantics()
+  semantics_non_neural.framework_configs = {
+    "jax": {"tiers": ["array"], "traits": {}},
+    "torch": {"traits": {"module_base": "torch.nn.Module"}},
+  }
+  context_non_neural = RewriterContext(semantics=semantics_non_neural, config=config)
+  transformer_non_neural = StructuralTransformer(context_non_neural)
+  class_mod = cst.parse_module("class Mod(torch.nn.Module): pass")
+  class_def: cst.ClassDef = class_mod.body[0]  # type: ignore[assignment]
+  transformer_non_neural.visit_ClassDef(class_def)
+  assert any(
+    "does not support Neural Network classes" in err for err in transformer_non_neural.context.current_stmt_errors
+  )
+
+  # 7. 488->510: leave_ClassDef when in_module_class is False
+  transformer.context.scope_stack.append(set())
+  transformer.context.in_module_class = False
+  res_class = transformer.leave_ClassDef(class_def, class_def)
+  assert res_class is class_def
+
+  # 8. 507: leave_ClassDef with non-framework base class
+  semantics.framework_configs["jax"] = {"tiers": ["neural"], "traits": {"module_base": "flax.nnx.Module"}}
+  class_multi_base: cst.ClassDef = cst.parse_module("class M(torch.nn.Module, OtherBase): pass").body[0]  # type: ignore[assignment]
+  transformer.context.scope_stack.append(set())
+  transformer.context.in_module_class = True
+  res_multi = transformer.leave_ClassDef(class_multi_base, class_multi_base)
+  assert isinstance(res_multi, cst.ClassDef)
+  assert len(res_multi.bases) == 2
+
+  # 9. 530->529: visit_FunctionDef when param.name is not cst.Name
+  param_noname = cst.Param(name=cst.SimpleString("'param'"))  # type: ignore[arg-type]
+  func_noname: cst.FunctionDef = cst.parse_module("def f(): pass").body[0]  # type: ignore[assignment]
+  func_noname = func_noname.with_changes(params=cst.Parameters(params=[param_noname]))
+  transformer.visit_FunctionDef(func_noname)
+  transformer.context.scope_stack.pop()
+  transformer.context.signature_stack.pop()
+
+  # 10. 559: leave_FunctionDef when signature_stack is empty
+  func_node: cst.FunctionDef = cst.parse_module("def g(): pass").body[0]  # type: ignore[assignment]
+  transformer.context.scope_stack.append(set())
+  transformer.context.signature_stack.clear()
+  assert transformer.leave_FunctionDef(func_node, func_node) is func_node
+
+  # 11. 580->579: leave_FunctionDef when inject_magic_args argument already exists in function args
+  semantics_magic = DummySemantics()
+  semantics_magic.framework_configs = {
+    "jax": {
+      "tiers": ["neural"],
+      "traits": {"module_base": "flax.nnx.Module", "inject_magic_args": [("rngs", "Any")]},
+    },
+    "torch": {"traits": {"module_base": "torch.nn.Module"}},
+  }
+  context_magic = RewriterContext(semantics=semantics_magic, config=config)
+  transformer_magic = StructuralTransformer(context_magic)
+  func_rngs_mod = cst.parse_module("class M(torch.nn.Module):\n  def __init__(self, rngs): pass")
+  class_rngs: cst.ClassDef = func_rngs_mod.body[0]  # type: ignore[assignment]
+  func_rngs: cst.FunctionDef = class_rngs.body.body[0]  # type: ignore[assignment]
+  transformer_magic.visit_ClassDef(class_rngs)
+  transformer_magic.visit_FunctionDef(func_rngs)
+  res_rngs = transformer_magic.leave_FunctionDef(func_rngs, func_rngs)
+  assert isinstance(res_rngs, cst.FunctionDef)

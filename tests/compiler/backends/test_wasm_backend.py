@@ -6,20 +6,21 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 
 def test_wasm_backend_compile() -> None:
   """Docstring."""
-  graph = LogicalGraph(name="test_graph")
-  graph.nodes.append(LogicalNode(id="in1", kind="Input"))
-  graph.nodes.append(LogicalNode(id="in2", kind="Input"))
-  graph.nodes.append(LogicalNode(id="add1", kind="Add"))
-  graph.nodes.append(LogicalNode(id="mul1", kind="Mul"))
-  graph.nodes.append(LogicalNode(id="out1", kind="Output"))
-
-  graph.edges.append(LogicalEdge(source="in1", target="add1"))
-  graph.edges.append(LogicalEdge(source="in2", target="add1"))
-
-  graph.edges.append(LogicalEdge(source="add1", target="mul1"))
-  graph.edges.append(LogicalEdge(source="in1", target="mul1"))
-
-  graph.edges.append(LogicalEdge(source="mul1", target="out1"))
+  nodes = {
+    "in1": LogicalNode(id="in1", op_type="Input"),
+    "in2": LogicalNode(id="in2", op_type="Input"),
+    "add1": LogicalNode(id="add1", op_type="Add"),
+    "mul1": LogicalNode(id="mul1", op_type="Mul"),
+    "out1": LogicalNode(id="out1", op_type="Output"),
+  }
+  edges = [
+    LogicalEdge(source="in1", target="add1"),
+    LogicalEdge(source="in2", target="add1"),
+    LogicalEdge(source="add1", target="mul1"),
+    LogicalEdge(source="in1", target="mul1"),
+    LogicalEdge(source="mul1", target="out1"),
+  ]
+  graph = LogicalGraph(name="test_graph", nodes=nodes, edges=edges)
 
   backend = WasmBackend(semantics="dummy_semantics")
   assert backend.semantics == "dummy_semantics"
@@ -41,10 +42,12 @@ def test_wasm_backend_compile() -> None:
 
 def test_wasm_backend_sub_and_custom() -> None:
   """Docstring."""
-  graph = LogicalGraph()
-  graph.nodes.append(LogicalNode(id="n1", kind="Sub"))
-  graph.nodes.append(LogicalNode(id="n2", kind="MyCustomOp"))
-  graph.edges.append(LogicalEdge(source="n1", target="n2"))
+  nodes = {
+    "n1": LogicalNode(id="n1", op_type="Sub"),
+    "n2": LogicalNode(id="n2", op_type="MyCustomOp"),
+  }
+  edges = [LogicalEdge(source="n1", target="n2")]
+  graph = LogicalGraph(nodes=nodes, edges=edges)
 
   backend = WasmBackend()
   wat = backend.compile(graph)
@@ -56,8 +59,8 @@ def test_wasm_backend_sub_and_custom() -> None:
 
 def test_wasm_backend_output_no_incoming() -> None:
   """Docstring."""
-  graph = LogicalGraph(name="")
-  graph.nodes.append(LogicalNode(id="out1", kind="Output"))
+  nodes = {"out1": LogicalNode(id="out1", op_type="Output")}
+  graph = LogicalGraph(name="", nodes=nodes)
   backend = WasmBackend()
   wat = backend.compile(graph)
   assert '(func $main (export "main")' in wat
@@ -66,9 +69,9 @@ def test_wasm_backend_output_no_incoming() -> None:
 
 def test_wasm_backend_incoming_not_found() -> None:
   """Docstring."""
-  graph = LogicalGraph()
-  graph.nodes.append(LogicalNode(id="n1", kind="Add"))
-  graph.edges.append(LogicalEdge(source="missing", target="n1"))
+  nodes = {"n1": LogicalNode(id="n1", op_type="Add")}
+  edges = [LogicalEdge(source="missing", target="n1")]
+  graph = LogicalGraph(nodes=nodes, edges=edges)
   backend = WasmBackend()
   wat = backend.compile(graph)
   assert "local.get $missing" in wat

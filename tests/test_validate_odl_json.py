@@ -1,93 +1,119 @@
-"""Tests for scripts/validate_odl_json.py."""
+"""Unit tests for scripts/validate_odl_json.py."""
 
-import json
-import sys
-import pytest
 from pathlib import Path
-from unittest import mock
+import runpy
+from unittest.mock import patch
 
-# Add scripts directory to sys.path to import it
-scripts_dir: Path = Path(__file__).parent.parent / "scripts"
-sys.path.insert(0, str(scripts_dir.resolve()))
+import pytest
 
-import validate_odl_json  # noqa: E402
+from scripts.validate_odl_json import main, validate_file
 
 
 def test_validate_file_success(tmp_path: Path) -> None:
-  """Docstring."""
-  valid_file: Path = tmp_path / "valid.json"
-  valid_data: dict = {"version": 1, "ops": [{"name": "test_op", "args": [{"name": "x", "type": "tensor"}]}]}
-  valid_file.write_text(json.dumps(valid_data), encoding="utf-8")
+  """Test validate_file on a valid semantics JSON file.
 
-  # Assuming SemanticsFile schema accepts this. We may need to mock it.
-  with mock.patch("validate_odl_json.SemanticsFile.model_validate") as mock_validate:
-    assert validate_odl_json.validate_file(valid_file) is True
-    mock_validate.assert_called_once_with(valid_data)
-
-
-def test_validate_file_failure(tmp_path: Path) -> None:
-  """Docstring."""
-  invalid_file: Path = tmp_path / "invalid.json"
-  invalid_file.write_text("invalid json", encoding="utf-8")
-
-  assert validate_odl_json.validate_file(invalid_file) is False
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  valid_file = tmp_path / "valid.json"
+  valid_file.write_text('{"__constants__": []}', encoding="utf-8")
+  assert validate_file(valid_file) is True
 
 
-def test_main_success(tmp_path: Path) -> None:
-  """Docstring."""
-  valid_file: Path = tmp_path / "semantics" / "valid.json"
-  valid_file.parent.mkdir(parents=True)
-  valid_file.write_text("{}", encoding="utf-8")
+def test_validate_file_invalid_json(tmp_path: Path) -> None:
+  """Test validate_file on malformed JSON content.
 
-  test_args: list = ["validate_odl_json.py", str(valid_file)]
-  with mock.patch.object(sys, "argv", test_args):
-    with mock.patch("validate_odl_json.validate_file", return_value=True) as mock_val:
-      validate_odl_json.main()
-      mock_val.assert_called_once_with(Path(str(valid_file)))
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  invalid_file = tmp_path / "invalid.json"
+  invalid_file.write_text("{broken json", encoding="utf-8")
+  assert validate_file(invalid_file) is False
 
 
-def test_main_failure(tmp_path: Path) -> None:
-  """Docstring."""
-  invalid_file: Path = tmp_path / "semantics" / "invalid.json"
-  invalid_file.parent.mkdir(parents=True)
-  invalid_file.write_text("{}", encoding="utf-8")
+def test_validate_file_schema_error(tmp_path: Path) -> None:
+  """Test validate_file on JSON violating the schema.
 
-  test_args: list = ["validate_odl_json.py", str(invalid_file)]
-  with mock.patch.object(sys, "argv", test_args):
-    with mock.patch("validate_odl_json.validate_file", return_value=False):
-      with pytest.raises(SystemExit) as exc_info:
-        validate_odl_json.main()
-      assert exc_info.value.code == 1
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  bad_schema_file = tmp_path / "bad_schema.json"
+  bad_schema_file.write_text("[1, 2, 3]", encoding="utf-8")
+  assert validate_file(bad_schema_file) is False
 
 
-def test_main_ignore_non_semantics(tmp_path: Path) -> None:
-  """Docstring."""
-  other_file: Path = tmp_path / "other" / "file.json"
-  other_file.parent.mkdir(parents=True)
-  txt_file: Path = tmp_path / "semantics" / "file.txt"
-  txt_file.parent.mkdir(parents=True)
+def test_main_with_explicit_args_success(tmp_path: Path) -> None:
+  """Test main CLI with explicit file arguments that succeed.
 
-  test_args: list = ["validate_odl_json.py", str(other_file), str(txt_file)]
-  with mock.patch.object(sys, "argv", test_args):
-    with mock.patch("validate_odl_json.validate_file") as mock_val:
-      validate_odl_json.main()
-      mock_val.assert_not_called()
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  sem_dir = tmp_path / "semantics"
+  sem_dir.mkdir()
+  f1 = sem_dir / "valid.json"
+  f1.write_text('{"__constants__": []}', encoding="utf-8")
+  ignored_file = tmp_path / "ignored.txt"
+  ignored_file.write_text("ignored", encoding="utf-8")
+  non_semantics = tmp_path / "other.json"
+  non_semantics.write_text("{}", encoding="utf-8")
+
+  exit_code = main([str(f1), str(ignored_file), str(non_semantics)])
+  assert exit_code == 0
 
 
-def test_import_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
-  import importlib
+def test_main_with_explicit_args_failure(tmp_path: Path) -> None:
+  """Test main CLI with explicit file arguments that fail validation.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  sem_dir = tmp_path / "semantics"
+  sem_dir.mkdir()
+  f1 = sem_dir / "bad.json"
+  f1.write_text("{invalid", encoding="utf-8")
+
+  exit_code = main([str(f1)])
+  assert exit_code == 1
+
+
+def test_main_default_scan_success() -> None:
+  """Test main CLI default scanning without arguments on repository semantics."""
+  exit_code = main([])
+  assert exit_code == 0
+
+
+def test_main_default_argv_none(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Test main CLI with argv=None using monkeypatched sys.argv.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  monkeypatch.setattr("sys.argv", ["validate_odl_json.py"])
+  exit_code = main(None)
+  assert exit_code == 0
+
+
+def test_main_entrypoint(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Test __main__ module execution block.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   import sys
 
-  monkeypatch.setitem(sys.modules, "ml_switcheroo.semantics.schema", None)
-  with pytest.raises(SystemExit) as exc_info:
-    importlib.reload(validate_odl_json)
-  assert exc_info.value.code == 1
+  src_resolved = str(Path("src").resolve())
+  removed = [p for p in list(sys.path) if "src" in p or Path(p).resolve() == Path(src_resolved).resolve()]
+  for p in removed:
+    sys.path.remove(p)
 
-
-def test_main_block(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
-  import runpy
-
-  monkeypatch.setattr(sys, "argv", ["validate_odl_json.py"])
-  runpy.run_path(str(scripts_dir / "validate_odl_json.py"), run_name="__main__")
+  monkeypatch.setattr("sys.argv", ["validate_odl_json.py"])
+  sys.modules.pop("scripts.validate_odl_json", None)
+  try:
+    with patch("scripts.validate_odl_json.main", return_value=0):
+      with pytest.raises(SystemExit) as excinfo:
+        runpy.run_module("scripts.validate_odl_json", run_name="__main__")
+      assert excinfo.value.code == 0
+  finally:
+    for p in removed:
+      if p not in sys.path:
+        sys.path.insert(0, p)

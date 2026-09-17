@@ -182,3 +182,21 @@ def test_runtime_generation_includes_jit_modules(tmp_path: Path) -> None:
   runtime: Path = out_file.parent / "runtime.py"
   assert runtime.exists()
   assert 'find_spec("jax")' in runtime.read_text()
+
+
+def test_jit_template_without_fn_placeholder(tmp_path: Path) -> None:
+  """Verifies the behavior when jit template does not contain {fn} placeholder."""
+  semantics: dict[str, typing.Any] = {
+    "abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}
+  }
+  tmpl: dict[str, dict[str, str]] = {
+    "jax": {"import": "import jax", "jit_template": "jax.jit_constant", "to_numpy": "{res_var}"},
+    "torch": {"import": "import torch"},
+  }
+  mgr = MockTraitSemantics(templates=tmpl)
+  mgr.test_templates = tmpl
+  out_file: Path = tmp_path / "test_jit_no_fn.py"
+  gen = TestCaseGenerator(semantics_mgr=mgr)
+  gen.generate(semantics, out_file)
+  content: str = out_file.read_text()
+  assert "res = fn(np_x)" in content

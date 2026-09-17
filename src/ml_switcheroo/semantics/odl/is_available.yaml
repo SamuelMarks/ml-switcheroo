@@ -1,6 +1,10 @@
 operation: is_available
 description: Return ``True`` if the distributed package is available.
-std_args: []
+std_args:
+- name: device
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
 variants:
   torch:
     api: torch.distributed.is_available

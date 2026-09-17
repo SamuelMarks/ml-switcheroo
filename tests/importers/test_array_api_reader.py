@@ -189,3 +189,21 @@ def test_array_api_reader_subscript_no_slice() -> None:
   if hasattr(node, "slice"):
     del node.slice
   assert reader._parse_annotation(node) == "List"
+
+
+def test_array_api_reader_constants_branches(tmp_path: Path) -> None:
+  """Test edge cases for constants docstring extraction."""
+  (tmp_path / "consts.py").write_text("""
+CONST_NO_DOC = 1
+def not_doc(): pass
+
+CONST_INT_EXPR = 2
+42
+
+CONST_LAST = 3
+""")
+  importer = ArrayApiSpecImporter()
+  res = importer.parse_folder(tmp_path)
+  assert res["CONST_NO_DOC"]["description"] == "Constant: CONST_NO_DOC"
+  assert res["CONST_INT_EXPR"]["description"] == "Constant: CONST_INT_EXPR"
+  assert res["CONST_LAST"]["description"] == "Constant: CONST_LAST"

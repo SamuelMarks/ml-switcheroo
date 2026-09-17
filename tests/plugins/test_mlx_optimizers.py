@@ -70,6 +70,22 @@ def test_transform_optimizer_init_fallback_name() -> None:
   transform_mlx_optimizer_init(call_node, ctx)
 
 
+def test_transform_optimizer_init_fallback_other() -> None:
+  """Docstring."""
+  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx.current_op_id = None
+  ctx.lookup_api.return_value = None
+
+  code: str = "(get_opt())(lr=0.01)"
+  module: cst.Module = cst.parse_module(code)
+  stmt = cast(cst.SimpleStatementLine, module.body[0])
+  expr = cast(cst.Expr, stmt.body[0])
+  call_node = cast(cst.Call, expr.value)
+
+  res = transform_mlx_optimizer_init(call_node, ctx)
+  assert res is not None
+
+
 def test_transform_optimizer_step_attribute() -> None:
   """Docstring."""
   ctx: MagicMock = MagicMock(spec=HookContext)

@@ -23,12 +23,15 @@ def test_stablehlo_backend() -> None:
   backend: StableHloBackend = StableHloBackend(semantics=MockSemantics())
 
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="unkn1", kind="UnknownOp"),
-      LogicalNode(id="known1", kind="KnownOp"),
-      LogicalNode(id="out1", kind="Output"),
-    ],
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="in1", op_type="Input"),
+        LogicalNode(id="unkn1", op_type="UnknownOp"),
+        LogicalNode(id="known1", op_type="KnownOp"),
+        LogicalNode(id="out1", op_type="Output"),
+      ]
+    },
     edges=[LogicalEdge("in1", "unkn1"), LogicalEdge("unkn1", "known1"), LogicalEdge("known1", "out1")],
   )
 
@@ -43,7 +46,7 @@ def test_stablehlo_backend() -> None:
 def test_stablehlo_backend_no_semantics() -> None:
   """Docstring."""
   backend: StableHloBackend = StableHloBackend(semantics=None)
-  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="node1", kind="MyOp")], edges=[])
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="node1", op_type="MyOp")]}, edges=[])
   code: str = backend.compile(graph)
   assert "stablehlo.custom_call" in code
 

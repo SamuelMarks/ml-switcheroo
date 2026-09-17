@@ -22,4 +22,5 @@ variants:
   torch:
     api: torch.Tensor.type
     args:
-      '**kwargs': '**kwargs'
+      dtype: dtype
+      non_blocking: non_blocking

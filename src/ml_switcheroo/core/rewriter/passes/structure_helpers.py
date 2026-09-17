@@ -22,7 +22,7 @@ class StructuralTransformerHelpersMixin:
 
   if TYPE_CHECKING:
 
-    def _create_dotted_name(self, name: str):
+    def _create_dotted_name(self, name: str) -> cst.BaseExpression:
       """Create a dotted name or attribute node from a dot-separated string representation.
 
       Args:
@@ -33,7 +33,7 @@ class StructuralTransformerHelpersMixin:
           A CST node representation of the dotted name, typically a `cst.Attribute`
           or `cst.Name` node.
       """
-      return None
+      ...
 
   def _strip_argument_from_signature(self, node: cst.FunctionDef, arg_name: str) -> cst.FunctionDef:
     """Remove an argument by name from the function definition signature.
@@ -67,7 +67,7 @@ class StructuralTransformerHelpersMixin:
     """
     params = list(node.params.params)
     insert_idx = 0
-    if params and params[0].name.value == "self":  # pragma: no branch
+    if params and params[0].name.value == "self":
       insert_idx = 1
 
     anno_node = cst.Annotation(annotation=self._create_dotted_name(annotation)) if annotation else None
@@ -94,7 +94,7 @@ class StructuralTransformerHelpersMixin:
       if params[i].comma == cst.MaybeSentinel.DEFAULT:
         params[i] = params[i].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
-    if len(params) > 0:  # pragma: no branch
+    if len(params) > 0:
       last = params[-1]
       if last.comma != cst.MaybeSentinel.DEFAULT:
         params[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
@@ -145,7 +145,7 @@ class StructuralTransformerHelpersMixin:
     existing = list(node.body.body)
     idx = 0
     # Skip docstring if exists
-    if existing and isinstance(existing[0], cst.SimpleStatementLine) and len(existing[0].body) == 1:  # pragma: no branch
+    if existing and isinstance(existing[0], cst.SimpleStatementLine) and len(existing[0].body) == 1:
       expr = existing[0].body[0]
       if isinstance(expr, cst.Expr) and isinstance(expr.value, (cst.SimpleString, cst.ConcatenatedString)):
         idx = 1
@@ -224,7 +224,7 @@ class StructuralTransformerHelpersMixin:
     Returns:
         True if a `super().__init__()` call statement is found; False otherwise.
     """
-    if hasattr(node.body, "body"):  # pragma: no branch
+    if hasattr(node.body, "body"):
       for stmt in node.body.body:
         if self._is_super_init_call(stmt):
           return True
@@ -244,9 +244,7 @@ class StructuralTransformerHelpersMixin:
       val = expr_or_assign.value if hasattr(expr_or_assign, "value") else None
       if isinstance(val, cst.Call) and isinstance(val.func, cst.Attribute) and val.func.attr.value == "__init__":
         inner = val.func.value
-        if (
-          isinstance(inner, cst.Call) and isinstance(inner.func, cst.Name) and inner.func.value == "super"
-        ):  # pragma: no branch
+        if isinstance(inner, cst.Call) and isinstance(inner.func, cst.Name) and inner.func.value == "super":
           return True
     return False
 

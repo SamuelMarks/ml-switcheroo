@@ -151,3 +151,22 @@ def test_fuzzer_parser_float_inference() -> None:
   with mock.patch("random.random", return_value=0.5):
     val: Any = generate_from_hint(AnyType(), {}, 0, 3, {}, {"default": 3.14})
     assert isinstance(val, float)
+
+
+def test_fuzzer_parser_additional_branches() -> None:
+  """Verifies parser branch coverage for non-primitive defaults and primitive fallbacks."""
+  import numpy as np
+  from unittest import mock
+
+  from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
+  from ml_switcheroo.testing.fuzzer.type_parser import AnyType, PrimitiveType
+
+  symbol_map: Dict[str, Any] = {}
+  with mock.patch("random.random", return_value=0.5):
+    # default_val is string (not bool, int, float, list) -> triggers 136->143
+    res: Any = generate_from_hint(AnyType(), (2, 2), 0, 5, symbol_map, {"default": "some_str"})
+    assert res is not None
+
+  # PrimitiveType with unrecognized name -> triggers 224->238
+  arr: Any = generate_from_hint(PrimitiveType(name="unrecognized_primitive"), (2, 2), 0, 5, symbol_map)
+  assert isinstance(arr, np.ndarray)

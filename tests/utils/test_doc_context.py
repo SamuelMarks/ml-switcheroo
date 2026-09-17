@@ -37,9 +37,26 @@ def test_argument_formatting_tuple(builder: DocContextBuilder) -> None:
 
 def test_argument_formatting_dict(builder: DocContextBuilder) -> None:
   """Verifies the behavior of argument formatting dictionary."""
-  std_args: List[Any] = [{"name": "dim", "type": "int", "default": "-1"}]
+  std_args: List[Any] = [
+    {"name": "dim", "type": "int", "default": "-1"},
+    {"name": "__doc__", "type": "str", "default": "docstring"},
+    {"name": "clean_backticks", "default": "'```(None)```'"},
+  ]
   formatted: List[str] = builder._format_args(std_args)
-  assert formatted == ["dim: int = -1"]
+  assert formatted == ["dim: int = -1", "clean_backticks = '(None)'"]
+
+
+def test_argument_formatting_edge_branches(builder: DocContextBuilder) -> None:
+  """Verifies branches with Any type hint, default without type, and tuple length 1."""
+  std_args: List[Any] = [
+    {"name": "any_arg", "type": "Any", "default": "None"},
+    {"name": "any_no_def", "type": "Any"},
+    {"name": "val_only", "default": 42},
+    ("single_elem",),
+    (),
+  ]
+  formatted: List[str] = builder._format_args(std_args)
+  assert formatted == ["any_arg = None", "any_no_def", "val_only = 42", "single_elem", "unknown"]
 
 
 def test_missing_property_defaults(builder: DocContextBuilder) -> None:
@@ -73,6 +90,32 @@ def test_impl_type_classification_direct(builder: DocContextBuilder) -> None:
   """Verifies the behavior of impl type classification direct."""
   var: Dict[str, Any] = {"api": "torch.abs"}
   assert builder._determine_impl_type(var) == "Direct Mapping"
+
+
+def test_impl_type_classification_inline_lambda_and_fallback(builder: DocContextBuilder) -> None:
+  """Verifies the behavior of inline_lambda and fallback custom classification."""
+  var_lambda: Dict[str, Any] = {"transformation_type": "inline_lambda"}
+  assert builder._determine_impl_type(var_lambda) == "Inline Lambda"
+
+  var_custom: Dict[str, Any] = {}
+  assert builder._determine_impl_type(var_custom) == "Custom / Partial"
+
+
+def test_resolve_variants_skips_none_and_handles_macro(builder: DocContextBuilder) -> None:
+  """Verifies that null variants are skipped and macros do not get doc URLs."""
+  op_def: Dict[str, Any] = {
+    "variants": {
+      "torch": None,
+      "jax": {"macro_template": "{x} * 2", "api": "jax.numpy.multiply"},
+    }
+  }
+  mock_jax: MagicMock = MagicMock()
+  mock_jax.display_name = "JAX"
+  with patch("ml_switcheroo.utils.doc_context.get_adapter", return_value=mock_jax):
+    context: Dict[str, Any] = builder.build("Op", op_def)
+  assert len(context["variants"]) == 1
+  assert context["variants"][0]["key"] == "jax"
+  assert context["variants"][0]["doc_url"] is None
 
 
 def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
@@ -116,3 +159,13 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
   v2: Dict[str, Any] = context["variants"][2]
   assert v2["key"] == "unknown_fw"
   assert v2["framework"] == "unknown_fw"
+
+
+def test_resolve_variants_adapter_without_display_name(builder: DocContextBuilder) -> None:
+  """Verifies fallback when adapter lacks display_name attribute."""
+  op_def: Dict[str, Any] = {"variants": {"custom": {"api": "custom.api"}}}
+  mock_adapter = MagicMock(spec=["get_doc_url"])  # No display_name attribute
+  mock_adapter.get_doc_url.return_value = "http://doc"
+  with patch("ml_switcheroo.utils.doc_context.get_adapter", return_value=mock_adapter):
+    context: Dict[str, Any] = builder.build("Op", op_def)
+  assert context["variants"][0]["framework"] == "custom"

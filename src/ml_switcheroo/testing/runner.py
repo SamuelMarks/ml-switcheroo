@@ -8,7 +8,7 @@ import typing
 
 
 import importlib
-from typing import Dict, Tuple, Optional, List
+from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 from hypothesis import given, settings, strategies as st
@@ -35,10 +35,10 @@ class EquivalenceRunner:
 
   def verify(
     self,
-    variants,
+    variants: Dict[str, Any],
     params: List[str],
     hints: Optional[Dict[str, str]] = None,
-    constraints=None,
+    constraints: Optional[Dict[str, Any]] = None,
     shape_calc: Optional[str] = None,
     rtol: float = 1e-3,
     atol: float = 1e-4,
@@ -68,7 +68,7 @@ class EquivalenceRunner:
 
     @settings(max_examples=20, deadline=None)
     @given(st.fixed_dictionaries(strat_dict))
-    def run_check(inputs):
+    def run_check(inputs: Dict[str, Any]) -> None:
       """Execute a single property-based test iteration using generated inputs.
 
       Runs the operation on all defined framework variants and performs equivalence
@@ -104,7 +104,7 @@ class EquivalenceRunner:
           adp = get_adapter("numpy")
           results[fw] = adp.convert(res) if adp else res
         except Exception as e:
-          if str(e) == "Mock Crash":  # pragma: no branch
+          if str(e) == "Mock Crash":
             failure_msg.append(f"Crash in {fw}: {e}")
           pass
 
@@ -117,18 +117,18 @@ class EquivalenceRunner:
           # If inputs has >1 arg, map by name if possible or values
           # Simple heuristic: inspect lambda arg count?
           # For current test scope (test_runner_shape), it usually checks 1 arg 'x'
-          if "x" in inputs:  # pragma: no branch
+          if "x" in inputs:
             calc_fn = eval(shape_calc)
             # Apply lambda to NumPy input 'x'
             expected_shape = calc_fn(inputs["x"])
 
             # Verify results
             for r in results.values():
-              if hasattr(r, "shape"):  # pragma: no branch
+              if hasattr(r, "shape"):
                 s = tuple(r.shape) if hasattr(r.shape, "__iter__") else (r.shape,)
-                e = tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)  # type: ignore
-                if s != e:
-                  failure_msg.append(f"Shape Mismatch: {s} != {e}")
+                exp = tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)
+                if s != exp:
+                  failure_msg.append(f"Shape Mismatch: {s} != {exp}")
         except Exception as e:
           failure_msg.append(f"Shape Calculation Error: {e}")
 
@@ -145,7 +145,7 @@ class EquivalenceRunner:
       # Hypothesis raises explicit errors when assertions fail
       return False, f"Verification Failed: {e}"
 
-  def _execute_api(self, api: str, kwargs: dict) -> typing.Any:
+  def _execute_api(self, api: str, kwargs: Dict[str, Any]) -> typing.Any:
     """Dynamically imports and calls a framework API function with specified arguments.
 
     Args:
@@ -161,7 +161,7 @@ class EquivalenceRunner:
     mod = importlib.import_module(m)
     return getattr(mod, f)(**kwargs)
 
-  def _remap_args(self, inputs: dict, mapping: dict) -> dict:
+  def _remap_args(self, inputs: Dict[str, Any], mapping: Dict[str, str]) -> Dict[str, Any]:
     """Remap input argument names to match the expected parameter names of a framework variant.
 
     Args:
@@ -173,7 +173,7 @@ class EquivalenceRunner:
     """
     return {mapping.get(k, k): v for k, v in inputs.items()}
 
-  def _compare_results(self, results: dict, rtol: float, atol: float, err_box: typing.List[str]) -> None:
+  def _compare_results(self, results: Dict[str, Any], rtol: float, atol: float, err_box: typing.List[str]) -> None:
     """Compare execution results from different frameworks and records mismatches.
 
     Performs exhaustive pairwise deep comparisons between the outputs of all
@@ -233,4 +233,4 @@ class EquivalenceRunner:
         return np.allclose(a_arr, b_arr, rtol=rtol, atol=atol, equal_nan=True)
       except Exception:
         return False
-    return a == b
+    return bool(a == b)

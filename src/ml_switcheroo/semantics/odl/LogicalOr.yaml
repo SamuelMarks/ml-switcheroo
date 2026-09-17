@@ -7,12 +7,8 @@ variants:
     required_imports: []
   flax_nnx:
     api: jax.numpy.logical_or
-    args:
-      input: x1
-      other: x2
-    dispatch_rules: []
-    pack_as: Tuple
-    required_imports: []
+    macro_template: jax.numpy.logical_or({input}, {other})
+    args: {}
   jax:
     api: jax.numpy.logical_or
     args: {}
@@ -25,3 +21,16 @@ variants:
   keras:
     api: keras.ops.logical_or
     args: {}
+std_args:
+- name: a
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: b
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any

@@ -37,7 +37,7 @@ def test_compile_interface_implementation(backend: PythonBackend) -> None:
 def test_synthesize_torch_chain(backend: PythonBackend) -> None:
   """Verifies the behavior of synthesize PyTorch chain."""
   g = LogicalGraph(
-    nodes=[LogicalNode("x", "Input"), LogicalNode("conv1", "Conv2d"), LogicalNode("output", "Output")],
+    nodes={n.id: n for n in [LogicalNode("x", "Input"), LogicalNode("conv1", "Conv2d"), LogicalNode("output", "Output")]},
     edges=[LogicalEdge("x", "conv1"), LogicalEdge("conv1", "output")],
   )
   code: str = backend.generate(g, "SimpleNet")
@@ -51,7 +51,7 @@ def test_synthesize_torch_chain(backend: PythonBackend) -> None:
 def test_synthesize_flax_chain() -> None:
   """Verifies the behavior of synthesize Flax chain."""
   backend = PythonBackend(framework="flax_nnx")
-  g = LogicalGraph(nodes=[LogicalNode("x", "Input"), LogicalNode("fc", "Linear", {"out": "10"})])
+  g = LogicalGraph(nodes={n.id: n for n in [LogicalNode("x", "Input"), LogicalNode("fc", "Linear", {"out": "10"})]})
   code: str = backend.generate(g, "FlaxNet")
   validate_python(code)
   assert "class FlaxNet(nnx.Module):" in code
@@ -62,7 +62,7 @@ def test_context_preservation(backend: PythonBackend) -> None:
   """Verifies the behavior of context preservation."""
   orig: str = "class MyNet(nn.Module): pass"
   tree: cst.Module = cst.parse_module(orig)
-  g = LogicalGraph(nodes=[LogicalNode("x", "Input")])
+  g = LogicalGraph(nodes={n.id: n for n in [LogicalNode("x", "Input")]})
   code: str = backend.generate(g, class_name="MyNet", original_tree=tree)
   validate_python(code)
   assert "class MyNet" in code
@@ -72,13 +72,16 @@ def test_python_backend_sharding() -> None:
   """Verifies the behavior of python backend sharding."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
-  graph = LogicalGraph(name="ShardedNet")
-  graph.nodes = [
-    LogicalNode(id="x", kind="Input"),
-    LogicalNode(id="fc1", kind="Linear", sharding=PartitionSpec(axes=("data", ("model", "tensor")))),
-    LogicalNode(id="out", kind="Output"),
-  ]
-  graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
+  graph = LogicalGraph(
+    name="ShardedNet",
+    nodes={
+      "x": LogicalNode(id="x", op_type="Input"),
+      "fc1": LogicalNode(
+        id="fc1", op_type="Linear", sharding=PartitionSpec(axes=("data", ("model", "tensor"))), inputs=["x"]
+      ),
+      "out": LogicalNode(id="out", op_type="Output", inputs=["fc1"]),
+    },
+  )
   backend = PythonBackend(framework="flax_nnx")
   code: str = backend.compile(graph)
   assert "jax.lax.with_sharding_constraint" in code
@@ -89,13 +92,14 @@ def test_python_backend_sharding_none() -> None:
   """Verifies the behavior of python backend sharding none."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
-  graph = LogicalGraph(name="ShardedNet")
-  graph.nodes = [
-    LogicalNode(id="x", kind="Input"),
-    LogicalNode(id="fc1", kind="Linear", sharding=PartitionSpec(axes=(None, "tensor"))),
-    LogicalNode(id="out", kind="Output"),
-  ]
-  graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
+  graph = LogicalGraph(
+    name="ShardedNet",
+    nodes={
+      "x": LogicalNode(id="x", op_type="Input"),
+      "fc1": LogicalNode(id="fc1", op_type="Linear", sharding=PartitionSpec(axes=(None, "tensor")), inputs=["x"]),
+      "out": LogicalNode(id="out", op_type="Output", inputs=["fc1"]),
+    },
+  )
   backend = PythonBackend(framework="jax")
   code: str = backend.compile(graph)
   assert "jax.lax.with_sharding_constraint" in code
@@ -106,13 +110,14 @@ def test_python_backend_sharding_torch() -> None:
   """Verifies the behavior of python backend sharding PyTorch."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
-  graph = LogicalGraph(name="ShardedNet")
-  graph.nodes = [
-    LogicalNode(id="x", kind="Input"),
-    LogicalNode(id="fc1", kind="Linear", sharding=PartitionSpec(axes=("data", None))),
-    LogicalNode(id="out", kind="Output"),
-  ]
-  graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
+  graph = LogicalGraph(
+    name="ShardedNet",
+    nodes={
+      "x": LogicalNode(id="x", op_type="Input"),
+      "fc1": LogicalNode(id="fc1", op_type="Linear", sharding=PartitionSpec(axes=("data", None)), inputs=["x"]),
+      "out": LogicalNode(id="out", op_type="Output", inputs=["fc1"]),
+    },
+  )
   backend = PythonBackend(framework="torch")
   code: str = backend.compile(graph)
   assert "distribute_tensor" in code
@@ -124,13 +129,16 @@ def test_python_backend_sharding_tf_mlx() -> None:
   """Verifies the behavior of python backend sharding tf MLX."""
   from ml_switcheroo.core.compiler.ir import PartitionSpec
 
-  graph = LogicalGraph(name="ShardedNet")
-  graph.nodes = [
-    LogicalNode(id="x", kind="Input"),
-    LogicalNode(id="fc1", kind="Linear", sharding=PartitionSpec(axes=("data", ("tensor", "model")))),
-    LogicalNode(id="out", kind="Output"),
-  ]
-  graph.edges = [LogicalEdge("x", "fc1"), LogicalEdge("fc1", "out")]
+  graph = LogicalGraph(
+    name="ShardedNet",
+    nodes={
+      "x": LogicalNode(id="x", op_type="Input"),
+      "fc1": LogicalNode(
+        id="fc1", op_type="Linear", sharding=PartitionSpec(axes=("data", ("tensor", "model"))), inputs=["x"]
+      ),
+      "out": LogicalNode(id="out", op_type="Output", inputs=["fc1"]),
+    },
+  )
   backend = PythonBackend(framework="tensorflow")
   code_tf: str = backend.compile(graph)
   assert "keras.distribution.layout" in code_tf
@@ -146,9 +154,9 @@ def test_python_backend_primitive_mapping_mlx() -> None:
 
   graph = LogicalGraph()
   graph.nodes = [
-    LogicalNode(id="rope", kind="RoPE"),
-    LogicalNode(id="vision", kind="VisionPatchEmbedding"),
-    LogicalNode(id="swiglu", kind="SwiGLU"),
+    LogicalNode(id="rope", op_type="RoPE"),
+    LogicalNode(id="vision", op_type="VisionPatchEmbedding"),
+    LogicalNode(id="swiglu", op_type="SwiGLU"),
   ]
   backend = PythonBackend(framework="mlx")
   code: str = backend.compile(graph)
@@ -390,8 +398,8 @@ def test_python_backend_forward_args() -> None:
 
   b._is_stateful_layer = mock_is_stateful_layer
 
-  n = LogicalNode("n", "func_x", metadata={"kwarg_a": "1"})
-  g = LogicalGraph("T", nodes=[LogicalNode("i", "Input"), n], edges=[LogicalEdge("i", "n")])
+  n = LogicalNode("n", "func_x", attributes={"kwarg_a": "1"})
+  g = LogicalGraph("T", nodes={n.id: n for n in [LogicalNode("i", "Input"), n]}, edges=[LogicalEdge("i", "n")])
   c: str = b.compile(g)
   assert "kwarg_a=1" in c
 
@@ -429,8 +437,7 @@ def test_python_backend_imports() -> None:
 def test_python_backend_compile_forward_pass_no_stmts() -> None:
   """Docstring."""
   backend = PythonBackend(framework="torch")
-  graph = LogicalGraph("Test")
-  graph.nodes.append(LogicalNode("input_0", "Input"))
+  graph = LogicalGraph(name="Test", nodes={"input_0": LogicalNode(id="input_0", op_type="Input")})
   res: str = backend.compile(graph)
   assert "def forward" in res
 
@@ -468,14 +475,10 @@ def test_python_backend_forward_pass_abstract_resolution() -> None:
 
   backend._is_stateful_layer = mock_is_stateful_layer
 
-  graph = LogicalGraph("Test")
-  n0 = LogicalNode("n0", "Input")
-
-  n1 = LogicalNode("n1", "my_func")
-  n2 = LogicalNode("n2", "func_concrete_func")
-
-  graph.nodes.extend([n0, n1, n2])
-  graph.edges.extend([LogicalEdge("n0", "n1"), LogicalEdge("n1", "n2")])
+  n0 = LogicalNode(id="n0", op_type="Input")
+  n1 = LogicalNode(id="n1", op_type="my_func", inputs=["n0"])
+  n2 = LogicalNode(id="n2", op_type="func_concrete_func", inputs=["n1"])
+  graph = LogicalGraph(name="Test", nodes={"n0": n0, "n1": n1, "n2": n2})
   code: str = backend.compile(graph)
   assert "resolved.my_func" in code
   assert "resolved.my_abstract" in code
@@ -502,27 +505,27 @@ def test_python_backend_frameworks() -> None:
   semantics.resolve_variant = mock_resolve
 
   b = PythonBackend(framework="torch", semantics=semantics)
-  c: str = b.compile(LogicalGraph("T", [LogicalNode("n1", "Relu")]))
+  c: str = b.compile(LogicalGraph("T", nodes={"n1": LogicalNode("n1", op_type="Relu")}))
   assert "self.n1 = nn.Relu" in c
 
   b = PythonBackend(framework="mlx", semantics=semantics)
-  c = b.compile(LogicalGraph("T", [LogicalNode("n1", "Relu")]))
+  c = b.compile(LogicalGraph("T", nodes={"n1": LogicalNode("n1", op_type="Relu")}))
   assert "self.n1 = nn.Relu" in c
 
   b = PythonBackend(framework="torch")
-  c = b.compile(LogicalGraph("T", [LogicalNode("n1", "Linear")]))
+  c = b.compile(LogicalGraph("T", nodes={"n1": LogicalNode("n1", op_type="Linear")}))
   assert "self.n1 = nn.Linear" in c
 
   b = PythonBackend(framework="mlx")
-  c = b.compile(LogicalGraph("T", [LogicalNode("n1", "Linear")]))
+  c = b.compile(LogicalGraph("T", nodes={"n1": LogicalNode("n1", op_type="Linear")}))
   assert "self.n1 = nn.Linear" in c
 
   b = PythonBackend(framework="paxml")
-  c = b.compile(LogicalGraph("T", [LogicalNode("n1", "Linear")]))
+  c = b.compile(LogicalGraph("T", nodes={"n1": LogicalNode("n1", op_type="Linear")}))
   assert "pl.Linear" in c
 
   b = PythonBackend(framework="keras")
-  c = b.compile(LogicalGraph("T", [LogicalNode("n1", "Layer")]))
+  c = b.compile(LogicalGraph("T", nodes={"n1": LogicalNode("n1", op_type="Layer")}))
   assert "self.n1 = keras.layers.Layer" in c
 
 
@@ -537,7 +540,7 @@ def test_python_backend_sharding_and_metadata() -> None:
       """Docstring."""
       self.axes: list[str] = ["x"]
 
-  n = LogicalNode("n", "func_x", metadata={"kwarg_a": "1"}, sharding=FakeSharding())  # type: ignore
+  n = LogicalNode("n", "func_x", attributes={"kwarg_a": "1"}, sharding=FakeSharding())  # type: ignore
 
   def mock_is_stateful_layer(node: LogicalNode) -> bool:
     """Docstring."""
@@ -545,7 +548,7 @@ def test_python_backend_sharding_and_metadata() -> None:
 
   b._is_stateful_layer = mock_is_stateful_layer
 
-  g = LogicalGraph("T", nodes=[LogicalNode("i", "Input"), n], edges=[LogicalEdge("i", "n")])
+  g = LogicalGraph("T", nodes={n.id: n for n in [LogicalNode("i", "Input"), n]}, edges=[LogicalEdge("i", "n")])
   c: str = b.compile(g)
   assert "kwarg_a=1" in c
   assert "distribute_tensor" in c
@@ -569,7 +572,7 @@ def test_python_backend_sharding_jax() -> None:
     return False
 
   b._is_stateful_layer = mock_is_stateful_layer
-  g = LogicalGraph("T", nodes=[LogicalNode("i", "Input"), n], edges=[LogicalEdge("i", "n")])
+  g = LogicalGraph("T", nodes={n.id: n for n in [LogicalNode("i", "Input"), n]}, edges=[LogicalEdge("i", "n")])
   assert "with_sharding_constraint" in b.compile(g)
 
 
@@ -591,7 +594,7 @@ def test_python_backend_sharding_keras() -> None:
     return False
 
   b._is_stateful_layer = mock_is_stateful_layer
-  g = LogicalGraph("T", nodes=[LogicalNode("i", "Input"), n], edges=[LogicalEdge("i", "n")])
+  g = LogicalGraph("T", nodes={n.id: n for n in [LogicalNode("i", "Input"), n]}, edges=[LogicalEdge("i", "n")])
   assert "keras.distribution.layout" in b.compile(g)
 
 
@@ -613,7 +616,7 @@ def test_python_backend_sharding_mlx() -> None:
     return False
 
   b._is_stateful_layer = mock_is_stateful_layer
-  g = LogicalGraph("T", nodes=[LogicalNode("i", "Input"), n], edges=[LogicalEdge("i", "n")])
+  g = LogicalGraph("T", nodes={n.id: n for n in [LogicalNode("i", "Input"), n]}, edges=[LogicalEdge("i", "n")])
   assert "mx.distributed.shard" in b.compile(g)
 
 

@@ -19,7 +19,7 @@ def test_nvidia_sass_synth_invalid_opcode() -> None:
   mock_semantics.get_definition.return_value = ("BadOp", {})
   mock_semantics.resolve_variant.return_value = {"api": "bad op code!"}
   synth = NvidiaSassSynthesizer(mock_semantics)
-  g = LogicalGraph(nodes=[LogicalNode(id="n1", kind="BadOp")])
+  g = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="n1", op_type="BadOp")]})
   with pytest.raises(ValueError, match="Invalid NVIDIA_SASS opcode"):
     synth.from_graph(g)
 
@@ -30,9 +30,12 @@ def test_nvidia_sass_synth_liveness_tracking() -> None:
   mock_semantics.get_definition.return_value = ("Add", {})
   mock_semantics.resolve_variant.return_value = {"api": "FADD"}
   synth = NvidiaSassSynthesizer(mock_semantics)
-  g = LogicalGraph()
-  g.nodes = [LogicalNode(id="n1", kind="Input"), LogicalNode(id="n2", kind="Add")]
-  g.edges = [LogicalEdge(source="n1", target="n2")]
+  g = LogicalGraph(
+    nodes={
+      "n1": LogicalNode(id="n1", op_type="Input"),
+      "n2": LogicalNode(id="n2", op_type="Add", inputs=["n1"]),
+    }
+  )
   assert synth.allocator._liveness_map == {}
   synth.from_graph(g)
   assert synth.allocator._liveness_map["n1"] == 0
@@ -109,10 +112,10 @@ def test_nvidia_sass_synth_suffix_macro() -> None:
   mock_semantics = MagicMock()
   mock_semantics.get_definition.return_value = ("nvidia_sass.l", {})
   synth = NvidiaSassSynthesizer(mock_semantics)
-  n1 = LogicalNode(id="n1", kind="dummy")
-  n2 = LogicalNode(id="n2", kind="nvidia_sass.l")
+  n1 = LogicalNode(id="n1", op_type="dummy")
+  n2 = LogicalNode(id="n2", op_type="nvidia_sass.l")
   edge = LogicalEdge(source="n1", target="n2")
-  g = LogicalGraph(nodes=[n1, n2], edges=[edge])
+  g = LogicalGraph(nodes={n.id: n for n in [n1, n2]}, edges=[edge])
   res: list[typing.Any] = synth.from_graph(g)
   assert len(res) >= 1
 
@@ -121,9 +124,16 @@ def test_nvidia_sass_synth_liveness_existing() -> None:
   """Docstring."""
   # Hit 130->132
   alloc = RegisterAllocator()
-  g = LogicalGraph("Test")
-  g.edges.append(LogicalEdge(source="s", target="t1"))
-  g.edges.append(LogicalEdge(source="s", target="t2"))
+  nodes = {
+    "s": LogicalNode("s", op_type="Input"),
+    "t1": LogicalNode("t1", op_type="Op"),
+    "t2": LogicalNode("t2", op_type="Op"),
+  }
+  edges = [
+    LogicalEdge(source="s", target="t1"),
+    LogicalEdge(source="s", target="t2"),
+  ]
+  g = LogicalGraph("Test", nodes=nodes, edges=edges)
   alloc.build_liveness(g)
   assert alloc._liveness_map["s"] == 2
 
@@ -182,9 +192,14 @@ def test_nvidia_sass_synth_existing_input_map() -> None:
   """Docstring."""
   # Hit 218->220
   synth = NvidiaSassSynthesizer(None)  # type: ignore
-  g = LogicalGraph("Test")
-  g.edges.append(LogicalEdge(source="s", target="t"))
-  g.edges.append(LogicalEdge(source="s2", target="t"))
+  g = LogicalGraph(
+    "Test",
+    nodes={
+      "s": LogicalNode(id="s", op_type="Input"),
+      "s2": LogicalNode(id="s2", op_type="Input"),
+      "t": LogicalNode(id="t", op_type="Output", inputs=["s", "s2"]),
+    },
+  )
   synth.from_graph(g)
 
 
@@ -193,7 +208,7 @@ def test_nvidia_sass_synth_output_no_sources() -> None:
   # Hit 234->238
   synth = NvidiaSassSynthesizer(None)  # type: ignore
   g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode(id="out", kind="Output"))
+  g.add_node(LogicalNode(id="out", op_type="Output"))
   synth.from_graph(g)
 
 
@@ -210,7 +225,7 @@ def test_nvidia_sass_synth_abstract_id_none() -> None:
 
   synth = NvidiaSassSynthesizer(FakeSemantics())  # type: ignore
   g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode(id="n", kind="not_found"))
+  g.add_node(LogicalNode(id="n", op_type="not_found"))
   res: list[typing.Any] = synth.from_graph(g)
   assert "Unmapped Op:" in res[0].text
 
@@ -352,10 +367,9 @@ def test_nvidia_sass_synth_hex_immediate() -> None:
 def test_nvidia_sass_synth_output_with_sources() -> None:
   """Docstring."""
   synth = NvidiaSassSynthesizer(None)  # type: ignore
-  g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode(id="src_node", kind="Input"))
-  g.nodes.append(LogicalNode(id="out", kind="Output"))
-  g.edges.append(LogicalEdge(source="src_node", target="out"))
+  src_node = LogicalNode(id="src_node", op_type="Input")
+  out_node = LogicalNode(id="out", op_type="Output", inputs=["src_node"])
+  g = LogicalGraph("Test", nodes={"src_node": src_node, "out": out_node})
   res: list[typing.Any] = synth.from_graph(g)
   assert len(res) > 0
 
@@ -370,11 +384,9 @@ def test_nvidia_sass_synthesizer_macro_exact_match() -> None:
 
   synth.macro_registry["my_macro"] = lambda alloc, nid, meta: [NvidiaSassComment(text="mock_my_macro")]
 
-  graph = LogicalGraph("test")
-  n1 = LogicalNode("n1", "tensor")
-  n2 = LogicalNode("n2", "my_macro")
-  graph.nodes.extend([n1, n2])
-  graph.edges.append(LogicalEdge("n1", "n2"))
+  n1 = LogicalNode(id="n1", op_type="tensor")
+  n2 = LogicalNode(id="n2", op_type="my_macro", inputs=["n1"])
+  graph = LogicalGraph("test", nodes={"n1": n1, "n2": n2})
 
   original = semantics.get_definition
 

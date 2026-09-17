@@ -10,3 +10,6 @@ variants:
     api: torch.nn.functional.logsigmoid
     args:
       input: input
+  mlx:
+    api: mlx.nn.LogSigmoid
+    args: {}

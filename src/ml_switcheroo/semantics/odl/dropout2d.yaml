@@ -25,3 +25,6 @@ variants:
     api: torch.nn.functional.dropout2d
     args:
       input: input
+  mlx:
+    api: mlx.nn.Dropout2d
+    args: {}

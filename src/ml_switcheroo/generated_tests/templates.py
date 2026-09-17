@@ -53,13 +53,13 @@ def get_template(
 
   """
   tmpl: Optional[Dict[str, str]] = None
-  if manager:  # pragma: no branch
+  if manager:
     try:
       tmpl = manager.get_test_template(framework)
     except Exception:
       pass
 
-  if tmpl:  # pragma: no branch
+  if tmpl:
     return tmpl
 
   return DEFAULT_TEST_TEMPLATES.get(framework, {})

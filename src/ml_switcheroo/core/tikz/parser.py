@@ -73,14 +73,14 @@ class TikzTransformer(Transformer[Token, Any]):
               options.append(TikzOption(key=o))
         elif el == "\\end{tikzpicture}":
           ended_env = True
-      elif isinstance(el, (TikzNode, TikzEdge)):
-        graph_children.append(el)
-      elif isinstance(el, TikzGraph):  # pragma: no branch
+      elif isinstance(el, TikzGraph):
         # If the parser successfully mapped the whole thing to a graph
         # we just return it with attached trivia
         el.leading_trivia = leading + el.leading_trivia
         el.trailing_trivia = el.trailing_trivia + trailing
         return el
+      elif isinstance(el, (TikzNode, TikzEdge)):
+        graph_children.append(el)
 
     # Fallback if no TIKZ_ENV_BEGIN was matched properly
     return TikzGraph(children=graph_children, options=options, leading_trivia=leading, trailing_trivia=trailing)
@@ -485,7 +485,7 @@ def _logical_from_tikz_graph(tikz_graph: TikzGraph) -> "LogicalGraph":
       elif isinstance(child.content, str) and child.content:
         kind = child.content.strip()
 
-      l_graph.nodes.append(LogicalNode(id=child.node_id, kind=kind, metadata=metadata))
+      l_graph.nodes[child.node_id] = LogicalNode(id=child.node_id, op_type=kind, attributes=metadata)
     elif isinstance(child, TikzEdge):
       l_graph.edges.append(LogicalEdge(source=child.source_id, target=child.target_id))
 

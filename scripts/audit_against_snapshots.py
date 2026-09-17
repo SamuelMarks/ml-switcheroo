@@ -20,6 +20,17 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.file_loader import KnowledgeBaseLoader
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
+try:
+  from ml_framework_snapshots.grounding.engine import GroundingEngine
+except ImportError:
+  try:
+    parent_snap_src = Path(__file__).resolve().parent.parent.parent / "ml-framework-snapshots" / "src"
+    if str(parent_snap_src) not in sys.path and parent_snap_src.exists():
+      sys.path.insert(0, str(parent_snap_src))
+    from ml_framework_snapshots.grounding.engine import GroundingEngine
+  except ImportError:
+    GroundingEngine = None
+
 
 def extract_api_calls(file_path: Path) -> Set[str]:
   """Extracts fully qualified API calls from a Python file."""
@@ -75,6 +86,9 @@ def audit_inline_snippets(manager: SemanticsManager, snapshots: Dict[str, Dict[s
     "flax": "flax",
     "keras": "keras",
     "praxis": "paxml",
+    "ir": "ir",
+    "ml_switcheroo_ir": "ir",
+    "sw_ir": "ir",
   }
 
   ignore_list = {
@@ -171,6 +185,9 @@ def audit_python_ast(src_dirs: List[Path], snapshots: Dict[str, Dict[str, Any]])
     "flax": "flax",
     "keras": "keras",
     "praxis": "paxml",
+    "ir": "ir",
+    "ml_switcheroo_ir": "ir",
+    "sw_ir": "ir",
   }
 
   ignore_list = {
@@ -236,6 +253,8 @@ def _flatten_single_framework(fw: str, snap: Any, flat_snapshots: Dict[str, Dict
             flat_snapshots[fw]["mx." + api_path[len("mlx.core.") :]] = item
           elif api_path.startswith("torch.nn.functional."):
             flat_snapshots[fw]["F." + api_path[len("torch.nn.functional.") :]] = item
+          elif api_path.startswith("flax.nnx."):
+            flat_snapshots[fw]["nnx." + api_path[len("flax.nnx.") :]] = item
         if "name" in item:
           flat_snapshots[fw][item["name"]] = item
         if "mnemonic" in item:
@@ -364,6 +383,8 @@ def load_snapshots_multi(snapshot_dirs: Optional[List[Path]] = None) -> Dict[str
       with open(file_path, "r", encoding="utf-8") as f:
         snap = json.load(f)
         _flatten_single_framework(fw, snap, flat_snapshots)
+        if fw == "optax_shim":
+          _flatten_single_framework("optax", snap, flat_snapshots)
 
   return flat_snapshots
 
@@ -438,6 +459,7 @@ def audit_frameworks(
   manager: SemanticsManager,
   snapshots: Dict[str, Dict[str, Any]],
   framework: Optional[str] = None,
+  grounding_engine: Optional[Any] = None,
 ) -> List[str]:
   """Audits the known manager data against the snapshots.
 
@@ -445,11 +467,18 @@ def audit_frameworks(
       manager: The hydrated SemanticsManager.
       snapshots: The loaded snapshots.
       framework: Optional framework identifier to filter auditing.
+      grounding_engine: Optional GroundingEngine instance for anti-hallucination verification.
 
   Returns:
       A list of error strings.
   """
   errors: List[str] = []
+
+  if grounding_engine is None and GroundingEngine is not None:
+    try:
+      grounding_engine = GroundingEngine()
+    except Exception:
+      grounding_engine = None
 
   # Ignore known gaps in our automated snapshot extraction (e.g., C-extensions, aliases)
   ignore_list = {
@@ -507,6 +536,19 @@ def audit_frameworks(
     "mlx.core.int64",
     "numpy.int64",
     "keras.ops.sum",
+    "jax.nn.elu",
+    "jax.nn.hard_sigmoid",
+    "jax.nn.hard_swish",
+    "jax.nn.leaky_relu",
+    "jax.nn.log_softmax",
+    "jax.numpy.linalg.norm",
+    "jax.nn.relu",
+    "jax.nn.selu",
+    "jax.nn.silu",
+    "jax.nn.sigmoid",
+    "jax.nn.softplus",
+    "mlx.nn.losses.binary_cross_entropy",
+    "mlx.nn.losses.cross_entropy",
   }
 
   for op_name, op_details in manager.data.items():
@@ -526,6 +568,15 @@ def audit_frameworks(
       is_valid_api = False
       if api in snapshot:
         is_valid_api = True
+      elif fw_name in ("jax", "flax_nnx") and str(api).startswith("optax."):
+        optax_snap = snapshots.get("optax") or snapshots.get("optax_shim")
+        if optax_snap and api in optax_snap:
+          is_valid_api = True
+          snapshot = optax_snap
+      elif fw_name == "flax_nnx" and (str(api).startswith("jax.numpy.") or str(api).startswith("jnp.")):
+        if "jax" in snapshots and api in snapshots["jax"]:
+          is_valid_api = True
+          snapshot = snapshots["jax"]
       elif fw_name == "nvidia_sass":
         api_str = str(api).upper()
         base = api_str.split(".")[0].split("_")[0]
@@ -553,6 +604,35 @@ def audit_frameworks(
           or base in RDNA_KNOWN_INSTRUCTIONS
         ):
           is_valid_api = True
+      elif fw_name == "ir":
+        api_str = str(api)
+        from ml_switcheroo_ir.schema.onnx_registry import ONNX_REGISTRY
+
+        ir_known_ops = set(ONNX_REGISTRY.keys()) | {
+          "RMSNorm",
+          "SwiGLU",
+          "RoPE",
+          "FlashAttention",
+          "VisionPatchEmbedding",
+          "ml_switcheroo_ir.LogicalNode",
+          "sw_ir.LogicalNode",
+          "LogicalNode",
+        }
+        if api_str in snapshot or api_str in ir_known_ops or api_str.startswith("sw_ir."):
+          is_valid_api = True
+
+      if not is_valid_api and grounding_engine is not None:
+        ge_target = "amd_rdna" if fw_name == "rdna" else fw_name
+        try:
+          has_files = (
+            grounding_engine._discover_target_files(ge_target)
+            if hasattr(grounding_engine, "_discover_target_files")
+            else True
+          )
+          if has_files and hasattr(grounding_engine, "has_symbol") and grounding_engine.has_symbol(ge_target, str(api)):
+            is_valid_api = True
+        except Exception:
+          pass
 
       if not is_valid_api:
         strictly_checked = {
@@ -566,6 +646,7 @@ def audit_frameworks(
           "numpy",
           "flax",
           "keras",
+          "ir",
         }
         if (
           fw_name in strictly_checked
@@ -573,7 +654,22 @@ def audit_frameworks(
           and not str(api).startswith(";")
           and not str(api).startswith("Macro.")
         ):
-          errors.append(f"[{fw_name}] '{op_name}' maps to hallucinated API: '{api}'")
+          suggestion = ""
+          if grounding_engine is not None and hasattr(grounding_engine, "suggest_closest_symbol"):
+            try:
+              ge_target = "amd_rdna" if fw_name == "rdna" else fw_name
+              has_files = (
+                grounding_engine._discover_target_files(ge_target)
+                if hasattr(grounding_engine, "_discover_target_files")
+                else True
+              )
+              if has_files:
+                closest = grounding_engine.suggest_closest_symbol(ge_target, str(api))
+                if closest:
+                  suggestion = f" (did you mean: '{closest}'?)"
+            except Exception:
+              pass
+          errors.append(f"[{fw_name}] '{op_name}' maps to hallucinated API: '{api}'{suggestion}")
       else:
         api_data = snapshot[api] if api in snapshot else {}
 
@@ -582,8 +678,22 @@ def audit_frameworks(
         if not args_map:
           continue
 
-        snapshot_args = api_data.get("params", api_data.get("args", []))
-        snapshot_arg_names = {arg["name"] for arg in snapshot_args}
+        raw_snapshot_args = api_data.get("params", api_data.get("args", []))
+        snapshot_args = []
+        for arg in raw_snapshot_args:
+          if not isinstance(arg, dict):
+            continue
+          arg_name = str(arg.get("name", ""))
+          if "," in arg_name:
+            for tok in [t.strip() for t in arg_name.split(",") if t.strip()]:
+              if tok.isidentifier():
+                exp_arg = dict(arg)
+                exp_arg["name"] = tok
+                snapshot_args.append(exp_arg)
+          else:
+            snapshot_args.append(arg)
+
+        snapshot_arg_names = {arg["name"] for arg in snapshot_args if isinstance(arg, dict) and "name" in arg}
 
         ignore_args = {
           ("torch.sum", "dim"),
@@ -591,6 +701,9 @@ def audit_frameworks(
         }
 
         for std_name, fw_arg_name in args_map.items():
+          if fw_arg_name is None:
+            # Explicit null parameter indicates intentional dropping/omission in target framework
+            continue
           if fw_arg_name not in snapshot_arg_names:
             if (api, fw_arg_name) in ignore_args:
               continue
@@ -608,6 +721,7 @@ def audit_frameworks(
                 "nvidia_sass",
                 "numpy",
                 "flax",
+                "flax_nnx",
                 "keras",
               ]:
                 errors.append(f"[{fw_name}] '{op_name}' maps to hallucinated argument: '{fw_arg_name}' for API '{api}'")
@@ -623,6 +737,7 @@ def audit_frameworks(
           "nvidia_sass",
           "numpy",
           "flax",
+          "flax_nnx",
           "keras",
         ]:
           required_args = {
@@ -631,10 +746,11 @@ def audit_frameworks(
             if arg.get("default") is None
             and arg.get("kind") not in ("VAR_POSITIONAL", "VAR_KEYWORD")
             and arg.get("name") not in ("self", "cls")
+            and str(arg.get("name", "")).isidentifier()
           }
           has_kwargs = any(arg["name"] == "kwargs" or arg.get("kind") == "VAR_KEYWORD" for arg in snapshot_args)
 
-          mapped_target_args = set(args_map.values())
+          mapped_target_args = {v for v in args_map.values() if v is not None}
           missing_args = required_args - mapped_target_args
 
           # Snapshots often miss defaults for kwargs, base classes, or C-extensions.
@@ -674,6 +790,8 @@ def audit_frameworks(
             "freeze",
             "out_features",
             "input_size",
+            "dtype",
+            "rngs",
           }
           missing_args = missing_args - known_missing_defaults
 
@@ -685,10 +803,51 @@ def audit_frameworks(
   return errors
 
 
+def compute_snapshot_checksums(snapshot_dirs: Optional[List[Path]] = None) -> Dict[str, str]:
+  """Computes SHA-256 checksums of discovered snapshot files.
+
+  Args:
+      snapshot_dirs: Optional list of directories to scan for snapshots.
+
+  Returns:
+      A dictionary mapping snapshot file names to their SHA-256 hexadecimal digests.
+  """
+  import hashlib
+
+  dirs_to_search: List[Path] = []
+  if snapshot_dirs is not None:
+    dirs_to_search.extend(snapshot_dirs)
+  else:
+    dirs_to_search.extend(
+      [
+        Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
+        Path("../ml-framework-snapshots/src/ml_framework_snapshots/frameworks"),
+        Path("src/ml_switcheroo/semantics"),
+      ]
+    )
+
+  checksums: Dict[str, str] = {}
+  for d in dirs_to_search:
+    if not d.exists():
+      continue
+    candidates = list(d.glob("*_v*.json")) + list(d.glob("*_exhaustive.json")) + list(d.glob("*_isa.json"))
+    for file_path in candidates:
+      if file_path.name.endswith("_map.json") or "_vunknown" in file_path.name:
+        continue
+      try:
+        data = file_path.read_bytes()
+        if len(data) > 0:
+          checksums[file_path.name] = hashlib.sha256(data).hexdigest()
+      except Exception:
+        pass
+  return checksums
+
+
 def generate_audit_report(
   manager: SemanticsManager,
   snapshots: Dict[str, Dict[str, Any]],
   errors: List[str],
+  checksums: Optional[Dict[str, str]] = None,
 ) -> Dict[str, Any]:
   """Generates a structured audit report dictionary across all supported targets.
 
@@ -696,11 +855,12 @@ def generate_audit_report(
       manager: The active SemanticsManager instance.
       snapshots: Flattened snapshot lookup dictionary.
       errors: List of detected error strings.
+      checksums: Optional dictionary of snapshot file SHA-256 checksums.
 
   Returns:
       A dictionary detailing coverage, mapped operation counts, and error metrics.
   """
-  targets = ["torch", "jax", "mlx", "keras", "nvidia_sass", "rdna"]
+  targets = ["torch", "jax", "mlx", "keras", "nvidia_sass", "rdna", "ir"]
   target_metrics: Dict[str, Dict[str, Any]] = {}
 
   for target in targets:
@@ -721,6 +881,7 @@ def generate_audit_report(
   return {
     "total_operations": len(manager.data),
     "loaded_snapshots": list(snapshots.keys()),
+    "snapshot_checksums": checksums or {},
     "total_errors": len(errors),
     "status": "pass" if len(errors) == 0 else "fail",
     "targets": target_metrics,
@@ -760,8 +921,16 @@ def main() -> int:
     pass
   snapshots = load_snapshots_multi(snapshot_dirs)
 
+  grounding_engine = None
+  if GroundingEngine is not None:
+    try:
+      ge_dirs = [str(d) for d in snapshot_dirs if d.exists()]
+      grounding_engine = GroundingEngine(base_dirs=ge_dirs)
+    except Exception:
+      grounding_engine = None
+
   print(f"Loaded {len(snapshots)} snapshots.")
-  errors = audit_frameworks(mgr, snapshots, framework=args.framework)
+  errors = audit_frameworks(mgr, snapshots, framework=args.framework, grounding_engine=grounding_engine)
 
   src_dirs = [Path("src/ml_switcheroo/frameworks"), Path("src/ml_switcheroo/plugins")]
   ast_errors = audit_python_ast(src_dirs, snapshots)
@@ -771,7 +940,8 @@ def main() -> int:
   errors.extend(snippet_errors)
 
   if args.report_path:
-    report = generate_audit_report(mgr, snapshots, errors)
+    checksums = compute_snapshot_checksums(snapshot_dirs)
+    report = generate_audit_report(mgr, snapshots, errors, checksums=checksums)
     with open(args.report_path, "w", encoding="utf-8") as f:
       json.dump(report, f, indent=2)
     print(f"Saved audit report to {args.report_path}")

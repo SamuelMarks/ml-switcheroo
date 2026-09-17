@@ -101,7 +101,7 @@ class SemanticsManager:
     import importlib.resources
 
     aliases_json_path = importlib.resources.files("ml_framework_snapshots.snapshots").joinpath("aliases.json")
-    if aliases_json_path.is_file():  # pragma: no branch
+    if aliases_json_path.is_file():
       with aliases_json_path.open("r", encoding="utf-8") as f:
         alias_map.update(json.load(f))
 
@@ -109,12 +109,12 @@ class SemanticsManager:
       if "alias" in config:
         mod = config["alias"].get("module")
         name = config["alias"].get("name")
-        if mod and name:  # pragma: no branch
+        if mod and name:
           alias_map[name] = mod
 
     priority_scores = {}
     priority_json_path = os.path.join(os.path.dirname(__file__), "priority_scores.json")
-    if os.path.exists(priority_json_path):  # pragma: no branch
+    if os.path.exists(priority_json_path):
       with open(priority_json_path, "r", encoding="utf-8") as f:
         priority_scores = json.load(f)
 
@@ -211,7 +211,7 @@ class SemanticsManager:
         sub = target_config.get("sub")
         alias = target_config.get("alias")
 
-        if root:  # pragma: no branch
+        if root:
           result[src_path] = (root, sub, alias)
 
     return result
@@ -444,7 +444,7 @@ class SemanticsManager:
     try:
       with open(report_path, "r", encoding="utf-8") as f:
         report = json.load(f)
-        if isinstance(report, dict):  # pragma: no branch
+        if isinstance(report, dict):
           self._validation_status.update(report)
           print(f"🔒 Loaded {len(report)} verification statuses.")
     except Exception as e:
@@ -480,7 +480,7 @@ class SemanticsManager:
     self.data[abstract_id] = final_data
     variants = final_data.get("variants", {})
     for _, impl in variants.items():
-      if isinstance(impl, dict) and "api" in impl:  # pragma: no branch
+      if isinstance(impl, dict) and "api" in impl:
         self._reverse_index[impl["api"]] = (abstract_id, final_data)
 
     safe_name = abstract_id.replace("/", "_")

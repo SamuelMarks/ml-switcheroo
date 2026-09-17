@@ -5,11 +5,33 @@ into final ReStructuredText (RST) content. It embeds custom HTML/CSS/JS logic to
 create an interactive "Vertical Tabs" layout for displaying framework variants side-by-side.
 """
 
+import re
 import textwrap
 
 
 class OpPageRenderer:
   """Render RST/HTML for a single Operation documentation page."""
+
+  def _sanitize_description(self, desc: str) -> str:
+    """Sanitize operation description for ReStructuredText safety.
+
+    Escapes unescaped asterisks outside of code/math backticks to prevent
+    docutils inline emphasis/strong warnings, and ensures balanced backticks.
+
+    Args:
+        desc: Raw description string.
+
+    Returns:
+        Sanitized description string safe for RST rendering.
+    """
+    if not desc:
+      return desc
+    if desc.count("`") % 2 != 0:
+      desc = desc + "`"
+    parts = desc.split("`")
+    for i in range(0, len(parts), 2):
+      parts[i] = re.sub(r"(?<!\\)\*", r"\*", parts[i])
+    return "`".join(parts)
 
   def render_rst(self, context) -> str:
     """Generate the full .rst content for the operation.
@@ -22,7 +44,7 @@ class OpPageRenderer:
 
     """
     op_name = context["name"]
-    desc = context["description"]
+    desc = self._sanitize_description(context.get("description", ""))
     args = context["args"]
     variants = context.get("variants", [])
 

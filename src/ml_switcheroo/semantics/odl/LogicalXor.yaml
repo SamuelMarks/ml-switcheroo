@@ -7,12 +7,8 @@ variants:
     required_imports: []
   flax_nnx:
     api: jax.numpy.logical_xor
-    args:
-      input: x1
-      other: x2
-    dispatch_rules: []
-    pack_as: Tuple
-    required_imports: []
+    macro_template: jax.numpy.logical_xor({input}, {other})
+    args: {}
   jax:
     api: jax.numpy.logical_or
     args: {}
@@ -20,8 +16,21 @@ variants:
     api: torch.logical_xor
     args: {}
   mlx:
-    api: mlx.core.logical_xor
+    api: mlx.core.bitwise_xor
     args: {}
   keras:
     api: keras.ops.logical_xor
     args: {}
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: b
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stream
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

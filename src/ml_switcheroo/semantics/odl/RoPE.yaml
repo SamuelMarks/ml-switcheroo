@@ -16,5 +16,8 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+  ir:
+    api: RoPE
+    args: {}
 operation: RoPE
 type: function

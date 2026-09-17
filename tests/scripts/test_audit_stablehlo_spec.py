@@ -2,24 +2,36 @@
 
 import json
 from pathlib import Path
+import runpy
 import sys
 import tempfile
 from typing import Any
 from unittest.mock import MagicMock, patch
+
 import pytest
 
 import scripts.audit_stablehlo_spec as auditor
 
 
 def test_get_pip_cache_dir_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-  """Test get_pip_cache_dir when PIP_CACHE_DIR is set."""
+  """Test get_pip_cache_dir when PIP_CACHE_DIR is set.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+      tmp_path: Temporary directory fixture.
+  """
   custom_dir = tmp_path / "custom_pip_cache"
   monkeypatch.setenv("PIP_CACHE_DIR", str(custom_dir))
   assert auditor.get_pip_cache_dir() == custom_dir
 
 
 def test_get_pip_cache_dir_platforms(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-  """Test get_pip_cache_dir across darwin, win32, and linux platforms."""
+  """Test get_pip_cache_dir across darwin, win32, and linux platforms.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+      tmp_path: Temporary directory fixture.
+  """
   monkeypatch.delenv("PIP_CACHE_DIR", raising=False)
   monkeypatch.setattr(Path, "home", lambda: tmp_path / "home")
 
@@ -47,7 +59,14 @@ def test_get_pip_cache_dir_platforms(monkeypatch: pytest.MonkeyPatch, tmp_path: 
 
   # Fallback on Path.home() exception
   def _raising_home() -> Path:
-    """Mock Path.home raising RuntimeError."""
+    """Mock Path.home raising RuntimeError.
+
+    Returns:
+        Never returns, raises RuntimeError.
+
+    Raises:
+        RuntimeError: Simulating inaccessible home directory.
+    """
     raise RuntimeError("No home dir")
 
   monkeypatch.setattr(Path, "home", _raising_home)
@@ -81,7 +100,12 @@ def test_fetch_raw_https() -> None:
 
 
 def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test download_spec caching, cache hits, fallbacks, and errors."""
+  """Test download_spec caching, cache hits, fallbacks, and errors.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   cache_dir = tmp_path / "pip_cache"
   monkeypatch.setenv("PIP_CACHE_DIR", str(cache_dir))
 
@@ -118,7 +142,18 @@ def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
   primary_url = "https://raw.githubusercontent.com/openxla/stablehlo/main/docs/spec.md"
 
   def _side_effect(req: Any, **kwargs: Any) -> MagicMock:
-    """Mock urlopen side effect simulating CDN fallback."""
+    """Mock urlopen side effect simulating CDN fallback.
+
+    Args:
+        req: Request object containing full_url attribute.
+        **kwargs: Arbitrary keyword arguments.
+
+    Returns:
+        Mock response for CDN requests.
+
+    Raises:
+        Exception: Simulating rate limit on primary URL.
+    """
     if "cdn.jsdelivr.net" in req.full_url:
       resp = MagicMock()
       resp.read.return_value = b"# CDN StableHLO Spec"
@@ -168,10 +203,17 @@ def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         auditor.download_spec("https://fake.url/spec.md", force_download=True)
 
   # 11. Fallback cache exists but is empty/whitespace when network fails: raises RuntimeError
-  cache_file.write_text("   \n", encoding="utf-8")
+  cache_file.write_text("   " + chr(10), encoding="utf-8")
   with patch("urllib.request.urlopen", side_effect=Exception("Network down")):
     with pytest.raises(RuntimeError, match="Failed to download spec"):
       auditor.download_spec("https://fake.url/spec.md", force_download=True)
+
+  # 12. Non-spec.md URL filename branch and empty filename branch
+  with patch("urllib.request.urlopen", return_value=mock_response):
+    custom_named = auditor.download_spec("https://fake.url/other.md", force_download=True)
+    assert custom_named == "# StableHLO Spec"
+    empty_named = auditor.download_spec("https://fake.url/", force_download=True)
+    assert empty_named == "# StableHLO Spec"
 
 
 def test_parse_stablehlo_ops() -> None:
@@ -189,7 +231,11 @@ Description of add.
 
 
 def test_load_implemented_stablehlo_ops(tmp_path: Path) -> None:
-  """Test loading implemented ops from ODL directory."""
+  """Test loading implemented ops from ODL directory.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
   missing_dir = tmp_path / "missing_odl"
   assert auditor.load_implemented_stablehlo_ops(missing_dir) == set()
 
@@ -235,7 +281,15 @@ variants:
     encoding="utf-8",
   )
 
-  # 5. Broken / non-dict YAML
+  # 5. Non-dict variants field
+  (odl_dir / "NonDictVariants.yaml").write_text(
+    """operation: NonDictVariants
+variants: "not_a_dict"
+""",
+    encoding="utf-8",
+  )
+
+  # 6. Broken / non-dict YAML
   (odl_dir / "broken.yaml").write_text("invalid: [broken yaml", encoding="utf-8")
   (odl_dir / "list.yaml").write_text(
     """- item1
@@ -249,7 +303,11 @@ variants:
 
 
 def test_generate_reports(tmp_path: Path) -> None:
-  """Test JSON and Markdown report generation."""
+  """Test JSON and Markdown report generation.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
   json_out = tmp_path / "out.json"
   md_out = tmp_path / "out.md"
 
@@ -273,9 +331,12 @@ def test_generate_reports(tmp_path: Path) -> None:
 
 
 def test_main_and_entrypoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test main execution with success, missing ops, and download failure."""
-  import runpy
+  """Test main execution with success, missing ops, and download failure.
 
+  Args:
+      tmp_path: Temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   odl_dir = tmp_path / "odl"
   odl_dir.mkdir()
   (odl_dir / "Abs.yaml").write_text(

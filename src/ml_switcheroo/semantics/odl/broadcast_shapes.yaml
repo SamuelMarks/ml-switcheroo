@@ -13,3 +13,8 @@ variants:
   mlx:
     api: mlx.core.broadcast_shapes
     args: {}
+std_args:
+- name: shapes
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any

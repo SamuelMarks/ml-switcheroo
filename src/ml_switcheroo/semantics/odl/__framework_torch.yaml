@@ -3,8 +3,16 @@ __frameworks__:
     alias:
       module: "torch"
       name: "torch"
+    traits:
+      module_base: "torch.nn.Module"
+      forward_method: "forward"
+      requires_super_init: true
   torch_nn:
     extends: "torch"
     alias:
       module: "torch.nn"
       name: "nn"
+    traits:
+      module_base: "torch.nn.Module"
+      forward_method: "forward"
+      requires_super_init: true

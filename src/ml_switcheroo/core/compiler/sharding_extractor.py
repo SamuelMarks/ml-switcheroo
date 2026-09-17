@@ -31,7 +31,11 @@ class ShardingExtractionPass:
         LogicalGraph: The updated logical graph with sharding constraints
         extracted and represented directly on the nodes.
     """
-    sharding_nodes = {n.id: n for n in graph.nodes if "with_sharding_constraint" in n.kind}
+    sharding_nodes = {
+      n.id: n
+      for n in graph.nodes.values()
+      if "with_sharding_constraint" in str(getattr(n, "op_type", None) or getattr(n, "kind", ""))
+    }
 
     if not sharding_nodes:
       return graph
@@ -52,17 +56,16 @@ class ShardingExtractionPass:
         continue
 
       # Find the source node object
-      source_node = None
-      for n in graph.nodes:
-        if n.id == source_id:
-          source_node = n
-          break
+      source_node = graph.nodes.get(source_id)
 
       if not source_node:
         continue
 
-      # Parse PartitionSpec from metadata
-      arg1 = snode.metadata.get("arg_1", "")
+      # Parse PartitionSpec from attributes/metadata
+      attrs = getattr(snode, "attributes", None)
+      if attrs is None:
+        attrs = getattr(snode, "metadata", {})
+      arg1 = attrs.get("arg_1", "")
 
       # Minimal parsing of "jax.sharding.PartitionSpec('data', None)" or similar
       # It could be 'PartitionSpec(...)'
@@ -72,15 +75,13 @@ class ShardingExtractionPass:
         removal_map[sid] = source_id
 
     if removal_map:
-      new_nodes = [n for n in graph.nodes if n.id not in removal_map]
-      graph.nodes = new_nodes
+      new_nodes = {n.id: n for n in graph.nodes.values() if n.id not in removal_map}
 
       new_edges = []
       for e in graph.edges:
         if e.target in removal_map:
-          # Edge from source to sharding constraint node is removed
-          pass
-        elif e.source in removal_map:
+          continue
+        if e.source in removal_map:
           # Edge from sharding constraint to output is wired from original source
           new_source = removal_map[e.source]
           new_edge = LogicalEdge(source=new_source, target=e.target)
@@ -89,7 +90,9 @@ class ShardingExtractionPass:
         else:
           new_edges.append(e)
 
-      graph.edges = new_edges
+      for node in new_nodes.values():
+        node.inputs = []
+      return LogicalGraph(name=graph.name, nodes=new_nodes, edges=new_edges, mesh=graph.mesh)
 
     return graph
 

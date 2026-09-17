@@ -182,7 +182,7 @@ class TestCaseGenerator:
               static_indices.append(idx)
           static_argnums = f"{tuple(static_indices)}" if static_indices else "None"
 
-          if "{fn}" in jit_tmpl:  # pragma: no branch
+          if "{fn}" in jit_tmpl:
             # e.g. "jax.jit({fn})" -> jax.jit(fn)
             jit_wrapper = jit_tmpl.format(fn=api_to_call, static_argnums=static_argnums)
             fn_call_expr = f"{jit_wrapper}({', '.join(call_args)})"
@@ -239,7 +239,7 @@ class TestCaseGenerator:
           file_lines.append("    for fw, val in results.items():")
           file_lines.append("        assert np.issubdtype(np.array(val).dtype, bool) or isinstance(val, bool)")
           file_lines.append("")
-        elif return_type in ["Tensor", "Array"]:  # pragma: no branch
+        elif return_type in ["Tensor", "Array"]:
           file_lines.append("    # Type Check")
           file_lines.append("    # Expected Array/Tensor")
           file_lines.append("    for fw, val in results.items():")

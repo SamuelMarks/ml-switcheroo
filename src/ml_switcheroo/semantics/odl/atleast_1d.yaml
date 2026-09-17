@@ -1,5 +1,13 @@
 description: Convert inputs to arrays with at least one dimension.
-std_args: []
+std_args:
+- name: arys
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
   dask:
     api: dask.array.atleast_1d

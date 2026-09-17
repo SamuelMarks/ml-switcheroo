@@ -472,3 +472,90 @@ def test_normalize_arguments_value_options_complex_obj() -> None:
     original, original, config, target_impl=target_impl, source_fw="numpy", is_module_alias_fn=lambda x: False
   )
   assert len(normalized) == 1
+
+
+def test_convert_value_to_cst_literal_eval_same_str() -> None:
+  """Test convert_value_to_cst with a str subclass where ast.literal_eval returns an equal string."""
+
+  class _EqualStr(str):
+    """String subclass returning False for inequality to test identical string branch."""
+
+    def __ne__(self, other: Any) -> bool:
+      """Check inequality."""
+      return False
+
+  val = _EqualStr("'test'")
+  res = convert_value_to_cst(val)
+  assert isinstance(res, cst.SimpleString)
+
+
+def test_normalize_arguments_dynamic_receiver_attribute_check() -> None:
+  """Test normalize_arguments when original_node.func ceases to be an attribute mid-processing."""
+
+  class _DynamicFuncCall:
+    """Mock call with dynamic func property."""
+
+    def __init__(self, first_func: cst.CSTNode, second_func: cst.CSTNode, args: List[cst.Arg]) -> None:
+      """Initialize mock call."""
+      self._first_func = first_func
+      self._second_func = second_func
+      self.args = args
+      self._count = 0
+
+    @property
+    def func(self) -> cst.CSTNode:
+      """Return first_func on initial checks, then second_func."""
+      self._count += 1
+      if self._count <= 2:
+        return self._first_func
+      return self._second_func
+
+  # Branch 211->220: std_args_order present, but func becomes non-attribute
+  mock_call = _DynamicFuncCall(
+    cst.Attribute(value=cst.Name("obj"), attr=cst.Name("method")),
+    cst.Name("not_attr"),
+    [cst.Arg(value=cst.Name("val"))],
+  )
+  config: Dict[str, Any] = {"std_args": ["first", "second"], "library_to_std_args": {}}
+  res1 = normalize_arguments(
+    mock_call,  # type: ignore[arg-type]
+    cst.Call(func=cst.Name("method"), args=[cst.Arg(value=cst.Name("val"))]),
+    config,
+    target_impl={},
+    source_fw="torch",
+    is_module_alias_fn=lambda _: False,
+  )
+  assert len(res1) == 1
+
+  # Branch 216->220: std_args_order empty, but func becomes non-attribute
+  mock_call_no_std = _DynamicFuncCall(
+    cst.Attribute(value=cst.Name("obj"), attr=cst.Name("method")),
+    cst.Name("not_attr"),
+    [cst.Arg(value=cst.Name("val"))],
+  )
+  config_no_std: Dict[str, Any] = {"std_args": [], "library_to_std_args": {}}
+  res2 = normalize_arguments(
+    mock_call_no_std,  # type: ignore[arg-type]
+    cst.Call(func=cst.Name("method"), args=[cst.Arg(value=cst.Name("val"))]),
+    config_no_std,
+    target_impl={},
+    source_fw="torch",
+    is_module_alias_fn=lambda _: False,
+  )
+  assert len(res2) == 1
+
+
+def test_normalize_arguments_val_options_dict_unmatched_key() -> None:
+  """Test val_options dictionary where primitive key is not present in dictionary."""
+  call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(keyword=cst.Name("mode"), value=cst.SimpleString("'unmatched'"))])
+  config: Dict[str, Any] = {"std_args": ["mode"], "library_to_std_args": {}}
+  target_impl: Dict[str, Any] = {"arg_values": {"mode": {"known": "1"}}}
+  res = normalize_arguments(
+    call,
+    call,
+    config,
+    target_impl=target_impl,
+    source_fw="torch",
+    is_module_alias_fn=lambda _: False,
+  )
+  assert len(res) == 1

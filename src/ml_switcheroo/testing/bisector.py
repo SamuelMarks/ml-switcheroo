@@ -17,7 +17,7 @@ import typing
 
 import copy
 import logging
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from ml_switcheroo.testing.runner import EquivalenceRunner
 
@@ -39,7 +39,7 @@ class SemanticsBisector:
     self.runner = runner
     self.logger = logging.getLogger(__name__)
 
-  def propose_fix(self, op_name: str, op_def: dict) -> typing.Optional[dict]:
+  def propose_fix(self, op_name: str, op_def: Dict[str, Any]) -> typing.Optional[Dict[str, Any]]:
     """Attempt to satisfy verification by mutating verification parameters.
 
     Strategies:
@@ -93,7 +93,7 @@ class SemanticsBisector:
         if len(arg) > 1:
           hints[name] = str(arg[1])
 
-      elif isinstance(arg, str):  # pragma: no branch
+      elif isinstance(arg, str):
         params.append(arg)
 
     # Iterate steps

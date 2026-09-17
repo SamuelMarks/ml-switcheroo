@@ -11,6 +11,12 @@ def test_get_required_packages_syntax_error() -> None:
   assert get_required_packages("import from invalid syntax") == []
 
 
+def test_get_required_packages_non_import_and_relative() -> None:
+  """Tests get_required_packages with non-import statements and relative imports."""
+  code = "x = 1\nfrom . import sibling\nimport os\n"
+  assert get_required_packages(code) == ["os"]
+
+
 def test_ensure_runtime_module_no_req_pkgs(tmp_path: Path) -> None:
   """Verifies the behavior of ensure runtime module no request pkgs."""
 

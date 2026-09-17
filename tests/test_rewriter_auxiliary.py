@@ -208,3 +208,80 @@ def test_aux_for_loop(context: RewriterContext) -> None:
   res5: Union[cst.BaseStatement, cst.FlattenSentinel, cst.RemovalSentinel] = transformer.leave_For(for_node, for_node)
   # wraps in escape hatch failure
   assert res5 is not for_node
+
+
+def test_aux_cst_to_string_attribute_with_non_convertible_base(context: RewriterContext) -> None:
+  """Test _cst_to_string when the base of an Attribute cannot be flattened."""
+  transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
+  node = cst.Attribute(value=cst.Call(func=cst.Name("fn")), attr=cst.Name("member"))
+  assert transformer._cst_to_string(node) is None
+
+
+def test_aux_report_errors_only(context: RewriterContext) -> None:
+  """Test leave_SimpleStatementLine when only errors are present in current_stmt_errors."""
+  transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
+  transformer._report_failure("error_only_1")
+  transformer._report_failure("error_only_1")  # duplicate to test deduplication
+  stmt: cst.SimpleStatementLine = getattr(cst.parse_module("b = 2"), "body")[0]
+  res: Union[cst.CSTNode, cst.FlattenSentinel, cst.RemovalSentinel] = transformer.leave_SimpleStatementLine(stmt, stmt)
+  assert res != stmt
+
+
+def test_aux_decorator_definition_not_found(context: RewriterContext) -> None:
+  """Test leave_Decorator when semantics definition is None."""
+  context.semantics.get_definition.return_value = None
+  transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
+  mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
+  dec: cst.Decorator = getattr(getattr(mod, "body")[0], "decorators")[0]
+  res = transformer.leave_Decorator(dec, dec)
+  assert res is dec
+
+
+def test_aux_decorator_variant_without_api(context: RewriterContext) -> None:
+  """Test leave_Decorator when target variant exists but contains no target api."""
+  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"jax": {}}})
+  transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
+  mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
+  dec: cst.Decorator = getattr(getattr(mod, "body")[0], "decorators")[0]
+  res = transformer.leave_Decorator(dec, dec)
+  assert res is dec
+
+
+def test_aux_for_loop_noops_and_non_statement_escape_hatch(
+  context: RewriterContext, monkeypatch: pytest.MonkeyPatch
+) -> None:
+  """Test leave_For when hooks return unchanged node, and when EscapeHatch returns non-statement."""
+  import ml_switcheroo.core.hooks_registry as hr
+  from ml_switcheroo.core.escape_hatch import EscapeHatch
+
+  transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
+  mod: cst.Module = cst.parse_module("for i in range(5): pass")
+  for_node: cst.For = getattr(mod, "body")[0]
+
+  # 1. Both static hook and normal hook return updated_node (no-op)
+  hr._HOOKS.clear()
+
+  @register_hook("transform_for_loop_static")
+  def mock_static_noop(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
+    """Noop static loop hook."""
+    return node
+
+  @register_hook("transform_for_loop")
+  def mock_loop_noop(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
+    """Noop loop hook."""
+    return node
+
+  res_noop = transformer.leave_For(for_node, for_node)
+  assert res_noop is for_node
+
+  # 2. Loop hook raises, and EscapeHatch.mark_failure returns an expression (not BaseStatement/FlattenSentinel)
+  hr._HOOKS.clear()
+
+  @register_hook("transform_for_loop")
+  def mock_loop_err(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
+    """Error loop hook."""
+    raise RuntimeError("test error")
+
+  monkeypatch.setattr(EscapeHatch, "mark_failure", lambda node, reason: cst.Name("expr_not_stmt"))
+  res_err = transformer.leave_For(for_node, for_node)
+  assert res_err is for_node

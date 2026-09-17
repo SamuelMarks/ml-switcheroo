@@ -9,7 +9,7 @@ import typing
 import pytest
 
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -54,10 +54,10 @@ def test_other_operations(backend: StableHloBackend, logical_op: str, expected_m
 
   This ensures both mapping resolution and operand generation are correct.
   """
-  g = LogicalGraph()
-  # Simple graph: Input -> Op -> Output
-  g.nodes = [LogicalNode("in_node", "Input"), LogicalNode("op_node", logical_op), LogicalNode("out_node", "Output")]
-  g.edges = [LogicalEdge("in_node", "op_node"), LogicalEdge("op_node", "out_node")]
+  in_n = LogicalNode(id="in_node", op_type="Input")
+  op_n = LogicalNode(id="op_node", op_type=logical_op, inputs=["in_node"])
+  out_n = LogicalNode(id="out_node", op_type="Output", inputs=["op_node"])
+  g = LogicalGraph(nodes={"in_node": in_n, "op_node": op_n, "out_node": out_n})
 
   mlir_code: str = backend.compile(g)
 
@@ -83,7 +83,7 @@ def test_stablehlo_semantics_not_found() -> None:
 
   backend = StableHloBackend(SemanticsNoDef())  # type: ignore
   g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode(id="n1", kind="not_found"))
+  g.add_node(LogicalNode(id="n1", op_type="not_found"))
   res: str = backend.compile(g)
   assert "stablehlo.custom_call" in res
 
@@ -101,7 +101,7 @@ def test_stablehlo_semantics_no_api() -> None:
 
   backend = StableHloBackend(SemanticsNoApi())  # type: ignore
   g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode(id="n1", kind="not_found"))
+  g.add_node(LogicalNode(id="n1", op_type="not_found"))
   res: str = backend.compile(g)
   assert "stablehlo.custom_call" in res
 
@@ -112,6 +112,6 @@ def test_stablehlo_semantics_none() -> None:
   backend = StableHloBackend()
   backend.semantics = None
   g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode(id="n1", kind="not_found"))
+  g.add_node(LogicalNode(id="n1", op_type="not_found"))
   res: str = backend.compile(g)
   assert "stablehlo.custom_call" in res

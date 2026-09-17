@@ -176,3 +176,53 @@ def test_nvidia_sass_parse_nvidia_sass_to_graph() -> None:
   nodes2: list[typing.Any] = list(graph2.nodes.values())
   assert len(nodes2) == 1
   assert nodes2[0].op_type == "Linear"
+
+
+def test_nvidia_sass_parse_bra_single_part() -> None:
+  """Test branch line parsing when split returns single item."""
+
+  class MockLine(str):
+    """Mock line string that returns length 1 on BRA split."""
+
+    def strip(self, chars: typing.Optional[str] = None) -> "MockLine":
+      """Return self on strip.
+
+      Args:
+          chars: Characters to strip.
+
+      Returns:
+          MockLine: Same mock line.
+      """
+      return self
+
+    def split(self, sep: typing.Optional[str] = None, maxsplit: typing.SupportsIndex = -1) -> list[str]:
+      """Split with special case for BRA delimiter.
+
+      Args:
+          sep: Separator string.
+          maxsplit: Max splits.
+
+      Returns:
+          list[str]: Split parts.
+      """
+      if sep == "BRA ":
+        return ["BRA "]
+      return super().split(sep, maxsplit)
+
+  class MockSass(str):
+    """Mock SASS input string."""
+
+    def splitlines(self, keepends: bool = False) -> list[str]:
+      """Split into lines with mock line.
+
+      Args:
+          keepends: Keep line breaks.
+
+      Returns:
+          list[str]: List with mock line.
+      """
+      return [MockLine("BRA ")]
+
+  adapter = NvidiaSassAdapter()
+  graph = adapter.parse_nvidia_sass_to_graph(MockSass())
+  assert len(graph.nodes) == 0

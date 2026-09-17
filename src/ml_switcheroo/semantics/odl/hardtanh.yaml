@@ -25,3 +25,6 @@ variants:
     api: torch.nn.functional.hardtanh
     args:
       input: input
+  mlx:
+    api: mlx.nn.HardTanh
+    args: {}

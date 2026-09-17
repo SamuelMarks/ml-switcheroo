@@ -303,3 +303,16 @@ def test_autogen_ops_variant_with_enum():
 
   res = _build_yaml_entry("TestOp", definition)
   assert res["variants"]["jax"]["some_field"] == "enum_val"
+
+
+def test_write_yaml_update_item_without_operation(tmp_path: Path) -> None:
+  """Test YAML update when existing file contains an item without 'operation' key.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+  """
+  out_path = tmp_path / "operations.yaml"
+  out_path.write_text(yaml.dump([{"foo": "bar"}, {"operation": "Op1"}]))
+  _write_yaml_update(out_path, [{"operation": "Op2"}])
+  loaded = yaml.safe_load(out_path.read_text())
+  assert len(loaded) == 2

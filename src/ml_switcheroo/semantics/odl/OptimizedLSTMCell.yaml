@@ -44,7 +44,6 @@ variants:
       recurrent_kernel_init: recurrent_kernel_init
       recurrent_kernel_metadata: recurrent_kernel_metadata
       rngs: rngs
-      self: self
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []

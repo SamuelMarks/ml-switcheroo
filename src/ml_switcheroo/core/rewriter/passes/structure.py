@@ -9,7 +9,7 @@ This module consolidates all structural transformation logic, including:
 """
 
 import libcst as cst
-from typing import Optional, Set, List, Union
+from typing import Any, Dict, List, Optional, Set, Union, cast
 
 from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.core.rewriter.passes.structure_helpers import StructuralTransformerHelpersMixin
@@ -90,7 +90,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     """
     config = self.context.semantics.get_framework_config(self.context.target_fw)
     if config and "tiers" in config:
-      return config["tiers"]
+      return cast(List[str], config["tiers"])
     return [SemanticTier.ARRAY_API.value, SemanticTier.NEURAL.value, SemanticTier.EXTRAS.value]
 
   def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
@@ -135,7 +135,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       return node.value
     elif isinstance(node, cst.Attribute):
       base = self._cst_to_string(node.value)
-      if base:  # pragma: no branch
+      if base:
         return f"{base}.{node.attr.value}"
     return None
 
@@ -217,11 +217,11 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     config = self.context.semantics.get_framework_config(self.context.source_fw)
     if config and "traits" in config:
       traits = StructuralTraits.model_validate(config["traits"])
-      if traits.known_inference_methods:  # pragma: no branch
+      if traits.known_inference_methods:
         return traits.known_inference_methods
     return defaults
 
-  def _get_type_mapping(self, name: str):
+  def _get_type_mapping(self, name: str) -> Optional[Dict[str, Any]]:
     """Look up the semantic type definition mapping in the database.
 
     Args:
@@ -351,7 +351,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     """
     if self._in_annotation and getattr(self, "_attribute_depth", 0) == 0:
       full_name = self._get_qualified_name(original_node)
-      if full_name:  # pragma: no branch
+      if full_name:
         mapping = self._get_type_mapping(full_name)
         if mapping and "api" in mapping:
           return self._create_dotted_name(mapping["api"])
@@ -374,7 +374,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     self._attribute_depth = max(0, getattr(self, "_attribute_depth", 1) - 1)
     if self._in_annotation and getattr(self, "_attribute_depth", 0) == 0:
       full_name = self._get_qualified_name(original_node)
-      if full_name:  # pragma: no branch
+      if full_name:
         mapping = self._get_type_mapping(full_name)
         if mapping and "api" in mapping:
           return self._create_dotted_name(mapping["api"])
@@ -492,7 +492,10 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       if self.context.current_stmt_errors:
         msg = "\n".join(self.context.current_stmt_errors)
         self.context.current_stmt_errors.clear()
-        return EscapeHatch.mark_failure(original_node, msg)
+        return cast(
+          Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel],
+          EscapeHatch.mark_failure(original_node, msg),
+        )
 
       target_base = self.target_traits.module_base
       new_bases = []
@@ -527,7 +530,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
     existing_args = set()
     for param in node.params.params:
-      if isinstance(param.name, cst.Name):  # pragma: no branch
+      if isinstance(param.name, cst.Name):
         existing_args.add(param.name.value)
 
     is_init = node.name.value == "__init__"
@@ -579,7 +582,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       for arg_name, arg_type in traits.inject_magic_args:
         if arg_name not in sig_ctx.existing_args:
           found_injected = any(n == arg_name for n, _ in sig_ctx.injected_args)
-          if not found_injected:  # pragma: no branch
+          if not found_injected:
             sig_ctx.injected_args.append((arg_name, arg_type))
 
       # Strip Magic Args

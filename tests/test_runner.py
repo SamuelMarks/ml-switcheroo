@@ -211,3 +211,31 @@ def test_runner_misc_misses() -> None:
       raise Exception("bad numpy")
 
   assert runner._deep_compare(BadNumpy(), 1) is False
+
+  # Line 229: array shape mismatch
+  assert runner._deep_compare(np.array([1]), np.array([1, 2])) is False
+
+  # Lines 234-235: exception during array conversion in _deep_compare
+  class BadArrayObj:
+    """Class raising error during __array__ conversion."""
+
+    def __array__(self, *args: Any, **kwargs: Any) -> Any:
+      """Raise conversion error."""
+      raise ValueError("cannot convert to array")
+
+  assert runner._deep_compare(np.array([1]), BadArrayObj()) is False
+
+  # 107->109: Exception not Mock Crash
+  with patch.object(runner, "_execute_api", side_effect=RuntimeError("Generic failure")):
+    pass_gen, _ = runner.verify({"torch": {"api": "torch.sum"}, "jax": {"api": "jax.sum"}}, ["x"])
+    assert pass_gen is True
+
+  # 127->126: result without shape attribute in shape check
+  with patch.object(runner, "_execute_api", return_value=42):
+    pass_shape, _ = runner.verify(
+      {"torch": {"api": "torch.sum"}, "jax": {"api": "jax.sum"}}, ["x"], shape_calc="lambda x: (1,)"
+    )
+
+  # 120->136: 'x' not in inputs during shape_calc
+  with patch.object(runner, "_execute_api", return_value=42):
+    runner.verify({"torch": {"api": "torch.sum"}}, ["y"], shape_calc="lambda y: (1,)")

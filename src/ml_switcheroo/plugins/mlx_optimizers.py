@@ -49,9 +49,9 @@ def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
     old_name = ""
     if isinstance(node.func, cst.Name):
       old_name = node.func.value
-    elif isinstance(node.func, cst.Attribute):  # pragma: no branch
+    elif isinstance(node.func, cst.Attribute):
       old_name = node.func.attr.value
-    target_api = f"mlx.optimizers.{old_name}"
+    target_api = f"mlx.optimizers.{old_name}" if old_name else "mlx.optimizers.Adam"
 
   new_func = _create_dotted_name(target_api)
 

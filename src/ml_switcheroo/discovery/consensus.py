@@ -139,9 +139,7 @@ class ConsensusEngine:
 
       # Propose the shortest token in the cluster as the Standard Name
       standard_name = min(matches, key=len).capitalize()
-
-      if standard_name not in clusters:  # pragma: no branch
-        clusters[standard_name] = []
+      clusters.setdefault(standard_name, [])
 
       for match in matches:
         clusters[standard_name].extend(self.vocabulary[match])

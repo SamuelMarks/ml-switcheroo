@@ -146,13 +146,14 @@ def test_hardware_macro_ir_roundtrip(kind: str) -> None:
   rdna_lifter = RdnaLifter()
 
   # 1. Construct canonical graph
+  nodes = {
+    "x": LogicalNode("x", op_type="Input"),
+    "m1": LogicalNode("m1", op_type=kind, attributes={"in_channels": 3, "out_channels": 16}),
+    "out": LogicalNode("out", op_type="Output"),
+  }
   g_in = LogicalGraph(
     name="MacroNet",
-    nodes=[
-      LogicalNode("x", "Input"),
-      LogicalNode("m1", kind, {"in_channels": 3, "out_channels": 16}),
-      LogicalNode("out", "Output"),
-    ],
+    nodes=nodes,
     edges=[
       LogicalEdge("x", "m1"),
       LogicalEdge("m1", "out"),
@@ -166,13 +167,13 @@ def test_hardware_macro_ir_roundtrip(kind: str) -> None:
   # 3. Lift SASS to IR
   sass_ast = NvidiaSassParser(sass_asm).parse().statements
   g_from_sass = sass_lifter.lift(sass_ast)
-  assert any(n.kind == kind for n in g_from_sass.nodes)
+  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == kind for n in g_from_sass.nodes.values())
 
   # 4. Compile lifted IR to RDNA
   rdna_asm = rdna_backend.compile(g_from_sass)
   assert f"BEGIN {kind}" in rdna_asm
 
-  # 5. Lift RDNA back to IR
+  # 5. Lift RDNA to IR
   rdna_ast = RdnaParser(rdna_asm).parse().statements
   g_from_rdna = rdna_lifter.lift(rdna_ast)
-  assert any(n.kind == kind for n in g_from_rdna.nodes)
+  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == kind for n in g_from_rdna.nodes.values())

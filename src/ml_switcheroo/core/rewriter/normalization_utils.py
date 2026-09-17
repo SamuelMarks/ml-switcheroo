@@ -6,7 +6,7 @@ bool, str) and recursive container types (list, tuple, dict).
 """
 
 import json
-from typing import Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import libcst as cst
 
@@ -33,7 +33,9 @@ def extract_primitive_key(node: cst.BaseExpression) -> Optional[str]:
   return None
 
 
-def convert_value_to_cst(val: Union[bool, int, float, str, list, tuple, dict, None]) -> cst.BaseExpression:
+def convert_value_to_cst(
+  val: Union[bool, int, float, str, List[Any], Tuple[Any, ...], Dict[Any, Any], None],
+) -> cst.BaseExpression:
   """Recursively converts a python value (primitive/container) to a CST literal expression node.
 
   Supported types:
@@ -127,8 +129,8 @@ def convert_value_to_cst(val: Union[bool, int, float, str, list, tuple, dict, No
 def normalize_arguments(
   original_node: cst.Call,
   updated_node: cst.Call,
-  op_details: dict,
-  target_impl: dict,
+  op_details: Dict[str, Any],
+  target_impl: Dict[str, Any],
   source_fw: str,
   is_module_alias_fn: Callable[[cst.BaseExpression], bool],
 ) -> List[cst.Arg]:
@@ -208,12 +210,12 @@ def normalize_arguments(
             break
 
       if not arg_provided:
-        if isinstance(original_node.func, cst.Attribute):  # pragma: no branch
+        if isinstance(original_node.func, cst.Attribute):
           rec = original_node.func.value
           found_args[first_std_arg] = cst.Arg(value=rec)
           receiver_injected = True
     else:
-      if isinstance(original_node.func, cst.Attribute):  # pragma: no branch
+      if isinstance(original_node.func, cst.Attribute):
         extra_args.append(cst.Arg(value=original_node.func.value))
 
   # 4. Process Args
@@ -311,7 +313,7 @@ def normalize_arguments(
         # If val_options is a dict, it's an enum mapping (val -> code)
         if isinstance(val_options, dict):
           raw_key = extract_primitive_key(current_arg.value)
-          if raw_key is not None and str(raw_key) in val_options:  # pragma: no branch
+          if raw_key is not None and str(raw_key) in val_options:
             target_code = val_options[str(raw_key)]
             final_val_node = cst.parse_expression(target_code)
         # Otherwise it's a constant injection (literal override)

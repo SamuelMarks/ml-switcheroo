@@ -7,7 +7,7 @@ import libcst as cst
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
-from ml_switcheroo.semantics.schema import SemanticTier
+from ml_switcheroo.semantics.schema import SemanticTier, StructuralTraits
 
 
 def test_api_attr_mixin_branches() -> None:
@@ -115,3 +115,77 @@ def test_api_attr_mixin_branches_extra() -> None:
   semantics.get_definition = lambda x: ("abs_id", {"op_type": "function", "std_args": {"a": "b"}})
   res_attr2: cst.CSTNode = transformer.leave_Attribute(attr, attr)
   assert res_attr2 is attr
+
+
+def test_api_attr_mixin_remaining_branches() -> None:
+  """Test remaining branches in ApiTransformerAttrMixin."""
+  config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
+  semantics: DummySemantics = DummySemantics()
+  context: RewriterContext = RewriterContext(semantics=semantics, config=config)
+  transformer: ApiTransformer = ApiTransformer(context)
+  transformer._cached_source_traits = StructuralTraits(functional_execution_method="apply")
+
+  # 92->109: func_name is None (e.g. lambda call)
+  assign_lambda: cst.Assign = getattr(cst.parse_statement("a = (lambda: 1)()"), "body")[0]
+  assert transformer.leave_Assign(assign_lambda, assign_lambda) is assign_lambda
+
+  # 101->99: target_name is None (e.g. subscript target a[0])
+  semantics.get_definition = lambda x: ("abs_id", {"variants": {}})
+  semantics._key_origins = {"abs_id": SemanticTier.NEURAL.value}
+  assign_sub: cst.Assign = getattr(cst.parse_statement("a[0] = t.func()"), "body")[0]
+  assert transformer.leave_Assign(assign_sub, assign_sub) is assign_sub
+
+  # 118->134: multi target assign with is_functional_apply
+  assign_multi: cst.Assign = getattr(cst.parse_statement("a = b = model.apply(p, x)"), "body")[0]
+  assert transformer.leave_Assign(assign_multi, assign_multi) is assign_multi
+
+  # 120->134: single target but not Tuple/List
+  assign_single: cst.Assign = getattr(cst.parse_statement("a = model.apply(p, x)"), "body")[0]
+  assert transformer.leave_Assign(assign_single, assign_single) is assign_single
+
+  # 122->134: empty Tuple target
+  assign_empty: cst.Assign = getattr(cst.parse_statement("() = model.apply(p, x)"), "body")[0]
+  assert transformer.leave_Assign(assign_empty, assign_empty) is assign_empty
+
+  # 124->134: primary target not BaseAssignTargetExpression (e.g. constant in tuple)
+  assign_const = cst.Assign(
+    targets=[cst.AssignTarget(target=cst.Tuple(elements=[cst.Element(value=cst.Integer("1"))]))],
+    value=getattr(cst.parse_statement("model.apply(p, x)"), "body")[0].value,
+  )
+  assert transformer.leave_Assign(assign_const, assign_const) is assign_const
+
+  # 124->125: unwrapping successful
+  assign_unwrapped: cst.Assign = getattr(cst.parse_statement("(a, b) = model.apply(p, x)"), "body")[0]
+  assert transformer.leave_Assign(assign_unwrapped, assign_unwrapped) != assign_unwrapped
+
+  # 117 False branch
+  assign_not_apply: cst.Assign = getattr(cst.parse_statement("a = model.other(p, x)"), "body")[0]
+  assert transformer.leave_Assign(assign_not_apply, assign_not_apply) is assign_not_apply
+
+  # 171->176: op_type != "function" (e.g. constant)
+  semantics.defs = {"t.my_const": ("id_const", {"op_type": "constant", "variants": {"jax": {"api": "jax.const"}}})}  # type: ignore[attr-defined]
+  semantics.get_definition = lambda x: getattr(semantics, "defs", {}).get(x)
+  attr_const = cst.parse_expression("t.my_const")
+  assert transformer.leave_Attribute(attr_const, attr_const) is not None
+
+
+def test_api_pass_remaining_branches() -> None:
+  """Test remaining branches in ApiTransformer / ApiPass."""
+  config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
+  semantics: DummySemantics = DummySemantics()
+  context: RewriterContext = RewriterContext(semantics=semantics, config=config)
+  transformer: ApiTransformer = ApiTransformer(context)
+
+  # 232->exit: _mark_stateful with empty scope_stack
+  transformer.context.scope_stack.clear()
+  transformer._mark_stateful("my_var")
+
+  # 310->309: visit_FunctionDef with param.name not cst.Name
+  param_noname = cst.Param(name=cst.SimpleString("'p'"))  # type: ignore[arg-type]
+  func_noname: cst.FunctionDef = getattr(cst.parse_module("def foo(): pass"), "body")[0]
+  func_noname = func_noname.with_changes(params=cst.Parameters(params=[param_noname]))
+  transformer.visit_FunctionDef(func_noname)
+
+  # 406: visit_Import with non-ImportAlias item in names
+  mock_import = type("MockImport", (), {"names": ["not_an_import_alias"]})()
+  assert transformer.visit_Import(mock_import) is False  # type: ignore[arg-type]

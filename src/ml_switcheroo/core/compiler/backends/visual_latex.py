@@ -81,20 +81,25 @@ class LatexBackend(CompilerBackend):
         ModelContainer: Model.
     """
     children: List[LatexNode] = []
-    # Reconstruct registry as graph nodes list
-    state_registry = {n.id: n for n in graph.nodes}
+    # Reconstruct registry as graph nodes lookup
+    state_registry = dict(graph.nodes)
 
     # Memory Logic
     for node_id, node in sorted(state_registry.items()):
-      if node.kind in ["Input", "Output"]:
+      op_type = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
+      if op_type in ["Input", "Output"]:
         continue
       if node_id.startswith("func_"):
         continue
-      config = node.metadata.copy()
-      mem = MemoryNode(node_id=node_id, op_type=node.kind, config=config)
+      node_attrs = getattr(node, "attributes", {})
+      config = node_attrs.copy()
+      mem = MemoryNode(node_id=node_id, op_type=op_type, config=config)
       children.append(mem)
 
-    input_node = next((n for n in graph.nodes if n.kind == "Input"), None)
+    input_node = next(
+      (n for n in graph.nodes.values() if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Input"),
+      None,
+    )
     input_name = "input"
     children.append(InputNode(name=input_name, shape="[_]"))
 
@@ -104,10 +109,18 @@ class LatexBackend(CompilerBackend):
     else:
       id_map["input"] = input_name
 
-    output_node = next((n for n in graph.nodes if n.kind == "Output"), None)
+    output_node = next(
+      (n for n in graph.nodes.values() if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Output"),
+      None,
+    )
     visited_ops = set()
 
-    for edge in graph.edges:
+    all_edges = list(graph.edges)
+    pending = getattr(graph, "_pending_edges", [])
+    if pending:
+      all_edges.extend(pending)
+
+    for edge in all_edges:
       target_id = edge.target
       source_id = edge.source
       if target_id == "output" or (output_node and target_id == output_node.id):
@@ -116,8 +129,10 @@ class LatexBackend(CompilerBackend):
         continue
 
       is_stateful = (target_id in state_registry) and not target_id.startswith("func_")
-      node_data = next((n for n in graph.nodes if n.id == target_id), None)
-      op_type = node_data.kind if node_data else "Unknown"
+      node_data = graph.nodes.get(target_id)
+      op_type = str(
+        getattr(node_data, "op_type", None) or getattr(node_data, "kind", "Unknown") if node_data else "Unknown"
+      )
       step_id = f"op_{target_id}"
       id_map[target_id] = step_id
       arg_ref = id_map.get(source_id, f"op_{source_id}")
@@ -128,7 +143,8 @@ class LatexBackend(CompilerBackend):
       else:
         meta_args = []
         if node_data:
-          for k, v in node_data.metadata.items():
+          node_attrs = getattr(node_data, "attributes", {})
+          for k, v in node_attrs.items():
             if k.startswith("arg"):
               meta_args.append(v)
             else:

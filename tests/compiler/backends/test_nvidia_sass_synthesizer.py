@@ -22,7 +22,7 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassPredicate,
   NvidiaSassRegister,
 )
-from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -81,9 +81,9 @@ def test_nvidia_sass_register_allocator_record_usage() -> None:
       None
   """
   allocator = RegisterAllocator()
-  graph = LogicalGraph()
-  graph.nodes = [LogicalNode("in", "Input"), LogicalNode("out", "Output")]
-  graph.edges = [LogicalEdge("in", "out")]
+  in_n = LogicalNode(id="in", op_type="Input")
+  out_n = LogicalNode(id="out", op_type="Output", inputs=["in"])
+  graph = LogicalGraph(nodes={"in": in_n, "out": out_n})
   allocator.build_liveness(graph)
 
   assert allocator._liveness_map["in"] == 1
@@ -112,10 +112,9 @@ def test_nvidia_sass_synth_from_graph_inputs_outputs() -> None:
   mock_semantics = MagicMock(spec=SemanticsManager)
   synth = NvidiaSassSynthesizer(mock_semantics)
 
-  graph = LogicalGraph()
-  graph.nodes.append(LogicalNode(id="in1", kind="Input", metadata={"name": "x"}))
-  graph.nodes.append(LogicalNode(id="out1", kind="Output"))
-  graph.edges.append(LogicalEdge(source="in1", target="out1"))
+  in1 = LogicalNode(id="in1", op_type="Input", attributes={"name": "x"})
+  out1 = LogicalNode(id="out1", op_type="Output", inputs=["in1"])
+  graph = LogicalGraph(nodes={"in1": in1, "out1": out1})
 
   nodes: list[typing.Any] = synth.from_graph(graph)
   assert len(nodes) == 2
@@ -144,7 +143,7 @@ def test_nvidia_sass_synth_from_graph_unmapped() -> None:
   synth = NvidiaSassSynthesizer(mock_semantics)
 
   graph = LogicalGraph()
-  graph.nodes.append(LogicalNode(id="op1", kind="UnknownOp"))
+  graph.add_node(LogicalNode(id="op1", op_type="UnknownOp"))
 
   nodes: list[typing.Any] = synth.from_graph(graph)
   assert len(nodes) == 1
@@ -422,7 +421,7 @@ def test_nvidia_sass_synthesizer_empty_output() -> None:
   synthesizer = NvidiaSassSynthesizer(semantics)
 
   graph = LogicalGraph(name="test")
-  graph.nodes.append(LogicalNode(id="out", kind="Output"))
+  graph.add_node(LogicalNode(id="out", op_type="Output"))
 
   res: typing.Any = synthesizer.from_graph(graph)
   assert res is not None

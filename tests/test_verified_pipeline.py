@@ -13,8 +13,21 @@ def test_verified_pipeline_dummy() -> None:
   assert hasattr(verified_pipeline, "run_verified_pipeline")
 
 
-def test_verified_pipeline_griffe_available() -> None:
+def test_verified_pipeline_griffe_available(monkeypatch: pytest.MonkeyPatch) -> None:
   """Docstring."""
+  import sys
+
+  def mock_parse_module(code: str) -> Dict[str, str]:
+    """Mock parse_module success."""
+    return {"parsed": code}
+
+  class MockGriffe:
+    """Mock Griffe module."""
+
+    parse_module = mock_parse_module
+
+  monkeypatch.setitem(sys.modules, "griffe", MockGriffe())
+
   source: str = "def foo(): pass"
   res: Dict[str, Any] = verified_pipeline.run_verified_pipeline(source)
   assert res["status"] == "success"

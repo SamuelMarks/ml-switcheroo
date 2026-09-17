@@ -44,4 +44,5 @@ variants:
   mlx:
     api: mlx.core.permute_dims
     args:
-      a: a
+      x: a
+      axes: axes

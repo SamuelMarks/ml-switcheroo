@@ -8,10 +8,9 @@ variants:
   jax:
     api: jax.numpy.take_along_axis
     args:
-      a: a
+      a: arr
       indices: indices
       axis: axis
-      arr: arr
   mlx:
     api: mlx.core.take_along_axis
     args:
@@ -22,3 +21,20 @@ variants:
     args:
       x: x
       indices: indices
+std_args:
+- name: a
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: indices
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any

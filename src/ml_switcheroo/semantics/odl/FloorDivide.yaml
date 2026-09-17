@@ -22,3 +22,16 @@ variants:
   keras:
     api: keras.ops.floor_divide
     args: {}
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: b
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stream
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

@@ -45,7 +45,7 @@ FADD R1, R0, R0;
   parser = NvidiaSassParser(sass_asm)
   statements = parser.parse().statements
   graph = NvidiaSassLifter().lift(statements)
-  assert any(n.kind == "Conv2d" for n in graph.nodes)
+  assert any(getattr(n, "op_type", None) == "Conv2d" for n in graph.nodes.values())
 
   backend = RdnaBackend(semantics)
   rdna_code = backend.compile(graph)

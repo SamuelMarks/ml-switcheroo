@@ -21,14 +21,14 @@ def test_extract_nodes_from_init() -> None:
   code: str = "\nclass Net:\n    def __init__(self):\n        self.conv1 = nn.Conv2d(1, 32, 3)\n        self.fc = nn.Linear(128, 10)\n"
   graph: LogicalGraph = parse_and_extract(code)
   assert len(graph.nodes) == 2
-  conv: typing.Any = next((n for n in graph.nodes if n.id == "conv1"))
-  assert conv.kind == "Conv2d"
-  assert conv.metadata["arg_0"] == "1"
-  assert conv.metadata["arg_1"] == "32"
-  assert conv.metadata["arg_2"] == "3"
-  fc: typing.Any = next((n for n in graph.nodes if n.id == "fc"))
-  assert fc.kind == "Linear"
-  assert fc.metadata["arg_0"] == "128"
+  conv: typing.Any = graph.nodes["conv1"]
+  assert conv.op_type == "Conv2d"
+  assert conv.attributes["arg_0"] == "1"
+  assert conv.attributes["arg_1"] == "32"
+  assert conv.attributes["arg_2"] == "3"
+  fc: typing.Any = graph.nodes["fc"]
+  assert fc.op_type == "Linear"
+  assert fc.attributes["arg_0"] == "128"
 
 
 def test_extract_edges_sequential_flow() -> None:
@@ -51,7 +51,7 @@ def test_functional_call_tracing() -> None:
   """Verifies the behavior of functional call tracing."""
   code: str = "\nclass Net:\n    def __init__(self):\n        self.conv = nn.Conv2d(1,1)\n\n    def forward(self, img):\n        y = self.conv(img)\n        z = F.relu(y)\n        return z\n"
   graph: LogicalGraph = parse_and_extract(code)
-  node_ids: set[str] = {n.id for n in graph.nodes}
+  node_ids: set[str] = set(graph.nodes.keys())
   assert "conv" in node_ids
   relu_node_found: bool = any(("func_relu" in nid for nid in node_ids))
   assert relu_node_found
@@ -66,9 +66,9 @@ def test_keyword_argument_extraction() -> None:
   """Docstring."""
   code: str = "\nclass Layer:\n    def __init__(self):\n        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)\n"
   graph: LogicalGraph = parse_and_extract(code)
-  pool: typing.Any = next((n for n in graph.nodes if n.id == "pool"))
-  assert pool.metadata["kernel_size"] == "2"
-  assert pool.metadata["stride"] == "2"
+  pool: typing.Any = graph.nodes["pool"]
+  assert pool.attributes["kernel_size"] == "2"
+  assert pool.attributes["stride"] == "2"
 
 
 def test_ignore_constants_reused() -> None:

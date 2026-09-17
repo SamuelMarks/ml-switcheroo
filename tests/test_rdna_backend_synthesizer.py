@@ -88,18 +88,23 @@ def test_synthesizer_from_graph() -> None:
   semantics: MockSemanticsManager = MockSemanticsManager()
   synthesizer: RdnaSynthesizer = RdnaSynthesizer(semantics)
 
-  graph: LogicalGraph = LogicalGraph()
-  n_in: LogicalNode = LogicalNode(id="in1", kind="Input", metadata={"name": "input_x"})
-  n_out: LogicalNode = LogicalNode(id="out1", kind="Output")
-  n_op1: LogicalNode = LogicalNode(id="op1", kind="known_op")
-  n_op2: LogicalNode = LogicalNode(id="op2", kind="unknown_op")
-  n_macro: LogicalNode = LogicalNode(id="op_macro", kind="macro_op")
-  n_macro_suffix: LogicalNode = LogicalNode(id="op_macro_s", kind="macro_suffix_op")
+  n_in: LogicalNode = LogicalNode(id="in1", op_type="Input", attributes={"name": "input_x"})
+  n_op1: LogicalNode = LogicalNode(id="op1", op_type="known_op", inputs=["in1"])
+  n_op2: LogicalNode = LogicalNode(id="op2", op_type="unknown_op", inputs=["op1"])
+  n_out: LogicalNode = LogicalNode(id="out1", op_type="Output", inputs=["op2"])
+  n_macro: LogicalNode = LogicalNode(id="op_macro", op_type="macro_op")
+  n_macro_suffix: LogicalNode = LogicalNode(id="op_macro_s", op_type="macro_suffix_op")
 
-  graph.nodes.extend([n_in, n_out, n_op1, n_op2, n_macro, n_macro_suffix])
-  graph.edges.append(LogicalEdge(source="in1", target="op1"))
-  graph.edges.append(LogicalEdge(source="op1", target="op2"))
-  graph.edges.append(LogicalEdge(source="op2", target="out1"))
+  graph: LogicalGraph = LogicalGraph(
+    nodes={
+      "in1": n_in,
+      "op1": n_op1,
+      "op2": n_op2,
+      "out1": n_out,
+      "op_macro": n_macro,
+      "op_macro_s": n_macro_suffix,
+    }
+  )
 
   # We also test a node that resolves to an abstract_id with a variant, but no 'api'
   semantics.resolve_variant = lambda aid, b: {"api": "v_add_f32"} if aid == "add" else {}
@@ -143,8 +148,8 @@ def test_rdna_backend() -> None:
   backend: RdnaBackend = RdnaBackend(semantics)
 
   graph: LogicalGraph = LogicalGraph()
-  n_in: LogicalNode = LogicalNode(id="in1", kind="Input")
-  graph.nodes.append(n_in)
+  n_in: LogicalNode = LogicalNode(id="in1", op_type="Input")
+  graph.add_node(n_in)
 
   result: str = backend.compile(graph)
   assert "RDNA Code Generation Initialized" in result
@@ -186,23 +191,23 @@ def test_rdna_synthesizer_branches() -> None:
 
   # 3. Test multiple edges to same target (174->176)
   nodes = [
-    LogicalNode(id="in1", kind="Input"),
-    LogicalNode(id="in2", kind="Input"),
-    LogicalNode(id="add", kind="Add"),
-    LogicalNode(id="out", kind="Output"),  # Empty output sources?
+    LogicalNode(id="in1", op_type="Input"),
+    LogicalNode(id="in2", op_type="Input"),
+    LogicalNode(id="add", op_type="Add"),
+    LogicalNode(id="out", op_type="Output"),  # Empty output sources?
   ]
   edges = [
     LogicalEdge(source="in1", target="add"),
     LogicalEdge(source="in2", target="add"),  # multiple edges
   ]
-  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
   synth3: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
   synth3.from_graph(graph)
 
   # 4. Test when output has no sources (188->178)
-  nodes2 = [LogicalNode(id="out2", kind="Output")]
+  nodes2 = [LogicalNode(id="out2", op_type="Output")]
   edges2 = []
-  graph2: LogicalGraph = LogicalGraph(nodes=nodes2, edges=edges2)
+  graph2: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes2}, edges=edges2)
   synth4: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
   synth4.from_graph(graph2)
 
@@ -249,9 +254,9 @@ def test_synthesizer_init_filenotfound(tmp_path: Path) -> None:
 def test_unmapped_op_and_comment() -> None:
   """Docstring."""
   # Test Unmapped Op and RdnaComment branches
-  nodes = [LogicalNode(id="unmapped1", kind="TotallyUnknownOp")]
-  nodes.append(LogicalNode(id="n2", kind="", metadata={}))  # Hit 211->214
-  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
+  nodes = [LogicalNode(id="unmapped1", op_type="TotallyUnknownOp")]
+  nodes.append(LogicalNode(id="n2", op_type="", attributes={}))  # Hit 211->214
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=[])
 
   synth: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
   cst_mod: list = synth.from_graph(graph)

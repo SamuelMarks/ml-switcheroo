@@ -15,3 +15,6 @@ variants:
     api: torch.nn.functional.softshrink
     args:
       input: input
+  mlx:
+    api: mlx.nn.Softshrink
+    args: {}

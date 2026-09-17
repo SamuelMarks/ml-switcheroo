@@ -68,15 +68,15 @@ def test_nn_shape_operations_backend(abstract_name: str, expected_api: str) -> N
       expected_api (str): Expected API string.
   """
   nodes: List[LogicalNode] = [
-    LogicalNode(id="in1", kind="Input"),
-    LogicalNode(id="op1", kind=abstract_name),
-    LogicalNode(id="out1", kind="Output"),
+    LogicalNode(id="in1", op_type="Input"),
+    LogicalNode(id="op1", op_type=abstract_name),
+    LogicalNode(id="out1", op_type="Output"),
   ]
   edges: List[LogicalEdge] = [
     LogicalEdge(source="in1", target="op1"),
     LogicalEdge(source="op1", target="out1"),
   ]
-  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
   backend: StableHloBackend = StableHloBackend(semantics=NNShapeSemanticsMock())  # type: ignore
   code: str = backend.compile(graph)
   assert expected_api in code

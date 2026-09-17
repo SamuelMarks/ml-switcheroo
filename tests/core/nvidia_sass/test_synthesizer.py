@@ -18,7 +18,7 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassNode,
   NvidiaSassRegister,
 )
-from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -100,9 +100,10 @@ def mock_semantics() -> MagicMock:
 def test_graph_to_sass_linear_flow(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to NVIDIA_SASS linear flow."""
   synth = NvidiaSassSynthesizer(mock_semantics)
-  g = LogicalGraph()
-  g.nodes = [LogicalNode("x", "Input", {}), LogicalNode("y", "Input", {}), LogicalNode("z", "Add", {})]
-  g.edges = [LogicalEdge("x", "z"), LogicalEdge("y", "z")]
+  x = LogicalNode(id="x", op_type="Input")
+  y = LogicalNode(id="y", op_type="Input")
+  z = LogicalNode(id="z", op_type="Add", inputs=["x", "y"])
+  g = LogicalGraph(nodes={"x": x, "y": y, "z": z})
   nodes: list[NvidiaSassNode] = synth.from_graph(g)
   assert len(nodes) == 3
   assert isinstance(nodes[0], NvidiaSassComment)
@@ -120,8 +121,7 @@ def test_graph_to_sass_linear_flow(mock_semantics: MagicMock) -> None:
 def test_graph_to_sass_unmapped_op(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to NVIDIA_SASS unmapped op."""
   synth = NvidiaSassSynthesizer(mock_semantics)
-  g = LogicalGraph()
-  g.nodes = [LogicalNode("n1", "UnknownOp", {})]
+  g = LogicalGraph(nodes={"n1": LogicalNode(id="n1", op_type="UnknownOp")})
   nodes: list[NvidiaSassNode] = synth.from_graph(g)
   assert len(nodes) == 1
   assert isinstance(nodes[0], NvidiaSassComment)
@@ -131,8 +131,7 @@ def test_graph_to_sass_unmapped_op(mock_semantics: MagicMock) -> None:
 def test_graph_to_sass_macro_expansion(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to NVIDIA_SASS macro expansion."""
   synth = NvidiaSassSynthesizer(mock_semantics)
-  g = LogicalGraph()
-  g.nodes = [LogicalNode("conv1", "Conv2d", {"k": 3})]
+  g = LogicalGraph(nodes={"conv1": LogicalNode(id="conv1", op_type="Conv2d", attributes={"k": 3})})
   nodes: list[NvidiaSassNode] = synth.from_graph(g)
   assert len(nodes) > 10
   comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -149,9 +148,9 @@ def test_graph_to_sass_macro_expansion(mock_semantics: MagicMock) -> None:
 def test_graph_to_sass_output_node(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to NVIDIA_SASS output node."""
   synth = NvidiaSassSynthesizer(mock_semantics)
-  g = LogicalGraph()
-  g.nodes = [LogicalNode("in1", "Input", {}), LogicalNode("out1", "Output", {})]
-  g.edges = [LogicalEdge("in1", "out1")]
+  in1 = LogicalNode(id="in1", op_type="Input")
+  out1 = LogicalNode(id="out1", op_type="Output", inputs=["in1"])
+  g = LogicalGraph(nodes={"in1": in1, "out1": out1})
   nodes: list[NvidiaSassNode] = synth.from_graph(g)
   assert len(nodes) == 2
   assert "Return: R0" in str(nodes[1])

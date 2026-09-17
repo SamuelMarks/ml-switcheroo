@@ -11,7 +11,7 @@ from typing import Dict, List, Optional
 import libcst as cst
 
 # Re-export Core IR definitions for backward compatibility
-from ml_switcheroo.core.compiler.ir import LogicalNode, LogicalEdge, LogicalGraph, topological_sort
+from ml_switcheroo.core.compiler.ir import LogicalNode, LogicalEdge, LogicalGraph, NodeDict, topological_sort
 from ml_switcheroo.core.scanners import get_full_name
 from ml_switcheroo.utils.node_diff import capture_node_source
 
@@ -231,23 +231,27 @@ class GraphExtractor(cst.CSTVisitor):
 
     attr_name = target.attr.value
     call = node.value
-    if not isinstance(call, cst.Call):
-      return
+    if isinstance(call, cst.Call):
+      op_type = get_full_name(call.func)
+      if "." in op_type:
+        op_type = op_type.split(".")[-1]
 
-    op_type = get_full_name(call.func)
-    if "." in op_type:
-      op_type = op_type.split(".")[-1]
+      metadata = {}
+      for i, arg in enumerate(call.args):
+        key = f"arg_{i}"
+        val = capture_node_source(arg.value)
+        if arg.keyword:
+          key = arg.keyword.value
+        metadata[key] = val
 
-    metadata = {}
-    for i, arg in enumerate(call.args):
-      key = f"arg_{i}"
-      val = capture_node_source(arg.value)
-      if arg.keyword:
-        key = arg.keyword.value
-      metadata[key] = val
-
-    self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, metadata)
-    # Provenance: The Assign statement
+      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, metadata)
+      self.node_map[attr_name] = node
+    elif isinstance(call, (cst.Attribute, cst.Name)):
+      op_type = get_full_name(call)
+      if "." in op_type:
+        op_type = op_type.split(".")[-1]
+      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, {})
+      self.node_map[attr_name] = node
     self.node_map[attr_name] = node
 
   def _analyze_data_flow(self, node: cst.Assign) -> None:
@@ -398,5 +402,5 @@ class GraphExtractor(cst.CSTVisitor):
     """
     if self.layer_registry:
       # Sort by definition order implicitly via dict preservation or explicitly if desired
-      self.graph.nodes = list(self.layer_registry.values())
+      self.graph.nodes = NodeDict(self.graph, self.layer_registry)
     self.graph.name = self.model_name

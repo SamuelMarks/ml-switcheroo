@@ -19,3 +19,6 @@ variants:
     args:
       key: key
       lam: lam
+  keras:
+    api: keras.metrics.Poisson
+    args: {}

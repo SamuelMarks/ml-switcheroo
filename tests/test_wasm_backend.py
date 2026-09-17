@@ -15,13 +15,13 @@ def test_wasm_backend_init() -> None:
 def test_wasm_backend_compile() -> None:
   """Docstring."""
   nodes: List[LogicalNode] = [
-    LogicalNode(id="in1", kind="Input"),
-    LogicalNode(id="in2", kind="Input"),
-    LogicalNode(id="add1", kind="Add"),
-    LogicalNode(id="mul1", kind="Mul"),
-    LogicalNode(id="sub1", kind="Sub"),
-    LogicalNode(id="other1", kind="Other"),
-    LogicalNode(id="out1", kind="Output"),
+    LogicalNode(id="in1", op_type="Input"),
+    LogicalNode(id="in2", op_type="Input"),
+    LogicalNode(id="add1", op_type="Add"),
+    LogicalNode(id="mul1", op_type="Mul"),
+    LogicalNode(id="sub1", op_type="Sub"),
+    LogicalNode(id="other1", op_type="Other"),
+    LogicalNode(id="out1", op_type="Output"),
   ]
   edges: List[LogicalEdge] = [
     LogicalEdge(source="in1", target="add1"),
@@ -33,7 +33,7 @@ def test_wasm_backend_compile() -> None:
     LogicalEdge(source="sub1", target="other1"),
     LogicalEdge(source="other1", target="out1"),
   ]
-  graph: LogicalGraph = LogicalGraph(name="test_graph", nodes=nodes, edges=edges)
+  graph: LogicalGraph = LogicalGraph(name="test_graph", nodes={n.id: n for n in nodes}, edges=edges)
   backend: WasmBackend = WasmBackend()
   code: str = backend.compile(graph)
 
@@ -56,11 +56,11 @@ def test_wasm_backend_compile() -> None:
 def test_wasm_backend_compile_no_output() -> None:
   """Docstring."""
   nodes: List[LogicalNode] = [
-    LogicalNode(id="in1", kind="Input"),
-    LogicalNode(id="add1", kind="Add"),
+    LogicalNode(id="in1", op_type="Input"),
+    LogicalNode(id="add1", op_type="Add"),
   ]
   edges: List[LogicalEdge] = [LogicalEdge(source="in1", target="add1")]
-  graph: LogicalGraph = LogicalGraph(name="main", nodes=nodes, edges=edges)
+  graph: LogicalGraph = LogicalGraph(name="main", nodes={n.id: n for n in nodes}, edges=edges)
   backend: WasmBackend = WasmBackend()
   code: str = backend.compile(graph)
 

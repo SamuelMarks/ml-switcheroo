@@ -117,7 +117,7 @@ def test_generate_success(
 ) -> None:
   """Docstring."""
   mock_extractor: MagicMock = mock_extractor_class.return_value
-  mock_node = LogicalNode(id="my_conv", kind="Conv2d")
+  mock_node = LogicalNode(id="my_conv", op_type="Conv2d")
   mock_extractor.layer_registry = {"my_conv": mock_node}
 
   # Mock parse_module to return a mock tree with a safe visit method
@@ -161,7 +161,7 @@ def test_generate_write_error(mock_semantics: SemanticsManager, mock_config: Run
     patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter") as mock_get_adapter,
   ):
     mock_extractor: MagicMock = mock_extractor_class.return_value
-    mock_extractor.layer_registry = {"my_conv": LogicalNode(id="my_conv", kind="Conv2d")}
+    mock_extractor.layer_registry = {"my_conv": LogicalNode(id="my_conv", op_type="Conv2d")}
     mock_get_adapter.return_value = MagicMock()
 
     gen = WeightScriptGenerator(mock_semantics, mock_config)
@@ -197,7 +197,7 @@ def test_flatten_mapping_rules_reverse(mock_semantics: MagicMock) -> None:
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter"):
     gen = WeightScriptGenerator(mock_semantics, conf)
 
-    layer_registry: dict[str, LogicalNode] = {"my_conv": LogicalNode(id="my_conv", kind="Conv2d")}
+    layer_registry: dict[str, LogicalNode] = {"my_conv": LogicalNode(id="my_conv", op_type="Conv2d")}
     rules = gen._flatten_mapping_rules(layer_registry)
 
     assert len(rules) > 0
@@ -210,7 +210,7 @@ def test_flatten_mapping_rules_no_def(mock_semantics: MagicMock, mock_config: Ru
   mock_semantics.get_definition.return_value = None
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter"):
     gen = WeightScriptGenerator(mock_semantics, mock_config)
-    layer_registry: dict[str, LogicalNode] = {"my_conv": LogicalNode(id="my_conv", kind="UnknownOp")}
+    layer_registry: dict[str, LogicalNode] = {"my_conv": LogicalNode(id="my_conv", op_type="UnknownOp")}
     rules = gen._flatten_mapping_rules(layer_registry)
     assert len(rules) == 0
 

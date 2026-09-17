@@ -294,7 +294,7 @@ def test_graph_optimizer_processed_ids() -> None:
   opt = GraphOptimizer([])
   n1 = LogicalNode("n1", "A")
   n2 = LogicalNode("n2", "B")
-  LogicalGraph(nodes=[n1, n2], edges=[LogicalEdge("n1", "n2"), LogicalEdge("n1", "n2")])
+  LogicalGraph(nodes={n.id: n for n in [n1, n2]}, edges=[LogicalEdge("n1", "n2"), LogicalEdge("n1", "n2")])
   opt._match_sequence(n1, ["A", "B"], {"n1": n1, "n2": n2}, {"n1": ["n2"]}, set())
 
 

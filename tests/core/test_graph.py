@@ -25,10 +25,10 @@ class MyModel:
   assert "linear" in extractor.layer_registry
 
   conv_node = extractor.layer_registry["conv1"]
-  assert conv_node.kind == "Conv2d"
-  assert conv_node.metadata["arg_0"] == "16"
-  assert conv_node.metadata["arg_1"] == "32"
-  assert conv_node.metadata["kernel_size"] == "3"
+  assert conv_node.op_type == "Conv2d"
+  assert conv_node.attributes["arg_0"] == "16"
+  assert conv_node.attributes["arg_1"] == "32"
+  assert conv_node.attributes["kernel_size"] == "3"
 
   # Check graph population
   assert len(extractor.graph.nodes) == 3

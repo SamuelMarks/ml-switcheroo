@@ -28,20 +28,17 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 
-jax: Optional[Any] = None
 try:
-  import jax as _jax
-
-  jax = _jax
+  import jax as _jax_mod
 except Exception:
-  jax = None
-flax_nnx: Optional[Any] = None
+  _jax_mod = None  # type: ignore[assignment]
+jax: Optional[Any] = _jax_mod
+
 try:
-  import flax.nnx
-
-  flax_nnx = flax.nnx
+  import flax.nnx as _flax_nnx_mod
 except Exception:
-  flax_nnx = None
+  _flax_nnx_mod = None  # type: ignore[assignment]
+flax_nnx: Optional[Any] = _flax_nnx_mod
 
 
 @register_framework("flax_nnx")

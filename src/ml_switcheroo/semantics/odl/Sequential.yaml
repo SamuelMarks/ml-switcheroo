@@ -17,7 +17,6 @@ variants:
     api: nnx.Sequential
     args:
       fns: fns
-      self: self
     dispatch_rules: []
     pack_as: Tuple
     pack_to_tuple: layers

@@ -1,5 +1,6 @@
 """Module docstring."""
 
+import typing
 from typing import List, Optional
 
 import libcst as cst
@@ -47,7 +48,7 @@ def test_everything_emitter() -> None:
     body: List[cst.BaseStatement] = []
 
   try:
-    emitter.visit_Module(FakeMod())  # type: ignore is forbidden, let's cast or omit it, or just let python handle it.
+    emitter.visit_Module(typing.cast(cst.Module, FakeMod()))
   except Exception:
     pass
 
@@ -61,12 +62,29 @@ def test_everything_emitter() -> None:
       FakeLine(None, None),
     ]
 
+  class FakeNodeEmptyNewlineEnd:
+    """Class doc."""
+
+    leading_lines: List[FakeLine] = [
+      FakeLine(None, cst.Newline("")),
+    ]
+
   try:
     emitter._extract_trivia(FakeNode())
   except Exception:
     pass
 
-  emitter._emit_block(None)  # type: ignore is forbidden, maybe pass empty list
+  try:
+    emitter._extract_trivia(FakeNodeEmptyNewlineEnd())
+  except Exception:
+    pass
+
+  try:
+    emitter._extract_trivia(object())
+  except Exception:
+    pass
+
+  emitter._emit_block(typing.cast(cst.BaseSuite, None))
   emitter._emit_statement(cst.parse_statement("class A: pass"))
   emitter._emit_statement(cst.parse_statement("def f(): pass"))
   emitter._emit_statement(cst.parse_statement("if True: pass"))
@@ -108,19 +126,27 @@ def test_everything_emitter() -> None:
   emitter._emit_import(cst.ImportFrom(module=cst.Name("math"), names=[cst.ImportAlias(cst.Name("sin"))]))
   emitter._emit_import(cst.ImportFrom(module=None, relative=[cst.Dot()], names=[cst.ImportAlias(cst.Name("sin"))]))
 
-  emitter._emit_assign(cst.parse_statement("x = y = 1").body[0])  # type: ignore is forbidden but body[0] is SmallStatement
-  emitter._emit_assign(cst.parse_statement("a[0] = 1").body[0])
-  emitter._emit_assign(cst.parse_statement("obj.attr = 1").body[0])
-  emitter._emit_assign(cst.parse_statement("foo().attr = 1").body[0])
+  def parse_assign(code: str) -> cst.Assign:
+    """Helper to parse an assign statement."""
+    stmt = cst.parse_statement(code)
+    assert isinstance(stmt, cst.SimpleStatementLine)
+    assign = stmt.body[0]
+    assert isinstance(assign, cst.Assign)
+    return assign
+
+  emitter._emit_assign(parse_assign("x = y = 1"))
+  emitter._emit_assign(parse_assign("a[0] = 1"))
+  emitter._emit_assign(parse_assign("obj.attr = 1"))
+  emitter._emit_assign(parse_assign("foo().attr = 1"))
   emitter.ctx.declare("self", ValueNode(name="%self"))
-  emitter._emit_assign(cst.parse_statement("self.attr = 1").body[0])
+  emitter._emit_assign(parse_assign("self.attr = 1"))
 
   emitter._emit_return(cst.Return(cst.Name("x")))
   emitter._emit_return(cst.Return(None))
 
   assert emitter._flatten_attr(cst.Name("x")) == "x"
   assert emitter._flatten_attr(cst.Attribute(cst.Name("obj"), cst.Name("attr"))) == "obj.attr"
-  assert emitter._flatten_attr(cst.Attribute(cst.Pass(), cst.Name("attr"))) is None
+  assert emitter._flatten_attr(cst.Attribute(typing.cast(cst.BaseExpression, cst.Pass()), cst.Name("attr"))) is None
   assert emitter._flatten_attr(cst.Pass()) is None
 
   assert emitter._get_binop_str(cst.Add()) == "add"
@@ -286,7 +312,9 @@ def test_emitter_decl_class_and_func4() -> None:
 
   # To cover the branch where param.name is NOT a Name, we can construct a FunctionDef CST directly
   # because Python 3 syntax no longer allows tuple unpacking in function arguments like `def f((x, y)):`
-  stmt_func: cst.FunctionDef = cst.parse_statement("def f(x): pass")  # type: ignore is forbidden but parse_statement returns BaseStatement. Actually it can be casted or duck-typed.
+  parsed = cst.parse_statement("def f(x): pass")
+  assert isinstance(parsed, cst.FunctionDef)
+  stmt_func: cst.FunctionDef = parsed
 
   # mutate the param name to be something other than Name, e.g., a Tuple
   class Mutator(cst.CSTTransformer):
@@ -294,7 +322,8 @@ def test_emitter_decl_class_and_func4() -> None:
 
     def leave_Param(self, original_node: cst.Param, updated_node: cst.Param) -> cst.Param:
       """Function doc."""
-      return updated_node.with_changes(name=cst.Tuple([cst.Element(cst.Name("x"))]))
+      return updated_node.with_changes(name=typing.cast(cst.Name, cst.Tuple([cst.Element(cst.Name("x"))])))
 
-  stmt_mutated: cst.FunctionDef = stmt_func.visit(Mutator())
-  emitter._emit_func_def(stmt_mutated)
+  mutated = stmt_func.visit(Mutator())
+  assert isinstance(mutated, cst.FunctionDef)
+  emitter._emit_func_def(mutated)

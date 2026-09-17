@@ -14,3 +14,26 @@ variants:
     api: mlx.core.logcumsumexp
     args:
       a: a
+std_args:
+- name: a
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: reverse
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: inclusive
+  kind: keyword_only
+  is_variadic: false
+  type: bool
+  default: 'True'
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any

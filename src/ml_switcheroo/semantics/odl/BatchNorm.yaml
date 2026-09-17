@@ -44,6 +44,12 @@ variants:
   keras:
     api: keras.layers.BatchNormalization
     args: {}
+  ir:
+    api: BatchNormalization
+    args:
+      input: X
+      weight: scale
+      bias: B
   mlx:
     api: mlx.nn.BatchNorm
     args: {}

@@ -24,22 +24,22 @@ def test_html_backend_is_stateful() -> None:
   """Docstring."""
   backend = HtmlBackend()
 
-  node_input = LogicalNode(id="in", kind="Input")
+  node_input = LogicalNode(id="in", op_type="Input")
   assert backend._is_stateful(node_input) is False
 
-  node_output = LogicalNode(id="out", kind="Output")
+  node_output = LogicalNode(id="out", op_type="Output")
   assert backend._is_stateful(node_output) is False
 
-  node_func_id = LogicalNode(id="func_1", kind="Linear")
+  node_func_id = LogicalNode(id="func_1", op_type="Linear")
   assert backend._is_stateful(node_func_id) is False
 
-  node_func_kind = LogicalNode(id="n1", kind="func_call")
+  node_func_kind = LogicalNode(id="n1", op_type="func_call")
   assert backend._is_stateful(node_func_kind) is False
 
-  node_upper = LogicalNode(id="n2", kind="Linear")
+  node_upper = LogicalNode(id="n2", op_type="Linear")
   assert backend._is_stateful(node_upper) is True
 
-  node_lower = LogicalNode(id="n3", kind="relu")
+  node_lower = LogicalNode(id="n3", op_type="relu")
   assert backend._is_stateful(node_lower) is False
 
 
@@ -78,8 +78,8 @@ def test_html_backend_layout_graph_empty() -> None:
   """Docstring."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="test")
-  graph.nodes.append(LogicalNode(id="in", kind="Input"))
-  graph.nodes.append(LogicalNode(id="out", kind="Output"))
+  graph.add_node(LogicalNode(id="in", op_type="Input"))
+  graph.add_node(LogicalNode(id="out", op_type="Output"))
 
   boxes: list[typing.Any] = backend._layout_graph(graph)
   assert boxes == []
@@ -91,11 +91,11 @@ def test_html_backend_layout_graph_nodes() -> None:
   graph = LogicalGraph(name="test_graph")
 
   # Add nodes to graph
-  n1 = LogicalNode(id="n1", kind="Linear", metadata={"arg_x": "1"})  # Stateful
-  n2 = LogicalNode(id="n2", kind="relu", metadata={"alpha": "0.1"})  # Stateless
-  n3 = LogicalNode(id="n3", kind="Linear")  # Stateful
+  n1 = LogicalNode(id="n1", op_type="Linear", attributes={"arg_x": "1"})  # Stateful
+  n2 = LogicalNode(id="n2", op_type="relu", attributes={"alpha": "0.1"})  # Stateless
+  n3 = LogicalNode(id="n3", op_type="Linear")  # Stateful
 
-  graph.nodes.extend([n1, n2, n3])
+  graph.nodes.update({n.id: n for n in [n1, n2, n3]})
   # Add some dummy edges to satisfy topological sort if it cares (it might just return nodes if no edges)
   # Actually, topological_sort of disconnected nodes will just return them in some order.
 
@@ -117,8 +117,8 @@ def test_html_backend_compile() -> None:
   """Docstring."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="MyModel")
-  n1 = LogicalNode(id="n1", kind="relu")
-  graph.nodes.append(n1)
+  n1 = LogicalNode(id="n1", op_type="relu")
+  graph.add_node(n1)
 
   html_str: str = backend.compile(graph)
   assert "MyModel" in html_str
@@ -128,8 +128,8 @@ def test_html_backend_compile_default_name() -> None:
   """Docstring."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="GeneratedNet")
-  n1 = LogicalNode(id="n1", kind="relu")
-  graph.nodes.append(n1)
+  n1 = LogicalNode(id="n1", op_type="relu")
+  graph.add_node(n1)
 
   html_str: str = backend.compile(graph)
   assert "ConvNet" in html_str
@@ -139,8 +139,8 @@ def test_html_backend_compile_no_name() -> None:
   """Docstring."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="")
-  n1 = LogicalNode(id="n1", kind="relu")
-  graph.nodes.append(n1)
+  n1 = LogicalNode(id="n1", op_type="relu")
+  graph.add_node(n1)
 
   html_str: str = backend.compile(graph)
   assert "ConvNet" in html_str
@@ -155,7 +155,7 @@ def test_html_backend_layout_graph_no_last_blue_row() -> None:
   graph = LogicalGraph(name="test")
 
   n1 = LogicalNode("n1", "add")
-  graph.nodes.append(n1)
+  graph.add_node(n1)
   backend._layout_graph(graph)
 
 
@@ -170,8 +170,8 @@ def test_html_backend_layout_graph_break_loop() -> None:
   graph = LogicalGraph(name="test")
   n1 = LogicalNode("n1", "add")
   n2 = LogicalNode("n2", "add")
-  graph.nodes.append(n1)
-  graph.nodes.append(n2)
+  graph.add_node(n1)
+  graph.add_node(n2)
 
   # We will mock the GridBox creation to prevent "box b" from being in the css_class
   from ml_switcheroo.core.compiler.backends.html import GridBox
@@ -200,8 +200,8 @@ def test_html_backend_layout_graph_no_match_last_blue_row2() -> None:
   graph = LogicalGraph(name="test")
   n1 = LogicalNode("n1", "add")
   n2 = LogicalNode("n2", "add")
-  graph.nodes.append(n1)
-  graph.nodes.append(n2)
+  graph.add_node(n1)
+  graph.add_node(n2)
 
   orig_gridbox = __import__("ml_switcheroo.core.compiler.backends.html", fromlist=["GridBox"]).GridBox
 
@@ -226,8 +226,8 @@ def test_html_backend_layout_graph_no_match_last_blue_row3() -> None:
 
   n1 = LogicalNode("n1", "add")
   n2 = LogicalNode("n2", "add")
-  graph.nodes.append(n1)
-  graph.nodes.append(n2)
+  graph.add_node(n1)
+  graph.add_node(n2)
 
   from unittest.mock import patch
 
@@ -256,8 +256,8 @@ def test_html_backend_layout_graph_no_match_last_blue_row4() -> None:
 
   n1 = LogicalNode("n1", "add")
   n2 = LogicalNode("n2", "add")
-  graph.nodes.append(n1)
-  graph.nodes.append(n2)
+  graph.add_node(n1)
+  graph.add_node(n2)
 
   from unittest.mock import patch
 
@@ -286,8 +286,8 @@ def test_html_backend_layout_graph_no_match_last_blue_row5() -> None:
 
   n1 = LogicalNode("n1", "add")
   n2 = LogicalNode("n2", "add")
-  graph.nodes.append(n1)
-  graph.nodes.append(n2)
+  graph.add_node(n1)
+  graph.add_node(n2)
 
   from unittest.mock import patch
 
@@ -316,8 +316,8 @@ def test_html_backend_layout_graph_no_match_last_blue_row6() -> None:
 
   n1 = LogicalNode("n1", "add")
   n2 = LogicalNode("n2", "add")
-  graph.nodes.append(n1)
-  graph.nodes.append(n2)
+  graph.add_node(n1)
+  graph.add_node(n2)
 
   from unittest.mock import patch
 
@@ -346,8 +346,8 @@ def test_html_backend_layout_graph_no_match_last_blue_row7() -> None:
 
   n1 = LogicalNode("n1", "add")
   n2 = LogicalNode("n2", "add")
-  graph.nodes.append(n1)
-  graph.nodes.append(n2)
+  graph.add_node(n1)
+  graph.add_node(n2)
 
   from unittest.mock import patch
 
@@ -376,8 +376,8 @@ def test_html_backend_layout_graph_no_match_last_blue_row8() -> None:
 
   n1 = LogicalNode("n1", "add")
   n2 = LogicalNode("n2", "add")
-  graph.nodes.append(n1)
-  graph.nodes.append(n2)
+  graph.add_node(n1)
+  graph.add_node(n2)
 
   from unittest.mock import patch
 
@@ -405,8 +405,8 @@ def test_html_backend_layout_graph_no_match_last_blue_row9() -> None:
   graph = LogicalGraph(name="test")
   n1 = LogicalNode("n1", "add")
   n2 = LogicalNode("n2", "add")
-  graph.nodes.append(n1)
-  graph.nodes.append(n2)
+  graph.add_node(n1)
+  graph.add_node(n2)
 
   from unittest.mock import patch
 
@@ -452,9 +452,9 @@ def test_html_backend_first_op_not_layer() -> None:
   graph = LogicalGraph(name="test")
   op = LogicalNode(
     id="regular_op",
-    kind="Regular",
+    op_type="Regular",
   )
-  graph.nodes.append(op)
+  graph.add_node(op)
   backend = HtmlBackend()
   code: str = backend.compile(graph)
   assert "box b" not in code or "box b" in code

@@ -163,3 +163,24 @@ def test_visualizer_complex_arg() -> None:
   gen: MermaidGenerator = MermaidGenerator()
   mermaid: str = gen.generate(tree)
   assert "sub_call()" in mermaid
+
+
+def test_visualizer_empty_stack_and_import_from_edge_cases() -> None:
+  """Verifies leave methods with empty stack and ImportFrom edge cases."""
+  from unittest.mock import MagicMock
+
+  gen: MermaidGenerator = MermaidGenerator()
+  gen.stack.clear()
+  gen.leave_Module(cst.Module([]))
+  gen.leave_ClassDef(cst.ClassDef(name=cst.Name("Foo"), body=cst.IndentedBlock([])))
+  gen.leave_FunctionDef(cst.FunctionDef(name=cst.Name("foo"), params=cst.Parameters(), body=cst.IndentedBlock([])))
+  gen.leave_Call(cst.Call(func=cst.Name("foo")))
+  gen.leave_Arg(cst.Arg(value=cst.Name("x")))
+
+  mock_imp_from: MagicMock = MagicMock(spec=cst.ImportFrom)
+  mock_imp_from.module = None
+  mock_imp_from.names = [
+    cst.ImportAlias(name=cst.Name("valid")),
+    object(),
+  ]
+  gen.visit_ImportFrom(mock_imp_from)

@@ -21,6 +21,5 @@ variants:
       other: other
   jax:
     api: jax.numpy.logaddexp2
-    args:
-      x1: x1
-      x2: x2
+    macro_template: jax.numpy.logaddexp2({input}, {other})
+    args: {}

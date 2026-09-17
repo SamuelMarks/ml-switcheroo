@@ -36,7 +36,7 @@ def test_tikz_backend_is_stateful() -> None:
 def test_tikz_backend_create_tikz_node_stateful() -> None:
   """Verify TikZ node generation for a stateful node.
 
-  This test checks that a stateful logical node (like 'Linear') with key-value metadata
+  This test checks that a stateful logical node (like 'Linear') with key-value attributes
   is correctly converted into a TikZ node, and that its formatted properties and backslashes
   are properly escaped in the emitted content.
 
@@ -47,19 +47,19 @@ def test_tikz_backend_create_tikz_node_stateful() -> None:
     None
   """
   backend = TikzBackend()
-  node = LogicalNode(id="L1", kind="Linear", metadata={"arg_0": 10})
+  node = LogicalNode(id="L1", op_type="Linear", attributes={"arg_0": 10})
   tnode = backend._create_tikz_node(node, 0, 0)
 
   assert tnode.node_id == "L1"
   assert "Linear" in tnode.content.emit()
-  assert "arg\\_0: 10" in tnode.content.emit()
+  assert r"arg\_0: 10" in tnode.content.emit()
 
 
 def test_tikz_backend_create_tikz_node_stateless() -> None:
   """Verify TikZ node generation for a stateless node.
 
   This test checks that a stateless logical node (like 'relu') is correctly converted
-  into a TikZ node representation with its kind properly preserved.
+  into a TikZ node representation with its op_type properly preserved.
 
   Args:
     None
@@ -68,7 +68,7 @@ def test_tikz_backend_create_tikz_node_stateless() -> None:
     None
   """
   backend = TikzBackend()
-  node = LogicalNode(id="R1", kind="relu")
+  node = LogicalNode(id="R1", op_type="relu")
   tnode = backend._create_tikz_node(node, 0, 0)
 
   assert tnode.node_id == "R1"
@@ -88,7 +88,7 @@ def test_tikz_backend_create_tikz_node_input_output() -> None:
     None
   """
   backend = TikzBackend()
-  node_in = LogicalNode(id="in", kind="Input")
+  node_in = LogicalNode(id="in", op_type="Input")
   tn_in = backend._create_tikz_node(node_in, 0, 0)
   assert tn_in.node_id == "in"
 
@@ -107,18 +107,21 @@ def test_latex_backend_compile() -> None:
     None
   """
   backend = LatexBackend()
-  graph = LogicalGraph(name="MyModel")
-  graph.nodes.append(LogicalNode(id="in1", kind="Input", metadata={"name": "x"}))
-  graph.nodes.append(LogicalNode(id="l1", kind="Linear", metadata={"arg_1": "10"}))
-  graph.nodes.append(LogicalNode(id="r1", kind="relu"))
-  graph.nodes.append(LogicalNode(id="out1", kind="Output"))
-
-  graph.edges.append(LogicalEdge("in1", "l1"))
-  graph.edges.append(LogicalEdge("l1", "r1"))
-  graph.edges.append(LogicalEdge("r1", "out1"))
+  nodes = {
+    "in1": LogicalNode(id="in1", op_type="Input", attributes={"name": "x"}),
+    "l1": LogicalNode(id="l1", op_type="Linear", attributes={"arg_1": "10"}),
+    "r1": LogicalNode(id="r1", op_type="relu"),
+    "out1": LogicalNode(id="out1", op_type="Output"),
+  }
+  edges = [
+    LogicalEdge("in1", "l1"),
+    LogicalEdge("l1", "r1"),
+    LogicalEdge("r1", "out1"),
+  ]
+  graph = LogicalGraph(name="MyModel", nodes=nodes, edges=edges)
 
   res = backend.compile(graph)
-  assert "\\begin{DefModel}" in res
+  assert r"\begin{DefModel}" in res
   assert "MyModel" in res
   assert "Linear" in res
   assert "Return" in res
@@ -137,8 +140,7 @@ def test_latex_backend_compile_no_name() -> None:
     None
   """
   backend = LatexBackend()
-  graph = LogicalGraph()
-  graph.nodes.append(LogicalNode(id="in1", kind="Input"))
+  graph = LogicalGraph(nodes={"in1": LogicalNode(id="in1", op_type="Input")})
 
   res = backend.compile(graph)
   assert "Model" in res
@@ -157,10 +159,12 @@ def test_latex_backend_compile_no_output() -> None:
     None
   """
   backend = LatexBackend()
-  graph = LogicalGraph()
-  graph.nodes.append(LogicalNode(id="in1", kind="Input"))
-  graph.nodes.append(LogicalNode(id="l1", kind="Linear"))
-  graph.edges.append(LogicalEdge("in1", "l1"))
+  nodes = {
+    "in1": LogicalNode(id="in1", op_type="Input"),
+    "l1": LogicalNode(id="l1", op_type="Linear"),
+  }
+  edges = [LogicalEdge("in1", "l1")]
+  graph = LogicalGraph(nodes=nodes, edges=edges)
 
   # Missing explicit Output node
   res = backend.compile(graph)
@@ -174,8 +178,12 @@ def test_latex_backend_compile_no_output() -> None:
 def test_calculate_layout_cycle() -> None:
   """Docstring."""
   b = TikzBackend()
-  g = LogicalGraph("T", nodes=[LogicalNode("n1", "Op"), LogicalNode("n2", "Op")])
-  g.edges.extend([LogicalEdge("n1", "n2"), LogicalEdge("n2", "n1")])
+  nodes = {
+    "n1": LogicalNode("n1", op_type="Op"),
+    "n2": LogicalNode("n2", op_type="Op"),
+  }
+  edges = [LogicalEdge("n1", "n2"), LogicalEdge("n2", "n1")]
+  g = LogicalGraph("T", nodes=nodes, edges=edges)
   ranks: dict[str, int] = b._calculate_layout(g)
   assert ranks
 
@@ -183,15 +191,18 @@ def test_calculate_layout_cycle() -> None:
 def test_calculate_layout_disconnected_explicit() -> None:
   """Docstring."""
   b = TikzBackend()
-  g = LogicalGraph("T")
-  g.nodes.append(LogicalNode("n1", "Input"))
-  g.nodes.append(LogicalNode("n2", "Op"))
-  g.edges.append(LogicalEdge("n1", "n2"))
-
-  g.nodes.append(LogicalNode("c1", "Op"))
-  g.nodes.append(LogicalNode("c2", "Op"))
-  g.edges.append(LogicalEdge("c1", "c2"))
-  g.edges.append(LogicalEdge("c2", "c1"))
+  nodes = {
+    "n1": LogicalNode("n1", op_type="Input"),
+    "n2": LogicalNode("n2", op_type="Op"),
+    "c1": LogicalNode("c1", op_type="Op"),
+    "c2": LogicalNode("c2", op_type="Op"),
+  }
+  edges = [
+    LogicalEdge("n1", "n2"),
+    LogicalEdge("c1", "c2"),
+    LogicalEdge("c2", "c1"),
+  ]
+  g = LogicalGraph("T", nodes=nodes, edges=edges)
 
   ranks: dict[str, int] = b._calculate_layout(g)
   assert "c1" in ranks
@@ -200,61 +211,71 @@ def test_calculate_layout_disconnected_explicit() -> None:
 def test_latex_backend_formatting() -> None:
   """Docstring."""
   b = LatexBackend()
-  g = LogicalGraph("T")
-  g.nodes.append(LogicalNode("n1", "Input"))
-  g.nodes.append(LogicalNode("n2", "a.b.Add", metadata={"other": "v"}))
-  g.nodes.append(LogicalNode("n3", "Output"))
-  g.edges.append(LogicalEdge("n1", "n2"))
-  g.edges.append(LogicalEdge("n2", "n3"))
+  nodes = {
+    "n1": LogicalNode("n1", op_type="Input"),
+    "n2": LogicalNode("n2", op_type="a.b.Add", attributes={"other": "v"}),
+    "n3": LogicalNode("n3", op_type="Output"),
+  }
+  edges = [
+    LogicalEdge("n1", "n2"),
+    LogicalEdge("n2", "n3"),
+  ]
+  g = LogicalGraph("T", nodes=nodes, edges=edges)
   b.compile(g)
 
 
 def test_latex_backend_duplicate_edge_and_noarg() -> None:
   """Docstring."""
   b = LatexBackend()
-  g = LogicalGraph("T")
-  g.nodes.append(LogicalNode("n1", "Input"))
-  g.nodes.append(LogicalNode("n2", "func_something", metadata={"notarg": "val"}))
-  g.nodes.append(LogicalNode("n3", "math.add"))
-  g.nodes.append(LogicalNode("n4", "Output"))
-  g.edges.append(LogicalEdge("n1", "n3"))
-  g.edges.append(LogicalEdge("n3", "n2"))
-  g.edges.append(LogicalEdge("n2", "n4"))
-  g.edges.append(LogicalEdge("n3", "n4"))
-  g.edges.append(LogicalEdge("n3", "n4"))
+  nodes = {
+    "n1": LogicalNode("n1", op_type="Input"),
+    "n2": LogicalNode("n2", op_type="func_something", attributes={"notarg": "val"}),
+    "n3": LogicalNode("n3", op_type="math.add"),
+    "n4": LogicalNode("n4", op_type="Output"),
+  }
+  edges = [
+    LogicalEdge("n1", "n3"),
+    LogicalEdge("n3", "n2"),
+    LogicalEdge("n2", "n4"),
+    LogicalEdge("n3", "n4"),
+    LogicalEdge("n3", "n4"),
+  ]
+  g = LogicalGraph("T", nodes=nodes, edges=edges)
   b.compile(g)
 
 
 def test_force_transcode_lines() -> None:
   """Docstring."""
   b = LatexBackend()
-  g3 = LogicalGraph("T")
-  g3.nodes.append(LogicalNode("n1", "Input"))
-  g3.nodes.append(LogicalNode("func_n2", "foo.bar", metadata={"notkey": "val"}))
-  g3.nodes.append(LogicalNode("n3", "Output"))
-  g3.edges.append(LogicalEdge("n1", "func_n2"))
-  g3.edges.append(LogicalEdge("func_n2", "n3"))
-
-  g3.nodes.append(LogicalNode("func_n4", "Op"))
-  g3.edges.append(LogicalEdge("func_n4", "func_n2"))
-  g3.edges.append(LogicalEdge("func_n2", "func_n4"))
+  nodes = {
+    "n1": LogicalNode("n1", op_type="Input"),
+    "func_n2": LogicalNode("func_n2", op_type="foo.bar", attributes={"notkey": "val"}),
+    "n3": LogicalNode("n3", op_type="Output"),
+    "func_n4": LogicalNode("func_n4", op_type="Op"),
+  }
+  edges = [
+    LogicalEdge("n1", "func_n2"),
+    LogicalEdge("func_n2", "n3"),
+    LogicalEdge("func_n4", "func_n2"),
+    LogicalEdge("func_n2", "func_n4"),
+  ]
+  g3 = LogicalGraph("T", nodes=nodes, edges=edges)
   b._transcode_graph(g3, "T")
 
 
 def test_visual_backends_rank_existing_higher() -> None:
   """Docstring."""
-  # Hit 147->146
-  g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode("A", "Input"))
-  g.nodes.append(LogicalNode("B", "Input"))
-  g.nodes.append(LogicalNode("C", "Linear"))
-  # A -> C, B -> C
-  g.edges.append(LogicalEdge("A", "C"))
-  g.edges.append(LogicalEdge("B", "C"))
+  nodes = {
+    "A": LogicalNode("A", op_type="Input"),
+    "B": LogicalNode("B", op_type="Input"),
+    "C": LogicalNode("C", op_type="Linear"),
+  }
+  edges = [
+    LogicalEdge("A", "C"),
+    LogicalEdge("B", "C"),
+  ]
+  g = LogicalGraph("Test", nodes=nodes, edges=edges)
 
-  # If A is processed first, ranks[C] = 1
-  # When B is processed, curr_rank = 0, ranks[C] = 1, so 1 < 0+1 is False!
-  # This hits 147->146.
   class DummyVisual(TikzBackend):
     """Dummy visual."""
 
@@ -263,5 +284,4 @@ def test_visual_backends_rank_existing_higher() -> None:
       return "box"
 
   backend = DummyVisual()
-  # just run _calculate_layout
   backend._calculate_layout(g)

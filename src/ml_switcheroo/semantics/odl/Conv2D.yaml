@@ -57,3 +57,9 @@ variants:
     args:
       input: input
       weight: weight
+  ir:
+    api: Conv
+    args:
+      input: input
+      weight: weight
+      bias: bias

@@ -89,6 +89,16 @@ def test_ensure_determinism() -> None:
     sys.modules["mlx"].core.random.seed.side_effect = Exception("err")  # type: ignore
     func()
 
+    # Test cuda is not available, tf without random, and mlx absent
+    sys.modules["torch"].manual_seed.side_effect = None  # type: ignore
+    sys.modules["torch"].cuda.is_available.return_value = False  # type: ignore
+    sys.modules["tensorflow"] = mock.MagicMock(spec=[])
+    if "mlx.core" in sys.modules:
+      del sys.modules["mlx.core"]
+    if "mlx" in sys.modules:
+      del sys.modules["mlx"]
+    func()
+
   with mock.patch.dict("sys.modules", {"mlx": mock.MagicMock()}):
     if "mlx.core" in sys.modules:
       del sys.modules["mlx.core"]

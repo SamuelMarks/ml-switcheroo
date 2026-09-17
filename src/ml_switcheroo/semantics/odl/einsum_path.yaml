@@ -17,3 +17,12 @@ variants:
     api: mlx.core.einsum_path
     args:
       subscripts: subscripts
+std_args:
+- name: subscripts
+  kind: positional_or_keyword
+  is_variadic: false
+  type: str
+- name: operands
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any

@@ -22,8 +22,8 @@ variants:
   jax:
     api: jax.numpy.greater
     args:
-      x1: x1
-      x2: x2
+      input: x
+      other: y
   mlx:
     api: mlx.core.greater
     args:

@@ -121,11 +121,18 @@ def test_injector_spec_write_parent_not_exist() -> None:
 # --- Merged from test_injector_spec_extra_loop.py ---
 
 
-def test_injector_spec_legacy_tuple_args():
-  """Docstring."""
+def test_injector_spec_legacy_tuple_args() -> None:
+  """Verifies that legacy tuple arguments are properly converted."""
   # Pass self as None
-  clean_args = StandardsInjector._serialize_args(None, args=[("x", "int"), ("y",)])
+  clean_args: list[Any] = StandardsInjector._serialize_args(None, args=[("x", "int"), ("y",)])  # type: ignore[arg-type]
   assert clean_args == [{"name": "x", "type": "int"}, {"name": "y"}]
+
+
+def test_injector_spec_non_string_arg_ignored() -> None:
+  """Verifies that unrecognized argument types in args sequence are skipped."""
+  bad_args: list[Any] = ["x", 123, None]
+  clean_args: list[Any] = StandardsInjector._serialize_args(None, args=bad_args)  # type: ignore[arg-type]
+  assert clean_args == ["x"]
 
 
 # --- Merged from test_injector_spec_missing.py ---

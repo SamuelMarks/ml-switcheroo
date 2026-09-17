@@ -23,7 +23,7 @@ def test_backend_protocol_enforcement() -> None:
 def test_noop_backend_compile() -> None:
   """Verifies the behavior of noop backend compile."""
   graph = LogicalGraph()
-  graph.nodes = [LogicalNode(id="n1", kind="Input"), LogicalNode(id="n2", kind="Output")]
+  graph.nodes = [LogicalNode(id="n1", op_type="Input"), LogicalNode(id="n2", op_type="Output")]
   backend = NoOpBackend()
   result: str = backend.compile(graph)
   assert result == "Compiled 2 nodes."

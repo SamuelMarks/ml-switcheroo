@@ -20,7 +20,7 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaSGPR,
   RdnaVGPR,
 )
-from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -175,10 +175,9 @@ def test_rdna_synth_from_graph_inputs_outputs():
   mock_semantics = MagicMock(spec=SemanticsManager)
   synth = RdnaSynthesizer(mock_semantics)
 
-  graph = LogicalGraph()
-  graph.nodes.append(LogicalNode(id="in1", kind="Input", metadata={"name": "x"}))
-  graph.nodes.append(LogicalNode(id="out1", kind="Output"))
-  graph.edges.append(LogicalEdge(source="in1", target="out1"))
+  in1 = LogicalNode(id="in1", op_type="Input", attributes={"name": "x"})
+  out1 = LogicalNode(id="out1", op_type="Output", inputs=["in1"])
+  graph = LogicalGraph(nodes={"in1": in1, "out1": out1})
 
   nodes = synth.from_graph(graph)
   assert len(nodes) == 2
@@ -207,7 +206,7 @@ def test_rdna_synth_from_graph_unmapped():
   synth = RdnaSynthesizer(mock_semantics)
 
   graph = LogicalGraph()
-  graph.nodes.append(LogicalNode(id="op1", kind="UnknownOp"))
+  graph.add_node(LogicalNode(id="op1", op_type="UnknownOp"))
 
   nodes = synth.from_graph(graph)
   assert len(nodes) == 1
@@ -233,12 +232,10 @@ def test_rdna_synth_from_graph_valid_op():
   mock_semantics.resolve_variant.return_value = {"api": "v_add_f32"}
   synth = RdnaSynthesizer(mock_semantics)
 
-  graph = LogicalGraph()
-  graph.nodes.append(LogicalNode(id="in1", kind="Input"))
-  graph.nodes.append(LogicalNode(id="in2", kind="Input"))
-  graph.nodes.append(LogicalNode(id="add1", kind="Add"))
-  graph.edges.append(LogicalEdge("in1", "add1"))
-  graph.edges.append(LogicalEdge("in2", "add1"))
+  in1 = LogicalNode(id="in1", op_type="Input")
+  in2 = LogicalNode(id="in2", op_type="Input")
+  add1 = LogicalNode(id="add1", op_type="Add", inputs=["in1", "in2"])
+  graph = LogicalGraph(nodes={"in1": in1, "in2": in2, "add1": add1})
 
   nodes = synth.from_graph(graph)
   assert len(nodes) == 3
@@ -460,7 +457,7 @@ def test_rdna_synthesizer_empty_output():
   synthesizer = RdnaSynthesizer(semantics)
 
   graph = LogicalGraph(name="test")
-  graph.nodes.append(LogicalNode(id="out", kind="Output"))
+  graph.add_node(LogicalNode(id="out", op_type="Output"))
 
   print("I RAN!!!")
   res = synthesizer.from_graph(graph)

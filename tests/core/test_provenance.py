@@ -44,7 +44,7 @@ def test_provenance_functional_call() -> None:
   assert isinstance(node, cst.Call)
   assert typing.cast(cst.Name, typing.cast(cst.Attribute, node.func).attr).value == "relu"
   logical_node = ex.layer_registry["func_relu"]
-  assert logical_node.metadata.get("inplace") == "True"
+  assert logical_node.attributes.get("inplace") == "True"
 
 
 def test_provenance_script_constant() -> None:

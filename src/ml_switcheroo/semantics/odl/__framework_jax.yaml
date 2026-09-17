@@ -3,8 +3,20 @@ __frameworks__:
     alias:
       module: "jax.numpy"
       name: "jnp"
+    plugin_traits:
+      has_numpy_compatible_arrays: true
+      requires_explicit_rng: true
+      requires_functional_state: true
+      requires_functional_control_flow: true
+      enforce_purity_analysis: true
+    traits:
+      module_base: "flax.nnx.Module"
+      forward_method: "__call__"
   flax:
     extends: "jax"
     alias:
       module: "flax.nnx"
       name: "nnx"
+    traits:
+      module_base: "flax.nnx.Module"
+      forward_method: "__call__"

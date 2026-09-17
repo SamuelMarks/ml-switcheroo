@@ -51,7 +51,6 @@ variants:
       merge_fn: merge_fn
       return_carry: return_carry
       rngs: rngs
-      self: self
       time_major: time_major
     dispatch_rules: []
     pack_as: Tuple

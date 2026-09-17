@@ -26,9 +26,8 @@ variants:
       other: other
   jax:
     api: jax.numpy.subtract
-    args:
-      x1: x1
-      x2: x2
+    macro_template: jax.numpy.subtract({input}, {other})
+    args: {}
   mlx:
     api: mlx.core.subtract
     args:

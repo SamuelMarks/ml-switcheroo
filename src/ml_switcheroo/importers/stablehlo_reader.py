@@ -62,7 +62,7 @@ class StableHloSpecImporter:
 
     for i, token in enumerate(tokens):
       if token.type == "heading_open" and token.tag == "h3":
-        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":  # pragma: no branch
+        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
           inline = tokens[i + 1]
           if inline.children and len(inline.children) >= 1:
             child = inline.children[0]
@@ -74,7 +74,7 @@ class StableHloSpecImporter:
               current_def = {"description": [], "raw_syntax": "", "std_args": []}
       elif current_op:
         if token.type == "paragraph_open":
-          if i + 1 < len(tokens) and tokens[i + 1].type == "inline":  # pragma: no branch
+          if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
             if not current_def["description"]:
               current_def["description"].append(tokens[i + 1].content)
         elif token.type == "fence":
@@ -87,7 +87,7 @@ class StableHloSpecImporter:
                 try:
                   parser = MlirParser(line.strip())
                   module = parser.parse()
-                  if module.body and module.body.operations:  # pragma: no branch
+                  if module.body and module.body.operations:
                     parsed_op = module.body.operations[0]
                     current_def["raw_syntax"] = line.strip()
                     current_def["parsed_op"] = parsed_op
@@ -95,7 +95,7 @@ class StableHloSpecImporter:
                   # Fallback to saving raw string if parse fails
                   current_def["raw_syntax"] = line.strip()
 
-    if current_op and current_def:  # pragma: no branch
+    if current_op and current_def:
       self._finalize_op(semantics, current_op, current_def)
 
     return semantics
@@ -122,7 +122,7 @@ class StableHloSpecImporter:
       # Use parsed operands, filtering out numeric intermediate values if any (though typically operands are named)
       for v in parsed_op.operands:
         v_name = v.name.strip("%")
-        if not v_name.isdigit() and v_name not in ["result", "results"]:  # pragma: no branch
+        if not v_name.isdigit() and v_name not in ["result", "results"]:
           args.append(v_name)
 
     # Fallback if parsing failed or no arguments found

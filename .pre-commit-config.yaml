@@ -96,6 +96,13 @@ repos:
         files: ^(src/ml_switcheroo/semantics/.*keras.*|src/ml_switcheroo/frameworks/keras.*\.py)$
         pass_filenames: false
 
+      - id: audit-ir-grounding
+        name: audit-ir-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework ir
+        language: system
+        files: ^(src/ml_switcheroo/semantics/.*ir.*|src/ml_switcheroo/frameworks/ir\.py|src/ml_switcheroo/core/compiler/backends/ir\.py|src/ml_switcheroo/core/compiler/frontends/ir\.py)$
+        pass_filenames: false
+
       - id: audit-mlir-spec
         name: audit-mlir-spec
         entry: uv run python scripts/audit_mlir_spec.py

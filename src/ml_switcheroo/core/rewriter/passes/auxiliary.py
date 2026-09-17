@@ -166,7 +166,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     self,
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
-  ):
+  ) -> Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
     """Proces statement errors.
 
     Args:
@@ -180,13 +180,19 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     if self.context.current_stmt_warnings:
       unique = list(dict.fromkeys(self.context.current_stmt_warnings))
       msg = "; ".join(unique)
-      return EscapeHatch.mark_failure(updated_node, msg)
+      return cast(
+        Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel],
+        EscapeHatch.mark_failure(updated_node, msg),
+      )
 
     # Check errors (Priority over warnings for reversion logic structure)
     if self.context.current_stmt_errors:
       unique = list(dict.fromkeys(self.context.current_stmt_errors))
       msg = "; ".join(unique)
-      return EscapeHatch.mark_failure(original_node, msg)
+      return cast(
+        Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel],
+        EscapeHatch.mark_failure(original_node, msg),
+      )
 
     return updated_node
 
@@ -287,7 +293,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
         # Since Compound statements aren't handled by leave_SimpleStatementLine error logic,
         # we must wrap manually here.
         failed = EscapeHatch.mark_failure(original_node, f"Loop transformation failed: {str(e)}")
-        if isinstance(failed, (cst.BaseStatement, cst.FlattenSentinel)):  # pragma: no branch
+        if isinstance(failed, (cst.BaseStatement, cst.FlattenSentinel)):
           return failed
 
     return updated_node

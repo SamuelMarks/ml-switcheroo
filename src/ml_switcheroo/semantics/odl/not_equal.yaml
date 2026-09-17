@@ -22,8 +22,8 @@ variants:
   jax:
     api: jax.numpy.not_equal
     args:
-      x1: x1
-      x2: x2
+      x1: x
+      x2: y
   mlx:
     api: mlx.core.not_equal
     args:

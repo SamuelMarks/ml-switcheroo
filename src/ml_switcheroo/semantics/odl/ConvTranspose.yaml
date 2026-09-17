@@ -49,7 +49,6 @@ variants:
       preferred_element_type: preferred_element_type
       promote_dtype: promote_dtype
       rngs: rngs
-      self: self
       strides: strides
       transpose_kernel: transpose_kernel
       use_bias: use_bias

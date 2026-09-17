@@ -94,15 +94,15 @@ class GraphDiffer:
     """
     actions: List[PatchAction] = []
 
-    src_ids = {n.id for n in source.nodes}
-    tgt_ids = {n.id for n in target.nodes}
+    src_ids = set(source.nodes.keys())
+    tgt_ids = set(target.nodes.keys())
 
     # 1. Deletions
     # All nodes present in Source but not Target are candidates for Deletion
     deleted_ids = src_ids - tgt_ids
 
     # 2. Additions (Replacements)
-    new_nodes = [n for n in target.nodes if n.id not in src_ids]
+    new_nodes = [n for n in target.nodes.values() if n.id not in src_ids]
 
     # We need to map New Nodes to an Anchor (one of the deleted nodes).
     # We use a greedy mapping strategy based on graph position or name heuristic.
@@ -116,9 +116,10 @@ class GraphDiffer:
     for new_node in new_nodes:
       anchor = None
 
-      # Metadata hint (Populated by GraphOptimizer in ideal implementation)
-      if "anchor" in new_node.metadata:
-        anchor = new_node.metadata["anchor"]
+      # Attributes/metadata hint (Populated by GraphOptimizer in ideal implementation)
+      attrs = getattr(new_node, "attributes", {})
+      if "anchor" in attrs:
+        anchor = attrs["anchor"]
       # Naming heuristic (fused_c1 -> c1)
       elif new_node.id.startswith("fused_"):
         candidate = new_node.id.replace("fused_", "")
@@ -181,6 +182,7 @@ def _is_likely_stateful(node) -> bool:
       bool: True if the node is deemed likely stateful based on naming or kind heuristics,
       False otherwise.
   """
-  if not node.kind:
+  op_type = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")
+  if not op_type:
     return False
-  return node.kind[0].isupper() or "Fused" in node.kind
+  return op_type[0].isupper() or "Fused" in op_type

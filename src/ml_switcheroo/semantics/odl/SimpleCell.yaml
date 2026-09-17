@@ -43,7 +43,6 @@ variants:
       recurrent_kernel_metadata: recurrent_kernel_metadata
       residual: residual
       rngs: rngs
-      self: self
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []

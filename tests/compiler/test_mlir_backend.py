@@ -16,8 +16,8 @@ def test_mlir_backend_compile_input_numeric() -> None:
   """Docstring."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
-  n1 = LogicalNode(id="n1", kind="Input", metadata={"value": "42"})
-  graph.nodes.append(n1)
+  n1 = LogicalNode(id="n1", op_type="Input", attributes={"value": "42"})
+  graph.add_node(n1)
 
   mlir_str: str = backend.compile(graph)
   assert "sw.constant" in mlir_str
@@ -30,8 +30,8 @@ def test_mlir_backend_compile_input_non_numeric() -> None:
   """Docstring."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
-  n1 = LogicalNode(id="n1", kind="Input", metadata={"value": "not_a_number"})
-  graph.nodes.append(n1)
+  n1 = LogicalNode(id="n1", op_type="Input", attributes={"value": "not_a_number"})
+  graph.add_node(n1)
 
   mlir_str: str = backend.compile(graph)
   assert "sw.op" in mlir_str
@@ -43,8 +43,8 @@ def test_mlir_backend_compile_input_default_numeric() -> None:
   """Docstring."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
-  n1 = LogicalNode(id="n1", kind="Input")  # metadata missing "value", should default to "1"
-  graph.nodes.append(n1)
+  n1 = LogicalNode(id="n1", op_type="Input")  # metadata missing "value", should default to "1"
+  graph.add_node(n1)
 
   mlir_str: str = backend.compile(graph)
   assert "sw.constant" in mlir_str
@@ -55,8 +55,8 @@ def test_mlir_backend_compile_output() -> None:
   """Docstring."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
-  n1 = LogicalNode(id="n1", kind="Output")
-  graph.nodes.append(n1)
+  n1 = LogicalNode(id="n1", op_type="Output")
+  graph.add_node(n1)
 
   mlir_str: str = backend.compile(graph)
   assert "sw.return" in mlir_str
@@ -67,8 +67,8 @@ def test_mlir_backend_compile_generic_op() -> None:
   """Docstring."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
-  n1 = LogicalNode(id="n1", kind="MyOp", metadata={"attr1": "val1", "attr2": "val2"})
-  graph.nodes.append(n1)
+  n1 = LogicalNode(id="n1", op_type="MyOp", attributes={"attr1": "val1", "attr2": "val2"})
+  graph.add_node(n1)
 
   mlir_str: str = backend.compile(graph)
   assert "sw.op" in mlir_str

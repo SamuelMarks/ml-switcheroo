@@ -188,6 +188,20 @@
   },
   "Acos_": {
     "operation": "Acos_",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.arccos",
@@ -1345,6 +1359,20 @@
   },
   "Addcdiv": {
     "operation": "Addcdiv",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x1",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x2",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.add",
@@ -1452,6 +1480,46 @@
   },
   "Addmm": {
     "operation": "Addmm",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "c",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "b",
+        "type": "Any"
+      },
+      {
+        "default": "1.0",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "alpha",
+        "type": "float"
+      },
+      {
+        "default": "1.0",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "beta",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "dispatch_rules": [],
@@ -4194,6 +4262,14 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
+      "ir": {
+        "api": "BatchNormalization",
+        "args": {
+          "bias": "B",
+          "input": "X",
+          "weight": "scale"
+        }
+      },
       "keras": {
         "api": "keras.layers.BatchNormalization",
         "args": {}
@@ -4909,7 +4985,6 @@
           "merge_fn": "merge_fn",
           "return_carry": "return_carry",
           "rngs": "rngs",
-          "self": "self",
           "time_major": "time_major"
         },
         "dispatch_rules": [],
@@ -5233,6 +5308,26 @@
   },
   "BitwiseAnd": {
     "operation": "BitwiseAnd",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "b",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jnp.bitwise_and",
@@ -5304,8 +5399,8 @@
       "jax": {
         "api": "jax.numpy.left_shift",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "paxml": {
@@ -5318,6 +5413,20 @@
   },
   "BitwiseNot": {
     "operation": "BitwiseNot",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jnp.invert",
@@ -5336,7 +5445,7 @@
         "args": {}
       },
       "mlx": {
-        "api": "mlx.core.bitwise_not",
+        "api": "mlx.core.bitwise_invert",
         "args": {}
       },
       "nvidia_sass": {
@@ -5369,6 +5478,26 @@
   },
   "BitwiseOr": {
     "operation": "BitwiseOr",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "b",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jnp.bitwise_or",
@@ -5423,8 +5552,8 @@
       "jax": {
         "api": "jax.numpy.right_shift",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "paxml": {
@@ -5437,6 +5566,26 @@
   },
   "BitwiseXor": {
     "operation": "BitwiseXor",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "b",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jnp.bitwise_xor",
@@ -5793,6 +5942,26 @@
   },
   "BroadcastTo": {
     "operation": "BroadcastTo",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "shape",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.broadcast_to",
@@ -6228,6 +6397,20 @@
   },
   "Cast": {
     "operation": "Cast",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "dtype",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "optax.tree.cast",
@@ -7261,10 +7444,8 @@
       },
       "jax": {
         "api": "jax.numpy.maximum",
-        "args": {
-          "x1": "x1",
-          "x2": "x2"
-        }
+        "args": {},
+        "macro_template": "jax.numpy.maximum({input}, {min})"
       },
       "paxml": {
         "api": "jnp.maximum",
@@ -8136,7 +8317,8 @@
         "api": "flax.nnx.ConvTranspose",
         "args": {
           "dilation_rate": "kernel_dilation",
-          "filters": "features",
+          "filters": "out_features",
+          "in_channels": "in_features",
           "kernel_size": "kernel_size",
           "padding": "padding",
           "strides": "strides",
@@ -8281,7 +8463,8 @@
         "api": "flax.nnx.ConvTranspose",
         "args": {
           "dilation_rate": "kernel_dilation",
-          "filters": "features",
+          "filters": "out_features",
+          "in_channels": "in_features",
           "kernel_size": "kernel_size",
           "padding": "padding",
           "strides": "strides",
@@ -9210,7 +9393,6 @@
           "preferred_element_type": "preferred_element_type",
           "promote_dtype": "promote_dtype",
           "rngs": "rngs",
-          "self": "self",
           "strides": "strides",
           "transpose_kernel": "transpose_kernel",
           "use_bias": "use_bias"
@@ -14376,7 +14558,7 @@
       "flax_nnx": {
         "api": "jax.numpy.empty_like",
         "args": {
-          "input": "a",
+          "input": "prototype",
           "requires_grad": null
         },
         "dispatch_rules": [],
@@ -14448,8 +14630,8 @@
       "flax_nnx": {
         "api": "jax.numpy.equal",
         "args": {
-          "input": "x1",
-          "other": "x2"
+          "input": "x",
+          "other": "y"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -14769,6 +14951,26 @@
   },
   "ExpandDims": {
     "operation": "ExpandDims",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.expand_dims",
@@ -15781,8 +15983,8 @@
       "jax": {
         "api": "jax.numpy.float_power",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "paxml": {
@@ -15891,6 +16093,26 @@
   },
   "FloorDivide": {
     "operation": "FloorDivide",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "b",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.floor_divide",
@@ -18367,6 +18589,7 @@
       "flax_nnx": {
         "api": "flax.nnx.MultiHeadAttention",
         "args": {
+          "in_features": "in_features",
           "num_query_heads": "num_heads"
         },
         "dispatch_rules": [],
@@ -18434,6 +18657,7 @@
         "api": "flax.nnx.MultiHeadAttention",
         "args": {
           "embed_dim": null,
+          "in_features": "in_features",
           "num_heads": "num_heads"
         },
         "dispatch_rules": [],
@@ -19356,10 +19580,8 @@
     ],
     "variants": {
       "jax": {
-        "api": "jax.lax.infeed",
-        "args": {
-          "token": "token"
-        }
+        "api": "; Macro.Infeed",
+        "args": {}
       },
       "stablehlo": {
         "api": "stablehlo.infeed"
@@ -21272,8 +21494,7 @@
           "dtype": "dtype",
           "hidden_size": "hidden_size",
           "input_size": "input_size",
-          "num_layers": "num_layers",
-          "split_gates": "split_gates"
+          "num_layers": "num_layers"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -21676,6 +21897,14 @@
           "use_bias": "use_bias",
           "use_fast_variance": "use_fast_variance",
           "use_scale": "use_scale"
+        }
+      },
+      "ir": {
+        "api": "LayerNormalization",
+        "args": {
+          "bias": "B",
+          "input": "X",
+          "weight": "scale"
         },
         "dispatch_rules": [],
         "macro_template": "nnx.LayerNorm(num_features={normalized_shape}, epsilon={eps}).call({input})",
@@ -22693,8 +22922,8 @@
       "jax": {
         "api": "jax.numpy.ldexp",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       }
     }
@@ -22850,6 +23079,26 @@
   },
   "LeftShift": {
     "operation": "LeftShift",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "b",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.left_shift",
@@ -22920,8 +23169,8 @@
       "flax_nnx": {
         "api": "jnp.less_equal",
         "args": {
-          "input": "x1",
-          "other": "x2"
+          "input": "x",
+          "other": "y"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -22930,8 +23179,8 @@
       "jax": {
         "api": "jax.numpy.less_equal",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "paxml": {
@@ -23006,7 +23255,6 @@
           "preferred_element_type": "preferred_element_type",
           "promote_dtype": "promote_dtype",
           "rngs": "rngs",
-          "self": "self",
           "use_bias": "use_bias"
         },
         "dispatch_rules": [],
@@ -23259,8 +23507,7 @@
           "lora_promote_dtype": "lora_promote_dtype",
           "lora_rank": "lora_rank",
           "out_features": "out_features",
-          "rngs": "rngs",
-          "self": "self"
+          "rngs": "rngs"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -23612,6 +23859,40 @@
   },
   "LogCumSumExp": {
     "operation": "LogCumSumExp",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "Any"
+      },
+      {
+        "default": "False",
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "reverse",
+        "type": "bool"
+      },
+      {
+        "default": "True",
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "inclusive",
+        "type": "bool"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "dispatch_rules": [],
@@ -23823,16 +24104,31 @@
   },
   "LogicalAnd": {
     "operation": "LogicalAnd",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "b",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.logical_and",
-        "args": {
-          "input": "x1",
-          "other": "x2"
-        },
-        "dispatch_rules": [],
-        "pack_as": "Tuple",
-        "required_imports": []
+        "args": {},
+        "macro_template": "jax.numpy.logical_and({input}, {other})"
       },
       "jax": {
         "api": "jax.numpy.logical_and",
@@ -23875,6 +24171,20 @@
   },
   "LogicalNot": {
     "operation": "LogicalNot",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.logical_not",
@@ -23911,16 +24221,31 @@
   },
   "LogicalOr": {
     "operation": "LogicalOr",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "b",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.logical_or",
-        "args": {
-          "input": "x1",
-          "other": "x2"
-        },
-        "dispatch_rules": [],
-        "pack_as": "Tuple",
-        "required_imports": []
+        "args": {},
+        "macro_template": "jax.numpy.logical_or({input}, {other})"
       },
       "jax": {
         "api": "jax.numpy.logical_or",
@@ -23948,16 +24273,31 @@
   },
   "LogicalXor": {
     "operation": "LogicalXor",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "b",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.logical_xor",
-        "args": {
-          "input": "x1",
-          "other": "x2"
-        },
-        "dispatch_rules": [],
-        "pack_as": "Tuple",
-        "required_imports": []
+        "args": {},
+        "macro_template": "jax.numpy.logical_xor({input}, {other})"
       },
       "jax": {
         "api": "jax.numpy.logical_or",
@@ -23968,7 +24308,7 @@
         "args": {}
       },
       "mlx": {
-        "api": "mlx.core.logical_xor",
+        "api": "mlx.core.bitwise_xor",
         "args": {}
       },
       "paxml": {
@@ -24142,8 +24482,8 @@
       "flax_nnx": {
         "api": "flax.nnx.LSTMCell",
         "args": {
-          "hidden_size": "features",
-          "input_size": "features"
+          "hidden_size": "hidden_features",
+          "input_size": "in_features"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -28116,8 +28456,7 @@
           "promote_dtype": "promote_dtype",
           "recurrent_kernel_init": "recurrent_kernel_init",
           "recurrent_kernel_metadata": "recurrent_kernel_metadata",
-          "rngs": "rngs",
-          "self": "self"
+          "rngs": "rngs"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -28223,7 +28562,7 @@
     ],
     "variants": {
       "torch": {
-        "api": "torch.autograd.Optional",
+        "api": "Macro.Optional",
         "args": {}
       }
     }
@@ -28339,11 +28678,8 @@
     ],
     "variants": {
       "jax": {
-        "api": "jax.lax.outfeed",
-        "args": {
-          "token": "token",
-          "xs": "xs"
-        }
+        "api": "; Macro.Outfeed",
+        "args": {}
       },
       "stablehlo": {
         "api": "stablehlo.outfeed"
@@ -28638,7 +28974,8 @@
       "flax_nnx": {
         "api": "jax.numpy.transpose",
         "args": {
-          "dims": "axes"
+          "dims": "axes",
+          "input": "a"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -28695,7 +29032,8 @@
       "flax_nnx": {
         "api": "jax.numpy.transpose",
         "args": {
-          "dims": "axes"
+          "dims": "axes",
+          "input": "a"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -30188,14 +30526,19 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
-      "keras": {
-        "api": "keras.layers.RMSNormalization",
+      "ir": {
+        "api": "RMSNorm",
         "args": {
+          "eps": "eps",
           "epsilon": "epsilon"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
         "required_imports": []
+      },
+      "keras": {
+        "api": "keras.layers.RMSNormalization",
+        "args": {}
       },
       "mlx": {
         "api": "mlx.nn.RMSNorm",
@@ -30266,7 +30609,7 @@
       "flax_nnx": {
         "api": "flax.nnx.RMSNorm",
         "args": {
-          "axis": "axis",
+          "axis": "feature_axes",
           "epsilon": "epsilon"
         },
         "dispatch_rules": [],
@@ -30466,7 +30809,6 @@
           "return_carry": "return_carry",
           "reverse": "reverse",
           "rngs": "rngs",
-          "self": "self",
           "state_axes": "state_axes",
           "time_major": "time_major",
           "unroll": "unroll"
@@ -32812,7 +33154,9 @@
       "flax_nnx": {
         "api": "jax.numpy.repeat",
         "args": {
-          "dim": "axis"
+          "dim": "axis",
+          "input": "a",
+          "repeats": "repeats"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -33161,6 +33505,26 @@
   },
   "RightShift": {
     "operation": "RightShift",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "b",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.right_shift",
@@ -33337,6 +33701,10 @@
     ],
     "type": "function",
     "variants": {
+      "ir": {
+        "api": "RoPE",
+        "args": {}
+      },
       "mlx": {
         "api": "mlx.nn.RoPE",
         "args": {
@@ -37210,8 +37578,7 @@
       "flax_nnx": {
         "api": "nnx.Sequential",
         "args": {
-          "fns": "fns",
-          "self": "self"
+          "fns": "fns"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -37956,8 +38323,7 @@
           "recurrent_kernel_init": "recurrent_kernel_init",
           "recurrent_kernel_metadata": "recurrent_kernel_metadata",
           "residual": "residual",
-          "rngs": "rngs",
-          "self": "self"
+          "rngs": "rngs"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -39781,6 +40147,14 @@
   },
   "Stream": {
     "operation": "Stream",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "s",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "dispatch_rules": [],
@@ -40102,10 +40476,7 @@
         "args": {}
       },
       "keras": {
-        "api": "keras.layers.Activation",
-        "arg_values": {
-          "activation": "swish"
-        },
+        "api": "keras.activations.swish",
         "args": {
           "x": "x"
         },
@@ -40974,7 +41345,8 @@
       "flax_nnx": {
         "api": "jax.lax.top_k",
         "args": {
-          "input": "operand"
+          "input": "operand",
+          "k": "k"
         },
         "dispatch_rules": [],
         "pack_as": "Tuple",
@@ -42063,8 +42435,8 @@
       "jax": {
         "api": "jax.numpy.divide",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "paxml": {
@@ -42827,7 +43199,7 @@
     ],
     "variants": {
       "torch": {
-        "api": "torch.autograd.Union",
+        "api": "Macro.Union",
         "args": {}
       }
     }
@@ -43037,6 +43409,26 @@
   },
   "Unsqueeze": {
     "operation": "Unsqueeze",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.expand_dims",
@@ -48630,12 +49022,27 @@
           "module": "flax.nnx",
           "name": "nnx"
         },
-        "extends": "jax"
+        "extends": "jax",
+        "traits": {
+          "forward_method": "__call__",
+          "module_base": "flax.nnx.Module"
+        }
       },
       "jax": {
         "alias": {
           "module": "jax.numpy",
           "name": "jnp"
+        },
+        "plugin_traits": {
+          "enforce_purity_analysis": true,
+          "has_numpy_compatible_arrays": true,
+          "requires_explicit_rng": true,
+          "requires_functional_control_flow": true,
+          "requires_functional_state": true
+        },
+        "traits": {
+          "forward_method": "__call__",
+          "module_base": "flax.nnx.Module"
         }
       }
     }
@@ -48646,6 +49053,11 @@
         "alias": {
           "module": "keras.ops",
           "name": "ops"
+        },
+        "traits": {
+          "forward_method": "call",
+          "module_base": "keras.Model",
+          "requires_super_init": true
         }
       },
       "keras_layers": {
@@ -48653,7 +49065,12 @@
           "module": "keras.layers",
           "name": "layers"
         },
-        "extends": "keras"
+        "extends": "keras",
+        "traits": {
+          "forward_method": "call",
+          "module_base": "keras.layers.Layer",
+          "requires_super_init": true
+        }
       }
     }
   },
@@ -48663,6 +49080,10 @@
         "alias": {
           "module": "mlx.core",
           "name": "mx"
+        },
+        "traits": {
+          "forward_method": "__call__",
+          "module_base": "mlx.nn.Module"
         }
       },
       "mlx_nn": {
@@ -48670,7 +49091,11 @@
           "module": "mlx.nn",
           "name": "nn"
         },
-        "extends": "mlx"
+        "extends": "mlx",
+        "traits": {
+          "forward_method": "__call__",
+          "module_base": "mlx.nn.Module"
+        }
       }
     }
   },
@@ -48710,6 +49135,11 @@
         "alias": {
           "module": "torch",
           "name": "torch"
+        },
+        "traits": {
+          "forward_method": "forward",
+          "module_base": "torch.nn.Module",
+          "requires_super_init": true
         }
       },
       "torch_nn": {
@@ -48717,7 +49147,12 @@
           "module": "torch.nn",
           "name": "nn"
         },
-        "extends": "torch"
+        "extends": "torch",
+        "traits": {
+          "forward_method": "forward",
+          "module_base": "torch.nn.Module",
+          "requires_super_init": true
+        }
       }
     }
   },
@@ -49236,6 +49671,13 @@
       }
     ],
     "variants": {
+      "ir": {
+        "api": "Add",
+        "args": {
+          "input": "input",
+          "other": "other"
+        }
+      },
       "jax": {
         "api": "jax.lax.add",
         "args": {
@@ -50485,8 +50927,8 @@
       "jax": {
         "api": "jax.numpy.atan2",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "keras": {
@@ -50902,6 +51344,33 @@
   },
   "array_equal": {
     "operation": "array_equal",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "b",
+        "type": "Any"
+      },
+      {
+        "default": "False",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "equal_nan",
+        "type": "bool"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.array_equal",
@@ -51344,7 +51813,7 @@
         "api": "jax.numpy.astype",
         "args": {
           "dtype": "dtype",
-          "x": "x"
+          "x": "a"
         }
       }
     }
@@ -51479,7 +51948,20 @@
   "atleast_1d": {
     "description": "Convert inputs to arrays with at least one dimension.",
     "operation": "atleast_1d",
-    "std_args": [],
+    "std_args": [
+      {
+        "is_variadic": true,
+        "kind": "positional_or_keyword",
+        "name": "arys",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "type": "function",
     "variants": {
       "dask": {
@@ -51505,7 +51987,20 @@
   "atleast_2d": {
     "description": "View inputs as arrays with at least two dimensions.",
     "operation": "atleast_2d",
-    "std_args": [],
+    "std_args": [
+      {
+        "is_variadic": true,
+        "kind": "positional_or_keyword",
+        "name": "arys",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "type": "function",
     "variants": {
       "dask": {
@@ -51531,7 +52026,20 @@
   "atleast_3d": {
     "description": "View inputs as arrays with at least three dimensions.",
     "operation": "atleast_3d",
-    "std_args": [],
+    "std_args": [
+      {
+        "is_variadic": true,
+        "kind": "positional_or_keyword",
+        "name": "arys",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "type": "function",
     "variants": {
       "dask": {
@@ -52496,6 +53004,13 @@
       }
     ],
     "variants": {
+      "mlx": {
+        "api": "mlx.nn.losses.binary_cross_entropy",
+        "args": {
+          "inputs": "inputs",
+          "targets": "targets"
+        }
+      },
       "torch": {
         "api": "torch.nn.functional.binary_cross_entropy",
         "args": {
@@ -52569,6 +53084,27 @@
   },
   "binary_crossentropy": {
     "operation": "binary_crossentropy",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "target",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "output",
+        "type": "Any"
+      },
+      {
+        "default": "False",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "from_logits",
+        "type": "bool"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "optax.sigmoid_binary_cross_entropy",
@@ -52790,6 +53326,20 @@
   },
   "bitwise_invert": {
     "operation": "bitwise_invert",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.bitwise_invert",
@@ -52819,6 +53369,20 @@
   },
   "bitwise_left_shift": {
     "operation": "bitwise_left_shift",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y",
+        "type": "int"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.bitwise_left_shift",
@@ -52829,8 +53393,8 @@
       "jax": {
         "api": "jax.numpy.left_shift",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x": "x",
+          "y": "y"
         }
       },
       "keras": {
@@ -52844,6 +53408,14 @@
   },
   "bitwise_not": {
     "operation": "bitwise_not",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "int"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.bitwise_not",
@@ -52919,6 +53491,20 @@
   },
   "bitwise_right_shift": {
     "operation": "bitwise_right_shift",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y",
+        "type": "int"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.bitwise_right_shift",
@@ -52929,8 +53515,8 @@
       "jax": {
         "api": "jax.numpy.bitwise_right_shift",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x": "x",
+          "y": "y"
         }
       },
       "keras": {
@@ -53193,6 +53779,14 @@
   },
   "broadcast_shapes": {
     "operation": "broadcast_shapes",
+    "std_args": [
+      {
+        "is_variadic": true,
+        "kind": "positional_or_keyword",
+        "name": "shapes",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.broadcast_shapes",
@@ -53603,6 +54197,10 @@
         "args": {
           "x": "x"
         }
+      },
+      "mlx": {
+        "api": "mlx.nn.CELU",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.functional.celu",
@@ -54169,6 +54767,8 @@
       "jax": {
         "api": "jax.numpy.clip",
         "args": {
+          "input": "arr",
+          "max": "max",
           "min": "min"
         }
       },
@@ -55157,6 +55757,14 @@
       "flax_nnx": {
         "api": "flax.nnx.Conv",
         "args": {}
+      },
+      "ir": {
+        "api": "Conv",
+        "args": {
+          "bias": "bias",
+          "input": "input",
+          "weight": "weight"
+        }
       },
       "keras": {
         "api": "keras.layers.Conv2D",
@@ -56358,8 +56966,8 @@
       "jax": {
         "api": "jax.numpy.copysign",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "torch": {
@@ -57003,6 +57611,13 @@
       }
     ],
     "variants": {
+      "mlx": {
+        "api": "mlx.nn.losses.cross_entropy",
+        "args": {
+          "logits": "logits",
+          "targets": "targets"
+        }
+      },
       "torch": {
         "api": "torch.nn.functional.cross_entropy",
         "args": {
@@ -58415,8 +59030,8 @@
       "jax": {
         "api": "jax.numpy.divide",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "keras": {
@@ -58494,8 +59109,8 @@
       "jax": {
         "api": "jax.numpy.divmod",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "mlx": {
@@ -58626,6 +59241,63 @@
   },
   "dot_product_attention": {
     "operation": "dot_product_attention",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "query",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "key",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "value",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "bias",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "mask",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "scale",
+        "type": "Any"
+      },
+      {
+        "default": "False",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "is_causal",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "flash_attention",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "attn_logits_soft_cap",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "nnx.nn.attention.dot_product_attention",
@@ -58787,6 +59459,10 @@
       }
     ],
     "variants": {
+      "mlx": {
+        "api": "mlx.nn.Dropout2d",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.functional.dropout2d",
         "args": {
@@ -58828,6 +59504,10 @@
       }
     ],
     "variants": {
+      "mlx": {
+        "api": "mlx.nn.Dropout3d",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.functional.dropout3d",
         "args": {
@@ -59420,6 +60100,20 @@
   },
   "einsum_path": {
     "operation": "einsum_path",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "subscripts",
+        "type": "str"
+      },
+      {
+        "is_variadic": true,
+        "kind": "positional_or_keyword",
+        "name": "operands",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.einsum_path",
@@ -59913,8 +60607,8 @@
       "jax": {
         "api": "jax.numpy.equal",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "keras": {
@@ -60291,7 +60985,7 @@
         "api": "mlx.core.expand_dims",
         "args": {
           "a": "a",
-          "axis": "axis"
+          "axis": "axes"
         }
       }
     }
@@ -60756,6 +61450,33 @@
   },
   "fft2": {
     "operation": "fft2",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "s",
+        "type": "Any"
+      },
+      {
+        "default": "[-2, -1]",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.fft2",
@@ -60802,6 +61523,32 @@
   },
   "fftn": {
     "operation": "fftn",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "s",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.fftn",
@@ -60825,6 +61572,26 @@
   },
   "fftshift": {
     "operation": "fftshift",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.fftshift",
@@ -60926,9 +61693,9 @@
     ],
     "variants": {
       "jax": {
-        "api": "jax.numpy.fix",
+        "api": "jax.numpy.trunc",
         "args": {
-          "x": "x"
+          "input": "x"
         }
       },
       "torch": {
@@ -61000,10 +61767,14 @@
     ],
     "variants": {
       "jax": {
-        "api": "jax.Array.ravel",
+        "api": "jax.numpy.ravel",
         "args": {
-          "a": "a"
+          "input": "a"
         }
+      },
+      "keras": {
+        "api": "keras.layers.Flatten",
+        "args": {}
       },
       "mlx": {
         "api": "mlx.core.flatten",
@@ -61172,8 +61943,8 @@
       "jax": {
         "api": "jax.numpy.float_power",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       }
     }
@@ -61268,8 +62039,8 @@
       "jax": {
         "api": "jax.numpy.floor_divide",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "keras": {
@@ -61315,8 +62086,8 @@
       "jax": {
         "api": "jax.numpy.fmax",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "torch": {
@@ -61355,8 +62126,8 @@
       "jax": {
         "api": "jax.numpy.fmin",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "torch": {
@@ -61395,8 +62166,8 @@
       "jax": {
         "api": "jax.numpy.fmod",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "torch": {
@@ -61422,6 +62193,32 @@
   },
   "fori_loop": {
     "operation": "fori_loop",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "lower",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "upper",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "body_fun",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "init_val",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "nnx.transforms.iteration.fori_loop",
@@ -62689,6 +63486,10 @@
           "x": "x"
         }
       },
+      "mlx": {
+        "api": "mlx.nn.GLU",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.functional.glu",
         "args": {
@@ -62855,8 +63656,8 @@
       "jax": {
         "api": "jax.numpy.greater",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "keras": {
@@ -62914,8 +63715,8 @@
       "jax": {
         "api": "jax.numpy.greater_equal",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "keras": {
@@ -63392,8 +64193,7 @@
         "args": {}
       },
       "mlx": {
-        "api": "mlx.nn.hardsigmoid",
-        "args": {}
+        "macro_template": "mx.maximum(0.0, mx.minimum(1.0, ({input} + 3.0) / 6.0))"
       },
       "torch": {
         "api": "torch.nn.functional.hardsigmoid",
@@ -63477,6 +64277,10 @@
       }
     ],
     "variants": {
+      "mlx": {
+        "api": "mlx.nn.HardTanh",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.functional.hardtanh",
         "args": {
@@ -63685,8 +64489,8 @@
       "jax": {
         "api": "jax.numpy.heaviside",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "values": "y"
         }
       },
       "torch": {
@@ -64336,8 +65140,8 @@
       "jax": {
         "api": "jax.numpy.hypot",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "torch": {
@@ -64510,6 +65314,33 @@
   },
   "ifft": {
     "operation": "ifft",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "n",
+        "type": "Any"
+      },
+      {
+        "default": "-1",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.ifft",
@@ -64533,6 +65364,33 @@
   },
   "ifft2": {
     "operation": "ifft2",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "s",
+        "type": "Any"
+      },
+      {
+        "default": "[-2, -1]",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.ifft2",
@@ -64562,6 +65420,32 @@
   },
   "ifftn": {
     "operation": "ifftn",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "s",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.ifftn",
@@ -64585,6 +65469,26 @@
   },
   "ifftshift": {
     "operation": "ifftshift",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.ifftshift",
@@ -65649,6 +66553,33 @@
   },
   "irfft": {
     "operation": "irfft",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "n",
+        "type": "Any"
+      },
+      {
+        "default": "-1",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.irfft",
@@ -65678,6 +66609,33 @@
   },
   "irfft2": {
     "operation": "irfft2",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "s",
+        "type": "Any"
+      },
+      {
+        "default": "[-2, -1]",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.irfft2",
@@ -65701,6 +66659,32 @@
   },
   "irfftn": {
     "operation": "irfftn",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "s",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.irfftn",
@@ -65725,7 +66709,14 @@
   "is_available": {
     "description": "Return ``True`` if the distributed package is available.",
     "operation": "is_available",
-    "std_args": [],
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "device",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "mlx": {
         "api": "mlx.core.is_available",
@@ -66380,9 +67371,8 @@
       },
       "jax": {
         "api": "jax.Array.item",
-        "args": {
-          "a": "a"
-        }
+        "args": {},
+        "macro_template": "{a}.item()"
       }
     }
   },
@@ -67159,8 +68149,8 @@
       "jax": {
         "api": "jax.numpy.ldexp",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "torch": {
@@ -67370,8 +68360,8 @@
       "jax": {
         "api": "jax.numpy.left_shift",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "keras": {
@@ -67450,8 +68440,8 @@
       "jax": {
         "api": "jax.numpy.less",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "keras": {
@@ -67509,8 +68499,8 @@
       "jax": {
         "api": "jax.numpy.less_equal",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "keras": {
@@ -67615,6 +68605,14 @@
       "flax_nnx": {
         "api": "flax.nnx.Linear",
         "args": {}
+      },
+      "ir": {
+        "api": "Gemm",
+        "args": {
+          "bias": "bias",
+          "input": "input",
+          "weight": "weight"
+        }
       },
       "keras": {
         "api": "keras.activations.linear",
@@ -68259,10 +69257,8 @@
     "variants": {
       "jax": {
         "api": "jax.numpy.logaddexp",
-        "args": {
-          "x1": "x1",
-          "x2": "x2"
-        }
+        "args": {},
+        "macro_template": "jax.numpy.logaddexp({input}, {other})"
       },
       "keras": {
         "api": "keras.ops.logaddexp",
@@ -68313,10 +69309,8 @@
     "variants": {
       "jax": {
         "api": "jax.numpy.logaddexp2",
-        "args": {
-          "x1": "x1",
-          "x2": "x2"
-        }
+        "args": {},
+        "macro_template": "jax.numpy.logaddexp2({input}, {other})"
       },
       "torch": {
         "api": "torch.logaddexp2",
@@ -68637,6 +69631,10 @@
       }
     ],
     "variants": {
+      "mlx": {
+        "api": "mlx.nn.LogSigmoid",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.functional.logsigmoid",
         "args": {
@@ -69401,6 +70399,13 @@
       }
     ],
     "variants": {
+      "ir": {
+        "api": "MatMul",
+        "args": {
+          "input": "input",
+          "other": "other"
+        }
+      },
       "jax": {
         "api": "jax.numpy.matmul",
         "args": {
@@ -70109,10 +71114,8 @@
     "variants": {
       "jax": {
         "api": "jax.numpy.maximum",
-        "args": {
-          "x1": "x1",
-          "x2": "x2"
-        }
+        "args": {},
+        "macro_template": "jax.numpy.maximum({input}, {other})"
       },
       "keras": {
         "api": "keras.ops.maximum",
@@ -70444,10 +71447,8 @@
     "variants": {
       "jax": {
         "api": "jax.numpy.minimum",
-        "args": {
-          "x1": "x1",
-          "x2": "x2"
-        }
+        "args": {},
+        "macro_template": "jax.numpy.minimum({input}, {other})"
       },
       "keras": {
         "api": "keras.ops.minimum",
@@ -70539,8 +71540,8 @@
       "jax": {
         "api": "jax.numpy.mod",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "keras": {
@@ -71197,20 +72198,16 @@
         "args": {
           "add_zero_attn": "add_zero_attn",
           "bias_k": "bias_k",
-          "bias_k, bias_v": "bias_k, bias_v",
           "bias_v": "bias_v",
           "dropout_p": "dropout_p",
           "embed_dim_to_check": "embed_dim_to_check",
           "in_proj_bias": "in_proj_bias",
           "in_proj_weight": "in_proj_weight",
-          "in_proj_weight, in_proj_bias": "in_proj_weight, in_proj_bias",
           "key": "key",
           "num_heads": "num_heads",
           "out_proj_bias": "out_proj_bias",
           "out_proj_weight": "out_proj_weight",
-          "out_proj_weight, out_proj_bias": "out_proj_weight, out_proj_bias",
           "query": "query",
-          "query, key, value": "query, key, value",
           "value": "value"
         }
       }
@@ -71459,10 +72456,8 @@
     "variants": {
       "jax": {
         "api": "jax.numpy.multiply",
-        "args": {
-          "x1": "x1",
-          "x2": "x2"
-        }
+        "args": {},
+        "macro_template": "jax.numpy.multiply({input}, {other})"
       },
       "keras": {
         "api": "keras.ops.multiply",
@@ -72972,8 +73967,8 @@
       "jax": {
         "api": "jax.numpy.not_equal",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "keras": {
@@ -74029,7 +75024,8 @@
       "mlx": {
         "api": "mlx.core.permute_dims",
         "args": {
-          "a": "a"
+          "axes": "axes",
+          "x": "a"
         }
       },
       "numpy": {
@@ -74192,6 +75188,20 @@
   },
   "pinv": {
     "operation": "pinv",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.linalg.pinv",
@@ -74550,6 +75560,10 @@
           "key": "key",
           "lam": "lam"
         }
+      },
+      "keras": {
+        "api": "keras.metrics.Poisson",
+        "args": {}
       },
       "torch": {
         "api": "torch.poisson",
@@ -75181,8 +76195,8 @@
       "jax": {
         "api": "jax.numpy.pow",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "keras": {
@@ -76637,6 +77651,12 @@
       }
     ],
     "variants": {
+      "ir": {
+        "api": "Relu",
+        "args": {
+          "input": "input"
+        }
+      },
       "jax": {
         "api": "jax.nn.relu",
         "args": {}
@@ -76693,6 +77713,10 @@
         "args": {
           "x": "x"
         }
+      },
+      "mlx": {
+        "api": "mlx.nn.ReLU6",
+        "args": {}
       },
       "torch": {
         "api": "torch.nn.functional.relu6",
@@ -76756,8 +77780,8 @@
       "jax": {
         "api": "jax.numpy.mod",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "keras": {
@@ -77094,6 +78118,33 @@
   },
   "rfft": {
     "operation": "rfft",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "n",
+        "type": "Any"
+      },
+      {
+        "default": "-1",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.rfft",
@@ -77123,6 +78174,33 @@
   },
   "rfft2": {
     "operation": "rfft2",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "s",
+        "type": "Any"
+      },
+      {
+        "default": "[-2, -1]",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.rfft2",
@@ -77163,6 +78241,32 @@
   },
   "rfftn": {
     "operation": "rfftn",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "s",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.fft.rfftn",
@@ -77208,8 +78312,8 @@
       "jax": {
         "api": "jax.numpy.right_shift",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "x1": "x",
+          "x2": "y"
         }
       },
       "keras": {
@@ -80172,6 +81276,13 @@
       }
     ],
     "variants": {
+      "ir": {
+        "api": "Softmax",
+        "args": {
+          "dim": "axis",
+          "input": "input"
+        }
+      },
       "jax": {
         "api": "jax.nn.softmax",
         "args": {
@@ -80317,6 +81428,10 @@
       }
     ],
     "variants": {
+      "mlx": {
+        "api": "mlx.nn.Softmin",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.functional.softmin",
         "args": {
@@ -80392,6 +81507,10 @@
       }
     ],
     "variants": {
+      "mlx": {
+        "api": "mlx.nn.Softshrink",
+        "args": {}
+      },
       "torch": {
         "api": "torch.nn.functional.softshrink",
         "args": {
@@ -81483,10 +82602,8 @@
     "variants": {
       "jax": {
         "api": "jax.numpy.subtract",
-        "args": {
-          "x1": "x1",
-          "x2": "x2"
-        }
+        "args": {},
+        "macro_template": "jax.numpy.subtract({input}, {other})"
       },
       "keras": {
         "api": "keras.ops.subtract",
@@ -81825,6 +82942,32 @@
   },
   "take_along_axis": {
     "operation": "take_along_axis",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_only",
+        "name": "a",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "indices",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "keyword_only",
+        "name": "stream",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "jax.numpy.take_along_axis",
@@ -81835,8 +82978,7 @@
       "jax": {
         "api": "jax.numpy.take_along_axis",
         "args": {
-          "a": "a",
-          "arr": "arr",
+          "a": "arr",
           "axis": "axis",
           "indices": "indices"
         }
@@ -83224,8 +84366,8 @@
       "jax": {
         "api": "jax.numpy.divide",
         "args": {
-          "x1": "x1",
-          "x2": "x2"
+          "input": "x",
+          "other": "y"
         }
       },
       "keras": {
@@ -83400,7 +84542,8 @@
       "torch": {
         "api": "torch.Tensor.type",
         "args": {
-          "**kwargs": "**kwargs"
+          "dtype": "dtype",
+          "non_blocking": "non_blocking"
         }
       }
     }
@@ -83950,6 +85093,12 @@
       }
     ],
     "variants": {
+      "mlx": {
+        "api": "mlx.nn.Upsample",
+        "args": {
+          "scale_factor": "scale_factor"
+        }
+      },
       "torch": {
         "api": "torch.nn.functional.upsample",
         "args": {
@@ -84028,6 +85177,27 @@
   },
   "value_and_grad": {
     "operation": "value_and_grad",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "fun",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "argnums",
+        "type": "Any"
+      },
+      {
+        "default": "[]",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "argnames",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "nnx.transforms.autodiff.value_and_grad",
@@ -84245,8 +85415,6 @@
       "jax": {
         "api": "jax.numpy.vecdot",
         "args": {
-          "a": "a",
-          "b": "b",
           "x1": "x1",
           "x2": "x2"
         }
@@ -84367,9 +85535,8 @@
     "variants": {
       "jax": {
         "api": "jax.Array.view",
-        "args": {
-          "arr": "arr"
-        }
+        "args": {},
+        "macro_template": "{a}.view({dtype})"
       },
       "mlx": {
         "api": "mlx.core.view",
@@ -84820,6 +85987,32 @@
   },
   "while_loop": {
     "operation": "while_loop",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "cond",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "body",
+        "type": "tuple"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "loop_vars",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "maximum_iterations",
+        "type": "Any"
+      }
+    ],
     "variants": {
       "flax_nnx": {
         "api": "nnx.transforms.iteration.while_loop",

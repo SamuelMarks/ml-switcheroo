@@ -161,3 +161,22 @@ def test_injector_fw_updating() -> None:
   with __import__("unittest.mock").mock.patch.object(injector, "_load_current", return_value={"bar": {"api": "old_foo"}}):
     with __import__("unittest.mock").mock.patch("builtins.open", __import__("unittest.mock").mock.mock_open()):
       assert injector.inject(dry_run=False) is True
+
+
+def test_injector_dry_run_nonexistent_parent_dir(tmp_path: Path, sample_variant: FrameworkVariant) -> None:
+  """Verifies dry-run behavior when target directory does not exist."""
+  missing_dir_file: Path = tmp_path / "nonexistent_dir" / "target.json"
+  with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=missing_dir_file):
+    injector: FrameworkInjector = FrameworkInjector("target_fw", "LogSoftmax", sample_variant)
+    success: bool = injector.inject(dry_run=True)
+    assert success is True
+    assert not missing_dir_file.parent.exists()
+
+
+def test_injector_fw_load_non_dict_json(tmp_path: Path, sample_variant: FrameworkVariant) -> None:
+  """Verifies that loading JSON containing a non-dict root returns an empty dict."""
+  json_file: Path = tmp_path / "list.json"
+  json_file.write_text("[1, 2, 3]", encoding="utf-8")
+  with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=json_file):
+    injector: FrameworkInjector = FrameworkInjector("target_fw", "LogSoftmax", sample_variant)
+    assert injector._load_current() == {}

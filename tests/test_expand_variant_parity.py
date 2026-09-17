@@ -103,7 +103,7 @@ def test_expand_op_variants_no_torch_api_or_unmatched() -> None:
     },
   }
   snapshots: Dict[str, Dict[str, Any]] = {"jax": {}, "mlx": {}, "keras": {}}
-  added = expander.expand_op_variants(odl_data, snapshots)
+  added = expander.expand_op_variants(odl_data, snapshots, stem_name="AlternativeStem")
   assert added == 0
 
   # Test torch variant with different function name

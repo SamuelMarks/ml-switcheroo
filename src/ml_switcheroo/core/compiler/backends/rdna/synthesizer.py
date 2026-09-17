@@ -186,14 +186,17 @@ class RdnaSynthesizer:
       input_map[edge.target].append(edge.source)
 
     for node in sorted_nodes:
+      op_type: str = str(node.op_type if hasattr(node, "op_type") else getattr(node, "kind", ""))
+      node_attrs = getattr(node, "attributes", {})
+
       # --- Inputs ---
-      if node.kind == "Input":
+      if op_type == "Input":
         reg = self.allocator.get_vector_register(node.id)
-        var_name = node.metadata.get("name", node.id)
+        var_name = node_attrs.get("name", node.id)
         output_nodes.append(RdnaComment(text=f"Input {var_name} -> {reg}"))
 
       # --- Outputs ---
-      elif node.kind == "Output":
+      elif op_type == "Output":
         sources = input_map.get(node.id, [])
         if sources:
           src_reg = self.allocator.get_vector_register(sources[0])
@@ -201,23 +204,23 @@ class RdnaSynthesizer:
 
       else:
         # Resolve Abstract ID
-        defn = self.semantics.get_definition(node.kind)
-        if not defn and ("." in node.kind):
-          suffix = node.kind.split(".", 1)[-1]
+        defn = self.semantics.get_definition(op_type)
+        if not defn and ("." in op_type):
+          suffix = op_type.split(".", 1)[-1]
           defn = self.semantics.get_definition(suffix)
-        abstract_id = defn[0] if defn else node.kind
+        abstract_id = defn[0] if defn else op_type
 
         # --- Macro Expansion ---
         if abstract_id in self.macro_registry:
           expander = self.macro_registry[abstract_id]
-          kernel_nodes = expander(self.allocator, node.id, node.metadata)
+          kernel_nodes = expander(self.allocator, node.id, node_attrs)
           output_nodes.extend(kernel_nodes)
           continue
 
         suffix_id = abstract_id.split(".")[-1] if abstract_id else ""
         if suffix_id and suffix_id in self.macro_registry:
           expander = self.macro_registry[suffix_id]
-          kernel_nodes = expander(self.allocator, node.id, node.metadata)
+          kernel_nodes = expander(self.allocator, node.id, node_attrs)
           output_nodes.extend(kernel_nodes)
           continue
 
@@ -227,7 +230,7 @@ class RdnaSynthesizer:
           variant = self.semantics.resolve_variant(abstract_id, "rdna")
 
         if not variant or not variant.get("api"):
-          output_nodes.append(RdnaComment(text=f"Unmapped Op: {node.kind} ({node.id})"))
+          output_nodes.append(RdnaComment(text=f"Unmapped Op: {op_type} ({node.id})"))
           continue
 
         opcode = variant["api"]
@@ -241,7 +244,7 @@ class RdnaSynthesizer:
 
         if clean_macro:
           if clean_macro in self.macro_registry:
-            kernel_nodes = self.macro_registry[clean_macro](self.allocator, node.id, node.metadata)
+            kernel_nodes = self.macro_registry[clean_macro](self.allocator, node.id, node_attrs)
             output_nodes.extend(kernel_nodes)
             continue
           else:

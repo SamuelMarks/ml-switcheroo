@@ -19,3 +19,6 @@ variants:
     api: keras.activations.relu6
     args:
       x: x
+  mlx:
+    api: mlx.nn.ReLU6
+    args: {}

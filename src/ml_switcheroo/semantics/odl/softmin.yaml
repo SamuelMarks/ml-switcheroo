@@ -23,3 +23,6 @@ variants:
     api: torch.nn.functional.softmin
     args:
       input: input
+  mlx:
+    api: mlx.nn.Softmin
+    args: {}

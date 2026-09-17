@@ -439,7 +439,7 @@ class MlirTransformer(Transformer):
         parts = c.children
         arrow_idx = -1
         for idx, pt in enumerate(parts):
-          if isinstance(pt, Token) and pt.type == "ARROW":  # pragma: no branch
+          if isinstance(pt, Token) and pt.type == "ARROW":
             arrow_idx = idx
             break
 

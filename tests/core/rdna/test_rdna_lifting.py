@@ -55,10 +55,10 @@ def test_lift_simple_chain() -> None:
   lifter = RdnaLifter()
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 3
-  ids: list[str] = [n.id for n in graph.nodes]
+  ids: list[str] = list(graph.nodes.keys())
   assert ids == ["x", "fc1", "output"]
-  fc_node: typing.Any = next((n for n in graph.nodes if n.id == "fc1"))
-  assert fc_node.metadata["in_features"] == 128
+  fc_node: typing.Any = graph.nodes["fc1"]
+  assert fc_node.attributes["in_features"] == 128
 
 
 def test_lift_unmapped_op() -> None:
@@ -70,9 +70,9 @@ def test_lift_unmapped_op() -> None:
   ]
   lifter = RdnaLifter()
   graph: LogicalGraph = lifter.lift(nodes)
-  flat_node: typing.Any = next((n for n in graph.nodes if n.id == "flat"))
-  assert flat_node.kind == "torch.flatten"
-  assert flat_node.metadata["arg_1"] == 1
+  flat_node: typing.Any = graph.nodes["flat"]
+  assert flat_node.op_type == "torch.flatten"
+  assert flat_node.attributes["arg_1"] == 1
 
 
 def test_lift_no_markers() -> None:
@@ -81,7 +81,7 @@ def test_lift_no_markers() -> None:
   lifter = RdnaLifter()
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].kind == "rdna.v_add_f32"
+  assert list(graph.nodes.values())[0].op_type == "rdna.v_add_f32"
 
 
 def test_rdna_analysis_conv2d_fallback() -> None:
@@ -89,7 +89,6 @@ def test_rdna_analysis_conv2d_fallback() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
-  # We need loop_limits to be populated. The code checks for s_cmp_lt_i32
   inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=3)])  # type: ignore
 
   meta: dict[str, Any] = RdnaAnalyzer.analyze_block("Conv2d", [inst])
@@ -156,7 +155,7 @@ def test_rdna_lifter_unmapped() -> None:
 
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].metadata.get("arg_1") == 1
+  assert list(graph.nodes.values())[0].attributes.get("arg_1") == 1
 
 
 def test_rdna_lifter_input() -> None:
@@ -169,4 +168,4 @@ def test_rdna_lifter_input() -> None:
 
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].kind == "Input"
+  assert list(graph.nodes.values())[0].op_type == "Input"

@@ -130,3 +130,50 @@ def test_api_call_mixin_branches2() -> None:
     "value",
   )
   transformer.leave_Call(call3, call3)
+
+
+def test_api_call_mixin_remaining_branches(monkeypatch: typing.Any) -> None:
+  """Test remaining branches in ApiTransformerCallMixin."""
+  config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
+  semantics: DummySemantics = DummySemantics()
+  context: RewriterContext = RewriterContext(semantics=semantics, config=config)
+  transformer: ApiTransformer = ApiTransformer(context)
+
+  # 109->112: resolve_implicit_method returns guessed name, but _get_mapping returns None
+  monkeypatch.setattr(
+    "ml_switcheroo.core.rewriter.passes.api_call_mixin.resolve_implicit_method",
+    lambda *args, **kwargs: "torch.unmapped_guessed",
+  )
+  call_guess: cst.Call = getattr(
+    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("x.func()").body[0]).body[0]),
+    "value",
+  )
+  assert transformer.leave_Call(call_guess, call_guess) is call_guess
+
+  # 116->119: is_builtin returns True
+  call_builtin: cst.Call = getattr(
+    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("len([1, 2])").body[0]).body[0]),
+    "value",
+  )
+  assert transformer.leave_Call(call_builtin, call_builtin) is call_builtin
+
+  # 129->133 and 136: lookup_id from abstract_id is not empty, neural tier to pure math jax
+  config.strict_mode = True
+  semantics.resolve_op_id = lambda fw, name: "nn_linear"
+  semantics._key_origins = {"nn_linear": "neural"}
+  call_strict: cst.Call = getattr(
+    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("torch.nn_linear()").body[0]).body[0]),
+    "value",
+  )
+  transformer.leave_Call(call_strict, call_strict)
+  assert any("Cannot map neural network abstraction" in err for err in transformer.context.current_stmt_errors)
+  transformer.context.current_stmt_errors.clear()
+
+  # 159->161: deprecated operation without replaced_by
+  semantics.get_definition = lambda x: ("DeprecatedOp", {"deprecated": True})
+  monkeypatch.setattr(transformer, "_get_mapping", lambda name, **kwargs: {"api": "jax.some_func"})
+  call_dep: cst.Call = getattr(
+    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("torch.dep()").body[0]).body[0]),
+    "value",
+  )
+  transformer.leave_Call(call_dep, call_dep)

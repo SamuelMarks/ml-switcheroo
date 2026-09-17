@@ -109,6 +109,7 @@ def test_main_entrypoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
   """Test __main__ execution block."""
   import runpy
 
+  monkeypatch.chdir(tmp_path)
   with patch("scripts.parse_td.parse_td_files", return_value={"test": ["op"]}):
     with pytest.raises(SystemExit) as excinfo:
       runpy.run_module("scripts.parse_td", run_name="__main__")

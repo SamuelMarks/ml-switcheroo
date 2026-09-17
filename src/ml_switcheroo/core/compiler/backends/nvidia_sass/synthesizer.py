@@ -230,14 +230,17 @@ class NvidiaSassSynthesizer:
       input_map[edge.target].append(edge.source)
 
     for node in sorted_nodes:
+      op_type: str = str(node.op_type if hasattr(node, "op_type") else getattr(node, "kind", ""))
+      node_attrs = getattr(node, "attributes", {})
+
       # Special Handling for Inputs: Just allocate to stabilize register index
-      if node.kind == "Input":
+      if op_type == "Input":
         reg = self.allocator.get_register(node.id)
-        # Extract original variable name from metadata if available
-        var_name = node.metadata.get("name", node.id)
+        # Extract original variable name from attributes if available
+        var_name = node_attrs.get("name", node.id)
         output_nodes.append(NvidiaSassComment(text=f"Input {var_name} -> {reg.name}"))
 
-      elif node.kind == "Output":
+      elif op_type == "Output":
         # Output nodes are usually sinks, just comment on location
         sources = input_map.get(node.id, [])
         if sources:
@@ -247,25 +250,25 @@ class NvidiaSassSynthesizer:
 
       else:
         # Look up Abstract ID
-        # 1. Try treating node.kind as an API path (e.g. "torch.nn.Conv2d")
+        # 1. Try treating op_type as an API path (e.g. "torch.nn.Conv2d")
         # to find Abstract ID ("Conv2d")
-        defn = self.semantics.get_definition(node.kind)
-        if not defn and ("." in node.kind):
-          suffix = node.kind.split(".", 1)[-1]
+        defn = self.semantics.get_definition(op_type)
+        if not defn and ("." in op_type):
+          suffix = op_type.split(".", 1)[-1]
           defn = self.semantics.get_definition(suffix)
         abstract_id = None
         if defn:
           abstract_id = defn[0]
         else:
-          # 2. Try treating node.kind as Abstract ID directly
-          abstract_id = node.kind
+          # 2. Try treating op_type as Abstract ID directly
+          abstract_id = op_type
 
         # --- Macro Expansion Path ---
         if abstract_id in self.macro_registry:
           expander = self.macro_registry[abstract_id]
           # Expand macro using the Allocator protocol.
           # Note: Macros handle their own internal register allocation for loops/etc.
-          kernel_nodes = expander(self.allocator, node.id, node.metadata)
+          kernel_nodes = expander(self.allocator, node.id, node_attrs)
           output_nodes.extend(kernel_nodes)
           sources = input_map.get(node.id, [])
           for src_id in sources:
@@ -276,7 +279,7 @@ class NvidiaSassSynthesizer:
         suffix_id = abstract_id.split(".")[-1] if abstract_id else ""
         if suffix_id and suffix_id in self.macro_registry:
           expander = self.macro_registry[suffix_id]
-          kernel_nodes = expander(self.allocator, node.id, node.metadata)
+          kernel_nodes = expander(self.allocator, node.id, node_attrs)
           output_nodes.extend(kernel_nodes)
           sources = input_map.get(node.id, [])
           for src_id in sources:
@@ -292,7 +295,8 @@ class NvidiaSassSynthesizer:
 
         if not variant or not variant.get("api"):
           # Fallback: Emit comment for unmapped op
-          output_nodes.append(NvidiaSassComment(text=f"Unmapped Op: {node.kind} ({node.id})"))
+          node_op_type = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")
+          output_nodes.append(NvidiaSassComment(text=f"Unmapped Op: {node_op_type} ({node.id})"))
           continue
 
         opcode = variant["api"]

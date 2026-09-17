@@ -248,3 +248,71 @@ def test_extract_std_args_default_filtering() -> None:
   assert len(std_args) == 2
   assert "default" not in std_args[0]
   assert "default" not in std_args[1]
+
+
+def test_clean_variant_args() -> None:
+  """Test clean_variant_args strips receiver parameters and composite names."""
+  args_map = {
+    "self": "self",
+    "cls": "cls",
+    "x, y": "x, y",
+    "input": "x",
+    "other": "y, z",
+  }
+  snapshot_params: list[dict[str, Any]] = [
+    {"name": "x"},
+    {"name": "y, 123invalid"},
+    {"name": "invalid identifier"},
+    "not-a-dict",  # type: ignore
+  ]
+  cleaned = hydrator.clean_variant_args(args_map, snapshot_params)
+  assert cleaned == {"input": "x"}
+
+
+def test_hydrate_odl_fix_args(tmp_path: Path) -> None:
+  """Test hydrate_odl_from_snapshots with fix_args=True.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  odl_dir = tmp_path / "odl_fix"
+  odl_dir.mkdir()
+  test_file = odl_dir / "TestOp.yaml"
+  initial_data = {
+    "operation": "TestOp",
+    "std_args": [{"name": "x", "type": "Tensor"}],
+    "variants": {
+      "torch": {
+        "api": "torch.foo",
+        "args": {"self": "self", "x": "x"},
+      },
+      "jax": "not-a-dict",
+      "mlx": {"api": "mlx.bar"},
+      "other_fw": {"api": "other.op", "args": {}},
+      "noparams": {"api": "noparams.op", "args": {"x": "x"}},
+      "unchanged": {"api": "unchanged.op", "args": {"x": "x"}},
+    },
+  }
+  test_file.write_text(yaml.dump(initial_data))
+
+  snapshots = {
+    "torch": {
+      "torch.foo": {
+        "params": [{"name": "self"}, {"name": "x"}],
+      }
+    },
+    "noparams": {
+      "noparams.op": {},
+    },
+    "unchanged": {
+      "unchanged.op": {
+        "params": [{"name": "x"}],
+      },
+    },
+  }
+
+  count = hydrator.hydrate_odl_from_snapshots(odl_dir, snapshots, dry_run=False, fix_args=True)
+  assert count == 1
+  with open(test_file) as f:
+    updated = yaml.safe_load(f)
+  assert updated["variants"]["torch"]["args"] == {"x": "x"}

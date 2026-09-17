@@ -38,8 +38,8 @@ class MyModel:
   assert extractor.model_name == "MyModel"
   assert "conv1" in extractor.layer_registry
   assert "conv2" in extractor.layer_registry
-  assert extractor.layer_registry["conv1"].kind == "Conv2d"
-  assert extractor.layer_registry["conv2"].kind == "Conv2d"
+  assert extractor.layer_registry["conv1"].op_type == "Conv2d"
+  assert extractor.layer_registry["conv2"].op_type == "Conv2d"
 
   # We should have edges for both forward and __call__ but because they overwrite provenance
   # the final state might just be from the last executed method if it was a visitor pass
@@ -69,7 +69,7 @@ class Net:
 
   # Verify metadata extraction
   node = extractor.layer_registry["conv1"]
-  assert node.metadata.get("kernel_size") == "3"
+  assert node.attributes.get("kernel_size") == "3"
 
 
 def test_graph_extractor_data_flow() -> None:
@@ -99,7 +99,7 @@ class Net:
   assert ("func_relu", "output") in edges
 
   # Check nodes
-  node_ids: set[str] = {n.id for n in extractor.graph.nodes}
+  node_ids: set[str] = {n.id for n in extractor.graph.nodes.values()}
   assert "layer1" in node_ids
   assert "layer2" in node_ids
   assert "input" in node_ids

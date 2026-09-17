@@ -3,8 +3,14 @@ __frameworks__:
     alias:
       module: "mlx.core"
       name: "mx"
+    traits:
+      module_base: "mlx.nn.Module"
+      forward_method: "__call__"
   mlx_nn:
     extends: "mlx"
     alias:
       module: "mlx.nn"
       name: "nn"
+    traits:
+      module_base: "mlx.nn.Module"
+      forward_method: "__call__"

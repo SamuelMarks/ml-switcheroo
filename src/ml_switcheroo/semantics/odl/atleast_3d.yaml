@@ -1,5 +1,13 @@
 description: View inputs as arrays with at least three dimensions.
-std_args: []
+std_args:
+- name: arys
+  kind: positional_or_keyword
+  is_variadic: true
+  type: Any
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any
 variants:
   dask:
     api: dask.array.atleast_3d

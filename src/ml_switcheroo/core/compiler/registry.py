@@ -25,6 +25,8 @@ from ml_switcheroo.core.compiler.backends.html import HtmlBackend
 from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
 from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend, LatexBackend
+from ml_switcheroo.core.compiler.backends.ir import IrBackend
+from ml_switcheroo.core.compiler.frontends.ir import IrFrontend
 from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
 
 
@@ -76,6 +78,8 @@ _BACKENDS: Dict[str, Type[CompilerBackend]] = {
   "latex_dsl": LatexBackend,
   "mlir": MlirBackend,
   "stablehlo": StableHloBackend,
+  "ir": IrBackend,
+  "ml_switcheroo_ir": IrBackend,
 }
 
 # Frontend mappings for the Compiler (Text -> Graph) pipeline
@@ -89,6 +93,8 @@ _FRONTENDS = {
   "numpy": PythonFrontend,
   "mlx": PythonFrontend,
   "paxml": PythonFrontend,
+  "ir": IrFrontend,
+  "ml_switcheroo_ir": IrFrontend,
   # ISAs use Parser+Lifter tuple strategy handled by engine
   "nvidia_sass": (NvidiaSassParser, NvidiaSassLifter),
   "rdna": (RdnaParser, RdnaLifter),
@@ -116,7 +122,7 @@ def is_isa_target(target: str) -> bool:
   backends that strictly consume Graphs are routed here.
 
 
-  Note: MLIR/StableHLO/TikZ/Latex/HTML/RDNA/NVIDIA_SASS use this path for graph-based generation
+  Note: MLIR/StableHLO/TikZ/Latex/HTML/RDNA/NVIDIA_SASS/IR use this path for graph-based generation
   if selected as target in CLI, bypassing the CST rewriter.
 
   Args:
@@ -126,19 +132,19 @@ def is_isa_target(target: str) -> bool:
       True if the target is an ISA or Graph-based format.
 
   """
-  return target in ["nvidia_sass", "rdna", "html", "tikz", "latex_dsl", "mlir"]
+  return target in ["nvidia_sass", "rdna", "html", "tikz", "latex_dsl", "mlir", "ir", "ml_switcheroo_ir"]
 
 
 def is_isa_source(source: str) -> bool:
-  """Determine if the source requires Lifting (ASM -> Graph -> AST).
+  """Determine if the source requires Lifting (ASM/IR -> Graph -> AST).
 
-  Only NVIDIA_SASS, RDNA, and StableHLO are treated as low-level source inputs.
+  NVIDIA_SASS, RDNA, StableHLO, and IR are treated as low-level or graph source inputs.
 
   Args:
       source: The source framework identifier.
 
   Returns:
-      True if the source is an ISA requiring lifting.
+      True if the source is an ISA or graph source requiring lifting.
 
   """
-  return source in ["nvidia_sass", "rdna", "stablehlo"]
+  return source in ["nvidia_sass", "rdna", "stablehlo", "ir", "ml_switcheroo_ir"]

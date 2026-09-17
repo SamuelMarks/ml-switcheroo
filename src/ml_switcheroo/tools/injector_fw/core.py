@@ -52,7 +52,7 @@ class FrameworkInjector:
 
     """
     if not self.json_path.parent.exists():
-      if not dry_run:  # pragma: no branch
+      if not dry_run:
         self.json_path.parent.mkdir(parents=True, exist_ok=True)
 
     data = self._load_current()
@@ -97,7 +97,10 @@ class FrameworkInjector:
 
     try:
       with open(self.json_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        loaded = json.load(f)
+        if isinstance(loaded, dict):
+          return loaded
+        return {}
     except json.JSONDecodeError:
       log_warning(f"Corrupt JSON at {self.json_path}. Overwriting with new data.")
       return {}

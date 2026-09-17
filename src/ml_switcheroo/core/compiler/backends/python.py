@@ -280,18 +280,20 @@ class PythonBackend(CompilerBackend):
         A CST FunctionDef node.
     """
     stmts: List[cst.BaseStatement] = []
-    input_nodes = [n for n in nodes if n.kind == "Input"]
+    input_nodes = [n for n in nodes if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Input"]
     input_arg_name = "x"
     if input_nodes:
-      input_arg_name = input_nodes[0].metadata.get("name", input_nodes[0].id)
+      inp_attrs = getattr(input_nodes[0], "attributes", {})
+      input_arg_name = inp_attrs.get("name", input_nodes[0].id)
 
     current_var = input_arg_name
     var_map = {input_nodes[0].id: input_arg_name} if input_nodes else {}
 
     for node in nodes:
-      if node.kind == "Input":
+      op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
+      if op_type == "Input":
         continue
-      if node.kind == "Output":
+      if op_type == "Output":
         # Check if output is fed by something specific
         stmts.append(cst.parse_statement(f"return {current_var}"))
         continue
@@ -300,7 +302,7 @@ class PythonBackend(CompilerBackend):
         line = f"{current_var} = self.{node.id}({current_var})"
         stmts.append(cst.parse_statement(line))
       else:
-        func_api = node.kind
+        func_api = op_type
         if self.semantics and hasattr(self.semantics, "resolve_variant"):
           # First, try to resolve it as an abstract ID directly.
           definition = self.semantics.resolve_variant(func_api, self.framework)
@@ -316,8 +318,9 @@ class PythonBackend(CompilerBackend):
             func_api = definition["api"]
 
         args_str = current_var
-        if node.metadata:
-          extra_args = self._format_args_from_metadata(node.metadata)
+        node_attrs = getattr(node, "attributes", {})
+        if node_attrs:
+          extra_args = self._format_args_from_metadata(node_attrs)
           if extra_args:
             args_str += f", {extra_args}"
         line = f"{current_var} = {func_api}({args_str})"
@@ -374,9 +377,10 @@ class PythonBackend(CompilerBackend):
     Returns:
         True if stateful, False otherwise.
     """
-    if node.kind in ["Input", "Output"]:
+    op_type: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
+    if op_type in ["Input", "Output"]:
       return False
-    if "." in node.kind and not node.kind.startswith("nn."):
+    if "." in op_type and not op_type.startswith("nn."):
       return False
     return True
 
@@ -389,7 +393,7 @@ class PythonBackend(CompilerBackend):
     Returns:
         A CST SimpleStatementLine node.
     """
-    kind = node.kind
+    kind: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
     if self.semantics and hasattr(self.semantics, "resolve_variant"):
       definition = self.semantics.resolve_variant(kind, self.framework)
       if definition and "api" in definition:
@@ -429,7 +433,8 @@ class PythonBackend(CompilerBackend):
       if kind.endswith("VisionPatchEmbedding") and self.framework == "mlx":
         kind = "nn.Conv2d"  # fallback mapping
 
-    args_str = self._format_args_from_metadata(node.metadata)
+    node_attrs = getattr(node, "attributes", {})
+    args_str = self._format_args_from_metadata(node_attrs)
     if self.framework in ["jax", "flax", "flax_nnx"]:
       if "rngs" not in args_str:
         suffix = ", rngs=rngs" if args_str else "rngs=rngs"

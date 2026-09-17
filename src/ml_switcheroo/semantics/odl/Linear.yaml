@@ -35,3 +35,9 @@ variants:
   mlx:
     api: mlx.nn.Linear
     args: {}
+  ir:
+    api: Gemm
+    args:
+      input: input
+      weight: weight
+      bias: bias

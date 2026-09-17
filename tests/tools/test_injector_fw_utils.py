@@ -95,3 +95,22 @@ def test_injector_fw_utils_convert_negative() -> None:
 
   assert isinstance(convert_to_cst_literal(-1), cst.UnaryOperation)
   assert isinstance(convert_to_cst_literal(-1.0), cst.UnaryOperation)
+
+
+def test_injector_fw_utils_convert_empty_containers() -> None:
+  """Verifies converting empty list, tuple, and dict to CST literals."""
+  import libcst as cst
+
+  from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
+
+  empty_list_node: cst.BaseExpression = convert_to_cst_literal([])
+  assert isinstance(empty_list_node, cst.List)
+  assert len(empty_list_node.elements) == 0
+
+  empty_tuple_node: cst.BaseExpression = convert_to_cst_literal(())
+  assert isinstance(empty_tuple_node, cst.Tuple)
+  assert len(empty_tuple_node.elements) == 0
+
+  empty_dict_node: cst.BaseExpression = convert_to_cst_literal({})
+  assert isinstance(empty_dict_node, cst.Dict)
+  assert len(empty_dict_node.elements) == 0

@@ -904,7 +904,7 @@ def test_rewriter_loopback() -> None:
     patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
     patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
-    real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
+    real_graph = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "b")]}, edges=[])
     real_map: dict[str, typing.Any] = {"a": None}
     with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor:
       mock_extractor.return_value.graph = real_graph
@@ -926,7 +926,7 @@ def test_rewriter_loopback_sharding_jax() -> None:
     patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
     patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
-    real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
+    real_graph = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "b")]}, edges=[])
     real_map: dict[str, typing.Any] = {"a": None}
     with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor:
       mock_extractor.return_value.graph = real_graph
@@ -948,7 +948,7 @@ def test_rewriter_loopback_sharding_torch() -> None:
     patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
     patch("ml_switcheroo.core.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
-    real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
+    real_graph = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "b")]}, edges=[])
     real_map: dict[str, typing.Any] = {"a": None}
     with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor:
       mock_extractor.return_value.graph = real_graph
@@ -1072,7 +1072,7 @@ def test_rewriter_loopback_sharding_full() -> None:
   ):
     mock_differ.return_value.diff.return_value = [1]
     with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor:
-      mock_extractor.return_value.graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
+      mock_extractor.return_value.graph = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "b")]}, edges=[])
       mock_extractor.return_value.node_map = {}
       engine._run_rewriter_pipeline("code", get_tracer_mock())
   engine_torch = ASTEngine(config=cfg, source="jax", target="torch", enable_graph_optimization=True)
@@ -1094,6 +1094,6 @@ def test_rewriter_loopback_sharding_full() -> None:
   ):
     mock_differ.return_value.diff.return_value = [1]
     with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor:
-      mock_extractor.return_value.graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
+      mock_extractor.return_value.graph = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "b")]}, edges=[])
       mock_extractor.return_value.node_map = {}
       engine_torch._run_rewriter_pipeline("code", get_tracer_mock())

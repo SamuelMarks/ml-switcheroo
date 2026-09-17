@@ -22,5 +22,5 @@ variants:
   jax:
     api: jax.numpy.ldexp
     args:
-      x1: x1
-      x2: x2
+      input: x
+      other: y

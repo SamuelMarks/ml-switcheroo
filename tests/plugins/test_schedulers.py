@@ -201,3 +201,21 @@ def test_transform_scheduler_step() -> None:
   result: Union[cst.CSTNode, cst.Call, cst.Name] = transform_scheduler_step(call_node, ctx)
   assert isinstance(result, cst.Name)
   assert result.value == "None"
+
+
+def test_step_lr_extra_args() -> None:
+  """Tests _transform_step_lr with extra keyword and extra positional arguments."""
+  ctx = DummyContext("StepLR", "optax.piecewise_constant_schedule")
+  call = cast(cst.Call, cst.parse_expression("optim.lr_scheduler.StepLR(optimizer, 10, 0.1, 999, verbose=True)"))
+  res = _transform_step_lr(call, cast(Any, ctx), "optax.piecewise_constant_schedule")
+  assert res is not None
+
+
+def test_cosine_lr_extra_args() -> None:
+  """Tests _transform_cosine_lr with extra keyword and extra positional arguments."""
+  ctx = DummyContext("CosineAnnealingLR", "optax.cosine_decay_schedule")
+  call = cast(
+    cst.Call, cst.parse_expression("optim.lr_scheduler.CosineAnnealingLR(optimizer, 50, 0.001, 999, verbose=True)")
+  )
+  res = _transform_cosine_lr(call, cast(Any, ctx), "optax.cosine_decay_schedule")
+  assert res is not None

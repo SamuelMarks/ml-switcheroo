@@ -33,21 +33,17 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.frameworks.torch_io import TorchIOMixin
 
-torch: Optional[Any] = None
-nn: Optional[Any] = None
-optim: Optional[Any] = None
 try:
-  import torch as _torch
-  import torch.nn as _nn
-  import torch.optim as _optim
-
-  torch = _torch
-  nn = _nn
-  optim = _optim
+  import torch as _torch_module
+  import torch.nn as _nn_module
+  import torch.optim as _optim_module
 except Exception:
-  torch = None
-  nn = None
-  optim = None
+  _torch_module = None  # type: ignore[assignment]
+  _nn_module = None  # type: ignore[assignment]
+  _optim_module = None  # type: ignore[assignment]
+torch: Optional[Any] = _torch_module
+nn: Optional[Any] = _nn_module
+optim: Optional[Any] = _optim_module
 
 
 @register_framework("torch")

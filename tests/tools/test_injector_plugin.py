@@ -280,3 +280,57 @@ def test_injector_plugin_generate_body_logic() -> None:
   mod: cst.Module = cst.Module(body=stmts)
   res: str = mod.code
   assert "val_0 > 5" in res
+
+
+def test_injector_plugin_to_snake_case_acronyms() -> None:
+  """Verifies NameMangler.to_snake_case handles acronyms and uppercase endings."""
+  from ml_switcheroo.tools.injector_plugin import NameMangler
+
+  assert NameMangler.to_snake_case("AB") == "ab"
+  assert NameMangler.to_snake_case("ABC") == "abc"
+  assert NameMangler.to_snake_case("XMLParser") == "xml_parser"
+  assert NameMangler.to_snake_case("HTTPResponse") == "http_response"
+
+
+def test_injector_plugin_overwrite_existing_file_function_not_found(tmp_path: Path) -> None:
+  """Verifies behavior when existing file does not contain the target hook function."""
+  from ml_switcheroo.tools.injector_plugin import PluginGenerator, PluginScaffoldDef, PluginType
+
+  plugin_dir: Path = tmp_path / "plugins"
+  plugin_dir.mkdir()
+  existing_file: Path = plugin_dir / "unrelated_hook.py"
+  existing_file.write_text("def other_function():\n    pass\n", encoding="utf-8")
+
+  gen: PluginGenerator = PluginGenerator(plugin_dir)
+  scaffold: PluginScaffoldDef = PluginScaffoldDef(
+    name="unrelated_hook",
+    type=PluginType.CALL,
+    doc="Unrelated Hook",
+  )
+  assert gen.generate(scaffold) is True
+
+
+def test_injector_plugin_preserved_body_suite_branches() -> None:
+  """Verifies branches for empty body statements and non-indented/non-simple suite."""
+  from unittest.mock import MagicMock
+
+  import libcst as cst
+
+  from ml_switcheroo.tools.injector_plugin import PluginGenerator, PluginScaffoldDef, PluginType
+
+  gen: PluginGenerator = PluginGenerator(Path("."))
+  scaffold: PluginScaffoldDef = PluginScaffoldDef(
+    name="empty_hook",
+    type=PluginType.CALL,
+    doc="Empty Hook",
+  )
+
+  # Empty indented block (stmts is empty -> hits 207->217)
+  empty_block: cst.IndentedBlock = cst.IndentedBlock(body=[])
+  code_empty: str = gen._build_cst_content(scaffold, preserved_body=empty_block)
+  assert "return node" in code_empty
+
+  # Unknown BaseSuite subclass (hits 203->207)
+  mock_suite: MagicMock = MagicMock(spec=cst.BaseSuite)
+  code_mock: str = gen._build_cst_content(scaffold, preserved_body=mock_suite)
+  assert "return node" in code_mock

@@ -70,7 +70,7 @@ def _build_yaml_entry(op_name: str, definition: dict) -> dict:
     elif isinstance(arg, dict):
       entry = {k: v for k, v in arg.items() if v is not None}
 
-    if entry:
+    if entry and not str(entry.get("name", "")).startswith("__"):
       yaml_args.append(entry)
 
   # 2. Normalize Meta
@@ -127,7 +127,7 @@ def _write_yaml_update(out_path: Path, new_entries: typing.List[dict]) -> None:
         loaded = yaml.safe_load(f)
         if isinstance(loaded, list):
           for item in loaded:
-            if "operation" in item:  # pragma: no branch
+            if "operation" in item:
               existing_map[item["operation"]] = item
     except Exception as e:
       logger.warning(f"[ml-switcheroo] Could not read existing YAML: {e}. Overwriting.")

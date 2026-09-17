@@ -154,10 +154,14 @@ def test_main_entrypoint(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Non
   out_json = tmp_path / "odl.json"
 
   repo_str = str(compiler.REPO_ROOT)
+  repo_src = str(compiler.REPO_ROOT / "src")
   orig_sys_path = list(sys.path)
-  sys.path = [p for p in sys.path if p != repo_str]
+  sys.path = [p for p in sys.path if p not in (repo_str, repo_src)]
 
   try:
+    import importlib
+
+    importlib.reload(compiler)
     monkeypatch.setattr(
       "sys.argv",
       ["compile_odl_catalog.py", "--odl-dir", str(odl_dir), "--output-json", str(out_json)],

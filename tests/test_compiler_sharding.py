@@ -23,31 +23,31 @@ def test_sharding_inference_pass_apply() -> None:
   """Docstring."""
   nodes: List[LogicalNode] = [
     # Column Parallel matches
-    LogicalNode(id="q_proj", kind="Linear"),
-    LogicalNode(id="k_proj_layer", kind="Linear"),
-    LogicalNode(id="V_PROJ", kind="Linear"),
-    LogicalNode(id="gate_proj", kind="Linear"),
-    LogicalNode(id="up_proj", kind="Linear"),
+    LogicalNode(id="q_proj", op_type="Linear"),
+    LogicalNode(id="k_proj_layer", op_type="Linear"),
+    LogicalNode(id="V_PROJ", op_type="Linear"),
+    LogicalNode(id="gate_proj", op_type="Linear"),
+    LogicalNode(id="up_proj", op_type="Linear"),
     # Row Parallel matches
-    LogicalNode(id="o_proj", kind="Linear"),
-    LogicalNode(id="down_proj", kind="Linear"),
-    LogicalNode(id="embed_tokens", kind="Embedding"),
+    LogicalNode(id="o_proj", op_type="Linear"),
+    LogicalNode(id="down_proj", op_type="Linear"),
+    LogicalNode(id="embed_tokens", op_type="Embedding"),
     # Fallback FSDP matches
-    LogicalNode(id="fc1", kind="Linear"),
-    LogicalNode(id="conv1", kind="Conv2d"),
-    LogicalNode(id="conv3", kind="Conv3d"),
-    LogicalNode(id="my_embedding_layer", kind="Embedding"),
+    LogicalNode(id="fc1", op_type="Linear"),
+    LogicalNode(id="conv1", op_type="Conv2d"),
+    LogicalNode(id="conv3", op_type="Conv3d"),
+    LogicalNode(id="my_embedding_layer", op_type="Embedding"),
     # Ignored node
-    LogicalNode(id="relu", kind="ReLU"),
+    LogicalNode(id="relu", op_type="ReLU"),
   ]
-  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=[])
   pass_: ShardingInferencePass = ShardingInferencePass()
   new_graph: LogicalGraph = pass_.apply(graph)
 
   # Check if mesh is attached
   assert new_graph.mesh == pass_.mesh
 
-  node_dict: Dict[str, LogicalNode] = {n.id: n for n in new_graph.nodes}
+  node_dict: Dict[str, LogicalNode] = dict(new_graph.nodes)
 
   # Column parallel
   assert node_dict["q_proj"].sharding == PartitionSpec(axes=(None, "tensor"))

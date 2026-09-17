@@ -19,3 +19,21 @@ variants:
     args:
       a: a
       b: b
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: b
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: equal_nan
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'
+- name: stream
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

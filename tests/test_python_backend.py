@@ -43,7 +43,7 @@ def test_python_backend_init() -> None:
 
 def test_python_backend_compile() -> None:
   """Docstring."""
-  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="input", kind="Input")], edges=[])
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="input", op_type="Input")]}, edges=[])
   backend: PythonBackend = PythonBackend("torch")
   code: str = backend.compile(graph)
   assert "class" in code
@@ -51,7 +51,7 @@ def test_python_backend_compile() -> None:
 
 def test_python_backend_generate_with_tree() -> None:
   """Docstring."""
-  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="input", kind="Input")], edges=[])
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="input", op_type="Input")]}, edges=[])
   backend: PythonBackend = PythonBackend("torch")
   tree: cst.Module = cst.parse_module("class CustomClass: pass")
   code: str = backend.generate(graph, class_name="CustomClass", original_tree=tree)
@@ -61,11 +61,11 @@ def test_python_backend_generate_with_tree() -> None:
 def test_is_stateful_layer() -> None:
   """Docstring."""
   backend: PythonBackend = PythonBackend("torch")
-  assert backend._is_stateful_layer(LogicalNode(id="n1", kind="Input")) is False
-  assert backend._is_stateful_layer(LogicalNode(id="n2", kind="Output")) is False
-  assert backend._is_stateful_layer(LogicalNode(id="n3", kind="torch.add")) is False
-  assert backend._is_stateful_layer(LogicalNode(id="n4", kind="Linear")) is True
-  assert backend._is_stateful_layer(LogicalNode(id="n5", kind="nn.Linear")) is True
+  assert backend._is_stateful_layer(LogicalNode(id="n1", op_type="Input")) is False
+  assert backend._is_stateful_layer(LogicalNode(id="n2", op_type="Output")) is False
+  assert backend._is_stateful_layer(LogicalNode(id="n3", op_type="torch.add")) is False
+  assert backend._is_stateful_layer(LogicalNode(id="n4", op_type="Linear")) is True
+  assert backend._is_stateful_layer(LogicalNode(id="n5", op_type="nn.Linear")) is True
 
 
 def test_generate_imports_all() -> None:
@@ -112,8 +112,8 @@ def test_build_forward_with_semantics() -> None:
   """Docstring."""
   backend: PythonBackend = PythonBackend("torch")
   nodes: List[LogicalNode] = [
-    LogicalNode(id="in1", kind="Input"),
-    LogicalNode(id="out1", kind="Output"),
+    LogicalNode(id="in1", op_type="Input"),
+    LogicalNode(id="out1", op_type="Output"),
   ]
   forward_def: cst.BaseStatement = backend._build_forward(nodes)
   assert "return in1" in cst.Module([forward_def]).code
@@ -123,10 +123,10 @@ def test_build_forward_complex() -> None:
   """Docstring."""
   backend: PythonBackend = PythonBackend("torch")
   nodes: List[LogicalNode] = [
-    LogicalNode(id="in1", kind="Input"),
-    LogicalNode(id="layer1", kind="Linear"),
-    LogicalNode(id="op1", kind="torch.add", metadata={"arg_1": "1"}),
-    LogicalNode(id="out1", kind="Output"),
+    LogicalNode(id="in1", op_type="Input"),
+    LogicalNode(id="layer1", op_type="Linear"),
+    LogicalNode(id="op1", op_type="torch.add", attributes={"arg_1": "1"}),
+    LogicalNode(id="out1", op_type="Output"),
   ]
 
   class MockSemantics:
@@ -172,9 +172,9 @@ def test_build_forward_with_semantics_reverse_lookup() -> None:
   backend.semantics = MockSemantics()
 
   nodes: List[LogicalNode] = [
-    LogicalNode(id="in1", kind="Input"),
-    LogicalNode(id="op1", kind="torch.concrete_api"),
-    LogicalNode(id="out1", kind="Output"),
+    LogicalNode(id="in1", op_type="Input"),
+    LogicalNode(id="op1", op_type="torch.concrete_api"),
+    LogicalNode(id="out1", op_type="Output"),
   ]
   forward_def: cst.BaseStatement = backend._build_forward(nodes)
   assert "resolved_target" in cst.Module([forward_def]).code
@@ -183,8 +183,8 @@ def test_build_forward_with_semantics_reverse_lookup() -> None:
 def test_build_forward_sharding() -> None:
   """Docstring."""
   nodes: List[LogicalNode] = [
-    LogicalNode(id="in1", kind="Input"),
-    LogicalNode(id="layer1", kind="Linear", sharding=PartitionSpec(axes=("data", None))),
+    LogicalNode(id="in1", op_type="Input"),
+    LogicalNode(id="layer1", op_type="Linear", sharding=PartitionSpec(axes=("data", None))),
   ]
 
   for fw in ["jax", "torch", "tensorflow", "keras", "mlx"]:
@@ -218,13 +218,13 @@ def test_generate_layer_init() -> None:
 
   backend.semantics = MockSemantics()
 
-  node: LogicalNode = LogicalNode(id="layer1", kind="Linear", metadata={"arg_1": "10"})
+  node: LogicalNode = LogicalNode(id="layer1", op_type="Linear", attributes={"arg_1": "10"})
   stmt: cst.BaseStatement = backend._generate_layer_init(node)
   code: str = cst.Module([stmt]).code
   assert "self.layer1 = nn.Linear(10)" in code
 
   # testing torch with functional
-  node_func: LogicalNode = LogicalNode(id="layer2", kind="Other", metadata={"arg_1": "10"})
+  node_func: LogicalNode = LogicalNode(id="layer2", op_type="Other", attributes={"arg_1": "10"})
   stmt_func: cst.BaseStatement = backend._generate_layer_init(node_func)
   code_func: str = cst.Module([stmt_func]).code
   assert "self.layer2 = nn.Other(10)" in code_func
@@ -245,7 +245,7 @@ def test_generate_layer_init_flax() -> None:
 
   backend.semantics = MockSemantics()
 
-  node: LogicalNode = LogicalNode(id="layer1", kind="Linear", metadata={"arg_1": "10"})
+  node: LogicalNode = LogicalNode(id="layer1", op_type="Linear", attributes={"arg_1": "10"})
   stmt: cst.BaseStatement = backend._generate_layer_init(node)
   code: str = cst.Module([stmt]).code
   assert "nn.Dense(10, rngs=rngs)" in code
@@ -254,7 +254,7 @@ def test_generate_layer_init_flax() -> None:
 def test_generate_layer_init_keras() -> None:
   """Docstring."""
   backend: PythonBackend = PythonBackend("keras")
-  node: LogicalNode = LogicalNode(id="layer1", kind="Linear", metadata={"arg_1": "10"})
+  node: LogicalNode = LogicalNode(id="layer1", op_type="Linear", attributes={"arg_1": "10"})
   stmt: cst.BaseStatement = backend._generate_layer_init(node)
   code: str = cst.Module([stmt]).code
   assert "keras.layers.Linear(10)" in code
@@ -268,7 +268,7 @@ def test_generate_layer_init_keras() -> None:
 def test_generate_layer_init_paxml() -> None:
   """Docstring."""
   backend: PythonBackend = PythonBackend("paxml")
-  node: LogicalNode = LogicalNode(id="layer1", kind="Linear", metadata={"arg_1": "10"})
+  node: LogicalNode = LogicalNode(id="layer1", op_type="Linear", attributes={"arg_1": "10"})
   stmt: cst.BaseStatement = backend._generate_layer_init(node)
   code: str = cst.Module([stmt]).code
   assert "self.create_child" in code
@@ -290,22 +290,22 @@ def test_generate_layer_init_mlx() -> None:
 
   backend.semantics = MockSemantics()
 
-  node: LogicalNode = LogicalNode(id="layer1", kind="VisionPatchEmbedding", metadata={"arg_1": "10"})
+  node: LogicalNode = LogicalNode(id="layer1", op_type="VisionPatchEmbedding", attributes={"arg_1": "10"})
   stmt: cst.BaseStatement = backend._generate_layer_init(node)
   code: str = cst.Module([stmt]).code
   assert "nn.Conv2d(10)" in code
 
-  node2: LogicalNode = LogicalNode(id="layer2", kind="RoPE", metadata={"arg_1": "10"})
+  node2: LogicalNode = LogicalNode(id="layer2", op_type="RoPE", attributes={"arg_1": "10"})
   stmt2: cst.BaseStatement = backend._generate_layer_init(node2)
   code2: str = cst.Module([stmt2]).code
   assert "nn.RoPE(10)" in code2
 
-  node3: LogicalNode = LogicalNode(id="layer3", kind="SwiGLU", metadata={})
+  node3: LogicalNode = LogicalNode(id="layer3", op_type="SwiGLU", attributes={})
   stmt3: cst.BaseStatement = backend._generate_layer_init(node3)
   code3: str = cst.Module([stmt3]).code
   assert "self.layer3 = nn.silu()" in code3
 
-  node4: LogicalNode = LogicalNode(id="layer4", kind="mlx.nn.Linear", metadata={})
+  node4: LogicalNode = LogicalNode(id="layer4", op_type="mlx.nn.Linear", attributes={})
   stmt4: cst.BaseStatement = backend._generate_layer_init(node4)
   code4: str = cst.Module([stmt4]).code
   assert "self.layer4 = nn.Linear()" in code4
@@ -314,7 +314,7 @@ def test_generate_layer_init_mlx() -> None:
 def test_generate_layer_init_swiglu() -> None:
   """Docstring."""
   backend: PythonBackend = PythonBackend("torch")
-  node: LogicalNode = LogicalNode(id="swiglu", kind="SwiGLU", metadata={})
+  node: LogicalNode = LogicalNode(id="swiglu", op_type="SwiGLU", attributes={})
   stmt: cst.BaseStatement = backend._generate_layer_init(node)
   code: str = cst.Module([stmt]).code
   assert "self.swiglu = nn.SwiGLU()" in code
@@ -322,7 +322,7 @@ def test_generate_layer_init_swiglu() -> None:
 
 def test_generate_base_class_formatting() -> None:
   """Docstring."""
-  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="in1", kind="Input")], edges=[])
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="in1", op_type="Input")]}, edges=[])
 
   class MockAdapter:
     """Docstring."""
@@ -382,7 +382,8 @@ def test_class_body_replacer_no_match() -> None:
 def test_build_init_stateful() -> None:
   """Docstring."""
   graph: LogicalGraph = LogicalGraph(
-    nodes=[LogicalNode(id="in1", kind="Input"), LogicalNode(id="layer1", kind="Linear")], edges=[]
+    nodes={n.id: n for n in [LogicalNode(id="in1", op_type="Input"), LogicalNode(id="layer1", op_type="Linear")]},
+    edges=[],
   )
   backend: PythonBackend = PythonBackend("torch")
   code: str = backend.compile(graph)
@@ -392,7 +393,7 @@ def test_build_init_stateful() -> None:
 def test_generate_layer_init_flax_nnx_dotless() -> None:
   """Docstring."""
   backend: PythonBackend = PythonBackend("flax_nnx")
-  node: LogicalNode = LogicalNode(id="layer1", kind="MyCustomLayer", metadata={"arg_1": "10"})
+  node: LogicalNode = LogicalNode(id="layer1", op_type="MyCustomLayer", attributes={"arg_1": "10"})
   stmt: cst.BaseStatement = backend._generate_layer_init(node)
   code: str = cst.Module([stmt]).code
   assert "nnx.MyCustomLayer" in code

@@ -1,7 +1,7 @@
 """Test suite for the Registry module."""
 
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.sphinx_ext.registry import scan_registry
@@ -60,14 +60,14 @@ def test_scan_registry(mock_get_adapter: MagicMock, mock_priority: MagicMock, mo
   mock_avail.return_value = ["torch", "jax", "flax_nnx", "unknown"]
   mock_priority.return_value = ["torch", "jax"]
 
-  def get_adapter_side_effect(name: str) -> MagicMock:
+  def get_adapter_side_effect(name: str) -> Optional[MagicMock]:
     """Effect.
 
     Args:
         name (str): The name argument.
 
     Returns:
-        MagicMock: A mock adapter.
+        Optional[MagicMock]: A mock adapter.
     """
     if name == "torch":
       adapter: MagicMock = MagicMock()
@@ -127,14 +127,14 @@ def test_scan_registry_extra(mock_get_adapter: MagicMock, mock_priority: MagicMo
   mock_avail.return_value = ["unknown"]
   mock_priority.return_value = ["jax"]
 
-  def get_adapter_side_effect(name: str) -> MagicMock:
+  def get_adapter_side_effect(name: str) -> Optional[MagicMock]:
     """Effect.
 
     Args:
         name (str): The name argument.
 
     Returns:
-        MagicMock: A mock adapter.
+        Optional[MagicMock]: A mock adapter.
     """
     if name == "unknown":
       adapter: MagicMock = MagicMock()
@@ -170,14 +170,14 @@ def test_scan_registry_no_candidates(
   mock_avail.return_value = ["torch"]
   mock_priority.return_value = ["torch"]
 
-  def get_adapter_side_effect(name: str) -> MagicMock:
+  def get_adapter_side_effect(name: str) -> Optional[MagicMock]:
     """Effect.
 
     Args:
         name (str): The name argument.
 
     Returns:
-        MagicMock: A mock adapter.
+        Optional[MagicMock]: A mock adapter.
     """
     if name == "torch":
       adapter: MagicMock = MagicMock()
@@ -230,3 +230,48 @@ def test_scan_registry_else_branch(mock_get_adapter: MagicMock, mock_priority: M
 
   mock_get_adapter.side_effect = get_adapter_side_effect
   scan_registry()
+
+
+@patch("ml_switcheroo.sphinx_ext.registry.available_frameworks")
+@patch("ml_switcheroo.sphinx_ext.registry.get_framework_priority_order")
+@patch("ml_switcheroo.sphinx_ext.registry.get_adapter")
+def test_scan_registry_rotated_exhaust(
+  mock_get_adapter: MagicMock, mock_priority: MagicMock, mock_avail: MagicMock
+) -> None:
+  """Test rotated loop in scan_registry when candidates are not in rotated slice.
+
+  Args:
+      mock_get_adapter (MagicMock): Mock adapter getter.
+      mock_priority (MagicMock): Mock priority list.
+      mock_avail (MagicMock): Mock available frameworks.
+  """
+
+  class MockPriorities(list):
+    """Custom priority list to test rotated candidate matching."""
+
+    def __getitem__(self, item: Any) -> Any:
+      """Retrieve slice or item.
+
+      Args:
+          item: Index or slice key.
+
+      Returns:
+          Unmatched framework list for slices, or standard item.
+      """
+      if isinstance(item, slice):
+        return ["unmatched_fw"]
+      return super().__getitem__(item)
+
+  mock_avail.return_value = ["torch"]
+  mock_priority.return_value = MockPriorities(["torch", "jax"])
+
+  adapter: MagicMock = MagicMock()
+  adapter.inherits_from = None
+  adapter.display_name = "Torch"
+  adapter.supported_tiers = None
+  adapter.get_tiered_examples.return_value = {"tier1_math": "torch_math"}
+  mock_get_adapter.return_value = adapter
+
+  hierarchy, examples_json, tier_metadata_json = scan_registry()
+  examples: Dict[str, Any] = json.loads(examples_json)
+  assert examples["torch_tier1_math"]["tgtFw"] == "target_placeholder"

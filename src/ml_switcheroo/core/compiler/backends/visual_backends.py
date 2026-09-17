@@ -68,7 +68,7 @@ class TikzBackend(CompilerBackend):
     )
     cst_nodes.append(TriviaNode("\n"))
 
-    for node in graph.nodes:
+    for node in graph.nodes.values():
       pos = positions.get(node.id, (0, 0))
       tikz_node = self._create_tikz_node(node, pos[0], pos[1])
       cst_nodes.append(tikz_node)
@@ -115,19 +115,19 @@ class TikzBackend(CompilerBackend):
 
     adj = defaultdict(list)
     in_degree = defaultdict(int)
-    for n in graph.nodes:
+    for n in graph.nodes.values():
       in_degree[n.id] = 0
 
     for edge in graph.edges:
       adj[edge.source].append(edge.target)
       in_degree[edge.target] += 1
 
-    queue = deque([n.id for n in graph.nodes if in_degree[n.id] == 0])
+    queue = deque([n.id for n in graph.nodes.values() if in_degree[n.id] == 0])
     ranks = {}
     processed = set()
 
     if not queue and graph.nodes:
-      first = graph.nodes[0].id
+      first = next(iter(graph.nodes.values())).id
       queue.append(first)
       ranks[first] = 0
     else:
@@ -148,7 +148,7 @@ class TikzBackend(CompilerBackend):
           ranks[neighbor] = curr_rank + 1
           queue.append(neighbor)
 
-    for n in graph.nodes:
+    for n in graph.nodes.values():
       if n.id not in ranks:
         max_rank += 1
         ranks[n.id] = max_rank
@@ -187,19 +187,21 @@ class TikzBackend(CompilerBackend):
       TikzOption("rounded corners"),
       TikzOption("align", "center"),
     ]
-    if node.kind == "Input":
+    node_op_type: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
+    if node_op_type == "Input":
       options.append(TikzOption("fill", "green!10"))
-    elif node.kind == "Output":
+    elif node_op_type == "Output":
       options.append(TikzOption("fill", "red!10"))
     else:
       options.append(TikzOption("fill", "blue!5"))
 
-    sanitized_kind = self._sanitize(node.kind)
+    sanitized_kind = self._sanitize(node_op_type)
     rows: List[List[Union[str, TikzTextNode]]] = [[rf"\textbf{{{sanitized_kind}}}"]]
     sanitized_id = self._sanitize(node.id)
     rows.append([rf"\textit{{{sanitized_id}}}"])
 
-    for k, v in node.metadata.items():
+    node_attrs = getattr(node, "attributes", {})
+    for k, v in node_attrs.items():
       clean_k = self._sanitize(k)
       clean_v = self._sanitize(str(v)[:20])
       rows.append([f"{clean_k}: {clean_v}"])
@@ -300,20 +302,25 @@ class LatexBackend(CompilerBackend):
         A ModelContainer node representing the root of the LaTeX AST.
     """
     children: List[LatexNode] = []
-    # Reconstruct registry as graph nodes list
-    state_registry = {n.id: n for n in graph.nodes}
+    # Reconstruct registry as graph nodes lookup
+    state_registry = dict(graph.nodes)
 
     # RdnaMemory Logic
     for node_id, node in sorted(state_registry.items()):
-      if node.kind in ["Input", "Output"]:
+      op_type = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
+      if op_type in ["Input", "Output"]:
         continue
       if node_id.startswith("func_"):
         continue
-      config = node.metadata.copy()
-      mem = MemoryNode(node_id=node_id, op_type=node.kind, config=config)
+      node_attrs = getattr(node, "attributes", {})
+      config = node_attrs.copy()
+      mem = MemoryNode(node_id=node_id, op_type=op_type, config=config)
       children.append(mem)
 
-    input_node = next((n for n in graph.nodes if n.kind == "Input"), None)
+    input_node = next(
+      (n for n in graph.nodes.values() if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Input"),
+      None,
+    )
     input_name = "input"
     children.append(InputNode(name=input_name, shape="[_]"))
 
@@ -323,10 +330,18 @@ class LatexBackend(CompilerBackend):
     else:
       id_map["input"] = input_name
 
-    output_node = next((n for n in graph.nodes if n.kind == "Output"), None)
+    output_node = next(
+      (n for n in graph.nodes.values() if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Output"),
+      None,
+    )
     visited_ops = set()
 
-    for edge in graph.edges:
+    all_edges = list(graph.edges)
+    pending = getattr(graph, "_pending_edges", [])
+    if pending:
+      all_edges.extend(pending)
+
+    for edge in all_edges:
       target_id = edge.target
       source_id = edge.source
       if target_id == "output" or (output_node and target_id == output_node.id):
@@ -335,8 +350,10 @@ class LatexBackend(CompilerBackend):
         continue
 
       is_stateful = (target_id in state_registry) and not target_id.startswith("func_")
-      node_data = next((n for n in graph.nodes if n.id == target_id), None)
-      op_type = node_data.kind if node_data else "Unknown"
+      node_data = graph.nodes.get(target_id)
+      op_type = str(
+        getattr(node_data, "op_type", None) or getattr(node_data, "kind", "Unknown") if node_data else "Unknown"
+      )
       step_id = f"op_{target_id}"
       id_map[target_id] = step_id
       arg_ref = id_map.get(source_id, f"op_{source_id}")
@@ -347,7 +364,8 @@ class LatexBackend(CompilerBackend):
       else:
         meta_args = []
         if node_data:
-          for k, v in node_data.metadata.items():
+          node_attrs = getattr(node_data, "attributes", {})
+          for k, v in node_attrs.items():
             if k.startswith("arg"):
               meta_args.append(v)
             else:

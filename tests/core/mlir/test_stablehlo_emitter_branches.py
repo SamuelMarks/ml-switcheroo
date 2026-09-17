@@ -139,6 +139,21 @@ def test_stablehlo_additional_branches() -> None:
     ops = emitter._emit_if(elif_node)
     assert len(ops) > 0
 
+  # 215->217: if with elif where nested _emit_if returns [OperationNode(name="stablehlo.return")]
+  calls_ret = 0
+
+  def fake_emit_if_ret(node: typing.Any) -> typing.List[OperationNode]:
+    """Mock recursive _emit_if call returning a return op."""
+    nonlocal calls_ret
+    calls_ret += 1
+    if calls_ret > 1:
+      return [OperationNode(name="stablehlo.return")]
+    return orig_emit_if(node)
+
+  with patch.object(emitter, "_emit_if", side_effect=fake_emit_if_ret):
+    ops = emitter._emit_if(elif_node)
+    assert len(ops) > 0
+
   # 324->exit: _resolve_sw_constant with result_types already set
   op_const = OperationNode(
     name="sw.constant",

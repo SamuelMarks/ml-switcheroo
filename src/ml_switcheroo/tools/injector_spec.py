@@ -116,7 +116,12 @@ class StandardsInjector:
     return out
 
   def _serialize_args(
-    self, args: typing.Sequence[typing.Union[str, dict, "ParameterDef", list, tuple]]
+    self,
+    args: typing.Sequence[
+      typing.Union[
+        str, typing.Dict[str, typing.Any], "ParameterDef", typing.List[typing.Any], typing.Tuple[typing.Any, ...]
+      ]
+    ],
   ) -> typing.List[typing.Any]:
     """Normalize argument list to clean dictionaries or strings.
 
@@ -150,7 +155,7 @@ class StandardsInjector:
           entry["type"] = arg[1]
         result.append(entry)
 
-      elif isinstance(arg, str):  # pragma: no branch
+      elif isinstance(arg, str):
         result.append(arg)  # type: ignore
 
     return result

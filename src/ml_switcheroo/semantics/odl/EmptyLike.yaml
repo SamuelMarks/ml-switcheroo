@@ -8,7 +8,7 @@ variants:
   flax_nnx:
     api: jax.numpy.empty_like
     args:
-      input: a
+      input: prototype
       requires_grad: null
     dispatch_rules: []
     pack_as: Tuple

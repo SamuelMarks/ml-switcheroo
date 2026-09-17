@@ -233,3 +233,8 @@ def test_subscript_slice_direct_expression_and_custom() -> None:
   int_const = parser.visit(cst.Integer("42"))
   assert isinstance(int_const, PrimitiveType)
   assert int_const.name == "42"
+
+  # Node without value attribute (branch 221->224)
+  no_val_const = parser.visit_Constant(cst.Pass())
+  assert isinstance(no_val_const, PrimitiveType)
+  assert no_val_const.name == ""

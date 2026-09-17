@@ -38,9 +38,13 @@ def semantics_mgr() -> SemanticsManager:
 
 def test_rdna_roundtrip_macro(semantics_mgr: SemanticsManager) -> None:
   """Verifies the behavior of RDNA roundtrip macro."""
-  g_in = LogicalGraph()
-  g_in.nodes = [LogicalNode("img", "Input"), LogicalNode("conv", "Conv2d", {"k": 3}), LogicalNode("out", "Output")]
-  g_in.edges = [LogicalEdge("img", "conv"), LogicalEdge("conv", "out")]
+  nodes = {
+    "img": LogicalNode("img", op_type="Input"),
+    "conv": LogicalNode("conv", op_type="Conv2d", attributes={"k": 3}),
+    "out": LogicalNode("out", op_type="Output"),
+  }
+  edges = [LogicalEdge("img", "conv"), LogicalEdge("conv", "out")]
+  g_in = LogicalGraph(nodes=nodes, edges=edges)
   backend = RdnaBackend(semantics_mgr)
   rdna_text: str = backend.compile(g_in)
   assert "BEGIN Conv2d" in rdna_text
@@ -50,9 +54,9 @@ def test_rdna_roundtrip_macro(semantics_mgr: SemanticsManager) -> None:
   lifter = RdnaLifter()
   g_out: LogicalGraph = lifter.lift(ast_nodes)
   assert len(g_out.nodes) == 3
-  node_ids: list[str] = [n.id for n in g_out.nodes]
+  node_ids: list[str] = list(g_out.nodes.keys())
   assert "img" in node_ids
   assert "conv" in node_ids
   assert "output" in node_ids
-  conv_node: LogicalNode = next((n for n in g_out.nodes if n.id == "conv"))
-  assert conv_node.metadata["k"] == 3
+  conv_node: LogicalNode = g_out.nodes["conv"]
+  assert conv_node.attributes["k"] == 3

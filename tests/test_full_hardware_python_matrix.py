@@ -86,14 +86,15 @@ def test_full_roundtrip_hardware_python_matrix(hardware_target: str, python_targ
   semantics = MockHardwareSemantics()
 
   # 1. Build canonical DAG
+  nodes = {
+    "x": LogicalNode("x", op_type="Input"),
+    "c1": LogicalNode("c1", op_type="Conv2d", attributes={"in_channels": 3, "out_channels": 16, "kernel_size": 3}),
+    "r1": LogicalNode("r1", op_type="ReLU"),
+    "out": LogicalNode("out", op_type="Output"),
+  }
   g_initial = LogicalGraph(
     name="MatrixNet",
-    nodes=[
-      LogicalNode("x", "Input"),
-      LogicalNode("c1", "Conv2d", {"in_channels": 3, "out_channels": 16, "kernel_size": 3}),
-      LogicalNode("r1", "ReLU"),
-      LogicalNode("out", "Output"),
-    ],
+    nodes=nodes,
     edges=[
       LogicalEdge("x", "c1"),
       LogicalEdge("c1", "r1"),
@@ -121,8 +122,8 @@ def test_full_roundtrip_hardware_python_matrix(hardware_target: str, python_targ
     sass_ast = NvidiaSassParser(asm_text).parse().statements
     g_lifted = NvidiaSassLifter().lift(sass_ast)
 
-  assert any(n.kind == "Conv2d" for n in g_lifted.nodes)
-  assert any(n.kind == "ReLU" for n in g_lifted.nodes)
+  assert any(n.op_type == "Conv2d" for n in g_lifted.nodes.values())
+  assert any(n.op_type == "ReLU" for n in g_lifted.nodes.values())
 
   # 4. Synthesize from lifted graph to Python target
   python_backend = PythonBackend(framework=python_target, semantics=semantics)

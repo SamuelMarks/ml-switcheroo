@@ -13,3 +13,8 @@ variants:
     api: keras.ops.bitwise_not
     args:
       x: x
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int

@@ -22,3 +22,16 @@ variants:
   keras:
     api: keras.ops.expand_dims
     args: {}
+std_args:
+- name: a
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: axis
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any

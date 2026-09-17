@@ -144,14 +144,10 @@ variants:
   torch:
     api: torch.nn.functional.multi_head_attention_forward
     args:
-      query, key, value: query, key, value
       embed_dim_to_check: embed_dim_to_check
       num_heads: num_heads
-      in_proj_weight, in_proj_bias: in_proj_weight, in_proj_bias
-      bias_k, bias_v: bias_k, bias_v
       add_zero_attn: add_zero_attn
       dropout_p: dropout_p
-      out_proj_weight, out_proj_bias: out_proj_weight, out_proj_bias
       out_proj_weight: out_proj_weight
       query: query
       in_proj_weight: in_proj_weight

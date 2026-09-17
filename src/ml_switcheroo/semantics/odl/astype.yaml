@@ -23,5 +23,5 @@ variants:
   jax:
     api: jax.numpy.astype
     args:
-      x: x
+      x: a
       dtype: dtype

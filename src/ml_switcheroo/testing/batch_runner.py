@@ -97,7 +97,7 @@ class BatchValidator:
 
   def _unpack_args(
     self, raw_args: typing.List[typing.Any]
-  ) -> typing.Tuple[typing.List[str], typing.Dict[str, str], typing.Dict[str, dict]]:
+  ) -> typing.Tuple[typing.List[str], typing.Dict[str, str], typing.Dict[str, typing.Dict[str, typing.Any]]]:
     """Separate argument names from type hints and extracts semantic constraints.
 
     Handles formats:
@@ -148,7 +148,7 @@ class BatchValidator:
         hints[name] = annotation
 
       # Case 1: Simple String
-      elif isinstance(item, str):  # pragma: no branch
+      elif isinstance(item, str):
         params.append(item)
         # No hint available
 
@@ -179,7 +179,7 @@ class BatchValidator:
         content = py_file.read_text(encoding="utf-8")
         tree = ast.parse(content)
         for node in tree.body:
-          if (  # pragma: no branch
+          if (
             isinstance(node, ast.FunctionDef) and node.name.startswith("test_") and not node.name.startswith("test_gen_")
           ):
             # Extract 'matmul' from 'test_matmul'

@@ -3,8 +3,16 @@ __frameworks__:
     alias:
       module: "keras.ops"
       name: "ops"
+    traits:
+      module_base: "keras.Model"
+      forward_method: "call"
+      requires_super_init: true
   keras_layers:
     extends: "keras"
     alias:
       module: "keras.layers"
       name: "layers"
+    traits:
+      module_base: "keras.layers.Layer"
+      forward_method: "call"
+      requires_super_init: true

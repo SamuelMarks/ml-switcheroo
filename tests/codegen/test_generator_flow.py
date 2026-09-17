@@ -28,8 +28,8 @@ def mock_mgr() -> SemanticsManager:
     },
     "numpy": {"import": "import numpy as np", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
   }
-  mgr.get_test_template = MagicMock(side_effect=lambda fw: templates.get(fw))
-  mgr.get_framework_config = MagicMock(return_value={})
+  setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: templates.get(fw)))
+  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   setattr(mgr, "test_templates", templates)
   return mgr
 
@@ -50,7 +50,9 @@ def test_generation_safety(tmp_path: Path, mock_mgr: SemanticsManager) -> None:
   """Verifies the behavior of generation safety."""
   semantics: dict[str, typing.Any] = {"abs": {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}}}
   out_file: Path = tmp_path / "test_generated.py"
-  out_file.write_text("\ndef test_gen_abs():\n    # Manual override\n    assert True\n")
+  out_file.write_text(
+    "import pytest\ndef helper():\n    pass\ndef test_gen_abs():\n    # Manual override\n    assert True\n"
+  )
   gen = TestCaseGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
   content: str = out_file.read_text()

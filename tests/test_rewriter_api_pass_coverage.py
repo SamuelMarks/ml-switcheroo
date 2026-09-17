@@ -498,7 +498,9 @@ def test_api_helpers_get_qualified_name():
     transformer._get_qualified_name(cst.Attribute(value=cst.Name("pd"), attr=cst.Name("DataFrame"))) == "pandas.DataFrame"
   )
   assert transformer._get_qualified_name(cst.Name("pd")) == "pandas"
-  with __import__("unittest").mock.patch.object(transformer, "_cst_to_string", return_value=None):
+  import unittest.mock
+
+  with unittest.mock.patch.object(transformer, "_cst_to_string", return_value=None):
     assert transformer._get_qualified_name(cst.Name("test")) is None
 
 

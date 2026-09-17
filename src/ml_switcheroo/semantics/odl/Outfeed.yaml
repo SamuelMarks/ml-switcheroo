@@ -3,10 +3,8 @@ variants:
   stablehlo:
     api: stablehlo.outfeed
   jax:
-    api: jax.lax.outfeed
-    args:
-      token: token
-      xs: xs
+    api: ; Macro.Outfeed
+    args: {}
 std_args:
 - name: inputs
   kind: positional_or_keyword

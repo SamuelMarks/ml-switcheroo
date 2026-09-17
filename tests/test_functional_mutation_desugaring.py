@@ -348,3 +348,54 @@ def test_mutation_transformer_helpers() -> None:
   mod = cst.parse_module("x += 1")
   transformed_mod = mutation_pass.transform(mod, ctx_jax)
   assert transformed_mod is not None
+
+  # Branch 192->204: leave_FunctionDef when function body is SimpleStatementSuite (not IndentedBlock)
+  trans_jax._stochastic_call_count = 1
+  trans_jax._has_rng_param = False
+  fn_simple: cst.FunctionDef = getattr(cst.parse_module("def foo(): pass"), "body")[0]
+  res_fn = trans_jax.leave_FunctionDef(fn_simple, fn_simple)
+  assert res_fn is fn_simple
+
+  # Branch 230->248: leave_AugAssign when subscript target value is not BaseAssignTargetExpression
+  aug_non_assign_target = cst.AugAssign(
+    target=cst.Subscript(
+      value=cst.Call(func=cst.Name("get_arr")),
+      slice=[cst.SubscriptElement(slice=cst.Index(value=cst.Integer("0")))],
+    ),
+    operator=cst.AddAssign(),
+    value=cst.Integer("1"),
+  )
+  res_aug2 = trans_jax.leave_AugAssign(aug_non_assign_target, aug_non_assign_target)
+  assert isinstance(res_aug2, cst.Assign)
+
+  # Branch 274->293: leave_Assign when target subscript value is not BaseAssignTargetExpression
+  assign_non_assign_target = cst.Assign(
+    targets=[
+      cst.AssignTarget(
+        target=cst.Subscript(
+          value=cst.Call(func=cst.Name("get_arr")),
+          slice=[cst.SubscriptElement(slice=cst.Index(value=cst.Integer("0")))],
+        )
+      )
+    ],
+    value=cst.Integer("1"),
+  )
+  res_assign2 = trans_jax.leave_Assign(assign_non_assign_target, assign_non_assign_target)
+  assert res_assign2 is assign_non_assign_target
+
+  # Branch 298->312: leave_Assign (eager target) when base_expr is not BaseAssignTargetExpression
+  ctx_torch = RewriterContext(semantics=mgr, config=RuntimeConfig.load(source="jax", target="torch"))
+  trans_torch = FunctionalMutationTransformer(ctx_torch)
+  assign_at_call = cst.Assign(
+    targets=[cst.AssignTarget(target=cst.Name("x"))],
+    value=getattr(cst.parse_statement("get_arr().at[0].set(1)"), "body")[0].value,  # type: ignore[attr-defined]
+  )
+  res_assign3 = trans_torch.leave_Assign(assign_at_call, assign_at_call)
+  assert res_assign3 is assign_at_call
+
+  # Branch 329->335: leave_Expr (eager target) when base_expr is not BaseAssignTargetExpression
+  expr_at_call = cst.Expr(
+    value=getattr(cst.parse_statement("get_arr().at[0].set(1)"), "body")[0].value  # type: ignore[attr-defined]
+  )
+  res_expr2 = trans_torch.leave_Expr(expr_at_call, expr_at_call)
+  assert res_expr2 is expr_at_call

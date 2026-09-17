@@ -12,3 +12,8 @@ variants:
     api: mlx.core.stream
     args:
       s: s
+std_args:
+- name: s
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

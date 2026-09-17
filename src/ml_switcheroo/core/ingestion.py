@@ -109,7 +109,24 @@ def ingest_code(
       tracer.end_phase()
       raise e
 
-  # 4. Standard Python
+  # 4. IR source (JSON or Python IR)
+  if source_fw in ["ir", "ml_switcheroo_ir"]:
+    tracer.start_phase("IR Ingest", "IR Source -> Python CST")
+    try:
+      from ml_switcheroo.core.compiler.frontends.ir import IrFrontend, IrToCstGenerator
+
+      ir_frontend = IrFrontend(code)
+      graph = ir_frontend.parse_to_graph()
+      generator = IrToCstGenerator()
+      tree = generator.generate(graph)
+      tracer.log_mutation("Ingestion", "(IR Source)", "(Python CST)")
+      tracer.end_phase()
+      return tree
+    except Exception as e:
+      tracer.end_phase()
+      raise e
+
+  # 5. Standard Python
   tracer.start_phase("Preprocessing", "Parsing & Analysis")
   try:
     tree = cst.parse_module(code)

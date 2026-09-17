@@ -3,9 +3,8 @@ variants:
   stablehlo:
     api: stablehlo.infeed
   jax:
-    api: jax.lax.infeed
-    args:
-      token: token
+    api: ; Macro.Infeed
+    args: {}
 std_args:
 - name: token
   kind: positional_or_keyword

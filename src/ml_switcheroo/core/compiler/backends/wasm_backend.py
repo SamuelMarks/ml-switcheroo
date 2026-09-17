@@ -55,14 +55,15 @@ class WasmBackend(CompilerBackend):
     func = WatFunc(name=func_name, export=True)
 
     # Determine inputs
-    inputs = [n for n in graph.nodes if n.kind == "Input"]
+    inputs = [n for n in graph.nodes.values() if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Input"]
     for i, inp in enumerate(inputs):
       func.params.append(WatParam(name=WasmRegister(f"arg{i}"), type_id="f32"))
 
     # Map nodes to instructions
     # Since WASM is stack-based, we map variables to locals
-    for node in graph.nodes:
-      if node.kind in ["Input", "Output"]:
+    for node in graph.nodes.values():
+      op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
+      if op_type in ["Input", "Output"]:
         continue
 
       # Map common IR nodes to basic WASM instructions
@@ -72,27 +73,28 @@ class WasmBackend(CompilerBackend):
       incoming = [e.source for e in graph.edges if e.target == node.id]
       for inc in incoming:
         # Map source to param if it's an input
-        src_node = next((n for n in graph.nodes if n.id == inc), None)
-        if src_node and src_node.kind == "Input":
+        src_node = graph.nodes.get(inc)
+        src_op_type = getattr(src_node, "op_type", None) or getattr(src_node, "kind", "") if src_node else ""
+        if src_node and src_op_type == "Input":
           idx = inputs.index(src_node)
           func.body.append(WatInstr(opcode=WasmOpcode("local.get"), args=[WasmArgument(f"$arg{idx}")]))
         else:
           func.body.append(WatInstr(opcode=WasmOpcode("local.get"), args=[WasmArgument(f"${inc}")]))
 
-      if node.kind == "Add":
+      if op_type == "Add":
         func.body.append(WatInstr(opcode=WasmOpcode("f32.add")))
-      elif node.kind == "Mul":
+      elif op_type == "Mul":
         func.body.append(WatInstr(opcode=WasmOpcode("f32.mul")))
-      elif node.kind == "Sub":
+      elif op_type == "Sub":
         func.body.append(WatInstr(opcode=WasmOpcode("f32.sub")))
       else:
         # Default to calling some imported function or just a comment
-        func.body.append(WatInstr(opcode=WasmOpcode("call"), args=[WasmArgument(f"${node.kind}")]))
+        func.body.append(WatInstr(opcode=WasmOpcode("call"), args=[WasmArgument(f"${op_type}")]))
 
       func.body.append(WatInstr(opcode=WasmOpcode("local.set"), args=[WasmArgument(f"${node.id}")]))
 
     # Output
-    outputs = [n for n in graph.nodes if n.kind == "Output"]
+    outputs = [n for n in graph.nodes.values() if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Output"]
     if outputs:
       func.results.append(WatResult(type_id="f32"))
       incoming = [e.source for e in graph.edges if e.target == outputs[0].id]

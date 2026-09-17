@@ -175,6 +175,8 @@ def test_jax_convert_array_exception() -> None:
   mock_jnp.array.side_effect = ValueError("bad array")
   with patch.dict(sys.modules, {"jax": mock_jax, "jax.numpy": mock_jnp}):
     assert adapter.convert([1, 2, 3]) == [1, 2, 3]
+    # Non-array input hits line 257
+    assert adapter.convert(42) == 42
 
 
 # --- Merged from test_jax_extra.py ---
@@ -219,6 +221,7 @@ def test_jax_adapter_collect_live() -> None:
     assert "loss1" in adapter._collect_live(SemanticTier.LOSS)
   with patch("ml_switcheroo.frameworks.jax.OptaxScanner.scan_optimizers", return_value=["opt1"], create=True):
     assert "opt1" in adapter._collect_live(SemanticTier.OPTIMIZER)
+  assert adapter._collect_live(SemanticTier.ARRAY_API) == []
 
 
 def test_jax_adapter_convert_exception() -> None:

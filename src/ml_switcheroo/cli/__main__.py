@@ -63,7 +63,7 @@ def main(argv: Optional[List[str]] = None) -> int:
   cmd_conv.add_argument(
     "--intermediate",
     default=None,
-    choices=["mlir", "tikz"],
+    choices=["mlir", "tikz", "ir", "ml_switcheroo_ir"],
     help="Force round-trip through intermediate representation for verification",
   )
   cmd_conv.add_argument(

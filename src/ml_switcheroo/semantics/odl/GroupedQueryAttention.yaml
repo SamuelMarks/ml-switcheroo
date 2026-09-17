@@ -36,6 +36,7 @@ variants:
     args:
       embed_dim: null
       num_heads: num_heads
+      in_features: in_features
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []

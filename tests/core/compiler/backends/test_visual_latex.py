@@ -6,27 +6,26 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 
 def create_sample_graph() -> LogicalGraph:
   """Creates sample graph."""
-  graph = LogicalGraph("TestGraph")
-  graph.nodes = [
-    LogicalNode("in", "Input", {"shape": "[10]"}),
-    LogicalNode("l1", "Linear", {"features": "20", "bias": "True"}),
-    LogicalNode("func_relu", "func_relu", {"arg1": "1.0"}),
-    LogicalNode("out", "Output", {}),
-  ]
-  graph.edges = [LogicalEdge("in", "l1"), LogicalEdge("l1", "func_relu"), LogicalEdge("func_relu", "out")]
-  return graph
+  nodes = {
+    "in": LogicalNode("in", op_type="Input", attributes={"shape": "[10]"}),
+    "l1": LogicalNode("l1", op_type="Linear", attributes={"features": "20", "bias": "True"}),
+    "func_relu": LogicalNode("func_relu", op_type="func_relu", attributes={"arg1": "1.0"}),
+    "out": LogicalNode("out", op_type="Output", attributes={}),
+  }
+  edges = [LogicalEdge("in", "l1"), LogicalEdge("l1", "func_relu"), LogicalEdge("func_relu", "out")]
+  return LogicalGraph("TestGraph", nodes=nodes, edges=edges)
 
 
 def test_latex_backend_basic() -> None:
   """Verifies the behavior of latex backend basic."""
   backend = visual_latex.LatexBackend()
-  graph = LogicalGraph("TestGraph")
-  graph.nodes = [
-    LogicalNode("in", "Input", {}),
-    LogicalNode("out", "Output", {}),
-    LogicalNode("comp", "Dense", {}),
-  ]
-  graph.edges = [LogicalEdge("in", "comp"), LogicalEdge("comp", "out")]
+  nodes = {
+    "in": LogicalNode("in", op_type="Input", attributes={}),
+    "out": LogicalNode("out", op_type="Output", attributes={}),
+    "comp": LogicalNode("comp", op_type="Dense", attributes={}),
+  }
+  edges = [LogicalEdge("in", "comp"), LogicalEdge("comp", "out")]
+  graph = LogicalGraph("TestGraph", nodes=nodes, edges=edges)
   res: str = backend.compile(graph)
   assert "documentclass" in res
   assert "TestGraph" in res
@@ -56,13 +55,13 @@ def test_latex_backend_sample() -> None:
 def test_latex_backend_custom() -> None:
   """Verifies the behavior of LaTeX backend custom."""
   backend = visual_latex.LatexBackend()
-  graph = LogicalGraph("Custom")
-  graph.nodes = [
-    LogicalNode("in", "Input", {}),
-    LogicalNode("some.op.Missing", "some.op.Missing", {}),
-    LogicalNode("output", "Output", {}),
-  ]
-  graph.edges = [LogicalEdge("in", "some.op.Missing"), LogicalEdge("some.op.Missing", "output")]
+  nodes = {
+    "in": LogicalNode("in", op_type="Input", attributes={}),
+    "some.op.Missing": LogicalNode("some.op.Missing", op_type="some.op.Missing", attributes={}),
+    "output": LogicalNode("output", op_type="Output", attributes={}),
+  }
+  edges = [LogicalEdge("in", "some.op.Missing"), LogicalEdge("some.op.Missing", "output")]
+  graph = LogicalGraph("Custom", nodes=nodes, edges=edges)
   res: str = backend.compile(graph)
   assert "Missing" in res
 
@@ -70,27 +69,31 @@ def test_latex_backend_custom() -> None:
 def test_latex_backend_no_out_edges() -> None:
   """Verifies the behavior of LaTeX backend no output edges."""
   backend = visual_latex.LatexBackend()
-  graph = LogicalGraph("Custom")
-  graph.nodes = [LogicalNode("in", "Input", {}), LogicalNode("some_mod.foo", "some_mod.foo", {})]
-  graph.edges = [LogicalEdge("in", "some_mod.foo")]
+  nodes = {
+    "in": LogicalNode("in", op_type="Input", attributes={}),
+    "some_mod.foo": LogicalNode("some_mod.foo", op_type="some_mod.foo", attributes={}),
+  }
+  edges = [LogicalEdge("in", "some_mod.foo")]
+  graph = LogicalGraph("Custom", nodes=nodes, edges=edges)
   res: str = backend.compile(graph)
   assert "ReturnNode" not in res or "last_step" in res
 
 
 def test_latex_backend_output_node_bypass() -> None:
-  """Docstring."""
+  """Verifies LaTeX backend handles nodes with multiple incoming edges and output bypass."""
   backend = visual_latex.LatexBackend()
-  graph = LogicalGraph("Custom")
-  graph.nodes = [
-    LogicalNode("in", "Input", {}),
-    LogicalNode("func_foo", "my.module.Foo", {"non_arg": "123"}),
-    LogicalNode("Output", "Output", {}),
-  ]
-  graph.edges = [
-    LogicalEdge("in", "func_foo"),
-    LogicalEdge("in", "func_foo"),  # Duplicate edge to hit visited_ops continue
+  nodes = {
+    "in1": LogicalNode("in1", op_type="Input", attributes={}),
+    "in2": LogicalNode("in2", op_type="Input", attributes={}),
+    "func_foo": LogicalNode("func_foo", op_type="my.module.Foo", attributes={"non_arg": "123"}),
+    "Output": LogicalNode("Output", op_type="Output", attributes={}),
+  }
+  edges = [
+    LogicalEdge("in1", "func_foo"),
+    LogicalEdge("in2", "func_foo"),  # Duplicate target to hit visited_ops continue
     LogicalEdge("func_foo", "Output"),
   ]
+  graph = LogicalGraph("Custom", nodes=nodes, edges=edges)
   res: str = backend.compile(graph)
   assert "Foo" in res
   assert "non_arg=123" in res
@@ -102,10 +105,7 @@ def test_visual_latex_no_node_data() -> None:
   from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph
 
-  g = LogicalGraph("Test")
-  # A graph with an edge but no nodes in graph.nodes.
-  # target_id will not be found in node_dict, so node_data = None
-  g.edges.append(LogicalEdge("in", "target"))
+  g = LogicalGraph("Test", nodes={}, edges=[LogicalEdge("in", "target")])
   backend = LatexBackend()
   code: str = backend.compile(g)
   assert "op_target" in code
@@ -117,10 +117,12 @@ def test_visual_latex_clean_type_no_dot_no_func() -> None:
   from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
-  g = LogicalGraph("Test")
-  g.nodes.append(LogicalNode("in", "Input"))
-  g.nodes.append(LogicalNode("target", "simple"))
-  g.edges.append(LogicalEdge("in", "target"))
+  nodes = {
+    "in": LogicalNode("in", op_type="Input"),
+    "target": LogicalNode("target", op_type="simple"),
+  }
+  edges = [LogicalEdge("in", "target")]
+  g = LogicalGraph("Test", nodes=nodes, edges=edges)
   backend = LatexBackend()
   code: str = backend.compile(g)
   assert "op_target = Simple" in code or "op_target" in code

@@ -57,7 +57,7 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
   macros_to_test: list[str] = ["Conv3d", "ReLU", "Flatten", "Reshape", "Mean"]
 
   for kind in macros_to_test:
-    g_in: LogicalGraph = LogicalGraph(nodes=[LogicalNode("n1", kind, {"k": 3, "elements": 10})])
+    g_in: LogicalGraph = LogicalGraph(nodes={"n1": LogicalNode("n1", op_type=kind, attributes={"k": 3, "elements": 10})})
     sass_text: str = backend.compile(g_in)
 
     assert f"BEGIN {kind}" in sass_text, f"Missing BEGIN comment for {kind}"
@@ -67,10 +67,11 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
     g_out: LogicalGraph = lifter.lift(ast_nodes)
 
     assert len(g_out.nodes) == 1, f"Failed to lift {kind} correctly"
-    assert g_out.nodes[0].kind == kind, f"Lifted node kind mismatch for {kind}"
+    out_node = list(g_out.nodes.values())[0]
+    assert out_node.op_type == kind, f"Lifted node kind mismatch for {kind}"
 
   # Test Abs (1:1 opcode)
-  g_in2: LogicalGraph = LogicalGraph(nodes=[LogicalNode("n1", "Abs")])
+  g_in2: LogicalGraph = LogicalGraph(nodes={"n1": LogicalNode("n1", op_type="Abs")})
   sass_text2: str = backend.compile(g_in2)
   assert "FABS" in sass_text2
 
@@ -80,7 +81,8 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
 
   # Because it's 1:1 without a BEGIN block, it parses as an assembly instruction node
   assert len(g_out2.nodes) == 1
-  assert g_out2.nodes[0].kind == "asm.FABS"
+  out_node2 = list(g_out2.nodes.values())[0]
+  assert out_node2.op_type == "asm.FABS"
 
 
 def test_rdna_sass_grounding_no_dummies() -> None:
@@ -135,14 +137,15 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
   sass_lifter = NvidiaSassLifter()
 
   # 1. Start with high-level DAG: Input -> Conv2d -> ReLU -> Output
+  nodes = {
+    "x": LogicalNode("x", op_type="Input"),
+    "c1": LogicalNode("c1", op_type="Conv2d", attributes={"k": 3, "stride": 1}),
+    "r1": LogicalNode("r1", op_type="ReLU"),
+    "out": LogicalNode("out", op_type="Output"),
+  }
   g_initial = LogicalGraph(
     name="TestNet",
-    nodes=[
-      LogicalNode("x", "Input"),
-      LogicalNode("c1", "Conv2d", {"k": 3, "stride": 1}),
-      LogicalNode("r1", "ReLU"),
-      LogicalNode("out", "Output"),
-    ],
+    nodes=nodes,
     edges=[
       LogicalEdge("x", "c1"),
       LogicalEdge("c1", "r1"),
@@ -158,19 +161,19 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
   # 3. Lift RDNA assembly into neutral LogicalGraph
   rdna_ast = RdnaParser(rdna_asm).parse().statements
   g_from_rdna = rdna_lifter.lift(rdna_ast)
-  assert any(n.kind == "Conv2d" for n in g_from_rdna.nodes)
-  assert any(n.kind == "ReLU" for n in g_from_rdna.nodes)
+  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Conv2d" for n in g_from_rdna.nodes.values())
+  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "ReLU" for n in g_from_rdna.nodes.values())
 
   # 4. Transpile lifted graph to NVIDIA SASS assembly
   sass_asm = sass_backend.compile(g_from_rdna)
   assert "BEGIN Conv2d" in sass_asm
   assert "BEGIN ReLU" in sass_asm
 
-  # 5. Lift NVIDIA SASS assembly into neutral LogicalGraph
+  # 5. Lift NVIDIA SASS assembly back into neutral LogicalGraph
   sass_ast = NvidiaSassParser(sass_asm).parse().statements
   g_from_sass = sass_lifter.lift(sass_ast)
-  assert any(n.kind == "Conv2d" for n in g_from_sass.nodes)
-  assert any(n.kind == "ReLU" for n in g_from_sass.nodes)
+  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Conv2d" for n in g_from_sass.nodes.values())
+  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "ReLU" for n in g_from_sass.nodes.values())
 
   # 6. Transpile lifted SASS graph back to AMD RDNA assembly
   rdna_asm_roundtrip = rdna_backend.compile(g_from_sass)

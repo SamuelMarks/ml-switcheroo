@@ -39,7 +39,9 @@ def test_sharding_extractor_gaps() -> None:
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
   from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 
-  graph = LogicalGraph(nodes=[LogicalNode("s", "with_sharding_constraint")], edges=[])
+  graph = LogicalGraph(nodes={n.id: n for n in [LogicalNode("s", "with_sharding_constraint")]}, edges=[])
   ShardingExtractionPass().apply(graph)
-  graph2 = LogicalGraph(nodes=[LogicalNode("s", "with_sharding_constraint")], edges=[LogicalEdge("missing", "s")])
+  graph2 = LogicalGraph(
+    nodes={n.id: n for n in [LogicalNode("s", "with_sharding_constraint")]}, edges=[LogicalEdge("missing", "s")]
+  )
   ShardingExtractionPass().apply(graph2)

@@ -71,7 +71,7 @@ class ReadmeEditor:
 
     for i, token in enumerate(tokens):
       if token.type == "heading_open":
-        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":  # pragma: no branch
+        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
           if header_marker in tokens[i + 1].content:
             target_idx = i
             break
@@ -99,7 +99,7 @@ class ReadmeEditor:
     end_line = len(content.splitlines())
     if next_heading_idx != -1:
       next_map = tokens[next_heading_idx].map
-      if next_map is not None:  # pragma: no branch
+      if next_map is not None:
         end_line = next_map[0]
 
     lines = content.splitlines()

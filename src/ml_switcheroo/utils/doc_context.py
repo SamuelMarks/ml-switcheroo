@@ -84,19 +84,23 @@ class DocContextBuilder:
         name = arg
       elif isinstance(arg, (list, tuple)) and len(arg) > 0:
         name = arg[0]
-        if len(arg) > 1:  # pragma: no branch
+        if len(arg) > 1:
           type_hint = arg[1]
-      elif isinstance(arg, dict):  # pragma: no branch
+      elif isinstance(arg, dict):
         name = arg.get("name", "unknown")
         type_hint = arg.get("type")
         default_val = arg.get("default")
+
+      if name.startswith("__") or name == "__doc__":
+        continue
 
       # Construct string
       sig_part = name
       if type_hint and type_hint != "Any":
         sig_part += f": {type_hint}"
       if default_val is not None:
-        sig_part += f" = {default_val}"
+        clean_val = str(default_val).replace("`", "")
+        sig_part += f" = {clean_val}"
 
       formatted.append(sig_part)
 

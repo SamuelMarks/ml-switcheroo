@@ -6,23 +6,23 @@ from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 
 def create_sample_graph() -> LogicalGraph:
   """Creates sample graph."""
-  graph = LogicalGraph("TestGraph")
-  graph.nodes = [
-    LogicalNode("in", "Input", {"shape": "[10]"}),
-    LogicalNode("l1", "Linear", {"features": "20", "bias": "True"}),
-    LogicalNode("func_relu", "func_relu", {"arg1": "1.0"}),
-    LogicalNode("out", "Output", {}),
-  ]
-  graph.edges = [LogicalEdge("in", "l1"), LogicalEdge("l1", "func_relu"), LogicalEdge("func_relu", "out")]
-  return graph
+  nodes = {
+    "in": LogicalNode("in", op_type="Input", attributes={"shape": "[10]"}),
+    "l1": LogicalNode("l1", op_type="Linear", attributes={"features": "20", "bias": "True"}),
+    "func_relu": LogicalNode("func_relu", op_type="func_relu", attributes={"arg1": "1.0"}),
+    "out": LogicalNode("out", op_type="Output", attributes={}),
+  }
+  edges = [LogicalEdge("in", "l1"), LogicalEdge("l1", "func_relu"), LogicalEdge("func_relu", "out")]
+  return LogicalGraph("TestGraph", nodes=nodes, edges=edges)
 
 
 def create_disconnected_graph() -> LogicalGraph:
   """Creates disconnected graph."""
-  graph = LogicalGraph("DisGraph")
-  graph.nodes = [LogicalNode("in", "Input", {}), LogicalNode("out", "Output", {})]
-  graph.edges = []
-  return graph
+  nodes = {
+    "in": LogicalNode("in", op_type="Input", attributes={}),
+    "out": LogicalNode("out", op_type="Output", attributes={}),
+  }
+  return LogicalGraph("DisGraph", nodes=nodes, edges=[])
 
 
 def test_tikz_backend_empty() -> None:
@@ -73,9 +73,12 @@ def test_latex_backend_sample() -> None:
 def test_latex_backend_custom() -> None:
   """Verifies the behavior of LaTeX backend custom."""
   backend = LatexBackend()
-  graph = LogicalGraph("Custom")
-  graph.nodes = [LogicalNode("in", "Input", {}), LogicalNode("output", "Output", {})]
-  graph.edges = [LogicalEdge("in", "some.op.Missing"), LogicalEdge("some.op.Missing", "output")]
+  nodes = {
+    "in": LogicalNode("in", op_type="Input", attributes={}),
+    "output": LogicalNode("output", op_type="Output", attributes={}),
+  }
+  edges = [LogicalEdge("in", "some.op.Missing"), LogicalEdge("some.op.Missing", "output")]
+  graph = LogicalGraph("Custom", nodes=nodes, edges=edges)
   res: str = backend.compile(graph)
   assert "Missing" in res
 
@@ -83,8 +86,11 @@ def test_latex_backend_custom() -> None:
 def test_latex_backend_no_out_edges() -> None:
   """Verifies the behavior of LaTeX backend no output edges."""
   backend = LatexBackend()
-  graph = LogicalGraph("Custom")
-  graph.nodes = [LogicalNode("in", "Input", {}), LogicalNode("some_mod.foo", "some_mod.foo", {})]
-  graph.edges = [LogicalEdge("in", "some_mod.foo")]
+  nodes = {
+    "in": LogicalNode("in", op_type="Input", attributes={}),
+    "some_mod.foo": LogicalNode("some_mod.foo", op_type="some_mod.foo", attributes={}),
+  }
+  edges = [LogicalEdge("in", "some_mod.foo")]
+  graph = LogicalGraph("Custom", nodes=nodes, edges=edges)
   res: str = backend.compile(graph)
   assert "ReturnNode" not in res or "last_step" in res

@@ -38,3 +38,8 @@ variants:
   rdna:
     api: ; Macro.Linear
     args: {}
+  ir:
+    api: MatMul
+    args:
+      input: input
+      other: other

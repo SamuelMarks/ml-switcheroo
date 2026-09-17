@@ -22,8 +22,8 @@ class GeneratedNet:
   assert extractor.model_name == "GeneratedNet"
   assert "conv" in extractor.layer_registry
   assert "fc" in extractor.layer_registry
-  assert extractor.layer_registry["conv"].kind == "Conv2d"
-  assert extractor.layer_registry["fc"].metadata["bias"] == "True"
+  assert extractor.layer_registry["conv"].op_type == "Conv2d"
+  assert extractor.layer_registry["fc"].attributes["bias"] == "True"
 
 
 def test_graph_extractor_forward_pass() -> None:
@@ -68,7 +68,7 @@ class GeneratedNet:
   tree.visit(extractor)
 
   assert "func_relu" in extractor.layer_registry
-  assert extractor.layer_registry["func_relu"].kind == "F.relu"
+  assert extractor.layer_registry["func_relu"].op_type == "F.relu"
 
 
 def test_graph_extractor_return_call() -> None:

@@ -116,3 +116,17 @@ def test_html_tabs_content() -> None:
   jax_block_start: int = html.find('id="JAX_1"')
   jax_block: str = html[jax_block_start:]
   assert "Official Docs" not in jax_block
+
+
+def test_sanitize_description_asterisks_and_backticks() -> None:
+  """Verifies escaping of asterisks and closing of unmatched backticks in descriptions."""
+  renderer: OpPageRenderer = OpPageRenderer()
+  assert renderer._sanitize_description("") == ""
+  assert (
+    renderer._sanitize_description("where(condition, input, other, *, out=None)")
+    == r"where(condition, input, other, \*, out=None)"
+  )
+  assert renderer._sanitize_description("load(f, *, **kwargs)") == r"load(f, \*, \*\*kwargs)"
+  assert renderer._sanitize_description("Wraps XLA's `Slice") == "Wraps XLA's `Slice`"
+  # Asterisks inside backticks should NOT be escaped
+  assert renderer._sanitize_description("Power: :math:`x^y * z`") == "Power: :math:`x^y * z`"

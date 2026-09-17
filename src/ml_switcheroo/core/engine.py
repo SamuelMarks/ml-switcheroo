@@ -117,6 +117,29 @@ class ASTEngine:
     tracer.start_phase("Pipeline Start", f"{self.source} -> {self.target}")
 
     try:
+      if self.config.intermediate in ["ir", "ml_switcheroo_ir"]:
+        tracer.start_phase("Intermediate Pipeline", f"{self.source} -> IR -> {self.target}")
+        engine_to_ir = ASTEngine(
+          semantics=self.semantics,
+          source=self.source,
+          target="ir",
+          strict_mode=self.strict_mode,
+        )
+        ir_result = engine_to_ir.run(code)
+        if not ir_result.success:
+          tracer.end_phase()
+          return ir_result
+
+        engine_from_ir = ASTEngine(
+          semantics=self.semantics,
+          source="ir",
+          target=self.target,
+          strict_mode=self.strict_mode,
+        )
+        final_result = engine_from_ir.run(ir_result.code)
+        tracer.end_phase()
+        return final_result
+
       if is_isa_source(self.source) or is_isa_target(self.target) or self.config.enable_sharding:
         result = self._run_compiler_pipeline(code, tracer)
       elif self.target == "stablehlo":
@@ -244,6 +267,11 @@ class ASTEngine:
         code_for_graph = self.to_source(cst_tree)
         frontend = PythonFrontend(code_for_graph)
         graph = frontend.parse_to_graph()
+      elif self.source in ["ir", "ml_switcheroo_ir"]:
+        from ml_switcheroo.core.compiler.frontends.ir import IrFrontend
+
+        ir_frontend = IrFrontend(code)
+        graph = ir_frontend.parse_to_graph()
       else:
         raise NotImplementedError(f"No frontend for {self.source}")
 

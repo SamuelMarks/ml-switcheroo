@@ -142,7 +142,7 @@ def test_graph_patcher_is_expr_context_and_unwrap() -> None:
   orig_call = cst.Call(func=cst.Name("f"))
   action = ReplaceAction(
     node_id="node1",
-    new_node=LogicalNode(id="node1", kind="Add"),
+    new_node=LogicalNode(id="node1", op_type="Add"),
     input_vars=[],
     output_var="x",
     is_init=False,

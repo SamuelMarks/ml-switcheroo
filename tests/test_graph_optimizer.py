@@ -9,21 +9,23 @@ from ml_switcheroo.core.graph_optimizer import GraphOptimizer
 
 def test_graph_optimizer_no_patterns() -> None:
   """Docstring."""
-  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="1", kind="A")], edges=[])
+  graph: LogicalGraph = LogicalGraph(nodes={"1": LogicalNode(id="1", op_type="A")}, edges=[])
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
   opt_graph: LogicalGraph = opt.optimize(graph)
   assert len(opt_graph.nodes) == 1
-  assert opt_graph.nodes[0].id == "1"
+  assert "1" in opt_graph.nodes
+  assert opt_graph.nodes["1"].id == "1"
 
 
 def test_graph_optimizer_simple_fusion() -> None:
   """Docstring."""
+  nodes = {
+    "1": LogicalNode(id="1", op_type="Conv"),
+    "2": LogicalNode(id="2", op_type="BatchNorm"),
+    "3": LogicalNode(id="3", op_type="ReLU"),
+  }
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="1", kind="Conv"),
-      LogicalNode(id="2", kind="BatchNorm"),
-      LogicalNode(id="3", kind="ReLU"),
-    ],
+    nodes=nodes,
     edges=[
       LogicalEdge(source="1", target="2"),
       LogicalEdge(source="2", target="3"),
@@ -34,21 +36,23 @@ def test_graph_optimizer_simple_fusion() -> None:
   opt_graph: LogicalGraph = opt.optimize(graph)
 
   assert len(opt_graph.nodes) == 1
-  assert opt_graph.nodes[0].kind == "FusedConv"
-  assert opt_graph.nodes[0].id == "fused_1"
+  assert "fused_1" in opt_graph.nodes
+  assert opt_graph.nodes["fused_1"].op_type == "FusedConv"
+  assert opt_graph.nodes["fused_1"].id == "fused_1"
   assert len(opt_graph.edges) == 0
 
 
 def test_graph_optimizer_fusion_with_surrounding_nodes() -> None:
   """Docstring."""
+  nodes = {
+    "0": LogicalNode(id="0", op_type="Input"),
+    "1": LogicalNode(id="1", op_type="Conv"),
+    "2": LogicalNode(id="2", op_type="BatchNorm"),
+    "3": LogicalNode(id="3", op_type="ReLU"),
+    "4": LogicalNode(id="4", op_type="Output"),
+  }
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="0", kind="Input"),
-      LogicalNode(id="1", kind="Conv"),
-      LogicalNode(id="2", kind="BatchNorm"),
-      LogicalNode(id="3", kind="ReLU"),
-      LogicalNode(id="4", kind="Output"),
-    ],
+    nodes=nodes,
     edges=[
       LogicalEdge(source="0", target="1"),
       LogicalEdge(source="1", target="2"),
@@ -61,7 +65,7 @@ def test_graph_optimizer_fusion_with_surrounding_nodes() -> None:
   opt_graph: LogicalGraph = opt.optimize(graph)
 
   assert len(opt_graph.nodes) == 3
-  assert set(n.id for n in opt_graph.nodes) == {"0", "fused_1", "4"}
+  assert set(n.id for n in opt_graph.nodes.values()) == {"0", "fused_1", "4"}
   assert len(opt_graph.edges) == 2
   edge_pairs = set((e.source, e.target) for e in opt_graph.edges)
   assert edge_pairs == {("0", "fused_1"), ("fused_1", "4")}
@@ -70,22 +74,20 @@ def test_graph_optimizer_fusion_with_surrounding_nodes() -> None:
 def test_graph_optimizer_internal_edges_dropped() -> None:
   """Docstring."""
   # If there is an edge from Conv to Output directly (branching)
-  graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="1", kind="Conv"),
-      LogicalNode(id="2", kind="BatchNorm"),
-      LogicalNode(id="3", kind="ReLU"),
-      LogicalNode(id="4", kind="Output"),
-    ],
-    edges=[
-      LogicalEdge(source="1", target="2"),
-      LogicalEdge(source="2", target="3"),
-      LogicalEdge(source="1", target="4"),  # Internal non-tail to non-fused
-      LogicalEdge(source="0", target="2"),  # External to internal non-head
-    ],
-  )
-  # also add node 0
-  graph.nodes.insert(0, LogicalNode(id="0", kind="Input"))
+  nodes = {
+    "0": LogicalNode(id="0", op_type="Input"),
+    "1": LogicalNode(id="1", op_type="Conv"),
+    "2": LogicalNode(id="2", op_type="BatchNorm"),
+    "3": LogicalNode(id="3", op_type="ReLU"),
+    "4": LogicalNode(id="4", op_type="Output"),
+  }
+  edges = [
+    LogicalEdge(source="1", target="2"),
+    LogicalEdge(source="2", target="3"),
+    LogicalEdge(source="1", target="4"),  # Internal non-tail to non-fused
+    LogicalEdge(source="0", target="2"),  # External to internal non-head
+  ]
+  graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
 
   pattern: PatternDef = PatternDef(name="ConvBNReLU", sequence=["Conv", "BatchNorm", "ReLU"], replace_with="FusedConv")
   opt: GraphOptimizer = GraphOptimizer(patterns=[pattern])
@@ -100,7 +102,7 @@ def test_match_sequence_returns_none_empty_sequence() -> None:
   """Docstring."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
   res: Optional[List[LogicalNode]] = opt._match_sequence(
-    start_node=LogicalNode(id="1", kind="A"), sequence=[], node_map={}, out_edges={}, processed_ids=set()
+    start_node=LogicalNode(id="1", op_type="A"), sequence=[], node_map={}, out_edges={}, processed_ids=set()
   )
   assert res is None
 
@@ -109,7 +111,7 @@ def test_match_sequence_mismatch_first() -> None:
   """Docstring."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
   res: Optional[List[LogicalNode]] = opt._match_sequence(
-    start_node=LogicalNode(id="1", kind="B"), sequence=["A", "C"], node_map={}, out_edges={}, processed_ids=set()
+    start_node=LogicalNode(id="1", op_type="B"), sequence=["A", "C"], node_map={}, out_edges={}, processed_ids=set()
   )
   assert res is None
 
@@ -117,7 +119,7 @@ def test_match_sequence_mismatch_first() -> None:
 def test_match_sequence_neighbor_not_found() -> None:
   """Docstring."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
-  node_map: Dict[str, LogicalNode] = {"1": LogicalNode(id="1", kind="A"), "2": LogicalNode(id="2", kind="C")}
+  node_map: Dict[str, LogicalNode] = {"1": LogicalNode(id="1", op_type="A"), "2": LogicalNode(id="2", op_type="C")}
   res: Optional[List[LogicalNode]] = opt._match_sequence(
     start_node=node_map["1"], sequence=["A", "B"], node_map=node_map, out_edges={"1": ["2"]}, processed_ids=set()
   )
@@ -127,7 +129,7 @@ def test_match_sequence_neighbor_not_found() -> None:
 def test_match_sequence_neighbor_already_processed() -> None:
   """Docstring."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
-  node_map: Dict[str, LogicalNode] = {"1": LogicalNode(id="1", kind="A"), "2": LogicalNode(id="2", kind="B")}
+  node_map: Dict[str, LogicalNode] = {"1": LogicalNode(id="1", op_type="A"), "2": LogicalNode(id="2", op_type="B")}
   res: Optional[List[LogicalNode]] = opt._match_sequence(
     start_node=node_map["1"], sequence=["A", "B"], node_map=node_map, out_edges={"1": ["2"]}, processed_ids={"2"}
   )

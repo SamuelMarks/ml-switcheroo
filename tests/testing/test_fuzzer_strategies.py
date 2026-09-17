@@ -56,6 +56,9 @@ def test_array_strategy() -> None:
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
   _array_strategy(parse_type_annotation("Array['N+1']"), {}, shared_dims)
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
+  shared_dims_dup: Dict[str, Any] = {}
+  _array_strategy(parse_type_annotation("Array['N', 'N']"), {}, shared_dims_dup)
+  _array_strategy(parse_type_annotation("Array"), {"dtype": "bool", "rank": 2}, {})
 
 
 def test_strategies_from_spec_more() -> None:

@@ -26,6 +26,7 @@ def test_tikz_parser_missing_lines() -> None:
   transformer = TikzTransformer()
   # 50: trailing trivia
   transformer.start([["node_here"], TriviaNode(" ")])
+  transformer.start([[123]])  # Non-matching element takes False branch of isinstance check
 
   # 78-83:
   tg = TikzGraph([])

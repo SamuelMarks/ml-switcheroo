@@ -45,3 +45,8 @@ variants:
     args:
       input: input
       target: target
+  mlx:
+    api: mlx.nn.losses.cross_entropy
+    args:
+      logits: logits
+      targets: targets

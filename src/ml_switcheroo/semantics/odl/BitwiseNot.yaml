@@ -24,8 +24,17 @@ variants:
     api: torch.bitwise_not
     args: {}
   mlx:
-    api: mlx.core.bitwise_not
+    api: mlx.core.bitwise_invert
     args: {}
   keras:
     api: keras.ops.bitwise_invert
     args: {}
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stream
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

@@ -1,12 +1,16 @@
 """Functional State and Mutation Desugaring Pass.
 
 Consolidates transformation logic for:
+
 1. In-place mutation replacement:
-   - Augmented assignments: `x += y` -> `x = x + y` for functional targets.
-   - Indexed assignments: `x[indices] = values` -> `x = x.at[indices].set(values)` for JAX.
-   - Reverse desugaring: `x = x.at[indices].set(values)` -> `x[indices] = values` for eager frameworks.
+
+   - Augmented assignments: ``x += y`` -> ``x = x + y`` for functional targets.
+   - Indexed assignments: ``x[indices] = values`` -> ``x = x.at[indices].set(values)`` for JAX.
+   - Reverse desugaring: ``x = x.at[indices].set(values)`` -> ``x[indices] = values`` for eager frameworks.
+
 2. PRNG key management and threading:
-   - Injecting `rng = jax.random.PRNGKey(seed)` and key threading for JAX.
+
+   - Injecting ``rng = jax.random.PRNGKey(seed)`` and key threading for JAX.
    - Extracting/stripping seed and key arguments when translating from JAX to eager frameworks.
 """
 
@@ -189,7 +193,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
         ]
       )
 
-      if isinstance(updated_node.body, cst.IndentedBlock):  # pragma: no branch
+      if isinstance(updated_node.body, cst.IndentedBlock):
         existing_stmts = list(updated_node.body.body)
         idx = 0
         if existing_stmts and isinstance(existing_stmts[0], cst.SimpleStatementLine):
@@ -227,7 +231,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
     # Special case: x[indices] += values -> x = x.at[indices].add(values)
     if isinstance(updated_node.target, cst.Subscript):
       base_var = updated_node.target.value
-      if isinstance(base_var, cst.BaseAssignTargetExpression):  # pragma: no branch
+      if isinstance(base_var, cst.BaseAssignTargetExpression):
         slice_elements = list(updated_node.target.slice)
         call_node = cst.Call(
           func=cst.Attribute(
@@ -271,7 +275,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
         target = updated_node.targets[0].target
         if isinstance(target, cst.Subscript):
           base_var = target.value
-          if isinstance(base_var, cst.BaseAssignTargetExpression):  # pragma: no branch
+          if isinstance(base_var, cst.BaseAssignTargetExpression):
             slice_elements = list(target.slice)
             call_node = cst.Call(
               func=cst.Attribute(
@@ -295,7 +299,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
         match = self._match_at_call(updated_node.value)
         if match:
           base_expr, slice_elements, method_name, val_expr = match
-          if isinstance(base_expr, cst.BaseAssignTargetExpression):  # pragma: no branch
+          if isinstance(base_expr, cst.BaseAssignTargetExpression):
             subscript_target = cst.Subscript(value=base_expr, slice=slice_elements)
             if method_name == "set":
               return updated_node.with_changes(
@@ -326,7 +330,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
         match = self._match_at_call(updated_node.value)
         if match:
           base_expr, slice_elements, method_name, val_expr = match
-          if isinstance(base_expr, cst.BaseAssignTargetExpression):  # pragma: no branch
+          if isinstance(base_expr, cst.BaseAssignTargetExpression):
             subscript_target = cst.Subscript(value=base_expr, slice=slice_elements)
             return cst.Assign(
               targets=[cst.AssignTarget(target=subscript_target)],

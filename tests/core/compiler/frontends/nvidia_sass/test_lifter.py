@@ -34,7 +34,7 @@ def test_nvidia_sass_lifter_unmapped() -> None:
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "custom_id"
-  assert graph.nodes[0].kind == "custom.op"
+  assert graph.nodes[0].op_type == "custom.op"
 
 
 def test_nvidia_sass_lifter_flatten() -> None:
@@ -54,7 +54,7 @@ def test_nvidia_sass_lifter_flatten() -> None:
   nodes: list[NvidiaSassNode] = [NvidiaSassComment(text="// Unmapped Op: torch.flatten (flat_id)")]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].metadata["arg_1"] == 1
+  assert graph.nodes[0].attributes["arg_1"] == 1
 
 
 def test_nvidia_sass_lifter_instruction_only() -> None:
@@ -77,10 +77,10 @@ def test_nvidia_sass_lifter_instruction_only() -> None:
   graph: LogicalGraph = lifter.lift([inst])
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "R0"
-  assert graph.nodes[0].kind == "asm.IADD3"
-  assert graph.nodes[0].metadata["arg_0"] == "R0"
-  assert graph.nodes[0].metadata["arg_1"] == "R1"
-  assert graph.nodes[0].metadata["arg_2"] == "R2"
+  assert graph.nodes[0].op_type == "asm.IADD3"
+  assert graph.nodes[0].attributes["arg_0"] == "R0"
+  assert graph.nodes[0].attributes["arg_1"] == "R1"
+  assert graph.nodes[0].attributes["arg_2"] == "R2"
 
 
 def test_nvidia_sass_lifter_non_alu() -> None:
@@ -101,8 +101,8 @@ def test_nvidia_sass_lifter_non_alu() -> None:
   graph: LogicalGraph = lifter.lift([inst])
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "inst_0"
-  assert graph.nodes[0].kind == "asm.BRA"
-  assert graph.nodes[0].metadata["arg_0"] == "10"
+  assert graph.nodes[0].op_type == "asm.BRA"
+  assert graph.nodes[0].attributes["arg_0"] == "10"
 
 
 def test_nvidia_sass_lifter_invalid_marker() -> None:

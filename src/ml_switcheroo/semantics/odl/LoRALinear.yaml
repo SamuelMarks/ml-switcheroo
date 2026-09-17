@@ -35,7 +35,6 @@ variants:
       lora_rank: lora_rank
       out_features: out_features
       rngs: rngs
-      self: self
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []

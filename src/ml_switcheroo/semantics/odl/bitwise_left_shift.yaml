@@ -8,10 +8,19 @@ variants:
   jax:
     api: jax.numpy.left_shift
     args:
-      x1: x1
-      x2: x2
+      x: x
+      y: y
   keras:
     api: keras.ops.bitwise_left_shift
     args:
       x: x
       y: y
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int
+- name: y
+  kind: positional_or_keyword
+  is_variadic: false
+  type: int

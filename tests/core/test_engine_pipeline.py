@@ -189,7 +189,7 @@ def test_engine_run_rewriter_pipeline_graph_opt(
   # Add a dummy node to trigger the "if original_graph.nodes:" branch
   from ml_switcheroo.core.compiler.ir import LogicalNode
 
-  mock_extractor_inst.graph.nodes = {"n1": LogicalNode(id="n1", kind="dummy")}
+  mock_extractor_inst.graph.nodes = {"n1": LogicalNode(id="n1", op_type="dummy")}
   mock_extractor_inst.node_map = {}
 
   mock_opt_inst = mock_opt.return_value
@@ -309,7 +309,7 @@ def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
   mock_extractor_inst.graph = LogicalGraph()
   from ml_switcheroo.core.compiler.ir import LogicalNode
 
-  mock_extractor_inst.graph.nodes = {"n1": LogicalNode(id="n1", kind="dummy")}  # type: ignore
+  mock_extractor_inst.graph.nodes = {"n1": LogicalNode(id="n1", op_type="dummy")}  # type: ignore
   mock_extractor_inst.node_map = {}
 
   class MockTree:

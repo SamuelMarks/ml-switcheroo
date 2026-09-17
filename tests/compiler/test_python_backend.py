@@ -24,7 +24,7 @@ def test_python_snippet_emitter_init():
 def test_python_snippet_emit_init_stateless():
   """Docstring."""
   emitter = PythonSnippetEmitter()
-  node = LogicalNode(id="n1", kind="func_add")
+  node = LogicalNode(id="n1", op_type="func_add")
   stmt = emitter.emit_init(node)
   assert isinstance(stmt, cst.SimpleStatementLine)
   assert isinstance(stmt.body[0], cst.Pass)
@@ -33,7 +33,7 @@ def test_python_snippet_emit_init_stateless():
 def test_python_snippet_emit_init_stateful():
   """Docstring."""
   emitter = PythonSnippetEmitter(framework="torch")
-  node = LogicalNode(id="l1", kind="Linear", metadata={"arg_1": "10", "arg_2": "20"})
+  node = LogicalNode(id="l1", op_type="Linear", attributes={"arg_1": "10", "arg_2": "20"})
   stmt = emitter.emit_init(node)
 
   code = cst.Module(body=[stmt]).code
@@ -43,7 +43,7 @@ def test_python_snippet_emit_init_stateful():
 def test_python_snippet_emit_init_flax():
   """Docstring."""
   emitter = PythonSnippetEmitter(framework="flax_nnx")
-  node = LogicalNode(id="l1", kind="Linear")
+  node = LogicalNode(id="l1", op_type="Linear")
   stmt = emitter.emit_init(node)
 
   code = cst.Module(body=[stmt]).code
@@ -53,7 +53,7 @@ def test_python_snippet_emit_init_flax():
 def test_python_snippet_emit_call_input():
   """Docstring."""
   emitter = PythonSnippetEmitter()
-  node = LogicalNode(id="in", kind="Input")
+  node = LogicalNode(id="in", op_type="Input")
   stmt = emitter.emit_call(node, ["x_in"], "x_out")
   code = cst.Module(body=[stmt]).code
   assert "x_out = x_in" in code
@@ -66,7 +66,7 @@ def test_python_snippet_emit_call_input():
 def test_python_snippet_emit_call_expr():
   """Docstring."""
   emitter = PythonSnippetEmitter()
-  node = LogicalNode(id="add", kind="add", metadata={"alpha": "1.0"})
+  node = LogicalNode(id="add", op_type="add", attributes={"alpha": "1.0"})
   stmt = emitter.emit_call(node, ["x", "y"], "out")
   code = cst.Module(body=[stmt]).code
   assert "out = torch.add(x, y, alpha = 1.0)" in code
@@ -76,7 +76,7 @@ def test_python_snippet_emit_expression_error():
   """Docstring."""
   emitter = PythonSnippetEmitter()
   # Invalid python expression string in metadata to cause parser error
-  node = LogicalNode(id="bad", kind="bad", metadata={"key": "def class *"})
+  node = LogicalNode(id="bad", op_type="bad", attributes={"key": "def class *"})
   expr = emitter.emit_expression(node, [])
   assert isinstance(expr, cst.Name)
   assert expr.value == "None"
@@ -84,7 +84,7 @@ def test_python_snippet_emit_expression_error():
 
 def test_python_snippet_resolve_api_name():
   """Docstring."""
-  _ = LogicalNode(id="1", kind="Linear")
+  _ = LogicalNode(id="1", op_type="Linear")
   emitter_torch = PythonSnippetEmitter("torch")
   assert emitter_torch._resolve_api_name("Linear") == "nn.Linear"
   assert emitter_torch._resolve_api_name("add") == "torch.add"
@@ -109,9 +109,9 @@ def test_python_backend_compile():
   """Docstring."""
   backend = PythonBackend(framework="torch")
   graph = LogicalGraph(name="MyModel")
-  graph.nodes.append(LogicalNode(id="in", kind="Input", metadata={"name": "x"}))
-  graph.nodes.append(LogicalNode(id="l1", kind="Linear", metadata={"arg_1": "10"}))
-  graph.nodes.append(LogicalNode(id="out", kind="Output"))
+  graph.add_node(LogicalNode(id="in", op_type="Input", attributes={"name": "x"}))
+  graph.add_node(LogicalNode(id="l1", op_type="Linear", attributes={"arg_1": "10"}))
+  graph.add_node(LogicalNode(id="out", op_type="Output"))
 
   code = backend.compile(graph)
   assert "class MyModel(nn.Module):" in code
@@ -126,7 +126,7 @@ def test_python_backend_compile_no_name():
   """Docstring."""
   backend = PythonBackend(framework="torch")
   graph = LogicalGraph()
-  graph.nodes.append(LogicalNode(id="out", kind="Output"))
+  graph.add_node(LogicalNode(id="out", op_type="Output"))
   code = backend.compile(graph)
   assert "class Model(nn.Module):" in code
 
@@ -135,7 +135,7 @@ def test_python_backend_generate_replacing():
   """Docstring."""
   backend = PythonBackend(framework="torch")
   graph = LogicalGraph(name="MyModel")
-  graph.nodes.append(LogicalNode(id="l1", kind="Linear"))
+  graph.add_node(LogicalNode(id="l1", op_type="Linear"))
 
   source = "class MyModel:\n  pass"
   tree = cst.parse_module(source)
@@ -169,7 +169,7 @@ def test_python_backend_framework_imports():
 def test_python_backend_build_init_paxml():
   """Docstring."""
   backend = PythonBackend("paxml")
-  node = LogicalNode(id="l1", kind="Linear", metadata={"arg_0": "10"})
+  node = LogicalNode(id="l1", op_type="Linear", attributes={"arg_0": "10"})
   init_def = backend._build_init([node])
   code = cst.Module(body=[init_def]).code
   assert "def setup(self):" in code
@@ -179,7 +179,7 @@ def test_python_backend_build_init_paxml():
 def test_python_backend_build_init_flax():
   """Docstring."""
   backend = PythonBackend("flax_nnx")
-  node = LogicalNode(id="l1", kind="Linear")
+  node = LogicalNode(id="l1", op_type="Linear")
   init_def = backend._build_init([node])
   code = cst.Module(body=[init_def]).code
   assert "rngs: nnx.Rngs" in code
@@ -188,7 +188,7 @@ def test_python_backend_build_init_flax():
 
 def test_python_backend_build_forward_sharding():
   """Docstring."""
-  node = LogicalNode(id="l1", kind="Linear", metadata={"arg_0": "10"})
+  node = LogicalNode(id="l1", op_type="Linear", attributes={"arg_0": "10"})
   node.sharding = MockSharding(["batch", None])
 
   # torch
@@ -216,7 +216,7 @@ def test_python_backend_build_forward_sharding():
   assert "mx.distributed.shard" in code_mlx
 
   # tuple in jax
-  node2 = LogicalNode(id="l2", kind="Linear")
+  node2 = LogicalNode(id="l2", op_type="Linear")
   node2.sharding = MockSharding([("a", "b")])
   fwd_jax2 = backend_jax._build_forward([node2])
   code_jax2 = cst.Module(body=[fwd_jax2]).code
@@ -226,15 +226,15 @@ def test_python_backend_build_forward_sharding():
 def test_python_backend_build_layer_init_mlx_specials():
   """Docstring."""
   backend = PythonBackend("mlx")
-  node = LogicalNode(id="s", kind="SwiGLU")
+  node = LogicalNode(id="s", op_type="SwiGLU")
   stmt = backend._generate_layer_init(node)
   assert "silu" in cst.Module(body=[stmt]).code
 
-  node2 = LogicalNode(id="r", kind="RoPE")
+  node2 = LogicalNode(id="r", op_type="RoPE")
   stmt2 = backend._generate_layer_init(node2)
   assert "nn.RoPE" in cst.Module(body=[stmt2]).code
 
-  node3 = LogicalNode(id="v", kind="VisionPatchEmbedding")
+  node3 = LogicalNode(id="v", op_type="VisionPatchEmbedding")
   stmt3 = backend._generate_layer_init(node3)
   assert "nn.Conv2d" in cst.Module(body=[stmt3]).code
 
@@ -265,7 +265,7 @@ def test_python_backend_generate_replacing_no_match():
 def test_python_backend_build_forward_tuple_outputs():
   """Docstring."""
   backend = PythonBackend("torch")
-  node = LogicalNode(id="l1", kind="Linear")
+  node = LogicalNode(id="l1", op_type="Linear")
   fwd = backend._build_forward([node])
   code = cst.Module(body=[fwd]).code
   assert "return" in code
@@ -274,7 +274,7 @@ def test_python_backend_build_forward_tuple_outputs():
 def test_python_backend_build_forward_no_outputs():
   """Docstring."""
   backend = PythonBackend("torch")
-  node = LogicalNode(id="l1", kind="Linear")
+  node = LogicalNode(id="l1", op_type="Linear")
   fwd = backend._build_forward([node])
   code = cst.Module(body=[fwd]).code
   assert "return" in code
@@ -283,15 +283,15 @@ def test_python_backend_build_forward_no_outputs():
 def test_python_backend_build_layer_init_torch_specials():
   """Docstring."""
   backend = PythonBackend("torch")
-  node_swi = LogicalNode(id="s", kind="SwiGLU")
+  node_swi = LogicalNode(id="s", op_type="SwiGLU")
   code = cst.Module(body=[backend._generate_layer_init(node_swi)]).code
   assert "nn.SwiGLU" in code
 
-  node_rope = LogicalNode(id="r", kind="RoPE")
+  node_rope = LogicalNode(id="r", op_type="RoPE")
   code_rope = cst.Module(body=[backend._generate_layer_init(node_rope)]).code
   assert "nn.RoPE" in code_rope
 
-  node_vpe = LogicalNode(id="v", kind="VisionPatchEmbedding")
+  node_vpe = LogicalNode(id="v", op_type="VisionPatchEmbedding")
   code_vpe = cst.Module(body=[backend._generate_layer_init(node_vpe)]).code
   assert "nn.VisionPatchEmbedding" in code_vpe
 
@@ -299,19 +299,19 @@ def test_python_backend_build_layer_init_torch_specials():
 def test_python_backend_build_layer_init_jax_specials():
   """Docstring."""
   backend = PythonBackend("jax")
-  node = LogicalNode(id="l", kind="Conv2d")
+  node = LogicalNode(id="l", op_type="Conv2d")
   code = cst.Module(body=[backend._generate_layer_init(node)]).code
   assert "nnx.Conv" in code
 
-  node_swi = LogicalNode(id="s", kind="SwiGLU")
+  node_swi = LogicalNode(id="s", op_type="SwiGLU")
   code_swi = cst.Module(body=[backend._generate_layer_init(node_swi)]).code
   assert "nnx.SwiGLU" in code_swi
 
-  node_rope = LogicalNode(id="r", kind="RoPE")
+  node_rope = LogicalNode(id="r", op_type="RoPE")
   code_rope = cst.Module(body=[backend._generate_layer_init(node_rope)]).code
   assert "nnx.RoPE" in code_rope
 
-  node_vpe = LogicalNode(id="v", kind="VisionPatchEmbedding")
+  node_vpe = LogicalNode(id="v", op_type="VisionPatchEmbedding")
   code_vpe = cst.Module(body=[backend._generate_layer_init(node_vpe)]).code
   assert "nnx.VisionPatchEmbedding" in code_vpe
 
@@ -319,7 +319,7 @@ def test_python_backend_build_layer_init_jax_specials():
 def test_python_backend_build_layer_init_paxml_specials():
   """Docstring."""
   backend = PythonBackend("paxml")
-  node = LogicalNode(id="l", kind="Conv2d")
+  node = LogicalNode(id="l", op_type="Conv2d")
   code = cst.Module(body=[backend._generate_layer_init(node)]).code
   assert "pl.Conv2d" in code
 
@@ -327,7 +327,7 @@ def test_python_backend_build_layer_init_paxml_specials():
 def test_python_snippet_emit_expression_bool():
   """Docstring."""
   emitter = PythonSnippetEmitter("torch")
-  node = LogicalNode(id="l", kind="Linear", metadata={"bias": "True", "other": "False"})
+  node = LogicalNode(id="l", op_type="Linear", attributes={"bias": "True", "other": "False"})
   stmt = emitter.emit_init(node)
   code = cst.Module(body=[stmt]).code
   assert "True" in code
@@ -360,19 +360,19 @@ def test_python_backend_semantics_resolution():
   backend.semantics = FakeSemantics()
 
   # Test _build_forward with resolve directly
-  node = LogicalNode(id="l1", kind="resolved.api", metadata={"a": "1"})
+  node = LogicalNode(id="l1", op_type="resolved.api", attributes={"a": "1"})
   fwd = backend._build_forward([node])
   code = cst.Module(body=[fwd]).code
   assert "resolved.api(x, a=1)" in code
 
   # Test _build_forward reverse lookup
-  node2 = LogicalNode(id="l2", kind="concrete.api")
+  node2 = LogicalNode(id="l2", op_type="concrete.api")
   fwd2 = backend._build_forward([node2])
   code2 = cst.Module(body=[fwd2]).code
   assert "resolved.api(x)" in code2
 
   # Test _generate_layer_init with functional torch (should ignore)
-  node_torch = LogicalNode(id="t", kind="TorchFunc")
+  node_torch = LogicalNode(id="t", op_type="TorchFunc")
   init_t = backend._generate_layer_init(node_torch)
   code_t = cst.Module(body=[init_t]).code
   assert "nn.TorchFunc()" in code_t
@@ -380,13 +380,13 @@ def test_python_backend_semantics_resolution():
   # Test _generate_layer_init with mlx core (should ignore)
   backend_mlx = PythonBackend("mlx")
   backend_mlx.semantics = FakeSemantics()
-  node_mlx = LogicalNode(id="m", kind="MlxCore")
+  node_mlx = LogicalNode(id="m", op_type="MlxCore")
   init_m = backend_mlx._generate_layer_init(node_mlx)
   code_m = cst.Module(body=[init_m]).code
   assert "nn.MlxCore()" in code_m
 
   # Test _generate_layer_init normal replacement
-  node_norm = LogicalNode(id="n", kind="ResolvedApi")
+  node_norm = LogicalNode(id="n", op_type="ResolvedApi")
   init_n = backend._generate_layer_init(node_norm)
   code_n = cst.Module(body=[init_n]).code
   assert "resolved.api()" in code_n
@@ -396,13 +396,13 @@ def test_python_backend_prefix_stripping():
   """Docstring."""
   # torch prefix
   backend_t = PythonBackend("torch")
-  node_t = LogicalNode(id="n", kind="torch.nn.Linear")
+  node_t = LogicalNode(id="n", op_type="torch.nn.Linear")
   c_t = cst.Module(body=[backend_t._generate_layer_init(node_t)]).code
   assert "nn.Linear" in c_t
 
   # mlx prefix
   backend_m = PythonBackend("mlx")
-  node_m = LogicalNode(id="m", kind="mlx.nn.Linear")
+  node_m = LogicalNode(id="m", op_type="mlx.nn.Linear")
   c_m = cst.Module(body=[backend_m._generate_layer_init(node_m)]).code
   assert "nn.Linear" in c_m
 
@@ -414,7 +414,7 @@ def test_python_backend_implicit_prefixes():
 
   for fw, pfx in zip(backends, prefixes):
     b = PythonBackend(fw)
-    node = LogicalNode(id="n", kind="Linear")
+    node = LogicalNode(id="n", op_type="Linear")
     code = cst.Module(body=[b._generate_layer_init(node)]).code
     assert pfx + "Linear" in code
 
@@ -422,7 +422,7 @@ def test_python_backend_implicit_prefixes():
 def test_python_backend_mlx_swiglu():
   """Docstring."""
   backend_m = PythonBackend("mlx")
-  node = LogicalNode(id="s", kind="SwiGLU")
+  node = LogicalNode(id="s", op_type="SwiGLU")
   code = cst.Module(body=[backend_m._generate_layer_init(node)]).code
   assert "self.s = nn.silu" in code
 
@@ -432,7 +432,7 @@ def test_python_backend_build_forward_resolve():
   backend = PythonBackend("torch")
   backend.semantics = FakeSemantics()
   # To hit 311->319: get_definition returns something, and definition has 'api'
-  node = LogicalNode(id="n1", kind="concrete.api", metadata={"k": "v"})
+  node = LogicalNode(id="n1", op_type="concrete.api", attributes={"k": "v"})
   fwd = backend._build_forward([node])
   c = cst.Module(body=[fwd]).code
   assert "resolved.api" in c
@@ -441,7 +441,7 @@ def test_python_backend_build_forward_resolve():
 def test_python_backend_layer_init_paxml():
   """Docstring."""
   backend = PythonBackend("paxml")
-  node = LogicalNode(id="l1", kind="Linear")
+  node = LogicalNode(id="l1", op_type="Linear")
   init = backend._generate_layer_init(node)
   c = cst.Module(body=[init]).code
   assert "pl.Linear" in c
@@ -462,7 +462,7 @@ def test_python_backend_format_partition_spec():
 def test_python_backend_build_layer_init_mlx_special():
   """Docstring."""
   backend = PythonBackend("mlx")
-  node = LogicalNode(id="s", kind="SwiGLU")
+  node = LogicalNode(id="s", op_type="SwiGLU")
   code = cst.Module(body=[backend._generate_layer_init(node)]).code
   assert "self.s = nn.silu()" in code
 
@@ -470,11 +470,11 @@ def test_python_backend_build_layer_init_mlx_special():
 def test_python_backend_build_layer_init_args():
   """Docstring."""
   backend = PythonBackend("flax_nnx")
-  node = LogicalNode(id="s", kind="Linear", metadata={"arg": "1"})
+  node = LogicalNode(id="s", op_type="Linear", attributes={"arg": "1"})
   code = cst.Module(body=[backend._generate_layer_init(node)]).code
   assert "arg=1, rngs=rngs" in code
 
-  node2 = LogicalNode(id="s2", kind="Linear")
+  node2 = LogicalNode(id="s2", op_type="Linear")
   code2 = cst.Module(body=[backend._generate_layer_init(node2)]).code
   assert "rngs=rngs" in code2
 
@@ -528,7 +528,7 @@ def test_python_backend_sharding_others():
 
   Shard = namedtuple("Shard", ["axes"])
   s = Shard(axes=[("a", "b")])
-  node = LogicalNode(id="l1", kind="Linear")
+  node = LogicalNode(id="l1", op_type="Linear")
   node.sharding = s
   backend._build_forward([node])
 
@@ -538,7 +538,7 @@ def test_python_backend_semantics_reverse_lookup_none():
   backend = PythonBackend("torch")
   backend.semantics = FakeSemantics()
   # Test _build_forward with reverse lookup returning None
-  node = LogicalNode(id="n1", kind="module.not_found", metadata={"k": "v"})
+  node = LogicalNode(id="n1", op_type="module.not_found", attributes={"k": "v"})
   fwd = backend._build_forward([node])
   c = cst.Module(body=[fwd]).code
   assert "module.not_found" in c
@@ -556,7 +556,7 @@ def test_python_backend_semantics_forward_lookup_none():
       return None
 
   backend.semantics = FakeSemanticsNone()
-  node = LogicalNode(id="n1", kind="resolved.api", metadata={"k": "v"})
+  node = LogicalNode(id="n1", op_type="resolved.api", attributes={"k": "v"})
   fwd = backend._build_forward([node])
   c = cst.Module(body=[fwd]).code
   assert "resolved.api" in c
@@ -565,12 +565,12 @@ def test_python_backend_semantics_forward_lookup_none():
 def test_python_backend_prefix_others():
   """Docstring."""
   backend_k = PythonBackend("keras")
-  node_k = LogicalNode(id="k", kind="Linear")
+  node_k = LogicalNode(id="k", op_type="Linear")
   c_k = cst.Module(body=[backend_k._generate_layer_init(node_k)]).code
   assert "keras.layers.Linear" in c_k
 
   backend_tf = PythonBackend("tensorflow")
-  node_tf = LogicalNode(id="t", kind="Linear")
+  node_tf = LogicalNode(id="t", op_type="Linear")
   c_tf = cst.Module(body=[backend_tf._generate_layer_init(node_tf)]).code
   assert "tf.keras.layers.Linear" in c_tf
 
@@ -660,7 +660,7 @@ def test_python_backend_prefix_paxml_and_other():
   """Docstring."""
   # Hit 425->429 (not paxml but hits the else branch)
   backend = PythonBackend("numpy")
-  node = LogicalNode(id="n", kind="Linear")
+  node = LogicalNode(id="n", op_type="Linear")
   c = cst.Module(body=[backend._generate_layer_init(node)]).code
   assert "self.n = Linear()" in c
 
@@ -669,7 +669,7 @@ def test_python_backend_flax_rngs_existing():
   """Docstring."""
   # Hit 438->442
   backend = PythonBackend("flax_nnx")
-  node = LogicalNode(id="n", kind="Linear", metadata={"rngs": "rngs"})
+  node = LogicalNode(id="n", op_type="Linear", attributes={"rngs": "rngs"})
   c = cst.Module(body=[backend._generate_layer_init(node)]).code
   assert "rngs=rngs" in c
 
@@ -687,7 +687,7 @@ def test_python_backend_semantics_concrete_hit():
       return {"not_api": "value"}
 
   backend.semantics = Semantics()
-  node = LogicalNode(id="n1", kind="torch.add", metadata={"k": "v"})
+  node = LogicalNode(id="n1", op_type="torch.add", attributes={"k": "v"})
   fwd = backend._build_forward([node])
   c = cst.Module(body=[fwd]).code
   assert "torch.add" in c
@@ -714,7 +714,7 @@ def test_python_backend_semantics_rev_lookup_no_api():
       return None
 
   backend.semantics = Semantics2()
-  node = LogicalNode(id="n1", kind="torch.concrete", metadata={"k": "v"})
+  node = LogicalNode(id="n1", op_type="torch.concrete", attributes={"k": "v"})
   fwd = backend._build_forward([node])
   c = cst.Module(body=[fwd]).code
   assert "torch.concrete" in c
@@ -739,7 +739,7 @@ def test_python_backend_build_forward_metadata_no_extra_args():
   backend.semantics = Semantics3()
   # If _format_args_from_metadata returns empty string
   backend._format_args_from_metadata = lambda m: ""
-  node = LogicalNode(id="n1", kind="torch.concrete", metadata={"k": "v"})
+  node = LogicalNode(id="n1", op_type="torch.concrete", attributes={"k": "v"})
   fwd = backend._build_forward([node])
   c = cst.Module(body=[fwd]).code
   assert "torch.concrete(x)" in c
@@ -763,12 +763,12 @@ def test_python_backend_semantics_no_api_dict():
 
   backend.semantics = Semantics4()
   # Test _build_forward (308->322 requires functional node)
-  node1 = LogicalNode(id="n1", kind="torch.add", metadata={"k": "v"})
+  node1 = LogicalNode(id="n1", op_type="torch.add", attributes={"k": "v"})
   fwd = backend._build_forward([node1])
   c = cst.Module(body=[fwd]).code
   assert "torch.add" in c
   # Test _generate_layer_init (399->409 requires stateful node)
-  node2 = LogicalNode(id="n2", kind="Linear")
+  node2 = LogicalNode(id="n2", op_type="Linear")
   init = backend._generate_layer_init(node2)
   c2 = cst.Module(body=[init]).code
   assert "nn.Linear" in c2
@@ -819,7 +819,7 @@ def test_python_backend_semantics_no_resolve_variant():
     pass
 
   backend.semantics = Semantics5()
-  node = LogicalNode(id="n1", kind="torch.add", metadata={"k": "v"})
+  node = LogicalNode(id="n1", op_type="torch.add", attributes={"k": "v"})
   fwd = backend._build_forward([node])
   c = cst.Module(body=[fwd]).code
   assert "torch.add" in c

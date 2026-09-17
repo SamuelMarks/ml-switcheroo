@@ -63,7 +63,7 @@ flowchart TD
 
     subgraph L3 [Level 3: Standard IR]
         direction LR
-        StableHLO[Stable HLO] ~~~ MLIR
+        StableHLO[Stable HLO] ~~~ MLIR ~~~ IR[ML-Switcheroo IR]
     end
 
     subgraph LBottom [Level 4: ASM]
@@ -80,7 +80,7 @@ flowchart TD
     class HTML,TikZ,LaTeX l0Node;
     class PyTorch,MLX,TensorFlow,Keras,FlaxNNX,Pax l1Node;
     class JAX,NumPy l2Node;
-    class StableHLO,MLIR l3Node;
+    class StableHLO,MLIR,IR l3Node;
     class NVIDIA_SASS asmNode;
     class RDNA asmNode;
     class L0 containerL0;
@@ -121,6 +121,15 @@ Automatically infer distributed sharding constraints for large models.
 *   Uses `ShardingInferencePass` to analyze unannotated graphs (e.g., standard PyTorch models).
 *   Injects `LogicalMesh` and `PartitionSpec` annotations using tensor-parallel and FSDP heuristics.
 *   Enables zero-effort distributed training when targeting frameworks like PaxML or JAX.
+
+### 6. Hexagonal Static Transpilation Lattice (30 Directed Paths)
+Bidirectional static source-to-source conversion across the 6 core targets:
+*   **High-Level Frameworks (12 Edges)**: **PyTorch** ↔ **JAX / Flax NNX** ↔ **Apple MLX** ↔ **Keras 3**.
+*   **Hardware Bridge Lowering (8 Edges)**: High-Level Models → `LogicalGraph` IR → **AMD RDNA** & **NVIDIA SASS**.
+*   **Hardware Bridge Lifting (8 Edges)**: Disassembly / Macro Streams → `LogicalGraph` IR → High-Level Modules.
+*   **Cross-ISA Direct Compilation (2 Edges)**: **AMD RDNA** ↔ **NVIDIA SASS**.
+*   **Ground Truth Grounding**: Formally verified against live framework snapshots in `../ml-framework-snapshots` with zero hallucinated APIs or arguments.
+*   **YAML-First Semantics**: Built on 3,285+ modular operation definitions in `src/ml_switcheroo/semantics/odl/` compiled deterministically into `odl.json`.
 
 ---
 

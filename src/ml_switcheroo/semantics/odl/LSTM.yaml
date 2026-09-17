@@ -39,7 +39,6 @@ variants:
       hidden_size: hidden_size
       input_size: input_size
       num_layers: num_layers
-      split_gates: split_gates
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []

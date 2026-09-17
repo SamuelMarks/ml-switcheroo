@@ -33,17 +33,14 @@ from ml_switcheroo.frameworks.common.optax_shim import OptaxScanner
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 
-jax: Optional[Any] = None
-jnp: Optional[Any] = None
 try:
-  import jax as _jax
-  import jax.numpy as _jnp
-
-  jax = _jax
-  jnp = _jnp
+  import jax as _jax_module
+  import jax.numpy as _jnp_module
 except Exception:
-  jax = None
-  jnp = None
+  _jax_module = None  # type: ignore[assignment]
+  _jnp_module = None  # type: ignore[assignment]
+jax: Optional[Any] = _jax_module
+jnp: Optional[Any] = _jnp_module
 
 
 @register_framework("jax")
@@ -229,7 +226,7 @@ class JaxCoreAdapter(JAXStackMixin):
       results.extend(getattr(OptaxScanner, "scan_losses", lambda: [])())
     elif category == SemanticTier.OPTIMIZER:
       results.extend(getattr(OptaxScanner, "scan_optimizers", lambda: [])())
-    elif category == SemanticTier.ACTIVATION:  # pragma: no branch
+    elif category == SemanticTier.ACTIVATION:
       results.extend(getattr(self, "_scan_jax_activations", lambda: [])())
     return results
 

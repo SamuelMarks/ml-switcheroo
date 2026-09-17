@@ -30,6 +30,14 @@ def test_create_dotted_name_chained() -> None:
   assert node.value.value.value == "jax"
 
 
+def test_detect_no_semantics() -> None:
+  """Tests is_framework_module_node when semantics is None."""
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  ctx: HookContext = HookContext(None, config)  # type: ignore
+  node: cst.Name = cst.Name("unknown_lib")
+  assert not is_framework_module_node(node, ctx)
+
+
 @pytest.fixture
 def mock_ctx() -> HookContext:
   """Provides a mock ctx for testing.

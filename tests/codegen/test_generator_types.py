@@ -24,7 +24,7 @@ def gen(tmp_path: Path) -> TestCaseGenerator:
       return {"import": "import jax", "convert_input": "jnp.array({np_var})", "to_numpy": "np.array({res_var})"}
     return None
 
-  mgr.get_test_template = MagicMock(side_effect=mock_get_template)
+  setattr(mgr, "get_test_template", MagicMock(side_effect=mock_get_template))
   return TestCaseGenerator(semantics_mgr=mgr)
 
 
@@ -118,3 +118,15 @@ def test_return_type_verification_tensor(gen: TestCaseGenerator, tmp_path: Path)
   content: str = (tmp_path / "test_tensor.py").read_text()
   assert "assert isinstance(val, (np.ndarray, np.generic))" in content
   assert "Expected Array/Tensor" in content
+
+
+def test_return_type_verification_other_float(gen: TestCaseGenerator, tmp_path: Path) -> None:
+  """Verifies the behavior of return type verification for float or custom type."""
+  semantics: dict[str, typing.Any] = {
+    "norm": {"std_args": ["x"], "return_type": "float", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
+  }
+  gen.generate(semantics, tmp_path / "test_float.py")
+  content: str = (tmp_path / "test_float.py").read_text()
+  assert "# Expected Array/Tensor" not in content
+  assert "# Expected int" not in content
+  assert "# Expected bool" not in content

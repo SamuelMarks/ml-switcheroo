@@ -82,11 +82,12 @@ variants:
     api: flax.nnx.ConvTranspose
     args:
       dilation_rate: kernel_dilation
-      filters: features
       kernel_size: kernel_size
       padding: padding
       strides: strides
       use_bias: use_bias
+      in_channels: in_features
+      filters: out_features
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []

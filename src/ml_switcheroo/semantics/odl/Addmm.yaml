@@ -18,3 +18,30 @@ variants:
       c: c
       a: a
       b: b
+std_args:
+- name: c
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: a
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: b
+  kind: positional_only
+  is_variadic: false
+  type: Any
+- name: alpha
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '1.0'
+- name: beta
+  kind: positional_or_keyword
+  is_variadic: false
+  type: float
+  default: '1.0'
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any

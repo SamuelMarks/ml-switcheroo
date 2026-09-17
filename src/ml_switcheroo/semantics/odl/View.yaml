@@ -22,5 +22,5 @@ variants:
       dtype: dtype
   jax:
     api: jax.Array.view
-    args:
-      arr: arr
+    macro_template: '{a}.view({dtype})'
+    args: {}

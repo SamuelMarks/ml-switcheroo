@@ -3,8 +3,8 @@ variants:
   flax_nnx:
     api: jax.numpy.equal
     args:
-      input: x1
-      other: x2
+      input: x
+      other: y
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []

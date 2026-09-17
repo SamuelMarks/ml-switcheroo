@@ -1,6 +1,7 @@
 """Test module."""
 
 from pathlib import Path
+from unittest.mock import patch
 
 from ml_switcheroo.importers.future_onnx_reader import OnnxSpecImporter
 
@@ -136,3 +137,78 @@ Another summary.
   md_file.write_text(md_content)
   res = importer.parse_file(md_file)
   assert "Dup" in res
+
+
+def test_onnx_reader_all_missing_branches(tmp_path: Path) -> None:
+  """Test remaining branches in future onnx reader."""
+  importer = OnnxSpecImporter()
+  md_content = """
+### HeaderWithoutAnchor
+
+### <a name="OpTest"></a>**OpTest**
+
+#### Summary
+
+OpTest
+
+Detailed summary for OpTest.
+
+#### OtherSection
+Some other section text.
+
+#### Inputs
+Some normal paragraph before dl.
+<dl>
+<dt><tt>NoColon</tt></dt>
+<dd>No colon description</dd>
+<dt></dt>
+<dd>Empty dt</dd>
+</dl>
+"""
+  md_file = tmp_path / "TestBranches.md"
+  md_file.write_text(md_content)
+  res = importer.parse_file(md_file)
+  assert "OpTest" in res
+  assert res["OpTest"]["description"] == "Detailed summary for OpTest."
+  assert res["OpTest"]["std_args"] == [("NoColon", "Any")]
+
+  # Test synthetic tokens ending on h3 and h4, and op without _raw_summary
+  import inspect
+  from unittest.mock import MagicMock
+  from markdown_it.token import Token
+
+  dummy_file = tmp_path / "dummy.md"
+  dummy_file.write_text("dummy")
+
+  t_h3 = Token("heading_open", "h3", 1)
+  t_h4 = Token("heading_open", "h4", 1)
+
+  with MagicMock() as mock_md:
+    mock_md.parse.return_value = [t_h3, t_h4]
+    with patch("markdown_it.MarkdownIt", return_value=mock_md):
+      parsed = importer._parse_markdown(dummy_file)
+      assert parsed == {}
+
+  # Trigger op without _raw_summary via inspect in _map_onnx_type
+  def pop_raw_summary(raw: str) -> str:
+    """Mock mapping function that clears _raw_summary from frame semantics.
+
+    Args:
+        raw: The raw type string to map.
+
+    Returns:
+        Mapped type string fallback.
+    """
+    frame = inspect.currentframe()
+    while frame:
+      if "semantics" in frame.f_locals:
+        for op in frame.f_locals["semantics"].values():
+          op.pop("_raw_summary", None)
+        break
+      frame = frame.f_back
+    return "Any"
+
+  with patch.object(importer, "_map_onnx_type", side_effect=pop_raw_summary):
+    res2 = importer.parse_file(md_file)
+    assert "OpTest" in res2
+    assert res2["OpTest"]["description"] == ""

@@ -125,18 +125,17 @@ def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
     new_args.append(v_arg_clean)
 
     # Convert Key to kwarg
-    if k_arg:  # pragma: no branch
-      k_val = k_arg.value
-      k_kw = cst.Arg(
-        keyword=cst.Name("key"),
-        value=k_val,
-        equal=cst.AssignEqual(
-          whitespace_before=cst.SimpleWhitespace(""),
-          whitespace_after=cst.SimpleWhitespace(""),
-        ),
-        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-      )
-      new_args.append(k_kw)
+    k_val = k_arg.value
+    k_kw = cst.Arg(
+      keyword=cst.Name("key"),
+      value=k_val,
+      equal=cst.AssignEqual(
+        whitespace_before=cst.SimpleWhitespace(""),
+        whitespace_after=cst.SimpleWhitespace(""),
+      ),
+      comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+    )
+    new_args.append(k_kw)
 
     # Map rest
     for arg in remaining_args:

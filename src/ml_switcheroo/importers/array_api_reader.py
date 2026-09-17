@@ -103,10 +103,10 @@ class ArrayApiSpecImporter:
 
           # Look ahead for Docstring (Expr -> Constant string)
           summary = f"Constant: {name}"
-          if i + 1 < len(tree.body):  # pragma: no branch
+          if i + 1 < len(tree.body):
             next_node = tree.body[i + 1]
-            if isinstance(next_node, ast.Expr) and isinstance(next_node.value, ast.Constant):  # pragma: no branch
-              if isinstance(next_node.value.value, str):  # pragma: no branch
+            if isinstance(next_node, ast.Expr) and isinstance(next_node.value, ast.Constant):
+              if isinstance(next_node.value.value, str):
                 summary = self._clean_docstring(next_node.value.value)
 
           semantics[name] = {
@@ -192,7 +192,7 @@ class ArrayApiSpecImporter:
 
     elif isinstance(annotation, ast.BinOp):
       # e.g. int | float (Python 3.10+ Union style)
-      if isinstance(annotation.op, ast.BitOr):  # pragma: no branch
+      if isinstance(annotation.op, ast.BitOr):
         left = self._parse_annotation(annotation.left)
         right = self._parse_annotation(annotation.right)
         return f"{left} | {right}"

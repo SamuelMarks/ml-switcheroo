@@ -9,16 +9,16 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 def test_differ_no_changes() -> None:
   """Verifies the behavior of differ no changes."""
   differ = GraphDiffer()
-  g1 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
-  g2 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
+  g1 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "Conv")]}, edges=[])
+  g2 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "Conv")]}, edges=[])
   assert len(differ.diff(g1, g2)) == 0
 
 
 def test_differ_deleted_node() -> None:
   """Verifies the behavior of differ deleted node."""
   differ = GraphDiffer()
-  g1 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
-  g2 = LogicalGraph(nodes=[], edges=[])
+  g1 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "Conv")]}, edges=[])
+  g2 = LogicalGraph(nodes={n.id: n for n in []}, edges=[])
   actions: list[typing.Any] = differ.diff(g1, g2)
   assert len(actions) > 0
   assert isinstance(actions[0], DeleteAction)
@@ -27,8 +27,8 @@ def test_differ_deleted_node() -> None:
 def test_differ_replace_node() -> None:
   """Verifies the behavior of differ replace node."""
   differ = GraphDiffer()
-  g1 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
-  g2 = LogicalGraph(nodes=[LogicalNode("fused_a", "Linear")], edges=[])
+  g1 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "Conv")]}, edges=[])
+  g2 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("fused_a", "Linear")]}, edges=[])
   actions: list[typing.Any] = differ.diff(g1, g2)
   assert len(actions) == 2  # One init, one call, since Linear is stateful
   assert isinstance(actions[0], ReplaceAction)
@@ -40,8 +40,8 @@ def test_differ_replace_node() -> None:
 def test_differ_replace_node_stateless() -> None:
   """Verifies replace node that is stateless."""
   differ = GraphDiffer()
-  g1 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
-  g2 = LogicalGraph(nodes=[LogicalNode("fused_a", "add")], edges=[])
+  g1 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "Conv")]}, edges=[])
+  g2 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("fused_a", "add")]}, edges=[])
   actions: list[typing.Any] = differ.diff(g1, g2)
   assert len(actions) == 1
   assert isinstance(actions[0], ReplaceAction)
@@ -51,8 +51,8 @@ def test_differ_replace_node_stateless() -> None:
 def test_differ_insert_node() -> None:
   """Verifies the behavior of differ insert node."""
   differ = GraphDiffer()
-  g1 = LogicalGraph(nodes=[], edges=[])
-  g2 = LogicalGraph(nodes=[LogicalNode("a", "Conv", metadata={"anchor": "missing"})], edges=[])
+  g1 = LogicalGraph(nodes={n.id: n for n in []}, edges=[])
+  g2 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "Conv", attributes={"anchor": "missing"})]}, edges=[])
   actions: list[typing.Any] = differ.diff(g1, g2)
   assert len(actions) == 0
 
@@ -60,9 +60,12 @@ def test_differ_insert_node() -> None:
 def test_differ_complex_replace() -> None:
   """Verifies the behavior of differ complex replace."""
   differ = GraphDiffer()
-  g1 = LogicalGraph(nodes=[LogicalNode("a", "Linear"), LogicalNode("b", "GELU")], edges=[LogicalEdge("a", "b")])
+  g1 = LogicalGraph(
+    nodes={n.id: n for n in [LogicalNode("a", "Linear"), LogicalNode("b", "GELU")]}, edges=[LogicalEdge("a", "b")]
+  )
   g2 = LogicalGraph(
-    nodes=[LogicalNode("fused_a", "FusedLinearGELU", metadata={"anchor": "a"})], edges=[LogicalEdge("x", "fused_a")]
+    nodes={n.id: n for n in [LogicalNode("fused_a", "FusedLinearGELU", attributes={"anchor": "a"})]},
+    edges=[LogicalEdge("x", "fused_a")],
   )
   actions: list[typing.Any] = differ.diff(g1, g2)
   assert len(actions) > 0
@@ -72,8 +75,8 @@ def test_differ_complex_replace() -> None:
 def test_differ_unmatched_new() -> None:
   """Verifies behavior when new node doesn't match any anchor."""
   differ = GraphDiffer()
-  g1 = LogicalGraph(nodes=[LogicalNode("a", "Conv")], edges=[])
-  g2 = LogicalGraph(nodes=[LogicalNode("fused_b", "Linear")], edges=[])
+  g1 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "Conv")]}, edges=[])
+  g2 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("fused_b", "Linear")]}, edges=[])
   actions: list[typing.Any] = differ.diff(g1, g2)
   assert len(actions) == 1
   assert isinstance(actions[0], DeleteAction)
@@ -96,12 +99,12 @@ def test_differ_diff_no_anchor() -> None:
   from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
   g1 = LogicalGraph("g1")
-  g1.nodes.append(LogicalNode("A", "Op"))
+  g1.add_node(LogicalNode("A", "Op"))
 
   g2 = LogicalGraph("g2")
-  g2.nodes.append(LogicalNode("B", "Op"))  # neither metadata anchor, nor starts with fused_
+  g2.add_node(LogicalNode("B", "Op"))  # neither metadata anchor, nor starts with fused_
   # or starts with fused_ but candidate not in deleted_ids
-  g2.nodes.append(LogicalNode("fused_C", "Op"))
+  g2.add_node(LogicalNode("fused_C", "Op"))
 
   differ = GraphDiffer()
   # It will identify 'A' as deleted, 'B' and 'fused_C' as added.

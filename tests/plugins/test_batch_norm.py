@@ -79,3 +79,18 @@ def test_bn_preserve_existing_args(rewriter: PivotRewriter) -> None:
   res: str = rewrite_code(rewriter, code)
   assert "other=1" in res
   assert "use_running_average" in res
+
+
+def test_bn_no_args(rewriter: PivotRewriter) -> None:
+  """Verifies the behavior of bn when called with no arguments."""
+  code: str = "y = self.bn()"
+  res: str = rewrite_code(rewriter, code)
+  assert "use_running_average" in res
+  assert "mutable" in res
+
+
+def test_bn_already_has_comma(rewriter: PivotRewriter) -> None:
+  """Verifies the behavior when argument already has a comma."""
+  code: str = "y = self.bn(use_running_average=True,)"
+  res: str = rewrite_code(rewriter, code)
+  assert "mutable" in res

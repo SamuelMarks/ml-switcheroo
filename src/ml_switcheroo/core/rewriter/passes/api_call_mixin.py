@@ -106,7 +106,7 @@ class ApiTransformerCallMixin:
       guessed_name = resolve_implicit_method(self, original_node, func_name)  # type: ignore
       if guessed_name:
         mapping = self._get_mapping(guessed_name, silent=True)
-        if mapping:  # pragma: no branch
+        if mapping:
           func_name = guessed_name
 
     if not mapping:

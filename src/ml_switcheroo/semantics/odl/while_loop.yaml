@@ -21,3 +21,20 @@ variants:
       cond: cond
       body: body
       loop_vars: loop_vars
+std_args:
+- name: cond
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: body
+  kind: positional_or_keyword
+  is_variadic: false
+  type: tuple
+- name: loop_vars
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: maximum_iterations
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

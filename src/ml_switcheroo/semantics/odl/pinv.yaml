@@ -14,3 +14,12 @@ variants:
     api: mlx.core.linalg.pinv
     args:
       a: a
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stream
+  kind: keyword_only
+  is_variadic: false
+  type: Any

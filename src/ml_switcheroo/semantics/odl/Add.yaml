@@ -48,3 +48,8 @@ variants:
   keras:
     api: keras.ops.add
     args: {}
+  ir:
+    api: Add
+    args:
+      input: input
+      other: other

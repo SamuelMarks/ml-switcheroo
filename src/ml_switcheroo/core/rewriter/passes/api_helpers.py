@@ -5,7 +5,7 @@ to perform CST string/node conversions, resolve API paths to FQNs, map APIs
 to target frameworks, inject imports, and handle version check constraints.
 """
 
-from typing import Optional, Union, List, Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 import libcst as cst
 import re
 from ml_switcheroo.core.tracer import get_tracer
@@ -121,20 +121,20 @@ class ApiHelpersMixin:
       return True
 
     known_roots = set()
-    if self.config:  # pragma: no branch
+    if self.config:
       known_roots.add(self.config.source_framework)
       known_roots.add(self.config.target_framework)
       if self.config.source_flavour:
         known_roots.add(self.config.source_flavour.split(".")[0])
 
-    if self.semantics:  # pragma: no branch
+    if self.semantics:
       configs = getattr(self.semantics, "framework_configs", {})
       for fw_key, conf in configs.items():
         known_roots.add(fw_key)
         alias_conf = conf.get("alias")
         if alias_conf and isinstance(alias_conf, dict):
           mod = alias_conf.get("module")
-          if mod:  # pragma: no branch
+          if mod:
             known_roots.add(mod.split(".")[0])
 
     root = name.split(".")[0]
@@ -198,7 +198,7 @@ class ApiHelpersMixin:
       return node.with_changes(body=cst.IndentedBlock(body=new_stmts))
     return node
 
-  def _get_mapping(self, name: str, silent: bool = False) -> Optional[dict]:
+  def _get_mapping(self, name: str, silent: bool = False) -> Optional[Dict[str, Any]]:
     """Query the Semantics Manager for the target implementation of the API.
 
     Args:
@@ -250,7 +250,7 @@ class ApiHelpersMixin:
       return target_impl
     return None
 
-  def _handle_variant_imports(self, variant: dict) -> None:
+  def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
     """Inject required imports defined in the variant mapping into the module context.
 
     Args:
@@ -265,16 +265,16 @@ class ApiHelpersMixin:
           stmt = clean
         else:
           stmt = f"import {clean}"
-      elif isinstance(r, dict):  # pragma: no branch
+      elif isinstance(r, dict):
         mod = r.get("module")
         alias = r.get("alias")
-        if mod:  # pragma: no branch
+        if mod:
           if alias:
             stmt = f"import {mod} as {alias}"
           else:
             stmt = f"import {mod}"
 
-      if stmt:  # pragma: no branch
+      if stmt:
         self.context.hook_context.inject_preamble(stmt)
 
   def _is_framework_base(self, name: str) -> bool:
@@ -337,7 +337,7 @@ class ApiHelpersMixin:
     if not current:
       return None
 
-    def parse_v(v_str: str) -> tuple:
+    def parse_v(v_str: str) -> Tuple[int, ...]:
       """Parse a version string into a tuple of integers for comparison.
 
       Args:
@@ -350,7 +350,7 @@ class ApiHelpersMixin:
       # Fix: Use re module safely imported at global scope
       tokens = re.split(r"[^\d]+", v_str)
       for t in tokens:
-        if t:  # pragma: no branch
+        if t:
           parts.append(int(t))
       return tuple(parts)
 
@@ -407,7 +407,7 @@ class ApiHelpersMixin:
     params.insert(insert_idx, new_param)
 
     # Fix trailing comma structure
-    if params:  # pragma: no branch
+    if params:
       params[-1] = params[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
     new_params_node = node.params.with_changes(params=params)

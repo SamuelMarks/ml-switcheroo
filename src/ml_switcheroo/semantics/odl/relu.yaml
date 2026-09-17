@@ -32,3 +32,7 @@ variants:
   jax:
     api: jax.nn.relu
     args: {}
+  ir:
+    api: Relu
+    args:
+      input: input

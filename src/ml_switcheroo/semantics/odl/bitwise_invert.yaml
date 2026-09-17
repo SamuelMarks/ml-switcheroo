@@ -17,3 +17,12 @@ variants:
     api: keras.ops.bitwise_invert
     args:
       x: x
+std_args:
+- name: a
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: stream
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

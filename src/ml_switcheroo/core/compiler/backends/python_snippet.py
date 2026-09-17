@@ -48,10 +48,12 @@ class PythonSnippetEmitter:
     if not self._is_stateful_layer(node):
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
-    kind = self._resolve_api_name(node.kind)
+    op_type = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")
+    kind = self._resolve_api_name(op_type)
     func_node = cst.parse_expression(kind)
 
-    args_list = self._build_args_from_metadata(node.metadata)
+    attrs = node.attributes if hasattr(node, "attributes") else getattr(node, "metadata", {})
+    args_list = self._build_args_from_metadata(attrs)
 
     if self.framework in ["jax", "flax", "flax_nnx"]:
       # Needs rngs=rngs, inject it directly if it doesn't already exist.
@@ -81,7 +83,8 @@ class PythonSnippetEmitter:
         A LibCST statement node (Assign).
 
     """
-    if node.kind == "Input":
+    op_type = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")
+    if op_type == "Input":
       if input_vars and input_vars[0] != output_var:
         return cst.SimpleStatementLine(
           body=[cst.Assign(targets=[cst.AssignTarget(target=cst.Name(output_var))], value=cst.Name(input_vars[0]))]
@@ -110,15 +113,17 @@ class PythonSnippetEmitter:
       if self._is_stateful_layer(node):
         func_node = cst.Attribute(value=cst.Name("self"), attr=cst.Name(node.id))
       else:
-        func_name = self._resolve_api_name(node.kind)
+        op_type = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")
+        func_name = self._resolve_api_name(op_type)
         func_node = cst.parse_expression(func_name)
 
       args_list = []
       for v in input_vars:
         args_list.append(cst.Arg(value=cst.parse_expression(v)))
 
-      if not self._is_stateful_layer(node) and node.metadata:
-        extra_args = self._build_args_from_metadata(node.metadata)
+      attrs = node.attributes if hasattr(node, "attributes") else getattr(node, "metadata", {})
+      if not self._is_stateful_layer(node) and attrs:
+        extra_args = self._build_args_from_metadata(attrs)
         args_list.extend(extra_args)
 
       return cst.Call(func=func_node, args=args_list)
@@ -134,11 +139,12 @@ class PythonSnippetEmitter:
     Returns:
         True if stateful, False otherwise.
     """
-    if node.kind in ["Input", "Output"]:
+    op_type = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")
+    if op_type in ["Input", "Output"]:
       return False
-    if node.kind.startswith("func_") or "functional" in node.kind or "ops" in node.kind:
+    if op_type.startswith("func_") or "functional" in op_type or "ops" in op_type:
       return False
-    leaf = node.kind.split(".")[-1]
+    leaf = op_type.split(".")[-1]
     if leaf and leaf[0].isupper():
       return True
     return False

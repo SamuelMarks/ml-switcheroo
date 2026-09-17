@@ -49,7 +49,7 @@ variants:
   flax_nnx:
     api: flax.nnx.RMSNorm
     args:
-      axis: axis
+      axis: feature_axes
       epsilon: epsilon
     dispatch_rules: []
     pack_as: Tuple

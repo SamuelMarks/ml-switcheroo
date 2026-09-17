@@ -11,3 +11,12 @@ variants:
     args:
       x: x
       dtype: dtype
+std_args:
+- name: x
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: dtype
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

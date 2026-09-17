@@ -30,6 +30,7 @@ variants:
     api: flax.nnx.MultiHeadAttention
     args:
       num_query_heads: num_heads
+      in_features: in_features
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []

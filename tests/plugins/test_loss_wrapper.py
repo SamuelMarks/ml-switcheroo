@@ -486,3 +486,15 @@ def test_loss_wrapper_direct_empty_context(rewriter_factory: Callable[[str], Piv
   )
   res: Union[cst.CSTNode, cst.Call] = transform_loss_reduction(node, rewriter.context.hook_context)
   assert "optax" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
+
+
+def test_loss_wrapper_unknown_reduction(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+  """Verifies unknown reduction mode hits unwrapped fallback.
+
+  Args:
+      rewriter_factory: Factory providing test rewriter instance.
+  """
+  rewriter: PivotRewriter = rewriter_factory("jax")
+  code: str = "torch.nn.functional.cross_entropy(a, b, reduction='batchmean')"
+  res: str = rewrite_code(rewriter, code)
+  assert "optax" in res

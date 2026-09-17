@@ -13,9 +13,7 @@ std_args:
   default: 'False'
 variants:
   keras:
-    api: keras.layers.Activation
-    arg_values:
-      activation: swish
+    api: keras.activations.swish
     args:
       x: x
     dispatch_rules: []

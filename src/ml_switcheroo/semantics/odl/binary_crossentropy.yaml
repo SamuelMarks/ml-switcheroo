@@ -10,3 +10,17 @@ variants:
     args:
       target: target
       output: output
+std_args:
+- name: target
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: output
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: from_logits
+  kind: positional_or_keyword
+  is_variadic: false
+  type: bool
+  default: 'False'

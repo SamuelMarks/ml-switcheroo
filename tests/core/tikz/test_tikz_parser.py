@@ -13,13 +13,13 @@ def test_parser_nodes_extraction() -> None:
   parser = TikzParser(SAMPLE_TIKZ)
   graph: LogicalGraph = _logical_from_tikz_graph(parser.parse())
   assert len(graph.nodes) == 2
-  conv: typing.Any = next((n for n in graph.nodes if n.id == "conv1"))
-  assert conv.kind == "Conv2d"
-  assert conv.metadata["kernel"] == "3"
-  assert conv.metadata["out"] == "64"
-  out: typing.Any = next((n for n in graph.nodes if n.id == "output"))
-  assert out.kind == "Output"
-  assert out.metadata == {}
+  conv: typing.Any = graph.nodes["conv1"]
+  assert conv.op_type == "Conv2d"
+  assert conv.attributes["kernel"] == "3"
+  assert conv.attributes["out"] == "64"
+  out: typing.Any = graph.nodes["output"]
+  assert out.op_type == "Output"
+  assert out.attributes == {}
 
 
 def test_parser_edges_extraction() -> None:
@@ -39,7 +39,7 @@ def test_parser_ignore_comments_and_env() -> None:
   graph: LogicalGraph = _logical_from_tikz_graph(parser.parse())
   assert len(graph.nodes) == 1
   assert graph.nodes[0].id == "a"
-  assert graph.nodes[0].kind == "A"
+  assert graph.nodes[0].op_type == "A"
 
 
 def test_parser_robust_metadata() -> None:
@@ -48,5 +48,5 @@ def test_parser_robust_metadata() -> None:
   parser = TikzParser(code)
   graph: LogicalGraph = _logical_from_tikz_graph(parser.parse())
   node: typing.Any = graph.nodes[0]
-  assert "kernel_size" in node.metadata
-  assert node.metadata["kernel_size"] == "(3, 3)" or "3" in node.metadata["kernel_size"]
+  assert "kernel_size" in node.attributes
+  assert node.attributes["kernel_size"] == "(3, 3)" or "3" in node.attributes["kernel_size"]

@@ -116,7 +116,8 @@ def strategies_from_spec(
       return st.booleans()
 
     if name in ("str", "string"):
-      return st.text(alphabet=st.characters(blacklist_categories=("Cs",)), min_size=1, max_size=10)
+      cs_cat: typing.Literal["Cs"] = "Cs"
+      return st.text(alphabet=st.characters(blacklist_categories=(cs_cat,)), min_size=1, max_size=10)
 
     if "dtype" in name.lower():
       return st.sampled_from([np.float32, np.int32, np.float64, np.bool_])
@@ -192,7 +193,7 @@ def _array_strategy(type_str: "TensorType", constraints: dict, shared_dims: typi
         dims.append(st.just(int(d)))
       elif d.isidentifier() and shared_dims is not None:
         # Symbolic dimension
-        if d not in shared_dims:  # pragma: no branch
+        if d not in shared_dims:
           # Define symbol (1 to 8 size) in shared scope
           shared_dims[d] = st.shared(st.integers(min_value=1, max_value=8), key=d)
         dims.append(shared_dims[d])
@@ -224,7 +225,7 @@ def _array_strategy(type_str: "TensorType", constraints: dict, shared_dims: typi
     max_v_i = int(mx) if mx is not None else 10
     elements = st.integers(min_value=min_v_i, max_value=max_v_i)
 
-  elif np.issubdtype(dtype, np.floating):  # pragma: no branch
+  elif np.issubdtype(dtype, np.floating):
     min_v_f = float(mn) if mn is not None else -10.0
     max_v_f = float(mx) if mx is not None else 10.0
     elements = st.floats(

@@ -21,9 +21,8 @@ variants:
       other: other
   jax:
     api: jax.numpy.multiply
-    args:
-      x1: x1
-      x2: x2
+    macro_template: jax.numpy.multiply({input}, {other})
+    args: {}
   mlx:
     api: mlx.core.multiply
     args:

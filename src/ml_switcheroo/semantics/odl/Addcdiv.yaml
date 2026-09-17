@@ -24,3 +24,12 @@ variants:
     macro_template: '{input} + {value} * ({tensor1} / {tensor2})'
     pack_as: Tuple
     required_imports: []
+std_args:
+- name: x1
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any
+- name: x2
+  kind: positional_or_keyword
+  is_variadic: false
+  type: Any

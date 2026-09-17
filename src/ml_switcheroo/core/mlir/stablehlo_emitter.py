@@ -212,7 +212,7 @@ class StableHloEmitter(PythonToMlirEmitter):
         false_block = BlockNode(label="", operations=self._emit_if(cast(cst.If, node.orelse)))
         if not false_block.operations:
           false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
-        elif false_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):  # pragma: no branch
+        elif false_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):
           false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
         false_region = RegionNode(blocks=[false_block])
         regions.append(false_region)

@@ -20,6 +20,8 @@ def test_split_outside_brackets() -> None:
   assert split_outside_brackets("int, str") == ["int", "str"]
   assert split_outside_brackets("List[int, str], float") == ["List[int, str]", "float"]
   assert split_outside_brackets("Tuple[int], Dict[str, Any]") == ["Tuple[int]", "Dict[str, Any]"]
+  assert split_outside_brackets("") == []
+  assert split_outside_brackets("a,") == ["a"]
 
 
 def test_resolve_symbolic_shape() -> None:

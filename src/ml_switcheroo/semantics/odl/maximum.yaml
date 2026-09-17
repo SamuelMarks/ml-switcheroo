@@ -21,9 +21,8 @@ variants:
       other: other
   jax:
     api: jax.numpy.maximum
-    args:
-      x1: x1
-      x2: x2
+    macro_template: jax.numpy.maximum({input}, {other})
+    args: {}
   mlx:
     api: mlx.core.maximum
     args:

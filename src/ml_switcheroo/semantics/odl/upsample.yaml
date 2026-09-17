@@ -30,3 +30,7 @@ variants:
     api: torch.nn.functional.upsample
     args:
       input: input
+  mlx:
+    api: mlx.nn.Upsample
+    args:
+      scale_factor: scale_factor

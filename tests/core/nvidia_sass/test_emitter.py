@@ -48,7 +48,7 @@ def test_emit_unmapped_op_fallback() -> None:
   mgr.resolve_variant.return_value = None
   mgr.get_definition.return_value = None
   synth = NvidiaSassSynthesizer(mgr)
-  graph = LogicalGraph(nodes=[LogicalNode(id="conv1", kind="WeirdOp", metadata={})])
+  graph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="conv1", op_type="WeirdOp", attributes={})]})
   ast_nodes: list[NvidiaSassNode] = synth.from_graph(graph)
   emitter = NvidiaSassEmitter()
   output: str = emitter.emit(ast_nodes)

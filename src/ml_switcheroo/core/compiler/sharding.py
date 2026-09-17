@@ -40,9 +40,10 @@ class ShardingInferencePass:
     """
     graph.mesh = self.mesh
 
-    for node in graph.nodes:
+    for node in graph.nodes.values():
+      op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
       # Apply to Conv as well for Vision Patch fallback
-      if node.kind in ["Linear", "Embedding", "Conv3d", "Conv2d"]:
+      if op_type in ["Linear", "Embedding", "Conv3d", "Conv2d"]:
         name = node.id.lower()
         if any(x in name for x in ["q_proj", "k_proj", "v_proj", "gate_proj", "up_proj"]):
           # Column Parallel: shard the output dimension

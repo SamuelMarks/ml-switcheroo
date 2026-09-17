@@ -65,27 +65,28 @@ class StableHloBackend(CompilerBackend):
     for edge in graph.edges:
       in_edges[edge.target].append(edge.source)
 
-    for node in graph.nodes:
+    for node in graph.nodes.values():
       op: OperationNode
-      if node.kind == "Input":
+      op_type: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
+      if op_type == "Input":
         op = StableHloConstantOp(
           name="stablehlo.constant",
           results=[ValueNode(name=f"%{node.id}")],
           attributes=[AttributeNode(name="value", value="dense<0.0>")],
           result_types=[TypeNode(body="tensor<f32>")],
         )
-      elif node.kind == "Output":
+      elif op_type == "Output":
         operands = [ValueNode(name=f"%{src}") for src in in_edges[node.id]]
         op = OperationNode(
           name="return",
           operands=operands,
         )
       else:
-        op_name = node.kind
+        op_name = op_type
         if self.semantics:
-          defn = self.semantics.get_definition(node.kind)
+          defn = self.semantics.get_definition(op_type)
           if not defn or "stablehlo" not in defn[1].get("variants", {}):
-            alias = _LOGICAL_OP_ALIASES.get(node.kind)
+            alias = _LOGICAL_OP_ALIASES.get(op_type)
             if alias:
               defn = self.semantics.get_definition(alias)
           if defn:
@@ -94,8 +95,8 @@ class StableHloBackend(CompilerBackend):
             if "stablehlo" in variants and "api" in variants["stablehlo"]:
               op_name = variants["stablehlo"]["api"]
 
-        if op_name == node.kind:
-          bare_name = node.kind.lower().split(".")[-1]
+        if op_name == op_type:
+          bare_name = op_type.lower().split(".")[-1]
           op = OperationNode(
             name="stablehlo.custom_call",
             results=[ValueNode(name=f"%{node.id}")],
@@ -104,7 +105,8 @@ class StableHloBackend(CompilerBackend):
         else:
           operands = [ValueNode(name=f"%{src}") for src in in_edges[node.id]]
           attrs = []
-          for k, v in node.metadata.items():
+          node_attrs = getattr(node, "attributes", {})
+          for k, v in node_attrs.items():
             if isinstance(v, str) and not v.startswith('"'):
               attrs.append(AttributeNode(name=k, value=f'"{v}"'))
             else:

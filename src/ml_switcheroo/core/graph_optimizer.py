@@ -19,7 +19,7 @@ Algorithm:
     5.  Reconstruct graph with fused nodes and updated edges.
 """
 
-from typing import List, Dict, Set, Optional
+from typing import Any, List, Dict, Set, Optional
 from collections import defaultdict
 import copy
 
@@ -70,7 +70,7 @@ class GraphOptimizer:
     """
     # 1. Build Adjacency and Lookup Maps
     # node_id -> Node
-    node_map = {n.id: n for n in graph.nodes}
+    node_map = {n.id: n for n in graph.nodes.values()}
     # source_id -> [target_id]
     out_edges = defaultdict(list)
     # target_id -> [source_id]
@@ -115,13 +115,14 @@ class GraphOptimizer:
         match_tail = matched_ids[-1]
         fused_id = f"fused_{match_root}"
 
-        # Merge Metadata
-        merged_meta = {}
+        # Merge Attributes / Metadata
+        merged_meta: Dict[str, Any] = {}
         for mid in matched_ids:
           mnode = node_map[mid]
-          merged_meta.update(mnode.metadata)
+          node_attrs = getattr(mnode, "attributes", {})
+          merged_meta.update(node_attrs)
 
-        fused_node = LogicalNode(id=fused_id, kind=matched_pattern.replace_with, metadata=merged_meta)
+        fused_node = LogicalNode(id=fused_id, op_type=matched_pattern.replace_with, attributes=merged_meta)
         new_nodes.append(fused_node)
 
         fusion_map[fused_id] = {"head": match_root, "tail": match_tail}
@@ -183,7 +184,11 @@ class GraphOptimizer:
       if final_src and final_tgt and final_src != final_tgt:
         final_edges.append(LogicalEdge(source=final_src, target=final_tgt))
 
-    return LogicalGraph(nodes=new_nodes, edges=final_edges)
+    # Clear prior inputs from new_nodes to prevent stale edge derivations
+    for n in new_nodes:
+      n.inputs = []
+
+    return LogicalGraph(nodes={n.id: n for n in new_nodes}, edges=final_edges)
 
   def _match_sequence(
     self,
@@ -212,7 +217,8 @@ class GraphOptimizer:
       return None
 
     # Check first node type
-    if start_node.kind != sequence[0]:
+    start_op_type = getattr(start_node, "op_type", None) or getattr(start_node, "kind", "")
+    if start_op_type != sequence[0]:
       return None
 
     matched_ids = [start_node.id]
@@ -229,7 +235,8 @@ class GraphOptimizer:
         if tgt in processed_ids:
           continue
         tgt_node = node_map.get(tgt)
-        if tgt_node and tgt_node.kind == kind:
+        tgt_op_type = getattr(tgt_node, "op_type", None) or getattr(tgt_node, "kind", "")
+        if tgt_node and tgt_op_type == kind:
           candidate_id = tgt
           break
 

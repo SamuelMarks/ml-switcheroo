@@ -87,15 +87,18 @@ def test_synthesizer_from_graph() -> None:
   synth.macro_registry = {"Linear": dummy_expander, "DirectMatch": dummy_expander}
 
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="conv1", kind="Conv2d", metadata={"k": "3"}),
-      LogicalNode(id="lin1", kind="Linear"),
-      LogicalNode(id="dir1", kind="DirectMatch"),
-      LogicalNode(id="fall1", kind="FallbackOp"),
-      LogicalNode(id="out1", kind="Output"),
-      LogicalNode(id="unkn1", kind="UnknownNode"),
-    ],
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="in1", op_type="Input"),
+        LogicalNode(id="conv1", op_type="Conv2d", attributes={"k": "3"}),
+        LogicalNode(id="lin1", op_type="Linear"),
+        LogicalNode(id="dir1", op_type="DirectMatch"),
+        LogicalNode(id="fall1", op_type="FallbackOp"),
+        LogicalNode(id="out1", op_type="Output"),
+        LogicalNode(id="unkn1", op_type="UnknownNode"),
+      ]
+    },
     edges=[
       LogicalEdge("in1", "conv1"),
       LogicalEdge("conv1", "lin1"),
@@ -127,9 +130,12 @@ def test_synthesizer_from_graph_unmapped() -> None:
   synth.macro_registry = {}
 
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="op1", kind="UnknownOp"),
-    ],
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="op1", op_type="UnknownOp"),
+      ]
+    },
     edges=[],
   )
   nodes: List[NvidiaSassNode] = synth.from_graph(graph)
@@ -193,7 +199,7 @@ def test_synthesizer_to_python_operands() -> None:
 def test_backend_compile() -> None:
   """Docstring."""
   backend: NvidiaSassBackend = NvidiaSassBackend()
-  graph: LogicalGraph = LogicalGraph(nodes=[LogicalNode(id="in1", kind="Input")], edges=[])
+  graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="in1", op_type="Input")]}, edges=[])
   code: str = backend.compile(graph)
   assert "Input in1" in code
 
@@ -218,9 +224,12 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
 
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, MockSemantics()))
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="n1", kind="rdna.v_add_f32"),
-    ],
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="n1", op_type="rdna.v_add_f32"),
+      ]
+    },
     edges=[],
   )
   nodes = synth.from_graph(graph)
@@ -274,13 +283,16 @@ def test_synthesizer_from_graph_edges_and_empty_output() -> None:
 
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, MockSemantics()))
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="in2", kind="Input"),
-      LogicalNode(id="add1", kind="add"),
-      LogicalNode(id="empty_kind", kind=""),
-      LogicalNode(id="disconnected_out", kind="Output"),
-    ],
+    nodes={
+      n.id: n
+      for n in [
+        LogicalNode(id="in1", op_type="Input"),
+        LogicalNode(id="in2", op_type="Input"),
+        LogicalNode(id="add1", op_type="add"),
+        LogicalNode(id="empty_kind", op_type=""),
+        LogicalNode(id="disconnected_out", op_type="Output"),
+      ]
+    },
     edges=[
       LogicalEdge("in1", "add1"),
       LogicalEdge("in2", "add1"),

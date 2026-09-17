@@ -9,16 +9,17 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 
 def get_dummy_graph() -> LogicalGraph:
   """Docstring."""
+  nodes = {
+    "in1": LogicalNode(id="in1", op_type="Input"),
+    "l1": LogicalNode(id="l1", op_type="Linear", attributes={"k": "3", "shape": "(10, 10)"}),
+    "add1": LogicalNode(id="add1", op_type="Add"),
+    "state1": LogicalNode(id="state1", op_type="StateOp"),
+    "mem1": LogicalNode(id="mem1", op_type="MemoryOp"),
+    "Output": LogicalNode(id="Output", op_type="Output"),
+  }
   return LogicalGraph(
     name="TestGraph",
-    nodes=[
-      LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="l1", kind="Linear", metadata={"k": "3", "shape": "(10, 10)"}),
-      LogicalNode(id="add1", kind="Add"),
-      LogicalNode(id="state1", kind="StateOp"),
-      LogicalNode(id="mem1", kind="MemoryOp"),
-      LogicalNode(id="Output", kind="Output"),
-    ],
+    nodes=nodes,
     edges=[
       LogicalEdge("in1", "l1"),
       LogicalEdge("l1", "add1"),
@@ -59,12 +60,13 @@ def test_vl_latex_backend() -> None:
 
 def test_vb_tikz_backend_metadata_edgecases() -> None:
   """Docstring."""
+  nodes = {
+    "in1": LogicalNode(id="in1", op_type="Input"),
+    "unkn1": LogicalNode(id="unkn1", op_type="Unknown", attributes={"k": "val", "v": "val2", "b": "v3", "c": "v4"}),
+    "unkn2": LogicalNode(id="unkn2", op_type="Unknown", attributes={"k": "val", "v": "val2", "b": "v3", "c": "v4"}),
+  }
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="unkn1", kind="Unknown", metadata={"k": "val", "v": "val2", "b": "v3", "c": "v4"}),
-      LogicalNode(id="unkn2", kind="Unknown", metadata={"k": "val", "v": "val2", "b": "v3", "c": "v4"}),
-    ],
+    nodes=nodes,
     edges=[
       LogicalEdge("in1", "unkn1"),
       LogicalEdge("in1", "unkn1"),
@@ -81,11 +83,12 @@ def test_vb_tikz_backend_metadata_edgecases() -> None:
 
 def test_vt_tikz_backend_metadata_edgecases() -> None:
   """Docstring."""
+  nodes = {
+    "in1": LogicalNode(id="in1", op_type="Input"),
+    "unkn1": LogicalNode(id="unkn1", op_type="Unknown", attributes={"k": "val", "v": "val2", "b": "v3", "c": "v4"}),
+  }
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="unkn1", kind="Unknown", metadata={"k": "val", "v": "val2", "b": "v3", "c": "v4"}),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("in1", "unkn1")],
   )
   backend: VT_TikzBackend = VT_TikzBackend()
@@ -95,12 +98,13 @@ def test_vt_tikz_backend_metadata_edgecases() -> None:
 
 def test_layout_cycles_and_disconnected() -> None:
   """Docstring."""
+  nodes = {
+    "A": LogicalNode(id="A", op_type="Op"),
+    "B": LogicalNode(id="B", op_type="Op"),
+    "C": LogicalNode(id="C", op_type="Op"),
+  }
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="A", kind="Op"),
-      LogicalNode(id="B", kind="Op"),
-      LogicalNode(id="C", kind="Op"),
-    ],
+    nodes=nodes,
     edges=[
       LogicalEdge("A", "B"),
       LogicalEdge("B", "A"),  # cycle
@@ -112,11 +116,12 @@ def test_layout_cycles_and_disconnected() -> None:
   assert "tikzpicture" in code
 
   # Pure cycle to trigger `if not queue`
+  nodes_cycle = {
+    "A": LogicalNode(id="A", op_type="Op"),
+    "B": LogicalNode(id="B", op_type="Op"),
+  }
   graph_cycle: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="A", kind="Op"),
-      LogicalNode(id="B", kind="Op"),
-    ],
+    nodes=nodes_cycle,
     edges=[
       LogicalEdge("A", "B"),
       LogicalEdge("B", "A"),  # cycle
@@ -127,21 +132,22 @@ def test_layout_cycles_and_disconnected() -> None:
   backend_vt.compile(graph_cycle)
 
   # Empty graph
-  code2: str = backend.compile(LogicalGraph(nodes=[], edges=[]))
+  code2: str = backend.compile(LogicalGraph(nodes={}, edges=[]))
   assert "tikzpicture" in code2
 
 
 def test_latex_edgecases() -> None:
   """Docstring."""
+  nodes = {
+    "in1": LogicalNode(id="in1", op_type="Input"),
+    "func_add": LogicalNode(id="func_add", op_type="func_add", attributes={"arg_1": "1"}),
+    "func_abs": LogicalNode(id="func_abs", op_type="torch.abs", attributes={"arg_something": "2", "other": "3"}),
+    "state": LogicalNode(id="state", op_type="StateOp", attributes={}),
+    "Output": LogicalNode(id="Output", op_type="Output"),
+    "unkn2": LogicalNode(id="unkn2", op_type="Unknown", attributes={"k": "val", "v": "val2", "b": "v3", "c": "v4"}),
+  }
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="func_add", kind="func_add", metadata={"arg_1": "1"}),
-      LogicalNode(id="func_abs", kind="torch.abs", metadata={"arg_something": "2", "other": "3"}),
-      LogicalNode(id="state", kind="StateOp", metadata={}),
-      LogicalNode(id="Output", kind="Output"),
-      LogicalNode(id="unkn2", kind="Unknown", metadata={"k": "val", "v": "val2", "b": "v3", "c": "v4"}),
-    ],
+    nodes=nodes,
     edges=[
       LogicalEdge("in1", "func_add"),
       LogicalEdge("func_add", "func_abs"),
@@ -163,10 +169,11 @@ def test_latex_edgecases() -> None:
 
 def test_latex_no_input() -> None:
   """Docstring."""
+  nodes = {
+    "op1": LogicalNode(id="op1", op_type="Op"),
+  }
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="op1", kind="Op"),
-    ],
+    nodes=nodes,
     edges=[],
   )
   backend: VB_LatexBackend = VB_LatexBackend()
@@ -179,11 +186,12 @@ def test_latex_no_input() -> None:
 
 def test_latex_no_output() -> None:
   """Docstring."""
+  nodes = {
+    "in1": LogicalNode(id="in1", op_type="Input"),
+    "op1": LogicalNode(id="op1", op_type="Op"),
+  }
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="in1", kind="Input"),
-      LogicalNode(id="op1", kind="Op"),
-    ],
+    nodes=nodes,
     edges=[LogicalEdge("in1", "op1")],
   )
   backend: VB_LatexBackend = VB_LatexBackend()
@@ -197,12 +205,13 @@ def test_latex_no_output() -> None:
 
 def test_tikz_empty_and_disconnected_vt() -> None:
   """Docstring."""
+  nodes = {
+    "A": LogicalNode(id="A", op_type="Op"),
+    "B": LogicalNode(id="B", op_type="Op"),
+    "C": LogicalNode(id="C", op_type="Op"),
+  }
   graph: LogicalGraph = LogicalGraph(
-    nodes=[
-      LogicalNode(id="A", kind="Op"),
-      LogicalNode(id="B", kind="Op"),
-      LogicalNode(id="C", kind="Op"),
-    ],
+    nodes=nodes,
     edges=[
       LogicalEdge("A", "B"),
       LogicalEdge("B", "A"),  # cycle
@@ -212,5 +221,5 @@ def test_tikz_empty_and_disconnected_vt() -> None:
   code: str = backend_vt.compile(graph)
   assert "tikzpicture" in code
 
-  code2: str = backend_vt.compile(LogicalGraph(nodes=[], edges=[]))
+  code2: str = backend_vt.compile(LogicalGraph(nodes={}, edges=[]))
   assert "tikzpicture" in code2

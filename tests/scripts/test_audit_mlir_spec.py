@@ -1,24 +1,36 @@
 """Tests for scripts/audit_mlir_spec.py."""
 
 from pathlib import Path
+import runpy
 import sys
 import tempfile
 from typing import Any
 from unittest.mock import MagicMock, patch
+
 import pytest
 
 import scripts.audit_mlir_spec as auditor
 
 
 def test_get_pip_cache_dir_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-  """Test get_pip_cache_dir when PIP_CACHE_DIR is set."""
+  """Test get_pip_cache_dir when PIP_CACHE_DIR is set.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+      tmp_path: Temporary directory fixture.
+  """
   custom_dir = tmp_path / "custom_pip_cache"
   monkeypatch.setenv("PIP_CACHE_DIR", str(custom_dir))
   assert auditor.get_pip_cache_dir() == custom_dir
 
 
 def test_get_pip_cache_dir_platforms(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-  """Test get_pip_cache_dir across darwin, win32, and linux platforms."""
+  """Test get_pip_cache_dir across darwin, win32, and linux platforms.
+
+  Args:
+      monkeypatch: Pytest monkeypatch fixture.
+      tmp_path: Temporary directory fixture.
+  """
   monkeypatch.delenv("PIP_CACHE_DIR", raising=False)
   monkeypatch.setattr(Path, "home", lambda: tmp_path / "home")
 
@@ -46,7 +58,14 @@ def test_get_pip_cache_dir_platforms(monkeypatch: pytest.MonkeyPatch, tmp_path: 
 
   # Fallback on Path.home() exception
   def _raising_home() -> Path:
-    """Mock Path.home raising RuntimeError."""
+    """Mock Path.home raising RuntimeError.
+
+    Returns:
+        Never returns, raises RuntimeError.
+
+    Raises:
+        RuntimeError: Simulating inaccessible home directory.
+    """
     raise RuntimeError("No home dir")
 
   monkeypatch.setattr(Path, "home", _raising_home)
@@ -80,7 +99,12 @@ def test_fetch_raw_https() -> None:
 
 
 def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test download_spec caching, cache hits, fallbacks, and errors."""
+  """Test download_spec caching, cache hits, fallbacks, and errors.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   cache_dir = tmp_path / "pip_cache"
   monkeypatch.setenv("PIP_CACHE_DIR", str(cache_dir))
 
@@ -117,7 +141,18 @@ def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
   primary_url = "https://raw.githubusercontent.com/llvm/llvm-project/main/mlir/docs/LangRef.md"
 
   def _side_effect(req: Any, **kwargs: Any) -> MagicMock:
-    """Mock urlopen side effect simulating CDN fallback."""
+    """Mock urlopen side effect simulating CDN fallback.
+
+    Args:
+        req: Request object containing full_url attribute.
+        **kwargs: Arbitrary keyword arguments.
+
+    Returns:
+        Mock response for CDN requests.
+
+    Raises:
+        Exception: Simulating rate limit on primary URL.
+    """
     if "cdn.jsdelivr.net" in req.full_url:
       resp = MagicMock()
       resp.read.return_value = b"# CDN Content"
@@ -167,10 +202,15 @@ def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         auditor.download_spec("https://fake.url/LangRef.md", force_download=True)
 
   # 11. Fallback cache exists but is empty/whitespace when network fails: raises RuntimeError
-  cache_file.write_text("   \n", encoding="utf-8")
+  cache_file.write_text("   " + chr(10), encoding="utf-8")
   with patch("urllib.request.urlopen", side_effect=Exception("Network down")):
     with pytest.raises(RuntimeError, match="Failed to download spec"):
       auditor.download_spec("https://fake.url/LangRef.md", force_download=True)
+
+  # 12. URL without a filename path falls back to LangRef.md default
+  with patch("urllib.request.urlopen", return_value=mock_response):
+    slash_content = auditor.download_spec("https://fake.url/", force_download=True)
+    assert slash_content == "# Downloaded Spec"
 
 
 def test_parse_grammar_rules() -> None:
@@ -178,10 +218,13 @@ def test_parse_grammar_rules() -> None:
   content = """# Header
 ```bnf
 operation ::= op-result-list? (generic-operation | custom-operation)
-// Comment line
+// Comment line with ::= inside should be ignored
+// ignored_comment ::= rule
 ignored ::= rule // should be ignored if in IGNORED_LHS_TERMS
 alternation ::= a | b
 val-id ::= "%" (bare-id | decimal-literal) // trailing comment
+empty_lhs ::=
+::= empty_rhs
 ```
 
 ```text
@@ -196,11 +239,17 @@ broken_rule // missing rhs
   assert "operation" in rules
   assert "val-id" in rules
   assert "alternation" not in rules
+  assert "empty_lhs" not in rules
+  assert "" not in rules
   assert rules["val-id"] == '"%" (bare-id | decimal-literal)'
 
 
 def test_extract_implemented_lark_rules(tmp_path: Path) -> None:
-  """Test extracting rules from grammar.lark."""
+  """Test extracting rules from grammar.lark.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
   missing_lark = tmp_path / "missing.lark"
   assert auditor.extract_implemented_lark_rules(missing_lark) == set()
 
@@ -211,6 +260,7 @@ operation: op_result
 val_id: "%" NAME
 string: ESCAPED_STRING
 number: INT
+unrelated_non_rule_line
 """,
     encoding="utf-8",
   )
@@ -241,7 +291,11 @@ def test_audit_mlir() -> None:
 
 
 def test_generate_reports(tmp_path: Path) -> None:
-  """Test report generation."""
+  """Test report generation.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
   json_out = tmp_path / "out.json"
   md_out = tmp_path / "out.md"
 
@@ -258,9 +312,12 @@ def test_generate_reports(tmp_path: Path) -> None:
 
 
 def test_main_and_entrypoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test main execution with success, missing rules, and error branches."""
-  import runpy
+  """Test main execution with success, missing rules, and error branches.
 
+  Args:
+      tmp_path: Temporary directory fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+  """
   lark_file = tmp_path / "grammar.lark"
   lark_file.write_text(
     """operation: op

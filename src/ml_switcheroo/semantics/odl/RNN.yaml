@@ -65,7 +65,6 @@ variants:
       return_carry: return_carry
       reverse: reverse
       rngs: rngs
-      self: self
       state_axes: state_axes
       time_major: time_major
       unroll: unroll

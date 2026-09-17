@@ -25,7 +25,9 @@ variants:
   jax:
     api: jax.numpy.clip
     args:
+      input: arr
       min: min
+      max: max
   mlx:
     api: mlx.core.clip
     args:

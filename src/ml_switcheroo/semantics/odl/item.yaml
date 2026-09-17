@@ -10,5 +10,5 @@ variants:
     required_imports: []
   jax:
     api: jax.Array.item
-    args:
-      a: a
+    macro_template: '{a}.item()'
+    args: {}

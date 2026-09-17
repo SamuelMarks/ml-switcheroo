@@ -7,7 +7,7 @@ from ground-truth framework snapshots and hydrates `std_args` across ODL definit
 import argparse
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Set
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -15,6 +15,43 @@ if str(REPO_ROOT) not in sys.path:
   sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.audit_against_snapshots import load_snapshots_multi  # noqa: E402
+
+
+def clean_variant_args(
+  args_map: Dict[str, Any],
+  snapshot_params: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+  """Cleanses variant argument mappings by removing receiver and composite artifacts.
+
+  Args:
+      args_map: Dictionary of standard-to-framework argument mappings.
+      snapshot_params: List of parameter dictionaries from snapshots.
+
+  Returns:
+      Cleaned argument mapping dictionary.
+  """
+  valid_target_names: Set[str] = set()
+  for p in snapshot_params:
+    if not isinstance(p, dict):
+      continue
+    name = str(p.get("name", ""))
+    if "," in name:
+      for tok in [t.strip() for t in name.split(",") if t.strip()]:
+        if tok.isidentifier():
+          valid_target_names.add(tok)
+    elif name.isidentifier():
+      valid_target_names.add(name)
+
+  cleaned: Dict[str, Any] = {}
+  for std_name, fw_name in args_map.items():
+    if fw_name in ("self", "cls"):
+      continue
+    if isinstance(std_name, str) and "," in std_name:
+      continue
+    if isinstance(fw_name, str) and "," in fw_name:
+      continue
+    cleaned[std_name] = fw_name
+  return cleaned
 
 
 def simplify_type(annotation: Optional[str]) -> str:
@@ -111,6 +148,7 @@ def hydrate_odl_from_snapshots(
   snapshots: Dict[str, Dict[str, Any]],
   dry_run: bool = False,
   framework_priority: Optional[Sequence[str]] = None,
+  fix_args: bool = False,
 ) -> int:
   """Hydrates missing or string std_args in ODL files from snapshot metadata.
 
@@ -119,9 +157,10 @@ def hydrate_odl_from_snapshots(
       snapshots: Mapping of framework names to flattened snapshot dictionaries.
       dry_run: If True, computes changes without writing back to disk.
       framework_priority: Sequence of frameworks to prioritize when extracting signatures.
+      fix_args: If True, cleanses variant arguments to eliminate receiver and composite artifacts.
 
   Returns:
-      The count of ODL files hydrated.
+      The count of ODL files hydrated or modified.
   """
   if framework_priority is None:
     framework_priority = ("torch", "jax", "mlx", "keras", "stablehlo")
@@ -138,32 +177,44 @@ def hydrate_odl_from_snapshots(
     if not isinstance(data, dict):
       continue
 
+    modified = False
+    variants = data.get("variants", {})
+
+    if fix_args and isinstance(variants, dict):
+      for fw, var_info in variants.items():
+        if isinstance(var_info, dict) and "api" in var_info and "args" in var_info:
+          api = var_info["api"]
+          if fw in snapshots and api in snapshots[fw]:
+            api_info = snapshots[fw][api]
+            params = api_info.get("params", api_info.get("args", []))
+            if params and isinstance(params, list):
+              cleaned_args = clean_variant_args(var_info["args"], params)
+              if cleaned_args != var_info["args"]:
+                var_info["args"] = cleaned_args
+                modified = True
+
     existing_std_args = data.get("std_args", [])
     has_rich_args = bool(existing_std_args) and all(
       isinstance(a, dict) and "name" in a and "type" in a for a in existing_std_args
     )
-    if has_rich_args:
-      continue
+    if not has_rich_args and isinstance(variants, dict):
+      extracted_args: Optional[List[Dict[str, Any]]] = None
+      for fw in framework_priority:
+        if fw in variants and isinstance(variants[fw], dict):
+          api = variants[fw].get("api")
+          if api and fw in snapshots and api in snapshots[fw]:
+            api_info = snapshots[fw][api]
+            params = api_info.get("params", api_info.get("args", []))
+            if params and isinstance(params, list):
+              arg_map = variants[fw].get("args", {})
+              extracted_args = extract_std_args_from_params(params, arg_map)
+              break
 
-    variants = data.get("variants", {})
-    if not isinstance(variants, dict):
-      continue
+      if extracted_args:
+        data["std_args"] = extracted_args
+        modified = True
 
-    extracted_args: Optional[List[Dict[str, Any]]] = None
-
-    for fw in framework_priority:
-      if fw in variants and isinstance(variants[fw], dict):
-        api = variants[fw].get("api")
-        if api and fw in snapshots and api in snapshots[fw]:
-          api_info = snapshots[fw][api]
-          params = api_info.get("params", api_info.get("args", []))
-          if params and isinstance(params, list):
-            arg_map = variants[fw].get("args", {})
-            extracted_args = extract_std_args_from_params(params, arg_map)
-            break
-
-    if extracted_args:
-      data["std_args"] = extracted_args
+    if modified:
       hydrated_count += 1
       if not dry_run:
         with open(yaml_path, "w", encoding="utf-8") as f:
@@ -193,18 +244,20 @@ def main(args: Optional[Sequence[str]] = None) -> int:
     action="store_true",
     help="Do not write changes to disk",
   )
+  parser.add_argument(
+    "--fix-args",
+    action="store_true",
+    help="Cleanse and align variant arguments with snapshots",
+  )
   parsed = parser.parse_args(args)
 
-  snapshot_dirs = [
-    Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
-    Path("../ml-compiler-snapshots"),
-  ]
-  snapshots = load_snapshots_multi(snapshot_dirs)
+  snapshots = load_snapshots_multi()
 
   count = hydrate_odl_from_snapshots(
     odl_dir=parsed.odl_dir,
     snapshots=snapshots,
     dry_run=parsed.dry_run,
+    fix_args=parsed.fix_args,
   )
 
   print(f"Hydrated {count} ODL definitions from snapshots.")

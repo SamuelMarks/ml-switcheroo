@@ -165,3 +165,45 @@ def test_index_variants_edge_cases() -> None:
   loader2.index_variants()
   assert ("op2", "torch") in mgr2._variant_cache
   assert ("op2", "jax") not in mgr2._variant_cache
+
+
+def test_registry_loader_remaining_branches(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Test remaining branches in registry loader.
+
+  Args:
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  manager: MagicMock = MagicMock()
+  manager.framework_configs = {"test_fw": {}}
+  manager._key_origins = {}
+  manager._providers = {}
+  manager._source_registry = {}
+  manager.data = {}
+
+  class MockSpec:
+    """Mock spec."""
+
+    def model_dump(self, **kwargs: Any) -> dict:
+      """Model dump.
+
+      Args:
+          **kwargs (Any): Keyword arguments.
+
+      Returns:
+          dict: Empty dictionary.
+      """
+      return {}
+
+  class TestAdapter:
+    """Adapter with None traits, lowercase spec, and non-ImportConfig namespace."""
+
+    structural_traits = None
+    specifications = {"lower_spec": MockSpec()}
+    import_namespaces = {"path.to.module": "not_an_import_config"}
+
+  monkeypatch.setattr(registry_loader, "get_adapter", lambda _: TestAdapter())
+  monkeypatch.setattr(registry_loader, "available_frameworks", lambda: ["test_fw"])
+
+  loader = RegistryLoader(manager)
+  loader._hydrate_adapters()
+  assert "traits" not in manager.framework_configs["test_fw"]

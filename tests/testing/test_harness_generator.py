@@ -11,12 +11,14 @@ def test_harness_generate_template() -> None:
 
   hg: HarnessGenerator = HarnessGenerator()
   semantics: Dict[str, Any] = {
-    "op1": {"std_args": [["arg1", "int"], {"name": "arg2", "type": "float"}, {"name": "arg3"}]}
+    "op1": {"std_args": [["arg1", "int"], {"name": "arg2", "type": "float"}, {"name": "arg3"}]},
+    "op2": {"std_args": ["string_arg_only"]},
   }
   source: Path = Path("source.py")
   target: Path = Path("target.py")
   out: Path = Path("out.py")
   hg.generate(source, target, out, "jax", "torch", semantics)
+  hg.generate(source, target, out, "jax", "torch", semantics=None)
 
 
 def test_harness_adapter_shim_exceptions() -> None:
@@ -40,6 +42,9 @@ def test_harness_adapter_shim_exceptions() -> None:
   ):
     res2: str = hg._build_result_normalization("jax", "torch")
     assert res2 == ""
+
+  res3: str = hg._build_result_normalization("nonexistent_fw", "torch")
+  assert isinstance(res3, str)
 
 
 def test_harness_extractor_oserror() -> None:

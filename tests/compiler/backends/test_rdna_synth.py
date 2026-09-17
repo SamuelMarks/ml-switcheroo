@@ -13,7 +13,7 @@ def test_rdna_synth_raw_opcode():
   mock_semantics = MagicMock()
   mock_semantics.get_definition.return_value = ("rdna.v_add_f32", {})
   synth = RdnaSynthesizer(mock_semantics)
-  g = LogicalGraph(nodes=[LogicalNode(id="n1", kind="rdna.v_add_f32")])
+  g = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="n1", op_type="rdna.v_add_f32")]})
   synth.from_graph(g)
 
 
@@ -23,7 +23,7 @@ def test_rdna_synth_invalid_opcode():
   mock_semantics.get_definition.return_value = ("BadOp", {})
   mock_semantics.resolve_variant.return_value = {"api": "bad op code with spaces!"}
   synth = RdnaSynthesizer(mock_semantics)
-  g = LogicalGraph(nodes=[LogicalNode(id="n1", kind="BadOp")])
+  g = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="n1", op_type="BadOp")]})
   with pytest.raises(ValueError, match="Invalid RDNA opcode"):
     synth.from_graph(g)
 
@@ -53,7 +53,7 @@ def test_rdna_synth_suffix_macro():
   mock_semantics = MagicMock()
   mock_semantics.get_definition.return_value = ("rdna.l", {})
   synth = RdnaSynthesizer(mock_semantics)
-  g = LogicalGraph(nodes=[LogicalNode(id="n1", kind="rdna.l")])
+  g = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="n1", op_type="rdna.l")]})
   res = synth.from_graph(g)
   assert len(res) >= 1
 
@@ -103,7 +103,7 @@ def test_rdna_synth_output_no_sources():
 
   synth = RdnaSynthesizer(None)
   graph = LogicalGraph("Test")
-  graph.nodes.append(LogicalNode("out", "Output"))
+  graph.add_node(LogicalNode("out", "Output"))
   # input_map is empty, so sources is []
   nodes = synth.from_graph(graph)
   assert len(nodes) == 0
@@ -125,7 +125,7 @@ def test_rdna_synth_abstract_id_none():
 
   synth.semantics = FakeSem()
   graph = LogicalGraph("Test")
-  graph.nodes.append(LogicalNode("n", "not_mapped"))
+  graph.add_node(LogicalNode("n", "not_mapped"))
   nodes = synth.from_graph(graph)
   # 214->217 is hit because abstract_id == ""
   assert "Unmapped Op:" in nodes[0].text

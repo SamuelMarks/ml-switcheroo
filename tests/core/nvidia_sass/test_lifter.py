@@ -27,12 +27,12 @@ def test_lift_simple_chain() -> None:
   lifter = NvidiaSassLifter()
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 4
-  node_ids = [n.id for n in graph.nodes]
+  node_ids = list(graph.nodes.keys())
   assert "x" in node_ids
   assert "conv1" in node_ids
   assert "output" in node_ids
   assert "R1" in node_ids
-  kinds = [n.kind for n in graph.nodes]
+  kinds = [n.op_type for n in graph.nodes.values()]
   assert "asm.MOV" in kinds
   assert "Conv2d" in kinds
   assert len(graph.edges) == 3
@@ -52,9 +52,9 @@ def test_lift_complex_snippet() -> None:
   lifter = NvidiaSassLifter()
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 5
-  ids = [n.id for n in graph.nodes]
+  ids = list(graph.nodes.keys())
   assert ids == ["x", "conv", "func_flatten", "fc", "output"]
-  kinds = [n.kind for n in graph.nodes]
+  kinds = [n.op_type for n in graph.nodes.values()]
   assert kinds == ["Input", "Conv2d", "torch.flatten", "Linear", "Output"]
   assert graph.edges[0].source == "x"
   assert graph.edges[0].target == "conv"
@@ -71,7 +71,7 @@ def test_lift_duplicate_markers_ignored() -> None:
   lifter = NvidiaSassLifter()
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].id == "l1"
+  assert list(graph.nodes.values())[0].id == "l1"
 
 
 def test_lift_no_comments() -> None:
@@ -83,4 +83,4 @@ def test_lift_no_comments() -> None:
   lifter = NvidiaSassLifter()
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].kind == "asm.FADD"
+  assert list(graph.nodes.values())[0].op_type == "asm.FADD"

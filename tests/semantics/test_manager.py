@@ -51,6 +51,12 @@ def test_manager_load_validation() -> None:
       sm.load_validation_report(Path("dummy.json"))
       assert sm._validation_status.get("Abs") is True
 
+  # Non-dict report
+  m_open_list: Any = mock_open(read_data="[1, 2, 3]")
+  with patch("pathlib.Path.exists", return_value=True):
+    with patch("builtins.open", m_open_list):
+      sm.load_validation_report(Path("dummy.json"))
+
 
 def test_manager_build_index_aliases_json() -> None:
   """Test that _build_index loads aliases.json if it exists."""
@@ -82,6 +88,21 @@ def test_manager_build_index_aliases_json() -> None:
     # parts[0] == "my_alias"
     # So "my_alias.sub" -> "my_module.sub"
     assert "my_module.sub" in sm._reverse_index
+
+
+def test_manager_build_index_no_priority_scores() -> None:
+  """Test _build_index when priority_scores.json does not exist."""
+  import os
+  from unittest.mock import patch
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  orig_exists = os.path.exists
+  with patch("os.path.exists", side_effect=lambda p: False if "priority_scores.json" in str(p) else orig_exists(p)):
+    sm._build_index()
+
+
+def test_manager_update_definition() -> None:
   """Docstring."""
   from unittest.mock import mock_open, patch
 
@@ -96,7 +117,7 @@ def test_manager_build_index_aliases_json() -> None:
   m_open: Any = mock_open()
   with patch("builtins.open", m_open):
     with patch("pathlib.Path.mkdir"):
-      sm.update_definition("NewOp", {"variants": {"torch": {"api": "torch.new_op"}}})
+      sm.update_definition("NewOp", {"variants": {"torch": {"api": "torch.new_op"}, "jax": {}}})
       assert "NewOp" in sm.data
       assert "torch.new_op" in sm._reverse_index
 
@@ -115,12 +136,16 @@ def test_manager_get_import_map() -> None:
 
   # Mocking internal states to hit coverage
   sm._providers = {
-    "jax": {"core": {"root": "jax.numpy", "alias": "jnp"}},
+    "jax": {
+      "core": {"root": "jax.numpy", "alias": "jnp"},
+      "no_root": {"root": None, "sub": None, "alias": None},
+    },
     "flax": {"nn": {"root": "flax.linen", "alias": "nn"}},
   }
   sm._source_registry = {
     "torch": ("torch", "core"),
     "torch.nn": ("torch.nn", "nn"),
+    "torch.no_root": ("torch.no_root", "no_root"),
     "torch.optim": ("torch.optim", "optim"),  # unmatched
   }
 
@@ -397,8 +422,8 @@ def test_manager_build_index_no_attrs() -> None:
 
     def __init__(self) -> None:
       """Docstring."""
-      self.data = {}
-      self.framework_configs = {}
+      self.data: dict[str, Any] = {}
+      self.framework_configs: dict[str, Any] = {}
 
   dummy = DummySubclass()
   dummy._build_index()

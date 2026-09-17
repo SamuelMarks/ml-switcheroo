@@ -43,6 +43,7 @@ filterwarnings = [
     "ignore::DeprecationWarning:tensorflow.lite.python.util",
     "ignore::DeprecationWarning:matplotlib.*",
     "ignore:.*ml_switcheroo\\.cli\\.__main__.*:RuntimeWarning",
+    "ignore:.*found in sys\\.modules after import of package 'scripts'.*:RuntimeWarning",
 
 #    "error"
 ]
@@ -108,7 +109,7 @@ ignore-private = false
 ignore-property-decorators = false
 ignore-module = false
 fail-under = 100
-exclude = ["setup.py", "docs", "build"]
+exclude = ["setup.py", "docs", "build", "onnx", "array-api", "out.py"]
 ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
 color = true
 omit-covered-files = false
