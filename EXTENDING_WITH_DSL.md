@@ -1,19 +1,19 @@
 Extending with DSL
 ==================
 
-The **Operation Definition Language (ODL)** is a declarative YAML schema used to teach `ml-switcheroo` new mathematical concepts. It serves as the "DNA" of the transpiler, defining:
+The **Operation Definition Language (ODL)** is a declarative YAML schema used to teach `ml-switcheroo` new mathematical and neural operations. It serves as the "DNA" of the compiler, defining:
 
-1.  **Semantic Interface**: Arguments, Types, Shapes, and Constraints.
-2.  **Implementation logic**: How to map the operation to specific backends (Torch, JAX, TF, etc.).
-3.  **Verification Data**: Hints for the automated fuzzer to prove correctness.
+1. **Semantic Interface**: Arguments, Types, Ranks, Shapes, and Bounds.
+2. **Implementation Logic**: How to map the operation to specific backends (PyTorch, JAX, Apple MLX, Keras 3, AMD RDNA, NVIDIA SASS).
+3. **Verification Data**: Constraints and hints for the automated hypothesis fuzzer to mathematically prove equivalence.
 
-ODL allows you to inject logic into the **Knowledge Base** without writing Python AST transformation code.
+ODL allows you to inject operations and mappings into the **Knowledge Base** without writing procedural AST transformation code.
 
 ---
 
 ## 🏗️ The ODL Lifecycle
 
-Data flows from the declarative YAML file into the distributed Knowledge Base (Hub & Spoke), triggering the automatic generation of validation tests.
+Data flows from discrete YAML files into the Knowledge Base (The Hub), which are compiled into a deterministic runtime catalog and used to generate verification harnesses.
 
 ```mermaid
 graph TD
@@ -23,102 +23,101 @@ graph TD
     classDef process fill:#4285f4,stroke:#20344b,stroke-width:2px,color:#ffffff,font-family:'Google Sans',rx:5px;
     classDef hub fill:#f9ab00,stroke:#20344b,stroke-width:2px,color:#20344b,font-family:'Google Sans',rx:5px;
     classDef output fill:#34a853,stroke:#20344b,stroke-width:2px,color:#ffffff,font-family:'Google Sans',rx:5px;
-    classDef generated fill:#57caff,stroke:#20344b,stroke-width:2px,color:#20344b,font-family:'Google Sans',rx:5px;
 
     %% --- NODES ---
-    YAML("<b>ODL YAML</b><br/>my_op.yaml"):::file
+    YAML("<b>ODL YAML Definition</b><br/>my_op.yaml"):::file
 
     subgraph CLI [" CLI: ml_switcheroo define "]
         direction TB
-        PARSER("<b>ODL Parser</b><br/>Validates Schema"):::process
-        INJECTOR("<b>Injectors</b><br/>Updates AST & JSONs"):::process
+        PARSER("<b>ODL Schema Validator</b><br/>Validates via OperationDef"):::process
+        INJECTOR("<b>Catalog Writer</b><br/>Saves to semantics/odl/my_op.yaml"):::process
 
         PARSER --> INJECTOR
     end
 
-    subgraph KB [" Knowledge Base "]
+    subgraph KB [" Knowledge Base Hub "]
         direction TB
-        HUB[("<b>The Hub</b><br/>standards.py<br/><i>Abstract Def</i>")]:::hub
-        SPOKE[("<b>The Spokes</b><br/>frameworks/*.json<br/><i>Variants</i>")]:::hub
+        ODL_DIR[("<b>ODL Directory</b><br/>semantics/odl/*.yaml<br/><i>3,290+ Discrete Ops</i>")]:::hub
+        CATALOG[("<b>Unified Catalog</b><br/>semantics/odl.json<br/><i>Compiled Hub Cache</i>")]:::hub
+        ODL_DIR -->|"compile_odl_catalog.py"| CATALOG
     end
 
-    TEST_GEN("<b>Test Generator</b><br/>Builds PyTest Harness"):::process
+    TEST_GEN("<b>Test Generator</b><br/>gen-tests / ci"):::process
 
-    ARTIFACTS("<b>Generated Code</b><br/>tests/generated/test_my_op.py<br/>plugins/my_op_plugin.py"):::output
+    ARTIFACTS("<b>Verification Suites</b><br/>tests/generated/test_*.py<br/>verified_ops.json"):::output
 
     %% --- EDGES ---
     YAML --> PARSER
-    INJECTOR -->|" 1a. Writes spec "| HUB
-    INJECTOR -->|" 1b. Writes maps "| SPOKE
-
-    HUB --> TEST_GEN
-    SPOKE --> TEST_GEN
-
-    TEST_GEN -->|" 2. Creates "| ARTIFACTS
+    INJECTOR --> ODL_DIR
+    CATALOG --> TEST_GEN
+    TEST_GEN --> ARTIFACTS
 ```
 
 ---
 
 ## 🤖 LLM-Assisted Workflow (The Fast Cycle)
 
-Writing YAML manually is slow. `ml-switcheroo` includes a suite of CLI tools designed to put an LLM "in the loop" for rapid API coverage.
+Authoring YAML manually is slow. `ml-switcheroo` provides tools to put an LLM "in the loop" for rapid, verified operation coverage.
 
-### 1. Find Missing Ops (`audit`)
+### 1. Identify Unmapped APIs
 
-Identify API calls in your codebase that are not yet mapped. Usage of `--json` allows piping to automation scripts.
+Audit your model dependencies or compare against live framework snapshots:
 
 ```bash
-# Check coverage
-ml_switcheroo audit ./my_project --roots torch
-
-# Output JSON for tooling
-ml_switcheroo audit ./my_project --roots torch --json | jq '.[].api'
+# Audit all ODL definitions against extracted framework snapshots
+python3 scripts/audit_against_snapshots.py
 ```
 
-### 2. Generate Context (`suggest`)
+### 2. Generate Prompt Context (`suggest`)
 
-The `suggest` command introspects the installed source library (live!) and generates a pre-filled prompt for an LLM. This prompt includes:
-
-*   **Signatures & Docstrings**: Extracted via runtime introspection.
-*   **ODL Schema**: The rigid ODL JSON schema required by the parser.
-*   **One-Shot Example**: A valid baseline mapping.
+The `suggest` command introspects the installed source library and generates a pre-filled prompt for an LLM containing:
+* **Signatures & Docstrings**: Extracted via runtime reflection.
+* **ODL Schema Constraints**: The formal schema requirements.
+* **Baseline Mapping Example**: A structured template.
 
 ```bash
 # Generate prompt for a specific API
-ml_switcheroo suggest torch.nn.functional.grid_sample > prompt.txt
+ml_switcheroo suggest 'torch.nn.functional.grid_sample' > prompt.md
 
-# Copy prompt.txt to ChatGPT / Claude / Local LLM to get valid YAML.
+# Batch-suggest entire namespaces to an output directory
+ml_switcheroo suggest 'torch.nn.functional' --out-dir ./prompts/ --batch-size 20
 ```
 
-**Automated Loop:** You can use the `scripts/suggest_gen_llm_loop.sh` script to automate building context for the LLM. It batches missing operations and copies a massive prompt into your clipboard (using `code2prompt` and `pbcopy`), which includes everything the LLM needs to write the ODL files.
+**Automated Loop:** Use `scripts/suggest_gen_llm_loop.sh` to automate batch prompt building and iterative code generation across missing operations.
 
 ```bash
-# Prepare the prompt for batch N (e.g., 1) in your clipboard
-./scripts/suggest_gen_llm_loop.sh 1
+./scripts/suggest_gen_llm_loop.sh
 ```
 
-### 3. Validate Safety (`dry-run`)
+### 3. Schema Export (`schema`)
 
-LLMs can hallucinate. Always preview the changes before injecting code.
-
-```bash
-# View Unified Diff of standards.py and framework adapters
-ml_switcheroo define generated_op.yaml --dry-run
-```
-
-### 4. Inject & Verify
-
-```bash
-# Apply the definition and generate tests
-ml_switcheroo define generated_op.yaml
-```
-
-### 5. Schema Export (`schema`)
-
-If building custom agents, you can export the raw JSON schema for function calling.
+Export the official ODL JSON schema to configure custom LLM tool-calling or IDE validation:
 
 ```bash
 ml_switcheroo schema > odl_schema.json
+```
+
+### 4. Inject Definition (`define`)
+
+The `define` command validates the YAML file against the Pydantic `OperationDef` schema before writing to disk. If the schema is invalid, it logs the validation error and aborts without altering files:
+
+```bash
+ml_switcheroo define my_op.yaml
+```
+
+### 5. Recompile Catalog & Verify
+
+Once definitions are injected into `src/ml_switcheroo/semantics/odl/`, compile the runtime catalog and run verification:
+
+```bash
+# 1. Compile all discrete YAML definitions into semantics/odl.json
+python3 scripts/compile_odl_catalog.py
+
+# 2. Validate catalog integrity
+python3 scripts/validate_odl_json.py
+
+# 3. Run property-based verification on the new operation
+ml_switcheroo ci --json-report verified_ops.json
 ```
 
 ---
@@ -130,27 +129,27 @@ A complete ODL definition looks like this:
 ```yaml
 operation: "LogSoftmax"
 description: "Applies the LogSoftmax function to an n-dimensional input Tensor."
-op_type: "function" # function | context | decorator
+op_type: "function" # function | context | decorator | attribute | class | macro_graph
 
 # 1. Standard Arguments (The Abstract Signature)
 std_args:
   - name: "input"
     type: "Tensor"
-    rank: 4                 # Constraint: Must be 4D (e.g. NCHW)
-    dtype: "float32"        # Constraint: Input must be float check
-    shape_spec: "[B, C, ...]" # Symbolic shape hint for Fuzzer
+    rank: 4                    # Constraint: Must be 4D (e.g. NCHW)
+    dtype: "float32"           # Constraint: Input must be float32
+    shape_spec: "[B, C, H, W]" # Symbolic shape hint for Fuzzer
 
   - name: "dim"
     type: "int"
-    default: "-1"           # Default value if missing in source
-    min: -2
+    default: -1                # Default value if missing in source
+    min: -4
     max: 3
 
 # 2. Return Verification
 return_type: "Tensor"
 output_shape_calc: "lambda input, dim: input.shape" # Verifies output shape matches input
 
-# 3. Framework Implementations
+# 3. Framework & Hardware Implementations
 variants:
   torch:
     api: "torch.nn.functional.log_softmax"
@@ -158,37 +157,50 @@ variants:
   jax:
     api: "jax.nn.log_softmax"
     args:
-      dim: "axis"           # Rename 'dim' -> 'axis'
-    min_version: "0.4.0"    # Version constraints
+      dim: "axis"              # Rename 'dim' -> 'axis'
+    min_version: "0.4.0"
     required_imports:
-      - "import jax"
+      - "import jax.nn"
+
+  mlx:
+    api: "mlx.core.log_softmax"
+    args:
+      dim: "axis"
+
+  nvidia_sass:
+    api: "; Macro.LogSoftmax"
+
+  rdna:
+    api: "; Macro.LogSoftmax"
 ```
 
-To apply this file:
+To install this definition:
 
 ```bash
-# Preview
-ml_switcheroo define my_op.yaml --dry-run
-# Apply
 ml_switcheroo define my_op.yaml
+python3 scripts/compile_odl_catalog.py
 ```
 
 ---
 
 ## 🧬 Feature Reference
 
-### 1. Argument Normalization
+### 1. Argument Normalization & Pivoting
 
 The core job of ODL is pivoting arguments from **Source Names** to **Standard Names**, and then to **Target Names**.
 
 ```yaml
-std_args: [ "x", "axis", "keepdims" ]
+std_args:
+  - name: "x"
+  - name: "axis"
+  - name: "keepdims"
+    default: false
 variants:
   torch:
     api: "torch.sum"
     args:
       axis: "dim"          # Map Spec 'axis' -> Torch 'dim'
-      keepdims: "keepdim"
+      keepdims: "keepdim"  # Map Spec 'keepdims' -> Torch 'keepdim'
   jax:
     api: "jnp.sum"
     # JAX matches standard names, no mapping needed
@@ -196,42 +208,37 @@ variants:
 
 ### 2. Rich Parameter Constraints (Fuzzer Control)
 
-You can attach metadata to `std_args` to constrain the inputs generated during verification (CI) or strict mode checking.
+You can attach metadata to `std_args` to constrain the inputs generated during property-based fuzzing (`ci`) or strict-mode checking.
 
 | Field | Description | Example |
 | :--- | :--- | :--- |
+| `name` | Standard argument name. | `"dim"` |
 | `type` | Python Type Hint string. | `"int"`, `"Tensor"`, `"List[int]"` |
-| `default` | Default value (transpiled if arg missing). | `"1e-5"`, `"True"` |
-| `rank` | Required tensor rank (number of dims). | `4` |
+| `default` | Default value (injected if missing). | `-1`, `1e-5`, `True`, `None` |
+| `rank` | Required tensor rank (number of dimensions). | `4` |
 | `dtype` | Required data type. | `"float32"`, `"int64"`, `"bool"` |
-| `shape_spec` | Symbolic shape string. | `"[B, T, D]"`, `"[N, N]"` |
+| `shape_spec` | Symbolic shape string indicating dimension constraints. | `"[B, T, D]"`, `"[N, N]"` |
 | `min` / `max` | Numeric bounds for scalar generation. | `min: 0`, `max: 1` |
-| `options` | Allowed values (Enumeration). | `["sum", "mean", "none"]` |
+| `options` | Allowed discrete values (Enumeration). | `["sum", "mean", "none"]` |
+| `is_variadic` | If `true`, accepts `*args`. | `true` |
+| `kind` | Parameter kind convention. | `"positional_only"`, `"keyword_only"` |
 
-**Example: Convolution Weights**
+### 3. Conditional Dispatch (Runtime Rules)
 
-```yaml
-std_args:
-  - name: "weight"
-    type: "Tensor"
-    rank: 4
-    shape_spec: "[Out, In, K, K]" # Enforce square kernel in fuzzer
-```
+When a target framework uses different APIs based on parameter values, use **Dispatch Rules** to dynamically switch the target API.
 
-### 3. Conditional Dispatch (Rules)
-
-Sometimes a single API mapping isn't enough. You can use **Dispatch Rules** to switch the target API based on the *value* or *type* of an argument at runtime.
-
-**Supported Operators:** `eq`, `neq`, `gt`, `lt`, `in`, `not_in`, `is_type`.
+**Supported Operators (`LogicOp`):** `eq`, `neq`, `gt`, `lt`, `gte`, `lte`, `in`, `not_in`, `is_type`.
 
 ```yaml
 operation: "Resize"
-std_args: [ "image", "mode" ]
+std_args:
+  - name: "image"
+  - name: "mode"
 variants:
   jax:
-    api: "jax.image.resize" # Default
+    api: "jax.image.resize" # Default API
     dispatch_rules:
-      # If mode == 'nearest', use specific function
+      # If mode == 'nearest', swap function
       - if_arg: "mode"
         op: "eq"
         val: "nearest"
@@ -246,41 +253,39 @@ variants:
 
 ### 4. Argument Value Mapping (Enum Translation)
 
-Map string literals or integers between frameworks.
+Translate string literals or enum values between frameworks.
 
 ```yaml
 operation: "Reduce"
-std_args: [ "x", "reduction" ]
+std_args:
+  - name: "x"
+  - name: "reduction"
 variants:
   torch:
     api: "torch.reduce"
-    # Logic: Source 'mean' -> Target 'avg'
     arg_values:
       reduction:
         mean: "'avg'"
         sum: "'add'"
 ```
 
-### 5. Output Adaptation
+### 5. Output Adaptation (Selection & Casting)
 
-Handle differences in return signatures.
-
-*   **Selection:** If source returns a Tuple `(val, idx)` but target returns only `val`.
-*   **Casting:** If target usually returns `float32` but spec requires `int64`.
+Handle differences in return signatures:
+* **Selection (`output_select_index`)**: If the source returns a tuple `(val, idx)` but the target only returns `val`.
+* **Casting (`output_cast`)**: If the target returns `float32` but the specification requires `int64`.
 
 ```yaml
 variants:
   jax:
     api: "jnp.max_indices"
-    # Select index 0 from result tuple
     output_select_index: 0
-    # Cast result to int64
     output_cast: "jnp.int64"
 ```
 
 ### 6. Tensor Layout Permutation
 
-Automatically inject `transpose` / `permute` calls to align memory layouts (e.g. NCHW vs NHWC).
+Automatically inject dimension permutation (`transpose` / `permute`) calls to align memory layouts (e.g. NCHW vs NHWC).
 
 ```yaml
 operation: "Conv2d"
@@ -296,28 +301,29 @@ variants:
 
 ### 7. Argument Packing & Variadics
 
-Convert `func(*args)` to `func(list=[...])`.
+Convert variadic parameters (`func(*args)`) into container arguments (`func(inputs=[...])`).
 
 ```yaml
 std_args:
   - name: "tensors"
-    is_variadic: true # Accepts *tensors
+    is_variadic: true
 variants:
   keras:
     api: "keras.layers.Add"
-    # Packs *tensors into a list and passes to 'inputs' argument (implicit pos 0)
-    pack_as: "List"
+    pack_as: "List" # Packs *tensors into a list and passes to pos 0
 ```
 
-### 8. Constraint Injection via Metadata
+### 8. Inline Macros
 
-Mark operations with specific flags to trigger built-in engine plugins without writing custom code.
+For operations that lack a direct single-kernel equivalent in the target framework, define inline string macro templates:
 
 ```yaml
-operation: "Add_"
-is_inplace: true   # Triggers 'unroll_inplace_ops' plugin automatically
+operation: "SiLU"
+std_args:
+  - name: "x"
 variants:
-  torch: { api: "torch.add_" }
+  my_lib:
+    macro_template: "{x} * my_lib.sigmoid({x})"
 ```
 
 ---
@@ -326,7 +332,7 @@ variants:
 
 ### Version Constraints
 
-Prevent invalid code generation if the target environment is too old or too new.
+Prevent invalid code generation if the target environment is outside supported version boundaries:
 
 ```yaml
 variants:
@@ -338,13 +344,12 @@ variants:
 
 ### Dependency Management
 
-Inject imports required by your mapping. The `ImportFixer` will place these at the top of the file and deduplicate them.
+Inject imports required by your mapping. The `ImportFixer` places these at the module top and deduplicates them:
 
 ```yaml
 variants:
   numpy:
     api: "np.sigmoid"
-    # Can be simple strings or structured objects
     required_imports:
       - "import numpy as np"
       - module: "scipy.special"
@@ -353,7 +358,7 @@ variants:
 
 ### Plugin Scaffolding
 
-If ODL is not expressive enough, define a stub for a Python plugin loop. The CLI will generate the file `src/ml_switcheroo/plugins/{name}.py` for you to fill in.
+If an operation requires custom AST manipulation, link it to a plugin hook:
 
 ```yaml
 operation: "ComplexOp"
@@ -361,12 +366,10 @@ variants:
   jax:
     requires_plugin: "my_complex_logic"
 
-# Define the stub to generate
 scaffold_plugins:
   - name: "my_complex_logic"
     type: "call_transform"
-    doc: "Handles complex logic for JAX."
-    # Optional: Pre-compile rules into the python code
+    doc: "Handles complex transformation for JAX."
     rules:
       - if_arg: "x"
         op: "eq"
@@ -378,13 +381,12 @@ scaffold_plugins:
 
 ## 🧪 Verification Logic
 
-The `gen-tests` command uses the metadata in your ODL to create physical test files.
+The `ci` and `gen-tests` commands use the metadata in your ODL to create and run equivalence verification:
 
-*   `test_rtol` / `test_atol`: Set numerical tolerance for equivalence checks.
-*   `nondeterministic`: Set to `true` to relax checks for RNG ops.
-*   `verification_mode`: Set to `"exact"` for strict integer/boolean matching, or `"approx"` (default) for floating point tolerances.
-*   `output_shape_calc`: A Python lambda string to verify output shape rigorously.
-    ```yaml
-    # Checks that output shape is input shape with last dim removed
-    output_shape_calc: "lambda input, dim: input.shape[:-1]"
-    ```
+* `test_rtol` / `test_atol`: Set numerical tolerances for floating-point checks.
+* `nondeterministic`: Set to `true` to relax checks for random/stochastic operations.
+* `verification_mode`: Set to `"exact"` for strict integer/boolean comparisons, or `"approx"` (default) for floating point checks.
+* `output_shape_calc`: A Python lambda string to mathematically assert that the output shape matches expectations:
+  ```yaml
+  output_shape_calc: "lambda input, dim: input.shape[:-1]"
+  ```

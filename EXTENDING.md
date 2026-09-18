@@ -6,11 +6,10 @@ Extending
 There are three ways to extend the system, ordered by complexity:
 
 1. **ODL (Operation Definition Language)**: Declaratively define operations using YAML or `StandardMap` objects. This handles 90% of cases (renaming, reordering, packing args, macros). **[See: [EXTENDING_WITH_DSL](EXTENDING_WITH_DSL.md)]**
-    - Or update these files directly (no YAML DSL required):
-      - `src/ml_switcheroo/semantics/*.json` (Abstract Specifications)
-      - `src/ml_switcheroo/frameworks/definitions/*.json` (Framework Implementations)
-2. **Adapter API**: Write Python classes to support entirely new frameworks (e.g. adding `TinyGrad`).
-3. **Plugin Hooks**: Write AST transformation logic for complex architectural mismatches that ODL cannot handle (e.g., state injection, context manager rewriting).
+    * Author discrete operation YAMLs: `src/ml_switcheroo/semantics/odl/{Operation}.yaml`
+    * Compile into the centralized catalog: `src/ml_switcheroo/semantics/odl.json` via `python3 scripts/compile_odl_catalog.py`
+2. **Adapter API**: Write Python classes to support entirely new frameworks or hardware dialects (e.g. adding `TinyGrad` or custom ISAs).
+3. **Plugin Hooks**: Write AST transformation logic for complex architectural mismatches that declarative ODL cannot express (e.g., state injection, PRNG threading, context manager rewriting).
 
 This document covers **2** and **3**.
 
@@ -18,7 +17,7 @@ This document covers **2** and **3**.
 
 ## 🏗️ Architecture Overview
 
-The extension system works by injecting definitions into the Knowledge Base (The Hub) and linking them to specific framework implementations (The Spokes).
+The extension system injects definitions into the Knowledge Base (The Hub) and links them to specific framework implementations (The Spokes).
 
 ```mermaid
 graph TD
@@ -32,18 +31,18 @@ graph TD
 
     subgraph "Your Extension"
         direction TB
-        ADAPTER("<b>Framework Adapter</b><br/>src/frameworks/*.py<br/><i>Definitions & Traits</i>"):::adapter
-        PLUGIN("<b>Plugin Hooks</b><br/>src/plugins/*.py<br/><i>AST Logic</i>"):::plugin
+        ADAPTER("<b>Framework Adapter</b><br/>src/ml_switcheroo/frameworks/*.py<br/><i>Definitions & Traits</i>"):::adapter
+        PLUGIN("<b>Plugin Hooks</b><br/>src/ml_switcheroo/plugins/*.py<br/><i>AST Logic</i>"):::plugin
     end
 
-    subgraph "Core System"
+    subgraph "Core Knowledge Base"
         direction TB
-        HUB("<b>Semantic Hub</b><br/>semantics/*.json<br/><i>Abstract Operations</i>"):::hub
+        HUB("<b>Semantic Hub</b><br/>semantics/odl/*.yaml & odl.json<br/><i>3,290+ Operations</i>"):::hub
     end
 
     subgraph "Automation Tools"
         direction TB
-        DEFINE("<b>CLI Command</b><br/>ml_switcheroo define<br/><i>Code Injection</i>"):::tool
+        DEFINE("<b>CLI / Scripts</b><br/>ml_switcheroo define<br/>compile_odl_catalog.py"):::tool
         YAML("<b>ODL YAML</b><br/>Operation Definition<br/><i>Declarative Spec</i>"):::input
     end
 
@@ -51,8 +50,7 @@ graph TD
     YAML --> DEFINE
     DEFINE -->|" 1a. Inject Spec "| HUB
     DEFINE -->|" 1b. Inject Mapping "| ADAPTER
-    DEFINE -->|" 2. Scaffold File "| PLUGIN
-    ADAPTER -->|" Registration "| HUB
+    ADAPTER -->|" Zero-Edit Registration "| HUB
     PLUGIN -.->|" AST Transformation "| HUB
 ```
 
@@ -60,7 +58,9 @@ graph TD
 
 ## 🔌 2. Adding a Framework Adapter
 
-To support a new library (e.g., `tinygrad`, `custom_engine`), you create a Python class that acts as the translation interface. It converts the library's specific idioms into traits understood by the core engine.
+To support a new library (e.g., `tinygrad`, `custom_engine`), create a Python class that acts as the translation interface. It converts the library's specific idioms into traits understood by the core engine.
+
+Adapters feature **Zero-Edit Registration**: simply placing an adapter module decorated with `@register_framework` inside `src/ml_switcheroo/frameworks/` automatically registers it across all CLI commands (`convert`, `matrix`, `gen-docs`).
 
 **Location:** `src/ml_switcheroo/frameworks/{my_lib}.py`
 
@@ -96,8 +96,7 @@ class MyLibAdapter:
     }
 
   # --- 2. Static Mappings (The "Definitions") ---
-  # This property allows Ghost Mode to work without the library installed.
-  # Alternatively, populate src/ml_switcheroo/frameworks/definitions/my_lib.json
+  # Allows Ghost Mode to function without the target library installed locally.
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     return {
@@ -109,7 +108,7 @@ class MyLibAdapter:
       "permute_dims": StandardMap(api="ml.transpose", pack_to_tuple="axes"),
       # DSL Feature: Inline Macro
       "SiLU": StandardMap(macro_template="{x} * ml.sigmoid({x})"),
-      # Linking to a Custom Plugin (Logic located in src/plugins/)
+      # Linking to a Custom Plugin (Logic located in src/ml_switcheroo/plugins/)
       "SpecialOp": StandardMap(requires_plugin="my_custom_logic"),
     }
 
@@ -121,7 +120,7 @@ class MyLibAdapter:
       module_base="ml.Module",  # Base class for layers
       forward_method="call",  # Inference method name
       requires_super_init=True,  # Inject super().__init__()?
-      inject_magic_args=[],  # No special context args
+      inject_magic_args=[],  # Special signature arguments (e.g. [("rngs", "nnx.Rngs")])
       lifecycle_strip_methods=["gpu"],  # Methods to silently remove
       impurity_methods=["add_"],  # Methods flagged as side-effects
     )
@@ -134,6 +133,8 @@ class MyLibAdapter:
       has_numpy_compatible_arrays=True,  # Supports .astype() casting?
       requires_explicit_rng=False,  # Requires JAX-style keys?
       requires_functional_state=False,  # Requires BatchNorm unrolling?
+      requires_functional_control_flow=False,  # Requires loop unrolling?
+      enforce_purity_analysis=False,  # Run PurityScanner before transpilation?
     )
 
   @property
@@ -145,13 +146,13 @@ class MyLibAdapter:
 
 ## 🧠 3. Plugin System (Custom Code)
 
-For operations that require manipulating the AST structure (e.g. injecting imports, wrapping contexts, unwrapping state), you use the **Hook System**.
+For operations that require manipulating the AST structure (e.g., injecting imports, wrapping contexts, unwrapping state, or threading PRNG keys), use the **Hook System**.
 
-Create a python file in `src/ml_switcheroo/plugins/`. It will be automatically discovered.
+Create a Python file in `src/ml_switcheroo/plugins/`. It is discovered and loaded automatically by the plugin registry.
 
 ### Anatomy of a Plugin
 
-Plugins are functions decorated with `@register_hook`. They receive the current AST node and a Context object.
+Plugins are functions decorated with `@register_hook`. They receive the current AST node and a `HookContext` object.
 
 ```python
 import libcst as cst
@@ -160,45 +161,38 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 @register_hook("my_custom_logic")
 def transform_special_op(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Example: Transforms `special_op(x)` into `context_wrapper(x)`
-  """
+  """Example: Transforms `special_op(x)` into `context_wrapper(x)`."""
   # 1. Inspect Context
-  # Check framework capabilities or configuration
   if not ctx.plugin_traits.has_numpy_compatible_arrays:
     return node
 
-  # Look up API path dynamically (Decoupling)
+  # Look up API path dynamically from the Hub (Decoupled from hardcoded strings)
   target_api = ctx.lookup_api("SpecialOp") or "default.op"
 
-  # 2. Inject Dependencies (Preamble)
+  # 2. Inject Dependencies (Preamble / Module Header)
   if not ctx.metadata.get("my_helper_injected"):
     ctx.inject_preamble("import my_helper_lib")
     ctx.metadata["my_helper_injected"] = True
 
   # 3. Modify AST
-  # Change function name
-  # Ensure you import logic for creating dotted names
-  # from ml_switcheroo.plugins.utils import create_dotted_name
-  pass
-
   return node
 ```
 
 ### The Hook Context (`ctx`)
 
-The context object passed to your function provides helper methods for robust plugin writing without hardcoding framework strings:
+The `HookContext` provides helper methods for writing framework-agnostic plugins:
 
-*   `ctx.target_fw`: The active target framework key (string).
-*   `ctx.plugin_traits`: A `PluginTraits` object describing the target (e.g., `requires_explicit_rng`). Prefer checking this over `target_fw`.
-*   `ctx.lookup_api(op_name)`: Resolve the API string for the current target via the Semantics Manager.
-*   `ctx.inject_signature_arg(name)`: Add an argument to the enclosing function definition (e.g., inject `rng` into `def forward(...)`).
-*   `ctx.inject_preamble(code)`: Add code to the start of the function body or module header.
-*   `ctx.current_variant`: Access the `FrameworkVariant` definition from ODL to read custom metadata (e.g. `args` map).
+* `ctx.target_fw`: The active target framework key (e.g. `"jax"`, `"flax_nnx"`, `"mlx"`).
+* `ctx.plugin_traits`: A `PluginTraits` object describing the target (e.g., `requires_explicit_rng`). Prefer checking traits over checking framework strings.
+* `ctx.lookup_api(op_name)`: Resolve the API string for the current target via the Semantics Manager.
+* `ctx.inject_signature_arg(name, type_hint)`: Add an argument to the enclosing function definition (e.g., inject `rng` into `def forward(...)`).
+* `ctx.inject_preamble(code)`: Add code to the start of the function body or module header.
+* `ctx.current_variant`: Access the active `FrameworkVariant` definition from ODL to read custom metadata (e.g. `args` map).
+* `ctx.resolve_type(node)`: Query the pre-calculated `SymbolTable` to determine if a node represents a `"Tensor"` or `"Module"`.
 
 ### Auto-Wired Plugins
 
-You can register a hook and inject its semantic mapping ("Hub entry") in one place using the `auto_wire` parameter. This architecture maintains locality of behavior.
+You can register a hook and declare its semantic Hub mapping in a single location using the `auto_wire` parameter. This pattern guarantees locality of behavior.
 
 ```python
 @register_hook(
@@ -213,6 +207,6 @@ You can register a hook and inject its semantic mapping ("Hub entry") in one pla
   },
 )
 def transform_reshape(node: cst.Call, ctx: HookContext) -> cst.Call:
-  # Logic here...
+  # Plugin AST transformation logic...
   return node
 ```

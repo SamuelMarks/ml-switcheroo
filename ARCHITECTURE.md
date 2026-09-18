@@ -1,34 +1,29 @@
 Architecture
 ============
 
-**ml-switcheroo** is a deterministic, specification-driven transpiler designed to convert Deep Learning code between
-frameworks (e.g., PyTorch to JAX/Flax, Keras 3 to TensorFlow) with mathematical rigor.
+**ml-switcheroo** is a deterministic, specification-driven **Universal Compiler** for Deep Learning. It translates and compiles computation between high-level frameworks (PyTorch, JAX/Flax NNX, Apple MLX, Keras 3, TensorFlow), intermediate representations (ML-Switcheroo IR, MLIR, StableHLO), native C++ PyBind11 extensions, WebAssembly (WAT), and low-level hardware assembly (NVIDIA SASS, AMD RDNA).
 
-It solves the $O(N^2)$ translation problem by decoupling **Specification** (the Abstract Operation) from
-**Implementation** (the Framework API) using a **Hub-and-Spoke** architecture. Rather than writing translators for every
-pair of frameworks, we map every framework to a central "Abstract Standard."
+It solves the $O(N^2)$ interoperability problem by decoupling **Specification** (the Abstract Operation) from **Implementation** (the Dialect / Target API) using a **Hub-and-Spoke** architecture. Rather than writing ad-hoc translators for every pair of languages, every dialect maps to a central **Abstract Standard**.
 
 ---
 
-## 🏗️ The Semantic Pivot Strategy
+## 🏗️ The Semantic Pivot Strategy & Dual-Path Routing
 
-The conversion process is a three-step movement through an abstract intermediate state:
+The core pipeline operates on a three-phase semantic pivot:
 
-1. **Ingest (Source $\to$ Hub):** The system identifies a framework call (e.g., `torch.permute`) and maps it to an *
-   *Abstract Operation** (e.g., `permute_dims`) using the source framework's snapshot or adapter definition. It also
-   normalizes input formats (assignments, attributes) into a unified AST.
-2. **Pivot (Normalization):** Arguments are reordered, renamed, unpacked, and validated to match the Abstract Standard (
-   The "Hub" signature).
-3. **Project (Hub $\to$ Target):** The system looks up the implementation for the target framework (e.g.,
-   `jax.numpy.transpose`) and generates the corresponding AST, applying any necessary DSL logic (Layout Permutation,
-   Macros) or Plugin hooks.
+1. **Ingest (Source $\to$ Hub):** The system identifies framework operations, AST nodes, or machine instructions (e.g., `torch.permute`, `v_fmac_f32`, or `LDG.E.F32`) and maps them to an **Abstract Operation** (e.g., `permute_dims`, `Conv2d`, or `Linear`) using the source dialect's snapshot, ODL catalog, or instruction grammar.
+2. **Pivot (Normalization & Optimization):** Arguments, shapes, layouts, and data types are normalized against the Abstract Standard. Graph-level passes (auto-sharding, SwiGLU/QKV fusion, topological diffing) optimize the computational graph.
+3. **Project (Hub $\to$ Target):** The system generates the target representation—emitting clean high-level Python AST, native C++ PyBind11 modules, WebAssembly Text instructions, or GPU machine kernels—applying DSL expansion, layout permutations, and plugin hooks.
+
+The `ASTEngine` performs **Route Selection** based on the source and target representations:
+* **Rewriter Pipeline (AST-to-AST):** Used for source-to-source translation between high-level Python frameworks (e.g., PyTorch to JAX/NNX). Operates on concrete syntax trees via LibCST.
+* **Compiler Pipeline (Graph-to-Backend):** Used when the conversion involves hardware ISAs (NVIDIA SASS, AMD RDNA), native C++ extensions, WebAssembly Text (WAT), visual DSLs (TikZ, HTML, LaTeX), distributed sharding annotations, or intermediate IR formats (`ir`, `mlir`, `stablehlo`).
 
 ---
 
 ## 🧩 1. The Knowledge Base (Hub & Spoke)
 
-The core dataset driving the transpiler is distributed across two layers. This separation allows the "What" (Standard)
-to evolve independently of the "How" (Implementation).
+The dataset driving the compiler is partitioned into declarative specifications (The Hub) and dialect overlays (The Spokes).
 
 ```mermaid
 graph TD
@@ -42,20 +37,22 @@ graph TD
     %% --- PHASE 1: DISCOVERY ---
     subgraph P1 [1. Ingestion Phase]
         direction TB
-        STANDARDS("External Specs<br/>(ONNX / Array API)"):::input
+        STANDARDS("ODL YAML Definitions<br/>(semantics/odl/*.yaml)"):::input
+        HARDWARE_ISA("Hardware ISA Specs<br/>(nvidia_sass_isa / rdna_isa)"):::input
         CODE("Adapter Classes<br/>(frameworks/*.py)"):::input
 
         LOADER("Registry & File<br/>Loaders"):::build
 
         STANDARDS --> LOADER
+        HARDWARE_ISA --> LOADER
         CODE --> LOADER
     end
 
     %% --- PHASE 2: STORAGE ---
     subgraph P2 [2. Semantics Manager]
         direction TB
-        HUB[("<b>The Hub (Specs)</b><br/>semantics/*.json<br/><i>Abstract Operations</i>")]:::hub
-        SPOKE[("<b>The Spokes (Variants)</b><br/>snapshots/*.json<br/><i>Framework Implementations</i>")]:::spoke
+        HUB[("<b>The Hub (Compiled Catalog)</b><br/>semantics/odl.json<br/><i>3,290+ Abstract Operations</i>")]:::hub
+        SPOKE[("<b>The Spokes (Variants)</b><br/>snapshots/*.json & adapters<br/><i>Framework Implementations</i>")]:::spoke
 
         %% Internal Context Link
         SPOKE -.->|"Hydrates"| HUB
@@ -68,7 +65,7 @@ graph TD
     %% --- PHASE 3: VERIFICATION ---
     subgraph P3 [3. Verification Phase]
         direction TB
-        TESTER("TestGen & Fuzzer"):::build
+        TESTER("Fuzzer & CI BatchRunner"):::build
     end
 
     %% Flow P2 -> P3
@@ -76,33 +73,40 @@ graph TD
     SPOKE -.->|"Read Variants"| TESTER
 ```
 
-### The Hub: Semantic Specifications
+### The Hub: Operation Definition Language (ODL)
 
-Defines **WHAT** an operation is. Populated from `src/ml_switcheroo/semantics/*.json` and internal defaults.
+Defines **WHAT** an operation is. The Hub is built from discrete, atomic YAML operation definitions in `src/ml_switcheroo/semantics/odl/` and deterministically compiled into `src/ml_switcheroo/semantics/odl.json` (3,291 compiled operations).
 
-* **Tier A (Math):** `k_array_api.json` — Array API Standard (NumPy-like).
-* **Tier B (Neural):** `k_neural_net.json` — ONNX Operators (Layers, Activations).
-* **Tier C (Extras):** `k_framework_extras.json` — Framework utilities, IO, and internals.
+Operations are organized by `SemanticTier`:
+* **`ARRAY_API`:** Pure mathematical array operations adhering to the Python Array API standard.
+* **`NEURAL`:** Stateful layers and modules (`Linear`, `Conv2d`, `BatchNorm`, `Embedding`).
+* **`NEURAL_OPS` / `ACTIVATION`:** Functional activations and neural primitives (`relu`, `gelu`, `scaled_dot_product_attention`).
+* **`LOSS`:** Loss functions (`cross_entropy`, `mse_loss`).
+* **`OPTIMIZER`:** Optimization algorithms and parameter update steps (`AdamW`, `SGD`).
+* **`EXTRAS`:** Framework IO, checkpointing, and runtime utilities.
 
-### The Spokes: Framework Overlays
+Hardware ISAs are modeled symmetrically via declarative instruction specifications:
+* `src/ml_switcheroo/semantics/nvidia_sass_isa.yaml`: NVIDIA Ampere/Hopper instruction set architecture.
+* `src/ml_switcheroo/semantics/rdna_isa.yaml`: AMD RDNA3 (GFX10/GFX11) instruction set architecture.
 
-Defines **HOW** a specific framework implements the standard. Populated from `src/ml_switcheroo/frameworks/*.py` (Live)
-or `../ml-compiler-snapshots/` (Ghost).
+### The Spokes: Framework Overlays & Ghost Protocol
 
-* **API Path:** E.g., `torch.abs`, `jax.numpy.abs`.
-* **Argument Map:** E.g., `{"input": "x", "dim": "axis"}`.
-* **DSL Config:** Layout maps, Macros, Type Casting rules.
+Defines **HOW** a specific dialect or framework implements the standard. Sourced from:
+* **Live Framework Adapters:** In `src/ml_switcheroo/frameworks/*.py` (introspecting installed packages).
+* **Ghost Framework Snapshots:** Sourced from `ml-framework-snapshots` and `ml-compiler-snapshots` directories.
 
-This supports **Ghost Mode**, allowing the engine to transpile code even if source/target libraries are not installed
-locally.
+Each spoke specifies:
+* **API Path:** E.g., `torch.abs`, `flax.nnx.Linear`, `mlx.core.matmul`.
+* **Argument Mapping:** Parameter renaming, default overrides, and positional-to-keyword translation.
+* **DSL Declarations:** Layout mapping rules, inline macros, type casting rules, and plugin hooks.
+
+The **Ghost Protocol** decouples transpilation from local environments: `ml-switcheroo` can compile code targeting JAX, MLX, or hardware assembly without requiring those heavy frameworks to be installed on the host machine.
 
 ---
 
-## ⚡ 2. The Transpilation Engine
+## ⚡ 2. The Execution Engine (`ASTEngine`)
 
-The `ASTEngine` orchestrates the conversion pipeline. It handles parsing, deep analysis, optimization, and transformation by performing **Route Selection**:
-* **Rewriter Pipeline:** Used when both source and target are high-level frameworks (e.g., PyTorch to JAX).
-* **Compiler Pipeline:** Used when the source or target involves an ISA (e.g., NVIDIA_SASS/RDNA) or visual documentation targets.
+The `ASTEngine` orchestrates conversion through either the **Rewriter Pipeline** or the **Compiler Pipeline**.
 
 ```mermaid
 graph TD
@@ -115,135 +119,204 @@ graph TD
     classDef plugin fill:#57caff,stroke:#20344b,stroke-width:2px,color:#20344b,font-family:'Google Sans Medium',rx:5px;
     classDef output fill:#34a853,stroke:#20344b,stroke-width:2px,color:#ffffff,font-family:'Google Sans Medium',rx:5px;
 
-    %% --- NODES ---
-    SRC("Source Code"):::artifact
+    SRC("Source Code / ASM"):::artifact
 
-    subgraph ENGINE [AST Engine]
+    subgraph ENGINE [AST Engine Dual-Path Pipeline]
         direction TB
-        INGEST("1. Ingestion<br/>(Python/MLIR/TikZ)"):::process
+        ROUTE{"Route Selection"}:::process
 
-        subgraph ANALYSIS_BLOCK [Analysis Phase]
+        %% --- REWRITER PATH ---
+        subgraph REWRITER_ROUTE [Path A: High-Level Rewriter Pipeline]
             direction TB
-            SYMBOLS("Symbol Table"):::process
-            PURITY("Purity & Safety"):::process
+            LIBCST("LibCST Parser"):::process
+            SYMBOLS("Symbol Table & Purity Scanner"):::process
+            PASS_STRUCT("1. StructuralPass"):::process
+            PASS_MUT("2. FunctionalMutationPass"):::process
+            PASS_API("3. ApiPass & Plugins"):::process
+            PASS_AUX("4. AuxiliaryPass"):::process
+            FIXER("5. ImportFixer & Linter"):::process
+
+            LIBCST --> SYMBOLS --> PASS_STRUCT --> PASS_MUT --> PASS_API --> PASS_AUX --> FIXER
         end
 
-        SERVER[("Semantics<br/>Manager")]:::kb
+        %% --- COMPILER PATH ---
+        subgraph COMPILER_ROUTE [Path B: Graph Compiler Pipeline]
+            direction TB
+            FRONTEND("Frontend / Lifter / CFG Analysis"):::process
+            GRAPH[("LogicalGraph IR")]:::kb
+            SHARDING("Auto-Sharding Pass (LogicalMesh)"):::optimization
+            FUSION("Topology Fusion (QKV / SwiGLU)"):::optimization
+            DIFFER("Topological Diff Engine"):::optimization
+            BACKEND("Compiler Backend (SASS / RDNA / C++ / WAT / Visual)"):::process
 
-        GRAPH_OPT("2. Graph Optimizer<br/>(Fusion)"):::optimization
+            FRONTEND --> GRAPH --> SHARDING --> FUSION --> DIFFER --> BACKEND
+        end
 
-        REWRITER("3. Rewriter Pipeline<br/>(Structure/API/Aux Passes)"):::process
-        PLUGINS{{Plugin & DSL System}}:::plugin
-
-        FIXER("4. Refinement<br/>(Import Fixer)"):::process
+        ROUTE -->|"High-Level Python"| REWRITER_ROUTE
+        ROUTE -->|"ISAs / C++ / WAT / Sharding"| COMPILER_ROUTE
     end
 
-    TGT("Target Code"):::output
+    KB_SERVER[("Semantics Manager")]:::kb
+    KB_SERVER -.->|"ODL Lookups"| PASS_API
+    KB_SERVER -.->|"ISA / Dialect Specs"| FRONTEND
+    KB_SERVER -.->|"Backend Templates"| BACKEND
 
-    %% --- EDGES ---
-    SRC --> INGEST
-    INGEST --> SYMBOLS
-    SYMBOLS --> PURITY
-    PURITY --> GRAPH_OPT
+    TARGET_OUT("Target Code / ASM / WAT"):::output
 
-    GRAPH_OPT --> REWRITER
-    SERVER -.->|"Lookup API"| REWRITER
-    REWRITER <-->|"Complex Logic"| PLUGINS
-
-    REWRITER --> FIXER
-    FIXER --> TGT
+    SRC --> ROUTE
+    FIXER --> TARGET_OUT
+    BACKEND --> TARGET_OUT
 ```
 
-### 1. Ingestion & Analysis
+### Path A: The High-Level Rewriter Pipeline
 
-Before touching the code, the engine parses and scans for context.
+Used for source-to-source translation between high-level Python frameworks. The pipeline shares a mutable `RewriterContext` across four sequential passes:
 
-* **Parsers:** Supports Python (LibCST), MLIR Text, and TikZ/Latex sources via Adapters.
-* **SymbolTableAnalyzer:** Infers variable types (e.g., "is `x` a Tensor or a Module?") and scopes to drive intelligent
-  rewriting.
-* **PurityScanner:** Detects side effects (IO, Globals, in-place mutation) unsafe for JAX/XLA targets (Enabled via
-  `PluginTraits`).
-* **LifecycleTracker:** Verification pass ensuring all class attributes used in `forward` are initialized in `__init__`.
+1. **`StructuralPass`:** Transforms class declarations and module architecture:
+   * Replaces base classes (e.g., `nn.Module` $\to$ `nnx.Module` or `keras.Layer`).
+   * Renames invocation methods (`forward` $\leftrightarrow$ `call` $\leftrightarrow$ `__call__`).
+   * Injects lifecycle arguments (e.g., threading `rngs: nnx.Rngs` into `__init__`).
+   * Strips lifecycle methods obsolete in the target (e.g., `.cuda()`, `.to()`, `.detach()`).
+2. **`FunctionalMutationPass`:** Desugars imperative in-place operations into pure functional assignments:
+   * Rewrites in-place augmentations (`x += y` $\to$ `x = x + y`).
+   * Unrolls tensor indexed assignments (`x[idx] = val` $\to$ `x = x.at[idx].set(val)`).
+   * Rewrites in-place methods (`x.relu_()` $\to$ `x = torch.relu(x)`).
+3. **`ApiPass`:** The core semantic operator transformer:
+   * Maps concrete framework calls to Abstract ODL IDs.
+   * Performs argument renaming, reordering, and keyword-to-positional normalization.
+   * Injects layout permutations (e.g., NCHW $\leftrightarrow$ NHWC) via `inject_permute_call`.
+   * Dispatches to registered plugin hooks when structural mutations are required.
+4. **`AuxiliaryPass`:** Rewrites secondary constructs:
+   * Maps decorators (e.g., `@torch.no_grad()` $\to$ `@jax.jit` or context wraps).
+   * Enforces control flow constraints (static loop unrolling, type-guard verification).
+5. **Refinement Phase (`ImportFixer` & `StructuralLinter`):**
+   * Post-processes the AST to prune unused source imports (`import torch`).
+   * Injects only necessary target imports (`import jax.numpy as jnp`, `from flax import nnx`).
+   * Resolves alias conflicts and ensures structural hygiene.
 
-### 2. Optimization Phase (`GraphOptimizer`)
+### Path B: The Graph Compiler Pipeline
 
-An optional pass that builds a `LogicalGraph` from the AST and applies fusion patterns.
+Used for hardware assembly lowering/lifting, C++ generation, WebAssembly Text output, visual DSLs, or distributed sharding:
 
-* Matches sequences like `Conv2d -> BatchNorm -> ReLU`.
-* Replaces them with fused macro operations (e.g., `FusedCBR`) based on `PatternDef` in Semantics.
-
-### 3. Rewriting Phase (`RewriterPipeline`)
-
-The core transformer is built on a **Pipeline** architecture. The `RewriterPipeline` orchestrates sequential **Passes** which share a mutable `RewriterContext`.
-
-* **StructuralPass:** Handles Class/Function definitions (swaps Base classes, renames `forward`, injects `rngs` args, strips Lifecycle methods).
-* **ApiPass:** The workhorse. Resolves API calls and Attributes to Abstract IDs, applies Layout Permutation, Argument Normalization, and dispatches to Plugins.
-* **AuxiliaryPass:** Handles secondary syntax constructions (Decorators) and ensures safety for Control Flow (e.g., Loop Unrolling checks).
-
-### 4. Refinement Phase
-
-* **ImportFixer:** An intelligent pass that post-processes the AST. It injects required imports (e.g.,
-  `import jax.numpy as jnp`) only if used and prunes unused source imports.
-* **StructuralLinter:** A final sanity verification that flags any residual artifacts from the source framework.
+1. **Frontend & Ingestion:**
+   * **Python Frontend:** Ingests Python CST and constructs a canonical `LogicalGraph` using semantic signatures.
+   * **Hardware Lifters (`NvidiaSassLifter`, `RdnaLifter`):** Parses raw machine instruction streams into statement lists.
+   * **CFG & Dominator Analysis:** Builds control-flow graphs and computes dominator trees to identify basic blocks, natural loops, and loop headers.
+2. **Graph Optimization Passes:**
+   * **`ShardingInferencePass`:** Analyzes unannotated computational graphs and injects `LogicalMesh` and `PartitionSpec` annotations using column-parallel (`q_proj`, `k_proj`, `v_proj`, `gate_proj`, `up_proj`), row-parallel (`o_proj`, `down_proj`), and data-parallel heuristics.
+   * **`QKVFusionPass` / `QKVDefusionPass`:** Detects and fuses separate Q, K, V projection layers into a unified multi-head projection (or unpacks them).
+   * **`SwiGLUFusionPass` / `SwiGLUDefusionPass`:** Detects separate `gate_proj` and `up_proj` pairs in LLM feed-forward layers and fuses them into a single `SwiGLU` operator.
+   * **`VisionPatchEmbeddingPass`:** Restructures multi-dimensional patch embeddings for multimodal vision models.
+   * **`GraphDiffer`:** Performs topological diffing between source and target graphs, producing structured `PatchAction` lists (`DeleteAction`, `ReplaceAction`).
+3. **Compiler Backends:**
+   * **Hardware Emitters:** `NvidiaSassBackend` and `RdnaBackend` synthesize macro streams into valid machine instruction code.
+   * **C++ Backend:** `TorchCppExtensionGenerator` compiles logical graphs into native PyTorch C++ extensions with PyBind11 bindings.
+   * **WebAssembly Backend:** `WasmBackend` generates valid WebAssembly Text (`WatModule`, `WatFunc`, `WatInstr`).
+   * **Visual Backends:** Generates publication-ready `TikZ` diagrams, responsive `HTML` Grid CSS layouts, or `LaTeX` equations.
+   * **Intermediate Representation Backend:** Serializes canonical JSON graphs conforming to the `ml_switcheroo_ir` schema.
 
 ---
 
-## 🔌 3. Framework Adapters (Traits & Hierarchy)
+## 🛠️ 3. Hardware Assembly Subsystem (SASS & RDNA)
 
-Support for specific libraries resides in `src/ml_switcheroo/frameworks/`. Adapters provide **Traits** to the engine
-rather than hardcoded logic.
+The hardware subsystem provides a verified, bidirectional compilation and decompilation bridge between GPU assembly and high-level Python code, as well as direct cross-ISA translation.
 
-### Structural Traits
+```
+       ┌───────────────────────────────┐
+       │   High-Level Python / IR      │
+       └──────────────┬────────────────┘
+                      │
+           Lowering   │   Lifting / Decompilation
+        (CompilerBE)  │   (CFG + Dominators)
+                      ▼
+       ┌───────────────────────────────┐
+       │     LogicalGraph (IR)         │
+       └───────┬───────────────▲───────┘
+               │               │
+  NvidiaSassBE │  Cross-ISA    │ NvidiaSassLifter
+   RdnaBackend │  Translation  │ RdnaLifter
+               ▼               │
+       ┌──────────────┐ ┌──────┴───────┐
+       │ NVIDIA SASS  │◄┤   AMD RDNA   │
+       │ (Ampere/Hop) │ │  (GFX10/11)  │
+       └──────────────┘ └──────────────┘
+```
 
-Adapters define a `StructuralTraits` configuration object that controls syntax generation:
+* **Control Flow Graph (CFG) Reconstruction:** The parser partitions raw assembly streams into basic blocks by tracking branch targets (`BRA`, `s_cbranch_scc1`), jump tables, and fallthrough edges.
+* **Dominator Tree Analysis:** Computes immediate dominators and dominance frontiers. A back-edge to a dominating block identifies a natural loop (e.g., matrix-multiplication or convolutional accumulation kernels).
+* **Cross-ISA Mapping:** Maps equivalent instruction semantics directly between hardware vendors:
+  * `FFMA` (NVIDIA) $\longleftrightarrow$ `v_fmac_f32` (AMD RDNA)
+  * `LDG.E.F32` (NVIDIA) $\longleftrightarrow$ `global_load_dword` (AMD RDNA)
+  * `IADD3` (NVIDIA) $\longleftrightarrow$ `v_add_u32` (AMD RDNA)
 
-* `module_base`: The base class for layers (e.g., `"flax.nnx.Module"`).
-* `forward_method`: The inference method name (`"forward"` vs `"call"` vs `"__call__"`).
-* `inject_magic_args`: Tuple of arguments to inject into signatures (e.g., `[("rngs", "nnx.Rngs")]`).
-* `lifecycle_strip_methods`: Methods to silently remove (e.g., `.cuda()`, `.detach()`).
+---
 
-### Plugin Traits
+## 🔌 4. Framework Adapters (Traits & Hierarchy)
 
-Adapters define `PluginTraits` to toggle logic blocks used by generic plugins:
+Adapters in `src/ml_switcheroo/frameworks/` expose declarative **Traits** rather than hardcoding conversion rules.
 
-* `has_numpy_compatible_arrays`: Enables `.astype()` casting and tuple-padding logic (JAX/TF/NumPy/MLX).
-* `requires_explicit_rng`: Enables PRNG key threading logic (JAX/Flax).
-* `requires_functional_state`: Enables BatchNorm state unwrapping logic (JAX).
+### Structural Traits (`StructuralTraits`)
+
+Controls high-level syntax and signature generation:
+* `module_base`: Target layer base class (`"flax.nnx.Module"`, `"keras.Layer"`).
+* `forward_method`: Name of execution entrypoint (`"forward"`, `"call"`, `"__call__"`).
+* `inject_magic_args`: Tuple of signature arguments to inject (e.g., `[("rngs", "nnx.Rngs")]`).
+* `lifecycle_strip_methods`: Methods to strip on sight (e.g., `.cuda()`, `.detach()`).
+
+### Plugin Traits (`PluginTraits`)
+
+Controls activation of generic AST transformation plugins:
+* `has_numpy_compatible_arrays`: Enables `.astype()` casting and tuple padding.
+* `requires_explicit_rng`: Activates PRNG key splitting and key threading.
+* `requires_functional_state`: Activates BatchNorm state container unwrapping.
 
 ### Intermediate Representation Adapter (`ir` / `ml_switcheroo_ir`)
 
-The `IrAdapter` integrates the language-agnostic Intermediate Representation as a symmetrical framework citizen:
-
+The `IrAdapter` integrates the language-agnostic Intermediate Representation as a first-class framework citizen:
 * **Source IR (`--source ir`):** Ingests serialized JSON graphs or Python scripts calling `ml_switcheroo_ir`, lifting them into `LogicalGraph` for compilation to any target.
-* **Target IR (`--target ir`):** Compiles computational graphs from any source framework into canonical, deterministic JSON conforming to `ml_switcheroo_ir` schema.
+* **Target IR (`--target ir`):** Compiles computational graphs from any source framework into canonical, deterministic JSON.
 * **Intermediate Layer (`--intermediate ir`):** Orchestrates double-hop verification (`Source -> IR -> Target`) with strict topology and attribute validation.
 
 ---
 
-## 🧠 4. DSL & Plugin System
+## 🧠 5. DSL & Modular Plugin System
 
-The system favors declarative logic in the ODL (Operation Definition Language) over python code, but falls back to
-Python Hooks for complex structural changes.
+The compiler favors declarative logic in ODL definitions over procedural Python, falling back to registered plugins for complex structural mutations.
 
-### Core DSL Logic (In `RewriterPipeline` via Passes)
+### Core Declarative DSL (in ODL Schema)
 
-Common patterns are handled directly by the engine using the ODL schema:
+Common transformations are handled natively by the engine based on YAML directives:
+* **Variadic Argument Packing:** `pack_to_tuple="axes"` converts `permute(x, 0, 1)` $\to$ `transpose(x, axes=(0, 1))`.
+* **Layout Permutations:** `layout_map={"input": "NCHW->NHWC"}` injects dimension permutation calls.
+* **Inline Macros:** `macro_template="{x} * sigmoid({x})"` expands composite ops inline.
+* **Dispatch Rules:** `dispatch_rules` switches target APIs based on argument values at runtime (e.g., `mode="nearest"`).
 
-* **Variadic Packing:** `pack_to_tuple="axes"` converts `permute(x, 0, 1)` $\to$ `transpose(x, axes=(0, 1))`.
-* **Layout Mapping:** `layout_map={"input": "NCHW->NHWC"}` injects permutation calls via `inject_permute_call`.
-* **Macros:** `macro_template="{x} * sigmoid({x})"` expands composite ops inline.
-* **Dispatch Rules:** `dispatch_rules` switch APIs based on argument values at runtime (e.g. `mode="nearest"` uses a
-  different function).
+### Modular AST Plugins (`src/ml_switcheroo/plugins/`)
 
-### Plugin Hooks (In `src/ml_switcheroo/plugins/`)
+Complex multi-node mutations are handled by registered plugin hooks:
 
-Complex architectural mismatches are handled by Python functions registered via `@register_hook`.
-
-* **RNG Threading (`rng_threading`):** Transforms global seeds to explicit JAX keys. Injects `rng, key = split(rng)`
-  preambles.
-* **Context Wrappers (`context_to_function_wrap`):** Converts `torch.no_grad()` to `contextlib.nullcontext()` for JAX.
-* **State Containers (`state_container`):** Converts `register_buffer`/`Parameter` calls into framework-specific object
-  wrappers (e.g., `nnx.BatchStat`, `nnx.Param`).
-* **IO Handlers (`io_handler`):** Maps `torch.save` to `orbax.checkpoint` or `tf.io.write_file` depending on the target
-  adapter's I/O configuration.
-* **Data Loaders (`convert_dataloader`):** Injects a generic Shim class to replace `torch.utils.data.DataLoader`.
+* **Distributed & Parallelism:**
+  * `auto_fsdp_wrapper`: Injects Fully Sharded Data Parallel wrappers.
+  * `sharding`: Emits mesh and partition specs.
+* **State & Lifecycle:**
+  * `rng_threading`: Manages JAX PRNG key splitting and propagation.
+  * `state_container`: Converts buffers to framework containers (`nnx.BatchStat`, `nnx.Param`).
+  * `state_flag_injection`: Injects training/eval mode flags into forward calls.
+  * `device_allocator` & `device_checks`: Normalizes accelerator assignments (`torch.device` $\leftrightarrow$ JAX devices).
+* **Tensor Layout & Packing:**
+  * `attention_packing`: Restructures multi-head attention Q/K/V tensors.
+  * `shape_packing`: Normalizes dynamic shapes and tuple-dimension wrapping.
+  * `einsum`, `gather`, `scatter`, `padding`, `reshape`, `flatten`: Normalizes complex tensor indexing and dimension operations.
+* **Training & Optimization:**
+  * `optimizer_step`: Adapts optimizer update idioms across frameworks.
+  * `schedulers`: Normalizes learning rate decay and warmup schedules.
+  * `loss_wrapper`: Rewrites loss function signatures and reductions.
+  * `checkpoint_keys`: Maps parameter names and state dict keys during weight conversion.
+* **Control Flow & Execution:**
+  * `context_to_function_wrap`: Converts context managers (e.g., `torch.no_grad()`) to target equivalents.
+  * `inplace_unroll`, `loop_unroll`, `static_unroll`: Converts imperative loops to static execution graphs.
+* **Framework-Specific Specializations:**
+  * `mlx_optimizers`, `mlx_extras`: Apple MLX runtime optimizations.
+  * `nnx_to_torch_params`: Bridges Flax NNX state dictionaries with PyTorch parameters.
+  * `jax_decompose`: Decomposes complex composite ops into primitive JAX operations.
+  * `keras_sequential`: Restructures Keras Sequential models into functional calls.

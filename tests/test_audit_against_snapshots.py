@@ -542,11 +542,19 @@ def test_generate_audit_report_and_cli(tmp_path: Path) -> None:
   (snap_dir / "unknown_vunknown.json").write_text("{}")
   (snap_dir / "error_v1.0.0.json").write_text('{"err": 1}')
   (snap_dir / "non_dir").touch()
-  with patch.object(Path, "read_bytes", side_effect=[b"valid", b"", Exception("read fail")]):
+  orig_read_bytes = Path.read_bytes
+
+  def mock_read_bytes(self: Path) -> bytes:
+    if "error" in self.name:
+      raise OSError("read fail")
+    return orig_read_bytes(self)
+
+  with patch.object(Path, "read_bytes", side_effect=mock_read_bytes, autospec=True):
     checksums = scripts.audit_against_snapshots.compute_snapshot_checksums([snap_dir, tmp_path / "nonexistent"])
   assert "torch_v1.0.0.json" in checksums
   assert len(checksums["torch_v1.0.0.json"]) == 64
   assert "empty_v1.0.0.json" not in checksums
+  assert "error_v1.0.0.json" not in checksums
 
   # Test compute_snapshot_checksums default dirs
   default_checksums = scripts.audit_against_snapshots.compute_snapshot_checksums(None)

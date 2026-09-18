@@ -2,21 +2,19 @@ Maintenance
 ===========
 
 ![Coverage Status](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)
+![Doc Coverage: 100%](https://img.shields.io/badge/doc%20coverage-100%25-brightgreen.svg)
 
-**ml-switcheroo** is a data-driven transpiler. Its intelligence relies on a distributed **Knowledge Base** separating
-*Abstract Specifications* (The Hub) from *Framework Implementations* (The Spokes).
+**ml-switcheroo** is a deterministic, specification-driven universal compiler. Its intelligence relies on a distributed **Knowledge Base** separating *Abstract Operation Specifications* (The Hub) from *Framework & Hardware Implementations* (The Spokes).
 
-Maintenance primarily involves synchronizing this knowledge base with the ecosystem of Machine Learning libraries and
-upstream standards.
+Maintenance primarily involves synchronizing this knowledge base with upstream framework releases, hardware instruction sets, and grounded snapshot datasets with zero hallucinated APIs.
 
-This guide covers the full lifecycle: **Ingestion**, **Discovery**, **Mapping**, **Verification**, and **Release**.
+This guide covers the full compiler lifecycle: **Authoring & Ingestion**, **Quarantine Triage**, **Snapshot Auditing**, **Variant Parity**, **Automated Verification & Repair**, and **Documentation**.
 
 ---
 
 ## 🔄 The Maintenance Lifecycle
 
-Data flows from external authoritative sources (Standards Bodies, Library APIs) into our semantic storage tiers, and
-finally into verification reports.
+Data flows from authoritative sources (live libraries, ground-truth framework snapshots, hardware ISA manuals) into discrete ODL definitions, through quarantine triage and signature hydration, and finally into verified catalogs and regression suites.
 
 ```mermaid
 graph TD
@@ -27,201 +25,220 @@ graph TD
     classDef spoke fill:#ffd427,stroke:#f9ab00,stroke-dasharray:5,5,color:#20344b,rx:5px,font-family:'Google Sans Medium';
     classDef action fill:#4285f4,stroke:#20344b,color:#ffffff,rx:5px,font-family:'Google Sans Medium';
 
-    subgraph Sources ["1. Upstream Sources"]
+    subgraph Sources ["1. Ground-Truth Sources"]
         direction TB
-        STD_A("Array API Standard<br/>(Python Consortium)"):::external
-        STD_B("ONNX Operators<br/>(Linux Foundation)"):::external
-        LIBS("Installed Libraries<br/>(Torch, JAX, TF)"):::external
+        SNAPSHOTS("Framework Snapshots<br/>(ml-framework-snapshots)"):::external
+        HARDWARE("Hardware ISAs<br/>(NVIDIA SASS / AMD RDNA)"):::external
+        STANDARDS("Array API & ONNX Specs"):::external
     end
 
-    subgraph Ingestion ["2. Ingestion & Discovery"]
-        IMPORT("import-spec"):::action
-        SCAFFOLD("scaffold / sync"):::action
-        CONSENSUS("sync-standards<br/>(Consensus Engine)"):::action
-        HARVEST("harvest<br/>(Learn from Tests)"):::action
+    subgraph Curation ["2. Authoring & Curation"]
+        SUGGEST("suggest / define / schema"):::action
+        LLM_LOOP("suggest_gen_llm_loop.sh"):::action
+        DRAIN("drain_quarantine.py"):::action
+        HYDRATE("hydrate_odl_signatures.py"):::action
+        PARITY("expand_variant_parity.py"):::action
     end
 
     subgraph Storage ["3. Knowledge Base"]
         direction TB
-        HUB[("<b>The Hub (Specs)</b><br/>semantics/*.json<br/><i>Definitions & Types</i>")]:::hub
-        SPOKE[("<b>The Spokes (Maps)</b><br/>snapshots/*_mappings.json<br/><i>API Links & Plugins</i>")]:::spoke
+        QUARANTINE[("quarantine.yaml<br/><i>Triage Buffer</i>")]:::spoke
+        ODL_YAMLS[("semantics/odl/*.yaml<br/><i>3,290+ Discrete Ops</i>")]:::hub
+        CATALOG[("semantics/odl.json<br/><i>Compiled Hub Catalog</i>")]:::hub
+        ISA_SPECS[("nvidia_sass_isa / rdna_isa<br/><i>Hardware Schemas</i>")]:::spoke
     end
 
-    subgraph Verify ["4. Verification"]
-        CI("CI Fuzzer &<br/>Gen-Tests"):::action
-        LOCK("Verified Lockfile<br/>README Matrix"):::spoke
+    subgraph Verify ["4. Audit & Verification"]
+        AUDIT("audit_against_snapshots.py"):::action
+        CI("CI Fuzzer & SemanticsBisector<br/>(ml_switcheroo ci --repair)"):::action
+        TESTS("gen-tests<br/>(Physical Test Generation)"):::action
     end
 
-    STD_A --> IMPORT
-    STD_B --> IMPORT
-    LIBS --> SCAFFOLD
-    LIBS --> CONSENSUS
+    SNAPSHOTS --> DRAIN
+    SNAPSHOTS --> HYDRATE
+    SNAPSHOTS --> PARITY
+    HARDWARE --> PARITY
+    STANDARDS --> SUGGEST
 
-    IMPORT --> HUB
-    CONSENSUS --> HUB
-    HARVEST --> SPOKE
-    SCAFFOLD --> SPOKE
+    SUGGEST --> ODL_YAMLS
+    LLM_LOOP --> ODL_YAMLS
+    QUARANTINE --> DRAIN
+    DRAIN --> ODL_YAMLS
+    ODL_YAMLS --> CATALOG
 
-    HUB --> CI
-    SPOKE --> CI
-    CI --> LOCK
+    CATALOG --> AUDIT
+    SNAPSHOTS --> AUDIT
+    CATALOG --> CI
+    CI --> TESTS
 ```
 
 ---
 
-## ⚡ Quick Start: The Bootstrap Script
+## 🛠️ Phase 1: Operation Authoring & Compilation (The Hub)
 
-The entire Knowledge Base can be hydrated from scratch using the bootstrap utility. This script sequentially runs
-ingestion, consensus discovery, scaffolding, ghost snapshotting, and synchronization for all supported frameworks.
+Operations are authored as atomic YAML files conforming to the **Operation Definition Language (ODL)** schema.
 
-**Run this when:**
+### 1. Exporting Schema
 
-* You have added a new framework adapter.
-* You want to update mappings for newer versions of PyTorch/JAX/TF.
-* You want to reset the semantic definitions to their upstream defaults.
+Export the official JSON Schema to validate YAML files during authoring or configure LLM generation constraints:
 
 ```bash
-# Full hydration cycle (Warning: Overwrites existing JSONs)
-./scripts/bootstrap.sh
+ml_switcheroo schema > src/ml_switcheroo/semantics/schema.json
+```
+
+### 2. Suggesting Unmapped APIs
+
+Generate structured prompts populated with introspection metadata for unmapped functions:
+
+```bash
+# Generate prompt for a single API
+ml_switcheroo suggest 'torch.nn.functional.scaled_dot_product_attention' > prompt.md
+
+# Batch-suggest entire namespaces to an output directory
+ml_switcheroo suggest 'torch.nn.functional' --out-dir ./suggestions/ --batch-size 20
+```
+
+### 3. Automated LLM Generation Loop
+
+Use `scripts/suggest_gen_llm_loop.sh` to run iterative suggestion and definition loops across unmapped framework modules:
+
+```bash
+./scripts/suggest_gen_llm_loop.sh
+```
+
+### 4. Injecting & Compiling Definitions
+
+Inject the new definition into `src/ml_switcheroo/semantics/odl/` and compile the unified catalog:
+
+```bash
+# 1. Inject a validated ODL definition
+ml_switcheroo define new_op.yaml
+
+# 2. Compile discrete YAML files into odl.json and validate roundtrips
+python3 scripts/compile_odl_catalog.py
+
+# 3. Verify odl.json schema validity
+python3 scripts/validate_odl_json.py
 ```
 
 ---
 
-## 🛠️ Phase 1: Ingestion (The Hub)
+## 🧪 Phase 2: Quarantine Triage & Signature Hydration
 
-We maintain three tiers of "Abstract Standards" in `src/ml_switcheroo/semantics/` defining **WHAT** an operation is.
+To prevent broken or ambiguous definitions from corrupting compilation, unverified operations reside in `src/ml_switcheroo/semantics/quarantine.yaml`.
 
-### Tier A: Math (Array API)
+### Draining Quarantine
 
-Derived from the Python Data API Consortium.
+`scripts/drain_quarantine.py` audits quarantined operators against ground-truth framework snapshots, extracting convertible operators into discrete ODL YAML files and purging non-convertible artifacts:
 
 ```bash
-# 1. Clone the standard stubs
-git clone -b 2024.12 --depth=1 https://github.com/data-apis/array-api _tmp/array-api
-
-# 2. Import definitions to k_array_api.json
-ml_switcheroo import-spec ./_tmp/array-api/src/array_api_stubs/_2024_12
+python3 scripts/drain_quarantine.py
 ```
 
-### Tier B: Neural (ONNX)
+### Hydrating Signatures
 
-Derived from the Open Neural Network Exchange (ONNX) operator set.
+`scripts/hydrate_odl_signatures.py` inspects ground-truth snapshots to extract parameter kinds, positional/keyword boundaries, default values, and variadics, hydrating the canonical `std_args` across all ODL definitions:
 
 ```bash
-# 1. Fetch Operators docs
-git clone --depth=1 -b v1.20.0 https://github.com/onnx/onnx _tmp/onnx
-
-# 2. Parse Markdown to k_neural_net.json
-ml_switcheroo import-spec ./_tmp/onnx/docs/Operators.md
+python3 scripts/hydrate_odl_signatures.py
 ```
 
-### Discovery (Consensus Engine)
+### Expanding Variant Parity
 
-For operations not covered by official bodies (e.g., Optimizers, proprietary Layers), we use the **Consensus Engine**.
-It scans all installed frameworks, clusters compatible API signatures (e.g., `Torch.Adam` vs `Flax.Adam`), and proposes
-a unified standard.
+`scripts/expand_variant_parity.py` audits operation definitions across the 6 core targets (PyTorch, JAX, MLX, Keras 3, AMD RDNA, NVIDIA SASS) and automatically fills missing variant edges using snapshot symbols and canonical ISA ALU macros:
 
 ```bash
-# Scan installed libs and generate k_discovered.json
-ml_switcheroo sync-standards --categories layer activation loss optimizer
+python3 scripts/expand_variant_parity.py
 ```
 
 ---
 
-## 🔗 Phase 2: Mapping (The Spokes)
+## 🛡️ Phase 3: Ground-Truth Snapshot Auditing
 
-Once the Hub (Specs) is populated, we link specific frameworks to it defining **HOW** operations are implemented. These
-mappings live in `../ml-compiler-snapshots/`.
+`ml-switcheroo` enforces a strict **Zero-Hallucination** policy: no API or argument mapping may exist in the Knowledge Base unless verified against live framework snapshots.
 
-### Mapping a Framework (`sync`)
-
-The `sync` command introspects a library (e.g., `torch`) and matches its API surface against the known Spec.
+### Auditing Framework Mappings
 
 ```bash
-# Link PyTorch implementation to the Standards
-ml_switcheroo sync torch
+# Audit all ODL definitions and adapters against extracted snapshots
+python3 scripts/audit_against_snapshots.py
 
-# Link JAX implementation
-ml_switcheroo sync jax
+# Generate markdown and JSON audit reports
+python3 scripts/audit_against_snapshots.py --report-md audit_report.md --report-json audit_report.json
 ```
 
-### Heuristic Scaffolding (`scaffold`)
+### Auditing IR Dialects (MLIR & StableHLO)
 
-For frameworks with non-standard naming conventions (e.g., `tensorflow`), use the `scaffold` command. It utilizes regex
-patterns defined in the Framework Adapter's `discovery_heuristics` property to fuzzy-match APIs.
+Verify that intermediate representation emitters adhere strictly to upstream dialect specifications:
 
 ```bash
-# Scan and populate mappings via regex heuristics
-ml_switcheroo scaffold --frameworks tensorflow mlx
+# Audit MLIR dialect coverage
+python3 scripts/audit_mlir_spec.py
+
+# Audit StableHLO dialect coverage
+python3 scripts/audit_stablehlo_spec.py
 ```
-
-### Semantic Harvesting (`harvest`)
-
-The most robust way to maintain mappings is to "Learn from Humans." If you write a manual test case fixing a translation
-error, the Harvester can extract the rule back into the JSONs.
-
-1. **Write/Fix a test** in `tests/examples/`:
-   ```python
-   def test_custom_add():
-     # You manually fixed arguments: alpha -> scale
-     jax.numpy.add(x, y, scale=0.5)
-   ```
-2. **Run the extractor**:
-   ```bash
-   ml_switcheroo harvest tests/examples/test_custom_add.py --target jax
-   ```
 
 ---
 
-## 👻 Phase 3: Ghost Mode Support
+## ✅ Phase 4: Verification & Automated Repair (CI Loop)
 
-ml-switcheroo can run in browser environments (WebAssembly) where heavy libraries like PyTorch cannot be installed. To
-support this, we must capture raw API signatures.
+We validate the mathematical equivalence of conversions across live frameworks using hypothesis-driven property tests.
 
-### Capturing Snapshots
+### Running Verification & Auto-Repair
 
-This command dumps the raw introspection data (signatures, docstrings, class hierarchies) of installed libraries into
-JSON files. This data allows the `GhostInspector` to simulate the presence of the library during transpilation.
+When numerical tolerances differ across backends (e.g., float32 precision differences between PyTorch and JAX on certain GPU/CPU kernels), the CI tool can automatically bisect and relax tolerances:
 
 ```bash
-# Generates files like snapshots/torch_v2.1.0.json
-ml_switcheroo snapshot --out-dir ../ml-compiler-snapshots
-```
+# 1. Run validation suite and output report
+ml_switcheroo ci --json-report verified_ops.json
 
-*Note: `bootstrap.sh` runs this automatically.*
-
----
-
-## ✅ Phase 4: Verification (CI Loop)
-
-We validate the mathematical correctness of mappings using a robotic fuzzer. It generates random inputs based on Type
-Hints in the Spec, executes the operation in both Source and Target frameworks, and asserts equivalence.
-
-### Running the Fuzzer
-
-```bash
-# 1. Install all backends
-pip install ".[test]"
-pip install torch jax flax tensorflow mlx numpy
-
-# 2. Run Verification Suite
-ml_switcheroo ci
+# 2. Run CI with automated tolerance bisection (SemanticsBisector) and update README
+ml_switcheroo ci --repair --update-readme
 ```
 
 ### Physical Test Generation
 
-To ensure regression testing without running the full fuzzer every time, generate physical Python test files:
+Generate physical Python test files to freeze verification suites for CI runners without requiring dynamic test harness generation:
 
 ```bash
 ml_switcheroo gen-tests --out tests/generated/test_tier_a_math.py
 ```
 
-### Updating Compatibility Matrix
+### Verified Ingestion Pipeline
 
-If the CI pass changes the support status of any operation, update the `README.md` table:
+Verify that an entire model script can be ingested, analyzed, and lowered through the compiler without errors:
 
 ```bash
-ml_switcheroo ci --update-readme
+ml_switcheroo verified-pipeline ./models/resnet.py
+```
+
+---
+
+## 🔧 Phase 5: Scaffolding, Harvesting & Documentation
+
+### Scaffolding New Frameworks
+
+Scaffold initial mapping templates for new or emerging libraries based on exported namespace introspection:
+
+```bash
+ml_switcheroo scaffold tinygrad
+```
+
+### Semantic Harvesting
+
+Extract verified argument pivot rules and mappings directly from manual test cases:
+
+```bash
+ml_switcheroo harvest tests/test_custom_add.py
+```
+
+### Generating Migration Guides
+
+Generate high-level Markdown documentation comparing API structures between frameworks:
+
+```bash
+ml_switcheroo gen-docs --source torch --target jax --out ./MIGRATION_GUIDE.md
 ```
 
 ---
@@ -236,24 +253,22 @@ The demo includes a "Time-Travel" stepping interface implemented via WASM. This 
 
 ### Building Docs & Wheel
 
-The documentation build script automatically packages the current source into a `.whl` and injects it into the static
-site assets.
+The documentation build script automatically packages the current source into a `.whl` and injects it into the static site assets:
 
 ```bash
-python scripts/build_docs.py
+python3 scripts/build_docs.py
 ```
 
 ---
 
-## 🗃️ Glossary of Artifacts
+## 🗃️ Glossary of Knowledge Base Artifacts
 
-The Knowledge Base is composed of specific JSON files with distinct roles.
-
-| Artifact Path | Classification | Role & Purpose | Maintenance Strategy |
+| Artifact Path | Classification | Role & Purpose | Maintenance Tool |
 | :--- | :--- | :--- | :--- |
-| `semantics/k_array_api.json` | **Hub (Spec)** | **Tier A (Math):** Basic array operations (abs, sum) derived from the Python Data API Consortium. | **Import** via `import-spec`. |
-| `semantics/k_neural_net.json` | **Hub (Spec)** | **Tier B (Neural):** stateful layers (Conv2d, LSTM) derived from ONNX Operators. | **Import** via `import-spec`. |
-| `semantics/k_framework_extras.json` | **Hub (Spec)** | **Tier C (Extras):** Utilities, IO, Devices. Often manually curated or scaffolded. | **Harvest** or **Wizard**. |
-| `semantics/k_discovered.json` | **Hub (Spec)** | **Consensus:** Ops discovered by overlapping API surfaces (Optimizers/Activations). | **Generate** via `sync-standards`. |
-| `snapshots/{fw}_v*_map.json` | **Spoke (Overlay)** | **Mapping Overlay:** Defines how a specific framework implements the specs. Contains API paths and Plugin hooks. | **Sync**, **Scaffold**, or **Harvest**. |
-| `snapshots/{fw}_v*.json` | **Ghost Snapshot** | **Raw API Dump:** Serialized signatures of the library. Used by `GhostInspector` in WASM. | **Capture** via `snapshot`. |
+| `src/ml_switcheroo/semantics/odl/*.yaml` | **Hub (ODL)** | Discrete, human-readable YAML specifications for 3,290+ abstract operations. | `ml_switcheroo define`, `drain_quarantine.py` |
+| `src/ml_switcheroo/semantics/odl.json` | **Hub (Catalog)** | Compiled, deterministic JSON database of all operations used at runtime. | `scripts/compile_odl_catalog.py` |
+| `src/ml_switcheroo/semantics/quarantine.yaml` | **Triage Buffer** | Staging ground for non-standard, ambiguous, or unverified operations. | `scripts/drain_quarantine.py` |
+| `src/ml_switcheroo/semantics/nvidia_sass_isa.yaml` | **Hardware Spec** | Declarative instruction set architecture schema for NVIDIA SASS (Ampere/Hopper). | `scripts/expand_variant_parity.py` |
+| `src/ml_switcheroo/semantics/rdna_isa.yaml` | **Hardware Spec** | Declarative instruction set architecture schema for AMD RDNA (GFX10/GFX11). | `scripts/expand_variant_parity.py` |
+| `src/ml_switcheroo/semantics/schema.yaml` | **Schema** | Formal Pydantic/JSON schema defining valid ODL syntax, constraints, and traits. | `ml_switcheroo schema` |
+| `snapshots/{fw}_v*.json` | **Ghost Snapshot** | Serialized API symbols, arguments, and type hierarchies from ground-truth environments. | `scripts/audit_against_snapshots.py` |

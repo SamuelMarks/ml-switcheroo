@@ -830,7 +830,7 @@ def compute_snapshot_checksums(snapshot_dirs: Optional[List[Path]] = None) -> Di
   for d in dirs_to_search:
     if not d.exists():
       continue
-    candidates = list(d.glob("*_v*.json")) + list(d.glob("*_exhaustive.json")) + list(d.glob("*_isa.json"))
+    candidates = sorted(set(list(d.glob("*_v*.json")) + list(d.glob("*_exhaustive.json")) + list(d.glob("*_isa.json"))))
     for file_path in candidates:
       if file_path.name.endswith("_map.json") or "_vunknown" in file_path.name:
         continue
