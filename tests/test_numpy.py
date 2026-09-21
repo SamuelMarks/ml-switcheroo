@@ -2,6 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
+import numpy as np
+
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 
@@ -23,17 +25,6 @@ def test_numpy_adapter_properties() -> None:
 
   with patch("ml_switcheroo.frameworks.numpy.load_definitions", return_value={"test": MagicMock()}):
     pass
-
-  orig_import = __import__
-
-  def mock_import_no_np(name, *args, **kwargs):
-    """Docstring."""
-    if name == "numpy":
-      raise ImportError("mock no numpy")
-    return orig_import(name, *args, **kwargs)
-
-  with patch("builtins.__import__", side_effect=mock_import_no_np):
-    adapter.convert([1, 2])
 
   # Test numpy array conversion with exception fallback
   mock_np = MagicMock()
@@ -120,20 +111,16 @@ def test_numpy_convert_branches() -> None:
   class ArrayDummy:
     """Docstring."""
 
-    def __array__(self, dtype: object = None) -> object:
+    def __array__(self, dtype: object = None, copy: object = None) -> object:
       """Docstring."""
-      import numpy as np
-
       return np.array([1], dtype=dtype)
-
-  import numpy as np
 
   assert np.array_equal(adapter.convert(ArrayDummy()), np.array([1]))
 
   class ArrayFail:
     """Docstring."""
 
-    def __array__(self) -> None:
+    def __array__(self, dtype: object = None, copy: object = None) -> None:
       """Docstring."""
       raise Exception("fail")
 

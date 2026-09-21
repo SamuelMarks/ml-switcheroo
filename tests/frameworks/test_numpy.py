@@ -167,10 +167,12 @@ def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
   """Docstring."""
   import builtins
   import importlib
+  import sys
   from unittest.mock import patch
 
   import ml_switcheroo.frameworks.numpy as np_fw
 
+  numpy_modules = {k: v for k, v in sys.modules.items() if k == "numpy" or k.startswith("numpy.")}
   orig_import = builtins.__import__
 
   def mock_import(name: str, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
@@ -179,11 +181,14 @@ def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
       raise ImportError("no numpy")
     return orig_import(name, *args, **kwargs)
 
-  with patch("builtins.__import__", side_effect=mock_import):
+  try:
+    with patch("builtins.__import__", side_effect=mock_import):
+      importlib.reload(np_fw)
+      assert getattr(np_fw, "np", None) is None
+  finally:
+    sys.modules.update(numpy_modules)
     importlib.reload(np_fw)
-    assert getattr(np_fw, "np", None) is None
-
-  importlib.reload(np_fw)
+    assert getattr(np_fw, "np", None) is not None
 
 
 def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:

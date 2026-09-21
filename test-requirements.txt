@@ -3,3 +3,5 @@ pytest
 pytest-xdist
 pytest-cov
 interrogate
+mypy
+types-PyYAML
