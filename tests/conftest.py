@@ -100,16 +100,18 @@ def isolate_semantics_manager() -> Generator[None, None, None]:
 def isolate_hook_registry() -> Generator[None, None, None]:
   """Helper to isolate hook registry."""
   import ml_switcheroo.core.hooks as hooks_module
+  import ml_switcheroo.core.hooks_registry as hr_module
   from ml_switcheroo.core.hooks import _HOOK_METADATA, _HOOKS
 
   original_hooks = _HOOKS.copy()
   original_metadata = _HOOK_METADATA.copy()
-  original_loaded = getattr(hooks_module, "_PLUGINS_LOADED", False)
+  original_loaded = getattr(hr_module, "_PLUGINS_LOADED", False)
   yield
   _HOOKS.clear()
   _HOOKS.update(original_hooks)
   _HOOK_METADATA.clear()
   _HOOK_METADATA.update(original_metadata)
+  hr_module._PLUGINS_LOADED = original_loaded
   hooks_module._PLUGINS_LOADED = original_loaded
 
 

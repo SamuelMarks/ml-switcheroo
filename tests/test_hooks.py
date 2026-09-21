@@ -225,3 +225,17 @@ def test_hook_context_variant_lookup_missing() -> None:
   ctx: HookContext = HookContext(mgr, config)
   ctx.current_op_id = "MissingOp"
   assert ctx.current_variant is None
+
+
+def test_hooks_module_plugins_loaded_sync() -> None:
+  """Verifies that hooks._PLUGINS_LOADED synchronizes with hooks_registry."""
+  import ml_switcheroo.core.hooks as h
+  import ml_switcheroo.core.hooks_registry as hr
+
+  h._PLUGINS_LOADED = True
+  assert hr._PLUGINS_LOADED is True
+  assert h._PLUGINS_LOADED is True
+
+  h._PLUGINS_LOADED = False
+  assert hr._PLUGINS_LOADED is False
+  assert h._PLUGINS_LOADED is False

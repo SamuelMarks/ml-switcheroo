@@ -268,6 +268,10 @@ class HookContext:
     return cleaned_args
 
 
+import sys
+import types
+
+import ml_switcheroo.core.hooks_registry as _hr
 from ml_switcheroo.core.hooks_registry import (  # noqa: E402
   register_hook,
   get_hook,
@@ -281,6 +285,32 @@ from ml_switcheroo.core.hooks_registry import (  # noqa: E402
 HookFunction = Callable[..., cst.CSTNode]
 
 _PLUGINS_LOADED: bool = False
+
+
+class _HooksModule(types.ModuleType):
+  """Dynamic module type ensuring synchronization with hooks_registry."""
+
+  @property
+  def _PLUGINS_LOADED(self) -> bool:
+    """Indicate whether plugins have been loaded in the hook registry.
+
+    Returns:
+        bool: True if plugins have been loaded, False otherwise.
+    """
+    return _hr._PLUGINS_LOADED
+
+  @_PLUGINS_LOADED.setter
+  def _PLUGINS_LOADED(self, value: bool) -> None:
+    """Set the plugin loading state in the hook registry.
+
+    Args:
+        value: The new plugin loaded state.
+    """
+    _hr._PLUGINS_LOADED = value
+
+
+sys.modules[__name__].__class__ = _HooksModule
+
 __all__ = [
   "HookContext",
   "AutoWireSpec",
@@ -291,4 +321,5 @@ __all__ = [
   "load_plugins",
   "_HOOKS",
   "_HOOK_METADATA",
+  "_PLUGINS_LOADED",
 ]
