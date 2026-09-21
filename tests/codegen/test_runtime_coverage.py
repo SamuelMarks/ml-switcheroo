@@ -107,6 +107,18 @@ def test_ensure_determinism() -> None:
     sys.modules["mlx"].core.random.seed.side_effect = Exception("err")  # type: ignore
     func()
 
+  # Test when torch and tensorflow are absent
+  with mock.patch.dict("sys.modules", {}):
+    if "torch" in sys.modules:
+      del sys.modules["torch"]
+    if "tensorflow" in sys.modules:
+      del sys.modules["tensorflow"]
+    if "mlx.core" in sys.modules:
+      del sys.modules["mlx.core"]
+    if "mlx" in sys.modules:
+      del sys.modules["mlx"]
+    func()
+
 
 def test_verify_results_more_cases() -> None:
   """Docstring."""

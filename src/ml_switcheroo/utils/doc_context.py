@@ -91,7 +91,7 @@ class DocContextBuilder:
         type_hint = arg.get("type")
         default_val = arg.get("default")
 
-      if name.startswith("__") or name == "__doc__":
+      if name.startswith("__"):
         continue
 
       # Construct string

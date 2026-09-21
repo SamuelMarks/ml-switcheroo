@@ -12,6 +12,8 @@ Refactor:
 """
 
 from __future__ import annotations
+import sys
+import types
 from typing import Callable, Dict, Optional, Type, TypeVar, List, Union, TYPE_CHECKING
 from pydantic import BaseModel, Field, ConfigDict
 import libcst as cst
@@ -268,10 +270,7 @@ class HookContext:
     return cleaned_args
 
 
-import sys
-import types
-
-import ml_switcheroo.core.hooks_registry as _hr
+import ml_switcheroo.core.hooks_registry as _hr  # noqa: E402
 from ml_switcheroo.core.hooks_registry import (  # noqa: E402
   register_hook,
   get_hook,

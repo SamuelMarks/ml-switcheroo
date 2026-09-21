@@ -773,8 +773,8 @@ def test_audit_frameworks_ir_and_grounding_exceptions() -> None:
   mock_ge_3 = MagicMock()
   mock_ge_3._discover_target_files.return_value = True
   mock_ge_3.has_symbol.side_effect = lambda tgt, sym: sym == "torch.found_in_ge"
-  mock_ge_3.suggest_closest_symbol.side_effect = (
-    lambda tgt, sym: "torch.suggested_api" if sym == "torch.needs_suggestion" else None
+  mock_ge_3.suggest_closest_symbol.side_effect = lambda tgt, sym: (
+    "torch.suggested_api" if sym == "torch.needs_suggestion" else None
   )
 
   snapshots: dict[str, dict[str, Any]] = {
