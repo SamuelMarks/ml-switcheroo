@@ -206,7 +206,7 @@ Used for hardware assembly lowering/lifting, C++ generation, WebAssembly Text ou
    * **`ShardingInferencePass`:** Analyzes unannotated computational graphs and injects `LogicalMesh` and `PartitionSpec` annotations using column-parallel (`q_proj`, `k_proj`, `v_proj`, `gate_proj`, `up_proj`), row-parallel (`o_proj`, `down_proj`), and data-parallel heuristics.
    * **`QKVFusionPass` / `QKVDefusionPass`:** Detects and fuses separate Q, K, V projection layers into a unified multi-head projection (or unpacks them).
    * **`SwiGLUFusionPass` / `SwiGLUDefusionPass`:** Detects separate `gate_proj` and `up_proj` pairs in LLM feed-forward layers and fuses them into a single `SwiGLU` operator.
-   * **`VisionPatchEmbeddingPass`:** Restructures multi-dimensional patch embeddings for multimodal vision models.
+   * **`VisionPatchEmbeddingFusionPass` / `VisionPatchEmbeddingDefusionPass`:** Restructures and lowers multi-dimensional patch embeddings for multimodal vision models.
    * **`GraphDiffer`:** Performs topological diffing between source and target graphs, producing structured `PatchAction` lists (`DeleteAction`, `ReplaceAction`).
 3. **Compiler Backends:**
    * **Hardware Emitters:** `NvidiaSassBackend` and `RdnaBackend` synthesize macro streams into valid machine instruction code.

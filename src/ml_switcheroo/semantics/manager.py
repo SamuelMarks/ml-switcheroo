@@ -100,10 +100,15 @@ class SemanticsManager:
 
     import importlib.resources
 
-    aliases_json_path = importlib.resources.files("ml_framework_snapshots.snapshots").joinpath("aliases.json")
-    if aliases_json_path.is_file():
-      with aliases_json_path.open("r", encoding="utf-8") as f:
-        alias_map.update(json.load(f))
+    for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
+      try:
+        aliases_json_path = importlib.resources.files(pkg).joinpath("aliases.json")
+        if aliases_json_path.is_file():
+          with aliases_json_path.open("r", encoding="utf-8") as f:
+            alias_map.update(json.load(f))
+          break
+      except Exception:
+        pass
 
     for fw, config in self.framework_configs.items():
       if "alias" in config:

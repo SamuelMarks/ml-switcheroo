@@ -260,7 +260,6 @@ def _build_footer(source_fw: str) -> str:
   return f"""
 --- INSTRUCTIONS ---
 1. Analyze the Target Operations listed above.
-2. Define the variants block mapping the source framework ('flax') and at least one target (e.g., 'jax' or 'numpy'). The goal is all of: PyTorch, MLX, Keras, TensorFlow (if different from Keras), Flax NNX (if different from JAX), and Pax (if different from JAX).
-3. Define the `variants` block mapping the source framework ('{source_fw}') and at least one target (e.g., 'jax' or 'numpy').
-4. Return ONLY the valid YAML block(s), separated by '---' if multiple.
+2. Define the `variants` block mapping the source framework ('{source_fw}') and target frameworks: PyTorch, JAX / Flax NNX, Apple MLX, Keras 3, and TensorFlow.
+3. Return ONLY the valid YAML block(s), conforming strictly to the OperationDef JSON Schema, separated by '---' if multiple.
 """

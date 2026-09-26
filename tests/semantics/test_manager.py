@@ -74,7 +74,9 @@ def test_manager_build_index_aliases_json() -> None:
       """Mock joinpath for file resolution."""
       if path == "aliases.json":
         return mock_path
-      return MagicMock()
+      m = MagicMock()
+      m.is_file.return_value = False
+      return m
 
   with patch("importlib.resources.files", return_value=MockFiles()):
     sm = SemanticsManager()
@@ -88,6 +90,31 @@ def test_manager_build_index_aliases_json() -> None:
     # parts[0] == "my_alias"
     # So "my_alias.sub" -> "my_module.sub"
     assert "my_module.sub" in sm._reverse_index
+
+
+def test_manager_build_index_aliases_exception() -> None:
+  """Test that _build_index handles exception when loading aliases."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from unittest.mock import patch
+
+  with patch("importlib.resources.files", side_effect=Exception("Failed")):
+    sm = SemanticsManager()
+    assert sm is not None
+
+
+def test_manager_empty_impl_and_missing_variant_cache() -> None:
+  """Test empty variant implementation and missing _variant_cache attribute."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  # Line 158: if not impl: continue
+  sm.data = {"OpWithNone": {"variants": {"torch": None, "jax": {}}}}
+  sm._build_index()
+
+  # Line 281: if not hasattr(self, "_variant_cache")
+  del sm._variant_cache
+  res = sm.resolve_variant("OpWithNone", "torch")
+  assert res is None
 
 
 def test_manager_build_index_no_priority_scores() -> None:

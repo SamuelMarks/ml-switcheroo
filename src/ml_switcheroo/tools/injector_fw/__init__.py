@@ -14,6 +14,21 @@ It handles:
 """
 
 from ml_switcheroo.tools.injector_fw.core import FrameworkInjector
+from ml_switcheroo.tools.injector_fw.scipy_grounding import (
+  audit_injected_scipy_fallbacks,
+  extract_scipy_endpoints_from_macro,
+  load_scipy_snapshot,
+  validate_scipy_api,
+  validate_scipy_macro,
+)
 from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
 
-__all__ = ["FrameworkInjector", "convert_to_cst_literal"]
+__all__ = [
+  "FrameworkInjector",
+  "audit_injected_scipy_fallbacks",
+  "convert_to_cst_literal",
+  "extract_scipy_endpoints_from_macro",
+  "load_scipy_snapshot",
+  "validate_scipy_api",
+  "validate_scipy_macro",
+]

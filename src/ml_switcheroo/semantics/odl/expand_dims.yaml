@@ -29,8 +29,8 @@ variants:
   mlx:
     api: mlx.core.expand_dims
     args:
-      a: a
-      axis: axes
+      x: a
+      axis: axis
   keras:
     api: keras.ops.expand_dims
     args:

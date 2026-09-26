@@ -1,16 +1,38 @@
 """Framework Definition Loader.
 
 This module provides utilities to load static operation definitions from JSON files
-located in `ml_framework_snapshots.snapshots`. It utilizes caching to
-ensure efficient access during runtime and discovery.
+located in `ml_ecosystem_snapshots.snapshots` (or legacy `ml_framework_snapshots.snapshots`).
+It utilizes caching to ensure efficient access during runtime and discovery.
 """
 
 import json
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict
+from typing import Any, Dict
 from ml_switcheroo_ir.schema.ghost import StandardMap
 import importlib.resources
+
+
+def _resolve_resource_file(framework: str) -> Any:
+  """Resolve snapshot resource file across ecosystem and legacy packages.
+
+  Args:
+      framework (str): The framework name key.
+
+  Returns:
+      Any: A traversable resource file path for the framework JSON.
+  """
+  for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
+    try:
+      fp = importlib.resources.files(pkg).joinpath(f"{framework}.json")
+      if fp.is_file():
+        return fp
+    except Exception:
+      pass
+  try:
+    return importlib.resources.files("ml_ecosystem_snapshots.snapshots").joinpath(f"{framework}.json")
+  except Exception:
+    return importlib.resources.files("ml_framework_snapshots.snapshots").joinpath(f"{framework}.json")
 
 
 @lru_cache(maxsize=None)
@@ -28,7 +50,10 @@ def load_definitions(framework: str) -> Dict[str, StandardMap]:
       Returns an empty dict if the definition file does not exist.
 
   """
-  file_path = importlib.resources.files("ml_framework_snapshots.snapshots").joinpath(f"{framework}.json")
+  try:
+    file_path = _resolve_resource_file(framework)
+  except Exception:
+    return {}
   if not file_path.is_file():
     return {}
   try:
@@ -59,7 +84,17 @@ def get_definitions_path(framework: str) -> Path:
 
   """
   # Fallback to local path representation for testing/compatibility
+  for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
+    try:
+      fp = importlib.resources.files(pkg).joinpath(f"{framework}.json")
+      if fp.is_file():
+        return Path(str(fp))
+    except Exception:
+      pass
   try:
-    return Path(str(importlib.resources.files("ml_framework_snapshots.snapshots").joinpath(f"{framework}.json")))
+    return Path(str(importlib.resources.files("ml_ecosystem_snapshots.snapshots").joinpath(f"{framework}.json")))
   except Exception:
-    return Path(f"{framework}.json")
+    try:
+      return Path(str(importlib.resources.files("ml_framework_snapshots.snapshots").joinpath(f"{framework}.json")))
+    except Exception:
+      return Path(f"{framework}.json")

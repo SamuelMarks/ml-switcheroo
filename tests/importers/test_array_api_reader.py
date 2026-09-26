@@ -207,3 +207,173 @@ CONST_LAST = 3
   assert res["CONST_NO_DOC"]["description"] == "Constant: CONST_NO_DOC"
   assert res["CONST_INT_EXPR"]["description"] == "Constant: CONST_INT_EXPR"
   assert res["CONST_LAST"]["description"] == "Constant: CONST_LAST"
+
+
+def test_parse_snapshot_valid(tmp_path: Path) -> None:
+  """Tests parsing a valid snapshot file with categories and operations."""
+  snap_data = {
+    "categories": {
+      "elementwise": [
+        {
+          "api_path": "array_api.add",
+          "name": "add",
+          "docstring": "Calculates the sum.",
+          "params": [
+            {"name": "x1", "kind": "POSITIONAL_ONLY", "annotation": "Array"},
+            {"name": "x2", "kind": "POSITIONAL_ONLY", "annotation": "Array"},
+            {"name": "out", "kind": "KEYWORD_ONLY", "annotation": "Optional[Array]"},
+            {"name": "extra", "kind": "VAR_POSITIONAL"},
+          ],
+          "returns_type": "Array",
+        },
+        "skip_non_dict",
+        {"api_path": "array_api._private"},
+      ]
+    },
+    "operations": {
+      "abs": {
+        "api_path": "array_api.abs",
+        "name": "abs",
+        "docstring": "Calculates absolute value.",
+        "params": [
+          {"name": "x", "kind": "POSITIONAL_OR_KEYWORD", "annotation": "Array"},
+          {"name": "", "kind": "POSITIONAL_OR_KEYWORD"},
+          "skip_param",
+        ],
+      }
+    },
+  }
+  import json
+
+  snap_file = tmp_path / "array_api_v2024.12.json"
+  snap_file.write_text(json.dumps(snap_data))
+
+  importer = ArrayApiSpecImporter()
+  res = importer.parse_snapshot(snap_file)
+  assert "add" in res
+  assert res["add"]["posonly_args"] == ["x1", "x2"]
+  assert res["add"]["kwonly_args"] == ["out"]
+  assert res["add"]["std_args"] == [("x1", "Array"), ("x2", "Array"), ("out", "Optional[Array]")]
+
+  assert "abs" in res
+  assert res["abs"]["std_args"] == [("x", "Array")]
+
+
+def test_parse_snapshot_non_container_sections(tmp_path: Path) -> None:
+  """Tests parsing snapshot when categories is not a dict or cat_items is not a list."""
+  import json
+
+  snap_file = tmp_path / "custom.json"
+  snap_file.write_text(
+    json.dumps(
+      {
+        "categories": "not_a_dict",
+        "operations": "not_a_dict",
+      }
+    )
+  )
+  importer = ArrayApiSpecImporter()
+  res = importer.parse_snapshot(snap_file)
+  assert res == {}
+
+  snap_file2 = tmp_path / "custom2.json"
+  snap_file2.write_text(
+    json.dumps(
+      {
+        "categories": {"cat1": "not_a_list"},
+      }
+    )
+  )
+  res2 = importer.parse_snapshot(snap_file2)
+  assert res2 == {}
+
+
+def test_parse_snapshot_errors(tmp_path: Path) -> None:
+  """Tests error handling for missing and invalid snapshot files."""
+  importer = ArrayApiSpecImporter()
+  missing = tmp_path / "missing.json"
+
+  import pytest
+
+  with pytest.raises(FileNotFoundError):
+    importer.parse_snapshot(missing)
+
+  bad_json = tmp_path / "bad.json"
+  bad_json.write_text("invalid json")
+  with pytest.raises(ValueError, match="Corrupt snapshot JSON"):
+    importer.parse_snapshot(bad_json)
+
+  non_dict_json = tmp_path / "array.json"
+  non_dict_json.write_text("[1, 2, 3]")
+  with pytest.raises(ValueError, match="top-level JSON must be an object"):
+    importer.parse_snapshot(non_dict_json)
+
+
+def test_validate_function_signature() -> None:
+  """Tests validation of function signatures against standard constraints."""
+  importer = ArrayApiSpecImporter()
+  import pytest
+
+  # Valid
+  assert importer.validate_function_signature("foo", {"std_args": [("x", "int"), ("y", "float")]})
+
+  # Invalid op_name
+  with pytest.raises(ValueError, match="Invalid operation name"):
+    importer.validate_function_signature("", {"std_args": []})
+
+  with pytest.raises(ValueError, match="Invalid operation name"):
+    importer.validate_function_signature(123, {"std_args": []})  # type: ignore
+
+  # Non-list std_args
+  with pytest.raises(ValueError, match="std_args for bar must be a list"):
+    importer.validate_function_signature("bar", {"std_args": "not a list"})
+
+  # Malformed item in std_args
+  with pytest.raises(ValueError, match="Malformed argument spec in baz"):
+    importer.validate_function_signature("baz", {"std_args": ["not_a_tuple"]})
+
+  # Invalid identifier
+  with pytest.raises(ValueError, match="Invalid parameter name '123bad' in qux"):
+    importer.validate_function_signature("qux", {"std_args": [("123bad", "int")]})
+
+
+def test_sync_with_snapshot_and_golden(tmp_path: Path) -> None:
+  """Tests sync_with_snapshot and golden regression against actual snapshot."""
+  from ml_switcheroo.semantics.paths import resolve_snapshots_dir
+
+  snap_path = resolve_snapshots_dir() / "array_api_v2024.12.json"
+  importer = ArrayApiSpecImporter()
+
+  if snap_path.exists():
+    res = importer.sync_with_snapshot(snap_path)
+    assert len(res) >= 100
+    # Check core Array API canonical operations
+    assert "add" in res
+    assert "abs" in res
+    assert "matmul" in res
+    assert "sum" in res
+    assert "concat" in res
+
+    # Validate add signature: x1, x2
+    add_args = [p[0] for p in res["add"]["std_args"]]
+    assert "x1" in add_args and "x2" in add_args
+  else:
+    # Fallback to test sync_with_snapshot forwarding to parse_snapshot
+    import json
+
+    dummy = tmp_path / "dummy.json"
+    dummy.write_text(json.dumps({"categories": {"ops": []}}))
+    assert importer.sync_with_snapshot(dummy) == {}
+
+
+def test_parse_snapshot_default_path(tmp_path: Path) -> None:
+  """Tests parse_snapshot using default path resolution."""
+  import json
+
+  snap_file = tmp_path / "array_api_v2024.12.json"
+  snap_file.write_text(json.dumps({"categories": {"array": []}}))
+  importer = ArrayApiSpecImporter()
+
+  with patch("ml_switcheroo.importers.array_api_reader.resolve_snapshots_dir", return_value=tmp_path):
+    res = importer.parse_snapshot()
+    assert res == {}

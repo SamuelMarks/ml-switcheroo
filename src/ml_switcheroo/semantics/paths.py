@@ -4,6 +4,7 @@ Handles locating the 'semantics/' and 'snapshots/' directories
 within the package or source tree.
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -47,20 +48,60 @@ def resolve_semantics_dir() -> Path:
 def resolve_snapshots_dir() -> Path:
   """Locate the directory containing framework snapshots and mapping overlays.
 
+  Prioritizes the ecosystem snapshot paths and user environment configurations
+  before falling back to legacy repositories.
+
+  Priority Order:
+      1. `$ML_ECOSYSTEM_SNAPSHOTS_DIR` environment variable.
+      2. Sibling repository `../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots/`
+         or `../ml-ecosystem-snapshots/src/ml_framework_snapshots/snapshots/`.
+      3. User cache directory `~/.cache/ml_ecosystem_snapshots/`.
+      4. Legacy `$ML_FRAMEWORK_SNAPSHOTS_DIR` environment variable.
+      5. Legacy sibling repositories `../ml-compiler-snapshots` or `../ml-framework-snapshots`.
+      6. Fallback candidate path.
+
   Returns:
-      Path: The absolute path to the 'snapshots' directory.
+      Path: The absolute path to the resolved 'snapshots' directory.
 
   """
-  candidate = resolve_semantics_dir().parent.parent.parent.parent / "ml-compiler-snapshots"
+  # 1. Check $ML_ECOSYSTEM_SNAPSHOTS_DIR environment variable
+  env_eco = os.environ.get("ML_ECOSYSTEM_SNAPSHOTS_DIR")
+  if env_eco:
+    eco_path = Path(env_eco)
+    if eco_path.exists():
+      return eco_path
+
+  # 2. Check sibling ml-ecosystem-snapshots repository
+  repos_root = resolve_semantics_dir().parent.parent.parent.parent
+  eco_snap = repos_root / "ml-ecosystem-snapshots" / "src" / "ml_ecosystem_snapshots" / "snapshots"
+  if eco_snap.exists():
+    return eco_snap
+
+  eco_fw_snap = repos_root / "ml-ecosystem-snapshots" / "src" / "ml_framework_snapshots" / "snapshots"
+  if eco_fw_snap.exists():
+    return eco_fw_snap
+
+  # 3. Check user cache ~/.cache/ml_ecosystem_snapshots/
+  cache_snap = Path.home() / ".cache" / "ml_ecosystem_snapshots" / "snapshots"
+  if cache_snap.exists():
+    return cache_snap
+  cache_dir = Path.home() / ".cache" / "ml_ecosystem_snapshots"
+  if cache_dir.exists():
+    return cache_dir
+
+  # 4. Check legacy $ML_FRAMEWORK_SNAPSHOTS_DIR environment variable
+  env_fw = os.environ.get("ML_FRAMEWORK_SNAPSHOTS_DIR")
+  if env_fw:
+    fw_path = Path(env_fw)
+    if fw_path.exists():
+      return fw_path
+
+  # 5. Check legacy sibling repositories
+  candidate = repos_root / "ml-compiler-snapshots"
   if candidate.exists():
     return candidate
-  framework_candidate = (
-    resolve_semantics_dir().parent.parent.parent.parent
-    / "ml-framework-snapshots"
-    / "src"
-    / "ml_framework_snapshots"
-    / "snapshots"
-  )
+  framework_candidate = repos_root / "ml-framework-snapshots" / "src" / "ml_framework_snapshots" / "snapshots"
   if framework_candidate.exists():
     return framework_candidate
+
   return candidate

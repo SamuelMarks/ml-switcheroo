@@ -120,8 +120,22 @@ def test_transformer() -> None:
 
 def test_cst_no_native_extensions() -> None:
   """Ensure no native parsing extensions are mistakenly imported in cst."""
+  import os
+  import subprocess
   import sys
+  from pathlib import Path
 
-  for module_name in sys.modules:
-    assert not module_name.startswith("llvmlite"), "Native extension llvmlite found"
-    assert not module_name.startswith("mlir.ir"), "Native extension mlir.ir found"
+  repo_root = Path(__file__).resolve().parent.parent.parent.parent
+  src_dir = str(repo_root / "src")
+  env = dict(os.environ)
+  env["PYTHONPATH"] = f"{src_dir}{os.pathsep}{env.get('PYTHONPATH', '')}"
+
+  cmd = [
+    sys.executable,
+    "-c",
+    "import ml_switcheroo.core.cst.base, sys; "
+    "assert not any(m.startswith('llvmlite') for m in sys.modules), 'Native extension llvmlite found'; "
+    "assert not any(m.startswith('mlir.ir') for m in sys.modules), 'Native extension mlir.ir found'",
+  ]
+  res = subprocess.run(cmd, env=env, capture_output=True, text=True)
+  assert res.returncode == 0, f"Native extension check failed: {res.stderr}"

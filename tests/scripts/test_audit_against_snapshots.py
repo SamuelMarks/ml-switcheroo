@@ -440,3 +440,238 @@ def test_audit_frameworks_macro_and_unknown_framework() -> None:
   snapshots: Dict[str, Dict[str, Any]] = {"unknown_fw": {}, "torch": {}, "jax": {}, "mlx": {}}
   errors = audit_frameworks(manager, snapshots)
   assert errors == []
+
+
+def test_import_grounding_engine_fallback() -> None:
+  """Test _resolve_grounding_engine across fallback chains."""
+  import importlib
+  from scripts.audit_against_snapshots import _resolve_grounding_engine
+
+  orig_import = importlib.import_module
+  mock_cls = MagicMock()
+  mock_mod = MagicMock()
+  mock_mod.GroundingEngine = mock_cls
+
+  # 1. Success on first module
+  def mock_import_1(name: str, *args: Any, **kwargs: Any) -> Any:
+    if "grounding.engine" in name:
+      return mock_mod
+    return orig_import(name, *args, **kwargs)
+
+  with patch("importlib.import_module", side_effect=mock_import_1):
+    assert _resolve_grounding_engine() == mock_cls
+
+  # 2. First raises ImportError, second succeeds
+  call_count = 0
+
+  def mock_import_2(name: str, *args: Any, **kwargs: Any) -> Any:
+    nonlocal call_count
+    if "grounding.engine" in name:
+      call_count += 1
+      if call_count == 1:
+        raise ImportError("No mod1")
+      return mock_mod
+    return orig_import(name, *args, **kwargs)
+
+  with patch("importlib.import_module", side_effect=mock_import_2):
+    assert _resolve_grounding_engine() == mock_cls
+
+  # 3. Both in installed loop fail, sibling path exists and parent loop succeeds
+  call_count = 0
+
+  def mock_import_3(name: str, *args: Any, **kwargs: Any) -> Any:
+    nonlocal call_count
+    if "grounding.engine" in name:
+      call_count += 1
+      if call_count <= 2:
+        raise ImportError("No installed mod")
+      return mock_mod
+    return orig_import(name, *args, **kwargs)
+
+  with patch("importlib.import_module", side_effect=mock_import_3):
+    with patch("pathlib.Path.exists", return_value=True):
+      assert _resolve_grounding_engine() == mock_cls
+
+  # 4. All fail -> returns None
+  def mock_import_4(name: str, *args: Any, **kwargs: Any) -> Any:
+    if "grounding.engine" in name:
+      raise ImportError("None found")
+    return orig_import(name, *args, **kwargs)
+
+  with patch("importlib.import_module", side_effect=mock_import_4):
+    with patch("pathlib.Path.exists", return_value=True):
+      assert _resolve_grounding_engine() is None
+
+
+def test_audit_frameworks_flax_nnx_non_jnp_branch() -> None:
+  """Test audit_frameworks when flax_nnx API does not start with jax.numpy or jnp."""
+  manager = MagicMock()
+  manager.data = {
+    "custom_op": {
+      "variants": {
+        "flax_nnx": {"api": "flax.nnx.CustomLinear"},
+      }
+    }
+  }
+  snapshots: Dict[str, Dict[str, Any]] = {"flax_nnx": {}}
+  mock_ge = MagicMock()
+  mock_ge.has_symbol.return_value = True
+  mock_ge._discover_target_files.return_value = True
+
+  errors = audit_frameworks(manager, snapshots, grounding_engine=mock_ge)
+  assert errors == []
+  mock_ge.has_symbol.assert_called_with("flax_nnx", "flax.nnx.CustomLinear")
+
+
+def test_audit_frameworks_flax_nnx_jnp_not_in_jax_snapshot() -> None:
+  """Test audit_frameworks when flax_nnx API starts with jax.numpy but is missing in jax snapshot."""
+  manager = MagicMock()
+  manager.data = {
+    "op": {
+      "variants": {
+        "flax_nnx": {"api": "jax.numpy.missing_fn"},
+      }
+    }
+  }
+  snapshots: Dict[str, Dict[str, Any]] = {"flax_nnx": {}, "jax": {}}
+  mock_ge = MagicMock()
+  mock_ge.has_symbol.return_value = True
+  mock_ge._discover_target_files.return_value = True
+
+  errors = audit_frameworks(manager, snapshots, grounding_engine=mock_ge)
+  assert errors == []
+  mock_ge.has_symbol.assert_called_with("flax_nnx", "jax.numpy.missing_fn")
+
+
+def test_flatten_single_framework_flax_nnx_prefix() -> None:
+  """Test flax_nnx api_path prefix handling."""
+  from scripts.audit_against_snapshots import _flatten_single_framework
+
+  flat: Dict[str, Dict[str, Any]] = {}
+  snap = {"categories": {"default": [{"api_path": "flax.nnx.Linear", "name": "Linear"}]}}
+  _flatten_single_framework("flax_nnx", snap, flat)
+  assert "nnx.Linear" in flat["flax_nnx"]
+
+
+def test_load_snapshots_multi_optax_shim(tmp_path: Path) -> None:
+  """Test load_snapshots_multi handling of optax_shim files.
+
+  Args:
+      tmp_path (Path): Temporary directory fixture.
+  """
+  snap_dir: Path = tmp_path / "snaps"
+  snap_dir.mkdir()
+  data = {"categories": {"default": [{"name": "adam", "api_path": "optax.adam"}]}}
+  (snap_dir / "optax_shim_v0.1.json").write_text(json.dumps(data))
+
+  result: Dict[str, Dict[str, Any]] = load_snapshots_multi([snap_dir])
+  assert "optax" in result
+  assert "adam" in result["optax"]
+
+
+def test_audit_frameworks_optax_fallback() -> None:
+  """Test audit_frameworks matching optax APIs for jax and flax_nnx."""
+  manager: MagicMock = MagicMock()
+  manager.data = {
+    "adam": {
+      "variants": {
+        "jax": {"api": "optax.adam", "args": {}},
+        "flax_nnx": {"api": "optax.sgd", "args": {}},
+      }
+    }
+  }
+  snapshots: Dict[str, Dict[str, Any]] = {
+    "jax": {},
+    "flax_nnx": {},
+    "optax": {"optax.adam": {"args": []}},
+    "optax_shim": {"optax.sgd": {"args": []}},
+  }
+  errors: List[str] = audit_frameworks(manager, snapshots)
+  assert errors == []
+
+
+def test_audit_frameworks_ignore_args() -> None:
+  """Test audit_frameworks ignoring known special arguments and dropped None arguments."""
+  manager: MagicMock = MagicMock()
+  manager.data = {
+    "sum": {
+      "variants": {
+        "torch": {
+          "api": "torch.sum",
+          "args": {"input": "input", "dropped_arg": None, "keepdim": "keepdim"},
+        }
+      }
+    }
+  }
+  snapshots: Dict[str, Dict[str, Any]] = {
+    "torch": {
+      "torch.sum": {
+        "args": [{"name": "input", "kind": "POSITIONAL_OR_KEYWORD"}],
+      }
+    }
+  }
+  errors: List[str] = audit_frameworks(manager, snapshots)
+  assert errors == []
+
+
+def test_audit_new_targets_integration(tmp_path: Path) -> None:
+  """Test integration of array_api, scipy, and safetensors targets in audit.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  from scripts.audit_against_snapshots import (
+    compute_snapshot_checksums,
+    generate_audit_report,
+    load_snapshots_multi,
+  )
+
+  snap_dir = tmp_path / "snapshots"
+  snap_dir.mkdir()
+
+  array_api_data = {
+    "categories": {
+      "elementwise": [{"name": "add", "api_path": "array_api.add", "params": []}],
+    }
+  }
+  (snap_dir / "array_api_v2024.12.json").write_text(json.dumps(array_api_data))
+
+  scipy_data = {
+    "categories": {
+      "special": [{"name": "erf", "api_path": "scipy.special.erf", "params": []}],
+    }
+  }
+  (snap_dir / "scipy_v1.13.1.json").write_text(json.dumps(scipy_data))
+
+  safetensors_data = {
+    "categories": {
+      "io": [{"name": "save_file", "api_path": "safetensors.torch.save_file", "params": []}],
+    }
+  }
+  (snap_dir / "safetensors_v0.7.0.json").write_text(json.dumps(safetensors_data))
+
+  snapshots = load_snapshots_multi([snap_dir])
+  assert "array_api" in snapshots
+  assert "scipy" in snapshots
+  assert "safetensors" in snapshots
+
+  checksums = compute_snapshot_checksums([snap_dir])
+  assert "array_api_v2024.12.json" in checksums
+  assert "scipy_v1.13.1.json" in checksums
+  assert "safetensors_v0.7.0.json" in checksums
+
+  manager = MagicMock()
+  manager.data = {
+    "add": {"variants": {"array_api": {"api": "array_api.add"}}},
+    "erf": {"variants": {"scipy": {"api": "scipy.special.erf"}}},
+    "save": {"variants": {"safetensors": {"api": "safetensors.torch.save_file"}}},
+  }
+
+  report = generate_audit_report(manager, snapshots, errors=[], checksums=checksums)
+  assert report["status"] == "pass"
+  assert "array_api" in report["targets"]
+  assert "scipy" in report["targets"]
+  assert "safetensors" in report["targets"]
+  assert report["targets"]["array_api"]["mapped_operations"] == 1
+  assert report["targets"]["scipy"]["mapped_operations"] == 1
+  assert report["targets"]["safetensors"]["mapped_operations"] == 1

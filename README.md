@@ -110,14 +110,15 @@ flowchart TD
 ### 1. Syntactic Transpilation (Python ↔ Python & Python → C++)
 Convert model code between frameworks with semantic fidelity, or export to native C++ extensions.
 *   **PyTorch** ↔ **JAX / Flax NNX** ↔ **Apple MLX** ↔ **Keras 3** ↔ **TensorFlow**
-*   **Target: C++ / PyBind11**: Compiles forward passes and custom operators into native PyTorch C++ extension modules (`TorchCppExtensionGenerator`) with full C++ CST parsing and AST transformation.
+*   **Target: C++ / PyBind11 (Compiler SDK)**: Compiles forward passes and custom operators into native PyTorch C++ extension modules (`TorchCppExtensionGenerator` in `ml_switcheroo.core.compiler.backends.cpp`) with full C++ CST parsing and AST transformation.
 *   Handles class rewriting (`nn.Module` -> `nnx.Module`), state injection (RNG keys), and functional unwrapping.
 
 ### 2. Architecture Visualization & WebAssembly (Python → Visuals & WAT)
 Compile your model graphs directly into diagramming languages and portable execution formats.
-*   **Target: TikZ**: Generates publication-ready LaTeX TikZ code for academic papers.
-*   **Target: HTML**: Generates static Grid CSS responsive layouts to visually inspect module hierarchies.
-*   **Target: WebAssembly (WAT)**: The `WasmBackend` generates stack-based WebAssembly Text representations directly from `LogicalGraph` for sandboxed or browser-based runtime verification.
+*   **Target: TikZ**: Generates publication-ready LaTeX TikZ code for academic papers (`--target tikz`).
+*   **Target: LaTeX DSL**: Transpiles computational expressions into mathematical LaTeX equations (`--target latex_dsl`).
+*   **Target: HTML**: Generates static Grid CSS responsive layouts to visually inspect module hierarchies (`--target html`).
+*   **Target: WebAssembly (WAT)**: The `WasmBackend` (`ml_switcheroo.core.compiler.backends.wasm_backend`) generates stack-based WebAssembly Text representations directly from `LogicalGraph` for sandboxed or browser-based runtime verification.
 
 ### 3. Hardware Lowering, Decompilation & Cross-ISA (Python ↔ ASM, SASS ↔ RDNA)
 Bridge the gap between high-level neural networks and raw GPU assembly.
@@ -137,7 +138,7 @@ Automatically optimize model topologies and infer distributed sharding constrain
 *   **Architecture Fusion Passes**:
     *   `QKVFusionPass` / `QKVDefusionPass`: Automatically fuse or separate `q_proj`, `k_proj`, `v_proj` projections in Transformer models.
     *   `SwiGLUFusionPass` / `SwiGLUDefusionPass`: Detect and fuse separate `gate_proj` and `up_proj` linear layers into unified `SwiGLU` blocks (e.g., for Qwen architectures).
-    *   `VisionPatchEmbeddingPass`: Restructure patch embedding projections for multimodal vision-language models.
+    *   `VisionPatchEmbeddingFusionPass` / `VisionPatchEmbeddingDefusionPass`: Restructure and optimize patch embedding projections for multimodal vision-language models.
 *   **Topological Diff Engine**: `GraphDiffer` computes granular patch actions (`DeleteAction`, `ReplaceAction`) between logical computation graphs.
 
 ### 6. Hexagonal Static Transpilation Lattice (30 Directed Paths)
@@ -146,7 +147,7 @@ Bidirectional static source-to-source conversion across the 6 core targets:
 *   **Hardware Bridge Lowering (8 Edges)**: High-Level Models → `LogicalGraph` IR → **AMD RDNA** & **NVIDIA SASS**.
 *   **Hardware Bridge Lifting (8 Edges)**: Disassembly / Macro Streams → `LogicalGraph` IR → High-Level Modules.
 *   **Cross-ISA Direct Compilation (2 Edges)**: **AMD RDNA** ↔ **NVIDIA SASS**.
-*   **Ground Truth Grounding**: Formally verified against live framework snapshots in `ml-framework-snapshots` and `ml-compiler-snapshots` with zero hallucinated APIs or arguments.
+*   **Ground Truth Grounding**: Formally verified against live framework snapshots in `ml-ecosystem-snapshots` (with backward compatibility for `ml-framework-snapshots`) and `ml-compiler-snapshots` with zero hallucinated APIs or arguments.
 *   **YAML-First Semantics**: Built on 3,290+ modular operation definitions (currently 3,291 compiled ops in `src/ml_switcheroo/semantics/odl.json`).
 
 ---
@@ -253,8 +254,14 @@ Transpile source code, lower to hardware assembly, or decompile ASM to Python.
 # Standard: PyTorch -> JAX
 ml_switcheroo convert ./models/resnet.py --target jax --out ./resnet_jax.py
 
+# Batch Directory Conversion: Recursively transpile an entire codebase
+ml_switcheroo convert ./torch_models/ --target jax --out ./jax_models/
+
 # Visualization: Python -> LaTeX (TikZ)
 ml_switcheroo convert ./models/transformer.py --target tikz --out ./diagram.tex
+
+# Mathematics: Python -> LaTeX math equations
+ml_switcheroo convert ./models/attention.py --target latex_dsl --out ./equations.tex
 
 # Hardware Lowering: Python -> AMD RDNA assembly
 ml_switcheroo convert ./models/conv.py --target rdna --out ./conv.rdna
@@ -301,12 +308,15 @@ ml_switcheroo ci --repair --update-readme
 # 1. Export the official ODL JSON Schema for LLM validation and prompt engineering
 ml_switcheroo schema > odl_schema.json
 
-# 2. Generate an LLM prompt with introspection data for an unmapped API
+# 2. Generate an LLM prompt with introspection data for a single unmapped API
 ml_switcheroo suggest 'torch.nn.functional.scaled_dot_product_attention' > prompt.md
 
-# 3. (Paste prompt to LLM, get validated ODL YAML back)
+# 3. Bulk Namespace Scanning: Batch-generate structured prompts for an entire module
+ml_switcheroo suggest 'jax.numpy.*' --out-dir ./prompts --batch-size 50
 
-# 4. Inject the new definition into the Knowledge Base
+# 4. (Paste prompt to LLM, get validated ODL YAML back)
+
+# 5. Inject the new definition into the Knowledge Base
 ml_switcheroo define new_ops.yaml
 ```
 
@@ -350,9 +360,11 @@ Core target support status across the compiler lattice:
 | **Intermediate Reps** | **ML-Switcheroo IR** | 🟢 Primary | Unified `LogicalGraph`, `PartitionSpec`, `LogicalMesh`, topological diff engine |
 | | **MLIR** | ⚪ Alpha | MLIR CST/AST parser, dialect emission, type inference |
 | | **StableHLO** | ⚪ Alpha | StableHLO dialect parser and emitter (bitwise, math, complex linalg, shapes) |
-| **Native & Visual** | **C++ (PyBind11)** | 🔵 Beta | Native C++ extension module generation, CST parser & transformer |
-| | **LaTeX / TikZ** | 🟢 Primary | Publication-ready LaTeX TikZ neural network diagram generation |
-| | **HTML / WASM** | 🟢 Primary | Static Grid CSS architecture layouts, WebAssembly Text (`WasmBackend` WAT) |
+| **Native & Visual** | **C++ (PyBind11)** | 🔵 Beta | Native C++ extension module generation (`TorchCppExtensionGenerator`), CST parser & transformer (Compiler SDK) |
+| | **TikZ** | 🟢 Primary | Publication-ready LaTeX TikZ neural network diagram generation (`--target tikz`) |
+| | **LaTeX DSL** | 🟢 Primary | Mathematical LaTeX equation transpilation (`--target latex_dsl`) |
+| | **HTML** | 🟢 Primary | Static Grid CSS responsive architecture layouts (`--target html`) |
+| | **WebAssembly (WAT)** | 🟢 Primary | Stack-based WebAssembly Text (`WasmBackend` WAT) from `LogicalGraph`; Pyodide in-browser runtime |
 
 To view the interactive, live compatibility table for your installed version and local extensions:
 
@@ -370,7 +382,7 @@ When converting functional paradigms (like **Flax Linen**) to Object-Oriented pa
 
 ### Graph-Guided Rewriting (Loopback Bridge) & Fusion
 The **Loopback Bridge** enables high-level architectural optimizations (like layer fusion and auto-sharding) to be applied directly to the low-level source code preservation layer, bridging graph analysis with AST manipulation.
-*   **Transformer & Qwen Topology Passes**: Includes `QKVFusionPass`, `SwiGLUFusionPass`, and `VisionPatchEmbeddingPass` to fuse projections into efficient single-kernel constructs (or defuse them for target frameworks lacking fused kernels).
+*   **Transformer & Qwen Topology Passes**: Includes `QKVFusionPass` / `QKVDefusionPass`, `SwiGLUFusionPass` / `SwiGLUDefusionPass`, and `VisionPatchEmbeddingFusionPass` / `VisionPatchEmbeddingDefusionPass` to fuse projections into efficient single-kernel constructs (or defuse them for target frameworks lacking fused kernels).
 *   **Topological Diff Engine**: `GraphDiffer` computes explicit `DeleteAction` and `ReplaceAction` transformation steps between graphs.
 
 ### State Injection (RNG Threading)
@@ -381,9 +393,17 @@ When converting **PyTorch** (global RNG state) to **JAX** (explicit RNG keys), t
 4. Threads the `key` argument into relevant function calls.
 
 ### Static Safety & Analysis Suite
-*   **Purity Scanner**: Inspects code for mutations, in-place tensor operations, and hidden state.
-*   **Static Safety Analyzer**: Evaluates dtypes, shape dimension consistency, and device allocations across translation boundaries.
-*   **CFG & Dominator Trees**: Reconstructs control-flow graphs and dominator relationships from assembly streams to isolate loops and basic blocks.
+*   **Purity Scanner**: Inspects code for mutations, in-place tensor operations, and hidden state (`ml_switcheroo.analysis.purity`).
+*   **Dependency Scanner**: Audits third-party library imports across translation boundaries to verify target environment compatibility (`ml_switcheroo.analysis.dependencies`).
+*   **Lifecycle & Initialization Tracker**: Validates that attributes accessed in `forward()` are declared during `__init__()`, preventing dynamic state leakage during static graph compilation (`ml_switcheroo.analysis.lifecycle`).
+*   **Static Safety Analyzer**: Evaluates dtypes, shape dimension consistency, and device allocations across translation boundaries (`ml_switcheroo.analysis.static_safety`).
+*   **CFG & Dominator Trees**: Reconstructs control-flow graphs and dominator relationships from assembly streams to isolate loops and basic blocks (`ml_switcheroo.analysis.cfg`, `dominators`).
+*   **Audit Analyzer & Symbol Table**: Tracks lexical scopes and variable lifetimes across transpilation passes (`ml_switcheroo.analysis.symbol_table`).
+
+### Error Handling & Pass-Through Protocol (Escape Hatch)
+To guarantee compilation resilience, the engine includes an **Escape Hatch** (`ml_switcheroo.core.escape_hatch`):
+*   In standard mode, any AST node that cannot be deterministically transpiled is safely wrapped in `# <SWITCHEROO_FAILED_TO_TRANS>` comment boundaries, emitting the original code unchanged without silent corruption.
+*   When `--strict` is enabled, any unmapped operation or ambiguous signature immediately raises an explicit compilation error.
 
 ### Intelligent Import Management
 The **Import Fixer** does not just swap strings; it analyzes usage logic:
@@ -399,17 +419,23 @@ ml-switcheroo is designed to be extended without modifying the core engine.
 
 1. **Add Operations (ODL)**: Use the **Operation Definition Language (YAML)** to define math/neural ops. This is the recommended way to add missing functionality.
    See [EXTENDING_WITH_DSL.md](EXTENDING_WITH_DSL.md) for the full guide.
+   * **Catalog Compilation**: Discrete YAML definitions in `src/ml_switcheroo/semantics/odl/` compile into the unified JSON catalog via `python scripts/compile_odl_catalog.py`.
+   * **Schema Validation**: Verified with `python scripts/validate_odl_json.py` against Pydantic models.
+   * **Quarantine Promotion**: Graduated into official standards via `python scripts/drain_quarantine.py`.
 
 2. **Add a Framework**: Create a class inheriting `FrameworkAdapter` in `src/ml_switcheroo/frameworks/`.
    See [EXTENDING.md](EXTENDING.md) for architectural details on Adapters and Plugins.
 
-3. **Modular AST Plugins**: Leverage the 30+ specialized plugins in `src/ml_switcheroo/plugins/`:
-   * **Distributed**: `auto_fsdp_wrapper`, `sharding`
-   * **State & Lifecycle**: `state_flag_injection`, `state_container`, `device_allocator`, `device_checks`
-   * **Tensor Layout & Packing**: `attention_packing`, `shape_packing`, `einsum`, `gather`, `scatter`, `padding`, `reshape`, `flatten`
+3. **Modular AST Plugins**: Leverage the 35+ specialized plugins in `src/ml_switcheroo/plugins/`:
+   * **Distributed**: `auto_fsdp_wrapper` (graph-level sharding passes reside in `core/compiler/sharding.py`)
+   * **State & Lifecycle**: `state_flag_injection`, `state_container`, `device_allocator`, `device_checks`, `rng_threading`
+   * **Tensor Layout & Packing**: `attention_packing`, `shape_packing`, `einsum`, `gather`, `scatter`, `padding`, `reshape`, `flatten`, `topk`, `in_top_k_plugin`, `batch_norm`
    * **Training & Optimization**: `optimizer_step`, `schedulers`, `clipping`, `loss_wrapper`, `checkpoint_keys`
    * **Functional Control Flow**: `inplace_unroll`, `loop_unroll`, `static_unroll`, `context_to_function_wrap`
-   * **Framework Specific**: `mlx_optimizers`, `mlx_extras`, `nnx_to_torch_params`, `jax_decompose`, `keras_sequential`
+   * **Framework Specific**: `mlx_optimizers`, `mlx_extras`, `nnx_to_torch_params`, `jax_decompose`, `keras_sequential`, `tf_data_loader`, `data_loader`
+
+4. **Interactive Documentation (Sphinx & WASM)**:
+   * Powered by `ml_switcheroo.sphinx_ext`, the documentation includes an interactive in-browser compiler demo (`.. switcheroo_demo::`) running via Pyodide / Emscripten without heavy server-side Python dependencies.
 
 ---
 

@@ -9,19 +9,144 @@ Now extracts type hints (e.g. ``x: Array``, ``axis: int``) to support Better Fuz
 """
 
 from typing import Any
-
-
 import typing
-
-
 import ast
+import json
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 from ml_switcheroo.utils.console import log_info, log_warning
+from ml_switcheroo.semantics.paths import resolve_snapshots_dir
 
 
 class ArrayApiSpecImporter:
   """Parse Python stub files (``*.py``) using the built-in ``ast`` module."""
+
+  def parse_snapshot(self, snapshot_path: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
+    """Parse Array API specifications from a serialized snapshot JSON.
+
+    Args:
+        snapshot_path: Optional path to the snapshot JSON file. If omitted,
+            resolves ``array_api_v2024.12.json`` via ``resolve_snapshots_dir()``.
+
+    Returns:
+        Dict mapping function names to semantic definitions.
+
+    Raises:
+        FileNotFoundError: If the snapshot file does not exist.
+        ValueError: If the snapshot JSON is corrupt or not a dictionary.
+    """
+    if snapshot_path is None:
+      snapshot_path = resolve_snapshots_dir() / "array_api_v2024.12.json"
+
+    if not snapshot_path.exists():
+      raise FileNotFoundError(f"Snapshot not found: {snapshot_path}")
+
+    try:
+      raw = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    except Exception as e:
+      raise ValueError(f"Corrupt snapshot JSON at {snapshot_path}: {e}") from e
+
+    if not isinstance(raw, dict):
+      raise ValueError("Corrupt snapshot: top-level JSON must be an object.")
+
+    semantics: Dict[str, Dict[str, Any]] = {}
+    categories = raw.get("categories", {})
+    all_items: List[Dict[str, Any]] = []
+
+    if isinstance(categories, dict):
+      for cat_items in categories.values():
+        if isinstance(cat_items, list):
+          all_items.extend(cat_items)
+
+    ops = raw.get("operations", {})
+    if isinstance(ops, dict):
+      all_items.extend(ops.values())
+
+    for entry in all_items:
+      if not isinstance(entry, dict):
+        continue
+      api_path = entry.get("api_path", "")
+      name = entry.get("name") or (api_path.split(".")[-1] if api_path else "")
+      if not name or name.startswith("_"):
+        continue
+
+      doc = entry.get("docstring") or ""
+      summary = self._clean_docstring(doc)
+
+      params = entry.get("params", [])
+      std_args: List[Tuple[str, str]] = []
+      posonly_args: List[str] = []
+      kwonly_args: List[str] = []
+
+      for p in params:
+        if not isinstance(p, dict):
+          continue
+        p_name = p.get("name", "")
+        if not p_name:
+          continue
+        p_kind = p.get("kind", "")
+        p_annot = p.get("annotation") or "Any"
+
+        if p_kind == "POSITIONAL_ONLY":
+          posonly_args.append(p_name)
+        elif p_kind == "KEYWORD_ONLY":
+          kwonly_args.append(p_name)
+
+        if p_kind not in ("VAR_POSITIONAL", "VAR_KEYWORD"):
+          std_args.append((p_name, p_annot))
+
+      defn: Dict[str, Any] = {
+        "from": f"snapshots/{snapshot_path.name}",
+        "description": summary,
+        "std_args": std_args,
+        "posonly_args": posonly_args,
+        "kwonly_args": kwonly_args,
+        "returns_type": entry.get("returns_type", "Any"),
+        "kind": entry.get("kind", "function"),
+      }
+
+      self.validate_function_signature(name, defn)
+      semantics[name] = defn
+
+    return semantics
+
+  def validate_function_signature(self, op_name: str, defn: Dict[str, Any]) -> bool:
+    """Validate parameter names, standard args, and keyword-only constraints.
+
+    Args:
+        op_name: Name of the operator.
+        defn: Dictionary containing operator definition and metadata.
+
+    Returns:
+        bool: True if signature conforms to Array API standards.
+
+    Raises:
+        ValueError: If op_name or parameters are malformed.
+    """
+    if not op_name or not isinstance(op_name, str):
+      raise ValueError("Invalid operation name.")
+    std_args = defn.get("std_args", [])
+    if not isinstance(std_args, list):
+      raise ValueError(f"std_args for {op_name} must be a list.")
+    for item in std_args:
+      if not isinstance(item, tuple) or len(item) != 2:
+        raise ValueError(f"Malformed argument spec in {op_name}: {item}")
+      param_name, _param_type = item
+      clean_name = param_name.lstrip("*")
+      if not clean_name.isidentifier():
+        raise ValueError(f"Invalid parameter name '{param_name}' in {op_name}.")
+    return True
+
+  def sync_with_snapshot(self, snapshot_path: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
+    """Synchronize semantic definitions against the standard Array API snapshot.
+
+    Args:
+        snapshot_path: Optional path to the array API snapshot JSON file.
+
+    Returns:
+        Dict[str, Dict[str, Any]]: Dictionary of validated semantic definitions.
+    """
+    return self.parse_snapshot(snapshot_path)
 
   def parse_folder(self, root_dir: Path) -> typing.Dict[str, dict]:
     """Parse Array API Python Stubs (``*.py``) in the target directory.

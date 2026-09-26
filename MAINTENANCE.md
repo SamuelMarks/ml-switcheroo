@@ -27,7 +27,7 @@ graph TD
 
     subgraph Sources ["1. Ground-Truth Sources"]
         direction TB
-        SNAPSHOTS("Framework Snapshots<br/>(ml-framework-snapshots)"):::external
+        SNAPSHOTS("Framework Snapshots<br/>(ml-ecosystem-snapshots)"):::external
         HARDWARE("Hardware ISAs<br/>(NVIDIA SASS / AMD RDNA)"):::external
         STANDARDS("Array API & ONNX Specs"):::external
     end

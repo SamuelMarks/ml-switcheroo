@@ -1256,6 +1256,16 @@ wheels = [
 ]
 
 [[package]]
+name = "ml-ecosystem-snapshots"
+version = "0.0.3"
+source = { git = "https://github.com/SamuelMarks/ml-ecosystem-snapshots.git?rev=master#e0b2b72409d5526a6629fccaf5cbfbcaf67ba4e3" }
+dependencies = [
+    { name = "griffe" },
+    { name = "ml-switcheroo-ir" },
+    { name = "pydantic" },
+]
+
+[[package]]
 name = "ml-framework-snapshots"
 version = "0.0.2"
 source = { git = "https://github.com/SamuelMarks/ml-framework-snapshots.git?rev=master#e49ae33bdf5613fa75f3ecf5f2543c722995d5d9" }
@@ -1278,7 +1288,7 @@ dependencies = [
     { name = "libcst" },
     { name = "markdown-it-py", version = "3.0.0", source = { registry = "https://pypi.org/simple" }, extra = ["linkify"], marker = "python_full_version < '3.11'" },
     { name = "markdown-it-py", version = "4.2.0", source = { registry = "https://pypi.org/simple" }, extra = ["linkify"], marker = "python_full_version >= '3.11'" },
-    { name = "ml-framework-snapshots" },
+    { name = "ml-ecosystem-snapshots" },
     { name = "ml-switcheroo-ir" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11' and sys_platform != 'emscripten'" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*' and sys_platform != 'emscripten'" },
@@ -1303,6 +1313,9 @@ docs = [
     { name = "sphinx-copybutton" },
     { name = "sphinx-material" },
     { name = "sphinxcontrib-mermaid" },
+]
+legacy = [
+    { name = "ml-framework-snapshots" },
 ]
 test = [
     { name = "build" },
@@ -1329,7 +1342,8 @@ requires-dist = [
     { name = "libcst", marker = "sys_platform == 'emscripten'", specifier = "==1.8.6" },
     { name = "linkify-it-py", marker = "extra == 'docs'", specifier = ">=2" },
     { name = "markdown-it-py", extras = ["linkify"] },
-    { name = "ml-framework-snapshots", git = "https://github.com/SamuelMarks/ml-framework-snapshots.git?rev=master" },
+    { name = "ml-ecosystem-snapshots", git = "https://github.com/SamuelMarks/ml-ecosystem-snapshots.git?rev=master" },
+    { name = "ml-framework-snapshots", marker = "extra == 'legacy'", git = "https://github.com/SamuelMarks/ml-framework-snapshots.git?rev=master" },
     { name = "ml-switcheroo-ir", git = "https://github.com/SamuelMarks/ml-switcheroo-ir.git?rev=master" },
     { name = "mypy", marker = "extra == 'test'" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=4" },
@@ -1351,7 +1365,7 @@ requires-dist = [
     { name = "texsoup" },
     { name = "types-pyyaml", marker = "extra == 'test'" },
 ]
-provides-extras = ["docs", "test"]
+provides-extras = ["docs", "legacy", "test"]
 
 [[package]]
 name = "ml-switcheroo-ir"

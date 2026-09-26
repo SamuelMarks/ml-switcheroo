@@ -147,13 +147,13 @@ The transformation is orchestrated by a `RewriterPipeline` (`src/ml_switcheroo/c
 
 ### 4.2. Plugin System & Hooks (`src/ml_switcheroo/plugins/`)
 
-Complex architectural mismatches are handled by 30+ registered plugins:
-* **Distributed**: `auto_fsdp_wrapper`, `sharding`.
+Complex architectural mismatches are handled by 35+ registered plugins:
+* **Distributed**: `auto_fsdp_wrapper` (graph-level sharding passes reside in `core/compiler/sharding.py`).
 * **State & Lifecycle**: `rng_threading`, `state_container`, `state_flag_injection`, `device_allocator`, `device_checks`.
-* **Tensor Layout & Operations**: `attention_packing`, `shape_packing`, `einsum`, `gather`, `scatter`, `padding`, `reshape`, `flatten`.
+* **Tensor Layout & Operations**: `attention_packing`, `shape_packing`, `einsum`, `gather`, `scatter`, `padding`, `reshape`, `flatten`, `topk`, `in_top_k_plugin`, `batch_norm`.
 * **Training & Schedulers**: `optimizer_step`, `schedulers`, `clipping`, `loss_wrapper`, `checkpoint_keys`.
 * **Control Flow**: `inplace_unroll`, `loop_unroll`, `static_unroll`, `context_to_function_wrap`.
-* **Framework Specializations**: `mlx_optimizers`, `mlx_extras`, `nnx_to_torch_params`, `jax_decompose`, `keras_sequential`.
+* **Framework Specializations**: `mlx_optimizers`, `mlx_extras`, `nnx_to_torch_params`, `jax_decompose`, `keras_sequential`, `tf_data_loader`, `data_loader`.
 
 Plugins use `@register_hook("trigger")` and receive a `HookContext` granting access to symbol tables, target traits, and AST context.
 
@@ -197,7 +197,7 @@ The `LogicalGraph` (`ml_switcheroo_ir`) serves as the universal compiler interme
 * **`ShardingInferencePass`**: Infers distributed parallel annotations for unannotated graphs.
 * **`QKVFusionPass` / `QKVDefusionPass`**: Fuses or splits Transformer attention projections (`q_proj`, `k_proj`, `v_proj`).
 * **`SwiGLUFusionPass` / `SwiGLUDefusionPass`**: Fuses separate `gate_proj` and `up_proj` linear layers into unified `SwiGLU` nodes for LLMs (Qwen).
-* **`VisionPatchEmbeddingPass`**: Re-structures patch embeddings for multimodal vision-language models.
+* **`VisionPatchEmbeddingFusionPass` / `VisionPatchEmbeddingDefusionPass`**: Restructures and lowers patch embeddings for multimodal vision-language models.
 * **`GraphDiffer`**: Computes minimal topological diffs (`DeleteAction`, `ReplaceAction`) between source and target computation graphs.
 
 ---

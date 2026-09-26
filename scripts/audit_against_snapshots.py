@@ -20,16 +20,35 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.file_loader import KnowledgeBaseLoader
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
-try:
-  from ml_framework_snapshots.grounding.engine import GroundingEngine
-except ImportError:
-  try:
-    parent_snap_src = Path(__file__).resolve().parent.parent.parent / "ml-framework-snapshots" / "src"
-    if str(parent_snap_src) not in sys.path and parent_snap_src.exists():
-      sys.path.insert(0, str(parent_snap_src))
-    from ml_framework_snapshots.grounding.engine import GroundingEngine
-  except ImportError:
-    GroundingEngine = None
+
+def _resolve_grounding_engine() -> Any:
+  """Resolve GroundingEngine class from available ecosystem or fallback packages.
+
+  Returns:
+      Any: The GroundingEngine class if resolvable, otherwise None.
+  """
+  for mod_name in ("ml_ecosystem_snapshots.grounding.engine", "ml_framework_snapshots.grounding.engine"):
+    try:
+      mod = importlib.import_module(mod_name)
+      return getattr(mod, "GroundingEngine")
+    except ImportError:
+      pass
+
+  for repo_name in ("ml-ecosystem-snapshots", "ml-framework-snapshots"):
+    try:
+      parent_src = Path(__file__).resolve().parent.parent.parent / repo_name / "src"
+      if parent_src.exists() and str(parent_src) not in sys.path:
+        sys.path.insert(0, str(parent_src))
+      pkg_name = repo_name.replace("-", "_") + ".grounding.engine"
+      mod = importlib.import_module(pkg_name)
+      return getattr(mod, "GroundingEngine")
+    except ImportError:
+      pass
+
+  return None
+
+
+GroundingEngine: Any = _resolve_grounding_engine()
 
 
 def extract_api_calls(file_path: Path) -> Set[str]:
@@ -210,6 +229,14 @@ def audit_python_ast(src_dirs: List[Path], snapshots: Dict[str, Dict[str, Any]])
         if call in ignore_list:
           continue
 
+        if (
+          call.endswith(".model_validate")
+          or call.endswith(".model_dump")
+          or call.endswith(".from_json")
+          or call.endswith(".to_json")
+        ):
+          continue
+
         root_module = call.split(".")[0]
         if root_module in framework_prefixes:
           fw_key = framework_prefixes[root_module]
@@ -332,21 +359,21 @@ def load_snapshots_multi(snapshot_dirs: Optional[List[Path]] = None) -> Dict[str
       if d.name == "snapshots" and (d.parent / "frameworks").exists():
         dirs_to_search.append(d.parent / "frameworks")
   else:
-    try:
-      snap_res = importlib.resources.files("ml_framework_snapshots.snapshots")
-      dirs_to_search.append(Path(str(snap_res)))
-    except Exception:
-      pass
-    try:
-      parent_snap = (
-        Path(__file__).resolve().parent.parent.parent / "ml-framework-snapshots" / "src" / "ml_framework_snapshots"
-      )
-      if (parent_snap / "snapshots").exists():
-        dirs_to_search.append(parent_snap / "snapshots")
-      if (parent_snap / "frameworks").exists():
-        dirs_to_search.append(parent_snap / "frameworks")
-    except Exception:
-      pass
+    for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
+      try:
+        snap_res = importlib.resources.files(pkg)
+        dirs_to_search.append(Path(str(snap_res)))
+      except Exception:
+        pass
+    for repo_name in ("ml-ecosystem-snapshots", "ml-framework-snapshots"):
+      try:
+        parent_snap = Path(__file__).resolve().parent.parent.parent / repo_name / "src" / repo_name.replace("-", "_")
+        if (parent_snap / "snapshots").exists():
+          dirs_to_search.append(parent_snap / "snapshots")
+        if (parent_snap / "frameworks").exists():
+          dirs_to_search.append(parent_snap / "frameworks")
+      except Exception:
+        pass
     try:
       semantics_dir = Path(__file__).resolve().parent.parent / "src" / "ml_switcheroo" / "semantics"
       if semantics_dir.exists():
@@ -716,7 +743,6 @@ def audit_frameworks(
                 "torch",
                 "jax",
                 "tensorflow",
-                "stablehlo",
                 "rdna",
                 "nvidia_sass",
                 "numpy",
@@ -732,7 +758,6 @@ def audit_frameworks(
           "torch",
           "jax",
           "tensorflow",
-          "stablehlo",
           "rdna",
           "nvidia_sass",
           "numpy",
@@ -820,6 +845,8 @@ def compute_snapshot_checksums(snapshot_dirs: Optional[List[Path]] = None) -> Di
   else:
     dirs_to_search.extend(
       [
+        Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
+        Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
         Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
         Path("../ml-framework-snapshots/src/ml_framework_snapshots/frameworks"),
         Path("src/ml_switcheroo/semantics"),
@@ -860,7 +887,7 @@ def generate_audit_report(
   Returns:
       A dictionary detailing coverage, mapped operation counts, and error metrics.
   """
-  targets = ["torch", "jax", "mlx", "keras", "nvidia_sass", "rdna", "ir"]
+  targets = ["torch", "jax", "mlx", "keras", "nvidia_sass", "rdna", "ir", "array_api", "scipy", "safetensors"]
   target_metrics: Dict[str, Dict[str, Any]] = {}
 
   for target in targets:
@@ -909,16 +936,19 @@ def main() -> int:
   RegistryLoader(mgr).hydrate()
 
   snapshot_dirs = [
+    Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
+    Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
     Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
     Path("../ml-framework-snapshots/src/ml_framework_snapshots/frameworks"),
     Path("src/ml_switcheroo/semantics"),
     Path("../ml-compiler-snapshots"),
   ]
-  try:
-    snap_res = importlib.resources.files("ml_framework_snapshots.snapshots")
-    snapshot_dirs.append(Path(str(snap_res)))
-  except Exception:
-    pass
+  for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
+    try:
+      snap_res = importlib.resources.files(pkg)
+      snapshot_dirs.append(Path(str(snap_res)))
+    except Exception:
+      pass
   snapshots = load_snapshots_multi(snapshot_dirs)
 
   grounding_engine = None

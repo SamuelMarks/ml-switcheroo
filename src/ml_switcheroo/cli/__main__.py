@@ -53,7 +53,6 @@ def main(argv: Optional[List[str]] = None) -> int:
     action="store_true",
     help="Enable distributed sharding semantics (e.g. QKV fusions, JAX sharding constraints)",
   )
-  cmd_conv.add_argument("--custom-snapshot", type=Path, help="Path to custom snapshot schema override")
   cmd_conv.add_argument(
     "--strict",
     action="store_true",

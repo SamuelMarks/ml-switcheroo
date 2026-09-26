@@ -82,6 +82,7 @@ coverage.xml
 !requirements.txt
 !test-requirements.txt
 !docs/docs-requirements.txt
+!legacy-requirements.txt
 !tests/integration/__snapshots__/*.txt
 !src/ml_switcheroo/utils/doc_*.py
 
