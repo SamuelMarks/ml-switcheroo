@@ -10,10 +10,12 @@ STUBS_DIR = Path("src/ml_switcheroo/semantics/odl")
 @pytest.mark.parametrize(
   "stub_file, expected_frameworks",
   [
-    ("__framework_jax.yaml", ["jax", "flax"]),
-    ("__framework_torch.yaml", ["torch", "torch_nn"]),
-    ("__framework_mlx.yaml", ["mlx", "mlx_nn"]),
-    ("__framework_keras.yaml", ["keras", "keras_layers"]),
+    ("ml_ecosystem_snapshots_jax.yaml", ["jax", "flax"]),
+    ("ml_ecosystem_snapshots_torch.yaml", ["torch", "torch_nn"]),
+    ("ml_ecosystem_snapshots_mlx.yaml", ["mlx", "mlx_nn"]),
+    ("ml_ecosystem_snapshots_keras.yaml", ["keras", "keras_layers"]),
+    ("ml_ecosystem_snapshots_nvidia_sass.yaml", ["nvidia_sass"]),
+    ("ml_ecosystem_snapshots_rdna.yaml", ["rdna"]),
   ],
 )
 def test_framework_stubs(stub_file, expected_frameworks):

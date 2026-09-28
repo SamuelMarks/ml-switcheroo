@@ -20,3 +20,4 @@ variants:
       ord: '''fro'''
     pack_as: Tuple
     required_imports: []
+std_args: []

@@ -2,3 +2,5 @@ operation: Ldsm
 variants:
   nvidia_sass:
     api: LDSM
+    args: {}
+std_args: []

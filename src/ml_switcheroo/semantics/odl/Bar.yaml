@@ -2,3 +2,5 @@ operation: Bar
 variants:
   nvidia_sass:
     api: BAR
+    args: {}
+std_args: []

@@ -11,10 +11,12 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: flax.nnx.Initializer
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: Initializer
 type: function

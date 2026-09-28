@@ -4,11 +4,14 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   torch:
     api: torch.nn.ModuleDict
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: flax.nnx.MultiMetric
     args:

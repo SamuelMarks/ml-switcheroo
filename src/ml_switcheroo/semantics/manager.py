@@ -499,3 +499,79 @@ class SemanticsManager:
         yaml.dump(final_data, f, sort_keys=False, indent=2, default_flow_style=False)
     except Exception as e:
       print(f"❌ Failed to write update for {abstract_id} to {filename}: {e}")
+
+  def lookup_snapshot_symbol(self, framework: str, symbol: str) -> typing.Optional[dict]:
+    """Look up a grounded symbol from indexed framework snapshots.
+
+    Args:
+        framework: The framework target identifier (e.g. 'torch', 'jax').
+        symbol: The fully qualified or base symbol name.
+
+    Returns:
+        The snapshot dictionary for the symbol if found, or None.
+    """
+    try:
+      from ml_ecosystem_snapshots.index import lookup_symbol
+
+      res = lookup_symbol(framework, symbol)
+      if isinstance(res, dict):
+        return res
+    except Exception:
+      pass
+    return None
+
+  def search_snapshot_symbols(
+    self,
+    query: str,
+    framework: typing.Optional[str] = None,
+    limit: int = 10,
+  ) -> typing.List[dict]:
+    """Search for symbols in indexed snapshots using full-text search.
+
+    Args:
+        query: Search query or symbol prefix.
+        framework: Optional framework target to restrict the search.
+        limit: Maximum number of search results to return.
+
+    Returns:
+        A list of matching symbol dictionaries from the snapshot index.
+    """
+    try:
+      from ml_ecosystem_snapshots.index import search_index
+
+      res = search_index(query, framework=framework, limit=limit)
+      if isinstance(res, list):
+        return res
+    except Exception:
+      pass
+    return []
+
+  def validate_python_call(
+    self,
+    framework: str,
+    api_path: str,
+    args: typing.Optional[typing.List[typing.Any]] = None,
+    kwargs: typing.Optional[typing.Dict[str, typing.Any]] = None,
+  ) -> typing.Any:
+    """Validate a Python call against grounded framework snapshot specifications.
+
+    Args:
+        framework: Target framework identifier (e.g. 'torch', 'jax').
+        api_path: Full or base API path (e.g. 'torch.add').
+        args: Optional list of positional argument representations.
+        kwargs: Optional dictionary of keyword argument representations.
+
+    Returns:
+        A GroundingReport if ml_ecosystem_snapshots is available, or None.
+    """
+    try:
+      from ml_ecosystem_snapshots.grounding.python_fw import validate_python_call
+
+      return validate_python_call(
+        framework=framework,
+        api_path=api_path,
+        args=args or [],
+        kwargs=kwargs or {},
+      )
+    except Exception:
+      return None

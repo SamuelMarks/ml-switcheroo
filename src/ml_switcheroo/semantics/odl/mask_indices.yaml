@@ -13,3 +13,4 @@ variants:
   jax:
     api: jax.numpy.mask_indices
     args: {}
+std_args: []

@@ -13,3 +13,4 @@ variants:
     api: jax.numpy.trim_zeros
     args:
       filt: filt
+std_args: []

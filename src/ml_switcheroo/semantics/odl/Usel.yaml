@@ -2,3 +2,5 @@ operation: Usel
 variants:
   nvidia_sass:
     api: USEL
+    args: {}
+std_args: []

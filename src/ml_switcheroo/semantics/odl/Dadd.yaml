@@ -2,3 +2,5 @@ operation: Dadd
 variants:
   nvidia_sass:
     api: DADD
+    args: {}
+std_args: []

@@ -2,3 +2,5 @@ operation: Uvirtcount
 variants:
   nvidia_sass:
     api: UVIRTCOUNT
+    args: {}
+std_args: []

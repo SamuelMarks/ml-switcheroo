@@ -26,6 +26,8 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: inject_prng
+    api: ''
+    args: {}
   torch:
     api: torch.nn.Dropout
     args: {}

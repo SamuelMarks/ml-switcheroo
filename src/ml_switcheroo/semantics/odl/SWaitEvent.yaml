@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_wait_event
     description: Auto-mapped instruction S_WAIT_EVENT
+    args: {}
+std_args: []

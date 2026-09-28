@@ -2,3 +2,5 @@ operation: Qgmma
 variants:
   nvidia_sass:
     api: QGMMA
+    args: {}
+std_args: []

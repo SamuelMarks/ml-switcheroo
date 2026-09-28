@@ -2,3 +2,5 @@ operation: Syncs
 variants:
   nvidia_sass:
     api: SYNCS
+    args: {}
+std_args: []

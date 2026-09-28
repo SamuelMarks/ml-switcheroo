@@ -6,15 +6,19 @@ variants:
     pack_as: Tuple
     pack_to_tuple: newshape
     required_imports: []
+    args: {}
   paxml:
     api: jax.numpy.reshape
     dispatch_rules: []
     pack_as: Tuple
     pack_to_tuple: shape
     required_imports: []
+    args: {}
   flax_nnx:
     api: jax.numpy.reshape
     dispatch_rules: []
     pack_as: Tuple
     pack_to_tuple: shape
     required_imports: []
+    args: {}
+std_args: []

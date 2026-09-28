@@ -19,3 +19,5 @@ variants:
     missing_message: Use native Python dict for parameter storage.
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}

@@ -3,3 +3,5 @@ variants:
   rdna:
     api: ds_gws_barrier
     description: Auto-mapped instruction DS_GWS_BARRIER
+    args: {}
+std_args: []

@@ -2,3 +2,5 @@ operation: Ldgsts
 variants:
   nvidia_sass:
     api: LDGSTS
+    args: {}
+std_args: []

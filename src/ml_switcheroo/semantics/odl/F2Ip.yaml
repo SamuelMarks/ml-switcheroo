@@ -2,3 +2,5 @@ operation: F2Ip
 variants:
   nvidia_sass:
     api: F2IP
+    args: {}
+std_args: []

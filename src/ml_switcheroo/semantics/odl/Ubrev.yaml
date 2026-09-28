@@ -2,3 +2,5 @@ operation: Ubrev
 variants:
   nvidia_sass:
     api: UBREV
+    args: {}
+std_args: []

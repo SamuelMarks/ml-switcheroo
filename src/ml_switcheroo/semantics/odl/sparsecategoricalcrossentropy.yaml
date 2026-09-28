@@ -23,16 +23,19 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.losses.SparseCategoricalCrossentropy
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     api: optax.softmax_cross_entropy_with_integer_labels
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   torch:
     api: torch.nn.CrossEntropyLoss
     arg_values:
@@ -50,6 +53,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   mlx:
     api: mlx.nn.losses.cross_entropy
     args: {}

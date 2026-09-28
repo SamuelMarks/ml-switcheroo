@@ -191,3 +191,30 @@ class IrBackend(CompilerBackend):
     lines.append("")
 
     return "\n".join(lines)
+
+  def validate_op(
+    self,
+    op_name: str,
+    inputs_count: Optional[int] = None,
+    attributes: Optional[List[str]] = None,
+  ) -> Any:
+    """Validate an ONNX operator specification against standard schema.
+
+    Args:
+        op_name: ONNX operator name (e.g. 'MatMul', 'Conv', 'Relu').
+        inputs_count: Optional number of expected inputs.
+        attributes: Optional list of attribute names to validate.
+
+    Returns:
+        Any: A GroundingReport if ml_ecosystem_snapshots is available, or None.
+    """
+    try:
+      from ml_ecosystem_snapshots.grounding.compiler import validate_onnx_op
+
+      return validate_onnx_op(
+        op_name=op_name,
+        inputs_count=inputs_count,
+        attributes=attributes,
+      )
+    except Exception:
+      return None

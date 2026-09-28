@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_frexp_exp_i32_f64
     description: Auto-mapped instruction V_FREXP_EXP_I32_F64
+    args: {}
+std_args: []

@@ -5,6 +5,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 std_args:
 - name: in_channels
   kind: positional_or_keyword

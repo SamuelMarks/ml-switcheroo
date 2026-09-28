@@ -2,3 +2,5 @@ operation: Match
 variants:
   nvidia_sass:
     api: MATCH
+    args: {}
+std_args: []

@@ -5,12 +5,15 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: jnp.bartlett
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   jax:
     api: jax.numpy.bartlett
     args:
       M: M
+std_args: []

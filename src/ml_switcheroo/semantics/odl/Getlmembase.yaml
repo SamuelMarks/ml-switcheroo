@@ -2,3 +2,5 @@ operation: Getlmembase
 variants:
   nvidia_sass:
     api: GETLMEMBASE
+    args: {}
+std_args: []

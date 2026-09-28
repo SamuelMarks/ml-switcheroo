@@ -43,6 +43,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   torch:
     api: torch.nn.RNNCell
     args:
@@ -55,5 +56,6 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: SimpleRNNCell
 type: function

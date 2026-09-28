@@ -10,3 +10,4 @@ variants:
     api: jax.random.key
     args:
       seed: seed
+std_args: []

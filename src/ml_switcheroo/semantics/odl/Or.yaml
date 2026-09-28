@@ -2,6 +2,7 @@ operation: Or
 variants:
   stablehlo:
     api: stablehlo.or
+    args: {}
 std_args:
 - name: lhs
   kind: positional_or_keyword

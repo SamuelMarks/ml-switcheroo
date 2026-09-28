@@ -11,3 +11,4 @@ variants:
     api: jax.numpy.diag_indices_from
     args:
       arr: arr
+std_args: []

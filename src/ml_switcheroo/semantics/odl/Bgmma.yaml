@@ -2,3 +2,5 @@ operation: Bgmma
 variants:
   nvidia_sass:
     api: BGMMA
+    args: {}
+std_args: []

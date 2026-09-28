@@ -2,6 +2,7 @@ operation: Send
 variants:
   stablehlo:
     api: stablehlo.send
+    args: {}
 std_args:
 - name: inputs
   kind: positional_or_keyword

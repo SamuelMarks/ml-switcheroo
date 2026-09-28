@@ -2,6 +2,7 @@ operation: Convolution
 variants:
   stablehlo:
     api: stablehlo.convolution
+    args: {}
 std_args:
 - name: lhs
   kind: positional_or_keyword

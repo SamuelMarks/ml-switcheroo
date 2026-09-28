@@ -6,6 +6,7 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: inject_prng
+    args: {}
   flax_nnx:
     api: jax.random.bernoulli
     args: {}
@@ -17,3 +18,4 @@ variants:
     api: jax.random.bernoulli
     args:
       key: key
+std_args: []

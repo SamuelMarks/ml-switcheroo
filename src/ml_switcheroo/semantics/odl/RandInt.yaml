@@ -16,3 +16,4 @@ variants:
       shape: shape
       minval: minval
       maxval: maxval
+std_args: []

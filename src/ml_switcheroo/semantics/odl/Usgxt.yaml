@@ -2,3 +2,5 @@ operation: Usgxt
 variants:
   nvidia_sass:
     api: USGXT
+    args: {}
+std_args: []

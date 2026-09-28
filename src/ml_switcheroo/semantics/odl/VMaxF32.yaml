@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_max_f32
     description: Auto-mapped instruction V_MAX_F32
+    args: {}
+std_args: []

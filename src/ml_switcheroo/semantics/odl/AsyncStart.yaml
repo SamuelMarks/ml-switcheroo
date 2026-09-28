@@ -2,6 +2,7 @@ operation: AsyncStart
 variants:
   stablehlo:
     api: stablehlo.async_start
+    args: {}
 std_args:
 - name: operands
   kind: positional_or_keyword

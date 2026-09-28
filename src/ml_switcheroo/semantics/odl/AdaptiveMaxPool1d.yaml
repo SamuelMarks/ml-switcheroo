@@ -20,8 +20,10 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.layers.GlobalMaxPooling1D
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}

@@ -2,3 +2,5 @@ operation: Shl
 variants:
   nvidia_sass:
     api: SHL
+    args: {}
+std_args: []

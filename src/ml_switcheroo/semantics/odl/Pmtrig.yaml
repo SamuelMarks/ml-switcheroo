@@ -2,3 +2,5 @@ operation: Pmtrig
 variants:
   nvidia_sass:
     api: PMTRIG
+    args: {}
+std_args: []

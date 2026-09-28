@@ -2,3 +2,5 @@ operation: Ldgmc
 variants:
   nvidia_sass:
     api: LDGMC
+    args: {}
+std_args: []

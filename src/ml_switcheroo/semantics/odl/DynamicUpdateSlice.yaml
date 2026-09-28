@@ -2,6 +2,7 @@ operation: DynamicUpdateSlice
 variants:
   stablehlo:
     api: stablehlo.dynamic_update_slice
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

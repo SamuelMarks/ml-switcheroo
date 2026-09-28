@@ -2,3 +2,5 @@ operation: Hfma2_32I
 variants:
   nvidia_sass:
     api: HFMA2_32I
+    args: {}
+std_args: []

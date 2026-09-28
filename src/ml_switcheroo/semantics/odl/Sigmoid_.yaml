@@ -24,6 +24,7 @@ variants:
     pack_as: Tuple
     required_imports: []
     transformation_type: macro
+    args: {}
   flax_nnx:
     api: jax.nn.sigmoid
     dispatch_rules: []
@@ -31,6 +32,7 @@ variants:
     pack_as: Tuple
     required_imports: []
     transformation_type: macro
+    args: {}
   jax:
     api: jax.nn.sigmoid
     args: {}

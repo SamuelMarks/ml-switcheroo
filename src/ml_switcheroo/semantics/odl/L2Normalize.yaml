@@ -6,9 +6,14 @@ variants:
       {epsilon}))'
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     macro_template: '{x} / jnp.sqrt(jnp.maximum(jnp.sum({x}**2, axis={axis}, keepdims=True),
       {epsilon}))'
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
+std_args: []

@@ -2,3 +2,5 @@ operation: Depbar
 variants:
   nvidia_sass:
     api: DEPBAR
+    args: {}
+std_args: []

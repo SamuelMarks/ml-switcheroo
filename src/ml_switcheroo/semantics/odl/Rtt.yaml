@@ -2,3 +2,5 @@ operation: Rtt
 variants:
   nvidia_sass:
     api: RTT
+    args: {}
+std_args: []

@@ -2,6 +2,7 @@ operation: DynamicPad
 variants:
   stablehlo:
     api: stablehlo.dynamic_pad
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

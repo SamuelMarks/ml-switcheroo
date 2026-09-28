@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_cbranch_scc1
     description: Conditional branch on SCC.
+    args: {}
+std_args: []

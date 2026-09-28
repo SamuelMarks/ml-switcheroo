@@ -21,3 +21,4 @@ variants:
     args:
       x1: x
       x2: y
+std_args: []

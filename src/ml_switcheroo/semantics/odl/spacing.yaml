@@ -12,10 +12,12 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: jax.numpy.spacing
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: Spacing
 type: function

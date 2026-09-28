@@ -2,6 +2,7 @@ operation: ReduceWindow
 variants:
   stablehlo:
     api: stablehlo.reduce_window
+    args: {}
 std_args:
 - name: inputs
   kind: positional_or_keyword

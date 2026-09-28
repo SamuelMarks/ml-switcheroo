@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_ashr_i64
     description: Auto-mapped instruction S_ASHR_I64
+    args: {}
+std_args: []

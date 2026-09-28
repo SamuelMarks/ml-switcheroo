@@ -2,6 +2,7 @@ operation: Case
 variants:
   stablehlo:
     api: stablehlo.case
+    args: {}
 std_args:
 - name: index
   kind: positional_or_keyword

@@ -5,8 +5,13 @@ variants:
     macro_template: jax.default_backend()
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     macro_template: jax.default_backend()
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
+std_args: []

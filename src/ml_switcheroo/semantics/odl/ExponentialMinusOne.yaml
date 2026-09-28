@@ -2,6 +2,7 @@ operation: ExponentialMinusOne
 variants:
   stablehlo:
     api: stablehlo.exponential_minus_one
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

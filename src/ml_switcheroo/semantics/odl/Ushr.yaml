@@ -2,3 +2,5 @@ operation: Ushr
 variants:
   nvidia_sass:
     api: USHR
+    args: {}
+std_args: []

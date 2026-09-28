@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_mov_b32
     description: Scalar register move.
+    args: {}
+std_args: []

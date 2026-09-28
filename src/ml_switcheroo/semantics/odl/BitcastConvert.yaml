@@ -2,6 +2,7 @@ operation: BitcastConvert
 variants:
   stablehlo:
     api: stablehlo.bitcast_convert
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

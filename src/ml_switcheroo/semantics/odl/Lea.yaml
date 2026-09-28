@@ -2,3 +2,5 @@ operation: Lea
 variants:
   nvidia_sass:
     api: LEA
+    args: {}
+std_args: []

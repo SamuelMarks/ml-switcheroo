@@ -2,6 +2,7 @@ operation: Recv
 variants:
   stablehlo:
     api: stablehlo.recv
+    args: {}
 std_args:
 - name: token
   kind: positional_or_keyword

@@ -2,3 +2,5 @@ operation: Cs2Ur
 variants:
   nvidia_sass:
     api: CS2UR
+    args: {}
+std_args: []

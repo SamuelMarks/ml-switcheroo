@@ -84,6 +84,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   rdna:
     api: ; Macro.ConvTranspose3d
     args: {}

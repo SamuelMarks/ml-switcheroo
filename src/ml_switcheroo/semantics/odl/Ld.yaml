@@ -2,3 +2,5 @@ operation: Ld
 variants:
   nvidia_sass:
     api: LD
+    args: {}
+std_args: []

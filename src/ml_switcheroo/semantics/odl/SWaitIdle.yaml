@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_wait_idle
     description: Auto-mapped instruction S_WAIT_IDLE
+    args: {}
+std_args: []

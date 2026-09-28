@@ -2,3 +2,5 @@ operation: Utcshift
 variants:
   nvidia_sass:
     api: UTCSHIFT
+    args: {}
+std_args: []

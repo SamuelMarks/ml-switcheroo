@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_cmp_gt_f16
     description: Auto-mapped instruction S_CMP_GT_F16
+    args: {}
+std_args: []

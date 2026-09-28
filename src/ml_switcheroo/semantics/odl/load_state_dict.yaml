@@ -6,3 +6,5 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: torch_load_state_dict_to_nnx
+    args: {}
+std_args: []

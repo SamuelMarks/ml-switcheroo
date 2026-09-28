@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_bitcmp1_b32
     description: Auto-mapped instruction S_BITCMP1_B32
+    args: {}
+std_args: []

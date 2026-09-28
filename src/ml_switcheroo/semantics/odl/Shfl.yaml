@@ -2,3 +2,5 @@ operation: Shfl
 variants:
   nvidia_sass:
     api: SHFL
+    args: {}
+std_args: []

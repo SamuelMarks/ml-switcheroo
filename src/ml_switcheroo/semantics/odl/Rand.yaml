@@ -7,6 +7,7 @@ variants:
     pack_to_tuple: shape
     required_imports: []
     requires_plugin: inject_prng
+    args: {}
   flax_nnx:
     api: jax.random.uniform
     dispatch_rules: []
@@ -14,3 +15,5 @@ variants:
     pack_to_tuple: shape
     required_imports: []
     requires_plugin: inject_prng
+    args: {}
+std_args: []

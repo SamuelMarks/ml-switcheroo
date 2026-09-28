@@ -2,3 +2,5 @@ operation: Uimnmx
 variants:
   nvidia_sass:
     api: UIMNMX
+    args: {}
+std_args: []

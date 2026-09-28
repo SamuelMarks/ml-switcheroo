@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_waitcnt_expcnt
     description: Auto-mapped instruction S_WAITCNT_EXPCNT
+    args: {}
+std_args: []

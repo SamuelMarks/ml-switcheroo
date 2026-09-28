@@ -2,3 +2,5 @@ operation: Utcomma
 variants:
   nvidia_sass:
     api: UTCOMMA
+    args: {}
+std_args: []

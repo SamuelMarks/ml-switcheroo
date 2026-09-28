@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_cmp_t_u64
     description: Auto-mapped instruction V_CMP_T_U64
+    args: {}
+std_args: []

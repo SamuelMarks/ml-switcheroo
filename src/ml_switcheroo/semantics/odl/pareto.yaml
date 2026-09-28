@@ -11,3 +11,4 @@ variants:
     args:
       key: key
       b: b
+std_args: []

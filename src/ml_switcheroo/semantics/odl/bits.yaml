@@ -10,3 +10,4 @@ variants:
     api: jax.random.bits
     args:
       key: key
+std_args: []

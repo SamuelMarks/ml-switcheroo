@@ -2,6 +2,7 @@ operation: DynamicBroadcastInDim
 variants:
   stablehlo:
     api: stablehlo.dynamic_broadcast_in_dim
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_frexp_mant_f64
     description: Auto-mapped instruction V_FREXP_MANT_F64
+    args: {}
+std_args: []

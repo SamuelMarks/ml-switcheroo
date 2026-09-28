@@ -6,9 +6,12 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: method_to_property
+    args: {}
   flax_nnx:
     api: data
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
     requires_plugin: method_to_property
+    args: {}
+std_args: []

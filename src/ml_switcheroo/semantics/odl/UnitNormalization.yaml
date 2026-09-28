@@ -21,10 +21,13 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
     requires_plugin: unit_norm_layer
+    api: ''
+    args: {}
 operation: UnitNormalization
 type: function

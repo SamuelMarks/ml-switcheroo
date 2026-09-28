@@ -2,3 +2,5 @@ operation: Ufset
 variants:
   nvidia_sass:
     api: UFSET
+    args: {}
+std_args: []

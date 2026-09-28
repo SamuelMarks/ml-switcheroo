@@ -2,3 +2,5 @@ operation: Bssy
 variants:
   nvidia_sass:
     api: BSSY
+    args: {}
+std_args: []

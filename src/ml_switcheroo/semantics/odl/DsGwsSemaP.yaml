@@ -3,3 +3,5 @@ variants:
   rdna:
     api: ds_gws_sema_p
     description: Auto-mapped instruction DS_GWS_SEMA_P
+    args: {}
+std_args: []

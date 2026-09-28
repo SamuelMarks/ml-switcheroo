@@ -5,12 +5,15 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: jnp.std
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   jax:
     api: jax.numpy.std
     args:
       a: a
+std_args: []

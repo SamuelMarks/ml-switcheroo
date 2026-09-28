@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_cmpk_lg_u32
     description: Auto-mapped instruction S_CMPK_LG_U32
+    args: {}
+std_args: []

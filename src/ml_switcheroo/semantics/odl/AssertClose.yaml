@@ -8,3 +8,4 @@ variants:
     pack_as: Tuple
     required_imports:
     - import numpy
+std_args: []

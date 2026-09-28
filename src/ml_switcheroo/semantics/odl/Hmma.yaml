@@ -2,3 +2,5 @@ operation: Hmma
 variants:
   nvidia_sass:
     api: HMMA
+    args: {}
+std_args: []

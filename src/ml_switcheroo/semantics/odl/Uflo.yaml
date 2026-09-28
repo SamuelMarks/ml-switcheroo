@@ -2,3 +2,5 @@ operation: Uflo
 variants:
   nvidia_sass:
     api: UFLO
+    args: {}
+std_args: []

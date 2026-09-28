@@ -2,3 +2,5 @@ operation: PartitionId
 variants:
   stablehlo:
     api: stablehlo.partition_id
+    args: {}
+std_args: []

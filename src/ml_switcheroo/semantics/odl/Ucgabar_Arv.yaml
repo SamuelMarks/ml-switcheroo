@@ -2,3 +2,5 @@ operation: Ucgabar_Arv
 variants:
   nvidia_sass:
     api: UCGABAR_ARV
+    args: {}
+std_args: []

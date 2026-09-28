@@ -12,6 +12,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   torch:
     api: torch.nn.AdaptiveAvgPool2d
     dispatch_rules: []
@@ -19,11 +20,13 @@ variants:
       output_size: 1
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.layers.GlobalAveragePooling2D
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 std_args:
 - name: output_size
   kind: positional_or_keyword

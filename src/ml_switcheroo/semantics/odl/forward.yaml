@@ -5,3 +5,6 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: inject_training_flag
+    api: ''
+    args: {}
+std_args: []

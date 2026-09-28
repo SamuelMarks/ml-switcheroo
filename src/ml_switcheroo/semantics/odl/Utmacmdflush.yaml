@@ -2,3 +2,5 @@ operation: Utmacmdflush
 variants:
   nvidia_sass:
     api: UTMACMDFLUSH
+    args: {}
+std_args: []

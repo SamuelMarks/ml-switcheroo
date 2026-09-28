@@ -297,8 +297,29 @@ def _flatten_single_framework(fw: str, snap: Any, flat_snapshots: Dict[str, Dict
     flat_snapshots[fw][k] = v
   for k, v in snap.get("classes", {}).items():
     flat_snapshots[fw][k] = v
+  for item in snap.get("operations", []):
+    if isinstance(item, dict):
+      if "api_path" in item:
+        flat_snapshots[fw][item["api_path"]] = item
+      if "class_name" in item:
+        flat_snapshots[fw][item["class_name"]] = item
+      if "name" in item:
+        flat_snapshots[fw][item["name"]] = item
+      if "aliases" in item and isinstance(item["aliases"], list):
+        for alias in item["aliases"]:
+          flat_snapshots[fw][alias] = item
   for k, v in snap.items():
-    if k not in ["categories", "functions", "classes", "version", "mappings", "templates", "imports", "structs"]:
+    if k not in [
+      "categories",
+      "functions",
+      "classes",
+      "operations",
+      "version",
+      "mappings",
+      "templates",
+      "imports",
+      "structs",
+    ]:
       if isinstance(v, dict) and (
         fw in ("nvidia_sass", "rdna")
         or "args" in v
@@ -344,6 +365,8 @@ def load_snapshots(snapshot_dir: Path) -> Dict[str, Dict[str, Any]]:
     with open(file_path, "r", encoding="utf-8") as f:
       snap = json.load(f)
       _flatten_single_framework(fw, snap, flat_snapshots)
+      if fw == "stablehlo_exhaustive":
+        _flatten_single_framework("stablehlo", snap, flat_snapshots)
 
   return flat_snapshots
 
@@ -412,6 +435,8 @@ def load_snapshots_multi(snapshot_dirs: Optional[List[Path]] = None) -> Dict[str
         _flatten_single_framework(fw, snap, flat_snapshots)
         if fw == "optax_shim":
           _flatten_single_framework("optax", snap, flat_snapshots)
+        elif fw == "stablehlo_exhaustive":
+          _flatten_single_framework("stablehlo", snap, flat_snapshots)
 
   return flat_snapshots
 
@@ -635,16 +660,35 @@ def audit_frameworks(
         api_str = str(api)
         from ml_switcheroo_ir.schema.onnx_registry import ONNX_REGISTRY
 
-        ir_known_ops = set(ONNX_REGISTRY.keys()) | {
-          "RMSNorm",
-          "SwiGLU",
-          "RoPE",
-          "FlashAttention",
-          "VisionPatchEmbedding",
-          "ml_switcheroo_ir.LogicalNode",
-          "sw_ir.LogicalNode",
-          "LogicalNode",
-        }
+        try:
+          from ml_ecosystem_snapshots.frameworks.onnx_spec import _load_onnx_ops
+
+          canonical_onnx = {op["name"] for op in _load_onnx_ops() if isinstance(op, dict) and "name" in op}
+        except Exception:
+          canonical_onnx = set()
+
+        ir_known_ops = (
+          set(ONNX_REGISTRY.keys())
+          | canonical_onnx
+          | {
+            "Add",
+            "BatchNormalization",
+            "Conv",
+            "LayerNormalization",
+            "Gemm",
+            "MatMul",
+            "Relu",
+            "Softmax",
+            "RMSNorm",
+            "SwiGLU",
+            "RoPE",
+            "FlashAttention",
+            "VisionPatchEmbedding",
+            "ml_switcheroo_ir.LogicalNode",
+            "sw_ir.LogicalNode",
+            "LogicalNode",
+          }
+        )
         if api_str in snapshot or api_str in ir_known_ops or api_str.startswith("sw_ir."):
           is_valid_api = True
 

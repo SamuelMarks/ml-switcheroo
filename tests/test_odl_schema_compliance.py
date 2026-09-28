@@ -22,7 +22,13 @@ def test_odl_atomic_files_schema_compliance() -> None:
   if not odl_dir.exists():
     pytest.skip("ODL directory not found.")
 
-  yaml_files: List[Path] = [p for p in odl_dir.glob("*.yaml") if not p.name.startswith("__framework_")]
+  yaml_files: List[Path] = [
+    p
+    for p in odl_dir.glob("*.yaml")
+    if not p.name.startswith("ml_ecosystem_snapshots_")
+    and not p.name.startswith("__ecosystem_")
+    and not p.name.startswith("__framework_")
+  ]
   assert len(yaml_files) > 0, "No atomic ODL files found to validate."
 
   failures: List[str] = []
@@ -39,15 +45,15 @@ def test_odl_atomic_files_schema_compliance() -> None:
 
 
 def test_odl_framework_files_schema_compliance() -> None:
-  """Validates that all __framework_*.yaml files satisfy SemanticsFile."""
+  """Validates that all ml_ecosystem_snapshots_*.yaml files satisfy SemanticsFile."""
   semantics_dir: Path = resolve_semantics_dir()
   odl_dir: Path = semantics_dir / "odl"
 
   if not odl_dir.exists():
     pytest.skip("ODL directory not found.")
 
-  framework_files: List[Path] = list(odl_dir.glob("__framework_*.yaml"))
-  assert len(framework_files) > 0, "No framework metadata files found."
+  framework_files: List[Path] = list(odl_dir.glob("ml_ecosystem_snapshots_*.yaml"))
+  assert len(framework_files) > 0, "No ecosystem metadata files found."
 
   for fpath in framework_files:
     with open(fpath, "r", encoding="utf-8") as f:

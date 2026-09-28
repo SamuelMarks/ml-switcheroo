@@ -2,3 +2,5 @@ operation: Fchk
 variants:
   nvidia_sass:
     api: FCHK
+    args: {}
+std_args: []

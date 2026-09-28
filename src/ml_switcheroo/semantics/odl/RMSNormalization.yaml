@@ -26,11 +26,13 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     api: praxis.layers.RMSNorm
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   mlx:
     api: mlx.nn.RMSNorm
     args:

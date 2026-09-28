@@ -13,6 +13,7 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: transformer_ff_block
+    args: {}
   mlx:
     api: mlx.nn.Sequential
     args: {}

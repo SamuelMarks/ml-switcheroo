@@ -3,8 +3,10 @@ variants:
   rdna:
     api: v_cmp_lt_f32
     description: Vector float comparison.
+    args: {}
   stablehlo:
     api: stablehlo.compare
+    args: {}
 std_args:
 - name: lhs
   kind: positional_or_keyword

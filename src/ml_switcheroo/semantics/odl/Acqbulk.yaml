@@ -2,3 +2,5 @@ operation: Acqbulk
 variants:
   nvidia_sass:
     api: ACQBULK
+    args: {}
+std_args: []

@@ -2,6 +2,7 @@ operation: ShiftRightArithmetic
 variants:
   stablehlo:
     api: stablehlo.shift_right_arithmetic
+    args: {}
 std_args:
 - name: lhs
   kind: positional_or_keyword

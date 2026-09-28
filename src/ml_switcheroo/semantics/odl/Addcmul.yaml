@@ -6,9 +6,14 @@ variants:
     pack_as: Tuple
     required_imports:
     - import jax.numpy as jnp
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     macro_template: jnp.add({input}, {value} * jnp.multiply({tensor1}, {tensor2}))
     pack_as: Tuple
     required_imports:
     - import jax.numpy as jnp
+    api: ''
+    args: {}
+std_args: []

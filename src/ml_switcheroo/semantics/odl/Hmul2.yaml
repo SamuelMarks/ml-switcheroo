@@ -2,3 +2,5 @@ operation: Hmul2
 variants:
   nvidia_sass:
     api: HMUL2
+    args: {}
+std_args: []

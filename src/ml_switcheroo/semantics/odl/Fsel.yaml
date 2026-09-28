@@ -2,3 +2,5 @@ operation: Fsel
 variants:
   nvidia_sass:
     api: FSEL
+    args: {}
+std_args: []

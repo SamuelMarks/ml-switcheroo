@@ -2,3 +2,5 @@ operation: Sttm
 variants:
   nvidia_sass:
     api: STTM
+    args: {}
+std_args: []

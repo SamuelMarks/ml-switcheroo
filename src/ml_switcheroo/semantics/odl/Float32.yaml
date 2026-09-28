@@ -5,11 +5,16 @@ std_args: []
 variants:
   torch:
     api: torch.float32
+    args: {}
   jax:
     api: jax.numpy.float32
+    args: {}
   mlx:
     api: mlx.core.float32
+    args: {}
   numpy:
     api: numpy.float32
+    args: {}
   keras:
     api: numpy.float32
+    args: {}

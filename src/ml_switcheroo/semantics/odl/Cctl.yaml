@@ -2,3 +2,5 @@ operation: Cctl
 variants:
   nvidia_sass:
     api: CCTL
+    args: {}
+std_args: []

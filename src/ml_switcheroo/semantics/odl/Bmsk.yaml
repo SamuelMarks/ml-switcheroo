@@ -2,3 +2,5 @@ operation: Bmsk
 variants:
   nvidia_sass:
     api: BMSK
+    args: {}
+std_args: []

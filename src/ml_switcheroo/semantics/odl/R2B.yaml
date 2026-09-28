@@ -2,3 +2,5 @@ operation: R2B
 variants:
   nvidia_sass:
     api: R2B
+    args: {}
+std_args: []

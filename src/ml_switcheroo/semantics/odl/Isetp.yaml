@@ -2,3 +2,5 @@ operation: Isetp
 variants:
   nvidia_sass:
     api: ISETP
+    args: {}
+std_args: []

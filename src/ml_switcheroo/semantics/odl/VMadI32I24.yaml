@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_mad_i32_i24
     description: Auto-mapped instruction V_MAD_I32_I24
+    args: {}
+std_args: []

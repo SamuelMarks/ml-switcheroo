@@ -2,3 +2,5 @@ operation: Utmapf
 variants:
   nvidia_sass:
     api: UTMAPF
+    args: {}
+std_args: []

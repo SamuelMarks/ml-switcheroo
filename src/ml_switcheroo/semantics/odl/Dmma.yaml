@@ -2,3 +2,5 @@ operation: Dmma
 variants:
   nvidia_sass:
     api: DMMA
+    args: {}
+std_args: []

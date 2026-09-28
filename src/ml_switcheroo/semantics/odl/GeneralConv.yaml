@@ -6,9 +6,12 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: jax_conv_general_adapter
+    args: {}
   flax_nnx:
     api: jax.lax.conv_general_dilated
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
     requires_plugin: jax_conv_general_adapter
+    args: {}
+std_args: []

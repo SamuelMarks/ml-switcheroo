@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_swap_b16
     description: Auto-mapped instruction V_SWAP_B16
+    args: {}
+std_args: []

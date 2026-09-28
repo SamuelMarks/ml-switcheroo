@@ -69,3 +69,30 @@ def test_sharding_inference_pass_apply() -> None:
 
   # Ignored
   assert node_dict["relu"].sharding is None
+
+
+def test_estimate_tensor_memory_and_graph() -> None:
+  """Test analytical memory estimation on tensors and graphs."""
+  from unittest.mock import patch
+  from ml_switcheroo.core.compiler.sharding import estimate_tensor_memory
+
+  # Normal computation
+  bytes_f32 = estimate_tensor_memory([10, 20], dtype="float32")
+  assert bytes_f32 == 800.0
+
+  # Fallback branch
+  with patch("ml_ecosystem_snapshots.compliance.estimate_tensor_memory_bytes", side_effect=Exception("Err")):
+    fallback_64 = estimate_tensor_memory([10, 20], dtype="float64")
+    assert fallback_64 == 1600.0
+    fallback_16 = estimate_tensor_memory([10, 20], dtype="float16")
+    assert fallback_16 == 400.0
+    fallback_8 = estimate_tensor_memory([10, 20], dtype="int8")
+    assert fallback_8 == 200.0
+    fallback_empty = estimate_tensor_memory([], dtype="float32")
+    assert fallback_empty == 0.0
+
+  pass_ = ShardingInferencePass()
+  node = LogicalNode(id="n1", op_type="Linear", attributes={"shape": [4, 8], "dtype": "float32"})
+  node_no_shape = LogicalNode(id="n2", op_type="Relu", attributes={})
+  graph = LogicalGraph(nodes={"n1": node, "n2": node_no_shape}, edges=[])
+  assert pass_.estimate_graph_memory_bytes(graph) == 128.0

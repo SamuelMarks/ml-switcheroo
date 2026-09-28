@@ -1,6 +1,6 @@
 """MLIR Compiler Backend."""
 
-from typing import Any
+from typing import Any, Dict, Optional
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.mlir.cst import (
@@ -85,3 +85,35 @@ class MlirBackend(CompilerBackend):
     module = ModuleNode(body=block)
     printer = MlirPrinter()
     return printer.emit(module)
+
+  def validate_op(
+    self,
+    op_name: str,
+    operand_count: int = 0,
+    attributes: Optional[Dict[str, Any]] = None,
+  ) -> Any:
+    """Validate an MLIR operation against grounded dialect specifications.
+
+    Args:
+        op_name: The MLIR operation name (e.g. 'func.func', 'arith.addi').
+        operand_count: Number of input operands.
+        attributes: Operation attributes dictionary.
+
+    Returns:
+        Any: A GroundingReport if ml_ecosystem_snapshots is available, or None.
+    """
+    try:
+      from ml_ecosystem_snapshots.grounding.compiler import validate_mlir_op
+
+      if "." in op_name:
+        dialect, name = op_name.split(".", 1)
+      else:
+        dialect, name = "builtin", op_name
+      return validate_mlir_op(
+        dialect=dialect,
+        op_name=name,
+        operand_count=operand_count,
+        attributes=attributes or {},
+      )
+    except Exception:
+      return None

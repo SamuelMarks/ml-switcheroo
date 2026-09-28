@@ -248,6 +248,32 @@ def test_resolve_snapshots_dir_fallback(tmp_path: Path) -> None:
         assert resolve_snapshots_dir() == expected
 
 
+def test_resolve_snapshots_dir_custom_paths(tmp_path: Path) -> None:
+  """Resolves snapshots directory from custom snapshots path.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  custom_dir = tmp_path / "custom_snapshots_env"
+  custom_dir.mkdir()
+  non_existent = tmp_path / "does_not_exist"
+  with patch(
+    "ml_switcheroo.semantics.paths.get_custom_snapshots_paths",
+    return_value=[str(non_existent), str(custom_dir)],
+  ):
+    assert resolve_snapshots_dir() == custom_dir
+
+
+def test_paths_import_fallback() -> None:
+  """Verifies the behavior of fallback when ml_ecosystem_snapshots.utils is missing."""
+  import importlib
+
+  with patch.dict("sys.modules", {"ml_ecosystem_snapshots.utils": None}):
+    importlib.reload(paths)
+    assert paths.get_custom_snapshots_paths() == []
+  importlib.reload(paths)
+
+
 def test_python_old() -> None:
   """Verifies the behavior of python old."""
   import importlib

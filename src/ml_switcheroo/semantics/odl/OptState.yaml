@@ -4,6 +4,8 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   flax_nnx:
     api: flax.nnx.OptState
     args:
@@ -16,3 +18,4 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+std_args: []

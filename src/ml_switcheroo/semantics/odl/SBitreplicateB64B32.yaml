@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_bitreplicate_b64_b32
     description: Auto-mapped instruction S_BITREPLICATE_B64_B32
+    args: {}
+std_args: []

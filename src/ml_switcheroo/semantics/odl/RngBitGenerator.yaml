@@ -2,6 +2,7 @@ operation: RngBitGenerator
 variants:
   stablehlo:
     api: stablehlo.rng_bit_generator
+    args: {}
 std_args:
 - name: rng_algorithm
   kind: keyword_only

@@ -14,21 +14,25 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.losses.MeanSquaredError
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     api: optax.squared_error
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   mlx:
     api: mlx.nn.losses.mse_loss
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   torch:
     api: torch.nn.MSELoss
     arg_values:
@@ -46,5 +50,6 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: MeanSquaredError
 type: function

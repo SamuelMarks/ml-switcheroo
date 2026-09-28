@@ -26,15 +26,19 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   flax_nnx:
     api: flax.linen.attention.dot_product_attention
     dispatch_rules: []
     missing_message: Flax does not provide a built-in Additive/Bahdanau Layer.
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: AdditiveAttention
 type: function

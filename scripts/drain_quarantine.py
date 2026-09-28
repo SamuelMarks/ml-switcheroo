@@ -202,6 +202,7 @@ def main(args: Optional[Sequence[str]] = None) -> int:
     quarantine_data = yaml.safe_load(f) or {}
 
   snapshot_dirs = [
+    Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
     Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
     Path("../ml-compiler-snapshots"),
   ]

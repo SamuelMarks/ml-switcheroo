@@ -13,3 +13,4 @@ variants:
     api: jax.numpy.unique_inverse
     args:
       x: x
+std_args: []

@@ -34,12 +34,14 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   torch:
     api: torch.nn.Embedding
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
     requires_plugin: vocab_lookup
+    args: {}
   mlx:
     api: mlx.nn.Embedding
     args:

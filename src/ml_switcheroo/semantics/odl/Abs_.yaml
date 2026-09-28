@@ -21,28 +21,34 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   keras:
     api: keras.ops.abs
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     api: jax.numpy.abs
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.abs
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: jax.numpy.abs
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   stablehlo:
     api: stablehlo.abs
+    args: {}
   rdna:
     api: v_abs_f32
     args: {}

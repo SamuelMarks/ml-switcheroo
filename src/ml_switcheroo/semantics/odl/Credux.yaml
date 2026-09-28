@@ -2,3 +2,5 @@ operation: Credux
 variants:
   nvidia_sass:
     api: CREDUX
+    args: {}
+std_args: []

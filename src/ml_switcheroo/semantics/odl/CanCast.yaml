@@ -5,8 +5,11 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: jax.numpy.can_cast
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
+std_args: []

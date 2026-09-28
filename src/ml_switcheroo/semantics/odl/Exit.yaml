@@ -2,3 +2,5 @@ operation: Exit
 variants:
   nvidia_sass:
     api: EXIT
+    args: {}
+std_args: []

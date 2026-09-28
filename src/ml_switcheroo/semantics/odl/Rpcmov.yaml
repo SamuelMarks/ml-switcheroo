@@ -2,3 +2,5 @@ operation: Rpcmov
 variants:
   nvidia_sass:
     api: RPCMOV
+    args: {}
+std_args: []

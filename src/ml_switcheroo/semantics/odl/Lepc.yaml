@@ -2,3 +2,5 @@ operation: Lepc
 variants:
   nvidia_sass:
     api: LEPC
+    args: {}
+std_args: []

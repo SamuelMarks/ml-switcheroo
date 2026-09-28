@@ -2,3 +2,5 @@ operation: MinMax
 variants:
   nvidia_sass:
     api: FMNMX
+    args: {}
+std_args: []

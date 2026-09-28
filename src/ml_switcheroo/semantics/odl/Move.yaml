@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_mov_b32
     description: Vector register move.
+    args: {}
+std_args: []

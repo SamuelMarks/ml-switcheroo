@@ -2,3 +2,5 @@ operation: Fset
 variants:
   nvidia_sass:
     api: FSET
+    args: {}
+std_args: []

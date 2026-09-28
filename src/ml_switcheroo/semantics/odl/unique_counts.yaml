@@ -13,3 +13,4 @@ variants:
     api: jax.numpy.unique_counts
     args:
       x: x
+std_args: []

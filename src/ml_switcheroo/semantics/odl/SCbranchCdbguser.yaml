@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_cbranch_cdbguser
     description: Auto-mapped instruction S_CBRANCH_CDBGUSER
+    args: {}
+std_args: []

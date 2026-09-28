@@ -2,6 +2,7 @@ operation: DotGeneral
 variants:
   stablehlo:
     api: stablehlo.dot_general
+    args: {}
 std_args:
 - name: lhs
   kind: positional_or_keyword

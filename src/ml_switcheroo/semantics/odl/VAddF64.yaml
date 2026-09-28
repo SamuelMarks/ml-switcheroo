@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_add_f64
     description: Auto-mapped instruction V_ADD_F64
+    args: {}
+std_args: []

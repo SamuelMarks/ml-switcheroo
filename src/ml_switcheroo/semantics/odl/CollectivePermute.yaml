@@ -2,6 +2,7 @@ operation: CollectivePermute
 variants:
   stablehlo:
     api: stablehlo.collective_permute
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

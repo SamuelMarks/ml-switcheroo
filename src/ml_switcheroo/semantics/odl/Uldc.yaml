@@ -2,3 +2,5 @@ operation: Uldc
 variants:
   nvidia_sass:
     api: ULDC
+    args: {}
+std_args: []

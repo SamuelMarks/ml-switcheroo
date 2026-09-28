@@ -2,3 +2,5 @@ operation: Ldc
 variants:
   nvidia_sass:
     api: LDC
+    args: {}
+std_args: []

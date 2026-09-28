@@ -3,3 +3,5 @@ variants:
   rdna:
     api: ds_add_rtn_u64
     description: Auto-mapped instruction DS_ADD_RTN_U64
+    args: {}
+std_args: []

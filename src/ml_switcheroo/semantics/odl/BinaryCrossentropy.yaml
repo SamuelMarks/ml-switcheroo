@@ -37,16 +37,19 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.losses.BinaryCrossentropy
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     api: optax.sigmoid_binary_cross_entropy
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   torch:
     api: torch.nn.BCELoss
     arg_values:
@@ -65,5 +68,6 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: loss_wrapper
+    args: {}
 operation: BinaryCrossentropy
 type: function

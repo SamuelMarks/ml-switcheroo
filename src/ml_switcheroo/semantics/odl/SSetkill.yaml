@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_setkill
     description: Auto-mapped instruction S_SETKILL
+    args: {}
+std_args: []

@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_cmpx_nlg_f32
     description: Auto-mapped instruction V_CMPX_NLG_F32
+    args: {}
+std_args: []

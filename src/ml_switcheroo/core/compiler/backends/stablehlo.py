@@ -4,7 +4,7 @@ This module provides the StableHloBackend class, which compiles a logical graph 
 of computations into StableHLO-flavored MLIR code representation.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.mlir.cst import (
@@ -123,3 +123,31 @@ class StableHloBackend(CompilerBackend):
     module = ModuleNode(body=block)
     printer = MlirPrinter()
     return printer.emit(module, header="// Graph -> StableHLO compilation output\n")
+
+  def validate_op(
+    self,
+    op_name: str,
+    operand_types: Optional[List[str]] = None,
+    attributes: Optional[Dict[str, Any]] = None,
+  ) -> Any:
+    """Validate a StableHLO operation against grounded dialect specifications.
+
+    Args:
+        op_name: The StableHLO operation name (e.g. 'stablehlo.add').
+        operand_types: Optional operand type strings.
+        attributes: Operation attributes dictionary.
+
+    Returns:
+        Any: A GroundingReport if ml_ecosystem_snapshots is available, or None.
+    """
+    try:
+      from ml_ecosystem_snapshots.grounding.compiler import validate_stablehlo_op
+
+      clean_op = op_name.replace("stablehlo.", "")
+      return validate_stablehlo_op(
+        op_name=clean_op,
+        operand_types=operand_types or ["tensor<f32>", "tensor<f32>"],
+        attributes=attributes or {},
+      )
+    except Exception:
+      return None

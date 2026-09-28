@@ -25,11 +25,13 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   mlx:
     api: mlx.nn.AvgPool2d
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   torch:
     api: torch.nn.AdaptiveAvgPool2d
     dispatch_rules: []
@@ -39,10 +41,12 @@ variants:
       - 1
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: flax.nnx.AvgPool
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: GlobalAveragePooling2D
 type: function

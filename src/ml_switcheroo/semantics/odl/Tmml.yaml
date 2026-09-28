@@ -2,3 +2,5 @@ operation: Tmml
 variants:
   nvidia_sass:
     api: TMML
+    args: {}
+std_args: []

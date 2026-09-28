@@ -73,6 +73,18 @@ def test_mlir_printer() -> None:
   assert "dummy_text" in code2
 
 
+def test_stablehlo_backend_validate_op() -> None:
+  """Test validate_op on StableHloBackend."""
+  from unittest.mock import patch
+
+  backend = StableHloBackend()
+  report = backend.validate_op("add")
+  assert report is not None
+
+  with patch("ml_ecosystem_snapshots.grounding.compiler.validate_stablehlo_op", side_effect=Exception("Error")):
+    assert backend.validate_op("add") is None
+
+
 def test_mlir_printer_with_module_op() -> None:
   """Docstring."""
   printer: MlirPrinter = MlirPrinter()

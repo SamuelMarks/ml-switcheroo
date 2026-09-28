@@ -32,12 +32,15 @@ std_args:
 variants:
   torch:
     api: torch.save
+    args: {}
   jax:
     api: save
     requires_plugin: io_handler
+    args: {}
   numpy:
     api: save
     requires_plugin: io_handler
+    args: {}
   mlx:
     api: mlx.core.save
     args:

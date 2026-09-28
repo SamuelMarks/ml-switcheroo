@@ -19,8 +19,10 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: jax.nn.pixel_unshuffle
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}

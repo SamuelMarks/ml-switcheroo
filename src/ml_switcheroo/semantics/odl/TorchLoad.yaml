@@ -29,12 +29,15 @@ std_args:
 variants:
   torch:
     api: torch.load
+    args: {}
   jax:
     api: load
     requires_plugin: io_handler
+    args: {}
   numpy:
     api: load
     requires_plugin: io_handler
+    args: {}
   mlx:
     api: mlx.core.load
     args:

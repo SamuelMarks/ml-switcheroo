@@ -14,3 +14,4 @@ variants:
     api: jax.numpy.cumulative_sum
     args:
       x: x
+std_args: []

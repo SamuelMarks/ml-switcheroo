@@ -12,6 +12,13 @@ from typing import Any, Dict
 from ml_switcheroo_ir.schema.ghost import StandardMap
 import importlib.resources
 
+try:
+  from ml_ecosystem_snapshots._alias import register_alias_finder
+
+  register_alias_finder()
+except ImportError:
+  pass
+
 
 def _resolve_resource_file(framework: str) -> Any:
   """Resolve snapshot resource file across ecosystem and legacy packages.

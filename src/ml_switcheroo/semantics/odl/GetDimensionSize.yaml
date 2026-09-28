@@ -2,6 +2,7 @@ operation: GetDimensionSize
 variants:
   stablehlo:
     api: stablehlo.get_dimension_size
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

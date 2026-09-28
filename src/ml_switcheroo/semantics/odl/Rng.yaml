@@ -2,6 +2,7 @@ operation: Rng
 variants:
   stablehlo:
     api: stablehlo.rng
+    args: {}
 std_args:
 - name: a
   kind: positional_or_keyword

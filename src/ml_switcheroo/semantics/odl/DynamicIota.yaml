@@ -2,6 +2,7 @@ operation: DynamicIota
 variants:
   stablehlo:
     api: stablehlo.dynamic_iota
+    args: {}
 std_args:
 - name: output_shape
   kind: positional_or_keyword

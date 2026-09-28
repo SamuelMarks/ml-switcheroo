@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_version
     description: Auto-mapped instruction S_VERSION
+    args: {}
+std_args: []

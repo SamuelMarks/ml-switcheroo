@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_trap
     description: Auto-mapped instruction S_TRAP
+    args: {}
+std_args: []

@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_xor3_b32
     description: Auto-mapped instruction V_XOR3_B32
+    args: {}
+std_args: []

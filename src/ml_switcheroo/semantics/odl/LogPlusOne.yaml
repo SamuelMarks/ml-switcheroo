@@ -2,6 +2,7 @@ operation: LogPlusOne
 variants:
   stablehlo:
     api: stablehlo.log_plus_one
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

@@ -2,6 +2,7 @@ operation: Xor
 variants:
   stablehlo:
     api: stablehlo.xor
+    args: {}
 std_args:
 - name: lhs
   kind: positional_or_keyword

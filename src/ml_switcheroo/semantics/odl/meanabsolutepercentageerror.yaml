@@ -14,20 +14,24 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.losses.MeanAbsolutePercentageError
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     api: optax.mape_loss
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: optax.mape_loss
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: MeanAbsolutePercentageError
 type: function

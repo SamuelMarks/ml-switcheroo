@@ -2,3 +2,5 @@ operation: Hadd2_32I
 variants:
   nvidia_sass:
     api: HADD2_32I
+    args: {}
+std_args: []

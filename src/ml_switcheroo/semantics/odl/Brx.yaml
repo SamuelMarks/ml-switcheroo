@@ -2,3 +2,5 @@ operation: Brx
 variants:
   nvidia_sass:
     api: BRX
+    args: {}
+std_args: []

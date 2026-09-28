@@ -14,6 +14,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   mlx:
     api: mlx.optimizers.Adagrad
     args:
@@ -53,3 +54,4 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}

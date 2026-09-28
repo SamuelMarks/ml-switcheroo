@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_decperflevel
     description: Auto-mapped instruction S_DECPERFLEVEL
+    args: {}
+std_args: []

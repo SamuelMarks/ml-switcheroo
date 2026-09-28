@@ -2,6 +2,7 @@ operation: Outfeed
 variants:
   stablehlo:
     api: stablehlo.outfeed
+    args: {}
   jax:
     api: ; Macro.Outfeed
     args: {}

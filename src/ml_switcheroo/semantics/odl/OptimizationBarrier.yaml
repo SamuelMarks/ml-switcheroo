@@ -2,6 +2,7 @@ operation: OptimizationBarrier
 variants:
   stablehlo:
     api: stablehlo.optimization_barrier
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

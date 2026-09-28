@@ -5,23 +5,29 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     dispatch_rules: []
     macro_template: 1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis})
       + {y_pred}.sum(axis={axis}))
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   tensorflow:
     api: tf.keras.losses.Dice
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     dispatch_rules: []
     macro_template: 1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis})
       + {y_pred}.sum(axis={axis}))
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
 std_args:
 - name: reduction
   kind: positional_or_keyword

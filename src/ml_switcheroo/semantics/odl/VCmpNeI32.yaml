@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_cmp_ne_i32
     description: Auto-mapped instruction V_CMP_NE_I32
+    args: {}
+std_args: []

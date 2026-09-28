@@ -7,3 +7,5 @@ variants:
       {batch2}), axis=0)'
     pack_as: Tuple
     required_imports: []
+    args: {}
+std_args: []

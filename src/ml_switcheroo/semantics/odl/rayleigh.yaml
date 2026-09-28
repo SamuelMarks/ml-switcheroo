@@ -11,3 +11,4 @@ variants:
     args:
       key: key
       scale: scale
+std_args: []

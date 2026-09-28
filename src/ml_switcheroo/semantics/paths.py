@@ -14,6 +14,18 @@ if sys.version_info >= (3, 9):
 else:
   files = None
 
+try:
+  from ml_ecosystem_snapshots.utils import get_custom_snapshots_paths
+except ImportError:
+
+  def get_custom_snapshots_paths() -> list[str]:
+    """Retrieve custom snapshot directory paths configured via environment variables.
+
+    Returns:
+        list[str]: Empty list fallback when ml_ecosystem_snapshots is not installed.
+    """
+    return []
+
 
 def resolve_semantics_dir() -> Path:
   """Locate the directory containing semantic JSON definitions.
@@ -52,19 +64,26 @@ def resolve_snapshots_dir() -> Path:
   before falling back to legacy repositories.
 
   Priority Order:
-      1. `$ML_ECOSYSTEM_SNAPSHOTS_DIR` environment variable.
-      2. Sibling repository `../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots/`
+      1. `$ML_SNAPSHOTS_PATH` / `$ML_FRAMEWORK_SNAPSHOTS_PATH` configured custom paths.
+      2. `$ML_ECOSYSTEM_SNAPSHOTS_DIR` environment variable.
+      3. Sibling repository `../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots/`
          or `../ml-ecosystem-snapshots/src/ml_framework_snapshots/snapshots/`.
-      3. User cache directory `~/.cache/ml_ecosystem_snapshots/`.
-      4. Legacy `$ML_FRAMEWORK_SNAPSHOTS_DIR` environment variable.
-      5. Legacy sibling repositories `../ml-compiler-snapshots` or `../ml-framework-snapshots`.
-      6. Fallback candidate path.
+      4. User cache directory `~/.cache/ml_ecosystem_snapshots/`.
+      5. Legacy `$ML_FRAMEWORK_SNAPSHOTS_DIR` environment variable.
+      6. Legacy sibling repositories `../ml-compiler-snapshots` or `../ml-framework-snapshots`.
+      7. Fallback candidate path.
 
   Returns:
       Path: The absolute path to the resolved 'snapshots' directory.
 
   """
-  # 1. Check $ML_ECOSYSTEM_SNAPSHOTS_DIR environment variable
+  # 1. Check custom snapshot paths configured via environment variables
+  for custom_dir in get_custom_snapshots_paths():
+    c_path = Path(custom_dir)
+    if c_path.exists():
+      return c_path
+
+  # 2. Check $ML_ECOSYSTEM_SNAPSHOTS_DIR environment variable
   env_eco = os.environ.get("ML_ECOSYSTEM_SNAPSHOTS_DIR")
   if env_eco:
     eco_path = Path(env_eco)

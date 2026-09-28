@@ -5,11 +5,13 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: jax.numpy.right_shift
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   rdna:
     api: v_lshrrev_b32
     args: {}

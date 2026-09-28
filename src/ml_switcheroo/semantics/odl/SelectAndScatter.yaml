@@ -2,6 +2,7 @@ operation: SelectAndScatter
 variants:
   stablehlo:
     api: stablehlo.select_and_scatter
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

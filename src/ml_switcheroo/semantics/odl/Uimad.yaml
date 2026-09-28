@@ -2,3 +2,5 @@ operation: Uimad
 variants:
   nvidia_sass:
     api: UIMAD
+    args: {}
+std_args: []

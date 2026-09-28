@@ -3,3 +3,5 @@ variants:
   rdna:
     api: ds_cmpstore_rtn_f64
     description: Auto-mapped instruction DS_CMPSTORE_RTN_F64
+    args: {}
+std_args: []

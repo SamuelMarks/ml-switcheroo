@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_fma_f64
     description: Auto-mapped instruction V_FMA_F64
+    args: {}
+std_args: []

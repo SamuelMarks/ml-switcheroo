@@ -2,3 +2,5 @@ operation: Redux
 variants:
   nvidia_sass:
     api: REDUX
+    args: {}
+std_args: []

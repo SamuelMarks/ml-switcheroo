@@ -34,6 +34,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   optax_shim:
     api: optax.lamb
     args: {}
@@ -60,5 +61,6 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: Lamb
 type: function

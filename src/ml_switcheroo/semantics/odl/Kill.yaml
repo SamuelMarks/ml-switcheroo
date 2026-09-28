@@ -2,3 +2,5 @@ operation: Kill
 variants:
   nvidia_sass:
     api: KILL
+    args: {}
+std_args: []

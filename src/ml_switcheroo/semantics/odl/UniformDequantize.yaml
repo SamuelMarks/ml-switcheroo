@@ -2,6 +2,7 @@ operation: UniformDequantize
 variants:
   stablehlo:
     api: stablehlo.uniform_dequantize
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

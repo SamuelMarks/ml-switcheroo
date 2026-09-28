@@ -20,11 +20,13 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.layers.GlobalAveragePooling1D
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: nnx.avg_pool
     dispatch_rules: []
@@ -32,3 +34,4 @@ variants:
       method='linear')
     pack_as: Tuple
     required_imports: []
+    args: {}

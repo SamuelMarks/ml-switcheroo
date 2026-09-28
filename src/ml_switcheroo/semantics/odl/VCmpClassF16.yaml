@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_cmp_class_f16
     description: Auto-mapped instruction V_CMP_CLASS_F16
+    args: {}
+std_args: []

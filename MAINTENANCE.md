@@ -163,9 +163,28 @@ python3 scripts/expand_variant_parity.py
 # Audit all ODL definitions and adapters against extracted snapshots
 python3 scripts/audit_against_snapshots.py
 
-# Generate markdown and JSON audit reports
+# Generate markdown and JSON compliance reports
 python3 scripts/audit_against_snapshots.py --report-md audit_report.md --report-json audit_report.json
 ```
+
+### Upgrading `ml-ecosystem-snapshots` Releases
+
+When a new versioned wheel is released under `SamuelMarks/ml-ecosystem-snapshots`:
+1. Update the dependency URL in `requirements.txt`:
+   ```
+   ml_ecosystem_snapshots @ https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/vX.Y.Z/ml_ecosystem_snapshots-X.Y.Z-py3-none-any.whl
+   ```
+2. Reinstall and update lockfile:
+   ```bash
+   uv pip install --reinstall https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/vX.Y.Z/ml_ecosystem_snapshots-X.Y.Z-py3-none-any.whl
+   uv lock
+   ```
+3. Run the strict audit suite:
+   ```bash
+   python scripts/audit_against_snapshots.py --strict
+   ```
+4. Verify 100% test branch coverage and 100% docstring coverage.
+
 
 ### Auditing IR Dialects (MLIR & StableHLO)
 

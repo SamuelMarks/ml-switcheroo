@@ -12,3 +12,4 @@ variants:
     api: jax.Array.item
     macro_template: '{a}.item()'
     args: {}
+std_args: []

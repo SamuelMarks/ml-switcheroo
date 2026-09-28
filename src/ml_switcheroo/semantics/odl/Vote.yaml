@@ -2,3 +2,5 @@ operation: Vote
 variants:
   nvidia_sass:
     api: VOTE
+    args: {}
+std_args: []

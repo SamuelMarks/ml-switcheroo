@@ -2,3 +2,5 @@ operation: Mov
 variants:
   nvidia_sass:
     api: MOV
+    args: {}
+std_args: []

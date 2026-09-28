@@ -109,3 +109,15 @@ def test_import_errors_frameworks() -> None:
       a5.collect_api(SemanticTier.NEURAL)
     except Exception:
       pass
+
+
+def test_import_loader_no_alias() -> None:
+  """Verifies loader import fallback when ml_ecosystem_snapshots._alias is missing."""
+  with patch.dict("sys.modules", {"ml_ecosystem_snapshots._alias": None}):
+    import ml_switcheroo.frameworks.loader
+
+    importlib.reload(ml_switcheroo.frameworks.loader)
+
+  import ml_switcheroo.frameworks.loader
+
+  importlib.reload(ml_switcheroo.frameworks.loader)

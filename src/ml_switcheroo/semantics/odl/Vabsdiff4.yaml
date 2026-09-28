@@ -2,3 +2,5 @@ operation: Vabsdiff4
 variants:
   nvidia_sass:
     api: VABSDIFF4
+    args: {}
+std_args: []

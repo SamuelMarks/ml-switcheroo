@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_floor_f16
     description: Auto-mapped instruction V_FLOOR_F16
+    args: {}
+std_args: []

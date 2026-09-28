@@ -2,6 +2,7 @@ operation: Popcnt
 variants:
   stablehlo:
     api: stablehlo.popcnt
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

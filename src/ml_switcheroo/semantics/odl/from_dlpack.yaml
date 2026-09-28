@@ -13,3 +13,4 @@ variants:
     api: jax.numpy.from_dlpack
     args:
       x: x
+std_args: []

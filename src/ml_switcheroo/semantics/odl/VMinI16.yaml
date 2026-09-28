@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_min_i16
     description: Auto-mapped instruction V_MIN_I16
+    args: {}
+std_args: []

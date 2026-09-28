@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_bfm_b32
     description: Auto-mapped instruction S_BFM_B32
+    args: {}
+std_args: []

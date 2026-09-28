@@ -2,3 +2,5 @@ operation: Sust
 variants:
   nvidia_sass:
     api: SUST
+    args: {}
+std_args: []

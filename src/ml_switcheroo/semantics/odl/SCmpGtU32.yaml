@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_cmp_gt_u32
     description: Auto-mapped instruction S_CMP_GT_U32
+    args: {}
+std_args: []

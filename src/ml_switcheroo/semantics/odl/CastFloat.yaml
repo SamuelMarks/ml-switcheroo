@@ -22,6 +22,8 @@ std_args:
 variants:
   torch:
     api: float
+    args: {}
   jax:
     api: astype
     requires_plugin: type_methods
+    args: {}

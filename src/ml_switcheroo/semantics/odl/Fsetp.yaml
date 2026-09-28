@@ -2,3 +2,5 @@ operation: Fsetp
 variants:
   nvidia_sass:
     api: FSETP
+    args: {}
+std_args: []

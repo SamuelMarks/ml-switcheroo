@@ -2,3 +2,5 @@ operation: Ur2Up
 variants:
   nvidia_sass:
     api: UR2UP
+    args: {}
+std_args: []

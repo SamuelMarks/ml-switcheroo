@@ -6,9 +6,12 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: loss_reduction
+    args: {}
   flax_nnx:
     api: optax.sigmoid_binary_cross_entropy
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
     requires_plugin: loss_reduction
+    args: {}
+std_args: []

@@ -456,3 +456,48 @@ def test_manager_build_index_no_attrs() -> None:
   dummy._build_index()
   assert hasattr(dummy, "_reverse_index")
   assert hasattr(dummy, "_variant_cache")
+
+
+def test_lookup_and_search_snapshot_symbols() -> None:
+  """Test lookup_snapshot_symbol and search_snapshot_symbols on SemanticsManager."""
+  from unittest.mock import patch
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+
+  # Real lookup
+  res = sm.lookup_snapshot_symbol("torch", "torch.add")
+  assert res is not None or sm.lookup_snapshot_symbol("unknown", "unknown") is None
+
+  # Real search
+  search_res = sm.search_snapshot_symbols("add", framework="torch", limit=5)
+  assert isinstance(search_res, list)
+
+  # Non-dict return from lookup
+  with patch("ml_ecosystem_snapshots.index.lookup_symbol", return_value=None):
+    assert sm.lookup_snapshot_symbol("torch", "unknown") is None
+
+  # Non-list return from search
+  with patch("ml_ecosystem_snapshots.index.search_index", return_value=None):
+    assert sm.search_snapshot_symbols("unknown") == []
+
+  # Exception handling in lookup
+  with patch("ml_ecosystem_snapshots.index.lookup_symbol", side_effect=Exception("DB Error")):
+    assert sm.lookup_snapshot_symbol("torch", "torch.add") is None
+
+  # Exception handling in search
+  with patch("ml_ecosystem_snapshots.index.search_index", side_effect=Exception("DB Error")):
+    assert sm.search_snapshot_symbols("add") == []
+
+
+def test_validate_python_call() -> None:
+  """Test validate_python_call on SemanticsManager."""
+  from unittest.mock import patch
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  report = sm.validate_python_call("torch", "torch.add", args=["x", "y"])
+  assert report is not None
+
+  with patch("ml_ecosystem_snapshots.grounding.python_fw.validate_python_call", side_effect=Exception("Err")):
+    assert sm.validate_python_call("torch", "torch.add") is None

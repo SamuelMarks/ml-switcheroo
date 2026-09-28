@@ -2,6 +2,7 @@ operation: If
 variants:
   stablehlo:
     api: stablehlo.if
+    args: {}
 std_args:
 - name: pred
   kind: positional_or_keyword

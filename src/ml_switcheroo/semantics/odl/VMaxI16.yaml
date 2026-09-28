@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_max_i16
     description: Auto-mapped instruction V_MAX_I16
+    args: {}
+std_args: []

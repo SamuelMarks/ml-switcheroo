@@ -5,8 +5,13 @@ variants:
     macro_template: jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat}, {vec}))
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     macro_template: jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat}, {vec}))
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
+std_args: []

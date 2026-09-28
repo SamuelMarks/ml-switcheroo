@@ -2,3 +2,5 @@ operation: Elect
 variants:
   nvidia_sass:
     api: ELECT
+    args: {}
+std_args: []

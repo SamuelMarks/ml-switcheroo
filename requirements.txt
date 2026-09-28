@@ -16,4 +16,4 @@ lark>=1.1.9
 texsoup
 markdown-it-py[linkify]
 beautifulsoup4
-ml_ecosystem_snapshots @ git+https://github.com/SamuelMarks/ml-ecosystem-snapshots.git@master
+ml_ecosystem_snapshots @ https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.3/ml_ecosystem_snapshots-0.0.3-py3-none-any.whl

@@ -2,3 +2,5 @@ operation: Ldcu
 variants:
   nvidia_sass:
     api: LDCU
+    args: {}
+std_args: []

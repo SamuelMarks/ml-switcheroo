@@ -5,8 +5,13 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: scatter_indexer
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
     requires_plugin: scatter_indexer
+    api: ''
+    args: {}
+std_args: []

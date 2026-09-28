@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_setprio
     description: Auto-mapped instruction S_SETPRIO
+    args: {}
+std_args: []

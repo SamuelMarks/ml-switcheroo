@@ -2,3 +2,5 @@ operation: Psetp
 variants:
   nvidia_sass:
     api: PSETP
+    args: {}
+std_args: []

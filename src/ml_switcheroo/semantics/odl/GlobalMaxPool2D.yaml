@@ -14,6 +14,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   torch:
     api: torch.nn.AdaptiveMaxPool2d
     dispatch_rules: []
@@ -23,16 +24,19 @@ variants:
       - 1
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.layers.GlobalMaxPool2D
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: flax.nnx.MaxPool
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 std_args:
 - name: output_size
   kind: positional_or_keyword

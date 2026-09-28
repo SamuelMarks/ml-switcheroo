@@ -24,16 +24,19 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   latex_dsl:
     api: midl.Module
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   html:
     api: html_dsl.Module
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: flax.nnx.Module
     args: {}

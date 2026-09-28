@@ -12,3 +12,4 @@ variants:
       key: key
       mean: mean
       cov: cov
+std_args: []

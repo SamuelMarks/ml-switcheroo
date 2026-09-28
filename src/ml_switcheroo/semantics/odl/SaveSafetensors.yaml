@@ -1,16 +1,20 @@
 operation: SaveSafetensors
-description: 'save_file(tensors: Dict[str, Any], filename: str, metadata: Optional[Dict[str, str]] = None) -> None'
+description: 'save_file(tensors: Dict[str, Any], filename: str, metadata: Optional[Dict[str,
+  str]] = None) -> None'
 std_args:
 - name: tensors
   kind: positional_or_keyword
   is_variadic: false
+  type: Any
 - name: filename
   kind: positional_or_keyword
   is_variadic: false
+  type: Any
 - name: metadata
   kind: keyword_only
   is_variadic: false
   default: null
+  type: Any
 variants:
   torch:
     dispatch_rules: []
@@ -18,21 +22,29 @@ variants:
     pack_as: Tuple
     required_imports:
     - from safetensors.torch import save_file
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     macro_template: save_file({tensors}, {filename}, metadata={metadata})
     pack_as: Tuple
     required_imports:
     - from safetensors.flax import save_file
+    api: ''
+    args: {}
   paxml:
     dispatch_rules: []
     macro_template: save_file({tensors}, {filename}, metadata={metadata})
     pack_as: Tuple
     required_imports:
     - from safetensors.flax import save_file
+    api: ''
+    args: {}
   mlx:
     dispatch_rules: []
     macro_template: mx.save_safetensors({filename}, {tensors}, metadata={metadata})
     pack_as: Tuple
     required_imports:
     - import mlx.core as mx
+    api: ''
+    args: {}

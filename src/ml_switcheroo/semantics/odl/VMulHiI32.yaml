@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_mul_hi_i32
     description: Auto-mapped instruction V_MUL_HI_I32
+    args: {}
+std_args: []

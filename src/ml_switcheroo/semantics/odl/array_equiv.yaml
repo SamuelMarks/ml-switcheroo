@@ -13,3 +13,4 @@ variants:
     args:
       a1: a1
       a2: a2
+std_args: []

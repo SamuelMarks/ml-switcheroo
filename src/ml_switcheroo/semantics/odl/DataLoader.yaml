@@ -41,11 +41,13 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.data.Dataset
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
     requires_plugin: tf_data_loader
+    args: {}
 operation: DataLoader
 type: function

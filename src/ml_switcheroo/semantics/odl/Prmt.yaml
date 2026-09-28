@@ -2,3 +2,5 @@ operation: Prmt
 variants:
   nvidia_sass:
     api: PRMT
+    args: {}
+std_args: []

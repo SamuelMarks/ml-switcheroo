@@ -61,3 +61,5 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: embedding_bag
+    api: ''
+    args: {}

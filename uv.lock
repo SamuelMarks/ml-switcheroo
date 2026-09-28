@@ -1258,12 +1258,55 @@ wheels = [
 [[package]]
 name = "ml-ecosystem-snapshots"
 version = "0.0.3"
-source = { git = "https://github.com/SamuelMarks/ml-ecosystem-snapshots.git?rev=master#e0b2b72409d5526a6629fccaf5cbfbcaf67ba4e3" }
+source = { url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.3/ml_ecosystem_snapshots-0.0.3-py3-none-any.whl" }
 dependencies = [
     { name = "griffe" },
     { name = "ml-switcheroo-ir" },
     { name = "pydantic" },
 ]
+wheels = [
+    { url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.3/ml_ecosystem_snapshots-0.0.3-py3-none-any.whl", hash = "sha256:614d0f695a1fd039a0026bc562e68cc77cf54b242694778953f01965b4a28ddd" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "build", marker = "extra == 'test'" },
+    { name = "cdd", marker = "extra == 'generate'", git = "https://github.com/offscale/cdd-python.git?rev=master" },
+    { name = "cupy-cuda12x", marker = "sys_platform == 'linux' and extra == 'frameworks'" },
+    { name = "dask", marker = "extra == 'frameworks'" },
+    { name = "deepspeed", marker = "extra == 'linux-x64'" },
+    { name = "flax", marker = "extra == 'frameworks'", specifier = ">=0.8.0" },
+    { name = "griffe", git = "https://github.com/SamuelMarks/griffe.git?rev=rest" },
+    { name = "griffe", marker = "extra == 'generate'", git = "https://github.com/SamuelMarks/griffe.git?rev=rest" },
+    { name = "hatch-requirements-txt", marker = "extra == 'test'" },
+    { name = "hatchling", marker = "extra == 'test'" },
+    { name = "interrogate", marker = "extra == 'test'" },
+    { name = "jax", marker = "extra == 'frameworks'" },
+    { name = "keras", marker = "extra == 'frameworks'", specifier = ">=3.0.0" },
+    { name = "ml-switcheroo-ir", git = "https://github.com/SamuelMarks/ml-switcheroo-ir.git?rev=master" },
+    { name = "ml-switcheroo-ir", marker = "extra == 'generate'", git = "https://github.com/SamuelMarks/ml-switcheroo-ir.git?rev=master" },
+    { name = "mlx", marker = "sys_platform == 'darwin' and extra == 'frameworks'", specifier = ">=0.10.0" },
+    { name = "numpy", marker = "extra == 'frameworks'", specifier = "<2.0.0" },
+    { name = "onnxruntime", marker = "extra == 'host'" },
+    { name = "optax", marker = "extra == 'host'" },
+    { name = "orbax-checkpoint", marker = "extra == 'host'" },
+    { name = "pydantic", specifier = ">=2.0.0" },
+    { name = "pydantic", marker = "extra == 'generate'", specifier = ">=2.0.0" },
+    { name = "pydantic", marker = "extra == 'test'" },
+    { name = "pytest", marker = "extra == 'test'" },
+    { name = "pytest-cov", marker = "extra == 'test'" },
+    { name = "pytest-mock", marker = "extra == 'test'" },
+    { name = "pytest-xdist", marker = "extra == 'test'" },
+    { name = "rich", marker = "extra == 'generate'" },
+    { name = "scikit-learn", marker = "extra == 'host'" },
+    { name = "scikit-learn", marker = "extra == 'test'" },
+    { name = "tensorflow", marker = "sys_platform != 'darwin' and extra == 'frameworks'" },
+    { name = "tensorflow-macos", marker = "sys_platform == 'darwin' and extra == 'frameworks'" },
+    { name = "torch", marker = "extra == 'frameworks'", specifier = ">=2.0.0" },
+    { name = "transformers", marker = "extra == 'host'" },
+    { name = "triton", marker = "extra == 'linux-x64'" },
+]
+provides-extras = ["frameworks", "generate", "host", "linux-x64", "test"]
 
 [[package]]
 name = "ml-framework-snapshots"
@@ -1342,7 +1385,7 @@ requires-dist = [
     { name = "libcst", marker = "sys_platform == 'emscripten'", specifier = "==1.8.6" },
     { name = "linkify-it-py", marker = "extra == 'docs'", specifier = ">=2" },
     { name = "markdown-it-py", extras = ["linkify"] },
-    { name = "ml-ecosystem-snapshots", git = "https://github.com/SamuelMarks/ml-ecosystem-snapshots.git?rev=master" },
+    { name = "ml-ecosystem-snapshots", url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.3/ml_ecosystem_snapshots-0.0.3-py3-none-any.whl" },
     { name = "ml-framework-snapshots", marker = "extra == 'legacy'", git = "https://github.com/SamuelMarks/ml-framework-snapshots.git?rev=master" },
     { name = "ml-switcheroo-ir", git = "https://github.com/SamuelMarks/ml-switcheroo-ir.git?rev=master" },
     { name = "mypy", marker = "extra == 'test'" },

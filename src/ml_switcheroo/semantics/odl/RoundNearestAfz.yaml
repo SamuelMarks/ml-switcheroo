@@ -2,6 +2,7 @@ operation: RoundNearestAfz
 variants:
   stablehlo:
     api: stablehlo.round_nearest_afz
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

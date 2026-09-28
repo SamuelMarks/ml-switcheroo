@@ -5,3 +5,6 @@ variants:
     macro_template: '{beta} * {input} + {alpha} * jax.numpy.matmul({batch1}, {batch2})'
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
+std_args: []

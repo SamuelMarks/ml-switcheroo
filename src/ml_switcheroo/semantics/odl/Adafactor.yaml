@@ -14,6 +14,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   mlx:
     api: mlx.optimizers.Adafactor
     args:
@@ -38,10 +39,12 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: optax.adafactor
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: Adafactor
 type: function

@@ -2,3 +2,5 @@ operation: Qspc
 variants:
   nvidia_sass:
     api: QSPC
+    args: {}
+std_args: []

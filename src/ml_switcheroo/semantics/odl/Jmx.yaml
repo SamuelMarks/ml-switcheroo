@@ -2,3 +2,5 @@ operation: Jmx
 variants:
   nvidia_sass:
     api: JMX
+    args: {}
+std_args: []

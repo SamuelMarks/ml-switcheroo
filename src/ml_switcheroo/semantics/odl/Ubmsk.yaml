@@ -2,3 +2,5 @@ operation: Ubmsk
 variants:
   nvidia_sass:
     api: UBMSK
+    args: {}
+std_args: []

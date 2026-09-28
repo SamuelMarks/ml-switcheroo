@@ -2,3 +2,5 @@ operation: Suld
 variants:
   nvidia_sass:
     api: SULD
+    args: {}
+std_args: []

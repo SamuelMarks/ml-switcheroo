@@ -5,8 +5,10 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   jax:
     api: jax.numpy.can_cast
     args:
       from_: from_
       to: to
+std_args: []

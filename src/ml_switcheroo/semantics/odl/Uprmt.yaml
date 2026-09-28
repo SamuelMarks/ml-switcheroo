@@ -2,3 +2,5 @@ operation: Uprmt
 variants:
   nvidia_sass:
     api: UPRMT
+    args: {}
+std_args: []

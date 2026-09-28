@@ -2,3 +2,5 @@ operation: Atoms
 variants:
   nvidia_sass:
     api: ATOMS
+    args: {}
+std_args: []

@@ -27,9 +27,13 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
 operation: MaxNumBoundingBoxes
 type: function

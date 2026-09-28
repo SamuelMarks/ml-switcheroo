@@ -2,6 +2,7 @@ operation: ReducePrecision
 variants:
   stablehlo:
     api: stablehlo.reduce_precision
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

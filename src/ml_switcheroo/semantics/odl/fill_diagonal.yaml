@@ -15,3 +15,4 @@ variants:
     args:
       a: a
       val: val
+std_args: []

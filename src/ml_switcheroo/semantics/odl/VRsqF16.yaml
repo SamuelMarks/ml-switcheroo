@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_rsq_f16
     description: Auto-mapped instruction V_RSQ_F16
+    args: {}
+std_args: []

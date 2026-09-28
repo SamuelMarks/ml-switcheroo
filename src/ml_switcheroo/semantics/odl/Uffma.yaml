@@ -2,3 +2,5 @@ operation: Uffma
 variants:
   nvidia_sass:
     api: UFFMA
+    args: {}
+std_args: []

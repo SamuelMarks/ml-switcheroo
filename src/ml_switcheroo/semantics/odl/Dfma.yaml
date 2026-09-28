@@ -2,3 +2,5 @@ operation: Dfma
 variants:
   nvidia_sass:
     api: DFMA
+    args: {}
+std_args: []

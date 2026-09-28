@@ -5,8 +5,13 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: unique_consecutive_plugin
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
     requires_plugin: unique_consecutive_plugin
+    api: ''
+    args: {}
+std_args: []

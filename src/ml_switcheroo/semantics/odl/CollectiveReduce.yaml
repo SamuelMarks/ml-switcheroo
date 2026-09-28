@@ -2,6 +2,7 @@ operation: CollectiveReduce
 variants:
   stablehlo:
     api: stablehlo.collective_reduce
+    args: {}
 std_args:
 - name: operands
   kind: positional_or_keyword

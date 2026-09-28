@@ -2,3 +2,5 @@ operation: Uisetp
 variants:
   nvidia_sass:
     api: UISETP
+    args: {}
+std_args: []

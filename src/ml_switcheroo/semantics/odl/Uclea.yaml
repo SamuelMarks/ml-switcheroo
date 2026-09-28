@@ -2,3 +2,5 @@ operation: Uclea
 variants:
   nvidia_sass:
     api: UCLEA
+    args: {}
+std_args: []

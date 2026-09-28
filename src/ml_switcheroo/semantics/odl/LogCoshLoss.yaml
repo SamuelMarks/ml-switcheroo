@@ -5,26 +5,31 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     api: optax.log_cosh
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   mlx:
     api: mlx.nn.losses.log_cosh_loss
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.losses.LogCosh
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: optax.log_cosh
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 std_args:
 - name: inputs
   kind: positional_or_keyword

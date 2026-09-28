@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_nor_saveexec_b64
     description: Auto-mapped instruction S_NOR_SAVEEXEC_B64
+    args: {}
+std_args: []

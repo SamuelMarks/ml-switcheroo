@@ -5,21 +5,28 @@ std_args: []
 variants:
   torch:
     api: torch.int64
+    args: {}
   jax:
     api: jax.numpy.int64
+    args: {}
   mlx:
     api: mlx.core.int64
+    args: {}
   numpy:
     api: numpy.int64
+    args: {}
   keras:
     api: numpy.int64
+    args: {}
   paxml:
     api: jax.numpy.int64
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: jax.numpy.int64
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}

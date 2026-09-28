@@ -2,3 +2,5 @@ operation: Utmastg
 variants:
   nvidia_sass:
     api: UTMASTG
+    args: {}
+std_args: []

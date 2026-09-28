@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_cvt_f32_i32
     description: Auto-mapped instruction S_CVT_F32_I32
+    args: {}
+std_args: []

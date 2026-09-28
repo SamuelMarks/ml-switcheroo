@@ -2,3 +2,5 @@ operation: Ufmnmx
 variants:
   nvidia_sass:
     api: UFMNMX
+    args: {}
+std_args: []

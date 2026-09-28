@@ -2,3 +2,5 @@ operation: Bpt
 variants:
   nvidia_sass:
     api: BPT
+    args: {}
+std_args: []

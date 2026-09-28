@@ -12,6 +12,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   mlx:
     api: mlx.optimizers.Adam
     args:
@@ -56,9 +57,11 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     api: optax.adam
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
     requires_plugin: optimizer_constructor
+    args: {}

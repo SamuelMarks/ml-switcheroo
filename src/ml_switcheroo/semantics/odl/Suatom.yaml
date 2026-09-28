@@ -2,3 +2,5 @@ operation: Suatom
 variants:
   nvidia_sass:
     api: SUATOM
+    args: {}
+std_args: []

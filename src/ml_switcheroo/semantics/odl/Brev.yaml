@@ -2,3 +2,5 @@ operation: Brev
 variants:
   nvidia_sass:
     api: BREV
+    args: {}
+std_args: []

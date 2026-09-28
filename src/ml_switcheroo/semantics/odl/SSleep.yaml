@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_sleep
     description: Auto-mapped instruction S_SLEEP
+    args: {}
+std_args: []

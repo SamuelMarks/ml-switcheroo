@@ -2,3 +2,5 @@ operation: Fswzadd
 variants:
   nvidia_sass:
     api: FSWZADD
+    args: {}
+std_args: []

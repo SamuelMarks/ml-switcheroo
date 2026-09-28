@@ -2,6 +2,7 @@ operation: AfterAll
 variants:
   stablehlo:
     api: stablehlo.after_all
+    args: {}
 std_args:
 - name: inputs
   kind: positional_or_keyword

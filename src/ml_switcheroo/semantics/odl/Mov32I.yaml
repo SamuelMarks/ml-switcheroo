@@ -2,3 +2,5 @@ operation: Mov32I
 variants:
   nvidia_sass:
     api: MOV32I
+    args: {}
+std_args: []

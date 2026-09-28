@@ -2,3 +2,5 @@ operation: Break
 variants:
   nvidia_sass:
     api: BREAK
+    args: {}
+std_args: []

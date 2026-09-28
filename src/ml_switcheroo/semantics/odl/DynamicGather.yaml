@@ -2,6 +2,7 @@ operation: DynamicGather
 variants:
   stablehlo:
     api: stablehlo.dynamic_gather
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

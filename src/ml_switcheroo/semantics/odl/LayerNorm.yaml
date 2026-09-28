@@ -65,12 +65,15 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   tensorflow:
     api: tf.keras.layers.LayerNormalization
     dispatch_rules: []
     macro_template: tf.keras.layers.LayerNormalization(epsilon={eps})({input})
     pack_as: Tuple
     required_imports: []
+    args: {}
   rdna:
     api: ; Macro.LayerNorm
     args: {}

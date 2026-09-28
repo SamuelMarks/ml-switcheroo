@@ -6,6 +6,7 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: loss_reduction
+    args: {}
   mlx:
     api: mlx.nn.losses.kl_div_loss
     args:
@@ -26,6 +27,7 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: loss_reduction
+    args: {}
 std_args:
 - name: size_average
   kind: positional_or_keyword

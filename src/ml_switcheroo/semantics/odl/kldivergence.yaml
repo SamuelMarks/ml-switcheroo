@@ -20,15 +20,18 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   mlx:
     api: mlx.nn.losses.kl_div_loss
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: optax.kl_divergence
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: KLDivergence
 type: function

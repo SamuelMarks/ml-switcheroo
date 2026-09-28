@@ -25,26 +25,31 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     api: praxis.layers.Sequential
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   mlx:
     api: mlx.nn.Sequential
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   torch:
     api: torch.nn.Sequential
     dispatch_rules: []
     pack_as: Tuple
     pack_to_tuple: args
     required_imports: []
+    args: {}
   flax_nnx:
     api: flax.nnx.Sequential
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: Pipeline
 type: function

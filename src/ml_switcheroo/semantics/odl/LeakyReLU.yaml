@@ -33,6 +33,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     api: paxml.layers.LeakyReLU
     args:

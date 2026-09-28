@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_nop
     description: Auto-mapped instruction V_NOP
+    args: {}
+std_args: []

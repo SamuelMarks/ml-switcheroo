@@ -2,3 +2,5 @@ operation: Txq
 variants:
   nvidia_sass:
     api: TXQ
+    args: {}
+std_args: []

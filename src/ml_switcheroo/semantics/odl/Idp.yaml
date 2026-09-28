@@ -2,3 +2,5 @@ operation: Idp
 variants:
   nvidia_sass:
     api: IDP
+    args: {}
+std_args: []

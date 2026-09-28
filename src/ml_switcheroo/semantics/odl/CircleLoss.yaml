@@ -5,11 +5,13 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.losses.Circle
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 std_args:
 - name: gamma
   kind: positional_or_keyword

@@ -11,3 +11,4 @@ variants:
     api: jax.numpy.column_stack
     args:
       tup: tup
+std_args: []

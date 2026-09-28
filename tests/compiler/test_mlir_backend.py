@@ -113,3 +113,18 @@ def test_mlir_printer_emit_module_without_module_op() -> None:
   assert "module {" in text
   assert "func.func @main() {" in text
   assert "some.op" in text
+
+
+def test_mlir_backend_validate_op() -> None:
+  """Test validate_op on MlirBackend."""
+  from unittest.mock import patch
+
+  backend = MlirBackend()
+  report = backend.validate_op("arith.addi", operand_count=2)
+  assert report is not None
+
+  report_builtin = backend.validate_op("func", operand_count=0)
+  assert report_builtin is not None
+
+  with patch("ml_ecosystem_snapshots.grounding.compiler.validate_mlir_op", side_effect=Exception("Failed")):
+    assert backend.validate_op("arith.addi") is None

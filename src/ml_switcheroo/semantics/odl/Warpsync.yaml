@@ -2,3 +2,5 @@ operation: Warpsync
 variants:
   nvidia_sass:
     api: WARPSYNC
+    args: {}
+std_args: []

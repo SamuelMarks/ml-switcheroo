@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_cmpx_gt_f32
     description: Auto-mapped instruction V_CMPX_GT_F32
+    args: {}
+std_args: []

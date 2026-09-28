@@ -2,3 +2,5 @@ operation: Setlmembase
 variants:
   nvidia_sass:
     api: SETLMEMBASE
+    args: {}
+std_args: []

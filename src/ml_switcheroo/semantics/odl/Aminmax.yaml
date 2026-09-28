@@ -6,9 +6,14 @@ variants:
       axis={dim}, keepdims={keepdim}))
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     macro_template: (jnp.min({input}, axis={dim}, keepdims={keepdim}), jnp.max({input},
       axis={dim}, keepdims={keepdim}))
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
+std_args: []

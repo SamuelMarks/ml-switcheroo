@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_cmp_lt_f64
     description: Auto-mapped instruction V_CMP_LT_F64
+    args: {}
+std_args: []

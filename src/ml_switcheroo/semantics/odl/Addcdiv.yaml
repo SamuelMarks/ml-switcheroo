@@ -6,24 +6,28 @@ variants:
     macro_template: '{input} + {value} * ({tensor1} / {tensor2})'
     pack_as: Tuple
     required_imports: []
+    args: {}
   keras:
     api: keras.ops.add
     dispatch_rules: []
     macro_template: '{input} + {value} * ({tensor1} / {tensor2})'
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.math.add
     dispatch_rules: []
     macro_template: '{input} + {value} * ({tensor1} / {tensor2})'
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: jax.numpy.add
     dispatch_rules: []
     macro_template: '{input} + {value} * ({tensor1} / {tensor2})'
     pack_as: Tuple
     required_imports: []
+    args: {}
 std_args:
 - name: x1
   kind: positional_or_keyword

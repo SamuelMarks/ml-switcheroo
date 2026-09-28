@@ -2,3 +2,5 @@ operation: Red
 variants:
   nvidia_sass:
     api: RED
+    args: {}
+std_args: []

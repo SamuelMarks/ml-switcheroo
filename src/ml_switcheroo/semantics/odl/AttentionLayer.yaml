@@ -5,10 +5,13 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   torch:
     api: torch.nn.MultiheadAttention
     dispatch_rules: []
@@ -16,16 +19,19 @@ variants:
       weights; Keras Attention is raw dot-product.'
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.layers.Attention
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: flax.linen.attention.dot_product_attention
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   rdna:
     api: ; Macro.MultiheadAttention
     args: {}

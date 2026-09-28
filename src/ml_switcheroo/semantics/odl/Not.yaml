@@ -4,8 +4,11 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   stablehlo:
     api: stablehlo.not
+    args: {}
   flax_nnx:
     api: flax.nnx.Not
     args:

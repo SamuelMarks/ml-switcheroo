@@ -4,6 +4,8 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   flax_nnx:
     api: jax.numpy.int4
     args:
@@ -11,3 +13,4 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+std_args: []

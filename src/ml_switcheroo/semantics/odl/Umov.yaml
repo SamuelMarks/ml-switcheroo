@@ -2,3 +2,5 @@ operation: Umov
 variants:
   nvidia_sass:
     api: UMOV
+    args: {}
+std_args: []

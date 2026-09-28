@@ -28,5 +28,6 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: HashedCrossing
 type: function

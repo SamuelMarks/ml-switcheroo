@@ -2,3 +2,5 @@ operation: Ldgdepbar
 variants:
   nvidia_sass:
     api: LDGDEPBAR
+    args: {}
+std_args: []

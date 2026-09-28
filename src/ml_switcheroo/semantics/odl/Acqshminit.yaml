@@ -2,3 +2,5 @@ operation: Acqshminit
 variants:
   nvidia_sass:
     api: ACQSHMINIT
+    args: {}
+std_args: []

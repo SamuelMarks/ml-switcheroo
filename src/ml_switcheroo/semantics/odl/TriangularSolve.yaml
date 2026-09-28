@@ -2,6 +2,7 @@ operation: TriangularSolve
 variants:
   stablehlo:
     api: stablehlo.triangular_solve
+    args: {}
 std_args:
 - name: a
   kind: positional_or_keyword

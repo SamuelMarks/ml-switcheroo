@@ -2,3 +2,5 @@ operation: Redg
 variants:
   nvidia_sass:
     api: REDG
+    args: {}
+std_args: []

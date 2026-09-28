@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_frexp_exp_i16_f16
     description: Auto-mapped instruction V_FREXP_EXP_I16_F16
+    args: {}
+std_args: []

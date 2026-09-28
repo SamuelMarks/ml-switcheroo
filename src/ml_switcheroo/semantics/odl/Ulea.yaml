@@ -2,3 +2,5 @@ operation: Ulea
 variants:
   nvidia_sass:
     api: ULEA
+    args: {}
+std_args: []

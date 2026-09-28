@@ -19,7 +19,9 @@ variants:
     api: jax.nn.hard_sigmoid
     args: {}
   mlx:
-    macro_template: "mx.maximum(0.0, mx.minimum(1.0, ({input} + 3.0) / 6.0))"
+    macro_template: mx.maximum(0.0, mx.minimum(1.0, ({input} + 3.0) / 6.0))
+    api: ''
+    args: {}
   keras:
     api: keras.activations.hard_sigmoid
     args: {}

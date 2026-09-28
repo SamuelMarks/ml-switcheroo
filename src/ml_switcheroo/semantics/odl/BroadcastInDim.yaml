@@ -13,3 +13,4 @@ operation: BroadcastInDim
 variants:
   stablehlo:
     api: stablehlo.broadcast_in_dim
+    args: {}

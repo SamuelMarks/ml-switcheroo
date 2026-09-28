@@ -2,3 +2,5 @@ operation: Popc
 variants:
   nvidia_sass:
     api: POPC
+    args: {}
+std_args: []

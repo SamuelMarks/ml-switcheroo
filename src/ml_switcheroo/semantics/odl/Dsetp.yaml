@@ -2,3 +2,5 @@ operation: Dsetp
 variants:
   nvidia_sass:
     api: DSETP
+    args: {}
+std_args: []

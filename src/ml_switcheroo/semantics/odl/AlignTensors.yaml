@@ -6,12 +6,15 @@ variants:
     pack_as: Tuple
     pack_to_tuple: args
     required_imports: []
+    args: {}
   flax_nnx:
     api: jnp.broadcast_arrays
     dispatch_rules: []
     pack_as: Tuple
     pack_to_tuple: args
     required_imports: []
+    args: {}
   jax:
     api: jax.numpy.broadcast_arrays
     args: {}
+std_args: []

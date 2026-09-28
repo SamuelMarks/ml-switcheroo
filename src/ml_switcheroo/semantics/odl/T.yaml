@@ -11,3 +11,4 @@ variants:
     args:
       key: key
       df: df
+std_args: []

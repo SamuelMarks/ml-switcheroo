@@ -2,3 +2,5 @@ operation: Flo
 variants:
   nvidia_sass:
     api: FLO
+    args: {}
+std_args: []

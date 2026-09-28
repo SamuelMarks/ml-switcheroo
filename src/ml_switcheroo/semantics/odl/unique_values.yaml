@@ -13,3 +13,4 @@ variants:
     api: jax.numpy.unique_values
     args:
       x: x
+std_args: []

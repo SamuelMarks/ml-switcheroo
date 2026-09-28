@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_mul_f32
     description: Auto-mapped instruction S_MUL_F32
+    args: {}
+std_args: []

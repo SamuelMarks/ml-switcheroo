@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_endpgm
     description: Auto-mapped instruction S_ENDPGM
+    args: {}
+std_args: []

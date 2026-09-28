@@ -25,6 +25,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   torch:
     api: torch.nn.AdaptiveAvgPool3d
     dispatch_rules: []
@@ -35,5 +36,6 @@ variants:
       - 1
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: GlobalAveragePooling3D
 type: function

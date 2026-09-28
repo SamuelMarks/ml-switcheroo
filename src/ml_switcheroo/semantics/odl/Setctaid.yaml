@@ -2,3 +2,5 @@ operation: Setctaid
 variants:
   nvidia_sass:
     api: SETCTAID
+    args: {}
+std_args: []

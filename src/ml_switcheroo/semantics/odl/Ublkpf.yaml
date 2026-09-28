@@ -2,3 +2,5 @@ operation: Ublkpf
 variants:
   nvidia_sass:
     api: UBLKPF
+    args: {}
+std_args: []

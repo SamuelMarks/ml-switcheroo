@@ -141,3 +141,15 @@ def test_ir_backend_validation_dangling_edges() -> None:
   )
   with pytest.raises(ValueError, match="Dangling edge target"):
     backend.compile(graph_bad_tgt)
+
+
+def test_ir_backend_validate_op() -> None:
+  """Test validate_op on IrBackend."""
+  from unittest.mock import patch
+
+  backend = IrBackend()
+  report = backend.validate_op("Add", inputs_count=2)
+  assert report is not None
+
+  with patch("ml_ecosystem_snapshots.grounding.compiler.validate_onnx_op", side_effect=Exception("Failed")):
+    assert backend.validate_op("Add") is None

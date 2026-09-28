@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_pipeflush
     description: Auto-mapped instruction V_PIPEFLUSH
+    args: {}
+std_args: []

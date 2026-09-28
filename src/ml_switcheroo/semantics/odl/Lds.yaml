@@ -2,3 +2,5 @@ operation: Lds
 variants:
   nvidia_sass:
     api: LDS
+    args: {}
+std_args: []

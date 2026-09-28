@@ -11,3 +11,4 @@ variants:
     args:
       key: key
       mean: mean
+std_args: []

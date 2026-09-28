@@ -2,3 +2,5 @@ operation: Ulepc
 variants:
   nvidia_sass:
     api: ULEPC
+    args: {}
+std_args: []

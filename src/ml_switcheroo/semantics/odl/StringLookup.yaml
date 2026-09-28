@@ -79,10 +79,13 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
     requires_plugin: string_lookup_shim
+    api: ''
+    args: {}
 operation: StringLookup
 type: function

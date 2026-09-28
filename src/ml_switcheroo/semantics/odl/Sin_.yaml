@@ -18,6 +18,7 @@ variants:
     pack_as: Tuple
     required_imports: []
     transformation_type: macro
+    args: {}
   flax_nnx:
     api: jax.numpy.sin
     dispatch_rules: []
@@ -25,6 +26,7 @@ variants:
     pack_as: Tuple
     required_imports: []
     transformation_type: macro
+    args: {}
   torch:
     api: torch.sin
     args: {}

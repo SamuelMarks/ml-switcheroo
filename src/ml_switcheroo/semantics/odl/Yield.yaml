@@ -2,3 +2,5 @@ operation: Yield
 variants:
   nvidia_sass:
     api: YIELD
+    args: {}
+std_args: []

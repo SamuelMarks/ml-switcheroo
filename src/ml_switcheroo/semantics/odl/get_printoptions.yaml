@@ -9,3 +9,4 @@ variants:
   jax:
     api: jax.numpy.get_printoptions
     args: {}
+std_args: []

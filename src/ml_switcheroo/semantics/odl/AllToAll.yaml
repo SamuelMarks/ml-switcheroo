@@ -2,6 +2,7 @@ operation: AllToAll
 variants:
   stablehlo:
     api: stablehlo.all_to_all
+    args: {}
 std_args:
 - name: operands
   kind: positional_or_keyword

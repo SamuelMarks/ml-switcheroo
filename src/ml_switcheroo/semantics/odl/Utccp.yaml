@@ -2,3 +2,5 @@ operation: Utccp
 variants:
   nvidia_sass:
     api: UTCCP
+    args: {}
+std_args: []

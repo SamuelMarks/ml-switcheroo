@@ -6,3 +6,5 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: torch_register_buffer_to_nnx
+    args: {}
+std_args: []

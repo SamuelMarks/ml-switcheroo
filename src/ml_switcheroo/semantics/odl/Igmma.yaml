@@ -2,3 +2,5 @@ operation: Igmma
 variants:
   nvidia_sass:
     api: IGMMA
+    args: {}
+std_args: []

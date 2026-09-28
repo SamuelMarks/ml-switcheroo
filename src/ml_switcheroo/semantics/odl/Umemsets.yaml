@@ -2,3 +2,5 @@ operation: Umemsets
 variants:
   nvidia_sass:
     api: UMEMSETS
+    args: {}
+std_args: []

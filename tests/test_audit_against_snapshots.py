@@ -831,3 +831,16 @@ def test_main_grounding_engine_exceptions_and_none(monkeypatch: pytest.MonkeyPat
     patch("scripts.audit_against_snapshots.GroundingEngine", None),
   ):
     assert scripts.audit_against_snapshots.main() == 0
+
+
+def test_precommit_strict_grounding_failure_on_invalid_symbol(monkeypatch: pytest.MonkeyPatch) -> None:
+  """Assert that invalid or missing symbols immediately trigger exit failure in pre-commit strict mode."""
+  monkeypatch.setattr("sys.argv", ["audit_against_snapshots.py", "--strict", "--framework", "torch"])
+  with (
+    patch("scripts.audit_against_snapshots.load_snapshots_multi", return_value={"torch": {}}),
+    patch(
+      "scripts.audit_against_snapshots.audit_frameworks",
+      return_value=["[torch] 'my_op' maps to hallucinated API: 'torch.fake'"],
+    ),
+  ):
+    assert scripts.audit_against_snapshots.main() == 1

@@ -2,3 +2,5 @@ operation: Ret
 variants:
   nvidia_sass:
     api: RET
+    args: {}
+std_args: []

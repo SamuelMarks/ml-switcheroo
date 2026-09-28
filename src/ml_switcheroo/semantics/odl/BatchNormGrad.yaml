@@ -2,6 +2,7 @@ operation: BatchNormGrad
 variants:
   stablehlo:
     api: stablehlo.batch_norm_grad
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

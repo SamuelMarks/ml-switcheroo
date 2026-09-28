@@ -12,6 +12,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: jax.numpy.single
     args:
@@ -19,3 +20,4 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+std_args: []

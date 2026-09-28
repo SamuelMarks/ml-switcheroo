@@ -37,11 +37,15 @@ variants:
       strides={stride})
     required_imports:
     - from onnx import helper
+    api: ''
+    args: {}
   future_onnx:
     macro_template: helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size},
       strides={stride})
     required_imports:
     - from onnx import helper
+    api: ''
+    args: {}
   keras:
     api: keras.layers.MaxPooling3D
     args:
@@ -55,6 +59,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.layers.MaxPooling3D
     args:

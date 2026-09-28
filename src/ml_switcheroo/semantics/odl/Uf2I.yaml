@@ -2,3 +2,5 @@ operation: Uf2I
 variants:
   nvidia_sass:
     api: UF2I
+    args: {}
+std_args: []

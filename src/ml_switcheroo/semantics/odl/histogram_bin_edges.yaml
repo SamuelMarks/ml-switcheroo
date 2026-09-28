@@ -14,3 +14,4 @@ variants:
     api: jax.numpy.histogram_bin_edges
     args:
       a: a
+std_args: []

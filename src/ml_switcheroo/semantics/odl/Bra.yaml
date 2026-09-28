@@ -2,3 +2,5 @@ operation: Bra
 variants:
   nvidia_sass:
     api: BRA
+    args: {}
+std_args: []

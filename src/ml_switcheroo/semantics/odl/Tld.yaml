@@ -2,3 +2,5 @@ operation: Tld
 variants:
   nvidia_sass:
     api: TLD
+    args: {}
+std_args: []

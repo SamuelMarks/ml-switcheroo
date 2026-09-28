@@ -2,3 +2,5 @@ operation: Ugetnextworkid
 variants:
   nvidia_sass:
     api: UGETNEXTWORKID
+    args: {}
+std_args: []

@@ -2,3 +2,5 @@ operation: Cgaerrbar
 variants:
   nvidia_sass:
     api: CGAERRBAR
+    args: {}
+std_args: []

@@ -3,3 +3,5 @@ variants:
   rdna:
     api: flat_atomic_add_f32
     description: Auto-mapped instruction FLAT_ATOMIC_ADD_F32
+    args: {}
+std_args: []

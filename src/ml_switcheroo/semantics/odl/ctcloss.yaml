@@ -26,20 +26,24 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   paxml:
     api: optax.ctc_loss
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   tensorflow:
     api: tf.keras.losses.CTC
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: optax.ctc_loss
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: CTCLoss
 type: function

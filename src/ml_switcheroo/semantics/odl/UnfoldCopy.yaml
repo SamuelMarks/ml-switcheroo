@@ -5,8 +5,13 @@ variants:
     pack_as: Tuple
     required_imports: []
     requires_plugin: unfold_op
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
     requires_plugin: unfold_op
+    api: ''
+    args: {}
+std_args: []

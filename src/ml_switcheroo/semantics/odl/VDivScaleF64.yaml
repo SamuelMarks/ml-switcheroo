@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_div_scale_f64
     description: Auto-mapped instruction V_DIV_SCALE_F64
+    args: {}
+std_args: []

@@ -2,3 +2,5 @@ operation: Upopc
 variants:
   nvidia_sass:
     api: UPOPC
+    args: {}
+std_args: []

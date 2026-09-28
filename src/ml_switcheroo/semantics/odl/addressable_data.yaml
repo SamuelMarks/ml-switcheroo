@@ -12,3 +12,4 @@ variants:
     api: jax.Array.addressable_data
     args:
       index: index
+std_args: []

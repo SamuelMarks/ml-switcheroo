@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_cbranch_scc0
     description: Auto-mapped instruction S_CBRANCH_SCC0
+    args: {}
+std_args: []

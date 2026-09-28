@@ -2,3 +2,5 @@ operation: Utmaredg
 variants:
   nvidia_sass:
     api: UTMAREDG
+    args: {}
+std_args: []

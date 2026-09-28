@@ -3,3 +3,5 @@ variants:
   rdna:
     api: ds_sub_u64
     description: Auto-mapped instruction DS_SUB_U64
+    args: {}
+std_args: []

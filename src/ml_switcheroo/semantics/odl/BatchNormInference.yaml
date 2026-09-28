@@ -2,6 +2,7 @@ operation: BatchNormInference
 variants:
   stablehlo:
     api: stablehlo.batch_norm_inference
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

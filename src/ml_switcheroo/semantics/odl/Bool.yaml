@@ -5,19 +5,25 @@ std_args: []
 variants:
   torch:
     api: torch.bool
+    args: {}
   jax:
     api: jax.numpy.bool_
+    args: {}
   mlx:
     api: mlx.core.bool_
+    args: {}
   numpy:
     api: numpy.bool_
+    args: {}
   keras:
     api: numpy.bool_
+    args: {}
   paxml:
     api: jax.numpy.bool_
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: jax.numpy.bool_
     args: {}

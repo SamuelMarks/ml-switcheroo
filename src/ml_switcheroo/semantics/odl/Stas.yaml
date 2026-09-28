@@ -2,3 +2,5 @@ operation: Stas
 variants:
   nvidia_sass:
     api: STAS
+    args: {}
+std_args: []

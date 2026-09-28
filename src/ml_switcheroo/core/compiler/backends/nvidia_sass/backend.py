@@ -7,7 +7,7 @@ structures into intermediate NVIDIA_SASS AST structures, followed by the final t
 emission.
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -60,3 +60,33 @@ class NvidiaSassBackend(CompilerBackend):
     """
     sass_nodes = self.synthesizer.from_graph(graph)
     return self.emitter.emit(sass_nodes)
+
+  def validate_instruction(
+    self,
+    mnemonic: str,
+    architecture: str = "sm_80",
+    operands: Optional[list[str]] = None,
+    modifiers: Optional[list[str]] = None,
+  ) -> Any:
+    """Validate a SASS instruction mnemonic against grounded hardware specifications.
+
+    Args:
+        mnemonic (str): The instruction mnemonic (e.g. 'FADD', 'FFMA').
+        architecture (str): Target GPU architecture (defaults to 'sm_80').
+        operands (Optional[list[str]]): Optional register/operand tokens.
+        modifiers (Optional[list[str]]): Optional instruction modifiers.
+
+    Returns:
+        Any: A GroundingReport if ml_ecosystem_snapshots is available, or None.
+    """
+    try:
+      from ml_ecosystem_snapshots.grounding.hardware import validate_sass_instruction
+
+      return validate_sass_instruction(
+        mnemonic=mnemonic,
+        architecture=architecture,
+        operands=operands or ["R0", "R1", "R2"],
+        modifiers=modifiers,
+      )
+    except Exception:
+      return None

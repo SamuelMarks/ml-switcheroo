@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_nand_b32
     description: Auto-mapped instruction S_NAND_B32
+    args: {}
+std_args: []

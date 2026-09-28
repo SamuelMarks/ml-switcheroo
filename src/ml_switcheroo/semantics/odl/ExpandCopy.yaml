@@ -9,3 +9,4 @@ variants:
     pack_as: Tuple
     pack_to_tuple: shape
     required_imports: []
+std_args: []

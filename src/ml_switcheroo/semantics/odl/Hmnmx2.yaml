@@ -2,3 +2,5 @@ operation: Hmnmx2
 variants:
   nvidia_sass:
     api: HMNMX2
+    args: {}
+std_args: []

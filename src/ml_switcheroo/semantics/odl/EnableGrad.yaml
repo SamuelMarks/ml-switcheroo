@@ -6,3 +6,5 @@ variants:
     pack_as: Tuple
     required_imports:
     - import contextlib
+    args: {}
+std_args: []

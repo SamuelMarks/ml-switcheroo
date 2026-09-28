@@ -2,3 +2,5 @@ operation: Endcollective
 variants:
   nvidia_sass:
     api: ENDCOLLECTIVE
+    args: {}
+std_args: []

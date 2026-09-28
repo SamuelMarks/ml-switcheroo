@@ -8,11 +8,13 @@ variants:
     pack_as: Tuple
     required_imports: []
     transformation_type: macro
+    args: {}
   flax_nnx:
     api: flax.nnx.dot_product_attention
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 std_args:
 - name: use_scale
   kind: positional_or_keyword

@@ -2,3 +2,5 @@ operation: Imad
 variants:
   nvidia_sass:
     api: IMAD
+    args: {}
+std_args: []

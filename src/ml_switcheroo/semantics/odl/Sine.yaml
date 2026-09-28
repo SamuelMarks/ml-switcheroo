@@ -2,6 +2,7 @@ operation: Sine
 variants:
   stablehlo:
     api: stablehlo.sine
+    args: {}
 std_args:
 - name: operand
   kind: positional_or_keyword

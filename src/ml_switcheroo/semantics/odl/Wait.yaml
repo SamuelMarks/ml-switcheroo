@@ -6,9 +6,14 @@ variants:
       else None'
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     macro_template: '{future}.block_until_ready() if hasattr({future}, ''block_until_ready'')
       else None'
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
+std_args: []

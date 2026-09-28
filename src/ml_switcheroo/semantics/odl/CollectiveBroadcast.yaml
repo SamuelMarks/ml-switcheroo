@@ -2,6 +2,7 @@ operation: CollectiveBroadcast
 variants:
   stablehlo:
     api: stablehlo.collective_broadcast
+    args: {}
 std_args:
 - name: operands
   kind: positional_or_keyword

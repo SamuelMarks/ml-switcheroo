@@ -17,12 +17,14 @@ variants:
     pack_as: Tuple
     pack_to_tuple: perm
     required_imports: []
+    args: {}
   numpy:
     api: numpy.transpose
     dispatch_rules: []
     pack_as: Tuple
     pack_to_tuple: axes
     required_imports: []
+    args: {}
   rdna:
     api: global_load_dword
     args: {}
@@ -35,12 +37,14 @@ variants:
     pack_as: Tuple
     pack_to_tuple: axes
     required_imports: []
+    args: {}
   flax_nnx:
     api: jnp.transpose
     dispatch_rules: []
     pack_as: Tuple
     pack_to_tuple: axes
     required_imports: []
+    args: {}
   mlx:
     api: mlx.core.permute_dims
     args:

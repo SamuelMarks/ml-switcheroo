@@ -3,3 +3,5 @@ variants:
   rdna:
     api: ds_gws_init
     description: Auto-mapped instruction DS_GWS_INIT
+    args: {}
+std_args: []

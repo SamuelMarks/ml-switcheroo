@@ -798,6 +798,8 @@ def main(args: Optional[Sequence[str]] = None) -> int:
   parsed = parser.parse_args(args)
 
   snapshot_dirs = [
+    Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
+    Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
     Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
     Path("../ml-framework-snapshots/src/ml_framework_snapshots/frameworks"),
     Path("../ml-compiler-snapshots"),

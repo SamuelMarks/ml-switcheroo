@@ -2,3 +2,5 @@ operation: Uf2Fp
 variants:
   nvidia_sass:
     api: UF2FP
+    args: {}
+std_args: []

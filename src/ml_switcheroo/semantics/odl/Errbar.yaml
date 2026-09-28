@@ -2,3 +2,5 @@ operation: Errbar
 variants:
   nvidia_sass:
     api: ERRBAR
+    args: {}
+std_args: []

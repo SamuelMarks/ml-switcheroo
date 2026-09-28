@@ -2,3 +2,5 @@ operation: Bmov
 variants:
   nvidia_sass:
     api: BMOV
+    args: {}
+std_args: []

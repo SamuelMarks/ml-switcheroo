@@ -2,3 +2,5 @@ operation: Mufu
 variants:
   nvidia_sass:
     api: MUFU
+    args: {}
+std_args: []

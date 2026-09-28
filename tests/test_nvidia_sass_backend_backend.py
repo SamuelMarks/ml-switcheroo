@@ -37,3 +37,13 @@ def test_nvidia_sass_backend_compile() -> None:
     mock_synthesizer.assert_called_once_with(graph)
     mock_emitter.assert_called_once_with(nodes)
     assert result == "    // test"
+
+
+def test_nvidia_sass_backend_validate_instruction() -> None:
+  """Test validate_instruction method of NvidiaSassBackend."""
+  backend = NvidiaSassBackend()
+  report = backend.validate_instruction("FADD")
+  assert report is not None
+
+  with patch("ml_ecosystem_snapshots.grounding.hardware.validate_sass_instruction", side_effect=Exception("Failed")):
+    assert backend.validate_instruction("FADD") is None

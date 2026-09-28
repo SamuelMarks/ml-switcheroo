@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_sat_pk_u8_i16
     description: Auto-mapped instruction V_SAT_PK_U8_I16
+    args: {}
+std_args: []

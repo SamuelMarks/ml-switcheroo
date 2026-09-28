@@ -2,3 +2,5 @@ operation: Utcbar
 variants:
   nvidia_sass:
     api: UTCBAR
+    args: {}
+std_args: []

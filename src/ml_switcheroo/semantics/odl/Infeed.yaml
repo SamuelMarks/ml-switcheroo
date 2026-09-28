@@ -2,6 +2,7 @@ operation: Infeed
 variants:
   stablehlo:
     api: stablehlo.infeed
+    args: {}
   jax:
     api: ; Macro.Infeed
     args: {}

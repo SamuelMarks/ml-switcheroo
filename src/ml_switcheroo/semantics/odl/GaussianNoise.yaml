@@ -24,10 +24,12 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   flax_nnx:
     api: flax.nnx.Dropout
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: GaussianNoise
 type: function

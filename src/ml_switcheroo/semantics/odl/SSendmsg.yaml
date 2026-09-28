@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_sendmsg
     description: Auto-mapped instruction S_SENDMSG
+    args: {}
+std_args: []

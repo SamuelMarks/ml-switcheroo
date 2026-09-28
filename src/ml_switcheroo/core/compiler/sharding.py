@@ -5,9 +5,41 @@ This module implements a compiler pass that analyzes an unannotated `LogicalGrap
 (e.g., for JAX/NNX targets) based on standard tensor-parallel and FSDP heuristics.
 """
 
-from typing import Optional
+from typing import Any, Optional, Sequence
 
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalMesh, PartitionSpec
+
+
+def estimate_tensor_memory(
+  shape: Sequence[Any],
+  dtype: str = "float32",
+) -> float:
+  """Estimate tensor memory in bytes using analytical memory models.
+
+  Args:
+      shape: Tensor dimensions sequence.
+      dtype: Tensor datatype string (e.g. 'float32', 'int32').
+
+  Returns:
+      float: Estimated size in bytes.
+  """
+  try:
+    from ml_ecosystem_snapshots.compliance import estimate_tensor_memory_bytes
+
+    int_shape = [int(x) for x in shape]
+    return float(estimate_tensor_memory_bytes(int_shape, dtype))
+  except Exception:
+    import math
+
+    bits = 32
+    if "64" in dtype:
+      bits = 64
+    elif "16" in dtype:
+      bits = 16
+    elif "8" in dtype:
+      bits = 8
+    elements = math.prod([int(x) for x in shape]) if shape else 0
+    return float(elements * (bits // 8))
 
 
 class ShardingInferencePass:
@@ -27,6 +59,23 @@ class ShardingInferencePass:
 
     """
     self.mesh = mesh or LogicalMesh(shape={"data": 1, "tensor": 1})
+
+  def estimate_graph_memory_bytes(self, graph: LogicalGraph) -> float:
+    """Estimate total parameter and activation tensor memory in bytes for the graph.
+
+    Args:
+        graph: The LogicalGraph to evaluate.
+
+    Returns:
+        float: Total estimated memory in bytes.
+    """
+    total = 0.0
+    for node in graph.nodes.values():
+      shape = getattr(node, "shape", None) or node.attributes.get("shape")
+      dtype = getattr(node, "dtype", None) or node.attributes.get("dtype", "float32")
+      if isinstance(shape, (list, tuple)):
+        total += estimate_tensor_memory(shape, str(dtype))
+    return total
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
     """Mutate the graph by injecting sharding annotations.

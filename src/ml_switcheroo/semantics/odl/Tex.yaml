@@ -2,3 +2,5 @@ operation: Tex
 variants:
   nvidia_sass:
     api: TEX
+    args: {}
+std_args: []

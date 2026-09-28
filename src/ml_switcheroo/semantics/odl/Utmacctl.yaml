@@ -2,3 +2,5 @@ operation: Utmacctl
 variants:
   nvidia_sass:
     api: UTMACCTL
+    args: {}
+std_args: []

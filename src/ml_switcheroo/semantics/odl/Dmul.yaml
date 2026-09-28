@@ -2,3 +2,5 @@ operation: Dmul
 variants:
   nvidia_sass:
     api: DMUL
+    args: {}
+std_args: []

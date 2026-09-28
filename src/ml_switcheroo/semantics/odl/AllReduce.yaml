@@ -2,6 +2,7 @@ operation: AllReduce
 variants:
   stablehlo:
     api: stablehlo.all_reduce
+    args: {}
 std_args:
 - name: operands
   kind: positional_or_keyword

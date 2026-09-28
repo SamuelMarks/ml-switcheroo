@@ -2,3 +2,5 @@ operation: Utcqmma
 variants:
   nvidia_sass:
     api: UTCQMMA
+    args: {}
+std_args: []

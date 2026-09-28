@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_xnor_b64
     description: Auto-mapped instruction S_XNOR_B64
+    args: {}
+std_args: []

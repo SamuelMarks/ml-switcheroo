@@ -3,3 +3,5 @@ variants:
   rdna:
     api: v_ashrrev_i16
     description: Auto-mapped instruction V_ASHRREV_I16
+    args: {}
+std_args: []

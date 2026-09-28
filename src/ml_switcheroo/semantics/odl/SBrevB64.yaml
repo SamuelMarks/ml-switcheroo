@@ -3,3 +3,5 @@ variants:
   rdna:
     api: s_brev_b64
     description: Auto-mapped instruction S_BREV_B64
+    args: {}
+std_args: []

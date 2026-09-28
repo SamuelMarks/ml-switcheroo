@@ -19,6 +19,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
 std_args:
 - name: equation
   kind: positional_or_keyword

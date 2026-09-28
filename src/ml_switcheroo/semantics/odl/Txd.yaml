@@ -2,3 +2,5 @@ operation: Txd
 variants:
   nvidia_sass:
     api: TXD
+    args: {}
+std_args: []

@@ -11,3 +11,4 @@ variants:
   jax:
     api: jax.numpy.set_printoptions
     args: {}
+std_args: []

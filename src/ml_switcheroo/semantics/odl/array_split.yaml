@@ -14,3 +14,4 @@ variants:
     args:
       ary: ary
       indices_or_sections: indices_or_sections
+std_args: []

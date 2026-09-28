@@ -320,3 +320,31 @@ Complex multi-node mutations are handled by registered plugin hooks:
   * `nnx_to_torch_params`: Bridges Flax NNX state dictionaries with PyTorch parameters.
   * `jax_decompose`: Decomposes complex composite ops into primitive JAX operations.
   * `keras_sequential`: Restructures Keras Sequential models into functional calls.
+
+---
+
+## 🔍 6. Grounding & Compliance Layer (`ml_ecosystem_snapshots` v0.0.3)
+
+`ml-switcheroo` integrates with `ml_ecosystem_snapshots` v0.0.3 to prevent hallucinated operations, validate signature parity, and model analytical memory constraints across both Python frameworks and low-level hardware targets.
+
+### Snapshot Discovery & Resolution Hierarchy
+
+1. **Environment Variables:** Custom directories configured via `$ML_SNAPSHOTS_PATH` or `$ML_ECOSYSTEM_SNAPSHOTS_DIR` (with legacy `$ML_FRAMEWORK_SNAPSHOTS_DIR` compatibility).
+2. **Sibling Local Workspaces:** `../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots/` and `../ml-framework-snapshots/src/ml_framework_snapshots/snapshots/` to enforce strict offline pre-commit validation.
+3. **Bundled Package Resources:** Embedded snapshot resources loaded via Python's `importlib.resources`.
+4. **User Cache:** Locally cached SQLite FTS5 index and discovered dumps in `~/.cache/ml_ecosystem_snapshots/`.
+
+### Verification Sequence Flow
+
+```mermaid
+sequenceDiagram
+    participant AST as ASTEngine / Rewriter
+    participant GE as GroundingEngine
+    participant FTS as SQLite FTS5 Index
+    participant CS as Compliance Scorer
+    AST->>GE: validate_python_call(target, api, args)
+    GE->>FTS: lookup_symbol(target, api)
+    FTS-->>GE: Symbol Signature & Constraints
+    GE->>CS: score_compliance(ast, signature)
+    CS-->>AST: GroundingReport(is_grounded, diagnostics)
+```

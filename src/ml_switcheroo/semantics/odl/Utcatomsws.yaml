@@ -2,3 +2,5 @@ operation: Utcatomsws
 variants:
   nvidia_sass:
     api: UTCATOMSWS
+    args: {}
+std_args: []

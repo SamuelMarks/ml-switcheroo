@@ -2,3 +2,5 @@ operation: Imma
 variants:
   nvidia_sass:
     api: IMMA
+    args: {}
+std_args: []

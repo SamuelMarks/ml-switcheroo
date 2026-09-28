@@ -24,6 +24,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
+    args: {}
   torch:
     api: torch.nn.AdaptiveMaxPool3d
     dispatch_rules: []
@@ -34,5 +35,6 @@ variants:
       - 1
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: GlobalMaxPooling3D
 type: function

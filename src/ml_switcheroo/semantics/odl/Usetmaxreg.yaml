@@ -2,3 +2,5 @@ operation: Usetmaxreg
 variants:
   nvidia_sass:
     api: USETMAXREG
+    args: {}
+std_args: []

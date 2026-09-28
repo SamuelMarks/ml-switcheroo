@@ -24,5 +24,6 @@ variants:
     missing_message: Flax NNX ALiBi support requires explicit extension.
     pack_as: Tuple
     required_imports: []
+    args: {}
 operation: ALiBi
 type: function

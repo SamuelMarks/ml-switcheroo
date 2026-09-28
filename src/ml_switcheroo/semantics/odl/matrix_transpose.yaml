@@ -11,3 +11,4 @@ variants:
     api: jax.numpy.matrix_transpose
     args:
       x: x
+std_args: []

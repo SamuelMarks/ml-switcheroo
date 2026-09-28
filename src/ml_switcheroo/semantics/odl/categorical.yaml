@@ -11,3 +11,4 @@ variants:
     args:
       key: key
       logits: logits
+std_args: []

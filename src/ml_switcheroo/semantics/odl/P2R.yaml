@@ -2,3 +2,5 @@ operation: P2R
 variants:
   nvidia_sass:
     api: P2R
+    args: {}
+std_args: []

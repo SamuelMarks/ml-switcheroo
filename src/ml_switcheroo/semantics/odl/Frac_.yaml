@@ -13,10 +13,14 @@ variants:
     macro_template: '{input} - jnp.trunc({input})'
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
   flax_nnx:
     dispatch_rules: []
     macro_template: '{input} - jnp.trunc({input})'
     pack_as: Tuple
     required_imports: []
+    api: ''
+    args: {}
 operation: Frac_
 type: function
