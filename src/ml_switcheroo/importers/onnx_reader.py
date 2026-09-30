@@ -1,37 +1,48 @@
 """Importer for ONNX Markdown Specifications.
 
-This module parses the official ONNX Operators documentation (Markdown files),
+This module parses official ONNX Operators documentation (Markdown files),
 extracting operator names, summaries, inputs, and attributes. It converts
-these definitions into the Semantic Knowledge Base format.
+these definitions into the Operation Definition Language (ODL) format.
 
 Key Features:
-
 - **Markdown Splitting**: Identifies operators via structurally parsing headings and links.
 - **Input & Attribute Parsing**: Extracts definitions lists (``<dl>``).
 - **Type Extraction**: Parses HTML type signatures (e.g., ``<dt>x : T</dt>``)
-  and maps them to ml-switcheroo/Fuzzer compatible type hints (e.g., ``Tensor``, ``int``).
+  and maps them to standard type hints (e.g., ``Tensor``, ``int``).
 - **Sanitization**: Cleans HTML tags like ``<tt>``, ``<b>`` from names.
+- **ODL Generation**: Generates validated ODL dictionary mappings with domain and opset tracking.
 """
 
-from typing import Any
-
-
-import typing
-
-
 from pathlib import Path
-from ml_switcheroo.utils.console import log_info, log_error
+import re
+from typing import Any, Dict, List
+import yaml
+
+from ml_switcheroo.utils.console import log_error, log_info
+
+
+def clean_html_tags(text: str) -> str:
+  """Clean HTML tags and formatting markup from text strings.
+
+  Args:
+      text: Input string potentially containing HTML tags.
+
+  Returns:
+      Cleaned text string.
+  """
+  clean = re.sub(r"<[^>]+>", "", text)
+  return clean.replace("*", "").strip()
 
 
 class OnnxSpecImporter:
-  """Parse ONNX Markdown specification files into semantic JSON structures.
+  """Parse ONNX Markdown specification files into semantic ODL structures.
 
   This class reads Markdown files (like `Operators.md`), identifies operator
   blocks, and parses their Inputs and Attributes sections to build a rich
-  function signature including type hints.
+  function signature including type hints and ODL dictionary mappings.
   """
 
-  def parse_file(self, target_file: Path) -> typing.Dict[str, dict]:
+  def parse_file(self, target_file: Path) -> Dict[str, Dict[str, Any]]:
     """Parse a specific ONNX Markdown file (e.g. Operators.md).
 
     Args:
@@ -40,7 +51,6 @@ class OnnxSpecImporter:
     Returns:
         Dictionary mapping Operator IDs (e.g., "Conv") to their semantic definition.
         The definition includes 'std_args' as a list of (name, type) tuples.
-
     """
     if not target_file.exists():
       log_error(f"File not found: {target_file}")
@@ -49,23 +59,23 @@ class OnnxSpecImporter:
     log_info(f"Parsing ONNX Spec: {target_file.name}...")
     return self._parse_markdown(target_file)
 
-  def _parse_markdown(self, fpath: Path) -> typing.Dict[str, dict]:
+  def _parse_markdown(self, fpath: Path) -> Dict[str, Dict[str, Any]]:
     """Parse markdown structurally.
 
     Args:
         fpath: Path to markdown file.
 
     Returns:
-        Dict: Extracted semantics.
+        Dict mapping operator names to extracted semantic properties.
     """
-    from markdown_it import MarkdownIt
     from bs4 import BeautifulSoup, Tag
+    from markdown_it import MarkdownIt
 
     content = fpath.read_text(encoding="utf-8")
     md = MarkdownIt()
     tokens = md.parse(content)
 
-    semantics = {}
+    semantics: Dict[str, Dict[str, Any]] = {}
     current_op: str = ""
     current_section: str = ""
 
@@ -79,7 +89,12 @@ class OnnxSpecImporter:
             name_val = a_tag["name"]
             current_op = str(name_val)
             if current_op not in semantics:
-              semantics[current_op] = {"from": fpath.name, "description": "", "std_args": [], "_raw_summary": []}
+              semantics[current_op] = {
+                "from": fpath.name,
+                "description": "",
+                "std_args": [],
+                "_raw_summary": [],
+              }
             current_section = "Summary"
       elif token.type == "heading_open" and token.tag == "h4":
         if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
@@ -129,7 +144,6 @@ class OnnxSpecImporter:
 
     Returns:
         A normalized type string.
-
     """
     raw = raw_type.lower().strip()
 
@@ -161,3 +175,75 @@ class OnnxSpecImporter:
 
     # Fallback
     return "Any"
+
+  def convert_to_odl(
+    self,
+    parsed_ops: Dict[str, Dict[str, Any]],
+    domain: str = "ai.onnx",
+    opset_version: int = 21,
+  ) -> Dict[str, Dict[str, Any]]:
+    """Convert parsed ONNX specifications into valid ODL dictionary entries.
+
+    Args:
+        parsed_ops: Dictionary of operator name to raw parsed metadata.
+        domain: ONNX operator domain (e.g. 'ai.onnx', 'ai.onnx.ml').
+        opset_version: Target ONNX opset version.
+
+    Returns:
+        Dictionary mapping operation names to full ODL specification dictionaries.
+    """
+    odl_catalog: Dict[str, Dict[str, Any]] = {}
+
+    for op_name, op_data in parsed_ops.items():
+      raw_desc = op_data.get("description", "")
+      clean_desc = clean_html_tags(raw_desc) or f"Standardized definition for {op_name}."
+
+      std_args: List[Dict[str, Any]] = []
+      for arg in op_data.get("std_args", []):
+        if isinstance(arg, (tuple, list)) and len(arg) >= 2:
+          std_args.append({"name": str(arg[0]), "type": str(arg[1])})
+        elif isinstance(arg, str):
+          std_args.append({"name": arg, "type": "Any"})
+        elif isinstance(arg, dict) and "name" in arg:
+          std_args.append(arg)
+
+      odl_catalog[op_name] = {
+        "operation": op_name,
+        "description": clean_desc,
+        "std_args": std_args,
+        "variants": {
+          "onnx": {
+            "api": f"{domain}.{op_name}",
+            "domain": domain,
+            "opset_version": opset_version,
+          }
+        },
+      }
+
+    return odl_catalog
+
+  def export_odl_yamls(
+    self,
+    odl_entries: Dict[str, Dict[str, Any]],
+    out_dir: Path,
+  ) -> int:
+    """Export ODL operation definitions into discrete YAML files in out_dir.
+
+    Args:
+        odl_entries: Dictionary of operation definitions.
+        out_dir: Destination directory path.
+
+    Returns:
+        Number of YAML files successfully written.
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    count = 0
+
+    for op_name, entry in odl_entries.items():
+      safe_name = op_name.replace("/", "_")
+      target_file = out_dir / f"{safe_name}.yaml"
+      with open(target_file, "w", encoding="utf-8") as f:
+        yaml.dump(entry, f, sort_keys=False, indent=2)
+      count += 1
+
+    return count

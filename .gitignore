@@ -23,7 +23,19 @@ _bootstrap_temp
 __pycache__/
 *.py[cod]
 *$py.class
-docs/ops/*.rst
+
+# Documentation build and generated artifacts
+docs/_build/
+docs/api/
+docs/ops/
+docs/ARCHITECTURE.md
+docs/EXTENDING.md
+docs/EXTENDING_WITH_DSL.md
+docs/IDEAS.md
+docs/INTERNALS.md
+docs/LICENSE
+docs/MAINTENANCE.md
+docs/README.md
 
 # Distribution / packaging
 .Python
@@ -45,7 +57,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-docs/_build
 
 *.txt
 fix_*.py

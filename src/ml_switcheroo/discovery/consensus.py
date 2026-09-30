@@ -11,6 +11,33 @@ import difflib
 import logging
 from typing import Dict, List, Set
 
+try:
+  from ml_ecosystem_snapshots.grounding.engine import compute_levenshtein
+except ImportError:  # pragma: no cover
+
+  def compute_levenshtein(s1: str, s2: str) -> int:
+    """Compute edit distance fallback.
+
+    Args:
+        s1: First string.
+        s2: Second string.
+
+    Returns:
+        Integer edit distance.
+    """
+    if len(s1) < len(s2):
+      return compute_levenshtein(s2, s1)
+    if len(s2) == 0:
+      return len(s1)
+    prev = list(range(len(s2) + 1))
+    for i, c1 in enumerate(s1):
+      curr = [i + 1]
+      for j, c2 in enumerate(s2):
+        curr.append(min(prev[j + 1] + 1, curr[j] + 1, prev[j] + (c1 != c2)))
+      prev = curr
+    return prev[-1]
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -111,6 +138,41 @@ class ConsensusEngine:
         name = name[len(prefix) :]
 
     return name.replace("_", "")
+
+  def compute_similarity(self, s1: str, s2: str) -> float:
+    """Compute normalized similarity ratio between two strings using Levenshtein distance.
+
+    Args:
+        s1: First string to compare.
+        s2: Second string to compare.
+
+    Returns:
+        Float similarity score between 0.0 and 1.0.
+    """
+    max_len = max(len(s1), len(s2))
+    if max_len == 0:
+      return 1.0
+    dist = compute_levenshtein(s1, s2)
+    return 1.0 - (dist / max_len)
+
+  def find_levenshtein_matches(self, token: str, candidates: List[str], threshold: float = 0.8) -> List[str]:
+    """Find candidate tokens exceeding the Levenshtein similarity threshold.
+
+    Args:
+        token: Target string token.
+        candidates: List of candidate tokens to compare against.
+        threshold: Minimum similarity threshold (default 0.8).
+
+    Returns:
+        List of matching candidate strings sorted by similarity descending.
+    """
+    scored = []
+    for cand in candidates:
+      score = self.compute_similarity(token, cand)
+      if score >= threshold:
+        scored.append((score, cand))
+    scored.sort(key=lambda x: (-x[0], x[1]))
+    return [c for _, c in scored]
 
   def cluster(self, threshold: float = 0.8) -> Dict[str, List[str]]:
     """Step 3: Computes Levenshtein Distance between normalized tokens.

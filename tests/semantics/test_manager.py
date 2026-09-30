@@ -501,3 +501,47 @@ def test_validate_python_call() -> None:
 
   with patch("ml_ecosystem_snapshots.grounding.python_fw.validate_python_call", side_effect=Exception("Err")):
     assert sm.validate_python_call("torch", "torch.add") is None
+
+
+def test_diff_snapshot_and_changelog() -> None:
+  """Test diff_snapshot_versions and generate_snapshot_changelog on SemanticsManager."""
+  from unittest.mock import patch
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+  snap1 = {"categories": {"math": [{"name": "foo", "api_path": "test.foo"}]}}
+  snap2 = {"categories": {"math": [{"name": "foo", "api_path": "test.foo"}, {"name": "bar", "api_path": "test.bar"}]}}
+
+  diff = sm.diff_snapshot_versions(snap1, snap2)
+  assert diff is not None
+  changelog = sm.generate_snapshot_changelog(diff)
+  assert isinstance(changelog, str)
+  assert "Added" in changelog or "test.bar" in changelog
+
+  # Exception branches
+  with patch("ml_ecosystem_snapshots.diff.diff_snapshots", side_effect=Exception("Diff Err")):
+    assert sm.diff_snapshot_versions(snap1, snap2) is None
+
+  with patch("ml_ecosystem_snapshots.diff.generate_changelog", side_effect=Exception("Changelog Err")):
+    assert sm.generate_snapshot_changelog(diff) == ""
+
+
+def test_extract_framework_isolated() -> None:
+  """Test extract_framework_isolated on SemanticsManager."""
+  from unittest.mock import patch
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  sm = SemanticsManager()
+
+  # Success branch with mock
+  with patch("ml_ecosystem_snapshots.api.extract_snapshot_isolated", return_value={"status": "ok"}):
+    res = sm.extract_framework_isolated("torch")
+    assert res == {"status": "ok"}
+
+  # Non-dict return
+  with patch("ml_ecosystem_snapshots.api.extract_snapshot_isolated", return_value="invalid"):
+    assert sm.extract_framework_isolated("torch") == {}
+
+  # Exception branch
+  with patch("ml_ecosystem_snapshots.api.extract_snapshot_isolated", side_effect=Exception("Extraction Error")):
+    assert sm.extract_framework_isolated("torch") == {}

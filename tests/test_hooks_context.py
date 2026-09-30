@@ -282,3 +282,49 @@ def test_hooks_lookup_signature_with_dict(mock_semantics: MagicMock) -> None:
   mock_semantics.get_definition_by_id.return_value = {"std_args": [{"name": "dict_arg"}, {"no_name": True}, "string_arg"]}
   sig: List[str] = ctx.lookup_signature("any")
   assert sig == ["dict_arg", "string_arg"]
+
+
+def test_hooks_plugin_traits_branches() -> None:
+  """Verifies plugin_traits returns default PluginTraits when semantics is None or config is None."""
+  config: RuntimeConfig = RuntimeConfig(target_framework="jax")
+
+  # Branch 1: semantics is None
+  ctx_no_sem: HookContext = HookContext(None, config)
+  traits1: PluginTraits = ctx_no_sem.plugin_traits
+  assert isinstance(traits1, PluginTraits)
+
+  # Branch 2: framework config is None
+  mock_semantics: MagicMock = MagicMock(spec=SemanticsManager)
+  mock_semantics.get_framework_config.return_value = None
+  ctx_no_conf: HookContext = HookContext(mock_semantics, config)
+  traits2: PluginTraits = ctx_no_conf.plugin_traits
+  assert isinstance(traits2, PluginTraits)
+  assert traits2.has_numpy_compatible_arrays is False
+
+
+def test_hooks_inject_preamble_branches() -> None:
+  """Verifies inject_preamble handles both present and missing preamble injectors."""
+  config: RuntimeConfig = RuntimeConfig(target_framework="jax")
+  ctx: HookContext = HookContext(None, config)
+  # Branch 1: None
+  ctx.inject_preamble("import math")
+
+  # Branch 2: Present injector
+  injected: List[str] = []
+  ctx._preamble_injector = lambda s: injected.append(s)
+  ctx.inject_preamble("import os")
+  assert injected == ["import os"]
+
+
+def test_hooks_lookup_api_no_semantics_explicit() -> None:
+  """Verifies lookup_api returns None when semantics is None."""
+  config: RuntimeConfig = RuntimeConfig(target_framework="jax")
+  ctx: HookContext = HookContext(None, config)
+  assert ctx.lookup_api("add") is None
+
+
+def test_hooks_lookup_signature_no_semantics_explicit() -> None:
+  """Verifies lookup_signature returns empty list when semantics is None."""
+  config: RuntimeConfig = RuntimeConfig(target_framework="jax")
+  ctx: HookContext = HookContext(None, config)
+  assert ctx.lookup_signature("add") == []

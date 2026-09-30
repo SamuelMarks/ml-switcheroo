@@ -17,6 +17,8 @@ from ml_switcheroo.cli.handlers.meta import handle_schema
 from ml_switcheroo.cli.handlers.suggest import handle_suggest
 from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
 from ml_switcheroo.cli.handlers.harvest import handle_harvest
+from ml_switcheroo.cli.handlers.import_onnx import handle_import_onnx
+from ml_switcheroo.cli.handlers.completion import handle_completion
 from ml_switcheroo import __version__
 
 
@@ -63,7 +65,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     "--intermediate",
     default=None,
     choices=["mlir", "tikz", "ir", "ml_switcheroo_ir"],
-    help="Force round-trip through intermediate representation for verification",
+    help="Force round-trip through an intermediate representation (choices: mlir, tikz, ir, ml_switcheroo_ir)",
   )
   cmd_conv.add_argument(
     "--json-trace", type=Path, default=None, help="Dump full execution trace (events, diffs) to a JSON file."
@@ -77,6 +79,15 @@ def main(argv: Optional[List[str]] = None) -> int:
   # --- Command: DEFINE ---
   cmd_def = subparsers.add_parser("define", help="Inject a new ODL definition into the Knowledge Base")
   cmd_def.add_argument("path", type=Path, help="Path to the ODL YAML file")
+
+  # --- Command: IMPORT ONNX ---
+  cmd_onnx = subparsers.add_parser(
+    "import-onnx", help="Convert official ONNX markdown specifications into ODL YAML files"
+  )
+  cmd_onnx.add_argument("path", type=Path, help="Path to ONNX operator markdown file (e.g. Operators.md)")
+  cmd_onnx.add_argument("--out-dir", type=Path, default=None, help="Output directory to save generated ODL YAML files")
+  cmd_onnx.add_argument("--domain", default="ai.onnx", help="ONNX operator domain (default: ai.onnx)")
+  cmd_onnx.add_argument("--opset-version", type=int, default=21, help="ONNX opset version (default: 21)")
 
   # --- Command: GEN_WEIGHT_SCRIPT ---
   cmd_wgt = subparsers.add_parser("gen-weight-script", help="Generate a checkpoint migration script.")
@@ -140,6 +151,10 @@ def main(argv: Optional[List[str]] = None) -> int:
   cmd_gen = subparsers.add_parser("gen-tests", help="Generate physical Python test files")
   cmd_gen.add_argument("--out", type=Path, default=Path("tests", "generated", "test_tier_a_math.py"))
 
+  # --- Command: COMPLETION ---
+  cmd_comp = subparsers.add_parser("completion", help="Generate shell completion script (bash, zsh, fish)")
+  cmd_comp.add_argument("shell", choices=["bash", "zsh", "fish"], help="Target shell type")
+
   args = parser.parse_args(argv)
 
   if args.command == "convert":
@@ -159,6 +174,14 @@ def main(argv: Optional[List[str]] = None) -> int:
 
   elif args.command == "define":
     return commands.handle_define(args.path)
+
+  elif args.command == "import-onnx":
+    return handle_import_onnx(
+      args.path,
+      out_dir=args.out_dir,
+      domain=args.domain,
+      opset_version=args.opset_version,
+    )
 
   elif args.command == "gen-weight-script":
     return commands.handle_gen_weight_script(args.source_file, args.out, args.source, args.target)
@@ -198,6 +221,9 @@ def main(argv: Optional[List[str]] = None) -> int:
 
   elif args.command == "gen-tests":
     return commands.handle_gen_tests(args.out)
+
+  elif args.command == "completion":
+    return handle_completion(args.shell)
 
   return 0
 

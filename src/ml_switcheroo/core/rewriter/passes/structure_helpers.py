@@ -278,7 +278,42 @@ class StructuralTransformerHelpersMixin:
       injection = "\n" + "\n".join([f"    {n}: Injected." for n, _ in args])
       new_val = f'"""{content}{injection}\n    """'
       new_expr = expr.with_changes(value=cst.SimpleString(new_val))
-      new_stmt = stmt.with_changes(body=[expr.with_changes(value=new_expr)])
+      new_stmt = stmt.with_changes(body=[new_expr])
       return node.with_changes(body=node.body.with_changes(body=[new_stmt] + list(node.body.body[1:])))
 
+    return node
+
+  def _strip_docstring_arg(self, node: cst.FunctionDef, arg_name: str) -> cst.FunctionDef:
+    """Remove docstring parameter entries for a stripped argument.
+
+    Args:
+        node: The CST FunctionDef node whose docstring is to be updated.
+        arg_name: The name of the parameter to prune from docstrings.
+
+    Returns:
+        The updated CST FunctionDef node with parameter documentation pruned.
+    """
+    if not hasattr(node.body, "body") or not node.body.body:
+      return node
+    stmt = node.body.body[0]
+    if not isinstance(stmt, cst.SimpleStatementLine) or len(stmt.body) != 1:
+      return node
+    expr = stmt.body[0]
+    if not isinstance(expr, cst.Expr) or not isinstance(expr.value, cst.SimpleString):
+      return node
+
+    val = expr.value.value
+    lines = val.split("\n")
+    cleaned_lines = []
+    for line in lines:
+      stripped = line.strip()
+      if stripped.startswith(f"{arg_name}: Injected.") or stripped == f"{arg_name}:":
+        continue
+      cleaned_lines.append(line)
+
+    new_val = "\n".join(cleaned_lines)
+    if new_val != val:
+      new_expr = expr.with_changes(value=cst.SimpleString(new_val))
+      new_stmt = stmt.with_changes(body=[new_expr])
+      return node.with_changes(body=node.body.with_changes(body=[new_stmt] + list(node.body.body[1:])))
     return node

@@ -155,3 +155,15 @@ def test_structure_helpers() -> None:
     0
   ]
   assert helper._update_docstring(func_single_quote_doc, [("arg", "int")]) is func_single_quote_doc
+
+  # _strip_docstring_arg coverage
+  func_with_injected_doc: cst.FunctionDef = helper._update_docstring(func_doc, [("rngs", None)])
+  assert "rngs: Injected." in get_code(func_with_injected_doc)
+  f_pruned = helper._strip_docstring_arg(func_with_injected_doc, "rngs")
+  assert "rngs: Injected." not in get_code(f_pruned)
+
+  # _strip_docstring_arg edge cases
+  assert helper._strip_docstring_arg(func_empty_body, "rngs") is func_empty_body
+  assert helper._strip_docstring_arg(func_def3, "rngs") is func_def3
+  assert helper._strip_docstring_arg(f_invalid_doc, "rngs") is f_invalid_doc
+  assert helper._strip_docstring_arg(func_doc, "not_present") is func_doc

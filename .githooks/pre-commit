@@ -6,28 +6,43 @@ echo "Running Pre-commit Hooks"
 echo "==================================="
 
 # 1. Format
-echo "=> [1/6] Auto-formatting code (ruff format)..."
+echo "=> [1/7] Auto-formatting code (ruff format)..."
 uv run ruff format .
 
-echo "=> [2/6] Linting code & auto-fixing (ruff check)..."
+echo "=> [2/7] Linting code & auto-fixing (ruff check)..."
 uv run ruff check --fix .
 
-echo "=> [3/6] Verifying formatting (ruff format --check)..."
+echo "=> [3/7] Verifying formatting (ruff format --check)..."
 uv run ruff format --check .
 
-echo "=> [4/6] Verifying linting (ruff check)..."
+echo "=> [4/7] Verifying linting (ruff check)..."
 uv run ruff check .
 
 # 2. Build
-echo "=> [5/6] Building package..."
+echo "=> [5/7] Building package..."
 uv build
 
-# 3. Test & Coverage
-echo "=> [6/6] Running tests and updating coverage shields..."
+# 3. Grounding Audit against ml-framework-snapshots
+echo "=> [6/7] Grounding Audit against ml-framework-snapshots..."
+AUDIT_FAILED=0
+uv run python scripts/audit_against_snapshots.py --strict || AUDIT_FAILED=1
+for fw in torch jax mlx keras rdna nvidia_sass ir; do
+  uv run python scripts/audit_against_snapshots.py --strict --framework "$fw" || AUDIT_FAILED=1
+done
+
+if [ $AUDIT_FAILED -eq 1 ]; then
+    echo "================================================================"
+    echo "Snapshot grounding audit failed! Aborting commit."
+    echo "================================================================"
+    exit 1
+fi
+
+# 4. Test & Coverage
+echo "=> [7/7] Running tests and updating coverage shields..."
 
 # We capture the status of the tests so we can fail the hook if they fail
 TESTS_FAILED=0
-uv run pytest -n auto --cov=src/ml_switcheroo --cov-report=term > coverage_output.tmp || TESTS_FAILED=1
+uv run pytest -n auto -m "not slow" -q --cov=src/ml_switcheroo --cov-report=term | tee coverage_output.tmp || TESTS_FAILED=1
 
 if [ $TESTS_FAILED -eq 1 ]; then
     echo "Tests failed! See pytest output below:"

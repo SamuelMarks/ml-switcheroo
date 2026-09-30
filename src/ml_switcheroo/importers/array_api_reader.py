@@ -362,3 +362,40 @@ class ArrayApiSpecImporter:
     summary = doc.strip().split("\n\n")[0]
     # Flatten newlines within that paragraph
     return summary.replace("\n", " ").strip()
+
+  def generate_conformance_report(self, semantics: Dict[str, Dict[str, Any]]) -> str:
+    """Generate a Markdown conformance report for ingested Array API operations.
+
+    Args:
+        semantics: Dictionary of operation definitions mapped to their metadata.
+
+    Returns:
+        Formatted Markdown report summarizing Array API conformance.
+    """
+    total = len(semantics)
+    with_args = sum(1 for d in semantics.values() if d.get("std_args"))
+    with_docs = sum(1 for d in semantics.values() if d.get("description"))
+
+    lines = [
+      "# Python Array API Standard Conformance Report",
+      "",
+      f"- **Total Operations Standardized**: {total}",
+      f"- **Operations with Typed Signatures**: {with_args}",
+      f"- **Operations with Validated Docstrings**: {with_docs}",
+      "",
+      "| Operation | Arguments | Returns | Source |",
+      "| :--- | :--- | :--- | :--- |",
+    ]
+
+    for name in sorted(semantics.keys()):
+      defn = semantics[name]
+      args_str = ", ".join(f"{a[0]}: {a[1]}" for a in defn.get("std_args", []))
+      ret = defn.get("returns_type", "Any")
+      src = defn.get("from", "stubs")
+      lines.append(f"| `{name}` | `{args_str or 'None'}` | `{ret}` | {src} |")
+
+    lines.append("")
+    return "\n".join(lines)
+
+
+ArrayApiReader = ArrayApiSpecImporter

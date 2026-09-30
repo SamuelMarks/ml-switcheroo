@@ -9,7 +9,13 @@ import pytest
 import yaml
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
-from ml_switcheroo.semantics.file_loader import KnowledgeBaseLoader
+from ml_switcheroo.semantics.file_loader import (
+  KnowledgeBaseLoader,
+  clean_content_descriptions,
+  clean_sphinx_roles,
+  get_docstring_parser,
+  parse_docstring_sections,
+)
 
 
 def test_file_loader_init() -> None:
@@ -136,18 +142,56 @@ def test_load_tier_content() -> None:
   """Loads tier content."""
   mgr: MagicMock = MagicMock()
   loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
+  content = {"Add": {"operation": "Add", "description": ":class:`~torch.Tensor` add"}}
   with patch("ml_switcheroo.semantics.file_loader.merge_tier_data") as mock_merge:
-    loader._load_tier_content({"a": 1}, SemanticTier.ARRAY_API)
+    loader._load_tier_content(content, SemanticTier.ARRAY_API)
     mock_merge.assert_called_once()
+    assert content["Add"]["description"] == "torch.Tensor add"
 
 
 def test_load_overlay_content() -> None:
   """Loads overlay content."""
   mgr: MagicMock = MagicMock()
   loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
+  content = {"Add": {"operation": "Add", "description": ":func:`relu` activation"}}
   with patch("ml_switcheroo.semantics.file_loader.merge_overlay_data") as mock_merge:
-    loader._load_overlay_content({"a": 1}, "test_map.json")
+    loader._load_overlay_content(content, "test_map.json")
     mock_merge.assert_called_once()
+    assert content["Add"]["description"] == "relu activation"
+
+
+def test_clean_sphinx_roles() -> None:
+  """Verifies clean_sphinx_roles behavior on None and formatted strings."""
+  assert clean_sphinx_roles(None) is None
+  assert clean_sphinx_roles("plain string") == "plain string"
+  res = clean_sphinx_roles(":class:`~torch.Tensor` and :func:`relu`")
+  assert res == "torch.Tensor and relu"
+
+
+def test_parse_docstring_sections_and_parser() -> None:
+  """Verifies docstring parsing with Griffe integration."""
+  parser = get_docstring_parser("google")
+  assert parser is not None
+  sections = parse_docstring_sections("Short description.\n\nArgs:\n    x: Input tensor.\n")
+  assert isinstance(sections, list)
+
+
+def test_clean_content_descriptions_branches() -> None:
+  """Verifies clean_content_descriptions handles non-dicts and various description forms."""
+  # Non-dict content
+  clean_content_descriptions("not a dict")
+  clean_content_descriptions([1, 2, 3])
+
+  # Non-dict op, dict without description, dict with non-string desc, and valid desc
+  data: dict = {
+    "raw_list": [1],
+    "no_desc": {"operation": "Foo"},
+    "non_str_desc": {"operation": "Bar", "description": 123},
+    "valid_desc": {"operation": "Baz", "description": ":func:`relu` op"},
+  }
+  clean_content_descriptions(data)
+  assert data["valid_desc"]["description"] == "relu op"
+  assert data["non_str_desc"]["description"] == 123
 
 
 # --- Merged from test_file_loader_missing.py ---

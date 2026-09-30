@@ -54287,18 +54287,24 @@
         "args": {
           "x": "x",
           "y": "y"
-        }
+        },
+        "inject_defaults": false
       },
       "keras": {
         "api": "keras.ops.add",
-        "args": {}
+        "args": {
+          "input": "x1",
+          "other": "x2"
+        },
+        "inject_defaults": false
       },
       "mlx": {
         "api": "mlx.core.add",
         "args": {
           "a": "a",
           "b": "b"
-        }
+        },
+        "inject_defaults": false
       },
       "nvidia_sass": {
         "api": "FADD",
@@ -54315,12 +54321,21 @@
           "rhs": "rhs"
         }
       },
+      "tensorflow": {
+        "api": "tf.add",
+        "args": {
+          "input": "x",
+          "other": "y"
+        },
+        "inject_defaults": false
+      },
       "torch": {
         "api": "torch.add",
         "args": {
           "input": "input",
           "other": "other"
-        }
+        },
+        "inject_defaults": false
       }
     }
   },
@@ -66455,7 +66470,9 @@
       "jax": {
         "api": "jax.numpy.ravel",
         "args": {
-          "input": "a"
+          "end_dim": null,
+          "input": "a",
+          "start_dim": null
         }
       },
       "keras": {
@@ -66465,8 +66482,11 @@
       "mlx": {
         "api": "mlx.core.flatten",
         "args": {
-          "a": "a"
-        }
+          "a": "a",
+          "end_axis": "end_dim",
+          "start_axis": "start_dim"
+        },
+        "inject_defaults": false
       },
       "nvidia_sass": {
         "api": "Macro.Flatten",
@@ -66479,8 +66499,11 @@
       "torch": {
         "api": "torch.flatten",
         "args": {
-          "input": "input"
-        }
+          "end_dim": "end_dim",
+          "input": "input",
+          "start_dim": "start_dim"
+        },
+        "inject_defaults": false
       }
     }
   },

@@ -220,11 +220,20 @@ def generate_reports(
     f.write(chr(10))
 
   with open(md_output, "w", encoding="utf-8") as f:
-    f.write("# StableHLO Missing Operations" + chr(10))
+    f.write("# StableHLO Dialect Operator Coverage Audit" + chr(10) + chr(10))
+    f.write(f"- **Total Official Ops**: {len(official_ops)}" + chr(10))
+    f.write(f"- **Implemented Ops**: {len(implemented_ops)}" + chr(10))
+    f.write(f"- **Missing Ops**: {len(missing_ops)}" + chr(10))
+    coverage_pct = (len(implemented_ops & set(official_ops)) / len(official_ops) * 100.0) if official_ops else 100.0
+    f.write(f"- **Dialect Coverage**: {coverage_pct:.1f}%" + chr(10) + chr(10))
     if missing_ops:
-      f.write(chr(10))
-    for op in missing_ops:
-      f.write(f"- [ ] Implement `{op}`" + chr(10))
+      f.write("## Missing Operations" + chr(10) + chr(10))
+      for op in missing_ops:
+        f.write(f"- [ ] Implement `{op}`" + chr(10))
+    else:
+      f.write("## Supported StableHLO Operations" + chr(10) + chr(10))
+      for op in sorted(list(implemented_ops)):
+        f.write(f"- [x] `{op}`" + chr(10))
 
 
 def main(

@@ -251,3 +251,18 @@ def test_main_entrypoint(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Non
       assert excinfo.value.code == 0
   finally:
     sys.path = orig_sys_path
+
+
+def test_quarantine_no_duplicate_keys_and_valid() -> None:
+  """Asserts quarantine.yaml contains zero duplicate keys and valid format."""
+  q_path = Path("src/ml_switcheroo/semantics/quarantine.yaml")
+  if not q_path.exists():
+    return
+  seen_keys = set()
+  with open(q_path, "r", encoding="utf-8") as f:
+    for line in f:
+      if line and not line.startswith(" ") and ":" in line and not line.startswith("#"):
+        key = line.split(":", 1)[0].strip()
+        if key:
+          assert key not in seen_keys, f"Duplicate key '{key}' found in quarantine.yaml"
+          seen_keys.add(key)

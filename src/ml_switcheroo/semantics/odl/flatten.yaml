@@ -20,10 +20,16 @@ variants:
     api: torch.flatten
     args:
       input: input
+      start_dim: start_dim
+      end_dim: end_dim
+    inject_defaults: false
   mlx:
     api: mlx.core.flatten
     args:
       a: a
+      start_axis: start_dim
+      end_axis: end_dim
+    inject_defaults: false
   rdna:
     api: ; Macro.Flatten
     args: {}
@@ -34,6 +40,8 @@ variants:
     api: jax.numpy.ravel
     args:
       input: a
+      start_dim: null
+      end_dim: null
   keras:
     api: keras.layers.Flatten
     args: {}

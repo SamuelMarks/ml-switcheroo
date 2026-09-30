@@ -136,6 +136,9 @@ class ApiHelpersMixin:
           mod = alias_conf.get("module")
           if mod:
             known_roots.add(mod.split(".")[0])
+          alias_name = alias_conf.get("name")
+          if alias_name:
+            known_roots.add(alias_name.split(".")[0])
 
     root = name.split(".")[0]
     return root in known_roots

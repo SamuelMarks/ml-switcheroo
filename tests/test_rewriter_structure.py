@@ -333,10 +333,14 @@ def test_structure_transformer_edge_cases2():
 
   # 505-507: strip magic args auto
   semantics.framework_configs = {
-    "jax": {"tiers": ["array", "neural"], "traits": {"auto_strip_magic_args": True, "inject_magic_args": []}},
-    "torch": {"traits": {"module_base": "torch.nn.Module"}},
+    "jax": {"traits": {"module_base": "flax.nnx.Module"}},
+    "torch": {
+      "tiers": ["array", "neural"],
+      "traits": {"module_base": "torch.nn.Module", "auto_strip_magic_args": True, "strip_magic_args": ["rngs"]},
+    },
   }
-  context = RewriterContext(semantics=semantics, config=config)
+  config_torch = RuntimeConfig(source_framework="jax", target_framework="torch")
+  context = RewriterContext(semantics=semantics, config=config_torch)
   transformer = StructuralTransformer(context)
   mod6 = cst.parse_module("class A(torch.nn.Module):\n  def __init__(self, rngs): pass")
   class_def6 = mod6.body[0]
@@ -397,7 +401,7 @@ def test_structure_transformer_edge_cases2():
   res_func6 = transformer.leave_FunctionDef(func_def8, func_def8)
   transformer.leave_ClassDef(class_def8, class_def8)
   # The first body item is a SimpleStatementLine containing an Expr with the string
-  assert "rngs" in res_func6.body.body[0].body[0].value.value.value
+  assert "rngs" in res_func6.body.body[0].body[0].value.value
 
   # 529: _resolve_alias missing fallback
   semantics.framework_configs = {"jax": {"tiers": ["array", "neural"], "traits": {}}}
@@ -542,3 +546,24 @@ def test_structure_missing_branches() -> None:
   transformer_magic.visit_FunctionDef(func_rngs)
   res_rngs = transformer_magic.leave_FunctionDef(func_rngs, func_rngs)
   assert isinstance(res_rngs, cst.FunctionDef)
+
+  # 12. 290->293: _get_type_mapping when target_fw is unknown in target_type_map
+  config_ir = RuntimeConfig(source_framework="torch", target_framework="ir")
+  context_ir = RewriterContext(semantics=DummySemantics(), config=config_ir)
+  transformer_ir = StructuralTransformer(context_ir)
+  res_type = transformer_ir._get_type_mapping("torch.Tensor")
+  assert res_type is None
+
+  # 13. 551: leave_ClassDef when target_base is None
+  semantics_nobase = DummySemantics()
+  semantics_nobase.framework_configs = {
+    "ir": {"tiers": ["neural"], "traits": {"module_base": None}},
+    "torch": {"traits": {"module_base": "torch.nn.Module"}},
+  }
+  context_nobase = RewriterContext(semantics=semantics_nobase, config=config_ir)
+  transformer_nobase = StructuralTransformer(context_nobase)
+  class_torch: cst.ClassDef = cst.parse_module("class M(torch.nn.Module): pass").body[0]  # type: ignore[assignment]
+  transformer_nobase.visit_ClassDef(class_torch)
+  res_nobase = transformer_nobase.leave_ClassDef(class_torch, class_torch)
+  assert isinstance(res_nobase, cst.ClassDef)
+  assert len(res_nobase.bases) == 1

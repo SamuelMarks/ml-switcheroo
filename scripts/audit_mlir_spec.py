@@ -277,11 +277,23 @@ def generate_reports(
     f.write(chr(10))
 
   with open(md_output, "w", encoding="utf-8") as f:
-    f.write("# MLIR LangRef Missing Grammar Rules" + chr(10))
+    f.write("# MLIR LangRef Dialect Grammar Audit" + chr(10) + chr(10))
+    total_rules = len(grammar_rules)
+    missing_count = len(missing_rules)
+    implemented_count = total_rules - missing_count
+    coverage_pct = (implemented_count / total_rules * 100.0) if total_rules else 100.0
+    f.write(f"- **Total Grammar Rules**: {total_rules}" + chr(10))
+    f.write(f"- **Implemented Rules**: {implemented_count}" + chr(10))
+    f.write(f"- **Missing Rules**: {missing_count}" + chr(10))
+    f.write(f"- **Grammar Parity**: {coverage_pct:.1f}%" + chr(10) + chr(10))
     if missing_rules:
-      f.write(chr(10))
-    for rule in sorted(missing_rules):
-      f.write(f"- [ ] Implement `{rule}` (Spec: `{grammar_rules[rule]}`)" + chr(10))
+      f.write("## Missing Grammar Rules" + chr(10) + chr(10))
+      for rule in sorted(missing_rules):
+        f.write(f"- [ ] Implement `{rule}` (Spec: `{grammar_rules[rule]}`)" + chr(10))
+    else:
+      f.write("## Implemented Grammar Rules" + chr(10) + chr(10))
+      for rule in sorted(grammar_rules.keys()):
+        f.write(f"- [x] `{rule}`" + chr(10))
 
 
 def main(

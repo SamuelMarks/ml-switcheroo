@@ -122,6 +122,10 @@ class ImportMixin(cst.CSTTransformer):
     if not new_aliases:
       return cst.RemoveFromParent()
 
+    last_alias = new_aliases[-1]
+    if last_alias.comma != cst.MaybeSentinel.DEFAULT:
+      new_aliases[-1] = last_alias.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+
     return updated_node.with_changes(names=new_aliases)
 
   def leave_ImportFrom(
@@ -190,5 +194,10 @@ class ImportMixin(cst.CSTTransformer):
 
     if not new_aliases:
       return cst.RemoveFromParent()
+
+    if not updated_node.rpar:
+      last_alias = new_aliases[-1]
+      if last_alias.comma != cst.MaybeSentinel.DEFAULT:
+        new_aliases[-1] = last_alias.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
     return updated_node.with_changes(names=new_aliases)

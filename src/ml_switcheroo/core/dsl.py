@@ -144,6 +144,10 @@ class FrameworkVariant(BaseModel):
     default_factory=lambda: {},
     description="Dictionary of new arguments to inject with fixed default values (supports primitives and complex types).",
   )
+  inject_defaults: bool = Field(
+    default=True,
+    description="If False, standard argument default values are not injected as keyword arguments during normalization.",
+  )
 
   casts: Optional[Dict[str, str]] = Field(
     None, description="Mapping of argument names to target types (e.g. {'x': 'int32'})."

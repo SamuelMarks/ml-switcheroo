@@ -121,3 +121,25 @@ def test_consensus_engine_cluster_difflib_no_matches() -> None:
   with patch("difflib.get_close_matches", return_value=[]):
     clusters: dict[str, typing.Any] = engine.cluster()
     assert len(clusters) == 0
+
+
+def test_consensus_engine_compute_similarity() -> None:
+  """Verifies the Levenshtein similarity calculation."""
+  engine = ConsensusEngine([])
+  assert engine.compute_similarity("", "") == 1.0
+  assert engine.compute_similarity("relu", "relu") == 1.0
+  sim = engine.compute_similarity("relu", "relufn")
+  assert 0.0 < sim < 1.0
+  assert engine.compute_similarity("abc", "xyz") == 0.0
+
+
+def test_consensus_engine_find_levenshtein_matches() -> None:
+  """Verifies find_levenshtein_matches candidate filtering and ordering."""
+  engine = ConsensusEngine([])
+  candidates = ["relu", "relufn", "completely_different", "rel"]
+  matches = engine.find_levenshtein_matches("relu", candidates, threshold=0.6)
+  assert "relu" in matches
+  assert "relufn" in matches
+  assert "rel" in matches
+  assert "completely_different" not in matches
+  assert matches[0] == "relu"

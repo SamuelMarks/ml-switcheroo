@@ -13,7 +13,7 @@ ml-switcheroo 🔄🦘
 
 *Usable via either the `ml_switcheroo` command or its CLI emoji alias `🔄🦘`.*
 
-**ml-switcheroo** has evolved from a simple AST transpiler into a deterministic **Universal Compiler** for Machine Learning. It enables conversion between distinct levels of the ML stack: from high-level frameworks (PyTorch, JAX, Apple MLX, Keras 3), down to hardware assembly (NVIDIA SASS, AMD RDNA), native C++ PyBind11 extensions, WebAssembly (WAT), and visual documentation formats (TikZ, HTML, LaTeX). **Note: Conversion to intermediate representations like StableHLO is currently in alpha/experimental state and is not yet loss-less.**
+**ml-switcheroo** has evolved from a simple AST transpiler into a deterministic **Universal Compiler** for Machine Learning. It enables conversion between distinct levels of the ML stack: from high-level frameworks (PyTorch, JAX, Apple MLX, Keras 3), down to hardware assembly (NVIDIA SASS, AMD RDNA) and visual documentation formats (TikZ, HTML, LaTeX). **Note: Conversion to intermediate representations like StableHLO is currently in alpha/experimental state and is not yet loss-less.**
 
 It solves the $O(N^2)$ interoperability problem using a **Hub-and-Spoke** architecture. Instead of writing translators for every pair of languages, we map every dialect to a central **Abstract Standard** (Hub).
 
@@ -35,10 +35,7 @@ flowchart TD
 %% Level 3: Yellow (Intermediate)
     classDef l3Node fill: #f9ab00, stroke: #ffd427, stroke-width: 2px, color: white, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
 
-%% Level 4: Teal (Native & Web)
-    classDef l4Node fill: #00897b, stroke: #80cbc4, stroke-width: 2px, color: white, font-family: 'Roboto Mono Normal', font-size: 14px, rx: 3px, ry: 3px;
-
-%% Level 5: Navy (Hardware ASM) - Roboto Mono
+%% Level 4: Navy (Hardware ASM) - Roboto Mono
     classDef asmNode fill: #20344b, stroke: #57caff, stroke-width: 2px, color: white, font-family: 'Roboto Mono Normal', font-size: 14px, rx: 2px, ry: 2px;
 
 %% --- 2. Subgraph Styling ---
@@ -46,60 +43,52 @@ flowchart TD
     classDef containerL1 fill: white, stroke: #4285f4, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
     classDef containerL2 fill: white, stroke: #34a853, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
     classDef containerL3 fill: white, stroke: #f9ab00, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
-    classDef containerL4 fill: white, stroke: #00897b, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
     classDef containerHW fill: white, stroke: #20344b, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
 
 %% --- 3. Diagram Structure ---
 
     subgraph L0 [Level 0: Representations]
-        direction LR
+        direction TB
         HTML ~~~ TikZ ~~~ LaTeX
     end
 
     subgraph L1 [Level 1: High-Level Frameworks]
-        direction LR
+        direction TB
         PyTorch ~~~ MLX ~~~ TensorFlow ~~~ Keras ~~~ FlaxNNX[Flax NNX] ~~~ PaxML
     end
 
     subgraph L2 [Level 2: Numerical Only]
-        direction LR
+        direction TB
         JAX ~~~ NumPy
     end
 
     subgraph L3 [Level 3: Standard IR]
-        direction LR
+        direction TB
         StableHLO[Stable HLO] ~~~ MLIR ~~~ IR[ML-Switcheroo IR]
     end
 
-    subgraph L4 [Level 4: Native & Binary]
-        direction LR
-        Cpp[C++ / PyBind11] ~~~ WAT[WebAssembly WAT]
-    end
-
-    subgraph LBottom [Level 5: Hardware ASM]
-        direction LR
-        NVIDIA_SASS[NVIDIA SASS] ~~~ RDNA[AMD RDNA]
+    subgraph LBottom [Level 4: Native & Hardware]
+        direction TB
+        NVIDIA_SASS[NVIDIA SASS] ~~~ RDNA[AMD RDNA] ~~~ CPP[C++] ~~~ WASM[WebAssembly]
     end
 
 %% --- 4. Connections ---
     TikZ ~~~ TensorFlow
     TensorFlow ~~~ JAX
     JAX ~~~ StableHLO
-    StableHLO ~~~ Cpp
-    Cpp ~~~ NVIDIA_SASS
+    StableHLO ~~~ NVIDIA_SASS
+    NVIDIA_SASS ~~~ CPP
 
 %% --- 5. Apply Styles ---
     class HTML,TikZ,LaTeX l0Node;
     class PyTorch,MLX,TensorFlow,Keras,FlaxNNX,PaxML l1Node;
     class JAX,NumPy l2Node;
     class StableHLO,MLIR,IR l3Node;
-    class Cpp,WAT l4Node;
-    class NVIDIA_SASS,RDNA asmNode;
+    class NVIDIA_SASS,RDNA,CPP,WASM asmNode;
     class L0 containerL0;
     class L1 containerL1;
     class L2 containerL2;
     class L3 containerL3;
-    class L4 containerL4;
     class LBottom containerHW;
 ```
 
@@ -107,18 +96,16 @@ flowchart TD
 
 ## 🚀 Key Capabilities
 
-### 1. Syntactic Transpilation (Python ↔ Python & Python → C++)
-Convert model code between frameworks with semantic fidelity, or export to native C++ extensions.
+### 1. Syntactic Transpilation (Python ↔ Python)
+Convert model code between frameworks with semantic fidelity.
 *   **PyTorch** ↔ **JAX / Flax NNX** ↔ **Apple MLX** ↔ **Keras 3** ↔ **TensorFlow**
-*   **Target: C++ / PyBind11 (Compiler SDK)**: Compiles forward passes and custom operators into native PyTorch C++ extension modules (`TorchCppExtensionGenerator` in `ml_switcheroo.core.compiler.backends.cpp`) with full C++ CST parsing and AST transformation.
 *   Handles class rewriting (`nn.Module` -> `nnx.Module`), state injection (RNG keys), and functional unwrapping.
 
-### 2. Architecture Visualization & WebAssembly (Python → Visuals & WAT)
-Compile your model graphs directly into diagramming languages and portable execution formats.
+### 2. Architecture Visualization (Python → Visuals)
+Compile your model graphs directly into diagramming languages and visual documentation formats.
 *   **Target: TikZ**: Generates publication-ready LaTeX TikZ code for academic papers (`--target tikz`).
 *   **Target: LaTeX DSL**: Transpiles computational expressions into mathematical LaTeX equations (`--target latex_dsl`).
 *   **Target: HTML**: Generates static Grid CSS responsive layouts to visually inspect module hierarchies (`--target html`).
-*   **Target: WebAssembly (WAT)**: The `WasmBackend` (`ml_switcheroo.core.compiler.backends.wasm_backend`) generates stack-based WebAssembly Text representations directly from `LogicalGraph` for sandboxed or browser-based runtime verification.
 
 ### 3. Hardware Lowering, Decompilation & Cross-ISA (Python ↔ ASM, SASS ↔ RDNA)
 Bridge the gap between high-level neural networks and raw GPU assembly.
@@ -126,13 +113,18 @@ Bridge the gap between high-level neural networks and raw GPU assembly.
 *   **Decompilation (ASM → Python)**: Reconstructs loops (e.g. `Conv2d` and GEMM kernels) from raw assembly streams using Control Flow Graph (CFG) reconstruction, basic block separation, and dominator tree analysis.
 *   **Cross-ISA Translation (SASS ↔ RDNA)**: Translates directly between NVIDIA SASS and AMD RDNA instruction streams (e.g., `FFMA` / `LDG` ↔ `v_fmac_f32` / `global_load`).
 
-### 4. Weight Migration (Checkpointing)
+### 4. C++ Code Generation & WebAssembly (WASM) Compilation
+Compile ML models natively into high-performance execution environments.
+*   **C++ Extensions**: Compiles `LogicalGraph` representations into PyTorch C++ Extensions (`.cpp` / `.hpp`) using a robust C++ CST API and `TorchCppExtensionGenerator`.
+*   **WebAssembly (WAT)**: Compiles `LogicalGraph` structures directly to WebAssembly Text (WAT) stack-based instructions for browser-native execution.
+
+### 5. Weight Migration (Checkpointing)
 Generate standalone scripts to convert model weights between formats.
 *   Reads source AST to determine layer mappings.
 *   Generates `orbax` / `torch.save` / `safetensors` (PyTorch, JAX, MLX) / `h5py` (`.keras`) migration logic.
 *   Automatically handles NCHW ↔ NHWC layout permutation.
 
-### 5. Auto-Sharding, Distributed Semantics & Architecture Fusion
+### 6. Auto-Sharding, Distributed Semantics & Architecture Fusion
 Automatically optimize model topologies and infer distributed sharding constraints.
 *   **Distributed Sharding**: Uses `ShardingInferencePass` to analyze unannotated graphs and inject `LogicalMesh` and `PartitionSpec` annotations (column-parallel, row-parallel, data-parallel heuristics) for PaxML and JAX/NNX targets.
 *   **Architecture Fusion Passes**:
@@ -141,12 +133,13 @@ Automatically optimize model topologies and infer distributed sharding constrain
     *   `VisionPatchEmbeddingFusionPass` / `VisionPatchEmbeddingDefusionPass`: Restructure and optimize patch embedding projections for multimodal vision-language models.
 *   **Topological Diff Engine**: `GraphDiffer` computes granular patch actions (`DeleteAction`, `ReplaceAction`) between logical computation graphs.
 
-### 6. Hexagonal Static Transpilation Lattice (30 Directed Paths)
-Bidirectional static source-to-source conversion across the 6 core targets:
+### 7. Heptagonal Static Transpilation Lattice (42 Directed Paths)
+Bidirectional static source-to-source conversion across the core targets:
 *   **High-Level Frameworks (12 Edges)**: **PyTorch** ↔ **JAX / Flax NNX** ↔ **Apple MLX** ↔ **Keras 3**.
 *   **Hardware Bridge Lowering (8 Edges)**: High-Level Models → `LogicalGraph` IR → **AMD RDNA** & **NVIDIA SASS**.
 *   **Hardware Bridge Lifting (8 Edges)**: Disassembly / Macro Streams → `LogicalGraph` IR → High-Level Modules.
 *   **Cross-ISA Direct Compilation (2 Edges)**: **AMD RDNA** ↔ **NVIDIA SASS**.
+*   **Native & Web Compilation (12 Edges)**: High-Level Models → `LogicalGraph` IR → **C++** & **WebAssembly (WAT)**.
 *   **Ground Truth Grounding**: Formally verified against live framework snapshots in `ml-ecosystem-snapshots` v0.0.3 (with transparent backward compatibility for `ml-framework-snapshots` via `_alias`) and `ml-compiler-snapshots` with zero hallucinated APIs or arguments. Supports SQLite FTS5 indexed fast symbol lookups (`ml_ecosystem_snapshots.index`) and custom discovery paths configured via `$ML_SNAPSHOTS_PATH` or `$ML_ECOSYSTEM_SNAPSHOTS_DIR`.
 *   **YAML-First Semantics**: Built on 3,290+ modular operation definitions (currently 3,291 compiled ops in `src/ml_switcheroo/semantics/odl.json`).
 
@@ -348,7 +341,7 @@ Core target support status across the compiler lattice:
 
 | Category | Dialect / Target | Status | Supported Features |
 |:---|:---|:---:|:---|
-| **High-Level Frameworks** | **PyTorch** | 🟢 Primary | Source/Target, `nn.Module`, `functional`, Optimizers, DataLoaders, C++ export |
+| **High-Level Frameworks** | **PyTorch** | 🟢 Primary | Source/Target, `nn.Module`, `functional`, Optimizers, DataLoaders |
 | | **JAX / Flax NNX** | 🟢 Primary | Source/Target (`flax.nnx`), `vmap`, `grad`, `jit`, Orbax Checkpointing, RNG keys |
 | | **Apple MLX** | 🔵 Beta | `mlx.nn` layers, `mlx.core` array ops, MLX optimizers |
 | | **Keras 3** | 🔵 Beta | Multi-backend layers, `keras.ops` math, Sequential restructuring |
@@ -360,11 +353,11 @@ Core target support status across the compiler lattice:
 | **Intermediate Reps** | **ML-Switcheroo IR** | 🟢 Primary | Unified `LogicalGraph`, `PartitionSpec`, `LogicalMesh`, topological diff engine |
 | | **MLIR** | ⚪ Alpha | MLIR CST/AST parser, dialect emission, type inference |
 | | **StableHLO** | ⚪ Alpha | StableHLO dialect parser and emitter (bitwise, math, complex linalg, shapes) |
-| **Native & Visual** | **C++ (PyBind11)** | 🔵 Beta | Native C++ extension module generation (`TorchCppExtensionGenerator`), CST parser & transformer (Compiler SDK) |
-| | **TikZ** | 🟢 Primary | Publication-ready LaTeX TikZ neural network diagram generation (`--target tikz`) |
+| **Native & Web** | **C++** | 🔵 Beta | PyTorch C++ Extension generation, `TorchCppExtensionGenerator`, robust C++ CST |
+| | **WebAssembly (WAT)** | ⚪ Alpha | Compiles `LogicalGraph` structures to WASM stack-based text format |
+| **Visual Formats** | **TikZ** | 🟢 Primary | Publication-ready LaTeX TikZ neural network diagram generation (`--target tikz`) |
 | | **LaTeX DSL** | 🟢 Primary | Mathematical LaTeX equation transpilation (`--target latex_dsl`) |
 | | **HTML** | 🟢 Primary | Static Grid CSS responsive architecture layouts (`--target html`) |
-| | **WebAssembly (WAT)** | 🟢 Primary | Stack-based WebAssembly Text (`WasmBackend` WAT) from `LogicalGraph`; Pyodide in-browser runtime |
 
 To view the interactive, live compatibility table for your installed version and local extensions:
 
@@ -426,15 +419,15 @@ ml-switcheroo is designed to be extended without modifying the core engine.
 2. **Add a Framework**: Create a class inheriting `FrameworkAdapter` in `src/ml_switcheroo/frameworks/`.
    See [EXTENDING.md](EXTENDING.md) for architectural details on Adapters and Plugins.
 
-3. **Modular AST Plugins**: Leverage the 35+ specialized plugins in `src/ml_switcheroo/plugins/`:
+3. **Modular AST Plugins**: Leverage the 36 specialized plugins in `src/ml_switcheroo/plugins/`:
    * **Distributed**: `auto_fsdp_wrapper` (graph-level sharding passes reside in `core/compiler/sharding.py`)
    * **State & Lifecycle**: `state_flag_injection`, `state_container`, `device_allocator`, `device_checks`, `rng_threading`
-   * **Tensor Layout & Packing**: `attention_packing`, `shape_packing`, `einsum`, `gather`, `scatter`, `padding`, `reshape`, `flatten`, `topk`, `in_top_k_plugin`, `batch_norm`
-   * **Training & Optimization**: `optimizer_step`, `schedulers`, `clipping`, `loss_wrapper`, `checkpoint_keys`
-   * **Functional Control Flow**: `inplace_unroll`, `loop_unroll`, `static_unroll`, `context_to_function_wrap`
+   * **Tensor Layout & Packing**: `attention_packing`, `shape_packing`, `einsum`, `gather`, `scatter`, `padding`, `reshape`, `flatten`, `topk`, `in_top_k_plugin`, `batch_norm`, `casting`
+   * **Training & Optimization**: `optimizer_step`, `schedulers`, `clipping`, `loss_wrapper`, `checkpoint_keys`, `io_handler`
+   * **Functional Control Flow**: `inplace_unroll`, `loop_unroll`, `static_unroll`, `context_to_function_wrap`, `method_property`
    * **Framework Specific**: `mlx_optimizers`, `mlx_extras`, `nnx_to_torch_params`, `jax_decompose`, `keras_sequential`, `tf_data_loader`, `data_loader`
 
-4. **Interactive Documentation (Sphinx & WASM)**:
+4. **Interactive Documentation (Sphinx & In-Browser Demo)**:
    * Powered by `ml_switcheroo.sphinx_ext`, the documentation includes an interactive in-browser compiler demo (`.. switcheroo_demo::`) running via Pyodide / Emscripten without heavy server-side Python dependencies.
 
 ---

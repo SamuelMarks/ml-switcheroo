@@ -291,3 +291,25 @@ python3 scripts/build_docs.py
 | `src/ml_switcheroo/semantics/rdna_isa.yaml` | **Hardware Spec** | Declarative instruction set architecture schema for AMD RDNA (GFX10/GFX11). | `scripts/expand_variant_parity.py` |
 | `src/ml_switcheroo/semantics/schema.yaml` | **Schema** | Formal Pydantic/JSON schema defining valid ODL syntax, constraints, and traits. | `ml_switcheroo schema` |
 | `snapshots/{fw}_v*.json` | **Ghost Snapshot** | Serialized API symbols, arguments, and type hierarchies from ground-truth environments. | `scripts/audit_against_snapshots.py` |
+
+---
+
+## 🛠️ Complete Developer Maintenance Scripts Reference
+
+The `scripts/` directory provides essential automation tools for auditing, catalog compilation, signature hydration, and CI validation:
+
+| Script Name | Purpose & Workflow | Typical Execution Command |
+| :--- | :--- | :--- |
+| `audit_against_snapshots.py` | Validates that all operation variants in `odl.json` strictly match ground-truth API signatures without hallucinated arguments. | `python scripts/audit_against_snapshots.py --strict` |
+| `audit_mlir_spec.py` | Audits MLIR dialect implementations against official LLVM/MLIR TableGen ODS specifications. | `python scripts/audit_mlir_spec.py` |
+| `audit_stablehlo_spec.py` | Audits StableHLO dialect implementations against official OpenXLA TableGen specifications. | `python scripts/audit_stablehlo_spec.py` |
+| `compile_odl_catalog.py` | Compiles discrete ODL YAML definitions in `src/ml_switcheroo/semantics/odl/` into the unified `odl.json` database. | `python scripts/compile_odl_catalog.py` |
+| `validate_odl_json.py` | Validates compiled `odl.json` against the official Pydantic schema model. | `python scripts/validate_odl_json.py` |
+| `drain_quarantine.py` | Triages and graduates verified operations from `quarantine.yaml` into discrete `odl/*.yaml` files. | `python scripts/drain_quarantine.py` |
+| `hydrate_odl_signatures.py` | Hydrates parameter names and default values into ODL YAML files using live library introspection. | `python scripts/hydrate_odl_signatures.py --in-place` |
+| `expand_variant_parity.py` | Discovers missing framework counterparts across high-level frameworks and hardware ISAs. | `python scripts/expand_variant_parity.py` |
+| `ensure_ops.py` | Asserts that required operational primitives exist in the catalog across all supported tiers. | `python scripts/ensure_ops.py` |
+| `prevent_hardcoded_frameworks.sh` | Linter script that verifies core rewriting logic relies on `PluginTraits` and semantic tiers rather than brittle framework string checks. | `bash scripts/prevent_hardcoded_frameworks.sh` |
+| `suggest_gen_llm_loop.sh` | Automates iterative LLM prompting, schema validation, and file creation for bulk-mapping namespaces. | `bash scripts/suggest_gen_llm_loop.sh torch.linalg` |
+| `build_docs.py` | Builds Sphinx documentation, generating interactive demo assets and API reference pages. | `python scripts/build_docs.py` |
+| `check_snapshot_regressions.py` | Diffs framework snapshots or live isolated extracts, identifies API removals/deprecations, and outputs markdown changelogs. | `python scripts/check_snapshot_regressions.py --older snap_old.json --newer snap_new.json --fail-on-breaking` |

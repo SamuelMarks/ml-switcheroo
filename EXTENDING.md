@@ -210,3 +210,17 @@ def transform_reshape(node: cst.Call, ctx: HookContext) -> cst.Call:
   # Plugin AST transformation logic...
   return node
 ```
+
+### Core Production Plugins Showcase
+
+1. **Type & Casting Desugaring (`casting.py` / `type_methods`)**:
+   - Converts framework shorthand type casts (`x.float()`, `x.long()`, `x.half()`) into target-idiomatic casting calls (e.g. `x.astype(jnp.float32)` for JAX/NumPy/Array API).
+   - Validates `has_numpy_compatible_arrays` via `PluginTraits` and queries the Semantics Manager for the target type API string.
+
+2. **Checkpoint & IO Handler (`io_handler.py` / `io_handler`)**:
+   - Transforms framework-specific model weight and tensor serialization calls (e.g. `torch.save(obj, f)` and `torch.load(f)`).
+   - Delegates serialization and file handle formatting directly to `adapter.get_weight_save_code()` and `adapter.get_weight_load_code()`, guaranteeing clean decoupling from core transpiler logic.
+
+3. **Method to Property Transformation (`method_property.py` / `method_to_property`)**:
+   - Translates method calls that represent attribute properties across framework conventions (e.g. PyTorch `x.size()` -> JAX/NumPy `x.shape`, or indexed `x.size(0)` -> `x.shape[0]`).
+   - Uses `SymbolTable` type inference to avoid false positives on non-tensor objects.

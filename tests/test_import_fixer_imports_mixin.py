@@ -309,3 +309,42 @@ def test_leave_import_from() -> None:
   fixer_non_name: MockFixer = MockFixer(plan, ["torch"], set())
   res_non_name = fixer_non_name.leave_ImportFrom(orig_non_name, orig_non_name)
   assert isinstance(res_non_name, cst.RemovalSentinel)
+
+  # Case: Import with trailing comma on kept alias
+  orig_import_comma: cst.Import = cst.Import(
+    names=[
+      cst.ImportAlias(name=cst.Name("sys"), comma=cst.Comma()),
+      cst.ImportAlias(name=cst.Name("unused")),
+    ]
+  )
+  fixer_comma: MockFixer = MockFixer(plan, ["torch"], {"sys"})
+  res_import_comma = fixer_comma.leave_Import(orig_import_comma, orig_import_comma)
+  assert isinstance(res_import_comma, cst.Import)
+  assert res_import_comma.names[0].comma == cst.MaybeSentinel.DEFAULT
+
+  # Case: ImportFrom with trailing comma on kept alias (no rpar)
+  orig_from_comma: cst.ImportFrom = cst.ImportFrom(
+    module=cst.Name("math"),
+    names=[
+      cst.ImportAlias(name=cst.Name("sin"), comma=cst.Comma()),
+      cst.ImportAlias(name=cst.Name("unused")),
+    ],
+  )
+  fixer_from_comma: MockFixer = MockFixer(plan, ["torch"], {"sin"})
+  res_from_comma = fixer_from_comma.leave_ImportFrom(orig_from_comma, orig_from_comma)
+  assert isinstance(res_from_comma, cst.ImportFrom)
+  assert res_from_comma.names[0].comma == cst.MaybeSentinel.DEFAULT
+
+  # Case: ImportFrom with rpar (parenthesized)
+  orig_from_rpar: cst.ImportFrom = cst.ImportFrom(
+    module=cst.Name("math"),
+    names=[
+      cst.ImportAlias(name=cst.Name("sin"), comma=cst.Comma()),
+    ],
+    lpar=cst.LeftParen(),
+    rpar=cst.RightParen(),
+  )
+  fixer_rpar: MockFixer = MockFixer(plan, ["torch"], {"sin"})
+  res_from_rpar = fixer_rpar.leave_ImportFrom(orig_from_rpar, orig_from_rpar)
+  assert isinstance(res_from_rpar, cst.ImportFrom)
+  assert res_from_rpar.names[0].comma != cst.MaybeSentinel.DEFAULT

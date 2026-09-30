@@ -150,7 +150,17 @@ class GraphExtractor(cst.CSTVisitor):
     Returns:
         True to continue traversing children, or None.
     """
-    if self._scope_depth == 0 or self._in_forward:
+    if self._in_init:
+      # Support self.create_child('layer_name', ...) in Paxml setup()
+      if (
+        isinstance(node.value, cst.Call)
+        and isinstance(node.value.func, cst.Attribute)
+        and isinstance(node.value.func.value, cst.Name)
+        and node.value.func.value.value == "self"
+        and node.value.func.attr.value == "create_child"
+      ):
+        self._analyze_create_child(node.value, node)
+    elif self._scope_depth == 0 or self._in_forward:
       if isinstance(node.value, cst.Call):
         # Pass the expression statement as context to link provenance to the line not just the call
         self._analyze_call_expression(node.value, output_vars=[], context_node=node)
@@ -253,6 +263,47 @@ class GraphExtractor(cst.CSTVisitor):
       self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, {})
       self.node_map[attr_name] = node
     self.node_map[attr_name] = node
+
+  def _analyze_create_child(self, call: cst.Call, context_node: cst.CSTNode) -> None:
+    """Parse self.create_child('layer_name', ...) calls.
+
+    Extracts Paxml/Praxis child layer instantiations and registers them into layer_registry.
+
+    Args:
+        call: The function call node invoking self.create_child.
+        context_node: The CST node representing the surrounding statement.
+    """
+    if len(call.args) < 2:
+      return
+
+    name_arg = call.args[0].value
+    if isinstance(name_arg, cst.SimpleString) and isinstance(name_arg.evaluated_value, str):
+      attr_name = name_arg.evaluated_value
+    else:
+      return
+
+    child_expr = call.args[1].value
+    if isinstance(child_expr, cst.Call):
+      op_type = get_full_name(child_expr.func)
+      if "." in op_type:
+        op_type = op_type.split(".")[-1]
+
+      metadata = {}
+      for i, arg in enumerate(child_expr.args):
+        key = f"arg_{i}"
+        val = capture_node_source(arg.value)
+        if arg.keyword:
+          key = arg.keyword.value
+        metadata[key] = val
+
+      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, metadata)
+      self.node_map[attr_name] = context_node
+    elif isinstance(child_expr, (cst.Attribute, cst.Name)):
+      op_type = get_full_name(child_expr)
+      if "." in op_type:
+        op_type = op_type.split(".")[-1]
+      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, {})
+      self.node_map[attr_name] = context_node
 
   def _analyze_data_flow(self, node: cst.Assign) -> None:
     """Parse x = self.layer(x) logic.

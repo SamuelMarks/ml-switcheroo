@@ -13,7 +13,7 @@ import ml_switcheroo
 
 import json
 from pathlib import Path
-from typing import List, Tuple, TYPE_CHECKING
+from typing import Any, List, Optional, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
   import ml_switcheroo.semantics.manager
@@ -24,6 +24,108 @@ from ml_switcheroo.semantics.merging import (
   infer_tier_from_priority,
 )
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
+
+try:
+  from ml_ecosystem_snapshots.utils import (
+    strip_sphinx_roles,
+    parse_docstring_with_griffe,
+    resolve_griffe_parser,
+  )
+except ImportError:  # pragma: no cover
+  import re
+
+  def strip_sphinx_roles(text: Optional[str]) -> Optional[str]:
+    """Strip Sphinx cross-referencing roles from text fallback.
+
+    Args:
+        text: The input text containing potential Sphinx roles.
+
+    Returns:
+        Cleaned text with Sphinx roles stripped, or None if input is None.
+    """
+    if text is None:
+      return None
+    return re.sub(r":[a-zA-Z0-9_:]+:`~?([^`]*)`", r"\1", str(text))
+
+  def resolve_griffe_parser(parser_name: str) -> Any:
+    """Resolve a parser identifier into a valid Griffe Parser instance fallback.
+
+    Args:
+        parser_name: The parser name ('rest', 'sphinx', 'google', 'numpy', 'auto').
+
+    Returns:
+        A Griffe Parser instance or None.
+    """
+    return None
+
+  def parse_docstring_with_griffe(docstring: str, parser_name: Optional[str] = None) -> List[Any]:
+    """Parse a docstring using Griffe with dynamic fallback fallback.
+
+    Args:
+        docstring: The docstring text to parse.
+        parser_name: Optional starting parser ('rest', 'google', 'numpy').
+
+    Returns:
+        A list of parsed Griffe DocstringSection objects.
+    """
+    return []
+
+
+def clean_sphinx_roles(text: Optional[str]) -> Optional[str]:
+  """Strip Sphinx cross-referencing roles from text using standard utility.
+
+  Transforms roles such as `:class:`~torch.Tensor`` or `:func:`relu``
+  into clean representations (e.g. `torch.Tensor` or `relu`).
+
+  Args:
+      text: The input text containing potential Sphinx roles.
+
+  Returns:
+      Cleaned text with Sphinx roles stripped, or None if input is None.
+  """
+  return strip_sphinx_roles(text)
+
+
+def parse_docstring_sections(docstring: str, parser_name: Optional[str] = None) -> List[Any]:
+  """Parse a docstring using unified Griffe parser extraction.
+
+  Args:
+      docstring: The docstring text to parse.
+      parser_name: Optional starting parser ('rest', 'google', 'numpy').
+
+  Returns:
+      List of parsed Griffe DocstringSection objects.
+  """
+  return parse_docstring_with_griffe(docstring, parser_name)
+
+
+def get_docstring_parser(parser_name: str) -> Any:
+  """Resolve a parser identifier into a valid Griffe Parser instance.
+
+  Args:
+      parser_name: The parser name ('rest', 'sphinx', 'google', 'numpy', 'auto').
+
+  Returns:
+      A Griffe Parser instance or None.
+  """
+  return resolve_griffe_parser(parser_name)
+
+
+def clean_content_descriptions(content: Any) -> None:
+  """Clean Sphinx roles in operation descriptions across a content mapping.
+
+  Args:
+      content: Dictionary or collection of operation definitions.
+  """
+  if not isinstance(content, dict):
+    return
+  for _, op_data in content.items():
+    if isinstance(op_data, dict):
+      desc = op_data.get("description")
+      if isinstance(desc, str):
+        cleaned = clean_sphinx_roles(desc)
+        op_data["description"] = cleaned or ""
+
 
 # Filenames to treat as discovered/consensus content
 DISCOVERED_FILENAMES = {"k_discovered.yaml"}
@@ -129,6 +231,7 @@ class KnowledgeBaseLoader:
         tier: The Semantic Tier classification.
 
     """
+    clean_content_descriptions(content)
     merge_tier_data(
       data=self.mgr.data,
       key_origins=self.mgr._key_origins,
@@ -145,6 +248,7 @@ class KnowledgeBaseLoader:
         filename: The source filename (used for metadata inference).
 
     """
+    clean_content_descriptions(content)
     merge_overlay_data(
       data=self.mgr.data,
       key_origins=self.mgr._key_origins,

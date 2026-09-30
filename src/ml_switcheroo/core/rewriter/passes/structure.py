@@ -180,8 +180,15 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         "keras.Model",
         "keras.layers.Layer",
         "keras.Layer",
+        "tf.Module",
+        "tf.keras.Model",
+        "tf.keras.layers.Layer",
+        "tensorflow.keras.Model",
+        "pax_fiddle.Configurable",
+        "praxis.base_layer.BaseLayer",
         "html_dsl.Module",
         "dsl.Module",
+        "midl.Module",
       }
       # Scan all registered configs for module_base traits
       for _, config in self.context.semantics.framework_configs.items():
@@ -252,6 +259,37 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       "Sequence",
     }:
       return None
+
+    tensor_types = {
+      "torch.Tensor",
+      "Tensor",
+      "jax.Array",
+      "Array",
+      "jnp.ndarray",
+      "jax.numpy.ndarray",
+      "mlx.core.array",
+      "mx.array",
+      "tf.Tensor",
+      "tensorflow.Tensor",
+      "keras.KerasTensor",
+      "np.ndarray",
+      "numpy.ndarray",
+    }
+    if name in tensor_types:
+      target_type_map = {
+        "torch": "torch.Tensor",
+        "jax": "jax.Array",
+        "flax_nnx": "jax.Array",
+        "mlx": "mlx.core.array",
+        "tensorflow": "tf.Tensor",
+        "keras": "keras.KerasTensor",
+        "numpy": "np.ndarray",
+        "paxml": "jax.Array",
+      }
+      tgt = self.context.target_fw
+      if tgt in target_type_map:
+        return {"api": target_type_map[tgt]}
+
     lookup = self.context.semantics.get_definition(name)
     if not lookup:
       return None
@@ -498,6 +536,9 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         )
 
       target_base = self.target_traits.module_base
+      if not target_base and self.context.target_fw == "jax":
+        target_base = "flax.nnx.Module"
+
       new_bases = []
       for base in updated_node.bases:
         name = self._get_qualified_name(base.value)
@@ -506,6 +547,8 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         if name and self._is_framework_base(name):
           if target_base:
             new_bases.append(cst.Arg(value=self._create_dotted_name(target_base)))
+          else:
+            new_bases.append(base)
         else:
           new_bases.append(base)
       updated_node = updated_node.with_changes(bases=new_bases)
@@ -579,7 +622,11 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     # 2. Magic Arguments & Super Init Logic
     if sig_ctx.is_init and sig_ctx.is_module_method:
       # Inject Magic Args (e.g. rngs)
-      for arg_name, arg_type in traits.inject_magic_args:
+      injections = list(traits.inject_magic_args)
+      if self.context.target_fw == "jax" and not any(a == "rngs" for a, _ in injections):
+        injections.append(("rngs", "nnx.Rngs"))
+
+      for arg_name, arg_type in injections:
         if arg_name not in sig_ctx.existing_args:
           found_injected = any(n == arg_name for n, _ in sig_ctx.injected_args)
           if not found_injected:
@@ -589,11 +636,12 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       args_to_strip = set(traits.strip_magic_args)
       if traits.auto_strip_magic_args:
         args_to_strip.update(self.context.semantics.known_magic_args)
-        native = {a[0] for a in traits.inject_magic_args}
+        native = {a[0] for a in injections}
         args_to_strip -= native
 
       for arg_name in args_to_strip:
         updated_node = self._strip_argument_from_signature(updated_node, arg_name)
+        updated_node = self._strip_docstring_arg(updated_node, arg_name)
 
       # Super Init Logic
       if traits.requires_super_init:

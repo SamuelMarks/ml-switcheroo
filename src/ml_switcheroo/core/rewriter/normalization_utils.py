@@ -6,7 +6,7 @@ bool, str) and recursive container types (list, tuple, dict).
 """
 
 import json
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import libcst as cst
 
@@ -34,7 +34,7 @@ def extract_primitive_key(node: cst.BaseExpression) -> Optional[str]:
 
 
 def convert_value_to_cst(
-  val: Union[bool, int, float, str, List[Any], Tuple[Any, ...], Dict[Any, Any], None],
+  val: Any,
 ) -> cst.BaseExpression:
   """Recursively converts a python value (primitive/container) to a CST literal expression node.
 
@@ -275,9 +275,10 @@ def normalize_arguments(
 
   # 6. Reconstruct
   new_args_list: List[cst.Arg] = []
+  should_inject_defaults: bool = target_impl.get("inject_defaults", True)
 
   for std_name in std_args_order:
-    if std_name not in found_args and std_name in defaults_map:
+    if should_inject_defaults and std_name not in found_args and std_name in defaults_map:
       try:
         default_val = defaults_map[std_name]
         lit_val_node = convert_value_to_cst(default_val)

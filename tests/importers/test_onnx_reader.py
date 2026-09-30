@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
+from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter, clean_html_tags
 
 
 def test_onnx_reader_missing_file(tmp_path: Path) -> None:
@@ -196,3 +196,47 @@ Some normal paragraph before dl.
   with patch.object(importer, "_map_onnx_type", side_effect=pop_raw_summary):
     res2 = importer.parse_file(md_file)
     assert "OpTest" in res2
+
+
+def test_clean_html_tags() -> None:
+  """Verifies clean_html_tags strips HTML tags and bold asterisks."""
+  assert clean_html_tags("<b>Add</b>") == "Add"
+  assert clean_html_tags("<a href='link'>Doc</a>") == "Doc"
+  assert clean_html_tags("Plain text") == "Plain text"
+
+
+def test_convert_to_odl_and_export(tmp_path: Path) -> None:
+  """Verifies convert_to_odl and export_odl_yamls functionality."""
+  importer = OnnxSpecImporter()
+
+  parsed_ops = {
+    "Add": {
+      "description": "<b>Adds two tensors</b>",
+      "std_args": [("A", "Tensor"), "B", {"name": "C", "type": "int"}, 12345],
+    },
+    "Sub": {
+      "description": "",
+      "std_args": [],
+    },
+  }
+
+  odl = importer.convert_to_odl(parsed_ops, domain="ai.onnx.custom", opset_version=18)
+  assert "Add" in odl
+  assert odl["Add"]["operation"] == "Add"
+  assert odl["Add"]["description"] == "Adds two tensors"
+  assert odl["Add"]["std_args"] == [
+    {"name": "A", "type": "Tensor"},
+    {"name": "B", "type": "Any"},
+    {"name": "C", "type": "int"},
+  ]
+  assert odl["Add"]["variants"]["onnx"]["api"] == "ai.onnx.custom.Add"
+  assert odl["Add"]["variants"]["onnx"]["opset_version"] == 18
+
+  assert "Sub" in odl
+  assert odl["Sub"]["description"] == "Standardized definition for Sub."
+
+  out_dir = tmp_path / "odl_export"
+  count = importer.export_odl_yamls(odl, out_dir)
+  assert count == 2
+  assert (out_dir / "Add.yaml").exists()
+  assert (out_dir / "Sub.yaml").exists()

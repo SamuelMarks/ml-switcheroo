@@ -675,3 +675,62 @@ def test_audit_new_targets_integration(tmp_path: Path) -> None:
   assert report["targets"]["array_api"]["mapped_operations"] == 1
   assert report["targets"]["scipy"]["mapped_operations"] == 1
   assert report["targets"]["safetensors"]["mapped_operations"] == 1
+
+
+def test_flatten_single_framework_operations_branches() -> None:
+  """Test _flatten_single_framework branches for operations list handling."""
+  from scripts.audit_against_snapshots import _flatten_single_framework
+
+  flat: Dict[str, Dict[str, Any]] = {}
+  snap: Dict[str, Any] = {
+    "operations": [
+      "not_a_dict",
+      {"api_path": "op.path"},
+      {"class_name": "OpClass"},
+      {"name": "OpName"},
+      {"name": "OpWithAliases", "aliases": ["alias_1", "alias_2"]},
+      {"name": "OpBadAliases", "aliases": "not_a_list"},
+    ]
+  }
+  _flatten_single_framework("torch", snap, flat)
+  assert "op.path" in flat["torch"]
+  assert "OpClass" in flat["torch"]
+  assert "OpName" in flat["torch"]
+  assert "alias_1" in flat["torch"]
+  assert "alias_2" in flat["torch"]
+
+
+def test_load_snapshots_stablehlo_exhaustive(tmp_path: Path) -> None:
+  """Test load_snapshots for stablehlo_exhaustive snapshot files.
+
+  Args:
+      tmp_path (Path): Temporary directory fixture.
+  """
+  from scripts.audit_against_snapshots import load_snapshots
+
+  snap_dir: Path = tmp_path / "snapshots"
+  snap_dir.mkdir()
+  stablehlo_data: Dict[str, Any] = {"operations": [{"name": "custom_call", "api_path": "stablehlo.custom_call"}]}
+  (snap_dir / "stablehlo_exhaustive.json").write_text(json.dumps(stablehlo_data))
+
+  snapshots: Dict[str, Dict[str, Any]] = load_snapshots(snap_dir)
+  assert "stablehlo_exhaustive" in snapshots
+  assert "stablehlo" in snapshots
+  assert "stablehlo.custom_call" in snapshots["stablehlo"]
+
+
+def test_audit_frameworks_ir_canonical_onnx_exception() -> None:
+  """Test audit_frameworks when loading canonical ONNX ops raises an exception."""
+  manager: MagicMock = MagicMock()
+  manager.data = {
+    "add": {
+      "variants": {
+        "ir": {"api": "Add", "args": {}},
+      }
+    }
+  }
+  snapshots: Dict[str, Dict[str, Any]] = {"ir": {}}
+
+  with patch("ml_ecosystem_snapshots.frameworks.onnx_spec._load_onnx_ops", side_effect=RuntimeError("Simulated failure")):
+    errors: List[str] = audit_frameworks(manager, snapshots)
+    assert errors == []

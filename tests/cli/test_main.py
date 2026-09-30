@@ -114,6 +114,15 @@ def test_main_gen_tests(mock_handle: MagicMock) -> None:
   mock_handle.assert_called_once()
 
 
+@patch("ml_switcheroo.cli.__main__.handle_completion")
+def test_main_completion(mock_handle: MagicMock) -> None:
+  """Verifies completion command dispatch in main."""
+  mock_handle.return_value = 0
+  res: int = main(["completion", "bash"])
+  assert res == 0
+  mock_handle.assert_called_once_with("bash")
+
+
 @patch("builtins.open")
 @patch("ml_switcheroo.ingestion.verified_pipeline.run_verified_pipeline")
 def test_main_verified_pipeline(mock_run: MagicMock, mock_open: MagicMock) -> None:
@@ -133,6 +142,15 @@ def test_main_verified_pipeline_fail(mock_run: MagicMock, mock_open: MagicMock) 
   mock_open.return_value.__enter__.return_value.read.return_value = "code"
   res: int = main(["verified-pipeline", "file.py"])
   assert res == 1
+
+
+@patch("ml_switcheroo.cli.__main__.handle_import_onnx")
+def test_main_import_onnx(mock_handle: MagicMock) -> None:
+  """Verifies import-onnx command dispatch in main."""
+  mock_handle.return_value = 0
+  res: int = main(["import-onnx", "Operators.md", "--out-dir", "out", "--domain", "ai.onnx", "--opset-version", "21"])
+  assert res == 0
+  mock_handle.assert_called_once_with(Path("Operators.md"), out_dir=Path("out"), domain="ai.onnx", opset_version=21)
 
 
 def test_main_unknown() -> None:

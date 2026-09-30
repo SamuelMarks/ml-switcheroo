@@ -575,3 +575,69 @@ class SemanticsManager:
       )
     except Exception:
       return None
+
+  def diff_snapshot_versions(self, snap1: typing.Any, snap2: typing.Any) -> typing.Any:
+    """Diff two snapshots to track API modifications, deprecations, and additions.
+
+    Args:
+        snap1: The older snapshot data structure or path.
+        snap2: The newer snapshot data structure or path.
+
+    Returns:
+        A DiffResult object from ml_ecosystem_snapshots if available, or None.
+    """
+    try:
+      from ml_ecosystem_snapshots.diff import diff_snapshots
+
+      return diff_snapshots(snap1, snap2)
+    except Exception:
+      return None
+
+  def generate_snapshot_changelog(self, diff: typing.Any) -> str:
+    """Generate a Markdown changelog describing differences between snapshot versions.
+
+    Args:
+        diff: A DiffResult object or structured difference report.
+
+    Returns:
+        A formatted markdown string detailing API changes, or empty string on failure.
+    """
+    try:
+      from ml_ecosystem_snapshots.diff import generate_changelog
+
+      return str(generate_changelog(diff))
+    except Exception:
+      return ""
+
+  def extract_framework_isolated(
+    self,
+    framework: str,
+    include_nonpublic: bool = False,
+    timeout: int = 300,
+  ) -> typing.Dict[str, typing.Any]:
+    """Extract a framework snapshot dynamically within an isolated child subprocess.
+
+    Prevents CUDA/Metal memory pre-allocation locks and C-extension segfaults
+    from terminating the parent process or test suite.
+
+    Args:
+        framework: Name of the framework target (e.g. 'torch', 'jax', 'mlx').
+        include_nonpublic: Whether to include non-public APIs in extraction.
+        timeout: Maximum duration in seconds to wait for child process.
+
+    Returns:
+        Dictionary containing extracted snapshot metadata and items, or empty dict on failure.
+    """
+    try:
+      from ml_ecosystem_snapshots.api import extract_snapshot_isolated
+
+      res = extract_snapshot_isolated(
+        framework=framework,
+        include_nonpublic=include_nonpublic,
+        timeout=timeout,
+      )
+      if isinstance(res, dict):
+        return res
+    except Exception:
+      pass
+    return {}

@@ -59,6 +59,7 @@ def test_resolve_snapshots_dir() -> None:
           if arg == "ml-framework-snapshots":
             sub = MagicMock()
             sub.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = mock_fw_candidate
+            sub.__truediv__.return_value.exists.return_value = False
             return sub
           if arg == "ml-ecosystem-snapshots":
             sub = MagicMock()
@@ -89,6 +90,11 @@ def test_resolve_snapshots_dir_candidate_exists() -> None:
           """Side effect function simulating path division."""
           if arg == "ml-compiler-snapshots":
             return mock_candidate
+          if arg == "ml-framework-snapshots":
+            sub = MagicMock()
+            sub.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
+            sub.__truediv__.return_value.exists.return_value = False
+            return sub
           if arg == "ml-ecosystem-snapshots":
             sub = MagicMock()
             sub.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = mock_eco_candidate

@@ -205,3 +205,30 @@ def test_resolve_layer_none_context() -> None:
   name2: cst.Name = cst.Name("sigmoid")
   res2: str = ex._resolve_layer_or_func_name(name2, cst.Pass())
   assert res2 == "func_sigmoid"
+
+
+def test_create_child_coverage() -> None:
+  """Test self.create_child parsing in setup() for Paxml/Praxis."""
+  code = """
+class PaxmlNet:
+    def __init__(self):
+        self.plain_layer = Linear
+        self.attr_layer = mod.Linear
+    def setup(self):
+        other.create_child('foo', Linear())
+        self.other_func('bar', Linear())
+        self.create_child('plain_child', Linear())
+        self.create_child('proj', layers.Conv3D(64, bias=True))
+        self.create_child('fc', Linear)
+        self.create_child('dense', pl.Dense)
+        self.create_child('too_few_args')
+        self.create_child(123, Linear)
+        self.create_child('unknown', 1 + 2)
+    def __call__(self, x):
+        return self.proj(x)
+"""
+  extractor = get_extractor(code)
+  assert "plain_layer" in extractor.layer_registry
+  assert "proj" in extractor.layer_registry
+  assert "fc" in extractor.layer_registry
+  assert "dense" in extractor.layer_registry

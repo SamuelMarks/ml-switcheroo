@@ -264,6 +264,63 @@ def test_resolve_snapshots_dir_custom_paths(tmp_path: Path) -> None:
     assert resolve_snapshots_dir() == custom_dir
 
 
+def test_resolve_snapshots_dir_env_snapshots_path(tmp_path: Path) -> None:
+  """Resolves snapshots directory from ML_SNAPSHOTS_PATH environment variable.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  custom_dir = tmp_path / "env_snapshots_path"
+  custom_dir.mkdir()
+  with patch.dict(os.environ, {"ML_SNAPSHOTS_PATH": str(custom_dir)}, clear=True):
+    assert resolve_snapshots_dir() == custom_dir
+
+
+def test_resolve_snapshots_dir_env_snapshots_path_nonexistent(tmp_path: Path) -> None:
+  """Continues search when ML_SNAPSHOTS_PATH points to non-existent directory.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  non_existent = tmp_path / "non_existent_snapshots_path"
+  fallback_dir = tmp_path / "fallback_snapshots"
+  fallback_dir.mkdir()
+  with patch.dict(
+    os.environ, {"ML_SNAPSHOTS_PATH": str(non_existent), "ML_FRAMEWORK_SNAPSHOTS_PATH": str(fallback_dir)}, clear=True
+  ):
+    assert resolve_snapshots_dir() == fallback_dir
+
+
+def test_resolve_snapshots_dir_env_framework_snapshots_path(tmp_path: Path) -> None:
+  """Resolves snapshots directory from ML_FRAMEWORK_SNAPSHOTS_PATH environment variable.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  custom_dir = tmp_path / "env_fw_snapshots_path"
+  custom_dir.mkdir()
+  with patch.dict(os.environ, {"ML_FRAMEWORK_SNAPSHOTS_PATH": str(custom_dir)}, clear=True):
+    assert resolve_snapshots_dir() == custom_dir
+
+
+def test_resolve_snapshots_dir_sibling_framework_direct(tmp_path: Path) -> None:
+  """Resolves snapshots from direct ml-framework-snapshots/snapshots directory.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  repos_root = tmp_path / "repos"
+  sem_dir = repos_root / "ml-switcheroo" / "src" / "ml_switcheroo" / "semantics"
+  fw_cand = repos_root / "ml-framework-snapshots" / "snapshots"
+  fw_cand.mkdir(parents=True)
+  fake_home = tmp_path / "empty_home"
+
+  with patch.dict(os.environ, {}, clear=True):
+    with patch("pathlib.Path.home", return_value=fake_home):
+      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
+        assert resolve_snapshots_dir() == fw_cand
+
+
 def test_paths_import_fallback() -> None:
   """Verifies the behavior of fallback when ml_ecosystem_snapshots.utils is missing."""
   import importlib

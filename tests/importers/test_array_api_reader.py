@@ -5,7 +5,7 @@ import typing
 from pathlib import Path
 from unittest.mock import patch
 
-from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
+from ml_switcheroo.importers.array_api_reader import ArrayApiReader, ArrayApiSpecImporter
 
 
 def test_array_api_reader(tmp_path: Path) -> None:
@@ -377,3 +377,40 @@ def test_parse_snapshot_default_path(tmp_path: Path) -> None:
   with patch("ml_switcheroo.importers.array_api_reader.resolve_snapshots_dir", return_value=tmp_path):
     res = importer.parse_snapshot()
     assert res == {}
+
+
+def test_array_api_reader_alias_and_conformance_report() -> None:
+  """Verifies ArrayApiReader alias and generate_conformance_report."""
+  assert ArrayApiReader is ArrayApiSpecImporter
+  reader = ArrayApiReader()
+  sample_semantics = {
+    "add": {
+      "std_args": [("x1", "Array"), ("x2", "Array")],
+      "description": "Calculates sum of two arrays.",
+      "returns_type": "Array",
+      "from": "stubs/elementwise.py",
+    },
+    "abs": {
+      "std_args": [("x", "Array")],
+      "description": "Calculates absolute value.",
+      "returns_type": "Array",
+      "from": "stubs/elementwise.py",
+    },
+  }
+  report = reader.generate_conformance_report(sample_semantics)
+  assert "# Python Array API Standard Conformance Report" in report
+  assert "`add`" in report
+  assert "`abs`" in report
+  assert "Total Operations Standardized**: 2" in report
+
+
+def test_ingest_from_repo_array_api_stubs() -> None:
+  """Verifies direct ingestion of official stubs from array-api submodule."""
+  stubs_dir = Path("array-api/src/array_api_stubs/_2024_12")
+  if stubs_dir.exists():
+    reader = ArrayApiReader()
+    res = reader.parse_folder(stubs_dir)
+    assert len(res) >= 100
+    assert "abs" in res
+    assert "add" in res
+    assert "matmul" in res

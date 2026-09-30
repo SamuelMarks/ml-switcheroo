@@ -147,6 +147,17 @@ def test_normalize_arguments_defaults() -> None:
   assert typing.cast(cst.Integer, result[0].value).value == "5"
 
 
+def test_normalize_arguments_inject_defaults_false() -> None:
+  """Verifies that defaults are omitted when inject_defaults is set to False."""
+  original = parse_call("func()")
+  updated = parse_call("func()")
+  details: dict[str, typing.Any] = {"std_args": [{"name": "a", "default": 5}]}
+  target_impl: dict[str, typing.Any] = {"args": {"a": "x"}, "inject_defaults": False}
+
+  result: list[cst.Arg] = normalize_arguments(original, updated, details, target_impl, "torch", lambda x: False)
+  assert len(result) == 0
+
+
 def test_normalize_arguments_val_map() -> None:
   """Docstring."""
   original = parse_call("func(a='fast')")

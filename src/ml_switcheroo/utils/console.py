@@ -250,7 +250,7 @@ def log_info(msg: str) -> None:
   Returns:
       None
   """
-  logging.info(f"ℹ️  {msg}", extra={"markup": True})
+  logging.info(f"ℹ️  {msg}")
 
 
 def log_success(msg: str) -> None:
@@ -262,7 +262,7 @@ def log_success(msg: str) -> None:
   Returns:
       None
   """
-  logging.log(SUCCESS_LEVEL_NUM, f"✅ {msg}", extra={"markup": True})
+  logging.log(SUCCESS_LEVEL_NUM, f"✅ {msg}")
 
 
 def log_warning(msg: str) -> None:
@@ -274,7 +274,7 @@ def log_warning(msg: str) -> None:
   Returns:
       None
   """
-  logging.warning(f"⚠️  {msg}", extra={"markup": True})
+  logging.warning(f"⚠️  {msg}")
 
 
 def log_error(msg: str) -> None:
@@ -286,4 +286,4 @@ def log_error(msg: str) -> None:
   Returns:
       None
   """
-  logging.error(f"❌ {msg}", extra={"markup": True})
+  logging.error(f"❌ {msg}")
