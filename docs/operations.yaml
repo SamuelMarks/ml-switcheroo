@@ -40267,16 +40267,25 @@
       args:
         input: input
         other: other
+      inject_defaults: false
     jax:
       api: jax.lax.add
       args:
         x: x
         y: y
+      inject_defaults: false
     mlx:
       api: mlx.core.add
       args:
         a: a
         b: b
+      inject_defaults: false
+    tensorflow:
+      api: tf.add
+      args:
+        input: x
+        other: y
+      inject_defaults: false
     stablehlo:
       api: stablehlo.add
       args:
@@ -40290,7 +40299,10 @@
       args: {}
     keras:
       api: keras.ops.add
-      args: {}
+      args:
+        input: x1
+        other: x2
+      inject_defaults: false
     ir:
       api: Add
       args:
@@ -46827,10 +46839,16 @@
       api: torch.flatten
       args:
         input: input
+        start_dim: start_dim
+        end_dim: end_dim
+      inject_defaults: false
     mlx:
       api: mlx.core.flatten
       args:
         a: a
+        start_axis: start_dim
+        end_axis: end_dim
+      inject_defaults: false
     rdna:
       api: ; Macro.Flatten
       args: {}
@@ -46841,6 +46859,8 @@
       api: jax.numpy.ravel
       args:
         input: a
+        start_dim: null
+        end_dim: null
     keras:
       api: keras.layers.Flatten
       args: {}

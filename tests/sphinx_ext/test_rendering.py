@@ -43,6 +43,38 @@ def test_render_primary_options_standard() -> None:
     assert '<option value="unknown_fw">Unknown_fw</option>' in html
 
 
+def test_render_primary_options_ir_grouped() -> None:
+  """Verifies that ir and ml_switcheroo_ir are grouped under Level 3: Standard IR with explicit labels."""
+  hierarchy: Dict[str, List[Dict[str, str]]] = {
+    "ir": [],
+    "ml_switcheroo_ir": [],
+    "torch": [],
+  }
+
+  class MockAdapter:
+    """Mock adapter returning distinct IR display names."""
+
+    def __init__(self, name: str) -> None:
+      """Init adapter.
+
+      Args:
+          name (str): Adapter framework key.
+      """
+      if name == "ir":
+        self.display_name: str = "ML-Switcheroo IR (JSON)"
+      elif name == "ml_switcheroo_ir":
+        self.display_name: str = "ML-Switcheroo IR (Python)"
+      else:
+        self.display_name = name.capitalize()
+
+  with mock.patch("ml_switcheroo.sphinx_ext.rendering.get_adapter", side_effect=MockAdapter):
+    html: str = _render_primary_options(hierarchy)
+    assert '<optgroup label="Level 3: Standard IR">' in html
+    assert '<option value="ir">ML-Switcheroo IR (JSON)</option>' in html
+    assert '<option value="ml_switcheroo_ir">ML-Switcheroo IR (Python)</option>' in html
+    assert "Level 3: Standard IR" in html
+
+
 def test_render_flavour_dropdown_empty() -> None:
   """Docstring."""
   hierarchy: Dict[str, List[Dict[str, str]]] = {"torch": [], "jax": []}

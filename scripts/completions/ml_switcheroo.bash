@@ -5,7 +5,7 @@ _ml_switcheroo_completion() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     commands="convert convert-weights define import-onnx gen-weight-script matrix schema suggest scaffold harvest verified-pipeline ci gen-docs gen-tests completion"
-    frameworks="torch jax flax_nnx mlx keras tensorflow numpy nvidia_sass rdna mlir stablehlo ir wasm cpp"
+    frameworks="torch jax flax_nnx mlx keras tensorflow numpy nvidia_sass rdna mlir stablehlo ir ml_switcheroo_ir"
 
     case "$prev" in
         --source|--target|-s|-t)

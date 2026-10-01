@@ -38,8 +38,7 @@ _FRAMEWORKS: List[str] = [
   "mlir",
   "stablehlo",
   "ir",
-  "wasm",
-  "cpp",
+  "ml_switcheroo_ir",
 ]
 
 

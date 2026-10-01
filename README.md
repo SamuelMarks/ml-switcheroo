@@ -67,9 +67,9 @@ flowchart TD
         StableHLO[Stable HLO] ~~~ MLIR ~~~ IR[ML-Switcheroo IR]
     end
 
-    subgraph LBottom [Level 4: Native & Hardware]
+    subgraph LBottom [Level 4: Hardware Assembly]
         direction TB
-        NVIDIA_SASS[NVIDIA SASS] ~~~ RDNA[AMD RDNA] ~~~ CPP[C++] ~~~ WASM[WebAssembly]
+        NVIDIA_SASS[NVIDIA SASS] ~~~ RDNA[AMD RDNA]
     end
 
 %% --- 4. Connections ---
@@ -77,14 +77,13 @@ flowchart TD
     TensorFlow ~~~ JAX
     JAX ~~~ StableHLO
     StableHLO ~~~ NVIDIA_SASS
-    NVIDIA_SASS ~~~ CPP
 
 %% --- 5. Apply Styles ---
     class HTML,TikZ,LaTeX l0Node;
     class PyTorch,MLX,TensorFlow,Keras,FlaxNNX,PaxML l1Node;
     class JAX,NumPy l2Node;
     class StableHLO,MLIR,IR l3Node;
-    class NVIDIA_SASS,RDNA,CPP,WASM asmNode;
+    class NVIDIA_SASS,RDNA asmNode;
     class L0 containerL0;
     class L1 containerL1;
     class L2 containerL2;
@@ -114,7 +113,7 @@ Bridge the gap between high-level neural networks and raw GPU assembly.
 *   **Cross-ISA Translation (SASS ↔ RDNA)**: Translates directly between NVIDIA SASS and AMD RDNA instruction streams (e.g., `FFMA` / `LDG` ↔ `v_fmac_f32` / `global_load`).
 
 ### 4. C++ Code Generation & WebAssembly (WASM) Compilation
-Compile ML models natively into high-performance execution environments.
+Compile ML models natively into high-performance execution environments. Note: C++ and WAT serve as direct code-emission compiler backends from `LogicalGraph` (not registered input/output framework adapters).
 *   **C++ Extensions**: Compiles `LogicalGraph` representations into PyTorch C++ Extensions (`.cpp` / `.hpp`) using a robust C++ CST API and `TorchCppExtensionGenerator`.
 *   **WebAssembly (WAT)**: Compiles `LogicalGraph` structures directly to WebAssembly Text (WAT) stack-based instructions for browser-native execution.
 
@@ -133,13 +132,13 @@ Automatically optimize model topologies and infer distributed sharding constrain
     *   `VisionPatchEmbeddingFusionPass` / `VisionPatchEmbeddingDefusionPass`: Restructure and optimize patch embedding projections for multimodal vision-language models.
 *   **Topological Diff Engine**: `GraphDiffer` computes granular patch actions (`DeleteAction`, `ReplaceAction`) between logical computation graphs.
 
-### 7. Heptagonal Static Transpilation Lattice (42 Directed Paths)
-Bidirectional static source-to-source conversion across the core targets:
+### 7. Hexagonal Static Transpilation Lattice (30 Core Directed Paths)
+Bidirectional static source-to-source conversion across the core framework targets:
 *   **High-Level Frameworks (12 Edges)**: **PyTorch** ↔ **JAX / Flax NNX** ↔ **Apple MLX** ↔ **Keras 3**.
 *   **Hardware Bridge Lowering (8 Edges)**: High-Level Models → `LogicalGraph` IR → **AMD RDNA** & **NVIDIA SASS**.
 *   **Hardware Bridge Lifting (8 Edges)**: Disassembly / Macro Streams → `LogicalGraph` IR → High-Level Modules.
 *   **Cross-ISA Direct Compilation (2 Edges)**: **AMD RDNA** ↔ **NVIDIA SASS**.
-*   **Native & Web Compilation (12 Edges)**: High-Level Models → `LogicalGraph` IR → **C++** & **WebAssembly (WAT)**.
+*   **Compiler Emission Backends**: Direct code emission from `LogicalGraph` IR to **C++** & **WebAssembly (WAT)**.
 *   **Ground Truth Grounding**: Formally verified against live framework snapshots in `ml-ecosystem-snapshots` v0.0.3 (with transparent backward compatibility for `ml-framework-snapshots` via `_alias`) and `ml-compiler-snapshots` with zero hallucinated APIs or arguments. Supports SQLite FTS5 indexed fast symbol lookups (`ml_ecosystem_snapshots.index`) and custom discovery paths configured via `$ML_SNAPSHOTS_PATH` or `$ML_ECOSYSTEM_SNAPSHOTS_DIR`.
 *   **YAML-First Semantics**: Built on 3,290+ modular operation definitions (currently 3,291 compiled ops in `src/ml_switcheroo/semantics/odl.json`).
 
@@ -353,7 +352,7 @@ Core target support status across the compiler lattice:
 | **Intermediate Reps** | **ML-Switcheroo IR** | 🟢 Primary | Unified `LogicalGraph`, `PartitionSpec`, `LogicalMesh`, topological diff engine |
 | | **MLIR** | ⚪ Alpha | MLIR CST/AST parser, dialect emission, type inference |
 | | **StableHLO** | ⚪ Alpha | StableHLO dialect parser and emitter (bitwise, math, complex linalg, shapes) |
-| **Native & Web** | **C++** | 🔵 Beta | PyTorch C++ Extension generation, `TorchCppExtensionGenerator`, robust C++ CST |
+| **Compiler Emission Backends** | **C++** | 🔵 Beta | PyTorch C++ Extension generation, `TorchCppExtensionGenerator`, robust C++ CST |
 | | **WebAssembly (WAT)** | ⚪ Alpha | Compiles `LogicalGraph` structures to WASM stack-based text format |
 | **Visual Formats** | **TikZ** | 🟢 Primary | Publication-ready LaTeX TikZ neural network diagram generation (`--target tikz`) |
 | | **LaTeX DSL** | 🟢 Primary | Mathematical LaTeX equation transpilation (`--target latex_dsl`) |

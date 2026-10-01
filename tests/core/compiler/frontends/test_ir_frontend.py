@@ -289,3 +289,32 @@ def test_ir_frontend_cst_generator_multiple_inputs() -> None:
   module = generator.generate(graph)
   assert "self.add = nn.Add()" in module.code
   assert "add = self.add(in1)" in module.code
+
+
+def test_ir_python_parser_global_graph_variable() -> None:
+  """Test parsing Python code where LogicalGraph is assigned to a global variable without build_graph()."""
+  code = (
+    "import ml_switcheroo_ir as sw_ir\n"
+    "custom_model = sw_ir.LogicalGraph(\n"
+    "    name='GlobalNet',\n"
+    "    nodes={'x': sw_ir.LogicalNode(id='x', op_type='Input')},\n"
+    ")\n"
+  )
+  parser = IrPythonParser()
+  graph = parser.parse(code)
+  assert graph.name == "GlobalNet"
+  assert "x" in graph.nodes
+
+
+def test_ir_python_parser_exec_exception_and_fallback() -> None:
+  """Test exception handling during exec in IrPythonParser falls back gracefully."""
+  # Code with runtime exception during execution
+  code_exec_fail = "import ml_switcheroo_ir as sw_ir\nraise RuntimeError('boom')\n"
+  parser = IrPythonParser()
+  graph = parser.parse(code_exec_fail)
+  assert len(graph.nodes) == 0
+
+  # Code with build_graph returning non-LogicalGraph
+  code_non_graph = "import ml_switcheroo_ir as sw_ir\ndef build_graph():\n    return 'not_a_graph'\n"
+  graph_non = parser.parse(code_non_graph)
+  assert len(graph_non.nodes) == 0

@@ -5,6 +5,7 @@ extracting operator names, summaries, inputs, and attributes. It converts
 these definitions into the Operation Definition Language (ODL) format.
 
 Key Features:
+
 - **Markdown Splitting**: Identifies operators via structurally parsing headings and links.
 - **Input & Attribute Parsing**: Extracts definitions lists (``<dl>``).
 - **Type Extraction**: Parses HTML type signatures (e.g., ``<dt>x : T</dt>``)

@@ -1,102 +1,88 @@
-"""Tests for scripts/test_wasm_ghost.py."""
+"""Unit tests for scripts/test_wasm_ghost.py."""
 
 from pathlib import Path
+import runpy
 import sys
 from types import ModuleType
+from typing import Any
 from unittest.mock import MagicMock, patch
-import pytest
 
-import scripts.test_wasm_ghost as wasm_ghost
-
-
-def test_check_forbidden_imports(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test checking forbidden library imports.
-
-  Args:
-      monkeypatch: Pytest monkeypatch fixture.
-  """
-  # When no forbidden packages are present or they have no __file__
-  fake_modules = dict(sys.modules)
-  for pkg in wasm_ghost.FORBIDDEN_LIBS:
-    fake_modules.pop(pkg, None)
-  monkeypatch.setattr(sys, "modules", fake_modules)
-
-  assert wasm_ghost.check_forbidden_imports() is True
-
-  # When a forbidden package is present with a __file__
-  dummy_mod = ModuleType("torch")
-  dummy_mod.__file__ = "/path/to/torch/__init__.py"
-  fake_modules["torch"] = dummy_mod
-
-  assert wasm_ghost.check_forbidden_imports() is False
-
-  # When passing custom sequence
-  assert wasm_ghost.check_forbidden_imports(["custom_pkg"]) is True
+from scripts.test_wasm_ghost import (
+  TestWasmGhostMode,
+  check_forbidden_imports,
+  main,
+)
 
 
-def test_wasm_ghost_mode_test_case() -> None:
-  """Test TestWasmGhostMode test execution directly."""
-  case = wasm_ghost.TestWasmGhostMode()
+def test_check_forbidden_imports_clean() -> None:
+  """Test check_forbidden_imports when none of the forbidden libraries are imported."""
+  # Custom clean list of libraries not in sys.modules
+  clean_libs = ["non_existent_ml_lib_1", "non_existent_ml_lib_2"]
+  assert check_forbidden_imports(clean_libs) is True
+
+
+def test_check_forbidden_imports_detected() -> None:
+  """Test check_forbidden_imports detects an imported library with a __file__ attribute."""
+  fake_module = ModuleType("fake_forbidden")
+  fake_module.__file__ = "/path/to/fake_forbidden/__init__.py"
+
+  with patch.dict(sys.modules, {"fake_forbidden": fake_module}):
+    assert check_forbidden_imports(["fake_forbidden"]) is False
+
+
+def test_check_forbidden_imports_default_list() -> None:
+  """Test check_forbidden_imports with default parameter list."""
+  with patch("sys.modules", {}):
+    assert check_forbidden_imports() is True
+
+
+def test_test_wasm_ghost_mode_case() -> None:
+  """Test TestWasmGhostMode execution directly."""
+  case = TestWasmGhostMode()
   case.test_ghost_mode_loads_snapshots()
 
 
-def test_main_cli_branches(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test main CLI entrypoint branches in test_wasm_ghost.
+def test_test_wasm_ghost_main_success() -> None:
+  """Test main execution function succeeding."""
+  with patch("scripts.test_wasm_ghost.check_forbidden_imports", return_value=True):
+    with patch("unittest.TextTestRunner.run") as mock_run:
+      mock_res = MagicMock()
+      mock_res.wasSuccessful.return_value = True
+      mock_run.return_value = mock_res
+      assert main() == 0
+
+
+def test_test_wasm_ghost_main_forbidden_fails() -> None:
+  """Test main execution failing when forbidden library is present."""
+  with patch("scripts.test_wasm_ghost.check_forbidden_imports", return_value=False):
+    assert main() == 1
+
+
+def test_test_wasm_ghost_main_test_failure() -> None:
+  """Test main execution when tests fail."""
+  with patch("scripts.test_wasm_ghost.check_forbidden_imports", return_value=True):
+    with patch("unittest.TextTestRunner.run") as mock_run:
+      mock_res = MagicMock()
+      mock_res.wasSuccessful.return_value = False
+      mock_run.return_value = mock_res
+      assert main() == 1
+
+
+def test_test_wasm_ghost_entrypoint(monkeypatch: Any) -> None:
+  """Test executing scripts/test_wasm_ghost.py as __main__ module.
 
   Args:
       monkeypatch: Pytest monkeypatch fixture.
   """
-  # Branch 1: check_forbidden_imports fails
-  with patch.object(wasm_ghost, "check_forbidden_imports", return_value=False):
-    exit_code = wasm_ghost.main([])
-    assert exit_code == 1
+  import pytest
 
-  # Branch 2: check_forbidden_imports passes, suite passes
-  mock_result = MagicMock()
-  mock_result.wasSuccessful.return_value = True
-  with (
-    patch.object(wasm_ghost, "check_forbidden_imports", return_value=True),
-    patch("scripts.test_wasm_ghost.unittest.TextTestRunner.run", return_value=mock_result),
-  ):
-    exit_code = wasm_ghost.main([])
-    assert exit_code == 0
+  repo_root = Path(__file__).resolve().parent.parent
+  src_dir = str(repo_root / "src")
 
-  # Branch 3: check_forbidden_imports passes, suite fails
-  mock_result.wasSuccessful.return_value = False
-  with (
-    patch.object(wasm_ghost, "check_forbidden_imports", return_value=True),
-    patch("scripts.test_wasm_ghost.unittest.TextTestRunner.run", return_value=mock_result),
-  ):
-    exit_code = wasm_ghost.main([])
-    assert exit_code == 1
+  # Remove src_dir from sys.path to hit the `if str(src_path) not in sys.path:` branch
+  monkeypatch.setattr(sys, "path", [p for p in sys.path if p != src_dir])
+  monkeypatch.setattr("sys.argv", ["scripts/test_wasm_ghost.py"])
 
-
-def test_main_entrypoint(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test __main__ execution block.
-
-  Args:
-      monkeypatch: Pytest monkeypatch fixture.
-  """
-  import importlib
-  import runpy
-
-  orig_sys_path = list(sys.path)
-  src_str = str(wasm_ghost.src_path)
-  sys.path = [p for p in sys.path if p != src_str]
-
-  fake_modules = dict(sys.modules)
-  for pkg in wasm_ghost.FORBIDDEN_LIBS:
-    fake_modules.pop(pkg, None)
-  monkeypatch.setattr(sys, "modules", fake_modules)
-
-  mock_res = MagicMock()
-  mock_res.wasSuccessful.return_value = True
-
-  try:
-    importlib.reload(wasm_ghost)
-    with patch("scripts.test_wasm_ghost.unittest.TextTestRunner.run", return_value=mock_res):
-      with pytest.raises(SystemExit) as excinfo:
-        runpy.run_path(str(Path(wasm_ghost.__file__).resolve()), run_name="__main__")
-      assert excinfo.value.code == 0
-  finally:
-    sys.path = orig_sys_path
+  with pytest.raises(SystemExit) as exc_info:
+    runpy.run_path(str(repo_root / "scripts" / "test_wasm_ghost.py"), run_name="__main__")
+  assert exc_info.value.code == 0

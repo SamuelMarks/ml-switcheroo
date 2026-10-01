@@ -6,7 +6,7 @@ from typing import Any, Dict
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
 from ml_switcheroo.frameworks.base import ImportConfig
-from ml_switcheroo.frameworks.ir import IrAdapter
+from ml_switcheroo.frameworks.ir import IrAdapter, IrPythonAdapter
 
 
 def test_ir_adapter_registration() -> None:
@@ -18,17 +18,23 @@ def test_ir_adapter_registration() -> None:
   adapter_ir = get_adapter("ir")
   adapter_sw = get_adapter("ml_switcheroo_ir")
   assert isinstance(adapter_ir, IrAdapter)
-  assert isinstance(adapter_sw, IrAdapter)
+  assert isinstance(adapter_sw, IrPythonAdapter)
 
 
 def test_ir_adapter_basic_properties() -> None:
-  """Verify metadata properties on the IrAdapter."""
+  """Verify metadata properties on the IrAdapter and IrPythonAdapter."""
   adapter = IrAdapter()
-  assert adapter.display_name == "ML-Switcheroo IR (Intermediate Representation)"
+  assert adapter.display_name == "ML-Switcheroo IR (JSON)"
   assert adapter.inherits_from is None
   assert adapter.ui_priority == 85
   assert adapter._mode.value == "live"
   assert adapter._snapshot_data == {}
+
+  py_adapter = IrPythonAdapter()
+  assert py_adapter.display_name == "ML-Switcheroo IR (Python)"
+  assert py_adapter.inherits_from is None
+  assert py_adapter.ui_priority == 86
+  assert py_adapter._mode.value == "live"
 
 
 def test_ir_adapter_import_configs() -> None:
@@ -164,17 +170,28 @@ def test_ir_adapter_convert() -> None:
 
 
 def test_ir_adapter_examples() -> None:
-  """Verify example code generation."""
+  """Verify example code generation for JSON and Python IR adapters."""
   adapter = IrAdapter()
   example = adapter.get_example_code()
   assert "SampleModel" in example
-  assert "LogicalGraph" in example
+  assert "nodes" in example
+  assert "edges" in example
 
   tiered = adapter.get_tiered_examples()
   assert "tier1_math" in tiered
   assert "tier2_neural" in tiered
   assert "tier3_extras" in tiered
   assert tiered["tier1_math"] == example
+
+  py_adapter = IrPythonAdapter()
+  py_example = py_adapter.get_example_code()
+  assert "SampleModel" in py_example
+  assert "LogicalGraph" in py_example
+  assert "import ml_switcheroo_ir as sw_ir" in py_example
+  assert "build_graph" in py_example
+
+  py_tiered = py_adapter.get_tiered_examples()
+  assert py_tiered["tier1_math"] == py_example
 
 
 def test_ir_adapter_definitions() -> None:

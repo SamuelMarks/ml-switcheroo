@@ -17,6 +17,9 @@ def test_generate_bash_completion() -> None:
   assert "_ml_switcheroo_completion" in script
   assert "convert" in script
   assert "torch" in script
+  assert "ml_switcheroo_ir" in script
+  assert "wasm" not in script
+  assert "cpp" not in script
   assert "completion" in script
 
 
@@ -26,6 +29,9 @@ def test_generate_zsh_completion() -> None:
   assert "#compdef ml_switcheroo" in script
   assert "convert" in script
   assert "torch" in script
+  assert "ml_switcheroo_ir" in script
+  assert "wasm" not in script
+  assert "cpp" not in script
 
 
 def test_generate_fish_completion() -> None:
@@ -34,6 +40,9 @@ def test_generate_fish_completion() -> None:
   assert "complete -c ml_switcheroo" in script
   assert "convert" in script
   assert "torch" in script
+  assert "ml_switcheroo_ir" in script
+  assert "wasm" not in script
+  assert "cpp" not in script
 
 
 def test_handle_completion_success() -> None:

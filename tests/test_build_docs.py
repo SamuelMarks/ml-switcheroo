@@ -105,17 +105,157 @@ def test_build_wheel_success(mock_env: Tuple[Path, Path, Path], monkeypatch: pyt
       mock_env (Tuple[Path, Path, Path]): Mock environment.
       monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
   """
-  project_root, _, _ = mock_env
+  project_root, docs_dir, _ = mock_env
   dist_dir: Path = project_root / "dist"
   dist_dir.mkdir()
 
-  mock_run: mock.MagicMock = mock.Mock()
+  def side_effect(*args: Any, **kwargs: Any) -> None:
+    """Mock subprocess side effect creating a dist wheel.
+
+    Args:
+        *args: Variable positional arguments.
+        **kwargs: Variable keyword arguments.
+    """
+    dist_dir.mkdir(exist_ok=True)
+    (dist_dir / "ml_switcheroo-0.0.1-py3-none-any.whl").touch()
+
+  mock_run: mock.MagicMock = mock.Mock(side_effect=side_effect)
   monkeypatch.setattr(build_docs.subprocess, "run", mock_run)
 
   build_docs.build_wheel()
 
-  assert not dist_dir.exists()
+  assert (docs_dir / "_static" / "ml_switcheroo-0.0.1-py3-none-any.whl").exists()
   mock_run.assert_called_once_with(["uv", "build", "--wheel"], cwd=project_root, check=True, capture_output=True)
+
+
+def test_copy_external_wheels_no_reqs(mock_env: Tuple[Path, Path, Path]) -> None:
+  """Tests copy_external_wheels when requirements.txt does not exist.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+  """
+  build_docs.copy_external_wheels()
+
+
+def test_copy_external_wheels_local(mock_env: Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+  """Tests copy_external_wheels with sibling local wheel.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  project_root, docs_dir, _ = mock_env
+  reqs: Path = project_root / "requirements.txt"
+  reqs.write_text(
+    "# comment\n\nother-pkg>=1.0\nfoo @ https://github.com/foo/foo/releases/download/v1.0/foo-1.0-py3-none-any.whl\n"
+  )
+
+  local_whl: Path = project_root.parent / "foo-1.0-py3-none-any.whl"
+  local_whl.touch()
+
+  monkeypatch.setattr(
+    "ml_switcheroo.sphinx_ext.hooks.find_local_wheel",
+    lambda root, pkg: local_whl if pkg == "foo" else None,
+  )
+
+  build_docs.copy_external_wheels()
+  target = docs_dir / "_static" / "foo-1.0-py3-none-any.whl"
+  assert target.exists()
+
+  # Test second run where target exists and is newer
+  import os
+
+  os.utime(target, (local_whl.stat().st_atime + 100, local_whl.stat().st_mtime + 100))
+  build_docs.copy_external_wheels()
+
+  # Test third run where target exists and is older
+  os.utime(target, (10, 10))
+  build_docs.copy_external_wheels()
+
+  # Test when local_wheel is not None but does not exist
+  non_existent = project_root.parent / "non_existent.whl"
+  monkeypatch.setattr(
+    "ml_switcheroo.sphinx_ext.hooks.find_local_wheel",
+    lambda root, pkg: non_existent if pkg == "foo" else None,
+  )
+  target.unlink()
+  with mock.patch("urllib.request.urlopen") as mock_open:
+    build_docs.copy_external_wheels()
+    mock_open.assert_called_once()
+
+
+def test_copy_external_wheels_download(
+  mock_env: Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+  """Tests copy_external_wheels downloading from github.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+  """
+  project_root, docs_dir, _ = mock_env
+  reqs: Path = project_root / "requirements.txt"
+  reqs.write_text("bar @ https://github.com/bar/bar/releases/download/v2.0/bar-2.0-py3-none-any.whl?rev=main\n")
+
+  monkeypatch.setattr("ml_switcheroo.sphinx_ext.hooks.find_local_wheel", lambda root, pkg: None)
+
+  import io
+
+  class MockResponse(io.BytesIO):
+    """Mock HTTP response."""
+
+    def __enter__(self) -> "MockResponse":
+      """Enter context manager.
+
+      Returns:
+          MockResponse: Self instance.
+      """
+      return self
+
+    def __exit__(self, *args: Any) -> None:
+      """Exit context manager.
+
+      Args:
+          *args: Variable positional arguments.
+      """
+      pass
+
+  with mock.patch("urllib.request.urlopen", return_value=MockResponse(b"wheel_content")):
+    build_docs.copy_external_wheels()
+
+  target = docs_dir / "_static" / "bar-2.0-py3-none-any.whl"
+  assert target.exists()
+  out, _ = capsys.readouterr()
+  assert "Downloaded bar-2.0-py3-none-any.whl" in out
+
+  # Second run when already exists: skips downloading
+  with mock.patch("urllib.request.urlopen") as mock_open:
+    build_docs.copy_external_wheels()
+    mock_open.assert_not_called()
+
+
+def test_copy_external_wheels_download_error(
+  mock_env: Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+  """Tests copy_external_wheels handles download errors gracefully.
+
+  Args:
+      mock_env (Tuple[Path, Path, Path]): Mock environment.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+  """
+  project_root, _, _ = mock_env
+  reqs: Path = project_root / "requirements.txt"
+  reqs.write_text("baz @ https://github.com/baz/baz/releases/download/v3.0/baz-3.0-py3-none-any.whl\n")
+
+  monkeypatch.setattr("ml_switcheroo.sphinx_ext.hooks.find_local_wheel", lambda root, pkg: None)
+
+  with mock.patch("urllib.request.urlopen", side_effect=Exception("Network error")):
+    build_docs.copy_external_wheels()
+
+  out, _ = capsys.readouterr()
+  assert "Warning: Failed to download" in out
 
 
 def test_build_wheel_failure(

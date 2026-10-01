@@ -153,3 +153,51 @@ def test_ir_backend_validate_op() -> None:
 
   with patch("ml_ecosystem_snapshots.grounding.compiler.validate_onnx_op", side_effect=Exception("Failed")):
     assert backend.validate_op("Add") is None
+
+
+def test_ir_roundtrip_python_cst() -> None:
+  """Test that Python CST format emitted by IrBackend roundtrips through IrFrontend."""
+  from ml_switcheroo.core.compiler.frontends.ir import IrFrontend
+
+  mesh = LogicalMesh(shape={"device": 4})
+  nodes = {
+    "x": LogicalNode(id="x", op_type="Input"),
+    "fc": LogicalNode(id="fc", op_type="Gemm", attributes={"transB": "1"}),
+  }
+  edges = [LogicalEdge(source="x", target="fc")]
+  graph = LogicalGraph(name="RoundtripNet", nodes=nodes, edges=edges, mesh=mesh)
+
+  backend = IrBackend(format="python")
+  code = backend.compile(graph)
+
+  assert "import ml_switcheroo_ir as sw_ir" in code
+
+  frontend = IrFrontend(code)
+  reconstructed = frontend.parse_to_graph()
+
+  assert reconstructed.name == "RoundtripNet"
+  assert "x" in reconstructed.nodes
+  assert "fc" in reconstructed.nodes
+  assert reconstructed.nodes["fc"].op_type == "Gemm"
+
+
+def test_ir_roundtrip_json() -> None:
+  """Test that JSON format emitted by IrBackend roundtrips through IrFrontend."""
+  from ml_switcheroo.core.compiler.frontends.ir import IrFrontend
+
+  nodes = {
+    "x": LogicalNode(id="x", op_type="Input"),
+    "relu": LogicalNode(id="relu", op_type="Relu"),
+  }
+  edges = [LogicalEdge(source="x", target="relu")]
+  graph = LogicalGraph(name="JsonRoundtripNet", nodes=nodes, edges=edges)
+
+  backend = IrBackend(format="json")
+  json_code = backend.compile(graph)
+
+  frontend = IrFrontend(json_code)
+  reconstructed = frontend.parse_to_graph()
+
+  assert reconstructed.name == "JsonRoundtripNet"
+  assert "x" in reconstructed.nodes
+  assert "relu" in reconstructed.nodes

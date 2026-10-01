@@ -215,19 +215,34 @@ importlib.util.find_spec("ml_switcheroo") is not None
                         .map(l => l.trim())
                         .filter(l => l && !l.startsWith('#') && !l.includes('git+'))
                         .map(l => {
-                            if (l.includes(' @ ') && !l.split(' @ ')[1].startsWith('http')) {
+                            if (l.includes(' @ ')) {
                                 const parts = l.split(' @ ');
-                                const url = new URL(getStaticPath(parts[1]), window.location.href).href;
-                                return `${parts[0]} @ ${url}`;
+                                const spec = parts[1].trim();
+                                if (!spec.startsWith('http')) {
+                                    const url = new URL(getStaticPath(spec), window.location.href).href;
+                                    return `${parts[0]} @ ${url}`;
+                                } else if (spec.includes('github.com') && spec.includes('.whl')) {
+                                    const filename = spec.split('/').pop().split('?')[0];
+                                    const url = new URL(getStaticPath(filename), window.location.href).href;
+                                    return `${parts[0]} @ ${url}`;
+                                }
                             }
                             return l;
                         });
                     await micropip.install("numpy");
                     for (const req of reqs) {
                         try {
-                            await micropip.install(req);
+                            if (req.includes(".whl") || req.includes(" @ ")) {
+                                await micropip.install(req, false, false);
+                            } else {
+                                await micropip.install(req);
+                            }
                         } catch (reqErr) {
-                            console.warn("Failed to install requirement:", req, reqErr);
+                            try {
+                                await micropip.install(req, false, false);
+                            } catch (fallbackErr) {
+                                console.warn("Failed to install requirement:", req, fallbackErr);
+                            }
                         }
                     }
                 } else {

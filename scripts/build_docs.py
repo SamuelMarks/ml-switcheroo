@@ -35,7 +35,7 @@ ROOT_FILES = (
 def clean() -> None:
   """Clean the build directory and temporary artifacts."""
   if BUILD_DIR.exists():
-    shutil.rmtree(BUILD_DIR)
+    shutil.rmtree(BUILD_DIR, ignore_errors=True)
 
   for fname in ROOT_FILES:
     dest = DOCS_DIR / fname
@@ -44,13 +44,18 @@ def clean() -> None:
 
   api_dir = DOCS_DIR / "api"
   if api_dir.exists():
-    shutil.rmtree(api_dir)
+    shutil.rmtree(api_dir, ignore_errors=True)
 
   # Clean generated Operations documentation to prevent stale files
   # triggering 'document isn't included in any toctree' warnings.
   ops_dir = DOCS_DIR / "ops"
   if ops_dir.exists():
-    shutil.rmtree(ops_dir)
+    shutil.rmtree(ops_dir, ignore_errors=True)
+
+  static_dir = DOCS_DIR / "_static"
+  if static_dir.exists():
+    for whl in static_dir.glob("*.whl"):
+      whl.unlink()
 
 
 def copy_root_files() -> None:
@@ -70,16 +75,80 @@ def build_wheel() -> None:
   print("📦 Building Python Wheel for WASM...")
   dist_dir = PROJECT_ROOT / "dist"
   if dist_dir.exists():
-    shutil.rmtree(dist_dir)
+    shutil.rmtree(dist_dir, ignore_errors=True)
 
   try:
     cmd = ["uv", "build", "--wheel"]
     subprocess.run(cmd, cwd=PROJECT_ROOT, check=True, capture_output=True)
     print("✅ Wheel built successfully in dist/")
+
+    static_dir = DOCS_DIR / "_static"
+    static_dir.mkdir(exist_ok=True)
+    if dist_dir.exists():
+      for whl in dist_dir.glob("*.whl"):
+        shutil.copy2(whl, static_dir / whl.name)
+        print(f"✅ Copied {whl.name} to {static_dir}/")
   except subprocess.CalledProcessError as e:
     print("❌ Failed to build wheel.")
     print("STDERR:", e.stderr.decode())
     sys.exit(1)
+
+
+def copy_external_wheels() -> None:
+  """Download or copy external GitHub wheels specified in requirements into docs/_static.
+
+  Scans requirements.txt for any package pinned to an HTTPS GitHub wheel URL.
+  If a matching local wheel exists in a sibling workspace, it is copied over.
+  Otherwise, it is downloaded and placed into docs/_static so the WASM demo can
+  install it locally without cross-origin or on-the-fly network issues.
+  """
+  static_dir = DOCS_DIR / "_static"
+  static_dir.mkdir(exist_ok=True)
+
+  reqs_file = PROJECT_ROOT / "requirements.txt"
+  if not reqs_file.exists():
+    return
+
+  import urllib.request
+  from ml_switcheroo.sphinx_ext.hooks import find_local_wheel
+
+  with open(reqs_file, "r", encoding="utf-8") as f:
+    lines = f.readlines()
+
+  for raw_line in lines:
+    line = raw_line.strip()
+    if not line or line.startswith("#"):
+      continue
+    if " @ " in line:
+      pkg, url_or_spec = line.split(" @ ", 1)
+      pkg = pkg.strip()
+      url_or_spec = url_or_spec.strip()
+
+      if (
+        ("http://" in url_or_spec or "https://" in url_or_spec) and "github.com" in url_or_spec and ".whl" in url_or_spec
+      ):
+        whl_filename = url_or_spec.split("/")[-1].split("?")[0]
+        dest_path = static_dir / whl_filename
+
+        # First check if local wheel exists in sibling repo
+        local_wheel = find_local_wheel(PROJECT_ROOT, pkg)
+        if local_wheel is not None and local_wheel.exists():
+          if dest_path.exists() and dest_path.stat().st_mtime >= local_wheel.stat().st_mtime:
+            continue
+          shutil.copy2(local_wheel, dest_path)
+          print(f"✅ Copied local wheel {local_wheel.name} to {static_dir}/")
+          continue
+
+        # Otherwise download from GitHub release if not already present
+        if not dest_path.exists():
+          print(f"⬇️  Downloading {url_or_spec} to {dest_path}...")
+          try:
+            req = urllib.request.Request(url_or_spec, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req) as resp, open(dest_path, "wb") as out:
+              shutil.copyfileobj(resp, out)
+            print(f"✅ Downloaded {whl_filename} to {static_dir}/")
+          except Exception as e:
+            print(f"⚠️  Warning: Failed to download {url_or_spec}: {e}")
 
 
 def calculate_unique_variants() -> None:
@@ -109,6 +178,7 @@ def build(build_all: bool = False) -> int:
   """
   calculate_unique_variants()
   build_wheel()
+  copy_external_wheels()
 
   print("🏗️  Building Sphinx documentation...")
   cmd = [

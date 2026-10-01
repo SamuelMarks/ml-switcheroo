@@ -148,6 +148,26 @@ class IrPythonParser:
     Returns:
         LogicalGraph: The extracted computational graph.
     """
+    if "ml_switcheroo_ir" in code or "LogicalGraph" in code:
+      try:
+        import ml_switcheroo_ir as sw_ir
+
+        env: Dict[str, Any] = {
+          "__builtins__": __builtins__,
+          "sw_ir": sw_ir,
+          "ml_switcheroo_ir": sw_ir,
+        }
+        exec(code, env)
+        if "build_graph" in env and callable(env["build_graph"]):
+          res = env["build_graph"]()
+          if isinstance(res, LogicalGraph):
+            return res
+        for val in env.values():
+          if isinstance(val, LogicalGraph):
+            return val
+      except Exception:
+        pass
+
     # First try PythonFrontend to extract classes / layers
     frontend = PythonFrontend(code)
     graph = frontend.parse_to_graph()

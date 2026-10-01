@@ -322,6 +322,9 @@ class ASTEngine:
 
     if backend_cls.__name__ == "PythonBackend":
       backend = backend_cls(framework=self.target, semantics=self.semantics)  # type: ignore
+    elif backend_cls.__name__ == "IrBackend":
+      ir_format = "python" if self.target == "ml_switcheroo_ir" else "json"
+      backend = cast(CompilerBackend, backend_cls(semantics=self.semantics, format=ir_format))  # type: ignore
     else:
       backend = cast(CompilerBackend, backend_cls(self.semantics))  # type: ignore
 

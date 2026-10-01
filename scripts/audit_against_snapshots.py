@@ -973,20 +973,31 @@ def main() -> int:
   parser.add_argument(
     "--report", "--output", dest="report_path", type=str, default=None, help="Save structured audit report to JSON"
   )
+  parser.add_argument(
+    "--snapshots-dir",
+    action="append",
+    default=[],
+    help="Explicit snapshot directory to audit against (can be specified multiple times)",
+  )
   args = parser.parse_args()
 
   mgr = SemanticsManager()
   KnowledgeBaseLoader(mgr).load_knowledge_graph()
   RegistryLoader(mgr).hydrate()
 
-  snapshot_dirs = [
-    Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
-    Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
-    Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
-    Path("../ml-framework-snapshots/src/ml_framework_snapshots/frameworks"),
-    Path("src/ml_switcheroo/semantics"),
-    Path("../ml-compiler-snapshots"),
-  ]
+  snapshot_dirs = [Path(p) for p in args.snapshots_dir]
+  snapshot_dirs.extend(
+    [
+      Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
+      Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
+      Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
+      Path("../ml-framework-snapshots/src/ml_framework_snapshots/frameworks"),
+      Path("../ml-framework-snapshots/snapshots"),
+      Path("../ml-framework-snapshots"),
+      Path("src/ml_switcheroo/semantics"),
+      Path("../ml-compiler-snapshots"),
+    ]
+  )
   for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
     try:
       snap_res = importlib.resources.files(pkg)

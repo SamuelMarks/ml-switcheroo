@@ -75,13 +75,7 @@ flowchart TD
         IR[ML-Switcheroo IR]
     end
 
-    subgraph L4 [Level 4: Native & Binary]
-        direction LR
-        Cpp[C++ / PyBind11]
-        WAT[WebAssembly WAT]
-    end
-
-    subgraph LBottom [Level 5: Hardware ASM]
+    subgraph LBottom [Level 4: Hardware ASM]
         direction LR
         NVIDIA_SASS[NVIDIA SASS]
         RDNA[AMD RDNA]
@@ -91,21 +85,18 @@ flowchart TD
     TikZ ~~~ TensorFlow
     TensorFlow ~~~ JAX
     JAX ~~~ StableHLO
-    StableHLO ~~~ Cpp
-    Cpp ~~~ NVIDIA_SASS
+    StableHLO ~~~ NVIDIA_SASS
 
 %% --- 5. Apply Styles ---
     class HTML,TikZ,LaTeX l0Node;
     class PyTorch,MLX,TensorFlow,Keras,FlaxNNX,Pax l1Node;
     class JAX,NumPy l2Node;
     class StableHLO,MLIR,IR l3Node;
-    class Cpp,WAT l4Node;
     class NVIDIA_SASS,RDNA asmNode;
     class L0 containerL0;
     class L1 containerL1;
     class L2 containerL2;
     class L3 containerL3;
-    class L4 containerL4;
     class LBottom containerHW;
 ```
 

@@ -562,3 +562,39 @@ def test_engine_safety_scanner_exception_handling() -> None:
   with patch.object(StaticSafetyScanner, "scan", side_effect=RuntimeError("Scanner error")):
     res_rew = engine_rew.run("import torch\nx = 1\n")
     assert res_rew.success is True
+
+
+def test_engine_transpile_to_ir_json_and_python() -> None:
+  """Verifies that transpiling to 'ir' produces JSON and 'ml_switcheroo_ir' produces Python CST with imports."""
+  import json
+  from ml_switcheroo.config import RuntimeConfig
+
+  torch_code = (
+    "import torch\n"
+    "import torch.nn as nn\n"
+    "class SampleNet(nn.Module):\n"
+    "    def __init__(self):\n"
+    "        super().__init__()\n"
+    "        self.linear = nn.Linear(4, 8)\n"
+    "    def forward(self, x):\n"
+    "        return self.linear(x)\n"
+  )
+
+  # Target 'ir' -> JSON output
+  cfg_ir = RuntimeConfig.load(source="torch", target="ir")
+  eng_ir = ASTEngine(config=cfg_ir)
+  res_ir = eng_ir.run(torch_code)
+  assert res_ir.success is True
+  json_data = json.loads(res_ir.code)
+  assert json_data["name"] == "SampleNet"
+  assert "nodes" in json_data
+  assert "edges" in json_data
+
+  # Target 'ml_switcheroo_ir' -> Python code with import ml_switcheroo_ir as sw_ir
+  cfg_sw = RuntimeConfig.load(source="torch", target="ml_switcheroo_ir")
+  eng_sw = ASTEngine(config=cfg_sw)
+  res_sw = eng_sw.run(torch_code)
+  assert res_sw.success is True
+  assert "import ml_switcheroo_ir as sw_ir" in res_sw.code
+  assert "def build_graph() -> sw_ir.LogicalGraph:" in res_sw.code
+  assert "name='SampleNet'" in res_sw.code

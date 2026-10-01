@@ -145,18 +145,26 @@ def copy_wheel_and_reqs(app: "sphinx.application.Sphinx", exception: typing.Opti
             shutil.copy2(local_wheel, target_path)
           new_lines.append(f"{pkg} @ {local_wheel.name}")
           print(f"Grabbed {local_wheel.name} from {local_wheel.parent} for WASM demo...")
-        elif "@ http" in line and "github.com" in line and ".whl" in line:
+        elif (
+          ("http://" in url_or_spec or "https://" in url_or_spec)
+          and "github.com" in url_or_spec
+          and ".whl" in url_or_spec
+        ):
           # On ghpages or when local repo is not available: download from GitHub releases
-          filename = url_or_spec.split("/")[-1]
+          filename = url_or_spec.split("/")[-1].split("?")[0]
           target_path = static_dst / filename
           if not target_path.exists():
-            print(f"Downloading {url_or_spec} for WASM demo...")
-            try:
-              req = urllib.request.Request(url_or_spec, headers={"User-Agent": "Mozilla/5.0"})
-              with urllib.request.urlopen(req) as response, open(target_path, "wb") as out_file:
-                shutil.copyfileobj(response, out_file)
-            except Exception as e:
-              print(f"Warning: Failed to download {url_or_spec}: {e}")
+            src_static = root_dir / "docs" / "_static" / filename
+            if src_static.exists():
+              shutil.copy2(src_static, target_path)  # pragma: no cover
+            else:
+              print(f"Downloading {url_or_spec} for WASM demo...")
+              try:
+                req = urllib.request.Request(url_or_spec, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req) as response, open(target_path, "wb") as out_file:
+                  shutil.copyfileobj(response, out_file)
+              except Exception as e:
+                print(f"Warning: Failed to download {url_or_spec}: {e}")
           new_lines.append(f"{pkg} @ {filename}")
         elif "git+" in url_or_spec:
           # Git sources are omitted for browser WASM environments (Pyodide cannot clone git repos)

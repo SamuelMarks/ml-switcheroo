@@ -38,6 +38,7 @@ docs/MAINTENANCE.md
 docs/README.md
 
 # Distribution / packaging
+*.whl
 .Python
 build/
 develop-eggs/

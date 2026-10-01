@@ -21,12 +21,11 @@ from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
 
 @register_framework("ir")
-@register_framework("ml_switcheroo_ir")
 class IrAdapter(FrameworkAdapter):
-  """Adapter for ML-Switcheroo Intermediate Representation (IR).
+  """Adapter for ML-Switcheroo Intermediate Representation (IR) in JSON format.
 
   This adapter handles metadata, traits, import mappings, and code generation
-  hooks for the language-agnostic Intermediate Representation.
+  hooks for the language-agnostic Intermediate Representation serialized as JSON.
 
   Attributes:
       display_name: Human-readable display label.
@@ -36,7 +35,7 @@ class IrAdapter(FrameworkAdapter):
       _snapshot_data: Cached snapshot metadata mapping.
   """
 
-  display_name: str = "ML-Switcheroo IR (Intermediate Representation)"
+  display_name: str = "ML-Switcheroo IR (JSON)"
   inherits_from: Optional[str] = None
   ui_priority: int = 85
   _mode: InitMode = InitMode.LIVE
@@ -336,21 +335,90 @@ class IrAdapter(FrameworkAdapter):
 
   @classmethod
   def get_example_code(cls) -> str:
-    """Return a basic example of IR framework code syntax.
+    """Return a basic example of IR framework code syntax in JSON format.
 
     Returns:
-        str: Example code block for IR graph.
+        str: Example code block for IR graph in JSON schema format.
+    """
+    return (
+      "{\n"
+      '  "name": "SampleModel",\n'
+      '  "nodes": [\n'
+      "    {\n"
+      '      "id": "x",\n'
+      '      "op_type": "Input",\n'
+      '      "inputs": []\n'
+      "    },\n"
+      "    {\n"
+      '      "id": "relu1",\n'
+      '      "op_type": "Relu",\n'
+      '      "inputs": ["x"]\n'
+      "    }\n"
+      "  ],\n"
+      '  "edges": [\n'
+      "    {\n"
+      '      "source": "x",\n'
+      '      "target": "relu1"\n'
+      "    }\n"
+      "  ]\n"
+      "}\n"
+    )
+
+  def get_tiered_examples(self) -> Dict[str, str]:
+    """Return tiered examples mapped to individual semantic tiers.
+
+    Returns:
+        Dict[str, str]: Mapping of tier name to example code string.
+    """
+    example = self.get_example_code()
+    return {
+      "tier1_math": example,
+      "tier2_neural": example,
+      "tier3_extras": example,
+    }
+
+
+@register_framework("ml_switcheroo_ir")
+class IrPythonAdapter(IrAdapter):
+  """Adapter for ML-Switcheroo Intermediate Representation (IR) in Python CST format.
+
+  This adapter handles metadata, traits, import mappings, and code generation
+  hooks for the language-agnostic Intermediate Representation expressed as
+  executable Python source code using `ml_switcheroo_ir`.
+
+  Attributes:
+      display_name: Human-readable display label.
+      inherits_from: Parent framework identifier if inheriting traits.
+      ui_priority: Display priority in user interfaces and CLI tables.
+      _mode: Initialization mode (Live vs Ghost).
+      _snapshot_data: Cached snapshot metadata mapping.
+  """
+
+  display_name: str = "ML-Switcheroo IR (Python)"
+  inherits_from: Optional[str] = None
+  ui_priority: int = 86
+  _mode: InitMode = InitMode.LIVE
+  _snapshot_data: Dict[Any, Any] = {}
+
+  @classmethod
+  def get_example_code(cls) -> str:
+    """Return a basic example of IR framework code syntax in Python.
+
+    Returns:
+        str: Example code block for IR graph using ml_switcheroo_ir.
     """
     return (
       "import ml_switcheroo_ir as sw_ir\n\n"
-      "graph = sw_ir.LogicalGraph(\n"
-      "    name='SampleModel',\n"
-      "    nodes={\n"
+      "def build_graph() -> sw_ir.LogicalGraph:\n"
+      '    """Construct sample LogicalGraph."""\n'
+      "    nodes = {\n"
       "        'x': sw_ir.LogicalNode(id='x', op_type='Input'),\n"
-      "        'relu1': sw_ir.LogicalNode(id='relu1', op_type='Relu', inputs=['x']),\n"
-      "    },\n"
-      "    outputs=['relu1'],\n"
-      ")\n"
+      "        'relu1': sw_ir.LogicalNode(id='relu1', op_type='Relu'),\n"
+      "    }\n"
+      "    edges = [\n"
+      "        sw_ir.LogicalEdge(source='x', target='relu1'),\n"
+      "    ]\n"
+      "    return sw_ir.LogicalGraph(name='SampleModel', nodes=nodes, edges=edges)\n"
     )
 
   def get_tiered_examples(self) -> Dict[str, str]:
