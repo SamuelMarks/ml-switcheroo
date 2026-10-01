@@ -16,6 +16,9 @@ Supported Directions:
 Unsupported combinations degrade gracefully by returning False.
 """
 
+from typing import Any
+
+
 import textwrap
 import pprint
 from pathlib import Path
@@ -96,7 +99,7 @@ class WeightScriptGenerator:
       log_error(f"Failed to write output script: {e}")
       return False
 
-  def _flatten_mapping_rules(self, layer_registry):
+  def _flatten_mapping_rules(self, layer_registry: Any) -> Any:
     """Construct mapping rules for each layer found in the AST.
 
     Args:
@@ -175,7 +178,7 @@ class WeightScriptGenerator:
 
     return rules
 
-  def _generate_script(self, rules) -> str:
+  def _generate_script(self, rules: Any) -> str:
     """Generate the migration script using Adapter primitives.
 
     Args:

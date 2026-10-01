@@ -12,6 +12,9 @@ Refactor:
 """
 
 from __future__ import annotations
+from typing import Any
+
+
 import sys
 import types
 from typing import Callable, Dict, Optional, Type, TypeVar, List, Union, TYPE_CHECKING
@@ -46,7 +49,7 @@ class AutoWireSpec(BaseModel):
 
   model_config = ConfigDict(extra="allow")
 
-  ops: Optional[Dict[str, Union[str, dict, list]]] = Field(
+  ops: Optional[Dict[str, Union[str, dict[Any, Any], list[Any]]]] = Field(
     default_factory=lambda: {},
     description="Dictionary of Abstract Operations to inject into SemanticsManager.",
   )
@@ -89,7 +92,7 @@ class HookContext:
     self.target_fw = config.effective_target
 
     # Plugin State
-    self.metadata: Dict[str, Union[str, int, float, bool, dict, list, None]] = {}
+    self.metadata: Dict[str, Union[str, int, float, bool, dict[Any, Any], list[Any], None]] = {}
     self.current_op_id: Optional[str] = None
 
   def resolve_type(self, node: cst.CSTNode) -> Optional[str]:
@@ -189,8 +192,8 @@ class HookContext:
       self._preamble_injector(code_str)
 
   def raw_config(
-    self, key: str, default: Union[str, int, float, bool, dict, list, None] = None
-  ) -> Union[str, int, float, bool, dict, list, None]:
+    self, key: str, default: Union[str, int, float, bool, dict[Any, Any], list[Any], None] = None
+  ) -> Union[str, int, float, bool, dict[Any, Any], list[Any], None]:
     """Retrieve a raw value from the unstructured plugin settings dict.
 
     Args:

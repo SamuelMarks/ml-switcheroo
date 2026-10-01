@@ -21,7 +21,7 @@ class InputFuzzer:
     self,
     params: List[str],
     hints: Optional[Dict[str, str]] = None,
-    constraints=None,
+    constraints: Any = None,
   ) -> Dict[str, st.SearchStrategy]:
     """Construct a dictionary of Hypothesis strategies for the given parameters.
 
@@ -82,7 +82,7 @@ class InputFuzzer:
 
     return strategies
 
-  def adapt_to_framework(self, kwargs: dict, framework: str) -> dict:
+  def adapt_to_framework(self, kwargs: dict[Any, Any], framework: str) -> dict[Any, Any]:
     """Delegate to Framework Adapter to convert NumPy/Native inputs to Tensors.
 
     Args:

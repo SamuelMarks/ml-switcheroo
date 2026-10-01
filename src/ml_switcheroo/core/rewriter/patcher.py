@@ -9,6 +9,9 @@ by using **Provenance Tracking** to locate the exact CST nodes corresponding
 to graph nodes, and the **Snippet Emitter** to generate valid replacement code.
 """
 
+from typing import Any
+
+
 from dataclasses import dataclass, field
 from typing import Dict, List, Union
 
@@ -206,7 +209,7 @@ class GraphPatcher(cst.CSTTransformer):
       return cst.RemoveFromParent()
     return updated_node
 
-  def _handle_node(self, original: cst.CSTNode, updated: cst.CSTNode):
+  def _handle_node(self, original: cst.CSTNode, updated: cst.CSTNode) -> Any:
     """Core dispatch logic for performing patch mutations.
 
     Identifies if a node matches an action in the index, then dispatches
@@ -251,7 +254,7 @@ class GraphPatcher(cst.CSTTransformer):
 
     return updated
 
-  def _unwrap_stmt_if_nested(self, context_node: cst.CSTNode, new_stmt: cst.SimpleStatementLine):
+  def _unwrap_stmt_if_nested(self, context_node: cst.CSTNode, new_stmt: cst.SimpleStatementLine) -> Any:
     """Support: If we are replacing a node that is already inside a SimpleStatementLine body list.
 
     (like Assign or Expr), we should return the inner component to avoid double wrapping.

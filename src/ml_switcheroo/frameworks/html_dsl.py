@@ -6,6 +6,8 @@ representation of the HTML Grid DSL, providing standard metadata, traits,
 and parsing capabilities without executing or compiling code.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -182,8 +184,8 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return {}
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert external data/tensors into the framework's native format.
 
     Args:
@@ -289,7 +291,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     return "# Weights not supported in HTML mode"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply snapshot parameter wiring to resolve framework structures.
 
     Args:

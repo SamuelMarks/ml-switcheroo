@@ -8,6 +8,8 @@ It inherits Level 0 (Core JAX) and Level 1 (Optax/Orbax) capabilities from
 such as the ``setup()`` lifecycle method for layer definition.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -148,7 +150,7 @@ class PaxmlAdapter(JAXStackMixin):
     ).strip()
 
   @property
-  def supported_tiers(self):
+  def supported_tiers(self) -> Any:
     """Return supported semantic tiers.
 
     Returns:
@@ -247,8 +249,8 @@ class PaxmlAdapter(JAXStackMixin):
     return []
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert input data to JAX arrays.
 
     Args:
@@ -260,7 +262,7 @@ class PaxmlAdapter(JAXStackMixin):
     """
     return JaxCoreAdapter().convert(data)
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply JAX Stack wiring.
 
     Injects core JAX math operations and Optax optimizer mappings into the snapshot.

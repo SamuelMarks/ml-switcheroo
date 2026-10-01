@@ -10,8 +10,11 @@ The plugin consists of two cooperating hooks:
 2.  `inject_training_flag`: Intercepts calls to the model (e.g. `model(x)`), checks if
     state was recorded, and injects the generic `training=...` keyword argument.
 
-State is tracked via a metadata dictionary in `HookContext` keyed by the object name.
+State is tracked via a metadata dict[str, typing.Any]ionary in `HookContext` keyed by the object name.
 """
+
+import typing
+
 
 from typing import Optional, Dict, cast
 import libcst as cst
@@ -65,7 +68,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
       The modified Call node with injected arguments, or the original if no state found.
 
   """
-  store = cast(dict, ctx.metadata.get(_PLUGIN_KEY, {}))
+  store = cast(dict[str, typing.Any], ctx.metadata.get(_PLUGIN_KEY, {}))
   if not store:
     return node
 
@@ -88,7 +91,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
   flags = None
   for key in candidate_keys:
     if key in store:
-      flags = cast(dict, store[key])
+      flags = cast(dict[str, typing.Any], store[key])
       break
 
   if not flags:
@@ -165,7 +168,7 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     state_updates["training"] = val
 
   # 3. persist State in Context
-  store = cast(dict, ctx.metadata.setdefault(_PLUGIN_KEY, {}))
+  store = cast(dict[str, typing.Any], ctx.metadata.setdefault(_PLUGIN_KEY, {}))
   if obj_name not in store:
     store[obj_name] = {}
 

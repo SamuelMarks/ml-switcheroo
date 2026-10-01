@@ -25,7 +25,7 @@ from ml_switcheroo.utils.console import log_error, log_info
 class StableHloSpecImporter:
   """Parse StableHLO Markdown specification files."""
 
-  def parse_file(self, target_file: Path) -> typing.Dict[str, dict]:
+  def parse_file(self, target_file: Path) -> typing.Dict[str, dict[Any, Any]]:
     """Parse `spec.md` from the StableHLO repository.
 
     Args:
@@ -41,7 +41,7 @@ class StableHloSpecImporter:
     log_info(f"Parsing StableHLO Spec: {target_file.name}...")
     return self._parse_markdown(target_file)
 
-  def _parse_markdown(self, fpath: Path) -> typing.Dict[str, dict]:
+  def _parse_markdown(self, fpath: Path) -> typing.Dict[str, dict[Any, Any]]:
     """Parse markdown structures directly into semantic definitions.
 
     Args:
@@ -100,7 +100,7 @@ class StableHloSpecImporter:
 
     return semantics
 
-  def _finalize_op(self, semantics: typing.Dict[str, dict], name: str, details: dict) -> None:
+  def _finalize_op(self, semantics: typing.Dict[str, dict[Any, Any]], name: str, details: dict[Any, Any]) -> None:
     """Clean up and register the operation.
 
     Args:

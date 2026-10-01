@@ -212,7 +212,7 @@ class TraceLogger:
     self,
     evt_type: TraceEventType,
     desc: str,
-    meta,
+    meta: Any,
     lineno: Optional[int] = None,
   ) -> None:
     """Support to create and append events.
@@ -236,7 +236,7 @@ class TraceLogger:
       )
     )
 
-  def export(self):
+  def export(self) -> Any:
     """Export the event log as a list of dictionaries.
 
     Returns:

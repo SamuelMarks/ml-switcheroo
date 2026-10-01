@@ -10,6 +10,8 @@ This module maps Operation Definition Language (ODL) type strings (e.g., ``Array
     across different arguments using a shared context.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -66,8 +68,8 @@ def _get_dtype_strategy(dtype_str: typing.Optional[str]) -> typing.Any:
 
 def strategies_from_spec(
   type_str: Union[str, ParsedType],
-  constraints,
-  shared_dims=None,
+  constraints: Any,
+  shared_dims: Any = None,
 ) -> st.SearchStrategy:
   """Construct a Hypothesis strategy from a type string and constraints.
 
@@ -168,7 +170,9 @@ def strategies_from_spec(
   return _array_strategy(TensorType(dims=None), constraints, shared_dims)
 
 
-def _array_strategy(type_str: "TensorType", constraints: dict, shared_dims: typing.Optional[dict]) -> "st.SearchStrategy":
+def _array_strategy(
+  type_str: "TensorType", constraints: dict[Any, Any], shared_dims: typing.Optional[dict[Any, Any]]
+) -> "st.SearchStrategy":
   """Construct a NumPy array strategy based on rank, symbolic shape, and element constraints.
 
   Args:
@@ -217,7 +221,6 @@ def _array_strategy(type_str: "TensorType", constraints: dict, shared_dims: typi
   mx = constraints.get("max")
 
   from hypothesis.strategies import SearchStrategy
-  from typing import Any
 
   elements: Optional[SearchStrategy[Any]] = None
   if np.issubdtype(dtype, np.integer):

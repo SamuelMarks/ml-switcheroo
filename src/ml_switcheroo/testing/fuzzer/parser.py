@@ -10,6 +10,8 @@ It includes logic to:
 4.  **Infer generation strategy from default values** when explicit hints are erased.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -88,8 +90,8 @@ def generate_from_hint(
   depth: int,
   max_depth: int,
   symbol_map: Dict[str, int],
-  constraints=None,
-):
+  constraints: Any = None,
+) -> Any:
   """Recursively parses a type hint and generates conforming data.
 
   If type hints are generic ("Any"), it attempts to infer the type logic

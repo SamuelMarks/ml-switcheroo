@@ -7,7 +7,16 @@ into a Docutils node.
 
 from typing import List
 from docutils import nodes
-from docutils.parsers.rst import Directive
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+
+  class Directive:
+    """Type stub for docutils Directive."""
+
+    ...
+else:
+  from docutils.parsers.rst import Directive
 
 from ml_switcheroo.sphinx_ext.registry import scan_registry
 from ml_switcheroo.sphinx_ext.rendering import render_demo_html

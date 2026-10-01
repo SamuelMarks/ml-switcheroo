@@ -83,6 +83,7 @@ def test_test_wasm_ghost_entrypoint(monkeypatch: Any) -> None:
   monkeypatch.setattr(sys, "path", [p for p in sys.path if p != src_dir])
   monkeypatch.setattr("sys.argv", ["scripts/test_wasm_ghost.py"])
 
-  with pytest.raises(SystemExit) as exc_info:
-    runpy.run_path(str(repo_root / "scripts" / "test_wasm_ghost.py"), run_name="__main__")
+  with patch.dict(sys.modules, {lib: None for lib in ["torch", "jax", "tensorflow", "mlx"]}):
+    with pytest.raises(SystemExit) as exc_info:
+      runpy.run_path(str(repo_root / "scripts" / "test_wasm_ghost.py"), run_name="__main__")
   assert exc_info.value.code == 0

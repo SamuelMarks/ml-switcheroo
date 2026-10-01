@@ -4,6 +4,9 @@ This module implements a Compiler Backend that synthesizes Python source code
 from the Logical Graph Internal Representation via LibCST.
 """
 
+from typing import Any
+
+
 from typing import List, Optional, Union, cast
 import libcst as cst
 from libcst import matchers as m
@@ -102,7 +105,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
 class PythonBackend(CompilerBackend):
   """Synthesize a Python CST Module from a LogicalGraph."""
 
-  def __init__(self, framework: str = "torch", semantics=None) -> None:
+  def __init__(self, framework: str = "torch", semantics: Any = None) -> None:
     """Initialize the PythonBackend.
 
     Args:
@@ -446,7 +449,7 @@ class PythonBackend(CompilerBackend):
       code = f"self.{node.id} = {kind}({args_str})"
     return cast(cst.SimpleStatementLine, cst.parse_statement(code))
 
-  def _format_args_from_metadata(self, metadata) -> str:
+  def _format_args_from_metadata(self, metadata: Any) -> str:
     """Format node metadata dictionary into a Python arguments string.
 
     Args:
@@ -466,7 +469,7 @@ class PythonBackend(CompilerBackend):
         args_list.append(f"{key}={val}")
     return ", ".join(args_list)
 
-  def _format_partition_spec(self, sharding) -> str:
+  def _format_partition_spec(self, sharding: Any) -> str:
     """Format JAX partition spec from abstract sharding.
 
     Args:
@@ -486,7 +489,7 @@ class PythonBackend(CompilerBackend):
         axes.append(f"({t_str})")
     return f"jax.sharding.PartitionSpec({', '.join(axes)})"
 
-  def _format_partition_spec_tf(self, sharding) -> str:
+  def _format_partition_spec_tf(self, sharding: Any) -> str:
     """Format TensorFlow layout specification.
 
     Args:
@@ -505,7 +508,7 @@ class PythonBackend(CompilerBackend):
         placements.append("'*'")
     return f"[{', '.join(placements)}]"
 
-  def _format_partition_spec_torch(self, sharding) -> str:
+  def _format_partition_spec_torch(self, sharding: Any) -> str:
     """Format PyTorch distribution specification.
 
     Args:

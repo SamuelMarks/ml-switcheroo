@@ -3,6 +3,8 @@
 Simplified to only provide Metadata.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -260,7 +262,7 @@ class MlirAdapter(FrameworkAdapter):
     """
     return "# Weights saving not supported in MLIR adapter"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply a framework wiring snapshot.
 
     Args:
@@ -280,8 +282,8 @@ class MlirAdapter(FrameworkAdapter):
     return None
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert input data representation to MLIR compatible format.
 
     Args:

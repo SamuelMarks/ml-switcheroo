@@ -245,7 +245,7 @@ class RuntimeConfig(BaseModel):
     intermediate: Optional[str] = None,
     enable_graph_optimization: Optional[bool] = None,
     enable_sharding: Optional[bool] = None,
-    plugin_settings=None,
+    plugin_settings: Any = None,
     validation_report: Optional[Path] = None,
     search_path: Optional[Path] = None,
   ) -> "RuntimeConfig":

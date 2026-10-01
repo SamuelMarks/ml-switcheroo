@@ -198,4 +198,6 @@ class MigrationGuideGenerator:
     """
     if not variant:
       return "—"
-    return variant.get("api", "—")
+    res = variant.get("api", "—")
+    assert isinstance(res, str)
+    return res

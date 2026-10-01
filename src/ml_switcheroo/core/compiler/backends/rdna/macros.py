@@ -56,7 +56,7 @@ class RegisterAllocatorProtocol(Protocol):
 def expand_conv2d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any,
 ) -> List[RdnaNode]:
   """Generate the RDNA assembly kernel for a 2D Convolution loop.
 
@@ -130,7 +130,7 @@ def expand_conv2d(
 def expand_linear(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any,
 ) -> List[RdnaNode]:
   """Generate the RDNA assembly kernel for a Linear Layer.
 
@@ -194,7 +194,7 @@ def expand_linear(
 def expand_relu(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any,
 ) -> List[RdnaNode]:
   """Generate the RDNA assembly kernel for ReLU.
 
@@ -218,7 +218,7 @@ def expand_relu(
 def expand_flatten(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any,
 ) -> List[RdnaNode]:
   """Generate the RDNA assembly kernel for Flatten.
 
@@ -236,7 +236,7 @@ def expand_flatten(
 def expand_reshape(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any,
 ) -> List[RdnaNode]:
   """Generate the RDNA assembly kernel for Reshape.
 
@@ -254,7 +254,7 @@ def expand_reshape(
 def expand_conv3d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any,
 ) -> List[RdnaNode]:
   """Generate the RDNA assembly kernel for Conv3d.
 
@@ -281,7 +281,7 @@ def expand_conv3d(
 def expand_dropout(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any,
 ) -> List[RdnaNode]:
   """Expand a dropout operation into RDNA nodes.
 
@@ -299,7 +299,7 @@ def expand_dropout(
 def expand_variable(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any,
 ) -> List[RdnaNode]:
   """Expand a variable operation into RDNA nodes.
 
@@ -317,7 +317,7 @@ def expand_variable(
 def expand_transpose(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any,
 ) -> List[RdnaNode]:
   """Expand a transpose operation into RDNA nodes.
 
@@ -335,7 +335,7 @@ def expand_transpose(
 def expand_conv_general_dilated(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any,
 ) -> List[RdnaNode]:
   """Expand a conv_general_dilated operation into RDNA nodes.
 
@@ -356,7 +356,7 @@ def expand_conv_general_dilated(
 def expand_adam(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata,
+  metadata: Any,
 ) -> List[RdnaNode]:
   """Expand an adam operation into RDNA nodes.
 

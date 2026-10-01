@@ -4,6 +4,8 @@ Provides the metadata and configuration required to map intermediate representat
 operations and semantics to TikZ/LaTeX visualization output.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -261,7 +263,7 @@ class TikzAdapter(FrameworkAdapter):
     """
     return "# Weights not supported in TikZ mode"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply visual connection wiring or post-processing logic to the representation.
 
     Args:
@@ -281,8 +283,8 @@ class TikzAdapter(FrameworkAdapter):
     return None
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert input data to a format compatible with LaTeX/TikZ serialization.
 
     Args:

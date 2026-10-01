@@ -9,6 +9,9 @@ Sorting Order:
     Typically: PyTorch (0) -> JAX (10) -> NumPy (20) -> TensorFlow (30) -> ...
 """
 
+from typing import Any
+
+
 from typing import Dict, List
 
 from rich.console import Console
@@ -129,7 +132,7 @@ class CompatibilityMatrix:
 
     self.console.print(table)
 
-  def _get_status_icon(self, variant_info) -> str:
+  def _get_status_icon(self, variant_info: Any) -> str:
     """Determine the visual status icon for a mapping entry.
 
     Args:

@@ -63,6 +63,7 @@ def ingest_code(
       tree = parser.parse()
       tracer.log_mutation("Transformed Ingestion", "(Raw Source)", "(AST Parsed)")
       tracer.end_phase()
+      assert isinstance(tree, cst.Module)
       return tree
     except Exception as e:
       tracer.end_phase()
@@ -82,6 +83,7 @@ def ingest_code(
       tree = gen.generate(mlir_mod)
       tracer.log_mutation("Ingestion", f"({source_fw.upper()} Text)", "(Python CST)")
       tracer.end_phase()
+      assert isinstance(tree, cst.Module)
       return tree
     except Exception as e:
       tracer.end_phase()
@@ -104,6 +106,7 @@ def ingest_code(
       tree = cst.parse_module(py_code)
       tracer.log_mutation("Ingestion", "(TikZ Source)", f"(Python CST)\n{py_code}")
       tracer.end_phase()
+      assert isinstance(tree, cst.Module)
       return tree
     except Exception as e:
       tracer.end_phase()
@@ -121,6 +124,7 @@ def ingest_code(
       tree = generator.generate(graph)
       tracer.log_mutation("Ingestion", "(IR Source)", "(Python CST)")
       tracer.end_phase()
+      assert isinstance(tree, cst.Module)
       return tree
     except Exception as e:
       tracer.end_phase()
@@ -132,6 +136,7 @@ def ingest_code(
     tree = cst.parse_module(code)
     tracer.log_mutation("Transformed Module", "(Raw Source)", "(AST Parsed)")
     tracer.end_phase()
+    assert isinstance(tree, cst.Module)
     return tree
   except Exception as e:
     tracer.end_phase()

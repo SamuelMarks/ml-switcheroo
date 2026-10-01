@@ -1,5 +1,8 @@
 """Logic for Conditional API Dispatch."""
 
+from typing import Any
+
+
 from typing import List, Optional, TYPE_CHECKING, Union
 import libcst as cst
 from ml_switcheroo.enums import LogicOp
@@ -28,7 +31,7 @@ if TYPE_CHECKING:
 
 
 def evaluate_dispatch_rules(
-  rewriter: "RewriterDummy", node: cst.Call, rules: List["DispatchRuleDummy"], details: dict
+  rewriter: "RewriterDummy", node: cst.Call, rules: List["DispatchRuleDummy"], details: dict[Any, Any]
 ) -> Optional[str]:
   """Evaluate conditional dispatch rules against the current call arguments.
 
@@ -191,6 +194,6 @@ def _check_rule_condition(node: cst.CSTNode, rule: "DispatchRuleDummy") -> bool:
 
   if op in op_map:
     # We must disable type-checking on this lambda map lookup due to broad dynamic typing bounds
-    return op_map[op](val, target)  # type: ignore
+    return op_map[op](val, target)
 
   return False

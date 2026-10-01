@@ -62,7 +62,7 @@ class SemanticsManager:
 
     # Indexes
     self._reverse_index: dict[Any, Any] = {}
-    self._variant_cache: Dict[Tuple[str, str], Optional[dict]] = {}
+    self._variant_cache: Dict[Tuple[str, str], typing.Optional[dict[str, typing.Any]]] = {}
     self._key_origins: Dict[str, str] = {}
     self._validation_status: Dict[str, bool] = {}
 
@@ -123,7 +123,7 @@ class SemanticsManager:
       with open(priority_json_path, "r", encoding="utf-8") as f:
         priority_scores = json.load(f)
 
-    def get_priority(abs_id: str, details: dict, tier: int) -> int:
+    def get_priority(abs_id: str, details: dict[str, typing.Any], tier: str) -> int:
       """Determine indexing priority when multiple abstract ops map to the same target API.
 
       This handles overlaps between generic ops like `cat` vs `concat`.
@@ -146,7 +146,7 @@ class SemanticsManager:
         score -= 100
 
       score += len(details.get("variants", {}))
-      return score
+      return int(score)
 
     for abstract_id, details in self.data.items():
       variants = details.get("variants", {})
@@ -265,7 +265,7 @@ class SemanticsManager:
 
     return ecosystem - {""}
 
-  def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Optional[dict]:
+  def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Optional[dict[str, typing.Any]]:
     """Resolve the implementation of an abstract operation.
 
     Args:
@@ -292,7 +292,8 @@ class SemanticsManager:
     if target_fw in variants:
       result = variants[target_fw]
       self._variant_cache[cache_key] = result
-      return result
+      v1: typing.Optional[dict[str, typing.Any]] = result
+      return v1
 
     curr = target_fw
     limit = 5
@@ -303,7 +304,8 @@ class SemanticsManager:
       if parent in variants:
         result = variants[parent]
         self._variant_cache[cache_key] = result
-        return result
+        v2: typing.Optional[dict[str, typing.Any]] = result
+        return v2
       curr = parent
       limit -= 1
 
@@ -316,7 +318,8 @@ class SemanticsManager:
             if target_fw in alt_vars:
               result = alt_vars[target_fw]
               self._variant_cache[cache_key] = result
-              return result
+              v3: typing.Optional[dict[str, typing.Any]] = result
+              return v3
 
     self._variant_cache[cache_key] = None
     return None
@@ -331,9 +334,9 @@ class SemanticsManager:
         True if the operation is verified or untracked, False otherwise.
     """
     status_map = getattr(self, "_validation_status", {})
-    return status_map.get(abstract_id, True)
+    return bool(status_map.get(abstract_id, True))
 
-  def get_definition_by_id(self, abstract_id: str) -> typing.Optional[dict]:
+  def get_definition_by_id(self, abstract_id: str) -> typing.Optional[dict[str, typing.Any]]:
     """Direct dictionary access.
 
     Args:
@@ -343,9 +346,10 @@ class SemanticsManager:
         The dictionary containing the definition of the abstract operation, or
         None if not found.
     """
-    return self.data.get(abstract_id)
+    dt: dict[str, typing.Any] = self.data
+    return dt.get(abstract_id)
 
-  def get_definition(self, api_name: str) -> typing.Optional[typing.Tuple[str, dict]]:
+  def get_definition(self, api_name: str) -> typing.Optional[typing.Tuple[str, dict[str, typing.Any]]]:
     """Reverse lookup from concrete API string or Abstract ID fallback.
 
     Args:
@@ -357,7 +361,7 @@ class SemanticsManager:
     """
     if not hasattr(self, "_reverse_index"):
       self._reverse_index = {}
-    res = self._reverse_index.get(api_name)
+    res: typing.Optional[typing.Tuple[str, dict[str, typing.Any]]] = self._reverse_index.get(api_name)
     if res:
       return res
 
@@ -373,15 +377,16 @@ class SemanticsManager:
 
     return None
 
-  def get_known_apis(self) -> typing.Dict[str, dict]:
+  def get_known_apis(self) -> typing.Dict[str, dict[str, typing.Any]]:
     """Return full knowledge graph.
 
     Returns:
         A dictionary mapping abstract IDs to their full operation definitions.
     """
-    return self.data
+    dt: dict[str, typing.Any] = self.data
+    return dt
 
-  def get_framework_config(self, framework: str) -> dict:
+  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
     """Return definition of framework traits.
 
     Args:
@@ -390,7 +395,8 @@ class SemanticsManager:
     Returns:
         A dictionary representing the framework configuration and traits.
     """
-    return self.framework_configs.get(framework, {})
+    d_traits: dict[str, typing.Any] = self.framework_configs.get(framework, {})
+    return d_traits
 
   def get_test_template(self, framework: str) -> Optional[Dict[str, str]]:
     """Return testing codegen templates.
@@ -455,7 +461,7 @@ class SemanticsManager:
     except Exception as e:
       print(f"❌ Error loading validation report: {e}")
 
-  def update_definition(self, abstract_id: str, new_data: dict) -> None:
+  def update_definition(self, abstract_id: str, new_data: dict[str, typing.Any]) -> None:
     """Update an operation definition in memory and persists to disk.
 
     Args:
@@ -500,7 +506,7 @@ class SemanticsManager:
     except Exception as e:
       print(f"❌ Failed to write update for {abstract_id} to {filename}: {e}")
 
-  def lookup_snapshot_symbol(self, framework: str, symbol: str) -> typing.Optional[dict]:
+  def lookup_snapshot_symbol(self, framework: str, symbol: str) -> typing.Optional[dict[str, typing.Any]]:
     """Look up a grounded symbol from indexed framework snapshots.
 
     Args:
@@ -525,7 +531,7 @@ class SemanticsManager:
     query: str,
     framework: typing.Optional[str] = None,
     limit: int = 10,
-  ) -> typing.List[dict]:
+  ) -> typing.List[dict[str, typing.Any]]:
     """Search for symbols in indexed snapshots using full-text search.
 
     Args:

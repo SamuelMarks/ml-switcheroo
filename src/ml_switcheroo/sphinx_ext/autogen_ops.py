@@ -12,6 +12,8 @@ Features:
 2. Exports `docs/operations.yaml` ensuring appended updates rather than destructive overwrites.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -45,7 +47,7 @@ class IndentedDumper(yaml.SafeDumper):
     return super(IndentedDumper, self).increase_indent(flow, False)
 
 
-def _build_yaml_entry(op_name: str, definition: dict) -> dict:
+def _build_yaml_entry(op_name: str, definition: dict[Any, Any]) -> dict[Any, Any]:
   """Normalize internal semantics data into clean ODL YAML structure.
 
   Provides safe sanitization of description strings to prevent broken RST references.
@@ -108,7 +110,7 @@ def _build_yaml_entry(op_name: str, definition: dict) -> dict:
   }
 
 
-def _write_yaml_update(out_path: Path, new_entries: typing.List[dict]) -> None:
+def _write_yaml_update(out_path: Path, new_entries: typing.List[dict[Any, Any]]) -> None:
   """Merge accumulated operations into the existing YAML file (Upsert logic).
 
   Reads the existing YAML file if it exists, updates it with the new entries,

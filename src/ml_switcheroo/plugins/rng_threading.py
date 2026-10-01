@@ -76,13 +76,13 @@ def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
   key_var = str(ctx.raw_config("key_var_name", default="key"))
 
   # 2. Request Signature Injection
-  ctx.inject_signature_arg(rng_arg)  # type: ignore
+  ctx.inject_signature_arg(rng_arg)
 
   # 3. Request Preamble Injection (Delegated to Adapter)
   adapter = get_adapter(ctx.target_fw)
   if adapter:
     # Ask adapter for the syntax: "rng, key = jax.random.split(rng)"
-    split_stmt = adapter.get_rng_split_syntax(rng_arg, key_var)  # type: ignore
+    split_stmt = adapter.get_rng_split_syntax(rng_arg, key_var)
     if split_stmt and split_stmt != "pass":
       ctx.inject_preamble(split_stmt)
 

@@ -71,10 +71,10 @@ def _supports_numpy_padding(ctx: HookContext) -> bool:
     return False
 
   if isinstance(traits, dict):
-    return traits.get("has_numpy_compatible_arrays", False)
+    return bool(traits.get("has_numpy_compatible_arrays", False))
 
   if hasattr(traits, "has_numpy_compatible_arrays"):
-    return getattr(traits, "has_numpy_compatible_arrays", False)
+    return bool(getattr(traits, "has_numpy_compatible_arrays", False))
 
   return False
 

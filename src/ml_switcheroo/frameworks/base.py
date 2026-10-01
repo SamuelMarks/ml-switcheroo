@@ -54,8 +54,8 @@ class FrameworkAdapter(Protocol):
     ...
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert framework-specific or generic data structures.
 
     Args:
@@ -325,7 +325,7 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply dynamic bindings or overrides onto the adapter using snapshot data.
 
     Args:
@@ -334,7 +334,7 @@ class FrameworkAdapter(Protocol):
     ...
 
 
-def load_snapshot_for_adapter(fw_key: str):
+def load_snapshot_for_adapter(fw_key: str) -> Any:
   """Load the most recent snapshot JSON data for a given framework key from the SNAPSHOT_DIR.
 
   Args:
@@ -361,7 +361,7 @@ def load_snapshot_for_adapter(fw_key: str):
 _ADAPTER_REGISTRY: Dict[str, Type[FrameworkAdapter]] = {}
 
 
-def register_framework(name: str):
+def register_framework(name: str) -> Any:
   """Get a decorator to register concrete FrameworkAdapter classes under a specific name.
 
   Args:
@@ -372,7 +372,7 @@ def register_framework(name: str):
       in the registry and returns the class itself.
   """
 
-  def wrapper(cls):
+  def wrapper(cls: typing.Type[typing.Any]) -> typing.Type[typing.Any]:
     """Register the decorated class in the framework adapter registry.
 
     Args:

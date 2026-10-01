@@ -9,6 +9,8 @@ Migration Note:
     have been removed. Routing now occurs via `compiler.registry`.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -265,7 +267,7 @@ class RdnaAdapter(FrameworkAdapter):
     """
     return "; Weights saving not supported in RDNA adapter"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply framework-specific wiring or configuration from a snapshot.
 
     Args:
@@ -285,8 +287,8 @@ class RdnaAdapter(FrameworkAdapter):
     return f"https://gpuopen.com/learn/rdna-performance-guide/?q={api_name}"
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert arbitrary data or objects into an RDNA-compatible representation.
 
     Args:

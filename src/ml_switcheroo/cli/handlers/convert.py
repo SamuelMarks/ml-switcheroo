@@ -9,6 +9,9 @@ It orchestrates:
 5. Output writing and trace logging.
 """
 
+from typing import Any
+
+
 import sys
 import json
 import subprocess
@@ -38,7 +41,7 @@ def handle_convert(
   verify: bool,
   strict: Optional[bool],
   intermediate: Optional[str],
-  plugin_settings,
+  plugin_settings: Any,
   json_trace_path: Optional[Path] = None,
   enable_sharding: bool = False,
 ) -> int:

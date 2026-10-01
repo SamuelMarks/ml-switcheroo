@@ -108,6 +108,7 @@ class ArrayApiSpecImporter:
       self.validate_function_signature(name, defn)
       semantics[name] = defn
 
+    assert isinstance(semantics, dict)
     return semantics
 
   def validate_function_signature(self, op_name: str, defn: Dict[str, Any]) -> bool:
@@ -148,7 +149,7 @@ class ArrayApiSpecImporter:
     """
     return self.parse_snapshot(snapshot_path)
 
-  def parse_folder(self, root_dir: Path) -> typing.Dict[str, dict]:
+  def parse_folder(self, root_dir: Path) -> typing.Dict[str, dict[Any, Any]]:
     """Parse Array API Python Stubs (``*.py``) in the target directory.
 
     Args:
@@ -168,7 +169,7 @@ class ArrayApiSpecImporter:
     log_info(f"Parsing {len(py_files)} stub files...")
     return self._parse_stubs(py_files, root_dir)
 
-  def _parse_stubs(self, files: typing.List[Path], root: Path) -> typing.Dict[str, dict]:
+  def _parse_stubs(self, files: typing.List[Path], root: Path) -> typing.Dict[str, dict[Any, Any]]:
     """Iterate over files and extracts AST nodes.
 
     Processes both function definitions and constant assignments (e.g. math constants).
@@ -241,6 +242,7 @@ class ArrayApiSpecImporter:
             "variants": {},
           }
 
+    assert isinstance(semantics, dict)
     return semantics
 
   def _extract_args(self, args: ast.arguments) -> List[Tuple[str, str]]:

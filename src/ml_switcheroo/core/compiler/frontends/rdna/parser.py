@@ -125,7 +125,7 @@ class RdnaLexer(Lexer):
       yield t3
 
 
-def _get_trivia(node) -> List[Trivia]:
+def _get_trivia(node: Any) -> List[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -205,7 +205,7 @@ class RdnaTransformer(Transformer[Any, Any]):
   """
 
   @v_args(inline=False)
-  def module(self, children) -> RdnaModule:
+  def module(self, children: Any) -> RdnaModule:
     """Transform the top-level module rule.
 
     Args:
@@ -228,7 +228,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return mod
 
   @v_args(inline=False)
-  def comment_stmt(self, children) -> RdnaComment:
+  def comment_stmt(self, children: Any) -> RdnaComment:
     """Transform a comment.
 
     Args:
@@ -242,7 +242,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return c
 
   @v_args(inline=False)
-  def directive(self, children) -> RdnaDirective:
+  def directive(self, children: Any) -> RdnaDirective:
     """Transform a directive.
 
     Args:
@@ -282,7 +282,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return children
 
   @v_args(inline=False)
-  def label(self, children) -> RdnaLabel:
+  def label(self, children: Any) -> RdnaLabel:
     """Transform a label.
 
     Args:
@@ -296,7 +296,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return lbl
 
   @v_args(inline=False)
-  def instruction(self, children) -> RdnaInstruction:
+  def instruction(self, children: Any) -> RdnaInstruction:
     """Transform an instruction.
 
     Args:
@@ -317,7 +317,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def operands(self, children) -> List[RdnaOperand]:
+  def operands(self, children: Any) -> List[RdnaOperand]:
     """Transform an operands list.
 
     Args:
@@ -329,7 +329,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return [c for c in children if isinstance(c, RdnaOperand)]
 
   @v_args(inline=False)
-  def mem_reg(self, children) -> RdnaMemory:
+  def mem_reg(self, children: Any) -> RdnaMemory:
     """Transform memory access.
 
     Args:
@@ -344,7 +344,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def mem_reg_pos(self, children) -> RdnaMemory:
+  def mem_reg_pos(self, children: Any) -> RdnaMemory:
     """Transform memory access with positive offset.
 
     Args:
@@ -361,7 +361,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def mem_reg_neg(self, children) -> RdnaMemory:
+  def mem_reg_neg(self, children: Any) -> RdnaMemory:
     """Transform memory access with negative offset.
 
     Args:
@@ -378,7 +378,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def register(self, children) -> Union[RdnaSGPR, RdnaVGPR]:
+  def register(self, children: Any) -> Union[RdnaSGPR, RdnaVGPR]:
     """Transform a register.
 
     Args:
@@ -406,7 +406,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return reg
 
   @v_args(inline=False)
-  def imm_num(self, children) -> RdnaImmediate:
+  def imm_num(self, children: Any) -> RdnaImmediate:
     """Transform number.
 
     Args:
@@ -423,7 +423,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def imm_hex(self, children) -> RdnaImmediate:
+  def imm_hex(self, children: Any) -> RdnaImmediate:
     """Transform hex.
 
     Args:
@@ -439,7 +439,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def neg_num(self, children) -> RdnaImmediate:
+  def neg_num(self, children: Any) -> RdnaImmediate:
     """Transform negative number.
 
     Args:
@@ -456,7 +456,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def neg_hex(self, children) -> RdnaImmediate:
+  def neg_hex(self, children: Any) -> RdnaImmediate:
     """Transform negative hex.
 
     Args:
@@ -472,7 +472,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def pos_num(self, children) -> RdnaImmediate:
+  def pos_num(self, children: Any) -> RdnaImmediate:
     """Transform positive number.
 
     Args:
@@ -489,7 +489,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def pos_hex(self, children) -> RdnaImmediate:
+  def pos_hex(self, children: Any) -> RdnaImmediate:
     """Transform positive hex.
 
     Args:
@@ -505,7 +505,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return i
 
   @v_args(inline=False)
-  def modifier(self, children) -> RdnaModifier:
+  def modifier(self, children: Any) -> RdnaModifier:
     """Transform a modifier.
 
     Args:
@@ -520,7 +520,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return m
 
   @v_args(inline=False)
-  def ident_or_modifier(self, children) -> Union[RdnaModifier, RdnaLabelRef]:
+  def ident_or_modifier(self, children: Any) -> Union[RdnaModifier, RdnaLabelRef]:
     """Transform an identifier which could be a modifier.
 
     Args:

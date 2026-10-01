@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     strict_mode: bool
     semantics: SemanticsManager
 
-    def _handle_variant_imports(self, mapping: dict) -> None:
+    def _handle_variant_imports(self, mapping: dict[str, typing.Any]) -> None:
       """Dummy."""
       ...
 
@@ -62,8 +62,8 @@ def execute_strategy(
   rewriter: "RewriterDummy",
   original: cst.Call,
   updated: cst.Call,
-  mapping: dict,
-  details: dict,
+  mapping: dict[str, typing.Any],
+  details: dict[str, typing.Any],
   abstract_id: str,
 ) -> cst.BaseExpression:
   """Apply the appropriate transformation strategy for rewriting a function call.
@@ -196,8 +196,8 @@ def execute_strategy(
 
 def _apply_layout_permutation(
   node: cst.Call,
-  mapping: dict,
-  details: dict,
+  mapping: dict[str, typing.Any],
+  details: dict[str, typing.Any],
   rewriter: "RewriterDummy",
 ) -> cst.BaseExpression:
   """Apply layout permutation to the arguments or return value of a call.

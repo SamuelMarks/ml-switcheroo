@@ -17,7 +17,7 @@ from typing import Tuple, Optional
 import numpy as np
 
 
-def generate_scalar_int(constraints: dict) -> int:
+def generate_scalar_int(constraints: dict[Any, Any]) -> int:
   """Generate a random integer within constrained bounds.
 
   Args:
@@ -33,7 +33,7 @@ def generate_scalar_int(constraints: dict) -> int:
   return random.randint(min_v, max_v)
 
 
-def generate_scalar_float(constraints: dict) -> float:
+def generate_scalar_float(constraints: dict[Any, Any]) -> float:
   """Generate a random float within constrained bounds.
 
   Args:
@@ -55,7 +55,7 @@ def generate_scalar_float(constraints: dict) -> float:
   return val
 
 
-def generate_array(type_lbl: str, shape: typing.Tuple[int, ...], constraints: dict) -> Any:
+def generate_array(type_lbl: str, shape: typing.Tuple[int, ...], constraints: dict[Any, Any]) -> Any:
   """Generate a random NumPy array bounded by constraints.
 
   Args:
@@ -182,7 +182,7 @@ def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tupl
   return tuple(new_shape)
 
 
-def generate_fake_callable(constraints: typing.Optional[dict] = None) -> typing.Callable:
+def generate_fake_callable(constraints: typing.Optional[dict[Any, Any]] = None) -> typing.Callable[..., typing.Any]:
   """Generate a dummy function (identity) for functional ops.
 
   Args:

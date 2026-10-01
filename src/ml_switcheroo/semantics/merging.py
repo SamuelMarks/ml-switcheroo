@@ -12,6 +12,8 @@ Handles:
 - Merging Patterns.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -52,7 +54,7 @@ def infer_tier_from_priority(priority: int) -> SemanticTier:
   return SemanticTier.EXTRAS
 
 
-def merge_frameworks(master_configs: typing.Dict[str, dict], new_configs: dict) -> None:
+def merge_frameworks(master_configs: typing.Dict[str, dict[Any, Any]], new_configs: dict[Any, Any]) -> None:
   """Merge new framework configurations (from __frameworks__ block) into the master.
 
   Updates in-place.
@@ -81,7 +83,7 @@ def merge_frameworks(master_configs: typing.Dict[str, dict], new_configs: dict) 
         current.update(traits)
 
 
-def merge_patterns(master_patterns: typing.List[PatternDef], new_patterns: typing.List[dict]) -> None:
+def merge_patterns(master_patterns: typing.List[PatternDef], new_patterns: typing.List[dict[Any, Any]]) -> None:
   """Append new patterns to the master list, avoiding duplicates by name.
 
   Args:
@@ -103,7 +105,7 @@ def merge_patterns(master_patterns: typing.List[PatternDef], new_patterns: typin
       print(f"⚠️ Invalid pattern definition: {e}")
 
 
-def _normalize_args(args_list: typing.List[typing.Union[str, dict, tuple, list]]) -> typing.List[str]:
+def _normalize_args(args_list: typing.List[typing.Union[str, dict[Any, Any], tuple[Any], list[Any]]]) -> typing.List[str]:
   """Simplify argument definitions to a list of names for relaxed comparison.
 
   Converts:
@@ -131,10 +133,10 @@ def _normalize_args(args_list: typing.List[typing.Union[str, dict, tuple, list]]
 
 
 def merge_tier_data(
-  data,
+  data: Any,
   key_origins: Dict[str, str],
-  framework_configs,
-  new_content,
+  framework_configs: Any,
+  new_content: Any,
   tier: SemanticTier,
   patterns: Optional[List[PatternDef]] = None,
   is_internal: bool = False,
@@ -285,11 +287,11 @@ def merge_tier_data(
 
 
 def merge_overlay_data(
-  data,
+  data: Any,
   key_origins: Dict[str, str],
-  framework_configs,
-  test_templates,
-  content,
+  framework_configs: Any,
+  test_templates: Any,
+  content: Any,
   filename: str,
 ) -> None:
   """Merge a mapping overlay file (snapshot) into the main data.

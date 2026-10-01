@@ -126,7 +126,7 @@ class NvidiaSassSpecImporter:
     ("Fused Multiply and Add", "FusedMultiplyAdd"),
   ]
 
-  def parse_file(self, html_path: Path) -> typing.Dict[str, dict]:
+  def parse_file(self, html_path: Path) -> typing.Dict[str, dict[Any, Any]]:
     """Parse an HTML file containing NVIDIA_SASS documentation.
 
     Reads the specified HTML documentation file, parses the NVIDIA_SASS instruction

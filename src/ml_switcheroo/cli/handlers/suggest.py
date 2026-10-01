@@ -223,7 +223,7 @@ variants:
 """
 
 
-def _build_target_block(api_path: str, info) -> str:
+def _build_target_block(api_path: str, info: Any) -> str:
   """Return the descriptive block for a single operation.
 
   Args:

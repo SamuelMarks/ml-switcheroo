@@ -101,12 +101,12 @@ class ImportMixin(cst.CSTTransformer):
           new_alias = new_alias.with_changes(asname=alias.asname)
 
         new_aliases.append(new_alias)
-        self._track_definition(new_alias)  # type: ignore
+        self._track_definition(new_alias)
 
         self._satisfied_injections.add(req.signature)
         continue
 
-      self._track_definition(alias)  # type: ignore
+      self._track_definition(alias)
 
       # 2. Existence Check
       for req in self.plan.required_imports:
@@ -170,18 +170,18 @@ class ImportMixin(cst.CSTTransformer):
           new_node = cst.Import(names=[self._make_alias_node(req)])
           self._satisfied_injections.add(req.signature)
           # Track definition manually since we bypass leave_Import logic
-          self._track_definition(new_node.names[0])  # type: ignore
+          self._track_definition(new_node.names[0])
           return new_node
 
         else:
           new_node = cst.Import(names=[self._make_alias_node(req)])
           self._satisfied_injections.add(req.signature)
-          self._track_definition(new_node.names[0])  # type: ignore
+          self._track_definition(new_node.names[0])
           return new_node
 
     new_aliases = []
     for alias in updated_node.names:
-      self._track_definition(alias)  # type: ignore
+      self._track_definition(alias)
 
       if alias.asname and isinstance(alias.asname.name, cst.Name):
         bound_name = alias.asname.name.value

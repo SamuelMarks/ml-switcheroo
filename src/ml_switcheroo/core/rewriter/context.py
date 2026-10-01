@@ -6,6 +6,9 @@ Scopes, Configuration) from the logic transformers (RewriterStages), enabling
 a composition-based architecture.
 """
 
+from typing import Any
+
+
 from typing import Dict, List, Optional, Set, Callable
 
 from ml_switcheroo.config import RuntimeConfig
@@ -140,7 +143,7 @@ class RewriterContext:
     return str(self.config.effective_target)
 
   @property
-  def plugin_traits(self):
+  def plugin_traits(self) -> Any:
     """Return plugin traits for target framework.
 
     Returns:

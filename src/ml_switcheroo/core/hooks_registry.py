@@ -21,7 +21,7 @@ _HOOK_METADATA: Dict[str, AutoWireSpec] = {}
 _PLUGINS_LOADED: bool = False
 
 
-def register_hook(trigger: str, auto_wire: Optional[dict] = None) -> Callable[[HookCallable], HookCallable]:
+def register_hook(trigger: str, auto_wire: Optional[dict[Any, Any]] = None) -> Callable[[HookCallable], HookCallable]:
   """Register a custom translation hook for a specific trigger.
 
   Args:

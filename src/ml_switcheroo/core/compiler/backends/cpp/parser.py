@@ -81,7 +81,7 @@ class CppTransformer(Transformer[Any, Any]):
   """Transform parsed AST nodes into CppNode classes."""
 
   @v_args(inline=False)
-  def module(self, children) -> CppModule:
+  def module(self, children: Any) -> CppModule:
     """Transform the top-level module rule.
 
     Args:
@@ -96,7 +96,7 @@ class CppTransformer(Transformer[Any, Any]):
     return CppModule(includes=includes, body=body)
 
   @v_args(inline=False)
-  def include_system(self, children) -> IncludeDirective:
+  def include_system(self, children: Any) -> IncludeDirective:
     """Transform a system include.
 
     Args:
@@ -114,7 +114,7 @@ class CppTransformer(Transformer[Any, Any]):
     raise AssertionError("No IDENTIFIER_PATH found")
 
   @v_args(inline=False)
-  def include_local(self, children) -> IncludeDirective:
+  def include_local(self, children: Any) -> IncludeDirective:
     """Transform a local include.
 
     Args:
@@ -132,7 +132,7 @@ class CppTransformer(Transformer[Any, Any]):
     raise AssertionError("No IDENTIFIER_PATH found")
 
   @v_args(inline=False)
-  def macro_define(self, children) -> MacroDefinition:
+  def macro_define(self, children: Any) -> MacroDefinition:
     """Transform a macro definition with a value.
 
     Args:
@@ -150,7 +150,7 @@ class CppTransformer(Transformer[Any, Any]):
     return MacroDefinition(name=name, value=val)
 
   @v_args(inline=False)
-  def macro_empty(self, children) -> MacroDefinition:
+  def macro_empty(self, children: Any) -> MacroDefinition:
     """Transform an empty macro definition.
 
     Args:
@@ -166,7 +166,7 @@ class CppTransformer(Transformer[Any, Any]):
     return MacroDefinition(name=name, value="")
 
   @v_args(inline=False)
-  def function(self, children) -> FunctionDefinition:
+  def function(self, children: Any) -> FunctionDefinition:
     """Transform a function definition.
 
     Args:
@@ -193,7 +193,7 @@ class CppTransformer(Transformer[Any, Any]):
     return FunctionDefinition(return_type=ret_type, name=name, arguments=args, body=body)
 
   @v_args(inline=False)
-  def func_args(self, children) -> List[FunctionArgument]:
+  def func_args(self, children: Any) -> List[FunctionArgument]:
     """Transform function arguments list.
 
     Args:
@@ -205,7 +205,7 @@ class CppTransformer(Transformer[Any, Any]):
     return [c for c in children if isinstance(c, FunctionArgument)]
 
   @v_args(inline=False)
-  def func_arg(self, children) -> FunctionArgument:
+  def func_arg(self, children: Any) -> FunctionArgument:
     """Transform a single function argument.
 
     Args:
@@ -222,7 +222,7 @@ class CppTransformer(Transformer[Any, Any]):
     return FunctionArgument(type_id=children[0], name=name)
 
   @v_args(inline=False)
-  def type_id(self, children) -> TypeIdentifier:
+  def type_id(self, children: Any) -> TypeIdentifier:
     """Transform a type identifier.
 
     Args:
@@ -234,7 +234,7 @@ class CppTransformer(Transformer[Any, Any]):
     return TypeIdentifier(name=children[0].value)
 
   @v_args(inline=False)
-  def pybind(self, children) -> PyBindModule:
+  def pybind(self, children: Any) -> PyBindModule:
     """Transform a PYBIND11_MODULE.
 
     Args:
@@ -257,7 +257,7 @@ class CppTransformer(Transformer[Any, Any]):
     return PyBindModule(name=name, module_var=module_var, defs=defs)
 
   @v_args(inline=False)
-  def pybind_def(self, children) -> PyBindDef:
+  def pybind_def(self, children: Any) -> PyBindDef:
     """Transform a m.def() call.
 
     Args:
@@ -274,7 +274,7 @@ class CppTransformer(Transformer[Any, Any]):
     return PyBindDef(name=strings[0], function_ref=idents[1], docstring=strings[1])
 
   @v_args(inline=False)
-  def return_empty(self, children) -> ReturnStatement:
+  def return_empty(self, children: Any) -> ReturnStatement:
     """Transform an empty return statement.
 
     Args:
@@ -286,7 +286,7 @@ class CppTransformer(Transformer[Any, Any]):
     return ReturnStatement()
 
   @v_args(inline=False)
-  def return_expr(self, children) -> ReturnStatement:
+  def return_expr(self, children: Any) -> ReturnStatement:
     """Transform a return statement with an expression.
 
     Args:
@@ -299,7 +299,7 @@ class CppTransformer(Transformer[Any, Any]):
     return ReturnStatement(value=expr)
 
   @v_args(inline=False)
-  def var_decl(self, children) -> VariableDeclaration:
+  def var_decl(self, children: Any) -> VariableDeclaration:
     """Transform a variable declaration.
 
     Args:
@@ -315,7 +315,7 @@ class CppTransformer(Transformer[Any, Any]):
     return VariableDeclaration(type_id=children[0], name=name)
 
   @v_args(inline=False)
-  def var_decl_init(self, children) -> VariableDeclaration:
+  def var_decl_init(self, children: Any) -> VariableDeclaration:
     """Transform a variable declaration with initialization.
 
     Args:
@@ -338,7 +338,7 @@ class CppTransformer(Transformer[Any, Any]):
     return VariableDeclaration(type_id=children[0], name=name, initializer=expr)
 
   @v_args(inline=False)
-  def raw_statement(self, children) -> RawStatement:
+  def raw_statement(self, children: Any) -> RawStatement:
     """Transform a raw statement.
 
     Args:
@@ -350,7 +350,7 @@ class CppTransformer(Transformer[Any, Any]):
     return RawStatement(code=children[0].value.strip())
 
   @v_args(inline=False)
-  def identifier(self, children) -> Identifier:
+  def identifier(self, children: Any) -> Identifier:
     """Transform an identifier.
 
     Args:
@@ -362,7 +362,7 @@ class CppTransformer(Transformer[Any, Any]):
     return Identifier(name=children[0].value)
 
   @v_args(inline=False)
-  def number_lit(self, children) -> Identifier:
+  def number_lit(self, children: Any) -> Identifier:
     """Transform a number literal into an identifier.
 
     Args:
@@ -374,7 +374,7 @@ class CppTransformer(Transformer[Any, Any]):
     return Identifier(name=children[0].value)
 
   @v_args(inline=False)
-  def string_lit(self, children) -> Identifier:
+  def string_lit(self, children: Any) -> Identifier:
     """Transform a string literal into an identifier.
 
     Args:
@@ -386,7 +386,7 @@ class CppTransformer(Transformer[Any, Any]):
     return Identifier(name=children[0].value)
 
   @v_args(inline=False)
-  def method_call(self, children) -> MethodCall:
+  def method_call(self, children: Any) -> MethodCall:
     """Transform a method call.
 
     Args:
@@ -401,7 +401,7 @@ class CppTransformer(Transformer[Any, Any]):
     return MethodCall(name=name, arguments=args)
 
   @v_args(inline=False)
-  def binary_expr(self, children) -> BinaryExpression:
+  def binary_expr(self, children: Any) -> BinaryExpression:
     """Transform a binary expression.
 
     Args:
@@ -452,6 +452,8 @@ class CppParser:
 
     try:
       tree = self.parser.parse(self.text)
-      return self.transformer.transform(tree)
+      node = self.transformer.transform(tree)
+      assert isinstance(node, CppModule)
+      return node
     except Exception as e:
       raise ValueError(f"Unexpected token: {e}")

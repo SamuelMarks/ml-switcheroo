@@ -10,6 +10,8 @@ It handles:
 - resolving documentation URLs via Framework Adapters.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -34,7 +36,7 @@ class DocContextBuilder:
     """
     self.semantics = semantics
 
-  def build(self, op_name: str, definition: dict) -> typing.Dict[str, typing.Any]:
+  def build(self, op_name: str, definition: dict[Any, Any]) -> typing.Dict[str, typing.Any]:
     """Construct the documentation context for a single operation.
 
     Args:

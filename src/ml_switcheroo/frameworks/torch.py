@@ -38,9 +38,9 @@ try:
   import torch.nn as _nn_module
   import torch.optim as _optim_module
 except Exception:
-  _torch_module = None  # type: ignore[assignment]
-  _nn_module = None  # type: ignore[assignment]
-  _optim_module = None  # type: ignore[assignment]
+  _torch_module = None
+  _nn_module = None
+  _optim_module = None
 torch: Optional[Any] = _torch_module
 nn: Optional[Any] = _nn_module
 optim: Optional[Any] = _optim_module
@@ -311,8 +311,8 @@ class TorchAdapter(TorchIOMixin):
     return get_torch_tiered_examples()
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert input data (NumPy, lists) into PyTorch Tensors for verification runners.
 
     Args:
@@ -375,7 +375,7 @@ class TorchAdapter(TorchIOMixin):
       results.extend(getattr(self, "_scan_layers", lambda: [])())
     return results
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply manual patches to the standard mappings if necessary.
 
     Used to inject complex behaviors not captured by simple API scanning.

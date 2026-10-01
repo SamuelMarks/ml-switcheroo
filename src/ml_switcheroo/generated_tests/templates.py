@@ -4,6 +4,9 @@ This module stores default code templates for supported frameworks and
 provides utilities to determine properties of test arguments (e.g., static JIT args).
 """
 
+from typing import Any
+
+
 import ml_switcheroo
 import typing
 
@@ -65,7 +68,7 @@ def get_template(
   return DEFAULT_TEST_TEMPLATES.get(framework, {})
 
 
-def is_static_arg(arg_info: dict) -> bool:
+def is_static_arg(arg_info: dict[Any, Any]) -> bool:
   """Determine if an argument should be marked static for JIT compilation.
 
   Heuristic checks for primitive types (int, bool, str) or specific names

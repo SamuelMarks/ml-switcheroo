@@ -435,6 +435,7 @@ class SemanticCommentParser:
       tree = self.parser.parse(text)
       transformer = _SemanticTransformer()
       marker = transformer.transform(tree)
+      assert isinstance(marker, SemanticMarker)
       return marker
     except Exception:
       return None

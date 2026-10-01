@@ -4,6 +4,8 @@ This module provides fallback logic for generating inputs when explicit
 type hints are missing, generally based on argument naming conventions.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -35,7 +37,7 @@ def guess_dtype_by_name(name: str) -> str:
 
 
 def generate_by_heuristic(
-  name: str, base_shape: typing.Tuple[int, ...], constraints: typing.Optional[dict] = None
+  name: str, base_shape: typing.Tuple[int, ...], constraints: typing.Optional[dict[Any, Any]] = None
 ) -> typing.Any:
   """Generate a value based on the argument name when no type hint is provided.
 

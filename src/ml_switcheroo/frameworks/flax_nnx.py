@@ -31,13 +31,13 @@ from ml_switcheroo.frameworks.loader import load_definitions
 try:
   import jax as _jax_mod
 except Exception:
-  _jax_mod = None  # type: ignore[assignment]
+  _jax_mod = None
 jax: Optional[Any] = _jax_mod
 
 try:
   import flax.nnx as _flax_nnx_mod
 except Exception:
-  _flax_nnx_mod = None  # type: ignore[assignment]
+  _flax_nnx_mod = None
 flax_nnx: Optional[Any] = _flax_nnx_mod
 
 
@@ -221,8 +221,8 @@ class FlaxNNXAdapter(JAXStackMixin):
     return defs
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert generic data to framework-specific Pytree/arrays.
 
     Contains self-contained logic to ensure safe extraction by the Harness Generator which
@@ -246,7 +246,7 @@ class FlaxNNXAdapter(JAXStackMixin):
         pass
     return data
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply manual wiring and modifies the snapshot to alias 'flax.nnx.' to 'nnx.'.
 
     Adds plugin wiring for key interface methods ensuring correctness during

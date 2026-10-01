@@ -4,6 +4,9 @@ This module provides the `MlirToPythonGenerator` class, which consumes the
 MLIR CST object model and reconstructs valid Python code via LibCST.
 """
 
+import typing
+
+
 from typing import Any
 
 
@@ -38,7 +41,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     self.ctx = NamingContext()
 
     # Store usage counts for inlining logic: {ssa_name: count}
-    self.usage_counts: Any = defaultdict(int)
+    self.usage_counts: typing.DefaultDict[str, int] = defaultdict(int)
     # Map of ssa_name -> consumer_op (single consumer context)
     self.usage_consumers: Dict[str, OperationNode] = {}
 
@@ -92,7 +95,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         for b in region.blocks:
           self._scan_block_usage(b)
 
-  def _convert_trivia(self, trivia) -> List[cst.EmptyLine]:
+  def _convert_trivia(self, trivia: Any) -> List[cst.EmptyLine]:
     """Convert MLIR comments (//) to Python comments (#).
 
     Ignores layout whitespace as LibCST handles indentation.

@@ -11,6 +11,8 @@ It supports:
 4.  **Weight Migration**: Loading checkpoints via ``tf.train.load_checkpoint``.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -246,7 +248,7 @@ class TensorFlowAdapter:
     """
     return ["set_seed", "random.set_seed"]
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply manual wiring patches to the generated snapshot.
 
     Updates `tensorflow.` API prefixes to `tf.` to match standard aliases.
@@ -417,8 +419,8 @@ class TensorFlowAdapter:
     )
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert input data (NumPy/List) into TensorFlow Tensors.
 
     Used by the Fuzzer for validation.

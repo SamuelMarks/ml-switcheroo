@@ -13,6 +13,9 @@ This is used by the ``GraphPatcher`` to surgically insert new code for
 nodes created during Graph Optimization (e.g. Fused Operations).
 """
 
+from typing import Any
+
+
 from typing import List
 import libcst as cst
 
@@ -182,7 +185,7 @@ class PythonSnippetEmitter:
 
     return clean_kind
 
-  def _build_args_from_metadata(self, metadata) -> List[cst.Arg]:
+  def _build_args_from_metadata(self, metadata: Any) -> List[cst.Arg]:
     """Build libcst arguments from node metadata.
 
     Args:

@@ -59,7 +59,7 @@ class ASTEngine:
     target: Optional[str] = None,
     strict_mode: bool = False,
     enable_graph_optimization: bool = False,
-    plugin_config=None,
+    plugin_config: Any = None,
     intermediate: Optional[str] = None,
   ) -> None:
     """Initialize the engine with semantics and configuration.

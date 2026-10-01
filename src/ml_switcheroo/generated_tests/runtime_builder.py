@@ -5,6 +5,9 @@ generated tests. It injects shared helpers, cross-framework comparison logic,
 and determinism fixtures.
 """
 
+from typing import Any
+
+
 import pathlib
 import ast
 from typing import List, Optional
@@ -155,7 +158,7 @@ def verify_results(ref: typing.Union[int, float, str, bool, list, dict, tuple, n
 def ensure_runtime_module(
   out_dir: pathlib.Path,
   frameworks: Optional[List[str]] = None,
-  mgr=None,
+  mgr: Any = None,
 ) -> None:
   """Create or updates the `runtime.py` module in the output directory.
 

@@ -294,7 +294,7 @@ class IrAdapter(FrameworkAdapter):
     """
     return f"# Weight saving for IR graph from {state_var} to {path_var}"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply a framework wiring snapshot.
 
     Args:
@@ -314,8 +314,8 @@ class IrAdapter(FrameworkAdapter):
     return f"https://github.com/SamuelMarks/ml-switcheroo-ir/blob/main/docs/api/{api_name}.md"
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert input data representation to IR compatible format.
 
     Args:

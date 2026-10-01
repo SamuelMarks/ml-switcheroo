@@ -49,7 +49,7 @@ flowchart TD
 
     subgraph L0 [Level 0: Representations]
         direction TB
-        HTML ~~~ TikZ ~~~ LaTeX
+        HTML ~~~ TikZ ~~~ LaTeX_DSL[LaTeX DSL]
     end
 
     subgraph L1 [Level 1: High-Level Frameworks]
@@ -64,7 +64,7 @@ flowchart TD
 
     subgraph L3 [Level 3: Standard IR]
         direction TB
-        StableHLO[Stable HLO] ~~~ MLIR ~~~ IR[ML-Switcheroo IR]
+        StableHLO[Stable HLO] ~~~ MLIR ~~~ IR_JSON[ML-Switcheroo IR JSON] ~~~ IR_Py[ML-Switcheroo IR Python]
     end
 
     subgraph LBottom [Level 4: Hardware Assembly]
@@ -79,10 +79,10 @@ flowchart TD
     StableHLO ~~~ NVIDIA_SASS
 
 %% --- 5. Apply Styles ---
-    class HTML,TikZ,LaTeX l0Node;
+    class HTML,TikZ,LaTeX_DSL l0Node;
     class PyTorch,MLX,TensorFlow,Keras,FlaxNNX,PaxML l1Node;
     class JAX,NumPy l2Node;
-    class StableHLO,MLIR,IR l3Node;
+    class StableHLO,MLIR,IR_JSON,IR_Py l3Node;
     class NVIDIA_SASS,RDNA asmNode;
     class L0 containerL0;
     class L1 containerL1;
@@ -112,33 +112,32 @@ Bridge the gap between high-level neural networks and raw GPU assembly.
 *   **Decompilation (ASM → Python)**: Reconstructs loops (e.g. `Conv2d` and GEMM kernels) from raw assembly streams using Control Flow Graph (CFG) reconstruction, basic block separation, and dominator tree analysis.
 *   **Cross-ISA Translation (SASS ↔ RDNA)**: Translates directly between NVIDIA SASS and AMD RDNA instruction streams (e.g., `FFMA` / `LDG` ↔ `v_fmac_f32` / `global_load`).
 
-### 4. C++ Code Generation & WebAssembly (WASM) Compilation
-Compile ML models natively into high-performance execution environments. Note: C++ and WAT serve as direct code-emission compiler backends from `LogicalGraph` (not registered input/output framework adapters).
-*   **C++ Extensions**: Compiles `LogicalGraph` representations into PyTorch C++ Extensions (`.cpp` / `.hpp`) using a robust C++ CST API and `TorchCppExtensionGenerator`.
-*   **WebAssembly (WAT)**: Compiles `LogicalGraph` structures directly to WebAssembly Text (WAT) stack-based instructions for browser-native execution.
-
-### 5. Weight Migration (Checkpointing)
+### 4. Weight Migration (Checkpointing)
 Generate standalone scripts to convert model weights between formats.
 *   Reads source AST to determine layer mappings.
 *   Generates `orbax` / `torch.save` / `safetensors` (PyTorch, JAX, MLX) / `h5py` (`.keras`) migration logic.
 *   Automatically handles NCHW ↔ NHWC layout permutation.
 
-### 6. Auto-Sharding, Distributed Semantics & Architecture Fusion
-Automatically optimize model topologies and infer distributed sharding constraints.
-*   **Distributed Sharding**: Uses `ShardingInferencePass` to analyze unannotated graphs and inject `LogicalMesh` and `PartitionSpec` annotations (column-parallel, row-parallel, data-parallel heuristics) for PaxML and JAX/NNX targets.
+### 5. Auto-Sharding, Distributed Semantics & Architecture Fusion
+Automatically optimize model topologies, estimate memory footprints, and infer distributed sharding constraints across targets.
+*   **Distributed Sharding Passes**:
+    *   `ShardingInferencePass`: Analyzes unannotated graphs and injects `LogicalMesh` and `PartitionSpec` annotations (column-parallel, row-parallel, data-parallel heuristics) for PaxML and JAX/NNX targets.
+    *   `PyTorchDTensorShardingPass`: Injects PyTorch DTensor / FSDP2 sharding attributes (`Shard(dim=0)`, `Shard(dim=1)`, `FSDP(dim=0)`) into graph nodes for multi-GPU training.
+    *   `MlxDistributedShardingPass`: Enforces Apple MLX distributed array annotations and surfaces diagnostic warnings for unified memory architectures.
+    *   `ShardingExtractionPass`: Reverse-translates inline `with_sharding_constraint` calls back into explicit node-level `sharding` metadata.
+*   **Analytical Memory Estimation**: `estimate_tensor_memory()` calculates activation buffers, gradient states, and device placement capacities with dynamic batch sizes and symbolic dimensions via `ml_ecosystem_snapshots.compliance`.
 *   **Architecture Fusion Passes**:
     *   `QKVFusionPass` / `QKVDefusionPass`: Automatically fuse or separate `q_proj`, `k_proj`, `v_proj` projections in Transformer models.
     *   `SwiGLUFusionPass` / `SwiGLUDefusionPass`: Detect and fuse separate `gate_proj` and `up_proj` linear layers into unified `SwiGLU` blocks (e.g., for Qwen architectures).
     *   `VisionPatchEmbeddingFusionPass` / `VisionPatchEmbeddingDefusionPass`: Restructure and optimize patch embedding projections for multimodal vision-language models.
 *   **Topological Diff Engine**: `GraphDiffer` computes granular patch actions (`DeleteAction`, `ReplaceAction`) between logical computation graphs.
 
-### 7. Hexagonal Static Transpilation Lattice (30 Core Directed Paths)
+### 6. Hexagonal Static Transpilation Lattice (30 Core Directed Paths)
 Bidirectional static source-to-source conversion across the core framework targets:
 *   **High-Level Frameworks (12 Edges)**: **PyTorch** ↔ **JAX / Flax NNX** ↔ **Apple MLX** ↔ **Keras 3**.
 *   **Hardware Bridge Lowering (8 Edges)**: High-Level Models → `LogicalGraph` IR → **AMD RDNA** & **NVIDIA SASS**.
 *   **Hardware Bridge Lifting (8 Edges)**: Disassembly / Macro Streams → `LogicalGraph` IR → High-Level Modules.
 *   **Cross-ISA Direct Compilation (2 Edges)**: **AMD RDNA** ↔ **NVIDIA SASS**.
-*   **Compiler Emission Backends**: Direct code emission from `LogicalGraph` IR to **C++** & **WebAssembly (WAT)**.
 *   **Ground Truth Grounding**: Formally verified against live framework snapshots in `ml-ecosystem-snapshots` v0.0.3 (with transparent backward compatibility for `ml-framework-snapshots` via `_alias`) and `ml-compiler-snapshots` with zero hallucinated APIs or arguments. Supports SQLite FTS5 indexed fast symbol lookups (`ml_ecosystem_snapshots.index`) and custom discovery paths configured via `$ML_SNAPSHOTS_PATH` or `$ML_ECOSYSTEM_SNAPSHOTS_DIR`.
 *   **YAML-First Semantics**: Built on 3,290+ modular operation definitions (currently 3,291 compiled ops in `src/ml_switcheroo/semantics/odl.json`).
 
@@ -175,7 +174,7 @@ graph TD
 
     subgraph CONTEXT ["Reflection Context"]
       direction TB
-      GHOST("<b>Ghost Snapshot</b><br/><i>torch_v2.1.json</i>"):::ghost
+      GHOST("<b>Ghost Snapshot</b><br/><i>torch.json</i>"):::ghost
       LIVE("<b>Live Library</b><br/><i>import torch</i>"):::ghost
     end
     GHOST -.->|" API Signatures "|P_LIBCST
@@ -185,7 +184,7 @@ graph TD
     HUB_HEAD("<b>Semantics Manager</b>"):::hub,title
     P_LIBCST --> HUB_HEAD
 
-    JSON_DB[("<b>Knowledge Base</b><br/><i>semantics/k_neural.json</i><br/><i>snapshots/jax_map.json</i>")]:::db
+    JSON_DB[("<b>Knowledge Base</b><br/><i>semantics/odl.json</i><br/><i>snapshots/jax.json</i>")]:::db
     JSON_DB -.->|" 1. Lookup 'Conv2d'<br/>2. Read Constraints "|HUB_HEAD
 
     ABS_NODE("<b>Abstract Operation Found:</b><br/>Op: Conv2d<br/>Tier: Neural (Stateful)<br/>Args: {in: 1, out: 32, k: 3}"):::code
@@ -231,6 +230,9 @@ pip install .
 
 # Install with testing dependencies (necessary for Fuzzer/Verification)
 pip install ".[test]"
+
+# Run test suite (excluding slow tests)
+pytest -m "not slow"
 ```
 
 ---
@@ -265,6 +267,7 @@ ml_switcheroo convert ./kernels/gemm.nvidia_sass --source nvidia_sass --target p
 ml_switcheroo convert ./models/llama.py --target paxml --sharding --out ./llama_pax.py
 
 # Verified Conversion with Intermediate Representation Roundtrip and Execution Trace:
+# (Supports --intermediate choices: ir, ml_switcheroo_ir, mlir, tikz)
 ml_switcheroo convert ./models/resnet.py --target jax --intermediate ir --verify --strict \
     --json-trace trace.json --config use_custom=True epsilon=1e-5
 ```
@@ -312,7 +315,28 @@ ml_switcheroo suggest 'jax.numpy.*' --out-dir ./prompts --batch-size 50
 ml_switcheroo define new_ops.yaml
 ```
 
-### 5. Advanced Tooling / SDK
+### 5. ONNX Operator Ingestion (`import-onnx`)
+Convert official ONNX operator markdown specifications directly into validated ODL YAML definitions.
+
+```bash
+ml_switcheroo import-onnx ./Operators.md \
+    --out-dir ./src/ml_switcheroo/semantics/odl/ \
+    --domain ai.onnx \
+    --opset-version 21
+```
+
+### 6. Shell Tab-Completion (`completion`)
+Generate tab completion scripts for bash, zsh, and fish shells (pre-generated scripts are also available in `scripts/completions/`).
+
+```bash
+# Generate completion script for bash
+ml_switcheroo completion bash > /etc/bash_completion.d/ml_switcheroo
+
+# Generate completion script for zsh
+ml_switcheroo completion zsh > ~/.zsh/completion/_ml_switcheroo
+```
+
+### 7. Advanced Tooling / SDK
 ml-switcheroo provides developer tools for mapping new libraries, harvesting unit tests, and running verified ingestion.
 
 ```bash
@@ -348,12 +372,12 @@ Core target support status across the compiler lattice:
 | | **NumPy** | 🟡 Stable | Array operations, fallback target for pure math |
 | | **PaxML** | ⚪ Alpha | `praxis` layer structure translation |
 | **Hardware ISAs** | **NVIDIA SASS** | 🟢 Primary | Ampere/Hopper assembly, `FFMA`/`LDG` loop CFG reconstruction & lowering, cross-ISA |
-| | **AMD RDNA** | 🟢 Primary | GFX10/GFX11 assembly, `v_fmac_f32` loop reconstruction & lowering, cross-ISA |
-| **Intermediate Reps** | **ML-Switcheroo IR** | 🟢 Primary | Unified `LogicalGraph`, `PartitionSpec`, `LogicalMesh`, topological diff engine |
+| | **AMD RDNA** | 🟢 Primary | GFX10/GFX11/GFX12/GFX12.5 assembly, `v_fmac_f32` loop reconstruction & lowering, cross-ISA |
+| **Intermediate Reps** | **ML-Switcheroo IR (JSON)** | 🟢 Primary | Unified `LogicalGraph` JSON serialization (`--target ir`), topological diff engine |
+| | **ML-Switcheroo IR (Python)** | 🟢 Primary | Executable Python CST graph definition (`--target ml_switcheroo_ir`) |
 | | **MLIR** | ⚪ Alpha | MLIR CST/AST parser, dialect emission, type inference |
 | | **StableHLO** | ⚪ Alpha | StableHLO dialect parser and emitter (bitwise, math, complex linalg, shapes) |
-| **Compiler Emission Backends** | **C++** | 🔵 Beta | PyTorch C++ Extension generation, `TorchCppExtensionGenerator`, robust C++ CST |
-| | **WebAssembly (WAT)** | ⚪ Alpha | Compiles `LogicalGraph` structures to WASM stack-based text format |
+| **Model Formats** | **ONNX** | 🟢 Primary | Spec importer (`import-onnx`), ODL YAML generation, graph AST ingestion |
 | **Visual Formats** | **TikZ** | 🟢 Primary | Publication-ready LaTeX TikZ neural network diagram generation (`--target tikz`) |
 | | **LaTeX DSL** | 🟢 Primary | Mathematical LaTeX equation transpilation (`--target latex_dsl`) |
 | | **HTML** | 🟢 Primary | Static Grid CSS responsive architecture layouts (`--target html`) |
@@ -414,6 +438,9 @@ ml-switcheroo is designed to be extended without modifying the core engine.
    * **Catalog Compilation**: Discrete YAML definitions in `src/ml_switcheroo/semantics/odl/` compile into the unified JSON catalog via `python scripts/compile_odl_catalog.py`.
    * **Schema Validation**: Verified with `python scripts/validate_odl_json.py` against Pydantic models.
    * **Quarantine Promotion**: Graduated into official standards via `python scripts/drain_quarantine.py`.
+   * **Signature Hydration**: Automatically sync argument signatures and docstrings from snapshots via `python scripts/hydrate_odl_signatures.py`.
+   * **Regression Detection**: Guard against API removals and signature breaks via `python scripts/check_snapshot_regressions.py`.
+   * **Dialect Auditing**: Audit MLIR and StableHLO op coverage against specifications via `scripts/audit_mlir_spec.py` and `scripts/audit_stablehlo_spec.py`.
 
 2. **Add a Framework**: Create a class inheriting `FrameworkAdapter` in `src/ml_switcheroo/frameworks/`.
    See [EXTENDING.md](EXTENDING.md) for architectural details on Adapters and Plugins.

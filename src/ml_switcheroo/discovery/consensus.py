@@ -5,6 +5,9 @@ It scans API surfaces, normalizes names, and clusters them using Levenshtein dis
 to propose candidate standards for the ODL.
 """
 
+from typing import Any
+
+
 import importlib
 import inspect
 import difflib
@@ -26,7 +29,7 @@ except ImportError:  # pragma: no cover
         Integer edit distance.
     """
     if len(s1) < len(s2):
-      return compute_levenshtein(s2, s1)
+      return int(compute_levenshtein(s2, s1))
     if len(s2) == 0:
       return len(s1)
     prev = list(range(len(s2) + 1))
@@ -75,7 +78,7 @@ class ConsensusEngine:
       except ImportError:
         logger.warning(f"Could not import framework '{fw}' for ingestion.")
 
-  def _scan_module(self, mod, prefix: str, depth: int = 0):
+  def _scan_module(self, mod: Any, prefix: str, depth: int = 0) -> Any:
     """Recursively scans a module's members to populate the vocabulary.
 
     Inspects all members of the given module. If a member is a function or a class,
@@ -153,7 +156,7 @@ class ConsensusEngine:
     if max_len == 0:
       return 1.0
     dist = compute_levenshtein(s1, s2)
-    return 1.0 - (dist / max_len)
+    return float(1.0 - (dist / max_len))
 
   def find_levenshtein_matches(self, token: str, candidates: List[str], threshold: float = 0.8) -> List[str]:
     """Find candidate tokens exceeding the Levenshtein similarity threshold.

@@ -9,6 +9,9 @@ Updates:
 - Using explicit path resolution imports.
 """
 
+import typing
+
+
 import ml_switcheroo
 
 import json
@@ -83,7 +86,8 @@ def clean_sphinx_roles(text: Optional[str]) -> Optional[str]:
   Returns:
       Cleaned text with Sphinx roles stripped, or None if input is None.
   """
-  return strip_sphinx_roles(text)
+  r = strip_sphinx_roles(text)
+  return str(r) if r is not None else None
 
 
 def parse_docstring_sections(docstring: str, parser_name: Optional[str] = None) -> List[Any]:
@@ -96,7 +100,9 @@ def parse_docstring_sections(docstring: str, parser_name: Optional[str] = None) 
   Returns:
       List of parsed Griffe DocstringSection objects.
   """
-  return parse_docstring_with_griffe(docstring, parser_name)
+  res = parse_docstring_with_griffe(docstring, parser_name)
+  assert isinstance(res, list)
+  return res
 
 
 def get_docstring_parser(parser_name: str) -> Any:
@@ -223,7 +229,7 @@ class KnowledgeBaseLoader:
       except Exception as e:
         print(f"⚠️ Error loading overlay {fpath.name}: {e}")
 
-  def _load_tier_content(self, content: dict, tier: SemanticTier) -> None:
+  def _load_tier_content(self, content: dict[str, typing.Any], tier: SemanticTier) -> None:
     """Merge a specification dictionary into the manager.
 
     Args:
@@ -240,7 +246,7 @@ class KnowledgeBaseLoader:
       tier=tier,
     )
 
-  def _load_overlay_content(self, content: dict, filename: str) -> None:
+  def _load_overlay_content(self, content: dict[str, typing.Any], filename: str) -> None:
     """Merge a snapshot overlay into the manager.
 
     Args:

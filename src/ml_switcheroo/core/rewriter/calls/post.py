@@ -4,6 +4,9 @@ Handles output adaptation and state threading.
 Updated to prevent imports from legacy modules and removed deprecated output adapter hooks.
 """
 
+from typing import Any
+
+
 from typing import TYPE_CHECKING, List, Tuple
 import libcst as cst
 
@@ -58,7 +61,7 @@ if TYPE_CHECKING:
 def handle_post_processing(
   rewriter: "RewriterDummy",
   node: cst.BaseExpression,
-  mapping: dict,
+  mapping: dict[Any, Any],
   abstract_id: str,
 ) -> cst.BaseExpression:
   """Apply post-rewrite modifications to the result node, such as type casting or state threading.

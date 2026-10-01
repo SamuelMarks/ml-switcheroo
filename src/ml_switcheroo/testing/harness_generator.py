@@ -4,6 +4,8 @@ Generates standalone verification scripts.
 Bundles fuzzer logic (including Hypothesis strategies).
 """
 
+from typing import Any
+
 import json
 import inspect
 import textwrap
@@ -95,7 +97,7 @@ class HarnessInjector(cst.CSTTransformer):
     new_body = list(updated_node.body[:insert_idx]) + nodes + list(updated_node.body[insert_idx:])
     return updated_node.with_changes(body=new_body)
 
-  def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef):
+  def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> Any:
     """Inject to_numpy logic into the to_numpy function definition.
 
     Args:
@@ -118,7 +120,7 @@ class HarnessInjector(cst.CSTTransformer):
       return updated_node.with_changes(body=updated_node.body.with_changes(body=new_body))
     return updated_node
 
-  def leave_If(self, original_node: cst.If, updated_node: cst.If):
+  def leave_If(self, original_node: cst.If, updated_node: cst.If) -> Any:
     """Inject the param injection logic replacing the target `if tp not in tgt_inputs: pass`.
 
     Args:
@@ -141,7 +143,7 @@ class HarnessInjector(cst.CSTTransformer):
           return updated_node.with_changes(body=updated_node.body.with_changes(body=parsed))
     return updated_node
 
-  def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
+  def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> Any:
     """Modify the run_verification arguments to use dynamic paths and frameworks.
 
     Args:
@@ -178,7 +180,7 @@ class HarnessGenerator:
     output_harness: Path,
     source_fw: str = "torch",
     target_fw: str = "jax",
-    semantics=None,
+    semantics: Any = None,
   ) -> None:
     """Create the verification harness file and writes it to disk.
 

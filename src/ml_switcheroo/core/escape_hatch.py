@@ -12,7 +12,10 @@ Reliability Logic:
   to avoid emitting partially mutated (broken) code.
 """
 
-from typing import TypeVar, Any
+import typing
+
+
+from typing import TypeVar
 import libcst as cst
 
 T = TypeVar("T", bound=cst.CSTNode)
@@ -28,7 +31,7 @@ class EscapeHatch:
   END_MARKER = "# </SWITCHEROO_FAILED_TO_TRANS>"
 
   @staticmethod
-  def mark_failure(node: T, reason: str) -> Any:
+  def mark_failure(node: T, reason: str) -> typing.Union[T, cst.FlattenSentinel[typing.Any]]:
     """Attach warning comments to the node and appends an end marker.
 
     Transformation:

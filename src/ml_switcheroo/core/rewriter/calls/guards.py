@@ -1,5 +1,8 @@
 """Strict Mode Guards Injection."""
 
+import typing
+
+
 from typing import List, Dict, TYPE_CHECKING, Union
 import libcst as cst
 
@@ -8,7 +11,7 @@ if TYPE_CHECKING:
   class HookContextDummy:
     """Structural type representation of a hook context."""
 
-    metadata: Dict[str, Union[str, int, float, bool, dict, list, None]]
+    metadata: Dict[str, Union[str, int, float, bool, dict[str, typing.Any], list[typing.Any], None]]
 
     def inject_preamble(self, code: str) -> None:
       """Inject preamble."""
@@ -40,8 +43,8 @@ def _check_rank(x, rank):
 def apply_strict_guards(
   rewriter: "RewriterDummy",
   norm_args: List[cst.Arg],
-  details: dict,
-  target_impl: dict,
+  details: dict[str, typing.Any],
+  target_impl: dict[str, typing.Any],
 ) -> List[cst.Arg]:
   """Wrap arguments with rank assertion helper calls if required by strict mode.
 

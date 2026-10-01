@@ -5,6 +5,8 @@ This adapter acts as a metadata container for the Compiler Registry,
 identifying StableHLO as a target language and providing static definitions.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -270,7 +272,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     """
     return "# Weights not supported in StableHLO mode"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply wiring modifications or links using snapshot data.
 
     Args:
@@ -293,8 +295,8 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     return None
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert the input data to a representation suitable for StableHLO (e.g., string representation).
 
     Args:

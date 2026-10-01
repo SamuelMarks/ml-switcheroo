@@ -172,7 +172,7 @@ class GraphDiffer:
     return actions
 
 
-def _is_likely_stateful(node) -> bool:
+def _is_likely_stateful(node: Any) -> bool:
   """Heuristic for statefulness based on kind (naming convention).
 
   Args:

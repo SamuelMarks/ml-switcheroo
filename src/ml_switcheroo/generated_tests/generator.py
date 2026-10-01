@@ -4,6 +4,9 @@ It orchestrates the generation of PyTest-compatible files that verify
 operations across multiple frameworks by using the semantic definitions.
 """
 
+from typing import Any
+
+
 import ml_switcheroo
 import typing
 
@@ -52,7 +55,7 @@ class TestCaseGenerator:
     """
     ensure_runtime_module(out_dir, frameworks, self.semantics_mgr)
 
-  def generate(self, semantics: typing.Dict[str, dict], out_file: pathlib.Path) -> None:
+  def generate(self, semantics: typing.Dict[str, dict[Any, Any]], out_file: pathlib.Path) -> None:
     """Generate a test file based on the provided semantics.
 
     Args:

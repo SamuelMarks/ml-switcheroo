@@ -226,7 +226,7 @@ GRAMMAR = r"""
 """
 
 
-def _get_trivia(node) -> List[Trivia]:
+def _get_trivia(node: Any) -> List[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -247,11 +247,11 @@ def _get_trivia(node) -> List[Trivia]:
   return []
 
 
-class MlirTransformer(Transformer):
+class MlirTransformer(Transformer[Any, Any]):
   """Transform parsed AST nodes into MlirNode classes."""
 
   @v_args(inline=False)
-  def module(self, children) -> ModuleNode:
+  def module(self, children: Any) -> ModuleNode:
     """Transform the top-level module rule.
 
     Args:
@@ -266,7 +266,7 @@ class MlirTransformer(Transformer):
     return ModuleNode(body=BlockNode(label="", operations=ops), aliases=aliases, leading_trivia=leading)
 
   @v_args(inline=False)
-  def type_alias_def(self, children) -> "TypeAliasDefNode":
+  def type_alias_def(self, children: Any) -> "TypeAliasDefNode":
     """Transform type_alias_def.
 
     Args:
@@ -285,7 +285,7 @@ class MlirTransformer(Transformer):
     return TypeAliasDefNode(name=name, type_node=type_node, leading_trivia=leading, trailing_trivia=trailing)
 
   @v_args(inline=False)
-  def attribute_alias_def(self, children) -> "AttributeAliasDefNode":
+  def attribute_alias_def(self, children: Any) -> "AttributeAliasDefNode":
     """Transform an attribute alias definition.
 
     Args:
@@ -323,7 +323,7 @@ class MlirTransformer(Transformer):
     return AttributeAliasDefNode(name=name, value_str=val_str, leading_trivia=leading, trailing_trivia=trailing)
 
   @v_args(inline=False)
-  def operation(self, children) -> OperationNode:
+  def operation(self, children: Any) -> OperationNode:
     """Transform an operation rule into an OperationNode.
 
     Args:
@@ -481,7 +481,7 @@ class MlirTransformer(Transformer):
     return op
 
   @v_args(inline=False)
-  def dictionary_attribute(self, children) -> List[AttributeNode]:
+  def dictionary_attribute(self, children: Any) -> List[AttributeNode]:
     """Transform the dictionary_attribute rule into a list of AttributeNode.
 
     Args:
@@ -510,7 +510,7 @@ class MlirTransformer(Transformer):
     return attrs
 
   @v_args(inline=False)
-  def region(self, children) -> RegionNode:
+  def region(self, children: Any) -> RegionNode:
     """Transform a region.
 
     Args:
@@ -528,7 +528,7 @@ class MlirTransformer(Transformer):
     return r
 
   @v_args(inline=False)
-  def regions(self, children) -> List[RegionNode]:
+  def regions(self, children: Any) -> List[RegionNode]:
     """Transform the regions rule into a list of RegionNode.
 
     Args:
@@ -540,7 +540,7 @@ class MlirTransformer(Transformer):
     return [c for c in children if isinstance(c, RegionNode)]
 
   @v_args(inline=False)
-  def block(self, children) -> BlockNode:
+  def block(self, children: Any) -> BlockNode:
     """Transform the block rule into a BlockNode.
 
     Args:
@@ -600,4 +600,5 @@ class MlirParser:
 
     tree = self.parser.parse(self.text)
     node = self.transformer.transform(tree)
+    assert isinstance(node, ModuleNode)
     return node

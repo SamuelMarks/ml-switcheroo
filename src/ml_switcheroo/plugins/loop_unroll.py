@@ -13,6 +13,9 @@ The strategy is **Safety-First**:
     attempting unsafe auto-conversion (solving the "carry state" problem is often undecidable).
 """
 
+import typing
+
+
 import libcst as cst
 from typing import Tuple, List
 
@@ -37,7 +40,7 @@ def _analyze_range_iterator(node: cst.BaseExpression) -> Tuple[bool, List[cst.Ar
 
 
 @register_hook("transform_for_loop")
-def transform_loops(node: cst.For, ctx: HookContext) -> cst.CSTNode:
+def transform_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[typing.Any]]:
   """Plugin Transform Transforms or Flags `for` loops for functional compliance.
 
   Triggered by the `ControlFlowMixin` when visiting `For` nodes.

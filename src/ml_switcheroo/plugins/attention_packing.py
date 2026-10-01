@@ -12,6 +12,9 @@ Decoupling Logic:
       constructor transformations are aborted to prevent hallucination.
 """
 
+from typing import Any
+
+
 import libcst as cst
 from typing import Optional
 from ml_switcheroo.core.hooks import register_hook, HookContext
@@ -45,7 +48,7 @@ def _resolve_target_class(ctx: HookContext) -> Optional[cst.BaseExpression]:
   return _create_dotted_name(api)
 
 
-def _is_constructor_signature(args) -> bool:
+def _is_constructor_signature(args: Any) -> bool:
   """Heuristic to detect initialization vs forward call.
 
   Args:

@@ -31,7 +31,7 @@ class OnnxSpecImporter:
   function signature including type hints.
   """
 
-  def parse_file(self, target_file: Path) -> typing.Dict[str, dict]:
+  def parse_file(self, target_file: Path) -> typing.Dict[str, dict[Any, Any]]:
     """Parse a specific ONNX Markdown file (e.g. Operators.md).
 
     Args:
@@ -49,7 +49,7 @@ class OnnxSpecImporter:
     log_info(f"Parsing ONNX Spec: {target_file.name}...")
     return self._parse_markdown(target_file)
 
-  def _parse_markdown(self, fpath: Path) -> typing.Dict[str, dict]:
+  def _parse_markdown(self, fpath: Path) -> typing.Dict[str, dict[Any, Any]]:
     """Parse markdown structurally.
 
     Args:
@@ -107,9 +107,9 @@ class OnnxSpecImporter:
               first_tag = dt.find(["tt", "b", "code", "span"])
               if first_tag:
                 raw_name = first_tag.get_text().strip()
-                from bs4 import NavigableString
+                import bs4.element
 
-                remaining_text = "".join([str(c) for c in dt.contents if isinstance(c, NavigableString)])
+                remaining_text = "".join([str(c) for c in dt.contents if isinstance(c, bs4.element.NavigableString)])
                 if ":" in remaining_text:
                   raw_type = remaining_text.split(":", 1)[1].strip()
               else:

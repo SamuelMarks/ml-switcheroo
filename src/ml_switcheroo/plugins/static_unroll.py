@@ -18,7 +18,7 @@ Process:
     3.  **Expansion**: Duplicates the loop body N times.
     4.  **Substitution**: Replaces usages of the loop variable (``i``) with the
         literal integer for that iteration (``0``, ``1``, etc.).
-    5.  **Output**: Returns a ``cst.FlattenSentinel`` containing the list of statements.
+    5.  **Output**: Returns a ``cst.FlattenSentinel[typing.Any]`` containing the list of statements.
 """
 
 import typing
@@ -60,7 +60,7 @@ class LoopVarReplacer(cst.CSTTransformer):
 
 
 @register_hook("transform_for_loop_static")
-def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For, cst.FlattenSentinel]:
+def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For, cst.FlattenSentinel[typing.Any]]:
   """Transform Unrolls loops with static ranges.
 
   Triggers:
@@ -79,7 +79,7 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For
       ctx (HookContext): The execution context (unused in this logic but required by protocol).
 
   Returns:
-      Union[cst.For, cst.FlattenSentinel]:
+      Union[cst.For, cst.FlattenSentinel[typing.Any]]:
           - ``FlattenSentinel`` containing unrolled statements if successful.
           - Original ``node`` if the loop is dynamic or too large.
 
@@ -134,4 +134,4 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For
       unrolled_stmts.append(new_stmt)
 
   # 4. Return Flattened List
-  return cst.FlattenSentinel(unrolled_stmts)
+  return cst.FlattenSentinel[typing.Any](unrolled_stmts)

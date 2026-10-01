@@ -14,6 +14,9 @@ Decoupling Logic:
     Functional unwrapping detection is driven by `StructuralTraits`.
 """
 
+import typing
+
+
 from typing import Dict, Optional, Tuple, Union, TYPE_CHECKING
 import libcst as cst
 
@@ -28,10 +31,10 @@ if TYPE_CHECKING:
   class SignatureContextDummy(Protocol):
     """Dummy signature context for type hinting."""
 
-    existing_args: set
-    injected_args: list
+    existing_args: set[str]
+    injected_args: list[tuple[str, typing.Optional[cst.CSTNode]]]
 
-  class Any(Protocol):
+  class DummyRewriter(Protocol):
     """Dummy rewriter context for type hinting."""
 
     signature_stack: list[SignatureContextDummy]
@@ -39,7 +42,7 @@ if TYPE_CHECKING:
   class RewriterDummy(Protocol):
     """Dummy rewriter for type hinting."""
 
-    context: Any
+    context: typing.Any
 
     def _report_warning(self, msg: str) -> None:
       """Dummy method."""

@@ -4,6 +4,8 @@ Provides metadata and hooks for the Machine Intelligence Definition Language (MI
 LaTeX DSL.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -280,7 +282,7 @@ class LatexDSLAdapter:
     """
     return "# Weights not supported in LaTeX mode"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply dynamic mappings or wiring configuration.
 
     Args:
@@ -300,8 +302,8 @@ class LatexDSLAdapter:
     return None
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert arbitrary data to its LaTeX DSL or string equivalent.
 
     Args:

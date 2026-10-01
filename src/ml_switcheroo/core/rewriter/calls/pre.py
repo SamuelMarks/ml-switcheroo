@@ -4,6 +4,10 @@ Handles functional unwrapping, plugin claims, and lifecycle method stripping.
 Updated to remove dependencies on deleted legacy modules.
 """
 
+import typing
+from typing import Any
+
+
 from typing import Tuple, Optional, TYPE_CHECKING, Set, cast
 
 import libcst as cst
@@ -21,16 +25,16 @@ if TYPE_CHECKING:
     """Structural type representation of a hook context."""
 
     functional_execution_method: str
-    implicit_method_roots: list
+    implicit_method_roots: list[Any]
 
   class SemanticManagerDummy:
     """Structural type representation of a hook context."""
 
-    def get_definition(self, func_name: str) -> Optional[Tuple[str, dict]]:
+    def get_definition(self, func_name: str) -> Optional[Tuple[str, dict[Any, Any]]]:
       """Structural method signature."""
       ...
 
-    def get_framework_config(self, target_fw: str) -> dict:
+    def get_framework_config(self, target_fw: str) -> dict[Any, Any]:
       """Structural method signature."""
       ...
 
@@ -42,8 +46,8 @@ if TYPE_CHECKING:
   class SignatureContextDummy:
     """Structural type representation of a hook context."""
 
-    existing_args: set
-    injected_args: list
+    existing_args: set[Any]
+    injected_args: list[Any]
 
   class RewriterContextDummy:
     """Structural type representation of a hook context."""
@@ -78,7 +82,7 @@ if TYPE_CHECKING:
       """Structural method signature."""
       ...
 
-    def _get_mapping(self, func_name: str, silent: bool = False) -> Optional[dict]:
+    def _get_mapping(self, func_name: str, silent: bool = False) -> Optional[dict[Any, Any]]:
       """Structural method signature."""
       ...
 
@@ -214,7 +218,7 @@ def handle_pre_checks(
     fw_config = rewriter.semantics.get_framework_config(rewriter.target_fw)
     stateful_spec = fw_config.get("stateful_call")
     if stateful_spec:
-      result_node = rewrite_stateful_call(rewriter, updated, func_name, stateful_spec)  # type: ignore[arg-type]
+      result_node = rewrite_stateful_call(rewriter, updated, func_name, stateful_spec)
       log_diff("State Mechanism", original, result_node)
       return True, result_node
 
@@ -265,13 +269,14 @@ def resolve_implicit_method(rewriter: "RewriterDummy", original: cst.Call, func_
       if hasattr(rewriter, "_get_target_traits"):
         # Note: Implicit roots usually belong to SOURCE traits
         if hasattr(rewriter, "source_traits"):
-          traits = rewriter.source_traits  # type: ignore[assignment]
+          traits = rewriter.source_traits
         else:
           # Fallback if property missing (shouldn't happen in ApiPass)
           config_dict = rewriter.semantics.get_framework_config(rewriter.source_fw)
           from ml_switcheroo.semantics.schema import StructuralTraits
 
-          traits = StructuralTraits.model_validate(config_dict.get("traits", {}))  # type: ignore[assignment]
+          fallback_traits = StructuralTraits.model_validate(config_dict.get("traits", {}))
+          traits = typing.cast(typing.Any, fallback_traits)
 
         implicit_roots = traits.implicit_method_roots
 

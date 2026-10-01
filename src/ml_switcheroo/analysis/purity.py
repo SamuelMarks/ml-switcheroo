@@ -97,7 +97,7 @@ class PurityScanner(cst.CSTTransformer):
     self,
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
-  ):
+  ) -> Any:
     """Exit a statement line.
 
     If violations were found within this statement, wraps it in the EscapeHatch.

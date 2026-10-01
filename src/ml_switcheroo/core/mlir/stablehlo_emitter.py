@@ -5,8 +5,11 @@ and the Func/Builtin dialects for structure. It relies on the SemanticsManager
 to map Python source APIs (like `torch.abs`) to StableHLO operations (like `stablehlo.abs`).
 """
 
+import typing
+
+
 import libcst as cst
-from typing import List, Tuple, Optional, TYPE_CHECKING, Union, cast
+from typing import List, Tuple, Optional, TYPE_CHECKING, Union
 
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 from ml_switcheroo.core.mlir.types import FunctionType
@@ -209,7 +212,7 @@ class StableHloEmitter(PythonToMlirEmitter):
       elif isinstance(node.orelse, cst.If):
         # To be strictly compliant with stablehlo.if vs case, we handle elif as nested here
         # Safe cast as we checked isinstance
-        false_block = BlockNode(label="", operations=self._emit_if(cast(cst.If, node.orelse)))
+        false_block = BlockNode(label="", operations=self._emit_if(node.orelse))
         if not false_block.operations:
           false_block.operations.append(OperationNode(name="stablehlo.return", operands=[]))
         elif false_block.operations[-1].name not in ("func.return", "sw.return", "stablehlo.return"):
@@ -369,7 +372,8 @@ class StableHloEmitter(PythonToMlirEmitter):
 
     # 2. Check for 'stablehlo' variant
     if "stablehlo" in variants and variants["stablehlo"]:
-      return variants["stablehlo"].get("api")
+      api = variants["stablehlo"].get("api")
+      return str(api) if api is not None else None
 
     return None
 
@@ -475,7 +479,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     ops.append(op)
     return result, ops
 
-  def _extract_literal(self, node: cst.CSTNode):
+  def _extract_literal(self, node: cst.CSTNode) -> typing.Any:
     """Extract python literal from CST node.
 
     Args:

@@ -9,6 +9,8 @@ Migration Note:
     Compilation logic is now handled by `ml_switcheroo.core.compiler.backends.nvidia_sass.NvidiaSassBackend`.
 """
 
+from typing import Any
+
 import typing
 
 
@@ -259,7 +261,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     """
     return "// Weights saving not supported in NVIDIA_SASS adapter"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
     """Apply framework-specific wiring or context snapshot logic.
 
     Args:
@@ -279,8 +281,8 @@ class NvidiaSassAdapter(FrameworkAdapter):
     return None
 
   def convert(
-    self, data: typing.Union[int, float, str, list, dict]
-  ) -> typing.Union[int, float, str, list, dict, typing.Any]:
+    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
+  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
     """Convert input data into a format suitable for the NVIDIA_SASS adapter.
 
     Args:

@@ -21,7 +21,7 @@ class TikzBackend(CompilerBackend):
   Verified to use Rank-Based Layout.
   """
 
-  def __init__(self, semantics=None, y_spacing: float = 2.5, x_spacing: float = 3.0) -> None:
+  def __init__(self, semantics: Any = None, y_spacing: float = 2.5, x_spacing: float = 3.0) -> None:
     """Initialize TikZ backend.
 
     Args:

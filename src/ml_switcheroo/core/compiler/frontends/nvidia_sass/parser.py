@@ -636,6 +636,8 @@ class NvidiaSassParser:
 
     try:
       tree = self.parser.parse(self.code)
-      return self.transformer.transform(tree)
+      node = self.transformer.transform(tree)
+      assert isinstance(node, NvidiaSassModule)
+      return node
     except Exception as e:
       raise ValueError(f"Unexpected token: {e}")
