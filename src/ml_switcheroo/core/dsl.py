@@ -249,7 +249,6 @@ class PatternDef(BaseModel):
   name: str = Field(..., description="Name of the pattern (e.g., 'ConvBNReLU').")
   sequence: List[str] = Field(..., description="Ordered list of Operation Kinds (e.g. ['Conv2d', 'BatchNorm', 'ReLU']).")
   replace_with: str = Field(..., description="The target Operation Kind to substitute (e.g. 'FusedConvBlock').")
-  allow_partial: bool = Field(False, description="If True, matches prefixes of sequence (not implemented yet).")
 
 
 class OperationDef(BaseModel):

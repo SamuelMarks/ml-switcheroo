@@ -237,7 +237,7 @@ class PluginGenerator:
         List[cst.BaseStatement]: Generated python CST statements.
     """
     if not rules:
-      mod = cst.parse_module("def __temp():\n    # TODO: Implement custom logic\n    return node\n")
+      mod = cst.parse_module("def __temp():\n    \n    return node\n")
       func_def = mod.body[0]
       if isinstance(func_def, cst.FunctionDef) and isinstance(func_def.body, cst.IndentedBlock):
         return list(func_def.body.body)

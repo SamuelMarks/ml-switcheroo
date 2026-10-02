@@ -39,7 +39,7 @@ from ml_switcheroo.testing.fuzzer.generators import (
   generate_array,
   generate_scalar_int,
   generate_scalar_float,
-  generate_fake_callable,
+  generate_symbolic_callable,
 )
 from ml_switcheroo.testing.fuzzer.utils import (
   resolve_symbolic_shape,
@@ -79,7 +79,7 @@ def get_fallback_base_value(parsed: "ParsedType", base_shape: typing.Tuple[int, 
   if isinstance(parsed, DictType):
     return {}
   if isinstance(parsed, CallableType):
-    return generate_fake_callable()
+    return generate_symbolic_callable()
 
   return None
 
@@ -220,7 +220,7 @@ def generate_from_hint(
 
   # 9. Callables
   if isinstance(type_hint, CallableType):
-    return generate_fake_callable(constrs)
+    return generate_symbolic_callable(constrs)
 
   # 10. Primitives
   if isinstance(type_hint, PrimitiveType):

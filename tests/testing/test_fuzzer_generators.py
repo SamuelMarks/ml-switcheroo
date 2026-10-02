@@ -76,9 +76,13 @@ def test_make_broadcastable_shape() -> None:
   assert all((d in (1, 10) for d in shape))
 
 
-def test_generate_fake_callable() -> None:
-  """Generates fake callable."""
-  from ml_switcheroo.testing.fuzzer.generators import generate_fake_callable
+def test_generate_symbolic_callable() -> None:
+  """Generates symbolic callable."""
+  from ml_switcheroo.testing.fuzzer.generators import generate_symbolic_callable
 
-  fn: Callable = generate_fake_callable()
+  fn: Callable = generate_symbolic_callable({"return_type": "float", "signature": "a, b"})
   assert fn(42) == 42
+  assert fn(10.0, 5.0) == 10.0
+
+  fn2 = generate_symbolic_callable()
+  assert fn2(42) == 42

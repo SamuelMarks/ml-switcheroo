@@ -31,13 +31,13 @@ from ml_switcheroo.frameworks.loader import load_definitions
 try:
   import jax as _jax_mod
 except Exception:
-  _jax_mod = None
+  _jax_mod = None  # type: ignore
 jax: Optional[Any] = _jax_mod
 
 try:
   import flax.nnx as _flax_nnx_mod
 except Exception:
-  _flax_nnx_mod = None
+  _flax_nnx_mod = None  # type: ignore
 flax_nnx: Optional[Any] = _flax_nnx_mod
 
 

@@ -38,9 +38,9 @@ try:
   import torch.nn as _nn_module
   import torch.optim as _optim_module
 except Exception:
-  _torch_module = None
-  _nn_module = None
-  _optim_module = None
+  _torch_module = None  # type: ignore
+  _nn_module = None  # type: ignore
+  _optim_module = None  # type: ignore
 torch: Optional[Any] = _torch_module
 nn: Optional[Any] = _nn_module
 optim: Optional[Any] = _optim_module

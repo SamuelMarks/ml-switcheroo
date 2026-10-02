@@ -346,9 +346,16 @@ class DummySemantics:
     return self.framework_configs.get(fw)
 
 
-def test_inject_imports():
+def test_inject_imports() -> None:
   """Docstring."""
-  pass
+  import libcst as cst
+  from ml_switcheroo.core.rewriter.passes.plugins.dsl import ImportFixerPass
+
+  module = cst.parse_module("a = 1")
+  transformer = ImportFixerPass(required_imports=["os", "sys"])
+  modified = module.visit(transformer)
+  assert "import os" in modified.code
+  assert "import sys" in modified.code
 
 
 def xtest_inject_imports():

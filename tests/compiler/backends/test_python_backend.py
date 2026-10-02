@@ -431,7 +431,11 @@ def test_class_body_replacer_else_branch() -> None:
 
 def test_python_backend_imports() -> None:
   """Docstring."""
-  pass
+  from ml_switcheroo.core.compiler.backends.python import PythonBackend
+
+  backend = PythonBackend(framework="torch")
+  assert backend is not None
+  assert backend.framework == "torch"
 
 
 def test_python_backend_compile_forward_pass_no_stmts() -> None:

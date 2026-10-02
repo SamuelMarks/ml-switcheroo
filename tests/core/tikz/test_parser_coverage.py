@@ -90,7 +90,10 @@ def test_tikz_parser_skip_unknown_multiple() -> None:
 
 def test_tikz_parser_standalone() -> None:
   """Docstring."""
-  pass
+  from ml_switcheroo.core.tikz.parser import TikzParser
+
+  parser = TikzParser("code")
+  assert parser is not None
 
 
 def test_tikz_transformer_direct() -> None:

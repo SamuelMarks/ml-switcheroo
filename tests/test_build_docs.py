@@ -73,6 +73,21 @@ def test_clean_no_dirs(mock_env: Tuple[Path, Path, Path]) -> None:
   Args:
       mock_env (Tuple[Path, Path, Path]): Mock environment.
   """
+  repo_root, _, _ = mock_env
+  docs_dir = repo_root / "docs"
+  if (docs_dir / "api").exists():
+    import shutil
+
+    shutil.rmtree(docs_dir / "api")
+  if (docs_dir / "operations").exists():
+    import shutil
+
+    shutil.rmtree(docs_dir / "operations")
+  if (docs_dir / "_static" / "css").exists():
+    import shutil
+
+    shutil.rmtree(docs_dir / "_static" / "css")
+
   build_docs.clean()  # Should not raise
 
 
@@ -134,6 +149,8 @@ def test_copy_external_wheels_no_reqs(mock_env: Tuple[Path, Path, Path]) -> None
   Args:
       mock_env (Tuple[Path, Path, Path]): Mock environment.
   """
+  repo_root, _, _ = mock_env
+  (repo_root / "docs" / "requirements.txt").unlink(missing_ok=True)
   build_docs.copy_external_wheels()
 
 

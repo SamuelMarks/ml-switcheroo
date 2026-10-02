@@ -30,7 +30,10 @@ def test_tikz_backend_is_stateful() -> None:
   Returns:
     None
   """
-  pass
+  from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend
+
+  backend = TikzBackend()
+  assert getattr(backend, "is_stateful", False) is False
 
 
 def test_tikz_backend_create_tikz_node_stateful() -> None:

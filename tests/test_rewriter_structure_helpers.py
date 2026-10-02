@@ -167,3 +167,8 @@ def test_structure_helpers() -> None:
   assert helper._strip_docstring_arg(func_def3, "rngs") is func_def3
   assert helper._strip_docstring_arg(f_invalid_doc, "rngs") is f_invalid_doc
   assert helper._strip_docstring_arg(func_doc, "not_present") is func_doc
+
+  # _strip_docstring_arg edge case for exactly matching argument name
+  func_doc_exact = getattr(cst.parse_module('def foo():\n    """Doc\n    rngs:\n    """\n    pass'), "body")[0]
+  f_pruned_exact = helper._strip_docstring_arg(func_doc_exact, "rngs")
+  assert "rngs:" not in get_code(f_pruned_exact)

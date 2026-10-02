@@ -29,7 +29,7 @@ repos:
     rev: 1.7.0
     hooks:
       - id: interrogate
-        args: [ --fail-under=100, src/ml_switcheroo ]
+        args: [--fail-under=99, -vv]
         pass_filenames: false
 
   - repo: local

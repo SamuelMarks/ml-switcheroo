@@ -37,8 +37,8 @@ try:
   import jax as _jax_module
   import jax.numpy as _jnp_module
 except Exception:
-  _jax_module = None
-  _jnp_module = None
+  _jax_module = None  # type: ignore
+  _jnp_module = None  # type: ignore
 jax: Optional[Any] = _jax_module
 jnp: Optional[Any] = _jnp_module
 

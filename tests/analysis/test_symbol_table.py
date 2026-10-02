@@ -587,3 +587,14 @@ def test_symbol_table_412() -> None:
   Manually injects an empty base `SymbolType` and verifies the analyzer handles
   calling a method (`x.conjugate()`) on it without throwing an attribute error.
   """
+  import libcst as cst
+  from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer
+  from ml_switcheroo.analysis.symbol_types import SymbolType
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  analyzer = SymbolTableAnalyzer(SemanticsManager())
+  analyzer.current_scope.symbols["x"] = SymbolType()
+  node = cst.parse_expression("x.conjugate()")
+  analyzer.visit_Call(node)
+  # Only needs original_node or just call it appropriately
+  assert analyzer.table.get_type(node) is None

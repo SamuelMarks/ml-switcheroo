@@ -21003,19 +21003,6 @@
       }
     }
   },
-  "InferredOp": {
-    "operation": "InferredOp",
-    "std_args": [],
-    "variants": {
-      "mock_fw": {
-        "api": "mock_fw.discovered_api",
-        "args": {},
-        "dispatch_rules": [],
-        "pack_as": "Tuple",
-        "required_imports": []
-      }
-    }
-  },
   "Initializer": {
     "description": "Variable initializer type.",
     "operation": "Initializer",

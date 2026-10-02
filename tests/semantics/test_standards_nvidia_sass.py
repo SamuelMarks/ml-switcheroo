@@ -26,3 +26,17 @@ def test_math_ops_sass_variants() -> None:
   variant_mul = mgr.resolve_variant("Mul", "nvidia_sass")
   assert variant_mul is not None
   assert variant_mul["api"] == "FMUL"
+
+
+def test_no_dummy_instructions_in_nvidia_sass() -> None:
+  """Verifies that no DUMMY instructions exist in the NVIDIA SASS ISA."""
+  import json
+  import os
+
+  path = os.path.join(os.path.dirname(__file__), "../../src/ml_switcheroo/semantics/nvidia_sass_isa.json")
+  with open(path, "r") as f:
+    data = json.load(f)
+  for k in data.keys():
+    assert not k.startswith("DUMMY_NVIDIA_SASS_INST"), f"Found dummy instruction: {k}"
+  assert "FFMA" in data
+  assert "LDG" in data

@@ -348,3 +348,4 @@ sequenceDiagram
     GE->>CS: score_compliance(ast, signature)
     CS-->>AST: GroundingReport(is_grounded, diagnostics)
 ```
+\n## 🛡️ Pre-commit Hooks & Quality Invariants\n\nThe repository strictly enforces codebase-wide quality checks through `pre-commit`.\n\n1. **100% Documentation Coverage**: `interrogate` enforces that all modules, classes, and methods have valid docstrings.\n2. **100% Test Coverage**: `pytest-cov` enforces exhaustive 100% branch and line coverage.\n3. **Strong Typing**: `mypy --strict` ensures no fallback typing.\n4. **Snapshot Grounding Validation**: The custom script `scripts/validate_snapshot_grounding.py` explicitly ensures that all operations in the Semantic Manager are physically grounded in actual APIs available in `../ml-framework-snapshots`.

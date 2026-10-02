@@ -60,7 +60,7 @@ def test_generate_call_plugin(plugin_dir: Path) -> None:
   assert '@register_hook("my_hook")' in content
   assert "def my_hook(node: cst.Call" in content
   assert '"""\nTest Hook\n"""' in content
-  assert "# TODO: Implement custom logic" in content
+  assert "return node" in content
 
 
 def test_generate_block_plugin(plugin_dir: Path) -> None:
@@ -229,7 +229,7 @@ def test_overwrite_on_syntax_error(plugin_dir: Path, capsys: pytest.CaptureFixtu
   assert "Overwriting" in captured.out
   content: str = file_path.read_text("utf-8")
   assert "syntax error" not in content
-  assert "# TODO: Implement custom logic" in content
+  assert "return node" in content
 
 
 def test_auto_wire_generation(plugin_dir: Path) -> None:
