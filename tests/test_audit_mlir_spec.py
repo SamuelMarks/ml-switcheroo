@@ -1,9 +1,10 @@
 """Unit tests for scripts/audit_mlir_spec.py MLIR specification auditor."""
 
-from pathlib import Path
 import runpy
 import tempfile
+from pathlib import Path
 from unittest.mock import MagicMock, patch
+
 import pytest
 
 from scripts.audit_mlir_spec import (

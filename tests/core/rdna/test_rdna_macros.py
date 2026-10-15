@@ -1,10 +1,8 @@
-"""Test suite for the Rdna Macros module."""
+"""Test suite for rdna macros."""
 
 import typing
 
 from ml_switcheroo.core.compiler.backends.rdna.macros import (
-  RdnaSGPR,
-  RdnaVGPR,
   RegisterAllocatorProtocol,
   expand_adam,
   expand_conv2d,
@@ -19,18 +17,24 @@ from ml_switcheroo.core.compiler.backends.rdna.macros import (
   expand_transpose,
   expand_variable,
 )
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaLabel, RdnaSGPR, RdnaVGPR  # noqa: F811
+from ml_switcheroo.core.compiler.frontends.rdna.cst import (
+  RdnaComment,
+  RdnaInstruction,
+  RdnaLabel,
+  RdnaSGPR,  # noqa: F811
+  RdnaVGPR,
+)
 
 
 class MockAllocator:
-  """Docstring."""
+  """Test helper class MockAllocator."""
 
   def __init__(self) -> None:
     """Initializes the MockAllocator instance."""
     self.v_counter = 0
     self.s_counter = 0
 
-  def get_vector_register(self, var_name: str) -> RdnaVGPR:
+  def get_register(self, var_name: str) -> RdnaVGPR:  # noqa: F811
     """Mock implementation of get vector register."""
     if var_name == "conv1":
       return RdnaVGPR(index=0)
@@ -38,19 +42,19 @@ class MockAllocator:
     self.v_counter += 1
     return RdnaVGPR(idx)
 
-  def get_scalar_register(self, var_name: str) -> RdnaSGPR:
+  def get_register(self, var_name: str) -> RdnaSGPR:  # noqa: F811
     """Mock implementation of get scalar register."""
     idx = self.s_counter
     self.s_counter += 1
     return RdnaSGPR(idx)
 
-  def allocate_vector_temp(self) -> RdnaVGPR:
+  def allocate_temp(self) -> RdnaVGPR:  # noqa: F811
     """Mock implementation of allocate vector temp."""
     idx = self.v_counter
     self.v_counter += 1
     return RdnaVGPR(idx)
 
-  def allocate_scalar_temp(self) -> RdnaSGPR:
+  def allocate_temp(self) -> RdnaSGPR:  # noqa: F811
     """Mock implementation of allocate scalar temp."""
     idx = self.s_counter
     self.s_counter += 1
@@ -126,27 +130,27 @@ class MockAllocatorExtra(RegisterAllocatorProtocol):
     self.vc: int = 0
     self.sc: int = 0
 
-  def get_vector_register(self, var_name: str) -> RdnaVGPR:
+  def get_register(self, var_name: str) -> RdnaVGPR:  # noqa: F811
     """Get vector register."""
     return RdnaVGPR(index=0)
 
-  def get_scalar_register(self, var_name: str) -> RdnaSGPR:
+  def get_register(self, var_name: str) -> RdnaSGPR:  # noqa: F811
     """Get scalar register."""
     return RdnaSGPR(index=0)
 
-  def allocate_vector_temp(self) -> RdnaVGPR:
+  def allocate_temp(self) -> RdnaVGPR:  # noqa: F811
     """Allocate vector temp."""
     self.vc += 1
     return RdnaVGPR(index=self.vc)
 
-  def allocate_scalar_temp(self) -> RdnaSGPR:
+  def allocate_temp(self) -> RdnaSGPR:  # noqa: F811
     """Allocate scalar temp."""
     self.sc += 1
     return RdnaSGPR(index=self.sc)
 
 
 def test_expand_all_macros() -> None:
-  """Docstring."""
+  """Verify expand all macros behavior."""
   alloc = MockAllocator()
   funcs: list[typing.Callable[..., typing.Any]] = [
     expand_conv2d,

@@ -7,15 +7,7 @@ represent neural network graphs with high fidelity. It supports:
 - Trivia preservation (comments/whitespace) for round-trip stability.
 """
 
-from ml_switcheroo.core.tikz.nodes import (
-  TikzBaseNode,
-  TriviaNode,
-  TikzOption,
-  TikzTable,
-  TikzNode,
-  TikzEdge,
-  TikzGraph,
-)
+from ml_switcheroo.core.tikz.nodes import TikzBaseNode, TikzEdge, TikzGraph, TikzNode, TikzOption, TikzTable, TriviaNode
 
 __all__ = [
   "TikzBaseNode",

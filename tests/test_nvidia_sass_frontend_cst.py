@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for nvidia sass frontend cst."""
 
 import pytest
 
@@ -19,7 +19,7 @@ from ml_switcheroo.core.cst.base import Trivia
 
 
 def test_nvidia_sass_register() -> None:
-  """Docstring."""
+  """Verify nvidia sass register behavior."""
   reg: NvidiaSassRegister = NvidiaSassRegister(name="R0")
   assert reg.to_text() == "R0"
 
@@ -39,7 +39,7 @@ def test_nvidia_sass_register() -> None:
 
 
 def test_nvidia_sass_predicate() -> None:
-  """Docstring."""
+  """Verify nvidia sass predicate behavior."""
   pred: NvidiaSassPredicate = NvidiaSassPredicate(name="P0")
   assert pred.to_text() == "P0"
 
@@ -59,7 +59,7 @@ def test_nvidia_sass_predicate() -> None:
 
 
 def test_nvidia_sass_immediate() -> None:
-  """Docstring."""
+  """Verify nvidia sass immediate behavior."""
   imm_int: NvidiaSassImmediate = NvidiaSassImmediate(value=42)
   assert imm_int.to_text() == "42"
 
@@ -76,7 +76,7 @@ def test_nvidia_sass_immediate() -> None:
 
 
 def test_nvidia_sass_memory() -> None:
-  """Docstring."""
+  """Verify nvidia sass memory behavior."""
   # Constant bank
   mem_c_bank_offset: NvidiaSassMemory = NvidiaSassMemory(base="c[0x0]", offset=4)
   assert mem_c_bank_offset.to_text() == "c[0x0][0x4]"
@@ -99,7 +99,7 @@ def test_nvidia_sass_memory() -> None:
 
 
 def test_nvidia_sass_instruction() -> None:
-  """Docstring."""
+  """Verify nvidia sass instruction behavior."""
   # Valid inst
   inst: NvidiaSassInstruction = NvidiaSassInstruction(
     opcode="MOV", operands=[NvidiaSassRegister(name="R0"), NvidiaSassImmediate(value=1)]
@@ -136,7 +136,7 @@ def test_nvidia_sass_instruction() -> None:
 
 
 def test_nvidia_sass_label() -> None:
-  """Docstring."""
+  """Verify nvidia sass label behavior."""
   lbl: NvidiaSassLabel = NvidiaSassLabel(name="L0")
   assert lbl.to_text() == "L0:"
 
@@ -146,7 +146,7 @@ def test_nvidia_sass_label() -> None:
 
 
 def test_nvidia_sass_directive() -> None:
-  """Docstring."""
+  """Verify nvidia sass directive behavior."""
   dir1: NvidiaSassDirective = NvidiaSassDirective(name="headerflags")
   assert dir1.to_text() == ".headerflags"
 
@@ -159,7 +159,7 @@ def test_nvidia_sass_directive() -> None:
 
 
 def test_nvidia_sass_comment() -> None:
-  """Docstring."""
+  """Verify nvidia sass comment behavior."""
   comm: NvidiaSassComment = NvidiaSassComment(text="test")
   assert comm.to_text() == "// test"
 
@@ -169,7 +169,7 @@ def test_nvidia_sass_comment() -> None:
 
 
 def test_nvidia_sass_module() -> None:
-  """Docstring."""
+  """Verify nvidia sass module behavior."""
   mod: NvidiaSassModule = NvidiaSassModule(statements=[NvidiaSassLabel(name="L0")])
   assert mod.to_text() == "L0:"
 
@@ -179,7 +179,7 @@ def test_nvidia_sass_module() -> None:
 
 
 def test_base_nodes() -> None:
-  """Docstring."""
+  """Verify base nodes behavior."""
   node: NvidiaSassNode = NvidiaSassNode()
   op: NvidiaSassOperand = NvidiaSassOperand()
   assert isinstance(node, NvidiaSassNode)

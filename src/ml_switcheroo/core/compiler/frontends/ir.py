@@ -4,13 +4,13 @@ This module provides parsers and lifters to ingest Intermediate Representation
 payloads (JSON or Python CST using `ml_switcheroo_ir`) into a `LogicalGraph`.
 """
 
-from typing import Any, Dict, List, Optional, Set
 import json
+from typing import Any, Dict, List, Optional, Set
+
 import libcst as cst
 
 from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
 from ml_switcheroo.core.compiler.ir import (
-  NodeDict,
   LogicalEdge,
   LogicalGraph,
   LogicalMesh,
@@ -215,7 +215,8 @@ class IrLifter:
         graph.nodes[edge.target].inputs.append(edge.source)
 
     sorted_nodes = topological_sort(graph)
-    graph.nodes = NodeDict(graph, {n.id: n for n in sorted_nodes})
+    graph.nodes.clear()
+    graph.nodes.update({n.id: n for n in sorted_nodes})
     return graph
 
 

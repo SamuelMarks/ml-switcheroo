@@ -5,7 +5,7 @@ import mlx.nn as nn
 
 
 class GAPModel(nn.Module):
-  """Docstring."""
+  """Test helper class GAPModel."""
 
   def __call__(self, x: mx.array) -> mx.array:
     """Executes the callable instance."""

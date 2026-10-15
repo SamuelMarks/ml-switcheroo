@@ -88,7 +88,7 @@ def test_visualizer_exceptions() -> None:
   gen: MermaidGenerator = MermaidGenerator()
 
   class BadNode(cst.CSTNode):
-    """Docstring."""
+    """Test helper class BadNode."""
 
     def _codegen_impl(self, state: Any) -> None:
       """Helper to  codegen impl."""
@@ -134,7 +134,9 @@ def test_visualizer_more_nodes() -> None:
   )
   gen.visit_ImportFrom(imp_from_node)
   imp_from_star: cst.ImportFrom = cst.ImportFrom(module=cst.Name("foo"), names=cst.ImportStar())
-  gen.visit_ImportFrom(imp_from_star)
+  res = gen.visit_ImportFrom(imp_from_star)
+  assert res is False
+  assert any("Foo" in line for line in gen.nodes)
 
 
 def test_visualizer_more_fallbacks() -> None:
@@ -148,12 +150,14 @@ def test_visualizer_more_fallbacks() -> None:
   gen.visit_Call(call)
 
   class DummyImportAlias(cst.ImportAlias):
-    """Docstring."""
+    """Test helper class DummyImportAlias."""
 
     pass
 
   imp: cst.Import = cst.Import(names=[DummyImportAlias(name=cst.Attribute(cst.Name("a"), cst.Name("b")))])
-  gen.visit_Import(imp)
+  res = gen.visit_Import(imp)
+  assert res is False
+  assert len(gen.nodes) > 0
 
 
 def test_visualizer_complex_arg() -> None:
@@ -183,4 +187,6 @@ def test_visualizer_empty_stack_and_import_from_edge_cases() -> None:
     cst.ImportAlias(name=cst.Name("valid")),
     object(),
   ]
-  gen.visit_ImportFrom(mock_imp_from)
+  res = gen.visit_ImportFrom(mock_imp_from)
+  assert res is False
+  assert gen.stack == []

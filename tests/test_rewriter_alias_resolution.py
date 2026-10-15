@@ -11,7 +11,7 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 class MockAliasSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockAliasSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockAliasSemantics instance."""
@@ -36,7 +36,7 @@ class MockAliasSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   semantics: MockAliasSemantics = MockAliasSemantics()
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(semantics, config)

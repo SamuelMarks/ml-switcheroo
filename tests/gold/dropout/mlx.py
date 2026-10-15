@@ -5,7 +5,7 @@ import mlx.nn as nn
 
 
 class DropoutModel(nn.Module):
-  """Docstring."""
+  """Test helper class DropoutModel."""
 
   def __init__(self, p: float = 0.5):
     """Initializes the DropoutModel instance."""

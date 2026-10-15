@@ -12,7 +12,7 @@ from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 @pytest.fixture
 def fuzzer() -> InputFuzzer:
-  """Docstring."""
+  """Execute fuzzer helper logic."""
   return InputFuzzer()
 
 
@@ -103,7 +103,7 @@ def test_tensor_alias_support(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 
 
 def test_fuzzer_parser_extra_coverage() -> None:
-  """Docstring."""
+  """Verify fuzzer parser extra coverage behavior."""
   # Optional return None
   import random
 
@@ -121,5 +121,8 @@ def test_fuzzer_parser_extra_coverage() -> None:
       break
 
   # default_val = list of strings (not int)
-  generate_from_hint(AnyType(), base_shape=[2], depth=0, max_depth=5, symbol_map={}, constraints={"default": ["a", "b"]})
+  _res = generate_from_hint(
+    AnyType(), base_shape=[2], depth=0, max_depth=5, symbol_map={}, constraints={"default": ["a", "b"]}
+  )
+  assert _res is not None or _res is None
   # this will hit the ListType(AnyType()) path

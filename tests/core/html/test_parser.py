@@ -305,7 +305,7 @@ def test_htmlparser_empty() -> None:
 
 
 def test_internal_parser_missing_attribute_value() -> None:
-  """Docstring."""
+  """Verify internal parser missing attribute value behavior."""
   parser = InternalHtmlParser()
   # Use a self-closing tag with a valueless attribute and a normal tag with a valueless attribute
   parser.feed('<div disabled><img src="test.png" defer/></div>')
@@ -321,7 +321,7 @@ def test_internal_parser_missing_attribute_value() -> None:
 
 
 def test_htmlparser_safe_val_eval_exception() -> None:
-  """Docstring."""
+  """Verify htmlparser safe val eval exception behavior."""
   html: str = """
     <div class="box b"><span>Op</span><code>some_unknown_var</code></div>
   """
@@ -334,7 +334,7 @@ def test_htmlparser_safe_val_eval_exception() -> None:
 
 
 def test_htmlparser_unclosed_tags() -> None:
-  """Docstring."""
+  """Verify htmlparser unclosed tags behavior."""
   html: str = "<div><span>unclosed"
   parser = HtmlParser(html)
   cst_mod: typing.Any = parser.parse()

@@ -23,10 +23,9 @@ Process:
 
 import typing
 
-
 import libcst as cst
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
 class LoopVarReplacer(cst.CSTTransformer):

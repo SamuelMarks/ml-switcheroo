@@ -2,59 +2,68 @@
 
 import typing
 from typing import TYPE_CHECKING
+
 import libcst as cst
 
 from ml_switcheroo.core.hooks import get_hook
 from ml_switcheroo.core.rewriter.calls.dispatch import evaluate_dispatch_rules
-from ml_switcheroo.core.rewriter.calls.transformers import (
-  rewrite_as_infix,
-  rewrite_as_inline_lambda,
-  rewrite_as_macro,
-)
+from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards
+from ml_switcheroo.core.rewriter.calls.transformers import rewrite_as_infix, rewrite_as_inline_lambda, rewrite_as_macro
 from ml_switcheroo.core.rewriter.calls.utils import (
   compute_permutation,
   inject_permute_call,
+  is_neural_on_math_backend,
 )
-from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards
 from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 
 if TYPE_CHECKING:
-  # Structural typing for rewriter to avoid circular import
-  class HookContextDummy:
-    """Dummy hook context."""
+  from typing import Protocol, Union
 
-    current_op_id: str
+  class RewriterDummy(Protocol):
+    """Structural protocol for rewriter host during call strategy execution."""
 
-  class Any:
-    """Dummy rewriter context."""
-
-    hook_context: HookContextDummy
-
-  from ml_switcheroo.semantics.manager import SemanticsManager
-
-  class RewriterDummy:
-    """Dummy rewriter."""
-
-    context: Any
+    context: typing.Any
     source_fw: str
     target_fw: str
     strict_mode: bool
-    semantics: SemanticsManager
+    semantics: typing.Any
 
     def _handle_variant_imports(self, mapping: dict[str, typing.Any]) -> None:
-      """Dummy."""
+      """Inject required imports specified by the variant mapping.
+
+      Args:
+          mapping: Target variant dictionary.
+      """
       ...
 
-    def _is_module_alias(self, name: cst.BaseExpression) -> bool:
-      """Dummy."""
+    def _is_module_alias(self, name: cst.CSTNode) -> bool:
+      """Check whether a CST node refers to a module alias.
+
+      Args:
+          name: CST node to inspect.
+
+      Returns:
+          True if module alias, False otherwise.
+      """
       ...
 
     def _report_failure(self, msg: str) -> None:
-      """Dummy."""
+      """Record a failure message in the rewriter context.
+
+      Args:
+          msg: Failure description string.
+      """
       ...
 
-    def _create_name_node(self, name: str) -> cst.Name:
-      """Dummy."""
+    def _create_name_node(self, name: str) -> Union[cst.Name, cst.Attribute]:
+      """Construct a CST Name or Attribute node for a dotted API path.
+
+      Args:
+          name: Dotted API path string.
+
+      Returns:
+          Constructed CST Name or Attribute node.
+      """
       ...
 
 
@@ -105,10 +114,11 @@ def execute_strategy(
   if trans_type == "infix":
     try:
       norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
+      op_str = str(mapping.get("operator") or "")
       return rewrite_as_infix(
         original,
         norm_args,
-        mapping.get("operator"),  # type: ignore
+        op_str,
         details.get("std_args", []),
       )
     except (ValueError, IndexError) as e:
@@ -161,7 +171,7 @@ def execute_strategy(
       origins = getattr(rewriter.semantics, "_key_origins", {})
       tier = origins.get(abstract_id)
 
-      if tier in ("neural", "neural_ops") and rewriter.target_fw in ("numpy", "jax"):
+      if is_neural_on_math_backend(tier, rewriter.target_fw):
         msg = f"Cannot map neural network abstraction '{abstract_id}' directly to pure math backend '{rewriter.target_fw}'. Use a framework like Flax or Keras."
       else:
         msg = mapping.get(
@@ -176,7 +186,7 @@ def execute_strategy(
 
       # Apply Strict Guards (Rank Checking)
       if rewriter.strict_mode:
-        norm_args = apply_strict_guards(rewriter, norm_args, details, mapping)  # type: ignore
+        norm_args = apply_strict_guards(rewriter, norm_args, details, mapping)
 
       new_func = rewriter._create_name_node(target_api)
       res_node: cst.BaseExpression = updated.with_changes(func=new_func, args=norm_args)

@@ -5,6 +5,7 @@ from NVIDIA SASS assembly into AMD RDNA assembly.
 """
 
 from typing import Dict, Optional, Tuple
+
 from ml_switcheroo import convert
 from ml_switcheroo.core.compiler.backends.rdna import RdnaBackend
 from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassLifter, NvidiaSassParser

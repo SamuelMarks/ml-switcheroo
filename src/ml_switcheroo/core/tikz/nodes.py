@@ -10,9 +10,10 @@ from abc import ABC
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
+from ml_switcheroo.core.markup.cst import MarkupNode
 
-@dataclass
-class TikzBaseNode(ABC):
+
+class TikzBaseNode(MarkupNode, ABC):
   """Abstract base class for all TikZ CST nodes."""
 
   def emit(self, indent_level: int = 0) -> str:

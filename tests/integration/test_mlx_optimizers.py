@@ -23,11 +23,11 @@ SOURCE_CODE: str = "\nimport torch.optim as optim\n\ndef setup_training(model):\
 
 @pytest.fixture
 def functional_framework_setup() -> str:
-  """Docstring."""
+  """Execute functional framework setup helper logic."""
 
   @register_framework("functional_fw")
   class FunctionalAdapter:
-    """Docstring."""
+    """Test helper class FunctionalAdapter."""
 
     pass
 
@@ -36,7 +36,7 @@ def functional_framework_setup() -> str:
 
 @pytest.fixture
 def mlx_semantics(functional_framework_setup: str) -> MagicMock:
-  """Docstring."""
+  """Execute mlx semantics helper logic."""
   fw_key = functional_framework_setup
   _HOOKS["mlx_optimizer_init"] = transform_mlx_optimizer_init
   _HOOKS["mlx_optimizer_step"] = transform_mlx_optimizer_step

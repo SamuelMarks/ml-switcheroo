@@ -10,7 +10,7 @@ tuple-of-tuples format required by XLA compilers and NumPy-compatible libraries.
 
 import libcst as cst
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 

@@ -1,9 +1,4 @@
-"""Unit tests for the NVIDIA_SASS Lifter frontend.
-
-This module contains tests to verify that `NvidiaSassLifter` correctly transforms low-level NVIDIA_SASS
-nodes (comments, instructions, registers, and immediates) into a unified `LogicalGraph`
-with correct nodes, kind prefixes, metadata, and connectivity.
-"""
+"""Test suite for lifter."""
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,

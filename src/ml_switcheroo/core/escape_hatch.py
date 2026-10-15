@@ -13,9 +13,8 @@ Reliability Logic:
 """
 
 import typing
-
-
 from typing import TypeVar
+
 import libcst as cst
 
 T = TypeVar("T", bound=cst.CSTNode)

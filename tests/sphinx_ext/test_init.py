@@ -8,7 +8,7 @@ from ml_switcheroo.sphinx_ext import setup
 
 
 class MockApp:
-  """Docstring."""
+  """Test helper class MockApp."""
 
   def __init__(self) -> None:
     """Initializes the MockApp instance."""

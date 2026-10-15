@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for ingestion."""
 
 from unittest.mock import MagicMock, patch
 
@@ -10,43 +10,43 @@ from ml_switcheroo.frameworks.base import FrameworkAdapter
 
 
 class DummyAdapter(FrameworkAdapter):
-  """Docstring."""
+  """Test helper class DummyAdapter."""
 
   def __init__(self, parser_class: type) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.parser_class: type = parser_class
 
   def create_parser(self, code: str) -> object:
-    """Docstring."""
+    """Execute create parser helper logic."""
     return self.parser_class(code)
 
 
 class DummyParser:
-  """Docstring."""
+  """Test helper class DummyParser."""
 
   def __init__(self, code: str) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.code: str = code
 
   def parse(self) -> cst.Module:
-    """Docstring."""
+    """Execute parse helper logic."""
     return cst.parse_module("a = 1")
 
 
 class DummyFailingParser:
-  """Docstring."""
+  """Test helper class DummyFailingParser."""
 
   def __init__(self, code: str) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.code: str = code
 
   def parse(self) -> cst.Module:
-    """Docstring."""
+    """Execute parse helper logic."""
     raise ValueError("Failed")
 
 
 def test_ingest_code_adapter() -> None:
-  """Docstring."""
+  """Verify ingest code adapter behavior."""
   tracer: MagicMock = MagicMock()
   adapter: DummyAdapter = DummyAdapter(DummyParser)
   tree: cst.Module = ingest_code("dummy code", "dummy", "torch", adapter, tracer)
@@ -55,7 +55,7 @@ def test_ingest_code_adapter() -> None:
 
 
 def test_ingest_code_adapter_fail() -> None:
-  """Docstring."""
+  """Verify ingest code adapter fail behavior."""
   tracer: MagicMock = MagicMock()
   adapter: DummyAdapter = DummyAdapter(DummyFailingParser)
   with pytest.raises(ValueError):
@@ -66,7 +66,7 @@ def test_ingest_code_adapter_fail() -> None:
 @patch("ml_switcheroo.core.ingestion.MlirParser")
 @patch("ml_switcheroo.core.ingestion.MlirToPythonGenerator")
 def test_ingest_code_mlir(mock_gen: MagicMock, mock_parser: MagicMock) -> None:
-  """Docstring."""
+  """Verify ingest code mlir behavior."""
   tracer: MagicMock = MagicMock()
   mock_parser_inst: MagicMock = MagicMock()
   mock_parser.return_value = mock_parser_inst
@@ -84,7 +84,7 @@ def test_ingest_code_mlir(mock_gen: MagicMock, mock_parser: MagicMock) -> None:
 @patch("ml_switcheroo.core.ingestion.StableHloParser")
 @patch("ml_switcheroo.core.ingestion.MlirToPythonGenerator")
 def test_ingest_code_stablehlo(mock_gen: MagicMock, mock_parser: MagicMock) -> None:
-  """Docstring."""
+  """Verify ingest code stablehlo behavior."""
   tracer: MagicMock = MagicMock()
   mock_parser_inst: MagicMock = MagicMock()
   mock_parser.return_value = mock_parser_inst
@@ -101,7 +101,7 @@ def test_ingest_code_stablehlo(mock_gen: MagicMock, mock_parser: MagicMock) -> N
 
 @patch("ml_switcheroo.core.ingestion.MlirParser")
 def test_ingest_code_mlir_fail(mock_parser: MagicMock) -> None:
-  """Docstring."""
+  """Verify ingest code mlir fail behavior."""
   tracer: MagicMock = MagicMock()
   mock_parser.side_effect = ValueError("fail")
   with pytest.raises(ValueError):
@@ -113,7 +113,7 @@ def test_ingest_code_mlir_fail(mock_parser: MagicMock) -> None:
 @patch("ml_switcheroo.core.tikz.parser._logical_from_tikz_graph")
 @patch("ml_switcheroo.core.ingestion.PythonBackend")
 def test_ingest_code_tikz(mock_backend: MagicMock, mock_logical: MagicMock, mock_parser: MagicMock) -> None:
-  """Docstring."""
+  """Verify ingest code tikz behavior."""
   tracer: MagicMock = MagicMock()
 
   mock_parser_inst: MagicMock = MagicMock()
@@ -138,7 +138,7 @@ def test_ingest_code_tikz(mock_backend: MagicMock, mock_logical: MagicMock, mock
 
 @patch("ml_switcheroo.core.ingestion.TikzParser")
 def test_ingest_code_tikz_fail(mock_parser: MagicMock) -> None:
-  """Docstring."""
+  """Verify ingest code tikz fail behavior."""
   tracer: MagicMock = MagicMock()
   mock_parser.side_effect = ValueError("fail")
   with pytest.raises(ValueError):
@@ -147,7 +147,7 @@ def test_ingest_code_tikz_fail(mock_parser: MagicMock) -> None:
 
 
 def test_ingest_code_python() -> None:
-  """Docstring."""
+  """Verify ingest code python behavior."""
   tracer: MagicMock = MagicMock()
   tree: cst.Module = ingest_code("a = 5", "torch", "torch", None, tracer)
   assert isinstance(tree, cst.Module)
@@ -155,7 +155,7 @@ def test_ingest_code_python() -> None:
 
 
 def test_ingest_code_python_fail() -> None:
-  """Docstring."""
+  """Verify ingest code python fail behavior."""
   tracer: MagicMock = MagicMock()
   with pytest.raises(Exception):
     ingest_code("a = ", "torch", "torch", None, tracer)

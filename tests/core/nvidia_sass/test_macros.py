@@ -1,4 +1,4 @@
-"""Test suite for the Macros module."""
+"""Test suite for macros."""
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_conv2d, expand_linear
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
@@ -10,19 +10,19 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
 
 
 class MockAllocator:
-  """Docstring."""
+  """Test helper class MockAllocator."""
 
   def __init__(self) -> None:
     """Initializes the MockAllocator instance."""
     self.counter = 10
 
-  def get_register(self, var_name: str) -> NvidiaSassRegister:
+  def get_register(self, var_name: str) -> NvidiaSassRegister:  # noqa: F811
     """Mock implementation of get register."""
     if var_name == "output":
       return NvidiaSassRegister(name="R0")
     return NvidiaSassRegister(name="R_VAR")
 
-  def allocate_temp(self) -> NvidiaSassRegister:
+  def allocate_temp(self) -> NvidiaSassRegister:  # noqa: F811
     """Mock implementation of allocate temp."""
     name = f"R{self.counter}"
     self.counter += 1

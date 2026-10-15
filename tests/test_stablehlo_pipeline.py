@@ -13,7 +13,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_stablehlo_parser_basic() -> None:
-  """Docstring."""
+  """Verify stablehlo parser basic behavior."""
   code = "module {}"
   parser = StableHloParser(code)
   result = parser.parse()

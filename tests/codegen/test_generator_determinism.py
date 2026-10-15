@@ -11,7 +11,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def generator() -> TestCaseGenerator:
-  """Docstring."""
+  """Execute generator helper logic."""
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {"torch": {"import": "import torch"}}
   mgr.get_test_template = MagicMock(side_effect=lambda fw: templates.get(fw))

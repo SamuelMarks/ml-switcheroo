@@ -77,7 +77,7 @@ def test_operation_trailing_trivia() -> None:
 
 def test_operation_node_to_text_missing_branches() -> None:
   """Hit the missing branches in OperationNode.to_text()."""
-  from ml_switcheroo.core.mlir.nodes import OperationNode, AttributeNode
+  from ml_switcheroo.core.mlir.nodes import AttributeNode, OperationNode
 
   # 198: is_generic
   op1 = OperationNode(name="my.op", is_generic=True, operands=[])
@@ -95,14 +95,14 @@ def test_operation_node_to_text_missing_branches() -> None:
 
 def test_operation_node_to_text_trailing_space() -> None:
   """Hit the branches where parts[-1] already ends with space."""
-  from ml_switcheroo.core.mlir.nodes import OperationNode, AttributeNode
+  from ml_switcheroo.core.mlir.nodes import AttributeNode, OperationNode
 
   # We use a dummy trivia that ends with a space to trigger the False branch
   class DummyTrivia:
-    """Docstring."""
+    """Test helper class DummyTrivia."""
 
     def to_text(self):
-      """Docstring."""
+      """Execute to text helper logic."""
       return " "
 
   op = OperationNode(
@@ -114,14 +114,14 @@ def test_operation_node_to_text_trailing_space() -> None:
 
 def test_operation_node_to_text_trailing_space_2() -> None:
   """Hit the branches where parts[-1] already ends with space for properties."""
-  from ml_switcheroo.core.mlir.nodes import OperationNode, AttributeNode
+  from ml_switcheroo.core.mlir.nodes import AttributeNode, OperationNode
 
   # We use a dummy trivia that ends with a space to trigger the False branch
   class DummyTrivia:
-    """Docstring."""
+    """Test helper class DummyTrivia."""
 
     def to_text(self):
-      """Docstring."""
+      """Execute to text helper logic."""
       return " "
 
   op = OperationNode(name="my.op", name_trivia=[DummyTrivia()], properties=[AttributeNode(name="x", value="1")])

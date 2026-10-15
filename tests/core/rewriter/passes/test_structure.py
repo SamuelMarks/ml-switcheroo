@@ -14,7 +14,7 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class MockSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -52,7 +52,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def run_pass() -> typing.Callable[[str], str]:
-  """Docstring."""
+  """Execute run pass helper logic."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   context = RewriterContext(semantics, config)
@@ -123,7 +123,7 @@ def test_ignore_non_module_classes(run_pass: typing.Callable[[str], str]) -> Non
 
 
 class DummySemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class DummySemantics."""
 
   def __init__(self) -> None:
     """Initializes the DummySemantics instance."""
@@ -191,7 +191,7 @@ def test_is_framework_base_traits_object() -> None:
   (transformer, sem, ctx) = get_transformer()
 
   class DummyTraits:
-    """Docstring."""
+    """Test helper class DummyTraits."""
 
     module_base = "my.Framework"
 
@@ -313,7 +313,7 @@ def test_super_init_logic() -> None:
 
 
 def test_leave_module_preamble_no_cover() -> None:
-  """Docstring."""
+  """Verify leave module preamble no cover behavior."""
   from ml_switcheroo.config import RuntimeConfig
   from ml_switcheroo.core.rewriter.context import RewriterContext
   from ml_switcheroo.core.rewriter.passes.structure import StructuralTransformer
@@ -328,7 +328,7 @@ def test_leave_module_preamble_no_cover() -> None:
 
 
 def test_leave_attribute_super_shim() -> None:
-  """Docstring."""
+  """Verify leave attribute super shim behavior."""
   from ml_switcheroo.config import RuntimeConfig
   from ml_switcheroo.core.rewriter.context import RewriterContext
   from ml_switcheroo.core.rewriter.passes.structure import StructuralTransformer
@@ -337,14 +337,14 @@ def test_leave_attribute_super_shim() -> None:
   ctx = RewriterContext(semantics=SemanticsManager(), config=RuntimeConfig())
 
   class SuperShim(cst.CSTTransformer):
-    """Docstring."""
+    """Test helper class SuperShim."""
 
     def leave_Attribute(self, original: typing.Any, updated: typing.Any) -> typing.Any:
-      """Docstring."""
+      """Execute leave Attribute helper logic."""
       return updated.with_changes(value=cst.Name("shimmed"))
 
   class ShimmedStructuralPass(StructuralTransformer, SuperShim):  # type: ignore
-    """Docstring."""
+    """Test helper class ShimmedStructuralPass."""
 
     pass
 
@@ -361,7 +361,7 @@ def test_leave_attribute_super_shim() -> None:
 
 
 class DummySemantics:
-  """Docstring."""
+  """Test helper class DummySemantics."""
 
   def __init__(self) -> None:
     """Initializes the DummySemantics instance."""
@@ -401,7 +401,7 @@ def get_transformer_extra() -> tuple[StructuralTransformer, DummySemantics, Rewr
 
 
 def test_preamble_and_docstring() -> None:
-  """Docstring."""
+  """Verify preamble and docstring behavior."""
   (transformer, sem, ctx) = get_transformer()
   func = typing.cast(cst.FunctionDef, cst.parse_module('def __init__(self):\n  """doc"""\n  pass').body[0])
   transformer.visit_FunctionDef(func)
@@ -514,7 +514,7 @@ def test_has_super_init_false() -> None:
 
 
 def test_update_docstring_fallback() -> None:
-  """Docstring."""
+  """Verify update docstring fallback behavior."""
   (transformer, sem, ctx) = get_transformer()
   func0 = typing.cast(cst.FunctionDef, cst.parse_module("def f(): pass").body[0])
   func0 = func0.with_changes(body=cst.SimpleStatementSuite(body=[]))

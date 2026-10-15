@@ -7,37 +7,37 @@ from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module,
 
 
 def test_get_required_packages_simple():
-  """Docstring."""
+  """Verify get required packages simple behavior."""
   packages = get_required_packages("import torch\nimport jax")
   assert packages == ["torch", "jax"]
 
 
 def test_get_required_packages_from():
-  """Docstring."""
+  """Verify get required packages from behavior."""
   packages = get_required_packages("from torch import nn\nfrom jax.numpy import abs")
   assert packages == ["torch", "jax"]
 
 
 def test_get_required_packages_aliases():
-  """Docstring."""
+  """Verify get required packages aliases behavior."""
   packages = get_required_packages("import torch as t\nimport jax.numpy as jnp")
   assert packages == ["torch", "jax"]
 
 
 def test_get_required_packages_deduplication():
-  """Docstring."""
+  """Verify get required packages deduplication behavior."""
   packages = get_required_packages("import torch\nfrom torch import nn")
   assert packages == ["torch"]
 
 
 def test_get_required_packages_syntax_error():
-  """Docstring."""
+  """Verify get required packages syntax error behavior."""
   packages = get_required_packages("import class")
   assert packages == []
 
 
 def test_ensure_runtime_module(tmp_path: pathlib.Path):
-  """Docstring."""
+  """Verify ensure runtime module behavior."""
   out_dir = tmp_path / "tests"
 
   # We mock get_template to supply predictable test data
@@ -82,7 +82,7 @@ def test_ensure_runtime_module(tmp_path: pathlib.Path):
 
 
 def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path):
-  """Docstring."""
+  """Verify ensure runtime module no frameworks behavior."""
   out_dir = tmp_path / "tests"
 
   def mock_get_template(mgr, fw):
@@ -105,7 +105,7 @@ def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path):
 
 
 def test_ensure_runtime_module_empty_template_import(tmp_path: pathlib.Path):
-  """Docstring."""
+  """Verify ensure runtime module empty template import behavior."""
   out_dir = tmp_path / "tests"
 
   def mock_get_template(mgr, fw):

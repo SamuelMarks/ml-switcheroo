@@ -1,4 +1,4 @@
-"""Test suite for the Rdna Emitter module."""
+"""Test suite for rdna emitter."""
 
 from ml_switcheroo.core.compiler.backends.rdna.emitter import RdnaEmitter
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
@@ -19,7 +19,7 @@ def test_emit_basic_instruction() -> None:
   inst = RdnaInstruction(opcode="v_add_f32", operands=[RdnaVGPR(index=0), RdnaVGPR(index=1), RdnaVGPR(index=2)])
   output = emitter.emit([inst])
   assert output.startswith("    ")
-  assert "v_add_f32 v0, v1, v2" in output
+  assert "v_add_f32       v0, v1, v2;" in output
   assert output.endswith("\n")
 
 
@@ -33,7 +33,7 @@ def test_emit_label_flush_left() -> None:
   output = emitter.emit(block)
   lines = output.strip().split("\n")
   assert lines[0] == "L_START:"
-  assert lines[1].strip() == "s_mov_b32 s0, 0"
+  assert lines[1].strip() == "s_mov_b32       s0, 0;"
   assert lines[1].startswith("    ")
 
 
@@ -62,5 +62,5 @@ def test_emit_directives_and_comments() -> None:
   emitter = RdnaEmitter()
   nodes = [RdnaDirective(name="text"), RdnaComment(text="Init")]
   output = emitter.emit(nodes)
-  assert "    .text" in output
-  assert "    ; Init" in output
+  assert ".text" in output
+  assert "; Init" in output

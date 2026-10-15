@@ -25,7 +25,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   hooks._HOOKS["context_to_function_wrap"] = transform_context_manager
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()

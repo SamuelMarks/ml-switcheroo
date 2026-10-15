@@ -5,7 +5,7 @@ import tensorflow_addons as tfa
 
 
 class WNModel(tf.keras.Model):
-  """Docstring."""
+  """Test helper class WNModel."""
 
   def __init__(self, in_features: int, out_features: int):
     """Initializes the WNModel instance."""

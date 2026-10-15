@@ -86,7 +86,7 @@ def test_math_operations_backend(abstract_name: str, expected_api: str) -> None:
 
 
 def test_stablehlo_emitter_math_ops() -> None:
-  """Docstring."""
+  """Verify stablehlo emitter math ops behavior."""
   semantics: SemanticsManager = SemanticsManager()
   # Assuming the semantics manager is loaded, but we can mock or inject
   # Actually, we can inject a mock directly.

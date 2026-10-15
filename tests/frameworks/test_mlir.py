@@ -52,7 +52,7 @@ def test_mlir_properties() -> None:
 
 
 def test_mlir_adapter_missing_methods() -> None:
-  """Docstring."""
+  """Verify mlir adapter missing methods behavior."""
   adapter = MlirAdapter()
 
   assert adapter.import_namespaces == {}

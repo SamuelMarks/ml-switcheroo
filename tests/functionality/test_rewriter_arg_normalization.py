@@ -11,7 +11,7 @@ from tests.conftest import TestRewriter
 
 
 class MockArgSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockArgSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockArgSemantics instance."""
@@ -86,7 +86,7 @@ class MockArgSemantics(SemanticsManager):
 
 @pytest.fixture
 def engine() -> TestRewriter:
-  """Docstring."""
+  """Execute engine helper logic."""
   semantics = MockArgSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(semantics, config)

@@ -12,7 +12,7 @@ from tests.conftest import TestRewriter
 
 @pytest.fixture
 def manager() -> SemanticsManager:
-  """Docstring."""
+  """Execute manager helper logic."""
   mgr = SemanticsManager()
   mgr.data = {}
   mgr._reverse_index = {}
@@ -56,7 +56,7 @@ def manager() -> SemanticsManager:
 
 @pytest.fixture
 def rewriter(manager: SemanticsManager) -> TestRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(manager, config)
 

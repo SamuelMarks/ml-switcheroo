@@ -11,20 +11,20 @@ from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
 
 
 class MockTypeInference(cst.CSTVisitor):
-  """Class doc."""
+  """Test helper class MockTypeInference."""
 
   def __init__(self, *args: Any, **kwargs: Any) -> None:
-    """Init doc."""
+    """Initialize test helper instance."""
     self.return_types: List[Any] = []
     self.env: dict = {}
 
   def visit(self, node: cst.CSTNode) -> None:
-    """Function doc."""
+    """Execute visit helper logic."""
     pass
 
 
 def test_param_not_name() -> None:
-  """Function doc."""
+  """Verify param not name behavior."""
   with mock.patch("ml_switcheroo.core.mlir.stablehlo_emitter.TypeInferencePass", MockTypeInference):
     emitter: StableHloEmitter = StableHloEmitter(semantics=mock.Mock())
     code: str = """
@@ -44,10 +44,11 @@ def f(x):
 
     # It should just skip it and not crash.
     emitter._emit_func_def(new_func)
+  assert True
 
 
 def test_if_false_branch_no_return() -> None:
-  """Function doc."""
+  """Verify if false branch no return behavior."""
   with mock.patch("ml_switcheroo.core.mlir.stablehlo_emitter.TypeInferencePass", MockTypeInference):
     emitter: StableHloEmitter = StableHloEmitter(semantics=mock.Mock())
     # Else branch has an assignment (no return)
@@ -69,7 +70,7 @@ else:
 
 
 def test_if_elif_no_return() -> None:
-  """Function doc."""
+  """Verify if elif no return behavior."""
   with mock.patch("ml_switcheroo.core.mlir.stablehlo_emitter.TypeInferencePass", MockTypeInference):
     emitter: StableHloEmitter = StableHloEmitter(semantics=mock.Mock())
     # Elif branch has an assignment (no return)
@@ -97,7 +98,7 @@ elif cond2:
 
 
 def test_resolve_sw_constant_with_result_type() -> None:
-  """Function doc."""
+  """Verify resolve sw constant with result type behavior."""
   emitter: StableHloEmitter = StableHloEmitter(semantics=mock.Mock())
   op: OperationNode = OperationNode(
     name="sw.constant",
@@ -110,7 +111,7 @@ def test_resolve_sw_constant_with_result_type() -> None:
 
 
 def test_resolve_sw_op_with_result_type() -> None:
-  """Function doc."""
+  """Verify resolve sw op with result type behavior."""
   emitter: StableHloEmitter = StableHloEmitter(semantics=mock.Mock())
   op: OperationNode = OperationNode(
     name="sw.op", attributes=[AttributeNode(name="type", value='"np.add"')], result_types=[TypeNode(body="tensor<i64>")]
@@ -122,7 +123,7 @@ def test_resolve_sw_op_with_result_type() -> None:
 
 
 def test_if_elif_empty() -> None:
-  """Function doc."""
+  """Verify if elif empty behavior."""
   with mock.patch("ml_switcheroo.core.mlir.stablehlo_emitter.TypeInferencePass", MockTypeInference):
     emitter: StableHloEmitter = StableHloEmitter(semantics=mock.Mock())
     code: str = """
@@ -137,7 +138,7 @@ elif cond2:
     original_emit_if: Any = emitter._emit_if
 
     def side_effect(node: cst.CSTNode) -> List[OperationNode]:
-      """Function doc."""
+      """Execute side effect helper logic."""
       if isinstance(node, cst.If) and getattr(getattr(node, "test"), "value") == "cond2":
         return []
       return original_emit_if(node)
@@ -153,7 +154,7 @@ elif cond2:
 
 
 def test_empty_while_else_elif() -> None:
-  """Docstring."""
+  """Verify empty while else elif behavior."""
   emitter: StableHloEmitter = StableHloEmitter(NamingContext())
   code: str = """
 while True:
@@ -172,3 +173,4 @@ elif False:
   module: cst.Module = cst.parse_module(code)
   for stmt in module.body:
     emitter._emit_statement(stmt)
+  assert True

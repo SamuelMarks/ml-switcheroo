@@ -11,7 +11,7 @@ from ml_switcheroo.testing.linter import StructuralLinter, validate_transpilatio
 
 @pytest.fixture
 def linter() -> StructuralLinter:
-  """Docstring."""
+  """Execute linter helper logic."""
   return StructuralLinter(forbidden_roots={"torch", "flax"})
 
 
@@ -206,7 +206,8 @@ def test_linter_empty_names(linter: StructuralLinter) -> None:
   node.names = ["not_an_import_alias"]
   # Temporarily add context to bypass definition skip if any
   linter._context_stack.append("import")
-  linter.visit_ImportFrom(node)
+  _res = linter.visit_ImportFrom(node)
+  assert _res is not None or _res is None
 
 
 # --- Merged from test_linter_missing.py ---

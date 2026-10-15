@@ -43,7 +43,7 @@ def test_propose_fix_returns_none_if_matches_original() -> None:
 
 
 def test_bisector_extract_params() -> None:
-  """Docstring."""
+  """Verify bisector extract params behavior."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
 
   bisector: SemanticsBisector = SemanticsBisector(None)
@@ -56,7 +56,7 @@ def test_bisector_extract_params() -> None:
   ):
 
     class MockRunner:
-      """Docstring."""
+      """Test helper class MockRunner."""
 
       def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
         """Mock implementation of verify."""
@@ -76,7 +76,7 @@ def test_bisector_runner_exception() -> None:
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunnerEx:
-    """Docstring."""
+    """Test helper class MockRunnerEx."""
 
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
       """Mock implementation of verify."""
@@ -95,7 +95,7 @@ def test_bisector_no_fix_needed() -> None:
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunnerOk:
-    """Docstring."""
+    """Test helper class MockRunnerOk."""
 
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
       """Mock implementation of verify."""
@@ -114,7 +114,7 @@ def test_bisector_fix_found() -> None:
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunner:
-    """Docstring."""
+    """Test helper class MockRunner."""
 
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
       """Mock implementation of verify."""
@@ -135,7 +135,7 @@ def test_bisector_exception() -> None:
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunner:
-    """Docstring."""
+    """Test helper class MockRunner."""
 
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
       """Mock implementation of verify."""

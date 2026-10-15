@@ -6,12 +6,13 @@ comply with the Pydantic schema standards and schema.yaml.
 
 from pathlib import Path
 from typing import Any, List
-import yaml
+
 import pytest
+import yaml
 
 from ml_switcheroo.core.dsl import OperationDef
-from ml_switcheroo.semantics.schema import SemanticsFile, validate_yaml_schema
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
+from ml_switcheroo.semantics.schema import SemanticsFile, validate_yaml_schema
 
 
 def test_odl_atomic_files_schema_compliance() -> None:

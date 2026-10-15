@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for audit traits."""
 
 from typing import Optional
 

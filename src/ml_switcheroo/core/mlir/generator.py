@@ -5,26 +5,18 @@ MLIR CST object model and reconstructs valid Python code via LibCST.
 """
 
 import typing
-
-
-from typing import Any
-
-
-from typing import Dict, List, Optional, Union, cast
 from collections import defaultdict
+from typing import Any, Dict, List, Optional, Union, cast
+
 import libcst as cst
 
-from ml_switcheroo.core.mlir.cst import (
-  BlockNode,
-  ModuleNode,
-  OperationNode,
-)
-
-# Import modular components
-from ml_switcheroo.core.mlir.naming import NamingContext
+from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
 from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
 from ml_switcheroo.core.mlir.gen_expressions import ExpressionGeneratorMixin
 from ml_switcheroo.core.mlir.gen_statements import StatementGeneratorMixin
+
+# Import modular components
+from ml_switcheroo.core.mlir.naming import NamingContext
 
 
 class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, BaseGeneratorMixin):

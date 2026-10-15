@@ -4,10 +4,8 @@ Implements the "Verified Pipeline" (Unstructured Code -> cdd-python -> Structure
 as claimed in the Futureproofing Machine Learning paper.
 """
 
-import typing
-
-
 import ast
+import typing
 
 
 def run_verified_pipeline(source_code: str) -> typing.Dict[str, typing.Union[str, int, bool]]:

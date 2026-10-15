@@ -7,9 +7,9 @@ preambles, injecting statements into function bodies, wrapping/unwrapping
 one-liners, managing `super().__init__()` calls, and updating docstrings.
 """
 
-from typing import List, Tuple, Optional
+from typing import TYPE_CHECKING, List, Optional, Tuple
+
 import libcst as cst
-from typing import TYPE_CHECKING
 
 
 class StructuralTransformerHelpersMixin:

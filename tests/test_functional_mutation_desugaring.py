@@ -250,10 +250,11 @@ def test_stochastic_key_argument_stripping() -> None:
 def test_mutation_transformer_helpers() -> None:
   """Directly test guard branches in FunctionalMutationTransformer."""
   import libcst as cst
-  from ml_switcheroo.core.rewriter.passes.mutation import FunctionalMutationTransformer
-  from ml_switcheroo.core.rewriter.context import RewriterContext
-  from ml_switcheroo.semantics.manager import SemanticsManager
+
   from ml_switcheroo.config import RuntimeConfig
+  from ml_switcheroo.core.rewriter.context import RewriterContext
+  from ml_switcheroo.core.rewriter.passes.mutation import FunctionalMutationTransformer
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
   mgr = SemanticsManager()
   cfg = RuntimeConfig.load(source="torch", target="torch")

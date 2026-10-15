@@ -18,7 +18,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   hooks._PLUGINS_LOADED = True  # type: ignore
   mgr = MagicMock()
   clamp_def: dict[str, typing.Any] = {

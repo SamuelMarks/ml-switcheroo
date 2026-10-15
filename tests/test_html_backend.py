@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for html backend."""
 
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
@@ -6,7 +6,7 @@ from ml_switcheroo.core.html.nodes import SvgArrow
 
 
 def test_html_backend_compile() -> None:
-  """Docstring."""
+  """Verify html backend compile behavior."""
   graph: LogicalGraph = LogicalGraph(
     nodes={
       n.id: n
@@ -26,7 +26,7 @@ def test_html_backend_compile() -> None:
 
 
 def test_html_backend_empty_graph() -> None:
-  """Docstring."""
+  """Verify html backend empty graph behavior."""
   graph: LogicalGraph = LogicalGraph(
     nodes={n.id: n for n in []},
     edges=[],
@@ -37,7 +37,7 @@ def test_html_backend_empty_graph() -> None:
 
 
 def test_html_backend_input_output_only() -> None:
-  """Docstring."""
+  """Verify html backend input output only behavior."""
   graph: LogicalGraph = LogicalGraph(
     nodes={
       n.id: n
@@ -54,7 +54,7 @@ def test_html_backend_input_output_only() -> None:
 
 
 def test_clean_kind() -> None:
-  """Docstring."""
+  """Verify clean kind behavior."""
   backend: HtmlBackend = HtmlBackend()
   assert backend._clean_kind("func_add") == "Add"
   assert backend._clean_kind("torch.nn.functional.relu") == "Relu"
@@ -62,7 +62,7 @@ def test_clean_kind() -> None:
 
 
 def test_is_stateful() -> None:
-  """Docstring."""
+  """Verify is stateful behavior."""
   backend: HtmlBackend = HtmlBackend()
   assert backend._is_stateful(LogicalNode(id="in1", op_type="Input")) is False
   assert backend._is_stateful(LogicalNode(id="out1", op_type="Output")) is False
@@ -73,7 +73,7 @@ def test_is_stateful() -> None:
 
 
 def test_create_arrow() -> None:
-  """Docstring."""
+  """Verify create arrow behavior."""
   backend: HtmlBackend = HtmlBackend()
   a1: SvgArrow = backend._create_arrow(1, 2, "def")
   assert a1.style_class == "s-red"

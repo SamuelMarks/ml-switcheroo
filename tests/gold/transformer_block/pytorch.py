@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class TransformerBlock(nn.Module):
-  """Docstring."""
+  """Test helper class TransformerBlock."""
 
   def __init__(self, embed_dim: int, num_heads: int, ff_dim: int, dropout: float = 0.1):
     """Initializes the TransformerBlock instance."""

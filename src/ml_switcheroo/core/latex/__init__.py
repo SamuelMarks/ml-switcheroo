@@ -6,13 +6,13 @@ to visualize neural network architectures.
 """
 
 from ml_switcheroo.core.latex.nodes import (
-  LatexNode,
-  ModelContainer,
-  MemoryNode,
-  InputNode,
   ComputeNode,
-  StateOpNode,
+  InputNode,
+  LatexNode,
+  MemoryNode,
+  ModelContainer,
   ReturnNode,
+  StateOpNode,
 )
 
 __all__ = [

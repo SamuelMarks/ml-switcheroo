@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for scaffold."""
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -7,7 +7,7 @@ from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
 
 
 def test_handle_scaffold(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify handle scaffold behavior."""
   args: MagicMock = MagicMock()
   args.framework = "test_fw"
 
@@ -29,7 +29,7 @@ def test_handle_scaffold(tmp_path: Path) -> None:
 
 
 def test_handle_scaffold_empty_paths() -> None:
-  """Docstring."""
+  """Verify handle scaffold empty paths behavior."""
   args = MagicMock()
   args.framework = "test_fw_empty"
 
@@ -43,3 +43,4 @@ def test_handle_scaffold_empty_paths() -> None:
     with patch.object(builtins, "open", mock_open):
       with patch("ml_switcheroo.cli.handlers.scaffold.json.dump"):
         handle_scaffold(args)
+  assert True

@@ -6,7 +6,7 @@ import keras
 
 
 class SameConvModel(keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class SameConvModel."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3) -> None:
     """Initializes the SameConvModel instance."""

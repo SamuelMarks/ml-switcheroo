@@ -9,7 +9,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def manager() -> SemanticsManager:
-  """Docstring."""
+  """Execute manager helper logic."""
   return SemanticsManager()
 
 

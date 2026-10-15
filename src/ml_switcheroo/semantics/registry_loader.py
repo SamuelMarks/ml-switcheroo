@@ -5,21 +5,18 @@ from registered Framework Adapters and Plugin Hooks. This enables "Code-First"
 definitions alongside "Config-First" JSONs.
 """
 
-import ml_switcheroo
 import typing
+
+import ml_switcheroo
 
 if typing.TYPE_CHECKING:
   import ml_switcheroo.semantics.manager
 
-
-from ml_switcheroo.frameworks.base import (
-  available_frameworks,
-  get_adapter,
-  ImportConfig,
-)
-from ml_switcheroo.core import hooks
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.semantics.merging import merge_tier_data, merge_overlay_data
+
+from ml_switcheroo.core import hooks
+from ml_switcheroo.frameworks.base import ImportConfig, available_frameworks, get_adapter
+from ml_switcheroo.semantics.merging import merge_overlay_data, merge_tier_data
 
 
 class RegistryLoader:
@@ -228,11 +225,12 @@ class RegistryLoader:
             root = parts[0]
             sub = parts[1]
 
-        self.mgr._providers[fw_name][tier] = {
+        provider_entry: typing.Dict[str, typing.Any] = {
           "root": root,
-          "sub": sub,  # type: ignore
-          "alias": alias,  # type: ignore
+          "sub": sub,
+          "alias": alias,
         }
+        self.mgr._providers[fw_name][tier] = provider_entry
 
         # 2. Register SOURCE identification
         self.mgr._source_registry[path] = (fw_name, tier)
@@ -270,7 +268,8 @@ class RegistryLoader:
     """
     plugin_metadata = hooks.get_all_hook_metadata()
     for _, spec in plugin_metadata.items():
-      for op_name, op_details in spec.ops.items():  # type: ignore
+      ops_dict: typing.Dict[str, typing.Any] = getattr(spec, "ops", {}) or {}
+      for op_name, op_details in ops_dict.items():
         merge_tier_data(
           data=self.mgr.data,
           key_origins=self.mgr._key_origins,

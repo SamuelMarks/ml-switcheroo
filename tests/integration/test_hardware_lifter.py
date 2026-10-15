@@ -3,15 +3,15 @@
 import typing
 import unittest
 
-from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
-from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassParser
+from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 class TestHardwareLifters(unittest.TestCase):
-  """Docstring."""
+  """Test helper class TestHardwareLifters."""
 
   def test_nvidia_sass_lifter_conv2d(self) -> None:
     """Verifies the behavior of NVIDIA_SASS lifter conv2d."""

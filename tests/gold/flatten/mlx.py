@@ -5,7 +5,7 @@ import mlx.nn as nn
 
 
 class FlattenModel(nn.Module):
-  """Docstring."""
+  """Test helper class FlattenModel."""
 
   def __init__(self, start_dim: int = 1):
     """Initializes the FlattenModel instance."""

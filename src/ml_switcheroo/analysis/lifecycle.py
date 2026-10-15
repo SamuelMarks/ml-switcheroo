@@ -12,6 +12,7 @@ This check helps detect:
 
 from dataclasses import dataclass, field
 from typing import List, Set
+
 import libcst as cst
 
 

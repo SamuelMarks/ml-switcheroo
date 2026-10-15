@@ -7,10 +7,8 @@ conventions (e.g., `dim` vs `axis`), and producing a structured migration guide.
 """
 
 import typing
-
-
-from typing import Dict, List
 from collections import defaultdict
+from typing import Dict, List
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -89,21 +87,19 @@ class MigrationGuideGenerator:
     return "\n".join(md_lines)
 
   def _has_variants(self, op_name: str, source: str) -> bool:
-    """Check if an operation has definitions for at least the source framework.
+    """Check whether an abstract operation defines a variant for the given source framework.
 
     Args:
-        op_name: Abstract operation ID.
-        source: Source framework name.
+        op_name: Abstract operation identifier string.
+        source: Source framework key to check.
 
     Returns:
-        True if the operation has a definition for the source framework, False
-        otherwise.
+        True if the operation has a variant entry for ``source``, False otherwise.
     """
     details = self.semantics.get_definition_by_id(op_name)
     if not details:
       return False
     variants = details.get("variants", {})
-    # We list it if Source exists. Target might be missing (which is useful info).
     return source in variants
 
   def _generate_table_header(self, source: str, target: str) -> str:

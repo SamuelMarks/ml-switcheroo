@@ -8,7 +8,7 @@ from praxis.layers import linears  # type: ignore
 
 
 class MLP(base_layer.BaseLayer):  # type: ignore
-  """Docstring."""
+  """Test helper class MLP."""
 
   in_features: int = 0
   hidden_features: int = 0

@@ -5,7 +5,7 @@ from flax import nnx
 
 
 class DropoutModel(nnx.Module):
-  """Docstring."""
+  """Test helper class DropoutModel."""
 
   def __init__(self, p: float = 0.5, rngs: nnx.Rngs = None):
     """Initializes the DropoutModel instance."""

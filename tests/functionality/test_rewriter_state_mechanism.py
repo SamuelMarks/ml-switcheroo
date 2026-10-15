@@ -12,7 +12,7 @@ from tests.conftest import TestRewriter
 
 
 class MockStateSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockStateSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockStateSemantics instance."""
@@ -61,7 +61,7 @@ class MockStateSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   semantics = MockStateSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow", strict_mode=False)
   return TestRewriter(semantics, config)

@@ -10,7 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockRuntimeSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockRuntimeSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockRuntimeSemantics instance."""
@@ -19,7 +19,7 @@ class MockRuntimeSemantics(SemanticsManager):
     self.data: dict[str, typing.Any] = {}
 
   def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
-    """Docstring."""
+    """Execute get test template helper logic."""
     return self.test_templates.get(fw)
 
   def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
@@ -29,7 +29,7 @@ class MockRuntimeSemantics(SemanticsManager):
 
 @pytest.fixture
 def generator(tmp_path: Path) -> TestCaseGenerator:
-  """Docstring."""
+  """Execute generator helper logic."""
   mgr = MockRuntimeSemantics()
   return TestCaseGenerator(semantics_mgr=mgr)
 
@@ -48,7 +48,7 @@ def test_runtime_file_creation(generator: TestCaseGenerator, tmp_path: Path) -> 
 
 
 def test_gen_tests_use_runtime_import(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify gen tests use runtime import behavior."""
   semantics: dict[str, typing.Any] = {
     "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}}
   }

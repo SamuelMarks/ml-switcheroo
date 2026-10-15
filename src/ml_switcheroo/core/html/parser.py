@@ -4,12 +4,12 @@ Parses the HTML DSL structure using a formal Lark grammar to construct an HTML C
 and extracts high-level model logic into a Python LibCST Module.
 """
 
-from typing import List, Tuple, Optional, Union
+from html.parser import HTMLParser as BaseHTMLParser
+from typing import List, Optional, Tuple, Union
 
 import libcst as cst
-from html.parser import HTMLParser as BaseHTMLParser
 
-from ml_switcheroo.core.html.nodes import HtmlDocument, TagNode, TextNode, CommentNode, AttributeNode, HtmlNode
+from ml_switcheroo.core.html.nodes import AttributeNode, CommentNode, HtmlDocument, HtmlNode, TagNode, TextNode
 
 
 class InternalHtmlParser(BaseHTMLParser):

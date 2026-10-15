@@ -6,7 +6,7 @@ from flax import nnx
 
 
 class TransformerBlock(nnx.Module):
-  """Docstring."""
+  """Test helper class TransformerBlock."""
 
   def __init__(self, embed_dim: int, num_heads: int, ff_dim: int, dropout: float = 0.1, rngs: nnx.Rngs = None):
     """Initializes the TransformerBlock instance."""

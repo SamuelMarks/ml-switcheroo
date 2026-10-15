@@ -9,40 +9,37 @@ This module provides the ``ASTEngine``, generating code via:
 Supports optional **Graph-Guided Rewriting** (Loopback).
 """
 
-from typing import Optional, cast, Any, List
+from typing import Any, List, Optional, cast
+
 import libcst as cst
 
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassLifter, NvidiaSassParser
+from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
+from ml_switcheroo.core.compiler.frontends.rdna import RdnaLifter, RdnaParser
+
+# Compiler Components
+from ml_switcheroo.core.compiler.registry import get_backend_class, is_isa_source
 from ml_switcheroo.core.conversion_result import ConversionResult as ConversionResult
-from ml_switcheroo.core.hooks import load_plugins
-from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
-from ml_switcheroo.core.scanners import GlobalUsageScanner
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.testing.linter import StructuralLinter
-from ml_switcheroo.core.tracer import get_tracer, reset_tracer
-from ml_switcheroo.core.ingestion import ingest_code
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.graph import GraphExtractor
+from ml_switcheroo.core.hooks import load_plugins
+from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
+from ml_switcheroo.core.ingestion import ingest_code
 
 # Rewriter Components
 from ml_switcheroo.core.rewriter.context import RewriterContext
-from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
-from ml_switcheroo.core.rewriter.passes.structure import StructuralPass
-from ml_switcheroo.core.rewriter.passes.mutation import FunctionalMutationPass
 from ml_switcheroo.core.rewriter.passes.api import ApiPass
 from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass
-
-# Compiler Components
-from ml_switcheroo.core.compiler.registry import (
-  is_isa_target,
-  is_isa_source,
-  get_backend_class,
-)
-from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
-from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassParser, NvidiaSassLifter
-from ml_switcheroo.core.compiler.frontends.rdna import RdnaParser, RdnaLifter
-from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.rewriter.passes.mutation import FunctionalMutationPass
+from ml_switcheroo.core.rewriter.passes.structure import StructuralPass
+from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
+from ml_switcheroo.core.scanners import GlobalUsageScanner
+from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 from ml_switcheroo.frameworks.base import get_adapter
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.testing.linter import StructuralLinter
 
 # Visualization
 from ml_switcheroo.utils.visualizer import MermaidGenerator
@@ -99,18 +96,11 @@ class ASTEngine:
   def run(self, code: str) -> ConversionResult:
     """Execute the complete conversion pipeline on the input code.
 
-    This method initiates the translation process from the source framework to
-    the target framework. Depending on the configuration and targets, it
-    routes the code through either the compiler pipeline (for ISAs or when
-    sharding is enabled), a specialized stablehlo bypass, or the standard
-    rewriter pipeline.
-
     Args:
-        code: The input source code string to be converted.
+        code: Input source code string to convert.
 
     Returns:
-        A ConversionResult object containing the converted code, success status,
-        and any collected execution trace events or error messages.
+        ConversionResult containing the transpiled code, diagnostics, and trace events.
     """
     reset_tracer()
     tracer = get_tracer()
@@ -140,26 +130,19 @@ class ASTEngine:
         tracer.end_phase()
         return final_result
 
-      if is_isa_source(self.source) or is_isa_target(self.target) or self.config.enable_sharding:
-        result = self._run_compiler_pipeline(code, tracer)
-      elif self.target == "stablehlo":
-        # special bypass for CST to MLIR string translation
-        source_adapter = get_adapter(self.source)
-        tree = ingest_code(code, self.source, self.target, source_adapter, tracer)
-        from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
+      from ml_switcheroo.core.strategies import STRATEGY_REGISTRY
 
-        emitter = StableHloEmitter(self.semantics)
-        mlir_code = emitter.convert(tree).to_text()
-        result = ConversionResult(code=mlir_code, success=True, trace_events=tracer.export())
-      else:
-        result = self._run_rewriter_pipeline(code, tracer)
+      for strategy in STRATEGY_REGISTRY:
+        if strategy.can_handle(self):
+          result = strategy.execute(self, code, tracer)
+          break
 
       tracer.end_phase()
       return result
     except Exception as e:
-      import traceback
+      import logging
 
-      traceback.print_exc()
+      logging.error(f"ASTEngine Error: {e}", exc_info=True)
       tracer.end_phase()
       return ConversionResult(
         code=code,
@@ -256,10 +239,10 @@ class ASTEngine:
         lifter = NvidiaSassLifter()
         graph = lifter.lift(nodes)
       elif self.source == "rdna":
-        parser = RdnaParser(code)  # type: ignore
-        nodes = parser.parse().statements
-        lifter = RdnaLifter()  # type: ignore
-        graph = lifter.lift(nodes)
+        rdna_parser = RdnaParser(code)
+        rdna_nodes = rdna_parser.parse().statements
+        rdna_lifter = RdnaLifter()
+        graph = rdna_lifter.lift(rdna_nodes)
       elif self.source == "stablehlo":
         # StableHLO parses via ingest_code to Python CST, then frontend parses to graph
         source_adapter = get_adapter(self.source)
@@ -289,15 +272,15 @@ class ASTEngine:
       tracer.end_phase()
 
     if getattr(self.config, "enable_sharding", False):
+      from ml_switcheroo.core.compiler.fusion import QKVDefusionPass, QKVFusionPass
+      from ml_switcheroo.core.compiler.qwen_fusion import (
+        SwiGLUDefusionPass,
+        SwiGLUFusionPass,
+        VisionPatchEmbeddingDefusionPass,
+        VisionPatchEmbeddingFusionPass,
+      )
       from ml_switcheroo.core.compiler.sharding import ShardingInferencePass
       from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
-      from ml_switcheroo.core.compiler.fusion import QKVFusionPass, QKVDefusionPass
-      from ml_switcheroo.core.compiler.qwen_fusion import (
-        SwiGLUFusionPass,
-        SwiGLUDefusionPass,
-        VisionPatchEmbeddingFusionPass,
-        VisionPatchEmbeddingDefusionPass,
-      )
 
       # Extract pre-existing constraints
       graph = ShardingExtractionPass().apply(graph)
@@ -308,7 +291,7 @@ class ASTEngine:
       graph = VisionPatchEmbeddingDefusionPass().apply(graph)
 
       # Re-infer constraints and re-fuse for target
-      if self.target in ["jax", "flax", "flax_nnx", "paxml"]:
+      if self._is_sharding_fusion_target():
         graph = ShardingInferencePass().apply(graph)
         graph = QKVFusionPass().apply(graph)
         graph = SwiGLUFusionPass().apply(graph)
@@ -320,13 +303,14 @@ class ASTEngine:
     if not backend_cls:
       raise ValueError(f"No backend found for {self.target}")
 
+    backend_factory: Any = backend_cls
     if backend_cls.__name__ == "PythonBackend":
-      backend = backend_cls(framework=self.target, semantics=self.semantics)  # type: ignore
+      backend: CompilerBackend = backend_factory(framework=self.target, semantics=self.semantics)
     elif backend_cls.__name__ == "IrBackend":
       ir_format = "python" if self.target == "ml_switcheroo_ir" else "json"
-      backend = cast(CompilerBackend, backend_cls(semantics=self.semantics, format=ir_format))  # type: ignore
+      backend = cast(CompilerBackend, backend_factory(semantics=self.semantics, format=ir_format))
     else:
-      backend = cast(CompilerBackend, backend_cls(self.semantics))  # type: ignore
+      backend = cast(CompilerBackend, backend_factory(self.semantics))
 
     warnings: List[str] = []
     try:
@@ -377,12 +361,10 @@ class ASTEngine:
     if self.config.enable_graph_optimization:
       tracer.start_phase("Graph Guided Rewriting", "Fusion & Surgery")
       try:
-        from ml_switcheroo.core.graph_optimizer import GraphOptimizer
+        from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
         from ml_switcheroo.core.compiler.differ import GraphDiffer
+        from ml_switcheroo.core.graph_optimizer import GraphOptimizer
         from ml_switcheroo.core.rewriter.patcher import GraphPatcher
-        from ml_switcheroo.core.compiler.backends.python_snippet import (
-          PythonSnippetEmitter,
-        )
 
         # A. Extraction
         extractor = GraphExtractor()
@@ -397,15 +379,15 @@ class ASTEngine:
           optimized_graph = optimizer.optimize(original_graph)
 
           if self.config.enable_sharding:
+            from ml_switcheroo.core.compiler.fusion import QKVDefusionPass, QKVFusionPass
+            from ml_switcheroo.core.compiler.qwen_fusion import (
+              SwiGLUDefusionPass,
+              SwiGLUFusionPass,
+              VisionPatchEmbeddingDefusionPass,
+              VisionPatchEmbeddingFusionPass,
+            )
             from ml_switcheroo.core.compiler.sharding import ShardingInferencePass
             from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
-            from ml_switcheroo.core.compiler.fusion import QKVFusionPass, QKVDefusionPass
-            from ml_switcheroo.core.compiler.qwen_fusion import (
-              SwiGLUFusionPass,
-              SwiGLUDefusionPass,
-              VisionPatchEmbeddingFusionPass,
-              VisionPatchEmbeddingDefusionPass,
-            )
 
             # Reverse translation: lift inline sharding out of AST into metadata
             optimized_graph = ShardingExtractionPass().apply(optimized_graph)
@@ -417,7 +399,7 @@ class ASTEngine:
 
             # Forward translation: synthesize optimized blocks and metadata
             optimized_graph = ShardingInferencePass().apply(optimized_graph)
-            if self.target in ["jax", "flax", "flax_nnx", "paxml"]:
+            if self._is_sharding_fusion_target():
               optimized_graph = QKVFusionPass().apply(optimized_graph)
               optimized_graph = SwiGLUFusionPass().apply(optimized_graph)
               optimized_graph = VisionPatchEmbeddingFusionPass().apply(optimized_graph)
@@ -429,8 +411,8 @@ class ASTEngine:
 
           # D. Patching
           if plan:
-            emitter = PythonSnippetEmitter(framework=self.target)
-            patcher = GraphPatcher(plan, provenance, emitter)  # type: ignore
+            emitter: Any = PythonSnippetEmitter(framework=self.target)
+            patcher = GraphPatcher(plan, provenance, emitter)
             tree = tree.visit(patcher)
             tracer.log_mutation(
               "Graph Patching",
@@ -481,13 +463,13 @@ class ASTEngine:
       used_names = usage_scanner.used_names
 
       resolver = ImportResolver(self.semantics)
-      plan = resolver.resolve(tree, self.target)  # type: ignore
+      resolution_plan = resolver.resolve(tree, self.target)
 
       source_fws = self.semantics.get_framework_ecosystem(self.config.source_framework)
       source_fws.update(self.semantics.get_framework_ecosystem(self.config.effective_source))
 
       fixer = ImportFixer(
-        plan=plan,  # type: ignore
+        plan=resolution_plan,
         source_fws=source_fws,
         used_names=used_names,
       )
@@ -506,7 +488,7 @@ class ASTEngine:
       errors.append(msg)
       tracer.log_warning(msg)
 
-    if self.strict_mode and self.target not in ["mlir", "stablehlo", "latex_dsl", "tikz"]:
+    if self.strict_mode:
       tracer.start_phase("Structural Linter", "Safety Verification")
       linter = StructuralLinter(forbidden_roots={self.source})
       list_errors = linter.check(final_code)
@@ -535,6 +517,17 @@ class ASTEngine:
       warnings=warnings,
       trace_events=tracer.export(),
     )
+
+  def _is_sharding_fusion_target(self) -> bool:
+    """Check whether the target framework requires sharded QKV/SwiGLU/VisionPatch fusion passes.
+
+    Returns:
+        True if target framework uses functional XLA/pjit sharding fusion.
+    """
+    adapter = get_adapter(self.target)
+    if adapter and adapter.plugin_traits.enforce_purity_analysis:
+      return True
+    return self.target in {"jax", "flax", "flax_nnx", "paxml"}
 
   @property
   def strict_mode(self) -> bool:

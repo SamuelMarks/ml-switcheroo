@@ -1,10 +1,10 @@
-"""Module docstring."""
+"""Test suite for mlir naming coverage."""
 
 from ml_switcheroo.core.mlir.naming import NamingContext
 
 
 def test_naming_context_register_branches() -> None:
-  """Docstring."""
+  """Verify naming context register branches behavior."""
   ctx: NamingContext = NamingContext()
 
   # 70 -> 71 (match ends with digits)
@@ -69,7 +69,7 @@ def test_naming_context_register_branches() -> None:
 
 
 def test_naming_context_lookup_branches() -> None:
-  """Docstring."""
+  """Verify naming context lookup branches behavior."""
   ctx: NamingContext = NamingContext()
   ctx.register("%a", hint="a")
 
@@ -88,7 +88,7 @@ def test_naming_context_lookup_branches() -> None:
 
 
 def test_naming_context_register_branches_extra() -> None:
-  """Docstring."""
+  """Verify naming context register branches extra behavior."""
   ctx: NamingContext = NamingContext()
 
   # 70 -> 71 (match ends with digits)
@@ -166,7 +166,7 @@ def test_naming_context_register_branches_extra() -> None:
 
 
 def test_more_branches() -> None:
-  """Docstring."""
+  """Verify more branches behavior."""
   ctx: NamingContext = NamingContext()
 
   ctx._used_names["_ssa2"] = "%ssa2"
@@ -201,7 +201,7 @@ def test_more_branches() -> None:
 
 
 def test_missing_more() -> None:
-  """Docstring."""
+  """Verify missing more behavior."""
   ctx: NamingContext = NamingContext()
 
   ctx._used_names["nonssa"] = "nonssa"
@@ -217,7 +217,7 @@ def test_missing_more() -> None:
 
 
 def test_missing_last() -> None:
-  """Docstring."""
+  """Verify missing last behavior."""
   ctx: NamingContext = NamingContext()
 
   ctx._used_names["a"] = "%a"

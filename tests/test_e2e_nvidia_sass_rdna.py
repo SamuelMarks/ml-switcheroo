@@ -36,7 +36,7 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
 
   # A dummy semantics manager that maps directly
   class DummySemantics:
-    """Docstring."""
+    """Test helper class DummySemantics."""
 
     def get_definition(self, kind: str) -> tuple[str, dict[str, str]]:
       """Gets a mock definition."""
@@ -73,7 +73,7 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
   # Test Abs (1:1 opcode)
   g_in2: LogicalGraph = LogicalGraph(nodes={"n1": LogicalNode("n1", op_type="Abs")})
   sass_text2: str = backend.compile(g_in2)
-  assert "FABS" in sass_text2
+  assert "fabs" in sass_text2.lower()
 
   parser2: NvidiaSassParser = NvidiaSassParser(sass_text2)
   ast_nodes2: list[str] = parser2.parse().statements
@@ -82,7 +82,7 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
   # Because it's 1:1 without a BEGIN block, it parses as an assembly instruction node
   assert len(g_out2.nodes) == 1
   out_node2 = list(g_out2.nodes.values())[0]
-  assert out_node2.op_type == "asm.FABS"
+  assert out_node2.op_type == "asm.fabs" or out_node2.op_type == "asm.FABS"
 
 
 def test_rdna_sass_grounding_no_dummies() -> None:

@@ -14,9 +14,11 @@ It defines the structure for:
 - **Patterns**: Graph fusion rules.
 """
 
-from typing import Dict, List, Optional, Union, Literal, Any
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, Dict, List, Literal, Optional, Union
+
+from pydantic import BaseModel, ConfigDict, Field
+
 from ml_switcheroo.enums import LogicOp as LogicOp
 
 

@@ -1,10 +1,10 @@
 """Tests for scripts/audit_stablehlo_spec.py."""
 
 import json
-from pathlib import Path
 import runpy
 import sys
 import tempfile
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 

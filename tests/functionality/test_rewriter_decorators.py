@@ -12,7 +12,7 @@ from tests.conftest import TestRewriter
 
 
 class MockDecoratorSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockDecoratorSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockDecoratorSemantics instance."""
@@ -50,7 +50,7 @@ class MockDecoratorSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   semantics = MockDecoratorSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(semantics, config)

@@ -3,8 +3,8 @@
 This module contains automatically generated OpSchemas for all official MLIR operations.
 """
 
-import json
 import importlib.resources as resources
+import json
 from typing import Dict
 
 from ml_switcheroo.core.mlir.dialect import OpSchema

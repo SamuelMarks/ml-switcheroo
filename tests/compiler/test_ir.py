@@ -114,7 +114,7 @@ def test_topological_sort_missing_node() -> None:
 
 
 def test_ir_topological_sort_cycle() -> None:
-  """Docstring."""
+  """Verify ir topological sort cycle behavior."""
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, topological_sort
 
   nodes = {

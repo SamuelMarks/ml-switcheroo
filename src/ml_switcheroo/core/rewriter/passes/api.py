@@ -12,21 +12,20 @@ This module consolidates all API-level transformations, including:
 
 from __future__ import annotations
 
-
 from typing import Any, List, Optional, Set, Tuple, Union, cast
+
 import libcst as cst
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.interface import RewriterPass
+from ml_switcheroo.core.rewriter.passes.api_attr_mixin import ApiTransformerAttrMixin
+from ml_switcheroo.core.rewriter.passes.api_call_mixin import ApiTransformerCallMixin
+from ml_switcheroo.core.rewriter.passes.api_helpers import ApiHelpersMixin
 from ml_switcheroo.core.rewriter.types import SignatureContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import StructuralTraits
-
-from ml_switcheroo.core.rewriter.passes.api_helpers import ApiHelpersMixin
-from ml_switcheroo.core.rewriter.passes.api_attr_mixin import ApiTransformerAttrMixin
-from ml_switcheroo.core.rewriter.passes.api_call_mixin import ApiTransformerCallMixin
 
 
 class ApiPass(RewriterPass):
@@ -211,7 +210,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
       try:
         mod = cst.parse_module(code)
         new_stmts.extend(mod.body)
-      except Exception:
+      except (cst.ParserSyntaxError, Exception):
         pass
 
     # Clear buffer to prevent re-injection

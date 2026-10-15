@@ -9,7 +9,7 @@ from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
 @pytest.fixture
 def adapter() -> TensorFlowAdapter:
-  """Docstring."""
+  """Execute adapter helper logic."""
   return TensorFlowAdapter()
 
 
@@ -43,7 +43,7 @@ def test_tier2_neural_validity(adapter: TensorFlowAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: TensorFlowAdapter) -> None:
-  """Docstring."""
+  """Verify tier3 extras validity behavior."""
   code: str = adapter.get_tiered_examples()["tier3_extras"]
   ast.parse(code)
   assert "tf.data.Dataset.from_tensor_slices" in code

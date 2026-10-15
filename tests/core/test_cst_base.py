@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for cst base."""
 
 import typing
 
@@ -8,19 +8,19 @@ from ml_switcheroo.core.cst.base import CSTNode, Trivia
 
 
 class MockCST(CSTNode):
-  """Docstring."""
+  """Test helper class MockCST."""
 
   def _get_name(self) -> str:
-    """Docstring."""
+    """Execute get name helper logic."""
     return "Mock"
 
   def _get_fields(self) -> dict[str, typing.Any]:
-    """Docstring."""
+    """Execute get fields helper logic."""
     return {"a": 1}
 
 
 def test_cst_base_render() -> None:
-  """Docstring."""
+  """Verify cst base render behavior."""
   t = Trivia(text=" ")
   m = MockCST(leading_trivia=[t], trailing_trivia=[t])  # type: ignore
   # The default to_text raises NotImplementedError
@@ -32,7 +32,7 @@ def test_cst_base_render() -> None:
 
 
 def test_cst_base_trivia_convert() -> None:
-  """Docstring."""
+  """Verify cst base trivia convert behavior."""
   m = MockCST(leading_trivia=" ")  # type: ignore
   assert len(m.leading_trivia) == 1
   assert m.leading_trivia[0].text == " "
@@ -43,7 +43,7 @@ def test_cst_base_trivia_convert() -> None:
 
 
 def test_trivia_eq() -> None:
-  """Docstring."""
+  """Verify trivia eq behavior."""
   t1 = Trivia(text="a")
   t2 = Trivia(text="a")
   assert t1 == t2
@@ -51,20 +51,20 @@ def test_trivia_eq() -> None:
 
 
 def test_cst_base_trivia_convert_none() -> None:
-  """Docstring."""
+  """Verify cst base trivia convert none behavior."""
   m = MockCST(leading_trivia=None, trailing_trivia=None)  # type: ignore
   assert m.leading_trivia == []
   assert m.trailing_trivia == []
 
 
 def test_cst_base_str() -> None:
-  """Docstring."""
+  """Verify cst base str behavior."""
 
   class MockStr(MockCST):
-    """Docstring."""
+    """Test helper class MockStr."""
 
     def to_text(self) -> str:
-      """Docstring."""
+      """Execute to text helper logic."""
       return "MockStr"
 
   m = MockStr()
@@ -72,14 +72,14 @@ def test_cst_base_str() -> None:
 
 
 def test_cst_visitor() -> None:
-  """Docstring."""
+  """Verify cst visitor behavior."""
   from ml_switcheroo.core.cst.base import CSTVisitor
 
   class MockVisitor(CSTVisitor):
-    """Docstring."""
+    """Test helper class MockVisitor."""
 
     def visit_MockCST(self, node: CSTNode) -> None:
-      """Docstring."""
+      """Execute visit MockCST helper logic."""
       self.visited = True  # type: ignore
 
   v = MockVisitor()
@@ -89,18 +89,18 @@ def test_cst_visitor() -> None:
 
 
 def test_cst_visitor_generic() -> None:
-  """Docstring."""
+  """Verify cst visitor generic behavior."""
   from ml_switcheroo.core.cst.base import CSTVisitor
 
   class MockVisitor(CSTVisitor):
-    """Docstring."""
+    """Test helper class MockVisitor."""
 
     def __init__(self) -> None:
-      """Docstring."""
+      """Initialize test helper instance."""
       self.generic_visited = False
 
     def generic_visit(self, node: CSTNode) -> None:
-      """Docstring."""
+      """Execute generic visit helper logic."""
       self.generic_visited = True
 
   v = MockVisitor()
@@ -110,7 +110,7 @@ def test_cst_visitor_generic() -> None:
 
 
 def test_cst_visitor_generic_fields() -> None:
-  """Docstring."""
+  """Verify cst visitor generic fields behavior."""
   from dataclasses import dataclass, field
   from typing import List, Optional
 
@@ -118,29 +118,29 @@ def test_cst_visitor_generic_fields() -> None:
 
   @dataclass
   class NodeA(CSTNode):
-    """Docstring."""
+    """Test helper class NodeA."""
 
     child: Optional[CSTNode] = None
     children: List[typing.Any] = field(default_factory=list)
     other: int = 1
 
     def _get_name(self) -> str:
-      """Docstring."""
+      """Execute get name helper logic."""
       return "NodeA"
 
     def _get_fields(self) -> dict[str, typing.Any]:
-      """Docstring."""
+      """Execute get fields helper logic."""
       return {"child": self.child, "children": self.children, "other": self.other}
 
   class MockVisitor(CSTVisitor):
-    """Docstring."""
+    """Test helper class MockVisitor."""
 
     def __init__(self) -> None:
-      """Docstring."""
+      """Initialize test helper instance."""
       self.visited_count = 0
 
     def generic_visit(self, node: CSTNode) -> None:
-      """Docstring."""
+      """Execute generic visit helper logic."""
       self.visited_count += 1
       super().generic_visit(node)
 
@@ -153,7 +153,7 @@ def test_cst_visitor_generic_fields() -> None:
 
 
 def test_cst_transformer_generic_fields() -> None:
-  """Docstring."""
+  """Verify cst transformer generic fields behavior."""
   from dataclasses import dataclass, field
   from typing import List, Optional
 
@@ -161,25 +161,25 @@ def test_cst_transformer_generic_fields() -> None:
 
   @dataclass
   class NodeA(CSTNode):
-    """Docstring."""
+    """Test helper class NodeA."""
 
     child: Optional[CSTNode] = None
     children: List[typing.Any] = field(default_factory=list)
     other: int = 1
 
     def _get_name(self) -> str:
-      """Docstring."""
+      """Execute get name helper logic."""
       return "NodeA"
 
     def _get_fields(self) -> dict[str, typing.Any]:
-      """Docstring."""
+      """Execute get fields helper logic."""
       return {"child": self.child, "children": self.children, "other": self.other}
 
   class MockTransformer(CSTTransformer):
-    """Docstring."""
+    """Test helper class MockTransformer."""
 
     def transform_NodeA(self, node: NodeA) -> typing.Any:
-      """Docstring."""
+      """Execute transform NodeA helper logic."""
       if node.other == 1:
         return self.generic_transform(node)
       return node

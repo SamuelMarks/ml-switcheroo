@@ -46,7 +46,7 @@ def test_nvidia_sass_properties() -> None:
 
 
 def test_nvidia_sass_missing_coverage() -> None:
-  """Docstring."""
+  """Verify nvidia sass missing coverage behavior."""
   adapter = NvidiaSassAdapter()
 
   # Traits
@@ -100,7 +100,7 @@ def test_nvidia_sass_missing_coverage() -> None:
 
 
 def test_nvidia_sass_missing_methods() -> None:
-  """Docstring."""
+  """Verify nvidia sass missing methods behavior."""
   adapter = NvidiaSassAdapter()
 
   assert adapter.get_device_syntax("cpu") == "// Target Device: cpu"
@@ -132,7 +132,7 @@ def test_nvidia_sass_missing_methods() -> None:
 
 
 def test_nvidia_sass_parse_nvidia_sass_to_graph() -> None:
-  """Docstring."""
+  """Verify nvidia sass parse nvidia sass to graph behavior."""
   adapter = NvidiaSassAdapter()
 
   # Test empty graph

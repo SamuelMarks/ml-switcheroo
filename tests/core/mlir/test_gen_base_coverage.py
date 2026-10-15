@@ -17,7 +17,7 @@ class DummyGen(BaseGeneratorMixin):
 
 
 def test_get_attr_list() -> None:
-  """Docstring."""
+  """Verify get attr list behavior."""
   gen = DummyGen()
   op = OperationNode(
     name="test",
@@ -30,7 +30,7 @@ def test_get_attr_list() -> None:
 
 
 def test_create_dotted_name_empty() -> None:
-  """Docstring."""
+  """Verify create dotted name empty behavior."""
   gen = DummyGen()
   node: typing.Any = gen._create_dotted_name("")
   assert isinstance(node, cst.Name)

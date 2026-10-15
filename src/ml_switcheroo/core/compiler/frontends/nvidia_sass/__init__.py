@@ -4,6 +4,7 @@ Handles the parsing of NVIDIA SASS assembly text into an Abstract Syntax Tree (A
 and the lifting of that AST into the high-level Logical Graph IR.
 """
 
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassDirective,
@@ -11,14 +12,13 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassInstruction,
   NvidiaSassLabel,
   NvidiaSassMemory,
+  NvidiaSassNode,
   NvidiaSassOperand,
   NvidiaSassPredicate,
   NvidiaSassRegister,
-  NvidiaSassNode,
 )
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassParser
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassParser
 
 __all__ = [
   "NvidiaSassComment",

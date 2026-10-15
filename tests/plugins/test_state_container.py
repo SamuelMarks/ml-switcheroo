@@ -17,7 +17,7 @@ from ml_switcheroo.plugins.state_container import (
 
 
 class DummyContext:
-  """Docstring."""
+  """Test helper class DummyContext."""
 
   def __init__(self, api_map: Optional[Dict[str, str]] = None) -> None:
     """Initializes the DummyContext instance."""

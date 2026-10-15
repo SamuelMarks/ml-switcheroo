@@ -5,9 +5,11 @@ to perform CST string/node conversions, resolve API paths to FQNs, map APIs
 to target frameworks, inject imports, and handle version check constraints.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Union
-import libcst as cst
 import re
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+
+import libcst as cst
+
 from ml_switcheroo.core.tracer import get_tracer
 
 
@@ -28,15 +30,21 @@ class ApiHelpersMixin:
   target_fw: Any
   strict_mode: Any
 
-  def _report_failure(self, msg: str) -> None:
-    """Dummy method."""
-    ...
+  if TYPE_CHECKING:
 
-  def _cst_to_string(self, node: cst.BaseExpression) -> Optional[str]:
+    def _report_failure(self, msg: str) -> None:
+      """Record a failure message in the current statement error buffer.
+
+      Args:
+          msg: Failure description string.
+      """
+      ...
+
+  def _cst_to_string(self, node: cst.CSTNode) -> Optional[str]:
     """Flatten CST nodes (Name/Attribute) to string.
 
     Args:
-        node (cst.BaseExpression): The CST expression node to convert.
+        node (cst.CSTNode): The CST expression node to convert.
 
     Returns:
         Optional[str]: The flattened dotted string representation of the expression (e.g., 'foo.bar'),
@@ -77,14 +85,14 @@ class ApiHelpersMixin:
 
     return full_str
 
-  def _create_name_node(self, api_path: str) -> cst.BaseExpression:
+  def _create_name_node(self, api_path: str) -> Union[cst.Name, cst.Attribute]:
     """Construct a CST node structure for a dotted API path.
 
     Args:
         api_path (str): The dotted API path string (e.g., 'foo.bar.baz').
 
     Returns:
-        cst.BaseExpression: The constructed CST expression node representing the path.
+        Union[cst.Name, cst.Attribute]: The constructed CST expression node representing the path.
     """
     parts = api_path.split(".")
     node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
@@ -101,8 +109,7 @@ class ApiHelpersMixin:
     Returns:
         Union[cst.Name, cst.Attribute]: A CST Name or Attribute representing the dotted name.
     """
-    # Type ignored because _create_name_node returns BaseExpression but plugins expect union subset
-    return self._create_name_node(name_str)  # type: ignore
+    return self._create_name_node(name_str)
 
   def _is_module_alias(self, node: cst.CSTNode) -> bool:
     """Determine if a node is a module reference (not a variable).
@@ -113,7 +120,7 @@ class ApiHelpersMixin:
     Returns:
         bool: True if the node is identified as a module alias, False otherwise.
     """
-    name = self._cst_to_string(node)  # type: ignore
+    name = self._cst_to_string(node)
     if not name:
       return False
 
@@ -158,7 +165,7 @@ class ApiHelpersMixin:
       try:
         mod = cst.parse_module(code)
         new_stmts.extend(mod.body)
-      except Exception:
+      except (cst.ParserSyntaxError, Exception):
         pass
 
     return self._inject_stmts_to_body(node, new_stmts)
@@ -239,9 +246,11 @@ class ApiHelpersMixin:
       )
     else:
       if self.strict_mode and not silent:
+        from ml_switcheroo.core.rewriter.calls.utils import is_neural_on_math_backend
+
         origins = getattr(self.semantics, "_key_origins", {})
         tier = origins.get(abstract_id)
-        if tier in ("neural", "neural_ops") and self.target_fw in ("NumPy", "jax"):
+        if is_neural_on_math_backend(tier, self.target_fw):
           self._report_failure(
             f"Cannot map neural network abstraction '{name}' directly to pure math backend '{self.target_fw}'. Use a framework like Flax or Keras."
           )
@@ -334,8 +343,8 @@ class ApiHelpersMixin:
         pkg = "flax"
       try:
         current = importlib.metadata.version(pkg)
-      except Exception:
-        pass
+      except (importlib.metadata.PackageNotFoundError, Exception):
+        current = None
 
     if not current:
       return None

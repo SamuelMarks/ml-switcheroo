@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for engine pipeline."""
 
 import typing
 from unittest.mock import MagicMock, patch
@@ -14,7 +14,7 @@ from ml_switcheroo.core.graph import LogicalGraph
 @patch("ml_switcheroo.core.engine.PythonFrontend")
 @patch("ml_switcheroo.core.engine.get_backend_class")
 def test_engine_run_compiler_pipeline_python(mock_get_backend: MagicMock, mock_frontend_class: MagicMock) -> None:
-  """Docstring."""
+  """Verify engine run compiler pipeline python behavior."""
   mock_frontend = mock_frontend_class.return_value
   mock_graph = LogicalGraph()
   mock_frontend.parse_to_graph.return_value = mock_graph
@@ -43,7 +43,7 @@ def test_engine_run_compiler_pipeline_python(mock_get_backend: MagicMock, mock_f
 def test_engine_run_compiler_pipeline_sass(
   mock_get_backend: MagicMock, mock_lifter_class: MagicMock, mock_parser_class: MagicMock
 ) -> None:
-  """Docstring."""
+  """Verify engine run compiler pipeline sass behavior."""
   mock_parser = mock_parser_class.return_value
   mock_parser.parse.return_value.statements = []
 
@@ -68,7 +68,7 @@ def test_engine_run_compiler_pipeline_sass(
 def test_engine_run_compiler_pipeline_rdna(
   mock_get_backend: MagicMock, mock_lifter_class: MagicMock, mock_parser_class: MagicMock
 ) -> None:
-  """Docstring."""
+  """Verify engine run compiler pipeline rdna behavior."""
   mock_parser = mock_parser_class.return_value
   mock_parser.parse.return_value.statements = []
 
@@ -93,7 +93,7 @@ def test_engine_run_compiler_pipeline_rdna(
 def test_engine_run_compiler_pipeline_stablehlo(
   mock_ingest: MagicMock, mock_get_backend: MagicMock, mock_frontend_class: MagicMock
 ) -> None:
-  """Docstring."""
+  """Verify engine run compiler pipeline stablehlo behavior."""
   mock_ingest.return_value = cst.parse_module("code")
   mock_frontend = mock_frontend_class.return_value
   mock_frontend.parse_to_graph.return_value = LogicalGraph()
@@ -122,7 +122,7 @@ def test_engine_run_rewriter_pipeline(
   mock_pipeline_class: MagicMock,
   mock_ingest: MagicMock,
 ) -> None:
-  """Docstring."""
+  """Verify engine run rewriter pipeline behavior."""
   mock_ingest.return_value = cst.parse_module("code")
 
   mock_pipeline = mock_pipeline_class.return_value
@@ -139,7 +139,7 @@ def test_engine_run_rewriter_pipeline(
 
   # Needs to ensure visit returns something
   class MockTree:
-    """Docstring."""
+    """Test helper class MockTree."""
 
     code = "final_code"
 
@@ -181,7 +181,7 @@ def test_engine_run_rewriter_pipeline_graph_opt(
   mock_pipeline: MagicMock,
   mock_ingest: MagicMock,
 ) -> None:
-  """Docstring."""
+  """Verify engine run rewriter pipeline graph opt behavior."""
   mock_ingest.return_value = cst.parse_module("code")
 
   mock_extractor_inst = mock_extractor.return_value
@@ -199,7 +199,7 @@ def test_engine_run_rewriter_pipeline_graph_opt(
   mock_differ_inst.diff.return_value = ["plan"]  # Some dummy plan
 
   class MockTree:
-    """Docstring."""
+    """Test helper class MockTree."""
 
     code = "final"
 
@@ -234,7 +234,7 @@ def test_engine_run_rewriter_pipeline_graph_opt(
 
 
 def test_engine_run_compiler_pipeline_unknown_isa() -> None:
-  """Docstring."""
+  """Verify engine run compiler pipeline unknown isa behavior."""
   # We can't use an unknown ISA in ASTEngine initialization because RuntimeConfig validates it.
   # So we bypass the validation by patching is_isa_source locally in the test instead
   engine = ASTEngine(source="nvidia_sass", target="html")  # use valid frameworks
@@ -248,7 +248,7 @@ def test_engine_run_compiler_pipeline_unknown_isa() -> None:
 @patch("ml_switcheroo.core.engine.PythonFrontend")
 @patch("ml_switcheroo.core.engine.get_backend_class")
 def test_engine_run_compiler_pipeline_no_backend(mock_get_backend: MagicMock, mock_frontend_class: MagicMock) -> None:
-  """Docstring."""
+  """Verify engine run compiler pipeline no backend behavior."""
   mock_get_backend.return_value = None
   config = RuntimeConfig(source_framework="torch", target_framework="jax", enable_sharding=True)
   engine = ASTEngine(config=config)
@@ -264,7 +264,7 @@ def test_engine_run_compiler_pipeline_no_backend(mock_get_backend: MagicMock, mo
 def test_engine_run_compiler_pipeline_graph_opt(
   mock_opt: MagicMock, mock_get_backend: MagicMock, mock_frontend_class: MagicMock
 ) -> None:
-  """Docstring."""
+  """Verify engine run compiler pipeline graph opt behavior."""
   mock_opt_inst = mock_opt.return_value
   mock_opt_inst.optimize.return_value = LogicalGraph()
 
@@ -303,7 +303,7 @@ def test_engine_run_compiler_pipeline_graph_opt(
 def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
   mock_differ: MagicMock, mock_opt: MagicMock, mock_extractor: MagicMock, mock_pipeline: MagicMock, mock_ingest: MagicMock
 ) -> None:
-  """Docstring."""
+  """Verify engine run rewriter pipeline graph opt no plan behavior."""
   mock_differ.return_value.diff.return_value = []  # Empty plan
   mock_extractor_inst = mock_extractor.return_value
   mock_extractor_inst.graph = LogicalGraph()
@@ -313,7 +313,7 @@ def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
   mock_extractor_inst.node_map = {}
 
   class MockTree:
-    """Docstring."""
+    """Test helper class MockTree."""
 
     code = "final"
 
@@ -336,11 +336,11 @@ def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
 def test_engine_run_rewriter_pipeline_graph_opt_fail(
   mock_extractor: MagicMock, mock_pipeline: MagicMock, mock_ingest: MagicMock
 ) -> None:
-  """Docstring."""
+  """Verify engine run rewriter pipeline graph opt fail behavior."""
   mock_extractor.side_effect = Exception("Graph Extraction Failed")
 
   class MockTree:
-    """Docstring."""
+    """Test helper class MockTree."""
 
     code = "final"
 
@@ -362,10 +362,10 @@ def test_engine_run_rewriter_pipeline_graph_opt_fail(
 @patch("ml_switcheroo.core.engine.ingest_code")
 @patch("ml_switcheroo.core.engine.RewriterPipeline")
 def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline: MagicMock, mock_ingest: MagicMock) -> None:
-  """Docstring."""
+  """Verify engine run rewriter pipeline escape hatch behavior."""
 
   class MockTree:
-    """Docstring."""
+    """Test helper class MockTree."""
 
     # Needs to exactly match the start marker string
     code = "# <SWITCHEROO_FAIL_123"
@@ -392,7 +392,7 @@ def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline: MagicMock, moc
 def test_engine_run_compiler_pipeline_ingest_fallback(
   mock_get_backend: MagicMock, mock_frontend_class: MagicMock
 ) -> None:
-  """Docstring."""
+  """Verify engine run compiler pipeline ingest fallback behavior."""
   mock_frontend = mock_frontend_class.return_value
   mock_graph = LogicalGraph()
   mock_frontend.parse_to_graph.return_value = mock_graph

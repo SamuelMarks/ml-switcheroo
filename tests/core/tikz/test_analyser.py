@@ -6,7 +6,7 @@ from ml_switcheroo.core.tikz.analyser import GraphExtractor
 
 
 def extract_graph(code: str) -> GraphExtractor:
-  """Docstring."""
+  """Execute extract graph helper logic."""
   module = cst.parse_module(code)
   extractor = GraphExtractor()
   module.visit(extractor)
@@ -14,7 +14,7 @@ def extract_graph(code: str) -> GraphExtractor:
 
 
 def test_graph_extractor_class_and_methods() -> None:
-  """Docstring."""
+  """Verify graph extractor class and methods behavior."""
   code: str = """
 class MyModel:
     def __init__(self):
@@ -48,7 +48,7 @@ class MyModel:
 
 
 def test_graph_extractor_layer_def_edge_cases() -> None:
-  """Docstring."""
+  """Verify graph extractor layer def edge cases behavior."""
   code: str = """
 class Net:
     def __init__(self):
@@ -73,7 +73,7 @@ class Net:
 
 
 def test_graph_extractor_data_flow() -> None:
-  """Docstring."""
+  """Verify graph extractor data flow behavior."""
   code: str = """
 class Net:
     def __init__(self):
@@ -108,7 +108,7 @@ class Net:
 
 
 def test_graph_extractor_return_call() -> None:
-  """Docstring."""
+  """Verify graph extractor return call behavior."""
   code: str = """
 class Net:
     def __init__(self):
@@ -124,7 +124,7 @@ class Net:
 
 
 def test_graph_extractor_return_untracked_variable() -> None:
-  """Docstring."""
+  """Verify graph extractor return untracked variable behavior."""
   code: str = """
 class Net:
     def __init__(self):
@@ -141,7 +141,7 @@ class Net:
 
 
 def test_graph_extractor_resolve_layer_func_name_fallback() -> None:
-  """Docstring."""
+  """Verify graph extractor resolve layer func name fallback behavior."""
   code: str = """
 class Net:
     def forward(self, x):
@@ -156,7 +156,7 @@ class Net:
 
 
 def test_graph_extractor_complex_assignment_targets() -> None:
-  """Docstring."""
+  """Verify graph extractor complex assignment targets behavior."""
   code: str = """
 class Net:
     def __init__(self):
@@ -176,20 +176,20 @@ class Net:
 
 
 def test_get_var_name_fallback() -> None:
-  """Docstring."""
+  """Verify get var name fallback behavior."""
   extractor = GraphExtractor()
   assert extractor._get_var_name(cst.Integer("1")) is None
 
 
 def test_node_to_string_fallback() -> None:
-  """Docstring."""
+  """Verify node to string fallback behavior."""
   extractor = GraphExtractor()
   node = cst.Name("var_name")
   assert extractor._node_to_string(node) == "var_name"
 
 
 def test_analyze_call_expression_missing_layer() -> None:
-  """Docstring."""
+  """Verify analyze call expression missing layer behavior."""
   extractor = GraphExtractor()
   # Mock a call with a complex func that doesn't resolve to a string
   call = cst.Call(func=cst.List([]))

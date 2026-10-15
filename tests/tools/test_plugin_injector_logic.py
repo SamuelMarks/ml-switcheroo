@@ -11,7 +11,7 @@ from ml_switcheroo.tools.injector_plugin import PluginGenerator
 
 @pytest.fixture
 def plugin_dir(tmp_path: Path) -> Path:
-  """Docstring."""
+  """Execute plugin dir helper logic."""
   d: Path = tmp_path / "plugins"
   d.mkdir()
   return d

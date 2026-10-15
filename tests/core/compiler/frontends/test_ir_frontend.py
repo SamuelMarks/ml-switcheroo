@@ -2,6 +2,7 @@
 
 import json
 from typing import Any, Dict
+
 import libcst as cst
 import pytest
 
@@ -13,11 +14,7 @@ from ml_switcheroo.core.compiler.frontends.ir import (
   IrPythonParser,
   IrToCstGenerator,
 )
-from ml_switcheroo.core.compiler.ir import (
-  LogicalEdge,
-  LogicalGraph,
-  LogicalNode,
-)
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def test_ir_frontend_parse_valid_json() -> None:

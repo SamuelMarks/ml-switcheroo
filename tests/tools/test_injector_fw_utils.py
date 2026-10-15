@@ -27,7 +27,7 @@ def test_injector_fw_utils_missing() -> None:
     assert isinstance(convert_to_cst_literal("something"), cst.SimpleString)
 
   class UnrecognizedObject:
-    """Docstring."""
+    """Test helper class UnrecognizedObject."""
 
     pass
 

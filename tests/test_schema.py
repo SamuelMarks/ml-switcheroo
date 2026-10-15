@@ -3,11 +3,11 @@
 import pytest
 
 from ml_switcheroo.semantics.schema import (
-  SemanticsFile,
-  validate_yaml_schema,
-  PluginTraits,
-  StructuralTraits,
   FrameworkTraits,
+  PluginTraits,
+  SemanticsFile,
+  StructuralTraits,
+  validate_yaml_schema,
 )
 
 

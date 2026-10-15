@@ -10,14 +10,12 @@ It handles:
 - resolving documentation URLs via Framework Adapters.
 """
 
+import typing
 from typing import Any
 
-import typing
-
-
+from ml_switcheroo.config import get_framework_priority_order
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.config import get_framework_priority_order
 
 
 class DocContextBuilder:

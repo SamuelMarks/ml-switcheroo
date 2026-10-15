@@ -23,7 +23,7 @@ def test_available_frameworks() -> None:
 
   @register_framework(key)
   class TestAdapterAvail:
-    """Docstring."""
+    """Test helper class TestAdapterAvail."""
 
     pass
 
@@ -38,10 +38,10 @@ def test_registry_mechanics() -> None:
 
   @register_framework(key)
   class TestAdapter:
-    """Docstring."""
+    """Test helper class TestAdapter."""
 
     def __init__(self) -> None:
-      """Docstring."""
+      """Initialize test helper instance."""
       self.initialized = True
 
   assert key in _ADAPTER_REGISTRY
@@ -58,7 +58,7 @@ def test_get_adapter_missing() -> None:
 
 @pytest.fixture
 def mock_snapshot_dir(tmp_path: Path) -> Path:
-  """Docstring."""
+  """Execute mock snapshot dir helper logic."""
   d: Path = tmp_path / "snapshots"
   d.mkdir()
   return d

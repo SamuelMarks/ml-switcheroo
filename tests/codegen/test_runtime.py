@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for runtime."""
 
 import pathlib
 import typing
@@ -8,7 +8,7 @@ from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module,
 
 
 def test_get_required_packages() -> None:
-  """Docstring."""
+  """Verify get required packages behavior."""
   assert get_required_packages("import os") == ["os"]
   assert get_required_packages("import os.path") == ["os"]
   assert get_required_packages("from os import path") == ["os"]
@@ -17,7 +17,7 @@ def test_get_required_packages() -> None:
 
 
 def test_ensure_runtime_module_tensorflow_and_jax(tmp_path: pathlib.Path) -> None:
-  """Docstring."""
+  """Verify ensure runtime module tensorflow and jax behavior."""
   mgr: mock.MagicMock = mock.MagicMock()
 
   def mock_get_template(m: typing.Any, fw: str) -> typing.Optional[dict[str, str]]:

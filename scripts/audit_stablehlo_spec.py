@@ -6,12 +6,13 @@ implemented operations to identify and output missing ones.
 
 import json
 import os
-from pathlib import Path
 import re
 import sys
 import tempfile
-from typing import List, Optional, Set
 import urllib.request
+from pathlib import Path
+from typing import List, Optional, Set
+
 import yaml
 
 

@@ -4,6 +4,7 @@ Contains the parser and lifter logic for converting AMD RDNA/GCN assembly
 text into Abstract Syntax Trees (AST) and then into the Logical Graph IR.
 """
 
+from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
   RdnaDirective,
@@ -13,16 +14,15 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaLabelRef,
   RdnaMemory,
   RdnaModifier,
-  RdnaOperand,
   RdnaNode,
+  RdnaOperand,
   RdnaSGPR,
   RdnaVGPR,
   c_SGPR,
   c_VGPR,
 )
-from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
-from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
+from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 
 __all__ = [
   "RdnaComment",

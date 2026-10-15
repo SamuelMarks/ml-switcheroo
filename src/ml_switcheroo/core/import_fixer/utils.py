@@ -7,6 +7,7 @@ generating signatures for deduplication, and creating CST nodes.
 from typing import Union
 
 import libcst as cst
+
 from ml_switcheroo.utils.node_diff import capture_node_source
 
 # Segments that should be collapsed if they appear in framework paths.

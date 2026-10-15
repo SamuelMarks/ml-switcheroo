@@ -6,6 +6,7 @@ internal data structures of ml-switcheroo.
 """
 
 import json
+
 from ml_switcheroo.core.dsl import OperationDef
 
 

@@ -5,8 +5,8 @@ Converts NVIDIA_SASS AST nodes into formatted assembly text.
 
 from typing import List
 
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
 from ml_switcheroo.core.compiler.backends.nvidia_sass.printer import NvidiaSassPrinter
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
 
 
 class NvidiaSassEmitter:

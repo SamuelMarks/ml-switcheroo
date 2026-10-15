@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for tracer."""
 
 from typing import Any, Dict, List, Optional
 
@@ -6,7 +6,7 @@ from ml_switcheroo.core.tracer import TraceEventType, TraceLogger, get_tracer, r
 
 
 def test_trace_logger_lifecycle() -> None:
-  """Docstring."""
+  """Verify trace logger lifecycle behavior."""
   logger: TraceLogger = TraceLogger()
   phase_id: Optional[str] = logger.start_phase("Test Phase", "Phase Description")
   assert phase_id is not None
@@ -60,7 +60,7 @@ def test_trace_logger_lifecycle() -> None:
 
 
 def test_global_tracer() -> None:
-  """Docstring."""
+  """Verify global tracer behavior."""
   reset_tracer()
   t1: TraceLogger = get_tracer()
   t2: TraceLogger = get_tracer()

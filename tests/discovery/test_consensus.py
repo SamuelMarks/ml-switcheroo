@@ -43,7 +43,7 @@ def test_consensus_engine_scan_module_recursion() -> None:
   engine = ConsensusEngine([])
 
   class DummyModule:
-    """Dummy."""
+    """Test helper class DummyModule."""
 
     __name__ = "dummy"
 
@@ -69,7 +69,7 @@ def test_consensus_engine_scan_submodule() -> None:
     __name__ = "dummy.sub"
 
   class Dummy:
-    """Dummy."""
+    """Test helper class Dummy."""
 
     __name__ = "dummy"
     sub = Sub()

@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for doc renderer."""
 
 from typing import Any, Dict, List
 
@@ -6,7 +6,7 @@ from ml_switcheroo.utils.doc_renderer import OpPageRenderer
 
 
 def test_render_rst_full() -> None:
-  """Docstring."""
+  """Verify render rst full behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
   context: Dict[str, Any] = {
     "name": "Abs",
@@ -43,7 +43,7 @@ def test_render_rst_full() -> None:
 
 
 def test_render_rst_no_variants_no_args() -> None:
-  """Docstring."""
+  """Verify render rst no variants no args behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
   context: Dict[str, Any] = {"name": "Dummy", "description": "Dummy desc.", "args": [], "variants": []}
 
@@ -53,7 +53,7 @@ def test_render_rst_no_variants_no_args() -> None:
 
 
 def test_rst_header_structure() -> None:
-  """Docstring."""
+  """Verify rst header structure behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
   context: Dict[str, Any] = {
     "name": "Linear",
@@ -66,7 +66,7 @@ def test_rst_header_structure() -> None:
 
 
 def test_rst_args_block() -> None:
-  """Docstring."""
+  """Verify rst args block behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
   context: Dict[str, Any] = {
     "name": "Linear",
@@ -79,7 +79,7 @@ def test_rst_args_block() -> None:
 
 
 def test_html_injection() -> None:
-  """Docstring."""
+  """Verify html injection behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
   context: Dict[str, Any] = {
     "name": "Linear",
@@ -92,7 +92,7 @@ def test_html_injection() -> None:
 
 
 def test_html_tabs_content() -> None:
-  """Docstring."""
+  """Verify html tabs content behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
   variants: List[Dict[str, Any]] = [
     {

@@ -5,19 +5,20 @@ and reconstructs the `TikzGraph` representation using a formal Lark grammar.
 """
 
 import os
-from typing import List, Union, TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, List, Union
 
 if TYPE_CHECKING:
   from ml_switcheroo.core.graph import LogicalGraph
 
-from lark import Lark, Transformer, Tree, Token
+from lark import Lark, Token, Transformer, Tree
+
 from ml_switcheroo.core.tikz.nodes import (
   TikzBaseNode,
+  TikzEdge,
   TikzGraph,
   TikzNode,
-  TikzEdge,
-  TikzTable,
   TikzOption,
+  TikzTable,
   TikzTextNode,
   TriviaNode,
 )
@@ -460,7 +461,7 @@ def _logical_from_tikz_graph(tikz_graph: TikzGraph) -> "LogicalGraph":
   Returns:
       The reconstructed LogicalGraph IR representing the logical dataflow.
   """
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
+  from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 
   l_graph = LogicalGraph()
   for child in tikz_graph.children:

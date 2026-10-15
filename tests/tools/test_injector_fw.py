@@ -13,7 +13,7 @@ from ml_switcheroo.tools.injector_fw import FrameworkInjector
 
 @pytest.fixture
 def target_json(tmp_path: Path) -> Path:
-  """Docstring."""
+  """Execute target json helper logic."""
   defs_dir: Path = tmp_path / "definitions"
   defs_dir.mkdir()
   initial_data: Dict[str, Dict[str, str]] = {"OldOp": {"api": "torch.old"}}
@@ -24,7 +24,7 @@ def target_json(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def sample_variant() -> FrameworkVariant:
-  """Docstring."""
+  """Execute sample variant helper logic."""
   return FrameworkVariant(api="torch.nn.functional.log_softmax", args={"dim": "dim"}, requires_plugin="custom_plugin")
 
 

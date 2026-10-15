@@ -4,24 +4,24 @@ from ml_switcheroo.core.mlir.types import ComplexType, FloatType, FunctionType, 
 
 
 def test_integer_type() -> None:
-  """Docstring."""
+  """Verify integer type behavior."""
   assert IntegerType(32).to_string() == "i32"
   assert IntegerType(1).to_string() == "i1"
 
 
 def test_float_type() -> None:
-  """Docstring."""
+  """Verify float type behavior."""
   assert FloatType("f32").to_string() == "f32"
   assert FloatType("bf16").to_string() == "bf16"
 
 
 def test_complex_type() -> None:
-  """Docstring."""
+  """Verify complex type behavior."""
   assert ComplexType(FloatType("f64")).to_string() == "complex<f64>"
 
 
 def test_tensor_type() -> None:
-  """Docstring."""
+  """Verify tensor type behavior."""
   f32 = FloatType("f32")
   # Unranked
   assert TensorType(f32, None).to_string() == "tensor<*xf32>"
@@ -34,7 +34,7 @@ def test_tensor_type() -> None:
 
 
 def test_function_type() -> None:
-  """Docstring."""
+  """Verify function type behavior."""
   f32 = FloatType("f32")
   t_f32 = TensorType(f32, None)
   t_i32 = TensorType(IntegerType(32), [10])

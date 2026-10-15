@@ -14,7 +14,8 @@ forcing a hard dependency on `jax` in the generated code.
 """
 
 import libcst as cst
-from ml_switcheroo.core.hooks import register_hook, HookContext
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 # The runtime utility source code to be injected by the transpiler.
 # Updated to use pure NumPy, removing the hard JAX dependency.

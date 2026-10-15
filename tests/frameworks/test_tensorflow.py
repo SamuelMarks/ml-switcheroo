@@ -139,7 +139,7 @@ def test_tensorflow_convert(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_tf = MagicMock()
 
     class DummyTensor:
-      """Docstring."""
+      """Test helper class DummyTensor."""
 
       pass
 
@@ -151,7 +151,7 @@ def test_tensorflow_convert(monkeypatch: pytest.MonkeyPatch) -> None:
     if not hasattr(mock_tf, "Tensor"):
 
       class DummyTensor2:
-        """Docstring."""
+        """Test helper class DummyTensor2."""
 
         pass
 
@@ -213,7 +213,7 @@ def test_tensorflow_missing_coverage() -> None:
 
 
 def test_tensorflow_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify tensorflow init missing behavior."""
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
   monkeypatch.setitem(sys.modules, "tensorflow", None)  # type: ignore
@@ -237,7 +237,7 @@ def test_tensorflow_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_tensorflow_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify tensorflow collect live behavior."""
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
   adapter = tf_fw.TensorFlowAdapter()
@@ -272,7 +272,7 @@ def test_tensorflow_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_tensorflow_collect_ghost_no_snapshot() -> None:
-  """Docstring."""
+  """Verify tensorflow collect ghost no snapshot behavior."""
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
   adapter = tf_fw.TensorFlowAdapter()
@@ -281,7 +281,7 @@ def test_tensorflow_collect_ghost_no_snapshot() -> None:
 
 
 def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify tensorflow convert logic behavior."""
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
   adapter = tf_fw.TensorFlowAdapter()
@@ -291,14 +291,14 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
   mock_tf = MagicMock()
 
   class DummyTensor:
-    """Docstring."""
+    """Test helper class DummyTensor."""
 
     pass
 
   mock_tf.Tensor = DummyTensor
 
   def fake_convert(x: typing.Any) -> typing.Any:
-    """Docstring."""
+    """Execute fake convert helper logic."""
     if type(x).__name__ not in ("list", "ndarray"):
       raise ValueError("Unsupported type")
     return DummyTensor()
@@ -374,7 +374,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_tensorflow_properties_extra() -> None:
-  """Docstring."""
+  """Verify tensorflow properties extra behavior."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
   adapter = TensorFlowAdapter()
@@ -398,7 +398,7 @@ def test_tensorflow_properties_extra() -> None:
 
 
 def test_tensorflow_examples() -> None:
-  """Docstring."""
+  """Verify tensorflow examples behavior."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
   adapter = TensorFlowAdapter()
@@ -409,7 +409,7 @@ def test_tensorflow_examples() -> None:
 
 
 def test_tensorflow_doc_url_extra() -> None:
-  """Docstring."""
+  """Verify tensorflow doc url extra behavior."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
   adapter = TensorFlowAdapter()
@@ -419,8 +419,9 @@ def test_tensorflow_doc_url_extra() -> None:
 
 
 def test_tensorflow_ghost_mode_with_snapshot() -> None:
-  """Docstring."""
+  """Verify tensorflow ghost mode with snapshot behavior."""
   from unittest.mock import patch
+
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
   with patch("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", return_value={"test": 1}):

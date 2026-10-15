@@ -8,14 +8,14 @@ from ml_switcheroo.testing.signature_extractor import FunctionDefVisitor, Signat
 
 
 def test_extract_first_function_name_simple() -> None:
-  """Docstring."""
+  """Verify extract first function name simple behavior."""
   code: str = "def my_func(a, b):\n    pass"
   name: Optional[str] = SignatureExtractor.extract_first_function_name(code)
   assert name == "my_func"
 
 
 def test_extract_first_function_name_multi_line() -> None:
-  """Docstring."""
+  """Verify extract first function name multi line behavior."""
   code: str = """
 def complex_function(
     arg1: int,
@@ -28,7 +28,7 @@ def complex_function(
 
 
 def test_extract_first_function_name_decorator() -> None:
-  """Docstring."""
+  """Verify extract first function name decorator behavior."""
   code: str = """
 # This is a comment
 @dataclass
@@ -41,7 +41,7 @@ def decorated_func():
 
 
 def test_extract_first_function_name_commented_out() -> None:
-  """Docstring."""
+  """Verify extract first function name commented out behavior."""
   code: str = """
 # def commented_func():
 #     pass
@@ -54,21 +54,21 @@ def actual_func():
 
 
 def test_extract_first_function_name_syntax_error() -> None:
-  """Docstring."""
+  """Verify extract first function name syntax error behavior."""
   code: str = "def invalid_syntax("
   name: Optional[str] = SignatureExtractor.extract_first_function_name(code)
   assert name is None
 
 
 def test_extract_first_function_name_no_function() -> None:
-  """Docstring."""
+  """Verify extract first function name no function behavior."""
   code: str = "a = 1 + 2\nprint(a)"
   name: Optional[str] = SignatureExtractor.extract_first_function_name(code)
   assert name is None
 
 
 def test_visitor_returns_false_second_time() -> None:
-  """Docstring."""
+  """Verify visitor returns false second time behavior."""
   visitor: FunctionDefVisitor = FunctionDefVisitor()
   visitor.function_name = "already_set"
   node: cst.FunctionDef = getattr(cst.parse_module("def new_func(): pass"), "body")[0]
@@ -77,7 +77,7 @@ def test_visitor_returns_false_second_time() -> None:
 
 
 def test_extract_first_function_name_another_syntax_error() -> None:
-  """Docstring."""
+  """Verify extract first function name another syntax error behavior."""
   code: str = "this is not python"
   name: Optional[str] = SignatureExtractor.extract_first_function_name(code)
   assert name is None

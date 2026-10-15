@@ -11,7 +11,7 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 class DynKerasAdapter:
-  """Docstring."""
+  """Test helper class DynKerasAdapter."""
 
   declared_magic_args: List[str] = []
   harness_imports: List[str] = []

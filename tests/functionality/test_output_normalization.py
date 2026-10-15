@@ -11,7 +11,7 @@ from tests.conftest import TestRewriter
 
 
 class MockOutputSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockOutputSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockOutputSemantics instance."""
@@ -50,7 +50,7 @@ class MockOutputSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   semantics = MockOutputSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   return TestRewriter(semantics, config)

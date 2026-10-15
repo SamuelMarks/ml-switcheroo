@@ -8,16 +8,36 @@ This module consolidates all structural transformation logic, including:
 5.  **Type Annotation Rewriting**: Mapping framework-specific types (e.g., ``torch.Tensor`` -> ``jax.Array``).
 """
 
-import libcst as cst
-from typing import Any, Dict, List, Optional, Set, Union, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
+import libcst as cst
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.core.rewriter.passes.structure_helpers import StructuralTransformerHelpersMixin
-from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.types import SignatureContext
 from ml_switcheroo.semantics.schema import StructuralTraits
-from ml_switcheroo.core.escape_hatch import EscapeHatch
-from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+_DEFAULT_TENSOR_TYPES: Dict[str, str] = {
+  "torch": "torch.Tensor",
+  "jax": "jax.Array",
+  "flax_nnx": "jax.Array",
+  "mlx": "mlx.core.array",
+  "tensorflow": "tf.Tensor",
+  "keras": "keras.KerasTensor",
+  "numpy": "np.ndarray",
+  "paxml": "jax.Array",
+}
+
+_FALLBACK_MODULE_BASES: Dict[str, str] = {
+  "jax": "flax.nnx.Module",
+}
+
+_FALLBACK_MAGIC_INJECTIONS: Dict[str, Tuple[str, str]] = {
+  "jax": ("rngs", "nnx.Rngs"),
+}
 
 
 class StructuralPass(RewriterPass):
@@ -276,19 +296,9 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       "numpy.ndarray",
     }
     if name in tensor_types:
-      target_type_map = {
-        "torch": "torch.Tensor",
-        "jax": "jax.Array",
-        "flax_nnx": "jax.Array",
-        "mlx": "mlx.core.array",
-        "tensorflow": "tf.Tensor",
-        "keras": "keras.KerasTensor",
-        "numpy": "np.ndarray",
-        "paxml": "jax.Array",
-      }
       tgt = self.context.target_fw
-      if tgt in target_type_map:
-        return {"api": target_type_map[tgt]}
+      if tgt in _DEFAULT_TENSOR_TYPES:
+        return {"api": self.target_traits.tensor_type or _DEFAULT_TENSOR_TYPES[tgt]}
 
     lookup = self.context.semantics.get_definition(name)
     if not lookup:
@@ -321,7 +331,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       try:
         mod = cst.parse_module(code)
         new_stmts.extend(mod.body)
-      except Exception:
+      except (cst.ParserSyntaxError, Exception):
         pass
 
     # Clear buffer to prevent re-injection
@@ -535,9 +545,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
           EscapeHatch.mark_failure(original_node, msg),
         )
 
-      target_base = self.target_traits.module_base
-      if not target_base and self.context.target_fw == "jax":
-        target_base = "flax.nnx.Module"
+      target_base = self.target_traits.module_base or _FALLBACK_MODULE_BASES.get(self.context.target_fw)
 
       new_bases = []
       for base in updated_node.bases:
@@ -623,8 +631,9 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if sig_ctx.is_init and sig_ctx.is_module_method:
       # Inject Magic Args (e.g. rngs)
       injections = list(traits.inject_magic_args)
-      if self.context.target_fw == "jax" and not any(a == "rngs" for a, _ in injections):
-        injections.append(("rngs", "nnx.Rngs"))
+      fallback_inj = _FALLBACK_MAGIC_INJECTIONS.get(self.context.target_fw)
+      if fallback_inj and not any(a == fallback_inj[0] for a, _ in injections):
+        injections.append(fallback_inj)
 
       for arg_name, arg_type in injections:
         if arg_name not in sig_ctx.existing_args:

@@ -1,10 +1,10 @@
 """Tests for local wheel resolution and requirements hooks."""
 
+import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-import os
 
-from ml_switcheroo.sphinx_ext.hooks import find_local_wheel, copy_wheel_and_reqs
+from ml_switcheroo.sphinx_ext.hooks import copy_wheel_and_reqs, find_local_wheel
 
 
 def test_find_local_wheel_cdd_python(tmp_path: Path) -> None:
@@ -88,6 +88,7 @@ def test_find_local_wheel_build_fallback(tmp_path: Path) -> None:
   (cdd_dir / "pyproject.toml").write_text("[project]" + chr(10) + "name='cdd'")
 
   def mock_run(*args: list, **kwargs: dict) -> None:
+    """Execute mock_run test helper."""
     dist = cdd_dir / "dist"
     dist.mkdir(parents=True, exist_ok=True)
     (dist / "cdd-1.0.0-py3-none-any.whl").write_text("built")

@@ -7,11 +7,12 @@ fully qualified names (FQNs) and checks them against the :class:`SemanticsManage
 to determine if they are currently supported by the transpiler.
 """
 
-import libcst as cst
 from typing import Dict, Set, Tuple
 
-from ml_switcheroo.semantics.manager import SemanticsManager
+import libcst as cst
+
 from ml_switcheroo.core.scanners import get_full_name
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class CoverageScanner(cst.CSTVisitor):

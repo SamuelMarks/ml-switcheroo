@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for cpp parser."""
 
 import pytest
 
@@ -18,7 +18,7 @@ from ml_switcheroo.core.compiler.backends.cpp.parser import CppParser
 
 
 def test_parser_empty() -> None:
-  """Docstring."""
+  """Verify parser empty behavior."""
   parser: CppParser = CppParser("   \n ")
   node: CppModule = parser.parse()
   assert isinstance(node, CppModule)
@@ -27,7 +27,7 @@ def test_parser_empty() -> None:
 
 
 def test_parser_include_system() -> None:
-  """Docstring."""
+  """Verify parser include system behavior."""
   parser: CppParser = CppParser("#include <iostream>")
   node: CppModule = parser.parse()
   assert isinstance(node, CppModule)
@@ -37,7 +37,7 @@ def test_parser_include_system() -> None:
 
 
 def test_parser_include_local() -> None:
-  """Docstring."""
+  """Verify parser include local behavior."""
   parser: CppParser = CppParser('#include "my_header.h"')
   node: CppModule = parser.parse()
   assert isinstance(node, CppModule)
@@ -47,7 +47,7 @@ def test_parser_include_local() -> None:
 
 
 def test_parser_macro_define() -> None:
-  """Docstring."""
+  """Verify parser macro define behavior."""
   parser: CppParser = CppParser("#define FOO 1")
   node: CppModule = parser.parse()
   assert len(node.body) == 1
@@ -64,7 +64,7 @@ def test_parser_macro_define() -> None:
 
 
 def test_parser_macro_empty() -> None:
-  """Docstring."""
+  """Verify parser macro empty behavior."""
   parser: CppParser = CppParser("#define BAZ")
   node: CppModule = parser.parse()
   assert len(node.body) == 1
@@ -74,7 +74,7 @@ def test_parser_macro_empty() -> None:
 
 
 def test_parser_function() -> None:
-  """Docstring."""
+  """Verify parser function behavior."""
   code: str = """
     int main() {
         return 0;
@@ -97,7 +97,7 @@ def test_parser_function() -> None:
 
 
 def test_parser_function_args() -> None:
-  """Docstring."""
+  """Verify parser function args behavior."""
   code: str = """
     void foo(int a, float b) {
     }
@@ -114,7 +114,7 @@ def test_parser_function_args() -> None:
 
 
 def test_parser_return_empty() -> None:
-  """Docstring."""
+  """Verify parser return empty behavior."""
   code: str = """
     void foo() {
         return;
@@ -130,7 +130,7 @@ def test_parser_return_empty() -> None:
 
 
 def test_parser_var_decl() -> None:
-  """Docstring."""
+  """Verify parser var decl behavior."""
   code: str = """
     int a;
     float b = 1.0;
@@ -149,7 +149,7 @@ def test_parser_var_decl() -> None:
 
 
 def test_parser_raw_statement() -> None:
-  """Docstring."""
+  """Verify parser raw statement behavior."""
   code: str = """
     std::cout << "hello";
     """
@@ -161,7 +161,7 @@ def test_parser_raw_statement() -> None:
 
 
 def test_parser_expressions() -> None:
-  """Docstring."""
+  """Verify parser expressions behavior."""
   code: str = """
     int main() {
         foo(1, a);
@@ -182,7 +182,7 @@ def test_parser_expressions() -> None:
 
 
 def test_parser_pybind() -> None:
-  """Docstring."""
+  """Verify parser pybind behavior."""
   code: str = """
     PYBIND11_MODULE(my_mod, m) {
         m.def("foo", &foo_impl, "doc");
@@ -202,14 +202,14 @@ def test_parser_pybind() -> None:
 
 
 def test_parser_invalid() -> None:
-  """Docstring."""
+  """Verify parser invalid behavior."""
   parser: CppParser = CppParser("invalid syntax")
   with pytest.raises(ValueError):
     parser.parse()
 
 
 def test_system_include_no_path() -> None:
-  """Docstring."""
+  """Verify system include no path behavior."""
   from lark import Token
 
   from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
@@ -222,7 +222,7 @@ def test_system_include_no_path() -> None:
 
 
 def test_local_include_no_path() -> None:
-  """Docstring."""
+  """Verify local include no path behavior."""
   from lark import Token
 
   from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
@@ -235,7 +235,7 @@ def test_local_include_no_path() -> None:
 
 
 def test_method_call() -> None:
-  """Docstring."""
+  """Verify method call behavior."""
   from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer
 
   transformer: CppTransformer = CppTransformer()
@@ -248,7 +248,7 @@ def test_method_call() -> None:
 
 
 def test_identifier_string_literal() -> None:
-  """Docstring."""
+  """Verify identifier string literal behavior."""
   from lark import Token
 
   from ml_switcheroo.core.compiler.backends.cpp.parser import CppTransformer

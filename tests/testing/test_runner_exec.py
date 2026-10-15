@@ -13,7 +13,7 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 
 @pytest.fixture
 def mock_frameworks() -> Generator[Dict[str, MagicMock], None, None]:
-  """Docstring."""
+  """Execute mock frameworks helper logic."""
 
   def create_safe_mock(name: str, ret_val: float = 5.0) -> MagicMock:
     """Creates safe mock."""

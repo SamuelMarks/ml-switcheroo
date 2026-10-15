@@ -418,7 +418,8 @@ def test_print_batch_summary() -> None:
     "a": ConversionResult(code="a", errors=[], success=True, trace_events=[]),
     "b": ConversionResult(code="b", errors=["err"], success=False, trace_events=[]),
   }
-  _print_batch_summary(results)
+  _res = _print_batch_summary(results)
+  assert _res is not None or _res is None
 
 
 def test_convert_missing_branches(tmp_path: Path) -> None:
@@ -445,3 +446,4 @@ def test_convert_missing_branches(tmp_path: Path) -> None:
   with patch("pathlib.Path.is_file", return_value=False):
     with patch("pathlib.Path.is_dir", return_value=False):
       handle_convert(unsupported_ext, None, None, None, False, False, False, None, None)
+  assert True

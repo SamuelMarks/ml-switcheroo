@@ -4,7 +4,8 @@ This module provides functions to calculate dominators, immediate dominators,
 and back-edges for loop detection in CFGs.
 """
 
-from typing import Dict, Set, List, Optional
+from typing import Dict, List, Optional, Set
+
 from ml_switcheroo.analysis.cfg import ControlFlowGraph
 
 

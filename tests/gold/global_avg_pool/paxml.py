@@ -5,7 +5,7 @@ from praxis import base_layer
 
 
 class GAPModel(base_layer.BaseLayer):
-  """Docstring."""
+  """Test helper class GAPModel."""
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance."""

@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class MaxPoolModel(tf.keras.Model):
-  """Docstring."""
+  """Test helper class MaxPoolModel."""
 
   def __init__(self, pool_size: int = 2, strides: int = 2):
     """Initializes the MaxPoolModel instance."""

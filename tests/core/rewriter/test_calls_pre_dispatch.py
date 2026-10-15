@@ -9,7 +9,7 @@ from ml_switcheroo.core.rewriter.calls.pre import handle_pre_checks, resolve_imp
 
 
 class MockTraits:
-  """Docstring."""
+  """Test helper class MockTraits."""
 
   def __init__(self, method: str = "apply", implicit_roots: typing.Optional[list[str]] = None) -> None:
     """Initializes the MockTraits instance."""
@@ -18,7 +18,7 @@ class MockTraits:
 
 
 class MockType:
-  """Docstring."""
+  """Test helper class MockType."""
 
   def __init__(self, name: str, framework: typing.Optional[str] = None) -> None:
     """Initializes the MockType instance."""
@@ -28,7 +28,7 @@ class MockType:
 
 
 class MockSymbolTable:
-  """Docstring."""
+  """Test helper class MockSymbolTable."""
 
   def __init__(self, sym_type: typing.Any = None) -> None:
     """Initializes the MockSymbolTable instance."""
@@ -40,7 +40,7 @@ class MockSymbolTable:
 
 
 class MockContext:
-  """Docstring."""
+  """Test helper class MockContext."""
 
   def __init__(self, symbol_table: typing.Any = None) -> None:
     """Initializes the MockContext instance."""
@@ -49,7 +49,7 @@ class MockContext:
 
 
 class MockRewriterPre:
-  """Docstring."""
+  """Test helper class MockRewriterPre."""
 
   def __init__(
     self,
@@ -261,7 +261,7 @@ def test_resolve_implicit_method_legacy_fallback() -> None:
 
 
 class MockRule:
-  """Docstring."""
+  """Test helper class MockRule."""
 
   def __init__(self, if_arg: typing.Any, op: typing.Any, is_val: typing.Any = None, use_api: typing.Any = None) -> None:
     """Initializes the MockRule instance."""
@@ -272,7 +272,7 @@ class MockRule:
 
 
 class MockRewriterDispatch:
-  """Docstring."""
+  """Test helper class MockRewriterDispatch."""
 
   def __init__(self, source_fw: str = "src", is_module_val: bool = False) -> None:
     """Initializes the MockRewriterDispatch instance."""

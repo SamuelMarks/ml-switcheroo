@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for discovery."""
 
 from typing import List, Optional
 from unittest.mock import MagicMock, patch
@@ -7,17 +7,17 @@ from ml_switcheroo.core.discovery import SimulatedReflection
 
 
 class MockAdapter:
-  """Docstring."""
+  """Test helper class MockAdapter."""
 
   def __init__(self, search_modules: Optional[List[str]] = None) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     if search_modules is not None:
       self.search_modules: List[str] = search_modules
 
 
 @patch("ml_switcheroo.core.discovery.get_adapter")
 def test_simulated_reflection_init(mock_get_adapter: MagicMock) -> None:
-  """Docstring."""
+  """Verify simulated reflection init behavior."""
   mock_get_adapter.return_value = MockAdapter(search_modules=["test_mod1", "test_mod2"])
   ref: SimulatedReflection = SimulatedReflection("test_fw")
   assert ref.search_modules == ["test_mod1", "test_mod2"]
@@ -25,7 +25,7 @@ def test_simulated_reflection_init(mock_get_adapter: MagicMock) -> None:
 
 @patch("ml_switcheroo.core.discovery.get_adapter")
 def test_simulated_reflection_init_no_search_modules(mock_get_adapter: MagicMock) -> None:
-  """Docstring."""
+  """Verify simulated reflection init no search modules behavior."""
   mock_get_adapter.return_value = MockAdapter()
   ref: SimulatedReflection = SimulatedReflection("test_fw")
   assert ref.search_modules == ["test_fw"]
@@ -33,7 +33,7 @@ def test_simulated_reflection_init_no_search_modules(mock_get_adapter: MagicMock
 
 @patch("ml_switcheroo.core.discovery.get_adapter")
 def test_simulated_reflection_init_no_adapter(mock_get_adapter: MagicMock) -> None:
-  """Docstring."""
+  """Verify simulated reflection init no adapter behavior."""
   mock_get_adapter.return_value = None
   ref: SimulatedReflection = SimulatedReflection("test_fw")
   assert ref.search_modules == ["test_fw"]
@@ -43,7 +43,7 @@ def test_simulated_reflection_init_no_adapter(mock_get_adapter: MagicMock) -> No
 @patch("ml_switcheroo.core.discovery.inspect.getmembers")
 @patch("ml_switcheroo.core.discovery.get_adapter")
 def test_discovery_exact_match(mock_get_adapter: MagicMock, mock_getmembers: MagicMock, mock_import: MagicMock) -> None:
-  """Docstring."""
+  """Verify discovery exact match behavior."""
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA"])
   mock_import.return_value = MagicMock()
   mock_getmembers.return_value = [("_private", None), ("LogSoftmax", None), ("log_softmax", None)]
@@ -58,7 +58,7 @@ def test_discovery_exact_match(mock_get_adapter: MagicMock, mock_getmembers: Mag
 @patch("ml_switcheroo.core.discovery.inspect.getmembers")
 @patch("ml_switcheroo.core.discovery.get_adapter")
 def test_discovery_fuzzy_match(mock_get_adapter: MagicMock, mock_getmembers: MagicMock, mock_import: MagicMock) -> None:
-  """Docstring."""
+  """Verify discovery fuzzy match behavior."""
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA"])
   mock_import.return_value = MagicMock()
   # It will not exactly match "log_softmax" normalized because target is "some_other_op"
@@ -76,7 +76,7 @@ def test_discovery_fuzzy_match(mock_get_adapter: MagicMock, mock_getmembers: Mag
 @patch("ml_switcheroo.core.discovery.importlib.import_module")
 @patch("ml_switcheroo.core.discovery.get_adapter")
 def test_discovery_import_error(mock_get_adapter: MagicMock, mock_import: MagicMock) -> None:
-  """Docstring."""
+  """Verify discovery import error behavior."""
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA"])
   mock_import.side_effect = ImportError("module not found")
 
@@ -91,11 +91,11 @@ def test_discovery_import_error(mock_get_adapter: MagicMock, mock_import: MagicM
 def test_discovery_fuzzy_import_error(
   mock_get_adapter: MagicMock, mock_getmembers: MagicMock, mock_import: MagicMock
 ) -> None:
-  """Docstring."""
+  """Verify discovery fuzzy import error behavior."""
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA", "modB"])
 
   def side_effect(name: str) -> MagicMock:
-    """Docstring."""
+    """Execute side effect helper logic."""
     if name == "modA":
       raise ImportError()
     return MagicMock()
@@ -115,7 +115,7 @@ def test_discovery_fuzzy_import_error(
 def test_discovery_no_fuzzy_match(
   mock_get_adapter: MagicMock, mock_getmembers: MagicMock, mock_import: MagicMock
 ) -> None:
-  """Docstring."""
+  """Verify discovery no fuzzy match behavior."""
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA"])
   mock_import.return_value = MagicMock()
   mock_getmembers.return_value = [("completely_different", None)]

@@ -15,13 +15,13 @@ repos:
         args: [ --fix ]
       - id: ruff-format
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
+  - repo: local
     hooks:
       - id: mypy
-        args: []
-        additional_dependencies: [ types-PyYAML, pydantic ]
-        exclude: ^tests/
+        name: mypy
+        entry: uv run mypy --strict src scripts docs
+        language: system
+        pass_filenames: false
 
 
 
@@ -29,11 +29,19 @@ repos:
     rev: 1.7.0
     hooks:
       - id: interrogate
-        args: [--fail-under=99, -vv]
+        args: [--fail-under=100, -vv, src, scripts, docs, tests]
         pass_filenames: false
 
   - repo: local
     hooks:
+      - id: check-docstrings
+        name: check-docstrings
+        entry: uv run python scripts/check_docstrings.py src scripts docs tests
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
       - id: check-python-loc
         name: check-python-loc
         entry: scripts/check_python_loc.sh
@@ -46,6 +54,13 @@ repos:
         language: script
         types: [python]
         files: ^src/
+
+      - id: validate-snapshot-grounding
+        name: validate-snapshot-grounding
+        entry: uv run python scripts/validate_snapshot_grounding.py --strict --snapshots-dir ../ml-framework-snapshots
+        language: system
+        files: ^(src/ml_switcheroo/semantics/.*|src/ml_switcheroo/frameworks/.*\.py|src/ml_switcheroo/core/compiler/backends/.*|docs/.*operations.*\.yaml)$
+        pass_filenames: false
 
       - id: audit-against-snapshots
         name: audit-against-snapshots
@@ -117,9 +132,16 @@ repos:
         files: ^src/ml_switcheroo/core/mlir/
         pass_filenames: false
 
+      - id: pytest-deprecation-warnings
+        name: pytest-deprecation-warnings
+        entry: uv run pytest -n auto -W error::DeprecationWarning
+        language: system
+        pass_filenames: false
+        always_run: true
+
       - id: pytest-coverage
         name: pytest-coverage
-        entry: uv run pytest -n auto --cov=src --cov-fail-under=100 --cov-branch tests
+        entry: uv run pytest -n auto --cov=src --cov-fail-under=100 --cov-branch -W error::DeprecationWarning tests
         language: system
         pass_filenames: false
         always_run: true

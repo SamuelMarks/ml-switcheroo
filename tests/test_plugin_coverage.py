@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for plugin coverage."""
 
 from unittest import mock
 
@@ -8,7 +8,7 @@ from ml_switcheroo.plugins.in_top_k_plugin import in_top_k_plugin
 
 
 def test_in_top_k_plugin() -> None:
-  """Docstring."""
+  """Verify in top k plugin behavior."""
   node: cst.Call = cst.Call(func=cst.Name("in_top_k"), args=[])
   ctx: mock.MagicMock = mock.MagicMock()
   result: cst.CSTNode = in_top_k_plugin(node, ctx)

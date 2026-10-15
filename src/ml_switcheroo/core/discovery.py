@@ -6,11 +6,12 @@ an abstract operation name. It is used by the ``define`` CLI command to
 resolve `api: "infer"` placeholders in ODL (Operation Definition Language) files.
 """
 
+import difflib
 import importlib
 import inspect
-import difflib
 import logging
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
+
 from ml_switcheroo.frameworks import get_adapter
 
 # Configure local logger

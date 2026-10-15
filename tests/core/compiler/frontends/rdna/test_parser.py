@@ -1,6 +1,4 @@
-"""Test suite for the Parser module."""
-
-import typing
+"""Test suite for parser."""
 
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
@@ -61,7 +59,7 @@ def test_parse_instruction_operands() -> None:
   parser = RdnaParser("v_add_f32 v0, v1, s0, 42, 0xff, my_label")
   nodes: list[RdnaNode] = parser.parse().statements
   assert len(nodes) == 1
-  inst = typing.cast(RdnaInstruction, nodes[0])
+  inst = nodes[0]
   assert inst.opcode == "v_add_f32"
   assert len(inst.operands) == 6
   assert isinstance(inst.operands[0], RdnaVGPR)
@@ -83,7 +81,7 @@ def test_parse_modifiers() -> None:
   """Parses modifiers."""
   parser = RdnaParser("v_add_f32 v0, glc")
   nodes: list[RdnaNode] = parser.parse().statements
-  inst = typing.cast(RdnaInstruction, nodes[0])
+  inst = nodes[0]
   assert len(inst.operands) == 2
   assert isinstance(inst.operands[1], RdnaModifier)
   assert inst.operands[1].name == "glc"
@@ -93,13 +91,13 @@ def test_parse_memory() -> None:
   """Parses memory."""
   parser = RdnaParser("v_add [v0 + 4]")
   nodes: list[RdnaNode] = parser.parse().statements
-  inst = typing.cast(RdnaInstruction, nodes[0])
+  inst = nodes[0]
   assert isinstance(inst.operands[0], RdnaMemory)
   assert isinstance(inst.operands[0].base, RdnaVGPR)
   assert inst.operands[0].offset == 4
   parser2 = RdnaParser("v_add [v1 - 0x2]")
   nodes2: list[RdnaNode] = parser2.parse().statements
-  inst2 = typing.cast(RdnaInstruction, nodes2[0])
+  inst2 = nodes2[0]
   assert getattr(inst2.operands[0], "offset", None) == -2
 
 
@@ -107,7 +105,7 @@ def test_parse_memory_no_offset() -> None:
   """Parses memory no offset."""
   parser = RdnaParser("v_add [v0]")
   nodes: list[RdnaNode] = parser.parse().statements
-  inst = typing.cast(RdnaInstruction, nodes[0])
+  inst = nodes[0]
   assert isinstance(inst.operands[0], RdnaMemory)
   assert inst.operands[0].offset == 0
 
@@ -116,7 +114,7 @@ def test_parse_register_range() -> None:
   """Parses register range."""
   parser = RdnaParser("s_mov_b64 s[0:1], v[10:11]")
   nodes: list[RdnaNode] = parser.parse().statements
-  inst = typing.cast(RdnaInstruction, nodes[0])
+  inst = nodes[0]
   assert isinstance(inst.operands[0], RdnaSGPR)
   assert inst.operands[0].index == 0
   assert inst.operands[0].count == 2
@@ -129,7 +127,7 @@ def test_parse_special_reg() -> None:
   """Parses special reg."""
   parser = RdnaParser("s_mov_b32 exec, 1")
   nodes: list[RdnaNode] = parser.parse().statements
-  inst = typing.cast(RdnaInstruction, nodes[0])
+  inst = nodes[0]
   assert isinstance(inst.operands[0], RdnaLabelRef)
   assert inst.operands[0].name == "exec"
 

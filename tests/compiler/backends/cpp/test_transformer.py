@@ -100,13 +100,6 @@ def test_transformer_return_empty() -> None:
 
 # --- Merged from test_transformer_extra.py ---
 
-"""Unit tests for validating the traversal and transformation capabilities of the C++ Concrete Syntax Tree (CST) Transformer.
-
-This module contains extra test scenarios targeting the CppCSTTransformer class, ensuring
-that the default visitor behavior correctly propagates across all major C++ AST node types
-and can be subclassed to target specific nodes.
-"""
-
 
 def test_full_transform() -> None:
   """Test the CppCSTTransformer with a complete C++ module CST.

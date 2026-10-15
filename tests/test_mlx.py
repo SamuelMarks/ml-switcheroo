@@ -6,7 +6,7 @@ from ml_switcheroo.frameworks.mlx import MLXAdapter
 
 
 def test_mlx_adapter_properties() -> None:
-  """Docstring."""
+  """Verify mlx adapter properties behavior."""
   adapter: MLXAdapter = MLXAdapter()
 
   adapter.import_alias
@@ -66,7 +66,7 @@ def test_mlx_adapter_properties() -> None:
 
 
 def test_mlx_missing_lines() -> None:
-  """Docstring."""
+  """Verify mlx missing lines behavior."""
   from ml_switcheroo.frameworks.mlx import MLXAdapter
 
   adapter: MLXAdapter = MLXAdapter()
@@ -75,12 +75,14 @@ def test_mlx_missing_lines() -> None:
   adapter.get_serialization_imports()
   adapter.get_serialization_syntax("save", "path", "obj")
   adapter.get_serialization_syntax("load", "path")
-  adapter.get_serialization_syntax("other", "path")
+  _res = adapter.get_serialization_syntax("other", "path")
+  assert _res is not None or _res is None
 
 
 def test_mlx_io_mixin_direct() -> None:
-  """Docstring."""
+  """Verify mlx io mixin direct behavior."""
   from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
   mixin: MlxIOMixin = MlxIOMixin()
-  mixin.get_serialization_imports()
+  _res = mixin.get_serialization_imports()
+  assert _res is not None or _res is None

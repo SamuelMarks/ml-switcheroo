@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin attention packing."""
 
 from unittest.mock import MagicMock
 
@@ -16,7 +16,7 @@ from ml_switcheroo.plugins.attention_packing import (
 
 
 def test_create_dotted_name():
-  """Docstring."""
+  """Verify create dotted name behavior."""
   node = _create_dotted_name("a.b.c")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "c"
@@ -27,7 +27,7 @@ def test_create_dotted_name():
 
 
 def test_resolve_target_class():
-  """Docstring."""
+  """Verify resolve target class behavior."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "new.MultiheadAttention"
   node = _resolve_target_class(ctx)
@@ -41,7 +41,7 @@ def test_resolve_target_class():
 
 
 def test_is_constructor_signature():
-  """Docstring."""
+  """Verify is constructor signature behavior."""
   args_kw = [cst.Arg(keyword=cst.Name("embed_dim"), value=cst.Integer("10"))]
   assert _is_constructor_signature(args_kw) is True
 
@@ -53,7 +53,7 @@ def test_is_constructor_signature():
 
 
 def test_repack_attn_keras_constructor():
-  """Docstring."""
+  """Verify repack attn keras constructor behavior."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "keras.layers.MultiHeadAttention"
   node = cst.Call(
@@ -78,7 +78,7 @@ def test_repack_attn_keras_constructor():
 
 
 def test_repack_attn_keras_call():
-  """Docstring."""
+  """Verify repack attn keras call behavior."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None  # Doesn't matter for call
   node = cst.Call(
@@ -110,7 +110,7 @@ def test_repack_attn_keras_call():
 
 
 def test_repack_attn_flax_constructor():
-  """Docstring."""
+  """Verify repack attn flax constructor behavior."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "flax.nnx.MultiHeadAttention"
   node = cst.Call(
@@ -127,7 +127,7 @@ def test_repack_attn_flax_constructor():
 
 
 def test_repack_attn_flax_call():
-  """Docstring."""
+  """Verify repack attn flax call behavior."""
   ctx = MagicMock(spec=HookContext)
   node = cst.Call(
     func=cst.Name("attn"),
@@ -149,7 +149,7 @@ def test_repack_attn_flax_call():
 
 
 def test_repack_attn_torch_constructor():
-  """Docstring."""
+  """Verify repack attn torch constructor behavior."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "torch.nn.MultiheadAttention"
   node = cst.Call(
@@ -176,7 +176,7 @@ def test_repack_attn_torch_constructor():
 
 
 def test_repack_attn_torch_call():
-  """Docstring."""
+  """Verify repack attn torch call behavior."""
   ctx = MagicMock(spec=HookContext)
   # In repack_attn_torch, it converts key kwarg to positional if named 'key' but if we have kwargs before positional it's invalid.
   # The original args must be valid Python.

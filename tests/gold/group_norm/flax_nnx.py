@@ -5,7 +5,7 @@ from flax import nnx
 
 
 class GNModel(nnx.Module):
-  """Docstring."""
+  """Test helper class GNModel."""
 
   def __init__(self, num_groups: int, num_channels: int, rngs: nnx.Rngs):
     """Initializes the GNModel instance."""

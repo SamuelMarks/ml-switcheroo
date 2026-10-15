@@ -4,7 +4,7 @@ import numpy as np
 
 
 class EmbeddingModel:
-  """Docstring."""
+  """Test helper class EmbeddingModel."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int):
     """Initializes the EmbeddingModel instance."""

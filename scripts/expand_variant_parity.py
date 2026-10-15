@@ -9,14 +9,15 @@ import argparse
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
+
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
   sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.audit_against_snapshots import load_snapshots_multi  # noqa: E402
-from scripts.drain_quarantine import find_snapshot_api_match, build_variant_entry  # noqa: E402
+from scripts.drain_quarantine import build_variant_entry, find_snapshot_api_match  # noqa: E402
+from scripts.snapshots.loader import load_snapshots_multi  # noqa: E402
 
 # Canonical mapping for basic ALU and Kernel Macros across RDNA and SASS
 ISA_ALU_MACRO_MAP: Dict[str, Dict[str, str]] = {

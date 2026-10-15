@@ -1,22 +1,33 @@
-"""Docstring."""
+"""Test suite for rdna cst."""
 
 import typing
 
+from ml_switcheroo.core.compiler.frontends.rdna.cst import (
+  RdnaDirective,
+  RdnaImmediate,
+  RdnaInstruction,
+  RdnaLabelRef,
+  RdnaMemory,
+  RdnaModifier,
+  RdnaSGPR,
+  RdnaVGPR,
+)
+
 
 def test_rdna_cst_repr() -> None:
-  """Docstring."""
+  """Verify rdna cst repr behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaNode
   from ml_switcheroo.core.cst.base import Trivia
 
   class DummyRdna(RdnaNode):
-    """Docstring."""
+    """Test helper class DummyRdna."""
 
     def _get_name(self) -> str:
-      """Docstring."""
+      """Execute get name helper logic."""
       return "Dummy"
 
     def _get_fields(self) -> dict[str, typing.Any]:
-      """Docstring."""
+      """Execute get fields helper logic."""
       return {"a": 1}
 
   d = DummyRdna()
@@ -26,9 +37,7 @@ def test_rdna_cst_repr() -> None:
 
 
 def test_rdna_cst_repr_methods() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaDirective, RdnaMemory, RdnaSGPR, RdnaVGPR
-
+  """Verify rdna cst repr methods behavior."""
   d = RdnaDirective(name="a", params=["1"])
   assert "a" in repr(d)
 
@@ -43,8 +52,8 @@ def test_rdna_cst_repr_methods() -> None:
 
 
 def test_rdna_cst_render() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaLabelRef, RdnaModifier, c_SGPR, c_VGPR
+  """Verify rdna cst render behavior."""
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import c_SGPR, c_VGPR
   from ml_switcheroo.core.cst.base import Trivia
 
   label = RdnaLabelRef(name="label")
@@ -65,7 +74,7 @@ def test_rdna_cst_render() -> None:
 
 
 def test_rdna_instruction_validation() -> None:
-  """Docstring."""
+  """Verify rdna instruction validation behavior."""
   import pytest
 
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction
@@ -75,8 +84,8 @@ def test_rdna_instruction_validation() -> None:
 
 
 def test_rdna_instruction_render_empty_operands() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
+  """Verify rdna instruction render empty operands behavior."""
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction
 
   i = RdnaInstruction(opcode="nop", operands=[RdnaImmediate(value=0), RdnaImmediate(value=1)])  # type: ignore
   assert "nop 0, 1" in i.to_text()
@@ -86,8 +95,8 @@ def test_rdna_instruction_render_empty_operands() -> None:
 
 
 def test_rdna_instruction_trivia() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction, RdnaModule
+  """Verify rdna instruction trivia behavior."""
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaModule
   from ml_switcheroo.core.cst.base import Trivia
 
   op = RdnaImmediate(value=0)  # type: ignore

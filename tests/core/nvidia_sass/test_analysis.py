@@ -1,4 +1,4 @@
-"""Test suite for the Analysis module."""
+"""Test suite for analysis."""
 
 import typing
 
@@ -57,7 +57,7 @@ def test_analyze_no_loop_found() -> None:
 
 
 def test_nvidia_sass_analysis_other_kinds() -> None:
-  """Docstring."""
+  """Verify nvidia sass analysis other kinds behavior."""
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate, NvidiaSassInstruction
 

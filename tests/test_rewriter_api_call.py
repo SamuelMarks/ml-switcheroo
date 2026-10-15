@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for rewriter api call."""
 
 
 # --- Merged from test_rewriter_api_call_extra.py ---
@@ -14,38 +14,38 @@ from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
 
 
 class DummySemantics:
-  """Docstring."""
+  """Test helper class DummySemantics."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.alias_map: Dict[str, str] = {"t": "torch"}
     self._key_origins: Dict[str, str] = {"abs_id": "neural"}
 
   def get_definition(self, func_name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-    """Docstring."""
+    """Execute get definition helper logic."""
     return None
 
   def get_framework_config(self, fw: str) -> Dict[str, Any]:
-    """Docstring."""
+    """Execute get framework config helper logic."""
     return {"alias": {}}
 
   def resolve_op_id(self, fw: str, name: str) -> Optional[str]:
-    """Docstring."""
+    """Execute resolve op id helper logic."""
     if name == "torch.nn.Linear":
       return "Linear"
     return None
 
   def is_verified(self, abs_id: str) -> bool:
-    """Docstring."""
+    """Execute is verified helper logic."""
     return True
 
   def resolve_variant(self, abs_id: str, target: str) -> Dict[str, str]:
-    """Docstring."""
+    """Execute resolve variant helper logic."""
     return {"api": "jax.func"}
 
 
 def test_api_call_mixin_branches() -> None:
-  """Docstring."""
+  """Verify api call mixin branches behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
   semantics: DummySemantics = DummySemantics()
   context: RewriterContext = RewriterContext(semantics=semantics, config=config)
@@ -71,38 +71,38 @@ def test_api_call_mixin_branches() -> None:
 
 
 class DummySemanticsExtra:
-  """Docstring."""
+  """Test helper class DummySemanticsExtra."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.alias_map: Dict[str, str] = {"t": "torch"}
     self._key_origins: Dict[str, str] = {"abs_id": "neural"}
 
   def get_definition(self, func_name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-    """Docstring."""
+    """Execute get definition helper logic."""
     return None
 
   def get_framework_config(self, fw: str) -> Dict[str, Any]:
-    """Docstring."""
+    """Execute get framework config helper logic."""
     return {"alias": {}}
 
   def resolve_op_id(self, fw: str, name: str) -> Optional[str]:
-    """Docstring."""
+    """Execute resolve op id helper logic."""
     if name == "torch.nn.Linear":
       return "Linear"
     return None
 
   def is_verified(self, abs_id: str) -> bool:
-    """Docstring."""
+    """Execute is verified helper logic."""
     return True
 
   def resolve_variant(self, abs_id: str, target: str) -> Dict[str, str]:
-    """Docstring."""
+    """Execute resolve variant helper logic."""
     return {"api": "jax.func"}
 
 
 def test_api_call_mixin_branches2() -> None:
-  """Docstring."""
+  """Verify api call mixin branches2 behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
   semantics: DummySemantics = DummySemantics()
   context: RewriterContext = RewriterContext(semantics=semantics, config=config)

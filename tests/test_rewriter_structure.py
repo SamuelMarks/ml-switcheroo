@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for rewriter structure."""
 
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -11,10 +11,10 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class DummySemantics:
-  """Docstring."""
+  """Test helper class DummySemantics."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.framework_configs: Dict[str, Any] = {
       "jax": {
         "tiers": ["array", "neural"],
@@ -28,11 +28,11 @@ class DummySemantics:
     self.variants: Dict[Tuple[str, str], Optional[Dict[str, Any]]] = {}
 
   def get_framework_config(self, fw: str) -> Optional[Dict[str, Any]]:
-    """Docstring."""
+    """Execute get framework config helper logic."""
     return self.framework_configs.get(fw)
 
   def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-    """Docstring."""
+    """Execute get definition helper logic."""
     if name in self.defs:
       return self.defs[name]
     if name == "torch.Tensor":
@@ -40,7 +40,7 @@ class DummySemantics:
     return None
 
   def resolve_variant(self, abstract_id: str, fw: str) -> Optional[Dict[str, Any]]:
-    """Docstring."""
+    """Execute resolve variant helper logic."""
     if (abstract_id, fw) in self.variants:
       return self.variants[(abstract_id, fw)]
     if abstract_id == "tensor" and fw == "jax":
@@ -49,7 +49,7 @@ class DummySemantics:
 
 
 def test_structure_pass() -> None:
-  """Docstring."""
+  """Verify structure pass behavior."""
   code: str = """
 import torch
 import torch.nn as nn
@@ -85,7 +85,7 @@ class MyModel(nn.Module):
 
 
 def test_structure_transformer_edge_cases() -> None:
-  """Docstring."""
+  """Verify structure transformer edge cases behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
   semantics: DummySemantics = DummySemantics()
   context: RewriterContext = RewriterContext(semantics=semantics, config=config)
@@ -184,7 +184,7 @@ def test_structure_transformer_edge_cases() -> None:
 
 
 def test_type_annotations_nested() -> None:
-  """Docstring."""
+  """Verify type annotations nested behavior."""
   code: str = """
 def foo(x: List[torch.Tensor]):
     pass
@@ -203,10 +203,10 @@ def foo(x: List[torch.Tensor]):
 
 
 class DummySemanticsExtra:
-  """Docstring."""
+  """Test helper class DummySemanticsExtra."""
 
   def __init__(self):
-    """Docstring."""
+    """Initialize test helper instance."""
     self.framework_configs = {
       "jax": {
         "tiers": ["array", "neural"],
@@ -218,24 +218,24 @@ class DummySemanticsExtra:
     self.known_magic_args = ["rngs"]
 
   def get_framework_config(self, fw):
-    """Docstring."""
+    """Execute get framework config helper logic."""
     return self.framework_configs.get(fw)
 
   def get_definition(self, name):
-    """Docstring."""
+    """Execute get definition helper logic."""
     if name == "torch.Tensor":
       return ("tensor", {})
     return None
 
   def resolve_variant(self, abstract_id, fw):
-    """Docstring."""
+    """Execute resolve variant helper logic."""
     if abstract_id == "tensor" and fw == "jax":
       return {"api": "jax.Array"}
     return None
 
 
 def test_structure_transformer_edge_cases2():
-  """Docstring."""
+  """Verify structure transformer edge cases2 behavior."""
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
   semantics = DummySemantics()
   context = RewriterContext(semantics=semantics, config=config)
@@ -243,7 +243,7 @@ def test_structure_transformer_edge_cases2():
 
   # 181, 183->174: self._known_module_bases
   class DummyTraits:
-    """Docstring."""
+    """Test helper class DummyTraits."""
 
     module_base = "dummy.Module"
 

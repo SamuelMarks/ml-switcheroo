@@ -14,9 +14,10 @@ Key Features:
 - **ODL Generation**: Generates validated ODL dictionary mappings with domain and opset tracking.
 """
 
-from pathlib import Path
 import re
+from pathlib import Path
 from typing import Any, Dict, List
+
 import yaml
 
 from ml_switcheroo.utils.console import log_error, log_info

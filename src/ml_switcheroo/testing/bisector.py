@@ -12,11 +12,9 @@ Capabilities:
     which can be used to patch the Knowledge Base.
 """
 
-import typing
-
-
 import copy
 import logging
+import typing
 from typing import Any, Dict, List
 
 from ml_switcheroo.testing.runner import EquivalenceRunner

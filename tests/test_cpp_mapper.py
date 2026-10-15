@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for cpp mapper."""
 
 import ast
 import os
@@ -11,14 +11,14 @@ from ml_switcheroo.core.compiler.backends.cpp.mapper import ASTToCppMapper
 
 
 def test_mapper_init_no_file(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify mapper init no file behavior."""
   monkeypatch.setattr(os.path, "exists", lambda p: False)
   mapper: ASTToCppMapper = ASTToCppMapper()
   assert mapper.op_map == {}
 
 
 def test_mapper_init_with_file() -> None:
-  """Docstring."""
+  """Verify mapper init with file behavior."""
   mock_data: str = '{"Add": "+"}'
   with patch("os.path.exists", return_value=True), patch("builtins.open", mock_open(read_data=mock_data)):
     mapper: ASTToCppMapper = ASTToCppMapper()
@@ -26,7 +26,7 @@ def test_mapper_init_with_file() -> None:
 
 
 def test_mapper_expression_name() -> None:
-  """Docstring."""
+  """Verify mapper expression name behavior."""
   mapper: ASTToCppMapper = ASTToCppMapper()
   node: ast.Name = ast.Name(id="foo")
   expr: CppNode = mapper.map_expression(node)
@@ -35,7 +35,7 @@ def test_mapper_expression_name() -> None:
 
 
 def test_mapper_expression_binop() -> None:
-  """Docstring."""
+  """Verify mapper expression binop behavior."""
   mapper: ASTToCppMapper = ASTToCppMapper()
   mapper.op_map = {"Add": "+"}
   node: ast.BinOp = ast.BinOp(left=ast.Name(id="a"), op=ast.Add(), right=ast.Name(id="b"))
@@ -47,7 +47,7 @@ def test_mapper_expression_binop() -> None:
 
 
 def test_mapper_expression_binop_unknown_op() -> None:
-  """Docstring."""
+  """Verify mapper expression binop unknown op behavior."""
   mapper: ASTToCppMapper = ASTToCppMapper()
   mapper.op_map = {}
   node: ast.BinOp = ast.BinOp(left=ast.Name(id="a"), op=ast.Sub(), right=ast.Name(id="b"))
@@ -57,7 +57,7 @@ def test_mapper_expression_binop_unknown_op() -> None:
 
 
 def test_mapper_expression_call_name() -> None:
-  """Docstring."""
+  """Verify mapper expression call name behavior."""
   mapper: ASTToCppMapper = ASTToCppMapper()
   node: ast.Call = ast.Call(func=ast.Name(id="foo"), args=[ast.Name(id="a")], keywords=[])
   expr: CppNode = mapper.map_expression(node)
@@ -68,7 +68,7 @@ def test_mapper_expression_call_name() -> None:
 
 
 def test_mapper_expression_call_attribute() -> None:
-  """Docstring."""
+  """Verify mapper expression call attribute behavior."""
   mapper: ASTToCppMapper = ASTToCppMapper()
   node: ast.Call = ast.Call(func=ast.Attribute(value=ast.Name(id="obj"), attr="method"), args=[], keywords=[])
   expr: CppNode = mapper.map_expression(node)
@@ -77,7 +77,7 @@ def test_mapper_expression_call_attribute() -> None:
 
 
 def test_mapper_expression_call_unknown() -> None:
-  """Docstring."""
+  """Verify mapper expression call unknown behavior."""
   mapper: ASTToCppMapper = ASTToCppMapper()
   # Call with a function that is not Name or Attribute (e.g. Call of Call)
   node: ast.Call = ast.Call(func=ast.Call(func=ast.Name(id="f"), args=[], keywords=[]), args=[], keywords=[])
@@ -87,7 +87,7 @@ def test_mapper_expression_call_unknown() -> None:
 
 
 def test_mapper_expression_call_attribute_complex() -> None:
-  """Docstring."""
+  """Verify mapper expression call attribute complex behavior."""
   mapper: ASTToCppMapper = ASTToCppMapper()
   # Call with an attribute where value is not a Name
   node: ast.Call = ast.Call(
@@ -99,7 +99,7 @@ def test_mapper_expression_call_attribute_complex() -> None:
 
 
 def test_mapper_expression_constant() -> None:
-  """Docstring."""
+  """Verify mapper expression constant behavior."""
   mapper: ASTToCppMapper = ASTToCppMapper()
   node: ast.Constant = ast.Constant(value=42)
   expr: CppNode = mapper.map_expression(node)
@@ -108,7 +108,7 @@ def test_mapper_expression_constant() -> None:
 
 
 def test_mapper_expression_unsupported() -> None:
-  """Docstring."""
+  """Verify mapper expression unsupported behavior."""
   mapper: ASTToCppMapper = ASTToCppMapper()
   node: ast.List = ast.List(elts=[])
   with pytest.raises(ValueError):

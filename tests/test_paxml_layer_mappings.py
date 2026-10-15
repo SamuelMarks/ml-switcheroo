@@ -7,7 +7,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_conv2d_paxml_positional() -> None:
-  """Docstring."""
+  """Verify conv2d paxml positional behavior."""
   code: str = "import torch.nn as nn\nself.conv = nn.Conv2d(1, 32, 3)"
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="paxml")
   semantics: SemanticsManager = SemanticsManager()
@@ -18,7 +18,7 @@ def test_conv2d_paxml_positional() -> None:
 
 
 def test_linear_paxml_positional() -> None:
-  """Docstring."""
+  """Verify linear paxml positional behavior."""
   code: str = "import torch.nn as nn\nself.fc = nn.Linear(32 * 26 * 26, 10)"
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="paxml")
   semantics: SemanticsManager = SemanticsManager()

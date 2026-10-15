@@ -4,8 +4,8 @@ This module provides the StableHloParser, which parses StableHLO textual represe
 It leverages the existing MlirParser infrastructure to produce an MLIR CST.
 """
 
-from ml_switcheroo.core.mlir.parser import MlirParser
 from ml_switcheroo.core.mlir.cst import ModuleNode
+from ml_switcheroo.core.mlir.parser import MlirParser
 
 
 class StableHloParser:

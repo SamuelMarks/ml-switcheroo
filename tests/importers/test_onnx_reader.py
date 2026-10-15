@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for onnx reader."""
 
 from pathlib import Path
 
@@ -6,14 +6,14 @@ from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter, clean_html_tag
 
 
 def test_onnx_reader_missing_file(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify onnx reader missing file behavior."""
   importer = OnnxSpecImporter()
   res = importer.parse_file(tmp_path / "missing.md")
   assert res == {}
 
 
 def test_onnx_reader_parse_markdown(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify onnx reader parse markdown behavior."""
   importer = OnnxSpecImporter()
 
   md_content = """
@@ -65,7 +65,7 @@ Adds two tensors.
 
 
 def test_map_onnx_type() -> None:
-  """Docstring."""
+  """Verify map onnx type behavior."""
   importer = OnnxSpecImporter()
 
   # Lists
@@ -91,7 +91,7 @@ def test_map_onnx_type() -> None:
 
 
 def test_long_summary(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify long summary behavior."""
   importer = OnnxSpecImporter()
   long_desc = "A" * 310
 
@@ -110,7 +110,7 @@ def test_long_summary(tmp_path: Path) -> None:
 
 
 def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify onnx reader extra branches behavior."""
   importer = OnnxSpecImporter()
   md_content = """
 ### <a name="Dup"></a>
@@ -131,6 +131,7 @@ def test_onnx_reader_all_missing_branches(tmp_path: Path) -> None:
   """Test remaining branches in onnx reader."""
   import inspect
   from unittest.mock import MagicMock, patch
+
   from markdown_it.token import Token
 
   importer = OnnxSpecImporter()

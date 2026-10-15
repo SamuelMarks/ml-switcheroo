@@ -1,9 +1,10 @@
 """Unit tests for scripts/audit_stablehlo_spec.py StableHLO specification auditor."""
 
-from pathlib import Path
 import runpy
 import tempfile
+from pathlib import Path
 from unittest.mock import MagicMock, patch
+
 import pytest
 
 from scripts.audit_stablehlo_spec import (

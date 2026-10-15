@@ -8,8 +8,10 @@ lazy-loading of plugins, and retrieval of hooks for AST transformations.
 import importlib
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Callable, List, Any
+from typing import Any, Callable, Dict, List, Optional
+
 import libcst as cst
+
 from ml_switcheroo.core.hooks import AutoWireSpec
 
 # Global registry
@@ -150,21 +152,22 @@ def _import_from_dir(directory: Path, base_package: Optional[str] = None) -> int
   if base_package is None:
     sys.path.insert(0, str(directory))
 
-  for py_file in directory.glob("*.py"):
-    if py_file.name.startswith("__"):
-      continue
-    mod_name = py_file.stem
-    full_mod_name = f"{base_package}.{mod_name}" if base_package else mod_name
-    try:
-      if full_mod_name in sys.modules:
-        importlib.reload(sys.modules[full_mod_name])
-      else:
-        importlib.import_module(full_mod_name)
-      count += 1
-    except Exception as e:
-      logging.getLogger("ml_switcheroo.hooks").warning(f"Failed to load plugin {py_file.name}: {e}")
-
-  if base_package is None:
-    sys.path.pop(0)
+  try:
+    for py_file in directory.glob("*.py"):
+      if py_file.name.startswith("__"):
+        continue
+      mod_name = py_file.stem
+      full_mod_name = f"{base_package}.{mod_name}" if base_package else mod_name
+      try:
+        if full_mod_name in sys.modules:
+          importlib.reload(sys.modules[full_mod_name])
+        else:
+          importlib.import_module(full_mod_name)
+        count += 1
+      except Exception as e:
+        logging.getLogger("ml_switcheroo.hooks").warning(f"Failed to load plugin {py_file.name}: {e}")
+  finally:
+    if base_package is None:
+      sys.path.pop(0)
 
   return count

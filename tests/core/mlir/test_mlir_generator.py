@@ -106,7 +106,7 @@ def test_sw_call_generation() -> None:
 
 
 def test_trivia_restoration_percent() -> None:
-  """Docstring."""
+  """Verify trivia restoration percent behavior."""
   from ml_switcheroo.core.cst.base import Trivia
   from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
   from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
@@ -118,7 +118,7 @@ def test_trivia_restoration_percent() -> None:
 
 
 def test_trivia_restoration_no_content() -> None:
-  """Docstring."""
+  """Verify trivia restoration no content behavior."""
   from ml_switcheroo.core.cst.base import Trivia
   from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
   from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator

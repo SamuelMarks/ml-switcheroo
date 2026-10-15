@@ -110,6 +110,7 @@ def copy_external_wheels() -> None:
     return
 
   import urllib.request
+
   from ml_switcheroo.sphinx_ext.hooks import find_local_wheel
 
   with open(reqs_file, "r", encoding="utf-8") as f:

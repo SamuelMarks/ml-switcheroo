@@ -4,11 +4,10 @@ This module provides helper functions to convert Python runtime objects (diction
 lists, primitives) into LibCST nodes, as well as utilities for inspecting import definitions.
 """
 
-import typing
-
-
-from typing import List
 import json
+import typing
+from typing import List
+
 import libcst as cst
 
 

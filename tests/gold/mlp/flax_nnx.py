@@ -6,7 +6,7 @@ from flax import nnx
 
 
 class MLP(nnx.Module):
-  """Docstring."""
+  """Test helper class MLP."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int, rngs: nnx.Rngs):
     """Initializes the MLP instance."""

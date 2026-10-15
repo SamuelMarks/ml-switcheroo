@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for GraphExtractor coverage with explicit graph assertions."""
 
 import libcst as cst
 
@@ -6,7 +6,7 @@ from ml_switcheroo.core.graph import GraphExtractor
 
 
 def get_extractor(code: str) -> GraphExtractor:
-  """Docstring."""
+  """Parse ``code`` and run GraphExtractor over the CST module."""
   tree: cst.Module = cst.parse_module(code)
   extractor: GraphExtractor = GraphExtractor()
   tree.visit(extractor)
@@ -14,7 +14,7 @@ def get_extractor(code: str) -> GraphExtractor:
 
 
 def test_other_functions() -> None:
-  """Docstring."""
+  """Verify helper methods outside __init__/forward are ignored by GraphExtractor."""
   code: str = """
 class Net:
     def __init__(self):
@@ -27,29 +27,34 @@ class Net:
   ex: GraphExtractor = get_extractor(code)
   assert not ex._in_forward
   assert not ex._in_init
+  assert "conv" in ex.layer_registry
 
 
 def test_expr_not_call() -> None:
-  """Docstring."""
+  """Verify non-call expressions at module scope do not create spurious op nodes."""
   code: str = """
 x = 1
 1 + 1
 """
   ex: GraphExtractor = get_extractor(code)
   assert len(ex.graph.nodes) == 1
+  assert "Input_x" in ex.graph.nodes
 
 
 def test_unsupported_return() -> None:
-  """Docstring."""
+  """Verify bare return statement produces no Output node."""
   code: str = """
 def forward():
     return
 """
-  get_extractor(code)
+  ex = get_extractor(code)
+  assert "output" not in ex.layer_registry
+  assert "output" not in ex.graph.nodes
+  assert ex.graph.edges == []
 
 
 def test_function_names() -> None:
-  """Docstring."""
+  """Verify setup() and call() are recognized as init and forward methods."""
   code: str = """
 class Net:
     def setup(self):
@@ -57,22 +62,30 @@ class Net:
     def call(self, x):
         pass
 """
-  get_extractor(code)
+  ex = get_extractor(code)
+  assert "layer" in ex.layer_registry
+  assert "Input_x" in ex.layer_registry
+  assert "Input_x" in ex.graph.nodes
 
 
 def test_other_forward_names() -> None:
-  """Docstring."""
+  """Verify kernel, f, and __call__ are recognized as forward entrypoints."""
   for name in ["kernel", "f", "__call__"]:
     code: str = f"""
 class Net:
     def {name}(self, x):
         return x
 """
-    get_extractor(code)
+    ex = get_extractor(code)
+    assert "Input_x" in ex.layer_registry
+    assert "output" in ex.layer_registry
+    assert "Input_x" in ex.graph.nodes
+    assert "output" in ex.graph.nodes
+    assert len(ex.graph.edges) == 1
 
 
 def test_layer_def_edge_cases() -> None:
-  """Docstring."""
+  """Verify layer definition edge cases in __init__."""
   code: str = """
 class Net:
     def __init__(self):
@@ -82,11 +95,15 @@ class Net:
         self.layer3 = nn.Sequential()
         self.layer3.sub = op()
 """
-  get_extractor(code)
+  ex = get_extractor(code)
+  assert "layer1" in ex.layer_registry
+  assert "layer2" not in ex.layer_registry
+  assert "layer3" in ex.layer_registry
+  assert ex.graph.edges == []
 
 
 def test_data_flow_edge_cases() -> None:
-  """Docstring."""
+  """Verify data flow analysis for literals, chained assignments, and attribute targets."""
   code: str = """
 a = 1.0
 b = a
@@ -96,11 +113,15 @@ def forward():
     y = z = F.relu(x)
     a.b = F.relu(x) # out_var_name is None
 """
-  get_extractor(code)
+  ex = get_extractor(code)
+  assert "Input_a" in ex.layer_registry
+  assert "func_relu" in ex.layer_registry
+  assert "func_relu" in ex.graph.nodes
+  assert ex.graph.edges == []
 
 
 def test_returns() -> None:
-  """Docstring."""
+  """Verify return statement handling across variable and call return expressions."""
   code: str = """
 class Net:
     def forward(self, x):
@@ -118,39 +139,50 @@ class Net:
         if False:
             return (a[0])() # returning a direct call where resolve returns None
 """
-  get_extractor(code)
+  ex = get_extractor(code)
+  assert "output" in ex.layer_registry
+  assert "func_op" in ex.layer_registry
+  assert "output" in ex.graph.nodes
+  assert len(ex.graph.edges) >= 2
 
 
 def test_module_level_call() -> None:
-  """Docstring."""
+  """Verify module-level function call registers implicit external input and functional op."""
   code: str = """
 F.relu(ext_var, kw=True)
 """
-  get_extractor(code)
+  ex = get_extractor(code)
+  assert "Input_ext_var" in ex.layer_registry
+  assert "func_relu" in ex.layer_registry
+  assert "func_relu" in ex.graph.nodes
+  assert len(ex.graph.edges) == 2
 
 
 def test_resolve_layer_or_func_name_context() -> None:
-  """Docstring."""
+  """Verify _resolve_layer_or_func_name with None and Pass context nodes."""
   code: str = """
 def forward():
     F.relu(1)
 """
   ex: GraphExtractor = get_extractor(code)
   call_node: cst.BaseExpression = cst.parse_expression("F.relu(x)")
-  # Context None
-  ex._resolve_layer_or_func_name(getattr(call_node, "func", None), context_node=None)
-  # Context not call, expr, assign (hit 322 -> 325 and 325 -> 334)
-  ex._resolve_layer_or_func_name(getattr(call_node, "func", None), context_node=cst.Pass())
+  res1 = ex._resolve_layer_or_func_name(getattr(call_node, "func", None), context_node=None)
+  assert res1 == "func_relu"
+  res2 = ex._resolve_layer_or_func_name(getattr(call_node, "func", None), context_node=cst.Pass())
+  assert res2 == "func_relu"
+  assert "func_relu" in ex.layer_registry
+  assert "func_relu" in ex.graph.nodes
 
 
 def test_empty_finalize() -> None:
-  """Docstring."""
+  """Verify empty module produces an empty LogicalGraph."""
   ex: GraphExtractor = get_extractor("")
   assert len(ex.graph.nodes) == 0
+  assert ex.graph.edges == []
 
 
 def test_implicit_external_input() -> None:
-  """Docstring."""
+  """Verify implicit external input registration across module and class scopes."""
   code: str = """
 x = 1
 y = op(x, z)
@@ -162,16 +194,18 @@ class Net:
     def forward(self):
         pass
 
-# Net.forward resets provenance to {}.
-# Now Input_z is in layer_registry but z is not in provenance.
-# This hits the false branch for ext_id not in self.layer_registry.
 v = op(z)
 """
-  get_extractor(code)
+  ex = get_extractor(code)
+  assert "Input_x" in ex.layer_registry
+  assert "Input_z" in ex.layer_registry
+  assert "Input_x" in ex.graph.nodes
+  assert "Input_z" in ex.graph.nodes
+  assert len(ex.graph.edges) >= 2
 
 
 def test_same_input_twice() -> None:
-  """Docstring."""
+  """Verify duplicate input parameter names across multiple forward methods."""
   code: str = """
 class Net:
     def forward(self, x):
@@ -179,31 +213,33 @@ class Net:
     def call(self, x):
         pass
 """
-  get_extractor(code)
+  ex = get_extractor(code)
+  assert "Input_x" in ex.layer_registry
+  assert "Input_x" in ex.graph.nodes
+  assert ex.graph.edges == []
 
 
 def test_complex_call() -> None:
-  """Docstring."""
+  """Verify subscript call expression that cannot be resolved to a layer name is ignored."""
   code: str = """
 def forward():
-    (a[0])() # hits layer_name is None in analyze_call_expression
+    (a[0])()
 """
-  get_extractor(code)
+  ex = get_extractor(code)
+  assert len(ex.graph.nodes) == 0
+  assert ex.graph.edges == []
+  assert len(ex.layer_registry) == 0
 
 
 def test_resolve_layer_none_context() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.graph import GraphExtractor
-
+  """Verify _resolve_layer_or_func_name registers new functional ops when context is None or Pass."""
   ex: GraphExtractor = GraphExtractor()
   name: cst.Name = cst.Name("relu")
-  # This will call _resolve_layer_or_func_name with context_node=None
-  res: str = ex._resolve_layer_or_func_name(name, None)
+  res = ex._resolve_layer_or_func_name(name, None)
   assert res == "func_relu"
 
-  # also cover when context_node is some random node like cst.Pass()
   name2: cst.Name = cst.Name("sigmoid")
-  res2: str = ex._resolve_layer_or_func_name(name2, cst.Pass())
+  res2 = ex._resolve_layer_or_func_name(name2, cst.Pass())
   assert res2 == "func_sigmoid"
 
 

@@ -7,7 +7,7 @@ from praxis.layers import stochastic  # type: ignore
 
 
 class DropoutModel(base_layer.BaseLayer):  # type: ignore
-  """Docstring."""
+  """Test helper class DropoutModel."""
 
   p: float = 0.5
 

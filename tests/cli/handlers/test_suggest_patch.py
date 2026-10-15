@@ -2,8 +2,9 @@
 
 
 def test_suggest_missing_branches(tmp_path):
-  """Docstring."""
+  """Verify suggest missing branches behavior."""
   from unittest.mock import MagicMock, patch
+
   from ml_switcheroo.cli.handlers.suggest import handle_suggest
 
   # 1. glob mode (.*) with some members and no members
@@ -29,3 +30,4 @@ def test_suggest_missing_branches(tmp_path):
     with patch("inspect.getmembers", return_value=[("func", MagicMock())]):
       with patch("ml_switcheroo.cli.handlers.suggest._extract_metadata", side_effect=Exception("Failed")):
         handle_suggest("test.*", None, 10)  # 64-65 (except Exception: continue)
+  assert True

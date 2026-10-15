@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for frontend semantic parser."""
 
 from typing import Optional
 
@@ -18,20 +18,20 @@ from ml_switcheroo.core.compiler.frontends.semantic_parser import (
 
 
 def test_trivia() -> None:
-  """Docstring."""
+  """Verify trivia behavior."""
   t: Trivia = Trivia("  ")
   assert t.to_text() == "  "
 
 
 def test_semantic_marker_base() -> None:
-  """Docstring."""
+  """Verify semantic marker base behavior."""
   marker: SemanticMarker = SemanticMarker()
   with pytest.raises(NotImplementedError):
     marker.to_text()
 
 
 def test_opt_trivia() -> None:
-  """Docstring."""
+  """Verify opt trivia behavior."""
   assert _opt_trivia(None) is None
   res: Optional[Trivia] = _opt_trivia(" test ")
   assert res is not None
@@ -39,15 +39,15 @@ def test_opt_trivia() -> None:
 
 
 class TestSemanticParser:
-  """Docstring."""
+  """Test helper class TestSemanticParser."""
 
   @pytest.fixture
   def parser(self) -> SemanticCommentParser:
-    """Docstring."""
+    """Execute parser helper logic."""
     return SemanticCommentParser()
 
   def test_parse_input(self, parser: SemanticCommentParser) -> None:
-    """Docstring."""
+    """Verify parse input behavior."""
     text: str = "  Input input_name -> something"
     marker: Optional[SemanticMarker] = parser.parse(text)
     assert isinstance(marker, SemanticInput)
@@ -59,7 +59,7 @@ class TestSemanticParser:
     assert marker.to_text() == text
 
   def test_parse_begin(self, parser: SemanticCommentParser) -> None:
-    """Docstring."""
+    """Verify parse begin behavior."""
     text: str = "BEGIN loop ( id_1 ) "
     marker: Optional[SemanticMarker] = parser.parse(text)
     assert isinstance(marker, SemanticBegin)
@@ -69,7 +69,7 @@ class TestSemanticParser:
     assert marker.to_text() == text
 
   def test_parse_end(self, parser: SemanticCommentParser) -> None:
-    """Docstring."""
+    """Verify parse end behavior."""
     text: str = "\tEND loop ( id_1 )\n"
     marker: Optional[SemanticMarker] = parser.parse(text)
     assert isinstance(marker, SemanticEnd)
@@ -79,7 +79,7 @@ class TestSemanticParser:
     assert marker.to_text() == text
 
   def test_parse_unmapped(self, parser: SemanticCommentParser) -> None:
-    """Docstring."""
+    """Verify parse unmapped behavior."""
     text: str = "Unmapped Op: jnp.add ( id_42 )"
     marker: Optional[SemanticMarker] = parser.parse(text)
     assert isinstance(marker, SemanticUnmapped)
@@ -89,7 +89,7 @@ class TestSemanticParser:
     assert marker.to_text() == text
 
   def test_parse_unmapped_tail(self, parser: SemanticCommentParser) -> None:
-    """Docstring."""
+    """Verify parse unmapped tail behavior."""
     text: str = "Unmapped Op: jnp.add ( id_42 ) trailing"
     marker: Optional[SemanticMarker] = parser.parse(text)
     assert isinstance(marker, SemanticUnmapped)
@@ -99,7 +99,7 @@ class TestSemanticParser:
     assert marker.to_text() == text
 
   def test_parse_return(self, parser: SemanticCommentParser) -> None:
-    """Docstring."""
+    """Verify parse return behavior."""
     text: str = "Return: output_1, output_2"
     marker: Optional[SemanticMarker] = parser.parse(text)
     assert isinstance(marker, SemanticReturn)
@@ -108,7 +108,7 @@ class TestSemanticParser:
     assert marker.to_text() == text
 
   def test_parse_invalid(self, parser: SemanticCommentParser) -> None:
-    """Docstring."""
+    """Verify parse invalid behavior."""
     assert parser.parse("invalid string") is None
     assert parser.parse("Input") is None
     assert parser.parse("BEGIN loop ( )") is None
@@ -116,13 +116,13 @@ class TestSemanticParser:
     assert parser.parse("Unmapped Op: (id_1)") is None
 
   def test_parse_exception_handled(self, parser: SemanticCommentParser, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Docstring."""
+    """Verify parse exception handled behavior."""
     monkeypatch.setattr(parser.parser, "parse", lambda x: 1 / 0)
     assert parser.parse("BEGIN loop ( id_1 ) ") is None
 
 
 def test_to_text_with_no_optional_trivia() -> None:
-  """Docstring."""
+  """Verify to text with no optional trivia behavior."""
   marker_input: SemanticInput = SemanticInput(name="inp")
   assert marker_input.to_text() == "Inputinp->"
 

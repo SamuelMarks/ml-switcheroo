@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for nvidia sass frontend analysis."""
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
@@ -9,7 +9,7 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
 
 
 def test_nvidia_sass_analyzer() -> None:
-  """Docstring."""
+  """Verify nvidia sass analyzer behavior."""
   inst1: NvidiaSassInstruction = NvidiaSassInstruction(
     opcode="ISETP.LT.AND",
     operands=[

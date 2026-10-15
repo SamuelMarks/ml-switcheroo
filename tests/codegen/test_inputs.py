@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for inputs."""
 
 import typing
 
@@ -12,7 +12,7 @@ from ml_switcheroo.generated_tests.inputs import (
 
 
 def test_parse_arg_def() -> None:
-  """Docstring."""
+  """Verify parse arg def behavior."""
   # hit dict logic
   res: dict[str, typing.Any] = parse_arg_def({"name": "x"})
   assert res["type"] == "Array"
@@ -31,7 +31,7 @@ def test_parse_arg_def() -> None:
 
 
 def test_infer_type() -> None:
-  """Docstring."""
+  """Verify infer type behavior."""
   assert _infer_type_from_default(True) == "bool"
   assert _infer_type_from_default(1) == "int"
   assert _infer_type_from_default(1.0) == "float"
@@ -41,7 +41,7 @@ def test_infer_type() -> None:
 
 
 def test_generate_input() -> None:
-  """Docstring."""
+  """Verify generate input behavior."""
   # list[int]
   res1: str = generate_input_value_code("x", {"type": "List[int]", "default": [5, 6]})
   assert res1 == "[5, 6]"
@@ -74,28 +74,28 @@ def test_generate_input() -> None:
 
 
 def test_heuristic_fallback() -> None:
-  """Docstring."""
+  """Verify heuristic fallback behavior."""
   assert "1" in _generate_dim_heuristic("dim")
   assert "bool" in _generate_dim_heuristic("keepdim")
   assert "1" in _generate_dim_heuristic("other")
 
 
 def test_generate_array_code() -> None:
-  """Docstring."""
+  """Verify generate array code behavior."""
   res: str = _generate_array_code({"min": 0, "max": 1, "dtype": "int32"})
   assert "astype(np.int32)" in res
   assert "uniform" in res
 
 
 def test_parse_arg_def_misc() -> None:
-  """Docstring."""
+  """Verify parse arg def misc behavior."""
   assert parse_arg_def("x") == {"name": "x", "type": "Array"}
   assert parse_arg_def(("x", "int")) == {"name": "x", "type": "int"}
   assert parse_arg_def(123) == {"name": "unknown", "type": "Array"}
 
 
 def test_generate_input_value_code_misc() -> None:
-  """Docstring."""
+  """Verify generate input value code misc behavior."""
   res: str = generate_input_value_code("x", {"options": [1, 2]})
   assert "random.choice" in res
 
@@ -110,26 +110,26 @@ def test_generate_input_value_code_misc() -> None:
 
 
 def test_generate_array_code_misc() -> None:
-  """Docstring."""
+  """Verify generate array code misc behavior."""
   res: str = _generate_array_code({"min": 5.0})
   assert "np.abs" in res
   assert "astype(np.float32)" in res
 
 
 def test_generate_input_value_code_str_arg_def() -> None:
-  """Docstring."""
+  """Verify generate input value code str arg def behavior."""
   res: str = generate_input_value_code("x", "int")
   assert "randint" in res
 
 
 def test_generate_input_value_code_bool() -> None:
-  """Docstring."""
+  """Verify generate input value code bool behavior."""
   res: str = generate_input_value_code("x", {"type": "bool"})
   assert "getrandbits" in res
 
 
 def test_generate_input_value_code_float() -> None:
-  """Docstring."""
+  """Verify generate input value code float behavior."""
   res: str = generate_input_value_code("x", {"type": "float", "min": 0, "max": 1})
   assert "random.uniform(0, 1)" in res
 
@@ -138,6 +138,6 @@ def test_generate_input_value_code_float() -> None:
 
 
 def test_generate_input_value_code_any_with_default() -> None:
-  """Docstring."""
+  """Verify generate input value code any with default behavior."""
   res: str = generate_input_value_code("x", {"type": "Any", "default": True})
   assert "bool" in res

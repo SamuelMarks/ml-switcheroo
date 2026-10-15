@@ -20,7 +20,7 @@ def _read_code(filename: str) -> str:
 
 
 class PaxE2ESemantics(SemanticsManager):  # type: ignore[misc]
-  """Docstring."""
+  """Test helper class PaxE2ESemantics."""
 
   def __init__(self) -> None:
     """Initializes the PaxE2ESemantics instance."""
@@ -94,7 +94,7 @@ class PaxE2ESemantics(SemanticsManager):  # type: ignore[misc]
 
 @pytest.fixture
 def pax_engine() -> ASTEngine:
-  """Docstring."""
+  """Execute pax engine helper logic."""
   semantics = PaxE2ESemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="paxml", strict_mode=False)
   return ASTEngine(semantics=semantics, config=config)

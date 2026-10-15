@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin reshape."""
 
 from unittest.mock import MagicMock
 
@@ -9,14 +9,14 @@ from ml_switcheroo.plugins.reshape import _create_dotted_name, transform_view_se
 
 
 def test_create_dotted_name() -> None:
-  """Docstring."""
+  """Verify create dotted name behavior."""
   node: cst.BaseExpression = _create_dotted_name("jax.numpy.reshape")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "reshape"
 
 
 def test_transform_view_semantics_no_api() -> None:
-  """Docstring."""
+  """Verify transform view semantics no api behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
 
@@ -29,7 +29,7 @@ def test_transform_view_semantics_no_api() -> None:
 
 
 def test_transform_view_semantics_method() -> None:
-  """Docstring."""
+  """Verify transform view semantics method behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.reshape"
   ctx._runtime_config = MagicMock(strict_mode=False)
@@ -47,7 +47,7 @@ def test_transform_view_semantics_method() -> None:
 
 
 def test_transform_view_semantics_method_single_int() -> None:
-  """Docstring."""
+  """Verify transform view semantics method single int behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.reshape"
   ctx._runtime_config = MagicMock(strict_mode=False)
@@ -65,7 +65,7 @@ def test_transform_view_semantics_method_single_int() -> None:
 
 
 def test_transform_view_semantics_method_tuple_arg() -> None:
-  """Docstring."""
+  """Verify transform view semantics method tuple arg behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.reshape"
   ctx._runtime_config = MagicMock(strict_mode=False)
@@ -83,7 +83,7 @@ def test_transform_view_semantics_method_tuple_arg() -> None:
 
 
 def test_transform_view_semantics_func_no_args() -> None:
-  """Docstring."""
+  """Verify transform view semantics func no args behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.reshape"
   ctx._runtime_config = MagicMock(strict_mode=False)
@@ -97,7 +97,7 @@ def test_transform_view_semantics_func_no_args() -> None:
 
 
 def test_transform_view_semantics_func_multiple_args() -> None:
-  """Docstring."""
+  """Verify transform view semantics func multiple args behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.reshape"
   ctx._runtime_config = MagicMock(strict_mode=False)
@@ -114,7 +114,7 @@ def test_transform_view_semantics_func_multiple_args() -> None:
 
 
 def test_transform_view_semantics_func_tuple_arg() -> None:
-  """Docstring."""
+  """Verify transform view semantics func tuple arg behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.reshape"
   ctx._runtime_config = MagicMock(strict_mode=False)
@@ -131,7 +131,7 @@ def test_transform_view_semantics_func_tuple_arg() -> None:
 
 
 def test_transform_view_semantics_strict() -> None:
-  """Docstring."""
+  """Verify transform view semantics strict behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.reshape"
   ctx._runtime_config = MagicMock(strict_mode=True)

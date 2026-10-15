@@ -4,7 +4,7 @@ import numpy as np
 
 
 class ResidualBlock:
-  """Docstring."""
+  """Test helper class ResidualBlock."""
 
   def __init__(self, channels: int):
     """Initializes the ResidualBlock instance."""

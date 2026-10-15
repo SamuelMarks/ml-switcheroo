@@ -6,17 +6,21 @@ echo "Running Pre-commit Hooks"
 echo "==================================="
 
 # 1. Format
+PRE_FORMAT_HASH=$(git diff | shasum)
 echo "=> [1/7] Auto-formatting code (ruff format)..."
 uv run ruff format .
 
 echo "=> [2/7] Linting code & auto-fixing (ruff check)..."
 uv run ruff check --fix .
+POST_FORMAT_HASH=$(git diff | shasum)
 
 echo "=> [3/7] Verifying formatting (ruff format --check)..."
 uv run ruff format --check .
 
-echo "=> [4/7] Verifying linting (ruff check)..."
+echo "=> [4/7] Verifying linting & docstring coverage..."
 uv run ruff check .
+uv run interrogate --fail-under=100 -q src scripts docs tests
+uv run python scripts/check_docstrings.py src scripts docs tests
 
 # 2. Build
 echo "=> [5/7] Building package..."
@@ -25,9 +29,10 @@ uv build
 # 3. Grounding Audit against ml-framework-snapshots
 echo "=> [6/7] Grounding Audit against ml-framework-snapshots..."
 AUDIT_FAILED=0
-uv run python scripts/audit_against_snapshots.py --strict || AUDIT_FAILED=1
+uv run python scripts/validate_snapshot_grounding.py --strict --snapshots-dir ../ml-framework-snapshots || AUDIT_FAILED=1
+uv run python scripts/audit_against_snapshots.py --strict --snapshots-dir ../ml-framework-snapshots || AUDIT_FAILED=1
 for fw in torch jax mlx keras rdna nvidia_sass ir; do
-  uv run python scripts/audit_against_snapshots.py --strict --framework "$fw" || AUDIT_FAILED=1
+  uv run python scripts/audit_against_snapshots.py --strict --framework "$fw" --snapshots-dir ../ml-framework-snapshots || AUDIT_FAILED=1
 done
 
 if [ $AUDIT_FAILED -eq 1 ]; then
@@ -96,7 +101,7 @@ fi
 # we only update the index for files that are already partially staged
 # or if ruff changed them, we just notify the user.
 # Actually, since it's a pre-commit hook, if ruff changed things, it's safer to just fail.
-if ! git diff --quiet; then
+if [ "$PRE_FORMAT_HASH" != "$POST_FORMAT_HASH" ]; then
     echo "================================================================"
     echo "Files were modified by auto-formatting or lint fixes."
     echo "README.md has been automatically staged."

@@ -9,7 +9,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockAdapterWithParent:
-  """Docstring."""
+  """Test helper class MockAdapterWithParent."""
 
   def __init__(self, parent: str) -> None:
     """Initializes the MockAdapterWithParent instance."""
@@ -137,7 +137,7 @@ def test_json_overrides_adapter_inheritance(manager: SemanticsManager) -> None:
   manager.data["op"] = {"variants": {"parent_B": {"api": "found_In_B"}}}
 
   class MockAdapterA:
-    """Docstring."""
+    """Test helper class MockAdapterA."""
 
     inherits_from: str = "parent_A"
 

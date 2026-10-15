@@ -11,39 +11,39 @@ It provides:
     to/from NumPy format for interoperability.
 """
 
-from typing import Any
-
-import typing
-
-
 import logging
-from typing import List, Tuple, Dict, Optional
+import typing
+from types import ModuleType
+from typing import Any, Dict, List, Optional, Tuple
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
 from ml_switcheroo.frameworks.base import (
-  register_framework,
-  StructuralTraits,
-  PluginTraits,
-  StandardMap,
+  GhostRef,
   ImportConfig,
   InitMode,
-  GhostRef,
+  PluginTraits,
+  StandardMap,
+  StructuralTraits,
   load_snapshot_for_adapter,
+  register_framework,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.frameworks.torch_io import TorchIOMixin
 
+torch: Optional[ModuleType] = None
+nn: Optional[ModuleType] = None
+optim: Optional[ModuleType] = None
 try:
   import torch as _torch_module
   import torch.nn as _nn_module
   import torch.optim as _optim_module
+
+  torch = _torch_module
+  nn = _nn_module
+  optim = _optim_module
 except Exception:
-  _torch_module = None  # type: ignore
-  _nn_module = None  # type: ignore
-  _optim_module = None  # type: ignore
-torch: Optional[Any] = _torch_module
-nn: Optional[Any] = _nn_module
-optim: Optional[Any] = _optim_module
+  pass
 
 
 @register_framework("torch")
@@ -323,8 +323,8 @@ class TorchAdapter(TorchIOMixin):
 
     """
     try:
-      import torch
       import numpy as np
+      import torch
     except Exception:
       return data
     if isinstance(data, (np.ndarray, np.generic)):

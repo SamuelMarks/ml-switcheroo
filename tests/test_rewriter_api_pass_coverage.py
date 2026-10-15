@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for rewriter api pass coverage."""
 
 from typing import Any, Dict, Optional, Tuple
 
@@ -11,7 +11,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_apipass_branches() -> None:
-  """Docstring."""
+  """Verify apipass branches behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
   semantics: SemanticsManager = SemanticsManager()
   context: RewriterContext = RewriterContext(semantics=semantics, config=config)
@@ -20,28 +20,29 @@ def test_apipass_branches() -> None:
   module: cst.Module = cst.parse_module(
     "import torch\nx = torch.abs(y)\nclass Model:\n def __init__(self):\n  self.layer = 1\n def forward(self, x):\n  return self.layer(x)\n"
   )
-  pass_obj.transform(module, context)
+  res_mod = pass_obj.transform(module, context)
+  assert isinstance(res_mod, cst.Module)
 
 
 def test_apitransformer_methods() -> None:
-  """Docstring."""
+  """Verify apitransformer methods behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemanticsNone:
-    """Docstring."""
+    """Test helper class DummySemanticsNone."""
 
     framework_configs: Dict[str, Any] = {"torch": {"traits": {"module_base": "torch.nn.Module"}}}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
+      """Execute get definition helper logic."""
       return None
 
     def is_verified(self, name: str) -> bool:
-      """Docstring."""
+      """Execute is verified helper logic."""
       return True
 
     def get_framework_config(self, fw: str) -> Optional[Dict[str, Any]]:
-      """Docstring."""
+      """Execute get framework config helper logic."""
       return None
 
   semantics_none: DummySemanticsNone = DummySemanticsNone()
@@ -58,110 +59,109 @@ def test_apitransformer_methods() -> None:
   transformer._get_target_traits()
 
   class DummySemanticsTraits:
-    """Docstring."""
+    """Test helper class DummySemanticsTraits."""
 
     framework_configs: Dict[str, Any] = {}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
+      """Execute get definition helper logic."""
       return None
 
     def is_verified(self, name: str) -> bool:
-      """Docstring."""
+      """Execute is verified helper logic."""
       return True
 
     def get_framework_config(self, fw: str) -> Optional[Dict[str, Any]]:
-      """Docstring."""
+      """Execute get framework config helper logic."""
       return {"traits": {}}
 
   semantics_traits: DummySemanticsTraits = DummySemanticsTraits()
   context_traits: RewriterContext = RewriterContext(semantics=semantics_traits, config=config)
   transformer_traits: ApiTransformer = ApiTransformer(context_traits)
 
-  getattr(transformer_traits, "source_traits")
-  getattr(transformer_traits, "source_traits")
-  transformer_traits._get_target_traits()
+  assert transformer_traits.source_traits is not None
+  assert transformer_traits._get_target_traits() is not None
   assert transformer._cst_to_string(cst.BinaryOperation(cst.Name("a"), cst.Add(), cst.Name("b"))) == "Add"
   assert transformer._cst_to_string(cst.Pass()) is None
   assert transformer._cst_to_string(cst.Attribute(value=cst.Pass(), attr=cst.Name("a"))) is None
 
-  transformer._get_source_lifecycle_lists()
-  getattr(transformer, "ctx", None)
+  assert transformer._get_source_lifecycle_lists() == (set(), set())
+  assert getattr(transformer, "ctx", None) is not None
 
   # 222
-  transformer.visit_Module(cst.parse_module("import os"))
+  assert transformer.visit_Module(cst.parse_module("import os")) is None
 
   # 231
   import_node: cst.Import = cst.Import(names=[cst.ImportAlias(cst.Name("os"))])
-  transformer.visit_Import(import_node)
+  assert transformer.visit_Import(import_node) is False
 
   # 260
   import_from_node: cst.ImportFrom = cst.ImportFrom(module=cst.Name("os"), names=[cst.ImportAlias(cst.Name("path"))])
-  transformer.visit_ImportFrom(import_from_node)
+  assert transformer.visit_ImportFrom(import_from_node) is False
 
   # 277, 280, 286-288, 299-301
   node_func: cst.FunctionDef = getattr(cst.parse_module("def f(): pass"), "body")[0]
-  transformer.leave_FunctionDef(node_func, node_func)
+  assert isinstance(transformer.leave_FunctionDef(node_func, node_func), cst.FunctionDef)
 
   # 351-359, 362
   node_assign: cst.Assign = getattr(cst.parse_statement("a = 1"), "body")[0]
-  transformer.leave_Assign(node_assign, node_assign)
+  assert isinstance(transformer.leave_Assign(node_assign, node_assign), cst.Assign)
 
   # 384-385, 391
   node_attr: cst.Attribute = getattr(getattr(cst.parse_statement("a.b"), "body")[0], "value")
-  transformer.leave_Attribute(node_attr, node_attr)
+  assert isinstance(transformer.leave_Attribute(node_attr, node_attr), cst.Attribute)
 
   # 498
   class_node: cst.ClassDef = getattr(cst.parse_module("class A(torch.nn.Module): pass"), "body")[0]
-  transformer.visit_ClassDef(class_node)
-  transformer.leave_ClassDef(class_node, class_node)
+  assert transformer.visit_ClassDef(class_node) is True
+  assert isinstance(transformer.leave_ClassDef(class_node, class_node), cst.ClassDef)
 
   class_node2: cst.ClassDef = getattr(cst.parse_module("class B(UnknownBase): pass"), "body")[0]
-  transformer.visit_ClassDef(class_node2)
-  transformer.leave_ClassDef(class_node2, class_node2)
+  assert transformer.visit_ClassDef(class_node2) is True
+  assert isinstance(transformer.leave_ClassDef(class_node2, class_node2), cst.ClassDef)
 
   # 644
   stmt_line: cst.SimpleStatementLine = getattr(cst.parse_module("a = 1"), "body")[0]
-  transformer.visit_SimpleStatementLine(stmt_line)
-  transformer.leave_SimpleStatementLine(stmt_line, stmt_line)
+  assert transformer.visit_SimpleStatementLine(stmt_line) is True
+  assert isinstance(transformer.leave_SimpleStatementLine(stmt_line, stmt_line), cst.SimpleStatementLine)
 
   # 1242
   def_node: cst.FunctionDef = getattr(cst.parse_module("def f(): pass"), "body")[0]
-  transformer._apply_preamble(def_node, ["a = 1"])
+  assert isinstance(transformer._apply_preamble(def_node, ["a = 1"]), cst.FunctionDef)
 
   # 1262
   stmt: cst.SimpleStatementLine = getattr(cst.parse_module("a = 1"), "body")[0]
-  transformer._inject_stmts_to_body(def_node, [stmt])
+  assert isinstance(transformer._inject_stmts_to_body(def_node, [stmt]), cst.FunctionDef)
 
   # 600
-  transformer._inject_argument_to_signature(def_node, "a", "int")
+  assert isinstance(transformer._inject_argument_to_signature(def_node, "a", "int"), cst.FunctionDef)
 
 
 def test_api_attr_mixin_leave_Assign() -> None:
-  """Docstring."""
+  """Verify api attr mixin leave Assign behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
-    """Docstring."""
+    """Test helper class DummySemantics."""
 
     framework_configs: Dict[str, Any] = {}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
+      """Execute get definition helper logic."""
       if name == "torch.tensor":
         return ("tensor", {"traits": {"lifecycle": ["module"]}})
       return None
 
     def is_verified(self, name: str) -> bool:
-      """Docstring."""
+      """Execute is verified helper logic."""
       return True
 
     def get_framework_config(self, fw: str) -> Dict[str, Any]:
-      """Docstring."""
+      """Execute get framework config helper logic."""
       return {}
 
     def resolve_variant(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
-      """Docstring."""
+      """Execute resolve variant helper logic."""
       return {"target": "jax.numpy.float32"}
 
   context: RewriterContext = RewriterContext(semantics=DummySemantics(), config=config)
@@ -176,71 +176,71 @@ def test_api_attr_mixin_leave_Assign() -> None:
 
   # without target value
   stmt3: cst.Assign = getattr(cst.parse_statement("a = b"), "body")[0]
-  transformer.leave_Assign(stmt3, stmt3)
+  assert transformer.leave_Assign(stmt3, stmt3) is not None
 
 
 def test_api_attr_mixin_leave_Attribute() -> None:
-  """Docstring."""
+  """Verify api attr mixin leave Attribute behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
-    """Docstring."""
+    """Test helper class DummySemantics."""
 
     framework_configs: Dict[str, Any] = {}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
+      """Execute get definition helper logic."""
       if name == "torch.float32":
         return ("float32", {"target": "jax.numpy.float32"})
       return None
 
     def is_verified(self, name: str) -> bool:
-      """Docstring."""
+      """Execute is verified helper logic."""
       return True
 
     def get_framework_config(self, fw: str) -> Dict[str, Any]:
-      """Docstring."""
+      """Execute get framework config helper logic."""
       return {}
 
     def resolve_variant(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
-      """Docstring."""
+      """Execute resolve variant helper logic."""
       return {"target": "jax.numpy.float32"}
 
   context: RewriterContext = RewriterContext(semantics=DummySemantics(), config=config)
   transformer: ApiTransformer = ApiTransformer(context)
 
   node: cst.Attribute = getattr(getattr(cst.parse_statement("torch.float32"), "body")[0], "value")
-  transformer.leave_Attribute(node, node)
+  assert transformer.leave_Attribute(node, node) is not None
 
   node2: cst.Attribute = getattr(getattr(cst.parse_statement("torch.unknown"), "body")[0], "value")
-  transformer.leave_Attribute(node2, node2)
+  assert transformer.leave_Attribute(node2, node2) == node2
 
 
 def test_api_call_mixin_leave_Call() -> None:
-  """Docstring."""
+  """Verify api call mixin leave Call behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
-    """Docstring."""
+    """Test helper class DummySemantics."""
 
     framework_configs: Dict[str, Any] = {}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
+      """Execute get definition helper logic."""
       if name == "torch.abs":
         return ("abs", {"target": "jax.numpy.abs"})
       return None
 
     def is_verified(self, name: str) -> bool:
-      """Docstring."""
+      """Execute is verified helper logic."""
       return True
 
     def get_framework_config(self, fw: str) -> Dict[str, Any]:
-      """Docstring."""
+      """Execute get framework config helper logic."""
       return {}
 
     def resolve_variant(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
-      """Docstring."""
+      """Execute resolve variant helper logic."""
       return {"target": "jax.numpy.float32"}
 
   context: RewriterContext = RewriterContext(semantics=DummySemantics(), config=config)
@@ -250,61 +250,61 @@ def test_api_call_mixin_leave_Call() -> None:
   transformer.leave_Call(node, node)
 
   node2: cst.Call = getattr(getattr(cst.parse_statement("unknown()"), "body")[0], "value")
-  transformer.leave_Call(node2, node2)
+  assert transformer.leave_Call(node2, node2) == node2
 
 
 def test_api_attr_mixin_leave_Attribute_plugin() -> None:
-  """Docstring."""
+  """Verify api attr mixin leave Attribute plugin behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
-    """Docstring."""
+    """Test helper class DummySemantics."""
 
     framework_configs: Dict[str, Any] = {}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
+      """Execute get definition helper logic."""
       if name == "torch.plugin_attr":
         return ("plugin_attr", {"variants": {"jax": {"requires_plugin": True}}})
       return None
 
     def is_verified(self, name: str) -> bool:
-      """Docstring."""
+      """Execute is verified helper logic."""
       return True
 
     def get_framework_config(self, fw: str) -> Dict[str, Any]:
-      """Docstring."""
+      """Execute get framework config helper logic."""
       return {}
 
   context: RewriterContext = RewriterContext(semantics=DummySemantics(), config=config)
   transformer: ApiTransformer = ApiTransformer(context)
 
   node: cst.Attribute = getattr(getattr(cst.parse_statement("torch.plugin_attr"), "body")[0], "value")
-  transformer.leave_Attribute(node, node)
+  assert transformer.leave_Attribute(node, node) is not None
 
 
 def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
-  """Docstring."""
+  """Verify api attr mixin leave Assign unwrapping behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   class DummySemantics:
-    """Docstring."""
+    """Test helper class DummySemantics."""
 
     framework_configs: Dict[str, Any] = {}
     _key_origins: Dict[str, str] = {"nn_call": "neural"}
 
     def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
+      """Execute get definition helper logic."""
       if name == "torch.nn.call":
         return ("nn_call", {})
       return None
 
     def is_verified(self, name: str) -> bool:
-      """Docstring."""
+      """Execute is verified helper logic."""
       return True
 
     def get_framework_config(self, fw: str) -> Dict[str, Any]:
-      """Docstring."""
+      """Execute get framework config helper logic."""
       return {}
 
   context: RewriterContext = RewriterContext(semantics=DummySemantics(), config=config)
@@ -319,36 +319,37 @@ def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
 
   stmt: cst.Assign = getattr(cst.parse_statement("self.a = torch.nn.call()"), "body")[0]
   transformer.leave_Assign(stmt, stmt)
-  assert "a" in transformer.context.scope_stack[-2] or True
+  assert "self.a" in transformer.context.scope_stack[-2]
 
   stmt2: cst.Assign = getattr(cst.parse_statement("b = torch.nn.call()"), "body")[0]
   transformer.leave_Assign(stmt2, stmt2)
-  # b added to scope stack top
+  assert "b" in transformer.context.scope_stack[-1]
 
   # unwrap
   transformer.__dict__["source_traits"] = type("StructuralTraits", (), {"functional_execution_method": "apply"})()
   stmt3: cst.Assign = getattr(cst.parse_statement("(a, b) = apply()"), "body")[0]
-  transformer.leave_Assign(stmt3, stmt3)
+  assert isinstance(transformer.leave_Assign(stmt3, stmt3), cst.Assign)
 
 
 # --- Merged from test_rewriter_api_pass_coverage_extra.py ---
 
 
 class DummySemantics:
-  """Docstring."""
+  """Test helper class DummySemantics."""
 
   def __init__(self):
-    """Docstring."""
+    """Initialize test helper instance."""
     self.framework_configs = {"jax": {"version": "0.4.0"}}
 
   def get_framework_config(self, fw):
-    """Docstring."""
+    """Execute get framework config helper logic."""
     return self.framework_configs.get(fw)
 
 
 def test_inject_imports() -> None:
-  """Docstring."""
+  """Verify inject imports behavior."""
   import libcst as cst
+
   from ml_switcheroo.core.rewriter.passes.plugins.dsl import ImportFixerPass
 
   module = cst.parse_module("a = 1")
@@ -358,8 +359,8 @@ def test_inject_imports() -> None:
   assert "import sys" in modified.code
 
 
-def xtest_inject_imports():
-  """Docstring."""
+def test_inject_imports_variants():
+  """Execute xtest inject imports helper logic."""
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
   semantics = DummySemantics()
   context = RewriterContext(semantics=semantics, config=config)
@@ -372,7 +373,7 @@ def xtest_inject_imports():
 
 
 def test_check_version():
-  """Docstring."""
+  """Verify check version behavior."""
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
   semantics = DummySemantics()
   context = RewriterContext(semantics=semantics, config=config)
@@ -381,7 +382,7 @@ def test_check_version():
 
 
 def test_is_framework_base():
-  """Docstring."""
+  """Verify is framework base behavior."""
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
   semantics = DummySemantics()
   semantics.framework_configs = {"torch": {"traits": {"module_base": "torch.nn.Module"}}}
@@ -392,24 +393,24 @@ def test_is_framework_base():
 
 
 def test_leave_module():
-  """Docstring."""
+  """Verify leave module behavior."""
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
   semantics = DummySemantics()
   context = RewriterContext(semantics=semantics, config=config)
   context.module_preamble = ["import math", "import math", "import bad code"]
   transformer = ApiTransformer(context)
   mod = cst.parse_module("import os")
-  transformer.leave_Module(mod, mod)
+  assert isinstance(transformer.leave_Module(mod, mod), cst.Module)
 
 
 def test_leave_call_coverage():
-  """Docstring."""
+  """Verify leave call coverage behavior."""
   config = RuntimeConfig(source_fw="torch", target_fw="jax")
 
   semantics = SemanticsManager()
 
   def mock_get_definition(name, *args, **kwargs):
-    """Function doc."""
+    """Execute mock get definition helper logic."""
     if name == "deprecated_func":
       return ("abs", {"deprecated": True, "replaced_by": "new_abs", "std_args": ["x"]})
     if name == "mod.alias":
@@ -435,35 +436,36 @@ def test_leave_call_coverage():
 
   # 910: deprecated func
   node = cst.parse_statement("deprecated_func()").body[0].value
-  transformer.leave_Call(node, node)
+  assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
+  assert any("deprecated" in w.lower() for w in transformer.context.current_stmt_warnings)
 
   # 1021: is_method_call = False if module_alias
   transformer._is_module_alias = lambda x: True
   node = cst.parse_statement("mod.alias()").body[0].value
-  transformer.leave_Call(node, node)
+  assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
   # 1036-1039: arg_provided by keyword mapping
   transformer._is_module_alias = lambda x: False
   node = cst.parse_statement("inj.func(A=1)").body[0].value
-  transformer.leave_Call(node, node)
+  assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
   # 1051: receiver injection with no std_args_order
   node = cst.parse_statement("inj2.func()").body[0].value
-  transformer.leave_Call(node, node)
+  assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
   # 1062: pack_target_kw variadics
   node = cst.parse_statement("vari.func(1, 2, 3)").body[0].value
-  transformer.leave_Call(node, node)
+  assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
   # 1069: extra args appended from args after positional mapping
   # kw.func has std_args ["x", "y", "z"]
   node = cst.parse_statement("kw.func(1, extra=2)").body[0].value
-  transformer.leave_Call(node, node)
+  assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
   # 1174: no value change in target when generating args
   semantics.resolve_variant = lambda *args: {"kwargs_map": {"drop_me": None}}
   node = cst.parse_statement("kw.func(drop_me=1, keep_me=2)").body[0].value
-  transformer.leave_Call(node, node)
+  assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
   # 1298: _convert_to_indented_block
   func_node = cst.parse_statement("def f(): pass")
@@ -472,7 +474,7 @@ def test_leave_call_coverage():
 
 
 def get_transformer():
-  """Function doc."""
+  """Execute get transformer helper logic."""
   from ml_switcheroo.config import RuntimeConfig
   from ml_switcheroo.core.rewriter.context import RewriterContext
   from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
@@ -486,7 +488,7 @@ def get_transformer():
 
 
 def test_api_helpers_cst_to_string_binary_op():
-  """Function doc."""
+  """Verify api helpers cst to string binary op behavior."""
   transformer = get_transformer()
   import libcst as cst
 
@@ -496,7 +498,7 @@ def test_api_helpers_cst_to_string_binary_op():
 
 
 def test_api_helpers_get_qualified_name():
-  """Function doc."""
+  """Verify api helpers get qualified name behavior."""
   transformer = get_transformer()
   import libcst as cst
 
@@ -512,7 +514,7 @@ def test_api_helpers_get_qualified_name():
 
 
 def test_api_helpers_is_module_alias():
-  """Function doc."""
+  """Verify api helpers is module alias behavior."""
   from unittest import mock
 
   transformer = get_transformer()
@@ -530,7 +532,7 @@ def test_api_helpers_is_module_alias():
 
 
 def test_api_helpers_get_mapping():
-  """Function doc."""
+  """Verify api helpers get mapping behavior."""
   from unittest import mock
 
   transformer = get_transformer()
@@ -547,7 +549,7 @@ def test_api_helpers_get_mapping():
 
 
 def test_api_helpers_version_fails():
-  """Function doc."""
+  """Verify api helpers version fails behavior."""
   from unittest import mock
 
   transformer = get_transformer()
@@ -565,7 +567,7 @@ def test_api_helpers_version_fails():
 
 
 def test_api_helpers_inject_stmts():
-  """Function doc."""
+  """Verify api helpers inject stmts behavior."""
   import libcst as cst
 
   transformer = get_transformer()
@@ -577,7 +579,7 @@ def test_api_helpers_inject_stmts():
 
 
 def test_api_helpers_convert_to_indented_block():
-  """Function doc."""
+  """Verify api helpers convert to indented block behavior."""
   import libcst as cst
 
   transformer = get_transformer()
@@ -592,7 +594,7 @@ def test_api_helpers_convert_to_indented_block():
 
 
 def test_api_helpers_inject_arg():
-  """Function doc."""
+  """Verify api helpers inject arg behavior."""
   import libcst as cst
 
   transformer = get_transformer()
@@ -602,7 +604,7 @@ def test_api_helpers_inject_arg():
 
 
 def test_api_py_missing_coverage():
-  """Function doc."""
+  """Verify api py missing coverage behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -628,13 +630,13 @@ def test_api_py_missing_coverage():
   # 229 leave_Module parse err
   mod = cst.parse_module("x = 1")
   transformer.context.module_preamble = ["import ??? bad"]
-  transformer.leave_Module(mod, mod)
+  assert isinstance(transformer.leave_Module(mod, mod), cst.Module)
 
   # 258, 259
   transformer._is_framework_base = lambda x: x == "Base"
   cls_node = cst.parse_module("class X(Base): pass").body[0]
   with mock.patch.object(transformer, "_get_qualified_name", return_value="Unknown"):
-    transformer.visit_ClassDef(cls_node)
+    assert transformer.visit_ClassDef(cls_node) is True
 
   # 328, 332
   from ml_switcheroo.core.rewriter.types import SignatureContext
@@ -645,30 +647,34 @@ def test_api_py_missing_coverage():
   transformer.context.signature_stack.append(sig)
   transformer.context.scope_stack.append(set())
   func_node = cst.parse_module("def f(): pass").body[0]
-  transformer.leave_FunctionDef(func_node, func_node)
+  res_f = transformer.leave_FunctionDef(func_node, func_node)
+  assert isinstance(res_f, cst.FunctionDef)
+  assert len(res_f.params.params) == 1
 
   # 366-373
   stmt = cst.parse_module("x=1").body[0]
   transformer.context.current_stmt_errors.append("err")
-  transformer.leave_SimpleStatementLine(stmt, stmt)
+  res_err_stmt = transformer.leave_SimpleStatementLine(stmt, stmt)
+  assert res_err_stmt is not None
   transformer.context.current_stmt_errors.clear()
   transformer.context.current_stmt_warnings.append("warn2")
-  transformer.leave_SimpleStatementLine(stmt, stmt)
+  res_warn_stmt = transformer.leave_SimpleStatementLine(stmt, stmt)
+  assert res_warn_stmt is not None
 
   # 391, 394, 395
   mod_i = cst.parse_module("from . import a\nfrom a import *\nfrom a import b")
-  transformer.visit_ImportFrom(mod_i.body[0].body[0])
-  transformer.visit_ImportFrom(mod_i.body[1].body[0])
+  assert transformer.visit_ImportFrom(mod_i.body[0].body[0]) is False
+  assert transformer.visit_ImportFrom(mod_i.body[1].body[0]) is False
   with mock.patch.object(transformer, "_cst_to_string", return_value=""):
-    transformer.visit_ImportFrom(mod_i.body[2].body[0])
+    assert transformer.visit_ImportFrom(mod_i.body[2].body[0]) is False
 
   # 411, 415, 418, 422
   mod_i2 = cst.parse_module("import numpy as np")
-  transformer.visit_Import(mod_i2.body[0].body[0])
+  assert transformer.visit_Import(mod_i2.body[0].body[0]) is False
 
 
 def test_api_helpers_missing_coverage():
-  """Function doc."""
+  """Verify api helpers missing coverage behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -684,34 +690,36 @@ def test_api_helpers_missing_coverage():
   transformer = ApiTransformer(ctx)
 
   # 80 _create_name_node
-  transformer._create_name_node("a.b.c")
+  assert isinstance(transformer._create_name_node("a.b.c"), cst.Attribute)
 
   # 146, 147 _apply_preamble format conversion error / generic body extraction
   func_node = cst.parse_module("def f(): pass").body[0]
-  transformer._apply_preamble(func_node, ["import os"])
+  assert isinstance(transformer._apply_preamble(func_node, ["import os"]), cst.FunctionDef)
 
   # 220 _get_mapping strict
   transformer.context.config.strict_mode = True
-  transformer._get_mapping("torch.missing", silent=False)
+  assert transformer._get_mapping("torch.missing", silent=False) is None
 
   # 230-259 _handle_variant_imports
   variant = {"required_imports": ["import os", "sys", {"module": "numpy", "alias": "np"}, {"module": "math"}]}
   transformer._handle_variant_imports(variant)
+  assert "import os" in transformer.context.module_preamble
 
   # 308-319 check_version_constraints
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value=None):
     with mock.patch("importlib.metadata.version", return_value="1.0.0"):
-      transformer.check_version_constraints(None, None)
+      assert transformer.check_version_constraints(None, None) is None
     with mock.patch("importlib.metadata.version", side_effect=Exception):
-      transformer.check_version_constraints(None, None)
+      assert transformer.check_version_constraints(None, None) is None
 
   # 373 duplicate check in _inject_argument_to_signature
   mod_f = cst.parse_module("def f(rng): pass")
-  transformer._inject_argument_to_signature(mod_f.body[0], "rng", "Any")
+  res_dup = transformer._inject_argument_to_signature(mod_f.body[0], "rng", "Any")
+  assert len(res_dup.params.params) == 1
 
 
 def test_api_attr_mixin_missing():
-  """Function doc."""
+  """Verify api attr mixin missing behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -733,14 +741,14 @@ def test_api_attr_mixin_missing():
   with mock.patch.object(transformer, "_get_qualified_name", return_value="torch.nn.call"):
     with mock.patch.object(transformer.context.semantics, "get_definition", return_value=("nn_call", {})):
       stmt = cst.parse_module("self.a = call()").body[0].body[0]
-      transformer.leave_Assign(stmt, stmt)
+      assert transformer.leave_Assign(stmt, stmt) is not None
 
       stmt2 = cst.parse_module("a = call()").body[0].body[0]
       transformer.leave_Assign(stmt2, stmt2)
 
   # unwrap
   class FakeTraits:
-    """Class doc."""
+    """Test helper class FakeTraits."""
 
     functional_execution_method = "apply"
 
@@ -755,7 +763,7 @@ def test_api_attr_mixin_missing():
   with mock.patch.object(transformer, "_get_qualified_name", return_value="torch.attr"):
     # Not mapped
     with mock.patch.object(transformer.context.semantics, "get_definition", return_value=None):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
 
     # Mapped, requires_plugin
     with mock.patch.object(
@@ -763,7 +771,7 @@ def test_api_attr_mixin_missing():
       "get_definition",
       return_value=("id", {"variants": {"jax": {"requires_plugin": "yes"}}}),
     ):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
 
     # Mapped, standard replacement
     with mock.patch.object(
@@ -776,11 +784,11 @@ def test_api_attr_mixin_missing():
     with mock.patch.object(
       transformer.context.semantics, "get_definition", return_value=("id", {"variants": {"jax": {"macro": "math.inf"}}})
     ):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
 
 
 def test_api_call_mixin_missing():
-  """Function doc."""
+  """Verify api call mixin missing behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -803,7 +811,7 @@ def test_api_call_mixin_missing():
     ):
       # get_mapping returns None
       with mock.patch.object(transformer, "_get_mapping", return_value=None):
-        transformer.leave_Call(call_node, call_node)
+        assert transformer.leave_Call(call_node, call_node) is not None
 
       # get_mapping returns valid
       mapping = {"api": "jax.foo", "macro": "None"}
@@ -814,17 +822,17 @@ def test_api_call_mixin_missing():
               with mock.patch(
                 "ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_post_processing", return_value=call_node
               ):
-                transformer.leave_Call(call_node, call_node)
+                assert transformer.leave_Call(call_node, call_node) is not None
 
     # pre checks handled it
     with mock.patch(
       "ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_pre_checks", return_value=(True, call_node)
     ):
-      transformer.leave_Call(call_node, call_node)
+      assert transformer.leave_Call(call_node, call_node) is not None
 
 
 def test_api_py_imports():
-  """Function doc."""
+  """Verify api py imports behavior."""
   import libcst as cst
 
   from ml_switcheroo.config import RuntimeConfig
@@ -839,11 +847,11 @@ def test_api_py_imports():
 
   mod = cst.parse_module("from . import a\nfrom a import *")
   transformer.visit_ImportFrom(mod.body[0].body[0])
-  transformer.visit_ImportFrom(mod.body[1].body[0])
+  assert transformer.visit_ImportFrom(mod.body[1].body[0]) is False
 
 
 def test_api_helpers_missing2():
-  """Function doc."""
+  """Verify api helpers missing2 behavior."""
   from unittest import mock
 
   from ml_switcheroo.config import RuntimeConfig
@@ -858,16 +866,16 @@ def test_api_helpers_missing2():
 
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value=None):
     with mock.patch("importlib.metadata.version", return_value="1.0"):
-      transformer.check_version_constraints(None, None)
+      assert transformer.check_version_constraints(None, None) is None
 
   with mock.patch.object(transformer.context.semantics, "get_definition", return_value=("id", {"variants": {"jax": {}}})):
     with mock.patch.object(transformer.context.semantics, "is_verified", return_value=True):
       with mock.patch.object(transformer.context.semantics, "resolve_variant", return_value={"api": "test"}):
-        transformer._get_mapping("test")
+        assert transformer._get_mapping("test") is not None
 
 
 def test_final_gaps():
-  """Function doc."""
+  """Verify final gaps behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -884,7 +892,7 @@ def test_final_gaps():
   # api.py 256
   transformer._is_framework_base = lambda x: False
   cls_node = cst.parse_module("class X(Base): pass").body[0]
-  transformer.visit_ClassDef(cls_node)
+  assert transformer.visit_ClassDef(cls_node) is True
 
   # api.py 417
   # visit_Import with asname where the module is tracked?
@@ -902,13 +910,15 @@ def test_final_gaps():
   with mock.patch.object(transformer.context.semantics, "get_definition", return_value=("id", {})):
     with mock.patch.object(transformer.context.semantics, "is_verified", return_value=True):
       with mock.patch.object(transformer.context.semantics, "resolve_variant", return_value=mock.Mock(spec=["get"])):
-        transformer._get_mapping("test")
+        assert transformer._get_mapping("test") is None
 
   # api_helpers.py 308-319 check_version_constraints fallback
   # pass invalid target_fw that fails importlib.metadata.version
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value=None):
     transformer.context.config.target_framework = "this_package_does_not_exist_123"
-    transformer.check_version_constraints("1.0", None)
+    assert transformer.check_version_constraints("1.0", None) is None or isinstance(
+      transformer.check_version_constraints("1.0", None), str
+    )
 
   # api_attr_mixin.py 85
   # leave_Assign no source traits cached
@@ -916,7 +926,7 @@ def test_final_gaps():
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value=None):
     stmt3 = cst.parse_module("a, b = obj.apply()").body[0].body[0]
     with mock.patch("ml_switcheroo.core.rewriter.passes.api_attr_mixin.is_functional_apply", return_value=True):
-      transformer.leave_Assign(stmt3, stmt3)
+      assert transformer.leave_Assign(stmt3, stmt3) is not None
 
   # api_attr_mixin.py 125
   attr = cst.parse_expression("obj.attr")
@@ -928,13 +938,13 @@ def test_final_gaps():
     with mock.patch.object(
       transformer.context.semantics, "get_definition", return_value=("id", {"variants": {"jax": {"macro": "math.inf"}}})
     ):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
     with mock.patch.object(
       transformer.context.semantics,
       "get_definition",
       return_value=("id", {"variants": {"jax": {"macro": "invalid syntax :::"}}}),
     ):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
 
   # api_call_mixin.py 82-84, 88, 94, 103, 107
   call_node = cst.parse_expression("foo()")
@@ -950,11 +960,11 @@ def test_final_gaps():
             with mock.patch(
               "ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_post_processing", return_value=call_node
             ):
-              transformer.leave_Call(call_node, call_node)
+              assert transformer.leave_Call(call_node, call_node) is not None
 
 
 def test_final_gaps_mixins_more():
-  """Function doc."""
+  """Verify final gaps mixins more behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -981,16 +991,16 @@ def test_final_gaps_mixins_more():
       "get_definition",
       return_value=("id", {"variants": {"jax": {"macro": "invalid syntax :::"}}}),
     ):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
 
     with mock.patch.object(
       transformer.context.semantics, "get_definition", return_value=("id", {"variants": {"jax": {"api": "jax.new_attr"}}})
     ):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
 
 
 def test_api_py_gaps_256():
-  """Function doc."""
+  """Verify api py gaps 256 behavior."""
   import libcst as cst
 
   from ml_switcheroo.config import RuntimeConfig
@@ -1004,11 +1014,11 @@ def test_api_py_gaps_256():
   transformer = ApiTransformer(ctx)
   transformer._is_framework_base = lambda x: x == "Base"
   cls_node = cst.parse_module("class X(Base): pass").body[0]
-  transformer.visit_ClassDef(cls_node)
+  assert transformer.visit_ClassDef(cls_node) is True
 
 
 def test_api_py_gaps_417():
-  """Function doc."""
+  """Verify api py gaps 417 behavior."""
   import libcst as cst
 
   from ml_switcheroo.config import RuntimeConfig
@@ -1021,11 +1031,11 @@ def test_api_py_gaps_417():
   )
   transformer = ApiTransformer(ctx)
   mod_i2 = cst.parse_module("import numpy")
-  transformer.visit_Import(mod_i2.body[0].body[0])
+  assert transformer.visit_Import(mod_i2.body[0].body[0]) is False
 
 
 def test_api_py_gaps_448():
-  """Function doc."""
+  """Verify api py gaps 448 behavior."""
   import libcst as cst
 
   from ml_switcheroo.config import RuntimeConfig
@@ -1039,11 +1049,11 @@ def test_api_py_gaps_448():
   transformer = ApiTransformer(ctx)
   mod = cst.parse_module("x = 1")
   transformer.context.module_preamble.clear()
-  transformer.leave_Module(mod, mod)
+  assert isinstance(transformer.leave_Module(mod, mod), cst.Module)
 
 
 def test_api_helpers_gaps_312():
-  """Function doc."""
+  """Verify api helpers gaps 312 behavior."""
   from unittest import mock
 
   from ml_switcheroo.config import RuntimeConfig
@@ -1057,11 +1067,11 @@ def test_api_helpers_gaps_312():
   transformer = ApiTransformer(ctx)
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value=None):
     with mock.patch("importlib.metadata.version", return_value="1.0.0"):
-      transformer.check_version_constraints(None, None)
+      assert transformer.check_version_constraints(None, None) is None
 
 
 def test_api_attr_mixin_gaps_85():
-  """Function doc."""
+  """Verify api attr mixin gaps 85 behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -1079,11 +1089,11 @@ def test_api_attr_mixin_gaps_85():
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value=None):
     stmt3 = cst.parse_module("a, b = obj.apply()").body[0].body[0]
     with mock.patch("ml_switcheroo.core.rewriter.passes.api_attr_mixin.is_functional_apply", return_value=True):
-      transformer.leave_Assign(stmt3, stmt3)
+      assert transformer.leave_Assign(stmt3, stmt3) is not None
 
 
 def test_api_attr_mixin_gaps_151_162():
-  """Function doc."""
+  """Verify api attr mixin gaps 151 162 behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -1102,17 +1112,17 @@ def test_api_attr_mixin_gaps_151_162():
     with mock.patch.object(
       transformer.context.semantics, "get_definition", return_value=("id", {"variants": {"jax": {"macro": "math.inf"}}})
     ):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
     with mock.patch.object(
       transformer.context.semantics,
       "get_definition",
       return_value=("id", {"variants": {"jax": {"macro": "invalid syntax :::"}}}),
     ):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
 
 
 def test_api_call_mixin_gaps_82_107():
-  """Function doc."""
+  """Verify api call mixin gaps 82 107 behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -1139,11 +1149,11 @@ def test_api_call_mixin_gaps_82_107():
               "ml_switcheroo.core.rewriter.passes.api_call_mixin.handle_post_processing", return_value=call_node
             ):
               with mock.patch.object(transformer, "_get_mapping", return_value={"api": "jax.foo"}):
-                transformer.leave_Call(call_node, call_node)
+                assert transformer.leave_Call(call_node, call_node) is not None
 
 
 def test_api_py_exact_lines():
-  """Function doc."""
+  """Verify api py exact lines behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -1159,19 +1169,19 @@ def test_api_py_exact_lines():
   transformer = ApiTransformer(ctx)
 
   transformer.context.scope_stack.append({"my_var"})
-  transformer._is_stateful("my_var")
+  assert transformer._is_stateful("my_var") is True
 
   mod_i = cst.parse_module("import a")
   with mock.patch.object(transformer, "_get_qualified_name", return_value=None):
-    transformer.visit_Import(mod_i.body[0].body[0])
+    assert transformer.visit_Import(mod_i.body[0].body[0]) is False
 
   alias = cst.Name("b")
   import_from = cst.ImportFrom(module=cst.Name("a"), names=[alias])
-  transformer.visit_ImportFrom(import_from)
+  assert transformer.visit_ImportFrom(import_from) is False
 
 
 def test_api_helpers_exact_lines():
-  """Function doc."""
+  """Verify api helpers exact lines behavior."""
   from ml_switcheroo.config import RuntimeConfig
   from ml_switcheroo.core.rewriter.context import RewriterContext
   from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
@@ -1181,11 +1191,13 @@ def test_api_helpers_exact_lines():
     semantics=SemanticsManager(), config=RuntimeConfig(source_framework="torch", target_framework="flax_nnx")
   )
   transformer = ApiTransformer(ctx)
-  transformer.check_version_constraints("1.0", None)
+  assert transformer.check_version_constraints("1.0", None) is None or isinstance(
+    transformer.check_version_constraints("1.0", None), str
+  )
 
 
 def test_api_attr_mixin_exact_lines():
-  """Function doc."""
+  """Verify api attr mixin exact lines behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -1204,31 +1216,31 @@ def test_api_attr_mixin_exact_lines():
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value=None):
     with mock.patch("ml_switcheroo.core.rewriter.passes.api_attr_mixin.is_functional_apply", return_value=True):
       stmt = cst.parse_module("a, b = foo()").body[0].body[0]
-      transformer.leave_Assign(stmt, stmt)
+      assert transformer.leave_Assign(stmt, stmt) is not None
 
   attr = cst.parse_expression("obj.attr")
   with mock.patch.object(transformer, "_get_qualified_name", return_value="torch.attr"):
     with mock.patch.object(
       transformer.context.semantics, "get_definition", return_value=("id", {"variants": {"jax": {"api": "new.api"}}})
     ):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
 
     with mock.patch.object(
       transformer.context.semantics,
       "get_definition",
       return_value=("id", {"variants": {"jax": {"macro_template": "math.inf"}}}),
     ):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
     with mock.patch.object(
       transformer.context.semantics,
       "get_definition",
       return_value=("id", {"variants": {"jax": {"macro_template": ":::"}}}),
     ):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
 
 
 def test_api_call_mixin_exact_lines():
-  """Function doc."""
+  """Verify api call mixin exact lines behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -1252,7 +1264,7 @@ def test_api_call_mixin_exact_lines():
       ):
         with mock.patch.object(transformer, "_get_mapping", return_value={"api": "jax.method"}):
           with mock.patch.object(transformer.context.semantics, "get_definition", return_value=("id", {})):
-            transformer.leave_Call(call_node, call_node)
+            assert transformer.leave_Call(call_node, call_node) is not None
 
   super_call = cst.parse_expression("super().__init__()")
   transformer.leave_Call(super_call, super_call)
@@ -1267,11 +1279,11 @@ def test_api_call_mixin_exact_lines():
     ):
       with mock.patch.object(transformer, "_get_mapping", return_value={"api": "jax.valid"}):
         with mock.patch.object(transformer, "check_version_constraints", return_value="Warning!"):
-          transformer.leave_Call(call_node2, call_node2)
+          assert transformer.leave_Call(call_node2, call_node2) is not None
 
 
 def test_api_py_gap_417():
-  """Function doc."""
+  """Verify api py gap 417 behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -1287,11 +1299,11 @@ def test_api_py_gap_417():
   transformer = ApiTransformer(ctx)
   mod_i = cst.parse_module("import a")
   with mock.patch.object(transformer, "_cst_to_string", return_value=None):
-    transformer.visit_Import(mod_i.body[0].body[0])
+    assert transformer.visit_Import(mod_i.body[0].body[0]) is False
 
 
 def test_api_attr_mixin_gap_85():
-  """Function doc."""
+  """Verify api attr mixin gap 85 behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -1299,22 +1311,22 @@ def test_api_attr_mixin_gap_85():
   from ml_switcheroo.core.rewriter.passes.api_attr_mixin import ApiTransformerAttrMixin
 
   class DummyTransformer(ApiTransformerAttrMixin):
-    """Class doc."""
+    """Test helper class DummyTransformer."""
 
     def _get_qualified_name(self, func):
-      """Function doc."""
+      """Execute get qualified name helper logic."""
       return "foo"
 
     @property
     def semantics(self):
-      """Function doc."""
+      """Execute semantics helper logic."""
       m = mock.Mock()
       m.get_definition.return_value = ("id", {})
       return m
 
     @property
     def context(self):
-      """Function doc."""
+      """Execute context helper logic."""
       m = mock.Mock()
       m.scope_stack = [set(), set()]
       return m
@@ -1322,11 +1334,11 @@ def test_api_attr_mixin_gap_85():
   transformer = DummyTransformer()
   stmt = cst.parse_module("a = call()").body[0].body[0]
   with mock.patch("ml_switcheroo.core.rewriter.passes.api_attr_mixin.is_functional_apply", return_value=False):
-    transformer.leave_Assign(stmt, stmt)
+    assert transformer.leave_Assign(stmt, stmt) is not None
 
 
 def test_api_attr_mixin_gaps_151_162_2():
-  """Function doc."""
+  """Verify api attr mixin gaps 151 162 2 behavior."""
   from unittest import mock
 
   import libcst as cst
@@ -1346,14 +1358,14 @@ def test_api_attr_mixin_gaps_151_162_2():
   # 151-152: target_impl has "api"
   with mock.patch.object(transformer, "_get_qualified_name", return_value="torch.attr"):
     with mock.patch.object(transformer, "_get_mapping", return_value={"api": "new.api"}):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
 
   # 156-160: target_impl has "macro_template" valid
   with mock.patch.object(transformer, "_get_qualified_name", return_value="torch.attr"):
     with mock.patch.object(transformer, "_get_mapping", return_value={"macro_template": "math.inf"}):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None
 
   # 161-162: target_impl has "macro_template" invalid syntax
   with mock.patch.object(transformer, "_get_qualified_name", return_value="torch.attr"):
     with mock.patch.object(transformer, "_get_mapping", return_value={"macro_template": ":::"}):
-      transformer.leave_Attribute(attr, attr)
+      assert transformer.leave_Attribute(attr, attr) is not None

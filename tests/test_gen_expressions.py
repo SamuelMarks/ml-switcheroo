@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for gen expressions."""
 
 from typing import Dict, List
 from unittest import mock
@@ -11,24 +11,24 @@ from ml_switcheroo.core.mlir.gen_expressions import ExpressionGeneratorMixin
 
 
 class DummyGenerator(ExpressionGeneratorMixin):
-  """Docstring."""
+  """Test helper class DummyGenerator."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self._resolved: Dict[str, cst.BaseExpression] = {}
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-    """Function doc."""
+    """Execute resolve operand helper logic."""
     if ssa_name in self._resolved:
       return self._resolved[ssa_name]
     return cst.Name(f"resolved_{ssa_name}")
 
 
 def test_resolve_operand_not_implemented() -> None:
-  """Docstring."""
+  """Verify resolve operand not implemented behavior."""
 
   class IncompleteGenerator(ExpressionGeneratorMixin):
-    """Class doc."""
+    """Test helper class IncompleteGenerator."""
 
     pass
 
@@ -38,7 +38,7 @@ def test_resolve_operand_not_implemented() -> None:
 
 
 def test_parse_keywords() -> None:
-  """Docstring."""
+  """Verify parse keywords behavior."""
   gen: DummyGenerator = DummyGenerator()
 
   # Empty
@@ -65,7 +65,7 @@ def test_parse_keywords() -> None:
 
 
 def test_expr_sw_constant() -> None:
-  """Docstring."""
+  """Verify expr sw constant behavior."""
   gen: DummyGenerator = DummyGenerator()
 
   # Valid parseable expression
@@ -91,7 +91,7 @@ def test_expr_sw_constant() -> None:
 
 
 def test_expr_sw_getattr() -> None:
-  """Docstring."""
+  """Verify expr sw getattr behavior."""
   gen: DummyGenerator = DummyGenerator()
 
   # No operands error
@@ -118,7 +118,7 @@ def test_expr_sw_getattr() -> None:
 
 
 def test_expr_sw_call() -> None:
-  """Docstring."""
+  """Verify expr sw call behavior."""
   gen: DummyGenerator = DummyGenerator()
 
   # No operands
@@ -148,7 +148,7 @@ def test_expr_sw_call() -> None:
 
 
 def test_expr_sw_op() -> None:
-  """Docstring."""
+  """Verify expr sw op behavior."""
   gen: DummyGenerator = DummyGenerator()
 
   # Generic call
@@ -179,7 +179,7 @@ def test_expr_sw_op() -> None:
 
 
 def test_expr_binop() -> None:
-  """Docstring."""
+  """Verify expr binop behavior."""
   gen: DummyGenerator = DummyGenerator()
 
   # Less than 2 operands
@@ -223,7 +223,7 @@ def test_expr_binop() -> None:
 
 
 def test_expr_sw_op_keyword() -> None:
-  """Function doc."""
+  """Verify expr sw op keyword behavior."""
   gen: DummyGenerator = DummyGenerator()
   op: OperationNode = OperationNode(
     name="sw.op",
@@ -237,15 +237,15 @@ def test_expr_sw_op_keyword() -> None:
 
 
 def test_parse_keywords_branches_invalid_type() -> None:
-  """Function doc."""
+  """Verify parse keywords branches invalid type behavior."""
   from ml_switcheroo.core.mlir.cst import AttributeNode, OperationNode
   from ml_switcheroo.core.mlir.gen_expressions import ExpressionGeneratorMixin
 
   class DummyGen(ExpressionGeneratorMixin):
-    """Class doc."""
+    """Test helper class DummyGen."""
 
     def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-      """Function doc."""
+      """Execute resolve operand helper logic."""
       return cst.Name("dummy")
 
   gen: DummyGen = DummyGen()
@@ -257,7 +257,7 @@ def test_parse_keywords_branches_invalid_type() -> None:
 
 
 def test_parse_keywords_branches_invalid_list() -> None:
-  """Function doc."""
+  """Verify parse keywords branches invalid list behavior."""
   gen: DummyGenerator = DummyGenerator()
   # val is not a list, for example an integer in a string literal
   op: OperationNode = OperationNode(name="sw.call", attributes=[AttributeNode(name="arg_keywords", value='"123"')])

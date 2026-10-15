@@ -13,11 +13,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def gen(tmp_path: Path) -> TestCaseGenerator:
-  """Docstring."""
+  """Execute gen helper logic."""
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
   def mock_get_template(fw: str) -> typing.Optional[dict[str, str]]:
-    """Docstring."""
+    """Execute mock get template helper logic."""
     if fw == "torch":
       return {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"}
     if fw == "jax":

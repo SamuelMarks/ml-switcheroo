@@ -6,7 +6,7 @@ from praxis.layers import attentions
 
 
 class AttentionModel(base_layer.BaseLayer):
-  """Docstring."""
+  """Test helper class AttentionModel."""
 
   embed_dim: int = 0
   num_heads: int = 0

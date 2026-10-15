@@ -10,7 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class StableMockSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class StableMockSemantics."""
 
   def get_known_apis(self) -> dict[str, typing.Any]:
     """Mock implementation of get known apis."""
@@ -31,7 +31,7 @@ class StableMockSemantics(SemanticsManager):
 
 
 class MockInspector:
-  """Docstring."""
+  """Test helper class MockInspector."""
 
   def inspect(self, _pkg: str) -> dict[str, typing.Any]:
     """Mock implementation of inspect."""

@@ -14,7 +14,7 @@ from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 @pytest.fixture
 def fuzzer() -> InputFuzzer:
-  """Docstring."""
+  """Execute fuzzer helper logic."""
   random.seed(42)
   np.random.seed(42)
   return InputFuzzer()
@@ -263,7 +263,7 @@ def test_adapt_to_framework_delegation(fuzzer: InputFuzzer) -> None:
 
   @register_framework("mock_fw")
   class MockAdapter:
-    """Docstring."""
+    """Test helper class MockAdapter."""
 
     def convert(self, x: Any) -> str:
       """Mock implementation of convert."""

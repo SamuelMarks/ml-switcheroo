@@ -1,1 +1,1 @@
-"""Test module."""
+"""Test suite for rewriter api."""

@@ -5,7 +5,7 @@ from ml_switcheroo.frameworks.rdna import RdnaAdapter
 
 
 def test_rdna_label_pass() -> None:
-  """Docstring."""
+  """Verify rdna label pass behavior."""
   adapter: RdnaAdapter = RdnaAdapter()
   code: str = """
 L_123:

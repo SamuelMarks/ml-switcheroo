@@ -5,7 +5,7 @@ from flax import nnx
 
 
 class MaxPoolModel(nnx.Module):
-  """Docstring."""
+  """Test helper class MaxPoolModel."""
 
   def __init__(self, kernel_size: int = 2, stride: int = 2, rngs: nnx.Rngs = None):
     """Initializes the MaxPoolModel instance."""

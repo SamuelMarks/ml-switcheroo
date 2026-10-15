@@ -8,10 +8,11 @@ enabling surgical patching later in the pipeline.
 """
 
 from typing import Dict, List, Optional
+
 import libcst as cst
 
 # Re-export Core IR definitions for backward compatibility
-from ml_switcheroo.core.compiler.ir import LogicalNode, LogicalEdge, LogicalGraph, NodeDict, topological_sort
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, topological_sort
 from ml_switcheroo.core.scanners import get_full_name
 from ml_switcheroo.utils.node_diff import capture_node_source
 
@@ -262,7 +263,6 @@ class GraphExtractor(cst.CSTVisitor):
         op_type = op_type.split(".")[-1]
       self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, {})
       self.node_map[attr_name] = node
-    self.node_map[attr_name] = node
 
   def _analyze_create_child(self, call: cst.Call, context_node: cst.CSTNode) -> None:
     """Parse self.create_child('layer_name', ...) calls.
@@ -453,5 +453,7 @@ class GraphExtractor(cst.CSTVisitor):
     """
     if self.layer_registry:
       # Sort by definition order implicitly via dict preservation or explicitly if desired
-      self.graph.nodes = NodeDict(self.graph, self.layer_registry)
+      self.graph.nodes.clear()
+      for k, v in self.layer_registry.items():
+        self.graph.nodes[k] = v
     self.graph.name = self.model_name

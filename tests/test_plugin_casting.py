@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin casting."""
 
 from unittest.mock import MagicMock
 
@@ -9,14 +9,14 @@ from ml_switcheroo.plugins.casting import _create_dotted_name, _supports_numpy_c
 
 
 def test_create_dotted_name() -> None:
-  """Docstring."""
+  """Verify create dotted name behavior."""
   node: cst.BaseExpression = _create_dotted_name("a.b.c")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "c"
 
 
 def test_supports_numpy_casting() -> None:
-  """Docstring."""
+  """Verify supports numpy casting behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
 
@@ -42,7 +42,7 @@ def test_supports_numpy_casting() -> None:
 
   # plugin_traits object
   class Traits:
-    """Docstring."""
+    """Test helper class Traits."""
 
     has_numpy_compatible_arrays: bool = True
 
@@ -50,7 +50,7 @@ def test_supports_numpy_casting() -> None:
   assert _supports_numpy_casting(ctx)
 
   class TraitsFalse:
-    """Docstring."""
+    """Test helper class TraitsFalse."""
 
     has_numpy_compatible_arrays: bool = False
 
@@ -58,7 +58,7 @@ def test_supports_numpy_casting() -> None:
   assert not _supports_numpy_casting(ctx)
 
   class TraitsMissing:
-    """Docstring."""
+    """Test helper class TraitsMissing."""
 
     pass
 
@@ -67,7 +67,7 @@ def test_supports_numpy_casting() -> None:
 
 
 def test_transform_casting() -> None:
-  """Docstring."""
+  """Verify transform casting behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
   ctx.semantics = MagicMock()

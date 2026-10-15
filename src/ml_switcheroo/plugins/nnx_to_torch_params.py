@@ -16,10 +16,11 @@ Decoupling:
     preventing hardcoded fallbacks to `torch.nn.Parameter`.
 """
 
-import libcst as cst
-from typing import Optional, List
+from typing import List, Optional
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 

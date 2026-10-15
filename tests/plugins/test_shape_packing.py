@@ -29,7 +29,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @register_framework("custom_fw")
 class CustomAdapter:
-  """Docstring."""
+  """Test helper class CustomAdapter."""
 
   @property
   def harness_imports(self) -> list:

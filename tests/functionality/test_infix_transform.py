@@ -9,7 +9,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInfixSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockInfixSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockInfixSemantics instance."""
@@ -44,7 +44,7 @@ class MockInfixSemantics(SemanticsManager):
 
 @pytest.fixture
 def engine() -> ASTEngine:
-  """Docstring."""
+  """Execute engine helper logic."""
   return ASTEngine(semantics=MockInfixSemantics(), source="torch", target="jax", strict_mode=True)
 
 

@@ -13,10 +13,8 @@ It serves two primary purposes:
     integration, where logs must be captured and returned to the browser context.
 """
 
-import typing
-
-
 import logging
+import typing
 
 from rich.console import Console
 from rich.logging import RichHandler
@@ -47,7 +45,7 @@ def _success(self: "logging.Logger", message: typing.Any, *args: typing.Any, **k
 
 
 # Patch basic Logger class
-logging.Logger.success = _success  # type: ignore
+setattr(logging.Logger, "success", _success)
 
 # Define standard semantic colors for the CLI
 _THEME = Theme(

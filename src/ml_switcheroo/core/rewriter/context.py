@@ -6,16 +6,13 @@ Scopes, Configuration) from the logic transformers (RewriterStages), enabling
 a composition-based architecture.
 """
 
-from typing import Any
+from typing import Any, Callable, Dict, List, Optional, Set
 
-
-from typing import Dict, List, Optional, Set, Callable
-
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.analysis.symbol_table import SymbolTable
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.core.rewriter.types import SignatureContext
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class RewriterContext:
@@ -162,10 +159,10 @@ class RewriterContext:
       if not fw_conf:
         return
 
-      alias_info = fw_conf.get("alias")
+      alias_info: Any = fw_conf.get("alias")
       # Handle Pydantic model dump or dict
       if hasattr(alias_info, "model_dump"):
-        alias_info = alias_info.model_dump()  # type: ignore
+        alias_info = getattr(alias_info, "model_dump")()
 
       if isinstance(alias_info, dict):
         name = alias_info.get("name")

@@ -5,18 +5,15 @@ It scans API surfaces, normalizes names, and clusters them using Levenshtein dis
 to propose candidate standards for the ODL.
 """
 
-from typing import Any
-
-
+import difflib
 import importlib
 import inspect
-import difflib
 import logging
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 
 try:
   from ml_ecosystem_snapshots.grounding.engine import compute_levenshtein
-except ImportError:  # pragma: no cover
+except ImportError:
 
   def compute_levenshtein(s1: str, s2: str) -> int:
     """Compute edit distance fallback.

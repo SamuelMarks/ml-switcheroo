@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for mlx optimizers."""
 
 from typing import Union, cast
 from unittest.mock import MagicMock
@@ -15,7 +15,7 @@ from ml_switcheroo.plugins.mlx_optimizers import (
 
 
 def test_create_dotted_name() -> None:
-  """Docstring."""
+  """Verify create dotted name behavior."""
   node: Union[cst.Name, cst.Attribute] = _create_dotted_name("mlx.optimizers.Adam")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "Adam"
@@ -26,7 +26,7 @@ def test_create_dotted_name() -> None:
 
 
 def test_transform_optimizer_init_with_lookup() -> None:
-  """Docstring."""
+  """Verify transform optimizer init with lookup behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "Adam"
   ctx.lookup_api.return_value = "mlx.optimizers.AdamW"
@@ -45,7 +45,7 @@ def test_transform_optimizer_init_with_lookup() -> None:
 
 
 def test_transform_optimizer_init_fallback_attribute() -> None:
-  """Docstring."""
+  """Verify transform optimizer init fallback attribute behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = None
   ctx.lookup_api.return_value = None
@@ -54,11 +54,13 @@ def test_transform_optimizer_init_fallback_attribute() -> None:
   module: cst.Module = cst.parse_module(code)
   call_node: cst.Call = cast(cst.Call, module.body[0].body[0].value)
 
-  transform_mlx_optimizer_init(call_node, ctx)
+  res = transform_mlx_optimizer_init(call_node, ctx)
+  assert isinstance(res, cst.Call)
+  assert "mlx.optimizers.Adam" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
 
 
 def test_transform_optimizer_init_fallback_name() -> None:
-  """Docstring."""
+  """Verify transform optimizer init fallback name behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = None
   ctx.lookup_api.return_value = None
@@ -67,11 +69,13 @@ def test_transform_optimizer_init_fallback_name() -> None:
   module: cst.Module = cst.parse_module(code)
   call_node: cst.Call = cast(cst.Call, module.body[0].body[0].value)
 
-  transform_mlx_optimizer_init(call_node, ctx)
+  res = transform_mlx_optimizer_init(call_node, ctx)
+  assert isinstance(res, cst.Call)
+  assert "mlx.optimizers.Adam" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
 
 
 def test_transform_optimizer_init_fallback_other() -> None:
-  """Docstring."""
+  """Verify transform optimizer init fallback other behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = None
   ctx.lookup_api.return_value = None
@@ -83,11 +87,12 @@ def test_transform_optimizer_init_fallback_other() -> None:
   call_node = cast(cst.Call, expr.value)
 
   res = transform_mlx_optimizer_init(call_node, ctx)
-  assert res is not None
+  assert isinstance(res, cst.Call)
+  assert "mlx.optimizers.Adam" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
 
 
 def test_transform_optimizer_step_attribute() -> None:
-  """Docstring."""
+  """Verify transform optimizer step attribute behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   code: str = "my_opt.step()"
@@ -106,7 +111,7 @@ def test_transform_optimizer_step_attribute() -> None:
 
 
 def test_transform_optimizer_step_name() -> None:
-  """Docstring."""
+  """Verify transform optimizer step name behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   code: str = "step()"
@@ -125,7 +130,7 @@ def test_transform_optimizer_step_name() -> None:
 
 
 def test_transform_zero_grad() -> None:
-  """Docstring."""
+  """Verify transform zero grad behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   code: str = "opt.zero_grad()"
@@ -139,7 +144,7 @@ def test_transform_zero_grad() -> None:
 
 
 def test_transform_optimizer_init_positional_args() -> None:
-  """Docstring."""
+  """Verify transform optimizer init positional args behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "Adam"
   ctx.lookup_api.return_value = "mlx.optimizers.AdamW"
@@ -156,7 +161,7 @@ def test_transform_optimizer_init_positional_args() -> None:
 
 
 def test_transform_optimizer_init_kwarg_no_value() -> None:
-  """Docstring."""
+  """Verify transform optimizer init kwarg no value behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = None
   ctx.lookup_api.return_value = None
@@ -165,11 +170,13 @@ def test_transform_optimizer_init_kwarg_no_value() -> None:
   module: cst.Module = cst.parse_module(code)
   call_node: cst.Call = cast(cst.Call, module.body[0].body[0].value)
 
-  transform_mlx_optimizer_init(call_node, ctx)
+  res = transform_mlx_optimizer_init(call_node, ctx)
+  assert isinstance(res, cst.Call)
+  assert len(res.args) == 0
 
 
 def test_transform_optimizer_init_lr_rename_no_keyword() -> None:
-  """Docstring."""
+  """Verify transform optimizer init lr rename no keyword behavior."""
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Adam"
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"
@@ -183,7 +190,7 @@ def test_transform_optimizer_init_lr_rename_no_keyword() -> None:
 
 
 def test_transform_optimizer_init_no_args() -> None:
-  """Docstring."""
+  """Verify transform optimizer init no args behavior."""
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Adam"
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"
@@ -196,7 +203,7 @@ def test_transform_optimizer_init_no_args() -> None:
 
 
 def test_transform_optimizer_init_lr_rename_no_keyword_true() -> None:
-  """Docstring."""
+  """Verify transform optimizer init lr rename no keyword true behavior."""
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Adam"
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"
@@ -210,7 +217,7 @@ def test_transform_optimizer_init_lr_rename_no_keyword_true() -> None:
 
 
 def test_transform_optimizer_init_lr_rename_no_keyword_false() -> None:
-  """Docstring."""
+  """Verify transform optimizer init lr rename no keyword false behavior."""
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Adam"
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"
@@ -224,7 +231,7 @@ def test_transform_optimizer_init_lr_rename_no_keyword_false() -> None:
 
 
 def test_transform_optimizer_init_lr_rename_no_keyword_true_already() -> None:
-  """Docstring."""
+  """Verify transform optimizer init lr rename no keyword true already behavior."""
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Adam"
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"
@@ -238,7 +245,7 @@ def test_transform_optimizer_init_lr_rename_no_keyword_true_already() -> None:
 
 
 def test_transform_optimizer_init_lr_rename_no_keyword_true_actually() -> None:
-  """Docstring."""
+  """Verify transform optimizer init lr rename no keyword true actually behavior."""
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Adam"
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"

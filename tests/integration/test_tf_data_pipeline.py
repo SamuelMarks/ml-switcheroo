@@ -13,7 +13,7 @@ SOURCE: str = "\nimport torch\nfrom torch.utils.data import DataLoader, TensorDa
 
 @pytest.fixture
 def tf_semantics() -> SemanticsManager:
-  """Docstring."""
+  """Execute tf semantics helper logic."""
   _HOOKS["tf_data_loader"] = transform_tf_dataloader
   mgr = SemanticsManager()
   mapping: dict[str, str] = {"api": "tf.data.Dataset", "requires_plugin": "tf_data_loader"}

@@ -1,11 +1,12 @@
-"""Docstring."""
+"""Test suite for scanners coverage."""
 
 import libcst as cst
-from ml_switcheroo.core.scanners import get_full_name, SimpleNameScanner, GlobalUsageScanner
+
+from ml_switcheroo.core.scanners import GlobalUsageScanner, SimpleNameScanner, get_full_name
 
 
 def test_scanners_coverage() -> None:
-  """Docstring."""
+  """Verify scanners coverage behavior."""
   # get_full_name
   assert get_full_name(cst.Name("torch")) == "torch"
   assert get_full_name(cst.Attribute(cst.Name("torch"), cst.Name("nn"))) == "torch.nn"

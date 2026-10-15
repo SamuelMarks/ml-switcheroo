@@ -15,7 +15,7 @@ from ml_switcheroo.frameworks.base import get_adapter
 
 @pytest.fixture
 def mock_all_imports() -> typing.Generator[None, None, None]:
-  """Docstring."""
+  """Execute mock all imports helper logic."""
   with patch.dict(
     sys.modules,
     {

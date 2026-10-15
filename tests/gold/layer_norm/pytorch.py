@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class LayerNormModel(nn.Module):
-  """Docstring."""
+  """Test helper class LayerNormModel."""
 
   def __init__(self, normalized_shape: int):
     """Initializes the LayerNormModel instance."""

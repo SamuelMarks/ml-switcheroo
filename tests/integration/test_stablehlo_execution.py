@@ -25,7 +25,7 @@ def requires_pjrt() -> bool:
 
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
-  """Docstring."""
+  """Execute semantics helper logic."""
   mgr = SemanticsManager()
   return mgr
 
@@ -58,7 +58,7 @@ module {
 
 @pytest.mark.skipif(not requires_pjrt(), reason="JAX PJRT cpu backend not available.")
 def test_stablehlo_math_parity(semantics: SemanticsManager) -> None:
-  """Docstring."""
+  """Verify stablehlo math parity behavior."""
   mlir_code: str = """
 module {
   func.func @main(%x: tensor<3xf32>, %y: tensor<3xf32>) -> tensor<3xf32> {
@@ -86,7 +86,7 @@ module {
 
 @pytest.mark.skipif(not requires_pjrt(), reason="JAX PJRT cpu backend not available.")
 def test_stablehlo_while_parity(semantics: SemanticsManager) -> None:
-  """Docstring."""
+  """Verify stablehlo while parity behavior."""
   # This is a basic structural test for while compilation parity
   code: str = "import torch\ndef forward(x: torch.Tensor, count: torch.Tensor):\n    while count:\n        x = torch.abs(x)\n    return x\n"
   config = RuntimeConfig(source_framework="torch", target_framework="stablehlo", strict_mode=True)

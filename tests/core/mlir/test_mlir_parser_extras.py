@@ -1,7 +1,9 @@
 """Test extra corner cases for the MLIR parser."""
 
-from typing import List, Any
+from typing import Any, List
+
 from lark import Token, Tree
+
 from ml_switcheroo.core.mlir.parser import MlirTransformer, OperationNode
 
 

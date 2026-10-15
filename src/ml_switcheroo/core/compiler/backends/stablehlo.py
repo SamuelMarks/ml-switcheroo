@@ -5,18 +5,19 @@ of computations into StableHLO-flavored MLIR code representation.
 """
 
 from typing import Any, Dict, List, Optional
+
 from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.mlir.cst import (
+  AttributeNode,
   BlockNode,
   ModuleNode,
   OperationNode,
   StableHloConstantOp,
-  AttributeNode,
-  ValueNode,
   TypeNode,
+  ValueNode,
 )
-from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
 
 _LOGICAL_OP_ALIASES: Dict[str, str] = {
   "Div": "divide",

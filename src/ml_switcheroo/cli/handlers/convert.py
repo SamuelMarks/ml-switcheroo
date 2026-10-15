@@ -9,28 +9,20 @@ It orchestrates:
 5. Output writing and trace logging.
 """
 
-from typing import Any
-
-
-import sys
 import json
 import subprocess
+import sys
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Any, Dict, Optional
 
+from rich.table import Table
+
+from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.core.hooks import load_plugins
-from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
-from ml_switcheroo.utils.console import (
-  console,
-  log_info,
-  log_success,
-  log_error,
-  log_warning,
-)
-from rich.table import Table
+from ml_switcheroo.utils.console import console, log_error, log_info, log_success, log_warning
 
 
 def handle_convert(

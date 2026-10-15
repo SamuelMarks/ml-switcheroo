@@ -10,7 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class FunctionalSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class FunctionalSemantics."""
 
   def __init__(self) -> None:
     """Initializes the FunctionalSemantics instance."""
@@ -66,7 +66,7 @@ class FunctionalSemantics(SemanticsManager):
 
 @pytest.fixture
 def engine_factory() -> typing.Callable[[str, str], ASTEngine]:
-  """Docstring."""
+  """Execute engine factory helper logic."""
   semantics = FunctionalSemantics()
 
   def create(source: str, target: str) -> ASTEngine:

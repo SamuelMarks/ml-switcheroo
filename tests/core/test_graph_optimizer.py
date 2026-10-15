@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for graph optimizer."""
 
 import typing
 
@@ -8,7 +8,7 @@ from ml_switcheroo.core.graph_optimizer import GraphOptimizer
 
 
 def build_test_graph() -> LogicalGraph:
-  """Docstring."""
+  """Execute build test graph helper logic."""
   # Input -> Conv2d -> BatchNorm -> ReLU -> Output
   nodes = {
     "in": LogicalNode("in", op_type="Input"),
@@ -22,7 +22,7 @@ def build_test_graph() -> LogicalGraph:
 
 
 def test_graph_optimizer_no_patterns() -> None:
-  """Docstring."""
+  """Verify graph optimizer no patterns behavior."""
   g: LogicalGraph = build_test_graph()
   opt = GraphOptimizer([])
   res: LogicalGraph = opt.optimize(g)
@@ -31,7 +31,7 @@ def test_graph_optimizer_no_patterns() -> None:
 
 
 def test_graph_optimizer_single_pattern() -> None:
-  """Docstring."""
+  """Verify graph optimizer single pattern behavior."""
   g: LogicalGraph = build_test_graph()
   patterns = [
     PatternDef(name="CBR", sequence=["Conv2d", "BatchNorm", "ReLU"], replace_with="Conv2dBNReLU", description="test")
@@ -60,7 +60,7 @@ def test_graph_optimizer_single_pattern() -> None:
 
 
 def test_graph_optimizer_no_match() -> None:
-  """Docstring."""
+  """Verify graph optimizer no match behavior."""
   g: LogicalGraph = build_test_graph()
   patterns = [PatternDef(name="LinearReLU", sequence=["Linear", "ReLU"], replace_with="LinearReLU", description="test")]
   opt = GraphOptimizer(patterns)
@@ -71,7 +71,7 @@ def test_graph_optimizer_no_match() -> None:
 
 
 def test_graph_optimizer_multiple_patterns() -> None:
-  """Docstring."""
+  """Verify graph optimizer multiple patterns behavior."""
   # Input -> Linear -> ReLU -> Linear -> Output
   nodes = {
     "in": LogicalNode("in", op_type="Input"),
@@ -98,21 +98,21 @@ def test_graph_optimizer_multiple_patterns() -> None:
 
 
 def test_match_sequence_fail_empty_seq() -> None:
-  """Docstring."""
+  """Verify match sequence fail empty seq behavior."""
   opt = GraphOptimizer([])
   n = LogicalNode("x", op_type="X")
   assert opt._match_sequence(n, [], {}, {}, set()) is None
 
 
 def test_match_sequence_fail_first_node() -> None:
-  """Docstring."""
+  """Verify match sequence fail first node behavior."""
   opt = GraphOptimizer([])
   n = LogicalNode("x", op_type="X")
   assert opt._match_sequence(n, ["Y", "Z"], {}, {}, set()) is None
 
 
 def test_match_sequence_fail_missing_target() -> None:
-  """Docstring."""
+  """Verify match sequence fail missing target behavior."""
   opt = GraphOptimizer([])
   n = LogicalNode("x", op_type="X")
   node_map: dict[str, LogicalNode] = {"x": n, "y": LogicalNode("y", op_type="Y")}
@@ -122,7 +122,7 @@ def test_match_sequence_fail_missing_target() -> None:
 
 
 def test_match_sequence_fail_already_processed() -> None:
-  """Docstring."""
+  """Verify match sequence fail already processed behavior."""
   opt = GraphOptimizer([])
   n = LogicalNode("x", op_type="X")
   y = LogicalNode("y", op_type="Y")
@@ -132,7 +132,7 @@ def test_match_sequence_fail_already_processed() -> None:
 
 
 def test_match_sequence_fail_wrong_kind() -> None:
-  """Docstring."""
+  """Verify match sequence fail wrong kind behavior."""
   opt = GraphOptimizer([])
   n = LogicalNode("x", op_type="X")
   y = LogicalNode("y", op_type="Z")  # Wrong kind
@@ -142,7 +142,7 @@ def test_match_sequence_fail_wrong_kind() -> None:
 
 
 def test_optimizer_branching_edge_drops() -> None:
-  """Docstring."""
+  """Verify optimizer branching edge drops behavior."""
   nodes = {
     "A": LogicalNode("A", op_type="OpA"),
     "B": LogicalNode("B", op_type="OpB"),
@@ -164,7 +164,7 @@ def test_optimizer_branching_edge_drops() -> None:
 
 
 def test_optimizer_double_fusion_link() -> None:
-  """Docstring."""
+  """Verify optimizer double fusion link behavior."""
   nodes = {
     "A1": LogicalNode("A1", op_type="A"),
     "B1": LogicalNode("B1", op_type="B"),

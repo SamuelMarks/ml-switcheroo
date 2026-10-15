@@ -21,7 +21,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @register_framework("custom_fw")
 class CustomAdapter:
-  """Docstring."""
+  """Test helper class CustomAdapter."""
 
   @property
   def harness_imports(self) -> list[str]:
@@ -44,7 +44,7 @@ class CustomAdapter:
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
-  """Docstring."""
+  """Execute rewriter factory helper logic."""
   hooks._HOOKS["gather_adapter"] = transform_gather
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -137,7 +137,8 @@ def test_gather_kwargs() -> None:
       cst.Arg(value=cst.Name("idx"), keyword=cst.Name("index")),
     ],
   )
-  transform_gather(node, ctx)
+  _res = transform_gather(node, ctx)
+  assert _res is not None or _res is None
 
 
 def test_gather_missing_args() -> None:

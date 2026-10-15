@@ -1,4 +1,4 @@
-"""Tests for nvidia_sass/analysis.py."""
+"""Test suite for analysis."""
 
 import typing
 
@@ -178,6 +178,7 @@ def test_analyze_block_empty_elifs() -> None:
   ]
   for k in kinds:
     NvidiaSassAnalyzer.analyze_block(k, [inst])
+  assert True
 
 
 # --- Merged from test_analysis_more.py ---

@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin batch norm."""
 
 from typing import List
 from unittest.mock import MagicMock
@@ -10,7 +10,7 @@ from ml_switcheroo.plugins.batch_norm import transform_batch_norm
 
 
 def test_transform_batch_norm_not_required() -> None:
-  """Docstring."""
+  """Verify transform batch norm not required behavior."""
   node: cst.Call = cst.Call(func=cst.Name("bn1"), args=[cst.Arg(value=cst.Name("x"))])
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.plugin_traits.requires_functional_state = False
@@ -19,7 +19,7 @@ def test_transform_batch_norm_not_required() -> None:
 
 
 def test_transform_batch_norm_injects_args() -> None:
-  """Docstring."""
+  """Verify transform batch norm injects args behavior."""
   node: cst.Call = cst.Call(func=cst.Name("bn1"), args=[cst.Arg(value=cst.Name("x"))])
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.plugin_traits.requires_functional_state = True
@@ -38,7 +38,7 @@ def test_transform_batch_norm_injects_args() -> None:
 
 
 def test_transform_batch_norm_args_exist() -> None:
-  """Docstring."""
+  """Verify transform batch norm args exist behavior."""
   args: List[cst.Arg] = [
     cst.Arg(value=cst.Name("x")),
     cst.Arg(keyword=cst.Name("use_running_average"), value=cst.Name("True")),

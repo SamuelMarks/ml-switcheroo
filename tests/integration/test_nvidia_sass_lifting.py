@@ -19,7 +19,7 @@ SASS_SOURCE = dedent(
 
 @pytest.fixture
 def lifting_engine() -> ASTEngine:
-  """Docstring."""
+  """Execute lifting engine helper logic."""
   register_framework("nvidia_sass")(NvidiaSassAdapter)
   register_framework("torch")(TorchAdapter)
   semantics = SemanticsManager()

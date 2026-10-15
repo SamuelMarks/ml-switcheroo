@@ -5,11 +5,9 @@ into final ReStructuredText (RST) content. It embeds custom HTML/CSS/JS logic to
 create an interactive "Vertical Tabs" layout for displaying framework variants side-by-side.
 """
 
-from typing import Any
-
-
 import re
 import textwrap
+from typing import Any
 
 
 class OpPageRenderer:

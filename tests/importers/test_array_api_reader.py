@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for array api reader."""
 
 import ast
 import typing
@@ -9,7 +9,7 @@ from ml_switcheroo.importers.array_api_reader import ArrayApiReader, ArrayApiSpe
 
 
 def test_array_api_reader(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify array api reader behavior."""
   # Create some dummy .py stubs
   (tmp_path / "valid.py").write_text('''
 e = 2.718
@@ -77,7 +77,7 @@ def broken(
 
 
 def test_parse_annotation() -> None:
-  """Docstring."""
+  """Verify parse annotation behavior."""
   importer = ArrayApiSpecImporter()
 
   # Test None
@@ -127,7 +127,7 @@ def test_parse_annotation() -> None:
 
 
 def test_get_assignment_name() -> None:
-  """Docstring."""
+  """Verify get assignment name behavior."""
   importer = ArrayApiSpecImporter()
 
   # Test Assign
@@ -157,7 +157,7 @@ def test_get_assignment_name() -> None:
 
 
 def test_clean_docstring() -> None:
-  """Docstring."""
+  """Verify clean docstring behavior."""
   importer = ArrayApiSpecImporter()
   assert importer._clean_docstring(None) == ""
   assert importer._clean_docstring("   ") == ""
@@ -168,7 +168,7 @@ def test_clean_docstring() -> None:
 
 
 def test_array_api_reader_relative_to_value_error(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify array api reader relative to value error behavior."""
   reader = ArrayApiSpecImporter()
 
   file_path: Path = tmp_path / "test.py"
@@ -182,7 +182,7 @@ def test_array_api_reader_relative_to_value_error(tmp_path: Path) -> None:
 
 
 def test_array_api_reader_subscript_no_slice() -> None:
-  """Docstring."""
+  """Verify array api reader subscript no slice behavior."""
   reader = ArrayApiSpecImporter()
   # Mock Subscript without slice
   node = ast.Subscript(value=ast.Name(id="List"), slice=ast.Name(id="Any"))

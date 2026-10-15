@@ -22,7 +22,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def base_semantics() -> MagicMock:
-  """Docstring."""
+  """Execute base semantics helper logic."""
   mgr = MagicMock()
   variants: dict[str, typing.Any] = {
     "jax": {"requires_plugin": "device_allocator"},

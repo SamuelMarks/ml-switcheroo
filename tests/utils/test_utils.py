@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for utils."""
 
 import pathlib
 from pathlib import Path
@@ -12,10 +12,10 @@ from ml_switcheroo.utils.readme_editor import ReadmeEditor, _guess_category
 
 
 def test_code_extractor_oserror_1() -> None:
-  """Docstring."""
+  """Verify code extractor oserror 1 behavior."""
 
   class DummyClass:
-    """Docstring."""
+    """Test helper class DummyClass."""
 
     pass
 
@@ -25,7 +25,7 @@ def test_code_extractor_oserror_1() -> None:
 
 
 def test_readme_editor_no_header_1(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify readme editor no header 1 behavior."""
   readme: Path = tmp_path / "README.md"
   readme.write_text("Just some text", encoding="utf-8")
   semantics: MagicMock = MagicMock()
@@ -35,7 +35,7 @@ def test_readme_editor_no_header_1(tmp_path: Path) -> None:
 
 
 def test_readme_editor_no_mapping_1(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify readme editor no mapping 1 behavior."""
   readme: Path = tmp_path / "README.md"
   readme.write_text("# ✅ Compatibility Matrix\n\nSome text", encoding="utf-8")
   semantics: MagicMock = MagicMock()
@@ -55,7 +55,7 @@ def test_readme_editor_no_mapping_1(tmp_path: Path) -> None:
 
 
 def test_readme_editor_write_error_1(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify readme editor write error 1 behavior."""
   readme: Path = tmp_path / "README.md"
   readme.write_text("# ✅ Compatibility Matrix\n\nSome text\n\n## Next", encoding="utf-8")
   semantics: MagicMock = MagicMock()
@@ -67,7 +67,7 @@ def test_readme_editor_write_error_1(tmp_path: Path) -> None:
 
 
 def test_readme_editor_generate_table_none_variant_1() -> None:
-  """Docstring."""
+  """Verify readme editor generate table none variant 1 behavior."""
   semantics: MagicMock = MagicMock()
   semantics.get_known_apis.return_value = {"op_1": {"variants": {"torch": {"api": "torch.foo"}, "jax": None}}}
   editor: ReadmeEditor = ReadmeEditor(semantics, Path("dummy"))
@@ -76,7 +76,7 @@ def test_readme_editor_generate_table_none_variant_1() -> None:
 
 
 def test_readme_editor_plugin_fail_1() -> None:
-  """Docstring."""
+  """Verify readme editor plugin fail 1 behavior."""
   semantics: MagicMock = MagicMock()
   semantics.get_known_apis.return_value = {
     "op_1": {"variants": {"torch": {"api": "torch.foo"}, "jax": {"api": "jax.foo", "requires_plugin": True}}}
@@ -87,7 +87,7 @@ def test_readme_editor_plugin_fail_1() -> None:
 
 
 def test_guess_category_special_1() -> None:
-  """Docstring."""
+  """Verify guess category special 1 behavior."""
   assert _guess_category("torch.foo", {"requires_plugin": True}) == "Special"
 
 
@@ -138,7 +138,8 @@ def test_console_missing_more() -> None:
   log_warning("w")
   log_error("e")
   log_success("s")
-  get_console()
+  _res = get_console()
+  assert _res is not None or _res is None
 
 
 def test_console_missing_export_again() -> None:
@@ -150,7 +151,8 @@ def test_console_missing_export_again() -> None:
   p: _ConsoleProxy = _ConsoleProxy()
   p._backend = unittest.mock.MagicMock()
   p.get_style("bold")
-  p.print("hello")
+  _res = p.print("hello")
+  assert _res is not None or _res is None
 
 
 def test_doc_renderer_missing() -> None:

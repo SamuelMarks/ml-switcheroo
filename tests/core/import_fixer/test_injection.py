@@ -8,7 +8,7 @@ from ml_switcheroo.core.import_fixer.injection_mixin import InjectionMixin
 
 
 class DummyPlan:
-  """Docstring."""
+  """Test helper class DummyPlan."""
 
   def __init__(self) -> None:
     """Initializes the DummyPlan instance."""
@@ -16,7 +16,7 @@ class DummyPlan:
 
 
 class DummyReq:
-  """Docstring."""
+  """Test helper class DummyReq."""
 
   def __init__(
     self, module: str, subcomponent: typing.Optional[str], alias: typing.Optional[str], signature: str
@@ -29,7 +29,7 @@ class DummyReq:
 
 
 class DummyFixer(InjectionMixin, cst.CSTTransformer):
-  """Docstring."""
+  """Test helper class DummyFixer."""
 
   def __init__(self, plan: DummyPlan) -> None:
     """Initializes the DummyFixer instance."""
@@ -71,7 +71,7 @@ def test_injection_add_imports() -> None:
 
 
 def test_injection_dedup_and_docstring() -> None:
-  """Docstring."""
+  """Verify injection dedup and docstring behavior."""
   plan = DummyPlan()
   plan.required_imports.append(DummyReq(module="sys", subcomponent=None, alias=None, signature="import sys"))
   plan.required_imports.append(DummyReq(module="sys", subcomponent=None, alias=None, signature="import sys"))

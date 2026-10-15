@@ -5,7 +5,7 @@ from flax import nnx
 
 
 class AttentionModel(nnx.Module):
-  """Docstring."""
+  """Test helper class AttentionModel."""
 
   def __init__(self, embed_dim: int, num_heads: int, rngs: nnx.Rngs):
     """Initializes the AttentionModel instance."""

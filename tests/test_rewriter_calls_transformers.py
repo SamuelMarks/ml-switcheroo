@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for rewriter calls transformers."""
 
 from typing import Dict, List
 
@@ -15,7 +15,7 @@ from ml_switcheroo.core.rewriter.calls.transformers import (
 
 
 def test_apply_index_select() -> None:
-  """Docstring."""
+  """Verify apply index select behavior."""
   node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   result: cst.Subscript = apply_index_select(node, 1)
 
@@ -26,7 +26,7 @@ def test_apply_index_select() -> None:
 
 
 def test_rewrite_as_inline_lambda_success() -> None:
-  """Docstring."""
+  """Verify rewrite as inline lambda success behavior."""
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("x"))]
   result: cst.Call = rewrite_as_inline_lambda("lambda a: a + 1", args)
 
@@ -36,14 +36,14 @@ def test_rewrite_as_inline_lambda_success() -> None:
 
 
 def test_rewrite_as_inline_lambda_syntax_error() -> None:
-  """Docstring."""
+  """Verify rewrite as inline lambda syntax error behavior."""
   args: List[cst.Arg] = []
   with pytest.raises(ValueError, match="Invalid lambda syntax"):
     rewrite_as_inline_lambda("lambda x y:", args)
 
 
 def test_macro_substitution_transformer() -> None:
-  """Docstring."""
+  """Verify macro substitution transformer behavior."""
   arg_map: Dict[str, cst.BaseExpression] = {"x": cst.Integer("42")}
   transformer: MacroSubstitutionTransformer = MacroSubstitutionTransformer(arg_map)
 
@@ -67,7 +67,7 @@ def test_macro_substitution_transformer() -> None:
 
 
 def test_rewrite_as_macro_success() -> None:
-  """Docstring."""
+  """Verify rewrite as macro success behavior."""
   template: str = "{x} * jax.nn.sigmoid({x})"
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("my_var"))]
   std_arg_names: List[str] = ["x"]
@@ -80,7 +80,7 @@ def test_rewrite_as_macro_success() -> None:
 
 
 def test_rewrite_as_macro_missing_arg() -> None:
-  """Docstring."""
+  """Verify rewrite as macro missing arg behavior."""
   template: str = "{y} + 1"
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("x"))]
   std_arg_names: List[str] = ["x"]
@@ -90,7 +90,7 @@ def test_rewrite_as_macro_missing_arg() -> None:
 
 
 def test_rewrite_as_macro_invalid_syntax() -> None:
-  """Docstring."""
+  """Verify rewrite as macro invalid syntax behavior."""
   template: str = "{x} + + -"
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("my_var"))]
   std_arg_names: List[str] = ["x"]
@@ -100,7 +100,7 @@ def test_rewrite_as_macro_invalid_syntax() -> None:
 
 
 def test_rewrite_as_infix_unary() -> None:
-  """Docstring."""
+  """Verify rewrite as infix unary behavior."""
   original_node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("x"))]
 
@@ -111,7 +111,7 @@ def test_rewrite_as_infix_unary() -> None:
 
 
 def test_rewrite_as_infix_unary_wrapped() -> None:
-  """Docstring."""
+  """Verify rewrite as infix unary wrapped behavior."""
   original_node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   bin_op: cst.BinaryOperation = cst.BinaryOperation(left=cst.Name("y"), operator=cst.Add(), right=cst.Name("z"))
   args: List[cst.Arg] = [cst.Arg(value=bin_op)]
@@ -123,14 +123,14 @@ def test_rewrite_as_infix_unary_wrapped() -> None:
 
 
 def test_rewrite_as_infix_unary_missing_args() -> None:
-  """Docstring."""
+  """Verify rewrite as infix unary missing args behavior."""
   original_node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   with pytest.raises(ValueError, match="Unary operator '-' expects 1 argument"):
     rewrite_as_infix(original_node, [], "-", ["a"])
 
 
 def test_rewrite_as_infix_unary_unsupported() -> None:
-  """Docstring."""
+  """Verify rewrite as infix unary unsupported behavior."""
   original_node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("x"))]
   with pytest.raises(ValueError, match="Unsupported unary operator: x"):
@@ -138,7 +138,7 @@ def test_rewrite_as_infix_unary_unsupported() -> None:
 
 
 def test_rewrite_as_infix_binary() -> None:
-  """Docstring."""
+  """Verify rewrite as infix binary behavior."""
   original_node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y"))]
 
@@ -150,7 +150,7 @@ def test_rewrite_as_infix_binary() -> None:
 
 
 def test_rewrite_as_infix_binary_missing_args() -> None:
-  """Docstring."""
+  """Verify rewrite as infix binary missing args behavior."""
   original_node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("x"))]
   with pytest.raises(ValueError, match="Binary operator '\\+' requires 2 arguments"):
@@ -158,7 +158,7 @@ def test_rewrite_as_infix_binary_missing_args() -> None:
 
 
 def test_rewrite_as_infix_binary_unsupported() -> None:
-  """Docstring."""
+  """Verify rewrite as infix binary unsupported behavior."""
   original_node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y"))]
   with pytest.raises(ValueError, match="Unsupported binary operator: x"):
@@ -166,7 +166,7 @@ def test_rewrite_as_infix_binary_unsupported() -> None:
 
 
 def test_rewrite_as_infix_wrong_arity() -> None:
-  """Docstring."""
+  """Verify rewrite as infix wrong arity behavior."""
   original_node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y")), cst.Arg(value=cst.Name("z"))]
   with pytest.raises(ValueError, match="Infix operator requires 1 or 2 args"):
@@ -174,7 +174,7 @@ def test_rewrite_as_infix_wrong_arity() -> None:
 
 
 def test_rewrite_as_infix_no_std_args() -> None:
-  """Docstring."""
+  """Verify rewrite as infix no std args behavior."""
   original_node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y"))]
 

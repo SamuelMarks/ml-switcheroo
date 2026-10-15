@@ -9,7 +9,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""

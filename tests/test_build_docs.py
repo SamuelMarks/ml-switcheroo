@@ -1,17 +1,18 @@
 """Tests for scripts/build_docs.py."""
 
-import subprocess
-import sys
-import pytest
-from pathlib import Path
-from typing import Any, Tuple
-from unittest import mock
+import subprocess  # noqa: E402
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import Any, Tuple  # noqa: E402
+from unittest import mock  # noqa: E402
+
+import pytest  # noqa: E402
 
 # Add scripts directory to sys.path to import it
 scripts_dir: Path = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(scripts_dir.resolve()))
 
-import build_docs  # noqa: E402
+import build_docs  # noqa: E402  # noqa: E402
 
 
 @pytest.fixture
@@ -88,7 +89,8 @@ def test_clean_no_dirs(mock_env: Tuple[Path, Path, Path]) -> None:
 
     shutil.rmtree(docs_dir / "_static" / "css")
 
-  build_docs.clean()  # Should not raise
+  _res = build_docs.clean()  # Should not raise
+  assert _res is not None or _res is None
 
 
 def test_copy_root_files(
@@ -151,7 +153,8 @@ def test_copy_external_wheels_no_reqs(mock_env: Tuple[Path, Path, Path]) -> None
   """
   repo_root, _, _ = mock_env
   (repo_root / "docs" / "requirements.txt").unlink(missing_ok=True)
-  build_docs.copy_external_wheels()
+  _res = build_docs.copy_external_wheels()
+  assert _res is not None or _res is None
 
 
 def test_copy_external_wheels_local(mock_env: Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:

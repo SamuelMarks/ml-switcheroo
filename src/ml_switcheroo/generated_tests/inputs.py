@@ -13,9 +13,8 @@ Features:
 - **Constraint Inference**: Uses `min`/`max` to govern random ranges.
 """
 
-from typing import Any
-
 import typing
+from typing import Any
 
 
 def parse_arg_def(arg: typing.Union[str, tuple[Any], list[Any], dict[Any, Any]]) -> dict[Any, Any]:

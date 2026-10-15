@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for nvidia sass parser coverage."""
 
 from lark import Tree
 
@@ -6,23 +6,23 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import _get_trivia
 
 
 def test_get_trivia_empty_children():
-  """Docstring."""
+  """Verify get trivia empty children behavior."""
 
   class DummyNode:
-    """Docstring."""
+    """Test helper class DummyNode."""
 
     def __init__(self):
-      """Docstring."""
+      """Initialize test helper instance."""
       self.children = []
 
   assert _get_trivia(DummyNode()) == []
 
 
 def test_get_trivia_no_children():
-  """Docstring."""
+  """Verify get trivia no children behavior."""
 
   class DummyNode:
-    """Docstring."""
+    """Test helper class DummyNode."""
 
     pass
 
@@ -30,13 +30,13 @@ def test_get_trivia_no_children():
 
 
 def test_get_trivia_from_children():
-  """Docstring."""
+  """Verify get trivia from children behavior."""
 
   class DummyNodeWithTrivia:
-    """Docstring."""
+    """Test helper class DummyNodeWithTrivia."""
 
     def __init__(self):
-      """Docstring."""
+      """Initialize test helper instance."""
       self.leading_trivia = ["some_trivia"]
 
   node = Tree("dummy", [DummyNodeWithTrivia()])

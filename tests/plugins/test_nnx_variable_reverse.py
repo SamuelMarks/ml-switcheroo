@@ -48,7 +48,7 @@ def rewriter() -> Generator[PivotRewriter, None, None]:
 
   @register_framework("custom_fw")
   class CustomFW:
-    """Docstring."""
+    """Test helper class CustomFW."""
 
     pass
 

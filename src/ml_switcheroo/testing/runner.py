@@ -4,16 +4,16 @@ Uses ``hypothesis`` to generate property-based test cases for operations.
 Maps ODL definitions to Strategies and executes cross-framework comparison.
 """
 
-import typing
-
-
 import importlib
+import typing
 from typing import Any, Dict, List, Optional, Tuple
-import numpy as np
 
-from hypothesis import given, settings, strategies as st
-from ml_switcheroo.testing.fuzzer import InputFuzzer
+import numpy as np
+from hypothesis import given, settings
+from hypothesis import strategies as st
+
 from ml_switcheroo.frameworks import get_adapter
+from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 
 class EquivalenceRunner:

@@ -5,8 +5,9 @@ for ingesting Python code into the Logical Graph IR.
 """
 
 import libcst as cst
-from ml_switcheroo.core.graph import GraphExtractor
+
 from ml_switcheroo.core.compiler.ir import LogicalGraph
+from ml_switcheroo.core.graph import GraphExtractor
 
 
 class PythonFrontend:

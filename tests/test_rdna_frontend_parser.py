@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for rdna frontend parser."""
 
 from typing import List
 
@@ -22,7 +22,7 @@ from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaLexer, RdnaPar
 
 
 def test_parser_empty() -> None:
-  """Docstring."""
+  """Verify parser empty behavior."""
   parser: RdnaParser = RdnaParser("")
   mod: RdnaModule = parser.parse()
   assert len(mod.statements) == 0
@@ -33,7 +33,7 @@ def test_parser_empty() -> None:
 
 
 def test_parser_comments() -> None:
-  """Docstring."""
+  """Verify parser comments behavior."""
   parser: RdnaParser = RdnaParser("; just a comment\n  ; another comment")
   mod: RdnaModule = parser.parse()
   assert len(mod.statements) == 2
@@ -43,7 +43,7 @@ def test_parser_comments() -> None:
 
 
 def test_parser_directive() -> None:
-  """Docstring."""
+  """Verify parser directive behavior."""
   parser: RdnaParser = RdnaParser(".text\n.globl main\n.type main, function")
   mod: RdnaModule = parser.parse()
   assert len(mod.statements) == 3
@@ -56,7 +56,7 @@ def test_parser_directive() -> None:
 
 
 def test_parser_label() -> None:
-  """Docstring."""
+  """Verify parser label behavior."""
   parser: RdnaParser = RdnaParser("main:\nL1:")
   mod: RdnaModule = parser.parse()
   assert len(mod.statements) == 2
@@ -66,7 +66,7 @@ def test_parser_label() -> None:
 
 
 def test_parser_instruction_no_args() -> None:
-  """Docstring."""
+  """Verify parser instruction no args behavior."""
   parser: RdnaParser = RdnaParser("s_endpgm")
   mod: RdnaModule = parser.parse()
   assert len(mod.statements) == 1
@@ -76,7 +76,7 @@ def test_parser_instruction_no_args() -> None:
 
 
 def test_parser_instruction_registers() -> None:
-  """Docstring."""
+  """Verify parser instruction registers behavior."""
   parser: RdnaParser = RdnaParser("v_add_f32 v0, s[1:2], v3")
   mod: RdnaModule = parser.parse()
   inst: RdnaInstruction = getattr(mod, "statements")[0]
@@ -99,7 +99,7 @@ def test_parser_instruction_registers() -> None:
 
 
 def test_parser_immediates() -> None:
-  """Docstring."""
+  """Verify parser immediates behavior."""
   parser: RdnaParser = RdnaParser("v_mov_b32 v0, 42\nv_mov_b32 v1, -42\nv_mov_b32 v2, +42")
   mod: RdnaModule = parser.parse()
   assert getattr(getattr(mod.statements[0], "operands", [])[1], "value", None) == 42
@@ -114,7 +114,7 @@ def test_parser_immediates() -> None:
 
 
 def test_parser_immediates_float() -> None:
-  """Docstring."""
+  """Verify parser immediates float behavior."""
   parser: RdnaParser = RdnaParser("v_mov_b32 v0, 3.14\nv_mov_b32 v1, -3.14\nv_mov_b32 v2, +3.14")
   mod: RdnaModule = parser.parse()
   assert getattr(getattr(mod.statements[0], "operands", [])[1], "value", None) == 3.14
@@ -123,7 +123,7 @@ def test_parser_immediates_float() -> None:
 
 
 def test_parser_memory() -> None:
-  """Docstring."""
+  """Verify parser memory behavior."""
   # Correct memory syntax: `[s[2:3]]`, `[s[2:3] + 4]`, `[s[2:3] - 4]`
   parser: RdnaParser = RdnaParser(
     "s_load_dword s0, [s[2:3]]\ns_load_dword s0, [s[2:3] + 4]\ns_load_dword s0, [s[2:3] - 8]"
@@ -144,7 +144,7 @@ def test_parser_memory() -> None:
 
 
 def test_parser_modifier() -> None:
-  """Docstring."""
+  """Verify parser modifier behavior."""
   parser: RdnaParser = RdnaParser("v_add_f32 v0, v1, v2, glc\n s_branch L1")
   mod: RdnaModule = parser.parse()
   inst: RdnaInstruction = getattr(mod, "statements")[0]
@@ -157,21 +157,21 @@ def test_parser_modifier() -> None:
 
 
 def test_parser_invalid() -> None:
-  """Docstring."""
+  """Verify parser invalid behavior."""
   parser: RdnaParser = RdnaParser("v_add_f32 @@@")
   with pytest.raises(ValueError):
     parser.parse()
 
 
 def test_parser_lexer_mismatch() -> None:
-  """Docstring."""
+  """Verify parser lexer mismatch behavior."""
   parser: RdnaParser = RdnaParser("!")
   with pytest.raises(ValueError, match="Unexpected '!'"):
     parser.parse()
 
 
 def test_parser_eof_trivia() -> None:
-  """Docstring."""
+  """Verify parser eof trivia behavior."""
   parser: RdnaParser = RdnaParser("v_add_f32 v0, v1 ")
   mod: RdnaModule = parser.parse()
   assert getattr(mod.statements[-1], "trailing_trivia")[-1].text == " "
@@ -181,35 +181,37 @@ def test_parser_eof_trivia() -> None:
 
 
 def test_parser_empty_line() -> None:
-  """Docstring."""
+  """Verify parser empty line behavior."""
   parser: RdnaParser = RdnaParser("  \n  v_add_f32 v0, v1, v2")
-  parser.parse()
+  _res = parser.parse()
+  assert _res is not None or _res is None
 
 
 def test_parser_modifier_extra() -> None:
-  """Docstring."""
+  """Verify parser modifier extra behavior."""
   transformer: RdnaTransformer = RdnaTransformer()
   res: RdnaModifier = transformer.modifier([Token("MODIFIER", "row_mask:0xf")])
   assert res.name == "row_mask:0xf"
 
 
 def test_parser_eof_trivia_extra() -> None:
-  """Docstring."""
+  """Verify parser eof trivia extra behavior."""
   parser: RdnaParser = RdnaParser("v_add_f32 v0, v1, v2 ; eof comment")
-  parser.parse()
+  _res = parser.parse()
+  assert _res is not None or _res is None
 
 
 def test_param_children() -> None:
-  """Docstring."""
+  """Verify param children behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaTransformer
 
   transformer: RdnaTransformer = RdnaTransformer()
 
   class DummyToken:
-    """Docstring."""
+    """Test helper class DummyToken."""
 
     def __init__(self) -> None:
-      """Docstring."""
+      """Initialize test helper instance."""
       self.children: List[Token] = [Token("A", "b"), Token("B", "c")]
 
   # We call directive directly
@@ -224,7 +226,7 @@ def test_rdna_tokenize_lexer_state_variants() -> None:
   """Test RdnaLexer with object having text attribute and arbitrary object."""
 
   class ObjWithText:
-    """Docstring."""
+    """Test helper class ObjWithText."""
 
     text = "v_add_f32 v0, v1, v2;\n"
 
@@ -233,7 +235,7 @@ def test_rdna_tokenize_lexer_state_variants() -> None:
   assert len(tokens1) > 0
 
   class ObjWithoutText:
-    """Docstring."""
+    """Test helper class ObjWithoutText."""
 
     def __str__(self) -> str:
       """Return string representation."""

@@ -6,7 +6,9 @@ and lifting hardware assembly back to Keras Model syntax.
 
 import ast
 from typing import Dict, Optional, Tuple
+
 import pytest
+
 from ml_switcheroo import convert
 from ml_switcheroo.core.compiler.backends.nvidia_sass import NvidiaSassBackend
 from ml_switcheroo.core.compiler.backends.python import PythonBackend
@@ -51,7 +53,7 @@ class Net(keras.Model):
         return self.conv(x)
 """
   converted = convert(keras_code, source="keras", target=hw_target)
-  assert "Conv2d" in converted or "Conv2D" in converted
+  assert "conv2d" in converted.lower()
   if hw_target == "rdna":
     assert "v0" in converted or "; BEGIN Conv2d" in converted or ";" in converted
   else:

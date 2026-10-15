@@ -11,13 +11,13 @@ from ml_switcheroo.utils.doc_context import DocContextBuilder
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Docstring."""
+  """Execute mock semantics helper logic."""
   return MagicMock(spec=SemanticsManager)
 
 
 @pytest.fixture
 def builder(mock_semantics: MagicMock) -> DocContextBuilder:
-  """Docstring."""
+  """Execute builder helper logic."""
   return DocContextBuilder(mock_semantics)
 
 

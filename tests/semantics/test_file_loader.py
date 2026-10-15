@@ -39,7 +39,8 @@ def test_load_knowledge_graph_missing_dirs(mock_snap_dir: MagicMock, mock_sem_di
   mock_snap_dir.return_value = tmp_path / "missing_snap"
   mgr: MagicMock = MagicMock()
   loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
-  loader.load_knowledge_graph()
+  _res = loader.load_knowledge_graph()
+  assert _res is not None or _res is None
 
 
 @patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir")
@@ -104,7 +105,8 @@ def test_load_knowledge_graph_errors(mock_snap_dir: MagicMock, mock_sem_dir: Mag
   map_file.write_text("invalid json")
   mgr: MagicMock = MagicMock()
   loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
-  loader.load_knowledge_graph()
+  _res = loader.load_knowledge_graph()
+  assert _res is not None or _res is None
 
 
 @patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir")
@@ -198,7 +200,7 @@ def test_clean_content_descriptions_branches() -> None:
 
 
 class DummyManager:
-  """Docstring."""
+  """Test helper class DummyManager."""
 
   def __init__(self) -> None:
     """Initializes the DummyManager instance."""

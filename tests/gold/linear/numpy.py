@@ -4,7 +4,7 @@ import numpy as np
 
 
 class Model:
-  """Docstring."""
+  """Test helper class Model."""
 
   def __init__(self, in_features: int, out_features: int):
     """Initializes the Model instance."""

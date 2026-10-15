@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for import fixer imports mixin."""
 
 from typing import List, Optional, Set, Union
 
@@ -9,12 +9,12 @@ from ml_switcheroo.core.import_fixer.resolution import ImportReq, ResolutionPlan
 
 
 class MockFixer(ImportMixin):
-  """Docstring."""
+  """Test helper class MockFixer."""
 
   def __init__(
     self, plan: ResolutionPlan, source_fws: Union[str, List[str], Set[str]], used_names: Optional[Set[str]] = None
   ) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.plan: ResolutionPlan = plan
     if isinstance(source_fws, str):
       self.source_fws = {source_fws}
@@ -27,12 +27,12 @@ class MockFixer(ImportMixin):
     self.defined: Set[cst.CSTNode] = set()
 
   def _track_definition(self, node: cst.CSTNode) -> None:
-    """Docstring."""
+    """Execute track definition helper logic."""
     self.defined.add(node)
 
 
 def test_make_alias_node() -> None:
-  """Docstring."""
+  """Verify make alias node behavior."""
   fixer: MockFixer = MockFixer(ResolutionPlan(), set())
 
   # Simple req without subcomponent or alias
@@ -72,7 +72,7 @@ def test_make_alias_node() -> None:
 
 
 def test_leave_import() -> None:
-  """Docstring."""
+  """Verify leave import behavior."""
   plan: ResolutionPlan = ResolutionPlan(mappings={"torch.nn": ImportReq("flax", "nnx", "nnx")})
   fixer: MockFixer = MockFixer(plan, ["torch"], set())
 
@@ -149,7 +149,7 @@ def test_leave_import() -> None:
 
 
 def test_leave_import_dce() -> None:
-  """Docstring."""
+  """Verify leave import dce behavior."""
   fixer: MockFixer = MockFixer(
     plan=ResolutionPlan(
       mappings={},
@@ -221,7 +221,7 @@ def test_leave_import_dce() -> None:
 
 
 def test_leave_import_from() -> None:
-  """Docstring."""
+  """Verify leave import from behavior."""
   plan: ResolutionPlan = ResolutionPlan(
     mappings={"torch.nn": ImportReq("flax", "nnx", "nnx"), "torch.Tensor": ImportReq("jax", "Array")}
   )

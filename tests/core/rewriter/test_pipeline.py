@@ -11,7 +11,7 @@ from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
 
 
 class MockPass(RewriterPass):
-  """Docstring."""
+  """Test helper class MockPass."""
 
   def __init__(self, label: str) -> None:
     """Initializes the MockPass instance."""
@@ -54,7 +54,7 @@ def test_interface_enforcement() -> None:
   with pytest.raises(TypeError):
 
     class InvalidPass(RewriterPass):
-      """Docstring."""
+      """Test helper class InvalidPass."""
 
       pass
 

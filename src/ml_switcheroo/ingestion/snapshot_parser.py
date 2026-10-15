@@ -6,7 +6,7 @@ This module provides Pydantic models to strictly define the schema of
 
 import json
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, ValidationError
 

@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for graph."""
 
 from typing import List
 
@@ -8,7 +8,7 @@ from ml_switcheroo.core.graph import GraphExtractor
 
 
 def test_graph_extractor_init_pass() -> None:
-  """Docstring."""
+  """Verify graph extractor init pass behavior."""
   code: str = """
 class GeneratedNet:
     def __init__(self):
@@ -27,7 +27,7 @@ class GeneratedNet:
 
 
 def test_graph_extractor_forward_pass() -> None:
-  """Docstring."""
+  """Verify graph extractor forward pass behavior."""
   code: str = """
 class GeneratedNet:
     def __init__(self):
@@ -56,7 +56,7 @@ class GeneratedNet:
 
 
 def test_graph_extractor_external_function() -> None:
-  """Docstring."""
+  """Verify graph extractor external function behavior."""
   code: str = """
 class GeneratedNet:
     def forward(self, x):
@@ -72,7 +72,7 @@ class GeneratedNet:
 
 
 def test_graph_extractor_return_call() -> None:
-  """Docstring."""
+  """Verify graph extractor return call behavior."""
   code: str = """
 class GeneratedNet:
     def forward(self, x):
@@ -88,7 +88,7 @@ class GeneratedNet:
 
 
 def test_graph_extractor_top_level_flow() -> None:
-  """Docstring."""
+  """Verify graph extractor top level flow behavior."""
   code: str = """
 x = 1
 y = F.relu(x)
@@ -102,7 +102,7 @@ y = F.relu(x)
 
 
 def test_graph_extractor_top_level_expr() -> None:
-  """Docstring."""
+  """Verify graph extractor top level expr behavior."""
   code: str = """
 F.relu(x)
 """

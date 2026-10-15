@@ -5,33 +5,54 @@ translation of standard Python expressions (via LibCST AST representation)
 into MLIR operations and values.
 """
 
+from typing import TYPE_CHECKING, List, Optional, Tuple
+
 import libcst as cst
-from typing import Tuple, List, TYPE_CHECKING, Optional
-from ml_switcheroo.core.mlir.cst import ValueNode, OperationNode, AttributeNode
+
+from ml_switcheroo.core.mlir.cst import AttributeNode, OperationNode, ValueNode
 
 if TYPE_CHECKING:
   # To avoid circular imports, we just assert the structural existence of the context
   class ContextDummy:
-    """Context structural type for type checking."""
+    """Context structural type for type checking MLIR expression emission."""
 
     def enter_scope(self) -> None:
-      """Enter a scope."""
+      """Push a new lexical symbol scope onto the MLIR emission context stack."""
       ...
 
     def exit_scope(self) -> None:
-      """Exit a scope."""
+      """Pop the current lexical symbol scope from the MLIR emission context stack."""
       ...
 
     def allocate_ssa(self, prefix: str = "%") -> ValueNode:
-      """Allocate an SSA."""
+      """Allocate a fresh SSA ValueNode with the given prefix.
+
+      Args:
+          prefix: SSA identifier prefix string (default: '%').
+
+      Returns:
+          Newly allocated ValueNode.
+      """
       ...
 
     def declare(self, name: str, val: ValueNode) -> None:
-      """Declare a value."""
+      """Bind a Python variable name to an MLIR SSA ValueNode in the current scope.
+
+      Args:
+          name: Python variable name.
+          val: MLIR SSA ValueNode to bind.
+      """
       ...
 
     def lookup(self, name: str) -> Optional[ValueNode]:
-      """Lookup a value."""
+      """Look up the MLIR SSA ValueNode bound to a Python variable name.
+
+      Args:
+          name: Python variable name to look up.
+
+      Returns:
+          Bound ValueNode if found, else None.
+      """
       ...
 
 

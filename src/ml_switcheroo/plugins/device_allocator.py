@@ -9,10 +9,11 @@ Supported:
 - Calls `adapter.get_device_syntax()` for target code generation.
 """
 
-import libcst as cst
 from typing import Optional, Tuple
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 # Fix: Import directly from base, avoiding frameworks.__init__ trigger
 from ml_switcheroo.frameworks.base import get_adapter

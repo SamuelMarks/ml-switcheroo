@@ -14,7 +14,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 
 class MockSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   pass
 
@@ -78,7 +78,7 @@ def test_clear_hooks_resets_registry() -> None:
 
     @register_hook("temp")
     def temp_hook(n: cst.CSTNode, c: HookContext) -> cst.CSTNode:
-      """Docstring."""
+      """Execute temp hook helper logic."""
       return n
 
     assert "temp" in _HOOKS
@@ -155,7 +155,7 @@ def test_config_validation_failure() -> None:
   bad_config: RuntimeConfig = RuntimeConfig(plugin_settings={"epsilon": "im_not_a_float"}, strict_mode=False)
 
   class PluginSchema(BaseModel):
-    """Docstring."""
+    """Test helper class PluginSchema."""
 
     epsilon: float
 
@@ -169,7 +169,7 @@ def test_config_validation_success() -> None:
   good_config: RuntimeConfig = RuntimeConfig(plugin_settings={"epsilon": 0.001, "ignored": "val"}, strict_mode=False)
 
   class PluginSchema(BaseModel):
-    """Docstring."""
+    """Test helper class PluginSchema."""
 
     epsilon: float = 1e-05
 

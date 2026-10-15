@@ -7,7 +7,7 @@ from praxis.layers import normalizations  # type: ignore
 
 
 class LayerNormModel(base_layer.BaseLayer):  # type: ignore
-  """Docstring."""
+  """Test helper class LayerNormModel."""
 
   normalized_shape: int = 0
 

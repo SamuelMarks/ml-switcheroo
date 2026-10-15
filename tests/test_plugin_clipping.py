@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin clipping."""
 
 from unittest.mock import MagicMock
 
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.clipping import transform_grad_clipping
 
 
 def test_transform_grad_clipping_not_required() -> None:
-  """Docstring."""
+  """Verify transform grad clipping not required behavior."""
   node: cst.Call = cst.Call(func=cst.Name("clip"), args=[])
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.plugin_traits.requires_functional_state = False
@@ -18,7 +18,7 @@ def test_transform_grad_clipping_not_required() -> None:
 
 
 def test_transform_grad_clipping_missing_args() -> None:
-  """Docstring."""
+  """Verify transform grad clipping missing args behavior."""
   node: cst.Call = cst.Call(func=cst.Name("clip"), args=[cst.Arg(value=cst.Name("grads"))])
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.plugin_traits.requires_functional_state = True
@@ -27,7 +27,7 @@ def test_transform_grad_clipping_missing_args() -> None:
 
 
 def test_transform_grad_clipping() -> None:
-  """Docstring."""
+  """Verify transform grad clipping behavior."""
   node: cst.Call = cst.Call(
     func=cst.Name("clip_grad_norm_"),
     args=[

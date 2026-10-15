@@ -3,9 +3,10 @@
 Handles converting operation nodes (`sw.op`, `sw.call`) into CST Expressions.
 """
 
-from typing import List, Optional
-import libcst as cst
 import ast
+from typing import List, Optional
+
+import libcst as cst
 
 from ml_switcheroo.core.mlir.cst import OperationNode
 from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin

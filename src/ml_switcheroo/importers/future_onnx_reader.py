@@ -13,14 +13,11 @@ Key Features:
 - **Sanitization**: Cleans HTML tags like ``<tt>``, ``<b>`` from names.
 """
 
+import typing
+from pathlib import Path
 from typing import Any
 
-
-import typing
-
-
-from pathlib import Path
-from ml_switcheroo.utils.console import log_info, log_error
+from ml_switcheroo.utils.console import log_error, log_info
 
 
 class OnnxSpecImporter:
@@ -58,8 +55,8 @@ class OnnxSpecImporter:
     Returns:
         Dict: Extracted semantics.
     """
-    from markdown_it import MarkdownIt
     from bs4 import BeautifulSoup, Tag
+    from markdown_it import MarkdownIt
 
     content = fpath.read_text(encoding="utf-8")
     md = MarkdownIt()

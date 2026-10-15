@@ -13,7 +13,7 @@ EXPECTED_JAX: str = "\nimport jax.numpy as jnp\nimport jax.nn as nn\n\ndef activ
 
 
 class MacroSemantics(SemanticsManager):  # type: ignore[misc]
-  """Docstring."""
+  """Test helper class MacroSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MacroSemantics instance."""

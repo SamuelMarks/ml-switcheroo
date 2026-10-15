@@ -1,12 +1,13 @@
 """Tests for audit_against_snapshots.py."""
 
-import json
-import sys
-from pathlib import Path
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, patch
+import json  # noqa: E402
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import Any, Dict, List  # noqa: E402
+from unittest.mock import MagicMock, patch  # noqa: E402
 
-from scripts.audit_against_snapshots import audit_frameworks, load_snapshots, load_snapshots_multi
+from scripts.snapshots.ast_auditor import audit_frameworks  # noqa: E402
+from scripts.snapshots.loader import load_snapshots, load_snapshots_multi  # noqa: E402
 
 # Provide access to the module
 sys.path.insert(0, str(Path("src").resolve()))
@@ -32,8 +33,8 @@ def test_load_snapshots(mock_sys: MagicMock) -> None:
 
 
 def test_load_snapshots_empty() -> None:
-  """Docstring."""
-  from scripts.audit_against_snapshots import load_snapshots
+  """Verify load snapshots empty behavior."""
+  from scripts.snapshots.loader import load_snapshots
 
   mock_path_obj: MagicMock = MagicMock()
   mock_path_obj.glob.return_value = []
@@ -41,7 +42,7 @@ def test_load_snapshots_empty() -> None:
 
 
 def test_audit_frameworks_coverage() -> None:
-  """Docstring."""
+  """Verify audit frameworks coverage behavior."""
   manager: MagicMock = MagicMock()
   manager.data = {
     "flatten": {
@@ -104,14 +105,14 @@ def test_audit_frameworks_coverage() -> None:
 
 
 def test_main_block() -> None:
-  """Docstring."""
+  """Verify main block behavior."""
   from scripts.audit_against_snapshots import main
 
   assert callable(main)
 
 
 def test_audit_frameworks_coverage2() -> None:
-  """Docstring."""
+  """Verify audit frameworks coverage2 behavior."""
   manager: MagicMock = MagicMock()
   manager.data = {
     "flatten": {
@@ -128,7 +129,7 @@ def test_audit_frameworks_coverage2() -> None:
 
 
 def test_audit_frameworks() -> None:
-  """Docstring."""
+  """Verify audit frameworks behavior."""
   manager: MagicMock = MagicMock()
   manager.data = {
     "flatten": {
@@ -309,7 +310,7 @@ sys.path.insert(0, str(Path("src").resolve()))
 
 
 def test_load_snapshots_branches() -> None:
-  """Docstring."""
+  """Verify load snapshots branches behavior."""
   mock_dir = MagicMock()
   mock_file1 = MagicMock()
   mock_file1.name = "torch_map.json"
@@ -345,7 +346,7 @@ def test_load_snapshots_branches() -> None:
 
 
 def test_load_snapshots_multi_branches() -> None:
-  """Docstring."""
+  """Verify load snapshots multi branches behavior."""
   mock_dir1 = MagicMock()
   mock_dir1.exists.return_value = False
 
@@ -387,7 +388,7 @@ def test_load_snapshots_multi_branches() -> None:
 
 def test_flatten_single_framework_edge_cases() -> None:
   """Test edge cases for _flatten_single_framework with non-dict/non-mnemonic items."""
-  from scripts.audit_against_snapshots import _flatten_single_framework
+  from scripts.snapshots.loader import _flatten_single_framework
 
   flat: Dict[str, Dict[str, Any]] = {}
   _flatten_single_framework("hw", ["string_item", {"no_mnemonic": 1}, {"mnemonic": "v_add"}], flat)
@@ -445,7 +446,8 @@ def test_audit_frameworks_macro_and_unknown_framework() -> None:
 def test_import_grounding_engine_fallback() -> None:
   """Test _resolve_grounding_engine across fallback chains."""
   import importlib
-  from scripts.audit_against_snapshots import _resolve_grounding_engine
+
+  from scripts.snapshots.loader import _resolve_grounding_engine
 
   orig_import = importlib.import_module
   mock_cls = MagicMock()
@@ -454,6 +456,7 @@ def test_import_grounding_engine_fallback() -> None:
 
   # 1. Success on first module
   def mock_import_1(name: str, *args: Any, **kwargs: Any) -> Any:
+    """Execute mock_import_1 test helper."""
     if "grounding.engine" in name:
       return mock_mod
     return orig_import(name, *args, **kwargs)
@@ -465,6 +468,7 @@ def test_import_grounding_engine_fallback() -> None:
   call_count = 0
 
   def mock_import_2(name: str, *args: Any, **kwargs: Any) -> Any:
+    """Execute mock_import_2 test helper."""
     nonlocal call_count
     if "grounding.engine" in name:
       call_count += 1
@@ -480,6 +484,7 @@ def test_import_grounding_engine_fallback() -> None:
   call_count = 0
 
   def mock_import_3(name: str, *args: Any, **kwargs: Any) -> Any:
+    """Execute mock_import_3 test helper."""
     nonlocal call_count
     if "grounding.engine" in name:
       call_count += 1
@@ -494,6 +499,7 @@ def test_import_grounding_engine_fallback() -> None:
 
   # 4. All fail -> returns None
   def mock_import_4(name: str, *args: Any, **kwargs: Any) -> Any:
+    """Execute mock_import_4 test helper."""
     if "grounding.engine" in name:
       raise ImportError("None found")
     return orig_import(name, *args, **kwargs)
@@ -545,7 +551,7 @@ def test_audit_frameworks_flax_nnx_jnp_not_in_jax_snapshot() -> None:
 
 def test_flatten_single_framework_flax_nnx_prefix() -> None:
   """Test flax_nnx api_path prefix handling."""
-  from scripts.audit_against_snapshots import _flatten_single_framework
+  from scripts.snapshots.loader import _flatten_single_framework
 
   flat: Dict[str, Dict[str, Any]] = {}
   snap = {"categories": {"default": [{"api_path": "flax.nnx.Linear", "name": "Linear"}]}}
@@ -620,11 +626,7 @@ def test_audit_new_targets_integration(tmp_path: Path) -> None:
   Args:
       tmp_path: Temporary directory fixture.
   """
-  from scripts.audit_against_snapshots import (
-    compute_snapshot_checksums,
-    generate_audit_report,
-    load_snapshots_multi,
-  )
+  from scripts.audit_against_snapshots import compute_snapshot_checksums, generate_audit_report, load_snapshots_multi
 
   snap_dir = tmp_path / "snapshots"
   snap_dir.mkdir()
@@ -679,7 +681,7 @@ def test_audit_new_targets_integration(tmp_path: Path) -> None:
 
 def test_flatten_single_framework_operations_branches() -> None:
   """Test _flatten_single_framework branches for operations list handling."""
-  from scripts.audit_against_snapshots import _flatten_single_framework
+  from scripts.snapshots.loader import _flatten_single_framework
 
   flat: Dict[str, Dict[str, Any]] = {}
   snap: Dict[str, Any] = {
@@ -706,7 +708,7 @@ def test_load_snapshots_stablehlo_exhaustive(tmp_path: Path) -> None:
   Args:
       tmp_path (Path): Temporary directory fixture.
   """
-  from scripts.audit_against_snapshots import load_snapshots
+  from scripts.snapshots.loader import load_snapshots
 
   snap_dir: Path = tmp_path / "snapshots"
   snap_dir.mkdir()
@@ -734,3 +736,139 @@ def test_audit_frameworks_ir_canonical_onnx_exception() -> None:
   with patch("ml_ecosystem_snapshots.frameworks.onnx_spec._load_onnx_ops", side_effect=RuntimeError("Simulated failure")):
     errors: List[str] = audit_frameworks(manager, snapshots)
     assert errors == []
+
+
+def test_snapshots_and_audit_remaining_coverage(tmp_path: Path) -> None:
+  """Cover remaining branches in audit_against_snapshots, validate_snapshot_grounding, and snapshots submodules.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  import importlib
+  import runpy
+
+  import scripts.audit_against_snapshots as aas
+  import scripts.check_snapshot_regressions as csr
+  import scripts.snapshots.ast_auditor as ast_aud
+  import scripts.snapshots.loader as snap_loader
+  from scripts.snapshots.loader import compute_snapshot_checksums
+
+  # 1. check_snapshot_regressions ImportError branch
+  with patch.dict(sys.modules, {"ml_ecosystem_snapshots.api": None, "ml_ecosystem_snapshots.diff": None}):
+    importlib.reload(csr)
+    assert csr.diff_snapshots is None
+  importlib.reload(csr)
+
+  # 2. validate_snapshot_grounding import and __main__
+  import scripts.validate_snapshot_grounding as vsg
+
+  assert hasattr(vsg, "main")
+  with patch("scripts.audit_against_snapshots.main", return_value=0):
+    try:
+      runpy.run_module("scripts.validate_snapshot_grounding", run_name="__main__")
+    except SystemExit as exc:
+      assert exc.code == 0
+
+  # 3. audit_against_snapshots.main branches: importlib.resources error, GroundingEngine None/Error, report_path
+  report_file = tmp_path / "audit_report.json"
+  with (
+    patch("sys.argv", ["audit_against_snapshots.py", "--report", str(report_file)]),
+    patch("importlib.resources.files", side_effect=RuntimeError("no pkg")),
+    patch.object(aas, "GroundingEngine", side_effect=RuntimeError("ge fail")),
+    patch.object(aas, "load_snapshots_multi", return_value={}),
+    patch.object(aas, "audit_frameworks", return_value=[]),
+    patch.object(aas, "audit_python_ast", return_value=[]),
+    patch.object(aas, "audit_inline_snippets", return_value=[]),
+    patch.object(aas, "compute_snapshot_checksums", return_value={}),
+  ):
+    assert aas.main() == 0
+    assert report_file.exists()
+
+  with (
+    patch("sys.argv", ["audit_against_snapshots.py"]),
+    patch.object(aas, "GroundingEngine", None),
+    patch.object(aas, "load_snapshots_multi", return_value={}),
+    patch.object(aas, "audit_frameworks", return_value=[]),
+    patch.object(aas, "audit_python_ast", return_value=[]),
+    patch.object(aas, "audit_inline_snippets", return_value=[]),
+  ):
+    assert aas.main() == 0
+
+  # 4. ast_auditor: GroundingEngine() init failure, has_symbol exception, suggest_closest_symbol branches, non-identifier comma param
+  with patch.object(ast_aud, "GroundingEngine", side_effect=RuntimeError("init fail")):
+    mgr_empty = MagicMock()
+    mgr_empty.data = {
+      "op_flax": {"variants": {"flax_nnx": {"api": "jax.numpy.sin"}}},
+      "op_ir_bad": {"variants": {"ir": {"api": "UnknownIrOp"}}},
+    }
+    assert len(audit_frameworks(mgr_empty, {"flax_nnx": {}, "jax": {"jax.numpy.sin": {}}, "ir": {}})) == 1
+
+  bad_ge = MagicMock()
+  bad_ge._discover_target_files.side_effect = [True, False]
+  bad_ge.has_symbol.side_effect = RuntimeError("sym fail")
+  mgr_err = MagicMock()
+  mgr_err.data = {"op1": {"variants": {"torch": {"api": "torch.bad_op"}}}}
+  errs = audit_frameworks(mgr_err, {"torch": {}}, grounding_engine=bad_ge)
+  assert len(errs) == 1
+
+  bad_ge2 = MagicMock()
+  bad_ge2._discover_target_files.side_effect = [False, RuntimeError("suggest fail")]
+  errs2 = audit_frameworks(mgr_err, {"torch": {}}, grounding_engine=bad_ge2)
+  assert len(errs2) == 1
+
+  bad_ge3 = MagicMock()
+  bad_ge3._discover_target_files.return_value = True
+  bad_ge3.has_symbol.return_value = False
+  bad_ge3.suggest_closest_symbol.return_value = ""
+  errs3 = audit_frameworks(mgr_err, {"torch": {}}, grounding_engine=bad_ge3)
+  assert len(errs3) == 1
+
+  # Non-identifier token in comma-separated param name & non-dict arg in snapshot_args
+  mgr_comma = MagicMock()
+  mgr_comma.data = {
+    "op_c": {
+      "variants": {
+        "torch": {
+          "api": "torch.comma_op",
+          "args": {"x": "valid_tok"},
+        }
+      }
+    }
+  }
+  snaps_comma: Dict[str, Dict[str, Any]] = {
+    "torch": {
+      "torch.comma_op": {
+        "params": ["not_a_dict", {"name": "valid_tok, 123invalid"}],
+      }
+    }
+  }
+  assert audit_frameworks(mgr_comma, snaps_comma) == []
+
+  # 5. loader: load_snapshots_multi(None) exception branches & compute_snapshot_checksums branches
+  with (
+    patch("importlib.resources.files", side_effect=RuntimeError("no res")),
+    patch.object(snap_loader, "Path", side_effect=RuntimeError("path fail")),
+  ):
+    assert load_snapshots_multi(None) == {}
+
+  assert isinstance(compute_snapshot_checksums(None), dict)
+
+  cs_dir = tmp_path / "cs_dir"
+  cs_dir.mkdir()
+  (cs_dir / "torch_v1_map.json").write_text("{}", encoding="utf-8")
+  (cs_dir / "empty_v1.json").write_text("", encoding="utf-8")
+  unreadable = cs_dir / "err_v1.json"
+  unreadable.write_text("{}", encoding="utf-8")
+
+  orig_read_bytes = Path.read_bytes
+
+  def mock_read_bytes(self_path: Path) -> bytes:
+    """Raise OSError for err_v1.json."""
+    if self_path.name == "err_v1.json":
+      raise OSError("cannot read")
+    return orig_read_bytes(self_path)
+
+  with patch.object(Path, "read_bytes", mock_read_bytes):
+    cs = compute_snapshot_checksums([cs_dir, tmp_path / "missing_cs_dir"])
+    assert "err_v1.json" not in cs
+    assert "empty_v1.json" not in cs

@@ -1,16 +1,17 @@
-"""Test suite for the Activation NVIDIA_SASS Macros."""
+"""Test suite for macro activations."""
 
 import typing
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_gelu, expand_sigmoid, expand_tanh
-from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import RegisterAllocator
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment, NvidiaSassInstruction
+from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment, NvidiaSassInstruction, NvidiaSassNode
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
 
 
 def test_nvidia_sass_macro_sigmoid() -> None:
   """Verifies that expand_sigmoid generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "sig1"
   metadata: dict[str, typing.Any] = {}
 
@@ -29,7 +30,7 @@ def test_nvidia_sass_macro_sigmoid() -> None:
 
 def test_nvidia_sass_macro_tanh() -> None:
   """Verifies that expand_tanh generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "tanh1"
   metadata: dict[str, typing.Any] = {}
 
@@ -42,7 +43,7 @@ def test_nvidia_sass_macro_tanh() -> None:
 
 def test_nvidia_sass_macro_gelu() -> None:
   """Verifies that expand_gelu generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "gelu1"
   metadata: dict[str, typing.Any] = {}
 

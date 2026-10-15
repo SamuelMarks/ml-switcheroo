@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class ResidualBlock(nn.Module):
-  """Docstring."""
+  """Test helper class ResidualBlock."""
 
   def __init__(self, channels: int):
     """Initializes the ResidualBlock instance."""

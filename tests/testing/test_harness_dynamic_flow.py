@@ -11,12 +11,12 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 @pytest.fixture
 def generator() -> HarnessGenerator:
-  """Docstring."""
+  """Execute generator helper logic."""
   return HarnessGenerator()
 
 
 class MockAdapterWithMagic:
-  """Docstring."""
+  """Test helper class MockAdapterWithMagic."""
 
   declared_magic_args: List[str] = ["magic_k", "other_k"]
   harness_imports: List[str] = ["import magic_lib"]
@@ -31,7 +31,7 @@ class MockAdapterWithMagic:
 
 
 class MockAdapterNoMagic:
-  """Docstring."""
+  """Test helper class MockAdapterNoMagic."""
 
   declared_magic_args: List[str] = []
   harness_imports: List[str] = []

@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class LSTMModel(nn.Module):
-  """Docstring."""
+  """Test helper class LSTMModel."""
 
   def __init__(self, input_size: int, hidden_size: int):
     """Initializes the LSTMModel instance."""

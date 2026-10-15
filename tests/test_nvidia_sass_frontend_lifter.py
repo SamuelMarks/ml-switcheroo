@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for nvidia sass frontend lifter."""
 
 from typing import List
 
@@ -14,7 +14,7 @@ from ml_switcheroo.core.graph import LogicalGraph
 
 
 def test_nvidia_sass_lifter_basic() -> None:
-  """Docstring."""
+  """Verify nvidia sass lifter basic behavior."""
   stmts: List[NvidiaSassNode] = [
     NvidiaSassComment(text="; BEGIN Linear(add1)"),
     NvidiaSassInstruction(
@@ -52,6 +52,7 @@ def test_nvidia_sass_lifter_basic() -> None:
   original_parse = lifter.comment_parser.parse
 
   def mock_parse(text):
+    """Execute mock_parse test helper."""
     if "FAKE_MARKER" in text:
       return FakeMarker()
     return original_parse(text)
@@ -94,7 +95,7 @@ def test_nvidia_sass_lifter_implicit_alu() -> None:
 
 
 def test_nvidia_sass_lifter_mismatch_end() -> None:
-  """Docstring."""
+  """Verify nvidia sass lifter mismatch end behavior."""
   stmts: List[NvidiaSassNode] = [
     NvidiaSassComment(text="; BEGIN Linear(add1)"),
     NvidiaSassComment(text="; END Linear(add2)"),
@@ -105,7 +106,7 @@ def test_nvidia_sass_lifter_mismatch_end() -> None:
 
 
 def test_nvidia_sass_lifter_unmapped_flatten() -> None:
-  """Docstring."""
+  """Verify nvidia sass lifter unmapped flatten behavior."""
   stmts: List[NvidiaSassNode] = [
     NvidiaSassComment(text="; Unmapped Op: flatten(some_id)"),
   ]
@@ -115,7 +116,7 @@ def test_nvidia_sass_lifter_unmapped_flatten() -> None:
 
 
 def test_nvidia_sass_lifter_instruction_unmapped() -> None:
-  """Docstring."""
+  """Verify nvidia sass lifter instruction unmapped behavior."""
   stmts: List[NvidiaSassNode] = [
     NvidiaSassInstruction(opcode="VADD", operands=[]),
   ]

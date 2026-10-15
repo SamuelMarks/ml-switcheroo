@@ -9,7 +9,7 @@ from ml_switcheroo.core.rewriter.passes.api_call_mixin import ApiTransformerCall
 
 
 class MockTracer:
-  """Docstring."""
+  """Test helper class MockTracer."""
 
   def log_inspection(self, *args: typing.Any, **kwargs: typing.Any) -> None:
     """Mock implementation of log inspection."""
@@ -21,7 +21,7 @@ class MockTracer:
 
 
 class MockHookContext:
-  """Docstring."""
+  """Test helper class MockHookContext."""
 
   def __init__(self) -> None:
     """Initializes the MockHookContext instance."""
@@ -29,7 +29,7 @@ class MockHookContext:
 
 
 class MockContext:
-  """Docstring."""
+  """Test helper class MockContext."""
 
   def __init__(self) -> None:
     """Initializes the MockContext instance."""
@@ -38,7 +38,7 @@ class MockContext:
 
 
 class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
-  """Docstring."""
+  """Test helper class MockTransformer."""
 
   def __init__(self) -> None:
     """Initializes the MockTransformer instance."""
@@ -217,7 +217,7 @@ def test_leave_Call_missing_def() -> None:
 
 
 def test_docstrings_are_not_placeholders() -> None:
-  """Docstring."""
+  """Verify docstrings are not placeholders behavior."""
   import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
 
   # Module docstring

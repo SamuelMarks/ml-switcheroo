@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin shape packing."""
 
 from unittest.mock import MagicMock, patch
 
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.shape_packing import transform_shape_packing
 
 
 def test_transform_shape_packing_no_target_api() -> None:
-  """Docstring."""
+  """Verify transform shape packing no target api behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "Reshape"
   ctx.lookup_api.return_value = None
@@ -23,7 +23,7 @@ def test_transform_shape_packing_no_target_api() -> None:
 
 @patch("ml_switcheroo.plugins.shape_packing.is_framework_module_node")
 def test_transform_shape_packing_method_call(mock_is_framework: MagicMock) -> None:
-  """Docstring."""
+  """Verify transform shape packing method call behavior."""
   mock_is_framework.return_value = False
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "Reshape"
@@ -54,7 +54,7 @@ def test_transform_shape_packing_method_call(mock_is_framework: MagicMock) -> No
 
 @patch("ml_switcheroo.plugins.shape_packing.is_framework_module_node")
 def test_transform_shape_packing_function_call(mock_is_framework: MagicMock) -> None:
-  """Docstring."""
+  """Verify transform shape packing function call behavior."""
   mock_is_framework.return_value = True
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "Reshape"

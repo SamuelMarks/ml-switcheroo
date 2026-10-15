@@ -12,7 +12,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockGlobalUsageScanner(cst.CSTVisitor):
-  """Docstring."""
+  """Test helper class MockGlobalUsageScanner."""
 
   def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
     """Initializes the MockGlobalUsageScanner instance."""
@@ -28,7 +28,7 @@ class MockGlobalUsageScanner(cst.CSTVisitor):
 
 
 class MockSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -62,7 +62,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def engine() -> typing.Generator[ASTEngine, None, None]:
-  """Docstring."""
+  """Execute engine helper logic."""
   mgr = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   mock_torch = MagicMock()

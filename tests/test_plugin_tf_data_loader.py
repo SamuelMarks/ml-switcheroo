@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin tf data loader."""
 
 from unittest.mock import MagicMock
 
@@ -9,19 +9,19 @@ from ml_switcheroo.plugins.tf_data_loader import _extract_tensor_dataset_inputs,
 
 
 def parse_expr(code: str) -> cst.BaseExpression:
-  """Docstring."""
+  """Execute parse expr helper logic."""
   return cst.parse_expression(code)
 
 
 def test_get_arg_by_name() -> None:
-  """Docstring."""
+  """Verify get arg by name behavior."""
   call: cst.BaseExpression = parse_expr("foo(a=1, b=2)")
   assert _get_arg_by_name(getattr(call, "args"), "b") is getattr(call, "args")[1]
   assert _get_arg_by_name(getattr(call, "args"), "c") is None
 
 
 def test_extract_tensor_dataset_inputs() -> None:
-  """Docstring."""
+  """Verify extract tensor dataset inputs behavior."""
   # Name
   call1: cst.BaseExpression = parse_expr("TensorDataset(x, y)")
   assert _extract_tensor_dataset_inputs(call1) == [
@@ -45,7 +45,7 @@ def test_extract_tensor_dataset_inputs() -> None:
 
 
 def test_transform_tf_dataloader_empty_args() -> None:
-  """Docstring."""
+  """Verify transform tf dataloader empty args behavior."""
   call: cst.BaseExpression = parse_expr("DataLoader()")
   ctx: MagicMock = MagicMock(spec=HookContext)
   res: cst.BaseExpression = transform_tf_dataloader(call, ctx)
@@ -53,7 +53,7 @@ def test_transform_tf_dataloader_empty_args() -> None:
 
 
 def test_transform_tf_dataloader_with_tensor_dataset() -> None:
-  """Docstring."""
+  """Verify transform tf dataloader with tensor dataset behavior."""
   call: cst.BaseExpression = parse_expr("DataLoader(TensorDataset(x, y), batch_size=64, shuffle=True)")
   ctx: MagicMock = MagicMock(spec=HookContext)
   res: cst.BaseExpression = transform_tf_dataloader(call, ctx)
@@ -65,7 +65,7 @@ def test_transform_tf_dataloader_with_tensor_dataset() -> None:
 
 
 def test_transform_tf_dataloader_no_tensor_dataset_single_input_no_shuffle() -> None:
-  """Docstring."""
+  """Verify transform tf dataloader no tensor dataset single input no shuffle behavior."""
   call: cst.BaseExpression = parse_expr("DataLoader(my_dataset)")
   ctx: MagicMock = MagicMock(spec=HookContext)
   res: cst.BaseExpression = transform_tf_dataloader(call, ctx)

@@ -11,13 +11,14 @@ specifically:
 It merges logic previously found in `decorators.py` and `control_flow.py`.
 """
 
-from typing import Union, Optional, cast
+from typing import Optional, Union, cast
+
 import libcst as cst
 
-from ml_switcheroo.core.rewriter.interface import RewriterPass
-from ml_switcheroo.core.rewriter.context import RewriterContext
-from ml_switcheroo.core.hooks import get_hook
 from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.core.hooks import get_hook
+from ml_switcheroo.core.rewriter.context import RewriterContext
+from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.semantics.schema import StructuralTraits
 
 

@@ -2,8 +2,9 @@
 
 
 def test_weight_script_generator_rules_no_arrow(tmp_path):
-  """Docstring."""
+  """Verify weight script generator rules no arrow behavior."""
   from unittest.mock import MagicMock, patch
+
   from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
 
   source = tmp_path / "model.py"
@@ -12,7 +13,7 @@ def test_weight_script_generator_rules_no_arrow(tmp_path):
   semantics = MagicMock()
 
   def mock_lookup(aid: str):
-    """Docstring."""
+    """Execute mock lookup helper logic."""
     if aid == "Conv2d":
       return (
         "Conv2d",
@@ -37,7 +38,7 @@ def test_weight_script_generator_rules_no_arrow(tmp_path):
     target_adapter = MagicMock()
 
     def adapter_side_effect(fw: str):
-      """Docstring."""
+      """Execute adapter side effect helper logic."""
       if fw == "torch":
         return source_adapter
       return target_adapter

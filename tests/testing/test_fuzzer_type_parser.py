@@ -20,27 +20,27 @@ from ml_switcheroo.testing.fuzzer.type_parser import (
 
 
 def test_empty_and_any() -> None:
-  """Docstring."""
+  """Verify empty and any behavior."""
   assert parse_type_annotation("") == AnyType()
   assert parse_type_annotation("   ") == AnyType()
   assert parse_type_annotation("Any") == AnyType()
 
 
 def test_none() -> None:
-  """Docstring."""
+  """Verify none behavior."""
   assert parse_type_annotation("None") == NoneType()
   assert parse_type_annotation("NoneType") == NoneType()
 
 
 def test_primitives() -> None:
-  """Docstring."""
+  """Verify primitives behavior."""
   primitives: list[str] = ["int", "integer", "float", "double", "number", "bool", "boolean", "str", "string"]
   for p in primitives:
     assert parse_type_annotation(p) == PrimitiveType(name=p)
 
 
 def test_tensors() -> None:
-  """Docstring."""
+  """Verify tensors behavior."""
   assert parse_type_annotation("Array") == TensorType(dims=None)
   assert parse_type_annotation("Tensor") == TensorType(dims=None)
   assert parse_type_annotation("Array[1:2]") == TensorType(dims=None)
@@ -56,14 +56,14 @@ def test_tensors() -> None:
 
 
 def test_callables() -> None:
-  """Docstring."""
+  """Verify callables behavior."""
   assert parse_type_annotation("Callable") == CallableType()
   assert parse_type_annotation("func") == CallableType()
   assert parse_type_annotation("function") == CallableType()
 
 
 def test_lists() -> None:
-  """Docstring."""
+  """Verify lists behavior."""
   assert parse_type_annotation("List") == ListType(inner=AnyType())
   assert parse_type_annotation("Sequence") == ListType(inner=AnyType())
   assert parse_type_annotation("List[int]") == ListType(inner=PrimitiveType(name="int"))
@@ -71,7 +71,7 @@ def test_lists() -> None:
 
 
 def test_dicts() -> None:
-  """Docstring."""
+  """Verify dicts behavior."""
   assert parse_type_annotation("Dict") == DictType(key_type=AnyType(), value_type=AnyType())
   assert parse_type_annotation("Mapping") == DictType(key_type=AnyType(), value_type=AnyType())
   assert parse_type_annotation("Dict[str, int]") == DictType(
@@ -81,7 +81,7 @@ def test_dicts() -> None:
 
 
 def test_tuples() -> None:
-  """Docstring."""
+  """Verify tuples behavior."""
   assert parse_type_annotation("Tuple") == TupleType(elements=[AnyType()], variadic=True)
   assert parse_type_annotation("Tuple[int]") == TupleType(elements=[PrimitiveType(name="int")], variadic=False)
   assert parse_type_annotation("Tuple[int, float]") == TupleType(
@@ -91,14 +91,14 @@ def test_tuples() -> None:
 
 
 def test_optional() -> None:
-  """Docstring."""
+  """Verify optional behavior."""
   assert parse_type_annotation("Optional") == OptionalType(inner=AnyType())
   assert parse_type_annotation("Optional[int]") == OptionalType(inner=PrimitiveType(name="int"))
   assert parse_type_annotation("Optional[List[str]]") == OptionalType(inner=ListType(inner=PrimitiveType(name="str")))
 
 
 def test_union() -> None:
-  """Docstring."""
+  """Verify union behavior."""
   # Union syntax (PEP 604)
   assert parse_type_annotation("int | float") == UnionType(types=[PrimitiveType(name="int"), PrimitiveType(name="float")])
   assert parse_type_annotation("int | float | str") == UnionType(
@@ -114,19 +114,19 @@ def test_union() -> None:
 
 
 def test_syntax_error_fallback() -> None:
-  """Docstring."""
+  """Verify syntax error fallback behavior."""
   # Invalid Python syntax, will fallback to PrimitiveType with raw string
   assert parse_type_annotation("a b c") == PrimitiveType(name="a b c")
 
 
 def test_unknown_types() -> None:
-  """Docstring."""
+  """Verify unknown types behavior."""
   assert parse_type_annotation("CustomClass") == PrimitiveType(name="CustomClass")
   assert parse_type_annotation("module.Class") == PrimitiveType(name="module.Class")
 
 
 def test_generic_visit() -> None:
-  """Docstring."""
+  """Verify generic visit behavior."""
   import libcst as cst
 
   parser: TypeAnnotationParser = TypeAnnotationParser()
@@ -136,14 +136,14 @@ def test_generic_visit() -> None:
 
 
 def test_binop_unknown() -> None:
-  """Docstring."""
+  """Verify binop unknown behavior."""
   # E.g., int + float
   res: ParsedType = parse_type_annotation("int + float")
   assert isinstance(res, PrimitiveType) and getattr(res, "name") == "Unknown"
 
 
 def test_full_name() -> None:
-  """Docstring."""
+  """Verify full name behavior."""
   import libcst as cst
 
   parser: TypeAnnotationParser = TypeAnnotationParser()
@@ -151,7 +151,7 @@ def test_full_name() -> None:
 
 
 def test_complex_nesting() -> None:
-  """Docstring."""
+  """Verify complex nesting behavior."""
   type_str: str = "Optional[Dict[str, List[Tuple[int, float]]]]"
   expected: OptionalType = OptionalType(
     inner=DictType(
@@ -165,7 +165,7 @@ def test_complex_nesting() -> None:
 
 
 def test_slice_subscript() -> None:
-  """Docstring."""
+  """Verify slice subscript behavior."""
   # In 'Array[1:2]', 1:2 is a cst.Slice, not cst.Index
   res: ParsedType = parse_type_annotation("Array[1:2]")
   assert isinstance(res, TensorType)
@@ -173,13 +173,13 @@ def test_slice_subscript() -> None:
 
 
 def test_parsed_type_base() -> None:
-  """Docstring."""
+  """Verify parsed type base behavior."""
   pt: ParsedType = ParsedType()
   assert isinstance(pt, ParsedType)
 
 
 def test_cst_formatting_preservation() -> None:
-  """Docstring."""
+  """Verify cst formatting preservation behavior."""
   import libcst as cst
 
   type_str: str = "Optional[  Dict[ str ,  int ]  ]"
@@ -193,7 +193,7 @@ def test_cst_formatting_preservation() -> None:
 
 
 def test_cst_fallback_formatting() -> None:
-  """Docstring."""
+  """Verify cst fallback formatting behavior."""
   type_str: str = "int + float"
   parsed: ParsedType = parse_type_annotation(type_str)
   assert getattr(parsed, "cst_node") is not None

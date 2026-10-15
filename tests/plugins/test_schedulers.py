@@ -15,7 +15,7 @@ from ml_switcheroo.plugins.schedulers import (
 
 
 class DummyVariant:
-  """Docstring."""
+  """Test helper class DummyVariant."""
 
   def __init__(self, args: Optional[Dict[str, Any]] = None) -> None:
     """Initializes the DummyVariant instance."""
@@ -23,7 +23,7 @@ class DummyVariant:
 
 
 class DummyContext:
-  """Docstring."""
+  """Test helper class DummyContext."""
 
   def __init__(self, op_id: Optional[str], api: Optional[str], variant_args: Optional[Dict[str, Any]] = None) -> None:
     """Initializes the DummyContext instance."""

@@ -8,16 +8,12 @@ It normalizes assembly mnemonics into the ML-Switcheroo Abstract Standard option
 where possible (e.g., "FP32 Add" -> "Add").
 """
 
-from typing import Any
-
 import typing
-
-
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
-from ml_switcheroo.utils.console import log_info, log_error, log_success
+from ml_switcheroo.utils.console import log_error, log_info, log_success
 
 
 class NvidiaSassHtmlParser(HTMLParser):

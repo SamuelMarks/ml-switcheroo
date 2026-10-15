@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin optimizer step."""
 
 from unittest.mock import MagicMock
 
@@ -14,7 +14,7 @@ from ml_switcheroo.plugins.optimizer_step import (
 
 
 def test_transform_optimizer_init() -> None:
-  """Docstring."""
+  """Verify transform optimizer init behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   code: str = "optax.adam(params, lr=0.01)"
@@ -28,7 +28,7 @@ def test_transform_optimizer_init() -> None:
 
 
 def test_transform_optimizer_init_no_args() -> None:
-  """Docstring."""
+  """Verify transform optimizer init no args behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   code: str = "optax.adam()"
@@ -41,7 +41,7 @@ def test_transform_optimizer_init_no_args() -> None:
 
 
 def test_transform_optimizer_step() -> None:
-  """Docstring."""
+  """Verify transform optimizer step behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   code: str = "optimizer.step()"
@@ -53,7 +53,7 @@ def test_transform_optimizer_step() -> None:
 
 
 def test_strip_zero_grad() -> None:
-  """Docstring."""
+  """Verify strip zero grad behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   code: str = "optimizer.zero_grad()"
@@ -68,6 +68,6 @@ def test_strip_zero_grad() -> None:
 
 
 def test_get_func_name() -> None:
-  """Docstring."""
+  """Verify get func name behavior."""
   node: cst.Call = cst.Call(func=cst.Name("my_func"), args=[])
   assert _get_func_name(node) == "step"

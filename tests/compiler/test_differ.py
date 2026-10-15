@@ -93,7 +93,7 @@ def test__is_likely_stateful() -> None:
 
 
 def test_differ_diff_no_anchor() -> None:
-  """Docstring."""
+  """Verify differ diff no anchor behavior."""
   # Hit 123->128
   from ml_switcheroo.core.compiler.differ import GraphDiffer
   from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode

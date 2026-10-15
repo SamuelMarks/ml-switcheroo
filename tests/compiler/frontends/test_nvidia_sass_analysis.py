@@ -1,9 +1,4 @@
-"""Unit tests for NVIDIA_SASS-based logical block analysis.
-
-This module verifies that the NvidiaSassAnalyzer correctly parses micro-architectural
-NVIDIA_SASS instructions (like ISETP conditional evaluations) and maps them back to
-higher-level logical node parameters (e.g., kernel size, in_features, elements).
-"""
+"""Test suite for nvidia sass analysis."""
 
 import typing
 
@@ -138,7 +133,7 @@ def test_nvidia_sass_analyzer_unknown_kind() -> None:
 
 
 def test_nvidia_sass_analysis_all_pass_blocks() -> None:
-  """Docstring."""
+  """Verify nvidia sass analysis all pass blocks behavior."""
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate, NvidiaSassInstruction
 
@@ -172,7 +167,7 @@ def test_nvidia_sass_analysis_all_pass_blocks() -> None:
 
 
 def test_nvidia_sass_analysis_linear_no_loop_limits() -> None:
-  """Docstring."""
+  """Verify nvidia sass analysis linear no loop limits behavior."""
   # Hit 52->116 (Linear with no limits)
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 
@@ -181,7 +176,7 @@ def test_nvidia_sass_analysis_linear_no_loop_limits() -> None:
 
 
 def test_nvidia_sass_analyzer_linear_no_loop_limits() -> None:
-  """Docstring."""
+  """Verify nvidia sass analyzer linear no loop limits behavior."""
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 
   analyzer = NvidiaSassAnalyzer()

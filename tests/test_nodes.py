@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for nodes."""
 
 from ml_switcheroo.core.mlir.nodes import (
   AttributeNode,
@@ -14,13 +14,13 @@ from ml_switcheroo.core.mlir.nodes import (
 
 
 def test_trivia_node() -> None:
-  """Docstring."""
+  """Verify trivia node behavior."""
   n: TriviaNode = TriviaNode("  ")
   assert n.to_text() == "  "
 
 
 def test_value_node() -> None:
-  """Docstring."""
+  """Verify value node behavior."""
   n: ValueNode = ValueNode("%0")
   assert n.to_text() == "%0"
 
@@ -29,7 +29,7 @@ def test_value_node() -> None:
 
 
 def test_type_node() -> None:
-  """Docstring."""
+  """Verify type node behavior."""
   n: TypeNode = TypeNode("!sw.type")
   assert n.to_text() == "!sw.type"
 
@@ -38,7 +38,7 @@ def test_type_node() -> None:
 
 
 def test_attribute_node() -> None:
-  """Docstring."""
+  """Verify attribute node behavior."""
   # String
   n_str: AttributeNode = AttributeNode(name="sym_name", value='"my_func"')
   assert n_str.to_text() == 'sym_name = "my_func"'
@@ -59,7 +59,7 @@ def test_attribute_node() -> None:
 
 
 def test_block_node() -> None:
-  """Docstring."""
+  """Verify block node behavior."""
   # Empty
   n_empty: BlockNode = BlockNode(label="^bb0")
   assert n_empty.to_text() == "^bb0:\n"
@@ -81,7 +81,7 @@ def test_block_node() -> None:
 
 
 def test_region_node() -> None:
-  """Docstring."""
+  """Verify region node behavior."""
   b: BlockNode = BlockNode(label="^bb0")
   n: RegionNode = RegionNode(blocks=[b])
   assert n.to_text() == "{^bb0:\n}"
@@ -91,7 +91,7 @@ def test_region_node() -> None:
 
 
 def test_operation_node() -> None:
-  """Docstring."""
+  """Verify operation node behavior."""
   # Bare
   n: OperationNode = OperationNode(name="sw.return")
   assert n.to_text() == "sw.return\n"
@@ -128,7 +128,7 @@ def test_operation_node() -> None:
 
 
 def test_stablehlo_constant_op() -> None:
-  """Docstring."""
+  """Verify stablehlo constant op behavior."""
   n: StableHloConstantOp = StableHloConstantOp(
     name="stablehlo.constant",
     results=[ValueNode("%0")],
@@ -156,7 +156,7 @@ def test_stablehlo_constant_op() -> None:
 
 
 def test_module_node() -> None:
-  """Docstring."""
+  """Verify module node behavior."""
   b: BlockNode = BlockNode(label="^bb0")
   m: ModuleNode = ModuleNode(body=b)
   assert m.to_text() == "^bb0:\n"

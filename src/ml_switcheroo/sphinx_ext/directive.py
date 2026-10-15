@@ -5,9 +5,9 @@ class which ties the scanning and rendering logic
 into a Docutils node.
 """
 
-from typing import List
+from typing import TYPE_CHECKING, List
+
 from docutils import nodes
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 

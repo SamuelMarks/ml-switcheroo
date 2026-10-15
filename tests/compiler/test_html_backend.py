@@ -1,19 +1,20 @@
 """Tests for the HTML Compiler Backend."""
 
 import typing
+from unittest.mock import patch
 
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def test_html_backend_init() -> None:
-  """Docstring."""
+  """Verify html backend init behavior."""
   backend = HtmlBackend()
   assert backend is not None
 
 
 def test_html_backend_format_args() -> None:
-  """Docstring."""
+  """Verify html backend format args behavior."""
   backend = HtmlBackend()
   metadata: dict[str, str] = {"arg_1": "val1", "other": "val2", "arg_3": "val3"}
   formatted: str = backend._format_args(metadata)
@@ -21,7 +22,7 @@ def test_html_backend_format_args() -> None:
 
 
 def test_html_backend_is_stateful() -> None:
-  """Docstring."""
+  """Verify html backend is stateful behavior."""
   backend = HtmlBackend()
 
   node_input = LogicalNode(id="in", op_type="Input")
@@ -44,7 +45,7 @@ def test_html_backend_is_stateful() -> None:
 
 
 def test_html_backend_clean_kind() -> None:
-  """Docstring."""
+  """Verify html backend clean kind behavior."""
   backend = HtmlBackend()
   assert backend._clean_kind("func_call") == "Call"
   assert backend._clean_kind("a.b.c.Relu") == "Relu"
@@ -52,7 +53,7 @@ def test_html_backend_clean_kind() -> None:
 
 
 def test_html_backend_create_arrow() -> None:
-  """Docstring."""
+  """Verify html backend create arrow behavior."""
   backend = HtmlBackend()
 
   arrow_def: typing.Any = backend._create_arrow(1, 2, "def")
@@ -67,7 +68,7 @@ def test_html_backend_create_arrow() -> None:
 
   arrow_seq: typing.Any = backend._create_arrow(1, 3, "seq")
   assert arrow_seq.style_class == "s-blue"
-  assert arrow_seq.y2 == 50 + (3 - 1 - 1) * 120  # 3 - 1 = 2 -> 2 - 1 = 1 -> 50 + 1 * 120 = 170
+  assert arrow_seq.y2 == 50 + (3 - 1 - 1) * 120
 
   arrow_unknown: typing.Any = backend._create_arrow(1, 2, "unknown")
   assert arrow_unknown.x2 == 0
@@ -75,7 +76,7 @@ def test_html_backend_create_arrow() -> None:
 
 
 def test_html_backend_layout_graph_empty() -> None:
-  """Docstring."""
+  """Verify html backend layout graph empty behavior."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="test")
   graph.add_node(LogicalNode(id="in", op_type="Input"))
@@ -86,35 +87,23 @@ def test_html_backend_layout_graph_empty() -> None:
 
 
 def test_html_backend_layout_graph_nodes() -> None:
-  """Docstring."""
+  """Verify html backend layout graph nodes behavior."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="test_graph")
 
-  # Add nodes to graph
-  n1 = LogicalNode(id="n1", op_type="Linear", attributes={"arg_x": "1"})  # Stateful
-  n2 = LogicalNode(id="n2", op_type="relu", attributes={"alpha": "0.1"})  # Stateless
-  n3 = LogicalNode(id="n3", op_type="Linear")  # Stateful
+  n1 = LogicalNode(id="n1", op_type="Linear", attributes={"arg_x": "1"})
+  n2 = LogicalNode(id="n2", op_type="relu", attributes={"alpha": "0.1"})
+  n3 = LogicalNode(id="n3", op_type="Linear")
 
   graph.nodes.update({n.id: n for n in [n1, n2, n3]})
-  # Add some dummy edges to satisfy topological sort if it cares (it might just return nodes if no edges)
-  # Actually, topological_sort of disconnected nodes will just return them in some order.
 
   boxes: list[typing.Any] = backend._layout_graph(graph)
-
-  # Expected boxes:
-  # n1: 1 red, 1 blue, 1 green
-  # n2: 1 blue, 1 green
-  # n3: 1 red, 1 blue, 1 green
-  # 1 return bubble
-  # Total = 3 + 2 + 3 + 1 = 9 boxes
   assert len(boxes) == 9
-
-  # Check return circle
   assert boxes[-1].css_class == "circ"
 
 
 def test_html_backend_compile() -> None:
-  """Docstring."""
+  """Verify html backend compile behavior."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="MyModel")
   n1 = LogicalNode(id="n1", op_type="relu")
@@ -125,7 +114,7 @@ def test_html_backend_compile() -> None:
 
 
 def test_html_backend_compile_default_name() -> None:
-  """Docstring."""
+  """Verify html backend compile default name behavior."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="GeneratedNet")
   n1 = LogicalNode(id="n1", op_type="relu")
@@ -136,7 +125,7 @@ def test_html_backend_compile_default_name() -> None:
 
 
 def test_html_backend_compile_no_name() -> None:
-  """Docstring."""
+  """Verify html backend compile no name behavior."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="")
   n1 = LogicalNode(id="n1", op_type="relu")
@@ -147,325 +136,86 @@ def test_html_backend_compile_no_name() -> None:
 
 
 def test_html_backend_layout_graph_no_last_blue_row() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
-
+  """Verify html backend layout graph with a single stateless op."""
   backend = HtmlBackend()
   graph = LogicalGraph(name="test")
 
   n1 = LogicalNode("n1", "add")
   graph.add_node(n1)
-  backend._layout_graph(graph)
+  boxes = backend._layout_graph(graph)
+  assert len(boxes) >= 2
 
 
 def test_html_backend_layout_graph_break_loop() -> None:
-  """Docstring."""
-  from unittest.mock import patch
-
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
-
-  backend = HtmlBackend()
-  graph = LogicalGraph(name="test")
-  n1 = LogicalNode("n1", "add")
-  n2 = LogicalNode("n2", "add")
-  graph.add_node(n1)
-  graph.add_node(n2)
-
-  # We will mock the GridBox creation to prevent "box b" from being in the css_class
-  from ml_switcheroo.core.compiler.backends.html import GridBox
-
-  orig_gridbox = GridBox
-
-  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-    """Docstring."""
-    css: str = kwargs.get("css_class", "")
-    if "box b" in css:
-      kwargs["css_class"] = "box mutated"
-    return orig_gridbox(*args, **kwargs)
-
-  with patch("ml_switcheroo.core.compiler.backends.html.GridBox", side_effect=mock_gridbox):
-    backend._layout_graph(graph)
-
-
-def test_html_backend_layout_graph_no_match_last_blue_row2() -> None:
-  """Docstring."""
-  from unittest.mock import patch
-
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
-
-  backend = HtmlBackend()
-  graph = LogicalGraph(name="test")
-  n1 = LogicalNode("n1", "add")
-  n2 = LogicalNode("n2", "add")
-  graph.add_node(n1)
-  graph.add_node(n2)
-
-  orig_gridbox = __import__("ml_switcheroo.core.compiler.backends.html", fromlist=["GridBox"]).GridBox
-
-  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-    """Docstring."""
-    css: str = kwargs.get("css_class", "")
-    if "box b" in css:
-      kwargs["css_class"] = "box mutated"
-    return orig_gridbox(*args, **kwargs)
-
-  with patch("ml_switcheroo.core.compiler.backends.html.GridBox", side_effect=mock_gridbox):
-    backend._layout_graph(graph)
-
-
-def test_html_backend_layout_graph_no_match_last_blue_row3() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
-
-  backend = HtmlBackend()
-  graph = LogicalGraph(name="test")
-
-  n1 = LogicalNode("n1", "add")
-  n2 = LogicalNode("n2", "add")
-  graph.add_node(n1)
-  graph.add_node(n2)
-
-  from unittest.mock import patch
-
+  """Verify html backend layout graph when GridBox css_class is mutated."""
   import ml_switcheroo.core.compiler.backends.html as html_mod
+
+  backend = HtmlBackend()
+  graph = LogicalGraph(name="test")
+  n1 = LogicalNode("n1", "add")
+  n2 = LogicalNode("n2", "add")
+  graph.add_node(n1)
+  graph.add_node(n2)
 
   orig_gridbox = html_mod.GridBox
 
   def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-    """Docstring."""
+    """Execute mock gridbox helper logic."""
     box = orig_gridbox(*args, **kwargs)
     if "box b" in box.css_class:
       box.css_class = "box g"
     return box
 
   with patch("ml_switcheroo.core.compiler.backends.html.GridBox", side_effect=mock_gridbox):
-    backend._layout_graph(graph)
+    boxes = backend._layout_graph(graph)
+    assert len(boxes) >= 2
 
 
-def test_html_backend_layout_graph_no_match_last_blue_row4() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
+def test_html_backend_layout_graph_row_mismatch() -> None:
+  """Verify html backend layout graph when blue box row does not match current row."""
+  import ml_switcheroo.core.compiler.backends.html as html_mod
 
   backend = HtmlBackend()
   graph = LogicalGraph(name="test")
-
   n1 = LogicalNode("n1", "add")
   n2 = LogicalNode("n2", "add")
   graph.add_node(n1)
   graph.add_node(n2)
 
-  from unittest.mock import patch
-
-  import ml_switcheroo.core.compiler.backends.html as html_mod
-
   orig_gridbox = html_mod.GridBox
 
   def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-    """Docstring."""
-    box = orig_gridbox(*args, **kwargs)
-    if "box b" in box.css_class:
-      box.css_class = "box g"
-    return box
-
-  with patch("ml_switcheroo.core.compiler.backends.html.GridBox", side_effect=mock_gridbox):
-    backend._layout_graph(graph)
-
-
-def test_html_backend_layout_graph_no_match_last_blue_row5() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
-
-  backend = HtmlBackend()
-  graph = LogicalGraph(name="test")
-
-  n1 = LogicalNode("n1", "add")
-  n2 = LogicalNode("n2", "add")
-  graph.add_node(n1)
-  graph.add_node(n2)
-
-  from unittest.mock import patch
-
-  import ml_switcheroo.core.compiler.backends.html as html_mod
-
-  orig_gridbox = html_mod.GridBox
-
-  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-    """Docstring."""
-    box = orig_gridbox(*args, **kwargs)
-    if "box b" in box.css_class:
-      box.css_class = "box g"
-    return box
-
-  with patch("ml_switcheroo.core.compiler.backends.html.GridBox", side_effect=mock_gridbox):
-    backend._layout_graph(graph)
-
-
-def test_html_backend_layout_graph_no_match_last_blue_row6() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
-
-  backend = HtmlBackend()
-  graph = LogicalGraph(name="test")
-
-  n1 = LogicalNode("n1", "add")
-  n2 = LogicalNode("n2", "add")
-  graph.add_node(n1)
-  graph.add_node(n2)
-
-  from unittest.mock import patch
-
-  import ml_switcheroo.core.compiler.backends.html as html_mod
-
-  orig_gridbox = html_mod.GridBox
-
-  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-    """Docstring."""
-    box = orig_gridbox(*args, **kwargs)
-    if "box b" in box.css_class:
-      box.row = 999
-    return box
-
-  with patch("ml_switcheroo.core.compiler.backends.html.GridBox", side_effect=mock_gridbox):
-    backend._layout_graph(graph)
-
-
-def test_html_backend_layout_graph_no_match_last_blue_row7() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
-
-  backend = HtmlBackend()
-  graph = LogicalGraph(name="test")
-
-  n1 = LogicalNode("n1", "add")
-  n2 = LogicalNode("n2", "add")
-  graph.add_node(n1)
-  graph.add_node(n2)
-
-  from unittest.mock import patch
-
-  import ml_switcheroo.core.compiler.backends.html as html_mod
-
-  orig_gridbox = html_mod.GridBox
-
-  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-    """Docstring."""
-    box = orig_gridbox(*args, **kwargs)
-    if "box b" in box.css_class:
-      box.row = 999
-    return box
-
-  with patch("ml_switcheroo.core.compiler.backends.html.GridBox", side_effect=mock_gridbox):
-    backend._layout_graph(graph)
-
-
-def test_html_backend_layout_graph_no_match_last_blue_row8() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
-
-  backend = HtmlBackend()
-  graph = LogicalGraph(name="test")
-
-  n1 = LogicalNode("n1", "add")
-  n2 = LogicalNode("n2", "add")
-  graph.add_node(n1)
-  graph.add_node(n2)
-
-  from unittest.mock import patch
-
-  import ml_switcheroo.core.compiler.backends.html as html_mod
-
-  orig_gridbox = html_mod.GridBox
-
-  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-    """Docstring."""
+    """Execute mock gridbox helper logic."""
     box = orig_gridbox(*args, **kwargs)
     if kwargs.get("css_class") == "box b" and kwargs.get("row") == 2:
-      box.css_class = "box g"
-    return box
-
-  with patch("ml_switcheroo.core.compiler.backends.html.GridBox", side_effect=mock_gridbox):
-    backend._layout_graph(graph)
-
-
-def test_html_backend_layout_graph_no_match_last_blue_row9() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
-
-  backend = HtmlBackend()
-  graph = LogicalGraph(name="test")
-  n1 = LogicalNode("n1", "add")
-  n2 = LogicalNode("n2", "add")
-  graph.add_node(n1)
-  graph.add_node(n2)
-
-  from unittest.mock import patch
-
-  import ml_switcheroo.core.compiler.backends.html as html_mod
-
-  orig_gridbox = html_mod.GridBox
-
-  def mock_gridbox(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-    """Docstring."""
-    box = orig_gridbox(*args, **kwargs)
-    # when creating the green box for row 2, it is added to the list.
-    # when iterating over the boxes looking for row 2 and "box b",
-    # if we set "box b" to have row 999 instead of 2, the search fails.
-    if kwargs.get("css_class") == "box b" and kwargs.get("row") == 2:
-      # don't mess with the constructor row parameter itself so it doesn't break other things maybe?
-      # Wait, if we set box.row = 999 here it DOES change it.
       box.row = 999
     return box
 
   with patch("ml_switcheroo.core.compiler.backends.html.GridBox", side_effect=mock_gridbox):
-    backend._layout_graph(graph)
-
-
-# --- Merged from test_html_backend_missing.py ---
+    boxes = backend._layout_graph(graph)
+    assert len(boxes) >= 2
 
 
 def test_html_backend_first_operation_no_blue_row() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.compiler.ir import LogicalGraph
-
+  """Verify html backend compile on empty graph produces valid HTML."""
   graph = LogicalGraph(name="test")
-  # No nodes, last_blue_row is -1 at the end
   backend = HtmlBackend()
-  backend.compile(graph)
+  res = backend.compile(graph)
+  assert "<!DOCTYPE html>" in res
 
 
 def test_html_backend_first_op_not_layer() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
-
+  """Verify html backend compile with a single stateful node."""
   graph = LogicalGraph(name="test")
-  op = LogicalNode(
-    id="regular_op",
-    op_type="Regular",
-  )
+  op = LogicalNode(id="regular_op", op_type="Regular")
   graph.add_node(op)
   backend = HtmlBackend()
   code: str = backend.compile(graph)
-  assert "box b" not in code or "box b" in code
+  assert "box b" in code
 
 
 def test_html_backend_second_operation_no_blue_row() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-
-  # Creates a minimal logical graph to invoke HTML compilation.
+  """Verify html backend compile with two connected nodes."""
   nodes = {
     "n1": LogicalNode(id="n1", op_type="UnknownOp", attributes={}),
     "n2": LogicalNode(id="n2", op_type="UnknownOp", attributes={}),
@@ -475,22 +225,4 @@ def test_html_backend_second_operation_no_blue_row() -> None:
 
   backend = HtmlBackend()
   html_output = backend.compile(graph)
-  assert html_output is not None
-
-
-def _ignore_original_test():
-  """Docstring."""
-  from ml_switcheroo.core.compiler.backends.html import HTMLBackend
-  from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-
-  # Creates a minimal logical graph to invoke HTML compilation.
-  nodes = {
-    "n1": LogicalNode(id="n1", op_type="UnknownOp", attributes={}),
-    "n2": LogicalNode(id="n2", op_type="UnknownOp", attributes={}),
-  }
-  edges = [LogicalEdge(source="n1", target="n2")]
-  graph = LogicalGraph(nodes=nodes, edges=edges)
-
-  backend = HTMLBackend(theme="dark")
-  html_output = backend.compile(graph)
-  assert html_output is not None
+  assert "Unknownop" in html_output

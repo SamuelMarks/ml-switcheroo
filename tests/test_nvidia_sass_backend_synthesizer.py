@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for nvidia sass backend synthesizer."""
 
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -7,17 +7,18 @@ from unittest.mock import patch
 import libcst as cst
 import pytest
 
-from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import RegisterAllocator, NvidiaSassSynthesizer
+from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import NvidiaSassSynthesizer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassImmediate,
   NvidiaSassInstruction,
   NvidiaSassLabel,
   NvidiaSassMemory,
-  NvidiaSassNode,
   NvidiaSassPredicate,
   NvidiaSassRegister,
 )
+from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
 from ml_switcheroo.core.graph import LogicalEdge as Edge
 from ml_switcheroo.core.graph import LogicalGraph
 from ml_switcheroo.core.graph import LogicalNode as Node
@@ -25,8 +26,8 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_register_allocator() -> None:
-  """Docstring."""
-  alloc: RegisterAllocator = RegisterAllocator()
+  """Verify register allocator behavior."""
+  alloc: RegisterAllocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
 
   # get_register
   r1: NvidiaSassRegister = alloc.get_register("var1")
@@ -39,7 +40,7 @@ def test_register_allocator() -> None:
   assert r2.name == "R1"
 
   alloc.free_register("var1")
-  assert len(alloc._free_pool) == 254
+  assert len(alloc._free_pool) == 255
   # freeing already freed
   alloc.free_register("var1")
 
@@ -61,18 +62,18 @@ def test_register_allocator() -> None:
 
 
 def test_register_allocator_overflow() -> None:
-  """Docstring."""
-  alloc: RegisterAllocator = RegisterAllocator()
+  """Verify register allocator overflow behavior."""
+  alloc: RegisterAllocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   alloc.reset()
-  for i in range(255):
+  for i in range(256):
     alloc.get_register(f"v{i}")
   with pytest.raises(ValueError, match="overflow"):
     alloc.get_register("v256")
 
 
 def test_register_allocator_liveness() -> None:
-  """Docstring."""
-  alloc: RegisterAllocator = RegisterAllocator()
+  """Verify register allocator liveness behavior."""
+  alloc: RegisterAllocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   nodes = {
     "n1": Node(id="n1", op_type="test"),
     "n2": Node(id="n2", op_type="test"),
@@ -89,16 +90,16 @@ def test_register_allocator_liveness() -> None:
 
   alloc.get_register("n1")
   alloc.record_usage("n1")
-  assert "n1" in alloc._var_to_reg
+  assert "n1" in alloc._var_to_reg_id
   alloc.record_usage("n1")
-  assert "n1" not in alloc._var_to_reg  # should be freed
+  assert "n1" not in alloc._var_to_reg_id  # should be freed
 
   # Test record_usage on nonexistent var
   alloc.record_usage("nonexistent")
 
 
 def test_synthesizer_init(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify synthesizer init behavior."""
   # test reading macros.json
   macros_json: Path = tmp_path / "macros.json"
   macros_json.write_text('{"Conv2d": "expand_conv2d", "UnknownOp": "expand_unknown"}')
@@ -138,7 +139,7 @@ def test_synthesizer_init_filenotfound(tmp_path: Path) -> None:
 
 
 def test_synthesizer_from_graph() -> None:
-  """Docstring."""
+  """Verify synthesizer from graph behavior."""
   sem: SemanticsManager = SemanticsManager()
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(sem)
 
@@ -149,11 +150,11 @@ def test_synthesizer_from_graph() -> None:
   graph: LogicalGraph = LogicalGraph(nodes={"in1": n_in, "add1": n_add, "conv1": n_conv, "out1": n_out})
 
   def mock_get_definition(kind: str) -> List[str]:
-    """Docstring."""
+    """Execute mock get definition helper logic."""
     return [kind]
 
   def mock_resolve_variant(abstract_id: str, target: str) -> Optional[Dict[str, str]]:
-    """Docstring."""
+    """Execute mock resolve variant helper logic."""
     if abstract_id == "Add":
       return {"api": "FADD"}
     return None
@@ -180,7 +181,7 @@ def test_synthesizer_from_graph() -> None:
 
 
 def test_synthesizer_from_graph_unmapped_op() -> None:
-  """Docstring."""
+  """Verify synthesizer from graph unmapped op behavior."""
   sem: SemanticsManager = SemanticsManager()
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(sem)
 
@@ -202,7 +203,7 @@ def test_synthesizer_from_graph_unmapped_op() -> None:
 
 
 def test_synthesizer_from_graph_method_suffix() -> None:
-  """Docstring."""
+  """Verify synthesizer from graph method suffix behavior."""
   sem: SemanticsManager = SemanticsManager()
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(sem)
 
@@ -214,7 +215,7 @@ def test_synthesizer_from_graph_method_suffix() -> None:
   with patch.object(sem, "get_definition", return_value=["tensor.reshape"]):
 
     def fake_expand(alloc: RegisterAllocator, node_id: str, meta: Dict[str, Any]) -> List[NvidiaSassNode]:
-      """Docstring."""
+      """Execute fake expand helper logic."""
       return [NvidiaSassComment(text="fake_reshape")]
 
     synth.macro_registry = {"reshape": fake_expand}
@@ -223,7 +224,7 @@ def test_synthesizer_from_graph_method_suffix() -> None:
 
 
 def test_synthesizer_to_python() -> None:
-  """Docstring."""
+  """Verify synthesizer to python behavior."""
   sem: SemanticsManager = SemanticsManager()
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(sem)
 

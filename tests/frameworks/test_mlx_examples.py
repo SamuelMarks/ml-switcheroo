@@ -9,7 +9,7 @@ from ml_switcheroo.frameworks.mlx import MLXAdapter
 
 @pytest.fixture
 def adapter() -> MLXAdapter:
-  """Docstring."""
+  """Execute adapter helper logic."""
   return MLXAdapter()
 
 
@@ -44,7 +44,7 @@ def test_tier2_neural_validity(adapter: MLXAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: MLXAdapter) -> None:
-  """Docstring."""
+  """Verify tier3 extras validity behavior."""
   code: str = adapter.get_tiered_examples()["tier3_extras"]
   ast.parse(code)
   assert "with mx.stream(mx.gpu):" in code

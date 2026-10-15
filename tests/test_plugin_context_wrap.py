@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin context wrap."""
 
 from unittest.mock import MagicMock
 
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.context_to_function_wrap import _create_dotted_name, 
 
 
 def test_create_dotted_name() -> None:
-  """Docstring."""
+  """Verify create dotted name behavior."""
   node: cst.BaseExpression = _create_dotted_name("a.b.c")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "c"
@@ -20,7 +20,7 @@ def test_create_dotted_name() -> None:
 
 
 def test_transform_context_manager() -> None:
-  """Docstring."""
+  """Verify transform context manager behavior."""
   node: cst.Call = cst.Call(func=cst.Name("no_grad"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   result: cst.CSTNode = transform_context_manager(node, ctx)

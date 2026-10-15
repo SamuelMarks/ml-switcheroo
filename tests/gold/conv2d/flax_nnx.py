@@ -5,7 +5,7 @@ from flax import nnx
 
 
 class ConvModel(nnx.Module):
-  """Docstring."""
+  """Test helper class ConvModel."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3, rngs: nnx.Rngs = None):
     """Initializes the ConvModel instance."""

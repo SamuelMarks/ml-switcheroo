@@ -17,8 +17,9 @@ might lack the equivalent library or that the mapping logic is missing.
 """
 
 import sys
-import libcst as cst
 from typing import Set
+
+import libcst as cst
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 

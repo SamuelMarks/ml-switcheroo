@@ -6,7 +6,7 @@ import keras
 
 
 class GNModel(keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class GNModel."""
 
   def __init__(self, num_groups: int, num_channels: int) -> None:
     """Initializes the GNModel instance."""

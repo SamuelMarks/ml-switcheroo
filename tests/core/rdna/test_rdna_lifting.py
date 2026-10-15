@@ -1,4 +1,4 @@
-"""Test suite for the Rdna Lifting module."""
+"""Test suite for rdna lifting."""
 
 import typing
 from typing import Any, List
@@ -85,7 +85,7 @@ def test_lift_no_markers() -> None:
 
 
 def test_rdna_analysis_conv2d_fallback() -> None:
-  """Docstring."""
+  """Verify rdna analysis conv2d fallback behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
@@ -96,7 +96,7 @@ def test_rdna_analysis_conv2d_fallback() -> None:
 
 
 def test_rdna_analysis_linear_fallback() -> None:
-  """Docstring."""
+  """Verify rdna analysis linear fallback behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
@@ -107,7 +107,7 @@ def test_rdna_analysis_linear_fallback() -> None:
 
 
 def test_rdna_analysis_unknown_kind() -> None:
-  """Docstring."""
+  """Verify rdna analysis unknown kind behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
@@ -118,9 +118,9 @@ def test_rdna_analysis_unknown_kind() -> None:
 
 
 def test_rdna_analysis_no_loop_limits() -> None:
-  """Docstring."""
+  """Verify rdna analysis no loop limits behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction, RdnaSGPR
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaSGPR
 
   inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaSGPR(index=0)])
 
@@ -129,7 +129,7 @@ def test_rdna_analysis_no_loop_limits() -> None:
 
 
 def test_rdna_lifter_seen_ids() -> None:
-  """Docstring."""
+  """Verify rdna lifter seen ids behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
   from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 
@@ -146,7 +146,7 @@ def test_rdna_lifter_seen_ids() -> None:
 
 
 def test_rdna_lifter_unmapped() -> None:
-  """Docstring."""
+  """Verify rdna lifter unmapped behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
   from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 
@@ -159,7 +159,7 @@ def test_rdna_lifter_unmapped() -> None:
 
 
 def test_rdna_lifter_input() -> None:
-  """Docstring."""
+  """Verify rdna lifter input behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
   from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
 

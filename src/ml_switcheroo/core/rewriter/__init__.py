@@ -14,13 +14,13 @@ Core Passes:
 """
 
 from ml_switcheroo.core.rewriter.context import RewriterContext
-from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
 from ml_switcheroo.core.rewriter.interface import RewriterPass
+from ml_switcheroo.core.rewriter.passes.api import ApiPass
+from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass
 
 # Passes
 from ml_switcheroo.core.rewriter.passes.structure import StructuralPass
-from ml_switcheroo.core.rewriter.passes.api import ApiPass
-from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass
+from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
 
 __all__ = [
   "RewriterContext",

@@ -9,16 +9,13 @@ Sorting Order:
     Typically: PyTorch (0) -> JAX (10) -> NumPy (20) -> TensorFlow (30) -> ...
 """
 
-from typing import Any
-
-
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from rich.console import Console
 from rich.table import Table
 
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import get_framework_priority_order
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class CompatibilityMatrix:

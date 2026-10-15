@@ -12,7 +12,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Docstring."""
+  """Execute mock semantics helper logic."""
   mgr: MagicMock = MagicMock(spec=SemanticsManager)
   data: Dict[str, Dict[str, Union[List[Union[str, tuple[str, str]]], Dict[str, Dict[str, str]]]]] = {
     "add": {"std_args": ["x1", "x2"], "variants": {"jax": {"api": "jax.numpy.add"}, "numpy": {"api": "numpy.add"}}},
@@ -97,7 +97,7 @@ def test_lookup_signature_unknown_returns_empty(mock_semantics: MagicMock) -> No
 
 
 def test_hooks_resolve_type_no_symbol_table() -> None:
-  """Docstring."""
+  """Verify hooks resolve type no symbol table behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -106,21 +106,21 @@ def test_hooks_resolve_type_no_symbol_table() -> None:
 
 
 def test_hooks_resolve_type_with_symbol_table() -> None:
-  """Docstring."""
+  """Verify hooks resolve type with symbol table behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
   ctx: HookContext = HookContext(mock_manager, config)
 
   class DummySym:
-    """Docstring."""
+    """Test helper class DummySym."""
 
     def __init__(self, name: str) -> None:
       """Init."""
       self.name: str = name
 
   class MockSymbolTable:
-    """Docstring."""
+    """Test helper class MockSymbolTable."""
 
     def get_type(self, node: str) -> Optional[DummySym]:
       """Get type."""
@@ -141,7 +141,7 @@ def test_hooks_resolve_type_with_symbol_table() -> None:
 
 
 def test_hooks_plugin_traits_no_semantics() -> None:
-  """Docstring."""
+  """Verify hooks plugin traits no semantics behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -153,7 +153,7 @@ def test_hooks_plugin_traits_no_semantics() -> None:
 
 
 def test_hooks_plugin_traits_with_dict(mock_semantics: MagicMock) -> None:
-  """Docstring."""
+  """Verify hooks plugin traits with dict behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   mock_semantics.get_framework_config.return_value = {"plugin_traits": {"some_trait": True}}
@@ -165,7 +165,7 @@ def test_hooks_plugin_traits_with_dict(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_plugin_traits_with_object(mock_semantics: MagicMock) -> None:
-  """Docstring."""
+  """Verify hooks plugin traits with object behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   from ml_switcheroo.core.hooks import PluginTraits
 
@@ -177,7 +177,7 @@ def test_hooks_plugin_traits_with_object(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_plugin_traits_with_other(mock_semantics: MagicMock) -> None:
-  """Docstring."""
+  """Verify hooks plugin traits with other behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   mock_semantics.get_framework_config.return_value = {"plugin_traits": "unsupported"}
@@ -186,7 +186,7 @@ def test_hooks_plugin_traits_with_other(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_plugin_traits_falsy(mock_semantics: MagicMock) -> None:
-  """Docstring."""
+  """Verify hooks plugin traits falsy behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   # The 'plugin_traits' key exists but value is falsy, e.g., empty dict or None
@@ -196,7 +196,7 @@ def test_hooks_plugin_traits_falsy(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_current_variant_no_semantics() -> None:
-  """Docstring."""
+  """Verify hooks current variant no semantics behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -205,14 +205,14 @@ def test_hooks_current_variant_no_semantics() -> None:
 
 
 def test_hooks_current_variant_no_op_id(mock_semantics: MagicMock) -> None:
-  """Docstring."""
+  """Verify hooks current variant no op id behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   assert ctx.current_variant is None
 
 
 def test_hooks_current_variant_not_resolved(mock_semantics: MagicMock) -> None:
-  """Docstring."""
+  """Verify hooks current variant not resolved behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   ctx.current_op_id = "missing"
@@ -221,7 +221,7 @@ def test_hooks_current_variant_not_resolved(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_current_variant_resolved(mock_semantics: MagicMock) -> None:
-  """Docstring."""
+  """Verify hooks current variant resolved behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   ctx.current_op_id = "add"
@@ -235,7 +235,7 @@ def test_hooks_current_variant_resolved(mock_semantics: MagicMock) -> None:
 
 
 def test_hooks_inject_signature_arg() -> None:
-  """Docstring."""
+  """Verify hooks inject signature arg behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -255,7 +255,7 @@ def test_hooks_inject_signature_arg() -> None:
 
 
 def test_hooks_lookup_api_no_semantics() -> None:
-  """Docstring."""
+  """Verify hooks lookup api no semantics behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -264,7 +264,7 @@ def test_hooks_lookup_api_no_semantics() -> None:
 
 
 def test_hooks_lookup_signature_no_semantics() -> None:
-  """Docstring."""
+  """Verify hooks lookup signature no semantics behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
@@ -273,7 +273,7 @@ def test_hooks_lookup_signature_no_semantics() -> None:
 
 
 def test_hooks_lookup_signature_with_dict(mock_semantics: MagicMock) -> None:
-  """Docstring."""
+  """Verify hooks lookup signature with dict behavior."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mock_semantics, config)
   mock_semantics.get_definition_by_id.side_effect = lambda aid: {

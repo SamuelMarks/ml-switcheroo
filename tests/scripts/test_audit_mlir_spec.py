@@ -1,9 +1,9 @@
 """Tests for scripts/audit_mlir_spec.py."""
 
-from pathlib import Path
 import runpy
 import sys
 import tempfile
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 

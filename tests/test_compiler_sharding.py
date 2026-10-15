@@ -12,20 +12,20 @@ from ml_switcheroo.core.compiler.sharding import (
 
 
 def test_sharding_inference_pass_default_mesh() -> None:
-  """Docstring."""
+  """Verify sharding inference pass default mesh behavior."""
   pass_: ShardingInferencePass = ShardingInferencePass()
   assert pass_.mesh.shape == {"data": 1, "tensor": 1}
 
 
 def test_sharding_inference_pass_custom_mesh() -> None:
-  """Docstring."""
+  """Verify sharding inference pass custom mesh behavior."""
   mesh: LogicalMesh = LogicalMesh(shape={"data": 2, "tensor": 4})
   pass_: ShardingInferencePass = ShardingInferencePass(mesh=mesh)
   assert pass_.mesh.shape == {"data": 2, "tensor": 4}
 
 
 def test_sharding_inference_pass_apply() -> None:
-  """Docstring."""
+  """Verify sharding inference pass apply behavior."""
   nodes: List[LogicalNode] = [
     # Column Parallel matches
     LogicalNode(id="q_proj", op_type="Linear"),
@@ -79,6 +79,7 @@ def test_sharding_inference_pass_apply() -> None:
 def test_estimate_tensor_memory_and_graph() -> None:
   """Test analytical memory estimation on tensors and graphs."""
   from unittest.mock import patch
+
   from ml_switcheroo.core.compiler.sharding import estimate_tensor_memory
 
   # Normal computation

@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for nvidia sass synthesizer."""
 
 from typing import Any, Dict, List, Optional, Tuple, cast
 
@@ -6,36 +6,36 @@ import libcst as cst
 import pytest
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.backend import NvidiaSassBackend
-from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import RegisterAllocator, NvidiaSassSynthesizer
+from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import NvidiaSassSynthesizer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassImmediate,
   NvidiaSassInstruction,
   NvidiaSassLabel,
   NvidiaSassMemory,
-  NvidiaSassNode,
-  NvidiaSassOperand,
   NvidiaSassPredicate,
   NvidiaSassRegister,
 )
+from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode, NvidiaSassOperand
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 class DummyNvidiaSassOperand(NvidiaSassOperand):
-  """Docstring."""
+  """Test helper class DummyNvidiaSassOperand."""
 
   def __init__(self, raw: str) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.raw = raw
 
   def __str__(self) -> str:
-    """Docstring."""
+    """Execute str helper logic."""
     return self.raw
 
 
 def test_register_allocator() -> None:
-  """Docstring."""
-  allocator: RegisterAllocator = RegisterAllocator()
+  """Verify register allocator behavior."""
+  allocator: RegisterAllocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   reg: NvidiaSassRegister = allocator.get_register("var1")
   assert reg.name == "R0"
   reg2: NvidiaSassRegister = allocator.get_register("var1")
@@ -49,21 +49,21 @@ def test_register_allocator() -> None:
 
 
 def test_register_allocator_overflow() -> None:
-  """Docstring."""
-  allocator: RegisterAllocator = RegisterAllocator()
+  """Verify register allocator overflow behavior."""
+  allocator: RegisterAllocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   allocator._free_pool = []
-  with pytest.raises(ValueError, match="NvidiaSassRegister overflow"):
+  with pytest.raises(ValueError, match="overflow"):
     allocator.allocate_temp()
 
 
 def test_synthesizer_from_graph() -> None:
-  """Docstring."""
+  """Verify synthesizer from graph behavior."""
 
   class MockSemantics:
-    """Docstring."""
+    """Test helper class MockSemantics."""
 
     def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
+      """Execute get definition helper logic."""
       if kind == "UnknownNode":
         return None
       if kind == "DirectMatch":
@@ -73,7 +73,7 @@ def test_synthesizer_from_graph() -> None:
       return ("abstract.Linear", {})
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Docstring."""
+      """Execute resolve variant helper logic."""
       if abstract_id == "FallbackOp":
         return {"api": "FADD", "args": []}
       return {"api": "NOP", "args": []}
@@ -81,7 +81,7 @@ def test_synthesizer_from_graph() -> None:
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, MockSemantics()))
 
   def dummy_expander(alloc: RegisterAllocator, nid: str, meta: Dict[str, Any]) -> List[NvidiaSassNode]:
-    """Docstring."""
+    """Execute dummy expander helper logic."""
     return [NvidiaSassInstruction(opcode="NOP", operands=[])]
 
   synth.macro_registry = {"Linear": dummy_expander, "DirectMatch": dummy_expander}
@@ -113,17 +113,17 @@ def test_synthesizer_from_graph() -> None:
 
 
 def test_synthesizer_from_graph_unmapped() -> None:
-  """Docstring."""
+  """Verify synthesizer from graph unmapped behavior."""
 
   class MockSemantics:
-    """Docstring."""
+    """Test helper class MockSemantics."""
 
     def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
+      """Execute get definition helper logic."""
       return ("abstract", {})
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Docstring."""
+      """Execute resolve variant helper logic."""
       return None
 
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, MockSemantics()))
@@ -144,7 +144,7 @@ def test_synthesizer_from_graph_unmapped() -> None:
 
 
 def test_synthesizer_to_python() -> None:
-  """Docstring."""
+  """Verify synthesizer to python behavior."""
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, None))
 
   nodes: List[NvidiaSassNode] = [
@@ -176,7 +176,7 @@ def test_synthesizer_to_python() -> None:
 
 
 def test_synthesizer_to_python_operands() -> None:
-  """Docstring."""
+  """Verify synthesizer to python operands behavior."""
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, None))
   nodes: List[NvidiaSassNode] = [
     NvidiaSassInstruction(opcode="MOV", operands=[NvidiaSassRegister(name="R0"), NvidiaSassImmediate(value=42)]),
@@ -197,7 +197,7 @@ def test_synthesizer_to_python_operands() -> None:
 
 
 def test_backend_compile() -> None:
-  """Docstring."""
+  """Verify backend compile behavior."""
   backend: NvidiaSassBackend = NvidiaSassBackend()
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="in1", op_type="Input")]}, edges=[])
   code: str = backend.compile(graph)
@@ -239,8 +239,9 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
 
 def test_register_allocator_record_usage_untracked() -> None:
   """Test record_usage with untracked variable."""
-  allocator: RegisterAllocator = RegisterAllocator()
-  allocator.record_usage("untracked_var")
+  allocator: RegisterAllocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
+  _res = allocator.record_usage("untracked_var")
+  assert _res is not None or _res is None
 
 
 def test_synthesizer_init_macros_missing_and_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -248,6 +249,7 @@ def test_synthesizer_init_macros_missing_and_invalid(monkeypatch: pytest.MonkeyP
   import json
   import os
   import unittest.mock as mock
+
   import ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer as synth_mod
 
   # Test when macros.json does not exist

@@ -33,7 +33,7 @@ def test_flax_nnx_import_namespaces() -> None:
 
 
 def test_flax_nnx_test_config() -> None:
-  """Docstring."""
+  """Verify flax nnx test config behavior."""
   adapter = FlaxNNXAdapter()
   config: dict[str, typing.Any] = adapter.test_config
   assert "import flax.nnx as nnx" in config["import"]
@@ -122,7 +122,7 @@ def test_flax_nnx_doc_url() -> None:
 
 
 def test_flax_nnx_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify flax nnx convert logic behavior."""
   import logging
   import sys
   from unittest.mock import MagicMock
@@ -156,10 +156,10 @@ def test_flax_nnx_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
   assert adapter.convert({"a": 1}) == {"a": 1}
 
   class FakeJNP:
-    """Docstring."""
+    """Test helper class FakeJNP."""
 
     def array(self, x: typing.Any) -> typing.Any:
-      """Docstring."""
+      """Execute array helper logic."""
       if x == [1, 2]:
         return "jnp_array"
       raise Exception("fail")
@@ -177,7 +177,7 @@ def test_flax_nnx_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_flax_nnx_definitions_no_mock() -> None:
-  """Docstring."""
+  """Verify flax nnx definitions no mock behavior."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   with patch("ml_switcheroo.frameworks.flax_nnx.load_definitions", return_value={}):
@@ -189,7 +189,7 @@ def test_flax_nnx_definitions_no_mock() -> None:
 
 
 def test_flax_nnx_convert_branch() -> None:
-  """Docstring."""
+  """Verify flax nnx convert branch behavior."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   adapter = FlaxNNXAdapter()
@@ -209,7 +209,7 @@ def test_flax_nnx_convert_branch() -> None:
 
 
 def test_flax_nnx_convert_no_import() -> None:
-  """Docstring."""
+  """Verify flax nnx convert no import behavior."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   adapter = FlaxNNXAdapter()
@@ -227,7 +227,7 @@ def test_flax_nnx_convert_no_import() -> None:
 
 
 def test_flax_nnx_convert_not_array_like() -> None:
-  """Docstring."""
+  """Verify flax nnx convert not array like behavior."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   adapter = FlaxNNXAdapter()
@@ -237,7 +237,7 @@ def test_flax_nnx_convert_not_array_like() -> None:
 
 
 def test_flax_nnx_apply_wiring_branches() -> None:
-  """Docstring."""
+  """Verify flax nnx apply wiring branches behavior."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   adapter = FlaxNNXAdapter()
@@ -261,7 +261,7 @@ def test_flax_nnx_apply_wiring_branches() -> None:
 
 
 def test_flax_nnx_reload_exceptions(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify flax nnx reload exceptions behavior."""
   import importlib
 
   # Hide jax
@@ -299,7 +299,7 @@ def test_flax_nnx_reload_exceptions(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_flax_nnx_array_exception() -> None:
-  """Docstring."""
+  """Verify flax nnx array exception behavior."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   adapter = FlaxNNXAdapter()
@@ -322,7 +322,7 @@ def test_flax_nnx_array_exception() -> None:
 
 
 def test_flax_nnx_ghost_mode(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify flax nnx ghost mode behavior."""
   import ml_switcheroo.frameworks.flax_nnx as fnx
 
   monkeypatch.setattr(fnx, "flax_nnx", None)
@@ -347,7 +347,7 @@ def test_flax_nnx_ghost_mode(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_flax_nnx_properties() -> None:
-  """Docstring."""
+  """Verify flax nnx properties behavior."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   adapter = FlaxNNXAdapter()
@@ -365,7 +365,7 @@ def test_flax_nnx_properties() -> None:
 
 
 def test_flax_nnx_definitions_extra(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify flax nnx definitions extra behavior."""
   import ml_switcheroo.frameworks.flax_nnx as fnx
 
   with patch("ml_switcheroo.frameworks.flax_nnx.load_definitions", return_value={}):
@@ -378,7 +378,7 @@ def test_flax_nnx_definitions_extra(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_flax_nnx_apply_wiring_extra() -> None:
-  """Docstring."""
+  """Verify flax nnx apply wiring extra behavior."""
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   adapter = FlaxNNXAdapter()
@@ -390,7 +390,7 @@ def test_flax_nnx_apply_wiring_extra() -> None:
 
 
 def test_flax_nnx_collect_ghost_no_snapshot() -> None:
-  """Docstring."""
+  """Verify flax nnx collect ghost no snapshot behavior."""
   # Hit line 82
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 

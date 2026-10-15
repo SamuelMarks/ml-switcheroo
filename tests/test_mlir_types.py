@@ -1,17 +1,17 @@
-"""Test module."""
+"""Test suite for mlir types."""
 
 from ml_switcheroo.core.mlir.types import ComplexType, FloatType, FunctionType, IntegerType, TensorType
 
 
 def test_complex_type() -> None:
-  """Docstring."""
+  """Verify complex type behavior."""
   f32: FloatType = FloatType("f32")
   c: ComplexType = ComplexType(f32)
   assert c.to_string() == "complex<f32>"
 
 
 def test_tensor_type() -> None:
-  """Docstring."""
+  """Verify tensor type behavior."""
   f32: FloatType = FloatType("f32")
   t0: TensorType = TensorType(f32, None)
   assert t0.to_string() == "tensor<*xf32>"
@@ -24,7 +24,7 @@ def test_tensor_type() -> None:
 
 
 def test_function_type() -> None:
-  """Docstring."""
+  """Verify function type behavior."""
   f32: FloatType = FloatType("f32")
   i32: IntegerType = IntegerType(32)
 

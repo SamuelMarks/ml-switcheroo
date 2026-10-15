@@ -10,11 +10,11 @@ This output is designed to be piped directly to an LLM to generate valid
 Operation Definition Language (YAML) for missing operations.
 """
 
-import json
 import importlib
 import inspect
+import json
 from pathlib import Path
-from typing import Optional, Any
+from typing import Any, Dict, Optional
 
 from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo.utils.console import log_error
@@ -69,8 +69,8 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
   else:
     # Single mode
     try:
-      info = _inspect_live_object(api_path)  # type: ignore
-      targets.append((api_path, info))
+      live_info: Dict[str, Any] = _inspect_live_object(str(api_path)) or {}
+      targets.append((str(api_path), live_info))
     except (ImportError, AttributeError) as e:
       log_error(f"Could not inspect '{api_path}': {e}. Is the library installed?")
       return 1

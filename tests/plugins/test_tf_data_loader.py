@@ -17,7 +17,7 @@ def test_get_arg_by_name() -> None:
 
 
 def test_extract_tensor_dataset_inputs() -> None:
-  """Docstring."""
+  """Verify extract tensor dataset inputs behavior."""
   node: cst.Call = cst.Call(func=cst.Name("TensorDataset"), args=[cst.Arg(cst.Name("x")), cst.Arg(cst.Name("y"))])
   res: Optional[List[cst.BaseExpression]] = _extract_tensor_dataset_inputs(node)
   assert res is not None
@@ -25,7 +25,7 @@ def test_extract_tensor_dataset_inputs() -> None:
 
 
 def test_extract_tensor_dataset_inputs_attribute() -> None:
-  """Docstring."""
+  """Verify extract tensor dataset inputs attribute behavior."""
   node: cst.Call = cst.Call(
     func=cst.Attribute(value=cst.Name("data"), attr=cst.Name("TensorDataset")), args=[cst.Arg(cst.Name("x"))]
   )
@@ -35,7 +35,7 @@ def test_extract_tensor_dataset_inputs_attribute() -> None:
 
 
 def test_extract_tensor_dataset_inputs_other() -> None:
-  """Docstring."""
+  """Verify extract tensor dataset inputs other behavior."""
   node: cst.Call = cst.Call(func=cst.Name("OtherDataset"), args=[cst.Arg(cst.Name("x"))])
   res: Optional[List[cst.BaseExpression]] = _extract_tensor_dataset_inputs(node)
   assert res is None
@@ -49,7 +49,7 @@ def test_extract_tensor_dataset_inputs_func_is_call() -> None:
 
 
 def test_extract_tensor_dataset_inputs_not_call() -> None:
-  """Docstring."""
+  """Verify extract tensor dataset inputs not call behavior."""
   node: cst.Name = cst.Name("x")
   res: Optional[List[cst.BaseExpression]] = _extract_tensor_dataset_inputs(node)  # type: ignore
   assert res is None

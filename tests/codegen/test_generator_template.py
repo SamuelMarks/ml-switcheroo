@@ -10,7 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockTemplateSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockTemplateSemantics."""
 
   def __init__(self, templates: typing.Optional[dict[str, dict[str, str]]] = None) -> None:
     """Initializes the MockTemplateSemantics instance."""
@@ -19,7 +19,7 @@ class MockTemplateSemantics(SemanticsManager):
     self.framework_configs: dict[str, typing.Any] = {}
 
   def get_test_template(self, framework: str) -> typing.Optional[dict[str, str]]:
-    """Docstring."""
+    """Execute get test template helper logic."""
     return self.test_templates.get(framework)
 
   def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
@@ -29,7 +29,7 @@ class MockTemplateSemantics(SemanticsManager):
 
 @pytest.fixture
 def semantics_data() -> dict[str, typing.Any]:
-  """Docstring."""
+  """Execute semantics data helper logic."""
   return {"abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "tinygrad": {"api": "tinygrad.abs"}}}}
 
 

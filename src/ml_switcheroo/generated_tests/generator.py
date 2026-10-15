@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """Generator backend for creating physical Python test files.
 
 It orchestrates the generation of PyTest-compatible files that verify
@@ -56,15 +57,14 @@ class TestCaseGenerator:
     ensure_runtime_module(out_dir, frameworks, self.semantics_mgr)
 
   def generate(self, semantics: typing.Dict[str, dict[Any, Any]], out_file: pathlib.Path) -> None:
-    """Generate a test file based on the provided semantics.
+    """Generate cross-framework physical equivalence pytest functions for all operations in ``semantics``.
 
     Args:
-        semantics: Dictionary mapping operator names to their definitions.
-        out_file: Path to write the generated Python file.
-
-    Returns:
-        None
+        semantics: Dictionary mapping operation names to their semantic definition dictionaries.
+        out_file: Output file path where the generated pytest module will be written.
     """
+    import libcst as cst
+
     if not semantics:
       return
 
@@ -87,15 +87,15 @@ class TestCaseGenerator:
         pass
 
     # 3. Accumulate lines for file
-    file_lines = [
-      '"""Generated tests."""',
-      "import pytest",
-      "import numpy as np",
-      "import numpy",
-      "import random",
-      "import math",
-      "from .runtime import *",
-      "",
+    module_body = [
+      cst.SimpleStatementLine(body=[cst.Expr(cst.SimpleString('"""Generated tests."""'))]),
+      cst.parse_statement("import pytest"),
+      cst.parse_statement("import numpy as np"),
+      cst.parse_statement("import numpy"),
+      cst.parse_statement("import random"),
+      cst.parse_statement("import math"),
+      cst.parse_statement("from .runtime import *"),
+      cst.EmptyLine(),
     ]
 
     ops_generated = False
@@ -104,7 +104,6 @@ class TestCaseGenerator:
       variants = op_def.get("variants", {})
       valid_variants = {k: v for k, v in variants.items() if get_template(self.semantics_mgr, k)}
 
-      # Skip generation if not enough variants or if test manually exists
       test_func_name = f"test_gen_{op_name}"
       if len(valid_variants) < 2 or test_func_name in existing_tests:
         continue
@@ -116,20 +115,14 @@ class TestCaseGenerator:
 
       return_type = op_def.get("return_type", "Tensor")
       is_void = return_type in ["None", "void"]
-
-      # Implicit default: True unless explicitly False
       differentiable = op_def.get("differentiable", True)
-
-      # Tolerances
       test_rtol = op_def.get("test_rtol", 0.001)
       test_atol = op_def.get("test_atol", 0.0001)
-
       ver_mode = op_def.get("verification_mode", "fuzzy")
       exact_kw = "exact=True" if ver_mode == "exact" else "exact=False"
 
-      # Function Body
-      file_lines.append(f"def {test_func_name}():")
-      file_lines.append("    # 1. Inputs")
+      func_body = []
+      func_body.append(cst.EmptyLine(comment=cst.Comment("# 1. Inputs")))
 
       input_names = []
       input_is_diff = False
@@ -137,45 +130,37 @@ class TestCaseGenerator:
       for idx, arg in enumerate(args):
         var_name = f"np_{arg['name']}"
         val_code = generate_input_value_code(arg["name"], arg)
-        file_lines.append(f"    {var_name} = {val_code}")
+        func_body.append(cst.parse_statement(f"{var_name} = {val_code}"))
         input_names.append(var_name)
 
-        # Check diff capability
         if idx == 0 and arg["type"] in ["Array", "Tensor", "float"]:
           input_is_diff = True
 
-      file_lines.append("    results = {}")
+      func_body.append(cst.parse_statement("results = {}"))
       if not is_void:
-        file_lines.append("    results_grad = {}")
-      file_lines.append("")
+        func_body.append(cst.parse_statement("results_grad = {}"))
 
-      # Framework Blocks
       for fw in sorted(valid_variants.keys()):
         fw_cfg = valid_variants[fw]
         api = fw_cfg["api"]
         tmpl = get_template(self.semantics_mgr, fw)
 
-        file_lines.append(f"    # Framework: {fw}")
-        file_lines.append(f"    if {fw.upper()}_AVAILABLE:")
-        file_lines.append("        try:")
+        func_body.append(cst.EmptyLine(comment=cst.Comment(f"# Framework: {fw}")))
 
-        # Input Conversion
+        try_body = []
         call_args = []
         for aname in input_names:
           conv_tmpl = tmpl.get("convert_input", "{np_var}")
           call_args.append(conv_tmpl.format(np_var=aname))
 
-        # Check JIT request
         jit_tmpl = tmpl.get("jit_template")
 
-        # Aliasing for JIT templates (e.g. jax.jit(fn))
         if jit_tmpl:
-          file_lines.append(f"            fn = {api}")
+          try_body.append(cst.parse_statement(f"fn = {api}"))
           api_to_call = "fn"
         else:
           api_to_call = api
 
-        # API Call Logic
         fn_call_expr = f"{api_to_call}({', '.join(call_args)})"
 
         if jit_tmpl:
@@ -186,93 +171,122 @@ class TestCaseGenerator:
           static_argnums = f"{tuple(static_indices)}" if static_indices else "None"
 
           if "{fn}" in jit_tmpl:
-            # e.g. "jax.jit({fn})" -> jax.jit(fn)
             jit_wrapper = jit_tmpl.format(fn=api_to_call, static_argnums=static_argnums)
             fn_call_expr = f"{jit_wrapper}({', '.join(call_args)})"
 
-        file_lines.append(f"            res = {fn_call_expr}")
+        try_body.append(cst.parse_statement(f"res = {fn_call_expr}"))
 
-        # Output Conversion
         to_numpy = tmpl.get("to_numpy", "{res_var}")
         res_conv = to_numpy.format(res_var="res")
         res_line = f"results['{fw}'] = {res_conv}" if not is_void else f"results['{fw}'] = res"
-        file_lines.append(f"            {res_line}")
+        try_body.append(cst.parse_statement(res_line))
 
-        # Gradient Check
         if not is_void and differentiable and input_is_diff:
-          file_lines.append("            # Gradient check")
-
+          try_body.append(cst.EmptyLine(comment=cst.Comment("# Gradient check")))
           lam_args = [f"a{i}" for i in range(len(call_args))]
           lam_sig = ", ".join(lam_args)
           lam_call_body = f"{api_to_call}({', '.join(lam_args)})"
 
-          if fw == "jax":
+          grad_templates = {
+            "jax": ("jax.grad(lambda {lam_sig}: jnp.sum({lam_call_body}))({input_0})", False),
+            "torch": ("torch.func.grad(lambda {lam_sig}: torch.sum({lam_call_body}))({input_0})", True),
+          }
+          if fw in grad_templates:
             input_0 = call_args[0]
-            grad_line = f"jax.grad(lambda {lam_sig}: jnp.sum({lam_call_body}))({input_0})"
-            file_lines.append(f"            grad_res = {grad_line}")
-            file_lines.append(f"            results_grad['{fw}'] = grad_res")
+            grad_tmpl, needs_to_numpy = grad_templates[fw]
+            grad_line = grad_tmpl.format(lam_sig=lam_sig, lam_call_body=lam_call_body, input_0=input_0)
+            try_body.append(cst.parse_statement(f"grad_res = {grad_line}"))
+            if needs_to_numpy:
+              res_conv_grad = to_numpy.format(res_var="grad_res")
+              try_body.append(cst.parse_statement(f"results_grad['{fw}'] = {res_conv_grad}"))
+            else:
+              try_body.append(cst.parse_statement(f"results_grad['{fw}'] = grad_res"))
 
-          elif fw == "torch":
-            input_0 = call_args[0]
-            grad_line = f"torch.func.grad(lambda {lam_sig}: torch.sum({lam_call_body}))({input_0})"
-            file_lines.append(f"            grad_res = {grad_line}")
-            res_conv_grad = to_numpy.format(res_var="grad_res")
-            file_lines.append(f"            results_grad['{fw}'] = {res_conv_grad}")
+        handler = cst.ExceptHandler(
+          type=cst.Name("Exception"),
+          name=cst.AsName(name=cst.Name("e")),
+          body=cst.IndentedBlock(body=[cst.parse_statement(f"print(f'Skipping {fw} due to error: {{e}}')")]),
+        )
+        try_stmt = cst.Try(body=cst.IndentedBlock(body=try_body), handlers=[handler])
 
-        file_lines.append("        except Exception as e:")
-        file_lines.append(f"            print(f'Skipping {fw} due to error: {{e}}')")
-        file_lines.append("")
+        if_stmt = cst.If(test=cst.Name(f"{fw.upper()}_AVAILABLE"), body=cst.IndentedBlock(body=[try_stmt]))
+        func_body.append(if_stmt)
 
-      # Result Verification
       if is_void:
-        file_lines.append("    # Comparison")
-        file_lines.append("    # Operation expected to return None / Void")
-        file_lines.append("    assert len(results) >= 2")
-
+        func_body.append(cst.EmptyLine(comment=cst.Comment("# Comparison")))
+        func_body.append(cst.EmptyLine(comment=cst.Comment("# Operation expected to return None / Void")))
+        func_body.append(cst.parse_statement("assert len(results) >= 2"))
       else:
         if return_type == "int":
-          file_lines.append("    # Type Check")
-          file_lines.append("    # Expected int")
-          file_lines.append("    for fw, val in results.items():")
-          file_lines.append("        assert np.issubdtype(np.array(val).dtype, np.integer) or isinstance(val, int)")
-          file_lines.append("")
+          func_body.append(cst.EmptyLine(comment=cst.Comment("# Type Check")))
+          func_body.append(cst.EmptyLine(comment=cst.Comment("# Expected int")))
+          func_body.append(
+            cst.parse_statement(
+              "for fw, val in results.items():\n    assert np.issubdtype(np.array(val).dtype, np.integer) or isinstance(val, int)"
+            )
+          )
         elif return_type == "bool":
-          file_lines.append("    # Type Check")
-          file_lines.append("    # Expected bool")
-          file_lines.append("    for fw, val in results.items():")
-          file_lines.append("        assert np.issubdtype(np.array(val).dtype, bool) or isinstance(val, bool)")
-          file_lines.append("")
+          func_body.append(cst.EmptyLine(comment=cst.Comment("# Type Check")))
+          func_body.append(cst.EmptyLine(comment=cst.Comment("# Expected bool")))
+          func_body.append(
+            cst.parse_statement(
+              "for fw, val in results.items():\n    assert np.issubdtype(np.array(val).dtype, bool) or isinstance(val, bool)"
+            )
+          )
         elif return_type in ["Tensor", "Array"]:
-          file_lines.append("    # Type Check")
-          file_lines.append("    # Expected Array/Tensor")
-          file_lines.append("    for fw, val in results.items():")
-          file_lines.append("        assert isinstance(val, (np.ndarray, np.generic))")
-          file_lines.append("")
+          func_body.append(cst.EmptyLine(comment=cst.Comment("# Type Check")))
+          func_body.append(cst.EmptyLine(comment=cst.Comment("# Expected Array/Tensor")))
+          func_body.append(
+            cst.parse_statement("for fw, val in results.items():\n    assert isinstance(val, (np.ndarray, np.generic))")
+          )
 
-        file_lines.append("    # Comparison")
-        file_lines.append("    if len(results) >= 2:")
-        file_lines.append("        vals = list(results.values())")
-        file_lines.append("        ref = vals[0]")
-        file_lines.append("        for val in vals[1:]:")
-        file_lines.append(f"            assert verify_results(ref, val, rtol={test_rtol}, atol={test_atol}, {exact_kw})")
-        file_lines.append("")
+        func_body.append(cst.EmptyLine(comment=cst.Comment("# Comparison")))
+        cmp_body = [
+          cst.parse_statement("vals = list(results.values())"),
+          cst.parse_statement("ref = vals[0]"),
+          cst.parse_statement(
+            f"for val in vals[1:]:\n    assert verify_results(ref, val, rtol={test_rtol}, atol={test_atol}, {exact_kw})"
+          ),
+        ]
+        func_body.append(
+          cst.If(
+            test=cst.Comparison(
+              left=cst.Call(func=cst.Name("len"), args=[cst.Arg(cst.Name("results"))]),
+              comparisons=[cst.ComparisonTarget(operator=cst.GreaterThanEqual(), comparator=cst.Integer("2"))],
+            ),
+            body=cst.IndentedBlock(body=cmp_body),
+          )
+        )
 
-        # Condition block for Gradients in Verification section
         if differentiable and input_is_diff:
-          file_lines.append("    # Gradient Verification")
-          file_lines.append("    # Grad Check")
-          file_lines.append("    if len(results_grad) >= 2:")
-          file_lines.append("        g_vals = list(results_grad.values())")
-          file_lines.append("        g_ref = g_vals[0]")
-          file_lines.append("        for g_val in g_vals[1:]:")
-          # Using assert_allclose as requested by test expectations
-          file_lines.append("            np.testing.assert_allclose(g_ref, g_val, rtol=0.01, atol=0.001)")
+          func_body.append(cst.EmptyLine(comment=cst.Comment("# Gradient Verification")))
+          func_body.append(cst.EmptyLine(comment=cst.Comment("# Grad Check")))
+          grad_cmp = [
+            cst.parse_statement("g_vals = list(results_grad.values())"),
+            cst.parse_statement("g_ref = g_vals[0]"),
+            cst.parse_statement(
+              "for g_val in g_vals[1:]:\n    np.testing.assert_allclose(g_ref, g_val, rtol=0.01, atol=0.001)"
+            ),
+          ]
+          func_body.append(
+            cst.If(
+              test=cst.Comparison(
+                left=cst.Call(func=cst.Name("len"), args=[cst.Arg(cst.Name("results_grad"))]),
+                comparisons=[cst.ComparisonTarget(operator=cst.GreaterThanEqual(), comparator=cst.Integer("2"))],
+              ),
+              body=cst.IndentedBlock(body=grad_cmp),
+            )
+          )
 
-      file_lines.append("")
+      module_body.append(
+        cst.FunctionDef(name=cst.Name(test_func_name), params=cst.Parameters(), body=cst.IndentedBlock(body=func_body))
+      )
+      module_body.append(cst.EmptyLine())
 
     if not ops_generated and not existing_tests:
       out_file.write_text(
         '"""Generated tests."""\n# No tests generated due to insufficient variants.\n', encoding="utf-8"
       )
     else:
-      out_file.write_text("\n".join(file_lines), encoding="utf-8")
+      mod = cst.Module(body=module_body)
+      out_file.write_text(mod.code, encoding="utf-8")

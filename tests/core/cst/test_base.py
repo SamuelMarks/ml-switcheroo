@@ -10,7 +10,7 @@ from ml_switcheroo.core.cst.base import CSTNode, CSTTransformer, CSTVisitor, Tri
 
 @dataclass
 class DummyNode(CSTNode):
-  """Docstring."""
+  """Test helper class DummyNode."""
 
   name: str = ""
   child: "CSTNode" = None
@@ -26,7 +26,7 @@ class DummyNode(CSTNode):
 
 
 class MockVisitor(CSTVisitor):
-  """Docstring."""
+  """Test helper class MockVisitor."""
 
   def __init__(self) -> None:
     """Initialize the visitor."""
@@ -39,7 +39,7 @@ class MockVisitor(CSTVisitor):
 
 
 class MockTransformer(CSTTransformer):
-  """Docstring."""
+  """Test helper class MockTransformer."""
 
   def transform_DummyNode(self, node: DummyNode) -> DummyNode:
     """Transforms a DummyNode."""
@@ -49,13 +49,13 @@ class MockTransformer(CSTTransformer):
 
 
 def test_trivia() -> None:
-  """Docstring."""
+  """Verify trivia behavior."""
   t = Trivia("  ")
   assert t.text == "  "
 
 
 def test_cstnode_base() -> None:
-  """Docstring."""
+  """Verify cstnode base behavior."""
   node = CSTNode()
   with pytest.raises(NotImplementedError):
     node.to_text()
@@ -65,7 +65,7 @@ def test_cstnode_base() -> None:
 
 
 def test_trivia_coercion() -> None:
-  """Docstring."""
+  """Verify trivia coercion behavior."""
   node_str = DummyNode(name="test", leading_trivia="  ", trailing_trivia="\n")
   assert len(node_str.leading_trivia) == 1
   assert node_str.leading_trivia[0].text == "  "
@@ -78,7 +78,7 @@ def test_trivia_coercion() -> None:
 
 
 def test_visitor() -> None:
-  """Docstring."""
+  """Verify visitor behavior."""
   root = DummyNode(name="root")
   child1 = DummyNode(name="child1")
   child2 = DummyNode(name="child2")
@@ -95,7 +95,7 @@ def test_visitor() -> None:
 
 
 def test_transformer() -> None:
-  """Docstring."""
+  """Verify transformer behavior."""
   root = DummyNode(name="root")
   child1 = DummyNode(name="child1")
   child2 = DummyNode(name="child2")

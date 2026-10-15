@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for convert weights."""
 
 import typing
 from pathlib import Path
@@ -14,7 +14,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def mock_semantics() -> SemanticsManager:
-  """Docstring."""
+  """Execute mock semantics helper logic."""
   sem = SemanticsManager()
   sem.get_definition = MagicMock(
     return_value=(
@@ -32,7 +32,7 @@ def mock_semantics() -> SemanticsManager:
 
 @pytest.fixture
 def mock_config() -> RuntimeConfig:
-  """Docstring."""
+  """Execute mock config helper logic."""
   conf: RuntimeConfig = MagicMock(spec=RuntimeConfig)
   conf.effective_source = "torch"
   conf.effective_target = "jax"
@@ -40,7 +40,7 @@ def mock_config() -> RuntimeConfig:
 
 
 def test_convert_weights_init(mock_semantics: SemanticsManager, mock_config: RuntimeConfig) -> None:
-  """Docstring."""
+  """Verify convert weights init behavior."""
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter") as mock_get_adapter:
     mock_get_adapter.side_effect = ["torch_adapter", "jax_adapter"]
     gen = WeightScriptGenerator(mock_semantics, mock_config)
@@ -51,14 +51,14 @@ def test_convert_weights_init(mock_semantics: SemanticsManager, mock_config: Run
 
 
 def test_generate_missing_adapter(mock_semantics: SemanticsManager, mock_config: RuntimeConfig) -> None:
-  """Docstring."""
+  """Verify generate missing adapter behavior."""
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value=None):
     gen = WeightScriptGenerator(mock_semantics, mock_config)
     assert gen.generate(Path("in.py"), Path("out.py")) is False
 
 
 def test_generate_file_error(mock_semantics: SemanticsManager, mock_config: RuntimeConfig) -> None:
-  """Docstring."""
+  """Verify generate file error behavior."""
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value="adapter"):
     gen = WeightScriptGenerator(mock_semantics, mock_config)
     # Pass a non-existent file
@@ -69,7 +69,7 @@ def test_generate_file_error(mock_semantics: SemanticsManager, mock_config: Runt
 def test_generate_ast_error(
   mock_parse: MagicMock, mock_semantics: SemanticsManager, mock_config: RuntimeConfig, tmp_path: Path
 ) -> None:
-  """Docstring."""
+  """Verify generate ast error behavior."""
   mock_parse.side_effect = Exception("Parse error")
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value="adapter"):
     gen = WeightScriptGenerator(mock_semantics, mock_config)
@@ -89,7 +89,7 @@ def test_generate_no_layers(
   mock_config: RuntimeConfig,
   tmp_path: Path,
 ) -> None:
-  """Docstring."""
+  """Verify generate no layers behavior."""
   mock_extractor: MagicMock = mock_extractor_class.return_value
   mock_extractor.layer_registry = {}
 
@@ -115,7 +115,7 @@ def test_generate_success(
   mock_config: RuntimeConfig,
   tmp_path: Path,
 ) -> None:
-  """Docstring."""
+  """Verify generate success behavior."""
   mock_extractor: MagicMock = mock_extractor_class.return_value
   mock_node = LogicalNode(id="my_conv", op_type="Conv2d")
   mock_extractor.layer_registry = {"my_conv": mock_node}
@@ -153,7 +153,7 @@ def test_generate_success(
 
 
 def test_generate_write_error(mock_semantics: SemanticsManager, mock_config: RuntimeConfig, tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify generate write error behavior."""
   # Mocking similar to success, but failing on write
   with (
     patch("ml_switcheroo.cli.handlers.convert_weights.cst.parse_module"),
@@ -177,7 +177,7 @@ def test_generate_write_error(mock_semantics: SemanticsManager, mock_config: Run
 
 
 def test_flatten_mapping_rules_reverse(mock_semantics: MagicMock) -> None:
-  """Docstring."""
+  """Verify flatten mapping rules reverse behavior."""
   # Test jax -> torch direction to hit the else branch for inverse permutation
   conf = MagicMock(spec=RuntimeConfig)
   conf.effective_source = "jax"
@@ -206,7 +206,7 @@ def test_flatten_mapping_rules_reverse(mock_semantics: MagicMock) -> None:
 
 
 def test_flatten_mapping_rules_no_def(mock_semantics: MagicMock, mock_config: RuntimeConfig) -> None:
-  """Docstring."""
+  """Verify flatten mapping rules no def behavior."""
   mock_semantics.get_definition.return_value = None
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter"):
     gen = WeightScriptGenerator(mock_semantics, mock_config)

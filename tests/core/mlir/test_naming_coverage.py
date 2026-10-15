@@ -4,7 +4,7 @@ from ml_switcheroo.core.mlir.naming import NamingContext
 
 
 def test_naming_collision() -> None:
-  """Docstring."""
+  """Verify naming collision behavior."""
   ctx = NamingContext()
   # To hit 100 and 123: py_name="coll", collision so attempt="_coll"
   ctx._used_names["coll"] = True
@@ -21,7 +21,7 @@ def test_naming_collision() -> None:
 
 
 def test_name_registry_fallback_loop() -> None:
-  """Docstring."""
+  """Verify name registry fallback loop behavior."""
   from ml_switcheroo.core.mlir.naming import NamingContext
 
   reg = NamingContext()
@@ -41,7 +41,7 @@ def test_name_registry_fallback_loop() -> None:
 
 
 def test_name_registry_hint_starts_without_underscore() -> None:
-  """Docstring."""
+  """Verify name registry hint starts without underscore behavior."""
   from ml_switcheroo.core.mlir.naming import NamingContext
 
   reg = NamingContext()
@@ -52,7 +52,7 @@ def test_name_registry_hint_starts_without_underscore() -> None:
 
 
 def test_name_registry_hint_starts_with_underscore() -> None:
-  """Docstring."""
+  """Verify name registry hint starts with underscore behavior."""
   from ml_switcheroo.core.mlir.naming import NamingContext
 
   reg = NamingContext()
@@ -63,7 +63,7 @@ def test_name_registry_hint_starts_with_underscore() -> None:
 
 
 def test_name_registry_hint_starts_with_underscore_loop() -> None:
-  """Docstring."""
+  """Verify name registry hint starts with underscore loop behavior."""
   from ml_switcheroo.core.mlir.naming import NamingContext
 
   reg = NamingContext()

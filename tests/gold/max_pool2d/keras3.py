@@ -6,7 +6,7 @@ import keras
 
 
 class MaxPoolModel(keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class MaxPoolModel."""
 
   def __init__(self, pool_size: int = 2, strides: int = 2) -> None:
     """Initializes the MaxPoolModel instance."""

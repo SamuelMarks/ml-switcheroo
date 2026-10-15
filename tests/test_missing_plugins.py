@@ -2,144 +2,54 @@
 
 from unittest.mock import MagicMock
 
-from ml_switcheroo.plugins import (
-  auto_fsdp_wrapper,
-  batch_norm,
-  casting,
-  checkpoint_keys,
-  clipping,
-  data_loader,
-  device_allocator,
-  device_checks,
-  einsum,
-  flatten,
-  gather,
-  in_top_k_plugin,
-  inplace_unroll,
-  io_handler,
-  keras_sequential,
-  loss_wrapper,
-  method_property,
-  mlx_extras,
-  mlx_optimizers,
-  nnx_to_torch_params,
-  padding,
-  scatter,
-  shape_packing,
-  state_flag_injection,
-  static_unroll,
-  tf_data_loader,
-  topk,
-)
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.core.hooks_registry import _HOOKS, load_plugins
 
 
-def test_auto_fsdp() -> None:
-  """Verifies the behavior of auto FSDP."""
-  try:
-    auto_fsdp_wrapper.AutoFSDPWrapper().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    batch_norm.BatchNorm().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    casting.Casting().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    checkpoint_keys.CheckpointKeys().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    clipping.Clipping().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    data_loader.DataLoader().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    device_allocator.DeviceAllocator().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    device_checks.DeviceChecks().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    einsum.Einsum().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    flatten.Flatten().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    gather.Gather().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    in_top_k_plugin.InTopKPlugin().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    inplace_unroll.InplaceUnroll().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    io_handler.IOHandler().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    keras_sequential.KerasSequential().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    loss_wrapper.LossWrapper().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    method_property.MethodProperty().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    mlx_extras.MlxExtras().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    mlx_optimizers.MlxOptimizers().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    nnx_to_torch_params.NnxToTorchParams().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    padding.Padding().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    scatter.Scatter().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    shape_packing.ShapePacking().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    state_flag_injection.StateFlagInjection().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    static_unroll.StaticUnroll().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    tf_data_loader.TfDataLoader().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
-  try:
-    topk.TopK().transform(MagicMock(), MagicMock())
-  except Exception:
-    pass
+def test_plugins_missing_prerequisites() -> None:
+  """Verifies that all plugins handle missing prerequisites gracefully without crashing.
+
+  They should either return the original node unmodified or raise a clear exception,
+  rather than swallowing exceptions or crashing randomly.
+  """
+  load_plugins()
+  # Create an empty context missing all traits and semantics
+  ctx = MagicMock(spec=HookContext)
+  ctx.plugin_traits = MagicMock()
+  # Explicitly make sure plugin_traits has no attributes set to True or real values
+  ctx.plugin_traits.requires_functional_state = False
+  ctx.plugin_traits.sharding_wrapper_api = None
+  ctx.plugin_traits.lookup_api.return_value = "dummy.api"
+  ctx.current_op_id = None
+  ctx.semantics = None
+  ctx.metadata = {}
+
+  # A generic node that lacks any plugin-specific attributes
+  node = cst.parse_expression("generic_call(missing_args)")
+
+  import inspect
+  import typing
+
+  from libcst._nodes.base import CSTValidationError
+
+  for name, func in _HOOKS.items():
+    sig = inspect.signature(func)
+    node_param = sig.parameters.get("node")
+    expected_type = (
+      node_param.annotation if node_param and node_param.annotation != inspect.Parameter.empty else cst.CSTNode
+    )
+
+    # Resolve Union types
+    types_to_check = (
+      typing.get_args(expected_type) if typing.get_origin(expected_type) is typing.Union else (expected_type,)
+    )
+
+    # Only run if our dummy node is one of the expected types
+    if any(t is cst.CSTNode or isinstance(node, t) or getattr(t, "__name__", "") == "CSTNode" for t in types_to_check):
+      try:
+        res = func(node, ctx)
+        assert res is not None, f"Plugin {name} returned None instead of a CSTNode"
+      except (AttributeError, CSTValidationError, TypeError, KeyError, IndexError, ValueError):
+        pass  # Ignore if it assumes attributes we didn't mock or if it throws due to mock objects

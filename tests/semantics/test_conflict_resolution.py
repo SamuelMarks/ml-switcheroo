@@ -11,7 +11,7 @@ from ml_switcheroo.semantics.merging import merge_tier_data
 
 
 class MockConflictSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockConflictSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockConflictSemantics instance."""
@@ -63,7 +63,7 @@ def test_array_vs_neural_silent_upgrade() -> None:
 
 
 def test_extras_override_silence() -> None:
-  """Docstring."""
+  """Verify extras override silence behavior."""
   mgr: MockConflictSemantics = MockConflictSemantics()
   merge_tier_data(
     data=mgr.data,

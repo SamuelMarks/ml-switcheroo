@@ -4,7 +4,7 @@ import numpy as np
 
 
 class DropoutModel:
-  """Docstring."""
+  """Test helper class DropoutModel."""
 
   def __init__(self, p: float = 0.5):
     """Initializes the DropoutModel instance."""

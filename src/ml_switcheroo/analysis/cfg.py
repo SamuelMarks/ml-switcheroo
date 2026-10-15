@@ -5,10 +5,7 @@ Control Flow Graphs from low-level assembly streams, replacing simple string
 heuristics with topological graph analysis.
 """
 
-from typing import Any
-
-
-from typing import List, Optional, Set, Dict
+from typing import Any, Dict, List, Optional, Set
 
 
 class BasicBlock:

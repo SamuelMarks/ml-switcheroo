@@ -4,11 +4,10 @@ This module stores default code templates for supported frameworks and
 provides utilities to determine properties of test arguments (e.g., static JIT args).
 """
 
+import typing
 from typing import Any
 
-
 import ml_switcheroo
-import typing
 
 if typing.TYPE_CHECKING:
   import ml_switcheroo.semantics.manager

@@ -1,4 +1,4 @@
-"""Test suite for the Parser module."""
+"""Test suite for parser."""
 
 import typing
 

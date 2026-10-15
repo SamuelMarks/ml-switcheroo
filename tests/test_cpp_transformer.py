@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for cpp transformer."""
 
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
   BinaryExpression,
@@ -20,7 +20,7 @@ from ml_switcheroo.core.compiler.backends.cpp.transformer import CppCSTTransform
 
 
 def test_transformer_generic_visit_cppmodule() -> None:
-  """Docstring."""
+  """Verify transformer generic visit cppmodule behavior."""
   transformer: CppCSTTransformer = CppCSTTransformer()
   node: CppModule = CppModule(includes=[IncludeDirective(path="iostream")], body=[ReturnStatement()])
   result: CppNode = transformer.visit(node)
@@ -28,7 +28,7 @@ def test_transformer_generic_visit_cppmodule() -> None:
 
 
 def test_transformer_function_definition() -> None:
-  """Docstring."""
+  """Verify transformer function definition behavior."""
   transformer: CppCSTTransformer = CppCSTTransformer()
   node: FunctionDefinition = FunctionDefinition(
     return_type=TypeIdentifier(name="int"),
@@ -41,7 +41,7 @@ def test_transformer_function_definition() -> None:
 
 
 def test_transformer_variable_declaration() -> None:
-  """Docstring."""
+  """Verify transformer variable declaration behavior."""
   transformer: CppCSTTransformer = CppCSTTransformer()
   node: VariableDeclaration = VariableDeclaration(
     type_id=TypeIdentifier(name="int"), name="x", initializer=Identifier(name="y")
@@ -61,7 +61,7 @@ def test_transformer_variable_declaration() -> None:
 
 
 def test_transformer_binary_expression() -> None:
-  """Docstring."""
+  """Verify transformer binary expression behavior."""
   transformer: CppCSTTransformer = CppCSTTransformer()
   node: BinaryExpression = BinaryExpression(left=Identifier(name="a"), operator="+", right=Identifier(name="b"))
   result: CppNode = transformer.visit(node)
@@ -69,7 +69,7 @@ def test_transformer_binary_expression() -> None:
 
 
 def test_transformer_method_call() -> None:
-  """Docstring."""
+  """Verify transformer method call behavior."""
   transformer: CppCSTTransformer = CppCSTTransformer()
   node: MethodCall = MethodCall(name="foo", arguments=[Identifier(name="a")])
   result: CppNode = transformer.visit(node)
@@ -77,7 +77,7 @@ def test_transformer_method_call() -> None:
 
 
 def test_transformer_block_statement() -> None:
-  """Docstring."""
+  """Verify transformer block statement behavior."""
   transformer: CppCSTTransformer = CppCSTTransformer()
   node: BlockStatement = BlockStatement(statements=[ReturnStatement()])
   result: CppNode = transformer.visit(node)
@@ -85,7 +85,7 @@ def test_transformer_block_statement() -> None:
 
 
 def test_transformer_pybind_module() -> None:
-  """Docstring."""
+  """Verify transformer pybind module behavior."""
   transformer: CppCSTTransformer = CppCSTTransformer()
   node: PyBindModule = PyBindModule(
     name="mod", module_var="m", defs=[PyBindDef(name="f", function_ref="f_impl", docstring="doc")]
@@ -95,7 +95,7 @@ def test_transformer_pybind_module() -> None:
 
 
 def test_transformer_identifiers() -> None:
-  """Docstring."""
+  """Verify transformer identifiers behavior."""
   transformer: CppCSTTransformer = CppCSTTransformer()
   node_id: Identifier = Identifier(name="x")
   assert transformer.visit(node_id) is node_id
@@ -105,13 +105,13 @@ def test_transformer_identifiers() -> None:
 
 
 def test_transformer_custom_node() -> None:
-  """Docstring."""
+  """Verify transformer custom node behavior."""
 
   class DummyNode(CppNode):
-    """Docstring."""
+    """Test helper class DummyNode."""
 
     def to_text(self) -> str:
-      """Docstring."""
+      """Execute to text helper logic."""
       return ""
 
   transformer: CppCSTTransformer = CppCSTTransformer()

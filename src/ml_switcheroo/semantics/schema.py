@@ -10,13 +10,12 @@ Updated to support:
 - **PatternDef**: Graph fusion patterns.
 """
 
-from typing import Dict, List, Optional, Tuple, Set, Any
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.core.dsl import (
-  PatternDef,
-)
+from pydantic import BaseModel, ConfigDict, Field
+
+from ml_switcheroo.core.dsl import PatternDef
 
 
 class PluginTraits(BaseModel):
@@ -51,6 +50,14 @@ class PluginTraits(BaseModel):
     default=None,
     description="Fully qualified API for wrapping operations in sharding (e.g. 'torch.distributed.fsdp.FSDP' or 'jax.experimental.pjit.pjit').",
   )
+  supports_dynamic_shapes: bool = Field(
+    default=False,
+    description="If True, the framework/IR supports dynamic symbolic tensor dimensions.",
+  )
+  supports_sharding: bool = Field(
+    default=False,
+    description="If True, the framework/IR supports distributed sharding annotations.",
+  )
 
 
 class StructuralTraits(BaseModel):
@@ -59,6 +66,7 @@ class StructuralTraits(BaseModel):
   model_config = ConfigDict(extra="allow")
 
   module_base: Optional[str] = Field(default=None, description="Base class API for neural modules.")
+  tensor_type: Optional[str] = Field(default=None, description="Canonical tensor type annotation for this framework.")
   forward_method: Optional[str] = Field(default=None, description="Standard method name for forward pass.")
   known_inference_methods: Set[str] = Field(
     default={"forward", "__call__", "call"},

@@ -12,7 +12,7 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 class MockTraitSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockTraitSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockTraitSemantics instance."""
@@ -43,10 +43,10 @@ class MockTraitSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
-  """Docstring."""
+  """Execute rewriter factory helper logic."""
 
   class CustomNNAdapter:
-    """Docstring."""
+    """Test helper class CustomNNAdapter."""
 
     def convert(self, x: typing.Any) -> typing.Any:
       """Converts ."""

@@ -9,24 +9,22 @@ Migration Note:
     have been removed. Routing now occurs via `compiler.registry`.
 """
 
-from typing import Any
-
 import typing
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
-
-from typing import Union, Dict, List, Optional, Tuple, TYPE_CHECKING
+from ml_switcheroo_ir import LogicalGraph, LogicalNode
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
 from ml_switcheroo.frameworks.base import (
-  register_framework,
   FrameworkAdapter,
-  StandardMap,
   ImportConfig,
   InitMode,
   OperationDef,
+  StandardMap,
+  register_framework,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
-from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
-from ml_switcheroo_ir import LogicalGraph, LogicalNode
+from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
 if TYPE_CHECKING:
   pass
@@ -312,7 +310,7 @@ class RdnaAdapter(FrameworkAdapter):
     Returns:
         A LogicalGraph containing reconstructed semantic nodes.
     """
-    from ml_switcheroo.analysis.cfg import ControlFlowGraph, BasicBlock
+    from ml_switcheroo.analysis.cfg import BasicBlock, ControlFlowGraph
     from ml_switcheroo.analysis.dominators import build_dominator_sets, find_back_edges
 
     cfg = ControlFlowGraph()

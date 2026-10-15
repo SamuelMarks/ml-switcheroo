@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for mlir parser."""
 
 import typing
 
@@ -7,7 +7,7 @@ from ml_switcheroo.core.mlir.parser import MlirParser
 
 
 def test_mlir_parser_basic() -> None:
-  """Docstring."""
+  """Verify mlir parser basic behavior."""
   text: str = """module {
       func.func @main(%arg0: tensor<f32>) -> tensor<f32> {
         %0 = stablehlo.add %arg0, %arg0 : tensor<f32>

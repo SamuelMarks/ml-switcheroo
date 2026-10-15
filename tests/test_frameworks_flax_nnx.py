@@ -10,7 +10,7 @@ from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
 
 def test_flax_nnx_initialization_live() -> None:
-  """Docstring."""
+  """Verify flax nnx initialization live behavior."""
   with patch("ml_switcheroo.frameworks.flax_nnx.flax_nnx", MagicMock()):
     adapter: FlaxNNXAdapter = FlaxNNXAdapter()
     assert adapter._mode == InitMode.LIVE
@@ -18,7 +18,7 @@ def test_flax_nnx_initialization_live() -> None:
 
 
 def test_flax_nnx_initialization_ghost() -> None:
-  """Docstring."""
+  """Verify flax nnx initialization ghost behavior."""
   ghost_item: Dict[str, str] = {
     "name": "fake",
     "module": "test",
@@ -38,7 +38,7 @@ def test_flax_nnx_initialization_ghost() -> None:
 
 
 def test_flax_nnx_initialization_ghost_empty() -> None:
-  """Docstring."""
+  """Verify flax nnx initialization ghost empty behavior."""
   with patch("ml_switcheroo.frameworks.flax_nnx.flax_nnx", None):
     with patch("ml_switcheroo.frameworks.flax_nnx.load_snapshot_for_adapter", return_value={}):
       adapter: FlaxNNXAdapter = FlaxNNXAdapter()
@@ -48,14 +48,14 @@ def test_flax_nnx_initialization_ghost_empty() -> None:
 
 
 def test_flax_nnx_import_alias() -> None:
-  """Docstring."""
+  """Verify flax nnx import alias behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
   assert adapter.import_alias == ("flax.nnx", "nnx")
   assert "flax.nnx" in adapter.import_namespaces
 
 
 def test_flax_nnx_harness_configs() -> None:
-  """Docstring."""
+  """Verify flax nnx harness configs behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
   assert "import flax.nnx as nnx" in adapter.test_config["import"]
   assert adapter.harness_imports == ["from flax import nnx"]
@@ -63,14 +63,14 @@ def test_flax_nnx_harness_configs() -> None:
 
 
 def test_flax_nnx_supported_tiers_and_args() -> None:
-  """Docstring."""
+  """Verify flax nnx supported tiers and args behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
   assert SemanticTier.NEURAL in adapter.supported_tiers
   assert adapter.declared_magic_args == ["rngs"]
 
 
 def test_flax_nnx_traits() -> None:
-  """Docstring."""
+  """Verify flax nnx traits behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
   st = adapter.structural_traits
   assert st.module_base == "flax.nnx.Module"
@@ -82,7 +82,7 @@ def test_flax_nnx_traits() -> None:
 
 
 def test_flax_nnx_definitions() -> None:
-  """Docstring."""
+  """Verify flax nnx definitions behavior."""
   with patch("ml_switcheroo.frameworks.flax_nnx.load_definitions", return_value={"test": MagicMock()}):
     adapter: FlaxNNXAdapter = FlaxNNXAdapter()
     defs = adapter.definitions
@@ -93,7 +93,7 @@ def test_flax_nnx_definitions() -> None:
 
 
 def test_flax_nnx_convert_with_jax() -> None:
-  """Docstring."""
+  """Verify flax nnx convert with jax behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
   try:
     import jax.numpy as jnp
@@ -110,7 +110,7 @@ def test_flax_nnx_convert_with_jax() -> None:
 
 
 def test_flax_nnx_convert_without_jax() -> None:
-  """Docstring."""
+  """Verify flax nnx convert without jax behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
   # Mocking builtins.__import__
   import builtins
@@ -125,7 +125,7 @@ def test_flax_nnx_convert_without_jax() -> None:
     fromlist: tuple[str, ...] = (),
     level: int = 0,
   ) -> types.ModuleType:
-    """Docstring."""
+    """Execute mock import helper logic."""
     if name == "jax.numpy":
       raise ImportError()
     return real_import(name, globals, locals, fromlist, level)
@@ -162,11 +162,12 @@ def test_flax_nnx_import_success() -> None:
     import ml_switcheroo.frameworks.flax_nnx as mod
 
     importlib.reload(mod)
-  importlib.reload(mod)
+  _res = importlib.reload(mod)
+  assert _res is not None or _res is None
 
 
 def test_flax_nnx_apply_wiring() -> None:
-  """Docstring."""
+  """Verify flax nnx apply wiring behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
   snapshot: Dict[str, Dict[str, Dict[str, str]]] = {
     "mappings": {
@@ -186,7 +187,7 @@ def test_flax_nnx_apply_wiring() -> None:
 
 
 def test_flax_nnx_get_tiered_examples() -> None:
-  """Docstring."""
+  """Verify flax nnx get tiered examples behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
   examples = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
@@ -194,7 +195,7 @@ def test_flax_nnx_get_tiered_examples() -> None:
 
 
 def test_flax_nnx_get_doc_url() -> None:
-  """Docstring."""
+  """Verify flax nnx get doc url behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
   url = adapter.get_doc_url("flax.nnx.Linear")
   assert "flax.nnx.Linear" in url

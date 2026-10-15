@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for mlir cst coverage."""
 
 from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import (
@@ -15,7 +15,7 @@ from ml_switcheroo.core.mlir.cst import (
 
 
 def test_mlir_cst_coverage() -> None:
-  """Docstring."""
+  """Verify mlir cst coverage behavior."""
   t: TypeNode = TypeNode(leading_trivia=[Trivia(" ")], body="i32", trailing_trivia=[Trivia(" ")])
   assert t.to_text() == " i32 "
 
@@ -225,12 +225,12 @@ def test_mlir_cst_coverage() -> None:
 def test_cst_missing_branches() -> None:
   """Cover missing branches in cst.py."""
   from ml_switcheroo.core.mlir.cst import (
-    ValueNode,
+    AttributeNode,
     OperationNode,
     StableHloConstantOp,
     TypeAliasDefNode,
     TypeNode,
-    AttributeNode,
+    ValueNode,
   )
 
   # 49

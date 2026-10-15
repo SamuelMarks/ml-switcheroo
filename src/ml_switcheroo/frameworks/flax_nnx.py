@@ -8,37 +8,42 @@ Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 - Wires important plugins and structural traits.
 """
 
-import typing
-
-
 import logging
 import textwrap
-from typing import Union, List, Tuple, Dict, Optional, Any
-from ml_switcheroo.frameworks.base import (
-  register_framework,
-  StructuralTraits,
-  PluginTraits,
-  InitMode,
-  ImportConfig,
-  StandardMap,
-  GhostRef,
-  load_snapshot_for_adapter,
-)
+import typing
+from types import ModuleType
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+from ml_switcheroo.frameworks.base import (
+  GhostRef,
+  ImportConfig,
+  InitMode,
+  PluginTraits,
+  StandardMap,
+  StructuralTraits,
+  load_snapshot_for_adapter,
+  register_framework,
+)
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 
+jax: Optional[ModuleType] = None
 try:
   import jax as _jax_mod
-except Exception:
-  _jax_mod = None  # type: ignore
-jax: Optional[Any] = _jax_mod
 
+  jax = _jax_mod
+except Exception:
+  pass
+
+flax_nnx: Optional[ModuleType] = None
 try:
   import flax.nnx as _flax_nnx_mod
+
+  flax_nnx = _flax_nnx_mod
 except Exception:
-  _flax_nnx_mod = None  # type: ignore
-flax_nnx: Optional[Any] = _flax_nnx_mod
+  pass
 
 
 @register_framework("flax_nnx")

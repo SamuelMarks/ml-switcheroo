@@ -14,12 +14,11 @@ State is tracked via a metadata dict[str, typing.Any]ionary in `HookContext` key
 """
 
 import typing
+from typing import Dict, Optional, cast
 
-
-from typing import Optional, Dict, cast
 import libcst as cst
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 # unique key for storing state in context metadata
 _PLUGIN_KEY = "state_flag_injection"

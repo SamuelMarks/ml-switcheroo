@@ -12,14 +12,13 @@ The `SymbolTableAnalyzer` visitor populates a `SymbolTable` by tracking:
 4.  **Control Flow**: Handling type ambiguity in branches (Phi nodes) via Union types.
 """
 
-import libcst as cst
 from typing import Dict, Optional
 
-from ml_switcheroo.semantics.manager import SemanticsManager
+import libcst as cst
+
+from ml_switcheroo.analysis.symbol_types import ModuleType, Scope, SymbolType, TensorType, UnionType
 from ml_switcheroo.core.scanners import get_full_name
-
-
-from ml_switcheroo.analysis.symbol_types import SymbolType, TensorType, ModuleType, UnionType, Scope
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class SymbolTable:

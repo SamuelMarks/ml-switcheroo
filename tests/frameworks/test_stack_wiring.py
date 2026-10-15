@@ -8,7 +8,7 @@ from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 
 
 class MockAdapter(JAXStackMixin):
-  """Docstring."""
+  """Test helper class MockAdapter."""
 
   def apply_wiring(self, snapshot: dict[str, typing.Any]) -> None:
     """Mock implementation of apply wiring."""
@@ -17,7 +17,7 @@ class MockAdapter(JAXStackMixin):
 
 @pytest.fixture
 def adapter() -> MockAdapter:
-  """Docstring."""
+  """Execute adapter helper logic."""
   return MockAdapter()
 
 

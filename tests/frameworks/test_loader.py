@@ -71,6 +71,7 @@ def test_resolve_resource_file_fallback_packages() -> None:
   mock_fp.is_file.return_value = True
 
   def mock_files(pkg: str) -> MagicMock:
+    """Execute mock_files test helper."""
     if pkg == "ml_ecosystem_snapshots.snapshots":
       raise ModuleNotFoundError()
     res = MagicMock()
@@ -87,6 +88,7 @@ def test_resolve_resource_file_all_fail() -> None:
   call_count = 0
 
   def mock_files(pkg: str) -> MagicMock:
+    """Execute mock_files test helper."""
     nonlocal call_count
     call_count += 1
     if call_count <= 2:
@@ -105,6 +107,7 @@ def test_resolve_resource_file_outer_fallback_exception() -> None:
   call_count = 0
 
   def mock_files(pkg: str) -> MagicMock:
+    """Execute mock_files test helper."""
     nonlocal call_count
     call_count += 1
     if call_count <= 3:
@@ -137,6 +140,7 @@ def test_get_definitions_path_fallback_second_package() -> None:
   mock_fp.is_file.return_value = True
 
   def mock_files(pkg: str) -> MagicMock:
+    """Execute mock_files test helper."""
     if pkg == "ml_ecosystem_snapshots.snapshots":
       res = MagicMock()
       res.joinpath.return_value.is_file.return_value = False
@@ -155,6 +159,7 @@ def test_get_definitions_path_fallback_after_loop() -> None:
   call_count = 0
 
   def mock_files(pkg: str) -> MagicMock:
+    """Execute mock_files test helper."""
     nonlocal call_count
     call_count += 1
     if call_count <= 2:
@@ -170,3 +175,16 @@ def test_get_definitions_path_fallback_after_loop() -> None:
   with patch("importlib.resources.files", side_effect=mock_files):
     path = get_definitions_path("test_fw")
     assert path == Path("final_path")
+
+
+def test_loader_alias_import_error_fallback() -> None:
+  """Test module-level fallback when ml_ecosystem_snapshots._alias is unavailable."""
+  import importlib
+  import sys
+
+  import ml_switcheroo.frameworks.loader as fw_loader
+
+  with patch.dict(sys.modules, {"ml_ecosystem_snapshots._alias": None}):
+    importlib.reload(fw_loader)
+  importlib.reload(fw_loader)
+  assert hasattr(fw_loader, "load_definitions")

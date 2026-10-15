@@ -10,13 +10,13 @@ Capabilities:
 3.  **Weight Migration**: Handling dict-based `.npz` archives via `get_weight_*` hooks.
 """
 
-import typing
-
-
 import textwrap
-from typing import Union, List, Tuple, Optional, Dict, Any
+import typing
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
+
+from ml_switcheroo.frameworks.base import ImportConfig, PluginTraits, StandardMap, StructuralTraits, register_framework
 from ml_switcheroo.frameworks.loader import load_definitions
 
 _np_mod: Optional[Any] = None

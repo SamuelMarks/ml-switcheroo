@@ -99,7 +99,7 @@ def test_graph_composition() -> None:
 
 
 def test_base_node():
-  """Docstring."""
+  """Verify base node behavior."""
 
   class DummyNode(TikzBaseNode):
     """A dummy node."""
@@ -112,13 +112,13 @@ def test_base_node():
 
 
 def test_trivia_node_extra():
-  """Docstring."""
+  """Verify trivia node extra behavior."""
   node = TriviaNode(content="  ", kind="whitespace")
   assert node.emit() == "  "
 
 
 def test_tikz_option():
-  """Docstring."""
+  """Verify tikz option behavior."""
   opt = TikzOption(key="draw")
   assert opt.emit() == "draw"
   opt = TikzOption(key="draw", value="black")
@@ -126,7 +126,7 @@ def test_tikz_option():
 
 
 def test_tikz_text_node():
-  """Docstring."""
+  """Verify tikz text node behavior."""
   node = TikzTextNode(content="Hello")
   assert node.emit() == "Hello"
   node = TikzTextNode(content="Hello", bold=True)
@@ -138,7 +138,7 @@ def test_tikz_text_node():
 
 
 def test_tikz_table():
-  """Docstring."""
+  """Verify tikz table behavior."""
   row = ["plain text", TikzTextNode("bold text", bold=True)]
   table = TikzTable(rows=[row], align="c", leading_trivia=[TriviaNode(" ")], trailing_trivia=[TriviaNode("\n")])
   res = table.emit()
@@ -146,7 +146,7 @@ def test_tikz_table():
 
 
 def test_tikz_node():
-  """Docstring."""
+  """Verify tikz node behavior."""
   node = TikzNode(
     node_id="n1",
     x=1.0,
@@ -165,7 +165,7 @@ def test_tikz_node():
 
 
 def test_tikz_edge():
-  """Docstring."""
+  """Verify tikz edge behavior."""
   edge = TikzEdge(
     source_id="n1",
     target_id="n2",
@@ -178,7 +178,7 @@ def test_tikz_edge():
 
 
 def test_tikz_graph():
-  """Docstring."""
+  """Verify tikz graph behavior."""
   graph = TikzGraph(
     children=[TikzNode(node_id="n1", x=0.0, y=0.0, content="A")],
     options=[TikzOption("scale", "2")],

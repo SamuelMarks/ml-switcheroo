@@ -1,9 +1,4 @@
-"""Unit tests for the NVIDIA_SASS frontend lifter.
-
-This module contains tests to verify that the NvidiaSassLifter correctly processes parsed
-NVIDIA_SASS compiler comments (like unmapped nodes, block beginning/end markers, inputs/returns)
-and raw instructions into an intermediate representation logical graph.
-"""
+"""Test suite for nvidia sass lifter."""
 
 import pytest
 
@@ -11,6 +6,7 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassImmediate,
   NvidiaSassInstruction,
+  NvidiaSassLabel,
   NvidiaSassNode,
   NvidiaSassRegister,
 )
@@ -80,7 +76,7 @@ def test_nvidia_sass_lifter_unrecognized_comment() -> None:
   lifter = NvidiaSassLifter()
 
   class MockNvidiaSassOperand:
-    """Docstring."""
+    """Test helper class MockNvidiaSassOperand."""
 
     def __str__(self) -> str:
       """Returns a string representation of the mock operand.
@@ -123,7 +119,7 @@ def test_nvidia_sass_lifter_end_without_begin() -> None:
 
 
 def test_nvidia_sass_lifter_return_already_seen() -> None:
-  """Docstring."""
+  """Verify nvidia sass lifter return already seen behavior."""
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
 
@@ -135,7 +131,7 @@ def test_nvidia_sass_lifter_return_already_seen() -> None:
 
 
 def test_nvidia_sass_lifter_return_no_previous() -> None:
-  """Docstring."""
+  """Verify nvidia sass lifter return no previous behavior."""
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
 
@@ -146,8 +142,7 @@ def test_nvidia_sass_lifter_return_no_previous() -> None:
 
 
 def test_nvidia_sass_lifter_instruction_in_block() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassLabel
+  """Verify nvidia sass lifter instruction in block behavior."""
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
 
   lifter = NvidiaSassLifter()
@@ -157,7 +152,7 @@ def test_nvidia_sass_lifter_instruction_in_block() -> None:
 
 
 def test_nvidia_sass_lifter_comment_no_marker() -> None:
-  """Docstring."""
+  """Verify nvidia sass lifter comment no marker behavior."""
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
@@ -170,7 +165,7 @@ def test_nvidia_sass_lifter_comment_no_marker() -> None:
 
 
 def test_nvidia_sass_lifter_comment_unknown_marker(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify nvidia sass lifter comment unknown marker behavior."""
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
@@ -183,7 +178,7 @@ def test_nvidia_sass_lifter_comment_unknown_marker(monkeypatch: pytest.MonkeyPat
 
 
 def test_nvidia_sass_lifter_mismatched_end() -> None:
-  """Docstring."""
+  """Verify nvidia sass lifter mismatched end behavior."""
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
 
@@ -198,7 +193,7 @@ def test_nvidia_sass_lifter_mismatched_end() -> None:
 
 
 def test_nvidia_sass_lifter_multiple_returns() -> None:
-  """Docstring."""
+  """Verify nvidia sass lifter multiple returns behavior."""
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
 

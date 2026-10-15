@@ -1,4 +1,4 @@
-"""Tests for RDNA macro expansions."""
+"""Test suite for rdna macros."""
 
 from typing import List
 
@@ -34,7 +34,7 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaNode, RdnaSGPR, R
 class DummyAllocator(RegisterAllocatorProtocol):
   """Dummy register allocator implementation for unit testing macros."""
 
-  def get_vector_register(self, var_name: str) -> RdnaVGPR:
+  def get_register(self, var_name: str) -> RdnaVGPR:  # noqa: F811
     """Get or allocate vector register for a variable name.
 
     Args:
@@ -45,7 +45,7 @@ class DummyAllocator(RegisterAllocatorProtocol):
     """
     return RdnaVGPR(index=0)
 
-  def get_scalar_register(self, var_name: str) -> RdnaSGPR:
+  def get_register(self, var_name: str) -> RdnaSGPR:  # noqa: F811
     """Get or allocate scalar register for a variable name.
 
     Args:
@@ -56,7 +56,7 @@ class DummyAllocator(RegisterAllocatorProtocol):
     """
     return RdnaSGPR(index=0)
 
-  def allocate_vector_temp(self) -> RdnaVGPR:
+  def allocate_temp(self) -> RdnaVGPR:  # noqa: F811
     """Allocate a temporary vector register.
 
     Returns:
@@ -64,7 +64,7 @@ class DummyAllocator(RegisterAllocatorProtocol):
     """
     return RdnaVGPR(index=1)
 
-  def allocate_scalar_temp(self) -> RdnaSGPR:
+  def allocate_temp(self) -> RdnaSGPR:  # noqa: F811
     """Allocate a temporary scalar register.
 
     Returns:

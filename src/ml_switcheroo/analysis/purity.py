@@ -15,7 +15,8 @@ Operations flagged:
 Violations are marked via the `EscapeHatch` mechanism.
 """
 
-from typing import List, Optional, Set, Any
+from typing import Any, List, Optional, Set
+
 import libcst as cst
 
 from ml_switcheroo.core.escape_hatch import EscapeHatch

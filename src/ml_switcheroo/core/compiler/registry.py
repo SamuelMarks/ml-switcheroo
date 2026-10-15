@@ -9,24 +9,24 @@ Graph/Compiler pipeline, from High-Level frameworks (Torch, JAX, MLIR, TikZ)
 which flow through the CST Rewriter pipeline.
 """
 
-from typing import Dict, Optional, Type, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Optional, Type
 
 if TYPE_CHECKING:
   from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
-from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassParser, NvidiaSassLifter
-from ml_switcheroo.core.compiler.backends.nvidia_sass import NvidiaSassBackend
-from ml_switcheroo.core.compiler.frontends.rdna import RdnaParser, RdnaLifter
-from ml_switcheroo.core.compiler.backends.rdna import RdnaBackend
-from ml_switcheroo.core.compiler.backends.python import PythonBackend
-from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
-from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
-from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
-from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend, LatexBackend
 from ml_switcheroo.core.compiler.backends.ir import IrBackend
+from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
+from ml_switcheroo.core.compiler.backends.nvidia_sass import NvidiaSassBackend
+from ml_switcheroo.core.compiler.backends.python import PythonBackend
+from ml_switcheroo.core.compiler.backends.rdna import RdnaBackend
+from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
+from ml_switcheroo.core.compiler.backends.visual_backends import LatexBackend, TikzBackend
 from ml_switcheroo.core.compiler.frontends.ir import IrFrontend
+from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassLifter, NvidiaSassParser
+from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
+from ml_switcheroo.core.compiler.frontends.rdna import RdnaLifter, RdnaParser
 from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
 
 

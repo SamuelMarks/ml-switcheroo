@@ -19,7 +19,7 @@ def cleanup_args(args_list: list[cst.Arg]) -> list[cst.Arg]:
 
 
 class MockSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -70,7 +70,7 @@ class MockSemantics(SemanticsManager):
 
 @register_hook("mock_alpha_rewrite")
 def mock_plugin_logic(node: cst.Call, _ctx: typing.Any) -> cst.Call:
-  """Docstring."""
+  """Execute mock plugin logic helper logic."""
   new_func = cst.Name("plugin_success")
   filtered: list[cst.Arg] = [
     a for a in node.args if not (a.keyword and typing.cast(cst.Name, a.keyword).value == "alpha")
@@ -103,7 +103,7 @@ def test_custom_framework_plugin_registration() -> None:
 
   @register_framework("plugin_test_fw")
   class PluginTestAdapter:
-    """Docstring."""
+    """Test helper class PluginTestAdapter."""
 
     pass
 

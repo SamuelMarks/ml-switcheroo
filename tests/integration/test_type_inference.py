@@ -24,7 +24,7 @@ def reload_required_plugins() -> None:
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Docstring."""
+  """Execute semantics helper logic."""
   mgr = SemanticsManager()
   return mgr
 

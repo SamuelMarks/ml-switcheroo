@@ -13,7 +13,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -61,7 +61,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def mock_report(tmp_path: Path) -> str:
-  """Docstring."""
+  """Execute mock report helper logic."""
   report: dict[str, bool] = {"good_op": True, "bad_op": False}
   path: Path = tmp_path / "verification.json"
   path.write_text(json.dumps(report))

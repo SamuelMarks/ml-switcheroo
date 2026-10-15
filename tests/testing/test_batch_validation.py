@@ -12,7 +12,7 @@ from ml_switcheroo.testing.batch_runner import BatchValidator
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Docstring."""
+  """Execute mock semantics helper logic."""
   mgr: MagicMock = MagicMock(spec=SemanticsManager)
   kb: Dict[str, Any] = {
     "auto_op": {"std_args": [("x", "int")], "variants": {"torch": {"api": "t.op"}}},
@@ -26,7 +26,7 @@ def mock_semantics() -> MagicMock:
 
 @pytest.fixture
 def validator(mock_semantics: MagicMock) -> BatchValidator:
-  """Docstring."""
+  """Execute validator helper logic."""
   return BatchValidator(mock_semantics)
 
 
@@ -40,7 +40,7 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
     constraints: Optional[Dict[str, Any]] = None,
     shape_calc: Optional[str] = None,
   ) -> Tuple[bool, str]:
-    """Docstring."""
+    """Execute mock verify helper logic."""
     if not variants:
       return (True, "Skipped")
     api: str = list(variants.values())[0]["api"]
@@ -64,7 +64,7 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
 
 
 def test_extraction_of_shape_calc(validator: BatchValidator) -> None:
-  """Docstring."""
+  """Verify extraction of shape calc behavior."""
   with patch.object(validator.runner, "verify", return_value=(True, "OK")) as mock_run:
     validator.run_all()
     found_shape_call: bool = False
@@ -88,7 +88,7 @@ def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.P
   (test_dir / "test_manual.py").write_text("def test_manual_op(): pass")
 
   def mock_verify(*args: Any, **kwargs: Any) -> Tuple[bool, str]:
-    """Docstring."""
+    """Execute mock verify helper logic."""
     return (True, "OK")
 
   with patch.object(validator.runner, "verify", side_effect=mock_verify) as mock_run:
@@ -98,7 +98,7 @@ def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.P
 
 
 def test_ignore_generated_tests(validator: BatchValidator, tmp_path: pathlib.Path) -> None:
-  """Docstring."""
+  """Verify ignore generated tests behavior."""
   gen_dir: pathlib.Path = tmp_path / "generated"
   gen_dir.mkdir()
   (gen_dir / "test_gen_auto_op.py").write_text("def test_gen_auto_op(): pass")

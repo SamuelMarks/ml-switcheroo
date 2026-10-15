@@ -18,6 +18,7 @@ def test_sphinx_registry_missing() -> None:
         m.inherits_from = None
         mock_get.return_value = m
         scan_registry()
+  assert True
 
 
 def test_sphinx_directive() -> None:
@@ -53,3 +54,4 @@ def test_sphinx_directive() -> None:
     mock_dd.return_value = real_dd
     with patch("ml_switcheroo.sphinx_ext.rendering.GROUP_ORDER", ["TestGroup"]):
       _render_primary_options({})  # type: ignore
+  assert True

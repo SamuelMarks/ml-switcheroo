@@ -8,8 +8,8 @@ from typing import Optional, Set, Union
 
 import libcst as cst
 
-from ml_switcheroo.core.scanners import get_full_name
 from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
+from ml_switcheroo.core.scanners import get_full_name
 
 
 class BaseImportFixer(cst.CSTTransformer):

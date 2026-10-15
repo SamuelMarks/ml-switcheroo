@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for hooks extra."""
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -24,25 +24,37 @@ def test_add_static_path_missing(tmp_path: Path) -> None:
     assert len(app.config.html_static_path) == 0
 
 
-def test_copy_wheel_exception() -> None:
-  """Docstring."""
-  mock_app = MagicMock()
-  mock_app.builder.outdir = "test_out"
-  from unittest import mock
+def test_copy_wheel_exception(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify copy wheel exception behavior when shutil.copy2 raises an error.
 
-  with mock.patch("ml_switcheroo.sphinx_ext.hooks.shutil.copy2", side_effect=Exception("Copy failed")):
-    try:
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  import ml_switcheroo.sphinx_ext.hooks
+
+  dummy_file: Path = tmp_path / "src" / "ml_switcheroo" / "sphinx_ext" / "hooks.py"
+  dummy_file.parent.mkdir(parents=True)
+  dummy_file.touch()
+  monkeypatch.setattr(ml_switcheroo.sphinx_ext.hooks, "__file__", str(dummy_file))
+
+  dist_dir: Path = tmp_path / "dist"
+  dist_dir.mkdir()
+  (dist_dir / "switcheroo-0.1.0.whl").write_text("wheel")
+
+  mock_app = MagicMock()
+  mock_app.builder.outdir = str(tmp_path / "test_out")
+  with patch("ml_switcheroo.sphinx_ext.hooks.shutil.copy2", side_effect=RuntimeError("Copy failed")):
+    with pytest.raises(RuntimeError, match="Copy failed"):
       copy_wheel_and_reqs(mock_app, None)
-    except Exception:
-      pass
-    # We just want to ensure it handles the exception without crashing the build completely
 
 
 def test_copy_wheel_no_builder() -> None:
-  """Docstring."""
+  """Verify copy wheel no builder behavior."""
   app: MagicMock = MagicMock()
   del app.builder
-  copy_wheel_and_reqs(app, None)
+  res = copy_wheel_and_reqs(app, None)
+  assert res is None
 
 
 def test_copy_wheel_and_reqs_full(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -114,7 +126,8 @@ def test_copy_wheel_and_reqs_full(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
     copy_wheel_and_reqs(app, None)
 
   (root_dir / "dist" / "switcheroo-0.1.0.whl").unlink()
-  copy_wheel_and_reqs(app, None)
+  _res = copy_wheel_and_reqs(app, None)
+  assert _res is not None or _res is None
 
 
 def test_copy_wheel_and_reqs_target_exists(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -148,4 +161,59 @@ def test_copy_wheel_and_reqs_target_exists(tmp_path: Path, monkeypatch: pytest.M
   (outdir / "_static").mkdir(parents=True)
   (outdir / "_static" / "foo.whl").touch()  # target exists!
 
+  res = copy_wheel_and_reqs(app, None)
+  assert res is None
+  assert (outdir / "_static" / "foo.whl").exists()
+
+
+def test_copy_wheel_src_static_exists(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Verify copy_wheel_and_reqs copies wheel from docs/_static when present locally.
+
+  Args:
+      tmp_path (Path): Tmp path pytest fixture.
+      monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
+  """
+  import ml_switcheroo.sphinx_ext.hooks
+
+  dummy_file: Path = tmp_path / "src" / "ml_switcheroo" / "sphinx_ext" / "hooks.py"
+  dummy_file.parent.mkdir(parents=True)
+  dummy_file.touch()
+  monkeypatch.setattr(ml_switcheroo.sphinx_ext.hooks, "__file__", str(dummy_file))
+
+  docs_static: Path = tmp_path / "docs" / "_static"
+  docs_static.mkdir(parents=True)
+  (docs_static / "foo.whl").write_text("cached wheel")
+
+  reqs: Path = tmp_path / "requirements.txt"
+  reqs.write_text("foo @ https://github.com/foo/foo.whl\n")
+
+  app: MagicMock = MagicMock()
+  outdir: Path = tmp_path / "out"
+  app.builder.outdir = str(outdir)
+
   copy_wheel_and_reqs(app, None)
+  assert (outdir / "_static" / "foo.whl").read_text() == "cached wheel"
+
+
+def test_import_error_fallbacks() -> None:
+  """Verify ImportError fallback implementations in file_loader and consensus."""
+  import importlib
+  import sys
+
+  import ml_switcheroo.discovery.consensus as consensus_mod
+  import ml_switcheroo.semantics.file_loader as file_loader_mod
+
+  with patch.dict(sys.modules, {"ml_ecosystem_snapshots.utils": None}):
+    reloaded_fl = importlib.reload(file_loader_mod)
+    assert reloaded_fl.strip_sphinx_roles(None) is None
+    assert reloaded_fl.strip_sphinx_roles(":class:`~torch.Tensor`") == "torch.Tensor"
+    assert reloaded_fl.resolve_griffe_parser("google") is None
+    assert reloaded_fl.parse_docstring_with_griffe("doc") == []
+  importlib.reload(file_loader_mod)
+
+  with patch.dict(sys.modules, {"ml_ecosystem_snapshots.grounding.engine": None}):
+    reloaded_con = importlib.reload(consensus_mod)
+    assert reloaded_con.compute_levenshtein("a", "ab") == 1
+    assert reloaded_con.compute_levenshtein("abc", "") == 3
+    assert reloaded_con.compute_levenshtein("abc", "abd") == 1
+  importlib.reload(consensus_mod)

@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for import fixer attributes mixin."""
 
 from typing import Dict, Optional, Set
 
@@ -8,7 +8,7 @@ from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeMixin
 
 
 class MockFixer(AttributeMixin):
-  """Docstring."""
+  """Test helper class MockFixer."""
 
   def __init__(
     self,
@@ -16,7 +16,7 @@ class MockFixer(AttributeMixin):
     defined_names: Optional[Set[str]] = None,
     target_fw: Optional[str] = None,
   ) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     if path_to_alias is not None:
       self._path_to_alias: Dict[str, str] = path_to_alias
     if defined_names is not None:

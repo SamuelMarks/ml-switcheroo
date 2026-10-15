@@ -6,7 +6,7 @@ escaping helper utilities.
 """
 
 import html
-from typing import List
+from typing import Any, List
 
 
 class StructuredFormatter:
@@ -90,3 +90,27 @@ def escape_latex(text: str) -> str:
   # Let's escape only a few core ones if needed. For now, replace % with \%.
   text = str(text)
   return text.replace("%", "\\%")
+
+
+class MarkupVisitor:
+  """Base class for traversing Markup nodes."""
+
+  def visit(self, node: Any) -> None:
+    """Dispatch traversal of a markup AST node to its class-specific visitor method.
+
+    Args:
+        node: Markup AST node to visit.
+    """
+    method_name = f"visit_{node.__class__.__name__}"
+    visitor = getattr(self, method_name, self.generic_visit)
+    visitor(node)
+
+  def generic_visit(self, node: Any) -> None:
+    """Recursively visit all child nodes when no specialized visitor method exists.
+
+    Args:
+        node: Markup AST node whose ``children`` sequence will be traversed.
+    """
+    if hasattr(node, "children"):
+      for child in node.children:
+        self.visit(child)

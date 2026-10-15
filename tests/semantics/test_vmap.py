@@ -10,7 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockVmapSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockVmapSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockVmapSemantics instance."""

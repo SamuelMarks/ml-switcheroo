@@ -117,8 +117,10 @@ def test_fuzzer_parser_more() -> None:
 
   symbol_map: Dict[str, Any] = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
-    generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1.0]})
-    generate_from_hint("Any", (), 0, 5, symbol_map, {"default": []})
+    res1 = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1.0]})
+    res2 = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": []})
+  assert isinstance(res1, list)
+  assert res2 is not None
 
 
 def test_fuzzer_parser_bool_list() -> None:
@@ -127,8 +129,10 @@ def test_fuzzer_parser_bool_list() -> None:
 
   symbol_map: Dict[str, Any] = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
-    generate_from_hint("Any", (), 0, 5, symbol_map, {"default": True})
-    generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1, 2, 3]})
+    res_bool = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": True})
+    res_list = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1, 2, 3]})
+  assert isinstance(res_bool, bool)
+  assert isinstance(res_list, list)
 
 
 def test_fuzzer_parser_int_inference() -> None:
@@ -137,11 +141,12 @@ def test_fuzzer_parser_int_inference() -> None:
 
   symbol_map: Dict[str, Any] = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
-    generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42})
+    res = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42})
+  assert isinstance(res, int)
 
 
 def test_fuzzer_parser_float_inference() -> None:
-  """Docstring."""
+  """Verify fuzzer parser float inference behavior."""
   from unittest import mock
 
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
@@ -155,8 +160,9 @@ def test_fuzzer_parser_float_inference() -> None:
 
 def test_fuzzer_parser_additional_branches() -> None:
   """Verifies parser branch coverage for non-primitive defaults and primitive fallbacks."""
-  import numpy as np
   from unittest import mock
+
+  import numpy as np
 
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
   from ml_switcheroo.testing.fuzzer.type_parser import AnyType, PrimitiveType

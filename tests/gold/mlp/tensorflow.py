@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class MLP(tf.keras.Model):
-  """Docstring."""
+  """Test helper class MLP."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int):
     """Initializes the MLP instance."""

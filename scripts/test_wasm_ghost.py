@@ -7,10 +7,10 @@ underlying pip packages (like torch, jax) to be installed. This validates the
 WebAssembly execution capability described in the paper.
 """
 
-from pathlib import Path
 import sys
-from typing import List, Optional, Sequence
 import unittest
+from pathlib import Path
+from typing import List, Optional, Sequence
 
 src_path = Path(__file__).resolve().parent.parent / "src"
 if str(src_path) not in sys.path:

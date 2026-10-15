@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for rewriter context."""
 
 from typing import Dict
 from unittest.mock import MagicMock
@@ -10,7 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_rewriter_context_default_injectors() -> None:
-  """Docstring."""
+  """Verify rewriter context default injectors behavior."""
   semantics: MagicMock = MagicMock(spec=SemanticsManager)
   config: MagicMock = MagicMock(spec=RuntimeConfig)
   config.effective_source = "pytorch"
@@ -56,16 +56,16 @@ def test_rewriter_context_default_injectors() -> None:
 
 
 def test_rewriter_context_hydrate_pydantic() -> None:
-  """Docstring."""
+  """Verify rewriter context hydrate pydantic behavior."""
   semantics: MagicMock = MagicMock(spec=SemanticsManager)
   config: MagicMock = MagicMock(spec=RuntimeConfig)
   config.effective_source = "pytorch"
 
   class FakeModel:
-    """Docstring."""
+    """Test helper class FakeModel."""
 
     def model_dump(self) -> Dict[str, str]:
-      """Docstring."""
+      """Execute model dump helper logic."""
       return {"name": "test_alias"}
 
   semantics.get_framework_config.return_value = {"alias": FakeModel()}
@@ -74,7 +74,7 @@ def test_rewriter_context_hydrate_pydantic() -> None:
 
 
 def test_rewriter_context_hydrate_exception() -> None:
-  """Docstring."""
+  """Verify rewriter context hydrate exception behavior."""
   semantics: MagicMock = MagicMock(spec=SemanticsManager)
   config: MagicMock = MagicMock(spec=RuntimeConfig)
   config.effective_source = "pytorch"
@@ -85,7 +85,7 @@ def test_rewriter_context_hydrate_exception() -> None:
 
 
 def test_rewriter_context_hydrate_none() -> None:
-  """Docstring."""
+  """Verify rewriter context hydrate none behavior."""
   semantics: MagicMock = MagicMock(spec=SemanticsManager)
   config: MagicMock = MagicMock(spec=RuntimeConfig)
   config.effective_source = "pytorch"
@@ -99,7 +99,7 @@ def test_rewriter_context_hydrate_none() -> None:
 
 
 def test_hydrate_alias_map_with_dict() -> None:
-  """Docstring."""
+  """Verify hydrate alias map with dict behavior."""
   # Hit the line 160->exit path
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   sm: MagicMock = MagicMock()
@@ -110,7 +110,7 @@ def test_hydrate_alias_map_with_dict() -> None:
 
 
 def test_hydrate_alias_map_no_name() -> None:
-  """Docstring."""
+  """Verify hydrate alias map no name behavior."""
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   sm: MagicMock = MagicMock()
   sm.get_framework_config.return_value = {"alias": {}}
@@ -119,15 +119,15 @@ def test_hydrate_alias_map_no_name() -> None:
 
 
 def test_hydrate_alias_map_model_dump() -> None:
-  """Docstring."""
+  """Verify hydrate alias map model dump behavior."""
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   sm: MagicMock = MagicMock()
 
   class DummyAlias:
-    """Docstring."""
+    """Test helper class DummyAlias."""
 
     def model_dump(self) -> Dict[str, str]:
-      """Docstring."""
+      """Execute model dump helper logic."""
       return {"name": "th_dummy"}
 
   sm.get_framework_config.return_value = {"alias": DummyAlias()}
@@ -136,7 +136,7 @@ def test_hydrate_alias_map_model_dump() -> None:
 
 
 def test_hydrate_alias_map_dict_no_name_key() -> None:
-  """Docstring."""
+  """Verify hydrate alias map dict no name key behavior."""
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   sm: MagicMock = MagicMock()
   sm.get_framework_config.return_value = {"alias": {"something_else": "value"}}
@@ -145,7 +145,7 @@ def test_hydrate_alias_map_dict_no_name_key() -> None:
 
 
 def test_hydrate_alias_map_not_dict() -> None:
-  """Docstring."""
+  """Verify hydrate alias map not dict behavior."""
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   sm: MagicMock = MagicMock()
   sm.get_framework_config.return_value = {"alias": "just_a_string"}

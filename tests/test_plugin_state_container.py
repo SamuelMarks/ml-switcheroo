@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin state container."""
 
 from typing import Optional
 from unittest.mock import MagicMock
@@ -18,7 +18,7 @@ from ml_switcheroo.plugins.state_container import (
 
 
 def test_create_node() -> None:
-  """Docstring."""
+  """Verify create node behavior."""
   node: cst.BaseExpression = _create_node("a.b.c")
   assert isinstance(node, cst.Attribute)
 
@@ -29,7 +29,7 @@ def test_create_node() -> None:
 
 
 def test_get_receiver() -> None:
-  """Docstring."""
+  """Verify get receiver behavior."""
   node: cst.BaseExpression = cst.parse_expression("self.func()")
   receiver: Optional[cst.BaseExpression] = _get_receiver(node)
   assert isinstance(receiver, cst.Name)
@@ -40,7 +40,7 @@ def test_get_receiver() -> None:
 
 
 def test_convert_register_buffer() -> None:
-  """Docstring."""
+  """Verify convert register buffer behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "BatchStat"
 
@@ -58,7 +58,7 @@ def test_convert_register_buffer() -> None:
 
 
 def test_convert_register_parameter() -> None:
-  """Docstring."""
+  """Verify convert register parameter behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "Param"
 
@@ -76,7 +76,7 @@ def test_convert_register_parameter() -> None:
 
 
 def test_convert_state_dict() -> None:
-  """Docstring."""
+  """Verify convert state dict behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "ModuleState"
 
@@ -91,7 +91,7 @@ def test_convert_state_dict() -> None:
 
 
 def test_convert_load_state_dict() -> None:
-  """Docstring."""
+  """Verify convert load state dict behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "UpdateState"
 
@@ -108,7 +108,7 @@ def test_convert_load_state_dict() -> None:
 
 
 def test_convert_parameters() -> None:
-  """Docstring."""
+  """Verify convert parameters behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.side_effect = lambda x: "ModuleState" if x == "ModuleState" else "Param"
 

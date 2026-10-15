@@ -196,7 +196,7 @@ def test_importmixin_leave_importfrom_empty_module() -> None:
 
 
 def test_importmixin_used_names() -> None:
-  """Docstring."""
+  """Verify importmixin used names behavior."""
   fixer = MockFixer()
   fixer.used_names = {"torch", "optim", "nn", "sys", "re"}
 
@@ -215,7 +215,7 @@ def test_importmixin_used_names() -> None:
 
 
 def test_importmixin_leave_ImportFrom_preserve_alias() -> None:
-  """Docstring."""
+  """Verify importmixin leave ImportFrom preserve alias behavior."""
   fixer = MockFixer()
   fixer.plan.mappings["torch.sub"] = ImportReq(module="jax", subcomponent="sub")
 
@@ -237,7 +237,7 @@ def test_importmixin_leave_ImportFrom_preserve_alias() -> None:
 
 
 def test_importmixin_remove_from_parent() -> None:
-  """Docstring."""
+  """Verify importmixin remove from parent behavior."""
   fixer = MockFixer()
   # It removes source_fws aliases if not used_names
   import_node = typing.cast(cst.Import, cst.parse_statement("import torch.unknown").body[0])  # type: ignore
@@ -250,7 +250,7 @@ def test_importmixin_remove_from_parent() -> None:
 
 
 def test_importmixin_leave_Import_used_names() -> None:
-  """Docstring."""
+  """Verify importmixin leave Import used names behavior."""
   fixer = MockFixer()
   fixer.used_names = {"torch", "optim", "nn", "sys", "re"}
   # We need it to NOT hit the root_pkg not in source_fws so it hits line 186
@@ -262,7 +262,7 @@ def test_importmixin_leave_Import_used_names() -> None:
 
 
 def test_importmixin_leave_ImportFrom_used_names_else() -> None:
-  """Docstring."""
+  """Verify importmixin leave ImportFrom used names else behavior."""
   fixer = MockFixer()
 
   from_node = typing.cast(cst.ImportFrom, cst.parse_statement("from unknown import sub").body[0])  # type: ignore
@@ -271,7 +271,7 @@ def test_importmixin_leave_ImportFrom_used_names_else() -> None:
 
 
 def test_importmixin_leave_ImportFrom_remove() -> None:
-  """Docstring."""
+  """Verify importmixin leave ImportFrom remove behavior."""
   fixer = MockFixer()
   # It removes source_fws aliases if not used_names
   from_node = typing.cast(cst.ImportFrom, cst.parse_statement("from torch import unknown").body[0])  # type: ignore
@@ -281,7 +281,7 @@ def test_importmixin_leave_ImportFrom_remove() -> None:
 
 
 def test_importmixin_leave_Import_remove() -> None:
-  """Docstring."""
+  """Verify importmixin leave Import remove behavior."""
   fixer = MockFixer()
   # It removes source_fws aliases if not used_names
   import_node = typing.cast(cst.Import, cst.parse_statement("import torch.unknown").body[0])  # type: ignore

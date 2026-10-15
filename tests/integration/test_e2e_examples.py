@@ -23,7 +23,7 @@ def _read_code(filename: str) -> str:
 
 
 class E2ESemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class E2ESemantics."""
 
   def __init__(self) -> None:
     """Initializes the E2ESemantics instance."""
@@ -160,7 +160,7 @@ class E2ESemantics(SemanticsManager):
 
 @pytest.fixture
 def engine_factory() -> typing.Callable[[str, str, bool], ASTEngine]:
-  """Docstring."""
+  """Execute engine factory helper logic."""
   semantics = E2ESemantics()
 
   def _create(source: str, target: str, strict: bool = False) -> ASTEngine:

@@ -4,15 +4,13 @@ Handles output adaptation and state threading.
 Updated to prevent imports from legacy modules and removed deprecated output adapter hooks.
 """
 
-from typing import Any
+from typing import TYPE_CHECKING, Any, List, Tuple
 
-
-from typing import TYPE_CHECKING, List, Tuple
 import libcst as cst
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 from ml_switcheroo.core.rewriter.calls.transformers import apply_index_select
 from ml_switcheroo.core.rewriter.calls.utils import inject_kwarg, strip_kwarg
-from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 if TYPE_CHECKING:
   # Structural typing for rewriter to avoid circular import
@@ -39,22 +37,39 @@ if TYPE_CHECKING:
 
     signature_stack: List[SignatureStackDummy]
 
-  class RewriterDummy:
-    """Structural type representation of a semantic manager."""
+  from typing import Protocol, Union
 
-    semantics: SemanticManagerDummy
-    context: RewriterContextDummy
+  class RewriterDummy(Protocol):
+    """Structural type representation of a rewriter host for post-processing."""
+
+    semantics: Any
+    context: Any
 
     def _report_failure(self, msg: str) -> None:
-      """Structural method signature."""
+      """Report a failure message in the current statement error buffer.
+
+      Args:
+          msg: Failure message string.
+      """
       ...
 
-    def _create_dotted_name(self, name: str) -> cst.Attribute:
-      """Structural method signature."""
+    def _create_dotted_name(self, name: str) -> Union[cst.Name, cst.Attribute]:
+      """Create a CST Name or Attribute chain from a dotted name string.
+
+      Args:
+          name: Dotted name string.
+
+      Returns:
+          CST Name or Attribute node.
+      """
       ...
 
-    def _get_target_traits(self) -> TargetTraitsDummy:
-      """Structural method signature."""
+    def _get_target_traits(self) -> Any:
+      """Retrieve target framework structural traits.
+
+      Returns:
+          StructuralTraits instance.
+      """
       ...
 
 

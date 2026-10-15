@@ -7,7 +7,7 @@ from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPas
 
 
 def test_sharding_extraction_pass_no_nodes() -> None:
-  """Docstring."""
+  """Verify sharding extraction pass no nodes behavior."""
   graph: LogicalGraph = LogicalGraph(nodes={"n1": LogicalNode(id="n1", op_type="Linear")}, edges=[])
   pass_: ShardingExtractionPass = ShardingExtractionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -18,7 +18,7 @@ def test_sharding_extraction_pass_no_nodes() -> None:
 
 
 def test_sharding_extraction_pass_missing_source() -> None:
-  """Docstring."""
+  """Verify sharding extraction pass missing source behavior."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="n1", op_type="Linear"),
     LogicalNode(id="s1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data', None)"}),
@@ -30,7 +30,7 @@ def test_sharding_extraction_pass_missing_source() -> None:
 
 
 def test_sharding_extraction_pass_missing_source_node() -> None:
-  """Docstring."""
+  """Verify sharding extraction pass missing source node behavior."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="s1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data', None)"})
   ]
@@ -44,7 +44,7 @@ def test_sharding_extraction_pass_missing_source_node() -> None:
 
 
 def test_sharding_extraction_pass_invalid_parse() -> None:
-  """Docstring."""
+  """Verify sharding extraction pass invalid parse behavior."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="n1", op_type="Linear"),
     LogicalNode(id="s1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec(!"}),
@@ -57,7 +57,7 @@ def test_sharding_extraction_pass_invalid_parse() -> None:
 
 
 def test_sharding_extraction_pass_success() -> None:
-  """Docstring."""
+  """Verify sharding extraction pass success behavior."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="n1", op_type="Linear"),
     LogicalNode(id="s1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data', None)"}),
@@ -86,7 +86,7 @@ def test_sharding_extraction_pass_success() -> None:
 
 
 def test_parse_partition_spec_various() -> None:
-  """Docstring."""
+  """Verify parse partition spec various behavior."""
   pass_: ShardingExtractionPass = ShardingExtractionPass()
 
   assert pass_._parse_partition_spec("foo()") is None
@@ -105,7 +105,7 @@ def test_parse_partition_spec_various() -> None:
 
 
 def test_sharding_extraction_pass_preserve_other_edges() -> None:
-  """Docstring."""
+  """Verify sharding extraction pass preserve other edges behavior."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="n1", op_type="Linear"),
     LogicalNode(id="s1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data', None)"}),

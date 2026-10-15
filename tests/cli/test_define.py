@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for define."""
 
 import typing
 from pathlib import Path
@@ -10,7 +10,7 @@ from ml_switcheroo.cli.handlers.define import handle_define
 
 
 def test_handle_define_not_found(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify handle define not found behavior."""
   res: int = handle_define(tmp_path / "missing.yaml")
   assert res == 1
 
@@ -18,7 +18,7 @@ def test_handle_define_not_found(tmp_path: Path) -> None:
 @patch("ml_switcheroo.cli.handlers.define.resolve_semantics_dir")
 @patch("ml_switcheroo.cli.handlers.define.shutil.copy2")
 def test_handle_define_success(mock_copy: MagicMock, mock_resolve: MagicMock, tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify handle define success behavior."""
   # Setup mock semantics dir
   sem_dir: Path = tmp_path / "semantics"
   sem_dir.mkdir()
@@ -42,7 +42,7 @@ def test_handle_define_success(mock_copy: MagicMock, mock_resolve: MagicMock, tm
 
 
 def test_handle_define_invalid_schema(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify handle define invalid schema behavior."""
   in_file: Path = tmp_path / "op.yaml"
   data: dict[str, str] = {"invalid": "data"}  # missing 'operation'
   with open(in_file, "w") as f:

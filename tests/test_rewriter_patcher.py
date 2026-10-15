@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for rewriter patcher."""
 
 from typing import Dict, Union
 from unittest.mock import MagicMock
@@ -11,7 +11,7 @@ from ml_switcheroo.core.rewriter.patcher import DeleteAction, GraphPatcher, Repl
 
 
 def test_graph_patcher_delete() -> None:
-  """Docstring."""
+  """Verify graph patcher delete behavior."""
   action: DeleteAction = DeleteAction(node_id="test_node")
   provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
   emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
@@ -25,7 +25,7 @@ def test_graph_patcher_delete() -> None:
 
 
 def test_graph_patcher_replace_init() -> None:
-  """Docstring."""
+  """Verify graph patcher replace init behavior."""
   logical_node: MagicMock = MagicMock(spec=LogicalNode)
   action: ReplaceAction = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=True)
   provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
@@ -51,7 +51,7 @@ def test_graph_patcher_replace_init() -> None:
 
 
 def test_graph_patcher_replace_call() -> None:
-  """Docstring."""
+  """Verify graph patcher replace call behavior."""
   logical_node: MagicMock = MagicMock(spec=LogicalNode)
   action: ReplaceAction = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"])
   provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Call(func=cst.Name("test"))}
@@ -68,7 +68,7 @@ def test_graph_patcher_replace_call() -> None:
 
 
 def test_graph_patcher_replace_call_stmt_like() -> None:
-  """Docstring."""
+  """Verify graph patcher replace call stmt like behavior."""
   logical_node: MagicMock = MagicMock(spec=LogicalNode)
   action: ReplaceAction = ReplaceAction(
     node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"], output_var="y"
@@ -91,7 +91,7 @@ def test_graph_patcher_replace_call_stmt_like() -> None:
 
 
 def test_graph_patcher_leave_hooks() -> None:
-  """Docstring."""
+  """Verify graph patcher leave hooks behavior."""
   patcher: GraphPatcher = GraphPatcher([], {}, MagicMock())
 
   # leave_Assign

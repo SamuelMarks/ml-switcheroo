@@ -1,4 +1,4 @@
-"""Tests for RDNA analysis coverage."""
+"""Test suite for analysis coverage."""
 
 import typing
 
@@ -7,13 +7,13 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaIn
 
 
 def test_analyze_block_empty() -> None:
-  """Docstring."""
+  """Verify analyze block empty behavior."""
   res: dict[str, typing.Any] = RdnaAnalyzer.analyze_block("Conv2d", [])
   assert res == {}
 
 
 def test_analyze_block_conv2d() -> None:
-  """Docstring."""
+  """Verify analyze block conv2d behavior."""
   inst1 = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaSGPR(index=0), RdnaImmediate(value=3)])
   inst2 = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaSGPR(index=1), RdnaImmediate(value=5)])
   inst3 = RdnaInstruction(opcode="s_add_u32", operands=[RdnaSGPR(index=2), RdnaImmediate(value=1)])
@@ -22,21 +22,21 @@ def test_analyze_block_conv2d() -> None:
 
 
 def test_analyze_block_linear() -> None:
-  """Docstring."""
+  """Verify analyze block linear behavior."""
   inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=128)])
   res: dict[str, typing.Any] = RdnaAnalyzer.analyze_block("Linear", [inst])
   assert res == {"in_features": 128, "arg_0": 128}
 
 
 def test_analyze_block_other() -> None:
-  """Docstring."""
+  """Verify analyze block other behavior."""
   inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=10)])
   res: dict[str, typing.Any] = RdnaAnalyzer.analyze_block("UnknownKind", [inst])
   assert res == {}
 
 
 def test_analyze_block_no_immediate() -> None:
-  """Docstring."""
+  """Verify analyze block no immediate behavior."""
   inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaSGPR(index=0), RdnaSGPR(index=1)])
   res: dict[str, typing.Any] = RdnaAnalyzer.analyze_block("Conv2d", [inst])
   assert res == {}

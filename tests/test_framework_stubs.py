@@ -1,7 +1,9 @@
 """Tests for generated framework mapping stubs."""
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 from ml_switcheroo.semantics.schema import validate_yaml_schema
 
 STUBS_DIR = Path("src/ml_switcheroo/semantics/odl")

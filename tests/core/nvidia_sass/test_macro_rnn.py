@@ -1,16 +1,17 @@
-"""Test suite for the RNN NVIDIA_SASS Macros."""
+"""Test suite for macro rnn."""
 
 import typing
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_gru, expand_lstm, expand_rnn
-from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import RegisterAllocator
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment, NvidiaSassInstruction
+from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment, NvidiaSassInstruction, NvidiaSassNode
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
 
 
 def test_nvidia_sass_macro_rnn() -> None:
   """Verifies that expand_rnn generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "rnn1"
   metadata: dict[str, typing.Any] = {"seq_len": 20}
 
@@ -29,7 +30,7 @@ def test_nvidia_sass_macro_rnn() -> None:
 
 def test_nvidia_sass_macro_lstm() -> None:
   """Verifies that expand_lstm generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "lstm1"
   metadata: dict[str, typing.Any] = {"seq_len": 20}
 
@@ -42,7 +43,7 @@ def test_nvidia_sass_macro_lstm() -> None:
 
 def test_nvidia_sass_macro_gru() -> None:
   """Verifies that expand_gru generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "gru1"
   metadata: dict[str, typing.Any] = {"seq_len": 20}
 

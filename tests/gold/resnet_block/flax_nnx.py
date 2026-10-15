@@ -6,7 +6,7 @@ from flax import nnx
 
 
 class ResidualBlock(nnx.Module):
-  """Docstring."""
+  """Test helper class ResidualBlock."""
 
   def __init__(self, channels: int, rngs: nnx.Rngs):
     """Initializes the ResidualBlock instance."""

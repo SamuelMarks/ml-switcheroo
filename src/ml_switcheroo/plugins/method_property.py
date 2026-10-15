@@ -8,10 +8,11 @@ Common usage:
 - PyTorch: `x.size(dim)` -> JAX/NumPy: `x.shape[dim]`
 """
 
-import libcst as cst
 from typing import Union
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
 @register_hook("method_to_property")

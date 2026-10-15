@@ -10,7 +10,7 @@ from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 @pytest.fixture
 def semantics_env() -> SemanticsManager:
-  """Docstring."""
+  """Execute semantics env helper logic."""
   mgr = SemanticsManager()
   RegistryLoader(mgr).hydrate()
   return mgr

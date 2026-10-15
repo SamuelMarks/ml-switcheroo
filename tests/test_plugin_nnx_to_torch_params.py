@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin nnx to torch params."""
 
 from unittest.mock import MagicMock
 
@@ -9,13 +9,13 @@ from ml_switcheroo.plugins.nnx_to_torch_params import _extract_leaf_name, transf
 
 
 def test_extract_leaf_name_unsupported() -> None:
-  """Docstring."""
+  """Verify extract leaf name unsupported behavior."""
   node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   assert _extract_leaf_name(node) is None
 
 
 def test_transform_nnx_param_missing_api() -> None:
-  """Docstring."""
+  """Verify transform nnx param missing api behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = None
   ctx.lookup_api.return_value = None
@@ -29,7 +29,7 @@ def test_transform_nnx_param_missing_api() -> None:
 
 
 def test_transform_nnx_param_trainable() -> None:
-  """Docstring."""
+  """Verify transform nnx param trainable behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "Param"
   ctx.lookup_api.return_value = "torch.nn.Parameter"
@@ -46,7 +46,7 @@ def test_transform_nnx_param_trainable() -> None:
 
 
 def test_transform_nnx_param_non_trainable_injects_requires_grad() -> None:
-  """Docstring."""
+  """Verify transform nnx param non trainable injects requires grad behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "BatchStat"
   ctx.lookup_api.return_value = "torch.nn.Parameter"
@@ -63,7 +63,7 @@ def test_transform_nnx_param_non_trainable_injects_requires_grad() -> None:
 
 
 def test_transform_nnx_param_non_trainable_has_requires_grad() -> None:
-  """Docstring."""
+  """Verify transform nnx param non trainable has requires grad behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "BatchStat"
   ctx.lookup_api.return_value = "torch.nn.Parameter"
@@ -80,7 +80,7 @@ def test_transform_nnx_param_non_trainable_has_requires_grad() -> None:
 
 
 def test_transform_nnx_param_with_no_args_non_trainable() -> None:
-  """Docstring."""
+  """Verify transform nnx param with no args non trainable behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "BatchStat"
   ctx.lookup_api.return_value = "torch.nn.Parameter"

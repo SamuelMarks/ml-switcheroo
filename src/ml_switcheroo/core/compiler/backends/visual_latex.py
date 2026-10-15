@@ -5,16 +5,17 @@ standalone LaTeX documents using the Machine Intelligence Definition Language (M
 package format, suitable for high-quality PDF rendering of neural architectures.
 """
 
-from typing import List, Any
+from typing import Any, List
+
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.latex.nodes import (
-  LatexNode,
-  ModelContainer,
-  InputNode,
-  ReturnNode,
   ComputeNode,
+  InputNode,
+  LatexNode,
   MemoryNode,
+  ModelContainer,
+  ReturnNode,
   StateOpNode,
 )
 

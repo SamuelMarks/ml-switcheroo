@@ -1,7 +1,14 @@
 onnx9000
 doc_cov.json
 ruff_errors.json
+/audit_mlir.json
+/audit_mlir.md
+/audit_stablehlo.json
+/audit_stablehlo.md
 *.bak
+*.orig
+*.patch
+*.rej
 *,cover
 tmp
 *.log

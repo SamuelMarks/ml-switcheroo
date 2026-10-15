@@ -10,29 +10,26 @@ This module maps Operation Definition Language (ODL) type strings (e.g., ``Array
     across different arguments using a shared context.
 """
 
-from typing import Any
-
 import typing
+from typing import Any, Optional, Union
 
-
-import numpy as np
-import hypothesis.strategies as st
 import hypothesis.extra.numpy as npst
-from typing import Optional, Union
+import hypothesis.strategies as st
+import numpy as np
 
 from ml_switcheroo.testing.fuzzer.type_parser import (
-  parse_type_annotation,
-  ParsedType,
   AnyType,
-  NoneType,
-  PrimitiveType,
-  UnionType,
-  OptionalType,
-  TupleType,
-  ListType,
-  DictType,
-  TensorType,
   CallableType,
+  DictType,
+  ListType,
+  NoneType,
+  OptionalType,
+  ParsedType,
+  PrimitiveType,
+  TensorType,
+  TupleType,
+  UnionType,
+  parse_type_annotation,
 )
 
 

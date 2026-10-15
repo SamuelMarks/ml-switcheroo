@@ -57,7 +57,7 @@ def test_runner_deep_compare_exceptions() -> None:
   sr: EquivalenceRunner = EquivalenceRunner()
 
   class BadNumpy:
-    """Docstring."""
+    """Test helper class BadNumpy."""
 
     def __array__(self, *args: Any, **kwargs: Any) -> Any:
       """Helper to   array  ."""
@@ -105,7 +105,7 @@ def test_runner_run_shape_calculation_error() -> None:
   variants: Dict[str, Any] = {"jax": {"api": "jax.add"}}
 
   class DummyFuzzer:
-    """Docstring."""
+    """Test helper class DummyFuzzer."""
 
     def build_strategies(self, p: List[str], h: Dict[str, str], c: Dict[str, Any]) -> Dict[str, Any]:
       """Mock implementation of build strategies."""

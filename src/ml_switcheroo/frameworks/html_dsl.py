@@ -6,18 +6,16 @@ representation of the HTML Grid DSL, providing standard metadata, traits,
 and parsing capabilities without executing or compiling code.
 """
 
-from typing import Any
-
 import typing
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-
-from typing import Union, Dict, List, Tuple, Optional
-from ml_switcheroo.frameworks.base import register_framework, FrameworkAdapter, StandardMap, ImportConfig, InitMode
-from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
-from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.frameworks.loader import load_definitions
+
+from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo.core.html.parser import HtmlParser
+from ml_switcheroo.frameworks.base import FrameworkAdapter, ImportConfig, InitMode, StandardMap, register_framework
+from ml_switcheroo.frameworks.loader import load_definitions
+from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
 
 @register_framework("html")

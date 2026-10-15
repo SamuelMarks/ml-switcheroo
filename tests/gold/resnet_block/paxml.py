@@ -9,7 +9,7 @@ from praxis.layers import normalizations  # type: ignore
 
 
 class ResidualBlock(base_layer.BaseLayer):  # type: ignore
-  """Docstring."""
+  """Test helper class ResidualBlock."""
 
   channels: int = 0
 

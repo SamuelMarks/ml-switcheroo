@@ -1,7 +1,7 @@
 """Unit and integration tests for scripts/check_python_loc.sh."""
 
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 
 def test_check_python_loc_compliant(tmp_path: Path) -> None:

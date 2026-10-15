@@ -2,12 +2,12 @@
 
 import json
 import os
-from pathlib import Path
 import re
 import sys
 import tempfile
-from typing import Dict, List, Optional, Set, Tuple
 import urllib.request
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 MANUAL_MAPPING: Dict[str, str] = {
   "string-literal": "string",

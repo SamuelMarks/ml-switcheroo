@@ -6,7 +6,7 @@ import keras
 
 
 class EmbeddingModel(keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class EmbeddingModel."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int) -> None:
     """Initializes the EmbeddingModel instance."""

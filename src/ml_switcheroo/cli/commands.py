@@ -5,25 +5,18 @@ to maintain backward compatibility with existing tests and imports. Must remain
 synced with handler modules.
 """
 
-from ml_switcheroo.cli.handlers.convert import (
-  handle_convert,
-  _convert_single_file,
-  _print_batch_summary,
-)
+from pathlib import Path
+from typing import Optional
+
+from ml_switcheroo.cli.handlers.convert import _convert_single_file, _print_batch_summary, handle_convert
 
 # New export
 from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
 from ml_switcheroo.cli.handlers.define import handle_define
+from ml_switcheroo.cli.handlers.dev import handle_docs, handle_gen_tests, handle_matrix
 from ml_switcheroo.cli.handlers.verify import handle_ci
-from ml_switcheroo.cli.handlers.dev import (
-  handle_matrix,
-  handle_docs,
-  handle_gen_tests,
-)
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
-from typing import Optional
-from pathlib import Path
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 # Re-export dependent classes to satisfy test patches that target this module
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir

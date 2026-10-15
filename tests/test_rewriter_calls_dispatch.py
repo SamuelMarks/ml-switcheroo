@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for rewriter calls dispatch."""
 
 from typing import Any, Dict
 
@@ -14,10 +14,10 @@ from ml_switcheroo.enums import LogicOp
 
 
 class DummyRule:
-  """Docstring."""
+  """Test helper class DummyRule."""
 
   def __init__(self, if_arg: str, if_value: Any, use_api: str, op: str = LogicOp.EQ.value) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.if_arg = if_arg
     self.is_val = if_value
     self.use_api = use_api
@@ -25,15 +25,15 @@ class DummyRule:
 
 
 class DummyRewriter:
-  """Docstring."""
+  """Test helper class DummyRewriter."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.source_fw = "torch"
 
 
 def test_dispatch_rules_branches() -> None:
-  """Docstring."""
+  """Verify dispatch rules branches behavior."""
   rewriter: DummyRewriter = DummyRewriter()
   node: cst.Call = getattr(getattr(cst.parse_statement("f()"), "body")[0], "value")
 
@@ -66,7 +66,7 @@ def test_dispatch_rules_branches() -> None:
 
 
 def test_extract_argument_node_branches() -> None:
-  """Docstring."""
+  """Verify extract argument node branches behavior."""
   rewriter: DummyRewriter = DummyRewriter()
   node: cst.Call = getattr(getattr(cst.parse_statement("obj.f(a=1, b=2)"), "body")[0], "value")
 
@@ -76,10 +76,10 @@ def test_extract_argument_node_branches() -> None:
   assert _extract_argument_node(rewriter, node2, "a", "a", ["a", "b"]) is not None
 
   class RewriterWithModuleAlias:
-    """Docstring."""
+    """Test helper class RewriterWithModuleAlias."""
 
     def _is_module_alias(self, val: Any) -> bool:
-      """Docstring."""
+      """Execute is module alias helper logic."""
       return True
 
   rewriter2: RewriterWithModuleAlias = RewriterWithModuleAlias()
@@ -88,10 +88,10 @@ def test_extract_argument_node_branches() -> None:
   node3: cst.Call = getattr(getattr(cst.parse_statement("obj.f(2)"), "body")[0], "value")
 
   class RewriterNotModule:
-    """Docstring."""
+    """Test helper class RewriterNotModule."""
 
     def _is_module_alias(self, val: Any) -> bool:
-      """Docstring."""
+      """Execute is module alias helper logic."""
       return False
 
   rewriter3: RewriterNotModule = RewriterNotModule()
@@ -104,7 +104,7 @@ def test_extract_argument_node_branches() -> None:
 
 
 def test_node_to_literal() -> None:
-  """Docstring."""
+  """Verify node to literal behavior."""
   assert _node_to_literal(cst.Integer("1")) == 1
   assert _node_to_literal(cst.Float("1.5")) == 1.5
   assert _node_to_literal(cst.SimpleString('"abc"')) == "abc"
@@ -115,59 +115,9 @@ def test_node_to_literal() -> None:
 
   assert _node_to_literal(cst.Pass()) is None
 
-  class BadInt(cst.Integer):
-    """Docstring."""
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-      """Docstring."""
-      super().__init__(*args, **kwargs)
-
-    @property
-    def value(self) -> str:
-      """Docstring."""
-      return "bad"
-
-    def _visit_and_replace_children(self, visitor: Any) -> "BadInt":
-      """Docstring."""
-      return self
-
-    def _codegen_impl(self, state: Any, default_semi: Any) -> None:
-      """Docstring."""
-      pass
-
-  try:
-    assert _node_to_literal(BadInt("1")) is None
-  except Exception:
-    pass
-
-  class BadFloat(cst.Float):
-    """Docstring."""
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-      """Docstring."""
-      super().__init__(*args, **kwargs)
-
-    @property
-    def value(self) -> str:
-      """Docstring."""
-      return "bad"
-
-    def _visit_and_replace_children(self, visitor: Any) -> "BadFloat":
-      """Docstring."""
-      return self
-
-    def _codegen_impl(self, state: Any, default_semi: Any) -> None:
-      """Docstring."""
-      pass
-
-  try:
-    assert _node_to_literal(BadFloat("1.0")) is None
-  except Exception:
-    pass
-
 
 def test_check_rule_condition_branches() -> None:
-  """Docstring."""
+  """Verify check rule condition branches behavior."""
   rule_int: DummyRule = DummyRule("a", "int", "f", LogicOp.IS_TYPE.value)
   assert _check_rule_condition(cst.Integer("1"), rule_int)
   assert not _check_rule_condition(cst.Float("1.0"), rule_int)
@@ -213,23 +163,23 @@ def test_check_rule_condition_branches() -> None:
 
 
 def test_node_to_literal_valueerror() -> None:
-  """Docstring."""
+  """Verify node to literal valueerror behavior."""
   import libcst as cst
 
   from ml_switcheroo.core.rewriter.calls.dispatch import _node_to_literal
 
   class HackyInt(cst.Integer):
-    """Docstring."""
+    """Test helper class HackyInt."""
 
     def _validate(self) -> None:
-      """Docstring."""
+      """Execute validate helper logic."""
       pass
 
   class HackyFloat(cst.Float):
-    """Docstring."""
+    """Test helper class HackyFloat."""
 
     def _validate(self) -> None:
-      """Docstring."""
+      """Execute validate helper logic."""
       pass
 
   # integer ValueError

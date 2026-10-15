@@ -4,28 +4,26 @@ Generates standalone verification scripts.
 Bundles fuzzer logic (including Hypothesis strategies).
 """
 
-from typing import Any
-
-import json
 import inspect
+import json
 import textwrap
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 import libcst as cst
-from ml_switcheroo.testing.harness_generator_template import get_harness_skeleton
-from ml_switcheroo.testing.fuzzer.core import InputFuzzer
-from ml_switcheroo.utils.code_extractor import CodeExtractor
-from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY, get_adapter
 
 # Imports needed for bundling the fuzzer logic
 import ml_switcheroo.testing.fuzzer.generators
-import ml_switcheroo.testing.fuzzer.parser
 import ml_switcheroo.testing.fuzzer.heuristics
-import ml_switcheroo.testing.fuzzer.utils
+import ml_switcheroo.testing.fuzzer.parser
 import ml_switcheroo.testing.fuzzer.strategies
 import ml_switcheroo.testing.fuzzer.type_parser
+import ml_switcheroo.testing.fuzzer.utils
+from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY, get_adapter
+from ml_switcheroo.testing.fuzzer.core import InputFuzzer
+from ml_switcheroo.testing.harness_generator_template import get_harness_skeleton
 from ml_switcheroo.testing.signature_extractor import SignatureExtractor
+from ml_switcheroo.utils.code_extractor import CodeExtractor
 
 
 class HarnessInjector(cst.CSTTransformer):
@@ -309,7 +307,9 @@ class CallableType(ParsedType):
     pass
 """)
 
-    def extract_module_functions(module: __import__("types").ModuleType) -> None:  # type: ignore
+    from types import ModuleType
+
+    def extract_module_functions(module: ModuleType) -> None:
       """Extract and de-indents all top-level functions from the given module.
 
       Args:
@@ -443,7 +443,7 @@ class CallableType(ParsedType):
         tree = ast.parse(textwrap.dedent(method_source))
         func_def = tree.body[0]
         assert isinstance(func_def, ast.FunctionDef)
-        body_str = ast.unparse(func_def.body)  # type: ignore[arg-type]
+        body_str = ast.unparse(ast.Module(body=func_def.body, type_ignores=[]))
       except Exception:
         continue
 

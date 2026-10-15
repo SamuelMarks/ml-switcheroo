@@ -1,8 +1,8 @@
 """Unit tests for scripts/parse_td.py TableGen parser."""
 
 import json
-from pathlib import Path
 import runpy
+from pathlib import Path
 from typing import Any, Dict, List
 from unittest.mock import patch
 

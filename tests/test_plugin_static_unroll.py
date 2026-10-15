@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin static unroll."""
 
 from unittest.mock import MagicMock
 
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.static_unroll import LoopVarReplacer, unroll_static_l
 
 
 def test_loop_var_replacer() -> None:
-  """Docstring."""
+  """Verify loop var replacer behavior."""
   replacer: LoopVarReplacer = LoopVarReplacer("i", 0)
 
   # match
@@ -26,7 +26,7 @@ def test_loop_var_replacer() -> None:
 
 
 def test_unroll_static_loops() -> None:
-  """Docstring."""
+  """Verify unroll static loops behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   # Valid static loop

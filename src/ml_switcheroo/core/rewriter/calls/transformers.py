@@ -4,8 +4,9 @@ Provides logic to reconstruct CST nodes for Infix operators, Inline Lambdas,
 and Structured Index Selection.
 """
 
-import libcst as cst
 from typing import List, Union
+
+import libcst as cst
 
 
 def apply_index_select(inner_node: cst.BaseExpression, index: int) -> cst.Subscript:

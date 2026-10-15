@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for suggest."""
 
 import sys
 import types
@@ -25,10 +25,10 @@ def dummy_func(a: int, b: int = 2) -> None:
 
 
 class DummyClass:
-  """Class doc."""
+  """Test helper class DummyClass."""
 
   def __init__(self, x: typing.Any) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     pass
 
 
@@ -41,7 +41,7 @@ sys.modules["dummy_mod"] = dummy_mod
 
 
 def test_extract_metadata() -> None:
-  """Docstring."""
+  """Verify extract metadata behavior."""
   info: dict[str, str] = _extract_metadata(dummy_func)
   assert info["kind"] == "function"
   assert "Dummy doc." in info["docstring"]
@@ -49,11 +49,11 @@ def test_extract_metadata() -> None:
 
   info_cls: dict[str, str] = _extract_metadata(DummyClass)
   assert info_cls["kind"] == "class"
-  assert "Class doc." in info_cls["docstring"]
+  assert "Test helper class DummyClass." in info_cls["docstring"]
 
 
 def test_extract_metadata_no_sig() -> None:
-  """Docstring."""
+  """Verify extract metadata no sig behavior."""
   # Builtins without Python-level signatures trigger ValueError/TypeError in inspect.signature
   info: dict[str, str] = _extract_metadata(iter)
   assert info["kind"] == "function"
@@ -61,7 +61,7 @@ def test_extract_metadata_no_sig() -> None:
 
 
 def test_inspect_live_object() -> None:
-  """Docstring."""
+  """Verify inspect live object behavior."""
   info: dict[str, str] = _inspect_live_object("dummy_mod.dummy_func")
   assert info["kind"] == "function"
 
@@ -73,7 +73,7 @@ def test_inspect_live_object() -> None:
 
 
 def test_build_blocks() -> None:
-  """Docstring."""
+  """Verify build blocks behavior."""
   header: str = _build_header("{}")
   assert "You are an expert AI assistant" in header
 
@@ -87,7 +87,7 @@ def test_build_blocks() -> None:
 
 
 def test_handle_suggest_single(capsys: pytest.CaptureFixture[str]) -> None:
-  """Docstring."""
+  """Verify handle suggest single behavior."""
   res: int = handle_suggest("dummy_mod.dummy_func")
   assert res == 0
   captured = capsys.readouterr()
@@ -97,13 +97,13 @@ def test_handle_suggest_single(capsys: pytest.CaptureFixture[str]) -> None:
 
 
 def test_handle_suggest_single_fail() -> None:
-  """Docstring."""
+  """Verify handle suggest single fail behavior."""
   res: int = handle_suggest("dummy_mod.missing_func")
   assert res == 1
 
 
 def test_handle_suggest_wildcard(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify handle suggest wildcard behavior."""
   out_dir: Path = tmp_path / "out"
   res: int = handle_suggest("dummy_mod.*", out_dir=out_dir, batch_size=1)
   assert res == 0
@@ -118,13 +118,13 @@ def test_handle_suggest_wildcard(tmp_path: Path) -> None:
 
 
 def test_handle_suggest_wildcard_fail() -> None:
-  """Docstring."""
+  """Verify handle suggest wildcard fail behavior."""
   res: int = handle_suggest("missing_module.*")
   assert res == 1
 
 
 def test_handle_suggest_wildcard_empty() -> None:
-  """Docstring."""
+  """Verify handle suggest wildcard empty behavior."""
   empty_mod = types.ModuleType("empty_mod")
   setattr(empty_mod, "_hidden", 1)
   sys.modules["empty_mod"] = empty_mod
@@ -133,7 +133,7 @@ def test_handle_suggest_wildcard_empty() -> None:
 
 
 def test_handle_suggest_wildcard_skip_module() -> None:
-  """Docstring."""
+  """Verify handle suggest wildcard skip module behavior."""
   import os
 
   mod = types.ModuleType("skip_mod")
@@ -145,12 +145,12 @@ def test_handle_suggest_wildcard_skip_module() -> None:
 
 
 def test_handle_suggest_wildcard_extract_exception() -> None:
-  """Docstring."""
+  """Verify handle suggest wildcard extract exception behavior."""
   mod = types.ModuleType("fail_mod")
 
   # Create an object that raises an exception when passed to inspect.getdoc
   class BadObj:
-    """Docstring."""
+    """Test helper class BadObj."""
 
     pass
 

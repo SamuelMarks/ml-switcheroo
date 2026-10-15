@@ -17,11 +17,8 @@ Usage:
         # ... logic ...
 """
 
-from typing import Any
-
-
 import textwrap
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class JAXStackMixin:

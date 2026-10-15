@@ -6,7 +6,7 @@ import keras
 
 
 class Model(keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class Model."""
 
   def __init__(self, in_features: int, out_features: int) -> None:
     """Initializes the Model instance."""

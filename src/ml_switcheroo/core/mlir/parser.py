@@ -5,22 +5,22 @@ producing a Concrete Syntax Tree (CST) using the pure-Python Lark parsing librar
 """
 
 import re
-from typing import List, cast, Any, Iterator
+from typing import Any, Iterator, List, cast
 
 from lark import Lark, Transformer, v_args
 from lark.lexer import Lexer, Token
 
 from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import (
-  ModuleNode,
-  BlockNode,
-  RegionNode,
-  OperationNode,
-  ValueNode,
-  TypeNode,
-  AttributeNode,
   AttributeAliasDefNode,
+  AttributeNode,
+  BlockNode,
+  ModuleNode,
+  OperationNode,
+  RegionNode,
   TypeAliasDefNode,
+  TypeNode,
+  ValueNode,
 )
 
 TOKEN_REGEX = [

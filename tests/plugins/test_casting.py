@@ -20,7 +20,7 @@ def rewrite_call(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   hooks._HOOKS["type_methods"] = transform_casting
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -138,7 +138,7 @@ def test_missing_traits(rewriter: PivotRewriter) -> None:
 
 
 class MockTraits:
-  """Docstring."""
+  """Test helper class MockTraits."""
 
   def __init__(self, val: bool) -> None:
     """Initializes the MockTraits instance."""

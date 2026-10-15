@@ -16,7 +16,7 @@ EXPECTED_JAX: str = "\nimport contextlib\nimport torch\n\ndef evaluate(model, x)
 
 @pytest.fixture
 def manager() -> SemanticsManager:
-  """Docstring."""
+  """Execute manager helper logic."""
   mgr = SemanticsManager()
   no_grad_def: dict[str, typing.Any] = {
     "op_type": OpType.CONTEXT,

@@ -7,28 +7,28 @@ from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 
 
 def test_rdna_parser_empty_lines():
-  """Docstring."""
+  """Verify rdna parser empty lines behavior."""
   parser = RdnaParser("v_mov_b32 v0, v1\n\n  \n")
   nodes = parser.parse().statements
   assert len(nodes) == 1
 
 
 def test_rdna_parser_trivia():
-  """Docstring."""
+  """Verify rdna parser trivia behavior."""
   parser = RdnaParser("  ; comment\n  v_nop\n")
   mod = parser.parse()
   assert mod.statements[0].leading_trivia[0].text == "  "
 
 
 def test_rdna_parser_errors():
-  """Docstring."""
+  """Verify rdna parser errors behavior."""
   parser = RdnaParser("!")
   with pytest.raises(ValueError):
     parser.parse()
 
 
 def test_rdna_parser_immediate_variants():
-  """Docstring."""
+  """Verify rdna parser immediate variants behavior."""
   # imm_num float
   parser = RdnaParser("v_add v0, 1.5")
   inst = parser.parse().statements[0]
@@ -62,7 +62,7 @@ def test_rdna_parser_immediate_variants():
 
 
 def test_rdna_parser_directive_variants():
-  """Docstring."""
+  """Verify rdna parser directive variants behavior."""
   parser = RdnaParser('.foo -1, -0x2, +3, +0x4, "string", bar:baz')
   d = parser.parse().statements[0]
   assert isinstance(d, RdnaDirective)
@@ -70,7 +70,7 @@ def test_rdna_parser_directive_variants():
 
 
 def test_rdna_parser_memory_variants():
-  """Docstring."""
+  """Verify rdna parser memory variants behavior."""
   parser = RdnaParser("v_add [v0 + 0x10]")
   inst = parser.parse().statements[0]
   assert isinstance(inst.operands[0], RdnaMemory)
@@ -83,13 +83,13 @@ def test_rdna_parser_memory_variants():
 
 
 def test_rdna_parser_empty():
-  """Docstring."""
+  """Verify rdna parser empty behavior."""
   parser = RdnaParser("")
   assert len(parser.parse().statements) == 0
 
 
 def test_rdna_parser_only_trivia():
-  """Docstring."""
+  """Verify rdna parser only trivia behavior."""
   parser = RdnaParser("  \n")
   mod = parser.parse()
   assert len(mod.statements) == 0
@@ -97,14 +97,14 @@ def test_rdna_parser_only_trivia():
 
 
 def test_rdna_parser_modifier():
-  """Docstring."""
+  """Verify rdna parser modifier behavior."""
   parser = RdnaParser("v_add_f32 v0, row_mask:0xf")
   inst = parser.parse().statements[0]
   assert inst.operands[1].name == "row_mask:0xf"
 
 
 def test_rdna_parser_misc():
-  """Docstring."""
+  """Verify rdna parser misc behavior."""
   # directive with single param list that is not a list? (not really possible but test coverage)
   from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 
@@ -112,7 +112,7 @@ def test_rdna_parser_misc():
 
 
 def test_rdna_parser_missing_coverage_extra():
-  """Docstring."""
+  """Verify rdna parser missing coverage extra behavior."""
   from lark import Token
 
   from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaTransformer
@@ -134,7 +134,7 @@ def test_rdna_parser_missing_coverage_extra():
 
 
 def test_rdna_parser_branch_coverage():
-  """Docstring."""
+  """Verify rdna parser branch coverage behavior."""
   from lark import Token
 
   from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaTransformer

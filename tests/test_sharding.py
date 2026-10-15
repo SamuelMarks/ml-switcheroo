@@ -1,11 +1,11 @@
-"""Docstring."""
+"""Test suite for sharding."""
 
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, PartitionSpec
 from ml_switcheroo.core.compiler.sharding import ShardingInferencePass
 
 
 def test_sharding_inference_pass() -> None:
-  """Docstring."""
+  """Verify sharding inference pass behavior."""
   nodes = {
     "q_proj_1": LogicalNode(id="q_proj_1", op_type="Linear"),
     "o_proj_1": LogicalNode(id="o_proj_1", op_type="Linear"),

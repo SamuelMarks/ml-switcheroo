@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin jax decompose."""
 
 from unittest.mock import MagicMock
 
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.jax_decompose import decompose_via_jax
 
 
 def test_decompose_via_jax() -> None:
-  """Docstring."""
+  """Verify decompose via jax behavior."""
   node: cst.Call = cst.Call(func=cst.Name("Hardswish"), args=[cst.Arg(value=cst.Name("x"))])
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "Hardswish"
@@ -25,7 +25,7 @@ def test_decompose_via_jax() -> None:
 
 
 def test_decompose_via_jax_no_op_id() -> None:
-  """Docstring."""
+  """Verify decompose via jax no op id behavior."""
   node: cst.Call = cst.Call(func=cst.Name("Unknown"), args=[cst.Arg(value=cst.Name("x"))])
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = None

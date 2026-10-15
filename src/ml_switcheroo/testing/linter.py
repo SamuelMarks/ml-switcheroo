@@ -10,8 +10,9 @@ Detection Scope:
 3.  **Attribute Access**: Flags `torch.nn.Linear` if `torch` is a forbidden root.
 """
 
+from typing import Dict, List, Set, Tuple
+
 import libcst as cst
-from typing import List, Set, Dict, Tuple
 
 from ml_switcheroo.frameworks import get_adapter
 

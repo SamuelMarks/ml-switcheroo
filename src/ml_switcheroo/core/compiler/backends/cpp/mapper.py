@@ -7,12 +7,7 @@ import ast
 import json
 import os
 
-from ml_switcheroo.core.compiler.backends.cpp.cst import (
-  Expression,
-  Identifier,
-  BinaryExpression,
-  MethodCall,
-)
+from ml_switcheroo.core.compiler.backends.cpp.cst import BinaryExpression, Expression, Identifier, MethodCall
 
 
 class ASTToCppMapper:

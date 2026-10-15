@@ -15,7 +15,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -39,7 +39,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def run_pass() -> typing.Callable[[str], str]:
-  """Docstring."""
+  """Execute run pass helper logic."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   ctx = RewriterContext(semantics, config)
@@ -90,7 +90,7 @@ def test_loop_static_unroll_hook(run_pass: typing.Callable[[str], str]) -> None:
 
   @register_hook("transform_for_loop_static")
   def mock_hook(node: typing.Any, ctx: typing.Any) -> typing.Any:
-    """Docstring."""
+    """Execute mock hook helper logic."""
     return cst.FlattenSentinel([cst.SimpleStatementLine([cst.Expr(cst.Name("unrolled"))])])
 
   with patch(
@@ -110,7 +110,7 @@ def test_loop_safety_hook(run_pass: typing.Callable[[str], str]) -> None:
 
   @register_hook("transform_for_loop")
   def mock_safety(node: typing.Any, ctx: typing.Any) -> typing.Any:
-    """Docstring."""
+    """Execute mock safety helper logic."""
     return EscapeHatch.mark_failure(node, "Unsafe Loop")
 
   with patch(
@@ -146,7 +146,7 @@ def test_loop_error_bubbling(run_pass: typing.Callable[[str], str]) -> None:
 
 
 def setup_ctx(alias_map: typing.Optional[dict[str, str]] = None) -> RewriterContext:
-  """Docstring."""
+  """Execute setup ctx helper logic."""
   config = RuntimeConfig(source_framework="torch", target_framework="torch")
   ctx = RewriterContext(semantics=SemanticsManager(), config=config)
   if alias_map:
@@ -155,7 +155,7 @@ def setup_ctx(alias_map: typing.Optional[dict[str, str]] = None) -> RewriterCont
 
 
 def test_auxiliary_traits_empty() -> None:
-  """Docstring."""
+  """Verify auxiliary traits empty behavior."""
   ctx = setup_ctx()
   ctx.semantics.get_framework_config = MagicMock(return_value={})  # type: ignore
   p = AuxiliaryTransformer(ctx)
@@ -165,7 +165,7 @@ def test_auxiliary_traits_empty() -> None:
 
 
 def test_auxiliary_get_qualified_name_alias_split() -> None:
-  """Docstring."""
+  """Verify auxiliary get qualified name alias split behavior."""
   ctx = setup_ctx({"np": "numpy"})
   p = AuxiliaryTransformer(ctx)
   node = cst.Attribute(value=cst.Name("np"), attr=cst.Name("add"))
@@ -173,7 +173,7 @@ def test_auxiliary_get_qualified_name_alias_split() -> None:
 
 
 def test_auxiliary_get_qualified_name_no_string() -> None:
-  """Docstring."""
+  """Verify auxiliary get qualified name no string behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   node = cst.Integer("1")
@@ -181,7 +181,7 @@ def test_auxiliary_get_qualified_name_no_string() -> None:
 
 
 def test_auxiliary_create_dotted_name() -> None:
-  """Docstring."""
+  """Verify auxiliary create dotted name behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   node: typing.Any = p._create_dotted_name("a.b.c")
@@ -190,7 +190,7 @@ def test_auxiliary_create_dotted_name() -> None:
 
 
 def test_auxiliary_leave_simplestatementline_warnings() -> None:
-  """Docstring."""
+  """Verify auxiliary leave simplestatementline warnings behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   p.context.current_stmt_warnings = ["warn1"]
@@ -201,7 +201,7 @@ def test_auxiliary_leave_simplestatementline_warnings() -> None:
 
 
 def test_auxiliary_leave_simplestatementline_errors() -> None:
-  """Docstring."""
+  """Verify auxiliary leave simplestatementline errors behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   p.context.current_stmt_errors = ["err1"]
@@ -211,7 +211,7 @@ def test_auxiliary_leave_simplestatementline_errors() -> None:
 
 
 def test_auxiliary_leave_decorator_remove() -> None:
-  """Docstring."""
+  """Verify auxiliary leave decorator remove behavior."""
   ctx = setup_ctx()
   ctx.semantics.get_definition = MagicMock(return_value=("id", {"variants": {"torch": None}}))  # type: ignore
   p = AuxiliaryTransformer(ctx)
@@ -221,7 +221,7 @@ def test_auxiliary_leave_decorator_remove() -> None:
 
 
 def test_auxiliary_leave_decorator_rename_noncall() -> None:
-  """Docstring."""
+  """Verify auxiliary leave decorator rename noncall behavior."""
   ctx = setup_ctx()
   ctx.semantics.get_definition = MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}}))  # type: ignore
   p = AuxiliaryTransformer(ctx)
@@ -248,7 +248,7 @@ def test_auxiliary_leave_decorator_name_none_or_not_found() -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_static_hook(mock_get_hook: MagicMock) -> None:
-  """Docstring."""
+  """Verify auxiliary for loop static hook behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   loop = cst.For(
@@ -270,7 +270,7 @@ def test_auxiliary_for_loop_static_hook(mock_get_hook: MagicMock) -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_static_hook_exception(mock_get_hook: MagicMock) -> None:
-  """Docstring."""
+  """Verify auxiliary for loop static hook exception behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   loop = cst.For(
@@ -290,7 +290,7 @@ def test_auxiliary_for_loop_static_hook_exception(mock_get_hook: MagicMock) -> N
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_hook(mock_get_hook: MagicMock) -> None:
-  """Docstring."""
+  """Verify auxiliary for loop hook behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   loop = cst.For(
@@ -310,7 +310,7 @@ def test_auxiliary_for_loop_hook(mock_get_hook: MagicMock) -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_hook_exception(mock_get_hook: MagicMock) -> None:
-  """Docstring."""
+  """Verify auxiliary for loop hook exception behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   loop = cst.For(
@@ -329,7 +329,7 @@ def test_auxiliary_for_loop_hook_exception(mock_get_hook: MagicMock) -> None:
 
 
 def test_auxiliary_traits_with_traits() -> None:
-  """Docstring."""
+  """Verify auxiliary traits with traits behavior."""
   ctx = setup_ctx()
   ctx.semantics.get_framework_config = MagicMock(return_value={"traits": {}})  # type: ignore
   p = AuxiliaryTransformer(ctx)
@@ -338,7 +338,7 @@ def test_auxiliary_traits_with_traits() -> None:
 
 
 def test_auxiliary_get_qualified_name_alias_no_split() -> None:
-  """Docstring."""
+  """Verify auxiliary get qualified name alias no split behavior."""
   ctx = setup_ctx({"np": "numpy"})
   p = AuxiliaryTransformer(ctx)
   node = cst.Name("np")
@@ -346,7 +346,7 @@ def test_auxiliary_get_qualified_name_alias_no_split() -> None:
 
 
 def test_auxiliary_leave_decorator_rename_noncall2() -> None:
-  """Docstring."""
+  """Verify auxiliary leave decorator rename noncall2 behavior."""
   ctx = setup_ctx()
   ctx.semantics.get_definition = MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}}))  # type: ignore
   p = AuxiliaryTransformer(ctx)
@@ -358,7 +358,7 @@ def test_auxiliary_leave_decorator_rename_noncall2() -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_static_hook_new_node(mock_get_hook: MagicMock) -> None:
-  """Docstring."""
+  """Verify auxiliary for loop static hook new node behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   loop = cst.For(
@@ -380,7 +380,7 @@ def test_auxiliary_for_loop_static_hook_new_node(mock_get_hook: MagicMock) -> No
 
 
 def test_auxiliary_leave_decorator_rename_call() -> None:
-  """Docstring."""
+  """Verify auxiliary leave decorator rename call behavior."""
   ctx = setup_ctx()
   ctx.semantics.get_definition = MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}}))  # type: ignore
   p = AuxiliaryTransformer(ctx)
@@ -391,7 +391,7 @@ def test_auxiliary_leave_decorator_rename_call() -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_static_hook_same2(mock_get_hook: MagicMock) -> None:
-  """Docstring."""
+  """Verify auxiliary for loop static hook same2 behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   loop = cst.For(target=cst.Name("i"), iter=cst.Name("range"), body=cst.IndentedBlock(body=[]))
@@ -402,7 +402,7 @@ def test_auxiliary_for_loop_static_hook_same2(mock_get_hook: MagicMock) -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_hook_same2(mock_get_hook: MagicMock) -> None:
-  """Docstring."""
+  """Verify auxiliary for loop hook same2 behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   loop = cst.For(target=cst.Name("i"), iter=cst.Name("range"), body=cst.IndentedBlock(body=[]))
@@ -415,7 +415,7 @@ def test_auxiliary_for_loop_hook_same2(mock_get_hook: MagicMock) -> None:
 
 
 def test_cst_to_string_none_base() -> None:
-  """Docstring."""
+  """Verify cst to string none base behavior."""
   transformer = AuxiliaryTransformer(CodemodContext())  # type: ignore
   attr_node = cst.Attribute(value=cst.Pass(), attr=cst.Name("bar"))  # type: ignore
   assert transformer._cst_to_string(attr_node) is None
@@ -425,7 +425,7 @@ def test_cst_to_string_none_base() -> None:
 
 
 def test_auxiliary_visit_simplestatementline() -> None:
-  """Docstring."""
+  """Verify auxiliary visit simplestatementline behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   res: typing.Any = p.visit_SimpleStatementLine(cst.SimpleStatementLine(body=[cst.Pass()]))
@@ -435,7 +435,7 @@ def test_auxiliary_visit_simplestatementline() -> None:
 
 
 def test_auxiliary_leave_decorator_rename_noncall3() -> None:
-  """Docstring."""
+  """Verify auxiliary leave decorator rename noncall3 behavior."""
   ctx = setup_ctx()
   ctx.semantics.get_definition = MagicMock(return_value=("id", {"variants": {"torch": {"no_api": "missing"}}}))  # type: ignore
   p = AuxiliaryTransformer(ctx)
@@ -446,7 +446,7 @@ def test_auxiliary_leave_decorator_rename_noncall3() -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_static_hook_same(mock_get_hook: MagicMock) -> None:
-  """Docstring."""
+  """Verify auxiliary for loop static hook same behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   loop = cst.For(target=cst.Name("i"), iter=cst.Name("range"), body=cst.IndentedBlock(body=[]))
@@ -457,7 +457,7 @@ def test_auxiliary_for_loop_static_hook_same(mock_get_hook: MagicMock) -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_hook_same(mock_get_hook: MagicMock) -> None:
-  """Docstring."""
+  """Verify auxiliary for loop hook same behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   loop = cst.For(target=cst.Name("i"), iter=cst.Name("range"), body=cst.IndentedBlock(body=[]))
@@ -468,7 +468,7 @@ def test_auxiliary_for_loop_hook_same(mock_get_hook: MagicMock) -> None:
 
 @patch("ml_switcheroo.core.rewriter.passes.auxiliary.get_hook")
 def test_auxiliary_for_loop_hook_none(mock_get_hook: MagicMock) -> None:
-  """Docstring."""
+  """Verify auxiliary for loop hook none behavior."""
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
   loop = cst.For(target=cst.Name("i"), iter=cst.Name("range"), body=cst.IndentedBlock(body=[]))

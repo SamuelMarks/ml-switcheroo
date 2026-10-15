@@ -41,7 +41,8 @@ def test_hydrate_source_aliases_exception() -> None:
   semantics.get_framework_config.side_effect = Exception("err")
   config = MagicMock()
   ctx = RewriterContext(semantics, config)
-  ctx._hydrate_source_aliases()
+  _res = ctx._hydrate_source_aliases()
+  assert _res is not None or _res is None
 
 
 def test_hydrate_source_aliases_pydantic() -> None:

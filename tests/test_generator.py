@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for generator."""
 
 import libcst as cst
 
@@ -14,7 +14,7 @@ def build_mock_op(
   regions: list[RegionNode] = [],
   trivia: list[type] = [],
 ) -> OperationNode:
-  """Docstring."""
+  """Execute build mock op helper logic."""
   return OperationNode(
     name=name,
     results=[ValueNode(name=r) for r in results],
@@ -26,7 +26,7 @@ def build_mock_op(
 
 
 def test_generator_init() -> None:
-  """Docstring."""
+  """Verify generator init behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   assert gen.ctx is not None
   assert gen.usage_counts == {}
@@ -35,7 +35,7 @@ def test_generator_init() -> None:
 
 
 def test_generator_scan_block_usage() -> None:
-  """Docstring."""
+  """Verify generator scan block usage behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   # Op with operands and results
@@ -60,21 +60,21 @@ def test_generator_scan_block_usage() -> None:
 
 
 def test_convert_trivia() -> None:
-  """Docstring."""
+  """Verify convert trivia behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   class MockTrivia:
-    """Class doc."""
+    """Test helper class MockTrivia."""
 
     def __init__(self, content: str) -> None:
-      """Init doc."""
+      """Initialize test helper instance."""
       self.content: str = content
 
   class MockTrivia2:
-    """Class doc."""
+    """Test helper class MockTrivia2."""
 
     def __init__(self, text: str) -> None:
-      """Init doc."""
+      """Initialize test helper instance."""
       self.text: str = text
 
   trivia_list: list[type] = [
@@ -92,7 +92,7 @@ def test_convert_trivia() -> None:
 
 
 def test_generator_should_inline_expression() -> None:
-  """Docstring."""
+  """Verify generator should inline expression behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   gen.usage_counts["%used_const"] = 1
   gen.usage_counts["%unused_const"] = 0
@@ -131,7 +131,7 @@ def test_generator_should_inline_expression() -> None:
 
 
 def test_resolve_operand() -> None:
-  """Docstring."""
+  """Verify resolve operand behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   # Deferred
@@ -153,7 +153,7 @@ def test_resolve_operand() -> None:
 
 
 def test_create_expression_from_op() -> None:
-  """Docstring."""
+  """Verify create expression from op behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   assert isinstance(gen._create_expression_from_op(build_mock_op("sw.constant")), cst.Integer)
@@ -164,7 +164,7 @@ def test_create_expression_from_op() -> None:
 
 
 def test_convert_statement_op() -> None:
-  """Docstring."""
+  """Verify convert statement op behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   assert isinstance(gen._convert_statement_op(build_mock_op("sw.return")), cst.SimpleStatementLine)
@@ -176,7 +176,7 @@ def test_convert_statement_op() -> None:
 
 
 def test_wrap_as_statement() -> None:
-  """Docstring."""
+  """Verify wrap as statement behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   expr: cst.Name = cst.Name("val")
@@ -224,7 +224,7 @@ def test_wrap_as_statement() -> None:
 
 
 def test_is_void_call() -> None:
-  """Docstring."""
+  """Verify is void call behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
 
   # super().__init__()
@@ -241,14 +241,14 @@ def test_is_void_call() -> None:
 
 
 def test_generate_integration() -> None:
-  """Docstring."""
+  """Verify generate integration behavior."""
 
   # Put it all together to test logic flow in _convert_block and generate
   class MockTrivia:
-    """Class doc."""
+    """Test helper class MockTrivia."""
 
     def __init__(self, content: str) -> None:
-      """Init doc."""
+      """Initialize test helper instance."""
       self.content: str = content
 
   # Need to build realistic block
@@ -278,7 +278,7 @@ def test_generate_integration() -> None:
 
 
 def test_generator_convert_block_uncovered() -> None:
-  """Function doc."""
+  """Verify generator convert block uncovered behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   gen.usage_counts["%unused"] = 0
   # Test op that is wrapped as statement and gets comments
@@ -315,7 +315,7 @@ def test_generator_convert_block_uncovered() -> None:
 
 
 def test_generator_wrap_as_statement_uncovered() -> None:
-  """Function doc."""
+  """Verify generator wrap as statement uncovered behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   gen.usage_counts["%used_once"] = 1
   gen.usage_consumers["%used_once"] = build_mock_op("sw.call")
@@ -340,7 +340,7 @@ def test_generator_wrap_as_statement_uncovered() -> None:
 
 
 def test_generator_is_void_call_branches() -> None:
-  """Function doc."""
+  """Verify generator is void call branches behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   # [344, 349] - func is Attribute but attr is not __init__
   expr1: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("other")))

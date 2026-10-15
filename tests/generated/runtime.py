@@ -2,12 +2,13 @@
 # ruff: noqa
 # fmt: off
 
-import sys
-import pytest
-import random
-import numpy as np
 import importlib.util
+import random
+import sys
 import typing
+
+import numpy as np
+import pytest
 
 # --- flax_nnx ---
 FLAX_NNX_AVAILABLE = importlib.util.find_spec("jax") is not None

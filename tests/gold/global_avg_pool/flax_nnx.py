@@ -5,7 +5,7 @@ from flax import nnx
 
 
 class GAPModel(nnx.Module):
-  """Docstring."""
+  """Test helper class GAPModel."""
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance."""

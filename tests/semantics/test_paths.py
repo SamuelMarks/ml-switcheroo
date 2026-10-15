@@ -1,12 +1,12 @@
 """Test suite for the Paths module."""
 
-import os
-import sys
-from pathlib import Path
-from unittest.mock import patch
+import os  # noqa: E402
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
-import ml_switcheroo.semantics.paths as paths
-from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
+import ml_switcheroo.semantics.paths as paths  # noqa: E402
+from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir  # noqa: E402
 
 
 def test_resolve_semantics_dir_local(tmp_path: Path) -> None:

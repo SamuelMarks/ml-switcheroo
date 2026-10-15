@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin method property."""
 
 from unittest.mock import MagicMock
 
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.method_property import transform_method_to_property
 
 
 def test_not_method_call() -> None:
-  """Docstring."""
+  """Verify not method call behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   code: str = "my_func()"
@@ -21,7 +21,7 @@ def test_not_method_call() -> None:
 
 
 def test_unknown_method() -> None:
-  """Docstring."""
+  """Verify unknown method behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   code: str = "x.unknown_method()"
@@ -33,7 +33,7 @@ def test_unknown_method() -> None:
 
 
 def test_not_tensor() -> None:
-  """Docstring."""
+  """Verify not tensor behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.resolve_type.return_value = "List"
 
@@ -46,7 +46,7 @@ def test_not_tensor() -> None:
 
 
 def test_no_target_prop() -> None:
-  """Docstring."""
+  """Verify no target prop behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.resolve_type.return_value = "Tensor"
   ctx.lookup_api.return_value = None
@@ -60,7 +60,7 @@ def test_no_target_prop() -> None:
 
 
 def test_size_no_args() -> None:
-  """Docstring."""
+  """Verify size no args behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.resolve_type.return_value = "Tensor"
   ctx.lookup_api.return_value = "shape"
@@ -75,7 +75,7 @@ def test_size_no_args() -> None:
 
 
 def test_size_with_args() -> None:
-  """Docstring."""
+  """Verify size with args behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.resolve_type.return_value = "Tensor"
   ctx.lookup_api.return_value = "shape"
@@ -91,7 +91,7 @@ def test_size_with_args() -> None:
 
 
 def test_size_with_multiple_args() -> None:
-  """Docstring."""
+  """Verify size with multiple args behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.resolve_type.return_value = "Tensor"
   ctx.lookup_api.return_value = "shape"
@@ -105,7 +105,7 @@ def test_size_with_multiple_args() -> None:
 
 
 def test_data_ptr() -> None:
-  """Docstring."""
+  """Verify data ptr behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.resolve_type.return_value = "Tensor"
   ctx.lookup_api.return_value = "data_ptr"

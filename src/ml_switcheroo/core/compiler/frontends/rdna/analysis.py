@@ -8,10 +8,7 @@ It enables the "Lifting" process to recover parameters like `kernel_size=3`
 from `s_cmp_lt_i32 sX, 3` instructions inside a loop structure.
 """
 
-from typing import Any
-
-
-from typing import List
+from typing import Any, List
 
 from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 

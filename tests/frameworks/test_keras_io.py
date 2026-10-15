@@ -13,7 +13,7 @@ def test_keras_io_dummy() -> None:
 
 
 def test_keras_io_mixin_serialization() -> None:
-  """Docstring."""
+  """Verify keras io mixin serialization behavior."""
   mixin = KerasIOMixin()
 
   assert mixin.get_serialization_imports() == ["import keras"]

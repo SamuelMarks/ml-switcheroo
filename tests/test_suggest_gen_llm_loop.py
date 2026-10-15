@@ -1,9 +1,9 @@
 """Unit and integration tests for scripts/suggest_gen_llm_loop.sh."""
 
 import os
-from pathlib import Path
 import stat
 import subprocess
+from pathlib import Path
 
 
 def test_missing_code2prompt() -> None:

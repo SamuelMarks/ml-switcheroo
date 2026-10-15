@@ -9,17 +9,17 @@ occur.
 import argparse
 import gzip
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 try:
-  from ml_ecosystem_snapshots.diff import diff_snapshots, generate_changelog
   from ml_ecosystem_snapshots.api import extract_snapshot_isolated
-except ImportError:  # pragma: no cover
-  diff_snapshots = None  # type: ignore[assignment]
-  generate_changelog = None  # type: ignore[assignment]
-  extract_snapshot_isolated = None  # type: ignore[assignment]
+  from ml_ecosystem_snapshots.diff import diff_snapshots, generate_changelog
+except ImportError:
+  diff_snapshots = None
+  generate_changelog = None
+  extract_snapshot_isolated = None
 
 
 def load_snapshot_file(path: Union[str, Path]) -> Dict[str, Any]:

@@ -4,7 +4,7 @@ import numpy as np
 
 
 class ConvModel:
-  """Docstring."""
+  """Test helper class ConvModel."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3):
     """Initializes the ConvModel instance."""

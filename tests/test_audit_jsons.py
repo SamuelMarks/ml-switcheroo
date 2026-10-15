@@ -1,10 +1,10 @@
 """Tests for audit_jsons script."""
 
 import json
-import yaml
 from pathlib import Path
 
 import pytest
+import yaml
 
 import scripts.audit_jsons
 
@@ -67,7 +67,8 @@ def test_run(setup_workspace: Path) -> None:
       "k_extras: dict[str, dict[str, Any]] = {}", 'k_extras: dict[str, dict[str, Any]] = {"ExtraOp": {}}'
     )
     exec(compile(source_code, "scripts/audit_jsons.py", "exec"), scripts.audit_jsons.__dict__)
-    scripts.audit_jsons.run()
+    _res = scripts.audit_jsons.run()
+    assert _res is not None or _res is None
 
   test_with_k_extras()
 

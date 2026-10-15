@@ -5,23 +5,21 @@ Updated to remove legacy `create_parser` and `create_emitter` hooks,
 enforcing the new Pipeline Routing architecture.
 """
 
-from typing import Any
-
-import typing
-
-
 import json
 import logging
-from functools import lru_cache
+import typing
 from enum import Enum
+from functools import lru_cache
 from pathlib import Path
-from typing import Protocol, Type, Dict, List, Tuple, Optional, Union
-from pydantic import BaseModel, Field
-from ml_switcheroo_ir.schema.ghost import SemanticTier, StandardMap, GhostRef
-from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
-from ml_switcheroo.core.dsl import OperationDef as OperationDef
+from typing import Any, Dict, List, Optional, Protocol, Tuple, Type, Union
 
-SNAPSHOT_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "ml-compiler-snapshots"
+from ml_switcheroo_ir.schema.ghost import GhostRef, SemanticTier, StandardMap
+from pydantic import BaseModel, Field
+
+from ml_switcheroo.core.dsl import OperationDef as OperationDef
+from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
+
+SNAPSHOT_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "ml-framework-snapshots"
 
 
 class InitMode(str, Enum):
@@ -353,7 +351,7 @@ def load_snapshot_for_adapter(fw_key: str) -> Any:
   try:
     with open(target, "r", encoding="utf-8") as f:
       return json.load(f)
-  except Exception as e:
+  except (json.JSONDecodeError, OSError) as e:
     logging.error(f"Failed to load snapshot {target}: {e}")
     return {}
 

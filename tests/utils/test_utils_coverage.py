@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 
 
 def test_code_extractor_error() -> None:
-  """Docstring."""
+  """Verify code extractor error behavior."""
   import pytest
 
   from ml_switcheroo.utils.code_extractor import CodeExtractor
@@ -16,7 +16,7 @@ def test_code_extractor_error() -> None:
 
 
 def test_code_extractor_normalize_harness_imports() -> None:
-  """Docstring."""
+  """Verify code extractor normalize harness imports behavior."""
   from ml_switcheroo.utils.code_extractor import CodeExtractor
 
   ce: CodeExtractor = CodeExtractor()
@@ -29,7 +29,7 @@ def test_doc_context_branches() -> None:
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
-    """Docstring."""
+    """Test helper class DummySM."""
 
     def get_all_operations(self) -> Dict[str, Any]:
       """Mock implementation of get all operations."""
@@ -48,7 +48,7 @@ def test_doc_context_branches() -> None:
 
 
 def test_code_extractor_error_more() -> None:
-  """Docstring."""
+  """Verify code extractor error more behavior."""
   import pytest
 
   from ml_switcheroo.utils.code_extractor import CodeExtractor
@@ -63,7 +63,7 @@ def test_doc_context_more() -> None:
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
-    """Docstring."""
+    """Test helper class DummySM."""
 
     pass
 
@@ -89,7 +89,7 @@ def test_doc_context_more_variants() -> None:
   from ml_switcheroo.utils.doc_context import DocContextBuilder
 
   class DummySM:
-    """Docstring."""
+    """Test helper class DummySM."""
 
     pass
 

@@ -59,7 +59,7 @@ def test_flax_nnx_to_torch_neural_ex0(semantics: SemanticsManager) -> None:
 
 
 class FixedSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class FixedSemantics."""
 
   def __init__(self) -> None:
     """Initializes the FixedSemantics instance."""

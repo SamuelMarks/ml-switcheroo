@@ -9,7 +9,7 @@ from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
 @pytest.fixture
 def adapter() -> PaxmlAdapter:
-  """Docstring."""
+  """Execute adapter helper logic."""
   return PaxmlAdapter()
 
 
@@ -39,7 +39,7 @@ def test_tier2_neural_validity(adapter: PaxmlAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: PaxmlAdapter) -> None:
-  """Docstring."""
+  """Verify tier3 extras validity behavior."""
   code: str = adapter.get_tiered_examples()["tier3_extras"]
   ast.parse(code)
   assert "pax_fiddle.Config" in code

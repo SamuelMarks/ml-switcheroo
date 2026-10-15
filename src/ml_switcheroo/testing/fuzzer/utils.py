@@ -5,8 +5,8 @@ This module provides helper functions for parsing complex type strings
 for tensor shapes.
 """
 
-from typing import List, Dict, Tuple
 import random
+from typing import Dict, List, Tuple
 
 
 def is_pipe_top_level(text: str) -> bool:

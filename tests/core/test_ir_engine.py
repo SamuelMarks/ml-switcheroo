@@ -3,8 +3,8 @@
 import json
 from typing import Any, Dict
 from unittest.mock import patch
-import pytest
 
+import pytest
 
 from ml_switcheroo.core.conversion_result import ConversionResult
 from ml_switcheroo.core.engine import ASTEngine

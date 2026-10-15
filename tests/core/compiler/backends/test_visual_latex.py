@@ -100,7 +100,7 @@ def test_latex_backend_output_node_bypass() -> None:
 
 
 def test_visual_latex_no_node_data() -> None:
-  """Docstring."""
+  """Verify visual latex no node data behavior."""
   # Hit 125->131
   from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph
@@ -112,7 +112,7 @@ def test_visual_latex_no_node_data() -> None:
 
 
 def test_visual_latex_clean_type_no_dot_no_func() -> None:
-  """Docstring."""
+  """Verify visual latex clean type no dot no func behavior."""
   # Hit 135->137
   from ml_switcheroo.core.compiler.backends.visual_latex import LatexBackend
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode

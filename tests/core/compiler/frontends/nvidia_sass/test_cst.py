@@ -1,4 +1,4 @@
-"""Tests for the NVIDIA_SASS Concrete Syntax Tree nodes."""
+"""Test suite for cst."""
 
 import pytest
 
@@ -17,7 +17,7 @@ from ml_switcheroo.core.cst.base import Trivia
 
 
 def test_register_to_text() -> None:
-  """Docstring."""
+  """Verify register to text behavior."""
   reg = NvidiaSassRegister(name="R0", leading_trivia=[Trivia(" ")], trailing_trivia=[Trivia(",")])
   assert reg.to_text() == " R0,"
 
@@ -32,7 +32,7 @@ def test_register_to_text() -> None:
 
 
 def test_predicate_to_text() -> None:
-  """Docstring."""
+  """Verify predicate to text behavior."""
   pred = NvidiaSassPredicate(name="P0", is_guard=True)
   assert pred.to_text() == "@P0"
 
@@ -44,7 +44,7 @@ def test_predicate_to_text() -> None:
 
 
 def test_immediate_to_text() -> None:
-  """Docstring."""
+  """Verify immediate to text behavior."""
   imm_int = NvidiaSassImmediate(value=42)
   assert imm_int.to_text() == "42"
 
@@ -56,7 +56,7 @@ def test_immediate_to_text() -> None:
 
 
 def test_memory_to_text() -> None:
-  """Docstring."""
+  """Verify memory to text behavior."""
   mem_reg = NvidiaSassMemory(base=NvidiaSassRegister(name="R1"))
   assert mem_reg.to_text() == "[R1]"
 
@@ -71,7 +71,7 @@ def test_memory_to_text() -> None:
 
 
 def test_instruction_to_text() -> None:
-  """Docstring."""
+  """Verify instruction to text behavior."""
   inst = NvidiaSassInstruction(
     leading_trivia=[Trivia("  ")],
     predicate=NvidiaSassPredicate(name="P0", is_guard=True, trailing_trivia=[Trivia(" ")]),
@@ -86,7 +86,7 @@ def test_instruction_to_text() -> None:
 
 
 def test_instruction_to_text_no_trivia() -> None:
-  """Docstring."""
+  """Verify instruction to text no trivia behavior."""
   inst = NvidiaSassInstruction(
     predicate=NvidiaSassPredicate(name="P0", is_guard=True),
     opcode="FADD",
@@ -102,19 +102,19 @@ def test_instruction_to_text_no_trivia() -> None:
 
 
 def test_instruction_invalid_opcode() -> None:
-  """Docstring."""
+  """Verify instruction invalid opcode behavior."""
   with pytest.raises(ValueError, match="Invalid NVIDIA_SASS opcode"):
     NvidiaSassInstruction(opcode="FADD R0")
 
 
 def test_label_to_text() -> None:
-  """Docstring."""
+  """Verify label to text behavior."""
   lbl = NvidiaSassLabel(name="L_0", trailing_trivia=[Trivia("\n")])
   assert lbl.to_text() == "L_0:\n"
 
 
 def test_directive_to_text() -> None:
-  """Docstring."""
+  """Verify directive to text behavior."""
   dir1 = NvidiaSassDirective(name="text")
   assert dir1.to_text() == ".text"
 
@@ -123,13 +123,13 @@ def test_directive_to_text() -> None:
 
 
 def test_comment_to_text() -> None:
-  """Docstring."""
+  """Verify comment to text behavior."""
   com = NvidiaSassComment(text="this is a comment", trailing_trivia=[Trivia("\n")])
   assert com.to_text() == "// this is a comment\n"
 
 
 def test_module_to_text() -> None:
-  """Docstring."""
+  """Verify module to text behavior."""
   mod = NvidiaSassModule(
     statements=[
       NvidiaSassDirective(name="text", trailing_trivia=[Trivia("\n")]),

@@ -1,22 +1,22 @@
-"""Test suite for the Loss NVIDIA_SASS Macros."""
+"""Test suite for macro loss."""
 
 import typing
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_crossentropyloss, expand_mseloss
-from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import RegisterAllocator
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassImmediate,
   NvidiaSassInstruction,
-  NvidiaSassNode,
   NvidiaSassRegister,
 )
+from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
 
 
 def test_nvidia_sass_macro_mseloss() -> None:
   """Verifies that expand_mseloss generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "mse1"
   metadata: dict[str, typing.Any] = {"elements": 32, "reduction": "mean"}
 
@@ -35,7 +35,7 @@ def test_nvidia_sass_macro_mseloss() -> None:
 
 def test_nvidia_sass_macro_crossentropyloss() -> None:
   """Verifies that expand_crossentropyloss generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "ce1"
   metadata: dict[str, typing.Any] = {"elements": 64}
 

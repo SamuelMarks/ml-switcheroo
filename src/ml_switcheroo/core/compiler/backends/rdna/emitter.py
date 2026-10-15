@@ -4,8 +4,9 @@ Converts RDNA AST nodes into formatted assembly text.
 """
 
 from typing import Any, List, Optional
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaNode
+
 from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaNode
 
 
 class RdnaEmitter:

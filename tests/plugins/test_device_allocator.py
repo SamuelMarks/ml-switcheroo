@@ -28,7 +28,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> typing.Generator[PivotRewriter, None, None]:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   hooks._HOOKS["device_allocator"] = transform_device_allocator
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -155,7 +155,7 @@ def test_device_allocator_invalid_colon_index(rewriter: PivotRewriter) -> None:
 
 
 def test_device_allocator_no_adapter() -> None:
-  """Docstring."""
+  """Verify device allocator no adapter behavior."""
   node = cst.parse_expression("torch.device('cuda', 0)")
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics_mock = MagicMock()
@@ -167,7 +167,7 @@ def test_device_allocator_no_adapter() -> None:
 
 
 def test_parse_device_args_no_args() -> None:
-  """Docstring."""
+  """Verify parse device args no args behavior."""
   node = cst.parse_expression("torch.device()")
   t, idx = _parse_device_args(typing.cast(cst.Call, node))
   assert t is None
@@ -175,7 +175,7 @@ def test_parse_device_args_no_args() -> None:
 
 
 def test_device_allocator_adapter_exception_extra() -> None:
-  """Docstring."""
+  """Verify device allocator adapter exception extra behavior."""
   node = cst.parse_expression("torch.device('cuda')")
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics_mock = MagicMock()

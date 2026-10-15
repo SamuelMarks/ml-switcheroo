@@ -68,7 +68,7 @@ def test_ast_to_cpp_mapper() -> None:
 
 
 def test_ast_to_cpp_mapper_no_operators_json(monkeypatch: MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify ast to cpp mapper no operators json behavior."""
   import os
 
   from ml_switcheroo.core.compiler.backends.cpp.mapper import ASTToCppMapper
@@ -80,17 +80,6 @@ def test_ast_to_cpp_mapper_no_operators_json(monkeypatch: MonkeyPatch) -> None:
 
 
 # --- Merged from test_mapper_extra.py ---
-
-"""Extra unit tests for the ASTToCppMapper.
-
-This module contains additional unit tests for the ASTToCppMapper class.
-It validates complex and boundary behavior when translating Python AST expression
-nodes into C++ CST nodes. The tests specifically target less common or default
-fallback paths for binary operations (such as subtraction, multiplication, division, and
-unmapped operators defaulting to standard addition), constant representations, function calls
-originating from unsupported non-name/non-attribute constructs (e.g., calling an integer),
-and error-handling branches for unsupported AST node types.
-"""
 
 
 def test_ast_to_cpp_mapper_extra() -> None:

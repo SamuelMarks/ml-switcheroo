@@ -1,9 +1,10 @@
 """Tests for the in_top_k plugin."""
 
 import libcst as cst
-from ml_switcheroo.plugins.in_top_k_plugin import in_top_k_plugin
-from ml_switcheroo.core.hooks import HookContext
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.plugins.in_top_k_plugin import in_top_k_plugin
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 

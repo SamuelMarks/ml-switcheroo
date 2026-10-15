@@ -57,14 +57,14 @@ def test_get_signature() -> None:
 
 
 def test_is_docstring() -> None:
-  """Docstring."""
+  """Verify is docstring behavior."""
   mod: cst.Module = cst.parse_module('"""doc"""\nimport foo')
   assert is_docstring(mod.body[0], 0)
   assert not is_docstring(mod.body[1], 1)
 
 
 def test_is_docstring_not_zero() -> None:
-  """Docstring."""
+  """Verify is docstring not zero behavior."""
   mod: cst.Module = cst.parse_module('import foo\n"""doc"""')
   assert not is_docstring(mod.body[1], 1)
 
@@ -76,12 +76,12 @@ def test_get_root_name_cst() -> None:
 
 
 def test_is_docstring_not_expr() -> None:
-  """Docstring."""
+  """Verify is docstring not expr behavior."""
   mod: cst.Module = cst.parse_module("import foo")
   assert not is_docstring(mod.body[0], 0)
 
 
 def test_is_docstring_not_string() -> None:
-  """Docstring."""
+  """Verify is docstring not string behavior."""
   mod: cst.Module = cst.parse_module("1")
   assert not is_docstring(mod.body[0], 0)

@@ -11,7 +11,7 @@ from ml_switcheroo.tools.injector_plugin import PluginGenerator
 
 @pytest.fixture
 def plugin_dir(tmp_path: Path) -> Path:
-  """Docstring."""
+  """Execute plugin dir helper logic."""
   d: Path = tmp_path / "plugins"
   d.mkdir()
   return d
@@ -148,7 +148,7 @@ def test_preserves_logic_with_complex_indentation(plugin_dir: Path) -> None:
 
 
 def test_preserves_logic_with_simple_statement_suite(plugin_dir: Path) -> None:
-  """Docstring."""
+  """Verify preserves logic with simple statement suite behavior."""
   gen: PluginGenerator = PluginGenerator(plugin_dir)
   scaffold: PluginScaffoldDef = PluginScaffoldDef(name="simple_stmt", type=PluginType.CALL, doc="Doc")
   file_path: Path = plugin_dir / "simple_stmt.py"
@@ -163,7 +163,7 @@ def test_preserves_logic_with_simple_statement_suite(plugin_dir: Path) -> None:
 
 
 def test_preserves_logic_empty_body(plugin_dir: Path) -> None:
-  """Docstring."""
+  """Verify preserves logic empty body behavior."""
   gen: PluginGenerator = PluginGenerator(plugin_dir)
   scaffold: PluginScaffoldDef = PluginScaffoldDef(name="empty_body", type=PluginType.CALL, doc="New Doc")
   file_path: Path = plugin_dir / "empty_body.py"
@@ -175,7 +175,7 @@ def test_preserves_logic_empty_body(plugin_dir: Path) -> None:
 
 
 def test_injector_plugin_edge_cases(plugin_dir: Path) -> None:
-  """Docstring."""
+  """Verify injector plugin edge cases behavior."""
   from ml_switcheroo.tools.injector_plugin import PluginGenerator
 
   gen: PluginGenerator = PluginGenerator(plugin_dir)

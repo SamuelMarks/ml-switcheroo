@@ -5,7 +5,7 @@ import mlx.nn as nn
 
 
 class AttentionModel(nn.Module):
-  """Docstring."""
+  """Test helper class AttentionModel."""
 
   def __init__(self, embed_dim: int, num_heads: int):
     """Initializes the AttentionModel instance."""

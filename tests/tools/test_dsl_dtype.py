@@ -41,7 +41,7 @@ def test_param_dtype_and_rank() -> None:
 
 @pytest.fixture
 def fuzzer() -> InputFuzzer:
-  """Docstring."""
+  """Execute fuzzer helper logic."""
   return InputFuzzer()
 
 

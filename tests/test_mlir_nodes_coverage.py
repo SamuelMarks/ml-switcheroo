@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for mlir nodes coverage."""
 
 from ml_switcheroo.core.mlir.nodes import (
   AttributeNode,
@@ -14,7 +14,7 @@ from ml_switcheroo.core.mlir.nodes import (
 
 
 def test_nodes_branches() -> None:
-  """Docstring."""
+  """Verify nodes branches behavior."""
   # ValueNode
   t: TypeNode = TypeNode(
     body="i32", leading_trivia=[TriviaNode(content="L", kind="w")], trailing_trivia=[TriviaNode(content="T", kind="w")]
@@ -124,7 +124,7 @@ def test_nodes_branches() -> None:
 
 
 def test_missing_nodes() -> None:
-  """Docstring."""
+  """Verify missing nodes behavior."""
   # 90 -> 92 (AttributeNode value is list)
   a_list: AttributeNode = AttributeNode(name="a", value=['"1"', '"2"'])
   assert a_list.to_text() == 'a = ["1", "2"]'
@@ -165,7 +165,7 @@ def test_missing_nodes() -> None:
 
 
 def test_missing_nodes_2() -> None:
-  """Docstring."""
+  """Verify missing nodes 2 behavior."""
   # 223 -> 226
   # parts[-1].endswith(" ")
   o: OperationNode = OperationNode(

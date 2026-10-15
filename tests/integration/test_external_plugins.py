@@ -10,7 +10,7 @@ from ml_switcheroo.core.hooks import get_hook, load_plugins
 
 @pytest.fixture
 def workspace(tmp_path):
-  """Docstring."""
+  """Execute workspace helper logic."""
   ws = tmp_path / "workspace"
   ws.mkdir()
   ext_dir = ws / "extensions"

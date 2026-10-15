@@ -12,7 +12,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def semantics_env() -> SemanticsManager:
-  """Docstring."""
+  """Execute semantics env helper logic."""
   mgr = SemanticsManager()
   silu_def: dict[str, typing.Any] = {
     "std_args": [{"name": "x", "type": "Tensor"}],

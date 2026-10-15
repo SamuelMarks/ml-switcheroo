@@ -5,8 +5,8 @@ This ensures that adding a new file (e.g., `my_new_op.py`) automatically
 registers its hooks without manual edits to this file.
 """
 
-import pkgutil
 import importlib
+import pkgutil
 from pathlib import Path
 
 # scan the current directory for modules

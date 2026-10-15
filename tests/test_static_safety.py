@@ -1,11 +1,8 @@
 """Unit tests for the StaticSafetyScanner and feasibility boundary detection."""
 
 import libcst as cst
-from ml_switcheroo.analysis.static_safety import (
-  StaticSafetyCategory,
-  StaticSafetyDiagnostic,
-  StaticSafetyScanner,
-)
+
+from ml_switcheroo.analysis.static_safety import StaticSafetyCategory, StaticSafetyDiagnostic, StaticSafetyScanner
 
 
 def test_static_safety_categories() -> None:

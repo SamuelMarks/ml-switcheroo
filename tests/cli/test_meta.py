@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for meta."""
 
 import json
 import typing
@@ -11,7 +11,7 @@ from ml_switcheroo.cli.handlers.meta import handle_schema
 
 @patch("ml_switcheroo.cli.handlers.meta.OperationDef.model_json_schema")
 def test_handle_schema(mock_schema: MagicMock, capsys: pytest.CaptureFixture[str]) -> None:
-  """Docstring."""
+  """Verify handle schema behavior."""
   mock_schema.return_value = {"type": "object", "properties": {"op": {"type": "string"}}}
   res: int = handle_schema()
   assert res == 0

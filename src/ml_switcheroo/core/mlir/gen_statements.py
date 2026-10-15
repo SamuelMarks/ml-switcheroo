@@ -5,15 +5,14 @@ This module implements the transformation logic for structural MLIR operations
 It operates as a mixin to be combined with expression generation logic in the main generator.
 """
 
+import ast
 import typing
-
-
-import libcst as cst
 from collections import defaultdict
 from typing import List, Union
-import ast
 
-from ml_switcheroo.core.mlir.cst import OperationNode, BlockNode
+import libcst as cst
+
+from ml_switcheroo.core.mlir.cst import BlockNode, OperationNode
 from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
 from ml_switcheroo.core.mlir.naming import NamingContext
 

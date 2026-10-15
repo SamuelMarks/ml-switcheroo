@@ -16,7 +16,7 @@ CONVNET_SOURCE: str = "\nimport torch\nimport torch.nn as nn\n\nclass ConvNet(nn
 
 
 class MockFlaxSemantics(SemanticsManager):  # type: ignore[misc]
-  """Docstring."""
+  """Test helper class MockFlaxSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockFlaxSemantics instance."""
@@ -85,7 +85,7 @@ class MockFlaxSemantics(SemanticsManager):  # type: ignore[misc]
 
 @pytest.fixture
 def engine_mlir() -> typing.Generator[ASTEngine, None, None]:
-  """Docstring."""
+  """Execute engine mlir helper logic."""
   config = RuntimeConfig(source_framework="mlir", target_framework="jax", strict_mode=False)
   with patch("ml_switcheroo.semantics.manager.SemanticsManager") as mock_mgr:
     mgr = mock_mgr.return_value

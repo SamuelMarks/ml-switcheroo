@@ -9,7 +9,7 @@ from ml_switcheroo.frameworks.torch import TorchAdapter
 
 @pytest.fixture
 def adapter() -> TorchAdapter:
-  """Docstring."""
+  """Execute adapter helper logic."""
   return TorchAdapter()
 
 
@@ -51,7 +51,7 @@ def test_tier2_neural_cnn_validity(adapter: TorchAdapter) -> None:
 
 
 def test_tier3_extras_dataloader_validity(adapter: TorchAdapter) -> None:
-  """Docstring."""
+  """Verify tier3 extras dataloader validity behavior."""
   code: str = adapter.get_tiered_examples()["tier3_extras_dataloader"]
   ast.parse(code)
   assert "DataLoader" in code

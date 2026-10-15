@@ -12,7 +12,7 @@ from ml_switcheroo.plugins.attention_packing import repack_attn_flax, repack_att
 
 @pytest.fixture
 def mock_ctx() -> MagicMock:
-  """Docstring."""
+  """Execute mock ctx helper logic."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "target.Attention"
   return ctx

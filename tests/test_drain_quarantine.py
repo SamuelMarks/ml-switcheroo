@@ -1,12 +1,13 @@
 """Tests for quarantine drainage and triage tool."""
 
-from pathlib import Path
-from typing import Any, Dict
-from unittest.mock import patch
-import pytest
-import yaml
+from pathlib import Path  # noqa: E402
+from typing import Any, Dict  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
-import scripts.drain_quarantine as drainer
+import pytest  # noqa: E402
+import yaml  # noqa: E402
+
+import scripts.drain_quarantine as drainer  # noqa: E402
 
 
 def test_find_snapshot_api_match() -> None:
@@ -228,8 +229,8 @@ def test_main_entrypoint(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Non
       monkeypatch: Pytest monkeypatch fixture.
       tmp_path: Pytest temporary directory fixture.
   """
-  import sys
   import runpy
+  import sys
 
   q_file = tmp_path / "quarantine.yaml"
   q_file.write_text("Op: {}\n")

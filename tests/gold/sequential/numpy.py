@@ -9,7 +9,7 @@ def create_sequential(in_features: int, hidden: int, out_features: int) -> typin
   """Creates sequential."""
 
   class SequentialImpl:
-    """Docstring."""
+    """Test helper class SequentialImpl."""
 
     def __init__(self, in_feat: int, hid: int, out_feat: int) -> None:
       """Initializes the SequentialImpl instance."""

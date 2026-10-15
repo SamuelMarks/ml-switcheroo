@@ -180,7 +180,7 @@ def test_unsupported_node_type_in_capture() -> None:
 
 
 def test_unsupported_receiver_name() -> None:
-  """Docstring."""
+  """Verify unsupported receiver name behavior."""
   # e.g., func_list[0].eval()
   node: cst.Call = cst.Call(
     func=cst.Attribute(

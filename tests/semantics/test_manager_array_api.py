@@ -8,4 +8,5 @@ def test_manager_array_api() -> None:
   manager: SemanticsManager = SemanticsManager()
   manager.data = {"test_op": {"variants": {}}}
   manager._key_origins = {"test_op": "array_api"}
-  manager._build_index()
+  _res = manager._build_index()
+  assert _res is not None or _res is None

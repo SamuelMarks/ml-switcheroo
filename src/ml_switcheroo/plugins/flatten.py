@@ -7,7 +7,8 @@ Mapping strategies:
 """
 
 import libcst as cst
-from ml_switcheroo.core.hooks import register_hook, HookContext
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 
@@ -25,7 +26,14 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 def _create_integer(val: int) -> cst.BaseExpression:
-  """Create a CST node for an integer, handling negative values."""
+  """Create a CST node for an integer, handling negative values.
+
+  Args:
+      val: Integer value to convert to a LibCST expression node.
+
+  Returns:
+      LibCST Integer or UnaryOperation expression node.
+  """
   if val < 0:
     return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer(str(-val)))
   return cst.Integer(str(val))

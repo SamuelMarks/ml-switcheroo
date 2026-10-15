@@ -1,36 +1,34 @@
-"""Docstring."""
+"""Test suite for nvidia sass synth macros."""
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import (
+  expand_adam,
+  expand_adaptivepool,
   expand_avgpool2d,
   expand_batchnorm2d,
+  expand_conv1d,
   expand_conv2d,
   expand_conv3d,
+  expand_conv_general_dilated,
+  expand_convtranspose,
   expand_crossentropyloss,
+  expand_depthwiseconv2d,
   expand_dropout,
   expand_flatten,
   expand_gelu,
-  expand_linear,
-  expand_maxpool2d,
-  expand_mseloss,
-  expand_relu,
-  expand_reshape,
-  expand_sigmoid,
-  expand_tanh,
-)
-from ml_switcheroo.core.compiler.backends.nvidia_sass.macros_extra import (
-  expand_adam,
-  expand_adaptivepool,
-  expand_conv1d,
-  expand_conv_general_dilated,
-  expand_convtranspose,
-  expand_depthwiseconv2d,
   expand_gru,
   expand_l,
+  expand_linear,
   expand_lstm,
+  expand_maxpool2d,
+  expand_mseloss,
   expand_multiheadattention,
   expand_pool1d,
   expand_pool3d,
+  expand_relu,
+  expand_reshape,
   expand_rnn,
+  expand_sigmoid,
+  expand_tanh,
   expand_transformer,
   expand_transformerdecoder,
   expand_transformerencoder,
@@ -41,23 +39,23 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassRegi
 
 
 class MockAllocator:
-  """Docstring."""
+  """Test helper class MockAllocator."""
 
-  def get_register(self, var_name: str) -> NvidiaSassRegister:
-    """Docstring."""
+  def get_register(self, var_name: str) -> NvidiaSassRegister:  # noqa: F811
+    """Execute get register helper logic."""
     return NvidiaSassRegister(var_name)
 
-  def allocate_temp(self) -> NvidiaSassRegister:
-    """Docstring."""
+  def allocate_temp(self) -> NvidiaSassRegister:  # noqa: F811
+    """Execute allocate temp helper logic."""
     return NvidiaSassRegister("TEMP")
 
   def free_register(self, var_name: str) -> None:
-    """Docstring."""
+    """Execute free register helper logic."""
     pass
 
 
 def test_all_macros() -> None:
-  """Docstring."""
+  """Verify all macros behavior."""
   alloc = MockAllocator()
   assert len(expand_conv2d(alloc, "n1", {"k": 3})) > 0  # type: ignore
   assert len(expand_linear(alloc, "n1", {"in_features": 3})) > 0  # type: ignore

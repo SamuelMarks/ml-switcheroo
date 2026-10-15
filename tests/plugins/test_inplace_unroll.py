@@ -22,7 +22,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   hooks._HOOKS["unroll_inplace_ops"] = unroll_inplace_ops
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -93,7 +93,7 @@ def test_ignore_single_underscore(rewriter: PivotRewriter) -> None:
 
 
 def test_inplace_unroll_not_attribute() -> None:
-  """Docstring."""
+  """Verify inplace unroll not attribute behavior."""
   node = cst.parse_expression("add_(x)")
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics_mock = MagicMock()
@@ -104,19 +104,19 @@ def test_inplace_unroll_not_attribute() -> None:
 
 
 def test_get_receiver_name_not_attribute() -> None:
-  """Docstring."""
+  """Verify get receiver name not attribute behavior."""
   node = cst.parse_expression("add_(x)")
   assert _get_receiver_name(typing.cast(cst.Call, node)) is None
 
 
 def test_get_method_name_not_attribute() -> None:
-  """Docstring."""
+  """Verify get method name not attribute behavior."""
   node = cst.parse_expression("add_(x)")
   assert _get_method_name(typing.cast(cst.Call, node)) is None
 
 
 def test_inplace_unroll_just_underscore() -> None:
-  """Docstring."""
+  """Verify inplace unroll just underscore behavior."""
   node = cst.parse_expression("x._(y)")
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics_mock = MagicMock()
@@ -127,7 +127,7 @@ def test_inplace_unroll_just_underscore() -> None:
 
 
 def test_inplace_unroll_no_underscore() -> None:
-  """Docstring."""
+  """Verify inplace unroll no underscore behavior."""
   node = cst.parse_expression("x.add(y)")
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics_mock = MagicMock()

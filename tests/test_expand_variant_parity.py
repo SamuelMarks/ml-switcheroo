@@ -1,12 +1,13 @@
 """Tests for ODL variant parity expansion tool."""
 
-from pathlib import Path
-from typing import Any, Dict
-from unittest.mock import patch
-import pytest
-import yaml
+from pathlib import Path  # noqa: E402
+from typing import Any, Dict  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
-import scripts.expand_variant_parity as expander
+import pytest  # noqa: E402
+import yaml  # noqa: E402
+
+import scripts.expand_variant_parity as expander  # noqa: E402
 
 
 def test_expand_op_variants_from_snapshots() -> None:
@@ -185,8 +186,8 @@ def test_main_entrypoint(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Non
       monkeypatch: Pytest monkeypatch fixture.
       tmp_path: Pytest temporary directory fixture.
   """
-  import sys
   import runpy
+  import sys
 
   odl_dir = tmp_path / "odl"
   odl_dir.mkdir()

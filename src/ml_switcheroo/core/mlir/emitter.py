@@ -4,20 +4,12 @@ This module provides the `PythonToMlirEmitter`, a compiler front-end that
 transforms Python LibCST trees into the MLIR CST object model.
 """
 
-from typing import Any
-
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import libcst as cst
-from typing import Dict, List, Optional, Union, Sequence
 
 from ml_switcheroo.core.cst.base import Trivia
-from ml_switcheroo.core.mlir.cst import (
-  ModuleNode,
-  OperationNode,
-  BlockNode,
-  ValueNode,
-  AttributeNode,
-)
+from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, ValueNode
 from ml_switcheroo.core.scanners import get_full_name
 
 
@@ -80,8 +72,8 @@ class SSAContext:
     return val
 
 
-from ml_switcheroo.core.mlir.emitter_expr import MlirEmitterExprMixin  # noqa: E402
 from ml_switcheroo.core.mlir.emitter_decl import MlirEmitterDeclMixin  # noqa: E402
+from ml_switcheroo.core.mlir.emitter_expr import MlirEmitterExprMixin  # noqa: E402
 
 
 class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):

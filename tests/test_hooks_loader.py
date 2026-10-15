@@ -10,7 +10,7 @@ from ml_switcheroo.core.hooks import _HOOKS, get_hook, load_plugins
 
 @pytest.fixture
 def mock_plugin_dir(tmp_path: Path) -> Path:
-  """Docstring."""
+  """Execute mock plugin dir helper logic."""
   plugin_dir: Path = tmp_path / "custom_plugins"
   plugin_dir.mkdir()
   plugin_file: Path = plugin_dir / "my_plugin.py"

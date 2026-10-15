@@ -15,3 +15,4 @@ def test_mlx_imports_success() -> None:
     import ml_switcheroo.frameworks.mlx as fmlx
 
     importlib.reload(fmlx)
+  assert True

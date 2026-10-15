@@ -7,12 +7,14 @@ Defines the structure for the visual elements used in the HTML/SVG DSL:
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Any
+from typing import Any, List, Optional
+
+from ml_switcheroo.core.markup.cst import MarkupNode
 from ml_switcheroo.utils.formatting import StructuredFormatter, escape_html
 
 
 @dataclass
-class HtmlNode:
+class HtmlNode(MarkupNode):
   """Abstract base class for all HTML DSL elements.
 
   Attributes:
@@ -20,8 +22,8 @@ class HtmlNode:
       trailing_trivia: Whitespace or comments succeeding this node.
   """
 
-  leading_trivia: str = ""
-  trailing_trivia: str = ""
+  leading_trivia: Any = ""
+  trailing_trivia: Any = ""
 
   def emit(self, indent_level: int = 0) -> str:
     """Render the node and its children to an HTML string with indentation.

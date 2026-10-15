@@ -9,15 +9,13 @@ by using **Provenance Tracking** to locate the exact CST nodes corresponding
 to graph nodes, and the **Snippet Emitter** to generate valid replacement code.
 """
 
-from typing import Any
-
-
 from dataclasses import dataclass, field
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 import libcst as cst
-from ml_switcheroo.core.compiler.ir import LogicalNode
+
 from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
+from ml_switcheroo.core.compiler.ir import LogicalNode
 
 
 @dataclass

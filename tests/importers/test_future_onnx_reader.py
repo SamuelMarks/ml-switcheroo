@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for future onnx reader."""
 
 from pathlib import Path
 from unittest.mock import patch
@@ -7,14 +7,14 @@ from ml_switcheroo.importers.future_onnx_reader import OnnxSpecImporter
 
 
 def test_onnx_reader_missing_file(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify onnx reader missing file behavior."""
   importer = OnnxSpecImporter()
   res = importer.parse_file(tmp_path / "missing.md")
   assert res == {}
 
 
 def test_onnx_reader_parse_markdown(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify onnx reader parse markdown behavior."""
   importer = OnnxSpecImporter()
 
   md_content = """
@@ -76,7 +76,7 @@ Adds two tensors.
 
 
 def test_map_onnx_type() -> None:
-  """Docstring."""
+  """Verify map onnx type behavior."""
   importer = OnnxSpecImporter()
 
   # Lists
@@ -102,7 +102,7 @@ def test_map_onnx_type() -> None:
 
 
 def test_long_summary(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify long summary behavior."""
   importer = OnnxSpecImporter()
   long_desc = "A" * 310
 
@@ -120,7 +120,7 @@ def test_long_summary(tmp_path: Path) -> None:
 
 
 def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify onnx reader extra branches behavior."""
   importer = OnnxSpecImporter()
   md_content = """
 ### <a name="Dup"></a>
@@ -175,6 +175,7 @@ Some normal paragraph before dl.
   # Test synthetic tokens ending on h3 and h4, and op without _raw_summary
   import inspect
   from unittest.mock import MagicMock
+
   from markdown_it.token import Token
 
   dummy_file = tmp_path / "dummy.md"

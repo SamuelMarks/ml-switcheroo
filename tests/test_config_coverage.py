@@ -41,7 +41,7 @@ def test_effective_frameworks() -> None:
 
 
 class DummySchema(BaseModel):
-  """Docstring."""
+  """Test helper class DummySchema."""
 
   my_int: int = Field(...)
 
@@ -91,7 +91,7 @@ def test_load_toml_settings_error(tmp_path: Path) -> None:
 
 
 def test_import_tomllib() -> None:
-  """Docstring."""
+  """Verify import tomllib behavior."""
   # Python 3.11+ mock
   with patch("sys.version_info", (3, 11)):
     with patch("builtins.__import__") as mock_import:
@@ -115,7 +115,7 @@ def test_import_tomllib() -> None:
 
 
 def test_runtime_config_load_overrides(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify runtime config load overrides behavior."""
   toml_file: Path = tmp_path / "pyproject.toml"
   toml_file.write_text("""
 [tool.ml_switcheroo]

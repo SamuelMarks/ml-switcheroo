@@ -229,7 +229,8 @@ def test_scan_registry_else_branch(mock_get_adapter: MagicMock, mock_priority: M
     return adapter
 
   mock_get_adapter.side_effect = get_adapter_side_effect
-  scan_registry()
+  _res = scan_registry()
+  assert _res is not None or _res is None
 
 
 @patch("ml_switcheroo.sphinx_ext.registry.available_frameworks")

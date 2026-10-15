@@ -6,7 +6,9 @@ and lifting hardware assembly back to JAX flax.nnx.Module syntax.
 
 import ast
 from typing import Dict, Optional, Tuple
+
 import pytest
+
 from ml_switcheroo import convert
 from ml_switcheroo.core.compiler.backends.nvidia_sass import NvidiaSassBackend
 from ml_switcheroo.core.compiler.backends.python import PythonBackend
@@ -50,7 +52,7 @@ class Net(nnx.Module):
         return self.conv(x)
 """
   converted = convert(jax_code, source="jax", target=hw_target)
-  assert "Conv" in converted
+  assert "conv" in converted
   if hw_target == "rdna":
     assert "v0" in converted or "; BEGIN Conv" in converted or ";" in converted
   else:

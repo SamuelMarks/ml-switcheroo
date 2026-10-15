@@ -4,14 +4,11 @@ This module serializes LogicalGraph instances into canonical JSON format or
 executable Python code conforming to the `ml_switcheroo_ir` specification.
 """
 
-from typing import Any, Dict, List, Optional
 import json
+from typing import Any, Dict, List, Optional
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
-from ml_switcheroo.core.compiler.ir import (
-  LogicalGraph,
-  topological_sort,
-)
+from ml_switcheroo.core.compiler.ir import LogicalGraph, topological_sort
 
 
 class IrBackend(CompilerBackend):

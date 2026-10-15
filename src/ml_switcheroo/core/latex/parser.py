@@ -3,18 +3,11 @@
 Parses MIDL LaTeX macros into a LibCST Module representing a Python AST.
 """
 
-from typing import Any
+from typing import Any, Dict, List, Optional, Union
 
-
-from typing import List, Dict, Optional, Union
 import libcst as cst
-from ml_switcheroo.core.latex.nodes import (
-  MemoryNode,
-  InputNode,
-  ComputeNode,
-  StateOpNode,
-  ReturnNode,
-)
+
+from ml_switcheroo.core.latex.nodes import ComputeNode, InputNode, MemoryNode, ReturnNode, StateOpNode
 
 
 class LatexParser:

@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for cpp generator."""
 
 from typing import Dict, List
 
@@ -7,7 +7,7 @@ from ml_switcheroo.core.compiler.backends.cpp.generator import TorchCppExtension
 
 
 def test_generator_init() -> None:
-  """Docstring."""
+  """Verify generator init behavior."""
   gen: TorchCppExtensionGenerator = TorchCppExtensionGenerator(module_name="my_module")
   assert gen.module_name == "my_module"
   assert len(gen.includes) == 2
@@ -16,7 +16,7 @@ def test_generator_init() -> None:
 
 
 def test_generator_forward_function() -> None:
-  """Docstring."""
+  """Verify generator forward function behavior."""
   gen: TorchCppExtensionGenerator = TorchCppExtensionGenerator(module_name="my_module")
   args: List[Dict[str, str]] = [{"name": "x", "type": "torch::Tensor"}]
   body: List[ReturnStatement] = [ReturnStatement()]
@@ -32,7 +32,7 @@ def test_generator_forward_function() -> None:
 
 
 def test_generator_pybind_module() -> None:
-  """Docstring."""
+  """Verify generator pybind module behavior."""
   gen: TorchCppExtensionGenerator = TorchCppExtensionGenerator(module_name="my_module")
   pybind: PyBindModule = gen.generate_pybind_module("forward")
   assert pybind.name == "TORCH_EXTENSION_NAME"
@@ -44,7 +44,7 @@ def test_generator_pybind_module() -> None:
 
 
 def test_generator_build_module() -> None:
-  """Docstring."""
+  """Verify generator build module behavior."""
   gen: TorchCppExtensionGenerator = TorchCppExtensionGenerator(module_name="my_module")
   args: List[Dict[str, str]] = [{"name": "x", "type": "torch::Tensor"}]
   body: List[ReturnStatement] = [ReturnStatement()]

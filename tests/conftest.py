@@ -1,15 +1,15 @@
 """Test suite for the Conftest module."""
 
-import importlib
-import sys
-import typing
-import warnings
-from pathlib import Path
-from typing import Callable, Generator, Optional
+import importlib  # noqa: E402
+import sys  # noqa: E402
+import typing  # noqa: E402
+import warnings  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import Callable, Generator, Optional  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
-from ml_switcheroo.core.rewriter import ApiPass, AuxiliaryPass, RewriterContext, RewriterPipeline, StructuralPass
+from ml_switcheroo.core.rewriter import ApiPass, AuxiliaryPass, RewriterContext, RewriterPipeline, StructuralPass  # noqa: E402
 
 warnings.filterwarnings("ignore", message=".*np\\.object.*")
 warnings.filterwarnings("ignore", category=FutureWarning, module="keras.*")
@@ -24,12 +24,12 @@ except ImportError:
 
 
 class TestRewriter:
-  """Docstring."""
+  """Test helper class TestRewriter."""
 
   __test__ = False
 
   def __init__(self, semantics: typing.Any, config: typing.Any, symbol_table: typing.Optional[typing.Any] = None) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.context = RewriterContext(semantics, config, symbol_table)
     self.pipeline = RewriterPipeline([StructuralPass(), ApiPass(), AuxiliaryPass()])
 
@@ -49,7 +49,7 @@ class TestRewriter:
 
 
 class SnapshotAssert:
-  """Docstring."""
+  """Test helper class SnapshotAssert."""
 
   def __init__(self, request: pytest.FixtureRequest) -> None:
     """Initializes the SnapshotAssert instance."""
@@ -81,7 +81,7 @@ class SnapshotAssert:
 
 @pytest.fixture
 def snapshot(request: pytest.FixtureRequest) -> SnapshotAssert:
-  """Docstring."""
+  """Execute snapshot helper logic."""
   return SnapshotAssert(request)
 
 
@@ -125,5 +125,5 @@ def isolate_framework_registry() -> Generator[None, None, None]:
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
-  """Docstring."""
+  """Execute pytest addoption helper logic."""
   parser.addoption("--update-snapshots", action="store_true", default=False, help="Update snapshots for visual tests")

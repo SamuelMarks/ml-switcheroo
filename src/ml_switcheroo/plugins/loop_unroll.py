@@ -14,13 +14,12 @@ The strategy is **Safety-First**:
 """
 
 import typing
-
+from typing import List, Tuple
 
 import libcst as cst
-from typing import Tuple, List
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
 from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
 def _analyze_range_iterator(node: cst.BaseExpression) -> Tuple[bool, List[cst.Arg]]:

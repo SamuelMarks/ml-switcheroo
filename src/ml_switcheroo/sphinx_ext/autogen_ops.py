@@ -12,15 +12,12 @@ Features:
 2. Exports `docs/operations.yaml` ensuring appended updates rather than destructive overwrites.
 """
 
+import shutil
+import typing
+from pathlib import Path
 from typing import Any
 
-import typing
-
-
 import yaml
-import shutil
-from pathlib import Path
-
 from sphinx.application import Sphinx
 from sphinx.util import logging
 

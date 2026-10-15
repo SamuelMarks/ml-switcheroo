@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin auto fsdp."""
 
 from unittest.mock import MagicMock
 
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.auto_fsdp_wrapper import wrap_with_sharding
 
 
 def test_wrap_with_sharding_no_op_def() -> None:
-  """Docstring."""
+  """Verify wrap with sharding no op def behavior."""
   node: cst.Call = cst.Call(func=cst.Name("Linear"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = None
@@ -18,7 +18,7 @@ def test_wrap_with_sharding_no_op_def() -> None:
 
 
 def test_wrap_with_sharding_no_sharding_support() -> None:
-  """Docstring."""
+  """Verify wrap with sharding no sharding support behavior."""
   node: cst.Call = cst.Call(func=cst.Name("Linear"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "nn.Linear"
@@ -31,7 +31,7 @@ def test_wrap_with_sharding_no_sharding_support() -> None:
 
 
 def test_wrap_with_sharding_no_api() -> None:
-  """Docstring."""
+  """Verify wrap with sharding no api behavior."""
   node: cst.Call = cst.Call(func=cst.Name("Linear"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "nn.Linear"
@@ -45,7 +45,7 @@ def test_wrap_with_sharding_no_api() -> None:
 
 
 def test_wrap_with_sharding_fsdp() -> None:
-  """Docstring."""
+  """Verify wrap with sharding fsdp behavior."""
   node: cst.Call = cst.Call(func=cst.Name("Linear"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "nn.Linear"
@@ -63,7 +63,7 @@ def test_wrap_with_sharding_fsdp() -> None:
 
 
 def test_wrap_with_sharding_pjit() -> None:
-  """Docstring."""
+  """Verify wrap with sharding pjit behavior."""
   node: cst.Call = cst.Call(func=cst.Name("Linear"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "nn.Linear"
@@ -80,7 +80,7 @@ def test_wrap_with_sharding_pjit() -> None:
 
 
 def test_wrap_with_sharding_other() -> None:
-  """Docstring."""
+  """Verify wrap with sharding other behavior."""
   node: cst.Call = cst.Call(func=cst.Name("Linear"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "nn.Linear"

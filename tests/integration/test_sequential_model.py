@@ -11,7 +11,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSequentialSemantics(SemanticsManager):  # type: ignore[misc]
-  """Docstring."""
+  """Test helper class MockSequentialSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockSequentialSemantics instance."""
@@ -59,7 +59,7 @@ class MockSequentialSemantics(SemanticsManager):  # type: ignore[misc]
 
 @pytest.fixture
 def semantics_manager() -> MockSequentialSemantics:
-  """Docstring."""
+  """Execute semantics manager helper logic."""
   return MockSequentialSemantics()
 
 

@@ -11,7 +11,7 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 @pytest.fixture
 def synthesizer() -> PythonBackend:
-  """Docstring."""
+  """Execute synthesizer helper logic."""
   return PythonBackend()
 
 
@@ -106,10 +106,12 @@ def test_missing_class_fallback(synthesizer: PythonBackend) -> None:
   assert "class OtherClass" not in new_code
 
 
-def test_format_args_helper(synthesizer: PythonBackend) -> None:
+def test_format_args_helper() -> None:
   """Formats arguments helper."""
+  from ml_switcheroo.core.compiler.backends.python_strategies.init import format_args_from_metadata
+
   meta = {"arg_1": "b", "arg_0": "a", "key": "val", "dropout": "0.5"}
-  res = synthesizer._format_args_from_metadata(meta)
+  res = format_args_from_metadata(meta)
   assert res == "a, b, dropout=0.5, key=val"
 
 

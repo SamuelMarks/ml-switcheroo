@@ -9,7 +9,7 @@ from ml_switcheroo.core.tikz.analyser import GraphExtractor
 
 
 def parse_and_extract(code: str) -> LogicalGraph:
-  """Docstring."""
+  """Execute parse and extract helper logic."""
   module = cst.parse_module(code)
   extractor = GraphExtractor()
   module.visit(extractor)
@@ -17,7 +17,7 @@ def parse_and_extract(code: str) -> LogicalGraph:
 
 
 def test_extract_nodes_from_init() -> None:
-  """Docstring."""
+  """Verify extract nodes from init behavior."""
   code: str = "\nclass Net:\n    def __init__(self):\n        self.conv1 = nn.Conv2d(1, 32, 3)\n        self.fc = nn.Linear(128, 10)\n"
   graph: LogicalGraph = parse_and_extract(code)
   assert len(graph.nodes) == 2
@@ -32,7 +32,7 @@ def test_extract_nodes_from_init() -> None:
 
 
 def test_extract_edges_sequential_flow() -> None:
-  """Docstring."""
+  """Verify extract edges sequential flow behavior."""
   code: str = "\nclass Net:\n    def __init__(self):\n        self.conv = nn.Conv(1, 1)\n        self.fc = nn.Linear(1, 1)\n\n    def forward(self, x):\n        x = self.conv(x)\n        x = self.fc(x)\n        return x\n"
   graph: LogicalGraph = parse_and_extract(code)
   assert len(graph.edges) == 3
@@ -63,7 +63,7 @@ def test_functional_call_tracing() -> None:
 
 
 def test_keyword_argument_extraction() -> None:
-  """Docstring."""
+  """Verify keyword argument extraction behavior."""
   code: str = "\nclass Layer:\n    def __init__(self):\n        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)\n"
   graph: LogicalGraph = parse_and_extract(code)
   pool: typing.Any = graph.nodes["pool"]

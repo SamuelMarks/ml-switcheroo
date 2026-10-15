@@ -6,9 +6,10 @@ and standard `ast.parse` with `libcst` to enable safe, format-preserving
 automated refactoring of type hints.
 """
 
-import libcst as cst
 from dataclasses import dataclass
 from typing import List, Optional
+
+import libcst as cst
 
 
 class ParsedType:

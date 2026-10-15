@@ -5,8 +5,6 @@ directly into the `README.md` file, ensuring documentation stays valid with the 
 """
 
 import typing
-
-
 from pathlib import Path
 from typing import Dict
 

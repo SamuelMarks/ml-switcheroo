@@ -12,7 +12,7 @@ INPUT_CODE: str = "\nimport torch\nimport torch.nn as nn\n\nclass ConvNet(nn.Mod
 
 
 class MockConvNetSemantics(SemanticsManager):  # type: ignore[misc]
-  """Docstring."""
+  """Test helper class MockConvNetSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockConvNetSemantics instance."""

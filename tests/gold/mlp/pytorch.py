@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class MLP(nn.Module):
-  """Docstring."""
+  """Test helper class MLP."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int):
     """Initializes the MLP instance."""

@@ -14,7 +14,7 @@ def test_verified_pipeline_dummy() -> None:
 
 
 def test_verified_pipeline_griffe_available(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify verified pipeline griffe available behavior."""
   import sys
 
   def mock_parse_module(code: str) -> Dict[str, str]:
@@ -36,14 +36,14 @@ def test_verified_pipeline_griffe_available(monkeypatch: pytest.MonkeyPatch) -> 
 
 @patch("ml_switcheroo.ingestion.verified_pipeline.ast.parse")
 def test_verified_pipeline_ast_error(mock_ast_parse: MagicMock) -> None:
-  """Docstring."""
+  """Verify verified pipeline ast error behavior."""
   mock_ast_parse.side_effect = SyntaxError("test syntax error")
   with pytest.raises(SyntaxError):
     verified_pipeline.run_verified_pipeline("invalid code")
 
 
 def test_verified_pipeline_griffe_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify verified pipeline griffe error behavior."""
 
   def mock_parse_module(code: str) -> None:
     """Mocks parse_module to throw an error."""
@@ -64,7 +64,7 @@ def test_verified_pipeline_griffe_error(monkeypatch: pytest.MonkeyPatch) -> None
 
 
 def test_verified_pipeline_griffe_not_available(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify verified pipeline griffe not available behavior."""
   import sys
 
   monkeypatch.setitem(sys.modules, "griffe", None)
@@ -75,7 +75,7 @@ def test_verified_pipeline_griffe_not_available(monkeypatch: pytest.MonkeyPatch)
 
 
 def test_verified_pipeline_cdd_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify verified pipeline cdd error behavior."""
   import builtins
 
   original_import: Any = builtins.__import__

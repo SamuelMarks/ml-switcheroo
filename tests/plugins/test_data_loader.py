@@ -22,7 +22,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
-  """Docstring."""
+  """Execute rewriter factory helper logic."""
   hooks._HOOKS["convert_dataloader"] = transform_dataloader
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -42,7 +42,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
 
   @register_framework("custom")
   class CustomAdapter:
-    """Docstring."""
+    """Test helper class CustomAdapter."""
 
     pass
 
@@ -76,7 +76,7 @@ def test_jax_shim_injection(rewriter_factory: typing.Callable[[str], PivotRewrit
 
 
 def test_dataloader_arg_extraction(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Docstring."""
+  """Verify dataloader arg extraction behavior."""
   rw: PivotRewriter = rewriter_factory("jax")
   code: str = "\ndef train():\n    dl = DataLoader(my_ds, batch_size=64, shuffle=True)\n"
   res: str = rewrite_code(rw, code)

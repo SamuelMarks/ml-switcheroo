@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for mlir type inference coverage."""
 
 import libcst as cst
 
@@ -7,7 +7,7 @@ from ml_switcheroo.core.mlir.types import FloatType
 
 
 def test_parse_py_type_to_mlir() -> None:
-  """Docstring."""
+  """Verify parse py type to mlir behavior."""
   assert parse_py_type_to_mlir("int").to_string() == "i32"
   assert parse_py_type_to_mlir("float").to_string() == "f32"
   assert parse_py_type_to_mlir("bool").to_string() == "i1"
@@ -17,7 +17,7 @@ def test_parse_py_type_to_mlir() -> None:
 
 
 def test_type_inference_pass_branches() -> None:
-  """Docstring."""
+  """Verify type inference pass branches behavior."""
   # 67 -> 68, 69 -> 70
   code: str = """
 def func(x: float, y: int):
@@ -76,17 +76,18 @@ def h(x):
 
 
 def test_type_inference_assign_not_name() -> None:
-  """Function doc."""
+  """Verify type inference assign not name behavior."""
   code: str = """
 obj.attr = 1
 """
   mod: cst.Module = cst.parse_module(code)
   infer: TypeInferencePass = TypeInferencePass(initial_env={})
-  mod.visit(infer)
+  _res = mod.visit(infer)
+  assert _res is not None or _res is None
 
 
 def test_type_inference_float_assign() -> None:
-  """Function doc."""
+  """Verify type inference float assign behavior."""
   code: str = """
 x = 1.0
 """

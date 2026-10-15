@@ -11,7 +11,7 @@ from tests.conftest import TestRewriter
 
 
 class MockUnwrapSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockUnwrapSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockUnwrapSemantics instance."""
@@ -36,7 +36,7 @@ class MockUnwrapSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   semantics = MockUnwrapSemantics()
   config = RuntimeConfig(source_framework="jax", target_framework="jax", strict_mode=False)
   return TestRewriter(semantics, config)

@@ -25,7 +25,7 @@ def register_hooks() -> None:
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Docstring."""
+  """Execute semantics helper logic."""
   mgr = SemanticsManager()
   mgr._key_origins["Variable"] = SemanticTier.NEURAL.value
   mgr._key_origins["Param"] = SemanticTier.NEURAL.value

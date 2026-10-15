@@ -6,7 +6,7 @@ from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 
 
 class MockHighLevelAdapter(JAXStackMixin):
-  """Docstring."""
+  """Test helper class MockHighLevelAdapter."""
 
   pass
 
@@ -59,7 +59,7 @@ def test_serialization_syntax_orbax() -> None:
 
 
 def test_weight_load_code() -> None:
-  """Docstring."""
+  """Verify weight load code behavior."""
   adapter = MockHighLevelAdapter()
   code: str = adapter.get_weight_load_code("path")
   assert "orbax.checkpoint.PyTreeCheckpointer" in code
@@ -68,14 +68,14 @@ def test_weight_load_code() -> None:
 
 
 def test_tensor_conversion_syntax() -> None:
-  """Docstring."""
+  """Verify tensor conversion syntax behavior."""
   adapter = MockHighLevelAdapter()
   code: str = adapter.get_tensor_to_numpy_expr("x")
   assert code == "np.array(x)"
 
 
 def test_weight_save_code() -> None:
-  """Docstring."""
+  """Verify weight save code behavior."""
   adapter = MockHighLevelAdapter()
   code: str = adapter.get_weight_save_code("state", "path")
   assert "tuple_params =" in code

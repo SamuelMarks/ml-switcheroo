@@ -13,13 +13,21 @@ This is used by the ``GraphPatcher`` to surgically insert new code for
 nodes created during Graph Optimization (e.g. Fused Operations).
 """
 
-from typing import Any
+from typing import Any, Dict, List, Set, Tuple
 
-
-from typing import List
 import libcst as cst
 
 from ml_switcheroo.core.compiler.ir import LogicalNode
+
+_SNIPPET_RNGS_FRAMEWORKS: Set[str] = {"jax", "flax", "flax_nnx"}
+
+_SNIPPET_API_PREFIXES: Dict[str, Tuple[str, str]] = {
+  "torch": ("nn", "torch"),
+  "jax": ("nnx", "jnp"),
+  "flax": ("nnx", "jnp"),
+  "flax_nnx": ("nnx", "jnp"),
+  "keras": ("keras.layers", "keras.ops"),
+}
 
 
 class PythonSnippetEmitter:
@@ -58,7 +66,7 @@ class PythonSnippetEmitter:
     attrs = node.attributes if hasattr(node, "attributes") else getattr(node, "metadata", {})
     args_list = self._build_args_from_metadata(attrs)
 
-    if self.framework in ["jax", "flax", "flax_nnx"]:
+    if self.framework in _SNIPPET_RNGS_FRAMEWORKS:
       # Needs rngs=rngs, inject it directly if it doesn't already exist.
       if not any(isinstance(a.keyword, cst.Name) and a.keyword.value == "rngs" for a in args_list):
         args_list.append(cst.Arg(keyword=cst.Name("rngs"), equal=cst.AssignEqual(), value=cst.Name("rngs")))
@@ -168,20 +176,11 @@ class PythonSnippetEmitter:
     if kind.startswith("func_"):
       clean_kind = kind[5:]
 
-    if self.framework == "torch":
+    if self.framework in _SNIPPET_API_PREFIXES:
+      layer_pref, func_pref = _SNIPPET_API_PREFIXES[self.framework]
       if clean_kind[0].isupper():
-        return f"nn.{clean_kind}"
-      return f"torch.{clean_kind}"
-
-    elif self.framework in ["jax", "flax", "flax_nnx"]:
-      if clean_kind[0].isupper():
-        return f"nnx.{clean_kind}"
-      return f"jnp.{clean_kind}"
-
-    elif self.framework == "keras":
-      if clean_kind[0].isupper():
-        return f"keras.layers.{clean_kind}"
-      return f"keras.ops.{clean_kind}"
+        return f"{layer_pref}.{clean_kind}"
+      return f"{func_pref}.{clean_kind}"
 
     return clean_kind
 

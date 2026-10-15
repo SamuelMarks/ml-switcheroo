@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for readme editor."""
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -7,20 +7,20 @@ from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
 
 def test_readme_editor_init() -> None:
-  """Docstring."""
+  """Verify readme editor init behavior."""
   editor: ReadmeEditor = ReadmeEditor(MagicMock(), Path("fake.md"))
   assert editor.readme_path.name == "fake.md"
 
 
 def test_update_matrix_no_readme() -> None:
-  """Docstring."""
+  """Verify update matrix no readme behavior."""
   editor: ReadmeEditor = ReadmeEditor(MagicMock(), Path("does_not_exist.md"))
   with patch("pathlib.Path.exists", return_value=False):
     assert editor.update_matrix({}) is False
 
 
 def test_update_matrix_no_heading() -> None:
-  """Docstring."""
+  """Verify update matrix no heading behavior."""
   editor: ReadmeEditor = ReadmeEditor(MagicMock(), Path("fake.md"))
   content: str = "# Title\nSome content."
   with patch("pathlib.Path.exists", return_value=True):
@@ -29,7 +29,7 @@ def test_update_matrix_no_heading() -> None:
 
 
 def test_update_matrix_success() -> None:
-  """Docstring."""
+  """Verify update matrix success behavior."""
   semantics: MagicMock = MagicMock()
   # Mocking standard map format
   sm: MagicMock = MagicMock()
@@ -52,7 +52,7 @@ def test_update_matrix_success() -> None:
 
 
 def test_update_matrix_success_no_next_heading() -> None:
-  """Docstring."""
+  """Verify update matrix success no next heading behavior."""
   semantics: MagicMock = MagicMock()
   # Mocking standard map format
   sm: MagicMock = MagicMock()
@@ -75,7 +75,7 @@ def test_update_matrix_success_no_next_heading() -> None:
 
 
 def test_update_matrix_read_error() -> None:
-  """Docstring."""
+  """Verify update matrix read error behavior."""
   editor: ReadmeEditor = ReadmeEditor(MagicMock(), Path("fake.md"))
   with patch("pathlib.Path.exists", return_value=True):
     with patch("pathlib.Path.read_text", side_effect=OSError("Read err")):
@@ -83,7 +83,7 @@ def test_update_matrix_read_error() -> None:
 
 
 def test_update_matrix_write_error() -> None:
-  """Docstring."""
+  """Verify update matrix write error behavior."""
   semantics: MagicMock = MagicMock()
   sm: MagicMock = MagicMock()
   sm.name = "Abs"
@@ -104,7 +104,7 @@ def test_update_matrix_write_error() -> None:
 
 
 def test_generate_markdown_table_none_variant() -> None:
-  """Docstring."""
+  """Verify generate markdown table none variant behavior."""
   semantics: MagicMock = MagicMock()
   semantics.get_known_apis.return_value = {
     "Abs": {
@@ -148,7 +148,7 @@ def test_update_matrix_target_map_none() -> None:
 
 
 def test_guess_category() -> None:
-  """Docstring."""
+  """Verify guess category behavior."""
   from ml_switcheroo.utils.readme_editor import _guess_category
 
   assert _guess_category("torch.nn.Linear", None) == "Neural"

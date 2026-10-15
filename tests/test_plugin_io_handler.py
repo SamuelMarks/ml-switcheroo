@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin io handler."""
 
 from typing import List
 from unittest.mock import MagicMock, patch
@@ -10,7 +10,7 @@ from ml_switcheroo.plugins.io_handler import _get_arg, _get_func_name, transform
 
 
 def test_get_func_name() -> None:
-  """Docstring."""
+  """Verify get func name behavior."""
   node1: cst.Call = cst.Call(func=cst.Name("load"), args=[])
   assert _get_func_name(node1) == "load"
 
@@ -22,7 +22,7 @@ def test_get_func_name() -> None:
 
 
 def test_get_arg() -> None:
-  """Docstring."""
+  """Verify get arg behavior."""
   arg_pos: cst.Arg = cst.Arg(value=cst.Name("x"))
   arg_kw: cst.Arg = cst.Arg(keyword=cst.Name("f"), value=cst.Name("y"))
   arg_kw2: cst.Arg = cst.Arg(keyword=cst.Name("obj"), value=cst.Name("z"))
@@ -37,7 +37,7 @@ def test_get_arg() -> None:
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 @patch("ml_switcheroo.plugins.io_handler.capture_node_source")
 def test_transform_io_calls(mock_capture: MagicMock, mock_get_adapter: MagicMock) -> None:
-  """Docstring."""
+  """Verify transform io calls behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
 

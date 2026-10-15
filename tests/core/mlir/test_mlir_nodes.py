@@ -144,7 +144,7 @@ def test_trailing_trivia() -> None:
 
 
 def test_stablehloconstantop() -> None:
-  """Docstring."""
+  """Verify stablehloconstantop behavior."""
   from ml_switcheroo.core.mlir.nodes import StableHloConstantOp
 
   op = StableHloConstantOp(

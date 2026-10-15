@@ -19,7 +19,7 @@ FLAX_SOURCE = textwrap.dedent(
 
 @pytest.fixture
 def semantics():
-  """Docstring."""
+  """Execute semantics helper logic."""
   mgr = SemanticsManager()
   mgr.data["Linear"] = {
     "std_args": ["in_features", "out_features"],

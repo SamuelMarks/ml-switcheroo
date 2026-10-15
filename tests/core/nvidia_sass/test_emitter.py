@@ -1,4 +1,4 @@
-"""Test suite for the Emitter module."""
+"""Test suite for emitter."""
 
 from unittest.mock import MagicMock
 
@@ -25,7 +25,7 @@ def test_emit_basic_instruction() -> None:
   )
   output: str = emitter.emit([inst])
   assert output.startswith("    ")
-  assert "FADD R0, R1, R2;" in output
+  assert "fadd            R0, R1, R2;" in output
   assert output.endswith("\n")
 
 
@@ -39,7 +39,7 @@ def test_emit_label_flush_left() -> None:
   output: str = emitter.emit(block)
   lines: list[str] = output.strip().split("\n")
   assert lines[0] == "L_START:"
-  assert lines[1] == "    MOV R0, RZ;"
+  assert lines[1] == "    mov             R0, RZ;"
 
 
 def test_emit_unmapped_op_fallback() -> None:
@@ -64,8 +64,8 @@ def test_emit_manual_directives() -> None:
     NvidiaSassComment(text="Start of block"),
   ]
   output: str = emitter.emit(nodes)
-  assert "    .headerflags @0x100" in output
-  assert "    // Start of block" in output
+  assert ".headerflags" in output
+  assert "// Start of block" in output
 
 
 def test_emit_immediate_values() -> None:

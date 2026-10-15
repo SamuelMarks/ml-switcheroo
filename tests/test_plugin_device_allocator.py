@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin device allocator."""
 
 from typing import Optional
 from unittest.mock import MagicMock, patch
@@ -10,7 +10,7 @@ from ml_switcheroo.plugins.device_allocator import _parse_device_args, transform
 
 
 def test_parse_device_args() -> None:
-  """Docstring."""
+  """Verify parse device args behavior."""
   # torch.device('cuda')
   node: cst.Call = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda'"))])
   t_node: Optional[cst.SimpleString]
@@ -52,7 +52,7 @@ def test_parse_device_args() -> None:
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_transform_device_allocator(mock_get_adapter: MagicMock) -> None:
-  """Docstring."""
+  """Verify transform device allocator behavior."""
   node: cst.Call = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
@@ -66,7 +66,7 @@ def test_transform_device_allocator(mock_get_adapter: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_transform_device_allocator_no_adapter(mock_get_adapter: MagicMock) -> None:
-  """Docstring."""
+  """Verify transform device allocator no adapter behavior."""
   node: cst.Call = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "unknown"
@@ -78,7 +78,7 @@ def test_transform_device_allocator_no_adapter(mock_get_adapter: MagicMock) -> N
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_transform_device_allocator_exception(mock_get_adapter: MagicMock) -> None:
-  """Docstring."""
+  """Verify transform device allocator exception behavior."""
   node: cst.Call = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
@@ -92,7 +92,7 @@ def test_transform_device_allocator_exception(mock_get_adapter: MagicMock) -> No
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_transform_device_allocator_parse_error(mock_get_adapter: MagicMock) -> None:
-  """Docstring."""
+  """Verify transform device allocator parse error behavior."""
   node: cst.Call = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"

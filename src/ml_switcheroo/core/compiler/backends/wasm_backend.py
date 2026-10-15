@@ -5,18 +5,19 @@ computational steps into its WebAssembly Text (WAT) equivalent.
 """
 
 from typing import Any
+
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.wasm.cst import (
-  WatModule,
+  WasmArgument,
+  WasmOpcode,
+  WasmRegister,
   WatFunc,
+  WatInstr,
+  WatLocal,
+  WatModule,
   WatParam,
   WatResult,
-  WatLocal,
-  WatInstr,
-  WasmRegister,
-  WasmOpcode,
-  WasmArgument,
 )
 
 

@@ -11,7 +11,7 @@ def test_fuzzer_core_coverage() -> None:
   ig.build_strategies(["shape", "axis", "mask", "indices", "alpha", "inputs"])
 
   class FailingAdapter:
-    """Docstring."""
+    """Test helper class FailingAdapter."""
 
     def convert(self, x: Any) -> Any:
       """Converts ."""

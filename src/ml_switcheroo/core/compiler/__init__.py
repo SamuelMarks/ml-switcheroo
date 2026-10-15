@@ -6,16 +6,16 @@ of a computation graph from the frontend parsing and backend generation logic.
 """
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, LogicalMesh, PartitionSpec, LogicalAxis
+from ml_switcheroo.core.compiler.fusion import QKVDefusionPass, QKVFusionPass
+from ml_switcheroo.core.compiler.ir import LogicalAxis, LogicalEdge, LogicalGraph, LogicalMesh, LogicalNode, PartitionSpec
+from ml_switcheroo.core.compiler.qwen_fusion import (
+  SwiGLUDefusionPass,
+  SwiGLUFusionPass,
+  VisionPatchEmbeddingDefusionPass,
+  VisionPatchEmbeddingFusionPass,
+)
 from ml_switcheroo.core.compiler.sharding import ShardingInferencePass
 from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
-from ml_switcheroo.core.compiler.fusion import QKVFusionPass, QKVDefusionPass
-from ml_switcheroo.core.compiler.qwen_fusion import (
-  SwiGLUFusionPass,
-  SwiGLUDefusionPass,
-  VisionPatchEmbeddingFusionPass,
-  VisionPatchEmbeddingDefusionPass,
-)
 
 __all__ = [
   "CompilerBackend",

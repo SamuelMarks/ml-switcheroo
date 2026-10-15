@@ -2,13 +2,7 @@
 
 import libcst as cst
 
-from ml_switcheroo.ingestion.visitors import (
-  PyTorchVisitor,
-  KerasVisitor,
-  JAXVisitor,
-  MLXVisitor,
-  ASTNormalizer,
-)
+from ml_switcheroo.ingestion.visitors import ASTNormalizer, JAXVisitor, KerasVisitor, MLXVisitor, PyTorchVisitor
 
 
 def test_pytorch_visitor_state_allocations():

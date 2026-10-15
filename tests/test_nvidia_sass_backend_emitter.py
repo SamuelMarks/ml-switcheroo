@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for nvidia sass backend emitter."""
 
 from typing import Any, List
 from unittest.mock import patch
@@ -8,7 +8,7 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComm
 
 
 def test_nvidia_sass_emitter_emit() -> None:
-  """Docstring."""
+  """Verify nvidia sass emitter emit behavior."""
   emitter: NvidiaSassEmitter = NvidiaSassEmitter()
   nodes: List[NvidiaSassNode] = [NvidiaSassComment(text="test")]
   with patch("ml_switcheroo.core.compiler.backends.nvidia_sass.emitter.NvidiaSassPrinter") as mock_printer:
@@ -21,7 +21,7 @@ def test_nvidia_sass_emitter_emit() -> None:
 
 
 def test_nvidia_sass_emitter_integration() -> None:
-  """Docstring."""
+  """Verify nvidia sass emitter integration behavior."""
   emitter: NvidiaSassEmitter = NvidiaSassEmitter()
   nodes: List[NvidiaSassNode] = [NvidiaSassComment(text="integration")]
   result: str = emitter.emit(nodes)

@@ -9,14 +9,14 @@ from ml_switcheroo.sphinx_ext.rendering import _render_flavour_dropdown, _render
 
 
 def test_render_primary_options_empty() -> None:
-  """Docstring."""
+  """Verify render primary options empty behavior."""
   hierarchy: Dict[str, List[Dict[str, str]]] = {}
   html: str = _render_primary_options(hierarchy)
   assert html == ""
 
 
 def test_render_primary_options_standard() -> None:
-  """Docstring."""
+  """Verify render primary options standard behavior."""
   hierarchy: Dict[str, List[Dict[str, str]]] = {"torch": [{"key": "t1", "label": "t1"}], "jax": [], "unknown_fw": []}
 
   # Needs get_adapter mock because it instantiates adapters during rendering
@@ -76,7 +76,7 @@ def test_render_primary_options_ir_grouped() -> None:
 
 
 def test_render_flavour_dropdown_empty() -> None:
-  """Docstring."""
+  """Verify render flavour dropdown empty behavior."""
   hierarchy: Dict[str, List[Dict[str, str]]] = {"torch": [], "jax": []}
   html: str = _render_flavour_dropdown("src", hierarchy, "torch")
   assert '<option value="" disabled selected data-parent="">No Flavours</option>' in html
@@ -84,7 +84,7 @@ def test_render_flavour_dropdown_empty() -> None:
 
 
 def test_render_flavour_dropdown_with_flavours() -> None:
-  """Docstring."""
+  """Verify render flavour dropdown with flavours behavior."""
   hierarchy: Dict[str, List[Dict[str, str]]] = {
     "torch": [{"key": "torch.nn", "label": "Torch NN"}, {"key": "torch.fx", "label": "Torch FX"}],
     "jax": [],
@@ -206,7 +206,7 @@ def test_render_demo_html_empty_wheels_and_fallback(tmp_path: Path) -> None:
   dist_dir.mkdir()
 
   class MockAdapter:
-    """Docstring."""
+    """Test helper class MockAdapter."""
 
     def __init__(self, name: str) -> None:
       """Docstring.
@@ -240,7 +240,7 @@ def test_render_demo_html_no_priority_order(tmp_path: Path) -> None:
   hierarchy: Dict[str, List[Dict[str, str]]] = {"numpy": []}
 
   class MockAdapter:
-    """Docstring."""
+    """Test helper class MockAdapter."""
 
     def __init__(self, name: str) -> None:
       """Docstring.

@@ -3,8 +3,11 @@
 Checks if target indices are present in top_k(predictions).
 """
 
+from typing import cast
+
 import libcst as cst
-from ml_switcheroo.core.hooks import register_hook, HookContext
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
 @register_hook("in_top_k_plugin")
@@ -62,4 +65,5 @@ def in_top_k_plugin(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
       return updated_node
 
   # We know this returns an expression node
-  return template.visit(TemplateReplacer())  # type: ignore
+  visited: cst.CSTNode = cast(cst.CSTNode, template.visit(TemplateReplacer()))
+  return visited

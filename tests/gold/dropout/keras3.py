@@ -6,7 +6,7 @@ import keras
 
 
 class DropoutModel(keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class DropoutModel."""
 
   def __init__(self, p: float = 0.5) -> None:
     """Initializes the DropoutModel instance."""

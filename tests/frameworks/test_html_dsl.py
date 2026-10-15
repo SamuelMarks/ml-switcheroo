@@ -11,7 +11,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def test_html_dsl_adapter_basics() -> None:
-  """Docstring."""
+  """Verify html dsl adapter basics behavior."""
   adapter = HtmlDSLAdapter()
   assert adapter.display_name == "HTML Grid DSL"
   assert adapter.import_alias == ("html_dsl", "dsl")
@@ -24,7 +24,7 @@ def test_html_dsl_adapter_basics() -> None:
 
 
 def test_html_dsl_parser() -> None:
-  """Docstring."""
+  """Verify html dsl parser behavior."""
   adapter = HtmlDSLAdapter()
   parser: typing.Any = adapter.create_parser("<div></div>")
   # Assuming HtmlParser just takes the code, checking if it doesn't fail
@@ -32,7 +32,7 @@ def test_html_dsl_parser() -> None:
 
 
 def test_html_dsl_traits_and_namespaces() -> None:
-  """Docstring."""
+  """Verify html dsl traits and namespaces behavior."""
   adapter = HtmlDSLAdapter()
   assert adapter.structural_traits.module_base == "html_dsl.Module"
   assert adapter.structural_traits.forward_method == "forward"
@@ -44,7 +44,7 @@ def test_html_dsl_traits_and_namespaces() -> None:
 
 
 def test_html_dsl_device_and_serialization() -> None:
-  """Docstring."""
+  """Verify html dsl device and serialization behavior."""
   adapter = HtmlDSLAdapter()
 
   assert adapter.get_to_numpy_code() == "return str(obj)"
@@ -65,7 +65,7 @@ def test_html_dsl_device_and_serialization() -> None:
 
 
 def test_html_dsl_definitions_and_docs() -> None:
-  """Docstring."""
+  """Verify html dsl definitions and docs behavior."""
   adapter = HtmlDSLAdapter()
 
   defs: typing.Any = adapter.definitions
@@ -88,7 +88,7 @@ def test_html_dsl_definitions_and_docs() -> None:
 
 
 def test_html_dsl_missing_methods_2() -> None:
-  """Docstring."""
+  """Verify html dsl missing methods 2 behavior."""
   adapter = HtmlDSLAdapter()
   assert isinstance(adapter.plugin_traits, PluginTraits)
   assert adapter.convert("test") == "test"
@@ -116,7 +116,7 @@ def test_html_dsl_missing_methods_2() -> None:
 
 
 def test_html_dsl_missing_methods() -> None:
-  """Docstring."""
+  """Verify html dsl missing methods behavior."""
   adapter = HtmlDSLAdapter()
   assert isinstance(adapter.plugin_traits, PluginTraits)
   assert adapter.convert("test") == "test"

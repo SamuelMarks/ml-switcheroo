@@ -1,24 +1,13 @@
 """Test suite for the MLIR CST Parser and Transformer."""
 
 import typing
+
 import pytest
 from lark import Token, Tree
 
 from ml_switcheroo.core.cst.base import Trivia
-from ml_switcheroo.core.mlir.cst import (
-  AttributeNode,
-  BlockNode,
-  ModuleNode,
-  OperationNode,
-  RegionNode,
-)
-from ml_switcheroo.core.mlir.parser import (
-  MlirLexer,
-  MlirParser,
-  MlirToken,
-  MlirTransformer,
-  _get_trivia,
-)
+from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, RegionNode
+from ml_switcheroo.core.mlir.parser import MlirLexer, MlirParser, MlirToken, MlirTransformer, _get_trivia
 
 
 def test_parser_comprehensive() -> None:

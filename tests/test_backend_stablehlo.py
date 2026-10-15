@@ -9,7 +9,7 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 
 
 class DummySemantics:
-  """Docstring."""
+  """Test helper class DummySemantics."""
 
   def get_definition(self, kind: str) -> Optional[Tuple[Optional[str], Dict[str, Any]]]:
     """Test element.
@@ -26,13 +26,13 @@ class DummySemantics:
 
 
 def test_stablehlo_backend_init() -> None:
-  """Docstring."""
+  """Verify stablehlo backend init behavior."""
   backend: StableHloBackend = StableHloBackend(semantics="dummy")  # type: ignore
   assert backend.semantics == "dummy"
 
 
 def test_stablehlo_backend_compile() -> None:
-  """Docstring."""
+  """Verify stablehlo backend compile behavior."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="in1", op_type="Input"),
     LogicalNode(id="in2", op_type="Input"),
@@ -60,7 +60,7 @@ def test_stablehlo_backend_compile() -> None:
 
 
 def test_stablehlo_backend_compile_no_semantics() -> None:
-  """Docstring."""
+  """Verify stablehlo backend compile no semantics behavior."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="add1", op_type="Add"),
   ]
@@ -179,7 +179,7 @@ class DummyStrSemantics:
 
 
 def test_stablehlo_backend_str_attribute() -> None:
-  """Docstring."""
+  """Verify stablehlo backend str attribute behavior."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="op1", op_type="Dummy", attributes={"str_attr": "hello_world", "quoted_attr": '"quoted"'})
   ]

@@ -5,31 +5,30 @@ into graphical representations using TikZ or document-based representations
 using a customized Machine Intelligence Definition Language (MIDL) LaTeX format.
 """
 
-from typing import Dict, Tuple, List, Union, Any
 from collections import defaultdict, deque
-
+from typing import Any, Dict, List, Tuple, Union
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalNode
 from ml_switcheroo.core.graph import LogicalGraph
-from ml_switcheroo.core.compiler.ir import LogicalNode, LogicalEdge
+from ml_switcheroo.core.latex.nodes import (
+  ComputeNode,
+  InputNode,
+  LatexNode,
+  MemoryNode,
+  ModelContainer,
+  ReturnNode,
+  StateOpNode,
+)
 from ml_switcheroo.core.tikz.nodes import (
   TikzBaseNode,
-  TikzNode,
   TikzEdge,
-  TikzOption,
   TikzGraph,
+  TikzNode,
+  TikzOption,
   TikzTable,
   TikzTextNode,
   TriviaNode,
-)
-from ml_switcheroo.core.latex.nodes import (
-  LatexNode,
-  ModelContainer,
-  InputNode,
-  ReturnNode,
-  MemoryNode,
-  StateOpNode,
-  ComputeNode,
 )
 
 

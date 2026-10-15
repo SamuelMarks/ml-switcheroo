@@ -2,8 +2,8 @@
 """Validates all semantics/*.json files against SemanticsFile schema."""
 
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import List, Optional, Sequence
 
 # Add src to sys.path to import ml_switcheroo

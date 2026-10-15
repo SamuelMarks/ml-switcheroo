@@ -5,12 +5,16 @@ located in `ml_ecosystem_snapshots.snapshots` (or legacy `ml_framework_snapshots
 It utilizes caching to ensure efficient access during runtime and discovery.
 """
 
+import importlib.resources
 import json
+import logging
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict
+
 from ml_switcheroo_ir.schema.ghost import StandardMap
-import importlib.resources
+
+logger = logging.getLogger(__name__)
 
 try:
   from ml_ecosystem_snapshots._alias import register_alias_finder
@@ -34,11 +38,11 @@ def _resolve_resource_file(framework: str) -> Any:
       fp = importlib.resources.files(pkg).joinpath(f"{framework}.json")
       if fp.is_file():
         return fp
-    except Exception:
+    except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError):
       pass
   try:
     return importlib.resources.files("ml_ecosystem_snapshots.snapshots").joinpath(f"{framework}.json")
-  except Exception:
+  except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError):
     return importlib.resources.files("ml_framework_snapshots.snapshots").joinpath(f"{framework}.json")
 
 
@@ -59,7 +63,7 @@ def load_definitions(framework: str) -> Dict[str, StandardMap]:
   """
   try:
     file_path = _resolve_resource_file(framework)
-  except Exception:
+  except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError):
     return {}
   if not file_path.is_file():
     return {}
@@ -68,7 +72,7 @@ def load_definitions(framework: str) -> Dict[str, StandardMap]:
       raw_data = json.load(f)
     return {op_name: StandardMap.model_validate(op_def) for op_name, op_def in raw_data.items()}
   except (json.JSONDecodeError, OSError) as e:
-    print(f"Failed to load definitions for {framework}: {e}")
+    logger.warning("Failed to load definitions for %s: %s", framework, e)
     return {}
 
 
@@ -96,12 +100,12 @@ def get_definitions_path(framework: str) -> Path:
       fp = importlib.resources.files(pkg).joinpath(f"{framework}.json")
       if fp.is_file():
         return Path(str(fp))
-    except Exception:
+    except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError, Exception):
       pass
   try:
     return Path(str(importlib.resources.files("ml_ecosystem_snapshots.snapshots").joinpath(f"{framework}.json")))
-  except Exception:
+  except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError, Exception):
     try:
       return Path(str(importlib.resources.files("ml_framework_snapshots.snapshots").joinpath(f"{framework}.json")))
-    except Exception:
+    except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError, Exception):
       return Path(f"{framework}.json")

@@ -1,7 +1,7 @@
 """Unit and integration tests for scripts/prevent_hardcoded_frameworks.sh."""
 
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 
 def test_prevent_hardcoded_frameworks_compliant(tmp_path: Path) -> None:

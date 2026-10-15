@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for mlir gen base."""
 
 import libcst as cst
 
@@ -7,13 +7,13 @@ from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
 
 
 class TestGenerator(BaseGeneratorMixin):
-  """Docstring."""
+  """Test helper class TestGenerator."""
 
   pass
 
 
 def test_get_attr() -> None:
-  """Docstring."""
+  """Verify get attr behavior."""
   gen: TestGenerator = TestGenerator()
   op: OperationNode = OperationNode(name="test.op")
   assert gen._get_attr(op, "missing") is None
@@ -26,7 +26,7 @@ def test_get_attr() -> None:
 
 
 def test_create_dotted_name() -> None:
-  """Docstring."""
+  """Verify create dotted name behavior."""
   gen: TestGenerator = TestGenerator()
 
   node: cst.BaseExpression = gen._create_dotted_name("")
@@ -50,13 +50,13 @@ def test_create_dotted_name() -> None:
 
 
 class TestGeneratorExtra(BaseGeneratorMixin):
-  """Docstring."""
+  """Test helper class TestGeneratorExtra."""
 
   pass
 
 
 def test_get_attr_continue() -> None:
-  """Docstring."""
+  """Verify get attr continue behavior."""
   gen: TestGenerator = TestGenerator()
   op: OperationNode = OperationNode(
     name="test.op", attributes=[AttributeNode(name="other", value="val"), AttributeNode(name="foo", value="bar")]

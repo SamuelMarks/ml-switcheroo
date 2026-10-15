@@ -13,7 +13,7 @@ SOURCE_TORCH: str = "\nimport torch.nn as nn\n\nclass MyAttn(nn.Module):\n    de
 
 @pytest.fixture
 def attn_semantics() -> SemanticsManager:
-  """Docstring."""
+  """Execute attn semantics helper logic."""
   _HOOKS["repack_attn_keras"] = repack_attn_keras
   _HOOKS["repack_attn_flax"] = repack_attn_flax
   mgr = SemanticsManager()

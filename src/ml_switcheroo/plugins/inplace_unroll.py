@@ -10,10 +10,11 @@ This plugin:
 3.  Transforms the expression statement `x.op_(y)` into an assignment `x = x.op(y)`.
 """
 
-import libcst as cst
 from typing import Optional, Union
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
 def _get_receiver_name(node: cst.Call) -> Optional[cst.BaseExpression]:

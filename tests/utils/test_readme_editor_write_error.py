@@ -8,7 +8,7 @@ def test_readme_editor_duck() -> None:
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   class DuckPath:
-    """Docstring."""
+    """Test helper class DuckPath."""
 
     def exists(self) -> bool:
       """Helper to exists."""
@@ -31,7 +31,7 @@ def test_readme_editor_read_error() -> None:
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   class DuckPath:
-    """Docstring."""
+    """Test helper class DuckPath."""
 
     def exists(self) -> bool:
       """Check if exists."""
@@ -52,7 +52,7 @@ def test_readme_editor_no_map() -> None:
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   class DuckPath:
-    """Docstring."""
+    """Test helper class DuckPath."""
 
     def exists(self) -> bool:
       """Check if exists."""

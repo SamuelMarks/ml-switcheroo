@@ -7,7 +7,7 @@ from praxis.layers import embedding_softmax  # type: ignore
 
 
 class EmbeddingModel(base_layer.BaseLayer):  # type: ignore
-  """Docstring."""
+  """Test helper class EmbeddingModel."""
 
   num_embeddings: int = 0
   embedding_dim: int = 0

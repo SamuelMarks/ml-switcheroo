@@ -1,1 +1,1 @@
-"""Docstring."""
+"""Test suite for init."""

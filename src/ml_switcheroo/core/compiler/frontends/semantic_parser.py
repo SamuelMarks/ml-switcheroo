@@ -5,9 +5,10 @@ compilation, allowing lifters to reconstruct high-level graphs from assembly
 without relying on regex.
 """
 
-from typing import Optional, List, Any
 from dataclasses import dataclass
-from lark import Lark, Transformer, v_args, Token
+from typing import Any, List, Optional
+
+from lark import Lark, Token, Transformer, v_args
 
 
 @dataclass

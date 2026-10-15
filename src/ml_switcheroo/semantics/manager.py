@@ -10,30 +10,27 @@ Core Responsibilities:
 3.  **Coordination**: Triggers file loaders and code hydrators on initialization.
 """
 
-from typing import Any
-
-import typing
-
-
-import os
-import json
-import yaml
 import copy
+import json
+import logging
+import typing
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Set, List
-from pydantic import ValidationError
+from typing import Any, Dict, List, Optional, Set, Tuple
 
+import yaml
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.core.dsl import OperationDef, PatternDef
-from ml_switcheroo.semantics.paths import resolve_semantics_dir
+
+from ml_switcheroo.core.dsl import PatternDef
 
 # Use base directly to avoid cycle
 from ml_switcheroo.frameworks.base import get_adapter
 
 # New modular loaders
 from ml_switcheroo.semantics.file_loader import KnowledgeBaseLoader
+from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
+logger = logging.getLogger(__name__)
 _MANAGER_CACHE = None
 
 
@@ -87,108 +84,9 @@ class SemanticsManager:
 
   def _build_index(self) -> None:
     """Construct the reverse index mapping from concrete API endpoints back to their abstract definitions."""
-    if not hasattr(self, "_reverse_index"):
-      self._reverse_index = {}
-    else:
-      self._reverse_index.clear()
+    from ml_switcheroo.semantics.index_builder import IndexBuilder
 
-    if not hasattr(self, "_variant_cache"):
-      self._variant_cache = {}
-    else:
-      self._variant_cache.clear()
-    alias_map = {}
-
-    import importlib.resources
-
-    for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
-      try:
-        aliases_json_path = importlib.resources.files(pkg).joinpath("aliases.json")
-        if aliases_json_path.is_file():
-          with aliases_json_path.open("r", encoding="utf-8") as f:
-            alias_map.update(json.load(f))
-          break
-      except Exception:
-        pass
-
-    for fw, config in self.framework_configs.items():
-      if "alias" in config:
-        mod = config["alias"].get("module")
-        name = config["alias"].get("name")
-        if mod and name:
-          alias_map[name] = mod
-
-    priority_scores = {}
-    priority_json_path = os.path.join(os.path.dirname(__file__), "priority_scores.json")
-    if os.path.exists(priority_json_path):
-      with open(priority_json_path, "r", encoding="utf-8") as f:
-        priority_scores = json.load(f)
-
-    def get_priority(abs_id: str, details: dict[str, typing.Any], tier: str) -> int:
-      """Determine indexing priority when multiple abstract ops map to the same target API.
-
-      This handles overlaps between generic ops like `cat` vs `concat`.
-
-      Args:
-          abs_id: The abstract operation identifier.
-          details: The details of the abstract operation.
-          tier: The semantic tier of the abstract operation.
-
-      Returns:
-          An integer priority score (higher score wins).
-      """
-      score = priority_scores.get(abs_id, 0)
-
-      if tier == SemanticTier.ARRAY_API.value:
-        score += 50
-      elif tier == SemanticTier.NEURAL.value:
-        score -= 50
-      elif tier == SemanticTier.EXTRAS.value:
-        score -= 100
-
-      score += len(details.get("variants", {}))
-      return int(score)
-
-    for abstract_id, details in self.data.items():
-      variants = details.get("variants", {})
-      tier = self._key_origins.get(abstract_id)
-      score = get_priority(abstract_id, details, tier)  # type: ignore
-
-      for _engine, impl in variants.items():
-        if not impl:
-          continue
-        api_name = impl.get("api")
-        if api_name:
-
-          def register_api(name: str) -> None:
-            """Register the target concrete API mapped back to its abstract concept.
-
-            Uses tie-breaker scores when overlaps are found.
-
-            Args:
-                name: The concrete API name or fully qualified name to register.
-            """
-            if name in self._reverse_index:
-              existing_id, existing_details = self._reverse_index[name]
-              existing_tier = self._key_origins.get(existing_id)
-              existing_score = get_priority(existing_id, existing_details, existing_tier)  # type: ignore
-              if score > existing_score:
-                self._reverse_index[name] = (abstract_id, details)
-            else:
-              self._reverse_index[name] = (abstract_id, details)
-
-          register_api(api_name)
-
-          # Forward mapping: short to long (e.g. tf.abs -> tensorflow.abs)
-          parts = api_name.split(".")
-          if parts[0] in alias_map:
-            fqn = alias_map[parts[0]] + "." + ".".join(parts[1:])
-            register_api(fqn)
-
-          # Reverse mapping: long to short (e.g. torch.nn.Conv2d -> nn.Conv2d)
-          for alias_name, module_path in alias_map.items():
-            if api_name.startswith(module_path + "."):
-              fqn = alias_name + api_name[len(module_path) :]
-              register_api(fqn)
+    IndexBuilder.build_index(self)
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
     """Generate the import mapping for the ImportFixer based on Tier linking.
@@ -269,60 +167,15 @@ class SemanticsManager:
     """Resolve the implementation of an abstract operation.
 
     Args:
-        abstract_id: The unique identifier of the abstract operation.
-        target_fw: The target framework name to resolve the variant for.
+        abstract_id: Canonical abstract operation identifier.
+        target_fw: Target framework key.
 
     Returns:
-        A dictionary containing the implementation variant details, or None if
-        the variant cannot be resolved.
+        Target variant dictionary if found, else None.
     """
-    cache_key = (abstract_id, target_fw)
-    if not hasattr(self, "_variant_cache"):
-      self._variant_cache = {}
-    if cache_key in self._variant_cache:
-      return self._variant_cache[cache_key]
+    from ml_switcheroo.semantics.resolution import ResolutionEngine
 
-    defn = self.data.get(abstract_id)
-    if not defn and isinstance(abstract_id, str):
-      defn = self.data.get(abstract_id.lower()) or self.data.get(abstract_id.capitalize())
-    if not defn:
-      self._variant_cache[cache_key] = None
-      return None
-    variants = defn.get("variants", {})
-    if target_fw in variants:
-      result = variants[target_fw]
-      self._variant_cache[cache_key] = result
-      v1: typing.Optional[dict[str, typing.Any]] = result
-      return v1
-
-    curr = target_fw
-    limit = 5
-    while limit > 0:
-      parent = self._resolve_inheritance(curr)
-      if not parent:
-        break
-      if parent in variants:
-        result = variants[parent]
-        self._variant_cache[cache_key] = result
-        v2: typing.Optional[dict[str, typing.Any]] = result
-        return v2
-      curr = parent
-      limit -= 1
-
-    if isinstance(abstract_id, str):
-      for candidate_id in [abstract_id.lower(), abstract_id.capitalize()]:
-        if candidate_id != abstract_id:
-          alt_defn = self.data.get(candidate_id)
-          if alt_defn:
-            alt_vars = alt_defn.get("variants", {})
-            if target_fw in alt_vars:
-              result = alt_vars[target_fw]
-              self._variant_cache[cache_key] = result
-              v3: typing.Optional[dict[str, typing.Any]] = result
-              return v3
-
-    self._variant_cache[cache_key] = None
-    return None
+    return ResolutionEngine.resolve_variant(self, abstract_id, target_fw)
 
   def is_verified(self, abstract_id: str) -> bool:
     """Return True if the operation is marked verified (or untracked).
@@ -353,29 +206,14 @@ class SemanticsManager:
     """Reverse lookup from concrete API string or Abstract ID fallback.
 
     Args:
-        api_name: The concrete API endpoint string or abstract ID fallback.
+        api_name: Concrete API path or abstract operation ID.
 
     Returns:
-        A tuple of (abstract_id, definition_dict) if resolved, or None if not
-        found.
+        Tuple of `(abstract_id, details)` if found, else None.
     """
-    if not hasattr(self, "_reverse_index"):
-      self._reverse_index = {}
-    res: typing.Optional[typing.Tuple[str, dict[str, typing.Any]]] = self._reverse_index.get(api_name)
-    if res:
-      return res
+    from ml_switcheroo.semantics.resolution import ResolutionEngine
 
-    lower_name = api_name.lower()
-    cap_name = api_name.capitalize()
-    for candidate in [api_name, lower_name, cap_name]:
-      if candidate in self.data and self.data[candidate].get("variants"):
-        return (candidate, self.data[candidate])
-
-    for candidate in [api_name, lower_name, cap_name]:
-      if candidate in self.data:
-        return (candidate, self.data[candidate])
-
-    return None
+    return ResolutionEngine.get_definition(self, api_name)
 
   def get_known_apis(self) -> typing.Dict[str, dict[str, typing.Any]]:
     """Return full knowledge graph.
@@ -465,27 +303,13 @@ class SemanticsManager:
     """Update an operation definition in memory and persists to disk.
 
     Args:
-        abstract_id: The unique identifier of the abstract operation.
-        new_data: The dictionary containing the updated operation details.
+        abstract_id: Abstract operation identifier to update.
+        new_data: New operation definition dictionary to validate and persist.
     """
-    # Create a copy to inject defaults without mutating input
-    details_to_validate = new_data.copy()
+    from ml_switcheroo.semantics.validator import SemanticsValidator
 
-    # 1. Inject missing fields required by Schema if not present
-    if "operation" not in details_to_validate:
-      details_to_validate["operation"] = abstract_id
-    if "variants" not in details_to_validate:
-      details_to_validate["variants"] = {}
-    if "description" not in details_to_validate:
-      details_to_validate["description"] = f"Definition for {abstract_id}"
-    if "std_args" not in details_to_validate:
-      details_to_validate["std_args"] = []
-
-    try:
-      validated = OperationDef.model_validate(details_to_validate)
-      final_data = validated.model_dump(by_alias=True, exclude_unset=True)
-    except ValidationError as e:
-      print(f"❌ Cannot update invalid definition for '{abstract_id}': {e}")
+    final_data = SemanticsValidator.validate_and_dump(abstract_id, new_data)
+    if not final_data:
       return
 
     self.data[abstract_id] = final_data
@@ -522,8 +346,8 @@ class SemanticsManager:
       res = lookup_symbol(framework, symbol)
       if isinstance(res, dict):
         return res
-    except Exception:
-      pass
+    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+      logger.debug("Snapshot symbol lookup failed for %s.%s: %s", framework, symbol, exc)
     return None
 
   def search_snapshot_symbols(
@@ -548,8 +372,8 @@ class SemanticsManager:
       res = search_index(query, framework=framework, limit=limit)
       if isinstance(res, list):
         return res
-    except Exception:
-      pass
+    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+      logger.debug("Snapshot symbol search failed for query '%s': %s", query, exc)
     return []
 
   def validate_python_call(
@@ -579,7 +403,8 @@ class SemanticsManager:
         args=args or [],
         kwargs=kwargs or {},
       )
-    except Exception:
+    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+      logger.debug("Snapshot Python call validation failed for %s.%s: %s", framework, api_path, exc)
       return None
 
   def diff_snapshot_versions(self, snap1: typing.Any, snap2: typing.Any) -> typing.Any:
@@ -596,7 +421,8 @@ class SemanticsManager:
       from ml_ecosystem_snapshots.diff import diff_snapshots
 
       return diff_snapshots(snap1, snap2)
-    except Exception:
+    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+      logger.debug("Snapshot diff failed: %s", exc)
       return None
 
   def generate_snapshot_changelog(self, diff: typing.Any) -> str:
@@ -612,7 +438,8 @@ class SemanticsManager:
       from ml_ecosystem_snapshots.diff import generate_changelog
 
       return str(generate_changelog(diff))
-    except Exception:
+    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+      logger.debug("Snapshot changelog generation failed: %s", exc)
       return ""
 
   def extract_framework_isolated(
@@ -644,6 +471,6 @@ class SemanticsManager:
       )
       if isinstance(res, dict):
         return res
-    except Exception:
-      pass
+    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+      logger.debug("Isolated snapshot extraction failed for %s: %s", framework, exc)
     return {}

@@ -13,7 +13,7 @@ EXPECTED_OUTPUT: str = "\nimport jax.numpy as jnp\n\ndef process_image(x):\n    
 
 
 class LayoutSemantics(SemanticsManager):  # type: ignore[misc]
-  """Docstring."""
+  """Test helper class LayoutSemantics."""
 
   def __init__(self) -> None:
     """Initializes the LayoutSemantics instance."""

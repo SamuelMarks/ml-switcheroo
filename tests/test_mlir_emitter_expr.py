@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for mlir emitter expr."""
 
 from typing import Dict, List, Optional
 
@@ -9,32 +9,32 @@ from ml_switcheroo.core.mlir.emitter_expr import MlirEmitterExprMixin
 
 
 class DummyCtx:
-  """Docstring."""
+  """Test helper class DummyCtx."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.count: int = 0
     self.vars: Dict[str, ValueNode] = {"foo": ValueNode(name="%foo")}
 
   def lookup(self, name: str) -> Optional[ValueNode]:
-    """Docstring."""
+    """Execute lookup helper logic."""
     return self.vars.get(name)
 
   def allocate_ssa(self, prefix: str = "%") -> ValueNode:
-    """Docstring."""
+    """Execute allocate ssa helper logic."""
     self.count += 1
     return ValueNode(name=f"{prefix}{self.count}")
 
 
 class DummyEmitter(MlirEmitterExprMixin):
-  """Docstring."""
+  """Test helper class DummyEmitter."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.ctx: DummyCtx = DummyCtx()
 
   def _flatten_attr(self, attr: cst.BaseExpression) -> Optional[str]:
-    """Docstring."""
+    """Execute flatten attr helper logic."""
     if isinstance(attr, cst.Name):
       return attr.value
     elif isinstance(attr, cst.Attribute):
@@ -44,7 +44,7 @@ class DummyEmitter(MlirEmitterExprMixin):
     return None
 
   def _get_binop_str(self, op: cst.BaseBinaryOp) -> str:
-    """Docstring."""
+    """Execute get binop str helper logic."""
     if isinstance(op, cst.Add):
       return "add"
     if isinstance(op, cst.Multiply):
@@ -53,7 +53,7 @@ class DummyEmitter(MlirEmitterExprMixin):
 
 
 def test_emit_name() -> None:
-  """Docstring."""
+  """Verify emit name behavior."""
   emitter: DummyEmitter = DummyEmitter()
   name_node: cst.Name = cst.Name(value="foo")
   val: ValueNode
@@ -70,7 +70,7 @@ def test_emit_name() -> None:
 
 
 def test_emit_call() -> None:
-  """Docstring."""
+  """Verify emit call behavior."""
   emitter: DummyEmitter = DummyEmitter()
   # static op call: tf.add(x, y=z)
   call_node: cst.Call = cst.Call(
@@ -86,7 +86,7 @@ def test_emit_call() -> None:
 
 
 def test_emit_method_call() -> None:
-  """Docstring."""
+  """Verify emit method call behavior."""
   emitter: DummyEmitter = DummyEmitter()
   # object method call: foo.add() where foo is a local variable
   call_node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("foo"), attr=cst.Name("add")), args=[])
@@ -100,7 +100,7 @@ def test_emit_method_call() -> None:
 
 
 def test_emit_func_call() -> None:
-  """Docstring."""
+  """Verify emit func call behavior."""
   emitter: DummyEmitter = DummyEmitter()
   # direct func call: foo() where foo is local
   call_node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
@@ -112,7 +112,7 @@ def test_emit_func_call() -> None:
 
 
 def test_emit_binary_op() -> None:
-  """Docstring."""
+  """Verify emit binary op behavior."""
   emitter: DummyEmitter = DummyEmitter()
   bin_node: cst.BinaryOperation = cst.BinaryOperation(left=cst.Name("foo"), operator=cst.Add(), right=cst.Name("foo"))
   val: ValueNode
@@ -125,7 +125,7 @@ def test_emit_binary_op() -> None:
 
 
 def test_emit_constants() -> None:
-  """Docstring."""
+  """Verify emit constants behavior."""
   emitter: DummyEmitter = DummyEmitter()
   int_node: cst.Integer = cst.Integer("42")
   val1: ValueNode
@@ -141,18 +141,18 @@ def test_emit_constants() -> None:
 
 
 def test_emit_error() -> None:
-  """Docstring."""
+  """Verify emit error behavior."""
   emitter: DummyEmitter = DummyEmitter()
 
   class DummyNode(cst.BaseExpression):
-    """Docstring."""
+    """Test helper class DummyNode."""
 
     def _visit_and_replace_children(self, visitor: object) -> cst.CSTNode:
-      """Docstring."""
+      """Execute visit and replace children helper logic."""
       return self
 
     def _codegen_impl(self, state: object, default_semi: bool = False) -> None:
-      """Docstring."""
+      """Execute codegen impl helper logic."""
       pass
 
   val: ValueNode
@@ -162,7 +162,7 @@ def test_emit_error() -> None:
 
 
 def test_annotation_to_string() -> None:
-  """Docstring."""
+  """Verify annotation to string behavior."""
   emitter: DummyEmitter = DummyEmitter()
   n: cst.Name = cst.Name("int")
   assert emitter._annotation_to_string(n) == "int"
@@ -171,21 +171,21 @@ def test_annotation_to_string() -> None:
   assert emitter._annotation_to_string(attr) == "typing.Any"
 
   class DummyNode(cst.CSTNode):
-    """Docstring."""
+    """Test helper class DummyNode."""
 
     def _visit_and_replace_children(self, visitor: object) -> cst.CSTNode:
-      """Docstring."""
+      """Execute visit and replace children helper logic."""
       return self
 
     def _codegen_impl(self, state: object, default_semi: bool = False) -> None:
-      """Docstring."""
+      """Execute codegen impl helper logic."""
       pass
 
   assert emitter._annotation_to_string(DummyNode()) == "Any"
 
 
 def test_emit_call_other() -> None:
-  """Docstring."""
+  """Verify emit call other behavior."""
   emitter: DummyEmitter = DummyEmitter()
   # call of call: foo()()
   call_node: cst.Call = cst.Call(func=cst.Call(func=cst.Name("foo"), args=[]), args=[])

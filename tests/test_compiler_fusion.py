@@ -7,7 +7,7 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 
 
 def test_qkv_fusion_pass_no_nodes() -> None:
-  """Docstring."""
+  """Verify qkv fusion pass no nodes behavior."""
   graph: LogicalGraph = LogicalGraph(nodes={}, edges=[])
   pass_: QKVFusionPass = QKVFusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -15,7 +15,7 @@ def test_qkv_fusion_pass_no_nodes() -> None:
 
 
 def test_qkv_fusion_pass_missing_k_v() -> None:
-  """Docstring."""
+  """Verify qkv fusion pass missing k v behavior."""
   nodes: Dict[str, LogicalNode] = {"q_proj": LogicalNode(id="q_proj", op_type="Linear")}
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
   pass_: QKVFusionPass = QKVFusionPass()
@@ -26,7 +26,7 @@ def test_qkv_fusion_pass_missing_k_v() -> None:
 
 
 def test_qkv_fusion_pass_success() -> None:
-  """Docstring."""
+  """Verify qkv fusion pass success behavior."""
   nodes: Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "q_proj": LogicalNode(id="q_proj", op_type="Linear"),
@@ -63,7 +63,7 @@ def test_qkv_fusion_pass_success() -> None:
 
 
 def test_qkv_defusion_pass_no_nodes() -> None:
-  """Docstring."""
+  """Verify qkv defusion pass no nodes behavior."""
   graph: LogicalGraph = LogicalGraph(nodes={}, edges=[])
   pass_: QKVDefusionPass = QKVDefusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -71,7 +71,7 @@ def test_qkv_defusion_pass_no_nodes() -> None:
 
 
 def test_qkv_defusion_pass_success() -> None:
-  """Docstring."""
+  """Verify qkv defusion pass success behavior."""
   nodes: Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "qkv_proj": LogicalNode(id="qkv_proj", op_type="Linear"),
@@ -102,7 +102,7 @@ def test_qkv_defusion_pass_success() -> None:
 
 
 def test_qkv_fusion_pass_unrelated_edge() -> None:
-  """Docstring."""
+  """Verify qkv fusion pass unrelated edge behavior."""
   nodes: Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "q_proj": LogicalNode(id="q_proj", op_type="Linear"),
@@ -127,7 +127,7 @@ def test_qkv_fusion_pass_unrelated_edge() -> None:
 
 
 def test_qkv_defusion_pass_unrelated_edge() -> None:
-  """Docstring."""
+  """Verify qkv defusion pass unrelated edge behavior."""
   nodes: Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "qkv_proj": LogicalNode(id="qkv_proj", op_type="Linear"),

@@ -5,17 +5,12 @@ This module provides the framework adapter for the Intermediate Representation
 translation, analysis, and discovery pipeline.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Union
 import typing
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier, StandardMap
-from ml_switcheroo.frameworks.base import (
-  FrameworkAdapter,
-  ImportConfig,
-  InitMode,
-  OperationDef,
-  register_framework,
-)
+
+from ml_switcheroo.frameworks.base import FrameworkAdapter, ImportConfig, InitMode, OperationDef, register_framework
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 

@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for html dsl."""
 
 import libcst as cst
 import pytest
@@ -17,7 +17,7 @@ from ml_switcheroo.core.html.parser import GridExtractor, HtmlParser, InternalHt
 
 
 def test_nodes_base_html_node() -> None:
-  """Docstring."""
+  """Verify nodes base html node behavior."""
   node: HtmlNode = HtmlNode()
   with pytest.raises(NotImplementedError):
     node.emit()
@@ -26,19 +26,19 @@ def test_nodes_base_html_node() -> None:
 
 
 def test_nodes_text_node() -> None:
-  """Docstring."""
+  """Verify nodes text node behavior."""
   node: TextNode = TextNode(content="hello", leading_trivia=" ", trailing_trivia=" ")
   assert node.emit() == " hello "
 
 
 def test_nodes_comment_node() -> None:
-  """Docstring."""
+  """Verify nodes comment node behavior."""
   node: CommentNode = CommentNode(content="comment", leading_trivia="  ")
   assert node.emit() == "  <!--comment-->"
 
 
 def test_nodes_attribute_node() -> None:
-  """Docstring."""
+  """Verify nodes attribute node behavior."""
   node: AttributeNode = AttributeNode(name="class", value="box", quote_style="'")
   assert node.emit() == "class='box'"
 
@@ -47,7 +47,7 @@ def test_nodes_attribute_node() -> None:
 
 
 def test_nodes_tag_node() -> None:
-  """Docstring."""
+  """Verify nodes tag node behavior."""
   tag: TagNode = TagNode(name="div")
   assert tag.emit() == "<div></div>"
 
@@ -84,7 +84,7 @@ def test_nodes_tag_node() -> None:
 
 
 def test_nodes_svg_arrow() -> None:
-  """Docstring."""
+  """Verify nodes svg arrow behavior."""
   arrow: SvgArrow = SvgArrow(
     x1=0, y1=1, x2=2, y2=3, style_class="s-blue", marker_end="url(#m)", parent_style="display:none"
   )
@@ -94,7 +94,7 @@ def test_nodes_svg_arrow() -> None:
 
 
 def test_nodes_grid_box() -> None:
-  """Docstring."""
+  """Verify nodes grid box behavior."""
   box: GridBox = GridBox(
     row=1, col=2, css_class="box r", header_text="Call (conv)", code_text="args: x", body_text="Hello", z_index=5
   )
@@ -108,7 +108,7 @@ def test_nodes_grid_box() -> None:
 
 
 def test_nodes_html_document() -> None:
-  """Docstring."""
+  """Verify nodes html document behavior."""
   doc: HtmlDocument = HtmlDocument(model_name="TestModel")
   html: str = doc.emit()
   assert "TestModel" in html
@@ -123,7 +123,7 @@ def test_nodes_html_document() -> None:
 
 
 def test_parser_internal() -> None:
-  """Docstring."""
+  """Verify parser internal behavior."""
   parser: InternalHtmlParser = InternalHtmlParser()
   parser.feed("<div><!--cmt-->Text<br/><img></div>")
   assert len(parser.root_children) == 1
@@ -144,7 +144,7 @@ def test_parser_internal() -> None:
 
 
 def test_parser_grid_extractor() -> None:
-  """Docstring."""
+  """Verify parser grid extractor behavior."""
   doc: HtmlDocument = HtmlDocument(
     model_name="Test",
     children=[
@@ -195,7 +195,7 @@ def test_parser_grid_extractor() -> None:
 
 
 def test_parser_facade() -> None:
-  """Docstring."""
+  """Verify parser facade behavior."""
   html: str = """
     <h3>Model: TestModel</h3>
     <div class="box r"><span>my_layer: Linear</span><code>in_features=10, out_features=5</code></div>
@@ -218,7 +218,7 @@ def test_parser_facade() -> None:
 
 
 def test_parser_facade_no_init() -> None:
-  """Docstring."""
+  """Verify parser facade no init behavior."""
   html: str = """<h3>Model: TestModel</h3>"""
   parser: HtmlParser = HtmlParser(html)
   tree: cst.Module = parser.parse()
@@ -227,7 +227,7 @@ def test_parser_facade_no_init() -> None:
 
 
 def test_parser_unclosed_tags() -> None:
-  """Docstring."""
+  """Verify parser unclosed tags behavior."""
   parser: HtmlParser = HtmlParser("<div><span>unclosed text")
   doc: HtmlDocument = parser.parse_cst()
   assert len(doc.children) == 1
@@ -240,7 +240,7 @@ def test_parser_unclosed_tags() -> None:
 
 
 def test_internal_parser_endtag() -> None:
-  """Docstring."""
+  """Verify internal parser endtag behavior."""
   parser: InternalHtmlParser = InternalHtmlParser()
   parser.feed("<div><span>text</span></div>")
   assert len(parser.root_children) == 1
@@ -248,7 +248,7 @@ def test_internal_parser_endtag() -> None:
 
 
 def test_parser_facade_ops_missing_args() -> None:
-  """Docstring."""
+  """Verify parser facade ops missing args behavior."""
   html: str = """
     <h3>Model: TestModel</h3>
     <div class="box b"><span>relu</span><code></code></div>

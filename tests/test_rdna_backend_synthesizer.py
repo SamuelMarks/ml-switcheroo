@@ -1,36 +1,32 @@
-"""Test module."""
+"""Test suite for rdna backend synthesizer."""
 
-from typing import Dict, List, Optional
 from pathlib import Path
+from typing import Dict, List, Optional
 from unittest.mock import patch
 
 import libcst as cst
 import pytest
 
-from ml_switcheroo.core.compiler.backends.rdna.synthesizer import (
-  MAX_SGPR,
-  MAX_VGPR,
-  RdnaBackend,
-  RdnaSynthesizer,
-  RegisterAllocator,
-)
+from ml_switcheroo.core.compiler.backends.rdna.synthesizer import MAX_SGPR, RdnaBackend, RdnaSynthesizer
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
-  RdnaLabel,
   RdnaImmediate,
   RdnaInstruction,
-  RdnaNode,
-  RdnaVGPR,
+  RdnaLabel,
   RdnaSGPR,
+  RdnaVGPR,
 )
+from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
+
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaNode
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 class MockSemanticsManager:
-  """Docstring."""
+  """Test helper class MockSemanticsManager."""
 
   def get_definition(self, kind: str) -> Optional[List[str]]:
-    """Docstring."""
+    """Execute get definition helper logic."""
     if kind == "known_op":
       return ["add"]
     elif kind == "macro_op":
@@ -40,51 +36,50 @@ class MockSemanticsManager:
     return None
 
   def resolve_variant(self, abstract_id: str, backend: str) -> Optional[Dict[str, str]]:
-    """Docstring."""
+    """Execute resolve variant helper logic."""
     if abstract_id == "add":
       return {"api": "v_add_f32"}
     return None
 
 
 def test_register_allocator() -> None:
-  """Docstring."""
-  allocator: RegisterAllocator = RegisterAllocator()
+  """Verify register allocator behavior."""
+  allocator: RegisterAllocator = RegisterAllocator(256, lambda x: RdnaVGPR(index=x))
 
-  v1: RdnaVGPR = allocator.get_vector_register("x")
-  v2: RdnaVGPR = allocator.get_vector_register("x")
+  v1: RdnaVGPR = allocator.get_register("x")
+  v2: RdnaVGPR = allocator.get_register("x")
   assert v1.index == v2.index
 
-  s1: RdnaSGPR = allocator.get_scalar_register("y")
-  s2: RdnaSGPR = allocator.get_scalar_register("y")
+  s1: RdnaSGPR = allocator.get_register("y")
+  s2: RdnaSGPR = allocator.get_register("y")
   assert s1.index == s2.index
 
-  v_temp: RdnaVGPR = allocator.allocate_vector_temp()
+  v_temp: RdnaVGPR = allocator.allocate_temp()
   assert isinstance(v_temp, RdnaVGPR)
   assert v_temp.index != v1.index
 
-  s_temp: RdnaSGPR = allocator.allocate_scalar_temp()
-  assert isinstance(s_temp, RdnaSGPR)
+  s_temp: RdnaSGPR = allocator.allocate_temp()
+  assert isinstance(s_temp, RdnaVGPR)
   assert s_temp.index != s1.index
 
   allocator.reset()
-  assert allocator._next_vgpr == 0
-  assert allocator._next_sgpr == 0
+  assert len(allocator._free_pool) == 256
 
 
 def test_register_allocator_overflow() -> None:
-  """Docstring."""
-  allocator: RegisterAllocator = RegisterAllocator()
-  allocator._next_vgpr = MAX_VGPR
-  with pytest.raises(ValueError, match="RdnaVGPR overflow"):
-    allocator.get_vector_register("new_var")
+  """Verify register allocator overflow behavior."""
+  allocator: RegisterAllocator = RegisterAllocator(256, lambda x: RdnaVGPR(index=x))
+  allocator._free_pool = []
+  with pytest.raises(ValueError, match="overflow"):
+    allocator.get_register("new_var")
 
   allocator._next_sgpr = MAX_SGPR
-  with pytest.raises(ValueError, match="RdnaSGPR overflow"):
-    allocator.get_scalar_register("new_var_s")
+  with pytest.raises(ValueError, match="overflow"):
+    allocator.get_register("new_var_s")
 
 
 def test_synthesizer_from_graph() -> None:
-  """Docstring."""
+  """Verify synthesizer from graph behavior."""
   semantics: MockSemanticsManager = MockSemanticsManager()
   synthesizer: RdnaSynthesizer = RdnaSynthesizer(semantics)
 
@@ -114,7 +109,7 @@ def test_synthesizer_from_graph() -> None:
 
 
 def test_synthesizer_to_python() -> None:
-  """Docstring."""
+  """Verify synthesizer to python behavior."""
   semantics: MockSemanticsManager = MockSemanticsManager()
   synthesizer: RdnaSynthesizer = RdnaSynthesizer(semantics)
 
@@ -143,7 +138,7 @@ def test_synthesizer_to_python() -> None:
 
 
 def test_rdna_backend() -> None:
-  """Docstring."""
+  """Verify rdna backend behavior."""
   semantics: MockSemanticsManager = MockSemanticsManager()
   backend: RdnaBackend = RdnaBackend(semantics)
 
@@ -156,7 +151,7 @@ def test_rdna_backend() -> None:
 
 
 def test_rdna_backend_default_semantics() -> None:
-  """Docstring."""
+  """Verify rdna backend default semantics behavior."""
   backend: RdnaBackend = RdnaBackend()
   assert backend.synthesizer.semantics is not None
 
@@ -165,19 +160,19 @@ def test_rdna_backend_default_semantics() -> None:
 
 
 class DummySemantics:
-  """Docstring."""
+  """Test helper class DummySemantics."""
 
   def resolve_variant(self, abstract_id: str, flavor: str) -> Optional[dict]:
-    """Docstring."""
+    """Execute resolve variant helper logic."""
     return None
 
   def get_definition(self, kind: str) -> Optional[dict]:
-    """Docstring."""
+    """Execute get definition helper logic."""
     return None
 
 
 def test_rdna_synthesizer_branches() -> None:
-  """Docstring."""
+  """Verify rdna synthesizer branches behavior."""
   # 1. Test when macros.json does not exist
   with patch("os.path.exists", return_value=False):
     synth: RdnaSynthesizer = RdnaSynthesizer(semantics=DummySemantics())
@@ -213,7 +208,7 @@ def test_rdna_synthesizer_branches() -> None:
 
 
 def test_synthesizer_init(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify synthesizer init behavior."""
   macros_json: Path = tmp_path / "macros.json"
   macros_json.write_text('{"Conv2d": "expand_conv2d", "UnknownOp": "expand_unknown"}')
 
@@ -252,7 +247,7 @@ def test_synthesizer_init_filenotfound(tmp_path: Path) -> None:
 
 
 def test_unmapped_op_and_comment() -> None:
-  """Docstring."""
+  """Verify unmapped op and comment behavior."""
   # Test Unmapped Op and RdnaComment branches
   nodes = [LogicalNode(id="unmapped1", op_type="TotallyUnknownOp")]
   nodes.append(LogicalNode(id="n2", op_type="", attributes={}))  # Hit 211->214

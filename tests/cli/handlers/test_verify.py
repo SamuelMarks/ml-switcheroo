@@ -11,7 +11,7 @@ from ml_switcheroo.cli.handlers.verify import handle_ci
 
 @pytest.fixture
 def mock_config() -> Generator[MagicMock, None, None]:
-  """Docstring."""
+  """Execute mock config helper logic."""
   with patch("ml_switcheroo.config.RuntimeConfig.load") as mock_load:
     mock_conf: MagicMock = MagicMock()
     mock_conf.plugin_paths = ["some/plugin"]
@@ -21,21 +21,21 @@ def mock_config() -> Generator[MagicMock, None, None]:
 
 @pytest.fixture
 def mock_semantics() -> Generator[MagicMock, None, None]:
-  """Docstring."""
+  """Execute mock semantics helper logic."""
   with patch("ml_switcheroo.cli.handlers.verify.SemanticsManager") as mock:
     yield mock
 
 
 @pytest.fixture
 def mock_validator() -> Generator[MagicMock, None, None]:
-  """Docstring."""
+  """Execute mock validator helper logic."""
   with patch("ml_switcheroo.cli.handlers.verify.BatchValidator") as mock:
     yield mock
 
 
 @pytest.fixture
 def mock_load_plugins() -> Generator[MagicMock, None, None]:
-  """Docstring."""
+  """Execute mock load plugins helper logic."""
   with patch("ml_switcheroo.cli.handlers.verify.load_plugins") as mock:
     yield mock
 

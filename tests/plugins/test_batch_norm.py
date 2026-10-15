@@ -20,7 +20,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   hooks._HOOKS["batch_norm_unwrap"] = transform_batch_norm
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()

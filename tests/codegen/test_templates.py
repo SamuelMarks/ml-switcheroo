@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for templates."""
 
 import typing
 from unittest.mock import MagicMock
@@ -7,7 +7,7 @@ from ml_switcheroo.generated_tests.templates import get_template
 
 
 def test_get_template_exception() -> None:
-  """Docstring."""
+  """Verify get template exception behavior."""
   manager: MagicMock = MagicMock()
   manager.get_test_template.side_effect = Exception("err")
   tmpl: typing.Optional[dict[str, str]] = get_template("torch", manager)
@@ -15,7 +15,7 @@ def test_get_template_exception() -> None:
 
 
 def test_is_static_arg() -> None:
-  """Docstring."""
+  """Verify is static arg behavior."""
   from ml_switcheroo.generated_tests.templates import is_static_arg
 
   assert is_static_arg({"type": "int"}) is True
@@ -31,7 +31,7 @@ def test_is_static_arg() -> None:
 
 
 def test_get_template_no_manager() -> None:
-  """Docstring."""
+  """Verify get template no manager behavior."""
   from ml_switcheroo.generated_tests.templates import get_template
 
   tmpl: typing.Optional[dict[str, str]] = get_template(None, "torch")

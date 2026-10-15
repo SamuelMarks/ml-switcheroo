@@ -12,7 +12,7 @@ from ml_switcheroo.semantics.merging import merge_overlay_data
 
 
 class FixedSemantics(SemanticsManager):  # type: ignore[misc]
-  """Docstring."""
+  """Test helper class FixedSemantics."""
 
   def __init__(self) -> None:
     """Initializes the FixedSemantics instance."""

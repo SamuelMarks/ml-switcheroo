@@ -7,7 +7,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_leftover_import_tensorflow() -> None:
-  """Docstring."""
+  """Verify leftover import tensorflow behavior."""
   code: str = "import torch\nimport torch.nn as nn\nself.conv = nn.Conv2d(1, 32, 3)"
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="tensorflow")
   semantics: SemanticsManager = SemanticsManager()
@@ -20,7 +20,7 @@ def test_leftover_import_tensorflow() -> None:
 
 
 def test_leftover_import_keras() -> None:
-  """Docstring."""
+  """Verify leftover import keras behavior."""
   code: str = "import torch\nimport torch.nn as nn\nself.conv = nn.Conv2d(1, 32, 3)"
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="keras")
   semantics: SemanticsManager = SemanticsManager()

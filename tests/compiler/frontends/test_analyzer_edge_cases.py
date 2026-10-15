@@ -2,14 +2,14 @@
 
 import typing
 
-from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate as RdnaImm
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction as RdnaInst
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR as VGPR
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate as NvidiaSassImm
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassInstruction as NvidiaSassInst
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassRegister as NvidiaSassReg
+from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate as RdnaImm
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction as RdnaInst
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR as VGPR
 
 
 def test_nvidia_sass_analyzer_edge_cases() -> None:

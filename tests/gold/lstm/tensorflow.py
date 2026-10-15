@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class LSTMModel(tf.keras.Model):
-  """Docstring."""
+  """Test helper class LSTMModel."""
 
   def __init__(self, hidden_size: int):
     """Initializes the LSTMModel instance."""

@@ -10,41 +10,33 @@ It includes logic to:
 4.  **Infer generation strategy from default values** when explicit hints are erased.
 """
 
-from typing import Any
-
-import typing
-
-
 import random
+import typing
+from typing import Any, Dict, Tuple, Union
+
 import numpy as np
-from typing import Dict, Tuple, Union
-
-from ml_switcheroo.testing.fuzzer.type_parser import (
-  parse_type_annotation,
-  ParsedType,
-  AnyType,
-  NoneType,
-  PrimitiveType,
-  UnionType,
-  OptionalType,
-  TupleType,
-  ListType,
-  DictType,
-  TensorType,
-  CallableType,
-)
-
 
 from ml_switcheroo.testing.fuzzer.generators import (
   generate_array,
-  generate_scalar_int,
   generate_scalar_float,
+  generate_scalar_int,
   generate_symbolic_callable,
 )
-from ml_switcheroo.testing.fuzzer.utils import (
-  resolve_symbolic_shape,
-  adjust_shape_rank,
+from ml_switcheroo.testing.fuzzer.type_parser import (
+  AnyType,
+  CallableType,
+  DictType,
+  ListType,
+  NoneType,
+  OptionalType,
+  ParsedType,
+  PrimitiveType,
+  TensorType,
+  TupleType,
+  UnionType,
+  parse_type_annotation,
 )
+from ml_switcheroo.testing.fuzzer.utils import adjust_shape_rank, resolve_symbolic_shape
 
 
 def get_fallback_base_value(parsed: "ParsedType", base_shape: typing.Tuple[int, ...]) -> typing.Any:

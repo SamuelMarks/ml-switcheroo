@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin einsum."""
 
 from unittest.mock import MagicMock
 
@@ -9,19 +9,19 @@ from ml_switcheroo.plugins.einsum import _create_dotted_name, _is_string, normal
 
 
 def test_is_string() -> None:
-  """Docstring."""
+  """Verify is string behavior."""
   assert _is_string(cst.SimpleString("'a'"))
   assert not _is_string(cst.Name("a"))
 
 
 def test_create_dotted_name() -> None:
-  """Docstring."""
+  """Verify create dotted name behavior."""
   node: cst.BaseExpression = _create_dotted_name("a.b")
   assert isinstance(node, cst.Attribute)
 
 
 def test_normalize_einsum_no_args() -> None:
-  """Docstring."""
+  """Verify normalize einsum no args behavior."""
   node: cst.Call = cst.Call(func=cst.Name("einsum"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.einsum"
@@ -33,7 +33,7 @@ def test_normalize_einsum_no_args() -> None:
 
 
 def test_normalize_einsum_already_correct() -> None:
-  """Docstring."""
+  """Verify normalize einsum already correct behavior."""
   node: cst.Call = cst.Call(
     func=cst.Name("einsum"),
     args=[
@@ -50,7 +50,7 @@ def test_normalize_einsum_already_correct() -> None:
 
 
 def test_normalize_einsum_reorder() -> None:
-  """Docstring."""
+  """Verify normalize einsum reorder behavior."""
   node: cst.Call = cst.Call(
     func=cst.Name("einsum"),
     args=[
@@ -71,7 +71,7 @@ def test_normalize_einsum_reorder() -> None:
 
 
 def test_normalize_einsum_no_string() -> None:
-  """Docstring."""
+  """Verify normalize einsum no string behavior."""
   node: cst.Call = cst.Call(
     func=cst.Name("einsum"),
     args=[

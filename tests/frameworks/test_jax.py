@@ -35,7 +35,7 @@ def test_jax_import_namespaces() -> None:
 
 
 def test_jax_test_config() -> None:
-  """Docstring."""
+  """Verify jax test config behavior."""
   adapter = JaxCoreAdapter()
   config: dict[str, typing.Any] = adapter.test_config
   assert "import jax.numpy as jnp" in config["import"]
@@ -134,7 +134,7 @@ def test_jax_init_live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_jax_activations_coverage() -> None:
-  """Docstring."""
+  """Verify jax activations coverage behavior."""
   adapter = JaxCoreAdapter()
   res: list[typing.Any] = adapter._collect_live(SemanticTier.ACTIVATION)
   assert isinstance(res, list)
@@ -183,7 +183,7 @@ def test_jax_convert_array_exception() -> None:
 
 
 def test_jax_adapter_ghost_mode() -> None:
-  """Docstring."""
+  """Verify jax adapter ghost mode behavior."""
   with patch("ml_switcheroo.frameworks.jax.jax", None):
     with patch(
       "ml_switcheroo.frameworks.jax.load_snapshot_for_adapter",
@@ -198,7 +198,7 @@ def test_jax_adapter_ghost_mode() -> None:
 
 
 def test_jax_adapter_ghost_mode_no_snapshot() -> None:
-  """Docstring."""
+  """Verify jax adapter ghost mode no snapshot behavior."""
   with patch("ml_switcheroo.frameworks.jax.jax", None):
     with patch("ml_switcheroo.frameworks.jax.load_snapshot_for_adapter", return_value={}):
       adapter = JaxCoreAdapter()
@@ -208,14 +208,14 @@ def test_jax_adapter_ghost_mode_no_snapshot() -> None:
 
 
 def test_jax_adapter_plugin_traits() -> None:
-  """Docstring."""
+  """Verify jax adapter plugin traits behavior."""
   adapter = JaxCoreAdapter()
   traits: typing.Any = adapter.plugin_traits
   assert traits.has_numpy_compatible_arrays
 
 
 def test_jax_adapter_collect_live() -> None:
-  """Docstring."""
+  """Verify jax adapter collect live behavior."""
   adapter = JaxCoreAdapter()
   with patch("ml_switcheroo.frameworks.jax.OptaxScanner.scan_losses", return_value=["loss1"], create=True):
     assert "loss1" in adapter._collect_live(SemanticTier.LOSS)
@@ -225,7 +225,7 @@ def test_jax_adapter_collect_live() -> None:
 
 
 def test_jax_adapter_convert_exception() -> None:
-  """Docstring."""
+  """Verify jax adapter convert exception behavior."""
   adapter = JaxCoreAdapter()
   with patch("builtins.__import__", side_effect=Exception):
     assert adapter.convert([1, 2]) == [1, 2]

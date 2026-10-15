@@ -10,9 +10,10 @@ Feature 086: Auto-Wire Dictionary injection.
 
 from pathlib import Path
 from typing import List, Optional
+
 import libcst as cst
 
-from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule, LogicOp
+from ml_switcheroo.core.dsl import LogicOp, PluginScaffoldDef, PluginType, Rule
 
 # Helper logic injected into plugins generated with rules
 HELPER_LOGIC = """

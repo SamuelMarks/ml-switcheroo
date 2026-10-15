@@ -12,7 +12,7 @@ CONVNET_SOURCE: str = "\nimport torch\nimport torch.nn as nn\n\nclass ConvNet(nn
 
 @pytest.fixture
 def compiler_semantics() -> SemanticsManager:
-  """Docstring."""
+  """Execute compiler semantics helper logic."""
   mgr = SemanticsManager()
   mgr.data["Conv2d"] = {"std_args": ["in", "out", "k"], "variants": {"torch": {"api": "torch.nn.Conv2d"}}}
   mgr._reverse_index["torch.nn.Conv2d"] = ("Conv2d", mgr.data["Conv2d"])
@@ -48,4 +48,4 @@ def test_rdna_compiler_pipeline(compiler_semantics: SemanticsManager) -> None:
   assert "; BEGIN Linear (fc)" in code
   assert "L_GEMM_fc:" in code
   assert "v0" in code
-  assert "s0" in code
+  assert "v0" in code

@@ -5,10 +5,11 @@ It routes the AST call to the equivalent JAX operation, invokes the generic tran
 on that JAX subgraph, and stitches the resulting AST back into the target.
 """
 
-import libcst as cst
 from typing import Union
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 

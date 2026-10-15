@@ -19,7 +19,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   hooks._HOOKS["einsum_normalizer"] = normalize_einsum
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()

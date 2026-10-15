@@ -17,27 +17,29 @@ It contains:
 3.  **RdnaBackend**: The CompilerBackend adapter for the Registry, including header generation.
 """
 
-from typing import Dict, List, Optional, TYPE_CHECKING, Any
+import os
+from typing import TYPE_CHECKING, Dict, List, Optional
+
 import libcst as cst
+
+import ml_switcheroo.core.compiler.backends.rdna.macros as rdna_macros
+from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.backends.rdna.emitter import RdnaEmitter
 
 # Direct Import from Frontend to avoid circular dependency via core shims
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
+  RdnaComment,
+  RdnaImmediate,
   RdnaInstruction,
+  RdnaLabel,
+  RdnaNode,
+  RdnaOperand,
   RdnaSGPR,
   RdnaVGPR,
-  RdnaNode,
-  RdnaComment,
-  RdnaOperand,
-  RdnaLabel,
-  RdnaImmediate,
 )
-from ml_switcheroo.core.compiler.backend import CompilerBackend
-from ml_switcheroo.core.compiler.backends.rdna.emitter import RdnaEmitter
 from ml_switcheroo.core.compiler.ir import LogicalGraph, topological_sort
-import ml_switcheroo.core.compiler.backends.rdna.macros as rdna_macros
-import json
-import os
-import yaml
+from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator
+from ml_switcheroo.core.compiler.isa.synthesizer import IsaSynthesizer
 
 if TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -47,122 +49,38 @@ MAX_VGPR = 256
 MAX_SGPR = 106
 
 
-class RegisterAllocator:
-  """Manage the mapping between symbolic variable names and physical registers.
-
-  Maintains separate accounting for Scalar (RdnaSGPR) and Vector (RdnaVGPR) files.
-  """
-
-  def __init__(self) -> None:
-    """Initialize the allocator with empty maps and counters."""
-    self._var_to_vgpr: Dict[str, int] = {}
-    self._var_to_sgpr: Dict[str, int] = {}
-    self._next_vgpr = 0
-    self._next_sgpr = 0
-
-  def get_vector_register(self, var_name: str) -> RdnaVGPR:
-    """Retrieve or allocates a Vector register (RdnaVGPR) for a symbolic variable.
-
-    Raises:
-        ValueError: If register limit is exceeded.
-
-    Args:
-        var_name: The symbolic name of the variable.
-
-    Returns:
-        RdnaVGPR: The allocated or retrieved vector register.
-    """
-    if var_name in self._var_to_vgpr:
-      return RdnaVGPR(index=self._var_to_vgpr[var_name])
-
-    if self._next_vgpr >= MAX_VGPR:
-      raise ValueError(f"RdnaVGPR overflow! Exceeded {MAX_VGPR} registers.")
-
-    idx = self._next_vgpr
-    self._var_to_vgpr[var_name] = idx
-    self._next_vgpr += 1
-    return RdnaVGPR(index=idx)
-
-  def get_scalar_register(self, var_name: str) -> RdnaSGPR:
-    """Retrieve or allocates a Scalar register (RdnaSGPR) for a symbolic variable.
-
-    Raises:
-        ValueError: If register limit is exceeded.
-
-    Args:
-        var_name: The symbolic name of the variable.
-
-    Returns:
-        RdnaSGPR: The allocated or retrieved scalar register.
-    """
-    if var_name in self._var_to_sgpr:
-      return RdnaSGPR(index=self._var_to_sgpr[var_name])
-
-    if self._next_sgpr >= MAX_SGPR:
-      raise ValueError(f"RdnaSGPR overflow! Exceeded {MAX_SGPR} registers.")
-
-    idx = self._next_sgpr
-    self._var_to_sgpr[var_name] = idx
-    self._next_sgpr += 1
-    return RdnaSGPR(index=idx)
-
-  def allocate_vector_temp(self) -> RdnaVGPR:
-    """Allocate an anonymous temporary RdnaVGPR.
-
-    Returns:
-        RdnaVGPR: The newly allocated temporary vector register.
-    """
-    name = f"__v_temp_{self._next_vgpr}__"
-    return self.get_vector_register(name)
-
-  def allocate_scalar_temp(self) -> RdnaSGPR:
-    """Allocate an anonymous temporary RdnaSGPR.
-
-    Returns:
-        RdnaSGPR: The newly allocated temporary scalar register.
-    """
-    name = f"__s_temp_{self._next_sgpr}__"
-    return self.get_scalar_register(name)
-
-  def reset(self) -> None:
-    """Reset all allocation state."""
-    self._var_to_vgpr.clear()
-    self._var_to_sgpr.clear()
-    self._next_vgpr = 0
-    self._next_sgpr = 0
-
-
-class RdnaSynthesizer:
+class RdnaSynthesizer(IsaSynthesizer):
   """Bidirectional transpiler component for RDNA ISA."""
 
   def __init__(self, semantics: "SemanticsManager") -> None:
-    """Initialize RDNA Synthesizer.
+    """Initialize the RDNA synthesizer with a 256-VGPR register allocator and RDNA macros.
 
     Args:
-        semantics: SemanticsManager for opcode resolution.
+        semantics: SemanticsManager instance used to resolve RDNA operation variants.
     """
-    self.semantics = semantics
-    self.allocator = RegisterAllocator()
-    self.macro_registry = {}
-    macros_yaml_path = os.path.join(os.path.dirname(__file__), "macros.yaml")
-    macros_json_path = os.path.join(os.path.dirname(__file__), "macros.json")
-    mapping: Dict[str, Any] = {}
-    if os.path.exists(macros_yaml_path):
-      try:
-        with open(macros_yaml_path, "r", encoding="utf-8") as f:
-          mapping = yaml.safe_load(f) or {}
-      except FileNotFoundError:
-        mapping = {}
-    if not mapping and os.path.exists(macros_json_path):
-      try:
-        with open(macros_json_path, "r", encoding="utf-8") as f:
-          mapping = json.load(f)
-      except FileNotFoundError:
-        mapping = {}
 
-    for key, func_name in mapping.items():
-      if hasattr(rdna_macros, func_name):
-        self.macro_registry[key] = getattr(rdna_macros, func_name)
+    def reg_factory(idx: int) -> RdnaVGPR:
+      """Construct an RdnaVGPR (`v{idx}`) for a physical vector register index.
+
+      Args:
+          idx: Zero-based VGPR register index.
+
+      Returns:
+          Constructed RdnaVGPR CST node.
+      """
+      return RdnaVGPR(index=idx)
+
+    # Note: Using VGPR limit for the unified allocator initially.
+    # Advanced usage requiring SGPR tracking would use a subclass of GenericRegisterAllocator.
+    allocator = GenericRegisterAllocator(MAX_VGPR, reg_factory)
+
+    super().__init__(
+      semantics=semantics,
+      allocator=allocator,
+      macros_yaml_path=os.path.join(os.path.dirname(__file__), "macros.yaml"),
+      macros_json_path=os.path.join(os.path.dirname(__file__), "macros.json"),
+      macro_module=rdna_macros,
+    )
 
   def from_graph(self, graph: LogicalGraph) -> List[RdnaNode]:
     """Convert a LogicalGraph into a list of RDNA AST nodes.
@@ -191,7 +109,7 @@ class RdnaSynthesizer:
 
       # --- Inputs ---
       if op_type == "Input":
-        reg = self.allocator.get_vector_register(node.id)
+        reg = self.allocator.get_register(node.id)
         var_name = node_attrs.get("name", node.id)
         output_nodes.append(RdnaComment(text=f"Input {var_name} -> {reg}"))
 
@@ -199,16 +117,12 @@ class RdnaSynthesizer:
       elif op_type == "Output":
         sources = input_map.get(node.id, [])
         if sources:
-          src_reg = self.allocator.get_vector_register(sources[0])
+          src_reg = self.allocator.get_register(sources[0])
           output_nodes.append(RdnaComment(text=f"Return: {src_reg}"))
 
       else:
         # Resolve Abstract ID
-        defn = self.semantics.get_definition(op_type)
-        if not defn and ("." in op_type):
-          suffix = op_type.split(".", 1)[-1]
-          defn = self.semantics.get_definition(suffix)
-        abstract_id = defn[0] if defn else op_type
+        abstract_id = self._resolve_abstract_id(op_type)
 
         # --- Macro Expansion ---
         if abstract_id in self.macro_registry:
@@ -257,13 +171,13 @@ class RdnaSynthesizer:
           continue
 
         # RDNA Vector ALU Format: OPCODE DST, SRC0, SRC1
-        dst_reg = self.allocator.get_vector_register(node.id)
+        dst_reg = self.allocator.get_register(node.id)
         operands: List[RdnaOperand] = [dst_reg]
         sources = input_map.get(node.id, [])
 
         for src_id in sources:
           # Assume inputs are in VGPRs for ALU ops
-          src_reg = self.allocator.get_vector_register(src_id)
+          src_reg = self.allocator.get_register(src_id)
           operands.append(src_reg)
 
         inst = RdnaInstruction(opcode=opcode, operands=operands)

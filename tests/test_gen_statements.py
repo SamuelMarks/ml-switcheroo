@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for gen statements."""
 
 from collections import defaultdict
 from typing import Any, Dict, List
@@ -12,42 +12,42 @@ from ml_switcheroo.core.mlir.naming import NamingContext
 
 
 class DummyGenerator(StatementGeneratorMixin):
-  """Docstring."""
+  """Test helper class DummyGenerator."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.ctx: NamingContext = NamingContext()
     self.usage_counts: Dict[str, int] = defaultdict(int)
     self.usage_consumers: Dict[str, Any] = {}
     self._resolved: Dict[str, cst.BaseExpression] = {}
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-    """Function doc."""
+    """Execute resolve operand helper logic."""
     if ssa_name in self._resolved:
       return self._resolved[ssa_name]
     return cst.Name(f"resolved_{ssa_name}")
 
   def _convert_block(self, block: BlockNode) -> List[cst.BaseStatement]:
-    """Function doc."""
+    """Execute convert block helper logic."""
     return [cst.SimpleStatementLine(body=[cst.Pass()])]
 
   def _scan_block_usage(self, block: BlockNode) -> None:
-    """Function doc."""
+    """Execute scan block usage helper logic."""
     pass
 
 
 def test_resolve_operand_not_implemented() -> None:
-  """Docstring."""
+  """Verify resolve operand not implemented behavior."""
 
   class IncompleteGenerator(StatementGeneratorMixin):
-    """Class doc."""
+    """Test helper class IncompleteGenerator."""
 
     def _convert_block(self, block: BlockNode) -> List[cst.BaseStatement]:
-      """Function doc."""
+      """Execute convert block helper logic."""
       return []
 
     def _scan_block_usage(self, block: BlockNode) -> None:
-      """Function doc."""
+      """Execute scan block usage helper logic."""
       pass
 
   gen: IncompleteGenerator = IncompleteGenerator()
@@ -56,17 +56,17 @@ def test_resolve_operand_not_implemented() -> None:
 
 
 def test_convert_block_not_implemented() -> None:
-  """Docstring."""
+  """Verify convert block not implemented behavior."""
 
   class IncompleteGenerator(StatementGeneratorMixin):
-    """Class doc."""
+    """Test helper class IncompleteGenerator."""
 
     def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-      """Function doc."""
+      """Execute resolve operand helper logic."""
       return cst.Name("dummy")
 
     def _scan_block_usage(self, block: BlockNode) -> None:
-      """Function doc."""
+      """Execute scan block usage helper logic."""
       pass
 
   gen: IncompleteGenerator = IncompleteGenerator()
@@ -75,17 +75,17 @@ def test_convert_block_not_implemented() -> None:
 
 
 def test_scan_block_usage_not_implemented() -> None:
-  """Docstring."""
+  """Verify scan block usage not implemented behavior."""
 
   class IncompleteGenerator(StatementGeneratorMixin):
-    """Class doc."""
+    """Test helper class IncompleteGenerator."""
 
     def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-      """Function doc."""
+      """Execute resolve operand helper logic."""
       return cst.Name("dummy")
 
     def _convert_block(self, block: BlockNode) -> List[cst.BaseStatement]:
-      """Function doc."""
+      """Execute convert block helper logic."""
       return []
 
   gen: IncompleteGenerator = IncompleteGenerator()
@@ -94,7 +94,7 @@ def test_scan_block_usage_not_implemented() -> None:
 
 
 def test_convert_setattr() -> None:
-  """Docstring."""
+  """Verify convert setattr behavior."""
   gen: DummyGenerator = DummyGenerator()
 
   # Missing operands
@@ -122,7 +122,7 @@ def test_convert_setattr() -> None:
 
 
 def test_convert_import() -> None:
-  """Docstring."""
+  """Verify convert import behavior."""
   gen: DummyGenerator = DummyGenerator()
 
   # From import multiple names and aliases
@@ -176,7 +176,7 @@ def test_convert_import() -> None:
   assert isinstance(stmt_norm, cst.SimpleStatementLine)
   assert isinstance(stmt_norm.body[0], cst.Import)
   assert isinstance(stmt_norm.body[0].names, tuple) or isinstance(stmt_norm.body[0].names, list)
-  assert stmt_norm.body[0].names[0].name.value == "sys"  # type: ignore is forbidden but actually Name isn't complex
+  assert stmt_norm.body[0].names[0].name.value == "sys"
 
   # Exception handling during literal_eval (should fallback to basic import module)
   op_err: OperationNode = OperationNode(
@@ -207,7 +207,7 @@ def test_convert_import() -> None:
 
 
 def test_convert_return() -> None:
-  """Docstring."""
+  """Verify convert return behavior."""
   gen: DummyGenerator = DummyGenerator()
 
   # Without operands
@@ -227,7 +227,7 @@ def test_convert_return() -> None:
 
 
 def test_convert_class_def() -> None:
-  """Docstring."""
+  """Verify convert class def behavior."""
   gen: DummyGenerator = DummyGenerator()
 
   # Empty Class
@@ -263,7 +263,7 @@ def test_convert_class_def() -> None:
 
 
 def test_convert_func_def() -> None:
-  """Docstring."""
+  """Verify convert func def behavior."""
   gen: DummyGenerator = DummyGenerator()
 
   # Empty func
@@ -312,7 +312,7 @@ def test_convert_func_def() -> None:
 
 
 def test_convert_class_def_missing_branches() -> None:
-  """Function doc."""
+  """Verify convert class def missing branches behavior."""
   gen: DummyGenerator = DummyGenerator()
   # clean is empty string
   op_empty_bases: OperationNode = OperationNode(
@@ -336,7 +336,7 @@ def test_convert_class_def_missing_branches() -> None:
 
 
 def test_convert_func_def_missing_branches() -> None:
-  """Function doc."""
+  """Verify convert func def missing branches behavior."""
   gen: DummyGenerator = DummyGenerator()
   op_no_sw_type: OperationNode = OperationNode(
     name="sw.func",

@@ -13,7 +13,7 @@ LATEX_SOURCE_CONVNET: str = "\n\\documentclass[tikz]{standalone}\n\\begin{DefMod
 
 @pytest.fixture
 def hydrated_semantics() -> SemanticsManager:
-  """Docstring."""
+  """Execute hydrated semantics helper logic."""
   mgr = SemanticsManager()
   loader = RegistryLoader(mgr)
   loader.hydrate()

@@ -16,7 +16,7 @@ from ml_switcheroo.sphinx_ext.autogen_ops import (
 
 
 class MockEnum:
-  """Docstring."""
+  """Test helper class MockEnum."""
 
   def __init__(self, value: str) -> None:
     """Initializes the MockEnum instance."""
@@ -156,7 +156,7 @@ def test_write_index_file(tmp_path: Path) -> None:
 
 
 class MockApp:
-  """Docstring."""
+  """Test helper class MockApp."""
 
   def __init__(self, srcdir: str) -> None:
     """Initializes the MockApp instance."""
@@ -289,14 +289,14 @@ def test_generate_op_docs_empty(
 
 
 def test_autogen_ops_variant_with_enum():
-  """Docstring."""
+  """Verify autogen ops variant with enum behavior."""
 
   class DummyEnum:
-    """Docstring."""
+    """Test helper class DummyEnum."""
 
     @property
     def value(self):
-      """Docstring."""
+      """Execute value helper logic."""
       return "enum_val"
 
   definition = {"variants": {"jax": {"some_field": DummyEnum()}}}

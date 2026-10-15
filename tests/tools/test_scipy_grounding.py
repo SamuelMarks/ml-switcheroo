@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 from unittest.mock import patch
+
 import pytest
 
 from ml_switcheroo.tools.injector_fw.scipy_grounding import (

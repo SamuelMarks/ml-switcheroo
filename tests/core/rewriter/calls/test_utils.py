@@ -19,14 +19,14 @@ from ml_switcheroo.core.rewriter.calls.utils import (
 
 
 def parse_call(code: str) -> cst.Call:
-  """Docstring."""
+  """Execute parse call helper logic."""
   module = cst.parse_module(code)
   expr = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
   return typing.cast(cst.Call, expr)
 
 
 def test_is_functional_apply() -> None:
-  """Docstring."""
+  """Verify is functional apply behavior."""
   call = parse_call("layer.apply(vars, x)")
   assert is_functional_apply(call, "apply")
   assert not is_functional_apply(call, "call")
@@ -35,37 +35,37 @@ def test_is_functional_apply() -> None:
 
 
 class MockSigCtx:
-  """Docstring."""
+  """Test helper class MockSigCtx."""
 
   def __init__(self, existing: list[str]) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.existing_args = existing
     self.injected_args: list[tuple[str, typing.Optional[cst.CSTNode]]] = []
 
 
 class MockContext:
-  """Docstring."""
+  """Test helper class MockContext."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.signature_stack = [MockSigCtx(["x"])]
 
 
 class MockRewriter:
-  """Docstring."""
+  """Test helper class MockRewriter."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.context = MockContext()
     self._report_warning = MagicMock()
 
   def _create_dotted_name(self, name: str) -> cst.Name:
-    """Docstring."""
+    """Execute create dotted name helper logic."""
     return cst.Name(name)
 
 
 def test_rewrite_stateful_call() -> None:
-  """Docstring."""
+  """Verify rewrite stateful call behavior."""
   rewriter = MockRewriter()
   node = parse_call("layer(x)")
   config: dict[str, typing.Any] = {"prepend_arg": "variables", "method": "apply"}
@@ -79,7 +79,7 @@ def test_rewrite_stateful_call() -> None:
 
 
 def test_rewrite_stateful_call_existing() -> None:
-  """Docstring."""
+  """Verify rewrite stateful call existing behavior."""
   rewriter = MockRewriter()
   # "variables" already exists in existing_args
   rewriter.context.signature_stack = [MockSigCtx(["variables"])]
@@ -92,7 +92,7 @@ def test_rewrite_stateful_call_existing() -> None:
 
 
 def test_rewrite_stateful_call_no_method() -> None:
-  """Docstring."""
+  """Verify rewrite stateful call no method behavior."""
   rewriter = MockRewriter()
   node = parse_call("layer(x)")
   config: dict[str, typing.Any] = {"prepend_arg": "vars"}
@@ -102,7 +102,7 @@ def test_rewrite_stateful_call_no_method() -> None:
 
 
 def test_inject_kwarg() -> None:
-  """Docstring."""
+  """Verify inject kwarg behavior."""
   node = parse_call("func(a=1)")
   result = inject_kwarg(node, "b", "b_val")
   assert len(result.args) == 2
@@ -111,14 +111,14 @@ def test_inject_kwarg() -> None:
 
 
 def test_inject_kwarg_existing() -> None:
-  """Docstring."""
+  """Verify inject kwarg existing behavior."""
   node = parse_call("func(b=1)")
   result = inject_kwarg(node, "b", "b_val")
   assert result == node
 
 
 def test_strip_kwarg() -> None:
-  """Docstring."""
+  """Verify strip kwarg behavior."""
   node = parse_call("func(a=1, b=2)")
   result = strip_kwarg(node, "a")
   assert len(result.args) == 1
@@ -126,14 +126,14 @@ def test_strip_kwarg() -> None:
 
 
 def test_is_super_call() -> None:
-  """Docstring."""
+  """Verify is super call behavior."""
   assert is_super_call(parse_call("super().foo()"))
   assert is_super_call(parse_call("super()"))
   assert not is_super_call(parse_call("foo()"))
 
 
 def test_is_builtin() -> None:
-  """Docstring."""
+  """Verify is builtin behavior."""
   assert is_builtin("len")
   assert not is_builtin("my_func")
 
@@ -141,7 +141,7 @@ def test_is_builtin() -> None:
 @patch("ml_switcheroo.core.rewriter.calls.utils.diff_nodes")
 @patch("ml_switcheroo.core.rewriter.calls.utils.get_tracer")
 def test_log_diff(mock_tracer: MagicMock, mock_diff: MagicMock) -> None:
-  """Docstring."""
+  """Verify log diff behavior."""
   mock_diff.return_value = ("a", "b", True)
   mock_tr = MagicMock()
   mock_tracer.return_value = mock_tr
@@ -157,26 +157,26 @@ def test_log_diff(mock_tracer: MagicMock, mock_diff: MagicMock) -> None:
 
 
 def test_compute_permutation() -> None:
-  """Docstring."""
+  """Verify compute permutation behavior."""
   assert compute_permutation("NCHW", "NHWC") == (0, 2, 3, 1)
   assert compute_permutation("NC", "NCD") is None
   assert compute_permutation("NCD", "NCX") is None
 
 
 class MockSemantics:
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self, variant: typing.Any) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.variant = variant
 
   def resolve_variant(self, name: str, fw: str) -> typing.Any:
-    """Docstring."""
+    """Execute resolve variant helper logic."""
     return self.variant
 
 
 def test_inject_permute_call_no_api() -> None:
-  """Docstring."""
+  """Verify inject permute call no api behavior."""
   semantics = MockSemantics({})
   node = cst.Name("x")
   result: typing.Any = inject_permute_call(node, (0, 1), semantics, "jax")  # type: ignore
@@ -184,7 +184,7 @@ def test_inject_permute_call_no_api() -> None:
 
 
 def test_inject_permute_call_kw() -> None:
-  """Docstring."""
+  """Verify inject permute call kw behavior."""
   semantics = MockSemantics({"api": "jax.numpy.transpose", "pack_to_tuple": "axes"})
   node = cst.Name("x")
   result: typing.Any = inject_permute_call(node, (1, 0), semantics, "jax")  # type: ignore
@@ -195,7 +195,7 @@ def test_inject_permute_call_kw() -> None:
 
 
 def test_inject_permute_call_varargs() -> None:
-  """Docstring."""
+  """Verify inject permute call varargs behavior."""
   semantics = MockSemantics({"api": "torch.permute"})
   node = cst.Name("x")
   result: typing.Any = inject_permute_call(node, (1, 0), semantics, "torch")  # type: ignore
@@ -207,13 +207,13 @@ def test_inject_permute_call_varargs() -> None:
 
 
 def test_rewrite_stateful_call_legacy() -> None:
-  """Docstring."""
+  """Verify rewrite stateful call legacy behavior."""
 
   class LegacyRewriter:
-    """Docstring."""
+    """Test helper class LegacyRewriter."""
 
     def __init__(self) -> None:
-      """Docstring."""
+      """Initialize test helper instance."""
       self._signature_stack = [MockSigCtx(["x"])]
       self._report_warning = MagicMock()
 
@@ -224,7 +224,7 @@ def test_rewrite_stateful_call_legacy() -> None:
 
 
 def test_strip_kwarg_trailing_comma() -> None:
-  """Docstring."""
+  """Verify strip kwarg trailing comma behavior."""
   node = parse_call("func(a=1, b=2,)")
   result = strip_kwarg(node, "b")
   assert len(result.args) == 1
@@ -232,7 +232,7 @@ def test_strip_kwarg_trailing_comma() -> None:
 
 
 def test_rewrite_stateful_call_no_method_coverage() -> None:
-  """Docstring."""
+  """Verify rewrite stateful call no method coverage behavior."""
   rewriter = MockRewriter()
   node = cst.Call(func=cst.Name("func"), args=[])
   result: typing.Any = rewrite_stateful_call(rewriter, node, "func", {})  # type: ignore

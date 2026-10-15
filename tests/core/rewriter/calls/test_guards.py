@@ -9,24 +9,24 @@ from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards
 
 
 class MockContext:
-  """Docstring."""
+  """Test helper class MockContext."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.hook_context = MagicMock()
     self.hook_context.metadata = {}
 
 
 class MockRewriter:
-  """Docstring."""
+  """Test helper class MockRewriter."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.context = MockContext()
 
 
 def parse_arg(code: str) -> cst.Arg:
-  """Docstring."""
+  """Execute parse arg helper logic."""
   module = cst.parse_module(code)
   # Extract arg from "foo(a=1)" -> `a=1`
   expr = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
@@ -34,7 +34,7 @@ def parse_arg(code: str) -> cst.Arg:
 
 
 def test_apply_strict_guards_no_guards() -> None:
-  """Docstring."""
+  """Verify apply strict guards no guards behavior."""
   rewriter = MockRewriter()
   args: list[cst.Arg] = [parse_arg("foo(x=1)")]
   details: dict[str, typing.Any] = {}
@@ -45,7 +45,7 @@ def test_apply_strict_guards_no_guards() -> None:
 
 
 def test_apply_strict_guards_match() -> None:
-  """Docstring."""
+  """Verify apply strict guards match behavior."""
   rewriter = MockRewriter()
   args = [parse_arg("foo(x=1)")]
 
@@ -66,7 +66,7 @@ def test_apply_strict_guards_match() -> None:
 
 
 def test_apply_strict_guards_match_different_name() -> None:
-  """Docstring."""
+  """Verify apply strict guards match different name behavior."""
   rewriter = MockRewriter()
   args = [parse_arg("foo(input_tensor=1)")]
 
@@ -81,7 +81,7 @@ def test_apply_strict_guards_match_different_name() -> None:
 
 
 def test_apply_strict_guards_no_match() -> None:
-  """Docstring."""
+  """Verify apply strict guards no match behavior."""
   rewriter = MockRewriter()
   args = [parse_arg("foo(y=1)")]
 
@@ -93,7 +93,7 @@ def test_apply_strict_guards_no_match() -> None:
 
 
 def test_apply_strict_guards_already_injected() -> None:
-  """Docstring."""
+  """Verify apply strict guards already injected behavior."""
   rewriter = MockRewriter()
   rewriter.context.hook_context.metadata["strict_helper_injected"] = True
 
@@ -106,7 +106,7 @@ def test_apply_strict_guards_already_injected() -> None:
 
 
 def test_apply_strict_guards_no_context() -> None:
-  """Docstring."""
+  """Verify apply strict guards no context behavior."""
   rewriter = MockRewriter()
   del rewriter.context  # type: ignore
   args = [parse_arg("foo(x=1)")]
@@ -117,7 +117,7 @@ def test_apply_strict_guards_no_context() -> None:
 
 
 def test_apply_strict_guards_fallback_name() -> None:
-  """Docstring."""
+  """Verify apply strict guards fallback name behavior."""
   rewriter = MockRewriter()
   args = [parse_arg("foo(x=1)")]
   details: dict[str, typing.Any] = {"std_args": [{"name": "x", "rank": 2}]}

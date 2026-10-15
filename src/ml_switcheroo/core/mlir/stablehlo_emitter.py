@@ -6,22 +6,14 @@ to map Python source APIs (like `torch.abs`) to StableHLO operations (like `stab
 """
 
 import typing
-
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import libcst as cst
-from typing import List, Tuple, Optional, TYPE_CHECKING, Union
 
+from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, OperationNode, RegionNode, TypeNode, ValueNode
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
+from ml_switcheroo.core.mlir.type_inference import TypeInferencePass, parse_py_type_to_mlir
 from ml_switcheroo.core.mlir.types import FunctionType
-from ml_switcheroo.core.mlir.cst import (
-  BlockNode,
-  OperationNode,
-  AttributeNode,
-  RegionNode,
-  TypeNode,
-  ValueNode,
-)
-from ml_switcheroo.core.mlir.type_inference import parse_py_type_to_mlir, TypeInferencePass
 
 if TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager

@@ -6,7 +6,7 @@ import keras
 
 
 class LayerNormModel(keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class LayerNormModel."""
 
   def __init__(self, normalized_shape: int) -> None:
     """Initializes the LayerNormModel instance."""

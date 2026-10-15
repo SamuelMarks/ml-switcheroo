@@ -9,10 +9,11 @@ of the 'Time-Travel' WASM interactive demo, which is a separate Sphinx documenta
 extension (`ml_switcheroo.sphinx_ext`) and not an artifact produced by this backend.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, topological_sort
-from ml_switcheroo.core.html.nodes import SvgArrow, GridBox, HtmlDocument
+from ml_switcheroo.core.html.nodes import GridBox, HtmlDocument, SvgArrow
 
 
 class HtmlBackend(CompilerBackend):

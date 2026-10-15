@@ -10,7 +10,7 @@ from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
 
 class MockSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def get_known_apis(self) -> dict:
     """Mock implementation of get known apis."""
@@ -23,7 +23,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def editor(tmp_path: Path) -> ReadmeEditor:
-  """Docstring."""
+  """Execute editor helper logic."""
   mgr: MockSemantics = MockSemantics()
   readme: Path = tmp_path / "README.md"
   readme.write_text("# Test Project\nStart.", encoding="utf-8")

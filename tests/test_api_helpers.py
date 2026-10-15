@@ -8,7 +8,7 @@ from ml_switcheroo.core.rewriter.passes.api_helpers import ApiHelpersMixin
 
 
 class DummyContext:
-  """Docstring."""
+  """Test helper class DummyContext."""
 
   def __init__(self) -> None:
     """Initialize the dummy context."""
@@ -36,7 +36,7 @@ class DummyTransformer(ApiHelpersMixin):
 
 
 def test_api_helpers_get_qualified_name_short() -> None:
-  """Docstring."""
+  """Verify api helpers get qualified name short behavior."""
   p: DummyTransformer = DummyTransformer()
   node: cst.Name = cst.Name("my_root")
   res: str = p._get_qualified_name(node)
@@ -44,7 +44,7 @@ def test_api_helpers_get_qualified_name_short() -> None:
 
 
 def test_api_helpers_inject_stmts_to_body_simple() -> None:
-  """Docstring."""
+  """Verify api helpers inject stmts to body simple behavior."""
   p: DummyTransformer = DummyTransformer()
   node: cst.FunctionDef = cst.parse_statement("def foo(): pass")  # type: ignore
   new_stmts: List[cst.BaseStatement] = [cst.parse_statement("x = 1").body[0]]  # type: ignore
@@ -54,7 +54,7 @@ def test_api_helpers_inject_stmts_to_body_simple() -> None:
 
 
 def test_api_helpers_inject_argument_to_signature_default_comma() -> None:
-  """Docstring."""
+  """Verify api helpers inject argument to signature default comma behavior."""
   p: DummyTransformer = DummyTransformer()
   node: cst.FunctionDef = cst.parse_statement("def foo(self): pass")  # type: ignore
   # Provide a dummy method to simulate create_dotted_name since it creates AST nodes

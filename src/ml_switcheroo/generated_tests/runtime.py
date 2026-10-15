@@ -9,15 +9,12 @@ generated tests to enforce reproducibility by seeding RNGs for Torch, JAX,
 TensorFlow, NumPy, and Python.
 """
 
-from typing import Any
-
-
-import typing
-
-
-import numpy as np
 import random
 import sys
+import typing
+from typing import Any
+
+import numpy as np
 import pytest
 
 

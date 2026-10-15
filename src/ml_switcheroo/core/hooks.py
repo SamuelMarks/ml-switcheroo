@@ -11,20 +11,20 @@ Refactor:
     - **New**: `resolve_type` method to query Symbol Table.
 """
 
-from __future__ import annotations
-from typing import Any
+from __future__ import annotations  # noqa: E402
+from typing import Any  # noqa: E402
 
 
-import sys
-import types
-from typing import Callable, Dict, Optional, Type, TypeVar, List, Union, TYPE_CHECKING
-from pydantic import BaseModel, Field, ConfigDict
-import libcst as cst
+import sys  # noqa: E402
+import types  # noqa: E402
+from typing import Callable, Dict, Optional, Type, TypeVar, List, Union, TYPE_CHECKING  # noqa: E402
+from pydantic import BaseModel, Field, ConfigDict  # noqa: E402
+import libcst as cst  # noqa: E402
 
 # We import RuntimeConfig for type hinting
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.dsl import FrameworkVariant
-from ml_switcheroo.semantics.schema import PluginTraits
+from ml_switcheroo.config import RuntimeConfig  # noqa: E402
+from ml_switcheroo.core.dsl import FrameworkVariant  # noqa: E402
+from ml_switcheroo.semantics.schema import PluginTraits  # noqa: E402
 
 # Lazy import to avoid circular dependency
 if TYPE_CHECKING:

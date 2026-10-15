@@ -6,7 +6,7 @@ import tensorflow as tf
 
 
 class ResidualBlock(tf.keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class ResidualBlock."""
 
   def __init__(self, channels: int) -> None:
     """Initializes the ResidualBlock instance."""

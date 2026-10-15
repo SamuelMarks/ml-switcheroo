@@ -5,12 +5,10 @@ generated tests. It injects shared helpers, cross-framework comparison logic,
 and determinism fixtures.
 """
 
-from typing import Any
-
-
-import pathlib
 import ast
-from typing import List, Optional
+import pathlib
+from typing import Any, List, Optional
+
 from ml_switcheroo.generated_tests.templates import get_template
 
 
@@ -205,12 +203,11 @@ def ensure_runtime_module(
       imports_block.append(f"{var_name} = {checks}")
     imports_block.append("")
 
-    if fw == "tensorflow":
-      alls.extend((var_name, "tf"))
-    else:
-      if fw == "jax":
-        alls.append("jnp")
-      alls.extend((var_name, fw))
+    export_symbols_map = {
+      "tensorflow": (var_name, "tf"),
+      "jax": ("jnp", var_name, fw),
+    }
+    alls.extend(export_symbols_map.get(fw, (var_name, fw)))
 
   imports_str = "\n".join(imports_block)
 

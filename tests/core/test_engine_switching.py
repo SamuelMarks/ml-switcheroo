@@ -16,7 +16,7 @@ register_framework("mlir")(MlirAdapter)
 
 @pytest.fixture
 def base_engine() -> typing.Callable[[str, str], ASTEngine]:
-  """Docstring."""
+  """Execute base engine helper logic."""
   semantics = MagicMock(spec=SemanticsManager)
   semantics.get_framework_config.return_value = {}
   semantics.get_import_map.return_value = {}

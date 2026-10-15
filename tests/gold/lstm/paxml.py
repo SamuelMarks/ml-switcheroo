@@ -7,7 +7,7 @@ from praxis.layers import rnn_cell  # type: ignore
 
 
 class LSTMModel(base_layer.BaseLayer):  # type: ignore
-  """Docstring."""
+  """Test helper class LSTMModel."""
 
   input_size: int = 0
   hidden_size: int = 0

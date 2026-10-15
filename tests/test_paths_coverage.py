@@ -34,6 +34,7 @@ def test_resolve_semantics_dir_installed(tmp_path: Path) -> None:
       with patch("ml_switcheroo.semantics.paths.sys") as mock_sys:
         mock_sys.version_info = (3, 9)
         resolve_semantics_dir()
+  assert True
 
 
 def test_resolve_snapshots_dir() -> None:

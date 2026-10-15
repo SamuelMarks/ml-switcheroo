@@ -7,16 +7,19 @@ deprecation checks, and strategy execution to convert source-framework APIs into
 target-framework equivalents.
 """
 
-from typing import Any
-
+from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple, Union
 
 import libcst as cst
-
 
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
 from ml_switcheroo.core.rewriter.calls.pre import handle_pre_checks, resolve_implicit_method
 from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy
-from ml_switcheroo.core.rewriter.calls.utils import is_builtin, is_super_call, log_diff
+from ml_switcheroo.core.rewriter.calls.utils import (
+  is_builtin,
+  is_neural_on_math_backend,
+  is_super_call,
+  log_diff,
+)
 from ml_switcheroo.core.tracer import get_tracer
 
 
@@ -46,26 +49,107 @@ class ApiTransformerCallMixin:
   source_fw: Any
   target_fw: Any
   strict_mode: Any
+  source_traits: Any
 
-  def _get_qualified_name(self, *args: Any, **kwargs: Any) -> Any:
-    """Dummy method."""
-    ...
+  if TYPE_CHECKING:
 
-  def _get_mapping(self, *args: Any, **kwargs: Any) -> Any:
-    """Dummy method."""
-    ...
+    def _get_target_traits(self) -> Any:
+      """Return structural traits for the target framework."""
+      ...
 
-  def _report_failure(self, *args: Any, **kwargs: Any) -> Any:
-    """Dummy method."""
-    ...
+    def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
+      """Return strip and warning lifecycle method sets for the source framework."""
+      ...
 
-  def _report_warning(self, msg: str) -> None:
-    """Dummy method."""
-    ...
+    def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
+      """Resolve a CST expression node to its fully qualified name string.
 
-  def check_version_constraints(self, *args: Any, **kwargs: Any) -> Any:
-    """Dummy method."""
-    ...
+      Args:
+          node: CST expression node to resolve.
+      """
+      ...
+
+    def _get_mapping(self, name: str, silent: bool = False) -> Optional[Dict[str, Any]]:
+      """Retrieve the target framework mapping for a qualified API name.
+
+      Args:
+          name: Qualified API name string.
+          silent: Whether to suppress failure reporting on missing mappings.
+      """
+      ...
+
+    def _report_failure(self, reason: str) -> None:
+      """Record a failure message in the current statement error buffer.
+
+      Args:
+          reason: Failure description string.
+      """
+      ...
+
+    def _report_warning(self, msg: str) -> None:
+      """Record a warning message in the current statement warning buffer.
+
+      Args:
+          msg: Warning description string.
+      """
+      ...
+
+    def check_version_constraints(self, min_v: Optional[str], max_v: Optional[str]) -> Optional[str]:
+      """Validate target framework version constraints for an operation mapping.
+
+      Args:
+          min_v: Minimum version string.
+          max_v: Maximum version string.
+      """
+      ...
+
+    def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
+      """Inject required imports specified by a target variant mapping.
+
+      Args:
+          variant: Target variant dictionary.
+      """
+      ...
+
+    def _create_name_node(self, api_path: str) -> Union[cst.Name, cst.Attribute]:
+      """Construct a CST Name or Attribute chain from a dotted API path.
+
+      Args:
+          api_path: Dotted API path string.
+      """
+      ...
+
+    def _create_dotted_name(self, name_str: str) -> Union[cst.Name, cst.Attribute]:
+      """Construct a CST Name or Attribute chain from a dotted name string.
+
+      Args:
+          name_str: Dotted name string.
+      """
+      ...
+
+    def _is_module_alias(self, node: cst.CSTNode) -> bool:
+      """Check whether a CST node refers to a known module alias.
+
+      Args:
+          node: CST node to inspect.
+      """
+      ...
+
+    def _mark_stateful(self, var_name: str) -> None:
+      """Mark a variable name as stateful in the current scope.
+
+      Args:
+          var_name: Variable identifier to mark as stateful.
+      """
+      ...
+
+    def _is_stateful(self, var_name: str) -> bool:
+      """Check whether a variable name is marked stateful in any active scope.
+
+      Args:
+          var_name: Variable identifier to check.
+      """
+      ...
 
   def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
     """Intercept and rewrites a function call node during CST traversal.
@@ -93,8 +177,7 @@ class ApiTransformerCallMixin:
     func_name = self._get_qualified_name(original_node.func)
 
     # 2. Pre-Checks
-    # Pass 'self' as rewriter interface (duck typing via properties)
-    handled, result_node = handle_pre_checks(self, original_node, updated_node, func_name)  # type: ignore
+    handled, result_node = handle_pre_checks(self, original_node, updated_node, func_name)
     if handled:
       return result_node
 
@@ -103,7 +186,7 @@ class ApiTransformerCallMixin:
 
     # Fallback: Implicit Method
     if not mapping:
-      guessed_name = resolve_implicit_method(self, original_node, func_name)  # type: ignore
+      guessed_name = resolve_implicit_method(self, original_node, func_name)
       if guessed_name:
         mapping = self._get_mapping(guessed_name, silent=True)
         if mapping:
@@ -132,7 +215,7 @@ class ApiTransformerCallMixin:
 
         tier = origins.get(lookup_id)
 
-        if tier in ("neural", "neural_ops") and self.target_fw in ("NumPy", "jax"):
+        if is_neural_on_math_backend(tier, self.target_fw):
           self._report_failure(
             f"Cannot map neural network abstraction '{func_name}' directly to pure math backend '{self.target_fw}'. Use a framework like Flax or Keras."
           )
@@ -148,7 +231,7 @@ class ApiTransformerCallMixin:
     if v_warn:
       self._report_warning(v_warn)
 
-    lookup = self.semantics.get_definition(func_name)
+    lookup = self.semantics.get_definition(str(func_name or ""))
     if not lookup:
       return updated_node
 
@@ -161,10 +244,10 @@ class ApiTransformerCallMixin:
       self._report_warning(msg)
 
     # 5. Execute Strategy
-    result_node = execute_strategy(self, original_node, updated_node, mapping, details, abstract_id)  # type: ignore
+    result_node = execute_strategy(self, original_node, updated_node, mapping, details, abstract_id)
 
     # 6. Post Processing
-    result_node = handle_post_processing(self, result_node, mapping, abstract_id)  # type: ignore
+    result_node = handle_post_processing(self, result_node, mapping, abstract_id)
 
     log_diff(f"Operation ({abstract_id})", original_node, result_node)
     return result_node

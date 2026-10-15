@@ -7,7 +7,7 @@ from praxis.layers import poolings  # type: ignore
 
 
 class MaxPoolModel(base_layer.BaseLayer):  # type: ignore
-  """Docstring."""
+  """Test helper class MaxPoolModel."""
 
   kernel_size: int = 2
   stride: int = 2

@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for dispatch error."""
 
 import typing
 from unittest.mock import MagicMock, patch
@@ -10,7 +10,7 @@ from ml_switcheroo.enums import LogicOp
 
 
 def test_node_to_literal_value_error() -> None:
-  """Docstring."""
+  """Verify node to literal value error behavior."""
   node = MagicMock(spec=cst.Integer)
   node.value = "not_an_int"
 
@@ -28,7 +28,7 @@ class DummyRule:
   """Mock rule for dispatch evaluation."""
 
   def __init__(self, if_arg: str, op: typing.Any, is_val: typing.Any, use_api: str) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.if_arg = if_arg
     self.op = op
     self.is_val = is_val
@@ -39,11 +39,11 @@ class DummyRewriter:
   """Mock rewriter."""
 
   def __init__(self, source_fw: str) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.source_fw = source_fw
 
   def _is_module_alias(self, name: typing.Any) -> bool:
-    """Docstring."""
+    """Execute is module alias helper logic."""
     return False
 
 
@@ -55,13 +55,13 @@ def parse_call(code: str) -> cst.Call:
 
 
 def test_check_rule_condition_unknown_op() -> None:
-  """Docstring."""
+  """Verify check rule condition unknown op behavior."""
   rule = DummyRule("x", "UNKNOWN_OP", 5, "foo")
   assert not _check_rule_condition(cst.Integer("5"), rule)  # type: ignore
 
 
 def test_evaluate_dispatch_rules_arg_not_found() -> None:
-  """Docstring."""
+  """Verify evaluate dispatch rules arg not found behavior."""
   rewriter = DummyRewriter("torch")
   call = parse_call("func(a=1)")
 

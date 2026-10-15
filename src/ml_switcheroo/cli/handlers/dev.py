@@ -6,11 +6,11 @@ and Test generation.
 
 from pathlib import Path
 
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
-from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
+from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.console import log_info, log_success
+from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
 
 def handle_matrix() -> int:

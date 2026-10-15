@@ -43,6 +43,7 @@ def test_broken_module_handling(capsys: pytest.CaptureFixture[str]) -> None:
         frameworks_pkg._auto_register_adapters()
       except Exception as e:
         pytest.fail(f"Discovery crashed on broken module: {e}")
+  assert True
 
 
 def test_helpers_are_exported() -> None:

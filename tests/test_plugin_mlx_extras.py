@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin mlx extras."""
 
 from unittest.mock import MagicMock
 
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.mlx_extras import _create_dotted_name, transform_comp
 
 
 def test_create_dotted_name() -> None:
-  """Docstring."""
+  """Verify create dotted name behavior."""
   node: cst.BaseExpression = _create_dotted_name("mlx.core.compile")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "compile"
@@ -20,7 +20,7 @@ def test_create_dotted_name() -> None:
 
 
 def test_transform_compiler_decorator() -> None:
-  """Docstring."""
+  """Verify transform compiler decorator behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "mlx.core.compile"
 
@@ -35,7 +35,7 @@ def test_transform_compiler_decorator() -> None:
 
 
 def test_transform_compiler_call_with_args() -> None:
-  """Docstring."""
+  """Verify transform compiler call with args behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "mlx.core.compile"
 
@@ -52,7 +52,7 @@ def test_transform_compiler_call_with_args() -> None:
 
 
 def test_transform_compiler_call_without_args() -> None:
-  """Docstring."""
+  """Verify transform compiler call without args behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
 
@@ -66,7 +66,7 @@ def test_transform_compiler_call_without_args() -> None:
 
 
 def test_transform_compiler_not_decorator_or_call() -> None:
-  """Docstring."""
+  """Verify transform compiler not decorator or call behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
 
@@ -79,7 +79,7 @@ def test_transform_compiler_not_decorator_or_call() -> None:
 
 
 def test_transform_synchronize() -> None:
-  """Docstring."""
+  """Verify transform synchronize behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   code: str = "torch.cuda.synchronize()"

@@ -5,7 +5,7 @@ from flax import nnx
 
 
 class EmbeddingModel(nnx.Module):
-  """Docstring."""
+  """Test helper class EmbeddingModel."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int, rngs: nnx.Rngs):
     """Initializes the EmbeddingModel instance."""

@@ -20,32 +20,32 @@ from ml_switcheroo.core.wasm.cst import (
 
 
 def test_wat_node_base() -> None:
-  """Docstring."""
+  """Verify wat node base behavior."""
   node = WatNode()
   with pytest.raises(NotImplementedError):
     node.to_text()
 
 
 def test_wat_param() -> None:
-  """Docstring."""
+  """Verify wat param behavior."""
   param = WatParam(WasmRegister("x"), "f32")
   assert param.to_text() == "(param $x f32)"
 
 
 def test_wat_result() -> None:
-  """Docstring."""
+  """Verify wat result behavior."""
   result = WatResult("f32")
   assert result.to_text() == "(result f32)"
 
 
 def test_wat_local() -> None:
-  """Docstring."""
+  """Verify wat local behavior."""
   local = WatLocal(WasmRegister("temp"), "f32")
   assert local.to_text() == "(local $temp f32)"
 
 
 def test_wat_instr() -> None:
-  """Docstring."""
+  """Verify wat instr behavior."""
   instr1 = WatInstr(WasmOpcode("f32.add"))
   assert instr1.to_text() == "f32.add"
 
@@ -54,7 +54,7 @@ def test_wat_instr() -> None:
 
 
 def test_wat_func() -> None:
-  """Docstring."""
+  """Verify wat func behavior."""
   func = WatFunc(
     name="add_two",
     export=True,
@@ -77,7 +77,7 @@ def test_wat_func() -> None:
 
 
 def test_wat_module() -> None:
-  """Docstring."""
+  """Verify wat module behavior."""
   mod = WatModule(functions=[WatFunc(name="main", body=[WatInstr(WasmOpcode("nop"))])])
   text = mod.to_text()
   assert "(module\n" in text
@@ -88,7 +88,7 @@ def test_wat_module() -> None:
 
 
 def test_wat_parser_roundtrip() -> None:
-  """Docstring."""
+  """Verify wat parser roundtrip behavior."""
   from ml_switcheroo.core.wasm.cst import WatParser
 
   text = """(module
@@ -111,7 +111,7 @@ def test_wat_parser_roundtrip() -> None:
 
 
 def test_wasm_parser_empty_peek_consume() -> None:
-  """Docstring."""
+  """Verify wasm parser empty peek consume behavior."""
   parser = WatParser("")
   assert parser._peek() == ""
   with pytest.raises(ValueError, match="Unexpected EOF"):
@@ -119,7 +119,7 @@ def test_wasm_parser_empty_peek_consume() -> None:
 
 
 def test_wasm_parser_consume_mismatch() -> None:
-  """Docstring."""
+  """Verify wasm parser consume mismatch behavior."""
   parser = WatParser("(module)")
   with pytest.raises(ValueError, match="Expected func, got module"):
     parser._consume("(")
@@ -127,7 +127,7 @@ def test_wasm_parser_consume_mismatch() -> None:
 
 
 def test_wasm_parser_skip_unrecognized_blocks() -> None:
-  """Docstring."""
+  """Verify wasm parser skip unrecognized blocks behavior."""
   text: str = '(module (import "env" "memory" (memory 1)) (func))'
   parser = WatParser(text)
   mod: typing.Any = parser.parse()
@@ -135,7 +135,7 @@ def test_wasm_parser_skip_unrecognized_blocks() -> None:
 
 
 def test_wasm_parser_func_unrecognized_block() -> None:
-  """Docstring."""
+  """Verify wasm parser func unrecognized block behavior."""
   text: str = "(module (func (unrecognized_stuff) nop))"
   parser = WatParser(text)
   mod: typing.Any = parser.parse()
@@ -143,7 +143,7 @@ def test_wasm_parser_func_unrecognized_block() -> None:
 
 
 def test_wasm_parser_func_sexpr_instruction() -> None:
-  """Docstring."""
+  """Verify wasm parser func sexpr instruction behavior."""
   text: str = "(module (func (local.get $x)))"
   parser = WatParser(text)
   mod: typing.Any = parser.parse()
@@ -152,7 +152,7 @@ def test_wasm_parser_func_sexpr_instruction() -> None:
 
 
 def test_wasm_parser_comments() -> None:
-  """Docstring."""
+  """Verify wasm parser comments behavior."""
   text: str = "(module ;; comment here\n (func))"
   parser = WatParser(text)
   mod: typing.Any = parser.parse()
@@ -160,7 +160,7 @@ def test_wasm_parser_comments() -> None:
 
 
 def test_wasm_parser_param_local_no_name() -> None:
-  """Docstring."""
+  """Verify wasm parser param local no name behavior."""
   text: str = "(module (func (param f32) (local i32) nop))"
   parser = WatParser(text)
   mod: typing.Any = parser.parse()
@@ -171,14 +171,14 @@ def test_wasm_parser_param_local_no_name() -> None:
 
 
 def test_wasm_parser_fallback_token() -> None:
-  """Docstring."""
+  """Verify wasm parser fallback token behavior."""
   text: str = "(module @)"
   parser = WatParser(text)
   assert "@" in parser.tokens
 
 
 def test_wasm_parser_bad_string() -> None:
-  """Docstring."""
+  """Verify wasm parser bad string behavior."""
   # an unclosed string might hit the fallback logic in _tokenize
   # but re.match handles the pattern, if it fails, it's not a match.
   text: str = '(module "unclosed)'

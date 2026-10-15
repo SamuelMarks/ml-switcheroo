@@ -12,7 +12,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def mock_managers() -> MagicMock:
-  """Docstring."""
+  """Execute mock managers helper logic."""
   sem = MagicMock(spec=SemanticsManager)
   sem.get_framework_config.return_value = {}
   return sem

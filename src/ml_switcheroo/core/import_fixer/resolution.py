@@ -9,8 +9,8 @@ from typing import Dict, List, Optional
 
 import libcst as cst
 
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.scanners import SimpleNameScanner, get_full_name
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @dataclass(frozen=True)

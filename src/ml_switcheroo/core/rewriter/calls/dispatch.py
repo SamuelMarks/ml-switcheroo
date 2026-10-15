@@ -1,10 +1,9 @@
 """Logic for Conditional API Dispatch."""
 
-from typing import Any
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
-
-from typing import List, Optional, TYPE_CHECKING, Union
 import libcst as cst
+
 from ml_switcheroo.enums import LogicOp
 
 if TYPE_CHECKING:
@@ -25,8 +24,15 @@ if TYPE_CHECKING:
 
     source_fw: str
 
-    def _is_module_alias(self, name: cst.BaseExpression) -> bool:
-      """Check if a name is a module alias."""
+    def _is_module_alias(self, name: cst.CSTNode) -> bool:
+      """Check if a name is a module alias.
+
+      Args:
+          name: CST node to inspect.
+
+      Returns:
+          True if module alias, False otherwise.
+      """
       ...
 
 

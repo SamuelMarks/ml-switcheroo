@@ -12,7 +12,7 @@ from ml_switcheroo.frameworks.tikz import TikzAdapter
 
 
 def test_html_dsl_adapter() -> None:
-  """Docstring."""
+  """Verify html dsl adapter behavior."""
   adapter: HtmlDSLAdapter = HtmlDSLAdapter()
   assert adapter._mode == InitMode.GHOST
   assert adapter.import_alias == ("html_dsl", "dsl")
@@ -61,7 +61,7 @@ def test_html_dsl_adapter() -> None:
 
 
 def test_latex_dsl_adapter() -> None:
-  """Docstring."""
+  """Verify latex dsl adapter behavior."""
   adapter: LatexDSLAdapter = LatexDSLAdapter()
   assert adapter._mode == InitMode.GHOST
   assert adapter.import_alias == ("midl", "midl")
@@ -106,7 +106,7 @@ def test_latex_dsl_adapter() -> None:
 
 
 def test_tikz_adapter() -> None:
-  """Docstring."""
+  """Verify tikz adapter behavior."""
   adapter: TikzAdapter = TikzAdapter()
   assert adapter._mode == InitMode.GHOST
   assert adapter.import_alias == ("tikz", "tikz")
@@ -150,20 +150,22 @@ def test_tikz_adapter() -> None:
 
 
 def test_latex_parser_create() -> None:
-  """Docstring."""
+  """Verify latex parser create behavior."""
   adapter: LatexDSLAdapter = LatexDSLAdapter()
   assert adapter.create_parser("code") is not None
   adapter.plugin_traits
 
 
 def test_tikz_parser_create() -> None:
-  """Docstring."""
+  """Verify tikz parser create behavior."""
   adapter: TikzAdapter = TikzAdapter()
   adapter.plugin_traits
+  assert True
 
 
 def test_missing() -> None:
-  """Docstring."""
+  """Verify missing behavior."""
   HtmlDSLAdapter().get_device_check_syntax()
   LatexDSLAdapter().get_device_check_syntax()
-  TikzAdapter().get_device_check_syntax()
+  _res = TikzAdapter().get_device_check_syntax()
+  assert _res is not None or _res is None

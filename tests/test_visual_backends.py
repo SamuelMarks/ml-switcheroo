@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for visual backends."""
 
 from ml_switcheroo.core.compiler.backends.visual_backends import LatexBackend as VB_LatexBackend
 from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend as VB_TikzBackend
@@ -8,7 +8,7 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 
 
 def get_dummy_graph() -> LogicalGraph:
-  """Docstring."""
+  """Execute get dummy graph helper logic."""
   nodes = {
     "in1": LogicalNode(id="in1", op_type="Input"),
     "l1": LogicalNode(id="l1", op_type="Linear", attributes={"k": "3", "shape": "(10, 10)"}),
@@ -31,35 +31,35 @@ def get_dummy_graph() -> LogicalGraph:
 
 
 def test_vb_tikz_backend() -> None:
-  """Docstring."""
+  """Verify vb tikz backend behavior."""
   backend: VB_TikzBackend = VB_TikzBackend()
   code: str = backend.compile(get_dummy_graph())
   assert "tikzpicture" in code
 
 
 def test_vt_tikz_backend() -> None:
-  """Docstring."""
+  """Verify vt tikz backend behavior."""
   backend: VT_TikzBackend = VT_TikzBackend()
   code: str = backend.compile(get_dummy_graph())
   assert "tikzpicture" in code
 
 
 def test_vb_latex_backend() -> None:
-  """Docstring."""
+  """Verify vb latex backend behavior."""
   backend: VB_LatexBackend = VB_LatexBackend()
   code: str = backend.compile(get_dummy_graph())
   assert "documentclass" in code
 
 
 def test_vl_latex_backend() -> None:
-  """Docstring."""
+  """Verify vl latex backend behavior."""
   backend: VL_LatexBackend = VL_LatexBackend()
   code: str = backend.compile(get_dummy_graph())
   assert "documentclass" in code
 
 
 def test_vb_tikz_backend_metadata_edgecases() -> None:
-  """Docstring."""
+  """Verify vb tikz backend metadata edgecases behavior."""
   nodes = {
     "in1": LogicalNode(id="in1", op_type="Input"),
     "unkn1": LogicalNode(id="unkn1", op_type="Unknown", attributes={"k": "val", "v": "val2", "b": "v3", "c": "v4"}),
@@ -82,7 +82,7 @@ def test_vb_tikz_backend_metadata_edgecases() -> None:
 
 
 def test_vt_tikz_backend_metadata_edgecases() -> None:
-  """Docstring."""
+  """Verify vt tikz backend metadata edgecases behavior."""
   nodes = {
     "in1": LogicalNode(id="in1", op_type="Input"),
     "unkn1": LogicalNode(id="unkn1", op_type="Unknown", attributes={"k": "val", "v": "val2", "b": "v3", "c": "v4"}),
@@ -97,7 +97,7 @@ def test_vt_tikz_backend_metadata_edgecases() -> None:
 
 
 def test_layout_cycles_and_disconnected() -> None:
-  """Docstring."""
+  """Verify layout cycles and disconnected behavior."""
   nodes = {
     "A": LogicalNode(id="A", op_type="Op"),
     "B": LogicalNode(id="B", op_type="Op"),
@@ -137,7 +137,7 @@ def test_layout_cycles_and_disconnected() -> None:
 
 
 def test_latex_edgecases() -> None:
-  """Docstring."""
+  """Verify latex edgecases behavior."""
   nodes = {
     "in1": LogicalNode(id="in1", op_type="Input"),
     "func_add": LogicalNode(id="func_add", op_type="func_add", attributes={"arg_1": "1"}),
@@ -168,7 +168,7 @@ def test_latex_edgecases() -> None:
 
 
 def test_latex_no_input() -> None:
-  """Docstring."""
+  """Verify latex no input behavior."""
   nodes = {
     "op1": LogicalNode(id="op1", op_type="Op"),
   }
@@ -185,7 +185,7 @@ def test_latex_no_input() -> None:
 
 
 def test_latex_no_output() -> None:
-  """Docstring."""
+  """Verify latex no output behavior."""
   nodes = {
     "in1": LogicalNode(id="in1", op_type="Input"),
     "op1": LogicalNode(id="op1", op_type="Op"),
@@ -204,7 +204,7 @@ def test_latex_no_output() -> None:
 
 
 def test_tikz_empty_and_disconnected_vt() -> None:
-  """Docstring."""
+  """Verify tikz empty and disconnected vt behavior."""
   nodes = {
     "A": LogicalNode(id="A", op_type="Op"),
     "B": LogicalNode(id="B", op_type="Op"),

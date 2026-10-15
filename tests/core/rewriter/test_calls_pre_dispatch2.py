@@ -15,7 +15,7 @@ from ml_switcheroo.enums import LogicOp
 
 
 class MockRule:
-  """Docstring."""
+  """Test helper class MockRule."""
 
   def __init__(
     self,
@@ -34,7 +34,7 @@ class MockRule:
 
 
 class MockRewriterDispatch:
-  """Docstring."""
+  """Test helper class MockRewriterDispatch."""
 
   def __init__(self) -> None:
     """Initializes the MockRewriterDispatch instance."""
@@ -44,7 +44,7 @@ class MockRewriterDispatch:
 
 
 class MockTraits:
-  """Docstring."""
+  """Test helper class MockTraits."""
 
   def __init__(self, method: str = "apply", implicit_roots: typing.Optional[list[str]] = None) -> None:
     """Initializes the MockTraits instance."""
@@ -70,7 +70,7 @@ def test_evaluate_dispatch_rules() -> None:
 
 
 def test_extract_argument_node_errors() -> None:
-  """Docstring."""
+  """Verify extract argument node errors behavior."""
   rewriter = MockRewriterDispatch()
   node = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[cst.Arg(value=cst.Name("a"))])
   res1: typing.Any = _extract_argument_node(rewriter, node, "not_found", "a", ["x", "a"])  # type: ignore

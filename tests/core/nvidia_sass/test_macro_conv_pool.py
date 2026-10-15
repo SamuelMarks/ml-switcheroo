@@ -1,4 +1,4 @@
-"""Test suite for Conv and Pooling NVIDIA_SASS Macros."""
+"""Test suite for macro conv pool."""
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import (
   expand_adaptivepool,
@@ -8,14 +8,14 @@ from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import (
   expand_pool1d,
   expand_pool3d,
 )
-from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import RegisterAllocator
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassInstruction
+from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 
 
 def test_nvidia_sass_macro_convs() -> None:
   """Verifies conv macros."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   assert len(expand_conv1d(allocator, "c1", {"k": 3})) > 5  # type: ignore
   assert len(expand_depthwiseconv2d(allocator, "c2", {"k": 3})) > 5  # type: ignore
   assert len(expand_convtranspose(allocator, "c3", {})) > 2
@@ -23,7 +23,7 @@ def test_nvidia_sass_macro_convs() -> None:
 
 def test_nvidia_sass_macro_pools() -> None:
   """Verifies pool macros."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   assert len(expand_pool1d(allocator, "p1", {})) > 2  # type: ignore
   assert len(expand_pool3d(allocator, "p3", {})) > 2  # type: ignore
   assert len(expand_adaptivepool(allocator, "pa", {})) > 2  # type: ignore

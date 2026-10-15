@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class LayerNormModel(tf.keras.Model):
-  """Docstring."""
+  """Test helper class LayerNormModel."""
 
   def __init__(self, normalized_shape: int):
     """Initializes the LayerNormModel instance."""

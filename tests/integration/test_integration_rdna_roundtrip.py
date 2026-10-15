@@ -17,7 +17,7 @@ CONVNET_SOURCE: str = textwrap.dedent(
 
 @pytest.fixture
 def semantics_mgr() -> SemanticsManager:
-  """Docstring."""
+  """Execute semantics mgr helper logic."""
   mgr = SemanticsManager()
   mgr.data["Conv2d"] = {"std_args": ["in", "out", "k"], "variants": {"torch": {"api": "torch.nn.Conv2d"}}}
   mgr._reverse_index["torch.nn.Conv2d"] = ("Conv2d", mgr.data["Conv2d"])

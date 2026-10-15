@@ -5,9 +5,11 @@ execution of multiple ``RewriterPass`` instances over a shared Context.
 """
 
 from typing import List
+
 import libcst as cst
-from ml_switcheroo.core.rewriter.interface import RewriterPass
+
 from ml_switcheroo.core.rewriter.context import RewriterContext
+from ml_switcheroo.core.rewriter.interface import RewriterPass
 
 
 class RewriterPipeline:

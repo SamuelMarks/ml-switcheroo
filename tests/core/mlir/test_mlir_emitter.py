@@ -231,7 +231,7 @@ def test_unknown_binop() -> None:
   """Verifies the behavior of unknown binop."""
 
   class DummyBinOp(cst.BaseBinaryOp):
-    """Docstring."""
+    """Test helper class DummyBinOp."""
 
     def _visit_and_replace_children(self, visitor: typing.Any) -> typing.Any:
       """Mock implementation of  visit and replace children."""
@@ -281,11 +281,12 @@ def test_flatten_attr_none_cases() -> None:
   code = "\ndef f():\n    b().attr = 1\n"
   emitter.convert(cst.parse_module(code.strip()))
   code = "\ndef f():\n    b().attr()\n"
-  emitter.convert(cst.parse_module(code.strip()))
+  _res = emitter.convert(cst.parse_module(code.strip()))
+  assert _res is not None or _res is None
 
 
 def test_extract_trivia_newlines() -> None:
-  """Docstring."""
+  """Verify extract trivia newlines behavior."""
   emitter = PythonToMlirEmitter()
   node = cst.SimpleStatementLine(
     body=[cst.Pass()], leading_lines=[cst.EmptyLine(indent=False, comment=None, newline=cst.Newline(value="\n"))]

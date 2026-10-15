@@ -2,11 +2,7 @@
 
 import libcst as cst
 
-from ml_switcheroo.core.rewriter.passes.plugins.dsl import (
-  LayoutPermutationPass,
-  FrameworkMacroPass,
-  ImportFixerPass,
-)
+from ml_switcheroo.core.rewriter.passes.plugins.dsl import FrameworkMacroPass, ImportFixerPass, LayoutPermutationPass
 
 
 def test_layout_permutation_pass_nchw_to_nhwc():

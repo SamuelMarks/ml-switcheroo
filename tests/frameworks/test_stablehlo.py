@@ -46,7 +46,7 @@ def test_stablehlo_properties() -> None:
 
 
 def test_stablehlo_missing_coverage() -> None:
-  """Docstring."""
+  """Verify stablehlo missing coverage behavior."""
   adapter = StableHloAdapter()
 
   # Traits
@@ -77,7 +77,7 @@ def test_stablehlo_missing_coverage() -> None:
 
 
 def test_stablehlo_missing_methods() -> None:
-  """Docstring."""
+  """Verify stablehlo missing methods behavior."""
   adapter = StableHloAdapter()
 
   assert adapter.get_device_syntax("cpu") == "// Target: cpu"

@@ -19,12 +19,12 @@ Algorithm:
     5.  Reconstruct graph with fused nodes and updated edges.
 """
 
-from typing import Any, List, Dict, Set, Optional
-from collections import defaultdict
 import copy
+from collections import defaultdict
+from typing import Any, Dict, List, Optional, Set
 
-from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.core.dsl import PatternDef
+from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 
 
 class GraphOptimizer:

@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for rewriter calls guards."""
 
 from typing import Any, Dict, List
 
@@ -8,36 +8,36 @@ from ml_switcheroo.core.rewriter.calls.guards import STRICT_RANK_HELPER, apply_s
 
 
 class MockHookContext:
-  """Docstring."""
+  """Test helper class MockHookContext."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.metadata: Dict[str, Any] = {}
     self.preamble_injected: List[str] = []
 
   def inject_preamble(self, text: str) -> None:
-    """Docstring."""
+    """Execute inject preamble helper logic."""
     self.preamble_injected.append(text)
 
 
 class MockContext:
-  """Docstring."""
+  """Test helper class MockContext."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.hook_context: MockHookContext = MockHookContext()
 
 
 class MockRewriter:
-  """Docstring."""
+  """Test helper class MockRewriter."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.context: MockContext = MockContext()
 
 
 def test_apply_strict_guards_no_guards() -> None:
-  """Docstring."""
+  """Verify apply strict guards no guards behavior."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [cst.Arg(value=cst.Name("x"))]
   details: Dict[str, Any] = {"std_args": ["a"]}
@@ -48,7 +48,7 @@ def test_apply_strict_guards_no_guards() -> None:
 
 
 def test_apply_strict_guards_with_guards() -> None:
-  """Docstring."""
+  """Verify apply strict guards with guards behavior."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [
     cst.Arg(keyword=cst.Name("inputs"), value=cst.Name("x"), equal=cst.AssignEqual()),
@@ -78,7 +78,7 @@ def test_apply_strict_guards_with_guards() -> None:
 
 
 def test_apply_strict_guards_multiple_calls_preamble() -> None:
-  """Docstring."""
+  """Verify apply strict guards multiple calls preamble behavior."""
   rewriter: MockRewriter = MockRewriter()
   rewriter.context.hook_context.metadata["strict_helper_injected"] = True
 
@@ -93,7 +93,7 @@ def test_apply_strict_guards_multiple_calls_preamble() -> None:
 
 
 def test_apply_strict_guards_target_impl_mapping() -> None:
-  """Docstring."""
+  """Verify apply strict guards target impl mapping behavior."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [cst.Arg(keyword=cst.Name("target_arg_name"), value=cst.Name("x"), equal=cst.AssignEqual())]
   details: Dict[str, Any] = {"std_args": [{"name": "std_input", "rank": 4}]}
@@ -106,10 +106,10 @@ def test_apply_strict_guards_target_impl_mapping() -> None:
 
 
 def test_apply_strict_guards_no_context() -> None:
-  """Docstring."""
+  """Verify apply strict guards no context behavior."""
 
   class RewriterNoContext:
-    """Docstring."""
+    """Test helper class RewriterNoContext."""
 
     pass
 
@@ -124,7 +124,7 @@ def test_apply_strict_guards_no_context() -> None:
 
 
 def test_apply_strict_guards_guards_applied_false() -> None:
-  """Docstring."""
+  """Verify apply strict guards guards applied false behavior."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [cst.Arg(value=cst.Name("x"))]
   details: Dict[str, Any] = {"std_args": [{"name": "inputs", "rank": 2}]}
@@ -136,7 +136,7 @@ def test_apply_strict_guards_guards_applied_false() -> None:
 
 
 def test_apply_strict_guards_arg_key_in_guards_map() -> None:
-  """Docstring."""
+  """Verify apply strict guards arg key in guards map behavior."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [cst.Arg(keyword=cst.Name("inputs"), value=cst.Name("x"), equal=cst.AssignEqual())]
   details: Dict[str, Any] = {"std_args": [{"name": "inputs", "rank": 2}]}
@@ -148,7 +148,7 @@ def test_apply_strict_guards_arg_key_in_guards_map() -> None:
 
 
 def test_apply_strict_guards_arg_key_not_in_guards_map() -> None:
-  """Docstring."""
+  """Verify apply strict guards arg key not in guards map behavior."""
   rewriter: MockRewriter = MockRewriter()
   norm_args: List[cst.Arg] = [cst.Arg(keyword=cst.Name("other"), value=cst.Name("x"), equal=cst.AssignEqual())]
   details: Dict[str, Any] = {"std_args": [{"name": "inputs", "rank": 2}]}

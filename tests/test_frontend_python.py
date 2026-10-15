@@ -5,13 +5,13 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 def test_python_frontend_init() -> None:
-  """Docstring."""
+  """Verify python frontend init behavior."""
   frontend: PythonFrontend = PythonFrontend(code="a = 1")
   assert frontend.code == "a = 1"
 
 
 def test_python_frontend_parse_to_graph_success() -> None:
-  """Docstring."""
+  """Verify python frontend parse to graph success behavior."""
   code: str = """
 class Model:
     def forward(self, x):
@@ -23,7 +23,7 @@ class Model:
 
 
 def test_python_frontend_parse_to_graph_error() -> None:
-  """Docstring."""
+  """Verify python frontend parse to graph error behavior."""
   # Syntax error
   code: str = "class Model"
   frontend: PythonFrontend = PythonFrontend(code=code)

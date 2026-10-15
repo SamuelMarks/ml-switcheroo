@@ -6,7 +6,7 @@ bool, str) and recursive container types (list, tuple, dict).
 """
 
 import json
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import libcst as cst
 
@@ -14,7 +14,7 @@ import libcst as cst
 def extract_primitive_key(node: cst.BaseExpression) -> Optional[str]:
   """Extract a string representation of a primitive AST node for Enum key lookup.
 
-  Handles simple strings strings, integers, and simple names (identifiers).
+  Handles simple strings, integers, and simple names (identifiers).
 
   Args:
       node: The CST expression node.
@@ -54,7 +54,6 @@ def convert_value_to_cst(
   if isinstance(val, str):
     try:
       parsed = ast.literal_eval(val)
-      # Avoid infinite recursion if ast.literal_eval returns the exact same string
       if not isinstance(parsed, str) or parsed != val:
         return convert_value_to_cst(parsed)
     except (ValueError, SyntaxError):
@@ -65,7 +64,6 @@ def convert_value_to_cst(
     elements = []
     for item in val:
       node = convert_value_to_cst(item)
-      # Add comma with spacing
       elements.append(
         cst.Element(
           value=node,
@@ -73,8 +71,6 @@ def convert_value_to_cst(
         )
       )
 
-    # Fix trailing comma for the last element based on Python style preferences
-    # Usually strict JSON-like structures don't strictly need one, but LibCST allows exact control.
     if elements:
       last = elements[-1]
       elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
@@ -105,7 +101,6 @@ def convert_value_to_cst(
     return cst.Dict(elements=dict_elements)
 
   # 3. Primitives
-  # Important: bool MUST be checked before int because bool is subclass of int in Python
   if isinstance(val, bool):
     return cst.Name("True") if val else cst.Name("False")
   elif isinstance(val, int):
@@ -117,13 +112,206 @@ def convert_value_to_cst(
       return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Float(repr(-val)))
     return cst.Float(repr(val))
   elif isinstance(val, str):
-    # Use json.dumps to ensure proper quoting and escaping (produces double quotes)
     return cst.SimpleString(json.dumps(val))
   elif val is None:
     return cst.Name("None")
   else:
-    # Fallback for unknown objects using string representation
     return cst.SimpleString(repr(str(val)))
+
+
+def _extract_std_arg_specs(
+  std_args_raw: List[Any],
+) -> Tuple[List[str], Dict[str, Any], Optional[str]]:
+  """Parse raw ``std_args`` declarations into ordered names, defaults, and variadic parameter name.
+
+  Args:
+      std_args_raw: List of raw standard argument declarations from operation details.
+
+  Returns:
+      Tuple of (std_args_order, defaults_map, variadic_arg_name).
+  """
+  std_args_order: List[str] = []
+  defaults_map: Dict[str, Any] = {}
+  variadic_arg_name: Optional[str] = None
+
+  for item in std_args_raw:
+    if isinstance(item, dict):
+      name = item.get("name")
+      if name:
+        std_args_order.append(name)
+        if item.get("is_variadic"):
+          variadic_arg_name = name
+        if "default" in item:
+          defaults_map[name] = item["default"]
+    elif isinstance(item, (list, tuple)):
+      std_args_order.append(item[0])
+    else:
+      std_args_order.append(item)
+
+  return std_args_order, defaults_map, variadic_arg_name
+
+
+def _inject_method_receiver(
+  original_node: cst.Call,
+  std_args_order: List[str],
+  lib_to_std: Dict[str, str],
+  found_args: Dict[str, cst.Arg],
+  extra_args: List[cst.Arg],
+  is_module_alias_fn: Callable[[cst.BaseExpression], bool],
+) -> bool:
+  """Inject the method receiver expression as the first standard argument when calling an instance method.
+
+  Args:
+      original_node: Original LibCST Call node.
+      std_args_order: Ordered list of standard argument names.
+      lib_to_std: Mapping from source framework argument names to standard argument names.
+      found_args: Mutable dictionary of bound standard arguments.
+      extra_args: Mutable list of extra unmapped arguments.
+      is_module_alias_fn: Predicate checking whether an expression is a module alias.
+
+  Returns:
+      True if the receiver expression was injected into ``found_args``, False otherwise.
+  """
+  is_method_call = isinstance(original_node.func, cst.Attribute)
+  if isinstance(original_node.func, cst.Attribute) and is_module_alias_fn(original_node.func.value):
+    is_method_call = False
+
+  if not is_method_call:
+    return False
+
+  if std_args_order:
+    first_std_arg = std_args_order[0]
+    arg_provided = False
+    for arg in original_node.args:
+      if arg.keyword:
+        k_name = arg.keyword.value
+        mapped = lib_to_std.get(k_name) or (k_name if k_name == first_std_arg else None)
+        if mapped == first_std_arg:
+          arg_provided = True
+          break
+
+    if not arg_provided and isinstance(original_node.func, cst.Attribute):
+      found_args[first_std_arg] = cst.Arg(value=original_node.func.value)
+      return True
+  elif isinstance(original_node.func, cst.Attribute):
+    extra_args.append(cst.Arg(value=original_node.func.value))
+
+  return False
+
+
+def _pack_variadic_args(
+  variadic_buffer: List[cst.Arg],
+  pack_target_kw: str,
+  pack_as_type: str,
+) -> cst.Arg:
+  """Pack a sequence of variadic positional arguments into a Tuple or List keyword argument.
+
+  Args:
+      variadic_buffer: List of variadic CST Arg nodes to pack.
+      pack_target_kw: Target keyword parameter name for the packed container.
+      pack_as_type: Container type identifier ('List' or 'Tuple').
+
+  Returns:
+      Constructed LibCST Arg node containing the packed Tuple or List.
+  """
+  elements = [
+    cst.Element(
+      value=arg.value,
+      comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+    )
+    for arg in variadic_buffer
+  ]
+
+  is_list = pack_as_type == "List"
+  trailing_comma: Union[cst.MaybeSentinel, cst.Comma] = cst.MaybeSentinel.DEFAULT
+  if not is_list and len(elements) == 1:
+    trailing_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
+  elements[-1] = elements[-1].with_changes(comma=trailing_comma)
+
+  container_node = cst.List(elements=elements) if is_list else cst.Tuple(elements=elements)
+
+  return cst.Arg(
+    keyword=cst.Name(pack_target_kw),
+    value=container_node,
+    equal=cst.AssignEqual(
+      whitespace_before=cst.SimpleWhitespace(""),
+      whitespace_after=cst.SimpleWhitespace(""),
+    ),
+  )
+
+
+def _resolve_target_arg_value(
+  std_name: str,
+  current_arg: cst.Arg,
+  target_val_map: Dict[str, Any],
+) -> cst.BaseExpression:
+  """Resolve enum value mappings or constant value overrides for a standard argument.
+
+  Args:
+      std_name: Standard argument name.
+      current_arg: Current CST Arg node bound to ``std_name``.
+      target_val_map: Target value mapping dictionary from ``target_impl['arg_values']``.
+
+  Returns:
+      Resolved LibCST expression node for the argument value.
+  """
+  final_val_node = current_arg.value
+  if not target_val_map or std_name not in target_val_map:
+    return final_val_node
+
+  val_options = target_val_map[std_name]
+  if isinstance(val_options, dict):
+    raw_key = extract_primitive_key(current_arg.value)
+    if raw_key is not None and str(raw_key) in val_options:
+      final_val_node = cst.parse_expression(val_options[str(raw_key)])
+  else:
+    target_code = val_options
+    if isinstance(target_code, str):
+      try:
+        final_val_node = cst.parse_expression(target_code)
+      except cst.ParserSyntaxError:
+        final_val_node = cst.SimpleString(f"'{target_code}'")
+    else:
+      final_val_node = convert_value_to_cst(target_code)
+
+  return final_val_node
+
+
+def _inject_trailing_args(
+  new_args_list: List[cst.Arg],
+  std_args_order: List[str],
+  target_inject_map: Dict[str, Any],
+  target_val_map: Dict[str, Any],
+) -> None:
+  """Append target-specific injected keyword arguments to ``new_args_list``.
+
+  Args:
+      new_args_list: Mutable list of normalized CST Arg nodes.
+      std_args_order: Ordered list of standard argument names.
+      target_inject_map: Target ``inject_args`` dictionary.
+      target_val_map: Target ``arg_values`` dictionary.
+  """
+  injections = target_inject_map.copy()
+  if target_val_map:
+    for k, v in target_val_map.items():
+      if not isinstance(v, dict) and k not in std_args_order:
+        injections[k] = v
+
+  for arg_name, arg_val in injections.items():
+    val_node = cst.parse_expression(arg_val) if isinstance(arg_val, str) else convert_value_to_cst(arg_val)
+
+    if len(new_args_list) > 0 and new_args_list[-1].comma == cst.MaybeSentinel.DEFAULT:
+      new_args_list[-1] = new_args_list[-1].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+
+    injected_arg = cst.Arg(
+      keyword=cst.Name(arg_name),
+      value=val_node,
+      equal=cst.AssignEqual(
+        whitespace_before=cst.SimpleWhitespace(""),
+        whitespace_after=cst.SimpleWhitespace(""),
+      ),
+    )
+    new_args_list.append(injected_arg)
 
 
 def normalize_arguments(
@@ -155,24 +343,7 @@ def normalize_arguments(
       for the target framework's implementation.
   """
   # 1. Parse Standard Types
-  std_args_raw = op_details.get("std_args", [])
-  std_args_order = []
-  defaults_map = {}
-  variadic_arg_name = None
-
-  for item in std_args_raw:
-    if isinstance(item, dict):
-      name = item.get("name")
-      if name:
-        std_args_order.append(name)
-        if item.get("is_variadic"):
-          variadic_arg_name = name
-        if "default" in item:
-          defaults_map[name] = item["default"]
-    elif isinstance(item, (list, tuple)):
-      std_args_order.append(item[0])
-    else:
-      std_args_order.append(item)
+  std_args_order, defaults_map, variadic_arg_name = _extract_std_arg_specs(op_details.get("std_args", []))
 
   # 2. Config Maps
   source_variant = op_details.get("variants", {}).get(source_fw, {}) or {}
@@ -191,38 +362,20 @@ def normalize_arguments(
   variadic_buffer: List[cst.Arg] = []
 
   # 3. Method Receiver Injection (e.g. x.add(y) -> add(x, y))
-  is_method_call = isinstance(original_node.func, cst.Attribute)
-  receiver_injected = False
-
-  if isinstance(original_node.func, cst.Attribute) and is_module_alias_fn(original_node.func.value):
-    is_method_call = False
-
-  if is_method_call:
-    if std_args_order:
-      first_std_arg = std_args_order[0]
-      arg_provided = False
-      for arg in original_node.args:
-        if arg.keyword:
-          k_name = arg.keyword.value
-          mapped = lib_to_std.get(k_name) or (k_name if k_name == first_std_arg else None)
-          if mapped == first_std_arg:
-            arg_provided = True
-            break
-
-      if not arg_provided:
-        if isinstance(original_node.func, cst.Attribute):
-          rec = original_node.func.value
-          found_args[first_std_arg] = cst.Arg(value=rec)
-          receiver_injected = True
-    else:
-      if isinstance(original_node.func, cst.Attribute):
-        extra_args.append(cst.Arg(value=original_node.func.value))
+  receiver_injected = _inject_method_receiver(
+    original_node,
+    std_args_order,
+    lib_to_std,
+    found_args,
+    extra_args,
+    is_module_alias_fn,
+  )
 
   # 4. Process Args
   pos_idx = 1 if receiver_injected else 0
   packing_mode = False
 
-  for i, upd_arg in enumerate(updated_node.args):
+  for upd_arg in updated_node.args:
     if not upd_arg.keyword:
       if packing_mode:
         variadic_buffer.append(upd_arg)
@@ -247,31 +400,7 @@ def normalize_arguments(
 
   # 5. Pack Variadics
   if packing_mode and variadic_arg_name and pack_target_kw:
-    elements = []
-    for arg in variadic_buffer:
-      elements.append(
-        cst.Element(
-          value=arg.value,
-          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-        )
-      )
-
-    is_list = pack_as_type == "List"
-    trailing_comma: Union[cst.MaybeSentinel, cst.Comma] = cst.MaybeSentinel.DEFAULT
-    if not is_list and len(elements) == 1:
-      trailing_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
-    elements[-1] = elements[-1].with_changes(comma=trailing_comma)
-
-    container_node = cst.List(elements=elements) if is_list else cst.Tuple(elements=elements)
-
-    found_args[variadic_arg_name] = cst.Arg(
-      keyword=cst.Name(pack_target_kw),
-      value=container_node,
-      equal=cst.AssignEqual(
-        whitespace_before=cst.SimpleWhitespace(""),
-        whitespace_after=cst.SimpleWhitespace(""),
-      ),
-    )
+    found_args[variadic_arg_name] = _pack_variadic_args(variadic_buffer, pack_target_kw, pack_as_type)
 
   # 6. Reconstruct
   new_args_list: List[cst.Arg] = []
@@ -290,7 +419,7 @@ def normalize_arguments(
             whitespace_after=cst.SimpleWhitespace(""),
           ),
         )
-      except Exception:
+      except (ValueError, TypeError, Exception):
         pass
 
     if std_name in found_args:
@@ -300,40 +429,14 @@ def normalize_arguments(
         new_args_list.append(current_arg)
         continue
 
-      tg_alias = target_arg_map.get(std_name, std_name)
       raw_alias = target_arg_map.get(std_name, std_name)
       tg_alias = str(raw_alias) if raw_alias is not None else None
       if tg_alias is None:
         continue
 
-      final_val_node = current_arg.value
+      final_val_node = _resolve_target_arg_value(std_name, current_arg, target_val_map)
 
-      if target_val_map and std_name in target_val_map:
-        val_options = target_val_map[std_name]
-
-        # If val_options is a dict, it's an enum mapping (val -> code)
-        if isinstance(val_options, dict):
-          raw_key = extract_primitive_key(current_arg.value)
-          if raw_key is not None and str(raw_key) in val_options:
-            target_code = val_options[str(raw_key)]
-            final_val_node = cst.parse_expression(target_code)
-        # Otherwise it's a constant injection (literal override)
-        # e.g. "False" string or boolean value
-        else:
-          target_code = val_options
-          if isinstance(target_code, str):
-            try:
-              final_val_node = cst.parse_expression(target_code)
-            except cst.ParserSyntaxError:
-              # Fallback if string isn't an expression but a literal name is invalid
-              # Or treat as simple string
-              final_val_node = cst.SimpleString(f"'{target_code}'")
-          else:
-            final_val_node = convert_value_to_cst(target_code)
-
-      should_use_keyword = current_arg.keyword is not None
-
-      if should_use_keyword:
+      if current_arg.keyword is not None:
         new_arg = current_arg.with_changes(
           keyword=cst.Name(tg_alias),
           value=final_val_node,
@@ -345,53 +448,22 @@ def normalize_arguments(
         new_args_list.append(new_arg)
       else:
         if final_val_node is not current_arg.value:
-          new_arg = current_arg.with_changes(value=final_val_node)
-          new_args_list.append(new_arg)
+          new_args_list.append(current_arg.with_changes(value=final_val_node))
         else:
           new_args_list.append(current_arg)
 
-  # Append extras
-  # Feature: Filtering based on kwargs_map
-  # If a keyword is explicitly set to null in kwargs_map, it should be dropped from extra_args
+  # Append extras with optional kwargs_map filtering
   if kwargs_map:
-    filtered_extras = []
-    for arg in extra_args:
-      if arg.keyword and arg.keyword.value in kwargs_map and kwargs_map[arg.keyword.value] is None:
-        continue
-      filtered_extras.append(arg)
-    extra_args = filtered_extras
+    extra_args = [
+      arg
+      for arg in extra_args
+      if not (arg.keyword and arg.keyword.value in kwargs_map and kwargs_map[arg.keyword.value] is None)
+    ]
 
   new_args_list.extend(extra_args)
 
   # 7. Inject Args
-
-  # Merge inject_args and constant arg_values
-  injections = target_inject_map.copy()
-  if target_val_map:
-    for k, v in target_val_map.items():
-      if not isinstance(v, dict) and k not in std_args_order:
-        injections[k] = v
-
-  # Processing injections
-  if injections:
-    for arg_name, arg_val in injections.items():
-      if isinstance(arg_val, str):
-        val_node = cst.parse_expression(arg_val)
-      else:
-        val_node = convert_value_to_cst(arg_val)
-
-      if len(new_args_list) > 0 and new_args_list[-1].comma == cst.MaybeSentinel.DEFAULT:
-        new_args_list[-1] = new_args_list[-1].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
-
-      injected_arg = cst.Arg(
-        keyword=cst.Name(arg_name),
-        value=val_node,
-        equal=cst.AssignEqual(
-          whitespace_before=cst.SimpleWhitespace(""),
-          whitespace_after=cst.SimpleWhitespace(""),
-        ),
-      )
-      new_args_list.append(injected_arg)
+  _inject_trailing_args(new_args_list, std_args_order, target_inject_map, target_val_map)
 
   # Formatting cleanups
   for i in range(len(new_args_list) - 1):

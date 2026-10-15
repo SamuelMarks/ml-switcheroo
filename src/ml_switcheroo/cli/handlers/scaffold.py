@@ -5,6 +5,7 @@ Heuristically scans a new library to generate a skeleton mapping.
 
 import json
 from argparse import Namespace
+
 from ml_switcheroo.discovery.consensus import ConsensusEngine
 
 

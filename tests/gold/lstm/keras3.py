@@ -6,7 +6,7 @@ import keras
 
 
 class LSTMModel(keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class LSTMModel."""
 
   def __init__(self, hidden_size: int) -> None:
     """Initializes the LSTMModel instance."""

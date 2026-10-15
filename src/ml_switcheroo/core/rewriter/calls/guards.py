@@ -1,9 +1,8 @@
 """Strict Mode Guards Injection."""
 
 import typing
+from typing import TYPE_CHECKING, Dict, List, Union
 
-
-from typing import List, Dict, TYPE_CHECKING, Union
 import libcst as cst
 
 if TYPE_CHECKING:
@@ -14,7 +13,11 @@ if TYPE_CHECKING:
     metadata: Dict[str, Union[str, int, float, bool, dict[str, typing.Any], list[typing.Any], None]]
 
     def inject_preamble(self, code: str) -> None:
-      """Inject preamble."""
+      """Inject preamble code into the module header.
+
+      Args:
+          code: Python source code snippet to inject at the top of the module.
+      """
       ...
 
   class Any:

@@ -10,14 +10,10 @@ It parses the specific structure of OpenXLA docs:
 - Syntax: `#### Syntax` blocks containing MLIR signatures.
 """
 
-from typing import Any
-
-import typing
-
-
 import re
+import typing
 from pathlib import Path
-from typing import List, Union
+from typing import Any, List, Union
 
 from ml_switcheroo.utils.console import log_error, log_info
 

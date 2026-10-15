@@ -10,13 +10,13 @@ from ml_switcheroo.core.compiler.ir import LogicalNode
 
 @pytest.fixture
 def emitter_torch() -> PythonSnippetEmitter:
-  """Docstring."""
+  """Execute emitter torch helper logic."""
   return PythonSnippetEmitter("torch")
 
 
 @pytest.fixture
 def emitter_flax() -> PythonSnippetEmitter:
-  """Docstring."""
+  """Execute emitter flax helper logic."""
   return PythonSnippetEmitter("flax_nnx")
 
 
@@ -130,12 +130,12 @@ def test_resolve_api_dotted_and_jax(emitter_flax: PythonSnippetEmitter) -> None:
 
 
 def test_format_args_from_metadata_empty(emitter_torch: PythonSnippetEmitter) -> None:
-  """Docstring."""
+  """Verify format args from metadata empty behavior."""
   assert emitter_torch._build_args_from_metadata({}) == []
 
 
 def test_python_snippet_emit_init_flax_with_rngs() -> None:
-  """Docstring."""
+  """Verify python snippet emit init flax with rngs behavior."""
   from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
   from ml_switcheroo.core.graph import LogicalNode
 

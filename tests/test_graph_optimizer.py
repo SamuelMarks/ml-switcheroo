@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for graph optimizer."""
 
 from typing import Dict, List, Optional
 
@@ -8,7 +8,7 @@ from ml_switcheroo.core.graph_optimizer import GraphOptimizer
 
 
 def test_graph_optimizer_no_patterns() -> None:
-  """Docstring."""
+  """Verify graph optimizer no patterns behavior."""
   graph: LogicalGraph = LogicalGraph(nodes={"1": LogicalNode(id="1", op_type="A")}, edges=[])
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
   opt_graph: LogicalGraph = opt.optimize(graph)
@@ -18,7 +18,7 @@ def test_graph_optimizer_no_patterns() -> None:
 
 
 def test_graph_optimizer_simple_fusion() -> None:
-  """Docstring."""
+  """Verify graph optimizer simple fusion behavior."""
   nodes = {
     "1": LogicalNode(id="1", op_type="Conv"),
     "2": LogicalNode(id="2", op_type="BatchNorm"),
@@ -43,7 +43,7 @@ def test_graph_optimizer_simple_fusion() -> None:
 
 
 def test_graph_optimizer_fusion_with_surrounding_nodes() -> None:
-  """Docstring."""
+  """Verify graph optimizer fusion with surrounding nodes behavior."""
   nodes = {
     "0": LogicalNode(id="0", op_type="Input"),
     "1": LogicalNode(id="1", op_type="Conv"),
@@ -72,7 +72,7 @@ def test_graph_optimizer_fusion_with_surrounding_nodes() -> None:
 
 
 def test_graph_optimizer_internal_edges_dropped() -> None:
-  """Docstring."""
+  """Verify graph optimizer internal edges dropped behavior."""
   # If there is an edge from Conv to Output directly (branching)
   nodes = {
     "0": LogicalNode(id="0", op_type="Input"),
@@ -99,7 +99,7 @@ def test_graph_optimizer_internal_edges_dropped() -> None:
 
 
 def test_match_sequence_returns_none_empty_sequence() -> None:
-  """Docstring."""
+  """Verify match sequence returns none empty sequence behavior."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
   res: Optional[List[LogicalNode]] = opt._match_sequence(
     start_node=LogicalNode(id="1", op_type="A"), sequence=[], node_map={}, out_edges={}, processed_ids=set()
@@ -108,7 +108,7 @@ def test_match_sequence_returns_none_empty_sequence() -> None:
 
 
 def test_match_sequence_mismatch_first() -> None:
-  """Docstring."""
+  """Verify match sequence mismatch first behavior."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
   res: Optional[List[LogicalNode]] = opt._match_sequence(
     start_node=LogicalNode(id="1", op_type="B"), sequence=["A", "C"], node_map={}, out_edges={}, processed_ids=set()
@@ -117,7 +117,7 @@ def test_match_sequence_mismatch_first() -> None:
 
 
 def test_match_sequence_neighbor_not_found() -> None:
-  """Docstring."""
+  """Verify match sequence neighbor not found behavior."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
   node_map: Dict[str, LogicalNode] = {"1": LogicalNode(id="1", op_type="A"), "2": LogicalNode(id="2", op_type="C")}
   res: Optional[List[LogicalNode]] = opt._match_sequence(
@@ -127,7 +127,7 @@ def test_match_sequence_neighbor_not_found() -> None:
 
 
 def test_match_sequence_neighbor_already_processed() -> None:
-  """Docstring."""
+  """Verify match sequence neighbor already processed behavior."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
   node_map: Dict[str, LogicalNode] = {"1": LogicalNode(id="1", op_type="A"), "2": LogicalNode(id="2", op_type="B")}
   res: Optional[List[LogicalNode]] = opt._match_sequence(

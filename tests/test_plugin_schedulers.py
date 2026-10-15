@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin schedulers."""
 
 from unittest.mock import MagicMock
 
@@ -14,7 +14,7 @@ from ml_switcheroo.plugins.schedulers import (
 
 
 def test_create_dotted_name() -> None:
-  """Docstring."""
+  """Verify create dotted name behavior."""
   node: cst.BaseExpression = _create_dotted_name("optax.exponential_decay")
   assert isinstance(node, cst.Attribute)
   assert isinstance(node.value, cst.Name)
@@ -23,7 +23,7 @@ def test_create_dotted_name() -> None:
 
 
 def test_get_target_arg_name() -> None:
-  """Docstring."""
+  """Verify get target arg name behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   # Case 1: no variant
@@ -41,7 +41,7 @@ def test_get_target_arg_name() -> None:
 
 
 def test_transform_scheduler_init_early_return() -> None:
-  """Docstring."""
+  """Verify transform scheduler init early return behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "StepLR"
   ctx.lookup_api.return_value = None
@@ -55,7 +55,7 @@ def test_transform_scheduler_init_early_return() -> None:
 
 
 def test_transform_scheduler_init_step_lr() -> None:
-  """Docstring."""
+  """Verify transform scheduler init step lr behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "StepLR"
   ctx.lookup_api.return_value = "optax.piecewise_constant"
@@ -80,7 +80,7 @@ def test_transform_scheduler_init_step_lr() -> None:
 
 
 def test_transform_scheduler_init_cosine_lr() -> None:
-  """Docstring."""
+  """Verify transform scheduler init cosine lr behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "CosineAnnealingLR"
   ctx.lookup_api.return_value = "optax.cosine_decay_schedule"
@@ -105,7 +105,7 @@ def test_transform_scheduler_init_cosine_lr() -> None:
 
 
 def test_transform_scheduler_step() -> None:
-  """Docstring."""
+  """Verify transform scheduler step behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   node: cst.BaseExpression = cst.parse_expression("scheduler.step()")
   new_node: cst.CSTNode = transform_scheduler_step(node, ctx)

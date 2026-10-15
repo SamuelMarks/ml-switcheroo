@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for stablehlo backend."""
 
 from typing import Any, Dict, Optional, Tuple
 
@@ -9,13 +9,13 @@ from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
 
 
 def test_stablehlo_backend() -> None:
-  """Docstring."""
+  """Verify stablehlo backend behavior."""
 
   class MockSemantics:
-    """Docstring."""
+    """Test helper class MockSemantics."""
 
     def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Docstring."""
+      """Execute get definition helper logic."""
       if kind == "KnownOp":
         return ("abstract.KnownOp", {"variants": {"stablehlo": {"api": "stablehlo.add"}}})
       return None
@@ -44,7 +44,7 @@ def test_stablehlo_backend() -> None:
 
 
 def test_stablehlo_backend_no_semantics() -> None:
-  """Docstring."""
+  """Verify stablehlo backend no semantics behavior."""
   backend: StableHloBackend = StableHloBackend(semantics=None)
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="node1", op_type="MyOp")]}, edges=[])
   code: str = backend.compile(graph)
@@ -52,7 +52,7 @@ def test_stablehlo_backend_no_semantics() -> None:
 
 
 def test_mlir_printer() -> None:
-  """Docstring."""
+  """Verify mlir printer behavior."""
   printer: MlirPrinter = MlirPrinter()
   module: ModuleNode = ModuleNode(body=BlockNode(label=""))
   module.body.operations.append(OperationNode(name="dummy.op"))
@@ -63,10 +63,10 @@ def test_mlir_printer() -> None:
 
   # testing _visit coverage for fallback
   class DummyNode:
-    """Docstring."""
+    """Test helper class DummyNode."""
 
     def to_text(self) -> str:
-      """Docstring."""
+      """Execute to text helper logic."""
       return "dummy_text"
 
   code2: str = printer.emit(DummyNode())
@@ -86,7 +86,7 @@ def test_stablehlo_backend_validate_op() -> None:
 
 
 def test_mlir_printer_with_module_op() -> None:
-  """Docstring."""
+  """Verify mlir printer with module op behavior."""
   printer: MlirPrinter = MlirPrinter()
   module: ModuleNode = ModuleNode(body=BlockNode(label=""))
   module.body.operations.append(OperationNode(name="module"))

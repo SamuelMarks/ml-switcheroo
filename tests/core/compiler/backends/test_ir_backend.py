@@ -2,16 +2,11 @@
 
 import json
 from typing import Any, Dict
+
 import pytest
 
 from ml_switcheroo.core.compiler.backends.ir import IrBackend
-from ml_switcheroo.core.compiler.ir import (
-  LogicalEdge,
-  LogicalGraph,
-  LogicalMesh,
-  LogicalNode,
-  PartitionSpec,
-)
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalMesh, LogicalNode, PartitionSpec
 
 
 def test_ir_backend_compile_json_basic() -> None:

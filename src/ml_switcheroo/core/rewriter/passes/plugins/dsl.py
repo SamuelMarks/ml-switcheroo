@@ -4,7 +4,8 @@ Includes layout permutations (NCHW <-> NHWC), macro template execution,
 and import fixing logic built on top of the generated AST.
 """
 
-from typing import List, Dict
+from typing import Dict, List
+
 import libcst as cst
 
 

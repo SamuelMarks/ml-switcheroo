@@ -16,7 +16,7 @@ SOURCE_TORCH: str = "\nimport torch.nn as nn\ndef get_model():\n    model = nn.S
 
 @pytest.fixture
 def keras_semantics() -> MagicMock:
-  """Docstring."""
+  """Execute keras semantics helper logic."""
   _HOOKS["keras_sequential_pack"] = transform_keras_sequential
   mgr = MagicMock(spec=SemanticsManager)
   mappings: dict[str, typing.Any] = {

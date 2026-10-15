@@ -5,8 +5,9 @@ framework detection, decoupling individual plugins from hardcoded lists of libra
 It relies on the `HookContext` to dynamically resolve framework identities.
 """
 
-import libcst as cst
 from typing import Optional, Union
+
+import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext
 

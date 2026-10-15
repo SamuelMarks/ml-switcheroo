@@ -1,10 +1,10 @@
-"""Module docstring."""
+"""Test suite for naming."""
 
 from ml_switcheroo.core.mlir.naming import NamingContext
 
 
 def test_naming_context_init() -> None:
-  """Docstring."""
+  """Verify naming context init behavior."""
   ctx: NamingContext = NamingContext()
   assert ctx._map == {}
   assert ctx._used_names == {}
@@ -13,7 +13,7 @@ def test_naming_context_init() -> None:
 
 
 def test_naming_context_register_no_hint() -> None:
-  """Docstring."""
+  """Verify naming context register no hint behavior."""
   ctx: NamingContext = NamingContext()
   # If ssa_name starts with %, replaces with _
   assert ctx.register("%0") == "_0"
@@ -22,7 +22,7 @@ def test_naming_context_register_no_hint() -> None:
 
 
 def test_naming_context_register_with_hint_strip_digits() -> None:
-  """Docstring."""
+  """Verify naming context register with hint strip digits behavior."""
   ctx: NamingContext = NamingContext()
   # Strip digits if candidate is available
   assert ctx.register("%self0", hint="self0") == "self"
@@ -33,14 +33,14 @@ def test_naming_context_register_with_hint_strip_digits() -> None:
 
 
 def test_naming_context_register_with_semantic_hint() -> None:
-  """Docstring."""
+  """Verify naming context register with semantic hint behavior."""
   ctx: NamingContext = NamingContext()
   # If hint does not match ssa_name (e.g. op type hint), adds _
   assert ctx.register("%1", hint="flatten") == "_flatten"
 
 
 def test_naming_context_register_collision_and_fallback() -> None:
-  """Docstring."""
+  """Verify naming context register collision and fallback behavior."""
   ctx: NamingContext = NamingContext()
   # Reserve a name manually to force collision
   ctx._used_names["_myvar"] = True
@@ -51,20 +51,20 @@ def test_naming_context_register_collision_and_fallback() -> None:
 
 
 def test_naming_context_register_reserved() -> None:
-  """Docstring."""
+  """Verify naming context register reserved behavior."""
   ctx: NamingContext = NamingContext()
   assert ctx.register("%return", hint="return") == "_return"
 
 
 def test_naming_context_register_invalid_identifier() -> None:
-  """Docstring."""
+  """Verify naming context register invalid identifier behavior."""
   ctx: NamingContext = NamingContext()
   # hint has bad chars
   assert ctx.register("%2", hint="invalid-name") == "_invalid-name_0"
 
 
 def test_naming_context_lookup() -> None:
-  """Docstring."""
+  """Verify naming context lookup behavior."""
   ctx: NamingContext = NamingContext()
   ctx.register("%val", hint="val")
 

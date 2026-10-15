@@ -7,14 +7,9 @@ determined by the `ResolutionPlan`.
 from typing import List, Set, Union
 
 import libcst as cst
-from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 
-from ml_switcheroo.core.import_fixer.utils import (
-  create_dotted_name,
-  get_signature,
-  is_docstring,
-  is_future_import,
-)
+from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
+from ml_switcheroo.core.import_fixer.utils import create_dotted_name, get_signature, is_docstring, is_future_import
 
 
 class InjectionMixin(cst.CSTTransformer):

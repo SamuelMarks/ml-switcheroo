@@ -3,10 +3,10 @@
 Exposes individual command handler functions aggregated by domain.
 """
 
-from .convert import handle_convert, _convert_single_file, _print_batch_summary
+from .convert import _convert_single_file, _print_batch_summary, handle_convert
 from .define import handle_define
+from .dev import handle_docs, handle_gen_tests, handle_matrix
 from .verify import handle_ci
-from .dev import handle_matrix, handle_docs, handle_gen_tests
 
 __all__ = [
   "_capture_framework",

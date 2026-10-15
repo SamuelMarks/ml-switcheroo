@@ -8,7 +8,7 @@ from ml_switcheroo.core.discovery import SimulatedReflection
 
 
 def mock_module_with_members(name: str, members: list[str]) -> types.ModuleType:
-  """Docstring."""
+  """Execute mock module with members helper logic."""
   mod = types.ModuleType(name)
   for m in members:
     setattr(mod, m, MagicMock())

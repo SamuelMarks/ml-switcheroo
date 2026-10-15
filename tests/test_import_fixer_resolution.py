@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for import fixer resolution."""
 
 from typing import Any, Dict, List, Optional, cast
 from unittest.mock import patch
@@ -15,7 +15,7 @@ from ml_switcheroo.core.import_fixer.resolution import (
 
 
 def test_importreq_signature() -> None:
-  """Docstring."""
+  """Verify importreq signature behavior."""
   req1: ImportReq = ImportReq(module="torch")
   assert req1.signature == "torch"
 
@@ -36,7 +36,7 @@ def test_importreq_signature() -> None:
 
 
 def test_import_resolver_usage_visitor_exception() -> None:
-  """Docstring."""
+  """Verify import resolver usage visitor exception behavior."""
   from ml_switcheroo.core.import_fixer.resolution import _QualNameScanner
 
   visitor = _QualNameScanner("some.path")
@@ -50,7 +50,7 @@ def test_import_resolver_usage_visitor_exception() -> None:
 
 
 def test_qual_name_scanner() -> None:
-  """Docstring."""
+  """Verify qual name scanner behavior."""
   tree: cst.Module = cst.parse_module("import jax.numpy\nx = jax.numpy.sum()")
   scanner: _QualNameScanner = _QualNameScanner("jax.numpy")
   tree.visit(scanner)
@@ -80,11 +80,11 @@ def test_qual_name_scanner() -> None:
   # cst.Attribute needs correct types but we can pass something to trigger exception inside get_full_name if we wanted,
   # but `get_full_name` is robust. Let's just create an invalid node dynamically.
   class BadNode(cst.Attribute):
-    """Docstring."""
+    """Test helper class BadNode."""
 
     @property
     def value(self) -> cst.BaseExpression:
-      """Docstring."""
+      """Execute value helper logic."""
       raise ValueError("bad")
 
   try:
@@ -95,14 +95,14 @@ def test_qual_name_scanner() -> None:
 
 
 class MockSemantics:
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def get_framework_aliases(self) -> Dict[str, tuple[str, str]]:
-    """Docstring."""
+    """Execute get framework aliases helper logic."""
     return {"jax": ("jax.numpy", "jnp")}
 
   def get_import_map(self, target_fw: str) -> Dict[str, tuple[str, str, str]]:
-    """Docstring."""
+    """Execute get import map helper logic."""
     if target_fw == "jax":
       return {
         "torch.nn": ("flax", "nnx", "nnx"),
@@ -111,7 +111,7 @@ class MockSemantics:
 
 
 def test_import_resolver() -> None:
-  """Docstring."""
+  """Verify import resolver behavior."""
   sm: MockSemantics = MockSemantics()
   resolver: ImportResolver = ImportResolver(cast(Any, sm))
 
@@ -145,14 +145,14 @@ def test_import_resolver() -> None:
 
   # Test 3: Check_name fallback
   class MockSemantics2:
-    """Docstring."""
+    """Test helper class MockSemantics2."""
 
     def get_framework_aliases(self) -> Dict[str, tuple[str, str]]:
-      """Docstring."""
+      """Execute get framework aliases helper logic."""
       return {}
 
     def get_import_map(self, target_fw: str) -> Dict[str, tuple[str, Optional[str], Optional[str]]]:
-      """Docstring."""
+      """Execute get import map helper logic."""
       return {"torch.optim": ("optax", None, None)}
 
   sm2: MockSemantics2 = MockSemantics2()

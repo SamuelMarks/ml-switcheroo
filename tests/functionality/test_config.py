@@ -30,7 +30,7 @@ def test_config_ui_priority_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
-    """Docstring."""
+    """Test helper class MockAdapter."""
 
     inherits_from = None
     ui_priority = "not_an_int"
@@ -44,7 +44,7 @@ def test_config_ui_priority_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_config_ui_priority_no_adapter(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify config ui priority no adapter behavior."""
   from ml_switcheroo.config import get_framework_priority_order
 
   with monkeypatch.context() as m:
@@ -55,11 +55,11 @@ def test_config_ui_priority_no_adapter(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_config_ui_priority_has_adapter_but_no_ui_priority(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify config ui priority has adapter but no ui priority behavior."""
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
-    """Docstring."""
+    """Test helper class MockAdapter."""
 
     inherits_from = None
     # no ui_priority
@@ -72,11 +72,11 @@ def test_config_ui_priority_has_adapter_but_no_ui_priority(monkeypatch: pytest.M
 
 
 def test_config_ui_priority_has_adapter_with_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify config ui priority has adapter with value error behavior."""
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
-    """Docstring."""
+    """Test helper class MockAdapter."""
 
     inherits_from = None
     ui_priority = "not_an_int"
@@ -89,11 +89,11 @@ def test_config_ui_priority_has_adapter_with_value_error(monkeypatch: pytest.Mon
 
 
 def test_config_ui_priority_has_adapter_with_type_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify config ui priority has adapter with type error behavior."""
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
-    """Docstring."""
+    """Test helper class MockAdapter."""
 
     inherits_from = None
     ui_priority = [1]  # list cannot be passed to int() natively, raises TypeError
@@ -106,7 +106,7 @@ def test_config_ui_priority_has_adapter_with_type_error(monkeypatch: pytest.Monk
 
 
 def test_config_load_enable_sharding_none() -> None:
-  """Docstring."""
+  """Verify config load enable sharding none behavior."""
   from unittest.mock import patch
 
   from ml_switcheroo.config import RuntimeConfig
@@ -118,7 +118,7 @@ def test_config_load_enable_sharding_none() -> None:
 
 
 def test_config_load_enable_sharding_not_none() -> None:
-  """Docstring."""
+  """Verify config load enable sharding not none behavior."""
   from unittest.mock import patch
 
   from ml_switcheroo.config import RuntimeConfig

@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for rewriter pipeline."""
 
 from unittest.mock import MagicMock
 
@@ -10,7 +10,7 @@ from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
 
 
 def test_rewriter_pipeline() -> None:
-  """Docstring."""
+  """Verify rewriter pipeline behavior."""
   # Setup
   pass1: MagicMock = MagicMock(spec=RewriterPass)
   pass2: MagicMock = MagicMock(spec=RewriterPass)

@@ -12,7 +12,7 @@ from tests.conftest import TestRewriter
 
 
 class MockDispatchSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockDispatchSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockDispatchSemantics instance."""
@@ -82,7 +82,7 @@ class MockDispatchSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   semantics = MockDispatchSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(semantics, config)
@@ -117,7 +117,7 @@ def test_dispatch_in_list(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_positional_extraction(rewriter: TestRewriter) -> None:
-  """Docstring."""
+  """Verify dispatch positional extraction behavior."""
   code: str = "y = torch.resize(x, None, 'nearest')"
   res: str = rewrite(rewriter, code)
   assert "jax.image.resize_nearest" in res

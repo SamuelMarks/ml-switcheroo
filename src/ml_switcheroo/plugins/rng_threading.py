@@ -17,10 +17,11 @@ Uses `traits.requires_explicit_rng` logic to determine execution, and
 calls `adapter.get_rng_split_syntax()` to determine code generation.
 """
 
-import libcst as cst
 from typing import List
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 # Fix: Import directly from base
 from ml_switcheroo.frameworks.base import get_adapter

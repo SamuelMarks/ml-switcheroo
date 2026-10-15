@@ -1,7 +1,8 @@
 """Auto-generated doc."""
 
-import yaml
 from pathlib import Path
+
+import yaml
 
 
 def run() -> None:

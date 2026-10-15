@@ -1,12 +1,13 @@
 """Tests for ODL signature hydrator script."""
 
-from pathlib import Path
-from typing import Any
-from unittest.mock import patch
-import pytest
-import yaml
+from pathlib import Path  # noqa: E402
+from typing import Any  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
-import scripts.hydrate_odl_signatures as hydrator
+import pytest  # noqa: E402
+import yaml  # noqa: E402
+
+import scripts.hydrate_odl_signatures as hydrator  # noqa: E402
 
 
 def test_simplify_type() -> None:
@@ -215,8 +216,8 @@ def test_main_entrypoint(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Non
       monkeypatch: Pytest monkeypatch fixture.
       tmp_path: Pytest temporary directory fixture.
   """
-  import sys
   import runpy
+  import sys
 
   odl_dir = tmp_path / "odl"
   odl_dir.mkdir()

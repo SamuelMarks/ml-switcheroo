@@ -13,7 +13,7 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 
 @pytest.fixture
 def mock_frameworks() -> Generator[Dict[str, MagicMock], None, None]:
-  """Docstring."""
+  """Execute mock frameworks helper logic."""
 
   def create_safe_mock(name: str, ret_val: float = 5.0) -> MagicMock:
     """Creates safe mock."""
@@ -135,7 +135,7 @@ def test_runner_crash_recovery(mock_frameworks: Dict[str, MagicMock]) -> None:
 
 
 def test_runner_error_branches() -> None:
-  """Docstring."""
+  """Verify runner error branches behavior."""
   runner: EquivalenceRunner = EquivalenceRunner()
   assert runner._deep_compare(1, 2) is False
   assert runner._deep_compare([1, 2], [1, 2]) is True
@@ -144,14 +144,14 @@ def test_runner_error_branches() -> None:
   assert runner._deep_compare(np.array([1.0]), np.array([2.0])) is False
 
   class BadIter:
-    """Docstring."""
+    """Test helper class BadIter."""
 
     def __len__(self) -> int:
-      """Docstring."""
+      """Execute len helper logic."""
       return 1
 
     def __iter__(self) -> Any:
-      """Docstring."""
+      """Execute iter helper logic."""
       raise Exception("bad")
 
   assert runner._deep_compare(BadIter(), [1]) is False
@@ -170,14 +170,14 @@ def test_runner_error_branches() -> None:
 
 
 def test_runner_hypothesis_exception() -> None:
-  """Docstring."""
+  """Verify runner hypothesis exception behavior."""
   runner: EquivalenceRunner = EquivalenceRunner()
   # Mock fuzzer to just return a dummy strategy
   runner.fuzzer.build_strategies = MagicMock(return_value={"x": MagicMock()})
 
   # We want execute_api to return different things for different fws
   def mock_exec(api: str, args: Dict[str, Any]) -> int:
-    """Docstring."""
+    """Execute mock exec helper logic."""
     if "tf" in api:
       return 1
     return 2
@@ -193,7 +193,7 @@ def test_runner_hypothesis_exception() -> None:
 
 
 def test_runner_misc_misses() -> None:
-  """Docstring."""
+  """Verify runner misc misses behavior."""
   runner: EquivalenceRunner = EquivalenceRunner()
 
   # 93 continue
@@ -204,10 +204,10 @@ def test_runner_misc_misses() -> None:
 
   # 228 exception in .numpy()
   class BadNumpy:
-    """Docstring."""
+    """Test helper class BadNumpy."""
 
     def numpy(self) -> Any:
-      """Docstring."""
+      """Execute numpy helper logic."""
       raise Exception("bad numpy")
 
   assert runner._deep_compare(BadNumpy(), 1) is False

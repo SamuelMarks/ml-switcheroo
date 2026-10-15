@@ -10,11 +10,12 @@ emitter to generate visual diagrams.
 """
 
 from typing import Dict, List, Optional
+
 import libcst as cst
 
+from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.scanners import get_full_name
 from ml_switcheroo.utils.node_diff import capture_node_source
-from ml_switcheroo.core.graph import LogicalNode, LogicalEdge, LogicalGraph
 
 
 class GraphExtractor(cst.CSTVisitor):
@@ -301,6 +302,6 @@ class GraphExtractor(cst.CSTVisitor):
   def _finalize_graph(self) -> None:
     """Populate the graph nodes dictionary from the registry."""
     if self.layer_registry:
-      from ml_switcheroo_ir import NodeDict
-
-      self.graph.nodes = NodeDict(self.graph, {n.id: n for n in self.layer_registry.values()})
+      self.graph.nodes.clear()
+      for n in self.layer_registry.values():
+        self.graph.nodes[n.id] = n

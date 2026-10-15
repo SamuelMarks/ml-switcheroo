@@ -13,10 +13,10 @@ from ml_switcheroo.core.tikz.nodes import (
 
 
 def test_tikz_base_node_abstract() -> None:
-  """Docstring."""
+  """Verify tikz base node abstract behavior."""
 
   class Dummy(TikzBaseNode):
-    """Dummy."""
+    """Test helper class Dummy."""
 
     def to_text(self) -> str:
       """To text."""
@@ -30,7 +30,7 @@ def test_tikz_base_node_abstract() -> None:
 
 
 def test_nodenode_with_trivia() -> None:
-  """Docstring."""
+  """Verify nodenode with trivia behavior."""
   triv = TriviaNode("% comment")
   node = TikzNode(node_id="A", x=0.0, y=0.0, leading_trivia=[triv], options=[], content="")  # type: ignore
   res: str = node.to_text()
@@ -38,7 +38,7 @@ def test_nodenode_with_trivia() -> None:
 
 
 def test_tikzpicturenode_no_options() -> None:
-  """Docstring."""
+  """Verify tikzpicturenode no options behavior."""
   pic = TikzGraph(options=[], children=[])
   res: str = pic.to_text()
   assert "\\begin{tikzpicture}" in res
@@ -48,13 +48,13 @@ def test_tikzpicturenode_no_options() -> None:
 
 
 def test_tikz_text_node() -> None:
-  """Docstring."""
+  """Verify tikz text node behavior."""
   node = TikzTextNode(content="hello", bold=True, italic=True)
   assert node.emit() == "\\textbf{\\textit{hello}}"
 
 
 def test_tikz_table_full() -> None:
-  """Docstring."""
+  """Verify tikz table full behavior."""
   t1 = TriviaNode(content=" % lead\n")
   t2 = TriviaNode(content=" % trail\n")
   tbl = TikzTable(rows=[[TikzTextNode(content="A", bold=True), "B"]], leading_trivia=[t1], trailing_trivia=[t2])  # type: ignore
@@ -65,7 +65,7 @@ def test_tikz_table_full() -> None:
 
 
 def test_tikz_node_full() -> None:
-  """Docstring."""
+  """Verify tikz node full behavior."""
   t1 = TriviaNode(content=" % nlead\n")
   t2 = TriviaNode(content=" % ntrail\n")
   n = TikzNode(
@@ -85,7 +85,7 @@ def test_tikz_node_full() -> None:
 
 
 def test_tikz_edge_full() -> None:
-  """Docstring."""
+  """Verify tikz edge full behavior."""
   t1 = TriviaNode(content=" % elead\n")
   t2 = TriviaNode(content=" % etrail\n")
   e = TikzEdge(source_id="A", target_id="B", options=[TikzOption(key="thick")], leading_trivia=[t1], trailing_trivia=[t2])  # type: ignore
@@ -96,7 +96,7 @@ def test_tikz_edge_full() -> None:
 
 
 def test_tikz_graph_full() -> None:
-  """Docstring."""
+  """Verify tikz graph full behavior."""
   t1 = TriviaNode(content=" % glead\n")
   t2 = TriviaNode(content=" % gtrail\n")
   g = TikzGraph(children=[], options=[TikzOption(key="scale", value="2")], leading_trivia=[t1], trailing_trivia=[t2])  # type: ignore

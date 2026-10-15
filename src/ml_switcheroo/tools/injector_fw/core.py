@@ -7,10 +7,8 @@ or updating of Semantic Operations in the JSON definition files located in
 It replaces the legacy LibCST-based injector that modified Python source code.
 """
 
-import typing
-
-
 import json
+import typing
 
 from ml_switcheroo.core.dsl import FrameworkVariant
 from ml_switcheroo.frameworks.loader import get_definitions_path

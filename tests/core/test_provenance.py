@@ -8,7 +8,7 @@ from ml_switcheroo.core.graph import GraphExtractor
 
 
 def extract(code: str) -> GraphExtractor:
-  """Docstring."""
+  """Execute extract helper logic."""
   tree = cst.parse_module(code)
   extractor = GraphExtractor()
   tree.visit(extractor)

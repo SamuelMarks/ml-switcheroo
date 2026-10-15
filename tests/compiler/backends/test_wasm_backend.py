@@ -5,7 +5,7 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 
 
 def test_wasm_backend_compile() -> None:
-  """Docstring."""
+  """Verify wasm backend compile behavior."""
   nodes = {
     "in1": LogicalNode(id="in1", op_type="Input"),
     "in2": LogicalNode(id="in2", op_type="Input"),
@@ -41,7 +41,7 @@ def test_wasm_backend_compile() -> None:
 
 
 def test_wasm_backend_sub_and_custom() -> None:
-  """Docstring."""
+  """Verify wasm backend sub and custom behavior."""
   nodes = {
     "n1": LogicalNode(id="n1", op_type="Sub"),
     "n2": LogicalNode(id="n2", op_type="MyCustomOp"),
@@ -58,7 +58,7 @@ def test_wasm_backend_sub_and_custom() -> None:
 
 
 def test_wasm_backend_output_no_incoming() -> None:
-  """Docstring."""
+  """Verify wasm backend output no incoming behavior."""
   nodes = {"out1": LogicalNode(id="out1", op_type="Output")}
   graph = LogicalGraph(name="", nodes=nodes)
   backend = WasmBackend()
@@ -68,7 +68,7 @@ def test_wasm_backend_output_no_incoming() -> None:
 
 
 def test_wasm_backend_incoming_not_found() -> None:
-  """Docstring."""
+  """Verify wasm backend incoming not found behavior."""
   nodes = {"n1": LogicalNode(id="n1", op_type="Add")}
   edges = [LogicalEdge(source="missing", target="n1")]
   graph = LogicalGraph(nodes=nodes, edges=edges)

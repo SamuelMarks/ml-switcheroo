@@ -12,10 +12,11 @@ This plugin handles:
 4.  **Syntax Cleaning**: Essential comma management when shuffling argument order in the AST.
 """
 
-import libcst as cst
 from typing import List
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 

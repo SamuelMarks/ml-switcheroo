@@ -1,16 +1,19 @@
-"""Docstring."""
+"""Test suite for nvidia sass cst."""
 
 import pytest
 
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
+  NvidiaSassImmediate,
+  NvidiaSassInstruction,
+  NvidiaSassLabel,
+  NvidiaSassMemory,
+  NvidiaSassPredicate,
+  NvidiaSassRegister,
+)
+
 
 def test_nvidia_sass_cst_render_edge() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
-    NvidiaSassLabel,
-    NvidiaSassMemory,
-    NvidiaSassPredicate,
-    NvidiaSassRegister,
-  )
+  """Verify nvidia sass cst render edge behavior."""
   from ml_switcheroo.core.cst.base import Trivia
 
   r = NvidiaSassRegister(name="R0", negated=True, absolute=True)
@@ -42,12 +45,8 @@ def test_nvidia_sass_cst_render_edge() -> None:
 
 
 def test_nvidia_sass_instruction_cst() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
-    NvidiaSassImmediate,
-    NvidiaSassInstruction,
-    NvidiaSassPredicate,
-  )
+  """Verify nvidia sass instruction cst behavior."""
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassPredicate
 
   with pytest.raises(ValueError):
     NvidiaSassInstruction(opcode="invalid op")
@@ -64,12 +63,8 @@ def test_nvidia_sass_instruction_cst() -> None:
 
 
 def test_nvidia_sass_instruction_trivia() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
-    NvidiaSassImmediate,
-    NvidiaSassInstruction,
-    NvidiaSassModule,
-  )
+  """Verify nvidia sass instruction trivia behavior."""
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassModule
   from ml_switcheroo.core.cst.base import Trivia
 
   op = NvidiaSassImmediate(value=0)  # type: ignore

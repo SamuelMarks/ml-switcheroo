@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for nvidia sass backend backend."""
 
 from typing import List
 from unittest.mock import patch
@@ -10,21 +10,21 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_nvidia_sass_backend_init() -> None:
-  """Docstring."""
+  """Verify nvidia sass backend init behavior."""
   backend: NvidiaSassBackend = NvidiaSassBackend()
   assert getattr(backend, "synthesizer") is not None
   assert getattr(backend, "emitter") is not None
 
 
 def test_nvidia_sass_backend_init_with_semantics() -> None:
-  """Docstring."""
+  """Verify nvidia sass backend init with semantics behavior."""
   sem: SemanticsManager = SemanticsManager()
   backend: NvidiaSassBackend = NvidiaSassBackend(semantics=sem)
   assert backend.synthesizer.semantics == sem
 
 
 def test_nvidia_sass_backend_compile() -> None:
-  """Docstring."""
+  """Verify nvidia sass backend compile behavior."""
   backend: NvidiaSassBackend = NvidiaSassBackend()
   graph: LogicalGraph = LogicalGraph()
 

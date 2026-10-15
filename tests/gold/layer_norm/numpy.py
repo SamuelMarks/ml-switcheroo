@@ -4,7 +4,7 @@ import numpy as np
 
 
 class LayerNormModel:
-  """Docstring."""
+  """Test helper class LayerNormModel."""
 
   def __init__(self, normalized_shape: int, eps: float = 1e-05):
     """Initializes the LayerNormModel instance."""

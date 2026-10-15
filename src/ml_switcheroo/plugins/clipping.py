@@ -9,7 +9,8 @@ Checks `traits.requires_functional_state` logic.
 """
 
 import libcst as cst
-from ml_switcheroo.core.hooks import register_hook, HookContext
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
 @register_hook("grad_clipper")

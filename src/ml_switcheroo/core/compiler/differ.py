@@ -10,47 +10,12 @@ Identifying replacements (new fused nodes).
 Mapping new nodes to anchors in the original graph for placement.
 """
 
-from typing import List, Any
-from dataclasses import dataclass
+from typing import Any, List
+
 from ml_switcheroo.core.compiler.ir import LogicalGraph
+from ml_switcheroo.core.rewriter.patcher import DeleteAction, PatchAction, ReplaceAction
 
-
-@dataclass
-class PatchAction:
-  """Base patch operation representing a generic transformation step.
-
-  Attributes:
-      node_id (str): The identifier of the node targeted by this action.
-  """
-
-  node_id: str
-
-
-@dataclass
-class DeleteAction(PatchAction):
-  """Instruction to remove a node from the logical graph."""
-
-  pass
-
-
-@dataclass
-class ReplaceAction(PatchAction):
-  """Instruction to replace an anchor node with new logic.
-
-  For the Differ context, 'new_node' is the LogicalNode from the target graph.
-
-  Attributes:
-      new_node (Any): The target LogicalNode that replaces the original anchor node.
-      input_vars (List[str]): A list of input variables/edge source IDs for this replacement.
-      output_var (str): The output variable/target ID name of the replaced block.
-      is_init (bool): A boolean flag indicating whether this is an initialization
-          (stateful setup) replacement. Defaults to False.
-  """
-
-  new_node: Any
-  input_vars: List[str]
-  output_var: str
-  is_init: bool = False
+__all__ = ["DeleteAction", "GraphDiffer", "PatchAction", "ReplaceAction"]
 
 
 class GraphDiffer:
@@ -183,6 +148,6 @@ def _is_likely_stateful(node: Any) -> bool:
       False otherwise.
   """
   op_type = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")
-  if not op_type:
+  if not op_type or op_type == "None":
     return False
   return op_type[0].isupper() or "Fused" in op_type

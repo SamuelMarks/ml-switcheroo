@@ -7,8 +7,8 @@ import libcst as cst
 import pytest
 
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.plugins.device_checks as dc
+from ml_switcheroo.config import RuntimeConfig
 from tests.conftest import TestRewriter as PivotRewriter
 
 
@@ -19,7 +19,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Docstring."""
+  """Execute rewriter helper logic."""
   hooks._HOOKS["cuda_is_available"] = dc.transform_cuda_check
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -60,7 +60,7 @@ def test_device_checks_adapter_error(mock_get_adapter: MagicMock, rewriter: Pivo
   """Verifies adapter errors are caught."""
 
   def raiser(fw: str) -> typing.Any:
-    """Docstring."""
+    """Execute raiser helper logic."""
     raise Exception("Adapter crashed")
 
   mock_get_adapter.side_effect = raiser

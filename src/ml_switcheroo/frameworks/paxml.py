@@ -8,36 +8,33 @@ It inherits Level 0 (Core JAX) and Level 1 (Optax/Orbax) capabilities from
 such as the ``setup()`` lifecycle method for layer definition.
 """
 
-from typing import Any
-
-import typing
-
-
 import logging
 import textwrap
-from typing import Union, List, Tuple, Dict, Optional
+import typing
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 try:
   import praxis
-  import praxis.layers
   import praxis.base_layer
+  import praxis.layers
   import praxis.layers.activations
   import praxis.layers.normalizations
 except Exception:
   praxis = None
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+
 from ml_switcheroo.frameworks.base import (
-  register_framework,
-  StructuralTraits,
-  PluginTraits,
-  InitMode,
-  StandardMap,
-  ImportConfig,
   GhostRef,
+  ImportConfig,
+  InitMode,
+  PluginTraits,
+  StandardMap,
+  StructuralTraits,
   load_snapshot_for_adapter,
+  register_framework,
 )
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
-from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.loader import load_definitions
 
 

@@ -46,7 +46,7 @@ def test_tikz_properties() -> None:
 
 
 def test_tikz_missing_coverage() -> None:
-  """Docstring."""
+  """Verify tikz missing coverage behavior."""
   adapter = TikzAdapter()
 
   # Traits

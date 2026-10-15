@@ -11,9 +11,10 @@ if typing.TYPE_CHECKING:
   import sphinx.application
 
 import os
-import sphinx
 import shutil
 from pathlib import Path
+
+import sphinx
 
 
 def add_static_path(app: "sphinx.application.Sphinx") -> None:
@@ -156,7 +157,7 @@ def copy_wheel_and_reqs(app: "sphinx.application.Sphinx", exception: typing.Opti
           if not target_path.exists():
             src_static = root_dir / "docs" / "_static" / filename
             if src_static.exists():
-              shutil.copy2(src_static, target_path)  # pragma: no cover
+              shutil.copy2(src_static, target_path)
             else:
               print(f"Downloading {url_or_spec} for WASM demo...")
               try:

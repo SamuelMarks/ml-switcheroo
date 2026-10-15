@@ -4,18 +4,11 @@ This module provides fallback logic for generating inputs when explicit
 type hints are missing, generally based on argument naming conventions.
 """
 
+import random
+import typing
 from typing import Any
 
-import typing
-
-
-import random
-
-from ml_switcheroo.testing.fuzzer.generators import (
-  generate_array,
-  generate_scalar_float,
-  generate_scalar_int,
-)
+from ml_switcheroo.testing.fuzzer.generators import generate_array, generate_scalar_float, generate_scalar_int
 
 
 def guess_dtype_by_name(name: str) -> str:

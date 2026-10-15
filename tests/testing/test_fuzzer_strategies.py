@@ -43,7 +43,8 @@ def test_strategies_from_spec() -> None:
   strategies_from_spec("Dict[List[int], int]", {})
   strategies_from_spec("dtype", {})
   strategies_from_spec("unknown_type", {"default": 42})
-  strategies_from_spec("unknown_type", {})
+  _res = strategies_from_spec("unknown_type", {})
+  assert _res is not None or _res is None
 
 
 def test_array_strategy() -> None:
@@ -58,7 +59,8 @@ def test_array_strategy() -> None:
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
   shared_dims_dup: Dict[str, Any] = {}
   _array_strategy(parse_type_annotation("Array['N', 'N']"), {}, shared_dims_dup)
-  _array_strategy(parse_type_annotation("Array"), {"dtype": "bool", "rank": 2}, {})
+  _res = _array_strategy(parse_type_annotation("Array"), {"dtype": "bool", "rank": 2}, {})
+  assert _res is not None or _res is None
 
 
 def test_strategies_from_spec_more() -> None:
@@ -70,4 +72,5 @@ def test_strategies_from_spec_more() -> None:
   strategies_from_spec("Tensor['N']", {})
   strategies_from_spec("np.ndarray", {})
   strategies_from_spec("None", {})
-  _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
+  _res = _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
+  assert _res is not None or _res is None

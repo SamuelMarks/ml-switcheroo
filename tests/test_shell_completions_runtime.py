@@ -1,8 +1,8 @@
 """Runtime execution and syntax verification tests for shell completions."""
 
-from pathlib import Path
 import shutil
 import subprocess
+from pathlib import Path
 
 
 def test_bash_completion_runtime_execution() -> None:

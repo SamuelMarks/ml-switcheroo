@@ -1,12 +1,14 @@
 """Test suite for the Plugin Loss Wrapper module."""
 
 from unittest.mock import MagicMock
+
 import libcst as cst
+
 from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
 
 def get_dummy_ctx(target_fw: str = "torch", current_op_id: str = "CrossEntropyLoss") -> MagicMock:
-  """Docstring."""
+  """Execute get dummy ctx helper logic."""
   ctx = MagicMock()
   ctx.target_fw = target_fw
   ctx.current_op_id = current_op_id
@@ -15,7 +17,7 @@ def get_dummy_ctx(target_fw: str = "torch", current_op_id: str = "CrossEntropyLo
 
 
 def test_plugin_loss_wrapper_mean() -> None:
-  """Docstring."""
+  """Verify plugin loss wrapper mean behavior."""
   ctx = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.mean"
   # no reduction arg -> mean by default
@@ -25,7 +27,7 @@ def test_plugin_loss_wrapper_mean() -> None:
 
 
 def test_plugin_loss_wrapper_sum() -> None:
-  """Docstring."""
+  """Verify plugin loss wrapper sum behavior."""
   ctx = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.sum"
   node = cst.Call(
@@ -37,7 +39,7 @@ def test_plugin_loss_wrapper_sum() -> None:
 
 
 def test_plugin_loss_wrapper_none() -> None:
-  """Docstring."""
+  """Verify plugin loss wrapper none behavior."""
   ctx = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else None
   node = cst.Call(func=cst.Name("dummy"), args=[cst.Arg(value=cst.SimpleString('"none"'), keyword=cst.Name("reduction"))])
@@ -46,7 +48,7 @@ def test_plugin_loss_wrapper_none() -> None:
 
 
 def test_plugin_loss_wrapper_other_keyword() -> None:
-  """Docstring."""
+  """Verify plugin loss wrapper other keyword behavior."""
   ctx = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.mean"
   node = cst.Call(
@@ -61,7 +63,7 @@ def test_plugin_loss_wrapper_other_keyword() -> None:
 
 
 def test_plugin_loss_wrapper_reduction_non_string() -> None:
-  """Docstring."""
+  """Verify plugin loss wrapper reduction non string behavior."""
   ctx = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.mean"
   node = cst.Call(func=cst.Name("dummy"), args=[cst.Arg(value=cst.Integer("1"), keyword=cst.Name("reduction"))])
@@ -70,7 +72,7 @@ def test_plugin_loss_wrapper_reduction_non_string() -> None:
 
 
 def test_plugin_loss_wrapper_reduction_name() -> None:
-  """Docstring."""
+  """Verify plugin loss wrapper reduction name behavior."""
   ctx = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.mean"
   node = cst.Call(func=cst.Name("dummy"), args=[cst.Arg(value=cst.Name("my_mode"), keyword=cst.Name("reduction"))])
@@ -79,7 +81,7 @@ def test_plugin_loss_wrapper_reduction_name() -> None:
 
 
 def test_plugin_loss_wrapper_none_ctx() -> None:
-  """Docstring."""
+  """Verify plugin loss wrapper none ctx behavior."""
   ctx = get_dummy_ctx(current_op_id=None)
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.mean"
   node = cst.Call(func=cst.Name("dummy"), args=[])
@@ -88,7 +90,7 @@ def test_plugin_loss_wrapper_none_ctx() -> None:
 
 
 def test_plugin_loss_wrapper_no_api() -> None:
-  """Docstring."""
+  """Verify plugin loss wrapper no api behavior."""
   ctx = get_dummy_ctx()
   ctx.lookup_api.return_value = None
   node = cst.Call(func=cst.Name("dummy"), args=[])
@@ -98,7 +100,7 @@ def test_plugin_loss_wrapper_no_api() -> None:
 
 
 def test_plugin_loss_wrapper_no_wrapper_api() -> None:
-  """Docstring."""
+  """Verify plugin loss wrapper no wrapper api behavior."""
   ctx = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else None
   node = cst.Call(func=cst.Name("dummy"), args=[])

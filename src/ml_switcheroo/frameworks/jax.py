@@ -9,38 +9,38 @@ to a high-level neural network library like Flax or Haiku. It maps:
 It specifically enables `requires_explicit_rng` in plugin traits.
 """
 
-from typing import Any
-
-import typing
-
-
 import logging
 import textwrap
-from typing import List, Tuple, Dict, Optional
+import typing
+from types import ModuleType
+from typing import Any, Dict, List, Optional, Tuple
+
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 from ml_switcheroo.frameworks.base import (
-  register_framework,
-  StructuralTraits,
-  PluginTraits,
-  StandardMap,
+  GhostRef,
   ImportConfig,
   InitMode,
-  GhostRef,
+  PluginTraits,
+  StandardMap,
+  StructuralTraits,
   load_snapshot_for_adapter,
+  register_framework,
 )
-from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.frameworks.common.optax_shim import OptaxScanner
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
+from ml_switcheroo.frameworks.common.optax_shim import OptaxScanner
 from ml_switcheroo.frameworks.loader import load_definitions
 
+jax: Optional[ModuleType] = None
+jnp: Optional[ModuleType] = None
 try:
   import jax as _jax_module
   import jax.numpy as _jnp_module
+
+  jax = _jax_module
+  jnp = _jnp_module
 except Exception:
-  _jax_module = None  # type: ignore
-  _jnp_module = None  # type: ignore
-jax: Optional[Any] = _jax_module
-jnp: Optional[Any] = _jnp_module
+  pass
 
 
 @register_framework("jax")

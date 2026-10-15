@@ -1,8 +1,8 @@
 """Tests for compiler registry mapping functions."""
 
 from ml_switcheroo.core.compiler.registry import (
-  PythonBackend,
   NvidiaSassBackend,
+  PythonBackend,
   get_backend_class,
   is_isa_source,
   is_isa_target,

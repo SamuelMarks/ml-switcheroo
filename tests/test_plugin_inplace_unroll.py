@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin inplace unroll."""
 
 from typing import Optional
 from unittest.mock import MagicMock
@@ -10,7 +10,7 @@ from ml_switcheroo.plugins.inplace_unroll import _get_method_name, _get_receiver
 
 
 def test_get_receiver_name() -> None:
-  """Docstring."""
+  """Verify get receiver name behavior."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("add_")))
   receiver: Optional[cst.BaseExpression] = _get_receiver_name(node)
   assert getattr(receiver, "value", None) == "x"
@@ -20,7 +20,7 @@ def test_get_receiver_name() -> None:
 
 
 def test_get_method_name() -> None:
-  """Docstring."""
+  """Verify get method name behavior."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("add_")))
   assert _get_method_name(node) == "add_"
 
@@ -29,7 +29,7 @@ def test_get_method_name() -> None:
 
 
 def test_unroll_inplace_ops_not_method() -> None:
-  """Docstring."""
+  """Verify unroll inplace ops not method behavior."""
   node: cst.Call = cst.Call(func=cst.Name("func"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   result: cst.CSTNode = unroll_inplace_ops(node, ctx)
@@ -37,7 +37,7 @@ def test_unroll_inplace_ops_not_method() -> None:
 
 
 def test_unroll_inplace_ops_not_inplace() -> None:
-  """Docstring."""
+  """Verify unroll inplace ops not inplace behavior."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("add")))
   ctx: MagicMock = MagicMock(spec=HookContext)
   result: cst.CSTNode = unroll_inplace_ops(node, ctx)
@@ -45,7 +45,7 @@ def test_unroll_inplace_ops_not_inplace() -> None:
 
 
 def test_unroll_inplace_ops_dunder() -> None:
-  """Docstring."""
+  """Verify unroll inplace ops dunder behavior."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("__add__")))
   ctx: MagicMock = MagicMock(spec=HookContext)
   result: cst.CSTNode = unroll_inplace_ops(node, ctx)
@@ -57,7 +57,7 @@ def test_unroll_inplace_ops_dunder() -> None:
 
 
 def test_unroll_inplace_ops_infix() -> None:
-  """Docstring."""
+  """Verify unroll inplace ops infix behavior."""
   node: cst.Call = cst.Call(
     func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("add_")), args=[cst.Arg(value=cst.Name("y"))]
   )
@@ -70,7 +70,7 @@ def test_unroll_inplace_ops_infix() -> None:
 
 
 def test_unroll_inplace_ops_functional_fallback() -> None:
-  """Docstring."""
+  """Verify unroll inplace ops functional fallback behavior."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("relu_")), args=[])
   ctx: MagicMock = MagicMock(spec=HookContext)
   result: cst.CSTNode = unroll_inplace_ops(node, ctx)

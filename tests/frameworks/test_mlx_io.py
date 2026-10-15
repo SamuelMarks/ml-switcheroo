@@ -13,7 +13,7 @@ def test_mlx_io_dummy() -> None:
 
 
 def test_mlx_io_mixin_serialization() -> None:
-  """Docstring."""
+  """Verify mlx io mixin serialization behavior."""
   mixin = MlxIOMixin()
 
   assert mixin.get_serialization_imports() == ["import mlx.core as mx"]

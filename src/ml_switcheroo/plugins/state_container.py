@@ -18,9 +18,11 @@ Decoupling:
     aborts and preserves the original code.
 """
 
-import libcst as cst
 from typing import Optional
-from ml_switcheroo.core.hooks import register_hook, HookContext
+
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
 def _create_node(code: str) -> cst.BaseExpression:

@@ -45,6 +45,8 @@ filterwarnings = [
     "ignore::FutureWarning:google.auth.*",
     "ignore::FutureWarning:google.oauth2.*",
     "ignore::DeprecationWarning:tensorflow.lite.python.util",
+    "ignore::DeprecationWarning:jax._src.deprecations",
+
     "ignore::DeprecationWarning:matplotlib.*",
     "ignore:.*ml_switcheroo\\.cli\\.__main__.*:RuntimeWarning",
     "ignore:.*found in sys\\.modules after import of package 'scripts'.*:RuntimeWarning",
@@ -103,6 +105,19 @@ ignore_missing_imports = true
 disable_error_code = ["import-untyped", "import-not-found"]
 plugins = ["pydantic.mypy"]
 
+[[tool.mypy.overrides]]
+module = ["tests.*", "conftest"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_calls = false
+disallow_untyped_decorators = false
+disallow_any_generics = false
+disallow_subclassing_any = false
+warn_return_any = false
+warn_unused_ignores = false
+check_untyped_defs = false
+disable_error_code = ["abstract", "attr-defined", "arg-type", "assignment", "call-arg", "call-overload", "comparison-overlap", "dict-item", "empty-body", "func-returns-value", "index", "list-item", "method-assign", "misc", "name-defined", "no-redef", "operator", "override", "redundant-cast", "return-value", "safe-super", "type-arg", "union-attr", "valid-type", "var-annotated"]
+
 
 [tool.interrogate]
 ignore-init-method = true
@@ -119,10 +134,8 @@ color = true
 omit-covered-files = false
 generate-badge = "."
 badge-format = "svg"
-init_forbid_extra = false
-init_typed = false
-warn_required_dynamic_aliases = false
+
 [tool.pydantic-mypy]
-init_forbid_extra = false
-init_typed = false
-warn_required_dynamic_aliases = false
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true

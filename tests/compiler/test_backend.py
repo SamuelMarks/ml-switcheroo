@@ -7,7 +7,7 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 
 class NoOpBackend(CompilerBackend):
-  """Docstring."""
+  """Test helper class NoOpBackend."""
 
   def compile(self, graph: LogicalGraph) -> str:
     """Compiles ."""

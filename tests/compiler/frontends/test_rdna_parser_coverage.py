@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for rdna parser coverage."""
 
 import typing
 
@@ -22,13 +22,13 @@ from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 
 
 def test_rdna_parser_empty() -> None:
-  """Docstring."""
+  """Verify rdna parser empty behavior."""
   mod: RdnaModule = RdnaParser("  \n").parse()
   assert len(mod.statements) == 0
 
 
 def test_rdna_parser_comment() -> None:
-  """Docstring."""
+  """Verify rdna parser comment behavior."""
   mod: RdnaModule = RdnaParser("; hello world").parse()
   assert len(mod.statements) == 1
   assert isinstance(mod.statements[0], RdnaComment)
@@ -36,7 +36,7 @@ def test_rdna_parser_comment() -> None:
 
 
 def test_rdna_parser_directive() -> None:
-  """Docstring."""
+  """Verify rdna parser directive behavior."""
   mod: RdnaModule = RdnaParser(".text").parse()
   assert isinstance(mod.statements[0], RdnaDirective)
   assert mod.statements[0].name == "text"
@@ -44,7 +44,7 @@ def test_rdna_parser_directive() -> None:
 
 
 def test_rdna_parser_directive_params() -> None:
-  """Docstring."""
+  """Verify rdna parser directive params behavior."""
   mod: RdnaModule = RdnaParser('.global main, 5, 0x1, -5, -0x1, +5, +0x1, off, "str"').parse()
   assert isinstance(mod.statements[0], RdnaDirective)
   assert mod.statements[0].name == "global"
@@ -52,14 +52,14 @@ def test_rdna_parser_directive_params() -> None:
 
 
 def test_rdna_parser_label() -> None:
-  """Docstring."""
+  """Verify rdna parser label behavior."""
   mod: RdnaModule = RdnaParser("main:").parse()
   assert isinstance(mod.statements[0], RdnaLabel)
   assert mod.statements[0].name == "main"
 
 
 def test_rdna_parser_instruction_no_operands() -> None:
-  """Docstring."""
+  """Verify rdna parser instruction no operands behavior."""
   mod: RdnaModule = RdnaParser("s_waitcnt").parse()
   assert isinstance(mod.statements[0], RdnaInstruction)
   assert mod.statements[0].opcode == "s_waitcnt"
@@ -67,7 +67,7 @@ def test_rdna_parser_instruction_no_operands() -> None:
 
 
 def test_rdna_parser_instruction_operands() -> None:
-  """Docstring."""
+  """Verify rdna parser instruction operands behavior."""
   mod: RdnaModule = RdnaParser("v_add_f32 v0, v1, v2").parse()
   assert isinstance(mod.statements[0], RdnaInstruction)
   assert mod.statements[0].opcode == "v_add_f32"
@@ -75,7 +75,7 @@ def test_rdna_parser_instruction_operands() -> None:
 
 
 def test_rdna_parser_memory() -> None:
-  """Docstring."""
+  """Verify rdna parser memory behavior."""
   mod: RdnaModule = RdnaParser("s_load_dword s0, [s[0:1]]").parse()
   assert isinstance(mod.statements[0], RdnaInstruction)
   assert isinstance(mod.statements[0].operands[1], RdnaMemory)
@@ -89,7 +89,7 @@ def test_rdna_parser_memory() -> None:
 
 
 def test_rdna_parser_registers() -> None:
-  """Docstring."""
+  """Verify rdna parser registers behavior."""
   mod: RdnaModule = RdnaParser("v_add_f32 v[0:1], s[0:1], v42").parse()
   assert isinstance(mod.statements[0], RdnaInstruction)
   assert isinstance(mod.statements[0].operands[0], RdnaVGPR)
@@ -112,7 +112,7 @@ def test_rdna_parser_registers() -> None:
 
 
 def test_rdna_parser_immediate() -> None:
-  """Docstring."""
+  """Verify rdna parser immediate behavior."""
   mod: RdnaModule = RdnaParser("v_mov_b32 v0, 5").parse()
   assert isinstance(mod.statements[0], RdnaInstruction)
   imm = typing.cast(RdnaImmediate, mod.statements[0].operands[1])
@@ -154,7 +154,7 @@ def test_rdna_parser_immediate() -> None:
 
 
 def test_rdna_parser_modifier() -> None:
-  """Docstring."""
+  """Verify rdna parser modifier behavior."""
   mod: RdnaModule = RdnaParser("s_waitcnt vmcnt(0)").parse()
   assert isinstance(mod.statements[0], RdnaInstruction)
   assert isinstance(mod.statements[0].operands[0], RdnaModifier)
@@ -167,7 +167,7 @@ def test_rdna_parser_modifier() -> None:
 
 
 def test_rdna_parser_label_ref() -> None:
-  """Docstring."""
+  """Verify rdna parser label ref behavior."""
   mod: RdnaModule = RdnaParser("s_branch main").parse()
   assert isinstance(mod.statements[0], RdnaInstruction)
   assert isinstance(mod.statements[0].operands[0], RdnaLabelRef)
@@ -175,13 +175,13 @@ def test_rdna_parser_label_ref() -> None:
 
 
 def test_rdna_parser_error() -> None:
-  """Docstring."""
+  """Verify rdna parser error behavior."""
   with pytest.raises(ValueError):
     RdnaParser("~").parse()
 
 
 def test_rdna_nodes_cst_print() -> None:
-  """Docstring."""
+  """Verify rdna nodes cst print behavior."""
   # Hit str/repr lines in cst.py and nodes.py
   mod: RdnaModule = RdnaParser(
     "main:\n  v_add_f32 v[0:1], s[0:1], v42 ; comment\n.directive arg\n  s_branch label"
@@ -218,21 +218,21 @@ def test_rdna_nodes_cst_print() -> None:
 
 
 def test_cst_extra_coverage() -> None:
-  """Docstring."""
+  """Verify cst extra coverage behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.parser import _get_trivia
 
   class DummyChild:
-    """Docstring."""
+    """Test helper class DummyChild."""
 
     def __init__(self) -> None:
-      """Docstring."""
+      """Initialize test helper instance."""
       self.leading_trivia: list[typing.Any] = ["trivia"]
 
   class DummyNode:
-    """Docstring."""
+    """Test helper class DummyNode."""
 
     def __init__(self) -> None:
-      """Docstring."""
+      """Initialize test helper instance."""
       self.children: list[typing.Any] = [DummyChild()]
       self.leading_trivia: list[typing.Any] = ["mytrivia"]
 
@@ -240,18 +240,10 @@ def test_cst_extra_coverage() -> None:
 
 
 def test_rdna_extra_cst_coverage() -> None:
-  """Docstring."""
+  """Verify rdna extra cst coverage behavior."""
   import pytest
 
-  from ml_switcheroo.core.compiler.frontends.rdna.cst import (
-    RdnaImmediate,
-    RdnaInstruction,
-    RdnaMemory,
-    RdnaModifier,
-    RdnaVGPR,
-    c_SGPR,
-    c_VGPR,
-  )
+  from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaMemory, RdnaModifier, c_SGPR, c_VGPR
   from ml_switcheroo.core.cst.base import Trivia
 
   assert isinstance(c_SGPR(0), RdnaNode)
@@ -275,7 +267,7 @@ def test_rdna_extra_cst_coverage() -> None:
 
 
 def test_rdna_extra_analysis_coverage() -> None:
-  """Docstring."""
+  """Verify rdna extra analysis coverage behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 
@@ -293,13 +285,13 @@ def test_rdna_extra_analysis_coverage() -> None:
 
 
 def test_rdna_parser_error_parse() -> None:
-  """Docstring."""
+  """Verify rdna parser error parse behavior."""
   with pytest.raises(ValueError, match="Unexpected token"):
     RdnaParser("MOV ,").parse()
 
 
 def test_rdna_analysis_empty() -> None:
-  """Docstring."""
+  """Verify rdna analysis empty behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 

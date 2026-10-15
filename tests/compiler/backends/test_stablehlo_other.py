@@ -71,7 +71,7 @@ def test_other_operations(backend: StableHloBackend, logical_op: str, expected_m
 
 
 def test_stablehlo_semantics_not_found() -> None:
-  """Docstring."""
+  """Verify stablehlo semantics not found behavior."""
   # Hit 75->83
 
   class SemanticsNoDef:
@@ -89,7 +89,7 @@ def test_stablehlo_semantics_not_found() -> None:
 
 
 def test_stablehlo_semantics_no_api() -> None:
-  """Docstring."""
+  """Verify stablehlo semantics no api behavior."""
   # Hit 80->83
 
   class SemanticsNoApi:
@@ -107,7 +107,7 @@ def test_stablehlo_semantics_no_api() -> None:
 
 
 def test_stablehlo_semantics_none() -> None:
-  """Docstring."""
+  """Verify stablehlo semantics none behavior."""
   # Hit 75->83 (self.semantics is None)
   backend = StableHloBackend()
   backend.semantics = None

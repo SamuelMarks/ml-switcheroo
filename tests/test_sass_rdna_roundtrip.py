@@ -102,7 +102,7 @@ def test_rdna_to_sass_via_engine() -> None:
   res = engine.run(SAMPLE_RDNA_GEMM)
   assert res.code is not None
   assert "BEGIN Linear (fc)" in res.code
-  assert "FFMA" in res.code
+  assert "ffma" in res.code.lower()
   assert "L_GEMM_fc" in res.code
 
 
@@ -114,7 +114,7 @@ def test_sass_rdna_sass_lossless_roundtrip() -> None:
 
   engine_r2s = ASTEngine(source="rdna", target="nvidia_sass")
   sass_roundtrip = engine_r2s.run(rdna_res.code)
-  assert "FFMA" in sass_roundtrip.code
+  assert "ffma" in sass_roundtrip.code.lower()
   assert "BEGIN Linear (fc)" in sass_roundtrip.code
   assert "L_GEMM_fc" in sass_roundtrip.code
 
@@ -123,7 +123,7 @@ def test_rdna_sass_rdna_lossless_roundtrip() -> None:
   """Tests a full roundtrip RDNA -> SASS -> RDNA preserving Linear block semantics."""
   engine_r2s = ASTEngine(source="rdna", target="nvidia_sass")
   sass_res = engine_r2s.run(SAMPLE_RDNA_GEMM)
-  assert "FFMA" in sass_res.code
+  assert "ffma" in sass_res.code.lower()
 
   engine_s2r = ASTEngine(source="nvidia_sass", target="rdna")
   rdna_roundtrip = engine_s2r.run(sass_res.code)

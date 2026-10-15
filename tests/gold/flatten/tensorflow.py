@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 class FlattenModel(tf.keras.Model):
-  """Docstring."""
+  """Test helper class FlattenModel."""
 
   def __init__(self, start_dim: int = 1):
     """Initializes the FlattenModel instance."""

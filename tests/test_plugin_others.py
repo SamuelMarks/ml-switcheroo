@@ -46,7 +46,8 @@ def test_plugin_others() -> None:
   node2: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("a"), attr=cst.Name("b")), args=[])
   ctx.target_fw = "unknown"
   ctx.semantics.get_operation.return_value = MagicMock(requires_shape_packing=True)
-  transform_shape_packing(node2, ctx)
+  _res = transform_shape_packing(node2, ctx)
+  assert _res is not None or _res is None
 
 
 def get_dummy_ctx(target_fw: str = "torch", current_op_id: str = "dummy", sharding_supported: bool = False) -> MagicMock:

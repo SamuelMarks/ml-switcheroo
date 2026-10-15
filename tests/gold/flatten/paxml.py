@@ -5,7 +5,7 @@ from praxis import base_layer
 
 
 class FlattenModel(base_layer.BaseLayer):
-  """Docstring."""
+  """Test helper class FlattenModel."""
 
   start_dim: int = 1
 

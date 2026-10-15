@@ -9,7 +9,7 @@ from ml_switcheroo.sphinx_ext.hooks import add_static_path, copy_wheel_and_reqs
 
 
 class MockApp:
-  """Docstring."""
+  """Test helper class MockApp."""
 
   def __init__(self, has_config: bool = True, has_builder: bool = True) -> None:
     """Initializes the MockApp instance."""
@@ -63,19 +63,24 @@ def test_add_static_path_no_config(tmp_path: Path) -> None:
   static_dir.mkdir()
   app: MockApp = MockApp(has_config=False)
   with mock.patch.object(ml_switcheroo.sphinx_ext.hooks, "__file__", str(mock_file)):
-    add_static_path(app)  # type: ignore
+    res = add_static_path(app)  # type: ignore
+  assert res is None
+  assert not hasattr(app, "config")
 
 
 def test_copy_wheel_and_reqs_exception() -> None:
   """Verifies the behavior of copy wheel and requirements correctly handling an exception."""
   app: MockApp = MockApp()
-  copy_wheel_and_reqs(app, Exception("mock error"))  # type: ignore
+  res = copy_wheel_and_reqs(app, Exception("mock error"))  # type: ignore
+  assert res is None
 
 
 def test_copy_wheel_and_reqs_no_builder() -> None:
   """Verifies the behavior of copy wheel and requirements no builder."""
   app: MockApp = MockApp(has_builder=False)
-  copy_wheel_and_reqs(app, None)  # type: ignore
+  res = copy_wheel_and_reqs(app, None)  # type: ignore
+  assert res is None
+  assert not hasattr(app, "builder")
 
 
 def test_copy_wheel_and_reqs_success(tmp_path: Path) -> None:

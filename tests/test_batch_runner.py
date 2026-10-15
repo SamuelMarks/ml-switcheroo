@@ -63,7 +63,7 @@ def test_skip_generated_tests(tmp_path: Any) -> None:
 
 
 def test_batch_runner_extract_sig() -> None:
-  """Docstring."""
+  """Verify batch runner extract sig behavior."""
   runner: BatchValidator = BatchValidator(MagicMock())
   runner.semantics.get_all_operations.return_value = ["foo"]  # type: ignore
 
@@ -92,7 +92,7 @@ def test_batch_runner_extract_sig() -> None:
 
 
 def test_batch_runner_scan_manual_tests() -> None:
-  """Docstring."""
+  """Verify batch runner scan manual tests behavior."""
   runner: BatchValidator = BatchValidator(MagicMock())
   runner.semantics.get_all_operations.return_value = ["foo"]  # type: ignore
 
@@ -116,7 +116,7 @@ def test_batch_runner_scan_manual_tests() -> None:
 
 
 def test_batch_runner_run() -> None:
-  """Docstring."""
+  """Verify batch runner run behavior."""
   mgr = MagicMock()
   mgr.get_known_apis.return_value = {"foo": {"variants": {}}}
   runner: BatchValidator = BatchValidator(mgr)

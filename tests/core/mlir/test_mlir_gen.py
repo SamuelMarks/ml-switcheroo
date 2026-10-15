@@ -13,7 +13,7 @@ from ml_switcheroo.core.mlir.naming import NamingContext
 
 
 class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
-  """Docstring."""
+  """Test helper class DummyGenerator."""
 
   def __init__(self) -> None:
     """Initializes the DummyGenerator instance."""
@@ -62,7 +62,7 @@ def test_expression_generator_mixin_unimplemented() -> None:
   """Verifies the behavior of expression generator mixin unimplemented."""
 
   class IncompleteGen(ExpressionGeneratorMixin):
-    """Docstring."""
+    """Test helper class IncompleteGen."""
 
     pass
 
@@ -75,7 +75,7 @@ def test_statement_generator_mixin_unimplemented() -> None:
   """Verifies the behavior of statement generator mixin unimplemented."""
 
   class IncompleteGen(StatementGeneratorMixin):
-    """Docstring."""
+    """Test helper class IncompleteGen."""
 
     pass
 
@@ -250,7 +250,7 @@ def test_convert_setattr_empty() -> None:
 
 
 class DummyGeneratorExtra(ExpressionGeneratorMixin, StatementGeneratorMixin):
-  """Docstring."""
+  """Test helper class DummyGeneratorExtra."""
 
   def __init__(self) -> None:
     """Initializes the DummyGenerator instance."""

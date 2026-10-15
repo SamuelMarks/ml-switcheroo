@@ -9,7 +9,7 @@ from ml_switcheroo.core.rewriter.passes.api_helpers import ApiHelpersMixin
 
 
 class MockTracer:
-  """Docstring."""
+  """Test helper class MockTracer."""
 
   def log_match(self, *args: typing.Any, **kwargs: typing.Any) -> None:
     """Mock implementation of log match."""
@@ -17,7 +17,7 @@ class MockTracer:
 
 
 class MockSemantics:
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self, defs: dict[str, tuple[str, dict[str, typing.Any]]], configs: dict[str, typing.Any]) -> None:
     """Initializes the MockSemantics instance."""
@@ -42,7 +42,7 @@ class MockSemantics:
 
 
 class MockHookContext:
-  """Docstring."""
+  """Test helper class MockHookContext."""
 
   def __init__(self) -> None:
     """Initializes the MockHookContext instance."""
@@ -54,7 +54,7 @@ class MockHookContext:
 
 
 class MockContext:
-  """Docstring."""
+  """Test helper class MockContext."""
 
   def __init__(self) -> None:
     """Initializes the MockContext instance."""
@@ -63,7 +63,7 @@ class MockContext:
 
 
 class MockConfig:
-  """Docstring."""
+  """Test helper class MockConfig."""
 
   def __init__(self) -> None:
     """Initializes the MockConfig instance."""
@@ -73,7 +73,7 @@ class MockConfig:
 
 
 class MockHelper(ApiHelpersMixin):
-  """Docstring."""
+  """Test helper class MockHelper."""
 
   def __init__(self) -> None:
     """Initializes the MockHelper instance."""
@@ -238,7 +238,7 @@ def test_inject_argument_exists() -> None:
 
 
 def test_apply_preamble_exception() -> None:
-  """Docstring."""
+  """Verify apply preamble exception behavior."""
   helper = MockHelper()
   func = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
   # Using invalid syntax to trigger parse error
@@ -247,7 +247,7 @@ def test_apply_preamble_exception() -> None:
 
 
 def test_convert_to_indented_block_fallback() -> None:
-  """Docstring."""
+  """Verify convert to indented block fallback behavior."""
   helper = MockHelper()
   func = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
   # Function body is an IndentedBlock
@@ -256,7 +256,7 @@ def test_convert_to_indented_block_fallback() -> None:
 
 
 def test_get_mapping_not_dict() -> None:
-  """Docstring."""
+  """Verify get mapping not dict behavior."""
   helper = MockHelper()
 
   class FakeImpl:
@@ -271,14 +271,14 @@ def test_get_mapping_not_dict() -> None:
 
 
 def test_cst_to_string_fallback() -> None:
-  """Docstring."""
+  """Verify cst to string fallback behavior."""
   helper = MockHelper()
   # Pass() is not supported, should return None
   assert helper._cst_to_string(cst.Pass()) is None
 
 
 def test_version_parse_empty() -> None:
-  """Docstring."""
+  """Verify version parse empty behavior."""
   helper = MockHelper()
   helper.semantics.framework_configs["jax"]["version"] = ""
   assert helper.check_version_constraints("1.0", None) is None

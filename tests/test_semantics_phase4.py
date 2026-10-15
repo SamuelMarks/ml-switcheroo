@@ -2,9 +2,9 @@
 
 import pytest
 
-from ml_switcheroo.semantics.resolution import SemanticResolver, ResolutionContext
 from ml_switcheroo.semantics.arguments import ArgumentPacker, ArgumentUnpacker
 from ml_switcheroo.semantics.casting import TypeCaster
+from ml_switcheroo.semantics.resolution import ResolutionContext, SemanticResolver
 
 
 @pytest.fixture

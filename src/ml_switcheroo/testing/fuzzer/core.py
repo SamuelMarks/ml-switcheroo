@@ -4,14 +4,13 @@ This module provides the `InputFuzzer` facade which now delegates generation log
 to Hypothesis Strategies. It maintains backward compatibility for casual usage via `generate_inputs`.
 """
 
-from typing import Any
+from typing import Any, Dict, List, Optional
 
-
-from typing import Dict, List, Optional
 import hypothesis.strategies as st
+
 from ml_switcheroo.frameworks import get_adapter
-from ml_switcheroo.testing.fuzzer.strategies import strategies_from_spec
 from ml_switcheroo.testing.fuzzer.heuristics import guess_dtype_by_name
+from ml_switcheroo.testing.fuzzer.strategies import strategies_from_spec
 
 
 class InputFuzzer:
@@ -78,7 +77,7 @@ class InputFuzzer:
             hint = "Array"
             cons.setdefault("dtype", "float")
 
-      strategies[p] = strategies_from_spec(hint, cons, shared_dims)  # type: ignore
+      strategies[p] = strategies_from_spec(str(hint or "Any"), cons, shared_dims)
 
     return strategies
 

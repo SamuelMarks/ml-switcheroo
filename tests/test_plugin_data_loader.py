@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin data loader."""
 
 from typing import Dict, List
 from unittest.mock import MagicMock
@@ -10,13 +10,13 @@ from ml_switcheroo.plugins.data_loader import get_shim_code, transform_dataloade
 
 
 def test_get_shim_code() -> None:
-  """Docstring."""
+  """Verify get shim code behavior."""
   code: str = get_shim_code()
   assert "class GenericDataLoader:" in code
 
 
 def test_transform_dataloader_injects_once() -> None:
-  """Docstring."""
+  """Verify transform dataloader injects once behavior."""
   node: cst.Call = cst.Call(func=cst.Name("DataLoader"), args=[cst.Arg(value=cst.Name("ds"))])
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.metadata = {}
@@ -34,7 +34,7 @@ def test_transform_dataloader_injects_once() -> None:
 
 
 def test_transform_dataloader_args() -> None:
-  """Docstring."""
+  """Verify transform dataloader args behavior."""
   args: List[cst.Arg] = [
     cst.Arg(value=cst.Name("ds")),
     cst.Arg(value=cst.Name("pos_arg")),
@@ -53,7 +53,7 @@ def test_transform_dataloader_args() -> None:
 
 
 def test_transform_dataloader_no_pos_args() -> None:
-  """Docstring."""
+  """Verify transform dataloader no pos args behavior."""
   args: List[cst.Arg] = [
     cst.Arg(keyword=cst.Name("dataset"), value=cst.Name("ds")),
   ]
@@ -68,7 +68,7 @@ def test_transform_dataloader_no_pos_args() -> None:
 
 
 def test_generic_data_loader_shim_exec() -> None:
-  """Docstring."""
+  """Verify generic data loader shim exec behavior."""
   code: str = get_shim_code()
   ns: Dict[str, type] = {}
   exec(code, ns)

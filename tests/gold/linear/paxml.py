@@ -7,7 +7,7 @@ from praxis.layers import linears  # type: ignore
 
 
 class Model(base_layer.BaseLayer):  # type: ignore
-  """Docstring."""
+  """Test helper class Model."""
 
   in_features: int = 0
   out_features: int = 0

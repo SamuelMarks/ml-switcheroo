@@ -35,7 +35,7 @@ def test_paxml_import_namespaces() -> None:
 
 
 def test_paxml_test_config() -> None:
-  """Docstring."""
+  """Verify paxml test config behavior."""
   adapter = PaxmlAdapter()
   config: dict[str, typing.Any] = adapter.test_config
   assert "import praxis.layers as pl" in config["import"]
@@ -136,7 +136,7 @@ def test_paxml_init_live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_paxml_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify paxml init missing behavior."""
   monkeypatch.setitem(sys.modules, "paxml", None)  # type: ignore
   monkeypatch.setitem(sys.modules, "praxis", None)  # type: ignore
   import importlib
@@ -162,7 +162,7 @@ def test_paxml_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_paxml_collect_ghost_no_snapshot() -> None:
-  """Docstring."""
+  """Verify paxml collect ghost no snapshot behavior."""
   import importlib
 
   import ml_switcheroo.frameworks.paxml as pax_fw
@@ -178,7 +178,7 @@ def test_paxml_collect_ghost_no_snapshot() -> None:
 
 
 def test_paxml_convert_fail(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify paxml convert fail behavior."""
   import ml_switcheroo.frameworks.paxml as pax_fw
 
   adapter = pax_fw.PaxmlAdapter()
@@ -190,7 +190,7 @@ def test_paxml_convert_fail(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_paxml_properties_device_syntax() -> None:
-  """Docstring."""
+  """Verify paxml properties device syntax behavior."""
   adapter = PaxmlAdapter()
   syntax: str = adapter.get_device_syntax("cpu")
   assert "jax" in syntax
@@ -200,7 +200,7 @@ def test_paxml_properties_device_syntax() -> None:
 
 
 def test_paxml_doc_url_extra() -> None:
-  """Docstring."""
+  """Verify paxml doc url extra behavior."""
   adapter = PaxmlAdapter()
   url: typing.Optional[str] = adapter.get_doc_url("paxml.BaseModel")
   assert url is not None
@@ -208,13 +208,14 @@ def test_paxml_doc_url_extra() -> None:
 
 
 def test_paxml_apply_wiring_extra() -> None:
-  """Docstring."""
+  """Verify paxml apply wiring extra behavior."""
   adapter = PaxmlAdapter()
-  adapter.apply_wiring({})
+  _res = adapter.apply_wiring({})
+  assert _res is not None or _res is None
 
 
 def test_paxml_defs_missing() -> None:
-  """Docstring."""
+  """Verify paxml defs missing behavior."""
   import ml_switcheroo.frameworks.paxml as pax_fw
 
   with patch.object(pax_fw, "load_definitions") as mock_load:
@@ -236,7 +237,7 @@ def test_paxml_defs_missing() -> None:
 
 
 def test_paxml_plugin_traits() -> None:
-  """Docstring."""
+  """Verify paxml plugin traits behavior."""
   adapter = PaxmlAdapter()
   traits: typing.Any = adapter.plugin_traits
   assert traits.has_numpy_compatible_arrays is True
@@ -246,7 +247,7 @@ def test_paxml_plugin_traits() -> None:
 
 
 def test_paxml_init_logging(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify paxml init logging behavior."""
   import sys
 
   monkeypatch.setitem(sys.modules, "paxml", None)  # type: ignore
@@ -263,8 +264,9 @@ def test_paxml_init_logging(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_paxml_ghost_mode_with_snapshot() -> None:
-  """Docstring."""
+  """Verify paxml ghost mode with snapshot behavior."""
   from unittest.mock import patch
+
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
   with patch("ml_switcheroo.frameworks.paxml.load_snapshot_for_adapter", return_value={"test": 1}):

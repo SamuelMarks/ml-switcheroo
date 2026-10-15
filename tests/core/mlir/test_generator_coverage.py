@@ -11,7 +11,7 @@ from ml_switcheroo.core.mlir.naming import NamingContext
 
 
 def test_stmt_with_changes_leading_lines() -> None:
-  """Docstring."""
+  """Verify stmt with changes leading lines behavior."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
   gen.ctx = ctx
@@ -33,7 +33,7 @@ def test_stmt_with_changes_leading_lines() -> None:
 
 
 def test_convert_statement_import_and_none() -> None:
-  """Docstring."""
+  """Verify convert statement import and none behavior."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
   gen.ctx = ctx
@@ -56,7 +56,7 @@ def test_convert_statement_import_and_none() -> None:
 
 
 def test_wrap_as_statement_void_call() -> None:
-  """Docstring."""
+  """Verify wrap as statement void call behavior."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
   gen.ctx = ctx
@@ -69,7 +69,7 @@ def test_wrap_as_statement_void_call() -> None:
 
 
 def test_wrap_as_statement_getattr() -> None:
-  """Docstring."""
+  """Verify wrap as statement getattr behavior."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
   gen.ctx = ctx
@@ -88,7 +88,7 @@ def test_wrap_as_statement_getattr() -> None:
 
 
 def test_wrap_as_statement_constant() -> None:
-  """Docstring."""
+  """Verify wrap as statement constant behavior."""
   ctx = NamingContext()
   gen = MlirToPythonGenerator()
   gen.ctx = ctx

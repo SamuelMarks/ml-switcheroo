@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for scaffold."""
 
 import json
 import typing
@@ -13,7 +13,7 @@ from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
 
 @patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine")
 def test_handle_scaffold(mock_engine_class: MagicMock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify handle scaffold behavior."""
   monkeypatch.chdir(tmp_path)
 
   mock_engine: MagicMock = mock_engine_class.return_value

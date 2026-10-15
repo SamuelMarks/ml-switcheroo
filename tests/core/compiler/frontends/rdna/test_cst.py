@@ -1,4 +1,4 @@
-"""Tests for the RDNA Concrete Syntax Tree nodes."""
+"""Test suite for cst."""
 
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
@@ -19,7 +19,7 @@ from ml_switcheroo.core.cst.base import Trivia
 
 
 def test_vgpr_to_text() -> None:
-  """Docstring."""
+  """Verify vgpr to text behavior."""
   reg1 = RdnaVGPR(index=0, leading_trivia=[Trivia(" ")])
   assert reg1.to_text() == " v0"
   reg2 = RdnaVGPR(index=1, count=3)
@@ -27,7 +27,7 @@ def test_vgpr_to_text() -> None:
 
 
 def test_sgpr_to_text() -> None:
-  """Docstring."""
+  """Verify sgpr to text behavior."""
   reg1 = RdnaSGPR(index=4, trailing_trivia=[Trivia(",")])
   assert reg1.to_text() == "s4,"
   reg2 = RdnaSGPR(index=0, count=2)
@@ -35,13 +35,13 @@ def test_sgpr_to_text() -> None:
 
 
 def test_helpers() -> None:
-  """Docstring."""
+  """Verify helpers behavior."""
   assert c_SGPR(5).to_text() == "s5"
   assert c_VGPR(10).to_text() == "v10"
 
 
 def test_immediate_to_text() -> None:
-  """Docstring."""
+  """Verify immediate to text behavior."""
   imm1 = RdnaImmediate(value=42)
   assert imm1.to_text() == "42"
   imm2 = RdnaImmediate(value=255, is_hex=True)
@@ -49,13 +49,13 @@ def test_immediate_to_text() -> None:
 
 
 def test_modifier_to_text() -> None:
-  """Docstring."""
+  """Verify modifier to text behavior."""
   mod = RdnaModifier(name="glc")
   assert mod.to_text() == "glc"
 
 
 def test_memory_to_text() -> None:
-  """Docstring."""
+  """Verify memory to text behavior."""
   mem1 = RdnaMemory(base=RdnaVGPR(index=1))
   assert mem1.to_text() == "v1"
   mem2 = RdnaMemory(base=RdnaSGPR(index=4, count=2), offset=16)
@@ -63,13 +63,13 @@ def test_memory_to_text() -> None:
 
 
 def test_label_ref_to_text() -> None:
-  """Docstring."""
+  """Verify label ref to text behavior."""
   lbl = RdnaLabelRef(name="target")
   assert lbl.to_text() == "target"
 
 
 def test_instruction_to_text() -> None:
-  """Docstring."""
+  """Verify instruction to text behavior."""
   inst = RdnaInstruction(
     leading_trivia=[Trivia("  ")],
     opcode="v_add_f32",
@@ -83,13 +83,13 @@ def test_instruction_to_text() -> None:
 
 
 def test_label_to_text() -> None:
-  """Docstring."""
+  """Verify label to text behavior."""
   lbl = RdnaLabel(name="L_START", trailing_trivia=[Trivia("\n")])
   assert lbl.to_text() == "L_START:\n"
 
 
 def test_directive_to_text() -> None:
-  """Docstring."""
+  """Verify directive to text behavior."""
   dir1 = RdnaDirective(name="text")
   assert dir1.to_text() == ".text"
   dir2 = RdnaDirective(name="globl", params=["main"])
@@ -97,13 +97,13 @@ def test_directive_to_text() -> None:
 
 
 def test_comment_to_text() -> None:
-  """Docstring."""
+  """Verify comment to text behavior."""
   com = RdnaComment(text="a comment")
   assert com.to_text() == "; a comment"
 
 
 def test_module_to_text() -> None:
-  """Docstring."""
+  """Verify module to text behavior."""
   mod = RdnaModule(
     leading_trivia=[Trivia("\n")],
     statements=[

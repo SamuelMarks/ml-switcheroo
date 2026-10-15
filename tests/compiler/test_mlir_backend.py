@@ -7,13 +7,13 @@ from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
 
 
 def test_mlir_backend_init() -> None:
-  """Docstring."""
+  """Verify mlir backend init behavior."""
   backend = MlirBackend(semantics="mock_semantics")  # type: ignore
   assert backend.semantics == "mock_semantics"
 
 
 def test_mlir_backend_compile_input_numeric() -> None:
-  """Docstring."""
+  """Verify mlir backend compile input numeric behavior."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", op_type="Input", attributes={"value": "42"})
@@ -27,7 +27,7 @@ def test_mlir_backend_compile_input_numeric() -> None:
 
 
 def test_mlir_backend_compile_input_non_numeric() -> None:
-  """Docstring."""
+  """Verify mlir backend compile input non numeric behavior."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", op_type="Input", attributes={"value": "not_a_number"})
@@ -40,7 +40,7 @@ def test_mlir_backend_compile_input_non_numeric() -> None:
 
 
 def test_mlir_backend_compile_input_default_numeric() -> None:
-  """Docstring."""
+  """Verify mlir backend compile input default numeric behavior."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", op_type="Input")  # metadata missing "value", should default to "1"
@@ -52,7 +52,7 @@ def test_mlir_backend_compile_input_default_numeric() -> None:
 
 
 def test_mlir_backend_compile_output() -> None:
-  """Docstring."""
+  """Verify mlir backend compile output behavior."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", op_type="Output")
@@ -64,7 +64,7 @@ def test_mlir_backend_compile_output() -> None:
 
 
 def test_mlir_backend_compile_generic_op() -> None:
-  """Docstring."""
+  """Verify mlir backend compile generic op behavior."""
   backend = MlirBackend()
   graph = LogicalGraph(name="test")
   n1 = LogicalNode(id="n1", op_type="MyOp", attributes={"attr1": "val1", "attr2": "val2"})
@@ -79,7 +79,7 @@ def test_mlir_backend_compile_generic_op() -> None:
 
 
 def test_mlir_printer_emit_non_module() -> None:
-  """Docstring."""
+  """Verify mlir printer emit non module behavior."""
   printer = MlirPrinter()
   # OperationNode.to_text() should be called
   op = OperationNode(name='"mock.op"')
@@ -88,7 +88,7 @@ def test_mlir_printer_emit_non_module() -> None:
 
 
 def test_mlir_printer_emit_module_with_module_op() -> None:
-  """Docstring."""
+  """Verify mlir printer emit module with module op behavior."""
   printer = MlirPrinter()
   op = OperationNode(name="module")
   block = BlockNode(label="")
@@ -102,7 +102,7 @@ def test_mlir_printer_emit_module_with_module_op() -> None:
 
 
 def test_mlir_printer_emit_module_without_module_op() -> None:
-  """Docstring."""
+  """Verify mlir printer emit module without module op behavior."""
   printer = MlirPrinter()
   op = OperationNode(name='"some.op"')
   block = BlockNode(label="")

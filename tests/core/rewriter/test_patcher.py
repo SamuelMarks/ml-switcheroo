@@ -12,7 +12,7 @@ from ml_switcheroo.core.rewriter.patcher import DeleteAction, GraphPatcher, Patc
 
 
 class MockEmitter(PythonSnippetEmitter):
-  """Docstring."""
+  """Test helper class MockEmitter."""
 
   def __init__(self) -> None:
     """Init."""
@@ -35,7 +35,7 @@ class MockEmitter(PythonSnippetEmitter):
 
 @pytest.fixture
 def emitter() -> MockEmitter:
-  """Docstring."""
+  """Execute emitter helper logic."""
   return MockEmitter()
 
 
@@ -112,14 +112,14 @@ def test_expression_statement_deletion(emitter: MockEmitter) -> None:
 
 
 def test_patcher_action_not_found_on_leave():
-  """Docstring."""
+  """Verify patcher action not found on leave behavior."""
 
   # If the action is not a ReplaceAction or DeleteAction, it reaches line 241
   # We did this with PatchAction in test_patcher_unhandled_action_type.
   # What if it's a ReplaceAction, but it IS an init? Wait we just tested that and it returned!
   # Ah! what if `self.emitter.emit_init` DOES NOT EXIST?!
   class DummyEmitterNoEmitInit:
-    """Docstring."""
+    """Test helper class DummyEmitterNoEmitInit."""
 
     pass
 
@@ -141,17 +141,17 @@ def test_patcher_action_not_found_on_leave():
 
 
 def test_patcher_replace_action_on_leave_return_updated_unknown():
-  """Docstring."""
+  """Verify patcher replace action on leave return updated unknown behavior."""
 
   # We already tested UnknownAction to hit line 241
   # What if it's NOT ReplaceAction and NOT DeleteAction?
   class MyAction(PatchAction):
-    """Docstring."""
+    """Test helper class MyAction."""
 
     pass
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     pass
 
@@ -172,10 +172,10 @@ def test_patcher_replace_action_on_leave_return_updated_unknown():
 
 
 def test_patcher_hit_241_explicitly():
-  """Docstring."""
+  """Verify patcher hit 241 explicitly behavior."""
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     pass
 
@@ -183,10 +183,10 @@ def test_patcher_hit_241_explicitly():
 
   # Needs to be a subclass of PatchAction, but NOT DeleteAction or ReplaceAction
   class UnknownAction(PatchAction):
-    """Docstring."""
+    """Test helper class UnknownAction."""
 
     def __init__(self):
-      """Docstring."""
+      """Initialize test helper instance."""
       # Bypass __init__
       pass
 
@@ -204,11 +204,11 @@ def test_patcher_hit_241_explicitly():
 
 
 def test_patcher_replace_action_no_branch_missing():
-  """Docstring."""
+  """Verify patcher replace action no branch missing behavior."""
   import builtins
 
   class MockEmitter:
-    """Docstring."""
+    """Test helper class MockEmitter."""
 
     pass
 
@@ -226,7 +226,7 @@ def test_patcher_replace_action_no_branch_missing():
   orig_isinstance = builtins.isinstance
 
   def mock_isinstance(obj, class_or_tuple):
-    """Docstring."""
+    """Execute mock isinstance helper logic."""
     if type(obj) is ReplaceAction and class_or_tuple == ReplaceAction:
       return False
     return orig_isinstance(obj, class_or_tuple)
@@ -239,10 +239,10 @@ def test_patcher_replace_action_no_branch_missing():
 
 
 def test_patcher_base_action_fallback():
-  """Docstring."""
+  """Verify patcher base action fallback behavior."""
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     pass
 
@@ -251,10 +251,10 @@ def test_patcher_base_action_fallback():
   updated = cst.Name("updated")
 
   class CustomPatch(PatchAction):
-    """Docstring."""
+    """Test helper class CustomPatch."""
 
     def __init__(self, node_id):
-      """Docstring."""
+      """Initialize test helper instance."""
       self.node_id = node_id
 
   action = CustomPatch(node_id="n1")
@@ -264,20 +264,20 @@ def test_patcher_base_action_fallback():
 
 
 def test_patcher_hit_241_explicitly2():
-  """Docstring."""
+  """Verify patcher hit 241 explicitly2 behavior."""
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitter())
 
   class MyPatchAction(PatchAction):
-    """Docstring."""
+    """Test helper class MyPatchAction."""
 
     def __init__(self):
-      """Docstring."""
+      """Initialize test helper instance."""
       self.node_id = "test"
 
   action = MyPatchAction()
@@ -289,20 +289,20 @@ def test_patcher_hit_241_explicitly2():
 
 
 def test_patcher_hit_241_direct_test():
-  """Docstring."""
+  """Verify patcher hit 241 direct test behavior."""
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     pass
 
   patcher = GraphPatcher([], {}, DummyEmitter())
 
   class MyPatchAction:
-    """Docstring."""
+    """Test helper class MyPatchAction."""
 
     def __init__(self):
-      """Docstring."""
+      """Initialize test helper instance."""
       self.node_id = "test"
 
   action = MyPatchAction()
@@ -317,10 +317,10 @@ def test_patcher_hit_241_direct_test():
 
 
 def test_patcher_base_action_fallback_extra():
-  """Docstring."""
+  """Verify patcher base action fallback extra behavior."""
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     pass
 
@@ -330,7 +330,7 @@ def test_patcher_base_action_fallback_extra():
 
   # Create an anonymous class that inherits from PatchAction
   class CustomPatch(PatchAction):
-    """Docstring."""
+    """Test helper class CustomPatch."""
 
     pass
 
@@ -344,10 +344,10 @@ def test_patcher_base_action_fallback_extra():
 
 
 def test_patcher_base_action():
-  """Docstring."""
+  """Verify patcher base action behavior."""
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     pass
 
@@ -364,13 +364,13 @@ def test_patcher_base_action():
 
 
 def test_patcher_replace_action_on_leave_return_updated_not_is_init():
-  """Docstring."""
+  """Verify patcher replace action on leave return updated not is init behavior."""
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     def emit_call(self, node, inputs, out):
-      """Docstring."""
+      """Execute emit call helper logic."""
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -378,7 +378,7 @@ def test_patcher_replace_action_on_leave_return_updated_not_is_init():
   # We want to hit line 241
   # Line 241 is reached if the action is NOT DeleteAction and NOT ReplaceAction
   class UnknownAction(PatchAction):
-    """Docstring."""
+    """Test helper class UnknownAction."""
 
     pass
 
@@ -397,13 +397,13 @@ def test_patcher_replace_action_on_leave_return_updated_not_is_init():
 
 
 def test_patcher_replace_action_on_leave_return_updated():
-  """Docstring."""
+  """Verify patcher replace action on leave return updated behavior."""
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     def emit_call(self, node, inputs, out):
-      """Docstring."""
+      """Execute emit call helper logic."""
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -423,13 +423,13 @@ def test_patcher_replace_action_on_leave_return_updated():
 
 
 def test_patcher_replace_action_on_leave_return_updated_extra():
-  """Docstring."""
+  """Verify patcher replace action on leave return updated extra behavior."""
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     def emit_call(self, node, inputs, out):
-      """Docstring."""
+      """Execute emit call helper logic."""
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -449,15 +449,15 @@ def test_patcher_replace_action_on_leave_return_updated_extra():
 
 
 def test_patcher_unhandled_action_type():
-  """Docstring."""
+  """Verify patcher unhandled action type behavior."""
 
   class DummyAction(PatchAction):
-    """Docstring."""
+    """Test helper class DummyAction."""
 
     pass
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     pass
 
@@ -471,10 +471,10 @@ def test_patcher_unhandled_action_type():
 
 
 def test_patcher_return_updated():
-  """Docstring."""
+  """Verify patcher return updated behavior."""
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     pass
 
@@ -487,13 +487,13 @@ def test_patcher_return_updated():
 
 
 def test_patcher_replace_action_not_expr_not_init():
-  """Docstring."""
+  """Verify patcher replace action not expr not init behavior."""
 
   class DummyEmitter:
-    """Docstring."""
+    """Test helper class DummyEmitter."""
 
     def emit_call(self, node, inputs, out):
-      """Docstring."""
+      """Execute emit call helper logic."""
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
   patcher = GraphPatcher([], {}, DummyEmitter())
@@ -510,14 +510,16 @@ def test_patcher_replace_action_not_expr_not_init():
 
 
 def test_patcher_missing_branches() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.rewriter.patcher import GraphPatcher, PatchAction
-  import libcst as cst
+  """Verify patcher missing branches behavior."""
   from unittest.mock import MagicMock
+
+  import libcst as cst
+
+  from ml_switcheroo.core.rewriter.patcher import GraphPatcher, PatchAction
 
   # Dummy unhandled action
   class DummyAction(PatchAction):
-    """Docstring."""
+    """Test helper class DummyAction."""
 
     pass
 

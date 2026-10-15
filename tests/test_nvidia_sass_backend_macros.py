@@ -1,28 +1,28 @@
-"""Test module."""
+"""Test suite for nvidia sass backend macros."""
 
 import inspect
 from typing import Any, Dict, List
 
 import ml_switcheroo.core.compiler.backends.nvidia_sass.macros as macros
-import ml_switcheroo.core.compiler.backends.nvidia_sass.macros_extra as macros_extra
+import ml_switcheroo.core.compiler.backends.nvidia_sass.macros as macros_extra
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import RegisterAllocatorProtocol
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode, NvidiaSassRegister
 
 
 class DummyAllocator(RegisterAllocatorProtocol):
-  """Docstring."""
+  """Test helper class DummyAllocator."""
 
-  def get_register(self, var_name: str) -> NvidiaSassRegister:
-    """Docstring."""
+  def get_register(self, var_name: str) -> NvidiaSassRegister:  # noqa: F811
+    """Execute get register helper logic."""
     return NvidiaSassRegister(name=f"REG_{var_name}")
 
-  def allocate_temp(self) -> NvidiaSassRegister:
-    """Docstring."""
+  def allocate_temp(self) -> NvidiaSassRegister:  # noqa: F811
+    """Execute allocate temp helper logic."""
     return NvidiaSassRegister(name="TEMP")
 
 
 def test_all_macros() -> None:
-  """Docstring."""
+  """Verify all macros behavior."""
   allocator: DummyAllocator = DummyAllocator()
   metadata: Dict[str, Any] = {"k": 3, "seq_len": 5}
   node_id: str = "test_node"

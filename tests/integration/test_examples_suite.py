@@ -22,7 +22,7 @@ def _load_files():
 
 
 class MockBidirectionalSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockBidirectionalSemantics."""
 
   def __init__(self):
     """Initializes the MockBidirectionalSemantics instance."""

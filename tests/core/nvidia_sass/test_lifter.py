@@ -1,4 +1,4 @@
-"""Test suite for the Lifter module."""
+"""Test suite for lifter."""
 
 from typing import List
 

@@ -7,7 +7,7 @@ from ml_switcheroo.core.mlir.types import FloatType, IntegerType, TensorType
 
 
 def test_parse_py_type_to_mlir() -> None:
-  """Docstring."""
+  """Verify parse py type to mlir behavior."""
   assert parse_py_type_to_mlir("int") == IntegerType(32)
   assert parse_py_type_to_mlir("float") == FloatType("f32")
   assert parse_py_type_to_mlir("bool") == IntegerType(1)
@@ -16,7 +16,7 @@ def test_parse_py_type_to_mlir() -> None:
 
 
 def test_type_inference_pass() -> None:
-  """Docstring."""
+  """Verify type inference pass behavior."""
   code = """
 def my_func(a):
     b = 5.0
@@ -41,7 +41,7 @@ def my_func(a):
 
 
 def test_type_inference_pass_empty_return() -> None:
-  """Docstring."""
+  """Verify type inference pass empty return behavior."""
   code = """
 def my_func():
     return
@@ -53,7 +53,7 @@ def my_func():
 
 
 def test_type_inference_pass_unknown_expression() -> None:
-  """Docstring."""
+  """Verify type inference pass unknown expression behavior."""
   code = """
 def my_func():
     b = unknown_func()

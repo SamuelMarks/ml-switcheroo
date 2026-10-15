@@ -1,8 +1,10 @@
-"""Module docstring."""
+"""Test suite for tikz coverage."""
 
 import typing
 
+import pytest
 from lark import Token
+from lark.exceptions import LarkError
 
 from ml_switcheroo.core.tikz.nodes import (
   TikzBaseNode,
@@ -18,7 +20,7 @@ from ml_switcheroo.core.tikz.parser import TikzParser, TikzTransformer
 
 
 def test_tikz_nodes_missing() -> None:
-  """Docstring."""
+  """Verify tikz nodes missing behavior."""
   nodes: list[typing.Any] = [
     TriviaNode(content=" "),
     TikzOption(key="a", value="b"),
@@ -36,113 +38,109 @@ def test_tikz_nodes_missing() -> None:
   for n in nodes:
     assert repr(n)
     if hasattr(n, "emit"):
-      n.emit()
+      assert isinstance(n.emit(), str)
 
   class DummyTikz(TikzBaseNode):  # type: ignore[misc]
-    """Docstring."""
+    """Test helper class DummyTikz."""
 
     def emit(self, indent_level: int = 0) -> str:
-      """Docstring."""
+      """Execute emit helper logic."""
       return "d"
 
-  DummyTikz().emit()
+  assert DummyTikz().emit() == "d"
 
 
-def test_tikz_parser_missing() -> None:
-  """Docstring."""
-  cases: list[str] = [
-    r"\node",
-    r"\node;",
-    r"\node (a) at (0,0) {A};",
-    r"\node[draw] (b) at (1,1) {B};",
-    r"\node[draw=black] (b) at (1,1) {B};",
-    r"\node (b) at (1,1) {\begin{tabular}{c} \textbf{A} \\ \textit{B} \\ C \end{tabular}};",
-    r"\draw",
-    r"\draw;",
-    r"\draw (a) -- (b);",
-    r"\draw[thick] (a) -> (b);",
-    r"\begin{tikzpicture} \end{tikzpicture}",
-    r"\begin{scope} \end{scope}",
-    r"% comment",
-    r"something else",
-    r"\node (a) { \textbf{foo} };",
-    r"\node (a) { \textit{foo} };",
-    r"\path (a) edge (b);",
-    r"\coordinate (c) at (1,1);",
-    r"\begin{scope}[shift={(1,1)}] \end{scope}",
-    r"\node (a) at (1,1) { \begin{tabular}{l} a \end{tabular} };",
-    r"\node (a) at (1,1) { \begin{tabular}{r} a \end{tabular} };",
-    r"\begin{tikzpicture} \node (a) at (0,0) {A}; \draw (a) -- (a); \end{tikzpicture}",
-    r"\node (a) { \begin{tabular}{c} a \\ b \end{tabular} };",
-    r"\node (a) {A};",
-    r"\node[x=1] (a) {A};",
-    r"\draw[color=red] (a) -- (b) node {label};",
-    r"\node [style] (a) at (1,1) {A};",
-    r"\draw (a) edge (b);",
-  ]
+VALID_TIKZ_CASES = [
+  r"\node (a) at (0,0) {A};",
+  r"\node[draw] (b) at (1,1) {B};",
+  r"\node[draw=black] (b) at (1,1) {B};",
+  r"\draw (a) -- (b);",
+  r"\draw[thick] (a) -> (b);",
+  r"\begin{tikzpicture} \end{tikzpicture}",
+  r"\begin{tikzpicture} \node (a) at (0,0) {A}; \draw (a) -- (a); \end{tikzpicture}",
+  r"\node (a) {A};",
+  r"\node[x=1] (a) {A};",
+  r"\node [style] (a) at (1,1) {A};",
+]
 
-  for case in cases:
-    parser = TikzParser(case)
-    try:
-      parser.parse()
-    except Exception:
-      pass
+INVALID_TIKZ_CASES = [
+  r"\node",
+  r"\node;",
+  r"\draw",
+  r"\draw;",
+]
 
+
+@pytest.mark.parametrize("case", VALID_TIKZ_CASES)
+def test_valid_tikz_parsing(case: str) -> None:
+  """Verifies that valid Tikz cases parse into a valid tree."""
+  parser = TikzParser(case)
+  tree = parser.parse()
+  assert tree is not None
+  assert isinstance(tree, TikzBaseNode)
+  # Emission should not crash
+  assert isinstance(tree.emit(), str)
+
+
+@pytest.mark.parametrize("case", INVALID_TIKZ_CASES)
+def test_invalid_tikz_parsing(case: str) -> None:
+  """Verifies that invalid Tikz cases correctly throw parsing exceptions."""
+  parser = TikzParser(case)
+  with pytest.raises((LarkError, ValueError)):
+    parser.parse()
+
+
+def test_transformer_explicit() -> None:
+  """Verifies transformer methods directly without exception swallowing."""
   t = TikzTransformer()
   # Hit missing lines directly
-  t.start([])
-  t.start([TriviaNode(content=" "), TikzNode(node_id="n", x=0, y=0, content="c")])
+  assert t.start([]) is not None
+  assert t.start([TriviaNode(content=" "), TikzNode(node_id="n", x=0, y=0, content="c")]) is not None
 
-  t.element([TriviaNode(content=" ")])
+  assert t.element([TriviaNode(content=" ")]) is not None
 
-  t.TIKZ_ENV_BEGIN(Token("TIKZ_ENV_BEGIN", "\\begin{tikzpicture}"))
-  t.TIKZ_ENV_END(Token("TIKZ_ENV_END", "\\end{tikzpicture}"))
-  t.NAME(Token("NAME", "foo"))
+  assert t.TIKZ_ENV_BEGIN(Token("TIKZ_ENV_BEGIN", "\\begin{tikzpicture}")) is not None
+  assert t.TIKZ_ENV_END(Token("TIKZ_ENV_END", "\\end{tikzpicture}")) is not None
+  assert t.NAME(Token("NAME", "foo")) is not None
 
-  t.OPTION(Token("OPTION", "k=v"))
-  t.OPTION(Token("OPTION", "k"))
+  assert t.OPTION(Token("OPTION", "k=v")) is not None
+  assert t.OPTION(Token("OPTION", "k")) is not None
 
-  t.COORD(Token("COORD", "(1,1)"))
-  t.ALIGN(Token("ALIGN", "c"))
-  t.EDGE_OP(Token("EDGE_OP", "--"))
+  assert t.COORD(Token("COORD", "(1,1)")) is not None
+  assert t.ALIGN(Token("ALIGN", "c")) is not None
+  assert t.EDGE_OP(Token("EDGE_OP", "--")) is not None
 
-  t.trivia([Token("IGNORE_TEXT", " "), Token("IGNORE_TEXT", "\n")])
-  t.trivia([Token("COMMENT", "% comm")])
+  assert t.trivia([Token("IGNORE_TEXT", " "), Token("IGNORE_TEXT", "\n")]) is not None
+  assert t.trivia([Token("COMMENT", "% comm")]) is not None
 
-  t.IGNORE_TEXT(Token("IGNORE_TEXT", " "))
+  assert t.IGNORE_TEXT(Token("IGNORE_TEXT", " ")) is not None
 
-  try:
-    t.node([Token("NAME", "n"), Token("COORD", "(1,1)"), "content"])
-  except Exception:
-    pass
+  # These transformer methods expect specific sequences.
+  res_node = t.node([Token("NAME", "n"), Token("COORD", "(1,1)"), "content"])
+  assert isinstance(res_node, TikzNode)
 
-  try:
-    t.node([Token("NAME", "n"), "content"])
-  except Exception:
-    pass
+  res_node2 = t.node([Token("NAME", "n"), "content"])
+  assert isinstance(res_node2, TikzNode)
 
-  try:
-    t.node([TikzOption(key="a"), Token("NAME", "n"), Token("COORD", "(1,1)"), "content"])
-  except Exception:
-    pass
+  res_node3 = t.node([TikzOption(key="a"), Token("NAME", "n"), Token("COORD", "(1,1)"), "content"])
+  assert isinstance(res_node3, TikzNode)
 
-  try:
-    t.edge([Token("NAME", "s"), Token("EDGE_OP", "--"), Token("NAME", "t")])
-  except Exception:
-    pass
+  res_edge = t.edge([Token("NAME", "s"), Token("EDGE_OP", "--"), Token("NAME", "t")])
+  assert isinstance(res_edge, TikzEdge)
 
   class DummyTree:
-    """Docstring."""
+    """Execute DummyTree test helper."""
 
     def __init__(self, data: str, children: list[typing.Any]) -> None:
-      """Docstring."""
+      """Execute __init__ test helper."""
       self.data: str = data
       self.children: list[typing.Any] = children
 
-  t.tabular([DummyTree("tabular_row", ["a", None, "b"]), DummyTree("kind", ["c"]), DummyTree("id", ["d"])])
+  res_tab = t.tabular([DummyTree("tabular_row", ["a", None, "b"]), DummyTree("kind", ["c"]), DummyTree("id", ["d"])])
+  assert isinstance(res_tab, TikzTable)
 
-  t.tabular_row(["a"])
-  t.kind(["c"])
-  t.id(["i"])
-  t.meta(["m"])
-  t.ignore(["x"])
+  assert t.tabular_row(["a"]) is not None
+  assert t.kind(["c"]) is not None
+  assert t.id(["i"]) is not None
+  assert t.meta(["m"]) is not None
+  assert t.ignore(["x"]) is not None

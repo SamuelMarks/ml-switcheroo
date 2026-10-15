@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for commands."""
 
 from pathlib import Path
 from unittest import mock
@@ -9,7 +9,7 @@ from ml_switcheroo.cli.commands import handle_gen_weight_script
 
 @patch("ml_switcheroo.cli.commands.WeightScriptGenerator")
 def test_handle_gen_weight_script_success(mock_gen_class: MagicMock) -> None:
-  """Docstring."""
+  """Verify handle gen weight script success behavior."""
   mock_instance: MagicMock = mock_gen_class.return_value
   mock_instance.generate.return_value = True
 
@@ -20,7 +20,7 @@ def test_handle_gen_weight_script_success(mock_gen_class: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.commands.WeightScriptGenerator")
 def test_handle_gen_weight_script_failure(mock_gen_class: MagicMock) -> None:
-  """Docstring."""
+  """Verify handle gen weight script failure behavior."""
   mock_instance: MagicMock = mock_gen_class.return_value
   mock_instance.generate.return_value = False
 
@@ -40,7 +40,7 @@ def test_handle_gen_weight_script(
   mock_sem_mgr: mock.MagicMock,
   mock_rc: mock.MagicMock,
 ) -> None:
-  """Docstring."""
+  """Verify handle gen weight script behavior."""
   # Setup mocks
   mock_config: mock.Mock = mock.Mock()
   mock_rc.load.return_value = mock_config

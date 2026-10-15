@@ -13,14 +13,12 @@ Definitions are loaded from `frameworks/definitions/mlx.json`.
 """
 
 import typing
+from typing import Any, Dict, List, Optional, Tuple
 
-
-from typing import List, Tuple, Optional, Dict, Any
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
+
+from ml_switcheroo.frameworks.base import ImportConfig, PluginTraits, StandardMap, StructuralTraits, register_framework
 from ml_switcheroo.frameworks.loader import load_definitions
-
-
 from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
 _np_mod: Optional[Any] = None

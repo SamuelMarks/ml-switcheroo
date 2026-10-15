@@ -7,15 +7,15 @@ structures into intermediate NVIDIA_SASS AST structures, followed by the final t
 emission.
 """
 
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
-from ml_switcheroo.core.graph import LogicalGraph
-from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import NvidiaSassSynthesizer
 from ml_switcheroo.core.compiler.backends.nvidia_sass.emitter import NvidiaSassEmitter
+from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import NvidiaSassSynthesizer
+from ml_switcheroo.core.graph import LogicalGraph
 
 
 class NvidiaSassBackend(CompilerBackend):

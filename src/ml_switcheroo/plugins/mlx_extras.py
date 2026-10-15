@@ -5,9 +5,11 @@ Handles:
 2. Eager Evaluation: `torch.cuda.synchronize()` -> Warning/No-op.
 """
 
-import libcst as cst
 from typing import Union
-from ml_switcheroo.core.hooks import register_hook, HookContext
+
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 

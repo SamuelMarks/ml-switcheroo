@@ -7,25 +7,34 @@ Each node inherits from the core `CSTNode` to guarantee exact round-trip formatt
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
-from ml_switcheroo.core.cst.base import CSTNode
+from ml_switcheroo.core.compiler.isa.cst import (
+  IsaComment,
+  IsaImmediate,
+  IsaInstruction,
+  IsaLabel,
+  IsaMemory,
+  IsaNode,
+  IsaOperand,
+  IsaRegister,
+)
 
 
 @dataclass
-class NvidiaSassNode(CSTNode):
+class NvidiaSassNode(IsaNode):
   """Abstract base class for all NVIDIA_SASS CST nodes."""
 
   pass
 
 
 @dataclass
-class NvidiaSassOperand(NvidiaSassNode):
+class NvidiaSassOperand(IsaOperand, NvidiaSassNode):
   """Base class for instruction operands (Registers, Immediates, etc.)."""
 
   pass
 
 
 @dataclass
-class NvidiaSassRegister(NvidiaSassOperand):
+class NvidiaSassRegister(IsaRegister, NvidiaSassOperand):
   """Represent a general-purpose register (e.g., R0, RZ).
 
   Attributes:
@@ -78,7 +87,7 @@ class NvidiaSassPredicate(NvidiaSassOperand):
 
 
 @dataclass
-class NvidiaSassImmediate(NvidiaSassOperand):
+class NvidiaSassImmediate(IsaImmediate, NvidiaSassOperand):
   """Represent a literal constant value.
 
   Attributes:
@@ -89,22 +98,9 @@ class NvidiaSassImmediate(NvidiaSassOperand):
   value: Union[int, float] = 0
   is_hex: bool = False
 
-  def to_text(self) -> str:
-    """Render the immediate to its literal text."""
-    res = "".join(t.text for t in self.leading_trivia)
-    if self.is_hex:
-      if isinstance(self.value, float):
-        res += hex(int(self.value))
-      else:
-        res += hex(int(self.value))
-    else:
-      res += str(self.value)
-    res += "".join(t.text for t in self.trailing_trivia)
-    return res
-
 
 @dataclass
-class NvidiaSassMemory(NvidiaSassOperand):
+class NvidiaSassMemory(IsaMemory, NvidiaSassOperand):
   """Represent a memory address operand.
 
   Supports Constant Bank access (e.g., `c[0x0][0x4]`) and Global/Local
@@ -142,7 +138,7 @@ class NvidiaSassMemory(NvidiaSassOperand):
 
 
 @dataclass
-class NvidiaSassInstruction(NvidiaSassNode):
+class NvidiaSassInstruction(IsaInstruction, NvidiaSassNode):
   """Represent a single NVIDIA_SASS operation line.
 
   Attributes:
@@ -188,7 +184,7 @@ class NvidiaSassInstruction(NvidiaSassNode):
 
 
 @dataclass
-class NvidiaSassLabel(NvidiaSassOperand):
+class NvidiaSassLabel(IsaLabel, NvidiaSassOperand):
   """Represent a jump target label.
 
   Attributes:
@@ -196,13 +192,6 @@ class NvidiaSassLabel(NvidiaSassOperand):
   """
 
   name: str = ""
-
-  def to_text(self) -> str:
-    """Render the label to its literal text."""
-    res = "".join(t.text for t in self.leading_trivia)
-    res += f"{self.name}:"
-    res += "".join(t.text for t in self.trailing_trivia)
-    return res
 
 
 @dataclass
@@ -228,7 +217,7 @@ class NvidiaSassDirective(NvidiaSassNode):
 
 
 @dataclass
-class NvidiaSassComment(NvidiaSassNode):
+class NvidiaSassComment(IsaComment, NvidiaSassNode):
   """Represent a line comment.
 
   Attributes:
@@ -236,13 +225,7 @@ class NvidiaSassComment(NvidiaSassNode):
   """
 
   text: str = ""
-
-  def to_text(self) -> str:
-    """Render the comment to its literal text."""
-    res = "".join(t.text for t in self.leading_trivia)
-    res += f"// {self.text}"
-    res += "".join(t.text for t in self.trailing_trivia)
-    return res
+  prefix: str = "//"
 
 
 @dataclass

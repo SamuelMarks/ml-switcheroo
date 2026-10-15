@@ -5,7 +5,11 @@ that converts a stream of characters into a Concrete Syntax Tree defined in `cst
 """
 
 import re
-from typing import List, cast, Any
+from typing import Any, List, cast
+
+from lark import Lark, Transformer, v_args
+from lark.lexer import Lexer, Token
+
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassDirective,
@@ -13,15 +17,12 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassInstruction,
   NvidiaSassLabel,
   NvidiaSassMemory,
+  NvidiaSassModule,
   NvidiaSassOperand,
   NvidiaSassPredicate,
   NvidiaSassRegister,
-  NvidiaSassModule,
 )
 from ml_switcheroo.core.cst.base import Trivia
-
-from lark import Lark, Transformer, v_args
-from lark.lexer import Lexer, Token
 
 TOKEN_REGEX = [
   ("COMMENT", r"//[^\n]*"),

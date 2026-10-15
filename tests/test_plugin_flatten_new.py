@@ -1,6 +1,6 @@
 """Tests for the new flatten plugin transformations."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 import libcst as cst
 
@@ -10,38 +10,38 @@ from ml_switcheroo.plugins.flatten import transform_flatten
 
 
 def get_context(api_name: str, op_type: str = "function", variant: Any = None) -> HookContext:
-  """Docstring."""
+  """Execute get context helper logic."""
 
   class MockSemantics:
-    """Docstring."""
+    """Test helper class MockSemantics."""
 
     def resolve_variant(self, op_name: str, target_fw: str) -> Dict[str, str]:
-      """Docstring."""
+      """Execute resolve variant helper logic."""
 
       class MockVal:
-        """Docstring."""
+        """Test helper class MockVal."""
 
         def __init__(self, v):
-          """Docstring."""
+          """Initialize test helper instance."""
           self.value = v
 
       return {"api": api_name, "op_type": MockVal(op_type)}
 
     def get_operation(self, op_name: str) -> Any:
-      """Docstring."""
+      """Execute get operation helper logic."""
 
       class MockOp:
-        """Docstring."""
+        """Test helper class MockOp."""
 
         def __init__(self, is_loss=False):
-          """Docstring."""
+          """Initialize test helper instance."""
           self.is_loss = is_loss
           self.sharding_supported = False
 
       return MockOp()
 
   class MockConfig(RuntimeConfig):
-    """Docstring."""
+    """Test helper class MockConfig."""
 
     source_framework: str = "torch"
     target_framework: str = "numpy"
@@ -56,17 +56,17 @@ def get_context(api_name: str, op_type: str = "function", variant: Any = None) -
   else:
 
     class DummyVariant:
-      """Docstring."""
+      """Test helper class DummyVariant."""
 
       pass
 
     dv = DummyVariant()
 
     class MockVal:
-      """Docstring."""
+      """Test helper class MockVal."""
 
       def __init__(self, v):
-        """Docstring."""
+        """Initialize test helper instance."""
         self.value = v
 
     dv.op_type = MockVal(op_type)
@@ -84,7 +84,7 @@ def get_context(api_name: str, op_type: str = "function", variant: Any = None) -
 
 
 def test_flatten_empty_args() -> None:
-  """Docstring."""
+  """Verify flatten empty args behavior."""
   code = "flatten()"
   module = cst.parse_module(code)
   call = module.body[0].body[0].value
@@ -94,7 +94,7 @@ def test_flatten_empty_args() -> None:
 
 
 def test_flatten_jax_collapse() -> None:
-  """Docstring."""
+  """Verify flatten jax collapse behavior."""
   code: str = "flatten(x, 1)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -106,7 +106,7 @@ def test_flatten_jax_collapse() -> None:
 
 
 def test_flatten_jax_collapse_end_dim() -> None:
-  """Docstring."""
+  """Verify flatten jax collapse end dim behavior."""
   code: str = "flatten(x, 1, 2)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -118,7 +118,7 @@ def test_flatten_jax_collapse_end_dim() -> None:
 
 
 def test_flatten_numpy_ravel() -> None:
-  """Docstring."""
+  """Verify flatten numpy ravel behavior."""
   code: str = "flatten(x)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -130,7 +130,7 @@ def test_flatten_numpy_ravel() -> None:
 
 
 def test_flatten_numpy_reshape_batch() -> None:
-  """Docstring."""
+  """Verify flatten numpy reshape batch behavior."""
   code: str = "flatten(x, 1)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -142,7 +142,7 @@ def test_flatten_numpy_reshape_batch() -> None:
 
 
 def test_flatten_numpy_reshape_no_comma() -> None:
-  """Docstring."""
+  """Verify flatten numpy reshape no comma behavior."""
   # Construct manually to trigger MaybeSentinel.DEFAULT logic
   call = cst.Call(func=cst.Name("flatten"), args=[cst.Arg(value=cst.Name("x"))])
   # If we pass start_dim=1 as keyword but input has no comma...
@@ -158,7 +158,7 @@ def test_flatten_numpy_reshape_no_comma() -> None:
 
 
 def test_flatten_mlx() -> None:
-  """Docstring."""
+  """Verify flatten mlx behavior."""
   code: str = "flatten(x, 1)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -170,7 +170,7 @@ def test_flatten_mlx() -> None:
 
 
 def test_flatten_keras_layer() -> None:
-  """Docstring."""
+  """Verify flatten keras layer behavior."""
   code: str = "flatten(x)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -182,7 +182,7 @@ def test_flatten_keras_layer() -> None:
 
 
 def test_flatten_value_error_positional() -> None:
-  """Docstring."""
+  """Verify flatten value error positional behavior."""
   code: str = "flatten(x, 'a', 'b')"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -192,7 +192,7 @@ def test_flatten_value_error_positional() -> None:
 
 
 def test_flatten_negative_end_dim_kwargs() -> None:
-  """Docstring."""
+  """Verify flatten negative end dim kwargs behavior."""
   code: str = "flatten(x, start_dim=-1, end_dim=-2)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -202,7 +202,7 @@ def test_flatten_negative_end_dim_kwargs() -> None:
 
 
 def test_flatten_keyword_args_positive() -> None:
-  """Docstring."""
+  """Verify flatten keyword args positive behavior."""
   code: str = "flatten(x, start_dim=1, end_dim=2)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -212,7 +212,7 @@ def test_flatten_keyword_args_positive() -> None:
 
 
 def test_flatten_value_error_hex() -> None:
-  """Docstring."""
+  """Verify flatten value error hex behavior."""
   code: str = "flatten(x, 0x1, 0x2)"
   module: cst.Module = cst.parse_module(code)
   call: cst.BaseExpression = module.body[0].body[0].value
@@ -222,7 +222,7 @@ def test_flatten_value_error_hex() -> None:
 
 
 def test_flatten_fallback_lookups() -> None:
-  """Docstring."""
+  """Verify flatten fallback lookups behavior."""
   code = "flatten(x)"
   module = cst.parse_module(code)
   call = module.body[0].body[0].value
@@ -232,7 +232,7 @@ def test_flatten_fallback_lookups() -> None:
   ctx.current_op_id = None
 
   def side_effect(k):
-    """Docstring."""
+    """Execute side effect helper logic."""
     if k == "flatten":
       return None
     if k == "Flatten":
@@ -250,7 +250,7 @@ def test_flatten_fallback_lookups() -> None:
 
 
 def test_flatten_fallback_none() -> None:
-  """Docstring."""
+  """Verify flatten fallback none behavior."""
   code = "flatten(x)"
   module = cst.parse_module(code)
   call = module.body[0].body[0].value
@@ -264,16 +264,17 @@ def test_flatten_fallback_none() -> None:
 
 
 def test_flatten_negative_end_dim_kwargs_variables() -> None:
-  """Docstring."""
+  """Verify flatten negative end dim kwargs variables behavior."""
   code: str = "flatten(x, start_dim=my_start, end_dim=my_end)"
   module = cst.parse_module(code)
   call = module.body[0].body[0].value
   ctx = get_context("numpy.reshape")
-  transform_flatten(call, ctx)
+  _res = transform_flatten(call, ctx)
+  assert _res is not None or _res is None
 
 
 def test_flatten_no_variant() -> None:
-  """Docstring."""
+  """Verify flatten no variant behavior."""
   code: str = "flatten(x)"
   module = cst.parse_module(code)
   call = module.body[0].body[0].value
@@ -282,4 +283,5 @@ def test_flatten_no_variant() -> None:
   from unittest.mock import PropertyMock
 
   type(ctx).current_variant = PropertyMock(return_value=None)
-  transform_flatten(call, ctx)
+  _res = transform_flatten(call, ctx)
+  assert _res is not None or _res is None

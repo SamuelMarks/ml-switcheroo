@@ -6,7 +6,7 @@ import keras
 
 
 class MLP(keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class MLP."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int) -> None:
     """Initializes the MLP instance."""

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Fail if any python file exceeds 400 lines of code
+# Fail if any python file exceeds MAX_LOC lines of code
 
-MAX_LOC=1500
+MAX_LOC=${MAX_LOC:-1500}
 FAILED=0
 
 for file in "$@"; do

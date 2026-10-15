@@ -12,7 +12,7 @@ from ml_switcheroo.testing.fuzzer.core import InputFuzzer
 
 @pytest.fixture
 def fuzzer() -> InputFuzzer:
-  """Docstring."""
+  """Execute fuzzer helper logic."""
   return InputFuzzer()
 
 

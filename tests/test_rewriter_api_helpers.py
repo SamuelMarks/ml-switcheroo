@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for rewriter api helpers."""
 
 
 # --- Merged from test_rewriter_api_helpers_extra.py ---
@@ -14,37 +14,37 @@ from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
 
 
 class DummySemantics:
-  """Docstring."""
+  """Test helper class DummySemantics."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.alias_map: Dict[str, str] = {"t": "torch"}
     self._key_origins: Dict[str, str] = {"abs_id": "neural"}
     self.framework_configs: Dict[str, Any] = {}
 
   def get_definition(self, func_name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-    """Docstring."""
+    """Execute get definition helper logic."""
     return None
 
   def get_framework_config(self, fw: str) -> Dict[str, Any]:
-    """Docstring."""
+    """Execute get framework config helper logic."""
     return self.framework_configs.get(fw, {"alias": {}})
 
   def resolve_op_id(self, fw: str, name: str) -> Optional[str]:
-    """Docstring."""
+    """Execute resolve op id helper logic."""
     return None
 
   def is_verified(self, abs_id: str) -> bool:
-    """Docstring."""
+    """Execute is verified helper logic."""
     return True
 
   def resolve_variant(self, a: Any, b: Any) -> Optional[Dict[str, Any]]:
-    """Docstring."""
+    """Execute resolve variant helper logic."""
     return None
 
 
 def test_api_helpers_module_alias() -> None:
-  """Docstring."""
+  """Verify api helpers module alias behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
   semantics: DummySemantics = DummySemantics()
   context: RewriterContext = RewriterContext(semantics=semantics, config=config)
@@ -67,7 +67,7 @@ def test_api_helpers_module_alias() -> None:
 
 
 def test_api_helpers_branches_missing() -> None:
-  """Docstring."""
+  """Verify api helpers branches missing behavior."""
   config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
   semantics: DummySemantics = DummySemantics()
   context: RewriterContext = RewriterContext(semantics=semantics, config=config)

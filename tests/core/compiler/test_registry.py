@@ -1,4 +1,4 @@
-"""Module docstring."""
+"""Test suite for registry."""
 
 import pytest
 
@@ -6,10 +6,10 @@ from ml_switcheroo.core.compiler.registry import GraphFrontend
 
 
 def test_graph_frontend_parse_not_implemented():
-  """Docstring."""
+  """Verify graph frontend parse not implemented behavior."""
 
   class DummyFrontend(GraphFrontend):
-    """Docstring."""
+    """Test helper class DummyFrontend."""
 
     pass
 

@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class GAPModel(nn.Module):
-  """Docstring."""
+  """Test helper class GAPModel."""
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
     """Helper to forward."""

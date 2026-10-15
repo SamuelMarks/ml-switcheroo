@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for stablehlo reader."""
 
 from pathlib import Path
 
@@ -6,14 +6,14 @@ from ml_switcheroo.importers.stablehlo_reader import StableHloSpecImporter
 
 
 def test_stablehlo_reader_missing_file(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify stablehlo reader missing file behavior."""
   importer = StableHloSpecImporter()
   res = importer.parse_file(tmp_path / "missing.md")
   assert res == {}
 
 
 def test_stablehlo_reader_parse_markdown(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify stablehlo reader parse markdown behavior."""
   importer = StableHloSpecImporter()
 
   md_content = """
@@ -110,7 +110,7 @@ stablehlo.broken_syntax ( ) [ ]
 
 
 def test_stablehlo_long_summary(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify stablehlo long summary behavior."""
   importer = StableHloSpecImporter()
   long_desc = "A" * 310
 
@@ -129,7 +129,7 @@ def test_stablehlo_long_summary(tmp_path: Path) -> None:
 
 
 def test_stablehlo_extra_coverage(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify stablehlo extra coverage behavior."""
   importer = StableHloSpecImporter()
   md_content = """
 Intro text before any h3 to hit elif current_op false branch.
@@ -162,6 +162,7 @@ Second paragraph to hit false branch of not current_def["description"].
 def test_stablehlo_all_missing_branches(tmp_path: Path) -> None:
   """Test remaining branches in stablehlo reader."""
   from unittest.mock import MagicMock, patch
+
   from markdown_it.token import Token
 
   importer = StableHloSpecImporter()

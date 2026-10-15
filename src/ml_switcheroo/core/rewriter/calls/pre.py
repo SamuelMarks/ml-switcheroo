@@ -5,19 +5,12 @@ Updated to remove dependencies on deleted legacy modules.
 """
 
 import typing
-from typing import Any
-
-
-from typing import Tuple, Optional, TYPE_CHECKING, Set, cast
+from typing import TYPE_CHECKING, Any, Optional, Set, Tuple, cast
 
 import libcst as cst
 
-from ml_switcheroo.core.rewriter.calls.utils import (
-  is_functional_apply,
-  log_diff,
-  rewrite_stateful_call,
-)
 from ml_switcheroo.core.hooks import get_hook
+from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply, log_diff, rewrite_stateful_call
 
 if TYPE_CHECKING:
   # Structural typing for rewriter to avoid circular import
@@ -31,11 +24,25 @@ if TYPE_CHECKING:
     """Structural type representation of a hook context."""
 
     def get_definition(self, func_name: str) -> Optional[Tuple[str, dict[Any, Any]]]:
-      """Structural method signature."""
+      """Retrieve operation definition by function name.
+
+      Args:
+          func_name: Qualified function name to look up.
+
+      Returns:
+          Tuple of (abstract_id, details) if found, else None.
+      """
       ...
 
     def get_framework_config(self, target_fw: str) -> dict[Any, Any]:
-      """Structural method signature."""
+      """Retrieve framework configuration dictionary.
+
+      Args:
+          target_fw: Target framework identifier string.
+
+      Returns:
+          Framework configuration dictionary.
+      """
       ...
 
   class HookContextDummy:
@@ -66,48 +73,92 @@ if TYPE_CHECKING:
     """Structural type representation of a hook context."""
 
     def get_type(self, node: cst.CSTNode) -> Optional[SymbolTypeDummy]:
-      """Structural method signature."""
+      """Retrieve inferred symbol type for a CST node.
+
+      Args:
+          node: CST node to look up in the symbol table.
+
+      Returns:
+          Inferred SymbolTypeDummy if available, else None.
+      """
       ...
 
-  class RewriterDummy:
+  class RewriterDummy(typing.Protocol):
     """Structural type representation of a hook context."""
 
-    source_traits: SourceTraitsDummy
-    semantics: SemanticManagerDummy
+    source_traits: Any
+    semantics: Any
     target_fw: str
     source_fw: str
-    context: RewriterContextDummy
-
-    def _get_source_traits(self) -> SourceTraitsDummy:
-      """Structural method signature."""
-      ...
+    context: Any
 
     def _get_mapping(self, func_name: str, silent: bool = False) -> Optional[dict[Any, Any]]:
-      """Structural method signature."""
+      """Retrieve target mapping for a function name.
+
+      Args:
+          func_name: Function name to look up.
+          silent: Whether to suppress errors.
+
+      Returns:
+          Mapping dictionary if found, else None.
+      """
       ...
 
     def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
-      """Structural method signature."""
+      """Retrieve strip and warning lifecycle method sets.
+
+      Returns:
+          Tuple of strip and warning method sets.
+      """
       ...
 
     def _report_warning(self, msg: str) -> None:
-      """Structural method signature."""
+      """Report a warning message during rewriting.
+
+      Args:
+          msg: Warning message string.
+      """
       ...
 
     def _is_stateful(self, func_name: str) -> bool:
-      """Structural method signature."""
+      """Check if a variable or callable is stateful.
+
+      Args:
+          func_name: Name of the callable or variable.
+
+      Returns:
+          True if stateful, False otherwise.
+      """
       ...
 
-    def _is_module_alias(self, name: cst.BaseExpression) -> bool:
-      """Structural method signature."""
+    def _is_module_alias(self, name: cst.CSTNode) -> bool:
+      """Check if a CST node is a module alias.
+
+      Args:
+          name: CST node to inspect.
+
+      Returns:
+          True if module alias, False otherwise.
+      """
       ...
 
-    def _get_target_traits(self) -> "SourceTraitsDummy":
-      """Structural method signature."""
+    def _get_target_traits(self) -> Any:
+      """Retrieve target structural traits.
+
+      Returns:
+          Target StructuralTraits object.
+      """
       ...
 
-    def _create_dotted_name(self, name: str) -> cst.Attribute:
-      """Structural method signature."""
+    def _create_dotted_name(self, name: str) -> typing.Union[cst.Name, cst.Attribute]:
+      """Create a CST Name or Attribute chain from a dotted name string.
+
+      Args:
+          name: Dotted name string.
+
+      Returns:
+          CST Name or Attribute node.
+      """
       ...
 
 
@@ -135,7 +186,7 @@ def handle_pre_checks(
     if hasattr(rewriter, "source_traits"):
       source_traits = rewriter.source_traits
     else:
-      source_traits = rewriter._get_source_traits()
+      source_traits = getattr(rewriter, "_get_source_traits")()
 
     unwrap_method = source_traits.functional_execution_method
 

@@ -5,7 +5,7 @@ from ml_switcheroo.core.engine import ASTEngine
 
 
 def test_astengine_init_missing_branches() -> None:
-  """Docstring."""
+  """Verify astengine init missing branches behavior."""
   engine1: ASTEngine = ASTEngine(source="torch", target="jax", intermediate="onnx")
   assert engine1.config.intermediate == "onnx"
 

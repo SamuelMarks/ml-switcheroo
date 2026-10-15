@@ -1,19 +1,26 @@
-"""Python Source Code Backend.
+"""Python code synthesis backend for compiling LogicalGraph IR into Python CST modules."""
 
-This module implements a Compiler Backend that synthesizes Python source code
-from the Logical Graph Internal Representation via LibCST.
-"""
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from typing import Any
-
-
-from typing import List, Optional, Union, cast
 import libcst as cst
-from libcst import matchers as m
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.backends.python_strategies.forward import build_forward
+from ml_switcheroo.core.compiler.backends.python_strategies.imports import generate_imports
+from ml_switcheroo.core.compiler.backends.python_strategies.init import build_init
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, topological_sort
 from ml_switcheroo.frameworks.base import get_adapter
+
+_BASE_CLASS_SHORT_PREFIX: Dict[str, Tuple[str, str]] = {
+  "torch": ("torch.nn.", "nn."),
+  "flax_nnx": ("flax.nnx.", "nnx."),
+  "paxml": ("praxis.base_layer.", ""),
+}
+
+_MODEL_BASE_OVERRIDE: Dict[str, Tuple[str, str]] = {
+  "tensorflow": ("keras.Layer", "tf.keras.Model"),
+  "keras": ("keras.Layer", "keras.Model"),
+}
 
 
 class ClassBodyReplacer(cst.CSTTransformer):
@@ -106,11 +113,11 @@ class PythonBackend(CompilerBackend):
   """Synthesize a Python CST Module from a LogicalGraph."""
 
   def __init__(self, framework: str = "torch", semantics: Any = None) -> None:
-    """Initialize the PythonBackend.
+    """Initialize PythonBackend with target framework and semantics manager.
 
     Args:
-        framework: Target ML framework (e.g., 'torch', 'jax').
-        semantics: Optional semantics configuration.
+        framework: Target framework identifier (default: 'torch').
+        semantics: Optional SemanticsManager instance for resolving API variants.
     """
     self.framework = framework
     self.semantics = semantics
@@ -121,6 +128,32 @@ class PythonBackend(CompilerBackend):
       from ml_switcheroo.semantics.schema import StructuralTraits
 
       self.traits = StructuralTraits()
+
+  def _is_stateful_layer(self, node: LogicalNode) -> bool:
+    """Check whether a LogicalNode represents a stateful neural layer.
+
+    Args:
+        node: The LogicalNode to inspect.
+
+    Returns:
+        True if the node is a stateful layer, False otherwise.
+    """
+    from ml_switcheroo.core.compiler.backends.python_strategies.init import is_stateful_layer
+
+    return is_stateful_layer(node)
+
+  def _generate_layer_init(self, node: LogicalNode) -> Any:
+    """Generate the LibCST layer initialization statement for a LogicalNode.
+
+    Args:
+        node: The LogicalNode representing the layer to initialize.
+
+    Returns:
+        Generated LibCST SimpleStatementLine for initializing the layer.
+    """
+    from ml_switcheroo.core.compiler.backends.python_strategies.init import generate_layer_init
+
+    return generate_layer_init(node, self.framework, self.semantics)
 
   def compile(self, graph: LogicalGraph) -> str:
     """Compile the given LogicalGraph to a Python string.
@@ -153,8 +186,8 @@ class PythonBackend(CompilerBackend):
     """
     ordered_nodes = topological_sort(graph)
     # Ensure graph input/output conventions are respected
-    init_func = self._build_init(ordered_nodes)
-    forward_func = self._build_forward(ordered_nodes)
+    init_func = build_init(ordered_nodes, self.framework, self.semantics, self.traits)
+    forward_func = build_forward(ordered_nodes, self.framework, self.semantics, self.traits, self)
 
     if original_tree:
       replacer = ClassBodyReplacer(class_name, init_func, forward_func)
@@ -163,23 +196,16 @@ class PythonBackend(CompilerBackend):
         return new_tree.code
 
     body: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
-    body.extend(self._generate_imports())
+    body.extend(generate_imports(self.framework))
 
     base_class = self.traits.module_base if self.traits.module_base else "nn.Module"
-    if self.framework == "torch" and base_class.startswith("torch.nn."):
-      base_class = "nn." + base_class[9:]
-    elif self.framework == "flax_nnx" and base_class.startswith("flax.nnx."):
-      base_class = "nnx." + base_class[9:]
-    elif self.framework == "paxml" and base_class.startswith("praxis.base_layer."):
-      base_class = "BaseLayer"
+    short_pref_rule = _BASE_CLASS_SHORT_PREFIX.get(self.framework)
+    if short_pref_rule and base_class.startswith(short_pref_rule[0]):
+      base_class = short_pref_rule[1] + base_class[len(short_pref_rule[0]) :]
 
-    if self.framework == "tensorflow" and base_class == "keras.Layer":
-      # The test explicitly looks for `tf.keras.Model` or `tf.keras.Layer`.
-      # I'll use tf.keras.Model as it matches the test I just broke and fixed, wait, let me use tf.keras.Model because we are building a top-level network (DecompiledModel).
-      base_class = "tf.keras.Model"
-    elif self.framework == "keras" and base_class == "keras.Layer":
-      # test_python_backend_imports expects keras.Model
-      base_class = "keras.Model"
+    override_rule = _MODEL_BASE_OVERRIDE.get(self.framework)
+    if override_rule and base_class == override_rule[0]:
+      base_class = override_rule[1]
 
     # To add spacing without appending invalid EmptyLine tokens to the body list,
     # we attach leading_lines to the class definition.
@@ -201,327 +227,3 @@ class PythonBackend(CompilerBackend):
     # LibCST module expects sequence of statements
     module = cst.Module(body=body)
     return module.code
-
-  def _generate_imports(self) -> List[cst.SimpleStatementLine]:
-    """Generate import statements for the chosen framework.
-
-    Returns:
-        A list of CST statement nodes for imports.
-    """
-    if self.framework == "torch":
-      return [
-        cast(cst.SimpleStatementLine, cst.parse_statement("import torch")),
-        cast(cst.SimpleStatementLine, cst.parse_statement("import torch.nn as nn")),
-      ]
-    elif self.framework in ["jax", "flax", "flax_nnx"]:
-      return [
-        cast(cst.SimpleStatementLine, cst.parse_statement("from flax import nnx")),
-        cast(cst.SimpleStatementLine, cst.parse_statement("import jax.numpy as jnp")),
-      ]
-    elif self.framework == "mlx":
-      return [
-        cast(cst.SimpleStatementLine, cst.parse_statement("import mlx.core as mx")),
-        cast(cst.SimpleStatementLine, cst.parse_statement("import mlx.nn as nn")),
-      ]
-    elif self.framework in ["keras", "tensorflow"]:
-      return [
-        cast(cst.SimpleStatementLine, cst.parse_statement("import keras")),
-        cast(cst.SimpleStatementLine, cst.parse_statement("import tensorflow as tf")),
-      ]
-    elif self.framework == "paxml":
-      return [
-        cast(cst.SimpleStatementLine, cst.parse_statement("import praxis.layers as pl")),
-        cast(cst.SimpleStatementLine, cst.parse_statement("import praxis.layers.convolutions")),
-        cast(cst.SimpleStatementLine, cst.parse_statement("from praxis.base_layer import BaseLayer")),
-      ]
-    return []
-
-  def _build_init(self, nodes: List[LogicalNode]) -> cst.FunctionDef:
-    """Build the __init__ or setup method for the class.
-
-    Args:
-        nodes: List of logical nodes in topological order.
-
-    Returns:
-        A CST FunctionDef node.
-    """
-    stmts: List[cst.BaseStatement] = []
-    if self.traits.requires_super_init:
-      stmts.append(cst.parse_statement("super().__init__()"))
-
-    for node in nodes:
-      if self._is_stateful_layer(node):
-        assignment = self._generate_layer_init(node)
-        stmts.append(assignment)
-
-    params = [cst.Param(name=cst.Name("self"))]
-    if self.framework in ["jax", "flax", "flax_nnx"]:
-      params.append(
-        cst.Param(
-          name=cst.Name("rngs"),
-          annotation=cst.Annotation(cst.parse_expression("nnx.Rngs")),
-        )
-      )
-
-    if not stmts:
-      stmts.append(cst.parse_statement("pass"))
-
-    init_name = "setup" if self.framework == "paxml" else "__init__"
-    return cst.FunctionDef(
-      name=cst.Name(init_name),
-      params=cst.Parameters(params=params),
-      body=cst.IndentedBlock(body=stmts),
-    )
-
-  def _build_forward(self, nodes: List[LogicalNode]) -> cst.FunctionDef:
-    """Build the forward pass or __call__ method for the class.
-
-    Args:
-        nodes: List of logical nodes in topological order.
-
-    Returns:
-        A CST FunctionDef node.
-    """
-    stmts: List[cst.BaseStatement] = []
-    input_nodes = [n for n in nodes if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Input"]
-    input_arg_name = "x"
-    if input_nodes:
-      inp_attrs = getattr(input_nodes[0], "attributes", {})
-      input_arg_name = inp_attrs.get("name", input_nodes[0].id)
-
-    current_var = input_arg_name
-    var_map = {input_nodes[0].id: input_arg_name} if input_nodes else {}
-
-    for node in nodes:
-      op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
-      if op_type == "Input":
-        continue
-      if op_type == "Output":
-        # Check if output is fed by something specific
-        stmts.append(cst.parse_statement(f"return {current_var}"))
-        continue
-
-      if self._is_stateful_layer(node):
-        line = f"{current_var} = self.{node.id}({current_var})"
-        stmts.append(cst.parse_statement(line))
-      else:
-        func_api = op_type
-        if self.semantics and hasattr(self.semantics, "resolve_variant"):
-          # First, try to resolve it as an abstract ID directly.
-          definition = self.semantics.resolve_variant(func_api, self.framework)
-          if not definition and hasattr(self.semantics, "get_definition"):
-            # If not found, it might be a concrete API (e.g. "torch.flatten").
-            # Try to reverse lookup its abstract ID.
-            rev = self.semantics.get_definition(func_api)
-            if rev:
-              abstract_id, _ = rev
-              definition = self.semantics.resolve_variant(abstract_id, self.framework)
-
-          if definition and "api" in definition:
-            func_api = definition["api"]
-
-        args_str = current_var
-        node_attrs = getattr(node, "attributes", {})
-        if node_attrs:
-          extra_args = self._format_args_from_metadata(node_attrs)
-          if extra_args:
-            args_str += f", {extra_args}"
-        line = f"{current_var} = {func_api}({args_str})"
-        stmts.append(cst.parse_statement(line))
-
-      # Apply sharding constraint if present
-      if getattr(node, "sharding", None):
-        if self.framework in ["jax", "flax", "flax_nnx"]:
-          spec_str = self._format_partition_spec(node.sharding)
-          sharding_line = f"{current_var} = jax.lax.with_sharding_constraint({current_var}, {spec_str})"
-          stmts.append(cst.parse_statement(sharding_line))
-        elif self.framework == "torch":
-          spec_str = self._format_partition_spec_torch(node.sharding)
-          sharding_line = f"{current_var} = distribute_tensor({current_var}, self.mesh, [{spec_str}])"
-          stmts.append(cst.parse_statement(sharding_line))
-        elif self.framework in ["keras", "tensorflow"]:
-          spec_str = self._format_partition_spec_tf(node.sharding)
-          sharding_line = (
-            f"with tf.distribute.Strategy().scope():\n    {current_var} = tf.distribute.experimental.Layout({spec_str})"
-          )
-          # It's better to just emit a warning comment or basic layout for keras
-          # We emit an actual statement because LibCST parse_statement rejects standalone comments easily
-          sharding_line = f"pass  # {current_var} = keras.distribution.layout({spec_str})"
-          stmts.append(cst.parse_statement(sharding_line))
-        elif self.framework == "mlx":
-          sharding_line = f"pass  # MLX: mx.distributed.shard({current_var})"
-          stmts.append(cst.parse_statement(sharding_line))
-
-      var_map[node.id] = current_var
-
-    # Ensure return at end
-    if not stmts or not m.matches(stmts[-1], m.SimpleStatementLine(body=[m.Return()])):
-      stmts.append(cst.parse_statement(f"return {current_var}"))
-
-    func_name = self.traits.forward_method if self.traits.forward_method else "forward"
-
-    return cst.FunctionDef(
-      name=cst.Name(func_name),
-      params=cst.Parameters(
-        params=[
-          cst.Param(name=cst.Name("self")),
-          cst.Param(name=cst.Name(input_arg_name)),
-        ]
-      ),
-      body=cst.IndentedBlock(body=stmts),
-    )
-
-  def _is_stateful_layer(self, node: LogicalNode) -> bool:
-    """Check if a node represents a stateful layer.
-
-    Args:
-        node: The node to evaluate.
-
-    Returns:
-        True if stateful, False otherwise.
-    """
-    op_type: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
-    if op_type in ["Input", "Output"]:
-      return False
-    if "." in op_type and not op_type.startswith("nn."):
-      return False
-    return True
-
-  def _generate_layer_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
-    """Generate the initialization assignment for a stateful layer.
-
-    Args:
-        node: The stateful logical node.
-
-    Returns:
-        A CST SimpleStatementLine node.
-    """
-    kind: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
-    if self.semantics and hasattr(self.semantics, "resolve_variant"):
-      definition = self.semantics.resolve_variant(kind, self.framework)
-      if definition and "api" in definition:
-        resolved_api = definition["api"]
-        # Do not use functional APIs for stateful layer init in PyTorch or MLX
-        if self.framework == "torch" and "functional" in resolved_api:
-          pass
-        elif self.framework == "mlx" and "mlx.core." in resolved_api:
-          pass
-        else:
-          kind = resolved_api
-
-    if self.framework == "torch" and kind.startswith("torch.nn."):
-      kind = "nn." + kind[9:]
-    elif self.framework == "mlx" and kind.startswith("mlx.nn."):
-      kind = "nn." + kind[7:]
-
-    if "." not in kind:
-      if self.framework == "torch":
-        kind = f"nn.{kind}"
-      elif self.framework in ["jax", "flax", "flax_nnx"]:
-        kind = f"nnx.{kind}"
-      elif self.framework == "keras":
-        kind = f"keras.layers.{kind}"
-      elif self.framework == "tensorflow":
-        kind = f"tf.keras.layers.{kind}"
-      elif self.framework == "mlx":
-        kind = f"nn.{kind}"
-      elif self.framework == "paxml":
-        kind = f"pl.{kind}"
-
-      # Framework specific primitive mapping
-      if kind.endswith("SwiGLU") and self.framework == "mlx":
-        kind = kind.replace("SwiGLU", "silu")  # Simplified mapping for demo
-      if kind.endswith("RoPE") and self.framework == "mlx":
-        kind = "nn.RoPE"
-      if kind.endswith("VisionPatchEmbedding") and self.framework == "mlx":
-        kind = "nn.Conv2d"  # fallback mapping
-
-    node_attrs = getattr(node, "attributes", {})
-    args_str = self._format_args_from_metadata(node_attrs)
-    if self.framework in ["jax", "flax", "flax_nnx"]:
-      if "rngs" not in args_str:
-        suffix = ", rngs=rngs" if args_str else "rngs=rngs"
-        args_str += suffix
-
-    if self.framework == "paxml":
-      code = f"self.create_child('{node.id}', {kind}({args_str}))"
-    else:
-      code = f"self.{node.id} = {kind}({args_str})"
-    return cast(cst.SimpleStatementLine, cst.parse_statement(code))
-
-  def _format_args_from_metadata(self, metadata: Any) -> str:
-    """Format node metadata dictionary into a Python arguments string.
-
-    Args:
-        metadata: The metadata dictionary.
-
-    Returns:
-        Formatted arguments string.
-    """
-    if not metadata:
-      return ""
-    args_list = []
-    for key in sorted(metadata.keys()):
-      val = str(metadata[key])
-      if key.startswith("arg_"):
-        args_list.append(val)
-      else:
-        args_list.append(f"{key}={val}")
-    return ", ".join(args_list)
-
-  def _format_partition_spec(self, sharding: Any) -> str:
-    """Format JAX partition spec from abstract sharding.
-
-    Args:
-        sharding: The abstract sharding definition.
-
-    Returns:
-        JAX PartitionSpec code string.
-    """
-    axes = []
-    for axis in sharding.axes:
-      if axis is None:
-        axes.append("None")
-      elif isinstance(axis, str):
-        axes.append(f"'{axis}'")
-      elif isinstance(axis, tuple):
-        t_str = ", ".join(f"'{a}'" for a in axis)
-        axes.append(f"({t_str})")
-    return f"jax.sharding.PartitionSpec({', '.join(axes)})"
-
-  def _format_partition_spec_tf(self, sharding: Any) -> str:
-    """Format TensorFlow layout specification.
-
-    Args:
-        sharding: The abstract sharding definition.
-
-    Returns:
-        TensorFlow layout code string.
-    """
-    placements = []
-    for axis in sharding.axes:
-      if axis is None:
-        placements.append("None")
-      elif isinstance(axis, str):
-        placements.append(f"'{axis}'")
-      else:
-        placements.append("'*'")
-    return f"[{', '.join(placements)}]"
-
-  def _format_partition_spec_torch(self, sharding: Any) -> str:
-    """Format PyTorch distribution specification.
-
-    Args:
-        sharding: The abstract sharding definition.
-
-    Returns:
-        PyTorch sharding code string.
-    """
-    placements = []
-    for axis in sharding.axes:
-      if axis is None:
-        placements.append("Replicate()")
-      else:
-        # Simplified: map to Shard(0) for demo
-        placements.append("Shard(0)")
-    return ", ".join(placements)

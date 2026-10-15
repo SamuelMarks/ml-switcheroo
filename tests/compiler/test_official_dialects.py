@@ -7,7 +7,7 @@ from ml_switcheroo.core.mlir.official_dialects import OFFICIAL_OPS
 
 
 def test_official_ops_exist() -> None:
-  """Docstring."""
+  """Verify official ops exist behavior."""
   assert len(OFFICIAL_OPS) > 0
 
   data_path = resources.files("ml_switcheroo.core.mlir.data").joinpath("mlir_official_ops.json")

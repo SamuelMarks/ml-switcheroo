@@ -10,7 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -53,7 +53,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def semantics_mgr() -> MockSemantics:
-  """Docstring."""
+  """Execute semantics mgr helper logic."""
   return MockSemantics()
 
 

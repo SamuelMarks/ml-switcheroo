@@ -9,7 +9,7 @@ from ml_switcheroo.core.rewriter.passes.api_attr_mixin import ApiTransformerAttr
 
 
 class MockSemantics:
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self, defs: dict[str, tuple[str, dict[str, typing.Any]]], origins: dict[str, str]) -> None:
     """Initializes the MockSemantics instance."""
@@ -22,7 +22,7 @@ class MockSemantics:
 
 
 class MockContext:
-  """Docstring."""
+  """Test helper class MockContext."""
 
   def __init__(self) -> None:
     """Initializes the MockContext instance."""
@@ -30,7 +30,7 @@ class MockContext:
 
 
 class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
-  """Docstring."""
+  """Test helper class MockTransformer."""
 
   def __init__(self, semantics: MockSemantics, context: MockContext, traits: typing.Optional[typing.Any] = None) -> None:
     """Initializes the MockTransformer instance."""

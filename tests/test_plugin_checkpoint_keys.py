@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin checkpoint keys."""
 
 from unittest.mock import MagicMock
 
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.checkpoint_keys import transform_checkpoint_keys
 
 
 def test_transform_checkpoint_keys_positional_arg() -> None:
-  """Docstring."""
+  """Verify transform checkpoint keys positional arg behavior."""
   # model.load_state_dict(state)
   node: cst.BaseExpression = cst.parse_expression("model.load_state_dict(state)")
   ctx: HookContext = HookContext(
@@ -26,7 +26,7 @@ def test_transform_checkpoint_keys_positional_arg() -> None:
 
 
 def test_transform_checkpoint_keys_keyword_arg() -> None:
-  """Docstring."""
+  """Verify transform checkpoint keys keyword arg behavior."""
   # model.load_state_dict(state_dict=state_var, strict=True)
   node: cst.BaseExpression = cst.parse_expression("model.load_state_dict(state_dict=state_var, strict=True)")
   ctx: HookContext = HookContext(
@@ -43,7 +43,7 @@ def test_transform_checkpoint_keys_keyword_arg() -> None:
 
 
 def test_transform_checkpoint_keys_no_args() -> None:
-  """Docstring."""
+  """Verify transform checkpoint keys no args behavior."""
   # model.load_state_dict()
   node: cst.BaseExpression = cst.parse_expression("model.load_state_dict()")
   ctx: HookContext = HookContext(
@@ -58,7 +58,7 @@ def test_transform_checkpoint_keys_no_args() -> None:
 
 
 def test_transform_checkpoint_keys_already_injected() -> None:
-  """Docstring."""
+  """Verify transform checkpoint keys already injected behavior."""
   node: cst.BaseExpression = cst.parse_expression("model.load_state_dict(state)")
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock(), preamble_injector=MagicMock())
   ctx.metadata = {"key_mapper_injected": True}

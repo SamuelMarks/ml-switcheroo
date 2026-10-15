@@ -11,11 +11,9 @@ Updates:
 - Sanitizes default values to avoid serializing memory addresses.
 """
 
-from typing import Any
-
-
 import inspect
-from typing import List, Optional, Union, Callable
+from typing import Any, Callable, List, Optional, Union
+
 from pydantic import BaseModel, Field
 
 

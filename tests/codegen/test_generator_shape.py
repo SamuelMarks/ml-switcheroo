@@ -11,7 +11,7 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 class MockShapeSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockShapeSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockShapeSemantics instance."""
@@ -52,7 +52,7 @@ class MockShapeSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[bool], PivotRewriter]:
-  """Docstring."""
+  """Execute rewriter factory helper logic."""
   semantics = MockShapeSemantics()
 
   def create(strict: bool = False) -> PivotRewriter:

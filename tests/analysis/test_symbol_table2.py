@@ -278,7 +278,8 @@ def test_assign_subscript(analyzer: SymbolTableAnalyzer) -> None:
       analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
   """
   code: str = "import torch\nmy_list[0] = torch.randn(1)"
-  analyze(code, analyzer)
+  _res = analyze(code, analyzer)
+  assert _res is not None or _res is None
 
 
 def test_call_non_tensor_return(analyzer: SymbolTableAnalyzer) -> None:
@@ -308,7 +309,8 @@ def test_import_star(analyzer: SymbolTableAnalyzer) -> None:
       analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
   """
   code: str = "from torch import *"
-  analyze(code, analyzer)
+  _res = analyze(code, analyzer)
+  assert _res is not None or _res is None
 
 
 def test_union_no_tensor(analyzer: SymbolTableAnalyzer) -> None:

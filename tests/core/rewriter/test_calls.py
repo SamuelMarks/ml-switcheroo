@@ -17,7 +17,7 @@ from ml_switcheroo.core.rewriter.calls.transformers import (
 
 
 class MockHookContext:
-  """Docstring."""
+  """Test helper class MockHookContext."""
 
   def __init__(self) -> None:
     """Initializes the MockHookContext instance."""
@@ -30,7 +30,7 @@ class MockHookContext:
 
 
 class MockContext:
-  """Docstring."""
+  """Test helper class MockContext."""
 
   def __init__(self) -> None:
     """Initializes the MockContext instance."""
@@ -39,7 +39,7 @@ class MockContext:
 
 
 class MockSemantics:
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -48,7 +48,7 @@ class MockSemantics:
 
 
 class MockTraits:
-  """Docstring."""
+  """Test helper class MockTraits."""
 
   def __init__(self) -> None:
     """Initializes the MockTraits instance."""
@@ -58,7 +58,7 @@ class MockTraits:
 
 
 class MockSignature:
-  """Docstring."""
+  """Test helper class MockSignature."""
 
   def __init__(self, is_init: bool = True, is_module_method: bool = True) -> None:
     """Initializes the MockSignature instance."""
@@ -67,7 +67,7 @@ class MockSignature:
 
 
 class MockRewriter:
-  """Docstring."""
+  """Test helper class MockRewriter."""
 
   def __init__(self) -> None:
     """Initializes the MockRewriter instance."""

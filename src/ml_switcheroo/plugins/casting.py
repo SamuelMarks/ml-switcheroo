@@ -13,7 +13,8 @@ Transformation:
 """
 
 import libcst as cst
-from ml_switcheroo.core.hooks import register_hook, HookContext
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 

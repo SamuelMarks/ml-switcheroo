@@ -12,7 +12,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def mock_mgr() -> SemanticsManager:
-  """Docstring."""
+  """Execute mock mgr helper logic."""
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {
     "torch": {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"},

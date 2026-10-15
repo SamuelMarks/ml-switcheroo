@@ -1,10 +1,11 @@
 """Tests for ODL catalog compiler and roundtrip verifier."""
 
-from pathlib import Path
-from unittest.mock import patch
-import pytest
+from pathlib import Path  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
-import scripts.compile_odl_catalog as compiler
+import pytest  # noqa: E402
+
+import scripts.compile_odl_catalog as compiler  # noqa: E402
 
 
 def test_compile_catalog_and_roundtrip(tmp_path: Path) -> None:
@@ -145,8 +146,8 @@ def test_main_entrypoint(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Non
       monkeypatch: Pytest monkeypatch fixture.
       tmp_path: Pytest temporary directory fixture.
   """
-  import sys
   import runpy
+  import sys
 
   odl_dir = tmp_path / "odl"
   odl_dir.mkdir()

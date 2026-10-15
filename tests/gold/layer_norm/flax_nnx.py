@@ -5,7 +5,7 @@ from flax import nnx
 
 
 class LayerNormModel(nnx.Module):
-  """Docstring."""
+  """Test helper class LayerNormModel."""
 
   def __init__(self, normalized_shape: int, rngs: nnx.Rngs):
     """Initializes the LayerNormModel instance."""

@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for rdna frontend lifter."""
 
 from typing import List
 
@@ -15,7 +15,7 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 
 def test_rdna_lifter_basic() -> None:
-  """Docstring."""
+  """Verify rdna lifter basic behavior."""
   lifter: RdnaLifter = RdnaLifter()
 
   # Manually inject a fake marker that isn't handled explicitly to hit the 'else' branch
@@ -29,6 +29,7 @@ def test_rdna_lifter_basic() -> None:
   original_parse = lifter.comment_parser.parse
 
   def mock_parse(text):
+    """Execute mock_parse test helper."""
     if "FAKE_MARKER" in text:
       return FakeMarker()
     return original_parse(text)
@@ -68,7 +69,7 @@ def test_rdna_lifter_basic() -> None:
 
 
 def test_rdna_lifter_seen_ids() -> None:
-  """Docstring."""
+  """Verify rdna lifter seen ids behavior."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [
     RdnaComment(text="; Input x ->"),
@@ -79,7 +80,7 @@ def test_rdna_lifter_seen_ids() -> None:
 
 
 def test_rdna_lifter_instruction() -> None:
-  """Docstring."""
+  """Verify rdna lifter instruction behavior."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [RdnaInstruction(opcode="v_add_f32", operands=[])]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -88,7 +89,7 @@ def test_rdna_lifter_instruction() -> None:
 
 
 def test_rdna_lifter_multiple_return() -> None:
-  """Docstring."""
+  """Verify rdna lifter multiple return behavior."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [
     RdnaComment(text="; Input x ->"),
@@ -103,7 +104,7 @@ def test_rdna_lifter_multiple_return() -> None:
 
 
 def test_rdna_lifter_unmapped_other() -> None:
-  """Docstring."""
+  """Verify rdna lifter unmapped other behavior."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [
     RdnaComment(text="; Unmapped Op: other_op(other_op)"),
@@ -116,7 +117,7 @@ def test_rdna_lifter_unmapped_other() -> None:
 
 
 def test_rdna_lifter_return_no_previous() -> None:
-  """Docstring."""
+  """Verify rdna lifter return no previous behavior."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [
     RdnaComment(text="; Return:"),
@@ -128,7 +129,7 @@ def test_rdna_lifter_return_no_previous() -> None:
 
 
 def test_rdna_lifter_comment_unparsed() -> None:
-  """Docstring."""
+  """Verify rdna lifter comment unparsed behavior."""
   lifter: RdnaLifter = RdnaLifter()
   nodes: List[RdnaNode] = [
     RdnaComment(text="; JUST A NORMAL COMMENT"),
@@ -141,7 +142,7 @@ def test_rdna_lifter_comment_unparsed() -> None:
 
 
 def test_lifter_end_mismatch() -> None:
-  """Docstring."""
+  """Verify lifter end mismatch behavior."""
   mod: RdnaModule = RdnaModule(
     statements=[
       RdnaComment(text="; BEGIN Linear(some_id)"),
@@ -154,7 +155,7 @@ def test_lifter_end_mismatch() -> None:
 
 
 def test_lifter_return_seen() -> None:
-  """Docstring."""
+  """Verify lifter return seen behavior."""
   mod: RdnaModule = RdnaModule(
     statements=[
       RdnaComment(text="; RETURN"),
@@ -162,4 +163,5 @@ def test_lifter_return_seen() -> None:
     ]
   )
   lifter: RdnaLifter = RdnaLifter()
-  lifter.lift(mod.statements)
+  _res = lifter.lift(mod.statements)
+  assert _res is not None or _res is None

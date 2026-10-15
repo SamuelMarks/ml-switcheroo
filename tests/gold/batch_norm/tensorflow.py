@@ -6,7 +6,7 @@ import tensorflow as tf
 
 
 class BNModel(tf.keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class BNModel."""
 
   def __init__(self, num_features: int) -> None:
     """Initializes the BNModel instance."""

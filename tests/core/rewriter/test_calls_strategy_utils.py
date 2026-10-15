@@ -10,7 +10,7 @@ from ml_switcheroo.core.rewriter.calls.utils import rewrite_stateful_call
 
 
 class MockSigCtx:
-  """Docstring."""
+  """Test helper class MockSigCtx."""
 
   def __init__(
     self,
@@ -23,7 +23,7 @@ class MockSigCtx:
 
 
 class MockContext:
-  """Docstring."""
+  """Test helper class MockContext."""
 
   def __init__(self, has_hook: bool = True, has_sig: bool = True) -> None:
     """Initializes the MockContext instance."""
@@ -34,7 +34,7 @@ class MockContext:
 
 
 class MockRewriter:
-  """Docstring."""
+  """Test helper class MockRewriter."""
 
   def __init__(
     self, fail_norm: bool = False, no_imports: bool = False, legacy_sig: bool = False, strict_mode: bool = False

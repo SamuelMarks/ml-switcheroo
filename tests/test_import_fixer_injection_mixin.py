@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for import fixer injection mixin."""
 
 from typing import List, Set, Union
 
@@ -9,17 +9,17 @@ from ml_switcheroo.core.import_fixer.resolution import ImportReq, ResolutionPlan
 
 
 class MockFixer(InjectionMixin):
-  """Docstring."""
+  """Test helper class MockFixer."""
 
   def __init__(self, plan: ResolutionPlan) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.plan: ResolutionPlan = plan
     self._satisfied_injections: Set[str] = set()
     self._defined_names: Set[str] = set()
 
 
 def test_leave_module_no_injections() -> None:
-  """Docstring."""
+  """Verify leave module no injections behavior."""
   plan: ResolutionPlan = ResolutionPlan()
   fixer: MockFixer = MockFixer(plan)
   orig_module: cst.Module = cst.parse_module("x = 1")
@@ -28,7 +28,7 @@ def test_leave_module_no_injections() -> None:
 
 
 def test_leave_module_with_injection() -> None:
-  """Docstring."""
+  """Verify leave module with injection behavior."""
   plan: ResolutionPlan = ResolutionPlan(
     required_imports=[ImportReq("torch"), ImportReq("jax", "numpy", "jnp"), ImportReq("torch", "nn", "nn")]
   )
@@ -131,7 +131,7 @@ def test_injection_deduplication_other_stmts() -> None:
 
 
 def test_leave_module_already_satisfied() -> None:
-  """Docstring."""
+  """Verify leave module already satisfied behavior."""
   plan: ResolutionPlan = ResolutionPlan(required_imports=[ImportReq("sys")])
   fixer: MockFixer = MockFixer(plan)
   fixer._satisfied_injections.add("sys")
@@ -142,7 +142,7 @@ def test_leave_module_already_satisfied() -> None:
 
 
 def test_leave_module_already_defined() -> None:
-  """Docstring."""
+  """Verify leave module already defined behavior."""
   plan: ResolutionPlan = ResolutionPlan(required_imports=[ImportReq("sys")])
   fixer: MockFixer = MockFixer(plan)
   fixer._defined_names.add("sys")
@@ -153,7 +153,7 @@ def test_leave_module_already_defined() -> None:
 
 
 def test_append_injection() -> None:
-  """Docstring."""
+  """Verify append injection behavior."""
   fixer: MockFixer = MockFixer(ResolutionPlan())
   injections: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
   stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(body=[cst.Pass()])

@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin state flag injection."""
 
 from unittest.mock import MagicMock
 
@@ -14,7 +14,7 @@ from ml_switcheroo.plugins.state_flag_injection import (
 
 
 def test_get_func_name() -> None:
-  """Docstring."""
+  """Verify get func name behavior."""
   node: cst.BaseExpression = cst.parse_expression("model")
   assert _get_func_name(node) == "model"
 
@@ -25,7 +25,7 @@ def test_get_func_name() -> None:
 
 
 def test_inject_training_flag_call() -> None:
-  """Docstring."""
+  """Verify inject training flag call behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.metadata = {}
 
@@ -54,7 +54,7 @@ def test_inject_training_flag_call() -> None:
 
 
 def test_capture_eval_state() -> None:
-  """Docstring."""
+  """Verify capture eval state behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.metadata = {}
 

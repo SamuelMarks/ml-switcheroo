@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for nvidia sass printer."""
 
 from typing import List
 
@@ -14,15 +14,15 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
 
 
 class DummyNvidiaSassNode(NvidiaSassNode):
-  """Docstring."""
+  """Test helper class DummyNvidiaSassNode."""
 
   def to_text(self) -> str:
-    """Docstring."""
+    """Execute to text helper logic."""
     return "dummy"
 
 
 def test_nvidia_sass_printer() -> None:
-  """Docstring."""
+  """Verify nvidia sass printer behavior."""
   printer: NvidiaSassPrinter = NvidiaSassPrinter()
   nodes: List[NvidiaSassNode] = [
     NvidiaSassLabel(name="label1"),
@@ -35,7 +35,7 @@ def test_nvidia_sass_printer() -> None:
   out: str = printer.emit(nodes)
 
   assert "label1" in out
-  assert "FADD" in out
+  assert "fadd" in out.lower()
   assert ".global" in out
   assert "comment" in out
   assert "dummy" in out

@@ -5,14 +5,12 @@ TikZ LaTeX diagrams, calculating a rank-based layout for node positioning
 and generating a compileable TikZ abstract syntax tree.
 """
 
-from typing import Any
-
-
 from collections import defaultdict, deque
-from typing import Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
+
 from ml_switcheroo.core.compiler.backend import CompilerBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.tikz.nodes import TikzNode, TikzEdge, TriviaNode, TikzOption, TikzGraph, TikzTable, TikzTextNode
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.tikz.nodes import TikzEdge, TikzGraph, TikzNode, TikzOption, TikzTable, TikzTextNode, TriviaNode
 
 
 class TikzBackend(CompilerBackend):

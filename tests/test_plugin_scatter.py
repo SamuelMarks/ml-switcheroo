@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin scatter."""
 
 from unittest.mock import MagicMock
 
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.scatter import transform_scatter
 
 
 def test_transform_scatter_basic() -> None:
-  """Docstring."""
+  """Verify transform scatter basic behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   # 3 positional args
@@ -20,7 +20,7 @@ def test_transform_scatter_basic() -> None:
 
 
 def test_transform_scatter_keywords() -> None:
-  """Docstring."""
+  """Verify transform scatter keywords behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   # with keywords
@@ -37,7 +37,7 @@ def test_transform_scatter_keywords() -> None:
 
 
 def test_transform_scatter_add() -> None:
-  """Docstring."""
+  """Verify transform scatter add behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   # scatter_add uses .add()
@@ -48,7 +48,7 @@ def test_transform_scatter_add() -> None:
 
 
 def test_transform_scatter_early_returns() -> None:
-  """Docstring."""
+  """Verify transform scatter early returns behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
 
   # args < 3

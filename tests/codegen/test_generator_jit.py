@@ -8,7 +8,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockTraitSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockTraitSemantics."""
 
   def __init__(self, templates: typing.Optional[dict[str, dict[str, str]]] = None) -> None:
     """Initializes the MockTraitSemantics instance."""
@@ -24,7 +24,7 @@ class MockTraitSemantics(SemanticsManager):
     return {}
 
   def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
-    """Docstring."""
+    """Execute get test template helper logic."""
     if fw in self.custom_templates:
       return self.custom_templates[fw]
     if fw == "jax":

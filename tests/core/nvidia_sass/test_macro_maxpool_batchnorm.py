@@ -1,13 +1,15 @@
-"""Test suite for the MaxPool2d and BatchNorm2d NVIDIA_SASS Macros."""
+"""Test suite for macro maxpool batchnorm."""
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_batchnorm2d, expand_maxpool2d
-from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import RegisterAllocator
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment, NvidiaSassInstruction
+from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as GenericRegisterAllocator
+
+RegisterAllocator = GenericRegisterAllocator
 
 
 def test_nvidia_sass_macro_maxpool2d() -> None:
   """Verifies that expand_maxpool2d generates correct NVIDIA_SASS loops."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "pool2"
   metadata = {"kernel_size": 2}
 
@@ -27,7 +29,7 @@ def test_nvidia_sass_macro_maxpool2d() -> None:
 
 def test_nvidia_sass_macro_batchnorm2d() -> None:
   """Verifies that expand_batchnorm2d generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "bn1"
   metadata = {"eps": 1e-5}
 

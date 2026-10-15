@@ -15,14 +15,13 @@ Decoupling Logic:
 """
 
 import typing
+from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union
 
-
-from typing import Dict, Optional, Tuple, Union, TYPE_CHECKING
 import libcst as cst
 
-from ml_switcheroo.utils.node_diff import diff_nodes
 from ml_switcheroo.core.tracer import get_tracer
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.utils.node_diff import diff_nodes
 
 if TYPE_CHECKING:
   # structural typing for rewriter to avoid circular import
@@ -40,17 +39,44 @@ if TYPE_CHECKING:
     signature_stack: list[SignatureContextDummy]
 
   class RewriterDummy(Protocol):
-    """Dummy rewriter for type hinting."""
+    """Structural protocol for rewriter in call utilities."""
 
     context: typing.Any
 
     def _report_warning(self, msg: str) -> None:
-      """Dummy method."""
+      """Record a warning message in the current statement warning buffer.
+
+      Args:
+          msg: Warning message string.
+      """
       ...
 
-    def _create_dotted_name(self, name: str) -> cst.Attribute:
-      """Dummy method."""
+    def _create_dotted_name(self, name: str) -> Union[cst.Name, cst.Attribute]:
+      """Construct a CST Name or Attribute chain from a dotted name string.
+
+      Args:
+          name: Dotted name string.
+
+      Returns:
+          CST Name or Attribute node.
+      """
       ...
+
+
+_PURE_MATH_BACKENDS = {"NumPy", "numpy", "jax"}
+
+
+def is_neural_on_math_backend(tier: Optional[str], target_fw: str) -> bool:
+  """Check if a neural network operation tier is being mapped directly to a pure math backend.
+
+  Args:
+      tier: Origin semantic tier string (e.g., 'neural', 'neural_ops').
+      target_fw: Target framework identifier string.
+
+  Returns:
+      True if the operation belongs to a neural tier and the target is a pure math backend.
+  """
+  return bool(tier in ("neural", "neural_ops") and target_fw in _PURE_MATH_BACKENDS)
 
 
 def is_functional_apply(node: cst.Call, method_name: Optional[str] = "apply") -> bool:

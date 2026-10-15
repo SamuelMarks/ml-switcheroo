@@ -16,11 +16,12 @@ Implementation Details:
     via `ctx.inject_preamble`.
 """
 
-import libcst as cst
 import textwrap
 from typing import List
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+import libcst as cst
+
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
 def get_shim_code() -> str:

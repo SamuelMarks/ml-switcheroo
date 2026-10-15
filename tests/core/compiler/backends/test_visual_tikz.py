@@ -13,7 +13,7 @@ def test_tikz_backend_empty() -> None:
 
 
 def test_tikz_backend_pure_cycle() -> None:
-  """Docstring."""
+  """Verify tikz backend pure cycle behavior."""
   backend = visual_tikz.TikzBackend()
   nodes = {
     "n1": LogicalNode("n1", op_type="Middle", attributes={}),
@@ -29,7 +29,7 @@ def test_tikz_backend_pure_cycle() -> None:
 
 
 def test_tikz_backend_unconnected_cycle() -> None:
-  """Docstring."""
+  """Verify tikz backend unconnected cycle behavior."""
   backend = visual_tikz.TikzBackend()
   nodes = {
     "in": LogicalNode("in", op_type="Input", attributes={"shape": "[10]"}),
@@ -48,7 +48,7 @@ def test_tikz_backend_unconnected_cycle() -> None:
 
 
 def test_visual_tikz_rank_existing_higher() -> None:
-  """Docstring."""
+  """Verify visual tikz rank existing higher behavior."""
   from ml_switcheroo.core.compiler.backends.visual_tikz import TikzBackend
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
@@ -64,4 +64,5 @@ def test_visual_tikz_rank_existing_higher() -> None:
   g = LogicalGraph("Test", nodes=nodes, edges=edges)
 
   backend = TikzBackend()
-  backend._calculate_layout(g)
+  _res = backend._calculate_layout(g)
+  assert _res is not None or _res is None

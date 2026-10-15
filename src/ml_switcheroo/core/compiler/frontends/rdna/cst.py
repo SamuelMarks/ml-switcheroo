@@ -7,18 +7,27 @@ Each node inherits from the core `CSTNode` to guarantee exact round-trip formatt
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
-from ml_switcheroo.core.cst.base import CSTNode
+from ml_switcheroo.core.compiler.isa.cst import (
+  IsaComment,
+  IsaImmediate,
+  IsaInstruction,
+  IsaLabel,
+  IsaMemory,
+  IsaNode,
+  IsaOperand,
+  IsaRegister,
+)
 
 
 @dataclass
-class RdnaNode(CSTNode):
+class RdnaNode(IsaNode):
   """Abstract base class for all RDNA CST nodes."""
 
   pass
 
 
 @dataclass
-class RdnaOperand(RdnaNode):
+class RdnaOperand(IsaOperand, RdnaNode):
   """Base class for instruction operands."""
 
   pass
@@ -47,7 +56,7 @@ class RdnaLabelRef(RdnaOperand):
 
 
 @dataclass
-class RdnaSGPR(RdnaOperand):
+class RdnaSGPR(IsaRegister, RdnaOperand):
   """Represent a Scalar General Purpose Register.
 
   Attributes:
@@ -75,7 +84,7 @@ class RdnaSGPR(RdnaOperand):
 
 
 @dataclass
-class RdnaVGPR(RdnaOperand):
+class RdnaVGPR(IsaRegister, RdnaOperand):
   """Represent a Vector General Purpose Register.
 
   Attributes:
@@ -127,7 +136,7 @@ def c_VGPR(idx: int) -> RdnaVGPR:
 
 
 @dataclass
-class RdnaImmediate(RdnaOperand):
+class RdnaImmediate(IsaImmediate, RdnaOperand):
   """Represent a literal constant value.
 
   Attributes:
@@ -137,20 +146,6 @@ class RdnaImmediate(RdnaOperand):
 
   value: Union[int, float] = 0
   is_hex: bool = False
-
-  def to_text(self) -> str:
-    """Render the immediate.
-
-    Returns:
-        str: The rendered text representation of the immediate value.
-    """
-    res = "".join(t.text for t in self.leading_trivia)
-    if self.is_hex:
-      res += hex(int(self.value))
-    else:
-      res += str(self.value)
-    res += "".join(t.text for t in self.trailing_trivia)
-    return res
 
 
 @dataclass
@@ -176,7 +171,7 @@ class RdnaModifier(RdnaOperand):
 
 
 @dataclass
-class RdnaMemory(RdnaOperand):
+class RdnaMemory(IsaMemory, RdnaOperand):
   """Represent a memory address operand.
 
   Attributes:
@@ -203,7 +198,7 @@ class RdnaMemory(RdnaOperand):
 
 
 @dataclass
-class RdnaInstruction(RdnaNode):
+class RdnaInstruction(IsaInstruction, RdnaNode):
   """Represent a single RDNA operation line.
 
   Attributes:
@@ -247,7 +242,7 @@ class RdnaInstruction(RdnaNode):
 
 
 @dataclass
-class RdnaLabel(RdnaNode):
+class RdnaLabel(IsaLabel, RdnaNode):
   """Represent a jump target label.
 
   Attributes:
@@ -255,17 +250,6 @@ class RdnaLabel(RdnaNode):
   """
 
   name: str = ""
-
-  def to_text(self) -> str:
-    """Render the label.
-
-    Returns:
-        str: The rendered text representation of the label.
-    """
-    res = "".join(t.text for t in self.leading_trivia)
-    res += f"{self.name}:"
-    res += "".join(t.text for t in self.trailing_trivia)
-    return res
 
 
 @dataclass
@@ -296,7 +280,7 @@ class RdnaDirective(RdnaNode):
 
 
 @dataclass
-class RdnaComment(RdnaNode):
+class RdnaComment(IsaComment, RdnaNode):
   """Represent a line comment.
 
   Attributes:
@@ -304,17 +288,7 @@ class RdnaComment(RdnaNode):
   """
 
   text: str = ""
-
-  def to_text(self) -> str:
-    """Render the comment.
-
-    Returns:
-        str: The rendered text representation of the comment.
-    """
-    res = "".join(t.text for t in self.leading_trivia)
-    res += f"; {self.text}"
-    res += "".join(t.text for t in self.trailing_trivia)
-    return res
+  prefix: str = ";"
 
 
 @dataclass

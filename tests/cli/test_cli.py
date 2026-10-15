@@ -11,14 +11,14 @@ from ml_switcheroo.cli.handlers.dev import handle_docs, handle_gen_tests, handle
 
 
 def test_gen_weight_script_failure() -> None:
-  """Docstring."""
+  """Verify gen weight script failure behavior."""
   # Coverage for failure in commands.py handle_gen_weight_script
   with patch("ml_switcheroo.cli.commands.WeightScriptGenerator.generate", return_value=False):
     assert handle_gen_weight_script(Path("in.py"), Path("out.py")) == 1
 
 
 def test_dev_handlers() -> None:
-  """Docstring."""
+  """Verify dev handlers behavior."""
   # Cover dev handler operations
   MockMatrix: MagicMock
   with patch("ml_switcheroo.cli.handlers.dev.CompatibilityMatrix") as MockMatrix:
@@ -54,7 +54,7 @@ def test_dev_handlers() -> None:
 
 
 def test_main_dispatch() -> None:
-  """Docstring."""
+  """Verify main dispatch behavior."""
   # Test all branches in main.py
 
   # 1. Missing args (should exit)
@@ -132,7 +132,7 @@ def test_main_dispatch() -> None:
 
 
 def test_main_dispatch_default_sys_argv() -> None:
-  """Docstring."""
+  """Verify main dispatch default sys argv behavior."""
   with patch("sys.argv", ["ml-switcheroo", "matrix"]):
     with patch("ml_switcheroo.cli.__main__.commands.handle_matrix", return_value=0):
       assert main() == 0

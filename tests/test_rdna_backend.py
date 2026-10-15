@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for rdna backend."""
 
 from typing import List
 
@@ -14,15 +14,15 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
 
 
 class DummyRdnaNode(RdnaNode):
-  """Docstring."""
+  """Test helper class DummyRdnaNode."""
 
   def to_text(self) -> str:
-    """Docstring."""
+    """Execute to text helper logic."""
     return "dummy"
 
 
 def test_rdna_printer() -> None:
-  """Docstring."""
+  """Verify rdna printer behavior."""
   printer: RdnaPrinter = RdnaPrinter()
   nodes: List[RdnaNode] = [
     RdnaLabel(name="label1"),

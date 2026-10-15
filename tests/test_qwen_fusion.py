@@ -1,6 +1,7 @@
-"""Docstring."""
+"""Test suite for qwen fusion."""
 
 from typing import Dict
+
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.compiler.qwen_fusion import (
   SwiGLUDefusionPass,
@@ -11,7 +12,7 @@ from ml_switcheroo.core.compiler.qwen_fusion import (
 
 
 def test_swiglu_fusion_pass() -> None:
-  """Docstring."""
+  """Verify swiglu fusion pass behavior."""
   nodes: Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "layer_gate_proj": LogicalNode(id="layer_gate_proj", op_type="Linear"),
@@ -37,7 +38,7 @@ def test_swiglu_fusion_pass() -> None:
 
 
 def test_swiglu_fusion_pass_no_match() -> None:
-  """Docstring."""
+  """Verify swiglu fusion pass no match behavior."""
   nodes: Dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
   pass_: SwiGLUFusionPass = SwiGLUFusionPass()
@@ -46,7 +47,7 @@ def test_swiglu_fusion_pass_no_match() -> None:
 
 
 def test_swiglu_defusion_pass() -> None:
-  """Docstring."""
+  """Verify swiglu defusion pass behavior."""
   nodes: Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "layer_swiglu": LogicalNode(id="layer_swiglu", op_type="SwiGLU"),
@@ -70,7 +71,7 @@ def test_swiglu_defusion_pass() -> None:
 
 
 def test_swiglu_defusion_pass_no_match() -> None:
-  """Docstring."""
+  """Verify swiglu defusion pass no match behavior."""
   nodes: Dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
   pass_: SwiGLUDefusionPass = SwiGLUDefusionPass()
@@ -79,7 +80,7 @@ def test_swiglu_defusion_pass_no_match() -> None:
 
 
 def test_vision_patch_fusion_pass() -> None:
-  """Docstring."""
+  """Verify vision patch fusion pass behavior."""
   nodes: Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "patch_conv": LogicalNode(id="patch_conv", op_type="Conv2d"),
@@ -104,7 +105,7 @@ def test_vision_patch_fusion_pass() -> None:
 
 
 def test_vision_patch_fusion_pass_no_match() -> None:
-  """Docstring."""
+  """Verify vision patch fusion pass no match behavior."""
   nodes: Dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
   pass_: VisionPatchEmbeddingFusionPass = VisionPatchEmbeddingFusionPass()
@@ -113,7 +114,7 @@ def test_vision_patch_fusion_pass_no_match() -> None:
 
 
 def test_vision_patch_defusion_pass() -> None:
-  """Docstring."""
+  """Verify vision patch defusion pass behavior."""
   nodes: Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "patch_embed": LogicalNode(id="patch_embed", op_type="VisionPatchEmbedding"),
@@ -136,7 +137,7 @@ def test_vision_patch_defusion_pass() -> None:
 
 
 def test_vision_patch_defusion_pass_no_match() -> None:
-  """Docstring."""
+  """Verify vision patch defusion pass no match behavior."""
   nodes: Dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
   pass_: VisionPatchEmbeddingDefusionPass = VisionPatchEmbeddingDefusionPass()

@@ -15,11 +15,11 @@ Consolidates transformation logic for:
 """
 
 from typing import Dict, List, Optional, Tuple, Union
+
 import libcst as cst
 
-from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.core.rewriter.context import RewriterContext
-
+from ml_switcheroo.core.rewriter.interface import RewriterPass
 
 AUG_OP_MAP: Dict[type, type] = {
   cst.AddAssign: cst.Add,
@@ -370,27 +370,18 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
           seed_arg = updated_node.args[0].value
         else:
           seed_arg = cst.Integer("0")
-        if self.context.target_fw == "torch":
-          return cst.Call(
-            func=cst.Attribute(value=cst.Name("torch"), attr=cst.Name("manual_seed")),
-            args=[cst.Arg(value=seed_arg)],
-          )
-        elif self.context.target_fw == "mlx":
-          return cst.Call(
-            func=cst.Attribute(
-              value=cst.Attribute(value=cst.Name("mx"), attr=cst.Name("random")),
-              attr=cst.Name("seed"),
-            ),
-            args=[cst.Arg(value=seed_arg)],
-          )
-        else:
-          return cst.Call(
-            func=cst.Attribute(
-              value=cst.Attribute(value=cst.Name("keras"), attr=cst.Name("utils")),
-              attr=cst.Name("set_random_seed"),
-            ),
-            args=[cst.Arg(value=seed_arg)],
-          )
+        seed_func_map = {
+          "torch": ("torch", "manual_seed"),
+          "mlx": ("mx", "random", "seed"),
+        }
+        parts = seed_func_map.get(self.context.target_fw, ("keras", "utils", "set_random_seed"))
+        func_expr: cst.BaseExpression = cst.Name(parts[0])
+        for part in parts[1:]:
+          func_expr = cst.Attribute(value=func_expr, attr=cst.Name(part))
+        return cst.Call(
+          func=func_expr,
+          args=[cst.Arg(value=seed_arg)],
+        )
 
       # Strip 'key' argument from calls when converting from JAX to eager
       cleaned_args = [

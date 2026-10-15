@@ -8,17 +8,15 @@ based on framework-specific structural traits, and mapping attributes, constants
 or macros from a source machine learning framework to a target framework.
 """
 
-from typing import Any, cast
-
+from typing import TYPE_CHECKING, Any, cast
 
 import libcst as cst
-
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply
 from ml_switcheroo.core.tracer import get_tracer
 from ml_switcheroo.semantics.schema import StructuralTraits
 from ml_switcheroo.utils.node_diff import capture_node_source
-from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 class ApiTransformerAttrMixin:
@@ -46,25 +44,48 @@ class ApiTransformerAttrMixin:
   target_fw: Any
   strict_mode: Any
 
-  def _get_qualified_name(self, *args: Any, **kwargs: Any) -> Any:
-    """Dummy method."""
-    ...
+  if TYPE_CHECKING:
 
-  def _mark_stateful(self, *args: Any, **kwargs: Any) -> Any:
-    """Dummy method."""
-    ...
+    def _get_qualified_name(self, node: cst.BaseExpression) -> Any:
+      """Resolve a CST expression node to its fully qualified name string.
 
-  def _get_mapping(self, *args: Any, **kwargs: Any) -> Any:
-    """Dummy method."""
-    ...
+      Args:
+          node: CST expression node to resolve.
+      """
+      ...
 
-  def _handle_variant_imports(self, *args: Any, **kwargs: Any) -> Any:
-    """Dummy method."""
-    ...
+    def _mark_stateful(self, var_name: str) -> None:
+      """Mark a variable name as stateful in the current scope.
 
-  def _create_dotted_name(self, *args: Any, **kwargs: Any) -> Any:
-    """Dummy method."""
-    ...
+      Args:
+          var_name: Variable identifier to mark as stateful.
+      """
+      ...
+
+    def _get_mapping(self, name: str, silent: bool = False) -> Any:
+      """Retrieve the target framework mapping for a qualified API name.
+
+      Args:
+          name: Qualified API name string.
+          silent: Whether to suppress failure reporting on missing mappings.
+      """
+      ...
+
+    def _handle_variant_imports(self, variant: dict[str, Any]) -> None:
+      """Inject required imports specified by a target variant mapping.
+
+      Args:
+          variant: Target variant dictionary.
+      """
+      ...
+
+    def _create_dotted_name(self, name_str: str) -> Any:
+      """Construct a CST Name or Attribute chain from a dotted name string.
+
+      Args:
+          name_str: Dotted name string.
+      """
+      ...
 
   def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
     """Intercept and post-processes CST assignment nodes during traversal.
@@ -188,7 +209,7 @@ class ApiTransformerAttrMixin:
 
           # Constants have no args, pass empty lists
           return rewrite_as_macro(target_impl["macro_template"], [], [])
-        except Exception:
+        except (ValueError, cst.ParserSyntaxError, Exception):
           pass
 
     return updated_node

@@ -8,8 +8,8 @@ resolution during MLIR-to-Python translation. It handles:
 - Collision resolution for duplicate names in the same scope.
 """
 
-from typing import Dict, Optional
 import re
+from typing import Dict, Optional
 
 
 class NamingContext:

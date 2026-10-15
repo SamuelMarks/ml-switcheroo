@@ -1,10 +1,8 @@
 """Tests for state pivoters."""
 
 import libcst as cst
-from ml_switcheroo.core.rewriter.pivoting.pivoters import (
-  OOPToFunctionalPivoter,
-  FunctionalToOOPPivoter,
-)
+
+from ml_switcheroo.core.rewriter.pivoting.pivoters import FunctionalToOOPPivoter, OOPToFunctionalPivoter
 
 
 def test_oop_to_functional_pivoter():

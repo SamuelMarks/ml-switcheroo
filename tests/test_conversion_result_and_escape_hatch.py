@@ -1,6 +1,7 @@
 """Tests for ConversionResult and EscapeHatch components."""
 
 from unittest.mock import MagicMock
+
 import libcst as cst
 
 from ml_switcheroo.core.conversion_result import ConversionResult

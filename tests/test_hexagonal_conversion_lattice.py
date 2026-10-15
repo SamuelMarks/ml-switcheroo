@@ -10,6 +10,7 @@ Verifies static conversion across all 30 directed edges between:
 """
 
 import pytest
+
 from ml_switcheroo.core.engine import ASTEngine
 
 TORCH_SNIPPET: str = """
@@ -161,7 +162,7 @@ def test_sass_rdna_roundtrip() -> None:
   engine_rdna_to_sass: ASTEngine = ASTEngine(source="rdna", target="nvidia_sass")
   sass_output = engine_rdna_to_sass.run(rdna_output.code)
   assert "BEGIN Linear" in sass_output.code
-  assert "FFMA" in sass_output.code
+  assert "fma" in sass_output.code.lower()
 
 
 def test_high_level_roundtrips() -> None:

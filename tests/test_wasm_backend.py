@@ -7,13 +7,13 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 
 
 def test_wasm_backend_init() -> None:
-  """Docstring."""
+  """Verify wasm backend init behavior."""
   backend: WasmBackend = WasmBackend(semantics="dummy")
   assert getattr(backend, "semantics") == "dummy"
 
 
 def test_wasm_backend_compile() -> None:
-  """Docstring."""
+  """Verify wasm backend compile behavior."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="in1", op_type="Input"),
     LogicalNode(id="in2", op_type="Input"),
@@ -54,7 +54,7 @@ def test_wasm_backend_compile() -> None:
 
 
 def test_wasm_backend_compile_no_output() -> None:
-  """Docstring."""
+  """Verify wasm backend compile no output behavior."""
   nodes: List[LogicalNode] = [
     LogicalNode(id="in1", op_type="Input"),
     LogicalNode(id="add1", op_type="Add"),

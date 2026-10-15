@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for nvidia sass reader."""
 
 import typing
 from pathlib import Path
@@ -8,14 +8,14 @@ from ml_switcheroo.importers.nvidia_sass_reader import NvidiaSassSpecImporter
 
 
 def test_nvidia_sass_reader_missing_file(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify nvidia sass reader missing file behavior."""
   importer = NvidiaSassSpecImporter()
   res = importer.parse_file(tmp_path / "missing.html")
   assert res == {}
 
 
 def test_nvidia_sass_reader_parse_html(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify nvidia sass reader parse html behavior."""
   importer = NvidiaSassSpecImporter()
 
   html_content = """
@@ -101,7 +101,7 @@ def test_nvidia_sass_reader_parse_html(tmp_path: Path) -> None:
 
 
 def test_fallback_opcodes(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify fallback opcodes behavior."""
   importer = NvidiaSassSpecImporter()
 
   html_content = """
@@ -123,7 +123,7 @@ def test_fallback_opcodes(tmp_path: Path) -> None:
 
 
 def test_invalid_ops(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify invalid ops behavior."""
   importer = NvidiaSassSpecImporter()
 
   html_content = """
@@ -155,7 +155,7 @@ def test_invalid_ops(tmp_path: Path) -> None:
 
 
 def test_nvidia_sass_reader_unicode_decode_error(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify nvidia sass reader unicode decode error behavior."""
   html_path: Path = tmp_path / "index.html"
   # Write invalid utf-8 byte
   html_path.write_bytes(b"\xff\xfeh\x00e\x00l\x00l\x00o\x00")  # Some UTF-16 maybe, but forces error in utf-8
@@ -174,7 +174,7 @@ def test_nvidia_sass_reader_unicode_decode_error(tmp_path: Path) -> None:
 
 
 def test_nvidia_sass_reader_fp32_update() -> None:
-  """Docstring."""
+  """Verify nvidia sass reader fp32 update behavior."""
   # Test line 173
   reader = NvidiaSassSpecImporter()
   html_path = MagicMock()
@@ -189,7 +189,7 @@ def test_nvidia_sass_reader_fp32_update() -> None:
 
 
 def test_nvidia_sass_reader_regex_substrings() -> None:
-  """Docstring."""
+  """Verify nvidia sass reader regex substrings behavior."""
   reader = NvidiaSassSpecImporter()
   # "integer" before "fp32"
   assert reader._infer_abstract_op("dummy", "convert an integer into a fp32") == "CastFloat"
@@ -198,7 +198,7 @@ def test_nvidia_sass_reader_regex_substrings() -> None:
 
 
 def test_nvidia_sass_reader_extra_branches(tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify nvidia sass reader extra branches behavior."""
   importer = NvidiaSassSpecImporter()
   html_content = """
 <table>

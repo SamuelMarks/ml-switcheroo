@@ -6,7 +6,9 @@ and lifting hardware assembly back to PyTorch nn.Module syntax.
 
 import ast
 from typing import Dict, Optional, Tuple
+
 import pytest
+
 from ml_switcheroo import convert
 from ml_switcheroo.core.compiler.backends.nvidia_sass import NvidiaSassBackend
 from ml_switcheroo.core.compiler.backends.python import PythonBackend

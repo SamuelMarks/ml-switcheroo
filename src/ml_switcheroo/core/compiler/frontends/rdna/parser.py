@@ -5,7 +5,7 @@ that converts a stream of characters into a Concrete Syntax Tree defined in `cst
 """
 
 import re
-from typing import List, Union, cast, Any
+from typing import Any, List, Union, cast
 
 from lark import Lark, Transformer, v_args
 from lark.lexer import Lexer, Token
@@ -17,13 +17,13 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaInstruction,
   RdnaLabel,
   RdnaLabelRef,
+  RdnaMemory,
   RdnaModifier,
+  RdnaModule,
+  RdnaNode,
   RdnaOperand,
   RdnaSGPR,
   RdnaVGPR,
-  RdnaMemory,
-  RdnaModule,
-  RdnaNode,
 )
 from ml_switcheroo.core.cst.base import Trivia
 

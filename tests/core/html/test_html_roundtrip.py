@@ -15,7 +15,7 @@ HTML_INPUT: str = '\n<h3>Model: RestoredNet</h3>\n<div class="sw-grid">\n  <!-- 
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Docstring."""
+  """Execute semantics helper logic."""
   mgr = SemanticsManager()
   RegistryLoader(mgr).hydrate()
   return mgr

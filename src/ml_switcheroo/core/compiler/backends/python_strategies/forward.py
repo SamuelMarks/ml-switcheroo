@@ -1,0 +1,162 @@
+"""Forward method construction strategies."""
+
+from typing import Any, Callable, Dict, List
+
+import libcst as cst
+from libcst import matchers as m
+
+from ml_switcheroo.core.compiler.backends.python_strategies.init import format_args_from_metadata
+from ml_switcheroo.core.compiler.backends.python_strategies.sharding import (
+  format_partition_spec,
+  format_partition_spec_tf,
+  format_partition_spec_torch,
+)
+from ml_switcheroo.core.compiler.ir import LogicalNode
+
+
+def _emit_jax_sharding(current_var: str, sharding: Any) -> str:
+  """Format a JAX sharding constraint statement.
+
+  Args:
+      current_var: Current tensor variable name.
+      sharding: Sharding specification object.
+
+  Returns:
+      Formatted Python statement string.
+  """
+  spec_str = format_partition_spec(sharding)
+  return f"{current_var} = jax.lax.with_sharding_constraint({current_var}, {spec_str})"
+
+
+def _emit_torch_sharding(current_var: str, sharding: Any) -> str:
+  """Format a PyTorch DTensor distribute_tensor statement.
+
+  Args:
+      current_var: Current tensor variable name.
+      sharding: Sharding specification object.
+
+  Returns:
+      Formatted Python statement string.
+  """
+  spec_str = format_partition_spec_torch(sharding)
+  return f"{current_var} = distribute_tensor({current_var}, self.mesh, [{spec_str}])"
+
+
+def _emit_tf_sharding(current_var: str, sharding: Any) -> str:
+  """Format a Keras/TensorFlow distribution layout comment statement.
+
+  Args:
+      current_var: Current tensor variable name.
+      sharding: Sharding specification object.
+
+  Returns:
+      Formatted Python statement string.
+  """
+  spec_str = format_partition_spec_tf(sharding)
+  return f"pass  # {current_var} = keras.distribution.layout({spec_str})"
+
+
+def _emit_mlx_sharding(current_var: str, _sharding: Any) -> str:
+  """Format an MLX distributed sharding comment statement.
+
+  Args:
+      current_var: Current tensor variable name.
+      _sharding: Sharding specification object.
+
+  Returns:
+      Formatted Python statement string.
+  """
+  return f"pass  # MLX: mx.distributed.shard({current_var})"
+
+
+_SHARDING_EMITTERS: Dict[str, Callable[[str, Any], str]] = {
+  "jax": _emit_jax_sharding,
+  "flax": _emit_jax_sharding,
+  "flax_nnx": _emit_jax_sharding,
+  "torch": _emit_torch_sharding,
+  "keras": _emit_tf_sharding,
+  "tensorflow": _emit_tf_sharding,
+  "mlx": _emit_mlx_sharding,
+}
+
+
+def build_forward(
+  nodes: List[LogicalNode], framework: str, semantics: Any, traits: Any, backend: Any = None
+) -> cst.FunctionDef:
+  """Construct the forward/inference method CST node for a synthesized Python class.
+
+  Args:
+      nodes: Ordered list of LogicalNodes in the model graph.
+      framework: Target framework identifier string.
+      semantics: Optional SemanticsManager for operation variant resolution.
+      traits: StructuralTraits for the target framework.
+      backend: Optional PythonBackend instance providing layer statefulness checks.
+
+  Returns:
+      Constructed LibCST FunctionDef node for the model's inference method.
+  """
+  stmts: List[cst.BaseStatement] = []
+  input_nodes = [n for n in nodes if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Input"]
+  input_arg_name = "x"
+  if input_nodes:
+    inp_attrs = getattr(input_nodes[0], "attributes", {})
+    input_arg_name = inp_attrs.get("name", input_nodes[0].id)
+
+  current_var = input_arg_name
+  var_map = {input_nodes[0].id: input_arg_name} if input_nodes else {}
+
+  for node in nodes:
+    op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
+    if op_type == "Input":
+      continue
+    if op_type == "Output":
+      stmts.append(cst.parse_statement(f"return {current_var}"))
+      continue
+
+    if hasattr(backend, "_is_stateful_layer") and backend._is_stateful_layer(node):
+      line = f"{current_var} = self.{node.id}({current_var})"
+      stmts.append(cst.parse_statement(line))
+    else:
+      func_api = op_type
+      if semantics and hasattr(semantics, "resolve_variant"):
+        definition = semantics.resolve_variant(func_api, framework)
+        if not definition and hasattr(semantics, "get_definition"):
+          rev = semantics.get_definition(func_api)
+          if rev:
+            abstract_id, _ = rev
+            definition = semantics.resolve_variant(abstract_id, framework)
+
+        if definition and "api" in definition:
+          func_api = definition["api"]
+
+      args_str = current_var
+      node_attrs = getattr(node, "attributes", {})
+      extra_args = format_args_from_metadata(node_attrs)
+      if extra_args:
+        args_str += f", {extra_args}"
+      line = f"{current_var} = {func_api}({args_str})"
+      stmts.append(cst.parse_statement(line))
+
+    sharding_val = getattr(node, "sharding", None)
+    sharding_emitter = _SHARDING_EMITTERS.get(framework)
+    if sharding_val is not None and sharding_emitter is not None:
+      sharding_line = sharding_emitter(current_var, sharding_val)
+      stmts.append(cst.parse_statement(sharding_line))
+
+    var_map[node.id] = current_var
+
+  if not stmts or not m.matches(stmts[-1], m.SimpleStatementLine(body=[m.Return()])):
+    stmts.append(cst.parse_statement(f"return {current_var}"))
+
+  func_name = traits.forward_method if traits.forward_method else "forward"
+
+  return cst.FunctionDef(
+    name=cst.Name(func_name),
+    params=cst.Parameters(
+      params=[
+        cst.Param(name=cst.Name("self")),
+        cst.Param(name=cst.Name(input_arg_name)),
+      ]
+    ),
+    body=cst.IndentedBlock(body=stmts),
+  )

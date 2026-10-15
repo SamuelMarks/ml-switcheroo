@@ -5,7 +5,7 @@ import torch.nn as nn
 
 
 class Model(nn.Module):
-  """Docstring."""
+  """Test helper class Model."""
 
   def __init__(self, in_features: int, out_features: int):
     """Initializes the Model instance."""

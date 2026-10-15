@@ -24,7 +24,7 @@ Addresses the architectural difference between:
 
 import libcst as cst
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 
@@ -55,7 +55,8 @@ def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:
       The mapped target argument name or the default value.
   """
   if ctx.current_variant and ctx.current_variant.args:
-    return ctx.current_variant.args.get(std_name, default)  # type: ignore
+    val = ctx.current_variant.args.get(std_name)
+    return str(val) if val is not None else default
   return default
 
 

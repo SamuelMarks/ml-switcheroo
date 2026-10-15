@@ -21,7 +21,7 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
 
 
 class SafeJaxCoreAdapter(JaxCoreAdapter):
-  """Docstring."""
+  """Test helper class SafeJaxCoreAdapter."""
 
   @property
   def harness_imports(self) -> list[str]:
@@ -34,7 +34,7 @@ class SafeJaxCoreAdapter(JaxCoreAdapter):
 
 
 class SafeFlaxAdapter(FlaxNNXAdapter):
-  """Docstring."""
+  """Test helper class SafeFlaxAdapter."""
 
   @property
   def harness_imports(self) -> list[str]:

@@ -14,7 +14,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Docstring."""
+  """Execute semantics helper logic."""
   importlib.reload(ml_switcheroo.plugins.device_checks)
   hooks._PLUGINS_LOADED = True  # type: ignore
   importlib.reload(ml_switcheroo.frameworks)

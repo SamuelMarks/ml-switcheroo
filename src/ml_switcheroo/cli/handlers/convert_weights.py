@@ -16,20 +16,19 @@ Supported Directions:
 Unsupported combinations degrade gracefully by returning False.
 """
 
+import pprint
+import textwrap
+from pathlib import Path
 from typing import Any
 
-
-import textwrap
-import pprint
-from pathlib import Path
-
 import libcst as cst
-from ml_switcheroo.core.graph import GraphExtractor
-from ml_switcheroo.semantics.manager import SemanticsManager
+
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.graph import GraphExtractor
 from ml_switcheroo.core.rewriter.calls.utils import compute_permutation
-from ml_switcheroo.utils.console import log_error, log_success
 from ml_switcheroo.frameworks import get_adapter
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.utils.console import log_error, log_success
 
 
 class WeightScriptGenerator:
@@ -188,14 +187,16 @@ class WeightScriptGenerator:
         The generated Python script as a string.
 
     """
-    src_imports = "\n".join(self.source_adapter.get_weight_conversion_imports())  # type: ignore
-    tgt_imports = "\n".join(self.target_adapter.get_weight_conversion_imports())  # type: ignore
+    assert self.source_adapter is not None
+    assert self.target_adapter is not None
+    src_imports = "\n".join(self.source_adapter.get_weight_conversion_imports())
+    tgt_imports = "\n".join(self.target_adapter.get_weight_conversion_imports())
 
-    load_code = textwrap.indent(self.source_adapter.get_weight_load_code("input_path"), "    ")  # type: ignore
+    load_code = textwrap.indent(self.source_adapter.get_weight_load_code("input_path"), "    ")
     save_code = textwrap.indent(
       self.target_adapter.get_weight_save_code("converted_state", "output_path") if self.target_adapter else "", "    "
     )
-    to_numpy_expr = self.source_adapter.get_tensor_to_numpy_expr("raw_val")  # type: ignore
+    to_numpy_expr = self.source_adapter.get_tensor_to_numpy_expr("raw_val")
 
     rules_repr = pprint.pformat(rules, indent=4, width=100)
 

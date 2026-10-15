@@ -1,17 +1,11 @@
 """MLIR Compiler Backend."""
 
 from typing import Any, Dict, Optional
+
 from ml_switcheroo.core.compiler.backend import CompilerBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph
-from ml_switcheroo.core.mlir.cst import (
-  BlockNode,
-  ModuleNode,
-  OperationNode,
-  AttributeNode,
-  ValueNode,
-  TypeNode,
-)
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
+from ml_switcheroo.core.compiler.ir import LogicalGraph
+from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, TypeNode, ValueNode
 
 
 class MlirBackend(CompilerBackend):

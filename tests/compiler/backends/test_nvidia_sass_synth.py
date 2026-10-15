@@ -1,4 +1,4 @@
-"""Test suite for the Sass Synth Extra module."""
+"""Test suite for nvidia sass synth."""
 
 import typing
 from pathlib import Path
@@ -6,8 +6,14 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import RegisterAllocator, NvidiaSassSynthesizer
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
+  NvidiaSassComment,
+  NvidiaSassImmediate,
+  NvidiaSassInstruction,
+  NvidiaSassLabel,
+)
+from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
+from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import NvidiaSassSynthesizer
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode  # noqa: F811
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -46,7 +52,7 @@ def test_nvidia_sass_macro_mean() -> None:
   """Verifies the behavior of NVIDIA_SASS mean macro expansion."""
   from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_mean
 
-  alloc = RegisterAllocator()
+  alloc = RegisterAllocator(255, lambda x: None)
   nodes: list[typing.Any] = expand_mean(alloc, "n1", {"elements": 10})
   assert any(n.opcode == "FADD" for n in nodes if hasattr(n, "opcode"))
   assert any(n.opcode == "FMUL" for n in nodes if hasattr(n, "opcode"))
@@ -56,7 +62,7 @@ def test_nvidia_sass_macro_relu() -> None:
   """Verifies the behavior of NVIDIA_SASS relu macro expansion."""
   from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_relu
 
-  alloc = RegisterAllocator()
+  alloc = RegisterAllocator(255, lambda x: None)
   nodes: list[typing.Any] = expand_relu(alloc, "n1", {})
   assert any(n.opcode == "FMAX" for n in nodes if hasattr(n, "opcode"))
 
@@ -65,7 +71,7 @@ def test_nvidia_sass_macro_flatten() -> None:
   """Verifies the behavior of NVIDIA_SASS flatten macro expansion."""
   from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_flatten
 
-  alloc = RegisterAllocator()
+  alloc = RegisterAllocator(255, lambda x: None)
   nodes: list[typing.Any] = expand_flatten(alloc, "n1", {})
   assert any(n.opcode == "MOV" for n in nodes if hasattr(n, "opcode"))
 
@@ -74,7 +80,7 @@ def test_nvidia_sass_macro_reshape() -> None:
   """Verifies the behavior of NVIDIA_SASS reshape macro expansion."""
   from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_reshape
 
-  alloc = RegisterAllocator()
+  alloc = RegisterAllocator(255, lambda x: None)
   nodes: list[typing.Any] = expand_reshape(alloc, "n1", {})
   assert any(n.opcode == "MOV" for n in nodes if hasattr(n, "opcode"))
 
@@ -83,14 +89,14 @@ def test_nvidia_sass_macro_conv3d() -> None:
   """Verifies the behavior of NVIDIA_SASS conv3d macro expansion."""
   from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_conv3d
 
-  alloc = RegisterAllocator()
+  alloc = RegisterAllocator(255, lambda x: None)
   nodes: list[typing.Any] = expand_conv3d(alloc, "n1", {"k": 3})
   assert any(n.opcode == "FFMA" for n in nodes if hasattr(n, "opcode"))
   assert any(n.opcode == "IMAD" for n in nodes if hasattr(n, "opcode"))
 
 
 def test_nvidia_sass_macros_coverage() -> None:
-  """Docstring."""
+  """Verify nvidia sass macros coverage behavior."""
   from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import (
     expand_adam,
     expand_conv_general_dilated,
@@ -108,7 +114,7 @@ def test_nvidia_sass_macros_coverage() -> None:
 
 
 def test_nvidia_sass_synth_suffix_macro() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth suffix macro behavior."""
   mock_semantics = MagicMock()
   mock_semantics.get_definition.return_value = ("nvidia_sass.l", {})
   synth = NvidiaSassSynthesizer(mock_semantics)
@@ -121,9 +127,9 @@ def test_nvidia_sass_synth_suffix_macro() -> None:
 
 
 def test_nvidia_sass_synth_liveness_existing() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth liveness existing behavior."""
   # Hit 130->132
-  alloc = RegisterAllocator()
+  alloc = RegisterAllocator(255, lambda x: None)
   nodes = {
     "s": LogicalNode("s", op_type="Input"),
     "t1": LogicalNode("t1", op_type="Op"),
@@ -139,23 +145,25 @@ def test_nvidia_sass_synth_liveness_existing() -> None:
 
 
 def test_nvidia_sass_synth_record_usage_missing() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth record usage missing behavior."""
   # Hit 141->exit (var_name not in _liveness_map)
-  alloc = RegisterAllocator()
-  alloc.record_usage("missing")  # should not throw
+  alloc = RegisterAllocator(255, lambda x: None)
+  res = alloc.record_usage("missing")  # should not throw
+  assert res is None
+  assert "missing" not in alloc._liveness_map
 
 
 def test_nvidia_sass_synth_record_usage_not_zero() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth record usage not zero behavior."""
   # Hit 143->exit
-  alloc = RegisterAllocator()
+  alloc = RegisterAllocator(255, lambda x: None)
   alloc._liveness_map["x"] = 2
   alloc.record_usage("x")
   assert alloc._liveness_map["x"] == 1
 
 
 def test_nvidia_sass_synth_macros_missing(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify nvidia sass synth macros missing behavior."""
   # Hit 173->exit
   import os
 
@@ -165,7 +173,7 @@ def test_nvidia_sass_synth_macros_missing(monkeypatch: pytest.MonkeyPatch) -> No
 
 
 def test_nvidia_sass_synth_macros_attr_missing(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-  """Docstring."""
+  """Verify nvidia sass synth macros attr missing behavior."""
   # Hit 178->177
   import json
   import os
@@ -189,7 +197,7 @@ def test_nvidia_sass_synth_macros_attr_missing(monkeypatch: pytest.MonkeyPatch, 
 
 
 def test_nvidia_sass_synth_existing_input_map() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth existing input map behavior."""
   # Hit 218->220
   synth = NvidiaSassSynthesizer(None)  # type: ignore
   g = LogicalGraph(
@@ -200,20 +208,23 @@ def test_nvidia_sass_synth_existing_input_map() -> None:
       "t": LogicalNode(id="t", op_type="Output", inputs=["s", "s2"]),
     },
   )
-  synth.from_graph(g)
+  res = synth.from_graph(g)
+  assert isinstance(res, list)
+  assert len(res) >= 1
 
 
 def test_nvidia_sass_synth_output_no_sources() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth output no sources behavior."""
   # Hit 234->238
   synth = NvidiaSassSynthesizer(None)  # type: ignore
   g = LogicalGraph("Test")
   g.add_node(LogicalNode(id="out", op_type="Output"))
-  synth.from_graph(g)
+  res = synth.from_graph(g)
+  assert res == []
 
 
 def test_nvidia_sass_synth_abstract_id_none() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth abstract id none behavior."""
   # Hit 278->281
 
   class FakeSemantics:
@@ -231,7 +242,7 @@ def test_nvidia_sass_synth_abstract_id_none() -> None:
 
 
 def test_nvidia_sass_synth_to_cst_other_node() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth to cst other node behavior."""
   # Hit 334->343
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment
 
@@ -241,16 +252,14 @@ def test_nvidia_sass_synth_to_cst_other_node() -> None:
 
 
 def test_nvidia_sass_synth_to_cst_label() -> None:
-  """Docstring."""
-  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassLabel
-
+  """Verify nvidia sass synth to cst label behavior."""
   synth = NvidiaSassSynthesizer(None)  # type: ignore
   mod: typing.Any = synth.to_python([NvidiaSassLabel("lbl")])
   assert len(mod.body) == 1
 
 
 def test_nvidia_sass_synth_to_cst_comment_no_begin_end() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth to cst comment no begin end behavior."""
   # Hit 334->343
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment
 
@@ -260,9 +269,9 @@ def test_nvidia_sass_synth_to_cst_comment_no_begin_end() -> None:
 
 
 def test_nvidia_sass_synth_instruction_dest_not_register() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth instruction dest not register behavior."""
   # Hit 408->412
-  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate, NvidiaSassInstruction
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate
 
   synth = NvidiaSassSynthesizer(None)  # type: ignore
   # create instruction with immediate as dest
@@ -275,7 +284,7 @@ def test_nvidia_sass_synth_instruction_dest_not_register() -> None:
 
 
 def test_nvidia_sass_synth_to_cst_other_non_label_non_comment() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth to cst other non label non comment behavior."""
   # Hit 334->343
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
 
@@ -290,8 +299,8 @@ def test_nvidia_sass_synth_to_cst_other_non_label_non_comment() -> None:
 
 
 def test_nvidia_sass_allocator_overflow() -> None:
-  """Docstring."""
-  allocator = RegisterAllocator()
+  """Verify nvidia sass allocator overflow behavior."""
+  allocator = RegisterAllocator(255, lambda x: None)
   # It has 255 registers. Allocate them all
   with pytest.raises(ValueError):
     for i in range(256):
@@ -299,10 +308,8 @@ def test_nvidia_sass_allocator_overflow() -> None:
 
 
 def test_nvidia_sass_synth_float_immediate() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth float immediate behavior."""
   import libcst as cst
-
-  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate
 
   synth = NvidiaSassSynthesizer(None)  # type: ignore
   res: typing.Any = synth._convert_operand_to_py(NvidiaSassImmediate(value=3.14))  # type: ignore
@@ -311,10 +318,10 @@ def test_nvidia_sass_synth_float_immediate() -> None:
 
 
 def test_nvidia_sass_synth_expr_statement() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth expr statement behavior."""
   import libcst as cst
 
-  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate, NvidiaSassInstruction
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate
 
   synth = NvidiaSassSynthesizer(None)  # type: ignore
   # Give it an instruction with operands, but where dest is not a Register
@@ -326,10 +333,8 @@ def test_nvidia_sass_synth_expr_statement() -> None:
 
 
 def test_nvidia_sass_synth_no_operands() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth no operands behavior."""
   import libcst as cst
-
-  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassInstruction
 
   synth = NvidiaSassSynthesizer(None)  # type: ignore
   inst = NvidiaSassInstruction(opcode="NOP", operands=[])
@@ -339,10 +344,10 @@ def test_nvidia_sass_synth_no_operands() -> None:
 
 
 def test_nvidia_sass_synth_nop() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth nop behavior."""
   import libcst as cst
 
-  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate, NvidiaSassInstruction
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate
 
   synth = NvidiaSassSynthesizer(None)  # type: ignore
   inst = NvidiaSassInstruction(opcode="NOP", operands=[NvidiaSassImmediate(value=0)])  # type: ignore
@@ -352,10 +357,8 @@ def test_nvidia_sass_synth_nop() -> None:
 
 
 def test_nvidia_sass_synth_hex_immediate() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth hex immediate behavior."""
   import libcst as cst
-
-  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate
 
   synth = NvidiaSassSynthesizer(None)  # type: ignore
   # Hex immediate
@@ -365,7 +368,7 @@ def test_nvidia_sass_synth_hex_immediate() -> None:
 
 
 def test_nvidia_sass_synth_output_with_sources() -> None:
-  """Docstring."""
+  """Verify nvidia sass synth output with sources behavior."""
   synth = NvidiaSassSynthesizer(None)  # type: ignore
   src_node = LogicalNode(id="src_node", op_type="Input")
   out_node = LogicalNode(id="out", op_type="Output", inputs=["src_node"])
@@ -378,7 +381,7 @@ def test_nvidia_sass_synth_output_with_sources() -> None:
 
 
 def test_nvidia_sass_synthesizer_macro_exact_match() -> None:
-  """Docstring."""
+  """Verify nvidia sass synthesizer macro exact match behavior."""
   semantics = SemanticsManager()
   synth = NvidiaSassSynthesizer(semantics)
 
@@ -391,7 +394,7 @@ def test_nvidia_sass_synthesizer_macro_exact_match() -> None:
   original = semantics.get_definition
 
   def mock_get_def(kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Docstring."""
+    """Execute mock get def helper logic."""
     if kind == "my_macro":
       return ("my_macro", {})
     return original(kind)
@@ -408,10 +411,131 @@ def test_nvidia_sass_synthesizer_macro_exact_match() -> None:
 
 
 def test_nvidia_sass_backend_semantics_provided() -> None:
-  """Docstring."""
+  """Verify nvidia sass backend semantics provided behavior."""
   from ml_switcheroo.core.compiler.backends.nvidia_sass.backend import NvidiaSassBackend
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sem = SemanticsManager()
   backend = NvidiaSassBackend(semantics=sem)
   assert backend.synthesizer.semantics is sem
+
+
+def test_nvidia_sass_misc_and_isa_cst_coverage() -> None:
+  """Verify coverage of nvidia_sass/misc.py helpers and core/compiler/isa/cst.py methods."""
+  from unittest.mock import patch
+
+  from ml_switcheroo.core.compiler.backends.nvidia_sass.misc import (
+    _make_generic_expand,
+    expand_adam,
+    expand_l,
+    expand_mseloss,
+    expand_transpose,
+    expand_variable,
+  )
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassRegister
+  from ml_switcheroo.core.compiler.isa.cst import IsaImmediate, IsaInstruction, IsaMemory
+  from ml_switcheroo.core.cst.base import Trivia
+  from ml_switcheroo.core.markup.cst import MarkupNode, TextNode, TriviaNode
+  from ml_switcheroo.core.markup.parser import BaseTokenizer, RecursiveDescentParser, Token
+  from ml_switcheroo.utils.formatting import MarkupVisitor
+
+  alloc = RegisterAllocator(255, lambda x: NvidiaSassRegister(name=f"R{x}"))
+  mse_none = expand_mseloss(alloc, "loss_node", {"reduction": "none", "elements": 8})
+  assert any("END MSELoss" in str(n) for n in mse_none)
+
+  generic_fn = _make_generic_expand("CustomOp")
+  generic_nodes = generic_fn(alloc, "custom_1", {})
+  assert len(generic_nodes) == 3
+  assert "BEGIN CustomOp" in str(generic_nodes[0])
+
+  assert len(expand_variable(alloc, "var_1", {})) == 2
+  assert len(expand_transpose(alloc, "tr_1", {})) == 2
+  assert len(expand_adam(alloc, "adam_1", {})) == 2
+  assert len(expand_l(alloc, "l_1", {})) == 2
+
+  # IsaMemory and IsaInstruction to_text()
+  reg = NvidiaSassRegister(name="R0", leading_trivia=[Trivia(" ")], trailing_trivia=[Trivia(" ")])
+  mem_int = IsaMemory(base_reg=reg, offset=4)
+  assert "[R0 + 4]" in mem_int.to_text()
+  mem_reg = IsaMemory(base_reg=None, offset=reg)
+  assert "[ + R0]" in mem_reg.to_text()
+  mem_plain = IsaMemory(base_reg=None, offset=None)
+  assert mem_plain.to_text() == "[]"
+
+  inst_empty = IsaInstruction(opcode="NOP", operands=[])
+  assert inst_empty.to_text() == "NOP"
+  inst_ops = IsaInstruction(opcode="MOV", operands=[IsaImmediate(value=1), IsaImmediate(value=16, is_hex=True)])
+  assert inst_ops.to_text() == "MOV 1, 0x10"
+
+  # MarkupNode, TriviaNode, TextNode
+  base_markup = MarkupNode()
+  with pytest.raises(NotImplementedError):
+    base_markup.to_text()
+
+  tn = TriviaNode(content="  \n")
+  assert tn.emit() == "  \n"
+
+  txt = TextNode(
+    content="hello",
+    bold=True,
+    italic=True,
+    leading_trivia=[Trivia("<")],
+    trailing_trivia=[Trivia(">")],
+  )
+  assert txt.emit() == "<***hello***>"
+  txt_plain = TextNode(content="plain")
+  assert txt_plain.emit() == "plain"
+
+  # Markup parser Token, BaseTokenizer, RecursiveDescentParser
+  tok = Token("IDENT", "foo", 0)
+  assert repr(tok) == "Token(IDENT, 'foo')"
+  tokenizer = BaseTokenizer([("SKIP", r"\s+"), ("IDENT", r"[a-z]+"), ("NUM", r"\d+")])
+  tokens = tokenizer.tokenize("  abc 123 ")
+  assert len(tokens) == 2
+  rdp = RecursiveDescentParser(tokens)
+  assert rdp.match("NUM") is False
+  assert rdp.match("IDENT") is True
+  num_tok = rdp.expect("NUM")
+  assert num_tok.value == "123"
+  assert rdp.current is None
+  assert rdp.advance() is None
+  with pytest.raises(ValueError, match="Expected IDENT"):
+    rdp.expect("IDENT")
+
+  # MarkupVisitor
+  visited: list[str] = []
+
+  class ChildNode:
+    """Test helper class ChildNode."""
+
+    pass
+
+  class ParentNode:
+    """Test helper class ParentNode."""
+
+    def __init__(self) -> None:
+      """Initialize test helper instance."""
+      self.children = [ChildNode()]
+
+  class CustomVisitor(MarkupVisitor):
+    """Test helper class CustomVisitor."""
+
+    def visit_ChildNode(self, node: ChildNode) -> None:
+      """Record visited ChildNode."""
+      visited.append("child")
+
+  v = CustomVisitor()
+  v.visit(ParentNode())
+  v.visit(ChildNode())
+  assert visited == ["child", "child"]
+
+  # optax_shim and exceptions branches
+  import ml_switcheroo.core.exceptions as core_exceptions
+  import ml_switcheroo.exceptions as root_exceptions
+  import ml_switcheroo.frameworks.common.optax_shim as optax_shim
+
+  assert issubclass(core_exceptions.TranspilationError, root_exceptions.MLSwitcherooError)
+
+  with patch.object(optax_shim, "optax", None):
+    with pytest.warns(DeprecationWarning), pytest.raises(AttributeError):
+      _ = optax_shim.adam

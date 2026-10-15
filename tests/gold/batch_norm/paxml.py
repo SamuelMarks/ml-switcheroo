@@ -6,7 +6,7 @@ from praxis.layers import normalizations
 
 
 class BNModel(base_layer.BaseLayer):
-  """Docstring."""
+  """Test helper class BNModel."""
 
   num_features: int = 0
 

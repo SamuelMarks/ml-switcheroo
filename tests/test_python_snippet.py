@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for python snippet."""
 
 import libcst as cst
 
@@ -7,7 +7,7 @@ from ml_switcheroo.core.compiler.ir import LogicalNode
 
 
 def test_emit_init() -> None:
-  """Docstring."""
+  """Verify emit init behavior."""
   emitter: PythonSnippetEmitter = PythonSnippetEmitter("torch")
   node: LogicalNode = LogicalNode(id="layer1", op_type="Linear", attributes={"arg_1": "10", "bias": "True"})
   stmt: cst.BaseStatement = emitter.emit_init(node)
@@ -16,7 +16,7 @@ def test_emit_init() -> None:
 
 
 def test_emit_init_flax() -> None:
-  """Docstring."""
+  """Verify emit init flax behavior."""
   emitter: PythonSnippetEmitter = PythonSnippetEmitter("flax_nnx")
   node: LogicalNode = LogicalNode(id="layer1", op_type="Linear", attributes={"arg_1": "10"})
   stmt: cst.BaseStatement = emitter.emit_init(node)
@@ -25,7 +25,7 @@ def test_emit_init_flax() -> None:
 
 
 def test_emit_init_flax_existing_rngs() -> None:
-  """Docstring."""
+  """Verify emit init flax existing rngs behavior."""
   emitter: PythonSnippetEmitter = PythonSnippetEmitter("flax_nnx")
   node: LogicalNode = LogicalNode(id="layer1", op_type="Linear", attributes={"arg_1": "10", "rngs": "rngs"})
   stmt: cst.BaseStatement = emitter.emit_init(node)
@@ -34,7 +34,7 @@ def test_emit_init_flax_existing_rngs() -> None:
 
 
 def test_emit_init_not_stateful() -> None:
-  """Docstring."""
+  """Verify emit init not stateful behavior."""
   emitter: PythonSnippetEmitter = PythonSnippetEmitter("torch")
   node: LogicalNode = LogicalNode(id="layer1", op_type="func_add", attributes={"arg_1": "10"})
   stmt: cst.BaseStatement = emitter.emit_init(node)
@@ -43,7 +43,7 @@ def test_emit_init_not_stateful() -> None:
 
 
 def test_emit_call_stateful() -> None:
-  """Docstring."""
+  """Verify emit call stateful behavior."""
   emitter: PythonSnippetEmitter = PythonSnippetEmitter("torch")
   node: LogicalNode = LogicalNode(id="layer1", op_type="Linear", attributes={"arg_1": "10"})
   stmt: cst.BaseStatement = emitter.emit_call(node, input_vars=["x"], output_var="y")
@@ -52,7 +52,7 @@ def test_emit_call_stateful() -> None:
 
 
 def test_emit_call_stateless() -> None:
-  """Docstring."""
+  """Verify emit call stateless behavior."""
   emitter: PythonSnippetEmitter = PythonSnippetEmitter("torch")
   node: LogicalNode = LogicalNode(id="op1", op_type="func_add", attributes={"arg_1": "1"})
   stmt: cst.BaseStatement = emitter.emit_call(node, input_vars=["x"], output_var="y")
@@ -61,7 +61,7 @@ def test_emit_call_stateless() -> None:
 
 
 def test_emit_call_input() -> None:
-  """Docstring."""
+  """Verify emit call input behavior."""
   emitter: PythonSnippetEmitter = PythonSnippetEmitter("torch")
   node: LogicalNode = LogicalNode(id="in1", op_type="Input")
   stmt: cst.BaseStatement = emitter.emit_call(node, input_vars=["x"], output_var="y")
@@ -74,7 +74,7 @@ def test_emit_call_input() -> None:
 
 
 def test_emit_expression_syntax_error() -> None:
-  """Docstring."""
+  """Verify emit expression syntax error behavior."""
   emitter: PythonSnippetEmitter = PythonSnippetEmitter("torch")
   # invalid var name to trigger parse error
   node: LogicalNode = LogicalNode(id="op1", op_type="func_add")
@@ -84,7 +84,7 @@ def test_emit_expression_syntax_error() -> None:
 
 
 def test_resolve_api_name() -> None:
-  """Docstring."""
+  """Verify resolve api name behavior."""
   e_torch: PythonSnippetEmitter = PythonSnippetEmitter("torch")
   assert e_torch._resolve_api_name("torch.add") == "torch.add"
   assert e_torch._resolve_api_name("Linear") == "nn.Linear"
@@ -103,7 +103,7 @@ def test_resolve_api_name() -> None:
 
 
 def test_is_stateful_layer() -> None:
-  """Docstring."""
+  """Verify is stateful layer behavior."""
   emitter: PythonSnippetEmitter = PythonSnippetEmitter("torch")
   assert emitter._is_stateful_layer(LogicalNode(id="n", op_type="Input")) is False
   assert emitter._is_stateful_layer(LogicalNode(id="n", op_type="func_add")) is False
@@ -114,6 +114,6 @@ def test_is_stateful_layer() -> None:
 
 
 def test_build_args_from_metadata_empty() -> None:
-  """Docstring."""
+  """Verify build args from metadata empty behavior."""
   emitter: PythonSnippetEmitter = PythonSnippetEmitter("torch")
   assert emitter._build_args_from_metadata({}) == []

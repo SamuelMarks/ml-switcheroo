@@ -6,7 +6,7 @@ import keras
 
 
 class GAPModel(keras.Model):  # type: ignore
-  """Docstring."""
+  """Test helper class GAPModel."""
 
   def call(self, x: typing.Any) -> typing.Any:
     """Helper to call."""

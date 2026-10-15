@@ -28,7 +28,7 @@ def test_numpy_import_namespaces() -> None:
 
 
 def test_numpy_test_config() -> None:
-  """Docstring."""
+  """Verify numpy test config behavior."""
   adapter = NumpyAdapter()
   config: dict[str, typing.Any] = adapter.test_config
   assert "import numpy as np" in config["import"]
@@ -111,7 +111,7 @@ def test_numpy_doc_url() -> None:
 
 
 class DummyTensor:
-  """Docstring."""
+  """Test helper class DummyTensor."""
 
   def __init__(self, data: typing.Any) -> None:
     """Initializes the DummyTensor instance."""
@@ -164,7 +164,7 @@ def test_numpy_tiered_examples() -> None:
 
 
 def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify numpy init missing behavior."""
   import builtins
   import importlib
   import sys
@@ -176,7 +176,7 @@ def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
   orig_import = builtins.__import__
 
   def mock_import(name: str, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-    """Docstring."""
+    """Execute mock import helper logic."""
     if name == "numpy":
       raise ImportError("no numpy")
     return orig_import(name, *args, **kwargs)
@@ -192,7 +192,7 @@ def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Docstring."""
+  """Verify numpy convert extra behavior."""
   import importlib
 
   import ml_switcheroo.frameworks.numpy as np_fw
@@ -284,7 +284,7 @@ def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_numpy_properties() -> None:
-  """Docstring."""
+  """Verify numpy properties behavior."""
   from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
   adapter = NumpyAdapter()
@@ -307,7 +307,7 @@ def test_numpy_properties() -> None:
 
 
 def test_numpy_doc_url_extra() -> None:
-  """Docstring."""
+  """Verify numpy doc url extra behavior."""
   from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
   adapter = NumpyAdapter()
@@ -315,7 +315,7 @@ def test_numpy_doc_url_extra() -> None:
 
 
 def test_numpy_test_config_extra() -> None:
-  """Docstring."""
+  """Verify numpy test config extra behavior."""
   from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
   adapter = NumpyAdapter()
@@ -323,7 +323,7 @@ def test_numpy_test_config_extra() -> None:
 
 
 def test_numpy_get_to_numpy_code_extra() -> None:
-  """Docstring."""
+  """Verify numpy get to numpy code extra behavior."""
   from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
   adapter = NumpyAdapter()
@@ -331,7 +331,7 @@ def test_numpy_get_to_numpy_code_extra() -> None:
 
 
 def test_numpy_get_tiered_examples() -> None:
-  """Docstring."""
+  """Verify numpy get tiered examples behavior."""
   from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
   adapter = NumpyAdapter()

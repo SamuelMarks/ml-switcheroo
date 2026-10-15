@@ -9,59 +9,59 @@ from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
 
 
 class MockContext:
-  """Docstring."""
+  """Test helper class MockContext."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.signature_stack: list[typing.Any] = []
 
 
 class MockSemantics:
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self._key_origins: dict[str, str] = {"my_id": "neural_ops"}
     self.known_magic_args: set[str] = set()
 
 
 class MockTraits:
-  """Docstring."""
+  """Test helper class MockTraits."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.inject_magic_args: list[tuple[str, str]] = [("is_training", "True")]
     self.strip_magic_args: list[str] = ["training"]
     self.auto_strip_magic_args: bool = False
 
 
 class MockRewriter:
-  """Docstring."""
+  """Test helper class MockRewriter."""
 
   def __init__(self) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.context = MockContext()
     self.semantics = MockSemantics()
     self._report_failure = MagicMock()
 
   def _create_dotted_name(self, name: str) -> cst.Name:
-    """Docstring."""
+    """Execute create dotted name helper logic."""
     return cst.Name(name)
 
   def _get_target_traits(self) -> MockTraits:
-    """Docstring."""
+    """Execute get target traits helper logic."""
     return MockTraits()
 
 
 def parse_call(code: str) -> cst.Call:
-  """Docstring."""
+  """Execute parse call helper logic."""
   module = cst.parse_module(code)
   expr = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
   return typing.cast(cst.Call, expr)
 
 
 def test_handle_post_processing_output_select_index() -> None:
-  """Docstring."""
+  """Verify handle post processing output select index behavior."""
   rewriter = MockRewriter()
   node = parse_call("func()")
   mapping: dict[str, typing.Any] = {"output_select_index": 1}
@@ -73,7 +73,7 @@ def test_handle_post_processing_output_select_index() -> None:
 
 
 def test_handle_post_processing_output_select_index_failure() -> None:
-  """Docstring."""
+  """Verify handle post processing output select index failure behavior."""
   rewriter = MockRewriter()
   node = parse_call("func()")
   # Force failure in apply_index_select by giving an invalid index type for CST Subscript builder
@@ -86,7 +86,7 @@ def test_handle_post_processing_output_select_index_failure() -> None:
 
 
 def test_handle_post_processing_output_cast() -> None:
-  """Docstring."""
+  """Verify handle post processing output cast behavior."""
   rewriter = MockRewriter()
   node = parse_call("func()")
   mapping: dict[str, typing.Any] = {"output_cast": "float32"}
@@ -100,7 +100,7 @@ def test_handle_post_processing_output_cast() -> None:
 
 
 def test_handle_post_processing_output_cast_failure() -> None:
-  """Docstring."""
+  """Verify handle post processing output cast failure behavior."""
   rewriter = MockRewriter()
   # Mock _create_dotted_name to raise
   rewriter._create_dotted_name = MagicMock(side_effect=ValueError)  # type: ignore
@@ -113,16 +113,16 @@ def test_handle_post_processing_output_cast_failure() -> None:
 
 
 class MockSignature:
-  """Docstring."""
+  """Test helper class MockSignature."""
 
   def __init__(self, is_init: bool, is_module_method: bool) -> None:
-    """Docstring."""
+    """Initialize test helper instance."""
     self.is_init = is_init
     self.is_module_method = is_module_method
 
 
 def test_handle_post_processing_state_threading_neural() -> None:
-  """Docstring."""
+  """Verify handle post processing state threading neural behavior."""
   rewriter = MockRewriter()
   rewriter.context.signature_stack.append(MockSignature(is_init=True, is_module_method=True))
 
@@ -139,7 +139,7 @@ def test_handle_post_processing_state_threading_neural() -> None:
 
 
 def test_handle_post_processing_state_threading_force() -> None:
-  """Docstring."""
+  """Verify handle post processing state threading force behavior."""
   rewriter = MockRewriter()
   rewriter.context.signature_stack.append(MockSignature(is_init=True, is_module_method=True))
 
@@ -158,7 +158,7 @@ def test_handle_post_processing_state_threading_force() -> None:
 
 
 def test_handle_post_processing_state_threading_auto_strip() -> None:
-  """Docstring."""
+  """Verify handle post processing state threading auto strip behavior."""
   rewriter = MockRewriter()
   rewriter.context.signature_stack.append(MockSignature(is_init=True, is_module_method=True))
 

@@ -7,7 +7,7 @@ from praxis.layers import convolutions  # type: ignore
 
 
 class ConvModel(base_layer.BaseLayer):  # type: ignore
-  """Docstring."""
+  """Test helper class ConvModel."""
 
   in_channels: int = 0
   out_channels: int = 0

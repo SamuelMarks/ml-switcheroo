@@ -9,7 +9,7 @@ from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
 
 class MockSemantics(SemanticsManager):
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
@@ -52,7 +52,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def generator() -> MigrationGuideGenerator:
-  """Docstring."""
+  """Execute generator helper logic."""
   semantics: MockSemantics = MockSemantics()
   return MigrationGuideGenerator(semantics)
 
@@ -119,7 +119,7 @@ def test_doc_gen_missing() -> None:
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
   class DummySM:
-    """Docstring."""
+    """Test helper class DummySM."""
 
     def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
       """Mock implementation of get definition by id."""
@@ -137,7 +137,7 @@ def test_doc_gen_missing_tuple_arg() -> None:
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
   class DummySM:
-    """Docstring."""
+    """Test helper class DummySM."""
 
     def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
       """Mock implementation of get definition by id."""

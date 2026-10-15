@@ -15,12 +15,13 @@ Classes match the DSL macros:
 
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import Dict, List
+
+from ml_switcheroo.core.markup.cst import MarkupNode
 from ml_switcheroo.utils.formatting import StructuredFormatter, escape_latex
 
 
-@dataclass
-class LatexNode(ABC):
+class LatexNode(MarkupNode, ABC):
   """Abstract base class for all MIDL nodes.
 
   Enforces a ``emit()`` method for serialization support.

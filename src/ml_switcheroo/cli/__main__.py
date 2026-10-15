@@ -9,17 +9,17 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from ml_switcheroo.config import parse_cli_key_values
+from ml_switcheroo import __version__
 from ml_switcheroo.cli import commands
+from ml_switcheroo.cli.handlers.completion import handle_completion
+from ml_switcheroo.cli.handlers.harvest import handle_harvest
+from ml_switcheroo.cli.handlers.import_onnx import handle_import_onnx
 
 # Import direct handler for new 'define' command
 from ml_switcheroo.cli.handlers.meta import handle_schema
-from ml_switcheroo.cli.handlers.suggest import handle_suggest
 from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
-from ml_switcheroo.cli.handlers.harvest import handle_harvest
-from ml_switcheroo.cli.handlers.import_onnx import handle_import_onnx
-from ml_switcheroo.cli.handlers.completion import handle_completion
-from ml_switcheroo import __version__
+from ml_switcheroo.cli.handlers.suggest import handle_suggest
+from ml_switcheroo.config import parse_cli_key_values
 
 
 def main(argv: Optional[List[str]] = None) -> int:

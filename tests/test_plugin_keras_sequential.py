@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin keras sequential."""
 
 from unittest.mock import MagicMock
 
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.keras_sequential import _create_dotted_name, transfor
 
 
 def test_create_dotted_name() -> None:
-  """Docstring."""
+  """Verify create dotted name behavior."""
   node: cst.BaseExpression = _create_dotted_name("keras.models.Sequential")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "Sequential"
@@ -20,7 +20,7 @@ def test_create_dotted_name() -> None:
 
 
 def test_transform_keras_sequential_op_api_not_string() -> None:
-  """Docstring."""
+  """Verify transform keras sequential op api not string behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None  # None is not a string
 
@@ -44,7 +44,7 @@ def test_transform_keras_sequential_op_api_not_string() -> None:
 
 
 def test_transform_keras_sequential_empty_args() -> None:
-  """Docstring."""
+  """Verify transform keras sequential empty args behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "mykeras.Sequential"
 
@@ -58,7 +58,7 @@ def test_transform_keras_sequential_empty_args() -> None:
 
 
 def test_transform_keras_sequential_already_list_or_tuple() -> None:
-  """Docstring."""
+  """Verify transform keras sequential already list or tuple behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "mykeras.Sequential"
 
@@ -82,7 +82,7 @@ def test_transform_keras_sequential_already_list_or_tuple() -> None:
 
 
 def test_transform_keras_sequential_pack_args_ignore_kwargs() -> None:
-  """Docstring."""
+  """Verify transform keras sequential pack args ignore kwargs behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "mykeras.Sequential"
 

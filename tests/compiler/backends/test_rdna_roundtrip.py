@@ -14,7 +14,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def semantics_mgr() -> SemanticsManager:
-  """Docstring."""
+  """Execute semantics mgr helper logic."""
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
   def get_def(kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:

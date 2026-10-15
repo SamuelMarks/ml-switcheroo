@@ -11,9 +11,10 @@ internal `_ADAPTER_REGISTRY`.
 """
 
 import importlib
-import pkgutil
 import logging
-from ml_switcheroo.frameworks.base import FrameworkAdapter, register_framework, get_adapter, available_frameworks
+import pkgutil
+
+from ml_switcheroo.frameworks.base import FrameworkAdapter, available_frameworks, get_adapter, register_framework
 
 _EXCLUDED_MODULES = {"base", "__init__", "common", "optax_shim", "loader"}
 

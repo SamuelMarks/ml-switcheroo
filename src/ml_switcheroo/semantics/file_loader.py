@@ -9,32 +9,24 @@ Updates:
 - Using explicit path resolution imports.
 """
 
+import json
 import typing
-
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 import ml_switcheroo
 
-import json
-from pathlib import Path
-from typing import Any, List, Optional, Tuple, TYPE_CHECKING
-
 if TYPE_CHECKING:
   import ml_switcheroo.semantics.manager
+
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from ml_switcheroo.semantics.merging import (
-  merge_tier_data,
-  merge_overlay_data,
-  infer_tier_from_priority,
-)
+
+from ml_switcheroo.semantics.merging import infer_tier_from_priority, merge_overlay_data, merge_tier_data
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 
 try:
-  from ml_ecosystem_snapshots.utils import (
-    strip_sphinx_roles,
-    parse_docstring_with_griffe,
-    resolve_griffe_parser,
-  )
-except ImportError:  # pragma: no cover
+  from ml_ecosystem_snapshots.utils import parse_docstring_with_griffe, resolve_griffe_parser, strip_sphinx_roles
+except ImportError:
   import re
 
   def strip_sphinx_roles(text: Optional[str]) -> Optional[str]:
@@ -187,7 +179,7 @@ class KnowledgeBaseLoader:
         try:
           if fpath.suffix == ".yaml":
             with open(fpath, "r", encoding="utf-8") as f:
-              yaml_content = yaml.safe_load(f)
+              yaml_content = yaml.load(f, Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))
               # Wrap it back into a dict keyed by operation name since atomic yamls are just the op definition
               if (
                 isinstance(yaml_content, dict)

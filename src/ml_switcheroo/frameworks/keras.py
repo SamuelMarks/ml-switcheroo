@@ -11,11 +11,9 @@ It handles:
 5.  **Weight Migration**: Loading/saving .h5 or .keras files via h5py.
 """
 
-import typing
-
-
 import logging
-from typing import Dict, Any, List, Optional, Tuple
+import typing
+from typing import Any, Dict, List, Optional, Tuple
 
 try:
   import keras
@@ -27,8 +25,8 @@ try:
   import keras.random
 except Exception:
   keras = None
-from ml_switcheroo_ir.schema.ghost import GhostRef
-from ml_switcheroo_ir.schema.ghost import SemanticTier
+from ml_switcheroo_ir.schema.ghost import GhostRef, SemanticTier
+
 from ml_switcheroo.frameworks.base import (
   ImportConfig,
   InitMode,
@@ -37,11 +35,9 @@ from ml_switcheroo.frameworks.base import (
   load_snapshot_for_adapter,
   register_framework,
 )
+from ml_switcheroo.frameworks.keras_io import KerasIOMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import PluginTraits
-
-
-from ml_switcheroo.frameworks.keras_io import KerasIOMixin
 
 
 @register_framework("keras")

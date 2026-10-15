@@ -1,4 +1,4 @@
-"""Test suite for the Attention NVIDIA_SASS Macros."""
+"""Test suite for macro attention."""
 
 import typing
 
@@ -8,14 +8,15 @@ from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import (
   expand_transformerdecoder,
   expand_transformerencoder,
 )
-from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import RegisterAllocator
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment, NvidiaSassInstruction
+from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment, NvidiaSassInstruction, NvidiaSassNode
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
 
 
 def test_nvidia_sass_macro_multiheadattention() -> None:
   """Verifies that expand_multiheadattention generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "mha1"
   metadata: dict[str, typing.Any] = {}
 
@@ -28,7 +29,7 @@ def test_nvidia_sass_macro_multiheadattention() -> None:
 
 def test_nvidia_sass_macro_transformer() -> None:
   """Verifies that expand_transformer generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "tf1"
   metadata: dict[str, typing.Any] = {}
 
@@ -41,7 +42,7 @@ def test_nvidia_sass_macro_transformer() -> None:
 
 def test_nvidia_sass_macro_transformer_enc_dec() -> None:
   """Verifies enc/dec macros."""
-  allocator = RegisterAllocator()
+  allocator = RegisterAllocator(256, lambda x: None)
   node_id = "enc1"
   metadata: dict[str, typing.Any] = {}
 

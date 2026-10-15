@@ -71,13 +71,13 @@ def test_latex_dsl_definitions_already_present(mock_load: MagicMock) -> None:
 
 
 def test_latex_dsl_adapter_get_device_check_syntax() -> None:
-  """Docstring."""
+  """Verify latex dsl adapter get device check syntax behavior."""
   adapter = LatexDSLAdapter()
   assert adapter.get_device_check_syntax() == "True"
 
 
 def test_latex_dsl_adapter_definitions() -> None:
-  """Docstring."""
+  """Verify latex dsl adapter definitions behavior."""
   from unittest.mock import patch
 
   import ml_switcheroo.frameworks.latex_dsl as ldsl
@@ -91,7 +91,7 @@ def test_latex_dsl_adapter_definitions() -> None:
 
 
 def test_latex_dsl_adapter_properties() -> None:
-  """Docstring."""
+  """Verify latex dsl adapter properties behavior."""
   adapter = LatexDSLAdapter()
   assert adapter.get_device_syntax("cpu") == ""
   assert adapter.get_rng_split_syntax("rng", "key") == ""
@@ -114,7 +114,7 @@ def test_latex_dsl_adapter_properties() -> None:
 
 
 def test_latex_dsl_adapter_missing_methods() -> None:
-  """Docstring."""
+  """Verify latex dsl adapter missing methods behavior."""
   adapter = LatexDSLAdapter()
   assert adapter.get_device_syntax("cpu") == ""
   assert adapter.get_device_check_syntax() == "True"

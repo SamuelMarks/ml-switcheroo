@@ -5,14 +5,14 @@ from ml_switcheroo.core.html.parser import GridExtractor, HtmlParser, InternalHt
 
 
 def test_html_parser_unmatched_endtag() -> None:
-  """Docstring."""
+  """Verify html parser unmatched endtag behavior."""
   parser = InternalHtmlParser()
   parser.feed("</div>")
   assert len(parser.root_children) == 0
 
 
 def test_html_parser_h3_non_text_child() -> None:
-  """Docstring."""
+  """Verify html parser h3 non text child behavior."""
   html: str = "<h3><span>Not a text node directly</span>Not Model</h3>"
   parser = HtmlParser(source=html)
   doc: HtmlDocument = parser.parse_cst()  # type: ignore
@@ -23,7 +23,7 @@ def test_html_parser_h3_non_text_child() -> None:
 
 
 def test_html_parser_div_non_class_attr() -> None:
-  """Docstring."""
+  """Verify html parser div non class attr behavior."""
   html: str = "<div id='test' class=''>Content</div>"
   parser = HtmlParser(source=html)
   doc: HtmlDocument = parser.parse_cst()  # type: ignore
@@ -33,7 +33,7 @@ def test_html_parser_div_non_class_attr() -> None:
 
 
 def test_html_parser_process_box_non_text_child() -> None:
-  """Docstring."""
+  """Verify html parser process box non text child behavior."""
   html: str = "<div class='box'><span><b>Bold</b></span><code><i>Italic</i></code><p>Ignored</p></div>"
   parser = HtmlParser(source=html)
   doc: HtmlDocument = parser.parse_cst()  # type: ignore

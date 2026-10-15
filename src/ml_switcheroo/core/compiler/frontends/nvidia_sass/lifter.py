@@ -11,24 +11,24 @@ Updates:
 - **FIX**: Preserves register destinations as node IDs for faithful variables.
 """
 
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
-from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassInstruction,
   NvidiaSassNode,
   NvidiaSassRegister,
 )
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.semantic_parser import (
-  SemanticCommentParser,
-  SemanticInput,
   SemanticBegin,
+  SemanticCommentParser,
   SemanticEnd,
-  SemanticUnmapped,
+  SemanticInput,
   SemanticReturn,
+  SemanticUnmapped,
 )
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 class NvidiaSassLifter:

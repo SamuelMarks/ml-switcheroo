@@ -9,38 +9,35 @@ from ml_switcheroo.core.tikz.parser import TikzParser
 
 
 def test_mlir_roundtrip() -> None:
-  """Docstring."""
-  code: str = "sw.func { sw.return %1 }\\n"
+  """Verify mlir roundtrip behavior."""
+  code: str = "sw.func { sw.return %1 }\n"
   parser = MlirParser(code)
-  try:
-    module: typing.Any = parser.parse()
-    out: str = module.to_text()
-    parser2 = MlirParser(out)
-    out2: str = parser2.parse().to_text()
-    assert out.strip() == out2.strip()
-  except Exception:
-    pass  # ignore if it fails
+  module: typing.Any = parser.parse()
+  out: str = module.to_text()
+  parser2 = MlirParser(out)
+  out2: str = parser2.parse().to_text()
+  assert out.strip() == out2.strip()
 
 
 def test_tikz_roundtrip() -> None:
-  """Docstring."""
-  code: str = r"""\begin{tikzpicture}
-    \node (node1) at (0.0, 0.0) {Text 1};
-\end{tikzpicture}
-"""
+  """Verify tikz roundtrip behavior."""
+  code: str = "\\begin{tikzpicture}\n    \\node (node1) at (0.0, 0.0) {Text 1};\n\\end{tikzpicture}\n"
   parser = TikzParser(code)
-  try:
-    graph: typing.Any = parser.parse()
-    out: str = graph.to_text()
-    parser2 = TikzParser(out)
-    out2: str = parser2.parse().to_text()
-    assert out.strip() == out2.strip()
-  except Exception:
-    pass
+  graph: typing.Any = parser.parse()
+  out: str = graph.to_text()
+  parser2 = TikzParser(out)
+  out2: str = parser2.parse().to_text()
+
+  # Normalize whitespace before asserting to ignore indentation issues
+  def normalize(s: str) -> str:
+    """Execute normalize test helper."""
+    return "\\n".join(line.strip() for line in s.strip().splitlines())
+
+  assert normalize(out) == normalize(out2)
 
 
 def test_html_roundtrip() -> None:
-  """Docstring."""
+  """Verify html roundtrip behavior."""
   code: str = """
 <html>
   <body>
@@ -58,7 +55,7 @@ def test_html_roundtrip() -> None:
 
 
 def test_semantic_roundtrip() -> None:
-  """Docstring."""
+  """Verify semantic roundtrip behavior."""
   code: str = "  BEGIN   Add ( node_1 ) // ok  "
   parser = SemanticCommentParser()
   marker: typing.Any = parser.parse(code)

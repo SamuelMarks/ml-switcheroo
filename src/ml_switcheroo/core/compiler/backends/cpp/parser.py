@@ -4,29 +4,28 @@ A pure Python Lark-based parser for a subset of C++
 used in PyTorch extensions, producing CppNode CSTs.
 """
 
-from typing import List, Any
+from typing import Any, List
 
 from lark import Lark, Transformer, v_args
 
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
+  BinaryExpression,
   CppModule,
+  CppNode,
+  Expression,
+  FunctionArgument,
+  FunctionDefinition,
+  Identifier,
   IncludeDirective,
   MacroDefinition,
-  FunctionDefinition,
-  FunctionArgument,
+  MethodCall,
+  PyBindDef,
+  PyBindModule,
+  RawStatement,
+  ReturnStatement,
   TypeIdentifier,
   VariableDeclaration,
-  ReturnStatement,
-  Identifier,
-  BinaryExpression,
-  MethodCall,
-  RawStatement,
-  PyBindModule,
-  PyBindDef,
-  Expression,
-  CppNode,
 )
-
 
 GRAMMAR = r"""
     ?start: module | statement

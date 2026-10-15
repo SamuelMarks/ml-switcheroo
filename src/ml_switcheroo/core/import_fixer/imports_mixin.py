@@ -8,11 +8,10 @@ import typing
 from typing import Union
 
 import libcst as cst
-from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 
+from ml_switcheroo.core.import_fixer.resolution import ImportReq, ResolutionPlan
 from ml_switcheroo.core.import_fixer.utils import create_dotted_name
 from ml_switcheroo.core.scanners import get_full_name
-from ml_switcheroo.core.import_fixer.resolution import ImportReq
 
 
 class ImportMixin(cst.CSTTransformer):
@@ -164,20 +163,12 @@ class ImportMixin(cst.CSTTransformer):
 
       if lookup_key in self.plan.mappings and root_pkg in self.source_fws:
         req = self.plan.mappings[lookup_key]
-
-        if req.subcomponent:
-          # Convert to Import for robustness (prevents deep from-imports if preferred)
-          new_node = cst.Import(names=[self._make_alias_node(req)])
-          self._satisfied_injections.add(req.signature)
-          # Track definition manually since we bypass leave_Import logic
-          self._track_definition(new_node.names[0])
-          return new_node
-
-        else:
-          new_node = cst.Import(names=[self._make_alias_node(req)])
-          self._satisfied_injections.add(req.signature)
-          self._track_definition(new_node.names[0])
-          return new_node
+        # Convert to Import for robustness (prevents deep from-imports if preferred)
+        new_node = cst.Import(names=[self._make_alias_node(req)])
+        self._satisfied_injections.add(req.signature)
+        # Track definition manually since we bypass leave_Import logic
+        self._track_definition(new_node.names[0])
+        return new_node
 
     new_aliases = []
     for alias in updated_node.names:

@@ -7,6 +7,7 @@ schema, and installs it into the project's knowledge base.
 
 import shutil
 from pathlib import Path
+
 import yaml
 
 from ml_switcheroo.core.dsl import OperationDef

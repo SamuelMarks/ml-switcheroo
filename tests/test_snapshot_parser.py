@@ -1,14 +1,15 @@
 """Tests for the GhostRef snapshot parser."""
 
 import json
-import pytest
 from pathlib import Path
+
+import pytest
 from pydantic import ValidationError
 
 from ml_switcheroo.ingestion.snapshot_parser import (
+  FrameworkSnapshot,
   SnapshotArgument,
   SnapshotOperation,
-  FrameworkSnapshot,
   parse_snapshot_file,
   parse_snapshot_string,
 )

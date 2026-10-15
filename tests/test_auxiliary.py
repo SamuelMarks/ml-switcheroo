@@ -8,7 +8,7 @@ from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryTransformer
 
 
 class MockSemantics:
-  """Docstring."""
+  """Test helper class MockSemantics."""
 
   def get_definition(self, name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
     """Retrieve a mock definition based on name.
@@ -25,7 +25,7 @@ class MockSemantics:
 
 
 class DummyContext:
-  """Docstring."""
+  """Test helper class DummyContext."""
 
   def __init__(self) -> None:
     """Initialize dummy context."""
@@ -34,7 +34,7 @@ class DummyContext:
 
 
 def test_auxiliary_leave_decorator_no_name() -> None:
-  """Docstring."""
+  """Verify auxiliary leave decorator no name behavior."""
   p: AuxiliaryTransformer = AuxiliaryTransformer(context=DummyContext())  # type: ignore
   node: cst.Decorator = cst.parse_module("@foo()()\ndef x(): pass").body[0].decorators[0]  # type: ignore
 
@@ -46,7 +46,7 @@ def test_auxiliary_leave_decorator_no_name() -> None:
 
 
 def test_auxiliary_leave_decorator_fw_not_in_variants() -> None:
-  """Docstring."""
+  """Verify auxiliary leave decorator fw not in variants behavior."""
   p: AuxiliaryTransformer = AuxiliaryTransformer(context=DummyContext())  # type: ignore
   node: cst.Decorator = cst.parse_module("@my_dec\ndef x(): pass").body[0].decorators[0]  # type: ignore
 

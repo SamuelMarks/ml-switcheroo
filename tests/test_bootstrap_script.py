@@ -1,7 +1,7 @@
 """Unit and integration tests for scripts/bootstrap.sh functions and logic."""
 
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 
 def _get_function_def(func_name: str) -> str:

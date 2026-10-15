@@ -1,8 +1,8 @@
-"""Module docstring."""
+"""Test suite for nvidia sass macros."""
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import (
-  RegisterAllocatorProtocol,
   NvidiaSassRegister,
+  RegisterAllocatorProtocol,
   expand_adam,
   expand_conv2d,
   expand_conv3d,
@@ -25,11 +25,11 @@ class MockAllocator(RegisterAllocatorProtocol):
     """Init."""
     self.counter = 0
 
-  def get_register(self, var_name: str) -> NvidiaSassRegister:
+  def get_register(self, var_name: str) -> NvidiaSassRegister:  # noqa: F811
     """Get register."""
     return NvidiaSassRegister(name=f"R_VAR_{var_name}")
 
-  def allocate_temp(self) -> NvidiaSassRegister:
+  def allocate_temp(self) -> NvidiaSassRegister:  # noqa: F811
     """Allocate temp."""
     self.counter += 1
     return NvidiaSassRegister(name=f"R_TMP_{self.counter}")
@@ -40,7 +40,7 @@ class MockAllocator(RegisterAllocatorProtocol):
 
 
 def test_expand_conv2d() -> None:
-  """Docstring."""
+  """Verify expand conv2d behavior."""
   alloc = MockAllocator()
   nodes: list[NvidiaSassNode] = expand_conv2d(alloc, "conv1", {"k": 3})  # type: ignore
   assert len(nodes) > 0
@@ -48,7 +48,7 @@ def test_expand_conv2d() -> None:
 
 
 def test_expand_linear() -> None:
-  """Docstring."""
+  """Verify expand linear behavior."""
   alloc = MockAllocator()
   nodes: list[NvidiaSassNode] = expand_linear(alloc, "lin1", {"in_features": 64})  # type: ignore
   assert len(nodes) > 0
@@ -56,7 +56,7 @@ def test_expand_linear() -> None:
 
 
 def test_expand_mean() -> None:
-  """Docstring."""
+  """Verify expand mean behavior."""
   alloc = MockAllocator()
   nodes: list[NvidiaSassNode] = expand_mean(alloc, "mean1", {"elements": 32})
   assert len(nodes) > 0
@@ -64,7 +64,7 @@ def test_expand_mean() -> None:
 
 
 def test_expand_flatten() -> None:
-  """Docstring."""
+  """Verify expand flatten behavior."""
   alloc = MockAllocator()
   nodes: list[NvidiaSassNode] = expand_flatten(alloc, "flat1", {})  # type: ignore
   assert len(nodes) > 0
@@ -72,7 +72,7 @@ def test_expand_flatten() -> None:
 
 
 def test_expand_reshape() -> None:
-  """Docstring."""
+  """Verify expand reshape behavior."""
   alloc = MockAllocator()
   nodes: list[NvidiaSassNode] = expand_reshape(alloc, "res1", {})  # type: ignore
   assert len(nodes) > 0
@@ -80,7 +80,7 @@ def test_expand_reshape() -> None:
 
 
 def test_expand_conv3d() -> None:
-  """Docstring."""
+  """Verify expand conv3d behavior."""
   alloc = MockAllocator()
   nodes: list[NvidiaSassNode] = expand_conv3d(alloc, "conv3d1", {"k": 5})  # type: ignore
   assert len(nodes) > 0
@@ -88,7 +88,7 @@ def test_expand_conv3d() -> None:
 
 
 def test_expand_generic_macros() -> None:
-  """Docstring."""
+  """Verify expand generic macros behavior."""
   alloc = MockAllocator()
   for func in [expand_variable, expand_transpose, expand_conv_general_dilated, expand_adam, expand_l]:
     nodes: list[NvidiaSassNode] = func(alloc, "node1", {})  # type: ignore
@@ -96,7 +96,7 @@ def test_expand_generic_macros() -> None:
 
 
 def test_expand_relu() -> None:
-  """Docstring."""
+  """Verify expand relu behavior."""
   alloc = MockAllocator()
   from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_relu
 

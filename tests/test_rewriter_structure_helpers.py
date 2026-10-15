@@ -1,4 +1,4 @@
-"""Test module."""
+"""Test suite for rewriter structure helpers."""
 
 from typing import List
 
@@ -8,10 +8,10 @@ from ml_switcheroo.core.rewriter.passes.structure_helpers import StructuralTrans
 
 
 class DummyTransformer(StructuralTransformerHelpersMixin):
-  """Docstring."""
+  """Test helper class DummyTransformer."""
 
   def _create_dotted_name(self, name: str) -> cst.BaseExpression:
-    """Docstring."""
+    """Execute create dotted name helper logic."""
     parts: List[str] = name.split(".")
     node: cst.BaseExpression = cst.Name(parts[0])
     for p in parts[1:]:
@@ -20,12 +20,12 @@ class DummyTransformer(StructuralTransformerHelpersMixin):
 
 
 def test_structure_helpers() -> None:
-  """Docstring."""
+  """Verify structure helpers behavior."""
   helper: DummyTransformer = DummyTransformer()
   func_def: cst.FunctionDef = getattr(cst.parse_module("def foo(self, a, b): pass"), "body")[0]
 
   def get_code(node: cst.CSTNode) -> str:
-    """Docstring."""
+    """Execute get code helper logic."""
     return cst.Module(body=[node]).code
 
   # test _strip_argument_from_signature
@@ -79,7 +79,7 @@ def test_structure_helpers() -> None:
   func_no_body: cst.ClassDef = getattr(cst.parse_module("class A: pass"), "body")[0]
 
   class A:
-    """Docstring."""
+    """Test helper class A."""
 
     pass
 

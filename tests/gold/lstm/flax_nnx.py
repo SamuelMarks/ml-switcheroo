@@ -5,7 +5,7 @@ from flax import nnx
 
 
 class LSTMModel(nnx.Module):
-  """Docstring."""
+  """Test helper class LSTMModel."""
 
   def __init__(self, input_size: int, hidden_size: int, rngs: nnx.Rngs):
     """Initializes the LSTMModel instance."""

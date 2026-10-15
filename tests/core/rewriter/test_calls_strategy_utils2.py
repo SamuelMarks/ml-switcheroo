@@ -21,7 +21,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockRewriter:
-  """Docstring."""
+  """Test helper class MockRewriter."""
 
   def __init__(self, strict_mode: bool = False) -> None:
     """Initializes the MockRewriter instance."""
@@ -53,7 +53,7 @@ class MockRewriter:
 
 
 class MockSigCtx:
-  """Docstring."""
+  """Test helper class MockSigCtx."""
 
   def __init__(self, node: typing.Any = None) -> None:
     """Initializes the MockSigCtx instance."""
@@ -209,14 +209,14 @@ def test_rewrite_stateful_call_no_create_dotted_fixed() -> None:
   """Rewrites stateful call no create dotted fixed."""
 
   class DummyContext:
-    """Docstring."""
+    """Test helper class DummyContext."""
 
     def __init__(self) -> None:
       """Initializes the DummyContext instance."""
       self.signature_stack = [MockSigCtx()]
 
   class BasicRewriter:
-    """Docstring."""
+    """Test helper class BasicRewriter."""
 
     def __init__(self) -> None:
       """Initializes the BasicRewriter instance."""

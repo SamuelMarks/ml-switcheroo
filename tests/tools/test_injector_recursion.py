@@ -34,7 +34,7 @@ def test_primitive_recursion() -> None:
 
 
 def test_get_import_root() -> None:
-  """Docstring."""
+  """Verify get import root behavior."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import get_import_root
@@ -46,7 +46,7 @@ def test_get_import_root() -> None:
 
 
 def test_is_docstring() -> None:
-  """Docstring."""
+  """Verify is docstring behavior."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import is_docstring
@@ -64,7 +64,7 @@ def test_is_docstring() -> None:
 
 
 def test_is_future_import() -> None:
-  """Docstring."""
+  """Verify is future import behavior."""
   import libcst as cst
 
   from ml_switcheroo.tools.injector_fw.utils import is_future_import

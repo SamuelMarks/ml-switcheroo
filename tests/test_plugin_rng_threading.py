@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin rng threading."""
 
 from typing import List
 from unittest.mock import MagicMock, patch
@@ -9,7 +9,7 @@ from ml_switcheroo.plugins.rng_threading import _remove_generator_arg, inject_pr
 
 
 def test_remove_generator_arg() -> None:
-  """Docstring."""
+  """Verify remove generator arg behavior."""
   # Has generator
   args: List[cst.Arg] = [cst.Arg(value=cst.Name("x")), cst.Arg(keyword=cst.Name("generator"), value=cst.Name("gen"))]
   cleaned: List[cst.Arg] = _remove_generator_arg(args)
@@ -24,7 +24,7 @@ def test_remove_generator_arg() -> None:
 
 @patch("ml_switcheroo.plugins.rng_threading.get_adapter")
 def test_inject_prng_threading_enabled(mock_get_adapter: MagicMock) -> None:
-  """Docstring."""
+  """Verify inject prng threading enabled behavior."""
   mock_adapter: MagicMock = MagicMock()
   mock_adapter.get_rng_split_syntax.return_value = "rng, key = jax.random.split(rng)"
   mock_get_adapter.return_value = mock_adapter
@@ -47,7 +47,7 @@ def test_inject_prng_threading_enabled(mock_get_adapter: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.rng_threading.get_adapter")
 def test_inject_prng_threading_disabled(mock_get_adapter: MagicMock) -> None:
-  """Docstring."""
+  """Verify inject prng threading disabled behavior."""
   ctx: MagicMock = MagicMock()
   ctx.plugin_traits.requires_explicit_rng = False
 
@@ -61,7 +61,7 @@ def test_inject_prng_threading_disabled(mock_get_adapter: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.rng_threading.get_adapter")
 def test_inject_prng_threading_no_adapter_or_split(mock_get_adapter: MagicMock) -> None:
-  """Docstring."""
+  """Verify inject prng threading no adapter or split behavior."""
   # Test adapter is None
   mock_get_adapter.return_value = None
 

@@ -6,16 +6,13 @@ Knowledge Base JSON files (The Hub) with new operation definitions.
 It replaces the legacy LibCST-based injector that modified `standards_internal.py`.
 """
 
+import typing
 from typing import Any
 
-
-import typing
-
-
 import yaml
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 from ml_switcheroo.core.dsl import OperationDef, ParameterDef
-from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.utils.console import log_info, log_success
 
@@ -133,7 +130,7 @@ class StandardsInjector:
         List[Any]: A list of normalized argument specifications formatted as either
             dictionaries or strings.
     """
-    result = []
+    result: typing.List[typing.Any] = []
     for arg in args:
       if isinstance(arg, (ParameterDef, dict)):
         # Convert object/dict to clean dict
@@ -156,6 +153,6 @@ class StandardsInjector:
         result.append(entry)
 
       elif isinstance(arg, str):
-        result.append(arg)  # type: ignore
+        result.append(arg)
 
     return result

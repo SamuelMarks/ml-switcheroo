@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin."""
 
 from typing import List
 from unittest.mock import MagicMock
@@ -10,7 +10,7 @@ from ml_switcheroo.plugins.loop_unroll import _analyze_range_iterator, transform
 
 
 def test_transform_loops_not_required() -> None:
-  """Docstring."""
+  """Verify transform loops not required behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.plugin_traits.requires_functional_control_flow = False
 
@@ -23,7 +23,7 @@ def test_transform_loops_not_required() -> None:
 
 
 def test_transform_loops_range() -> None:
-  """Docstring."""
+  """Verify transform loops range behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.plugin_traits.requires_functional_control_flow = True
   ctx.target_fw = "jax"
@@ -46,7 +46,7 @@ def test_transform_loops_range() -> None:
 
 
 def test_transform_loops_not_range() -> None:
-  """Docstring."""
+  """Verify transform loops not range behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.plugin_traits.requires_functional_control_flow = True
   ctx.target_fw = "jax"
@@ -69,7 +69,7 @@ def test_transform_loops_not_range() -> None:
 
 
 def test_analyze_range_iterator_not_call() -> None:
-  """Docstring."""
+  """Verify analyze range iterator not call behavior."""
   code: str = "for i in my_list:\n    pass"
   module: cst.Module = cst.parse_module(code)
   for_node: cst.CSTNode = module.body[0]
@@ -82,7 +82,7 @@ def test_analyze_range_iterator_not_call() -> None:
 
 
 def test_analyze_range_iterator_not_range_name() -> None:
-  """Docstring."""
+  """Verify analyze range iterator not range name behavior."""
   code: str = "for i in my_func(10):\n    pass"
   module: cst.Module = cst.parse_module(code)
   for_node: cst.CSTNode = module.body[0]

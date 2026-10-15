@@ -4,6 +4,7 @@ import json
 from typing import Any, Dict
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
 from ml_switcheroo.frameworks.base import ImportConfig
 from ml_switcheroo.frameworks.ir import IrAdapter, IrPythonAdapter

@@ -359,7 +359,7 @@ def test_ghost_annotation_without_name() -> None:
       return "NoName"
 
   def func_with_anno(x: typing.Any) -> None:  # Cannot annotate with instance
-    """Docstring."""
+    """Execute func with anno helper logic."""
     pass
 
   # We manually override annotations for the test

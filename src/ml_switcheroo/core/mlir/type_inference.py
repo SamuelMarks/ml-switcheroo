@@ -1,13 +1,10 @@
 """Static Type Inference Engine for MLIR Emitters."""
 
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
+
 import libcst as cst
-from ml_switcheroo.core.mlir.types import (
-  MLIRType,
-  IntegerType,
-  FloatType,
-  TensorType,
-)
+
+from ml_switcheroo.core.mlir.types import FloatType, IntegerType, MLIRType, TensorType
 
 
 def parse_py_type_to_mlir(type_str: str) -> MLIRType:

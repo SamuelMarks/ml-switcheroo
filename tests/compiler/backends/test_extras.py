@@ -174,13 +174,16 @@ def test_mlir_backend_compile() -> None:
   """Verifies the behavior of MLIR backend compile."""
   backend = MlirBackend()
   g = LogicalGraph()
-  g.nodes = [
-    LogicalNode("in", "Input", {"value": "42"}),
-    LogicalNode("in2", "Input", {"value": "float"}),
-    LogicalNode("op", "MyOp", {"attr": "v"}),
-    LogicalNode("op_no_attr", "MyOp", {}),
-    LogicalNode("out", "Output"),
-  ]
+  g.nodes = {
+    n.id: n
+    for n in [
+      LogicalNode("in", "Input", {"value": "42"}),
+      LogicalNode("in2", "Input", {"value": "float"}),
+      LogicalNode("op", "MyOp", {"attr": "v"}),
+      LogicalNode("op_no_attr", "MyOp", {}),
+      LogicalNode("out", "Output"),
+    ]
+  }
   mlir: str = backend.compile(g)
   assert "value = 42" in mlir
   assert 'type = "Input"' in mlir
@@ -193,7 +196,7 @@ def test_stablehlo_backend_compile() -> None:
   """Verifies the behavior of StableHLO backend compile."""
   backend = StableHloBackend()
   g = LogicalGraph()
-  g.nodes = [LogicalNode("in", "Input"), LogicalNode("op", "math.Add"), LogicalNode("out", "Output")]
+  g.nodes = {n.id: n for n in [LogicalNode("in", "Input"), LogicalNode("op", "math.Add"), LogicalNode("out", "Output")]}
   shlo: str = backend.compile(g)
   assert "stablehlo.constant" in shlo
   assert "dense<0.0>" in shlo

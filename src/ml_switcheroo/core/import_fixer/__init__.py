@@ -12,7 +12,7 @@ from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeMixin
 from ml_switcheroo.core.import_fixer.base import BaseImportFixer
 from ml_switcheroo.core.import_fixer.imports_mixin import ImportMixin
 from ml_switcheroo.core.import_fixer.injection_mixin import InjectionMixin
-from ml_switcheroo.core.import_fixer.resolution import ImportResolver, ResolutionPlan, ImportReq
+from ml_switcheroo.core.import_fixer.resolution import ImportReq, ImportResolver, ResolutionPlan
 
 
 class ImportFixer(AttributeMixin, ImportMixin, InjectionMixin, BaseImportFixer):

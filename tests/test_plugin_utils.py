@@ -1,4 +1,4 @@
-"""Docstring."""
+"""Test suite for plugin utils."""
 
 from unittest.mock import MagicMock
 
@@ -9,33 +9,33 @@ from ml_switcheroo.plugins.utils import _extract_root_name, create_dotted_name, 
 
 
 def parse_expr(code: str) -> cst.BaseExpression:
-  """Docstring."""
+  """Execute parse expr helper logic."""
   return cst.parse_expression(code)
 
 
 def test_create_dotted_name() -> None:
-  """Docstring."""
+  """Verify create dotted name behavior."""
   node: cst.BaseExpression = create_dotted_name("a.b.c")
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=node)])]).code
   assert code.strip() == "a.b.c"
 
 
 def test_extract_root_name_attribute() -> None:
-  """Docstring."""
+  """Verify extract root name attribute behavior."""
   node: cst.BaseExpression = parse_expr("a.b.c")
   assert _extract_root_name(node) == "a"
   assert _extract_root_name(parse_expr("1 + 1")) is None
 
 
 def test_is_framework_module_node_no_name() -> None:
-  """Docstring."""
+  """Verify is framework module node no name behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   node: cst.BaseExpression = parse_expr("1 + 1")
   assert not is_framework_module_node(node, ctx)
 
 
 def test_is_framework_module_node_source_fw() -> None:
-  """Docstring."""
+  """Verify is framework module node source fw behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "torch"
   ctx.target_fw = None
@@ -44,7 +44,7 @@ def test_is_framework_module_node_source_fw() -> None:
 
 
 def test_is_framework_module_node_target_fw() -> None:
-  """Docstring."""
+  """Verify is framework module node target fw behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "jax"
   ctx.target_fw = "torch"
@@ -53,7 +53,7 @@ def test_is_framework_module_node_target_fw() -> None:
 
 
 def test_is_framework_module_node_configs_direct() -> None:
-  """Docstring."""
+  """Verify is framework module node configs direct behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "a"
   ctx.target_fw = "b"
@@ -64,7 +64,7 @@ def test_is_framework_module_node_configs_direct() -> None:
 
 
 def test_is_framework_module_node_configs_alias_dict() -> None:
-  """Docstring."""
+  """Verify is framework module node configs alias dict behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "a"
   ctx.target_fw = "b"
@@ -75,17 +75,17 @@ def test_is_framework_module_node_configs_alias_dict() -> None:
 
 
 def test_is_framework_module_node_configs_alias_object() -> None:
-  """Docstring."""
+  """Verify is framework module node configs alias object behavior."""
 
   class AliasInfo:
-    """Docstring."""
+    """Test helper class AliasInfo."""
 
     def model_dump(self) -> dict:
-      """Docstring."""
+      """Execute model dump helper logic."""
       return {"name": "jnp"}
 
   class Conf:
-    """Docstring."""
+    """Test helper class Conf."""
 
     alias = AliasInfo()
 
@@ -99,10 +99,10 @@ def test_is_framework_module_node_configs_alias_object() -> None:
 
 
 def test_is_framework_module_node_configs_alias_object_no_dump() -> None:
-  """Docstring."""
+  """Verify is framework module node configs alias object no dump behavior."""
 
   class Conf:
-    """Docstring."""
+    """Test helper class Conf."""
 
     alias = {"name": "jnp"}
 
@@ -116,7 +116,7 @@ def test_is_framework_module_node_configs_alias_object_no_dump() -> None:
 
 
 def test_is_framework_module_node_source_registry() -> None:
-  """Docstring."""
+  """Verify is framework module node source registry behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "a"
   ctx.target_fw = "b"
@@ -128,7 +128,7 @@ def test_is_framework_module_node_source_registry() -> None:
 
 
 def test_is_framework_module_node_no_match() -> None:
-  """Docstring."""
+  """Verify is framework module node no match behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.source_fw = "a"
   ctx.target_fw = "b"
