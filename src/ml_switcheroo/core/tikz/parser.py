@@ -461,7 +461,7 @@ def _logical_from_tikz_graph(tikz_graph: TikzGraph) -> "LogicalGraph":
   Returns:
       The reconstructed LogicalGraph IR representing the logical dataflow.
   """
-  from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
+  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
   l_graph = LogicalGraph()
   for child in tikz_graph.children:
@@ -488,6 +488,6 @@ def _logical_from_tikz_graph(tikz_graph: TikzGraph) -> "LogicalGraph":
 
       l_graph.nodes[child.node_id] = LogicalNode(id=child.node_id, op_type=kind, attributes=metadata)
     elif isinstance(child, TikzEdge):
-      l_graph.edges.append(LogicalEdge(source=child.source_id, target=child.target_id))
+      l_graph.add_edge(child.source_id, child.target_id)
 
   return l_graph

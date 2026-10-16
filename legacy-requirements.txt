@@ -1,3 +1,3 @@
 # Legacy package requirement. ml_ecosystem_snapshots v0.0.3+ provides a transparent
 # import aliasing layer (ml_ecosystem_snapshots._alias) mapping ml_framework_snapshots to ml_ecosystem_snapshots.
-ml_framework_snapshots @ git+https://github.com/SamuelMarks/ml-framework-snapshots.git@master
+ml_framework_snapshots @ git+https://github.com/SamuelMarks/ml-framework-snapshots.git@e49ae33bdf5613fa75f3ecf5f2543c722995d5d9

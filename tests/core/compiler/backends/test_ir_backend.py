@@ -134,6 +134,7 @@ def test_ir_backend_validation_dangling_edges() -> None:
     nodes={"src_node": LogicalNode(id="src_node", op_type="Input")},
     edges=[LogicalEdge(source="src_node", target="missing_target")],
   )
+  graph_bad_tgt._pending_edges = [LogicalEdge(source="src_node", target="missing_target")]
   with pytest.raises(ValueError, match="Dangling edge target"):
     backend.compile(graph_bad_tgt)
 

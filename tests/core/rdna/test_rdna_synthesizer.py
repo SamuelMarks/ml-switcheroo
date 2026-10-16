@@ -118,7 +118,7 @@ def test_graph_to_rdna_unmapped(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to RDNA unmapped."""
   synth = RdnaSynthesizer(mock_semantics)
   g = LogicalGraph()
-  g.nodes = [LogicalNode("n1", "MysteryOp", {})]
+  g.nodes = {"n1": LogicalNode("n1", "MysteryOp", {})}
   nodes: list[typing.Any] = synth.from_graph(g)
   assert len(nodes) == 1
   assert "Unmapped Op: MysteryOp" in str(nodes[0])

@@ -385,7 +385,17 @@ variants:
     assert res_fail == 1
 
   # 4. __main__ entrypoint
-  with patch("scripts.audit_stablehlo_spec.main", return_value=0):
+  monkeypatch.setenv("PIP_CACHE_DIR", str(tmp_path / "cache"))
+  nested_odl = tmp_path / "src" / "ml_switcheroo" / "semantics" / "odl"
+  nested_odl.mkdir(parents=True, exist_ok=True)
+  (nested_odl / "Abs.yaml").write_text(
+    "operation: Abs\nvariants:\n  stablehlo:\n    api: stablehlo.abs\n",
+    encoding="utf-8",
+  )
+  monkeypatch.chdir(tmp_path)
+  mock_resp = MagicMock()
+  mock_resp.__enter__.return_value.read.return_value = b"### abs\n"
+  with patch("urllib.request.urlopen", return_value=mock_resp):
     with pytest.raises(SystemExit) as excinfo:
       runpy.run_module("scripts.audit_stablehlo_spec", run_name="__main__")
     assert excinfo.value.code == 0

@@ -28,8 +28,8 @@ def test_nvidia_sass_lifter_unmapped() -> None:
   nodes: list[NvidiaSassNode] = [NvidiaSassComment(text="// Unmapped Op: custom.op (custom_id)")]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].id == "custom_id"
-  assert graph.nodes[0].op_type == "custom.op"
+  assert graph.nodes["custom_id"].id == "custom_id"
+  assert graph.nodes["custom_id"].op_type == "custom.op"
 
 
 def test_nvidia_sass_lifter_flatten() -> None:
@@ -49,7 +49,7 @@ def test_nvidia_sass_lifter_flatten() -> None:
   nodes: list[NvidiaSassNode] = [NvidiaSassComment(text="// Unmapped Op: torch.flatten (flat_id)")]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].attributes["arg_1"] == 1
+  assert graph.nodes["flat_id"].attributes["arg_1"] == 1
 
 
 def test_nvidia_sass_lifter_instruction_only() -> None:
@@ -71,11 +71,11 @@ def test_nvidia_sass_lifter_instruction_only() -> None:
   )
   graph: LogicalGraph = lifter.lift([inst])
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].id == "R0"
-  assert graph.nodes[0].op_type == "asm.IADD3"
-  assert graph.nodes[0].attributes["arg_0"] == "R0"
-  assert graph.nodes[0].attributes["arg_1"] == "R1"
-  assert graph.nodes[0].attributes["arg_2"] == "R2"
+  assert graph.nodes["R0"].id == "R0"
+  assert graph.nodes["R0"].op_type == "asm.IADD3"
+  assert graph.nodes["R0"].attributes["arg_0"] == "R0"
+  assert graph.nodes["R0"].attributes["arg_1"] == "R1"
+  assert graph.nodes["R0"].attributes["arg_2"] == "R2"
 
 
 def test_nvidia_sass_lifter_non_alu() -> None:
@@ -95,9 +95,9 @@ def test_nvidia_sass_lifter_non_alu() -> None:
   inst = NvidiaSassInstruction(opcode="BRA", operands=[NvidiaSassImmediate(value=10)])
   graph: LogicalGraph = lifter.lift([inst])
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].id == "inst_0"
-  assert graph.nodes[0].op_type == "asm.BRA"
-  assert graph.nodes[0].attributes["arg_0"] == "10"
+  assert graph.nodes["inst_0"].id == "inst_0"
+  assert graph.nodes["inst_0"].op_type == "asm.BRA"
+  assert graph.nodes["inst_0"].attributes["arg_0"] == "10"
 
 
 def test_nvidia_sass_lifter_invalid_marker() -> None:
@@ -138,7 +138,7 @@ def test_nvidia_sass_lifter_return_already_seen() -> None:
   ]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].id == "output"
+  assert graph.nodes["output"].id == "output"
 
 
 def test_nvidia_sass_lifter_duplicate_node() -> None:
@@ -161,4 +161,4 @@ def test_nvidia_sass_lifter_duplicate_node() -> None:
   ]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].id == "x"
+  assert graph.nodes["x"].id == "x"

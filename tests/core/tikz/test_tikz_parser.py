@@ -38,8 +38,8 @@ def test_parser_ignore_comments_and_env() -> None:
   parser = TikzParser(code)
   graph: LogicalGraph = _logical_from_tikz_graph(parser.parse())
   assert len(graph.nodes) == 1
-  assert graph.nodes[0].id == "a"
-  assert graph.nodes[0].op_type == "A"
+  assert graph.nodes["a"].id == "a"
+  assert graph.nodes["a"].op_type == "A"
 
 
 def test_parser_robust_metadata() -> None:
@@ -47,6 +47,6 @@ def test_parser_robust_metadata() -> None:
   code: str = "\n\\node (n) at (0,0) {\n    \\begin{tabular}{c}\n        \\textbf{Layer} \\\\\n        \\textit{n} \\\\\n        kernel\\_size: (3, 3) \\\\\n    \\end{tabular}\n};\n"
   parser = TikzParser(code)
   graph: LogicalGraph = _logical_from_tikz_graph(parser.parse())
-  node: typing.Any = graph.nodes[0]
+  node: typing.Any = graph.nodes["n"]
   assert "kernel_size" in node.attributes
   assert node.attributes["kernel_size"] == "(3, 3)" or "3" in node.attributes["kernel_size"]

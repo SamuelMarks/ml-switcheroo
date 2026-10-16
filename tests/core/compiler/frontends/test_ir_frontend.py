@@ -141,6 +141,7 @@ def test_ir_frontend_dangling_edges() -> None:
     nodes={"n1": LogicalNode(id="n1", op_type="Input")},
     edges=[LogicalEdge(source="n1", target="n2")],
   )
+  bad_tgt_graph._pending_edges = [LogicalEdge(source="n1", target="n2")]
   with pytest.raises(IrParseError, match="Dangling edge target"):
     lifter.lift(bad_tgt_graph)
 

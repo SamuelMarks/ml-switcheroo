@@ -28,7 +28,7 @@ from ml_switcheroo.core.compiler.frontends.semantic_parser import (
   SemanticReturn,
   SemanticUnmapped,
 )
-from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 
 class NvidiaSassLifter:
@@ -84,7 +84,7 @@ class NvidiaSassLifter:
       seen_ids.add(node_id)
 
       if previous_node_id:
-        graph.edges.append(LogicalEdge(source=previous_node_id, target=node_id))
+        graph.add_edge(previous_node_id, node_id)
       previous_node_id = node_id
 
     instruction_counter = 0
@@ -135,7 +135,7 @@ class NvidiaSassLifter:
             # No Logic, simple sink
             graph.nodes["output"] = LogicalNode(id="output", op_type="Output")
             if "previous_node_id" in locals() and previous_node_id:
-              graph.edges.append(LogicalEdge(source=previous_node_id, target="output"))
+              graph.add_edge(previous_node_id, "output")
             seen_ids.add("output")
         else:
           # Fallback to prevent coverage holes if new markers are added

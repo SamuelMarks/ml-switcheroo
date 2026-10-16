@@ -49,6 +49,7 @@ class GraphExtractor(cst.CSTVisitor):
     self.layer_registry: Dict[str, LogicalNode] = {}  # attr_name -> Node
     self.provenance: Dict[str, str] = {}  # var_name -> node_id_that_produced_it
     self.node_map: Dict[str, cst.CSTNode] = {}
+    self._edges: List[LogicalEdge] = []
     self.model_name: str = "GeneratedNet"
 
     self._in_init = False
@@ -190,7 +191,7 @@ class GraphExtractor(cst.CSTVisitor):
           if out_id not in self.layer_registry:
             self.layer_registry[out_id] = LogicalNode(out_id, "Output", {})
             self.node_map[out_id] = node
-          self.graph.edges.append(LogicalEdge(layer_name, out_id))
+          self._edges.append(LogicalEdge(layer_name, out_id))
         return False
 
       # 2. Check if returning a variable
@@ -201,7 +202,7 @@ class GraphExtractor(cst.CSTVisitor):
         if out_id not in self.layer_registry:
           self.layer_registry[out_id] = LogicalNode(out_id, "Output", {})
           self.node_map[out_id] = node
-        self.graph.edges.append(LogicalEdge(source_id, out_id))
+        self._edges.append(LogicalEdge(source_id, out_id))
 
     return False
 
@@ -425,7 +426,7 @@ class GraphExtractor(cst.CSTVisitor):
 
       if var_name and var_name in self.provenance:
         source_id = self.provenance[var_name]
-        self.graph.edges.append(LogicalEdge(source_id, layer_name))
+        self._edges.append(LogicalEdge(source_id, layer_name))
 
     for out_var in output_vars:
       self.provenance[out_var] = layer_name
@@ -456,4 +457,6 @@ class GraphExtractor(cst.CSTVisitor):
       self.graph.nodes.clear()
       for k, v in self.layer_registry.items():
         self.graph.nodes[k] = v
+      for edge in self._edges:
+        self.graph.add_edge(edge.source, edge.target)
     self.graph.name = self.model_name

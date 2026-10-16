@@ -75,6 +75,7 @@ def test_latex_backend_custom() -> None:
   backend = LatexBackend()
   nodes = {
     "in": LogicalNode("in", op_type="Input", attributes={}),
+    "some.op.Missing": LogicalNode("some.op.Missing", op_type="some.op.Missing", attributes={}),
     "output": LogicalNode("output", op_type="Output", attributes={}),
   }
   edges = [LogicalEdge("in", "some.op.Missing"), LogicalEdge("some.op.Missing", "output")]
@@ -94,3 +95,12 @@ def test_latex_backend_no_out_edges() -> None:
   graph = LogicalGraph("Custom", nodes=nodes, edges=edges)
   res: str = backend.compile(graph)
   assert "ReturnNode" not in res or "last_step" in res
+
+
+def test_latex_backend_pending_edge_no_node_data() -> None:
+  """Verifies the behavior of LaTeX backend with pending edges and missing target node data."""
+  backend = LatexBackend()
+  graph = LogicalGraph("Custom", nodes={}, edges=[LogicalEdge("in", "target")])
+  graph._pending_edges = [LogicalEdge("in", "target")]
+  res: str = backend.compile(graph)
+  assert "op_target" in res

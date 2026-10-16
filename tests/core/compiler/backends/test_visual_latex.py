@@ -106,6 +106,7 @@ def test_visual_latex_no_node_data() -> None:
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph
 
   g = LogicalGraph("Test", nodes={}, edges=[LogicalEdge("in", "target")])
+  g._pending_edges = [LogicalEdge("in", "target")]
   backend = LatexBackend()
   code: str = backend.compile(g)
   assert "op_target" in code

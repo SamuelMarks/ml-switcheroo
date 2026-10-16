@@ -17,7 +17,7 @@ from ml_switcheroo.core.compiler.frontends.semantic_parser import (
   SemanticReturn,
   SemanticUnmapped,
 )
-from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 
 
 class RdnaLifter:
@@ -76,7 +76,7 @@ class RdnaLifter:
       seen_ids.add(node_id)
 
       if previous_node_id:
-        graph.edges.append(LogicalEdge(source=previous_node_id, target=node_id))
+        graph.add_edge(previous_node_id, node_id)
       previous_node_id = node_id
 
     for node in nodes:
@@ -118,7 +118,7 @@ class RdnaLifter:
           if "output" not in seen_ids:
             graph.nodes["output"] = LogicalNode(id="output", op_type="Output")
             if previous_node_id:
-              graph.edges.append(LogicalEdge(source=previous_node_id, target="output"))
+              graph.add_edge(previous_node_id, "output")
             seen_ids.add("output")
         else:
           pass

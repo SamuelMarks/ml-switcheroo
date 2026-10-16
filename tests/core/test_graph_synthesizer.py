@@ -26,7 +26,11 @@ def validate_python(code: str) -> None:
 def test_synthesize_simple_chain(synthesizer: PythonBackend) -> None:
   """Verifies the behavior of synthesize simple chain."""
   g = LogicalGraph()
-  g.nodes = [LogicalNode("x", "Input"), LogicalNode("conv1", "Conv2d"), LogicalNode("output", "Output")]
+  g.nodes = {
+    "x": LogicalNode("x", "Input"),
+    "conv1": LogicalNode("conv1", "Conv2d"),
+    "output": LogicalNode("output", "Output"),
+  }
   code = synthesizer.generate(g, "SimpleNet")
   validate_python(code)
   assert "class SimpleNet(nn.Module):" in code
@@ -38,12 +42,12 @@ def test_synthesize_simple_chain(synthesizer: PythonBackend) -> None:
 def test_synthesize_functional_mix(synthesizer: PythonBackend) -> None:
   """Verifies the behavior of synthesize functional mix."""
   g = LogicalGraph()
-  g.nodes = [
-    LogicalNode("x", "Input"),
-    LogicalNode("fc", "Linear"),
-    LogicalNode("flat", "torch.flatten"),
-    LogicalNode("out", "Output"),
-  ]
+  g.nodes = {
+    "x": LogicalNode("x", "Input"),
+    "fc": LogicalNode("fc", "Linear"),
+    "flat": LogicalNode("flat", "torch.flatten"),
+    "out": LogicalNode("out", "Output"),
+  }
   code = synthesizer.generate(g)
   validate_python(code)
   assert "self.fc = nn.Linear()" in code
@@ -57,11 +61,11 @@ def test_synthesize_functional_mix(synthesizer: PythonBackend) -> None:
 def test_synthesize_metadata_args(synthesizer: PythonBackend) -> None:
   """Verifies the behavior of synthesize metadata arguments."""
   g = LogicalGraph()
-  g.nodes = [
-    LogicalNode("x", "Input"),
-    LogicalNode("c1", "Conv2d", {"arg_0": "1", "arg_1": "32", "kernel_size": "3"}),
-    LogicalNode("out", "Output"),
-  ]
+  g.nodes = {
+    "x": LogicalNode("x", "Input"),
+    "c1": LogicalNode("c1", "Conv2d", {"arg_0": "1", "arg_1": "32", "kernel_size": "3"}),
+    "out": LogicalNode("out", "Output"),
+  }
   code = synthesizer.generate(g)
   validate_python(code)
   assert "nn.Conv2d(1, 32, kernel_size=3)" in code
@@ -70,7 +74,11 @@ def test_synthesize_metadata_args(synthesizer: PythonBackend) -> None:
 def test_synthesize_custom_input_name(synthesizer: PythonBackend) -> None:
   """Verifies the behavior of synthesize custom input name."""
   g = LogicalGraph()
-  g.nodes = [LogicalNode("in_node", "Input", {"name": "img"}), LogicalNode("l1", "Linear"), LogicalNode("out", "Output")]
+  g.nodes = {
+    "in_node": LogicalNode("in_node", "Input", {"name": "img"}),
+    "l1": LogicalNode("l1", "Linear"),
+    "out": LogicalNode("out", "Output"),
+  }
   code = synthesizer.generate(g)
   validate_python(code)
   assert "def forward(self, img):" in code
